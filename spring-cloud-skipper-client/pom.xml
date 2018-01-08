@@ -47,11 +47,6 @@
             <artifactId>spring-boot-starter-validation</artifactId>
         </dependency>
         <dependency>
-            <groupId>io.codearte.props2yaml</groupId>
-            <artifactId>props2yaml</artifactId>
-            <version>0.5</version>
-        </dependency>
-        <dependency>
             <groupId>org.yaml</groupId>
             <artifactId>snakeyaml</artifactId>
         </dependency>

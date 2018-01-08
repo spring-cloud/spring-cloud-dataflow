@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 the original author or authors.
+ * Copyright 2017-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,13 +18,13 @@ package org.springframework.cloud.skipper.shell.command.support;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.util.StringTokenizer;
 
-import io.codearte.props2yaml.Props2YAML;
 import org.yaml.snakeyaml.Yaml;
 
 import org.springframework.cloud.skipper.SkipperException;
+import org.springframework.cloud.skipper.support.DeploymentPropertiesUtils;
+import org.springframework.cloud.skipper.support.yaml.YamlConverter;
+import org.springframework.cloud.skipper.support.yaml.YamlConverter.Mode;
 import org.springframework.util.StringUtils;
 
 /**
@@ -36,32 +36,7 @@ import org.springframework.util.StringUtils;
  */
 public abstract class YmlUtils {
 
-	private static final String APPLICATION_PROPERTIES_PREFIX = "spec.applicationProperties.";
-
-	private static final String DEPLOYMENT_PROPERTIES_PREFIX = "spec.deploymentProperties.";
-
-	private static final String SPEC_APPLICATION_PROPERTIES_REPLACEMENT = "REPLACE_APPLICATION_PROPERTIES";
-
-	private static final String SPEC_DEPLOYMENT_PROPERTIES_REPLACEMENT = "REPLACE_DEPLOYMENT_PROPERTIES";
-
-	private static final String DOT_CHAR = "\\.";
-
-	private static final String DOT_CHAR_REPLACEMENT = "------";
-
-	private static final String DOT_SPEC_STRING = ".spec.";
-
-	private static final String SPEC_STRING = "spec.";
-
-	public static String convertFromCsvToYaml(String propertiesAsString) {
-		String stringToConvert = propertiesAsString.replaceAll(",", "\n");
-		String yamlString = Props2YAML.fromContent(stringToConvert).convert();
-		// validate the yaml can be parsed
-		Yaml yaml = new Yaml();
-		yaml.load(yamlString);
-		return yamlString;
-	}
-
-	public static String getYamlConfigValues(File yamlFile, String propertiesAsCsvString) throws IOException {
+	public static String getYamlConfigValues(File yamlFile, String properties) {
 		String configValuesYML = null;
 		if (yamlFile != null) {
 			Yaml yaml = new Yaml();
@@ -73,50 +48,20 @@ public abstract class YmlUtils {
 				throw new SkipperException("Could not find file " + yamlFile.toString());
 			}
 		}
-		else if (StringUtils.hasText(propertiesAsCsvString)) {
-			configValuesYML = convertToYaml(propertiesAsCsvString);
+		else if (StringUtils.hasText(properties)) {
+			configValuesYML = convertToYaml(properties);
 		}
 		return configValuesYML;
 	}
 
-	private static String convertToYaml(String propertiesAsCsvString) {
-		String configValuesYML;
-		StringTokenizer tokenizer = new StringTokenizer(propertiesAsCsvString, ",");
-		StringBuilder sb = new StringBuilder();
-		while (tokenizer.hasMoreElements()) {
-			String value = tokenizer.nextToken();
-			if (value.contains(DOT_SPEC_STRING)) {
-				int i = value.indexOf(DOT_SPEC_STRING) + 1;
-				String trimmed = value.substring(i);
-				String prefix = value.substring(0, i);
-				String modifiedString = modifyString(trimmed);
-				value = new String(prefix + modifiedString);
-			}
-			else if (value.contains(SPEC_STRING)) {
-				value = modifyString(value);
-			}
-			sb.append(value);
-			sb.append("\n");
-		}
-		String ymlString = Props2YAML.fromContent(sb.toString()).convert();
-		// Revert original property keys' dots
-		ymlString = ymlString.replaceAll(DOT_CHAR_REPLACEMENT, DOT_CHAR);
-		Yaml yaml = new Yaml();
-		configValuesYML = yaml.dump(yaml.load(ymlString));
-		return configValuesYML;
-	}
-
-	private static String modifyString(String property) {
-		String propertyValue = property.replaceAll(APPLICATION_PROPERTIES_PREFIX,
-				SPEC_APPLICATION_PROPERTIES_REPLACEMENT);
-		propertyValue = propertyValue.replaceAll(DEPLOYMENT_PROPERTIES_PREFIX,
-				SPEC_DEPLOYMENT_PROPERTIES_REPLACEMENT);
-		// Replace the original property keys' dots to avoid type errors when using Props2YML
-		propertyValue = propertyValue.replaceAll(DOT_CHAR, DOT_CHAR_REPLACEMENT);
-		propertyValue = propertyValue.replaceAll(SPEC_APPLICATION_PROPERTIES_REPLACEMENT,
-				APPLICATION_PROPERTIES_PREFIX);
-		propertyValue = propertyValue.replaceAll(SPEC_DEPLOYMENT_PROPERTIES_REPLACEMENT,
-				DEPLOYMENT_PROPERTIES_PREFIX);
-		return propertyValue;
+	private static String convertToYaml(String properties) {
+		return YamlConverter.builder()
+				.mode(Mode.FLATTEN)
+				.flat("spec.applicationProperties")
+				.flat("spec.deploymentProperties")
+				.flat("\\w+\\.spec\\.applicationProperties")
+				.flat("\\w+\\.spec\\.deploymentProperties")
+				.map(DeploymentPropertiesUtils.parse(properties)).build()
+				.convert().getYaml();
 	}
 }

@@ -8,5 +8,4 @@ log4j:
         org:
             hibernate: DEBUG
             hibernate.type: ALL
-    rootLogger: INFO
-stdout: ''
+    rootLogger: INFO, stdout

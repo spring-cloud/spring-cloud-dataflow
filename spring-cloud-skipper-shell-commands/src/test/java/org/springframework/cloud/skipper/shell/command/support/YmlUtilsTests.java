@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 the original author or authors.
+ * Copyright 2017-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,13 +16,8 @@
 package org.springframework.cloud.skipper.shell.command.support;
 
 import java.io.IOException;
-import java.nio.charset.Charset;
 
 import org.junit.Test;
-
-import org.springframework.core.io.ClassPathResource;
-import org.springframework.core.io.Resource;
-import org.springframework.util.StreamUtils;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -35,20 +30,8 @@ public class YmlUtilsTests {
 	@Test
 	public void testSimpleConversion() {
 		String stringToConvert = "hello=oi,world=mundo";
-		String yml = YmlUtils.convertFromCsvToYaml(stringToConvert);
+		String yml = YmlUtils.getYamlConfigValues(null, stringToConvert);
 		assertThat(yml).isEqualTo("hello: oi\nworld: mundo\n");
-	}
-
-	@Test
-	public void testBasicContent() throws IOException {
-		Resource resource = new ClassPathResource(
-				"/org/springframework/cloud/skipper/shell/command/support/log4j.properties");
-		String stringToConvert = StreamUtils.copyToString(resource.getInputStream(), Charset.defaultCharset());
-		String yml = YmlUtils.convertFromCsvToYaml(stringToConvert);
-		Resource convertedYmlResource = new ClassPathResource(
-				"/org/springframework/cloud/skipper/shell/command/support/log4j.yml");
-		assertThat(yml).isEqualTo(StreamUtils.copyToString(convertedYmlResource.getInputStream(),
-				Charset.defaultCharset()));
 	}
 
 	@Test
@@ -59,10 +42,12 @@ public class YmlUtilsTests {
 		assertThat(propertiesYml).isEqualTo(
 				"log:\n"
 						+ "  spec:\n"
-						+ "    deploymentProperties: {spring.cloud.deployer.cloudfoundry.route: mlp3-helloworld.cfapps.io}\n"
+						+ "    deploymentProperties:\n"
+						+ "      spring.cloud.deployer.cloudfoundry.route: mlp3-helloworld.cfapps.io\n"
 						+ "time:\n"
 						+ "  spec:\n"
-						+ "    deploymentProperties: {spring.cloud.deployer.cloudfoundry.route: mlp1-helloworld.cfapps.io}\n");
+						+ "    deploymentProperties:\n"
+						+ "      spring.cloud.deployer.cloudfoundry.route: mlp1-helloworld.cfapps.io\n");
 	}
 
 	@Test
@@ -70,14 +55,15 @@ public class YmlUtilsTests {
 		String properties = "spec.deploymentProperties.spring.cloud.deployer.cloudfoundry.route=mlp3-helloworld.cfapps.io";
 		String propertiesYml = YmlUtils.getYamlConfigValues(null, properties);
 		assertThat(propertiesYml).isEqualTo("spec:\n"
-				+ "  deploymentProperties: {spring.cloud.deployer.cloudfoundry.route: mlp3-helloworld.cfapps.io}\n");
+				+ "  deploymentProperties:\n"
+				+ "    spring.cloud.deployer.cloudfoundry.route: mlp3-helloworld.cfapps.io\n");
 	}
 
 	@Test
 	public void testLogVersion() throws IOException {
 		String properties = "log.version=1.1.1.RELEASE";
 		String propertiesYml = YmlUtils.getYamlConfigValues(null, properties);
-		assertThat(propertiesYml).isEqualTo("log: {version: 1.1.1.RELEASE}\n");
+		assertThat(propertiesYml).isEqualTo("log:\n  version: 1.1.1.RELEASE\n");
 	}
 
 }
