@@ -1,5 +1,5 @@
 /*
- * Copyright 2015-2016 the original author or authors.
+ * Copyright 2015-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,10 +16,6 @@
 
 package org.springframework.cloud.dataflow.shell.command;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertThat;
-import static org.mockito.Mockito.when;
-
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -31,24 +27,31 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+
 import org.springframework.cloud.dataflow.core.ApplicationType;
 import org.springframework.cloud.dataflow.rest.client.AppRegistryOperations;
 import org.springframework.cloud.dataflow.rest.client.DataFlowOperations;
 import org.springframework.cloud.dataflow.rest.resource.AppRegistrationResource;
+import org.springframework.cloud.dataflow.shell.command.classic.ClassicAppRegistryCommands;
+import org.springframework.cloud.dataflow.shell.command.common.AbstractAppRegistryCommands;
 import org.springframework.cloud.dataflow.shell.config.DataFlowShell;
 import org.springframework.hateoas.PagedResources;
 import org.springframework.shell.table.Table;
 import org.springframework.shell.table.TableModel;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThat;
+import static org.mockito.Mockito.when;
+
 /**
- * Unit tests for {@link AppRegistryCommands}.
+ * Unit tests for {@link org.springframework.cloud.dataflow.shell.command.classic.ClassicStreamCommands}.
  *
  * @author Eric Bottard
  * @author Mark Fisher
  */
-public class AppRegistryCommandsTests {
+public class ClassicAppRegistryCommandsTests {
 
-	AppRegistryCommands appRegistryCommands = new AppRegistryCommands();
+	ClassicAppRegistryCommands appRegistryCommands = new ClassicAppRegistryCommands();
 
 	@Mock
 	private DataFlowOperations dataFlowOperations;
@@ -108,8 +111,8 @@ public class AppRegistryCommandsTests {
 	@Test
 	public void testUnknownModule() {
 		List<Object> result = appRegistryCommands
-				.info(new AppRegistryCommands.QualifiedApplicationName("unknown", ApplicationType.processor),
-						null);
+				.info(new AbstractAppRegistryCommands.QualifiedApplicationName("unknown", ApplicationType.processor));
+
 		assertEquals((String) result.get(0), "Application info is not available for processor:unknown");
 	}
 
@@ -121,21 +124,7 @@ public class AppRegistryCommandsTests {
 		boolean force = false;
 		AppRegistrationResource resource = new AppRegistrationResource(name, type.name(), uri);
 		when(appRegistryOperations.register(name, type, uri, null, force)).thenReturn(resource);
-		String result = appRegistryCommands.register(name, type, null, uri, null, force);
-		assertEquals("Successfully registered application 'sink:foo'", result);
-	}
-
-	@Test
-	public void versionedRegister() {
-		String name = "foo";
-		ApplicationType type = ApplicationType.sink;
-		String version = "1.0.0";
-		boolean isDefault = true;
-		String uri = "file:///foo";
-		boolean force = false;
-		AppRegistrationResource resource = new AppRegistrationResource(name, type.name(), version, uri, isDefault);
-		when(appRegistryOperations.register(name, type, uri, null, force)).thenReturn(resource);
-		String result = appRegistryCommands.register(name, type, uri, version, null, force);
+		String result = appRegistryCommands.register(name, type, uri, null, force);
 		assertEquals("Successfully registered application 'sink:foo'", result);
 	}
 

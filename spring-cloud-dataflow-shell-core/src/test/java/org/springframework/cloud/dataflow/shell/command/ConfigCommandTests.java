@@ -28,12 +28,16 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
+import org.springframework.cloud.dataflow.rest.Version;
 import org.springframework.cloud.dataflow.rest.client.AboutOperations;
 import org.springframework.cloud.dataflow.rest.client.DataFlowOperations;
 import org.springframework.cloud.dataflow.rest.resource.RootResource;
 import org.springframework.cloud.dataflow.rest.resource.about.AboutResource;
+import org.springframework.cloud.dataflow.rest.resource.security.SecurityInfoResource;
+import org.springframework.cloud.dataflow.shell.DataFlowMode;
 import org.springframework.cloud.dataflow.shell.Target;
 import org.springframework.cloud.dataflow.shell.TargetHolder;
+import org.springframework.cloud.dataflow.shell.command.common.ConfigCommands;
 import org.springframework.cloud.dataflow.shell.config.DataFlowShell;
 import org.springframework.hateoas.Link;
 import org.springframework.http.converter.HttpMessageConverter;
@@ -66,7 +70,7 @@ public class ConfigCommandTests {
 	private RestTemplate restTemplate;
 
 	@Before
-	public void setUp() throws Exception {
+	public void setUp() {
 		MockitoAnnotations.initMocks(this);
 
 		final CommandLine commandLine = Mockito.mock(CommandLine.class);
@@ -120,4 +124,58 @@ public class ConfigCommandTests {
 		assertThat(targetResult, containsString("Incompatible version of Data Flow server detected"));
 	}
 
+	@Test
+	public void testModeWithSkipperShellAndClassicServer() {
+		testDataFlowMode(DataFlowMode.skipper, DataFlowMode.classic,
+				"You must re-start the Shell with --dataflow.mode=classic");
+	}
+
+	@Test
+	public void testModeWithSkipperShellAndSkipperServer() {
+		testDataFlowMode(DataFlowMode.skipper, DataFlowMode.skipper,
+				"Shell mode: skipper, Server mode: skipper");
+	}
+
+	@Test
+	public void testModeWithClassicShellAndSkipperServer() {
+		testDataFlowMode(DataFlowMode.classic, DataFlowMode.skipper,
+				"You must re-start the Shell with --dataflow.mode=skipper");
+	}
+
+	@Test
+	public void testModeWithClassicShellAndClassicServer() {
+		testDataFlowMode(DataFlowMode.classic, DataFlowMode.classic,
+				"Shell mode: classic, Server mode: classic");
+	}
+
+	public void testDataFlowMode(DataFlowMode shellDataFlowMode, DataFlowMode serverDataFlowMode, String expectedTargetMessage) {
+
+		configCommands.setShellDataflowMode(shellDataFlowMode);
+
+		AboutResource aboutResource = new AboutResource();
+		if (serverDataFlowMode == DataFlowMode.skipper) {
+			aboutResource.getFeatureInfo().setSkipperEnabled(true);
+		}
+		when(restTemplate.getForObject(Mockito.any(String.class), Mockito.eq(AboutResource.class))).thenReturn(aboutResource);
+
+		RootResource value = new RootResource(Version.REVISION);
+		value.add(new Link("http://localhost:9393/dashboard", "dashboard"));
+		value.add(new Link("http://localhost:9393/about", "about"));
+		value.add(new Link("http://localhost:9393/apps", "apps"));
+		value.add(new Link("http://localhost:9393/completions/task", "completions/task"));
+		value.add(new Link("http://localhost:9393/completions/stream", "completions/stream"));
+
+		when(restTemplate.getForObject(Mockito.any(URI.class), Mockito.eq(RootResource.class))).thenReturn(value);
+
+		SecurityInfoResource securityInfoResource = new SecurityInfoResource();
+		securityInfoResource.setAuthenticationEnabled(false);
+		when(restTemplate.getForObject(Mockito.any(String.class), Mockito.eq(SecurityInfoResource.class))).thenReturn(securityInfoResource);
+
+		final String targetResult = configCommands.target(Target.DEFAULT_TARGET, Target.DEFAULT_USERNAME,
+				Target.DEFAULT_SPECIFIED_PASSWORD, Target.DEFAULT_CREDENTIALS_PROVIDER_COMMAND, true);
+
+		System.out.println(targetResult);
+
+		assertThat(targetResult, is(expectedTargetMessage));
+	}
 }

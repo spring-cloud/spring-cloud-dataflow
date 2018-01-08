@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 the original author or authors.
+ * Copyright 2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,4 +16,4 @@
 /**
  * Command classes for the Spring Cloud Data Flow Shell.
  */
-package org.springframework.cloud.dataflow.shell.command;
+package org.springframework.cloud.dataflow.shell.command.common;

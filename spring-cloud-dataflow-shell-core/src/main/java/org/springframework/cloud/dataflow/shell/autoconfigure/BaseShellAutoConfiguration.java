@@ -24,6 +24,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.cloud.dataflow.shell.ShellCommandLineParser;
 import org.springframework.cloud.dataflow.shell.ShellProperties;
 import org.springframework.cloud.dataflow.shell.TargetHolder;
@@ -91,14 +92,33 @@ public class BaseShellAutoConfiguration {
 	}
 
 	@Configuration
-	@ComponentScan({ "org.springframework.shell.commands", "org.springframework.cloud.dataflow.shell.command",
+	@ComponentScan({ "org.springframework.shell.commands", "org.springframework.cloud.dataflow.shell.command.common",
+			"org.springframework.cloud.dataflow.shell.command.classic",
 			"org.springframework.cloud.dataflow.shell.converter", "org.springframework.cloud.dataflow.shell.config" })
-	public static class RegisterInternalCommands {
+	@ConditionalOnProperty(name = "dataflow.mode", havingValue = "classic", matchIfMissing = true)
+	public static class ClassicRegisterInternalCommands {
 
 		@PostConstruct
 		public void log() {
+			logger.debug("Classic Mode");
 			logger.debug("(o.s.shell.commands) Spring Shell" + " packages are being scanned");
 			logger.debug("(o.s.c.dataflow.shell.command) Spring Cloud Data Flow Shell" + " packages are being scanned");
 		}
 	}
+
+	@Configuration
+	@ComponentScan({ "org.springframework.shell.commands", "org.springframework.cloud.dataflow.shell.command.common",
+			"org.springframework.cloud.dataflow.shell.command.skipper",
+			"org.springframework.cloud.dataflow.shell.converter", "org.springframework.cloud.dataflow.shell.config" })
+	@ConditionalOnProperty(name = "dataflow.mode", havingValue = "skipper")
+	public static class SkipperRegisterInternalCommands {
+
+		@PostConstruct
+		public void log() {
+			logger.debug("Skipper Mode");
+			logger.debug("(o.s.shell.commands) Spring Shell" + " packages are being scanned");
+			logger.debug("(o.s.c.dataflow.shell.command) Spring Cloud Data Flow Shell" + " packages are being scanned");
+		}
+	}
+
 }
