@@ -200,18 +200,19 @@ public class DataFlowControllerAutoConfiguration {
 		public SkipperStreamDeployer skipperStreamDeployer(SkipperClient skipperClient,
 				StreamDefinitionRepository streamDefinitionRepository,
 				SkipperClientProperties skipperClientProperties,
+				AppRegistryService appRegistryService,
 				ForkJoinPool runtimeAppsStatusFJPFB) {
 			logger.info("Skipper URI [" + skipperClientProperties.getServerUri() + "]");
-			return new SkipperStreamDeployer(skipperClient, streamDefinitionRepository, runtimeAppsStatusFJPFB);
+			return new SkipperStreamDeployer(skipperClient, streamDefinitionRepository, appRegistryService,
+					runtimeAppsStatusFJPFB);
 		}
 
 		@Bean
 		@ConditionalOnBean(StreamDefinitionRepository.class)
 		public StreamService skipperStreamDeploymentService(StreamDefinitionRepository streamDefinitionRepository,
-				AppRegistryService appRegistryService, SkipperStreamDeployer skipperStreamDeployer,
-				AppDeploymentRequestCreator appDeploymentRequestCreator) {
-			return new SkipperStreamService(streamDefinitionRepository, appRegistryService,
-					skipperStreamDeployer, appDeploymentRequestCreator);
+				SkipperStreamDeployer skipperStreamDeployer, AppDeploymentRequestCreator appDeploymentRequestCreator) {
+			return new SkipperStreamService(streamDefinitionRepository, skipperStreamDeployer,
+					appDeploymentRequestCreator);
 		}
 
 		@Bean

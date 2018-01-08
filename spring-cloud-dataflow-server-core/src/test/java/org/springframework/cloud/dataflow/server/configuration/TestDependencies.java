@@ -175,12 +175,8 @@ public class TestDependencies extends WebMvcConfigurationSupport {
 	@Bean
 	@ConditionalOnSkipperEnabled
 	public StreamService skipperStreamService(StreamDefinitionRepository streamDefinitionRepository,
-			AppRegistryService appRegistryService, SkipperStreamDeployer skipperStreamDeployer,
-			AppDeploymentRequestCreator appDeploymentRequestCreator) {
-		return new SkipperStreamService(streamDefinitionRepository,
-				appRegistryService,
-				skipperStreamDeployer,
-				appDeploymentRequestCreator);
+			SkipperStreamDeployer skipperStreamDeployer, AppDeploymentRequestCreator appDeploymentRequestCreator) {
+		return new SkipperStreamService(streamDefinitionRepository, skipperStreamDeployer, appDeploymentRequestCreator);
 	}
 
 	@Bean
@@ -212,8 +208,10 @@ public class TestDependencies extends WebMvcConfigurationSupport {
 	@Bean
 	@ConditionalOnSkipperEnabled
 	public SkipperStreamDeployer skipperStreamDeployer(SkipperClient skipperClient,
+			AppRegistryService appRegistryService,
 			StreamDefinitionRepository streamDefinitionRepository) {
-		return new SkipperStreamDeployer(skipperClient, streamDefinitionRepository, new ForkJoinPool(2));
+		return new SkipperStreamDeployer(skipperClient, streamDefinitionRepository, appRegistryService,
+				new ForkJoinPool(2));
 	}
 
 	@Bean

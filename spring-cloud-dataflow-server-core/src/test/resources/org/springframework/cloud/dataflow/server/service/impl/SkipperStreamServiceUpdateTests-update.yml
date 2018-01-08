@@ -5,5 +5,10 @@ log:
       server.port: '9999'
       log.level: ERROR
       endpoints.sensitive: 'false'
+      spring.cloud.dataflow.stream.app.type: sink
     deploymentProperties:
       spring.cloud.deployer.memory: 4096m
+time:
+  spec:
+    applicationProperties:
+      spring.cloud.dataflow.stream.app.type: source

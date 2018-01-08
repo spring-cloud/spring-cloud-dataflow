@@ -17,6 +17,7 @@ package org.springframework.cloud.dataflow.server.stream;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.URI;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -41,8 +42,11 @@ import org.json.JSONObject;
 import org.yaml.snakeyaml.DumperOptions;
 import org.yaml.snakeyaml.Yaml;
 
+import org.springframework.cloud.dataflow.core.ApplicationType;
+import org.springframework.cloud.dataflow.core.StreamAppDefinition;
 import org.springframework.cloud.dataflow.core.StreamDefinition;
 import org.springframework.cloud.dataflow.core.StreamDeployment;
+import org.springframework.cloud.dataflow.registry.service.AppRegistryService;
 import org.springframework.cloud.dataflow.registry.support.ResourceUtils;
 import org.springframework.cloud.dataflow.server.controller.NoSuchAppException;
 import org.springframework.cloud.dataflow.server.controller.StreamDefinitionController;
@@ -98,19 +102,25 @@ public class SkipperStreamDeployer implements StreamDeployer {
 
 	private static Log logger = LogFactory.getLog(SkipperStreamDeployer.class);
 
+	public static final String SPRING_CLOUD_DATAFLOW_STREAM_APP_TYPE = "spring.cloud.dataflow.stream.app.type";
+
 	private final SkipperClient skipperClient;
 
 	private final StreamDefinitionRepository streamDefinitionRepository;
 
+	private final AppRegistryService appRegistryService;
+
 	private final ForkJoinPool forkJoinPool;
 
 	public SkipperStreamDeployer(SkipperClient skipperClient, StreamDefinitionRepository streamDefinitionRepository,
-			ForkJoinPool forkJoinPool) {
+			AppRegistryService appRegistryService, ForkJoinPool forkJoinPool) {
 		Assert.notNull(skipperClient, "SkipperClient can not be null");
 		Assert.notNull(streamDefinitionRepository, "StreamDefinitionRepository can not be null");
+		Assert.notNull(appRegistryService, "StreamDefinitionRepository can not be null");
 		Assert.notNull(forkJoinPool, "ForkJoinPool can not be null");
 		this.skipperClient = skipperClient;
 		this.streamDefinitionRepository = streamDefinitionRepository;
+		this.appRegistryService = appRegistryService;
 		this.forkJoinPool = forkJoinPool;
 	}
 
@@ -160,6 +170,9 @@ public class SkipperStreamDeployer implements StreamDeployer {
 	}
 
 	public Release deployStream(StreamDeploymentRequest streamDeploymentRequest) {
+
+		validateAllAppsRegistered(streamDeploymentRequest);
+
 		Map<String, String> streamDeployerProperties = streamDeploymentRequest.getStreamDeployerProperties();
 		String packageVersion = streamDeployerProperties.get(SKIPPER_PACKAGE_VERSION);
 		Assert.isTrue(StringUtils.hasText(packageVersion), "Package Version must be set");
@@ -201,6 +214,39 @@ public class SkipperStreamDeployer implements StreamDeployer {
 		Release release = skipperClient.install(installRequest);
 		// TODO store releasename in deploymentIdRepository...
 		return release;
+	}
+
+	private void validateAllAppsRegistered(StreamDeploymentRequest streamDeploymentRequest) {
+		for (AppDeploymentRequest adr : streamDeploymentRequest.getAppDeploymentRequests()) {
+			String version = ResourceUtils.getResourceVersion(adr.getResource());
+			validateAppVersionIsRegistered(adr, version);
+		}
+	}
+
+	public void validateAppVersionIsRegistered(AppDeploymentRequest appDeploymentRequest, String appVersion) {
+		String name = appDeploymentRequest.getDefinition().getName();
+		String appTypeString = appDeploymentRequest.getDefinition().getProperties()
+				.get(SPRING_CLOUD_DATAFLOW_STREAM_APP_TYPE);
+		ApplicationType applicationType = ApplicationType.valueOf(appTypeString);
+		if (!this.appRegistryService.appExist(name, applicationType, appVersion)) {
+			throw new IllegalStateException(String.format("The %s:%s:%s app is not registered!",
+					name, appTypeString, appVersion));
+		}
+	}
+
+	public void updateAppVersionIfChanged(StreamAppDefinition appDefinition,
+			SpringCloudDeployerApplicationManifest appManifest) {
+
+		String version = appManifest.getSpec().getVersion();
+		String name = appDefinition.getRegisteredAppName();
+		ApplicationType type = ApplicationType.valueOf(
+				appManifest.getSpec().getApplicationProperties().get(SPRING_CLOUD_DATAFLOW_STREAM_APP_TYPE));
+		String resourceUri = appManifest.getSpec().getResource();
+
+		if (!this.appRegistryService.appExist(name, type, version)) {
+			URI metadataUri = null; // TODO Skipper should provide the metadata URI as well
+			this.appRegistryService.save(name, type, version, URI.create(resourceUri), metadataUri);
+		}
 	}
 
 	private File createPackageForStream(String packageName, String packageVersion,

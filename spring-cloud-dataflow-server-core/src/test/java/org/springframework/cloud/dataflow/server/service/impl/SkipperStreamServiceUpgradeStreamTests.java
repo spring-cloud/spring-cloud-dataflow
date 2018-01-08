@@ -70,7 +70,14 @@ public class SkipperStreamServiceUpgradeStreamTests {
 				null, null);
 		verify(this.skipperStreamDeployer, times(1))
 				.upgradeStream(this.streamDeployment2.getStreamName(),
-						null, "");
+						null, "log:\n" +
+								"  spec:\n" +
+								"    applicationProperties:\n" +
+								"      spring.cloud.dataflow.stream.app.type: sink\n" +
+								"time:\n" +
+								"  spec:\n" +
+								"    applicationProperties:\n" +
+								"      spring.cloud.dataflow.stream.app.type: source\n");
 		verifyNoMoreInteractions(this.skipperStreamDeployer);
 	}
 

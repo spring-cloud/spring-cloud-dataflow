@@ -17,16 +17,20 @@
 package org.springframework.cloud.dataflow.server.service.impl;
 
 import java.io.IOException;
+import java.net.URI;
 import java.nio.charset.Charset;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.junit.After;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.cloud.dataflow.core.ApplicationType;
 import org.springframework.cloud.dataflow.core.StreamDefinition;
+import org.springframework.cloud.dataflow.registry.service.AppRegistryService;
 import org.springframework.cloud.dataflow.server.config.features.FeaturesProperties;
 import org.springframework.cloud.dataflow.server.configuration.TestDependencies;
 import org.springframework.cloud.dataflow.server.repository.StreamDefinitionRepository;
@@ -51,8 +55,30 @@ public class SkipperStreamServiceUpdateTests {
 	@Autowired
 	private StreamDefinitionRepository streamDefinitionRepository;
 
+	@Autowired
+	private AppRegistryService appRegistryService;
+
+	@After
+	public void after() {
+		this.appRegistryService.delete("log", ApplicationType.sink, "1.1.1.RELEASE");
+		this.streamDefinitionRepository.deleteAll();
+	}
+
 	@Test
+	public void testCreateUpdateRequestsWithRegisteredApp() throws IOException {
+		this.appRegistryService.save("log", ApplicationType.sink, "1.1.1.RELEASE",
+				URI.create("maven://org.springframework.cloud.stream.app:log-sink-rabbit:jar:1.0.0.BUILD-SNAPSHOT"),
+				null);
+		testCreateUpdateRequests();
+	}
+
+	@Test(expected = IllegalStateException.class)
+	public void testCreateUpdateRequestsWithoutRegisteredApp() throws IOException {
+		testCreateUpdateRequests();
+	}
+
 	public void testCreateUpdateRequests() throws IOException {
+
 		StreamDefinition streamDefinition = new StreamDefinition("test", "time | log");
 		this.streamDefinitionRepository.save(streamDefinition);
 		Map<String, String> updateProperties = new HashMap<>();
@@ -61,11 +87,10 @@ public class SkipperStreamServiceUpdateTests {
 		updateProperties.put("app.log.level", "ERROR"); //this should be expanded
 		updateProperties.put("deployer.log.memory", "4096m");
 		updateProperties.put("version.log", "1.1.1.RELEASE");
-		String yml = streamService.convertPropertiesToSkipperYaml("test", updateProperties);
+		String yml = streamService.convertPropertiesToSkipperYaml(streamDefinition, updateProperties);
 		String expectedYaml = StreamUtils.copyToString(
 				TestResourceUtils.qualifiedResource(getClass(), "update.yml").getInputStream(),
 				Charset.defaultCharset());
 		assertThat(yml).isEqualTo(expectedYaml);
 	}
-
 }
