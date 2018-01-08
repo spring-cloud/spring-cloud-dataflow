@@ -1,5 +1,5 @@
 [[skipper-installation]]
-= Using Skipper
+= Installation
 
 [[skipper-installation-local]]
 == Installing on a local machine
@@ -99,4 +99,4 @@ spring:
                 memory: 1024m
 ```
 
-Mnore information on the deployment properties that can be configured can be found in https://github.com/spring-cloud/spring-cloud-deployer-kubernetes/blob/master/src/main/java/org/springframework/cloud/deployer/spi/kubernetes/KubernetesDeployerProperties.java[KubernetesDeployerProperties]
+More information on the deployment properties that can be configured can be found in https://github.com/spring-cloud/spring-cloud-deployer-kubernetes/blob/master/src/main/java/org/springframework/cloud/deployer/spi/kubernetes/KubernetesDeployerProperties.java[KubernetesDeployerProperties]
