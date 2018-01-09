@@ -5,12 +5,14 @@ import java.util.Map;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 
+import org.springframework.cloud.dataflow.rest.SkipperStream;
 import org.springframework.cloud.dataflow.rest.client.DataFlowOperations;
 import org.springframework.cloud.dataflow.rest.client.StreamOperations;
 import org.springframework.cloud.dataflow.rest.resource.StreamDefinitionResource;
@@ -44,8 +46,8 @@ public class StreamDslTests {
 	public void simpleDefinition() throws Exception {
 		StreamApplication time = new StreamApplication("time");
 		StreamApplication log = new StreamApplication("log");
-		Stream stream = Stream.builder(client).name("foo").source(time).sink(log)
-				.create().deploy();
+		Stream stream = Stream.builder(client).name("foo").source(time).sink(log).create()
+				.deploy();
 		assertThat("time | log").isEqualTo(stream.getDefinition());
 	}
 
@@ -54,8 +56,8 @@ public class StreamDslTests {
 		StreamApplication time = new StreamApplication("time").label("tick");
 		StreamApplication log = new StreamApplication("log");
 
-		Stream stream = Stream.builder(client).name("foo").source(time).sink(log)
-				.create().deploy();
+		Stream stream = Stream.builder(client).name("foo").source(time).sink(log).create()
+				.deploy();
 		assertThat("tick: time | log").isEqualTo(stream.getDefinition());
 	}
 
@@ -74,8 +76,8 @@ public class StreamDslTests {
 		StreamApplication time = new StreamApplication("time").label("tick")
 				.addProperty("fixed-delay", 5000);
 		StreamApplication log = new StreamApplication("log");
-		Stream stream = Stream.builder(client).name("foo").source(time).sink(log)
-				.create().deploy();
+		Stream stream = Stream.builder(client).name("foo").source(time).sink(log).create()
+				.deploy();
 		assertThat("tick: time --fixed-delay=5000 | log")
 				.isEqualTo(stream.getDefinition());
 	}
@@ -87,6 +89,31 @@ public class StreamDslTests {
 
 		Map<String, Object> deploymentProperties = time.getDeploymentProperties();
 		assertThat(deploymentProperties.get("deployer.tick.count")).isEqualTo(2);
+	}
+
+	@Test
+	public void definitionWithDeploymentPropertiesBuilder() throws Exception {
+		StreamDefinitionResource resource = new StreamDefinitionResource("ticktock",
+				"tick: time | log");
+		resource.setStatus("deploying");
+		Mockito.when(streamOperations.createStream(Mockito.anyString(),
+				Mockito.anyString(), Mockito.anyBoolean())).thenReturn(resource);
+		DeploymentPropertiesBuilder propertiesBuilder = new DeploymentPropertiesBuilder();
+		Map<String, String> props = propertiesBuilder.count("tick", 2)
+				.memory("tick", 2048)
+				.withSkipper()
+				.packageVersion("1.0.0.RELEASE")
+				.repoName("foo")
+				.platformName("pcf").build();
+		Stream.builder(client).name("ticktock").definition("tick: time | log").create()
+				.deploy(props);
+		ArgumentCaptor<Map> mapArgumentCaptor = ArgumentCaptor.forClass(Map.class);
+		Mockito.verify(streamOperations, Mockito.times(1)).deploy(Mockito.eq("ticktock"),
+				mapArgumentCaptor.capture());
+		assertThat(mapArgumentCaptor.getValue()).containsKeys("deployer.tick.count",
+				"deployer.tick.memory", SkipperStream.SKIPPER_PLATFORM_NAME,
+				SkipperStream.SKIPPER_ENABLED_PROPERTY_KEY,
+				SkipperStream.SKIPPER_PACKAGE_VERSION, SkipperStream.SKIPPER_REPO_NAME);
 	}
 
 	@Test
@@ -140,8 +167,8 @@ public class StreamDslTests {
 			}
 		}).when(streamOperations).deploy(Mockito.eq("ticktock"), Mockito.anyMap());
 
-		StreamDefinition streamDefinition = Stream.builder(client).name("ticktock").definition("time | log")
-				.create();
+		StreamDefinition streamDefinition = Stream.builder(client).name("ticktock")
+				.definition("time | log").create();
 		Mockito.verify(streamOperations, Mockito.times(1)).createStream(
 				Mockito.eq("ticktock"), Mockito.eq("time | log"), Mockito.eq(false));
 		Stream stream = streamDefinition.deploy();
@@ -157,8 +184,7 @@ public class StreamDslTests {
 				Mockito.anyString(), Mockito.anyBoolean())).thenReturn(resource);
 		StreamApplication time = new StreamApplication("time");
 		StreamApplication log = new StreamApplication("log");
-		Stream.builder(client).name("ticktock").source(time).sink(log)
-				.create();
+		Stream.builder(client).name("ticktock").source(time).sink(log).create();
 		Mockito.verify(streamOperations, Mockito.times(1)).createStream(
 				Mockito.eq("ticktock"), Mockito.eq("time | log"), Mockito.eq(false));
 	}
@@ -166,16 +192,19 @@ public class StreamDslTests {
 	@Test
 	public void testDuplicateNameWithLabel() throws Exception {
 		StreamApplication filter2 = new StreamApplication("filter").label("filter2");
-		Stream.builder(client).name("test").source(timeApplication).processor(filterApplication).processor(filter2)
-				.sink(logApplication).create();
+		Stream.builder(client).name("test").source(timeApplication)
+				.processor(filterApplication).processor(filter2).sink(logApplication)
+				.create();
 		Mockito.verify(streamOperations, Mockito.times(1)).createStream(
-				Mockito.eq("test"), Mockito.eq("time | filter | filter2: filter | log"), Mockito.eq(false));
+				Mockito.eq("test"), Mockito.eq("time | filter | filter2: filter | log"),
+				Mockito.eq(false));
 	}
 
 	@Test(expected = IllegalStateException.class)
 	public void testDuplicateNameNoLabel() throws Exception {
-		Stream.builder(client).name("test").source(timeApplication).processor(filterApplication)
-				.processor(filterApplication).sink(logApplication).create();
+		Stream.builder(client).name("test").source(timeApplication)
+				.processor(filterApplication).processor(filterApplication)
+				.sink(logApplication).create();
 	}
 
 	@Test
