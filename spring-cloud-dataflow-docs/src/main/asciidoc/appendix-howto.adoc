@@ -168,6 +168,24 @@ These properties can also be specified via `deployment` properties when deployin
 dataflow:>stream deploy foo --properties "app.*.logging.level.org.springframework.integration=DEBUG"
 ----
 
+==== Remote Debugging with Local Deployer
+
+When using Local Deployer you may want to benefit from the ability to debug your individual applications. This could be accomplished using remote debugging feature of the JVM.
+While generally a straight forward process, Local Deployer simplifies it even further by allowing you to manage it with deployment properties.
+
+For example:
+[source,bash]
+----
+stream deploy --name mystream --properties "deployer.fooApp.local.debugPort=9999"
+----
+The above will start the `fooApp` application in debug mode allowing remote debugger to be attached on port 9999. 
+By default the application will start in a ’suspend’ mode waiting for the remote debug session to be attached (started). Otherwise you can  provide an additional `debugSuspend` property with value `n`.
+
+Also, in the event when there is more then one instance of the application, the debug port for each instance will be the value of `debugPort` + instanceId.
+
+NOTE: Unlike other properties you must NOT use wild-card for the application name, since each application must use a unique debug port.
+
+
 ==== Log redirect
 
 Given that each application is a separate process with each maintaining it's own set of logs, accessing individual logs could be a bit inconvinient especially in the early stages of the development when logs are accessed more often (i.e., debugging, troubleshooting, etc.).
