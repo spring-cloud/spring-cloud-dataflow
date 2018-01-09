@@ -192,7 +192,7 @@ public class DataFlowControllerAutoConfiguration {
 					.messageConverters(Arrays.asList(new StringHttpMessageConverter(),
 							new MappingJackson2HttpMessageConverter(objectMapper)))
 					.build();
-			return new DefaultSkipperClient(properties.getUri(), restTemplate);
+			return new DefaultSkipperClient(properties.getServerUri(), restTemplate);
 		}
 
 		@Bean
@@ -202,7 +202,7 @@ public class DataFlowControllerAutoConfiguration {
 				StreamDefinitionRepository streamDefinitionRepository,
 				SkipperClientProperties skipperClientProperties,
 				ForkJoinPool runtimeAppsStatusFJPFB) {
-			logger.info("Skipper URI [" + skipperClientProperties.getUri() + "]");
+			logger.info("Skipper URI [" + skipperClientProperties.getServerUri() + "]");
 			return new SkipperStreamDeployer(skipperClient, streamDeploymentRepository, streamDefinitionRepository,
 					runtimeAppsStatusFJPFB);
 		}
