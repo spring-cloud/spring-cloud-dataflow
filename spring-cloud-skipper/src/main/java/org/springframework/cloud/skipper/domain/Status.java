@@ -47,7 +47,7 @@ import org.springframework.cloud.deployer.spi.app.DeploymentState;
  */
 @Entity
 @Table(name = "SkipperStatus")
-public class Status extends AbstractEntity {
+public class Status extends NonVersionedAbstractEntity {
 
 	// Status from the Release managment platform
 	@Enumerated(EnumType.STRING)
