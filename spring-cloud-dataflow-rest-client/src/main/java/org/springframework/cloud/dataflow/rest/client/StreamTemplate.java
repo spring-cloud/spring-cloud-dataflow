@@ -1,5 +1,5 @@
 /*
- * Copyright 2015-2016 the original author or authors.
+ * Copyright 2015-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,6 +22,7 @@ import java.util.Map;
 
 import org.springframework.cloud.dataflow.rest.UpdateStreamRequest;
 import org.springframework.cloud.dataflow.rest.resource.StreamDefinitionResource;
+import org.springframework.cloud.dataflow.rest.resource.StreamDeploymentResource;
 import org.springframework.cloud.skipper.domain.Deployer;
 import org.springframework.cloud.skipper.domain.PackageIdentifier;
 import org.springframework.cloud.skipper.domain.Release;
@@ -79,6 +80,12 @@ public class StreamTemplate implements StreamOperations {
 		String uriTemplate = definitionsLink.expand().getHref();
 		uriTemplate = uriTemplate + "?size=2000";
 		return restTemplate.getForObject(uriTemplate, StreamDefinitionResource.Page.class);
+	}
+
+	@Override
+	public StreamDeploymentResource info(String name) {
+		String uriTemplate = deploymentLink.expand(name).getHref();
+		return restTemplate.getForObject(uriTemplate, StreamDeploymentResource.class);
 	}
 
 	@Override

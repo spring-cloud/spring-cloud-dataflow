@@ -31,7 +31,6 @@ import org.springframework.cloud.dataflow.server.configuration.TestDependencies;
 import org.springframework.cloud.dataflow.server.repository.DeploymentIdRepository;
 import org.springframework.cloud.dataflow.server.repository.StreamDefinitionRepository;
 import org.springframework.cloud.dataflow.server.repository.StreamDeploymentRepository;
-import org.springframework.cloud.dataflow.server.stream.StreamDeployers;
 import org.springframework.cloud.deployer.spi.app.AppDeployer;
 import org.springframework.cloud.deployer.spi.app.AppStatus;
 import org.springframework.cloud.deployer.spi.app.DeploymentState;
@@ -92,10 +91,8 @@ public class RuntimeAppsControllerTests {
 		streamDefinitionRepository.save(streamDefinition1);
 		streamDefinitionRepository.save(streamDefinition2);
 
-		StreamDeployment streamDeployment1 = new StreamDeployment(streamDefinition1.getName(), StreamDeployers
-				.appdeployer.name());
-		StreamDeployment streamDeployment2 = new StreamDeployment(streamDefinition2.getName(), StreamDeployers
-				.appdeployer.name());
+		StreamDeployment streamDeployment1 = new StreamDeployment(streamDefinition1.getName());
+		StreamDeployment streamDeployment2 = new StreamDeployment(streamDefinition2.getName());
 		this.streamDeploymentRepository.save(streamDeployment1);
 		this.streamDeploymentRepository.save(streamDeployment2);
 

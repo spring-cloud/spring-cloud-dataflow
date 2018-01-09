@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 the original author or authors.
+ * Copyright 2017-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.EnumSet;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -32,13 +33,16 @@ import java.util.stream.Stream;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.json.JSONObject;
 
 import org.springframework.cloud.dataflow.core.StreamAppDefinition;
 import org.springframework.cloud.dataflow.core.StreamDefinition;
 import org.springframework.cloud.dataflow.core.StreamDeployment;
+import org.springframework.cloud.dataflow.registry.support.ResourceUtils;
 import org.springframework.cloud.dataflow.server.controller.StreamDefinitionController;
 import org.springframework.cloud.dataflow.server.repository.DeploymentIdRepository;
 import org.springframework.cloud.dataflow.server.repository.DeploymentKey;
+import org.springframework.cloud.dataflow.server.repository.NoSuchStreamDefinitionException;
 import org.springframework.cloud.dataflow.server.repository.StreamDefinitionRepository;
 import org.springframework.cloud.dataflow.server.repository.StreamDeploymentRepository;
 import org.springframework.cloud.deployer.spi.app.AppDeployer;
@@ -128,8 +132,14 @@ public class AppDeployerStreamDeployer implements StreamDeployer {
 						e);
 			}
 		}
+		Map<String, Map<String, String>> deploymentProperties = new HashMap<>();
+		Map<String, String> appVersions = new HashMap<>();
+		for (AppDeploymentRequest appDeploymentRequest: streamDeploymentRequest.getAppDeploymentRequests()) {
+			deploymentProperties.put(appDeploymentRequest.getDefinition().getName(), appDeploymentRequest.getDeploymentProperties());
+			appVersions.put(appDeploymentRequest.getDefinition().getName(), ResourceUtils.getResourceVersion(appDeploymentRequest.getResource()));
+		}
 		StreamDeployment streamDeployment = new StreamDeployment(streamDeploymentRequest.getStreamName(),
-				StreamDeployers.appdeployer.name());
+				new JSONObject(deploymentProperties).toString());
 		this.streamDeploymentRepository.save(streamDeployment);
 	}
 
@@ -244,5 +254,18 @@ public class AppDeployerStreamDeployer implements StreamDeployer {
 	@Override
 	public RuntimeEnvironmentInfo environmentInfo() {
 		return appDeployer.environmentInfo();
+	}
+
+	@Override
+	public StreamDeployment getStreamInfo(String streamName) {
+		StreamDefinition streamDefinition = this.streamDefinitionRepository.findOne(streamName);
+		if (streamDefinition == null) {
+			throw new NoSuchStreamDefinitionException(streamName);
+		}
+		StreamDeployment streamDeployment = this.streamDeploymentRepository.findOne(streamName);
+		if (streamDeployment == null) {
+			streamDeployment = new StreamDeployment(streamDefinition.getName());
+		}
+		return streamDeployment;
 	}
 }

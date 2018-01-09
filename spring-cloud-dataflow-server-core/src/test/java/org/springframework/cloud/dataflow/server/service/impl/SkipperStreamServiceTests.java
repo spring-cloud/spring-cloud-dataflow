@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 the original author or authors.
+ * Copyright 2017-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,11 +17,12 @@
 package org.springframework.cloud.dataflow.server.service.impl;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.json.JSONObject;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -34,17 +35,11 @@ import org.springframework.cloud.dataflow.core.StreamDeployment;
 import org.springframework.cloud.dataflow.registry.AppRegistry;
 import org.springframework.cloud.dataflow.registry.service.AppRegistryService;
 import org.springframework.cloud.dataflow.server.config.apps.CommonApplicationProperties;
-import org.springframework.cloud.dataflow.server.repository.IncompatibleStreamDeployerException;
 import org.springframework.cloud.dataflow.server.repository.StreamDefinitionRepository;
 import org.springframework.cloud.dataflow.server.repository.StreamDeploymentRepository;
 import org.springframework.cloud.dataflow.server.stream.SkipperStreamDeployer;
-import org.springframework.cloud.dataflow.server.stream.StreamDeployers;
-import org.springframework.cloud.deployer.spi.app.DeploymentState;
 import org.springframework.test.context.junit4.SpringRunner;
-import org.springframework.util.Assert;
 
-import static junit.framework.TestCase.fail;
-import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -67,12 +62,9 @@ public class SkipperStreamServiceTests {
 	private StreamDefinition streamDefinition3 = new StreamDefinition("test3", "time | log");
 	private StreamDefinition streamDefinition4 = new StreamDefinition("test4", "time | log");
 
-	private StreamDeployment streamDeployment1 = new StreamDeployment(streamDefinition1.getName(),
-			StreamDeployers.appdeployer.name(), null, null, null);
-	private StreamDeployment streamDeployment2 = new StreamDeployment(streamDefinition2.getName(),
-			StreamDeployers.skipper.name(), "pkg1", "release1", "local");
-	private StreamDeployment streamDeployment3 = new StreamDeployment(streamDefinition3.getName(),
-			StreamDeployers.skipper.name(), "pkg1", "release2", "local");
+	private StreamDeployment streamDeployment1 = new StreamDeployment(streamDefinition1.getName());
+	private StreamDeployment streamDeployment2 = new StreamDeployment(streamDefinition2.getName());
+	private StreamDeployment streamDeployment3 = new StreamDeployment(streamDefinition3.getName());
 
 	private List<StreamDefinition> streamDefinitionList = new ArrayList<>();
 	private List<StreamDefinition> skipperStreamDefinitions = new ArrayList<>();
@@ -95,8 +87,7 @@ public class SkipperStreamServiceTests {
 				mock(CommonApplicationProperties.class),
 				new BootApplicationConfigurationMetadataResolver());
 		this.skipperStreamService = new SkipperStreamService(mock(StreamDefinitionRepository.class),
-				this.streamDeploymentRepository, this.appRegistryService, this.skipperStreamDeployer,
-				this.appDeploymentRequestCreator);
+				this.appRegistryService, this.skipperStreamDeployer, this.appDeploymentRequestCreator);
 		this.streamDefinitionList.add(streamDefinition1);
 		this.streamDefinitionList.add(streamDefinition2);
 		this.streamDefinitionList.add(streamDefinition3);
@@ -109,23 +100,10 @@ public class SkipperStreamServiceTests {
 		when(streamDeploymentRepository.findOne(streamDeployment3.getStreamName())).thenReturn(streamDeployment3);
 	}
 
-
-	@Test(expected = IncompatibleStreamDeployerException.class)
-	public void verifyUndeployStreamInIncompatibleDeployer() {
-		StreamDefinition streamDefinition1 = new StreamDefinition("test1", "time | log");
-		StreamDeployment streamDeployment1 = new StreamDeployment(streamDefinition1.getName(),
-				StreamDeployers.appdeployer.name(), null, null, null);
-
-		when(this.streamDeploymentRepository.findOne(streamDeployment1.getStreamName())).thenReturn(streamDeployment1);
-
-		this.skipperStreamService.undeployStream(streamDefinition1.getName());
-	}
-
 	@Test
 	public void verifyUndeployStream() {
 		StreamDefinition streamDefinition2 = new StreamDefinition("test2", "time | log");
-		StreamDeployment streamDeployment2 = new StreamDeployment(streamDefinition2.getName(),
-				StreamDeployers.skipper.name(), "pkg1", "release1", "local");
+		StreamDeployment streamDeployment2 = new StreamDeployment(streamDefinition2.getName(), "");
 
 		when(this.streamDeploymentRepository.findOne(streamDeployment2.getStreamName())).thenReturn(streamDeployment2);
 
@@ -135,29 +113,9 @@ public class SkipperStreamServiceTests {
 	}
 
 	@Test
-	public void verifyRollbackStreamOnIncompatibleDeployer() {
-		StreamDefinition streamDefinition1 = new StreamDefinition("test1", "time | log");
-		StreamDeployment streamDeployment1 = new StreamDeployment(streamDefinition1.getName(),
-				StreamDeployers.appdeployer.name(), null, null, null);
-
-		when(this.streamDeploymentRepository.findOne(streamDeployment1.getStreamName())).thenReturn(streamDeployment1);
-
-		verifyNoMoreInteractions(this.skipperStreamDeployer);
-		try {
-			this.skipperStreamService.rollbackStream(streamDefinition1.getName(), 0);
-			fail("IncompatibleStreamDeployerException is expected when trying to rollback a stream that was deployed using "
-					+ "app deployer");
-		}
-		catch (IncompatibleStreamDeployerException e) {
-			assertThat(e.getMessage()).isEqualTo("Can perform this stream operation only on deployer: skipper");
-		}
-	}
-
-	@Test
 	public void verifyRollbackStream() {
 		StreamDefinition streamDefinition2 = new StreamDefinition("test2", "time | log");
-		StreamDeployment streamDeployment2 = new StreamDeployment(streamDefinition2.getName(),
-				StreamDeployers.skipper.name(), "pkg1", "release1", "local");
+		StreamDeployment streamDeployment2 = new StreamDeployment(streamDefinition2.getName(), "");
 		when(this.streamDeploymentRepository.findOne(streamDeployment2.getStreamName())).thenReturn(streamDeployment2);
 
 		verifyNoMoreInteractions(this.skipperStreamDeployer);
@@ -166,38 +124,20 @@ public class SkipperStreamServiceTests {
 	}
 
 	@Test
-	public void verifyAppDeployerUpgrade() {
-		try {
-			this.skipperStreamService.updateStream(this.streamDeployment1.getStreamName(),
-					this.streamDeployment1.getReleaseName(),
-					null, null);
-			fail("IllegalStateException is expected to be thrown.");
-		}
-		catch (IncompatibleStreamDeployerException e) {
-		}
-	}
-
-	@Test
-	public void verifySkipperDeploymentState() {
-
-		Map<StreamDefinition, DeploymentState> skipperDeployerStates = new HashMap<>();
-		skipperDeployerStates.put(this.streamDefinition2, DeploymentState.undeployed);
-		skipperDeployerStates.put(this.streamDefinition3, DeploymentState.failed);
-
-		when(this.skipperStreamDeployer.state(
-				Arrays.asList(streamDefinition2, streamDefinition3))).thenReturn(skipperDeployerStates);
-
-		// Note that streamDefinition4 has not been deployed? E.g. there is is not deployer in the registry
-		Map<StreamDefinition, DeploymentState> states = this.skipperStreamService.state(
-				Arrays.asList(streamDefinition2, streamDefinition3, streamDefinition4));
-
-		Assert.isTrue(states.size() == 3, "Deployment states size mismatch");
-
-		Assert.isTrue(states.get(this.streamDefinition4).equals(DeploymentState.unknown),
-				"Deployment state is incorrect");
-		Assert.isTrue(states.get(this.streamDefinition2).equals(DeploymentState.undeployed),
-				"Deployment state is incorrect");
-		Assert.isTrue(states.get(this.streamDefinition3).equals(DeploymentState.failed),
-				"Deployment state is incorrect");
+	public void verifyStreamInfo() {
+		StreamDefinition streamDefinition1 = new StreamDefinition("test1", "time | log");
+		Map<String, String> deploymentProperties1 = new HashMap<>();
+		deploymentProperties1.put("test1", "value1");
+		Map<String, String> deploymentProperties2 = new HashMap<>();
+		deploymentProperties2.put("test2", "value2");
+		Map<String, Map<String, String>> streamDeploymentProperties = new HashMap<>();
+		streamDeploymentProperties.put("time", deploymentProperties1);
+		streamDeploymentProperties.put("log", deploymentProperties2);
+		StreamDeployment streamDeployment1 = new StreamDeployment(streamDefinition1.getName(),
+				new JSONObject(streamDeploymentProperties).toString());
+		when(this.skipperStreamDeployer.getStreamInfo(streamDeployment1.getStreamName())).thenReturn(streamDeployment1);
+		StreamDeployment streamDeployment = this.skipperStreamService.info("test1");
+		Assert.assertTrue(streamDeployment.getStreamName().equals(streamDefinition1.getName()));
+		Assert.assertTrue(streamDeployment.getDeploymentProperties().equals("{\"log\":{\"test2\":\"value2\"},\"time\":{\"test1\":\"value1\"}}"));
 	}
 }
