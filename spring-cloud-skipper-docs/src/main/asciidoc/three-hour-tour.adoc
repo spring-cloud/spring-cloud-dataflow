@@ -19,14 +19,14 @@ For example,
 
 [source,bash,subs=attributes]
 ```
-java -jar spring-cloud-skipper-shell-{project-version}.jar --spring.cloud.skipper.client.uri=http://localhost:9123/api
+java -jar spring-cloud-skipper-shell-{project-version}.jar --spring.cloud.skipper.client.serverUri=http://localhost:9123/api
 ```
 Will bring up the interactive shell and connect to `http://localhost:9123/api`.
 However, the command
 
 [source,bash,subs=attributes]
 ```
-$ java -jar spring-cloud-skipper-shell-{project-version}.jar --spring.cloud.skipper.client.uri=http://localhost:9123/api search
+$ java -jar spring-cloud-skipper-shell-{project-version}.jar --spring.cloud.skipper.client.serverUri=http://localhost:9123/api search
 ```
 
 Will connect to `http://localhost:9123/api`, execute the `search` command and then exit.

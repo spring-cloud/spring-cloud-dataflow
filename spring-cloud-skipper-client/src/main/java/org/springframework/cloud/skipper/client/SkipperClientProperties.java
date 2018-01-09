@@ -42,7 +42,7 @@ public class SkipperClientProperties {
 
 	public static final String DEFAULT_CREDENTIALS_PROVIDER_COMMAND = "";
 
-	private String uri = DEFAULT_TARGET;
+	private String serverUri = DEFAULT_TARGET;
 
 	private String username = DEFAULT_USERNAME;
 
@@ -52,12 +52,12 @@ public class SkipperClientProperties {
 
 	private String credentialsProviderCommand = DEFAULT_CREDENTIALS_PROVIDER_COMMAND;
 
-	public String getUri() {
-		return uri;
+	public String getServerUri() {
+		return serverUri;
 	}
 
-	public void setUri(String url) {
-		this.uri = url;
+	public void setServerUri(String url) {
+		this.serverUri = url;
 	}
 
 	public String getPassword() {

@@ -61,7 +61,7 @@ public class InitializeConnectionApplicationRunner implements ApplicationRunner 
 			return;
 		}
 
-		Target target = new Target(skipperClientProperties.getUri(), skipperClientProperties.getUsername(),
+		Target target = new Target(skipperClientProperties.getServerUri(), skipperClientProperties.getUsername(),
 				skipperClientProperties.getPassword(), skipperClientProperties.isSkipSslValidation());
 
 		// Attempt connection (including against default values) but do not crash the shell on
