@@ -16,7 +16,6 @@
 package org.springframework.cloud.dataflow.server.service.impl;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.logging.Log;
@@ -70,13 +69,6 @@ public abstract class AbstractStreamService implements StreamService {
 		if (deploymentProperties == null) {
 			deploymentProperties = new HashMap<>();
 		}
-		doDeployStream(name, deploymentProperties);
-	}
-
-	protected abstract void doDeployStream(String name, Map<String, String> deploymentProperties);
-
-
-	protected StreamDefinition createStreamDefinitionForDeploy(String name) {
 		StreamDefinition streamDefinition = this.streamDefinitionRepository.findOne(name);
 		if (streamDefinition == null) {
 			throw new NoSuchStreamDefinitionException(name);
@@ -90,16 +82,10 @@ public abstract class AbstractStreamService implements StreamService {
 		else if (DeploymentState.deploying.equals(DeploymentState.valueOf(status))) {
 			throw new StreamAlreadyDeployingException(name);
 		}
-		return streamDefinition;
+		doDeployStream(streamDefinition, deploymentProperties);
 	}
+
+	protected abstract void doDeployStream(StreamDefinition streamDefinition, Map<String, String> deploymentProperties);
 
 	protected abstract String doCalculateStreamState(String name);
-
-	// State
-	@Override
-	public Map<StreamDefinition, DeploymentState> state(List<StreamDefinition> streamDefinitions) {
-		return this.doState(streamDefinitions);
-	}
-
-	protected abstract Map<StreamDefinition, DeploymentState> doState(List<StreamDefinition> streamDefinitions);
 }

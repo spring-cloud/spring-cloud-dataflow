@@ -75,9 +75,7 @@ public class AppDeployerStreamService extends AbstractStreamService {
 	}
 
 	@Override
-	public void doDeployStream(String name, Map<String, String> deploymentProperties) {
-		StreamDefinition streamDefinition = createStreamDefinitionForDeploy(name);
-
+	public void doDeployStream(StreamDefinition streamDefinition, Map<String, String> deploymentProperties) {
 		Map<String, String> deploymentPropertiesToUse = deploymentProperties.entrySet().stream()
 				.filter(mapEntry -> !mapEntry.getKey().startsWith(SKIPPER_KEY_PREFIX))
 				.collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
@@ -98,7 +96,7 @@ public class AppDeployerStreamService extends AbstractStreamService {
 
 	// State
 	@Override
-	public Map<StreamDefinition, DeploymentState> doState(List<StreamDefinition> streamDefinitions) {
+	public Map<StreamDefinition, DeploymentState> state(List<StreamDefinition> streamDefinitions) {
 		return this.appDeployerStreamDeployer.state(streamDefinitions);
 	}
 

@@ -35,7 +35,6 @@ import org.springframework.cloud.dataflow.core.StreamDefinition;
 import org.springframework.cloud.dataflow.core.StreamDeployment;
 import org.springframework.cloud.dataflow.rest.resource.StreamDeploymentResource;
 import org.springframework.cloud.dataflow.server.repository.StreamDefinitionRepository;
-import org.springframework.cloud.dataflow.server.repository.StreamDeploymentRepository;
 import org.springframework.cloud.dataflow.server.service.StreamService;
 import org.springframework.cloud.deployer.spi.app.DeploymentState;
 import org.springframework.cloud.skipper.domain.Deployer;
@@ -70,13 +69,7 @@ public class StreamDeploymentControllerTests {
 	private StreamService defaultStreamService;
 
 	@Mock
-	private StreamDeploymentRepository streamDeploymentRepository;
-
-	@Mock
 	private Deployer deployer;
-
-	@Mock
-	private ServletRequestAttributes attrs;
 
 	@Before
 	public void setup() {
