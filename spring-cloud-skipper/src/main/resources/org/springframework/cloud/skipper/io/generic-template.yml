@@ -6,8 +6,8 @@ metadata:
   {{/metadata.entrySet}}
 spec:
   resource: {{spec.resource}}
-  resourceMetadata: {{spec.resource}}:jar:metadata:{{version}}
-  version: {{version}}
+  resourceMetadata: {{spec.resource}}:jar:metadata:{{spec.version}}
+  version: {{spec.version}}
   applicationProperties:
     {{#spec.applicationProperties.entrySet}}
     {{key}}: {{value}}

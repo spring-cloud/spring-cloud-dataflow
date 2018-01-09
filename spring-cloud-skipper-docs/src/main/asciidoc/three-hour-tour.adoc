@@ -247,8 +247,8 @@ metadata:
   type: sample
 spec:
   resource: maven://org.mysample:mypackage
-  resourceMetadata:  maven://org.mysample:mypackage:jar:metadata:{{version}}
-  version: {{version}}
+  resourceMetadata:  maven://org.mysample:mypackage:jar:metadata:{{spec.version}}
+  version: {{spec.version}}
   applicationProperties:
     {{#spec.applicationProperties.entrySet}}
     {{key}}: {{value}}
@@ -261,10 +261,11 @@ spec:
 
 The `apiVersion`, `kind` and `spec.resource` are required.
 
-The `spec.resource` and `spec.version` defines where the application executable is located.
+The `spec.resource` and `spec.version` define where the application executable is located.
 The `spec.resourceMetadata` field defines where a https://docs.spring.io/spring-boot/docs/current/reference/html/configuration-metadata.html[Spring Boot Configuration meta-data] jar is located that contains
 configuration properties of the application.
-This is either a Spring Boot uberjar hosted under a http endpoint or a maven or docker repository.  The template placeholder `{{version}}` so that the version of a specific application can be easily upgraded without having to create a new package .zip file.
+This is either a Spring Boot uberjar hosted under a http endpoint or a maven or docker repository.
+The template placeholder `{{spec.version}}` so that the version of a specific application can be easily upgraded without having to create a new package .zip file.
 
 The `resource` is `http://` or a `maven://` or `docker:` based.  The format for specifying a `resource` is shown below.
 
