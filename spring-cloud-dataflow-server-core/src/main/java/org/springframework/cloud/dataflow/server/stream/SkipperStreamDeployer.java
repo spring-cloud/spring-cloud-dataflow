@@ -412,7 +412,12 @@ public class SkipperStreamDeployer implements StreamDeployer {
 	}
 
 	public String manifest(String name, int version) {
-		return this.skipperClient.manifest(name, version);
+		if (version > 0) {
+			return this.skipperClient.manifest(name, version);
+		}
+		else {
+			return this.skipperClient.manifest(name);
+		}
 	}
 
 	public String manifest(String name) {

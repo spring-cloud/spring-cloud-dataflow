@@ -137,8 +137,10 @@ public class SkipperStreamDeployerTests {
 				mock(StreamDefinitionRepository.class), mock(ForkJoinPool.class));
 
 		skipperStreamDeployer.manifest("name", 666);
-
 		verify(skipperClient).manifest(eq("name"), eq(666));
+
+		skipperStreamDeployer.manifest("name");
+		verify(skipperClient).manifest(eq("name"));
 	}
 
 	@Test
