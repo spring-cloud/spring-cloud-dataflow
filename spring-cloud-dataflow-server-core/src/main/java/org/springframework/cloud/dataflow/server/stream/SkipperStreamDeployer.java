@@ -289,16 +289,6 @@ public class SkipperStreamDeployer implements StreamDeployer {
 		Map<String, Object> metadataMap = new HashMap<>();
 		Map<String, Object> specMap = new HashMap<>();
 
-		// Add version, including possible override via deploymentProperties - hack to store
-		// version in cmdline args
-		String version = ResourceUtils.getResourceVersion(appDeploymentRequest.getResource());
-		if (appDeploymentRequest.getCommandlineArguments().size() == 1) {
-			configValueMap.put("version", appDeploymentRequest.getCommandlineArguments().get(0));
-		}
-		else {
-			configValueMap.put("version", version);
-		}
-
 		// Add metadata
 		metadataMap.put("name", packageName);
 
@@ -307,7 +297,14 @@ public class SkipperStreamDeployer implements StreamDeployer {
 		specMap.put("resource", resourceWithoutVersion);
 		specMap.put("applicationProperties", appDeploymentRequest.getDefinition().getProperties());
 		specMap.put("deploymentProperties", appDeploymentRequest.getDeploymentProperties());
-
+		String version = ResourceUtils.getResourceVersion(appDeploymentRequest.getResource());
+		// Add version, including possible override via deploymentProperties - hack to store version in cmdline args
+		if (appDeploymentRequest.getCommandlineArguments().size() == 1) {
+			specMap.put("version", appDeploymentRequest.getCommandlineArguments().get(0));
+		}
+		else {
+			specMap.put("version", version);
+		}
 		// Add metadata and spec to top level map
 		configValueMap.put("metadata", metadataMap);
 		configValueMap.put("spec", specMap);

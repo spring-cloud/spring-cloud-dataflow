@@ -211,13 +211,14 @@ public class SkipperStreamService extends AbstractStreamService {
 				specMap.put(SpringCloudDeployerApplicationSpec.DEPLOYMENT_PROPERTIES_STRING,
 						appDeploymentRequest.getDeploymentProperties());
 			}
-			if (hasProps) {
-				appMap.put(SpringCloudDeployerApplicationManifest.SPEC_STRING, specMap);
-			}
 			if (appDeploymentRequest.getCommandlineArguments().size() == 1) {
+				hasProps = true;
 				String version = appDeploymentRequest.getCommandlineArguments().get(0);
 				this.skipperStreamDeployer.validateAppVersionIsRegistered(appDeploymentRequest, version);
-				appMap.put("version", version);
+				specMap.put("version", version);
+			}
+			if (hasProps) {
+				appMap.put(SpringCloudDeployerApplicationManifest.SPEC_STRING, specMap);
 			}
 			if (appMap.size() != 0) {
 				skipperConfigValuesMap.put(appName, appMap);
