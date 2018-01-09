@@ -92,7 +92,9 @@ public class SkipperStreamCommands extends AbstractStreamCommands implements Com
 	}
 
 	@Autowired
-	private UserInput userInput;
+	public void setUserInput(UserInput userInput) {
+		this.userInput = userInput;
+	}
 
 	@CliAvailabilityIndicator({ CREATE_STREAM, STREAM_SKIPPER_DEPLOY, STREAM_SKIPPER_UPDATE })
 	public boolean availableWithCreateRole() {
