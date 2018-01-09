@@ -139,7 +139,7 @@ public class DataFlowServerConfigurationTests {
 
 	@Test
 	public void testSkipperConfig() throws Exception {
-		EnvironmentTestUtils.addEnvironment(context, "spring.cloud.skipper.client.uri:http://fakehost:1234/api",
+		EnvironmentTestUtils.addEnvironment(context, "spring.cloud.skipper.client.serverUri:http://fakehost:1234/api",
 				"spring.cloud.dataflow.features.skipper-enabled:true");
 		context.refresh();
 		SkipperClient skipperClient = context.getBean(SkipperClient.class);
