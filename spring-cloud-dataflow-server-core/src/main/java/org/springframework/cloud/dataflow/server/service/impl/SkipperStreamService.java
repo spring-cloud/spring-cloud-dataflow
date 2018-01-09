@@ -37,9 +37,7 @@ import org.springframework.cloud.dataflow.registry.service.AppRegistryService;
 import org.springframework.cloud.dataflow.rest.UpdateStreamRequest;
 import org.springframework.cloud.dataflow.rest.util.DeploymentPropertiesUtils;
 import org.springframework.cloud.dataflow.server.repository.NoSuchStreamDefinitionException;
-import org.springframework.cloud.dataflow.server.repository.NoSuchStreamDeploymentException;
 import org.springframework.cloud.dataflow.server.repository.StreamDefinitionRepository;
-import org.springframework.cloud.dataflow.server.repository.StreamDeploymentRepository;
 import org.springframework.cloud.dataflow.server.stream.SkipperStreamDeployer;
 import org.springframework.cloud.dataflow.server.stream.StreamDeployers;
 import org.springframework.cloud.dataflow.server.stream.StreamDeploymentRequest;
@@ -80,12 +78,11 @@ public class SkipperStreamService extends AbstractStreamService {
 	private final AppRegistryService appRegistryService;
 
 	public SkipperStreamService(StreamDefinitionRepository streamDefinitionRepository,
-			StreamDeploymentRepository streamDeploymentRepository,
 			AppRegistryService appRegistryService,
 			SkipperStreamDeployer skipperStreamDeployer,
 			AppDeploymentRequestCreator appDeploymentRequestCreator) {
 
-		super(streamDefinitionRepository, streamDeploymentRepository, StreamDeployers.skipper);
+		super(streamDefinitionRepository, StreamDeployers.skipper);
 
 		Assert.notNull(appRegistryService, "AppRegistryService must not be null");
 		Assert.notNull(skipperStreamDeployer, "SkipperStreamDeployer must not be null");
@@ -137,7 +134,7 @@ public class SkipperStreamService extends AbstractStreamService {
 	}
 
 	@Override
-	public void doUndeployStream(String streamName) {
+	public void undeployStream(String streamName) {
 		this.skipperStreamDeployer.undeployStream(streamName);
 	}
 
@@ -215,10 +212,6 @@ public class SkipperStreamService extends AbstractStreamService {
 	@Override
 	public void rollbackStream(String streamName, int releaseVersion) {
 		Assert.isTrue(StringUtils.hasText(streamName), "Stream name must not be null");
-		StreamDeployment streamDeployment = this.streamDeploymentRepository.findOne(streamName);
-		if (streamDeployment == null) {
-			throw new NoSuchStreamDeploymentException(streamName);
-		}
 		this.skipperStreamDeployer.rollbackStream(streamName, releaseVersion);
 	}
 

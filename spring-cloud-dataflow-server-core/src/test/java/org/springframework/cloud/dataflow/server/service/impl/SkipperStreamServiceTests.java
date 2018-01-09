@@ -87,8 +87,7 @@ public class SkipperStreamServiceTests {
 				mock(CommonApplicationProperties.class),
 				new BootApplicationConfigurationMetadataResolver());
 		this.skipperStreamService = new SkipperStreamService(mock(StreamDefinitionRepository.class),
-				this.streamDeploymentRepository, this.appRegistryService, this.skipperStreamDeployer,
-				this.appDeploymentRequestCreator);
+				this.appRegistryService, this.skipperStreamDeployer, this.appDeploymentRequestCreator);
 		this.streamDefinitionList.add(streamDefinition1);
 		this.streamDefinitionList.add(streamDefinition2);
 		this.streamDefinitionList.add(streamDefinition3);

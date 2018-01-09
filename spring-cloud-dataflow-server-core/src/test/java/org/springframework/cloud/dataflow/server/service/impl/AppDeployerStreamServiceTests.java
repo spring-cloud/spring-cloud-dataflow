@@ -101,7 +101,7 @@ public class AppDeployerStreamServiceTests {
 				mock(CommonApplicationProperties.class),
 				new BootApplicationConfigurationMetadataResolver());
 		this.simpleStreamService = new AppDeployerStreamService(mock(StreamDefinitionRepository.class),
-				this.streamDeploymentRepository, this.appDeployerStreamDeployer, this.appDeploymentRequestCreator);
+				this.appDeployerStreamDeployer, this.appDeploymentRequestCreator);
 		this.streamDefinitionList.add(streamDefinition1);
 		this.appDeployerStreamDefinitions.add(streamDefinition1);
 		this.streamDefinitionList.add(streamDefinition2);

@@ -41,6 +41,7 @@ import org.springframework.hateoas.ExposesResourceFor;
 import org.springframework.hateoas.mvc.ResourceAssemblerSupport;
 import org.springframework.http.HttpStatus;
 import org.springframework.util.Assert;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -128,7 +129,15 @@ public class StreamDeploymentController {
 			throw new NoSuchStreamDefinitionException(name);
 		}
 		StreamDeployment streamDeployment = this.streamService.info(name);
-		return new Assembler(streamDefinition).toResource(streamDeployment);
+		Map<StreamDefinition, DeploymentState> streamDeploymentStates =
+				this.streamService.state(Arrays.asList(streamDefinition));
+		DeploymentState deploymentState = streamDeploymentStates.get(streamDefinition);
+		String status = "";
+		if (deploymentState != null) {
+			final DeploymentStateResource deploymentStateResource = ControllerUtils.mapState(deploymentState);
+			status = deploymentStateResource.getKey();
+		}
+		return new Assembler(streamDefinition.getDslText(), status).toResource(streamDeployment);
 	}
 
 	/**
@@ -181,17 +190,20 @@ public class StreamDeploymentController {
 	 */
 	class Assembler extends ResourceAssemblerSupport<StreamDeployment, StreamDeploymentResource> {
 
-		private final StreamDefinition streamDefinition;
+		private final String dslText;
 
-		public Assembler(StreamDefinition streamDefinition) {
+		private final String status;
+
+		public Assembler(String dslText, String status) {
 			super(StreamDeploymentController.class, StreamDeploymentResource.class);
-			this.streamDefinition = streamDefinition;
+			this.dslText = dslText;
+			this.status = status;
 		}
 
 		@Override
-		public StreamDeploymentResource toResource(StreamDeployment stream) {
+		public StreamDeploymentResource toResource(StreamDeployment streamDeployment) {
 			try {
-				return createResourceWithId(this.streamDefinition.getName(), stream);
+				return createResourceWithId(streamDeployment.getStreamName(), streamDeployment);
 			}
 			catch (IllegalStateException e) {
 				logger.warn("Failed to create StreamDeploymentResource. " + e.getMessage());
@@ -200,18 +212,19 @@ public class StreamDeploymentController {
 		}
 
 		@Override
-		public StreamDeploymentResource instantiateResource(StreamDeployment stream) {
-			final StreamDeploymentResource resource = new StreamDeploymentResource(this.streamDefinition.getName(),
-					ArgumentSanitizer.sanitizeStream(this.streamDefinition.getDslText()), stream.getDeploymentProperties()
-			);
-			Map<StreamDefinition, DeploymentState> streamDeploymentStates = StreamDeploymentController.this.streamService.state(Arrays.asList(this.streamDefinition));
-			DeploymentState deploymentState = streamDeploymentStates.get(this.streamDefinition);
-			if (deploymentState != null) {
-				final DeploymentStateResource deploymentStateResource = ControllerUtils.mapState(deploymentState);
-				resource.setStatus(deploymentStateResource.getKey());
-				resource.setStatusDescription(deploymentStateResource.getDescription());
+		public StreamDeploymentResource instantiateResource(StreamDeployment streamDeployment) {
+			String deploymentProperties = "";
+			if (StringUtils.hasText(streamDeployment.getDeploymentProperties()) && canDisplayDeploymentProperties()) {
+				deploymentProperties = streamDeployment.getDeploymentProperties();
 			}
-			return resource;
+			return new StreamDeploymentResource(streamDeployment.getStreamName(),
+					ArgumentSanitizer.sanitizeStream(this.dslText), deploymentProperties, this.status);
+		}
+
+		private boolean canDisplayDeploymentProperties() {
+			return StringUtils.hasText(this.status) &&
+					(this.status.equals(DeploymentState.deployed.name()))
+					|| this.status.equals(DeploymentState.deploying.name());
 		}
 
 	}

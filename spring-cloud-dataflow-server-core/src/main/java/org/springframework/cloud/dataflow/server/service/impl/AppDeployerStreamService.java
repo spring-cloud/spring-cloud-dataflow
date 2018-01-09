@@ -30,7 +30,6 @@ import org.springframework.cloud.dataflow.rest.UpdateStreamRequest;
 import org.springframework.cloud.dataflow.rest.util.DeploymentPropertiesUtils;
 import org.springframework.cloud.dataflow.server.repository.IncompatibleStreamDeployerException;
 import org.springframework.cloud.dataflow.server.repository.StreamDefinitionRepository;
-import org.springframework.cloud.dataflow.server.repository.StreamDeploymentRepository;
 import org.springframework.cloud.dataflow.server.stream.AppDeployerStreamDeployer;
 import org.springframework.cloud.dataflow.server.stream.StreamDeployers;
 import org.springframework.cloud.dataflow.server.stream.StreamDeploymentRequest;
@@ -61,10 +60,9 @@ public class AppDeployerStreamService extends AbstractStreamService {
 	private final AppDeploymentRequestCreator appDeploymentRequestCreator;
 
 	public AppDeployerStreamService(StreamDefinitionRepository streamDefinitionRepository,
-			StreamDeploymentRepository streamDeploymentRepository,
 			AppDeployerStreamDeployer appDeployerStreamDeployer,
 			AppDeploymentRequestCreator appDeploymentRequestCreator) {
-		super(streamDefinitionRepository, streamDeploymentRepository, StreamDeployers.appdeployer);
+		super(streamDefinitionRepository, StreamDeployers.appdeployer);
 		Assert.notNull(appDeployerStreamDeployer, "AppDeployerStreamDeployer must not be null");
 		Assert.notNull(appDeploymentRequestCreator, "AppDeploymentRequestCreator must not be null");
 		this.appDeployerStreamDeployer = appDeployerStreamDeployer;
@@ -94,7 +92,7 @@ public class AppDeployerStreamService extends AbstractStreamService {
 	}
 
 	@Override
-	public void doUndeployStream(String streamName) {
+	public void undeployStream(String streamName) {
 		this.appDeployerStreamDeployer.undeployStream(streamName);
 	}
 

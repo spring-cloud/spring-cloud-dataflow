@@ -47,7 +47,6 @@ import org.springframework.cloud.dataflow.registry.support.ResourceUtils;
 import org.springframework.cloud.dataflow.server.controller.NoSuchAppException;
 import org.springframework.cloud.dataflow.server.controller.StreamDefinitionController;
 import org.springframework.cloud.dataflow.server.repository.StreamDefinitionRepository;
-import org.springframework.cloud.dataflow.server.repository.StreamDeploymentRepository;
 import org.springframework.cloud.deployer.spi.app.AppInstanceStatus;
 import org.springframework.cloud.deployer.spi.app.AppStatus;
 import org.springframework.cloud.deployer.spi.app.DeploymentState;
@@ -105,8 +104,8 @@ public class SkipperStreamDeployer implements StreamDeployer {
 
 	private final ForkJoinPool forkJoinPool;
 
-	public SkipperStreamDeployer(SkipperClient skipperClient, StreamDeploymentRepository streamDeploymentRepository,
-			StreamDefinitionRepository streamDefinitionRepository, ForkJoinPool forkJoinPool) {
+	public SkipperStreamDeployer(SkipperClient skipperClient, StreamDefinitionRepository streamDefinitionRepository,
+			ForkJoinPool forkJoinPool) {
 		Assert.notNull(skipperClient, "SkipperClient can not be null");
 		Assert.notNull(streamDefinitionRepository, "StreamDefinitionRepository can not be null");
 		Assert.notNull(forkJoinPool, "ForkJoinPool can not be null");

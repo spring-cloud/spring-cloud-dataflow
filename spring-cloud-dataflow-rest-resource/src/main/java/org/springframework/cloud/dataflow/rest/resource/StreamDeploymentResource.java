@@ -17,6 +17,7 @@
 package org.springframework.cloud.dataflow.rest.resource;
 
 import org.springframework.hateoas.PagedResources;
+import org.springframework.hateoas.ResourceSupport;
 
 /**
  * A HATEOAS representation of a stream deployment.
@@ -24,12 +25,22 @@ import org.springframework.hateoas.PagedResources;
  * @author Eric Bottard
  * @author Ilayaperumal Gopinathan
  */
-public class StreamDeploymentResource extends StreamDefinitionResource {
+public class StreamDeploymentResource extends ResourceSupport {
 
 	/**
 	 * The name of the stream under deployment.
 	 */
 	private String streamName;
+
+	/**
+	 * Stream definition DSL text.
+	 */
+	private String dslText;
+
+	/**
+	 * Stream status (i.e. deployed, undeployed, etc).
+	 */
+	private String status;
 
 	/**
 	 * The JSON String value of the deployment properties Map<String, String> values.
@@ -42,6 +53,21 @@ public class StreamDeploymentResource extends StreamDefinitionResource {
 	protected StreamDeploymentResource() {
 	}
 
+	public StreamDeploymentResource(String streamName, String dslText) {
+		this(streamName, dslText, "");
+	}
+
+	public StreamDeploymentResource(String streamName, String dslText, String deploymentProperties) {
+		this(streamName, dslText, deploymentProperties, "");
+	}
+
+	public StreamDeploymentResource(String streamName, String dslText, String deploymentProperties, String status) {
+		this.streamName = streamName;
+		this.dslText = dslText;
+		this.deploymentProperties = deploymentProperties;
+		this.status = status;
+	}
+
 	public String getStreamName() {
 		return streamName;
 	}
@@ -50,14 +76,12 @@ public class StreamDeploymentResource extends StreamDefinitionResource {
 		return deploymentProperties;
 	}
 
-	public StreamDeploymentResource(String streamName, String dslText) {
-		this(streamName, dslText, "");
+	public String getDslText() {
+		return dslText;
 	}
 
-	public StreamDeploymentResource(String streamName, String dslText, String deploymentProperties) {
-		super(streamName, dslText);
-		this.streamName = streamName;
-		this.deploymentProperties = deploymentProperties;
+	public String getStatus() {
+		return status;
 	}
 
 	public static class Page extends PagedResources<StreamDeploymentResource> {

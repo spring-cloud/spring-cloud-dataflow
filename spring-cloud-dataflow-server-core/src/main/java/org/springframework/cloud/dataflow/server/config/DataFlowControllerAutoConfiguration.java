@@ -182,7 +182,7 @@ public class DataFlowControllerAutoConfiguration {
 	public static class SkipperDeploymentConfiguration {
 
 		@Bean
-		@ConditionalOnBean({ StreamDefinitionRepository.class, StreamDeploymentRepository.class })
+		@ConditionalOnBean(StreamDefinitionRepository.class)
 		public SkipperClient skipperClient(SkipperClientProperties properties,
 				RestTemplateBuilder restTemplateBuilder, ObjectMapper objectMapper) {
 			objectMapper.registerModule(new Jackson2HalModule());
@@ -196,24 +196,23 @@ public class DataFlowControllerAutoConfiguration {
 		}
 
 		@Bean
-		@ConditionalOnBean({ StreamDefinitionRepository.class, StreamDeploymentRepository.class })
+		@ConditionalOnBean(StreamDefinitionRepository.class)
 		public SkipperStreamDeployer skipperStreamDeployer(SkipperClient skipperClient,
-				StreamDeploymentRepository streamDeploymentRepository,
 				StreamDefinitionRepository streamDefinitionRepository,
 				SkipperClientProperties skipperClientProperties,
 				ForkJoinPool runtimeAppsStatusFJPFB) {
 			logger.info("Skipper URI [" + skipperClientProperties.getUri() + "]");
-			return new SkipperStreamDeployer(skipperClient, streamDeploymentRepository, streamDefinitionRepository,
+			return new SkipperStreamDeployer(skipperClient, streamDefinitionRepository,
 					runtimeAppsStatusFJPFB);
 		}
 
 		@Bean
-		@ConditionalOnBean({ StreamDefinitionRepository.class, StreamDeploymentRepository.class })
+		@ConditionalOnBean(StreamDefinitionRepository.class)
 		public StreamService skipperStreamDeploymentService(StreamDefinitionRepository streamDefinitionRepository,
-				StreamDeploymentRepository streamDeploymentRepository, AppRegistryService appRegistryService,
-				SkipperStreamDeployer skipperStreamDeployer, AppDeploymentRequestCreator appDeploymentRequestCreator) {
-			return new SkipperStreamService(streamDefinitionRepository, streamDeploymentRepository,
-					appRegistryService, skipperStreamDeployer, appDeploymentRequestCreator);
+				AppRegistryService appRegistryService, SkipperStreamDeployer skipperStreamDeployer,
+				AppDeploymentRequestCreator appDeploymentRequestCreator) {
+			return new SkipperStreamService(streamDefinitionRepository, appRegistryService,
+					skipperStreamDeployer, appDeploymentRequestCreator);
 		}
 
 		@Bean
@@ -237,11 +236,9 @@ public class DataFlowControllerAutoConfiguration {
 		@Bean
 		@ConditionalOnBean({ StreamDefinitionRepository.class, StreamDeploymentRepository.class })
 		public StreamService simpleStreamDeploymentService(StreamDefinitionRepository streamDefinitionRepository,
-				StreamDeploymentRepository streamDeploymentRepository,
 				AppDeployerStreamDeployer appDeployerStreamDeployer,
 				AppDeploymentRequestCreator appDeploymentRequestCreator) {
 			return new AppDeployerStreamService(streamDefinitionRepository,
-					streamDeploymentRepository,
 					appDeployerStreamDeployer,
 					appDeploymentRequestCreator);
 		}

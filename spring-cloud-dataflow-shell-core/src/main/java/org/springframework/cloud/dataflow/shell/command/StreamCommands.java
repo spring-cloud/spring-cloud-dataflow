@@ -150,7 +150,7 @@ public class StreamCommands implements CommandMarker {
 		final StreamDeploymentResource stream = streamOperations().info(name);
 		TableModelBuilder<Object> modelBuilder = new TableModelBuilder<>();
 		modelBuilder.addRow().addValue("Name").addValue("DSL").addValue("Status");
-		modelBuilder.addRow().addValue(stream.getName())
+		modelBuilder.addRow().addValue(stream.getStreamName())
 					.addValue(stream.getDslText())
 					.addValue(stream.getStatus());
 		TableBuilder builder = DataFlowTables.applyStyle(new TableBuilder(modelBuilder.build()))
