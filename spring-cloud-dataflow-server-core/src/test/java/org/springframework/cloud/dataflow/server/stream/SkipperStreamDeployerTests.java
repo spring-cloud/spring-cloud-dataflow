@@ -27,15 +27,21 @@ import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 
 import org.springframework.cloud.dataflow.core.ApplicationType;
+import org.springframework.cloud.dataflow.core.StreamDefinition;
 import org.springframework.cloud.dataflow.registry.service.AppRegistryService;
 import org.springframework.cloud.dataflow.registry.support.ResourceUtils;
 import org.springframework.cloud.dataflow.server.repository.StreamDefinitionRepository;
 import org.springframework.cloud.deployer.resource.docker.DockerResource;
 import org.springframework.cloud.deployer.resource.maven.MavenResource;
+import org.springframework.cloud.deployer.spi.app.AppStatus;
+import org.springframework.cloud.deployer.spi.app.DeploymentState;
 import org.springframework.cloud.deployer.spi.core.AppDefinition;
 import org.springframework.cloud.deployer.spi.core.AppDeploymentRequest;
+import org.springframework.cloud.skipper.ReleaseNotFoundException;
 import org.springframework.cloud.skipper.client.SkipperClient;
+import org.springframework.cloud.skipper.domain.Info;
 import org.springframework.cloud.skipper.domain.InstallRequest;
+import org.springframework.cloud.skipper.domain.Status;
 import org.springframework.cloud.skipper.domain.UploadRequest;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
@@ -116,7 +122,7 @@ public class SkipperStreamDeployerTests {
 	}
 
 	@Test
-	public void testDeployeWithRegistredApps() {
+	public void testDeployeWithRegisteredApps() {
 		AppRegistryService appRegistryService = mock(AppRegistryService.class);
 
 		when(appRegistryService.appExist(eq("time"), eq(ApplicationType.source), eq("1.2.0.RELEASE")))
@@ -124,14 +130,14 @@ public class SkipperStreamDeployerTests {
 		when(appRegistryService.appExist(eq("log"), eq(ApplicationType.sink), eq("1.2.0.RELEASE")))
 				.thenReturn(true);
 
-		testAppRegistredOnStreamDeploy(appRegistryService);
+		testAppRegisteredOnStreamDeploy(appRegistryService);
 
 		verify(appRegistryService, times(1)).appExist(eq("time"), eq(ApplicationType.source), eq("1.2.0.RELEASE"));
 		verify(appRegistryService, times(1)).appExist(eq("log"), eq(ApplicationType.sink), eq("1.2.0.RELEASE"));
 	}
 
 	@Test(expected = IllegalStateException.class)
-	public void testDeployeWithUnRegistredApps() {
+	public void testDeployeWithNotRegisteredApps() {
 		AppRegistryService appRegistryService = mock(AppRegistryService.class);
 
 		when(appRegistryService.appExist(eq("time"), eq(ApplicationType.source), eq("1.2.0.RELEASE")))
@@ -139,13 +145,13 @@ public class SkipperStreamDeployerTests {
 		when(appRegistryService.appExist(eq("log"), eq(ApplicationType.sink), eq("1.2.0.RELEASE")))
 				.thenReturn(false);
 
-		testAppRegistredOnStreamDeploy(appRegistryService);
+		testAppRegisteredOnStreamDeploy(appRegistryService);
 	}
 
-	public void testAppRegistredOnStreamDeploy(AppRegistryService appRegistryService) {
+	private void testAppRegisteredOnStreamDeploy(AppRegistryService appRegistryService) {
 
 		HashMap<String, String> timeAppProps = new HashMap<>();
-		timeAppProps.put("spring.cloud.dataflow.stream.app.type","source");
+		timeAppProps.put("spring.cloud.dataflow.stream.app.type", "source");
 		AppDefinition timeAppDefinition = new AppDefinition("time", timeAppProps);
 		MavenResource timeResource = new MavenResource.Builder()
 				.artifactId("time-source-rabbit").groupId("org.springframework.cloud.stream.app")
@@ -153,7 +159,7 @@ public class SkipperStreamDeployerTests {
 		AppDeploymentRequest timeAppDeploymentRequest = new AppDeploymentRequest(timeAppDefinition, timeResource);
 
 		HashMap<String, String> logAppProps = new HashMap<>();
-		logAppProps.put("spring.cloud.dataflow.stream.app.type","sink");
+		logAppProps.put("spring.cloud.dataflow.stream.app.type", "sink");
 		AppDefinition logAppDefinition = new AppDefinition("log", logAppProps);
 		MavenResource logResource = new MavenResource.Builder()
 				.artifactId("log-sink-rabbit").groupId("org.springframework.cloud.stream.app")
@@ -178,6 +184,97 @@ public class SkipperStreamDeployerTests {
 				appRegistryService, mock(ForkJoinPool.class));
 
 		skipperStreamDeployer.deployStream(streamDeploymentRequest);
+	}
+
+	@Test
+	public void testStateOfUndefinedUndeployedStream() {
+
+		AppRegistryService appRegistryService = mock(AppRegistryService.class);
+		SkipperClient skipperClient = mock(SkipperClient.class);
+		StreamDefinitionRepository streamDefinitionRepository = mock(StreamDefinitionRepository.class);
+
+		SkipperStreamDeployer skipperStreamDeployer = new SkipperStreamDeployer(skipperClient,
+				streamDefinitionRepository, appRegistryService, mock(ForkJoinPool.class));
+
+		StreamDefinition streamDefinition = new StreamDefinition("foo", "foo|bar");
+
+		// Stream is defined
+		when(streamDefinitionRepository.findOne(streamDefinition.getName())).thenReturn(null);
+
+		// Stream is undeployed
+		when(skipperClient.status(eq(streamDefinition.getName()))).thenThrow(new ReleaseNotFoundException(""));
+
+		Map<StreamDefinition, DeploymentState> state = skipperStreamDeployer.state(Arrays.asList(streamDefinition));
+
+		assertThat(state).isNotNull();
+		assertThat(state.size()).isEqualTo(0);
+	}
+
+	@Test
+	public void testStateOfDefinedUndeployedStream() {
+
+		AppRegistryService appRegistryService = mock(AppRegistryService.class);
+		SkipperClient skipperClient = mock(SkipperClient.class);
+		StreamDefinitionRepository streamDefinitionRepository = mock(StreamDefinitionRepository.class);
+
+		SkipperStreamDeployer skipperStreamDeployer = new SkipperStreamDeployer(skipperClient,
+				streamDefinitionRepository, appRegistryService, mock(ForkJoinPool.class));
+
+		StreamDefinition streamDefinition = new StreamDefinition("foo", "foo|bar");
+
+		// Stream is defined
+		when(streamDefinitionRepository.findOne(streamDefinition.getName())).thenReturn(streamDefinition);
+
+		// Stream is undeployed
+		when(skipperClient.status(eq(streamDefinition.getName()))).thenThrow(new ReleaseNotFoundException(""));
+
+		Map<StreamDefinition, DeploymentState> state = skipperStreamDeployer.state(Arrays.asList(streamDefinition));
+
+		assertThat(state).isNotNull();
+		assertThat(state.size()).isEqualTo(1);
+		assertThat(state).containsKeys(streamDefinition);
+		assertThat(state.get(streamDefinition)).isEqualTo(DeploymentState.undeployed);
+	}
+
+	@Test
+	public void testUndepoySkippedForUndefinedStream() {
+		AppRegistryService appRegistryService = mock(AppRegistryService.class);
+		SkipperClient skipperClient = mock(SkipperClient.class);
+		StreamDefinitionRepository streamDefinitionRepository = mock(StreamDefinitionRepository.class);
+
+		SkipperStreamDeployer skipperStreamDeployer = new SkipperStreamDeployer(skipperClient,
+				streamDefinitionRepository, appRegistryService, mock(ForkJoinPool.class));
+
+		StreamDefinition streamDefinition = new StreamDefinition("foo", "foo|bar");
+
+		when(skipperClient.status(eq(streamDefinition.getName()))).thenThrow(new ReleaseNotFoundException(""));
+
+		skipperStreamDeployer.undeployStream(streamDefinition.getName());
+
+		verify(skipperClient, times(0)).delete(eq(streamDefinition.getName()));
+	}
+
+	@Test
+	public void testUndepoyForDefinedStream() {
+		AppRegistryService appRegistryService = mock(AppRegistryService.class);
+		SkipperClient skipperClient = mock(SkipperClient.class);
+		StreamDefinitionRepository streamDefinitionRepository = mock(StreamDefinitionRepository.class);
+
+		SkipperStreamDeployer skipperStreamDeployer = new SkipperStreamDeployer(skipperClient,
+				streamDefinitionRepository, appRegistryService, mock(ForkJoinPool.class));
+
+		StreamDefinition streamDefinition = new StreamDefinition("foo", "foo|bar");
+
+		Info info = new Info();
+		info.setStatus(new Status());
+		AppStatus fooAppStatus = AppStatus.of("foo").generalState(DeploymentState.deployed).build();
+		AppStatus barAppStatus = AppStatus.of("bar").generalState(DeploymentState.deployed).build();
+		info.getStatus().setPlatformStatusAsAppStatusList(Arrays.asList(fooAppStatus, barAppStatus));
+		when(skipperClient.status(eq(streamDefinition.getName()))).thenReturn(info);
+
+		skipperStreamDeployer.undeployStream(streamDefinition.getName());
+
+		verify(skipperClient, times(1)).delete(eq(streamDefinition.getName()));
 	}
 
 	@Test
