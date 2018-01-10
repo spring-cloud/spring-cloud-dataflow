@@ -45,6 +45,7 @@ import org.springframework.cloud.dataflow.server.configuration.TestDependencies;
 import org.springframework.cloud.dataflow.server.repository.StreamDefinitionRepository;
 import org.springframework.cloud.dataflow.server.service.StreamService;
 import org.springframework.cloud.dataflow.server.support.TestResourceUtils;
+import org.springframework.cloud.skipper.ReleaseNotFoundException;
 import org.springframework.cloud.skipper.client.SkipperClient;
 import org.springframework.cloud.skipper.domain.InstallRequest;
 import org.springframework.cloud.skipper.domain.Package;
@@ -62,6 +63,7 @@ import org.springframework.util.StreamUtils;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.fail;
+import static org.mockito.Matchers.eq;
 import static org.mockito.Matchers.isA;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -116,6 +118,7 @@ public class SkipperStreamServiceIntegrationTests {
 		// override log version to 1.2.0.RELEASE
 		deploymentProperties.put("badthing.version.log", "1.2.0.RELEASE");
 
+		when(skipperClient.status(eq("ticktock"))).thenThrow(new ReleaseNotFoundException(""));
 		try {
 			streamService.deployStream("ticktock", deploymentProperties);
 			fail("Expected an IllegalArgumentException to be thrown.");
@@ -132,6 +135,7 @@ public class SkipperStreamServiceIntegrationTests {
 		Map<String, String> deploymentProperties = createSkipperDeploymentProperties();
 		// override log to 1.2.0.RELEASE
 		deploymentProperties.put("version.log", "1.2.0.RELEASE");
+		when(skipperClient.status(eq("ticktock"))).thenThrow(new ReleaseNotFoundException(""));
 
 		streamService.deployStream("ticktock", deploymentProperties);
 
@@ -172,6 +176,7 @@ public class SkipperStreamServiceIntegrationTests {
 		Release release = new Release();
 		release.setManifest(expectedReleaseManifest);
 		when(skipperClient.install(isA(InstallRequest.class))).thenReturn(release);
+		when(skipperClient.status(eq("ticktock"))).thenThrow(new ReleaseNotFoundException(""));
 
 		Map<String, String> deploymentProperties = createSkipperDeploymentProperties();
 		deploymentProperties.put("version.log", "1.2.0.RELEASE");
@@ -203,6 +208,7 @@ public class SkipperStreamServiceIntegrationTests {
 				Charset.defaultCharset());
 		Release release = new Release();
 		release.setManifest(expectedReleaseManifest);
+		when(skipperClient.status(eq("ticktock"))).thenThrow(new ReleaseNotFoundException(""));
 		when(skipperClient.upgrade(isA(UpgradeRequest.class))).thenReturn(release);
 
 		Map<String, String> deploymentProperties = createSkipperDeploymentProperties();
@@ -234,6 +240,7 @@ public class SkipperStreamServiceIntegrationTests {
 										+ "\"maven:\\/\\/org.springframework.cloud.stream.app:log-sink-rabbit\":\"1.2.0.RELEASE\"}"
 										+ ",\"time\":{\"maven:\\/\\/org.springframework.cloud.stream.app:time-source-rabbit\":\"1.2.0.RELEASE\","
 										+ "\"spring.cloud.deployer.group\":\"ticktock\"}}";
+		when(skipperClient.status(eq("ticktock"))).thenThrow(new ReleaseNotFoundException(""));
 		when(skipperClient.manifest(streamDefinition.getName())).thenReturn(releaseManifest);
 		StreamDeployment streamDeployment = this.streamService.info(streamDefinition.getName());
 		assertThat(streamDeployment.getStreamName()).isEqualTo(streamDefinition.getName());

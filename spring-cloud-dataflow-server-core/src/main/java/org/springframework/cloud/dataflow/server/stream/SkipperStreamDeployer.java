@@ -152,19 +152,35 @@ public class SkipperStreamDeployer implements StreamDeployer {
 	public Map<StreamDefinition, DeploymentState> state(List<StreamDefinition> streamDefinitions) {
 		Map<StreamDefinition, DeploymentState> states = new HashMap<>();
 		for (StreamDefinition streamDefinition : streamDefinitions) {
-			try {
-				Info info = this.skipperClient.status(streamDefinition.getName());
-				List<AppStatus> appStatusList = deserializeAppStatus(info.getStatus().getPlatformStatus());
-				Set<DeploymentState> deploymentStateList = appStatusList.stream().map(appStatus -> appStatus.getState())
-						.collect(Collectors.toSet());
-				DeploymentState aggregateState = StreamDefinitionController.aggregateState(deploymentStateList);
-				states.put(streamDefinition, aggregateState);
-			}
-			catch (ReleaseNotFoundException e) {
-				// ignore
+			DeploymentState streamDeploymentState = getStreamDeploymentState(streamDefinition.getName());
+			if (streamDeploymentState != null) {
+				states.put(streamDefinition, streamDeploymentState);
 			}
 		}
 		return states;
+	}
+
+	private DeploymentState getStreamDeploymentState(String streamName) {
+		DeploymentState state = null;
+		try {
+			Info info = this.skipperClient.status(streamName);
+			List<AppStatus> appStatusList = deserializeAppStatus(info.getStatus().getPlatformStatus());
+			Set<DeploymentState> deploymentStateList = appStatusList.stream().map(appStatus -> appStatus.getState())
+					.collect(Collectors.toSet());
+			DeploymentState aggregateState = StreamDefinitionController.aggregateState(deploymentStateList);
+			state = aggregateState;
+		}
+		catch (ReleaseNotFoundException e) {
+			// a defined stream but unknown to skipper is considered to be in undeployed state
+			if (streamDefinitionExists(streamName)) {
+				state = DeploymentState.undeployed;
+			}
+		}
+		return state;
+	}
+
+	private boolean streamDefinitionExists(String streamName) {
+		return this.streamDefinitionRepository.findOne(streamName) != null;
 	}
 
 	public Release deployStream(StreamDeploymentRequest streamDeploymentRequest) {
@@ -330,7 +346,10 @@ public class SkipperStreamDeployer implements StreamDeployer {
 
 	@Override
 	public void undeployStream(String streamName) {
-		this.skipperClient.delete(streamName);
+		DeploymentState streamDeploymentState = getStreamDeploymentState(streamName);
+		if (streamDeploymentState != null && streamDeploymentState != DeploymentState.undeployed) {
+			this.skipperClient.delete(streamName);
+		}
 	}
 
 	@Override
