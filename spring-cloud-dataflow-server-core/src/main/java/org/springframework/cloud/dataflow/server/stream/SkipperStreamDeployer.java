@@ -56,6 +56,7 @@ import org.springframework.cloud.deployer.spi.core.AppDeploymentRequest;
 import org.springframework.cloud.deployer.spi.core.RuntimeEnvironmentInfo;
 import org.springframework.cloud.skipper.ReleaseNotFoundException;
 import org.springframework.cloud.skipper.client.SkipperClient;
+import org.springframework.cloud.skipper.domain.AboutInfo;
 import org.springframework.cloud.skipper.domain.ConfigValues;
 import org.springframework.cloud.skipper.domain.Deployer;
 import org.springframework.cloud.skipper.domain.Info;
@@ -75,6 +76,7 @@ import org.springframework.cloud.skipper.domain.UploadRequest;
 import org.springframework.cloud.skipper.io.DefaultPackageWriter;
 import org.springframework.cloud.skipper.io.PackageWriter;
 import org.springframework.data.domain.Pageable;
+import org.springframework.hateoas.Resources;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
@@ -380,8 +382,20 @@ public class SkipperStreamDeployer implements StreamDeployer {
 
 	@Override
 	public RuntimeEnvironmentInfo environmentInfo() {
-		// TODO To fix when https://github.com/spring-cloud/spring-cloud-skipper/issues/392
-		throw new UnsupportedOperationException("EnvironmentInfo is not supported for Skipper mode");
+		AboutInfo skipperInfo = skipperClient.info();
+		Resources<Deployer> deployers = skipperClient.listDeployers();
+		RuntimeEnvironmentInfo.Builder builder = new RuntimeEnvironmentInfo.Builder()
+				.implementationName(skipperInfo.getName())
+				.implementationVersion(skipperInfo.getVersion())
+				.platformApiVersion("")
+				.platformClientVersion("")
+				.platformHostVersion("")
+				.platformType("Skipper Managed")
+				.spiClass(SkipperClient.class);
+		for (Deployer d : deployers) {
+			builder.addPlatformSpecificInfo(d.getName(), d.getType());
+		}
+		return builder.build();
 	}
 
 	@Override

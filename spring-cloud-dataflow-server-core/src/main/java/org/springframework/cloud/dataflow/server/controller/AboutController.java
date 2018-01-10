@@ -149,27 +149,23 @@ public class AboutController {
 		final RuntimeEnvironment runtimeEnvironment = new RuntimeEnvironment();
 
 		if (this.streamDeployer != null) {
-			try {
-				final RuntimeEnvironmentInfo deployerEnvironmentInfo = this.streamDeployer.environmentInfo();
-				final RuntimeEnvironmentDetails deployerInfo = new RuntimeEnvironmentDetails();
+			final RuntimeEnvironmentInfo deployerEnvironmentInfo = this.streamDeployer.environmentInfo();
+			final RuntimeEnvironmentDetails deployerInfo = new RuntimeEnvironmentDetails();
 
-				deployerInfo.setDeployerImplementationVersion(deployerEnvironmentInfo.getImplementationVersion());
-				deployerInfo.setDeployerName(deployerEnvironmentInfo.getImplementationName());
-				deployerInfo.setDeployerSpiVersion(deployerEnvironmentInfo.getSpiVersion());
-				deployerInfo.setJavaVersion(deployerEnvironmentInfo.getJavaVersion());
-				deployerInfo.setPlatformApiVersion(deployerEnvironmentInfo.getPlatformApiVersion());
-				deployerInfo.setPlatformClientVersion(deployerEnvironmentInfo.getPlatformClientVersion());
-				deployerInfo.setPlatformHostVersion(deployerEnvironmentInfo.getPlatformHostVersion());
-				deployerInfo.setPlatformSpecificInfo(deployerEnvironmentInfo.getPlatformSpecificInfo());
-				deployerInfo.setPlatformHostVersion(deployerEnvironmentInfo.getPlatformHostVersion());
-				deployerInfo.setPlatformType(deployerEnvironmentInfo.getPlatformType());
-				deployerInfo.setSpringBootVersion(deployerEnvironmentInfo.getSpringBootVersion());
-				deployerInfo.setSpringVersion(deployerEnvironmentInfo.getSpringVersion());
+			deployerInfo.setDeployerImplementationVersion(deployerEnvironmentInfo.getImplementationVersion());
+			deployerInfo.setDeployerName(deployerEnvironmentInfo.getImplementationName());
+			deployerInfo.setDeployerSpiVersion(deployerEnvironmentInfo.getSpiVersion());
+			deployerInfo.setJavaVersion(deployerEnvironmentInfo.getJavaVersion());
+			deployerInfo.setPlatformApiVersion(deployerEnvironmentInfo.getPlatformApiVersion());
+			deployerInfo.setPlatformClientVersion(deployerEnvironmentInfo.getPlatformClientVersion());
+			deployerInfo.setPlatformHostVersion(deployerEnvironmentInfo.getPlatformHostVersion());
+			deployerInfo.setPlatformSpecificInfo(deployerEnvironmentInfo.getPlatformSpecificInfo());
+			deployerInfo.setPlatformHostVersion(deployerEnvironmentInfo.getPlatformHostVersion());
+			deployerInfo.setPlatformType(deployerEnvironmentInfo.getPlatformType());
+			deployerInfo.setSpringBootVersion(deployerEnvironmentInfo.getSpringBootVersion());
+			deployerInfo.setSpringVersion(deployerEnvironmentInfo.getSpringVersion());
 
-				runtimeEnvironment.setAppDeployer(deployerInfo);
-			} catch (UnsupportedOperationException uoe) {
-				logger.debug("RuntimeEnvironmentInfo is not supported!");
-			}
+			runtimeEnvironment.setAppDeployer(deployerInfo);
 		}
 
 		if (this.taskLauncher != null) {
@@ -210,7 +206,7 @@ public class AboutController {
 		updateDependency(versionInfo.getShell(),
 				versionInfoProperties.getDependencies().getSpringCloudDataflowShell());
 
-		if(versionInfoProperties.getDependencyFetch().isEnabled()) {
+		if (versionInfoProperties.getDependencyFetch().isEnabled()) {
 			versionInfo.getShell().setChecksumSha1(getChecksum(
 					versionInfoProperties.getDependencies().getSpringCloudDataflowShell().getChecksumSha1(),
 					versionInfoProperties.getDependencies().getSpringCloudDataflowShell().getChecksumSha1Url(),
@@ -226,7 +222,7 @@ public class AboutController {
 	private String getChecksum(String defaultValue, String url,
 			String version) {
 		String result = defaultValue;
-		if(result == null && StringUtils.hasText(url)) {
+		if (result == null && StringUtils.hasText(url)) {
 			CloseableHttpClient httpClient = HttpClients.custom()
 					.setSSLHostnameVerifier(new NoopHostnameVerifier())
 					.build();
@@ -252,7 +248,7 @@ public class AboutController {
 
 	private void updateDependency(Dependency dependency, VersionInfoProperties.DependencyAboutInfo dependencyAboutInfo) {
 		dependency.setName(dependencyAboutInfo.getName());
-		if(dependencyAboutInfo.getUrl() != null) {
+		if (dependencyAboutInfo.getUrl() != null) {
 			dependency.setUrl(constructUrl(dependencyAboutInfo.getUrl(),
 					dependencyAboutInfo.getVersion()));
 		}
@@ -262,7 +258,7 @@ public class AboutController {
 	private String constructUrl(String url, String version) {
 		final String VERSION_TAG = "{version}";
 		final String REPOSITORY_TAG = "{repository}";
-		if(url.contains(VERSION_TAG)) {
+		if (url.contains(VERSION_TAG)) {
 			url = StringUtils.replace(url, VERSION_TAG, version);
 			url = StringUtils.replace(url, REPOSITORY_TAG, repoSelector(version));
 		}
@@ -276,13 +272,13 @@ public class AboutController {
 		final String REPO_RELEASE_ROOT = "https://repo.spring.io/libs-release";
 		final String MAVEN_ROOT = "https://repo1.maven.org/maven2";
 		String result = MAVEN_ROOT;
-		if(version.endsWith(BUILD_SNAPSHOT_CRITERIA)){
+		if (version.endsWith(BUILD_SNAPSHOT_CRITERIA)) {
 			result = REPO_SNAPSHOT_ROOT;
 		}
-		else if(version.contains(".M")) {
+		else if (version.contains(".M")) {
 			result = REPO_MILESTONE_ROOT;
 		}
-		else if(version.contains(".RC")) {
+		else if (version.contains(".RC")) {
 			result = REPO_RELEASE_ROOT;
 		}
 		return result;

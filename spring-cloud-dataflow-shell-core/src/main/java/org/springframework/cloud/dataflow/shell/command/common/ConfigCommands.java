@@ -312,7 +312,8 @@ public class ConfigCommands implements CommandMarker, InitializingBean, Applicat
 
 		RuntimeEnvironmentDetails appDeployer = about.getRuntimeEnvironment().getAppDeployer();
 		RuntimeEnvironmentDetails taskLauncher = about.getRuntimeEnvironment().getTaskLauncher();
-		modelBuilder.addRow().addValue("App Deployer").addValue(appDeployer);
+		String deployerColumnName = this.shellDataflowMode == DataFlowMode.skipper ? "Skipper Deployer" : "App Deployer";
+		modelBuilder.addRow().addValue(deployerColumnName).addValue(appDeployer);
 		rowIndex++;
 		if (!appDeployer.getPlatformSpecificInfo().isEmpty()) {
 			modelBuilder.addRow().addValue("Platform Specific").addValue(appDeployer.getPlatformSpecificInfo());
