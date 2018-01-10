@@ -122,6 +122,7 @@ public class AppDeploymentRequestCreator {
 			Map<String, String> expandedAppUpdateTimeProperties = this.whitelistProperties
 					.qualifyProperties(appUpdateTimeProperties, metadataResource);
 
+			expandedAppUpdateTimeProperties.put(DataFlowPropertyKeys.STREAM_APP_TYPE, type.toString());
 			AppDefinition appDefinition = new AppDefinition(currentApp.getName(), expandedAppUpdateTimeProperties);
 
 			AppDeploymentRequest request = new AppDeploymentRequest(appDefinition, appResource,

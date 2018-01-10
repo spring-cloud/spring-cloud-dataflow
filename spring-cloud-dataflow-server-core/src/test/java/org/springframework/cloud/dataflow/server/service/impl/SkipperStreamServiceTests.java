@@ -33,7 +33,6 @@ import org.springframework.cloud.dataflow.configuration.metadata.BootApplication
 import org.springframework.cloud.dataflow.core.StreamDefinition;
 import org.springframework.cloud.dataflow.core.StreamDeployment;
 import org.springframework.cloud.dataflow.registry.AppRegistry;
-import org.springframework.cloud.dataflow.registry.service.AppRegistryService;
 import org.springframework.cloud.dataflow.server.config.apps.CommonApplicationProperties;
 import org.springframework.cloud.dataflow.server.repository.StreamDefinitionRepository;
 import org.springframework.cloud.dataflow.server.repository.StreamDeploymentRepository;
@@ -74,20 +73,18 @@ public class SkipperStreamServiceTests {
 	private SkipperStreamDeployer skipperStreamDeployer;
 	private AppDeploymentRequestCreator appDeploymentRequestCreator;
 
-	private AppRegistryService appRegistryService;
 	private SkipperStreamService skipperStreamService;
 
 	@Before
 	public void setupMock() {
 		this.streamDeploymentRepository = mock(StreamDeploymentRepository.class);
 		this.streamDefinitionRepository = mock(StreamDefinitionRepository.class);
-		this.appRegistryService = mock(AppRegistryService.class);
 		this.skipperStreamDeployer = mock(SkipperStreamDeployer.class);
 		this.appDeploymentRequestCreator = new AppDeploymentRequestCreator(mock(AppRegistry.class),
 				mock(CommonApplicationProperties.class),
 				new BootApplicationConfigurationMetadataResolver());
 		this.skipperStreamService = new SkipperStreamService(mock(StreamDefinitionRepository.class),
-				this.appRegistryService, this.skipperStreamDeployer, this.appDeploymentRequestCreator);
+				this.skipperStreamDeployer, this.appDeploymentRequestCreator);
 		this.streamDefinitionList.add(streamDefinition1);
 		this.streamDefinitionList.add(streamDefinition2);
 		this.streamDefinitionList.add(streamDefinition3);
