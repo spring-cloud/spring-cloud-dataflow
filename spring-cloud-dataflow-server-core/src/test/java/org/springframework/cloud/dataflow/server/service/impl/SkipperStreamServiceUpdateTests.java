@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 the original author or authors.
+ * Copyright 2017-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,9 +40,12 @@ import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.util.StreamUtils;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 
 /**
  * @author Mark Pollack
+ * @author Christian Tzolov
+ * @author Ilayaperumal Gopinathan
  */
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = TestDependencies.class)
@@ -72,9 +75,15 @@ public class SkipperStreamServiceUpdateTests {
 		testCreateUpdateRequests();
 	}
 
-	@Test(expected = IllegalStateException.class)
+	@Test
 	public void testCreateUpdateRequestsWithoutRegisteredApp() throws IOException {
-		testCreateUpdateRequests();
+		try {
+			testCreateUpdateRequests();
+			fail("IllegalStateException is expected.");
+		}
+		catch (IllegalStateException e) {
+			assertThat(e.getMessage()).isEqualTo("The log:sink:1.1.1.RELEASE app is not registered!");
+		}
 	}
 
 	public void testCreateUpdateRequests() throws IOException {

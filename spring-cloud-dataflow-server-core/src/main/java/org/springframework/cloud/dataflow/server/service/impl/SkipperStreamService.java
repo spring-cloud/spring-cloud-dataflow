@@ -147,9 +147,6 @@ public class SkipperStreamService extends AbstractStreamService {
 			// overrides app definition properties with those from the release manifest
 			appDefinitionBuilder.setProperties(applicationManifest.getSpec().getApplicationProperties());
 			updatedStreamAppDefinitions.addLast(appDefinitionBuilder.build(streamDefinition.getName()));
-
-			//Check and register any missing app version
-			//this.skipperStreamDeployer.updateAppVersionIfChanged(appDefinition, applicationManifest);
 		}
 
 		String dslText = new StreamDefinitionToDslConverter().toDsl(updatedStreamAppDefinitions);

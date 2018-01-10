@@ -17,7 +17,6 @@ package org.springframework.cloud.dataflow.server.stream;
 
 import java.io.File;
 import java.io.IOException;
-import java.net.URI;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -43,7 +42,6 @@ import org.yaml.snakeyaml.DumperOptions;
 import org.yaml.snakeyaml.Yaml;
 
 import org.springframework.cloud.dataflow.core.ApplicationType;
-import org.springframework.cloud.dataflow.core.StreamAppDefinition;
 import org.springframework.cloud.dataflow.core.StreamDefinition;
 import org.springframework.cloud.dataflow.core.StreamDeployment;
 import org.springframework.cloud.dataflow.registry.service.AppRegistryService;
@@ -170,9 +168,7 @@ public class SkipperStreamDeployer implements StreamDeployer {
 	}
 
 	public Release deployStream(StreamDeploymentRequest streamDeploymentRequest) {
-
 		validateAllAppsRegistered(streamDeploymentRequest);
-
 		Map<String, String> streamDeployerProperties = streamDeploymentRequest.getStreamDeployerProperties();
 		String packageVersion = streamDeployerProperties.get(SKIPPER_PACKAGE_VERSION);
 		Assert.isTrue(StringUtils.hasText(packageVersion), "Package Version must be set");
@@ -231,21 +227,6 @@ public class SkipperStreamDeployer implements StreamDeployer {
 		if (!this.appRegistryService.appExist(name, applicationType, appVersion)) {
 			throw new IllegalStateException(String.format("The %s:%s:%s app is not registered!",
 					name, appTypeString, appVersion));
-		}
-	}
-
-	public void updateAppVersionIfChanged(StreamAppDefinition appDefinition,
-			SpringCloudDeployerApplicationManifest appManifest) {
-
-		String version = appManifest.getSpec().getVersion();
-		String name = appDefinition.getRegisteredAppName();
-		ApplicationType type = ApplicationType.valueOf(
-				appManifest.getSpec().getApplicationProperties().get(SPRING_CLOUD_DATAFLOW_STREAM_APP_TYPE));
-		String resourceUri = appManifest.getSpec().getResource();
-
-		if (!this.appRegistryService.appExist(name, type, version)) {
-			URI metadataUri = null; // TODO Skipper should provide the metadata URI as well
-			this.appRegistryService.save(name, type, version, URI.create(resourceUri), metadataUri);
 		}
 	}
 
