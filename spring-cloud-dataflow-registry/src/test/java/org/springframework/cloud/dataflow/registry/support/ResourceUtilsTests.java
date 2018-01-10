@@ -19,6 +19,7 @@ import java.net.MalformedURLException;
 
 import org.junit.Test;
 
+import org.springframework.cloud.deployer.resource.docker.DockerResource;
 import org.springframework.cloud.deployer.resource.maven.MavenProperties;
 import org.springframework.cloud.deployer.resource.maven.MavenResource;
 import org.springframework.core.io.Resource;
@@ -56,6 +57,14 @@ public class ResourceUtilsTests {
 		catch (Exception e) {
 			assertThat(e.getMessage().equals("URI path doesn't exist"));
 		}
+	}
+
+	@Test
+	public void testDockerUriString() throws Exception {
+		String dockerUri = "docker:springcloudstream/log-sink-rabbit:1.2.0.RELEASE";
+		Resource resource = ResourceUtils.getResource(dockerUri, null);
+		assertThat(resource instanceof DockerResource);
+		assertThat(resource.getURI().toString().equals(dockerUri));
 	}
 
 	@Test

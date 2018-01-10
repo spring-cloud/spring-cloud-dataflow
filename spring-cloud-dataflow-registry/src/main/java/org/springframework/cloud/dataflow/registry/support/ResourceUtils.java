@@ -112,7 +112,8 @@ public class ResourceUtils {
 				return mavenResource;
 			}
 			else if (scheme.equals("docker")) {
-				return new DockerResource(uriString);
+				String dockerUri = uriString.replaceFirst("docker:\\/*", "");
+				return new DockerResource(dockerUri);
 			}
 			else {
 				ResourceLoader resourceLoader = null;
