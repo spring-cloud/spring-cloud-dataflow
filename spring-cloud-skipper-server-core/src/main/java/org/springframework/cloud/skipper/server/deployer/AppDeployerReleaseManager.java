@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 the original author or authors.
+ * Copyright 2017-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,7 +28,6 @@ import org.springframework.cloud.deployer.spi.app.AppDeployer;
 import org.springframework.cloud.deployer.spi.app.AppStatus;
 import org.springframework.cloud.deployer.spi.app.DeploymentState;
 import org.springframework.cloud.deployer.spi.app.MultiStateAppDeployer;
-import org.springframework.cloud.deployer.spi.cloudfoundry.CloudFoundryDeploymentProperties;
 import org.springframework.cloud.deployer.spi.core.AppDeploymentRequest;
 import org.springframework.cloud.skipper.SkipperException;
 import org.springframework.cloud.skipper.domain.Release;
@@ -86,7 +85,6 @@ public class AppDeployerReleaseManager implements ReleaseManager {
 	}
 
 	public Release install(Release releaseInput) {
-		validate(releaseInput);
 		Release release = this.releaseRepository.save(releaseInput);
 		logger.debug("Manifest = " + ArgumentSanitizer.sanitizeYml(releaseInput.getManifest()));
 		// Deploy the application
@@ -133,37 +131,6 @@ public class AppDeployerReleaseManager implements ReleaseManager {
 
 		// Store updated state in in DB and compute status
 		return status(this.releaseRepository.save(release));
-	}
-
-	private void validate(Release releaseInput) {
-		/**
-		 * Do some AppDeployer specific checks. These should be pushed down into the
-		 * implementations to fail fast.
-		 */
-		List<SpringCloudDeployerApplicationManifest> applicationSpecs = this.applicationManifestReader
-				.read(releaseInput.getManifest());
-		for (SpringCloudDeployerApplicationManifest applicationManifest : applicationSpecs) {
-			SpringCloudDeployerApplicationManifest spec = (SpringCloudDeployerApplicationManifest) applicationManifest;
-			if (hasRoutePathProperty(spec)) {
-				String route = spec.getSpec().getDeploymentProperties()
-						.get(CloudFoundryDeploymentProperties.ROUTE_PATH_PROPERTY);
-				if (!route.startsWith("/")) {
-					throw new SkipperException(
-							"Cloud Foundry routes must start with \"/\". Route passed = [" + route + "].");
-				}
-			}
-
-		}
-	}
-
-	private boolean hasRoutePathProperty(SpringCloudDeployerApplicationManifest applicationSpec) {
-		if (applicationSpec.getSpec().getDeploymentProperties() != null) {
-			return applicationSpec.getSpec().getDeploymentProperties()
-					.containsKey(CloudFoundryDeploymentProperties.ROUTE_PATH_PROPERTY);
-		}
-		else {
-			return false;
-		}
 	}
 
 	@Override
