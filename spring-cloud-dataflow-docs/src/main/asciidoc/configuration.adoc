@@ -88,6 +88,9 @@ upgrading from version `1.0.x` to `1.1.x`.  Migration scripts for specific
 database types can be found
 https://github.com/spring-cloud/spring-cloud-task/tree/master/spring-cloud-task-core/src/main/resources/org/springframework/cloud/task/migration[here].
 
+NOTE: There is a schema update to the Spring Cloud Data Flow datastore when upgrading to version `1.3.x` from any of the previous releases.
+Migration scripts for specific database types can be found at  `https://github.com/spring-cloud/spring-cloud-dataflow/spring-cloud-dataflow-server-core/src/main/resources/migration/1.3.x`
+
 NOTE: If you wish to use an external H2 database instance instead of the one
 embedded with Spring Cloud Data Flow set the
 `spring.dataflow.embedded.database.enabled` property to false.  If
