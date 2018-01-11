@@ -160,51 +160,7 @@ public final class DeploymentPropertiesUtils {
 						: "spring.cloud.deployer." + kv.getKey().substring(appLength), kv -> kv.getValue(),
 						(fromWildcard, fromApp) -> fromApp));
 
-		Map<String, String> deprecated = extractDeprecatedDeployerProperties(input, appName);
-		// Also, 'count' used to be treated as a special case. Handle here
-		String deprecatedWildcardCound = input.get("app.*.count");
-		String deprecatedCount = input.getOrDefault("app." + appName + ".count", deprecatedWildcardCound);
-		if (deprecatedCount != null && deprecated.get("spring.cloud.deployer.count") == null) {
-			deprecated.put("spring.cloud.deployer.count", deprecatedCount);
-			logger.warn("Usage of application property 'app.{}.count' to specify number of instances has been "
-					+ "deprecated and will be removed in a future release\n"
-					+ "Instead, please use 'deployer.{}.count = {}'", appName, appName, deprecatedCount);
-		}
-
-		if (deprecated.isEmpty()) {
-			return result;
-		}
-		else {
-			deprecated.entrySet().forEach(kv -> {
-				logger.warn(
-						"Usage of application property prefix 'spring.cloud.deployer' to pass properties to the "
-								+ "deployer has been deprecated and will be removed in a future release\n"
-								+ "Instead of 'app.{}.{} = {}', please use\n" + "           'deployer.{}.{} = {}'",
-						appName, kv.getKey(), kv.getValue(), appName,
-						kv.getKey().substring("spring.cloud.deployer.".length()), kv.getValue());
-			});
-			if (result.isEmpty()) {
-				return deprecated;
-			}
-			else {
-				return result;
-			}
-		}
-
-	}
-
-	private static Map<String, String> extractDeprecatedDeployerProperties(Map<String, String> input, String appName) {
-		final String wildcardPrefix = "app.*.spring.cloud.deployer.";
-		final int wildcardLength = "app.*.".length();
-		final String appPrefix = String.format("app.%s.spring.cloud.deployer.", appName);
-		final int appLength = String.format("app.%s.", appName).length();
-
-		return new TreeMap<>(input).entrySet().stream()
-				.filter(kv -> kv.getKey().startsWith(wildcardPrefix) || kv.getKey().startsWith(appPrefix))
-				.collect(Collectors.toMap(
-						kv -> kv.getKey().startsWith(wildcardPrefix) ? kv.getKey().substring(wildcardLength)
-								: kv.getKey().substring(appLength),
-						kv -> kv.getValue(), (fromWildcard, fromApp) -> fromApp));
+		return result;
 	}
 
 	/**
