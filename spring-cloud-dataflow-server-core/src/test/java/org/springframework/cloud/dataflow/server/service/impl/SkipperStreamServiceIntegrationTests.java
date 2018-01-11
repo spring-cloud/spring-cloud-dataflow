@@ -197,6 +197,8 @@ public class SkipperStreamServiceIntegrationTests {
 		this.streamDefinitionRepository.delete(streamDefinition.getName());
 		this.streamDefinitionRepository.save(streamDefinition);
 
+		when(skipperClient.status(eq("ticktock"))).thenThrow(new ReleaseNotFoundException(""));
+
 		streamService.deployStream("ticktock", createSkipperDeploymentProperties());
 
 		StreamDefinition streamDefinitionBeforeDeploy = this.streamDefinitionRepository.findOne("ticktock");
@@ -208,7 +210,6 @@ public class SkipperStreamServiceIntegrationTests {
 				Charset.defaultCharset());
 		Release release = new Release();
 		release.setManifest(expectedReleaseManifest);
-		when(skipperClient.status(eq("ticktock"))).thenThrow(new ReleaseNotFoundException(""));
 		when(skipperClient.upgrade(isA(UpgradeRequest.class))).thenReturn(release);
 
 		Map<String, String> deploymentProperties = createSkipperDeploymentProperties();
@@ -230,6 +231,8 @@ public class SkipperStreamServiceIntegrationTests {
 		this.streamDefinitionRepository.delete(streamDefinition.getName());
 		this.streamDefinitionRepository.save(streamDefinition);
 
+		when(skipperClient.status(eq("ticktock"))).thenThrow(new ReleaseNotFoundException(""));
+
 		Map<String, String> deploymentProperties = createSkipperDeploymentProperties();
 		this.streamService.deployStream("ticktock", deploymentProperties);
 		String releaseManifest = StreamUtils.copyToString(
@@ -240,7 +243,6 @@ public class SkipperStreamServiceIntegrationTests {
 										+ "\"maven:\\/\\/org.springframework.cloud.stream.app:log-sink-rabbit\":\"1.2.0.RELEASE\"}"
 										+ ",\"time\":{\"maven:\\/\\/org.springframework.cloud.stream.app:time-source-rabbit\":\"1.2.0.RELEASE\","
 										+ "\"spring.cloud.deployer.group\":\"ticktock\"}}";
-		when(skipperClient.status(eq("ticktock"))).thenThrow(new ReleaseNotFoundException(""));
 		when(skipperClient.manifest(streamDefinition.getName())).thenReturn(releaseManifest);
 		StreamDeployment streamDeployment = this.streamService.info(streamDefinition.getName());
 		assertThat(streamDeployment.getStreamName()).isEqualTo(streamDefinition.getName());

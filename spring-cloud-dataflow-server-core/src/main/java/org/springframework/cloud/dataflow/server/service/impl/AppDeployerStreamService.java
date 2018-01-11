@@ -70,7 +70,7 @@ public class AppDeployerStreamService extends AbstractStreamService {
 	}
 
 	@Override
-	public String doCalculateStreamState(String name) {
+	public DeploymentState doCalculateStreamState(String name) {
 		return this.appDeployerStreamDeployer.calculateStreamState(name);
 	}
 

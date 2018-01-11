@@ -50,6 +50,7 @@ import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
 import static org.springframework.cloud.dataflow.rest.SkipperStream.SKIPPER_KEY_PREFIX;
+import static org.springframework.cloud.dataflow.rest.SkipperStream.SKIPPER_PACKAGE_VERSION;
 
 /**
  * {@link SkipperStreamDeployer} specific {@link AbstractStreamService}.
@@ -63,6 +64,9 @@ public class SkipperStreamService extends AbstractStreamService {
 	private static Log logger = LogFactory.getLog(SkipperStreamService.class);
 
 	public static final String SPRING_CLOUD_DATAFLOW_STREAM_APP_LABEL = "spring.cloud.dataflow.stream.app.label";
+
+	public static final String DEFAULT_SKIPPER_PACKAGE_VERSION = "1.0.0";
+
 
 	/**
 	 * The repository this controller will use for stream CRUD operations.
@@ -93,6 +97,11 @@ public class SkipperStreamService extends AbstractStreamService {
 	public void doDeployStream(StreamDefinition streamDefinition, Map<String, String> deploymentProperties) {
 		// Extract skipper properties
 		Map<String, String> skipperDeploymentProperties = getSkipperProperties(deploymentProperties);
+
+		if (!skipperDeploymentProperties.containsKey(SKIPPER_PACKAGE_VERSION)) {
+			skipperDeploymentProperties.put(SKIPPER_PACKAGE_VERSION, DEFAULT_SKIPPER_PACKAGE_VERSION);
+		}
+
 		// Create map without any skipper properties
 		Map<String, String> deploymentPropertiesToUse = deploymentProperties.entrySet().stream()
 				.filter(mapEntry -> !mapEntry.getKey().startsWith(SKIPPER_KEY_PREFIX))
@@ -117,7 +126,7 @@ public class SkipperStreamService extends AbstractStreamService {
 	}
 
 	@Override
-	public String doCalculateStreamState(String name) {
+	public DeploymentState doCalculateStreamState(String name) {
 		return this.skipperStreamDeployer.calculateStreamState(name);
 	}
 

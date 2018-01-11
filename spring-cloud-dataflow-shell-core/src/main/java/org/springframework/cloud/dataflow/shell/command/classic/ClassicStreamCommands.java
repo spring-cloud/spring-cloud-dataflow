@@ -46,8 +46,6 @@ import org.springframework.stereotype.Component;
 // todo: reenable optionContext attributes
 public class ClassicStreamCommands extends AbstractStreamCommands implements CommandMarker {
 
-	private static final String CREATE_STREAM = "stream create";
-
 	private static final String DEPLOY_STREAM = "stream deploy";
 
 	@Autowired
@@ -60,23 +58,9 @@ public class ClassicStreamCommands extends AbstractStreamCommands implements Com
 		this.userInput = userInput;
 	}
 
-	@CliAvailabilityIndicator({ CREATE_STREAM, DEPLOY_STREAM })
+	@CliAvailabilityIndicator({ DEPLOY_STREAM })
 	public boolean availableWithCreateRole() {
 		return dataFlowShell.hasAccess(RoleType.CREATE, OpsType.STREAM);
-	}
-
-	@CliCommand(value = CREATE_STREAM, help = "Create a new stream definition")
-	public String createStream(
-			@CliOption(mandatory = true, key = { "", "name" }, help = "the name to give to the stream") String name,
-			@CliOption(mandatory = true, key = { "definition" }, help = "a stream definition, using the DSL (e.g. "
-					+ "\"http --port=9000 | hdfs\")", optionContext = "disable-string-converter completion-stream") String dsl,
-			@CliOption(key = "deploy", help = "whether to deploy the stream immediately", unspecifiedDefaultValue = "false", specifiedDefaultValue = "true") boolean deploy) {
-		streamOperations().createStream(name, dsl, deploy);
-		String message = String.format("Created new stream '%s'", name);
-		if (deploy) {
-			message += "\nDeployment request has been sent";
-		}
-		return message;
 	}
 
 	@CliCommand(value = DEPLOY_STREAM, help = "Deploy a previously created stream")

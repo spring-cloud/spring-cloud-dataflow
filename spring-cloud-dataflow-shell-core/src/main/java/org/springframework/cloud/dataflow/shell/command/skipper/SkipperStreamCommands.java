@@ -68,8 +68,6 @@ import static org.springframework.cloud.dataflow.rest.SkipperStream.SKIPPER_REPO
 // todo: reenable optionContext attributes
 public class SkipperStreamCommands extends AbstractStreamCommands implements CommandMarker {
 
-	private static final String CREATE_STREAM = "stream create";
-
 	private static final String STREAM_SKIPPER_DEPLOY = "stream deploy";
 
 	private static final String STREAM_SKIPPER_UPDATE = "stream update";
@@ -96,18 +94,9 @@ public class SkipperStreamCommands extends AbstractStreamCommands implements Com
 		this.userInput = userInput;
 	}
 
-	@CliAvailabilityIndicator({ CREATE_STREAM, STREAM_SKIPPER_DEPLOY, STREAM_SKIPPER_UPDATE })
+	@CliAvailabilityIndicator({ STREAM_SKIPPER_DEPLOY, STREAM_SKIPPER_UPDATE })
 	public boolean availableWithCreateRole() {
 		return dataFlowShell.hasAccess(RoleType.CREATE, OpsType.STREAM);
-	}
-
-	@CliCommand(value = CREATE_STREAM, help = "Create a new stream definition")
-	public String createStream(
-			@CliOption(mandatory = true, key = { "", "name" }, help = "the name to give to the stream") String name,
-			@CliOption(mandatory = true, key = { "definition" }, help = "a stream definition, using the DSL (e.g. "
-					+ "\"http --port=9000 | hdfs\")", optionContext = "disable-string-converter completion-stream") String dsl) {
-		streamOperations().createStream(name, dsl, false);
-		return String.format("Created new stream '%s'", name);
 	}
 
 	@CliCommand(value = STREAM_SKIPPER_DEPLOY, help = "Deploy a previously created stream using Skipper")
