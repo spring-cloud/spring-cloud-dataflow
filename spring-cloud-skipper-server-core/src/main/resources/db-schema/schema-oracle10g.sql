@@ -134,6 +134,7 @@
         object_version number(19,0),
         api_version varchar2(255 char),
         description varchar2(255 char),
+        display_name varchar2(255 char),
         icon_url varchar2(255 char),
         kind varchar2(255 char),
         maintainer varchar2(255 char),
@@ -176,7 +177,6 @@
 
     create table skipper_status (
         id number(19,0) not null,
-        object_version number(19,0),
         platform_status clob,
         status_code varchar2(255 char),
         primary key (id)
