@@ -17,6 +17,7 @@
 package org.springframework.cloud.dataflow.server.service.impl;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -28,15 +29,18 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
 
 import org.springframework.cloud.dataflow.configuration.metadata.BootApplicationConfigurationMetadataResolver;
 import org.springframework.cloud.dataflow.core.StreamDefinition;
 import org.springframework.cloud.dataflow.core.StreamDeployment;
-import org.springframework.cloud.dataflow.registry.AppRegistry;
+import org.springframework.cloud.dataflow.registry.AppRegistryCommon;
 import org.springframework.cloud.dataflow.server.config.apps.CommonApplicationProperties;
 import org.springframework.cloud.dataflow.server.repository.StreamDefinitionRepository;
 import org.springframework.cloud.dataflow.server.repository.StreamDeploymentRepository;
 import org.springframework.cloud.dataflow.server.stream.SkipperStreamDeployer;
+import org.springframework.cloud.dataflow.server.stream.StreamDeploymentRequest;
+import org.springframework.cloud.deployer.spi.core.AppDeploymentRequest;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import static org.mockito.Mockito.mock;
@@ -44,6 +48,8 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
+import static org.springframework.cloud.dataflow.rest.SkipperStream.SKIPPER_PACKAGE_VERSION;
+import static org.springframework.cloud.dataflow.server.service.impl.SkipperStreamService.DEFAULT_SKIPPER_PACKAGE_VERSION;
 
 /**
  * @author Ilayaperumal Gopinathan
@@ -74,16 +80,18 @@ public class SkipperStreamServiceTests {
 	private AppDeploymentRequestCreator appDeploymentRequestCreator;
 
 	private SkipperStreamService skipperStreamService;
+	private AppRegistryCommon appRegistryCommon;
 
 	@Before
 	public void setupMock() {
 		this.streamDeploymentRepository = mock(StreamDeploymentRepository.class);
 		this.streamDefinitionRepository = mock(StreamDefinitionRepository.class);
 		this.skipperStreamDeployer = mock(SkipperStreamDeployer.class);
-		this.appDeploymentRequestCreator = new AppDeploymentRequestCreator(mock(AppRegistry.class),
+		this.appRegistryCommon = mock(AppRegistryCommon.class);
+		this.appDeploymentRequestCreator = new AppDeploymentRequestCreator(this.appRegistryCommon,
 				mock(CommonApplicationProperties.class),
 				new BootApplicationConfigurationMetadataResolver());
-		this.skipperStreamService = new SkipperStreamService(mock(StreamDefinitionRepository.class),
+		this.skipperStreamService = new SkipperStreamService(streamDefinitionRepository,
 				this.skipperStreamDeployer, this.appDeploymentRequestCreator);
 		this.streamDefinitionList.add(streamDefinition1);
 		this.streamDefinitionList.add(streamDefinition2);
@@ -136,5 +144,50 @@ public class SkipperStreamServiceTests {
 		StreamDeployment streamDeployment = this.skipperStreamService.info("test1");
 		Assert.assertTrue(streamDeployment.getStreamName().equals(streamDefinition1.getName()));
 		Assert.assertTrue(streamDeployment.getDeploymentProperties().equals("{\"log\":{\"test2\":\"value2\"},\"time\":{\"test1\":\"value1\"}}"));
+	}
+
+	@Test
+	public void testStreamDeployWithDefaultPackageVersion() {
+		Map<String, String> deploymentProperties = new HashMap<>();
+
+		ArgumentCaptor<StreamDeploymentRequest> argumentCaptor = this.testStreamDeploy(deploymentProperties);
+
+		Assert.assertEquals(DEFAULT_SKIPPER_PACKAGE_VERSION,
+				argumentCaptor.getValue().getStreamDeployerProperties().get(SKIPPER_PACKAGE_VERSION));
+	}
+
+	@Test
+	public void testStreamDeployWithPreDefinedPackageVersion() {
+		Map<String, String> deploymentProperties = new HashMap<>();
+		deploymentProperties.put(SKIPPER_PACKAGE_VERSION, "2.0.0");
+
+		ArgumentCaptor<StreamDeploymentRequest> argumentCaptor = this.testStreamDeploy(deploymentProperties);
+
+		Assert.assertEquals("2.0.0",
+				argumentCaptor.getValue().getStreamDeployerProperties().get(SKIPPER_PACKAGE_VERSION));
+	}
+
+	public ArgumentCaptor<StreamDeploymentRequest> testStreamDeploy(Map<String, String> deploymentProperties) {
+		appDeploymentRequestCreator = mock(AppDeploymentRequestCreator.class);
+		skipperStreamDeployer = mock(SkipperStreamDeployer.class);
+		streamDefinitionRepository = mock(StreamDefinitionRepository.class);
+
+		this.skipperStreamService = new SkipperStreamService(streamDefinitionRepository,
+				this.skipperStreamDeployer, this.appDeploymentRequestCreator);
+
+		StreamDefinition streamDefinition = new StreamDefinition("test1", "time | log");
+
+		when(streamDefinitionRepository.findOne(streamDefinition.getName())).thenReturn(streamDefinition);
+
+		List<AppDeploymentRequest> appDeploymentRequests = Arrays.asList(mock(AppDeploymentRequest.class));
+		when(appDeploymentRequestCreator.createRequests(streamDefinition, new HashMap<>()))
+				.thenReturn(appDeploymentRequests);
+
+		this.skipperStreamService.deployStream(streamDefinition1.getName(), deploymentProperties);
+
+		ArgumentCaptor<StreamDeploymentRequest> argumentCaptor = ArgumentCaptor.forClass(StreamDeploymentRequest.class);
+		verify(skipperStreamDeployer, times(1)).deployStream(argumentCaptor.capture());
+
+		return argumentCaptor;
 	}
 }

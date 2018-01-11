@@ -145,9 +145,8 @@ public class SkipperStreamDeployer implements StreamDeployer {
 	}
 
 	@Override
-	public String calculateStreamState(String streamName) {
-		// TODO call out to skipper for stream state.
-		return DeploymentState.unknown.toString();
+	public DeploymentState calculateStreamState(String streamName) {
+		return getStreamDeploymentState(streamName);
 	}
 
 	@Override

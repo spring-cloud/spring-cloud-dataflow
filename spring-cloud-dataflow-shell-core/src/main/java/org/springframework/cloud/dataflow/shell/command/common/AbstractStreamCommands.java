@@ -62,6 +62,8 @@ import org.springframework.util.StringUtils;
  */
 public abstract class AbstractStreamCommands implements CommandMarker {
 
+	private static final String CREATE_STREAM = "stream create";
+
 	private static final String INFO_STREAM = "stream info";
 
 	private static final String LIST_STREAM = "stream list";
@@ -87,10 +89,24 @@ public abstract class AbstractStreamCommands implements CommandMarker {
 		return dataFlowShell.hasAccess(RoleType.VIEW, OpsType.STREAM);
 	}
 
-	@CliAvailabilityIndicator({ UNDEPLOY_STREAM, UNDEPLOY_STREAM_ALL, DESTROY_STREAM,
+	@CliAvailabilityIndicator({ CREATE_STREAM, UNDEPLOY_STREAM, UNDEPLOY_STREAM_ALL, DESTROY_STREAM,
 			DESTROY_STREAM_ALL })
 	public boolean availableWithCreateRole() {
 		return dataFlowShell.hasAccess(RoleType.CREATE, OpsType.STREAM);
+	}
+
+	@CliCommand(value = CREATE_STREAM, help = "Create a new stream definition")
+	public String createStream(
+			@CliOption(mandatory = true, key = { "", "name" }, help = "the name to give to the stream") String name,
+			@CliOption(mandatory = true, key = { "definition" }, help = "a stream definition, using the DSL (e.g. "
+					+ "\"http --port=9000 | hdfs\")", optionContext = "disable-string-converter completion-stream") String dsl,
+			@CliOption(key = "deploy", help = "whether to deploy the stream immediately", unspecifiedDefaultValue = "false", specifiedDefaultValue = "true") boolean deploy) {
+		streamOperations().createStream(name, dsl, deploy);
+		String message = String.format("Created new stream '%s'", name);
+		if (deploy) {
+			message += "\nDeployment request has been sent";
+		}
+		return message;
 	}
 
 	@CliCommand(value = LIST_STREAM, help = "List created streams")

@@ -34,7 +34,7 @@ import org.springframework.data.domain.Pageable;
  */
 public interface StreamDeployer {
 
-	String calculateStreamState(String streamName);
+	DeploymentState calculateStreamState(String streamName);
 
 	Map<StreamDefinition, DeploymentState> state(List<StreamDefinition> content);
 

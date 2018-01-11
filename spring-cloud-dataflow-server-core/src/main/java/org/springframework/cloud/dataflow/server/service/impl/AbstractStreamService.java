@@ -74,12 +74,12 @@ public abstract class AbstractStreamService implements StreamService {
 			throw new NoSuchStreamDefinitionException(name);
 		}
 
-		String status = this.doCalculateStreamState(name);
+		DeploymentState status = this.doCalculateStreamState(name);
 
-		if (DeploymentState.deployed.equals(DeploymentState.valueOf(status))) {
+		if (DeploymentState.deployed == status) {
 			throw new StreamAlreadyDeployedException(name);
 		}
-		else if (DeploymentState.deploying.equals(DeploymentState.valueOf(status))) {
+		else if (DeploymentState.deploying  == status) {
 			throw new StreamAlreadyDeployingException(name);
 		}
 		doDeployStream(streamDefinition, deploymentProperties);
@@ -87,5 +87,5 @@ public abstract class AbstractStreamService implements StreamService {
 
 	protected abstract void doDeployStream(StreamDefinition streamDefinition, Map<String, String> deploymentProperties);
 
-	protected abstract String doCalculateStreamState(String name);
+	protected abstract DeploymentState doCalculateStreamState(String name);
 }

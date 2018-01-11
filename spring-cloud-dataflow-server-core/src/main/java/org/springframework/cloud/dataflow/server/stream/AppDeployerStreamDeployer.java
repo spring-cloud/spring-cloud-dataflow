@@ -162,7 +162,7 @@ public class AppDeployerStreamDeployer implements StreamDeployer {
 	}
 
 	@Override
-	public String calculateStreamState(String streamName) {
+	public DeploymentState calculateStreamState(String streamName) {
 		Set<DeploymentState> appStates = EnumSet.noneOf(DeploymentState.class);
 		StreamDefinition stream = this.streamDefinitionRepository.findOne(streamName);
 		for (StreamAppDefinition appDefinition : stream.getAppDefinitions()) {
@@ -176,7 +176,7 @@ public class AppDeployerStreamDeployer implements StreamDeployer {
 				appStates.add(DeploymentState.undeployed);
 			}
 		}
-		return StreamDefinitionController.aggregateState(appStates).toString();
+		return StreamDefinitionController.aggregateState(appStates);
 	}
 
 	@Override
