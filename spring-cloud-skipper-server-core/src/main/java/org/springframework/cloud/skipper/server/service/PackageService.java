@@ -31,7 +31,7 @@ import org.slf4j.LoggerFactory;
 import org.zeroturnaround.zip.ZipUtil;
 
 import org.springframework.cloud.skipper.SkipperException;
-import org.springframework.cloud.skipper.SkipperUtils;
+import org.springframework.cloud.skipper.io.PackageFileUtils;
 import org.springframework.cloud.skipper.domain.Package;
 import org.springframework.cloud.skipper.domain.PackageMetadata;
 import org.springframework.cloud.skipper.domain.Repository;
@@ -94,7 +94,7 @@ public class PackageService implements ResourceLoaderAware {
 		// package file is in a non DB hosted repository
 		try {
 			targetPath = TempFileUtils.createTempDirectory("skipper" + packageMetadata.getName());
-			File targetFile = SkipperUtils.calculatePackageZipFile(packageMetadata, targetPath.toFile());
+			File targetFile = PackageFileUtils.calculatePackageZipFile(packageMetadata, targetPath.toFile());
 			logger.debug("Finding repository for package  {}", packageMetadata.getName());
 			Repository packageRepository = repositoryRepository.findOne(packageMetadata.getRepositoryId());
 			if (packageRepository == null) {
@@ -161,7 +161,7 @@ public class PackageService implements ResourceLoaderAware {
 			tmpDirPath = TempFileUtils.createTempDirectory("skipper");
 			File targetPath = new File(tmpDirPath + File.separator + packageMetadata.getName());
 			targetPath.mkdirs();
-			File targetFile = SkipperUtils.calculatePackageZipFile(packageMetadata, targetPath);
+			File targetFile = PackageFileUtils.calculatePackageZipFile(packageMetadata, targetPath);
 			try {
 				StreamUtils.copy(packageMetadata.getPackageFileBytes(), new FileOutputStream(targetFile));
 			}

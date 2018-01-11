@@ -13,18 +13,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.springframework.cloud.skipper;
+package org.springframework.cloud.skipper.io;
 
 import java.io.File;
 
 import org.springframework.cloud.skipper.domain.PackageMetadata;
 
 /**
- * Utility methods used by Skipper.
+ * Package File methods used by Skipper.
  *
  * @author Ilayaperumal Gopinathan
  */
-public class SkipperUtils {
+public class PackageFileUtils {
 
 	public static File calculatePackageZipFile(PackageMetadata packageMetadata, File targetPath) {
 		return new File(targetPath, packageMetadata.getName() + "-" + packageMetadata.getVersion() + ".zip");

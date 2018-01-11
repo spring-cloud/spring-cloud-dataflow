@@ -71,24 +71,24 @@ public class AppDeploymentRequestFactoryTests {
 				+ "log-sink-rabbit/1.2.0.RELEASE/log-sink-rabbit";
 		when(springBootAppSpec3.getResource()).thenReturn(httpSpecResource);
 		when(springBootAppSpec3.getVersion()).thenReturn("1.2.0.RELEASE");
-		assertThat(ResourceUtils.getResourceLocation(springBootAppSpec1.getResource(), springBootAppSpec1.getVersion()))
+		assertThat(AppDeploymentRequestFactory.getResourceLocation(springBootAppSpec1.getResource(), springBootAppSpec1.getVersion()))
 				.isEqualTo(String.format("%s:%s", mavenSpecResource, mavenSpecVersion));
-		assertThat(ResourceUtils.getResourceLocation(springBootAppSpec2.getResource(), springBootAppSpec2.getVersion()))
+		assertThat(AppDeploymentRequestFactory.getResourceLocation(springBootAppSpec2.getResource(), springBootAppSpec2.getVersion()))
 				.isEqualTo(String.format("%s:%s", dockerSpecResource, dockerSpecVersion));
-		assertThat(ResourceUtils.getResourceLocation(springBootAppSpec3.getResource(), springBootAppSpec3.getVersion()))
+		assertThat(AppDeploymentRequestFactory.getResourceLocation(springBootAppSpec3.getResource(), springBootAppSpec3.getVersion()))
 				.isEqualTo(httpSpecResource + "-1.2.0.RELEASE.jar");
 		SpringCloudDeployerApplicationSpec springBootAppSpec4 = mock(SpringCloudDeployerApplicationSpec.class);
 		String mavenSpecResource2 = "maven://org.springframework.cloud.stream.app:log-sink-rabbit:1.2.0.RELEASE";
 		String mavenSpecVersion2 = "1.2.0.RELEASE";
 		when(springBootAppSpec4.getResource()).thenReturn(mavenSpecResource2);
 		when(springBootAppSpec4.getVersion()).thenReturn(mavenSpecVersion2);
-		assertThat(ResourceUtils.getResourceLocation(springBootAppSpec4.getResource(), springBootAppSpec4.getVersion()))
+		assertThat(AppDeploymentRequestFactory.getResourceLocation(springBootAppSpec4.getResource(), springBootAppSpec4.getVersion()))
 				.isEqualTo(mavenSpecResource2);
 		String mavenSpecResource3 = "maven://org.springframework.cloud.stream.app:log-sink-rabbit:1.2.0.RELEASE";
 		SpringCloudDeployerApplicationSpec springBootAppSpec5 = mock(SpringCloudDeployerApplicationSpec.class);
 		when(springBootAppSpec5.getResource()).thenReturn(mavenSpecResource3);
 		when(springBootAppSpec5.getVersion()).thenReturn(null);
-		assertThat(ResourceUtils.getResourceLocation(springBootAppSpec4.getResource(), springBootAppSpec4.getVersion()))
+		assertThat(AppDeploymentRequestFactory.getResourceLocation(springBootAppSpec4.getResource(), springBootAppSpec4.getVersion()))
 				.isEqualTo(mavenSpecResource3);
 	}
 

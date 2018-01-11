@@ -31,8 +31,6 @@ import org.springframework.cloud.skipper.domain.SpringCloudDeployerApplicationSp
 import org.springframework.core.io.Resource;
 import org.springframework.util.Assert;
 
-import static org.springframework.cloud.skipper.server.deployer.ResourceUtils.getResourceLocation;
-
 /**
  * Factory managing {@link AppDeploymentRequest}s.
  *
@@ -54,6 +52,28 @@ public class AppDeploymentRequestFactory {
 	public AppDeploymentRequestFactory(DelegatingResourceLoader delegatingResourceLoader) {
 		Assert.notNull(delegatingResourceLoader, "'delegatingResourceLoader' must be set");
 		this.delegatingResourceLoader = delegatingResourceLoader;
+	}
+
+	public static String getResourceLocation(String specResource, String specVersion) {
+		Assert.hasText(specResource, "Spec resource must not be empty");
+		if (specVersion != null) {
+			if ((specResource.startsWith("maven") || specResource.startsWith("docker"))) {
+				if (specResource.endsWith(":" + specVersion)) {
+					// May still be consume 1.0 M1 based package artifacts
+					return specResource;
+				}
+				else {
+					return String.format("%s:%s", specResource, specVersion);
+				}
+			}
+			// Assume the resource extension is JAR when it is neither maven nor docker.
+			else {
+				return String.format("%s-%s.jar", specResource, specVersion);
+			}
+		}
+		else {
+			return specResource;
+		}
 	}
 
 	/**

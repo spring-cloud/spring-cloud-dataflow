@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.springframework.cloud.skipper.server.service;
+package org.springframework.cloud.skipper.server.util;
 
 import java.util.List;
 import java.util.Map;
@@ -25,6 +25,7 @@ import org.springframework.cloud.skipper.domain.Package;
 import org.springframework.cloud.skipper.domain.Template;
 
 /**
+ * Utility functions for manifest file processing.
  * @author Mark Pollack
  */
 public class ManifestUtils {

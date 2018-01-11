@@ -25,7 +25,6 @@ import org.yaml.snakeyaml.DumperOptions;
 import org.yaml.snakeyaml.Yaml;
 import org.zeroturnaround.zip.ZipUtil;
 
-import org.springframework.cloud.skipper.SkipperUtils;
 import org.springframework.cloud.skipper.domain.Package;
 import org.springframework.cloud.skipper.domain.PackageMetadata;
 import org.springframework.core.io.ClassPathResource;
@@ -66,7 +65,7 @@ public class DefaultPackageWriter implements PackageWriter {
 				writePackage(dependencyPkg, packageDir);
 			}
 		}
-		File targetZipFile = SkipperUtils.calculatePackageZipFile(pkg.getMetadata(), targetDirectory);
+		File targetZipFile = PackageFileUtils.calculatePackageZipFile(pkg.getMetadata(), targetDirectory);
 		ZipUtil.pack(rootPackageDir, targetZipFile, true);
 		FileSystemUtils.deleteRecursively(tmpDir);
 		return targetZipFile;

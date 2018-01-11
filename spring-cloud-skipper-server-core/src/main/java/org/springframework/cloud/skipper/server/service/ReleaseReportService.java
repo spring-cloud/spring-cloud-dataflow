@@ -31,6 +31,8 @@ import org.springframework.cloud.skipper.server.deployer.ReleaseAnalysisReport;
 import org.springframework.cloud.skipper.server.deployer.ReleaseManager;
 import org.springframework.cloud.skipper.server.repository.PackageMetadataRepository;
 import org.springframework.cloud.skipper.server.repository.ReleaseRepository;
+import org.springframework.cloud.skipper.server.util.ConfigValueUtils;
+import org.springframework.cloud.skipper.server.util.ManifestUtils;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Assert;
 

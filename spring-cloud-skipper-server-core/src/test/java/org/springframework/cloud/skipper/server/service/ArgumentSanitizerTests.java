@@ -20,6 +20,7 @@ import java.nio.charset.Charset;
 import org.junit.Test;
 
 import org.springframework.cloud.skipper.server.TestResourceUtils;
+import org.springframework.cloud.skipper.server.util.ArgumentSanitizer;
 import org.springframework.util.StreamUtils;
 
 import static org.assertj.core.api.Assertions.assertThat;

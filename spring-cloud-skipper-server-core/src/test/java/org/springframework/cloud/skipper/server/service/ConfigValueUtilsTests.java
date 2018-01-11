@@ -22,6 +22,7 @@ import java.util.TreeMap;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.springframework.cloud.skipper.server.util.ConfigValueUtils;
 import org.yaml.snakeyaml.DumperOptions;
 import org.yaml.snakeyaml.Yaml;
 

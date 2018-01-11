@@ -40,9 +40,9 @@ import org.springframework.cloud.skipper.server.domain.AppDeployerData;
 import org.springframework.cloud.skipper.server.repository.AppDeployerDataRepository;
 import org.springframework.cloud.skipper.server.repository.DeployerRepository;
 import org.springframework.cloud.skipper.server.repository.ReleaseRepository;
-import org.springframework.cloud.skipper.server.service.ArgumentSanitizer;
-import org.springframework.cloud.skipper.server.service.ConfigValueUtils;
-import org.springframework.cloud.skipper.server.service.ManifestUtils;
+import org.springframework.cloud.skipper.server.util.ArgumentSanitizer;
+import org.springframework.cloud.skipper.server.util.ConfigValueUtils;
+import org.springframework.cloud.skipper.server.util.ManifestUtils;
 import org.springframework.util.StringUtils;
 
 /**
