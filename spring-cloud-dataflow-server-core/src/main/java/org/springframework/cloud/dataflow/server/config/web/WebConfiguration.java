@@ -124,9 +124,7 @@ public class WebConfiguration implements ServletContextInitializer, ApplicationL
 	}
 
 	@Bean
-	public HttpMessageConverters messageConverters() {
-		final ObjectMapper objectMapper = new ObjectMapper();
-		setupObjectMapper(objectMapper);
+	public HttpMessageConverters messageConverters(ObjectMapper objectMapper) {
 		return new HttpMessageConverters(
 				// Prevent default converters
 				false,
