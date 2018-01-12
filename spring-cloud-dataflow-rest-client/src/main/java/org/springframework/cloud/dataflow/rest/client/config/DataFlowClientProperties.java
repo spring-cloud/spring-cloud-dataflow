@@ -11,7 +11,7 @@ import org.springframework.cloud.dataflow.core.DataFlowPropertyKeys;
 @ConfigurationProperties(prefix = DataFlowPropertyKeys.PREFIX + "client")
 public class DataFlowClientProperties {
 
-	private String target = "http://localhost:9393";
+	private String uri = "http://localhost:9393";
 
 	private Security security = new Security();
 
@@ -35,12 +35,12 @@ public class DataFlowClientProperties {
 		this.skipSslValidation = skipSslValidation;
 	}
 
-	public String getTarget() {
-		return target;
+	public String getUri() {
+		return uri;
 	}
 
-	public void setTarget(String target) {
-		this.target = target;
+	public void setUri(String uri) {
+		this.uri = uri;
 	}
 
 	public Security getSecurity() {

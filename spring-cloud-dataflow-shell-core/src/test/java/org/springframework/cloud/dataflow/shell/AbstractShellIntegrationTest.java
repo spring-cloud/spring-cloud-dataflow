@@ -34,6 +34,7 @@ import org.springframework.boot.actuate.metrics.repository.InMemoryMetricReposit
 import org.springframework.boot.actuate.metrics.repository.MetricRepository;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.builder.SpringApplicationBuilder;
+import org.springframework.cloud.dataflow.rest.client.config.DataFlowClientAutoConfiguration;
 import org.springframework.cloud.dataflow.server.EnableDataFlowServer;
 import org.springframework.cloud.dataflow.shell.command.JobCommandTemplate;
 import org.springframework.cloud.dataflow.shell.command.MetricsCommandTemplate;
@@ -224,7 +225,7 @@ public abstract class AbstractShellIntegrationTest {
 		}
 	}
 
-	@EnableAutoConfiguration
+	@EnableAutoConfiguration(exclude = DataFlowClientAutoConfiguration.class)
 	@EnableDataFlowServer
 	@Configuration
 	public static class TestConfig {

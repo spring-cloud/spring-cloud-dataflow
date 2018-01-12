@@ -4,9 +4,7 @@ import java.net.URI;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
-import org.springframework.cloud.dataflow.core.DataFlowPropertyKeys;
 import org.springframework.cloud.dataflow.rest.client.DataFlowOperations;
 import org.springframework.cloud.dataflow.rest.client.DataFlowTemplate;
 import org.springframework.cloud.dataflow.rest.client.dsl.Stream;
@@ -23,7 +21,6 @@ import org.springframework.web.client.RestTemplate;
  */
 @Configuration
 @EnableConfigurationProperties(DataFlowClientProperties.class)
-@ConditionalOnProperty(prefix = DataFlowPropertyKeys.PREFIX + "client", name = "enableDsl")
 public class DataFlowClientAutoConfiguration {
 
 	@Autowired
@@ -37,14 +34,14 @@ public class DataFlowClientAutoConfiguration {
 	public DataFlowOperations dataFlowOperations() throws Exception{
 		RestTemplate template = DataFlowTemplate.prepareRestTemplate(restTemplate);
 		final HttpClientConfigurer httpClientConfigurer = HttpClientConfigurer.create()
-				.targetHost(new URI(properties.getTarget()))
+				.targetHost(new URI(properties.getUri()))
 				.skipTlsCertificateVerification(properties.isSkipSslValidation());
 		if(!StringUtils.isEmpty(properties.getSecurity().getUsername()) &&
 				!StringUtils.isEmpty(properties.getSecurity().getPassword())){
 			httpClientConfigurer.basicAuthCredentials(properties.getSecurity().getUsername(), properties.getSecurity().getPassword());
 			template.setRequestFactory(httpClientConfigurer.buildClientHttpRequestFactory());
 		}
-		return new DataFlowTemplate(new URI(properties.getTarget()), template);
+		return new DataFlowTemplate(new URI(properties.getUri()), template);
 	}
 
 	@Bean
