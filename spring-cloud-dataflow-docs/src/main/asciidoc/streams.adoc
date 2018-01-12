@@ -1428,6 +1428,7 @@ When using the definition style, the deployment properties are specified as a `j
 private Map<String, String> createDeploymentProperties() {
   Map<String, String> deploymentProperties = new HashMap<>();
   deploymentProperties.put("app.splitter.producer.partitionKeyExpression", "payload");
+  deploymentProperties.put("deployer.log.memory","512");
   deploymentProperties.put("deployer.log.count", "2");
   return deploymentProperties;
 }
@@ -1495,6 +1496,42 @@ public MyStreamApps {
 }
 ----
 This style allows you to easily share `StreamApplications` across multiple Streams.
+
+=== Using the DeploymentPropertiesBuilder
+
+Regardless of style you choose, the `deploy(Map<String, String> deploymentProperties)` method allows customization of how your streams will be deployed. We made it a easier to create a map with properties by using a builder style, as well as creating static methods for some properties so you don't need to remember the name of such properties. If you take the previous example of `createDeploymentProperties` it could be rewritten as:
+
+[source,java,options="nowrap"]
+----
+private Map<String, String> createDeploymentProperties() {
+	return new DeploymentPropertiesBuilder()
+		.count("log", 2)
+		.memory("log", 512)
+		.put("app.splitter.producer.partitionKeyExpression", "payload")
+		.build();
+}
+----
+
+This utility class is meant to help with the creation of a Map and adds a few methods to assist with defining pre-defined properties.
+
+== Deploying using Skipper
+
+If you desire to deploy your streams using Skipper, you need to pass certain properties to the server. With the new `DeploymentPropertiesBuilder` we made it simpler for you to enable it.
+
+[source,java,options="nowrap"]
+----
+private Map<String, String> createDeploymentProperties() {
+	return new DeploymentPropertiesBuilder()
+		.count("log", 2)
+		.memory("log", 512)
+		.put("app.splitter.producer.partitionKeyExpression", "payload")
+		.withSkipper()
+		.platformName("pcf")
+		.build();
+}
+----
+
+To enable Skipper deployment just use the `withSkipper()` method. You can then configure skipper specific properties such as `packageVersion` and `repoName`.
 
 [[spring-cloud-dataflow-stream-multi-binder]]
 == Stream applications with multiple binder configurations
