@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 the original author or authors.
+ * Copyright 2017-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -148,46 +148,47 @@ public class AboutController {
 
 		final RuntimeEnvironment runtimeEnvironment = new RuntimeEnvironment();
 
-		if (this.streamDeployer != null) {
-			final RuntimeEnvironmentInfo deployerEnvironmentInfo = this.streamDeployer.environmentInfo();
-			final RuntimeEnvironmentDetails deployerInfo = new RuntimeEnvironmentDetails();
+		if (!authenticationEnabled || (authenticationEnabled && SecurityContextHolder.getContext().getAuthentication() != null)) {
+			if (this.streamDeployer != null) {
+				final RuntimeEnvironmentInfo deployerEnvironmentInfo = this.streamDeployer.environmentInfo();
+				final RuntimeEnvironmentDetails deployerInfo = new RuntimeEnvironmentDetails();
 
-			deployerInfo.setDeployerImplementationVersion(deployerEnvironmentInfo.getImplementationVersion());
-			deployerInfo.setDeployerName(deployerEnvironmentInfo.getImplementationName());
-			deployerInfo.setDeployerSpiVersion(deployerEnvironmentInfo.getSpiVersion());
-			deployerInfo.setJavaVersion(deployerEnvironmentInfo.getJavaVersion());
-			deployerInfo.setPlatformApiVersion(deployerEnvironmentInfo.getPlatformApiVersion());
-			deployerInfo.setPlatformClientVersion(deployerEnvironmentInfo.getPlatformClientVersion());
-			deployerInfo.setPlatformHostVersion(deployerEnvironmentInfo.getPlatformHostVersion());
-			deployerInfo.setPlatformSpecificInfo(deployerEnvironmentInfo.getPlatformSpecificInfo());
-			deployerInfo.setPlatformHostVersion(deployerEnvironmentInfo.getPlatformHostVersion());
-			deployerInfo.setPlatformType(deployerEnvironmentInfo.getPlatformType());
-			deployerInfo.setSpringBootVersion(deployerEnvironmentInfo.getSpringBootVersion());
-			deployerInfo.setSpringVersion(deployerEnvironmentInfo.getSpringVersion());
+				deployerInfo.setDeployerImplementationVersion(deployerEnvironmentInfo.getImplementationVersion());
+				deployerInfo.setDeployerName(deployerEnvironmentInfo.getImplementationName());
+				deployerInfo.setDeployerSpiVersion(deployerEnvironmentInfo.getSpiVersion());
+				deployerInfo.setJavaVersion(deployerEnvironmentInfo.getJavaVersion());
+				deployerInfo.setPlatformApiVersion(deployerEnvironmentInfo.getPlatformApiVersion());
+				deployerInfo.setPlatformClientVersion(deployerEnvironmentInfo.getPlatformClientVersion());
+				deployerInfo.setPlatformHostVersion(deployerEnvironmentInfo.getPlatformHostVersion());
+				deployerInfo.setPlatformSpecificInfo(deployerEnvironmentInfo.getPlatformSpecificInfo());
+				deployerInfo.setPlatformHostVersion(deployerEnvironmentInfo.getPlatformHostVersion());
+				deployerInfo.setPlatformType(deployerEnvironmentInfo.getPlatformType());
+				deployerInfo.setSpringBootVersion(deployerEnvironmentInfo.getSpringBootVersion());
+				deployerInfo.setSpringVersion(deployerEnvironmentInfo.getSpringVersion());
 
-			runtimeEnvironment.setAppDeployer(deployerInfo);
+				runtimeEnvironment.setAppDeployer(deployerInfo);
+			}
+
+			if (this.taskLauncher != null) {
+				final RuntimeEnvironmentInfo taskLauncherEnvironmentInfo = this.taskLauncher.environmentInfo();
+				final RuntimeEnvironmentDetails taskLauncherInfo = new RuntimeEnvironmentDetails();
+
+				taskLauncherInfo.setDeployerImplementationVersion(taskLauncherEnvironmentInfo.getImplementationVersion());
+				taskLauncherInfo.setDeployerName(taskLauncherEnvironmentInfo.getImplementationName());
+				taskLauncherInfo.setDeployerSpiVersion(taskLauncherEnvironmentInfo.getSpiVersion());
+				taskLauncherInfo.setJavaVersion(taskLauncherEnvironmentInfo.getJavaVersion());
+				taskLauncherInfo.setPlatformApiVersion(taskLauncherEnvironmentInfo.getPlatformApiVersion());
+				taskLauncherInfo.setPlatformClientVersion(taskLauncherEnvironmentInfo.getPlatformClientVersion());
+				taskLauncherInfo.setPlatformHostVersion(taskLauncherEnvironmentInfo.getPlatformHostVersion());
+				taskLauncherInfo.setPlatformSpecificInfo(taskLauncherEnvironmentInfo.getPlatformSpecificInfo());
+				taskLauncherInfo.setPlatformHostVersion(taskLauncherEnvironmentInfo.getPlatformHostVersion());
+				taskLauncherInfo.setPlatformType(taskLauncherEnvironmentInfo.getPlatformType());
+				taskLauncherInfo.setSpringBootVersion(taskLauncherEnvironmentInfo.getSpringBootVersion());
+				taskLauncherInfo.setSpringVersion(taskLauncherEnvironmentInfo.getSpringVersion());
+
+				runtimeEnvironment.setTaskLauncher(taskLauncherInfo);
+			}
 		}
-
-		if (this.taskLauncher != null) {
-			final RuntimeEnvironmentInfo taskLauncherEnvironmentInfo = this.taskLauncher.environmentInfo();
-			final RuntimeEnvironmentDetails taskLauncherInfo = new RuntimeEnvironmentDetails();
-
-			taskLauncherInfo.setDeployerImplementationVersion(taskLauncherEnvironmentInfo.getImplementationVersion());
-			taskLauncherInfo.setDeployerName(taskLauncherEnvironmentInfo.getImplementationName());
-			taskLauncherInfo.setDeployerSpiVersion(taskLauncherEnvironmentInfo.getSpiVersion());
-			taskLauncherInfo.setJavaVersion(taskLauncherEnvironmentInfo.getJavaVersion());
-			taskLauncherInfo.setPlatformApiVersion(taskLauncherEnvironmentInfo.getPlatformApiVersion());
-			taskLauncherInfo.setPlatformClientVersion(taskLauncherEnvironmentInfo.getPlatformClientVersion());
-			taskLauncherInfo.setPlatformHostVersion(taskLauncherEnvironmentInfo.getPlatformHostVersion());
-			taskLauncherInfo.setPlatformSpecificInfo(taskLauncherEnvironmentInfo.getPlatformSpecificInfo());
-			taskLauncherInfo.setPlatformHostVersion(taskLauncherEnvironmentInfo.getPlatformHostVersion());
-			taskLauncherInfo.setPlatformType(taskLauncherEnvironmentInfo.getPlatformType());
-			taskLauncherInfo.setSpringBootVersion(taskLauncherEnvironmentInfo.getSpringBootVersion());
-			taskLauncherInfo.setSpringVersion(taskLauncherEnvironmentInfo.getSpringVersion());
-
-			runtimeEnvironment.setTaskLauncher(taskLauncherInfo);
-		}
-
 		aboutResource.setRuntimeEnvironment(runtimeEnvironment);
 		aboutResource.add(ControllerLinkBuilder.linkTo(AboutController.class).withSelfRel());
 
