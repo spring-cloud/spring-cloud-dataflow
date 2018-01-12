@@ -112,7 +112,6 @@ public class StreamDslTests {
 				mapArgumentCaptor.capture());
 		assertThat(mapArgumentCaptor.getValue()).containsKeys("deployer.tick.count",
 				"deployer.tick.memory", SkipperStream.SKIPPER_PLATFORM_NAME,
-				SkipperStream.SKIPPER_ENABLED_PROPERTY_KEY,
 				SkipperStream.SKIPPER_PACKAGE_VERSION, SkipperStream.SKIPPER_REPO_NAME);
 	}
 

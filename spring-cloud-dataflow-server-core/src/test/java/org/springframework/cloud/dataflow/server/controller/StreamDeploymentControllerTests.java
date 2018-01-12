@@ -46,7 +46,6 @@ import static org.mockito.Matchers.anyListOf;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static org.springframework.cloud.dataflow.rest.SkipperStream.SKIPPER_ENABLED_PROPERTY_KEY;
 
 /**
  * Unit tests for StreamDeploymentController.
@@ -80,16 +79,11 @@ public class StreamDeploymentControllerTests {
 
 	@Test
 	public void testDeployViaStreamService() {
-		Map<String, String> deploymentProperties = new HashMap<>();
-		deploymentProperties.put(SKIPPER_ENABLED_PROPERTY_KEY, "true");
-		this.controller.deploy("test", deploymentProperties);
+		this.controller.deploy("test", new HashMap<>());
 		ArgumentCaptor<String> argumentCaptor1 = ArgumentCaptor.forClass(String.class);
 		ArgumentCaptor<Map> argumentCaptor2 = ArgumentCaptor.forClass(Map.class);
 		verify(defaultStreamService).deployStream(argumentCaptor1.capture(), argumentCaptor2.capture());
 		Assert.assertEquals(argumentCaptor1.getValue(), "test");
-		Assert.assertTrue("Skipper enabled property is missing", argumentCaptor2.getValue().containsKey(SKIPPER_ENABLED_PROPERTY_KEY));
-		Assert.assertFalse("useSkipper key shouldn't exist", argumentCaptor2.getValue().containsKey("useSkipper"));
-		Assert.assertEquals(argumentCaptor2.getValue().get(SKIPPER_ENABLED_PROPERTY_KEY), "true");
 	}
 
 	@Test

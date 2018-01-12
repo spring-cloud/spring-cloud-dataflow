@@ -87,7 +87,6 @@ public class DeploymentPropertiesBuilder {
 	class SkipperDeploymentPropertiesBuilder extends DeploymentPropertiesBuilder {
 
 		SkipperDeploymentPropertiesBuilder(Map<String, String> map) {
-			map.put(SkipperStream.SKIPPER_ENABLED_PROPERTY_KEY, "true");
 			this.deploymentProperties.putAll(map);
 		}
 
