@@ -45,6 +45,7 @@ import org.springframework.util.StreamUtils;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.api.Assertions.entry;
+import static org.assertj.core.api.Assertions.fail;
 
 /**
  * Uses @Transactional for ease of re-using existing JPA managed objects within Spring's
@@ -153,6 +154,14 @@ public class PackageServiceTests extends AbstractIntegrationTest {
 		assertThat(downloadedPackage.getMetadata()).isEqualToIgnoringGivenFields(retrievedPackageMetadata);
 		assertThat(downloadedPackage.getTemplates()).isNotNull();
 		assertThat(downloadedPackage.getConfigValues()).isNotNull();
+
+		try {
+			this.packageService.upload(uploadProperties);
+			fail("Attempt to upload a package with same name, version withing the same repository must fail!");
+		}
+		catch (SkipperException se) {
+			assertThat(se.getMessage()).contains("Package [log:9.9.9] in Repository [local] already exists.");
+		}
 
 	}
 
