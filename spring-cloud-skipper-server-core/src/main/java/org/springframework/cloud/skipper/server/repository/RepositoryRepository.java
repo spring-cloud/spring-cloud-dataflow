@@ -21,6 +21,7 @@ import org.springframework.cloud.skipper.domain.Repository;
 import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.data.repository.query.Param;
 import org.springframework.data.rest.core.annotation.RepositoryRestResource;
+import org.springframework.data.rest.core.annotation.RestResource;
 
 /**
  * @author Mark Pollack
@@ -37,5 +38,21 @@ public interface RepositoryRepository extends PagingAndSortingRepository<Reposit
 	 * @return the list of repositories
 	 */
 	List<Repository> findAllByOrderByRepoOrderDesc();
+
+	@Override
+	@RestResource(exported = false)
+	Repository save(Repository repository);
+
+	@Override
+	@RestResource(exported = false)
+	void delete(Long id);
+
+	@Override
+	@RestResource(exported = false)
+	void delete(Repository deployer);
+
+	@Override
+	@RestResource(exported = false)
+	void deleteAll();
 
 }
