@@ -56,7 +56,7 @@ import org.springframework.cloud.deployer.spi.core.AppDeploymentRequest;
 import org.springframework.cloud.deployer.spi.core.RuntimeEnvironmentInfo;
 import org.springframework.cloud.skipper.ReleaseNotFoundException;
 import org.springframework.cloud.skipper.client.SkipperClient;
-import org.springframework.cloud.skipper.domain.AboutInfo;
+import org.springframework.cloud.skipper.domain.AboutResource;
 import org.springframework.cloud.skipper.domain.ConfigValues;
 import org.springframework.cloud.skipper.domain.Deployer;
 import org.springframework.cloud.skipper.domain.Info;
@@ -381,11 +381,11 @@ public class SkipperStreamDeployer implements StreamDeployer {
 
 	@Override
 	public RuntimeEnvironmentInfo environmentInfo() {
-		AboutInfo skipperInfo = skipperClient.info();
+		AboutResource skipperInfo = skipperClient.info();
 		Resources<Deployer> deployers = skipperClient.listDeployers();
 		RuntimeEnvironmentInfo.Builder builder = new RuntimeEnvironmentInfo.Builder()
-				.implementationName(skipperInfo.getName())
-				.implementationVersion(skipperInfo.getVersion())
+				.implementationName(skipperInfo.getVersionInfo().getServer().getName())
+				.implementationVersion(skipperInfo.getVersionInfo().getServer().getVersion())
 				.platformApiVersion("")
 				.platformClientVersion("")
 				.platformHostVersion("")
