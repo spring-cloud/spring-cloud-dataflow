@@ -869,6 +869,126 @@ The generated package is uploaded to Skipper's package repository and Data Flow 
 Skipper to install the package that corresponds to the Stream.
 Subsequent commands to upgrade and rollback applications within the Stream are passed through to Skipper after some validation checks are performed by Data Flow.
 
+=== Register a Versioned Stream App
+Skipper extends the _<<streams.adoc#spring-cloud-dataflow-register-stream-apps, Register a Stream App>>_
+ lifecycle with support of multi-versioned stream applications.
+This allows to upgrade or rollback those applications at runtime using the deployment properties.
+
+Register a versioned stream application using the `app register` command. You must provide a unique name, application type, and a URI that can be resolved to the app artifact.
+For the type, specify "source", "processor", or "sink". The version is resolved from the URI. Here are a few examples:
+[source,bash]
+----
+dataflow:>app register --name mysource --type source --uri maven://com.example:mysource:0.0.1
+dataflow:>app register --name mysource --type source --uri maven://com.example:mysource:0.0.2
+dataflow:>app register --name mysource --type source --uri maven://com.example:mysource:0.0.3
+
+dataflow:>app list --id source:mysource
+╔══════════════════╤═════════╤════╤════╗
+║     source       │processor│sink│task║
+╠══════════════════╪═════════╪════╪════╣
+║> mysource-0.0.1 <│         │    │    ║
+║mysource-0.0.2    │         │    │    ║
+║mysource-0.0.3    │         │    │    ║
+╚══════════════════╧═════════╧════╧════╝
+----
+
+The application URI should conform to one the following schema formats:
+
+* maven schema
+[source,bash]
+----
+maven://<groupId>:<artifactId>[:<extension>[:<classifier>]]:<version>
+----
+* http schema
+[source,bash]
+----
+http://<web-path>/<artifactName>-<version>.jar
+----
+* file schema
+[source,bash]
+----
+file:///<local-path>/<artifactName>-<version>.jar
+----
+* docker schema
+[source,bash]
+----
+docker:<docker-image-path>/<imageName>:<version>
+----
+
+[NOTE]
+The URI `<version>` part is compulsory for the versioned stream applications
+
+Multiple versions can be registered for the same applications (e.g. same name and type) but only one can be set as default.
+The default version is used for deploying Streams.
+
+The first time an application is registered it will be marked as default. The default application version can be altered with the `app default` command:
+[source,bash]
+----
+dataflow:>app default --id source:mysource --version 0.0.2
+dataflow:>app list --id source:mysource
+╔══════════════════╤═════════╤════╤════╗
+║     source       │processor│sink│task║
+╠══════════════════╪═════════╪════╪════╣
+║mysource-0.0.1    │         │    │    ║
+║> mysource-0.0.2 <│         │    │    ║
+║mysource-0.0.3    │         │    │    ║
+╚══════════════════╧═════════╧════╧════╝
+----
+
+The `app list --id <type:name>` command lists all versions for a given stream application.
+
+The `app unregister` command has an optional `--version` parameter to specify the app version to unregister.
+[source,bash]
+----
+dataflow:>app unregister --name mysource --type source --version 0.0.1
+dataflow:>app list --id source:mysource
+╔══════════════════╤═════════╤════╤════╗
+║     source       │processor│sink│task║
+╠══════════════════╪═════════╪════╪════╣
+║> mysource-0.0.2 <│         │    │    ║
+║mysource-0.0.3    │         │    │    ║
+╚══════════════════╧═════════╧════╧════╝
+----
+If a `--version` is not specified, the default version is unregistered.
+
+[NOTE]
+====
+All applications in a stream should have a default version set for the stream to be deployed.
+Otherwise they will be treated as unregistered application during the deployment.
+Use the `app default` to set the defaults.
+====
+
+[source,bash]
+----
+app default --id source:mysource --version 0.0.3
+dataflow:>app list --id source:mysource
+╔══════════════════╤═════════╤════╤════╗
+║     source       │processor│sink│task║
+╠══════════════════╪═════════╪════╪════╣
+║mysource-0.0.2    │         │    │    ║
+║> mysource-0.0.3 <│         │    │    ║
+╚══════════════════╧═════════╧════╧════╝
+----
+
+The `stream deploy` necessitates default app versions to be set.
+The `stream update` and `stream rollback` commands though can use all (default and non-default) registered app versions.
+
+[source,bash]
+----
+dataflow:>stream create foo --definition "mysource | log"
+----
+This will create stream using the default mysource version (0.0.3). Then we can update the version to 0.0.2 like this:
+[source,bash]
+----
+dataflow:>stream update foo --properties version.mysource=0.0.2
+----
+
+[IMPORTANT]
+====
+Only pre-registered applications can be used to `deploy`, `update` or `rollback` a Stream.
+====
+
+An attempt to update the `mysource` to version `0.0.1` (not registered) will fail!
 
 [[spring-cloud-dataflow-stream-lifecycle-skipper-create]]
 === Creating and Deploying a Stream
@@ -899,7 +1019,10 @@ If the Stream `http | log` was deployed, and the version of `log` which register
 ----
 dataflow:>stream skipper update --name httptest --properties version.log=1.2.0.RELEASE
 ----
-
+[IMPORTANT]
+====
+Only pre-registered application versions can be used to `deploy`, `update` or `rollback` a Stream.
+====
 === Stream versions
 Skipper keeps a history of the Streams that were deployed.
 After updating a Stream, there will be a second version of the stream.
