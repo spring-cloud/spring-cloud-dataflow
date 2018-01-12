@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 the original author or authors.
+ * Copyright 2017-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,7 @@ package org.springframework.cloud.skipper.shell.command;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.skipper.client.SkipperServerException;
-import org.springframework.cloud.skipper.domain.AboutInfo;
+import org.springframework.cloud.skipper.domain.AboutResource;
 import org.springframework.cloud.skipper.shell.command.support.ConsoleUserInput;
 import org.springframework.cloud.skipper.shell.command.support.Target;
 import org.springframework.cloud.skipper.shell.command.support.TargetHolder;
@@ -86,7 +86,7 @@ public class ConfigCommands extends AbstractSkipperCommand {
 	}
 
 	@ShellMethod(key = "info", value = "Show the Skipper server being used.")
-	public AboutInfo info() {
+	public AboutResource info() {
 		Target target = targetHolder.getTarget();
 		if (target.getTargetException() != null) {
 			throw new SkipperServerException(this.targetHolder.getTarget().getTargetResultMessage());

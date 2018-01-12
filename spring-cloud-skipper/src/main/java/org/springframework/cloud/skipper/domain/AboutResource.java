@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 the original author or authors.
+ * Copyright 2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,36 +15,34 @@
  */
 package org.springframework.cloud.skipper.domain;
 
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonProperty;
+import org.springframework.hateoas.ResourceSupport;
 
 /**
- * This contains information about the underlying Skipper server.
+ * Provides meta-information about the Spring Cloud Skipper server.
  *
- * @author Mark Pollack
+ * @author Janne Valkealahti
+ *
  */
-public class AboutInfo {
+public class AboutResource extends ResourceSupport {
 
-	private String version;
+	private VersionInfo versionInfo = new VersionInfo();
 
-	private String name;
-
-	@JsonCreator
-	public AboutInfo(@JsonProperty("name") String name, @JsonProperty("version") String version) {
-		this.name = name;
-		this.version = version;
+	/**
+	 * Default constructor for serialization frameworks.
+	 */
+	public AboutResource() {
 	}
 
-	public String getVersion() {
-		return version;
+	public VersionInfo getVersionInfo() {
+		return versionInfo;
 	}
 
-	public String getName() {
-		return name;
+	public void setVersionInfo(VersionInfo versionInfo) {
+		this.versionInfo = versionInfo;
 	}
 
 	@Override
 	public String toString() {
-		return name + " v" + version;
+		return getVersionInfo().getServer().getName() + " v" + getVersionInfo().getServer().getVersion();
 	}
 }

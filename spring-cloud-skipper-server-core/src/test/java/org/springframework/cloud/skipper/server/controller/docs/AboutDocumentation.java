@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 the original author or authors.
+ * Copyright 2017-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,8 +35,10 @@ public class AboutDocumentation extends BaseDocumentation {
 		this.mockMvc.perform(get("/api/about").accept(MediaType.APPLICATION_JSON)).andExpect(status().isOk())
 				.andDo(this.documentationHandler.document(
 						responseFields(
-								fieldWithPath("name").description("Name of the Skipper server."),
-								fieldWithPath("version").description(
-										"Version of the Skipper server."))));
+								fieldWithPath("versionInfo.server.name").description("Spring Cloud Skipper Server dependency."),
+								fieldWithPath("versionInfo.server.version").description("Spring Cloud Skipper Server dependency version."),
+								fieldWithPath("versionInfo.shell.name").description("Spring Cloud Skipper Shell dependency."),
+								fieldWithPath("versionInfo.shell.version").description("Spring Cloud Skipper Shell dependency version."),
+								fieldWithPath("links").description("Links."))));
 	}
 }

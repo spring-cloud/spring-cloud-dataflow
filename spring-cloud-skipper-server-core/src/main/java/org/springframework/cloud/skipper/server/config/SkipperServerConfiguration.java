@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 the original author or authors.
+ * Copyright 2017-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -41,9 +41,11 @@ import org.springframework.cloud.skipper.io.DefaultPackageReader;
 import org.springframework.cloud.skipper.io.DefaultPackageWriter;
 import org.springframework.cloud.skipper.io.PackageReader;
 import org.springframework.cloud.skipper.io.PackageWriter;
+import org.springframework.cloud.skipper.server.controller.AboutController;
 import org.springframework.cloud.skipper.server.controller.RootController;
 import org.springframework.cloud.skipper.server.controller.SkipperController;
 import org.springframework.cloud.skipper.server.controller.SkipperErrorAttributes;
+import org.springframework.cloud.skipper.server.controller.VersionInfoProperties;
 import org.springframework.cloud.skipper.server.deployer.AppDeployerReleaseManager;
 import org.springframework.cloud.skipper.server.deployer.AppDeploymentRequestFactory;
 import org.springframework.cloud.skipper.server.deployer.ReleaseAnalyzer;
@@ -94,9 +96,8 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
  * @author Donovan Muller
  */
 @Configuration
-@EnableConfigurationProperties({ SkipperServerProperties.class,
-		LocalPlatformProperties.class, MavenConfigurationProperties.class,
-		HealthCheckProperties.class })
+@EnableConfigurationProperties({ SkipperServerProperties.class, VersionInfoProperties.class,
+		LocalPlatformProperties.class, MavenConfigurationProperties.class, HealthCheckProperties.class })
 @EntityScan({ "org.springframework.cloud.skipper.domain",
 		"org.springframework.cloud.skipper.server.domain" })
 @EnableMapRepositories(basePackages = "org.springframework.cloud.skipper.server.repository")
@@ -136,6 +137,11 @@ public class SkipperServerConfiguration implements AsyncConfigurer {
 	public SkipperController skipperController(ReleaseService releaseService, PackageService packageService,
 			SkipperStateMachineService skipperStateMachineService) {
 		return new SkipperController(releaseService, packageService, skipperStateMachineService);
+	}
+
+	@Bean
+	public AboutController aboutController(VersionInfoProperties versionInfoProperties) {
+		return new AboutController(versionInfoProperties);
 	}
 
 	@Bean

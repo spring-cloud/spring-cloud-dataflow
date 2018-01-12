@@ -22,6 +22,19 @@ spring:
   cloud:
     skipper:
       server:
+        version-info:
+          dependency-fetch:
+            enabled: false
+          dependencies:
+            spring-cloud-skipper-server:
+              name: Spring Cloud Skipper Server
+              version: "@project.version@"
+            spring-cloud-skipper-shell:
+              name: Spring Cloud Skipper Shell
+              version: "@project.version@"
+              url: "{repository}/org/springframework/cloud/spring-cloud-skipper-shell/{version}/spring-cloud-skipper-shell-{version}.jar"
+              checksum-sha1-url: "{repository}/org/springframework/cloud/spring-cloud-skipper-shell/{version}/spring-cloud-skipper-shell-{version}.jar.sha1"
+              checksum-sha256-url: "{repository}/org/springframework/cloud/spring-cloud-skipper-shell/{version}/spring-cloud-skipper-shell-{version}.jar.sha256"
         packageRepositories:
           -
             name: experimental

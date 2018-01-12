@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 the original author or authors.
+ * Copyright 2017-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,7 +26,7 @@ import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import org.springframework.cloud.skipper.domain.AboutInfo;
+import org.springframework.cloud.skipper.domain.AboutResource;
 import org.springframework.cloud.skipper.domain.Deployer;
 import org.springframework.cloud.skipper.domain.Info;
 import org.springframework.cloud.skipper.domain.InstallRequest;
@@ -114,8 +114,8 @@ public class DefaultSkipperClient implements SkipperClient {
 	}
 
 	@Override
-	public AboutInfo info() {
-		return this.restTemplate.getForObject(baseUri + "/about", AboutInfo.class);
+	public AboutResource info() {
+		return this.restTemplate.getForObject(baseUri + "/about", AboutResource.class);
 	}
 
 	@Override

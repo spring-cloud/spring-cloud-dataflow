@@ -15,6 +15,7 @@
  */
 package org.springframework.cloud.skipper.server.index;
 
+import org.springframework.cloud.skipper.server.controller.AboutController;
 import org.springframework.cloud.skipper.server.controller.SkipperController;
 import org.springframework.data.rest.webmvc.RepositoryLinksResource;
 import org.springframework.hateoas.ResourceProcessor;
@@ -32,7 +33,7 @@ public class SkipperControllerResourceProcessor implements ResourceProcessor<Rep
 
 	@Override
 	public RepositoryLinksResource process(RepositoryLinksResource resource) {
-		resource.add(ControllerLinkBuilder.linkTo(methodOn(SkipperController.class).getAboutInfo()).withRel("about"));
+		resource.add(ControllerLinkBuilder.linkTo(methodOn(AboutController.class).getAboutResource()).withRel("about"));
 		resource.add(ControllerLinkBuilder.linkTo(methodOn(SkipperController.class).upload(null)).withRel("upload"));
 		resource.add(ControllerLinkBuilder.linkTo(methodOn(SkipperController.class).install(null)).withRel("install"));
 		resource.add(ControllerLinkBuilder.linkTo(methodOn(SkipperController.class).install(null, null))

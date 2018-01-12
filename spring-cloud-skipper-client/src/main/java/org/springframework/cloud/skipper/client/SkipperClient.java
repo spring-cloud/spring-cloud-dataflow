@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 the original author or authors.
+ * Copyright 2017-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,7 @@ package org.springframework.cloud.skipper.client;
 
 import java.util.List;
 
-import org.springframework.cloud.skipper.domain.AboutInfo;
+import org.springframework.cloud.skipper.domain.AboutResource;
 import org.springframework.cloud.skipper.domain.Deployer;
 import org.springframework.cloud.skipper.domain.Info;
 import org.springframework.cloud.skipper.domain.InstallRequest;
@@ -50,7 +50,7 @@ public interface SkipperClient {
 	/**
 	 * @return The AboutInfo for the server
 	 */
-	AboutInfo info();
+	AboutResource info();
 
 	/**
 	 * Search for package metadata.
@@ -74,7 +74,7 @@ public interface SkipperClient {
 	 */
 	Release upgrade(UpgradeRequest upgradeRequest);
 
-	/*
+	/**
 	 * Upload the package.
 	 *
 	 * @param uploadRequest the properties for the package upload

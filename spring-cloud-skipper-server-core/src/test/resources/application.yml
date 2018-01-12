@@ -14,6 +14,20 @@ spring:
     generate-ddl: true
     hibernate:
       ddl-auto: create
+  cloud:
+    skipper:
+      server:
+        version-info:
+          dependency-fetch:
+            enabled: false
+          dependencies:
+            spring-cloud-skipper-server:
+              name: Spring Cloud Skipper Server
+              version: fake-server-version
+            spring-cloud-skipper-shell:
+              name: Spring Cloud Skipper Shell
+              version: fake-shell-version
+
 
 maven:
   remoteRepositories:

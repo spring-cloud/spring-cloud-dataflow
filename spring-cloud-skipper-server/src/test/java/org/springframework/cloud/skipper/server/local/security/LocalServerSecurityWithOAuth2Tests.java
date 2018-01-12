@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 the original author or authors.
+ * Copyright 2017-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -148,8 +148,8 @@ public class LocalServerSecurityWithOAuth2Tests {
 		localSkipperResource.getMockMvc()
 				.perform(get("/api/about").header("Authorization", "bearer " + accessTokenAsString)).andDo(print())
 				.andExpect(status().isOk())
-				.andExpect(jsonPath("$.name", is("spring-cloud-skipper-server-core")))
-				.andExpect(jsonPath("$.version", notNullValue()));
+				.andExpect(jsonPath("$.versionInfo.server.name", is("Spring Cloud Skipper Server")))
+				.andExpect(jsonPath("$.versionInfo.server.version", notNullValue()));
 	}
 
 	@Test

@@ -19,7 +19,6 @@ import java.util.List;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cloud.skipper.ReleaseNotFoundException;
-import org.springframework.cloud.skipper.domain.AboutInfo;
 import org.springframework.cloud.skipper.domain.Info;
 import org.springframework.cloud.skipper.domain.InstallProperties;
 import org.springframework.cloud.skipper.domain.InstallRequest;
@@ -68,12 +67,6 @@ public class SkipperController {
 		this.releaseService = releaseService;
 		this.packageService = packageService;
 		this.skipperStateMachineService = skipperStateMachineService;
-	}
-
-	@RequestMapping(path = "/about", method = RequestMethod.GET)
-	@ResponseStatus(HttpStatus.OK)
-	public AboutInfo getAboutInfo() {
-		return new AboutInfo(appName, appVersion);
 	}
 
 	@RequestMapping(path = "/upload", method = RequestMethod.POST)
