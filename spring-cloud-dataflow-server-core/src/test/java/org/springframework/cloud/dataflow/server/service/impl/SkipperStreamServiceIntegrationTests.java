@@ -67,7 +67,6 @@ import static org.mockito.Matchers.eq;
 import static org.mockito.Matchers.isA;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static org.springframework.cloud.dataflow.rest.SkipperStream.SKIPPER_ENABLED_PROPERTY_KEY;
 import static org.springframework.cloud.dataflow.rest.SkipperStream.SKIPPER_PACKAGE_NAME;
 import static org.springframework.cloud.dataflow.rest.SkipperStream.SKIPPER_PACKAGE_VERSION;
 
@@ -251,7 +250,6 @@ public class SkipperStreamServiceIntegrationTests {
 
 	private Map<String, String> createSkipperDeploymentProperties() {
 		Map<String, String> deploymentProperties = new HashMap<>();
-		deploymentProperties.put(SKIPPER_ENABLED_PROPERTY_KEY, "true");
 		deploymentProperties.put(SKIPPER_PACKAGE_NAME, "ticktock");
 		deploymentProperties.put(SKIPPER_PACKAGE_VERSION, "1.0.0");
 		return deploymentProperties;

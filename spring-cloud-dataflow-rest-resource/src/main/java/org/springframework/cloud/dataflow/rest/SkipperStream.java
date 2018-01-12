@@ -31,8 +31,6 @@ public abstract class SkipperStream {
 
 	public static final String SKIPPER_PLATFORM_NAME = SKIPPER_KEY_PREFIX + ".platformName";
 
-	public static final String SKIPPER_ENABLED_PROPERTY_KEY = SKIPPER_KEY_PREFIX + ".enabled";
-
 	public static final String SKIPPER_DEFAULT_API_VERSION = "skipper.spring.io/v1";
 
 	public static final String SKIPPER_DEFAULT_KIND = "SpringCloudDeployerApplication";

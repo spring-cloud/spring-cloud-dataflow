@@ -50,7 +50,6 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
-import static org.springframework.cloud.dataflow.rest.SkipperStream.SKIPPER_ENABLED_PROPERTY_KEY;
 import static org.springframework.cloud.dataflow.rest.SkipperStream.SKIPPER_PACKAGE_NAME;
 import static org.springframework.cloud.dataflow.rest.SkipperStream.SKIPPER_PACKAGE_VERSION;
 import static org.springframework.cloud.dataflow.rest.SkipperStream.SKIPPER_PLATFORM_NAME;
@@ -116,7 +115,6 @@ public class SkipperStreamCommands extends AbstractStreamCommands implements Com
 		int which = Assertions.atMostOneOf(PROPERTIES_OPTION, deploymentProperties, PROPERTIES_FILE_OPTION,
 				propertiesFile);
 		Map<String, String> propertiesToUse = getDeploymentProperties(deploymentProperties, propertiesFile, which);
-		propertiesToUse.put(SKIPPER_ENABLED_PROPERTY_KEY, "true");
 		propertiesToUse.put(SKIPPER_PACKAGE_NAME, name);
 		Assert.isTrue(StringUtils.hasText(packageVersion), "Package version must be set when using Skipper.");
 		propertiesToUse.put(SKIPPER_PACKAGE_VERSION, packageVersion);
