@@ -1,5 +1,5 @@
 /*
- * Copyright 2016-2017 the original author or authors.
+ * Copyright 2016-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,6 @@
 package org.springframework.cloud.common.security;
 
 import org.slf4j.LoggerFactory;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.security.oauth2.OAuth2ClientProperties;
@@ -102,7 +101,9 @@ public class ManualOAuthAuthenticationProvider implements AuthenticationProvider
 					String.format("Unable to perform OAuth authentication for user '%s'.", username), e);
 		}
 
+		final ManualOAuthAuthenticationDetails details = new ManualOAuthAuthenticationDetails(accessToken);
 		final OAuth2Authentication auth2Authentication = userInfoTokenServices.loadAuthentication(accessToken.getValue());
+		auth2Authentication.setDetails(details);
 		return auth2Authentication;
 	}
 
