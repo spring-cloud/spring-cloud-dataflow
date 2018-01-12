@@ -28,6 +28,7 @@ import java.util.stream.StreamSupport;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.cloud.skipper.domain.PackageFile;
 import org.zeroturnaround.zip.ZipUtil;
 
 import org.springframework.cloud.skipper.SkipperException;
@@ -81,7 +82,7 @@ public class PackageService implements ResourceLoaderAware {
 	public Package downloadPackage(PackageMetadata packageMetadata) {
 		Assert.notNull(packageMetadata, "Can't download PackageMetadata, it is a null value.");
 		// Database contains the package file from a previous upload
-		if (packageMetadata.getPackageFileBytes() != null) {
+		if (packageMetadata.getPackageFile() != null) {
 			return deserializePackageFromDatabase(packageMetadata);
 		}
 		else {
@@ -120,7 +121,7 @@ public class PackageService implements ResourceLoaderAware {
 					.read(new File(targetPath.toFile(), packageMetadata.getName() + "-" +
 							packageMetadata.getVersion()));
 			// TODO should we have an option to not cache the package file?
-			packageMetadata.setPackageFileBytes(Files.readAllBytes(targetFile.toPath()));
+			packageMetadata.setPackageFile(new PackageFile(Files.readAllBytes(targetFile.toPath())));
 			// Only save once package is successfully deserialized and package file read.
 			pkgToReturn.setMetadata(this.packageMetadataRepository.save(packageMetadata));
 			return pkgToReturn;
@@ -163,7 +164,7 @@ public class PackageService implements ResourceLoaderAware {
 			targetPath.mkdirs();
 			File targetFile = PackageFileUtils.calculatePackageZipFile(packageMetadata, targetPath);
 			try {
-				StreamUtils.copy(packageMetadata.getPackageFileBytes(), new FileOutputStream(targetFile));
+				StreamUtils.copy(packageMetadata.getPackageFile().getPackageBytes(), new FileOutputStream(targetFile));
 			}
 			catch (IOException e) {
 				throw new SkipperException(
@@ -224,7 +225,7 @@ public class PackageService implements ResourceLoaderAware {
 				packageMetadata.setRepositoryId(localRepositoryToUpload.getId());
 				packageMetadata.setRepositoryName(localRepositoryToUpload.getName());
 			}
-			packageMetadata.setPackageFileBytes(uploadRequest.getPackageFileAsBytes());
+			packageMetadata.setPackageFile(new PackageFile((uploadRequest.getPackageFileAsBytes())));
 			return this.packageMetadataRepository.save(packageMetadata);
 		}
 		catch (IOException e) {

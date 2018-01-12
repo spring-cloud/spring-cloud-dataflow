@@ -15,8 +15,11 @@
  */
 package org.springframework.cloud.skipper.domain;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Entity;
-import javax.persistence.Lob;
+import javax.persistence.FetchType;
+import javax.persistence.JoinColumn;
+import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import javax.validation.constraints.NotNull;
 
@@ -92,9 +95,10 @@ public class PackageMetadata extends AbstractEntity {
 	/**
 	 * Package file.
 	 */
-	@Lob
 	@JsonIgnore
-	private byte[] packageFile;
+	@OneToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+	@JoinColumn(name = "packagefile_id")
+	private PackageFile packageFile;
 
 	/**
 	 * A comma separated list of tags to use for searching
@@ -190,13 +194,13 @@ public class PackageMetadata extends AbstractEntity {
 	}
 
 	@JsonIgnore
-	public byte[] getPackageFileBytes() {
+	public PackageFile getPackageFile() {
 		return packageFile;
 	}
 
 	@JsonIgnore
-	public void setPackageFileBytes(byte[] packageFileBytes) {
-		this.packageFile = packageFileBytes;
+	public void setPackageFile(PackageFile packageFile) {
+		this.packageFile = packageFile;
 	}
 
 	public String getTags() {

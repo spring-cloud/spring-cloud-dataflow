@@ -85,13 +85,13 @@ public class PackageServiceTests extends AbstractIntegrationTest {
 		PackageMetadata packageMetadata = packageMetadataRepository.findByNameAndVersionByMaxRepoOrder("log", "1.0.0");
 		// Other tests may have caused the file to be loaded into the database, ensure we start
 		// fresh.
-		if (packageMetadata.getPackageFileBytes() != null) {
-			packageMetadata.setPackageFileBytes(null);
+		if (packageMetadata.getPackageFile() != null) {
+			packageMetadata.setPackageFile(null);
 			packageMetadataRepository.save(packageMetadata);
 		}
 		packageMetadata = packageMetadataRepository.findByNameAndVersionByMaxRepoOrder("log", "1.0.0");
 		assertThat(packageMetadata).isNotNull();
-		assertThat(packageMetadata.getPackageFileBytes()).isNullOrEmpty();
+		assertThat(packageMetadata.getPackageFile()).isNull();
 		assertThat(packageService).isNotNull();
 		assertThat(packageMetadata.getId()).isNotNull();
 		assertThat(packageMetadata.getRepositoryId()).isNotNull();
@@ -99,12 +99,12 @@ public class PackageServiceTests extends AbstractIntegrationTest {
 		assertThat(repository).isNotNull();
 
 		Package downloadedPackage = packageService.downloadPackage(packageMetadata);
-		assertThat(downloadedPackage.getMetadata().getPackageFileBytes()).isNotNull();
+		assertThat(downloadedPackage.getMetadata().getPackageFile()).isNotNull();
 		assertThat(downloadedPackage.getMetadata()).isEqualToIgnoringGivenFields(packageMetadata);
 		assertThat(downloadedPackage.getTemplates()).isNotNull();
 		assertThat(downloadedPackage.getConfigValues()).isNotNull();
 		packageMetadata = packageMetadataRepository.findByNameAndVersionByMaxRepoOrder("log", "1.0.0");
-		assertThat(packageMetadata.getPackageFileBytes()).isNotNull();
+		assertThat(packageMetadata.getPackageFile().getPackageBytes()).isNotNull();
 	}
 
 	@Test
@@ -145,8 +145,8 @@ public class PackageServiceTests extends AbstractIntegrationTest {
 		assertThat(retrievedPackageMetadata.getName().equals("log")).isTrue();
 		assertThat(retrievedPackageMetadata.getVersion().equals("9.9.9")).isTrue();
 		assertThat(retrievedPackageMetadata).isNotNull();
-		assertThat(retrievedPackageMetadata.getPackageFileBytes()).isNotNull();
-		byte[] retrievedPackageBytes = retrievedPackageMetadata.getPackageFileBytes();
+		assertThat(retrievedPackageMetadata.getPackageFile().getPackageBytes()).isNotNull();
+		byte[] retrievedPackageBytes = retrievedPackageMetadata.getPackageFile().getPackageBytes();
 		assertThat(originalPackageBytes).isEqualTo(retrievedPackageBytes);
 
 		// Check that package can be deserialized from the database.
