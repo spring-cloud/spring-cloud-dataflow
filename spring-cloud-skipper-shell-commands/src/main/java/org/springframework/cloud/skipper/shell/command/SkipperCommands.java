@@ -328,6 +328,13 @@ public class SkipperCommands extends AbstractSkipperCommand {
 		return "Package uploaded successfully:[" + packageMetadata.getName() + ":" + packageMetadata.getVersion() + "]";
 	}
 
+	@ShellMethod(key = "package delete", value = "Delete a package.")
+	public String packageDelete(@ShellOption(help = "the package name to be deleted") String packageName) {
+		skipperClient.packageDelete(packageName);
+		return String.format("Deleted Package '%s'", packageName);
+	}
+
+
 	@ShellMethod(key = "list", value = "List the latest version of releases with status of deployed or failed.")
 	public Table list(
 			@ShellOption(help = "wildcard expression to search by release name", defaultValue = NULL) String releaseName) {

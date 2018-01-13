@@ -106,4 +106,5 @@ public interface ReleaseRepositoryCustom {
 	 */
 	Release findLatestReleaseIfDeleted(String releaseName);
 
+
 }

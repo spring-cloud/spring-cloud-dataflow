@@ -282,6 +282,12 @@ public class DefaultSkipperClient implements SkipperClient {
 		return this.restTemplate.postForObject(url, uploadRequest, PackageMetadata.class);
 	}
 
+	@Override
+	public void packageDelete(String packageName) {
+		String url = String.format("%s/%s/%s", baseUri, "package", packageName);
+		restTemplate.delete(url);
+	}
+
 	protected Traverson createTraverson(String baseUrl, RestOperations restOperations) {
 		try {
 			return new Traverson(new URI(baseUrl), MediaTypes.HAL_JSON).setRestOperations(restOperations);

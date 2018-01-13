@@ -15,6 +15,8 @@
  */
 package org.springframework.cloud.skipper.server.statemachine;
 
+import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 
 import org.junit.Test;
@@ -26,6 +28,7 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.cloud.skipper.domain.Info;
 import org.springframework.cloud.skipper.domain.InstallProperties;
+import org.springframework.cloud.skipper.domain.Package;
 import org.springframework.cloud.skipper.domain.PackageMetadata;
 import org.springframework.cloud.skipper.domain.Release;
 import org.springframework.cloud.skipper.domain.Status;
@@ -61,6 +64,7 @@ import org.springframework.statemachine.test.StateMachineTestPlanBuilder;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import org.springframework.util.ReflectionUtils;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Matchers.any;
@@ -308,6 +312,7 @@ public class StateMachineTests {
 		status.setStatusCode(StatusCode.DELETED);
 		Info info = Info.createNewInfo("xxx");
 		info.setStatus(status);
+		release.setPkg(createPkg());
 		release.setInfo(info);
 		Mockito.when(releaseRepository.findLatestReleaseForUpdate(any())).thenReturn(release);
 		Mockito.when(releaseRepository.findReleaseToRollback(any())).thenReturn(release);
@@ -345,6 +350,34 @@ public class StateMachineTests {
 		plan.test();
 
 		Mockito.verify(errorAction, never()).execute(any());
+	}
+
+	private Package createPkg() {
+		PackageMetadata packageMetadata1 = new PackageMetadata();
+		packageMetadata1.setApiVersion("skipper.spring.io/v1");
+		packageMetadata1.setKind("SpringCloudDeployerApplication");
+		setId(PackageMetadata.class, packageMetadata1, "id", 1L);
+		packageMetadata1.setRepositoryId(1L);
+		packageMetadata1.setName("package1");
+		packageMetadata1.setVersion("1.0.0");
+		Package pkg1 = new Package();
+		pkg1.setMetadata(packageMetadata1);
+		return pkg1;
+	}
+
+	private static void setId(Class<?> clazz, Object instance, String fieldName, Object value) {
+		try {
+			Field field = ReflectionUtils.findField(clazz, fieldName);
+			field.setAccessible(true);
+			int modifiers = field.getModifiers();
+			Field modifierField = field.getClass().getDeclaredField("modifiers");
+			modifiers = modifiers & ~Modifier.FINAL;
+			modifierField.setAccessible(true);
+			modifierField.setInt(field, modifiers);
+			ReflectionUtils.setField(field, instance, value);
+		} catch (ReflectiveOperationException e) {
+			throw new IllegalArgumentException(e);
+		}
 	}
 
 	@Test

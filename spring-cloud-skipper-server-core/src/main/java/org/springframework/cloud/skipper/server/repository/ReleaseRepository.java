@@ -63,4 +63,16 @@ public interface ReleaseRepository extends PagingAndSortingRepository<Release, L
 
 	@Transactional(readOnly = true)
 	List<Release> findByNameIgnoreCaseContaining(@Param("name") String name);
+
+	/**
+	 * Return all releases that are associated with the provided package and repository id in decending
+	 * version order.
+	 *
+	 * @param repositoryId the Id of the repository where the package is located
+	 * @param packageMetadataId the id of the package metadata
+	 * @return @return releases associated with the provided package and repository id
+	 */
+	@Transactional(readOnly = true)
+	@RestResource(exported = false)
+	List<Release> findByRepositoryIdAndPackageMetadataIdOrderByNameAscVersionDesc(Long repositoryId, Long packageMetadataId);
 }

@@ -59,6 +59,12 @@ public class Release extends AbstractEntity {
 	@Transient
 	private Package pkg;
 
+	//TODO don't expose the ID, use names instead.
+
+	private Long packageMetadataId;
+
+	private Long repositoryId;
+
 	@Lob
 	private String pkgJsonString;
 
@@ -106,6 +112,8 @@ public class Release extends AbstractEntity {
 
 	public void setPkg(Package pkg) {
 		this.pkg = pkg;
+		this.packageMetadataId = pkg.getMetadata().getId();
+		this.repositoryId = pkg.getMetadata().getRepositoryId();
 		ObjectMapper mapper = new ObjectMapper();
 		try {
 			// TODO verify this behavior
@@ -115,6 +123,22 @@ public class Release extends AbstractEntity {
 		catch (JsonProcessingException e) {
 			e.printStackTrace();
 		}
+	}
+
+	public Long getPackageMetadataId() {
+		return packageMetadataId;
+	}
+
+	public void setPackageMetadataId(Long packageMetadataId) {
+		this.packageMetadataId = packageMetadataId;
+	}
+
+	public Long getRepositoryId() {
+		return repositoryId;
+	}
+
+	public void setRepositoryId(Long repositoryId) {
+		this.repositoryId = repositoryId;
 	}
 
 	public ConfigValues getConfigValues() {

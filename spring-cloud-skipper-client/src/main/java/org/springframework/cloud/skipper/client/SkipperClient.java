@@ -83,6 +83,12 @@ public interface SkipperClient {
 	PackageMetadata upload(UploadRequest uploadRequest);
 
 	/**
+	 * Delete a package
+	 * @param packageName the name of the package
+	 */
+	void packageDelete(String packageName);
+
+	/**
 	 * Delete a specific release.
 	 *
 	 * @param releaseName the release name

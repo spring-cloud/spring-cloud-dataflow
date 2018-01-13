@@ -21,7 +21,9 @@ import java.io.IOException;
 import java.net.URI;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.MappingIterator;
@@ -31,17 +33,23 @@ import org.slf4j.LoggerFactory;
 
 import org.springframework.cloud.skipper.SkipperException;
 import org.springframework.cloud.skipper.domain.PackageMetadata;
+import org.springframework.cloud.skipper.domain.Release;
 import org.springframework.cloud.skipper.domain.Repository;
+import org.springframework.cloud.skipper.domain.StatusCode;
 import org.springframework.cloud.skipper.io.TempFileUtils;
+import org.springframework.cloud.skipper.server.repository.PackageMetadataRepository;
+import org.springframework.cloud.skipper.server.repository.ReleaseRepository;
 import org.springframework.cloud.skipper.server.repository.RepositoryRepository;
 import org.springframework.context.ResourceLoaderAware;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.FileSystemUtils;
 import org.springframework.util.StreamUtils;
+import org.springframework.util.StringUtils;
 
 /**
- * Downloads package metadata from known repositories.
+ * Downloads package metadata from known repositories and deletes PackageMetadata.
  * @author Mark Pollack
  */
 public class PackageMetadataService implements ResourceLoaderAware {
@@ -50,10 +58,84 @@ public class PackageMetadataService implements ResourceLoaderAware {
 
 	private final RepositoryRepository repositoryRepository;
 
+	private final PackageMetadataRepository packageMetadataRepository;
+
+	private final ReleaseRepository releaseRepository;
+
 	private ResourceLoader resourceLoader;
 
-	public PackageMetadataService(RepositoryRepository repositoryRepository) {
+	public PackageMetadataService(RepositoryRepository repositoryRepository,
+			PackageMetadataRepository packageMetadataRepository,
+			ReleaseRepository releaseRepository) {
 		this.repositoryRepository = repositoryRepository;
+		this.packageMetadataRepository = packageMetadataRepository;
+		this.releaseRepository = releaseRepository;
+	}
+
+	/**
+	 * Delete all versions of the package metadata only if the latest releases currently using
+	 * it are in the StatusCode.DELETED state.
+	 * @param packageName the name of the package
+	 */
+	@Transactional
+	public void deleteIfAllReleasesDeleted(String packageName) {
+		List<PackageMetadata> packageMetadataList = this.packageMetadataRepository.findByNameRequired(packageName);
+		List<String> errorMessages = new ArrayList<String>();
+		for (PackageMetadata packageMetadata : packageMetadataList) {
+			List<Release> releases = this.releaseRepository.findByRepositoryIdAndPackageMetadataIdOrderByNameAscVersionDesc(
+					packageMetadata.getRepositoryId(),
+					packageMetadata.getId());
+			boolean canDelete = true;
+
+			List<Release> releasesFromLocalRepositories = filterReleasesFromLocalRepos(releases, packageMetadata.getName());
+
+			// Only keep latest release per release name.
+			Map<String, Release> latestReleaseMap = new HashMap<>();
+			for (Release release : releasesFromLocalRepositories) {
+				if (!latestReleaseMap.containsKey(release.getName())) {
+					latestReleaseMap.put(release.getName(), release);
+				}
+			}
+
+			// Find releases that are still 'active' so can't be deleted
+			List<String> activeReleaseNames = new ArrayList<>();
+			for (Release release : latestReleaseMap.values()) {
+				if (!release.getInfo().getStatus().getStatusCode().equals(StatusCode.DELETED)) {
+					canDelete = false;
+					activeReleaseNames.add(release.getName());
+				}
+			}
+			if (!canDelete) {
+				Repository repository = this.repositoryRepository.findOne(packageMetadata.getRepositoryId());
+				errorMessages.add(String.format("Can not delete Package Metadata [%s:%s] in Repository [%s]. " +
+								"Not all releases of this package have the status DELETED. Active Releases [%s]",
+						packageMetadata.getName(), packageMetadata.getVersion(), repository.getName(),
+						StringUtils.collectionToCommaDelimitedString(activeReleaseNames)));
+			}
+		}
+		if (errorMessages.isEmpty()) {
+			for (PackageMetadata packageMetadata : packageMetadataList) {
+				packageMetadataRepository.deleteByRepositoryIdAndName(packageMetadata.getRepositoryId(),
+						packageMetadata.getName());
+			}
+		} else {
+			throw new SkipperException(StringUtils.collectionToCommaDelimitedString(errorMessages));
+		}
+	}
+
+	private List<Release> filterReleasesFromLocalRepos(List<Release> releases, String packageMetadataName) {
+		List<Release> releasesFromLocalRepositories = new ArrayList<>();
+		for (Release release : releases) {
+			Repository repository = this.repositoryRepository.findOne(release.getRepositoryId());
+			if (repository == null) {
+				throw new SkipperException("Can not delete Package Metadata [" + packageMetadataName + "]. " +
+						"Associated repository not found.");
+			}
+			if (repository.isLocal()) {
+				releasesFromLocalRepositories.add(release);
+			}
+		}
+		return releasesFromLocalRepositories;
 	}
 
 	/**
@@ -151,4 +233,5 @@ public class PackageMetadataService implements ResourceLoaderAware {
 	public void setResourceLoader(ResourceLoader resourceLoader) {
 		this.resourceLoader = resourceLoader;
 	}
+
 }

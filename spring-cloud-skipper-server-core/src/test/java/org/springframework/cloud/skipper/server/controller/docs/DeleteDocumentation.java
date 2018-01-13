@@ -56,6 +56,8 @@ public class DeleteDocumentation extends BaseDocumentation {
 						responseFields(
 								fieldWithPath("name").description("Name of the release"),
 								fieldWithPath("version").description("Version of the release"),
+								fieldWithPath("packageMetadataId").description("The package metadata id"),
+								fieldWithPath("repositoryId").description("The repository id the package came from"),
 								fieldWithPath("info.status.statusCode").description(
 										String.format("StatusCode of the release's status (%s)",
 												StringUtils.arrayToCommaDelimitedString(StatusCode.values()))),

@@ -137,6 +137,7 @@ public class PackageServiceTests extends AbstractIntegrationTest {
 		PackageMetadata uploadedPackageMetadata = this.packageService.upload(uploadProperties);
 		assertThat(uploadedPackageMetadata.getName().equals("log")).isTrue();
 		assertThat(uploadedPackageMetadata.getVersion().equals("9.9.9")).isTrue();
+		assertThat(uploadedPackageMetadata.getId()).isNotNull();
 
 		// Retrieve new package
 		PackageMetadata retrievedPackageMetadata = packageMetadataRepository.findByNameAndVersionByMaxRepoOrder("log",

@@ -21,6 +21,7 @@ import org.springframework.cloud.skipper.domain.PackageMetadata;
 import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.data.repository.query.Param;
 import org.springframework.data.rest.core.annotation.RepositoryRestResource;
+import org.springframework.data.rest.core.annotation.RestResource;
 
 /**
  * @author Mark Pollack
@@ -47,5 +48,9 @@ public interface PackageMetadataRepository extends PagingAndSortingRepository<Pa
 	PackageMetadata findByRepositoryNameAndNameAndVersion(@Param("repositoryName") String repositoryName,
 			@Param("name") String name,
 			@Param("version") String version);
+
+	@RestResource(exported = false)
+	void deleteByRepositoryIdAndName(@Param("repositoryId") Long repositoryId,
+			@Param("name") String name);
 
 }

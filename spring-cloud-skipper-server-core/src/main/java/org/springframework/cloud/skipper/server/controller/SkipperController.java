@@ -26,6 +26,7 @@ import org.springframework.cloud.skipper.domain.PackageMetadata;
 import org.springframework.cloud.skipper.domain.Release;
 import org.springframework.cloud.skipper.domain.UpgradeRequest;
 import org.springframework.cloud.skipper.domain.UploadRequest;
+import org.springframework.cloud.skipper.server.service.PackageMetadataService;
 import org.springframework.cloud.skipper.server.service.PackageService;
 import org.springframework.cloud.skipper.server.service.ReleaseService;
 import org.springframework.cloud.skipper.server.statemachine.SkipperStateMachineService;
@@ -54,6 +55,8 @@ public class SkipperController {
 
 	private final PackageService packageService;
 
+	private final PackageMetadataService packageMetadataService;
+
 	@Value("${info.app.name:#{null}}")
 	private String appName;
 
@@ -63,17 +66,28 @@ public class SkipperController {
 	private SkipperStateMachineService skipperStateMachineService;
 
 	public SkipperController(ReleaseService releaseService, PackageService packageService,
+			PackageMetadataService packageMetadataService,
 			SkipperStateMachineService skipperStateMachineService) {
 		this.releaseService = releaseService;
 		this.packageService = packageService;
+		this.packageMetadataService = packageMetadataService;
 		this.skipperStateMachineService = skipperStateMachineService;
 	}
+
+	// Package commands
 
 	@RequestMapping(path = "/upload", method = RequestMethod.POST)
 	@ResponseStatus(HttpStatus.CREATED)
 	public PackageMetadata upload(@RequestBody UploadRequest uploadRequest) {
 		return this.packageService.upload(uploadRequest);
 	}
+
+	@RequestMapping(path = "/package/{name}", method = RequestMethod.DELETE)
+	@ResponseStatus(HttpStatus.OK)
+	public void packageDelete(@PathVariable("name") String name) {
+		this.packageMetadataService.deleteIfAllReleasesDeleted(name);
+	}
+
 
 	@RequestMapping(path = "/install", method = RequestMethod.POST)
 	@ResponseStatus(HttpStatus.CREATED)
@@ -86,6 +100,8 @@ public class SkipperController {
 	public Release install(@PathVariable("id") Long id, @RequestBody InstallProperties installProperties) {
 		return this.skipperStateMachineService.installRelease(id, installProperties);
 	}
+
+	// Release commands
 
 	@RequestMapping(path = "/status/{name}", method = RequestMethod.GET)
 	@ResponseStatus(HttpStatus.OK)

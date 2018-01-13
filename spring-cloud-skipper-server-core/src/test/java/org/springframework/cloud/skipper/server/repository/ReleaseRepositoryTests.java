@@ -21,6 +21,7 @@ import org.junit.Test;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.skipper.ReleaseNotFoundException;
+import org.springframework.cloud.skipper.SkipperException;
 import org.springframework.cloud.skipper.domain.Info;
 import org.springframework.cloud.skipper.domain.Package;
 import org.springframework.cloud.skipper.domain.PackageMetadata;
@@ -28,6 +29,7 @@ import org.springframework.cloud.skipper.domain.Release;
 import org.springframework.cloud.skipper.domain.Status;
 import org.springframework.cloud.skipper.domain.StatusCode;
 import org.springframework.cloud.skipper.server.AbstractIntegrationTest;
+import org.springframework.cloud.skipper.server.service.PackageMetadataService;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -36,51 +38,57 @@ import static org.assertj.core.api.Java6Assertions.fail;
 
 /**
  * @author Ilayaperumal Gopinathan
+ * @author Mark Pollack
  */
 @ActiveProfiles("repo-test")
 @Transactional
 public class ReleaseRepositoryTests extends AbstractIntegrationTest {
 
+	private static Long REMOTE_REPO = 1L;
+
+	private static Long LOCAL_REPO = 2L;
+
 	@Autowired
 	private ReleaseRepository releaseRepository;
+
+	@Autowired
+	private PackageMetadataRepository packageMetadataRepository;
+
+	@Autowired
+	private PackageMetadataService packageMetadataService;
 
 	@Test
 	public void verifyFindByMethods() {
 		PackageMetadata packageMetadata1 = new PackageMetadata();
+		packageMetadata1.setApiVersion("skipper.spring.io/v1");
+		packageMetadata1.setKind("SpringCloudDeployerApplication");
+		packageMetadata1.setRepositoryId(REMOTE_REPO);
 		packageMetadata1.setName("package1");
 		packageMetadata1.setVersion("1.0.0");
 		Package pkg1 = new Package();
 		pkg1.setMetadata(packageMetadata1);
+		this.packageMetadataRepository.save(packageMetadata1);
+
 
 		PackageMetadata packageMetadata2 = new PackageMetadata();
+		packageMetadata2.setApiVersion("skipper.spring.io/v1");
+		packageMetadata2.setKind("SpringCloudDeployerApplication");
+		packageMetadata2.setRepositoryId(LOCAL_REPO);
 		packageMetadata2.setName("package2");
 		packageMetadata2.setVersion("1.0.1");
 		Package pkg2 = new Package();
 		pkg2.setMetadata(packageMetadata2);
+		this.packageMetadataRepository.save(packageMetadata2);
 
-		Info deletedInfo = new Info();
-		Status deletedStatus = new Status();
-		deletedStatus.setPlatformStatus("Deleted successfully");
-		deletedStatus.setStatusCode(StatusCode.DELETED);
-		deletedInfo.setStatus(deletedStatus);
+		Info deletedInfo = createDeletedInfo();
 
-		Info deployedInfo = new Info();
-		Status deployedStatus = new Status();
-		deployedStatus.setPlatformStatus("Deployed successfully");
-		deployedStatus.setStatusCode(StatusCode.DEPLOYED);
-		deployedInfo.setStatus(deployedStatus);
+		Info deployedInfo = createDeployedInfo();
 
-		Info unknownInfo = new Info();
-		Status unknownStatus = new Status();
-		unknownStatus.setPlatformStatus("Unknown");
-		unknownStatus.setStatusCode(StatusCode.UNKNOWN);
-		unknownInfo.setStatus(unknownStatus);
+		Info unknownInfo = createUnknownInfo();
 
-		Info failedInfo = new Info();
-		Status failedStatus = new Status();
-		failedStatus.setPlatformStatus("Deployment failed");
-		failedStatus.setStatusCode(StatusCode.FAILED);
-		failedInfo.setStatus(failedStatus);
+		Info failedInfo = createFailedInfo();
+
+		// Release stableA
 
 		Release release1 = new Release();
 		release1.setName("stableA");
@@ -91,20 +99,22 @@ public class ReleaseRepositoryTests extends AbstractIntegrationTest {
 		this.releaseRepository.save(release1);
 
 		Release release2 = new Release();
-		release2.setName(release1.getName());
+		release2.setName("stableA");
 		release2.setVersion(2);
-		release2.setPlatformName(release1.getPlatformName());
+		release2.setPlatformName("platform1");
 		release2.setPkg(pkg2);
 		release2.setInfo(deletedInfo);
 		this.releaseRepository.save(release2);
 
 		Release release3 = new Release();
-		release3.setName(release1.getName());
+		release3.setName("stableA");
 		release3.setVersion(3);
-		release3.setPlatformName(release1.getPlatformName());
-		release2.setPkg(pkg1);
+		release3.setPlatformName("platform1");
+		release3.setPkg(pkg1);
 		release3.setInfo(deployedInfo);
 		this.releaseRepository.save(release3);
+
+		// Release stableB
 
 		Release release4 = new Release();
 		release4.setName("stableB");
@@ -115,12 +125,14 @@ public class ReleaseRepositoryTests extends AbstractIntegrationTest {
 		this.releaseRepository.save(release4);
 
 		Release release5 = new Release();
-		release5.setName(release4.getName());
+		release5.setName("stableB");
 		release5.setVersion(2);
-		release5.setPlatformName(release4.getPlatformName());
+		release5.setPlatformName("platform2");
 		release5.setPkg(pkg2);
 		release5.setInfo(failedInfo);
 		this.releaseRepository.save(release5);
+
+		// Release multipleDeleted
 
 		Release release6 = new Release();
 		release6.setName("multipleDeleted");
@@ -131,28 +143,30 @@ public class ReleaseRepositoryTests extends AbstractIntegrationTest {
 		this.releaseRepository.save(release6);
 
 		Release release7 = new Release();
-		release7.setName(release6.getName());
+		release7.setName("multipleDeleted");
 		release7.setVersion(2);
-		release7.setPlatformName(release6.getPlatformName());
+		release7.setPlatformName("platform2");
 		release7.setPkg(pkg2);
 		release7.setInfo(deletedInfo);
 		this.releaseRepository.save(release7);
 
 		Release release8 = new Release();
-		release8.setName(release6.getName());
+		release8.setName("multipleDeleted");
 		release8.setVersion(3);
-		release8.setPlatformName(release6.getPlatformName());
+		release8.setPlatformName("platform2");
 		release8.setPkg(pkg2);
 		release8.setInfo(failedInfo);
 		this.releaseRepository.save(release8);
 
 		Release release9 = new Release();
-		release9.setName(release6.getName());
+		release9.setName("multipleDeleted");
 		release9.setVersion(4);
-		release9.setPlatformName(release6.getPlatformName());
+		release9.setPlatformName("platform2");
 		release9.setPkg(pkg2);
 		release9.setInfo(deletedInfo);
 		this.releaseRepository.save(release9);
+
+		// Release multipleRevisions1
 
 		Release release10 = new Release();
 		release10.setName("multipleRevisions1");
@@ -163,20 +177,22 @@ public class ReleaseRepositoryTests extends AbstractIntegrationTest {
 		this.releaseRepository.save(release10);
 
 		Release release11 = new Release();
-		release11.setName(release10.getName());
+		release11.setName("multipleRevisions1");
 		release11.setVersion(2);
-		release11.setPlatformName(release10.getPlatformName());
+		release11.setPlatformName("platform2");
 		release11.setPkg(pkg2);
 		release11.setInfo(failedInfo);
 		this.releaseRepository.save(release11);
 
 		Release release12 = new Release();
-		release12.setName(release10.getName());
+		release12.setName("multipleRevisions1");
 		release12.setVersion(3);
-		release12.setPlatformName(release10.getPlatformName());
+		release12.setPlatformName("platform2");
 		release12.setPkg(pkg2);
 		release12.setInfo(failedInfo);
 		this.releaseRepository.save(release12);
+
+		// Release multipleRevisions2
 
 		Release release13 = new Release();
 		release13.setName("multipleRevisions2");
@@ -187,33 +203,36 @@ public class ReleaseRepositoryTests extends AbstractIntegrationTest {
 		this.releaseRepository.save(release13);
 
 		Release release14 = new Release();
-		release14.setName(release13.getName());
+		release14.setName("multipleRevisions2");
 		release14.setVersion(2);
-		release14.setPlatformName(release13.getPlatformName());
+		release14.setPlatformName("platform2");
 		release14.setPkg(pkg2);
 		release14.setInfo(deletedInfo);
 		this.releaseRepository.save(release14);
 
 		Release release15 = new Release();
-		release15.setName(release13.getName());
+		release15.setName("multipleRevisions2");
 		release15.setVersion(3);
-		release15.setPlatformName(release13.getPlatformName());
+		release15.setPlatformName("platform2");
 		release15.setPkg(pkg2);
 		release15.setInfo(unknownInfo);
 		this.releaseRepository.save(release15);
 
+
+		// Release multipleRevisions3
+
 		Release release16 = new Release();
 		release16.setName("multipleRevisions3");
 		release16.setVersion(1);
-		release16.setPlatformName(release16.getPlatformName());
+		release16.setPlatformName("platform2");
 		release16.setPkg(pkg2);
 		release16.setInfo(failedInfo);
 		this.releaseRepository.save(release16);
 
 		Release release17 = new Release();
-		release17.setName(release16.getName());
+		release17.setName("multipleRevisions3");
 		release17.setVersion(2);
-		release17.setPlatformName(release16.getPlatformName());
+		release17.setPlatformName("platform2");
 		release17.setPkg(pkg2);
 		release17.setInfo(unknownInfo);
 		this.releaseRepository.save(release17);
@@ -222,6 +241,17 @@ public class ReleaseRepositoryTests extends AbstractIntegrationTest {
 		Iterable<Release> releases = this.releaseRepository.findAll();
 		assertThat(releases).isNotEmpty();
 		assertThat(releases).hasSize(17);
+
+		Long packageMetadataId1 = this.packageMetadataRepository.findByName("package1").get(0).getId();
+		Long packageMetadataId2 = this.packageMetadataRepository.findByName("package2").get(0).getId();
+
+		List<Release> foundByRepositoryIdAndPackageMetadataId =
+				this.releaseRepository.findByRepositoryIdAndPackageMetadataIdOrderByNameAscVersionDesc(REMOTE_REPO, packageMetadataId1);
+		assertThat(foundByRepositoryIdAndPackageMetadataId).hasSize(6);
+
+		foundByRepositoryIdAndPackageMetadataId =
+				this.releaseRepository.findByRepositoryIdAndPackageMetadataIdOrderByNameAscVersionDesc(LOCAL_REPO, packageMetadataId2);
+		assertThat(foundByRepositoryIdAndPackageMetadataId).hasSize(11);
 
 		// findByNameAndVersionOrderByApiVersionDesc
 		Release foundByNameAndVersion = this.releaseRepository.findByNameAndVersion(release1.getName(), 2);
@@ -317,6 +347,140 @@ public class ReleaseRepositoryTests extends AbstractIntegrationTest {
 			assertThat(e.getMessage())
 					.isEqualTo(String.format("Release with the name [%s] doesn't exist", release16.getName()));
 		}
+
+		this.packageMetadataRepository.deleteByRepositoryIdAndName(REMOTE_REPO, "package1");
+		foundByRepositoryIdAndPackageMetadataId =
+				this.releaseRepository.findByRepositoryIdAndPackageMetadataIdOrderByNameAscVersionDesc(REMOTE_REPO, packageMetadataId1);
+		assertThat(foundByRepositoryIdAndPackageMetadataId).hasSize(6);
+
+		try {
+			this.packageMetadataService.deleteIfAllReleasesDeleted(packageMetadata2.getName());
+			fail("SkipperException is expected");
+		} catch (SkipperException e) {
+			assertThat(e.getMessage())
+					.contains("Can not delete Package Metadata [package2:1.0.1] in Repository [local]")
+					.contains("Not all releases of this package have the status DELETED.")
+					.contains("Active Releases [stableB,multipleRevisions1,multipleRevisions2,multipleRevisions3]");
+
+		}
+
+		release5.setInfo(deletedInfo);
+		this.releaseRepository.save(release5);
+
+		try {
+			this.packageMetadataService.deleteIfAllReleasesDeleted(packageMetadata2.getName());
+			fail("SkipperException is expected");
+		} catch (SkipperException e) {
+			assertThat(e.getMessage())
+					.contains("Can not delete Package Metadata [package2:1.0.1] in Repository [local]")
+					.contains("Not all releases of this package have the status DELETED.")
+					.contains("Active Releases [multipleRevisions1,multipleRevisions2,multipleRevisions3]");
+
+		}
+	}
+
+	private Info createFailedInfo() {
+		Info failedInfo = new Info();
+		Status failedStatus = new Status();
+		failedStatus.setPlatformStatus("Deployment failed");
+		failedStatus.setStatusCode(StatusCode.FAILED);
+		failedInfo.setStatus(failedStatus);
+		return failedInfo;
+	}
+
+	private Info createUnknownInfo() {
+		Info unknownInfo = new Info();
+		Status unknownStatus = new Status();
+		unknownStatus.setPlatformStatus("Unknown");
+		unknownStatus.setStatusCode(StatusCode.UNKNOWN);
+		unknownInfo.setStatus(unknownStatus);
+		return unknownInfo;
+	}
+
+	private Info createDeployedInfo() {
+		Info deployedInfo = new Info();
+		Status deployedStatus = new Status();
+		deployedStatus.setPlatformStatus("Deployed successfully");
+		deployedStatus.setStatusCode(StatusCode.DEPLOYED);
+		deployedInfo.setStatus(deployedStatus);
+		return deployedInfo;
+	}
+
+	private Info createDeletedInfo() {
+		Info deletedInfo = new Info();
+		Status deletedStatus = new Status();
+		deletedStatus.setPlatformStatus("Deleted successfully");
+		deletedStatus.setStatusCode(StatusCode.DELETED);
+		deletedInfo.setStatus(deletedStatus);
+		return deletedInfo;
+	}
+
+	@Test
+	public void verifydeleteIfAllReleasesDeleted() {
+
+		PackageMetadata packageMetadata1 = new PackageMetadata();
+		packageMetadata1.setApiVersion("skipper.spring.io/v1");
+		packageMetadata1.setKind("SpringCloudDeployerApplication");
+		packageMetadata1.setRepositoryId(LOCAL_REPO);
+		packageMetadata1.setName("ticktock");
+		packageMetadata1.setVersion("1.0.0");
+		Package pkg1 = new Package();
+		pkg1.setMetadata(packageMetadata1);
+		this.packageMetadataRepository.save(packageMetadata1);
+
+		Info deletedInfo = createDeletedInfo();
+		Info deployedInfo = createDeployedInfo();
+		Info unknownInfo = createUnknownInfo();
+		Info failedInfo = createFailedInfo();
+
+		// Release ticktock1
+
+		Release release1 = new Release();
+		release1.setName("ticktock1");
+		release1.setVersion(1);
+		release1.setPlatformName("platform1");
+		release1.setPkg(pkg1);
+		release1.setInfo(deployedInfo);
+		this.releaseRepository.save(release1);
+
+		Release release2 = new Release();
+		release2.setName("ticktock1");
+		release2.setVersion(2);
+		release2.setPlatformName("platform1");
+		release2.setPkg(pkg1);
+		release2.setInfo(deletedInfo);
+		this.releaseRepository.save(release2);
+
+
+		Release release3 = new Release();
+		release3.setName("ticktock2");
+		release3.setVersion(1);
+		release3.setPlatformName("platform2");
+		release3.setPkg(pkg1);
+		release3.setInfo(deployedInfo);
+		this.releaseRepository.save(release3);
+
+
+		Long ticktockPackageMetadataId = this.packageMetadataRepository.findByName("ticktock").get(0).getId();
+		try {
+			this.packageMetadataService.deleteIfAllReleasesDeleted(packageMetadata1.getName());
+			fail("SkipperException is expected");
+		} catch (SkipperException e) {
+			assertThat(e.getMessage())
+					.contains("Can not delete Package Metadata [ticktock:1.0.0] in Repository [local]")
+					.contains("Not all releases of this package have the status DELETED.")
+					.contains("Active Releases [ticktock2]");
+
+		}
+
+		release3.setInfo(deletedInfo);
+		this.releaseRepository.save(release3);
+		this.packageMetadataService.deleteIfAllReleasesDeleted(packageMetadata1.getName());
+		List<Release> foundByRepositoryIdAndPackageMetadataId =
+				this.releaseRepository.findByRepositoryIdAndPackageMetadataIdOrderByNameAscVersionDesc(REMOTE_REPO,
+						ticktockPackageMetadataId);
+		assertThat(foundByRepositoryIdAndPackageMetadataId).hasSize(0);
+
 	}
 
 	@Test
