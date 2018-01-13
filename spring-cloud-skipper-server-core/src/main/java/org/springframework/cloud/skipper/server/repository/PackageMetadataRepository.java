@@ -41,7 +41,11 @@ public interface PackageMetadataRepository extends PagingAndSortingRepository<Pa
 	PackageMetadata findFirstByNameOrderByVersionDesc(@Param("name") String name);
 
 	PackageMetadata findByRepositoryIdAndNameAndVersion(@Param("repositoryId") Long repositoryId,
-														@Param("name") String name,
-														@Param("version") String version);
+			@Param("name") String name,
+			@Param("version") String version);
+
+	PackageMetadata findByRepositoryNameAndNameAndVersion(@Param("repositoryName") String repositoryName,
+			@Param("name") String name,
+			@Param("version") String version);
 
 }

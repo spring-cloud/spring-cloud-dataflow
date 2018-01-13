@@ -52,7 +52,9 @@ public class PackageMetadataDocumentation extends BaseDocumentation {
 								fieldWithPath("_embedded.packageMetadata[].origin")
 										.description("Indicates the origin of the repository (free form text)"),
 								fieldWithPath("_embedded.packageMetadata[].repositoryId")
-										.description("The repository ID this Package Index file belongs to"),
+										.description("The repository ID this Package belongs to"),
+								fieldWithPath("_embedded.packageMetadata[].repositoryName")
+										.description("The repository name this Package belongs to."),
 								fieldWithPath("_embedded.packageMetadata[].kind")
 										.description("What type of package system is being used"),
 								fieldWithPath("_embedded.packageMetadata[].name")
@@ -100,7 +102,9 @@ public class PackageMetadataDocumentation extends BaseDocumentation {
 								fieldWithPath("origin")
 										.description("Indicates the origin of the repository (free form text)"),
 								fieldWithPath("repositoryId")
-										.description("The repository ID this Package Index file belongs to"),
+										.description("The repository ID this Package belongs to."),
+								fieldWithPath("repositoryName")
+										.description("The repository name this Package belongs to."),
 								fieldWithPath("kind").description("What type of package system is being used"),
 								fieldWithPath("name").description("The name of the package"),
 								fieldWithPath("displayName").description("The display name of the package"),

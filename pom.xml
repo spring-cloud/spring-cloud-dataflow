@@ -34,6 +34,7 @@
         <spring-shell.version>2.0.0.M2</spring-shell.version>
         <spring-statemachine.version>1.2.8.RC1</spring-statemachine.version>
         <jsonpath.version>2.2.0</jsonpath.version>
+        <equalverifier.version>2.4.1</equalverifier.version>
 
         <jacoco-maven-plugin.version>0.7.9</jacoco-maven-plugin.version>
         <surefire-maven-plugin.version>2.20</surefire-maven-plugin.version>

@@ -80,6 +80,7 @@ public class PackageMetadataService implements ResourceLoaderAware {
 									downloadedFileAsList);
 							for (PackageMetadata packageMetadata : downloadedPackageMetadata) {
 								packageMetadata.setRepositoryId(packageRepository.getId());
+								packageMetadata.setRepositoryName(packageRepository.getName());
 							}
 							finalMetadataList.addAll(downloadedPackageMetadata);
 						}

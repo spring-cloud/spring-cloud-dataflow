@@ -78,7 +78,9 @@ public class InstallDocumentation extends BaseDocumentation {
 								fieldWithPath("pkg.metadata.apiVersion")
 										.description("The Package Index spec version this file is based on"),
 								fieldWithPath("pkg.metadata.repositoryId")
-										.description("The repository ID this Package Index file belongs to"),
+										.description("The repository ID this Package belongs to"),
+								fieldWithPath("pkg.metadata.repositoryName")
+										.description("The repository name this Package belongs to."),
 								fieldWithPath("pkg.metadata.kind")
 										.description("What type of package system is being used"),
 								fieldWithPath("pkg.metadata.name").description("The name of the package"),
@@ -155,7 +157,9 @@ public class InstallDocumentation extends BaseDocumentation {
 								fieldWithPath("pkg.metadata.origin")
 										.description("Indicates the origin of the repository (free form text)"),
 								fieldWithPath("pkg.metadata.repositoryId")
-										.description("The repository ID this Package Index file belongs to"),
+										.description("The repository ID this Package belongs to"),
+								fieldWithPath("pkg.metadata.repositoryName")
+										.description("The repository name this Package belongs to."),
 								fieldWithPath("pkg.metadata.kind")
 										.description("What type of package system is being used"),
 								fieldWithPath("pkg.metadata.name").description("The name of the package"),

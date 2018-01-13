@@ -45,9 +45,16 @@ public class PackageMetadata extends AbstractEntity {
 	private String origin;
 
 	/**
-	 * The repository ID this Package Index file belongs to.
+	 * The repository ID this Package belongs to.
 	 */
+	@NotNull
 	private Long repositoryId;
+
+	/**
+	 * The repository name this Package belongs to.
+	 */
+	@NotNull
+	private String repositoryName;
 
 	/**
 	 * What type of package system is being used.
@@ -240,71 +247,31 @@ public class PackageMetadata extends AbstractEntity {
 		this.repositoryId = repositoryId;
 	}
 
+	public String getRepositoryName() {
+		return repositoryName;
+	}
+
+	public void setRepositoryName(String repositoryName) {
+		this.repositoryName = repositoryName;
+	}
+
 	@Override
 	public boolean equals(Object o) {
-		if (this == o) {
-			return true;
-		}
-		if (o == null || getClass() != o.getClass()) {
-			return false;
-		}
+		if (this == o) return true;
+		if (!(o instanceof PackageMetadata)) return false;
 
 		PackageMetadata that = (PackageMetadata) o;
 
-		if (apiVersion != null ? !apiVersion.equals(that.apiVersion) : that.apiVersion != null) {
-			return false;
-		}
-		if (origin != null ? !origin.equals(that.origin) : that.origin != null) {
-			return false;
-		}
-		if (repositoryId != null ? !repositoryId.equals(that.repositoryId) : that.repositoryId != null) {
-			return false;
-		}
-		if (kind != null ? !kind.equals(that.kind) : that.kind != null) {
-			return false;
-		}
-		if (name != null ? !name.equals(that.name) : that.name != null) {
-			return false;
-		}
-		if (version != null ? !version.equals(that.version) : that.version != null) {
-			return false;
-		}
-		if (packageSourceUrl != null ? !packageSourceUrl.equals(that.packageSourceUrl)
-				: that.packageSourceUrl != null) {
-			return false;
-		}
-		if (packageHomeUrl != null ? !packageHomeUrl.equals(that.packageHomeUrl) : that.packageHomeUrl != null) {
-			return false;
-		}
-		if (tags != null ? !tags.equals(that.tags) : that.tags != null) {
-			return false;
-		}
-		if (maintainer != null ? !maintainer.equals(that.maintainer) : that.maintainer != null) {
-			return false;
-		}
-		if (description != null ? !description.equals(that.description) : that.description != null) {
-			return false;
-		}
-		if (sha256 != null ? !sha256.equals(that.sha256) : that.sha256 != null) {
-			return false;
-		}
-		return iconUrl != null ? iconUrl.equals(that.iconUrl) : that.iconUrl == null;
+		if (repositoryId != null ? !repositoryId.equals(that.repositoryId) : that.repositoryId != null) return false;
+		if (name != null ? !name.equals(that.name) : that.name != null) return false;
+		return version != null ? version.equals(that.version) : that.version == null;
 	}
 
 	@Override
 	public int hashCode() {
-		int result = apiVersion != null ? apiVersion.hashCode() : 0;
-		result = 31 * result + (origin != null ? origin.hashCode() : 0);
-		result = 31 * result + (kind != null ? kind.hashCode() : 0);
+		int result = repositoryId != null ? repositoryId.hashCode() : 0;
 		result = 31 * result + (name != null ? name.hashCode() : 0);
 		result = 31 * result + (version != null ? version.hashCode() : 0);
-		result = 31 * result + (packageSourceUrl != null ? packageSourceUrl.hashCode() : 0);
-		result = 31 * result + (packageHomeUrl != null ? packageHomeUrl.hashCode() : 0);
-		result = 31 * result + (tags != null ? tags.hashCode() : 0);
-		result = 31 * result + (maintainer != null ? maintainer.hashCode() : 0);
-		result = 31 * result + (description != null ? description.hashCode() : 0);
-		result = 31 * result + (sha256 != null ? sha256.hashCode() : 0);
-		result = 31 * result + (iconUrl != null ? iconUrl.hashCode() : 0);
 		return result;
 	}
 
@@ -314,7 +281,7 @@ public class PackageMetadata extends AbstractEntity {
 				"id='" + getId() + '\'' +
 				", apiVersion='" + apiVersion + '\'' +
 				", origin='" + origin + '\'' +
-				", repositoryId='" + repositoryId + '\'' +
+				", repositoryName='" + repositoryName + '\'' +
 				", kind='" + kind + '\'' +
 				", name='" + name + '\'' +
 				", version='" + version + '\'' +

@@ -66,8 +66,10 @@ public class PackageMetadataRepositoryTests extends AbstractIntegrationTest {
 		PackageMetadata latestPackage2 = this.packageMetadataRepository.findFirstByNameOrderByVersionDesc("package2");
 		assertThat(latestPackage2.getVersion()).isEqualTo("1.1.0");
 
-		PackageMetadata aPackage = this.packageMetadataRepository.findByRepositoryIdAndNameAndVersion(1L,
-				"package1", "2.0.0");
+		PackageMetadata aPackage =
+				this.packageMetadataRepository.findByRepositoryNameAndNameAndVersion(
+						PackageMetadataCreator.TEST_REPO_NAME,
+						"package1", "2.0.0");
 		assertThat(aPackage.getVersion()).isEqualTo("2.0.0");
 
 	}

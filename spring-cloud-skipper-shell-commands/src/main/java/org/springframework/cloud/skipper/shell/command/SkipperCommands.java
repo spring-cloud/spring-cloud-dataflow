@@ -145,6 +145,7 @@ public class SkipperCommands extends AbstractSkipperCommand {
 			headers.put("name", "Name");
 			headers.put("version", "Version");
 			headers.put("description", "Description");
+			headers.put("repositoryName","Repository Name");
 			TableModel model = new BeanListTableModel<>(resources.getContent(), headers);
 			TableBuilder tableBuilder = new TableBuilder(model);
 			TableUtils.applyStyle(tableBuilder);

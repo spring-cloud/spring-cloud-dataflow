@@ -40,4 +40,6 @@ public interface PackageSummary {
 	String getIconUrl();
 
 	String getDescription();
+
+	String getRepositoryName();
 }

@@ -81,7 +81,9 @@ public class UploadDocumentation extends BaseDocumentation {
 										fieldWithPath("origin")
 												.description("Indicates the origin of the repository (free form text)"),
 										fieldWithPath("repositoryId")
-												.description("The repository ID this Package Index file belongs to"),
+												.description("The repository ID this Package belongs to."),
+										fieldWithPath("repositoryName")
+												.description("The repository nane this Package belongs to."),
 										fieldWithPath("kind").description("What type of package system is being used"),
 										fieldWithPath("name").description("The name of the package"),
 										fieldWithPath("displayName").description("The display name of the package"),

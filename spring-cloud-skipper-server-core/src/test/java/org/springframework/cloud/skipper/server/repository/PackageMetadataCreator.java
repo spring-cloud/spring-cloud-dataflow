@@ -22,11 +22,16 @@ import org.springframework.cloud.skipper.domain.PackageMetadata;
  */
 public class PackageMetadataCreator {
 
+	public static Long TEST_REPO_ID = 1L;
+	
+	public static String TEST_REPO_NAME = "testRepo";
+	
 	public static void createTwoPackages(PackageMetadataRepository repository) {
 		PackageMetadata packageMetadata = new PackageMetadata();
 		packageMetadata.setApiVersion("1");
 		packageMetadata.setOrigin("www.package-repos.com/repo1");
-		packageMetadata.setRepositoryId(1L);
+		packageMetadata.setRepositoryId(TEST_REPO_ID);
+		packageMetadata.setRepositoryName(TEST_REPO_NAME);
 		packageMetadata.setKind("skipper");
 		packageMetadata.setName("package1");
 		packageMetadata.setVersion("1.0.0");
@@ -36,7 +41,8 @@ public class PackageMetadataCreator {
 		repository.save(packageMetadata);
 		packageMetadata = new PackageMetadata();
 		packageMetadata.setApiVersion("1");
-		packageMetadata.setRepositoryId(1L);
+		packageMetadata.setRepositoryId(TEST_REPO_ID);
+		packageMetadata.setRepositoryName(TEST_REPO_NAME);
 		packageMetadata.setOrigin("www.package-repos.com/repo2");
 		packageMetadata.setKind("skipper");
 		packageMetadata.setName("package2");
@@ -50,7 +56,8 @@ public class PackageMetadataCreator {
 	public static void createPackageWithMultipleVersions(PackageMetadataRepository repository) {
 		PackageMetadata packageMetadata = new PackageMetadata();
 		packageMetadata.setApiVersion("1");
-		packageMetadata.setRepositoryId(1L);
+		packageMetadata.setRepositoryId(TEST_REPO_ID);
+		packageMetadata.setRepositoryName(TEST_REPO_NAME);
 		packageMetadata.setKind("skipper");
 		packageMetadata.setName("package1");
 		packageMetadata.setVersion("1.0.0");
@@ -60,7 +67,8 @@ public class PackageMetadataCreator {
 		repository.save(packageMetadata);
 		packageMetadata = new PackageMetadata();
 		packageMetadata.setApiVersion("1");
-		packageMetadata.setRepositoryId(1L);
+		packageMetadata.setRepositoryId(TEST_REPO_ID);
+		packageMetadata.setRepositoryName(TEST_REPO_NAME);
 		packageMetadata.setKind("skipper");
 		packageMetadata.setName("package1");
 		packageMetadata.setVersion("2.0.0");
@@ -70,7 +78,8 @@ public class PackageMetadataCreator {
 		repository.save(packageMetadata);
 		packageMetadata = new PackageMetadata();
 		packageMetadata.setApiVersion("1");
-		packageMetadata.setRepositoryId(1L);
+		packageMetadata.setRepositoryId(TEST_REPO_ID);
+		packageMetadata.setRepositoryName(TEST_REPO_NAME);
 		packageMetadata.setKind("skipper");
 		packageMetadata.setName("package2");
 		packageMetadata.setVersion("1.0.1");
@@ -80,7 +89,8 @@ public class PackageMetadataCreator {
 		repository.save(packageMetadata);
 		packageMetadata = new PackageMetadata();
 		packageMetadata.setApiVersion("1");
-		packageMetadata.setRepositoryId(1L);
+		packageMetadata.setRepositoryId(TEST_REPO_ID);
+		packageMetadata.setRepositoryName(TEST_REPO_NAME);
 		packageMetadata.setKind("skipper");
 		packageMetadata.setName("package2");
 		packageMetadata.setVersion("1.1.0");
@@ -94,6 +104,7 @@ public class PackageMetadataCreator {
 		PackageMetadata packageMetadata = new PackageMetadata();
 		packageMetadata.setApiVersion(apiVersion);
 		packageMetadata.setRepositoryId(repoId);
+		packageMetadata.setRepositoryName(TEST_REPO_NAME);
 		packageMetadata.setKind("skipper");
 		packageMetadata.setName("package1");
 		packageMetadata.setVersion("1.0.0");
@@ -104,6 +115,7 @@ public class PackageMetadataCreator {
 		packageMetadata = new PackageMetadata();
 		packageMetadata.setApiVersion(apiVersion);
 		packageMetadata.setRepositoryId(repoId);
+		packageMetadata.setRepositoryName(TEST_REPO_NAME);
 		packageMetadata.setKind("skipper");
 		packageMetadata.setName("package2");
 		packageMetadata.setVersion("2.0.0");
