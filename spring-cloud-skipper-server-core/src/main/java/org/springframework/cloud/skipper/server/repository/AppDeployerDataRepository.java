@@ -17,11 +17,14 @@ package org.springframework.cloud.skipper.server.repository;
 
 import org.springframework.cloud.skipper.server.domain.AppDeployerData;
 import org.springframework.data.repository.PagingAndSortingRepository;
+import org.springframework.data.rest.core.annotation.RestResource;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
+ * Stores data related to the app deployment.
  * @author Mark Pollack
  */
+@RestResource(exported = false)
 public interface AppDeployerDataRepository
 		extends PagingAndSortingRepository<AppDeployerData, Long>, AppDeployerDataRepositoryCustom {
 

@@ -72,7 +72,6 @@ public class ApiDocumentation extends BaseDocumentation {
 				linkWithRel("upload").description("Uploads a package"),
 				linkWithRel("install").description("Installs a package"),
 				linkWithRel("install/id").description("Installs a package by also providing the package id"),
-				linkWithRel("appDeployerDatas").description("Exposes App Deployer Data"),
 				linkWithRel("repositories").description("Exposes package repositories"),
 				linkWithRel("deployers").description("Exposes deployer"),
 				linkWithRel("releases").description("Exposes release information"),

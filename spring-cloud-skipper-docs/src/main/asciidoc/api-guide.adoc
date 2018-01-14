@@ -417,8 +417,8 @@ include::{snippets}/list-documentation/list-releases-by-release-name/http-respon
 
 include::{snippets}/list-documentation/list-releases-by-release-name/response-fields.adoc[]
 
-[[resources-repositories]]
-=== Resources Repositories
+[[repositories]]
+=== Repositories
 
 ==== Retrieving a list of repositories
 A `GET` request will return a paginated list for all Spring Cloud Skipper repositories.
@@ -459,33 +459,10 @@ include::{snippets}/repositories-documentation/get-single-repository/http-respon
 
 include::{snippets}/repositories-documentation/get-single-repository/response-fields.adoc[]
 
-[[resources-app-deployers-datas]]
-=== App Deployers Datas
+=== Platform Deployers
 
-==== Retrieving a list of app deployer datas
-A `GET` request will return a paginated list for all Spring Cloud Skipper app deployer data.
-
-===== Request structure
-
-include::{snippets}/app-deployers-datas-documentation/get-all-app-deployer-datas/http-request.adoc[]
-
-===== Example request
-
-include::{snippets}/app-deployers-datas-documentation/get-all-app-deployer-datas/curl-request.adoc[]
-
-===== Response structure
-
-include::{snippets}/app-deployers-datas-documentation/get-all-app-deployer-datas/http-response.adoc[]
-
-===== Response fields
-
-include::{snippets}/app-deployers-datas-documentation/get-all-app-deployer-datas/response-fields.adoc[]
-
-[[resources-app-deployers-datas]]
-=== Deployers
-
-==== Retrieving a list of app deployers
-A `GET` request will return a paginated list for all the Spring Cloud Skipper application deployers.
+==== Retrieving a list of platform deployers
+A `GET` request will return a paginated list for all the Spring Cloud Skipper platform deployers.
 
 ===== Request structure
 
