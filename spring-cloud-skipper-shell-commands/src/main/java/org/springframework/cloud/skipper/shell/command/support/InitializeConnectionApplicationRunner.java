@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 the original author or authors.
+ * Copyright 2017-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,7 +20,7 @@ import org.springframework.boot.ApplicationRunner;
 import org.springframework.cloud.skipper.client.SkipperClientProperties;
 import org.springframework.core.annotation.Order;
 import org.springframework.shell.ResultHandler;
-import org.springframework.shell.jline.DefaultShellApplicationRunner;
+import org.springframework.shell.jline.InteractiveShellApplicationRunner;
 
 /**
  * An {@link ApplicationRunner} implementation that initialises the connection to the
@@ -29,7 +29,7 @@ import org.springframework.shell.jline.DefaultShellApplicationRunner;
  * @author Eric Bottard
  * @author Janne Valkealahti
  */
-@Order(DefaultShellApplicationRunner.PRECEDENCE - 10)
+@Order(InteractiveShellApplicationRunner.PRECEDENCE - 10)
 public class InitializeConnectionApplicationRunner implements ApplicationRunner {
 
 	private TargetHolder targetHolder;

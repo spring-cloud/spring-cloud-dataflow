@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 the original author or authors.
+ * Copyright 2017-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,7 +24,7 @@ import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.cloud.skipper.shell.command.support.ShellUtils;
 import org.springframework.core.annotation.Order;
-import org.springframework.shell.jline.DefaultShellApplicationRunner;
+import org.springframework.shell.jline.InteractiveShellApplicationRunner;
 import org.springframework.util.Assert;
 import org.springframework.util.FileCopyUtils;
 
@@ -37,7 +37,7 @@ import org.springframework.util.FileCopyUtils;
  * @see DefaultShellApplicationRunner
  * @see InitialConnectionApplicationRunner
  */
-@Order(DefaultShellApplicationRunner.PRECEDENCE - 20)
+@Order(InteractiveShellApplicationRunner.PRECEDENCE - 20)
 public class HelpAwareShellApplicationRunner implements ApplicationRunner {
 
 	@Override

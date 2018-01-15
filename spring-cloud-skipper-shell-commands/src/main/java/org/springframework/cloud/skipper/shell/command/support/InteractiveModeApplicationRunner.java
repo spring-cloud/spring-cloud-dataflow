@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 the original author or authors.
+ * Copyright 2017-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,26 +15,17 @@
  */
 package org.springframework.cloud.skipper.shell.command.support;
 
-import java.io.File;
-import java.io.FileReader;
-import java.io.Reader;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
-
-import org.jline.reader.LineReader;
-import org.jline.reader.Parser;
 
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.core.annotation.Order;
+import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.shell.Input;
 import org.springframework.shell.InputProvider;
 import org.springframework.shell.Shell;
-import org.springframework.shell.jline.DefaultShellApplicationRunner;
-import org.springframework.shell.jline.DefaultShellApplicationRunner.JLineInputProvider;
-import org.springframework.shell.jline.FileInputProvider;
-import org.springframework.shell.jline.PromptProvider;
+import org.springframework.shell.jline.InteractiveShellApplicationRunner;
 import org.springframework.util.StringUtils;
 
 /**
@@ -52,31 +43,21 @@ import org.springframework.util.StringUtils;
  * @author Janne Valkealahti
  *
  */
-@Order(DefaultShellApplicationRunner.PRECEDENCE - 5)
+@Order(InteractiveShellApplicationRunner.PRECEDENCE - 5)
 public class InteractiveModeApplicationRunner implements ApplicationRunner {
 
-	private final LineReader lineReader;
-
-	private final PromptProvider promptProvider;
-
-	private final Parser parser;
-
 	private final Shell shell;
+	private final ConfigurableEnvironment environment;
 
 	/**
 	 * Construct a new InteractiveModeApplicationRunner, given the required shell components.
 	 *
-	 * @param lineReader the line reader
-	 * @param promptProvider the prompt provider
-	 * @param parser the parser
 	 * @param shell the shell
+	 * @param environment the environment
 	 */
-	public InteractiveModeApplicationRunner(LineReader lineReader, PromptProvider promptProvider, Parser parser,
-			Shell shell) {
-		this.lineReader = lineReader;
-		this.promptProvider = promptProvider;
-		this.parser = parser;
+	public InteractiveModeApplicationRunner(Shell shell, ConfigurableEnvironment environment) {
 		this.shell = shell;
+		this.environment = environment;
 	}
 
 	@Override
@@ -96,54 +77,46 @@ public class InteractiveModeApplicationRunner implements ApplicationRunner {
 				argsToShellCommand.clear();
 				argsToShellCommand.add("help");
 			}
-			CommandInputProvider inputProvider = new CommandInputProvider(
-					StringUtils.collectionToDelimitedString(argsToShellCommand, " "));
-			shell.run(inputProvider);
-			return;
 		}
 
-		// otherwise, fallback to what DefaultShellApplicationRunner would do
-		List<File> scriptsToRun = args.getNonOptionArgs().stream()
-				.filter(s -> s.startsWith("@"))
-				.map(s -> new File(s.substring(1)))
-				.collect(Collectors.toList());
-		if (scriptsToRun.isEmpty()) {
-			InputProvider inputProvider = new JLineInputProvider(lineReader, promptProvider);
-			shell.run(inputProvider);
-		}
-		else {
-			for (File file : scriptsToRun) {
-				try (Reader reader = new FileReader(file);
-						FileInputProvider inputProvider = new FileInputProvider(reader, parser)) {
-					shell.run(inputProvider);
-				}
-			}
+		if (!argsToShellCommand.isEmpty()) {
+			InteractiveShellApplicationRunner.disable(environment);
+			shell.run(new StringInputProvider(argsToShellCommand));
 		}
 	}
 
 	/**
 	 * {@link InputProvider} which gives a single input to shell.
 	 */
-	private static class CommandInputProvider implements InputProvider {
+	private class StringInputProvider implements InputProvider {
 
-		private String command;
+		private final List<String> commands;
 
 		private boolean done;
 
-		CommandInputProvider(String command) {
-			this.command = command;
+		public StringInputProvider(List<String> words) {
+			this.commands = words;
 		}
 
 		@Override
 		public Input readInput() {
-			// we can only give single input as otherwise
-			// shell will start to loop command. thus use a simple
-			// flag to return null next time.
 			if (!done) {
 				done = true;
-				return () -> command;
+				return new Input() {
+					@Override
+					public List<String> words() {
+						return commands;
+					}
+
+					@Override
+					public String rawText() {
+						return StringUtils.collectionToDelimitedString(commands, " ");
+					}
+				};
 			}
-			return null;
+			else {
+				return null;
+			}
 		}
 	}
 }

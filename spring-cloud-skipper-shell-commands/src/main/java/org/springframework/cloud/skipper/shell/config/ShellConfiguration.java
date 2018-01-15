@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 the original author or authors.
+ * Copyright 2017-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,6 @@
 package org.springframework.cloud.skipper.shell.config;
 
 import org.jline.reader.LineReader;
-import org.jline.reader.Parser;
 
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.ApplicationRunner;
@@ -30,9 +29,9 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Lazy;
+import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.shell.ResultHandler;
 import org.springframework.shell.Shell;
-import org.springframework.shell.jline.PromptProvider;
 
 /**
  * Configures the various commands that are part of the default Spring Shell experience.
@@ -61,9 +60,8 @@ public class ShellConfiguration {
 	}
 
 	@Bean
-	public ApplicationRunner applicationRunner(LineReader lineReader, PromptProvider promptProvider, Parser parser,
-			Shell shell) {
-		return new InteractiveModeApplicationRunner(lineReader, promptProvider, parser, shell);
+	public ApplicationRunner applicationRunner(Shell shell, ConfigurableEnvironment environment) {
+		return new InteractiveModeApplicationRunner(shell, environment);
 	}
 
 	@Bean
