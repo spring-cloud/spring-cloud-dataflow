@@ -22,6 +22,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import org.springframework.cloud.skipper.SkipperException;
+import org.springframework.cloud.skipper.domain.DeleteProperties;
 import org.springframework.cloud.skipper.domain.InstallProperties;
 import org.springframework.cloud.skipper.domain.InstallRequest;
 import org.springframework.cloud.skipper.domain.PackageMetadata;
@@ -107,10 +108,11 @@ public class SkipperStateMachineService {
 	 * @param releaseName the release name
 	 * @return the release
 	 */
-	public Release deleteRelease(String releaseName) {
+	public Release deleteRelease(String releaseName, DeleteProperties deleteProperties) {
 		Message<SkipperEvents> message = MessageBuilder
 				.withPayload(SkipperEvents.DELETE)
 				.setHeader(SkipperEventHeaders.RELEASE_NAME, releaseName)
+				.setHeader(SkipperEventHeaders.RELEASE_DELETE_PROPERTIES, deleteProperties)
 				.build();
 		return handleMessageAndWait(message, releaseName);
 	}
@@ -448,6 +450,11 @@ public class SkipperStateMachineService {
 		 * Header for rollback version.
 		 */
 		public static final String ROLLBACK_VERSION = "ROLLBACK_VERSION";
+
+		/**
+		 * SCDF specific extension to allow deletion of
+		 */
+		public static final String RELEASE_DELETE_PROPERTIES = "RELEASE_DELETE_PROPERTIES";
 	}
 
 	/**

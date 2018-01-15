@@ -356,9 +356,11 @@ public class ReleaseRepositoryTests extends AbstractIntegrationTest {
 		assertThat(foundByRepositoryIdAndPackageMetadataId).hasSize(6);
 
 		try {
-			this.packageMetadataService.deleteIfAllReleasesDeleted(packageMetadata2.getName());
+			this.packageMetadataService.deleteIfAllReleasesDeleted(packageMetadata2.getName(),
+					PackageMetadataService.DEFAULT_RELEASE_ACTIVITY_CHECK);
 			fail("SkipperException is expected");
-		} catch (SkipperException e) {
+		}
+		catch (SkipperException e) {
 			assertThat(e.getMessage())
 					.contains("Can not delete Package Metadata [package2:1.0.1] in Repository [local]")
 					.contains("Not all releases of this package have the status DELETED.")
@@ -370,9 +372,11 @@ public class ReleaseRepositoryTests extends AbstractIntegrationTest {
 		this.releaseRepository.save(release5);
 
 		try {
-			this.packageMetadataService.deleteIfAllReleasesDeleted(packageMetadata2.getName());
+			this.packageMetadataService.deleteIfAllReleasesDeleted(packageMetadata2.getName(),
+					PackageMetadataService.DEFAULT_RELEASE_ACTIVITY_CHECK);
 			fail("SkipperException is expected");
-		} catch (SkipperException e) {
+		}
+		catch (SkipperException e) {
 			assertThat(e.getMessage())
 					.contains("Can not delete Package Metadata [package2:1.0.1] in Repository [local]")
 					.contains("Not all releases of this package have the status DELETED.")
@@ -466,9 +470,11 @@ public class ReleaseRepositoryTests extends AbstractIntegrationTest {
 
 		Long ticktockPackageMetadataId = this.packageMetadataRepository.findByName("ticktock").get(0).getId();
 		try {
-			this.packageMetadataService.deleteIfAllReleasesDeleted(packageMetadata1.getName());
+			this.packageMetadataService.deleteIfAllReleasesDeleted(packageMetadata1.getName(),
+					PackageMetadataService.DEFAULT_RELEASE_ACTIVITY_CHECK);
 			fail("SkipperException is expected");
-		} catch (SkipperException e) {
+		}
+		catch (SkipperException e) {
 			assertThat(e.getMessage())
 					.contains("Can not delete Package Metadata [ticktock:1.0.0] in Repository [local]")
 					.contains("Not all releases of this package have the status DELETED.")
@@ -478,7 +484,8 @@ public class ReleaseRepositoryTests extends AbstractIntegrationTest {
 
 		release3.setInfo(deletedInfo);
 		this.releaseRepository.save(release3);
-		this.packageMetadataService.deleteIfAllReleasesDeleted(packageMetadata1.getName());
+		this.packageMetadataService.deleteIfAllReleasesDeleted(packageMetadata1.getName(),
+				PackageMetadataService.DEFAULT_RELEASE_ACTIVITY_CHECK);
 		List<Release> foundByRepositoryIdAndPackageMetadataId =
 				this.releaseRepository.findByRepositoryIdAndPackageMetadataIdOrderByNameAscVersionDesc(REMOTE_REPO,
 						ticktockPackageMetadataId);

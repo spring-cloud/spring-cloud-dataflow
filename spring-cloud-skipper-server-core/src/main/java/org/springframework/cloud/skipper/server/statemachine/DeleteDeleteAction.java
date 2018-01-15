@@ -18,6 +18,7 @@ package org.springframework.cloud.skipper.server.statemachine;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import org.springframework.cloud.skipper.domain.DeleteProperties;
 import org.springframework.cloud.skipper.domain.Release;
 import org.springframework.cloud.skipper.server.service.ReleaseService;
 import org.springframework.cloud.skipper.server.statemachine.SkipperStateMachineService.SkipperEventHeaders;
@@ -32,6 +33,7 @@ import org.springframework.util.Assert;
  * StateMachine {@link Action} handling delete with a {@link ReleaseService}.
  *
  * @author Janne Valkealahti
+ * @author Christian Tzolov
  *
  */
 public class DeleteDeleteAction extends AbstractAction {
@@ -56,7 +58,9 @@ public class DeleteDeleteAction extends AbstractAction {
 		log.debug("Starting action " + context);
 		String releaseName = context.getMessageHeaders().get(SkipperEventHeaders.RELEASE_NAME, String.class);
 		log.info("About to delete {}", releaseName);
-		Release release = this.releaseService.delete(releaseName);
+		DeleteProperties deleteProperties = context.getMessageHeaders()
+				.get(SkipperEventHeaders.RELEASE_DELETE_PROPERTIES, DeleteProperties.class);
+		Release release = this.releaseService.delete(releaseName, deleteProperties.isDeletePackage());
 		context.getExtendedState().getVariables().put(SkipperVariables.RELEASE, release);
 	}
 }

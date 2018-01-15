@@ -27,6 +27,7 @@ import org.springframework.data.rest.core.annotation.RestResource;
  * @author Mark Pollack
  * @author Ilayaperumal Gopinathan
  * @author Janne Valkealahti
+ * @author Christian Tzolov
  */
 @RepositoryRestResource(path = "packageMetadata", collectionResourceRel = "packageMetadata")
 public interface PackageMetadataRepository extends PagingAndSortingRepository<PackageMetadata, Long>,
@@ -56,5 +57,4 @@ public interface PackageMetadataRepository extends PagingAndSortingRepository<Pa
 	@RestResource(exported = false)
 	void deleteByRepositoryIdAndName(@Param("repositoryId") Long repositoryId,
 			@Param("name") String name);
-
 }

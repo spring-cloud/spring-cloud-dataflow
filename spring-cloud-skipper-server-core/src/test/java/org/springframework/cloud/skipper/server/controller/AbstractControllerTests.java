@@ -21,6 +21,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cloud.skipper.domain.DeleteProperties;
 import org.springframework.cloud.skipper.domain.InstallProperties;
 import org.springframework.cloud.skipper.domain.InstallRequest;
 import org.springframework.cloud.skipper.domain.PackageIdentifier;
@@ -74,7 +75,8 @@ public abstract class AbstractControllerTests extends AbstractMockMvcTests {
 		for (Release release : releaseRepository.findAll()) {
 			if (release.getInfo().getStatus().getStatusCode() != StatusCode.DELETED) {
 				try {
-					mockMvc.perform(post("/api/release/delete/" + release.getName()))
+					mockMvc.perform(post("/api/release/delete/" + release.getName())
+								.content(convertObjectToJson(new DeleteProperties())))
 							.andDo(print())
 							.andExpect(status().isCreated()).andReturn();
 				}

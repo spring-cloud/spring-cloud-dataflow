@@ -206,10 +206,9 @@ public class SkipperServerConfiguration implements AsyncConfigurer {
 			PackageService packageService,
 			ReleaseManager releaseManager,
 			DeployerRepository deployerRepository,
-			ReleaseReportService releaseReportService) {
+			PackageMetadataService packageMetadataService) {
 		return new ReleaseService(packageMetadataRepository, releaseRepository,
-				packageService, releaseManager,
-				deployerRepository, releaseReportService);
+				packageService, releaseManager, deployerRepository, packageMetadataService);
 	}
 
 	@Bean

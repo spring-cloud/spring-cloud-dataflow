@@ -15,12 +15,14 @@
  */
 package org.springframework.cloud.skipper.server.service;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import org.springframework.cloud.skipper.PackageDeleteException;
 import org.springframework.cloud.skipper.ReleaseNotFoundException;
 import org.springframework.cloud.skipper.SkipperException;
 import org.springframework.cloud.skipper.domain.Info;
@@ -53,6 +55,7 @@ import org.springframework.util.StringUtils;
  * @author Mark Pollack
  * @author Ilayaperumal Gopinathan
  * @author Glenn Renfro
+ * @author Christian Tzolov
  */
 public class ReleaseService {
 
@@ -68,20 +71,20 @@ public class ReleaseService {
 
 	private final DeployerRepository deployerRepository;
 
-	private final ReleaseReportService releaseReportService;
+	private PackageMetadataService packageMetadataService;
 
 	public ReleaseService(PackageMetadataRepository packageMetadataRepository,
 			ReleaseRepository releaseRepository,
 			PackageService packageService,
 			ReleaseManager releaseManager,
 			DeployerRepository deployerRepository,
-			ReleaseReportService releaseReportService) {
+			PackageMetadataService packageMetadataService) {
 		this.packageMetadataRepository = packageMetadataRepository;
 		this.releaseRepository = releaseRepository;
 		this.packageService = packageService;
 		this.releaseManager = releaseManager;
 		this.deployerRepository = deployerRepository;
-		this.releaseReportService = releaseReportService;
+		this.packageMetadataService = packageMetadataService;
 	}
 
 	/**
@@ -195,9 +198,42 @@ public class ReleaseService {
 	 */
 	@Transactional
 	public Release delete(String releaseName) {
+		return this.delete(releaseName, false);
+	}
+
+	/**
+	 * If the deleteReleasePackage is true deletes the release along with the package it was created from. The
+	 * transactions succeeds only if there are no other deployed release from the same package but the releaseName.
+	 * If the deleteReleasePackage is false it behaves as {@link #delete(String)}
+	 * @param releaseName the name of the release to be deleted
+	 * @param deleteReleasePackage if true tries to delete the package of the releaseName release
+	 * @return the state of the release after requesting a deletion
+	 */
+	@Transactional
+	public Release delete(String releaseName, boolean deleteReleasePackage) {
 		Assert.notNull(releaseName, "Release name must not be null");
-		Release release = this.releaseRepository.findLatestDeployedRelease(releaseName);
-		return this.releaseManager.delete(release);
+		Release releaseToDelete = this.releaseRepository.findLatestDeployedRelease(releaseName);
+		if (deleteReleasePackage) {
+			// Note: the app deployer delete is not transactional operations (e.g. we can't revert the Deployer's state
+			// in case of failure. Therefore we should call the package delete before the release delete!
+			String packageName = releaseToDelete.getPkg().getMetadata().getName();
+			if (this.packageMetadataService.filterReleasesFromLocalRepos(
+					Arrays.asList(releaseToDelete), packageName).isEmpty()) {
+				throw new PackageDeleteException("Can't delete package: " + packageName + " from non-local repository");
+			}
+
+			this.packageMetadataService.deleteIfAllReleasesDeleted(packageName,
+					r -> {
+						// Exclude the release being deleted from the is active check
+						if (r.getName().equals(releaseToDelete.getName())
+								&& r.getVersion() == releaseToDelete.getVersion()) {
+							return false;
+						}
+						// If not the deleted release follow the default package delete policies
+						return PackageMetadataService.DEFAULT_RELEASE_ACTIVITY_CHECK.test(r);
+					});
+		}
+		return this.releaseManager.delete(releaseToDelete);
 	}
 
 	/**

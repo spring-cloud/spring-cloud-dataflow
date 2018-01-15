@@ -18,6 +18,7 @@ package org.springframework.cloud.skipper.client;
 import java.util.List;
 
 import org.springframework.cloud.skipper.domain.AboutResource;
+import org.springframework.cloud.skipper.domain.DeleteProperties;
 import org.springframework.cloud.skipper.domain.Deployer;
 import org.springframework.cloud.skipper.domain.Info;
 import org.springframework.cloud.skipper.domain.InstallRequest;
@@ -92,9 +93,10 @@ public interface SkipperClient {
 	 * Delete a specific release.
 	 *
 	 * @param releaseName the release name
+	 * @param deleteProperties release delete properties
 	 * @return the deleted {@link Release}
 	 */
-	Release delete(String releaseName);
+	Release delete(String releaseName, DeleteProperties deleteProperties);
 
 	/**
 	 * Rollback a specific release.

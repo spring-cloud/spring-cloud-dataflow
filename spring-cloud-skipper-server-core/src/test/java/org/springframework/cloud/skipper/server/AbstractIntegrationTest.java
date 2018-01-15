@@ -170,8 +170,12 @@ public abstract class AbstractIntegrationTest extends AbstractAssertReleaseDeplo
 	}
 
 	protected Release delete(String releaseName) {
-		logger.info("Deleting release {}", releaseName);
-		return releaseService.delete(releaseName);
+		return releaseService.delete(releaseName, false);
+	}
+
+	protected Release delete(String releaseName, boolean deleteReleasePackage) {
+		logger.info("Deleting release {} with package {}", releaseName, deleteReleasePackage);
+		return releaseService.delete(releaseName, deleteReleasePackage);
 	}
 
 	@Configuration

@@ -24,6 +24,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Predicate;
 
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.MappingIterator;
@@ -31,6 +32,7 @@ import com.fasterxml.jackson.dataformat.yaml.YAMLMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import org.springframework.cloud.skipper.PackageDeleteException;
 import org.springframework.cloud.skipper.SkipperException;
 import org.springframework.cloud.skipper.domain.PackageMetadata;
 import org.springframework.cloud.skipper.domain.Release;
@@ -72,13 +74,17 @@ public class PackageMetadataService implements ResourceLoaderAware {
 		this.releaseRepository = releaseRepository;
 	}
 
+	public final static Predicate<Release> DEFAULT_RELEASE_ACTIVITY_CHECK =
+			release -> !release.getInfo().getStatus().getStatusCode().equals(StatusCode.DELETED);
+
+
 	/**
 	 * Delete all versions of the package metadata only if the latest releases currently using
 	 * it are in the StatusCode.DELETED state.
 	 * @param packageName the name of the package
 	 */
 	@Transactional
-	public void deleteIfAllReleasesDeleted(String packageName) {
+	public void deleteIfAllReleasesDeleted(String packageName, Predicate<Release> releaseCheckPredicate) {
 		List<PackageMetadata> packageMetadataList = this.packageMetadataRepository.findByNameRequired(packageName);
 		List<String> errorMessages = new ArrayList<String>();
 		for (PackageMetadata packageMetadata : packageMetadataList) {
@@ -100,7 +106,7 @@ public class PackageMetadataService implements ResourceLoaderAware {
 			// Find releases that are still 'active' so can't be deleted
 			List<String> activeReleaseNames = new ArrayList<>();
 			for (Release release : latestReleaseMap.values()) {
-				if (!release.getInfo().getStatus().getStatusCode().equals(StatusCode.DELETED)) {
+				if (releaseCheckPredicate.test(release)) {
 					canDelete = false;
 					activeReleaseNames.add(release.getName());
 				}
@@ -118,12 +124,13 @@ public class PackageMetadataService implements ResourceLoaderAware {
 				packageMetadataRepository.deleteByRepositoryIdAndName(packageMetadata.getRepositoryId(),
 						packageMetadata.getName());
 			}
-		} else {
-			throw new SkipperException(StringUtils.collectionToCommaDelimitedString(errorMessages));
+		}
+		else {
+			throw new PackageDeleteException(StringUtils.collectionToCommaDelimitedString(errorMessages));
 		}
 	}
 
-	private List<Release> filterReleasesFromLocalRepos(List<Release> releases, String packageMetadataName) {
+	public List<Release> filterReleasesFromLocalRepos(List<Release> releases, String packageMetadataName) {
 		List<Release> releasesFromLocalRepositories = new ArrayList<>();
 		for (Release release : releases) {
 			Repository repository = this.repositoryRepository.findOne(release.getRepositoryId());

@@ -20,12 +20,17 @@ import javax.servlet.ServletContext;
 
 import org.junit.Test;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cloud.skipper.domain.DeleteProperties;
 import org.springframework.cloud.skipper.domain.InstallProperties;
 import org.springframework.cloud.skipper.domain.InstallRequest;
 import org.springframework.cloud.skipper.domain.PackageIdentifier;
 import org.springframework.cloud.skipper.domain.Release;
+import org.springframework.cloud.skipper.domain.Repository;
 import org.springframework.cloud.skipper.domain.StatusCode;
+import org.springframework.cloud.skipper.server.repository.RepositoryRepository;
 import org.springframework.mock.web.MockHttpServletRequest;
+import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.RequestBuilder;
@@ -39,13 +44,17 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 /**
  * @author Mark Pollack
  * @author Ilayaperumal Gopinathan
+ * @author Christian Tzolov
  */
 @ActiveProfiles("repo-test")
+@DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
 public class ReleaseControllerTests extends AbstractControllerTests {
+
+	@Autowired
+	private RepositoryRepository repositoryRepository;
 
 	@Test
 	public void deployTickTock() throws Exception {
-		String releaseName = "myTicker";
 		Release release = install("ticktock", "1.0.0", "myTicker");
 		assertThat(release.getVersion()).isEqualTo(1);
 	}
@@ -76,10 +85,58 @@ public class ReleaseControllerTests extends AbstractControllerTests {
 		assertThat(release.getVersion()).isEqualTo(1);
 
 		// Undeploy
-		mockMvc.perform(post("/api/release/delete/" + releaseName)).andDo(print())
+		mockMvc.perform(post("/api/release/delete/" + releaseName)
+				.content(convertObjectToJson(new DeleteProperties()))).andDo(print())
 				.andExpect(status().isCreated()).andReturn();
 		Release deletedRelease = this.releaseRepository.findByNameAndVersion(releaseName, 1);
 		assertThat(deletedRelease.getInfo().getStatus().getStatusCode()).isEqualTo(StatusCode.DELETED);
+	}
+
+	@Test
+	public void checkDeleteReleaseWithPackage() throws Exception {
+
+		// Make the test repo Local
+		Repository repo = this.repositoryRepository.findByName("test");
+		repo.setLocal(true);
+		this.repositoryRepository.save(repo);
+
+		// Deploy
+		String releaseNameOne = "test1";
+		Release release = install("log", "1.0.0", releaseNameOne);
+		assertThat(release.getVersion()).isEqualTo(1);
+
+		String releaseNameTwo = "test2";
+		Release release2 = install("log", "1.0.0", releaseNameTwo);
+		assertThat(release2.getVersion()).isEqualTo(1);
+
+		// Undeploy
+		DeleteProperties deleteProperties = new DeleteProperties();
+		deleteProperties.setDeletePackage(true);
+
+		MvcResult result = mockMvc.perform(post("/api/release/delete/" + releaseNameOne)
+				.content(convertObjectToJson(deleteProperties)))
+				.andDo(print()).andExpect(status().isConflict()).andReturn();
+
+		assertThat(result.getResponse().getContentAsString())
+				.contains("Can not delete Package Metadata [log:1.0.0] in Repository [test]. Not all releases of " +
+						"this package have the status DELETED. Active Releases [test2]");
+
+		assertThat(this.packageMetadataRepository.findByName("log").size()).isEqualTo(3);
+
+		// Delete the 'release2' only not the package.
+		deleteProperties.setDeletePackage(false);
+		mockMvc.perform(post("/api/release/delete/" + releaseNameTwo)
+				.content(convertObjectToJson(deleteProperties)))
+				.andDo(print()).andExpect(status().isCreated()).andReturn();
+		assertThat(this.packageMetadataRepository.findByName("log").size()).isEqualTo(3);
+
+		// Second attempt to delete 'release1' along with its package 'log'.
+		deleteProperties.setDeletePackage(true);
+		mockMvc.perform(post("/api/release/delete/" + releaseNameOne)
+				.content(convertObjectToJson(deleteProperties)))
+				.andDo(print()).andExpect(status().isCreated()).andReturn();
+		assertThat(this.packageMetadataRepository.findByName("log").size()).isEqualTo(0);
+
 	}
 
 	@Test
@@ -118,7 +175,7 @@ public class ReleaseControllerTests extends AbstractControllerTests {
 		assertThat(release.getInfo().getStatus().getStatusCode()).isEqualTo(StatusCode.DEPLOYED);
 
 		// Undeploy
-		mockMvc.perform(post("/api/release/delete/" + releaseName))
+		mockMvc.perform(post("/api/release/delete/" + releaseName).content(convertObjectToJson(new DeleteProperties())))
 				.andDo(print())
 				.andExpect(status().isCreated()).andReturn();
 		Release deletedRelease = this.releaseRepository.findByNameAndVersion(releaseName,

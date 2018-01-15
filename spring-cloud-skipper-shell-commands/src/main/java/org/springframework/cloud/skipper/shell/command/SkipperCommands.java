@@ -32,6 +32,7 @@ import org.springframework.cloud.deployer.spi.app.DeploymentState;
 import org.springframework.cloud.skipper.ReleaseNotFoundException;
 import org.springframework.cloud.skipper.client.SkipperClient;
 import org.springframework.cloud.skipper.domain.ConfigValues;
+import org.springframework.cloud.skipper.domain.DeleteProperties;
 import org.springframework.cloud.skipper.domain.Info;
 import org.springframework.cloud.skipper.domain.PackageIdentifier;
 import org.springframework.cloud.skipper.domain.Release;
@@ -192,8 +193,11 @@ public class SkipperCommands extends AbstractSkipperCommand {
 
 	@ShellMethod(key = "release delete", value = "Delete the release.")
 	public String delete(
-			@ShellOption(help = "the name of the release to delete") String releaseName) {
-		Release release = skipperClient.delete(releaseName);
+			@ShellOption(help = "the name of the release to delete") String releaseName,
+			@ShellOption(help = "delete the release package", defaultValue = "false") boolean deletePackage) {
+		DeleteProperties deleteProperties = new DeleteProperties();
+		deleteProperties.setDeletePackage(deletePackage);
+		Release release = skipperClient.delete(releaseName, deleteProperties);
 		StringBuilder sb = new StringBuilder();
 		sb.append(release.getName() + " has been deleted.");
 		return sb.toString();

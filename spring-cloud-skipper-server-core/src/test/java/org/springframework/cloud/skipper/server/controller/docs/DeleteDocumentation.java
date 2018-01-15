@@ -16,11 +16,15 @@
 
 package org.springframework.cloud.skipper.server.controller.docs;
 
+import java.nio.charset.Charset;
+
 import org.junit.Test;
 
+import org.springframework.cloud.skipper.domain.DeleteProperties;
 import org.springframework.cloud.skipper.domain.InstallRequest;
 import org.springframework.cloud.skipper.domain.PackageIdentifier;
 import org.springframework.cloud.skipper.domain.StatusCode;
+import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.util.StringUtils;
 
@@ -49,8 +53,14 @@ public class DeleteDocumentation extends BaseDocumentation {
 
 		installPackage(installRequest);
 
+		final MediaType contentType = new MediaType(MediaType.APPLICATION_JSON.getType(),
+				MediaType.APPLICATION_JSON.getSubtype(), Charset.forName("utf8"));
+
 		this.mockMvc.perform(
-				post("/api/release/delete/{releaseName}", releaseName)).andDo(print())
+				post("/api/release/delete/{releaseName}", releaseName)
+						.accept(MediaType.APPLICATION_JSON).contentType(contentType)
+						.content(convertObjectToJson(new DeleteProperties())))
+				.andDo(print())
 				.andExpect(status().isCreated())
 				.andDo(this.documentationHandler.document(
 						responseFields(

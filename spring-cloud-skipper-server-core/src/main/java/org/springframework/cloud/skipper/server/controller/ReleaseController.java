@@ -18,7 +18,9 @@ package org.springframework.cloud.skipper.server.controller;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cloud.skipper.PackageDeleteException;
 import org.springframework.cloud.skipper.ReleaseNotFoundException;
+import org.springframework.cloud.skipper.domain.DeleteProperties;
 import org.springframework.cloud.skipper.domain.Info;
 import org.springframework.cloud.skipper.domain.Release;
 import org.springframework.cloud.skipper.domain.UpgradeRequest;
@@ -81,7 +83,7 @@ public class ReleaseController {
 		resource.add(
 				ControllerLinkBuilder.linkTo(methodOn(ReleaseController.class).rollback(null, null))
 						.withRel("rollback"));
-		resource.add(ControllerLinkBuilder.linkTo(methodOn(ReleaseController.class).delete(null))
+		resource.add(ControllerLinkBuilder.linkTo(methodOn(ReleaseController.class).delete(null, null))
 							.withRel("delete"));
 		resource.add(
 				ControllerLinkBuilder.linkTo(methodOn(ReleaseController.class).history(null, null))
@@ -133,8 +135,9 @@ public class ReleaseController {
 
 	@RequestMapping(path = "/delete/{name}", method = RequestMethod.POST)
 	@ResponseStatus(HttpStatus.CREATED)
-	public Release delete(@PathVariable("name") String releaseName) {
-		return this.skipperStateMachineService.deleteRelease(releaseName);
+	public Release delete(@PathVariable("name") String releaseName,
+			@RequestBody DeleteProperties deleteProperties) {
+		return this.skipperStateMachineService.deleteRelease(releaseName, deleteProperties);
 	}
 
 	@RequestMapping(path = "/history/{name}/{max}", method = RequestMethod.GET)
@@ -169,5 +172,10 @@ public class ReleaseController {
 
 		public ReleaseControllerLinksResource() {
 		}
+	}
+
+	@ExceptionHandler(PackageDeleteException.class)
+	public ResponseEntity<String> handlePackageDeleteException(PackageDeleteException e) {
+		return ResponseEntity.status(HttpStatus.CONFLICT).body(e.getMessage());
 	}
 }

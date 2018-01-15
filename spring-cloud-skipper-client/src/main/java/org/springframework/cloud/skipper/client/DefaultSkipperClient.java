@@ -27,6 +27,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import org.springframework.cloud.skipper.domain.AboutResource;
+import org.springframework.cloud.skipper.domain.DeleteProperties;
 import org.springframework.cloud.skipper.domain.Deployer;
 import org.springframework.cloud.skipper.domain.Info;
 import org.springframework.cloud.skipper.domain.InstallRequest;
@@ -182,9 +183,10 @@ public class DefaultSkipperClient implements SkipperClient {
 	}
 
 	@Override
-	public Release delete(String releaseName) {
+	public Release delete(String releaseName, DeleteProperties deleteProperties) {
 		String url = String.format("%s/%s/%s/%s", baseUri, "release", "delete", releaseName);
-		return this.restTemplate.postForObject(url, null, Release.class);
+		log.debug("Posting Delete to " + url + ". DeleteProperties = " + deleteProperties);
+		return this.restTemplate.postForObject(url, deleteProperties, Release.class);
 	}
 
 	@Override

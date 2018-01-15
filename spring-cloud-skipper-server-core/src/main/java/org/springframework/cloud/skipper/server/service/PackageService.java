@@ -201,6 +201,16 @@ public class PackageService implements ResourceLoaderAware {
 	}
 
 	@Transactional
+	public void delete(PackageMetadata packageMetadata) {
+		Assert.notNull(packageMetadata, "Can't download PackageMetadata, it is a null value.");
+		Assert.hasText(packageMetadata.getName(), "Package name can not be empty.");
+		Assert.hasText(packageMetadata.getVersion(), "Package version can not be empty.");
+		Assert.isTrue(packageMetadata.getRepositoryId() > 0, "Invalid Repository ID.");
+
+		this.packageMetadataRepository.delete(packageMetadata);
+	}
+
+	@Transactional
 	public PackageMetadata upload(UploadRequest uploadRequest) {
 		validateUploadRequest(uploadRequest);
 		Repository localRepositoryToUpload = getRepositoryToUpload(uploadRequest.getRepoName());

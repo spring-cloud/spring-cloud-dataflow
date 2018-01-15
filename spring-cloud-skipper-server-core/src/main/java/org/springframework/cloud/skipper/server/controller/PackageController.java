@@ -92,7 +92,7 @@ public class PackageController {
 	@RequestMapping(path = "/{name}", method = RequestMethod.DELETE)
 	@ResponseStatus(HttpStatus.OK)
 	public void packageDelete(@PathVariable("name") String name) {
-		this.packageMetadataService.deleteIfAllReleasesDeleted(name);
+		this.packageMetadataService.deleteIfAllReleasesDeleted(name, PackageMetadataService.DEFAULT_RELEASE_ACTIVITY_CHECK);
 	}
 
 	/**

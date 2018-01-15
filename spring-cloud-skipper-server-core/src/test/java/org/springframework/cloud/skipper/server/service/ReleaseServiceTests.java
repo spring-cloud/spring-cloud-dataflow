@@ -15,6 +15,9 @@
  */
 package org.springframework.cloud.skipper.server.service;
 
+import java.util.List;
+
+import org.junit.After;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -22,6 +25,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.deployer.resource.support.DelegatingResourceLoader;
 import org.springframework.cloud.deployer.resource.support.LRUCleaningResourceLoader;
+import org.springframework.cloud.skipper.PackageDeleteException;
 import org.springframework.cloud.skipper.ReleaseNotFoundException;
 import org.springframework.cloud.skipper.SkipperException;
 import org.springframework.cloud.skipper.domain.ConfigValues;
@@ -31,12 +35,14 @@ import org.springframework.cloud.skipper.domain.InstallRequest;
 import org.springframework.cloud.skipper.domain.PackageIdentifier;
 import org.springframework.cloud.skipper.domain.PackageMetadata;
 import org.springframework.cloud.skipper.domain.Release;
+import org.springframework.cloud.skipper.domain.Repository;
 import org.springframework.cloud.skipper.domain.StatusCode;
 import org.springframework.cloud.skipper.domain.UpgradeProperties;
 import org.springframework.cloud.skipper.domain.UpgradeRequest;
 import org.springframework.cloud.skipper.server.AbstractIntegrationTest;
 import org.springframework.cloud.skipper.server.repository.AppDeployerDataRepository;
 import org.springframework.cloud.skipper.server.repository.PackageMetadataRepository;
+import org.springframework.cloud.skipper.server.repository.RepositoryRepository;
 import org.springframework.test.context.ActiveProfiles;
 
 import static junit.framework.TestCase.fail;
@@ -48,6 +54,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
  * @author Mark Pollack
  * @author Ilayaperumal Gopinathan
  * @author Glenn Renfro
+ * @author Christian Tzolov
  */
 @ActiveProfiles("repo-test")
 public class ReleaseServiceTests extends AbstractIntegrationTest {
@@ -62,6 +69,16 @@ public class ReleaseServiceTests extends AbstractIntegrationTest {
 
 	@Autowired
 	private DelegatingResourceLoader delegatingResourceLoader;
+
+	@Autowired
+	private RepositoryRepository repositoryRepository;
+
+	@After
+	public void afterTests() {
+		Repository repo = this.repositoryRepository.findByName("test");
+		repo.setLocal(false);
+		this.repositoryRepository.save(repo);
+	}
 
 	@Test
 	public void testResourceLoaderInstance() {
@@ -222,6 +239,172 @@ public class ReleaseServiceTests extends AbstractIntegrationTest {
 		// Install again
 		Release release2 = install(installRequest);
 		assertThat(release2.getVersion()).isEqualTo(2);
+	}
+
+	@Test
+	public void testDeletedReleaseWithPackage() throws InterruptedException {
+		// Make the test repo Local
+		Repository repo = this.repositoryRepository.findByName("test");
+		repo.setLocal(true);
+		this.repositoryRepository.save(repo);
+
+		String releaseName = "deletedRelease";
+		InstallRequest installRequest = new InstallRequest();
+		installRequest.setInstallProperties(createInstallProperties(releaseName));
+		PackageIdentifier packageIdentifier = new PackageIdentifier();
+		packageIdentifier.setPackageName("log");
+		packageIdentifier.setPackageVersion("1.0.0");
+		installRequest.setPackageIdentifier(packageIdentifier);
+
+		List<PackageMetadata> releasePackage = this.packageMetadataRepository.findByNameAndVersionOrderByApiVersionDesc(
+				packageIdentifier.getPackageName(), packageIdentifier.getPackageVersion());
+
+		assertThat(releasePackage).isNotNull();
+		assertThat(releasePackage.size()).isEqualTo(1);
+
+		assertThat(this.packageMetadataRepository.findByName(packageIdentifier.getPackageName()).size()).isEqualTo(3);
+
+		// Install
+		Release release = install(installRequest);
+		assertThat(release).isNotNull();
+		// Delete
+		delete(releaseName, true);
+
+		assertThat(this.packageMetadataRepository.findByName(packageIdentifier.getPackageName()).size()).isEqualTo(0);
+	}
+
+	@Test
+	public void testDeletedReleaseWithPackageNonLocalRepo() throws InterruptedException {
+		// Make the test repo Non-local
+		Repository repo = this.repositoryRepository.findByName("test");
+		repo.setLocal(false);
+		this.repositoryRepository.save(repo);
+
+		String releaseName = "deletedRelease";
+		InstallRequest installRequest = new InstallRequest();
+		installRequest.setInstallProperties(createInstallProperties(releaseName));
+		PackageIdentifier packageIdentifier = new PackageIdentifier();
+		packageIdentifier.setPackageName("log");
+		packageIdentifier.setPackageVersion("1.0.0");
+		installRequest.setPackageIdentifier(packageIdentifier);
+
+		assertThat(this.packageMetadataRepository.findByName(packageIdentifier.getPackageName()).size()).isEqualTo(3);
+
+		// Install
+		Release release = install(installRequest);
+		assertThat(release).isNotNull();
+		assertReleaseStatus(releaseName, StatusCode.DEPLOYED);
+
+		// Delete attempt
+		try {
+			delete(releaseName, true);
+			fail("Packages from non-local repositories can't be deleted");
+		} catch (SkipperException se) {
+		}
+		assertReleaseStatus(releaseName, StatusCode.DEPLOYED);
+		assertThat(this.packageMetadataRepository.findByName(packageIdentifier.getPackageName()).size()).isEqualTo(3);
+	}
+
+	@Test
+	public void testInstallDeleteOfdMultipleReleasesFromSingePackage() throws InterruptedException {
+
+		Repository repo = this.repositoryRepository.findByName("test");
+		repo.setLocal(true);
+		this.repositoryRepository.save(repo);
+
+		boolean DELETE_RELEASE_PACKAGE = true;
+		String RELEASE_ONE = "RELEASE_ONE";
+		String RELEASE_TWO = "RELEASE_TWO";
+		String RELEASE_THREE = "RELEASE_THREE";
+
+		// 3 versions of package "log" exists
+		PackageIdentifier logPackageIdentifier = new PackageIdentifier();
+		logPackageIdentifier.setPackageName("log");
+		logPackageIdentifier.setPackageVersion("1.0.0");
+
+		List<PackageMetadata> releasePackage = this.packageMetadataRepository.findByNameAndVersionOrderByApiVersionDesc(
+				logPackageIdentifier.getPackageName(), logPackageIdentifier.getPackageVersion());
+		assertThat(releasePackage).isNotNull();
+		assertThat(releasePackage.size()).isEqualTo(1);
+		assertThat(this.packageMetadataRepository.findByName(logPackageIdentifier.getPackageName()).size()).isEqualTo(3);
+
+		// Install 2 releases (RELEASE_ONE, RELEASE_TWO) from the same "log" package
+		install(RELEASE_ONE, logPackageIdentifier);
+		install(RELEASE_TWO, logPackageIdentifier);
+
+		assertReleaseStatus(RELEASE_ONE, StatusCode.DEPLOYED);
+		assertReleaseStatus(RELEASE_TWO, StatusCode.DEPLOYED);
+
+		// Attempt to delete release one together with its package
+		try {
+			delete(RELEASE_ONE, DELETE_RELEASE_PACKAGE);
+			fail("Attempt to delete a package with other deployed releases should fail");
+		}
+		catch (PackageDeleteException se) {
+			assertThat(se.getMessage()).isEqualTo("Can not delete Package Metadata [log:1.0.0] in Repository [test]. " +
+					"Not all releases of this package have the status DELETED. Active Releases [RELEASE_TWO]");
+		}
+
+		// Verify that neither the releases nor the package have been deleted
+		assertReleaseStatus(RELEASE_ONE, StatusCode.DEPLOYED);
+		assertReleaseStatus(RELEASE_TWO, StatusCode.DEPLOYED);
+		assertThat(this.packageMetadataRepository.findByName(logPackageIdentifier.getPackageName()).size()).isEqualTo(3);
+
+		// Install a third release (RELEASE_THREE) from the same package (log)
+		install(RELEASE_THREE, logPackageIdentifier);
+		assertReleaseStatus(RELEASE_THREE, StatusCode.DEPLOYED);
+
+		// Attempt to delete release one together with its package
+		try {
+			delete(RELEASE_ONE, DELETE_RELEASE_PACKAGE);
+			fail("Attempt to delete a package with other deployed releases must fail.");
+		}
+		catch (PackageDeleteException se) {
+			assertThat(se.getMessage()).isEqualTo("Can not delete Package Metadata [log:1.0.0] in Repository [test]. " +
+					"Not all releases of this package have the status DELETED. Active Releases [RELEASE_THREE,RELEASE_TWO]");
+		}
+
+		// Verify that nothing has been deleted
+		assertReleaseStatus(RELEASE_ONE, StatusCode.DEPLOYED);
+		assertReleaseStatus(RELEASE_TWO, StatusCode.DEPLOYED);
+		assertReleaseStatus(RELEASE_THREE, StatusCode.DEPLOYED);
+		assertThat(this.packageMetadataRepository.findByName(logPackageIdentifier.getPackageName()).size()).isEqualTo(3);
+
+		// Delete releases two and three without without deleting their package.
+		delete(RELEASE_TWO, !DELETE_RELEASE_PACKAGE);
+		delete(RELEASE_THREE, !DELETE_RELEASE_PACKAGE);
+
+		// Release One is still deployed
+		assertReleaseStatus(RELEASE_ONE, StatusCode.DEPLOYED);
+
+		// Releases Two and Three were undeployed
+		assertReleaseStatus(RELEASE_TWO, StatusCode.DELETED);
+		assertReleaseStatus(RELEASE_THREE, StatusCode.DELETED);
+
+		// Package "log" still has 3 registered versions
+		assertThat(this.packageMetadataRepository.findByName(logPackageIdentifier.getPackageName()).size()).isEqualTo(3);
+
+		// Attempt to delete release one together with its package
+		delete(RELEASE_ONE, DELETE_RELEASE_PACKAGE);
+
+		// Successful deletion of release and its package.
+		assertReleaseStatus(RELEASE_ONE, StatusCode.DELETED);
+		assertThat(this.packageMetadataRepository.findByName(logPackageIdentifier.getPackageName()).size()).isEqualTo(0);
+	}
+
+	private Release install(String releaseName, PackageIdentifier packageIdentifier) throws InterruptedException {
+		InstallRequest installRequest = new InstallRequest();
+		installRequest.setPackageIdentifier(packageIdentifier);
+		installRequest.setInstallProperties(createInstallProperties(releaseName));
+		Release release = install(installRequest);
+		assertThat(release).isNotNull();
+		return release;
+	}
+
+	private void assertReleaseStatus(String releaseName, StatusCode expectedStatusCode) {
+		assertThat(this.releaseRepository.findByNameIgnoreCaseContaining(releaseName).size()).isEqualTo(1);
+		assertThat(this.releaseRepository.findByNameIgnoreCaseContaining(releaseName).iterator().next()
+				.getInfo().getStatus().getStatusCode()).isEqualTo(expectedStatusCode);
 	}
 
 	@Test

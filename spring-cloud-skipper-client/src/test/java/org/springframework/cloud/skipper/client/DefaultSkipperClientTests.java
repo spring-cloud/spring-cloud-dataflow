@@ -15,18 +15,23 @@
  */
 package org.springframework.cloud.skipper.client;
 
+import java.nio.charset.Charset;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Test;
 
 import org.springframework.cloud.skipper.ReleaseNotFoundException;
 import org.springframework.cloud.skipper.SkipperException;
+import org.springframework.cloud.skipper.domain.DeleteProperties;
 import org.springframework.cloud.skipper.domain.Info;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.client.MockRestServiceServer;
+import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.springframework.test.web.client.match.MockRestRequestMatchers.content;
 import static org.springframework.test.web.client.match.MockRestRequestMatchers.requestTo;
 import static org.springframework.test.web.client.response.MockRestResponseCreators.withStatus;
 import static org.springframework.test.web.client.response.MockRestResponseCreators.withSuccess;
@@ -36,6 +41,7 @@ import static org.springframework.test.web.client.response.MockRestResponseCreat
  *
  * @author Mark Pollack
  * @author Janne Valkealahti
+ * @author Christian Tzolov
  */
 public class DefaultSkipperClientTests {
 
@@ -50,6 +56,13 @@ public class DefaultSkipperClientTests {
 			"\"error\":\"Not Found\"," +
 			"\"exception\":\"org.springframework.cloud.skipper.SkipperException\"," +
 			"\"message\":\"Some skipper message\",\"path\":\"/api/status/mylog\"}";
+
+	private final String ERROR3 = "{\"timestamp\":1508161424577," +
+			"\"status\":409," +
+			"\"error\":\"Conflict\"," +
+			"\"exception\":\"org.springframework.cloud.skipper.PackageDeleteException\"," +
+			"\"message\":\"Can't delete package: [package1] because is used by deployed releases: [release2]\"," +
+			"\"path\":\"/api/status/mylog\",\"releaseName\":\"mylog\"}";
 
 	@Test
 	public void genericTemplateTest() {
@@ -97,5 +110,50 @@ public class DefaultSkipperClientTests {
 				.andRespond(withStatus(HttpStatus.NOT_FOUND).body(ERROR2).contentType(MediaType.APPLICATION_JSON));
 
 		skipperClient.status("mylog");
+	}
+
+	@Test
+	public void testDeleteReleaseWithoutPackageDeletion() {
+		testDeleteRelease(new DeleteProperties(), "{\"deletePackage\":false}");
+	}
+
+	@Test
+	public void testDeleteReleaseWithPackageDeletion() {
+		DeleteProperties deleteProperties = new DeleteProperties();
+		deleteProperties.setDeletePackage(true);
+		testDeleteRelease(deleteProperties, "{\"deletePackage\":true}");
+	}
+
+	private void testDeleteRelease(DeleteProperties deleteProperties, String expectedContent) {
+		RestTemplate restTemplate = new RestTemplate();
+		restTemplate.setErrorHandler(new SkipperClientResponseErrorHandler(new ObjectMapper()));
+		SkipperClient skipperClient = new DefaultSkipperClient("", restTemplate);
+
+		final MediaType contentType = new MediaType(MediaType.APPLICATION_JSON.getType(),
+				MediaType.APPLICATION_JSON.getSubtype(), Charset.forName("utf8"));
+
+		MockRestServiceServer mockServer = MockRestServiceServer.bindTo(restTemplate).build();
+		mockServer.expect(requestTo("/delete/release1"))
+				.andExpect(content().string(expectedContent))
+				.andExpect(content().contentType(contentType))
+				.andRespond(withStatus(HttpStatus.CREATED).contentType(MediaType.APPLICATION_JSON));
+
+		skipperClient.delete("release1", deleteProperties);
+	}
+
+	@Test(expected = HttpClientErrorException.class)
+	public void testDeeltePackageHasDeployedRelease() {
+		RestTemplate restTemplate = new RestTemplate();
+		restTemplate.setErrorHandler(new SkipperClientResponseErrorHandler(new ObjectMapper()));
+		SkipperClient skipperClient = new DefaultSkipperClient("", restTemplate);
+
+		MockRestServiceServer mockServer = MockRestServiceServer.bindTo(restTemplate).build();
+		mockServer.expect(requestTo("/delete/release1"))
+				.andExpect(content().string("{\"deletePackage\":true}"))
+				.andRespond(withStatus(HttpStatus.CONFLICT).body(ERROR3).contentType(MediaType.APPLICATION_JSON));
+
+		DeleteProperties deleteProperties = new DeleteProperties();
+		deleteProperties.setDeletePackage(true);
+		skipperClient.delete("release1", deleteProperties);
 	}
 }
