@@ -52,7 +52,7 @@ public class ListDocumentation extends BaseDocumentation {
 		installPackage(installRequest);
 
 		this.mockMvc.perform(
-				get("/api/list")).andDo(print())
+				get("/api/release/list")).andDo(print())
 				.andExpect(status().isOk())
 				.andDo(this.documentationHandler.document(
 						responseFields(
@@ -127,7 +127,7 @@ public class ListDocumentation extends BaseDocumentation {
 		installPackage(installRequest);
 
 		this.mockMvc.perform(
-				get("/api/list/{releaseName}", releaseName)).andDo(print())
+				get("/api/release/list/{releaseName}", releaseName)).andDo(print())
 				.andExpect(status().isOk())
 				.andDo(this.documentationHandler.document(
 						responseFields(

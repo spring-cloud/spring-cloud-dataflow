@@ -53,7 +53,7 @@ public class StatusDocumentation extends BaseDocumentation {
 		final Release release = installPackage(installRequest);
 
 		this.mockMvc.perform(
-				get("/api/status/{releaseName}", release.getName())).andDo(print())
+				get("/api/release/status/{releaseName}", release.getName())).andDo(print())
 				.andExpect(status().isOk())
 				.andDo(this.documentationHandler.document(
 						responseFields(
@@ -83,7 +83,7 @@ public class StatusDocumentation extends BaseDocumentation {
 		final Release release = installPackage(installRequest);
 
 		this.mockMvc.perform(
-				get("/api/status/{releaseName}/{releaseVersion}",
+				get("/api/release/status/{releaseName}/{releaseVersion}",
 						release.getName(), release.getVersion()))
 				.andDo(print())
 				.andExpect(status().isOk())

@@ -90,7 +90,7 @@ public abstract class AbstractMockMvcTests extends AbstractAssertReleaseDeployed
 	protected boolean isDeployed(String releaseName, int releaseVersion) {
 		try {
 			logger.info("Checking status of release={} version={}", releaseName, releaseVersion);
-			MvcResult result = mockMvc.perform(get(String.format("/api/status/%s/%s", releaseName, releaseVersion)))
+			MvcResult result = mockMvc.perform(get(String.format("/api/release/status/%s/%s", releaseName, releaseVersion)))
 					.andReturn();
 			Info info = convertContentToInfo(result.getResponse().getContentAsString());
 

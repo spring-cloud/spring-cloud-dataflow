@@ -50,7 +50,7 @@ public class DeleteDocumentation extends BaseDocumentation {
 		installPackage(installRequest);
 
 		this.mockMvc.perform(
-				post("/api/delete/{releaseName}", releaseName)).andDo(print())
+				post("/api/release/delete/{releaseName}", releaseName)).andDo(print())
 				.andExpect(status().isCreated())
 				.andDo(this.documentationHandler.document(
 						responseFields(

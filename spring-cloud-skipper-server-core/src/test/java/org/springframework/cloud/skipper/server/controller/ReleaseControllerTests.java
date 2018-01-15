@@ -41,7 +41,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  * @author Ilayaperumal Gopinathan
  */
 @ActiveProfiles("repo-test")
-public class SkipperControllerTests extends AbstractControllerTests {
+public class ReleaseControllerTests extends AbstractControllerTests {
 
 	@Test
 	public void deployTickTock() throws Exception {
@@ -76,7 +76,7 @@ public class SkipperControllerTests extends AbstractControllerTests {
 		assertThat(release.getVersion()).isEqualTo(1);
 
 		// Undeploy
-		mockMvc.perform(post("/api/delete/" + releaseName)).andDo(print())
+		mockMvc.perform(post("/api/release/delete/" + releaseName)).andDo(print())
 				.andExpect(status().isCreated()).andReturn();
 		Release deletedRelease = this.releaseRepository.findByNameAndVersion(releaseName, 1);
 		assertThat(deletedRelease.getInfo().getStatus().getStatusCode()).isEqualTo(StatusCode.DELETED);
@@ -91,7 +91,7 @@ public class SkipperControllerTests extends AbstractControllerTests {
 		assertThat(release.getVersion()).isEqualTo(1);
 
 		// Check manifest
-		MvcResult result = mockMvc.perform(get("/api/manifest/" + releaseName)).andDo(print())
+		MvcResult result = mockMvc.perform(get("/api/release/manifest/" + releaseName)).andDo(print())
 				.andExpect(status().isOk()).andReturn();
 		assertThat(result.getResponse().getContentAsString()).isNotEmpty();
 
@@ -101,7 +101,7 @@ public class SkipperControllerTests extends AbstractControllerTests {
 		assertThat(release.getVersion()).isEqualTo(2);
 
 		// Check manifest
-		result = mockMvc.perform(get("/api/manifest/" + releaseName + "/2")).andDo(print())
+		result = mockMvc.perform(get("/api/release/manifest/" + releaseName + "/2")).andDo(print())
 				.andExpect(status().isOk()).andReturn();
 		assertThat(result.getResponse().getContentAsString()).isNotEmpty();
 
@@ -118,7 +118,7 @@ public class SkipperControllerTests extends AbstractControllerTests {
 		assertThat(release.getInfo().getStatus().getStatusCode()).isEqualTo(StatusCode.DEPLOYED);
 
 		// Undeploy
-		mockMvc.perform(post("/api/delete/" + releaseName))
+		mockMvc.perform(post("/api/release/delete/" + releaseName))
 				.andDo(print())
 				.andExpect(status().isCreated()).andReturn();
 		Release deletedRelease = this.releaseRepository.findByNameAndVersion(releaseName,
@@ -143,7 +143,7 @@ public class SkipperControllerTests extends AbstractControllerTests {
 		// In a real container the response is carried over into the error dispatcher, but
 		// in the mock a new one is created so we have to assert the status at this
 		// intermediate point
-		MvcResult result = mockMvc.perform(get("/api/status/myLog")).andDo(print())
+		MvcResult result = mockMvc.perform(get("/api/release/status/myLog")).andDo(print())
 				.andExpect(status().is4xxClientError()).andReturn();
 		MvcResult response = this.mockMvc.perform(new ErrorDispatcher(result, "/error"))
 				.andReturn();

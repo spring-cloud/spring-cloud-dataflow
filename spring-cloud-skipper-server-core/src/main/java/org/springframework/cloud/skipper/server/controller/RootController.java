@@ -38,4 +38,5 @@ public class RootController {
 	public RedirectView index() {
 		return new RedirectView("/api");
 	}
+
 }

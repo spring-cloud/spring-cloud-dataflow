@@ -70,7 +70,7 @@ public class UploadDocumentation extends BaseDocumentation {
 		final MediaType contentType = new MediaType(MediaType.APPLICATION_JSON.getType(),
 				MediaType.APPLICATION_JSON.getSubtype(), Charset.forName("utf8"));
 
-		mockMvc.perform(post("/api/upload").accept(MediaType.APPLICATION_JSON).contentType(contentType)
+		mockMvc.perform(post("/api/package/upload").accept(MediaType.APPLICATION_JSON).contentType(contentType)
 				.content(convertObjectToJson(uploadProperties))).andDo(print())
 				.andExpect(status().isCreated())
 				.andDo(

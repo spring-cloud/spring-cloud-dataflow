@@ -50,7 +50,7 @@ public class HistoryDocumentation extends BaseDocumentation {
 		installPackage(installRequest);
 
 		this.mockMvc.perform(
-				get("/api/history/{releaseName}/{maxRevisions}", releaseName, 3)).andDo(print())
+				get("/api/release/history/{releaseName}/{maxRevisions}", releaseName, 3)).andDo(print())
 				.andExpect(status().isOk())
 				.andDo(this.documentationHandler.document(
 						responseFields(

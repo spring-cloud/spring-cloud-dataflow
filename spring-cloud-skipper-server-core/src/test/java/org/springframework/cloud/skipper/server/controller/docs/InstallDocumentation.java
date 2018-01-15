@@ -56,7 +56,7 @@ public class InstallDocumentation extends BaseDocumentation {
 		final MediaType contentType = new MediaType(MediaType.APPLICATION_JSON.getType(),
 				MediaType.APPLICATION_JSON.getSubtype(), Charset.forName("utf8"));
 
-		mockMvc.perform(post("/api/install").accept(MediaType.APPLICATION_JSON).contentType(contentType)
+		mockMvc.perform(post("/api/package/install").accept(MediaType.APPLICATION_JSON).contentType(contentType)
 				.content(convertObjectToJson(installRequest))).andDo(print())
 				.andExpect(status().isCreated())
 				.andDo(this.documentationHandler.document(
@@ -136,7 +136,7 @@ public class InstallDocumentation extends BaseDocumentation {
 		final MediaType contentType = new MediaType(MediaType.APPLICATION_JSON.getType(),
 				MediaType.APPLICATION_JSON.getSubtype(), Charset.forName("utf8"));
 
-		mockMvc.perform(post("/api/install/{packageMetaDataId}", release.getId()).accept(MediaType.APPLICATION_JSON)
+		mockMvc.perform(post("/api/package/install/{packageMetaDataId}", release.getId()).accept(MediaType.APPLICATION_JSON)
 				.contentType(contentType)
 				.content(convertObjectToJson(installProperties2))).andDo(print())
 				.andExpect(status().isCreated())

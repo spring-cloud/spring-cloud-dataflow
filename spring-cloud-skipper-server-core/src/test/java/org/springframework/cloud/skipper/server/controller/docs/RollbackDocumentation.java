@@ -53,7 +53,7 @@ public class RollbackDocumentation extends BaseDocumentation {
 		upgrade("log", "1.1.0", releaseName);
 
 		MvcResult result = this.mockMvc.perform(
-				post("/api/rollback/{releaseName}/1", releaseName)).andDo(print())
+				post("/api/release/rollback/{releaseName}/1", releaseName)).andDo(print())
 				.andExpect(status().isCreated())
 				.andDo(this.documentationHandler.document(
 						responseFields(

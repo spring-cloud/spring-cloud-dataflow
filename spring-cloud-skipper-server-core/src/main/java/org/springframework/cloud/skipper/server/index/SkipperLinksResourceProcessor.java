@@ -15,29 +15,29 @@
  */
 package org.springframework.cloud.skipper.server.index;
 
+import org.springframework.cloud.skipper.server.controller.AboutController;
 import org.springframework.cloud.skipper.server.controller.PackageController;
-import org.springframework.cloud.skipper.server.domain.PackageSummary;
-import org.springframework.hateoas.Link;
-import org.springframework.hateoas.Resource;
+import org.springframework.cloud.skipper.server.controller.ReleaseController;
+import org.springframework.data.rest.webmvc.RepositoryLinksResource;
 import org.springframework.hateoas.ResourceProcessor;
+import org.springframework.hateoas.mvc.ControllerLinkBuilder;
 import org.springframework.stereotype.Component;
 
-import static org.springframework.hateoas.mvc.ControllerLinkBuilder.linkTo;
 import static org.springframework.hateoas.mvc.ControllerLinkBuilder.methodOn;
 
 /**
- * @author Mark Pollack
+ * @author Gunnar Hillert
+ * @author Ilayaperumal Gopinathan
  */
 @Component
-public class PackageSummaryResourceProcessor implements ResourceProcessor<Resource<PackageSummary>> {
+public class SkipperLinksResourceProcessor implements ResourceProcessor<RepositoryLinksResource> {
+
 
 	@Override
-	public Resource<PackageSummary> process(Resource<PackageSummary> packageSummaryResource) {
-		Link link = linkTo(
-				methodOn(PackageController.class).install(Long.valueOf(packageSummaryResource.getContent().getId()),
-						null))
-								.withRel("install");
-		packageSummaryResource.add(link);
-		return packageSummaryResource;
+	public RepositoryLinksResource process(RepositoryLinksResource resource) {
+		resource.add(ControllerLinkBuilder.linkTo(methodOn(AboutController.class).getAboutResource()).withRel("about"));
+		resource.add(ControllerLinkBuilder.linkTo(ReleaseController.class).withRel("release"));
+		resource.add(ControllerLinkBuilder.linkTo(PackageController.class).withRel("package"));
+		return resource;
 	}
 }

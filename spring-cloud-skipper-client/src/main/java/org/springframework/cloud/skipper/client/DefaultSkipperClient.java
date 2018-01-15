@@ -122,7 +122,7 @@ public class DefaultSkipperClient implements SkipperClient {
 	public Info status(String releaseName) {
 		Map<String, String> uriVariables = new HashMap<String, String>();
 		uriVariables.put("releaseName", releaseName);
-		return this.restTemplate.getForObject(baseUri + "/status/{releaseName}", Info.class, uriVariables);
+		return this.restTemplate.getForObject(baseUri + "/release/status/{releaseName}", Info.class, uriVariables);
 	}
 
 	@Override
@@ -130,7 +130,7 @@ public class DefaultSkipperClient implements SkipperClient {
 		Map<String, String> uriVariables = new HashMap<String, String>();
 		uriVariables.put("releaseName", releaseName);
 		uriVariables.put("releaseVersion", Integer.toString(releaseVersion));
-		return this.restTemplate.getForObject(baseUri + "/status/{releaseName}/{releaseVersion}",
+		return this.restTemplate.getForObject(baseUri + "/release/status/{releaseName}/{releaseVersion}",
 				Info.class, uriVariables);
 	}
 
@@ -138,7 +138,7 @@ public class DefaultSkipperClient implements SkipperClient {
 	public String manifest(String releaseName) {
 		Map<String, String> uriVariables = new HashMap<String, String>();
 		uriVariables.put("releaseName", releaseName);
-		return this.restTemplate.getForObject(baseUri + "/manifest/{releaseName}", String.class, uriVariables);
+		return this.restTemplate.getForObject(baseUri + "/release/manifest/{releaseName}", String.class, uriVariables);
 	}
 
 	@Override
@@ -146,7 +146,7 @@ public class DefaultSkipperClient implements SkipperClient {
 		Map<String, String> uriVariables = new HashMap<String, String>();
 		uriVariables.put("releaseName", releaseName);
 		uriVariables.put("releaseVersion", Integer.toString(releaseVersion));
-		return this.restTemplate.getForObject(baseUri + "/manifest/{releaseName}/{releaseVersion}",
+		return this.restTemplate.getForObject(baseUri + "/release/manifest/{releaseName}/{releaseVersion}",
 				String.class, uriVariables);
 	}
 
@@ -170,26 +170,26 @@ public class DefaultSkipperClient implements SkipperClient {
 	}
 
 	public Release install(InstallRequest installRequest) {
-		String url = String.format("%s/%s", baseUri, "install");
+		String url = String.format("%s/%s/%s", baseUri, "package", "install");
 		return this.restTemplate.postForObject(url, installRequest, Release.class);
 	}
 
 	@Override
 	public Release upgrade(UpgradeRequest upgradeRequest) {
-		String url = String.format("%s/%s", baseUri, "upgrade");
+		String url = String.format("%s/%s/%s", baseUri, "release", "upgrade");
 		log.debug("Posting UpgradeRequest to " + url + ". UpgradeRequest = " + upgradeRequest);
 		return this.restTemplate.postForObject(url, upgradeRequest, Release.class);
 	}
 
 	@Override
 	public Release delete(String releaseName) {
-		String url = String.format("%s/%s/%s", baseUri, "delete", releaseName);
+		String url = String.format("%s/%s/%s/%s", baseUri, "release", "delete", releaseName);
 		return this.restTemplate.postForObject(url, null, Release.class);
 	}
 
 	@Override
 	public Release rollback(String releaseName, int releaseVersion) {
-		String url = String.format("%s/%s/%s/%s", baseUri, "rollback", releaseName, releaseVersion);
+		String url = String.format("%s/%s/%s/%s/%s", baseUri, "release", "rollback", releaseName, releaseVersion);
 		return this.restTemplate.postForObject(url, null, Release.class);
 	}
 
@@ -199,10 +199,10 @@ public class DefaultSkipperClient implements SkipperClient {
 		};
 		String url;
 		if (StringUtils.hasText(releaseNameLike)) {
-			url = String.format("%s/%s/%s", baseUri, "list", releaseNameLike);
+			url = String.format("%s/%s/%s/%s", baseUri, "release", "list", releaseNameLike);
 		}
 		else {
-			url = String.format("%s/%s", baseUri, "list");
+			url = String.format("%s/%s/%s", baseUri, "release", "list");
 		}
 		return this.restTemplate.exchange(url, HttpMethod.GET, null, typeReference, new HashMap<>()).getBody();
 	}
@@ -212,7 +212,7 @@ public class DefaultSkipperClient implements SkipperClient {
 		ParameterizedTypeReference<List<Release>> typeReference = new ParameterizedTypeReference<List<Release>>() {
 		};
 		Map<String, Object> parameters = new HashMap<>();
-		String url = String.format("%s/%s/%s/%s", baseUri, "history", releaseName, maxRevisions);
+		String url = String.format("%s/%s/%s/%s/%s", baseUri, "release", "history", releaseName, maxRevisions);
 		return this.restTemplate.exchange(url, HttpMethod.GET, null, typeReference, parameters).getBody();
 	}
 
@@ -276,7 +276,7 @@ public class DefaultSkipperClient implements SkipperClient {
 
 	@Override
 	public PackageMetadata upload(UploadRequest uploadRequest) {
-		String url = String.format("%s/%s", baseUri, "upload");
+		String url = String.format("%s/%s/%s", baseUri, "package", "upload");
 		log.debug("Uploading package {}-{} to repository {}.", uploadRequest.getName(), uploadRequest.getVersion(),
 				uploadRequest.getRepoName());
 		return this.restTemplate.postForObject(url, uploadRequest, PackageMetadata.class);

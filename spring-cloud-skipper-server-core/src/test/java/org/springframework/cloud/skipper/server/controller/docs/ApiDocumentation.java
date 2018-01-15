@@ -68,38 +68,24 @@ public class ApiDocumentation extends BaseDocumentation {
 	@Test
 	public void index() throws Exception {
 		this.mockMvc.perform(get("/api")).andExpect(status().isOk()).andDo(this.documentationHandler.document(links(
-				linkWithRel("about").description("Provides meta information of the server"),
-				linkWithRel("upload").description("Uploads a package"),
-				linkWithRel("install").description("Installs a package"),
-				linkWithRel("install/id").description("Installs a package by also providing the package id"),
-				linkWithRel("repositories").description("Exposes package repositories"),
-				linkWithRel("deployers").description("Exposes deployer"),
-				linkWithRel("releases").description("Exposes release information"),
-				linkWithRel("packageMetadata").description("Provides details for Package Metadata"),
-				linkWithRel("jpaRepositoryStates").description(""),
-				linkWithRel("jpaRepositoryGuards").description(""),
-				linkWithRel("jpaRepositoryTransitions").description(""),
-				linkWithRel("jpaRepositoryStateMachines").description(""),
-				linkWithRel("jpaRepositoryActions").description(""),
+				//TODO investigate
+				linkWithRel("jpaRepositoryStates").ignored(),
+				linkWithRel("jpaRepositoryGuards").ignored(),
+				linkWithRel("jpaRepositoryTransitions").ignored(),
+				linkWithRel("jpaRepositoryStateMachines").ignored(),
+				linkWithRel("jpaRepositoryActions").ignored(),
+
+				linkWithRel("repositories").description("Exposes 'package repository' repository"),
+				linkWithRel("deployers").description("Exposes deployer repository"),
+				linkWithRel("packageMetadata").description("Exposes package metadata repository"),
+
+
+				linkWithRel("releases").description("Exposes release repository"),
 				linkWithRel("profile").description(
 						"Entrypoint to provide ALPS metadata defining simple descriptions of application-level semantics"),
-				linkWithRel("status/name")
-						.description("Get the status for the last known release version of the release "
-								+ "by the given release name"),
-				linkWithRel("status/name/version")
-						.description("Get the status for the release by the given release name "
-								+ "and version"),
-				linkWithRel("manifest").description("Get a release's manifest"),
-				linkWithRel("manifest/name/version")
-						.description("Get a release's manifest by providing name and version"),
-				linkWithRel("upgrade").description("Upgrade a release"),
-				linkWithRel("rollback").description("Rollback the release to a previous or a specific release"),
-				linkWithRel("delete").description("Delete the release"),
-				linkWithRel("history").description("List the history of versions for a given release"),
-				linkWithRel("list")
-						.description("List the latest version of releases with status of deployed or failed"),
-				linkWithRel("list/name")
-						.description("List the latest version of releases by release name with status of "
-								+ "deployed or failed"))));
+				linkWithRel("about").description("Provides meta information of the server"),
+				linkWithRel("release").description("Exposes release resource"),
+				linkWithRel("package").description("Exposes package resource"))));
+
 	}
 }

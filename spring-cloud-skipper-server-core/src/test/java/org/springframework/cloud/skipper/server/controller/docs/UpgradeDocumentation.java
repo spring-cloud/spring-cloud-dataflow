@@ -71,7 +71,7 @@ public class UpgradeDocumentation extends BaseDocumentation {
 				MediaType.APPLICATION_JSON.getSubtype(), Charset.forName("utf8"));
 
 		MvcResult result = this.mockMvc
-				.perform(post("/api/upgrade").accept(MediaType.APPLICATION_JSON).contentType(contentType)
+				.perform(post("/api/release/upgrade").accept(MediaType.APPLICATION_JSON).contentType(contentType)
 						.content(convertObjectToJson(upgradeRequest)))
 				.andDo(print())
 				.andExpect(status().isCreated())

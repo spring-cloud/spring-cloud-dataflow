@@ -56,7 +56,7 @@ public class ManifestDocumentation extends BaseDocumentation {
 				MediaType.APPLICATION_JSON.getSubtype(), Charset.forName("utf8"));
 
 		this.mockMvc.perform(
-				get("/api/manifest/{releaseName}", release.getName()).accept(MediaType.APPLICATION_JSON)
+				get("/api/release/manifest/{releaseName}", release.getName()).accept(MediaType.APPLICATION_JSON)
 						.contentType(contentType))
 				.andDo(print())
 				.andExpect(status().isOk())
@@ -78,7 +78,7 @@ public class ManifestDocumentation extends BaseDocumentation {
 		final Release release = installPackage(installRequest);
 
 		this.mockMvc.perform(
-				get("/api/manifest/{releaseName}/{releaseVersion}",
+				get("/api/release/manifest/{releaseName}/{releaseVersion}",
 						release.getName(), release.getVersion()))
 				.andDo(print())
 				.andExpect(status().isOk())

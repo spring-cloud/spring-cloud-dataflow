@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 the original author or authors.
+ * Copyright 2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,20 +15,19 @@
  */
 package org.springframework.cloud.skipper.server.config;
 
-import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Import;
+import org.springframework.data.rest.core.config.RepositoryRestConfiguration;
+import org.springframework.data.rest.core.mapping.RepositoryDetectionStrategy;
+import org.springframework.data.rest.webmvc.config.RepositoryRestConfigurerAdapter;
 
 /**
- * Auto-configuration for skipper server.
- *
- * @author Janne Valkealahti
+ * @author Mark Pollack
  */
 @Configuration
-@ConditionalOnBean(EnableSkipperServerConfiguration.Marker.class)
-@Import({SkipperServerConfiguration.class, SkipperServerPlatformConfiguration.class,
-		SpringDataRestConfiguration.class})
-@ConditionalOnProperty(prefix = "spring.cloud.skipper.server", name = "enabled", havingValue = "true", matchIfMissing = true)
-public class SkipperServerAutoConfiguration {
+public class SpringDataRestConfiguration extends RepositoryRestConfigurerAdapter {
+
+	@Override
+	public void configureRepositoryRestConfiguration(RepositoryRestConfiguration config) {
+		config.setRepositoryDetectionStrategy(RepositoryDetectionStrategy.RepositoryDetectionStrategies.ANNOTATED);
+	}
 }

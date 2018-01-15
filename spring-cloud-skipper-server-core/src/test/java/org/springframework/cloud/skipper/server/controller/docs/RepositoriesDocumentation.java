@@ -23,8 +23,6 @@ import org.springframework.test.context.ActiveProfiles;
 import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.get;
 import static org.springframework.restdocs.payload.PayloadDocumentation.fieldWithPath;
 import static org.springframework.restdocs.payload.PayloadDocumentation.responseFields;
-import static org.springframework.restdocs.request.RequestDocumentation.parameterWithName;
-import static org.springframework.restdocs.request.RequestDocumentation.pathParameters;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -63,15 +61,12 @@ public class RepositoriesDocumentation extends BaseDocumentation {
 
 	@Test
 	public void getSingleRepository() throws Exception {
-		install("log", "1.0.0", "test2");
 
 		this.mockMvc.perform(
-				get("/api/repositories/{repositoryId}", 1))
+				get("/api/repositories/search/findByName?name={name}", "local"))
 				.andDo(print())
 				.andExpect(status().isOk())
 				.andDo(this.documentationHandler.document(
-						pathParameters(
-								parameterWithName("repositoryId").description("The id of the repository to query")),
 						responseFields(
 								fieldWithPath("name").description("Name of the Repository"),
 								fieldWithPath("url").description("URL of the Repository"),
