@@ -16,7 +16,7 @@ spring:
     rest:
       base-path: /api
   jpa:
-    generate-ddl: true
+    generate-ddl: false
     properties:
       hibernate.id.new_generator_mappings: true
   cloud:
@@ -153,4 +153,6 @@ logging:
     # The following INFO is to log the generated password when using basic security
     org.springframework.boot.autoconfigure.security: 'INFO'
     org.springframework.cloud.skipper: 'INFO'
-    org.springframework.statemachine: 'INFO'    
+    org.springframework.statemachine: 'INFO'
+flyway:
+  locations: /db/migration/{vendor}
