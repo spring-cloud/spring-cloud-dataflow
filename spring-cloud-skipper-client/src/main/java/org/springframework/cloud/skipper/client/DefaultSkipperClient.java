@@ -268,7 +268,7 @@ public class DefaultSkipperClient implements SkipperClient {
 	public Resources<Deployer> listDeployers() {
 		ParameterizedTypeReference<Resources<Deployer>> typeReference = new ParameterizedTypeReference<Resources<Deployer>>() {
 		};
-		Traverson.TraversalBuilder traversalBuilder = this.traverson.follow("platforms");
+		Traverson.TraversalBuilder traversalBuilder = this.traverson.follow("deployers");
 		Map<String, Object> parameters = new HashMap<>();
 		parameters.put("size", 2000);
 		return traversalBuilder.withTemplateParameters(parameters).toObject(typeReference);
