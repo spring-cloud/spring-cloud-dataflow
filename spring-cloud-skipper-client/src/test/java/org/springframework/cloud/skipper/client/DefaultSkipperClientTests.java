@@ -64,7 +64,7 @@ public class DefaultSkipperClientTests {
 		SkipperClient skipperClient = new DefaultSkipperClient("", restTemplate);
 
 		MockRestServiceServer mockServer = MockRestServiceServer.bindTo(restTemplate).build();
-		mockServer.expect(requestTo("/status/mylog")).andRespond(withSuccess("{}", MediaType.APPLICATION_JSON));
+		mockServer.expect(requestTo("/release/status/mylog")).andRespond(withSuccess("{}", MediaType.APPLICATION_JSON));
 
 		Info status = skipperClient.status("mylog");
 		mockServer.verify();
@@ -80,7 +80,7 @@ public class DefaultSkipperClientTests {
 		SkipperClient skipperClient = new DefaultSkipperClient("", restTemplate);
 
 		MockRestServiceServer mockServer = MockRestServiceServer.bindTo(restTemplate).build();
-		mockServer.expect(requestTo("/status/mylog"))
+		mockServer.expect(requestTo("/release/status/mylog"))
 				.andRespond(withStatus(HttpStatus.NOT_FOUND).body(ERROR1).contentType(MediaType.APPLICATION_JSON));
 
 		skipperClient.status("mylog");
@@ -93,7 +93,7 @@ public class DefaultSkipperClientTests {
 		SkipperClient skipperClient = new DefaultSkipperClient("", restTemplate);
 
 		MockRestServiceServer mockServer = MockRestServiceServer.bindTo(restTemplate).build();
-		mockServer.expect(requestTo("/status/mylog"))
+		mockServer.expect(requestTo("/release/status/mylog"))
 				.andRespond(withStatus(HttpStatus.NOT_FOUND).body(ERROR2).contentType(MediaType.APPLICATION_JSON));
 
 		skipperClient.status("mylog");

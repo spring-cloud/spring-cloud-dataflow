@@ -20,14 +20,8 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cloud.skipper.ReleaseNotFoundException;
 import org.springframework.cloud.skipper.domain.Info;
-import org.springframework.cloud.skipper.domain.InstallProperties;
-import org.springframework.cloud.skipper.domain.InstallRequest;
-import org.springframework.cloud.skipper.domain.PackageMetadata;
 import org.springframework.cloud.skipper.domain.Release;
 import org.springframework.cloud.skipper.domain.UpgradeRequest;
-import org.springframework.cloud.skipper.domain.UploadRequest;
-import org.springframework.cloud.skipper.server.service.PackageMetadataService;
-import org.springframework.cloud.skipper.server.service.PackageService;
 import org.springframework.cloud.skipper.server.service.ReleaseService;
 import org.springframework.cloud.skipper.server.statemachine.SkipperStateMachineService;
 import org.springframework.hateoas.ResourceSupport;
@@ -54,53 +48,20 @@ import static org.springframework.hateoas.mvc.ControllerLinkBuilder.methodOn;
 @RequestMapping("/api/release")
 public class ReleaseController {
 
-	private final ReleaseService releaseService;
-
-	private final PackageService packageService;
-
-	private final PackageMetadataService packageMetadataService;
-
 	@Value("${info.app.name:#{null}}")
 	private String appName;
 
 	@Value("${info.app.version:#{null}}")
 	private String appVersion;
 
-	private SkipperStateMachineService skipperStateMachineService;
+	private final ReleaseService releaseService;
 
-	public ReleaseController(ReleaseService releaseService, PackageService packageService,
-			PackageMetadataService packageMetadataService,
+	private final SkipperStateMachineService skipperStateMachineService;
+
+	public ReleaseController(ReleaseService releaseService,
 			SkipperStateMachineService skipperStateMachineService) {
 		this.releaseService = releaseService;
-		this.packageService = packageService;
-		this.packageMetadataService = packageMetadataService;
 		this.skipperStateMachineService = skipperStateMachineService;
-	}
-
-	// Package commands
-
-	@RequestMapping(path = "/upload", method = RequestMethod.POST)
-	@ResponseStatus(HttpStatus.CREATED)
-	public PackageMetadata upload(@RequestBody UploadRequest uploadRequest) {
-		return this.packageService.upload(uploadRequest);
-	}
-
-	@RequestMapping(path = "/package/{name}", method = RequestMethod.DELETE)
-	@ResponseStatus(HttpStatus.OK)
-	public void packageDelete(@PathVariable("name") String name) {
-		this.packageMetadataService.deleteIfAllReleasesDeleted(name);
-	}
-
-	@RequestMapping(path = "/install", method = RequestMethod.POST)
-	@ResponseStatus(HttpStatus.CREATED)
-	public Release install(@RequestBody InstallRequest installRequest) {
-		return this.skipperStateMachineService.installRelease(installRequest);
-	}
-
-	@RequestMapping(path = "/install/{id}", method = RequestMethod.POST)
-	@ResponseStatus(HttpStatus.CREATED)
-	public Release install(@PathVariable("id") Long id, @RequestBody InstallProperties installProperties) {
-		return this.skipperStateMachineService.installRelease(id, installProperties);
 	}
 
 	@RequestMapping(method = RequestMethod.GET)

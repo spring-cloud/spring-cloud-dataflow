@@ -20,6 +20,7 @@ import org.springframework.cloud.skipper.domain.InstallRequest;
 import org.springframework.cloud.skipper.domain.PackageMetadata;
 import org.springframework.cloud.skipper.domain.Release;
 import org.springframework.cloud.skipper.domain.UploadRequest;
+import org.springframework.cloud.skipper.server.service.PackageMetadataService;
 import org.springframework.cloud.skipper.server.service.PackageService;
 import org.springframework.cloud.skipper.server.statemachine.SkipperStateMachineService;
 import org.springframework.hateoas.ResourceSupport;
@@ -38,6 +39,7 @@ import static org.springframework.hateoas.mvc.ControllerLinkBuilder.methodOn;
  * REST controller for Skipper package related operations.
  *
  * @author Mark Pollack
+ * @author Ilayaperumal Gopinathan
  */
 @RestController
 @RequestMapping("/api/package")
@@ -47,8 +49,12 @@ public class PackageController {
 
 	private final PackageService packageService;
 
-	public PackageController(PackageService packageService, SkipperStateMachineService skipperStateMachineService) {
+	private final PackageMetadataService packageMetadataService;
+
+	public PackageController(PackageService packageService, PackageMetadataService packageMetadataService,
+			SkipperStateMachineService skipperStateMachineService) {
 		this.packageService = packageService;
+		this.packageMetadataService = packageMetadataService;
 		this.skipperStateMachineService = skipperStateMachineService;
 	}
 
@@ -81,6 +87,12 @@ public class PackageController {
 	@ResponseStatus(HttpStatus.CREATED)
 	public Release install(@PathVariable("id") Long id, @RequestBody InstallProperties installProperties) {
 		return this.skipperStateMachineService.installRelease(id, installProperties);
+	}
+
+	@RequestMapping(path = "/{name}", method = RequestMethod.DELETE)
+	@ResponseStatus(HttpStatus.OK)
+	public void packageDelete(@PathVariable("name") String name) {
+		this.packageMetadataService.deleteIfAllReleasesDeleted(name);
 	}
 
 	/**

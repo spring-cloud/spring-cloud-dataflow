@@ -135,17 +135,15 @@ public class SkipperServerConfiguration implements AsyncConfigurer {
 	}
 
 	@Bean
-	public ReleaseController releaseController(ReleaseService releaseService, PackageService packageService,
-			PackageMetadataService packageMetadataService,
+	public ReleaseController releaseController(ReleaseService releaseService,
 			SkipperStateMachineService skipperStateMachineService) {
-		return new ReleaseController(releaseService, packageService,
-				packageMetadataService, skipperStateMachineService);
+		return new ReleaseController(releaseService, skipperStateMachineService);
 	}
 
 	@Bean
 	public PackageController packageController(PackageService packageService,
-			SkipperStateMachineService skipperStateMachineService) {
-		return new PackageController(packageService, skipperStateMachineService);
+			PackageMetadataService packageMetadataService, SkipperStateMachineService skipperStateMachineService) {
+		return new PackageController(packageService, packageMetadataService, skipperStateMachineService);
 	}
 
 	@Bean
