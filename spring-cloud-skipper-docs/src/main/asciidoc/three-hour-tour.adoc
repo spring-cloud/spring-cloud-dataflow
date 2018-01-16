@@ -424,7 +424,7 @@ Using the Skipper Shell, we can upload the package zip into Skipper server's one
 
 [source,bash,options="nowrap"]
 ----
-skipper:>upload --path /path-to-package/mypackage-1.0.0.zip
+skipper:>package upload --path /path-to-package/mypackage-1.0.0.zip
 Package uploaded successfully:[mypackage:1.0.0]
 ----
 
@@ -432,7 +432,7 @@ If no `--repo-name` is set, the `upload` command will use `local` as the reposit
 
 [source,bash,options="nowrap"]
 ----
-skipper:>search
+skipper:>package search
 ╔═════════════════╤═══════╤════════════════════════════════════════════════════════════════════════════════╗
 ║      Name       │Version│                                  Description                                   ║
 ╠═════════════════╪═══════╪════════════════════════════════════════════════════════════════════════════════╣
@@ -540,14 +540,14 @@ $ zip -r demo-1.0.0.zip demo-1.0.0/
 Armed with our zipped file and the path to it, we can head to skipper and use the `upload` command:
 
 ----
-skipper:> upload --path /Users/path-to-your-zip/demo-1.0.0.zip
+skipper:>package upload --path /Users/path-to-your-zip/demo-1.0.0.zip
 Package uploaded successfully:[demo:1.0.0]
 ----
 
 Now you can search for it as shown above, then install it!
 
 ----
-skipper:>install --package-name demo --package-version 1.0.0 --release-name demo
+skipper:>package install --package-name demo --package-version 1.0.0 --release-name demo
 Released demo. Now at version v1.
 ----
 

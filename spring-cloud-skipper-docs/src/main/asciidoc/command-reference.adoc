@@ -9,7 +9,7 @@ The command `search` shows all the packages available to be installed by the Ski
 
 [source,bash,options="nowrap"]
 ----
-skipper:>search
+skipper:>package search
 ╔═════════════════╤═══════╤════════════════════════════════════════════════════════════════════════════════╗
 ║      Name       │Version│                                  Description                                   ║
 ╠═════════════════╪═══════╪════════════════════════════════════════════════════════════════════════════════╣
@@ -24,7 +24,7 @@ The `search` command can use `--name` option to search for the package name cont
 
 [source,bash,options="nowrap"]
 ----
-skipper:>search --name helloworld-
+skipper:>package search --name helloworld-
 ╔═════════════════╤═══════╤════════════════════════════════════════════════════════════════════════════════╗
 ║      Name       │Version│                                  Description                                   ║
 ╠═════════════════╪═══════╪════════════════════════════════════════════════════════════════════════════════╣
@@ -37,7 +37,7 @@ To search for more details of the packages, the option `--details` can be used.
 
 [source,bash,options="nowrap"]
 ----
-skipper:>search --name helloworld- --details
+skipper:>package search --name helloworld- --details
 ╔════════════════╤═════════════════════════════════════════════════════════════════════════════╗
 ║      Name      │                                    Value                                    ║
 ╠════════════════╪═════════════════════════════════════════════════════════════════════════════╣
@@ -82,7 +82,7 @@ This command installs a package.
 
 [source,bash,options="nowrap"]
 ----
-skipper:>install --release-name helloworldlocal --package-name helloworld --package-version 1.0.0 --properties spec.applicationProperties.server.port=8099
+skipper:>package install --release-name helloworldlocal --package-name helloworld --package-version 1.0.0 --properties spec.applicationProperties.server.port=8099
 Released helloworldlocal. Now at version v1.
 ----
 
@@ -99,7 +99,7 @@ This command upgrades a package.
 
 [source,bash,options="nowrap"]
 ----
-skipper:>upgrade --release-name helloworldlocal --package-name helloworld --package-version 1.0.0 --properties spec.applicationProperties.server.port=9090
+skipper:>release upgrade --release-name helloworldlocal --package-name helloworld --package-version 1.0.0 --properties spec.applicationProperties.server.port=9090
 helloworldpcf has been upgraded.  Now at version v2.
 ----
 
@@ -118,7 +118,7 @@ For example, the `ticktock` package that contains a `time` and a `log` applicati
 
 [source,bash,options="nowrap"]
 ----
-skipper:>upgrade --release-name ticktockskipper --package-name ticktock --file /home/mpollack/log-level-change.yml
+skipper:>release upgrade --release-name ticktockskipper --package-name ticktock --file /home/mpollack/log-level-change.yml
 ----
 
 where `log-level-change.yml` is
@@ -150,7 +150,7 @@ You can then use the `--properties` option in the `upgrade` command as shown bel
 
 [source,bash,options="nowrap"]
 ----
-skipper:>upgrade --release-name ticktockskipper --package-name ticktock --properties log.version=1.1.1.RELEASE
+skipper:>release upgrade --release-name ticktockskipper --package-name ticktock --properties log.version=1.1.1.RELEASE
 ----
 
 === Status command
@@ -159,7 +159,7 @@ This command shows the `status` of a specific release and version.
 
 [source,bash,options="nowrap"]
 ----
-skipper:>status --release-name helloworldlocal
+skipper:>release status --release-name helloworldlocal
 ╔═══════════════╤═══════════════════════════════════════════════════════════════════════════════════╗
 ║Last Deployed  │Mon Oct 30 17:53:50 IST 2017                                                       ║
 ║Status         │DEPLOYED                                                                           ║
@@ -172,7 +172,7 @@ If no `--release-version` specifed, then the latest release version will be used
 
 [source,bash,options="nowrap"]
 ----
-skipper:>status --release-name helloworldlocal --release-version 1
+skipper:>release status --release-name helloworldlocal --release-version 1
 ╔═══════════════╤════════════════════════════════════════════════════════════════════════╗
 ║Last Deployed  │Mon Oct 30 17:52:57 IST 2017                                            ║
 ║Status         │DELETED                                                                 ║
@@ -187,7 +187,7 @@ This command rollsback the release to a specific version.
 
 [source,bash,options="nowrap"]
 ----
-skipper:>rollback --release-name helloworldlocal --release-version 1
+skipper:>release rollback --release-name helloworldlocal --release-version 1
 helloworldlocal has been rolled back.  Now at version v3.
 ----
 
@@ -200,7 +200,7 @@ This command lists the latest deployed or failed release.
 
 [source,bash,options="nowrap"]
 ----
-skipper:>list
+skipper:>release list
 ╔═══════════════╤═══════╤═════════════════════════╤════════╤═══════════╤══════════════╤════════════╤══════════════════════════════════════════════════════════════════════════════╗
 ║     Name      │Version│      Last updated       │ Status │  Package  │   Package    │  Platform  │                               Platform Status                                ║
 ║               │       │                         │        │   Name    │   Version    │    Name    │                                                                              ║
@@ -217,7 +217,7 @@ This command shows the history of a specific release.
 
 [source,bash,options="nowrap"]
 ----
-skipper:>history --release-name helloworldlocal
+skipper:>release history --release-name helloworldlocal
 ╔═══════╤════════════════════════════╤════════╤════════════╤═══════════════╤════════════════╗
 ║Version│        Last updated        │ Status │Package Name│Package Version│  Description   ║
 ╠═══════╪════════════════════════════╪════════╪════════════╪═══════════════╪════════════════╣
@@ -227,18 +227,6 @@ skipper:>history --release-name helloworldlocal
 ╚═══════╧════════════════════════════╧════════╧════════════╧═══════════════╧════════════════╝
 ----
 
-The number of revisions in the history result can be limited using `--max` option. For instance,
-
-[source,bash,options="nowrap"]
-----
-skipper:>history --release-name helloworldlocal --max 2
-╔═══════╤════════════════════════════╤════════╤════════════╤═══════════════╤════════════════╗
-║Version│        Last updated        │ Status │Package Name│Package Version│  Description   ║
-╠═══════╪════════════════════════════╪════════╪════════════╪═══════════════╪════════════════╣
-║3      │Mon Oct 30 17:57:41 IST 2017│DEPLOYED│helloworld  │1.0.0          │Upgrade complete║
-║2      │Mon Oct 30 17:53:50 IST 2017│DELETED │helloworld  │1.0.0          │Delete complete ║
-╚═══════╧════════════════════════════╧════════╧════════════╧═══════════════╧════════════════╝
-----
 
 === Delete command
 
@@ -246,7 +234,7 @@ This command deletes a specific release's latest deployed revision.
 
 [source,bash,options="nowrap"]
 ----
-skipper:>delete --release-name helloworldlocal
+skipper:>release delete --release-name helloworldlocal
 helloworldlocal has been deleted.
 ----
 

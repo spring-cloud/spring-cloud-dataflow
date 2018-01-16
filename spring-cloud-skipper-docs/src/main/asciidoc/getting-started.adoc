@@ -84,7 +84,7 @@ skipper:>repo list
 Search for the available packages using the `search` command.
 [source,bash,options="nowrap"]
 ----
-skipper:>search
+skipper:>package search
 ╔═════════════════╤═══════╤════════════════════════════════════════════════════════════════════════════════╗
 ║      Name       │Version│                                  Description                                   ║
 ╠═════════════════╪═══════╪════════════════════════════════════════════════════════════════════════════════╣
@@ -98,7 +98,7 @@ skipper:>search
 Install the Maven based Hello World application using the `install` command.  Since this application picks a random port for the http server by default, we specify the Spring Boot property `server.port`, prefixed via `spec.applicationProperties`.
 [source,bash,options="nowrap"]
 ----
-skipper:>install --release-name helloworld-local --package-name helloworld --package-version 1.0.0 --properties spec.applicationProperties.server.port=8099
+skipper:>package install --release-name helloworld-local --package-name helloworld --package-version 1.0.0 --properties spec.applicationProperties.server.port=8099
 Released helloworld-local. Now at version v1.
 ----
 You can now curl the `greeting` endpoint.
@@ -112,7 +112,7 @@ The release name `helloworld-local` is used for subsequent commands such as stat
 To see the status of the release, use the `status` command
 [source,bash,options="nowrap"]
 ----
-skipper:>status --release-name helloworld-local
+skipper:>release status --release-name helloworld-local
 ╔═══════════════╤═════════════════════════════════════════════════════════════════════════════════════╗
 ║Last Deployed  │Fri Oct 27 16:17:53 IST 2017                                                         ║
 ║Status         │DEPLOYED                                                                             ║
@@ -125,7 +125,7 @@ of the greeting to be in `Portuguese`.
 
 [source,bash,options="nowrap"]
 ----
-skipper:>upgrade --release-name helloworld-local --package-name helloworld --package-version 1.0.1  --properties spec.applicationProperties.server.port=8100
+skipper:>release upgrade --release-name helloworld-local --package-name helloworld --package-version 1.0.1  --properties spec.applicationProperties.server.port=8100
 helloworld-local has been upgraded.  Now at version v2.
 ----
 
@@ -133,7 +133,7 @@ This will deploy the new version of the application, wait until it is healthy, a
 
 [source,bash,options="nowrap"]
 ----
-skipper:>status --release-name helloworld-local
+skipper:>release status --release-name helloworld-local
 ╔═══════════════╤═════════════════════════════════════════════════════════════════════════════════════╗
 ║Last Deployed  │Fri Oct 27 16:20:07 IST 2017                                                         ║
 ║Status         │DEPLOYED                                                                             ║
@@ -153,7 +153,7 @@ To delete the release, use the `delete` command.
 
 [source,bash,options="nowrap"]
 ----
-skipper:>delete --release-name helloworld-local
+skipper:>release delete --release-name helloworld-local
 helloworld-local has been deleted.
 ----
 NOTE: This example where the upgrade changed only a property of the application is not realistic. A more realistic example is the case where code has changed in the updated application so that it behaves differently.

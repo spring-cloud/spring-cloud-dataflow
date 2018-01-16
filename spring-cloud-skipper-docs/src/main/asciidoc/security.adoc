@@ -219,69 +219,77 @@ no way to merge lists). Always refer to your version of `application.yml`, as th
 
 [source,yaml]
 ----
-# About
+            # About
 
-            - GET    /api/about                      => hasRole('ROLE_VIEW')
+            - GET /api/about                      => hasRole('ROLE_VIEW')
 
-             # AppDeployerDatas
+            # AppDeployerDatas
 
-            - GET    /api/appDeployerDatas           => hasRole('ROLE_VIEW')
-
-            # Delete
-
-            - DELETE /api/delete/**                  => hasRole('ROLE_CREATE')
+            - GET /api/appDeployerDatas           => hasRole('ROLE_VIEW')
 
             # Deployers
 
-            - GET /api/deployers                     => hasRole('ROLE_VIEW')
+            - GET /api/deployers                  => hasRole('ROLE_VIEW')
 
-            # History
+            ## Releases
 
-            - GET /api/history/**                    => hasRole('ROLE_VIEW')
+            - GET /api/releases                   => hasRole('ROLE_VIEW')
 
-            # Install
+            # Status
 
-            - POST /api/install                      => hasRole('ROLE_CREATE')
-            - POST /api/install/**                   => hasRole('ROLE_CREATE')
-
-            # List
-
-            - GET /api/list                         => hasRole('ROLE_VIEW')
-            - GET /api/list/**                      => hasRole('ROLE_VIEW')
+            - GET /api/release/status/**         => hasRole('ROLE_VIEW')
 
             # Manifest
 
-            - GET /api/manifest/**                  => hasRole('ROLE_VIEW')
+            - GET /api/release/manifest/**       => hasRole('ROLE_VIEW')
+
+            # Upgrade
+
+            - POST /api/release/upgrade          => hasRole('ROLE_CREATE')
+
+            # Rollback
+
+            - POST /api/release/rollback/**      => hasRole('ROLE_CREATE')
+
+            # Delete
+
+            - POST /api/release/delete/**        => hasRole('ROLE_CREATE')
+
+            # History
+
+            - GET /api/release/history/**           => hasRole('ROLE_VIEW')
+
+            # List
+
+            - GET /api/release/list                         => hasRole('ROLE_VIEW')
+            - GET /api/release/list/**                      => hasRole('ROLE_VIEW')
+
+            # Packages
+
+            - GET /api/packages                    => hasRole('ROLE_VIEW')
+
+            # Upload
+
+            - POST /api/package/upload             => hasRole('ROLE_CREATE')
+
+            # Install
+
+            - POST /api/package/install             => hasRole('ROLE_CREATE')
+            - POST /api/package/install/**          => hasRole('ROLE_CREATE')
+
+            # Delete
+
+            - DELETE /api/package/**                => hasRole('ROLE_CREATE')
 
             # PackageMetaData
 
             - GET /api/packageMetadata              => hasRole('ROLE_VIEW')
             - GET /api/packageMetadata/**           => hasRole('ROLE_VIEW')
 
-            # Release
-
-            - GET /api/releases                     => hasRole('ROLE_VIEW')
-
             # Repositories
 
             - GET /api/repositories                 => hasRole('ROLE_VIEW')
             - GET /api/repositories/**              => hasRole('ROLE_VIEW')
-
-            # Rollback
-
-            - POST /api/rollback/**                 => hasRole('ROLE_CREATE')
-
-            # Status
-
-            - POST /api/status/**                   => hasRole('ROLE_VIEW')
-
-            # Upgrade
-
-            - POST /api/upgrade                     => hasRole('ROLE_CREATE')
-
-            # Upload
-
-            - POST /api/upload                      => hasRole('ROLE_CREATE')
 
             # Boot Endpoints
 

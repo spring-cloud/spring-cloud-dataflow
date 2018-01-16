@@ -13,7 +13,7 @@ Let's install and then update the hello world application.
 
 [source,bash,options="nowrap"]
 ----
-skipper:>install --release-name helloworldlocal --package-name helloworld --package-version 1.0.0 --properties spec.applicationProperties.server.port=8099
+skipper:>package install --release-name helloworldlocal --package-name helloworld --package-version 1.0.0 --properties spec.applicationProperties.server.port=8099
 Released helloworldlocal. Now at version v1.
 ----
 
@@ -41,7 +41,7 @@ spec:
 The `upgrade` command
 [source,bash,options="nowrap"]
 ----
-skipper:>upgrade --release-name helloworldlocal --package-name helloworld --package-version 1.0.1 --file /home/mpollack/helloworld-upgrade-local.yml
+skipper:>release upgrade --release-name helloworldlocal --package-name helloworld --package-version 1.0.1 --file /home/mpollack/helloworld-upgrade-local.yml
 helloworldlocal has been upgraded.  Now at version v2.
 ----
 
@@ -62,7 +62,7 @@ In this case there is just one entry
 
 [source,bash,options="nowrap"]
 ----
-skipper:>list
+skipper:>release list
 ╔═══════════════╤═══════╤═════════════╤════════╤══════════╤═════════╤═════════╤════════════════════════════════════════════════════╗
 ║     Name      │Version│Last updated │ Status │ Package  │ Package │Platform │                  Platform Status                   ║
 ║               │       │             │        │   Name   │ Version │  Name   │                                                    ║
@@ -76,7 +76,7 @@ skipper:>list
 You can get the full history of the release using the `history` command.
 [source,bash,options="nowrap"]
 ----
-skipper:>history --release-name helloworldlocal
+skipper:>release history --release-name helloworldlocal
 ╔═══════╤════════════════════════════╤════════╤════════════╤═══════════════╤════════════════╗
 ║Version│        Last updated        │ Status │Package Name│Package Version│  Description   ║
 ╠═══════╪════════════════════════════╪════════╪════════════╪═══════════════╪════════════════╣
@@ -135,7 +135,7 @@ Since we have the manifest for that version, we have all we need to redeploy an 
 
 [source,bash,options="nowrap"]
 ----
-skipper:>rollback --release-name helloworldlocal --release-version 1
+skipper:>release rollback --release-name helloworldlocal --release-version 1
 helloworldlocal has been rolled back.  Now at version v3.
 ----
 
@@ -143,7 +143,7 @@ The history now shows a new `v3` version, even though it is identical in terms o
 
 [source,bash,options="nowrap"]
 ----
-skipper:>history --release-name helloworldlocal
+skipper:>release history --release-name helloworldlocal
 ╔═══════╤════════════════════════════╤════════╤════════════╤═══════════════╤════════════════╗
 ║Version│        Last updated        │ Status │Package Name│Package Version│  Description   ║
 ╠═══════╪════════════════════════════╪════════╪════════════╪═══════════════╪════════════════╣
@@ -248,7 +248,7 @@ skipper:>repo list
 and the `search` command shows
 [source,bash,options="nowrap"]
 ----
-skipper:>search
+skipper:>package search
 ╔═════════════════╤═══════╤════════════════════════════════════════════════════════════════════════════════╗
 ║      Name       │Version│                                  Description                                   ║
 ╠═════════════════╪═══════╪════════════════════════════════════════════════════════════════════════════════╣
@@ -275,7 +275,7 @@ Let's install the Hello World app, specifically, the maven based artifact.
 
 [source,bash,options="nowrap"]
 ----
-skipper:>install --release-name helloworldpcf --package-name helloworld --package-version 1.0.0 --platform-name cf-dev --properties spec.deploymentProperties.spring.cloud.deployer.cloudfoundry.route=helloworldpcf.cfapps.io
+skipper:>package install --release-name helloworldpcf --package-name helloworld --package-version 1.0.0 --platform-name cf-dev --properties spec.deploymentProperties.spring.cloud.deployer.cloudfoundry.route=helloworldpcf.cfapps.io
 Released helloworldpcf. Now at version v1.
 ----
 
@@ -285,7 +285,7 @@ You can monitor the process using the `status command`.
 
 [source,bash,options="nowrap"]
 ----
-skipper:>status --release-name helloworldpcf
+skipper:>release status --release-name helloworldpcf
 ╔═══════════════╤════════════════════════════════════════════════╗
 ║Last Deployed  │Tue Oct 24 22:54:30 EDT 2017                    ║
 ║Status         │DEPLOYED                                        ║
@@ -365,7 +365,7 @@ spec:
 The `upgrade` command
 [source,bash,options="nowrap"]
 ----
-skipper:>upgrade --release-name helloworldpcf --package-name helloworld --package-version 1.0.0 --file /home/mpollack/helloworld-upgrade.yml
+skipper:>release upgrade --release-name helloworldpcf --package-name helloworld --package-version 1.0.0 --file /home/mpollack/helloworld-upgrade.yml
 helloworldpcf has been upgraded.  Now at version v2.
 ----
 
@@ -414,7 +414,7 @@ $ curl http://helloworldpcf.cfapps.io/about
 Hello World v1.0.0.RELEASE
 ----
 
-The `list` command shows you the current `DEPLOYED` and `DELETED` releases for every release name.
+The `release list` command shows you the current `DEPLOYED` and `DELETED` releases for every release name.
 In this case there is just one entry
 
 [source,bash,options="nowrap"]
@@ -432,7 +432,7 @@ You can get the full history of the release using the `history` command
 
 [source,bash,options="nowrap"]
 ----
-skipper:>history --release-name helloworldpcf
+skipper:>release history --release-name helloworldpcf
 ╔═══════╤════════════════════════════╤════════╤════════════╤═══════════════╤════════════════╗
 ║Version│        Last updated        │ Status │Package Name│Package Version│  Description   ║
 ╠═══════╪════════════════════════════╪════════╪════════════╪═══════════════╪════════════════╣
@@ -446,7 +446,7 @@ In this case, we will not add any additional properties other than the route.
 
 [source,bash,options="nowrap"]
 ----
-skipper:>upgrade --release-name helloworldpcf --package-name helloworld --package-version 1.0.1 --properties spec.deploymentProperties.spring.cloud.deployer.cloudfoundry.route=helloworldpcf.cfapps.io
+skipper:>release upgrade --release-name helloworldpcf --package-name helloworld --package-version 1.0.1 --properties spec.deploymentProperties.spring.cloud.deployer.cloudfoundry.route=helloworldpcf.cfapps.io
 helloworldpcf has been upgraded.  Now at version v3.
 ----
 
@@ -456,7 +456,7 @@ You can monitor the status of the upgrade using the `status` command
 
 [source,bash,options="nowrap"]
 ----
-skipper:>status --release-name helloworldpcf
+skipper:>release status --release-name helloworldpcf
 ╔═══════════════╤═════════════════════════════════════════════════════════════════════════════════╗
 ║Last Deployed  │Tue Oct 24 23:09:39 EDT 2017                                                     ║
 ║Status         │DEPLOYED                                                                         ║
@@ -479,7 +479,7 @@ Our history now looks like
 
 [source,bash,options="nowrap"]
 ----
-skipper:>history --release-name helloworldpcf
+skipper:>release history --release-name helloworldpcf
 ╔═══════╤════════════════════════════╤════════╤════════════╤═══════════════╤════════════════╗
 ║Version│        Last updated        │ Status │Package Name│Package Version│  Description   ║
 ╠═══════╪════════════════════════════╪════════╪════════════╪═══════════════╪════════════════╣
@@ -494,7 +494,7 @@ Since we have the manifest for that version, we have all we need to redeploy an 
 
 [source,bash,options="nowrap"]
 ----
-skipper:>rollback --release-name helloworldpcf --release-version 2
+skipper:>release rollback --release-name helloworldpcf --release-version 2
 helloworldpcf has been rolled back.  Now at version v4.
 ----
 
@@ -502,7 +502,7 @@ The history now shows a new `v4` version, even though it is identical in terms o
 
 [source,bash,options="nowrap"]
 ----
-skipper:>history --release-name helloworldpcf
+skipper:>release history --release-name helloworldpcf
 ╔═══════╤════════════════════════════╤════════╤════════════╤═══════════════╤════════════════╗
 ║Version│        Last updated        │ Status │Package Name│Package Version│  Description   ║
 ╠═══════╪════════════════════════════╪════════╪════════════╪═══════════════╪════════════════╣
@@ -560,7 +560,7 @@ skipper:>repo list
 and the `search` command shows
 [source,bash,options="nowrap"]
 ----
-skipper:>search
+skipper:>package search
 ╔═════════════════╤═══════╤════════════════════════════════════════════════════════════════════════════════╗
 ║      Name       │Version│                                  Description                                   ║
 ╠═════════════════╪═══════╪════════════════════════════════════════════════════════════════════════════════╣
@@ -586,7 +586,7 @@ skipper:>platform list
 Let's install the Hello World app, specifically, the Docker based artifact.
 [source,bash,options="nowrap"]
 ----
-skipper:>install --release-name helloworldk8s --package-name helloworld-docker --package-version 1.0.0 --platform-name minikube --properties spec.deploymentProperties.spring.cloud.deployer.kubernetes.createNodePort=32123
+skipper:>package install --release-name helloworldk8s --package-name helloworld-docker --package-version 1.0.0 --platform-name minikube --properties spec.deploymentProperties.spring.cloud.deployer.kubernetes.createNodePort=32123
 Released helloworldk8s. Now at version v1.
 ----
 
@@ -595,7 +595,7 @@ If you do not specify `--platform-name minikube` the command will fail since the
 You can monitor the process using the `status command`.
 [source,bash,options="nowrap"]
 ----
-skipper:>status --release-name helloworldk8s
+skipper:>release status --release-name helloworldk8s
 ╔═══════════════╤══════════════════════════════════════════════════════════════════════════════════════════════════╗
 ║Last Deployed  │Wed Oct 25 17:34:24 EDT 2017                                                                      ║
 ║Status         │DEPLOYED                                                                                          ║
@@ -678,10 +678,10 @@ spec:
     spring.cloud.deployer.memory: 2048m
 ----
 
-The `upgrade` command
+The `release upgrade` command
 [source,bash,options="nowrap"]
 ----
-skipper:>upgrade --release-name helloworldk8s --package-name helloworld-docker --package-version 1.0.0 --file /home/mpollack/helloworld-upgrade-k8s.yml
+skipper:>release upgrade --release-name helloworldk8s --package-name helloworld-docker --package-version 1.0.0 --file /home/mpollack/helloworld-upgrade-k8s.yml
 helloworldk8s has been upgraded.  Now at version v2.
 ----
 
@@ -729,11 +729,11 @@ Hello World v1.0.0.RELEASE
 ----
 
 
-The `list` command shows you the current `DEPLOYED` and `DELETED` release for every release name.
+The `release list` command shows you the current `DEPLOYED` and `DELETED` release for every release name.
 In this case there is just one entry
 [source,bash,options="nowrap"]
 ----
-skipper:>list
+skipper:>release list
 ╔═════════════╤═══════╤════════════════════════════╤════════╤═════════════════╤═══════════════╤═════════════╤═══════════════╗
 ║    Name     │Version│        Last updated        │ Status │  Package Name   │Package Version│Platform Name│Platform Status║
 ╠═════════════╪═══════╪════════════════════════════╪════════╪═════════════════╪═══════════════╪═════════════╪═══════════════╣
@@ -744,7 +744,7 @@ skipper:>list
 You can get the full history of the release using the `history` command.
 
 ----
-skipper:>history --release-name helloworldk8s
+skipper:>release history --release-name helloworldk8s
 ╔═══════╤════════════════════════════╤════════╤═════════════════╤═══════════════╤════════════════╗
 ║Version│        Last updated        │ Status │  Package Name   │Package Version│  Description   ║
 ╠═══════╪════════════════════════════╪════════╪═════════════════╪═══════════════╪════════════════╣
@@ -757,7 +757,7 @@ In this case we will not add any additional properties other than the NodePort.
 
 [source,bash,options="nowrap"]
 ----
-skipper:>upgrade --release-name helloworldk8s --package-name helloworld-docker --package-version 1.0.1 --properties spec.deploymentProperties.spring.cloud.deployer.kubernetes.createNodePort=32125
+skipper:>release upgrade --release-name helloworldk8s --package-name helloworld-docker --package-version 1.0.1 --properties spec.deploymentProperties.spring.cloud.deployer.kubernetes.createNodePort=32125
 Released helloworldk8s. Now at version v3.
 ----
 
@@ -767,7 +767,7 @@ You can monitor the status of the upgrade using the `status` command
 
 [source,bash,options="nowrap"]
 ----
-skipper:>status --release-name helloworldk8s
+skipper:>release status --release-name helloworldk8s
 ╔═══════════════╤══════════════════════════════════════════════════════════════════════════════════════════════════╗
 ║Last Deployed  │Wed Oct 25 17:41:33 EDT 2017                                                                      ║
 ║Status         │DEPLOYED                                                                                          ║
@@ -789,7 +789,7 @@ Hello World v1.0.1.RELEASE
 Our history now looks like
 [source,bash,options="nowrap"]
 ----
-skipper:>history --release-name helloworldk8s
+skipper:>release history --release-name helloworldk8s
 ╔═══════╤════════════════════════════╤════════╤═════════════════╤═══════════════╤════════════════╗
 ║Version│        Last updated        │ Status │  Package Name   │Package Version│  Description   ║
 ╠═══════╪════════════════════════════╪════════╪═════════════════╪═══════════════╪════════════════╣
@@ -804,7 +804,7 @@ Since we have the manifest for that version, we have all we need to redeploy an 
 
 [source,bash,options="nowrap"]
 ----
-skipper:>rollback --release-name helloworldk8s --release-version 2
+skipper:>release rollback --release-name helloworldk8s --release-version 2
 helloworldk8s has been rolled back.  Now at version v4.
 ----
 
@@ -812,7 +812,7 @@ The history now shows a new `v4` version, even though it is identical to the `v2
 
 [source,bash,options="nowrap"]
 ----
-skipper:>history --release-name helloworldk8s
+skipper:>release history --release-name helloworldk8s
 ╔═══════╤════════════════════════════╤════════╤═════════════════╤═══════════════╤════════════════╗
 ║Version│        Last updated        │ Status │  Package Name   │Package Version│  Description   ║
 ╠═══════╪════════════════════════════╪════════╪═════════════════╪═══════════════╪════════════════╣
