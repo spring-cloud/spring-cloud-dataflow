@@ -37,6 +37,7 @@ public interface RepositoryRepository extends PagingAndSortingRepository<Reposit
 	 *
 	 * @return the list of repositories
 	 */
+	@RestResource(exported = false)
 	List<Repository> findAllByOrderByRepoOrderDesc();
 
 	@Override

@@ -20,6 +20,7 @@ import java.util.List;
 import org.springframework.cloud.skipper.SkipperException;
 import org.springframework.cloud.skipper.domain.PackageMetadata;
 import org.springframework.data.repository.query.Param;
+import org.springframework.data.rest.core.annotation.RestResource;
 
 /**
  * @author Ilayaperumal Gopinathan
@@ -34,6 +35,7 @@ public interface PackageMetadataRepositoryCustom {
 	 * @param version the version of the package metadata
 	 * @return the package metadata
 	 */
+	@RestResource(exported = false)
 	PackageMetadata findByNameAndVersionByMaxRepoOrder(@Param("name") String name, @Param("version") String version);
 
 	/**
@@ -44,6 +46,7 @@ public interface PackageMetadataRepositoryCustom {
 	 * @throws {@link org.springframework.cloud.skipper.SkipperException} if there is no
 	 * package exists with the given name.
 	 */
+	@RestResource(exported = false)
 	List<PackageMetadata> findByNameRequired(@Param("name") String name) throws SkipperException;
 
 	/**
@@ -56,6 +59,7 @@ public interface PackageMetadataRepositoryCustom {
 	 * @throws {@link org.springframework.cloud.skipper.SkipperException} if there is no
 	 * package exists with the given name.
 	 */
+	@RestResource(exported = false)
 	PackageMetadata findByNameAndOptionalVersionRequired(String packageName, String packageVersion);
 
 }

@@ -49,19 +49,23 @@ public interface ReleaseRepository extends PagingAndSortingRepository<Release, L
 	void deleteAll();
 
 	@Transactional(readOnly = true)
+	@RestResource(exported = false)
 	List<Release> findByNameOrderByVersionDesc(@Param("name") String name);
 
 	@Transactional(readOnly = true)
 	List<Release> findByNameIgnoreCaseContainingOrderByNameAscVersionDesc(@Param("name") String name);
 
 	@Transactional(readOnly = true)
+	@RestResource(exported = false)
 	List<Release> findByNameAndVersionBetweenOrderByNameAscVersionDesc(@Param("name") String name,
 			@Param("from") int fromVersion, @Param("to") int toVersion);
 
 	@Transactional(readOnly = true)
+	@RestResource(exported = false)
 	Release findTopByNameOrderByVersionDesc(@Param("name") String name);
 
 	@Transactional(readOnly = true)
+	@RestResource(exported = false)
 	List<Release> findByNameIgnoreCaseContaining(@Param("name") String name);
 
 	/**

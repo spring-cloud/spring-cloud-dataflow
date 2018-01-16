@@ -20,6 +20,7 @@ import java.util.List;
 import org.springframework.cloud.skipper.ReleaseNotFoundException;
 import org.springframework.cloud.skipper.SkipperException;
 import org.springframework.cloud.skipper.domain.Release;
+import org.springframework.data.rest.core.annotation.RestResource;
 
 /**
  * @author Mark Pollack
@@ -33,6 +34,7 @@ public interface ReleaseRepositoryCustom {
 	 * @return the Release object
 	 * @throws {@link ReleaseNotFoundException} if no Release for the given name can be found.
 	 */
+	@RestResource(exported = false)
 	Release findLatestRelease(String releaseName);
 
 	/**
@@ -41,6 +43,7 @@ public interface ReleaseRepositoryCustom {
 	 * @return the Release object
 	 * @throws {@link ReleaseNotFoundException} if no deployed Release for the given name can be found.
 	 */
+	@RestResource(exported = false)
 	Release findLatestDeployedRelease(String releaseName);
 
 	/**
@@ -51,6 +54,7 @@ public interface ReleaseRepositoryCustom {
 	 * @throws {@link ReleaseNotFoundException} if no latest Release (with the deployed/deleted status) for the given
 	 * name can be found.
 	 */
+	@RestResource(exported = false)
 	Release findLatestReleaseForUpdate(String releaseName);
 
 	/**
@@ -60,6 +64,7 @@ public interface ReleaseRepositoryCustom {
 	 * @return the Release object to rollback to
 	 * @throws {@link ReleaseNotFoundException} if no latest Release found to rollback to.
 	 */
+	@RestResource(exported = false)
 	Release findReleaseToRollback(String releaseName);
 
 	/**
@@ -69,6 +74,7 @@ public interface ReleaseRepositoryCustom {
 	 * @return {@link ReleaseNotFoundException} if no Release for the given name and version
 	 * can be found.
 	 */
+	@RestResource(exported = false)
 	Release findByNameAndVersion(String releaseName, int version);
 
 	/**
@@ -78,6 +84,7 @@ public interface ReleaseRepositoryCustom {
 	 * @return the list of Releases with their revisions as history
 	 * @throws SkipperException if no Release for the given name can be found.
 	 */
+	@RestResource(exported = false)
 	List<Release> findReleaseRevisions(String releaseName, int revisions);
 
 	/**
@@ -86,6 +93,7 @@ public interface ReleaseRepositoryCustom {
 	 * @return list of releases (by the given name) that has the latest revision with the
 	 * state either deployed or failed.
 	 */
+	@RestResource(exported = false)
 	List<Release> findLatestDeployedOrFailed(String releaseName);
 
 	/**
@@ -94,6 +102,7 @@ public interface ReleaseRepositoryCustom {
 	 * @return list of releases that has the latest revision with the state either deployed or
 	 * failed.
 	 */
+	@RestResource(exported = false)
 	List<Release> findLatestDeployedOrFailed();
 
 	/**
@@ -104,6 +113,7 @@ public interface ReleaseRepositoryCustom {
 	 * @return if the latest status of the release is deleted then the release is returned,
 	 * otherwise null.
 	 */
+	@RestResource(exported = false)
 	Release findLatestReleaseIfDeleted(String releaseName);
 
 
