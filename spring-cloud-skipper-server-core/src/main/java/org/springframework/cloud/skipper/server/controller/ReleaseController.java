@@ -22,11 +22,17 @@ import org.springframework.cloud.skipper.PackageDeleteException;
 import org.springframework.cloud.skipper.ReleaseNotFoundException;
 import org.springframework.cloud.skipper.domain.DeleteProperties;
 import org.springframework.cloud.skipper.domain.Info;
+import org.springframework.cloud.skipper.domain.Manifest;
 import org.springframework.cloud.skipper.domain.Release;
 import org.springframework.cloud.skipper.domain.UpgradeRequest;
 import org.springframework.cloud.skipper.server.service.ReleaseService;
 import org.springframework.cloud.skipper.server.statemachine.SkipperStateMachineService;
+import org.springframework.cloud.skipper.server.util.InfoResourceAssembler;
+import org.springframework.cloud.skipper.server.util.ManifestResourceAssembler;
+import org.springframework.cloud.skipper.server.util.ReleaseResourceAssembler;
+import org.springframework.hateoas.Resource;
 import org.springframework.hateoas.ResourceSupport;
+import org.springframework.hateoas.Resources;
 import org.springframework.hateoas.mvc.ControllerLinkBuilder;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -50,15 +56,16 @@ import static org.springframework.hateoas.mvc.ControllerLinkBuilder.methodOn;
 @RequestMapping("/api/release")
 public class ReleaseController {
 
+	private final ReleaseService releaseService;
+	private final SkipperStateMachineService skipperStateMachineService;
+	private final ReleaseResourceAssembler releaseResourceAssembler = new ReleaseResourceAssembler();
+	private final ManifestResourceAssembler manifestResourceAssembler = new ManifestResourceAssembler();
+	private final InfoResourceAssembler infoResourceAssembler = new InfoResourceAssembler();
+
 	@Value("${info.app.name:#{null}}")
 	private String appName;
-
 	@Value("${info.app.version:#{null}}")
 	private String appVersion;
-
-	private final ReleaseService releaseService;
-
-	private final SkipperStateMachineService skipperStateMachineService;
 
 	public ReleaseController(ReleaseService releaseService,
 			SkipperStateMachineService skipperStateMachineService) {
@@ -70,28 +77,25 @@ public class ReleaseController {
 	public ReleaseControllerLinksResource resourceLinks() {
 		ReleaseControllerLinksResource resource = new ReleaseControllerLinksResource();
 		resource.add(ControllerLinkBuilder.linkTo(methodOn(ReleaseController.class).status(null))
-							.withRel("status/name"));
+				.withRel("status/name"));
 		resource.add(ControllerLinkBuilder.linkTo(methodOn(ReleaseController.class).status(null, null))
-							.withRel("status/name/version"));
+				.withRel("status/name/version"));
 		resource.add(
 				ControllerLinkBuilder.linkTo(methodOn(ReleaseController.class).manifest(null))
 						.withRel("manifest"));
 		resource.add(ControllerLinkBuilder.linkTo(methodOn(ReleaseController.class).manifest(null, null))
-							.withRel("manifest/name/version"));
+				.withRel("manifest/name/version"));
 		resource.add(ControllerLinkBuilder.linkTo(methodOn(ReleaseController.class).upgrade(null))
-							.withRel("upgrade"));
+				.withRel("upgrade"));
 		resource.add(
-				ControllerLinkBuilder.linkTo(methodOn(ReleaseController.class).rollback(null, null))
+				ControllerLinkBuilder.linkTo(methodOn(ReleaseController.class).rollback(null, 123))
 						.withRel("rollback"));
 		resource.add(ControllerLinkBuilder.linkTo(methodOn(ReleaseController.class).delete(null, null))
 							.withRel("delete"));
-		resource.add(
-				ControllerLinkBuilder.linkTo(methodOn(ReleaseController.class).history(null, null))
-						.withRel("history"));
 		resource.add(ControllerLinkBuilder.linkTo(methodOn(ReleaseController.class).list())
-							.withRel("list"));
+				.withRel("list"));
 		resource.add(ControllerLinkBuilder.linkTo(methodOn(ReleaseController.class).list(null))
-							.withRel("list/name"));
+				.withRel("list/name"));
 		return resource;
 	}
 
@@ -99,64 +103,66 @@ public class ReleaseController {
 
 	@RequestMapping(path = "/status/{name}", method = RequestMethod.GET)
 	@ResponseStatus(HttpStatus.OK)
-	public Info status(@PathVariable("name") String name) {
-		return this.releaseService.status(name);
+	public Resource<Info> status(@PathVariable("name") String name) {
+		return this.infoResourceAssembler.toResource(this.releaseService.status(name));
 	}
 
 	@RequestMapping(path = "/status/{name}/{version}", method = RequestMethod.GET)
 	@ResponseStatus(HttpStatus.OK)
-	public Info status(@PathVariable("name") String name, @PathVariable("version") Integer version) {
-		return this.releaseService.status(name, version);
+	public Resource<Info> status(@PathVariable("name") String name, @PathVariable("version") Integer version) {
+		return this.infoResourceAssembler.toResource(this.releaseService.status(name, version));
 	}
 
 	@RequestMapping(path = "/manifest/{name}", method = RequestMethod.GET)
-	public ResponseEntity<String> manifest(@PathVariable("name") String name) {
-		return new ResponseEntity<String>(this.releaseService.manifest(name), HttpStatus.OK);
+	@ResponseStatus(HttpStatus.OK)
+	public Resource<Manifest> manifest(@PathVariable("name") String name) {
+		return this.manifestResourceAssembler.toResource(this.releaseService.manifest(name));
 	}
 
 	@RequestMapping(path = "/manifest/{name}/{version}", method = RequestMethod.GET)
-	public ResponseEntity<String> manifest(@PathVariable("name") String name,
+	@ResponseStatus(HttpStatus.OK)
+	public Resource<Manifest> manifest(@PathVariable("name") String name,
 			@PathVariable("version") Integer version) {
-		return new ResponseEntity<String>(this.releaseService.manifest(name, version), HttpStatus.OK);
+		return this.manifestResourceAssembler.toResource(this.releaseService.manifest(name, version));
 	}
 
 	@RequestMapping(path = "/upgrade", method = RequestMethod.POST)
 	@ResponseStatus(HttpStatus.CREATED)
-	public Release upgrade(@RequestBody UpgradeRequest upgradeRequest) {
-		return this.skipperStateMachineService.upgradeRelease(upgradeRequest);
+	public Resource<Release> upgrade(@RequestBody UpgradeRequest upgradeRequest) {
+		Release release = this.skipperStateMachineService.upgradeRelease(upgradeRequest);
+		return this.releaseResourceAssembler.toResource(release);
 	}
 
 	@RequestMapping(path = "/rollback/{name}/{version}", method = RequestMethod.POST)
 	@ResponseStatus(HttpStatus.CREATED)
-	public Release rollback(@PathVariable("name") String releaseName,
-			@PathVariable("version") Integer rollbackVersion) {
-		return this.skipperStateMachineService.rollbackRelease(releaseName, rollbackVersion);
+	public Resource<Release> rollback(@PathVariable("name") String releaseName,
+			@PathVariable("version") int rollbackVersion) {
+		Release release = this.skipperStateMachineService.rollbackRelease(releaseName, rollbackVersion);
+		return this.releaseResourceAssembler.toResource(release);
 	}
 
 	@RequestMapping(path = "/delete/{name}", method = RequestMethod.POST)
 	@ResponseStatus(HttpStatus.CREATED)
-	public Release delete(@PathVariable("name") String releaseName,
+	public Resource<Release> delete(@PathVariable("name") String releaseName,
 			@RequestBody DeleteProperties deleteProperties) {
-		return this.skipperStateMachineService.deleteRelease(releaseName, deleteProperties);
-	}
-
-	@RequestMapping(path = "/history/{name}/{max}", method = RequestMethod.GET)
-	@ResponseStatus(HttpStatus.OK)
-	public List<Release> history(@PathVariable("name") String releaseName,
-			@PathVariable("max") Integer maxRevisions) {
-		return this.releaseService.history(releaseName, maxRevisions);
+		Release release = this.skipperStateMachineService.deleteRelease(releaseName, deleteProperties);
+		return this.releaseResourceAssembler.toResource(release);
 	}
 
 	@RequestMapping(path = "/list", method = RequestMethod.GET)
 	@ResponseStatus(HttpStatus.OK)
-	public List<Release> list() {
-		return this.releaseService.list();
+	public Resources<Resource<Release>> list() {
+		List<Release> releaseList = this.releaseService.list();
+		Resources<Resource<Release>> resources = this.releaseResourceAssembler.toResources(releaseList);
+		return resources;
 	}
 
 	@RequestMapping(path = "/list/{name}", method = RequestMethod.GET)
 	@ResponseStatus(HttpStatus.OK)
-	public List<Release> list(@PathVariable("name") String releaseName) {
-		return this.releaseService.list(releaseName);
+	public Resources<Resource<Release>> list(@PathVariable("name") String releaseName) {
+		List<Release> releaseList = this.releaseService.list(releaseName);
+		Resources<Resource<Release>> resources = this.releaseResourceAssembler.toResources(releaseList);
+		return resources;
 	}
 
 	@ResponseStatus(value = HttpStatus.NOT_FOUND, reason = "Release not found")

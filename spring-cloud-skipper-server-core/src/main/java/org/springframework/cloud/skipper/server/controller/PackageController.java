@@ -23,6 +23,9 @@ import org.springframework.cloud.skipper.domain.UploadRequest;
 import org.springframework.cloud.skipper.server.service.PackageMetadataService;
 import org.springframework.cloud.skipper.server.service.PackageService;
 import org.springframework.cloud.skipper.server.statemachine.SkipperStateMachineService;
+import org.springframework.cloud.skipper.server.util.PackageMetadataResourceAssembler;
+import org.springframework.cloud.skipper.server.util.ReleaseResourceAssembler;
+import org.springframework.hateoas.Resource;
 import org.springframework.hateoas.ResourceSupport;
 import org.springframework.hateoas.mvc.ControllerLinkBuilder;
 import org.springframework.http.HttpStatus;
@@ -51,6 +54,10 @@ public class PackageController {
 
 	private final PackageMetadataService packageMetadataService;
 
+	private PackageMetadataResourceAssembler packageMetadataResourceAssembler = new PackageMetadataResourceAssembler();
+
+	private ReleaseResourceAssembler releaseResourceAssembler = new ReleaseResourceAssembler();
+
 	public PackageController(PackageService packageService, PackageMetadataService packageMetadataService,
 			SkipperStateMachineService skipperStateMachineService) {
 		this.packageService = packageService;
@@ -73,20 +80,20 @@ public class PackageController {
 
 	@RequestMapping(path = "/upload", method = RequestMethod.POST)
 	@ResponseStatus(HttpStatus.CREATED)
-	public PackageMetadata upload(@RequestBody UploadRequest uploadRequest) {
-		return this.packageService.upload(uploadRequest);
+	public Resource<PackageMetadata> upload(@RequestBody UploadRequest uploadRequest) {
+		return this.packageMetadataResourceAssembler.toResource(this.packageService.upload(uploadRequest));
 	}
 
 	@RequestMapping(path = "/install", method = RequestMethod.POST)
 	@ResponseStatus(HttpStatus.CREATED)
-	public Release install(@RequestBody InstallRequest installRequest) {
-		return this.skipperStateMachineService.installRelease(installRequest);
+	public Resource<Release> install(@RequestBody InstallRequest installRequest) {
+		return this.releaseResourceAssembler.toResource(this.skipperStateMachineService.installRelease(installRequest));
 	}
 
 	@RequestMapping(path = "/install/{id}", method = RequestMethod.POST)
 	@ResponseStatus(HttpStatus.CREATED)
-	public Release install(@PathVariable("id") Long id, @RequestBody InstallProperties installProperties) {
-		return this.skipperStateMachineService.installRelease(id, installProperties);
+	public Resource<Release> install(@PathVariable("id") Long id, @RequestBody InstallProperties installProperties) {
+		return this.releaseResourceAssembler.toResource(this.skipperStateMachineService.installRelease(id, installProperties));
 	}
 
 	@RequestMapping(path = "/{name}", method = RequestMethod.DELETE)
@@ -95,12 +102,11 @@ public class PackageController {
 		this.packageMetadataService.deleteIfAllReleasesDeleted(name, PackageMetadataService.DEFAULT_RELEASE_ACTIVITY_CHECK);
 	}
 
-	/**
-	 * @author Mark Pollack
-	 */
 	public static class PackageControllerLinksResource extends ResourceSupport {
 
 		public PackageControllerLinksResource() {
 		}
 	}
+
+
 }

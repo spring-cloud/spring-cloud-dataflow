@@ -61,7 +61,7 @@ import static org.springframework.shell.standard.ShellOption.NULL;
 @ShellComponent
 public class PackageCommands extends AbstractSkipperCommand {
 
-	private static final Logger logger = LoggerFactory.getLogger(SkipperCommands.class);
+	private static final Logger logger = LoggerFactory.getLogger(ReleaseCommands.class);
 
 	@Autowired
 	public PackageCommands(SkipperClient skipperClient) {

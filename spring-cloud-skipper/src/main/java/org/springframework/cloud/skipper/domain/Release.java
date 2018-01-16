@@ -76,8 +76,9 @@ public class Release extends AbstractEntity {
 	@Lob
 	private String configValuesString;
 
-	@Lob
-	private String manifest;
+	@OneToOne(cascade = { CascadeType.ALL })
+	@JoinColumn(foreignKey = @ForeignKey(name = "fk_release_manifest"))
+	private Manifest manifest;
 
 	private String platformName;
 
@@ -159,11 +160,11 @@ public class Release extends AbstractEntity {
 		}
 	}
 
-	public String getManifest() {
+	public Manifest getManifest() {
 		return manifest;
 	}
 
-	public void setManifest(String manifest) {
+	public void setManifest(Manifest manifest) {
 		this.manifest = manifest;
 	}
 

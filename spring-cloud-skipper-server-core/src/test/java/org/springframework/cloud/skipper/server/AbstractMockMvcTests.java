@@ -20,6 +20,7 @@ import java.nio.charset.Charset;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Before;
 import org.junit.runner.RunWith;
@@ -106,6 +107,7 @@ public abstract class AbstractMockMvcTests extends AbstractAssertReleaseDeployed
 
 	private Info convertContentToInfo(String json) {
 		ObjectMapper objectMapper = new ObjectMapper();
+		objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
 		try {
 			return objectMapper.readValue(json, new TypeReference<Info>() {
 			});
@@ -117,6 +119,7 @@ public abstract class AbstractMockMvcTests extends AbstractAssertReleaseDeployed
 
 	protected Release convertContentToRelease(String json) {
 		ObjectMapper objectMapper = new ObjectMapper();
+		objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
 		try {
 			return objectMapper.readValue(json, new TypeReference<Release>() {
 			});

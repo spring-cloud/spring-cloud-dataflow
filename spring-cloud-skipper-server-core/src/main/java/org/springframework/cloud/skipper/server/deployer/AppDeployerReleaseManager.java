@@ -30,6 +30,7 @@ import org.springframework.cloud.deployer.spi.app.DeploymentState;
 import org.springframework.cloud.deployer.spi.app.MultiStateAppDeployer;
 import org.springframework.cloud.deployer.spi.core.AppDeploymentRequest;
 import org.springframework.cloud.skipper.SkipperException;
+import org.springframework.cloud.skipper.domain.Manifest;
 import org.springframework.cloud.skipper.domain.Release;
 import org.springframework.cloud.skipper.domain.SpringCloudDeployerApplicationManifest;
 import org.springframework.cloud.skipper.domain.SpringCloudDeployerApplicationManifestReader;
@@ -86,10 +87,10 @@ public class AppDeployerReleaseManager implements ReleaseManager {
 
 	public Release install(Release releaseInput) {
 		Release release = this.releaseRepository.save(releaseInput);
-		logger.debug("Manifest = " + ArgumentSanitizer.sanitizeYml(releaseInput.getManifest()));
+		logger.debug("Manifest = " + ArgumentSanitizer.sanitizeYml(releaseInput.getManifest().getData()));
 		// Deploy the application
 		List<? extends SpringCloudDeployerApplicationManifest> applicationSpecList = this.applicationManifestReader
-				.read(release.getManifest());
+				.read(release.getManifest().getData());
 		AppDeployer appDeployer = this.deployerRepository.findByNameRequired(release.getPlatformName())
 				.getAppDeployer();
 		Map<String, String> appNameDeploymentIdMap = new HashMap<>();
@@ -150,7 +151,9 @@ public class AppDeployerReleaseManager implements ReleaseManager {
 		Map<String, Object> model = calculateAppCountsForRelease(replacingRelease, existingAppNamesAndDeploymentIds,
 				applicationNamesToUpgrade, appStatuses);
 
-		String manifest = ManifestUtils.createManifest(replacingRelease.getPkg(), model);
+		String manifestData = ManifestUtils.createManifest(replacingRelease.getPkg(), model);
+		Manifest manifest = new Manifest();
+		manifest.setData(manifestData);
 		replacingRelease.setManifest(manifest);
 		this.releaseRepository.save(replacingRelease);
 		return releaseAnalysisReport;

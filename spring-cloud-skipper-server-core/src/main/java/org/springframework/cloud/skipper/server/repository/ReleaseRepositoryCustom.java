@@ -85,7 +85,7 @@ public interface ReleaseRepositoryCustom {
 	 * @throws SkipperException if no Release for the given name can be found.
 	 */
 	@RestResource(exported = false)
-	List<Release> findReleaseRevisions(String releaseName, int revisions);
+	List<Release> findReleaseRevisions(String releaseName, Integer revisions);
 
 	/**
 	 * Find the latest status (deployed or failed) of the release, by the name.

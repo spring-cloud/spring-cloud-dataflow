@@ -528,26 +528,5 @@ include::{snippets}/delete-documentation/delete-release/http-response.adoc[]
 
 include::{snippets}/delete-documentation/delete-release/response-fields.adoc[]
 
-[[resources-history]]
-==== History
 
-===== Show version history
-
-List the history of versions for a given release.
-
-====== Request structure
-
-include::{snippets}/history-documentation/show-version-history-for-release/http-request.adoc[]
-
-====== Example request
-
-include::{snippets}/history-documentation/show-version-history-for-release/curl-request.adoc[]
-
-====== Response structure
-
-include::{snippets}/history-documentation/show-version-history-for-release/http-response.adoc[]
-
-====== Response fields
-
-include::{snippets}/history-documentation/show-version-history-for-release/response-fields.adoc[]
 

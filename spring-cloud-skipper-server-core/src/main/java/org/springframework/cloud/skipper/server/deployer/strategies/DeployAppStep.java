@@ -119,7 +119,7 @@ public class DeployAppStep {
 			AppDeployer appDeployer) {
 		List<? extends SpringCloudDeployerApplicationManifest> applicationSpecList = this.applicationManifestReader
 				.read(replacingRelease
-						.getManifest());
+						.getManifest().getData());
 
 		Map<String, String> appNameDeploymentIdMap = new HashMap<>();
 		for (SpringCloudDeployerApplicationManifest applicationManifest : applicationSpecList) {

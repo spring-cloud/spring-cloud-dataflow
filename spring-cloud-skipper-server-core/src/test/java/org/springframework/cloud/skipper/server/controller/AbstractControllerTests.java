@@ -97,6 +97,7 @@ public abstract class AbstractControllerTests extends AbstractMockMvcTests {
 		MvcResult result = mockMvc.perform(post("/api/package/install/" + packageMetadata.getId())
 				.content(convertObjectToJson(installProperties))).andDo(print())
 				.andExpect(status().isCreated()).andReturn();
+
 		Release release = convertContentToRelease(result.getResponse().getContentAsString());
 		assertReleaseIsDeployedSuccessfully(releaseName, release.getVersion());
 		Release deployedRelease = this.releaseRepository.findByNameAndVersion(releaseName, release.getVersion());

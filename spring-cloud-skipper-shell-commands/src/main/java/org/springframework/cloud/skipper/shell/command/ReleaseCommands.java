@@ -55,17 +55,17 @@ import org.springframework.util.StringUtils;
 import static org.springframework.shell.standard.ShellOption.NULL;
 
 /**
- * The main skipper commands that deal with packages and releases.
+ * The main skipper commands that deal with releases.
  * @author Ilayaperumal Gopinathan
  * @author Mark Pollack
  */
 @ShellComponent
-public class SkipperCommands extends AbstractSkipperCommand {
+public class ReleaseCommands extends AbstractSkipperCommand {
 
-	private static final Logger logger = LoggerFactory.getLogger(SkipperCommands.class);
+	private static final Logger logger = LoggerFactory.getLogger(ReleaseCommands.class);
 
 	@Autowired
-	public SkipperCommands(SkipperClient skipperClient) {
+	public ReleaseCommands(SkipperClient skipperClient) {
 		this.skipperClient = skipperClient;
 	}
 
@@ -224,16 +224,9 @@ public class SkipperCommands extends AbstractSkipperCommand {
 
 	@ShellMethod(key = "release history", value = "List the history of versions for a given release.")
 	public Table history(
-			@ShellOption(help = "wildcard expression to search by release name") @NotNull String releaseName,
-			@ShellOption(help = "maximum number of revisions to include in the history", defaultValue = NULL) String max) {
+			@ShellOption(help = "wildcard expression to search by release name") @NotNull String releaseName) {
 		Collection<Release> releases;
-		if (StringUtils.hasText(max)) {
-			assertMaxIsIntegerAndGreaterThanZero(max);
-			releases = this.skipperClient.history(releaseName, max);
-		}
-		else {
-			releases = this.skipperClient.history(releaseName).getContent();
-		}
+		releases = this.skipperClient.history(releaseName).getContent();
 		LinkedHashMap<String, Object> headers = new LinkedHashMap<>();
 		headers.put("version", "Version");
 		headers.put("info.lastDeployed", "Last updated");

@@ -96,7 +96,7 @@ public class ReleaseRepositoryImpl implements ReleaseRepositoryCustom {
 	}
 
 	@Override
-	public List<Release> findReleaseRevisions(String releaseName, int revisions) {
+	public List<Release> findReleaseRevisions(String releaseName, Integer revisions) {
 		int latestVersion = findLatestRelease(releaseName).getVersion();
 		int lowerVersion = latestVersion - Integer.valueOf(revisions);
 		return this.releaseRepository.findByNameAndVersionBetweenOrderByNameAscVersionDesc(releaseName,

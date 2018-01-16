@@ -28,6 +28,7 @@ import org.springframework.util.StringUtils;
 import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.get;
 import static org.springframework.restdocs.payload.PayloadDocumentation.fieldWithPath;
 import static org.springframework.restdocs.payload.PayloadDocumentation.responseFields;
+import static org.springframework.restdocs.payload.PayloadDocumentation.subsectionWithPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -56,59 +57,62 @@ public class ListDocumentation extends BaseDocumentation {
 				.andExpect(status().isOk())
 				.andDo(this.documentationHandler.document(
 						responseFields(
-								fieldWithPath("[].name").description("Name of the release"),
-								fieldWithPath("[].version").description("Version of the release"),
-								fieldWithPath("[].info.status.statusCode").description(
+								subsectionWithPath("_embedded.releases[]._links").ignored(),
+								fieldWithPath("_embedded.releases[].name").description("Name of the release"),
+								fieldWithPath("_embedded.releases[].version").description("Version of the release"),
+								fieldWithPath("_embedded.releases[].info.status.statusCode").description(
 										String.format("StatusCode of the release's status (%s)",
 												StringUtils.arrayToCommaDelimitedString(StatusCode.values()))),
-								fieldWithPath("[].info.status.platformStatus")
+								fieldWithPath("_embedded.releases[].info.status.platformStatus")
 										.description("Status from the underlying platform"),
-								fieldWithPath("[].info.firstDeployed").description("Date/Time of first deployment"),
-								fieldWithPath("[].info.lastDeployed").description("Date/Time of last deployment"),
-								fieldWithPath("[].info.deleted")
+								fieldWithPath("_embedded.releases[].info.firstDeployed").description("Date/Time of first deployment"),
+								fieldWithPath("_embedded.releases[].info.lastDeployed").description("Date/Time of last deployment"),
+								fieldWithPath("_embedded.releases[].info.deleted")
 										.description("Date/Time of when the release was deleted"),
-								fieldWithPath("[].info.description")
+								fieldWithPath("_embedded.releases[].info.description")
 										.description("Human-friendly 'log entry' about this release"),
-								fieldWithPath("[].pkg.metadata.apiVersion")
+								fieldWithPath("_embedded.releases[].pkg.metadata.apiVersion")
 										.description("The Package Index spec version this file is based on"),
-								fieldWithPath("[].pkg.metadata.origin")
+								fieldWithPath("_embedded.releases[].pkg.metadata.origin")
 										.description("Indicates the origin of the repository (free form text)"),
-								fieldWithPath("[].pkg.metadata.repositoryId")
+								fieldWithPath("_embedded.releases[].pkg.metadata.repositoryId")
 										.description("The repository ID this Package belongs to"),
-								fieldWithPath("[].pkg.metadata.repositoryName")
+								fieldWithPath("_embedded.releases[].pkg.metadata.repositoryName")
 										.description("The repository name this Package belongs to."),
-								fieldWithPath("[].pkg.metadata.kind")
+								fieldWithPath("_embedded.releases[].pkg.metadata.kind")
 										.description("What type of package system is being used"),
-								fieldWithPath("[].pkg.metadata.name").description("The name of the package"),
-								fieldWithPath("[].pkg.metadata.displayName").description("Display name of the release"),
-								fieldWithPath("[].pkg.metadata.version").description("The version of the package"),
-								fieldWithPath("[].pkg.metadata.packageSourceUrl")
+								fieldWithPath("_embedded.releases[].pkg.metadata.name").description("The name of the package"),
+								fieldWithPath("_embedded.releases[].pkg.metadata.displayName").description("Display name of the release"),
+								fieldWithPath("_embedded.releases[].pkg.metadata.version").description("The version of the package"),
+								fieldWithPath("_embedded.releases[].pkg.metadata.packageSourceUrl")
 										.description("Location to source code for this package"),
-								fieldWithPath("[].pkg.metadata.packageHomeUrl")
+								fieldWithPath("_embedded.releases[].pkg.metadata.packageHomeUrl")
 										.description("The home page of the package"),
-								fieldWithPath("[].pkg.metadata.tags")
+								fieldWithPath("_embedded.releases[].pkg.metadata.tags")
 										.description("A comma separated list of tags to use for searching"),
-								fieldWithPath("[].pkg.metadata.maintainer")
+								fieldWithPath("_embedded.releases[].pkg.metadata.maintainer")
 										.description("Who is maintaining this package"),
-								fieldWithPath("[].pkg.metadata.description")
+								fieldWithPath("_embedded.releases[].pkg.metadata.description")
 										.description("Brief description of the package"),
-								fieldWithPath("[].pkg.metadata.sha256").description(
+								fieldWithPath("_embedded.releases[].pkg.metadata.sha256").description(
 										"Hash of package binary that will be downloaded using SHA256 hash algorithm"),
-								fieldWithPath("[].pkg.metadata.iconUrl").description("Url location of a icon"),
-								fieldWithPath("[].pkg.templates[].name")
+								fieldWithPath("_embedded.releases[].pkg.metadata.iconUrl").description("Url location of a icon"),
+								fieldWithPath("_embedded.releases[].pkg.templates[].name")
 										.description("Name is the path-like name of the template"),
-								fieldWithPath("[].pkg.templates[].data")
+								fieldWithPath("_embedded.releases[].pkg.templates[].data")
 										.description("Data is the template as string data"),
-								fieldWithPath("[].pkg.dependencies")
+								fieldWithPath("_embedded.releases[].pkg.dependencies")
 										.description("The packages that this package depends upon"),
-								fieldWithPath("[].pkg.configValues.raw")
+								fieldWithPath("_embedded.releases[].pkg.configValues.raw")
 										.description("The raw YAML string of configuration values"),
-								fieldWithPath("[].pkg.fileHolders")
+								fieldWithPath("_embedded.releases[].pkg.fileHolders")
 										.description("Miscellaneous files in a package, e.g. README, LICENSE, etc."),
-								fieldWithPath("[].configValues.raw")
+								fieldWithPath("_embedded.releases[].configValues.raw")
 										.description("The raw YAML string of configuration values"),
-								fieldWithPath("[].manifest").description("The manifest of the release"),
-								fieldWithPath("[].platformName").description("Platform name of the release"))));
+								fieldWithPath("_embedded.releases[].manifest.data").description("The manifest of the release"),
+								fieldWithPath("_embedded.releases[].platformName").description("Platform name of the release"))
+
+				));
 	}
 
 	@Test
@@ -129,58 +133,59 @@ public class ListDocumentation extends BaseDocumentation {
 				.andExpect(status().isOk())
 				.andDo(this.documentationHandler.document(
 						responseFields(
-								fieldWithPath("[].name").description("Name of the release"),
-								fieldWithPath("[].version").description("Version of the release"),
-								fieldWithPath("[].info.status.statusCode").description(
+								subsectionWithPath("_embedded.releases[]._links").ignored(),
+								fieldWithPath("_embedded.releases[].name").description("Name of the release"),
+								fieldWithPath("_embedded.releases[].version").description("Version of the release"),
+								fieldWithPath("_embedded.releases[].info.status.statusCode").description(
 										String.format("StatusCode of the release's status (%s)",
 												StringUtils.arrayToCommaDelimitedString(StatusCode.values()))),
-								fieldWithPath("[].info.status.platformStatus")
+								fieldWithPath("_embedded.releases[].info.status.platformStatus")
 										.description("Status from the underlying platform"),
-								fieldWithPath("[].info.firstDeployed").description("Date/Time of first deployment"),
-								fieldWithPath("[].info.lastDeployed").description("Date/Time of last deployment"),
-								fieldWithPath("[].info.deleted")
+								fieldWithPath("_embedded.releases[].info.firstDeployed").description("Date/Time of first deployment"),
+								fieldWithPath("_embedded.releases[].info.lastDeployed").description("Date/Time of last deployment"),
+								fieldWithPath("_embedded.releases[].info.deleted")
 										.description("Date/Time of when the release was deleted"),
-								fieldWithPath("[].info.description")
+								fieldWithPath("_embedded.releases[].info.description")
 										.description("Human-friendly 'log entry' about this release"),
-								fieldWithPath("[].pkg.metadata.apiVersion")
+								fieldWithPath("_embedded.releases[].pkg.metadata.apiVersion")
 										.description("The Package Index spec version this file is based on"),
-								fieldWithPath("[].pkg.metadata.origin")
+								fieldWithPath("_embedded.releases[].pkg.metadata.origin")
 										.description("Indicates the origin of the repository (free form text)"),
-								fieldWithPath("[].pkg.metadata.repositoryId")
+								fieldWithPath("_embedded.releases[].pkg.metadata.repositoryId")
 										.description("The repository ID this Package belongs to"),
-								fieldWithPath("[].pkg.metadata.repositoryName")
+								fieldWithPath("_embedded.releases[].pkg.metadata.repositoryName")
 										.description("The repository name this Package belongs to."),
-								fieldWithPath("[].pkg.metadata.kind")
+								fieldWithPath("_embedded.releases[].pkg.metadata.kind")
 										.description("What type of package system is being used"),
-								fieldWithPath("[].pkg.metadata.name").description("The name of the package"),
-								fieldWithPath("[].pkg.metadata.displayName").description("Display name of the release"),
-								fieldWithPath("[].pkg.metadata.version").description("The version of the package"),
-								fieldWithPath("[].pkg.metadata.packageSourceUrl")
+								fieldWithPath("_embedded.releases[].pkg.metadata.name").description("The name of the package"),
+								fieldWithPath("_embedded.releases[].pkg.metadata.displayName").description("Display name of the release"),
+								fieldWithPath("_embedded.releases[].pkg.metadata.version").description("The version of the package"),
+								fieldWithPath("_embedded.releases[].pkg.metadata.packageSourceUrl")
 										.description("Location to source code for this package"),
-								fieldWithPath("[].pkg.metadata.packageHomeUrl")
+								fieldWithPath("_embedded.releases[].pkg.metadata.packageHomeUrl")
 										.description("The home page of the package"),
-								fieldWithPath("[].pkg.metadata.tags")
+								fieldWithPath("_embedded.releases[].pkg.metadata.tags")
 										.description("A comma separated list of tags to use for searching"),
-								fieldWithPath("[].pkg.metadata.maintainer")
+								fieldWithPath("_embedded.releases[].pkg.metadata.maintainer")
 										.description("Who is maintaining this package"),
-								fieldWithPath("[].pkg.metadata.description")
+								fieldWithPath("_embedded.releases[].pkg.metadata.description")
 										.description("Brief description of the package"),
-								fieldWithPath("[].pkg.metadata.sha256").description(
+								fieldWithPath("_embedded.releases[].pkg.metadata.sha256").description(
 										"Hash of package binary that will be downloaded using SHA256 hash algorithm"),
-								fieldWithPath("[].pkg.metadata.iconUrl").description("Url location of a icon"),
-								fieldWithPath("[].pkg.templates[].name")
+								fieldWithPath("_embedded.releases[].pkg.metadata.iconUrl").description("Url location of a icon"),
+								fieldWithPath("_embedded.releases[].pkg.templates[].name")
 										.description("Name is the path-like name of the template"),
-								fieldWithPath("[].pkg.templates[].data")
+								fieldWithPath("_embedded.releases[].pkg.templates[].data")
 										.description("Data is the template as string data"),
-								fieldWithPath("[].pkg.dependencies")
+								fieldWithPath("_embedded.releases[].pkg.dependencies")
 										.description("The packages that this package depends upon"),
-								fieldWithPath("[].pkg.configValues.raw")
+								fieldWithPath("_embedded.releases[].pkg.configValues.raw")
 										.description("The raw YAML string of configuration values"),
-								fieldWithPath("[].pkg.fileHolders")
+								fieldWithPath("_embedded.releases[].pkg.fileHolders")
 										.description("Miscellaneous files in a package, e.g. README, LICENSE, etc."),
-								fieldWithPath("[].configValues.raw")
+								fieldWithPath("_embedded.releases[].configValues.raw")
 										.description("The raw YAML string of configuration values"),
-								fieldWithPath("[].manifest").description("The manifest of the release"),
-								fieldWithPath("[].platformName").description("Platform name of the release"))));
+								fieldWithPath("_embedded.releases[].manifest.data").description("The manifest of the release"),
+								fieldWithPath("_embedded.releases[].platformName").description("Platform name of the release"))));
 	}
 }

@@ -21,6 +21,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import org.springframework.cloud.skipper.domain.Info;
+import org.springframework.cloud.skipper.domain.Manifest;
 import org.springframework.cloud.skipper.domain.Package;
 import org.springframework.cloud.skipper.domain.PackageIdentifier;
 import org.springframework.cloud.skipper.domain.PackageMetadata;
@@ -86,7 +87,9 @@ public class ReleaseReportService {
 				existingRelease.getPlatformName());
 		Map<String, Object> model = ConfigValueUtils.mergeConfigValues(replacingRelease.getPkg(),
 				replacingRelease.getConfigValues());
-		String manifest = ManifestUtils.createManifest(replacingRelease.getPkg(), model);
+		String manifestData = ManifestUtils.createManifest(replacingRelease.getPkg(), model);
+		Manifest manifest = new Manifest();
+		manifest.setData(manifestData);
 		replacingRelease.setManifest(manifest);
 		return this.releaseManager.createReport(existingRelease, replacingRelease);
 	}

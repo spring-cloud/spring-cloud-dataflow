@@ -65,10 +65,10 @@ public class ReleaseAnalyzer {
 		// For now, assume single package with no deps or package with same number of deps
 		List<? extends SpringCloudDeployerApplicationManifest> existingApplicationSpecList = this.applicationManifestReader
 				.read(existingRelease
-						.getManifest());
+						.getManifest().getData());
 		List<? extends SpringCloudDeployerApplicationManifest> replacingApplicationSpecList = this.applicationManifestReader
 				.read(replacingRelease
-						.getManifest());
+						.getManifest().getData());
 
 		if (existingRelease.getPkg().getDependencies().size() == replacingRelease.getPkg().getDependencies().size()) {
 			if (existingRelease.getPkg().getDependencies().size() == 0) {

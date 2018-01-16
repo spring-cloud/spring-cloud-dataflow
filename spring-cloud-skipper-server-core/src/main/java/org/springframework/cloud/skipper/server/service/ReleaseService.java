@@ -28,6 +28,7 @@ import org.springframework.cloud.skipper.SkipperException;
 import org.springframework.cloud.skipper.domain.Info;
 import org.springframework.cloud.skipper.domain.InstallProperties;
 import org.springframework.cloud.skipper.domain.InstallRequest;
+import org.springframework.cloud.skipper.domain.Manifest;
 import org.springframework.cloud.skipper.domain.Package;
 import org.springframework.cloud.skipper.domain.PackageIdentifier;
 import org.springframework.cloud.skipper.domain.PackageMetadata;
@@ -183,8 +184,10 @@ public class ReleaseService {
 	public Release install(Release release) {
 		Map<String, Object> mergedMap = ConfigValueUtils.mergeConfigValues(release.getPkg(), release.getConfigValues());
 		// Render yaml resources
-		String manifest = ManifestUtils.createManifest(release.getPkg(), mergedMap);
-		logger.debug("Manifest = " + ArgumentSanitizer.sanitizeYml(manifest));
+		String manifestData = ManifestUtils.createManifest(release.getPkg(), mergedMap);
+		logger.debug("Manifest = " + ArgumentSanitizer.sanitizeYml(manifestData));
+		Manifest manifest = new Manifest();
+		manifest.setData(manifestData);
 		release.setManifest(manifest);
 		// Deployment
 		Release releaseToReturn = this.releaseManager.install(release);
@@ -272,7 +275,7 @@ public class ReleaseService {
 	 * @return the release manifest
 	 */
 	@Transactional
-	public String manifest(String releaseName) {
+	public Manifest manifest(String releaseName) {
 		Release release = this.releaseRepository.findTopByNameOrderByVersionDesc(releaseName);
 		if (release == null) {
 			throw new ReleaseNotFoundException(releaseName);
@@ -288,7 +291,7 @@ public class ReleaseService {
 	 * @return the release manifest
 	 */
 	@Transactional
-	public String manifest(String releaseName, Integer version) {
+	public Manifest manifest(String releaseName, Integer version) {
 		return this.releaseRepository.findByNameAndVersion(releaseName, version).getManifest();
 	}
 

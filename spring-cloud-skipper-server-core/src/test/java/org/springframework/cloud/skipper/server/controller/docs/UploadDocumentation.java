@@ -35,6 +35,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.post;
 import static org.springframework.restdocs.payload.PayloadDocumentation.fieldWithPath;
 import static org.springframework.restdocs.payload.PayloadDocumentation.responseFields;
+import static org.springframework.restdocs.payload.PayloadDocumentation.subsectionWithPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -76,6 +77,7 @@ public class UploadDocumentation extends BaseDocumentation {
 				.andDo(
 						this.documentationHandler.document(
 								responseFields(
+										subsectionWithPath("links").ignored(),
 										fieldWithPath("apiVersion")
 												.description("The Package Index spec version this file is based on"),
 										fieldWithPath("origin")
