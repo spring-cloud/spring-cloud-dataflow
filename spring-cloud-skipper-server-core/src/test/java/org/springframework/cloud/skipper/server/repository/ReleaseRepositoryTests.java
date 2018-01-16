@@ -63,6 +63,7 @@ public class ReleaseRepositoryTests extends AbstractIntegrationTest {
 		packageMetadata1.setApiVersion("skipper.spring.io/v1");
 		packageMetadata1.setKind("SpringCloudDeployerApplication");
 		packageMetadata1.setRepositoryId(REMOTE_REPO);
+		packageMetadata1.setRepositoryName("local");
 		packageMetadata1.setName("package1");
 		packageMetadata1.setVersion("1.0.0");
 		Package pkg1 = new Package();
@@ -74,6 +75,7 @@ public class ReleaseRepositoryTests extends AbstractIntegrationTest {
 		packageMetadata2.setApiVersion("skipper.spring.io/v1");
 		packageMetadata2.setKind("SpringCloudDeployerApplication");
 		packageMetadata2.setRepositoryId(LOCAL_REPO);
+		packageMetadata2.setRepositoryName("local");
 		packageMetadata2.setName("package2");
 		packageMetadata2.setVersion("1.0.1");
 		Package pkg2 = new Package();
@@ -422,6 +424,7 @@ public class ReleaseRepositoryTests extends AbstractIntegrationTest {
 		packageMetadata1.setApiVersion("skipper.spring.io/v1");
 		packageMetadata1.setKind("SpringCloudDeployerApplication");
 		packageMetadata1.setRepositoryId(LOCAL_REPO);
+		packageMetadata1.setRepositoryName("local");
 		packageMetadata1.setName("ticktock");
 		packageMetadata1.setVersion("1.0.0");
 		Package pkg1 = new Package();
