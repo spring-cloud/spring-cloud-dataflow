@@ -20,6 +20,7 @@ import java.io.IOException;
 import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.ForeignKey;
+import javax.persistence.Index;
 import javax.persistence.JoinColumn;
 import javax.persistence.Lob;
 import javax.persistence.OneToOne;
@@ -41,7 +42,7 @@ import org.springframework.util.StringUtils;
  * @author Gunnar Hillert
  */
 @Entity
-@Table(name = "SkipperRelease")
+@Table(name = "SkipperRelease", indexes = @Index(name="idx_rel_name", columnList = "name"))
 public class Release extends AbstractEntity {
 
 	/**
