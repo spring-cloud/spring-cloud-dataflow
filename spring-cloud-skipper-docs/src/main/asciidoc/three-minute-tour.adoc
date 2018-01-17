@@ -359,7 +359,7 @@ spec:
     helloworld.greeting: yo
   deploymentProperties:
     spring.cloud.deployer.cloudfoundry.route: helloworldpcf.cfapps.io
-    spring.cloud.deployer.memory: 2048m
+    spring.cloud.deployer.memory: 768m
 ----
 
 The `upgrade` command
@@ -675,7 +675,7 @@ spec:
     helloworld.greeting: yo
   deploymentProperties:
     spring.cloud.deployer.kubernetes.createNodePort: 32124
-    spring.cloud.deployer.memory: 2048m
+    spring.cloud.deployer.memory: 768m
 ----
 
 The `release upgrade` command
