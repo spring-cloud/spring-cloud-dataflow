@@ -872,42 +872,48 @@ Subsequent commands to upgrade and rollback applications within the Stream are p
 
 [[spring-cloud-dataflow-stream-lifecycle-skipper-create]]
 === Creating and Deploying a Stream
-You create and deploy a stream using skipper in two steps, creating the stream definition and then deploying the stream.
+You create and deploy a stream as follows:
+[source,bash]
+----
+dataflow:> stream create --name httptest --definition "http --server.port=9000 | log" --deploy
+----
+
+If you want to pass deployment properties, you can create and deploy a stream in two steps:
 [source,bash]
 ----
 dataflow:> stream create --name httptest --definition "http --server.port=9000 | log"
-dataflow:> stream skipper deploy --name httptest
+dataflow:> stream deploy --name httptest
 ----
 
-There is an important optional command argument to the `stream skipper deploy` command, which is `--platformName`.
+There is an important optional command argument to the `stream deploy` command, which is `--platformName`.
 Skipper can be configured to deploy to multiple platforms.
 Skipper is pre-configured with a platform named `default` which will deploys applications to the local machine where Skipper is running.
 The default value of the command line argument `--platformName` is `default`.
 If you are commonly deploying to one platform, when installing Skipper you can override the configuration of the `default` platform.
-Otherwise, specify the platformName to one of the values returned by the command `stream skipper platform-list`
+Otherwise, specify the platformName to one of the values returned by the command `stream platform-list`
 
 NOTE: In future releases, only the local Data Flow server will be configured with the `default` platform.
 
 
 [[spring-cloud-dataflow-stream-lifecycle-skipper-update]]
 === Updating a Stream
-To update the stream, use the command `stream skipper update` which takes as a command argument either `--properties` or `--propertiesFile`.
+To update the stream, use the command `stream update` which takes as a command argument either `--properties` or `--propertiesFile`.
 You can pass in values to these command arguments in the same format as when deploy the stream with or without Skipper.
 There is an important new top level prefix available when using Skipper, which is `version`.
 If the Stream `http | log` was deployed, and the version of `log` which registered at the time of deployment was `1.1.0.RELEASE`, the following command will update the Stream to use the `1.2.0.RELEASE` of the log application.
 [source,bash]
 ----
-dataflow:>stream skipper update --name httptest --properties version.log=1.2.0.RELEASE
+dataflow:>stream update --name httptest --properties version.log=1.2.0.RELEASE
 ----
 
 === Stream versions
 Skipper keeps a history of the Streams that were deployed.
 After updating a Stream, there will be a second version of the stream.
-You can query for the history of the versions using the command `stream skipper history --name <name-of-stream>`.
+You can query for the history of the versions using the command `stream history --name <name-of-stream>`.
 
 [source,bash]
 ----
-dataflow:>stream skipper history --name httptest
+dataflow:>stream history --name httptest
 ╔═══════╤════════════════════════════╤════════╤════════════╤═══════════════╤════════════════╗
 ║Version│        Last updated        │ Status │Package Name│Package Version│  Description   ║
 ╠═══════╪════════════════════════════╪════════╪════════════╪═══════════════╪════════════════╣
@@ -919,12 +925,12 @@ dataflow:>stream skipper history --name httptest
 === Stream Manifests
 Skipper keeps an "manifest" of the all the applications, their application properties and deployment properties after all values have been substituted.
 This represents the final state of what was deployed to the platform.
-You can view the manifest for any of the versions of a Stream using the command `stream skipper manifest --name <name-of-stream> --releaseVersion <optional-version>`
+You can view the manifest for any of the versions of a Stream using the command `stream manifest --name <name-of-stream> --releaseVersion <optional-version>`
 If the `--releaseVersion` is not specified, the manifest for the last version is returned.
 
 [source,bash]
 ----
-dataflow:>stream skipper manifest --name httptest
+dataflow:>stream manifest --name httptest
 
 ---
 # Source: log.yml
@@ -976,10 +982,10 @@ The majority of the deployment and application properties were set by Data Flow 
 
 [[spring-cloud-dataflow-stream-lifecycle-skipper-rollback]]
 === Rollback a Stream
-You can rollback to a previous version of the Stream using the command `stream skipper rollback`.
+You can rollback to a previous version of the Stream using the command `stream rollback`.
 [source,bash]
 ----
-dataflow:>stream skipper rollback --name httptest
+dataflow:>stream rollback --name httptest
 ----
 
 There is an optional `--releaseVersion` command argument which is the version of the Stream.

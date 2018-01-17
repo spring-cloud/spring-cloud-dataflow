@@ -33,7 +33,7 @@ app:
 Now update the Stream
 [source,bash]
 ----
-dataflow:> stream skipper update --name httptest --propertiesFile /home/mpollack/local-log-update.yml
+dataflow:> stream update --name httptest --propertiesFile /home/mpollack/local-log-update.yml
 Update request has been sent for the stream 'httptest'
 ----
 
@@ -81,11 +81,11 @@ $ curl http://localhost:9002/info
 
 === Stream History
 
-The history of the Stream can be viewed by executing the `stream skipper history` command
+The history of the Stream can be viewed by executing the `stream history` command
 
 [source,bash]
 ----
-dataflow:>stream skipper history --name httptest
+dataflow:>stream history --name httptest
 ╔═══════╤════════════════════════════╤════════╤════════════╤═══════════════╤════════════════╗
 ║Version│        Last updated        │ Status │Package Name│Package Version│  Description   ║
 ╠═══════╪════════════════════════════╪════════╪════════════╪═══════════════╪════════════════╣
@@ -97,12 +97,12 @@ dataflow:>stream skipper history --name httptest
 === Stream Manifest
 
 The manifest is a YAML document that represents the final state of what was deployed to the platform.
-You can view the manifest for any Stream version using the command `stream skipper manifest --name <name-of-stream> --releaseVersion <optional-version>`
+You can view the manifest for any Stream version using the command `stream manifest --name <name-of-stream> --releaseVersion <optional-version>`
 If the `--releaseVersion` is not specified, the manifest for the last version is returned.
 
 [source,bash]
 ----
-dataflow:>stream skipper manifest --name httptest
+dataflow:>stream manifest --name httptest
 
 ---
 # Source: log.yml
@@ -156,11 +156,11 @@ If you compare this YAML document to the one for `--releaseVersion=1` you will s
 
 == Rolling back
 
-To go back to the previous version of the stream, use the `stream skipper rollback` command.
+To go back to the previous version of the stream, use the `stream rollback` command.
 
 [source,bash]
 ----
-dataflow:>stream skipper rollback --name httptest
+dataflow:>stream rollback --name httptest
 Rollback request has been sent for the stream 'httptest'
 ----
 
@@ -203,7 +203,7 @@ The history command now shows the third version of the stream hsa been deployed.
 
 [source,bash]
 ----
-dataflow:>stream skipper history --name httptest
+dataflow:>stream history --name httptest
 ╔═══════╤════════════════════════════╤════════╤════════════╤═══════════════╤════════════════╗
 ║Version│        Last updated        │ Status │Package Name│Package Version│  Description   ║
 ╠═══════╪════════════════════════════╪════════╪════════════╪═══════════════╪════════════════╣
