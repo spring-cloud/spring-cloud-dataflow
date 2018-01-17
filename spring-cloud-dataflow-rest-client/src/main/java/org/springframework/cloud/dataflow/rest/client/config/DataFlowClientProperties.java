@@ -13,7 +13,7 @@ public class DataFlowClientProperties {
 
 	private String uri = "http://localhost:9393";
 
-	private Security security = new Security();
+	private Authentication authentication = new Authentication();
 
 	private boolean skipSslValidation = true;
 
@@ -43,34 +43,49 @@ public class DataFlowClientProperties {
 		this.uri = uri;
 	}
 
-	public Security getSecurity() {
-		return security;
+	public Authentication getAuthentication() {
+		return authentication;
 	}
 
-	public void setSecurity(Security security) {
-		this.security = security;
+	public void setAuthentication(Authentication authentication) {
+		this.authentication = authentication;
 	}
 
-	public static class Security {
+	public static class Authentication {
 
-		private String username;
+		private Basic basic = new Basic();
 
-		private String password;
-
-		public String getUsername() {
-			return username;
+		public Basic getBasic() {
+			return basic;
 		}
 
-		public void setUsername(String username) {
-			this.username = username;
+		public void setBasic(Basic basic) {
+			this.basic = basic;
 		}
 
-		public String getPassword() {
-			return password;
+		public static class Basic {
+
+			private String username;
+
+			private String password;
+
+			public String getUsername() {
+				return username;
+			}
+
+			public void setUsername(String username) {
+				this.username = username;
+			}
+
+			public String getPassword() {
+				return password;
+			}
+
+			public void setPassword(String password) {
+				this.password = password;
+			}
 		}
 
-		public void setPassword(String password) {
-			this.password = password;
-		}
+
 	}
 }

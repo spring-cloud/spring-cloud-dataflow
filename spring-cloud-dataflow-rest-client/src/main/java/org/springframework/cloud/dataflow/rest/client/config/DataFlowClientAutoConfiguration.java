@@ -36,9 +36,9 @@ public class DataFlowClientAutoConfiguration {
 		final HttpClientConfigurer httpClientConfigurer = HttpClientConfigurer.create()
 				.targetHost(new URI(properties.getUri()))
 				.skipTlsCertificateVerification(properties.isSkipSslValidation());
-		if(!StringUtils.isEmpty(properties.getSecurity().getUsername()) &&
-				!StringUtils.isEmpty(properties.getSecurity().getPassword())){
-			httpClientConfigurer.basicAuthCredentials(properties.getSecurity().getUsername(), properties.getSecurity().getPassword());
+		if(!StringUtils.isEmpty(properties.getAuthentication().getBasic().getUsername()) &&
+				!StringUtils.isEmpty(properties.getAuthentication().getBasic().getPassword())){
+			httpClientConfigurer.basicAuthCredentials(properties.getAuthentication().getBasic().getUsername(), properties.getAuthentication().getBasic().getPassword());
 			template.setRequestFactory(httpClientConfigurer.buildClientHttpRequestFactory());
 		}
 		return new DataFlowTemplate(new URI(properties.getUri()), template);

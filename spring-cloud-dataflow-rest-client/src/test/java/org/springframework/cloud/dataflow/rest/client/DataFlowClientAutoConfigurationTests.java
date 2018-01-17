@@ -35,15 +35,15 @@ public class DataFlowClientAutoConfigurationTests {
 	@Test
 	public void usingAuthentication() throws Exception {
 		ConfigurableApplicationContext applicationContext = SpringApplication.run(TestApplication.class,
-				"--spring.cloud.dataflow.client.security.username=foo", "--spring.cloud.dataflow.client.security.password=bar", "--spring.cloud.dataflow.client.enableDsl=true");
+				"--spring.cloud.dataflow.client.authentication.basic.username=foo", "--spring.cloud.dataflow.client.authentication.basic.password=bar");
 		Assert.assertNotNull(applicationContext.getBean(DataFlowTemplate.class));
 		Assert.assertNotNull(applicationContext.getBean(StreamBuilder.class));
 
 		RestTemplate template = applicationContext.getBean(RestTemplate.class);
 		DataFlowClientProperties properties = applicationContext.getBean(DataFlowClientProperties.class);
-		Assert.assertNotNull(properties.getSecurity());
-		Assert.assertEquals("foo", properties.getSecurity().getUsername());
-		Assert.assertEquals("bar", properties.getSecurity().getPassword());
+		Assert.assertNotNull(properties.getAuthentication());
+		Assert.assertEquals("foo", properties.getAuthentication().getBasic().getUsername());
+		Assert.assertEquals("bar", properties.getAuthentication().getBasic().getPassword());
 		Mockito.verify(template, Mockito.times(1)).setRequestFactory(Mockito.any());
 		applicationContext.close();
 	}
