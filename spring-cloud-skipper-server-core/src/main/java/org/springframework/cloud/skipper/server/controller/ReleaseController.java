@@ -90,7 +90,7 @@ public class ReleaseController {
 		resource.add(
 				ControllerLinkBuilder.linkTo(methodOn(ReleaseController.class).rollback(null, 123))
 						.withRel("rollback"));
-		resource.add(ControllerLinkBuilder.linkTo(methodOn(ReleaseController.class).delete(null, null))
+		resource.add(ControllerLinkBuilder.linkTo(methodOn(ReleaseController.class).delete(null, true))
 							.withRel("delete"));
 		resource.add(ControllerLinkBuilder.linkTo(methodOn(ReleaseController.class).list())
 				.withRel("list"));
@@ -141,10 +141,18 @@ public class ReleaseController {
 		return this.releaseResourceAssembler.toResource(release);
 	}
 
-	@RequestMapping(path = "/delete/{name}", method = RequestMethod.POST)
-	@ResponseStatus(HttpStatus.CREATED)
+	@RequestMapping(path = "/{name}", method = RequestMethod.DELETE)
+	@ResponseStatus(HttpStatus.OK)
+	public Resource<Release> delete(@PathVariable("name") String releaseName) {
+		return delete(releaseName, false);
+	}
+
+	@RequestMapping(path = "/{name}/{deletePackage}", method = RequestMethod.DELETE)
+	@ResponseStatus(HttpStatus.OK)
 	public Resource<Release> delete(@PathVariable("name") String releaseName,
-			@RequestBody DeleteProperties deleteProperties) {
+			@PathVariable("deletePackage") boolean deletePackage) {
+		DeleteProperties deleteProperties = new DeleteProperties();
+		deleteProperties.setDeletePackage(deletePackage);
 		Release release = this.skipperStateMachineService.deleteRelease(releaseName, deleteProperties);
 		return this.releaseResourceAssembler.toResource(release);
 	}

@@ -28,7 +28,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import org.springframework.cloud.skipper.domain.AboutResource;
-import org.springframework.cloud.skipper.domain.DeleteProperties;
 import org.springframework.cloud.skipper.domain.Deployer;
 import org.springframework.cloud.skipper.domain.Info;
 import org.springframework.cloud.skipper.domain.InstallRequest;
@@ -224,10 +223,10 @@ public class DefaultSkipperClient implements SkipperClient {
 	}
 
 	@Override
-	public Release delete(String releaseName, DeleteProperties deleteProperties) {
-		String url = String.format("%s/%s/%s/%s", baseUri, "release", "delete", releaseName);
-		log.debug("Posting Delete to " + url + ". DeleteProperties = " + deleteProperties);
-		return this.restTemplate.postForObject(url, deleteProperties, Release.class);
+	public void delete(String releaseName, boolean deletePackage) {
+		String url = String.format("%s/%s/%s/%s", baseUri, "release", releaseName, deletePackage);
+		log.debug("Sending Delete request to " + url + " with the option deletePackage = " + deletePackage);
+		this.restTemplate.delete(url, deletePackage);
 	}
 
 	@Override
@@ -327,7 +326,7 @@ public class DefaultSkipperClient implements SkipperClient {
 	@Override
 	public void packageDelete(String packageName) {
 		String url = String.format("%s/%s/%s", baseUri, "package", packageName);
-		restTemplate.delete(url);
+		this.restTemplate.delete(url);
 	}
 
 	protected Traverson createTraverson(String baseUrl, RestOperations restOperations) {

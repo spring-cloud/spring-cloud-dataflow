@@ -510,7 +510,28 @@ include::{snippets}/manifest-documentation/get-manifest-of-release-for-version/h
 
 ===== Delete a release
 
-Delete an existing release by uninstalling the installed packages corresponding to the release.
+Delete an existing release.
+This doesn't uninstall the uploaded packages corresponding to the release.
+
+====== Request structure
+
+include::{snippets}/delete-documentation/delete-release-default/http-request.adoc[]
+
+====== Example request
+
+include::{snippets}/delete-documentation/delete-release-default/curl-request.adoc[]
+
+====== Response structure
+
+include::{snippets}/delete-documentation/delete-release-default/http-response.adoc[]
+
+====== Response fields
+
+include::{snippets}/delete-documentation/delete-release-default/response-fields.adoc[]
+
+===== Delete a release
+
+Delete an existing release by providing an option to uninstall the installed packages corresponding to the release.
 
 ====== Request structure
 

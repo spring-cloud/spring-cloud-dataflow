@@ -21,7 +21,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cloud.skipper.domain.DeleteProperties;
 import org.springframework.cloud.skipper.domain.InstallProperties;
 import org.springframework.cloud.skipper.domain.InstallRequest;
 import org.springframework.cloud.skipper.domain.PackageIdentifier;
@@ -38,6 +37,7 @@ import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.web.servlet.MvcResult;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -75,10 +75,9 @@ public abstract class AbstractControllerTests extends AbstractMockMvcTests {
 		for (Release release : releaseRepository.findAll()) {
 			if (release.getInfo().getStatus().getStatusCode() != StatusCode.DELETED) {
 				try {
-					mockMvc.perform(post("/api/release/delete/" + release.getName())
-								.content(convertObjectToJson(new DeleteProperties())))
+					mockMvc.perform(delete("/api/release/" + release.getName()))
 							.andDo(print())
-							.andExpect(status().isCreated()).andReturn();
+							.andExpect(status().isOk()).andReturn();
 				}
 				catch (Exception e) {
 					logger.warn("Can not delete release {}-v{}, as it has not yet deployed.", release.getName(),

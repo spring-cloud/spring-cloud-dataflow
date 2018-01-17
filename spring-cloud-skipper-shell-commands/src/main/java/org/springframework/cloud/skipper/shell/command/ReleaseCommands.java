@@ -15,13 +15,12 @@
  */
 package org.springframework.cloud.skipper.shell.command;
 
+import javax.validation.constraints.NotNull;
 import java.io.File;
 import java.io.IOException;
 import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.List;
-
-import javax.validation.constraints.NotNull;
 
 import org.apache.commons.io.FilenameUtils;
 import org.slf4j.Logger;
@@ -32,7 +31,6 @@ import org.springframework.cloud.deployer.spi.app.DeploymentState;
 import org.springframework.cloud.skipper.ReleaseNotFoundException;
 import org.springframework.cloud.skipper.client.SkipperClient;
 import org.springframework.cloud.skipper.domain.ConfigValues;
-import org.springframework.cloud.skipper.domain.DeleteProperties;
 import org.springframework.cloud.skipper.domain.Info;
 import org.springframework.cloud.skipper.domain.PackageIdentifier;
 import org.springframework.cloud.skipper.domain.Release;
@@ -195,11 +193,9 @@ public class ReleaseCommands extends AbstractSkipperCommand {
 	public String delete(
 			@ShellOption(help = "the name of the release to delete") String releaseName,
 			@ShellOption(help = "delete the release package", defaultValue = "false") boolean deletePackage) {
-		DeleteProperties deleteProperties = new DeleteProperties();
-		deleteProperties.setDeletePackage(deletePackage);
-		Release release = skipperClient.delete(releaseName, deleteProperties);
+		this.skipperClient.delete(releaseName, deletePackage);
 		StringBuilder sb = new StringBuilder();
-		sb.append(release.getName() + " has been deleted.");
+		sb.append(releaseName + " has been deleted.");
 		return sb.toString();
 	}
 

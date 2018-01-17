@@ -87,16 +87,16 @@ spring:
 
             # Delete
 
-            - POST /api/release/delete/**        => hasRole('ROLE_CREATE')
+            - DELETE /api/release/**             => hasRole('ROLE_CREATE')
 
             # History
 
-            - GET /api/release/history/**           => hasRole('ROLE_VIEW')
+            - GET /api/release/history/**        => hasRole('ROLE_VIEW')
 
             # List
 
-            - GET /api/release/list                         => hasRole('ROLE_VIEW')
-            - GET /api/release/list/**                      => hasRole('ROLE_VIEW')
+            - GET /api/release/list              => hasRole('ROLE_VIEW')
+            - GET /api/release/list/**           => hasRole('ROLE_VIEW')
 
             # Packages
 

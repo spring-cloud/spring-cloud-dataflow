@@ -253,7 +253,7 @@ no way to merge lists). Always refer to your version of `application.yml`, as th
 
             # Delete
 
-            - POST /api/release/delete/**        => hasRole('ROLE_CREATE')
+            - DELETE /api/release/**             => hasRole('ROLE_CREATE')
 
             # History
 
