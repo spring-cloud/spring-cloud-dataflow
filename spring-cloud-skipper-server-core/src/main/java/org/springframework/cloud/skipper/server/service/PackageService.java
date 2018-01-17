@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 the original author or authors.
+ * Copyright 2017-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,6 +26,8 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
+import com.github.zafarkhaja.semver.ParseException;
+import com.github.zafarkhaja.semver.Version;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.cloud.skipper.domain.PackageFile;
@@ -264,8 +266,13 @@ public class PackageService implements ResourceLoaderAware {
 	private void validateUploadRequest(UploadRequest uploadRequest) {
 		Assert.notNull(uploadRequest.getRepoName(), "Repo name can not be null");
 		Assert.notNull(uploadRequest.getName(), "Name of package can not be null");
-		// TODO assert is semver format
 		Assert.notNull(uploadRequest.getVersion(), "Version can not be null");
+		try {
+			Version.valueOf(uploadRequest.getVersion());
+		}
+		catch (ParseException e) {
+			throw new IllegalArgumentException("UploadRequest doesn't have a valid version. "+ e);
+		}
 		Assert.notNull(uploadRequest.getExtension(), "Extension can not be null");
 		Assert.isTrue(uploadRequest.getExtension().equals("zip"), "Extension must be 'zip', not "
 				+ uploadRequest.getExtension());

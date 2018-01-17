@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 the original author or authors.
+ * Copyright 2017-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,6 +15,7 @@
  */
 package org.springframework.cloud.skipper.server.service;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -45,6 +46,7 @@ import org.springframework.util.StreamUtils;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.api.Assertions.entry;
+import static org.assertj.core.api.Assertions.fail;
 
 /**
  * Uses @Transactional for ease of re-using existing JPA managed objects within Spring's
@@ -155,6 +157,40 @@ public class PackageServiceTests extends AbstractIntegrationTest {
 		assertThat(downloadedPackage.getTemplates()).isNotNull();
 		assertThat(downloadedPackage.getConfigValues()).isNotNull();
 
+	}
+
+	@Test
+	public void testInvalidVersions() throws IOException {
+		UploadRequest uploadRequest = new UploadRequest();
+		uploadRequest.setRepoName("local");
+		uploadRequest.setName("log");
+		uploadRequest.setVersion("abc");
+		uploadRequest.setExtension("zip");
+		Resource resource = new ClassPathResource("/org/springframework/cloud/skipper/server/service/log-9.9.9.zip");
+		assertThat(resource.exists()).isTrue();
+		byte[] originalPackageBytes = StreamUtils.copyToByteArray(resource.getInputStream());
+		assertThat(originalPackageBytes).isNotEmpty();
+		Assert.isTrue(originalPackageBytes.length != 0,
+				"PackageServiceTests.Assert.isTrue: Package file as bytes must not be empty");
+		assertInvalidPackageVersion(uploadRequest);
+		uploadRequest.setVersion("1abc");
+		assertInvalidPackageVersion(uploadRequest);
+		uploadRequest.setVersion("1.abc.2");
+		assertInvalidPackageVersion(uploadRequest);
+		uploadRequest.setVersion("a.b.c");
+		assertInvalidPackageVersion(uploadRequest);
+		uploadRequest.setVersion("a.b.c.2");
+		assertInvalidPackageVersion(uploadRequest);
+	}
+
+	private void assertInvalidPackageVersion(UploadRequest uploadRequest) {
+		try {
+			PackageMetadata uploadedPackageMetadata = this.packageService.upload(uploadRequest);
+			fail("IllegalArgumentException when parsing invalid version");
+		}
+		catch (IllegalArgumentException e) {
+			assertThat(e.getMessage()).contains("UploadRequest doesn't have a valid version.");
+		}
 	}
 
 	@Test
