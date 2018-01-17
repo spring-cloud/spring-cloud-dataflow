@@ -36,6 +36,7 @@ import org.springframework.cloud.dataflow.server.service.StreamService;
 import org.springframework.cloud.deployer.spi.app.AppDeployer;
 import org.springframework.cloud.deployer.spi.app.DeploymentState;
 import org.springframework.cloud.skipper.domain.Deployer;
+import org.springframework.cloud.skipper.domain.Release;
 import org.springframework.hateoas.ExposesResourceFor;
 import org.springframework.hateoas.mvc.ResourceAssemblerSupport;
 import org.springframework.http.HttpStatus;
@@ -168,6 +169,12 @@ public class StreamDeploymentController {
 	@ResponseStatus(HttpStatus.OK)
 	public String manifest(@PathVariable("name") String name, @PathVariable("version") int version) {
 		return this.streamService.manifest(name, version);
+	}
+
+	@RequestMapping(path = "/history/{name}", method = RequestMethod.GET)
+	@ResponseStatus(HttpStatus.OK)
+	public Collection<Release> history(@PathVariable("name") String releaseName) {
+		return this.streamService.history(releaseName);
 	}
 
 	@RequestMapping(path = "/platform/list", method = RequestMethod.GET)
