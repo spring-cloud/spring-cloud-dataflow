@@ -118,7 +118,7 @@ public class SkipperStreamService extends AbstractStreamService {
 		Release release = this.skipperStreamDeployer.deployStream(streamDeploymentRequest);
 
 		if (release != null) {
-			updateStreamDefinitionFromReleaseManifest(streamDefinition.getName(), release.getManifest());
+			updateStreamDefinitionFromReleaseManifest(streamDefinition.getName(), release.getManifest().getData());
 		}
 		else {
 			logger.error("Missing skipper release after Stream deploy!");
@@ -186,7 +186,7 @@ public class SkipperStreamService extends AbstractStreamService {
 		String yamlProperties = convertPropertiesToSkipperYaml(streamDefinition, updateProperties);
 		Release release = this.skipperStreamDeployer.upgradeStream(releaseName, packageIdentifier, yamlProperties);
 		if (release != null) {
-			updateStreamDefinitionFromReleaseManifest(streamName, release.getManifest());
+			updateStreamDefinitionFromReleaseManifest(streamName, release.getManifest().getData());
 		}
 		else {
 			logger.error("Missing release after Stream Update!");

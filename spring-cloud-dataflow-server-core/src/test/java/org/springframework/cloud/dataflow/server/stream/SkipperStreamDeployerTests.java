@@ -39,7 +39,6 @@ import org.springframework.cloud.deployer.spi.core.AppDefinition;
 import org.springframework.cloud.deployer.spi.core.AppDeploymentRequest;
 import org.springframework.cloud.skipper.ReleaseNotFoundException;
 import org.springframework.cloud.skipper.client.SkipperClient;
-import org.springframework.cloud.skipper.domain.DeleteProperties;
 import org.springframework.cloud.skipper.domain.Info;
 import org.springframework.cloud.skipper.domain.InstallRequest;
 import org.springframework.cloud.skipper.domain.Status;
@@ -251,10 +250,7 @@ public class SkipperStreamDeployerTests {
 		when(skipperClient.status(eq(streamDefinition.getName()))).thenThrow(new ReleaseNotFoundException(""));
 
 		skipperStreamDeployer.undeployStream(streamDefinition.getName());
-
-		DeleteProperties deleteProperties = new DeleteProperties();
-		deleteProperties.setDeletePackage(true);
-		verify(skipperClient, times(0)).delete(eq(streamDefinition.getName()), eq(deleteProperties));
+		verify(skipperClient, times(0)).delete(eq(streamDefinition.getName()), eq(true));
 	}
 
 	@Test
@@ -276,10 +272,7 @@ public class SkipperStreamDeployerTests {
 		when(skipperClient.status(eq(streamDefinition.getName()))).thenReturn(info);
 
 		skipperStreamDeployer.undeployStream(streamDefinition.getName());
-
-		DeleteProperties deleteProperties = new DeleteProperties();
-		deleteProperties.setDeletePackage(true);
-		verify(skipperClient, times(1)).delete(eq(streamDefinition.getName()), eq(deleteProperties));
+		verify(skipperClient, times(1)).delete(eq(streamDefinition.getName()), eq(true));
 	}
 
 	@Test
@@ -324,15 +317,6 @@ public class SkipperStreamDeployerTests {
 				mock(StreamDefinitionRepository.class), mock(AppRegistryService.class), mock(ForkJoinPool.class));
 		skipperStreamDeployer.platformList();
 		verify(skipperClient, times(1)).listDeployers();
-	}
-
-	@Test
-	public void testHistory() {
-		SkipperClient skipperClient = mock(SkipperClient.class);
-		SkipperStreamDeployer skipperStreamDeployer = new SkipperStreamDeployer(skipperClient,
-				mock(StreamDefinitionRepository.class), mock(AppRegistryService.class), mock(ForkJoinPool.class));
-		skipperStreamDeployer.history("releaseName", 666);
-		verify(skipperClient).history(eq("releaseName"), eq("666"));
 	}
 
 }

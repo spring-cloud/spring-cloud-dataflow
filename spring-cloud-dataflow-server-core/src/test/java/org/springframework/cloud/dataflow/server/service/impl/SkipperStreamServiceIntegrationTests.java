@@ -48,6 +48,7 @@ import org.springframework.cloud.dataflow.server.support.TestResourceUtils;
 import org.springframework.cloud.skipper.ReleaseNotFoundException;
 import org.springframework.cloud.skipper.client.SkipperClient;
 import org.springframework.cloud.skipper.domain.InstallRequest;
+import org.springframework.cloud.skipper.domain.Manifest;
 import org.springframework.cloud.skipper.domain.Package;
 import org.springframework.cloud.skipper.domain.PackageIdentifier;
 import org.springframework.cloud.skipper.domain.Release;
@@ -173,7 +174,9 @@ public class SkipperStreamServiceIntegrationTests {
 				TestResourceUtils.qualifiedResource(getClass(), "deployManifest.yml").getInputStream(),
 				Charset.defaultCharset());
 		Release release = new Release();
-		release.setManifest(expectedReleaseManifest);
+		Manifest manifest = new Manifest();
+		manifest.setData(expectedReleaseManifest);
+		release.setManifest(manifest);
 		when(skipperClient.install(isA(InstallRequest.class))).thenReturn(release);
 		when(skipperClient.status(eq("ticktock"))).thenThrow(new ReleaseNotFoundException(""));
 
@@ -208,7 +211,9 @@ public class SkipperStreamServiceIntegrationTests {
 				TestResourceUtils.qualifiedResource(getClass(), "upgradeManifest.yml").getInputStream(),
 				Charset.defaultCharset());
 		Release release = new Release();
-		release.setManifest(expectedReleaseManifest);
+		Manifest manifest = new Manifest();
+		manifest.setData(expectedReleaseManifest);
+		release.setManifest(manifest);
 		when(skipperClient.upgrade(isA(UpgradeRequest.class))).thenReturn(release);
 
 		Map<String, String> deploymentProperties = createSkipperDeploymentProperties();
