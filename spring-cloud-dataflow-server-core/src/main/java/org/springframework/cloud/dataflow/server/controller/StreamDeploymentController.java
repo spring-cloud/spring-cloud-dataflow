@@ -171,11 +171,10 @@ public class StreamDeploymentController {
 		return this.streamService.manifest(name, version);
 	}
 
-	@RequestMapping(path = "/history/{name}/{max}", method = RequestMethod.GET)
+	@RequestMapping(path = "/history/{name}", method = RequestMethod.GET)
 	@ResponseStatus(HttpStatus.OK)
-	public Collection<Release> history(@PathVariable("name") String releaseName,
-			@PathVariable("max") int maxRevisions) {
-		return this.streamService.history(releaseName, maxRevisions);
+	public Collection<Release> history(@PathVariable("name") String releaseName) {
+		return this.streamService.history(releaseName);
 	}
 
 	@RequestMapping(path = "/platform/list", method = RequestMethod.GET)

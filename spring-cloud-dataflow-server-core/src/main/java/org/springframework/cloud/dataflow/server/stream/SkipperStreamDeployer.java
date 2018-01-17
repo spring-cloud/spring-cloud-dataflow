@@ -480,7 +480,7 @@ public class SkipperStreamDeployer implements StreamDeployer {
 		return this.skipperClient.manifest(name);
 	}
 
-	public Collection<Release> history(String releaseName, int maxRevisions) {
+	public Collection<Release> history(String releaseName) {
 		return this.skipperClient.history(releaseName).getContent();
 	}
 

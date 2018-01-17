@@ -142,10 +142,8 @@ public class SkipperStreamCommands extends AbstractStreamCommands implements Com
 	public Table history(
 			@CliOption(key = { "",
 					"name" }, help = "the name of the stream", mandatory = true, optionContext = "existing-stream "
-					+ "disable-string-converter") String name,
-			@CliOption(key = { "max" }, help = "the maximum number of revisions to retrieve",
-					unspecifiedDefaultValue = "0") int max) {
-		Collection<Release> releases = streamOperations().history(name, max);
+					+ "disable-string-converter") String name) {
+		Collection<Release> releases = streamOperations().history(name);
 		LinkedHashMap<String, Object> headers = new LinkedHashMap<>();
 		headers.put("version", "Version");
 		headers.put("info.lastDeployed", "Last updated");

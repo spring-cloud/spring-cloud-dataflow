@@ -173,13 +173,13 @@ public class StreamTemplate implements StreamOperations {
 	}
 
 	@Override
-	public Collection<Release> history(String streamName, int maxRevisions) {
+	public Collection<Release> history(String streamName) {
 		Assert.hasText(streamName, "Release name cannot be null or empty");
 		ParameterizedTypeReference<Collection<Release>> typeReference = new ParameterizedTypeReference<Collection<Release>>
 				() {
 		};
 		Map<String, Object> parameters = new HashMap<>();
-		String url = String.format("%s/%s/%s/%s", deploymentsLink.getHref(), "history", streamName, maxRevisions);
+		String url = String.format("%s/%s/%s", deploymentsLink.getHref(), "history", streamName);
 		return this.restTemplate.exchange(url, HttpMethod.GET, null, typeReference, parameters).getBody();
 	}
 

@@ -116,7 +116,7 @@ public class AppDeployerStreamService extends AbstractStreamService {
 	}
 
 	@Override
-	public Collection<Release> history(String releaseName, int maxRevisions) {
+	public Collection<Release> history(String releaseName) {
 		throw new IncompatibleStreamDeployerException(StreamDeployers.appdeployer.toString());
 	}
 
