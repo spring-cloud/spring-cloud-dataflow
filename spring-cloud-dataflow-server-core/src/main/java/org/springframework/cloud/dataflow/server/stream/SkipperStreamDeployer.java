@@ -38,6 +38,7 @@ import com.fasterxml.jackson.databind.module.SimpleModule;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.json.JSONObject;
+import org.springframework.cloud.skipper.domain.DeleteProperties;
 import org.yaml.snakeyaml.DumperOptions;
 import org.yaml.snakeyaml.Yaml;
 
@@ -349,7 +350,9 @@ public class SkipperStreamDeployer implements StreamDeployer {
 	public void undeployStream(String streamName) {
 		DeploymentState streamDeploymentState = getStreamDeploymentState(streamName);
 		if (streamDeploymentState != null && streamDeploymentState != DeploymentState.undeployed) {
-			this.skipperClient.delete(streamName);
+			DeleteProperties deleteProperties = new DeleteProperties();
+			deleteProperties.setDeletePackage(true);
+			this.skipperClient.delete(streamName, deleteProperties);
 		}
 	}
 

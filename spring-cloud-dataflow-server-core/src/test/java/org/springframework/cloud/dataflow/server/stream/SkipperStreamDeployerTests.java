@@ -39,6 +39,7 @@ import org.springframework.cloud.deployer.spi.core.AppDefinition;
 import org.springframework.cloud.deployer.spi.core.AppDeploymentRequest;
 import org.springframework.cloud.skipper.ReleaseNotFoundException;
 import org.springframework.cloud.skipper.client.SkipperClient;
+import org.springframework.cloud.skipper.domain.DeleteProperties;
 import org.springframework.cloud.skipper.domain.Info;
 import org.springframework.cloud.skipper.domain.InstallRequest;
 import org.springframework.cloud.skipper.domain.Status;
@@ -251,7 +252,9 @@ public class SkipperStreamDeployerTests {
 
 		skipperStreamDeployer.undeployStream(streamDefinition.getName());
 
-		verify(skipperClient, times(0)).delete(eq(streamDefinition.getName()));
+		DeleteProperties deleteProperties = new DeleteProperties();
+		deleteProperties.setDeletePackage(true);
+		verify(skipperClient, times(0)).delete(eq(streamDefinition.getName()), eq(deleteProperties));
 	}
 
 	@Test
@@ -274,7 +277,9 @@ public class SkipperStreamDeployerTests {
 
 		skipperStreamDeployer.undeployStream(streamDefinition.getName());
 
-		verify(skipperClient, times(1)).delete(eq(streamDefinition.getName()));
+		DeleteProperties deleteProperties = new DeleteProperties();
+		deleteProperties.setDeletePackage(true);
+		verify(skipperClient, times(1)).delete(eq(streamDefinition.getName()), eq(deleteProperties));
 	}
 
 	@Test
