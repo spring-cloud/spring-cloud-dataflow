@@ -133,7 +133,7 @@ public class DefaultSkipperClientTests {
 				MediaType.APPLICATION_JSON.getSubtype(), Charset.forName("utf8"));
 
 		MockRestServiceServer mockServer = MockRestServiceServer.bindTo(restTemplate).build();
-		mockServer.expect(requestTo("/delete/release1"))
+		mockServer.expect(requestTo("/release/delete/release1"))
 				.andExpect(content().string(expectedContent))
 				.andExpect(content().contentType(contentType))
 				.andRespond(withStatus(HttpStatus.CREATED).contentType(MediaType.APPLICATION_JSON));
@@ -142,13 +142,13 @@ public class DefaultSkipperClientTests {
 	}
 
 	@Test(expected = HttpClientErrorException.class)
-	public void testDeeltePackageHasDeployedRelease() {
+	public void testDeletePackageHasDeployedRelease() {
 		RestTemplate restTemplate = new RestTemplate();
 		restTemplate.setErrorHandler(new SkipperClientResponseErrorHandler(new ObjectMapper()));
 		SkipperClient skipperClient = new DefaultSkipperClient("", restTemplate);
 
 		MockRestServiceServer mockServer = MockRestServiceServer.bindTo(restTemplate).build();
-		mockServer.expect(requestTo("/delete/release1"))
+		mockServer.expect(requestTo("/release/delete/release1"))
 				.andExpect(content().string("{\"deletePackage\":true}"))
 				.andRespond(withStatus(HttpStatus.CONFLICT).body(ERROR3).contentType(MediaType.APPLICATION_JSON));
 
