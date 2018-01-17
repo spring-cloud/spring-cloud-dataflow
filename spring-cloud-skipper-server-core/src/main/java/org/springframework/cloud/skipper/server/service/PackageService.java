@@ -268,10 +268,11 @@ public class PackageService implements ResourceLoaderAware {
 		Assert.notNull(uploadRequest.getName(), "Name of package can not be null");
 		Assert.notNull(uploadRequest.getVersion(), "Version can not be null");
 		try {
-			Version.valueOf(uploadRequest.getVersion());
+			Version.valueOf(uploadRequest.getVersion().trim());
 		}
 		catch (ParseException e) {
-			throw new IllegalArgumentException("UploadRequest doesn't have a valid version. "+ e);
+			throw new SkipperException("UploadRequest doesn't have a valid semantic version.  Version = " +
+					uploadRequest.getVersion().trim());
 		}
 		Assert.notNull(uploadRequest.getExtension(), "Extension can not be null");
 		Assert.isTrue(uploadRequest.getExtension().equals("zip"), "Extension must be 'zip', not "

@@ -186,10 +186,11 @@ public class PackageServiceTests extends AbstractIntegrationTest {
 	private void assertInvalidPackageVersion(UploadRequest uploadRequest) {
 		try {
 			PackageMetadata uploadedPackageMetadata = this.packageService.upload(uploadRequest);
-			fail("IllegalArgumentException when parsing invalid version");
+			fail("Expected exception to be thrown when parsing invalid version = "
+					+ uploadRequest.getVersion().trim());
 		}
-		catch (IllegalArgumentException e) {
-			assertThat(e.getMessage()).contains("UploadRequest doesn't have a valid version.");
+		catch (SkipperException e) {
+			assertThat(e.getMessage()).contains("UploadRequest doesn't have a valid semantic version.  Version =");
 		}
 	}
 
