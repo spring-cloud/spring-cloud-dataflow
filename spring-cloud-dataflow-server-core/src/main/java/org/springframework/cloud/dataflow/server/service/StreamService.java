@@ -88,10 +88,9 @@ public interface StreamService {
 	/**
 	 * Get stream's deployment history
 	 * @param releaseName Stream release name
-	 * @param maxRevisions If positive, the max release revision to filter by. Negative value will return all releases.
 	 * @return List or Releases for this release name
 	 */
-	Collection<Release> history(String releaseName, int maxRevisions);
+	Collection<Release> history(String releaseName);
 
 	/**
 	 * @return list of supported deployment platforms

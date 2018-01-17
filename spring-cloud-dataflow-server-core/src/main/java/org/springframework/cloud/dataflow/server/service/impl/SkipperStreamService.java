@@ -263,8 +263,8 @@ public class SkipperStreamService extends AbstractStreamService {
 	}
 
 	@Override
-	public Collection<Release> history(String releaseName, int maxRevisions) {
-		return this.skipperStreamDeployer.history(releaseName, maxRevisions);
+	public Collection<Release> history(String releaseName) {
+		return this.skipperStreamDeployer.history(releaseName);
 	}
 
 	@Override

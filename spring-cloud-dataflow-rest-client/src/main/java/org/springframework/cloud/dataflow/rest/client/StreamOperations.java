@@ -127,10 +127,9 @@ public interface StreamOperations {
 	/**
 	 * Get the history of releases for the given stream deployed via Skipper.
 	 * @param streamName the stream(release) name
-	 * @param max the maximum number of revisions to include in the history
 	 * @return the history of releases for the stream
 	 */
-	Collection<Release> history(String streamName, int max);
+	Collection<Release> history(String streamName);
 
 	/**
 	 * @return the list of all Skipper platforms
