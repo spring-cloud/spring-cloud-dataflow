@@ -2,7 +2,7 @@
 = Installation
 
 [[skipper-installation-local]]
-== Installing on a local machine
+== Installing on a Local Platform
 
 === Local Platform configuration
 
@@ -29,13 +29,21 @@ The key-value pairs that follow the name of the account are `javaCmd`, `workingD
 
 === Cloud Foundry configuration
 
-Here is an example YAML file to configure two Cloud Foundry accounts named `cf-dev` and `cf-qa`
+Here is an example YAML file to configure two Cloud Foundry accounts named `cf-dev` and `cf-qa`.
+This is useful on Cloud Foundry if you are using the Spring Cloud Config Server to manage Skipper's configuration properties.
 
-```
+Here is a sample YML snippet, modify to fit your needs.
+
+NOTE: It is important to set `enableLocalPlatform` to `false` so that the local platform deployer is never used.
+NOTE: The `deleteRoutes` deployment setting is `false` so that "v2" of an application has the same route as "v1".  Otherwise, undeploying "v1" will remove the route.
+
+[source,yml]
+----
 spring:
   cloud:
     skipper:
       server:
+        enableLocalPlatform: false
         platform:
           cloudfoundry:
             accounts:
@@ -52,6 +60,7 @@ spring:
                   memory: 2048m
                   disk: 2048m
                   services: rabbit
+                  deleteRoutes: false
               cf-qa:
                 connection:
                   url: https://api.run.pivotal.io
@@ -65,10 +74,55 @@ spring:
                   memory: 1024m
                   disk: 1024m
                   services: rabbitQA
+                  deleteRoutes: false
+----
 
-```
+If you are using `cf push` to deploy Skipper, a Cloud Foundry manifest is more appropriate to use.
+Here is a sample manifest.yml, modify to fit your needs.
+
+NOTE: It is important to set `SPRING_CLOUD_SKIPPER_SERVER_ENABLE_LOCAL_PLATFORM` to `false` so that the local platform deployer is never used.
+NOTE: It is important to set `SPRING_CLOUD_SKIPPER_SERVER_PLATFORM_CLOUDFOUNDRY_ACCOUNTS[pws]_DEPLOYMENT_DELETE_ROUTES: false` so that "v2" of an application has the same route as "v1".  Otherwise, undeploying "v1" will remove the route.
+
+[source,yml]
+----
+applications:
+- name: mlp-skipper
+  host: mlp-skipper
+  memory: 1G
+  disk_quota: 1G
+  timeout: 180
+  instances: 1
+  buildpack: java_buildpack
+  path: spring-cloud-skipper-server.jar
+env:
+    SPRING_APPLICATION_NAME: mlp-skipper
+    SPRING_CLOUD_SKIPPER_SERVER_ENABLE_LOCAL_PLATFORM: false
+    SPRING_CLOUD_SKIPPER_SERVER_STRATEGIES_HEALTHCHECK.TIMEOUTINMILLIS: 300000
+    SPRING_CLOUD_SKIPPER_SERVER_PLATFORM_CLOUDFOUNDRY_ACCOUNTS[pws]_CONNECTION_URL: https://api.run.pivotal.io
+    SPRING_CLOUD_SKIPPER_SERVER_PLATFORM_CLOUDFOUNDRY_ACCOUNTS[pws]_CONNECTION_ORG: myOrgQA
+    SPRING_CLOUD_SKIPPER_SERVER_PLATFORM_CLOUDFOUNDRY_ACCOUNTS[pws]_CONNECTION_SPACE: mySpaceQA
+    SPRING_CLOUD_SKIPPER_SERVER_PLATFORM_CLOUDFOUNDRY_ACCOUNTS[pws]_CONNECTION_DOMAIN: cfapps.io
+    SPRING_CLOUD_SKIPPER_SERVER_PLATFORM_CLOUDFOUNDRY_ACCOUNTS[pws]_CONNECTION_USERNAME: cf-qa@example.com
+    SPRING_CLOUD_SKIPPER_SERVER_PLATFORM_CLOUDFOUNDRY_ACCOUNTS[pws]_CONNECTION_PASSWORD: drowssap
+    SPRING_CLOUD_SKIPPER_SERVER_PLATFORM_CLOUDFOUNDRY_ACCOUNTS[pws]_CONNECTION_SKIP_SSL_VALIDATION: false
+    SPRING_CLOUD_SKIPPER_SERVER_PLATFORM_CLOUDFOUNDRY_ACCOUNTS[pws]_DEPLOYMENT_DELETE_ROUTES: false
+    SPRING_CLOUD_SKIPPER_SERVER_PLATFORM_CLOUDFOUNDRY_ACCOUNTS[pws]_DEPLOYMENT_SERVICES: rabbitmq
+services:
+- mysqlboost
+----
 
 For information on the deployment properties that can be configured can be found in https://github.com/spring-cloud/spring-cloud-deployer-cloudfoundry/blob/master/src/main/java/org/springframework/cloud/deployer/spi/cloudfoundry/CloudFoundryDeploymentProperties.java[CloudFoundryDeploymentProperties].
+
+When starting the Skipper shell on your local machine, it will try to connect to the Server at the default location of  `http://localhost:7577/api`.
+Use the shell's command line option `--spring.cloud.skipper.client.serverUri` to specify the location of the server.
+You can alternatively use the interactive shell command `config` to set the server location
+
+[source,bash]
+----
+server-unknown:>config --uri https://mlp-skipper.cfapps.io/api
+Successfully targeted https://mlp-skipper.cfapps.io/api
+skipper:>
+----
 
 [[skipper-installation-kubernetes]]
 == Installing on Kubernetes
@@ -77,7 +131,7 @@ There is a docker image `springcloud/spring-cloud-skipper-server` is available f
 You can use this to run the Skipper server in Kubernetes.
 
 
-[skipper-kubernetes-configuration]
+[[skipper-kubernetes-configuration]]
 === Kuberenetes configuration
 
 
@@ -101,30 +155,35 @@ spring:
 
 More information on the deployment properties that can be configured can be found in https://github.com/spring-cloud/spring-cloud-deployer-kubernetes/blob/master/src/main/java/org/springframework/cloud/deployer/spi/kubernetes/KubernetesDeployerProperties.java[KubernetesDeployerProperties]
 
+[[skipper-database-configuration]]
 == Database configuration
 
 Spring Cloud Skipper uses a relational database to store metadata. We use https://flywaydb.org/[flyway] to bootstrap and then migrate the database as the product evolves.
 We currently provide schemas for the following databases: *H2*, *HSQLDB*, *MySQL*, *PostgreSQL*, *Microsoft SQL Server*, *Oracle 12*, *IBM DB2*.
-The JDBC drivers for *MySQL* (via MariaDB driver), *HSQLDB*, *PostgreSQL*, *SQL Server*,  along with embedded *H2* are available out of the box.
+
+The JDBC drivers for *MySQL* (via MariaDB driver), *HSQLDB*, *PostgreSQL*, *SQL Server*, along the embedded *H2* database are bundled with the server jar.
 If you are using any other database, then the corresponding JDBC driver jar needs to be on the classpath of the server.
 If not specified the server will start with the embedded in memory *H2* database.
 
-The database properties can be passed as environment variables or command-line arguments to the Data Flow Server.
+The database properties can be passed as environment variables or command-line arguments to the Server.
 
 
-* Environment variables:
+NOTE: Please make sure that you configure the correct `flyway.schemas` for *Oracle*, *DB2* and *SQL Server*, otherwise flyway will try to create it's `schema_version` table on the default schema for a connection, which could be different than that your credentials are associated with.
+Please refer to the https://flywaydb.org/documentation/[Flyway documentation] for more options.
+
+Here are some examples.
+
 ```
 export spring_datasource_url=jdbc:postgresql://localhost:5432/mydb
 export spring_datasource_username=myuser
 export spring_datasource_password=mypass
 export spring_datasource_driver-class-name="org.postgresql.Driver"
 ```
-* Command Line arguments
 
 * *MySQL*
-[source,bash]
+[source,bash,subs=attributes]
 ----
-java -jar {skipper_jar} \
+java -jar spring-cloud-skipper-server-{project-version}.jar \
     --spring.datasource.url=jdbc:mysql:<db-info> \
     --spring.datasource.username=<user> \
     --spring.datasource.password=<password> \
@@ -132,9 +191,9 @@ java -jar {skipper_jar} \
 ----
 
 * *PostgreSQL*
-[source,bash]
+[source,bash,subs=attributes]
 ----
-java -jar {skipper_jar} \
+java -jar spring-cloud-skipper-server-{project-version}.jar \
     --spring.datasource.url=jdbc:postgresql:<db-info> \
     --spring.datasource.username=<user> \
     --spring.datasource.password=<password> \
@@ -142,9 +201,9 @@ java -jar {skipper_jar} \
 ----
 
 * *HSQLDB*
-[source,bash]
+[source,bash,subs=attributes]
 ----
-java -jar {skipper_jar} \
+java -jar spring-cloud-skipper-server-{project-version}.jar \
     --spring.datasource.url=jdbc:hsqldb:mem:<db-info> \
     --spring.datasource.username=sa \
     --spring.datasource.password= \
@@ -152,37 +211,35 @@ java -jar {skipper_jar} \
 ----
 
 * *Microsoft SQL Server*
-[source,bash]
+[source,bash,subs=attributes]
 ----
-java -jar {skipper_jar} \
+java -jar spring-cloud-skipper-server-{project-version}.jar \
     --spring.datasource.url=jdbc:sqlserver://<db-info>;database=<database-name> \
     --spring.datasource.username=<user> \
     --spring.datasource.password=<password> \
-    --flyway.schemas=<database-name>
+    --flyway.schemas=<database-name> \
     --spring.datasource.driver-class-name=com.microsoft.sqlserver.jdbc.SQLServerDriver &
 ----
 
 * *Oracle*
-[source,bash]
+[source,bash,subs=attributes]
 ----
-java -jar {skipper_jar} \
-    --spring.datasource.url=jdbc:oracle:thin:<user>/<password>@<database-address>/<service-id> \
+java -jar spring-cloud-skipper-server-{project-version}.jar \
+    --spring.datasource.url=jdbc:oracle:thin:<user>/<password>@<db-address>/<service-id> \
     --spring.datasource.username=<user> \
     --spring.datasource.password=<password> \
-    --flyway.schemas=<tablespace-name>
+    --flyway.schemas=<tablespace-name> \
     --spring.datasource.driver-class-name=oracle.jdbc.driver.OracleDriver &
 ----
 
 * *IBM DB2*
-[source,bash]
+[source,bash,subs=attributes]
 ----
-java -jar {skipper_jar} \
+java -jar spring-cloud-skipper-server-{project-version}.jar \
     --spring.datasource.url=jdbc:db2:thin://<db-info>/<db-name> \
     --spring.datasource.username=<user> \
     --spring.datasource.password=<password> \
-    --flyway.schemas=<db-name>
+    --flyway.schemas=<db-name> \
     --spring.datasource.driver-class-name=com.ibm.db2.jcc.DB2Driver &
 ----
 
-NOTE: Please make sure that you configure the correct `flyway.schemas` for *Oracle*, *DB2* and *SQL Server*, otherwise flyway will try to create it's `schema_version` table on the default schema for a connection, which could be different than that your credentials are associated with.
-Please refer to the https://flywaydb.org/documentation/[Flyway documentation] for more options.
