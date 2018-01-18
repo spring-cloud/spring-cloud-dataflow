@@ -160,6 +160,33 @@ public class PackageServiceTests extends AbstractIntegrationTest {
 	}
 
 	@Test
+	public void testPackageNameVersionMismatch() throws IOException {
+		UploadRequest uploadRequest = new UploadRequest();
+		uploadRequest.setRepoName("local");
+		uploadRequest.setName("buggy");
+		uploadRequest.setVersion("6.6.6");
+		uploadRequest.setExtension("zip");
+		Resource resource = new ClassPathResource("/org/springframework/cloud/skipper/server/service/buggy-6.6.6.zip");
+		assertThat(resource.exists()).isTrue();
+		byte[] originalPackageBytes = StreamUtils.copyToByteArray(resource.getInputStream());
+		uploadRequest.setPackageFileAsBytes(originalPackageBytes);
+
+		assertThat(originalPackageBytes).isNotEmpty();
+		Assert.isTrue(originalPackageBytes.length != 0,
+				"PackageServiceTests.Assert.isTrue: Package file as bytes must not be empty");
+
+		try {
+			this.packageService.upload(uploadRequest);
+			fail("Expected exception to be thrown when upload request package name is different from " +
+					"this inside the package.zip");
+		}
+		catch (SkipperException e) {
+			assertThat(e.getMessage()).isEqualTo("Package definition in the request [buggy:6.6.6] differs from " +
+					"one inside the package.yml [log:9.9.9]");
+		}
+	}
+
+	@Test
 	public void testInvalidVersions() throws IOException {
 		UploadRequest uploadRequest = new UploadRequest();
 		uploadRequest.setRepoName("local");

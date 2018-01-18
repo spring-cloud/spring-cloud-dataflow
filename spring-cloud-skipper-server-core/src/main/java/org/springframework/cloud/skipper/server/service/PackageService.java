@@ -233,6 +233,13 @@ public class PackageService implements ResourceLoaderAware {
 			Assert.isTrue(unpackagedFile.exists(), "Package is expected to be unpacked, but it doesn't exist");
 			Package packageToUpload = this.packageReader.read(unpackagedFile);
 			PackageMetadata packageMetadata = packageToUpload.getMetadata();
+			if (!packageMetadata.getName().equals(uploadRequest.getName())
+					|| !packageMetadata.getVersion().equals(uploadRequest.getVersion())) {
+				throw new SkipperException(String.format("Package definition in the request [%s:%s] " +
+								"differs from one inside the package.yml [%s:%s]",
+						uploadRequest.getName(), uploadRequest.getVersion(),
+						packageMetadata.getName(), packageMetadata.getVersion()));
+			}
 			if (localRepositoryToUpload != null) {
 				packageMetadata.setRepositoryId(localRepositoryToUpload.getId());
 				packageMetadata.setRepositoryName(localRepositoryToUpload.getName());
