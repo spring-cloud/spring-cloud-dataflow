@@ -183,7 +183,7 @@ alter table skipper_info
     references skipper_status;
 
 alter table skipper_package_metadata
-    add constraint FKq2maocius5sr76isk7xlhn7b4
+    add constraint fk_package_metadata_pfile
     foreign key (packagefile_id)
     references skipper_package_file;
 

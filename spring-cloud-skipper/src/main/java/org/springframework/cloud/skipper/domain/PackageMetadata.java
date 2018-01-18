@@ -18,6 +18,7 @@ package org.springframework.cloud.skipper.domain;
 import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
+import javax.persistence.ForeignKey;
 import javax.persistence.Index;
 import javax.persistence.JoinColumn;
 import javax.persistence.Lob;
@@ -101,7 +102,8 @@ public class PackageMetadata extends AbstractEntity {
 	 */
 	@JsonIgnore
 	@OneToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-	@JoinColumn(name = "packagefile_id")
+	// need to keep fk key max 30 char thus not using fk_package_metadata_package_file
+	@JoinColumn(name = "packagefile_id", foreignKey = @ForeignKey(name="fk_package_metadata_pfile"))
 	private PackageFile packageFile;
 
 	/**
