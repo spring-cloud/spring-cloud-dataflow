@@ -301,5 +301,5 @@ If a repository is local, it is backed by Skipper's database and you will be abl
 If it is not local, it is a remote repository and you are only
 able to read packages.
 The packages in a remote repository are updated outside of Skipper's control.
-The 1.0 M2 release only polls the remote repository for contents upon server startup.
+The 1.0 release only polls the remote repository for contents upon server startup.
 Follow issue https://github.com/spring-cloud/spring-cloud-skipper/issues/262[GH-262] for more on adding support for dynamic updating of remote repository metadata.

@@ -529,9 +529,9 @@ include::{snippets}/delete-documentation/delete-release-default/http-response.ad
 
 include::{snippets}/delete-documentation/delete-release-default/response-fields.adoc[]
 
-===== Delete a release
+===== Delete a release and uninstall package
 
-Delete an existing release and uninstall the installed packages corresponding to the release (provided there are no other releases in active state use these packages).
+Delete an existing release and uninstall the installed packages corresponding to the release provided there are no other releases in active state use these packages.
 
 ====== Request structure
 

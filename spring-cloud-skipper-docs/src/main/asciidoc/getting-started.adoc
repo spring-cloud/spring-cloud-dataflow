@@ -20,8 +20,9 @@ Supported databases are H2, HSQLDB, MySQL, Oracle, Postgresql, DB2 and SqlServer
 [[getting-started-installing-skipper]]
 == Installing Skipper
 
-This section will cover installing Skipper on your local machine as it is the easiest way to get started..
-Installing Skipper on other platforms will be covered separately.
+This section will cover installing Skipper on your *local machine* as it is the easiest way to get started.
+The section <<skipper-installation>> discusses installing on Cloud Foundry and Kubernetes.
+It also shows additional options for installing on your local machine.
 
 * Download the Skipper Server and Shell apps:
 
@@ -71,6 +72,7 @@ java -jar spring-cloud-skipper-server/target/spring-cloud-skipper-server-{projec
 [[three-second-tour]]
 == A three second tour
 
+In this tour we will use
 By default, Skipper will deploy apps to the local machine.
 The default configuration also has one local repository named `local` where you can upload packages, and one remote repository named `experimental` where some sample test packages are located.
 You can get a list of the package repositories by using the command `repo list`.

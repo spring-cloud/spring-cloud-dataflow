@@ -35,6 +35,7 @@ This is useful on Cloud Foundry if you are using the Spring Cloud Config Server 
 Here is a sample YML snippet, modify to fit your needs.
 
 NOTE: It is important to set `enableLocalPlatform` to `false` so that the local platform deployer is never used.
+
 NOTE: The `deleteRoutes` deployment setting is `false` so that "v2" of an application has the same route as "v1".  Otherwise, undeploying "v1" will remove the route.
 
 [source,yml]
@@ -77,13 +78,17 @@ spring:
                   deleteRoutes: false
 ----
 
+You can also run the Skipper Server locally and deploy to Cloud Foundry.
+In this case, it is more convenient to specify the configuration in a `skipper.yml` file, and start the server with the option `--spring.config.location=skipper.yml`
+
 If you are using `cf push` to deploy Skipper, a Cloud Foundry manifest is more appropriate to use.
 Here is a sample manifest.yml, modify to fit your needs.
 
 NOTE: It is important to set `SPRING_CLOUD_SKIPPER_SERVER_ENABLE_LOCAL_PLATFORM` to `false` so that the local platform deployer is never used.
+
 NOTE: It is important to set `SPRING_CLOUD_SKIPPER_SERVER_PLATFORM_CLOUDFOUNDRY_ACCOUNTS[pws]_DEPLOYMENT_DELETE_ROUTES: false` so that "v2" of an application has the same route as "v1".  Otherwise, undeploying "v1" will remove the route.
 
-[source,yml]
+[source,yml,options="nowrap"]
 ----
 applications:
 - name: mlp-skipper
@@ -110,6 +115,9 @@ env:
 services:
 - mysqlboost
 ----
+
+NOTE: In the manifest above we bound the application to the `mysqlboost` service.
+If you do not specify a service, the server will use an embedded database.
 
 For information on the deployment properties that can be configured can be found in https://github.com/spring-cloud/spring-cloud-deployer-cloudfoundry/blob/master/src/main/java/org/springframework/cloud/deployer/spi/cloudfoundry/CloudFoundryDeploymentProperties.java[CloudFoundryDeploymentProperties].
 
