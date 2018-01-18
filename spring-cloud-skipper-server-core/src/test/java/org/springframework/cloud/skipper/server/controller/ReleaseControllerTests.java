@@ -108,9 +108,7 @@ public class ReleaseControllerTests extends AbstractControllerTests {
 		assertThat(release2.getVersion()).isEqualTo(1);
 
 		// Undeploy
-		boolean deletePackage = true;
-
-		MvcResult result = mockMvc.perform(delete("/api/release/" + releaseNameOne + "/" + deletePackage))
+		MvcResult result = mockMvc.perform(delete("/api/release/" + releaseNameOne + "/package"))
 				.andDo(print()).andExpect(status().isConflict()).andReturn();
 
 		assertThat(result.getResolvedException().getMessage())
@@ -120,12 +118,12 @@ public class ReleaseControllerTests extends AbstractControllerTests {
 		assertThat(this.packageMetadataRepository.findByName("log").size()).isEqualTo(3);
 
 		// Delete the 'release2' only not the package.
-		mockMvc.perform(delete("/api/release/" + releaseNameTwo + "/" + false))
+		mockMvc.perform(delete("/api/release/" + releaseNameTwo ))
 				.andDo(print()).andExpect(status().isOk()).andReturn();
 		assertThat(this.packageMetadataRepository.findByName("log").size()).isEqualTo(3);
 
 		// Second attempt to delete 'release1' along with its package 'log'.
-		mockMvc.perform(delete("/api/release/" + releaseNameOne + "/" + deletePackage))
+		mockMvc.perform(delete("/api/release/" + releaseNameOne + "/package"))
 				.andDo(print()).andExpect(status().isOk()).andReturn();
 		assertThat(this.packageMetadataRepository.findByName("log").size()).isEqualTo(0);
 
@@ -167,7 +165,7 @@ public class ReleaseControllerTests extends AbstractControllerTests {
 		assertThat(release.getInfo().getStatus().getStatusCode()).isEqualTo(StatusCode.DEPLOYED);
 
 		// Undeploy
-		mockMvc.perform(delete("/api/release/" + releaseName + "/false"))
+		mockMvc.perform(delete("/api/release/" + releaseName))
 				.andDo(print())
 				.andExpect(status().isOk()).andReturn();
 		Release deletedRelease = this.releaseRepository.findByNameAndVersion(releaseName,

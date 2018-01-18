@@ -224,8 +224,14 @@ public class DefaultSkipperClient implements SkipperClient {
 
 	@Override
 	public void delete(String releaseName, boolean deletePackage) {
-		String url = String.format("%s/%s/%s/%s", baseUri, "release", releaseName, deletePackage);
-		log.debug("Sending Delete request to " + url + " with the option deletePackage = " + deletePackage);
+		String url = null;
+		if (deletePackage) {
+			url = String.format("%s/%s/%s/%s", baseUri, "release", releaseName, "package");
+			log.debug("Sending Delete request to " + url + " with the option to delete package");
+		}
+		else {
+			url = String.format("%s/%s/%s", baseUri, "release", releaseName);
+		}
 		this.restTemplate.delete(url, deletePackage);
 	}
 

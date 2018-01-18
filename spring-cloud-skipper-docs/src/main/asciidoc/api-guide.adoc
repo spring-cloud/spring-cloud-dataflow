@@ -531,7 +531,7 @@ include::{snippets}/delete-documentation/delete-release-default/response-fields.
 
 ===== Delete a release
 
-Delete an existing release by providing an option to uninstall the installed packages corresponding to the release.
+Delete an existing release and uninstall the installed packages corresponding to the release (provided there are no other releases in active state use these packages).
 
 ====== Request structure
 

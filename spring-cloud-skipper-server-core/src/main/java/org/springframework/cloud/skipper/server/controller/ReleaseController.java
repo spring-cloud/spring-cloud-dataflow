@@ -90,8 +90,6 @@ public class ReleaseController {
 		resource.add(
 				ControllerLinkBuilder.linkTo(methodOn(ReleaseController.class).rollback(null, 123))
 						.withRel("rollback"));
-		resource.add(ControllerLinkBuilder.linkTo(methodOn(ReleaseController.class).delete(null, true))
-							.withRel("delete"));
 		resource.add(ControllerLinkBuilder.linkTo(methodOn(ReleaseController.class).list())
 				.withRel("list"));
 		resource.add(ControllerLinkBuilder.linkTo(methodOn(ReleaseController.class).list(null))
@@ -144,15 +142,18 @@ public class ReleaseController {
 	@RequestMapping(path = "/{name}", method = RequestMethod.DELETE)
 	@ResponseStatus(HttpStatus.OK)
 	public Resource<Release> delete(@PathVariable("name") String releaseName) {
-		return delete(releaseName, false);
+		return deleteRelease(releaseName, false);
 	}
 
-	@RequestMapping(path = "/{name}/{deletePackage}", method = RequestMethod.DELETE)
+	@RequestMapping(path = "/{name}/package", method = RequestMethod.DELETE)
 	@ResponseStatus(HttpStatus.OK)
-	public Resource<Release> delete(@PathVariable("name") String releaseName,
-			@PathVariable("deletePackage") boolean deletePackage) {
+	public Resource<Release> deleteWithPackage(@PathVariable("name") String releaseName) {
+		return deleteRelease(releaseName, true);
+	}
+
+	private Resource<Release> deleteRelease(String releaseName, boolean canDeletePackage) {
 		DeleteProperties deleteProperties = new DeleteProperties();
-		deleteProperties.setDeletePackage(deletePackage);
+		deleteProperties.setDeletePackage(canDeletePackage);
 		Release release = this.skipperStateMachineService.deleteRelease(releaseName, deleteProperties);
 		return this.releaseResourceAssembler.toResource(release);
 	}
