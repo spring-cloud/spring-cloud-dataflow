@@ -41,4 +41,13 @@ public class UpgradeRequest {
 	public void setUpgradeProperties(UpgradeProperties upgradeProperties) {
 		this.upgradeProperties = upgradeProperties;
 	}
+
+	@Override
+	public String toString() {
+		final StringBuffer sb = new StringBuffer("UpgradeRequest{");
+		sb.append("packageIdentifier=").append(packageIdentifier);
+		sb.append(", upgradeProperties=").append(upgradeProperties);
+		sb.append('}');
+		return sb.toString();
+	}
 }

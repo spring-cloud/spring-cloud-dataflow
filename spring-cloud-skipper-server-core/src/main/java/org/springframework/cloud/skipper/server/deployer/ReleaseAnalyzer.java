@@ -22,12 +22,14 @@ import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import org.springframework.cloud.deployer.resource.support.DelegatingResourceLoader;
 import org.springframework.cloud.skipper.SkipperException;
 import org.springframework.cloud.skipper.domain.Release;
 import org.springframework.cloud.skipper.domain.SpringCloudDeployerApplicationManifest;
 import org.springframework.cloud.skipper.domain.SpringCloudDeployerApplicationManifestReader;
 import org.springframework.cloud.skipper.domain.deployer.ApplicationManifestDifference;
 import org.springframework.cloud.skipper.domain.deployer.ReleaseDifference;
+import org.springframework.core.io.Resource;
 import org.springframework.util.StringUtils;
 
 /**
@@ -45,11 +47,13 @@ public class ReleaseAnalyzer {
 	private final SpringCloudDeployerApplicationManifestReader applicationManifestReader;
 
 	private final Logger logger = LoggerFactory.getLogger(ReleaseAnalyzer.class);
-
+	private final DelegatingResourceLoader delegatingResourceLoader;
 	private ApplicationManifestDifferenceFactory applicationManifestDifferenceFactory = new ApplicationManifestDifferenceFactory();
 
-	public ReleaseAnalyzer(SpringCloudDeployerApplicationManifestReader applicationManifestReader) {
+	public ReleaseAnalyzer(SpringCloudDeployerApplicationManifestReader applicationManifestReader,
+			DelegatingResourceLoader delegatingResourceLoader) {
 		this.applicationManifestReader = applicationManifestReader;
+		this.delegatingResourceLoader = delegatingResourceLoader;
 	}
 
 	/**
@@ -107,6 +111,9 @@ public class ReleaseAnalyzer {
 			String applicationName = existingApplicationManifest.getApplicationName();
 			SpringCloudDeployerApplicationManifest matchingReplacingApplicationManifest = findMatching(
 					applicationName, replacingApplicationSpecList);
+
+			replacingResourceExistsAssertion(matchingReplacingApplicationManifest);
+
 			ApplicationManifestDifference applicationManifestDifference = applicationManifestDifferenceFactory
 					.createApplicationManifestDifference(applicationName,
 							existingApplicationManifest,
@@ -116,6 +123,23 @@ public class ReleaseAnalyzer {
 
 		return createReleaseAnalysisReport(existingRelease, replacingRelease, applicationManifestDifferences);
 
+	}
+
+	private void replacingResourceExistsAssertion(
+			SpringCloudDeployerApplicationManifest matchingReplacingApplicationManifest) {
+		String resourceName = matchingReplacingApplicationManifest.getSpec().getResource();
+		String resourceVersion = matchingReplacingApplicationManifest.getSpec().getVersion();
+		try {
+			Resource resource = delegatingResourceLoader.getResource(
+					AppDeploymentRequestFactory.getResourceLocation(resourceName, resourceVersion));
+		}
+		catch (Exception e) {
+			throw new SkipperException(
+					"Could not find Resource in replacing release name [" + resourceName
+							+ "], version ["
+							+ resourceVersion + "].",
+					e);
+		}
 	}
 
 	private ReleaseAnalysisReport analyzeTopLevelPackagesOnly(

@@ -64,7 +64,7 @@ public class UpgradeStartAction extends AbstractAction {
 		log.info("upgradeRequest {}", upgradeRequest);
 		if (upgradeRequest != null) {
 			ReleaseAnalysisReport releaseAnalysisReport = this.releaseReportService.createReport(upgradeRequest);
-			log.info("releaseAnalysisReport {}", releaseAnalysisReport);
+			log.info("releaseAnalysisReport difference summary {}", releaseAnalysisReport.getReleaseDifferenceSummary());
 			context.getExtendedState().getVariables().put(SkipperVariables.RELEASE_ANALYSIS_REPORT, releaseAnalysisReport);
 		}
 		else {

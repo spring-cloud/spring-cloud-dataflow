@@ -54,4 +54,14 @@ public class PackageIdentifier {
 	public void setPackageVersion(String packageVersion) {
 		this.packageVersion = packageVersion;
 	}
+
+	@Override
+	public String toString() {
+		final StringBuffer sb = new StringBuffer("PackageIdentifier{");
+		sb.append("repositoryName='").append(repositoryName).append('\'');
+		sb.append(", packageName='").append(packageName).append('\'');
+		sb.append(", packageVersion='").append(packageVersion).append('\'');
+		sb.append('}');
+		return sb.toString();
+	}
 }
