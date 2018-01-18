@@ -158,7 +158,8 @@ public class PackageCommands extends AbstractSkipperCommand {
 	public String packageDelete(@ShellOption(help = "the package name to be deleted") String packageName) {
 		try {
 			this.skipperClient.packageDelete(packageName);
-		} catch (PackageDeleteException e) {
+		}
+		catch (PackageDeleteException e) {
 			return e.getMessage();
 		}
 		return String.format("Deleted Package '%s'", packageName);

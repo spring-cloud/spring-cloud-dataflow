@@ -57,6 +57,9 @@ public class ReleaseRepositoryTests extends AbstractIntegrationTest {
 	@Autowired
 	private PackageMetadataService packageMetadataService;
 
+	@Autowired
+	private RepositoryRepository repositoryRepository;
+
 	@Test
 	public void verifyFindByMethods() {
 		PackageMetadata packageMetadata1 = new PackageMetadata();
@@ -426,10 +429,12 @@ public class ReleaseRepositoryTests extends AbstractIntegrationTest {
 
 		PackageMetadata packageMetadata1 = new PackageMetadata();
 		packageMetadata1.setApiVersion("skipper.spring.io/v1");
-		packageMetadata1.setKind("SpringCloudDeployerApplication");
 		packageMetadata1.setRepositoryId(LOCAL_REPO);
-		packageMetadata1.setRepositoryName("local");
-		packageMetadata1.setName("ticktock");
+		packageMetadata1.setKind("SpringCloudDeployerApplication");
+		String repoName = "local";
+		packageMetadata1.setRepositoryId(this.repositoryRepository.findByName(repoName).getId());
+		packageMetadata1.setRepositoryName(repoName);
+		packageMetadata1.setName("myticktock");
 		packageMetadata1.setVersion("1.0.0");
 		Package pkg1 = new Package();
 		pkg1.setMetadata(packageMetadata1);
@@ -437,8 +442,6 @@ public class ReleaseRepositoryTests extends AbstractIntegrationTest {
 
 		Info deletedInfo = createDeletedInfo();
 		Info deployedInfo = createDeployedInfo();
-		Info unknownInfo = createUnknownInfo();
-		Info failedInfo = createFailedInfo();
 
 		// Release ticktock1
 
@@ -468,7 +471,7 @@ public class ReleaseRepositoryTests extends AbstractIntegrationTest {
 		this.releaseRepository.save(release3);
 
 
-		Long ticktockPackageMetadataId = this.packageMetadataRepository.findByName("ticktock").get(0).getId();
+		Long ticktockPackageMetadataId = this.packageMetadataRepository.findByName("myticktock").get(0).getId();
 		try {
 			this.packageMetadataService.deleteIfAllReleasesDeleted(packageMetadata1.getName(),
 					PackageMetadataService.DEFAULT_RELEASE_ACTIVITY_CHECK);
@@ -476,7 +479,7 @@ public class ReleaseRepositoryTests extends AbstractIntegrationTest {
 		}
 		catch (SkipperException e) {
 			assertThat(e.getMessage())
-					.contains("Can not delete Package Metadata [ticktock:1.0.0] in Repository [local]")
+					.contains("Can not delete Package Metadata [myticktock:1.0.0] in Repository [local]")
 					.contains("Not all releases of this package have the status DELETED.")
 					.contains("Active Releases [ticktock2]");
 
@@ -490,6 +493,33 @@ public class ReleaseRepositoryTests extends AbstractIntegrationTest {
 				this.releaseRepository.findByRepositoryIdAndPackageMetadataIdOrderByNameAscVersionDesc(REMOTE_REPO,
 						ticktockPackageMetadataId);
 		assertThat(foundByRepositoryIdAndPackageMetadataId).hasSize(0);
+
+	}
+
+	@Test
+	public void verifydeletePackageFromRemoteRepository() {
+
+		PackageMetadata packageMetadata1 = new PackageMetadata();
+		packageMetadata1.setApiVersion("skipper.spring.io/v1");
+		packageMetadata1.setRepositoryId(LOCAL_REPO);
+		packageMetadata1.setKind("SpringCloudDeployerApplication");
+		String repoName = "test";
+		packageMetadata1.setRepositoryId(this.repositoryRepository.findByName(repoName).getId());
+		packageMetadata1.setRepositoryName(repoName);
+		packageMetadata1.setName("myticktock");
+		packageMetadata1.setVersion("1.0.0");
+		Package pkg1 = new Package();
+		pkg1.setMetadata(packageMetadata1);
+		this.packageMetadataRepository.save(packageMetadata1);
+		try {
+			this.packageMetadataService.deleteIfAllReleasesDeleted(packageMetadata1.getName(),
+					PackageMetadataService.DEFAULT_RELEASE_ACTIVITY_CHECK);
+			fail("SkipperException is expected");
+		}
+		catch (SkipperException e) {
+			assertThat(e.getMessage())
+					.contains("Can not delete package [myticktock], associated repository [test] is remote.");
+		}
 
 	}
 
