@@ -20,13 +20,13 @@ import java.nio.charset.Charset;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Test;
 
+import org.springframework.cloud.skipper.PackageDeleteException;
 import org.springframework.cloud.skipper.ReleaseNotFoundException;
 import org.springframework.cloud.skipper.SkipperException;
 import org.springframework.cloud.skipper.domain.Info;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.client.MockRestServiceServer;
-import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -136,7 +136,7 @@ public class DefaultSkipperClientTests {
 		skipperClient.delete("release1", deletePackage);
 	}
 
-	@Test(expected = HttpClientErrorException.class)
+	@Test(expected = PackageDeleteException.class)
 	public void testDeletePackageHasDeployedRelease() {
 		RestTemplate restTemplate = new RestTemplate();
 		restTemplate.setErrorHandler(new SkipperClientResponseErrorHandler(new ObjectMapper()));
