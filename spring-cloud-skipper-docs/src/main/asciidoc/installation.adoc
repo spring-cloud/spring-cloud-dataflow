@@ -127,7 +127,7 @@ You can alternatively use the interactive shell command `config` to set the serv
 
 [source,bash]
 ----
-server-unknown:>config --uri https://mlp-skipper.cfapps.io/api
+server-unknown:>skipper config --uri https://mlp-skipper.cfapps.io/api
 Successfully targeted https://mlp-skipper.cfapps.io/api
 skipper:>
 ----

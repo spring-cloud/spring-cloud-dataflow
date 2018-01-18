@@ -34,8 +34,7 @@ import org.springframework.util.FileCopyUtils;
  *
  * @author Gunnar Hillert
  *
- * @see DefaultShellApplicationRunner
- * @see InitialConnectionApplicationRunner
+ * @see org.springframework.cloud.skipper.shell.command.support.InitializeConnectionApplicationRunner
  */
 @Order(InteractiveShellApplicationRunner.PRECEDENCE - 20)
 public class HelpAwareShellApplicationRunner implements ApplicationRunner {

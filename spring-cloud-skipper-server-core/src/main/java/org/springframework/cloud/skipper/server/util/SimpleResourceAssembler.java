@@ -35,8 +35,8 @@ public class SimpleResourceAssembler<T> implements ResourceAssembler<T, Resource
 	/**
 	 * Converts the given entity into a {@link Resource}.
 	 *
-	 * @param entity
-	 * @return
+	 * @param entity the entity
+	 * @return a resource for the entity.
 	 */
 	@Override
 	public Resource<T> toResource(T entity) {

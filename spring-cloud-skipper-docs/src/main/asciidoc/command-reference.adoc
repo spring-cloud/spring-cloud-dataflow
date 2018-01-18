@@ -1,10 +1,10 @@
 [[skipper-commands-reference]]
 = Skipper Commands
 
-[[skipper-commands-release]]
-== Release and Package commands
+[[skipper-commands-package]]
+== Package commands
 
-=== Search command
+=== Search
 The command `search` shows all the packages available to be installed by the Skipper server.
 
 [source,bash,options="nowrap"]
@@ -76,7 +76,19 @@ skipper:>package search --name helloworld- --details
 
 ----
 
-=== Install command
+=== Upload
+This command uploads a package .zip file
+
+[source,bash,options="nowrap"]
+----
+skipper:>package upload --path /path-to-package/mypackage-1.0.0.zip
+Package uploaded successfully:[mypackage:1.0.0]
+----
+
+If no `--repo-name` is set, the `upload` command will use `local` as the repository to upload.
+
+
+=== Install
 
 This command installs a package.
 
@@ -93,7 +105,66 @@ If no `platform-name` is specified, the platform name `default` will be used.
 The properties can either be provided via comma separated YAML String using the `--properties` option or, via a YAML
 file using the `--file` option.
 
-=== Upgrade command
+=== Delete
+
+This command deletes a package.  You can only delete a package that is in a local (database backed) repository.
+[source,bash,options="nowrap"]
+----
+skipper:>package delete --package-name helloworld
+Can not delete package [helloworld], associated repository [experimental] is remote.
+----
+
+
+[[skipper-commands-release]]
+== Release commands
+
+
+=== List
+
+This command lists the latest deployed or failed release.
+
+[source,bash,options="nowrap"]
+----
+skipper:>release list
+╔═══════════════╤═══════╤═════════════════════════╤════════╤═══════════╤══════════════╤════════════╤══════════════════════════════════════════════════════════════════════════════╗
+║     Name      │Version│      Last updated       │ Status │  Package  │   Package    │  Platform  │                               Platform Status                                ║
+║               │       │                         │        │   Name    │   Version    │    Name    │                                                                              ║
+╠═══════════════╪═══════╪═════════════════════════╪════════╪═══════════╪══════════════╪════════════╪══════════════════════════════════════════════════════════════════════════════╣
+║helloworldlocal│3      │Mon Oct 30 17:57:41 IST  │DEPLOYED│helloworld │1.0.0         │default     │[helloworldlocal.helloworld-v3], State =                                      ║
+║               │       │2017                     │        │           │              │            │[helloworldlocal.helloworld-v3-0=deployed]                                    ║
+╚═══════════════╧═══════╧═════════════════════════╧════════╧═══════════╧══════════════╧════════════╧══════════════════════════════════════════════════════════════════════════════╝
+----
+
+
+=== Status
+
+This command shows the `status` of a specific release and version.
+
+[source,bash,options="nowrap"]
+----
+skipper:>release status --release-name helloworldlocal
+╔═══════════════╤═══════════════════════════════════════════════════════════════════════════════════╗
+║Last Deployed  │Mon Oct 30 17:53:50 IST 2017                                                       ║
+║Status         │DEPLOYED                                                                           ║
+║Platform Status│All applications have been successfully deployed.                                  ║
+║               │[helloworldlocal.helloworld-v2], State = [helloworldlocal.helloworld-v2-0=deployed]║
+╚═══════════════╧═══════════════════════════════════════════════════════════════════════════════════╝
+----
+
+If no `--release-version` specifed, then the latest release version will be used.
+
+[source,bash,options="nowrap"]
+----
+skipper:>release status --release-name helloworldlocal --release-version 1
+╔═══════════════╤════════════════════════════════════════════════════════════════════════╗
+║Last Deployed  │Mon Oct 30 17:52:57 IST 2017                                            ║
+║Status         │DELETED                                                                 ║
+║Platform Status│The applications are known to the system, but is not currently deployed.║
+║               │[helloworldlocal.helloworld-v1], State = [unknown]                      ║
+╚═══════════════╧════════════════════════════════════════════════════════════════════════╝
+----
+
+=== Upgrade
 
 This command upgrades a package.
 
@@ -153,35 +224,7 @@ You can then use the `--properties` option in the `upgrade` command as shown bel
 skipper:>release upgrade --release-name ticktockskipper --package-name ticktock --properties log.version=1.1.1.RELEASE
 ----
 
-=== Status command
-
-This command shows the `status` of a specific release and version.
-
-[source,bash,options="nowrap"]
-----
-skipper:>release status --release-name helloworldlocal
-╔═══════════════╤═══════════════════════════════════════════════════════════════════════════════════╗
-║Last Deployed  │Mon Oct 30 17:53:50 IST 2017                                                       ║
-║Status         │DEPLOYED                                                                           ║
-║Platform Status│All applications have been successfully deployed.                                  ║
-║               │[helloworldlocal.helloworld-v2], State = [helloworldlocal.helloworld-v2-0=deployed]║
-╚═══════════════╧═══════════════════════════════════════════════════════════════════════════════════╝
-----
-
-If no `--release-version` specifed, then the latest release version will be used.
-
-[source,bash,options="nowrap"]
-----
-skipper:>release status --release-name helloworldlocal --release-version 1
-╔═══════════════╤════════════════════════════════════════════════════════════════════════╗
-║Last Deployed  │Mon Oct 30 17:52:57 IST 2017                                            ║
-║Status         │DELETED                                                                 ║
-║Platform Status│The applications are known to the system, but is not currently deployed.║
-║               │[helloworldlocal.helloworld-v1], State = [unknown]                      ║
-╚═══════════════╧════════════════════════════════════════════════════════════════════════╝
-----
-
-=== Rollback command
+=== Rollback
 
 This command rollsback the release to a specific version.
 
@@ -194,24 +237,8 @@ helloworldlocal has been rolled back.  Now at version v3.
 If no `--release-version` specified, then the rollback version is the previous stable release (either in `DELETED` or
 `DEPLOYED` status).
 
-=== List command
 
-This command lists the latest deployed or failed release.
-
-[source,bash,options="nowrap"]
-----
-skipper:>release list
-╔═══════════════╤═══════╤═════════════════════════╤════════╤═══════════╤══════════════╤════════════╤══════════════════════════════════════════════════════════════════════════════╗
-║     Name      │Version│      Last updated       │ Status │  Package  │   Package    │  Platform  │                               Platform Status                                ║
-║               │       │                         │        │   Name    │   Version    │    Name    │                                                                              ║
-╠═══════════════╪═══════╪═════════════════════════╪════════╪═══════════╪══════════════╪════════════╪══════════════════════════════════════════════════════════════════════════════╣
-║helloworldlocal│3      │Mon Oct 30 17:57:41 IST  │DEPLOYED│helloworld │1.0.0         │default     │[helloworldlocal.helloworld-v3], State =                                      ║
-║               │       │2017                     │        │           │              │            │[helloworldlocal.helloworld-v3-0=deployed]                                    ║
-╚═══════════════╧═══════╧═════════════════════════╧════════╧═══════════╧══════════════╧════════════╧══════════════════════════════════════════════════════════════════════════════╝
-----
-
-
-=== History command
+=== History
 
 This command shows the history of a specific release.
 
@@ -228,9 +255,9 @@ skipper:>release history --release-name helloworldlocal
 ----
 
 
-=== Delete command
+=== Delete
 
-This command deletes a specific release's latest deployed revision.
+This command deletes a specific release's latest deployed revision, undeploying the application or applications.
 
 [source,bash,options="nowrap"]
 ----
@@ -241,6 +268,8 @@ helloworldlocal has been deleted.
 
 [[skipper-commands-manifest]]
 == Manifest commands
+
+=== Get
 
 The `manifest get` command shows the manifest used for a specific release.
 
@@ -265,6 +294,8 @@ spec:
 [[skipper-commands-platform]]
 == Platform commands
 
+=== List
+
 The `platform list` command shows the list all the available deployment platform accounts.
 
 An example output of `platform list` can be
@@ -285,6 +316,8 @@ skipper:>platform list
 [[skipper-commands-repository]]
 == Repository commands
 
+=== List
+
 You can list add or delete a repository using the commands `repo add`, `repo delete` and `repo list`
 
 An example output of `repo list` is shown below
@@ -303,3 +336,40 @@ able to read packages.
 The packages in a remote repository are updated outside of Skipper's control.
 The 1.0 release only polls the remote repository for contents upon server startup.
 Follow issue https://github.com/spring-cloud/spring-cloud-skipper/issues/262[GH-262] for more on adding support for dynamic updating of remote repository metadata.
+
+
+[[skipper-commands-config]]
+== Skipper Server commands
+
+=== Config
+
+This command configures the shell to reference the HTTP API endpoint of the Skipper Server.
+
+[source,bash]
+----
+skipper:>skipper config --uri https://localhost:8443/api
+----
+
+When using OAuth, you can use the username and password options
+
+
+From within the Skipper Shell you can also provide credentials using:
+
+[source,bash]
+----
+skipper:> skipper config --uri https://localhost:7577/api --username my_username --password my_password
+----
+
+See the section <<configuration-security>> for more information.
+
+=== Info
+
+This command shows which server version is being used
+[source,bash,subs=attributes]
+----
+skipper:>info
+Spring Cloud Skipper Server v1.0.0.{project-version}
+----
+
+
+

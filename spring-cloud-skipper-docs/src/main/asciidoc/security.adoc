@@ -130,7 +130,7 @@ Don't forget to target the Skipper Server with:
 
 [source,bash]
 ----
-skipper:> config --uri https://localhost:8443/api
+skipper:>skipper config --uri https://localhost:8443/api
 ----
 
 **Skip Certificate Validation**
@@ -346,7 +346,7 @@ From within the Skipper Shell you can also provide credentials using:
 
 [source,bash]
 ----
-skipper:> config --uri https://localhost:7577/api --username my_username --password my_password
+skipper:> skipper config --uri https://localhost:7577/api --username my_username --password my_password
 ----
 
 Once successfully targeted, you should see the following output:

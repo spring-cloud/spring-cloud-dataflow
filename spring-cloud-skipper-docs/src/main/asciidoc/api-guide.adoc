@@ -115,7 +115,9 @@ include::{snippets}/api-documentation/index/links.adoc[]
 [[resources-about]]
 === Server
 
-==== Retrieving information about the server
+The Server resource exposes build and version information of the server.
+
+==== Server info
 A `GET` request will return meta information for Spring Cloud Skipper. This includes:
 
 * Server name, typically `spring-cloud-skipper-server`
@@ -139,6 +141,9 @@ include::{snippets}/about-documentation/get-meta-information/response-fields.ado
 
 === Platforms
 
+
+The Platforms (or Platform Deployer) resource is what is exported from the Spring Data Repository `DeployerRepository` and exposed by Spring Data REST.
+
 ==== Find All
 A `GET` request will return a paginated list for all the Spring Cloud Skipper platform deployers.
 
@@ -158,8 +163,10 @@ include::{snippets}/deployers-documentation/get-all-deployers/http-response.adoc
 
 include::{snippets}/deployers-documentation/get-all-deployers/response-fields.adoc[]
 
-[[resources-package-metadata]]
+[[resources-packages-metadata]]
 === Packages
+
+The Packages resource is what is exported from the Spring Data Repository `PackageMetadata` and exposed by Spring Data REST.
 
 [[resources-package-search]]
 ==== Search
@@ -202,6 +209,11 @@ include::{snippets}/package-metadata-documentation/get-package-metadata-details/
 ===== Response fields
 
 include::{snippets}/package-metadata-documentation/get-package-metadata-details/response-fields.adoc[]
+
+[[resources-package]]
+=== Package
+
+The Package resource maps onto the PackageController for uploading and installing packages
 
 [[resources-package-upload]]
 ==== Upload
@@ -269,6 +281,8 @@ include::{snippets}/install-documentation/install-package-with-id/response-field
 [[repositories]]
 === Repositories
 
+The Repositories resource is what is exported from the Spring Data Repository `RepositoryRepository` (yes, funnyn name) and exposed by Spring Data REST.
+
 ==== Find All
 A `GET` request will return a paginated list for all Spring Cloud Skipper repositories.
 
@@ -309,54 +323,10 @@ include::{snippets}/repositories-documentation/get-single-repository/http-respon
 include::{snippets}/repositories-documentation/get-single-repository/response-fields.adoc[]
 
 
-[[resources-app-deployers-datas]]
+[[resources-releases]]
 === Releases
 
-[[resources-release-upgrade]]
-==== Upgrade
-
-===== Upgrade a release
-
-Upgrade an existing release using the configured package and config values from the UpgradeRequest.
-
-====== Request structure
-
-include::{snippets}/upgrade-documentation/upgrade-release/http-request.adoc[]
-
-====== Example request
-
-include::{snippets}/upgrade-documentation/upgrade-release/curl-request.adoc[]
-
-====== Response structure
-
-include::{snippets}/upgrade-documentation/upgrade-release/http-response.adoc[]
-
-====== Response fields
-
-include::{snippets}/upgrade-documentation/upgrade-release/response-fields.adoc[]
-
-[[resources-release-rollback]]
-==== Rollback
-
-===== Rollback release
-
-Rollback the release to a previous or a specific release.
-
-====== Request structure
-
-include::{snippets}/rollback-documentation/rollback-release/http-request.adoc[]
-
-====== Example request
-
-include::{snippets}/rollback-documentation/rollback-release/curl-request.adoc[]
-
-====== Response structure
-
-include::{snippets}/rollback-documentation/rollback-release/http-response.adoc[]
-
-====== Response fields
-
-include::{snippets}/rollback-documentation/rollback-release/response-fields.adoc[]
+The Release resource is what is exported from the Spring Data Repository `ReleaseRepository` and exposed by Spring Data REST.
 
 [[resources-release-find-all]]
 ==== Find all
@@ -381,6 +351,12 @@ include::{snippets}/releases-documentation/get-all-releases/http-response.adoc[]
 ====== Response fields
 
 include::{snippets}/releases-documentation/get-all-releases/response-fields.adoc[]
+
+[[resources-release]]
+=== Release
+
+The Release resource maps onto the ReleaseController for managing the lifecycle of a release.
+
 
 [[resources-release-list]]
 ==== List
@@ -468,6 +444,54 @@ include::{snippets}/status-documentation/get-status-of-release-for-version/http-
 ====== Response fields
 
 include::{snippets}/status-documentation/get-status-of-release-for-version/response-fields.adoc[]
+
+
+[[resources-release-upgrade]]
+==== Upgrade
+
+===== Upgrade a release
+
+Upgrade an existing release using the configured package and config values from the UpgradeRequest.
+
+====== Request structure
+
+include::{snippets}/upgrade-documentation/upgrade-release/http-request.adoc[]
+
+====== Example request
+
+include::{snippets}/upgrade-documentation/upgrade-release/curl-request.adoc[]
+
+====== Response structure
+
+include::{snippets}/upgrade-documentation/upgrade-release/http-response.adoc[]
+
+====== Response fields
+
+include::{snippets}/upgrade-documentation/upgrade-release/response-fields.adoc[]
+
+[[resources-release-rollback]]
+==== Rollback
+
+===== Rollback release
+
+Rollback the release to a previous or a specific release.
+
+====== Request structure
+
+include::{snippets}/rollback-documentation/rollback-release/http-request.adoc[]
+
+====== Example request
+
+include::{snippets}/rollback-documentation/rollback-release/curl-request.adoc[]
+
+====== Response structure
+
+include::{snippets}/rollback-documentation/rollback-release/http-response.adoc[]
+
+====== Response fields
+
+include::{snippets}/rollback-documentation/rollback-release/response-fields.adoc[]
+
 
 [[resources-release-manifest]]
 ==== Manifest

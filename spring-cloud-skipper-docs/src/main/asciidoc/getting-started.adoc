@@ -1,7 +1,7 @@
 [[getting-started]]
 = Getting started
 
-This section describes the minimal steps to install Skipper in addition to installing a sample application.
+This section describes the minimal steps to install Skipper on your local machine in addition to using Skipper to installing a sample application.
 It is the "three second tour".
 After completing this section, you can move on to the <<three-minute-tour>>.
 When you are ready to dive deeper, head on over to the "three hour tour" section, <<three-hour-tour>>.
@@ -13,7 +13,7 @@ Well, it isn't really three hours...
 The Skipper server is a Spring Boot application.
 Both the Server and Shell are based on Java 8.
 The server uses a RDBMS to store state.
-An embedded H2 database is used if you do not provide a Data Source configuration via Spring Boot configuration properties, find out more here <<building>>.
+An embedded H2 database is used if you do not provide a Data Source configuration via Spring Boot configuration properties.
 Supported databases are H2, HSQLDB, MySQL, Oracle, Postgresql, DB2 and SqlServer.  Schemas are created on server startup
 
 
@@ -47,37 +47,15 @@ The default port that the server listens on is 7577.  That is `SKPR` on a teleph
 
 There is also a docker image hosted on https://hub.docker.com/r/springcloud/spring-cloud-skipper-server/[dockerhub]
 
-* Install some apps!
+*Now let's install some apps!*
 
-
-=== Using an External Database
-
-By default Skipper uses an embedded H2 database if no `spring.datasource` property is specified.  You can use other external databases by setting various `spring.datasource` properties.  The database drivers for MySQL, Postgres, SQL Server, and HSQLDB are already on the classpath of the server.  Here are a few sample commands that start the server using an external database.
-
-[source,bash,subs=attributes]
-----
-# MySQL
-java -jar spring-cloud-skipper-server/target/spring-cloud-skipper-server-{project-version}.jar --spring.datasource.url=jdbc:mysql://localhost/skipper --spring.datasource.username=xxx --spring.datasource.password=xxx --spring.datasource.driver-class-name=org.mariadb.jdbc.Driver
-
-# Postgres
-java -jar spring-cloud-skipper-server/target/spring-cloud-skipper-server-{project-version}.jar --spring.datasource.url=jdbc:postgresql://localhost:5432/skipper --spring.datasource.username=xxx --spring.datasource.password=xxx --spring.datasource.driver-class-name=org.postgresql.Driver
-
-# MSSQL
-java -jar spring-cloud-skipper-server/target/spring-cloud-skipper-server-{project-version}.jar --spring.datasource.url='jdbc:sqlserver://172.16.101.143;databaseName=skipper' --spring.datasource.username=xxx --spring.datasource.password=xxx --spring.datasource.driver-class-name=com.microsoft.sqlserver.jdbc.SQLServerDriver
-
-# HSQLDB
-java -jar spring-cloud-skipper-server/target/spring-cloud-skipper-server-{project-version}.jar --spring.datasource.url=jdbc:hsqldb:hsql://localhost:9101/xxxx --spring.datasource.username=xxx --spring.datasource.driver-class-name=org.hsqldb.jdbcDriver
-----
 
 [[three-second-tour]]
 == A three second tour
 
-In this tour we will use
-By default, Skipper will deploy apps to the local machine.
+The default configuration of Skipper will deploy apps to the local machine.
 The default configuration also has one local repository named `local` where you can upload packages, and one remote repository named `experimental` where some sample test packages are located.
 You can get a list of the package repositories by using the command `repo list`.
-
-NOTE: The shell supports tab completion.
 
 [source,bash,options="nowrap"]
 ----
@@ -90,7 +68,7 @@ skipper:>repo list
 ╚════════════╧═══════════════════════════════════════════════════════════╧═════╧═════╝
 ----
 
-Search for the available packages using the `search` command.
+Search for the available packages using the `package search` command.
 [source,bash,options="nowrap"]
 ----
 skipper:>package search
@@ -104,7 +82,10 @@ skipper:>package search
 ╚═════════════════╧═══════╧════════════════════════════════════════════════════════════════════════════════╝
 ----
 
-Install the Maven based Hello World application using the `install` command.  Since this application picks a random port for the http server by default, we specify the Spring Boot property `server.port`, prefixed via `spec.applicationProperties`.
+Install the Maven based Hello World application using the `package install` command.
+Since this application picks a random port for the http server by default, we specify the Spring Boot property `server.port`, prefixed with `spec.applicationProperties`.
+The prefix is due to the internal format of the <<package-templates,template file>>.
+
 [source,bash,options="nowrap"]
 ----
 skipper:>package install --release-name helloworld-local --package-name helloworld --package-version 1.0.0 --properties spec.applicationProperties.server.port=8099
@@ -116,9 +97,9 @@ $ curl http://localhost:8099/greeting
 Hello World!
 ```
 
-The release name `helloworld-local` is used for subsequent commands such as status, upgrade or delete.
+The release name `helloworld-local` is used for subsequent commands such as `release status`, `release upgrade` or `release delete`.
 
-To see the status of the release, use the `status` command
+To see the status of the release, use the `release status` command
 [source,bash,options="nowrap"]
 ----
 skipper:>release status --release-name helloworld-local
@@ -169,7 +150,7 @@ NOTE: This example where the upgrade changed only a property of the application 
 
 You can also deploy the other packages named `helloworld-docker` to the local machine.
 
-This example shows the most basic operations, other interesting commands such as `manifest get`, `rollback`, `list` and `history` are covered in the <<three-minute-tour>>.
+This example shows the most basic operations, other interesting commands such as `manifest get`, `release rollback`, `release list` and `release history` are covered in the <<three-minute-tour>>.
 
 
 

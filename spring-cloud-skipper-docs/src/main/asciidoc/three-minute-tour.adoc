@@ -45,8 +45,10 @@ skipper:>release upgrade --release-name helloworldlocal --package-name helloworl
 helloworldlocal has been upgraded.  Now at version v2.
 ----
 
+The command line option `--package-version 1.0.1` is used to also upgrade to a newer version of the package.
+
 The current upgrade strategy is very simple, if the new app is healthy, the old app is removed.  There is not a rolling upgrade option, all new apps are deployed, checked for health, and then previous versions removed.
-More flexible upgrade strategies are planned along with the introduction of the https://projects.spring.io/spring-statemachine/[Spring Cloud State Machine] project to orchestrate the update process.
+More flexible upgrade strategies are planned in a future release of Skipper.
 
 
 You can now curl the `greeting` endpoint and the `about` endpoint or view them in your browser.
@@ -139,7 +141,7 @@ skipper:>release rollback --release-name helloworldlocal --release-version 1
 helloworldlocal has been rolled back.  Now at version v3.
 ----
 
-The history now shows a new `v3` version, even though it is identical in terms of app behavior to the `v2` version.
+The history now shows a new `v3` version, even though it is identical in terms of app behavior to the `v1` version.
 
 [source,bash,options="nowrap"]
 ----
@@ -178,7 +180,7 @@ java -jar spring-cloud-skipper-shell-{project-version}.jar --spring.cloud.skippe
 or
 [source,bash]
 ----
-skipper:>config --uri https://mlp-skipper.cfapps.io/api
+skipper:>skipper config --uri https://mlp-skipper.cfapps.io/api
 Successfully targeted https://mlp-skipper.cfapps.io/api
 ----
 
@@ -527,7 +529,7 @@ skipper:>repo list
 ╚════════════╧═══════════════════════════════════════════════════════════╧═════╧═════╝
 ----
 
-and the `search` command shows
+and the `package search` command shows
 [source,bash,options="nowrap"]
 ----
 skipper:>package search
@@ -559,10 +561,9 @@ Let's install the Hello World app, specifically, the Docker based artifact.
 skipper:>package install --release-name helloworldk8s --package-name helloworld-docker --package-version 1.0.0 --platform-name minikube --properties spec.deploymentProperties.spring.cloud.deployer.kubernetes.createNodePort=32123
 Released helloworldk8s. Now at version v1.
 ----
+The command option `--platform-name minikube` was specified since the default value of that shell option is `default`. You can register a platform under the name `default` when installing Skipper, but it is a best practice to specify the target platform name.
 
-If you do not specify `--platform-name minikube` the command will fail since the command property defaults to a platform named `default`.  Instead of specifying it, you can register this Kubernetes Platform account in the manifest with the name `default` instead of `minikube`.
-
-You can monitor the process using the `status command`.
+You can monitor the process using the `release status` command.
 [source,bash,options="nowrap"]
 ----
 skipper:>release status --release-name helloworldk8s
@@ -609,7 +610,7 @@ $ curl http://192.168.99.100:32123/about
 Hello World v1.0.0.RELEASE
 ----
 
-The name of the application is based on the convention <release-name>-<package-name>-v<incrementing-counter>.  This will need to change in future releases in order to handle routing correctly.
+The name of the application is based on the convention `<release-name>-<package-name>-v<incrementing-counter>`.  This will need to change in future releases in order to handle routing correctly.
 
 The package provides a means to template the application version, application properties and deployment properties that are used to deploy the application to Kubernetes.  The `manifest get` command shows the final YAML file which is passed off to the Spring Cloud Deployer Library.
 

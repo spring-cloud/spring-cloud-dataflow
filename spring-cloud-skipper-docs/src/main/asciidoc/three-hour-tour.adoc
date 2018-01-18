@@ -2,13 +2,34 @@
 = Using Skipper
 
 This section is the 'three hour tour' of Skipper.  It describes how to configure and use the main feature set of Skipper in detail.
- We will cover, platforms, packages, repositories, releases and update strategies.
+ We will cover, the shell, platforms, packages, and repositories.
 
 Feel free to reach out on https://gitter.im/spring-cloud/spring-cloud-skipper[Gitter] for help and ask questions on https://stackoverflow.com/questions/tagged/spring-cloud-skipper[Stack Overflow].
 Issues can be filed on https://github.com/spring-cloud/spring-cloud-skipper/issues[Github issues].
 
 [[using-shell]]
-== Shell Modes
+== Skipper Shell
+
+The shell is based on the https://projects.spring.io/spring-shell/[Spring Shell project].  One of the shell's best features is tab-completion and colorization of commands.  Use the 'help' command or the `--help` argument when starting the shell to get help information.
+The output of using the `--help` argument is shown below
+
+[source,bash,options=nowrap]
+----
+Skipper Options:
+
+  --spring.cloud.skipper.client.serverUri=<uri>                        Address of the Skipper Server [default: http://localhost:7577].
+  --spring.cloud.skipper.client.username=<USER>                        Username of the Skipper Server [no default].
+  --spring.cloud.skipper.client.password=<PASSWORD>                    Password of the Skipper Server [no default].
+  --spring.cloud.skipper.client.credentials-provider-command=<COMMAND> Executes an external command which must return an OAuth Access Token [no default].
+  --spring.cloud.skipper.client.skip-ssl-validation=<true|false>       Accept any SSL certificate (even self-signed) [default: no].
+
+  --spring.shell.historySize=<SIZE>                 Default size of the shell log file [default: 3000].
+  --spring.shell.commandFile=<FILE>                 Skipper Shell executes commands read from the file(s) and then exits.
+
+  --help                                            This message.
+----
+
+=== Shell Modes
 
 The shell can be started either in interactive or non-interactive mode.
  In the case of the non-interactive mode, command line arguments are executed as Skipper commands and then the shell exits.
@@ -181,7 +202,7 @@ The file https://github.com/spring-cloud/spring-cloud-skipper/blob/master/spring
 
 
 [[using-package-metadata]]
-=== Package Metadata (package.yml)
+=== Package Metadata
 
 The `package.yml` file specifies the package metadata.
 A sample package metadata would look like this:
@@ -223,8 +244,8 @@ NOTE: Currently, the package search functionality is only a wildcard match again
 
 A Package Repository exposes an `index.yml` file that contains multiple metadata documents, separated by the standard three dash notation `---` to separate the documents.  For example http://skipper-repository.cfapps.io/repository/experimental/index.yml[index.yml].
 
-[[using-package-template-files]]
-=== Package Templates (template.yml)
+[[package-templates]]
+=== Package Templates
 
 The `template.yml` file in a package structure such as
 
@@ -258,6 +279,9 @@ spec:
     {{key}}: {{value}}
     {{/spec.deploymentProperties.entrySet}}
 ----
+
+Skipper only knows how to manage applications defined in this way.
+A future release will introduce support for different formats, for example supporting the Cloud Foundry manifest format.
 
 The `apiVersion`, `kind` and `spec.resource` are required.
 
@@ -351,9 +375,9 @@ NOTE: The `name` of the template file can be anything as all the files under `te
 apply the template configurations.
 
 [[using-package-values]]
-=== Package Values (values.yml)
+=== Package Values
 
-The `values` YAML file contains the default values for any of the keys specified in the template files.
+The `values.yml` file contains the default values for any of the keys specified in the template files.
 
 For instance, in a package that defines one application, the format is
 
@@ -420,7 +444,7 @@ mypackage-1.0.0
 This zip file can be uploaded into one of the local repositories of Skipper server.
 By default, Skipper server has the local repository with the name `local`.
 
-Using the Skipper Shell, we can upload the package zip into Skipper server's one of the local repositories.
+Using the Skipper Shell, we can upload the package zip into Skipper server's local repository.
 
 [source,bash,options="nowrap"]
 ----
