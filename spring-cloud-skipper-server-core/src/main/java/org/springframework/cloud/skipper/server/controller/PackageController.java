@@ -16,6 +16,8 @@
 package org.springframework.cloud.skipper.server.controller;
 
 import org.springframework.cloud.skipper.PackageDeleteException;
+import org.springframework.cloud.skipper.ReleaseNotFoundException;
+import org.springframework.cloud.skipper.SkipperException;
 import org.springframework.cloud.skipper.domain.InstallProperties;
 import org.springframework.cloud.skipper.domain.InstallRequest;
 import org.springframework.cloud.skipper.domain.PackageMetadata;
@@ -30,7 +32,6 @@ import org.springframework.hateoas.Resource;
 import org.springframework.hateoas.ResourceSupport;
 import org.springframework.hateoas.mvc.ControllerLinkBuilder;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -38,9 +39,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
-
-import java.util.HashMap;
-import java.util.Map;
 
 import static org.springframework.hateoas.mvc.ControllerLinkBuilder.methodOn;
 
@@ -108,13 +106,22 @@ public class PackageController {
 		this.packageMetadataService.deleteIfAllReleasesDeleted(name, PackageMetadataService.DEFAULT_RELEASE_ACTIVITY_CHECK);
 	}
 
+	@ResponseStatus(value = HttpStatus.NOT_FOUND, reason = "Release not found")
+	@ExceptionHandler(ReleaseNotFoundException.class)
+	public void handleReleaseNotFoundException() {
+		// needed for server not to log 500 errors
+	}
+
+	@ResponseStatus(value = HttpStatus.CONFLICT, reason = "Package deletion error")
 	@ExceptionHandler(PackageDeleteException.class)
-	public ResponseEntity<Map<String, String>> handlePackageDeleteException(PackageDeleteException error) {
-		// TODO investigate why SkipperErrorAttributes is not being invoked.
-		Map<String, String> map = new HashMap<>();
-		map.put("exception", error.getClass().getName());
-		map.put("message", error.getMessage());
-		return new ResponseEntity<Map<String, String>>(map, HttpStatus.CONFLICT);
+	public void handlePackageDeleteException() {
+		// needed for server not to log 500 errors
+	}
+
+	@ResponseStatus(value = HttpStatus.CONFLICT, reason = "Skipper server exception")
+	@ExceptionHandler(SkipperException.class)
+	public void handleSkipperException() {
+		// needed for server not to log 500 errors
 	}
 
 	public static class PackageControllerLinksResource extends ResourceSupport {
