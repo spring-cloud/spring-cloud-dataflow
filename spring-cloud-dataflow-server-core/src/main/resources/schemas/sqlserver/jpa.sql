@@ -1,11 +1,10 @@
+    create table hibernate_sequence (
+     next_val bigint
+    );
 
-    drop table app_registration;
+    insert into hibernate_sequence with (rowlock) (next_val) select 1 where not exists (select next_val from hibernate_sequence);
 
-    drop sequence hibernate_sequence;
-
-    create sequence hibernate_sequence start with 1 increment by 1;
-
-    create table app_registration (
+    create table APP_REGISTRATION (
         id bigint not null,
         object_version bigint,
         default_version bit,
