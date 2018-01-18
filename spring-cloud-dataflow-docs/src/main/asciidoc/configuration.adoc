@@ -219,7 +219,7 @@ To use features such as Stream update and rollback, the Data Flow Server delegat
 +
 [source,bash,subs=attributes]
 ----
-$ java -jar -jar spring-cloud-dataflow-server-local-{project-version}.jar --spring.cloud.config.skipper.client.uri=http://192.51.100.1:7577/api
+$ java -jar spring-cloud-dataflow-server-local-{project-version}.jar --spring.cloud.skipper.client.serverUri=http://192.51.100.1:7577/api --spring.cloud.dataflow.features.skipper-enabled=true
 ----
 
 [[configuration-security]]
