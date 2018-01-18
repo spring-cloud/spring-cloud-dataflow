@@ -21,6 +21,7 @@ import java.util.Map;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import org.springframework.cloud.skipper.PackageDeleteException;
 import org.springframework.cloud.skipper.ReleaseNotFoundException;
 import org.springframework.cloud.skipper.SkipperException;
 import org.springframework.http.client.ClientHttpResponse;
@@ -68,11 +69,15 @@ public class SkipperClientResponseErrorHandler extends DefaultResponseErrorHandl
 		if (ObjectUtils.nullSafeEquals(exceptionClazz, ReleaseNotFoundException.class.getName())) {
 			handleReleaseNotFoundException(map);
 		}
+		else if (ObjectUtils.nullSafeEquals(exceptionClazz, PackageDeleteException.class.getName())) {
+			handlePackageDeleteException(map);
+		}
 		else if (ObjectUtils.nullSafeEquals(exceptionClazz, SkipperException.class.getName())) {
 			handleSkipperException(map);
 		}
 		super.handleError(response);
 	}
+
 
 	private void handleReleaseNotFoundException(Map<String, String> map) {
 		String releaseName = map.get("releaseName");
@@ -92,6 +97,11 @@ public class SkipperClientResponseErrorHandler extends DefaultResponseErrorHandl
 				throw new ReleaseNotFoundException(releaseName);
 			}
 		}
+	}
+
+	private void handlePackageDeleteException(Map<String, String> map) {
+		String message = map.get("message");
+		throw new PackageDeleteException(StringUtils.hasText(message) ? message : "");
 	}
 
 	private void handleSkipperException(Map<String, String> map) {

@@ -30,16 +30,4 @@ public class PackageDeleteException extends SkipperException {
 		super(message, cause);
 	}
 
-//	public PackageDeleteException(String packageName, List<Release> releases) {
-//		super(getMessage(packageName, releases));
-//	}
-//
-//	public PackageDeleteException(String packageName, Release releases) {
-//		super(getMessage(packageName, Arrays.asList(releases)));
-//	}
-//
-//	private static String getMessage(String packageName, List<Release> releases) {
-//		return String.format("Can't delete package: [%s] because is used by deployed releases: %s",
-//				packageName, releases.stream().map(Release::getName).collect(Collectors.toList()));
-//	}
 }

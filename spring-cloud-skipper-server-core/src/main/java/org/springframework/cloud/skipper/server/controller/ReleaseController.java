@@ -15,7 +15,9 @@
  */
 package org.springframework.cloud.skipper.server.controller;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cloud.skipper.PackageDeleteException;
@@ -179,6 +181,15 @@ public class ReleaseController {
 		// needed for server not to log 500 errors
 	}
 
+	@ExceptionHandler(PackageDeleteException.class)
+	public ResponseEntity<Map<String, String>> handlePackageDeleteException(PackageDeleteException error) {
+		// TODO investigate why SkipperErrorAttributes is not being invoked.
+		Map<String, String> map = new HashMap<>();
+		map.put("exception", error.getClass().getName());
+		map.put("message", error.getMessage());
+		return new ResponseEntity<Map<String, String>>(map, HttpStatus.CONFLICT);
+	}
+
 	/**
 	 * @author Mark Pollack
 	 */
@@ -186,10 +197,5 @@ public class ReleaseController {
 
 		public ReleaseControllerLinksResource() {
 		}
-	}
-
-	@ExceptionHandler(PackageDeleteException.class)
-	public ResponseEntity<String> handlePackageDeleteException(PackageDeleteException e) {
-		return ResponseEntity.status(HttpStatus.CONFLICT).body(e.getMessage());
 	}
 }

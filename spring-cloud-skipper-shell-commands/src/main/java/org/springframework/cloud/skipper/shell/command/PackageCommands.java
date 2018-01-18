@@ -31,6 +31,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cloud.skipper.PackageDeleteException;
 import org.springframework.cloud.skipper.client.SkipperClient;
 import org.springframework.cloud.skipper.domain.ConfigValues;
 import org.springframework.cloud.skipper.domain.InstallProperties;
@@ -155,7 +156,11 @@ public class PackageCommands extends AbstractSkipperCommand {
 
 	@ShellMethod(key = "package delete", value = "Delete a package.")
 	public String packageDelete(@ShellOption(help = "the package name to be deleted") String packageName) {
-		this.skipperClient.packageDelete(packageName);
+		try {
+			this.skipperClient.packageDelete(packageName);
+		} catch (PackageDeleteException e) {
+			return e.getMessage();
+		}
 		return String.format("Deleted Package '%s'", packageName);
 	}
 

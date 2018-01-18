@@ -93,6 +93,11 @@ public class PackageMetadataService implements ResourceLoaderAware {
 					packageMetadata.getId());
 			boolean canDelete = true;
 
+			// Is the package from a local repository?
+			if (checkIfPackageIsFromLocalRepo(errorMessages, packageMetadata)) {
+				break;
+			}
+
 			List<Release> releasesFromLocalRepositories = filterReleasesFromLocalRepos(releases, packageMetadata.getName());
 
 			// Only keep latest release per release name.
@@ -128,6 +133,23 @@ public class PackageMetadataService implements ResourceLoaderAware {
 		else {
 			throw new PackageDeleteException(StringUtils.collectionToCommaDelimitedString(errorMessages));
 		}
+	}
+
+	private boolean checkIfPackageIsFromLocalRepo(List<String> errorMessages, PackageMetadata packageMetadata) {
+		Repository repository = this.repositoryRepository.findOne(packageMetadata.getRepositoryId());
+		if (repository != null) {
+			if (!repository.isLocal()) {
+				errorMessages.add(String.format("Can not delete package [%s], associated repository [%s] is remote.",
+						packageMetadata.getName(),
+						repository.getName()));
+				return true;
+			}
+		} else {
+			errorMessages.add(String.format("Can not delete package {}, repositoryId {} does not exist.",
+					packageMetadata.getName(),
+					packageMetadata.getRepositoryId()));
+		}
+		return false;
 	}
 
 	public List<Release> filterReleasesFromLocalRepos(List<Release> releases, String packageMetadataName) {
