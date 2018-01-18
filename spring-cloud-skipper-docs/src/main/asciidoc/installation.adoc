@@ -100,3 +100,89 @@ spring:
 ```
 
 More information on the deployment properties that can be configured can be found in https://github.com/spring-cloud/spring-cloud-deployer-kubernetes/blob/master/src/main/java/org/springframework/cloud/deployer/spi/kubernetes/KubernetesDeployerProperties.java[KubernetesDeployerProperties]
+
+== Database configuration
+
+Spring Cloud Skipper uses a relational database to store metadata. We use https://flywaydb.org/[flyway] to bootstrap and then migrate the database as the product evolves.
+We currently provide schemas for the following databases: *H2*, *HSQLDB*, *MySQL*, *PostgreSQL*, *Microsoft SQL Server*, *Oracle 12*, *IBM DB2*.
+The JDBC drivers for *MySQL* (via MariaDB driver), *HSQLDB*, *PostgreSQL*, *SQL Server*,  along with embedded *H2* are available out of the box.
+If you are using any other database, then the corresponding JDBC driver jar needs to be on the classpath of the server.
+If not specified the server will start with the embedded in memory *H2* database.
+
+The database properties can be passed as environment variables or command-line arguments to the Data Flow Server.
+
+
+* Environment variables:
+```
+export spring_datasource_url=jdbc:postgresql://localhost:5432/mydb
+export spring_datasource_username=myuser
+export spring_datasource_password=mypass
+export spring_datasource_driver-class-name="org.postgresql.Driver"
+```
+* Command Line arguments
+
+* *MySQL*
+[source,bash]
+----
+java -jar {skipper_jar} \
+    --spring.datasource.url=jdbc:mysql:<db-info> \
+    --spring.datasource.username=<user> \
+    --spring.datasource.password=<password> \
+    --spring.datasource.driver-class-name=org.mariadb.jdbc.Driver &
+----
+
+* *PostgreSQL*
+[source,bash]
+----
+java -jar {skipper_jar} \
+    --spring.datasource.url=jdbc:postgresql:<db-info> \
+    --spring.datasource.username=<user> \
+    --spring.datasource.password=<password> \
+    --spring.datasource.driver-class-name=org.postgresql.Driver &
+----
+
+* *HSQLDB*
+[source,bash]
+----
+java -jar {skipper_jar} \
+    --spring.datasource.url=jdbc:hsqldb:mem:<db-info> \
+    --spring.datasource.username=sa \
+    --spring.datasource.password= \
+    --spring.datasource.driver-class-name=org.hsqldb.jdbc.JDBCDriver &
+----
+
+* *Microsoft SQL Server*
+[source,bash]
+----
+java -jar {skipper_jar} \
+    --spring.datasource.url=jdbc:sqlserver://<db-info>;database=<database-name> \
+    --spring.datasource.username=<user> \
+    --spring.datasource.password=<password> \
+    --flyway.schemas=<database-name>
+    --spring.datasource.driver-class-name=com.microsoft.sqlserver.jdbc.SQLServerDriver &
+----
+
+* *Oracle*
+[source,bash]
+----
+java -jar {skipper_jar} \
+    --spring.datasource.url=jdbc:oracle:thin:<user>/<password>@<database-address>/<service-id> \
+    --spring.datasource.username=<user> \
+    --spring.datasource.password=<password> \
+    --flyway.schemas=<tablespace-name>
+    --spring.datasource.driver-class-name=oracle.jdbc.driver.OracleDriver &
+----
+
+* *IBM DB2*
+[source,bash]
+----
+java -jar {skipper_jar} \
+    --spring.datasource.url=jdbc:db2:thin://<db-info>/<db-name> \
+    --spring.datasource.username=<user> \
+    --spring.datasource.password=<password> \
+    --flyway.schemas=<db-name>
+    --spring.datasource.driver-class-name=com.ibm.db2.jcc.DB2Driver &
+----
+
+NOTE: Please make sure that you configure the correct `flyway.schemas` for *Oracle*, *DB2* and *SQL Server*, otherwise flyway will try to create it's `schema_version` table on the default schema for a connection, which could be different than that your credentials are associated with.
+Please refer to the https://flywaydb.org/documentation/[Flyway documentation] for more options.

@@ -1,5 +1,5 @@
 = Spring Cloud Skipper Reference Guide
-Mark Pollack; Ilayaperumal Gopinathan; Janne Valkealahti; Gunnar Hillert; Sabby Anandan
+Mark Pollack; Ilayaperumal Gopinathan; Janne Valkealahti; Gunnar Hillert; Sabby Anandan; Vinicius Carvalho
 :doctype: book
 :toc: left
 :toclevels: 4
