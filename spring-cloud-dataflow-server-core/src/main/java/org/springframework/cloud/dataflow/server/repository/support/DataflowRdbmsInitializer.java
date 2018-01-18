@@ -16,6 +16,8 @@
 
 package org.springframework.cloud.dataflow.server.repository.support;
 
+import java.sql.SQLException;
+
 import javax.sql.DataSource;
 
 import org.apache.commons.logging.Log;
@@ -24,12 +26,12 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.jdbc.DatabaseDriver;
 import org.springframework.cloud.dataflow.core.DataFlowPropertyKeys;
 import org.springframework.cloud.dataflow.server.config.features.FeaturesProperties;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.jdbc.datasource.init.DatabasePopulatorUtils;
 import org.springframework.jdbc.datasource.init.ResourceDatabasePopulator;
-import org.springframework.jdbc.support.MetaDataAccessException;
 
 /**
  * Utility for initializing the Definition Repository's datasource. If a single
@@ -47,7 +49,7 @@ public final class DataflowRdbmsInitializer implements InitializingBean {
 
 	private static final Log logger = LogFactory.getLog(DataflowRdbmsInitializer.class);
 
-	private static final String DEFAULT_SCHEMA_LOCATION = "classpath:schema-@@platform@@-@@suffix@@.sql";
+	private static final String DEFAULT_SCHEMA_LOCATION = "classpath:schemas/@@platform@@/@@suffix@@.sql";
 
 	private static final String COMMON_SCHEMA_SUFFIX = "common";
 
@@ -56,6 +58,8 @@ public final class DataflowRdbmsInitializer implements InitializingBean {
 	private static final String TASKS_SCHEMA_SUFFIX = "tasks";
 
 	private static final String DEPLOYMENT_SCHEMA_SUFFIX = "deployment";
+
+	private static final String JPA_SCHEMA_SUFFIX = "jpa";
 
 	/**
 	 * Path to the SQL file to use to initialize the database schema.
@@ -88,15 +92,7 @@ public final class DataflowRdbmsInitializer implements InitializingBean {
 	public void afterPropertiesSet() throws Exception {
 		if (dataSource != null && definitionInitializationEnable) {
 			String platform = getDatabaseType(dataSource);
-			if ("hsql".equals(platform)) {
-				platform = "hsqldb";
-			}
-			if ("postgres".equals(platform)) {
-				platform = "postgresql";
-			}
-			if ("oracle".equals(platform)) {
-				platform = "oracle10g";
-			}
+
 			ResourceDatabasePopulator populator = new ResourceDatabasePopulator();
 			String schemaLocation = schema;
 			schemaLocation = schemaLocation.replace("@@platform@@", platform);
@@ -124,6 +120,11 @@ public final class DataflowRdbmsInitializer implements InitializingBean {
 						String.format("Adding dataflow schema %s for %s database", deploymentSchemaLocation, platform));
 				populator.addScript(resourceLoader.getResource(deploymentSchemaLocation));
 			}
+			String jpaSchemaLocation = schemaLocation;
+			jpaSchemaLocation = jpaSchemaLocation.replace("@@suffix@@", JPA_SCHEMA_SUFFIX);
+			logger.info(
+					String.format("Adding dataflow schema %s for %s database", jpaSchemaLocation, platform));
+			populator.addScript(resourceLoader.getResource(jpaSchemaLocation));
 			populator.setContinueOnError(true);
 			logger.debug(String.format("Initializing dataflow schema for %s database", platform));
 			DatabasePopulatorUtils.execute(populator, dataSource);
@@ -132,9 +133,9 @@ public final class DataflowRdbmsInitializer implements InitializingBean {
 
 	private String getDatabaseType(DataSource dataSource) {
 		try {
-			return DatabaseType.fromMetaData(dataSource).toString().toLowerCase();
+			return DatabaseDriver.fromJdbcUrl(dataSource.getConnection().getMetaData().getURL()).getId();
 		}
-		catch (MetaDataAccessException ex) {
+		catch (SQLException ex) {
 			throw new IllegalStateException("Unable to detect database type", ex);
 		}
 	}

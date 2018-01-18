@@ -1,11 +1,7 @@
 
-    drop table if exists app_registration cascade;
-
-    drop sequence hibernate_sequence;
-
     create sequence hibernate_sequence start 1 increment 1;
 
-    create table app_registration (
+    create table APP_REGISTRATION (
         id int8 not null,
         object_version int8,
         default_version boolean,

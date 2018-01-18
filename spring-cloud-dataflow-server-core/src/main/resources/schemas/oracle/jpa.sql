@@ -1,11 +1,7 @@
 
-    drop table app_registration cascade constraints;
-
-    drop sequence hibernate_sequence;
-
     create sequence hibernate_sequence start with 1 increment by 1;
 
-    create table app_registration (
+    create table APP_REGISTRATION (
         id number(19,0) not null,
         object_version number(19,0),
         default_version number(1,0),

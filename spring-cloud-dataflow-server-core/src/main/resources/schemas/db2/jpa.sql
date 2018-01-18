@@ -1,11 +1,6 @@
-
-    drop table app_registration;
-
-    drop sequence hibernate_sequence restrict;
-
     create sequence hibernate_sequence start with 1 increment by 1;
 
-    create table app_registration (
+    create table APP_REGISTRATION (
         id bigint not null,
         object_version bigint,
         default_version smallint,

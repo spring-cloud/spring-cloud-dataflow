@@ -1,9 +1,5 @@
 
-    drop table if exists app_registration;
-
-    drop table if exists hibernate_sequence;
-
-    create table app_registration (
+   create table APP_REGISTRATION (
         id bigint not null,
         object_version bigint,
         default_version bit,
@@ -19,4 +15,4 @@
         next_val bigint
     );
 
-    insert into hibernate_sequence values ( 1 );
+    insert into hibernate_sequence(next_val) select * from (select 1) as tmp where not exists ( select next_val from hibernate_sequence) limit 1;
