@@ -867,7 +867,7 @@ Spring Cloud Data Flow is integrated with Skipper by generating a Skipper packag
 The generated package name is the same name as the Stream.
 The generated package is uploaded to Skipper's package repository and Data Flow then instructs
 Skipper to install the package that corresponds to the Stream.
-Subsequent commands to upgrade and rollback applications within the Stream are passed through to Skipper after some validation checks are performed by Data Flow.
+Subsequent commands to upgrade and rollback the applications within the Stream are passed through to Skipper after some validation checks are performed by Data Flow.
 
 
 [[spring-cloud-dataflow-stream-lifecycle-skipper-create]]
@@ -885,6 +885,31 @@ dataflow:> stream create --name httptest --definition "http --server.port=9000 |
 dataflow:> stream deploy --name httptest
 ----
 
+The command `stream info` shows useful information about the stream including the deployment properties.
+[source,bash]
+----
+dataflow:>stream info httptest
+╔══════════════════════════════╤══════════════════════════════╤══════════════════════════════╗
+║             Name             │             DSL              │            Status            ║
+╠══════════════════════════════╪══════════════════════════════╪══════════════════════════════╣
+║httptest                      │http --server.port=9000 | log │deploying                     ║
+╚══════════════════════════════╧══════════════════════════════╧══════════════════════════════╝
+
+Stream Deployment properties: {
+  "log" : {
+    "spring.cloud.deployer.indexed" : "true",
+    "spring.cloud.deployer.group" : "httptest",
+    "maven://org.springframework.cloud.stream.app:log-sink-rabbit" : "1.1.0.RELEASE"
+  },
+  "http" : {
+    "spring.cloud.deployer.group" : "httptest",
+    "maven://org.springframework.cloud.stream.app:http-source-rabbit" : "1.1.0.RELEASE"
+  }
+}
+
+----
+
+
 There is an important optional command argument to the `stream deploy` command, which is `--platformName`.
 Skipper can be configured to deploy to multiple platforms.
 Skipper is pre-configured with a platform named `default` which will deploys applications to the local machine where Skipper is running.
@@ -901,11 +926,43 @@ To update the stream, use the command `stream update` which takes as a command a
 You can pass in values to these command arguments in the same format as when deploy the stream with or without Skipper.
 There is an important new top level prefix available when using Skipper, which is `version`.
 If the Stream `http | log` was deployed, and the version of `log` which registered at the time of deployment was `1.1.0.RELEASE`, the following command will update the Stream to use the `1.2.0.RELEASE` of the log application.
+Before updating the stream with the specific version of the app, we need to make sure that the app is registered with that version.
+[source,bash]
+----
+dataflow:>app register --name log --type sink --uri maven://org.springframework.cloud.stream.app:log-sink-rabbit:1.2.0.RELEASE
+Successfully registered application 'sink:log'
+----
+
 [source,bash]
 ----
 dataflow:>stream update --name httptest --properties version.log=1.2.0.RELEASE
 ----
 
+To verify the deployment properties and the updated version, we can use `stream info`
+
+[source,bash]
+----
+dataflow:>stream info httptest
+╔══════════════════════════════╤══════════════════════════════╤══════════════════════════════╗
+║             Name             │             DSL              │            Status            ║
+╠══════════════════════════════╪══════════════════════════════╪══════════════════════════════╣
+║httptest                      │http --server.port=9000 | log │deploying                     ║
+╚══════════════════════════════╧══════════════════════════════╧══════════════════════════════╝
+
+Stream Deployment properties: {
+  "log" : {
+    "spring.cloud.deployer.indexed" : "true",
+    "spring.cloud.deployer.count" : "1",
+    "spring.cloud.deployer.group" : "httptest",
+    "maven://org.springframework.cloud.stream.app:log-sink-rabbit" : "1.2.0.RELEASE"
+  },
+  "http" : {
+    "spring.cloud.deployer.group" : "httptest",
+    "maven://org.springframework.cloud.stream.app:http-source-rabbit" : "1.1.0.RELEASE"
+  }
+}
+
+----
 === Stream versions
 Skipper keeps a history of the Streams that were deployed.
 After updating a Stream, there will be a second version of the stream.
