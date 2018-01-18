@@ -892,7 +892,7 @@ dataflow:>app list --id source:mysource
 ╚══════════════════╧═════════╧════╧════╝
 ----
 
-Depending on the schema the provided a URI should conform to the following formats:
+The application URI should conform to one the following schema formats:
 
 * maven schema
 [source,bash]
@@ -909,13 +909,19 @@ http://<web-path>/<artifactName>-<version>.jar
 ----
 file:///<local-path>/<artifactName>-<version>.jar
 ----
+* docker schema
+[source,bash]
+----
+docker:<docker-image-path>/<imageName>:<version>
+----
 
-E.g. the `<version>` is a compulsory part of the versioned app URI.
+[NOTE]
+The URI `<version>` part is compulsory for the versioned stream applications
 
-Multiple versions can be registered for the same applications (e.g. same name and type) but only one can be set as a default.
+Multiple versions can be registered for the same applications (e.g. same name and type) but only one can be set as default.
 The default version is used for deploying Streams.
 
-The version of the first app registration is marked as default. The default version can be changed at any time with the help of the `app default` command:
+The version of the first app registration is marked as default. This can be changed at any time with the help of the `app default` command:
 [source,bash]
 ----
 dataflow:>app default --id source:mysource --version 0.0.2
@@ -929,7 +935,7 @@ dataflow:>app list --id source:mysource
 ╚══════════════════╧═════════╧════╧════╝
 ----
 
-The `app list --id <type:name>` command lists all version for a given stream application.
+The `app list --id <type:name>` command lists all versions for a given stream application.
 
 The `app unregister` command provides an optional `--version` parameter to specify the app version to unregister.
 [source,bash]
@@ -947,9 +953,8 @@ If the `--version` is not specified then the default version is unregistered.
 
 [NOTE]
 ====
-The stream applications should have their default version set for the stream to be deployed. Applications without a default version
-are treated as unregistered application on stream deployment attempt.
-
+The stream applications should have the default versions set for the stream to be deployed.
+Otherwise they will be treated as unregistered application for deployment.
 Use the `app default` command to set the default versions.
 ====
 
