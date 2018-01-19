@@ -32,24 +32,43 @@ import org.springframework.data.domain.Pageable;
  *
  * @author Mark Pollack
  * @author Ilayaperumal Gopinathan
+ * @author Christian Tzolov
  */
 public interface StreamDeployer {
 
-	DeploymentState calculateStreamState(String streamName);
-
-	Map<StreamDefinition, DeploymentState> state(List<StreamDefinition> content);
+	/**
+	 * Get the deployment state of a stream. Stream state is computed from the deployment states of its apps.
+	 * @param streamName stream name
+	 * @return the deployment status
+	 */
+	DeploymentState streamState(String streamName);
 
 	/**
-	 * Undeploys the stream identified by the given stream name.
-	 *
-	 * @param name the name of the stream to un-deploy
+	 * Get the deployment states for a list of stream definitions
+	 * @param content
+	 * @return map of stream definition and its corresponding deployment state
 	 */
-	void undeployStream(String name);
+	Map<StreamDefinition, DeploymentState> streamsStates(List<StreamDefinition> content);
 
+	/**
+	 * Returns application statuses of all deployed applications
+	 * @param pageable
+	 * @return pagable list of all app statuses
+	 * @throws ExecutionException
+	 * @throws InterruptedException
+	 */
 	Page<AppStatus> getAppStatuses(Pageable pageable) throws ExecutionException, InterruptedException;
 
-	AppStatus getAppStatus(String id);
+	/**
+	 * Gets runtime application status
+	 * @param appDeploymentId the id of the application instance running in the target runtime environment
+	 * @return app status
+	 */
+	AppStatus getAppStatus(String appDeploymentId);
 
+	/**
+	 * @return the runtime environment info for deploying streams.
+	 */
 	RuntimeEnvironmentInfo environmentInfo();
 
 	/**

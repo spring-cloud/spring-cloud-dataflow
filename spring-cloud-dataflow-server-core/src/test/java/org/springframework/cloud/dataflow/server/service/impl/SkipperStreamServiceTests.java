@@ -18,6 +18,7 @@ package org.springframework.cloud.dataflow.server.service.impl;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -40,9 +41,16 @@ import org.springframework.cloud.dataflow.server.repository.StreamDefinitionRepo
 import org.springframework.cloud.dataflow.server.repository.StreamDeploymentRepository;
 import org.springframework.cloud.dataflow.server.stream.SkipperStreamDeployer;
 import org.springframework.cloud.dataflow.server.stream.StreamDeploymentRequest;
+import org.springframework.cloud.deployer.spi.app.DeploymentState;
 import org.springframework.cloud.deployer.spi.core.AppDeploymentRequest;
+import org.springframework.cloud.skipper.domain.Deployer;
+import org.springframework.cloud.skipper.domain.Release;
 import org.springframework.test.context.junit4.SpringRunner;
 
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyInt;
+import static org.mockito.Matchers.anyString;
+import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -144,6 +152,61 @@ public class SkipperStreamServiceTests {
 		StreamDeployment streamDeployment = this.skipperStreamService.info("test1");
 		Assert.assertTrue(streamDeployment.getStreamName().equals(streamDefinition1.getName()));
 		Assert.assertTrue(streamDeployment.getDeploymentProperties().equals("{\"log\":{\"test2\":\"value2\"},\"time\":{\"test1\":\"value1\"}}"));
+	}
+
+	@Test
+	public void verifyStreamState() {
+		StreamDefinition streamDefinition = new StreamDefinition("myStream", "time|log");
+		Map<StreamDefinition, DeploymentState> streamSates = new HashMap<>();
+		streamSates.put(streamDefinition, DeploymentState.deployed);
+		when(this.skipperStreamDeployer.streamsStates(eq(Arrays.asList(streamDefinition)))).thenReturn(streamSates);
+
+		Map<StreamDefinition, DeploymentState> resultStates = this.skipperStreamService.state(Arrays.asList(streamDefinition));
+
+		verify(this.skipperStreamDeployer, times(1)).streamsStates(any());
+
+		Assert.assertNotNull(resultStates);
+		Assert.assertEquals(1, resultStates.size());
+		Assert.assertEquals(DeploymentState.deployed, resultStates.get(streamDefinition));
+	}
+
+
+	@Test
+	public void verifyStreamHistory() {
+		Release release = new Release();
+		release.setName("RELEASE666");
+		when(this.skipperStreamDeployer.history(eq("myStream"))).thenReturn(Arrays.asList(release));
+
+		Collection<Release> releases = this.skipperStreamService.history("myStream");
+
+		verify(this.skipperStreamDeployer, times(1)).history(eq("myStream"));
+
+		Assert.assertNotNull(releases);
+		Assert.assertEquals(1, releases.size());
+		Assert.assertEquals("RELEASE666", releases.iterator().next().getName());
+	}
+
+	@Test
+	public void verifyStreamPlatformList() {
+		Deployer deployer = new Deployer("testDeployer", "testType", null);
+		when(this.skipperStreamDeployer.platformList()).thenReturn(Arrays.asList(deployer));
+		Collection<Deployer> deployers = this.skipperStreamService.platformList();
+
+		verify(this.skipperStreamDeployer, times(1)).platformList();
+
+		Assert.assertNotNull(deployers);
+		Assert.assertEquals(1, deployers.size());
+		Assert.assertEquals("testDeployer", deployers.iterator().next().getName());
+	}
+
+	@Test
+	public void verifyStreamManifest() {
+		when(this.skipperStreamDeployer.manifest(eq("myManifest"), eq(666))).thenReturn("MANIFEST666");
+
+		String manifest = this.skipperStreamService.manifest("myManifest", 666);
+
+		verify(this.skipperStreamDeployer, times(1)).manifest(anyString(), anyInt());
+		Assert.assertEquals("MANIFEST666", manifest);
 	}
 
 	@Test

@@ -146,12 +146,12 @@ public class SkipperStreamDeployer implements StreamDeployer {
 	}
 
 	@Override
-	public DeploymentState calculateStreamState(String streamName) {
+	public DeploymentState streamState(String streamName) {
 		return getStreamDeploymentState(streamName);
 	}
 
 	@Override
-	public Map<StreamDefinition, DeploymentState> state(List<StreamDefinition> streamDefinitions) {
+	public Map<StreamDefinition, DeploymentState> streamsStates(List<StreamDefinition> streamDefinitions) {
 		Map<StreamDefinition, DeploymentState> states = new HashMap<>();
 		for (StreamDefinition streamDefinition : streamDefinitions) {
 			DeploymentState streamDeploymentState = getStreamDeploymentState(streamDefinition.getName());
@@ -173,7 +173,7 @@ public class SkipperStreamDeployer implements StreamDeployer {
 			state = aggregateState;
 		}
 		catch (ReleaseNotFoundException e) {
-			// a defined stream but unknown to skipper is considered to be in undeployed state
+			// a defined stream but unknown to skipper is considered to be in undeployed streamsStates
 			if (streamDefinitionExists(streamName)) {
 				state = DeploymentState.undeployed;
 			}
@@ -372,7 +372,6 @@ public class SkipperStreamDeployer implements StreamDeployer {
 		return templateList;
 	}
 
-	@Override
 	public void undeployStream(String streamName) {
 		DeploymentState streamDeploymentState = getStreamDeploymentState(streamName);
 		if (streamDeploymentState != null && streamDeploymentState != DeploymentState.undeployed) {
@@ -398,17 +397,17 @@ public class SkipperStreamDeployer implements StreamDeployer {
 	}
 
 	@Override
-	public AppStatus getAppStatus(String id) {
+	public AppStatus getAppStatus(String appDeploymentId) {
 		Iterable<StreamDefinition> streamDefinitions = this.streamDefinitionRepository.findAll();
 		for (StreamDefinition streamDefinition : streamDefinitions) {
 			List<AppStatus> appStatuses = skipperStatus(streamDefinition.getName());
 			for (AppStatus appStatus : appStatuses) {
-				if (appStatus.getDeploymentId().equals(id)) {
+				if (appStatus.getDeploymentId().equals(appDeploymentId)) {
 					return appStatus;
 				}
 			}
 		}
-		throw new NoSuchAppException(id);
+		throw new NoSuchAppException(appDeploymentId);
 	}
 
 	@Override

@@ -43,8 +43,8 @@ import org.springframework.cloud.dataflow.rest.UpdateStreamRequest;
 import org.springframework.cloud.dataflow.server.config.features.FeaturesProperties;
 import org.springframework.cloud.dataflow.server.configuration.TestDependencies;
 import org.springframework.cloud.dataflow.server.repository.StreamDefinitionRepository;
-import org.springframework.cloud.dataflow.server.service.StreamService;
 import org.springframework.cloud.dataflow.server.support.MockUtils;
+import org.springframework.cloud.dataflow.server.service.UpdatableStreamService;
 import org.springframework.cloud.dataflow.server.support.TestResourceUtils;
 import org.springframework.cloud.skipper.ReleaseNotFoundException;
 import org.springframework.cloud.skipper.client.SkipperClient;
@@ -85,7 +85,7 @@ import static org.springframework.cloud.dataflow.rest.SkipperStream.SKIPPER_PACK
 public class SkipperStreamServiceIntegrationTests {
 
 	@Autowired
-	private StreamService streamService;
+	private UpdatableStreamService streamService;
 
 	@Autowired
 	private StreamDefinitionRepository streamDefinitionRepository;
@@ -245,10 +245,10 @@ public class SkipperStreamServiceIntegrationTests {
 				TestResourceUtils.qualifiedResource(getClass(), "deployManifest.yml").getInputStream(),
 				Charset.defaultCharset());
 		String deploymentProps = "{\"log\":{\"spring.cloud.deployer.indexed\":\"true\","
-										+ "\"spring.cloud.deployer.group\":\"ticktock\","
-										+ "\"maven:\\/\\/org.springframework.cloud.stream.app:log-sink-rabbit\":\"1.2.0.RELEASE\"}"
-										+ ",\"time\":{\"maven:\\/\\/org.springframework.cloud.stream.app:time-source-rabbit\":\"1.2.0.RELEASE\","
-										+ "\"spring.cloud.deployer.group\":\"ticktock\"}}";
+				+ "\"spring.cloud.deployer.group\":\"ticktock\","
+				+ "\"maven:\\/\\/org.springframework.cloud.stream.app:log-sink-rabbit\":\"1.2.0.RELEASE\"}"
+				+ ",\"time\":{\"maven:\\/\\/org.springframework.cloud.stream.app:time-source-rabbit\":\"1.2.0.RELEASE\","
+				+ "\"spring.cloud.deployer.group\":\"ticktock\"}}";
 		when(skipperClient.manifest(streamDefinition.getName())).thenReturn(releaseManifest);
 		StreamDeployment streamDeployment = this.streamService.info(streamDefinition.getName());
 		assertThat(streamDeployment.getStreamName()).isEqualTo(streamDefinition.getName());

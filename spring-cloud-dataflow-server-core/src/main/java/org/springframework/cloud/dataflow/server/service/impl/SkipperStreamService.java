@@ -36,8 +36,8 @@ import org.springframework.cloud.dataflow.rest.UpdateStreamRequest;
 import org.springframework.cloud.dataflow.rest.util.DeploymentPropertiesUtils;
 import org.springframework.cloud.dataflow.server.repository.NoSuchStreamDefinitionException;
 import org.springframework.cloud.dataflow.server.repository.StreamDefinitionRepository;
+import org.springframework.cloud.dataflow.server.service.UpdatableStreamService;
 import org.springframework.cloud.dataflow.server.stream.SkipperStreamDeployer;
-import org.springframework.cloud.dataflow.server.stream.StreamDeployers;
 import org.springframework.cloud.dataflow.server.stream.StreamDeploymentRequest;
 import org.springframework.cloud.deployer.spi.app.DeploymentState;
 import org.springframework.cloud.deployer.spi.core.AppDeploymentRequest;
@@ -60,7 +60,7 @@ import static org.springframework.cloud.dataflow.rest.SkipperStream.SKIPPER_PACK
  * @author Ilayaperumal Gopinathan
  * @author Christian Tzolov
  */
-public class SkipperStreamService extends AbstractStreamService {
+public class SkipperStreamService extends AbstractStreamService implements UpdatableStreamService {
 
 	private static Log logger = LogFactory.getLog(SkipperStreamService.class);
 
@@ -77,7 +77,7 @@ public class SkipperStreamService extends AbstractStreamService {
 			SkipperStreamDeployer skipperStreamDeployer,
 			AppDeploymentRequestCreator appDeploymentRequestCreator) {
 
-		super(streamDefinitionRepository, StreamDeployers.skipper);
+		super(streamDefinitionRepository);
 
 		Assert.notNull(skipperStreamDeployer, "SkipperStreamDeployer must not be null");
 		Assert.notNull(appDeploymentRequestCreator, "AppDeploymentRequestCreator must not be null");
@@ -125,7 +125,7 @@ public class SkipperStreamService extends AbstractStreamService {
 
 	@Override
 	public DeploymentState doCalculateStreamState(String name) {
-		return this.skipperStreamDeployer.calculateStreamState(name);
+		return this.skipperStreamDeployer.streamState(name);
 	}
 
 	@Override
@@ -252,7 +252,7 @@ public class SkipperStreamService extends AbstractStreamService {
 
 	@Override
 	public Map<StreamDefinition, DeploymentState> state(List<StreamDefinition> streamDefinitions) {
-		return this.skipperStreamDeployer.state(streamDefinitions);
+		return this.skipperStreamDeployer.streamsStates(streamDefinitions);
 	}
 
 	@Override

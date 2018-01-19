@@ -50,12 +50,13 @@ import org.springframework.cloud.dataflow.server.config.apps.CommonApplicationPr
 import org.springframework.cloud.dataflow.server.config.features.FeaturesProperties;
 import org.springframework.cloud.dataflow.server.controller.AboutController;
 import org.springframework.cloud.dataflow.server.controller.AppRegistryController;
+import org.springframework.cloud.dataflow.server.controller.StreamDeploymentController;
 import org.springframework.cloud.dataflow.server.controller.CompletionController;
 import org.springframework.cloud.dataflow.server.controller.MetricsController;
 import org.springframework.cloud.dataflow.server.controller.RestControllerAdvice;
 import org.springframework.cloud.dataflow.server.controller.RuntimeAppsController;
+import org.springframework.cloud.dataflow.server.controller.UpdatableStreamDeploymentController;
 import org.springframework.cloud.dataflow.server.controller.StreamDefinitionController;
-import org.springframework.cloud.dataflow.server.controller.StreamDeploymentController;
 import org.springframework.cloud.dataflow.server.controller.TaskDefinitionController;
 import org.springframework.cloud.dataflow.server.controller.TaskExecutionController;
 import org.springframework.cloud.dataflow.server.controller.ToolsController;
@@ -76,6 +77,7 @@ import org.springframework.cloud.dataflow.server.repository.StreamDeploymentRepo
 import org.springframework.cloud.dataflow.server.repository.TaskDefinitionRepository;
 import org.springframework.cloud.dataflow.server.service.StreamService;
 import org.springframework.cloud.dataflow.server.service.TaskService;
+import org.springframework.cloud.dataflow.server.service.UpdatableStreamService;
 import org.springframework.cloud.dataflow.server.service.impl.AppDeployerStreamService;
 import org.springframework.cloud.dataflow.server.service.impl.AppDeploymentRequestCreator;
 import org.springframework.cloud.dataflow.server.service.impl.DefaultTaskService;
@@ -162,9 +164,17 @@ public class TestDependencies extends WebMvcConfigurationSupport {
 	}
 
 	@Bean
+	@ConditionalOnSkipperDisabled
 	public StreamDeploymentController streamDeploymentController(StreamDefinitionRepository repository,
 			StreamService streamService) {
 		return new StreamDeploymentController(repository, streamService);
+	}
+
+	@Bean
+	@ConditionalOnSkipperEnabled
+	public UpdatableStreamDeploymentController updatableStreamDeploymentController(StreamDefinitionRepository repository,
+			UpdatableStreamService updatableStreamService) {
+		return new UpdatableStreamDeploymentController(repository, updatableStreamService);
 	}
 
 	@Bean
@@ -174,14 +184,14 @@ public class TestDependencies extends WebMvcConfigurationSupport {
 
 	@Bean
 	@ConditionalOnSkipperEnabled
-	public StreamService skipperStreamService(StreamDefinitionRepository streamDefinitionRepository,
+	public UpdatableStreamService skipperStreamService(StreamDefinitionRepository streamDefinitionRepository,
 			SkipperStreamDeployer skipperStreamDeployer, AppDeploymentRequestCreator appDeploymentRequestCreator) {
 		return new SkipperStreamService(streamDefinitionRepository, skipperStreamDeployer, appDeploymentRequestCreator);
 	}
 
 	@Bean
 	@ConditionalOnSkipperDisabled
-	public AppDeployerStreamService simpleStreamService(StreamDefinitionRepository streamDefinitionRepository,
+	public StreamService simpleStreamService(StreamDefinitionRepository streamDefinitionRepository,
 			AppDeployerStreamDeployer appDeployerStreamDeployer, AppDeploymentRequestCreator appDeploymentRequestCreator) {
 		return new AppDeployerStreamService(streamDefinitionRepository, appDeployerStreamDeployer,
 				appDeploymentRequestCreator);
@@ -418,21 +428,16 @@ public class TestDependencies extends WebMvcConfigurationSupport {
 	@Bean
 	public AboutController aboutController(VersionInfoProperties versionInfoProperties, FeaturesProperties featuresProperties) {
 		StreamDeployer streamDeployer = mock(StreamDeployer.class);
-		TaskLauncher taskLauncher = mock(TaskLauncher.class);
-		RuntimeEnvironmentInfo.Builder builder = new RuntimeEnvironmentInfo.Builder();
-		RuntimeEnvironmentInfo appDeployerEnvInfo = builder.implementationName("testAppDepImplementationName").
-				implementationVersion("testAppDepImplementationVersion").
-				platformType("testAppDepPlatformType").
-				platformApiVersion("testAppDepPlatformApiVersion").
-				platformClientVersion("testAppDepPlatformClientVersion").spiClass(Class.class).
-				platformHostVersion("testAppDepPlatformHostVersion").build();
-		RuntimeEnvironmentInfo taskDeployerEnvInfo = builder.implementationName("testTaskDepImplementationName").
-				implementationVersion("testTaskDepImplementationVersion").
-				platformType("testTaskDepPlatformType").
-				platformApiVersion("testTaskDepPlatformApiVersion").
-				platformClientVersion("testTaskDepPlatformClientVersion").spiClass(Class.class).
-				platformHostVersion("testTaskDepPlatformHostVersion").build();
+
 		if (!featuresProperties.isSkipperEnabled()) {
+			RuntimeEnvironmentInfo.Builder builder = new RuntimeEnvironmentInfo.Builder();
+			RuntimeEnvironmentInfo appDeployerEnvInfo = builder.implementationName("testAppDepImplementationName").
+					implementationVersion("testAppDepImplementationVersion").
+					platformType("testAppDepPlatformType").
+					platformApiVersion("testAppDepPlatformApiVersion").
+					platformClientVersion("testAppDepPlatformClientVersion").spiClass(Class.class).
+					platformHostVersion("testAppDepPlatformHostVersion").build();
+
 			when(streamDeployer.environmentInfo()).thenReturn(appDeployerEnvInfo);
 		}
 		else {
@@ -447,7 +452,20 @@ public class TestDependencies extends WebMvcConfigurationSupport {
 
 			when(streamDeployer.environmentInfo()).thenReturn(appDeployerEnvInfoSkipper);
 		}
+
+		TaskLauncher taskLauncher = mock(TaskLauncher.class);
+
+		RuntimeEnvironmentInfo taskDeployerEnvInfo = new RuntimeEnvironmentInfo.Builder()
+				.implementationName("testTaskDepImplementationName")
+				.implementationVersion("testTaskDepImplementationVersion")
+				.platformType("testTaskDepPlatformType")
+				.platformApiVersion("testTaskDepPlatformApiVersion")
+				.platformClientVersion("testTaskDepPlatformClientVersion")
+				.spiClass(Class.class)
+				.platformHostVersion("testTaskDepPlatformHostVersion").build();
+
 		when(taskLauncher.environmentInfo()).thenReturn(taskDeployerEnvInfo);
+
 		return new AboutController(streamDeployer, taskLauncher,
 				featuresProperties, versionInfoProperties,
 				mock(SecurityStateBean.class));

@@ -27,7 +27,6 @@ import org.springframework.cloud.dataflow.server.controller.StreamAlreadyDeployi
 import org.springframework.cloud.dataflow.server.repository.NoSuchStreamDefinitionException;
 import org.springframework.cloud.dataflow.server.repository.StreamDefinitionRepository;
 import org.springframework.cloud.dataflow.server.service.StreamService;
-import org.springframework.cloud.dataflow.server.stream.StreamDeployers;
 import org.springframework.cloud.dataflow.server.stream.StreamDeploymentRequest;
 import org.springframework.cloud.deployer.spi.app.DeploymentState;
 import org.springframework.util.Assert;
@@ -55,13 +54,9 @@ public abstract class AbstractStreamService implements StreamService {
 	 */
 	protected final StreamDefinitionRepository streamDefinitionRepository;
 
-	protected final StreamDeployers streamDeployer;
-
-	public AbstractStreamService(StreamDefinitionRepository streamDefinitionRepository, StreamDeployers streamDeployer) {
+	public AbstractStreamService(StreamDefinitionRepository streamDefinitionRepository) {
 		Assert.notNull(streamDefinitionRepository, "StreamDefinitionRepository must not be null");
-		Assert.notNull(streamDeployer, "StreamDeployer must not be null");
 		this.streamDefinitionRepository = streamDefinitionRepository;
-		this.streamDeployer = streamDeployer;
 	}
 
 	@Override

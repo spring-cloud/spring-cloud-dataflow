@@ -33,9 +33,7 @@ import org.springframework.cloud.dataflow.configuration.metadata.BootApplication
 import org.springframework.cloud.dataflow.core.StreamDefinition;
 import org.springframework.cloud.dataflow.core.StreamDeployment;
 import org.springframework.cloud.dataflow.registry.AppRegistry;
-import org.springframework.cloud.dataflow.rest.UpdateStreamRequest;
 import org.springframework.cloud.dataflow.server.config.apps.CommonApplicationProperties;
-import org.springframework.cloud.dataflow.server.repository.IncompatibleStreamDeployerException;
 import org.springframework.cloud.dataflow.server.repository.StreamDefinitionRepository;
 import org.springframework.cloud.dataflow.server.repository.StreamDeploymentRepository;
 import org.springframework.cloud.dataflow.server.stream.AppDeployerStreamDeployer;
@@ -124,21 +122,6 @@ public class AppDeployerStreamServiceTests {
 		verify(this.appDeployerStreamDeployer, times(1)).undeployStream(streamDefinition1.getName());
 		verifyNoMoreInteractions(this.appDeployerStreamDeployer);
 		verify(this.skipperStreamDeployer, never()).undeployStream(streamDefinition1.getName());
-	}
-
-	@Test(expected = IncompatibleStreamDeployerException.class)
-	public void verifyRollbackStream() {
-		StreamDefinition streamDefinition1 = new StreamDefinition("test1", "time | log");
-		StreamDeployment streamDeployment1 = new StreamDeployment(streamDefinition1.getName());
-		when(this.streamDeploymentRepository.findOne(streamDeployment1.getStreamName())).thenReturn(streamDeployment1);
-		verifyNoMoreInteractions(this.appDeployerStreamDeployer);
-
-		this.simpleStreamService.rollbackStream(streamDefinition1.getName(), 0);
-	}
-
-	@Test(expected = IncompatibleStreamDeployerException.class)
-	public void verifyAppDeployerUpgrade() {
-		this.simpleStreamService.updateStream(this.streamDeployment1.getStreamName(), mock(UpdateStreamRequest.class));
 	}
 
 	@Test
