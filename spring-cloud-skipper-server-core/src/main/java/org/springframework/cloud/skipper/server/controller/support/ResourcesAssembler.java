@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.springframework.cloud.skipper.server.util;
+package org.springframework.cloud.skipper.server.controller.support;
 
 import org.springframework.hateoas.Resource;
 import org.springframework.hateoas.ResourceAssembler;

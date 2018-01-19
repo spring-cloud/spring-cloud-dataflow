@@ -13,12 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.springframework.cloud.skipper.server.util;
+package org.springframework.cloud.skipper.server.controller.support;
 
-import org.springframework.cloud.skipper.domain.PackageMetadata;
-import org.springframework.cloud.skipper.server.controller.PackageController;
+import org.springframework.cloud.skipper.domain.Release;
+import org.springframework.cloud.skipper.server.controller.ReleaseController;
 import org.springframework.hateoas.Resource;
-
 
 import static org.springframework.hateoas.mvc.ControllerLinkBuilder.linkTo;
 import static org.springframework.hateoas.mvc.ControllerLinkBuilder.methodOn;
@@ -26,13 +25,11 @@ import static org.springframework.hateoas.mvc.ControllerLinkBuilder.methodOn;
 /**
  * @author Mark Pollack
  */
-public class PackageMetadataResourceAssembler extends SimpleResourceAssembler<PackageMetadata> {
+public class ReleaseResourceAssembler extends SimpleResourceAssembler<Release> {
 
 	@Override
-	protected void addLinks(Resource<PackageMetadata> resource) {
+	protected void addLinks(Resource<Release> resource) {
 		super.addLinks(resource);
-
-		resource.add(linkTo(methodOn(PackageController.class).install(null)).withRel("install"));
-
+		resource.add(linkTo(methodOn(ReleaseController.class).status(null)).withRel("status"));
 	}
 }

@@ -13,9 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.springframework.cloud.skipper.server.util;
+package org.springframework.cloud.skipper.server.controller.support;
 
-import org.springframework.cloud.skipper.domain.Release;
+import org.springframework.cloud.skipper.domain.Manifest;
 import org.springframework.cloud.skipper.server.controller.ReleaseController;
 import org.springframework.hateoas.Resource;
 
@@ -25,10 +25,10 @@ import static org.springframework.hateoas.mvc.ControllerLinkBuilder.methodOn;
 /**
  * @author Mark Pollack
  */
-public class ReleaseResourceAssembler extends SimpleResourceAssembler<Release> {
+public class ManifestResourceAssembler extends SimpleResourceAssembler<Manifest> {
 
 	@Override
-	protected void addLinks(Resource<Release> resource) {
+	protected void addLinks(Resource<Manifest> resource) {
 		super.addLinks(resource);
 		resource.add(linkTo(methodOn(ReleaseController.class).status(null)).withRel("status"));
 	}
