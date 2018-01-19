@@ -159,13 +159,13 @@ public class VersionedAppRegistryControllerTests {
 	public void testRegisterAllWithForce() throws Exception {
 		this.appRegistryService.importAll(true, new ClassPathResource("META-INF/test-apps-overwrite.properties"));
 		assertThat(this.appRegistryService.find("time", ApplicationType.source).getUri().toString(),
-				is("maven://org" + ".springframework.cloud.stream.app:time-source-rabbit:1.0.0.BUILD-SNAPSHOT"));
+				is("maven://org" + ".springframework.cloud.stream.app:time-source-kafka:1.0.0.BUILD-SNAPSHOT"));
 		assertThat(this.appRegistryService.find("filter", ApplicationType.processor).getUri().toString(),
-				is("maven://org" + ".springframework.cloud.stream.app:filter-processor-rabbit:1.0.0.BUILD-SNAPSHOT"));
+				is("maven://org" + ".springframework.cloud.stream.app:filter-processor-kafka:1.0.0.BUILD-SNAPSHOT"));
 		assertThat(this.appRegistryService.find("log", ApplicationType.sink).getUri().toString(),
-				is("maven://org.springframework" + ".cloud.stream.app:log-sink-rabbit:1.0.0.BUILD-SNAPSHOT"));
+				is("maven://org.springframework" + ".cloud.stream.app:log-sink-kafka:1.0.0.BUILD-SNAPSHOT"));
 		assertThat(this.appRegistryService.find("timestamp", ApplicationType.task).getUri().toString(),
-				is("maven://org" + ".springframework.cloud.task.app:timestamp-task:1.0.0.BUILD-SNAPSHOT"));
+				is("maven://org" + ".springframework.cloud.task.app:timestamp-overwrite-task:1.0.0.BUILD-SNAPSHOT"));
 	}
 
 	@Test

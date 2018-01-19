@@ -141,10 +141,19 @@ public class DefaultAppRegistryService extends AbstractAppRegistryCommon impleme
 
 	@Override
 	public AppRegistration save(AppRegistration app) {
-		if (getDefaultApp(app.getName(), app.getType()) == null) {
-			app.setDefaultVersion(true);
+		AppRegistration appRegistration = this.appRegistrationRepository.findAppRegistrationByNameAndTypeAndVersion(
+				app.getName(), app.getType(), app.getVersion());
+		if (appRegistration != null) {
+			appRegistration.setUri(app.getUri());
+			appRegistration.setMetadataUri(app.getMetadataUri());
+			return this.appRegistrationRepository.save(appRegistration);
 		}
-		return this.appRegistrationRepository.save(app);
+		else {
+			if (getDefaultApp(app.getName(), app.getType()) == null) {
+				app.setDefaultVersion(true);
+			}
+			return this.appRegistrationRepository.save(app);
+		}
 	}
 
 	/**
