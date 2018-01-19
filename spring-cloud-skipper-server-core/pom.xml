@@ -15,6 +15,7 @@
         <zeroturnaround.version>1.11</zeroturnaround.version>
         <spring-restdocs.version>1.2.2.RELEASE</spring-restdocs.version>
         <java-semver.version>0.9.0</java-semver.version>
+	<spring-common-security>1.0.0.RC2</spring-common-security>
     </properties>
 
     <dependencies>
@@ -152,7 +153,7 @@
         <dependency>
             <groupId>org.springframework.cloud</groupId>
             <artifactId>spring-cloud-common-security-config-web</artifactId>
-            <version>1.0.0.BUILD-SNAPSHOT</version>
+            <version>${spring-common-security}</version>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
