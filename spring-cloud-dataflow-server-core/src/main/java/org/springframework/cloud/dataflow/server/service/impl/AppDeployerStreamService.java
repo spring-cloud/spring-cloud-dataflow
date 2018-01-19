@@ -15,28 +15,19 @@
  */
 package org.springframework.cloud.dataflow.server.service.impl;
 
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
 import org.springframework.cloud.dataflow.core.StreamDefinition;
 import org.springframework.cloud.dataflow.core.StreamDeployment;
-import org.springframework.cloud.dataflow.rest.UpdateStreamRequest;
 import org.springframework.cloud.dataflow.rest.util.DeploymentPropertiesUtils;
-import org.springframework.cloud.dataflow.server.repository.IncompatibleStreamDeployerException;
 import org.springframework.cloud.dataflow.server.repository.StreamDefinitionRepository;
 import org.springframework.cloud.dataflow.server.stream.AppDeployerStreamDeployer;
-import org.springframework.cloud.dataflow.server.stream.StreamDeployers;
 import org.springframework.cloud.dataflow.server.stream.StreamDeploymentRequest;
 import org.springframework.cloud.deployer.spi.app.DeploymentState;
 import org.springframework.cloud.deployer.spi.core.AppDeploymentRequest;
-import org.springframework.cloud.skipper.domain.Deployer;
-import org.springframework.cloud.skipper.domain.Release;
 import org.springframework.util.Assert;
 
 import static org.springframework.cloud.dataflow.rest.SkipperStream.SKIPPER_KEY_PREFIX;
@@ -50,8 +41,6 @@ import static org.springframework.cloud.dataflow.rest.SkipperStream.SKIPPER_KEY_
  */
 public class AppDeployerStreamService extends AbstractStreamService {
 
-	private static Log logger = LogFactory.getLog(AppDeployerStreamService.class);
-
 	/**
 	 * The repository this controller will use for stream CRUD operations.
 	 */
@@ -62,7 +51,7 @@ public class AppDeployerStreamService extends AbstractStreamService {
 	public AppDeployerStreamService(StreamDefinitionRepository streamDefinitionRepository,
 			AppDeployerStreamDeployer appDeployerStreamDeployer,
 			AppDeploymentRequestCreator appDeploymentRequestCreator) {
-		super(streamDefinitionRepository, StreamDeployers.appdeployer);
+		super(streamDefinitionRepository);
 		Assert.notNull(appDeployerStreamDeployer, "AppDeployerStreamDeployer must not be null");
 		Assert.notNull(appDeploymentRequestCreator, "AppDeploymentRequestCreator must not be null");
 		this.appDeployerStreamDeployer = appDeployerStreamDeployer;
@@ -71,7 +60,7 @@ public class AppDeployerStreamService extends AbstractStreamService {
 
 	@Override
 	public DeploymentState doCalculateStreamState(String name) {
-		return this.appDeployerStreamDeployer.calculateStreamState(name);
+		return this.appDeployerStreamDeployer.streamState(name);
 	}
 
 	@Override
@@ -94,35 +83,9 @@ public class AppDeployerStreamService extends AbstractStreamService {
 		this.appDeployerStreamDeployer.undeployStream(streamName);
 	}
 
-	// State
 	@Override
 	public Map<StreamDefinition, DeploymentState> state(List<StreamDefinition> streamDefinitions) {
-		return this.appDeployerStreamDeployer.state(streamDefinitions);
-	}
-
-	@Override
-	public void updateStream(String streamName, UpdateStreamRequest updateStreamRequest) {
-		throw new IncompatibleStreamDeployerException(StreamDeployers.appdeployer.toString());
-	}
-
-	@Override
-	public void rollbackStream(String streamName, int releaseVersion) {
-		throw new IncompatibleStreamDeployerException(StreamDeployers.appdeployer.toString());
-	}
-
-	@Override
-	public String manifest(String releaseName, int releaseVersion) {
-		throw new IncompatibleStreamDeployerException(StreamDeployers.appdeployer.toString());
-	}
-
-	@Override
-	public Collection<Release> history(String releaseName) {
-		throw new IncompatibleStreamDeployerException(StreamDeployers.appdeployer.toString());
-	}
-
-	@Override
-	public Collection<Deployer> platformList() {
-		throw new IncompatibleStreamDeployerException(StreamDeployers.appdeployer.toString());
+		return this.appDeployerStreamDeployer.streamsStates(streamDefinitions);
 	}
 
 	@Override

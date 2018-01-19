@@ -16,11 +16,12 @@
 
 package org.springframework.cloud.dataflow.server.config;
 
-import javax.sql.DataSource;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ForkJoinPool;
+
+import javax.sql.DataSource;
 
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -74,6 +75,7 @@ import org.springframework.cloud.dataflow.server.controller.RestControllerAdvice
 import org.springframework.cloud.dataflow.server.controller.RootController;
 import org.springframework.cloud.dataflow.server.controller.RuntimeAppsController;
 import org.springframework.cloud.dataflow.server.controller.RuntimeAppsController.AppInstanceController;
+import org.springframework.cloud.dataflow.server.controller.SkipperStreamDeploymentController;
 import org.springframework.cloud.dataflow.server.controller.StreamDefinitionController;
 import org.springframework.cloud.dataflow.server.controller.StreamDeploymentController;
 import org.springframework.cloud.dataflow.server.controller.TaskDefinitionController;
@@ -88,12 +90,13 @@ import org.springframework.cloud.dataflow.server.repository.DeploymentIdReposito
 import org.springframework.cloud.dataflow.server.repository.StreamDefinitionRepository;
 import org.springframework.cloud.dataflow.server.repository.StreamDeploymentRepository;
 import org.springframework.cloud.dataflow.server.repository.TaskDefinitionRepository;
+import org.springframework.cloud.dataflow.server.service.SkipperStreamService;
 import org.springframework.cloud.dataflow.server.service.StreamService;
 import org.springframework.cloud.dataflow.server.service.TaskJobService;
 import org.springframework.cloud.dataflow.server.service.TaskService;
 import org.springframework.cloud.dataflow.server.service.impl.AppDeployerStreamService;
 import org.springframework.cloud.dataflow.server.service.impl.AppDeploymentRequestCreator;
-import org.springframework.cloud.dataflow.server.service.impl.SkipperStreamService;
+import org.springframework.cloud.dataflow.server.service.impl.DefaultSkipperStreamService;
 import org.springframework.cloud.dataflow.server.stream.AppDeployerStreamDeployer;
 import org.springframework.cloud.dataflow.server.stream.SkipperStreamDeployer;
 import org.springframework.cloud.dataflow.server.stream.StreamDeployer;
@@ -167,109 +170,6 @@ public class DataFlowControllerAutoConfiguration {
 	public StreamDefinitionController streamDefinitionController(StreamDefinitionRepository repository,
 			AppRegistryCommon appRegistry, StreamService streamService) {
 		return new StreamDefinitionController(repository, appRegistry, streamService);
-	}
-
-	@Bean
-	@ConditionalOnBean({ StreamDefinitionRepository.class, StreamDeploymentRepository.class })
-	public StreamDeploymentController streamDeploymentController(StreamDefinitionRepository repository,
-			StreamService streamService) {
-		return new StreamDeploymentController(repository, streamService);
-	}
-
-	@Configuration
-	@ConditionalOnSkipperEnabled
-	@EnableConfigurationProperties(SkipperClientProperties.class)
-	public static class SkipperDeploymentConfiguration {
-
-		@Bean
-		@ConditionalOnBean(StreamDefinitionRepository.class)
-		public SkipperClient skipperClient(SkipperClientProperties properties,
-				RestTemplateBuilder restTemplateBuilder, ObjectMapper objectMapper) {
-			objectMapper.registerModule(new Jackson2HalModule());
-			objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-			RestTemplate restTemplate = restTemplateBuilder
-					.errorHandler(new SkipperClientResponseErrorHandler(objectMapper))
-					.interceptors(new OAuth2AccessTokenProvidingClientHttpRequestInterceptor())
-					.messageConverters(Arrays.asList(new StringHttpMessageConverter(),
-							new MappingJackson2HttpMessageConverter(objectMapper)))
-					.build();
-			return new DefaultSkipperClient(properties.getServerUri(), restTemplate);
-		}
-
-		@Bean
-		@ConditionalOnBean(StreamDefinitionRepository.class)
-		public SkipperStreamDeployer skipperStreamDeployer(SkipperClient skipperClient,
-				StreamDefinitionRepository streamDefinitionRepository,
-				SkipperClientProperties skipperClientProperties,
-				AppRegistryService appRegistryService,
-				ForkJoinPool runtimeAppsStatusFJPFB) {
-			logger.info("Skipper URI [" + skipperClientProperties.getServerUri() + "]");
-			return new SkipperStreamDeployer(skipperClient, streamDefinitionRepository, appRegistryService,
-					runtimeAppsStatusFJPFB);
-		}
-
-		@Bean
-		@ConditionalOnBean(StreamDefinitionRepository.class)
-		public StreamService skipperStreamDeploymentService(StreamDefinitionRepository streamDefinitionRepository,
-				SkipperStreamDeployer skipperStreamDeployer, AppDeploymentRequestCreator appDeploymentRequestCreator) {
-			return new SkipperStreamService(streamDefinitionRepository, skipperStreamDeployer,
-					appDeploymentRequestCreator);
-		}
-
-		@Bean
-		public AppRegistryService appRegistryService(AppRegistrationRepository appRegistrationRepository,
-				DelegatingResourceLoader resourceLoader, MavenProperties mavenProperties) {
-			return new DefaultAppRegistryService(appRegistrationRepository, resourceLoader, mavenProperties);
-		}
-
-		@Bean
-		public VersionedAppRegistryController appRegistryController2(AppRegistryService appRegistry,
-				ApplicationConfigurationMetadataResolver metadataResolver, ForkJoinPool appRegistryFJPFB, MavenProperties mavenProperties) {
-			return new VersionedAppRegistryController(appRegistry, metadataResolver, appRegistryFJPFB, mavenProperties);
-		}
-	}
-
-	@Configuration
-	@ConditionalOnSkipperDisabled
-	@ConditionalOnBean({ AppDeployer.class })
-	public static class AppDeploymentConfiguration {
-
-		@Bean
-		@ConditionalOnBean({ StreamDefinitionRepository.class, StreamDeploymentRepository.class })
-		public StreamService simpleStreamDeploymentService(StreamDefinitionRepository streamDefinitionRepository,
-				AppDeployerStreamDeployer appDeployerStreamDeployer,
-				AppDeploymentRequestCreator appDeploymentRequestCreator) {
-			return new AppDeployerStreamService(streamDefinitionRepository,
-					appDeployerStreamDeployer,
-					appDeploymentRequestCreator);
-		}
-
-		@Bean
-		@ConditionalOnBean({ StreamDefinitionRepository.class, StreamDeploymentRepository.class })
-		public AppDeployerStreamDeployer appDeployerStreamDeployer(AppDeployer appDeployer,
-				DeploymentIdRepository deploymentIdRepository,
-				StreamDefinitionRepository streamDefinitionRepository,
-				StreamDeploymentRepository streamDeploymentRepository, ForkJoinPool appRegistryFJPFB) {
-			return new AppDeployerStreamDeployer(appDeployer, deploymentIdRepository, streamDefinitionRepository,
-					streamDeploymentRepository, appRegistryFJPFB);
-		}
-
-		@Bean
-		public AppRegistryController appRegistryController(AppRegistry appRegistry,
-				ApplicationConfigurationMetadataResolver metadataResolver, ForkJoinPool appRegistryFJPFB) {
-			return new AppRegistryController(appRegistry, metadataResolver, appRegistryFJPFB);
-		}
-
-		@Bean
-		public UriRegistry uriRegistry(DataSource dataSource) {
-			return new RdbmsUriRegistry(dataSource);
-		}
-
-		@Bean
-		public AppRegistry appRegistry(UriRegistry uriRegistry, DelegatingResourceLoader resourceLoader,
-				MavenProperties mavenProperties) {
-			return new AppRegistry(uriRegistry, resourceLoader, mavenProperties);
-		}
 	}
 
 	@Bean
@@ -406,7 +306,8 @@ public class DataFlowControllerAutoConfiguration {
 	public AboutController aboutController(ObjectProvider<StreamDeployer> streamDeployer, TaskLauncher taskLauncher,
 			FeaturesProperties featuresProperties, VersionInfoProperties versionInfoProperties,
 			SecurityStateBean securityStateBean) {
-		return new AboutController(streamDeployer.getIfAvailable(), taskLauncher, featuresProperties, versionInfoProperties,
+		return new AboutController(streamDeployer.getIfAvailable(), taskLauncher, featuresProperties,
+				versionInfoProperties,
 				securityStateBean);
 	}
 
@@ -448,6 +349,118 @@ public class DataFlowControllerAutoConfiguration {
 	@Bean
 	public SecurityStateBean securityStateBean() {
 		return new SecurityStateBean();
+	}
+
+	@Configuration
+	@ConditionalOnSkipperEnabled
+	@EnableConfigurationProperties(SkipperClientProperties.class)
+	public static class SkipperDeploymentConfiguration {
+
+		@Bean
+		@ConditionalOnBean({ StreamDefinitionRepository.class, StreamDeploymentRepository.class })
+		public SkipperStreamDeploymentController updatableStreamDeploymentController(
+				StreamDefinitionRepository repository, SkipperStreamService streamService) {
+			return new SkipperStreamDeploymentController(repository, streamService);
+		}
+
+		@Bean
+		@ConditionalOnBean(StreamDefinitionRepository.class)
+		public SkipperClient skipperClient(SkipperClientProperties properties,
+				RestTemplateBuilder restTemplateBuilder, ObjectMapper objectMapper) {
+			objectMapper.registerModule(new Jackson2HalModule());
+			objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+			RestTemplate restTemplate = restTemplateBuilder
+					.errorHandler(new SkipperClientResponseErrorHandler(objectMapper))
+					.interceptors(new OAuth2AccessTokenProvidingClientHttpRequestInterceptor())
+					.messageConverters(Arrays.asList(new StringHttpMessageConverter(),
+							new MappingJackson2HttpMessageConverter(objectMapper)))
+					.build();
+			return new DefaultSkipperClient(properties.getServerUri(), restTemplate);
+		}
+
+		@Bean
+		@ConditionalOnBean(StreamDefinitionRepository.class)
+		public SkipperStreamDeployer skipperStreamDeployer(SkipperClient skipperClient,
+				StreamDefinitionRepository streamDefinitionRepository,
+				SkipperClientProperties skipperClientProperties,
+				AppRegistryService appRegistryService,
+				ForkJoinPool runtimeAppsStatusFJPFB) {
+			logger.info("Skipper URI [" + skipperClientProperties.getServerUri() + "]");
+			return new SkipperStreamDeployer(skipperClient, streamDefinitionRepository, appRegistryService,
+					runtimeAppsStatusFJPFB);
+		}
+
+		@Bean
+		@ConditionalOnBean(StreamDefinitionRepository.class)
+		public SkipperStreamService skipperStreamDeploymentService(
+				StreamDefinitionRepository streamDefinitionRepository,
+				SkipperStreamDeployer skipperStreamDeployer, AppDeploymentRequestCreator appDeploymentRequestCreator) {
+			return new DefaultSkipperStreamService(streamDefinitionRepository, skipperStreamDeployer,
+					appDeploymentRequestCreator);
+		}
+
+		@Bean
+		public AppRegistryService appRegistryService(AppRegistrationRepository appRegistrationRepository,
+				DelegatingResourceLoader resourceLoader, MavenProperties mavenProperties) {
+			return new DefaultAppRegistryService(appRegistrationRepository, resourceLoader, mavenProperties);
+		}
+
+		@Bean
+		public VersionedAppRegistryController appRegistryController2(AppRegistryService appRegistry,
+				ApplicationConfigurationMetadataResolver metadataResolver, ForkJoinPool appRegistryFJPFB,
+				MavenProperties mavenProperties) {
+			return new VersionedAppRegistryController(appRegistry, metadataResolver, appRegistryFJPFB, mavenProperties);
+		}
+	}
+
+	@Configuration
+	@ConditionalOnSkipperDisabled
+	@ConditionalOnBean({ AppDeployer.class })
+	public static class AppDeploymentConfiguration {
+
+		@Bean
+		@ConditionalOnBean({ StreamDefinitionRepository.class, StreamDeploymentRepository.class })
+		public StreamDeploymentController streamDeploymentController(StreamDefinitionRepository repository,
+				StreamService streamService) {
+			return new StreamDeploymentController(repository, streamService);
+		}
+
+		@Bean
+		@ConditionalOnBean({ StreamDefinitionRepository.class, StreamDeploymentRepository.class })
+		public StreamService simpleStreamDeploymentService(StreamDefinitionRepository streamDefinitionRepository,
+				AppDeployerStreamDeployer appDeployerStreamDeployer,
+				AppDeploymentRequestCreator appDeploymentRequestCreator) {
+			return new AppDeployerStreamService(streamDefinitionRepository,
+					appDeployerStreamDeployer,
+					appDeploymentRequestCreator);
+		}
+
+		@Bean
+		@ConditionalOnBean({ StreamDefinitionRepository.class, StreamDeploymentRepository.class })
+		public AppDeployerStreamDeployer appDeployerStreamDeployer(AppDeployer appDeployer,
+				DeploymentIdRepository deploymentIdRepository,
+				StreamDefinitionRepository streamDefinitionRepository,
+				StreamDeploymentRepository streamDeploymentRepository, ForkJoinPool appRegistryFJPFB) {
+			return new AppDeployerStreamDeployer(appDeployer, deploymentIdRepository, streamDefinitionRepository,
+					streamDeploymentRepository, appRegistryFJPFB);
+		}
+
+		@Bean
+		public AppRegistryController appRegistryController(AppRegistry appRegistry,
+				ApplicationConfigurationMetadataResolver metadataResolver, ForkJoinPool appRegistryFJPFB) {
+			return new AppRegistryController(appRegistry, metadataResolver, appRegistryFJPFB);
+		}
+
+		@Bean
+		public UriRegistry uriRegistry(DataSource dataSource) {
+			return new RdbmsUriRegistry(dataSource);
+		}
+
+		@Bean
+		public AppRegistry appRegistry(UriRegistry uriRegistry, DelegatingResourceLoader resourceLoader,
+				MavenProperties mavenProperties) {
+			return new AppRegistry(uriRegistry, resourceLoader, mavenProperties);
+		}
 	}
 
 	@ConfigurationProperties(prefix = "maven")

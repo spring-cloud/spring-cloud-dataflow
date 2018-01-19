@@ -36,8 +36,8 @@ import org.springframework.cloud.dataflow.rest.UpdateStreamRequest;
 import org.springframework.cloud.dataflow.rest.util.DeploymentPropertiesUtils;
 import org.springframework.cloud.dataflow.server.repository.NoSuchStreamDefinitionException;
 import org.springframework.cloud.dataflow.server.repository.StreamDefinitionRepository;
+import org.springframework.cloud.dataflow.server.service.SkipperStreamService;
 import org.springframework.cloud.dataflow.server.stream.SkipperStreamDeployer;
-import org.springframework.cloud.dataflow.server.stream.StreamDeployers;
 import org.springframework.cloud.dataflow.server.stream.StreamDeploymentRequest;
 import org.springframework.cloud.deployer.spi.app.DeploymentState;
 import org.springframework.cloud.deployer.spi.core.AppDeploymentRequest;
@@ -54,18 +54,16 @@ import static org.springframework.cloud.dataflow.rest.SkipperStream.SKIPPER_KEY_
 import static org.springframework.cloud.dataflow.rest.SkipperStream.SKIPPER_PACKAGE_VERSION;
 
 /**
- * {@link SkipperStreamDeployer} specific {@link AbstractStreamService}.
+ * An implementation of {@link SkipperStreamService}.
  *
  * @author Mark Pollack
  * @author Ilayaperumal Gopinathan
  * @author Christian Tzolov
  */
-public class SkipperStreamService extends AbstractStreamService {
-
-	private static Log logger = LogFactory.getLog(SkipperStreamService.class);
+public class DefaultSkipperStreamService extends AbstractStreamService implements SkipperStreamService {
 
 	public static final String DEFAULT_SKIPPER_PACKAGE_VERSION = "1.0.0";
-
+	private static Log logger = LogFactory.getLog(DefaultSkipperStreamService.class);
 	/**
 	 * The repository this controller will use for stream CRUD operations.
 	 */
@@ -73,11 +71,11 @@ public class SkipperStreamService extends AbstractStreamService {
 
 	private final AppDeploymentRequestCreator appDeploymentRequestCreator;
 
-	public SkipperStreamService(StreamDefinitionRepository streamDefinitionRepository,
+	public DefaultSkipperStreamService(StreamDefinitionRepository streamDefinitionRepository,
 			SkipperStreamDeployer skipperStreamDeployer,
 			AppDeploymentRequestCreator appDeploymentRequestCreator) {
 
-		super(streamDefinitionRepository, StreamDeployers.skipper);
+		super(streamDefinitionRepository);
 
 		Assert.notNull(skipperStreamDeployer, "SkipperStreamDeployer must not be null");
 		Assert.notNull(appDeploymentRequestCreator, "AppDeploymentRequestCreator must not be null");
@@ -125,7 +123,7 @@ public class SkipperStreamService extends AbstractStreamService {
 
 	@Override
 	public DeploymentState doCalculateStreamState(String name) {
-		return this.skipperStreamDeployer.calculateStreamState(name);
+		return this.skipperStreamDeployer.streamState(name);
 	}
 
 	@Override
@@ -135,8 +133,8 @@ public class SkipperStreamService extends AbstractStreamService {
 
 	private void updateStreamDefinitionFromReleaseManifest(String streamName, String releaseManifest) {
 
-		List<SpringCloudDeployerApplicationManifest> appManifests =
-				new SpringCloudDeployerApplicationManifestReader().read(releaseManifest);
+		List<SpringCloudDeployerApplicationManifest> appManifests = new SpringCloudDeployerApplicationManifestReader()
+				.read(releaseManifest);
 
 		Map<String, SpringCloudDeployerApplicationManifest> appManifestMap = new HashMap<>();
 
@@ -198,7 +196,8 @@ public class SkipperStreamService extends AbstractStreamService {
 		this.skipperStreamDeployer.rollbackStream(streamName, releaseVersion);
 	}
 
-	public String convertPropertiesToSkipperYaml(StreamDefinition streamDefinition, Map<String, String> updateProperties) {
+	public String convertPropertiesToSkipperYaml(StreamDefinition streamDefinition,
+			Map<String, String> updateProperties) {
 
 		List<AppDeploymentRequest> appDeploymentRequests = this.appDeploymentRequestCreator
 				.createUpdateRequests(streamDefinition, updateProperties);
@@ -252,7 +251,7 @@ public class SkipperStreamService extends AbstractStreamService {
 
 	@Override
 	public Map<StreamDefinition, DeploymentState> state(List<StreamDefinition> streamDefinitions) {
-		return this.skipperStreamDeployer.state(streamDefinitions);
+		return this.skipperStreamDeployer.streamsStates(streamDefinitions);
 	}
 
 	@Override

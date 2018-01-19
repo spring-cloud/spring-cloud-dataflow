@@ -50,10 +50,10 @@ import static org.assertj.core.api.Assertions.fail;
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = TestDependencies.class)
 @TestPropertySource(properties = { FeaturesProperties.FEATURES_PREFIX + "." + FeaturesProperties.SKIPPER_ENABLED + "=true" })
-public class SkipperStreamServiceUpdateTests {
+public class DefaultSkipperStreamServiceUpdateTests {
 
 	@Autowired
-	private SkipperStreamService streamService;
+	private DefaultSkipperStreamService streamService;
 
 	@Autowired
 	private StreamDefinitionRepository streamDefinitionRepository;

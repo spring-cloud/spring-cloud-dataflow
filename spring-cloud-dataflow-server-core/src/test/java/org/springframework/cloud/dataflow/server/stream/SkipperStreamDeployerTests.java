@@ -15,7 +15,6 @@
  */
 package org.springframework.cloud.dataflow.server.stream;
 
-import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -29,22 +28,24 @@ import org.mockito.ArgumentCaptor;
 import org.springframework.cloud.dataflow.core.ApplicationType;
 import org.springframework.cloud.dataflow.core.StreamDefinition;
 import org.springframework.cloud.dataflow.registry.service.AppRegistryService;
-import org.springframework.cloud.dataflow.registry.support.ResourceUtils;
 import org.springframework.cloud.dataflow.server.repository.StreamDefinitionRepository;
-import org.springframework.cloud.deployer.resource.docker.DockerResource;
 import org.springframework.cloud.deployer.resource.maven.MavenResource;
 import org.springframework.cloud.deployer.spi.app.AppStatus;
 import org.springframework.cloud.deployer.spi.app.DeploymentState;
 import org.springframework.cloud.deployer.spi.core.AppDefinition;
 import org.springframework.cloud.deployer.spi.core.AppDeploymentRequest;
+import org.springframework.cloud.deployer.spi.core.RuntimeEnvironmentInfo;
 import org.springframework.cloud.skipper.ReleaseNotFoundException;
 import org.springframework.cloud.skipper.client.SkipperClient;
+import org.springframework.cloud.skipper.domain.AboutResource;
+import org.springframework.cloud.skipper.domain.Dependency;
+import org.springframework.cloud.skipper.domain.Deployer;
 import org.springframework.cloud.skipper.domain.Info;
 import org.springframework.cloud.skipper.domain.InstallRequest;
+import org.springframework.cloud.skipper.domain.Release;
 import org.springframework.cloud.skipper.domain.Status;
 import org.springframework.cloud.skipper.domain.UploadRequest;
-import org.springframework.core.io.Resource;
-import org.springframework.core.io.UrlResource;
+import org.springframework.cloud.skipper.domain.VersionInfo;
 import org.springframework.hateoas.Resources;
 
 import static junit.framework.TestCase.fail;
@@ -67,31 +68,6 @@ import static org.springframework.cloud.dataflow.server.support.MockUtils.create
  * @author Glenn Renfro
  */
 public class SkipperStreamDeployerTests {
-
-	@Test
-	public void testMavenResourceProcessing() {
-		MavenResource mavenResource = new MavenResource.Builder()
-				.artifactId("timestamp-task")
-				.groupId("org.springframework.cloud.task.app")
-				.version("1.0.0.RELEASE")
-				.build();
-		String resourceWithoutVersion = ResourceUtils.getResourceWithoutVersion(mavenResource);
-		assertThat(resourceWithoutVersion).isEqualTo("maven://org.springframework.cloud.task.app:timestamp-task");
-		assertThat(ResourceUtils.getResourceVersion(mavenResource)).isEqualTo("1.0.0.RELEASE");
-	}
-
-	@Test
-	public void testDockerResourceProcessing() {
-		DockerResource dockerResource = new DockerResource("springcloudstream/file-source-kafka-10:1.2.0.RELEASE");
-		assertThat(ResourceUtils.getResourceWithoutVersion(dockerResource)).isEqualTo("docker:springcloudstream/file-source-kafka-10");
-		assertThat(ResourceUtils.getResourceVersion(dockerResource)).isEqualTo("1.2.0.RELEASE");
-	}
-
-	@Test(expected = IllegalArgumentException.class)
-	public void testInvalidDockerResourceProcessing() {
-		DockerResource dockerResource = new DockerResource("springcloudstream:file-source-kafka-10:1.2.0.RELEASE");
-		ResourceUtils.getResourceWithoutVersion(dockerResource);
-	}
 
 	@Test
 	public void testInstallUploadProperties() {
@@ -172,7 +148,7 @@ public class SkipperStreamDeployerTests {
 	}
 
 	@Test
-	public void testDeployeWithRegisteredApps() {
+	public void testDeployWithRegisteredApps() {
 		AppRegistryService appRegistryService = mock(AppRegistryService.class);
 
 		when(appRegistryService.appExist(eq("time"), eq(ApplicationType.source), eq("1.2.0.RELEASE")))
@@ -187,7 +163,7 @@ public class SkipperStreamDeployerTests {
 	}
 
 	@Test(expected = IllegalStateException.class)
-	public void testDeployeWithNotRegisteredApps() {
+	public void testDeployWithNotRegisteredApps() {
 		AppRegistryService appRegistryService = mock(AppRegistryService.class);
 
 		when(appRegistryService.appExist(eq("time"), eq(ApplicationType.source), eq("1.2.0.RELEASE")))
@@ -256,7 +232,7 @@ public class SkipperStreamDeployerTests {
 		// Stream is undeployed
 		when(skipperClient.status(eq(streamDefinition.getName()))).thenThrow(new ReleaseNotFoundException(""));
 
-		Map<StreamDefinition, DeploymentState> state = skipperStreamDeployer.state(Arrays.asList(streamDefinition));
+		Map<StreamDefinition, DeploymentState> state = skipperStreamDeployer.streamsStates(Arrays.asList(streamDefinition));
 
 		assertThat(state).isNotNull();
 		assertThat(state.size()).isEqualTo(0);
@@ -280,7 +256,7 @@ public class SkipperStreamDeployerTests {
 		// Stream is undeployed
 		when(skipperClient.status(eq(streamDefinition.getName()))).thenThrow(new ReleaseNotFoundException(""));
 
-		Map<StreamDefinition, DeploymentState> state = skipperStreamDeployer.state(Arrays.asList(streamDefinition));
+		Map<StreamDefinition, DeploymentState> state = skipperStreamDeployer.streamsStates(Arrays.asList(streamDefinition));
 
 		assertThat(state).isNotNull();
 		assertThat(state.size()).isEqualTo(1);
@@ -329,24 +305,16 @@ public class SkipperStreamDeployerTests {
 	}
 
 	@Test
-	public void testFileResourceProcessing() throws MalformedURLException {
-		Resource resource = new UrlResource("file:/springcloudstream/file-source-kafka-10-1.2.0.RELEASE.jar");
-		assertThat(ResourceUtils.getResourceWithoutVersion(resource)).isEqualTo("file:/springcloudstream/file-source-kafka-10");
-		assertThat(ResourceUtils.getResourceVersion(resource)).isEqualTo("1.2.0.RELEASE");
+	public void testManifestWithRelease() {
+		SkipperClient skipperClient = mock(SkipperClient.class);
+		SkipperStreamDeployer skipperStreamDeployer = new SkipperStreamDeployer(skipperClient,
+				mock(StreamDefinitionRepository.class), mock(AppRegistryService.class), mock(ForkJoinPool.class));
 
-		resource = new UrlResource("file:/springcloudstream/file-source-kafka-10-1.2.0.BUILD-SNAPSHOT.jar");
-		assertThat(ResourceUtils.getResourceWithoutVersion(resource)).isEqualTo("file:/springcloudstream/file-source-kafka-10");
-		assertThat(ResourceUtils.getResourceVersion(resource)).isEqualTo("1.2.0.BUILD-SNAPSHOT");
+		skipperStreamDeployer.manifest("name", 666);
+		verify(skipperClient).manifest(eq("name"), eq(666));
 
-		resource = new UrlResource("http://springcloudstream/file-source-kafka-10-1.2.0.RELEASE.jar");
-		assertThat(ResourceUtils.getResourceWithoutVersion(resource)).isEqualTo("http://springcloudstream/file-source-kafka-10");
-		assertThat(ResourceUtils.getResourceVersion(resource)).isEqualTo("1.2.0.RELEASE");
-	}
-
-	@Test(expected = IllegalArgumentException.class)
-	public void testFileResourceWithoutVersion() throws MalformedURLException {
-		Resource resource = new UrlResource("http://springcloudstream/filesourcekafkacrap.jar");
-		assertThat(ResourceUtils.getResourceWithoutVersion(resource)).isEqualTo("http://springcloudstream/filesourcekafkacrap.jar");
+		skipperStreamDeployer.manifest("name", -1);
+		verify(skipperClient).manifest(eq("name"));
 	}
 
 	@Test
@@ -354,9 +322,6 @@ public class SkipperStreamDeployerTests {
 		SkipperClient skipperClient = mock(SkipperClient.class);
 		SkipperStreamDeployer skipperStreamDeployer = new SkipperStreamDeployer(skipperClient,
 				mock(StreamDefinitionRepository.class), mock(AppRegistryService.class), mock(ForkJoinPool.class));
-
-		skipperStreamDeployer.manifest("name", 666);
-		verify(skipperClient).manifest(eq("name"), eq(666));
 
 		skipperStreamDeployer.manifest("name");
 		verify(skipperClient).manifest(eq("name"));
@@ -370,6 +335,47 @@ public class SkipperStreamDeployerTests {
 				mock(StreamDefinitionRepository.class), mock(AppRegistryService.class), mock(ForkJoinPool.class));
 		skipperStreamDeployer.platformList();
 		verify(skipperClient, times(1)).listDeployers();
+	}
+
+	@Test
+	public void testHistory() {
+		SkipperClient skipperClient = mock(SkipperClient.class);
+		when(skipperClient.history(eq("release1"))).thenReturn(new Resources<Release>(new ArrayList<>()));
+		SkipperStreamDeployer skipperStreamDeployer = new SkipperStreamDeployer(skipperClient,
+				mock(StreamDefinitionRepository.class), mock(AppRegistryService.class), mock(ForkJoinPool.class));
+		skipperStreamDeployer.history("release1");
+		verify(skipperClient, times(1)).history(eq("release1"));
+	}
+
+	@Test
+	public void testRollback() {
+		SkipperClient skipperClient = mock(SkipperClient.class);
+		SkipperStreamDeployer skipperStreamDeployer = new SkipperStreamDeployer(skipperClient,
+				mock(StreamDefinitionRepository.class), mock(AppRegistryService.class), mock(ForkJoinPool.class));
+		skipperStreamDeployer.rollbackStream("release666", 666);
+		verify(skipperClient).rollback(eq("release666"), eq(666));
+	}
+
+	@Test
+	public void testEnvironmentInfo() {
+		SkipperClient skipperClient = mock(SkipperClient.class);
+		AboutResource about = new AboutResource();
+		about.setVersionInfo(new VersionInfo());
+		about.getVersionInfo().setServer(new Dependency("d1", "v1", "check", "check2", "url"));
+		when(skipperClient.info()).thenReturn(about);
+		when(skipperClient.listDeployers()).thenReturn(new Resources<>(Arrays.asList(new Deployer("d1", "t1", null))));
+
+		SkipperStreamDeployer skipperStreamDeployer = new SkipperStreamDeployer(skipperClient,
+				mock(StreamDefinitionRepository.class), mock(AppRegistryService.class), mock(ForkJoinPool.class));
+
+		RuntimeEnvironmentInfo info = skipperStreamDeployer.environmentInfo();
+
+		assertThat(info.getImplementationName()).isEqualTo("d1");
+		assertThat(info.getImplementationVersion()).isEqualTo("v1");
+		assertThat(info.getPlatformType()).isEqualTo("Skipper Managed");
+
+		verify(skipperClient).info();
+		verify(skipperClient).listDeployers();
 	}
 
 }

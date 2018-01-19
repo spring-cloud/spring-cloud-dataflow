@@ -35,7 +35,7 @@ import org.springframework.cloud.dataflow.core.StreamDefinition;
 import org.springframework.cloud.dataflow.core.StreamDeployment;
 import org.springframework.cloud.dataflow.rest.resource.StreamDeploymentResource;
 import org.springframework.cloud.dataflow.server.repository.StreamDefinitionRepository;
-import org.springframework.cloud.dataflow.server.service.StreamService;
+import org.springframework.cloud.dataflow.server.service.SkipperStreamService;
 import org.springframework.cloud.deployer.spi.app.DeploymentState;
 import org.springframework.cloud.skipper.domain.Deployer;
 import org.springframework.mock.web.MockHttpServletRequest;
@@ -59,13 +59,13 @@ public class StreamDeploymentControllerTests {
 	@Rule
 	public ExpectedException thrown = ExpectedException.none();
 
-	private StreamDeploymentController controller;
+	private SkipperStreamDeploymentController controller;
 
 	@Mock
 	private StreamDefinitionRepository streamDefinitionRepository;
 
 	@Mock
-	private StreamService defaultStreamService;
+	private SkipperStreamService skipperStreamService;
 
 	@Mock
 	private Deployer deployer;
@@ -74,7 +74,7 @@ public class StreamDeploymentControllerTests {
 	public void setup() {
 		MockHttpServletRequest request = new MockHttpServletRequest();
 		RequestContextHolder.setRequestAttributes(new ServletRequestAttributes(request));
-		this.controller = new StreamDeploymentController(streamDefinitionRepository, defaultStreamService);
+		this.controller = new SkipperStreamDeploymentController(streamDefinitionRepository, skipperStreamService);
 	}
 
 	@Test
@@ -82,7 +82,7 @@ public class StreamDeploymentControllerTests {
 		this.controller.deploy("test", new HashMap<>());
 		ArgumentCaptor<String> argumentCaptor1 = ArgumentCaptor.forClass(String.class);
 		ArgumentCaptor<Map> argumentCaptor2 = ArgumentCaptor.forClass(Map.class);
-		verify(defaultStreamService).deployStream(argumentCaptor1.capture(), argumentCaptor2.capture());
+		verify(skipperStreamService).deployStream(argumentCaptor1.capture(), argumentCaptor2.capture());
 		Assert.assertEquals(argumentCaptor1.getValue(), "test");
 	}
 
@@ -91,16 +91,16 @@ public class StreamDeploymentControllerTests {
 		this.controller.rollback("test1", 2);
 		ArgumentCaptor<String> argumentCaptor1 = ArgumentCaptor.forClass(String.class);
 		ArgumentCaptor<Integer> argumentCaptor2 = ArgumentCaptor.forClass(Integer.class);
-		verify(defaultStreamService).rollbackStream(argumentCaptor1.capture(), argumentCaptor2.capture());
+		verify(skipperStreamService).rollbackStream(argumentCaptor1.capture(), argumentCaptor2.capture());
 		Assert.assertEquals(argumentCaptor1.getValue(), "test1");
 		Assert.assertTrue("Rollback version is incorrect", argumentCaptor2.getValue() == 2);
 	}
 
 	@Test
 	public void tesPlatformsListViaSkipperClient() {
-		when(defaultStreamService.platformList()).thenReturn(Arrays.asList(deployer));
+		when(skipperStreamService.platformList()).thenReturn(Arrays.asList(deployer));
 		this.controller.platformList();
-		verify(defaultStreamService, times(1)).platformList();
+		verify(skipperStreamService, times(1)).platformList();
 	}
 
 	@Test
@@ -121,8 +121,8 @@ public class StreamDeploymentControllerTests {
 		Map<StreamDefinition, DeploymentState> streamDeploymentStates = new HashMap<>();
 		streamDeploymentStates.put(streamDefinition, DeploymentState.deployed);
 		when(this.streamDefinitionRepository.findOne(streamDefinition.getName())).thenReturn(streamDefinition);
-		when(this.defaultStreamService.info(streamDefinition.getName())).thenReturn(streamDeployment);
-		when(this.defaultStreamService.state(anyListOf(StreamDefinition.class))).thenReturn(streamDeploymentStates);
+		when(this.skipperStreamService.info(streamDefinition.getName())).thenReturn(streamDeployment);
+		when(this.skipperStreamService.state(anyListOf(StreamDefinition.class))).thenReturn(streamDeploymentStates);
 		StreamDeploymentResource streamDeploymentResource = this.controller.info(streamDefinition.getName());
 		Assert.assertTrue(streamDeploymentResource.getStreamName().equals(streamDefinition.getName()));
 		Assert.assertTrue(streamDeploymentResource.getDslText().equals(streamDefinition.getDslText()));

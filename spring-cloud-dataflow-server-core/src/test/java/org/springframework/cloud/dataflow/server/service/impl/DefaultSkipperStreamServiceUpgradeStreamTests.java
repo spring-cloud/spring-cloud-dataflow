@@ -43,13 +43,13 @@ import static org.mockito.Mockito.when;
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = TestDependencies.class)
 @TestPropertySource(properties = { FeaturesProperties.FEATURES_PREFIX + "." + FeaturesProperties.SKIPPER_ENABLED + "=true" })
-public class SkipperStreamServiceUpgradeStreamTests {
+public class DefaultSkipperStreamServiceUpgradeStreamTests {
 
 	@MockBean
 	private StreamDefinitionRepository streamDefinitionRepository;
 
 	@Autowired
-	private SkipperStreamService streamService;
+	private DefaultSkipperStreamService streamService;
 
 	@MockBean
 	@ConditionalOnSkipperEnabled
