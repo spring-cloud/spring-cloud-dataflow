@@ -33,16 +33,18 @@ public class ReleaseDifferenceSummaryGenerator {
 			String replacingReleseName, int replacingReleaseVersion,
 			ReleaseDifference releaseDifference) {
 		StringBuilder stringBuilder = new StringBuilder();
-		stringBuilder.append("Release Difference Summary between existing release ");
-		stringBuilder.append("[name: " + existingReleaseName + "version: " + existingReleaseVersion + "]");
-		stringBuilder.append(" and replacing release ");
-		stringBuilder
-				.append("[name: " + replacingReleseName + "version: " + replacingReleaseVersion + "]\n");
-		ApplicationManifestDifferenceSummaryGenerator applicationManifestDifferenceSummaryGenerator = new ApplicationManifestDifferenceSummaryGenerator();
-		for (ApplicationManifestDifference applicationManifestDifference : releaseDifference.getDifferences()) {
-			if (!applicationManifestDifference.areEqual()) {
-				stringBuilder.append(applicationManifestDifferenceSummaryGenerator
-						.generateSummary(applicationManifestDifference));
+		if (releaseDifference.getDifferences() != null) {
+			stringBuilder.append("Release Difference Summary between existing release ");
+			stringBuilder.append("[name: " + existingReleaseName + "version: " + existingReleaseVersion + "]");
+			stringBuilder.append(" and replacing release ");
+			stringBuilder
+					.append("[name: " + replacingReleseName + "version: " + replacingReleaseVersion + "]\n");
+			ApplicationManifestDifferenceSummaryGenerator applicationManifestDifferenceSummaryGenerator = new ApplicationManifestDifferenceSummaryGenerator();
+			for (ApplicationManifestDifference applicationManifestDifference : releaseDifference.getDifferences()) {
+				if (!applicationManifestDifference.areEqual()) {
+					stringBuilder.append(applicationManifestDifferenceSummaryGenerator
+							.generateSummary(applicationManifestDifference));
+				}
 			}
 		}
 		return stringBuilder.toString();
