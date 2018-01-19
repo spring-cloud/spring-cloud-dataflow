@@ -176,7 +176,7 @@ If not specified the server will start with the embedded in memory *H2* database
 The database properties can be passed as environment variables or command-line arguments to the Server.
 
 
-NOTE: Please make sure that you configure the correct `flyway.schemas` for *Oracle*, *DB2* and *SQL Server*, otherwise flyway will try to create it's `schema_version` table on the default schema for a connection, which could be different than that your credentials are associated with.
+NOTE: Please make sure that you configure the correct `flyway.schemas` for *DB2* and *SQL Server*, otherwise flyway will try to create it's `schema_version` table on the default schema for a connection, which could be different than that your credentials are associated with.
 Please refer to the https://flywaydb.org/documentation/[Flyway documentation] for more options.
 
 Here are some examples.
@@ -236,7 +236,6 @@ java -jar spring-cloud-skipper-server-{project-version}.jar \
     --spring.datasource.url=jdbc:oracle:thin:<user>/<password>@<db-address>/<service-id> \
     --spring.datasource.username=<user> \
     --spring.datasource.password=<password> \
-    --flyway.schemas=<tablespace-name> \
     --spring.datasource.driver-class-name=oracle.jdbc.driver.OracleDriver &
 ----
 
