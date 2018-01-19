@@ -4,12 +4,12 @@
 
     <groupId>org.springframework.cloud</groupId>
     <artifactId>spring-cloud-common-security-config-web</artifactId>
-    <version>1.0.0.RC2</version>
+    <version>1.0.0.BUILD-SNAPSHOT</version>
 
     <parent>
         <groupId>org.springframework.cloud</groupId>
         <artifactId>spring-cloud-common-security-config</artifactId>
-        <version>1.0.0.RC2</version>
+        <version>1.0.0.BUILD-SNAPSHOT</version>
     </parent>
 
     <dependencies>
