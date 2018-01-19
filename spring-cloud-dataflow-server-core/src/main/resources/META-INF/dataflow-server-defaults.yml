@@ -15,6 +15,9 @@ logging:
     # The following INFO is to log the embedded tomcat port
     org.springframework.boot.context.embedded.tomcat: 'INFO'
 spring:
+  jpa:
+    properties:
+      hibernate.id.new_generator_mappings: true
   autoconfigure:
     exclude: org.springframework.boot.autoconfigure.session.SessionAutoConfiguration
   cloud:
