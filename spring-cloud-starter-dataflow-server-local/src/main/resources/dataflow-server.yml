@@ -22,9 +22,8 @@ spring:
   application:
     name: spring-cloud-dataflow-server-local
   jpa:
-    generate-ddl: false
     hibernate:
-      ddl-auto: none
+      ddl-auto: create
   cloud:
     config:
       uri: http://localhost:8888
