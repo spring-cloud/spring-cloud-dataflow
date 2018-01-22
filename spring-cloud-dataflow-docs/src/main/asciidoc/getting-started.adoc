@@ -59,17 +59,18 @@ $ java -jar spring-cloud-skipper-server-{skipper-version}.jar
 In the directory where you downloaded Data Flow, run the server using `java -jar`
 +
 To run the Data Flow server in `classic` mode:
++
 [source,bash,subs=attributes]
 ----
 $ java -jar spring-cloud-dataflow-server-local-{project-version}.jar
 ----
-
++
 To run the Data Flow server in `skipper` mode:
++
 [source,bash,subs=attributes]
 ----
 $ java -jar spring-cloud-dataflow-server-local-{project-version}.jar --spring.cloud.dataflow.features.skipper-enabled=true
 ----
-
 +
 If Skipper and the Data Flow server are not running on the same host, set the configuration property `spring.cloud.skipper.client.serverUri` to the location of Skipper, e.g.
 +
@@ -77,19 +78,19 @@ If Skipper and the Data Flow server are not running on the same host, set the co
 ----
 $ java -jar spring-cloud-dataflow-server-local-{project-version}.jar --spring.cloud.skipper.client.serverUri=http://192.51.100.1:7577/api
 ----
-
 +
 . Launch the Data Flow Shell:
 +
 Launching the Data Flow shell requires the appropriate data flow server mode to be specified.
 To start the Data Flow Shell for the Data Flow server running in `classic` mode:
-
++
 [source,bash,subs=attributes]
 ----
 $ java -jar spring-cloud-dataflow-shell-{project-version}.jar
 ----
-
++
 To start the Data Flow Shell for the Data Flow server running in `skipper` mode:
++
 [source,bash,subs=attributes]
 ----
 $ java -jar spring-cloud-dataflow-shell-{project-version}.jar --dataflow.mode=skipper
@@ -97,9 +98,7 @@ $ java -jar spring-cloud-dataflow-shell-{project-version}.jar --dataflow.mode=sk
 
 NOTE: Both the Data Flow Server and the Shell must be on the same mode.
 
-+
 If the Data Flow Server and shell are not running on the same host, point the shell to the Data Flow server URL:
-+
 [source,bash]
 ----
 server-unknown:>dataflow config server http://198.51.100.0

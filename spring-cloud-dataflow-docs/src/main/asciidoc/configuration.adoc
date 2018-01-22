@@ -206,7 +206,7 @@ As these are Spring Boot `@ConfigurationProperties` you can also specify them as
 Another common option, is to set the properties using the `SPRING_APPLICATION_JSON` environment variable.
 An example of how the JSON is structured is shown below:
 
-[source,bash]
+[source,bash,subs=attributes]
 ----
 $ SPRING_APPLICATION_JSON='{ "maven": { "local-repository": null,
 "remote-repositories": { "repo1": { "url": "https://repo1", "auth": { "username": "repo1user", "password": "repo1pass" } }, "repo2": { "url": "https://repo2" } },
