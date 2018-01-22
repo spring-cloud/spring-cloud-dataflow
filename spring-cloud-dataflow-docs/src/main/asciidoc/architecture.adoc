@@ -238,7 +238,7 @@ Each target runtime lets you control the amount of memory, disk and CPU that is 
 === Scaling at runtime
 
 When deploying a stream, you can set the instance count for each individual application that comprises the stream.
-Once the stream is deployed, each target runtime lets you control the target number of instances for each individual application.
+Once the stream is deployed, each target runtime lets you control the uri number of instances for each individual application.
 Using the APIs, UIs, or command line tools for each runtime, you can scale up or down the number of instances as required.
 Future work will provide a portable command in the Data Flow Server to perform this operation.
 
