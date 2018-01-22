@@ -2,58 +2,54 @@
 [[dataflow-template]]
 == Data Flow Template
 
-As described in the previous chapter, Spring Cloud Data Flow's functionality is completely
-exposed via REST endpoints. While you can use those endpoints directly, Spring Cloud
-Data Flow also provides a Java-based API, which makes using those REST endpoints
-even easier.
+As described in the previous chapter, Spring Cloud Data Flow's functionality is completely exposed through REST endpoints.
+While you can use those endpoints directly, Spring Cloud Data Flow also provides a Java-based API, which makes using those REST endpoints even easier.
 
-The central entrypoint is the `DataFlowTemplate` class in package `org.springframework.cloud.dataflow.rest.client`.
+The central entry point is the `DataFlowTemplate` class in the `org.springframework.cloud.dataflow.rest.client` package.
 
-This class implements the interface `DataFlowOperations` and delegates to sub-templates
-that provide the specific functionality for each feature-set:
+This class implements the `DataFlowOperations` interface and delegates to the following sub-templates that provide the specific functionality for each feature-set:
 
 |===
 | Interface | Description
 
-| StreamOperations
+| `StreamOperations`
 | REST client for stream operations
 
-| CounterOperations
+| `CounterOperations`
 | REST client for counter operations
 
-| FieldValueCounterOperations
+| `FieldValueCounterOperations`
 | REST client for field value counter operations
 
-| AggregateCounterOperations
+| `AggregateCounterOperations`
 | REST client for aggregate counter operations
 
-| TaskOperations
+| `TaskOperations`
 | REST client for task operations
 
-| JobOperations
+| `JobOperations`
 | REST client for job operations
 
-| AppRegistryOperations
+| `AppRegistryOperations`
 | REST client for app registry operations
 
-| CompletionOperations
+| `CompletionOperations`
 | REST client for completion operations
 
-| RuntimeOperations
+| `RuntimeOperations`
 | REST Client for runtime operations
 |===
 
-When the `DataFlowTemplate` is being initialized, the sub-templates will be discovered
-via the REST relations, which are provided by HATEOAS.footnote:[HATEOAS stands for Hypermedia as the Engine of Application State]
+When the `DataFlowTemplate` is being initialized, the sub-templates can be discovered through the REST relations, which are provided by HATEOAS.footnote:[HATEOAS stands for Hypermedia as the Engine of Application State]
 
-IMPORTANT: If a resource cannot be resolved, the respective sub-template will result
-in being _NULL_. A common cause is that Spring Cloud Data Flow offers for specific
-sets of features to be enabled/disabled when launching. For more information see <<enable-disable-specific-features>>.
+IMPORTANT: If a resource cannot be resolved, the respective sub-template results
+in NULL. A common cause is that Spring Cloud Data Flow offers for specific
+sets of features to be enabled/disabled when launching. For more information, see "`<<enable-disable-specific-features>>`".
 
 === Using the Data Flow Template
 
-When using the Data Flow Template the only needed Data Flow dependency is the
-Spring Cloud Data Flow Rest Client:
+When you use the Data Flow Template, the only needed Data Flow dependency is the
+Spring Cloud Data Flow Rest Client, as shown in the following Maven snippet:
 
 [source,xml,subs=attributes]
 ----
@@ -64,13 +60,11 @@ Spring Cloud Data Flow Rest Client:
 &lt;/dependency&gt;
 ----
 
-With that dependency you will get the `DataFlowTemplate` class as well as all needed
-dependencies to make calls to a Spring Cloud Data Flow server.
+With that dependency, you get the `DataFlowTemplate` class as well as all the dependencies needed to make calls to a Spring Cloud Data Flow server.
 
-When instantiating the `DataFlowTemplate`, you will also pass in a `RestTemplate`.
-Please be aware that the needed `RestTemplate` requires some additional configuration
-to be valid in the context of the `DataFlowTemplate`. When declaring a `RestTemplate`
-as a bean, the following configuration will suffice:
+When instantiating the `DataFlowTemplate`, you also pass in a `RestTemplate`.
+Please be aware that the needed `RestTemplate` requires some additional configuration to be valid in the context of the `DataFlowTemplate`.
+When declaring a `RestTemplate` as a bean, the following configuration suffices:
 
 [source,java]
 ----
@@ -98,7 +92,7 @@ as a bean, the following configuration will suffice:
   }
 ----
 
-Now you can instantiate the `DataFlowTemplate` with:
+Now you can instantiate the `DataFlowTemplate` with the following code:
 
 [source,java]
 ----
@@ -109,7 +103,7 @@ DataFlowTemplate dataFlowTemplate = new DataFlowTemplate(
 <1> The `URI` points to the ROOT of your Spring Cloud Data Flow Server.
 
 Depending on your requirements, you can now make calls to the server. For instance,
-if you like to get a list of currently available applications you can execute:
+if you want to get a list of currently available applications you can run the following code:
 
 [source,java]
 ----

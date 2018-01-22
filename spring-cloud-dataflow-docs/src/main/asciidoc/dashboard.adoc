@@ -3,110 +3,133 @@
 
 [partintro]
 --
-This section describe how to use the Dashboard of Spring Cloud Data Flow.
+This section describes how to use the dashboard of Spring Cloud Data Flow.
 --
+
+
 
 [[dashboard-introduction]]
 == Introduction
 
-Spring Cloud Data Flow provides a browser-based GUI and it currently includes 6 tabs:
+Spring Cloud Data Flow provides a browser-based GUI called the dashboard to manage the following information:
 
-* **Apps** Lists all available applications and provides the control to register/unregister them
-* **Runtime** Provides the Data Flow cluster view with the list of all running applications
-* **Streams** List, create, deploy, and destroy Stream Definitions
+* *Apps*: The Apps tab lists all available applications and provides the control to register/unregister them.
+* *Runtime*: The Runtime tab provides the Data Flow cluster view with the list of all running applications.
+* *Streams*: The Streams tab lets you list, create, deploy, and destroy Stream Definitions.
 ifndef::omit-tasks-docs[]
-* **Tasks** List, create, launch and destroy Task Definitions
+* *Tasks*: The Tasks tab lets you list, create, launch and, destroy Task Definitions.
 endif::omit-tasks-docs[]
-* **Jobs** Perform Batch Job related functions
-* **Analytics** Create data visualizations for the various analytics applications
+* *Jobs*: The Jobs tab lets you perform batch job related functions.
+* *Analytics*: The Analytics tab lets you create data visualizations for the various analytics applications.
 
-Upon starting Spring Cloud Data Flow, the Dashboard is available at:
+Upon starting Spring Cloud Data Flow, the dashboard is available at:
 
 `\http://<host>:<port>/dashboard`
 
-For example: http://localhost:9393/dashboard[http://localhost:9393/dashboard]
+For example, if Spring Cloud Data Flow is running locally, the dashboard is available at `\http://localhost:9393/dashboard`.
 
-If you have enabled https, then it will be located at `\https://localhost:9393/dashboard`.
+If you have enabled https, then the dashboard will be located at `\https://localhost:9393/dashboard`.
 If you have enabled security, a login form is available at `\http://localhost:9393/dashboard/#/login`.
 
-NOTE: The default Dashboard server port is `9393`
+NOTE: The default Dashboard server port is `9393`.
+
+The following image shows the opening page of the Spring Cloud Data Flow dashboard:
 
 .The Spring Cloud Data Flow Dashboard
 image::{dataflow-asciidoc}/images/dataflow-dashboard-about.png[The Spring Cloud Data Flow Dashboard, scaledwidth="100%"]
 
+
+
 [[dashboard-apps]]
 == Apps
 
-The _Apps_ section of the Dashboard lists all the available applications and
-provides the control to register/unregister them (if applicable). It is possible
-to import a number of applications at once using the *Bulk Import Applications* action.
+The Apps section of the dashboard lists all the available applications and provides the control to register and unregister them (if applicable).
+It is possible to import a number of applications at once by using the Bulk Import Applications action.
+
+The following image shows a typical list of available apps within the dashboard:
 
 .List of Available Applications
 image::{dataflow-asciidoc}/images/dataflow-available-apps-list.png[List of available applications, scaledwidth="100%"]
 
+
+
 === Bulk Import of Applications
 
-The bulk import applications page provides numerous options for defining and importing a set of
-applications in one go. For bulk import the application definitions are expected to be
-expressed in a properties style:
+The Bulk Import Applications page provides numerous options for defining and importing a set of applications all at once.
+For bulk import, the application definitions are expected to be expressed in a properties style, as follows:
 
 `<type>.<name> = <coordinates>`
 
-For example:
+The following examples show a typical application definitions:
 
-`task.timestamp=maven://org.springframework.cloud.task.app:timestamp-task:1.2.0.RELEASE`
+[source]
+task.timestamp=maven://org.springframework.cloud.task.app:timestamp-task:1.2.0.RELEASE
+processor.transform=maven://org.springframework.cloud.stream.app:transform-processor-rabbit:1.2.0.RELEASE
 
-`processor.transform=maven://org.springframework.cloud.stream.app:transform-processor-rabbit:1.2.0.RELEASE`
+At the top of the bulk import page, a URI can be specified that points to a properties file stored elsewhere, it should contain properties formatted as shown in the previous example.
+Alternatively, by using the textbox labeled "`Apps as Properties`", you can directly list each property string. Finally, if the properties are stored in a local file, the "`Select Properties File`" option opens a local file browser to select the file.
+After setting your definitions through one of these routes, click Import.
 
-At the top of the bulk import page an _Uri_ can be specified that points to a properties file stored elsewhere, it
-should contain properties formatted as above. Alternatively, using the textbox labeled _Apps as Properties_
-it is possible to directly list each property string. Finally, if the properties are stored in a local file
-the _Select Properties File_ option will open a local file browser to select the file. After setting your definitions
-via one of these routes, click *Import*.
+The bottom of the page has quick links to the property files for common groups of stream apps and task apps.
+If those meet your needs, select your appropriate variant (Rabbit, Kafka, Docker, and so on) and click the Import action on those lines to immediately import all those applications.
 
-At the bottom of the page there are quick links to the property files for common groups of stream apps and
-task apps. If those meet your needs, simply select your appropriate variant (rabbit, kafka, docker, etc) and
-click the *Import* action on those lines to immediately import all those applications.
+The following image shows the Bulk Import Applications page:
 
 .Bulk Import Applications
 image::{dataflow-asciidoc}/images/dataflow-bulk-import-applications.png[Bulk Import Applications, scaledwidth="100%"]
 
+
+
 [[dashboard-runtime]]
 == Runtime
-The _Runtime_ section of the Dashboard application shows the Spring Cloud Data Flow
-cluster view with the list of all running applications. For each runtime app the
-state of the deployment and the number of deployed instances is shown.
-A list of the used deployment properties is available by clicking on the
-app id.
+
+The Runtime section of the Dashboard application shows the Spring Cloud Data Flow cluster view with the list of all running applications.
+For each runtime app, the state of the deployment and the number of deployed instances is shown.
+A list of the used deployment properties is available by clicking on the App Id.
+
+The following image shows an example of the Runtime tab in use:
 
 .List of Running Applications
 image::{dataflow-asciidoc}/images/dataflow-runtime.png[List of running applications, scaledwidth="100%"]
 
+
+
 [[dashboard-streams]]
 == Streams
 
-The _Streams_ section of the Dashboard provides the _Definitions_ tab that provides
-a listing of Stream definitions. There you have the option to *deploy* or *undeploy*
-those stream definitions. Additionally you can remove the definition by clicking on *destroy*.
-Each row includes an arrow on the left, which can be clicked to see a visual representation
-of the definition. Hovering over the boxes in the visual representation will show more details
-about the apps including any options passed to them. In this screenshot the timer stream has
-been expanded to show the visual representation:
+The Streams tab has two child tabs: Definitions and Create Stream. The following topics describe how to work with each one:
+
+* <<dashboard-stream-definitions>>
+* <<dashboard-flo-streams-designer>>
+
+
+
+[[dashboard-stream-definitions]]
+=== Working with Stream Definitions
+
+The Streams section of the Dashboard includes the Definitions tab that provides a listing of Stream definitions.
+There you have the option to deploy or undeploy those stream definitions.
+Additionally, you can remove the definition by clicking on Destroy.
+Each row includes an arrow on the left, which you can click to see a visual representation of the definition.
+Hovering over the boxes in the visual representation shows more details about the apps, including any options passed to them.
+
+In the following screenshot, the timer stream has been expanded to show the visual representation:
 
 .List of Stream Definitions
 image::{dataflow-asciidoc}/images/dataflow-streams-list-definitions.png[List of Stream Definitions, scaledwidth="100%"]
 
-If the *details* button is clicked the view will change to show a visual representation of that
-stream and also any related streams.  In the above example, if clicking *details* for the timer stream, the
-view will change to the one shown below which clearly shows the relationship between the three streams (two of
-them are tapping into the timer stream).
+If you click the details button, the view changes to show a visual representation of that stream and any related streams.
+In the preceding example, if you click details for the timer stream, the view changes to the following view, which clearly shows the relationship between the three streams (two of them are tapping into the timer stream):
 
 .Stream Details Page
 image::{dataflow-asciidoc}/images/dataflow-stream-details.png[Stream Details Page, scaledwidth="100%"]
 
+
+
 [[dashboard-flo-streams-designer]]
-== Create Stream
-The _Create Stream_ section of the Dashboard includes the https://github.com/spring-projects/spring-flo[Spring Flo] designer tab that provides the canvas application, offering a interactive graphical interface for creating data pipelines.
+=== Creating a Stream
+
+The Streams section of the Dashboard includes the Create Stream tab, which makes available the https://github.com/spring-projects/spring-flo[Spring Flo] designer: a canvas application that offers an interactive graphical interface for creating data pipelines.
 
 In this tab, you can:
 
@@ -114,219 +137,245 @@ In this tab, you can:
 * Write pipelines via DSL with content-assist and auto-complete
 * Use auto-adjustment and grid-layout capabilities in the GUI for simpler and interactive organization of pipelines
 
-Watch this https://www.youtube.com/watch?v=78CgV46OstI[screencast] that highlights some of the "Flo for Spring Cloud Data Flow" capabilities. Spring Flo https://github.com/spring-projects/spring-flo/wiki[wiki] includes more detailed content on core Flo capabilities.
+You should watch this https://www.youtube.com/watch?v=78CgV46OstI[screencast] that highlights some of the "Flo for Spring Cloud Data Flow" capabilities.
+The Spring Flo https://github.com/spring-projects/spring-flo/wiki[wiki] includes more detailed content on core Flo capabilities.
+
+The following image shows the Flo designer in use:
 
 .Flo for Spring Cloud Data Flow
 image::{dataflow-asciidoc}/images/dataflow-flo-create-stream.png[Flo for Spring Cloud Data Flo, scaledwidth="100%"]
+
+
 
 ifndef::omit-tasks-docs[]
 [[dashboard-tasks]]
 == Tasks
 
-The _Tasks_ section of the Dashboard currently has three tabs:
+The Tasks section of the Dashboard currently has three tabs:
 
-* Apps
-* Definitions
-* Executions
+* <<dashboard-tasks-apps>>
+* <<dashboard-task-definition>>
+* <<dashboard-tasks-executions>>
+
+
 
 [[dashboard-tasks-apps]]
 === Apps
 
-_Apps_ encapsulate a unit of work into a reusable component. Within the Data Flow
-runtime environment _Apps_ allow users to create definitions for _Streams_ as
-well as _Tasks_. Consequently, the _Apps_ tab within the _Tasks_ section
-allows users to create _Task_ definitions.
+Each app encapsulates a unit of work into a reusable component.
+Within the Data Flow runtime environment, apps let users create definitions for streams as well as tasks.
+Consequently, the Apps tab within the Tasks section lets users create task definitions.
 
-NOTE: You will also use this tab to create Batch Jobs.
+TIP: You can also use this tab to create Batch Jobs.
+
+The following image shows a typical list of task apps:
 
 .List of Task Apps
 image::{dataflow-asciidoc}/images/dataflow-task-apps-list.png[List of Task Apps, scaledwidth="100%"]
 
-On this screen you can perform the following actions:
+On this screen, you can perform the following actions:
 
-* View details such as the task app options.
-* Create a Task Definition from the respective App.
+* View details, such as the task app options.
+* Create a task definition from the respective app.
 
-==== Create a Task Definition from a selected Task App
 
-On this screen you can create a new Task Definition. As a minimum you must provide a
-name for the new definition. You will also have the option
-to specify various properties that are used during the deployment of the app.
-
-NOTE: Each parameter is only included if the _Include_ checkbox is selected.
 
 ==== View Task App Details
 
-On this page you can view the details of a selected task app,
-including the list of available options (properties) for that app.
+On this page you can view the details of a selected task app, including the list of available options (properties) for that app.
+
+
+
+==== Create a Task Definition from a Selected Task App
+
+On this screen you can create a new Task Definition.
+At a minimum, you must provide a name for the new definition.
+You also have the option to specify various properties that are used during the deployment of the app.
+
+NOTE: Each parameter is included only if the Include checkbox is selected.
+
+
 
 [[dashboard-task-definition]]
 === Definitions
 
-This page lists the Data Flow Task definitions and provides actions to *launch*
-or *destroy* those tasks. It also provides a shortcut operation to define
-one or more tasks using simple textual input, indicated by
-the *bulk define tasks* button.
+This page lists the Data Flow task definitions and provides actions to launch or destroy those tasks.
+It also provides a shortcut operation to define one or more tasks with simple textual input, indicated by
+the Bulk Define Tasks button.
+
+The following image shows the Definitions page:
 
 .List of Task Definitions
 image::{dataflow-asciidoc}/images/dataflow-task-definitions-list.png[List of Task Definitions, scaledwidth="100%"]
 
-==== Creating Task Definitions using the bulk define interface
 
-After pressing *bulk define tasks*, the following screen will
-be shown.
+
+==== Creating Task Definitions with the Bulk Define Interface
+
+After pressing Bulk Define Tasks, the following screen appears:
 
 .Bulk Define Tasks
 image::{dataflow-asciidoc}/images/dataflow-bulk-define-tasks.png[Bulk Define Tasks, scaledwidth="100%"]
 
 It includes a textbox where one or more definitions can be entered
-and then various actions performed on those definitions.
-The required input text format for task definitions is very basic, each line should be
-of the form:
+and, for each definition, various actions that can be performed.
+Each line of the text input should be formatted as follows:
 
 `<task-definition-name> = <task-application> <options>`
 
-For example:
+For example, the following line defines an a task called `demo-timestamp`:
 
 `demo-timestamp = timestamp --format=hhmmss`
 
-After entering any data a validator will run asynchronously to
-verify both the syntax and that the application name entered is
-a valid application and it supports the options
-specified. If validation fails the editor will show the errors with more
-information via tooltips.
+After entering any data, a validator runs asynchronously to verify the syntax, that the application name entered is a valid application, and that it supports the options specified.
+If validation fails, the editor shows the errors with more information available in tooltips.
 
-To make it easier to enter definitions into the text area, content assist is
-supported. Pressing *Ctrl+Space* will invoke content assist to suggest
-simple task names (based on the line on which it is invoked), task applications
-and task application options. Press ESCape to close the content assist
-window without taking a selection.
+To make it easier to enter definitions into the text area, content assist is supported.
+Pressing Ctrl+Space invokes content assist to suggest simple task names (based on the line on which it is invoked), task applications, and task application options.
+Press Escape to close the content assist window without choosing a selection.
 
-If the validator should not verify the applications or the options
-(for example if specifying non-whitelisted options to the
-applications) then turn off that part of validation by toggling the checkbox
-off on the *Verify Apps* button - the validator will then only perform
-syntax checking.  When correctly validated, the *create* button will
-be clickable and on pressing it the UI will proceed to create each task definition. If there
-are any errors during creation then after creation finishes the
-editor will show any lines of input, as it cannot be used in task definitions.
-These can then be fixed up and creation repeated.  There is an
-*import file* button to open a file browser on the
-local file system if the definitions are in a file and it is easier
-to import than copy/paste.
+If the validator should not verify the applications or the options (for example, when specifying non-whitelisted options to the applications), you can turn off that part of validation by toggling the checkbox off on the Verify Apps button.
+The validator then performs only syntax checking.
+When an app is correctly validated, the Create button becomes clickable.
+Clicking it causes the creation of each task definition.
+If there are any errors during creation, then, after creation finishes, the editor shows any lines of input that cannot be used in task definitions.
+These can then be fixed, and the creation process can be repeated.
+The Import File button opens a file browser on the local file system, for those cases where the definitions are in a file and it is easier to import than copy and paste.
 
 NOTE: Bulk loading of composed task definitions is not currently supported.
 
+
+
 ==== Creating Composed Task Definitions
-The dashboard includes the Create Composed Task tab that provides the canvas
-application, offering a interactive graphical interface for creating
-composed tasks.
+
+The dashboard includes the Create Composed Task tab, which provides an interactive graphical interface for creating composed tasks.
 
 In this tab, you can:
 
-* Create and visualize composed tasks using DSL, a graphical canvas, or both
-* Use auto-adjustment and grid-layout capabilities in the GUI for simpler and
-interactive organization of the composed task
+* Create and visualize composed tasks using DSL, a graphical canvas, or both.
+* Use auto-adjustment and grid-layout capabilities in the GUI for simpler and interactive organization of the composed task.
+
+On the Create Composed Task screen, you can define one or more task parameters by entering both the parameter key and the parameter value.
+
+NOTE: Task parameters are not typed.
+
+The following image shows the composed task designer:
 
 .Composed Task Designer
 image::{dataflow-asciidoc}/images/dataflow-ctr-flo-tab.png[Composed Task Designer, scaledwidth="100%"]
 
+
+
 ==== Launching Tasks
 
-Once the task definition is created, they can be launched through the Dashboard
-as well. Navigate to the *Definitions* tab. Select the Task you want to launch by
-pressing `Launch`.
+Once the task definition has been created, the tasks can be launched through the dashboard.
+To do so, click the Definitions tab and select the task you want to launch by pressing `Launch`.
 
-On the following screen, you can define one or more Task parameters by entering:
 
-* Parameter Key
-* Parameter Value
-
-Task parameters are not typed.
 
 [[dashboard-tasks-executions]]
 === Executions
 
+The Executions tab shows the current running and completed tasks.
+
+The following image shows the Executions tab:
+
 .List of Task Executions
 image::{dataflow-asciidoc}/images/dataflow-task-executions-list.png[List of Task Executions, scaledwidth="100%"]
+
+
 
 [[dashboard-jobs]]
 == Jobs
 
-The _Jobs_ section of the Dashboard allows you to inspect *Batch Jobs*. The main
-section of the screen provides a list of Job Executions. *Batch Jobs*
-are *Tasks* that were executing one or more *Batch Job*. As such each
-Job Execution has a back reference to the *Task Execution Id* (Task Id).
+The Jobs section of the Dashboard lets you inspect batch jobs.
+The main section of the screen provides a list of job executions.
+Batch jobs are tasks that each execute one or more batch jobs.
+Each job execution has a reference to the task execution ID (in the Task Id column).
 
-In case of a failed job, you can also restart the task. When dealing with long-running
-Batch Jobs, you can also request to stop it.
+The list of Job Executions also shows the state of the underlying Job Definition.
+Thus, if the underlying definition has been deleted, "`deleted`" appears in the Status column.
+
+You can take the following actions for each job:
+
+* Restart (for failed jobs).
+* Stop (for running jobs).
+* View execution details.
+
+// TODO To get to the Job Execution Details page, what does one click?
+
+Note: Clicking the stop button actually sends a stop request to the running job, which may not immediately stop.
+
+The following image shows the Jobs page:
 
 .List of Job Executions
 image::{dataflow-asciidoc}/images/dataflow-job-executions-list.png[List of Job Executions, scaledwidth="100%"]
 
-[[dashboard-job-executions-list]]
-=== List job executions
 
-This page lists the Batch Job Executions and provides the option to *restart* or *stop* a specific job execution, provided the operation is available.
-Furthermore, you have the option to view the Job execution details.
-
-The list of Job Executions also shows the state of the underlying Job Definition.
-Thus, if the underlying definition has been deleted, _deleted_ will be shown.
 
 [[dashboard-job-executions-details]]
-==== Job execution details
+==== Job Execution Details
+
+The Job Execution Details page provides information about an individual job.
+
+The following image shows the Job Execution Details page:
 
 .Job Execution Details
 image::{dataflow-asciidoc}/images/dataflow-jobs-job-execution-details.png[Job Execution Details, scaledwidth="100%"]
 
-The Job Execution Details screen also contains a list of the executed steps. You can
-further drill into the _Step Execution Details_ by clicking onto the magnifying glass.
+The Job Execution Details page contains a list of the executed steps.
+You can further drill into the details of each step's execution by clicking the magnifying glass.
+
+
 
 [[dashboard-job-executions-steps]]
-==== Step execution details
+==== Step Execution Details
 
-On the top of the page, you will see progress indicator the respective step, with
-the option to refresh the indicator. Furthermore, a link is provided to view the
-_step execution history_.
+The Step Execution Details page provides information about an individual step within a job.
 
-The Step Execution details screen provides a complete list of all Step Execution
-Context key/value pairs.
+The following image shows the Step Execution Details page:
 
-IMPORTANT: In case of exceptions, the _Exit Description_ field will contain
-additional error information. Please be aware, though, that this field can only
-have a maximum of *2500 characters*. Therefore, in case of long exception
-stacktraces, trimming of error messages may occur. In that case, please refer to
-the server log files for further details.
+.Step Execution Details
+image::{dataflow-asciidoc}/images/dataflow-step-execution-history.png[Step Execution History, scaledwidth="100%"]
+
+On the top of the page, you can see a progress indicator the respective step, with the option to refresh the indicator.
+A link is provided to view the step execution history.
+
+The Step Execution Details screen provides a complete list of all Step Execution Context key/value pairs.
+
+IMPORTANT: For exceptions, the Exit Description field contains additional error information.
+However, this field can have a maximum of 2500 characters.
+Therefore, in the case of long exception stack traces, trimming of error messages may occur.
+When that happens, refer to the server log files for further details.
+
+
 
 [[dashboard-job-executions-steps-progress]]
 ==== Step Execution Progress
 
 On this screen, you can see a progress bar indicator in regards to the execution
-of the current step. Under the *Step Execution History*, you can also view various
-metrics associated with the selected step such as *duration*, *read counts*, *write
-counts* etc.
+of the current step. Under the Step Execution History, you can also view various
+metrics associated with the selected step, such as duration, read counts, write
+counts, and others.
 
-.Step Execution History
-image::{dataflow-asciidoc}/images/dataflow-step-execution-history.png[Step Execution History, scaledwidth="100%"]
 endif::omit-tasks-docs[]
+
 
 
 [[dashboard-analytics]]
 == Analytics
 
-The _Analytics_ section of the Dashboard provided data visualization capabilities
-for the various analytics applications available in _Spring Cloud Data Flow_:
+The Analytics page of the Dashboard provides the following data visualization capabilities for the various analytics applications available in Spring Cloud Data Flow:
 
 * Counters
 * Field-Value Counters
 * Aggregate Counters
 
-For example, if you create a stream with a link:https://github.com/spring-cloud-stream-app-starters/counter/tree/master/spring-cloud-starter-stream-sink-counter[Counter] application, you can now easily create the corresponding
-graph from within the **Dashboard** tab:
+For example, if you create a stream with a link:https://github.com/spring-cloud-stream-app-starters/counter/tree/master/spring-cloud-starter-stream-sink-counter[Counter] application, you can create the corresponding graph from within the Dashboard tab.
+To do so:
 
-1. Under `Metric Type`, select `Counters` from the select box
-2. Under `Stream`, select `tweetcount`
-3. Under `Visualization`, select the desired chart option, `Bar Chart`
+. Under `Metric Type`, select `Counters` from the select box.
+. Under `Stream`, select `tweetcount`.
+. Under `Visualization`, select the desired chart option, `Bar Chart`.
 
-Using the icons to the right, you can add additional charts to the Dashboard,
-re-arange the order of created dashboards or remove data visualizations.
+Using the icons to the right, you can add additional charts to the Dashboard, re-arange the order of created dashboards, or remove data visualizations.

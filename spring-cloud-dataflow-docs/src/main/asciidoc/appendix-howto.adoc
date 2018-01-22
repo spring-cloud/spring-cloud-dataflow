@@ -1,29 +1,25 @@
 [appendix]
 [[howto]]
-== '`How-to`' guides
+== "`How-to`" guides
 
-This section provides answers to some common '`how do I do that...`' type of questions
-that often arise when using Spring Cloud Data Flow.
+This section provides answers to some common '`how do I do that...`' type of questions that often arise when using Spring Cloud Data Flow.
 
-If you are having a specific problem that we don't cover here, you might want to check out
-http://stackoverflow.com/tags/spring-cloud-dataflow[stackoverflow.com] to see if someone has
-already provided an answer; this is also a great place to ask new questions (please use
-the `spring-cloud-dataflow` tag).
+If you are having a specific problem that we do not cover here, you might want to check out http://stackoverflow.com/tags/spring-cloud-dataflow[stackoverflow.com] to see if someone has already provided an answer.
+That is also a great place to ask new questions (please use the `spring-cloud-dataflow` tag).
 
-We're also more than happy to extend this section; If you want to add a '`how-to`' you
-can send us a {github-code}[pull request].
+We are also more than happy to extend this section. If you want to add a "`how-to`", you can send us a {github-code}[pull request].
+
+
 
 === Configure Maven Properties
 
-You can set the maven properties such as local maven repository location, remote maven repositories and their authentication credentials including
-the proxy server properties via commandline properties when starting the Dataflow server or using the `SPRING_APPLICATION_JSON` environment property
-for the Dataflow server.
+You can set the maven properties such as local maven repository location, remote maven repositories, and their authentication credentials (including the proxy server properties) through command line properties when starting the Dataflow server or by using the `SPRING_APPLICATION_JSON` environment property for the Dataflow server.
 
-The remote maven repositories need to be configured explicitly if the apps are resolved using maven repository except for `local` Data Flow server. The other
- Data Flow server implementations (that use maven resources for app artifacts resolution) have no default value for remote repositories.
- The `local` server has `https://repo.spring.io/libs-snapshot` as the default remote repository.
+The remote maven repositories need to be configured explicitly if the apps are resolved using maven repository, except for a `local` Data Flow server.
+The other Data Flow server implementations (that use maven resources for app artifacts resolution) have no default value for remote repositories.
+The `local` server has `https://repo.spring.io/libs-snapshot` as the default remote repository.
 
-To pass the properties as commandline options:
+To pass the properties as commandline options, run the server with a command similar to the following:
 
 [source,bash]
 ----
@@ -36,7 +32,7 @@ $ java -jar <dataflow-server>.jar --maven.localRepository=mylocal
 --maven.proxy.auth.password=proxypass
 ----
 
-or, using the `SPRING_APPLICATION_JSON` environment property:
+You can also use the `SPRING_APPLICATION_JSON` environment property:
 
 [source,json]
 ----
@@ -44,7 +40,7 @@ export SPRING_APPLICATION_JSON='{ "maven": { "local-repository": "local","remote
 "repo2": { "url": "https://repo2" } }, "proxy": { "host": "proxyhost", "port": 9018, "auth": { "username": "proxyuser", "password": "proxypass" } } } }'
 ----
 
-Formatted JSON:
+Here is the same content in nicely formatted JSON:
 
 [source,json]
 ----
@@ -75,100 +71,86 @@ SPRING_APPLICATION_JSON='{
 }'
 ----
 
-NOTE: Depending on Spring Cloud Data Flow server implementation, you may have to pass the
-environment properties using the platform specific environment-setting capabilities. For instance,
-in Cloud Foundry, you'd be passing them as `cf set-env SPRING_APPLICATION_JSON`.
+NOTE: Depending on the Spring Cloud Data Flow server implementation, you may have to pass the environment properties by using the platform specific environment-setting capabilities. For instance, in Cloud Foundry, you would pass them as `cf set-env SPRING_APPLICATION_JSON`.
+
+
 
 === Logging
 
-Spring Cloud Data Flow is built upon several Spring projects, but ultimately the dataflow-server is a
-Spring Boot app, so the logging techniques that apply to any link:http://docs.spring.io/spring-boot/docs/current/reference/html/howto-logging.html#howto-logging[Spring Boot]
-application are applicable here as well.
+Spring Cloud Data Flow is built upon several Spring projects, but ultimately the dataflow-server is a Spring Boot app, so the logging techniques that apply to any link:http://docs.spring.io/spring-boot/docs/current/reference/html/howto-logging.html#howto-logging[Spring Boot] application are applicable here as well.
+
+While troubleshooting, the two primary areas where enabling the DEBUG logs could be useful are
+
+* <<troubleshooting-deployment-logs>>
+* <<troubleshooting-application-logs>>
 
 
-While troubleshooting, following are the two primary areas where enabling the DEBUG logs could be
-useful.
 
+[[troubleshooting-deployment-logs]]
 === Deployment Logs
-Spring Cloud Data Flow builds upon link:https://github.com/spring-cloud/spring-cloud-deployer[Spring Cloud Deployer] SPI
-and the platform specific dataflow-server uses the respective link:https://github.com/spring-cloud?utf8=%E2%9C%93&q=spring-cloud-deployer[SPI implementations].
-Specifically, if we were to troubleshoot deployment specific issues; such as the network errors, it'd
-be useful to enable the DEBUG logs at the underlying deployer and the libraries used by it.
 
-. For instance, if you'd like to enable DEBUG logs for the link:https://github.com/spring-cloud/spring-cloud-deployer-local[local-deployer], 
-you'd be starting the server with following.
+Spring Cloud Data Flow builds upon link:https://github.com/spring-cloud/spring-cloud-deployer[Spring Cloud Deployer] SPI, and the platform-specific dataflow server uses the respective link:https://github.com/spring-cloud?utf8=%E2%9C%93&q=spring-cloud-deployer[SPI implementations].
+Specifically, if we were to troubleshoot deployment specific issues, such as network errors, it would be useful to enable the DEBUG logs at the underlying deployer and the libraries used by it.
 
-+
+To enable DEBUG logs for the link:https://github.com/spring-cloud/spring-cloud-deployer-local[local-deployer], start the server as follows:
+
 [source,bash]
 ----
 $ java -jar <dataflow-server>.jar --logging.level.org.springframework.cloud.deployer.spi.local=DEBUG
 ----
-+
 
-(_where, `org.springframework.cloud.deployer.spi.local` is the global package for everything local-deployer
-related_)
+(where `org.springframework.cloud.deployer.spi.local` is the global package for everything local-deployer
+related.)
 
-. For instance, if you'd like to enable DEBUG logs for the link:https://github.com/spring-cloud/spring-cloud-deployer-cloudfoundry[cloudfoundry-deployer],
-you'd be setting the following environment variable and upon restaging the dataflow-server, we will
-see more logs around request, response and the elaborate stack traces (_upon failures_). The cloudfoundry-deployer
-uses link:https://github.com/cloudfoundry/cf-java-client[cf-java-client], so we will have to enable DEBUG
-logs for this library.
+To enable DEBUG logs for the link:https://github.com/spring-cloud/spring-cloud-deployer-cloudfoundry[cloudfoundry-deployer], set the following environment variable and, after restaging the dataflow server, you can see more logs around request and response and see detailed stack traces for failures.
+The cloudfoundry deployer uses link:https://github.com/cloudfoundry/cf-java-client[cf-java-client], so you must also enable DEBUG logs for this library.
 
-
-+
 [source,bash]
 ----
 $ cf set-env dataflow-server JAVA_OPTS '-Dlogging.level.cloudfoundry-client=DEBUG'
 $ cf restage dataflow-server
 ----
-+
 
-(_where, `cloudfoundry-client` is the global package for everything `cf-java-client` related_)
+(where `cloudfoundry-client` is the global package for everything `cf-java-client` related.)
 
-. If there's a need to review Reactor logs, which is used by the `cf-java-client`, then the following
-would be helpful.
+To review Reactor logs, which are used by the `cf-java-client`, then the following commad would be helpful:
 
-+
 [source,bash]
 ----
 $ cf set-env dataflow-server JAVA_OPTS '-Dlogging.level.cloudfoundry-client=DEBUG -Dlogging.level.reactor.ipc.netty=DEBUG'
 $ cf restage dataflow-server
 ----
-+
 
-(_where, `reactor.ipc.netty` is the global package for everything `reactor-netty` related_)
+(where `reactor.ipc.netty` is the global package for everything `reactor-netty` related.)
 
-NOTE: Similar to the `local-deployer` and `cloudfoundry-deployer` options as discussed above, there
-are equivalent settings available for Apache YARN, Apache Mesos and Kubernetes variants, too. Check out the
-respective link:https://github.com/spring-cloud?utf8=%E2%9C%93&q=spring-cloud-deployer[SPI implementations] to
-find out more details about the packages to configure for logging.
+NOTE: Similar to the `local-deployer` and `cloudfoundry-deployer` options as discussed above, there are equivalent settings available for Apache YARN, Apache Mesos, and Kubernetes variants.
+See the respective link:https://github.com/spring-cloud?utf8=%E2%9C%93&q=spring-cloud-deployer[SPI implementations] for more detail about the packages to configure for logging.
 
+
+
+[[troubleshooting-application-logs]]
 === Application Logs
 
-The streaming applications in Spring Cloud Data Flow are Spring Boot applications and they can be
-independently setup with logging configurations.
+The streaming applications in Spring Cloud Data Flow are Spring Boot applications, and they can be independently setup with logging configurations.
 
-For instance, if you'd have to troubleshoot the `header` and `payload` specifics that are being passed
-around source, processor and sink channels, you'd be deploying the stream with the following
-options.
-
+For instance, if you must troubleshoot the `header` and `payload` specifics that are being passed around source, processor, and sink channels, you should deploy the stream with the following options:
 
 [source,bash]
 ----
 dataflow:>stream create foo --definition "http --logging.level.org.springframework.integration=DEBUG | transform --logging.level.org.springframework.integration=DEBUG | log --logging.level.org.springframework.integration=DEBUG" --deploy
 ----
 
-(_where, `org.springframework.integration` is the global package for everything Spring Integration related,
-which is responsible for messaging channels_)
+(where `org.springframework.integration` is the global package for everything Spring Integration related,
+which is responsible for messaging channels.)
 
-These properties can also be specified via `deployment` properties when deploying the stream.
+These properties can also be specified with `deployment` properties when deploying the stream, as follows:
 
 [source,bash]
 ----
 dataflow:>stream deploy foo --properties "app.*.logging.level.org.springframework.integration=DEBUG"
 ----
 
-==== Remote Debugging 
+==== Remote Debugging
 
 Data Flow allows you to debug the deployed applications.
 This is accomplished using enabling the remote debugging feature of the JVM through deployment properites.
@@ -178,7 +160,7 @@ For example:
 ----
 stream deploy --name mystream --properties "deployer.fooApp.local.debugPort=9999"
 ----
-The above will start the `fooApp` application in debug mode allowing remote debugger to be attached on port 9999. 
+The above will start the `fooApp` application in debug mode allowing remote debugger to be attached on port 9999.
 By default the application will start in a ’suspend’ mode waiting for the remote debug session to be attached (started). Otherwise you can  provide an additional `debugSuspend` property with value `n`.
 
 Also, in the event when there is more then one instance of the application, the debug port for each instance will be the value of `debugPort` + instanceId.
@@ -188,49 +170,57 @@ NOTE: Unlike other properties you must NOT use wild-card for the application nam
 
 ==== Log redirect
 
-Given that each application is a separate process with each maintaining it's own set of logs, accessing individual logs could be a bit inconvinient especially in the early stages of the development when logs are accessed more often (i.e., debugging, troubleshooting, etc.).
-Since it is also a common pattern to rely on Local SCDF Server which deploys each application as a local JVM process using link:https://github.com/spring-cloud/spring-cloud-deployer-local[local-deployer], the framework provides support for redirecting such logs to a parent process’s streams (both stdout and stderr). So essentially with Local SCDF Server the application logs will appear in the logs of running Local SCDF Server.
 
-Typically when you deploy the stream you will see something like this in the server logs:
+==== Log Redirect
+
+Given that each application is a separate process that maintains its own set of logs, accessing individual logs could be a bit inconvenient, especially in the early stages of development, when logs are accessed more often.
+Since it is also a common pattern to rely on a local SCDF Server that deploys each application as a local JVM process with link:https://github.com/spring-cloud/spring-cloud-deployer-local[local-deployer], the framework provides support for redirecting such logs to a parent process’s streams (both stdout and stderr). Thus, with a local SCDF Server, the application logs appear in the logs of the running local SCDF Server.
+
+Typically when you deploy the stream, you see something resembling the following in the server logs:
+
 [source,bash]
 ----
 017-06-28 09:50:16.372  INFO 41161 --- [nio-9393-exec-7] o.s.c.d.spi.local.LocalAppDeployer       : Deploying app with deploymentId mystream.myapp instance 0.
    Logs will be in /var/folders/l2/63gcnd9d7g5dxxpjbgr0trpw0000gn/T/spring-cloud-dataflow-5939494818997196225/mystream-1498661416369/mystream.myapp
 ----
-However, by providing `local.inheritLogging=true` as a deployment property you will see the following:
+
+However, by setting `local.inheritLogging=true` as a deployment property, you can see the following:
 [source,bash]
 ----
 017-06-28 09:50:16.372  INFO 41161 --- [nio-9393-exec-7] o.s.c.d.spi.local.LocalAppDeployer       : Deploying app with deploymentId mystream.myapp instance 0.
    Logs will be inherited.
 ----
 
-After which the application logs will appear along side the server logs.
+After that, the application logs appear alongside the server logs, as shown in the following example:
 
-For example:
 [source,bash]
 ----
 stream deploy --name mystream --properties "deployer.*.local.inheritLogging=true”
 ----
-The above will enable log redirection for each application in the stream
+
+The preceding stream definition enables log redirection for each application in the stream.
+The following stream definition enables log redirection for only the application named ‘my app’.
+
 [source,bash]
 ----
 stream deploy --name mystream --properties "deployer.myapp.local.inheritLogging=true”
 ----
-The above will enable log redirection for application named ‘my app’ only.
 
 NOTE: Log redirect is only supported with link:https://github.com/spring-cloud/spring-cloud-deployer-local[local-deployer].
 
 
-[[faqs]]
-=== Frequently asked questions
-In this section, we will review the frequently discussed questions in Spring Cloud Data Flow.
 
-==== Advanced SpEL expressions
+[[faqs]]
+=== Frequently Asked Questions
+In this section, we review the frequently asked questions in Spring Cloud Data Flow.
+
+==== Advanced SpEL Expressions
 
 One of the powerful features of SpEL expressions is http://docs.spring.io/spring/docs/current/spring-framework-reference/html/expressions.html#expressions-ref-functions[functions].
-Spring Integration provides `jsonPath()` and `xpath()` out-of-the-box http://docs.spring.io/spring-integration/reference/html/spel.html#spel-functions[SpEL-functions], if appropriate libraries are in the classpath.
-All the provided Spring Cloud Stream application starters are supplied with the `json-path` and `spring-integration-xml` jars, thus we can use those SpEL-functions in Spring Cloud Data Flow streams whenever expressions are possible.
-For example we can transform JSON-aware `payload` from the HTTP request using some `jsonPath()` expression:
+If the appropriate libraries are in the classpath, Spring Integration provides the `jsonPath()` and `xpath()` http://docs.spring.io/spring-integration/reference/html/spel.html#spel-functions[SpEL-functions].
+All the provided Spring Cloud Stream application starters are supplied with the `json-path` and `spring-integration-xml` jars.
+Consequently, we can use those SpEL-functions in Spring Cloud Data Flow streams whenever expressions are possible.
+For example, we can transform JSON-aware `payload` from the HTTP request by using a few `jsonPath()` expressions, as follows:
 
 [source,bash]
 ----
@@ -240,36 +230,43 @@ dataflow:> http post --target http://localhost:8080 --data {"symbol":"SCDF","pri
 dataflow:> http post --target http://localhost:8080 --data {"symbol":"SCDF","price":72.06}
 dataflow:> http post --target http://localhost:8080 --data {"symbol":"SCDF","price":72.08}
 ----
-In this sample we apply jsonPath for the incoming payload to extract just only the `price` field value.
+
+In the preceding example, we apply `jsonPath` for the incoming payload to extract only the `price` field value.
 Similar syntax can be used with `splitter` or `filter` `expression` options.
-Actually any available SpEL-based option has access to the built-in SpEL-functions.
-For example we can extract some value from JSON data to calculate the `partitionKey` before sending output to the Binder:
+Actually, any available SpEL-based option has access to the built-in SpEL-functions.
+For example, we can extract some value from JSON data to calculate the `partitionKey` before sending output to the Binder, as follows:
 
 [source,bash]
 ----
 dataflow:>stream deploy foo --properties "deployer.transform.count=2,app.transform.producer.partitionKeyExpression=#jsonPath(payload,'$.symbol')"
 ----
 The same syntax can be applied for `xpath()` SpEL-function when you deal with XML data.
-Any other custom SpEL-function can also be used, but for this purpose you should build a library with the `@Configuration` class containing an appropriate `SpelFunctionFactoryBean` `@Bean` definition.
-The target Spring Cloud Stream application starter should be re-packaged to supply such a custom extension via built-in Spring Boot `@ComponentScan` mechanism or auto-configuration hook.
+Any other custom SpEL-function can also be used.
+However, for this purpose, you should build a library with a `@Configuration` class containing an appropriate `SpelFunctionFactoryBean` `@Bean` definition.
+The target Spring Cloud Stream application starter should be repackaged to supply such a custom extension with a built-in Spring Boot `@ComponentScan` mechanism or auto-configuration hook.
+
+
 
 [[dataflow-jdbc-sink]]
-==== How to use JDBC-sink?
-The JDBC-sink can be used to insert message payload data into a relational database table. By default,
-it inserts the entire payload into a table named after the `jdbc.table-name` property, and if it is not set,
-by default the application expects to use a table with the name `messages`. To alter this behavior, the
-JDBC sink accepts link:http://docs.spring.io/spring-cloud-stream-app-starters/docs/current/reference/html/spring-cloud-stream-modules-sinks.html#spring-cloud-stream-modules-jdbc-sink[several options] that you can pass using the --foo=bar notation in the stream, or change globally. 
-The JDBC sink has a `jdbc.initialize` property that if set to `true` will result in the sink creating a table based on the specified configuration when the it starts up. If that initialize property is `false`, which is the default, you will have to make sure that the table to use is already available.
+==== How to Use JDBC-sink?
 
-A stream definition using `jdbc` sink relying on all defaults with MySQL as the backing database looks
-like the following. In this example, the system time is persisted in MySQL for every second.
+The JDBC-sink can be used to insert message payload data into a relational database table.
+By default, it inserts the entire payload into a table named after the `jdbc.table-name` property.
+If it is not set, by default, the application expects to use a table with a name of `messages`.
+To alter this behavior, the JDBC sink accepts link:http://docs.spring.io/spring-cloud-stream-app-starters/docs/current/reference/html/spring-cloud-stream-modules-sinks.html#spring-cloud-stream-modules-jdbc-sink[several options] that you can pass by using the --param=value notation in the stream or change globally.
+The JDBC sink has a `jdbc.initialize` property that, if set to `true`, results in the sink creating a table based on the specified configuration when it starts.
+If that initialize property is `false`, which is the default, you must make sure that the table to use is already available.
+
+A stream definition using `jdbc` sink and relying on all defaults with MySQL as the backing database looks
+like the following example:
 
 [source,bash]
 ----
 dataflow:>stream create --name mydata --definition "time | jdbc --spring.datasource.url=jdbc:mysql://localhost:3306/test --spring.datasource.username=root --spring.datasource.password=root --spring.datasource.driver-class-name=org.mariadb.jdbc.Driver" --deploy
 ----
 
-For this to work, you'd have to have the following table in the MySQL database.
+In the preceding example, the system time is persisted in MySQL for every second.
+For this to work, you must have the following table in the MySQL database:
 
 [source,sql]
 ----
@@ -306,70 +303,59 @@ mysql> select * from test.messages;
 .............
 ----
 
+
+
 [[dataflow-multiple-brokers]]
-==== How to use multiple message-binders?
-For situations where the data is consumed and processed between two different message brokers, Spring
-Cloud Data Flow provides easy to override global configurations, out-of-the-box link:https://github.com/spring-cloud-stream-app-starters/bridge[`bridge-processor`],
-and DSL primitives to build these type of topologies.
+==== How to Use Multiple Message-binders?
 
-Let's assume we have data queueing up in RabbitMQ _(e.g., queue = `fooRabbit`)_ and the requirement
-is to consume all the payloads and publish them to Apache Kafka _(e.g., topic = `barKafka`)_, as the
-destination for downstream processing.
+For situations where the data is consumed and processed between two different message brokers, Spring Cloud Data Flow provides easy-to-override global configurations, an out-of-the-box link:https://github.com/spring-cloud-stream-app-starters/bridge[`bridge-processor`], and DSL primitives to build these type of topologies.
 
-Follow the global application of <<streams.adoc#spring-cloud-dataflow-global-properties, configurations>>
-to define multiple binder configurations.
+Assume that data is queueing up in RabbitMQ (for example, queue = `myRabbit`) and the requirement is to consume all the payloads and publish them to Apache Kafka (for example, topic = `myKafka`), as the destination for downstream processing.
+
+In that case, you should follow the global application of <<streams.adoc#spring-cloud-dataflow-global-properties, configurations>> to define multiple binder configurations, as shown i the following configuration
 
 [source,properties]
 ----
-# Apache Kafka Global Configurations (i.e., identified by "kafka1")
+# Apache Kafka Global Configurations (that is, identified by "kafka1")
 spring.cloud.dataflow.applicationProperties.stream.spring.cloud.stream.binders.kafka1.type=kafka
 spring.cloud.dataflow.applicationProperties.stream.spring.cloud.stream.binders.kafka1.environment.spring.cloud.stream.kafka.binder.brokers=localhost:9092
 spring.cloud.dataflow.applicationProperties.stream.spring.cloud.stream.binders.kafka1.environment.spring.cloud.stream.kafka.binder.zkNodes=localhost:2181
 
-# RabbitMQ Global Configurations (i.e., identified by "rabbit1")
+# RabbitMQ Global Configurations (that is, identified by "rabbit1")
 spring.cloud.dataflow.applicationProperties.stream.spring.cloud.stream.binders.rabbit1.type=rabbit
 spring.cloud.dataflow.applicationProperties.stream.spring.cloud.stream.binders.rabbit1.environment.spring.rabbitmq.host=localhost
 spring.cloud.dataflow.applicationProperties.stream.spring.cloud.stream.binders.rabbit1.environment.spring.rabbitmq.port=5672
 ----
 
-NOTE: In this example, both the message brokers are running locally and reachable at `localhost`
-with respective ports.
+NOTE: In the preceding example, both message brokers are running locally and are reachable at `localhost` through their respective ports.
 
-These properties can be supplied in a ".properties" file that is accessible to the server directly or via
-`config-server`.
+These properties can be supplied in a `.properties` file that is accessible to the server directly or through `config-server`, as follows:
 
 [source,bash]
 ----
 java -jar spring-cloud-dataflow-server-local/target/spring-cloud-dataflow-server-local-1.1.4.RELEASE.jar --spring.config.location=<PATH-TO-FILE>/foo.properties
 ----
 
-Spring Cloud Data Flow internally uses `bridge-processor` to directly connect different named channel
-destinations. Since we are publishing and subscribing from two different messaging systems, you'd have
-to build the `bridge-processor` with both RabbitMQ and Apache Kafka binders in the classpath. To do that,
-head over to http://start-scs.cfapps.io/ and select `Bridge Processor`, `Kafka binder starter`, and
-`Rabbit binder starter` as the dependencies and follow the patching procedure described in the
-link:http://docs.spring.io/spring-cloud-stream-app-starters/docs/Celsius.SR1/reference/html/_introduction.html#customizing-binder[reference guide].
-Specifically, for the `bridge-processor`, you'd have to import the `BridgeProcessorConfiguration`
-provided by the starter.
+Spring Cloud Data Flow internally uses `bridge-processor` to directly connect different named channel destinations.
+Since we are publishing and subscribing from two different messaging systems, you must build the `bridge-processor` with both RabbitMQ and Apache Kafka binders in the classpath.
+To do that, head over to http://start-scs.cfapps.io/ and select `Bridge Processor`, `Kafka binder starter`, and `Rabbit binder starter` as the dependencies and follow the patching procedure described in the link:http://docs.spring.io/spring-cloud-stream-app-starters/docs/Celsius.SR1/reference/html/_introduction.html#customizing-binder[reference guide].
+Specifically, for the `bridge-processor`, you must import the `BridgeProcessorConfiguration` provided by the starter.
 
-Once you have the necessary adjustments, you can build the application. Let's register the name of the
-application as `multiBinderBridge`.
+Once you have the necessary adjustments, you can build the application. The following example registers the name of the
+application as `multiBinderBridge`:
 
 [source,bash]
 ----
 dataflow:>app register --type processor --name multiBinderBridge --uri file:///<PATH-TO-FILE>/multipleBinderBridge-0.0.1-SNAPSHOT.jar
 ----
 
-It is time to create a stream definition with the newly registered processor application.
+It is time to create a stream definition with the newly registered processor application, as follows:
 
 [source,bash]
 ----
 dataflow:>stream create fooRabbitToBarKafka --definition ":fooRabbit > multiBinderBridge --spring.cloud.stream.bindings.input.binder=rabbit1 --spring.cloud.stream.bindings.output.binder=kafka1 > :barKafka" --deploy
 ----
 
-NOTE: Since we are to consume messages from RabbitMQ _(i.e., identified by `rabbit1`)_ and then
-publish the payload to Apache Kafka _(i.e., identified by `kafka1`)_, we are supplying them as `input`
-and `output` channel settings respectively.
+NOTE: Since we wat to consume messages from RabbitMQ (identified by `rabbit1`) and then publish the payload to Apache Kafka (identified by `kafka1`), we are supplying them as the `input` and `output` channel settings respectively.
 
-NOTE: The queue `fooRabbit` in RabbitMQ is where the stream is consuming events from and the topic
-`barKafka` in Apache Kafka is where the data is finally landing.
+NOTE: The stream consumes events from the `myRabbit` queue in RabbitMQ and sends the data to the  `myKafka` topic in Apache Kafka.
