@@ -10,10 +10,6 @@
         <version>1.0.0.BUILD-SNAPSHOT</version>
     </parent>
 
-    <properties>
-        <spring-cloud-deployer-cloudfoundry.version>1.3.0.M6</spring-cloud-deployer-cloudfoundry.version>
-    </properties>
-
     <dependencies>
         <dependency>
             <groupId>org.springframework.cloud</groupId>

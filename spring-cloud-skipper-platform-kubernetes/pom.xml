@@ -10,10 +10,6 @@
         <version>1.0.0.BUILD-SNAPSHOT</version>
     </parent>
 
-    <properties>
-        <spring-cloud-deployer-kubernetes.version>1.3.0.M1</spring-cloud-deployer-kubernetes.version>
-    </properties>
-
     <dependencies>
         <dependency>
             <groupId>org.springframework.cloud</groupId>

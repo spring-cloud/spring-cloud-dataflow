@@ -11,11 +11,6 @@
     </parent>
 
     <properties>
-        <spring-cloud-deployer-cloudfoundry.version>1.3.0.M6</spring-cloud-deployer-cloudfoundry.version>
-        <zeroturnaround.version>1.11</zeroturnaround.version>
-        <spring-restdocs.version>1.2.2.RELEASE</spring-restdocs.version>
-        <java-semver.version>0.9.0</java-semver.version>
-	<spring-common-security>1.0.0.RC2</spring-common-security>
     </properties>
 
     <dependencies>
@@ -173,11 +168,6 @@
             <groupId>org.springframework.cloud</groupId>
             <artifactId>spring-cloud-skipper</artifactId>
             <version>1.0.0.BUILD-SNAPSHOT</version>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework.cloud</groupId>
-            <artifactId>spring-cloud-deployer-cloudfoundry</artifactId>
-            <version>${spring-cloud-deployer-cloudfoundry.version}</version>
         </dependency>
          <dependency>
             <groupId>org.springframework.restdocs</groupId>

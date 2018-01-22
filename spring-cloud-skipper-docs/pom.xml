@@ -72,7 +72,7 @@
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-javadoc-plugin</artifactId>
-                        <version>2.10.1</version>
+                        <version>${maven-javadoc-plugin.version}</version>
                         <executions>
                             <execution>
                                 <id>attach-javadocs</id>
@@ -90,7 +90,7 @@
                                     <stylesheetfile>${basedir}/src/main/javadoc/spring-javadoc.css</stylesheetfile>
                                     <links>
                                         <link>
-                                            http://docs.spring.io/spring-framework/docs/${spring-framework.version}/javadoc-api/
+                                            http://docs.spring.io/spring-framework/docs/${spring.version}/javadoc-api/
                                         </link>
                                         <link>http://docs.spring.io/spring-shell/docs/current/api/</link>
                                     </links>
@@ -101,12 +101,12 @@
                     <plugin>
                         <groupId>org.asciidoctor</groupId>
                         <artifactId>asciidoctor-maven-plugin</artifactId>
-                        <version>1.5.3</version>
+                        <version>${asciidoctor-maven-plugin.version}</version>
                         <dependencies>
                             <dependency>
                                 <groupId>org.asciidoctor</groupId>
                                 <artifactId>asciidoctorj-pdf</artifactId>
-                                <version>1.5.0-alpha.11</version>
+                                <version>${asciidoctorj-pdf.version}</version>
                             </dependency>
                         </dependencies>
                         <configuration>
@@ -153,7 +153,7 @@
                     <plugin>
                         <groupId>com.agilejava.docbkx</groupId>
                         <artifactId>docbkx-maven-plugin</artifactId>
-                        <version>2.0.15</version>
+                        <version>${docbkx-maven-plugin.version}</version>
                         <configuration>
                             <sourceDirectory>${basedir}/target/generated-docs</sourceDirectory>
                             <imgSrcPath />
@@ -178,12 +178,12 @@
                             <dependency>
                                 <groupId>net.sf.xslthl</groupId>
                                 <artifactId>xslthl</artifactId>
-                                <version>2.1.0</version>
+                                <version>${xslthl.version}</version>
                             </dependency>
                             <dependency>
                                 <groupId>net.sf.docbook</groupId>
                                 <artifactId>docbook-xml</artifactId>
-                                <version>5.0-all</version>
+                                <version>${docbook-xml.version}</version>
                                 <classifier>resources</classifier>
                                 <type>zip</type>
                                 <scope>runtime</scope>
@@ -221,12 +221,12 @@
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-antrun-plugin</artifactId>
-                        <version>1.8</version>
+                        <version>${maven-antrun-plugin.version}</version>
                         <dependencies>
                             <dependency>
                                 <groupId>ant-contrib</groupId>
                                 <artifactId>ant-contrib</artifactId>
-                                <version>1.0b3</version>
+                                <version>${ant-contrib.version}</version>
                                 <exclusions>
                                     <exclusion>
                                         <groupId>ant</groupId>
@@ -237,12 +237,12 @@
                             <dependency>
                                 <groupId>org.apache.ant</groupId>
                                 <artifactId>ant-nodeps</artifactId>
-                                <version>1.8.1</version>
+                                <version>${ant-nodeps.version}</version>
                             </dependency>
                             <dependency>
                                 <groupId>org.tigris.antelope</groupId>
                                 <artifactId>antelopetasks</artifactId>
-                                <version>3.2.10</version>
+                                <version>${antelopetasks.version}</version>
                             </dependency>
                         </dependencies>
                         <executions>
@@ -292,7 +292,7 @@
                     <plugin>
                         <groupId>org.codehaus.mojo</groupId>
                         <artifactId>build-helper-maven-plugin</artifactId>
-                        <version>1.9.1</version>
+                        <version>${build-helper-maven-plugin}</version>
                         <executions>
                             <execution>
                                 <id>attach-zip</id>

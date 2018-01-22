@@ -27,15 +27,27 @@
         <jopt.version>4.6</jopt.version>
 
         <spring.version>4.3.7.RELEASE</spring.version>
-        <spring-cloud.version>Dalston.RELEASE</spring-cloud.version>
-        <spring-cloud-deployer.version>1.3.0.M2</spring-cloud-deployer.version>
-        <spring-cloud-deployer-local.version>1.3.0.M2</spring-cloud-deployer-local.version>
-        <reactor.version>3.0.7.RELEASE</reactor.version>
         <spring-shell.version>2.0.0.RELEASE</spring-shell.version>
         <spring-statemachine.version>1.2.8.RC4</spring-statemachine.version>
+
+        <spring-cloud.version>Dalston.RELEASE</spring-cloud.version>
+        <spring-cloud-deployer.version>1.3.0.RC1</spring-cloud-deployer.version>
+        <spring-cloud-deployer-local.version>1.3.0.RC1</spring-cloud-deployer-local.version>
+        <spring-cloud-deployer-cloudfoundry.version>1.3.0.RC2</spring-cloud-deployer-cloudfoundry.version>
+        <spring-cloud-deployer-kubernetes.version>1.3.0.RC1</spring-cloud-deployer-kubernetes.version>
+
+        <dockerfile-maven-plugin.version>1.3.6</dockerfile-maven-plugin.version>
+        <zeroturnaround.version>1.11</zeroturnaround.version>
+        <spring-restdocs.version>1.2.2.RELEASE</spring-restdocs.version>
+        <java-semver.version>0.9.0</java-semver.version>
+        <spring-common-security>1.0.0.RC2</spring-common-security>
+
+        <reactor.version>3.0.7.RELEASE</reactor.version>
         <jsonpath.version>2.2.0</jsonpath.version>
+        <commons-lang.version>3.4</commons-lang.version>
         <equalverifier.version>2.4.1</equalverifier.version>
         <flyway.version>5.0.5</flyway.version>
+        <hibernate.jpa.version>1.0.0.Final</hibernate.jpa.version>
 
         <jacoco-maven-plugin.version>0.7.9</jacoco-maven-plugin.version>
         <surefire-maven-plugin.version>2.20</surefire-maven-plugin.version>
@@ -43,6 +55,21 @@
         <checkstyle.config.location>etc/checkstyle/checkstyle.xml</checkstyle.config.location>
         <javadoc.opts>-Xdoclint:none</javadoc.opts>
         <checkstyle.config.location>etc/checkstyle/checkstyle.xml</checkstyle.config.location>
+
+        <commons-io.version>2.5</commons-io.version>
+        <snakeyaml.version>1.18</snakeyaml.version>
+
+        <maven-javadoc-plugin.version>2.10.1</maven-javadoc-plugin.version>
+        <asciidoctor-maven-plugin.version>1.5.3</asciidoctor-maven-plugin.version>
+        <asciidoctorj-pdf.version>1.5.0-alpha.11</asciidoctorj-pdf.version>
+        <docbkx-maven-plugin.version>2.0.15</docbkx-maven-plugin.version>
+        <xslthl.version>2.1.0</xslthl.version>
+        <docbook-xml.version>5.0-all</docbook-xml.version>
+        <maven-antrun-plugin.version>1.8</maven-antrun-plugin.version>
+        <ant-contrib.version>1.0b3</ant-contrib.version>
+        <ant-nodeps.version>1.8.1</ant-nodeps.version>
+        <antelopetasks.version>3.2.10</antelopetasks.version>
+        <build-helper-maven-plugin>1.9.1</build-helper-maven-plugin>
 
     </properties>
 
