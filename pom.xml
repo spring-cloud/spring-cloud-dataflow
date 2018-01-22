@@ -28,7 +28,7 @@
 
         <spring.version>4.3.7.RELEASE</spring.version>
         <spring-shell.version>2.0.0.RELEASE</spring-shell.version>
-        <spring-statemachine.version>1.2.8.RC4</spring-statemachine.version>
+        <spring-statemachine.version>1.2.8.RELEASE</spring-statemachine.version>
 
         <spring-cloud.version>Dalston.RELEASE</spring-cloud.version>
         <spring-cloud-deployer.version>1.3.0.RC1</spring-cloud-deployer.version>
