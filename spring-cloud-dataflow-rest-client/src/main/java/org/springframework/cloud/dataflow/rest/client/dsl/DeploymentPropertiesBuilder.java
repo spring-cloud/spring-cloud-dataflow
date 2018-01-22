@@ -15,21 +15,16 @@
  */
 package org.springframework.cloud.dataflow.rest.client.dsl;
 
-import java.util.Collections;
-import java.util.HashMap;
 import java.util.Map;
 
-import org.springframework.cloud.dataflow.rest.SkipperStream;
 import org.springframework.util.Assert;
 
 /**
  * @author Vinicius Carvalho
+ *
+ * Utility class to help building a Map of classic mode based deployment properties
  */
-public class DeploymentPropertiesBuilder {
-
-	protected Map<String, String> deploymentProperties = new HashMap<>();
-
-	private final String DEPLOYER_PREFIX = "deployer.%s.%s";
+public class DeploymentPropertiesBuilder extends AbstractPropertiesBuilder{
 
 	public DeploymentPropertiesBuilder(){
 	}
@@ -76,53 +71,4 @@ public class DeploymentPropertiesBuilder {
 		return this;
 	}
 
-	public Map<String, String> build() {
-		return Collections.unmodifiableMap(this.deploymentProperties);
-	}
-
-	public SkipperDeploymentPropertiesBuilder withSkipper() {
-		return new SkipperDeploymentPropertiesBuilder(deploymentProperties);
-	}
-
-	class SkipperDeploymentPropertiesBuilder extends DeploymentPropertiesBuilder {
-
-		SkipperDeploymentPropertiesBuilder(Map<String, String> map) {
-			this.deploymentProperties.putAll(map);
-		}
-
-		/**
-		 * Sets the target platform to be used by skipper
-		 * @param platformName
-		 * @return
-		 */
-		public SkipperDeploymentPropertiesBuilder platformName(String platformName){
-			Assert.hasLength(platformName, "Platform can't be empty");
-			this.deploymentProperties.put(SkipperStream.SKIPPER_PLATFORM_NAME, platformName);
-			return this;
-		}
-
-		/**
-		 * Sets the package version to be used by skipper
-		 * @param packageVersion
-		 * @return
-		 */
-		public SkipperDeploymentPropertiesBuilder packageVersion(String packageVersion){
-			Assert.hasLength(packageVersion, "Package version can't be empty");
-			this.deploymentProperties.put(SkipperStream.SKIPPER_PACKAGE_VERSION, packageVersion);
-			return this;
-		}
-
-		/**
-		 * Sets the repo name platform to be used by skipper
-		 * @param repoName
-		 * @return
-		 */
-		public SkipperDeploymentPropertiesBuilder repoName(String repoName){
-			Assert.hasLength(repoName, "Repository name can't be empty");
-			this.deploymentProperties.put(SkipperStream.SKIPPER_REPO_NAME, repoName);
-			return this;
-		}
-
-
-	}
 }

@@ -98,10 +98,9 @@ public class StreamDslTests {
 		resource.setStatus("deploying");
 		Mockito.when(streamOperations.createStream(Mockito.anyString(),
 				Mockito.anyString(), Mockito.anyBoolean())).thenReturn(resource);
-		DeploymentPropertiesBuilder propertiesBuilder = new DeploymentPropertiesBuilder();
+		SkipperDeploymentPropertiesBuilder propertiesBuilder = new SkipperDeploymentPropertiesBuilder();
 		Map<String, String> props = propertiesBuilder.count("tick", 2)
 				.memory("tick", 2048)
-				.withSkipper()
 				.packageVersion("1.0.0.RELEASE")
 				.repoName("foo")
 				.platformName("pcf").build();

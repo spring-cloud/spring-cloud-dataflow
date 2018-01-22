@@ -1516,22 +1516,20 @@ This utility class is meant to help with the creation of a Map and adds a few me
 
 == Deploying using Skipper
 
-If you desire to deploy your streams using Skipper, you need to pass certain properties to the server. With the new `DeploymentPropertiesBuilder` we made it simpler for you to enable it.
+If you desire to deploy your streams using Skipper, you need to pass certain properties to the server. With the new `SkipperDeploymentPropertiesBuilder` we made it simpler for you to enable it.
 
 [source,java,options="nowrap"]
 ----
 private Map<String, String> createDeploymentProperties() {
-	return new DeploymentPropertiesBuilder()
+	return new SkipperDeploymentPropertiesBuilder()
 		.count("log", 2)
 		.memory("log", 512)
 		.put("app.splitter.producer.partitionKeyExpression", "payload")
-		.withSkipper()
 		.platformName("pcf")
 		.build();
 }
 ----
 
-To enable Skipper deployment just use the `withSkipper()` method. You can then configure skipper specific properties such as `packageVersion` and `repoName`.
 
 [[spring-cloud-dataflow-stream-multi-binder]]
 == Stream applications with multiple binder configurations
