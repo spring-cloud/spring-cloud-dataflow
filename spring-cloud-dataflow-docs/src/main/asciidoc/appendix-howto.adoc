@@ -152,23 +152,21 @@ dataflow:>stream deploy foo --properties "app.*.logging.level.org.springframewor
 
 ==== Remote Debugging
 
-Data Flow allows you to debug the deployed applications.
-This is accomplished using enabling the remote debugging feature of the JVM through deployment properites.
+Data Flow lets you debug the deployed applications.
+This is accomplished by enabling the remote debugging feature of the JVM through deployment properites, as shown in the following example:
 
-For example:
 [source,bash]
 ----
 stream deploy --name mystream --properties "deployer.fooApp.local.debugPort=9999"
 ----
-The above will start the `fooApp` application in debug mode allowing remote debugger to be attached on port 9999.
-By default the application will start in a ’suspend’ mode waiting for the remote debug session to be attached (started). Otherwise you can  provide an additional `debugSuspend` property with value `n`.
 
-Also, in the event when there is more then one instance of the application, the debug port for each instance will be the value of `debugPort` + instanceId.
+The preceding example starts the `fooApp` application in debug mode, allowing a remote debugger to be attached on port 9999.
+By default, the application starts in a ’suspend’ mode and waits for the remote debug session to be attached (started). Otherwise, you can  provide an additional `debugSuspend` property with value `n`.
 
-NOTE: Unlike other properties you must NOT use wild-card for the application name, since each application must use a unique debug port.
+Also, when there is more then one instance of the application, the debug port for each instance is the value of `debugPort` + instanceId.
 
+NOTE: Unlike other properties you must NOT use a wildcard for the application name, since each application must use a unique debug port.
 
-==== Log redirect
 
 
 ==== Log Redirect

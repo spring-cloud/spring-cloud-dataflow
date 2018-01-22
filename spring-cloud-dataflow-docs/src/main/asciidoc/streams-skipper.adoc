@@ -90,7 +90,7 @@ $ curl http://localhost:9002/info
 
 === Stream History
 
-The history of the Stream can be viewed by executing the `stream history` command
+The history of the stream can be viewed by running the `stream history` command, as shown (with its output), in the following example:
 
 [source,bash]
 ----
@@ -106,8 +106,9 @@ dataflow:>stream history --name httptest
 === Stream Manifest
 
 The manifest is a YAML document that represents the final state of what was deployed to the platform.
-You can view the manifest for any Stream version using the command `stream manifest --name <name-of-stream> --releaseVersion <optional-version>`
+You can view the manifest for any stream version by using the `stream manifest --name <name-of-stream> --releaseVersion <optional-version>` command.
 If the `--releaseVersion` is not specified, the manifest for the last version is returned.
+The following listing shows a typical `stream manifest` command and its output:
 
 [source,bash]
 ----
@@ -165,7 +166,7 @@ If you compare this YAML document to the one for `--releaseVersion=1` you will s
 
 == Rolling back
 
-To go back to the previous version of the stream, use the `stream rollback` command.
+To go back to the previous version of the stream, use the `stream rollback` command, as shown (with its output) in the following example:
 
 [source,bash]
 ----
