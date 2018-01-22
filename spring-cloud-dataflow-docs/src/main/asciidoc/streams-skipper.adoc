@@ -1,12 +1,13 @@
 [[spring-cloud-dataflow-streams-skipper]]
 = Streams with Skipper
 
-The section <<spring-cloud-dataflow-stream-lifecycle-skipper>> covers the overall role of Skipper in Spring Cloud Data Flow.
+The <<spring-cloud-dataflow-stream-lifecycle-skipper>> section covers the overall role of Skipper in Spring Cloud Data Flow.
 
-This section is a continuation of the getting started section on <<getting-started-deploying-streams-spring-cloud-dataflow>> and shows how Streams can be updated and rolled back using the Local Data Flow server and Skipper.
-The getting started section leaves off with the Stream `httptest` deployed.
+This section is a continuation of the getting started section on <<getting-started-deploying-streams-spring-cloud-dataflow>> and shows how Streams can be updated and rolled back by using the Local Data Flow server and Skipper.
+The "`<<getting-started>>`" chapter leaves off with the Stream `httptest` deployed.
+This chapter continues where the "`Getting Started`" chapter ended.
 The Stream consists of two applications, the `http` source and the `log` sink.
-If you execute the Unix command `jps` you can see the two java processes running.
+If you execute the Unix `jps` command you can see the two java processes running, as shown in the following listing:
 
 [source,bash]
 ----
@@ -15,11 +16,14 @@ $ jps | grep rabbit
 12645 http-source-rabbit-1.2.0.RELEASE.jar
 ----
 
+[[spring-cloud-dataflow-streams-skipper-upgrading]]
 == Upgrading
-We will now upgrade the log sink to version 1.2.0.RELEASE.
-Since we are using the local server we will need to set the port to a different value (9001) than the currently running log sink's value of 9000 to avoid a conflict.
-While we are at it, let's update log level to be `ERROR`.
-Create a YAML file named `local-log-update.yml` with the following contents
+
+We start by upgrading the log sink to version 1.2.0.RELEASE.
+Since we are using the local server, we need to set the port to a different value (9001) than the currently running log sink's value of 9000 to avoid a conflict.
+While we are at it, we update log level to be `ERROR`.
+To do so, we create a YAML file, named `local-log-update.yml`, with the following contents:
+
 [source,yml]
 ----
 version:
@@ -30,14 +34,15 @@ app:
     log.level: ERROR
 ----
 
-Now update the Stream
+Now we update the Stream, as follows:
+
 [source,bash]
 ----
 dataflow:> stream update --name httptest --propertiesFile /home/mpollack/local-log-update.yml
 Update request has been sent for the stream 'httptest'
 ----
 
-Executing the Unix command `jps` you can see the two java processes running, but now the log application is version 1.2.0.RELEASE
+By executing the Unix `jps` command, you can see the two java processes running, but now the log application is version 1.2.0.RELEASE, as shown in the following listing:
 
 [source,bash]
 ----
@@ -46,7 +51,12 @@ $ jps | grep rabbit
 22031 log-sink-rabbit-1.1.0.RELEASE.jar
 ----
 
-Looking in the log file of the Skipper server, you will see the following log entries
+Now you can look in the log file of the Skipper server.
+To do so, use the following command:
+
+`cd` to the directory `/tmp/spring-cloud-dataflow-5262910238261867964/httptest-1511749222274/httptest.log-v2` and `tail -f stdout_0.log`
+
+You should see log entries similar to the following:
 
 [source,bash,options=nowrap]
 ----
@@ -57,22 +67,22 @@ INFO 12591 --- [  StateUpdate-1] o.s.c.s.s.d.s.HandleHealthCheckStep      : Rele
 INFO 12591 --- [  StateUpdate-1] o.s.c.s.s.d.s.HandleHealthCheckStep      : Apps in release httptest-v2 are healthy.
 ----
 
-`cd` to the directory `/tmp/spring-cloud-dataflow-5262910238261867964/httptest-1511749222274/httptest.log-v2` and `tail -f stdout_0.log`
-
-Now post a message to the http source at port `9000`
+Now you can post a message to the http source at port `9000`, as follows:
 
 [source,bash]
 ----
 dataflow:> http post --target http://localhost:9000 --data "hello world upgraded"
 ----
 
-And the log message will now be at the error level
+The log message is now at the error level, as shown in the following example:
+
 [source,bash]
 ----
 ERROR 22311 --- [http.httptest-1] log-sink  : hello world upgraded
 ----
 
-If you query the `/info` endpoint of the app, you can also see that it is at version `1.2.0.RELEASE`
+If you query the `/info` endpoint of the application, you can also see that it is at version `1.2.0.RELEASE`, as shown in the following example:
+
 [source,bash]
 ----
 $ curl http://localhost:9002/info
@@ -81,7 +91,7 @@ $ curl http://localhost:9002/info
 
 === Stream History
 
-The history of the Stream can be viewed by executing the `stream history` command
+The history of the stream can be viewed by running the `stream history` command, as shown (with its output), in the following example:
 
 [source,bash]
 ----
@@ -97,8 +107,9 @@ dataflow:>stream history --name httptest
 === Stream Manifest
 
 The manifest is a YAML document that represents the final state of what was deployed to the platform.
-You can view the manifest for any Stream version using the command `stream manifest --name <name-of-stream> --releaseVersion <optional-version>`
+You can view the manifest for any stream version by using the `stream manifest --name <name-of-stream> --releaseVersion <optional-version>` command.
 If the `--releaseVersion` is not specified, the manifest for the last version is returned.
+The following listing shows a typical `stream manifest` command and its output:
 
 [source,bash]
 ----
@@ -150,13 +161,14 @@ spec:
     spring.cloud.deployer.group: httptest
 ----
 
-The majority of the deployment and application properties were set by Data Flow in order to enable the applications to talk to each other and sending application metrics with identifying labels.
+The majority of the deployment and application properties were set by Data Flow in order to enable the applications to talk to each other and send application metrics with identifying labels.
 
 If you compare this YAML document to the one for `--releaseVersion=1` you will see the difference in the log application version.
 
+[[spring-cloud-dataflow-streams-skipper-rollback]]
 == Rolling back
 
-To go back to the previous version of the stream, use the `stream rollback` command.
+To go back to the previous version of the stream, use the `stream rollback` command, as shown (with its output) in the following example:
 
 [source,bash]
 ----
@@ -164,7 +176,9 @@ dataflow:>stream rollback --name httptest
 Rollback request has been sent for the stream 'httptest'
 ----
 
-Executing the Unix command `jps` you can see the two java processes running, but now the log application is back to 1.1.0.RELEASE.  The http source process has remain unchanged.
+By executing the Unix `jps` command, you can see the two java processes running, but now the log application is back to 1.1.0.RELEASE.
+The http source process remains unchanged.
+The following listing shows the `jps` command and typical output:
 
 [source,bash]
 ----
@@ -173,7 +187,11 @@ $ jps | grep rabbit
 23939 log-sink-rabbit-1.1.0.RELEASE.jar
 ----
 
-Looking in the log file for the skipper server, you will see the following log entries
+Now look in the log file for the skipper server, by using the following command:
+
+`cd` to the directory `/tmp/spring-cloud-dataflow-3784227772192239992/httptest-1511755751505/httptest.log-v3` and `tail -f stdout_0.log`
+
+You should see log entries similar to the following:
 
 [source,bash,options=nowrap]
 ----
@@ -184,22 +202,20 @@ INFO 21487 --- [  StateUpdate-2] o.s.c.s.s.d.s.HandleHealthCheckStep      : Rele
 INFO 21487 --- [  StateUpdate-2] o.s.c.s.s.d.s.HandleHealthCheckStep      : Apps in release httptest-v3 are healthy.
 ----
 
-`cd` to the directory `/tmp/spring-cloud-dataflow-3784227772192239992/httptest-1511755751505/httptest.log-v3` and `tail -f stdout_0.log`
-
-Now post a message to the http source at port `9000`
+Now post a message to the http source at port `9000`, as follows:
 
 [source,bash]
 ----
 dataflow:> http post --target http://localhost:9000 --data "hello world upgraded"
 ----
 
-And the log message in the log sink will now be back at the info error level.
+The log message in the log sink is now back at the info error level, as shown in the following example:
 [source,bash]
 ----
 INFO 23939 --- [http.httptest-1] log-sink  : hello world rollback
 ----
 
-The history command now shows the third version of the stream hsa been deployed.
+The `history` command now shows that the third version of the stream has been deployed, as shown (with its output) in the following listing:
 
 [source,bash]
 ----
@@ -212,4 +228,5 @@ dataflow:>stream history --name httptest
 ║1      │Mon Nov 27 22:40:41 EST 2017│DELETED │httptest    │1.0.0          │Delete complete ║
 ╚═══════╧════════════════════════════╧════════╧════════════╧═══════════════╧════════════════╝
 ----
-If you look at the manifest for version 3, it will show version 1.1.0.RELEASE for the log sink.
+
+If you look at the manifest for version 3, you can see that it shows version 1.1.0.RELEASE for the log sink.

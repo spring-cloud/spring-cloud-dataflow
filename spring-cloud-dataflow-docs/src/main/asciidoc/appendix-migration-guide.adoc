@@ -1,15 +1,19 @@
 [appendix]
 [[migrationguide]]
 == Spring XD to SCDF
-In this section you will learn all about the migration path from Spring XD to Spring Cloud Data Flow
-along with the tips and tricks.
+
+This appendix describes how to migrate from Spring XD to Spring Cloud Data Flow, along with some tips and tricks that may be helpful.
+
+
 
 === Terminology Changes
+
+The following table describes the changes in terminology from Spring XD to Spring Cloud Data Flow:
 
 [width="100%",frame="topbot",options="header"]
 |======================
 |Old |New
-|XD-Admin        |Server (_implementations_: local, cloud foundry, apache yarn, kubernetes, and apache mesos)
+|XD-Admin        |Server (implementations: local, Cloud Foundry, Apache Yarn, Kubernetes, and Apache Mesos)
 |XD-Container       |N/A
 |Modules       |Applications
 |Admin UI        |Dashboard
@@ -17,58 +21,72 @@ along with the tips and tricks.
 |Batch / Job        |Task
 |======================
 
+
+
 === Modules to Applications
-If you have custom Spring XD modules, you’d have to refactor them to use Spring Cloud
-Stream and Spring Cloud Task annotations, with updated dependencies and built as normal
-Spring Boot "applications".
+
+If you have custom Spring XD modules, you need refactor them to use Spring Cloud Stream and Spring Cloud Task annotations.
+As part of that work, you need to update dependencies and build them as normal Spring Boot applications.
+
+
 
 ==== Custom Applications
 
-* Spring XD's stream and batch modules are refactored into link:https://github.com/spring-cloud-stream-app-starters[Spring Cloud Stream] and link:https://github.com/spring-cloud-task-app-starters[Spring
-Cloud Task] application-starters, respectively. These applications can be used as the reference while refactoring Spring XD modules
-* There are also some samples for link:https://github.com/spring-cloud/spring-cloud-stream-samples[Spring Cloud Stream] and link:https://github.com/spring-cloud/spring-cloud-task/tree/master/spring-cloud-task-samples[Spring Cloud Task] applications for reference
-* If you’d like to create a brand new custom application, use the getting started guide for link:http://docs.spring.io/spring-cloud-stream/docs/current/reference/htmlsingle/#_getting_started[Spring Cloud Stream] and link:http://docs.spring.io/spring-cloud-task/docs/current/reference/htmlsingle/#getting-started[Spring Cloud Task] applications and as well as  review the development link:http://docs.spring.io/spring-cloud-stream-app-starters/docs/current/reference/htmlsingle/#_creating_your_own_applications[guide]
-* Alternatively, if you’d like to patch any of the out-of-the-box stream applications, you can
-follow the procedure link:http://docs.spring.io/spring-cloud-stream-app-starters/docs/current/reference/htmlsingle/#_patching_pre_built_applications[here]
+As you convert custom applications, keep the following information in mind:
+
+* Spring XD's stream and batch modules are refactored into the link:https://github.com/spring-cloud-stream-app-starters[Spring Cloud Stream] and link:https://github.com/spring-cloud-task-app-starters[Spring Cloud Task] application-starters, respectively.
+These applications can be used as the reference while refactoring Spring XD modules.
+* There are also some samples for link:https://github.com/spring-cloud/spring-cloud-stream-samples[Spring Cloud Stream] and link:https://github.com/spring-cloud/spring-cloud-task/tree/master/spring-cloud-task-samples[Spring Cloud Task] applications for reference.
+* If you want to create a brand new custom application, use the getting started guide for link:http://docs.spring.io/spring-cloud-stream/docs/current/reference/htmlsingle/#_getting_started[Spring Cloud Stream] and link:http://docs.spring.io/spring-cloud-task/docs/current/reference/htmlsingle/#getting-started[Spring Cloud Task] applications and as well as  review the link:http://docs.spring.io/spring-cloud-stream-app-starters/docs/current/reference/htmlsingle/#_creating_your_own_applications[develeopment guide].
+* Alternatively, if you want to patch any of the out-of-the-box stream applications, you can follow the procedure link:http://docs.spring.io/spring-cloud-stream-app-starters/docs/current/reference/htmlsingle/#_patching_pre_built_applications[described here].
+
+
 
 ==== Application Registration
 
-* Custom Stream/Task application requires being installed to a maven repository for Local, YARN, and
-CF implementations or as docker images, when deploying to Kubernetes and Mesos. Other than maven and
-docker resolution, you can also resolve application artifacts from `http`, `file`, or as `hdfs`
-coordinates
-* Unlike Spring XD, you do not have to upload the application bits while registering custom applications anymore; instead, you’re expected to <<spring-cloud-dataflow-register-stream-apps, register>> the application coordinates that are hosted in the maven repository or by other means as discussed in the previous bullet
-* By default, none of the out-of-the-box applications are preloaded already. It is intentionally designed to
-provide the flexibility to register app(s), as you find appropriate for the given use-case requirement
-* Depending on the binder choice, you can manually add the appropriate binder dependency to build
-applications specific to that binder-type. Alternatively, you can follow the Spring Initialzr link:https://github.com/spring-cloud/spring-cloud-stream-app-starters/blob/master/spring-cloud-stream-app-starters-docs/src/main/asciidoc/overview.adoc#using-the-starters-to-create-custom-components[procedure]
-to create an application with binder embedded in it
+As you register your applications, keep the following information in mind:
+
+* Custom Stream/Task applications require being installed to a Maven repository for local, Yarn, and Cloud Foundry implementations or, as docker images, when deploying to Kubernetes or Mesos. Other than Maven and docker resolution, you can also resolve application artifacts from `http`, `file`, or as `hdfs` coordinates.
+* Unlike Spring XD, you do not have to upload the application bits while registering custom applications anymore.
+Instead, you need to <<spring-cloud-dataflow-register-stream-apps, register>> the application coordinates that are hosted in the Maven repository or by other means as discussed in the previous bullet.
+* By default, none of the out-of-the-box applications are preloaded. It is intentionally designed to provide the flexibility to register apps as you find appropriate for the given use-case requirement.
+* Depending on the binder choice, you can manually add the appropriate binder dependency to build applications specific to that binder-type.
+Alternatively, you can follow the http://start.spring.io[Spring Initializr] link:https://github.com/spring-cloud/spring-cloud-stream-app-starters/blob/master/spring-cloud-stream-app-starters-docs/src/main/asciidoc/overview.adoc#using-the-starters-to-create-custom-components[procedure] to create an application with binder embedded in it.
+
+
 
 ==== Application Properties
 
-* counter-sink:
-** The peripheral `redis` is not required in Spring Cloud Data Flow. If you intend to use the `counter-sink`, then `redis` becomes required, and you’re expected to have your own running `redis` cluster
+As you modify your applications' properties, keep the following information in mind:
+
+* Counter-sink:
+** The peripheral `redis` is not required in Spring Cloud Data Flow.
+If you intend to use the `counter-sink`, then `redis` is required, and you need to have your own running `redis` cluster.
 * field-value-counter-sink:
-** The peripheral `redis` is not required in Spring Cloud Data Flow. If you intend to use the `field-value-counter-sink`, then `redis` becomes required, and you’re expected to have your own running `redis` cluster
-* aggregate-counter-sink:
-** The peripheral `redis` is not required in Spring Cloud Data Flow. If you intend to use the `aggregate-counter-sink`, then `redis` becomes required, and you’re expected to have your own running `redis` cluster
+** The peripheral `redis` is not required in Spring Cloud Data Flow.
+If you intend to use the `field-value-counter-sink`, then `redis` becomes required, and you need to have your own running `redis` cluster.
+* Aggregate-counter-sink:
+** The peripheral `redis` is not required in Spring Cloud Data Flow.
+If you intend to use the `aggregate-counter-sink`, then `redis` becomes required, and you need to have your own running `redis` cluster.
+
+
 
 === Message Bus to Binders
-Terminology wise, in Spring Cloud Data Flow, the message bus implementation is commonly referred to
-as binders.
+Terminology wise, in Spring Cloud Data Flow, the message bus implementation is commonly referred to as binders.
+
+
 
 ==== Message Bus
 
-Similar to Spring XD, there’s an abstraction available to extend the binder interface. By default,
-we take the opinionated view of link:https://github.com/spring-cloud/spring-cloud-stream-binder-kafka[Apache Kafka] and link:https://github.com/spring-cloud/spring-cloud-stream-binder-rabbit[RabbitMQ] as the
-production-ready binders and are available as GA releases.
+Similar to Spring XD, Spring Cloud Data Flow includes an abstraction that you can use to extend the binder interface.
+By default, we take the opinionated view of link:https://github.com/spring-cloud/spring-cloud-stream-binder-kafka[Apache Kafka] and link:https://github.com/spring-cloud/spring-cloud-stream-binder-rabbit[RabbitMQ] as the production-ready binders.
+They are available as GA releases.
 
 ==== Binders
 
-Selecting a binder is as simple as providing the right binder dependency in the classpath. If you’re
-to choose Kafka as the binder, you’d register stream applications that are pre-built with Kafka binder
-in it. If you were to create a custom application with Kafka binder, you'd add the following
-dependency in the classpath.
+Selecting a binder requires providing the right binder dependency in the classpath.
+If you choose Kafka as the binder, you need to register stream applications that are pre-built with Kafka binder in it.
+If you to create a custom application with Kafka binder, you need add the following dependency in the classpath:
 
 [source,xml]
 ----
@@ -79,63 +97,67 @@ dependency in the classpath.
 </dependency>
 ----
 
-* Spring Cloud Stream supports link:https://github.com/spring-cloud/spring-cloud-stream-binder-kafka[Apache Kafka], link:https://github.com/spring-cloud/spring-cloud-stream-binder-rabbit[RabbitMQ] and experimental
-link:https://github.com/spring-cloud/spring-cloud-stream-binder-google-pubsub[Google PubSub] and
-link:https://github.com/spring-cloud/spring-cloud-stream-binder-solace[Solace JMS].  All binder implementations
-are maintained and managed in their individual repositories
-* Every Stream/Task application can be built with a binder implementation of your choice.
-All the out-of-the-box applications are pre-built for both Kafka and Rabbit and they’re
-readily available for use as maven artifacts [link:http://repo.spring.io/libs-milestone/org/springframework/cloud/stream/app/[Spring Cloud Stream] / link:http://repo.spring.io/libs-milestone/org/springframework/cloud/task/app/[Spring Cloud Task] or docker images [link:https://hub.docker.com/r/springcloudstream/[Spring Cloud Stream] / link:https://hub.docker.com/r/springcloudtask/[Spring Cloud Task]
-Changing the binder requires selecting the right binder link:http://docs.spring.io/spring-cloud-stream/docs/current/reference/htmlsingle/#_binders[dependency]. Alternatively, you can download the pre-built application from this version of link:http://start-scs.cfapps.io/[Spring Initializr] with the desired “binder-starter” dependency
+* Spring Cloud Stream supports link:https://github.com/spring-cloud/spring-cloud-stream-binder-kafka[Apache Kafka] and  link:https://github.com/spring-cloud/spring-cloud-stream-binder-rabbit[RabbitMQ].
+All binder implementations are maintained and managed in their individual repositories.
+* Every Stream/Task application can be built with the binder implementation of your choice.
+All the out-of-the-box applications are pre-built for both Kafka and Rabbit and are readily available for use as Maven artifacts (link:http://repo.spring.io/libs-milestone/org/springframework/cloud/stream/app/[Spring Cloud Stream] or link:http://repo.spring.io/libs-milestone/org/springframework/cloud/task/app/[Spring Cloud Task]) or as Docker images (link:https://hub.docker.com/r/springcloudstream/[Spring Cloud Stream] or link:https://hub.docker.com/r/springcloudtask/[Spring Cloud Task]).
+Changing the binder requires selecting the right binder link:http://docs.spring.io/spring-cloud-stream/docs/current/reference/htmlsingle/#_binders[dependency].
+Alternatively, you can download the pre-built application from this version of link:http://start-scs.cfapps.io/[Spring Initializr] with the desired “binder-starter” dependency.
+
+
 
 ==== Named Channels
 
-Fundamentally, all the messaging channels are backed by pub/sub semantics. Unlike Spring XD, the
-messaging channels are backed only by `topics` or `topic-exchange` and there’s no representation of
-`queues` in the new architecture.
+Fundamentally, all the messaging channels are backed by pub/sub semantics.
+Unlike Spring XD, the messaging channels are backed only by `topics` or `topic-exchange` and there is no representation of `queues` in the new architecture.
 
-* `${xd.module.index}` is not supported anymore; instead, you can directly interact with named
-destinations
+* `${xd.module.index}` is no longer supported. Instead, you can directly interact with <<spring-cloud-dataflow-stream-dsl-named-destinations,named destinations>>.
 * `stream.index` changes to `:<stream-name>.<label/app-name>`
-** _for instance:_ `ticktock.0` changes to `:ticktock.time`
-* “topic/queue” prefixes are not required to interact with named-channels
-** _for instance:_ `topic:foo` changes to `:foo`
-** _for instance:_ `stream create stream1 --definition ":foo > log"`
+** For example, `ticktock.0` changes to `:ticktock.time`.
+* “topic/queue” prefixes are not required to interact with named-channels.
+** For example, `topic:mytopic` changes to `:mytopic`.
+** For example, `stream create stream1 --definition ":foo > log"`.
+
+
 
 ==== Directed Graphs
-If you’re building non-linear streams, you could take advantage of named destinations to build
-directed graphs.
+If you build non-linear streams, you can take advantage of <<spring-cloud-dataflow-stream-dsl-named-destinations,named destinations>> to build directed graphs.
 
-_for instance, in Spring XD:_
-
-[source,xml]
-----
-stream create f --definition "queue:foo > transform --expression=payload+'-foo' | log" --deploy
-stream create b --definition "queue:bar > transform --expression=payload+'-bar' | log" --deploy
-stream create r --definition "http | router --expression=payload.contains('a')?'queue:foo':'queue:bar'" --deploy
-----
-
-_for instance, in Spring Cloud Data Flow:_
+Consider the following example from Spring XD:
 
 [source,xml]
 ----
-stream create f --definition ":foo > transform --expression=payload+'-foo' | log" --deploy
-stream create b --definition ":bar > transform --expression=payload+'-bar' | log" --deploy
-stream create r --definition "http | router --expression=payload.contains('a')?'foo':'bar'" --deploy
+stream create f --definition "queue:foo > transform --expression=payload+'-sample1' | log" --deploy
+stream create b --definition "queue:bar > transform --expression=payload+'-sample2' | log" --deploy
+stream create r --definition "http | router --expression=payload.contains('a')?'queue:sample1':'queue:sample2'" --deploy
 ----
+
+You can do the following in Spring Cloud Data Flow:
+
+[source,xml]
+----
+stream create f --definition ":foo > transform --expression=payload+'-sample1' | log" --deploy
+stream create b --definition ":bar > transform --expression=payload+'-sample2' | log" --deploy
+stream create r --definition "http | router --expression=payload.contains('a')?'sample1':'sample2'" --deploy
+----
+
+
 
 === Batch to Tasks
 
-A Task by definition, is any application that does not run forever, including Spring Batch jobs, and they
-end/stop at some point. Task applications can be majorly used for on-demand use-cases such as database migration, machine learning, scheduled operations etc. Using link:http://cloud.spring.io/spring-cloud-task/[Spring Cloud Task], users can build Spring Batch jobs as microservice applications.
+A Task, by definition, is any application that does not run forever, and they end at some point.
+Tasks include Spring Batch jobs.
+Task applications can be used for on-demand use cases, such as database migration, machine learning, scheduled operations, and others.
+With link:http://cloud.spring.io/spring-cloud-task/[Spring Cloud Task], you can build Spring Batch jobs as microservice applications.
 
-* Spring Batch link:http://docs.spring.io/spring-xd/docs/current-SNAPSHOT/reference/html/#jobs[jobs]
-from Spring XD are being refactored to Spring Boot applications a.k.a Spring Cloud Task
-link:https://github.com/spring-cloud-task-app-starters[applications]
-* Unlike Spring XD, these “Tasks” don't require explicit deployment; instead, a task is ready to be
-launched directly once the definition is declared
+* Spring Batch link:http://docs.spring.io/spring-xd/docs/current-SNAPSHOT/reference/html/#jobs[jobs] from Spring XD are being refactored to Spring Boot applications, also known as Spring Cloud Task link:https://github.com/spring-cloud-task-app-starters[applications].
+* Unlike Spring XD, these tasks do not require explicit deployment. Instead, a task is ready to be launched directly once the definition is declared.
 
-=== Shell/DSL Commands
+
+
+=== Shell and DSL Command Changes
+
+The following table shows the changes to shell and DSL commands:
 
 [width="100%",frame="topbot",options="header"]
 |======================
@@ -155,7 +177,9 @@ launched directly once the definition is declared
 |======================
 
 
-=== REST-API
+=== REST API Changes
+
+The following table shows the changes to the REST API:
 
 [width="70%",frame="topbot",options="header"]
 |======================
@@ -167,29 +191,35 @@ launched directly once the definition is declared
 |/jobs/deployments        |/task/deployments
 |======================
 
-=== UI / Flo
 
-The Admin-UI is now renamed as Dashboard. The URI for accessing the Dashboard is changed from
-http://localhost:9393/admin-ui to http://localhost:9393/dashboard
 
-* _(New)_ Apps: Lists all the registered applications that are available for use. This view includes informational details such as the URI and the properties supported by each application. You can also register/unregister applications from this view
+=== UI (including Flo)
 
-* Runtime: Container changes to Runtime. The notion of `xd-container` is gone, replaced by out-of-the-box applications running as autonomous Spring Boot applications. The Runtime tab displays the applications
-running in the runtime platforms (_implementations:_ cloud foundry, apache yarn, apache mesos, or
-kubernetes). You can click on each application to review relevant details about the application such
-as where it is running with, and what resources etc.
+The Admin-UI is now named Dashboard. The URI for accessing the Dashboard is changed from
+`http://localhost:9393/admin-ui` to `http://localhost:9393/dashboard`.
+
+* Apps (a new view): Lists all the registered applications that are available for use.
+This view includes details such as the URI and the properties supported by each application.
+You can also register/unregister applications from this view.
+* Runtime (was Container): Container changes to Runtime. The notion of `xd-container` is gone, replaced by out-of-the-box applications running as autonomous Spring Boot applications.
+The Runtime tab displays the applications running in the runtime platforms (implementations: Cloud Foundry, Apache Yarn, Apache Mesos, or
+Kubernetes). You can click on each application to review relevant details, such
+as where it is running, what resources it uses, and other details.
 * link:https://github.com/spring-projects/spring-flo[Spring Flo] is now an OSS product. Flo for
-Spring Cloud Data Flow’s “Create Stream”, the designer-tab comes pre-built in the Dashboard
-* _(New)_ Tasks:
-** The sub-tab “Modules” is renamed to “Apps”
-** The sub-tab “Definitions” lists all the Task definitions, including Spring Batch jobs that are
-orchestrated as Tasks
-** The sub-tab “Executions” lists all the Task execution details similar to Spring XD's Job executions
+Spring Cloud Data Flow’s "`Create Stream`" is now the designer-tab in the Dashboard.
+* Tasks (a new view):
+** The "`Modules`" sub-tab is renamed to "`Apps`".
+** The "`Definitions`" sub-tab lists all the task definitions, including Spring Batch jobs that are orchestrated as tasks.
+** The "`Executions`" sub-tab lists all the task execution details in a fashion similar to the listing of Spring XD's Job executions.
+
+
 
 === Architecture Components
 
-Spring Cloud Data Flow comes with a significantly simplified architecture. In fact, when compared with
-Spring XD, there are less peripherals that are necessary to operationalize Spring Cloud Data Flow.
+Spring Cloud Data Flow comes with a significantly simplified architecture.
+In fact, when compared with Spring XD, you need fewer peripherals to use Spring Cloud Data Flow.
+
+
 
 ==== ZooKeeper
 
@@ -198,84 +228,89 @@ ZooKeeper is not used in the new architecture.
 [[rdbms]]
 ==== RDBMS
 
-Spring Cloud Data Flow uses an RDBMS instead of Redis for stream/task definitions, application
-registration, and for job repositories.The default configuration uses an embedded H2 instance, but Oracle, DB2, SqlServer, MySQL/MariaDB, PostgreSQL, H2, and HSQLDB databases are supported. To use Oracle, DB2 and
-SqlServer you will need to create your own Data Flow Server using link:https://start.spring.io/[Spring Initializr] and add the appropriate JDBC driver dependency.
+Spring Cloud Data Flow uses an RDBMS instead of Redis for stream/task definitions, application registration, and for job repositories.
+The default configuration uses an embedded H2 instance, but Oracle, DB2, SqlServer, MySQL/MariaDB, PostgreSQL, H2, and HSQLDB databases are supported.
+To use Oracle, DB2, and SqlServer, you need to create your own Data Flow Server by using link:https://start.spring.io/[Spring Initializr] and add the appropriate JDBC driver dependency.
+
+
 
 ==== Redis
 
-Running a Redis cluster is only required for analytics functionality. Specifically, when the `counter-sink`,
-`field-value-counter-sink`, or `aggregate-counter-sink` applications are used, it is expected to also
-have a running instance of Redis cluster.
+Running a Redis cluster is only required for analytics functionality.
+Specifically, when you use the `counter-sink`, `field-value-counter-sink`, or `aggregate-counter-sink` applications, you also need to have a running instance of Redis cluster.
+
+
 
 ==== Cluster Topology
 
-Spring XD’s `xd-admin` and `xd-container` server components are replaced by stream and task
-applications themselves running as autonomous Spring Boot applications. The applications run natively
-on various platforms including Cloud Foundry, Apache YARN, Apache Mesos, or Kubernetes. You can develop,
-test, deploy, scale +/-, and interact with (Spring Boot) applications individually, and they can
-evolve in isolation.
+Spring XD’s `xd-admin` and `xd-container` server components are replaced by stream and task applications that are themselves running as autonomous Spring Boot applications.
+The applications run natively on various platforms, including Cloud Foundry, Apache YARN, Apache Mesos, and Kubernetes.
+You can develop, test, deploy, scale up or down, and interact with (Spring Boot) applications individually, and they can evolve in isolation.
+
+
 
 === Central Configuration
 
-To support centralized and consistent management of an application’s configuration properties,
-link:https://cloud.spring.io/spring-cloud-config/[Spring Cloud Config] client libraries have been
-included into the Spring Cloud Data Flow server as well as the Spring Cloud Stream applications provided
-by the Spring Cloud Stream App Starters. You can also <<streams.adoc#spring-cloud-dataflow-global-properties, pass common application properties>>
-to all streams when the Data Flow Server starts.
+To support centralized and consistent management of an application’s configuration properties, link:https://cloud.spring.io/spring-cloud-config/[Spring Cloud Config] client libraries have been included in the Spring Cloud Data Flow server as well as the Spring Cloud Stream applications provided by the Spring Cloud Stream App Starters. You can also <<streams.adoc#spring-cloud-dataflow-global-properties, pass common application properties>> to all streams when the Data Flow Server starts.
+
+
 
 === Distribution
 
-Spring Cloud Data Flow is a Spring Boot application. Depending on the platform of your choice, you
-can download the respective release uber-jar and deploy/push it to the runtime platform
-(cloud foundry, apache yarn, kubernetes, or apache mesos). For example, if you’re running Spring
-Cloud Data Flow on Cloud Foundry, you’d download the Cloud Foundry server implementation and do a
-`cf push` as explained in the link:http://docs.spring.io/spring-cloud-dataflow-server-cloudfoundry/docs/current-SNAPSHOT/reference/htmlsingle/#getting-started[reference guide].
+Spring Cloud Data Flow is a Spring Boot application. Depending on the platform of your choice, you can download the respective release uber jar and deploy or push it to the runtime platform (Cloud Foundry, Apache Yarn, Kubernetes, or Apache Mesos). For example, if you run Spring Cloud Data Flow on Cloud Foundry, you can download the Cloud Foundry server implementation and do a `cf push`, as explained in the link:http://docs.spring.io/spring-cloud-dataflow-server-cloudfoundry/docs/current-SNAPSHOT/reference/htmlsingle/#getting-started[Cloud Foundry Reference Guide].
+
+
 
 === Hadoop Distribution Compatibility
 
 The `hdfs-sink` application builds upon Spring Hadoop 2.4.0 release, so this application is compatible
-with following Hadoop distributions.
+with the following Hadoop distributions:
 
-* Cloudera - cdh5
-* Pivotal Hadoop - phd30
-* Hortonworks Hadoop - hdp24
-* Hortonworks Hadoop - hdp23
-* Vanilla Hadoop - hadoop26
-* Vanilla Hadoop - 2.7.x (default)
+* Cloudera: cdh5
+* Pivotal Hadoop: phd30
+* Hortonworks Hadoop: hdp24
+* Hortonworks Hadoop: hdp23
+* Vanilla Hadoop: hadoop26
+* Vanilla Hadoop: 2.7.x (default)
+
+
 
 === YARN Deployment
 
-Spring Cloud Data Flow can be deployed and used with Apche YARN in two different ways.
+Spring Cloud Data Flow can be deployed and used with Apche YARN in two different ways:
 
-* Deploy the server link:http://docs.spring.io/spring-cloud-dataflow-server-yarn/docs/current-SNAPSHOT/reference/htmlsingle/#yarn-deploying-on-yarn[directly] in a YARN cluster
-* Leverage Apache Ambari link:http://docs.spring.io/spring-cloud-dataflow-server-yarn/docs/current-SNAPSHOT/reference/htmlsingle/#yarn-deploying-on-ambari[plugin to provision] Spring Cloud Data Flow as
-a service
+* Deploy the server link:http://docs.spring.io/spring-cloud-dataflow-server-yarn/docs/current-SNAPSHOT/reference/htmlsingle/#yarn-deploying-on-yarn[directly] in a YARN cluster.
+* Use the Apache Ambari link:http://docs.spring.io/spring-cloud-dataflow-server-yarn/docs/current-SNAPSHOT/reference/htmlsingle/#yarn-deploying-on-ambari[plugin] to provision Spring Cloud Data Flow as a service.
+
+
 
 === Use Case Comparison
 
-Let's review some use-cases to compare and contrast the differences between Spring XD and Spring
-Cloud Data Flow.
+The remainder of this appendix reviews some use cases to show the differences between Spring XD and Spring Cloud Data Flow.
 
-==== Use Case #1
 
-(_It is assumed both XD and SCDF distributions are already downloaded_)
+
+==== Use Case #1: Ticktock
+
+This use case assumes that you have already downloaded both the XD and the SCDF distributions.
 
 Description: Simple `ticktock` example using local/singlenode.
+
+The following table describes the differences:
 
 [width="100%",frame="topbot",options="header"]
 |======================
 |Spring XD |Spring Cloud Data Flow
 
-| Start `xd-singlenode` server from CLI
+| Start an `xd-singlenode` server from CLI
 
 `→ xd-singlenode` | Start a binder of your choice
 
-Start `local-server` implementation of SCDF from the CLI
+Start a `local-server` implementation of SCDF from the CLI
 
 `→ java -jar spring-cloud-dataflow-server-local-1.0.0.BUILD-SNAPSHOT.jar`
 
-| Start `xd-shell` server from the CLI
+| Start an `xd-shell` server from the CLI
 
 `→ xd-shell` | Start `dataflow-shell` server from the CLI
 
@@ -287,81 +322,85 @@ Start `local-server` implementation of SCDF from the CLI
 
 `dataflow:>stream create ticktock --definition “time \| log” --deploy`
 
-| Review `ticktock` results in the `xd-singlenode` server console | Review `ticktock` results by tailing the `ticktock.log/stdout_log` application logs
+| Review `ticktock` results in the `xd-singlenode` server console | Review `ticktock` results by using the `tail` commang to view the `ticktock.log/stdout_log` application logs
 |======================
 
-==== Use Case #2
 
-(_It is assumed both XD and SCDF distributions are already downloaded_)
 
-Description: Stream with custom module/application.
+==== Use Case #2: Stream with Custom Module or Application
+
+This use case assumes that you have already downloaded both the XD and the SCDF distributions.
+
+Description: Stream with custom module or application.
+
+The following table describes the differences:
 
 [width="100%",frame="topbot",options="header"]
 |======================
 |Spring XD |Spring Cloud Data Flow
 
-| Start `xd-singlenode` server from CLI
+| Start an `xd-singlenode` server from CLI
 
 `→ xd-singlenode` | Start a binder of your choice
 
-Start `local-server` implementation of SCDF from the CLI
+Start a `local-server` implementation of SCDF from the CLI
 
 `→ java -jar spring-cloud-dataflow-server-local-1.0.0.BUILD-SNAPSHOT.jar`
 
-| Start `xd-shell` server from the CLI
+| Start an `xd-shell` server from the CLI
 
 `→ xd-shell` | Start `dataflow-shell` server from the CLI
 
 `→ java -jar spring-cloud-dataflow-shell-1.0.0.BUILD-SNAPSHOT.jar`
 
-| Register custom “processor” module to transform payload to a desired format
+| Register a custom “processor” module to transform the payload to the desired format
 
 `xd:>module upload --name toupper --type processor --file <CUSTOM_JAR_FILE_LOCATION>` | Register custom “processor” application to transform payload to a desired format
 
 `dataflow:>app register --name toupper --type processor --uri <MAVEN_URI_COORDINATES>`
 
-| Create a stream with custom module
+| Create a stream with a custom module
 
 `xd:>stream create testupper --definition “http \| toupper \| log” --deploy` | Create a stream with custom application
 
 `dataflow:>stream create testupper --definition “http \| toupper \| log” --deploy`
 
-| Review results in the `xd-singlenode` server console | Review results by tailing the `testupper.log/stdout_log` application logs
+| Review results in the `xd-singlenode` server console | Review results by using the `tail` command to view the `testupper.log/stdout_log` application logs
 |======================
 
 
-==== Use Case #3
 
-(_It is assumed both XD and SCDF distributions are already downloaded_)
+==== Use Case #3: Batch Job
 
-Description: Simple batch-job.
+This use case assumes that you have already downloaded both the XD and the SCDF distributions.
+
+Description: batch-job.
 
 [width="100%",frame="topbot",options="header"]
 |======================
 |Spring XD |Spring Cloud Data Flow
 
-| Start `xd-singlenode` server from CLI
+| Start an `xd-singlenode` server from CLI
 
-`→ xd-singlenode` | Start `local-server` implementation of SCDF from the CLI
+`→ xd-singlenode` | Start a `local-server` implementation of SCDF from the CLI
 
 `→ java -jar spring-cloud-dataflow-server-local-1.0.0.BUILD-SNAPSHOT.jar`
 
-| Start `xd-shell` server from the CLI
+| Start an `xd-shell` server from the CLI
 
 `→ xd-shell` | Start `dataflow-shell` server from the CLI
 
 `→ java -jar spring-cloud-dataflow-shell-1.0.0.BUILD-SNAPSHOT.jar`
 
-| Register custom “batch-job” module
+| Register a custom "`batch job`" module
 
-`xd:>module upload --name simple-batch --type job --file <CUSTOM_JAR_FILE_LOCATION>` | Register
-custom “batch-job” as task application
+`xd:>module upload --name simple-batch --type job --file <CUSTOM_JAR_FILE_LOCATION>` | Register a custom “batch-job” as task application
 
 `dataflow:>app register --name simple-batch --type task --uri <MAVEN_URI_COORDINATES>`
 
 | Create a job with custom batch-job module
 
-`xd:>job create batchtest --definition “simple-batch”` | Create a task with custom batch-job application
+`xd:>job create batchtest --definition “simple-batch”` | Create a task with a custom batch-job application
 
 `dataflow:>task create batchtest --definition “simple-batch”`
 
@@ -375,6 +414,6 @@ custom “batch-job” as task application
 
 `dataflow:>task launch batchtest`
 
-| Review results in the `xd-singlenode` server console as well as Jobs tab in UI
-(executions sub-tab should include all step details) | Review results by tailing the `batchtest/stdout_log` application logs as well as Task tab in UI (executions sub-tab should include all step details)
+| Review results in the `xd-singlenode` server console as well as the Jobs tab in the UI
+(executions sub-tab should include all step details) | Review results by using the `tail` command to view the `batchtest/stdout_log` application logs as well as the Task tab in UI (the executions sub-tab should include all step details)
 |======================
