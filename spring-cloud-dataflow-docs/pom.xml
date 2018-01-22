@@ -230,6 +230,9 @@
 										<copy todir="${basedir}/target/contents/reference/html/css">
 											<fileset dir="${basedir}/src/main/docbook/css" />
 										</copy>
+										<copy todir="${basedir}/target/generated-docs/tocbot-3.0.2">
+											<fileset dir="${basedir}/src/main/asciidoc/tocbot-3.0.2" />
+										</copy>
 									</postProcess>
 								</configuration>
 							</execution>
@@ -277,6 +280,7 @@
 											<zipfileset dir="${project.build.directory}/generated-docs" prefix="reference/htmlsingle">
 												<include name="index.html" />
 												<include name="images/**" />
+												<include name="tocbot-3.0.2/**" />
 											</zipfileset>
 										</zip>
 									</target>
