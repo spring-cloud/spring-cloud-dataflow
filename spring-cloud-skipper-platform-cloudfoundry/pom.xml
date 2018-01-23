@@ -7,7 +7,7 @@
     <parent>
         <artifactId>spring-cloud-skipper-parent</artifactId>
         <groupId>org.springframework.cloud</groupId>
-        <version>1.0.0.RC4</version>
+        <version>1.0.0.BUILD-SNAPSHOT</version>
     </parent>
 
     <dependencies>
