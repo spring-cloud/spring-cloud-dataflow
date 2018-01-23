@@ -18,6 +18,9 @@ spring:
   jpa:
     properties:
       hibernate.id.new_generator_mappings: true
+    hibernate:
+        naming:
+          physical-strategy: org.springframework.cloud.dataflow.server.repository.support.UpperCaseSpringPhysicalNamingStrategy
   autoconfigure:
     exclude: org.springframework.boot.autoconfigure.session.SessionAutoConfiguration
   cloud:
