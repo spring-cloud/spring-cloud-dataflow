@@ -36,8 +36,8 @@ spring:
             name: Spring Cloud Data Flow Core
             version: "@project.version@"
           spring-cloud-dataflow-implementation:
-            name: spring-cloud-dataflow-server-local
-            version: "@project.version@"
+            name: ${info.app.name}
+            version: ${info.app.version}
           spring-cloud-dataflow-shell:
             name: Spring Cloud Data Flow Shell
             version: "@project.version@"
