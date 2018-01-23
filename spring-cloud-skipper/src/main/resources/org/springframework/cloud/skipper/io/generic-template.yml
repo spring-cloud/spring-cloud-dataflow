@@ -2,17 +2,17 @@ apiVersion: skipper.spring.io/v1
 kind: SpringCloudDeployerApplication
 metadata:
   {{#metadata.entrySet}}
-  {{key}}: {{value}}
+  {{{key}}}: {{{value}}}
   {{/metadata.entrySet}}
 spec:
-  resource: {{spec.resource}}
-  resourceMetadata: {{spec.resource}}:jar:metadata:{{spec.version}}
+  resource: {{{spec.resource}}}
+  resourceMetadata: {{{spec.resource}}}:jar:metadata:{{{spec.version}}}
   version: {{spec.version}}
   applicationProperties:
     {{#spec.applicationProperties.entrySet}}
-    {{key}}: {{value}}
+    {{{key}}}: {{{value}}}
     {{/spec.applicationProperties.entrySet}}
   deploymentProperties:
     {{#spec.deploymentProperties.entrySet}}
-    {{key}}: {{value}}
+    {{{key}}}: {{{value}}}
     {{/spec.deploymentProperties.entrySet}}
