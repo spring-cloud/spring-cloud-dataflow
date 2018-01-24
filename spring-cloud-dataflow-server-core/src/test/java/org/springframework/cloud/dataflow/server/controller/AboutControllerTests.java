@@ -75,7 +75,7 @@ public class AboutControllerTests {
 		ResultActions result = mockMvc.perform(get("/about").accept(MediaType.APPLICATION_JSON)).andDo(print()).andExpect(status().isOk());
 				result.andExpect(jsonPath("$.featureInfo.analyticsEnabled", is(false)))
 				.andExpect(jsonPath("$.featureInfo.skipperEnabled", is(false)))
-				.andExpect(jsonPath("$.versionInfo.implementation.name", is("spring-cloud-dataflow-server-local")))
+				.andExpect(jsonPath("$.versionInfo.implementation.name", is("${info.app.name}")))
 				.andExpect(jsonPath("$.versionInfo.implementation.version", is("1.2.3.IMPLEMENTATION.TEST")))
 				.andExpect(jsonPath("$.versionInfo.core.name", is("Spring Cloud Data Flow Core")))
 				.andExpect(jsonPath("$.versionInfo.core.version", is("1.2.3.CORE.TEST")))
