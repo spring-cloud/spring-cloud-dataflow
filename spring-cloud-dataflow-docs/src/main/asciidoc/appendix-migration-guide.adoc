@@ -195,6 +195,7 @@ Spring XD, there are less peripherals that are necessary to operationalize Sprin
 
 ZooKeeper is not used in the new architecture.
 
+[[rdbms]]
 ==== RDBMS
 
 Spring Cloud Data Flow uses an RDBMS instead of Redis for stream/task definitions, application

@@ -739,4 +739,63 @@ Data Flow which allows the user to track the tasks launched by the
 NOTE: Releases of `ComposedTaskRunner` can be found
 https://github.com/spring-cloud-task-app-starters/composed-task-runner/releases[here]
 
+[[sharing-spring-cloud-dataflows-datastore-with-tasks]]
+== Sharing Spring Cloud Data Flow's Datastore with Tasks
+As discussed in the <<spring-cloud-dataflow-task, Tasks>> documentation Spring
+Cloud Data Flow allows a user to view Spring Cloud Task App executions. So in
+this section we will discuss what is required by a Task Application and Spring
+Cloud Data Flow to share the task execution information.
 
+[a-common-datastore-dependency]
+=== A Common DataStore Dependency
+Spring Cloud Data Flow supports many database <<appendix-migration-guide.adoc#rdbms, types>> out-of-the-box,
+so all the user typically has to do is declare the `spring_datasource_*` environment variables
+to establish what data store Spring Cloud Data Flow will need.
+So whatever database you decide to use for Spring Cloud Data Flow make sure that the your task also
+includes that database dependency in its `pom.xml` or `gradle.build` file.  If the database dependency
+that is used by Spring Cloud Data Flow is not present in the Task Application, the task will fail
+and the task execution will not be recorded.
+
+[a-common-datastore]
+=== A Common Data Store
+Spring Cloud Data Flow and your task application must access the same datastore instance.
+This is so that the task executions recorded by the task application can be read by Spring Cloud Data Flow to list them in the Shell and Dashboard views.
+Also the task app must have read  & write privileges to the task data tables that are used by Spring Cloud Data Flow.
+
+Given the understanding of Datasource dependency between Task apps and Spring Cloud Data Flow, let's review how to apply them in various Task orchestration scenarios.
+
+[datasource-simple-task-launch]
+==== Simple Task Launch
+When launching a task from Spring Cloud Data Flow, Data Flow adds its datasource
+properties (`spring.datasource.url`, `spring.datasource.driverClassName`, `spring.datasource.username`, `spring.datasource.password`)
+to the app properties of the task being launched.  Thus a task application
+will record its task execution information to the Spring Cloud Data Flow repository.
+
+[datasource-task-launcher-sink]
+==== Task Launcher Sink
+The https://github.com/spring-cloud-stream-app-starters/tasklauncher-local[Task Launcher Sink] allows tasks to be launched via a stream as discussed <<spring-cloud-dataflow-launch-tasks-from-stream, here>>.
+Since tasks launched by the Task Launcher Sink may not want their task executions
+recorded to the same datastore as Spring Cloud Data Flow,
+each https://docs.spring.io/spring-cloud-task/docs/current/apidocs/org/springframework/cloud/task/launcher/TaskLaunchRequest.html[TaskLaunchRequest]
+received by the Task Launcher Sink must have the required datasource information established as app properties or command line arguments.
+Both https://github.com/spring-cloud-stream-app-starters/tasklaunchrequest-transform/blob/master/spring-cloud-starter-stream-processor-tasklaunchrequest-transform/README.adoc[TaskLaunchRequest-Transform]
+and https://github.com/spring-cloud-stream-app-starters/triggertask/blob/master/spring-cloud-starter-stream-source-triggertask/README.adoc[TriggerTask Source] are examples
+of how a source and a processor allow a user to set the datasource properties via the app properties or command line arguments.
+
+==== Composed Task Runner
+Spring Cloud Data Flow allows a user to create a directed graph where each node
+of the graph is a task application and this is done via the
+https://github.com/spring-cloud-task-app-starters/composed-task-runner/blob/master/spring-cloud-starter-task-composedtaskrunner/README.adoc[Composed Task Runner].
+In this case the rules that applied to a <<datasource-simple-task-launch, Simple Task Launch>>
+or <<datasource-task-launcher-sink, Task Launcher Sink>> apply to the composed task runner as well.
+All child apps must also have access to the datastore that is being used by the composed task runner
+Also, All child apps must have the same database dependency as the composed task runner enumerated in their `pom.xml` or `gradle.build` file.
+
+==== Launching a task externally from Spring Cloud Data Flow
+Users may wish to launch Spring Cloud Task applications via another method (scheduler for example) but still track the task execution via Spring Cloud Data Flow.
+This can be done so long as the task applications observe the rules specified <<a-common-datastore-dependency, here>> and <<a-common-datastore, here>>.
+
+NOTE: If a user wishes to use Spring Cloud Data Flow to view their
+https://projects.spring.io/spring-batch/[Spring Batch] jobs, the user must make sure that
+their batch application use the `@EnableTask` annotation and follow the rules enumerated <<a-common-datastore-dependency, here>> and <<a-common-datastore, here>>.
+More information is available https://github.com/spring-projects/spring-batch-admin/blob/master/MIGRATION.md[here].
