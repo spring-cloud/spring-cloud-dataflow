@@ -32,6 +32,7 @@ import org.springframework.cloud.deployer.resource.registry.InMemoryUriRegistry;
 import org.springframework.cloud.deployer.resource.registry.UriRegistry;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.DefaultResourceLoader;
+import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -64,6 +65,27 @@ public class AppRegistryTests {
 		AppRegistration registration = appRegistry.find("foo", source);
 		assertThat(registration.getName(), is("foo"));
 		assertThat(registration.getType(), is(source));
+	}
+
+	@Test
+	public void testMetadataResouceResolvesWhenAvailable() {
+		uriRegistry.register("source.foo", URI.create("classpath:/foo"));
+		uriRegistry.register("source.foo.metadata", URI.create("classpath:/foo-metadata"));
+
+		AppRegistration registration = appRegistry.find("foo", source);
+		Resource appMetadataResource = appRegistry.getAppMetadataResource(registration);
+
+		assertThat(appMetadataResource.getFilename(), is("foo-metadata"));
+	}
+
+	@Test
+	public void testMetadataResouceNotAvailableResolvesToMainResource() {
+		uriRegistry.register("source.foo", URI.create("classpath:/foo"));
+
+		AppRegistration registration = appRegistry.find("foo", source);
+		Resource appMetadataResource = appRegistry.getAppMetadataResource(registration);
+
+		assertThat(appMetadataResource.getFilename(), is("foo"));
 	}
 
 	@Test
