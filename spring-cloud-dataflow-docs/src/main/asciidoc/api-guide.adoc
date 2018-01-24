@@ -3,23 +3,24 @@
 
 [partintro]
 --
-In this section you will learn all about the Spring Cloud Data Flow REST API.
+This section describes the Spring Cloud Data Flow REST API.
 --
 
 [[api-guide-overview]]
 == Overview
 
-Spring Cloud Data Flow provides a  REST API allowing you to access all aspects of
-the server. In fact the Spring Cloud Data Flow Shell is a first-class consumer of
-that API.
+Spring Cloud Data Flow provides a REST API that lets you access all aspects of the server.
+In fact, the Spring Cloud Data Flow shell is a first-class consumer of that API.
 
-TIP: If you plan on using the REST API using Java, please also consider using the
-provided Java client (DataflowTemplate) that uses the REST API internally.
+TIP: If you plan to use the REST API with Java, you should consider using the
+provided Java client (`DataflowTemplate`) that uses the REST API internally.
+
+
 
 [[api-guide-overview-http-verbs]]
 === HTTP verbs
 
-Spring Cloud Data Flow tries to adhere as closely as possible to standard HTTP and REST conventions in its use of HTTP verbs.
+Spring Cloud Data Flow tries to adhere as closely as possible to standard HTTP and REST conventions in its use of HTTP verbs, as described in the following table:
 
 |===
 | Verb | Usage
@@ -32,43 +33,46 @@ Spring Cloud Data Flow tries to adhere as closely as possible to standard HTTP a
 
 | `PUT`
 | Used to update an existing resource, including partial updates. Also used for
-resources that imply the concept of `restarts` such as Tasks.
+resources that imply the concept of `restarts`, such as Tasks.
 
 | `DELETE`
-| Used to delete an existing resource
+| Used to delete an existing resource.
 |===
 
-[[api-guide-overview-http-status-codes]]
-=== HTTP status codes
 
-RESTful note tries to adhere as closely as possible to standard HTTP and REST conventions in its use of HTTP status codes.
+
+[[api-guide-overview-http-status-codes]]
+=== HTTP Status Codes
+
+Spring Cloud Data Flow tries to adhere as closely as possible to standard HTTP and REST conventions in its use of HTTP status codes, as shown in the following table:
 
 |===
 | Status code | Usage
 
 | `200 OK`
-| The request completed successfully
+| The request completed successfully.
 
 | `201 Created`
-| A new resource has been created successfully. The resource's URI is available from the response's `Location` header
+| A new resource has been created successfully. The resource's URI is available from the response's `Location` header.
 
 | `204 No Content`
-| An update to an existing resource has been applied successfully
+| An update to an existing resource has been applied successfully.
 
 | `400 Bad Request`
-| The request was malformed. The response body will include an error providing further information
+| The request was malformed. The response body includes an error description that provides further information.
 
 | `404 Not Found`
-| The requested resource did not exist
+| The requested resource did not exist.
 
 | `409 Conflict`
-| The requested resource already exists, e.g. the task already exists or the stream
-was already being deployed
+| The requested resource already exists. For example, the task already exists or the stream was already being deployed
 
 | `422 Unprocessable Entity`
-| Returned in cases the Job Execution cannot be stopped or restarted
+| Returned in cases where the Job Execution cannot be stopped or restarted.
 
 |===
+
+
 
 [[api-guide-overview-headers]]
 === Headers
@@ -77,846 +81,1759 @@ Every response has the following header(s):
 
 include::{snippets}/api-documentation/headers/response-headers.adoc[]
 
+
+
 [[api-guide-overview-errors]]
 === Errors
 
 include::{snippets}/api-documentation/errors/response-fields.adoc[]
 
+
+
 [[api-guide-overview-hypermedia]]
 === Hypermedia
 
-Spring Cloud Data Flow uses hypermedia and resources include links to other resources
-in their responses. Responses are in http://stateless.co/hal_specification.html[Hypertext Application from resource to resource Language (HAL)] format. Links can be found beneath the `_links` key. Users of the API should not create URIs themselves, instead they should use the above-described links to navigate.
+Spring Cloud Data Flow uses hypermedia, and resources include links to other resources
+in their responses.
+Responses are in the http://stateless.co/hal_specification.html[Hypertext Application from resource to resource Language (HAL)] format.
+Links can be found beneath the `_links` key.
+Users of the API should not create URIs themselves.
+Instead. they should use the above-described links to navigate.
+
+
 
 [[api-guide-resources]]
 == Resources
+
+The API includes the following resources:
+
+* <<api-guide-resources-index>>
+* <<resources-about>>
+* <<resources-registered-applications>>
+* <<api-guide-resources-stream-definitions>>
+* <<api-guide-resources-stream-deployment>>
+* <<api-guide-resources-task-definitions>>
+* <<api-guide-resources-task-executions>>
+* <<api-guide-resources-job-executions>>
+* <<api-guide-resources-job-instances>>
+* <<api-guide-resources-job-step-executions>>
+* <<api-guide-resources-runtime-information-applications>>
+* <<api-guide-resources-metrics-stream-applications>>
+
+
 
 [[api-guide-resources-index]]
 === Index
 
 The index provides the entry point into Spring Cloud Data Flow's REST API.
+The following topics provide more detail:
+
+* <<api-guide-resources-index-access>>
+* <<api-guide-resources-index-request-structure>>
+* <<api-guide-resources-index-example-request>>
+* <<api-guide-resources-index-response-structure>>
+* <<api-guide-resources-index-example-response>>
+* <<api-guide-resources-index-links>>
+
+
 
 [[api-guide-resources-index-access]]
 ==== Accessing the index
 
-A `GET` request is used to access the index
+Use a `GET` request to access the index.
 
-===== Request structure
+
+
+[[api-guide-resources-index-request-structure]]
+===== Request Structure
 
 include::{snippets}/api-documentation/index/http-request.adoc[]
 
-===== Example request
+
+
+[[api-guide-resources-index-example-request]]
+===== Example Request
 
 include::{snippets}/api-documentation/index/curl-request.adoc[]
 
-===== Response structure
+
+
+[[api-guide-resources-index-response-structure]]
+===== Response Structure
 
 include::{snippets}/api-documentation/index/response-fields.adoc[]
 
-===== Example response
+
+
+[[api-guide-resources-index-example-response]]
+===== Example Response
 
 include::{snippets}/api-documentation/index/http-response.adoc[]
+
+
 
 [[api-guide-resources-index-links]]
 ===== Links
 
-The main element of the index are the links as they allow you to traverse the API
+The main element of the index are the links, as they let you traverse the API
 and execute the desired functionality:
 
 include::{snippets}/api-documentation/index/links.adoc[]
 
+
+
 [[resources-about]]
 === Server Meta Information
 
-==== Retrieving information about the server
-A `GET` request will return meta information for Spring Cloud Data Flow. This includes:
+The server meta information endpoint provides more information about the server itself.
+The following topics provide more detail:
 
-* Runtime Environment Information
+* <<api-guide-resources-server-meta-retrieving>>
+* <<api-guide-resources-server-meta-request-structure>>
+* <<api-guide-resources-server-meta-example-request>>
+* <<api-guide-resources-server-meta-response-structure>>
+
+
+
+[[api-guide-resources-server-meta-retrieving]]
+==== Retrieving information about the server
+A `GET` request returns meta information for Spring Cloud Data Flow, including:
+
+* Runtime environment information
 * Information regarding which features are enabled
 * Dependency information of Spring Cloud Data Flow Server
 * Security information
 
-===== Request structure
+
+
+[[api-guide-resources-server-meta-request-structure]]
+===== Request Structure
 
 include::{snippets}/about-documentation/get-meta-information/http-request.adoc[]
 
-===== Example request
+
+
+[[api-guide-resources-server-meta-example-request]]
+===== Example Request
 
 include::{snippets}/about-documentation/get-meta-information/curl-request.adoc[]
 
-===== Response structure
+
+
+[[api-guide-resources-server-meta-response-structure]]
+===== Response Structure
 
 include::{snippets}/about-documentation/get-meta-information/http-response.adoc[]
 
+
+[[resources-registered-applications]]
 === Registered Applications
+
+The registered applications endpoint provides information about the applications that are registered with the Spring Cloud Data Flow server.
+The following topics provide more detail:
+
+* <<resources-app-registry-list>>
+* <<resources-app-registry-get>>
+* <<resources-app-registry-post>>
+* <<resources-app-registry-delete>>
+* <<resources-app-registry-bulk>>
+
+
 
 [[resources-app-registry-list]]
 ==== Listing Applications
 A `GET` request will list all applications known to Spring Cloud Data Flow.
+The following topics provide more detail:
 
-===== Request structure
+* <<api-guide-resources-app-registry-request-structure>>
+* <<api-guide-resources-app-registry-request-parameters>>
+* <<api-guide-resources-app-registry-example-request>>
+* <<api-guide-resources-app-registry-response-structure>>
+
+
+
+[[api-guide-resources-app-registry-request-structure]]
+===== Request Structure
 
 include::{snippets}/app-registry-documentation/get-applications-filtered/http-request.adoc[]
 
-===== Request parameters
+
+
+[[api-guide-resources-app-registry-request-parameters]]
+===== Request Parameters
 
 include::{snippets}/app-registry-documentation/get-applications-filtered/request-parameters.adoc[]
 
-===== Example request
+
+
+[[api-guide-resources-app-registry-example-request]]
+===== Example Request
 
 include::{snippets}/app-registry-documentation/get-applications-filtered/curl-request.adoc[]
 
-===== Response structure
+
+
+[[api-guide-resources-app-registry-response-structure]]
+===== Response Structure
 
 include::{snippets}/app-registry-documentation/get-applications-filtered/http-response.adoc[]
 
-[[resources-app-registry-get]]
-==== Getting Information on a partical Application
-A `GET` request on `/apps/<type>/<name>` will get info on a particular application.
 
-===== Request structure
+
+[[resources-app-registry-get]]
+==== Getting Information on a Particular Application
+
+A `GET` request on `/apps/<type>/<name>` gets info on a particular application.
+The following topics provide more detail:
+
+* <<api-guide-resources-app-registry-get-request-structure>>
+* <<api-guide-resources-app-registry-get-path-parameters>>
+* <<api-guide-resources-app-registry-get-example-request>>
+* <<api-guide-resources-app-registry-get-response-structure>>
+
+
+
+[[api-guide-resources-app-registry-get-request-structure]]
+===== Request Structure
 
 include::{snippets}/app-registry-documentation/get-single-application/http-request.adoc[]
 
-===== Path parameters
+
+
+[[api-guide-resources-app-registry-get-path-parameters]]
+===== Path Parameters
 
 include::{snippets}/app-registry-documentation/get-single-application/path-parameters.adoc[]
 
-===== Example request
+
+
+[[api-guide-resources-app-registry-get-example-request]]
+===== Example Request
 
 include::{snippets}/app-registry-documentation/get-single-application/curl-request.adoc[]
 
-===== Response structure
+
+
+[[api-guide-resources-app-registry-get-response-structure]]
+===== Response Structure
 
 include::{snippets}/app-registry-documentation/get-single-application/http-response.adoc[]
 
+
+
 [[resources-app-registry-post]]
 ==== Registering a New Application
-A `POST` request on `/apps/<type>/<name>` will allow registration of a new application.
+A `POST` request on `/apps/<type>/<name>` allows registration of a new application.
+The following topics provide more detail:
 
-===== Request structure
+* <<api-guide-resources-app-registry-post-request-structure>>
+* <<api-guide-resources-app-registry-post-request-parameters>>
+* <<api-guide-resources-app-registry-post-path-parameters>>
+* <<api-guide-resources-app-registry-post-example-request>>
+* <<api-guide-resources-app-registry-post-response-structure>>
+
+
+
+[[api-guide-resources-app-registry-post-request-structure]]
+===== Request Structure
 
 include::{snippets}/app-registry-documentation/registering-an-application/http-request.adoc[]
 
-===== Request parameters
+
+
+[[api-guide-resources-app-registry-post-request-parameters]]
+===== Request Parameters
 
 include::{snippets}/app-registry-documentation/registering-an-application/request-parameters.adoc[]
 
-===== Path parameters
+
+
+[[api-guide-resources-app-registry-post-path-parameters]]
+===== Path Parameters
 
 include::{snippets}/app-registry-documentation/registering-an-application/path-parameters.adoc[]
 
-===== Example request
+
+
+[[api-guide-resources-app-registry-post-example-request]]
+===== Example Request
 
 include::{snippets}/app-registry-documentation/registering-an-application/curl-request.adoc[]
 
-===== Response structure
+
+
+[[api-guide-resources-app-registry-post-response-structure]]
+===== Response Structure
 
 include::{snippets}/app-registry-documentation/registering-an-application/http-response.adoc[]
 
+
+
 [[resources-app-registry-delete]]
 ==== Unregistering an Application
-A `DELETE` request on `/apps/<type>/<name>` will unregister a previously registered application.
+A `DELETE` request on `/apps/<type>/<name>` unregisters a previously registered application.
+The following topics provide more detail:
 
-===== Request structure
+* <<api-guide-resources-app-registry-delete-request-structure>>
+* <<api-guide-resources-app-registry-delete-path-parameters>>
+* <<api-guide-resources-app-registry-delete-example-request>>
+* <<api-guide-resources-app-registry-delete-response-structure>>
+
+
+
+[[api-guide-resources-app-registry-delete-request-structure]]
+===== Request Structure
 
 include::{snippets}/app-registry-documentation/unregistering-an-application/http-request.adoc[]
 
-===== Path parameters
+
+
+[[api-guide-resources-app-registry-delete-path-parameters]]
+===== Path Parameters
 
 include::{snippets}/app-registry-documentation/unregistering-an-application/path-parameters.adoc[]
 
-===== Example request
+
+
+[[api-guide-resources-app-registry-delete-example-request]]
+===== Example Request
 
 include::{snippets}/app-registry-documentation/unregistering-an-application/curl-request.adoc[]
 
-===== Response structure
+
+
+[[api-guide-resources-app-registry-delete-response-structure]]
+===== Response Structure
 
 include::{snippets}/app-registry-documentation/unregistering-an-application/http-response.adoc[]
+
+
 
 [[resources-app-registry-bulk]]
 ==== Registering Applications in Bulk
 A `POST` request on `/apps` allows registering multiple applications at once.
+The following topics provide more detail:
 
-===== Request structure
+* <<api-guide-resources-app-registry-bulk-request-structure>>
+* <<api-guide-resources-app-registry-bulk-request-parameters>>
+* <<api-guide-resources-app-registry-bulk-example-request>>
+* <<api-guide-resources-app-registry-bulk-response-structure>>
+
+
+
+[[api-guide-resources-app-registry-bulk-request-structure]]
+===== Request Structure
 
 include::{snippets}/app-registry-documentation/bulk-registering-apps/http-request.adoc[]
 
-===== Request parameters
+
+
+[[api-guide-resources-app-registry-bulk-request-parameters]]
+===== Request Parameters
 
 include::{snippets}/app-registry-documentation/bulk-registering-apps/request-parameters.adoc[]
 
-===== Example request
+
+
+[[api-guide-resources-app-registry-bulk-example-request]]
+===== Example Request
 
 include::{snippets}/app-registry-documentation/bulk-registering-apps/curl-request.adoc[]
 
-===== Response structure
+
+
+[[api-guide-resources-app-registry-bulk-response-structure]]
+===== Response Structure
 
 include::{snippets}/app-registry-documentation/bulk-registering-apps/http-response.adoc[]
+
+
 
 [[api-guide-resources-stream-definitions]]
 === Stream Definitions
 
-[[api-guide-resources-stream-definitions-create]]
-==== Creating a new Stream Definition
+The registered applications endpoint provides information about the stream definitions that are registered with the Spring Cloud Data Flow server.
+The following topics provide more detail:
 
-Creating a stream definition is achieved by POSTing to the stream definitions endpoint.
-A simple curl request for a `ticktock` stream may look like:
+* <<api-guide-resources-stream-definitions-create>>
+* <<api-guide-resources-stream-definitions-list>>
+* <<api-guide-resources-stream-definitions-list-related>>
+* <<api-guide-resources-stream-definitions-delete-one>>
+* <<api-guide-resources-stream-definitions-delete-all>>
+* <<api-guide-resources-stream-deployment-deploy>>
+* <<api-guide-resources-stream-deployment-undeploy>>
+* <<api-guide-resources-stream-deployment-undeploy-all>>
+
+
+
+[[api-guide-resources-stream-definitions-create]]
+==== Creating a New Stream Definition
+
+Creating a stream definition is achieved by creating a POST request to the stream definitions endpoint.
+A curl request for a `ticktock` stream might resemble the following:
 
 [source,bash]
 ----
 curl -X POST -d "name=ticktock&definition=time | log" localhost:9393/streams/definitions?deploy=false
 ----
 
-A stream definition you create may also contain additional parameters. For instance,
-in the following example we also provide the date-time format.
+A stream definition can also contain additional parameters.
+For instance, in the example shown under "`<<api-guide-resources-stream-definitions-create-request-structure>>`", we also provide the date-time format.
 
-===== Request structure
+The following topics provide more detail:
+
+* <<api-guide-resources-stream-definitions-create-request-structure>>
+* <<api-guide-resources-stream-definitions-create-request-parameters>>
+* <<api-guide-resources-stream-definitions-create-example-request>>
+* <<api-guide-resources-stream-definitions-create-response-structure>>
+
+
+
+[[api-guide-resources-stream-definitions-create-request-structure]]
+===== Request Structure
 
 include::{snippets}/stream-definitions-documentation/create-definition/http-request.adoc[]
 
-===== Request parameters
+
+
+[[api-guide-resources-stream-definitions-create-request-parameters]]
+===== Request Parameters
 
 include::{snippets}/stream-definitions-documentation/create-definition/request-parameters.adoc[]
 
-===== Example request
+
+
+[[api-guide-resources-stream-definitions-create-example-request]]
+===== Example Request
 
 include::{snippets}/stream-definitions-documentation/create-definition/curl-request.adoc[]
 
-===== Response structure
+
+
+[[api-guide-resources-stream-definitions-create-response-structure]]
+===== Response Structure
 
 include::{snippets}/stream-definitions-documentation/create-definition/http-response.adoc[]
 
-[[api-guide-resources-stream-definitions-list]]
-==== List all Stream Definitions
 
-===== Request structure
+
+[[api-guide-resources-stream-definitions-list]]
+==== List All Stream Definitions
+
+The streams endpoint lets you list all the stream definitions.
+The following topics provide more detail:
+
+* <<api-guide-resources-stream-definitions-list-request-structure>>
+* <<api-guide-resources-stream-definitions-list-request-parameters>>
+* <<api-guide-resources-stream-definitions-list-example-request>>
+* <<api-guide-resources-stream-definitions-list-response-structure>>
+
+
+[[api-guide-resources-stream-definitions-list-request-structure]]
+===== Request Structure
 
 include::{snippets}/stream-definitions-documentation/list-all-stream-definitions/http-request.adoc[]
 
-===== Request parameters
+
+
+[[api-guide-resources-stream-definitions-list-request-parameters]]
+===== Request Parameters
 
 include::{snippets}/stream-definitions-documentation/list-all-stream-definitions/request-parameters.adoc[]
 
-===== Example request
+
+[[api-guide-resources-stream-definitions-list-example-request]]
+===== Example Request
 
 include::{snippets}/stream-definitions-documentation/list-all-stream-definitions/curl-request.adoc[]
 
-===== Response structure
+
+
+[[api-guide-resources-stream-definitions-list-response-structure]]
+===== Response Structure
 
 include::{snippets}/stream-definitions-documentation/list-all-stream-definitions/http-response.adoc[]
 
-[[api-guide-resources-stream-definitions-list-related]]
-==== List related Stream Definitions
 
-===== Request structure
+
+[[api-guide-resources-stream-definitions-list-related]]
+==== List Related Stream Definitions
+
+The streams endpoint lets you list related stream definitions.
+The following topics provide more detail:
+
+* <<api-guide-resources-stream-definitions-list-related-request-structure>>
+* <<api-guide-resources-stream-definitions-list-related-request-parameters>>
+* <<api-guide-resources-stream-definitions-list-related-example-request>>
+* <<api-guide-resources-stream-definitions-list-related-response-structure>>
+
+
+
+[[api-guide-resources-stream-definitions-list-related-request-structure]]
+===== Request Structure
 
 include::{snippets}/stream-definitions-documentation/list-related-stream-definitions/http-request.adoc[]
 
-===== Request parameters
+
+
+[[api-guide-resources-stream-definitions-list-related-request-parameters]]
+===== Request Parameters
 
 include::{snippets}/stream-definitions-documentation/list-related-stream-definitions/request-parameters.adoc[]
 
-===== Example request
+
+
+[[api-guide-resources-stream-definitions-list-related-example-request]]
+===== Example Request
 
 include::{snippets}/stream-definitions-documentation/list-related-stream-definitions/curl-request.adoc[]
 
-===== Response structure
+
+
+[[api-guide-resources-stream-definitions-list-related-response-structure]]
+===== Response Structure
 
 include::{snippets}/stream-definitions-documentation/list-related-stream-definitions/http-response.adoc[]
 
-[[api-guide-resources-stream-definitions-delete-one]]
-==== Delete a single Stream Definition
 
-===== Request structure
+
+
+[[api-guide-resources-stream-definitions-delete-one]]
+==== Delete a Single Stream Definition
+
+The streams endpoint lets you delete a single stream definition.
+(See also: <<api-guide-resources-stream-definitions-delete-all>>.)
+The following topics provide more detail:
+
+* <<api-guide-resources-stream-definitions-delete-one-request-structure>>
+* <<api-guide-resources-stream-definitions-delete-one-request-parameters>>
+* <<api-guide-resources-stream-definitions-delete-one-example-request>>
+* <<api-guide-resources-stream-definitions-delete-one-response-structure>>
+
+
+
+[[api-guide-resources-stream-definitions-delete-one-request-structure]]
+===== Request Structure
 
 include::{snippets}/stream-definitions-documentation/stream-definition-delete1/http-request.adoc[]
 
-===== Request parameters
+
+
+[[api-guide-resources-stream-definitions-delete-one-request-parameters]]
+===== Request Parameters
 
 There are no request parameters for this endpoint.
 
-===== Example request
+
+
+[[api-guide-resources-stream-definitions-delete-one-example-request]]
+===== Example Request
 
 include::{snippets}/stream-definitions-documentation/stream-definition-delete1/curl-request.adoc[]
 
-===== Response structure
+
+
+[[api-guide-resources-stream-definitions-delete-one-response-structure]]
+===== Response Structure
 
 include::{snippets}/stream-definitions-documentation/stream-definition-delete1/http-response.adoc[]
 
-[[api-guide-resources-stream-definitions-delete-all]]
-==== Delete all Stream Definitions
 
-===== Request structure
+
+[[api-guide-resources-stream-definitions-delete-all]]
+==== Delete All Stream Definitions
+
+The streams endpoint lets you delete all single stream definitions.
+(See also: <<api-guide-resources-stream-definitions-delete-one>>.)
+The following topics provide more detail:
+
+* <<api-guide-resources-stream-definitions-delete-all-request-structure>>
+* <<api-guide-resources-stream-definitions-delete-all-request-parameters>>
+* <<api-guide-resources-stream-definitions-delete-all-example-request>>
+* <<api-guide-resources-stream-definitions-delete-all-response-structure>>
+
+
+
+[[api-guide-resources-stream-definitions-delete-all-request-structure]]
+===== Request Structure
 
 include::{snippets}/stream-definitions-documentation/stream-definition-delete-all/http-request.adoc[]
 
-===== Request parameters
+
+
+[[api-guide-resources-stream-definitions-delete-all-request-parameters]]
+===== Request Parameters
 
 There are no request parameters for this endpoint.
 
-===== Example request
+
+
+[[api-guide-resources-stream-definitions-delete-all-example-request]]
+===== Example Request
 
 include::{snippets}/stream-definitions-documentation/stream-definition-delete-all/curl-request.adoc[]
 
-===== Response structure
+
+
+[[api-guide-resources-stream-definitions-delete-all-response-structure]]
+===== Response Structure
 
 include::{snippets}/stream-definitions-documentation/stream-definition-delete-all/http-response.adoc[]
+
+
 
 [[api-guide-resources-stream-deployment]]
 === Stream Deployments
 
+The deployment definitions endpoint provides information about the deployments that are registered with the Spring Cloud Data Flow server.
+The following topics provide more detail:
+
+* <<api-guide-resources-stream-deployment-deploy>>
+* <<api-guide-resources-stream-deployment-undeploy>>
+* <<api-guide-resources-stream-deployment-undeploy-all>>
+
+
+
 [[api-guide-resources-stream-deployment-deploy]]
 ==== Deploying Stream Definition
 
-Deploying a stream definition is achieved by POSTing to the deployment definitions endpoint.
-Optionally a user can pass application params as properties via the request body.
+The stream definition endpoint lets you deploy a single stream definition.
+Optionally, you can pass application parameters as properties in the request body.
+The following topics provide more detail:
 
-===== Request structure
+* <<api-guide-resources-stream-definitions-deployment-deploy-request-structure>>
+* <<api-guide-resources-stream-definitions-deployment-deploy-request-parameters>>
+* <<api-guide-resources-stream-definitions-deployment-deploy-example-request>>
+* <<api-guide-resources-stream-definitions-deployment-deploy-response-structure>>
+
+
+
+[[api-guide-resources-stream-definitions-deployment-deploy-request-structure]]
+===== Request Structure
 
 include::{snippets}/stream-deployments-documentation/deploy/http-request.adoc[]
 
 include::{snippets}/stream-deployments-documentation/deploy/path-parameters.adoc[]
 
-===== Request parameters
+
+
+[[api-guide-resources-stream-definitions-deployment-deploy-request-parameters]]
+===== Request Parameters
 
 There are no request parameters for this endpoint.
 
-===== Example request
+
+
+[[api-guide-resources-stream-definitions-deployment-deploy-example-request]]
+===== Example Request
 
 include::{snippets}/stream-deployments-documentation/deploy/curl-request.adoc[]
 
-===== Response structure
+
+
+[[api-guide-resources-stream-definitions-deployment-deploy-response-structure]]
+===== Response Structure
 
 include::{snippets}/stream-deployments-documentation/deploy/http-response.adoc[]
+
+
 
 [[api-guide-resources-stream-deployment-undeploy]]
 ==== Undeploy Stream Definition
 
-===== Request structure
+The stream definition endpoint lets you undeploy a single stream definition.
+The following topics provide more detail:
+
+* <<api-guide-resources-stream-definitions-deployment-undeploy-request-structure>>
+* <<api-guide-resources-stream-definitions-deployment-undeploy-request-parameters>>
+* <<api-guide-resources-stream-definitions-deployment-undeploy-example-request>>
+* <<api-guide-resources-stream-definitions-deployment-undeploy-response-structure>>
+
+
+
+[[api-guide-resources-stream-definitions-deployment-undeploy-request-structure]]
+===== Request Structure
 
 include::{snippets}/stream-deployments-documentation/un-deploy/http-request.adoc[]
 
 include::{snippets}/stream-deployments-documentation/un-deploy/path-parameters.adoc[]
 
-===== Request parameters
+
+[[api-guide-resources-stream-definitions-deployment-undeploy-request-parameters]]
+===== Request Parameters
 
 There are no request parameters for this endpoint.
 
-===== Example request
+
+
+[[api-guide-resources-stream-definitions-deployment-undeploy-example-request]]
+===== Example Request
 
 include::{snippets}/stream-deployments-documentation/un-deploy/curl-request.adoc[]
 
-===== Response structure
+
+
+[[api-guide-resources-stream-definitions-deployment-undeploy-response-structure]]
+===== Response Structure
 
 include::{snippets}/stream-deployments-documentation/un-deploy/http-response.adoc[]
+
+
 
 [[api-guide-resources-stream-deployment-undeploy-all]]
 ==== Undeploy All Stream Definitions
 
-===== Request structure
+The stream definition endpoint lets you undeploy all single stream definitions.
+The following topics provide more detail:
+
+* <<api-guide-resources-stream-definitions-deployment-undeploy-all-request-structure>>
+* <<api-guide-resources-stream-definitions-deployment-undeploy-all-request-parameters>>
+* <<api-guide-resources-stream-definitions-deployment-undeploy-all-example-request>>
+* <<api-guide-resources-stream-definitions-deployment-undeploy-all-response-structure>>
+
+
+
+[[api-guide-resources-stream-definitions-deployment-undeploy-all-request-structure]]
+===== Request Structure
 
 include::{snippets}/stream-deployments-documentation/un-deploy-all/http-request.adoc[]
 
-===== Request parameters
+
+
+[[api-guide-resources-stream-definitions-deployment-undeploy-all-request-parameters]]
+===== Request Parameters
 
 There are no request parameters for this endpoint.
 
-===== Example request
+
+
+[[api-guide-resources-stream-definitions-deployment-undeploy-all-example-request]]
+===== Example Request
 
 include::{snippets}/stream-deployments-documentation/un-deploy-all/curl-request.adoc[]
 
-===== Response structure
+
+
+[[api-guide-resources-stream-definitions-deployment-undeploy-all-response-structure]]
+===== Response Structure
 
 include::{snippets}/stream-deployments-documentation/un-deploy-all/http-response.adoc[]
+
+
 
 [[api-guide-resources-task-definitions]]
 === Task Definitions
 
-==== Creating a new Task Definition
-Creating a task definition is achieved by POSTing to the task definitions endpoint.
+The task definitions endpoint provides information about the task definitions that are registered with the Spring Cloud Data Flow server.
+The following topics provide more detail:
 
-===== Request structure
+* <<api-guide-resources-task-definitions-creating>>
+* <<api-guide-resources-task-definitions-list>>
+* <<api-guide-resources-task-definition-detail>>
+* <<api-guide-resources-delete-task-definition>>
+
+
+
+[[api-guide-resources-task-definitions-creating]]
+==== Creating a New Task Definition
+
+The task definition endpoint lets you create a new task definition.
+The following topics provide more detail:
+
+* <<api-guide-resources-stream-task-definitions-creating-request-structure>>
+* <<api-guide-resources-stream-task-definitions-creating-request-parameters>>
+* <<api-guide-resources-stream-task-definitions-creating-example-request>>
+* <<api-guide-resources-stream-task-definitions-creating-response-structure>>
+
+
+
+[[api-guide-resources-stream-task-definitions-creating-request-structure]]
+===== Request Structure
 
 include::{snippets}/task-definitions-documentation/create-definition/http-request.adoc[]
 
-===== Request parameters
+
+
+[[api-guide-resources-stream-task-definitions-creating-request-parameters]]
+===== Request Parameters
 
 include::{snippets}/task-definitions-documentation/create-definition/request-parameters.adoc[]
 
-===== Example request
+
+
+[[api-guide-resources-stream-task-definitions-creating-example-request]]
+===== Example Request
 
 include::{snippets}/task-definitions-documentation/create-definition/curl-request.adoc[]
 
-===== Response structure
+
+
+[[api-guide-resources-stream-task-definitions-creating-response-structure]]
+===== Response Structure
 
 include::{snippets}/task-definitions-documentation/create-definition/http-response.adoc[]
 
-[[api-guide-resources-task-definitions-list]]
-==== List all Task Definitions
 
-===== Request structure
+
+[[api-guide-resources-task-definitions-list]]
+==== List All Task Definitions
+
+The task definition endpoint lets you get all task definitions.
+The following topics provide more detail:
+
+* <<api-guide-resources-stream-task-definitions-list-request-structure>>
+* <<api-guide-resources-stream-task-definitions-list-request-parameters>>
+* <<api-guide-resources-stream-task-definitions-list-example-request>>
+* <<api-guide-resources-stream-task-definitions-list-response-structure>>
+
+
+
+[[api-guide-resources-stream-task-definitions-list-request-structure]]
+===== Request Structure
 
 include::{snippets}/task-definitions-documentation/list-all-task-definitions/http-request.adoc[]
 
-===== Request parameters
+
+
+[[api-guide-resources-stream-task-definitions-list-request-parameters]]
+===== Request Parameters
 
 include::{snippets}/task-definitions-documentation/list-all-task-definitions/request-parameters.adoc[]
 
-===== Example request
+
+
+[[api-guide-resources-stream-task-definitions-list-example-request]]
+===== Example Request
 
 include::{snippets}/task-definitions-documentation/list-all-task-definitions/curl-request.adoc[]
 
-===== Response structure
+
+
+[[api-guide-resources-stream-task-definitions-list-response-structure]]
+===== Response Structure
 
 include::{snippets}/task-definitions-documentation/list-all-task-definitions/http-response.adoc[]
+
+
 
 [[api-guide-resources-task-definition-detail]]
 ==== Retrieve Task Definition Detail
 
-===== Request structure
+The task definition endpoint lets you get a single task definition.
+The following topics provide more detail:
+
+* <<api-guide-resources-stream-task-definitions-detail-request-structure>>
+* <<api-guide-resources-stream-task-definitions-detail-request-parameters>>
+* <<api-guide-resources-stream-task-definitions-detail-example-request>>
+* <<api-guide-resources-stream-task-definitions-detail-response-structure>>
+
+
+
+[[api-guide-resources-stream-task-definitions-detail-request-structure]]
+===== Request Structure
 
 include::{snippets}/task-definitions-documentation/display-detail/http-request.adoc[]
 
 include::{snippets}/task-definitions-documentation/display-detail/path-parameters.adoc[]
 
-===== Request parameters
+
+
+[[api-guide-resources-stream-task-definitions-detail-request-parameters]]
+===== Request Parameters
 
 There are no request parameters for this endpoint.
 
-===== Example request
+
+
+[[api-guide-resources-stream-task-definitions-detail-example-request]]
+===== Example Request
 
 include::{snippets}/task-definitions-documentation/display-detail/curl-request.adoc[]
 
-===== Response structure
+
+
+[[api-guide-resources-stream-task-definitions-detail-response-structure]]
+===== Response Structure
 
 include::{snippets}/task-definitions-documentation/display-detail/http-response.adoc[]
+
+
+
 
 [[api-guide-resources-delete-task-definition]]
 ==== Delete Task Definition
 
-===== Request structure
+The task definition endpoint lets you delete a single task definition.
+The following topics provide more detail:
+
+* <<api-guide-resources-delete-task-definition-request-structure>>
+* <<api-guide-resources-delete-task-definition-request-parameters>>
+* <<api-guide-resources-delete-task-definition-example-request>>
+* <<api-guide-resources-delete-task-definition-response-structure>>
+
+
+
+[[api-guide-resources-delete-task-definition-request-structure]]
+===== Request Structure
 
 include::{snippets}/task-definitions-documentation/task-definition-delete/http-request.adoc[]
 
 include::{snippets}/task-definitions-documentation/task-definition-delete/path-parameters.adoc[]
 
-===== Request parameters
+
+
+[[api-guide-resources-delete-task-definition-request-parameters]]
+===== Request Parameters
 
 There are no request parameters for this endpoint.
 
-===== Example request
+
+
+[[api-guide-resources-delete-task-definition-example-request]]
+===== Example Request
 
 include::{snippets}/task-definitions-documentation/task-definition-delete/curl-request.adoc[]
 
-===== Response structure
+
+
+[[api-guide-resources-delete-task-definition-response-structure]]
+===== Response Structure
 
 include::{snippets}/task-definitions-documentation/task-definition-delete/http-response.adoc[]
+
+
 
 [[api-guide-resources-task-executions]]
 === Task Executions
 
-==== Launching a Task
-Launching a task is done by requesting the creation of a new Task Execution.
+The task executions endpoint provides information about the task executions that are registered with the Spring Cloud Data Flow server.
+The following topics provide more detail:
 
-===== Request structure
+* <<api-guide-resources-task-executions-launching>>
+* <<api-guide-resources-task-executions-list>>
+* <<api-guide-resources-task-executions-list-by-name>>
+* <<api-guide-resources-task-executions-detail>>
+* <<api-guide-resources-task-executions-delete>>
+
+
+
+[[api-guide-resources-task-executions-launching]]
+==== Launching a Task
+
+Launching a task is done by requesting the creation of a new task execution.
+The following topics provide more detail:
+
+* <<api-guide-resources-task-executions-launching-request-structure>>
+* <<api-guide-resources-task-executions-launching-request-parameters>>
+* <<api-guide-resources-task-executions-launching-example-request>>
+* <<api-guide-resources-task-executions-launching-response-structure>>
+
+
+
+[[api-guide-resources-task-executions-launching-request-structure]]
+===== Request Structure
 
 include::{snippets}/task-executions-documentation/launch-task/http-request.adoc[]
 
-===== Request parameters
+
+
+[[api-guide-resources-task-executions-launching-request-parameters]]
+===== Request Parameters
 
 include::{snippets}/task-executions-documentation/launch-task/request-parameters.adoc[]
 
-===== Example request
+
+
+[[api-guide-resources-task-executions-launching-example-request]]
+===== Example Request
 
 include::{snippets}/task-executions-documentation/launch-task/curl-request.adoc[]
 
-===== Response structure
+
+
+[[api-guide-resources-task-executions-launching-response-structure]]
+===== Response Structure
 
 include::{snippets}/task-executions-documentation/launch-task/http-response.adoc[]
+
+
 
 [[api-guide-resources-task-executions-list]]
 ==== List All Task Executions
 
-===== Request structure
+The task executions endpoint lets you list all task executions.
+The following topics provide more detail:
+
+* <<api-guide-resources-task-executions-list-request-structure>>
+* <<api-guide-resources-task-executions-list-request-parameters>>
+* <<api-guide-resources-task-executions-list-example-request>>
+* <<api-guide-resources-task-executions-list-response-structure>>
+
+
+
+[[api-guide-resources-task-executions-list-request-structure]]
+===== Request Structure
 
 include::{snippets}/task-executions-documentation/list-task-executions/http-request.adoc[]
 
-===== Request parameters
+
+
+[[api-guide-resources-task-executions-list-request-parameters]]
+===== Request Parameters
 
 include::{snippets}/task-executions-documentation/list-task-executions/request-parameters.adoc[]
 
-===== Example request
+
+
+[[api-guide-resources-task-executions-list-example-request]]
+===== Example Request
 
 include::{snippets}/task-executions-documentation/list-task-executions/curl-request.adoc[]
 
-===== Response structure
+
+
+[[api-guide-resources-task-executions-list-response-structure]]
+===== Response Structure
 
 include::{snippets}/task-executions-documentation/list-task-executions/http-response.adoc[]
+
+
 
 [[api-guide-resources-task-executions-list-by-name]]
 ==== List All Task Executions With a Specified Task Name
 
-===== Request structure
+The task executions endpoint lets you list task executions with a specified task name.
+The following topics provide more detail:
+
+* <<api-guide-resources-task-executions-list-by-name-request-structure>>
+* <<api-guide-resources-task-executions-list-by-name-request-parameters>>
+* <<api-guide-resources-task-executions-list-by-name-example-request>>
+* <<api-guide-resources-task-executions-list-by-name-response-structure>>
+
+
+
+[[api-guide-resources-task-executions-list-by-name-request-structure]]
+===== Request Structure
 
 include::{snippets}/task-executions-documentation/list-task-executions-by-name/http-request.adoc[]
 
-===== Request parameters
+
+
+[[api-guide-resources-task-executions-list-by-name-request-parameters]]
+===== Request Parameters
 
 include::{snippets}/task-executions-documentation/list-task-executions-by-name/request-parameters.adoc[]
 
-===== Example request
+
+
+[[api-guide-resources-task-executions-list-by-name-example-request]]
+===== Example Request
 
 include::{snippets}/task-executions-documentation/list-task-executions-by-name/curl-request.adoc[]
 
-===== Response structure
+
+
+[[api-guide-resources-task-executions-list-by-name-response-structure]]
+===== Response Structure
 
 include::{snippets}/task-executions-documentation/list-task-executions-by-name/http-response.adoc[]
+
+
 
 [[api-guide-resources-task-executions-detail]]
 ==== Task Execution Detail
 
-===== Request structure
+The task executions endpoint lets you get the details about a task execution.
+The following topics provide more detail:
+
+* <<api-guide-resources-task-executions-detail-request-structure>>
+* <<api-guide-resources-task-executions-detail-request-parameters>>
+* <<api-guide-resources-task-executions-detail-example-request>>
+* <<api-guide-resources-task-executions-detail-response-structure>>
+
+
+
+[[api-guide-resources-task-executions-detail-request-structure]]
+===== Request Structure
 
 include::{snippets}/task-executions-documentation/launch-task-display-detail/http-request.adoc[]
 
 include::{snippets}/task-executions-documentation/launch-task-display-detail/path-parameters.adoc[]
 
-===== Request parameters
+
+
+[[api-guide-resources-task-executions-detail-request-parameters]]
+===== Request Parameters
 
 There are no request parameters for this endpoint.
 
-===== Example request
+
+
+[[api-guide-resources-task-executions-detail-example-request]]
+===== Example Request
 
 include::{snippets}/task-executions-documentation/launch-task-display-detail/curl-request.adoc[]
 
-===== Response structure
+
+
+[[api-guide-resources-task-executions-detail-response-structure]]
+===== Response Structure
 
 include::{snippets}/task-executions-documentation/launch-task-display-detail/http-response.adoc[]
+
+
 
 [[api-guide-resources-task-executions-delete]]
 ==== Delete Task Execution
 
-===== Request structure
+The task executions endpoint lets you delete a task execution.
+The following topics provide more detail:
+
+* <<api-guide-resources-task-executions-delete-request-structure>>
+* <<api-guide-resources-task-executions-delete-request-parameters>>
+* <<api-guide-resources-task-executions-delete-example-request>>
+* <<api-guide-resources-task-executions-delete-response-structure>>
+
+
+
+[[api-guide-resources-task-executions-delete-request-structure]]
+===== Request Structure
 
 include::{snippets}/task-executions-documentation/remove-task-execution/http-request.adoc[]
 
 include::{snippets}/task-executions-documentation/remove-task-execution/path-parameters.adoc[]
 
-===== Request parameters
+
+
+[[api-guide-resources-task-executions-delete-request-parameters]]
+===== Request Parameters
 
 There are no request parameters for this endpoint.
 
-===== Example request
+
+
+[[api-guide-resources-task-executions-delete-example-request]]
+===== Example Request
 
 include::{snippets}/task-executions-documentation/remove-task-execution/curl-request.adoc[]
 
-===== Response structure
+
+
+[[api-guide-resources-task-executions-delete-response-structure]]
+===== Response Structure
 
 include::{snippets}/task-executions-documentation/remove-task-execution/http-response.adoc[]
+
+
 
 [[api-guide-resources-job-executions]]
 === Job Executions
 
+The job executions endpoint provides information about the job executions that are registered with the Spring Cloud Data Flow server.
+The following topics provide more detail:
+
+* <<api-guide-resources-job-executions-list>>
+* <<api-guide-resources-job-executions-list-by-name>>
+* <<api-guide-resources-job-executions-detail>>
+* <<api-guide-resources-job-executions-stop>>
+* <<api-guide-resources-job-executions-restart>>
+
+
+
 [[api-guide-resources-job-executions-list]]
 ==== List All Job Executions
 
-===== Request structure
+The job executions endpoint lets you list all job executions.
+The following topics provide more detail:
+
+* <<api-guide-resources-job-executions-list-request-structure>>
+* <<api-guide-resources-job-executions-list-request-parameters>>
+* <<api-guide-resources-job-executions-list-example-request>>
+* <<api-guide-resources-job-executions-list-response-structure>>
+
+
+
+[[api-guide-resources-job-executions-list-request-structure]]
+===== Request Structure
 
 include::{snippets}/job-executions-documentation/list-job-executions/http-request.adoc[]
 
-===== Request parameters
+
+
+[[api-guide-resources-job-executions-list-request-parameters]]
+===== Request Parameters
 
 include::{snippets}/job-executions-documentation/list-job-executions/request-parameters.adoc[]
 
-===== Example request
+
+
+[[api-guide-resources-job-executions-list-example-request]]
+===== Example Request
 
 include::{snippets}/job-executions-documentation/list-job-executions/curl-request.adoc[]
 
-===== Response structure
+
+
+[[api-guide-resources-job-executions-list-response-structure]]
+===== Response Structure
 
 include::{snippets}/job-executions-documentation/list-job-executions/http-response.adoc[]
+
+
 
 [[api-guide-resources-job-executions-list-by-name]]
 ==== List All Job Executions With a Specified Job Name
 
-===== Request structure
+The job executions endpoint lets you list all job executions.
+The following topics provide more detail:
+
+* <<api-guide-resources-job-executions-list-by-name-request-structure>>
+* <<api-guide-resources-job-executions-list-by-name-request-parameters>>
+* <<api-guide-resources-job-executions-list-by-name-example-request>>
+* <<api-guide-resources-job-executions-list-by-name-response-structure>>
+
+
+
+[[api-guide-resources-job-executions-list-by-name-request-structure]]
+===== Request Structure
 
 include::{snippets}/job-executions-documentation/list-job-executions-by-name/http-request.adoc[]
 
-===== Request parameters
+
+
+[[api-guide-resources-job-executions-list-by-name-request-parameters]]
+===== Request Parameters
 
 include::{snippets}/job-executions-documentation/list-job-executions-by-name/request-parameters.adoc[]
 
-===== Example request
+
+
+[[api-guide-resources-job-executions-list-by-name-example-request]]
+===== Example Request
 
 include::{snippets}/job-executions-documentation/list-job-executions-by-name/curl-request.adoc[]
 
-===== Response structure
+
+
+[[api-guide-resources-job-executions-list-by-name-response-structure]]
+===== Response Structure
 
 include::{snippets}/job-executions-documentation/list-job-executions-by-name/http-response.adoc[]
+
+
 
 [[api-guide-resources-job-executions-detail]]
 ==== Job Execution Detail
 
-===== Request structure
+The job executions endpoint lets you get the details about a job execution.
+The following topics provide more detail:
+
+* <<api-guide-resources-job-executions-detail-request-structure>>
+* <<api-guide-resources-job-executions-detail-request-parameters>>
+* <<api-guide-resources-job-executions-detail-example-request>>
+* <<api-guide-resources-job-executions-detail-response-structure>>
+
+
+
+[[api-guide-resources-job-executions-detail-request-structure]]
+===== Request Structure
 
 include::{snippets}/job-executions-documentation/job-display-detail/http-request.adoc[]
 
 include::{snippets}/job-executions-documentation/job-display-detail/path-parameters.adoc[]
 
-===== Request parameters
+
+
+[[api-guide-resources-job-executions-detail-request-parameters]]
+===== Request Parameters
 
 There are no request parameter for this endpoint.
 
-===== Example request
+
+
+[[api-guide-resources-job-executions-detail-example-request]]
+===== Example Request
 
 include::{snippets}/job-executions-documentation/job-display-detail/curl-request.adoc[]
 
-===== Response structure
+
+
+[[api-guide-resources-job-executions-detail-response-structure]]
+===== Response Structure
 
 include::{snippets}/job-executions-documentation/job-display-detail/http-response.adoc[]
+
+
 
 [[api-guide-resources-job-executions-stop]]
 ==== Stop Job Execution
 
+The job executions endpoint lets you stop a job execution.
+The following topics provide more detail:
+
+* <<api-guide-resources-job-executions-stop-request-structure>>
+* <<api-guide-resources-job-executions-stop-request-parameters>>
+* <<api-guide-resources-job-executions-stop-example-request>>
+* <<api-guide-resources-job-executions-stop-response-structure>>
+
+
+
+[[api-guide-resources-job-executions-stop-request-structure]]
 ===== Request structure
 
 include::{snippets}/job-executions-documentation/job-stop/http-request.adoc[]
 
 include::{snippets}/job-executions-documentation/job-stop/path-parameters.adoc[]
 
+
+
+[[api-guide-resources-job-executions-stop-request-parameters]]
 ===== Request parameters
 
 include::{snippets}/job-executions-documentation/job-stop/request-parameters.adoc[]
 
+
+
+[[api-guide-resources-job-executions-stop-example-request]]
 ===== Example request
 
 include::{snippets}/job-executions-documentation/job-stop/curl-request.adoc[]
 
+
+
+[[api-guide-resources-job-executions-stop-response-structure]]
 ===== Response structure
 
 include::{snippets}/job-executions-documentation/job-stop/http-response.adoc[]
 
+
+
 [[api-guide-resources-job-executions-restart]]
 ==== Restart Job Execution
 
-===== Request structure
+The job executions endpoint lets you restart a job execution.
+The following topics provide more detail:
+
+* <<api-guide-resources-job-executions-restart-request-structure>>
+* <<api-guide-resources-job-executions-restart-request-parameters>>
+* <<api-guide-resources-job-executions-restart-example-request>>
+* <<api-guide-resources-job-executions-restart-response-structure>>
+
+
+
+[[api-guide-resources-job-executions-restart-request-structure]]
+===== Request Structure
 
 include::{snippets}/job-executions-documentation/job-restart/http-request.adoc[]
 
 include::{snippets}/job-executions-documentation/job-restart/path-parameters.adoc[]
 
-===== Request parameters
+
+
+[[api-guide-resources-job-executions-restart-request-parameters]]
+===== Request Parameters
 
 include::{snippets}/job-executions-documentation/job-restart/request-parameters.adoc[]
 
-===== Example request
+
+
+[[api-guide-resources-job-executions-restart-example-request]]
+===== Example Request
 
 include::{snippets}/job-executions-documentation/job-restart/curl-request.adoc[]
 
-===== Response structure
+
+
+[[api-guide-resources-job-executions-restart-response-structure]]
+===== Response Structure
 
 include::{snippets}/job-executions-documentation/job-restart/http-response.adoc[]
+
+
 
 [[api-guide-resources-job-instances]]
 === Job Instances
 
+The job instances endpoint provides information about the job instances that are registered with the Spring Cloud Data Flow server.
+The following topics provide more detail:
+
+* <<api-guide-resources-job-instances-list>>
+* <<api-guide-resources-job-instances-detail>>
+
+
+
 [[api-guide-resources-job-instances-list]]
 ==== List All Job Instances
 
-===== Request structure
+The job instances endpoint lets you list all job instances.
+The following topics provide more detail:
+
+* <<api-guide-resources-job-instances-list-request-structure>>
+* <<api-guide-resources-job-instances-list-request-parameters>>
+* <<api-guide-resources-job-instances-list-example-request>>
+* <<api-guide-resources-job-instances-list-response-structure>>
+
+
+
+[[api-guide-resources-job-instances-list-request-structure]]
+===== Request Structure
 
 include::{snippets}/job-instances-documentation/list-job-instances/http-request.adoc[]
 
-===== Request parameters
+
+
+[[api-guide-resources-job-instances-list-request-parameters]]
+===== Request Parameters
 
 include::{snippets}/job-instances-documentation/list-job-instances/request-parameters.adoc[]
 
-===== Example request
+
+
+[[api-guide-resources-job-instances-list-example-request]]
+===== Example Request
 
 include::{snippets}/job-instances-documentation/list-job-instances/curl-request.adoc[]
 
-===== Response structure
+
+
+[[api-guide-resources-job-instances-list-response-structure]]
+===== Response Structure
 
 include::{snippets}/job-instances-documentation/list-job-instances/http-response.adoc[]
+
+
 
 [[api-guide-resources-job-instances-detail]]
 ==== Job Instance Detail
 
-===== Request structure
+The job instances endpoint lets you list all job instances.
+The following topics provide more detail:
+
+* <<api-guide-resources-job-instances-detail-request-structure>>
+* <<api-guide-resources-job-instances-detail-request-parameters>>
+* <<api-guide-resources-job-instances-detail-example-request>>
+* <<api-guide-resources-job-instances-detail-response-structure>>
+
+
+
+[[api-guide-resources-job-instances-detail-request-structure]]
+===== Request Structure
 
 include::{snippets}/job-instances-documentation/job-display-detail/http-request.adoc[]
 
 include::{snippets}/job-instances-documentation/job-display-detail/path-parameters.adoc[]
 
-===== Request parameters
+
+
+[[api-guide-resources-job-instances-detail-request-parameters]]
+===== Request Parameters
 
 There are no request parameters for this endpoint.
 
-===== Example request
+
+
+[[api-guide-resources-job-instances-detail-example-request]]
+===== Example Request
 
 include::{snippets}/job-instances-documentation/job-display-detail/curl-request.adoc[]
 
-===== Response structure
+
+
+[[api-guide-resources-job-instances-detail-response-structure]]
+===== Response Structure
 
 include::{snippets}/job-instances-documentation/job-display-detail/http-response.adoc[]
+
+
 
 [[api-guide-resources-job-step-executions]]
 === Job Step Executions
 
+The job step executions endpoint provides information about the job step executions that are registered with the Spring Cloud Data Flow server.
+The following topics provide more detail:
+
+* <<api-guide-resources-job-step-executions-list>>
+* <<api-guide-resources-job-step-execution-detail>>
+* <<api-guide-resources-job-step-execution-progress>>
+
+
+
 [[api-guide-resources-job-step-executions-list]]
 ==== List All Step Executions For a Job Execution
 
-===== Request structure
+The job step executions endpoint lets you list all job step executions.
+The following topics provide more detail:
+
+* <<api-guide-resources-job-step-executions-list-request-structure>>
+* <<api-guide-resources-job-step-executions-list-request-parameters>>
+* <<api-guide-resources-job-step-executions-list-example-request>>
+* <<api-guide-resources-job-step-executions-list-response-structure>>
+
+
+
+[[api-guide-resources-job-step-executions-list-request-structure]]
+===== Request Structure
 
 include::{snippets}/job-step-executions-documentation/list-step-executions-for-job/http-request.adoc[]
 
-===== Request parameters
+
+
+[[api-guide-resources-job-step-executions-list-request-parameters]]
+===== Request Parameters
 
 include::{snippets}/job-step-executions-documentation/list-step-executions-for-job/request-parameters.adoc[]
 
-===== Example request
+
+
+[[api-guide-resources-job-step-executions-list-example-request]]
+===== Example Request
 
 include::{snippets}/job-step-executions-documentation/list-step-executions-for-job/curl-request.adoc[]
 
-===== Response structure
+
+
+[[api-guide-resources-job-step-executions-list-response-structure]]
+===== Response Structure
 
 include::{snippets}/job-step-executions-documentation/list-step-executions-for-job/http-response.adoc[]
+
+
 
 [[api-guide-resources-job-step-execution-detail]]
 ==== Job Step Execution Detail
 
-===== Request structure
+The job step executions endpoint lets you get details about a job step execution.
+The following topics provide more detail:
+
+* <<api-guide-resources-job-step-execution-detail-request-structure>>
+* <<api-guide-resources-job-step-execution-detail-request-parameters>>
+* <<api-guide-resources-job-step-execution-detail-example-request>>
+* <<api-guide-resources-job-step-execution-detail-response-structure>>
+
+
+
+[[api-guide-resources-job-step-execution-detail-request-structure]]
+===== Request Structure
 
 include::{snippets}/job-step-executions-documentation/step-detail/http-request.adoc[]
 
 include::{snippets}/job-step-executions-documentation/step-detail/path-parameters.adoc[]
 
-===== Request parameters
+
+
+[[api-guide-resources-job-step-execution-detail-request-parameters]]
+===== Request Parameters
 
 There are no request parameters for this endpoint.
 
-===== Example request
+
+
+[[api-guide-resources-job-step-execution-detail-example-request]]
+===== Example Request
 
 include::{snippets}/job-step-executions-documentation/step-detail/curl-request.adoc[]
 
-===== Response structure
+
+
+[[api-guide-resources-job-step-execution-detail-response-structure]]
+===== Response Structure
 
 include::{snippets}/job-step-executions-documentation/step-detail/http-response.adoc[]
 
 [[api-guide-resources-job-step-execution-progress]]
 ==== Job Step Execution Progress
 
-===== Request structure
+The job step executions endpoint lets you get details about the progress of a job step execution.
+The following topics provide more detail:
+
+* <<api-guide-resources-job-step-execution-progress-request-structure>>
+* <<api-guide-resources-job-step-execution-progress-request-parameters>>
+* <<api-guide-resources-job-step-execution-progress-example-request>>
+* <<api-guide-resources-job-step-execution-progress-response-structure>>
+
+
+
+[[api-guide-resources-job-step-execution-progress-request-structure]]
+===== Request Structure
 
 include::{snippets}/job-step-executions-documentation/step-progress/http-request.adoc[]
 
 include::{snippets}/job-step-executions-documentation/step-progress/path-parameters.adoc[]
 
-===== Request parameters
+
+
+[[api-guide-resources-job-step-execution-progress-request-parameters]]
+===== Request Parameters
 
 There are no request parameters for this endpoint.
 
-===== Example request
+
+
+[[api-guide-resources-job-step-execution-progress-example-request]]
+===== Example Request
 
 include::{snippets}/job-step-executions-documentation/step-progress/curl-request.adoc[]
 
-===== Response structure
+
+
+[[api-guide-resources-job-step-execution-progress-response-structure]]
+===== Response Structure
 
 include::{snippets}/job-step-executions-documentation/step-progress/http-response.adoc[]
 
+
+
+[[api-guide-resources-runtime-information-applications]]
 === Runtime Information about Applications
 
 It is possible to get information about running apps known to the system, either globally or individually.
+The following topics provide more detail:
 
+* <<api-guide-resources-runtime-information-applications-listing-all>>
+* <<api-guide-resources-runtime-information-applications-querying-all-instances-single-app>>
+* <<api-guide-resources-runtime-information-applications-querying-single-instance-single-app>>
+
+
+
+[[api-guide-resources-runtime-information-applications-listing-all]]
 ==== Listing All Applications at Runtime
-To retrieve information about all instances of all apps, query the `/runtime/apps` endpoint using `GET`.
 
-===== Request structure
+To retrieve information about all instances of all apps, query the `/runtime/apps` endpoint by using `GET`.
+The following topics provide more detail:
 
-include::{snippets}/runtime-apps-documentation/list-all-apps/http-request.adoc[]
+* <<api-guide-resources-runtime-information-applications-listing-all-request-structure>>
+* <<api-guide-resources-runtime-information-applications-listing-all-example-request>>
+* <<api-guide-resources-runtime-information-applications-listing-all-response-structure>>
 
-===== Example request
 
-include::{snippets}/runtime-apps-documentation/list-all-apps/curl-request.adoc[]
 
-===== Response structure
-
-include::{snippets}/runtime-apps-documentation/list-all-apps/http-response.adoc[]
-
-==== Querying all Instances of a Single App
-To retrieve information about all instances of a particular app, query the `/runtime/apps/<appId>/instances` endpoint using `GET`.
-
-===== Request structure
+[[api-guide-resources-runtime-information-applications-listing-all-request-structure]]
+===== Request Structure
 
 include::{snippets}/runtime-apps-documentation/list-all-apps/http-request.adoc[]
 
-===== Example request
+
+
+[[api-guide-resources-runtime-information-applications-listing-all-example-request]]
+===== Example Request
 
 include::{snippets}/runtime-apps-documentation/list-all-apps/curl-request.adoc[]
 
-===== Response structure
+
+
+[[api-guide-resources-runtime-information-applications-listing-all-response-structure]]
+===== Response Structure
 
 include::{snippets}/runtime-apps-documentation/list-all-apps/http-response.adoc[]
 
+
+
+[[api-guide-resources-runtime-information-applications-querying-all-instances-single-app]]
+==== Querying All Instances of a Single App
+
+To retrieve information about all instances of a particular app, query the `/runtime/apps/<appId>/instances` endpoint by using `GET`.
+The following topics provide more detail:
+
+* <<api-guide-resources-runtime-information-applications-querying-all-instances-single-app-request-structure>>
+* <<api-guide-resources-runtime-information-applications-querying-all-instances-single-app-example-request>>
+* <<api-guide-resources-runtime-information-applications-querying-all-instances-single-app-response-structure>>
+
+
+
+[[api-guide-resources-runtime-information-applications-querying-all-instances-single-app-request-structure]]
+===== Request Structure
+
+include::{snippets}/runtime-apps-documentation/list-all-apps/http-request.adoc[]
+
+
+
+[[api-guide-resources-runtime-information-applications-querying-all-instances-single-app-example-request]]
+===== Example Request
+
+include::{snippets}/runtime-apps-documentation/list-all-apps/curl-request.adoc[]
+
+
+
+[[api-guide-resources-runtime-information-applications-querying-all-instances-single-app-response-structure]]
+===== Response Structure
+
+include::{snippets}/runtime-apps-documentation/list-all-apps/http-response.adoc[]
+
+
+
+[[api-guide-resources-runtime-information-applications-querying-single-instance-single-app]]
 ==== Querying a Single Instance of a Single App
-Finally, to retrieve information about a particuler instance of a particular app,
-query the `/runtime/apps/<appId>/instances/<instanceId>` endpoint using `GET`.
 
-===== Request structure
+Finally, to retrieve information about a particular instance of a particular app, query the `/runtime/apps/<appId>/instances/<instanceId>` endpoint by using `GET`.
+The following topics provide more detail:
+
+* <<api-guide-resources-runtime-information-applications-querying-single-instance-single-app-request-structure>>
+* <<api-guide-resources-runtime-information-applications-querying-single-instance-single-app-example-request>>
+* <<api-guide-resources-runtime-information-applications-querying-single-instance-single-app-response-structure>>
+
+
+
+[[api-guide-resources-runtime-information-applications-querying-single-instance-single-app-request-structure]]
+===== Request Structure
 
 include::{snippets}/runtime-apps-documentation/list-all-apps/http-request.adoc[]
 
-===== Example request
+
+
+[[api-guide-resources-runtime-information-applications-querying-single-instance-single-app-example-request]]
+===== Example Request
 
 include::{snippets}/runtime-apps-documentation/list-all-apps/curl-request.adoc[]
 
-===== Response structure
+
+
+[[api-guide-resources-runtime-information-applications-querying-single-instance-single-app-response-structure]]
+===== Response Structure
 
 include::{snippets}/runtime-apps-documentation/list-all-apps/http-response.adoc[]
 
-[[resources-metrics-stream-applications]]
+
+
+[[api-guide-resources-metrics-stream-applications]]
 === Metrics for Stream Applications
 
-This REST endpoint exposes metrics for stream applications. This REST enpoint requires
-the https://github.com/spring-cloud/spring-cloud-dataflow-metrics-collector[Metrics Collector]
-application to be running as a separate service. If not running, this endpoint will
-return an empty response.
+This REST endpoint exposes metrics for stream applications.
+It requires the https://github.com/spring-cloud/spring-cloud-dataflow-metrics-collector[Metrics Collector] application to be running as a separate service.
+If it is not running, this endpoint returns an empty response.
 
-NOTE: In order to learn more about the Metrics Collector, please also refer to chapter
-<<configuration-monitoring-deployed-applications>>
+NOTE: In order to learn more about the Metrics Collector, please also refer to the  "`<<configuration-monitoring-deployed-applications>>`" chapter.
 
-==== Request structure
+The following topics provide more detail:
 
-For example, a typical request may look like:
+* <<api-guide-resources-metrics-stream-applications-request-structure>>
+* <<api-guide-resources-metrics-stream-applications-example-request>>
+* <<api-guide-resources-metrics-stream-applications-response-structure>>
+* <<api-guide-resources-metrics-stream-applications-example-response>>
+
+
+
+[[api-guide-resources-metrics-stream-applications-request-structure]]
+==== Request Structure
+
+For example, a typical request might resemble the following:
 
 include::{snippets}/metrics-for-stream-apps-without-collector-documentation/get-metrics-without-collector-running/http-request.adoc[]
 
-==== Example request
+==== Example Request
 
 include::{snippets}/metrics-for-stream-apps-without-collector-documentation/get-metrics-without-collector-running/curl-request.adoc[]
 
-==== Response structure
+==== Response Structure
 
-This REST endpoint uses https://github.com/Netflix/Hystrix[Hystrix] via the
-https://github.com/spring-cloud/spring-cloud-netflix[Spring Cloud Netflix] project
-under the covers to make a proxy HTTP request to the Metrics Collector.
+This REST endpoint uses https://github.com/Netflix/Hystrix[Hystrix] through the https://github.com/spring-cloud/spring-cloud-netflix[Spring Cloud Netflix] project under the covers to make a proxy HTTP request to the Metrics Collector.
 
-==== Example response
+==== Example Response
 
-Therefore, the endpoint will not generate an error in case the
-Metrics Collector is not running, but rather gracefully degrade and return an
-empty response such as the following:
+The endpoint does not generate an error when the Metrics Collector is not running. Rather, it gracefully degrades and returns an empty response such as the following:
 
 include::{snippets}/metrics-for-stream-apps-without-collector-documentation/get-metrics-without-collector-running/http-response.adoc[]
 
-However, if metrics are being collected and the Metrics Collector is running you
-should see a response similar to the listing below. The metrics data returned in
-the listing below is based on the example stream definition created
-in chapter <<configuration-monitoring-deployed-applications>> `time | log` with
+However, if metrics are being collected and the Metrics Collector is running, you should see a response similar to the listing below. The metrics data returned in the listing below is based on the example stream definition created in  the "`<<configuration-monitoring-deployed-applications>>`" chapter, where we created `time | log` with
 two instances of each application deployed.
 
 include::{snippets}/metrics-for-stream-apps-documentation/get-metrics-with-collector-running/http-response.adoc[]
-
-
