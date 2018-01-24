@@ -98,13 +98,15 @@ $ java -jar spring-cloud-dataflow-shell-{project-version}.jar --dataflow.mode=sk
 
 NOTE: Both the Data Flow Server and the Shell must be on the same mode.
 
-If the Data Flow Server and shell are not running on the same host, point the shell to the Data Flow server URL:
+If the Data Flow Server and shell are not running on the same host, point the shell to the Data Flow server URL using the `dataflow config server` command when in the shell's interactive mode.
 [source,bash]
 ----
 server-unknown:>dataflow config server http://198.51.100.0
 Successfully targeted http://198.51.100.0
 dataflow:>
 ----
+
+Alternatively, pass in the command line option `--dataflow.uri`.  The shell's command line option `--helps shows what is available.
 
 [[getting-started-deploying-streams-spring-cloud-dataflow]]
 == Deploying Streams
