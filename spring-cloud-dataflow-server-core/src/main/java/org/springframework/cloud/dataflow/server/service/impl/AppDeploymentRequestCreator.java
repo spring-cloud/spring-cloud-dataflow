@@ -59,13 +59,6 @@ import static org.springframework.cloud.deployer.spi.app.AppDeployer.COUNT_PROPE
  */
 public class AppDeploymentRequestCreator {
 
-	/**
-	 * This is the spring boot property key that Spring Cloud Stream uses to filter the
-	 * metrics to import when the specific Spring Cloud Stream "applicaiton" trigger is fired
-	 * for metrics export.
-	 */
-	private static final String METRICS_TRIGGER_INCLUDES = "spring.metrics.export.triggers.application.includes";
-
 	private static final String DEFAULT_PARTITION_KEY_EXPRESSION = "payload";
 
 	private static Log logger = LogFactory.getLog(AppDeploymentRequestCreator.class);
@@ -321,7 +314,7 @@ public class AppDeploymentRequestCreator {
 
 		merged.putIfAbsent(StreamPropertyKeys.METRICS_PROPERTIES, "spring.application.name,spring.application.index,"
 				+ "spring.cloud.application.*,spring.cloud.dataflow.*");
-		merged.putIfAbsent(METRICS_TRIGGER_INCLUDES, "integration**");
+		merged.putIfAbsent(StreamPropertyKeys.METRICS_TRIGGER_INCLUDES, "integration**");
 
 		return new AppDefinition(original.getName(), merged);
 	}
