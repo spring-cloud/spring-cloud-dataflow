@@ -43,9 +43,7 @@ import org.springframework.shell.core.CommandMarker;
 import org.springframework.shell.core.annotation.CliAvailabilityIndicator;
 import org.springframework.shell.core.annotation.CliCommand;
 import org.springframework.shell.core.annotation.CliOption;
-import org.springframework.shell.table.AbsoluteWidthSizeConstraints;
 import org.springframework.shell.table.BeanListTableModel;
-import org.springframework.shell.table.CellMatchers;
 import org.springframework.shell.table.Table;
 import org.springframework.shell.table.TableBuilder;
 import org.springframework.shell.table.TableModelBuilder;
@@ -126,12 +124,11 @@ public abstract class AbstractStreamCommands implements CommandMarker {
 		List<Object> result = new ArrayList<>();
 		final StreamDeploymentResource stream = streamOperations().info(name);
 		TableModelBuilder<Object> modelBuilder = new TableModelBuilder<>();
-		modelBuilder.addRow().addValue("Name").addValue("DSL").addValue("Status");
+		modelBuilder.addRow().addValue("Stream Name").addValue("Stream Definition").addValue("Status");
 		modelBuilder.addRow().addValue(stream.getStreamName())
 				.addValue(stream.getDslText())
 				.addValue(stream.getStatus());
-		TableBuilder builder = DataFlowTables.applyStyle(new TableBuilder(modelBuilder.build()))
-				.on(CellMatchers.table()).addSizer(new AbsoluteWidthSizeConstraints(30)).and();
+		TableBuilder builder = DataFlowTables.applyStyle(new TableBuilder(modelBuilder.build()));
 		result.add(builder.build());
 		if (StringUtils.hasText(stream.getDeploymentProperties())) {
 			//TODO: rename Deployment properties for Skipper as it includes apps' info (app:version) as well

@@ -64,7 +64,6 @@ import static org.springframework.cloud.dataflow.rest.SkipperStream.SKIPPER_REPO
  * @author Glenn Renfro
  */
 @Component
-// todo: reenable optionContext attributes
 public class SkipperStreamCommands extends AbstractStreamCommands implements CommandMarker {
 
 	private static final String STREAM_SKIPPER_DEPLOY = "stream deploy";
