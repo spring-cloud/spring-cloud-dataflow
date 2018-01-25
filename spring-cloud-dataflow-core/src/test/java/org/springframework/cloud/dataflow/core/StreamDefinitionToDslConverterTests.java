@@ -126,7 +126,7 @@ public class StreamDefinitionToDslConverterTests {
 	}
 
 	@Test
-	public void textExclusionOfDataFlowAddedProperties() {
+	public void testExclusionOfDataFlowAddedProperties() {
 
 		List<String> dataFlowAddedProperties = Arrays.asList(
 				DataFlowPropertyKeys.STREAM_APP_TYPE,
@@ -151,7 +151,7 @@ public class StreamDefinitionToDslConverterTests {
 	}
 
 	@Test
-	public void textInputDestinatioProperty() {
+	public void testInputDestinationProperty() {
 
 		String dslText = "foo --" + BindingPropertyKeys.INPUT_DESTINATION + "=boza  | bar";
 
@@ -160,6 +160,31 @@ public class StreamDefinitionToDslConverterTests {
 
 		assertEquals(":boza > foo | bar",
 				new StreamDefinitionToDslConverter().toDsl(streamDefinition.getAppDefinitions()));
+	}
+
+	@Test
+	public void testPropertyAutoQuotes() {
+
+		StreamDefinition streamDefinition = new StreamDefinition("streamName", "foo | bar");
+
+
+		StreamAppDefinition foo = streamDefinition.getAppDefinitions().get(0);
+		StreamAppDefinition bar = streamDefinition.getAppDefinitions().get(1);
+
+		StreamAppDefinition foo2 = StreamAppDefinition.Builder.from(foo)
+				.setProperty("p1", "a b")
+				.setProperty("p2", "'c d'")
+				.setProperty("p3", "ef")
+				.build("stream2");
+
+		StreamAppDefinition bar2 = StreamAppDefinition.Builder.from(bar)
+				.setProperty("p1", "a b")
+				.setProperty("p2", "'c d'")
+				.setProperty("p3", "ef")
+				.build("stream2");
+
+		assertEquals("foo --p1='a b' --p2='c d' --p3=ef | bar --p1='a b' --p2='c d' --p3=ef",
+				new StreamDefinitionToDslConverter().toDsl(Arrays.asList(foo2, bar2)));
 	}
 
 }
