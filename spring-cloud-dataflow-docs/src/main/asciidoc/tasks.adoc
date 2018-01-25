@@ -759,8 +759,10 @@ and the task execution will not be recorded.
 [a-common-datastore]
 === A Common Data Store
 Spring Cloud Data Flow and your task application must access the same datastore instance.
-This is so that the task executions recorded by the task application can be read by Spring Cloud Data Flow.
+This is so that the task executions recorded by the task application can be read by Spring Cloud Data Flow to list them in the Shell and Dashboard views.
 Also the task app must have read  & write privileges to the task data tables that are used by Spring Cloud Data Flow.
+
+Given the understanding of Datasource dependency between Task apps and Spring Cloud Data Flow, let's review how to apply them in various Task orchestration scenarios.
 
 [datasource-simple-task-launch]
 ==== Simple Task Launch
@@ -785,15 +787,15 @@ Spring Cloud Data Flow allows a user to create a directed graph where each node
 of the graph is a task application and this is done via the
 https://github.com/spring-cloud-task-app-starters/composed-task-runner/blob/master/spring-cloud-starter-task-composedtaskrunner/README.adoc[Composed Task Runner].
 In this case the rules that applied to a <<datasource-simple-task-launch, Simple Task Launch>>
-or <<datasource-task-launcher-sink, Task Launcher Sink>> apply to the composed task runner.
+or <<datasource-task-launcher-sink, Task Launcher Sink>> apply to the composed task runner as well.
 All child apps must also have access to the datastore that is being used by the composed task runner
-Also All child apps must have the same database dependency as the composed task runner enumerated in their `pom.xml` or `gradle.build` file.
+Also, All child apps must have the same database dependency as the composed task runner enumerated in their `pom.xml` or `gradle.build` file.
 
 ==== Launching a task externally from Spring Cloud Data Flow
 Users may wish to launch Spring Cloud Task applications via another method (scheduler for example) but still track the task execution via Spring Cloud Data Flow.
 This can be done so long as the task applications observe the rules specified <<a-common-datastore-dependency, here>> and <<a-common-datastore, here>>.
 
 NOTE: If a user wishes to use Spring Cloud Data Flow to view their
-https://projects.spring.io/spring-batch/[Spring Batch] jobs, must make sure that
+https://projects.spring.io/spring-batch/[Spring Batch] jobs, the user must make sure that
 their batch application use the `@EnableTask` annotation and follow the rules enumerated <<a-common-datastore-dependency, here>> and <<a-common-datastore, here>>.
 More information is available https://github.com/spring-projects/spring-batch-admin/blob/master/MIGRATION.md[here].
