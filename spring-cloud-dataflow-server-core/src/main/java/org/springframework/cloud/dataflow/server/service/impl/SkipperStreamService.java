@@ -27,6 +27,7 @@ import org.apache.commons.logging.LogFactory;
 import org.yaml.snakeyaml.DumperOptions;
 import org.yaml.snakeyaml.Yaml;
 
+import org.springframework.cloud.dataflow.core.DataFlowPropertyKeys;
 import org.springframework.cloud.dataflow.core.StreamAppDefinition;
 import org.springframework.cloud.dataflow.core.StreamDefinition;
 import org.springframework.cloud.dataflow.core.StreamDefinitionToDslConverter;
@@ -63,10 +64,7 @@ public class SkipperStreamService extends AbstractStreamService {
 
 	private static Log logger = LogFactory.getLog(SkipperStreamService.class);
 
-	public static final String SPRING_CLOUD_DATAFLOW_STREAM_APP_LABEL = "spring.cloud.dataflow.stream.app.label";
-
 	public static final String DEFAULT_SKIPPER_PACKAGE_VERSION = "1.0.0";
-
 
 	/**
 	 * The repository this controller will use for stream CRUD operations.
@@ -143,7 +141,7 @@ public class SkipperStreamService extends AbstractStreamService {
 		Map<String, SpringCloudDeployerApplicationManifest> appManifestMap = new HashMap<>();
 
 		for (SpringCloudDeployerApplicationManifest am : appManifests) {
-			String name = am.getSpec().getApplicationProperties().get(SPRING_CLOUD_DATAFLOW_STREAM_APP_LABEL);
+			String name = am.getSpec().getApplicationProperties().get(DataFlowPropertyKeys.STREAM_APP_LABEL);
 			appManifestMap.put(name, am);
 		}
 

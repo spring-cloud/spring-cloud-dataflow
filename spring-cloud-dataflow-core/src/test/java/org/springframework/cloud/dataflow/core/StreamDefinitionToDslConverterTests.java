@@ -16,6 +16,9 @@
 
 package org.springframework.cloud.dataflow.core;
 
+import java.util.Arrays;
+import java.util.List;
+
 import org.junit.Ignore;
 import org.junit.Test;
 
@@ -121,4 +124,42 @@ public class StreamDefinitionToDslConverterTests {
 		assertEquals(streamDefinition.getDslText(),
 				new StreamDefinitionToDslConverter().toDsl(streamDefinition.getAppDefinitions()));
 	}
+
+	@Test
+	public void textExclusionOfDataFlowAddedProperties() {
+
+		List<String> dataFlowAddedProperties = Arrays.asList(
+				DataFlowPropertyKeys.STREAM_APP_TYPE,
+				DataFlowPropertyKeys.STREAM_APP_LABEL,
+				DataFlowPropertyKeys.STREAM_NAME,
+				StreamPropertyKeys.METRICS_TRIGGER_INCLUDES,
+				StreamPropertyKeys.METRICS_KEY,
+				StreamPropertyKeys.METRICS_PROPERTIES,
+				BindingPropertyKeys.INPUT_GROUP,
+				BindingPropertyKeys.OUTPUT_REQUIRED_GROUPS,
+				BindingPropertyKeys.OUTPUT_DESTINATION);
+
+		for (String key : dataFlowAddedProperties) {
+			String dslText = "foo --" + key + "=boza  | bar";
+
+			System.out.println(dslText);
+			StreamDefinition streamDefinition = new StreamDefinition("streamName", dslText);
+
+			assertEquals("foo | bar",
+					new StreamDefinitionToDslConverter().toDsl(streamDefinition.getAppDefinitions()));
+		}
+	}
+
+	@Test
+	public void textInputDestinatioProperty() {
+
+		String dslText = "foo --" + BindingPropertyKeys.INPUT_DESTINATION + "=boza  | bar";
+
+		System.out.println(dslText);
+		StreamDefinition streamDefinition = new StreamDefinition("streamName", dslText);
+
+		assertEquals(":boza > foo | bar",
+				new StreamDefinitionToDslConverter().toDsl(streamDefinition.getAppDefinitions()));
+	}
+
 }

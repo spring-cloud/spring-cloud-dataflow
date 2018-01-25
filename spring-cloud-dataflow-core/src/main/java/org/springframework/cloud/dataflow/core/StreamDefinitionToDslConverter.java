@@ -16,6 +16,7 @@
 
 package org.springframework.cloud.dataflow.core;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
@@ -24,9 +25,22 @@ import org.apache.commons.lang.StringEscapeUtils;
 import org.springframework.util.StringUtils;
 
 /**
+ * Reverse engineers a {@link StreamDefinition} into a semantically equivalent DSL text representation.
  * @author Christian Tzolov
  */
 public class StreamDefinitionToDslConverter {
+
+	private final static List<String> dataFlowAddedProperties = Arrays.asList(
+			DataFlowPropertyKeys.STREAM_APP_TYPE,
+			DataFlowPropertyKeys.STREAM_APP_LABEL,
+			DataFlowPropertyKeys.STREAM_NAME,
+			StreamPropertyKeys.METRICS_TRIGGER_INCLUDES,
+			StreamPropertyKeys.METRICS_KEY,
+			StreamPropertyKeys.METRICS_PROPERTIES,
+			BindingPropertyKeys.INPUT_GROUP,
+			BindingPropertyKeys.OUTPUT_REQUIRED_GROUPS,
+			BindingPropertyKeys.OUTPUT_DESTINATION,
+			BindingPropertyKeys.INPUT_DESTINATION);
 
 	/**
 	 * Reverse engineers a {@link StreamDefinition} into a semantically equivalent DSL text representation.
@@ -58,7 +72,7 @@ public class StreamDefinitionToDslConverter {
 			// Check for Input Named Destination
 			if (appDefinitionIndex == 0 && StringUtils.hasText(inputDestination)) {
 				dslBuilder.append(":").append(inputDestination);
-				if (!inputGroup.equals(appDefinition.getStreamName())) {
+				if (inputGroup != null && !inputGroup.equals(appDefinition.getStreamName())) {
 					dslBuilder.append(" --group=").append(inputGroup);
 				}
 				dslBuilder.append(" > ");
@@ -72,7 +86,7 @@ public class StreamDefinitionToDslConverter {
 			}
 
 			for (String propertyName : props.keySet()) {
-				if (!propertyName.startsWith("spring")) {
+				if (!dataFlowAddedProperties.contains(propertyName)) {
 					String propertyValue = unescape(props.get(propertyName));
 					dslBuilder.append(" --").append(propertyName).append("=").append(propertyValue);
 				}
