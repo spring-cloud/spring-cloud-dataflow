@@ -42,6 +42,7 @@ import org.yaml.snakeyaml.DumperOptions;
 import org.yaml.snakeyaml.Yaml;
 
 import org.springframework.cloud.dataflow.core.ApplicationType;
+import org.springframework.cloud.dataflow.core.DataFlowPropertyKeys;
 import org.springframework.cloud.dataflow.core.StreamDefinition;
 import org.springframework.cloud.dataflow.core.StreamDeployment;
 import org.springframework.cloud.dataflow.registry.service.AppRegistryService;
@@ -101,8 +102,6 @@ import static org.springframework.cloud.dataflow.rest.SkipperStream.SKIPPER_REPO
 public class SkipperStreamDeployer implements StreamDeployer {
 
 	private static Log logger = LogFactory.getLog(SkipperStreamDeployer.class);
-
-	public static final String SPRING_CLOUD_DATAFLOW_STREAM_APP_TYPE = "spring.cloud.dataflow.stream.app.type";
 
 	private final SkipperClient skipperClient;
 
@@ -239,7 +238,7 @@ public class SkipperStreamDeployer implements StreamDeployer {
 	public void validateAppVersionIsRegistered(AppDeploymentRequest appDeploymentRequest, String appVersion) {
 		String name = appDeploymentRequest.getDefinition().getName();
 		String appTypeString = appDeploymentRequest.getDefinition().getProperties()
-				.get(SPRING_CLOUD_DATAFLOW_STREAM_APP_TYPE);
+				.get(DataFlowPropertyKeys.STREAM_APP_TYPE);
 		ApplicationType applicationType = ApplicationType.valueOf(appTypeString);
 		if (!this.appRegistryService.appExist(name, applicationType, appVersion)) {
 			throw new IllegalStateException(String.format("The %s:%s:%s app is not registered!",
