@@ -41,6 +41,7 @@ import org.springframework.shell.core.annotation.CliOption;
 import org.springframework.shell.table.TableBuilder;
 import org.springframework.shell.table.TableModel;
 import org.springframework.util.Assert;
+import org.springframework.util.StringUtils;
 
 /**
  * Commands for working with the application registry. Allows retrieval of information
@@ -129,7 +130,8 @@ public abstract class AbstractAppRegistryCommands implements CommandMarker {
 			List<String> column = mappings.get(appRegistration.getType());
 			String value = appRegistration.getName();
 			if (application != null) {
-				value = value + "-" + appRegistration.getVersion();
+				String version = StringUtils.isEmpty(appRegistration.getVersion()) ? "" : "-"+appRegistration.getVersion();
+				value = value + version;
 				if (appRegistration.getDefaultVersion()) {
 					value = String.format("> %s <", value);
 				}
