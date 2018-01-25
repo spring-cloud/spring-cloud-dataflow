@@ -105,7 +105,7 @@ public class RootController {
 			root.add(unescapeTemplateVariables(
 					entityLinks.linkForSingleResource(AppStatusResource.class, "{appId}").withRel("runtime/apps/app")));
 			root.add(unescapeTemplateVariables(
-					entityLinks.linkFor(AppInstanceStatusResource.class, UriComponents.UriTemplateVariables.SKIP_VALUE)
+					entityLinks.linkFor(AppInstanceStatusResource.class, "{appId}")
 							.withRel("runtime/apps/instances")));
 			root.add(linkTo(MetricsController.class).withRel("metrics/streams"));
 		}
