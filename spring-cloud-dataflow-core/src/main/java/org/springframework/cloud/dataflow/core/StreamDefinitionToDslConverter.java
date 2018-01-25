@@ -88,7 +88,7 @@ public class StreamDefinitionToDslConverter {
 			for (String propertyName : props.keySet()) {
 				if (!dataFlowAddedProperties.contains(propertyName)) {
 					String propertyValue = unescape(props.get(propertyName));
-					dslBuilder.append(" --").append(propertyName).append("=").append(propertyValue);
+					dslBuilder.append(" --").append(propertyName).append("=").append(autoQuotes(propertyValue));
 				}
 			}
 
@@ -109,6 +109,13 @@ public class StreamDefinitionToDslConverter {
 		String dsl = dslBuilder.toString().replace("> bridge >", ">");
 
 		return dsl;
+	}
+
+	private String autoQuotes(String propertyValue) {
+		if (propertyValue.contains(" ") && !propertyValue.contains("'")) {
+			return "'" + propertyValue + "'";
+		}
+		return propertyValue;
 	}
 
 	private String unescape(String text) {
