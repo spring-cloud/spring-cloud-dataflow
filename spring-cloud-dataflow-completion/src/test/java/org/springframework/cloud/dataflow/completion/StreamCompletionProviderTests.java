@@ -16,30 +16,14 @@
 
 package org.springframework.cloud.dataflow.completion;
 
-import java.io.File;
-import java.io.FileFilter;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.cloud.dataflow.configuration.metadata.ApplicationConfigurationMetadataResolver;
-import org.springframework.cloud.dataflow.configuration.metadata.BootApplicationConfigurationMetadataResolver;
-import org.springframework.cloud.dataflow.core.ApplicationType;
-import org.springframework.cloud.dataflow.registry.domain.AppRegistration;
 import org.springframework.cloud.dataflow.registry.AppRegistry;
-import org.springframework.cloud.deployer.resource.registry.InMemoryUriRegistry;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.core.io.FileSystemResourceLoader;
-import org.springframework.core.io.ResourceLoader;
 import org.springframework.test.context.junit4.SpringRunner;
-import org.springframework.util.Assert;
 
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.hasItems;
@@ -62,7 +46,7 @@ import static org.springframework.cloud.dataflow.completion.Proposals.proposalTh
  * @author Mark Fisher
  */
 @RunWith(SpringRunner.class)
-@SpringBootTest(classes = { CompletionConfiguration.class, StreamCompletionProviderTests.Mocks.class })
+@SpringBootTest(classes = { CompletionConfiguration.class, CompletionTestsMocks.class })
 public class StreamCompletionProviderTests {
 
 	@Autowired
@@ -200,69 +184,6 @@ public class StreamCompletionProviderTests {
 	public void testClosedSetValuesShouldBeExclusive() {
 		assertThat(completionProvider.complete("http --use-ssl=tr", 1),
 				not(hasItems(proposalThat(startsWith("http --use-ssl=tr --port")))));
-	}
-
-	/**
-	 * A set of mocks that consider the contents of the {@literal apps/} directory as app
-	 * archives.
-	 *
-	 * @author Eric Bottard
-	 * @author Mark Fisher
-	 */
-	@Configuration
-	public static class Mocks {
-
-		private static final File ROOT = new File("src/test/resources",
-				Mocks.class.getPackage().getName().replace('.', '/') + "/apps");
-
-		private static final FileFilter FILTER = new FileFilter() {
-			@Override
-			public boolean accept(File pathname) {
-				return pathname.isDirectory() && pathname.getName().matches(".+-.+");
-			}
-		};
-
-		@Bean
-		public AppRegistry appRegistry() {
-			final ResourceLoader resourceLoader = new FileSystemResourceLoader();
-			return new AppRegistry(new InMemoryUriRegistry(), resourceLoader) {
-				@Override
-				public AppRegistration find(String name, ApplicationType type) {
-					String filename = name + "-" + type;
-					File file = new File(ROOT, filename);
-					if (file.exists()) {
-						return new AppRegistration(name, type, file.toURI(), file.toURI());
-					}
-					else {
-						return null;
-					}
-				}
-
-				@Override
-				public List<AppRegistration> findAll() {
-					List<AppRegistration> result = new ArrayList<>();
-					for (File file : ROOT.listFiles(FILTER)) {
-						result.add(makeAppRegistration(file));
-					}
-					return result;
-				}
-
-				private AppRegistration makeAppRegistration(File file) {
-					String fileName = file.getName();
-					Matcher matcher = Pattern.compile("(?<name>.+)-(?<type>.+)").matcher(fileName);
-					Assert.isTrue(matcher.matches(), fileName + " does not match expected pattern.");
-					String name = matcher.group("name");
-					ApplicationType type = ApplicationType.valueOf(matcher.group("type"));
-					return new AppRegistration(name, type, file.toURI());
-				}
-			};
-		}
-
-		@Bean
-		public ApplicationConfigurationMetadataResolver metadataResolver() {
-			return new BootApplicationConfigurationMetadataResolver(
-					StreamCompletionProviderTests.class.getClassLoader());
-		}
 	}
 
 }
