@@ -215,7 +215,7 @@ $ SPRING_APPLICATION_JSON='{ "maven": { "local-repository": null,
 
 [[configuration-skipper]]
 == Skipper
-To use features such as Stream update and rollback, the Data Flow Server delegates to the Skipper server to manage the Stream's lifecycle.  Set the configuration property `spring.cloud.skipper.client.uri` to the location of Skipper, e.g.
+To use features such as Stream update and rollback, the Data Flow Server delegates to the Skipper server to manage the Stream's lifecycle.  Set the configuration property `spring.cloud.skipper.client.serverUri` to the location of Skipper, e.g.
 +
 [source,bash,subs=attributes]
 ----
