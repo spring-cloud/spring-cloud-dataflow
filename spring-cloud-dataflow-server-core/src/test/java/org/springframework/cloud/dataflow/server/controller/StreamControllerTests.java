@@ -889,7 +889,7 @@ public class StreamControllerTests {
 
 	@Test
 	public void testAggregateState() {
-		assertThat(StreamDefinitionController.aggregateState(EnumSet.of(deployed, failed)), is(failed));
+		assertThat(StreamDefinitionController.aggregateState(EnumSet.of(deployed, failed)), is(partial));
 		assertThat(StreamDefinitionController.aggregateState(EnumSet.of(unknown, failed)), is(failed));
 		assertThat(StreamDefinitionController.aggregateState(EnumSet.of(deployed, failed, error)), is(error));
 		assertThat(StreamDefinitionController.aggregateState(EnumSet.of(deployed, undeployed)), is(partial));

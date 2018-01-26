@@ -1,5 +1,5 @@
 /*
- * Copyright 2015-2017 the original author or authors.
+ * Copyright 2015-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -145,6 +145,10 @@ public class StreamDefinitionController {
 		if (states.isEmpty() || states.contains(DeploymentState.error)) {
 			logger.debug("aggregateState: Returning " + DeploymentState.error);
 			return DeploymentState.error;
+		}
+		if (states.contains(DeploymentState.deployed) && states.contains(DeploymentState.failed)) {
+			logger.debug("aggregateState: Returning " + DeploymentState.partial);
+			return DeploymentState.partial;
 		}
 		if (states.contains(DeploymentState.failed)) {
 			logger.debug("aggregateState: Returning " + DeploymentState.failed);
