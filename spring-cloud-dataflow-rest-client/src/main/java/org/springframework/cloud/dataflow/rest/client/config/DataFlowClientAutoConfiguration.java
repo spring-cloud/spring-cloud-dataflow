@@ -34,14 +34,14 @@ public class DataFlowClientAutoConfiguration {
 	public DataFlowOperations dataFlowOperations() throws Exception{
 		RestTemplate template = DataFlowTemplate.prepareRestTemplate(restTemplate);
 		final HttpClientConfigurer httpClientConfigurer = HttpClientConfigurer.create()
-				.targetHost(new URI(properties.getUri()))
+				.targetHost(new URI(properties.getServerUri()))
 				.skipTlsCertificateVerification(properties.isSkipSslValidation());
 		if(!StringUtils.isEmpty(properties.getAuthentication().getBasic().getUsername()) &&
 				!StringUtils.isEmpty(properties.getAuthentication().getBasic().getPassword())){
 			httpClientConfigurer.basicAuthCredentials(properties.getAuthentication().getBasic().getUsername(), properties.getAuthentication().getBasic().getPassword());
 			template.setRequestFactory(httpClientConfigurer.buildClientHttpRequestFactory());
 		}
-		return new DataFlowTemplate(new URI(properties.getUri()), template);
+		return new DataFlowTemplate(new URI(properties.getServerUri()), template);
 	}
 
 	@Bean

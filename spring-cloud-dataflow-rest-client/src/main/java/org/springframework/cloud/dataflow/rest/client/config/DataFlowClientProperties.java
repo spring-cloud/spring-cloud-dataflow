@@ -11,7 +11,7 @@ import org.springframework.cloud.dataflow.core.DataFlowPropertyKeys;
 @ConfigurationProperties(prefix = DataFlowPropertyKeys.PREFIX + "client")
 public class DataFlowClientProperties {
 
-	private String uri = "http://localhost:9393";
+	private String serverUri = "http://localhost:9393";
 
 	private Authentication authentication = new Authentication();
 
@@ -35,12 +35,12 @@ public class DataFlowClientProperties {
 		this.skipSslValidation = skipSslValidation;
 	}
 
-	public String getUri() {
-		return uri;
+	public String getServerUri() {
+		return serverUri;
 	}
 
-	public void setUri(String uri) {
-		this.uri = uri;
+	public void setServerUri(String serverUri) {
+		this.serverUri = serverUri;
 	}
 
 	public Authentication getAuthentication() {
