@@ -447,7 +447,7 @@ You can customize the user by setting the following properties:
 ```
 security.user.name=user # Default user name.
 security.user.password= # Password for the default user name. A random password is logged on startup by default.
-security.user.role=VIEW, CREATE, MANAGE # Granted roles for the default user name.
+security.user.role=VIEW,CREATE,MANAGE # Granted roles for the default user name.
 ```
 
 NOTE: Please be aware of inherent issues of Basic Authentication and logging out: The credentials are cached by the browser and simply browsing back to application pages logs you back in.
