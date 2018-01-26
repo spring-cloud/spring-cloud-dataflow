@@ -10,7 +10,7 @@
     newtoc.setAttribute('class', 'js-toc');
     oldtoc.parentNode.replaceChild(newtoc, oldtoc);
     tocbot.init({ contentSelector: '#content',
-        tocSelector: '#toc',
+        tocSelector: '.js-toc',
         headingSelector: 'h1, h2, h3, h4, h5',
         smoothScroll: false });
     var handleTocRefresh = function() {
@@ -22,7 +22,7 @@
                     || document.body.clientWidth;
         if (width < 768) {
             tocbot.refresh({ contentSelector: '#content',
-                tocSelector: '#toc',
+                tocSelector: '.js-toc',
                 headingSelector: 'h1, h2, h3, h4, h5',
                 collapseDepth: 6,
                 activeLinkClass: 'ignoreactive',
@@ -31,7 +31,7 @@
         }
         else {
             tocbot.refresh({ contentSelector: '#content',
-                tocSelector: '#toc',
+                tocSelector: '.js-toc',
                 headingSelector: 'h1, h2, h3, h4, h5',
                 smoothScroll: false });
         }
