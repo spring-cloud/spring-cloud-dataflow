@@ -44,6 +44,7 @@ import org.springframework.cloud.dataflow.server.config.features.FeaturesPropert
 import org.springframework.cloud.dataflow.server.configuration.TestDependencies;
 import org.springframework.cloud.dataflow.server.repository.StreamDefinitionRepository;
 import org.springframework.cloud.dataflow.server.service.StreamService;
+import org.springframework.cloud.dataflow.server.support.MockUtils;
 import org.springframework.cloud.dataflow.server.support.TestResourceUtils;
 import org.springframework.cloud.skipper.ReleaseNotFoundException;
 import org.springframework.cloud.skipper.client.SkipperClient;
@@ -101,6 +102,7 @@ public class SkipperStreamServiceIntegrationTests {
 	@Before
 	public void before() throws URISyntaxException {
 		createTickTock();
+		this.skipperClient = MockUtils.configureMock(this.skipperClient);
 	}
 
 	@After

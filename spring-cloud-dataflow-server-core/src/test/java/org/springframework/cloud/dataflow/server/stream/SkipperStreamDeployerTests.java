@@ -47,6 +47,7 @@ import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
 import org.springframework.hateoas.Resources;
 
+import static junit.framework.TestCase.fail;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
@@ -57,6 +58,7 @@ import static org.springframework.cloud.dataflow.rest.SkipperStream.SKIPPER_PACK
 import static org.springframework.cloud.dataflow.rest.SkipperStream.SKIPPER_PACKAGE_VERSION;
 import static org.springframework.cloud.dataflow.rest.SkipperStream.SKIPPER_PLATFORM_NAME;
 import static org.springframework.cloud.dataflow.rest.SkipperStream.SKIPPER_REPO_NAME;
+import static org.springframework.cloud.dataflow.server.support.MockUtils.createSkipperClientMock;
 
 /**
  * @author Mark Pollack
@@ -96,12 +98,14 @@ public class SkipperStreamDeployerTests {
 		Map<String, String> skipperDeployerProperties = new HashMap<>();
 		skipperDeployerProperties.put(SKIPPER_PACKAGE_NAME, "package1");
 		skipperDeployerProperties.put(SKIPPER_PACKAGE_VERSION, "1.0.1");
-		skipperDeployerProperties.put(SKIPPER_PLATFORM_NAME, "platform1");
+		skipperDeployerProperties.put(SKIPPER_PLATFORM_NAME, "testPlatform");
 		skipperDeployerProperties.put(SKIPPER_REPO_NAME, "mylocal-repo1");
 		StreamDeploymentRequest streamDeploymentRequest = new StreamDeploymentRequest("test1", "time | log",
 				new ArrayList<>(),
 				skipperDeployerProperties);
-		SkipperClient skipperClient = mock(SkipperClient.class);
+
+		SkipperClient skipperClient = createSkipperClientMock();
+
 		SkipperStreamDeployer skipperStreamDeployer = new SkipperStreamDeployer(skipperClient,
 				mock(StreamDefinitionRepository.class), mock(AppRegistryService.class), mock(ForkJoinPool.class));
 		skipperStreamDeployer.deployStream(streamDeploymentRequest);
@@ -112,13 +116,59 @@ public class SkipperStreamDeployerTests {
 		assertThat(installRequestCaptor.getValue().getPackageIdentifier().getPackageName()).isEqualTo("package1");
 		assertThat(installRequestCaptor.getValue().getPackageIdentifier().getPackageVersion()).isEqualTo("1.0.1");
 		assertThat(installRequestCaptor.getValue().getPackageIdentifier().getRepositoryName()).isEqualTo("mylocal-repo1");
-		assertThat(installRequestCaptor.getValue().getInstallProperties().getPlatformName()).isEqualTo("platform1");
+		assertThat(installRequestCaptor.getValue().getInstallProperties().getPlatformName()).isEqualTo("testPlatform");
 		verify(skipperClient).upload(uploadRequestCaptor.capture());
 		assertThat(uploadRequestCaptor.getValue()).isNotNull();
 		assertThat(uploadRequestCaptor.getValue().getName()).isEqualTo("package1");
 		assertThat(uploadRequestCaptor.getValue().getVersion()).isEqualTo("1.0.1");
 		assertThat(installRequestCaptor.getValue().getPackageIdentifier().getRepositoryName()).isEqualTo("mylocal-repo1");
-		assertThat(installRequestCaptor.getValue().getInstallProperties().getPlatformName()).isEqualTo("platform1");
+		assertThat(installRequestCaptor.getValue().getInstallProperties().getPlatformName()).isEqualTo("testPlatform");
+	}
+
+	@Test
+	public void testInvalidPlatformName() {
+		Map<String, String> skipperDeployerProperties = new HashMap<>();
+		skipperDeployerProperties.put(SKIPPER_PACKAGE_NAME, "package1");
+		skipperDeployerProperties.put(SKIPPER_PACKAGE_VERSION, "1.0.1");
+		skipperDeployerProperties.put(SKIPPER_PLATFORM_NAME, "badPlatform");
+		skipperDeployerProperties.put(SKIPPER_REPO_NAME, "mylocal-repo1");
+		StreamDeploymentRequest streamDeploymentRequest = new StreamDeploymentRequest("test1", "time | log",
+				new ArrayList<>(),
+				skipperDeployerProperties);
+
+		SkipperClient skipperClient = createSkipperClientMock();
+
+		SkipperStreamDeployer skipperStreamDeployer = new SkipperStreamDeployer(skipperClient,
+				mock(StreamDefinitionRepository.class), mock(AppRegistryService.class), mock(ForkJoinPool.class));
+		try {
+			skipperStreamDeployer.deployStream(streamDeploymentRequest);
+			fail();
+		} catch (IllegalArgumentException expected) {
+			assertThat(expected).hasMessage("No platform named 'badPlatform'");
+		}
+	}
+
+	@Test
+	public void testNoPlatforms() {
+		Map<String, String> skipperDeployerProperties = new HashMap<>();
+		skipperDeployerProperties.put(SKIPPER_PACKAGE_NAME, "package1");
+		skipperDeployerProperties.put(SKIPPER_PACKAGE_VERSION, "1.0.1");
+		skipperDeployerProperties.put(SKIPPER_REPO_NAME, "mylocal-repo1");
+		StreamDeploymentRequest streamDeploymentRequest = new StreamDeploymentRequest("test1", "time | log",
+				new ArrayList<>(),
+				skipperDeployerProperties);
+
+		SkipperClient skipperClient = mock(SkipperClient.class);
+		when(skipperClient.listDeployers()).thenReturn(new Resources<>(new ArrayList<>(), new ArrayList<>()));
+
+		SkipperStreamDeployer skipperStreamDeployer = new SkipperStreamDeployer(skipperClient,
+				mock(StreamDefinitionRepository.class), mock(AppRegistryService.class), mock(ForkJoinPool.class));
+		try {
+			skipperStreamDeployer.deployStream(streamDeploymentRequest);
+			fail();
+		} catch (IllegalArgumentException expected) {
+			assertThat(expected).hasMessage("No platforms configured");
+		}
 	}
 
 	@Test
@@ -171,13 +221,13 @@ public class SkipperStreamDeployerTests {
 		Map<String, String> skipperDeployerProperties = new HashMap<>();
 		skipperDeployerProperties.put(SKIPPER_PACKAGE_NAME, "package1");
 		skipperDeployerProperties.put(SKIPPER_PACKAGE_VERSION, "1.0.1");
-		skipperDeployerProperties.put(SKIPPER_PLATFORM_NAME, "platform1");
+		skipperDeployerProperties.put(SKIPPER_PLATFORM_NAME, "testPlatform");
 		skipperDeployerProperties.put(SKIPPER_REPO_NAME, "mylocal-repo1");
 
 		StreamDeploymentRequest streamDeploymentRequest = new StreamDeploymentRequest("test1", "time | log",
 				appDeploymentRequests, skipperDeployerProperties);
 
-		SkipperClient skipperClient = mock(SkipperClient.class);
+		SkipperClient skipperClient = createSkipperClientMock();
 
 		SkipperStreamDeployer skipperStreamDeployer = new SkipperStreamDeployer(skipperClient,
 				mock(StreamDefinitionRepository.class),
@@ -185,6 +235,8 @@ public class SkipperStreamDeployerTests {
 
 		skipperStreamDeployer.deployStream(streamDeploymentRequest);
 	}
+
+
 
 	@Test
 	public void testStateOfUndefinedUndeployedStream() {
