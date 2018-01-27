@@ -132,6 +132,106 @@ public class AboutControllerTests {
 	@SpringBootTest(classes = TestDependencies.class)
 	@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
 	@TestPropertySource(properties = {
+			"spring.cloud.dataflow.version-info.dependencies.spring-cloud-dataflow-shell.version=1.2.3.M1",
+			"spring.cloud.dataflow.version-info.dependency-fetch.enabled=false",
+			"spring.cloud.dataflow.version-info.dependencies.spring-cloud-dataflow-shell.checksum-sha1=ABCDEFG"
+	})
+	public static class MilestoneUrlTests {
+
+		private MockMvc mockMvc;
+
+		@Autowired
+		private WebApplicationContext wac;
+
+		@Before
+		public void setupMocks() {
+			this.mockMvc = MockMvcBuilders.webAppContextSetup(wac)
+					.defaultRequest(get("/").accept(MediaType.APPLICATION_JSON)).build();
+		}
+
+		@Test
+		public void testMilestone() throws Exception {
+			ResultActions result = mockMvc.perform(get("/about").accept(MediaType.APPLICATION_JSON)).andDo(print()).andExpect(status().isOk());
+			result.andExpect(jsonPath("$.featureInfo.analyticsEnabled", is(false)))
+					.andExpect(jsonPath("$.versionInfo.shell.name", is("Spring Cloud Data Flow Shell")))
+					.andExpect(jsonPath("$.versionInfo.shell.url", is("https://repo.spring.io/libs-milestone/org/springframework/cloud/spring-cloud-dataflow-shell/1.2.3.M1/spring-cloud-dataflow-shell-1.2.3.M1.jar")))
+					.andExpect(jsonPath("$.versionInfo.shell.version", is("1.2.3.M1")))
+					.andExpect(jsonPath("$.versionInfo.shell.checksumSha1").doesNotExist())
+					.andExpect(jsonPath("$.versionInfo.shell.checksumSha256").doesNotExist());
+		}
+	}
+
+
+	@RunWith(SpringRunner.class)
+	@SpringBootTest(classes = TestDependencies.class)
+	@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
+	@TestPropertySource(properties = {
+			"spring.cloud.dataflow.version-info.dependencies.spring-cloud-dataflow-shell.version=1.2.3.RC1",
+			"spring.cloud.dataflow.version-info.dependency-fetch.enabled=false",
+			"spring.cloud.dataflow.version-info.dependencies.spring-cloud-dataflow-shell.checksum-sha1=ABCDEFG"
+	})
+	public static class RCUrlTests {
+
+		private MockMvc mockMvc;
+
+		@Autowired
+		private WebApplicationContext wac;
+
+		@Before
+		public void setupMocks() {
+			this.mockMvc = MockMvcBuilders.webAppContextSetup(wac)
+					.defaultRequest(get("/").accept(MediaType.APPLICATION_JSON)).build();
+		}
+
+		@Test
+		public void testRC() throws Exception {
+			ResultActions result = mockMvc.perform(get("/about").accept(MediaType.APPLICATION_JSON)).andDo(print()).andExpect(status().isOk());
+			result.andExpect(jsonPath("$.featureInfo.analyticsEnabled", is(false)))
+					.andExpect(jsonPath("$.versionInfo.shell.name", is("Spring Cloud Data Flow Shell")))
+					.andExpect(jsonPath("$.versionInfo.shell.url", is("https://repo.spring.io/libs-milestone/org/springframework/cloud/spring-cloud-dataflow-shell/1.2.3.RC1/spring-cloud-dataflow-shell-1.2.3.RC1.jar")))
+					.andExpect(jsonPath("$.versionInfo.shell.version", is("1.2.3.RC1")))
+					.andExpect(jsonPath("$.versionInfo.shell.checksumSha1").doesNotExist())
+					.andExpect(jsonPath("$.versionInfo.shell.checksumSha256").doesNotExist());
+		}
+	}
+
+	@RunWith(SpringRunner.class)
+	@SpringBootTest(classes = TestDependencies.class)
+	@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
+	@TestPropertySource(properties = {
+			"spring.cloud.dataflow.version-info.dependencies.spring-cloud-dataflow-shell.version=1.2.3.GA1",
+			"spring.cloud.dataflow.version-info.dependency-fetch.enabled=false",
+			"spring.cloud.dataflow.version-info.dependencies.spring-cloud-dataflow-shell.checksum-sha1=ABCDEFG"
+	})
+	public static class ReleaseUrlTests {
+
+		private MockMvc mockMvc;
+
+		@Autowired
+		private WebApplicationContext wac;
+
+		@Before
+		public void setupMocks() {
+			this.mockMvc = MockMvcBuilders.webAppContextSetup(wac)
+					.defaultRequest(get("/").accept(MediaType.APPLICATION_JSON)).build();
+		}
+
+		@Test
+		public void testRelease() throws Exception {
+			ResultActions result = mockMvc.perform(get("/about").accept(MediaType.APPLICATION_JSON)).andDo(print()).andExpect(status().isOk());
+			result.andExpect(jsonPath("$.featureInfo.analyticsEnabled", is(false)))
+					.andExpect(jsonPath("$.versionInfo.shell.name", is("Spring Cloud Data Flow Shell")))
+					.andExpect(jsonPath("$.versionInfo.shell.url", is("https://repo1.maven.org/maven2/org/springframework/cloud/spring-cloud-dataflow-shell/1.2.3.GA1/spring-cloud-dataflow-shell-1.2.3.GA1.jar")))
+					.andExpect(jsonPath("$.versionInfo.shell.version", is("1.2.3.GA1")))
+					.andExpect(jsonPath("$.versionInfo.shell.checksumSha1").doesNotExist())
+					.andExpect(jsonPath("$.versionInfo.shell.checksumSha256").doesNotExist());
+		}
+	}
+
+	@RunWith(SpringRunner.class)
+	@SpringBootTest(classes = TestDependencies.class)
+	@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
+	@TestPropertySource(properties = {
 			"spring.cloud.dataflow.version-info.dependencies.spring-cloud-dataflow-shell.version=1.2.3.RELEASE",
 			"spring.cloud.dataflow.version-info.dependency-fetch.enabled=true",
 			"spring.cloud.dataflow.version-info.dependencies.spring-cloud-dataflow-shell.url=https://repo.spring.io/libs-milestone/org/springframework/cloud/spring-cloud-dataflow-shell/1.3.0.BUILD-SNAPSHOT/spring-cloud-dataflow-shell-1.3.0.BUILD-SNAPSHOT.jsdfasdf",
