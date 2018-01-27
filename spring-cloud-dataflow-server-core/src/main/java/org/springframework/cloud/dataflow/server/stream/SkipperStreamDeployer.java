@@ -192,7 +192,7 @@ public class SkipperStreamDeployer implements StreamDeployer {
 		String repoName = streamDeployerProperties.get(SKIPPER_REPO_NAME);
 		repoName = (StringUtils.hasText(repoName)) ? (repoName) : "local";
 		String platformName = streamDeployerProperties.get(SKIPPER_PLATFORM_NAME);
-		platformName = (StringUtils.hasText(platformName)) ? platformName : "default";
+		platformName = determinePlatformName(platformName);
 		String packageName = streamDeployerProperties.get(SKIPPER_PACKAGE_NAME);
 		packageName = (StringUtils.hasText(packageName)) ? packageName : streamDeploymentRequest.getStreamName();
 		// Create the package .zip file to upload
@@ -226,6 +226,29 @@ public class SkipperStreamDeployer implements StreamDeployer {
 		Release release = skipperClient.install(installRequest);
 		// TODO store releasename in deploymentIdRepository...
 		return release;
+	}
+
+	private String determinePlatformName(final String platformName) {
+		Resources<Deployer> deployerResources = skipperClient.listDeployers();
+		Collection<Deployer> deployers = deployerResources.getContent();
+		if (StringUtils.hasText(platformName)) {
+			List<Deployer> filteredDeployers = deployers.stream()
+					.filter(d -> d.getName().equals(platformName))
+					.collect(toList());
+			if (filteredDeployers.size() == 0) {
+				throw new IllegalArgumentException("No platform named '" + platformName + "'");
+			} else {
+				return platformName;
+			}
+		} else {
+			if (deployers.size() == 0) {
+				throw new IllegalArgumentException("No platforms configured");
+			} else {
+				String platformNameToUse = deployers.stream().findFirst().get().getName();
+				logger.info("Using platform '" + platformNameToUse + "'");
+				return platformNameToUse;
+			}
+		}
 	}
 
 	private void validateAllAppsRegistered(StreamDeploymentRequest streamDeploymentRequest) {
