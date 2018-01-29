@@ -157,6 +157,8 @@ spring.cloud.deployer.local.javaCmd=java # Command to run java.
 spring.cloud.deployer.local.shutdownTimeout=30 # Max number of seconds to wait for app shutdown.
 
 spring.cloud.deployer.local.javaOpts= # The Java options to pass to the JVM
+
+spring.cloud.deployer.local.freeDiskSpacePercentage=5 # The target percentage of free disk space to always aim for when cleaning downloaded resources (typically via the local maven repository). Specify as an integer greater than zero and less than 100. Default is 5.
 ----
 
 When deploying the application, you can also set deployer properties prefixed with `deployer.<name of application>`. For example, to set Java options for the time application in the `ticktock` stream, use the following stream deployment properties.
