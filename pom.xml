@@ -31,16 +31,16 @@
         <spring-statemachine.version>1.2.8.RELEASE</spring-statemachine.version>
 
         <spring-cloud.version>Dalston.RELEASE</spring-cloud.version>
-        <spring-cloud-deployer.version>1.3.0.RC1</spring-cloud-deployer.version>
-        <spring-cloud-deployer-local.version>1.3.0.RC1</spring-cloud-deployer-local.version>
-        <spring-cloud-deployer-cloudfoundry.version>1.3.0.RC2</spring-cloud-deployer-cloudfoundry.version>
-        <spring-cloud-deployer-kubernetes.version>1.3.0.RC1</spring-cloud-deployer-kubernetes.version>
+        <spring-cloud-deployer.version>1.3.0.RELEASE</spring-cloud-deployer.version>
+        <spring-cloud-deployer-local.version>1.3.0.RELEASE</spring-cloud-deployer-local.version>
+        <spring-cloud-deployer-cloudfoundry.version>1.3.0.RELEASE</spring-cloud-deployer-cloudfoundry.version>
+        <spring-cloud-deployer-kubernetes.version>1.3.0.RELEASE</spring-cloud-deployer-kubernetes.version>
 
         <dockerfile-maven-plugin.version>1.3.6</dockerfile-maven-plugin.version>
         <zeroturnaround.version>1.11</zeroturnaround.version>
         <spring-restdocs.version>1.2.2.RELEASE</spring-restdocs.version>
         <java-semver.version>0.9.0</java-semver.version>
-        <spring-common-security>1.0.0.RC2</spring-common-security>
+        <spring-common-security>1.0.0.RELEASE</spring-common-security>
 
         <reactor.version>3.0.7.RELEASE</reactor.version>
         <jsonpath.version>2.2.0</jsonpath.version>
