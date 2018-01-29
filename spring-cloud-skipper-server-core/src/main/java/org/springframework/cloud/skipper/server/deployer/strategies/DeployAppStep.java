@@ -96,7 +96,6 @@ public class DeployAppStep {
 			replacingRelease.getInfo().setStatus(status);
 			replacingRelease.getInfo().setDescription("Could not deploy app.");
 			this.releaseRepository.save(replacingRelease);
-			// TODO If app 2 of 3 failed, what to do with the previous app that deployed?
 		}
 		return applicationNamesToUpgrade;
 	}

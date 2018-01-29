@@ -63,9 +63,6 @@ public class ManifestCommands extends AbstractSkipperCommand {
 		}
 		catch (HttpStatusCodeException e) {
 			if (e.getStatusCode() == HttpStatus.NOT_FOUND) {
-				// 404 means release not found.
-				// TODO it'd be nice to rethrow ReleaseNotFoundException in
-				// SkipperClient but that exception is on server
 				return "Release with name '" + releaseName + "' not found";
 			}
 			// if something else, rethrow

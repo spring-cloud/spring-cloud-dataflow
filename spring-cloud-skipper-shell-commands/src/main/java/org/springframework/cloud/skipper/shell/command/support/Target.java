@@ -223,7 +223,6 @@ public class Target {
 	}
 
 	public enum TargetStatus {
-		// TODO SUCCESS ENUM IS NOT USED.
 		SUCCESS,
 		ERROR
 	}

@@ -199,7 +199,6 @@ public class DefaultSkipperClient implements SkipperClient {
 		if (!details) {
 			parameters.put("projection", "summary");
 			parameters.put("sort", "name,asc");
-			// TODO semver sort..
 		}
 		return traversalBuilder.withTemplateParameters(parameters).toObject(typeReference);
 	}

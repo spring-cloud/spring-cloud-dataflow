@@ -122,7 +122,6 @@ public class PackageService implements ResourceLoaderAware {
 			Package pkgToReturn = this.packageReader
 					.read(new File(targetPath.toFile(), packageMetadata.getName() + "-" +
 							packageMetadata.getVersion()));
-			// TODO should we have an option to not cache the package file?
 			packageMetadata.setPackageFile(new PackageFile(Files.readAllBytes(targetFile.toPath())));
 			// Only save once package is successfully deserialized and package file read.
 			pkgToReturn.setMetadata(this.packageMetadataRepository.save(packageMetadata));
@@ -259,8 +258,6 @@ public class PackageService implements ResourceLoaderAware {
 
 	private Repository getRepositoryToUpload(String repoName) {
 		Repository localRepositoryToUpload = this.repositoryRepository.findByName(repoName);
-		// TODO: Verify the repo name set to package upload properties always belong to local
-		// repository type.
 		if (localRepositoryToUpload == null) {
 			throw new SkipperException("Could not find local repository to upload to named " + repoName);
 		}

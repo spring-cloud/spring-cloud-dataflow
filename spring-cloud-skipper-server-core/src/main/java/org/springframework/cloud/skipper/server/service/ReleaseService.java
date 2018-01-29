@@ -251,7 +251,6 @@ public class ReleaseService {
 			throw new ReleaseNotFoundException(releaseName);
 		}
 		release = status(release);
-		// TODO check contract for status wrt to returning null.
 		if (release == null) {
 			throw new ReleaseNotFoundException(releaseName);
 		}

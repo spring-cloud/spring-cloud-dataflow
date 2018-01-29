@@ -68,8 +68,6 @@ public class Repository extends AbstractEntity {
 	 */
 	private Integer repoOrder;
 
-	// TODO security/checksum fields of referenced index file.
-
 	public Repository() {
 	}
 

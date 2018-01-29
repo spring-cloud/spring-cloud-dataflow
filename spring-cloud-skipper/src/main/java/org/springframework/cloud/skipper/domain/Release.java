@@ -119,7 +119,6 @@ public class Release extends AbstractEntity {
 		this.repositoryId = pkg.getMetadata().getRepositoryId();
 		ObjectMapper mapper = new ObjectMapper();
 		try {
-			// TODO verify this behavior
 			// Note that @JsonIgnore is on the package file byte array field.
 			this.pkgJsonString = mapper.writeValueAsString(pkg);
 		}

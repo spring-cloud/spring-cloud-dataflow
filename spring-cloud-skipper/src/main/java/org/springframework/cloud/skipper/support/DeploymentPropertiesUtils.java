@@ -130,7 +130,6 @@ public final class DeploymentPropertiesUtils {
 	private static void addKeyValuePairAsProperty(String pair, Map<String, String> properties) {
 		int firstEquals = pair.indexOf('=');
 		if (firstEquals != -1) {
-			// todo: should key only be a "flag" as in: put(key, true)?
 			properties.put(pair.substring(0, firstEquals).trim(), pair.substring(firstEquals + 1).trim());
 		}
 	}

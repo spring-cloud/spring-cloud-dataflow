@@ -152,7 +152,6 @@ public class ConfigValueUtils {
 			merge(currentPackageValueMapForDependency, overrideMapToUse);
 
 			mergedValues.put(dependency.getMetadata().getName(),
-					// TODO support multiple levels of dependency, convert PackageValueMap to ConfigValues
 					mergeOverrideMap(dependency, currentPackageValueMapForDependency));
 		}
 		return mergedValues;

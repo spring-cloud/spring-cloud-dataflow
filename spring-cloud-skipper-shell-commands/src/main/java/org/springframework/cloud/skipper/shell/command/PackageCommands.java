@@ -138,12 +138,9 @@ public class PackageCommands extends AbstractSkipperCommand {
 	public String install(
 			@ShellOption(help = "name of the package to install") String packageName,
 			@ShellOption(help = "version of the package to install, if not specified latest version will be used", defaultValue = NULL) String packageVersion,
-			// TODO specify a specific package repository
 			@ShellOption(help = "specify values in a YAML file", defaultValue = NULL) File file,
 			@ShellOption(help = "the comma separated set of properties to override during install", defaultValue = NULL) String properties,
-			// TODO support generation of a release name
 			@ShellOption(help = "the release name to use") String releaseName,
-			// TODO investigate server side support of 'default'
 			@ShellOption(help = "the platform name to use", defaultValue = "default") String platformName)
 			throws IOException {
 		// Commented out until https://github.com/spring-cloud/spring-cloud-skipper/issues/263 is

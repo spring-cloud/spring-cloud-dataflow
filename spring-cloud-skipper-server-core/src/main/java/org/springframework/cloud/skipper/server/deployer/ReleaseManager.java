@@ -33,7 +33,6 @@ public interface ReleaseManager {
 	 * @param release the requested release
 	 * @return the release object after requesting installation
 	 */
-	// TODO return just release name and version
 	Release install(Release release);
 
 	/**
