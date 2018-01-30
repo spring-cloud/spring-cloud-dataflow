@@ -270,8 +270,9 @@ public class AboutController {
 		final String BUILD_SNAPSHOT_CRITERIA = "BUILD-SNAPSHOT";
 		final String REPO_SNAPSHOT_ROOT = "https://repo.spring.io/libs-snapshot";
 		final String REPO_MILESTONE_ROOT = "https://repo.spring.io/libs-milestone";
-		final String REPO_RELEASE_ROOT = "https://repo.spring.io/libs-release";
 		final String MAVEN_ROOT = "https://repo1.maven.org/maven2";
+		final String REPO_RELEASE_ROOT = "https://repo.spring.io/libs-release";
+
 		String result = MAVEN_ROOT;
 		if (version.endsWith(BUILD_SNAPSHOT_CRITERIA)) {
 			result = REPO_SNAPSHOT_ROOT;
@@ -280,6 +281,9 @@ public class AboutController {
 			result = REPO_MILESTONE_ROOT;
 		}
 		else if (version.contains(".RC")) {
+			result = REPO_MILESTONE_ROOT;
+		}
+		else if (version.contains(".RELEASE")) {
 			result = REPO_RELEASE_ROOT;
 		}
 		return result;
