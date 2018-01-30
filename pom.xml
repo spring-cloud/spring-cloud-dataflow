@@ -4,7 +4,7 @@
 
     <groupId>org.springframework.cloud</groupId>
     <artifactId>spring-cloud-common-security-config</artifactId>
-    <version>1.0.1.BUILD-SNAPSHOT</version>
+    <version>1.0.0.BUILD-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <properties>
@@ -23,4 +23,32 @@
         <module>spring-cloud-starter-common-security-config-web</module>
     </modules>
 
+    <organization>
+        <name>Pivotal Software, Inc.</name>
+        <url>http://www.spring.io</url>
+    </organization>
+    <licenses>
+        <license>
+          <name>The Apache Software License, Version 2.0</name>
+          <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+          <distribution>repo</distribution>
+        </license>
+    </licenses>
+    <developers>
+        <developer>
+            <id>ghillert</id>
+            <name>Gunnar Hillert</name>
+            <email>ghillert@pivotal.io</email>
+        </developer>
+        <developer>
+            <id>ilayaperumalg</id>
+            <name>Ilayaperumal Gopinathan</name>
+            <email>igopinathan@pivotal.io</email>
+        </developer>
+    </developers>
+    <scm>
+        <connection>scm:git:git://github.com/spring-cloud/spring-cloud-common-security-config.git</connection>
+        <developerConnection>scm:git:ssh://github.com:spring-cloud/spring-cloud-common-security-config.git</developerConnection>
+        <url>https://github.com/spring-cloud/spring-cloud-common-security-config</url>
+    </scm>
 </project>
