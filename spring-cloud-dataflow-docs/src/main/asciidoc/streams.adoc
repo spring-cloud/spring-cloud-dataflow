@@ -1291,22 +1291,6 @@ To get started, you need to add the following dependency to your project, as fol
 </dependency>
 ----
 
-You also need to add a reference to the Spring Milestone Maven repository, as follows:
-
-[source,xml]
-----
-	<repositories>
-		<repository>
-			<id>spring-milestones</id>
-			<name>Spring Milestones</name>
-			<url>http://repo.spring.io/libs-milestone-local</url>
-			<snapshots>
-				<enabled>false</enabled>
-			</snapshots>
-		</repository>
-	</repositories>
-----
-
 NOTE: A complete sample can be found in the https://github.com/spring-cloud/spring-cloud-dataflow-samples[Spring Cloud Data Flow Samples Repository].
 
 === Overview
