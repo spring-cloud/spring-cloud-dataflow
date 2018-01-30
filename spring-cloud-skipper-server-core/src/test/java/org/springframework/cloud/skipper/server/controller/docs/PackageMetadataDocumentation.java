@@ -25,11 +25,13 @@ import static org.springframework.restdocs.payload.PayloadDocumentation.fieldWit
 import static org.springframework.restdocs.payload.PayloadDocumentation.responseFields;
 import static org.springframework.restdocs.request.RequestDocumentation.parameterWithName;
 import static org.springframework.restdocs.request.RequestDocumentation.pathParameters;
+import static org.springframework.restdocs.request.RequestDocumentation.requestParameters;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 /**
  * @author Gunnar Hillert
+ * @author Ilayaperumal Gopinathan
  */
 @ActiveProfiles("repo-test")
 public class PackageMetadataDocumentation extends BaseDocumentation {
@@ -123,5 +125,81 @@ public class PackageMetadataDocumentation extends BaseDocumentation {
 								fieldWithPath("_links.packageMetadata.templated").ignored(),
 								fieldWithPath("_links.install.href").ignored())
 										.and(super.defaultLinkProperties)));
+	}
+
+	@Test
+	public void getPackageMetadataSearchFindByName() throws Exception {
+		this.mockMvc.perform(
+				get("/api/packageMetadata/search/findByName?name=log"))
+				.andDo(print())
+				.andExpect(status().isOk())
+				.andDo(this.documentationHandler.document(
+						requestParameters(parameterWithName("name").description("The name of the Package")),
+						responseFields(
+								fieldWithPath("_embedded.packageMetadata[].apiVersion")
+										.description("The Package Index spec version this file is based on"),
+								fieldWithPath("_embedded.packageMetadata[].origin")
+										.description("Indicates the origin of the repository (free form text)"),
+								fieldWithPath("_embedded.packageMetadata[].repositoryId")
+										.description("The repository ID this Package belongs to."),
+								fieldWithPath("_embedded.packageMetadata[].repositoryName")
+										.description("The repository name this Package belongs to."),
+								fieldWithPath("_embedded.packageMetadata[].kind").description("What type of package system is being used"),
+								fieldWithPath("_embedded.packageMetadata[].name").description("The name of the package"),
+								fieldWithPath("_embedded.packageMetadata[].displayName").description("The display name of the package"),
+								fieldWithPath("_embedded.packageMetadata[].version").description("The version of the package"),
+								fieldWithPath("_embedded.packageMetadata[].packageSourceUrl")
+										.description("Location to source code for this package"),
+								fieldWithPath("_embedded.packageMetadata[].packageHomeUrl").description("The home page of the package"),
+								fieldWithPath("_embedded.packageMetadata[].tags")
+										.description("A comma separated list of tags to use for searching"),
+								fieldWithPath("_embedded.packageMetadata[].maintainer").description("Who is maintaining this package"),
+								fieldWithPath("_embedded.packageMetadata[].description").description("Brief description of the package"),
+								fieldWithPath("_embedded.packageMetadata[].sha256").description(
+										"Hash of package binary that will be downloaded using SHA256 hash algorithm"),
+								fieldWithPath("_embedded.packageMetadata[].iconUrl").description("Url location of a icon"),
+								fieldWithPath("_embedded.packageMetadata[]._links.self.href").ignored(),
+								fieldWithPath("_embedded.packageMetadata[]._links.packageMetadata.href").ignored(),
+								fieldWithPath("_embedded.packageMetadata[]._links.packageMetadata.templated").ignored(),
+								fieldWithPath("_embedded.packageMetadata[]._links.install.href").ignored())
+								.and(super.defaultLinkProperties)));
+	}
+
+	@Test
+	public void getPackageMetadataSearchFindByNameContainingIgnoreCase() throws Exception {
+		this.mockMvc.perform(
+				get("/api/packageMetadata/search/findByNameContainingIgnoreCase?name=LO"))
+				.andDo(print())
+				.andExpect(status().isOk())
+				.andDo(this.documentationHandler.document(
+						requestParameters(parameterWithName("name").description("The name of the Package")),
+						responseFields(
+								fieldWithPath("_embedded.packageMetadata[].apiVersion")
+										.description("The Package Index spec version this file is based on"),
+								fieldWithPath("_embedded.packageMetadata[].origin")
+										.description("Indicates the origin of the repository (free form text)"),
+								fieldWithPath("_embedded.packageMetadata[].repositoryId")
+										.description("The repository ID this Package belongs to."),
+								fieldWithPath("_embedded.packageMetadata[].repositoryName")
+										.description("The repository name this Package belongs to."),
+								fieldWithPath("_embedded.packageMetadata[].kind").description("What type of package system is being used"),
+								fieldWithPath("_embedded.packageMetadata[].name").description("The name of the package"),
+								fieldWithPath("_embedded.packageMetadata[].displayName").description("The display name of the package"),
+								fieldWithPath("_embedded.packageMetadata[].version").description("The version of the package"),
+								fieldWithPath("_embedded.packageMetadata[].packageSourceUrl")
+										.description("Location to source code for this package"),
+								fieldWithPath("_embedded.packageMetadata[].packageHomeUrl").description("The home page of the package"),
+								fieldWithPath("_embedded.packageMetadata[].tags")
+										.description("A comma separated list of tags to use for searching"),
+								fieldWithPath("_embedded.packageMetadata[].maintainer").description("Who is maintaining this package"),
+								fieldWithPath("_embedded.packageMetadata[].description").description("Brief description of the package"),
+								fieldWithPath("_embedded.packageMetadata[].sha256").description(
+										"Hash of package binary that will be downloaded using SHA256 hash algorithm"),
+								fieldWithPath("_embedded.packageMetadata[].iconUrl").description("Url location of a icon"),
+								fieldWithPath("_embedded.packageMetadata[]._links.self.href").ignored(),
+								fieldWithPath("_embedded.packageMetadata[]._links.packageMetadata.href").ignored(),
+								fieldWithPath("_embedded.packageMetadata[]._links.packageMetadata.templated").ignored(),
+								fieldWithPath("_embedded.packageMetadata[]._links.install.href").ignored())
+								.and(super.defaultLinkProperties)));
 	}
 }

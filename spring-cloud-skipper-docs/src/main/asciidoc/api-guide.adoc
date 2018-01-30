@@ -210,6 +210,49 @@ include::{snippets}/package-metadata-documentation/get-package-metadata-details/
 
 include::{snippets}/package-metadata-documentation/get-package-metadata-details/response-fields.adoc[]
 
+[[resources-package-search-find-by-name]]
+==== Search by Package Name
+
+A `GET` request will return a list for all Spring Cloud Skipper package metadata by the given package name.
+
+===== Request structure
+getPackageMetadataSearchFindByName
+include::{snippets}/package-metadata-documentation/get-package-metadata-search-find-by-name/http-request.adoc[]
+
+===== Example request
+
+include::{snippets}/package-metadata-documentation/get-package-metadata-search-find-by-name/curl-request.adoc[]
+
+===== Response structure
+
+include::{snippets}/package-metadata-documentation/get-package-metadata-search-find-by-name/http-response.adoc[]
+
+===== Response fields
+
+include::{snippets}/package-metadata-documentation/get-package-metadata-search-find-by-name/response-fields.adoc[]
+
+[[resources-package-search-findbyname-ignore-case]]
+==== Search by Package Name ignoring case
+
+A `GET` request will return a list for all Spring Cloud Skipper package metadata by the given package name ignoring case.
+
+===== Request structure
+
+include::{snippets}/package-metadata-documentation/get-package-metadata-search-find-by-name-containing-ignore-case//http-request.adoc[]
+
+===== Example request
+
+include::{snippets}/package-metadata-documentation/get-package-metadata-search-find-by-name-containing-ignore-case/curl-request.adoc[]
+
+===== Response structure
+
+include::{snippets}/package-metadata-documentation/get-package-metadata-search-find-by-name-containing-ignore-case/http-response.adoc[]
+
+===== Response fields
+
+include::{snippets}/package-metadata-documentation/get-package-metadata-search-find-by-name-containing-ignore-case/response-fields.adoc[]
+
+
 [[resources-package]]
 === Package
 
