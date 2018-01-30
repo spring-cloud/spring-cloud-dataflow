@@ -850,21 +850,12 @@ An additional lifecycle stage of Stream is available if you run in "skipper" mod
 
 https://cloud.spring.io/spring-cloud-skipper/[Skipper] is a server that you discover Spring Boot applications and manage their lifecycle on multiple Cloud Platforms.
 
-Applications in Skipper are bundled as packages that contain templated configuration files. They also contain an optional `values` file that contains default values used to fill in template placeholders.  You can find out more about the format of the package .zip file in Skipper's documentation on https://docs.spring.io/spring-cloud-skipper/docs/1.0.0.M2/reference/htmlsingle/#packages[Packages].
-Skipper's templated configuration files contain placeholders for application properties, application version, and deployment properties.
-Package .zip files are uploaded to Skipper and stored in a package repository.
-Skipper's package repository is analogous to those found in tools such as `apt-get` or `brew`.
+Applications in Skipper are bundled as packages that contain the application's resource location, application properties and deployment properites.
+You can think Skipper packages as analogous to packages found in tools such as `apt-get` or `brew`.
 
-You can override template values when installing or upgrading a package.
-Skipper orchestrates the upgrade/rollback procedure of applications between different versions, taking the minimal set of actions to bring the system to the desired state.
-For example, if only one application in a stream has been updated, only that single application is deployed with a new version, and only the old version of that one application is undeployed.
-When upgrading, an application is considered different if any of its application properties, deployment properties (excluding count), or application version (for example, 1.0.0.RELEASE) differs from the currently installed application.
-
-Spring Cloud Data Flow is integrated with Skipper by generating a Skipper package when deploying a Stream.
-The generated package name is the same name as the Stream.
-The generated package is uploaded to Skipper's package repository, and Data Flow then instructs
-Skipper to install the package that corresponds to the Stream.
-Subsequent commands to upgrade and rollback the applications within the Stream are passed through to Skipper after some validation checks are performed by Data Flow.
+When Data Flow deploys a Stream, it will generate and upload a package to Skipper that represents the applications in the Stream.
+Subsequent commands to upgrade or rollback the applications within the Stream are passed through to Skipper.
+In addition, the Stream definition is reverse engineered from the package and the status of the Stream is also delegated to Skipper.
 
 === Register a Versioned Stream App
 Skipper extends the _<<streams.adoc#spring-cloud-dataflow-register-stream-apps, Register a Stream App>>_
