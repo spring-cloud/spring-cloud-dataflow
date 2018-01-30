@@ -4,19 +4,19 @@
 
     <groupId>org.springframework.cloud</groupId>
     <artifactId>spring-cloud-starter-common-security-config-web</artifactId>
-    <version>1.0.0.RELEASE</version>
+    <version>1.0.1.BUILD-SNAPSHOT</version>
 
     <parent>
         <groupId>org.springframework.cloud</groupId>
         <artifactId>spring-cloud-common-security-config</artifactId>
-        <version>1.0.0.RELEASE</version>
+        <version>1.0.1.BUILD-SNAPSHOT</version>
     </parent>
 
     <dependencies>
         <dependency>
             <groupId>org.springframework.cloud</groupId>
             <artifactId>spring-cloud-common-security-config-web</artifactId>
-            <version>1.0.0.RELEASE</version>
+            <version>1.0.1.BUILD-SNAPSHOT</version>
         </dependency>
     </dependencies>
 
