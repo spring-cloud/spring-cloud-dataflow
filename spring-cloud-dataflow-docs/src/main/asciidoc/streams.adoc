@@ -1272,6 +1272,8 @@ The preceding example directs the data payloads from the Amazon S3, FTP, and HTT
 The fan-out use case is when you determine the destination of a stream based on some information that is only known at runtime.
 In this case, the link:http://docs.spring.io/spring-cloud-stream-app-starters/docs/Celsius.SR1/reference/html/spring-cloud-stream-modules-sinks.html#spring-cloud-stream-modules-router-sink[Router Application] can be used to specify how to direct the incoming message to one of N named destinations.
 
+A nice link:https://youtu.be/l8SgHtP5QCI[Video] showing Fan-in and Fan-out behavior is also available.
+
 [[spring-cloud-dataflow-stream-java-dsl]]
 == Stream Java DSL
 
