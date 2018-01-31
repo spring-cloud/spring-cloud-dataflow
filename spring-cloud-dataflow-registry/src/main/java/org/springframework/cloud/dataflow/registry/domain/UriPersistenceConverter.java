@@ -22,7 +22,7 @@ import javax.persistence.Converter;
 import org.springframework.util.StringUtils;
 
 /**
- * Used by the repository to ser/deser URI fields
+ * Convert URI to strings, used by the repository to ser/deser URI fields in Hibernate.
  *
  * @author Christian Tzolov
  */

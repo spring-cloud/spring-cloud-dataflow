@@ -9,6 +9,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.repository.PagingAndSortingRepository;
 
 /**
+ * Repository interface for managing the {@link AppRegistration} class.
  * @author Christian Tzolov
  * @author Ilayaperumal Gopinathan
  */

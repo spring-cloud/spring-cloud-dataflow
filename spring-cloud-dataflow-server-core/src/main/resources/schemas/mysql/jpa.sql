@@ -1,15 +1,15 @@
 
-   create table APP_REGISTRATION (
-        id bigint not null,
-        object_version bigint,
-        default_version bit,
-        metadata_uri varchar(255),
+    create table APP_REGISTRATION (
+       id bigint not null,
+        object_Version bigint,
+        default_Version bit,
+        metadata_Uri longtext,
         name varchar(255),
         type integer,
-        uri varchar(255),
+        uri longtext,
         version varchar(255),
         primary key (id)
-    );
+    )
 
     create table hibernate_sequence (
         next_val bigint
