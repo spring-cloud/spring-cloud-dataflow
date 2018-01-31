@@ -909,6 +909,9 @@ Spring Cloud Data Flow.
 [[configuration-security-oauth2-shell]]
 ==== OAuth Authentication using the Spring Cloud Data Flow Shell
 
+When using the Shell, the credentials can either be provided via username and password
+or by specifying a _credentials-provider_ command.
+
 If your OAuth2 provider supports the _Password_ Grant Type you can start the
 _Data Flow Shell_ with:
 
@@ -921,7 +924,7 @@ $ java -jar spring-cloud-dataflow-shell-{project-version}.jar \
 
 NOTE: Keep in mind that when authentication for Spring Cloud Data Flow is enabled,
 the underlying OAuth2 provider *must* support the _Password_ OAuth2 Grant Type
-if you want to use the Shell.
+if you want to use the Shell via username/password authentication.
 
 From within the Data Flow Shell you can also provide credentials by using the following command:
 
@@ -944,6 +947,27 @@ dataflow config info
 ║Target     │http://localhost:9393                  ║
 ╚═══════════╧═══════════════════════════════════════╝
 ----
+
+Alternatively, you can specify the _credentials-provider_ command in order to
+pass-in a bearer token directly, instead of providing a username and password.
+This works from within the shell or by providing the
+`--dataflow.credentials-provider-command` command-line argument when starting the Shell.
+
+[IMPORTANT]
+====
+When using the _credentials-provider_ command, please be aware that your
+specified command *must* return a _Bearer token_ (Access Token prefixed with _Bearer_).
+For instance, in Unix environments the following simplistic command can be used:
+
+[source,bash,subs=attributes]
+----
+$ java -jar spring-cloud-dataflow-shell-{project-version}.jar \
+  --dataflow.uri=http://localhost:9393 \
+  --dataflow.credentials-provider-command="echo Bearer 123456789"
+----
+
+====
+
 ==== OAuth2 Authentication Examples
 
 This section offers the following authentication examples:
