@@ -436,11 +436,20 @@ public class TestDependencies extends WebMvcConfigurationSupport {
 			when(streamDeployer.environmentInfo()).thenReturn(appDeployerEnvInfo);
 		}
 		else {
-			when(streamDeployer.environmentInfo()).thenThrow(new UnsupportedOperationException());
+			RuntimeEnvironmentInfo appDeployerEnvInfoSkipper = builder
+					.implementationName("skipper server")
+					.implementationVersion("1.0")
+					.platformApiVersion("")
+					.platformClientVersion("")
+					.platformHostVersion("")
+					.platformType("Skipper Managed")
+					.spiClass(SkipperClient.class).build();
+
+			when(streamDeployer.environmentInfo()).thenReturn(appDeployerEnvInfoSkipper);
 		}
 		when(taskLauncher.environmentInfo()).thenReturn(taskDeployerEnvInfo);
 		return new AboutController(streamDeployer, taskLauncher,
-				mock(FeaturesProperties.class), versionInfoProperties,
+				featuresProperties, versionInfoProperties,
 				mock(SecurityStateBean.class));
 	}
 }
