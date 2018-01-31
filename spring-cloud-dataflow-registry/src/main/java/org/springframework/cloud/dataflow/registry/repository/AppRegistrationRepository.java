@@ -7,11 +7,14 @@ import org.springframework.cloud.dataflow.registry.domain.AppRegistration;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.repository.PagingAndSortingRepository;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
+ * Repository interface for managing the {@link AppRegistration} class.
  * @author Christian Tzolov
  * @author Ilayaperumal Gopinathan
  */
+@Transactional
 public interface AppRegistrationRepository extends PagingAndSortingRepository<AppRegistration, Long> {
 
 	AppRegistration findAppRegistrationByNameAndTypeAndVersion(String name, ApplicationType type, String version);
