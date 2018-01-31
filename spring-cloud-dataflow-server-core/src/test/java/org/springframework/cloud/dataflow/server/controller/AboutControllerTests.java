@@ -17,12 +17,14 @@
 package org.springframework.cloud.dataflow.server.controller;
 
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.cloud.dataflow.server.configuration.TestDependencies;
+import org.springframework.cloud.dataflow.server.support.LogTestNameRule;
 import org.springframework.http.MediaType;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.TestPropertySource;
@@ -61,6 +63,9 @@ public class AboutControllerTests {
 
 	private MockMvc mockMvc;
 
+	@Rule
+	public LogTestNameRule logTestName = new LogTestNameRule();
+
 	@Autowired
 	private WebApplicationContext wac;
 
@@ -73,7 +78,7 @@ public class AboutControllerTests {
 	@Test
 	public void testListApplications() throws Exception {
 		ResultActions result = mockMvc.perform(get("/about").accept(MediaType.APPLICATION_JSON)).andDo(print()).andExpect(status().isOk());
-				result.andExpect(jsonPath("$.featureInfo.analyticsEnabled", is(false)))
+				result.andExpect(jsonPath("$.featureInfo.analyticsEnabled", is(true)))
 				.andExpect(jsonPath("$.featureInfo.skipperEnabled", is(false)))
 				.andExpect(jsonPath("$.versionInfo.implementation.name", is("${info.app.name}")))
 				.andExpect(jsonPath("$.versionInfo.implementation.version", is("1.2.3.IMPLEMENTATION.TEST")))
@@ -107,6 +112,9 @@ public class AboutControllerTests {
 
 		private MockMvc mockMvc;
 
+		@Rule
+		public LogTestNameRule logTestName = new LogTestNameRule();
+
 		@Autowired
 		private WebApplicationContext wac;
 
@@ -119,7 +127,7 @@ public class AboutControllerTests {
 		@Test
 		public void testChecksumDisabled() throws Exception {
 			ResultActions result = mockMvc.perform(get("/about").accept(MediaType.APPLICATION_JSON)).andDo(print()).andExpect(status().isOk());
-			result.andExpect(jsonPath("$.featureInfo.analyticsEnabled", is(false)))
+			result.andExpect(jsonPath("$.featureInfo.analyticsEnabled", is(true)))
 					.andExpect(jsonPath("$.versionInfo.shell.name", is("Spring Cloud Data Flow Shell")))
 					.andExpect(jsonPath("$.versionInfo.shell.url", is("https://repo.spring.io/libs-milestone/org/springframework/cloud/spring-cloud-dataflow-shell/1.3.0.BUILD-SNAPSHOT/spring-cloud-dataflow-shell-1.3.0.BUILD-SNAPSHOT.jsdfasdf")))
 					.andExpect(jsonPath("$.versionInfo.shell.version", is("1.2.3.SHELL.TEST")))
@@ -140,6 +148,9 @@ public class AboutControllerTests {
 
 		private MockMvc mockMvc;
 
+		@Rule
+		public LogTestNameRule logTestName = new LogTestNameRule();
+
 		@Autowired
 		private WebApplicationContext wac;
 
@@ -152,7 +163,7 @@ public class AboutControllerTests {
 		@Test
 		public void testMilestone() throws Exception {
 			ResultActions result = mockMvc.perform(get("/about").accept(MediaType.APPLICATION_JSON)).andDo(print()).andExpect(status().isOk());
-			result.andExpect(jsonPath("$.featureInfo.analyticsEnabled", is(false)))
+			result.andExpect(jsonPath("$.featureInfo.analyticsEnabled", is(true)))
 					.andExpect(jsonPath("$.versionInfo.shell.name", is("Spring Cloud Data Flow Shell")))
 					.andExpect(jsonPath("$.versionInfo.shell.url", is("https://repo.spring.io/libs-milestone/org/springframework/cloud/spring-cloud-dataflow-shell/1.2.3.M1/spring-cloud-dataflow-shell-1.2.3.M1.jar")))
 					.andExpect(jsonPath("$.versionInfo.shell.version", is("1.2.3.M1")))
@@ -174,6 +185,9 @@ public class AboutControllerTests {
 
 		private MockMvc mockMvc;
 
+		@Rule
+		public LogTestNameRule logTestName = new LogTestNameRule();
+
 		@Autowired
 		private WebApplicationContext wac;
 
@@ -186,7 +200,7 @@ public class AboutControllerTests {
 		@Test
 		public void testRC() throws Exception {
 			ResultActions result = mockMvc.perform(get("/about").accept(MediaType.APPLICATION_JSON)).andDo(print()).andExpect(status().isOk());
-			result.andExpect(jsonPath("$.featureInfo.analyticsEnabled", is(false)))
+			result.andExpect(jsonPath("$.featureInfo.analyticsEnabled", is(true)))
 					.andExpect(jsonPath("$.versionInfo.shell.name", is("Spring Cloud Data Flow Shell")))
 					.andExpect(jsonPath("$.versionInfo.shell.url", is("https://repo.spring.io/libs-milestone/org/springframework/cloud/spring-cloud-dataflow-shell/1.2.3.RC1/spring-cloud-dataflow-shell-1.2.3.RC1.jar")))
 					.andExpect(jsonPath("$.versionInfo.shell.version", is("1.2.3.RC1")))
@@ -219,7 +233,7 @@ public class AboutControllerTests {
 		@Test
 		public void testGA() throws Exception {
 			ResultActions result = mockMvc.perform(get("/about").accept(MediaType.APPLICATION_JSON)).andDo(print()).andExpect(status().isOk());
-			result.andExpect(jsonPath("$.featureInfo.analyticsEnabled", is(false)))
+			result.andExpect(jsonPath("$.featureInfo.analyticsEnabled", is(true)))
 					.andExpect(jsonPath("$.versionInfo.shell.name", is("Spring Cloud Data Flow Shell")))
 					.andExpect(jsonPath("$.versionInfo.shell.url", is("https://repo1.maven.org/maven2/org/springframework/cloud/spring-cloud-dataflow-shell/1.2.3.GA/spring-cloud-dataflow-shell-1.2.3.GA.jar")))
 					.andExpect(jsonPath("$.versionInfo.shell.version", is("1.2.3.GA")))
@@ -240,6 +254,9 @@ public class AboutControllerTests {
 
 		private MockMvc mockMvc;
 
+		@Rule
+		public LogTestNameRule logTestName = new LogTestNameRule();
+
 		@Autowired
 		private WebApplicationContext wac;
 
@@ -252,7 +269,7 @@ public class AboutControllerTests {
 		@Test
 		public void testRelease() throws Exception {
 			ResultActions result = mockMvc.perform(get("/about").accept(MediaType.APPLICATION_JSON)).andDo(print()).andExpect(status().isOk());
-			result.andExpect(jsonPath("$.featureInfo.analyticsEnabled", is(false)))
+			result.andExpect(jsonPath("$.featureInfo.analyticsEnabled", is(true)))
 					.andExpect(jsonPath("$.versionInfo.shell.name", is("Spring Cloud Data Flow Shell")))
 					.andExpect(jsonPath("$.versionInfo.shell.url", is("https://repo.spring.io/libs-release/org/springframework/cloud/spring-cloud-dataflow-shell/1.2.3.RELEASE/spring-cloud-dataflow-shell-1.2.3.RELEASE.jar")))
 					.andExpect(jsonPath("$.versionInfo.shell.version", is("1.2.3.RELEASE")))
@@ -275,6 +292,9 @@ public class AboutControllerTests {
 
 		private MockMvc mockMvc;
 
+		@Rule
+		public LogTestNameRule logTestName = new LogTestNameRule();
+
 		@Autowired
 		private WebApplicationContext wac;
 
@@ -287,7 +307,7 @@ public class AboutControllerTests {
 		@Test
 		public void testChecksumNoDefaults() throws Exception {
 			ResultActions result = mockMvc.perform(get("/about").accept(MediaType.APPLICATION_JSON)).andDo(print()).andExpect(status().isOk());
-			result.andExpect(jsonPath("$.featureInfo.analyticsEnabled", is(false)))
+			result.andExpect(jsonPath("$.featureInfo.analyticsEnabled", is(true)))
 					.andExpect(jsonPath("$.versionInfo.shell.name", is("Spring Cloud Data Flow Shell")))
 					.andExpect(jsonPath("$.versionInfo.shell.url", is("https://repo.spring.io/libs-milestone/org/springframework/cloud/spring-cloud-dataflow-shell/1.3.0.BUILD-SNAPSHOT/spring-cloud-dataflow-shell-1.3.0.BUILD-SNAPSHOT.jsdfasdf")))
 					.andExpect(jsonPath("$.versionInfo.shell.checksumSha1").doesNotExist())
@@ -296,9 +316,10 @@ public class AboutControllerTests {
 	}
 
 	@RunWith(SpringRunner.class)
-	@SpringBootTest(classes = TestDependencies.class, properties = {"spring.cloud.dataflow.features.skipper-enabled=true"})
+	@SpringBootTest(classes = TestDependencies.class)
 	@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
 	@TestPropertySource(properties = {
+			"spring.cloud.dataflow.features.skipper-enabled=true",
 			"spring.cloud.dataflow.version-info.dependencies.spring-cloud-dataflow-implementation.version=1.2.3.IMPLEMENTATION.TEST",
 			"spring.cloud.dataflow.version-info.dependencies.spring-cloud-dataflow-core.version=1.2.3.CORE.TEST",
 			"spring.cloud.dataflow.version-info.dependencies.spring-cloud-dataflow-dashboard.version=1.2.3.UI.TEST",
@@ -310,7 +331,11 @@ public class AboutControllerTests {
 			"spring.cloud.dataflow.version-info.dependencies.spring-cloud-dataflow-shell.checksum-sha1-url={repository}/org/springframework/cloud/spring-cloud-dataflow-shell/{version}/spring-cloud-dataflow-shell-{version}.jar.sha1"
 	})
 	public static class SkipperMode {
+
 		private MockMvc mockMvc;
+
+		@Rule
+		public LogTestNameRule logTestName = new LogTestNameRule();
 
 		@Autowired
 		private WebApplicationContext wac;
@@ -322,11 +347,11 @@ public class AboutControllerTests {
 		}
 
 		@Test
-		public void testListApplications() throws Exception {
+		public void testAboutInSkipperMode() throws Exception {
 			ResultActions result = mockMvc.perform(get("/about").accept(MediaType.APPLICATION_JSON)).andDo(print()).andExpect(status().isOk());
-			result.andExpect(jsonPath("$.featureInfo.analyticsEnabled", is(false)))
-					.andExpect(jsonPath("$.featureInfo.skipperEnabled", is(false)))
-					.andExpect(jsonPath("$.versionInfo.implementation.name", is("spring-cloud-dataflow-server-local")))
+			result.andExpect(jsonPath("$.featureInfo.analyticsEnabled", is(true)))
+					.andExpect(jsonPath("$.featureInfo.skipperEnabled", is(true)))
+					.andExpect(jsonPath("$.versionInfo.implementation.name", is("${info.app.name}")))
 					.andExpect(jsonPath("$.versionInfo.implementation.version", is("1.2.3.IMPLEMENTATION.TEST")))
 					.andExpect(jsonPath("$.versionInfo.core.name", is("Spring Cloud Data Flow Core")))
 					.andExpect(jsonPath("$.versionInfo.core.version", is("1.2.3.CORE.TEST")))
@@ -342,7 +367,7 @@ public class AboutControllerTests {
 					.andExpect(jsonPath("$.securityInfo.formLogin", is(false)))
 					.andExpect(jsonPath("$.securityInfo.authenticated", is(false)))
 					.andExpect(jsonPath("$.securityInfo.username", isEmptyOrNullString()))
-					.andExpect(jsonPath("$.runtimeEnvironment.appDeployer.deployerName", isEmptyOrNullString()));
+					.andExpect(jsonPath("$.runtimeEnvironment.appDeployer.deployerName", is("skipper server")));
 		}
 	}
 }
