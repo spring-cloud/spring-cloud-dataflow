@@ -96,8 +96,8 @@ create table skipper_repository (
     local number(1,0),
     name varchar2(255 char),
     repo_order number(10,0),
-    source_url varchar2(255 char),
-    url varchar2(255 char),
+    source_url clob,
+    url clob,
     primary key (id)
 );
 

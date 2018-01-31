@@ -17,6 +17,7 @@ package org.springframework.cloud.skipper.domain;
 
 import javax.persistence.Entity;
 import javax.persistence.Index;
+import javax.persistence.Lob;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 import javax.validation.constraints.NotNull;
@@ -44,12 +45,14 @@ public class Repository extends AbstractEntity {
 	 * supporting the index e.g. myapp-1.0.0.zip, icons-64x64.zip
 	 */
 	@NotNull
+	@Lob
 	private String url;
 
 	/**
 	 * The url that points to the source package files that was used to create the index and
 	 * packages.
 	 */
+	@Lob
 	private String sourceUrl;
 
 	/**

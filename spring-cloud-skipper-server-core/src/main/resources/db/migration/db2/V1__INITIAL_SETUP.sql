@@ -22,7 +22,7 @@ create table guard (
 create table skipper_app_deployer_data (
     id bigint not null,
     object_version bigint,
-    deployment_data clob(255),
+    deployment_data clob(4096),
     release_name varchar(255),
     release_version integer,
     primary key (id)
@@ -42,13 +42,13 @@ create table skipper_info (
 create table skipper_manifest (
     id bigint not null,
     object_version bigint,
-    data clob(255),
+    data clob(65536),
     primary key (id)
 );
 
 create table skipper_package_file (
     id bigint not null,
-    package_bytes blob(255),
+    package_bytes blob(1048576),
     primary key (id)
 );
 
@@ -56,19 +56,19 @@ create table skipper_package_metadata (
     id bigint not null,
     object_version bigint,
     api_version varchar(255),
-    description clob(255),
+    description clob(65536),
     display_name varchar(255),
-    icon_url clob(255),
+    icon_url clob(16384),
     kind varchar(255),
     maintainer varchar(255),
     name varchar(255),
     origin varchar(255),
-    package_home_url clob(255),
-    package_source_url clob(255),
+    package_home_url clob(16384),
+    package_source_url clob(16384),
     repository_id bigint,
     repository_name varchar(255),
     sha256 varchar(255),
-    tags clob(255),
+    tags clob(16384),
     version varchar(255),
     packagefile_id bigint,
     primary key (id)
@@ -77,10 +77,10 @@ create table skipper_package_metadata (
 create table skipper_release (
     id bigint not null,
     object_version bigint,
-    config_values_string clob(255),
+    config_values_string clob(16384),
     name varchar(255),
     package_metadata_id bigint,
-    pkg_json_string clob(255),
+    pkg_json_string clob(65536),
     platform_name varchar(255),
     repository_id bigint,
     version integer not null,
@@ -96,14 +96,14 @@ create table skipper_repository (
     local smallint,
     name varchar(255),
     repo_order integer,
-    source_url varchar(255),
-    url varchar(255),
+    source_url clob(16384),
+    url clob(16384),
     primary key (id)
 );
 
 create table skipper_status (
     id bigint not null,
-    platform_status clob(255),
+    platform_status clob(4096),
     status_code varchar(255),
     primary key (id)
 );
