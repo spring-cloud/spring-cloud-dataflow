@@ -22,14 +22,17 @@ import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.data.repository.query.Param;
 import org.springframework.data.rest.core.annotation.RepositoryRestResource;
 import org.springframework.data.rest.core.annotation.RestResource;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
+ * Repository for PackageMetadata
  * @author Mark Pollack
  * @author Ilayaperumal Gopinathan
  * @author Janne Valkealahti
  * @author Christian Tzolov
  */
 @RepositoryRestResource(path = "packageMetadata", collectionResourceRel = "packageMetadata")
+@Transactional
 public interface PackageMetadataRepository extends PagingAndSortingRepository<PackageMetadata, Long>,
 		PackageMetadataRepositoryCustom {
 

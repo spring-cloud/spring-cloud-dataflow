@@ -302,6 +302,7 @@ public class ReleaseService {
 		return Info.createNewInfo("Initial install underway");
 	}
 
+	@Transactional
 	public ReleaseAnalysisReport createReport(Release existingRelease, Release replacingRelease) {
 		return this.releaseManager.createReport(existingRelease, replacingRelease);
 	}
@@ -335,6 +336,7 @@ public class ReleaseService {
 	 * @param maxRevisions the maximum number of revisions to get
 	 * @return the list of all releases by the given name and revisions max.
 	 */
+	@Transactional
 	public List<Release> history(String releaseName, int maxRevisions) {
 		return this.releaseRepository.findReleaseRevisions(releaseName, maxRevisions);
 	}
@@ -345,6 +347,7 @@ public class ReleaseService {
 	 * @param releaseNameLike the wildcard name of releases to search for
 	 * @return the list of all matching releases
 	 */
+	@Transactional
 	public List<Release> list(String releaseNameLike) {
 		return this.releaseRepository.findLatestDeployedOrFailed(releaseNameLike);
 	}
@@ -354,6 +357,7 @@ public class ReleaseService {
 	 *
 	 * @return the list of all matching releases
 	 */
+	@Transactional
 	public List<Release> list() {
 		return this.releaseRepository.findLatestDeployedOrFailed();
 	}

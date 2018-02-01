@@ -152,6 +152,12 @@ public class PackageMetadataService implements ResourceLoaderAware {
 		return false;
 	}
 
+	/**
+	 * Return a list of releases that have a specific package and the package is in a local repository
+	 * @param releases A list of releases
+	 * @param packageMetadataName the package name.
+	 */
+	@Transactional
 	public List<Release> filterReleasesFromLocalRepos(List<Release> releases, String packageMetadataName) {
 		List<Release> releasesFromLocalRepositories = new ArrayList<>();
 		for (Release release : releases) {
@@ -171,6 +177,7 @@ public class PackageMetadataService implements ResourceLoaderAware {
 	 * Download package metadata from all repositories.
 	 * @return A list of package metadata, not yet persisted in the PackageMetadataRepository.
 	 */
+	@Transactional
 	public List<PackageMetadata> downloadPackageMetadata() {
 		List<PackageMetadata> finalMetadataList = new ArrayList<>();
 		Path targetPath = null;

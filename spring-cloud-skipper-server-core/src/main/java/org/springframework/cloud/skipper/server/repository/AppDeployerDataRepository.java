@@ -25,6 +25,7 @@ import org.springframework.transaction.annotation.Transactional;
  * @author Mark Pollack
  */
 @RestResource(exported = false)
+@Transactional
 public interface AppDeployerDataRepository
 		extends PagingAndSortingRepository<AppDeployerData, Long>, AppDeployerDataRepositoryCustom {
 

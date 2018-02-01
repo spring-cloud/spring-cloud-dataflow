@@ -25,10 +25,12 @@ import org.springframework.data.rest.core.annotation.RestResource;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
+ * Repository for Releases
  * @author Mark Pollack
  * @author Ilayaperumal Gopinathan
  */
 @RepositoryRestResource(path = "releases", collectionResourceRel = "releases")
+@Transactional
 @SuppressWarnings("unchecked")
 public interface ReleaseRepository extends PagingAndSortingRepository<Release, Long>, ReleaseRepositoryCustom {
 
