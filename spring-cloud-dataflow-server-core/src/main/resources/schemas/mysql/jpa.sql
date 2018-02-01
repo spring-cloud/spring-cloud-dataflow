@@ -9,7 +9,7 @@
         uri longtext,
         version varchar(255),
         primary key (id)
-    )
+    );
 
     create table hibernate_sequence (
         next_val bigint
