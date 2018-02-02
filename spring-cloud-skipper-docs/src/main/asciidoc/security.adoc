@@ -14,13 +14,7 @@ By default, the REST endpoints (administration, management and health) do not re
 == Enabling HTTPS
 
 By default, the REST endpoints use plain HTTP as a transport.
-You can switch to HTTPS easily, by adding a certificate to your configuration in e.g.
-`skipper.yml`.
-
-[TIP]
-====
-You can reference the Yaml file using the following parameter: `--spring.config.location=skipper.yml`
-====
+You can switch to HTTPS by adding a certificate to your configuration, as shown in the following `skipper.yml` example:
 
 [source,yaml]
 ----
@@ -43,15 +37,16 @@ server:
 <6> The path to the truststore file. Classpath resources may also be specified, by using the classpath prefix: `classpath:path/to/trust-store`
 <7> The password of the trust store.
 
-NOTE: If HTTPS is enabled, it will completely replace HTTP as the protocol over
-which the REST endpoints interact. Plain HTTP requests
-will fail - therefore, make sure that you configure the Skipper Shell accordingly.
+TIP: You can reference the YAML file using the following parameter: `--spring.config.location=skipper.yml`
+
+NOTE: If HTTPS is enabled, it completely replaces HTTP as the protocol over which the REST endpoints interact.
+Plain HTTP requests then fail. Therefore, you must make sure that you configure the Skipper shell accordingly.
 
 [[configuration-security-self-signed-certificates]]
 === Using Self-Signed Certificates
 
-For testing purposes or during development it might be convenient to create self-signed certificates.
-To get started, execute the following command to create a certificate:
+For testing purposes or during development, it might be convenient to create self-signed certificates.
+To get started, run the following command to create a certificate:
 
 [source,bash]
 ----
@@ -61,7 +56,7 @@ $ keytool -genkey -alias skipper -keyalg RSA -keystore skipper.keystore \
           -keypass skipper -storepass skipper
 ----
 
-<1> _CN_ is the only important parameter here. It should match the domain you are trying to access, e.g. `localhost`.
+<1> `CN` is the only important parameter here. It should match the domain you are trying to access, e.g. `localhost`.
 
 Then add the following to your `skipper.yml` file:
 
@@ -78,22 +73,22 @@ server:
     key-password: skipper
 ----
 
-This is all that's needed for the Skipper Server. Once you start the server,
-you should be able to access it via https://localhost:8443/[https://localhost:8443/].
-As this is a self-signed certificate, you will hit a warning in your browser, that
-you need to ignore.
+That is all you need for the Skipper Server.
+Once you start the server, you should be able to access it at https://localhost:8443/[https://localhost:8443/].
+As this is a self-signed certificate, you should hit a warning in your browser. You need to ignore that.
 
 [[configuration-security-self-signed-certificates-shell]]
 === Self-Signed Certificates and the Shell
 
-By default self-signed certificates are an issue for the Shell and additional steps
-are necessary to make the Shell work with self-signed certificates. Two options
-are available:
+By default, self-signed certificates are an issue for the shell.
+Additional steps are necessary to make the shell work with self-signed certificates.
+Two options are available:
 
-1. Add the self-signed certificate to the JVM truststore
-2. Skip certificate validation
+* <<configuration-security-add-self-signed-certificate-jvm-truststore,Add the self-signed certificate to the JVM truststore>>
+* <<configuration-security-skip-certificate-validation,Skip certificate validation>>
 
-**Add the self-signed certificate to the JVM truststore**
+[[configuration-security-add-self-signed-certificate-jvm-truststore]]
+==== Add the Self-signed Certificate to the JVM Truststore
 
 In order to use the JVM truststore option, we need to
 export the previously created certificate from the keystore:
@@ -103,14 +98,14 @@ export the previously created certificate from the keystore:
 $ keytool -export -alias skipper -keystore skipper.keystore -file skipper_cert -storepass skipper
 ----
 
-Next, we need to create a truststore which the Shell will use:
+Next, we need to create a truststore which the Shell uses:
 
 [source,bash]
 ----
 $ keytool -importcert -keystore skipper.truststore -alias skipper -storepass skipper -file skipper_cert -noprompt
 ----
 
-Now, you are ready to launch the Skipper Shell using the following JVM arguments:
+Now you can launch the Skipper shell by using the following JVM arguments:
 
 [source,bash,subs=attributes]
 ----
@@ -120,52 +115,43 @@ $ java -Djavax.net.ssl.trustStorePassword=skipper \
        -jar spring-cloud-skipper-shell-{project-version}.jar
 ----
 
-[TIP]
-====
-In case you run into trouble establishing a connection via SSL, you can enable additional
-logging by using and setting the `javax.net.debug` JVM argument to `ssl`.
-====
+TIP: If you run into trouble establishing a connection over SSL, you can enable additional logging by setting the `javax.net.debug` JVM argument to `ssl`.
 
-Don't forget to target the Skipper Server with:
+Remember to target the Skipper server with a config command similar to the following:
 
 [source,bash]
 ----
 skipper:>skipper config --uri https://localhost:8443/api
 ----
 
-**Skip Certificate Validation**
+[[configuration-security-skip-certificate-validation]]
+==== Skip Certificate Validation
 
-Alternatively, you can also bypass the certification validation by providing the
-optional command-line parameter `--spring.cloud.skipper.client.skip-ssl-validation=true`.
+Alternatively, you can bypass the certification validation by providing the following optional command-line parameter: `--spring.cloud.skipper.client.skip-ssl-validation=true`.
 
-Using this command-line parameter, the shell will accept any (self-signed) SSL
-certificate.
+When you set this command-line parameter, the shell accepts any (self-signed) SSL certificate.
 
-[WARNING]
-====
-If possible you should avoid using this option. Disabling the trust manager
-defeats the purpose of SSL and makes you vulnerable to man-in-the-middle attacks.
-====
+WARNING: If possible, you should avoid using this option.
+Disabling the trust manager defeats the purpose of SSL and makes your site vulnerable to man-in-the-middle attacks.
+
 
 [[configuration-security-oauth2]]
 == OAuth 2.0 Security
 
-https://oauth.net/2/[OAuth 2.0] allows you to integrate Spring Cloud
-Skipper into Single Sign On (SSO) environments. The following 3 OAuth2 Grant Types will be used:
+https://oauth.net/2/[OAuth 2.0] lets you integrate Spring Cloud Skipper into Single Sign-on (SSO) environments.
+You can use the following OAuth2 Grant Types:
 
-* _Password_ - Used by the shell (And the REST integration), so you can login using username and password
-* _Client Credentials_ - Retrieve an Access Token directly from your OAuth provider and pass it to the Skipper server using the _Authorization_ Http header.
+* Password: Used by the shell (and the REST integration), so you can login with a username and a password
+* Client Credentials: Retrieve an Access Token directly from your OAuth provider and pass it to the Skipper server in the `Authorization` HTTP header.
 
-The REST endpoints can be accessed using 2 ways:
+The REST endpoints can be accessed in two ways:
 
-* Basic Authentication which will use the _Password Grant Type_ under the covers to authenticate with your OAuth2 service
-* Access Token which will use the _Client Credentials Grant Type_ under the covers
+* Basic Authentication: Uses the _Password Grant Type_ to authenticate with your OAuth2 service.
+* Access Token: Uses the _Client Credentials Grant Type_
 
-NOTE: When authentication is set up, it is strongly recommended to enable HTTPS
-as well, especially in production environments.
+NOTE: When you set up authentication, we strongly recommended enabling HTTPS as well, especially in production environments.
 
-You can turn on OAuth2 authentication by adding the following to `skipper.yml` or via
-environment variables:
+You can turn on OAuth2 authentication by setting environment variables or by adding the following block to `skipper.yml`:
 
 [source,yaml]
 ----
@@ -180,42 +166,35 @@ security:
       user-info-uri: http://127.0.0.1:9999/me
 ----
 
-<1> Providing the Client Id in the OAuth Configuration Section will activate OAuth2 security
+<1> Providing the Client ID in the OAuth Configuration Section activates OAuth2 security.
 
-You can verify that basic authentication is working properly using _curl_:
+You can verify that basic authentication is working properly by using `curl`, as follows:
 
-[source,bash]
-----
-$ curl -u myusername:mypassword http://localhost:7577/
-----
+`$ curl -u myusername:mypassword http://localhost:7577/`
 
-As a result you should see a list of available REST endpoints.
+As a result, you should see a list of available REST endpoints.
 
-Besides Basic Authentication, you can also provide an Access Token in order to
-access the REST Api. In order to make that happen, you would retrieve an
-OAuth2 Access Token from your OAuth2 provider first, and then pass that Access Token to
-the REST Api using the **Authorization** Http header:
+Besides Basic Authentication, you can also provide an Access Token to access the REST API.
+To make that happen, retrieve an OAuth2 Access Token from your OAuth2 provider and then pass that Access Token to the REST API by using the `Authorization` HTTP header, as follows:
 
-```
-$ curl -H "Authorization: Bearer <ACCESS_TOKEN>" http://localhost:7577/
-```
+`$ curl -H "Authorization: Bearer <ACCESS_TOKEN>" http://localhost:7577/`
 
 [[configuration-security-oauth2-authorization]]
 ==== OAuth REST Endpoint Authorization
 
-Spring Cloud Skipper supports the following 3 roles:
+Spring Cloud Skipper supports the following roles:
 
-* *VIEW* for anything that relates to retrieving state
-* *CREATE* for anything that involves creating, deleting or mutating the state of the system
-* *MANAGE* for boot management endpoints.
+* *VIEW*: For anything that relates to retrieving state.
+* *CREATE*: For anything that involves creating, deleting, or mutating the state of the system.
+* *MANAGE*: For boot management endpoints.
 
-The rules regarding which REST endpoints require which roles, are specified in
-`application.yml` of the `spring-cloud-skipper-server-core` module.
+The rules regarding which REST endpoints require which roles are specified in the `application.yml` of the `spring-cloud-skipper-server-core` module.
 
-Nonetheless, you can override those, if desired. The configuration takes
-the form of a YAML *list* (as some rules may have precedence over others) and so
-you'll need to copy/paste the whole list and tailor it to your needs (as there is
-no way to merge lists). Always refer to your version of `application.yml`, as the snippet reproduced below may be out-dated. The default rules are as such:
+Nonetheless, you can override those, if desired.
+The configuration takes the form of a YAML *list* (as some rules may have precedence over others).
+Consequently, you need to copy/paste the whole list and tailor it to your needs (as there is no way to merge lists).
+Always refer to your version of `application.yml`, as the snippet reproduced below may be outdated.
+The default rules are as follows:
 
 [source,yaml]
 ----
@@ -297,38 +276,33 @@ no way to merge lists). Always refer to your version of `application.yml`, as th
 
 ----
 
-The format of each line is the following:
-----
-HTTP_METHOD URL_PATTERN '=>' SECURITY_ATTRIBUTE
-----
+The format of each line is as follows:
+
+`HTTP_METHOD URL_PATTERN '=>' SECURITY_ATTRIBUTE`
 
 where
 
-* HTTP_METHOD is one http method, capital case
-* URL_PATTERN is an Ant style URL pattern
+* HTTP_METHOD is one http method, capital case.
+* URL_PATTERN is an Ant-style URL pattern.
 * SECURITY_ATTRIBUTE is a SpEL expression (see http://docs.spring.io/spring-security/site/docs/current/reference/htmlsingle/#el-access)
-* each of those separated by one or several blank characters (spaces, tabs, _etc._)
+* Each of those parts is separated by one or several white space characters (spaces, tabs, and others).
 
 Be mindful that the above is indeed a YAML list, not a map (thus the use of '-' dashes at the start of each line) that lives under the `spring.cloud.skipper.security.authorization.rules` key.
 
 [[configuration-security-oauth2-authorization-user-roles]]
 ===== Users and Roles
 
-Spring Cloud Skipper does not make any assumptions of how roles are assigned to
-users. Due to fact that the determination of security roles is very environment-specific,
-_Spring Cloud Data Skipper_ will by default assign _all roles_ to authenticated OAuth2
-users using the `DefaultAuthoritiesExtractor` class.
+Spring Cloud Skipper does not make any assumptions of how roles are assigned to users.
+Due to the fact that the determination of security roles is very environment-specific, Spring Cloud Data Skipper, by default, assigns _all roles_ to authenticated OAuth2 users by using the `DefaultAuthoritiesExtractor` class.
 
-You can customize that behavior by providing your own Spring bean definition that
-extends Spring Security OAuth's `AuthoritiesExtractor` interface. In that case,
-the custom bean definition will take precedence over the default one provided by
-_Spring Cloud Skipper_.
+You can customize that behavior by providing your own Spring bean definition that extends Spring Security OAuth's `AuthoritiesExtractor` interface.
+In that case, the custom bean definition takes precedence over the default one provided by Spring Cloud Skipper.
 
 [[configuration-security-oauth2-shell]]
-==== OAuth Authentication using the Spring Cloud Skipper Shell
+==== OAuth Authentication Using the Spring Cloud Skipper Shell
 
-If your OAuth2 provider supports the _Password_ Grant Type you can start the
-_Skipper Shell_ with:
+If your OAuth2 provider supports the Password Grant Type, you can start the
+Skipper shell with the following command:
 
 [source,bash,subs=attributes]
 ----
@@ -338,11 +312,9 @@ $ java -jar spring-cloud-skipper-shell-{project-version}.jar \
   --spring.cloud.skipper.client.password=my_password
 ----
 
-NOTE: Keep in mind that when authentication for Spring Cloud Skipper is enabled,
-the underlying OAuth2 provider *must* support the _Password_ OAuth2 Grant Type,
-if you want to use the Shell.
+NOTE: When authentication for Spring Cloud Skipper is enabled, the underlying OAuth2 provider *must* support the Password OAuth2 Grant Type if you want to use the hell.
 
-From within the Skipper Shell you can also provide credentials using:
+From within the Skipper shell, you can also provide credentials by using the following command:
 
 [source,bash]
 ----
@@ -359,40 +331,46 @@ skipper:>
 
 === OAuth2 Authentication Examples
 
+This section provides examples of some common security arrangements for Skipper:
+
+* <<skipper-security-local-oauth2-server>>
+* <<skipper-security-authentication-using-uaa>>
+* <<skipper-security-authentication-using-github>>
+
+[[skipper-security-local-oauth2-server]]
 ==== Local OAuth2 Server
 
-With http://projects.spring.io/spring-security-oauth/[Spring Security OAuth] you
-can easily create your own OAuth2 Server with the following 2 simple annotations:
+With http://projects.spring.io/spring-security-oauth/[Spring Security OAuth], you
+can create your own OAuth2 Server by using the following annotations:
 
-* @EnableResourceServer
-* @EnableAuthorizationServer
+* `@EnableResourceServer`
+* `@EnableAuthorizationServer`
 
-A working example application can be found at:
+You can find a working example application at https://github.com/ghillert/oauth-test-server/[https://github.com/ghillert/oauth-test-server/].
 
-https://github.com/ghillert/oauth-test-server/[https://github.com/ghillert/oauth-test-server/]
+To do so, clone the project, build it, and start it.
+Then configure Spring Cloud Skipper with the respective Client ID and Client Secret.
 
-Simply clone the project, built and start it. Furthermore configure Spring Cloud
-Skipper with the respective _Client Id_ and _Client Secret_.
+WARNING: Use this option only for development or demo purposes.
 
-IMPORTANT: Please use this option for development or demo purposes only.
+[[skipper-security-authentication-using-uaa]]
 
-==== Authentication using UAA
+==== Authentication Using UAA
 
-If you need to setup a production-ready OAuth provider, you may want to consider
-using the _CloudFoundry User Account and Authentication (UAA) Server_. Used by
+If you need to set up a production-ready OAuth provider, you may want to consider
+using the CloudFoundry User Account and Authentication (UAA) Server. While it is used by
 Cloud Foundry, it can also be used stand-alone. For more information see
 https://github.com/cloudfoundry/uaa.
 
+[[skipper-security-authentication-using-github]]
 ==== Authentication using GitHub
 
-If you rather like to use an existing OAuth2 provider, here is an example for GitHub.
-First you need to **Register a new application** under your GitHub account at:
+If you would like to use an existing OAuth2 provider, here is an example for GitHub.
+First, you need to register a new application under your GitHub account at: https://github.com/settings/developers[https://github.com/settings/developers]
 
-https://github.com/settings/developers[https://github.com/settings/developers]
+NOTE: For the Authorization callback URL, enter Spring Cloud Skippers's Login URL -- for example, `http://localhost:9393/login`.
 
-NOTE: For the _Authorization callback URL_ you will enter Spring Cloud Skippers's Login URL, e.g. `http://localhost:9393/login`.
-
-Configure Spring Cloud Skipper with the GitHub relevant Client Id and Secret:
+Configure Spring Cloud Skipper with the GitHub Client ID and Secret, as follows:
 
 [source,yaml]
 ----
@@ -407,7 +385,5 @@ security:
       user-info-uri: https://api.github.com/user
 ----
 
-IMPORTANT: GitHub does not support the OAuth2 password grant type. As such you
-cannot use the Spring Cloud Skipper Shell in conjunction with GitHub.
-
-
+IMPORTANT: GitHub does not support the OAuth2 password grant type.
+As a result, you cannot use the Spring Cloud Skipper shell in conjunction with GitHub.

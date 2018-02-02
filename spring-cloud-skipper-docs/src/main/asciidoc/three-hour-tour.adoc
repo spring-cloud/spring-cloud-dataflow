@@ -1,8 +1,9 @@
 [[three-hour-tour]]
 = Using Skipper
 
-This section is the 'three hour tour' of Skipper.  It describes how to configure and use the main feature set of Skipper in detail.
- We will cover, the shell, platforms, packages, and repositories.
+This section is the "'three-hour tour'" of Skipper.
+It describes how to configure and use the main feature set of Skipper in detail.
+We will cover the shell, platforms, packages, and repositories.
 
 Feel free to reach out on https://gitter.im/spring-cloud/spring-cloud-skipper[Gitter] for help and ask questions on https://stackoverflow.com/questions/tagged/spring-cloud-skipper[Stack Overflow].
 Issues can be filed on https://github.com/spring-cloud/spring-cloud-skipper/issues[Github issues].
@@ -10,8 +11,10 @@ Issues can be filed on https://github.com/spring-cloud/spring-cloud-skipper/issu
 [[using-shell]]
 == Skipper Shell
 
-The shell is based on the https://projects.spring.io/spring-shell/[Spring Shell project].  One of the shell's best features is tab-completion and colorization of commands.  Use the 'help' command or the `--help` argument when starting the shell to get help information.
-The output of using the `--help` argument is shown below
+The shell is based on the https://projects.spring.io/spring-shell/[Spring Shell project].
+Two of the shell's best features are tab-completion and colorization of commands.
+Use the 'help' command or the `--help` argument when starting the shell to get help information.
+The output of using the `--help` argument follows:
 
 [source,bash,options=nowrap]
 ----
@@ -31,28 +34,28 @@ Skipper Options:
 
 === Shell Modes
 
-The shell can be started either in interactive or non-interactive mode.
- In the case of the non-interactive mode, command line arguments are executed as Skipper commands and then the shell exits.
-If there are any arguments that do not have the prefix `spring.cloud.skipper.client`, they will be considered as skipper commands to execute.
+The shell can be started in either interactive or non-interactive mode.
+In the case of the non-interactive mode, command line arguments are executed as Skipper commands, and then the shell exits.
+If there are any arguments that do not have the prefix `spring.cloud.skipper.client`, they are considered as skipper commands to execute.
 
 
-For example,
+Consider the following example:
 
 [source,bash,subs=attributes]
 ```
 java -jar spring-cloud-skipper-shell-{project-version}.jar --spring.cloud.skipper.client.serverUri=http://localhost:9123/api
 ```
-Will bring up the interactive shell and connect to `http://localhost:9123/api`.
-However, the command
+The preceding example brings up the interactive shell and connects to `http://localhost:9123/api`.
+Now consider the following command:
 
 [source,bash,subs=attributes]
 ```
 $ java -jar spring-cloud-skipper-shell-{project-version}.jar --spring.cloud.skipper.client.serverUri=http://localhost:9123/api search
 ```
 
-Will connect to `http://localhost:9123/api`, execute the `search` command and then exit.
+The preceding command connects to `http://localhost:9123/api`, executes the `search` command, and then exits.
 
-A more common use case would be to update a package from within a CI job.  For example, in a Jenkins Stage.
+A more common use case would be to update a package from within a CI job -- for example, in a Jenkins Stage, as shown in the following example:
 
 [source,groovy]
 ```
@@ -82,20 +85,21 @@ stage ('Build') {
 == Platforms
 
 Skipper supports deploying to multiple platforms.
-The platforms included are Local, Cloud Foundry and Kubernetes.
+The platforms included are Local, Cloud Foundry, and Kubernetes.
 For each platform, you can configure multiple accounts.
 Each `account name` must be globally unique across all platforms.
 
-Usually different `accounts` will correspond to a different orgs/spaces for Cloud Foundry and different namespaces for a single Kubernetes cluster.
+Usually, different `accounts` correspond to different orgs or spaces for Cloud Foundry and to different namespaces for a single Kubernetes cluster.
 
-Platforms are defined using Spring Boot's https://docs.spring.io/spring-boot/docs/current/reference/html/boot-features-external-config.html[Externalized Configuration] feature.
-To simplify the getting started experience, if a local platform account is not defined in your configuration, Skipper will create a `local` deployer implementation named `default`.
+Platforms are defined by using Spring Boot's https://docs.spring.io/spring-boot/docs/current/reference/html/boot-features-external-config.html[Externalized Configuration] feature.
+To simplify the getting started experience, if a local platform account is not defined in your configuration, Skipper creates a `local` deployer implementation named `default`.
 
 You can make use of the http://cloud.spring.io/spring-cloud-static/spring-cloud-config/1.3.3.RELEASE/multi/multi__spring_cloud_config_server.html#_encryption_and_decryption[Encryption and Decryption] features of Spring Cloud Config as one way to secure credentials.
 
-Distinct from where Skipper will deploy application, you can also run the Skipper server itself on a platform.  Installation on other platforms is covered in the <<skipper-installation>> section.
+Distinct from where Skipper deploys the application, you can also run the Skipper server itself on a platform.
+Installation on other platforms is covered in the <<skipper-installation>> section.
 
-Here is example YAML file showing configuration of all three platforms
+The following example YAML file shows configuration of all three platforms:
 
 ----
 spring:
@@ -126,7 +130,7 @@ spring:
                 namespace: default
 ----
 
-The properties available for each platform can be found in these classes
+The properties available for each platform can be found in the following classes:
 
 * https://github.com/spring-cloud/spring-cloud-deployer-local/blob/master/spring-cloud-deployer-local/src/main/java/org/springframework/cloud/deployer/spi/local/LocalDeployerProperties.java[LocalDeployerProperties].
 * https://github.com/spring-cloud/spring-cloud-deployer-cloudfoundry/blob/master/src/main/java/org/springframework/cloud/deployer/spi/cloudfoundry/CloudFoundryDeploymentProperties.java[CloudFoundryDeploymentProperties] for `deployment:` and https://github.com/spring-cloud/spring-cloud-deployer-cloudfoundry/blob/master/src/main/java/org/springframework/cloud/deployer/spi/cloudfoundry/CloudFoundryConnectionProperties.java[CloudFoundryConnectionProperties] for the `connection:`.
@@ -136,20 +140,22 @@ The properties available for each platform can be found in these classes
 == Packages
 
 Packages contain all the necessary information to install your application or group of applications.
-The approach to decribing the applications is to use a YAML file that provides all the necessary information to help facilitate searching for your application hosted in a Package Registry and to install your application to a platform.
+The approach to describing the applications is to use a YAML file that provides all the necessary information to help facilitate searching for your application hosted in a Package Registry and to install your application to a platform.
 
-To make it easy to customize a package, the YAML files are templated.  The final version of the YAML file, with all values substituted is known as the release `manifest`.
-Skipper currently understands how to deploy applications based off a YAML file that contains the information needed for a Spring Cloud Deployer implementation to deploy an application.  It describes, where to find the application (either a http, maven or docker location) , application properties (think Spring Boot `@ConfigurationProperties`), an deployment properites (e.g. how much memory to use).
+To make it easy to customize a package, the YAML files are templated.
+The final version of the YAML file, with all values substituted, is known as the release `manifest`.
+Skipper currently understands how to deploy applications based off a YAML file that contains the information needed for a Spring Cloud Deployer implementation to deploy an application.
+It describes where to find the application (an HTTP, Maven or Docker location), application properties (think Spring Boot `@ConfigurationProperties`), and deployment properties (such as how much memory to use).
 
 [[using-package-format]]
 === Package Format
 
-A package is a collection of YAML files that are zipped up into a file with the naming convention
-`[PackageName]-[PackageVersion].zip` for example: `mypackage-1.0.0.zip`
+A package is a collection of YAML files that are zipped up into a file with the following naming convention:
+`[PackageName]-[PackageVersion].zip` (for example: `mypackage-1.0.0.zip`).
 
 A package can define a single application or a group of applications.
 
-The single application package file, `mypackage-1.0.0.zip` when unzipped, should have the following directory structure.
+The single application package file, `mypackage-1.0.0.zip`, when unzipped, should have the following directory structure:
 
 ----
 mypackage-1.0.0
@@ -161,19 +167,19 @@ mypackage-1.0.0
 
 The `package.yml` file contains metadata about the package and is used to support Skipper's search functionality.
 The `template.yml` file contains placeholders for values that are specified in the `values.yml` file.
-When installing a package, placeholder values can also be specified and they would override the values in the `values.yml` file.
-The templating engine that Skipper uses https://github.com/samskivert/jmustache[JMustache].
+When installing a package, placeholder values can also be specified, and they would override the values in the `values.yml` file.
+The templating engine that Skipper uses is https://github.com/samskivert/jmustache[JMustache].
 The YAML files can have either `.yml` or `.yaml` extensions.
 
-The files https://github.com/markpollack/skipper-sample-repository/blob/master/src/main/resources/static/repository/experimental/helloworld/helloworld-1.0.0.zip[helloworld-1.0.0.zip] or https://github.com/markpollack/skipper-sample-repository/blob/master/src/main/resources/static/repository/experimental/helloworld-docker/helloworld-docker-1.0.0.zip[helloworld-docker-1.0.0.zip] are good examples to use as a basis to create your own package 'by-hand'.
+The  https://github.com/markpollack/skipper-sample-repository/blob/master/src/main/resources/static/repository/experimental/helloworld/helloworld-1.0.0.zip[helloworld-1.0.0.zip] or https://github.com/markpollack/skipper-sample-repository/blob/master/src/main/resources/static/repository/experimental/helloworld-docker/helloworld-docker-1.0.0.zip[helloworld-docker-1.0.0.zip] files are good examples to use as a basis to create your own package "'by hand'".
 
-The source code for the helloword sample can be found https://github.com/markpollack/skipper-samples[here].
+The source code for the `helloworld` sample can be found https://github.com/markpollack/skipper-samples[here].
 
 [[using-package-format-multiple-apps]]
 === Package with multiple applications
 
 A package can contain a group of applications bundled in it.
-In those cases, the structure of the package would look like this:
+In those cases, the structure of the package would resemble the following:
 
 ----
 mypackagegroup-1.0.0
@@ -192,20 +198,20 @@ mypackagegroup-1.0.0
 └── values.yml
 ----
 
-In the above, the `mypackagegroup` would still have its own `package.yml`, `values.yml` to specify the package metadata
+In the preceding example, the `mypackagegroup` still has its own `package.yml` and `values.yml` to specify the package metadata
  and the values to override.
-All the applications inside the `mypackagegroup`  are considered sub-packages and would follow the similar package
-structure as the individual packages.
-These sub packages need to be specified inside the `packages` directory of the root package `mypackagegroup`.
+All the applications inside the `mypackagegroup`  are considered to be sub-packages and follow a  package
+structure similar to the individual packages.
+These sub packages need to be specified inside the `packages` directory of the root package, `mypackagegroup`.
 
-The file https://github.com/spring-cloud/spring-cloud-skipper/blob/master/spring-cloud-skipper-server-core/src/test/resources/repositories/binaries/test/ticktock/ticktock-1.0.0.zip[ticktock-1.0.0.zip] is a good example to use as a basis for creating your own package 'by-hand'.
+The  https://github.com/spring-cloud/spring-cloud-skipper/blob/master/spring-cloud-skipper-server-core/src/test/resources/repositories/binaries/test/ticktock/ticktock-1.0.0.zip[ticktock-1.0.0.zip] file is a good example to use as a basis for creating your own package 'by-hand'.
 
 
 [[using-package-metadata]]
 === Package Metadata
 
 The `package.yml` file specifies the package metadata.
-A sample package metadata would look like this:
+A sample package metadata would resemble the following:
 
 ----
 # Required Fields
@@ -224,30 +230,30 @@ description: This is a mypackage sample.
 
 *Required Fields:*
 
-* `apiVersion` - 	The Package Index spec version this file is based on
-* `kinds` - What type of package system is being used
-* `name` -  name of the package
-* `version` - version of the package
+* `apiVersion`: The Package Index spec version this file is based on.
+* `kinds`: What type of package system is being used.
+* `name`: The name of the package.
+* `version`: The version of the package.
 
 *Optional Fields:*
 
-* `packageSourceUrl` - 	Location to source code for this package.
-* `packageHomeUrl` - The home page of the package
-* `tags` -  A comma separated list of tags to be used for searching
-* `maintainer` - Who is maintaining this package
-* `description` Free form text describing the functionality of the package.  Will generally be shown in search results.
-* `sha256` - Hash of package binary  (not yet enforced)
-* `iconUrl` - URL for an icon to show for this package.
-* `origin` - Free form text describing the origin of this package, for example your company name.
+* `packageSourceUrl`: The location of the source code for this package.
+* `packageHomeUrl`: The home page of the package.
+* `tags`:  A comma-separated list of tags to be used for searching.
+* `maintainer`: Who maintains this package.
+* `description`: Free-form text describing the functionality of the package -- generally shown in search results.
+* `sha256`: The hash of the package binary (not yet enforced).
+* `iconUrl`: The URL for an icon to show for this package.
+* `origin`: Free-form text describing the origin of this package -- for example, your company name.
 
 NOTE: Currently, the package search functionality is only a wildcard match against the name of the package.
 
-A Package Repository exposes an `index.yml` file that contains multiple metadata documents, separated by the standard three dash notation `---` to separate the documents.  For example http://skipper-repository.cfapps.io/repository/experimental/index.yml[index.yml].
+A Package Repository exposes an `index.yml` file that contains multiple metadata documents and that uses the standard three dash notation `---` to separate the documents -- for example, http://skipper-repository.cfapps.io/repository/experimental/index.yml[index.yml].
 
 [[package-templates]]
 === Package Templates
 
-The `template.yml` file in a package structure such as
+The `template.yml` file has a package structure similar to that of the following example:
 
 ----
 mypackage-1.0.0
@@ -257,7 +263,7 @@ mypackage-1.0.0
 └── values.yml
 ----
 
-will commonly have the following content:
+`template.yml` commonly has content similar to the following:
 
 ----
 # template.yml
@@ -280,20 +286,22 @@ spec:
     {{/spec.deploymentProperties.entrySet}}
 ----
 
-Skipper only knows how to manage applications defined in this way.
-A future release will introduce support for different formats, for example supporting the Cloud Foundry manifest format.
+Skipper knows only how to manage applications defined in this way.
+A future release will introduce support for different formats -- for example supporting the Cloud Foundry manifest format.
 
-The `apiVersion`, `kind` and `spec.resource` are required.
+The `apiVersion`, `kind`, and `spec.resource` are required.
 
 The `spec.resource` and `spec.version` define where the application executable is located.
-The `spec.resourceMetadata` field defines where a https://docs.spring.io/spring-boot/docs/current/reference/html/configuration-metadata.html[Spring Boot Configuration meta-data] jar is located that contains
-configuration properties of the application.
-This is either a Spring Boot uberjar hosted under a http endpoint or a maven or docker repository.
-The template placeholder `{{spec.version}}` so that the version of a specific application can be easily upgraded without having to create a new package .zip file.
+The `spec.resourceMetadata` field defines where a https://docs.spring.io/spring-boot/docs/current/reference/html/configuration-metadata.html[Spring Boot Configuration metadata] jar is located that contains the configuration properties of the application.
+This is either a Spring Boot uber jar hosted under a HTTP endpoint or a Maven or Docker repository.
+The template placeholder `{{spec.version}}` exists so that the version of a specific application can be easily upgraded without having to create a new package .zip file.
 
-The `resource` is `http://` or a `maven://` or `docker:` based.  The format for specifying a `resource` is shown below.
+The `resource` is based on `http://` or `maven://` or `docker:`.
+The format for specifying a `resource` follows:
 
 ==== HTTP Resources
+
+The following example shows a typical spec for HTTP:
 
 ----
 spec:
@@ -301,11 +309,13 @@ spec:
   version: 1.0.0.RELEASE
 ----
 
-There is a naming convention that must be followed for HTTP based resource so that Skipper can assemble a full URL from the `resource` and `version` field and also parse the version number given the URL.
-The above `spec` will reference a URL at `http://example.com/app/hello-world-1.0.0.RELEASE.jar`.
+There is a naming convention that must be followed for HTTP-based resources so that Skipper can assemble a full URL from the `resource` and `version` field and also parse the version number given the URL.
+The preceding `spec` references a URL at `http://example.com/app/hello-world-1.0.0.RELEASE.jar`.
 The `resource` and `version` fields should not have any numbers after the `-` character.
 
 ==== Docker Resources
+
+The following example shows a typical spec for Docker:
 
 ----
 spec:
@@ -313,7 +323,7 @@ spec:
   version: 1.0.0.RELEASE
 ----
 
-The mapping to docker registry names is
+The mapping to docker registry names follows:
 
 ----
 spec:
@@ -324,20 +334,24 @@ spec:
 
 ==== Maven Resources
 
+The following example shows a typical spec for Maven:
+
 ----
 spec:
   resource: maven://org.springframework.cloud.samples:spring-cloud-skipper-samples-helloworld:1.0.0.RELEASE
   version: 1.0.0.RELEASE
 ----
 
-The mapping to maven artifact names is
+The mapping to Maven artifact names follows
 ----
 spec:
   resource: maven://<maven-group-name>:<maven-artifact-name>
   version:<maven-version>
 ----
 
-There is only one setting to specify with maven repositories to search.  This applies across all platform accounts.  By default the configuration:
+There is only one setting to specify with Maven repositories to search.
+This setting applies across all platform accounts.
+By default, the following configuration is used:
 
 ----
 maven:
@@ -345,7 +359,9 @@ maven:
     springRepo: https://repo.spring.io/libs-snapshot
 ----
 
-is used.  You can specify other entries and also specify proxy properties.  This is currently best documented https://docs.spring.io/spring-cloud-dataflow/docs/1.3.0.M2/reference/htmlsingle/#getting-started-maven-configuration[here]. Essentially, this needs to be set a property in your launch properties or `manifest.yml` (when pushing to PCF) like so:
+You can specify other entries and also specify proxy properties.
+This is currently best documented https://docs.spring.io/spring-cloud-dataflow/docs/1.3.0.M2/reference/htmlsingle/#getting-started-maven-configuration[here].
+Essentially, this needs to be set as a property in your launch properties or `manifest.yml` (when pushing to PCF), as follows:
 
 ----
 # manifest.yml
@@ -355,31 +371,30 @@ env:
 ...
 ----
 
-The metadata section is used to help search for applications after they have been installed.  This feature will be made available in a future release.
+The metadata section is used to help search for applications after they have been installed.
+This feature will be made available in a future release.
 
-Currently, only `SpringCloudDeployerApplication` kind is supported which means the applications can be deployed into the target platforms only using their corresponding Spring Cloud Deployer implementations (CF, Kubernetes Deployer etc.).
+Currently, only the `SpringCloudDeployerApplication` kind is supported, which means the applications can be deployed into the target platforms only by using their corresponding Spring Cloud Deployer implementations (CF, Kubernetes Deployer, and so on).
 
 The `spec` contains the resource specification and the properties for the package.
 
-The `resource` represents the resource URI to download the application from. This would typically be a maven
-co-ordinate or a docker image URL.
+The `resource` represents the resource URI to download the application from.
+This would typically be a Maven co-ordinate or a Docker image URL.
 
-The `SpringCloudDeployerApplication` kind of application can have `applicationProperties` and `deploymentProperties` as the
-configuration properties.
+The `SpringCloudDeployerApplication` kind of application can have `applicationProperties` and `deploymentProperties` as the configuration properties.
 
 The application properties correspond to the properties for the application itself.
 
 The deployment properties correspond to the properties for the deployment operation performed by Spring Cloud Deployer implementations.
 
-NOTE: The `name` of the template file can be anything as all the files under `templates` directory are loaded to
-apply the template configurations.
+NOTE: The `name` of the template file can be anything, as all the files under `templates` directory are loaded to apply the template configurations.
 
 [[using-package-values]]
 === Package Values
 
 The `values.yml` file contains the default values for any of the keys specified in the template files.
 
-For instance, in a package that defines one application, the format is
+For instance, in a package that defines one application, the format is as follows:
 
 ----
 version: 1.0.0.RELEASE
@@ -388,7 +403,8 @@ spec:
     server.port: 9090
 ----
 
-If the package defines multiple applications, provide the name of the package in the top level YML section to scope the `spec` section.  That is, given a multiple application package with the layout
+If the package defines multiple applications, provide the name of the package in the top-level YML section to scope the `spec` section.
+Consider the example of a multiple application package with the following layout:
 
 ----
 ticktock-1.0.0/
@@ -403,7 +419,7 @@ ticktock-1.0.0/
 └── values.yml
 
 ----
-A top level `values.yml` file
+The top-level `values.yml` file might resemble the following:
 
 ----
 #values.yml
@@ -424,15 +440,16 @@ log:
       log.name: skipperlogger
 ----
 
-Would set `hello` as a variable available to be used as a placeholder in the `packages\log\values.yml` file and the `packages\time\values.yml`.  However, the YML section under `time:` is applied only to the `packages\time\values.yml` file and the YML section under `log:` is applied only to the `packages\time\values.yml` file.
+The preceding `values.yml` file sets `hello` as a variable available to be used as a placeholder in the `packages\log\values.yml` file and the `packages\time\values.yml`.
+However, the YML section under `time:` is applied only to the `packages\time\values.yml` file and the YML section under `log:` is applied only to the `packages\time\values.yml` file.
 
 [[using-package-upload]]
 === Package Upload
 
-After creating the package in the above structure, we can compress it in a zip file with the name
-[PackageName]-[PackageVersion].zip e.g. mypackage-1.0.0.zip
+After creating the package in the structure shown in the previous section, we can compress it in a zip file with the following naming scheme:
+[PackageName]-[PackageVersion].zip (for example, mypackage-1.0.0.zip).
 
-For instance, the package directory would look like this before compression:
+For instance, the package directory would resemble the following before compression:
 
 ----
 mypackage-1.0.0
@@ -441,10 +458,10 @@ mypackage-1.0.0
 │   └── template.yml
 └── values.yml
 ----
-This zip file can be uploaded into one of the local repositories of Skipper server.
-By default, Skipper server has the local repository with the name `local`.
+The zip file can be uploaded into one of the local repositories of the Skipper server.
+By default, the Skipper server has a local repository with the name, `local`.
 
-Using the Skipper Shell, we can upload the package zip into Skipper server's local repository.
+By using the Skipper shell, we can upload the package zip file into the Skipper server's local repository, as follows:
 
 [source,bash,options="nowrap"]
 ----
@@ -452,7 +469,9 @@ skipper:>package upload --path /path-to-package/mypackage-1.0.0.zip
 Package uploaded successfully:[mypackage:1.0.0]
 ----
 
-If no `--repo-name` is set, the `upload` command will use `local` as the repository to upload.
+If no `--repo-name` is set, the `upload` command uses `local` as the repository to upload.
+
+We can then use the `package search` command to see that our package has been uploaded, as shown (with its output) in the following example:
 
 [source,bash,options="nowrap"]
 ----
@@ -471,15 +490,15 @@ skipper:>package search
 [[using-package-create]]
 === Creating Your Own Package
 
-In this section, we will try to create a package that can be deployed using Spring Cloud Deployer implementations.
+In this section, we create a package that can be deployed by using Spring Cloud Deployer implementations.
 
-For this package, we are going to be creating a super simple package and uploading it to our local machine.
+For this package, we are going to create a simple package and upload it to our local machine.
 
-To get started creating your own package, create a folder following the naming convention (`[package-name]-[package-version]`), in our case it will be `demo-1.0.0`.
-In this directory, create empty files `values.yml`, `package.yml` and a `templates` directory.
-In the `templates` directory create an empty `template.yml` file.
+To get started creating your own package, create a folder following a naming convention of `[package-name]-[package-version]`. In our case, the folder name is `demo-1.0.0`.
+In this directory, create empty files named `values.yml` and `package.yml` and create a `templates` directory.
+In the `templates` directory, create an empty file named `template.yml`.
 
-Go into the `package.yml` where we are going to specify the package metadata, for this app we are only going to be filling the minimum values possible:
+Go into the `package.yml` where we are going to specify the package metadata. For this app, we fill only the minimum values possible, as shown in the following example:
 
 ----
 # package.yml
@@ -491,10 +510,12 @@ version: 1.0.0
 description: Greets the world!
 ----
 
-Importantly here, ensure that your `name` and `version` matches the `name` and `version` in your folder name or you will get an error.
+IMPORTANT: Ensure that your `name` and `version` matches the `name` and `version` in your folder name, or you get an error.
 
-Next, open up your `templates/template.yml`. Here we are going to be specifying the actual information about your package and most importantly setting default values.
-In the `template.yml`, copy the template for the kind `SpringCloudDeployerApplication` from the above sample.
+Next, open up your `templates/template.yml` file.
+Here, we are going to specify the actual information about your package and, most importantly, set default values.
+In the `template.yml`, copy the template for the kind `SpringCloudDeployerApplication` from the preceding sample.
+Your resulting `template.yml` file should resemble the following:
 
 ----
 # templates/template.yml
@@ -516,8 +537,8 @@ spec:
     {{/spec.deploymentProperties.entrySet}}
 ----
 
-Simply, this specifies our application name is `demo`, and finds our package in maven and we can specify a `version`,
-`applicationProperties` and `deploymentProperties` in our `values.yml`. So lets do that.
+The preceding example file specifies that our application name is `demo` and finds our package in Maven.
+Now we can specify the `version`, `applicationProperties`, and `deploymentProperties` in our `values.yml`, as follows:
 
 ----
 # values.yml
@@ -530,8 +551,8 @@ spec:
     server.port: 8100
 ----
 
-This will set out `version` to `1.0.0.RELEASE` and also set the `server.port=8100` as one of the application properties.
-When the Skipper Package reader resolves these values by merging the `values.yml` against the template, the resolved values would look like this:
+The preceding example sets the `version` to `1.0.0.RELEASE` and also sets the `server.port=8100` as one of the application properties.
+When the Skipper Package reader resolves these values by merging the `values.yml` against the template, the resolved values resemble the following:
 
 ----
 # hypothetical template.yml
@@ -548,9 +569,11 @@ spec:
   deploymentProperties:
 ----
 
-The reason to use `values.yml` instead of entering the values directly is that it allows you to overwrite the values at run time using the `--file` or `--properties` flags.
+The reason to use `values.yml` instead of entering the values directly is that it lets you overwrite the values at run time by using the `--file` or `--properties` flags.
 
-We have now finished making our file, we now have to zip it up. The easiest way to do is the `zip -r` command line command. You should see something like:
+We have finished making our file.
+Now we have to zip it up.
+The easiest way to do is by using the `zip -r` command on the command line, as follows:
 
 ----
 $ zip -r demo-1.0.0.zip demo-1.0.0/
@@ -561,27 +584,28 @@ $ zip -r demo-1.0.0.zip demo-1.0.0/
   adding: demo-1.0.0/values.yml (deflated 4%)
 ----
 
-Armed with our zipped file and the path to it, we can head to skipper and use the `upload` command:
+Armed with our zipped file and the path to it, we can head to Skipper and use the `upload` command, as follows:
 
 ----
 skipper:>package upload --path /Users/path-to-your-zip/demo-1.0.0.zip
 Package uploaded successfully:[demo:1.0.0]
 ----
 
-Now you can search for it as shown above, then install it!
+Now you can search for it as shown previously and then install it, as follows
 
 ----
 skipper:>package install --package-name demo --package-version 1.0.0 --release-name demo
 Released demo. Now at version v1.
 ----
 
-Congratulations! You have now created, packaged, uploaded and installed your own Skipper Package!
+Congratulations! You have now created, packaged, uploaded, and installed your own Skipper package!
 
 == Repositories
 
-Repositories are where package metadata and package .zip files are hosted.  Repositores can be local or remote, were local means backed by Skipper's relational database and remote means a filesystem exposed over http.
+Repositories store package metadata and host package .zip files.
+Repositores can be local or remote, were local means backed by Skipper's relational database and remote means a filesystem exposed over HTTP.
 
-When registering a remote registry, for example, the `experimental` one that is currently defined by default in addition to one named local` use the following format:
+When registering a remote registry (for example, the `experimental` one that is currently defined by default in addition to one named local`), use the following format:
 
 ----
 spring
@@ -603,15 +627,19 @@ spring
 
 ----
 
-The `repoOrder` determines which repository will serve up a package if one with the same name is registered in two or more repositories.
+The `repoOrder` determines which repository serves up a package if one with the same name is registered in two or more repositories.
 
-The directory structure assumed for a remote repository is the registered `url` value followed by the package name and then the zip file name., e.g. `http://skipper-repository.cfapps.io/repository/experimental/helloworld/helloworld-1.0.0.zip` for the package `helloworld` with the version `1.0.0`.  Directly under the registered `url` is expected to be a file named `index.yml`, e.g. http://skipper-repository.cfapps.io/repository/experimental/index.yml.  This contains the package metadata for all the packages hosted by the repository.
+The directory structure assumed for a remote repository is the registered `url` value followed by the package name and then the zip file name (for example, `http://skipper-repository.cfapps.io/repository/experimental/helloworld/helloworld-1.0.0.zip` for the package `helloworld` with a version of `1.0.0`).
+A file named `index.yml` is expected to be directly under the registered `url` -- for example, http://skipper-repository.cfapps.io/repository/experimental/index.yml.
+This file contains the package metadata for all the packages hosted by the repository.
 
-It is up to you to update the `index.yml` file 'by-hand' for remote repositories.
+It is up to you to update the `index.yml` file "'by hand'" for remote repositories.
 
-'Local' repositories are backed by Skipper's database.  In the Skipper 1.0 release they does not expose the index.yml or the .zip files under a filesystem like URL structure as with remote repositories. This will be provided in the next version.  However, on the positive side, you can upload packages to a local repository and don't need to maintain an index file.  See the skipper command section for information on creating local repositories.
+'Local' repositories are backed by Skipper's database.
+In the Skipper 1.0 release, they do not expose the index.yml or the .zip files under a filesystem-like URL structure as with remote repositories.
+This feature will be provided in the next version.
+However, you can upload packages to a local repository and do not need to maintain an index file.
+See the "`<<skipper-commands-reference>>`" section for information on creating local repositories.
 
-A good example that shows using a Spring Boot web application with static resources to host a Repository can be found https://github.com/markpollack/skipper-sample-repository[here].  This application is currently running under http://skipper-repository.cfapps.io/repository/experimental.
-
-
-
+A good example that shows using a Spring Boot web application with static resources to host a Repository can be found https://github.com/markpollack/skipper-sample-repository[here].
+This application is currently running under http://skipper-repository.cfapps.io/repository/experimental.

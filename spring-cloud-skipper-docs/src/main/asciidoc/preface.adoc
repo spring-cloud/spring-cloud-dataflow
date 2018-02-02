@@ -2,7 +2,7 @@
 = Preface
 
 [[skipper-documentation-about]]
-== About the documentation
+== About the Documentation
 
 The documentation for this release is available in http://docs.spring.io/spring-cloud-skipper/docs/{project-version}/reference/htmlsingle[HTML].
 
@@ -14,13 +14,13 @@ further provided that each copy contains this Copyright Notice, whether distribu
 print or electronically.
 
 [[skipper-documentation-getting-help]]
-== Getting help
+== Getting Help
 If you are having trouble with Spring Cloud Skipper, we would like to help!
 
-* Ask a question - we monitor http://stackoverflow.com[stackoverflow.com] for questions
+* Ask a question. We monitor http://stackoverflow.com[stackoverflow.com] for questions
   tagged with http://stackoverflow.com/tags/spring-cloud-skipper[`spring-cloud-skipper`].
 * Reach out to us on https://gitter.im/spring-cloud/spring-cloud-skipper[gitter].
 * Report bugs with Spring Cloud Skipper at https://github.com/spring-cloud/spring-cloud-skipper/issues.
 
 NOTE: All of Spring Cloud Skipper is open source, including the documentation! If you find problems
-with the docs; or if you just want to improve them, please {github-code}[get involved].
+with the docs or if you want to improve them, please {github-code}[get involved].

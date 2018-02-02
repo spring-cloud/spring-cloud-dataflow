@@ -1,10 +1,9 @@
 [appendix]
 [[building]]
 == Building
-To build the source you will need to install JDK 1.8.
+To build the source, you need to install JDK 1.8.
 
-The build uses the Maven wrapper so you don't have to install a specific
-version of Maven.
+The build uses the Maven wrapper so that you do not have to install a specific version of Maven.
 
 The main build command is
 
@@ -12,46 +11,38 @@ The main build command is
 $ ./mvnw clean install
 ----
 
-To create the executables and avoid running the tests and generating JavaDocs, use the command
+To create the executables and avoid running the tests and generating JavaDocs, use the following command:
 
 ----
 $./mvnw clean package -DskipTests -Dmaven.javadoc.skip=true
 ----
 
-NOTE: You can also install Maven (>=3.3.3) yourself and run the `mvn` command
-in place of `./mvnw` in the examples below. If you do that you also
-might need to add `-P spring` if your local Maven settings do not
-contain repository declarations for spring pre-release artifacts.
+NOTE: You can also install Maven (>=3.3.3) yourself and run the `mvn` command in place of `./mvnw` in the examples.
+If you do so, you also might need to add `-P spring` if your local Maven settings do not contain repository declarations for spring pre-release artifacts.
 
-NOTE: Be aware that you might need to increase the amount of memory
-available to Maven by setting a `MAVEN_OPTS` environment variable with
-a value like `-Xmx512m -XX:MaxPermSize=128m`. We try to cover this in
-the `.mvn` configuration, so if you find you have to do it to make a
-build succeed, please raise a ticket to get the settings added to
-source control.
+NOTE: You might need to increase the amount of memory available to Maven by setting a `MAVEN_OPTS` environment variable with a value like `-Xmx512m -XX:MaxPermSize=128m`.
+We try to cover this in the `.mvn` configuration, so, if you find you have to increase memory to make a build succeed, please raise a ticket to get the settings added to source control.
 
 === Documentation
 
-To generate just the REST Docs documentation, use the command
+To generate only the REST Docs documentation, use the following command:
 
 ----
 ./mvnw test -pl spring-cloud-skipper-server-core -Dtest=*Documentation*
 ----
 
-To build the asciidoctor documentation only, use the command
+To build the only the Asciidoctor documentation, use the following command:
 
 ----
 ./mvnw package -DskipTests -Pfull -pl spring-cloud-skipper-docs
 ----
 
 === Importing into eclipse
-You can generate eclipse project metadata using the following command:
+You can generate Eclipse project metadata by using the following command:
 
 [indent=0]
 ----
 	$ ./mvnw eclipse:eclipse
 ----
 
-The generated eclipse projects can be imported by selecting `import existing projects`
-from the `file` menu.
-
+In Eclipse, the generated projects can be imported by selecting `Import existing projects` from the `File` menu.

@@ -1,11 +1,28 @@
 [[skipper-commands-reference]]
 = Skipper Commands
 
-[[skipper-commands-package]]
-== Package commands
+Skipper commands fit into the following categories:
 
+* <<skipper-commands-package>>
+* <<skipper-commands-release>>
+* <<skipper-commands-manifest>>
+* <<skipper-commands-platform>>
+* <<skipper-commands-repository>>
+* <<skipper-commands-config>>
+
+[[skipper-commands-package]]
+== Package Commands
+
+Skipper's package commands include the following:
+
+* <<skipper-commands-package-search>>
+* <<skipper-commands-package-upload>>
+* <<skipper-commands-package-install>>
+* <<skipper-commands-package-delete>>
+
+[[skipper-commands-package-search]]
 === Search
-The command `search` shows all the packages available to be installed by the Skipper server.
+The  `search` command shows all the packages available to be installed by the Skipper server, as shown (with output) in the following example:
 
 [source,bash,options="nowrap"]
 ----
@@ -20,7 +37,7 @@ skipper:>package search
 ╚═════════════════╧═══════╧════════════════════════════════════════════════════════════════════════════════╝
 ----
 
-The `search` command can use `--name` option to search for the package name containing the given option value.
+The `search` command can use `--name` option to search for the package name containing the given option value, as shown (with output) in the following example:
 
 [source,bash,options="nowrap"]
 ----
@@ -33,7 +50,7 @@ skipper:>package search --name helloworld-
 ╚═════════════════╧═══════╧════════════════════════════════════════════════════════════════════════════════╝
 ----
 
-To search for more details of the packages, the option `--details` can be used.
+To search for more details of the packages, the `--details` option can be used, as shown (with output) in the following example:
 
 [source,bash,options="nowrap"]
 ----
@@ -76,8 +93,9 @@ skipper:>package search --name helloworld- --details
 
 ----
 
+[[skipper-commands-package-upload]]
 === Upload
-This command uploads a package .zip file
+This command uploads a package .zip file, as shown (with output) in the following example:
 
 [source,bash,options="nowrap"]
 ----
@@ -85,12 +103,12 @@ skipper:>package upload --path /path-to-package/mypackage-1.0.0.zip
 Package uploaded successfully:[mypackage:1.0.0]
 ----
 
-If no `--repo-name` is set, the `upload` command will use `local` as the repository to upload.
+If no `--repo-name` is set, the `upload` command uses `local` as the repository to upload.
 
-
+[[skipper-commands-package-install]]
 === Install
 
-This command installs a package.
+This command installs a package, as shown (with output) in the following example:
 
 [source,bash,options="nowrap"]
 ----
@@ -98,16 +116,18 @@ skipper:>package install --release-name helloworldlocal --package-name helloworl
 Released helloworldlocal. Now at version v1.
 ----
 
-If no `package-version` is specified, then the latest package version by the given `package-name` will be considered.
+If no `package-version` is specified, then the latest package version by the given `package-name` is considered.
 
-If no `platform-name` is specified, the platform name `default` will be used.
+If no `platform-name` is specified, the platform name, `default`, is used.
 
-The properties can either be provided via comma separated YAML String using the `--properties` option or, via a YAML
-file using the `--file` option.
+The properties can either be provided through comma separated YAML string by using the `--properties` option or through a YAML
+file by using the `--file` option.
 
+[[skipper-commands-package-delete]]
 === Delete
 
-This command deletes a package.  You can only delete a package that is in a local (database backed) repository.
+This command deletes a package.
+You can only delete a package that is in a local (database backed) repository, as shown (with output) in the following example:
 [source,bash,options="nowrap"]
 ----
 skipper:>package delete --package-name helloworld
@@ -116,12 +136,21 @@ Can not delete package [helloworld], associated repository [experimental] is rem
 
 
 [[skipper-commands-release]]
-== Release commands
+== Release Commands
 
+Skipper's release commands include the following:
 
+* <<skipper-commands-release-list>>
+* <<skipper-commands-release-status>>
+* <<skipper-commands-release-upgrade>>
+* <<skipper-commands-release-rollback>>
+* <<skipper-commands-release-history>>
+* <<skipper-commands-release-delete>>
+
+[[skipper-commands-release-list]]
 === List
 
-This command lists the latest deployed or failed release.
+This command lists the latest deployed or failed release, as shown (with output) in the following example:
 
 [source,bash,options="nowrap"]
 ----
@@ -135,10 +164,10 @@ skipper:>release list
 ╚═══════════════╧═══════╧═════════════════════════╧════════╧═══════════╧══════════════╧════════════╧══════════════════════════════════════════════════════════════════════════════╝
 ----
 
-
+[[skipper-commands-release-status]]
 === Status
 
-This command shows the `status` of a specific release and version.
+This command shows the `status` of a specific release and version, as shown (with output) in the following example:
 
 [source,bash,options="nowrap"]
 ----
@@ -151,7 +180,8 @@ skipper:>release status --release-name helloworldlocal
 ╚═══════════════╧═══════════════════════════════════════════════════════════════════════════════════╝
 ----
 
-If no `--release-version` specifed, then the latest release version will be used.
+If no `--release-version` specified, the latest release version is used.
+The following example shows the command with the `--release-version` option:
 
 [source,bash,options="nowrap"]
 ----
@@ -164,9 +194,10 @@ skipper:>release status --release-name helloworldlocal --release-version 1
 ╚═══════════════╧════════════════════════════════════════════════════════════════════════╝
 ----
 
+[[skipper-commands-release-upgrade]]
 === Upgrade
 
-This command upgrades a package.
+This command upgrades a package, as shown (with output) in the following example:
 
 [source,bash,options="nowrap"]
 ----
@@ -174,25 +205,24 @@ skipper:>release upgrade --release-name helloworldlocal --package-name helloworl
 helloworldpcf has been upgraded.  Now at version v2.
 ----
 
-If no `package-version` is specified, then the latest package version by the given `package-name` will be considered.
-The properties can either be provided via comma separated YAML String using the `--properties` option or, via a YAML
-file using the `--file` option.
+If no `package-version` is specified, the latest package version by the given `--package-name` option is considered.
+The properties can either be provided through comma separated YAML string by using the `--properties` option or through a YAML
+file by using the `--file` option.
 
-NOTE: An upgrade can be done by overriding the package version or by keeping the existing package version but by
-overriding the properties. When overriding the package version, it needs to accompany with the corresponding
-properties as the existing properties won't be carried over.
-In a future release we will introduce a `--reuse-properties` command that will carry the current release properties over to the next release to be made.
+NOTE: An upgrade can be done by overriding the package version or by keeping the existing package version but overriding the properties.
+When overriding the package version, it needs to accompany with the corresponding properties as the existing properties are not carried over.
+In a future release, we plan to introduce a `--reuse-properties` command that will carry the current release properties over to the next release to be made.
 
 
 When performing an update on a package that contains nested packages, use the name of the package as a prefix in the property string or as the first level in the YAML document.
-For example, the `ticktock` package that contains a `time` and a `log` application, a command to upgrade the `log` application would be
+For example, the `ticktock` package that contains a `time` and a `log` application, a command to upgrade the `log` application would be as follows:
 
 [source,bash,options="nowrap"]
 ----
 skipper:>release upgrade --release-name ticktockskipper --package-name ticktock --file /home/mpollack/log-level-change.yml
 ----
 
-where `log-level-change.yml` is
+where `log-level-change.yml` contains the following:
 
 [source,bash,options="nowrap"]
 ----
@@ -205,7 +235,8 @@ log:
       log.level: ERROR
 ----
 
-Since it is quite a common use-case to change only the version of the application, the packages can list the version as a top level property in the `values.yml` file.  For example, in the test package `ticktock` (located https://github.com/spring-cloud/spring-cloud-skipper/blob/master/spring-cloud-skipper-server-core/src/test/resources/repositories/sources/test/ticktock/ticktock-1.0.0/packages/log/values.yml[here]), `values.yml` is
+Since it is a common use-case to change only the version of the application, the packages can list the version as a top-level property in the `values.yml` file.
+For example, in the test package `ticktock` (located https://github.com/spring-cloud/spring-cloud-skipper/blob/master/spring-cloud-skipper-server-core/src/test/resources/repositories/sources/test/ticktock/ticktock-1.0.0/packages/log/values.yml[here]), `values.yml` contains the following:
 
 [source,bash,options="nowrap"]
 ----
@@ -217,16 +248,17 @@ spec:
     memory: 1024m
 ----
 
-You can then use the `--properties` option in the `upgrade` command as shown below
+You can then use the `--properties` option in the `upgrade` command, as shown in the following example:
 
 [source,bash,options="nowrap"]
 ----
 skipper:>release upgrade --release-name ticktockskipper --package-name ticktock --properties log.version=1.1.1.RELEASE
 ----
 
+[[skipper-commands-release-rollback]]
 === Rollback
 
-This command rollsback the release to a specific version.
+This command rolls back the release to a specific version, as shown (with output) in the following example:
 
 [source,bash,options="nowrap"]
 ----
@@ -234,13 +266,13 @@ skipper:>release rollback --release-name helloworldlocal --release-version 1
 helloworldlocal has been rolled back.  Now at version v3.
 ----
 
-If no `--release-version` specified, then the rollback version is the previous stable release (either in `DELETED` or
+If no `--release-version` is specified, then the rollback version is the previous stable release (either in `DELETED` or
 `DEPLOYED` status).
 
-
+[[skipper-commands-release-history]]
 === History
 
-This command shows the history of a specific release.
+This command shows the history of a specific release, as shown (with output) in the following example:
 
 [source,bash,options="nowrap"]
 ----
@@ -254,10 +286,10 @@ skipper:>release history --release-name helloworldlocal
 ╚═══════╧════════════════════════════╧════════╧════════════╧═══════════════╧════════════════╝
 ----
 
-
+[[skipper-commands-release-delete]]
 === Delete
 
-This command deletes a specific release's latest deployed revision, undeploying the application or applications.
+This command deletes a specific release's latest deployed revision, undeploying the application or applications, as shown (with output) in the following example:
 
 [source,bash,options="nowrap"]
 ----
@@ -267,11 +299,14 @@ helloworldlocal has been deleted.
 
 
 [[skipper-commands-manifest]]
-== Manifest commands
+== Manifest Commands
 
+Skipper's manifest has only one command: `get`.
+
+[[skipper-commands-manifest-get]]
 === Get
 
-The `manifest get` command shows the manifest used for a specific release.
+The `manifest get` command shows the manifest used for a specific release, as shown (with output) in the following example:
 
 [source,bash,options="nowrap"]
 ----
@@ -294,11 +329,12 @@ spec:
 [[skipper-commands-platform]]
 == Platform commands
 
+Skipper's platform has only one command: `list`.
+
+[[skipper-commands-platform-list]]
 === List
 
-The `platform list` command shows the list all the available deployment platform accounts.
-
-An example output of `platform list` can be
+The `platform list` command shows the list all the available deployment platform accounts, as shown (with output) in the following example:
 
 ```
 skipper:>platform list
@@ -314,13 +350,14 @@ skipper:>platform list
 ```
 
 [[skipper-commands-repository]]
-== Repository commands
+== Repository Commands
+
+Skipper's repository has only one command: `list`.
 
 === List
 
-You can list add or delete a repository using the commands `repo add`, `repo delete` and `repo list`
+You can list add or delete a repository using the commands `repo add`, `repo delete` and `repo list`, as shown (with output) in the following example:
 
-An example output of `repo list` is shown below
 ```
 skipper:>repo list
 ╔════════════╤═══════════════════════════════════════════════════════════╤═════╤═════╗
@@ -330,46 +367,49 @@ skipper:>repo list
 ║local       │http://10.55.13.45:7577                                    │true │1    ║
 ╚════════════╧═══════════════════════════════════════════════════════════╧═════╧═════╝
 ```
-If a repository is local, it is backed by Skipper's database and you will be able to upload packages to the repository.
-If it is not local, it is a remote repository and you are only
-able to read packages.
+If a repository is local, it is backed by Skipper's database and you can upload packages to the repository.
+If it is not local, it is a remote repository and you can only read packages.
 The packages in a remote repository are updated outside of Skipper's control.
 The 1.0 release only polls the remote repository for contents upon server startup.
 Follow issue https://github.com/spring-cloud/spring-cloud-skipper/issues/262[GH-262] for more on adding support for dynamic updating of remote repository metadata.
 
 
 [[skipper-commands-config]]
-== Skipper Server commands
+== Skipper Server Commands
 
+Skipper's package commands include the following:
+
+* <<skipper-commands-config-config>>
+* <<skipper-commands-config-info>>
+
+[[skipper-commands-config-config]]
 === Config
 
-This command configures the shell to reference the HTTP API endpoint of the Skipper Server.
+This command configures the shell to reference the HTTP API endpoint of the Skipper Server, as shown in the following example:
 
 [source,bash]
 ----
 skipper:>skipper config --uri https://localhost:8443/api
 ----
 
-When using OAuth, you can use the username and password options
+When using OAuth, you can use the username and password options.
 
 
-From within the Skipper Shell you can also provide credentials using:
+From within the Skipper Shell you can also provide credentials, as shown in the following example:
 
 [source,bash]
 ----
 skipper:> skipper config --uri https://localhost:7577/api --username my_username --password my_password
 ----
 
-See the section <<configuration-security>> for more information.
+See the "`<<configuration-security>>`" section for more information.
 
+[[skipper-commands-config-info]]
 === Info
 
-This command shows which server version is being used
+This command shows which server version is being used, as shown (with output) in the following example:
 [source,bash,subs=attributes]
 ----
 skipper:>info
 Spring Cloud Skipper Server v1.0.0.{project-version}
 ----
-
-
-

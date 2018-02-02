@@ -42,7 +42,7 @@ public class ApiDocumentation extends BaseDocumentation {
 	public void headers() throws Exception {
 		this.mockMvc.perform(get("/api")).andExpect(status().isOk())
 				.andDo(this.documentationHandler.document(responseHeaders(headerWithName("Content-Type")
-						.description("The Content-Type of the payload, e.g. " + "`application/hal+json`"))));
+						.description("The `Content-Type` of the payload (for example `application/hal+json`)."))));
 	}
 
 	@Test
@@ -51,18 +51,18 @@ public class ApiDocumentation extends BaseDocumentation {
 				.perform(get("/error").requestAttr(RequestDispatcher.ERROR_STATUS_CODE, 400)
 						.requestAttr(RequestDispatcher.ERROR_REQUEST_URI, "/path/not/there").requestAttr(
 								RequestDispatcher.ERROR_MESSAGE,
-								"The path 'http://localhost:8080/path/not/there' does not exist"))
+								"The path, 'http://localhost:8080/path/not/there', does not exist."))
 				.andExpect(status().isBadRequest()).andExpect(jsonPath("error", is("Bad Request")))
 				.andExpect(jsonPath("timestamp", is(notNullValue()))).andExpect(jsonPath("status", is(400)))
 				.andExpect(jsonPath("path", is(notNullValue())))
 				.andDo(this.documentationHandler.document(responseFields(
 						fieldWithPath("error").description(
-								"The HTTP error that occurred, e.g. `Bad Request`"),
-						fieldWithPath("message").description("A description of the cause of the error"),
-						fieldWithPath("path").description("The path to which the request was made"),
-						fieldWithPath("status").description("The HTTP status code, e.g. `400`"),
+								"The HTTP error that occurred (for example, `Bad Request`)."),
+						fieldWithPath("message").description("A description of the cause of the error."),
+						fieldWithPath("path").description("The path to which the request was made."),
+						fieldWithPath("status").description("The HTTP status code (for example `400`)."),
 						fieldWithPath("timestamp")
-								.description("The time, in milliseconds, at which the error occurred"))));
+								.description("The time, in milliseconds, at which the error occurred."))));
 	}
 
 	@Test
@@ -75,17 +75,17 @@ public class ApiDocumentation extends BaseDocumentation {
 				linkWithRel("jpaRepositoryStateMachines").ignored(),
 				linkWithRel("jpaRepositoryActions").ignored(),
 
-				linkWithRel("repositories").description("Exposes 'package repository' repository"),
-				linkWithRel("deployers").description("Exposes deployer repository"),
-				linkWithRel("packageMetadata").description("Exposes package metadata repository"),
+				linkWithRel("repositories").description("Exposes the 'package repository' repository."),
+				linkWithRel("deployers").description("Exposes the deployer repository."),
+				linkWithRel("packageMetadata").description("Exposes the package metadata repository."),
 
 
-				linkWithRel("releases").description("Exposes release repository"),
+				linkWithRel("releases").description("Exposes the release repository."),
 				linkWithRel("profile").description(
-						"Entrypoint to provide ALPS metadata defining simple descriptions of application-level semantics"),
-				linkWithRel("about").description("Provides meta information of the server"),
-				linkWithRel("release").description("Exposes release resource"),
-				linkWithRel("package").description("Exposes package resource"))));
+						"Entrypoint to provide ALPS metadata that defines simple descriptions of application-level semantics."),
+				linkWithRel("about").description("Provides meta information about the server."),
+				linkWithRel("release").description("Exposes the release resource."),
+				linkWithRel("package").description("Exposes the package resource."))));
 
 	}
 }

@@ -6,7 +6,7 @@
 
 === Local Platform configuration
 
-Here is an example YAML file to configure two local deployer accounts named `localDev` and `localDevDebug`
+The following example YAML file configures two local deployer accounts, named `localDev` and `localDevDebug`:
 ```
 spring:
   cloud:
@@ -22,21 +22,18 @@ spring:
                 javaOpts: "-Xdebug"
 ```
 
-The key-value pairs that follow the name of the account are `javaCmd`, `workingDirectoriesRoot`, `deleteFilesOnExit`, `envVarsToInherit`, `shutdownTimeout`, `javaOpts`, and `useSpringApplicationJson`.  More information can be found in the JavaDocs for https://github.com/spring-cloud/spring-cloud-deployer-local/blob/master/spring-cloud-deployer-local/src/main/java/org/springframework/cloud/deployer/spi/local/LocalDeployerProperties.java[LocalDeployerProperties].
+The key-value pairs that follow the name of the account are `javaCmd`, `workingDirectoriesRoot`, `deleteFilesOnExit`, `envVarsToInherit`, `shutdownTimeout`, `javaOpts`, and `useSpringApplicationJson`.
+More information can be found in the JavaDocs for https://github.com/spring-cloud/spring-cloud-deployer-local/blob/master/spring-cloud-deployer-local/src/main/java/org/springframework/cloud/deployer/spi/local/LocalDeployerProperties.java[LocalDeployerProperties].
 
 [[skipper-installation-cloudfoundry]]
 == Installing on Cloud Foundry
 
-=== Cloud Foundry configuration
+This section contains an example YAML file that configures two Cloud Foundry accounts, named `cf-dev` and `cf-qa`.
+This is useful on Cloud Foundry if you use the Spring Cloud Config Server to manage Skipper's configuration properties.
 
-Here is an example YAML file to configure two Cloud Foundry accounts named `cf-dev` and `cf-qa`.
-This is useful on Cloud Foundry if you are using the Spring Cloud Config Server to manage Skipper's configuration properties.
+=== Cloud Foundry Configuration
 
-Here is a sample YML snippet, modify to fit your needs.
-
-NOTE: It is important to set `enableLocalPlatform` to `false` so that the local platform deployer is never used.
-
-NOTE: The `deleteRoutes` deployment setting is `false` so that "v2" of an application has the same route as "v1".  Otherwise, undeploying "v1" will remove the route.
+You can modify the following sample YML snippet to fit your needs:
 
 [source,yml]
 ----
@@ -78,15 +75,16 @@ spring:
                   deleteRoutes: false
 ----
 
-You can also run the Skipper Server locally and deploy to Cloud Foundry.
-In this case, it is more convenient to specify the configuration in a `skipper.yml` file, and start the server with the option `--spring.config.location=skipper.yml`
+NOTE: You must set `enableLocalPlatform` to `false` so that the local platform deployer is never used.
 
-If you are using `cf push` to deploy Skipper, a Cloud Foundry manifest is more appropriate to use.
-Here is a sample manifest.yml, modify to fit your needs.
+NOTE: The `deleteRoutes` deployment setting is `false` so that "`v2`" of an application has the same route as "`v1`".
+Otherwise, undeploying "`v1`" removes the route.
 
-NOTE: It is important to set `SPRING_CLOUD_SKIPPER_SERVER_ENABLE_LOCAL_PLATFORM` to `false` so that the local platform deployer is never used.
+You can also run the Skipper server locally and deploy to Cloud Foundry.
+In this case, it is more convenient to specify the configuration in a `skipper.yml` file and start the server with the `--spring.config.location=skipper.yml` option.
 
-NOTE: It is important to set `SPRING_CLOUD_SKIPPER_SERVER_PLATFORM_CLOUDFOUNDRY_ACCOUNTS[pws]_DEPLOYMENT_DELETE_ROUTES: false` so that "v2" of an application has the same route as "v1".  Otherwise, undeploying "v1" will remove the route.
+If you use `cf push` to deploy Skipper, a Cloud Foundry manifest is more appropriate to use.
+You can modify the following sample manifest.yml to fit your needs:
 
 [source,yml,options="nowrap"]
 ----
@@ -116,14 +114,19 @@ services:
 - mysqlboost
 ----
 
-NOTE: In the manifest above we bound the application to the `mysqlboost` service.
-If you do not specify a service, the server will use an embedded database.
+NOTE: In the preceding manifest, we bound the application to the `mysqlboost` service.
+If you do not specify a service, the server uses an embedded database.
 
-For information on the deployment properties that can be configured can be found in https://github.com/spring-cloud/spring-cloud-deployer-cloudfoundry/blob/master/src/main/java/org/springframework/cloud/deployer/spi/cloudfoundry/CloudFoundryDeploymentProperties.java[CloudFoundryDeploymentProperties].
+NOTE: You must set `SPRING_CLOUD_SKIPPER_SERVER_ENABLE_LOCAL_PLATFORM` to `false` so that the local platform deployer is never used.
 
-When starting the Skipper shell on your local machine, it will try to connect to the Server at the default location of  `http://localhost:7577/api`.
-Use the shell's command line option `--spring.cloud.skipper.client.serverUri` to specify the location of the server.
-You can alternatively use the interactive shell command `config` to set the server location
+NOTE: You must set `SPRING_CLOUD_SKIPPER_SERVER_PLATFORM_CLOUDFOUNDRY_ACCOUNTS[pws]_DEPLOYMENT_DELETE_ROUTES: false` so that "`v2`" of an application has the same route as "`v1`".
+Otherwise, undeploying "`v1`" removes the route.
+
+You can find information on the deployment properties that you can configure in https://github.com/spring-cloud/spring-cloud-deployer-cloudfoundry/blob/master/src/main/java/org/springframework/cloud/deployer/spi/cloudfoundry/CloudFoundryDeploymentProperties.java[CloudFoundryDeploymentProperties].
+
+When starting the Skipper shell on your local machine, it tries to connect to the Server at the default location of `http://localhost:7577/api`.
+Use the shell's `--spring.cloud.skipper.client.serverUri` command line option to specify the location of the server.
+You can alternatively use the `config` interactive shell command to set the server location, as follows:
 
 [source,bash]
 ----
@@ -135,15 +138,15 @@ skipper:>
 [[skipper-installation-kubernetes]]
 == Installing on Kubernetes
 
-There is a docker image `springcloud/spring-cloud-skipper-server` is available for Skipper server in dockerhub.
-You can use this to run the Skipper server in Kubernetes.
+A docker image, named `springcloud/spring-cloud-skipper-server`, is available for Skipper server in dockerhub.
+You can use this image to run the Skipper server in Kubernetes.
 
 
 [[skipper-kubernetes-configuration]]
 === Kuberenetes configuration
 
 
-Here is an example YAML file to configure two accounts named `k8s-dev` and `k8sqa` on a Kubernetes cluster that correspond to different namespaces.  We are investigating how to support connecting to different Kubernetes clusters.
+The following example YAML file configures two accounts, named `k8s-dev` and `k8sqa`, on a Kubernetes cluster.
 
 ```
 spring:
@@ -161,25 +164,29 @@ spring:
                 memory: 1024m
 ```
 
-More information on the deployment properties that can be configured can be found in https://github.com/spring-cloud/spring-cloud-deployer-kubernetes/blob/master/src/main/java/org/springframework/cloud/deployer/spi/kubernetes/KubernetesDeployerProperties.java[KubernetesDeployerProperties]
+The accounts correspond to different namespaces.
+We are investigating how to support connecting to different Kubernetes clusters.
+
+You can find more information on the deployment properties that you can configure in https://github.com/spring-cloud/spring-cloud-deployer-kubernetes/blob/master/src/main/java/org/springframework/cloud/deployer/spi/kubernetes/KubernetesDeployerProperties.java[KubernetesDeployerProperties]
 
 [[skipper-database-configuration]]
 == Database configuration
 
-Spring Cloud Skipper uses a relational database to store metadata. We use https://flywaydb.org/[flyway] to bootstrap and then migrate the database as the product evolves.
-We currently provide schemas for the following databases: *H2*, *HSQLDB*, *MySQL*, *PostgreSQL*, *Microsoft SQL Server*, *Oracle 12*, *IBM DB2*.
+Spring Cloud Skipper uses a relational database to store metadata.
+We use https://flywaydb.org/[Flyway] to bootstrap and then migrate the database as the product evolves.
+We currently provide schemas for the following databases: H2, HSQLDB, MySQL, PostgreSQL, Microsoft SQL Server, Oracle 12, and IBM DB2.
 
-The JDBC drivers for *MySQL* (via MariaDB driver), *HSQLDB*, *PostgreSQL*, *SQL Server*, along the embedded *H2* database are bundled with the server jar.
-If you are using any other database, then the corresponding JDBC driver jar needs to be on the classpath of the server.
-If not specified the server will start with the embedded in memory *H2* database.
+The JDBC drivers for MySQL (through the MariaDB driver), HSQLDB, PostgreSQL, and SQL Server, along the embedded H2 database, are bundled with the server jar.
+If you  use any other database, the corresponding JDBC driver jar needs to be on the classpath of the server.
+If not specified, the server starts with the embedded in-memory H2 database.
 
 The database properties can be passed as environment variables or command-line arguments to the Server.
 
 
-NOTE: Please make sure that you configure the correct `flyway.schemas` for *DB2* and *SQL Server*, otherwise flyway will try to create it's `schema_version` table on the default schema for a connection, which could be different than that your credentials are associated with.
-Please refer to the https://flywaydb.org/documentation/[Flyway documentation] for more options.
+NOTE: Make sure that you configure the correct `flyway.schemas` for DB2 and SQL Server. Otherwise, Flyway tries to create its `schema_version` table on the default schema for a connection, which could be different than the schema with which your credentials are associated.
+See the https://flywaydb.org/documentation/[Flyway documentation] for more options.
 
-Here are some examples.
+The following listings show some examples:
 
 ```
 export spring_datasource_url=jdbc:postgresql://localhost:5432/mydb
@@ -249,4 +256,3 @@ java -jar spring-cloud-skipper-server-{project-version}.jar \
     --flyway.schemas=<db-name> \
     --spring.datasource.driver-class-name=com.ibm.db2.jcc.DB2Driver &
 ----
-

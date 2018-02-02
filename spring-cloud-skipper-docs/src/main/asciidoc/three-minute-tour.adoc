@@ -1,15 +1,20 @@
 [[three-minute-tour]]
 = Three minute Tour
 
-Picking up from where the <<three-second-tour>> left off, this section walks through the additional commands and
-other features of Skipper.  Each section walks through the same set of operations, but for a different platform.
+Picking up from where the <<three-second-tour>> left off, this section walks through the additional commands and other features of Skipper.
+Each section walks through the same set of operations, but for a different platform:
+
+* <<tour-local>>
+* <<tour-cloud-foundry>>
+* <<tour-kubernetes>>
 
 [[tour-local]]
-== Local machine
+== Local Machine
 
-Start up the server and shell as in the <<three-second-tour, three second tour>>.
+Start up the server and shell as in the <<three-second-tour, three-second tour>>.
 
-Let's install and then update the hello world application.
+Now you can install and then update the Hello World application.
+Start by running the `package install` command, as shown (with its output) in the following example:
 
 [source,bash,options="nowrap"]
 ----
@@ -17,7 +22,7 @@ skipper:>package install --release-name helloworldlocal --package-name helloworl
 Released helloworldlocal. Now at version v1.
 ----
 
-You can now curl the `greeting` endpoint.
+You can now curl the `greeting` endpoint, as shown (with its output) in the following example:
 ```
 $ curl http://localhost:8099/greeting
 Hello World!
@@ -25,9 +30,11 @@ $ curl http://localhost:8099/about
 Hello World v1.0.0.RELEASE
 ```
 
-We will use a YAML file to update the release.  This application contains a Spring Boot `@ConfigurationProperty` named `helloworld.greeting`, so we will set that along with a standard Spring Boot property `endpoints.sensitive=false`.  We will also bump the memory up to 2G, make the Boot actuator endpoint not sensitive and set the port to 8100.
+We use a YAML file to update the release.
+This application contains a Spring Boot `@ConfigurationProperty`, named `helloworld.greeting`, so we set that along with a standard Spring Boot property: `endpoints.sensitive=false`.
+We also bump the memory up to 2G, make the Boot actuator endpoint not sensitive, and set the port to 8100.
 
-The `helloworld-upgrade-local.yml` file contains
+The `helloworld-upgrade-local.yml` file contains the following code:
 ----
 spec:
   applicationProperties:
@@ -38,20 +45,21 @@ spec:
     spring.cloud.deployer.memory: 2048m
 ----
 
-The `upgrade` command
+The following example shows the `release upgrade` command, with its output:
 [source,bash,options="nowrap"]
 ----
 skipper:>release upgrade --release-name helloworldlocal --package-name helloworld --package-version 1.0.1 --file /home/mpollack/helloworld-upgrade-local.yml
 helloworldlocal has been upgraded.  Now at version v2.
 ----
 
-The command line option `--package-version 1.0.1` is used to also upgrade to a newer version of the package.
+The `--package-version 1.0.1` command line option is also used to upgrade to a newer version of the package.
 
-The current upgrade strategy is very simple, if the new app is healthy, the old app is removed.  There is not a rolling upgrade option, all new apps are deployed, checked for health, and then previous versions removed.
+The current upgrade strategy is simple: If the new app is healthy, the old app is removed.
+There is no rolling upgrade option. All new apps are deployed and checked for health. Then any previous versions are removed.
 More flexible upgrade strategies are planned in a future release of Skipper.
 
 
-You can now curl the `greeting` endpoint and the `about` endpoint or view them in your browser.
+You can now curl the `greeting` endpoint and the `about` endpoint, as shown (with its output) in the following example:
 ```
 $ curl http://localhost:8100/greeting
 yo
@@ -59,8 +67,10 @@ $ curl http://localhost:8100/about
 Hello World v1.0.1.RELEASE
 ```
 
+You can also view the endpoints in your browser.
+
 The `list` command shows you the current `DEPLOYED` and `DELETED` releases for every release name.
-In this case there is just one entry
+In this case there, is just one entry, as you can see with the `release list` command, as follows:
 
 [source,bash,options="nowrap"]
 ----
@@ -75,7 +85,7 @@ skipper:>release list
 ╚═══════════════╧═══════╧═════════════╧════════╧══════════╧═════════╧═════════╧════════════════════════════════════════════════════╝
 ----
 
-You can get the full history of the release using the `history` command.
+You can get the full history of the release by using the `history` command, as shown (with its output) in the following example:
 [source,bash,options="nowrap"]
 ----
 skipper:>release history --release-name helloworldlocal
@@ -87,8 +97,7 @@ skipper:>release history --release-name helloworldlocal
 ╚═══════╧════════════════════════════╧════════╧════════════╧═══════════════╧════════════════╝
 ----
 
-To see what changed, you can look at the Skipper manifest for each release using the `manifest get` command.
-  A `manifest diff` command is coming in a future release.
+To see what changed, you can look at the Skipper manifest for each release by using the `manifest get` command, as shown (with its output) in the following example:
 
 [source,bash,options="nowrap"]
 ----
@@ -112,7 +121,7 @@ spec:
     spring.cloud.deployer.count: 1
 ----
 
-and
+The following example shows the `manifest get` command and its output for version 1:
 
 [source,bash,options="nowrap"]
 ----
@@ -132,8 +141,11 @@ spec:
   deploymentProperties:
 ----
 
-Next we will use the `rollback` command to deploy an older version of the application.
-Since we have the manifest for that version, we have all we need to redeploy an earlier release.
+(A `manifest diff` command is coming in a future release.)
+
+
+Now we can use the `rollback` command to deploy an older version of the application.
+Since we have the manifest for that version, we have all we need to redeploy an earlier release, as shown (with its output) in the following example:
 
 [source,bash,options="nowrap"]
 ----
@@ -141,7 +153,9 @@ skipper:>release rollback --release-name helloworldlocal --release-version 1
 helloworldlocal has been rolled back.  Now at version v3.
 ----
 
-The history now shows a new `v3` version, even though it is identical in terms of app behavior to the `v1` version.
+NOTE: The history now shows a new `v3` version, even though it is identical in terms of app behavior to the `v1` version.
+
+The `release history` command shows all the versions that have been deployed, as shown (with its output) in the following example:
 
 [source,bash,options="nowrap"]
 ----
@@ -156,7 +170,7 @@ skipper:>release history --release-name helloworldlocal
 ----
 
 
-You can now curl the `greeting` endpoint.
+You can now curl the `greeting` endpoint and see the output of each endpoint, as follows:
 ```
 $ curl http://localhost:8099/greeting
 Hello World!
@@ -169,15 +183,16 @@ Hello World v1.0.0.RELEASE
 
 First, follow the instructions in the section <<skipper-installation-cloudfoundry>> to deploy the Skipper Server to Cloud Foundry.
 
-When you start the Skipper shell, by default it tries to look for the Skipper server on the same (local) machine.
+When you start the Skipper shell, by default, it tries to look for the Skipper server on the same (local) machine.
 To specify the Skipper server that is running on Cloud Foundry, provide the `serverUrl` when launching the shell or use the `config` command after the shell has started.
+The following example provides the `serverUrl`:
 
 [source,bash,subs=attributes]
 ----
 java -jar spring-cloud-skipper-shell-{project-version}.jar --spring.cloud.skipper.client.serverUri=https://mlp-skipper.cfapps.io/api
 ----
 
-or
+The following example uses `config`:
 [source,bash]
 ----
 skipper:>skipper config --uri https://mlp-skipper.cfapps.io/api
@@ -187,6 +202,7 @@ Successfully targeted https://mlp-skipper.cfapps.io/api
 The `repo list` command shows the `experimental` and `local` repositories, since they are configured by default.
 The `local` repository is where you can upload new packages.
 The `experimental` repository has a few "hello world" applications to help get you started.
+The following example shows the `repo list` command and the output of our example:
 
 [source,bash,options="nowrap"]
 ----
@@ -199,7 +215,7 @@ skipper:>repo list
 ╚════════════╧═══════════════════════════════════════════════════════════╧═════╧═════╝
 ----
 
-and the `package search` command shows
+The following example shows the `package search` command and the output of our example:
 
 [source,bash,options="nowrap"]
 ----
@@ -214,8 +230,7 @@ skipper:>package search
 ╚═════════════════╧═══════╧════════════════════════════════════════════════════════════════════════════════╝
 ----
 
-The command `platform list` shows which platforms the server has been configured with, in this case just one Cloud Foundry platform.
-Disabling the local platform during the installation process via property `enableLocalPlatform = false` is why the default `local` platform does not appear.
+The command `platform list` shows the platforms with which the server has been configured, as shown (with its output) in the following example:
 
 [source,bash,options="nowrap"]
 ----
@@ -226,7 +241,11 @@ Disabling the local platform during the installation process via property `enabl
 ╚════╧════════════╧═════════════════════════════════════════════════════════════════════════╝
 ----
 
-Let's install the Hello World app, specifically, the maven based artifact.
+In the preceding example, there is only one Cloud Foundry platform.
+Disabling the local platform during the installation process (by setting the `enableLocalPlatform` property to `false`) caused the default `local` platform to not appear.
+
+Now we can install the Hello World app (specifically, the maven based artifact).
+The following example shows the `package install` command (with its output) that we use to install the `Hello World` application:
 
 [source,bash,options="nowrap"]
 ----
@@ -234,12 +253,12 @@ skipper:>package install --release-name helloworldpcf --package-name helloworld 
 Released helloworldpcf. Now at version v1.
 ----
 
-The deployment property `spring.cloud.deployer.cloudfoundry.route=helloworldpcf.cfapps.io` is set so that when different versions of this application are deployed, they have the same http route.
+The `spring.cloud.deployer.cloudfoundry.route=helloworldpcf.cfapps.io` deployment property is set so that, when different versions of this application are deployed, they have the same HTTP route.
 
-The command option `--platform-name pws` was specified since the default value of that shell option is `default`.
-You can register a platform under the name `default` when installing Skipper, but it is a best practice to specify the target platform name.
+Because the default value of that shell option is `default`he `--platform-name pws`, we used the command option.
+When installing Skipper, you can register a platform under the name `default`, but it is a best practice to specify the target platform name.
 
-Monitor the progress of the deployment using the `release status` command.
+You can monitor the progress of the deployment by using the `release status` command, as shown (with its output) in the following example:
 
 [source,bash,options="nowrap"]
 ----
@@ -252,11 +271,13 @@ skipper:>release status --release-name helloworldpcf
 ╚═══════════════╧════════════════════════════════════════════════╝
 ----
 
-Eventually the Platform Status will say `All applications have been successfully deployed.`
+Eventually, the Platform Status says, `All applications have been successfully deployed.`
 
-NOTE: The status `DEPLOYED` above indicates that Skipper has told the platform to deploy.  Skipper does not keep track of the intermediate states 'deploying' or 'deleting'.  The platform status provides finer grained status information.
+NOTE: The `DEPLOYED` status in the preceding example indicates that Skipper has told the platform to deploy.
+Skipper does not keep track of the intermediate states 'deploying' or 'deleting'.
+The platform status provides finer-grained status information.
 
-A `cf apps` command will now have a new listing for this deployed application.
+The `cf apps` command now has a new listing for this deployed application, as shown (with its output) in the following example:
 
 [source,bash,options="nowrap"]
 ----
@@ -268,7 +289,7 @@ name                          requested state   instances   memory   disk   urls
 helloworldpcf-helloworld-v1   started           1/1         1G       1G     helloworldpcf.cfapps.io
 ----
 
-You can now curl the `greeting` endpoint and the `about` endpoint.
+You can now curl the `greeting` endpoint and the `about` endpoint, as shown in the following example:
 
 [source,bash,options="nowrap"]
 ----
@@ -278,13 +299,13 @@ $ curl http://helloworldpcf.cfapps.io/about
 Hello World v1.0.0.RELEASE
 ----
 
-The name of the application is based on the convention `<release-name>-<package-name>-v<incrementing-counter>`.
+The name of the application is based on the `<release-name>-<package-name>-v<incrementing-counter>` convention.
 
 Also note that we specified a route for this application that is different than the application's name.
-The deployment property `spring.cloud.deployer.cloudfoundry.route` is set to something that will not change across the deployment of different versions of this application, in this case `helloworldpcf.cfapps.io`.
+The deployment property `spring.cloud.deployer.cloudfoundry.route` is set to something that does not change across the deployment of different versions of this application -- in this case, `helloworldpcf.cfapps.io`.
 
-The package provides a means to template the application version, application properties and deployment properties that are used to deploy the application to Cloud Foundry.
-The `manifest get` command shows the final YAML file which is passed off to the Spring Cloud Deployer Library.
+The package provides a means to template the application version, application properties, and deployment properties that are used to deploy the application to Cloud Foundry.
+The `manifest get` command shows the final YAML file which is passed off to the Spring Cloud Deployer Library, as shown (with its output) in the following example:
 
 [source,bash,options="nowrap"]
 ----
@@ -304,14 +325,15 @@ spec:
     spring.cloud.deployer.cloudfoundry.route: helloworldpcf.cfapps.io
 ----
 
-The manifest is in a Kubernetes Resource file inspired format.  By looking at the manifest you can see which maven artifact was used and which properties were set before the final push to Cloud Foundry.
-The metadata values that are present will be used in a future release to support searching for releases based on those values.
+The manifest format is inspired by the Kubernetes Resource file format.
+By looking at the manifest, you can see which Maven artifact was used and which properties were set before the final push to Cloud Foundry.
+A future release of Skipper will use the metadata values to support searching for releases based on those values.
 
-Since it is somewhat awkward to specify multiple flattened out YAML values for the `--properties` argument in the shell, you can also specify the location of a YAML file when installing or upgrading.
-We will use a YAML file, named `helloworld-upgrade.yml` to update the release.
-This application contains a Spring Boot `@ConfigurationProperty` named `helloworld.greeting`, so we will set that along with a standard Spring Boot property `endpoints.sensitive=false`.
-We will also bump the memory up to 2G from the default 1G.
-The contents of the `helloworld-upgrade.yml` file is shown below.
+Since it is somewhat awkward to specify multiple flattened-out YAML values for the `--properties` argument in the shell, you can also specify the location of a YAML file when installing or upgrading.
+In the next example, we use a YAML file, named `helloworld-upgrade.yml`, to update the release.
+This application contains a Spring Boot `@ConfigurationProperty` named `helloworld.greeting`, so we set that, along with a standard Spring Boot property: `endpoints.sensitive=false`.
+We also bump the memory up to 2G from the default 1G.
+The contents of the `helloworld-upgrade.yml` file follows:
 
 [source,yml]
 ----
@@ -324,18 +346,18 @@ spec:
     spring.cloud.deployer.memory: 2048m
 ----
 
-Run the `release upgrade` command
+Now you can run the `release upgrade` command, as shown (with its output) in the following example:
 [source,bash,options="nowrap"]
 ----
 skipper:>release upgrade --release-name helloworldpcf --package-name helloworld --package-version 1.0.0 --file /home/mpollack/helloworld-upgrade.yml
 helloworldpcf has been upgraded.  Now at version v2.
 ----
 
-This will start another instance of the hello world application and Skipper will determine when it can stop the instance of the previous instance.
-If you do not specify `--package-version` it will pick the latest version of the `helloworld` package.
-You do not need to specify the `--platform-name` as it will always be where the current application was deployed.
+The preceding example starts another instance of the hello world application, and Skipper determines when it can stop the instance of the previous instance.
+If you do not specify `--package-version`, it picks the latest version of the `helloworld` package.
+You do not need to specify the `--platform-name`, as it is always where the current application was deployed.
 
-The `cf apps` and `cf routes` command shows
+The following example shows the `cf apps` command and its output:
 
 [source,bash,options="nowrap"]
 ----
@@ -348,7 +370,7 @@ helloworldpcf-helloworld-v1   started           1/1         1G       1G     hell
 helloworldpcf-helloworld-v2   stopped           0/1         2G       1G     helloworldpcf.cfapps.io
 ----
 
-and
+The following example shows the `cf routes` command and its output:
 
 [source,bash,options="nowrap"]
 ----
@@ -360,20 +382,20 @@ space-mark   helloworldpcf                 cfapps.io                        hell
 
 ----
 
-At this point Skipper is checking the health of the new application.
-The default health check is to test that the HTTP port of the application is open.
-There is a simple customization in Skipper to influences the way the health check is performed.
-The property `spring.cloud.skipper.server.strategies.healthcheck.timeoutInMillis` is the maximum time the upgrade process will wait for a healthy app.
+At this point, Skipper is checking the health of the new application.
+The default health checks whether the HTTP port of the application is open.
+There is a customization in Skipper that influences the way the health check is performed.
+The `spring.cloud.skipper.server.strategies.healthcheck.timeoutInMillis` property is the maximum time the upgrade process waits for a healthy app.
 The default value is 5 minutes.
-Skipper will fail the deployment if it is not healthy within that time.
-The property `spring.cloud.skipper.server.strategies.healthcheck.sleepInMillis` is how long to sleep between health checks.
+Skipper fails the deployment if it is not healthy within that time.
+The `spring.cloud.skipper.server.strategies.healthcheck.sleepInMillis` property is how long to sleep between health checks.
 
-The current upgrade strategy is very simple, if the new app is healthy, the old app is removed.
+The current upgrade strategy is very simple: If the new app is healthy, the old app is removed.
 There is not a rolling upgrade option, all new apps are deployed, checked for health, and then previous versions removed.
 More flexible upgrade strategies are planned in a future release.
 
 
-You can now curl the `greeting` endpoint and the `about` endpoint.
+You can now curl the `greeting` endpoint and the `about` endpoint, as shown in the following example:
 [source,bash,options="nowrap"]
 ----
 $ curl http://helloworldpcf.cfapps.io/greeting
@@ -382,8 +404,8 @@ $ curl http://helloworldpcf.cfapps.io/about
 Hello World v1.0.0.RELEASE
 ----
 
-The `release list` command shows you the current `DEPLOYED` and `DELETED` releases for every release name.
-In this case there is just one entry
+The `release list` command shows the current `DEPLOYED` and `DELETED` releases for every release name.
+In the following example from the sample application, there is only one entry, as shown in the following example:
 
 [source,bash,options="nowrap"]
 ----
@@ -397,7 +419,7 @@ In this case there is just one entry
 
 ----
 
-You can get the full history of the release using the `release history` command
+You can get the full history of the release byusing the `release history` command, as shown (with its output) in the following example:
 
 [source,bash,options="nowrap"]
 ----
@@ -410,9 +432,10 @@ skipper:>release history --release-name helloworldpcf
 ╚═══════╧════════════════════════════╧════════╧════════════╧═══════════════╧════════════════╝
 ----
 
-A more typical upgrade process is not to change application properties, but to change the version of the application because the code has changed.
-We will now upgrade the release to use a new maven artifact, version 1.0.1, which also corresponds to version 1.0.1 of the helloworld skipper package.
-In this case, we will not add any additional properties other than the route.
+A more typical upgrade process is not to change application properties but to change the version of the application because the code has changed.
+In the following example, we now upgrade the release to use a new Maven artifact, version 1.0.1, which also corresponds to version 1.0.1 of the `helloworld` Skipper package.
+In this case, we do not add any additional properties other than the route.
+The following example shows the `release upgrade` command (with its update) to deploy version 1.0.1:
 
 [source,bash,options="nowrap"]
 ----
@@ -420,9 +443,9 @@ skipper:>release upgrade --release-name helloworldpcf --package-name helloworld 
 helloworldpcf has been upgraded.  Now at version v3.
 ----
 
-Note that the current release's property values such as using 2G, or the greeting being `yo` are not carried over.
-In a future release we will introduce a `--reuse-properties` command that will carry the current release properties over to the next release to be made.
-You can monitor the status of the upgrade using the `status` command
+Note that the current release's property values, such as using 2G or the greeting being `yo` are not carried over.
+A future release will introduce a `--reuse-properties` command that will carry the current release properties over to the next release to be made.
+You can monitor the status of the upgrade by using the `status` command, as shown (with its output) in the following example:
 
 [source,bash,options="nowrap"]
 ----
@@ -435,7 +458,7 @@ skipper:>release status --release-name helloworldpcf
 ╚═══════════════╧════════════════════════════════════════════════╝
 ----
 
-And a curl command shows
+Now a `curl` command shows the following output:
 
 [source,bash,options="nowrap"]
 ----
@@ -445,7 +468,7 @@ $ curl http://helloworldpcf.cfapps.io/about
 Hello World v1.0.1.RELEASE
 ----
 
-Our release history now looks like
+Our release history is now as follows:
 
 [source,bash,options="nowrap"]
 ----
@@ -459,8 +482,9 @@ skipper:>release history --release-name helloworldpcf
 ╚═══════╧════════════════════════════╧════════╧════════════╧═══════════════╧════════════════╝
 ----
 
-Next we will use the `rollback` command to deploy an older version of the application.
+Next, we use the `rollback` command to deploy an older version of the application.
 Since we have the manifest for that version, we have all we need to redeploy an earlier release.
+The following example shows the `release rollback` command and its output:
 
 [source,bash,options="nowrap"]
 ----
@@ -468,7 +492,7 @@ skipper:>release rollback --release-name helloworldpcf --release-version 2
 helloworldpcf has been rolled back.  Now at version v4.
 ----
 
-The history now shows a new `v4` version, even though it is identical in terms of app behavior to the `v2` version.
+The history now shows a new `v4` version, even though it is identical in terms of app behavior to the `v2` version, as follows:
 
 [source,bash,options="nowrap"]
 ----
@@ -483,7 +507,7 @@ skipper:>release history --release-name helloworldpcf
 ╚═══════╧════════════════════════════╧════════╧════════════╧═══════════════╧════════════════╝
 ----
 
-The curl commands show
+The `curl` commands shows the following output:
 [source,bash,options="nowrap"]
 ----
 $ curl http://helloworldpcf.cfapps.io/greeting
@@ -495,14 +519,14 @@ Hello World v1.0.0.RELEASE
 [[tour-kubernetes]]
 == Kuberenetes
 
-In this example we will be running the Skipper server on the local machine and deploying to minikube also running on the local machine.
+In this example, we run the Skipper server on the local machine and deploy to minikube, which also runs on the local machine.
 
-NOTE: The upgrade approach in 1.02 does not handle correctly the routing of http traffic between versions, so take what is below with a grain of salt.
-The Spring Cloud Deployer for Kubernetes creates a service, replication controller, and pod for the app (or optionally
-  a Deployment).
-This is not an issue for apps that communicate via Messaging middleware and will be addressed in a future release.
+NOTE: The upgrade approach in 1.02 does not correctly handle the routing of HTTP traffic between versions, so the following representation may not be exactly accurate.
 
-Start the Skipper server with the option `--spring.config.location=skipper.yml` where the YAML is shown below.
+The Spring Cloud Deployer for Kubernetes creates a service, a replication controller, and a pod for the app (or, optionally, a deployment).
+This is not an issue for apps that communicate over Messaging middleware and will be addressed in a future release.
+
+Start the Skipper server with the `--spring.config.location=skipper.yml` option. The YAML content follows:
 
 ----
 spring:
@@ -517,7 +541,7 @@ spring:
                 namespace: default
 ----
 
-The `repo list` command shows the `experimental` and `local` repositories, since they are configured by default.
+The `repo list` command shows the `experimental` and `local` repositories, since they are configured by default, as follows:
 [source,bash,options="nowrap"]
 ----
 skipper:>repo list
@@ -529,7 +553,7 @@ skipper:>repo list
 ╚════════════╧═══════════════════════════════════════════════════════════╧═════╧═════╝
 ----
 
-and the `package search` command shows
+The `package search` command shows the Name, the Version, and the Description, as follows:
 [source,bash,options="nowrap"]
 ----
 skipper:>package search
@@ -543,7 +567,8 @@ skipper:>package search
 ╚═════════════════╧═══════╧════════════════════════════════════════════════════════════════════════════════╝
 ----
 
-The command `platform list` shows which platforms the server has been configured with, in this case just one Kubernetes namespace.  Disabling the local platform with the property `enableLocalPlatform = false` is why the default `local` platform does not appear.
+The `platform list` command shows which platforms the server has been configured with -- in this case, one Kubernetes namespace.
+Disabling the local platform by setting the `enableLocalPlatform` property to `false` causes the default `local` platform to not appear.
 
 [source,bash,options="nowrap"]
 ----
@@ -555,15 +580,16 @@ skipper:>platform list
 ╚════════╧══════════╧══════════════════════════════════════════════════════════════════════════════════════╝
 ----
 
-Let's install the Hello World app, specifically, the Docker based artifact.
+Now we can install the Hello World app (specifically, the Docker-based artifact), as follows:
 [source,bash,options="nowrap"]
 ----
 skipper:>package install --release-name helloworldk8s --package-name helloworld-docker --package-version 1.0.0 --platform-name minikube --properties spec.deploymentProperties.spring.cloud.deployer.kubernetes.createNodePort=32123
 Released helloworldk8s. Now at version v1.
 ----
-The command option `--platform-name minikube` was specified since the default value of that shell option is `default`. You can register a platform under the name `default` when installing Skipper, but it is a best practice to specify the target platform name.
+We use the `--platform-name minikube` command option, because the default value of that shell option is `default`.
+You can register a platform under the `default` name when installing Skipper, but it is a best practice to specify the target platform name.
 
-You can monitor the process using the `release status` command.
+You can monitor the process by using the `release status` command, as follows:
 [source,bash,options="nowrap"]
 ----
 skipper:>release status --release-name helloworldk8s
@@ -576,11 +602,12 @@ skipper:>release status --release-name helloworldk8s
 ----
 
 
-Eventually the Platform Status will say `All applications have been successfully deployed.`
+Eventually, the Platform Status says, `All applications have been successfully deployed.`
 
-Note that the status `DEPLOYED` above indicates that Skipper has told the platform to deploy.  Skipper does not keep track of the intermediate states 'deploying' or 'deleting'.
+Note that the `DEPLOYED` status in the preceding example indicates that Skipper has told the platform to deploy.
+Skipper does not keep track of the intermediate states ('deploying' or 'deleting').
 
-A `kubectl pods` command will now have a new listing for this deployed application
+A `kubectl pods` command now shows a new listing for this deployed application, as follows:
 [source,bash,options="nowrap"]
 ----
 $ kubectl get pods
@@ -594,14 +621,14 @@ kubernetes                           10.0.0.1     <none>        443/TCP         
 
 ----
 
-To get the URL of this app on minikube
+To get the URL of this app on minikube, use the `minikube service` command, as follows:
 [source,bash,options="nowrap"]
 ----
 $ minikube service --url helloworldk8s-helloworld-docker-v1
 http://192.168.99.100:32123
 ----
 
-You can now curl the `greeting` endpoint and the `about` endpoint.
+You can now curl the `greeting` endpoint and the `about` endpoint, as shown in the following example:
 [source,bash,options="nowrap"]
 ----
 $ curl http://192.168.99.100:32123/greeting
@@ -610,9 +637,11 @@ $ curl http://192.168.99.100:32123/about
 Hello World v1.0.0.RELEASE
 ----
 
-The name of the application is based on the convention `<release-name>-<package-name>-v<incrementing-counter>`.  This will need to change in future releases in order to handle routing correctly.
+The name of the application is based on the following convention: `<release-name>-<package-name>-v<incrementing-counter>`.
+Future releases will change this convention to correctly handle routing.
 
-The package provides a means to template the application version, application properties and deployment properties that are used to deploy the application to Kubernetes.  The `manifest get` command shows the final YAML file which is passed off to the Spring Cloud Deployer Library.
+The package provides a means to template the application version, application properties, and deployment properties that are used to deploy the application to Kubernetes.
+The `manifest get` command shows the final YAML file, which is passed off to the Spring Cloud Deployer Library, as shown (with its output) in the following example:
 
 [source,bash,options="nowrap"]
 ----
@@ -631,12 +660,15 @@ spec:
     spring.cloud.deployer.kubernetes.createNodePort: 32123
 ----
 
-The manifest is in a Kubernetes Resource file inspired format.  By looking at the manifest you can see which Docker images was used and which properties were set before the final push to Kubernetes.
-The metadata values that are present will be used in an upcoming release of Skipper to support searching for releases based on those values.
+The format of the is inspired by the Kubernetes Resource file format.
+By looking at the manifest, you can see which Docker images were used and which properties were set before the final push to Kubernetes.
+A future release of Skipper will use the metadata values to support searching for releases based on those values.
 
 Since it is somewhat awkward to specify multiple flattened out YAML values for the `--properties` argument in the shell, you can also specify the location of a YAML file when installing or upgrading.
-We will use a YAML file when we will update the release.  This application contains a Spring Boot
-`@ConfigurationProperty` named `helloworld.greeting`, so we will set that along with a standard Spring Boot property `endpoints.sensitive=false`.  We will also bump the memory down to 768m from the default 1G.
+We use a YAML file when we update the release.
+This application contains a Spring Boot
+`@ConfigurationProperty` named `helloworld.greeting`, so we set that, along with a standard Spring Boot property: `endpoints.sensitive=false`.  We also bump the memory down to 768m from the default 1G.
+The following listing shows all the settings:
 
 [source,bash,options="nowrap"]
 ----
@@ -649,19 +681,19 @@ spec:
     spring.cloud.deployer.memory: 768m
 ----
 
-The `release upgrade` command
+The following example shows the `release upgrade` command and its output:
 [source,bash,options="nowrap"]
 ----
 skipper:>release upgrade --release-name helloworldk8s --package-name helloworld-docker --package-version 1.0.0 --file /home/mpollack/helloworld-upgrade-k8s.yml
 helloworldk8s has been upgraded.  Now at version v2.
 ----
 
-This will start another instance of the hello world application. If you do not specify `--package-version` it will pick
-the latest version of the `helloworld-docker` package.  You do not need to specify the `--platform-name` as it will
-always be where the current application was deployed.
+The preceding command starts another instance of the hello world application.
+If you do not specify `--package-version`, it picks the latest version of the `helloworld-docker` package.
+You do not need to specify the `--platform-name` as it is always where the current application was deployed.
 
 
-the `kubectl get all` command shows
+The following example shows the `kubectl get all` command and its output:
 [source,bash,options="nowrap"]
 ----
 $ kubectl get all
@@ -679,17 +711,18 @@ svc/helloworldk8s-helloworld-docker-v2   10.0.0.154   <nodes>       8080:32124/T
 svc/kubernetes                           10.0.0.1     <none>        443/TCP          59m
 ----
 
-At this point Skipper is looking to see if the health endpoint of the Boot application is ok.
-The property `spring.cloud.skipper.server.strategies.healthcheck.timeoutInMillis` is the maximum time the upgrade process will wait for a healthy app.
+At this point, Skipper is looking to see if the health endpoint of the Boot application is OK.
+The `spring.cloud.skipper.server.strategies.healthcheck.timeoutInMillis` property sets the maximum time the upgrade process waits for a healthy app.
 The default value is 5 minutes.
-Skipper will fail the deployment if it is not healthy within that time.
-The property `spring.cloud.skipper.server.strategies.healthcheck.sleepInMillis` is how long to sleep between health checks.
+Skipper fails the deployment if it is not healthy within that time.
+The `spring.cloud.skipper.server.strategies.healthcheck.sleepInMillis` property sets how long to sleep between health checks.
 
-The current upgrade strategy is very simple, if the new app is healthy, the old app is removed.  There is not a rolling upgrade option, all new apps are deployed, checked for health, and then previous versions removed.
-More flexible upgrade strategies are planned along with the introduction of the https://projects.spring.io/spring-statemachine/[Spring Cloud State Machine] project to orchestrate the update process.
+The current upgrade strategy is simple: If the new app is healthy, the old app is removed.
+There is not a rolling upgrade option. All new apps are deployed and checked for health. Then any previous versions are removed.
+Future releases will have more flexible upgrade strategies, along with the introduction of the https://projects.spring.io/spring-statemachine/[Spring Cloud State Machine] project to orchestrate the update process.
 
 
-You can now curl the `greeting` endpoint and the `about` endpoint.
+You can now curl the `greeting` endpoint and the `about` endpoint, as follows:
 
 [source,bash,options="nowrap"]
 ----
@@ -700,8 +733,8 @@ Hello World v1.0.0.RELEASE
 ----
 
 
-The `release list` command shows you the current `DEPLOYED` and `DELETED` release for every release name.
-In this case there is just one entry
+The `release list` command shows the current `DEPLOYED` and `DELETED` release for every release name.
+In the following example, there is only one entry:
 [source,bash,options="nowrap"]
 ----
 skipper:>release list
@@ -712,7 +745,7 @@ skipper:>release list
 ╚═════════════╧═══════╧════════════════════════════╧════════╧═════════════════╧═══════════════╧═════════════╧═══════════════╝
 ----
 
-You can get the full history of the release using the `history` command.
+You can get the full history of the release using the `history` command, as follows:
 
 ----
 skipper:>release history --release-name helloworldk8s
@@ -723,8 +756,9 @@ skipper:>release history --release-name helloworldk8s
 ║1      │Wed Oct 25 17:34:24 EDT 2017│DELETED │helloworld-docker│1.0.0          │Delete complete ║
 ╚═══════╧════════════════════════════╧════════╧═════════════════╧═══════════════╧════════════════╝
 ----
-A more typical upgrade process is not to change application properties, but to change the version of the application because the code has change.  We will now upgrade the release to use a new Docker artifact, version 1.0.1, which also corresponds to version 1.0.1 of the helloworld Skipper package.
-In this case we will not add any additional properties other than the NodePort.
+A more typical upgrade process is not to change application properties but to change the version of the application because the code has changed.
+We can now upgrade the release to use a new Docker artifact, version 1.0.1, which also corresponds to version 1.0.1 of the `helloworld` Skipper package.
+In the following example, we do not add any additional properties other than `NodePort`:
 
 [source,bash,options="nowrap"]
 ----
@@ -732,9 +766,9 @@ skipper:>release upgrade --release-name helloworldk8s --package-name helloworld-
 Released helloworldk8s. Now at version v3.
 ----
 
-Note that the the current release's property values such as using 2G, or the greeting being `yo` are not carried over.
-In a future release we will introduce a `--reuse-properties` command that will carry the current release properties over to the next release to be made.
-You can monitor the status of the upgrade using the `status` command
+Note that the the current release's property values, such as using 2G RAM or the greeting being `yo`, are not carried over.
+A future release will introduce a `--reuse-properties` command option that will carry the current release properties over to the next release to be made.
+You can monitor the status of the upgrade by using the `status` command, as shown (with its output) in the following example:
 
 [source,bash,options="nowrap"]
 ----
@@ -747,7 +781,7 @@ skipper:>release status --release-name helloworldk8s
 ╚═══════════════╧══════════════════════════════════════════════════════════════════════════════════════════════════╝
 ----
 
-And a curl command shows
+A `curl` command shows the following output:
 [source,bash,options="nowrap"]
 ----
 $ curl http://192.168.99.100:32125/greeting
@@ -757,7 +791,7 @@ $ curl http://192.168.99.100:32125/about
 Hello World v1.0.1.RELEASE
 ----
 
-Our history now looks like
+The following example shows the `release history` command and its output:
 [source,bash,options="nowrap"]
 ----
 skipper:>release history --release-name helloworldk8s
@@ -770,8 +804,9 @@ skipper:>release history --release-name helloworldk8s
 ╚═══════╧════════════════════════════╧════════╧═════════════════╧═══════════════╧════════════════╝
 ----
 
-Next we will use the `rollback` command to deploy an older version of the application.
+Next, we use the `rollback` command to deploy an older version of the application.
 Since we have the manifest for that version, we have all we need to redeploy an earlier release.
+The following example shows the rollback command and its output:
 
 [source,bash,options="nowrap"]
 ----
@@ -779,7 +814,7 @@ skipper:>release rollback --release-name helloworldk8s --release-version 2
 helloworldk8s has been rolled back.  Now at version v4.
 ----
 
-The history now shows a new `v4` version, even though it is identical to the `v2` version.
+The history now shows a new `v4` version, even though it is identical to the `v2` version, as shown in the following example:
 
 [source,bash,options="nowrap"]
 ----
@@ -794,7 +829,7 @@ skipper:>release history --release-name helloworldk8s
 ╚═══════╧════════════════════════════╧════════╧═════════════════╧═══════════════╧════════════════╝
 ----
 
-The curl commands show
+The `curl` commands now shows the following:
 [source,bash,options="nowrap"]
 ----
 $ curl http://192.168.99.100:32124/greeting

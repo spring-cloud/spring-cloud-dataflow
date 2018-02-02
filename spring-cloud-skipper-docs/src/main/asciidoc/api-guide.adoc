@@ -3,61 +3,62 @@
 
 [partintro]
 --
-In this section you will learn all about the Spring Cloud Skipper REST API.
+This section covers the Spring Cloud Skipper REST API.
 --
 
 [[api-guide-overview]]
 == Overview
 
-Spring Cloud Skipper provides a  REST API allowing you to access all aspects of
-the server. In fact the Spring Cloud Skipper Shell is a first-class consumer of
-that API.
+Spring Cloud Skipper provides a REST API that lets you access all aspects of the server.
+The Spring Cloud Skipper shell is a first-class consumer of the API.
 
 [[api-guide-overview-http-verbs]]
-=== HTTP verbs
+=== HTTP Verbs
 
-Spring Cloud Skipper tries to adhere as closely as possible to standard HTTP and
-REST conventions in its use of HTTP verbs.
+Spring Cloud Skipper tries to adhere as closely as possible to standard HTTP and REST conventions in its use of HTTP verbs.
+The following table shows each verb and how Skipper uses it:
 
 |===
 | Verb | Usage
 
 | `GET`
-| Used to retrieve a resource
+| Used to retrieve a resource.
 
 | `POST`
-| Used to create a new resource
+| Used to create a new resource.
 
 | `PUT`
-| Used to update an existing resource, including partial updates. Also used for
-resources that imply the concept of `restarts`.
+| Used to update an existing resource, including partial updates.
+Also used for resources that imply the concept of `restarts`.
 
 | `DELETE`
-| Used to delete an existing resource
+| Used to delete an existing resource.
 |===
 
 [[api-guide-overview-http-status-codes]]
-=== HTTP status codes
+=== HTTP Status Codes
 
-RESTful note tries to adhere as closely as possible to standard HTTP and REST conventions in its use of HTTP status codes.
+Skipper adheres as closely as possible to standard HTTP and REST conventions in its use of HTTP status codes.
+The following table shows each status and its meaning in Skipper:
 
 |===
 | Status code | Usage
 
 | `200 OK`
-| The request completed successfully
+| The request completed successfully.
 
 | `201 Created`
-| A new resource has been created successfully. The resource's URI is available from the response's `Location` header
+| A new resource has been created successfully.
+The resource's URI is available from the response's `Location` header.
 
 | `204 No Content`
-| An update to an existing resource has been applied successfully
+| An update to an existing resource has been applied successfully.
 
 | `400 Bad Request`
-| The request was malformed. The response body will include an error providing further information
+| The request was malformed. The response body includes an error that provides further information.
 
 | `404 Not Found`
-| The requested resource did not exist
+| The requested resource does not exist.
 
 |===
 
@@ -76,8 +77,12 @@ include::{snippets}/api-documentation/errors/response-fields.adoc[]
 [[api-guide-overview-hypermedia]]
 === Hypermedia
 
-Spring Cloud Skipper uses hypermedia and resources include links to other resources
-in their responses. Responses are in http://stateless.co/hal_specification.html[Hypertext Application from resource to resource Language (HAL)] format. Links can be found beneath the `_links` key. Users of the API should not create URIs themselves, instead they should use the above-described links to navigate.
+Spring Cloud Skipper uses hypermedia.
+As a result, resources include links to other resources in their responses.
+More specifically, responses are in http://stateless.co/hal_specification.html[Hypertext Application from resource to resource Language (HAL)] format.
+Links can be found beneath the `_links` key.
+Consumers of the API should not create URIs themselves.
+Instead they should use the links in the resources to navigate.
 
 [[api-guide-resources]]
 == Resources
@@ -88,27 +93,29 @@ in their responses. Responses are in http://stateless.co/hal_specification.html[
 The index provides the entry point into Spring Cloud Skipper's REST API.
 
 [[api-guide-resources-index-access]]
-==== Accessing the index
+==== Accessing the Index
 
-A `GET` request is used to access the index
+You can use a `GET` request to access the index.
 
-===== Request structure
+===== Request Structure
+
+The following
 
 include::{snippets}/api-documentation/index/http-request.adoc[]
 
-===== Example request
+===== Example Request
 
 include::{snippets}/api-documentation/index/curl-request.adoc[]
 
-===== Example response
+===== Example Response
 
 include::{snippets}/api-documentation/index/http-response.adoc[]
 
 [[api-guide-resources-index-links]]
 ===== Links
 
-The main element of the index are the links as they allow you to traverse the API
-and execute the desired functionality:
+The links are the main element of the index, as they allow you to traverse the API and execute the desired functionality.
+The following table dsecribes the links:
 
 include::{snippets}/api-documentation/index/links.adoc[]
 
@@ -118,10 +125,10 @@ include::{snippets}/api-documentation/index/links.adoc[]
 The Server resource exposes build and version information of the server.
 
 ==== Server info
-A `GET` request will return meta information for Spring Cloud Skipper. This includes:
+A `GET` request returns meta information for Spring Cloud Skipper, including the following:
 
-* Server name, typically `spring-cloud-skipper-server`
-* Version of the server, e.g. `{project-version}`
+* Server name -- typically `spring-cloud-skipper-server`
+* Version of the server -- for example, `{project-version}`
 
 ===== Request structure
 
@@ -142,10 +149,10 @@ include::{snippets}/about-documentation/get-meta-information/response-fields.ado
 === Platforms
 
 
-The Platforms (or Platform Deployer) resource is what is exported from the Spring Data Repository `DeployerRepository` and exposed by Spring Data REST.
+The Platforms (or Platform Deployer) resource is exported from the Spring Data Repository `DeployerRepository` and exposed by Spring Data REST.
 
 ==== Find All
-A `GET` request will return a paginated list for all the Spring Cloud Skipper platform deployers.
+A `GET` request returns a paginated list for all the Spring Cloud Skipper platform deployers.
 
 ===== Request structure
 
@@ -166,7 +173,7 @@ include::{snippets}/deployers-documentation/get-all-deployers/response-fields.ad
 [[resources-packages-metadata]]
 === Packages
 
-The Packages resource is what is exported from the Spring Data Repository `PackageMetadata` and exposed by Spring Data REST.
+The Packages resource is exported from the Spring Data Repository `PackageMetadata` and exposed by Spring Data REST.
 
 [[resources-package-search]]
 ==== Search
@@ -192,7 +199,7 @@ include::{snippets}/package-metadata-documentation/get-all-package-metadata/resp
 [[resources-package-search-summary]]
 ==== Search summary
 
-A `GET` request will return the list of available package metadata with the summary information of each package
+A `GET` request returns the list of available package metadata with the summary information of each package.
 
 ===== Request structure
 
@@ -214,7 +221,7 @@ include::{snippets}/package-metadata-documentation/get-package-metadata-summary/
 [[resources-package-search-details]]
 ==== Search with details
 
-A `GET` request will return details of a package using the _id_ of the package.
+A `GET` request returns the details of a package using the `id` of the package.
 
 ===== Request structure
 
@@ -235,7 +242,7 @@ include::{snippets}/package-metadata-documentation/get-package-metadata-details/
 [[resources-package-search-find-by-name]]
 ==== Search by Package Name
 
-A `GET` request will return a list for all Spring Cloud Skipper package metadata by the given package name.
+A `GET` request returns a list of all the Spring Cloud Skipper package metadata for the given package name.
 
 ===== Request structure
 getPackageMetadataSearchFindByName
@@ -254,9 +261,9 @@ include::{snippets}/package-metadata-documentation/get-package-metadata-search-f
 include::{snippets}/package-metadata-documentation/get-package-metadata-search-find-by-name/response-fields.adoc[]
 
 [[resources-package-search-findbyname-ignore-case]]
-==== Search by Package Name ignoring case
+==== Search by Package Name, Ignoring Case
 
-A `GET` request will return a list for all Spring Cloud Skipper package metadata by the given package name ignoring case.
+A `GET` request returns a list for all Spring Cloud Skipper package metadata by the given package name ignoring case.
 
 ===== Request structure
 
@@ -278,12 +285,12 @@ include::{snippets}/package-metadata-documentation/get-package-metadata-search-f
 [[resources-package]]
 === Package
 
-The Package resource maps onto the PackageController for uploading and installing packages
+The Package resource maps onto the PackageController for uploading and installing packages.
 
 [[resources-package-upload]]
 ==== Upload
 
-Upload  a package into a the `local` database backed repository.
+The `upload` link uploads a package into a the `local` database backed repository.
 
 ===== Request structure
 
@@ -304,7 +311,7 @@ include::{snippets}/upload-documentation/upload-release/response-fields.adoc[]
 [[resources-package-install]]
 ==== Install
 
-Install a package (identified by the InstallRequest) into the target platform.
+The `install` link can install a package (identified by the `InstallRequest`) into the target platform.
 
 ===== Request structure
 
@@ -323,9 +330,9 @@ include::{snippets}/install-documentation/install-package/http-response.adoc[]
 include::{snippets}/install-documentation/install-package/response-fields.adoc[]
 
 [[resources-package-install-id]]
-==== Install with id
+==== Install with ID
 
-Install a package identified by its ID into the target platform.
+The `install` link can install a package identified by its ID into the target platform.
 
 ===== Request structure
 
@@ -346,10 +353,10 @@ include::{snippets}/install-documentation/install-package-with-id/response-field
 [[repositories]]
 === Repositories
 
-The Repositories resource is what is exported from the Spring Data Repository `RepositoryRepository` (yes, funnyn name) and exposed by Spring Data REST.
+The Repositories resource is exported from the Spring Data Repository `RepositoryRepository` (yes, it's a funny name) and exposed by Spring Data REST.
 
 ==== Find All
-A `GET` request will return a paginated list for all Spring Cloud Skipper repositories.
+A `GET` request returns a paginated list for all Spring Cloud Skipper repositories.
 
 ===== Request structure
 
@@ -369,7 +376,7 @@ include::{snippets}/repositories-documentation/get-all-repositories/response-fie
 
 ==== Find By Name
 
-A `GET` request will return a single Spring Cloud Skipper repositories.
+A `GET` request returns a single Spring Cloud Skipper repositories.
 
 ===== Request structure
 
@@ -391,29 +398,25 @@ include::{snippets}/repositories-documentation/get-single-repository/response-fi
 [[resources-releases]]
 === Releases
 
-The Release resource is what is exported from the Spring Data Repository `ReleaseRepository` and exposed by Spring Data REST.
+The `release` resource is exported from the Spring Data Repository `ReleaseRepository` and exposed by Spring Data REST.
 
 [[resources-release-find-all]]
 ==== Find all
-A `GET` request will return a paginated list for all Spring Cloud Skipper releases.
+A `GET` request returns a paginated list for all Spring Cloud Skipper releases.
 
-===== Find All Releases
-
-Rollback the release to a previous or a specific release.
-
-====== Request structure
+===== Request structure
 
 include::{snippets}/releases-documentation/get-all-releases/http-request.adoc[]
 
-====== Example request
+===== Example request
 
 include::{snippets}/releases-documentation/get-all-releases/curl-request.adoc[]
 
-====== Response structure
+===== Response structure
 
 include::{snippets}/releases-documentation/get-all-releases/http-response.adoc[]
 
-====== Response fields
+===== Response fields
 
 include::{snippets}/releases-documentation/get-all-releases/response-fields.adoc[]
 
@@ -428,7 +431,7 @@ The Release resource maps onto the ReleaseController for managing the lifecycle 
 
 ===== List latest
 
-List the latest version of releases with status of deployed or failed.
+The `list` link can list the latest version of releases with status of deployed or failed.
 
 ====== Request structure
 
@@ -448,7 +451,7 @@ include::{snippets}/list-documentation/list-release/response-fields.adoc[]
 
 ===== List latest by name
 
-List the latest version of releases with status of deployed or failed by the
+The `list` link can list the latest version of releases with status of deployed or failed by the
 given release name.
 
 ====== Request structure
@@ -472,7 +475,7 @@ include::{snippets}/list-documentation/list-releases-by-release-name/response-fi
 
 ===== Get the status of a release
 
-This REST endpoint provides the status for the last known release version.
+The `status` REST endpoint provides the status for the last known release version.
 
 ====== Request structure
 
@@ -492,7 +495,7 @@ include::{snippets}/status-documentation/get-status-of-release/response-fields.a
 
 ===== Status by version
 
-This REST endpoint provides the status for a specific release version.
+The `status` REST endpoint can provide the status for a specific release version.
 
 ====== Request structure
 
@@ -516,7 +519,7 @@ include::{snippets}/status-documentation/get-status-of-release-for-version/respo
 
 ===== Upgrade a release
 
-Upgrade an existing release using the configured package and config values from the UpgradeRequest.
+The upgrade link upgrades an existing release with the configured package and config values from the `UpgradeRequest`.
 
 ====== Request structure
 
@@ -539,7 +542,7 @@ include::{snippets}/upgrade-documentation/upgrade-release/response-fields.adoc[]
 
 ===== Rollback release
 
-Rollback the release to a previous or a specific release.
+The rollback link rolls back the release to a previous or a specific release.
 
 ====== Request structure
 
@@ -563,7 +566,7 @@ include::{snippets}/rollback-documentation/rollback-release/response-fields.adoc
 
 ===== Get manifest
 
-REST endpoint that returns the manifest for the last known release version.
+The `manifest` REST endpoint returns the manifest for the last known release version.
 
 ====== Request structure
 
@@ -579,7 +582,7 @@ include::{snippets}/manifest-documentation/get-manifest-of-release/http-response
 
 ===== Get manifest by version
 
-REST endpoint that returns the manifest for a specific release version.
+The `manifest` REST endpoint can return the manifest for a specific release version.
 
 ====== Request structure
 
@@ -599,8 +602,8 @@ include::{snippets}/manifest-documentation/get-manifest-of-release-for-version/h
 
 ===== Delete a release
 
-Delete an existing release.
-This doesn't uninstall the uploaded packages corresponding to the release.
+You can use a `DELETE` request to delete an existing release.
+The delete operation does not uninstall the uploaded packages corresponding to the release.
 
 ====== Request structure
 
@@ -620,7 +623,7 @@ include::{snippets}/delete-documentation/delete-release-default/response-fields.
 
 ===== Delete a release and uninstall package
 
-Delete an existing release and uninstall the installed packages corresponding to the release provided there are no other releases in active state use these packages.
+You can use a DELETE request to delete an existing release and uninstall the packages corresponding to the release, provided there are no other releases in active state use these packages.
 
 ====== Request structure
 
@@ -637,6 +640,3 @@ include::{snippets}/delete-documentation/delete-release/http-response.adoc[]
 ====== Response fields
 
 include::{snippets}/delete-documentation/delete-release/response-fields.adoc[]
-
-
-
