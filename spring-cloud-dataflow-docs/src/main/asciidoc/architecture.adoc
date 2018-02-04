@@ -227,7 +227,7 @@ Rolling back to a previous application version is also supported.
 
 ifndef::omit-tasks-docs[]
 [[arch-task]]
-== Task Programming Mdoel
+== Task Programming Model
 
 The Spring Cloud Task programming model provides:
 
