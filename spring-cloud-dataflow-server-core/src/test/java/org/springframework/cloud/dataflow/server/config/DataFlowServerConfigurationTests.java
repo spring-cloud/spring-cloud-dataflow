@@ -99,7 +99,7 @@ public class DataFlowServerConfigurationTests {
 		Map myMap = new HashMap();
 		myMap.put("spring.datasource.url", "jdbc:h2:tcp://localhost:19092/mem:dataflow");
 		myMap.put("spring.dataflow.embedded.database.enabled", "true");
-		propertySources.addFirst(new MapPropertySource("EnvrionmentTestPropsource", myMap));
+		propertySources.addFirst(new MapPropertySource("EnvironmentTestPropsource", myMap));
 		context.setEnvironment(environment);
 
 		context.refresh();
@@ -119,7 +119,7 @@ public class DataFlowServerConfigurationTests {
 		myMap.put("spring.datasource.url", "jdbc:h2:tcp://localhost:19092/mem:dataflow");
 		myMap.put("spring.dataflow.embedded.database.enabled", "false");
 		myMap.put("spring.jpa.database", "H2");
-		propertySources.addFirst(new MapPropertySource("EnvrionmentTestPropsource", myMap));
+		propertySources.addFirst(new MapPropertySource("EnvironmentTestPropsource", myMap));
 		context.setEnvironment(environment);
 		try {
 			context.refresh();
