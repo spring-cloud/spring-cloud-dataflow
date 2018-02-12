@@ -178,12 +178,9 @@ public class AppDeploymentRequestCreator {
 				appDeployTimeProperties.put(StreamPropertyKeys.INSTANCE_COUNT,
 						deployerDeploymentProperties.get(COUNT_PROPERTY_KEY));
 			}
-			if (!type.equals(ApplicationType.source)) {
-				deployerDeploymentProperties.put(AppDeployer.INDEXED_PROPERTY_KEY, "true");
-			}
 
-			// consumer app partition properties
 			if (upstreamAppSupportsPartition) {
+				deployerDeploymentProperties.put(AppDeployer.INDEXED_PROPERTY_KEY, "true");
 				updateConsumerPartitionProperties(appDeployTimeProperties);
 			}
 
