@@ -13,5 +13,4 @@ spec:
     spring.cloud.stream.bindings.input.destination: ticktock.time
   version: 1.2.0.RELEASE
   deploymentProperties:
-    spring.cloud.deployer.indexed: 'true'
     spring.cloud.deployer.group: ticktock

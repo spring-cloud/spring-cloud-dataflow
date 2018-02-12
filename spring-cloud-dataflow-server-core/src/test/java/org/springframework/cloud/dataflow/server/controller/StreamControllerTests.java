@@ -627,7 +627,6 @@ public class StreamControllerTests {
 		assertEquals(2, requests.size());
 		AppDeploymentRequest logRequest = requests.get(0);
 		assertThat(logRequest.getDefinition().getName(), is("log"));
-		assertEquals("true", logRequest.getDeploymentProperties().get(AppDeployer.INDEXED_PROPERTY_KEY));
 		AppDeploymentRequest timeRequest = requests.get(1);
 		assertThat(timeRequest.getDefinition().getName(), is("time"));
 	}
@@ -645,7 +644,6 @@ public class StreamControllerTests {
 		assertThat(logRequest.getDefinition().getName(), is("log"));
 		Map<String, String> logAppProps = logRequest.getDefinition().getProperties();
 		assertEquals("WARN", logAppProps.get("log.level"));
-		assertEquals("true", logRequest.getDeploymentProperties().get(AppDeployer.INDEXED_PROPERTY_KEY));
 		assertNull(logAppProps.get("level"));
 		AppDeploymentRequest timeRequest = requests.get(1);
 		assertThat(timeRequest.getDefinition().getName(), is("time"));
@@ -660,6 +658,7 @@ public class StreamControllerTests {
 		Map<String, String> properties = new HashMap<>();
 		properties.put("app.time.fixed-delay", "4");
 		properties.put("app.log.level", "ERROR");
+		properties.put("app.time.producer.partitionKeyExpression", "payload");
 		mockMvc.perform(post("/streams/deployments/myStream").content(new ObjectMapper().writeValueAsBytes(properties))
 				.contentType(MediaType.APPLICATION_JSON)).andExpect(status().isCreated());
 		ArgumentCaptor<AppDeploymentRequest> captor = ArgumentCaptor.forClass(AppDeploymentRequest.class);
@@ -691,7 +690,6 @@ public class StreamControllerTests {
 		assertEquals(2, requests.size());
 		AppDeploymentRequest logRequest = requests.get(0);
 		assertThat(logRequest.getDefinition().getName(), is("b"));
-		assertEquals("true", logRequest.getDeploymentProperties().get(AppDeployer.INDEXED_PROPERTY_KEY));
 		Map<String, String> logAppProps = logRequest.getDefinition().getProperties();
 		assertEquals("ERROR", logAppProps.get("log.level"));
 		AppDeploymentRequest timeRequest = requests.get(1);
