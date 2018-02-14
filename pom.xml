@@ -34,7 +34,7 @@
 		<spring-boot.version>1.5.9.RELEASE</spring-boot.version>
 
 		<!-- Note: Change ./spring-cloud-dataflow-server-local/pom.xml to match the spring-cloud-task.version -->
-		<spring-cloud-task.version>1.2.1.RELEASE</spring-cloud-task.version>
+		<spring-cloud-task.version>1.2.2.RELEASE</spring-cloud-task.version>
 
 		<!-- Note: Change ./spring-cloud-dataflow-server-local/pom.xml to match the spring-cloud.version -->
 		<spring-cloud.version>Edgware.RELEASE</spring-cloud.version>
