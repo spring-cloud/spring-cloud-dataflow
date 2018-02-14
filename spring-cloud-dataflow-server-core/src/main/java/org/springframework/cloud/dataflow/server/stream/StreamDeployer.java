@@ -24,6 +24,7 @@ import org.springframework.cloud.dataflow.core.StreamDeployment;
 import org.springframework.cloud.deployer.spi.app.AppStatus;
 import org.springframework.cloud.deployer.spi.app.DeploymentState;
 import org.springframework.cloud.deployer.spi.core.RuntimeEnvironmentInfo;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
 /**
@@ -45,7 +46,7 @@ public interface StreamDeployer {
 	 */
 	void undeployStream(String name);
 
-	List<AppStatus> getAppStatuses(Pageable pageable) throws ExecutionException, InterruptedException;
+	Page<AppStatus> getAppStatuses(Pageable pageable) throws ExecutionException, InterruptedException;
 
 	AppStatus getAppStatus(String id);
 

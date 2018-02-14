@@ -157,7 +157,7 @@ public class RuntimeAppsControllerSkipperTests {
 				.perform(get("/runtime/apps?page=0&size=1").accept(MediaType.APPLICATION_JSON)).andDo(print())
 				.andExpect(status().isOk()).andReturn().getResponse();
 		assertThat(responseString.getContentAsString().contains("ticktock3.log"), is(true));
-		assertThat(responseString.getContentAsString().contains("ticktock3.time"), is(true));
+		assertThat(responseString.getContentAsString().contains("ticktock3.time"), is(false));
 		assertThat(responseString.getContentAsString().contains("ticktock4.log"), is(false));
 		assertThat(responseString.getContentAsString().contains("ticktock4.time"), is(false));
 
@@ -165,10 +165,31 @@ public class RuntimeAppsControllerSkipperTests {
 				.andDo(print()).andExpect(status().isOk()).andReturn().getResponse();
 		assertThat(responseString.getContentAsString().contains("ticktock3.log"), is(true));
 		assertThat(responseString.getContentAsString().contains("ticktock3.time"), is(true));
+		assertThat(responseString.getContentAsString().contains("ticktock4.log"), is(false));
+		assertThat(responseString.getContentAsString().contains("ticktock4.time"), is(false));
+
+		responseString = mockMvc.perform(get("/runtime/apps?page=0&size=3").accept(MediaType.APPLICATION_JSON))
+				.andDo(print()).andExpect(status().isOk()).andReturn().getResponse();
+		assertThat(responseString.getContentAsString().contains("ticktock3.log"), is(true));
+		assertThat(responseString.getContentAsString().contains("ticktock3.time"), is(true));
+		assertThat(responseString.getContentAsString().contains("ticktock4.log"), is(true));
+		assertThat(responseString.getContentAsString().contains("ticktock4.time"), is(false));
+
+		responseString = mockMvc.perform(get("/runtime/apps?page=0&size=4").accept(MediaType.APPLICATION_JSON))
+				.andDo(print()).andExpect(status().isOk()).andReturn().getResponse();
+		assertThat(responseString.getContentAsString().contains("ticktock3.log"), is(true));
+		assertThat(responseString.getContentAsString().contains("ticktock3.time"), is(true));
 		assertThat(responseString.getContentAsString().contains("ticktock4.log"), is(true));
 		assertThat(responseString.getContentAsString().contains("ticktock4.time"), is(true));
 
 		responseString = mockMvc.perform(get("/runtime/apps?page=1&size=2").accept(MediaType.APPLICATION_JSON))
+				.andDo(print()).andExpect(status().isOk()).andReturn().getResponse();
+		assertThat(responseString.getContentAsString().contains("ticktock3.log"), is(false));
+		assertThat(responseString.getContentAsString().contains("ticktock3.time"), is(false));
+		assertThat(responseString.getContentAsString().contains("ticktock4.log"), is(true));
+		assertThat(responseString.getContentAsString().contains("ticktock4.time"), is(true));
+
+		responseString = mockMvc.perform(get("/runtime/apps?page=1&size=4").accept(MediaType.APPLICATION_JSON))
 				.andDo(print()).andExpect(status().isOk()).andReturn().getResponse();
 		assertThat(responseString.getContentAsString().contains("ticktock3.log"), is(false));
 		assertThat(responseString.getContentAsString().contains("ticktock3.time"), is(false));
