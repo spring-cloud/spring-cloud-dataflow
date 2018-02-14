@@ -51,6 +51,8 @@ import org.springframework.cloud.deployer.spi.app.DeploymentState;
 import org.springframework.cloud.deployer.spi.app.MultiStateAppDeployer;
 import org.springframework.cloud.deployer.spi.core.AppDeploymentRequest;
 import org.springframework.cloud.deployer.spi.core.RuntimeEnvironmentInfo;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.util.Assert;
 
@@ -134,7 +136,7 @@ public class AppDeployerStreamDeployer implements StreamDeployer {
 		}
 		Map<String, Map<String, String>> deploymentProperties = new HashMap<>();
 		Map<String, String> appVersions = new HashMap<>();
-		for (AppDeploymentRequest appDeploymentRequest: streamDeploymentRequest.getAppDeploymentRequests()) {
+		for (AppDeploymentRequest appDeploymentRequest : streamDeploymentRequest.getAppDeploymentRequests()) {
 			deploymentProperties.put(appDeploymentRequest.getDefinition().getName(), appDeploymentRequest.getDeploymentProperties());
 			appVersions.put(appDeploymentRequest.getDefinition().getName(), ResourceUtils.getResourceVersion(appDeploymentRequest.getResource()));
 		}
@@ -211,7 +213,7 @@ public class AppDeployerStreamDeployer implements StreamDeployer {
 	}
 
 	@Override
-	public List<AppStatus> getAppStatuses(Pageable pageable) throws ExecutionException, InterruptedException {
+	public Page<AppStatus> getAppStatuses(Pageable pageable) throws ExecutionException, InterruptedException {
 
 		Iterable<StreamDefinition> streamDefinitions = this.streamDefinitionRepository.findAll();
 		Iterable<StreamDeployment> streamDeployments = this.streamDeploymentRepository.findAll();
@@ -239,11 +241,11 @@ public class AppDeployerStreamDeployer implements StreamDeployer {
 
 		// Running this this inside the FJP will make sure it is used by the parallel stream
 		// Skip first items depending on page size, then take page and discard rest.
-		// todo: Use correct pageable values based on the number of apps deployed via all supported StreamDeployers
-		return this.forkJoinPool.submit(() -> deploymentIds.stream()
+		List<AppStatus> content = this.forkJoinPool.submit(() -> deploymentIds.stream()
 				.skip(pageable.getPageNumber() * pageable.getPageSize())
 				.limit(pageable.getPageSize()).parallel().map(appDeployer::status).collect(toList()))
 				.get();
+		return new PageImpl<>(content, pageable, deploymentIds.size());
 	}
 
 	@Override
