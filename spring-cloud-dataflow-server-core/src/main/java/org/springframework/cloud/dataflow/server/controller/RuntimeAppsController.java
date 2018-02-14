@@ -34,6 +34,7 @@ import org.springframework.cloud.dataflow.server.stream.StreamDeployer;
 import org.springframework.cloud.deployer.spi.app.AppInstanceStatus;
 import org.springframework.cloud.deployer.spi.app.AppStatus;
 import org.springframework.cloud.deployer.spi.app.DeploymentState;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PagedResourcesAssembler;
@@ -96,16 +97,15 @@ public class RuntimeAppsController {
 	public PagedResources<AppStatusResource> list(Pageable pageable, PagedResourcesAssembler<AppStatus> assembler)
 			throws ExecutionException, InterruptedException {
 
-		List<AppStatus> statuses = streamDeployer.getAppStatuses(pageable);
+		Page<AppStatus> statuses = streamDeployer.getAppStatuses(pageable);
 
 		enrichWithMetrics(statuses);
-		int deploymentSize = statuses.size(); // TODO to check if this count is the expected one.
 		// finally, pass in pageable and tell how many items we have in all pages
-		return assembler.toResource(new PageImpl<>(statuses, pageable, deploymentSize), statusAssembler);
+		return assembler.toResource(new PageImpl<>(statuses.getContent(), pageable, statuses.getTotalElements()), statusAssembler);
 
 	}
 
-	private void enrichWithMetrics(List<AppStatus> statuses) {
+	private void enrichWithMetrics(Page<AppStatus> statuses) {
 		List<ApplicationsMetrics> metricsIn = metricStore.getMetrics();
 		Map<String, ApplicationsMetrics.Instance> metricsInstanceMap = new HashMap<>();
 		for (ApplicationsMetrics am : metricsIn) {

@@ -76,6 +76,8 @@ import org.springframework.cloud.skipper.domain.UpgradeRequest;
 import org.springframework.cloud.skipper.domain.UploadRequest;
 import org.springframework.cloud.skipper.io.DefaultPackageWriter;
 import org.springframework.cloud.skipper.io.PackageWriter;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.hateoas.Resources;
 import org.springframework.util.Assert;
@@ -379,15 +381,20 @@ public class SkipperStreamDeployer implements StreamDeployer {
 	}
 
 	@Override
-	public List<AppStatus> getAppStatuses(Pageable pageable) throws ExecutionException, InterruptedException {
+	public Page<AppStatus> getAppStatuses(Pageable pageable) throws ExecutionException, InterruptedException {
 		List<String> skipperStreams = new ArrayList<>();
 		Iterable<StreamDefinition> streamDefinitions = this.streamDefinitionRepository.findAll();
 		for (StreamDefinition streamDefinition : streamDefinitions) {
 			skipperStreams.add(streamDefinition.getName());
 		}
-		List<AppStatus> statuses = new ArrayList<>();
-		statuses.addAll(getSkipperStatuses(pageable, skipperStreams).stream().flatMap(List::stream).collect(toList()));
-		return statuses;
+
+		List<AppStatus> allStatuses = getStreamStatuses(pageable, skipperStreams);
+
+		List<AppStatus> pagedStatuses = allStatuses.stream().skip(pageable.getPageNumber() * pageable.getPageSize())
+				.limit(pageable.getPageSize()).parallel().collect(toList());
+		//pagedStatuses.addAll(getSkipperStatuses(pageable, skipperStreams).stream().flatMap(List::stream).collect(toList()));
+
+		return new PageImpl<>(pagedStatuses, pageable, allStatuses.size());
 	}
 
 	@Override
@@ -444,13 +451,10 @@ public class SkipperStreamDeployer implements StreamDeployer {
 		}
 	}
 
-	private List<List<AppStatus>> getSkipperStatuses(Pageable pageable, List<String> skipperStreamNames)
+	private List<AppStatus> getStreamStatuses(Pageable pageable, List<String> skipperStreamNames)
 			throws ExecutionException, InterruptedException {
-		//todo: Pageable values correspond to the number apps while Skipper status is done at the stream level.
-		//todo: Fix the mismatch with Skipper stream apps' pagination
-		return this.forkJoinPool
-				.submit(() -> skipperStreamNames.stream().skip(pageable.getPageNumber() * pageable.getPageSize())
-						.limit(pageable.getPageSize()).parallel().map(this::skipperStatus).collect(toList())).get();
+		return this.forkJoinPool.submit(() -> skipperStreamNames.stream().parallel()
+				.map(this::skipperStatus).flatMap(List::stream).collect(toList())).get();
 	}
 
 	private List<AppStatus> skipperStatus(String streamName) {
