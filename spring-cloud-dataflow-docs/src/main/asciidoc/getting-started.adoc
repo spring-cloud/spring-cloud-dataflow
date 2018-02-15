@@ -14,7 +14,7 @@ We then build an introductory Spring Cloud Data Flow application, discussing som
 [[getting-started-system-requirements]]
 == System Requirements
 
-You need Java (Java 8 or later), and, to build, you need to have Maven.
+You need Java 8 to run and to build you need to have Maven.
 
 You need to have an RDBMS for storing stream definition and deployment properites and task/batch job states.
 By default, the Data Flow server uses embedded H2 database for this purpose but you can easily configure the server to use another external database.
@@ -120,7 +120,7 @@ Alternatively, pass in the command line option `--dataflow.uri`.  The shell's co
 
 [[getting-started-deploying-streams-spring-cloud-dataflow]]
 == Deploying Streams
-. Import Apps
+. Register Stream Apps
 +
 By default, the application registry is empty.
 As an example, register two applications, `http` and `log`, that communicate by using RabbitMQ.
@@ -171,4 +171,88 @@ In both cases, this setting is propagated as a configuration property that overr
 ====
 
 == Deploying Tasks
-Refer to <<spring-cloud-dataflow-register-task-apps>> for an example of how to get started using tasks in Spring Cloud Data Flow.
+In this getting started section, we show how to register a task, create a task definition and then launch it.
+We will then also review information about the task executions.
++
+NOTE: Launching Spring Cloud Task applications are not delegated to Skipper since they are short lived applications.  Tasks are alwasy deployed directly via the Data Flow Server.
++
+. Register a Task App
++
+By default, the application registry is empty.
+As an example, we will register one task application, `timestamp` which simply prints the current time to the log.
++
+[source,bash]
+----
+dataflow:>app register --name timestamp --type task --uri maven://org.springframework.cloud.task.app:timestamp-task:1.3.0.RELEASE
+Successfully registered application 'task:timestamp'
+----
++
+NOTE: Depending on your environment, you may need to configure the Data Flow Server to point to a custom
+Maven repository location or configure proxy settings.  See <<configuration-maven>> for more information.
++
+. Create a Task Definition
++
+Use the `task create` command to create a task definition using the previously registered `timestamp` application.
+In this example, no additional properties are used to configure the `timestamp` application.
++
+[source,bash]
+----
+dataflow:> task create --name printTimeStamp --definition "timestamp"
+----
++
+. Launch a Task
++
+The launching of task definitions is done through the shell's `task launch` command.
++
+[source,bash]
+----
+dataflow:> task launch printTimeStamp
+----
++
+Check to see if the a timestamp ended up in log file for the timestamp task.
+The location of the log file for the task application will be shown in the Data Flow server’s log.
+You should see a log entry similar to
++
+[source,bash]
+----
+TimestampTaskConfiguration$TimestampTask : 2018-02-28 16:42:21.051
+----
++
+. Review task execution
++
+Information about the task execution can be obtained using the command `task execution list`.
++
+[source,bash]
+----
+dataflow:>task execution list
+╔══════════════╤══╤════════════════════════════╤════════════════════════════╤═════════╗
+║  Task Name   │ID│         Start Time         │          End Time          │Exit Code║
+╠══════════════╪══╪════════════════════════════╪════════════════════════════╪═════════╣
+║printTimeStamp│1 │Wed Feb 28 16:42:21 EST 2018│Wed Feb 28 16:42:21 EST 2018│0        ║
+╚══════════════╧══╧════════════════════════════╧════════════════════════════╧═════════╝
+----
++
+Additional information can be obtained using the command `task execution status`.
++
+[source,bash]
+----
+dataflow:>task execution status --id 1
+╔══════════════════════╤═══════════════════════════════════════════════════╗
+║         Key          │                       Value                       ║
+╠══════════════════════╪═══════════════════════════════════════════════════╣
+║Id                    │1                                                  ║
+║Name                  │printTimeStamp                                     ║
+║Arguments             │[--spring.cloud.task.executionid=1]                ║
+║Job Execution Ids     │[]                                                 ║
+║Start Time            │Wed Feb 28 16:42:21 EST 2018                       ║
+║End Time              │Wed Feb 28 16:42:21 EST 2018                       ║
+║Exit Code             │0                                                  ║
+║Exit Message          │                                                   ║
+║Error Message         │                                                   ║
+║External Execution Id │printTimeStamp-ab86b2cc-0508-4c1e-b33d-b3896d17fed7║
+╚══════════════════════╧═══════════════════════════════════════════════════╝
+----
++
+The <<spring-cloud-dataflow-task>> section has more information on the lifecycle of Tasks and also how to use
+<<spring-cloud-dataflow-composed-tasks>> which let you create a directed graph where each node of the graph is a task application.
+
