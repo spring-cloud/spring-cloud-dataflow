@@ -33,8 +33,8 @@ There are two options for deploying streams:
 * Configure the Data Flow Server to delegate the deployment to a new server in the Spring Cloud ecosystem named http://cloud.spring.io/spring-cloud-skipper/[Skipper].
 
 
-When using the first option, you can use the Local Data Flow Serfver to deploy streams to your local machine, the Data Flow Server for Cloud Foundry to deploy streams to a single org and space on Cloud Foundry.
-Similarly, you can use Data Flow for Kuberenetes to deploy a stream to a single namespace on a Kubernetes cluster.
+When using the first option, you can use the Local Data Flow Server to deploy streams to your local machine, the Data Flow Server for Cloud Foundry to deploy streams to a single org and space on Cloud Foundry.
+Similarly, you can use Data Flow Server for Kuberenetes to deploy a stream to a single namespace on a Kubernetes cluster.
 See http://cloud.spring.io/spring-cloud-dataflow/#platform-implementations[the Spring Cloud Data Flow project page] for a list of Data Flow server implementations.
 
 When using the second option, you can configure Skipper to deploy applications to one or more Cloud Foundry orgs and spaces, one or more namespaces on a Kubernetes cluster, or to the local machine.
@@ -68,7 +68,7 @@ A stream that involves some processing would be expressed as:
 
 `http | filter | transform | file`
 
-Stream definitions can be created by using the shell's `create stream` command, as shown in the following example:
+Stream definitions can be created by using the shell's `stream create` command, as shown in the following example:
 
 `dataflow:> stream create --name httpIngest --definition "http | file"`
 
