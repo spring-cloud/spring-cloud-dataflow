@@ -9,17 +9,35 @@ It covers topics such as creating and running task applications.
 If you are just starting out with Spring Cloud Data Flow, you should probably read the "`<<getting-started.adoc#getting-started, Getting Started>>`" guide before diving into this section.
 --
 
-
-
 [[spring-cloud-dataflow-task-intro]]
 == Introduction
 
 A task executes a process on demand.
 In the case of Spring Cloud Task, a task is a http://projects.spring.io/spring-boot/[Spring Boot] application that is annotated with `@EnableTask`.
-A user launches a task that performs a certain process, and, once complete, the task ends.
+A user launches a task that performs a certain process, and, once complete, the task ends.  Unlike a stream where a stream definition can have at most one deployment a single task definition can be launched multiple times simultaneously.
 An example of a task would be a Spring Boot application that exports data from a JDBC repository to an HDFS instance.
 Tasks record the start time and the end time as well as the boot exit code in a relational database.
 The task implementation is based on the http://cloud.spring.io/spring-cloud-task/[Spring Cloud Task] project.
+
+=== Application properties
+
+Each application takes properties to customize its behavior.  As an example, the `timestamp` task `format` setting establishes a output format that is different from the default value.
+
+`dataflow:> task create --definition "timestamp --format=\"yyyy\"" --name printTimeStamp`
+
+This `timestamp` property is actually the same as the `timestamp.format` property specified by the timestamp application.
+Data Flow adds the ability to use the shorthand form `format` instead of `timestamp.format`.
+One may also specify the longhand version as well, as shown in the following example:
+
+`dataflow:> task create --definition "timestamp --timestamp.format=\"yyyy\"" --name printTimeStamp`
+
+This shorthand behavior is discussed more in the section on <<spring-cloud-dataflow-stream-app-whitelisting>>.
+If you have <<spring-cloud-dataflow-stream-app-metadata-artifact, registered application property metadata>> you can use tab completion in the shell after typing `--` to get a list of candidate property names.
+
+The shell provides tab completion for application properties. The shell command `app info <appType>:<appName>` provides additional documentation for all the supported properties.
+
+NOTE: The supported Task `<appType>` is task.
+
 
 == The Lifecycle of a Task
 
@@ -31,8 +49,6 @@ Before we dive deeper into the details of creating Tasks, we need to understand 
 . <<spring-cloud-dataflow-task-launch>>
 . <<spring-cloud-dataflow-task-review-executions>>
 . <<spring-cloud-dataflow-task-definition-destroying>>
-
-
 
 [[spring-cloud-dataflow-create-task-apps]]
 === Creating a Task Application
@@ -212,8 +228,8 @@ To display the latest task executions through the shell, use the `task execution
 
 To get a list of task executions for just one task definition, add `--name` and
 the task definition name, for example `task execution list --name foo`.  To retrieve full
-details for a task execution use the `task display` command with the id of the task execution,
-for example `task display --id 549`.
+details for a task execution use the `task execution status` command with the id of the task execution,
+for example `task execution status --id 549`.
 
 
 
