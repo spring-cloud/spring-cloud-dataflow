@@ -33,6 +33,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.boot.configurationmetadata.ConfigurationMetadataProperty;
 import org.springframework.cloud.dataflow.configuration.metadata.ApplicationConfigurationMetadataResolver;
 import org.springframework.cloud.dataflow.core.ApplicationType;
+import org.springframework.cloud.dataflow.core.StreamAppDefinition;
+import org.springframework.cloud.dataflow.core.StreamDefinition;
 import org.springframework.cloud.dataflow.registry.domain.AppRegistration;
 import org.springframework.cloud.dataflow.registry.service.AppRegistryService;
 import org.springframework.cloud.dataflow.registry.service.DefaultAppRegistryService;
@@ -40,6 +42,9 @@ import org.springframework.cloud.dataflow.registry.support.NoSuchAppRegistration
 import org.springframework.cloud.dataflow.registry.support.ResourceUtils;
 import org.springframework.cloud.dataflow.rest.resource.AppRegistrationResource;
 import org.springframework.cloud.dataflow.rest.resource.DetailedAppRegistrationResource;
+import org.springframework.cloud.dataflow.server.DataFlowServerUtil;
+import org.springframework.cloud.dataflow.server.repository.StreamDefinitionRepository;
+import org.springframework.cloud.dataflow.server.support.CannotDetermineApplicationTypeException;
 import org.springframework.cloud.deployer.resource.maven.MavenProperties;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.DefaultResourceLoader;
@@ -81,6 +86,8 @@ public class VersionedAppRegistryController {
 
 	private final Assembler assembler = new Assembler();
 
+	private final StreamDefinitionRepository streamDefinitionRepository;
+
 	private final AppRegistryService appRegistryService;
 
 	private ApplicationConfigurationMetadataResolver metadataResolver;
@@ -91,9 +98,11 @@ public class VersionedAppRegistryController {
 
 	private ResourceLoader resourceLoader = new DefaultResourceLoader();
 
-	public VersionedAppRegistryController(AppRegistryService appRegistryService,
+	public VersionedAppRegistryController(StreamDefinitionRepository streamDefinitionRepository,
+			AppRegistryService appRegistryService,
 			ApplicationConfigurationMetadataResolver metadataResolver,
 			ForkJoinPool forkJoinPool, MavenProperties mavenProperties) {
+		this.streamDefinitionRepository = streamDefinitionRepository;
 		this.appRegistryService = appRegistryService;
 		this.metadataResolver = metadataResolver;
 		this.forkJoinPool = forkJoinPool;
@@ -230,7 +239,39 @@ public class VersionedAppRegistryController {
 	@ResponseStatus(HttpStatus.OK)
 	public void unregister(@PathVariable("type") ApplicationType type, @PathVariable("name") String name,
 			@PathVariable("version") String version) {
+
+		AppRegistration defaultApp = appRegistryService.getDefaultApp(name, type);
+		if (defaultApp != null && defaultApp.getVersion().equals(version)) {
+			String streamWithApp = findStreamContainingAppOf(type, name);
+			if (streamWithApp != null) {
+				throw new AppUsedInStreamException(String.format("The app [%s:%s:%s] you're trying to unregister is " +
+						"already in use on %s stream", name, type, version, streamWithApp));
+			}
+		}
+
 		appRegistryService.delete(name, type, version);
+	}
+
+	private String findStreamContainingAppOf(ApplicationType type, String name) {
+		Iterable<StreamDefinition> streams = streamDefinitionRepository.findAll();
+		for (StreamDefinition stream : streams) {
+			for (StreamAppDefinition streamAppDefinition : stream.getAppDefinitions()) {
+				final String streamAppName = streamAppDefinition.getRegisteredAppName();
+				final ApplicationType streamAppType;
+				try {
+					streamAppType = DataFlowServerUtil.determineApplicationType(streamAppDefinition);
+				}
+				catch (CannotDetermineApplicationTypeException e) {
+					//skip
+					continue;
+				}
+
+				if (streamAppType == type && streamAppName.equals(name)) {
+					return stream.getName();
+				}
+			}
+		}
+		return null;
 	}
 
 	@Deprecated

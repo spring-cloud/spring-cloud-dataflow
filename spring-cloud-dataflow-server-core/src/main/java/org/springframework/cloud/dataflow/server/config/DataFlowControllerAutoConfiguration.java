@@ -16,11 +16,11 @@
 
 package org.springframework.cloud.dataflow.server.config;
 
-import javax.sql.DataSource;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ForkJoinPool;
+import javax.sql.DataSource;
 
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -223,9 +223,11 @@ public class DataFlowControllerAutoConfiguration {
 		}
 
 		@Bean
-		public VersionedAppRegistryController appRegistryController2(AppRegistryService appRegistry,
-				ApplicationConfigurationMetadataResolver metadataResolver, ForkJoinPool appRegistryFJPFB, MavenProperties mavenProperties) {
-			return new VersionedAppRegistryController(appRegistry, metadataResolver, appRegistryFJPFB, mavenProperties);
+		public VersionedAppRegistryController appRegistryController2(StreamDefinitionRepository streamDefinitionRepository,
+				AppRegistryService appRegistry, ApplicationConfigurationMetadataResolver metadataResolver,
+				ForkJoinPool appRegistryFJPFB, MavenProperties mavenProperties) {
+			return new VersionedAppRegistryController(streamDefinitionRepository, appRegistry,
+					metadataResolver, appRegistryFJPFB, mavenProperties);
 		}
 	}
 
