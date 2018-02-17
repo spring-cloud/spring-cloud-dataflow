@@ -25,11 +25,13 @@ import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.cloud.dataflow.core.ApplicationType;
+import org.springframework.cloud.dataflow.core.StreamDefinition;
 import org.springframework.cloud.dataflow.registry.domain.AppRegistration;
 import org.springframework.cloud.dataflow.registry.service.AppRegistryService;
 import org.springframework.cloud.dataflow.registry.support.NoSuchAppRegistrationException;
 import org.springframework.cloud.dataflow.server.configuration.TestDependencies;
 import org.springframework.cloud.dataflow.server.registry.DataFlowAppRegistryPopulator;
+import org.springframework.cloud.dataflow.server.repository.StreamDefinitionRepository;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.http.MediaType;
 import org.springframework.test.annotation.DirtiesContext;
@@ -72,6 +74,9 @@ public class VersionedAppRegistryControllerTests {
 
 	@Autowired
 	private DataFlowAppRegistryPopulator uriRegistryPopulator;
+
+	@Autowired
+	private StreamDefinitionRepository streamDefinitionRepository;
 
 	@Before
 	public void setupMocks() {
@@ -236,6 +241,35 @@ public class VersionedAppRegistryControllerTests {
 		mockMvc.perform(delete("/apps/processor/blubba").accept(MediaType.APPLICATION_JSON))
 				.andExpect(status().isOk());
 	}
+
+	@Test
+	@Transactional
+	public void testUnregisterApplicationUsedInStream() throws Exception {
+		mockMvc.perform(post("/apps/source/time")
+				.param("uri", "maven://org.springframework.cloud.stream.app:time-source-rabbit:1.2.0.RELEASE").accept(MediaType.APPLICATION_JSON))
+				.andExpect(status().isCreated());
+		mockMvc.perform(get("/apps/source/time").accept(MediaType.APPLICATION_JSON))
+				.andExpect(status().isOk()).andExpect(jsonPath("name", is("time")))
+				.andExpect(jsonPath("type", is("source")));
+
+		mockMvc.perform(post("/apps/sink/log")
+				.param("uri", "maven://org.springframework.cloud.stream.app:log-sink-rabbit:1.2.0.RELEASE").accept(MediaType.APPLICATION_JSON))
+				.andExpect(status().isCreated());
+
+		mockMvc.perform(post("/apps/processor/transformer")
+				.param("uri", "maven://org.springframework.cloud.stream.app:transformer-processor-rabbit:1.2.0.RELEASE").accept(MediaType.APPLICATION_JSON))
+				.andExpect(status().isCreated());
+
+		StreamDefinition streamDefinition = new StreamDefinition("ticktock", "time | log");
+		streamDefinitionRepository.save(streamDefinition);
+
+		mockMvc.perform(delete("/apps/processor/transformer").accept(MediaType.APPLICATION_JSON))
+				.andExpect(status().isOk());
+
+		mockMvc.perform(delete("/apps/source/time").accept(MediaType.APPLICATION_JSON))
+				.andExpect(status().isConflict());
+	}
+
 
 	@Test
 	public void testUnregisterApplicationNotFound() throws Exception {

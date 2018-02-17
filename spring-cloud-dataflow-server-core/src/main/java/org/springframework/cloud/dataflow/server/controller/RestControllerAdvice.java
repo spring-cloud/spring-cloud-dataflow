@@ -90,7 +90,8 @@ public class RestControllerAdvice {
 	 * application/vnd.error+json
 	 */
 	@ExceptionHandler({ AppAlreadyRegisteredException.class, DuplicateStreamDefinitionException.class,
-			DuplicateTaskException.class, StreamAlreadyDeployedException.class, StreamAlreadyDeployingException.class })
+			DuplicateTaskException.class, StreamAlreadyDeployedException.class, StreamAlreadyDeployingException.class,
+			AppUsedInStreamException.class})
 	@ResponseStatus(HttpStatus.CONFLICT)
 	@ResponseBody
 	public VndErrors onConflictException(Exception e) {

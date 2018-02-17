@@ -264,9 +264,11 @@ public class TestDependencies extends WebMvcConfigurationSupport {
 
 	@Bean
 	@ConditionalOnSkipperEnabled
-	public VersionedAppRegistryController versionedAppRegistryController(AppRegistryService appRegistry,
+	public VersionedAppRegistryController versionedAppRegistryController(
+			StreamDefinitionRepository streamDefinitionRepository, AppRegistryService appRegistry,
 			ApplicationConfigurationMetadataResolver metadataResolver, MavenProperties mavenProperties) {
-		return new VersionedAppRegistryController(appRegistry, metadataResolver, new ForkJoinPool(2), mavenProperties);
+		return new VersionedAppRegistryController(streamDefinitionRepository, appRegistry, metadataResolver,
+				new ForkJoinPool(2), mavenProperties);
 	}
 
 	@Bean
