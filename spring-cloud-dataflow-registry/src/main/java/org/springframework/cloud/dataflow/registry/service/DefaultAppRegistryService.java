@@ -166,7 +166,6 @@ public class DefaultAppRegistryService extends AbstractAppRegistryCommon impleme
 	 */
 	public void delete(String name, ApplicationType type, String version) {
 		this.appRegistrationRepository.deleteAppRegistrationByNameAndTypeAndVersion(name, type, version);
-		// TODO select new default
 	}
 
 	@Override
