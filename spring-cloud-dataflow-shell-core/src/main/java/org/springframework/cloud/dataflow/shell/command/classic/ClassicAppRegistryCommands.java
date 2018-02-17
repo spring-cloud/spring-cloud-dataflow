@@ -138,6 +138,6 @@ public class ClassicAppRegistryCommands extends AbstractAppRegistryCommands impl
 					"type" }, help = "type of the application to unregister") ApplicationType type) {
 
 		appRegistryOperations().unregister(name, type, null);
-		return String.format(("Successfully unregistered application '%s' with type %s"), name, type);
+		return String.format(("Successfully unregistered application '%s' with type '%s'"), name, type);
 	}
 }
