@@ -18,10 +18,13 @@ package org.springframework.cloud.dataflow.shell.command.skipper;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.configurationmetadata.ConfigurationMetadataProperty;
 import org.springframework.cloud.dataflow.core.ApplicationType;
+import org.springframework.cloud.dataflow.rest.resource.AppRegistrationResource;
 import org.springframework.cloud.dataflow.rest.resource.DetailedAppRegistrationResource;
 import org.springframework.cloud.dataflow.shell.command.common.AbstractAppRegistryCommands;
 import org.springframework.cloud.dataflow.shell.command.common.DataFlowTables;
@@ -40,6 +43,7 @@ import org.springframework.shell.table.TableBuilder;
 import org.springframework.shell.table.TableModelBuilder;
 import org.springframework.stereotype.Component;
 import org.springframework.util.Assert;
+import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
 /**
@@ -149,7 +153,27 @@ public class SkipperAppRegistryCommands extends AbstractAppRegistryCommands impl
 			@CliOption(key = { "version" }, help = "the version application to unregister") String version) {
 
 		appRegistryOperations().unregister(name, type, version);
-		return String.format(("Successfully unregistered application '%s' with type %s"), name, type);
+
+		List<AppRegistrationResource> appRegistrations = findAllAppsByNameAndType(name, type);
+		Optional<AppRegistrationResource> defaultApp = appRegistrations.stream()
+				.filter(a -> a.getDefaultVersion() == true).findFirst();
+
+		if (!CollectionUtils.isEmpty(appRegistrations) && !defaultApp.isPresent()) {
+			String appVersions = appRegistrations.stream().map(app -> app.getVersion())
+					.collect(Collectors.joining(", ", "(", ")"));
+			return String.format("Successfully unregistered application '%s' with type %s. " +
+					"Please select new default version from: %s", name, type, appVersions);
+		}
+
+		return String.format("Successfully unregistered application '%s' with type %s", name, type);
+
+	}
+
+	private List<AppRegistrationResource> findAllAppsByNameAndType(String appName, ApplicationType appType) {
+		return appRegistryOperations().list().getContent().stream()
+				.filter(a -> a.getName().equals(appName))
+				.filter(a -> a.getType().equals(appType.toString()))
+				.collect(Collectors.toList());
 	}
 
 	@CliCommand(value = DEFAULT_APPLICATION, help = "Change the default application version")
