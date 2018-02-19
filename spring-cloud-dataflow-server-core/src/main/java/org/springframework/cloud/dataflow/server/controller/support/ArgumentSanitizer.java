@@ -38,9 +38,9 @@ public class ArgumentSanitizer {
 	private static Pattern passwordParameterPatternForStreams = Pattern.compile(
 			//Search for the -- characters then look for unicode letters
 			"(?i)(--[\\p{Z}]*[\\p{L}]*("
-			//that match the following strings from the KEYS_TO_SANITIZE array
+					//that match the following strings from the KEYS_TO_SANITIZE array
 					+ StringUtils.arrayToDelimitedString(KEYS_TO_SANITIZE, "|")
-			//Following the equal sign (group1) accept any number of unicode characters(letters, open punctuation, close punctuation etc) for the value to be sanitized for group 3.
+					//Following the equal sign (group1) accept any number of unicode characters(letters, open punctuation, close punctuation etc) for the value to be sanitized for group 3.
 					+ ")[\\p{L}]*[\\p{Z}]*=[\\p{Z}]*)((\"[\\p{L}|\\p{Pd}|\\p{Ps}|\\p{Pe}|\\p{Pc}|\\p{S}|\\p{N}|\\p{Z}]*\")|([\\p{N}|\\p{L}|\\p{Po}|\\p{Pc}|\\p{S}]*))",
 			Pattern.UNICODE_CASE);
 

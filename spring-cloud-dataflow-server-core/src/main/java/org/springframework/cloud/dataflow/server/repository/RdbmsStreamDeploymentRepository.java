@@ -16,11 +16,12 @@
 
 package org.springframework.cloud.dataflow.server.repository;
 
-import javax.sql.DataSource;
 import java.sql.Types;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+
+import javax.sql.DataSource;
 
 import org.springframework.cloud.dataflow.core.StreamDeployment;
 import org.springframework.cloud.dataflow.server.controller.StreamAlreadyDeployedException;

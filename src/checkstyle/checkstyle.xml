@@ -119,7 +119,7 @@
         <module name="UnusedImports"/>
 
         <!-- Miscellaneous -->
-        <!--<module name="CommentsIndentation"/>-->
+        <module name="CommentsIndentation"/>
         <module name="UpperEll"/>
         <module name="ArrayTypeStyle"/>
         <module name="OuterTypeFilename"/>

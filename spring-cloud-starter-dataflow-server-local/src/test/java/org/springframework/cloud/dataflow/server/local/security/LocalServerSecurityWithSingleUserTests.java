@@ -29,6 +29,7 @@ import org.junit.runners.Parameterized.Parameter;
 import org.junit.runners.Parameterized.Parameters;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
 import org.springframework.cloud.dataflow.server.local.LocalDataflowResource;
 import org.springframework.cloud.dataflow.server.local.TestUtils;
 import org.springframework.data.authentication.UserCredentials;
@@ -103,10 +104,7 @@ public class LocalServerSecurityWithSingleUserTests {
 						TestUtils.toImmutableMap("uri", "maven://io.spring.cloud:scdf-sample-app:jar:1.0.0.BUILD-SNAPSHOT","force", "false")},
 				{ HttpMethod.POST, HttpStatus.UNAUTHORIZED, "/apps/task/taskname", null, null },
 
-				{ HttpMethod.DELETE, HttpStatus.OK, "/apps/task/taskname", singleUser, null }, // Should
-																								// be
-																								// 404
-																								// -
+				{ HttpMethod.DELETE, HttpStatus.OK, "/apps/task/taskname", singleUser, null }, // Should be 404 -
 				// See https://github.com/spring-cloud/spring-cloud-dataflow/issues/1071
 				{ HttpMethod.DELETE, HttpStatus.UNAUTHORIZED, "/apps/task/taskname", null, null },
 

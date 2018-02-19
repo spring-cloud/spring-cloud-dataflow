@@ -15,8 +15,9 @@
  */
 package org.springframework.cloud.dataflow.rest.util;
 
-import org.springframework.core.io.Resource;
 import java.io.IOException;
+
+import org.springframework.core.io.Resource;
 
 /**
  * A CheckableResource is a {@link org.springframework.core.io.Resource} which can be checked for validity.

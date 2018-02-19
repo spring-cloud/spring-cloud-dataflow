@@ -15,9 +15,9 @@
  */
 package org.springframework.cloud.dataflow.rest;
 
-import org.springframework.cloud.skipper.domain.PackageIdentifier;
-
 import java.util.Map;
+
+import org.springframework.cloud.skipper.domain.PackageIdentifier;
 
 /**
  * Captures the required data for updating a stream using Skipper.

@@ -120,7 +120,7 @@ public class BootApplicationConfigurationMetadataResolver extends ApplicationCon
 				if (include || isWhiteListed(group, whiteListedClasses)) {
 					result.addAll(group.getProperties().values());
 				} // Props in the root group have an id that looks prefixed itself. Handle
-					// here
+				// here
 				else if ("_ROOT_GROUP_".equals(group.getId())) {
 					for (ConfigurationMetadataProperty property : group.getProperties().values()) {
 						if (isWhiteListed(property, whiteListedProperties)) {

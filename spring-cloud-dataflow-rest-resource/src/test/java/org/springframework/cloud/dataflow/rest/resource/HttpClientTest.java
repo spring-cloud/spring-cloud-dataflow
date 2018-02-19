@@ -16,6 +16,8 @@
 package org.springframework.cloud.dataflow.rest.resource;
 
 
+import java.io.IOException;
+
 import org.apache.http.HttpHeaders;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.CloseableHttpClient;
@@ -26,8 +28,6 @@ import org.springframework.cloud.dataflow.rest.util.CheckableResource;
 import org.springframework.cloud.dataflow.rest.util.HttpClientConfigurer;
 import org.springframework.cloud.dataflow.rest.util.ResourceBasedAuthorizationInterceptor;
 import org.springframework.core.io.ByteArrayResource;
-
-import java.io.IOException;
 
 /**
  * @author Mike Heath

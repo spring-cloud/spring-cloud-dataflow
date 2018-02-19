@@ -120,8 +120,7 @@ public class CompletionUtils {
 		} // Handle special case of short form for whitelist
 		else {
 			for (ConfigurationMetadataProperty white : whiteListedProps) {
-				if (property.getId().equals(white.getId())) { // prop#equals() not
-																// implemented
+				if (property.getId().equals(white.getId())) { // prop#equals() not implemented
 					return property.getName().equals(propertyName);
 				}
 			}
