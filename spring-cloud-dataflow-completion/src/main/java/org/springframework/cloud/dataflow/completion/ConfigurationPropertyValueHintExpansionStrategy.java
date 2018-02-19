@@ -80,8 +80,7 @@ public class ConfigurationPropertyValueHintExpansionStrategy implements Expansio
 		}
 		catch (CheckPointedParseException exception) {
 			List<Token> tokens = exception.getTokens();
-			int end = tokens.size() - 1 - 2; // -2 for skipping dangling -- and space
-												// preceding it
+			int end = tokens.size() - 1 - 2; // -2 for skipping dangling -- and space preceding it
 			int tokenPointer = end;
 			while (!tokens.get(tokenPointer - 1).isKind(TokenKind.DOUBLE_MINUS)) {
 				tokenPointer--;

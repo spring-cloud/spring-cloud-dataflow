@@ -117,11 +117,7 @@ public class LocalServerSecurityWithUsersFileTests {
 
 				{ HttpMethod.DELETE, HttpStatus.FORBIDDEN, "/apps/task/taskname", manageOnlyUser, null },
 				{ HttpMethod.DELETE, HttpStatus.FORBIDDEN, "/apps/task/taskname", viewOnlyUser, null },
-				{ HttpMethod.DELETE, HttpStatus.OK, "/apps/task/taskname", createOnlyUser, null }, // Should
-																									// be
-																									// 404
-																									// -
-				// See https://github.com/spring-cloud/spring-cloud-dataflow/issues/1071
+				{ HttpMethod.DELETE, HttpStatus.OK, "/apps/task/taskname", createOnlyUser, null }, // Should be 404 - See https://github.com/spring-cloud/spring-cloud-dataflow/issues/1071
 				{ HttpMethod.DELETE, HttpStatus.UNAUTHORIZED, "/apps/task/taskname", null, null },
 
 				{ HttpMethod.POST, HttpStatus.FORBIDDEN, "/apps", manageOnlyUser,

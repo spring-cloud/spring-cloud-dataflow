@@ -147,8 +147,7 @@ public class StreamParser extends AppParser {
 		List<AppNode> appNodes = new ArrayList<>();
 		if (bridge) {
 			// Create a bridge app to hang the source/sink destinations off
-			tokens.decrementPosition(); // Rewind so we can nicely eat the sink
-										// destination
+			tokens.decrementPosition(); // Rewind so we can nicely eat the sink destination
 			appNodes.add(new AppNode(null, "bridge", tokens.peek().startPos, tokens.peek().endPos, null));
 		}
 		else {

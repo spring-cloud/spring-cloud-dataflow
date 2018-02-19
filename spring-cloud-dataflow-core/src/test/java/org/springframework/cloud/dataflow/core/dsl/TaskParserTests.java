@@ -760,8 +760,7 @@ public class TaskParserTests {
 		List<LabelledTaskNode> sequences = ctn.getSequences();
 		LabelledTaskNode labelledTaskNode = sequences.get(1);
 		assertEquals("foo", labelledTaskNode.getLabelString());
-		LabelledTaskNode fooSequence = ctn.getSequenceWithLabel("foo"); // get the AST for
-																		// foo: ...
+		LabelledTaskNode fooSequence = ctn.getSequenceWithLabel("foo"); // get the AST for foo: ...
 		assertNotNull(fooSequence);
 		TestVisitor tv = new TestVisitor();
 		ctn.accept(tv);

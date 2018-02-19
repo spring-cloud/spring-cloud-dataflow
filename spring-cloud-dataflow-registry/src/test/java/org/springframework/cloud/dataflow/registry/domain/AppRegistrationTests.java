@@ -16,12 +16,12 @@
 
 package org.springframework.cloud.dataflow.registry.domain;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.springframework.cloud.dataflow.core.ApplicationType.task;
-
 import java.net.URI;
 
 import org.junit.Test;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.springframework.cloud.dataflow.core.ApplicationType.task;
 
 /**
  * Unit tests for {@link AppRegistration}.

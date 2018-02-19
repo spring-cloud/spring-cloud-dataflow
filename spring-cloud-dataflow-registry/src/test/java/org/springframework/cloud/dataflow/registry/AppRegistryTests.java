@@ -16,16 +16,12 @@
 
 package org.springframework.cloud.dataflow.registry;
 
-import static org.hamcrest.Matchers.*;
-import static org.junit.Assert.*;
-import static org.springframework.cloud.dataflow.core.ApplicationType.sink;
-import static org.springframework.cloud.dataflow.core.ApplicationType.source;
-
 import java.net.URI;
 import java.util.List;
 
 import org.hamcrest.Matchers;
 import org.junit.Test;
+
 import org.springframework.cloud.dataflow.registry.domain.AppRegistration;
 import org.springframework.cloud.dataflow.registry.support.NoSuchAppRegistrationException;
 import org.springframework.cloud.deployer.resource.registry.InMemoryUriRegistry;
@@ -36,6 +32,18 @@ import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+
+import static org.hamcrest.Matchers.allOf;
+import static org.hamcrest.Matchers.containsInAnyOrder;
+import static org.hamcrest.Matchers.hasProperty;
+import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.notNullValue;
+import static org.hamcrest.Matchers.nullValue;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+import static org.springframework.cloud.dataflow.core.ApplicationType.sink;
+import static org.springframework.cloud.dataflow.core.ApplicationType.source;
 
 /**
  * Unit tests for {@link AppRegistry}.

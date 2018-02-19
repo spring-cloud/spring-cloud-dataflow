@@ -17,6 +17,7 @@
 package org.springframework.cloud.dataflow.registry.domain;
 
 import java.net.URI;
+
 import javax.persistence.Entity;
 import javax.persistence.Lob;
 import javax.persistence.Table;

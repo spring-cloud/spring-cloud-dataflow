@@ -21,8 +21,8 @@ import java.io.IOException;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cloud.dataflow.shell.command.common.Assertions;
 import org.springframework.cloud.dataflow.shell.command.common.AbstractStreamCommands;
+import org.springframework.cloud.dataflow.shell.command.common.Assertions;
 import org.springframework.cloud.dataflow.shell.command.common.UserInput;
 import org.springframework.cloud.dataflow.shell.command.support.OpsType;
 import org.springframework.cloud.dataflow.shell.command.support.RoleType;

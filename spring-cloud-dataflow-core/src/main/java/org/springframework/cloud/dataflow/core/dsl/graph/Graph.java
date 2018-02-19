@@ -151,8 +151,7 @@ public class Graph {
 					printNode(graphText, nextHead, unvisitedNodes);
 					followLinks(graphText, toFollow, null, unvisitedNodes, unfollowedLinks);
 				}
-				loopCount++; // Just a guard on malformed input - a good graph will not
-								// trigger this
+				loopCount++; // Just a guard on malformed input - a good graph will not trigger this
 			}
 		}
 

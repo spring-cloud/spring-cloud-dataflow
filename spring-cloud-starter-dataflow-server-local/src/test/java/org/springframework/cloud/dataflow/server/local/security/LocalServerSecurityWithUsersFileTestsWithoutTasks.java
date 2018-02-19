@@ -119,11 +119,7 @@ public class LocalServerSecurityWithUsersFileTestsWithoutTasks {
 
 				{ HttpMethod.DELETE, HttpStatus.FORBIDDEN, "/apps/task/taskname", adminOnlyUser, null },
 				{ HttpMethod.DELETE, HttpStatus.FORBIDDEN, "/apps/task/taskname", viewOnlyUser, null },
-				{ HttpMethod.DELETE, HttpStatus.OK, "/apps/task/taskname", createOnlyUser, null }, // Should
-																									// be
-																									// 404
-																									// -
-				// See https://github.com/spring-cloud/spring-cloud-dataflow/issues/1071
+				{ HttpMethod.DELETE, HttpStatus.OK, "/apps/task/taskname", createOnlyUser, null }, // Should be 404 - See https://github.com/spring-cloud/spring-cloud-dataflow/issues/1071
 				{ HttpMethod.DELETE, HttpStatus.UNAUTHORIZED, "/apps/task/taskname", null, null },
 
 				{ HttpMethod.POST, HttpStatus.FORBIDDEN, "/apps", adminOnlyUser,
@@ -434,16 +430,8 @@ public class LocalServerSecurityWithUsersFileTestsWithoutTasks {
 				{ HttpMethod.POST, HttpStatus.FORBIDDEN, "/tasks/definitions", viewOnlyUser,
 						TestUtils.toImmutableMap("name", "my-name", "definition", "foo") },
 				{ HttpMethod.POST, HttpStatus.NOT_FOUND, "/tasks/definitions", createOnlyUser,
-						TestUtils.toImmutableMap("name", "my-name", "definition", "foo") }, // Should
-																					// be
-																					// a
-																					// `400`
-																					// error
-																					// -
-																					// See
-																					// also:
-																					// https://github
-				// .com/spring-cloud/spring-cloud-dataflow/issues/1075
+						TestUtils.toImmutableMap("name", "my-name", "definition", "foo") }, // Should be a `400` error - see also:
+				// https://github.com/spring-cloud/spring-cloud-dataflow/issues/1075
 				{ HttpMethod.POST, HttpStatus.UNAUTHORIZED, "/tasks/definitions", null,
 						TestUtils.toImmutableMap("name", "my-name", "definition", "foo") },
 

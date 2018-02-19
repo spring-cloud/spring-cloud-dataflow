@@ -31,8 +31,7 @@ public class ParseException extends RuntimeException {
 
 	protected String expressionString;
 
-	protected int position; // -1 if not known - but should be known in all reasonable
-							// cases
+	protected int position; // -1 if not known - but should be known in all reasonable cases
 
 	protected DSLMessage message;
 

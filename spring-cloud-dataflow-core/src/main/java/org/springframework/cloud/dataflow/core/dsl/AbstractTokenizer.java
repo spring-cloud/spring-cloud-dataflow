@@ -236,10 +236,8 @@ public abstract class AbstractTokenizer {
 
 		int start = pos;
 		boolean quoteOpen = false;
-		int quoteClosedCount = 0; // Enables identification of this pattern:
-									// 'hello'+'world'
-		Character quoteInUse = null; // If set, indicates this is being treated as a
-										// quoted string
+		int quoteClosedCount = 0; // Enables identification of this pattern: 'hello'+'world'
+		Character quoteInUse = null; // If set, indicates this is being treated as a quoted string
 		if (isQuote(toProcess[pos])) {
 			quoteOpen = true;
 			quoteInUse = toProcess[pos++];
