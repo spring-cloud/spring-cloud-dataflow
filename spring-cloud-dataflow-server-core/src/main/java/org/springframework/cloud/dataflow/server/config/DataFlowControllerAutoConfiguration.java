@@ -16,11 +16,11 @@
 
 package org.springframework.cloud.dataflow.server.config;
 
-import javax.sql.DataSource;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ForkJoinPool;
+import javax.sql.DataSource;
 
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -64,6 +64,7 @@ import org.springframework.cloud.dataflow.server.config.apps.CommonApplicationPr
 import org.springframework.cloud.dataflow.server.config.features.FeaturesProperties;
 import org.springframework.cloud.dataflow.server.controller.AboutController;
 import org.springframework.cloud.dataflow.server.controller.AppRegistryController;
+import org.springframework.cloud.dataflow.server.controller.StreamDeploymentController;
 import org.springframework.cloud.dataflow.server.controller.CompletionController;
 import org.springframework.cloud.dataflow.server.controller.JobExecutionController;
 import org.springframework.cloud.dataflow.server.controller.JobInstanceController;
@@ -74,8 +75,8 @@ import org.springframework.cloud.dataflow.server.controller.RestControllerAdvice
 import org.springframework.cloud.dataflow.server.controller.RootController;
 import org.springframework.cloud.dataflow.server.controller.RuntimeAppsController;
 import org.springframework.cloud.dataflow.server.controller.RuntimeAppsController.AppInstanceController;
+import org.springframework.cloud.dataflow.server.controller.UpdatableStreamDeploymentController;
 import org.springframework.cloud.dataflow.server.controller.StreamDefinitionController;
-import org.springframework.cloud.dataflow.server.controller.StreamDeploymentController;
 import org.springframework.cloud.dataflow.server.controller.TaskDefinitionController;
 import org.springframework.cloud.dataflow.server.controller.TaskExecutionController;
 import org.springframework.cloud.dataflow.server.controller.ToolsController;
@@ -91,6 +92,7 @@ import org.springframework.cloud.dataflow.server.repository.TaskDefinitionReposi
 import org.springframework.cloud.dataflow.server.service.StreamService;
 import org.springframework.cloud.dataflow.server.service.TaskJobService;
 import org.springframework.cloud.dataflow.server.service.TaskService;
+import org.springframework.cloud.dataflow.server.service.UpdatableStreamService;
 import org.springframework.cloud.dataflow.server.service.impl.AppDeployerStreamService;
 import org.springframework.cloud.dataflow.server.service.impl.AppDeploymentRequestCreator;
 import org.springframework.cloud.dataflow.server.service.impl.SkipperStreamService;
@@ -169,17 +171,18 @@ public class DataFlowControllerAutoConfiguration {
 		return new StreamDefinitionController(repository, appRegistry, streamService);
 	}
 
-	@Bean
-	@ConditionalOnBean({ StreamDefinitionRepository.class, StreamDeploymentRepository.class })
-	public StreamDeploymentController streamDeploymentController(StreamDefinitionRepository repository,
-			StreamService streamService) {
-		return new StreamDeploymentController(repository, streamService);
-	}
 
 	@Configuration
 	@ConditionalOnSkipperEnabled
 	@EnableConfigurationProperties(SkipperClientProperties.class)
 	public static class SkipperDeploymentConfiguration {
+
+		@Bean
+		@ConditionalOnBean({ StreamDefinitionRepository.class, StreamDeploymentRepository.class })
+		public UpdatableStreamDeploymentController updatableStreamDeploymentController(
+				StreamDefinitionRepository repository, UpdatableStreamService streamService) {
+			return new UpdatableStreamDeploymentController(repository, streamService);
+		}
 
 		@Bean
 		@ConditionalOnBean(StreamDefinitionRepository.class)
@@ -210,7 +213,7 @@ public class DataFlowControllerAutoConfiguration {
 
 		@Bean
 		@ConditionalOnBean(StreamDefinitionRepository.class)
-		public StreamService skipperStreamDeploymentService(StreamDefinitionRepository streamDefinitionRepository,
+		public UpdatableStreamService skipperStreamDeploymentService(StreamDefinitionRepository streamDefinitionRepository,
 				SkipperStreamDeployer skipperStreamDeployer, AppDeploymentRequestCreator appDeploymentRequestCreator) {
 			return new SkipperStreamService(streamDefinitionRepository, skipperStreamDeployer,
 					appDeploymentRequestCreator);
@@ -233,6 +236,13 @@ public class DataFlowControllerAutoConfiguration {
 	@ConditionalOnSkipperDisabled
 	@ConditionalOnBean({ AppDeployer.class })
 	public static class AppDeploymentConfiguration {
+
+		@Bean
+		@ConditionalOnBean({ StreamDefinitionRepository.class, StreamDeploymentRepository.class })
+		public StreamDeploymentController streamDeploymentController(StreamDefinitionRepository repository,
+				StreamService streamService) {
+			return new StreamDeploymentController(repository, streamService);
+		}
 
 		@Bean
 		@ConditionalOnBean({ StreamDefinitionRepository.class, StreamDeploymentRepository.class })

@@ -145,7 +145,6 @@ public class AppDeployerStreamDeployer implements StreamDeployer {
 		this.streamDeploymentRepository.save(streamDeployment);
 	}
 
-	@Override
 	public void undeployStream(String streamName) {
 		StreamDefinition streamDefinition = this.streamDefinitionRepository.findOne(streamName);
 		for (StreamAppDefinition appDefinition : streamDefinition.getAppDefinitions()) {
@@ -164,7 +163,7 @@ public class AppDeployerStreamDeployer implements StreamDeployer {
 	}
 
 	@Override
-	public DeploymentState calculateStreamState(String streamName) {
+	public DeploymentState streamState(String streamName) {
 		Set<DeploymentState> appStates = EnumSet.noneOf(DeploymentState.class);
 		StreamDefinition stream = this.streamDefinitionRepository.findOne(streamName);
 		for (StreamAppDefinition appDefinition : stream.getAppDefinitions()) {
@@ -182,18 +181,18 @@ public class AppDeployerStreamDeployer implements StreamDeployer {
 	}
 
 	@Override
-	public Map<StreamDefinition, DeploymentState> state(List<StreamDefinition> streamDefinitions) {
+	public Map<StreamDefinition, DeploymentState> streamsStates(List<StreamDefinition> streamDefinitions) {
 		Map<StreamDefinition, List<String>> deploymentIdsPerStream = streamDefinitions.stream()
 				.collect(Collectors.toMap(Function.identity(),
 						sd -> sd.getAppDefinitions().stream().map(
 								sad -> deploymentIdRepository.findOne(DeploymentKey.forStreamAppDefinition(sad)))
 								.collect(Collectors.toList())));
 
-		// Map from app deployment id to state
+		// Map from app deployment id to streamsStates
 		Map<String, DeploymentState> statePerApp = gatherDeploymentStates(deploymentIdsPerStream.values().stream()
 				.flatMap(Collection::stream).filter(Objects::nonNull).toArray(String[]::new));
 
-		// Map from SCDF Stream to aggregate state
+		// Map from SCDF Stream to aggregate streamsStates
 		return deploymentIdsPerStream.entrySet().stream()
 				.map(kv -> new AbstractMap.SimpleImmutableEntry<>(kv.getKey(),
 						StreamDefinitionController.aggregateState(kv.getValue().stream()
@@ -249,8 +248,8 @@ public class AppDeployerStreamDeployer implements StreamDeployer {
 	}
 
 	@Override
-	public AppStatus getAppStatus(String id) {
-		return appDeployer.status(id);
+	public AppStatus getAppStatus(String appDeploymentId) {
+		return appDeployer.status(appDeploymentId);
 	}
 
 	@Override

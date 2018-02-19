@@ -1,5 +1,5 @@
 /*
- * Copyright 2015-2018 the original author or authors.
+ * Copyright 2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,6 @@
 package org.springframework.cloud.dataflow.server.controller;
 
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.Map;
 
 import org.slf4j.Logger;
@@ -25,7 +24,6 @@ import org.slf4j.LoggerFactory;
 
 import org.springframework.cloud.dataflow.core.StreamDefinition;
 import org.springframework.cloud.dataflow.core.StreamDeployment;
-import org.springframework.cloud.dataflow.rest.UpdateStreamRequest;
 import org.springframework.cloud.dataflow.rest.resource.DeploymentStateResource;
 import org.springframework.cloud.dataflow.rest.resource.StreamDeploymentResource;
 import org.springframework.cloud.dataflow.server.controller.support.ArgumentSanitizer;
@@ -35,8 +33,6 @@ import org.springframework.cloud.dataflow.server.repository.StreamDefinitionRepo
 import org.springframework.cloud.dataflow.server.service.StreamService;
 import org.springframework.cloud.deployer.spi.app.AppDeployer;
 import org.springframework.cloud.deployer.spi.app.DeploymentState;
-import org.springframework.cloud.skipper.domain.Deployer;
-import org.springframework.cloud.skipper.domain.Release;
 import org.springframework.hateoas.ExposesResourceFor;
 import org.springframework.hateoas.mvc.ResourceAssemblerSupport;
 import org.springframework.http.HttpStatus;
@@ -58,6 +54,7 @@ import org.springframework.web.bind.annotation.RestController;
  * @author Ilayaperumal Gopinathan
  * @author Marius Bogoevici
  * @author Janne Valkealahti
+ * @author Christian Tzolov
  */
 @RestController
 @RequestMapping("/streams/deployments")
@@ -151,36 +148,6 @@ public class StreamDeploymentController {
 	public void deploy(@PathVariable("name") String name,
 			@RequestBody(required = false) Map<String, String> properties) {
 		this.streamService.deployStream(name, properties);
-	}
-
-	@RequestMapping(value = "/update/{name}", method = RequestMethod.POST)
-	@ResponseStatus(HttpStatus.CREATED)
-	public void update(@PathVariable("name") String name, @RequestBody UpdateStreamRequest updateStreamRequest) {
-		this.streamService.updateStream(name, updateStreamRequest);
-	}
-
-	@RequestMapping(value = "/rollback/{name}/{version}", method = RequestMethod.POST)
-	@ResponseStatus(HttpStatus.CREATED)
-	public void rollback(@PathVariable("name") String name, @PathVariable("version") int version) {
-		this.streamService.rollbackStream(name, version);
-	}
-
-	@RequestMapping(value = "/manifest/{name}/{version}", method = RequestMethod.GET)
-	@ResponseStatus(HttpStatus.OK)
-	public String manifest(@PathVariable("name") String name, @PathVariable("version") int version) {
-		return this.streamService.manifest(name, version);
-	}
-
-	@RequestMapping(path = "/history/{name}", method = RequestMethod.GET)
-	@ResponseStatus(HttpStatus.OK)
-	public Collection<Release> history(@PathVariable("name") String releaseName) {
-		return this.streamService.history(releaseName);
-	}
-
-	@RequestMapping(path = "/platform/list", method = RequestMethod.GET)
-	@ResponseStatus(HttpStatus.OK)
-	public Collection<Deployer> platformList() {
-		return this.streamService.platformList();
 	}
 
 	/**
