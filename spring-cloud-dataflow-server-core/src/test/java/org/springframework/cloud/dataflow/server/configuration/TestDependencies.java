@@ -429,8 +429,8 @@ public class TestDependencies extends WebMvcConfigurationSupport {
 	public AboutController aboutController(VersionInfoProperties versionInfoProperties, FeaturesProperties featuresProperties) {
 		StreamDeployer streamDeployer = mock(StreamDeployer.class);
 
+		RuntimeEnvironmentInfo.Builder builder = new RuntimeEnvironmentInfo.Builder();
 		if (!featuresProperties.isSkipperEnabled()) {
-			RuntimeEnvironmentInfo.Builder builder = new RuntimeEnvironmentInfo.Builder();
 			RuntimeEnvironmentInfo appDeployerEnvInfo = builder.implementationName("testAppDepImplementationName").
 					implementationVersion("testAppDepImplementationVersion").
 					platformType("testAppDepPlatformType").
