@@ -22,20 +22,6 @@ import java.util.List;
 
 import org.springframework.util.Assert;
 
-import static org.springframework.cloud.dataflow.core.dsl.TokenKind.ANDAND;
-import static org.springframework.cloud.dataflow.core.dsl.TokenKind.ARROW;
-import static org.springframework.cloud.dataflow.core.dsl.TokenKind.CLOSE_PAREN;
-import static org.springframework.cloud.dataflow.core.dsl.TokenKind.COLON;
-import static org.springframework.cloud.dataflow.core.dsl.TokenKind.DOUBLE_MINUS;
-import static org.springframework.cloud.dataflow.core.dsl.TokenKind.GT;
-import static org.springframework.cloud.dataflow.core.dsl.TokenKind.IDENTIFIER;
-import static org.springframework.cloud.dataflow.core.dsl.TokenKind.LITERAL_STRING;
-import static org.springframework.cloud.dataflow.core.dsl.TokenKind.LT;
-import static org.springframework.cloud.dataflow.core.dsl.TokenKind.OPEN_PAREN;
-import static org.springframework.cloud.dataflow.core.dsl.TokenKind.OROR;
-import static org.springframework.cloud.dataflow.core.dsl.TokenKind.SEMICOLON;
-import static org.springframework.cloud.dataflow.core.dsl.TokenKind.STAR;
-
 /**
  * Parse a single or composed task specification.
  *
@@ -113,7 +99,7 @@ public class TaskParser extends AppParser {
 	private List<LabelledTaskNode> eatSequences() {
 		List<LabelledTaskNode> sequence = new ArrayList<>();
 		sequence.add(parseTaskNode());
-		while (getTokens().hasNext() && (nextTokenIsOnNewline() || maybeEat(SEMICOLON))) {
+		while (getTokens().hasNext() && (nextTokenIsOnNewline() || maybeEat(TokenKind.SEMICOLON))) {
 			sequence.add(parseTaskNode());
 		}
 		return sequence;
@@ -128,9 +114,9 @@ public class TaskParser extends AppParser {
 	}
 
 	private Token maybeEatLabel() {
-		if (peek(IDENTIFIER) && (peek(1) != null && peek(1).isKind(COLON))) {
+		if (peek(TokenKind.IDENTIFIER) && (peek(1) != null && peek(1).isKind(TokenKind.COLON))) {
 			Token labelToken = eat();
-			eat(COLON);
+			eat(TokenKind.COLON);
 			return labelToken;
 		}
 		return null;
@@ -138,15 +124,15 @@ public class TaskParser extends AppParser {
 
 	private LabelledTaskNode parseTaskNode() {
 		// Handle (...)
-		if (maybeEat(OPEN_PAREN)) {
+		if (maybeEat(TokenKind.OPEN_PAREN)) {
 			LabelledTaskNode node = parseTaskNode();
-			eat(CLOSE_PAREN);
+			eat(TokenKind.CLOSE_PAREN);
 			return node;
 		}
 		Token label = maybeEatLabel();
 		if (label != null) {
 			Token secondLabel;
-			if (peek(OPEN_PAREN)) {
+			if (peek(TokenKind.OPEN_PAREN)) {
 				getTokens().raiseException(peek().startPos, DSLMessage.TASK_NO_LABELS_ON_PARENS);
 			}
 			else if ((secondLabel = maybeEatLabel()) != null) {
@@ -154,7 +140,7 @@ public class TaskParser extends AppParser {
 			}
 		}
 		// Handle a split < ... >
-		if (peek(LT)) {
+		if (peek(TokenKind.LT)) {
 			LabelledTaskNode node = parseSplit();
 			node.setLabel(label);
 			// is the split part of a flow? "<..> && b"
@@ -169,7 +155,7 @@ public class TaskParser extends AppParser {
 	private FlowNode parseFlow(LabelledTaskNode firstNodeInFlow) {
 		List<LabelledTaskNode> nodes = new ArrayList<>();
 		nodes.add(firstNodeInFlow);
-		while (maybeEat(ANDAND)) {
+		while (maybeEat(TokenKind.ANDAND)) {
 			LabelledTaskNode nextNode = parseTaskNode();
 			// If nextNode is a Flow node, merge it with this one
 			if (nextNode instanceof FlowNode) {
@@ -187,12 +173,12 @@ public class TaskParser extends AppParser {
 	// '<' jobs ['||' jobs]+ '>'
 	private LabelledTaskNode parseSplit() {
 		List<LabelledTaskNode> flows = new ArrayList<>();
-		Token startSplit = eat(LT);
+		Token startSplit = eat(TokenKind.LT);
 		flows.add(parseTaskNode());
-		while (maybeEat(OROR)) {
+		while (maybeEat(TokenKind.OROR)) {
 			flows.add(parseTaskNode());
 		}
-		Token endSplit = eat(GT);
+		Token endSplit = eat(TokenKind.GT);
 		return new SplitNode(startSplit.startPos, endSplit.endPos, flows);
 	}
 
@@ -211,7 +197,7 @@ public class TaskParser extends AppParser {
 		}
 		getTokens().checkpoint();
 		ArgumentNode[] arguments = (inAppMode ? maybeEatAppArgs() : null);
-		if (!inAppMode && peek(DOUBLE_MINUS)) {
+		if (!inAppMode && peek(TokenKind.DOUBLE_MINUS)) {
 			getTokens().raiseException(peek().startPos, DSLMessage.TASK_ARGUMENTS_NOT_ALLOWED_UNLESS_IN_APP_MODE);
 		}
 		List<TransitionNode> transitions = transitionsAllowed ? maybeEatTransitions() : Collections.emptyList();
@@ -263,26 +249,26 @@ public class TaskParser extends AppParser {
 		List<TransitionNode> transitions = new ArrayList<>();
 		Token transitionOn = null;
 		while (true) {
-			if (peek(ARROW)) {
+			if (peek(TokenKind.ARROW)) {
 				getTokens().raiseException(peek().startPos, DSLMessage.TASK_ARROW_SHOULD_BE_PRECEDED_BY_CODE);
 				break;
 			}
 			Token possibleArrow = peek(+1);
-			if (possibleArrow == null || possibleArrow.getKind() != ARROW) {
+			if (possibleArrow == null || possibleArrow.getKind() != TokenKind.ARROW) {
 				break;
 			}
 			transitionOn = peek();
-			if (transitionOn == null || (transitionOn.getKind() != IDENTIFIER
-					&& transitionOn.getKind() != LITERAL_STRING && transitionOn.getKind() != STAR)) {
+			if (transitionOn == null || (transitionOn.getKind() != TokenKind.IDENTIFIER
+					&& transitionOn.getKind() != TokenKind.LITERAL_STRING && transitionOn.getKind() != TokenKind.STAR)) {
 				break;
 			}
 			eat();
-			if (!maybeEat(ARROW)) {
+			if (!maybeEat(TokenKind.ARROW)) {
 				getTokens().raiseException(transitionOn.startPos, DSLMessage.TASK_MISSING_TRANSITION_ARROW);
 			}
 			TransitionNode t = null;
-			if (maybeEat(COLON)) {
-				Token labelReference = eat(IDENTIFIER);
+			if (maybeEat(TokenKind.COLON)) {
+				Token labelReference = eat(TokenKind.IDENTIFIER);
 				t = TransitionNode.toLabelReference(transitionOn, labelReference);
 			}
 			else {

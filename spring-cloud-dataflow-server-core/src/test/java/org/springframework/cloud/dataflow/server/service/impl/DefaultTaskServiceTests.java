@@ -71,7 +71,6 @@ import static org.mockito.Mockito.atLeast;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static org.springframework.cloud.dataflow.core.ApplicationType.task;
 
 /**
  * @author Glenn Renfro
@@ -443,7 +442,7 @@ public class DefaultTaskServiceTests {
 
 	private void initializeSuccessfulRegistry() {
 		when(this.appRegistry.find(anyString(), any(ApplicationType.class)))
-				.thenReturn(new AppRegistration("some-name", task, URI.create("http://helloworld")));
+				.thenReturn(new AppRegistration("some-name", ApplicationType.task, URI.create("http://helloworld")));
 		when(this.appRegistry.getAppResource(any())).thenReturn(mock(Resource.class));
 		when(this.appRegistry.getAppMetadataResource(any())).thenReturn(null);
 	}

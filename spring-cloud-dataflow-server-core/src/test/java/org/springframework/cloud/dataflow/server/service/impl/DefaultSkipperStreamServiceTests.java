@@ -36,6 +36,7 @@ import org.springframework.cloud.dataflow.configuration.metadata.BootApplication
 import org.springframework.cloud.dataflow.core.StreamDefinition;
 import org.springframework.cloud.dataflow.core.StreamDeployment;
 import org.springframework.cloud.dataflow.registry.AppRegistryCommon;
+import org.springframework.cloud.dataflow.rest.SkipperStream;
 import org.springframework.cloud.dataflow.server.config.apps.CommonApplicationProperties;
 import org.springframework.cloud.dataflow.server.repository.StreamDefinitionRepository;
 import org.springframework.cloud.dataflow.server.repository.StreamDeploymentRepository;
@@ -56,8 +57,6 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
-import static org.springframework.cloud.dataflow.rest.SkipperStream.SKIPPER_PACKAGE_VERSION;
-import static org.springframework.cloud.dataflow.server.service.impl.DefaultSkipperStreamService.DEFAULT_SKIPPER_PACKAGE_VERSION;
 
 /**
  * @author Ilayaperumal Gopinathan
@@ -215,19 +214,19 @@ public class DefaultSkipperStreamServiceTests {
 
 		ArgumentCaptor<StreamDeploymentRequest> argumentCaptor = this.testStreamDeploy(deploymentProperties);
 
-		Assert.assertEquals(DEFAULT_SKIPPER_PACKAGE_VERSION,
-				argumentCaptor.getValue().getStreamDeployerProperties().get(SKIPPER_PACKAGE_VERSION));
+		Assert.assertEquals(DefaultSkipperStreamService.DEFAULT_SKIPPER_PACKAGE_VERSION,
+				argumentCaptor.getValue().getStreamDeployerProperties().get(SkipperStream.SKIPPER_PACKAGE_VERSION));
 	}
 
 	@Test
 	public void testStreamDeployWithPreDefinedPackageVersion() {
 		Map<String, String> deploymentProperties = new HashMap<>();
-		deploymentProperties.put(SKIPPER_PACKAGE_VERSION, "2.0.0");
+		deploymentProperties.put(SkipperStream.SKIPPER_PACKAGE_VERSION, "2.0.0");
 
 		ArgumentCaptor<StreamDeploymentRequest> argumentCaptor = this.testStreamDeploy(deploymentProperties);
 
 		Assert.assertEquals("2.0.0",
-				argumentCaptor.getValue().getStreamDeployerProperties().get(SKIPPER_PACKAGE_VERSION));
+				argumentCaptor.getValue().getStreamDeployerProperties().get(SkipperStream.SKIPPER_PACKAGE_VERSION));
 	}
 
 	public ArgumentCaptor<StreamDeploymentRequest> testStreamDeploy(Map<String, String> deploymentProperties) {

@@ -22,7 +22,8 @@ import org.junit.FixMethodOrder;
 import org.junit.Test;
 import org.junit.runners.MethodSorters;
 
-import static org.springframework.cloud.dataflow.core.ApplicationType.task;
+import org.springframework.cloud.dataflow.core.ApplicationType;
+
 import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.delete;
 import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.get;
 import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.post;
@@ -45,7 +46,7 @@ public class TaskExecutionsDocumentation extends BaseDocumentation {
 
 	@Before
 	public void setup() throws Exception {
-		registerApp(task, "timestamp");
+		registerApp(ApplicationType.task, "timestamp");
 		createTaskDefinition("taskA");
 		createTaskDefinition("taskB");
 
@@ -55,7 +56,7 @@ public class TaskExecutionsDocumentation extends BaseDocumentation {
 	public void tearDown() throws Exception {
 		destroyTaskDefinition("taskA");
 		destroyTaskDefinition("taskB");
-		unregisterApp(task, "timestamp");
+		unregisterApp(ApplicationType.task, "timestamp");
 	}
 
 	@Test

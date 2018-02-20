@@ -114,7 +114,6 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurationSupp
 
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
-import static org.springframework.hateoas.config.EnableHypermediaSupport.HypermediaType.HAL;
 
 /**
  * @author Michael Minella
@@ -125,7 +124,7 @@ import static org.springframework.hateoas.config.EnableHypermediaSupport.Hyperme
  */
 @Configuration
 @EnableSpringDataWebSupport
-@EnableHypermediaSupport(type = HAL)
+@EnableHypermediaSupport(type = EnableHypermediaSupport.HypermediaType.HAL)
 @Import(CompletionConfiguration.class)
 @ImportAutoConfiguration({ HibernateJpaAutoConfiguration.class, EmbeddedDataSourceConfiguration.class })
 @EnableWebMvc

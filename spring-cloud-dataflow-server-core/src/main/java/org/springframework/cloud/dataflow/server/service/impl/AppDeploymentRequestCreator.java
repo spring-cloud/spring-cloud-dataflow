@@ -45,8 +45,6 @@ import org.springframework.cloud.deployer.spi.core.AppDeploymentRequest;
 import org.springframework.core.io.Resource;
 import org.springframework.util.Assert;
 
-import static org.springframework.cloud.deployer.spi.app.AppDeployer.COUNT_PROPERTY_KEY;
-
 /**
  * Create the list of {@link AppDeploymentRequest}s from a {@link StreamDefinition} and
  * deployment properties map.
@@ -174,9 +172,9 @@ public class AppDeploymentRequestCreator {
 			boolean upstreamAppSupportsPartition = upstreamAppHasPartitionInfo(streamDefinition, currentApp,
 					streamDeploymentProperties);
 			// Set instance count property
-			if (deployerDeploymentProperties.containsKey(COUNT_PROPERTY_KEY)) {
+			if (deployerDeploymentProperties.containsKey(AppDeployer.COUNT_PROPERTY_KEY)) {
 				appDeployTimeProperties.put(StreamPropertyKeys.INSTANCE_COUNT,
-						deployerDeploymentProperties.get(COUNT_PROPERTY_KEY));
+						deployerDeploymentProperties.get(AppDeployer.COUNT_PROPERTY_KEY));
 			}
 
 			if (upstreamAppSupportsPartition) {
@@ -347,7 +345,7 @@ public class AppDeploymentRequestCreator {
 	 * contain a count, a value of {@code 1} is returned
 	 */
 	/* default */ int getInstanceCount(Map<String, String> properties) {
-		return Integer.valueOf(properties.getOrDefault(COUNT_PROPERTY_KEY, "1"));
+		return Integer.valueOf(properties.getOrDefault(AppDeployer.COUNT_PROPERTY_KEY, "1"));
 	}
 
 	/**

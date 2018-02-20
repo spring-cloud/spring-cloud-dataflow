@@ -18,13 +18,11 @@ package org.springframework.cloud.dataflow.completion;
 
 import java.util.List;
 
+import org.springframework.cloud.dataflow.core.ApplicationType;
 import org.springframework.cloud.dataflow.core.StreamDefinition;
 import org.springframework.cloud.dataflow.core.dsl.CheckPointedParseException;
 import org.springframework.cloud.dataflow.registry.AppRegistryCommon;
 import org.springframework.cloud.dataflow.registry.domain.AppRegistration;
-
-import static org.springframework.cloud.dataflow.core.ApplicationType.processor;
-import static org.springframework.cloud.dataflow.core.ApplicationType.sink;
 
 /**
  * Provides completions for the case where the user has entered a pipe symbol and a app
@@ -55,7 +53,7 @@ public class AppsAfterPipeRecoveryStrategy
 		// We only support full streams at the moment, so completions can only be
 		// processor or sink
 		for (AppRegistration appRegistration : appRegistry.findAll()) {
-			if (appRegistration.getType() == processor || appRegistration.getType() == sink) {
+			if (appRegistration.getType() == ApplicationType.processor || appRegistration.getType() == ApplicationType.sink) {
 				String expansion = CompletionUtils.maybeQualifyWithLabel(appRegistration.getName(), streamDefinition);
 				collector.add(proposals.withSeparateTokens(expansion,
 						"Continue stream definition with a " + appRegistration.getType()));

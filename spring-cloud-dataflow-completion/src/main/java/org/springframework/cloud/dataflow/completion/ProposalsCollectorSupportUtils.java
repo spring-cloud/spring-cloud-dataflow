@@ -31,8 +31,6 @@ import org.springframework.cloud.dataflow.registry.AppRegistryCommon;
 import org.springframework.cloud.dataflow.registry.domain.AppRegistration;
 import org.springframework.core.io.Resource;
 
-import static org.springframework.cloud.dataflow.completion.CompletionProposal.expanding;
-
 /**
  * Support class to be used by various strategies to gather {@link CompletionProposal}s
  *
@@ -56,7 +54,7 @@ class ProposalsCollectorSupportUtils {
 		Resource metadataResource = appRegistry.getAppMetadataResource(appRegistration);
 		// For whitelisted properties, use their simple name
 		if (metadataResource != null) {
-			CompletionProposal.Factory proposals = expanding(text);
+			CompletionProposal.Factory proposals = CompletionProposal.expanding(text);
 			for (ConfigurationMetadataProperty property : metadataResolver.listProperties(metadataResource)) {
 				String name = property.getName();
 				if (!alreadyPresentOptions.contains(name) && name.startsWith(startsWith)) {
@@ -82,7 +80,7 @@ class ProposalsCollectorSupportUtils {
 		if (metadataResource != null) {
 			final URLClassLoader classLoader = metadataResolver.createAppClassLoader(metadataResource);
 			this.doWithClassLoader(classLoader, () -> {
-				CompletionProposal.Factory proposals = expanding(dsl);
+				CompletionProposal.Factory proposals = CompletionProposal.expanding(dsl);
 				List<ConfigurationMetadataProperty> whiteList = metadataResolver.listProperties(metadataResource);
 				for (ConfigurationMetadataProperty property : metadataResolver.listProperties(metadataResource, true)) {
 					if (CompletionUtils.isMatchingProperty(propertyName, property, whiteList)) {
@@ -106,7 +104,7 @@ class ProposalsCollectorSupportUtils {
 		}
 		final URLClassLoader classLoader = metadataResolver.createAppClassLoader(metadataResource);
 		return this.doWithClassLoader(classLoader, () -> {
-			CompletionProposal.Factory proposals = expanding(text);
+			CompletionProposal.Factory proposals = CompletionProposal.expanding(text);
 			List<ConfigurationMetadataProperty> allProps = metadataResolver.listProperties(metadataResource, true);
 			List<ConfigurationMetadataProperty> whiteListedProps = metadataResolver.listProperties(metadataResource);
 			for (ConfigurationMetadataProperty property : allProps) {

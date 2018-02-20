@@ -20,9 +20,9 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import static org.springframework.cloud.dataflow.core.ApplicationType.sink;
-import static org.springframework.cloud.dataflow.core.ApplicationType.source;
-import static org.springframework.http.MediaType.APPLICATION_JSON;
+import org.springframework.cloud.dataflow.core.ApplicationType;
+import org.springframework.http.MediaType;
+
 import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -36,23 +36,23 @@ public class RuntimeAppsDocumentation extends BaseDocumentation {
 
 	@Before
 	public void setup() throws Exception {
-		registerApp(source, "http");
-		registerApp(sink, "log");
+		registerApp(ApplicationType.source, "http");
+		registerApp(ApplicationType.sink, "log");
 		createStream("mystream", "http | log", true);
 	}
 
 	@After
 	public void cleanup() throws Exception {
 		destroyStream("mystream");
-		unregisterApp(source, "http");
-		unregisterApp(sink, "log");
+		unregisterApp(ApplicationType.source, "http");
+		unregisterApp(ApplicationType.sink, "log");
 	}
 
 	@Test
 	public void listAllApps() throws Exception {
 		this.mockMvc.perform(
 			get("/runtime/apps")
-				.accept(APPLICATION_JSON)
+				.accept(MediaType.APPLICATION_JSON)
 		)
 		.andExpect(status().isOk())
 		.andDo(this.documentationHandler.document());
@@ -62,7 +62,7 @@ public class RuntimeAppsDocumentation extends BaseDocumentation {
 	public void listSingleAppAllInstances() throws Exception {
 		this.mockMvc.perform(
 			get("/runtime/apps/mystream.http/instances")
-				.accept(APPLICATION_JSON)
+				.accept(MediaType.APPLICATION_JSON)
 		)
 		.andExpect(status().isOk())
 			.andDo(this.documentationHandler.document());
@@ -72,7 +72,7 @@ public class RuntimeAppsDocumentation extends BaseDocumentation {
 	public void getSingleAppSingleInstance() throws Exception {
 		this.mockMvc.perform(
 			get("/runtime/apps/mystream.http/instances/mystream.http-0")
-				.accept(APPLICATION_JSON)
+				.accept(MediaType.APPLICATION_JSON)
 		)
 		.andExpect(status().isOk())
 		.andDo(this.documentationHandler.document());

@@ -33,8 +33,6 @@ import org.springframework.data.web.config.EnableSpringDataWebSupport;
 import org.springframework.hateoas.config.EnableHypermediaSupport;
 import org.springframework.jdbc.datasource.DataSourceTransactionManager;
 
-import static org.springframework.hateoas.config.EnableHypermediaSupport.HypermediaType.HAL;
-
 /**
  * Configuration for the Data Flow Server application context. This includes support for
  * the REST API framework configuration.
@@ -49,7 +47,7 @@ import static org.springframework.hateoas.config.EnableHypermediaSupport.Hyperme
  * @author Michael Minella
  * @author Gunnar Hillert
  */
-@EnableHypermediaSupport(type = HAL)
+@EnableHypermediaSupport(type = EnableHypermediaSupport.HypermediaType.HAL)
 @EnableSpringDataWebSupport
 @Configuration
 @Import({ CompletionConfiguration.class, FeaturesConfiguration.class, WebConfiguration.class,

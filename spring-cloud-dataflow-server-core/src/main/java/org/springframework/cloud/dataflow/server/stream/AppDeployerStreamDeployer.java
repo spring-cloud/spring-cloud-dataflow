@@ -56,8 +56,6 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.util.Assert;
 
-import static java.util.stream.Collectors.toList;
-
 /**
  * Uses an AppDeployer instance to deploy the stream.
  *
@@ -236,13 +234,13 @@ public class AppDeployerStreamDeployer implements StreamDeployer {
 					String key = DeploymentKey.forStreamAppDefinition(sad);
 					String id = this.deploymentIdRepository.findOne(key);
 					return id != null ? Stream.of(id) : Stream.empty();
-				}).sorted(String::compareTo).collect(toList());
+				}).sorted(String::compareTo).collect(Collectors.toList());
 
 		// Running this this inside the FJP will make sure it is used by the parallel stream
 		// Skip first items depending on page size, then take page and discard rest.
 		List<AppStatus> content = this.forkJoinPool.submit(() -> deploymentIds.stream()
 				.skip(pageable.getPageNumber() * pageable.getPageSize())
-				.limit(pageable.getPageSize()).parallel().map(appDeployer::status).collect(toList()))
+				.limit(pageable.getPageSize()).parallel().map(appDeployer::status).collect(Collectors.toList()))
 				.get();
 		return new PageImpl<>(content, pageable, deploymentIds.size());
 	}

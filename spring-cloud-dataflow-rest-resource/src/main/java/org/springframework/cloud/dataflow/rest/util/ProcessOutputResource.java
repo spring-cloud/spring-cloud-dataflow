@@ -21,8 +21,6 @@ import java.io.InputStream;
 
 import org.springframework.core.io.AbstractResource;
 
-import static java.lang.String.format;
-
 /**
  * {@link org.springframework.core.io.Resource} implementation to create an
  * operating system process process and capture its output.
@@ -64,7 +62,7 @@ public class ProcessOutputResource extends AbstractResource implements Checkable
 			if (process != null && !process.isAlive()) {
 				int exitStatusCode = process.exitValue();
 				if (exitStatusCode != 0) {
-					throw new IOException(format("Command for resource %s failed with exit status code %d", toString(), exitStatusCode));
+					throw new IOException(String.format("Command for resource %s failed with exit status code %d", toString(), exitStatusCode));
 				}
 			}
 		}
