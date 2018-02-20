@@ -34,6 +34,11 @@ import org.springframework.shell.core.CommandMarker;
 import org.springframework.shell.core.annotation.CliAvailabilityIndicator;
 import org.springframework.shell.core.annotation.CliCommand;
 import org.springframework.shell.core.annotation.CliOption;
+import org.springframework.shell.table.BorderSpecification;
+import org.springframework.shell.table.BorderStyle;
+import org.springframework.shell.table.CellMatchers;
+import org.springframework.shell.table.SimpleHorizontalAligner;
+import org.springframework.shell.table.SimpleVerticalAligner;
 import org.springframework.shell.table.Table;
 import org.springframework.shell.table.TableBuilder;
 import org.springframework.shell.table.TableModel;
@@ -41,14 +46,6 @@ import org.springframework.shell.table.TableModelBuilder;
 import org.springframework.shell.table.Tables;
 import org.springframework.stereotype.Component;
 import org.springframework.util.Assert;
-
-import static org.springframework.shell.table.BorderSpecification.TOP;
-import static org.springframework.shell.table.BorderStyle.fancy_light;
-import static org.springframework.shell.table.BorderStyle.fancy_light_quadruple_dash;
-import static org.springframework.shell.table.CellMatchers.column;
-import static org.springframework.shell.table.CellMatchers.ofType;
-import static org.springframework.shell.table.SimpleHorizontalAligner.center;
-import static org.springframework.shell.table.SimpleVerticalAligner.middle;
 
 /**
  * Commands for displaying the runtime state of deployed apps.
@@ -130,17 +127,17 @@ public class RuntimeCommands implements CommandMarker {
 		TableModel model = modelBuilder.build();
 		final TableBuilder builder = new TableBuilder(model);
 		DataFlowTables.applyStyle(builder);
-		builder.on(column(0)).addAligner(middle).on(column(1)).addAligner(middle).on(column(1)).addAligner(center)
+		builder.on(CellMatchers.column(0)).addAligner(SimpleVerticalAligner.middle).on(CellMatchers.column(1)).addAligner(SimpleVerticalAligner.middle).on(CellMatchers.column(1)).addAligner(SimpleHorizontalAligner.center)
 				// This will match the "number of instances" cells only
-				.on(ofType(Integer.class)).addAligner(center);
+				.on(CellMatchers.ofType(Integer.class)).addAligner(SimpleHorizontalAligner.center);
 
 		Tables.configureKeyValueRendering(builder, " = ");
 		for (int i = 2; i < model.getRowCount(); i++) {
 			if (splits.contains(i)) {
-				builder.paintBorder(fancy_light, TOP).fromRowColumn(i, 0).toRowColumn(i + 1, model.getColumnCount());
+				builder.paintBorder(BorderStyle.fancy_light, BorderSpecification.TOP).fromRowColumn(i, 0).toRowColumn(i + 1, model.getColumnCount());
 			}
 			else {
-				builder.paintBorder(fancy_light_quadruple_dash, TOP).fromRowColumn(i, 0).toRowColumn(i + 1,
+				builder.paintBorder(BorderStyle.fancy_light_quadruple_dash, BorderSpecification.TOP).fromRowColumn(i, 0).toRowColumn(i + 1,
 						model.getColumnCount());
 			}
 		}

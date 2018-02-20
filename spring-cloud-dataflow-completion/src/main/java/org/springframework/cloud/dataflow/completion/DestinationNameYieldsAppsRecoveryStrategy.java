@@ -18,12 +18,10 @@ package org.springframework.cloud.dataflow.completion;
 
 import java.util.List;
 
+import org.springframework.cloud.dataflow.core.ApplicationType;
 import org.springframework.cloud.dataflow.core.dsl.CheckPointedParseException;
 import org.springframework.cloud.dataflow.registry.AppRegistryCommon;
 import org.springframework.cloud.dataflow.registry.domain.AppRegistration;
-
-import static org.springframework.cloud.dataflow.core.ApplicationType.processor;
-import static org.springframework.cloud.dataflow.core.ApplicationType.sink;
 
 /**
  * Proposes app names when the user has typed a destination redirection.
@@ -56,7 +54,7 @@ class DestinationNameYieldsAppsRecoveryStrategy
 			List<CompletionProposal> proposals) {
 		CompletionProposal.Factory completionFactory = CompletionProposal.expanding(dsl);
 		for (AppRegistration appRegistration : appRegistry.findAll()) {
-			if (appRegistration.getType() == processor || appRegistration.getType() == sink) {
+			if (appRegistration.getType() == ApplicationType.processor || appRegistration.getType() == ApplicationType.sink) {
 				proposals.add(completionFactory.withSeparateTokens(appRegistration.getName(),
 						"Wire destination into a " + appRegistration.getType() + " app"));
 			}

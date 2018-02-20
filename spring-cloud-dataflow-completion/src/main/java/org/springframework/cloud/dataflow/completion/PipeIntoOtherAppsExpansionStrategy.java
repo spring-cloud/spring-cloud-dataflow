@@ -18,13 +18,11 @@ package org.springframework.cloud.dataflow.completion;
 
 import java.util.List;
 
+import org.springframework.cloud.dataflow.core.ApplicationType;
 import org.springframework.cloud.dataflow.core.StreamAppDefinition;
 import org.springframework.cloud.dataflow.core.StreamDefinition;
 import org.springframework.cloud.dataflow.registry.AppRegistryCommon;
 import org.springframework.cloud.dataflow.registry.domain.AppRegistration;
-
-import static org.springframework.cloud.dataflow.core.ApplicationType.processor;
-import static org.springframework.cloud.dataflow.core.ApplicationType.sink;
 
 /**
  * Continues a well-formed stream definition by adding a pipe symbol and another app,
@@ -50,9 +48,9 @@ public class PipeIntoOtherAppsExpansionStrategy implements ExpansionStrategy {
 		StreamAppDefinition lastApp = parseResult.getDeploymentOrderIterator().next();
 		// Consider "bar | foo". If there is indeed a sink named foo in the registry,
 		// "foo" may also be a processor, in which case we can continue
-		boolean couldBeASink = appRegistry.find(lastApp.getName(), sink) != null;
+		boolean couldBeASink = appRegistry.find(lastApp.getName(), ApplicationType.sink) != null;
 		if (couldBeASink) {
-			boolean couldBeAProcessor = appRegistry.find(lastApp.getName(), processor) != null;
+			boolean couldBeAProcessor = appRegistry.find(lastApp.getName(), ApplicationType.processor) != null;
 			if (!couldBeAProcessor) {
 				return false;
 			}
@@ -60,7 +58,7 @@ public class PipeIntoOtherAppsExpansionStrategy implements ExpansionStrategy {
 
 		CompletionProposal.Factory proposals = CompletionProposal.expanding(text);
 		for (AppRegistration appRegistration : appRegistry.findAll()) {
-			if (appRegistration.getType() == processor || appRegistration.getType() == sink) {
+			if (appRegistration.getType() == ApplicationType.processor || appRegistration.getType() == ApplicationType.sink) {
 				String expansion = CompletionUtils.maybeQualifyWithLabel(appRegistration.getName(), parseResult);
 				collector.add(proposals.withSeparateTokens("| " + expansion,
 						"Continue stream definition with a " + appRegistration.getType()));

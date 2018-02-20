@@ -31,7 +31,6 @@ import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.startsWith;
 import static org.junit.Assert.assertThat;
-import static org.springframework.cloud.dataflow.completion.Proposals.proposalThat;
 
 /**
  * Integration tests for TaskCompletionProvider.
@@ -57,46 +56,46 @@ public class TaskCompletionProviderTests {
 	@Test
 	// <TAB> => basic,plum,etc
 	public void testEmptyStartShouldProposeSourceApps() {
-		assertThat(completionProvider.complete("", 1), hasItems(proposalThat(is("basic")), proposalThat(is("plum"))));
-		assertThat(completionProvider.complete("", 1), not(hasItems(proposalThat(is("log")))));
+		assertThat(completionProvider.complete("", 1), hasItems(Proposals.proposalThat(is("basic")), Proposals.proposalThat(is("plum"))));
+		assertThat(completionProvider.complete("", 1), not(hasItems(Proposals.proposalThat(is("log")))));
 	}
 
 	@Test
 	// b<TAB> => basic
 	public void testUnfinishedAppNameShouldReturnCompletions() {
-		assertThat(completionProvider.complete("b", 1), hasItems(proposalThat(is("basic"))));
-		assertThat(completionProvider.complete("ba", 1), hasItems(proposalThat(is("basic"))));
-		assertThat(completionProvider.complete("pl", 1), not(hasItems(proposalThat(is("basic")))));
+		assertThat(completionProvider.complete("b", 1), hasItems(Proposals.proposalThat(is("basic"))));
+		assertThat(completionProvider.complete("ba", 1), hasItems(Proposals.proposalThat(is("basic"))));
+		assertThat(completionProvider.complete("pl", 1), not(hasItems(Proposals.proposalThat(is("basic")))));
 	}
 
 	@Test
 	// basic<TAB> => basic --foo=, etc
 	public void testValidTaskDefinitionShouldReturnAppOptions() {
 		assertThat(completionProvider.complete("basic ", 1),
-				hasItems(proposalThat(is("basic --expression=")), proposalThat(is("basic --expresso="))));
+				hasItems(Proposals.proposalThat(is("basic --expression=")), Proposals.proposalThat(is("basic --expresso="))));
 		// Same as above, no final space
 		assertThat(completionProvider.complete("basic", 1),
-				hasItems(proposalThat(is("basic --expression=")), proposalThat(is("basic --expresso="))));
+				hasItems(Proposals.proposalThat(is("basic --expression=")), Proposals.proposalThat(is("basic --expresso="))));
 	}
 
 	@Test
 	// file | filter -<TAB> => file | filter --foo,etc
 	public void testOneDashShouldReturnTwoDashes() {
 		assertThat(completionProvider.complete("basic -", 1),
-				hasItems(proposalThat(is("basic --expression=")), proposalThat(is("basic --expresso="))));
+				hasItems(Proposals.proposalThat(is("basic --expression=")), Proposals.proposalThat(is("basic --expresso="))));
 	}
 
 	@Test
 	// basic --<TAB> => basic --foo,etc
 	public void testTwoDashesShouldReturnOptions() {
 		assertThat(completionProvider.complete("basic --", 1),
-				hasItems(proposalThat(is("basic --expression=")), proposalThat(is("basic --expresso="))));
+				hasItems(Proposals.proposalThat(is("basic --expression=")), Proposals.proposalThat(is("basic --expresso="))));
 	}
 
 	@Test
 	// file --p<TAB> => file --preventDuplicates=, file --pattern=
 	public void testUnfinishedOptionNameShouldComplete() {
-		assertThat(completionProvider.complete("basic --foo", 1), hasItems(proposalThat(is("basic --fooble="))));
+		assertThat(completionProvider.complete("basic --foo", 1), hasItems(Proposals.proposalThat(is("basic --fooble="))));
 	}
 
 	@Test
@@ -109,14 +108,14 @@ public class TaskCompletionProviderTests {
 	// plum --use-ssl=<TAB> => propose true|false
 	public void testValueHintForBooleans() {
 		assertThat(completionProvider.complete("plum --use-ssl=", 1),
-				hasItems(proposalThat(is("plum --use-ssl=true")), proposalThat(is("plum --use-ssl=false"))));
+				hasItems(Proposals.proposalThat(is("plum --use-ssl=true")), Proposals.proposalThat(is("plum --use-ssl=false"))));
 	}
 
 	@Test
 	// basic --enum-value=<TAB> => propose enum values
 	public void testValueHintForEnums() {
 		assertThat(completionProvider.complete("basic --expresso=", 1),
-				hasItems(proposalThat(is("basic --expresso=SINGLE")), proposalThat(is("basic --expresso=DOUBLE"))));
+				hasItems(Proposals.proposalThat(is("basic --expresso=SINGLE")), Proposals.proposalThat(is("basic --expresso=DOUBLE"))));
 	}
 
 	@Test
@@ -137,6 +136,6 @@ public class TaskCompletionProviderTests {
 	@Test
 	public void testClosedSetValuesShouldBeExclusive() {
 		assertThat(completionProvider.complete("basic --expresso=s", 1),
-				not(hasItems(proposalThat(startsWith("basic --expresso=s --fooble")))));
+				not(hasItems(Proposals.proposalThat(startsWith("basic --expresso=s --fooble")))));
 	}
 }

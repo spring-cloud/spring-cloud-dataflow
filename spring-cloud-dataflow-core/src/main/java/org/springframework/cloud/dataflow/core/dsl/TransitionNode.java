@@ -16,9 +16,6 @@
 
 package org.springframework.cloud.dataflow.core.dsl;
 
-import static org.springframework.cloud.dataflow.core.dsl.TokenKind.LITERAL_STRING;
-import static org.springframework.cloud.dataflow.core.dsl.TokenKind.STAR;
-
 /**
  * An AST node representing a transition found in a parsed task specification. A
  * transition is expressed in the form "<tt>STATE->TARGET</tt>". If <tt>STATE</tt> is
@@ -66,7 +63,7 @@ public class TransitionNode extends AstNode {
 		super(statusToken.startPos, endPos);
 		this.statusToken = statusToken;
 		// If it is quoted, strip them off to determine real status
-		if (statusToken.isKind(LITERAL_STRING)) {
+		if (statusToken.isKind(TokenKind.LITERAL_STRING)) {
 			isExitCodeCheck = false;
 			String quotesUsed = statusToken.data.substring(0, 1);
 			this.status = statusToken.data.substring(1, statusToken.data.length() - 1).replace(quotesUsed + quotesUsed,
@@ -74,7 +71,7 @@ public class TransitionNode extends AstNode {
 		}
 		else {
 			isExitCodeCheck = true;
-			if (statusToken.isKind(STAR)) {
+			if (statusToken.isKind(TokenKind.STAR)) {
 				this.status = "*";
 			}
 			else {
@@ -98,7 +95,7 @@ public class TransitionNode extends AstNode {
 	@Override
 	public String stringify(boolean includePositionInfo) {
 		StringBuilder s = new StringBuilder();
-		s.append(statusToken.getKind() == STAR ? "*" : statusToken.stringValue()).append("->");
+		s.append(statusToken.getKind() == TokenKind.STAR ? "*" : statusToken.stringValue()).append("->");
 		if (targetLabel != null) {
 			s.append(":").append(targetLabel.stringValue());
 		}

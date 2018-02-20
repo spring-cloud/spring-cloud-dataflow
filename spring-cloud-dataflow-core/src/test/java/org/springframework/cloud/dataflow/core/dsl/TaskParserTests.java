@@ -35,15 +35,6 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
-import static org.springframework.cloud.dataflow.core.dsl.TokenKind.ANDAND;
-import static org.springframework.cloud.dataflow.core.dsl.TokenKind.ARROW;
-import static org.springframework.cloud.dataflow.core.dsl.TokenKind.CLOSE_PAREN;
-import static org.springframework.cloud.dataflow.core.dsl.TokenKind.COLON;
-import static org.springframework.cloud.dataflow.core.dsl.TokenKind.GT;
-import static org.springframework.cloud.dataflow.core.dsl.TokenKind.IDENTIFIER;
-import static org.springframework.cloud.dataflow.core.dsl.TokenKind.LITERAL_STRING;
-import static org.springframework.cloud.dataflow.core.dsl.TokenKind.LT;
-import static org.springframework.cloud.dataflow.core.dsl.TokenKind.OPEN_PAREN;
 
 /**
  * Test the parser and visitor infrastructure. Check it accepts expected data and
@@ -397,25 +388,29 @@ public class TaskParserTests {
 	@Test
 	public void basics() {
 		Tokens tokens = new TaskTokenizer().getTokens("App1");
-		assertToken(IDENTIFIER, "App1", 0, 4, tokens.next());
+		assertToken(TokenKind.IDENTIFIER, "App1", 0, 4, tokens.next());
 		tokens = new TaskTokenizer().getTokens("App1 && App2");
-		assertToken(IDENTIFIER, "App1", 0, 4, tokens.next());
-		assertToken(ANDAND, "&&", 5, 7, tokens.next());
-		assertToken(IDENTIFIER, "App2", 8, 12, tokens.next());
+		assertToken(TokenKind.IDENTIFIER, "App1", 0, 4, tokens.next());
+		assertToken(TokenKind.ANDAND, "&&", 5, 7, tokens.next());
+		assertToken(TokenKind.IDENTIFIER, "App2", 8, 12, tokens.next());
 		tokens = new TaskTokenizer().getTokens("< > -> ( )");
-		assertToken(LT, "<", 0, 1, tokens.next());
-		assertToken(GT, ">", 2, 3, tokens.next());
-		assertToken(ARROW, "->", 4, 6, tokens.next());
-		assertToken(OPEN_PAREN, "(", 7, 8, tokens.next());
-		assertToken(CLOSE_PAREN, ")", 9, 10, tokens.next());
+		assertToken(TokenKind.LT, "<", 0, 1, tokens.next());
+		assertToken(TokenKind.GT, ">", 2, 3, tokens.next());
+		assertToken(TokenKind.ARROW, "->", 4, 6, tokens.next());
+		assertToken(TokenKind.OPEN_PAREN, "(", 7, 8, tokens.next());
+		assertToken(TokenKind.CLOSE_PAREN, ")", 9, 10, tokens.next());
 	}
 
 	@Test
 	public void tokenStreams() {
 		Tokens tokens = new TaskTokenizer().getTokens("App1 0->App2 1->:Bar");
-		assertTokens(tokens, IDENTIFIER, IDENTIFIER, ARROW, IDENTIFIER, IDENTIFIER, ARROW, COLON, IDENTIFIER);
+		assertTokens(tokens, TokenKind.IDENTIFIER, TokenKind.IDENTIFIER,
+				TokenKind.ARROW, TokenKind.IDENTIFIER, TokenKind.IDENTIFIER,
+				TokenKind.ARROW, TokenKind.COLON, TokenKind.IDENTIFIER);
 		tokens = new TaskTokenizer().getTokens("App1 0->App2 'abc' ->   App3");
-		assertTokens(tokens, IDENTIFIER, IDENTIFIER, ARROW, IDENTIFIER, LITERAL_STRING, ARROW, IDENTIFIER);
+		assertTokens(tokens, TokenKind.IDENTIFIER, TokenKind.IDENTIFIER,
+				TokenKind.ARROW, TokenKind.IDENTIFIER, TokenKind.LITERAL_STRING,
+				TokenKind.ARROW, TokenKind.IDENTIFIER);
 	}
 
 	@Test

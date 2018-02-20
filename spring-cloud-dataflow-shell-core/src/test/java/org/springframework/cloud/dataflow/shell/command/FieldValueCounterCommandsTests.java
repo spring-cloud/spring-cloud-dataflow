@@ -28,7 +28,6 @@ import org.springframework.shell.table.Table;
 
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
-import static org.springframework.cloud.dataflow.shell.command.TableMatcher.hasRowThat;
 
 /**
  * Integration tests for {@link FieldValueCounterCommands}.
@@ -68,8 +67,8 @@ public class FieldValueCounterCommandsTests extends AbstractShellIntegrationTest
 
 
 		Table values = metrics().displayFieldValueCounter("foo");
-		assertThat(values, hasRowThat(is("fieldA"), is(12d)));
-		assertThat(values, hasRowThat(is("fieldB"), is(42d)));
+		assertThat(values, TableMatcher.hasRowThat(is("fieldA"), is(12d)));
+		assertThat(values, TableMatcher.hasRowThat(is("fieldB"), is(42d)));
 
 		String message = metrics().resetFieldValueCounter("foo");
 		assertThat(message, is("Deleted field value counter 'foo'"));

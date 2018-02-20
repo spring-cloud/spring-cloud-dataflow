@@ -27,6 +27,7 @@ import org.springframework.batch.core.JobExecution;
 import org.springframework.batch.core.JobParameters;
 import org.springframework.batch.core.repository.JobRepository;
 import org.springframework.batch.core.repository.support.JobRepositoryFactoryBean;
+import org.springframework.cloud.dataflow.core.ApplicationType;
 import org.springframework.cloud.task.batch.listener.TaskBatchDao;
 import org.springframework.cloud.task.batch.listener.support.JdbcTaskBatchDao;
 import org.springframework.cloud.task.repository.TaskExecution;
@@ -35,7 +36,6 @@ import org.springframework.cloud.task.repository.support.TaskExecutionDaoFactory
 import org.springframework.http.MediaType;
 import org.springframework.jdbc.datasource.DataSourceTransactionManager;
 
-import static org.springframework.cloud.dataflow.core.ApplicationType.task;
 import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.get;
 import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.post;
 import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.put;
@@ -65,7 +65,7 @@ public class JobExecutionsDocumentation extends BaseDocumentation {
 	@Before
 	public void setup() throws Exception {
 		if (!initialized) {
-			registerApp(task, "timestamp");
+			registerApp(ApplicationType.task, "timestamp");
 			initialize();
 			createJobExecution(JOB_NAME, BatchStatus.STARTED);
 			createJobExecution(JOB_NAME + "_1", BatchStatus.STOPPED);

@@ -30,7 +30,6 @@ import org.springframework.shell.table.Table;
 
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
-import static org.springframework.cloud.dataflow.shell.command.TableMatcher.hasRowThat;
 
 /**
  * Integration tests for {@link AggregateCounterCommands}.
@@ -70,8 +69,8 @@ public class AggregateCounterCommandsTests extends AbstractShellIntegrationTest 
 
 
 		Table values = metrics().displayAggregateCounter("foo", "2012-04-04 05:00:00", "2012-04-04 17:00:00");
-		assertThat(values, hasRowThat(is(Instant.parse("2012-04-04T10:00").toDate()), is(42L)));
-		assertThat(values, hasRowThat(is(Instant.parse("2012-04-04T11:00").toDate()), is(12L)));
+		assertThat(values, TableMatcher.hasRowThat(is(Instant.parse("2012-04-04T10:00").toDate()), is(42L)));
+		assertThat(values, TableMatcher.hasRowThat(is(Instant.parse("2012-04-04T11:00").toDate()), is(12L)));
 
 		String message = metrics().resetAggregateCounter("foo");
 		assertThat(message, is("Deleted aggregatecounter 'foo'"));

@@ -85,11 +85,24 @@
         <module name="ParameterAssignment"/>
         -->
         <!-- Imports -->
-        <!--<module name="AvoidStarImport"/>-->
-        <!--<module name="AvoidStaticImport">-->
-        <!--<property name="excludes"-->
-        <!--value="org.junit.Assert.*,org.mockito.Mockito.*,org.mockito.Matchers.*,org.hamcrest.Matchers.*,org.assertj.core.api.Assertions.*"/>-->
-        <!--</module>-->
+        <module name="AvoidStarImport"/>
+        <module name="AvoidStaticImport">
+        <property name="excludes"
+        value="org.junit.Assert.*,org.mockito.Mockito.*,org.mockito.Matchers.*,org.hamcrest.Matchers.*,
+        org.assertj.core.api.Assertions.*,org.hamcrest.CoreMatchers.*,org.hamcrest.core.Is.*,
+        org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*,
+        org.springframework.test.web.servlet.result.MockMvcResultMatchers.*,
+        org.springframework.test.web.servlet.result.MockMvcResultHandlers.*,
+        junit.framework.TestCase.*,
+        org.springframework.cloud.dataflow.server.local.security.SecurityTestUtils.*,
+        org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.*,
+        org.springframework.restdocs.operation.preprocess.Preprocessors.*,
+        org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.*,
+        org.springframework.restdocs.payload.PayloadDocumentation.*,
+        org.springframework.restdocs.request.RequestDocumentation.*,
+        org.springframework.restdocs.headers.HeaderDocumentation.*,
+        org.springframework.restdocs.hypermedia.HypermediaDocumentation.*"/>
+        </module>
         <!--<module name="FallThrough"/>-->
         <module name="ImportOrder">
             <property name="groups" value="java,/^javax?\./,*,org.springframework"/>
