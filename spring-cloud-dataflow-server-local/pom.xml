@@ -170,6 +170,7 @@
 							<consoleOutput>true</consoleOutput>
 							<failsOnError>true</failsOnError>
 							<includeTestSourceDirectory>true</includeTestSourceDirectory>
+							<configLocation>${checkstyle.config.location}</configLocation>
 						</configuration>
 						<goals>
 							<goal>check</goal>
