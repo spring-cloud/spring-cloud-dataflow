@@ -178,6 +178,34 @@
 					</execution>
 				</executions>
 			</plugin>
+			<plugin>
+				<groupId>io.fabric8</groupId>
+				<artifactId>docker-maven-plugin</artifactId>
+				<version>0.21.0</version>
+				<configuration>
+				  <images>
+					<image>
+					  <name>springcloud/${project.artifactId}</name>
+					  <build>
+						<from>java:8-alpine</from>
+						<volumes>
+						  <volume>/tmp</volume>
+						</volumes>
+						<entryPoint>
+						  <exec>
+							<arg>java</arg>
+							<arg>-jar</arg>
+							<arg>/maven/spring-cloud-dataflow-server-local.jar</arg>
+						  </exec>
+						</entryPoint>
+						<assembly>
+						  <descriptor>assembly.xml</descriptor>
+						</assembly>
+					  </build>
+					</image>
+				  </images>
+				</configuration>
+			</plugin>
 		</plugins>
 		<pluginManagement>
 			<plugins>
