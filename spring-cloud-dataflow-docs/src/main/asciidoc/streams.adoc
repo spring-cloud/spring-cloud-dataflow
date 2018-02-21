@@ -1246,7 +1246,7 @@ It is also possible to connect two different destinations (`source` and `sink` p
 In the precding stream, both the destinations (`destination1` and `destination2`) are located in the broker. The messages flow from the source destination to the sink destination over a `bridge` app that connects them.
 
 
-[spring-cloud-dataflow-stream-dsl-fanin-fanout]]
+[[spring-cloud-dataflow-stream-dsl-fanin-fanout]]
 === Fan-in and Fan-out
 
 By using named destinations, you can support fan-in and fan-out use cases.  Fan-in use cases are when multiple sources all send data to the same named destination, as shown in the following example:
