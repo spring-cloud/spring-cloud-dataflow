@@ -155,6 +155,10 @@ In this example we have data from an _HTTP Source_ and a _JDBC Source_ that is b
 _sharedData_ channel (*Fan-in* use case). On the other end we have a _Cassandra Sink_
 and a _File Sink_ subscribed to the _sharedData_ channel (*Fan-out* use case).
 
+TIP: When interacting directly with <<spring-cloud-dataflow-stream-dsl-named-destinations,named destinations>>,
+there can be "n" combinations (Inputs/Outputs). This allows you to create complex topologies involving a
+wide variety of data sources and destinations.
+
 ifndef::omit-tasks-docs[]
 [[dashboard-tasks]]
 == Tasks
