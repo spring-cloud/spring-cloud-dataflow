@@ -145,15 +145,15 @@ image::{dataflow-asciidoc}/images/dataflow-flo-create-stream.png[Flo for Spring 
 [dashboard-flo-streams-designer-fanin-fanout]]
 === Creating Fan-In/Fan-Out Streams
 
-In chapter <<spring-cloud-dataflow-stream-dsl-fanin-fanout>> you learned how we can support fan-in and fan-out use cases using <<spring-cloud-dataflow-stream-dsl-named-destinations,named destinations>>. The UI provides dedicated support
-as well:
+In chapter <<spring-cloud-dataflow-stream-dsl-fanin-fanout>> you learned how we can support fan-in and fan-out use cases using <<spring-cloud-dataflow-stream-dsl-named-destinations,named destinations>>.
+The UI provides dedicated support for named destinations as well:
 
 .Flo for Spring Cloud Data Flow
 image::{dataflow-asciidoc}/images/dataflow-flo-create-stream-fanin-fanout.png[Fan-in and Fan-out example, scaledwidth="100%"]
 
-In this example we have data from an _HTTP Source_ and a _JDBC Source_ that is being to the
-_sharedData_ channel (*Fan-in* use case). On the other end we have a _Cassandra Sink_
-and a _File Sink_ subscribed to the _sharedData_ channel (*Fan-out* use case).
+In this example we have data from an _HTTP Source_ and a _JDBC Source_ that is being sent to the
+_sharedData_ channel which represents a *Fan-in* use case.
+On the other end we have a _Cassandra Sink_ and a _File Sink_ subscribed to the _sharedData_ channel which represents a *Fan-out* use case.
 
 === Creating a Tap Stream
 
@@ -182,6 +182,10 @@ Do the same for the tap stream and switch it to a primary stream.
 
 .End Result of Switching the Primary Stream
 image::{dataflow-asciidoc}/images/dataflow-flo-tap-stream-switch-to-primary-stream-result.png[End result of switching the tap stream to a primary stream, scaledwidth="100%"]
+=======
+TIP: When interacting directly with <<spring-cloud-dataflow-stream-dsl-named-destinations,named destinations>>,
+there can be "n" combinations (Inputs/Outputs). This allows you to create complex topologies involving a
+wide variety of data sources and destinations.
 
 ifndef::omit-tasks-docs[]
 [[dashboard-tasks]]
