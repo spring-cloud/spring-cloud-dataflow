@@ -32,9 +32,9 @@
 
         <spring-cloud.version>Dalston.RELEASE</spring-cloud.version>
         <spring-cloud-deployer.version>1.3.0.RELEASE</spring-cloud-deployer.version>
-        <spring-cloud-deployer-local.version>1.3.1.RELEASE</spring-cloud-deployer-local.version>
-        <spring-cloud-deployer-cloudfoundry.version>1.3.0.RELEASE</spring-cloud-deployer-cloudfoundry.version>
-        <spring-cloud-deployer-kubernetes.version>1.3.1.RELEASE</spring-cloud-deployer-kubernetes.version>
+        <spring-cloud-deployer-local.version>1.3.2.BUILD-SNAPSHOT</spring-cloud-deployer-local.version>
+        <spring-cloud-deployer-cloudfoundry.version>1.3.1.BUILD-SNAPSHOT</spring-cloud-deployer-cloudfoundry.version>
+        <spring-cloud-deployer-kubernetes.version>1.3.2.BUILD-SNAPSHOT</spring-cloud-deployer-kubernetes.version>
 
         <dockerfile-maven-plugin.version>1.3.6</dockerfile-maven-plugin.version>
         <zeroturnaround.version>1.11</zeroturnaround.version>
@@ -52,7 +52,6 @@
         <jacoco-maven-plugin.version>0.7.9</jacoco-maven-plugin.version>
         <surefire-maven-plugin.version>2.20</surefire-maven-plugin.version>
         <sonar-maven-plugin.version>3.0.2</sonar-maven-plugin.version>
-        <checkstyle.config.location>etc/checkstyle/checkstyle.xml</checkstyle.config.location>
         <javadoc.opts>-Xdoclint:none</javadoc.opts>
         <checkstyle.config.location>etc/checkstyle/checkstyle.xml</checkstyle.config.location>
 
