@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 the original author or authors.
+ * Copyright 2016-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,6 +39,8 @@ public class LocalDataflowResource extends ExternalResource {
 
 	final boolean tasksEnabled;
 
+	final boolean metricsEnabled;
+
 	private String originalConfigLocation = null;
 
 	private SpringApplication app;
@@ -55,12 +57,21 @@ public class LocalDataflowResource extends ExternalResource {
 		this.configurationLocation = configurationLocation;
 		this.streamsEnabled = true;
 		this.tasksEnabled = true;
+		this.metricsEnabled = true;
 	}
 
 	public LocalDataflowResource(String configurationLocation, boolean streamsEnabled, boolean tasksEnabled) {
 		this.configurationLocation = configurationLocation;
 		this.streamsEnabled = streamsEnabled;
 		this.tasksEnabled = tasksEnabled;
+		this.metricsEnabled = true;
+	}
+
+	public LocalDataflowResource(String configurationLocation, boolean streamsEnabled, boolean tasksEnabled, boolean metricsEnabled) {
+		this.configurationLocation = configurationLocation;
+		this.streamsEnabled = streamsEnabled;
+		this.tasksEnabled = tasksEnabled;
+		this.metricsEnabled = metricsEnabled;
 	}
 
 	@Override
@@ -77,7 +88,9 @@ public class LocalDataflowResource extends ExternalResource {
 						+ this.streamsEnabled,
 				"--" + FeaturesProperties.FEATURES_PREFIX + "." + FeaturesProperties.TASKS_ENABLED + "="
 						+ this.tasksEnabled,
-				"--" + FeaturesProperties.FEATURES_PREFIX + "." + FeaturesProperties.ANALYTICS_ENABLED + "=true" });
+				"--" + FeaturesProperties.FEATURES_PREFIX + "." + FeaturesProperties.ANALYTICS_ENABLED + "="
+						+ this.metricsEnabled
+		});
 
 		Collection<Filter> filters = configurableApplicationContext.getBeansOfType(Filter.class).values();
 		mockMvc = MockMvcBuilders.webAppContextSetup(configurableApplicationContext)

@@ -503,10 +503,10 @@ public class LocalServerSecurityWithUsersFileTestsWithoutTasks {
 				{ HttpMethod.GET, HttpStatus.FOUND, "/dashboard", createOnlyUser, null },
 				{ HttpMethod.GET, HttpStatus.FOUND, "/dashboard", null, null },
 
-				{ HttpMethod.GET, HttpStatus.OK, "/about", adminOnlyUser, null },
+				{ HttpMethod.GET, HttpStatus.FORBIDDEN, "/about", adminOnlyUser, null },
 				{ HttpMethod.GET, HttpStatus.OK, "/about", viewOnlyUser, null },
-				{ HttpMethod.GET, HttpStatus.OK, "/about", createOnlyUser, null },
-				{ HttpMethod.GET, HttpStatus.OK, "/about", null, null },
+				{ HttpMethod.GET, HttpStatus.FORBIDDEN, "/about", createOnlyUser, null },
+				{ HttpMethod.GET, HttpStatus.UNAUTHORIZED, "/about", null, null },
 
 				{ HttpMethod.GET, HttpStatus.OK, "/management", adminOnlyUser, null },
 				{ HttpMethod.GET, HttpStatus.FORBIDDEN, "/management", viewOnlyUser, null },
@@ -535,10 +535,10 @@ public class LocalServerSecurityWithUsersFileTestsWithoutTasks {
 
 				/* LoginController */
 
-				{ HttpMethod.POST, HttpStatus.INTERNAL_SERVER_ERROR, "/authenticate", adminOnlyUser, null },
-				{ HttpMethod.POST, HttpStatus.INTERNAL_SERVER_ERROR, "/authenticate", viewOnlyUser, null },
-				{ HttpMethod.POST, HttpStatus.INTERNAL_SERVER_ERROR, "/authenticate", createOnlyUser, null },
-				{ HttpMethod.POST, HttpStatus.INTERNAL_SERVER_ERROR, "/authenticate", null, null },
+				{ HttpMethod.POST, HttpStatus.BAD_REQUEST, "/authenticate", adminOnlyUser, null },
+				{ HttpMethod.POST, HttpStatus.BAD_REQUEST, "/authenticate", viewOnlyUser, null },
+				{ HttpMethod.POST, HttpStatus.BAD_REQUEST, "/authenticate", createOnlyUser, null },
+				{ HttpMethod.POST, HttpStatus.BAD_REQUEST, "/authenticate", null, null },
 
 				/* SecurityController */
 
