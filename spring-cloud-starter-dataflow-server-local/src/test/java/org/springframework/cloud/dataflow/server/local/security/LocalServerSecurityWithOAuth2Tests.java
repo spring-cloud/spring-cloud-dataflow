@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 the original author or authors.
+ * Copyright 2017-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -58,6 +58,47 @@ public class LocalServerSecurityWithOAuth2Tests {
 		localDataflowResource.getMockMvc()
 				.perform(get("/").header("Authorization", basicAuthorizationHeader("user", "secret10"))).andDo(print())
 				.andExpect(status().isOk());
+	}
+
+	@Test
+	public void testAccessRootUrlAndCheckAllLinksWithBasicAuthCredentials() throws Exception {
+		localDataflowResource.getMockMvc()
+				.perform(get("/").header("Authorization", basicAuthorizationHeader("user", "secret10"))).andDo(print())
+				.andExpect(status().isOk())
+				.andExpect(jsonPath("$._links.dashboard.href", is("http://localhost/dashboard")))
+				.andExpect(jsonPath("$._links.streams/definitions.href", is("http://localhost/streams/definitions")))
+				.andExpect(jsonPath("$._links.streams/definitions/definition.href", is("http://localhost/streams/definitions/{name}")))
+				.andExpect(jsonPath("$._links.streams/deployments.href", is("http://localhost/streams/deployments")))
+				.andExpect(jsonPath("$._links.streams/deployments/deployment.href", is("http://localhost/streams/deployments/{name}")))
+				.andExpect(jsonPath("$._links.runtime/apps.href", is("http://localhost/runtime/apps")))
+				.andExpect(jsonPath("$._links.runtime/apps/app.href", is("http://localhost/runtime/apps/{appId}")))
+				.andExpect(jsonPath("$._links.runtime/apps/instances.href", is("http://localhost/runtime/apps/{appId}/instances")))
+				.andExpect(jsonPath("$._links.metrics/streams.href", is("http://localhost/metrics/streams")))
+				.andExpect(jsonPath("$._links.tasks/definitions.href", is("http://localhost/tasks/definitions")))
+				.andExpect(jsonPath("$._links.tasks/definitions/definition.href", is("http://localhost/tasks/definitions/{name}")))
+				.andExpect(jsonPath("$._links.tasks/executions.href", is("http://localhost/tasks/executions")))
+				.andExpect(jsonPath("$._links.tasks/executions/name.href", is("http://localhost/tasks/executions{?name}")))
+				.andExpect(jsonPath("$._links.tasks/executions/execution.href", is("http://localhost/tasks/executions/{id}")))
+				.andExpect(jsonPath("$._links.jobs/executions.href", is("http://localhost/jobs/executions")))
+				.andExpect(jsonPath("$._links.jobs/executions/name.href", is("http://localhost/jobs/executions{?name}")))
+				.andExpect(jsonPath("$._links.jobs/executions/execution.href", is("http://localhost/jobs/executions/{id}")))
+				.andExpect(jsonPath("$._links.jobs/executions/execution/steps.href", is("http://localhost/jobs/executions/{jobExecutionId}/steps")))
+				.andExpect(jsonPath("$._links.jobs/executions/execution/steps/step.href", is("http://localhost/jobs/executions/{jobExecutionId}/steps/{stepId}")))
+				.andExpect(jsonPath("$._links.jobs/executions/execution/steps/step/progress.href", is("http://localhost/jobs/executions/{jobExecutionId}/steps/{stepId}/progress")))
+				.andExpect(jsonPath("$._links.jobs/instances/name.href", is("http://localhost/jobs/instances{?name}")))
+				.andExpect(jsonPath("$._links.jobs/instances/instance.href", is("http://localhost/jobs/instances/{id}")))
+				.andExpect(jsonPath("$._links.tools/parseTaskTextToGraph.href", is("http://localhost/tools")))
+				.andExpect(jsonPath("$._links.tools/convertTaskGraphToText.href", is("http://localhost/tools")))
+				.andExpect(jsonPath("$._links.counters.href", is("http://localhost/metrics/counters")))
+				.andExpect(jsonPath("$._links.counters/counter.href", is("http://localhost/metrics/counters/{name}")))
+				.andExpect(jsonPath("$._links.field-value-counters.href", is("http://localhost/metrics/field-value-counters")))
+				.andExpect(jsonPath("$._links.field-value-counters/counter.href", is("http://localhost/metrics/field-value-counters/{name}")))
+				.andExpect(jsonPath("$._links.aggregate-counters.href", is("http://localhost/metrics/aggregate-counters")))
+				.andExpect(jsonPath("$._links.aggregate-counters/counter.href", is("http://localhost/metrics/aggregate-counters/{name}")))
+				.andExpect(jsonPath("$._links.apps.href", is("http://localhost/apps")))
+				.andExpect(jsonPath("$._links.about.href", is("http://localhost/about")))
+				.andExpect(jsonPath("$._links.completions/stream.href", is("http://localhost/completions/stream{?start,detailLevel}")))
+				.andExpect(jsonPath("$._links.completions/task.href", is("http://localhost/completions/task{?start,detailLevel}")));
 	}
 
 	@Test
