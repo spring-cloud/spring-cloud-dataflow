@@ -187,6 +187,35 @@ TIP: When interacting directly with <<spring-cloud-dataflow-stream-dsl-named-des
 there can be "n" combinations (Inputs/Outputs). This allows you to create complex topologies involving a
 wide variety of data sources and destinations.
 
+=== Creating a Tap Stream
+
+Creating Taps using the Dashboard is super-straightforward. Let's say you have stream
+consisting of an _HTTP Source_ and a _File Sink_ and you would like to tap into the stream
+to also send data to a _JDBC Sink_. In order to create the tap stream simply connect the output
+connector of the _HTTP Source_ to the _JDBC Sink_. The connection will be displayed as
+a dotted line, indicating that you created a tap stream.
+
+.Creating a Tap Stream
+image::{dataflow-asciidoc}/images/dataflow-flo-create-tap-stream.png[Tap stream example, scaledwidth="100%"]
+
+The primary stream (_HTTP Source_ to _File Sink_) will be automatically
+named, in case you did not provide a name for the stream, yet. When creating tap streams,
+the primary stream must always be explicitly named. In the picture above, the primary stream
+was named _HTTP_INGEST_.
+
+Using the Dashboard, you can also switch the primary stream to become the secondary tap stream.
+
+.Change Primary Stream to Secondary Tap Stream
+image::{dataflow-asciidoc}/images/dataflow-flo-tap-stream-switch-to-primary-stream.png[Switch tap stream to primary stream, scaledwidth="100%"]
+
+Simply hover over the existing primary stream, the line between _HTTP Source_ and _File Sink_.
+Several control icons will appear, and by clicking on the icon labeled _Switch to/from tap_,
+you change the primary stream into a tap stream. Do the same for the tap stream and switch it to
+a primary stream.
+
+.End Result of Switching the Primary Stream
+image::{dataflow-asciidoc}/images/dataflow-flo-tap-stream-switch-to-primary-stream-result.png[End result of switching the tap stream to a primary stream, scaledwidth="100%"]
+
 ifndef::omit-tasks-docs[]
 [[dashboard-tasks]]
 == Tasks
