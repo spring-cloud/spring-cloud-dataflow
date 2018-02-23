@@ -13,3 +13,4 @@ spring:
               bob: bobspassword, ROLE_VIEW
               alice: alicepwd, ROLE_MANAGE
               cartman: cartmanpwd, ROLE_CREATE
+              fulluser: fullpassword, ROLE_VIEW, ROLE_MANAGE, ROLE_CREATE
