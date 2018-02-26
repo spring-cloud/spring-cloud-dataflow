@@ -15,20 +15,21 @@
  */
 package org.springframework.cloud.dataflow.server.local.security;
 
-import static org.hamcrest.Matchers.is;
+import org.junit.ClassRule;
+import org.junit.Test;
+import org.junit.rules.RuleChain;
+import org.junit.rules.TestRule;
+
+import org.springframework.cloud.dataflow.server.local.LocalDataflowResource;
+import org.springframework.data.authentication.UserCredentials;
+
 import static org.hamcrest.Matchers.hasSize;
+import static org.hamcrest.Matchers.is;
 import static org.springframework.cloud.dataflow.server.local.security.SecurityTestUtils.basicAuthorizationHeader;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-
-import org.junit.ClassRule;
-import org.junit.Test;
-import org.junit.rules.RuleChain;
-import org.junit.rules.TestRule;
-import org.springframework.cloud.dataflow.server.local.LocalDataflowResource;
-import org.springframework.data.authentication.UserCredentials;
 
 /**
  * Tests the root URL when security with file-based user list is enabled.
