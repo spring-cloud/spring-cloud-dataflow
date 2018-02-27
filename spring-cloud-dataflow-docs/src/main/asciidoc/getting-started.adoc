@@ -126,10 +126,10 @@ By default, the application registry is empty.
 As an example, register two applications, `http` and `log`, that communicate by using RabbitMQ.
 +
 ```
-dataflow:>app register --name http --type source --uri maven://org.springframework.cloud.stream.app:http-source-rabbit:1.2.0.RELEASE
+dataflow:>app register --name http --type source --uri maven://org.springframework.cloud.stream.app:http-source-rabbit:1.3.1.RELEASE
 Successfully registered application 'source:http'
 
-dataflow:>app register --name log --type sink --uri maven://org.springframework.cloud.stream.app:log-sink-rabbit:1.1.0.RELEASE
+dataflow:>app register --name log --type sink --uri maven://org.springframework.cloud.stream.app:log-sink-rabbit:1.3.1.RELEASE
 Successfully registered application 'sink:log'
 ```
 +
@@ -171,4 +171,44 @@ In both cases, this setting is propagated as a configuration property that overr
 ====
 
 == Deploying Tasks
-Refer to <<spring-cloud-dataflow-register-task-apps>> for an example of how to get started using tasks in Spring Cloud Data Flow.
+
+The general lifecycle of a Task is:
+
+. Import App
++
+By default, the application registry is empty.
+As an example, register one task applications, `timestamp`.
++
+[source,bash]
+----
+dataflow:>app register --name timestamp --type task --uri maven://org.springframework.cloud.task.app:timestamp-task:1.3.0.RELEASE
+Successfully registered application 'task:timestamp'
+----
++
+NOTE: Depending on your environment, you may need to configure the Data Flow Server to point to a custom
+Maven repository location or configure proxy settings.  See <<configuration-maven>> for more information.
++
+In this getting started section, we show how to create a task definition and launch it.
++
+NOTE: Launching Spring Cloud Task applications can not be delegated to Skipper at this time.  You must use the Data Flow Server option to launch tasks.
++
+. Create a Task Definition
++
+Use the `task create` command to create a task definition using the `timestamp` application.
++
+[source,bash]
+----
+dataflow:> task create --name printTimeStamp --definition "timestamp"
+----
++
+The Task definition is passed in to the `--definition` command option.
++
+. Launch a Task
++
+The launching of task definitions is done through the shell's `task launch` command.
++
+[source,bash]
+----
+dataflow:> task launch printTimeStamp
+----
+

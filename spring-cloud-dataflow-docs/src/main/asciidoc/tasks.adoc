@@ -19,64 +19,6 @@ An example of a task would be a Spring Boot application that exports data from a
 Tasks record the start time and the end time as well as the boot exit code in a relational database.
 The task implementation is based on the http://cloud.spring.io/spring-cloud-task/[Spring Cloud Task] project.
 
-The general lifecycle of a Task is:
-
-. Register Applications.
-. Create Task Definition.
-. Launch Task.
-
-You can use the Local Data Flow Server to launch tasks to your local machine, the Data Flow Server for Cloud Foundry to launch tasks to a single org and space on Cloud Foundry.
-Similarly, you can use Data Flow Server for Kuberenetes to launch a task to a single namespace on a Kubernetes cluster.
-See http://cloud.spring.io/spring-cloud-dataflow/#platform-implementations[the Spring Cloud Data Flow project page] for a list of Data Flow server implementations.
-
-NOTE: Launching Spring Cloud Task applications can not be delegated to Skipper at this time.  You must use the Data Flow Server option to launch tasks.
-
-[[spring-cloud-dataflow-stream-intro-dsl]]
-=== Launching a task
-
-A task is defined by specifying the Task application you wish to execute along with any properties that you want to remain static for the definition.
-Each Spring Cloud Task application is registered under a simple name.
-The registration process specifies where the application can be obtained (for example, in a Maven Repository or a Docker registry).  You can find out more information on how to register Spring Cloud Task applications in this <<spring-cloud-dataflow-register-task-apps,section>>.
-
-As a simple example, consider printing a timestamp to the console.
-The Task definition to use the timestamp application is simply:
-
-`timestamp`
-
-Task definitions can be created by using the shell's `task create` command, as shown in the following example:
-
-`dataflow:> task create --name printTimeStamp --definition "timestamp"`
-
-The Task definition is passed in to the `--definition` command option.
-
-The launching of task definitions is done through the shell's `task launch` command.
-
-`dataflow:> task launch printTimeStamp`
-
-The xref:getting-started#getting-started[Getting Started] section shows you how to start the server and how to start and use the Spring Cloud Data Flow shell.
-
-Note that the shell calls the Data Flow Servers' REST API. For more information on making HTTP requests directly to the server, consult the <<api-guide, REST API Guide>>.
-
-=== Application properties
-
-Each application takes properties to customize its behavior.  As an example, the `timestamp` task `format` setting establishes a output format that is different from the default value.
-
-`dataflow:> task create --definition "timestamp --format=\"yyyy\"" --name printTimeStamp`
-
-This `timestamp` property is actually the same as the `timestamp.format` property specified by the timestamp application.
-Data Flow adds the ability to use the shorthand form `format` instead of `timestamp.format`.
-One may also specify the longhand version as well, as shown in the following example:
-
-`dataflow:> task create --definition "timestamp --timestamp.format=\"yyyy\"" --name printTimeStamp`
-
-This shorthand behavior is discussed more in the section on <<spring-cloud-dataflow-stream-app-whitelisting>>.
-If you have <<spring-cloud-dataflow-stream-app-metadata-artifact, registered application property metadata>> you can use tab completion in the shell after typing `--` to get a list of candidate property names.
-
-The shell provides tab completion for application properties. The shell command `app info <appType>:<appName>` provides additional documentation for all the supported properties.
-
-NOTE: The supported Task `<appType>` is task.
-
-
 == The Lifecycle of a Task
 
 Before we dive deeper into the details of creating Tasks, we need to understand the typical lifecycle for tasks in the context of Spring Cloud Data Flow:
