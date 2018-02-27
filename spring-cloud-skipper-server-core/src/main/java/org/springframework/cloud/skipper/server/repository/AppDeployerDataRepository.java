@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 the original author or authors.
+ * Copyright 2017-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,14 +17,14 @@ package org.springframework.cloud.skipper.server.repository;
 
 import org.springframework.cloud.skipper.server.domain.AppDeployerData;
 import org.springframework.data.repository.PagingAndSortingRepository;
-import org.springframework.data.rest.core.annotation.RestResource;
+import org.springframework.data.rest.core.annotation.RepositoryRestResource;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
  * Stores data related to the app deployment.
  * @author Mark Pollack
  */
-@RestResource(exported = false)
+@RepositoryRestResource(exported = false)
 @Transactional
 public interface AppDeployerDataRepository
 		extends PagingAndSortingRepository<AppDeployerData, Long>, AppDeployerDataRepositoryCustom {
