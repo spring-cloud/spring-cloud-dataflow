@@ -1,5 +1,5 @@
 /*
- * Copyright 2015-2017 the original author or authors.
+ * Copyright 2015-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,6 +22,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceProperties;
 import org.springframework.cloud.dataflow.configuration.metadata.ApplicationConfigurationMetadataResolver;
 import org.springframework.cloud.dataflow.registry.AppRegistry;
+import org.springframework.cloud.dataflow.server.config.apps.CommonApplicationProperties;
 import org.springframework.cloud.dataflow.server.config.features.FeaturesProperties;
 import org.springframework.cloud.dataflow.server.repository.InMemoryDeploymentIdRepository;
 import org.springframework.cloud.dataflow.server.repository.RdbmsTaskDefinitionRepository;
@@ -128,10 +129,10 @@ public class TaskServiceDependencies {
 	public DefaultTaskService defaultTaskService(TaskDefinitionRepository taskDefinitionRepository, TaskExplorer taskExplorer,
 			TaskRepository taskExecutionRepository, AppRegistry appRegistry,
 			ResourceLoader resourceLoader, TaskLauncher taskLauncher,
-			ApplicationConfigurationMetadataResolver metadataResolver) {
+			ApplicationConfigurationMetadataResolver metadataResolver, CommonApplicationProperties commonApplicationProperties) {
 		return new DefaultTaskService(dataSourceProperties, taskDefinitionRepository, taskExplorer,
 				taskExecutionRepository, appRegistry, resourceLoader, taskLauncher, metadataResolver,
-				new TaskConfigurationProperties(), new InMemoryDeploymentIdRepository(), null);
+				new TaskConfigurationProperties(), new InMemoryDeploymentIdRepository(), null, commonApplicationProperties);
 
 	}
 }
