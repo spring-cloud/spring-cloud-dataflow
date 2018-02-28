@@ -17,14 +17,11 @@
 package org.springframework.cloud.dataflow.shell.command.common;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Properties;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.dataflow.rest.client.TaskOperations;
@@ -53,6 +50,7 @@ import org.springframework.util.StringUtils;
  * @author Michael Minella
  * @author Gunnar Hillert
  * @author Ilayaperumal Gopinathan
+ * @author Janne Valkealahti
  */
 @Component
 public class TaskCommands implements CommandMarker {
@@ -122,24 +120,9 @@ public class TaskCommands implements CommandMarker {
 					ARGUMENTS_OPTION }, help = "the commandline arguments for this launch", mandatory = false) String arguments)
 			throws IOException {
 		int which = Assertions.atMostOneOf(PROPERTIES_OPTION, properties, PROPERTIES_FILE_OPTION, propertiesFile);
-		Map<String, String> propertiesToUse;
-		switch (which) {
-		case 0:
-			propertiesToUse = DeploymentPropertiesUtils.parse(properties);
-			break;
-		case 1:
-			Properties props = new Properties();
-			try (FileInputStream fis = new FileInputStream(propertiesFile)) {
-				props.load(fis);
-			}
-			propertiesToUse = DeploymentPropertiesUtils.convert(props);
-			break;
-		case -1: // Neither option specified
-			propertiesToUse = Collections.emptyMap();
-			break;
-		default:
-			throw new AssertionError();
-		}
+		Map<String, String> propertiesToUse = DeploymentPropertiesUtils.parseDeploymentProperties(properties,
+				propertiesFile, which);
+
 		List<String> argumentsToUse = new ArrayList<String>();
 		if (StringUtils.hasText(arguments)) {
 			argumentsToUse.add(arguments);

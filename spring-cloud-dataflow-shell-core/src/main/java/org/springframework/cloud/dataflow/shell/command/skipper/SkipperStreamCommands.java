@@ -17,23 +17,19 @@
 package org.springframework.cloud.dataflow.shell.command.skipper;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-import org.apache.commons.io.FilenameUtils;
-import org.yaml.snakeyaml.Yaml;
-
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cloud.dataflow.rest.util.DeploymentPropertiesUtils;
 import org.springframework.cloud.dataflow.shell.command.common.AbstractStreamCommands;
 import org.springframework.cloud.dataflow.shell.command.common.Assertions;
 import org.springframework.cloud.dataflow.shell.command.common.DataFlowTables;
 import org.springframework.cloud.dataflow.shell.command.common.UserInput;
 import org.springframework.cloud.dataflow.shell.command.support.OpsType;
 import org.springframework.cloud.dataflow.shell.command.support.RoleType;
-import org.springframework.cloud.dataflow.shell.command.support.YmlUtils;
 import org.springframework.cloud.dataflow.shell.config.DataFlowShell;
 import org.springframework.cloud.skipper.domain.Deployer;
 import org.springframework.cloud.skipper.domain.PackageIdentifier;
@@ -62,6 +58,7 @@ import static org.springframework.cloud.dataflow.rest.SkipperStream.SKIPPER_REPO
  * @author Mark Fisher
  * @author Gunnar Hillert
  * @author Glenn Renfro
+ * @author Janne Valkealahti
  */
 @Component
 public class SkipperStreamCommands extends AbstractStreamCommands implements CommandMarker {
@@ -77,10 +74,6 @@ public class SkipperStreamCommands extends AbstractStreamCommands implements Com
 	private static final String STREAM_SKIPPER_HISTORY = "stream history";
 
 	private static final String STREAM_SKIPPER_PLATFORM_LIST = "stream platform-list";
-
-	private static final String YAML_OPTION = "yaml";
-
-	private static final String YAML_FILE_OPTION = "yamlFile";
 
 	@Autowired
 	public void setDataFlowShell(DataFlowShell dataFlowShell) {
@@ -113,7 +106,8 @@ public class SkipperStreamCommands extends AbstractStreamCommands implements Com
 			throws IOException {
 		int which = Assertions.atMostOneOf(PROPERTIES_OPTION, deploymentProperties, PROPERTIES_FILE_OPTION,
 				propertiesFile);
-		Map<String, String> propertiesToUse = getDeploymentProperties(deploymentProperties, propertiesFile, which);
+		Map<String, String> propertiesToUse = DeploymentPropertiesUtils.parseDeploymentProperties(deploymentProperties,
+				propertiesFile, which);
 		propertiesToUse.put(SKIPPER_PACKAGE_NAME, name);
 		Assert.isTrue(StringUtils.hasText(packageVersion), "Package version must be set when using Skipper.");
 		propertiesToUse.put(SKIPPER_PACKAGE_VERSION, packageVersion);
@@ -182,11 +176,9 @@ public class SkipperStreamCommands extends AbstractStreamCommands implements Com
 			throws IOException {
 		int which = Assertions.atMostOneOf(PROPERTIES_OPTION, properties, PROPERTIES_FILE_OPTION,
 				propertiesFile);
-		Map<String, String> propertiesToUse = getDeploymentProperties(properties, propertiesFile, which);
+		Map<String, String> propertiesToUse = DeploymentPropertiesUtils.parseDeploymentProperties(properties,
+				propertiesFile, which);
 
-
-		//assertMutuallyExclusiveFileAndProperties(propertiesFile, properties);
-		//String yamlConfigValues = getYamlConfigValues(propertiesFile, properties);
 		PackageIdentifier packageIdentifier = new PackageIdentifier();
 		packageIdentifier.setPackageName(name);
 		if (StringUtils.hasText(packageVersion)) {
@@ -197,29 +189,6 @@ public class SkipperStreamCommands extends AbstractStreamCommands implements Com
 		}
 		streamOperations().updateStream(name, name, packageIdentifier, propertiesToUse);
 		return String.format("Update request has been sent for the stream '%s'", name);
-	}
-
-	private void assertMutuallyExclusiveFileAndProperties(File yamlFile, String propertyString) {
-		Assert.isTrue(!(yamlFile != null && propertyString != null),
-				"The options " + YAML_FILE_OPTION + " and " + YAML_OPTION + "are mutually exclusive.");
-		if (yamlFile != null) {
-			String extension = FilenameUtils.getExtension(yamlFile.getName());
-			Assert.isTrue((extension.equalsIgnoreCase("yml") || extension.equalsIgnoreCase("yaml")),
-					"The YAML file should have a yml or yaml as the file extension.");
-		}
-	}
-
-	private String getYamlConfigValues(File yamlFile, String yamlString) throws IOException {
-		String configValuesYML = null;
-		if (yamlFile != null) {
-			Yaml yaml = new Yaml();
-			// Validate it is yaml formatted.
-			configValuesYML = yaml.dump(yaml.load(new FileInputStream(yamlFile)));
-		}
-		else if (StringUtils.hasText(yamlString)) {
-			configValuesYML = YmlUtils.convertFromCsvToYaml(yamlString);
-		}
-		return configValuesYML;
 	}
 
 	@CliCommand(value = STREAM_SKIPPER_ROLLBACK, help = "Rollback a stream using Skipper")
