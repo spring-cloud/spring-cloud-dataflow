@@ -16,28 +16,17 @@
 
 package org.springframework.cloud.dataflow.shell.command.common;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.Properties;
 
-import org.apache.commons.io.FilenameUtils;
-
-import org.springframework.beans.factory.config.YamlPropertiesFactoryBean;
 import org.springframework.cloud.dataflow.rest.client.StreamOperations;
 import org.springframework.cloud.dataflow.rest.resource.StreamDefinitionResource;
 import org.springframework.cloud.dataflow.rest.resource.StreamDeploymentResource;
-import org.springframework.cloud.dataflow.rest.util.DeploymentPropertiesUtils;
 import org.springframework.cloud.dataflow.shell.command.support.OpsType;
 import org.springframework.cloud.dataflow.shell.command.support.RoleType;
 import org.springframework.cloud.dataflow.shell.command.support.ShellUtils;
 import org.springframework.cloud.dataflow.shell.config.DataFlowShell;
-import org.springframework.core.io.FileSystemResource;
 import org.springframework.hateoas.PagedResources;
 import org.springframework.shell.core.CommandMarker;
 import org.springframework.shell.core.annotation.CliAvailabilityIndicator;
@@ -57,6 +46,7 @@ import org.springframework.util.StringUtils;
  * @author Gunnar Hillert
  * @author Glenn Renfro
  * @author Christian Tzolov
+ * @author Janne Valkealahti
  */
 public abstract class AbstractStreamCommands implements CommandMarker {
 
@@ -135,42 +125,6 @@ public abstract class AbstractStreamCommands implements CommandMarker {
 			result.add(String.format("Stream Deployment properties: %s", ShellUtils.prettyPrintIfJson(stream.getDeploymentProperties())));
 		}
 		return result;
-	}
-
-	protected Map<String, String> getDeploymentProperties(@CliOption(key = {
-			PROPERTIES_OPTION }, help = "the properties for this deployment") String deploymentProperties,
-			@CliOption(key = {
-					PROPERTIES_FILE_OPTION }, help = "the properties for this deployment (as a File)") File propertiesFile,
-			int which) throws IOException {
-		Map<String, String> propertiesToUse;
-		switch (which) {
-		case 0:
-			propertiesToUse = DeploymentPropertiesUtils.parse(deploymentProperties);
-			break;
-		case 1:
-			String extension = FilenameUtils.getExtension(propertiesFile.getName());
-			Properties props = null;
-			if (extension.equals("yaml") || extension.equals("yml")) {
-				YamlPropertiesFactoryBean yamlPropertiesFactoryBean = new YamlPropertiesFactoryBean();
-				yamlPropertiesFactoryBean.setResources(new FileSystemResource(propertiesFile));
-				yamlPropertiesFactoryBean.afterPropertiesSet();
-				props = yamlPropertiesFactoryBean.getObject();
-			}
-			else {
-				props = new Properties();
-				try (FileInputStream fis = new FileInputStream(propertiesFile)) {
-					props.load(fis);
-				}
-			}
-			propertiesToUse = DeploymentPropertiesUtils.convert(props);
-			break;
-		case -1: // Neither option specified
-			propertiesToUse = new HashMap<>(1);
-			break;
-		default:
-			throw new AssertionError();
-		}
-		return propertiesToUse;
 	}
 
 	@CliCommand(value = UNDEPLOY_STREAM, help = "Un-deploy a previously deployed stream")
