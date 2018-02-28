@@ -1,5 +1,5 @@
 /*
- * Copyright 2015-2017 the original author or authors.
+ * Copyright 2015-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,12 +33,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.context.PropertyPlaceholderAutoConfiguration;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceProperties;
 import org.springframework.boot.autoconfigure.jdbc.EmbeddedDataSourceConfiguration;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.cloud.dataflow.configuration.metadata.ApplicationConfigurationMetadataResolver;
 import org.springframework.cloud.dataflow.core.ApplicationType;
 import org.springframework.cloud.dataflow.core.TaskDefinition;
 import org.springframework.cloud.dataflow.registry.AppRegistry;
 import org.springframework.cloud.dataflow.registry.domain.AppRegistration;
+import org.springframework.cloud.dataflow.server.config.apps.CommonApplicationProperties;
 import org.springframework.cloud.dataflow.server.configuration.TaskServiceDependencies;
 import org.springframework.cloud.dataflow.server.repository.DuplicateTaskException;
 import org.springframework.cloud.dataflow.server.repository.InMemoryDeploymentIdRepository;
@@ -76,8 +78,10 @@ import static org.springframework.cloud.dataflow.core.ApplicationType.task;
  * @author Ilayaperumal Gopinathan
  */
 @RunWith(SpringRunner.class)
-@SpringBootTest(classes = { EmbeddedDataSourceConfiguration.class,
-		TaskServiceDependencies.class, PropertyPlaceholderAutoConfiguration.class })
+@SpringBootTest(classes = { EmbeddedDataSourceConfiguration.class, TaskServiceDependencies.class,
+		PropertyPlaceholderAutoConfiguration.class }, properties = {
+				"spring.cloud.dataflow.applicationProperties.task.app.composed-task-runner.globalkey=globalvalue" })
+@EnableConfigurationProperties({ CommonApplicationProperties.class })
 public class DefaultTaskServiceTests {
 
 	private final static String BASE_TASK_NAME = "myTask";
@@ -110,6 +114,9 @@ public class DefaultTaskServiceTests {
 
 	@Autowired
 	private TaskService taskService;
+
+	@Autowired
+	private CommonApplicationProperties commonApplicationProperties;
 
 	@Before
 	public void setupMockMVC() {
@@ -154,7 +161,7 @@ public class DefaultTaskServiceTests {
 		assertTrue(request.getDefinition().getProperties().containsKey("interval-time-between-checks"));
 		assertEquals("1000", request.getDefinition().getProperties().get("interval-time-between-checks"));
 		assertFalse(request.getDefinition().getProperties().containsKey("app.foo"));
-
+		assertEquals("globalvalue", request.getDefinition().getProperties().get("globalkey"));
 	}
 
 	@Test
@@ -205,7 +212,7 @@ public class DefaultTaskServiceTests {
 		TaskService taskService = new DefaultTaskService(this.dataSourceProperties,
 				mock(TaskDefinitionRepository.class), this.taskExplorer, this.taskExecutionRepository, this.appRegistry,
 				this.resourceLoader, this.taskLauncher, this.metadataResolver, new TaskConfigurationProperties(),
-				new InMemoryDeploymentIdRepository(), null);
+				new InMemoryDeploymentIdRepository(), null, commonApplicationProperties);
 		try {
 			taskService.executeTask(TASK_NAME_ORIG, new HashMap<>(), new LinkedList<>());
 		}
@@ -333,7 +340,7 @@ public class DefaultTaskServiceTests {
 		TaskService taskService = new DefaultTaskService(this.dataSourceProperties,
 				mock(TaskDefinitionRepository.class), this.taskExplorer, this.taskExecutionRepository, this.appRegistry,
 				this.resourceLoader, this.taskLauncher, this.metadataResolver, new TaskConfigurationProperties(),
-				new InMemoryDeploymentIdRepository(), "http://myserver:9191");
+				new InMemoryDeploymentIdRepository(), "http://myserver:9191", commonApplicationProperties);
 		List<String> cmdLineArgs = new ArrayList<>();
 		Method method = ReflectionUtils.findMethod(DefaultTaskService.class, "updateDataFlowUriIfNeeded", Map.class,
 				List.class);

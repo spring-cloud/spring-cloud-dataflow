@@ -1,5 +1,5 @@
 /*
- * Copyright 2015-2017 the original author or authors.
+ * Copyright 2015-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,6 +36,7 @@ import org.springframework.cloud.dataflow.registry.domain.AppRegistration;
 import org.springframework.cloud.dataflow.registry.AppRegistry;
 import org.springframework.cloud.dataflow.registry.AppRegistryCommon;
 import org.springframework.cloud.dataflow.rest.util.DeploymentPropertiesUtils;
+import org.springframework.cloud.dataflow.server.config.apps.CommonApplicationProperties;
 import org.springframework.cloud.dataflow.server.controller.WhitelistProperties;
 import org.springframework.cloud.dataflow.server.repository.DeploymentIdRepository;
 import org.springframework.cloud.dataflow.server.repository.DeploymentKey;
@@ -109,6 +110,8 @@ public class DefaultTaskService implements TaskService {
 
 	private final String dataflowServerUri;
 
+	private final CommonApplicationProperties commonApplicationProperties;
+
 	/**
 	 * Initializes the {@link DefaultTaskService}.
 	 *
@@ -125,13 +128,14 @@ public class DefaultTaskService implements TaskService {
 	 * @param taskConfigurationProperties the properties used to define the behavior of tasks
 	 * @param deploymentIdRepository the repository that maps deployment keys to IDs
 	 * @param dataflowServerUri the data flow server URI
+	 * @param commonApplicationProperties the common application properties
 	 */
 	public DefaultTaskService(DataSourceProperties dataSourceProperties,
 			TaskDefinitionRepository taskDefinitionRepository, TaskExplorer taskExplorer,
 			TaskRepository taskExecutionRepository, AppRegistryCommon registry, ResourceLoader resourceLoader,
 			TaskLauncher taskLauncher, ApplicationConfigurationMetadataResolver metaDataResolver,
 			TaskConfigurationProperties taskConfigurationProperties, DeploymentIdRepository deploymentIdRepository,
-			String dataflowServerUri) {
+			String dataflowServerUri, CommonApplicationProperties commonApplicationProperties) {
 		Assert.notNull(dataSourceProperties, "DataSourceProperties must not be null");
 		Assert.notNull(taskDefinitionRepository, "TaskDefinitionRepository must not be null");
 		Assert.notNull(taskExecutionRepository, "TaskExecutionRepository must not be null");
@@ -142,6 +146,7 @@ public class DefaultTaskService implements TaskService {
 		Assert.notNull(metaDataResolver, "metaDataResolver must not be null");
 		Assert.notNull(taskConfigurationProperties, "taskConfigurationProperties must not be null");
 		Assert.notNull(deploymentIdRepository, "deploymentIdRepository must not be null");
+		Assert.notNull(commonApplicationProperties, "commonApplicationProperties must not be null");
 		this.dataSourceProperties = dataSourceProperties;
 		this.taskDefinitionRepository = taskDefinitionRepository;
 		this.taskExecutionRepository = taskExecutionRepository;
@@ -153,6 +158,7 @@ public class DefaultTaskService implements TaskService {
 		this.taskConfigurationProperties = taskConfigurationProperties;
 		this.deploymentIdRepository = deploymentIdRepository;
 		this.dataflowServerUri = dataflowServerUri;
+		this.commonApplicationProperties = commonApplicationProperties;
 	}
 
 	@Override
@@ -276,7 +282,10 @@ public class DefaultTaskService implements TaskService {
 
 	private Map<String, String> extractAppProperties(String name, Map<String, String> taskDeploymentProperties) {
 		final String prefix = "app." + name + ".";
-		return taskDeploymentProperties.entrySet().stream().filter(kv -> kv.getKey().startsWith(prefix))
+		return Stream
+				.concat(commonApplicationProperties.getTask().entrySet().stream(),
+						taskDeploymentProperties.entrySet().stream())
+				.filter(kv -> kv.getKey().startsWith(prefix))
 				.collect(Collectors.toMap(kv -> kv.getKey().substring(prefix.length()), kv -> kv.getValue()));
 	}
 
