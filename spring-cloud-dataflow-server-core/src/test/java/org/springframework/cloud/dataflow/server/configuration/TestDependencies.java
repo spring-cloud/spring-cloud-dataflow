@@ -326,17 +326,19 @@ public class TestDependencies extends WebMvcConfigurationSupport {
 	@Bean
 	public TaskDefinitionController taskDefinitionController(TaskDefinitionRepository repository,
 			DeploymentIdRepository deploymentIdRepository, ApplicationConfigurationMetadataResolver metadataResolver,
-			AppRegistryCommon appRegistry, DelegatingResourceLoader delegatingResourceLoader) {
+			AppRegistryCommon appRegistry, DelegatingResourceLoader delegatingResourceLoader,
+			CommonApplicationProperties commonApplicationProperties) {
 		return new TaskDefinitionController(repository, deploymentIdRepository, taskLauncher(), appRegistry,
-				taskService(metadataResolver, taskRepository(), deploymentIdRepository, appRegistry, delegatingResourceLoader));
+				taskService(metadataResolver, taskRepository(), deploymentIdRepository, appRegistry, delegatingResourceLoader, commonApplicationProperties));
 	}
 
 	@Bean
 	public TaskExecutionController taskExecutionController(TaskExplorer explorer,
 			ApplicationConfigurationMetadataResolver metadataResolver, DeploymentIdRepository deploymentIdRepository,
-			AppRegistryCommon appRegistry, DelegatingResourceLoader delegatingResourceLoader) {
+			AppRegistryCommon appRegistry, DelegatingResourceLoader delegatingResourceLoader,
+			CommonApplicationProperties commonApplicationProperties) {
 		return new TaskExecutionController(explorer,
-				taskService(metadataResolver, taskRepository(), deploymentIdRepository, appRegistry, delegatingResourceLoader),
+				taskService(metadataResolver, taskRepository(), deploymentIdRepository, appRegistry, delegatingResourceLoader, commonApplicationProperties),
 				taskDefinitionRepository());
 	}
 
@@ -387,10 +389,11 @@ public class TestDependencies extends WebMvcConfigurationSupport {
 	@Bean
 	public TaskService taskService(ApplicationConfigurationMetadataResolver metadataResolver,
 			TaskRepository taskExecutionRepository, DeploymentIdRepository deploymentIdRepository,
-			AppRegistryCommon appRegistry, DelegatingResourceLoader delegatingResourceLoader) {
+			AppRegistryCommon appRegistry, DelegatingResourceLoader delegatingResourceLoader,
+			CommonApplicationProperties commonApplicationProperties) {
 		return new DefaultTaskService(new DataSourceProperties(), taskDefinitionRepository(), taskExplorer(),
 				taskExecutionRepository, appRegistry, delegatingResourceLoader, taskLauncher(), metadataResolver,
-				new TaskConfigurationProperties(), deploymentIdRepository, null);
+				new TaskConfigurationProperties(), deploymentIdRepository, null, commonApplicationProperties);
 	}
 
 	@Bean
