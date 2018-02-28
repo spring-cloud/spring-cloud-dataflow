@@ -9,14 +9,12 @@ It covers topics such as creating and running task applications.
 If you are just starting out with Spring Cloud Data Flow, you should probably read the "`<<getting-started.adoc#getting-started, Getting Started>>`" guide before diving into this section.
 --
 
-
-
 [[spring-cloud-dataflow-task-intro]]
 == Introduction
 
 A task executes a process on demand.
 In the case of Spring Cloud Task, a task is a http://projects.spring.io/spring-boot/[Spring Boot] application that is annotated with `@EnableTask`.
-A user launches a task that performs a certain process, and, once complete, the task ends.
+A user launches a task that performs a certain process, and, once complete, the task ends.  Unlike a stream where a stream definition can have at most one deployment a single task definition can be launched multiple times simultaneously.
 An example of a task would be a Spring Boot application that exports data from a JDBC repository to an HDFS instance.
 Tasks record the start time and the end time as well as the boot exit code in a relational database.
 The task implementation is based on the http://cloud.spring.io/spring-cloud-task/[Spring Cloud Task] project.
@@ -31,8 +29,6 @@ Before we dive deeper into the details of creating Tasks, we need to understand 
 . <<spring-cloud-dataflow-task-launch>>
 . <<spring-cloud-dataflow-task-review-executions>>
 . <<spring-cloud-dataflow-task-definition-destroying>>
-
-
 
 [[spring-cloud-dataflow-create-task-apps]]
 === Creating a Task Application
