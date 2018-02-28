@@ -22,6 +22,7 @@ import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.dataflow.shell.command.common.Assertions;
+import org.springframework.cloud.dataflow.rest.util.DeploymentPropertiesUtils;
 import org.springframework.cloud.dataflow.shell.command.common.AbstractStreamCommands;
 import org.springframework.cloud.dataflow.shell.command.common.UserInput;
 import org.springframework.cloud.dataflow.shell.command.support.OpsType;
@@ -41,6 +42,7 @@ import org.springframework.stereotype.Component;
  * @author Gunnar Hillert
  * @author Glenn Renfro
  * @author Christian Tzolov
+ * @author Janne Valkealahti
  */
 @Component
 // todo: reenable optionContext attributes
@@ -74,7 +76,8 @@ public class ClassicStreamCommands extends AbstractStreamCommands implements Com
 			throws IOException {
 		int which = Assertions.atMostOneOf(PROPERTIES_OPTION, deploymentProperties, PROPERTIES_FILE_OPTION,
 				propertiesFile);
-		Map<String, String> propertiesToUse = getDeploymentProperties(deploymentProperties, propertiesFile, which);
+		Map<String, String> propertiesToUse = DeploymentPropertiesUtils.parseDeploymentProperties(deploymentProperties,
+				propertiesFile, which);
 		streamOperations().deploy(name, propertiesToUse);
 		return String.format("Deployment request has been sent for stream '%s'\n", name);
 	}

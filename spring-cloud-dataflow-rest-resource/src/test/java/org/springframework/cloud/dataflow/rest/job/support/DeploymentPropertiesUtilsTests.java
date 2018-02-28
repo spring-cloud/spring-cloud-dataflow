@@ -16,6 +16,9 @@
 
 package org.springframework.cloud.dataflow.rest.job.support;
 
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedHashMap;
@@ -24,6 +27,7 @@ import java.util.Map;
 import org.junit.Test;
 
 import org.springframework.cloud.dataflow.rest.util.DeploymentPropertiesUtils;
+import org.springframework.util.FileCopyUtils;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.Matchers.containsInAnyOrder;
@@ -137,5 +141,19 @@ public class DeploymentPropertiesUtilsTests {
 		assertArrays(new String[] { " --foo1=bar1 ", " --foo2=bar2 " }, new String[] { "--foo1=bar1", "--foo2=bar2" });
 		assertArrays(new String[] { "'--format=yyyy-MM-dd HH:mm:ss.SSS'", "--foo1=bar1" },
 				new String[] { "--format=yyyy-MM-dd HH:mm:ss.SSS", "--foo1=bar1" });
+	}
+
+	@Test
+	public void testParseDeploymentProperties() throws IOException {
+		File file = Files.createTempFile(null, ".yaml").toFile();
+		FileCopyUtils.copy("foo1:\n  bar1: spam".getBytes(), file);
+
+		Map<String, String> props = DeploymentPropertiesUtils.parseDeploymentProperties("foo2=bar2", file, 0);
+		assertThat(props.size(), is(1));
+		assertThat(props.get("foo2"), is("bar2"));
+
+		props = DeploymentPropertiesUtils.parseDeploymentProperties("foo2=bar2", file, 1);
+		assertThat(props.size(), is(1));
+		assertThat(props.get("foo1.bar1"), is("spam"));
 	}
 }

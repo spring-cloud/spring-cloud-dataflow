@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 the original author or authors.
+ * Copyright 2017-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,9 @@
 
 package org.springframework.cloud.dataflow.rest.util;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.HashMap;
@@ -28,9 +31,9 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
+import org.apache.commons.io.FilenameUtils;
+import org.springframework.beans.factory.config.YamlPropertiesFactoryBean;
+import org.springframework.core.io.FileSystemResource;
 import org.springframework.util.StringUtils;
 
 /**
@@ -38,10 +41,9 @@ import org.springframework.util.StringUtils;
  *
  * @author Eric Bottard
  * @author Mark Fisher
+ * @author Janne Valkealahti
  */
 public final class DeploymentPropertiesUtils {
-
-	private static final Logger logger = LoggerFactory.getLogger(DeploymentPropertiesUtils.class);
 
 	/**
 	 * Pattern used for parsing a String of command-line arguments.
@@ -94,6 +96,49 @@ public final class DeploymentPropertiesUtils {
 			addKeyValuePairAsProperty(pair, deploymentProperties);
 		}
 		return deploymentProperties;
+	}
+
+	/**
+	 * Parses a deployment properties conditionally either from properties
+	 * string or file which can be legacy properties file or yaml.
+	 *
+	 * @param deploymentProperties the deployment properties string
+	 * @param propertiesFile the deployment properties file
+	 * @param which the flag to choose between properties or file
+	 * @return the map of parsed properties
+	 * @throws IOException if file loading errors
+	 */
+	public static Map<String, String> parseDeploymentProperties(String deploymentProperties, File propertiesFile,
+			int which) throws IOException {
+		Map<String, String> propertiesToUse;
+		switch (which) {
+		case 0:
+			propertiesToUse = parse(deploymentProperties);
+			break;
+		case 1:
+			String extension = FilenameUtils.getExtension(propertiesFile.getName());
+			Properties props = null;
+			if (extension.equals("yaml") || extension.equals("yml")) {
+				YamlPropertiesFactoryBean yamlPropertiesFactoryBean = new YamlPropertiesFactoryBean();
+				yamlPropertiesFactoryBean.setResources(new FileSystemResource(propertiesFile));
+				yamlPropertiesFactoryBean.afterPropertiesSet();
+				props = yamlPropertiesFactoryBean.getObject();
+			}
+			else {
+				props = new Properties();
+				try (FileInputStream fis = new FileInputStream(propertiesFile)) {
+					props.load(fis);
+				}
+			}
+			propertiesToUse = convert(props);
+			break;
+		case -1: // Neither option specified
+			propertiesToUse = new HashMap<>(1);
+			break;
+		default:
+			throw new AssertionError();
+		}
+		return propertiesToUse;
 	}
 
 	/**
