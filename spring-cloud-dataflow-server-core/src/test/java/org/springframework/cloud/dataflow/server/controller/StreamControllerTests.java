@@ -73,12 +73,6 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static org.springframework.cloud.deployer.spi.app.DeploymentState.deployed;
-import static org.springframework.cloud.deployer.spi.app.DeploymentState.error;
-import static org.springframework.cloud.deployer.spi.app.DeploymentState.failed;
-import static org.springframework.cloud.deployer.spi.app.DeploymentState.partial;
-import static org.springframework.cloud.deployer.spi.app.DeploymentState.undeployed;
-import static org.springframework.cloud.deployer.spi.app.DeploymentState.unknown;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -887,13 +881,13 @@ public class StreamControllerTests {
 
 	@Test
 	public void testAggregateState() {
-		assertThat(StreamDefinitionController.aggregateState(EnumSet.of(deployed, failed)), is(partial));
-		assertThat(StreamDefinitionController.aggregateState(EnumSet.of(unknown, failed)), is(failed));
-		assertThat(StreamDefinitionController.aggregateState(EnumSet.of(deployed, failed, error)), is(error));
-		assertThat(StreamDefinitionController.aggregateState(EnumSet.of(deployed, undeployed)), is(partial));
-		assertThat(StreamDefinitionController.aggregateState(EnumSet.of(deployed, unknown)), is(partial));
-		assertThat(StreamDefinitionController.aggregateState(EnumSet.of(undeployed, unknown)), is(partial));
-		assertThat(StreamDefinitionController.aggregateState(EnumSet.of(unknown)), is(undeployed));
+		assertThat(StreamDefinitionController.aggregateState(EnumSet.of(DeploymentState.deployed, DeploymentState.failed)), is(DeploymentState.partial));
+		assertThat(StreamDefinitionController.aggregateState(EnumSet.of(DeploymentState.unknown, DeploymentState.failed)), is(DeploymentState.failed));
+		assertThat(StreamDefinitionController.aggregateState(EnumSet.of(DeploymentState.deployed, DeploymentState.failed, DeploymentState.error)), is(DeploymentState.error));
+		assertThat(StreamDefinitionController.aggregateState(EnumSet.of(DeploymentState.deployed, DeploymentState.undeployed)), is(DeploymentState.partial));
+		assertThat(StreamDefinitionController.aggregateState(EnumSet.of(DeploymentState.deployed, DeploymentState.unknown)), is(DeploymentState.partial));
+		assertThat(StreamDefinitionController.aggregateState(EnumSet.of(DeploymentState.undeployed, DeploymentState.unknown)), is(DeploymentState.partial));
+		assertThat(StreamDefinitionController.aggregateState(EnumSet.of(DeploymentState.unknown)), is(DeploymentState.undeployed));
 	}
 
 	@Test

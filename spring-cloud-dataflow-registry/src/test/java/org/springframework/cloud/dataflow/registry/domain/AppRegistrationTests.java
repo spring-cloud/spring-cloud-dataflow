@@ -20,8 +20,9 @@ import java.net.URI;
 
 import org.junit.Test;
 
+import org.springframework.cloud.dataflow.core.ApplicationType;
+
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.springframework.cloud.dataflow.core.ApplicationType.task;
 
 /**
  * Unit tests for {@link AppRegistration}.
@@ -56,18 +57,18 @@ public class AppRegistrationTests {
 
 	@Test
 	public void testCompareTo() {
-		AppRegistration registration1 = new AppRegistration("foo", task, URI.create("file:///foobar"));
-		AppRegistration registration2 = new AppRegistration("foo2", task, URI.create("file:///foobar2"));
+		AppRegistration registration1 = new AppRegistration("foo", ApplicationType.task, URI.create("file:///foobar"));
+		AppRegistration registration2 = new AppRegistration("foo2", ApplicationType.task, URI.create("file:///foobar2"));
 		assertThat(registration1).isNotEqualByComparingTo(registration2);
-		AppRegistration registration3 = new AppRegistration("foo1", task, URI.create("file:///foobar"));
+		AppRegistration registration3 = new AppRegistration("foo1", ApplicationType.task, URI.create("file:///foobar"));
 		assertThat(registration1).isNotEqualByComparingTo(registration3);
-		AppRegistration registration4 = new AppRegistration("foo", task, URI.create("file:///foobar"));
+		AppRegistration registration4 = new AppRegistration("foo", ApplicationType.task, URI.create("file:///foobar"));
 		assertThat(registration1).isEqualByComparingTo(registration4);
 	}
 
 	@Test
 	public void testToString() {
-		AppRegistration registration1 = new AppRegistration("foo", task, URI.create("file:///foobar"),
+		AppRegistration registration1 = new AppRegistration("foo", ApplicationType.task, URI.create("file:///foobar"),
 				URI.create("file:///foobar-metadata"));
 		assertThat(registration1.toString()).contains("foo").contains("task").contains("file:///foobar")
 				.contains("file:///foobar-metadata");

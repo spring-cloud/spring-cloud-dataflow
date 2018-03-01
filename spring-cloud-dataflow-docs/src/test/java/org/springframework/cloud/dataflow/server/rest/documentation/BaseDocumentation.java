@@ -34,7 +34,6 @@ import org.springframework.test.web.servlet.ResultHandler;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 
-import static org.springframework.cloud.dataflow.core.ApplicationType.task;
 import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.document;
 import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.documentationConfiguration;
 import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.delete;
@@ -88,8 +87,8 @@ public abstract class BaseDocumentation {
 	 * @param name the name of the app to register
 	 */
 	void registerApp(ApplicationType type, String name) throws Exception {
-		String group = type == task ? "org.springframework.cloud.task.app" : "org.springframework.cloud.stream.app";
-		String binder = type == task ? "" : "-rabbit";
+		String group = type == ApplicationType.task ? "org.springframework.cloud.task.app" : "org.springframework.cloud.stream.app";
+		String binder = type == ApplicationType.task ? "" : "-rabbit";
 
 		documentation.dontDocument(
 			() -> this.mockMvc.perform(

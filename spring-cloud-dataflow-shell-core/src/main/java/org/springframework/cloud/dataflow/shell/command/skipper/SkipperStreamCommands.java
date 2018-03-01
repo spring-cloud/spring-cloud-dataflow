@@ -23,6 +23,7 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cloud.dataflow.rest.SkipperStream;
 import org.springframework.cloud.dataflow.rest.util.DeploymentPropertiesUtils;
 import org.springframework.cloud.dataflow.shell.command.common.AbstractStreamCommands;
 import org.springframework.cloud.dataflow.shell.command.common.Assertions;
@@ -46,10 +47,6 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
-import static org.springframework.cloud.dataflow.rest.SkipperStream.SKIPPER_PACKAGE_NAME;
-import static org.springframework.cloud.dataflow.rest.SkipperStream.SKIPPER_PACKAGE_VERSION;
-import static org.springframework.cloud.dataflow.rest.SkipperStream.SKIPPER_PLATFORM_NAME;
-import static org.springframework.cloud.dataflow.rest.SkipperStream.SKIPPER_REPO_NAME;
 
 /**
  * Stream commands.
@@ -108,14 +105,14 @@ public class SkipperStreamCommands extends AbstractStreamCommands implements Com
 				propertiesFile);
 		Map<String, String> propertiesToUse = DeploymentPropertiesUtils.parseDeploymentProperties(deploymentProperties,
 				propertiesFile, which);
-		propertiesToUse.put(SKIPPER_PACKAGE_NAME, name);
+		propertiesToUse.put(SkipperStream.SKIPPER_PACKAGE_NAME, name);
 		Assert.isTrue(StringUtils.hasText(packageVersion), "Package version must be set when using Skipper.");
-		propertiesToUse.put(SKIPPER_PACKAGE_VERSION, packageVersion);
+		propertiesToUse.put(SkipperStream.SKIPPER_PACKAGE_VERSION, packageVersion);
 		if (StringUtils.hasText(platformName)) {
-			propertiesToUse.put(SKIPPER_PLATFORM_NAME, platformName);
+			propertiesToUse.put(SkipperStream.SKIPPER_PLATFORM_NAME, platformName);
 		}
 		if (StringUtils.hasText(repoName)) {
-			propertiesToUse.put(SKIPPER_REPO_NAME, repoName);
+			propertiesToUse.put(SkipperStream.SKIPPER_REPO_NAME, repoName);
 		}
 		streamOperations().deploy(name, propertiesToUse);
 		return String.format("Deployment request has been sent for stream '%s'", name);

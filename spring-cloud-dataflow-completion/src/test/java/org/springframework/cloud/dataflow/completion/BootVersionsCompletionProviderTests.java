@@ -40,7 +40,6 @@ import org.springframework.test.context.junit4.SpringRunner;
 import static org.hamcrest.CoreMatchers.hasItems;
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
-import static org.springframework.cloud.dataflow.completion.Proposals.proposalThat;
 
 /**
  * Tests that the completion mechanism knows how to cope with different versions of Spring
@@ -59,30 +58,30 @@ public class BootVersionsCompletionProviderTests {
 	@Test
 	public void testBoot13Layout() {
 		List<CompletionProposal> result = completionProvider.complete("boot13 --", 0);
-		assertThat(result, hasItems(proposalThat(is("boot13 --level=")), proposalThat(is("boot13 --number=")),
-				proposalThat(is("boot13 --some-string="))));
+		assertThat(result, hasItems(Proposals.proposalThat(is("boot13 --level=")), Proposals.proposalThat(is("boot13 --number=")),
+				Proposals.proposalThat(is("boot13 --some-string="))));
 
 		// Test that custom classes can also be loaded correctly
 		result = completionProvider.complete("boot13 --level=", 0);
-		assertThat(result, hasItems(proposalThat(is("boot13 --level=low")), proposalThat(is("boot13 --level=high"))));
+		assertThat(result, hasItems(Proposals.proposalThat(is("boot13 --level=low")), Proposals.proposalThat(is("boot13 --level=high"))));
 
 		result = completionProvider.complete("boot13 --number=", 0);
-		assertThat(result, hasItems(proposalThat(is("boot13 --number=one")), proposalThat(is("boot13 --number=two"))));
+		assertThat(result, hasItems(Proposals.proposalThat(is("boot13 --number=one")), Proposals.proposalThat(is("boot13 --number=two"))));
 	}
 
 	@Test
 	public void testBoot14Layout() {
 		List<CompletionProposal> result = completionProvider.complete("boot14 --", 0);
-		assertThat(result, hasItems(proposalThat(is("boot14 --level=")), proposalThat(is("boot14 --number=")),
-				proposalThat(is("boot14 --some-string="))));
+		assertThat(result, hasItems(Proposals.proposalThat(is("boot14 --level=")), Proposals.proposalThat(is("boot14 --number=")),
+				Proposals.proposalThat(is("boot14 --some-string="))));
 
 		// Test that custom classes can also be loaded correctly
 		result = completionProvider.complete("boot14 --level=", 0);
 		assertThat(result,
-				hasItems(proposalThat(is("boot14 --level=very_low")), proposalThat(is("boot14 --level=very_high"))));
+				hasItems(Proposals.proposalThat(is("boot14 --level=very_low")), Proposals.proposalThat(is("boot14 --level=very_high"))));
 
 		result = completionProvider.complete("boot14 --number=", 0);
-		assertThat(result, hasItems(proposalThat(is("boot14 --number=one")), proposalThat(is("boot14 --number=two"))));
+		assertThat(result, hasItems(Proposals.proposalThat(is("boot14 --number=one")), Proposals.proposalThat(is("boot14 --number=two"))));
 
 	}
 

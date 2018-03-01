@@ -78,7 +78,6 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 
-import static org.springframework.shell.table.BorderSpecification.TOP;
 
 /**
  * Configuration commands for the Shell. The default Data Flow Server location is
@@ -350,7 +349,7 @@ public class ConfigCommands implements CommandMarker, InitializingBean, Applicat
 						Arrays.asList("class", "platformSpecificInfo")))
 				.addAligner(new KeyValueHorizontalAligner(":")).addSizer(new KeyValueSizeConstraints(": "))
 				.addWrapper(new KeyValueTextWrapper(": "));
-		rowsWithThinSeparators.forEach(row -> builder.paintBorder(BorderStyle.fancy_light_quadruple_dash, TOP)
+		rowsWithThinSeparators.forEach(row -> builder.paintBorder(BorderStyle.fancy_light_quadruple_dash, BorderSpecification.TOP)
 				.fromRowColumn(row, 0).toRowColumn(row + 1, builder.getModel().getColumnCount()));
 
 		result.add(builder.build());

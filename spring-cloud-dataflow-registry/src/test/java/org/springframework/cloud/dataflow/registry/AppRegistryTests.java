@@ -22,6 +22,7 @@ import java.util.List;
 import org.hamcrest.Matchers;
 import org.junit.Test;
 
+import org.springframework.cloud.dataflow.core.ApplicationType;
 import org.springframework.cloud.dataflow.registry.domain.AppRegistration;
 import org.springframework.cloud.dataflow.registry.support.NoSuchAppRegistrationException;
 import org.springframework.cloud.deployer.resource.registry.InMemoryUriRegistry;
@@ -42,8 +43,6 @@ import static org.hamcrest.Matchers.nullValue;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
-import static org.springframework.cloud.dataflow.core.ApplicationType.sink;
-import static org.springframework.cloud.dataflow.core.ApplicationType.source;
 
 /**
  * Unit tests for {@link AppRegistry}.
@@ -61,7 +60,7 @@ public class AppRegistryTests {
 
 	@Test
 	public void testNotFound() {
-		AppRegistration registration = appRegistry.find("foo", source);
+		AppRegistration registration = appRegistry.find("foo", ApplicationType.source);
 		assertThat(registration, Matchers.nullValue());
 	}
 
@@ -70,9 +69,9 @@ public class AppRegistryTests {
 		uriRegistry.register("source.foo", URI.create("classpath:/foo"));
 		uriRegistry.register("source.foo.metadata", URI.create("classpath:/foo-metadata"));
 
-		AppRegistration registration = appRegistry.find("foo", source);
+		AppRegistration registration = appRegistry.find("foo", ApplicationType.source);
 		assertThat(registration.getName(), is("foo"));
-		assertThat(registration.getType(), is(source));
+		assertThat(registration.getType(), is(ApplicationType.source));
 	}
 
 	@Test
@@ -80,7 +79,7 @@ public class AppRegistryTests {
 		uriRegistry.register("source.foo", URI.create("classpath:/foo"));
 		uriRegistry.register("source.foo.metadata", URI.create("classpath:/foo-metadata"));
 
-		AppRegistration registration = appRegistry.find("foo", source);
+		AppRegistration registration = appRegistry.find("foo", ApplicationType.source);
 		Resource appMetadataResource = appRegistry.getAppMetadataResource(registration);
 
 		assertThat(appMetadataResource.getFilename(), is("foo-metadata"));
@@ -90,7 +89,7 @@ public class AppRegistryTests {
 	public void testMetadataResouceNotAvailableResolvesToMainResource() {
 		uriRegistry.register("source.foo", URI.create("classpath:/foo"));
 
-		AppRegistration registration = appRegistry.find("foo", source);
+		AppRegistration registration = appRegistry.find("foo", ApplicationType.source);
 		Resource appMetadataResource = appRegistry.getAppMetadataResource(registration);
 
 		assertThat(appMetadataResource.getFilename(), is("foo"));
@@ -109,12 +108,12 @@ public class AppRegistryTests {
 		assertThat(registrations, containsInAnyOrder(
 				allOf(hasProperty("name", is("foo")), hasProperty("uri", is(URI.create("classpath:/foo-source"))),
 						hasProperty("metadataUri", is(URI.create("classpath:/foo-source-metadata"))),
-						hasProperty("type", is(source))),
+						hasProperty("type", is(ApplicationType.source))),
 				allOf(hasProperty("name", is("bar")), hasProperty("uri", is(URI.create("classpath:/bar-source"))),
 						hasProperty("metadataUri", is(URI.create("classpath:/bar-source-metadata"))),
-						hasProperty("type", is(source))),
+						hasProperty("type", is(ApplicationType.source))),
 				allOf(hasProperty("name", is("foo")), hasProperty("uri", is(URI.create("classpath:/foo-sink"))),
-						hasProperty("metadataUri", nullValue()), hasProperty("type", is(sink)))));
+						hasProperty("metadataUri", nullValue()), hasProperty("type", is(ApplicationType.sink)))));
 	}
 
 	@Test
@@ -140,18 +139,18 @@ public class AppRegistryTests {
 
 	@Test
 	public void testSave() {
-		appRegistry.save("foo", source, URI.create("classpath:/foo"), URI.create("foo-metadata"));
+		appRegistry.save("foo", ApplicationType.source, URI.create("classpath:/foo"), URI.create("foo-metadata"));
 
-		AppRegistration registration = appRegistry.find("foo", source);
+		AppRegistration registration = appRegistry.find("foo", ApplicationType.source);
 
 		assertThat(registration.getName(), is("foo"));
-		assertThat(registration.getType(), is(source));
+		assertThat(registration.getType(), is(ApplicationType.source));
 	}
 
 	@Test
 	public void testImportAll() {
 		// pre-register an app
-		appRegistry.save("foo", source, URI.create("classpath:/previous-foo-source"), null);
+		appRegistry.save("foo", ApplicationType.source, URI.create("classpath:/previous-foo-source"), null);
 
 		appRegistry.importAll(false, new ClassPathResource("AppRegistryTests-importAll.properties", getClass()));
 		List<AppRegistration> registrations = appRegistry.findAll();
@@ -159,13 +158,13 @@ public class AppRegistryTests {
 		assertThat(registrations,
 				containsInAnyOrder(allOf(hasProperty("name", is("foo")),
 						hasProperty("uri", is(URI.create("classpath:/previous-foo-source"))),
-						hasProperty("metadataUri", nullValue()), hasProperty("type", is(source))),
+						hasProperty("metadataUri", nullValue()), hasProperty("type", is(ApplicationType.source))),
 						allOf(hasProperty("name", is("bar")),
 								hasProperty("uri", is(URI.create("classpath:/bar-source"))),
 								hasProperty("metadataUri", is(URI.create("classpath:/bar-source-metadata"))),
-								hasProperty("type", is(source))),
+								hasProperty("type", is(ApplicationType.source))),
 						allOf(hasProperty("name", is("foo")), hasProperty("uri", is(URI.create("classpath:/foo-sink"))),
-								hasProperty("metadataUri", nullValue()), hasProperty("type", is(sink)))));
+								hasProperty("metadataUri", nullValue()), hasProperty("type", is(ApplicationType.sink)))));
 
 		// Now import with overwrite = true
 		appRegistry.importAll(true, new ClassPathResource("AppRegistryTests-importAll.properties", getClass()));
@@ -174,25 +173,25 @@ public class AppRegistryTests {
 		assertThat(registrations, containsInAnyOrder(
 				allOf(hasProperty("name", is("foo")), hasProperty("uri", is(URI.create("classpath:/foo-source"))),
 						hasProperty("metadataUri", is(URI.create("classpath:/foo-source-metadata"))),
-						hasProperty("type", is(source))),
+						hasProperty("type", is(ApplicationType.source))),
 				allOf(hasProperty("name", is("bar")), hasProperty("uri", is(URI.create("classpath:/bar-source"))),
 						hasProperty("metadataUri", is(URI.create("classpath:/bar-source-metadata"))),
-						hasProperty("type", is(source))),
+						hasProperty("type", is(ApplicationType.source))),
 				allOf(hasProperty("name", is("foo")), hasProperty("uri", is(URI.create("classpath:/foo-sink"))),
-						hasProperty("metadataUri", nullValue()), hasProperty("type", is(sink)))));
+						hasProperty("metadataUri", nullValue()), hasProperty("type", is(ApplicationType.sink)))));
 	}
 
 	@Test
 	public void testDelete() {
 		// pre-register an app
-		appRegistry.save("foo", source, URI.create("classpath:/previous-foo-source"), null);
-		assertThat(appRegistry.find("foo", source), notNullValue());
+		appRegistry.save("foo", ApplicationType.source, URI.create("classpath:/previous-foo-source"), null);
+		assertThat(appRegistry.find("foo", ApplicationType.source), notNullValue());
 
-		appRegistry.delete("foo", source);
-		assertThat(appRegistry.find("foo", source), nullValue());
+		appRegistry.delete("foo", ApplicationType.source);
+		assertThat(appRegistry.find("foo", ApplicationType.source), nullValue());
 
 		try {
-			appRegistry.delete("foo", source);
+			appRegistry.delete("foo", ApplicationType.source);
 			fail();
 		}
 		catch (NoSuchAppRegistrationException expected) {

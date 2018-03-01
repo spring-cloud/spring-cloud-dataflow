@@ -26,14 +26,6 @@ import org.springframework.jdbc.support.MetaDataAccessException;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
-import static org.springframework.cloud.dataflow.server.repository.support.DatabaseType.DB2;
-import static org.springframework.cloud.dataflow.server.repository.support.DatabaseType.H2;
-import static org.springframework.cloud.dataflow.server.repository.support.DatabaseType.HSQL;
-import static org.springframework.cloud.dataflow.server.repository.support.DatabaseType.MYSQL;
-import static org.springframework.cloud.dataflow.server.repository.support.DatabaseType.ORACLE;
-import static org.springframework.cloud.dataflow.server.repository.support.DatabaseType.POSTGRES;
-import static org.springframework.cloud.dataflow.server.repository.support.DatabaseType.SQLSERVER;
-
 /**
  * Factory bean for {@link PagingQueryProvider} interface. The database type will be
  * determined from the data source if not provided explicitly. Valid types are given by
@@ -58,13 +50,13 @@ public class SqlPagingQueryProviderFactoryBean implements FactoryBean<PagingQuer
 	private Map<DatabaseType, AbstractSqlPagingQueryProvider> providers = new HashMap<DatabaseType, AbstractSqlPagingQueryProvider>();
 
 	{
-		providers.put(HSQL, new HsqlPagingQueryProvider());
-		providers.put(H2, new H2PagingQueryProvider());
-		providers.put(MYSQL, new MySqlPagingQueryProvider());
-		providers.put(POSTGRES, new PostgresPagingQueryProvider());
-		providers.put(ORACLE, new OraclePagingQueryProvider());
-		providers.put(SQLSERVER, new SqlServerPagingQueryProvider());
-		providers.put(DB2, new Db2PagingQueryProvider());
+		providers.put(DatabaseType.HSQL, new HsqlPagingQueryProvider());
+		providers.put(DatabaseType.H2, new H2PagingQueryProvider());
+		providers.put(DatabaseType.MYSQL, new MySqlPagingQueryProvider());
+		providers.put(DatabaseType.POSTGRES, new PostgresPagingQueryProvider());
+		providers.put(DatabaseType.ORACLE, new OraclePagingQueryProvider());
+		providers.put(DatabaseType.SQLSERVER, new SqlServerPagingQueryProvider());
+		providers.put(DatabaseType.DB2, new Db2PagingQueryProvider());
 	}
 
 	/**

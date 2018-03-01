@@ -47,6 +47,7 @@ import org.springframework.cloud.dataflow.core.StreamDefinition;
 import org.springframework.cloud.dataflow.core.StreamDeployment;
 import org.springframework.cloud.dataflow.registry.service.AppRegistryService;
 import org.springframework.cloud.dataflow.registry.support.ResourceUtils;
+import org.springframework.cloud.dataflow.rest.SkipperStream;
 import org.springframework.cloud.dataflow.server.controller.NoSuchAppException;
 import org.springframework.cloud.dataflow.server.controller.StreamDefinitionController;
 import org.springframework.cloud.dataflow.server.repository.StreamDefinitionRepository;
@@ -82,15 +83,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.hateoas.Resources;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
-
-import static java.util.stream.Collectors.toList;
-import static org.springframework.cloud.dataflow.rest.SkipperStream.SKIPPER_DEFAULT_API_VERSION;
-import static org.springframework.cloud.dataflow.rest.SkipperStream.SKIPPER_DEFAULT_KIND;
-import static org.springframework.cloud.dataflow.rest.SkipperStream.SKIPPER_DEFAULT_MAINTAINER;
-import static org.springframework.cloud.dataflow.rest.SkipperStream.SKIPPER_PACKAGE_NAME;
-import static org.springframework.cloud.dataflow.rest.SkipperStream.SKIPPER_PACKAGE_VERSION;
-import static org.springframework.cloud.dataflow.rest.SkipperStream.SKIPPER_PLATFORM_NAME;
-import static org.springframework.cloud.dataflow.rest.SkipperStream.SKIPPER_REPO_NAME;
 
 /**
  * Delegates to Skipper to deploy the stream.
@@ -188,14 +180,14 @@ public class SkipperStreamDeployer implements StreamDeployer {
 	public Release deployStream(StreamDeploymentRequest streamDeploymentRequest) {
 		validateAllAppsRegistered(streamDeploymentRequest);
 		Map<String, String> streamDeployerProperties = streamDeploymentRequest.getStreamDeployerProperties();
-		String packageVersion = streamDeployerProperties.get(SKIPPER_PACKAGE_VERSION);
+		String packageVersion = streamDeployerProperties.get(SkipperStream.SKIPPER_PACKAGE_VERSION);
 		Assert.isTrue(StringUtils.hasText(packageVersion), "Package Version must be set");
 		logger.info("Deploying Stream " + streamDeploymentRequest.getStreamName() + " using skipper.");
-		String repoName = streamDeployerProperties.get(SKIPPER_REPO_NAME);
+		String repoName = streamDeployerProperties.get(SkipperStream.SKIPPER_REPO_NAME);
 		repoName = (StringUtils.hasText(repoName)) ? (repoName) : "local";
-		String platformName = streamDeployerProperties.get(SKIPPER_PLATFORM_NAME);
+		String platformName = streamDeployerProperties.get(SkipperStream.SKIPPER_PLATFORM_NAME);
 		platformName = determinePlatformName(platformName);
-		String packageName = streamDeployerProperties.get(SKIPPER_PACKAGE_NAME);
+		String packageName = streamDeployerProperties.get(SkipperStream.SKIPPER_PACKAGE_NAME);
 		packageName = (StringUtils.hasText(packageName)) ? packageName : streamDeploymentRequest.getStreamName();
 		// Create the package .zip file to upload
 		File packageFile = createPackageForStream(packageName, packageVersion, streamDeploymentRequest);
@@ -236,7 +228,7 @@ public class SkipperStreamDeployer implements StreamDeployer {
 		if (StringUtils.hasText(platformName)) {
 			List<Deployer> filteredDeployers = deployers.stream()
 					.filter(d -> d.getName().equals(platformName))
-					.collect(toList());
+					.collect(Collectors.toList());
 			if (filteredDeployers.size() == 0) {
 				throw new IllegalArgumentException("No platform named '" + platformName + "'");
 			}
@@ -295,11 +287,11 @@ public class SkipperStreamDeployer implements StreamDeployer {
 			StreamDeploymentRequest streamDeploymentRequest) {
 		Package pkg = new Package();
 		PackageMetadata packageMetadata = new PackageMetadata();
-		packageMetadata.setApiVersion(SKIPPER_DEFAULT_API_VERSION);
-		packageMetadata.setKind(SKIPPER_DEFAULT_KIND);
+		packageMetadata.setApiVersion(SkipperStream.SKIPPER_DEFAULT_API_VERSION);
+		packageMetadata.setKind(SkipperStream.SKIPPER_DEFAULT_KIND);
 		packageMetadata.setName(packageName);
 		packageMetadata.setVersion(packageVersion);
-		packageMetadata.setMaintainer(SKIPPER_DEFAULT_MAINTAINER);
+		packageMetadata.setMaintainer(SkipperStream.SKIPPER_DEFAULT_MAINTAINER);
 		packageMetadata.setDescription(streamDeploymentRequest.getDslText());
 		pkg.setMetadata(packageMetadata);
 		pkg.setDependencies(createDependentPackages(packageVersion, streamDeploymentRequest));
@@ -320,11 +312,11 @@ public class SkipperStreamDeployer implements StreamDeployer {
 		String packageName = appDeploymentRequest.getDefinition().getName();
 
 		PackageMetadata packageMetadata = new PackageMetadata();
-		packageMetadata.setApiVersion(SKIPPER_DEFAULT_API_VERSION);
-		packageMetadata.setKind(SKIPPER_DEFAULT_KIND);
+		packageMetadata.setApiVersion(SkipperStream.SKIPPER_DEFAULT_API_VERSION);
+		packageMetadata.setKind(SkipperStream.SKIPPER_DEFAULT_KIND);
 		packageMetadata.setName(packageName);
 		packageMetadata.setVersion(packageVersion);
-		packageMetadata.setMaintainer(SKIPPER_DEFAULT_MAINTAINER);
+		packageMetadata.setMaintainer(SkipperStream.SKIPPER_DEFAULT_MAINTAINER);
 
 		pkg.setMetadata(packageMetadata);
 
@@ -390,8 +382,7 @@ public class SkipperStreamDeployer implements StreamDeployer {
 		List<AppStatus> allStatuses = getStreamStatuses(pageable, skipperStreams);
 
 		List<AppStatus> pagedStatuses = allStatuses.stream().skip(pageable.getPageNumber() * pageable.getPageSize())
-				.limit(pageable.getPageSize()).parallel().collect(toList());
-		//pagedStatuses.addAll(getSkipperStatuses(pageable, skipperStreams).stream().flatMap(List::stream).collect(toList()));
+				.limit(pageable.getPageSize()).parallel().collect(Collectors.toList());
 
 		return new PageImpl<>(pagedStatuses, pageable, allStatuses.size());
 	}
@@ -453,7 +444,7 @@ public class SkipperStreamDeployer implements StreamDeployer {
 	private List<AppStatus> getStreamStatuses(Pageable pageable, List<String> skipperStreamNames)
 			throws ExecutionException, InterruptedException {
 		return this.forkJoinPool.submit(() -> skipperStreamNames.stream().parallel()
-				.map(this::skipperStatus).flatMap(List::stream).collect(toList())).get();
+				.map(this::skipperStatus).flatMap(List::stream).collect(Collectors.toList())).get();
 	}
 
 	private List<AppStatus> skipperStatus(String streamName) {

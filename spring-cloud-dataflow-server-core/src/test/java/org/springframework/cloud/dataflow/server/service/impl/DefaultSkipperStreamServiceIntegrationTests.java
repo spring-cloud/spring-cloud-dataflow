@@ -39,6 +39,7 @@ import org.springframework.cloud.dataflow.core.ApplicationType;
 import org.springframework.cloud.dataflow.core.StreamDefinition;
 import org.springframework.cloud.dataflow.core.StreamDeployment;
 import org.springframework.cloud.dataflow.registry.service.AppRegistryService;
+import org.springframework.cloud.dataflow.rest.SkipperStream;
 import org.springframework.cloud.dataflow.rest.UpdateStreamRequest;
 import org.springframework.cloud.dataflow.server.config.features.FeaturesProperties;
 import org.springframework.cloud.dataflow.server.configuration.TestDependencies;
@@ -69,8 +70,6 @@ import static org.mockito.Matchers.eq;
 import static org.mockito.Matchers.isA;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static org.springframework.cloud.dataflow.rest.SkipperStream.SKIPPER_PACKAGE_NAME;
-import static org.springframework.cloud.dataflow.rest.SkipperStream.SKIPPER_PACKAGE_VERSION;
 
 /**
  * @author Mark Pollack
@@ -257,8 +256,8 @@ public class DefaultSkipperStreamServiceIntegrationTests {
 
 	private Map<String, String> createSkipperDeploymentProperties() {
 		Map<String, String> deploymentProperties = new HashMap<>();
-		deploymentProperties.put(SKIPPER_PACKAGE_NAME, "ticktock");
-		deploymentProperties.put(SKIPPER_PACKAGE_VERSION, "1.0.0");
+		deploymentProperties.put(SkipperStream.SKIPPER_PACKAGE_NAME, "ticktock");
+		deploymentProperties.put(SkipperStream.SKIPPER_PACKAGE_VERSION, "1.0.0");
 		return deploymentProperties;
 	}
 

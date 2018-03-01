@@ -32,6 +32,7 @@ import org.springframework.cloud.dataflow.core.StreamAppDefinition;
 import org.springframework.cloud.dataflow.core.StreamDefinition;
 import org.springframework.cloud.dataflow.core.StreamDefinitionToDslConverter;
 import org.springframework.cloud.dataflow.core.StreamDeployment;
+import org.springframework.cloud.dataflow.rest.SkipperStream;
 import org.springframework.cloud.dataflow.rest.UpdateStreamRequest;
 import org.springframework.cloud.dataflow.rest.util.DeploymentPropertiesUtils;
 import org.springframework.cloud.dataflow.server.repository.NoSuchStreamDefinitionException;
@@ -49,9 +50,6 @@ import org.springframework.cloud.skipper.domain.SpringCloudDeployerApplicationMa
 import org.springframework.cloud.skipper.domain.SpringCloudDeployerApplicationSpec;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
-
-import static org.springframework.cloud.dataflow.rest.SkipperStream.SKIPPER_KEY_PREFIX;
-import static org.springframework.cloud.dataflow.rest.SkipperStream.SKIPPER_PACKAGE_VERSION;
 
 /**
  * An implementation of {@link SkipperStreamService}.
@@ -94,13 +92,13 @@ public class DefaultSkipperStreamService extends AbstractStreamService implement
 		// Extract skipper properties
 		Map<String, String> skipperDeploymentProperties = getSkipperProperties(deploymentProperties);
 
-		if (!skipperDeploymentProperties.containsKey(SKIPPER_PACKAGE_VERSION)) {
-			skipperDeploymentProperties.put(SKIPPER_PACKAGE_VERSION, DEFAULT_SKIPPER_PACKAGE_VERSION);
+		if (!skipperDeploymentProperties.containsKey(SkipperStream.SKIPPER_PACKAGE_VERSION)) {
+			skipperDeploymentProperties.put(SkipperStream.SKIPPER_PACKAGE_VERSION, DEFAULT_SKIPPER_PACKAGE_VERSION);
 		}
 
 		// Create map without any skipper properties
 		Map<String, String> deploymentPropertiesToUse = deploymentProperties.entrySet().stream()
-				.filter(mapEntry -> !mapEntry.getKey().startsWith(SKIPPER_KEY_PREFIX))
+				.filter(mapEntry -> !mapEntry.getKey().startsWith(SkipperStream.SKIPPER_KEY_PREFIX))
 				.collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
 
 		List<AppDeploymentRequest> appDeploymentRequests = this.appDeploymentRequestCreator
@@ -245,7 +243,7 @@ public class DefaultSkipperStreamService extends AbstractStreamService implement
 	private Map<String, String> getSkipperProperties(Map<String, String> deploymentProperties) {
 		// Extract skipper properties
 		return deploymentProperties.entrySet().stream()
-				.filter(mapEntry -> mapEntry.getKey().startsWith(SKIPPER_KEY_PREFIX))
+				.filter(mapEntry -> mapEntry.getKey().startsWith(SkipperStream.SKIPPER_KEY_PREFIX))
 				.collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
 	}
 

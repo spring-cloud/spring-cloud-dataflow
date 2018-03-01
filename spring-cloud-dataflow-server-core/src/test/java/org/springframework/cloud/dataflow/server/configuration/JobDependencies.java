@@ -67,7 +67,6 @@ import org.springframework.jdbc.datasource.DataSourceTransactionManager;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 
 import static org.mockito.Mockito.mock;
-import static org.springframework.hateoas.config.EnableHypermediaSupport.HypermediaType.HAL;
 
 /**
  * @author Glenn Renfro
@@ -75,7 +74,7 @@ import static org.springframework.hateoas.config.EnableHypermediaSupport.Hyperme
  */
 @Configuration
 @EnableSpringDataWebSupport
-@EnableHypermediaSupport(type = HAL)
+@EnableHypermediaSupport(type = EnableHypermediaSupport.HypermediaType.HAL)
 @EnableWebMvc
 public class JobDependencies {
 

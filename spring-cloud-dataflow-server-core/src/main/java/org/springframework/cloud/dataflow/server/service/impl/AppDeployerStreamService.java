@@ -22,6 +22,7 @@ import java.util.stream.Collectors;
 
 import org.springframework.cloud.dataflow.core.StreamDefinition;
 import org.springframework.cloud.dataflow.core.StreamDeployment;
+import org.springframework.cloud.dataflow.rest.SkipperStream;
 import org.springframework.cloud.dataflow.rest.util.DeploymentPropertiesUtils;
 import org.springframework.cloud.dataflow.server.repository.StreamDefinitionRepository;
 import org.springframework.cloud.dataflow.server.stream.AppDeployerStreamDeployer;
@@ -29,8 +30,6 @@ import org.springframework.cloud.dataflow.server.stream.StreamDeploymentRequest;
 import org.springframework.cloud.deployer.spi.app.DeploymentState;
 import org.springframework.cloud.deployer.spi.core.AppDeploymentRequest;
 import org.springframework.util.Assert;
-
-import static org.springframework.cloud.dataflow.rest.SkipperStream.SKIPPER_KEY_PREFIX;
 
 /**
  * {@link AppDeployerStreamDeployer} specific {@link AbstractStreamService}.
@@ -66,7 +65,7 @@ public class AppDeployerStreamService extends AbstractStreamService {
 	@Override
 	public void doDeployStream(StreamDefinition streamDefinition, Map<String, String> deploymentProperties) {
 		Map<String, String> deploymentPropertiesToUse = deploymentProperties.entrySet().stream()
-				.filter(mapEntry -> !mapEntry.getKey().startsWith(SKIPPER_KEY_PREFIX))
+				.filter(mapEntry -> !mapEntry.getKey().startsWith(SkipperStream.SKIPPER_KEY_PREFIX))
 				.collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
 
 		List<AppDeploymentRequest> appDeploymentRequests = this.appDeploymentRequestCreator

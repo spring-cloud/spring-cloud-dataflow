@@ -28,7 +28,9 @@ import org.mockito.ArgumentCaptor;
 import org.springframework.cloud.dataflow.core.ApplicationType;
 import org.springframework.cloud.dataflow.core.StreamDefinition;
 import org.springframework.cloud.dataflow.registry.service.AppRegistryService;
+import org.springframework.cloud.dataflow.rest.SkipperStream;
 import org.springframework.cloud.dataflow.server.repository.StreamDefinitionRepository;
+import org.springframework.cloud.dataflow.server.support.MockUtils;
 import org.springframework.cloud.deployer.resource.maven.MavenResource;
 import org.springframework.cloud.deployer.spi.app.AppStatus;
 import org.springframework.cloud.deployer.spi.app.DeploymentState;
@@ -55,11 +57,6 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static org.springframework.cloud.dataflow.rest.SkipperStream.SKIPPER_PACKAGE_NAME;
-import static org.springframework.cloud.dataflow.rest.SkipperStream.SKIPPER_PACKAGE_VERSION;
-import static org.springframework.cloud.dataflow.rest.SkipperStream.SKIPPER_PLATFORM_NAME;
-import static org.springframework.cloud.dataflow.rest.SkipperStream.SKIPPER_REPO_NAME;
-import static org.springframework.cloud.dataflow.server.support.MockUtils.createSkipperClientMock;
 
 /**
  * @author Mark Pollack
@@ -72,15 +69,15 @@ public class SkipperStreamDeployerTests {
 	@Test
 	public void testInstallUploadProperties() {
 		Map<String, String> skipperDeployerProperties = new HashMap<>();
-		skipperDeployerProperties.put(SKIPPER_PACKAGE_NAME, "package1");
-		skipperDeployerProperties.put(SKIPPER_PACKAGE_VERSION, "1.0.1");
-		skipperDeployerProperties.put(SKIPPER_PLATFORM_NAME, "testPlatform");
-		skipperDeployerProperties.put(SKIPPER_REPO_NAME, "mylocal-repo1");
+		skipperDeployerProperties.put(SkipperStream.SKIPPER_PACKAGE_NAME, "package1");
+		skipperDeployerProperties.put(SkipperStream.SKIPPER_PACKAGE_VERSION, "1.0.1");
+		skipperDeployerProperties.put(SkipperStream.SKIPPER_PLATFORM_NAME, "testPlatform");
+		skipperDeployerProperties.put(SkipperStream.SKIPPER_REPO_NAME, "mylocal-repo1");
 		StreamDeploymentRequest streamDeploymentRequest = new StreamDeploymentRequest("test1", "time | log",
 				new ArrayList<>(),
 				skipperDeployerProperties);
 
-		SkipperClient skipperClient = createSkipperClientMock();
+		SkipperClient skipperClient = MockUtils.createSkipperClientMock();
 
 		SkipperStreamDeployer skipperStreamDeployer = new SkipperStreamDeployer(skipperClient,
 				mock(StreamDefinitionRepository.class), mock(AppRegistryService.class), mock(ForkJoinPool.class));
@@ -104,15 +101,15 @@ public class SkipperStreamDeployerTests {
 	@Test
 	public void testInvalidPlatformName() {
 		Map<String, String> skipperDeployerProperties = new HashMap<>();
-		skipperDeployerProperties.put(SKIPPER_PACKAGE_NAME, "package1");
-		skipperDeployerProperties.put(SKIPPER_PACKAGE_VERSION, "1.0.1");
-		skipperDeployerProperties.put(SKIPPER_PLATFORM_NAME, "badPlatform");
-		skipperDeployerProperties.put(SKIPPER_REPO_NAME, "mylocal-repo1");
+		skipperDeployerProperties.put(SkipperStream.SKIPPER_PACKAGE_NAME, "package1");
+		skipperDeployerProperties.put(SkipperStream.SKIPPER_PACKAGE_VERSION, "1.0.1");
+		skipperDeployerProperties.put(SkipperStream.SKIPPER_PLATFORM_NAME, "badPlatform");
+		skipperDeployerProperties.put(SkipperStream.SKIPPER_REPO_NAME, "mylocal-repo1");
 		StreamDeploymentRequest streamDeploymentRequest = new StreamDeploymentRequest("test1", "time | log",
 				new ArrayList<>(),
 				skipperDeployerProperties);
 
-		SkipperClient skipperClient = createSkipperClientMock();
+		SkipperClient skipperClient = MockUtils.createSkipperClientMock();
 
 		SkipperStreamDeployer skipperStreamDeployer = new SkipperStreamDeployer(skipperClient,
 				mock(StreamDefinitionRepository.class), mock(AppRegistryService.class), mock(ForkJoinPool.class));
@@ -127,9 +124,9 @@ public class SkipperStreamDeployerTests {
 	@Test
 	public void testNoPlatforms() {
 		Map<String, String> skipperDeployerProperties = new HashMap<>();
-		skipperDeployerProperties.put(SKIPPER_PACKAGE_NAME, "package1");
-		skipperDeployerProperties.put(SKIPPER_PACKAGE_VERSION, "1.0.1");
-		skipperDeployerProperties.put(SKIPPER_REPO_NAME, "mylocal-repo1");
+		skipperDeployerProperties.put(SkipperStream.SKIPPER_PACKAGE_NAME, "package1");
+		skipperDeployerProperties.put(SkipperStream.SKIPPER_PACKAGE_VERSION, "1.0.1");
+		skipperDeployerProperties.put(SkipperStream.SKIPPER_REPO_NAME, "mylocal-repo1");
 		StreamDeploymentRequest streamDeploymentRequest = new StreamDeploymentRequest("test1", "time | log",
 				new ArrayList<>(),
 				skipperDeployerProperties);
@@ -195,15 +192,15 @@ public class SkipperStreamDeployerTests {
 		List<AppDeploymentRequest> appDeploymentRequests = Arrays.asList(logAppDeploymentRequest, timeAppDeploymentRequest);
 
 		Map<String, String> skipperDeployerProperties = new HashMap<>();
-		skipperDeployerProperties.put(SKIPPER_PACKAGE_NAME, "package1");
-		skipperDeployerProperties.put(SKIPPER_PACKAGE_VERSION, "1.0.1");
-		skipperDeployerProperties.put(SKIPPER_PLATFORM_NAME, "testPlatform");
-		skipperDeployerProperties.put(SKIPPER_REPO_NAME, "mylocal-repo1");
+		skipperDeployerProperties.put(SkipperStream.SKIPPER_PACKAGE_NAME, "package1");
+		skipperDeployerProperties.put(SkipperStream.SKIPPER_PACKAGE_VERSION, "1.0.1");
+		skipperDeployerProperties.put(SkipperStream.SKIPPER_PLATFORM_NAME, "testPlatform");
+		skipperDeployerProperties.put(SkipperStream.SKIPPER_REPO_NAME, "mylocal-repo1");
 
 		StreamDeploymentRequest streamDeploymentRequest = new StreamDeploymentRequest("test1", "time | log",
 				appDeploymentRequests, skipperDeployerProperties);
 
-		SkipperClient skipperClient = createSkipperClientMock();
+		SkipperClient skipperClient = MockUtils.createSkipperClientMock();
 
 		SkipperStreamDeployer skipperStreamDeployer = new SkipperStreamDeployer(skipperClient,
 				mock(StreamDefinitionRepository.class),

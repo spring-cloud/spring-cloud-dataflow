@@ -42,10 +42,9 @@ import org.springframework.hateoas.EntityLinks;
 import org.springframework.hateoas.ExposesResourceFor;
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.ResourceSupport;
+import org.springframework.hateoas.mvc.ControllerLinkBuilder;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-
-import static org.springframework.hateoas.mvc.ControllerLinkBuilder.linkTo;
 
 /**
  * Controller for the root resource of the Data Flow server.
@@ -88,7 +87,7 @@ public class RootController {
 	public RootResource info() {
 		RootResource root = new RootResource(Version.REVISION);
 
-		root.add(linkTo(UiController.class).withRel("dashboard"));
+		root.add(ControllerLinkBuilder.linkTo(UiController.class).withRel("dashboard"));
 		if (featuresProperties.isStreamsEnabled()) {
 			root.add(entityLinks.linkToCollectionResource(StreamDefinitionResource.class)
 					.withRel("streams/definitions"));
@@ -106,7 +105,7 @@ public class RootController {
 			root.add(unescapeTemplateVariables(
 					entityLinks.linkFor(AppInstanceStatusResource.class, "{appId}")
 							.withRel("runtime/apps/instances")));
-			root.add(linkTo(MetricsController.class).withRel("metrics/streams"));
+			root.add(ControllerLinkBuilder.linkTo(MetricsController.class).withRel("metrics/streams"));
 		}
 		if (featuresProperties.isTasksEnabled()) {
 			root.add(entityLinks.linkToCollectionResource(TaskDefinitionResource.class).withRel("tasks/definitions"));
