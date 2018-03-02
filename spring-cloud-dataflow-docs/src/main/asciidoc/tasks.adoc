@@ -404,7 +404,21 @@ dataflow:>task execution list
 In the preceding example, we see that `my-compose-task` launched and that it also launched the other tasks in sequential order.
 All of them executed successfully with `Exit Code` as `0`.
 
+===== Passing properties to the child tasks
 
+To set the properties for child tasks in a composed task graph at task launch time,
+you would use the following format of `app.<composed task definition name>.<child task app name>.<property>`.
+Using the following Composed Task definition as an example:
+
+[source,bash]
+----
+dataflow:> task create my-composed-task --definition "mytaskapp  && mytimestamp"
+----
+To have mytaskapp display 'HELLO' and set the mytimestamp timestamp format to 'YYYY' for the Composed Task definition, you would use the following task launch format:
+[source,bash]
+----
+task launch my-composed-task --properties "app.my-composed-task.mytaskapp.displayMessage=HELLO,app.my-composed-task.mytimestamp.timestamp.format=YYYY"
+----
 
 ===== Exit Statuses
 
