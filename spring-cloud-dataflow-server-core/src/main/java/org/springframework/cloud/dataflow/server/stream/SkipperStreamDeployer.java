@@ -91,6 +91,8 @@ import static org.springframework.cloud.dataflow.rest.SkipperStream.SKIPPER_PACK
 import static org.springframework.cloud.dataflow.rest.SkipperStream.SKIPPER_PACKAGE_VERSION;
 import static org.springframework.cloud.dataflow.rest.SkipperStream.SKIPPER_PLATFORM_NAME;
 import static org.springframework.cloud.dataflow.rest.SkipperStream.SKIPPER_REPO_NAME;
+import static org.springframework.cloud.dataflow.rest.SkipperStream.SKIPPER_SPEC_RESOURCE;
+import static org.springframework.cloud.dataflow.rest.SkipperStream.SKIPPER_SPEC_VERSION;
 
 /**
  * Delegates to Skipper to deploy the stream.
@@ -440,7 +442,8 @@ public class SkipperStreamDeployer implements StreamDeployer {
 				SpringCloudDeployerApplicationSpec spec = applicationManifest.getSpec();
 				String applicationName = applicationManifest.getApplicationName();
 				versionAndDeploymentProperties.putAll(spec.getDeploymentProperties());
-				versionAndDeploymentProperties.put(spec.getResource(), spec.getVersion());
+				versionAndDeploymentProperties.put(SKIPPER_SPEC_RESOURCE, spec.getResource());
+				versionAndDeploymentProperties.put(SKIPPER_SPEC_VERSION, spec.getVersion());
 				streamPropertiesMap.put(applicationName, versionAndDeploymentProperties);
 			}
 			return new StreamDeployment(streamName, new JSONObject(streamPropertiesMap).toString());

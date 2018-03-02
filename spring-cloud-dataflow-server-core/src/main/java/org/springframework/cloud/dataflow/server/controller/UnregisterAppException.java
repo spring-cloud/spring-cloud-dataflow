@@ -16,13 +16,15 @@
 package org.springframework.cloud.dataflow.server.controller;
 
 /**
+ * Exception thrown when an application can not be unregistered.
+ *
  * @author Christian Tzolov
  */
-public class AppUsedInStreamException extends RuntimeException {
+public class UnregisterAppException extends RuntimeException {
 
 	private static final long serialVersionUID = 1L;
 
-	public AppUsedInStreamException(String appId) {
-		super(String.format("The '%s' application could not be found.", appId));
+	public UnregisterAppException(String message) {
+		super(message);
 	}
 }

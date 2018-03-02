@@ -23,7 +23,6 @@ import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
@@ -71,6 +70,8 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
+
+import static org.springframework.cloud.dataflow.rest.SkipperStream.SKIPPER_SPEC_VERSION;
 
 /**
  * Handles all {@link DefaultAppRegistryService} related interactions.
@@ -250,23 +251,31 @@ public class SkipperAppRegistryController {
 	public void unregister(@PathVariable("type") ApplicationType type, @PathVariable("name") String name,
 			@PathVariable("version") String version) {
 
-		// AppRegistration defaultApp = appRegistryService.getDefaultApp(name, type);
-		if (type != ApplicationType.task) { // && defaultApp != null && defaultApp.getVersion().equals(version)) {
+		if (type != ApplicationType.task) {
 			String streamWithApp = findStreamContainingAppOf(type, name, version);
 			if (streamWithApp != null) {
-				throw new AppUsedInStreamException(String.format("The app [%s:%s:%s] you're trying to unregister is " +
-						"already in use on %s stream", name, type, version, streamWithApp));
+				throw new UnregisterAppException(String.format("The app [%s:%s:%s] you're trying to unregister is " +
+						"currently used in stream '%s'.", name, type, version, streamWithApp));
 			}
 		}
 
 		appRegistryService.delete(name, type, version);
 	}
 
+	/**
+	 * Given the application type, name, and version, determine if it is being used in a deployed stream definition.
+	 *
+	 * @param appType the application type
+	 * @param appName the application name
+	 * @param appVersion application version
+	 * @return the name of the deployed stream where the app is being used.  If the app is not deployed in a stream,
+	 * return {@code null}.
+	 */
 	private String findStreamContainingAppOf(ApplicationType appType, String appName, String appVersion) {
-		Iterable<StreamDefinition> streams = streamDefinitionRepository.findAll();
-		for (StreamDefinition stream : streams) {
-			StreamDeployment streamDeployment = this.streamService.info(stream.getName());
-			for (StreamAppDefinition streamAppDefinition : stream.getAppDefinitions()) {
+		Iterable<StreamDefinition> streamDefinitions = streamDefinitionRepository.findAll();
+		for (StreamDefinition streamDefinition : streamDefinitions) {
+			StreamDeployment streamDeployment = this.streamService.info(streamDefinition.getName());
+			for (StreamAppDefinition streamAppDefinition : streamDefinition.getAppDefinitions()) {
 				final String streamAppName = streamAppDefinition.getRegisteredAppName();
 				final ApplicationType streamAppType;
 				try {
@@ -277,9 +286,9 @@ public class SkipperAppRegistryController {
 					continue;
 				}
 				if (appType != streamAppType) {
-					break;
+					continue;
 				}
-				Map<String, Map<String, String>> streamDeploymentPropertiesMap = new HashMap<>();
+				Map<String, Map<String, String>> streamDeploymentPropertiesMap;
 				String streamDeploymentPropertiesString = streamDeployment.getDeploymentProperties();
 				ObjectMapper objectMapper = new ObjectMapper();
 				try {
@@ -288,12 +297,16 @@ public class SkipperAppRegistryController {
 							});
 				}
 				catch (IOException e) {
-					throw new RuntimeException("Can not deserialize string " + streamDeploymentPropertiesString);
+					throw new RuntimeException("Can not deserialize Stream Deployment Properties JSON '"
+							+ streamDeploymentPropertiesString + "'");
 				}
 				if (streamDeploymentPropertiesMap.containsKey(appName)) {
 					Map<String, String> appDeploymentProperties = streamDeploymentPropertiesMap.get(streamAppName);
-					if (appDeploymentProperties.containsValue(appVersion)) {
-						return stream.getName();
+					if (appDeploymentProperties.containsKey(SKIPPER_SPEC_VERSION)) {
+						String version = appDeploymentProperties.get(SKIPPER_SPEC_VERSION);
+						if (version != null && version.equals(appVersion)) {
+							return streamDefinition.getName();
+						}
 					}
 				}
 			}
