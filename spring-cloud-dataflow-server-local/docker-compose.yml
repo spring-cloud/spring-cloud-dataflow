@@ -10,10 +10,6 @@ services:
       - KAFKA_ZOOKEEPER_CONNECT=zookeeper:2181
     depends_on:
       - zookeeper
-  redis:
-    image: redis:2.8
-    expose:
-      - "6379"
   zookeeper:
     image: wurstmeister/zookeeper
     expose:
@@ -30,5 +26,3 @@ services:
       - spring.cloud.dataflow.applicationProperties.stream.spring.cloud.stream.kafka.binder.zkNodes=zookeeper:2181
     depends_on:
       - kafka
-      - redis
-
