@@ -1,5 +1,5 @@
 /*
- * Copyright 2016-2017 the original author or authors.
+ * Copyright 2016-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -49,6 +49,14 @@ public class Target {
 	public static final String DEFAULT_CREDENTIALS_PROVIDER_COMMAND = "";
 
 	public static final String DEFAULT_TARGET = DEFAULT_SCHEME + "://" + DEFAULT_HOST + ":" + DEFAULT_PORT + "/";
+
+	public static final String DEFAULT_PROXY_USERNAME = "";
+
+	public static final String DEFAULT_PROXY_SPECIFIED_PASSWORD = "";
+
+	public static final String DEFAULT_PROXY_UNSPECIFIED_PASSWORD = "__NULL__";
+
+	public static final String DEFAULT_PROXY_URI = "";
 
 	private final URI targetUri;
 

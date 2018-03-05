@@ -1,5 +1,5 @@
 /*
- * Copyright 2016-2017 the original author or authors.
+ * Copyright 2016-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -120,7 +120,7 @@ public class ConfigCommandTests {
 
 		configCommands.onApplicationEvent(null);
 
-		final String targetResult = configCommands.target("http://localhost:9393", null, null, null, false);
+		final String targetResult = configCommands.target("http://localhost:9393", null, null, null, false, null, null, null);
 		assertThat(targetResult, containsString("Incompatible version of Data Flow server detected"));
 	}
 
@@ -171,8 +171,15 @@ public class ConfigCommandTests {
 		securityInfoResource.setAuthenticationEnabled(false);
 		when(restTemplate.getForObject(Mockito.any(String.class), Mockito.eq(SecurityInfoResource.class))).thenReturn(securityInfoResource);
 
-		final String targetResult = configCommands.target(Target.DEFAULT_TARGET, Target.DEFAULT_USERNAME,
-				Target.DEFAULT_SPECIFIED_PASSWORD, Target.DEFAULT_CREDENTIALS_PROVIDER_COMMAND, true);
+		final String targetResult = configCommands.target(
+				Target.DEFAULT_TARGET,
+				Target.DEFAULT_USERNAME,
+				Target.DEFAULT_SPECIFIED_PASSWORD,
+				Target.DEFAULT_CREDENTIALS_PROVIDER_COMMAND,
+				true,
+				Target.DEFAULT_PROXY_URI,
+				Target.DEFAULT_PROXY_USERNAME,
+				Target.DEFAULT_PROXY_SPECIFIED_PASSWORD);
 
 		System.out.println(targetResult);
 
