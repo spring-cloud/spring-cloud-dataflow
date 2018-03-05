@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 the original author or authors.
+ * Copyright 2017-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -68,7 +68,7 @@ public class FakeMetricsCollector {
 
 	private static final Log LOGGER = LogFactory.getLog(FakeMetricsCollector.class);
 
-	@Value(value = "classpath:/org/springframework/cloud/dataflow/server/local/metrics/metrics-collector-sample-response.json")
+	@Value("classpath:/org/springframework/cloud/dataflow/server/local/metrics/metrics-collector-sample-response.json")
 	private Resource metricsCollectorResponseResource;
 
 	public static void main(String[] args) {

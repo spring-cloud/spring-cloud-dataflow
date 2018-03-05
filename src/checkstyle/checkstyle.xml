@@ -18,9 +18,11 @@
         <!--</module>-->
 
         <!-- Annotations -->
-        <!--<module name="AnnotationUseStyle">-->
-        <!--<property name="elementStyle" value="compact"/>-->
-        <!--</module>-->
+        <module name="AnnotationUseStyle">
+            <property name="elementStyle" value="compact"/>
+            <property name="trailingArrayComma" value="never"/>
+            <property name="closingParens" value="never"/>
+        </module>
         <module name="MissingOverride"/>
         <module name="PackageAnnotation"/>
         <module name="AnnotationLocation">

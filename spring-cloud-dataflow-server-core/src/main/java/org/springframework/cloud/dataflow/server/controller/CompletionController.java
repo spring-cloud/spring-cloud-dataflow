@@ -1,5 +1,5 @@
 /*
- * Copyright 2015-2016 the original author or authors.
+ * Copyright 2015-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -72,7 +72,7 @@ public class CompletionController {
 	 * 1. Higher values request more detail, with values typically in the range [1..5]
 	 * @return the list of completion proposals
 	 */
-	@RequestMapping(value = "/stream")
+	@RequestMapping("/stream")
 	public CompletionProposalsResource completions(@RequestParam("start") String start,
 			@RequestParam(value = "detailLevel", defaultValue = "1") @Min(value = 1, message = "The provided detail level must be greater than zero.") int detailLevel) {
 		return assembler.toResource(completionProvider.complete(start, detailLevel));
@@ -87,7 +87,7 @@ public class CompletionController {
 	 * 1. Higher values request more detail, with values typically in the range [1..5]
 	 * @return the list of completion proposals
 	 */
-	@RequestMapping(value = "/task")
+	@RequestMapping("/task")
 	public CompletionProposalsResource taskCompletions(@RequestParam("start") String start,
 			@RequestParam(value = "detailLevel", defaultValue = "1") @Min(value = 1, message = "The provided detail level must be greater than zero.") int detailLevel) {
 		return assembler.toResource(taskCompletionProvider.complete(start, detailLevel));
