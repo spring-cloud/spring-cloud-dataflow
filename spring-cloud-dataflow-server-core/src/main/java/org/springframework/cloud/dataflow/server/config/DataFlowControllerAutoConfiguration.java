@@ -75,6 +75,7 @@ import org.springframework.cloud.dataflow.server.controller.RestControllerAdvice
 import org.springframework.cloud.dataflow.server.controller.RootController;
 import org.springframework.cloud.dataflow.server.controller.RuntimeAppsController;
 import org.springframework.cloud.dataflow.server.controller.RuntimeAppsController.AppInstanceController;
+import org.springframework.cloud.dataflow.server.controller.SkipperAppRegistryController;
 import org.springframework.cloud.dataflow.server.controller.SkipperStreamDeploymentController;
 import org.springframework.cloud.dataflow.server.controller.StreamDefinitionController;
 import org.springframework.cloud.dataflow.server.controller.StreamDeploymentController;
@@ -82,7 +83,6 @@ import org.springframework.cloud.dataflow.server.controller.TaskDefinitionContro
 import org.springframework.cloud.dataflow.server.controller.TaskExecutionController;
 import org.springframework.cloud.dataflow.server.controller.ToolsController;
 import org.springframework.cloud.dataflow.server.controller.UiController;
-import org.springframework.cloud.dataflow.server.controller.VersionedAppRegistryController;
 import org.springframework.cloud.dataflow.server.controller.security.LoginController;
 import org.springframework.cloud.dataflow.server.controller.security.SecurityController;
 import org.springframework.cloud.dataflow.server.controller.support.MetricStore;
@@ -406,10 +406,15 @@ public class DataFlowControllerAutoConfiguration {
 		}
 
 		@Bean
-		public VersionedAppRegistryController appRegistryController2(AppRegistryService appRegistry,
-				ApplicationConfigurationMetadataResolver metadataResolver, ForkJoinPool appRegistryFJPFB,
-				MavenProperties mavenProperties) {
-			return new VersionedAppRegistryController(appRegistry, metadataResolver, appRegistryFJPFB, mavenProperties);
+		public SkipperAppRegistryController skipperAppRegistryController(
+				StreamDefinitionRepository streamDefinitionRepository,
+				StreamService streamService,
+				AppRegistryService appRegistry, ApplicationConfigurationMetadataResolver metadataResolver,
+				ForkJoinPool appRegistryFJPFB, MavenProperties mavenProperties) {
+			return new SkipperAppRegistryController(streamDefinitionRepository,
+					streamService,
+					appRegistry,
+					metadataResolver, appRegistryFJPFB, mavenProperties);
 		}
 	}
 

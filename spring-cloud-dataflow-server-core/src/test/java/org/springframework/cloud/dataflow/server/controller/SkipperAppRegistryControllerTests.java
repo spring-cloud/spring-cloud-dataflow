@@ -16,6 +16,10 @@
 
 package org.springframework.cloud.dataflow.server.controller;
 
+import java.nio.charset.Charset;
+import java.util.HashMap;
+import java.util.Map;
+
 import javax.transaction.Transactional;
 
 import org.junit.Before;
@@ -24,12 +28,24 @@ import org.junit.runner.RunWith;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.cloud.dataflow.core.ApplicationType;
+import org.springframework.cloud.dataflow.core.StreamDefinition;
 import org.springframework.cloud.dataflow.registry.domain.AppRegistration;
 import org.springframework.cloud.dataflow.registry.service.AppRegistryService;
 import org.springframework.cloud.dataflow.registry.support.NoSuchAppRegistrationException;
 import org.springframework.cloud.dataflow.server.configuration.TestDependencies;
 import org.springframework.cloud.dataflow.server.registry.DataFlowAppRegistryPopulator;
+import org.springframework.cloud.dataflow.server.repository.StreamDefinitionRepository;
+import org.springframework.cloud.dataflow.server.service.SkipperStreamService;
+import org.springframework.cloud.dataflow.server.service.impl.DefaultSkipperStreamServiceIntegrationTests;
+import org.springframework.cloud.dataflow.server.support.MockUtils;
+import org.springframework.cloud.dataflow.server.support.TestResourceUtils;
+import org.springframework.cloud.skipper.ReleaseNotFoundException;
+import org.springframework.cloud.skipper.client.SkipperClient;
+import org.springframework.cloud.skipper.domain.InstallRequest;
+import org.springframework.cloud.skipper.domain.Manifest;
+import org.springframework.cloud.skipper.domain.Release;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.http.MediaType;
 import org.springframework.test.annotation.DirtiesContext;
@@ -39,11 +55,15 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.util.Assert;
+import org.springframework.util.StreamUtils;
 import org.springframework.web.context.WebApplicationContext;
 
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
+import static org.mockito.Matchers.eq;
+import static org.mockito.Matchers.isA;
+import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -60,7 +80,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 		"spring.datasource.url=jdbc:h2:tcp://localhost:19092/mem:dataflow"})
 @DirtiesContext(classMode = ClassMode.AFTER_EACH_TEST_METHOD)
 @Transactional
-public class VersionedAppRegistryControllerTests {
+public class SkipperAppRegistryControllerTests {
 
 	private MockMvc mockMvc;
 
@@ -71,7 +91,16 @@ public class VersionedAppRegistryControllerTests {
 	private AppRegistryService appRegistryService;
 
 	@Autowired
+	private SkipperStreamService streamService;
+
+	@MockBean
+	private SkipperClient skipperClient;
+
+	@Autowired
 	private DataFlowAppRegistryPopulator uriRegistryPopulator;
+
+	@Autowired
+	private StreamDefinitionRepository streamDefinitionRepository;
 
 	@Before
 	public void setupMocks() {
@@ -81,6 +110,7 @@ public class VersionedAppRegistryControllerTests {
 			this.appRegistryService.delete(appRegistration.getName(), appRegistration.getType(), appRegistration.getVersion());
 		}
 		this.uriRegistryPopulator.afterPropertiesSet();
+		this.skipperClient = MockUtils.configureMock(this.skipperClient);
 	}
 
 	@Test
@@ -236,6 +266,93 @@ public class VersionedAppRegistryControllerTests {
 		mockMvc.perform(delete("/apps/processor/blubba").accept(MediaType.APPLICATION_JSON))
 				.andExpect(status().isOk());
 	}
+
+	@Test
+	@Transactional
+	public void testUnregisterApplicationUsedInStream() throws Exception {
+		// Note, by default there are apps registered from classpath:META-INF/test-apps.properties.
+
+		// Register time source v1.2
+		mockMvc.perform(post("/apps/source/time")
+				.param("uri", "maven://org.springframework.cloud.stream.app:time-source-rabbit:1.2.0.RELEASE").accept(MediaType.APPLICATION_JSON))
+				.andExpect(status().isCreated());
+
+		// Make sure the 1.2 time source is registered.
+		mockMvc.perform(get("/apps/source/time/1.2.0.RELEASE").accept(MediaType.APPLICATION_JSON))
+				.andExpect(status().isOk()).andExpect(jsonPath("name", is("time")))
+				.andExpect(jsonPath("type", is("source")));
+
+		// Register log sink v1.2
+		mockMvc.perform(post("/apps/sink/log")
+				.param("uri", "maven://org.springframework.cloud.stream.app:log-sink-rabbit:1.2.0.RELEASE").accept(MediaType.APPLICATION_JSON))
+				.andExpect(status().isCreated());
+
+		// Make sure the 1.2 log sink is registered.
+		mockMvc.perform(get("/apps/sink/log/1.2.0.RELEASE").accept(MediaType.APPLICATION_JSON))
+				.andExpect(status().isOk()).andExpect(jsonPath("name", is("log")))
+				.andExpect(jsonPath("type", is("sink")));
+
+		// Register a transformer
+		mockMvc.perform(post("/apps/processor/transformer")
+				.param("uri", "maven://org.springframework.cloud.stream.app:transformer-processor-rabbit:1.2.0.RELEASE").accept(MediaType.APPLICATION_JSON))
+				.andExpect(status().isCreated());
+
+		// Register a task
+		mockMvc.perform(post("/apps/task/timestamp")
+				.param("uri", "maven://org.springframework.cloud.task.app:timestamp-task:1.3.0.RELEASE")
+				.accept(MediaType.APPLICATION_JSON))
+				.andExpect(status().isCreated());
+
+		// Create stream definition
+		StreamDefinition streamDefinition = new StreamDefinition("ticktock", "time --fixed-delay=100 | log --level=DEBUG");
+		streamDefinitionRepository.save(streamDefinition);
+
+		// configure mock SkipperClient
+		String expectedReleaseManifest = StreamUtils.copyToString(
+				TestResourceUtils.qualifiedResource(DefaultSkipperStreamServiceIntegrationTests.class,
+						"deployManifest.yml").getInputStream(),
+				Charset.defaultCharset());
+		Release release = new Release();
+		Manifest manifest = new Manifest();
+		manifest.setData(expectedReleaseManifest);
+		release.setManifest(manifest);
+		when(skipperClient.install(isA(InstallRequest.class))).thenReturn(release);
+		when(skipperClient.manifest(eq("ticktock"))).thenReturn(expectedReleaseManifest);
+		when(skipperClient.status(eq("ticktock"))).thenThrow(new ReleaseNotFoundException(""));
+
+		// Deploy stream with time source v1.2 and log sink v1.2
+		Map<String, String> deploymentProperties = new HashMap<>();
+		deploymentProperties.put("version.time", "1.2.0.RELEASE");
+		deploymentProperties.put("version.log", "1.2.0.RELEASE");
+		streamService.deployStream("ticktock", deploymentProperties);
+
+
+		// This log sink v1.2 is part of a deployed stream, so it can be unregistered
+		mockMvc.perform(delete("/apps/sink/log/1.2.0.RELEASE").accept(MediaType.APPLICATION_JSON))
+				.andExpect(status().isConflict());
+
+		// This log sink v1.0.BS is part of a deployed stream, so it can be unregistered
+		mockMvc.perform(delete("/apps/sink/log/1.0.0.BUILD-SNAPSHOT").accept(MediaType.APPLICATION_JSON))
+				.andExpect(status().isOk());
+
+		// This time source v1.0 BS is not part of a deployed stream, so it can be unregistered
+		mockMvc.perform(delete("/apps/source/time/1.0.0.BUILD-SNAPSHOT").accept(MediaType.APPLICATION_JSON))
+				.andExpect(status().isOk());
+
+		// This time source is part of a deployed stream, so it can not be unregistered.
+		mockMvc.perform(delete("/apps/source/time/1.2.0.RELEASE").accept(MediaType.APPLICATION_JSON))
+				.andExpect(status().isConflict());
+
+
+		// This is unrelated to a stream, so should work
+		mockMvc.perform(delete("/apps/task/timestamp/1.3.0.RELEASE").accept(MediaType.APPLICATION_JSON))
+				.andExpect(status().isOk());
+
+		// Transformer processor is not deployed, so should work
+		mockMvc.perform(delete("/apps/processor/transformer").accept(MediaType.APPLICATION_JSON))
+				.andExpect(status().isOk());
+	}
+
 
 	@Test
 	public void testUnregisterApplicationNotFound() throws Exception {

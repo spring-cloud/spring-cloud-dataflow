@@ -24,22 +24,33 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.ForkJoinPool;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import org.springframework.boot.configurationmetadata.ConfigurationMetadataProperty;
 import org.springframework.cloud.dataflow.configuration.metadata.ApplicationConfigurationMetadataResolver;
 import org.springframework.cloud.dataflow.core.ApplicationType;
+import org.springframework.cloud.dataflow.core.StreamAppDefinition;
+import org.springframework.cloud.dataflow.core.StreamDefinition;
+import org.springframework.cloud.dataflow.core.StreamDeployment;
 import org.springframework.cloud.dataflow.registry.domain.AppRegistration;
 import org.springframework.cloud.dataflow.registry.service.AppRegistryService;
 import org.springframework.cloud.dataflow.registry.service.DefaultAppRegistryService;
 import org.springframework.cloud.dataflow.registry.support.NoSuchAppRegistrationException;
 import org.springframework.cloud.dataflow.registry.support.ResourceUtils;
+import org.springframework.cloud.dataflow.rest.SkipperStream;
 import org.springframework.cloud.dataflow.rest.resource.AppRegistrationResource;
 import org.springframework.cloud.dataflow.rest.resource.DetailedAppRegistrationResource;
+import org.springframework.cloud.dataflow.server.DataFlowServerUtil;
+import org.springframework.cloud.dataflow.server.repository.StreamDefinitionRepository;
+import org.springframework.cloud.dataflow.server.service.StreamService;
+import org.springframework.cloud.dataflow.server.support.CannotDetermineApplicationTypeException;
 import org.springframework.cloud.deployer.resource.maven.MavenProperties;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.DefaultResourceLoader;
@@ -75,25 +86,33 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/apps")
 @ExposesResourceFor(AppRegistrationResource.class)
-public class VersionedAppRegistryController {
+public class SkipperAppRegistryController {
 
-	private static final Logger logger = LoggerFactory.getLogger(VersionedAppRegistryController.class);
+	private static final Logger logger = LoggerFactory.getLogger(SkipperAppRegistryController.class);
 
 	private final Assembler assembler = new Assembler();
 
+	private final StreamDefinitionRepository streamDefinitionRepository;
+
 	private final AppRegistryService appRegistryService;
+
+	private final MavenProperties mavenProperties;
+
+	private final StreamService streamService;
 
 	private ApplicationConfigurationMetadataResolver metadataResolver;
 
 	private ForkJoinPool forkJoinPool;
 
-	private final MavenProperties mavenProperties;
-
 	private ResourceLoader resourceLoader = new DefaultResourceLoader();
 
-	public VersionedAppRegistryController(AppRegistryService appRegistryService,
+	public SkipperAppRegistryController(StreamDefinitionRepository streamDefinitionRepository,
+			StreamService streamService,
+			AppRegistryService appRegistryService,
 			ApplicationConfigurationMetadataResolver metadataResolver,
 			ForkJoinPool forkJoinPool, MavenProperties mavenProperties) {
+		this.streamDefinitionRepository = streamDefinitionRepository;
+		this.streamService = streamService;
 		this.appRegistryService = appRegistryService;
 		this.metadataResolver = metadataResolver;
 		this.forkJoinPool = forkJoinPool;
@@ -230,7 +249,68 @@ public class VersionedAppRegistryController {
 	@ResponseStatus(HttpStatus.OK)
 	public void unregister(@PathVariable("type") ApplicationType type, @PathVariable("name") String name,
 			@PathVariable("version") String version) {
+
+		if (type != ApplicationType.task) {
+			String streamWithApp = findStreamContainingAppOf(type, name, version);
+			if (streamWithApp != null) {
+				throw new UnregisterAppException(String.format("The app [%s:%s:%s] you're trying to unregister is " +
+						"currently used in stream '%s'.", name, type, version, streamWithApp));
+			}
+		}
+
 		appRegistryService.delete(name, type, version);
+	}
+
+	/**
+	 * Given the application type, name, and version, determine if it is being used in a deployed stream definition.
+	 *
+	 * @param appType the application type
+	 * @param appName the application name
+	 * @param appVersion application version
+	 * @return the name of the deployed stream where the app is being used.  If the app is not deployed in a stream,
+	 * return {@code null}.
+	 */
+	private String findStreamContainingAppOf(ApplicationType appType, String appName, String appVersion) {
+		Iterable<StreamDefinition> streamDefinitions = streamDefinitionRepository.findAll();
+		for (StreamDefinition streamDefinition : streamDefinitions) {
+			StreamDeployment streamDeployment = this.streamService.info(streamDefinition.getName());
+			for (StreamAppDefinition streamAppDefinition : streamDefinition.getAppDefinitions()) {
+				final String streamAppName = streamAppDefinition.getRegisteredAppName();
+				final ApplicationType streamAppType;
+				try {
+					streamAppType = DataFlowServerUtil.determineApplicationType(streamAppDefinition);
+				}
+				catch (CannotDetermineApplicationTypeException e) {
+					logger.warn("Can not determine ApplicationType for " + streamAppDefinition);
+					continue;
+				}
+				if (appType != streamAppType) {
+					continue;
+				}
+				Map<String, Map<String, String>> streamDeploymentPropertiesMap;
+				String streamDeploymentPropertiesString = streamDeployment.getDeploymentProperties();
+				ObjectMapper objectMapper = new ObjectMapper();
+				try {
+					streamDeploymentPropertiesMap = objectMapper.readValue(streamDeploymentPropertiesString,
+							new TypeReference<Map<String, Map<String, String>>>() {
+							});
+				}
+				catch (IOException e) {
+					throw new RuntimeException("Can not deserialize Stream Deployment Properties JSON '"
+							+ streamDeploymentPropertiesString + "'");
+				}
+				if (streamDeploymentPropertiesMap.containsKey(appName)) {
+					Map<String, String> appDeploymentProperties = streamDeploymentPropertiesMap.get(streamAppName);
+					if (appDeploymentProperties.containsKey(SkipperStream.SKIPPER_SPEC_VERSION)) {
+						String version = appDeploymentProperties.get(SkipperStream.SKIPPER_SPEC_VERSION);
+						if (version != null && version.equals(appVersion)) {
+							return streamDefinition.getName();
+						}
+					}
+				}
+			}
+		}
+		return null;
 	}
 
 	@Deprecated
@@ -306,7 +386,7 @@ public class VersionedAppRegistryController {
 	class Assembler extends ResourceAssemblerSupport<AppRegistration, AppRegistrationResource> {
 
 		public Assembler() {
-			super(VersionedAppRegistryController.class, AppRegistrationResource.class);
+			super(SkipperAppRegistryController.class, AppRegistrationResource.class);
 		}
 
 		@Override

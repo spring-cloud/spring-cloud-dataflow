@@ -243,11 +243,9 @@ public class DefaultSkipperStreamServiceIntegrationTests {
 		String releaseManifest = StreamUtils.copyToString(
 				TestResourceUtils.qualifiedResource(getClass(), "deployManifest.yml").getInputStream(),
 				Charset.defaultCharset());
-		String deploymentProps = "{\"log\":{\"spring.cloud.deployer.indexed\":\"true\","
-				+ "\"spring.cloud.deployer.group\":\"ticktock\","
-				+ "\"maven:\\/\\/org.springframework.cloud.stream.app:log-sink-rabbit\":\"1.2.0.RELEASE\"}"
-				+ ",\"time\":{\"maven:\\/\\/org.springframework.cloud.stream.app:time-source-rabbit\":\"1.2.0.RELEASE\","
-				+ "\"spring.cloud.deployer.group\":\"ticktock\"}}";
+		String deploymentProps =  StreamUtils.copyToString(
+				TestResourceUtils.qualifiedResource(getClass(), "deploymentProps.json").getInputStream(),
+				Charset.defaultCharset());
 		when(skipperClient.manifest(streamDefinition.getName())).thenReturn(releaseManifest);
 		StreamDeployment streamDeployment = this.streamService.info(streamDefinition.getName());
 		assertThat(streamDeployment.getStreamName()).isEqualTo(streamDefinition.getName());

@@ -431,7 +431,8 @@ public class SkipperStreamDeployer implements StreamDeployer {
 				SpringCloudDeployerApplicationSpec spec = applicationManifest.getSpec();
 				String applicationName = applicationManifest.getApplicationName();
 				versionAndDeploymentProperties.putAll(spec.getDeploymentProperties());
-				versionAndDeploymentProperties.put(spec.getResource(), spec.getVersion());
+				versionAndDeploymentProperties.put(SkipperStream.SKIPPER_SPEC_RESOURCE, spec.getResource());
+				versionAndDeploymentProperties.put(SkipperStream.SKIPPER_SPEC_VERSION, spec.getVersion());
 				streamPropertiesMap.put(applicationName, versionAndDeploymentProperties);
 			}
 			return new StreamDeployment(streamName, new JSONObject(streamPropertiesMap).toString());

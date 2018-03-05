@@ -54,13 +54,13 @@ import org.springframework.cloud.dataflow.server.controller.CompletionController
 import org.springframework.cloud.dataflow.server.controller.MetricsController;
 import org.springframework.cloud.dataflow.server.controller.RestControllerAdvice;
 import org.springframework.cloud.dataflow.server.controller.RuntimeAppsController;
+import org.springframework.cloud.dataflow.server.controller.SkipperAppRegistryController;
 import org.springframework.cloud.dataflow.server.controller.SkipperStreamDeploymentController;
 import org.springframework.cloud.dataflow.server.controller.StreamDefinitionController;
 import org.springframework.cloud.dataflow.server.controller.StreamDeploymentController;
 import org.springframework.cloud.dataflow.server.controller.TaskDefinitionController;
 import org.springframework.cloud.dataflow.server.controller.TaskExecutionController;
 import org.springframework.cloud.dataflow.server.controller.ToolsController;
-import org.springframework.cloud.dataflow.server.controller.VersionedAppRegistryController;
 import org.springframework.cloud.dataflow.server.controller.support.ApplicationsMetrics;
 import org.springframework.cloud.dataflow.server.controller.support.ApplicationsMetrics.Application;
 import org.springframework.cloud.dataflow.server.controller.support.ApplicationsMetrics.Instance;
@@ -274,9 +274,13 @@ public class TestDependencies extends WebMvcConfigurationSupport {
 
 	@Bean
 	@ConditionalOnSkipperEnabled
-	public VersionedAppRegistryController versionedAppRegistryController(AppRegistryService appRegistry,
+	public SkipperAppRegistryController versionedAppRegistryController(
+			StreamDefinitionRepository streamDefinitionRepository,
+			StreamService streamService,
+			AppRegistryService appRegistry,
 			ApplicationConfigurationMetadataResolver metadataResolver, MavenProperties mavenProperties) {
-		return new VersionedAppRegistryController(appRegistry, metadataResolver, new ForkJoinPool(2), mavenProperties);
+		return new SkipperAppRegistryController(streamDefinitionRepository, streamService, appRegistry, metadataResolver,
+				new ForkJoinPool(2), mavenProperties);
 	}
 
 	@Bean
