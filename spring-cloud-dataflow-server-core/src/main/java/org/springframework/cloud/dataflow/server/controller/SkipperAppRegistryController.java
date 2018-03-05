@@ -289,6 +289,9 @@ public class SkipperAppRegistryController {
 				}
 				Map<String, Map<String, String>> streamDeploymentPropertiesMap;
 				String streamDeploymentPropertiesString = streamDeployment.getDeploymentProperties();
+				if (!StringUtils.hasText(streamDeploymentPropertiesString)) {
+					continue;
+				}
 				ObjectMapper objectMapper = new ObjectMapper();
 				try {
 					streamDeploymentPropertiesMap = objectMapper.readValue(streamDeploymentPropertiesString,

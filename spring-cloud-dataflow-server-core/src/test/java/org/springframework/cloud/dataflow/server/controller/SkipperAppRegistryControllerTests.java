@@ -353,6 +353,75 @@ public class SkipperAppRegistryControllerTests {
 				.andExpect(status().isOk());
 	}
 
+	@Test
+	@Transactional
+	public void testUnregisterApplicationUsedInStreamNotDeployed() throws Exception {
+		// Note, by default there are apps registered from classpath:META-INF/test-apps.properties.
+
+		// Register time source v1.2
+		mockMvc.perform(post("/apps/source/time")
+				.param("uri", "maven://org.springframework.cloud.stream.app:time-source-rabbit:1.2.0.RELEASE").accept(MediaType.APPLICATION_JSON))
+				.andExpect(status().isCreated());
+
+		// Make sure the 1.2 time source is registered.
+		mockMvc.perform(get("/apps/source/time/1.2.0.RELEASE").accept(MediaType.APPLICATION_JSON))
+				.andExpect(status().isOk()).andExpect(jsonPath("name", is("time")))
+				.andExpect(jsonPath("type", is("source")));
+
+		// Register log sink v1.2
+		mockMvc.perform(post("/apps/sink/log")
+				.param("uri", "maven://org.springframework.cloud.stream.app:log-sink-rabbit:1.2.0.RELEASE").accept(MediaType.APPLICATION_JSON))
+				.andExpect(status().isCreated());
+
+		// Make sure the 1.2 log sink is registered.
+		mockMvc.perform(get("/apps/sink/log/1.2.0.RELEASE").accept(MediaType.APPLICATION_JSON))
+				.andExpect(status().isOk()).andExpect(jsonPath("name", is("log")))
+				.andExpect(jsonPath("type", is("sink")));
+
+		// Register a transformer
+		mockMvc.perform(post("/apps/processor/transformer")
+				.param("uri", "maven://org.springframework.cloud.stream.app:transformer-processor-rabbit:1.2.0.RELEASE").accept(MediaType.APPLICATION_JSON))
+				.andExpect(status().isCreated());
+
+		// Register a task
+		mockMvc.perform(post("/apps/task/timestamp")
+				.param("uri", "maven://org.springframework.cloud.task.app:timestamp-task:1.3.0.RELEASE")
+				.accept(MediaType.APPLICATION_JSON))
+				.andExpect(status().isCreated());
+
+		// Create stream definition
+		StreamDefinition streamDefinition = new StreamDefinition("ticktock", "time --fixed-delay=100 | log --level=DEBUG");
+		streamDefinitionRepository.save(streamDefinition);
+
+		// configure mock SkipperClient
+		when(skipperClient.manifest(eq("ticktock"))).thenThrow(new ReleaseNotFoundException(""));
+		when(skipperClient.status(eq("ticktock"))).thenThrow(new ReleaseNotFoundException(""));
+
+		// This log sink v1.2 is part of a deployed stream, so it can be unregistered
+		mockMvc.perform(delete("/apps/sink/log/1.2.0.RELEASE").accept(MediaType.APPLICATION_JSON))
+				.andExpect(status().isOk());
+
+		// This log sink v1.0.BS is part of a deployed stream, so it can be unregistered
+		mockMvc.perform(delete("/apps/sink/log/1.0.0.BUILD-SNAPSHOT").accept(MediaType.APPLICATION_JSON))
+				.andExpect(status().isOk());
+
+		// This time source v1.0 BS is not part of a deployed stream, so it can be unregistered
+		mockMvc.perform(delete("/apps/source/time/1.0.0.BUILD-SNAPSHOT").accept(MediaType.APPLICATION_JSON))
+				.andExpect(status().isOk());
+
+		// This time source is part of a deployed stream, so it can not be unregistered.
+		mockMvc.perform(delete("/apps/source/time/1.2.0.RELEASE").accept(MediaType.APPLICATION_JSON))
+				.andExpect(status().isOk());
+
+
+		// This is unrelated to a stream, so should work
+		mockMvc.perform(delete("/apps/task/timestamp/1.3.0.RELEASE").accept(MediaType.APPLICATION_JSON))
+				.andExpect(status().isOk());
+
+		// Transformer processor is not deployed, so should work
+		mockMvc.perform(delete("/apps/processor/transformer").accept(MediaType.APPLICATION_JSON))
+				.andExpect(status().isOk());
+	}
 
 	@Test
 	public void testUnregisterApplicationNotFound() throws Exception {
