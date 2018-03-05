@@ -21,13 +21,16 @@ import org.apache.http.HttpHost;
 import org.apache.http.HttpRequestInterceptor;
 import org.apache.http.auth.AuthScope;
 import org.apache.http.auth.UsernamePasswordCredentials;
+import org.apache.http.client.CredentialsProvider;
 import org.apache.http.conn.ssl.NoopHostnameVerifier;
 import org.apache.http.impl.client.BasicCredentialsProvider;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
+import org.apache.http.impl.client.ProxyAuthenticationStrategy;
 
 import org.springframework.http.client.ClientHttpRequestFactory;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
+import org.springframework.util.Assert;
 
 /**
  * Utility for configuring a {@link CloseableHttpClient}. This class allows for
@@ -63,6 +66,34 @@ public class HttpClientConfigurer {
 
 		useBasicAuth = true;
 
+		return this;
+	}
+
+	/**
+	 * Configures the {@link HttpClientBuilder} with a proxy host. If the
+	 * {@code proxyUsername} and {@code proxyPassword} are not {@code null}
+	 * then a {@link CredentialsProvider} is also configured for the proxy host.
+	 *
+	 * @param proxyUri Must not be null and must be configured with a scheme (http or https).
+	 * @param proxyUsername May be null
+	 * @param proxyPassword May be null
+	 * @return a reference to {@code this} to enable chained method invocation
+	 */
+	public HttpClientConfigurer withProxyCredentials(URI proxyUri, String proxyUsername, String proxyPassword) {
+
+		Assert.notNull(proxyUri, "The proxyUri must not be null.");
+		Assert.hasText(proxyUri.getScheme(), "The scheme component of the proxyUri must not be empty.");
+
+		httpClientBuilder
+			.setProxy(new HttpHost(proxyUri.getHost(), proxyUri.getPort(), proxyUri.getScheme()));
+		if (proxyUsername !=null && proxyPassword != null) {
+			final CredentialsProvider proxyCredsProvider = new BasicCredentialsProvider();
+			proxyCredsProvider.setCredentials(
+				new AuthScope(proxyUri.getHost(), proxyUri.getPort()),
+				new UsernamePasswordCredentials(proxyUsername, proxyPassword));
+			httpClientBuilder.setDefaultCredentialsProvider(proxyCredsProvider)
+				.setProxyAuthenticationStrategy(new ProxyAuthenticationStrategy());
+		}
 		return this;
 	}
 

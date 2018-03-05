@@ -18,6 +18,7 @@ package org.springframework.cloud.dataflow.shell.command.common;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedHashMap;
@@ -122,6 +123,15 @@ public class ConfigCommands implements CommandMarker, InitializingBean, Applicat
 	@Value("${dataflow.skip-ssl-validation:" + Target.DEFAULT_UNSPECIFIED_SKIP_SSL_VALIDATION + "}")
 	private boolean skipSslValidation;
 
+	@Value("${dataflow.proxy.uri:" + Target.DEFAULT_PROXY_URI + "}")
+	private String proxyUri;
+
+	@Value("${dataflow.proxy.username:" + Target.DEFAULT_PROXY_USERNAME + "}")
+	private String proxyUsername;
+
+	@Value("${dataflow.proxy.password:" + Target.DEFAULT_PROXY_SPECIFIED_PASSWORD + "}")
+	private String proxyPassword;
+
 	@Value("${dataflow.credentials-provider-command:" + Target.DEFAULT_CREDENTIALS_PROVIDER_COMMAND + "}")
 	private String credentialsProviderCommand;
 
@@ -182,7 +192,16 @@ public class ConfigCommands implements CommandMarker, InitializingBean, Applicat
 			@CliOption(mandatory = false, key = {
 					"credentials-provider-command" }, help = "a command to run that outputs the HTTP credentials used for authentication", unspecifiedDefaultValue = Target.DEFAULT_CREDENTIALS_PROVIDER_COMMAND) String credentialsProviderCommand,
 			@CliOption(mandatory = false, key = {
-					"skip-ssl-validation" }, help = "accept any SSL certificate (even self-signed)", specifiedDefaultValue = Target.DEFAULT_SPECIFIED_SKIP_SSL_VALIDATION, unspecifiedDefaultValue = Target.DEFAULT_UNSPECIFIED_SKIP_SSL_VALIDATION) boolean skipSslValidation) {
+					"skip-ssl-validation" }, help = "accept any SSL certificate (even self-signed)", specifiedDefaultValue = Target.DEFAULT_SPECIFIED_SKIP_SSL_VALIDATION, unspecifiedDefaultValue = Target.DEFAULT_UNSPECIFIED_SKIP_SSL_VALIDATION) boolean skipSslValidation,
+
+			@CliOption(mandatory = false, key = {
+					"proxy-uri" }, help = "the uri of the proxy server", specifiedDefaultValue = Target.DEFAULT_SPECIFIED_PASSWORD, unspecifiedDefaultValue = Target.DEFAULT_UNSPECIFIED_PASSWORD) String proxyUri,
+			@CliOption(mandatory = false, key = {
+					"proxy-username" }, help = "the username for authenticated access to the secured proxy server (valid only with a "
+					+ "username)", specifiedDefaultValue = Target.DEFAULT_SPECIFIED_PASSWORD, unspecifiedDefaultValue = Target.DEFAULT_UNSPECIFIED_PASSWORD) String proxyUsername,
+			@CliOption(mandatory = false, key = {
+					"proxy-password" }, help = "the password for authenticated access to the secured proxy server (valid only with a "
+					+ "username)", specifiedDefaultValue = Target.DEFAULT_SPECIFIED_PASSWORD, unspecifiedDefaultValue = Target.DEFAULT_UNSPECIFIED_PASSWORD) String proxyPassword) {
 		if (StringUtils.isEmpty(credentialsProviderCommand) &&
 				!StringUtils.isEmpty(targetPassword) && StringUtils.isEmpty(targetUsername)) {
 			return "A password may be specified only together with a username";
@@ -207,6 +226,13 @@ public class ConfigCommands implements CommandMarker, InitializingBean, Applicat
 				this.targetHolder.getTarget().setTargetCredentials(new TargetCredentials(true));
 				final CheckableResource credentialsResource = new ProcessOutputResource(credentialsProviderCommand.split("\\s+"));
 				httpClientConfigurer.addInterceptor(new ResourceBasedAuthorizationInterceptor(credentialsResource));
+			}
+			if (StringUtils.hasText(proxyUri)) {
+				if (StringUtils.isEmpty(proxyPassword) && !StringUtils.isEmpty(proxyUsername)) {
+					// read password from the command line
+					proxyPassword = userInput.prompt("Proxy Server Password", "", false);
+				}
+				httpClientConfigurer.withProxyCredentials(URI.create(proxyUri), proxyUsername, proxyPassword);
 			}
 			this.restTemplate.setRequestFactory(httpClientConfigurer.buildClientHttpRequestFactory());
 
@@ -409,7 +435,16 @@ public class ConfigCommands implements CommandMarker, InitializingBean, Applicat
 		// Only invoke if the shell is executing in the same application context as the
 		// data flow server.
 		if (!initialized) {
-			target(this.serverUri, this.userName, this.password, this.credentialsProviderCommand, this.skipSslValidation);
+			target(
+				this.serverUri,
+				this.userName,
+				this.password,
+				this.credentialsProviderCommand,
+				this.skipSslValidation,
+				this.proxyUri,
+				this.proxyUsername,
+				this.proxyPassword
+			);
 		}
 	}
 
@@ -419,7 +454,16 @@ public class ConfigCommands implements CommandMarker, InitializingBean, Applicat
 		// mode.
 		if (applicationContext != null && !applicationContext.containsBean("streamDefinitionRepository")) {
 			initialized = true;
-			target(this.serverUri, this.userName, this.password, this.credentialsProviderCommand, this.skipSslValidation);
+			target(
+				this.serverUri,
+				this.userName,
+				this.password,
+				this.credentialsProviderCommand,
+				this.skipSslValidation,
+				this.proxyUri,
+				this.proxyUsername,
+				this.proxyPassword
+			);
 		}
 	}
 
