@@ -16,9 +16,9 @@ services:
       - "2181"
     environment:
       - KAFKA_ADVERTISED_HOST_NAME=zookeeper
-
   dataflow-server:
     image: springcloud/spring-cloud-dataflow-server-local:latest
+    container_name: dataflow-server
     ports:
       - "9393:9393"
     environment:
@@ -26,3 +26,18 @@ services:
       - spring.cloud.dataflow.applicationProperties.stream.spring.cloud.stream.kafka.binder.zkNodes=zookeeper:2181
     depends_on:
       - kafka
+  app-import:
+    image: alpine:3.7
+    depends_on:
+      - dataflow-server
+    command: >
+      /bin/sh -c "
+        while ! nc -z dataflow-server 9393;
+        do
+          sleep 1;
+        done;
+        wget -qO- 'http://dataflow-server:9393/apps' --post-data='uri=http://bit.ly/Celsius-SR1-stream-applications-kafka-10-maven&force=true';
+        echo 'Stream apps imported'
+        wget -qO- 'http://dataflow-server:9393/apps'  --post-data='uri=http://bit.ly/Clark-GA-task-applications-maven&force=true';
+        echo 'Task apps imported'
+      "
