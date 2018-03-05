@@ -186,6 +186,7 @@ image::{dataflow-asciidoc}/images/dataflow-flo-tap-stream-switch-to-primary-stre
 TIP: When interacting directly with <<spring-cloud-dataflow-stream-dsl-named-destinations,named destinations>>,
 there can be "n" combinations (Inputs/Outputs). This allows you to create complex topologies involving a
 wide variety of data sources and destinations.
+=======
 
 ifndef::omit-tasks-docs[]
 [[dashboard-tasks]]
