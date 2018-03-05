@@ -16,6 +16,9 @@
 
 package org.springframework.cloud.dataflow.server.controller;
 
+import java.util.List;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -26,6 +29,8 @@ import org.springframework.cloud.dataflow.core.ApplicationType;
 import org.springframework.cloud.dataflow.registry.AppRegistry;
 import org.springframework.cloud.dataflow.registry.domain.AppRegistration;
 import org.springframework.cloud.dataflow.server.configuration.TestDependencies;
+import org.springframework.cloud.dataflow.server.controller.support.BulkAppRegisterRequest;
+import org.springframework.cloud.dataflow.server.controller.support.RegisteredApp;
 import org.springframework.cloud.dataflow.server.registry.DataFlowAppRegistryPopulator;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.http.MediaType;
@@ -278,6 +283,23 @@ public class AppRegistryControllerTests {
 				.andExpect(jsonPath("page.totalElements", is(3)))
 				.andExpect(jsonPath("page.totalPages", is(2)))
 				.andExpect(jsonPath("page.number", is(0)));
+	}
+
+	@Test
+	public void testBulkUnregister() throws Exception {
+		ObjectMapper mapper = new ObjectMapper();
+		appRegistry.importAll(true, new ClassPathResource("META-INF/test-apps-overwrite.properties"));
+		List<AppRegistration> apps = appRegistry.findAll();
+		BulkAppRegisterRequest request = new BulkAppRegisterRequest();
+		apps.forEach(app -> {
+			request.getRegisteredApps().add(new RegisteredApp(app.getName(), app.getType(), app.getVersion()));
+		});
+		mockMvc.perform(post("/apps/bulk/unregister").content(mapper.writeValueAsString(request))
+				.accept(MediaType.APPLICATION_JSON)
+				.contentType(MediaType.APPLICATION_JSON))
+				.andExpect(status().isOk())
+				.andExpect(jsonPath("unregisterAppResponses", hasSize(4)));
+		assertThat(appRegistry.findAll(), hasSize(0));
 	}
 
 }

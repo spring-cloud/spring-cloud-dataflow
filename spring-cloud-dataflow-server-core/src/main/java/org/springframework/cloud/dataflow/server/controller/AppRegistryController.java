@@ -39,6 +39,9 @@ import org.springframework.cloud.dataflow.registry.domain.AppRegistration;
 import org.springframework.cloud.dataflow.registry.support.NoSuchAppRegistrationException;
 import org.springframework.cloud.dataflow.rest.resource.AppRegistrationResource;
 import org.springframework.cloud.dataflow.rest.resource.DetailedAppRegistrationResource;
+import org.springframework.cloud.dataflow.server.controller.support.BulkAppRegisterRequest;
+import org.springframework.cloud.dataflow.server.controller.support.BulkAppRegisterResponse;
+import org.springframework.cloud.dataflow.server.controller.support.UnregisterAppResponse;
 import org.springframework.context.ResourceLoaderAware;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.DefaultResourceLoader;
@@ -55,6 +58,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -71,6 +75,7 @@ import org.springframework.web.bind.annotation.RestController;
  * @author Gary Russell
  * @author Patrick Peralta
  * @author Thomas Risberg
+ * @author Vinicius Carvalho
  */
 @RestController
 @RequestMapping("/apps")
@@ -250,6 +255,26 @@ public class AppRegistryController implements ResourceLoaderAware {
 		return pagedResourcesAssembler.toResource(
 				new PageImpl<>(registrations, pageable, appRegistry.findAll().size()),
 				assembler);
+	}
+
+	/**
+	 * Unregisters the list of applications provided via request parameter.
+	 * @param request - Contains a list of applications to be removed
+	 * @return A response with the status of each requested application with either success or error
+	 */
+	@RequestMapping(method = RequestMethod.POST, value = "/bulk/unregister")
+	@ResponseStatus(HttpStatus.OK)
+	public BulkAppRegisterResponse bulkUnregister(@RequestBody BulkAppRegisterRequest request) {
+		BulkAppRegisterResponse response = new BulkAppRegisterResponse();
+		request.getRegisteredApps().forEach(registeredApp -> {
+			try{
+				unregister(registeredApp.getType(), registeredApp.getName());
+				response.getUnregisterAppResponses().add(new UnregisterAppResponse(registeredApp, "success", ""));
+			}catch (Exception e){
+				response.getUnregisterAppResponses().add(new UnregisterAppResponse(registeredApp, "error", e.getMessage()));
+			}
+		});
+		return response;
 	}
 
 	/**
