@@ -58,7 +58,6 @@ public class ResourceUtils {
 		String version = getUrlResourceVersion(urlResource);
 		URI uri = getUri(urlResource);
 		String theRest = uri.toString().substring(0, uri.toString().indexOf("-" + version));
-		Assert.isTrue(!theRest.contains(version), "URL resource with version as part of its path is not supported.");
 		return theRest;
 	}
 
