@@ -60,15 +60,13 @@ By default the latest GA releases of Stream and Task applications will be import
 . Create a Stream
 +
 To create a stream, first navigate to the "Streams" menu link then click the "Create Stream" link.
-Enter `time | log` into the "Create Stream" textarea as shown in the following image:
+Enter `time | log` into the "Create Stream" textarea then click the "CREATE STREAM" button.
+Enter "ticktock" for the stream name and click the "Deploy Stream(s) checkbox as show in the following image:
 +
-
 .Creating a Stream
 image::{dataflow-asciidoc}/images/dataflow-stream-create.png[Creating a Stream, scaledwidth="60%"]
-
 +
-After entering the stream definition, click the "CREATE STREAM" button.
-Enter "ticktock" for the stream name and click the "Deploy Stream(s) checkbox, then click "OK".
+Then click "OK" which will return back to the Definitions page.
 The stream will be in "deploying" status and move to "deployed" when finished.
 You may need to refresh your browser to see the updated status.
 +
