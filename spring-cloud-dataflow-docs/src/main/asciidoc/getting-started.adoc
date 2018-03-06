@@ -10,11 +10,27 @@ We then build an introductory Spring Cloud Data Flow application, discussing som
 --
 
 
+[[getting-started-system-requirements]]
+== System Requirements
 
-[[getting-started-deploying-spring-cloud-dataflow-quick-start]]
-== Quick Start using Docker Compose
+You need Java 8 to run and to build you need to have Maven.
 
-As of Spring Cloud Data Flow 1.4, a Docker Compose file is provided to quickly bring up Spring Cloud Data Flow and its dependencies without having to obtain them manually. Docker Compose is required and it's recommended to use the link:https://docs.docker.com/compose/install/[latest version].
+You need to have an RDBMS for storing stream definition and deployment properites and task/batch job states.
+By default, the Data Flow server uses embedded H2 database for this purpose but you can easily configure the server to use another external database.
+
+You also need to have link:https://redis.io[Redis] running if you are running any streams that involve analytics applications. Redis may also be required to run the unit/integration tests.
+
+For the deployed streams applications communicate, either link:http://www.rabbitmq.com[RabbitMQ] or link:http://kafka.apache.org[Kafka] needs to be installed.
+
+If you would like to have the feature of upgrading and rolling back applications in Streams at runtime, you should install the Spring Cloud Skipper server.
+
+
+[[getting-started-deploying-spring-cloud-dataflow-docker]]
+== Getting Started with Docker Compose
+
+As of Spring Cloud Data Flow 1.4, a Docker Compose file is provided to quickly bring up Spring Cloud Data Flow and its dependencies without having to obtain them manually.
+When running, a composed system includes the latest GA release of Spring Cloud Data Flow Local Server using the Kafka binder for communication.
+Docker Compose is required and it's recommended to use the link:https://docs.docker.com/compose/install/[latest version].
 
 . Download the Spring Cloud Data Flow Local Server Docker Compose file:
 +
@@ -32,11 +48,14 @@ In the directory where you downloaded `docker-compose.yml`, start the system, as
 $ docker-compose up
 ----
 +
+NOTE: By default Docker Compose will use locally available images.
+If for example when using the `latest` tag, execute `docker-compose pull` prior to `docker-compose up` to ensure the latest image is downloaded.
++
 . Launch the Spring Cloud Data Flow Dashboard
 +
 Spring Cloud Data Flow will be ready for use once the `docker-compose` command stops emitting log messages.
 At this time, in your browser navigate to the link:http://localhost:9393/dashboard[Spring Cloud Data Flow Dashboard].
-By default the latest GA Stream and Task applications will be imported automatically.
+By default the latest GA releases of Stream and Task applications will be imported automatically.
 +
 . Create a Stream
 +
@@ -66,7 +85,7 @@ Click the "DESTROY ALL 1 SELECTED STREAMS" button and then "YES" to destroy the 
 +
 . Destroy the Quick Start environment
 +
-To destroy the Quick Start environment, in another console, type as follows:
+To destroy the Quick Start environment, in another console from where the `docker-compose.yml` is located, type as follows:
 +
 [source,bash,subs=attributes]
 ----
@@ -75,8 +94,8 @@ $ docker-compose down
 +
 
 
-[[getting-started-customizing-spring-cloud-dataflow-quick-start]]
-== Quick Start using Docker Compose Customization
+[[getting-started-customizing-spring-cloud-dataflow-docker]]
+=== Docker Compose Customization
 
 Out of the box Spring Cloud Data Flow will use the H2 embedded database for storing state, Kafka for communication and no analytics.
 Customizations can be made to these components by editing the `docker-compose.yml` file as described below.
@@ -197,23 +216,8 @@ Then add the following entries to the `environment` block of the `dataflow-serve
 +
 
 
-[[getting-started-system-requirements]]
-== System Requirements
-
-You need Java 8 to run and to build you need to have Maven.
-
-You need to have an RDBMS for storing stream definition and deployment properites and task/batch job states.
-By default, the Data Flow server uses embedded H2 database for this purpose but you can easily configure the server to use another external database.
-
-You also need to have link:https://redis.io[Redis] running if you are running any streams that involve analytics applications. Redis may also be required to run the unit/integration tests.
-
-For the deployed streams applications communicate, either link:http://www.rabbitmq.com[RabbitMQ] or link:http://kafka.apache.org[Kafka] needs to be installed.
-
-If you would like to have the feature of upgrading and rolling back applications in Streams at runtime, you should install the Spring Cloud Skipper server.
-
-
 [[getting-started-deploying-spring-cloud-dataflow]]
-== Installation
+== Getting Started with Manual Installation
 
 . Download the Spring Cloud Data Flow Server and Shell apps:
 +
