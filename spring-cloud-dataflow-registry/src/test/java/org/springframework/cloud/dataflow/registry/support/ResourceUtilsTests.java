@@ -40,11 +40,10 @@ public class ResourceUtilsTests {
 		ResourceUtils.getUrlResourceVersion(urlResource);
 	}
 
-	@Test(expected = IllegalArgumentException.class)
 	public void testInvalidUrlResourceWithoutVersion() throws Exception {
 		UrlResource urlResource = new UrlResource("http://repo.spring"
 				+ ".io/libs-release/org/springframework/cloud/stream/app/file-sink-rabbit/1.2.0.RELEASE/file-sink-rabbit-1.2.0.RELEASE.jar");
-		ResourceUtils.getUrlResourceWithoutVersion(urlResource);
+		assertThat(ResourceUtils.getUrlResourceWithoutVersion(urlResource)).isEqualTo("1.2.0.RELEASE");
 	}
 
 	@Test
