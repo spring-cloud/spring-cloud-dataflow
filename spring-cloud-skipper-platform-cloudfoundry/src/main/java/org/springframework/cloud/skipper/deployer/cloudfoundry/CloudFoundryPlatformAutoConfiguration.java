@@ -126,9 +126,9 @@ public class CloudFoundryPlatformAutoConfiguration {
 			return deployer;
 		}
 		catch (Exception e) {
-			logger.error("Cloud Foundry platform account" + account
-					+ " could not be registered." + e.getMessage());
-			return null;
+			logger.error("Cloud Foundry platform account [{}] could not be registered: {}",
+					account, e.getMessage());
+			throw e;
 		}
 	}
 }
