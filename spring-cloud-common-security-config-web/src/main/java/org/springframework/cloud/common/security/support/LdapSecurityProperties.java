@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 the original author or authors.
+ * Copyright 2016-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,8 @@
 package org.springframework.cloud.common.security.support;
 
 import java.net.URI;
+import java.util.HashMap;
+import java.util.Map;
 
 import javax.validation.constraints.NotNull;
 
@@ -48,6 +50,8 @@ public class LdapSecurityProperties {
 	private String groupSearchBase = "";
 
 	private String groupRoleAttribute = "cn";
+
+	private Map<String, String> roleMappings = new HashMap<>(0);
 
 	public boolean isEnabled() {
 		return enabled;
@@ -127,6 +131,23 @@ public class LdapSecurityProperties {
 
 	public void setGroupRoleAttribute(String groupRoleAttribute) {
 		this.groupRoleAttribute = groupRoleAttribute;
+	}
+
+	/**
+	 * When using Ldap, you can optionally specify a custom mapping of role names
+	 * in Ldap to role names as they exist in the Spring application. If not
+	 * set, then the roles in Ldap itself must match the role names:
+	 *
+	 * <ul>
+	 *   <li>MANAGE
+	 *   <li>VIEW
+	 *   <li>CREATE
+	 * </ul>
+	 *
+	 * @return Optional (May be null). Returns a map of role-to-role mappings.
+	 */
+	public Map<String, String> getRoleMappings() {
+		return roleMappings;
 	}
 
 }

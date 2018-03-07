@@ -21,6 +21,7 @@ import java.util.Collections;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.ldap.core.DirContextOperations;
+import org.springframework.cloud.common.security.support.LdapAuthorityMapper;
 import org.springframework.cloud.common.security.support.LdapSecurityProperties;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.authentication.configurers.GlobalAuthenticationConfigurerAdapter;
@@ -46,7 +47,15 @@ public class LdapAuthenticationConfiguration extends GlobalAuthenticationConfigu
 	@Override
 	public void init(AuthenticationManagerBuilder auth) throws Exception {
 
-		LdapAuthenticationProviderConfigurer<AuthenticationManagerBuilder> ldapConfigurer = auth.ldapAuthentication();
+		final LdapAuthenticationProviderConfigurer<AuthenticationManagerBuilder> ldapConfigurer = auth.ldapAuthentication();
+		final String rolePrefix = "ROLE_";
+		ldapConfigurer.rolePrefix(rolePrefix);
+
+		if (this.ldapSecurityProperties.getRoleMappings() != null && !this.ldapSecurityProperties.getRoleMappings().isEmpty()) {
+			final LdapAuthorityMapper ldapAuthorityMapper = new LdapAuthorityMapper(ldapSecurityProperties.getRoleMappings());
+			ldapAuthorityMapper.setRolePrefix(rolePrefix);
+			ldapConfigurer.authoritiesMapper(ldapAuthorityMapper);
+		}
 
 		ldapConfigurer.contextSource().url(ldapSecurityProperties.getUrl().toString())
 				.managerDn(ldapSecurityProperties.getManagerDn())
