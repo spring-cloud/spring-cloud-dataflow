@@ -577,6 +577,39 @@ TIP: For more information, please also see the
 http://docs.spring.io/spring-security/site/docs/current/reference/html/ldap.html[LDAP Authentication]
 chapter of the Spring Security reference guide.
 
+===== LDAP Role Mapping
+
+By default, the role name retrieved from Ldap needs to match the name of the
+role in Spring Cloud Data Flow. However, it is also possible to explicitly
+provide a mapping between LDAP roles and Spring Cloud Data Flow roles.
+[source,yaml]
+----
+security:
+  basic:
+    enabled: true
+    realm: Spring Cloud Data Flow
+spring:
+  cloud:
+    dataflow:
+      security:
+        authentication:
+          ldap:
+            enabled: true
+            url: ldap://localhost:10389
+            managerDn: uid=admin,ou=system
+            managerPassword: secret
+            userSearchBase: ou=otherpeople,dc=example,dc=com
+            userSearchFilter: uid={0}
+            roleMappings:                                                 # <1>
+              ROLE_MANAGE: foo-manage                                     # <2>
+              ROLE_VIEW: bar-view
+              ROLE_CREATE: foo-manage
+----
+
+<1> Enables explicit role mapping support
+<2> When role mapping support is enabled, you must provide a mapping for
+all 3 Spring Cloud Data Flow roles *ROLE_MANAGE*, *ROLE_VIEW*, *ROLE_CREATE*.
+
 ===== LDAP Transport Security
 
 When connecting to an LDAP server, you typically (in the LDAP world) have two options
