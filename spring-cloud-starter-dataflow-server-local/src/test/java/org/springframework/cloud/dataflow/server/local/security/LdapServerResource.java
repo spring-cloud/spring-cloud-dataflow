@@ -55,12 +55,21 @@ public class LdapServerResource extends ExternalResource {
 
 	private boolean enabledSsl = false;
 
+	private final String ldapFileName;
+
 	public LdapServerResource() {
 		super();
+		this.ldapFileName = "testUsers.ldif";
+	}
+
+	public LdapServerResource(String ldapFileName) {
+		super();
+		this.ldapFileName = ldapFileName;
 	}
 
 	public LdapServerResource(boolean enabledSsl) {
 		this.enabledSsl = true;
+		this.ldapFileName = "testUsers.ldif";
 	}
 
 	@Override
@@ -70,9 +79,8 @@ public class LdapServerResource extends ExternalResource {
 
 		temporaryFolder.create();
 		apacheDSContainer = new ApacheDSContainerWithSecurity("dc=springframework,dc=org",
-				"classpath:org/springframework/cloud/dataflow/server/local/security/testUsers.ldif");
+				"classpath:org/springframework/cloud/dataflow/server/local/security/" + this.ldapFileName);
 		int ldapPort = SocketUtils.findAvailableTcpPort();
-
 		if (enabledSsl) {
 
 			apacheDSContainer.setEnabledLdapOverSsl(true);
