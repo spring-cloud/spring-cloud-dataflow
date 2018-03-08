@@ -112,8 +112,10 @@ public class StreamDefinitionToDslConverter {
 	}
 
 	private String autoQuotes(String propertyValue) {
-		if (propertyValue.contains(" ") && !propertyValue.contains("'")) {
-			return "'" + propertyValue + "'";
+		if (!propertyValue.contains("'")) {
+			if (propertyValue.contains(" ") || propertyValue.contains(";")  || propertyValue.contains("*")) {
+				return "'" + propertyValue + "'";
+			}
 		}
 		return propertyValue;
 	}

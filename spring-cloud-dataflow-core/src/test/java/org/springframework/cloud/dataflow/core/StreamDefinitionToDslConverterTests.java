@@ -187,4 +187,49 @@ public class StreamDefinitionToDslConverterTests {
 				new StreamDefinitionToDslConverter().toDsl(Arrays.asList(foo2, bar2)));
 	}
 
+	@Test
+	public void autoQuotesOnSemicolonProperties() {
+
+		StreamDefinition streamDefinition = new StreamDefinition("streamName",
+				"http-source-kafka --server.port=9900 | couchbase-sink-kafka " +
+						"--inputType=\"application/x-java-object;type=com.example.dto.InputDto\"");
+
+		assertEquals("http-source-kafka --server.port=9900 | couchbase-sink-kafka " +
+						"--spring.cloud.stream.bindings.input.contentType='application/x-java-object;type=com.example.dto.InputDto'",
+				new StreamDefinitionToDslConverter().toDsl(streamDefinition));
+
+
+		streamDefinition = new StreamDefinition("stream2", "jdbc-mssql --cron='/10 * * * * *' " +
+				"--max-messages=-1 --password='******' --query='UPDATE top (100) ASSURANCE SET assurance_flag = 1 " +
+				"OUTPUT Inserted.* WHERE assurance_flag IS NULL' " +
+				"--url='jdbc:sqlserver://db:1433;databaseName=Spring' --username='*****' | " +
+				"cust-processor | router --default-output-channel=out");
+
+		assertEquals("jdbc-mssql --cron='/10 * * * * *' " +
+						"--max-messages=-1 --password='******' --query='UPDATE top (100) ASSURANCE SET assurance_flag = 1 " +
+						"OUTPUT Inserted.* WHERE assurance_flag IS NULL' " +
+						"--url='jdbc:sqlserver://db:1433;databaseName=Spring' --username='*****' | " +
+						"cust-processor | router --default-output-channel=out",
+				new StreamDefinitionToDslConverter().toDsl(streamDefinition));
+
+	}
+
+	@Test
+	public void autoQuotesOnStarProperties() {
+
+		StreamDefinition streamDefinition = new StreamDefinition("stream2", "jdbc-mssql --cron='/10 * * * * *' " +
+				"--max-messages=-1 --password='******' --query='UPDATE top (100) ASSURANCE SET assurance_flag = 1 " +
+				"OUTPUT Inserted.* WHERE assurance_flag IS NULL' " +
+				"--url='jdbc:sqlserver://db:1433;databaseName=Spring' --username='*****' | " +
+				"cust-processor | router --default-output-channel=out");
+
+		assertEquals("jdbc-mssql --cron='/10 * * * * *' " +
+						"--max-messages=-1 --password='******' --query='UPDATE top (100) ASSURANCE SET assurance_flag = 1 " +
+						"OUTPUT Inserted.* WHERE assurance_flag IS NULL' " +
+						"--url='jdbc:sqlserver://db:1433;databaseName=Spring' --username='*****' | " +
+						"cust-processor | router --default-output-channel=out",
+				new StreamDefinitionToDslConverter().toDsl(streamDefinition));
+
+	}
+
 }
