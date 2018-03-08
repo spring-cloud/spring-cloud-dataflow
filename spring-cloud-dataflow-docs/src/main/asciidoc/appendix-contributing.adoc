@@ -21,7 +21,7 @@ They can also be added after the original pull request but before a merge.
 
 * Use the Spring Framework code format conventions. If you use Eclipse, you can import formatter settings by using the `eclipse-code-formatter.xml` file from the https://github.com/spring-cloud/spring-cloud-build/blob/master/spring-cloud-dependencies-parent/eclipse-code-formatter.xml[Spring Cloud Build] project.
 If using IntelliJ, you can use the http://plugins.jetbrains.com/plugin/6546[Eclipse Code Formatter Plugin] to import the same file.
-* Make sure all new `.java` files have a simple Javadoc class comment with at least an  `@author` tag identifying you, and preferably at least a paragraph describig the class's purpose.
+* Make sure all new `.java` files have a simple Javadoc class comment with at least an  `@author` tag identifying you, and preferably at least a paragraph describing the class's purpose.
 * Add the ASF license header comment to all new `.java` files (to do so, copy from existing files in the project).
 * Add yourself as an `@author` to the .java files that you modify substantially (more than cosmetic changes).
 * Add some Javadocs and, if you change the namespace, some XSD doc elements.
