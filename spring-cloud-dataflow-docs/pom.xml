@@ -149,6 +149,7 @@
 								<skipper-version>${spring-cloud-skipper.version}</skipper-version>
 								<skipper-version-type-lowercase>${skipper-version-type-lowercase}</skipper-version-type-lowercase>
 								<skipper-branch-or-tag>${skipper-branch-or-tag}</skipper-branch-or-tag>
+								<github-tag>${github-tag}</github-tag>
 							</attributes>
 						</configuration>
 						<executions>
@@ -316,6 +317,8 @@
 											<lowercase />
 										</stringutil>
 
+										<var name="github-tag" value="v${project.version}" />
+										<propertyregex property="github-tag" override="true" input="${github-tag}" regexp=".*SNAPSHOT" replace="master" />
 									</target>
 								</configuration>
 							</execution>

@@ -36,7 +36,7 @@ Docker Compose is required and it's recommended to use the link:https://docs.doc
 +
 [source,bash,subs=attributes]
 ----
-wget https://raw.githubusercontent.com/spring-cloud/spring-cloud-dataflow/master/spring-cloud-dataflow-server-local/docker-compose.yml
+wget https://raw.githubusercontent.com/spring-cloud/spring-cloud-dataflow/{github-tag}/spring-cloud-dataflow-server-local/docker-compose.yml
 ----
 +
 . Start Docker Compose
