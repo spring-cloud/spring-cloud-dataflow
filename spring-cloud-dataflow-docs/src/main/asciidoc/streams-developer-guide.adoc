@@ -7,10 +7,10 @@ It also shows how to map these applications into Spring Cloud Data Flow and depl
 
 
 [[streams-dev-guide-prebuilt-apps]]
-== Prebuilt applications
+== Prebuilt Applications
 
 The link:http://cloud.spring.io/spring-cloud-stream-app-starters/[Spring Cloud Stream App Starters] project provides many applications that you can start using right away.
-For example, there is an HTTP source application that recieves messages posted to an HTTP endpoint and publishes the data to the messaging middleware.
+For example, there is an HTTP source application that receives messages posted to an HTTP endpoint and publishes the data to the messaging middleware.
 Each existing application comes in three variations, one for each type of messaging middleware that is supported.
 The current supported messaging middleware systems are RabbitMQ, Apache Kafka 0.9, and Apache Kafka 0.10.
 All the applications are based on link:https://projects.spring.io/spring-boot/[Spring Boot] and link:https://cloud.spring.io/spring-cloud-stream/[Spring Cloud Stream].
@@ -20,7 +20,7 @@ For GA releases, the Maven artifacts are published to Maven central and the link
 Milestone and snapshot releases are published to the link:http://repo.spring.io/milestone[Spring Milestone] and link:http://repo.spring.io/snapshot[Spring Snapshot] repositories, respectively.
 Docker images are pushed to link:https://hub.docker.com/u/springcloudstream/[Docker Hub].
 
-We use the maven artifacts for our examples.
+We use the Maven artifacts for our examples.
 The root location of the Spring Repository that hosts the GA artifacts of prebuilt applications is http://repo.spring.io/release/org/springframework/cloud/stream/app/
 
 
