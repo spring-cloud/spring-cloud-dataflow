@@ -19,7 +19,14 @@ $ jps | grep rabbit
 [[spring-cloud-dataflow-streams-skipper-upgrading]]
 == Upgrading
 
-We start by upgrading the log sink to version 1.2.0.RELEASE.
+Before we start upgrading the log-sink version to 1.2.0.RELEASE, we will have to register that version in the app registry.
+
+[source,bash]
+----
+dataflow:>app register --name log --type sink --uri maven://org.springframework.cloud.stream.app:log-sink-rabbit:1.2.0.RELEASE
+Successfully registered application 'sink:log'
+----
+
 Since we are using the local server, we need to set the port to a different value (9001) than the currently running log sink's value of 9000 to avoid a conflict.
 While we are at it, we update log level to be `ERROR`.
 To do so, we create a YAML file, named `local-log-update.yml`, with the following contents:
