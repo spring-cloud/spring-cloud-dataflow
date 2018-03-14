@@ -26,8 +26,8 @@
 		<javadoc.opts>-Xdoclint:none</javadoc.opts>
 		<spring-cloud-dataflow-ui.version>1.4.0.RELEASE</spring-cloud-dataflow-ui.version>
 
-		<spring-cloud-deployer.version>1.3.0.RELEASE</spring-cloud-deployer.version>
-		<spring-cloud-deployer-local.version>1.3.3.BUILD-SNAPSHOT</spring-cloud-deployer-local.version>
+		<spring-cloud-deployer.version>1.3.1.RELEASE</spring-cloud-deployer.version>
+		<spring-cloud-deployer-local.version>1.3.3.RELEASE</spring-cloud-deployer-local.version>
 
 		<spring-cloud-skipper.version>1.0.1.RELEASE</spring-cloud-skipper.version>
 		<!-- Note: Change ./spring-cloud-dataflow-server-local/pom.xml to match the spring-boot.version -->
