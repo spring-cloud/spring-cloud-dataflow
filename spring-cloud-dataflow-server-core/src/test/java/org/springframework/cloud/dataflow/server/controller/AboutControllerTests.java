@@ -288,7 +288,7 @@ public class AboutControllerTests {
 			"spring.cloud.dataflow.version-info.dependencies.spring-cloud-dataflow-shell.checksum-sha1-url=",
 			"spring.cloud.dataflow.version-info.dependencies.spring-cloud-dataflow-shell.checksum-sha256-url="
 	})
-	public static class ChecksumNoDefault {
+	public static class ChecksumNoDefaultTests {
 
 		private MockMvc mockMvc;
 
@@ -330,7 +330,7 @@ public class AboutControllerTests {
 			"spring.cloud.dataflow.version-info.dependencies.spring-cloud-dataflow-shell.checksum-sha1=ABCDEFG",
 			"spring.cloud.dataflow.version-info.dependencies.spring-cloud-dataflow-shell.checksum-sha1-url={repository}/org/springframework/cloud/spring-cloud-dataflow-shell/{version}/spring-cloud-dataflow-shell-{version}.jar.sha1"
 	})
-	public static class SkipperMode {
+	public static class SkipperModeTests {
 
 		private MockMvc mockMvc;
 
