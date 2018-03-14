@@ -30,6 +30,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
+import org.yaml.snakeyaml.DumperOptions;
 import org.zeroturnaround.zip.ZipUtil;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -46,6 +47,7 @@ import org.springframework.cloud.dataflow.server.configuration.TestDependencies;
 import org.springframework.cloud.dataflow.server.repository.StreamDefinitionRepository;
 import org.springframework.cloud.dataflow.server.service.SkipperStreamService;
 import org.springframework.cloud.dataflow.server.support.MockUtils;
+import org.springframework.cloud.dataflow.server.support.PlatformUtils;
 import org.springframework.cloud.dataflow.server.support.TestResourceUtils;
 import org.springframework.cloud.skipper.ReleaseNotFoundException;
 import org.springframework.cloud.skipper.client.SkipperClient;
@@ -156,14 +158,19 @@ public class DefaultSkipperStreamServiceIntegrationTests {
 			}
 		}
 		assertThat(logPackage).isNotNull();
-		assertThat(logPackage.getConfigValues().getRaw()).isEqualTo(expectedYaml);
+		String actualYaml = logPackage.getConfigValues().getRaw();
+		if (PlatformUtils.isWindows()) {
+			actualYaml = actualYaml + DumperOptions.LineBreak.WIN.getString();
+		}
+		assertThat(actualYaml).isEqualTo(expectedYaml);
 	}
 
 	@Test
 	public void testUpdateStreamDslOnDeploy() throws IOException {
 
 		// Create stream
-		StreamDefinition streamDefinition = new StreamDefinition("ticktock", "time --fixed-delay=100 | log --level=DEBUG");
+		StreamDefinition streamDefinition = new StreamDefinition("ticktock",
+				"time --fixed-delay=100 | log --level=DEBUG");
 		this.streamDefinitionRepository.delete(streamDefinition.getName());
 		this.streamDefinitionRepository.save(streamDefinition);
 
@@ -186,7 +193,6 @@ public class DefaultSkipperStreamServiceIntegrationTests {
 
 		streamService.deployStream("ticktock", deploymentProperties);
 
-
 		StreamDefinition streamDefinitionAfterDeploy = this.streamDefinitionRepository.findOne("ticktock");
 		assertThat(streamDefinitionAfterDeploy.getDslText())
 				.isEqualTo("time --trigger.fixed-delay=100 | log --log.level=DEBUG");
@@ -196,7 +202,8 @@ public class DefaultSkipperStreamServiceIntegrationTests {
 	public void testUpdateStreamDslOnUpgrade() throws IOException {
 
 		// Create stream
-		StreamDefinition streamDefinition = new StreamDefinition("ticktock", "time --fixed-delay=100 | log --level=DEBUG");
+		StreamDefinition streamDefinition = new StreamDefinition("ticktock",
+				"time --fixed-delay=100 | log --level=DEBUG");
 		this.streamDefinitionRepository.delete(streamDefinition.getName());
 		this.streamDefinitionRepository.save(streamDefinition);
 
@@ -243,7 +250,7 @@ public class DefaultSkipperStreamServiceIntegrationTests {
 		String releaseManifest = StreamUtils.copyToString(
 				TestResourceUtils.qualifiedResource(getClass(), "deployManifest.yml").getInputStream(),
 				Charset.defaultCharset());
-		String deploymentProps =  StreamUtils.copyToString(
+		String deploymentProps = StreamUtils.copyToString(
 				TestResourceUtils.qualifiedResource(getClass(), "deploymentProps.json").getInputStream(),
 				Charset.defaultCharset());
 		when(skipperClient.manifest(streamDefinition.getName())).thenReturn(releaseManifest);

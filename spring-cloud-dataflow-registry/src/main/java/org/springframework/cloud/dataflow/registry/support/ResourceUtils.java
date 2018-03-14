@@ -19,7 +19,6 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.function.BiFunction;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -143,7 +142,7 @@ public class ResourceUtils {
 		}
 		else if (resource instanceof DockerResource) {
 			DockerResource dockerResource = (DockerResource) resource;
-			return formatDockerResource(dockerResource, (s, i) -> s.substring(i + 1, s.length()));
+			return getDockerImageTag(dockerResource);
 		}
 		else if (resource instanceof UrlResource) {
 			return getUrlResourceVersion((UrlResource) resource);
@@ -151,6 +150,22 @@ public class ResourceUtils {
 		else {
 			throw new IllegalArgumentException("Do not support extracting resource from Resource of type "
 					+ resource.getClass().getSimpleName());
+		}
+	}
+
+	private static String getDockerImageTag(DockerResource dockerResource) {
+		try {
+			String uri = dockerResource.getURI().toString().substring("docker:".length());
+			DockerImage dockerImage = DockerImage.fromImageName(uri);
+			String tag = dockerImage.getTag();
+			Assert.isTrue(StringUtils.hasText(tag), "Could not extract tag from " +
+			dockerResource.getDescription());
+			return tag;
+		} catch (IOException e) {
+				throw new IllegalArgumentException(
+						"Docker Resource URI is not in expected format to extract version. " +
+								dockerResource.getDescription(),
+						e);
 		}
 	}
 
@@ -163,23 +178,6 @@ public class ResourceUtils {
 	 */
 	public static String getResourceVersion(String uriString, MavenProperties mavenProperties) {
 		return ResourceUtils.getResourceVersion(getResource(uriString, mavenProperties));
-	}
-
-	private static String formatDockerResource(DockerResource dockerResource,
-			BiFunction<String, Integer, String> function) {
-		try {
-			String dockerResourceUri = dockerResource.getURI().toString();
-			Assert.isTrue(StringUtils.countOccurrencesOf(dockerResourceUri, ":") == 2,
-					"Invalid docker resource URI: " + dockerResourceUri);
-			int indexOfVersionSeparator = dockerResourceUri.lastIndexOf(":");
-			return function.apply(dockerResourceUri, indexOfVersionSeparator);
-		}
-		catch (IOException e) {
-			throw new IllegalArgumentException(
-					"Docker Resource URI is not in expected format to extract version. Resource = " +
-							dockerResource.getDescription(),
-					e);
-		}
 	}
 
 	/**
@@ -197,7 +195,7 @@ public class ResourceUtils {
 		}
 		else if (resource instanceof DockerResource) {
 			DockerResource dockerResource = (DockerResource) resource;
-			return formatDockerResource(dockerResource, (s, i) -> s.substring(0, i));
+			return getDockerImageWithoutVersion(dockerResource);
 		}
 		else if (resource instanceof UrlResource) {
 			return getUrlResourceWithoutVersion((UrlResource) resource);
@@ -207,5 +205,25 @@ public class ResourceUtils {
 					+ resource.getClass().getSimpleName());
 		}
 	}
+
+	private static String getDockerImageWithoutVersion(DockerResource dockerResource) {
+		try {
+			String uri = dockerResource.getURI().toString().substring("docker:".length());
+			DockerImage dockerImage = DockerImage.fromImageName(uri);
+			StringBuilder sb = new StringBuilder("docker:");
+			if (StringUtils.hasText(dockerImage.getHost())) {
+				sb.append(dockerImage.getHost());
+				sb.append(DockerImage.SECTION_SEPARATOR);
+			}
+			sb.append(dockerImage.getNamespaceAndRepo());
+			return sb.toString();
+		} catch (IOException e) {
+			throw new IllegalArgumentException(
+					"Docker Resource URI is not in expected format to extract version. " +
+							dockerResource.getDescription(),
+					e);
+		}
+	}
+
 
 }

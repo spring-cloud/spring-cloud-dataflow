@@ -54,6 +54,13 @@ public class ResourceUtilsTests {
 		assertThat(ResourceUtils.getResourceVersion(dockerResource)).isEqualTo("1.2.0.RELEASE");
 	}
 
+	@Test
+	public void testDockerResourceProcessingWithHostIP() {
+		DockerResource dockerResource = new DockerResource("192.168.99.100:80/myrepo/rabbitsink:current");
+		assertThat(ResourceUtils.getResourceWithoutVersion(dockerResource)).isEqualTo("docker:192.168.99.100:80/myrepo/rabbitsink");
+		assertThat(ResourceUtils.getResourceVersion(dockerResource)).isEqualTo("current");
+	}
+
 	@Test(expected = IllegalArgumentException.class)
 	public void testInvalidDockerResourceProcessing() {
 		DockerResource dockerResource = new DockerResource("springcloudstream:file-source-kafka-10:1.2.0.RELEASE");

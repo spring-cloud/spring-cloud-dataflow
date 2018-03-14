@@ -25,6 +25,7 @@ import java.util.Map;
 import org.junit.After;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.yaml.snakeyaml.DumperOptions;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -34,6 +35,7 @@ import org.springframework.cloud.dataflow.registry.service.AppRegistryService;
 import org.springframework.cloud.dataflow.server.config.features.FeaturesProperties;
 import org.springframework.cloud.dataflow.server.configuration.TestDependencies;
 import org.springframework.cloud.dataflow.server.repository.StreamDefinitionRepository;
+import org.springframework.cloud.dataflow.server.support.PlatformUtils;
 import org.springframework.cloud.dataflow.server.support.TestResourceUtils;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
@@ -49,7 +51,8 @@ import static org.assertj.core.api.Assertions.fail;
  */
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = TestDependencies.class)
-@TestPropertySource(properties = { FeaturesProperties.FEATURES_PREFIX + "." + FeaturesProperties.SKIPPER_ENABLED + "=true" })
+@TestPropertySource(properties = {
+		FeaturesProperties.FEATURES_PREFIX + "." + FeaturesProperties.SKIPPER_ENABLED + "=true" })
 public class DefaultSkipperStreamServiceUpdateTests {
 
 	@Autowired
@@ -93,10 +96,13 @@ public class DefaultSkipperStreamServiceUpdateTests {
 		Map<String, String> updateProperties = new HashMap<>();
 		updateProperties.put("app.log.server.port", "9999");
 		updateProperties.put("app.log.endpoints.sensitive", "false");
-		updateProperties.put("app.log.level", "ERROR"); //this should be expanded
+		updateProperties.put("app.log.level", "ERROR"); // this should be expanded
 		updateProperties.put("deployer.log.memory", "4096m");
 		updateProperties.put("version.log", "1.1.1.RELEASE");
 		String yml = streamService.convertPropertiesToSkipperYaml(streamDefinition, updateProperties);
+		if (PlatformUtils.isWindows()) {
+			yml = yml + DumperOptions.LineBreak.WIN.getString();
+		}
 		String expectedYaml = StreamUtils.copyToString(
 				TestResourceUtils.qualifiedResource(getClass(), "update.yml").getInputStream(),
 				Charset.defaultCharset());

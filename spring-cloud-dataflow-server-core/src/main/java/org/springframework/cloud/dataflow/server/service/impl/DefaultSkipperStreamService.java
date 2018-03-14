@@ -232,6 +232,7 @@ public class DefaultSkipperStreamService extends AbstractStreamService implement
 			DumperOptions dumperOptions = new DumperOptions();
 			dumperOptions.setDefaultFlowStyle(DumperOptions.FlowStyle.BLOCK);
 			dumperOptions.setPrettyFlow(true);
+			dumperOptions.setLineBreak(DumperOptions.LineBreak.getPlatformLineBreak());
 			Yaml yaml = new Yaml(dumperOptions);
 			return yaml.dump(skipperConfigValuesMap);
 		}
