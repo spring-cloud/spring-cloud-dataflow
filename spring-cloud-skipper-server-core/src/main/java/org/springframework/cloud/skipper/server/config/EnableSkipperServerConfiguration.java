@@ -34,6 +34,6 @@ public class EnableSkipperServerConfiguration {
 		return new Marker();
 	}
 
-	class Marker {
+	public class Marker {
 	}
 }

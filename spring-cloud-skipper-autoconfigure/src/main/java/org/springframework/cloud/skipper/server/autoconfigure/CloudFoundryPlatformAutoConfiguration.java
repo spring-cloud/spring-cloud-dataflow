@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.springframework.cloud.skipper.deployer.cloudfoundry;
+package org.springframework.cloud.skipper.server.autoconfigure;
 
 import java.time.Duration;
 import java.util.ArrayList;
@@ -41,6 +41,7 @@ import org.springframework.cloud.deployer.spi.cloudfoundry.CloudFoundryConnectio
 import org.springframework.cloud.deployer.spi.cloudfoundry.CloudFoundryDeploymentProperties;
 import org.springframework.cloud.deployer.spi.core.RuntimeEnvironmentInfo;
 import org.springframework.cloud.deployer.spi.util.RuntimeVersionUtils;
+import org.springframework.cloud.skipper.deployer.cloudfoundry.CloudFoundryPlatformProperties;
 import org.springframework.cloud.skipper.domain.Deployer;
 import org.springframework.cloud.skipper.domain.Platform;
 import org.springframework.context.annotation.Bean;

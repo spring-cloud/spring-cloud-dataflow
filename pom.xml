@@ -88,6 +88,9 @@
         <module>spring-cloud-skipper-docs</module>
         <module>spring-cloud-skipper-platform-cloudfoundry</module>
         <module>spring-cloud-skipper-platform-kubernetes</module>
+        <module>spring-cloud-skipper-autoconfigure</module>
+        <module>spring-cloud-skipper-dependencies</module>
+        <module>spring-cloud-starter-skipper-server</module>
     </modules>
     <dependencyManagement>
         <dependencies>
@@ -97,6 +100,11 @@
                 <version>${spring-cloud.version}</version>
                 <type>pom</type>
                 <scope>import</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.springframework.cloud</groupId>
+                <artifactId>spring-cloud-skipper-autoconfigure</artifactId>
+                <version>1.0.2.BUILD-SNAPSHOT</version>
             </dependency>
             <dependency>
                 <groupId>org.springframework.cloud</groupId>
@@ -139,6 +147,11 @@
                 <version>1.0.2.BUILD-SNAPSHOT</version>
             </dependency>
             <dependency>
+                <groupId>org.springframework.cloud</groupId>
+                <artifactId>spring-cloud-deployer-cloudfoundry</artifactId>
+                <version>${spring-cloud-deployer-cloudfoundry.version}</version>
+            </dependency>
+            <dependency>
                 <groupId>org.springframework.shell</groupId>
                 <artifactId>spring-shell-starter</artifactId>
                 <version>${spring-shell.version}</version>
@@ -167,6 +180,11 @@
                 <groupId>org.flywaydb</groupId>
                 <artifactId>flyway-core</artifactId>
                 <version>${flyway.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.projectreactor</groupId>
+                <artifactId>reactor-core</artifactId>
+                <version>${reactor.version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
