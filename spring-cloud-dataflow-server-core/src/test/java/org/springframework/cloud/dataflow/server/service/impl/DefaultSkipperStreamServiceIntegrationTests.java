@@ -160,7 +160,7 @@ public class DefaultSkipperStreamServiceIntegrationTests {
 		assertThat(logPackage).isNotNull();
 		String actualYaml = logPackage.getConfigValues().getRaw();
 		if (PlatformUtils.isWindows()) {
-			actualYaml = actualYaml + DumperOptions.LineBreak.WIN.getString();
+			expectedYaml = expectedYaml + DumperOptions.LineBreak.WIN.getString();
 		}
 		assertThat(actualYaml).isEqualTo(expectedYaml);
 	}

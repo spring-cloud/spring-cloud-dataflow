@@ -100,12 +100,13 @@ public class DefaultSkipperStreamServiceUpdateTests {
 		updateProperties.put("deployer.log.memory", "4096m");
 		updateProperties.put("version.log", "1.1.1.RELEASE");
 		String yml = streamService.convertPropertiesToSkipperYaml(streamDefinition, updateProperties);
-		if (PlatformUtils.isWindows()) {
-			yml = yml + DumperOptions.LineBreak.WIN.getString();
-		}
+
 		String expectedYaml = StreamUtils.copyToString(
 				TestResourceUtils.qualifiedResource(getClass(), "update.yml").getInputStream(),
 				Charset.defaultCharset());
+		if (PlatformUtils.isWindows()) {
+			expectedYaml = expectedYaml + DumperOptions.LineBreak.WIN.getString();
+		}
 		assertThat(yml).isEqualTo(expectedYaml);
 	}
 }
