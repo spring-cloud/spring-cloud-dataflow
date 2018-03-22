@@ -15,6 +15,7 @@
  */
 package org.springframework.cloud.common.security;
 
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -25,9 +26,11 @@ import org.slf4j.LoggerFactory;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.security.SecurityProperties;
+import org.springframework.boot.autoconfigure.security.oauth2.resource.AuthoritiesExtractor;
 import org.springframework.boot.autoconfigure.security.oauth2.resource.ResourceServerProperties;
 import org.springframework.boot.autoconfigure.security.oauth2.resource.UserInfoTokenServices;
 import org.springframework.cloud.common.security.support.DefaultAuthoritiesExtractor;
+import org.springframework.cloud.common.security.support.ExternalOauth2ResourceAuthoritiesExtractor;
 import org.springframework.cloud.common.security.support.OnSecurityEnabledAndOAuth2Enabled;
 import org.springframework.cloud.common.security.support.SecurityConfigUtils;
 import org.springframework.cloud.common.security.support.SecurityStateBean;
@@ -59,6 +62,7 @@ import org.springframework.security.web.authentication.www.BasicAuthenticationFi
 import org.springframework.security.web.util.matcher.AnyRequestMatcher;
 import org.springframework.security.web.util.matcher.MediaTypeRequestMatcher;
 import org.springframework.security.web.util.matcher.RequestMatcher;
+import org.springframework.util.StringUtils;
 import org.springframework.web.HttpMediaTypeNotAcceptableException;
 import org.springframework.web.accept.HeaderContentNegotiationStrategy;
 import org.springframework.web.context.request.NativeWebRequest;
@@ -151,7 +155,14 @@ public class OAuthSecurityConfiguration extends WebSecurityConfigurerAdapter {
 		final UserInfoTokenServices tokenServices = new UserInfoTokenServices(resourceServerProperties.getUserInfoUri(),
 				authorizationCodeResourceDetails.getClientId());
 		tokenServices.setRestTemplate(oAuth2RestTemplate());
-		tokenServices.setAuthoritiesExtractor(new DefaultAuthoritiesExtractor());
+		final AuthoritiesExtractor authoritiesExtractor;
+		if (StringUtils.isEmpty(authorizationProperties.getExternalAuthoritiesUrl())) {
+			authoritiesExtractor = new DefaultAuthoritiesExtractor();
+		} else {
+			authoritiesExtractor = new ExternalOauth2ResourceAuthoritiesExtractor(
+					oAuth2RestTemplate(), URI.create(authorizationProperties.getExternalAuthoritiesUrl()));
+		}
+		tokenServices.setAuthoritiesExtractor(authoritiesExtractor);
 		return tokenServices;
 	}
 
@@ -201,7 +212,7 @@ public class OAuthSecurityConfiguration extends WebSecurityConfigurerAdapter {
 	@EventListener
 	public void handleOAuth2AuthenticationFailureEvent(
 			OAuth2AuthenticationFailureEvent oAuth2AuthenticationFailureEvent) {
-		logger.error("An error ocurred while accessing an authentication REST resource.",
+		logger.error("An error occurred while accessing an authentication REST resource.",
 				oAuth2AuthenticationFailureEvent.getException());
 	}
 

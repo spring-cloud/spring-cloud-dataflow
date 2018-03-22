@@ -24,10 +24,13 @@ import java.util.List;
  * @author Eric Bottard
  * @author Gunnar Hillert
  * @author Ilayaperumal Gopinathan
+ * @author Mike Heath
  */
 public class AuthorizationProperties {
 
 	private boolean enabled = true;
+
+	private String externalAuthoritiesUrl;
 
 	private List<String> rules = new ArrayList<>();
 
@@ -59,6 +62,14 @@ public class AuthorizationProperties {
 
 	public void setEnabled(boolean enabled) {
 		this.enabled = enabled;
+	}
+
+	public String getExternalAuthoritiesUrl() {
+		return externalAuthoritiesUrl;
+	}
+
+	public void setExternalAuthoritiesUrl(String externalAuthoritiesUrl) {
+		this.externalAuthoritiesUrl = externalAuthoritiesUrl;
 	}
 
 	public String getDashboardUrl() {
@@ -116,5 +127,4 @@ public class AuthorizationProperties {
 	public void setAuthenticatedPaths(List<String> authenticatedPaths) {
 		this.authenticatedPaths = authenticatedPaths;
 	}
-
 }
