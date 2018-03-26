@@ -91,7 +91,7 @@ public class RollbackStartAction  extends AbstractAction {
 		newRollbackRelease.setVersion(currentRelease.getVersion() + 1);
 		newRollbackRelease.setPlatformName(releaseToRollback.getPlatformName());
 		newRollbackRelease.setConfigValues(releaseToRollback.getConfigValues());
-		newRollbackRelease.setInfo(Info.createNewInfo("Initial install underway"));
+		newRollbackRelease.setInfo(Info.createNewInfo("Rollback underway"));
 
 		context.getExtendedState().getVariables().put(SkipperVariables.TARGET_RELEASE, newRollbackRelease);
 
