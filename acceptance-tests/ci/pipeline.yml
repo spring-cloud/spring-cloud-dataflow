@@ -1,0 +1,162 @@
+resource_types:
+- name: artifactory-resource
+  type: docker-image
+  source:
+    repository: springio/artifactory-resource
+    tag: 0.0.3
+resources:
+- name: git-repo
+  type: git
+  source:
+    uri: ((github-repo))
+    branch: ((branch))
+    ignore_paths: ["ci/images/*"]
+- name: ci-images-git-repo
+  type: git
+  source:
+    uri: ((github-repo))
+    branch: ((branch))
+    paths: ["ci/images/*"]
+
+- name: artifactory-repo
+  type: artifactory-resource
+  source:
+    uri: ((artifactory-server))
+    username: ((artifactory-username))
+    password: ((artifactory-password))
+    build_name: ((build-name))
+
+- name: spring-cloud-skipper-ci-image
+  type: docker-image
+  source:
+    repository: springsource-docker-private-local.jfrog.io/spring-cloud-skipper-ci-image
+    username: ((artifactory-username))
+    password: ((artifactory-password))
+    tag: ((branch))
+
+- name: acceptance-tests-reports
+  type: s3
+  source:
+    bucket: ((spr-artifacts-s3-bucket-name))
+    regexp: distribution-repository/spring-cloud-skipper-acceptance-tests-(.*).tar.gz
+    access_key_id: ((spr-s3-access-key-id))
+    secret_access_key: ((spr-s3-secret-access-key))
+    region_name: us-west-1
+
+jobs:
+- name: spring-cloud-skipper-ci-images
+  plan:
+  - get: ci-images-git-repo
+    trigger: false
+  - put: spring-cloud-skipper-ci-image
+    params:
+      build: ci-images-git-repo/ci/images/spring-cloud-skipper-ci-image
+
+- name: acceptance-tests
+  serial: true
+  public: false
+  plan:
+  - get: spring-cloud-skipper-ci-image
+  - get: git-repo
+    trigger: true
+  - do:
+    - task: build-project
+      privileged: true
+      timeout: 90m
+      image: spring-cloud-skipper-ci-image
+      file: git-repo/ci/tasks/build-project.yml
+      on_failure:
+        aggregate:
+        - put: acceptance-tests-reports
+          params:
+            file: distribution-repository/spring-cloud-skipper-acceptance-tests-*.tar.gz
+
+- name: build-skipper-server-with-drivers100
+  serial: true
+  public: false
+  plan:
+  - get: spring-cloud-skipper-ci-image
+  - get: git-repo
+    trigger: false
+  - do:
+    - task: build-skipper-server-with-drivers
+      privileged: true
+      timeout: 30m
+      image: spring-cloud-skipper-ci-image
+      file: git-repo/ci/tasks/build-skipper-server-with-drivers100.yml
+  - put: artifactory-repo
+    params: &artifactory-params
+      repo: libs-snapshot-local
+      folder: distribution-repository
+      strip_snapshot_timestamps: false
+      build_uri: "https://ci.spring.io/teams/${BUILD_TEAM_NAME}/pipelines/${BUILD_PIPELINE_NAME}/jobs/${BUILD_JOB_NAME}/builds/${BUILD_NAME}"
+      build_number: "${BUILD_PIPELINE_NAME}-${BUILD_JOB_NAME}-${BUILD_NAME}"
+      disable_checksum_uploads: true
+      include:
+        - "**/*.jar"
+        - "**/*.pom"
+      exclude:
+        - "**/*.xml"
+
+- name: build-skipper-server-with-drivers101
+  serial: true
+  public: false
+  plan:
+  - get: spring-cloud-skipper-ci-image
+  - get: git-repo
+    trigger: false
+  - do:
+    - task: build-skipper-server-with-drivers
+      privileged: true
+      timeout: 30m
+      image: spring-cloud-skipper-ci-image
+      file: git-repo/ci/tasks/build-skipper-server-with-drivers101.yml
+  - put: artifactory-repo
+    params: &artifactory-params
+      repo: libs-snapshot-local
+      folder: distribution-repository
+      strip_snapshot_timestamps: false
+      build_uri: "https://ci.spring.io/teams/${BUILD_TEAM_NAME}/pipelines/${BUILD_PIPELINE_NAME}/jobs/${BUILD_JOB_NAME}/builds/${BUILD_NAME}"
+      build_number: "${BUILD_PIPELINE_NAME}-${BUILD_JOB_NAME}-${BUILD_NAME}"
+      disable_checksum_uploads: true
+      include:
+        - "**/*.jar"
+        - "**/*.pom"
+      exclude:
+        - "**/*.xml"
+
+- name: build-skipper-server-with-drivers102
+  serial: true
+  public: false
+  plan:
+  - get: spring-cloud-skipper-ci-image
+  - get: git-repo
+    trigger: false
+  - do:
+    - task: build-skipper-server-with-drivers
+      privileged: true
+      timeout: 30m
+      image: spring-cloud-skipper-ci-image
+      file: git-repo/ci/tasks/build-skipper-server-with-drivers102.yml
+  - put: artifactory-repo
+    params: &artifactory-params
+      repo: libs-snapshot-local
+      folder: distribution-repository
+      strip_snapshot_timestamps: false
+      build_uri: "https://ci.spring.io/teams/${BUILD_TEAM_NAME}/pipelines/${BUILD_PIPELINE_NAME}/jobs/${BUILD_JOB_NAME}/builds/${BUILD_NAME}"
+      build_number: "${BUILD_PIPELINE_NAME}-${BUILD_JOB_NAME}-${BUILD_NAME}"
+      disable_checksum_uploads: true
+      include:
+        - "**/*.jar"
+        - "**/*.pom"
+      exclude:
+        - "**/*.xml"
+
+groups:
+- name: "Tests"
+  jobs: ["acceptance-tests"]
+- name: "CI-Images"
+  jobs: ["spring-cloud-skipper-ci-images"]
+- name: "CI-Apps"
+  jobs: ["build-skipper-server-with-drivers100", "build-skipper-server-with-drivers101", "build-skipper-server-with-drivers102"]
+

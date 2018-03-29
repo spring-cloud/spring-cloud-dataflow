@@ -1,0 +1,18 @@
+version: '3'
+services:
+  mysql:
+    image: 'mysql:5.6'
+    container_name: mysql
+    network_mode: bridge
+    environment:
+      MYSQL_ROOT_PASSWORD: spring
+      MYSQL_DATABASE: skipper
+      MYSQL_USER: spring
+      MYSQL_PASSWORD: spring
+    ports:
+      - 3306
+    healthcheck:
+      test: ["CMD", "mysqladmin" ,"ping", "-h127.0.0.1", "-P3306", "-uspring", "-pspring"]
+      interval: 1s
+      timeout: 20s
+      retries: 10

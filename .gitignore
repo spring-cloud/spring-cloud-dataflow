@@ -19,6 +19,9 @@ spring-shell.log
 target/
 test-output
 file:/
+.sts4-cache
+.attach*
+.gradle
 
 # Eclipse artifacts, including WTP generated manifests
 .classpath

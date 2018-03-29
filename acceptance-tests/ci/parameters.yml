@@ -1,0 +1,7 @@
+email-server: "smtp.svc.pivotal.io"
+email-from: "ci@spring.io"
+email-to: ["jvalkealahti@pivotal.io"]
+github-repo: "https://github.com/spring-cloud/spring-cloud-skipper.git"
+artifactory-server: "https://repo.spring.io/"
+branch: "master"
+build-name: "spring-cloud-skipper-acceptance-tests"

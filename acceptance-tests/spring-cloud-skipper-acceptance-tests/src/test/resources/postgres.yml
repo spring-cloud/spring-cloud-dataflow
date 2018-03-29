@@ -1,0 +1,17 @@
+version: '3'
+services:
+  postgres:
+    image: 'postgres:10'
+    container_name: postgres
+    network_mode: bridge
+    environment:
+      - POSTGRES_PASSWORD=spring
+      - POSTGRES_USER=spring
+      - POSTGRES_DB=skipper
+    ports:
+      - 5432
+    healthcheck:
+      test: ["CMD", "psql", "-U", "postgres", "-w", "-c", "SELECT version();"]
+      interval: 1s
+      timeout: 5s
+      retries: 12

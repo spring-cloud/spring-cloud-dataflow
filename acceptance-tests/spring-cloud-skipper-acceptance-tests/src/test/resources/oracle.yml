@@ -1,0 +1,8 @@
+version: '3'
+services:
+  oracle:
+    image: 'springsource-docker-private-local.jfrog.io/oracle/database-prebuilt:12.2.0.1-se2'
+    container_name: oracle
+    network_mode: bridge
+    ports:
+      - 1521

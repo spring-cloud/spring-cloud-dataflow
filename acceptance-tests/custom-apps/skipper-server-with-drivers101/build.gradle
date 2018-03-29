@@ -1,0 +1,47 @@
+buildscript {
+	ext {
+		springBootVersion = '1.5.9.RELEASE'
+        springCloudSkipperVersion = '1.0.1.BUILD-SNAPSHOT'
+        oracleJdbcDriverVersion = '12.2.0.1'
+        flywayVersion = '5.0.5'
+	}
+	repositories {
+		mavenCentral()
+	}
+	dependencies {
+		classpath("org.springframework.boot:spring-boot-gradle-plugin:${springBootVersion}")
+	}
+}
+
+apply plugin: 'java'
+apply plugin: 'maven'
+apply plugin: 'eclipse'
+apply plugin: 'org.springframework.boot'
+
+group = 'org.springframework.cloud.skipper.acceptance.app'
+version = '1.0.1.BUILD-SNAPSHOT'
+sourceCompatibility = 1.8
+
+repositories {
+	mavenCentral()
+	mavenLocal()
+	maven { url "http://repo.springsource.org/libs-snapshot" }
+	maven { url "http://repo.springsource.org/libs-release" }
+	maven { url "http://repo.springsource.org/libs-milestone" }
+	maven {
+		url "http://repo.springsource.org/ext-private-local"
+		credentials {
+            username = System.getenv('ARTIFACTORY_USERNAME') ?: artifactoryUsername
+            password = System.getenv('ARTIFACTORY_PASSWORD') ?: artifactoryPassword
+		}
+	}
+}
+
+dependencies {
+	compile("org.springframework.cloud:spring-cloud-skipper-server:${springCloudSkipperVersion}")
+	compile('org.springframework.boot:spring-boot-starter')
+	runtime("com.oracle.jdbc:ojdbc8:${oracleJdbcDriverVersion}")
+    runtime("org.flywaydb:flyway-core:${flywayVersion}")
+	testCompile('org.springframework.boot:spring-boot-starter-test')
+}
+

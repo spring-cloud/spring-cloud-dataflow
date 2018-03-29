@@ -1,0 +1,102 @@
+= Create prebuilt oracle database
+
+These instruction uses oracle's own docker scripts to create a database based on installation file you need to download. It's not possible to have a simple dockerfile and build image dymanically. Instead we build it locally, modify it and flatten it before manually uploading to docker registry. We use private registry behind authentication as oracle's license terms don't allow these to be accessible to 3rd parties publicly.
+
+== Setup base image
+Download `linuxx64_12201_database.zip` from oracle's site and place it into expected folder.
+
+```
+cp linuxx64_12201_database.zip docker-images/oracle/dockerfiles
+```
+
+Use oracle's tools to create a base image.
+
+```
+./buildDockerImage.sh -v 12.2.0.1 -s -i
+```
+
+You should now have:
+
+```
+docker images
+REPOSITORY                                TAG                 IMAGE ID            CREATED             SIZE
+oracle/database                           12.2.0.1-se2        2c2f57c0562b        45 seconds ago      13.3GB
+```
+
+== Create database, user and schema
+
+We need to start database it to get created. First run takes about 6 minutes and you see message `DATABASE IS READY TO USE!`
+
+```
+docker run --name oracle-build -p 1521:1521 -p 5500:5500 oracle/database:12.2.0.1-se2
+```
+
+Now you should have.
+
+```
+docker ps
+CONTAINER ID        IMAGE                          COMMAND                  CREATED             STATUS                   PORTS                                            NAMES
+e4e9757c0043        oracle/database:12.2.0.1-se2   "/bin/sh -c 'exec $O…"   9 minutes ago       Up 9 minutes (healthy)   0.0.0.0:1521->1521/tcp, 0.0.0.0:5500->5500/tcp   oracle-build
+```
+
+Change admin passwords to `oracle`.
+
+```
+docker exec oracle-build ./setPassword.sh oracle
+```
+
+Create schema and user.
+
+```
+docker exec -it oracle-build sqlplus system/oracle@ORCLPDB1
+```
+
+In `sqlplus` run commands:
+
+```
+CREATE USER spring IDENTIFIED BY spring;
+GRANT create session TO spring;
+GRANT create table TO spring;
+GRANT create view TO spring;
+GRANT create any trigger TO spring;
+GRANT create any procedure TO spring;
+GRANT create sequence TO spring;
+GRANT create synonym TO spring;
+GRANT UNLIMITED TABLESPACE TO spring;
+```
+
+Stop container
+
+```
+docker stop -t 30 oracle-build
+```
+
+```
+docker commit -m "Image with prebuilt spring database" oracle-build oracle/database-prebuilt-commit:12.2.0.1-se2
+```
+
+Use `https://github.com/goldmann/docker-squash` to flatten image. Take oldest layer id using `docker history`.
+```
+docker-squash -f 9870bebfb1d5 -t oracle/database-prebuilt:12.2.0.1-se2 oracle/database-prebuilt-commit:12.2.0.1-se2
+```
+
+Check that it comes up:
+```
+docker run --name oracle-build-prebuilt -p 1521:1521 -p 5500:5500 oracle/database-prebuilt:12.2.0.1-se2
+```
+
+```
+docker login springsource-docker-private-local.jfrog.io
+
+docker images
+REPOSITORY                                TAG                 IMAGE ID            CREATED             SIZE
+oracle/database-prebuilt                  12.2.0.1-se2        21085dc2ce49        10 minutes ago      10.1GB
+oracle/database-prebuilt-commit           12.2.0.1-se2        793eb00abe1a        14 minutes ago      17GB
+oracle/database                           12.2.0.1-se2        cfc468186bd0        About an hour ago   13.3GB
+
+
+docker tag 21085dc2ce49 springsource-docker-private-local.jfrog.io/oracle/database-prebuilt:12.2.0.1-se2
+docker push springsource-docker-private-local.jfrog.io/oracle/database-prebuilt:12.2.0.1-se2
+```
+
+

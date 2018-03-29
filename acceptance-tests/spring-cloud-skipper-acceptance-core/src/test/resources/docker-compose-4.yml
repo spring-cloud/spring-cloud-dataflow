@@ -1,0 +1,5 @@
+version: '3'
+services:
+  testservice4:
+    image: 'alpine'
+    command: sh -c 'sleep 60'

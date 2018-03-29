@@ -1,0 +1,16 @@
+version: '3'
+services:
+  skipper:
+    image: 'spring-cloud-skipper-acceptance-image-legacy101'
+    container_name: skipper
+    network_mode: bridge
+    environment:
+      - ACCEPTANCE_TEST_START_WAIT=5
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/skipper
+      - SPRING_DATASOURCE_USERNAME=spring
+      - SPRING_DATASOURCE_PASSWORD=spring
+      - SPRING_DATASOURCE_DRIVER_CLASS=org.postgresql.Driver
+    ports:
+      - 7577
+    external_links:
+      - postgres:postgres
