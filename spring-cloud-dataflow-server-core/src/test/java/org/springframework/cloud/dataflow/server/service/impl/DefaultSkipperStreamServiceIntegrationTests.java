@@ -199,6 +199,42 @@ public class DefaultSkipperStreamServiceIntegrationTests {
 	}
 
 	@Test
+	public void testUpdateStreamDslOnDeployWithSensitiveProperties() throws IOException {
+
+		// Create stream
+		StreamDefinition streamDefinition = new StreamDefinition("ticktock",
+				"time --fixed-delay=100 --password=boza | log --level=DEBUG");
+
+		this.streamDefinitionRepository.delete(streamDefinition.getName());
+		this.streamDefinitionRepository.save(streamDefinition);
+
+		StreamDefinition streamDefinitionBeforeDeploy = this.streamDefinitionRepository.findOne("ticktock");
+
+		assertThat(streamDefinitionBeforeDeploy.getDslText())
+				.isEqualTo("time --fixed-delay=100 --password=boza | log --level=DEBUG");
+
+		String expectedReleaseManifest = StreamUtils.copyToString(
+				TestResourceUtils.qualifiedResource(getClass(), "upgradeWithSensitivePropertiesManifest.yml").getInputStream(),
+				Charset.defaultCharset());
+		Release release = new Release();
+		Manifest manifest = new Manifest();
+		manifest.setData(expectedReleaseManifest);
+		release.setManifest(manifest);
+		when(skipperClient.install(isA(InstallRequest.class))).thenReturn(release);
+		when(skipperClient.status(eq("ticktock"))).thenThrow(new ReleaseNotFoundException(""));
+
+		Map<String, String> deploymentProperties = createSkipperDeploymentProperties();
+		deploymentProperties.put("version.log", "1.2.0.RELEASE");
+
+		streamService.deployStream("ticktock", deploymentProperties);
+
+		StreamDefinition streamDefinitionAfterDeploy = this.streamDefinitionRepository.findOne("ticktock");
+		assertThat(streamDefinitionAfterDeploy.getDslText())
+				.isEqualTo("time --two.token='******' --one_two_three.secret='******' --one.two.password='******' " +
+						"--trigger.fixed-delay=200 --one.key='******' | log --log.level=INFO");
+	}
+
+	@Test
 	public void testUpdateStreamDslOnUpgrade() throws IOException {
 
 		// Create stream

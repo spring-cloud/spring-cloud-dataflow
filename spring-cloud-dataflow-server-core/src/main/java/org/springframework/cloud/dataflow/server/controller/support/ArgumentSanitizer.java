@@ -28,12 +28,12 @@ import org.springframework.util.StringUtils;
  * @author Glenn Renfro
  */
 public class ArgumentSanitizer {
-	private static final String[] REGEX_PARTS = {"*", "$", "^", "+"};
+	private static final String[] REGEX_PARTS = { "*", "$", "^", "+" };
 
 	private static final String REDACTION_STRING = "******";
 
-	private static final String[] KEYS_TO_SANITIZE = {"password", "secret", "key", "token", ".*credentials.*",
-			"vcap_services"};
+	private static final String[] KEYS_TO_SANITIZE = { "password", "secret", "key", "token", ".*credentials.*",
+			"vcap_services" };
 	//used to find the passwords embedded in a stream definition
 	private static Pattern passwordParameterPatternForStreams = Pattern.compile(
 			//Search for the -- characters then look for unicode letters
@@ -83,13 +83,27 @@ public class ArgumentSanitizer {
 		}
 		String key = argument.substring(0, indexOfFirstEqual);
 		String value = argument.substring(indexOfFirstEqual + 1);
+
+		value = sanitize(key, value);
+
+		return String.format("%s=%s", key, value);
+	}
+
+	/**
+	 * Replaces a potential secure value with "******".
+	 *
+	 * @param key to check for sensitive words.
+	 * @param value the argument to cleanse.
+	 * @return the argument with a potentially sanitized value
+	 */
+	public String sanitize(String key, String value) {
 		for (Pattern pattern : this.keysToSanitize) {
 			if (pattern.matcher(key).matches()) {
 				value = REDACTION_STRING;
 				break;
 			}
 		}
-		return String.format("%s=%s", key, value);
+		return value;
 	}
 
 	/**
