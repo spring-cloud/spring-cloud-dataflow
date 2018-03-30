@@ -174,8 +174,8 @@ public class DefaultSkipperStreamService extends AbstractStreamService implement
 	}
 
 	/**
-	 * For all sensitive properties (e.g. key names containing words like password, secret,
-	 * key, token) replace the value with '*****' string
+	 * For all sensitive properties (e.g. key names containing words like password, secret, key, token) replace the
+	 * value with '*****' string
 	 */
 	private Map<String, String> sanitize(Map<String, String> properties) {
 		if (!CollectionUtils.isEmpty(properties)) {
