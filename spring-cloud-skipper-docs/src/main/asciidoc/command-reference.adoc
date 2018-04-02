@@ -22,11 +22,24 @@ Skipper's package commands include the following:
 
 [[skipper-commands-package-search]]
 === Search
-The  `search` command shows all the packages available to be installed by the Skipper server, as shown (with output) in the following example:
+The  `search` or its alias `list` command shows all the packages available to be installed by the Skipper server, as shown (with output) in the following example:
 
 [source,bash,options="nowrap"]
 ----
 skipper:>package search
+╔═════════════════╤═══════╤════════════════════════════════════════════════════════════════════════════════╗
+║      Name       │Version│                                  Description                                   ║
+╠═════════════════╪═══════╪════════════════════════════════════════════════════════════════════════════════╣
+║helloworld       │1.0.0  │The app has two endpoints, /about and /greeting in English.  Maven resource.    ║
+║helloworld       │1.0.1  │The app has two endpoints, /about and /greeting in Portuguese.  Maven resource. ║
+║helloworld-docker│1.0.1  │The app has two endpoints, /about and /greeting in Portuguese.  Docker resource.║
+║helloworld-docker│1.0.0  │The app has two endpoints, /about and /greeting in English.  Docker resource.   ║
+╚═════════════════╧═══════╧════════════════════════════════════════════════════════════════════════════════╝
+----
+
+[source,bash,options="nowrap"]
+----
+skipper:>package list
 ╔═════════════════╤═══════╤════════════════════════════════════════════════════════════════════════════════╗
 ║      Name       │Version│                                  Description                                   ║
 ╠═════════════════╪═══════╪════════════════════════════════════════════════════════════════════════════════╣

@@ -471,11 +471,11 @@ Package uploaded successfully:[mypackage:1.0.0]
 
 If no `--repo-name` is set, the `upload` command uses `local` as the repository to upload.
 
-We can then use the `package search` command to see that our package has been uploaded, as shown (with its output) in the following example:
+We can then use the `package list` or `package search` command to see that our package has been uploaded, as shown (with its output) in the following example:
 
 [source,bash,options="nowrap"]
 ----
-skipper:>package search
+skipper:>package list
 ╔═════════════════╤═══════╤════════════════════════════════════════════════════════════════════════════════╗
 ║      Name       │Version│                                  Description                                   ║
 ╠═════════════════╪═══════╪════════════════════════════════════════════════════════════════════════════════╣

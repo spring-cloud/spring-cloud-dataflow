@@ -69,7 +69,7 @@ skipper:>repo list
 ╚════════════╧═══════════════════════════════════════════════════════════╧═════╧═════╝
 ----
 
-Search for the available packages using the `package search` command.
+Search for the available packages using the `package search` or its alias `package list` command.
 The following example shows the `package search` command and typical output for it:
 [source,bash,options="nowrap"]
 ----

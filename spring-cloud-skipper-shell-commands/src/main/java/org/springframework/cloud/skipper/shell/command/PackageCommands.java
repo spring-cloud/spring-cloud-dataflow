@@ -69,7 +69,7 @@ public class PackageCommands extends AbstractSkipperCommand {
 		this.skipperClient = skipperClient;
 	}
 
-	@ShellMethod(key = "package search", value = "Search for packages.")
+	@ShellMethod(key = {"package search", "package list"}, value = "Search for packages.")
 	public Object search(
 			@ShellOption(help = "wildcard expression to search for the package name", defaultValue = NULL) String name,
 			@ShellOption(help = "boolean to set for more detailed package metadata") boolean details)
