@@ -77,7 +77,6 @@ public abstract class AbstractStreamService implements StreamService {
 	}
 
 	public StreamDefinition createStream(String streamName, String dsl, boolean deploy) {
-
 		StreamDefinition streamDefinition = createStreamDefinition(streamName, dsl);
 
 		List<String> errorMessages = new ArrayList<>();
@@ -98,10 +97,12 @@ public abstract class AbstractStreamService implements StreamService {
 				continue;
 			}
 		}
+
 		if (!errorMessages.isEmpty()) {
 			throw new InvalidStreamDefinitionException(
 					StringUtils.collectionToDelimitedString(errorMessages, "\n"));
 		}
+
 		this.streamDefinitionRepository.save(streamDefinition);
 
 		if (deploy) {

@@ -20,6 +20,7 @@ import java.util.Map;
 
 import org.springframework.cloud.dataflow.core.StreamDefinition;
 import org.springframework.cloud.dataflow.core.StreamDeployment;
+import org.springframework.cloud.dataflow.server.controller.support.InvalidStreamDefinitionException;
 import org.springframework.cloud.deployer.spi.app.DeploymentState;
 
 /**
@@ -39,7 +40,7 @@ public interface StreamService {
 	 * @param deploy if {@code true}, the stream is deployed upon creation (default is
 	 * {@code false})
 	 * @return the created stream definition already exists
-	 * @throws InvalidStreamDefinitionException if there errors in parsing the stream DSL,
+	 * @throws InvalidStreamDefinitionException if there are errors in parsing the stream DSL,
 	 * resolving the name, or type of applications in the stream
 	 */
 	StreamDefinition createStream(String streamName, String dsl, boolean deploy);
