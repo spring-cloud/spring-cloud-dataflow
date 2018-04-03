@@ -172,7 +172,7 @@ public class TestDependencies extends WebMvcConfigurationSupport {
 	@Bean
 	@ConditionalOnSkipperEnabled
 	public SkipperStreamDeploymentController updatableStreamDeploymentController(StreamDefinitionRepository repository,
-																				SkipperStreamService skipperStreamService) {
+			SkipperStreamService skipperStreamService) {
 		return new SkipperStreamDeploymentController(repository, skipperStreamService);
 	}
 
@@ -184,17 +184,19 @@ public class TestDependencies extends WebMvcConfigurationSupport {
 	@Bean
 	@ConditionalOnSkipperEnabled
 	public SkipperStreamService skipperStreamService(StreamDefinitionRepository streamDefinitionRepository,
-													SkipperStreamDeployer skipperStreamDeployer,
-													AppDeploymentRequestCreator appDeploymentRequestCreator) {
-		return new DefaultSkipperStreamService(streamDefinitionRepository, skipperStreamDeployer, appDeploymentRequestCreator);
+			SkipperStreamDeployer skipperStreamDeployer, AppDeploymentRequestCreator appDeploymentRequestCreator,
+			AppRegistryCommon appRegistry) {
+		return new DefaultSkipperStreamService(streamDefinitionRepository, skipperStreamDeployer,
+				appDeploymentRequestCreator, appRegistry);
 	}
 
 	@Bean
 	@ConditionalOnSkipperDisabled
 	public StreamService simpleStreamService(StreamDefinitionRepository streamDefinitionRepository,
-			AppDeployerStreamDeployer appDeployerStreamDeployer, AppDeploymentRequestCreator appDeploymentRequestCreator) {
+			AppDeployerStreamDeployer appDeployerStreamDeployer,
+			AppDeploymentRequestCreator appDeploymentRequestCreator, AppRegistryCommon appRegistry) {
 		return new AppDeployerStreamService(streamDefinitionRepository, appDeployerStreamDeployer,
-				appDeploymentRequestCreator);
+				appDeploymentRequestCreator, appRegistry);
 	}
 
 	@Bean
@@ -232,8 +234,8 @@ public class TestDependencies extends WebMvcConfigurationSupport {
 
 	@Bean
 	public StreamDefinitionController streamDefinitionController(StreamDefinitionRepository repository,
-			StreamService streamService, AppRegistryCommon appRegistryCommon) {
-		return new StreamDefinitionController(repository, appRegistryCommon, streamService);
+			StreamService streamService) {
+		return new StreamDefinitionController(repository, streamService);
 	}
 
 	@Bean

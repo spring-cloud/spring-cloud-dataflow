@@ -16,17 +16,14 @@
 package org.springframework.cloud.dataflow.server.controller;
 
 import java.lang.reflect.Field;
-import java.net.URI;
 
 import org.junit.Test;
 import sun.misc.Unsafe;
 
 import org.springframework.beans.DirectFieldAccessor;
-import org.springframework.cloud.dataflow.registry.AppRegistry;
+import org.springframework.cloud.dataflow.core.StreamDefinition;
 import org.springframework.cloud.dataflow.server.repository.StreamDefinitionRepository;
 import org.springframework.cloud.dataflow.server.service.StreamService;
-import org.springframework.cloud.deployer.resource.registry.UriRegistry;
-import org.springframework.core.io.ResourceLoader;
 
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -39,26 +36,23 @@ public class StreamDefinitionControllerTests {
 	// there is nothing to assert in this test other then it does not fail (see GH-1462)
 	@Test
 	public void validateStreamSaveOutsideOfMVC() throws Exception {
+		StreamService streamService = mock(StreamService.class);
+		when(streamService.createStream("foo", "foo|bar", false))
+				.thenReturn(new StreamDefinition("foo", "foo|bar"));
 
-		UriRegistry uriRegistry = mock(UriRegistry.class);
-		when(uriRegistry.find("source.foo")).thenReturn(new URI("file://foo"));
-		when(uriRegistry.find("sink.bar")).thenReturn(new URI("file://bar"));
-
-		StreamDefinitionController controller = buildStreamDefinitionControllerStub(uriRegistry);
+		StreamDefinitionController controller = buildStreamDefinitionControllerStub(streamService);
 		controller.save("foo", "foo|bar", false);
 	}
 
-	private static StreamDefinitionController buildStreamDefinitionControllerStub(UriRegistry uriRegistry)
+	private static StreamDefinitionController buildStreamDefinitionControllerStub(StreamService streamService)
 			throws Exception {
 		Unsafe unsafe = getUnsafe();
 
 		StreamDefinitionController controller = (StreamDefinitionController) unsafe
 				.allocateInstance(StreamDefinitionController.class);
 
-		AppRegistry appRegistry = new AppRegistry(uriRegistry, mock(ResourceLoader.class));
 		DirectFieldAccessor accessor = new DirectFieldAccessor(controller);
-		accessor.setPropertyValue("appRegistry", appRegistry);
-		accessor.setPropertyValue("streamService", mock(StreamService.class));
+		accessor.setPropertyValue("streamService", streamService);
 		accessor.setPropertyValue("streamDefinitionRepository", mock(StreamDefinitionRepository.class));
 		return controller;
 	}

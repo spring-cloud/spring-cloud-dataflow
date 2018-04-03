@@ -35,7 +35,6 @@ import org.springframework.cloud.dataflow.core.BindingPropertyKeys;
 import org.springframework.cloud.dataflow.core.StreamAppDefinition;
 import org.springframework.cloud.dataflow.core.StreamDefinition;
 import org.springframework.cloud.dataflow.core.StreamPropertyKeys;
-import org.springframework.cloud.dataflow.registry.AppRegistry;
 import org.springframework.cloud.dataflow.server.config.apps.CommonApplicationProperties;
 import org.springframework.cloud.dataflow.server.configuration.TestDependencies;
 import org.springframework.cloud.dataflow.server.repository.DeploymentIdRepository;
@@ -43,10 +42,7 @@ import org.springframework.cloud.dataflow.server.repository.DeploymentKey;
 import org.springframework.cloud.dataflow.server.repository.InMemoryStreamDefinitionRepository;
 import org.springframework.cloud.dataflow.server.repository.StreamDefinitionRepository;
 import org.springframework.cloud.dataflow.server.service.StreamService;
-import org.springframework.cloud.deployer.resource.maven.MavenProperties;
 import org.springframework.cloud.deployer.resource.maven.MavenResource;
-import org.springframework.cloud.deployer.resource.maven.MavenResourceLoader;
-import org.springframework.cloud.deployer.resource.registry.InMemoryUriRegistry;
 import org.springframework.cloud.deployer.spi.app.AppDeployer;
 import org.springframework.cloud.deployer.spi.app.AppInstanceStatus;
 import org.springframework.cloud.deployer.spi.app.AppStatus;
@@ -93,9 +89,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @DirtiesContext(classMode = ClassMode.AFTER_EACH_TEST_METHOD)
 public class StreamControllerTests {
 
-	private final AppRegistry appRegistry = new AppRegistry(new InMemoryUriRegistry(),
-			new MavenResourceLoader(new MavenProperties()));
-
 	@Autowired
 	private StreamDefinitionRepository repository;
 
@@ -136,12 +129,12 @@ public class StreamControllerTests {
 	public void testConstructorMissingRepository() {
 		StreamDeploymentController deploymentController = new StreamDeploymentController(
 				new InMemoryStreamDefinitionRepository(), defaultStreamService);
-		new StreamDefinitionController(null, appRegistry, defaultStreamService);
+		new StreamDefinitionController(null, defaultStreamService);
 	}
 
 	@Test(expected = IllegalArgumentException.class)
 	public void testConstructorMissingStreamService() {
-		new StreamDefinitionController(new InMemoryStreamDefinitionRepository(), appRegistry, null);
+		new StreamDefinitionController(new InMemoryStreamDefinitionRepository(), null);
 	}
 
 	@Test

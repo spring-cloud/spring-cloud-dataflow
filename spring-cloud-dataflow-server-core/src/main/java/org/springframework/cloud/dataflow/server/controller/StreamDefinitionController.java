@@ -18,7 +18,6 @@ package org.springframework.cloud.dataflow.server.controller;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
@@ -27,16 +26,11 @@ import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import org.springframework.cloud.dataflow.core.ApplicationType;
-import org.springframework.cloud.dataflow.core.StreamAppDefinition;
 import org.springframework.cloud.dataflow.core.StreamDefinition;
-import org.springframework.cloud.dataflow.core.dsl.ParseException;
 import org.springframework.cloud.dataflow.core.dsl.StreamNode;
 import org.springframework.cloud.dataflow.core.dsl.StreamParser;
-import org.springframework.cloud.dataflow.registry.AppRegistryCommon;
 import org.springframework.cloud.dataflow.rest.resource.DeploymentStateResource;
 import org.springframework.cloud.dataflow.rest.resource.StreamDefinitionResource;
-import org.springframework.cloud.dataflow.server.DataFlowServerUtil;
 import org.springframework.cloud.dataflow.server.controller.support.ArgumentSanitizer;
 import org.springframework.cloud.dataflow.server.controller.support.ControllerUtils;
 import org.springframework.cloud.dataflow.server.controller.support.InvalidStreamDefinitionException;
@@ -45,7 +39,6 @@ import org.springframework.cloud.dataflow.server.repository.NoSuchStreamDefiniti
 import org.springframework.cloud.dataflow.server.repository.StreamDefinitionRepository;
 import org.springframework.cloud.dataflow.server.repository.support.SearchPageable;
 import org.springframework.cloud.dataflow.server.service.StreamService;
-import org.springframework.cloud.dataflow.server.support.CannotDetermineApplicationTypeException;
 import org.springframework.cloud.deployer.spi.app.DeploymentState;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -56,7 +49,6 @@ import org.springframework.hateoas.PagedResources;
 import org.springframework.hateoas.mvc.ResourceAssemblerSupport;
 import org.springframework.http.HttpStatus;
 import org.springframework.util.Assert;
-import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -75,6 +67,7 @@ import org.springframework.web.bind.annotation.RestController;
  * @author Gunnar Hillert
  * @author Oleg Zhurakousky
  * @author Glenn Renfro
+ * @author Christian Tzolov
  */
 @RestController
 @RequestMapping("/streams/definitions")
@@ -87,11 +80,6 @@ public class StreamDefinitionController {
 	 * The streamDefinitionRepository this controller will use for stream CRUD operations.
 	 */
 	private final StreamDefinitionRepository streamDefinitionRepository;
-
-	/**
-	 * The app registry this controller will use to lookup apps.
-	 */
-	private final AppRegistryCommon appRegistry;
 
 	/**
 	 * The service that is responsible for deploying streams.
@@ -107,17 +95,14 @@ public class StreamDefinitionController {
 	 *
 	 * @param repository the streamDefinitionRepository this controller will use for stream
 	 * CRUD operations
-	 * @param appRegistry the app registry to look up registered apps
 	 * @param streamService the stream service to use to delegate stream operations such as
 	 * deploy/status.
 	 */
-	public StreamDefinitionController(StreamDefinitionRepository repository, AppRegistryCommon appRegistry,
+	public StreamDefinitionController(StreamDefinitionRepository repository,
 			StreamService streamService) {
 		Assert.notNull(repository, "StreamDefinitionRepository must not be null");
-		Assert.notNull(appRegistry, "AppRegistry must not be null");
 		Assert.notNull(streamService, "StreamService must not be null");
 		this.streamDefinitionRepository = repository;
-		this.appRegistry = appRegistry;
 		this.streamService = streamService;
 	}
 
@@ -208,39 +193,7 @@ public class StreamDefinitionController {
 	@ResponseStatus(HttpStatus.CREATED)
 	public StreamDefinitionResource save(@RequestParam("name") String name, @RequestParam("definition") String dsl,
 			@RequestParam(value = "deploy", defaultValue = "false") boolean deploy) {
-		StreamDefinition streamDefinition;
-		try {
-			streamDefinition = new StreamDefinition(name, dsl);
-		}
-		catch (ParseException ex) {
-			throw new InvalidStreamDefinitionException(ex.getMessage());
-		}
-		List<String> errorMessages = new ArrayList<>();
-		for (StreamAppDefinition streamAppDefinition : streamDefinition.getAppDefinitions()) {
-			final String appName = streamAppDefinition.getRegisteredAppName();
-			final ApplicationType appType;
-			try {
-				appType = DataFlowServerUtil.determineApplicationType(streamAppDefinition);
-			}
-			catch (CannotDetermineApplicationTypeException e) {
-				errorMessages.add(String.format("Cannot determine application type for application '%s': %s", appName,
-						e.getMessage()));
-				continue;
-			}
-			if (!appRegistry.appExist(appName, appType)) {
-				errorMessages.add(
-						String.format("Application name '%s' with type '%s' does not exist in the app " + "registry.",
-								appName, appType));
-			}
-		}
-		if (!errorMessages.isEmpty()) {
-			throw new InvalidStreamDefinitionException(
-					StringUtils.collectionToDelimitedString(errorMessages, "\n"));
-		}
-		this.streamDefinitionRepository.save(streamDefinition);
-		if (deploy) {
-			this.streamService.deployStream(name, new HashMap<>());
-		}
+		StreamDefinition streamDefinition = this.streamService.createStream(name, dsl, deploy);
 		return new Assembler(new PageImpl<>(Collections.singletonList(streamDefinition))).toResource(streamDefinition);
 	}
 
