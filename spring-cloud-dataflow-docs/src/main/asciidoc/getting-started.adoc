@@ -45,7 +45,7 @@ In the directory where you downloaded `docker-compose.yml`, start the system, as
 +
 [source,bash,subs=attributes]
 ----
-$ docker-compose up
+$ DATAFLOW_VERSION={local-server-image-tag} docker-compose up
 ----
 +
 NOTE: By default Docker Compose will use locally available images.
