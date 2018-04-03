@@ -15,21 +15,31 @@
  */
 package org.springframework.cloud.dataflow.server.service.impl;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import org.springframework.cloud.dataflow.core.ApplicationType;
+import org.springframework.cloud.dataflow.core.StreamAppDefinition;
 import org.springframework.cloud.dataflow.core.StreamDefinition;
+import org.springframework.cloud.dataflow.core.dsl.ParseException;
+import org.springframework.cloud.dataflow.registry.AppRegistryCommon;
+import org.springframework.cloud.dataflow.server.DataFlowServerUtil;
 import org.springframework.cloud.dataflow.server.controller.StreamAlreadyDeployedException;
 import org.springframework.cloud.dataflow.server.controller.StreamAlreadyDeployingException;
+import org.springframework.cloud.dataflow.server.controller.support.InvalidStreamDefinitionException;
 import org.springframework.cloud.dataflow.server.repository.NoSuchStreamDefinitionException;
 import org.springframework.cloud.dataflow.server.repository.StreamDefinitionRepository;
 import org.springframework.cloud.dataflow.server.service.StreamService;
 import org.springframework.cloud.dataflow.server.stream.StreamDeploymentRequest;
+import org.springframework.cloud.dataflow.server.support.CannotDetermineApplicationTypeException;
 import org.springframework.cloud.deployer.spi.app.DeploymentState;
 import org.springframework.util.Assert;
+import org.springframework.util.StringUtils;
 
 /**
  * Performs manipulation on application and deployment properties, expanding shorthand
@@ -54,9 +64,61 @@ public abstract class AbstractStreamService implements StreamService {
 	 */
 	protected final StreamDefinitionRepository streamDefinitionRepository;
 
-	public AbstractStreamService(StreamDefinitionRepository streamDefinitionRepository) {
+	/**
+	 * The app registry this controller will use to lookup apps.
+	 */
+	private final AppRegistryCommon appRegistry;
+
+	public AbstractStreamService(StreamDefinitionRepository streamDefinitionRepository, AppRegistryCommon appRegistry) {
 		Assert.notNull(streamDefinitionRepository, "StreamDefinitionRepository must not be null");
+		Assert.notNull(appRegistry, "AppRegistryCommon must not be null");
 		this.streamDefinitionRepository = streamDefinitionRepository;
+		this.appRegistry = appRegistry;
+	}
+
+	public StreamDefinition createStream(String streamName, String dsl, boolean deploy) {
+		StreamDefinition streamDefinition = createStreamDefinition(streamName, dsl);
+
+		List<String> errorMessages = new ArrayList<>();
+
+		for (StreamAppDefinition streamAppDefinition : streamDefinition.getAppDefinitions()) {
+			final String appName = streamAppDefinition.getRegisteredAppName();
+			try {
+				final ApplicationType appType = DataFlowServerUtil.determineApplicationType(streamAppDefinition);
+				if (!appRegistry.appExist(appName, appType)) {
+					errorMessages.add(
+							String.format("Application name '%s' with type '%s' does not exist in the app registry.",
+									appName, appType));
+				}
+			}
+			catch (CannotDetermineApplicationTypeException e) {
+				errorMessages.add(String.format("Cannot determine application type for application '%s': %s",
+						appName, e.getMessage()));
+				continue;
+			}
+		}
+
+		if (!errorMessages.isEmpty()) {
+			throw new InvalidStreamDefinitionException(
+					StringUtils.collectionToDelimitedString(errorMessages, "\n"));
+		}
+
+		this.streamDefinitionRepository.save(streamDefinition);
+
+		if (deploy) {
+			this.deployStream(streamName, new HashMap<>());
+		}
+
+		return streamDefinition;
+	}
+
+	private StreamDefinition createStreamDefinition(String streamName, String dsl) {
+		try {
+			return new StreamDefinition(streamName, dsl);
+		}
+		catch (ParseException ex) {
+			throw new InvalidStreamDefinitionException(ex.getMessage());
+		}
 	}
 
 	@Override
@@ -74,7 +136,7 @@ public abstract class AbstractStreamService implements StreamService {
 		if (DeploymentState.deployed == status) {
 			throw new StreamAlreadyDeployedException(name);
 		}
-		else if (DeploymentState.deploying  == status) {
+		else if (DeploymentState.deploying == status) {
 			throw new StreamAlreadyDeployingException(name);
 		}
 		doDeployStream(streamDefinition, deploymentProperties);

@@ -33,6 +33,7 @@ import org.springframework.cloud.dataflow.configuration.metadata.BootApplication
 import org.springframework.cloud.dataflow.core.StreamDefinition;
 import org.springframework.cloud.dataflow.core.StreamDeployment;
 import org.springframework.cloud.dataflow.registry.AppRegistry;
+import org.springframework.cloud.dataflow.registry.AppRegistryCommon;
 import org.springframework.cloud.dataflow.server.config.apps.CommonApplicationProperties;
 import org.springframework.cloud.dataflow.server.repository.StreamDefinitionRepository;
 import org.springframework.cloud.dataflow.server.repository.StreamDeploymentRepository;
@@ -89,6 +90,8 @@ public class AppDeployerStreamServiceTests {
 
 	private AppDeployerStreamService simpleStreamService;
 
+	private AppRegistryCommon appRegistryCommon;
+
 	@Before
 	public void setupMock() {
 		this.streamDeploymentRepository = mock(StreamDeploymentRepository.class);
@@ -98,8 +101,9 @@ public class AppDeployerStreamServiceTests {
 		this.appDeploymentRequestCreator = new AppDeploymentRequestCreator(mock(AppRegistry.class),
 				mock(CommonApplicationProperties.class),
 				new BootApplicationConfigurationMetadataResolver());
+		this.appRegistryCommon = mock(AppRegistryCommon.class);
 		this.simpleStreamService = new AppDeployerStreamService(mock(StreamDefinitionRepository.class),
-				this.appDeployerStreamDeployer, this.appDeploymentRequestCreator);
+				this.appDeployerStreamDeployer, this.appDeploymentRequestCreator, this.appRegistryCommon);
 		this.streamDefinitionList.add(streamDefinition1);
 		this.appDeployerStreamDefinitions.add(streamDefinition1);
 		this.streamDefinitionList.add(streamDefinition2);

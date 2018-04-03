@@ -168,8 +168,8 @@ public class DataFlowControllerAutoConfiguration {
 	@Bean
 	@ConditionalOnBean(StreamDefinitionRepository.class)
 	public StreamDefinitionController streamDefinitionController(StreamDefinitionRepository repository,
-			AppRegistryCommon appRegistry, StreamService streamService) {
-		return new StreamDefinitionController(repository, appRegistry, streamService);
+			StreamService streamService) {
+		return new StreamDefinitionController(repository, streamService);
 	}
 
 	@Bean
@@ -394,9 +394,10 @@ public class DataFlowControllerAutoConfiguration {
 		@ConditionalOnBean(StreamDefinitionRepository.class)
 		public SkipperStreamService skipperStreamDeploymentService(
 				StreamDefinitionRepository streamDefinitionRepository,
-				SkipperStreamDeployer skipperStreamDeployer, AppDeploymentRequestCreator appDeploymentRequestCreator) {
+				SkipperStreamDeployer skipperStreamDeployer, AppDeploymentRequestCreator appDeploymentRequestCreator,
+				AppRegistryCommon appRegistry) {
 			return new DefaultSkipperStreamService(streamDefinitionRepository, skipperStreamDeployer,
-					appDeploymentRequestCreator);
+					appDeploymentRequestCreator, appRegistry);
 		}
 
 		@Bean
@@ -434,10 +435,9 @@ public class DataFlowControllerAutoConfiguration {
 		@ConditionalOnBean({ StreamDefinitionRepository.class, StreamDeploymentRepository.class })
 		public StreamService simpleStreamDeploymentService(StreamDefinitionRepository streamDefinitionRepository,
 				AppDeployerStreamDeployer appDeployerStreamDeployer,
-				AppDeploymentRequestCreator appDeploymentRequestCreator) {
+				AppDeploymentRequestCreator appDeploymentRequestCreator, AppRegistryCommon appRegistry) {
 			return new AppDeployerStreamService(streamDefinitionRepository,
-					appDeployerStreamDeployer,
-					appDeploymentRequestCreator);
+					appDeployerStreamDeployer, appDeploymentRequestCreator, appRegistry);
 		}
 
 		@Bean
