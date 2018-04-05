@@ -70,7 +70,10 @@ public abstract class BaseDocumentation extends AbstractControllerTests {
 	 * Snippet for link properties. Set to ignore common links.
 	 */
 	protected final List<FieldDescriptor> defaultLinkProperties = Arrays.asList(
+			fieldWithPath("_links.first.href").ignored().optional(),
 			fieldWithPath("_links.self.href").ignored().optional(),
+			fieldWithPath("_links.next.href").ignored().optional(),
+			fieldWithPath("_links.last.href").ignored().optional(),
 			fieldWithPath("_links.self.templated").ignored().optional(),
 			fieldWithPath("_links.profile.href").ignored().optional(),
 			fieldWithPath("_links.repository.href").ignored().optional(),
@@ -95,6 +98,9 @@ public abstract class BaseDocumentation extends AbstractControllerTests {
 	public static LinksSnippet linksForSkipper(LinkDescriptor... descriptors) {
 		return HypermediaDocumentation.links(
 				linkWithRel("self").ignored(),
+				linkWithRel("first").ignored().optional(),
+				linkWithRel("next").ignored().optional(),
+				linkWithRel("last").ignored().optional(),
 				linkWithRel("profile").ignored(),
 				linkWithRel("search").ignored(),
 				linkWithRel("deployer").ignored().optional(),

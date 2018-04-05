@@ -94,3 +94,39 @@ packageHomeUrl: http://cloud.spring.io/spring-cloud-stream-app-starters/
 tags: helloworld
 maintainer: https://github.com/markpollack
 description: The hello world app says hello.
+
+---
+apiVersion: skipper.spring.io/v1
+kind: SkipperPackageMetadata
+origin: samples-package-repository
+name: testapp
+version: 1.0.0
+packageSourceUrl: https://github.com/spring-cloud/spring-cloud-deployer
+packageHomeUrl: https://cloud.spring.io/spring-cloud-dataflow/
+tags: logging, sink
+maintainer: https://github.com/jvalkeal
+description: The testapp up starts and conditionally fails.
+
+---
+apiVersion: skipper.spring.io/v1
+kind: SkipperPackageMetadata
+origin: samples-package-repository
+name: testapp
+version: 1.1.0
+packageSourceUrl: https://github.com/spring-cloud/spring-cloud-deployer
+packageHomeUrl: https://cloud.spring.io/spring-cloud-dataflow/
+tags: logging, sink
+maintainer: https://github.com/jvalkeal
+description: The testapp up starts and conditionally fails.
+
+---
+apiVersion: skipper.spring.io/v1
+kind: SkipperPackageMetadata
+origin: samples-package-repository
+name: testapp
+version: 1.2.0
+packageSourceUrl: https://github.com/spring-cloud/spring-cloud-deployer
+packageHomeUrl: https://cloud.spring.io/spring-cloud-dataflow/
+tags: logging, sink
+maintainer: https://github.com/jvalkeal
+description: The testapp up starts and conditionally fails.
