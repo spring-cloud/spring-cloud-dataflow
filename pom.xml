@@ -38,9 +38,9 @@
         release versions -->
         <spring-cloud.version>Dalston.SR5</spring-cloud.version>
         <spring-cloud-deployer.version>1.3.1.RELEASE</spring-cloud-deployer.version>
-        <spring-cloud-deployer-local.version>1.3.3.RELEASE</spring-cloud-deployer-local.version>
+        <spring-cloud-deployer-local.version>1.3.4.BUILD-SNAPSHOT</spring-cloud-deployer-local.version>
         <spring-cloud-deployer-cloudfoundry.version>1.3.1.RELEASE</spring-cloud-deployer-cloudfoundry.version>
-        <spring-cloud-deployer-kubernetes.version>1.3.2.RELEASE</spring-cloud-deployer-kubernetes.version>
+        <spring-cloud-deployer-kubernetes.version>1.3.3.BUILD-SNAPSHOT</spring-cloud-deployer-kubernetes.version>
 
         <dockerfile-maven-plugin.version>1.3.6</dockerfile-maven-plugin.version>
         <zeroturnaround.version>1.11</zeroturnaround.version>

@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 the original author or authors.
+ * Copyright 2017-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,7 +19,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import io.fabric8.kubernetes.client.DefaultKubernetesClient;
 import io.fabric8.kubernetes.client.KubernetesClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -28,6 +27,7 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.cloud.deployer.spi.kubernetes.ContainerFactory;
 import org.springframework.cloud.deployer.spi.kubernetes.DefaultContainerFactory;
 import org.springframework.cloud.deployer.spi.kubernetes.KubernetesAppDeployer;
+import org.springframework.cloud.deployer.spi.kubernetes.KubernetesClientFactory;
 import org.springframework.cloud.deployer.spi.kubernetes.KubernetesDeployerProperties;
 import org.springframework.cloud.skipper.deployer.kubernetes.KubernetesPlatformProperties;
 import org.springframework.cloud.skipper.domain.Deployer;
@@ -37,6 +37,7 @@ import org.springframework.context.annotation.Configuration;
 
 /**
  * @author Donovan Muller
+ * @author Ilayaperumal Gopinathan
  */
 @Configuration
 @EnableConfigurationProperties(KubernetesPlatformProperties.class)
@@ -61,8 +62,7 @@ public class KubernetesPlatformAutoConfiguration {
 
 	protected Deployer createAndSaveKubernetesAppDeployers(String account,
 			KubernetesDeployerProperties kubernetesProperties) {
-		KubernetesClient kubernetesClient = new DefaultKubernetesClient()
-				.inNamespace(kubernetesProperties.getNamespace());
+		KubernetesClient kubernetesClient = KubernetesClientFactory.getKubernetesClient(kubernetesProperties);
 		ContainerFactory containerFactory = new DefaultContainerFactory(
 				kubernetesProperties);
 		KubernetesAppDeployer kubernetesAppDeployer = new KubernetesAppDeployer(
