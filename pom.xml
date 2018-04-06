@@ -24,20 +24,20 @@
 	<properties>
 		<java.version>1.8</java.version>
 		<javadoc.opts>-Xdoclint:none</javadoc.opts>
-		<spring-cloud-dataflow-ui.version>1.4.0.RELEASE</spring-cloud-dataflow-ui.version>
+		<spring-cloud-dataflow-ui.version>1.5.0.BUILD-SNAPSHOT</spring-cloud-dataflow-ui.version>
 
 		<spring-cloud-deployer.version>1.3.1.RELEASE</spring-cloud-deployer.version>
 		<spring-cloud-deployer-local.version>1.3.4.BUILD-SNAPSHOT</spring-cloud-deployer-local.version>
 
-		<spring-cloud-skipper.version>1.0.1.RELEASE</spring-cloud-skipper.version>
+		<spring-cloud-skipper.version>1.0.3.BUILD-SNAPSHOT</spring-cloud-skipper.version>
 		<!-- Note: Change ./spring-cloud-dataflow-server-local/pom.xml to match the spring-boot.version -->
-		<spring-boot.version>1.5.10.RELEASE</spring-boot.version>
+		<spring-boot.version>1.5.12.RELEASE</spring-boot.version>
 
 		<!-- Note: Change ./spring-cloud-dataflow-server-local/pom.xml to match the spring-cloud-task.version -->
 		<spring-cloud-task.version>1.2.2.RELEASE</spring-cloud-task.version>
 
 		<!-- Note: Change ./spring-cloud-dataflow-server-local/pom.xml to match the spring-cloud.version -->
-		<spring-cloud.version>Edgware.SR2</spring-cloud.version>
+		<spring-cloud.version>Edgware.SR3</spring-cloud.version>
 
 		<spring-cloud-common-security-config.version>1.0.1.RELEASE</spring-cloud-common-security-config.version>
 
