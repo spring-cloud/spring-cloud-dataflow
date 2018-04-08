@@ -61,6 +61,7 @@ import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
@@ -79,7 +80,8 @@ import static org.mockito.Mockito.when;
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = { EmbeddedDataSourceConfiguration.class, TaskServiceDependencies.class,
 		PropertyPlaceholderAutoConfiguration.class }, properties = {
-				"spring.cloud.dataflow.applicationProperties.task.app.composed-task-runner.globalkey=globalvalue" })
+		"spring.cloud.dataflow.applicationProperties.task.globalkey=globalvalue",
+		"spring.cloud.dataflow.applicationProperties.stream.globalstreamkey=nothere" })
 @EnableConfigurationProperties({ CommonApplicationProperties.class })
 public class DefaultTaskServiceTests {
 
@@ -161,6 +163,7 @@ public class DefaultTaskServiceTests {
 		assertEquals("1000", request.getDefinition().getProperties().get("interval-time-between-checks"));
 		assertFalse(request.getDefinition().getProperties().containsKey("app.foo"));
 		assertEquals("globalvalue", request.getDefinition().getProperties().get("globalkey"));
+		assertNull(request.getDefinition().getProperties().get("globalstreamkey"));
 	}
 
 	@Test

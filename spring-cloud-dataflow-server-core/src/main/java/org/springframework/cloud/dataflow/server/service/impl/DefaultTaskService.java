@@ -68,6 +68,7 @@ import org.springframework.util.StringUtils;
  * @author Gunnar Hillert
  * @author Thomas Risberg
  * @author Ilayaperumal Gopinathan
+ * @author Michael Wirth
  */
 public class DefaultTaskService implements TaskService {
 
@@ -189,8 +190,10 @@ public class DefaultTaskService implements TaskService {
 		TaskExecution taskExecution = taskExecutionRepository.createTaskExecution(taskName);
 		taskDefinition = this.updateTaskProperties(taskDefinition);
 
-		Map<String, String> appDeploymentProperties = extractAppProperties(taskDefinition.getRegisteredAppName(),
-				taskDeploymentProperties);
+		Map<String, String> appDeploymentProperties = new HashMap<>(commonApplicationProperties.getTask());
+		appDeploymentProperties.putAll(
+			extractAppProperties(taskDefinition.getRegisteredAppName(), taskDeploymentProperties));
+
 		Map<String, String> deployerDeploymentProperties = DeploymentPropertiesUtils
 				.extractAndQualifyDeployerProperties(taskDeploymentProperties, taskDefinition.getRegisteredAppName());
 		if (StringUtils.hasText(this.dataflowServerUri) && taskNode.isComposed()) {
@@ -282,9 +285,7 @@ public class DefaultTaskService implements TaskService {
 
 	private Map<String, String> extractAppProperties(String name, Map<String, String> taskDeploymentProperties) {
 		final String prefix = "app." + name + ".";
-		return Stream
-				.concat(commonApplicationProperties.getTask().entrySet().stream(),
-						taskDeploymentProperties.entrySet().stream())
+		return taskDeploymentProperties.entrySet().stream()
 				.filter(kv -> kv.getKey().startsWith(prefix))
 				.collect(Collectors.toMap(kv -> kv.getKey().substring(prefix.length()), kv -> kv.getValue()));
 	}
@@ -389,3 +390,4 @@ public class DefaultTaskService implements TaskService {
 	}
 
 }
+
