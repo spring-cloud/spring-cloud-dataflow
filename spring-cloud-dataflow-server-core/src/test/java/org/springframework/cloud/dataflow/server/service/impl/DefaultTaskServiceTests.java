@@ -79,7 +79,7 @@ import static org.mockito.Mockito.when;
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = { EmbeddedDataSourceConfiguration.class, TaskServiceDependencies.class,
 		PropertyPlaceholderAutoConfiguration.class }, properties = {
-				"spring.cloud.dataflow.applicationProperties.task.app.composed-task-runner.globalkey=globalvalue" })
+				"spring.cloud.dataflow.applicationProperties.task.globalkey=globalvalue" })
 @EnableConfigurationProperties({ CommonApplicationProperties.class })
 public class DefaultTaskServiceTests {
 
