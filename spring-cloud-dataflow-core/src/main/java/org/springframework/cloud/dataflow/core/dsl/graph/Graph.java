@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 the original author or authors.
+ * Copyright 2017-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,9 +17,13 @@
 package org.springframework.cloud.dataflow.core.dsl.graph;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
@@ -125,7 +129,7 @@ public class Graph {
 
 		List<Link> toFollow = findLinksFrom(start, false);
 		// This will build the main part of the DSL text based on walking the graph
-		followLinks(graphText, toFollow, null, unvisitedNodes, unfollowedLinks);
+		followLinks(graphText, toFollow, null, unvisitedNodes, unfollowedLinks, false);
 
 		// This will follow up any loose ends that were not reachable down the regular
 		// path
@@ -149,7 +153,7 @@ public class Graph {
 				if (toFollow.size() != 0) {
 					graphText.append(" && ");
 					printNode(graphText, nextHead, unvisitedNodes);
-					followLinks(graphText, toFollow, null, unvisitedNodes, unfollowedLinks);
+					followLinks(graphText, toFollow, null, unvisitedNodes, unfollowedLinks, false);
 				}
 				loopCount++; // Just a guard on malformed input - a good graph will not trigger this
 			}
@@ -182,18 +186,42 @@ public class Graph {
 	 * @param graphText where to place the DSL text as we process the graph
 	 * @param toFollow the links to follow
 	 * @param nodeToTerminateFollow the node that should trigger termination of following
+	 * @param inNestedSplit true if following nested split links immediately inside an
+	 * outer split
 	 */
 	private void followLinks(StringBuilder graphText, List<Link> toFollow, Node nodeToTerminateFollow,
-			List<Node> unvisitedNodes, List<Link> unfollowedLinks) {
+			List<Node> unvisitedNodes, List<Link> unfollowedLinks, boolean inNestedSplit) {
 		while (toFollow.size() != 0) {
 			if (toFollow.size() > 1) { // SPLIT
-				if (graphText.length() != 0) {
+				if (!inNestedSplit && graphText.length() != 0) {
 					// If there is something already in the text, a || is needed to
 					// join it to the preceding element
 					graphText.append(" && ");
 				}
 				graphText.append("<");
 				Node endOfSplit = findEndOfSplit(toFollow);
+				if (toFollow.size() > 2) {
+					// Nested splits are possible if there are more than two links, need
+					// to investigate
+					Map<Node, List<Link>> nestedSplits = findNestedSplits(toFollow, endOfSplit);
+					int i = 0;
+					for (Map.Entry<Node, List<Link>> nestedSplit : nestedSplits.entrySet()) {
+						Node endOfNestedSplit = nestedSplit.getKey();
+						List<Link> nestedSplitLinks = nestedSplit.getValue();
+						followLinks(graphText, nestedSplitLinks, endOfNestedSplit, unvisitedNodes, unfollowedLinks,
+								true);
+						toFollow.removeAll(nestedSplitLinks);
+						graphText.append(" && ");
+						followNode(graphText, endOfNestedSplit, endOfSplit, unvisitedNodes, unfollowedLinks);
+						i++;
+						if (i < nestedSplits.size()) {
+							graphText.append(" || ");
+						}
+					}
+					if (!toFollow.isEmpty() && !nestedSplits.isEmpty()) {
+						graphText.append(" || ");
+					}
+				}
 				for (int i = 0; i < toFollow.size(); i++) {
 					if (i > 0) {
 						graphText.append(" || ");
@@ -235,6 +263,151 @@ public class Graph {
 				break;
 			}
 		}
+	}
+
+	/**
+	 * Find out if any of the supplied links contain a specified node in their successor chain.
+	 * @param links the set of links to check
+	 * @param linkToIgnore a link within the supplied list to ignore (caller has already
+	 * checked)
+	 * @param node a possible common node amongst these links
+	 * @return a list of links that do have that node in common
+	 */
+	private List<Link> findSubsetOfLinksThatReachNode(List<Link> links, Link linkToIgnore, Node node) {
+		List<Link> result = null;
+		for (Link link : links) {
+			if (link == linkToIgnore) {
+				continue;
+			}
+			if (foundInChain(link, node)) {
+				if (result == null) {
+					result = new ArrayList<>();
+				}
+				result.add(link);
+			}
+		}
+		if (result != null) {
+			// Add the one we avoided which is known to definitely contain the node
+			result.add(linkToIgnore);
+		}
+		return result;
+	}
+
+	/**
+	 * Called when there are more than two links being followed from a node because there
+	 * might be nested splits. For example where two of them form a split which then joins
+	 * with a third link at a later point: &lt;&lt;AA || BB&gt; && CC || DD&gt; will look
+	 * like 3 links leaving START but there are two splits in play AA split with BB and
+	 * that with DD. This method will discover nested splits, and sort them so that they
+	 * can be visited in the right order (innermost to outermost).
+	 * 
+	 * @param toFollow a number of links representing a split, may contain nested splits
+	 * @param end the end of the split represented by the supplied links (a nested split
+	 * wouldn't go beyond this point)
+	 * @return any discovered nested splits. Node for the nested split maps to links that
+	 * are in that nested split.
+	 */
+	private Map<Node, List<Link>> findNestedSplits(List<Link> toFollow, Node end) {
+		Map<Node, List<Link>> nestedSplits = new LinkedHashMap<>();
+		for (Link link : toFollow) {
+			Node successor = findNodeById(link.to);
+			while (successor != null && successor != end) {
+				List<Link> commonLinks = findSubsetOfLinksThatReachNode(toFollow, link, successor);
+				if (commonLinks != null) {
+					// Some other links were found that share this successor, indicating
+					// that
+					// is the end of some nested split (because successor != known end
+					// across all links)
+
+					// Review current set of nested splits - if there is one with the same
+					// set of links, check the newly found proposal isn't just a node
+					// after the
+					// current known candidate for that split.
+					boolean insertThisOne = true;
+					Node forRemoval = null;
+					for (Map.Entry<Node, List<Link>> subsplit : nestedSplits.entrySet()) {
+						if (equalLinkLists(subsplit.getValue(), commonLinks)) {
+							// same set of links!
+							if (isSuccessor(subsplit.getKey(), successor)) {
+								// the new proposal is just a node that comes after the
+								// current known candidate
+								insertThisOne = false;
+							}
+							else {
+								// the new proposal is a shorter one
+								forRemoval = subsplit.getKey();
+							}
+						}
+					}
+					if (insertThisOne) {
+						if (forRemoval != null) {
+							nestedSplits.remove(forRemoval);
+						}
+						nestedSplits.put(successor, commonLinks);
+					}
+				}
+				List<Link> links = findLinksFrom(successor, true);
+				if (links.size() == 0) {
+					successor = null;
+				}
+				else if (links.size() == 1) {
+					successor = findNodeById(links.get(0).to);
+				}
+				else {
+					if (countLinksWithoutTransitions(links) == 0 || countLinksWithoutTransitions(links) == 1) {
+						// Assert: it doesn't therefore matter which one is chosen, they
+						// will
+						// come together at
+						// the same place
+						successor = findNodeById(links.get(0).to);
+					}
+					else {
+						while (countLinksWithoutTransitions(links) > 1) {
+							successor = findEndOfSplit(links);
+							links = findLinksFrom(successor, true);
+						}
+					}
+				}
+			}
+		}
+		// Now we have a list of splits, need to sort them according to their end nodes.
+		// Earlier end nodes first.
+		List<Map.Entry<Node, List<Link>>> toSort = new ArrayList<>(nestedSplits.entrySet());
+		Collections.sort(toSort, new NestedSplitComparator());
+		nestedSplits = new LinkedHashMap<>();
+		for (Map.Entry<Node, List<Link>> entry : toSort) {
+			nestedSplits.put(entry.getKey(), entry.getValue());
+		}
+		return nestedSplits;
+	}
+
+	class NestedSplitComparator implements Comparator<Entry<Node, List<Link>>> {
+
+		@Override
+		public int compare(Entry<Node, List<Link>> splitA, Entry<Node, List<Link>> splitB) {
+			Node endOfA = splitA.getKey();
+			Node endOfB = splitB.getKey();
+			if (endOfA == endOfB) {
+				return 0;
+			}
+			if (isSuccessor(endOfA, endOfB)) {
+				return -1;
+			}
+			return 1;
+		}
+	}
+
+	private boolean equalLinkLists(List<Link> list1, List<Link> list2) {
+		return list1.containsAll(list2) && list2.containsAll(list1);
+	}
+
+	private boolean isSuccessor(Node a, Node b) {
+		for (Link link : findLinksFrom(a, true)) {
+			if (foundInChain(link, b)) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 	private Node findEndOfSplit(List<Link> toFollow) {
@@ -340,14 +513,18 @@ public class Graph {
 		}
 	}
 
+	private void followNode(StringBuilder graphText, Node node, Node nodeToFinishFollowingAt, List<Node> unvisitedNodes,
+			List<Link> unfollowedLinks) {
+		printNode(graphText, node, unvisitedNodes);
+		List<Link> toFollow = findLinksFrom(node, false);
+		printTransitions(graphText, unvisitedNodes, unfollowedLinks, toFollow, nodeToFinishFollowingAt);
+		followLinks(graphText, toFollow, nodeToFinishFollowingAt, unvisitedNodes, unfollowedLinks, false);
+	}
+
 	private void followLink(StringBuilder graphText, Link link, Node nodeToFinishFollowingAt, List<Node> unvisitedNodes,
 			List<Link> unfollowedLinks) {
 		unfollowedLinks.remove(link);
-		Node target = findNodeById(link.to);
-		printNode(graphText, target, unvisitedNodes);
-		List<Link> toFollow = findLinksFrom(target, false);
-		printTransitions(graphText, unvisitedNodes, unfollowedLinks, toFollow, nodeToFinishFollowingAt);
-		followLinks(graphText, toFollow, nodeToFinishFollowingAt, unvisitedNodes, unfollowedLinks);
+		followNode(graphText, findNodeById(link.to), nodeToFinishFollowingAt, unvisitedNodes, unfollowedLinks);
 	}
 
 	private void printTransitions(StringBuilder graphText, List<Node> unvisitedNodes, List<Link> unfollowedLinks,
@@ -436,7 +613,7 @@ public class Graph {
 		}
 		return result;
 	}
-	
+
 	private boolean hasNoProperties(Link link) {
 		return link.properties == null || link.properties.size() == 0;
 	}
