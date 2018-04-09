@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 the original author or authors.
+ * Copyright 2017-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -890,10 +890,10 @@ public class TaskParserTests {
 		checkForParseError("App1 ->xx", DSLMessage.TASK_ARROW_SHOULD_BE_PRECEDED_BY_CODE, 5);
 		checkForParseError("App1 xx->", DSLMessage.OOD, 9);
 	}
-	
+
 	@Test
 	public void graphToText_1712() {
-		assertGraph("[0:START][1:timestamp][2:END][0-1][1-2]","timestamp");
+		assertGraph("[0:START][1:timestamp][2:END][0-1][1-2]", "timestamp");
 		// In issue 1712 the addition of an empty properties map to the link damages the
 		// generation of the DSL. It was expecting null if there are no properties.
 		TaskNode ctn = parse("timestamp");
@@ -1167,6 +1167,145 @@ public class TaskParserTests {
 		assertEquals("bar", transitions.get(0).getTargetApp().getName());
 		assertEquals("wibble", transitions.get(1).getStatusToCheck());
 		assertEquals("wobble", transitions.get(1).getTargetApp().getName());
+	}
+
+	@Test
+	public void moreSophisticatedScenarios_gh712_1a() {
+		TaskNode ctn = parse(
+				"<<jdbchdfs-local && spark-client || spark-cluster && two: spark-cluster> && timestamp || spark-yarn>");
+
+		// Check it looks like the picture:
+		// https://user-images.githubusercontent.com/1562654/38313990-27662f60-37da-11e8-9106-26688d631fae.png
+		LabelledTaskNode start = ctn.getStart();
+		FlowNode f1 = (FlowNode) start;
+		assertEquals(1, f1.getSeriesLength());
+		SplitNode s1 = (SplitNode) f1.getSeriesElement(0);
+		assertEquals(2, s1.getSeriesLength());
+		// This one is just spark-yarn
+		assertFlow(s1.getSeriesElement(1), "spark-yarn");
+
+		// This one is a flow of a split of jdbchdfs-local/spark-client and
+		// spark-cluster/spark-cluster and then timestamp
+		FlowNode f2 = (FlowNode) s1.getSeriesElement(0);
+		assertEquals(2, f2.getSeriesLength());
+		assertEquals("timestamp", ((TaskAppNode) f2.getSeriesElement(1)).getName());
+
+		SplitNode s2 = (SplitNode) f2.getSeriesElement(0);
+		assertEquals(2, s2.getSeriesLength());
+		FlowNode s2fa = (FlowNode) s2.getSeriesElement(0);
+		FlowNode s2fb = (FlowNode) s2.getSeriesElement(1);
+		assertFlow(s2fa, "jdbchdfs-local", "spark-client");
+		assertFlow(s2fb, "spark-cluster", "spark-cluster");
+
+		Graph graph = ctn.toGraph();
+		assertEquals(
+				"[0:START][1:jdbchdfs-local][2:spark-client][3:spark-cluster][4:two:spark-cluster][5:timestamp][6:spark-yarn][7:END]"+
+				"[0-1][1-2][0-3][3-4][2-5][4-5][0-6][5-7][6-7]",
+				graph.toVerboseString());
+
+		assertEquals(
+				"<<jdbchdfs-local && spark-client || spark-cluster && two: spark-cluster> && timestamp || spark-yarn>",
+				graph.toDSLText());
+	}
+
+	@Test
+	public void moreSophisticatedScenarios_gh712_1b() {
+		TaskNode ctn = parse("<<AA || BB> && CC || DD>");
+		Graph graph = ctn.toGraph();
+		assertEquals(
+				"[0:START][1:AA][2:BB][3:CC][4:DD][5:END]" +
+				"[0-1][0-2][1-3][2-3][0-4][3-5][4-5]",
+				graph.toVerboseString());
+		assertEquals("<<AA || BB> && CC || DD>", graph.toDSLText());
+	}
+
+	@Test
+	public void moreSophisticatedScenarios_gh712_1c() {
+		TaskNode ctn = parse("<<AA || BB> && CC && DD || EE>");
+		Graph graph = ctn.toGraph();
+		assertEquals(
+				"[0:START][1:AA][2:BB][3:CC][4:DD][5:EE][6:END]" +
+				"[0-1][0-2][1-3][2-3][3-4][0-5][4-6][5-6]",
+				graph.toVerboseString());
+		assertEquals("<<AA || BB> && CC && DD || EE>", graph.toDSLText());
+		ctn = parse("<<AA || BB> && CC && DD || EE>");
+		assertEquals("<<AA || BB> && CC && DD || EE>", ctn.toGraph().toDSLText());
+	}
+
+	@Test
+	public void moreSophisticatedScenarios_gh712_1d() {
+		TaskNode ctn = parse("<<AC && AD || AE && AF> && AG || AB>");
+		assertEquals("<<AC && AD || AE && AF> && AG || AB>", ctn.toGraph().toDSLText());
+		// Now include a transition
+		ctn = parse("<<AC && AD || AE 'jumpOut'-> AH && AF> && AG || AB>");
+		Graph graph = ctn.toGraph();
+		assertEquals(
+				"[0:START][1:AC][2:AD][3:AE][4:AH][5:AF][6:AG][7:AB][8:END]" +
+				"[0-1][1-2][0-3][jumpOut:3-4][3-5][2-6][5-6][4-6][0-7][6-8][7-8]",
+				graph.toVerboseString());
+		// Key thing to observe above is the link from [4-6] which goes from
+		// the transition target AH to the end of the split AG
+		assertEquals("<<AC && AD || AE 'jumpOut'->AH && AF> && AG || AB>", graph.toDSLText());
+	}
+
+	@Test
+	public void moreSophisticatedScenarios_gh712_1e() {
+		TaskNode ctn = parse("<<AA || BB> && CC && DD || <EE || FF> && GG || HH>");
+		Graph graph = ctn.toGraph();
+		assertEquals(
+				"[0:START][1:AA][2:BB][3:CC][4:DD][5:EE][6:FF][7:GG][8:HH][9:END]" +
+				"[0-1][0-2][1-3][2-3][3-4][0-5][0-6][5-7][6-7][0-8][4-9][7-9][8-9]",
+				graph.toVerboseString());
+		assertEquals("<<AA || BB> && CC && DD || <EE || FF> && GG || HH>", graph.toDSLText());
+	}
+
+	@Test
+	public void moreSophisticatedScenarios_gh712_1f() {
+		// Multiple nested splits in parallel
+		TaskNode ctn = parse("<<AA || BB> && CC || <DD || EE> && FF && GG || HH>");
+		Graph graph = ctn.toGraph();
+		assertEquals(
+				"[0:START][1:AA][2:BB][3:CC][4:DD][5:EE][6:FF][7:GG][8:HH][9:END]"+
+				"[0-1][0-2][1-3][2-3][0-4][0-5][4-6][5-6][6-7][0-8][3-9][7-9][8-9]",
+				graph.toVerboseString());
+		assertEquals("<<AA || BB> && CC || <DD || EE> && FF && GG || HH>", graph.toDSLText());
+	}
+
+	// Case2: expecting a validation error on the parse because the second spark-cluster
+	// isn't labeled
+	@Test
+	public void moreSophisticatedScenarios_gh712_2() {
+		try {
+			parse("<<jdbchdfs-local && spark-client || spark-cluster && spark-cluster> && timestamp || spark-yarn>");
+			fail();
+		}
+		catch (TaskValidationException tve) {
+			List<TaskValidationProblem> validationProblems = tve.getValidationProblems();
+			assertEquals(1, validationProblems.size());
+			TaskValidationProblem tvp = validationProblems.get(0);
+			assertEquals(53, tvp.getOffset());
+			assertEquals(DSLMessage.TASK_VALIDATION_APP_NAME_ALREADY_IN_USE, tvp.getMessage());
+		}
+	}
+
+	// Case3: no graph when 1 label included?
+	@Test
+	public void moreSophisticatedScenarios_gh712_3() {
+		try {
+			parse("<1: jdbchdfs-local && spark-client && timestamp || spark-cluster && spark-cluster && timestamp || spark-yarn>");
+			fail();
+		}
+		catch (TaskValidationException tve) {
+			System.out.println(tve);
+			List<TaskValidationProblem> validationProblems = tve.getValidationProblems();
+			assertEquals(2, validationProblems.size());
+			TaskValidationProblem tvp = validationProblems.get(0);
+			assertEquals(68, tvp.getOffset());
+			assertEquals(DSLMessage.TASK_VALIDATION_APP_NAME_ALREADY_IN_USE, tvp.getMessage());
+			tvp = validationProblems.get(1);
+			assertEquals(85, tvp.getOffset());
+			assertEquals(DSLMessage.TASK_VALIDATION_APP_NAME_ALREADY_IN_USE, tvp.getMessage());
+		}
 	}
 
 	@Test
