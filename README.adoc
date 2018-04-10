@@ -59,7 +59,9 @@ spring:
             url: "file:///home/mpollack/projects/spring-cloud-skipper/spring-cloud-skipper-server-core/src/test/resources/repositories/binaries/test/"
 ```
 
-and start the Skipper server using
+Where you replace `/home/mpollack/projects/` to the path where you cloned `spring-cloud-skipper`.
+
+Then start the Skipper server
 
 ----
 $ java -jar spring-cloud-skipper-server/target/spring-cloud-skipper-server-1.0.0.BUILD-SNAPSHOT.jar --spring.config.location=/home/mpollack/skipper.yml
@@ -73,11 +75,11 @@ Then launch the Skipper shell in another terminal
 $ java -jar spring-cloud-skipper-shell/target/spring-cloud-skipper-shell-1.0.0.BUILD-SNAPSHOT.jar
 ----
 
-The command `search` will search for all available packages. It should then show you the following output
+The command `package search` will search for all available packages. It should then show you the following output
 
 [source,bash,options="nowrap"]
 ----
-skipper:>search
+skipper:>package search
 ╔═════════════════╤═══════╤═════════════════════════════════════════════════════════════╗
 ║      Name       │Version│                         Description                         ║
 ╠═════════════════╪═══════╪═════════════════════════════════════════════════════════════╣
@@ -101,7 +103,7 @@ Now deploy the log 1.0.0 package.
 
 [source,bash,options="nowrap"]
 ----
-skipper:>install --package-name log --package-version 1.0.0 --release-name mylog
+skipper:>package install --package-name log --package-version 1.0.0 --release-name mylog
 Released mylog. Now at version v1.
 ----
 
@@ -111,7 +113,7 @@ You can ask for the status using the status command
 
 [source,bash,options="nowrap"]
 ----
-skipper:>status --release-name mylog
+skipper:>release status --release-name mylog
 ╔═══════════════╤═════════════════════════════════════════════════╗
 ║Last Deployed  │Fri Oct 27 15:44:00 IST 2017                     ║
 ║Status         │DEPLOYED                                         ║
@@ -145,7 +147,7 @@ Now update the release with a newer version
 
 [source,bash,options="nowrap"]
 ----
-skipper:>upgrade --release-name mylog --package-name log --package-version 2.0.0
+skipper:>release upgrade --release-name mylog --package-name log --package-version 2.0.0
 mylog has been upgraded.  Now at version v2.
 ----
 
@@ -155,7 +157,7 @@ The status command should shortly show it has been deployed successfully.  Note 
 
 [source,bash,options="nowrap"]
 ----
-skipper:>status --release-name mylog
+skipper:>release status --release-name mylog
 ╔═══════════════╤═════════════════════════════════════════════════╗
 ║Last Deployed  │Fri Oct 27 15:45:43 IST 2017                     ║
 ║Status         │DEPLOYED                                         ║
@@ -168,7 +170,7 @@ Next rollback to the previous release
 
 [source,bash,options="nowrap"]
 ----
-skipper:>rollback --release-name mylog
+skipper:>release rollback --release-name mylog
 mylog has been rolled back.  Now at version v3.
 ----
 
@@ -178,7 +180,7 @@ The status command should shortly show it has been deployed successfully.
 
 [source,bash,options="nowrap"]
 ----
-skipper:>status --release-name mylog
+skipper:>release status --release-name mylog
 ╔═══════════════╤═════════════════════════════════════════════════╗
 ║Last Deployed  │Fri Oct 27 15:48:03 IST 2017                     ║
 ║Status         │DEPLOYED                                         ║
@@ -191,7 +193,7 @@ The `history` command shows you the various releases that were made
 
 [source,bash,options="nowrap"]
 ----
-skipper:>history --release-name mylog
+skipper:>release history --release-name mylog
 ╔═══════╤════════════════════════════╤════════╤════════════╤═══════════════╤════════════════╗
 ║Version│        Last updated        │ Status │Package Name│Package Version│  Description   ║
 ╠═══════╪════════════════════════════╪════════╪════════════╪═══════════════╪════════════════╣
@@ -206,7 +208,7 @@ Now delete the release.
 
 [source,bash,options="nowrap"]
 ----
-skipper:>delete --release-name mylog
+skipper:>release delete --release-name mylog
 mylog has been deleted.
 ----
 
@@ -223,3 +225,4 @@ You should not see any `log-sink-rabbit` apps in the `jps` command.
 Then navigate to `Intellij IDEA > Preferences` and select the Eclipse Code Formatter.  Select the `eclipse-code-formatter.xml` file for the field `Eclipse Java Formatter config file` and the file `eclipse.importorder` for the field `Import order`.
 Enable the `Eclipse code formatter` by clicking `Use the Eclipse code formatter` then click the *OK* button.
 ** NOTE: If you configure the `Eclipse Code Formatter` from `File > Other Settings > Default Settings` it will set this policy across all of your Intellij projects.
+
