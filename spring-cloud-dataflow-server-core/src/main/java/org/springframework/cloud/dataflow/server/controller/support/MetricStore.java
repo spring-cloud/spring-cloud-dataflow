@@ -86,8 +86,7 @@ public class MetricStore {
 						collector.getPassword());
 				if (StringUtils.hasText(collector.getUsername())
 						&& StringUtils.hasText(collector.getPassword())) {
-					this.restTemplate.setRequestFactory(HttpClientConfigurer.create()
-							.targetHost(new URI(collectorEndpoint))
+					this.restTemplate.setRequestFactory(HttpClientConfigurer.create(new URI(collectorEndpoint))
 							.basicAuthCredentials(collector.getUsername(), collector.getPassword())
 							.skipTlsCertificateVerification(collector.isSkipSslValidation())
 							.buildClientHttpRequestFactory());

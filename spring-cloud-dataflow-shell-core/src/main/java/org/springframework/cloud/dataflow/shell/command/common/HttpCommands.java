@@ -95,8 +95,7 @@ public class HttpCommands implements CommandMarker {
 			outputRequest("POST", requestURI, mediaType, data, buffer);
 			final RestTemplate restTemplate = createRestTemplate(buffer);
 
-			restTemplate.setRequestFactory(HttpClientConfigurer.create()
-					.targetHost(requestURI)
+			restTemplate.setRequestFactory(HttpClientConfigurer.create(requestURI)
 					.basicAuthCredentials(targetUsername, targetPassword)
 					.skipTlsCertificateVerification(skipSslValidation)
 					.buildClientHttpRequestFactory());
@@ -137,8 +136,7 @@ public class HttpCommands implements CommandMarker {
 
 			final RestTemplate restTemplate = createRestTemplate(buffer);
 
-			restTemplate.setRequestFactory(HttpClientConfigurer.create()
-					.targetHost(requestURI)
+			restTemplate.setRequestFactory(HttpClientConfigurer.create(requestURI)
 					.basicAuthCredentials(targetUsername, targetPassword)
 					.skipTlsCertificateVerification(skipSslValidation)
 					.buildClientHttpRequestFactory());

@@ -33,6 +33,7 @@ import org.springframework.web.client.RestTemplate;
 /**
  * Configuration class to provide default beans for {@link DataFlowOperations} and {@link org.springframework.cloud.dataflow.rest.client.dsl.StreamBuilder} instances.
  * @author Vinicius Carvalho
+ * @author Gunnar Hillert
  */
 @Configuration
 @EnableConfigurationProperties(DataFlowClientProperties.class)
@@ -48,8 +49,7 @@ public class DataFlowClientAutoConfiguration {
 	@ConditionalOnMissingBean(DataFlowOperations.class)
 	public DataFlowOperations dataFlowOperations() throws Exception{
 		RestTemplate template = DataFlowTemplate.prepareRestTemplate(restTemplate);
-		final HttpClientConfigurer httpClientConfigurer = HttpClientConfigurer.create()
-				.targetHost(new URI(properties.getServerUri()))
+		final HttpClientConfigurer httpClientConfigurer = HttpClientConfigurer.create(new URI(properties.getServerUri()))
 				.skipTlsCertificateVerification(properties.isSkipSslValidation());
 		if(!StringUtils.isEmpty(properties.getAuthentication().getBasic().getUsername()) &&
 				!StringUtils.isEmpty(properties.getAuthentication().getBasic().getPassword())){

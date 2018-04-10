@@ -17,6 +17,7 @@ package org.springframework.cloud.dataflow.rest.resource;
 
 
 import java.io.IOException;
+import java.net.URI;
 
 import org.apache.http.HttpHeaders;
 import org.apache.http.client.methods.HttpGet;
@@ -62,7 +63,8 @@ public class HttpClientTest {
 
 		final CheckableResource resource = new ByteArrayCheckableResource(credentials.getBytes(), null);
 
-		try (final CloseableHttpClient client = HttpClientConfigurer.create()
+		final URI targetHost = new URI("http://test.com");
+		try (final CloseableHttpClient client = HttpClientConfigurer.create(targetHost)
 				.addInterceptor(new ResourceBasedAuthorizationInterceptor(resource))
 				.addInterceptor((request, context) -> {
 					final String authorization = request.getFirstHeader(HttpHeaders.AUTHORIZATION).getValue();
@@ -72,7 +74,7 @@ public class HttpClientTest {
 					throw new Passed();
 				})
 				.buildHttpClient()) {
-			client.execute(new HttpGet("http://test.com"));
+			client.execute(new HttpGet(targetHost));
 		}
 	}
 
@@ -85,7 +87,8 @@ public class HttpClientTest {
 
 		final CheckableResource resource = new ByteArrayCheckableResource(credentials.getBytes(), new TestException());
 
-		try (final CloseableHttpClient client = HttpClientConfigurer.create()
+		final URI targetHost = new URI("http://test.com");
+		try (final CloseableHttpClient client = HttpClientConfigurer.create(targetHost)
 				.addInterceptor(new ResourceBasedAuthorizationInterceptor(resource))
 				.addInterceptor((request, context) -> {
 					final String authorization = request.getFirstHeader(HttpHeaders.AUTHORIZATION).getValue();
@@ -95,7 +98,7 @@ public class HttpClientTest {
 					throw new Passed();
 				})
 				.buildHttpClient()) {
-			client.execute(new HttpGet("http://test.com"));
+			client.execute(new HttpGet(targetHost));
 		}
 	}
 }

@@ -197,8 +197,7 @@ public class ConfigCommands implements CommandMarker, InitializingBean, Applicat
 			@CliOption(mandatory = false, key = {
 					"proxy-uri" }, help = "the uri of the proxy server", specifiedDefaultValue = Target.DEFAULT_SPECIFIED_PASSWORD, unspecifiedDefaultValue = Target.DEFAULT_UNSPECIFIED_PASSWORD) String proxyUri,
 			@CliOption(mandatory = false, key = {
-					"proxy-username" }, help = "the username for authenticated access to the secured proxy server (valid only with a "
-					+ "username)", specifiedDefaultValue = Target.DEFAULT_SPECIFIED_PASSWORD, unspecifiedDefaultValue = Target.DEFAULT_UNSPECIFIED_PASSWORD) String proxyUsername,
+					"proxy-username" }, help = "the username for authenticated access to the secured proxy server", specifiedDefaultValue = Target.DEFAULT_SPECIFIED_PASSWORD, unspecifiedDefaultValue = Target.DEFAULT_UNSPECIFIED_PASSWORD) String proxyUsername,
 			@CliOption(mandatory = false, key = {
 					"proxy-password" }, help = "the password for authenticated access to the secured proxy server (valid only with a "
 					+ "username)", specifiedDefaultValue = Target.DEFAULT_SPECIFIED_PASSWORD, unspecifiedDefaultValue = Target.DEFAULT_UNSPECIFIED_PASSWORD) String proxyPassword) {
@@ -216,8 +215,7 @@ public class ConfigCommands implements CommandMarker, InitializingBean, Applicat
 		try {
 			this.targetHolder.setTarget(new Target(targetUriString, targetUsername, targetPassword, skipSslValidation));
 
-			final HttpClientConfigurer httpClientConfigurer = HttpClientConfigurer.create()
-					.targetHost(this.targetHolder.getTarget().getTargetUri())
+			final HttpClientConfigurer httpClientConfigurer = HttpClientConfigurer.create(this.targetHolder.getTarget().getTargetUri())
 					.skipTlsCertificateVerification(skipSslValidation);
 			if (StringUtils.hasText(targetUsername) && StringUtils.hasText(targetPassword)) {
 				httpClientConfigurer.basicAuthCredentials(targetUsername, targetPassword);

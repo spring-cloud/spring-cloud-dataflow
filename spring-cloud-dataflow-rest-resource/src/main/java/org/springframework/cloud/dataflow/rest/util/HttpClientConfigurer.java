@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 the original author or authors.
+ * Copyright 2017-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -43,6 +43,7 @@ import org.springframework.util.Assert;
  * {@link #buildClientHttpRequestFactory()}.
  *
  * @author Mike Heath
+ * @author Gunnar Hillert
  */
 public class HttpClientConfigurer {
 
@@ -51,22 +52,30 @@ public class HttpClientConfigurer {
 	private boolean useBasicAuth;
 	private HttpHost targetHost;
 
-	public static HttpClientConfigurer create() {
-		return new HttpClientConfigurer();
+	private CredentialsProvider credentialsProvider;
+
+	public static HttpClientConfigurer create(URI targetHost) {
+		return new HttpClientConfigurer(targetHost);
 	}
 
-	protected HttpClientConfigurer() {
+	protected HttpClientConfigurer(URI targetHost) {
 		httpClientBuilder = HttpClientBuilder.create();
+		this.targetHost = new HttpHost(targetHost.getHost(), targetHost.getPort(), targetHost.getScheme());
 	}
 
 	public HttpClientConfigurer basicAuthCredentials(String username, String password) {
-		final BasicCredentialsProvider credentialsProvider = new BasicCredentialsProvider();
-		credentialsProvider.setCredentials(AuthScope.ANY, new UsernamePasswordCredentials(username, password));
+		final CredentialsProvider credentialsProvider = this.getOrInitializeCredentialsProvider();
+		credentialsProvider.setCredentials(new AuthScope(this.targetHost), new UsernamePasswordCredentials(username, password));
 		httpClientBuilder.setDefaultCredentialsProvider(credentialsProvider);
-
 		useBasicAuth = true;
-
 		return this;
+	}
+
+	private CredentialsProvider getOrInitializeCredentialsProvider() {
+		if (this.credentialsProvider == null) {
+			this.credentialsProvider = new BasicCredentialsProvider();
+		}
+		return this.credentialsProvider;
 	}
 
 	/**
@@ -87,11 +96,11 @@ public class HttpClientConfigurer {
 		httpClientBuilder
 			.setProxy(new HttpHost(proxyUri.getHost(), proxyUri.getPort(), proxyUri.getScheme()));
 		if (proxyUsername !=null && proxyPassword != null) {
-			final CredentialsProvider proxyCredsProvider = new BasicCredentialsProvider();
-			proxyCredsProvider.setCredentials(
+			final CredentialsProvider credentialsProvider = this.getOrInitializeCredentialsProvider();
+			credentialsProvider.setCredentials(
 				new AuthScope(proxyUri.getHost(), proxyUri.getPort()),
 				new UsernamePasswordCredentials(proxyUsername, proxyPassword));
-			httpClientBuilder.setDefaultCredentialsProvider(proxyCredsProvider)
+			httpClientBuilder.setDefaultCredentialsProvider(credentialsProvider)
 				.setProxyAuthenticationStrategy(new ProxyAuthenticationStrategy());
 		}
 		return this;
@@ -114,12 +123,6 @@ public class HttpClientConfigurer {
 		if (skipTlsCertificateVerification) {
 			skipTlsCertificateVerification();
 		}
-
-		return this;
-	}
-
-	public HttpClientConfigurer targetHost(URI targetHost) {
-		this.targetHost = new HttpHost(targetHost.getHost(), targetHost.getPort(), targetHost.getScheme());
 
 		return this;
 	}
