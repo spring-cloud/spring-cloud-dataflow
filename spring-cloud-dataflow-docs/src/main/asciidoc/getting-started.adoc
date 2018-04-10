@@ -368,9 +368,9 @@ In both cases, this setting is propagated as a configuration property that overr
 == Deploying Tasks
 In this getting started section, we show how to register a task, create a task definition and then launch it.
 We will then also review information about the task executions.
-+
+
 NOTE: Launching Spring Cloud Task applications are not delegated to Skipper since they are short lived applications.  Tasks are alwasy deployed directly via the Data Flow Server.
-+
+
 . Register a Task App
 +
 By default, the application registry is empty.
