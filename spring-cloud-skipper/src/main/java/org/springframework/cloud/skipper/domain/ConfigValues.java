@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 the original author or authors.
+ * Copyright 2017-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,8 @@ package org.springframework.cloud.skipper.domain;
  * Configuration values for the deployment.
  *
  * @author Mark Pollack
+ * @author Janne Valkealahti
+ *
  */
 public class ConfigValues {
 
@@ -36,4 +38,28 @@ public class ConfigValues {
 		this.raw = raw;
 	}
 
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + ((raw == null) ? 0 : raw.hashCode());
+		return result;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		ConfigValues other = (ConfigValues) obj;
+		if (raw == null) {
+			if (other.raw != null)
+				return false;
+		} else if (!raw.equals(other.raw))
+			return false;
+		return true;
+	}
 }

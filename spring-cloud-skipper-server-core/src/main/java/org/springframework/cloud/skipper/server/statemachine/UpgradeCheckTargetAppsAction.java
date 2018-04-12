@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 the original author or authors.
+ * Copyright 2017-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,9 +17,9 @@ package org.springframework.cloud.skipper.server.statemachine;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 import org.springframework.cloud.skipper.server.deployer.ReleaseAnalysisReport;
 import org.springframework.cloud.skipper.server.deployer.strategies.UpgradeStrategy;
+import org.springframework.cloud.skipper.server.service.ReleaseReportService;
 import org.springframework.cloud.skipper.server.statemachine.SkipperStateMachineService.SkipperEvents;
 import org.springframework.cloud.skipper.server.statemachine.SkipperStateMachineService.SkipperStates;
 import org.springframework.cloud.skipper.server.statemachine.SkipperStateMachineService.SkipperVariables;
@@ -32,7 +32,7 @@ import org.springframework.statemachine.action.Action;
  * @author Janne Valkealahti
  *
  */
-public class UpgradeCheckTargetAppsAction extends AbstractAction {
+public class UpgradeCheckTargetAppsAction extends AbstractUpgradeStartAction {
 
 	private static final Logger log = LoggerFactory.getLogger(UpgradeCheckTargetAppsAction.class);
 	private final UpgradeStrategy upgradeStrategy;
@@ -40,17 +40,19 @@ public class UpgradeCheckTargetAppsAction extends AbstractAction {
 	/**
 	 * Instantiates a new upgrade check target apps action.
 	 *
+	 * @param releaseReportService the release report service
 	 * @param upgradeStrategy the upgrade strategy
 	 */
-	public UpgradeCheckTargetAppsAction(UpgradeStrategy upgradeStrategy) {
-		super();
+	public UpgradeCheckTargetAppsAction(ReleaseReportService releaseReportService, UpgradeStrategy upgradeStrategy) {
+		super(releaseReportService);
 		this.upgradeStrategy = upgradeStrategy;
 	}
 
 	@Override
 	protected void executeInternal(StateContext<SkipperStates, SkipperEvents> context) {
-		ReleaseAnalysisReport releaseAnalysisReport = context.getExtendedState().get(SkipperVariables.RELEASE_ANALYSIS_REPORT,
-				ReleaseAnalysisReport.class);
+		super.executeInternal(context);
+		ReleaseAnalysisReport releaseAnalysisReport = getReleaseAnalysisReport(context);
+
 		int upgradeStatus = 0;
 		boolean ok = upgradeStrategy.checkStatus(releaseAnalysisReport.getReplacingRelease());
 		log.debug("upgradeStrategy checkStatus {}", ok);
@@ -67,6 +69,10 @@ public class UpgradeCheckTargetAppsAction extends AbstractAction {
 	private boolean cutOffTimeExceed(StateContext<SkipperStates, SkipperEvents> context) {
 		long now = System.currentTimeMillis();
 		Long cutOffTime = context.getExtendedState().get(SkipperVariables.UPGRADE_CUTOFF_TIME, Long.class);
+		if (cutOffTime == null) {
+			// missing cutoff, indicate exceed
+			return true;
+		}
 		log.debug("Testing cutOffTime {} to now {}", cutOffTime, now);
 		return now > cutOffTime;
 	}

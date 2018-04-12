@@ -304,7 +304,7 @@ public class ReleaseService {
 
 	@Transactional
 	public ReleaseAnalysisReport createReport(Release existingRelease, Release replacingRelease) {
-		return this.releaseManager.createReport(existingRelease, replacingRelease);
+		return this.releaseManager.createReport(existingRelease, replacingRelease, true);
 	}
 
 	protected Release createInitialRelease(InstallProperties installProperties, Package packageToInstall,

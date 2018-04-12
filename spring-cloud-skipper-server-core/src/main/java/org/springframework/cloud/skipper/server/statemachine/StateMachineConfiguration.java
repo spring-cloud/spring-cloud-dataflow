@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 the original author or authors.
+ * Copyright 2017-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,6 +23,7 @@ import org.springframework.cloud.skipper.server.deployer.strategies.UpgradeStrat
 import org.springframework.cloud.skipper.server.repository.ReleaseRepository;
 import org.springframework.cloud.skipper.server.service.ReleaseReportService;
 import org.springframework.cloud.skipper.server.service.ReleaseService;
+import org.springframework.cloud.skipper.server.statemachine.SkipperStateMachineService.SkipperEventHeaders;
 import org.springframework.cloud.skipper.server.statemachine.SkipperStateMachineService.SkipperEvents;
 import org.springframework.cloud.skipper.server.statemachine.SkipperStateMachineService.SkipperStates;
 import org.springframework.cloud.skipper.server.statemachine.SkipperStateMachineService.SkipperVariables;
@@ -311,17 +312,17 @@ public class StateMachineConfiguration {
 
 		@Bean
 		public UpgradeStartAction upgradeStartAction() {
-			return new UpgradeStartAction(releaseReportService, releaseService);
+			return new UpgradeStartAction(releaseReportService);
 		}
 
 		@Bean
 		public UpgradeDeployTargetAppsAction upgradeDeployTargetAppsAction() {
-			return new UpgradeDeployTargetAppsAction(upgradeStrategy);
+			return new UpgradeDeployTargetAppsAction(releaseReportService, upgradeStrategy);
 		}
 
 		@Bean
 		public UpgradeCheckTargetAppsAction upgradeCheckTargetAppsAction() {
-			return new UpgradeCheckTargetAppsAction(upgradeStrategy);
+			return new UpgradeCheckTargetAppsAction(releaseReportService, upgradeStrategy);
 		}
 
 		@Bean
@@ -346,12 +347,12 @@ public class StateMachineConfiguration {
 
 		@Bean
 		public UpgradeCancelAction upgradeCancelAction() {
-			return new UpgradeCancelAction(upgradeStrategy);
+			return new UpgradeCancelAction(releaseReportService, upgradeStrategy);
 		}
 
 		@Bean
 		public UpgradeDeleteSourceAppsAction upgradeDeleteSourceAppsAction() {
-			return new UpgradeDeleteSourceAppsAction(upgradeStrategy);
+			return new UpgradeDeleteSourceAppsAction(releaseReportService, upgradeStrategy);
 		}
 
 		@Bean
@@ -367,16 +368,14 @@ public class StateMachineConfiguration {
 		@Bean
 		public Guard<SkipperStates, SkipperEvents> rollbackInstallGuard() {
 			return context -> {
-				return context.getExtendedState().getVariables().containsKey(SkipperVariables.TARGET_RELEASE)
-						&& !context.getExtendedState().getVariables().containsKey(SkipperVariables.SOURCE_RELEASE);
+				return context.getExtendedState().getVariables().containsKey(SkipperEventHeaders.INSTALL_REQUEST);
 			};
 		}
 
 		@Bean
 		public Guard<SkipperStates, SkipperEvents> rollbackUpgradeGuard() {
 			return context -> {
-				return context.getExtendedState().getVariables().containsKey(SkipperVariables.TARGET_RELEASE)
-						&& context.getExtendedState().getVariables().containsKey(SkipperVariables.SOURCE_RELEASE);
+				return context.getExtendedState().getVariables().containsKey(SkipperEventHeaders.UPGRADE_REQUEST);
 			};
 		}
 	}

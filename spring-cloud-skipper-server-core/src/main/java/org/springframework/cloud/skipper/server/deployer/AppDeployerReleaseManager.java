@@ -135,7 +135,7 @@ public class AppDeployerReleaseManager implements ReleaseManager {
 	}
 
 	@Override
-	public ReleaseAnalysisReport createReport(Release existingRelease, Release replacingRelease) {
+	public ReleaseAnalysisReport createReport(Release existingRelease, Release replacingRelease, boolean initial) {
 		ReleaseAnalysisReport releaseAnalysisReport = this.releaseAnalyzer.analyze(existingRelease, replacingRelease);
 		if (releaseAnalysisReport.getReleaseDifference().areEqual()) {
 			throw new SkipperException(
@@ -155,7 +155,9 @@ public class AppDeployerReleaseManager implements ReleaseManager {
 		Manifest manifest = new Manifest();
 		manifest.setData(manifestData);
 		replacingRelease.setManifest(manifest);
-		this.releaseRepository.save(replacingRelease);
+		if (initial) {
+			this.releaseRepository.save(replacingRelease);
+		}
 		return releaseAnalysisReport;
 	}
 
@@ -275,7 +277,17 @@ public class AppDeployerReleaseManager implements ReleaseManager {
 		List<String> deploymentIds = appDeployerData.getDeploymentIds();
 		if (!deploymentIds.isEmpty()) {
 			for (String deploymentId : deploymentIds) {
-				appDeployer.undeploy(deploymentId);
+
+				// don't error trying trying to undeploy something
+				// which is not deployed
+				AppStatus appStatus = appDeployer.status(deploymentId);
+				if (appStatus.getState().equals(DeploymentState.deployed)) {
+					appDeployer.undeploy(deploymentId);
+				}
+				else {
+					logger.warn("For Release name {}, did not undeploy existing app {} as its status is not "
+									+ "'deployed'.", release.getName(), deploymentId);
+				}
 			}
 			Status deletedStatus = new Status();
 			deletedStatus.setStatusCode(StatusCode.DELETED);

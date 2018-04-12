@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 the original author or authors.
+ * Copyright 2017-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,7 +18,6 @@ package org.springframework.cloud.skipper.server.statemachine;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import org.springframework.cloud.skipper.SkipperException;
 import org.springframework.cloud.skipper.domain.InstallProperties;
 import org.springframework.cloud.skipper.domain.InstallRequest;
 import org.springframework.cloud.skipper.domain.Release;
@@ -48,6 +47,7 @@ public class InstallInstallAction extends AbstractAction {
 	 * Instantiates a new install install action.
 	 *
 	 * @param releaseService the release service
+	 * @param releaseRepository the release repository
 	 */
 	public InstallInstallAction(ReleaseService releaseService) {
 		super();
@@ -57,9 +57,14 @@ public class InstallInstallAction extends AbstractAction {
 
 	@Override
 	protected void executeInternal(StateContext<SkipperStates, SkipperEvents> context) {
-		log.debug("Starging execution action " + context);
-		InstallRequest installRequest = context.getMessageHeaders().get(SkipperEventHeaders.INSTALL_REQUEST, InstallRequest.class);
-		InstallProperties installProperties = context.getMessageHeaders().get(SkipperEventHeaders.INSTALL_PROPERTIES, InstallProperties.class);
+		log.debug("Starting to execute action");
+		// get from event headers and fall back checking if it's in context
+		// in case machine died and we restored
+		InstallRequest installRequest = context.getExtendedState().get(SkipperEventHeaders.INSTALL_REQUEST,
+				InstallRequest.class);
+		InstallProperties installProperties = context.getExtendedState().get(SkipperEventHeaders.INSTALL_PROPERTIES,
+				InstallProperties.class);
+
 		if (installRequest != null) {
 			// we have an install request
 			Release release = this.releaseService.install(installRequest);
@@ -72,14 +77,8 @@ public class InstallInstallAction extends AbstractAction {
 			context.getExtendedState().getVariables().put(SkipperVariables.RELEASE, release);
 		}
 		else {
-			// fall back to assuming target release
-			Release replacingRelease = context.getExtendedState().get(SkipperVariables.TARGET_RELEASE, Release.class);
-			if (replacingRelease == null) {
-				// will end up into machine error handling
-				throw new SkipperException("No InstallRequest or InstallProperties given and replacingRelease is null");
-			}
-			Release release = this.releaseService.install(replacingRelease);
-			context.getExtendedState().getVariables().put(SkipperVariables.RELEASE, release);
+			throw new IllegalArgumentException(
+					"Neither 'installRequest' or 'installProperties' not known to the system in extended state");
 		}
 	}
 }

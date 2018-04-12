@@ -41,9 +41,10 @@ public interface ReleaseManager {
 	 * @param existingRelease the existing release that is deployed
 	 * @param replacingRelease the release that is to be deployed in place of the existing
 	 * release
+	 * @param initial the flag indicating this is initial report creation
 	 * @return a report describing the actions to take to update
 	 */
-	ReleaseAnalysisReport createReport(Release existingRelease, Release replacingRelease);
+	ReleaseAnalysisReport createReport(Release existingRelease, Release replacingRelease, boolean initial);
 
 	/**
 	 * Delete the release

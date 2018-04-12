@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 the original author or authors.
+ * Copyright 2017-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,15 +18,10 @@ package org.springframework.cloud.skipper.server.statemachine;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import org.springframework.cloud.skipper.domain.Release;
-import org.springframework.cloud.skipper.domain.UpgradeRequest;
 import org.springframework.cloud.skipper.server.deployer.ReleaseAnalysisReport;
 import org.springframework.cloud.skipper.server.service.ReleaseReportService;
-import org.springframework.cloud.skipper.server.service.ReleaseService;
-import org.springframework.cloud.skipper.server.statemachine.SkipperStateMachineService.SkipperEventHeaders;
 import org.springframework.cloud.skipper.server.statemachine.SkipperStateMachineService.SkipperEvents;
 import org.springframework.cloud.skipper.server.statemachine.SkipperStateMachineService.SkipperStates;
-import org.springframework.cloud.skipper.server.statemachine.SkipperStateMachineService.SkipperVariables;
 import org.springframework.statemachine.StateContext;
 import org.springframework.statemachine.action.Action;
 
@@ -37,52 +32,29 @@ import org.springframework.statemachine.action.Action;
  * @author Janne Valkealahti
  *
  */
-public class UpgradeStartAction extends AbstractAction {
+public class UpgradeStartAction extends AbstractUpgradeStartAction {
 
 	private static final Logger log = LoggerFactory.getLogger(UpgradeStartAction.class);
-	private static final long DEFAULT_UPGRADE_TIMEOUT = 300000L;
-	private final ReleaseReportService releaseReportService;
-	private final ReleaseService releaseService;
 
 	/**
 	 * Instantiates a new upgrade start action.
 	 *
 	 * @param releaseReportService the release report service
-	 * @param releaseService the release service
 	 */
-	public UpgradeStartAction(ReleaseReportService releaseReportService, ReleaseService releaseService) {
-		super();
-		this.releaseReportService = releaseReportService;
-		this.releaseService = releaseService;
+	public UpgradeStartAction(ReleaseReportService releaseReportService) {
+		super(releaseReportService);
 	}
 
 	@Override
 	protected void executeInternal(StateContext<SkipperStates, SkipperEvents> context) {
-		setUpgradeCutOffTime(context);
-
-		UpgradeRequest upgradeRequest = context.getMessageHeaders().get(SkipperEventHeaders.UPGRADE_REQUEST, UpgradeRequest.class);
-		log.info("upgradeRequest {}", upgradeRequest);
-		if (upgradeRequest != null) {
-			ReleaseAnalysisReport releaseAnalysisReport = this.releaseReportService.createReport(upgradeRequest);
-			log.info("releaseAnalysisReport difference summary {}", releaseAnalysisReport.getReleaseDifferenceSummary());
-			context.getExtendedState().getVariables().put(SkipperVariables.RELEASE_ANALYSIS_REPORT, releaseAnalysisReport);
-		}
-		else {
-			Release existingRelease = context.getExtendedState().get(SkipperVariables.SOURCE_RELEASE, Release.class);
-			Release replacingRelease = context.getExtendedState().get(SkipperVariables.TARGET_RELEASE, Release.class);
-			ReleaseAnalysisReport releaseAnalysisReport = releaseService.createReport(existingRelease, replacingRelease);
-			context.getExtendedState().getVariables().put(SkipperVariables.RELEASE_ANALYSIS_REPORT, releaseAnalysisReport);
-		}
+		super.executeInternal(context);
+		log.debug("Starting to execute action");
+		// get from event headers and fall back checking if it's in context
+		// in case machine died and we restored
 	}
 
-	private void setUpgradeCutOffTime(StateContext<SkipperStates, SkipperEvents> context) {
-		Long upgradeTimeout = context.getMessageHeaders().get(SkipperEventHeaders.UPGRADE_TIMEOUT, Long.class);
-		if (upgradeTimeout == null) {
-			upgradeTimeout = DEFAULT_UPGRADE_TIMEOUT;
-		}
-		long cutOffTime = System.currentTimeMillis() + upgradeTimeout;
-		context.getExtendedState().getVariables().put(SkipperVariables.UPGRADE_CUTOFF_TIME,
-				cutOffTime);
-		log.debug("Set cutoff time as {}", cutOffTime);
+	@Override
+	protected boolean handlesInitialReport() {
+		return true;
 	}
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 the original author or authors.
+ * Copyright 2017-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,9 +16,6 @@
 package org.springframework.cloud.skipper.server.service;
 
 import java.util.Map;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import org.springframework.cloud.skipper.domain.Info;
 import org.springframework.cloud.skipper.domain.Manifest;
@@ -41,8 +38,6 @@ import org.springframework.util.Assert;
  * @author Mark Pollack
  */
 public class ReleaseReportService {
-
-	private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
 	private final PackageMetadataRepository packageMetadataRepository;
 
@@ -67,11 +62,12 @@ public class ReleaseReportService {
 	 * creates the Report for the next stage of upgrading a Release.
 	 * @param upgradeRequest containing the {@link UpgradeProperties} and
 	 * {@link PackageIdentifier} for the update.
+	 * @param initial the flag indicating this is initial report creation
 	 * @return A report of what needs to change to bring the current release to the requested
 	 * release
 	 */
 	@Transactional
-	public ReleaseAnalysisReport createReport(UpgradeRequest upgradeRequest) {
+	public ReleaseAnalysisReport createReport(UpgradeRequest upgradeRequest, boolean initial) {
 		Assert.notNull(upgradeRequest.getUpgradeProperties(), "UpgradeProperties can not be null");
 		Assert.notNull(upgradeRequest.getPackageIdentifier(), "PackageIdentifier can not be null");
 		UpgradeProperties upgradeProperties = upgradeRequest.getUpgradeProperties();
@@ -82,16 +78,26 @@ public class ReleaseReportService {
 				packageIdentifier.getPackageName(),
 				packageIdentifier
 						.getPackageVersion());
-		Release replacingRelease = createReleaseForUpgrade(packageMetadata, latestRelease.getVersion() + 1,
-				upgradeProperties,
-				existingRelease.getPlatformName());
+
+		// if we're about to save new release during this report, create
+		// or restore replacing one.
+		Release replacingRelease = null;
+		if (initial) {
+			replacingRelease = createReleaseForUpgrade(packageMetadata, latestRelease.getVersion() + 1,
+					upgradeProperties, existingRelease.getPlatformName());
+		}
+		else {
+			replacingRelease = this.releaseRepository.findByNameAndVersion(
+					upgradeRequest.getUpgradeProperties().getReleaseName(), latestRelease.getVersion());
+		}
+
 		Map<String, Object> model = ConfigValueUtils.mergeConfigValues(replacingRelease.getPkg(),
 				replacingRelease.getConfigValues());
 		String manifestData = ManifestUtils.createManifest(replacingRelease.getPkg(), model);
 		Manifest manifest = new Manifest();
 		manifest.setData(manifestData);
 		replacingRelease.setManifest(manifest);
-		return this.releaseManager.createReport(existingRelease, replacingRelease);
+		return this.releaseManager.createReport(existingRelease, replacingRelease, initial);
 	}
 
 	private Release createReleaseForUpgrade(PackageMetadata packageMetadata, Integer newVersion,

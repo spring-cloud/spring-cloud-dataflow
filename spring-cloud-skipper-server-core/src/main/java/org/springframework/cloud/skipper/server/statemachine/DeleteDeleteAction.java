@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 the original author or authors.
+ * Copyright 2017-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -58,8 +58,9 @@ public class DeleteDeleteAction extends AbstractAction {
 		log.debug("Starting action " + context);
 		String releaseName = context.getMessageHeaders().get(SkipperEventHeaders.RELEASE_NAME, String.class);
 		log.info("About to delete {}", releaseName);
-		DeleteProperties deleteProperties = context.getMessageHeaders()
+		DeleteProperties deleteProperties = context.getExtendedState()
 				.get(SkipperEventHeaders.RELEASE_DELETE_PROPERTIES, DeleteProperties.class);
+		Assert.notNull(deleteProperties, "'deleteProperties' not known to the system in extended state");
 		Release release = this.releaseService.delete(releaseName, deleteProperties.isDeletePackage());
 		context.getExtendedState().getVariables().put(SkipperVariables.RELEASE, release);
 	}
