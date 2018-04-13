@@ -1,0 +1,159 @@
+/*
+ * Copyright 2018 the original author or authors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package org.springframework.cloud.dataflow.server.service.impl;
+
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
+
+import org.springframework.boot.autoconfigure.jdbc.DataSourceProperties;
+import org.springframework.cloud.dataflow.core.TaskDefinition;
+import org.springframework.cloud.dataflow.core.dsl.TaskApp;
+import org.springframework.cloud.dataflow.core.dsl.TaskNode;
+import org.springframework.cloud.dataflow.server.controller.WhitelistProperties;
+import org.springframework.cloud.deployer.spi.core.AppDefinition;
+import org.springframework.core.io.Resource;
+import org.springframework.util.StringUtils;
+
+/**
+ * Provides utility methods for setting up tasks for execution.
+ */
+public class TaskServiceUtils {
+
+	/**
+	 * Creates a properly formatted CTR definition based on the graph provided.
+	 * @param graph the graph for the CTR to execute.
+	 * @param taskConfigurationProperties the properties that contain the name
+	 * of the CTR app to be launched.
+	 * @return String containing the CTR task definition.
+	 */
+	public static  String createComposedTaskDefinition(String graph,
+			TaskConfigurationProperties taskConfigurationProperties) {
+		return String.format("%s --graph=\"%s\"", taskConfigurationProperties.getComposedTaskRunnerName(), graph);
+	}
+
+	/**
+	 * Establish the app and deployment properties to be used for a CTR.
+	 * @param taskDeploymentProperties properties to be parsed for the CTR.
+	 * @param taskNode containing the tasks apps to be executed by the CTR
+	 * @return properties that can be consumed by the CTR.
+	 */
+	public static Map<String, String> establishComposedTaskProperties(
+			Map<String, String> taskDeploymentProperties,
+			TaskNode taskNode) {
+		String result = "";
+		for (TaskApp subTask : taskNode.getTaskApps()) {
+			result = updateProperties(taskNode, subTask, taskDeploymentProperties, result, "app");
+			result = updateProperties(taskNode, subTask, taskDeploymentProperties, result, "deployer");
+		}
+		if (result.length() != 0) {
+			taskDeploymentProperties.put("app.composed-task-runner.composed-task-properties", result);
+		}
+		return taskDeploymentProperties;
+	}
+
+	/**
+	 * Updates the task definition with the datasource properties.
+	 * @param taskDefinition the {@link TaskDefinition} to be updated.
+	 * @param dataSourceProperties the dataSource properties used by SCDF.
+	 * @return
+	 */
+	public static TaskDefinition updateTaskProperties(TaskDefinition taskDefinition,
+			DataSourceProperties dataSourceProperties) {
+		TaskDefinition.TaskDefinitionBuilder builder = TaskDefinition.TaskDefinitionBuilder.from(taskDefinition);
+		builder.setProperty("spring.datasource.url", dataSourceProperties.getUrl());
+		builder.setProperty("spring.datasource.username", dataSourceProperties.getUsername());
+		// password may be empty
+		if (StringUtils.hasText(dataSourceProperties.getPassword())) {
+			builder.setProperty("spring.datasource.password", dataSourceProperties.getPassword());
+		}
+		builder.setProperty("spring.datasource.driverClassName", dataSourceProperties.getDriverClassName());
+
+		return builder.build();
+	}
+
+	/**
+	 * Extract app properties from the deployment properties by task name.
+	 * @param name the task app name to search for in the deployment properties.
+	 * @param taskDeploymentProperties the properties for the task deployment.
+	 * @return a map containing the app properties for a task.
+	 */
+	public static Map<String, String> extractAppProperties(String name, Map<String, String> taskDeploymentProperties) {
+		return extractPropertiesByPrefix("app", name, taskDeploymentProperties);
+	}
+
+	/**
+	 * Extract scheduler properties from the deployment properties by task name.
+	 * @param name the task app name to search for in the deployment properties.
+	 * @param taskDeploymentProperties the properties for the task deployment.
+	 * @return a map containing the scheduler properties for a task schedule.
+	 */
+	public static Map<String, String> extractSchedulerProperties(String name, Map<String, String> taskDeploymentProperties) {
+		return extractPropertiesByPrefix("scheduler", name, taskDeploymentProperties);
+	}
+
+	/**
+	 * Return a copy of a given task definition where short form parameters have been expanded
+	 * to their long form (amongst the whitelisted supported properties of the app) if
+	 * applicable.
+ 	 * @param original the task definition with the original set of properties.
+	 * @param resource the resource to be used for identifying white listed properties.
+	 * @param appDeploymentProperties the app deployment properties to be added to the {@link AppDefinition}.
+	 * @param whitelistProperties util for formatting white listed properties properly.
+	 * @return fully qualified {@link AppDefinition}.
+	 */
+	public static AppDefinition mergeAndExpandAppProperties(TaskDefinition original,
+			Resource resource,
+			Map<String, String> appDeploymentProperties,
+			WhitelistProperties whitelistProperties) {
+		Map<String, String> merged = new HashMap<>(original.getProperties());
+		merged.putAll(appDeploymentProperties);
+		merged = whitelistProperties.qualifyProperties(merged, resource);
+		return new AppDefinition(original.getName(), merged);
+	}
+
+	private static Map<String, String> extractPropertiesByPrefix(String type,
+			String name, Map<String, String> taskDeploymentProperties) {
+		final String prefix = type + "." + name + ".";
+		return taskDeploymentProperties.entrySet().stream()
+				.filter(kv -> kv.getKey().startsWith(prefix))
+				.collect(Collectors.toMap(kv -> kv.getKey().substring(prefix.length()), kv -> kv.getValue()));
+	}
+
+	private static String updateProperties(TaskNode taskNode, TaskApp subTask, Map<String, String> taskDeploymentProperties,
+			String result, String prefix) {
+		String subTaskName = String.format("%s.%s-%s.", prefix, taskNode.getName(),
+				(subTask.getLabel() == null) ? subTask.getName() : subTask.getLabel());
+		String scdfTaskName = String.format("%s.%s.%s.", prefix, taskNode.getName(),
+				(subTask.getLabel() == null) ? subTask.getName() : subTask.getLabel());
+		Set<String> propertyKeys = taskDeploymentProperties.keySet().
+				stream().filter(taskProperty -> taskProperty.startsWith(scdfTaskName))
+				.collect(Collectors.toSet());
+		for (String taskProperty : propertyKeys) {
+			if (result.length() != 0) {
+				result += ", ";
+			}
+			result += String.format("%s%s.%s.%s=%s", subTaskName, prefix,
+					subTask.getName(),
+					taskProperty.substring(subTaskName.length()),
+					taskDeploymentProperties.get(taskProperty));
+			taskDeploymentProperties.remove(taskProperty);
+		}
+		return result;
+	}
+}

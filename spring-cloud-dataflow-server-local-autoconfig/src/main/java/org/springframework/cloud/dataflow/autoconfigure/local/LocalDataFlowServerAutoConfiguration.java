@@ -18,6 +18,7 @@ package org.springframework.cloud.dataflow.autoconfigure.local;
 
 import java.io.File;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.springframework.boot.autoconfigure.AutoConfigureBefore;
@@ -28,6 +29,9 @@ import org.springframework.cloud.deployer.resource.maven.MavenResourceLoader;
 import org.springframework.cloud.deployer.resource.support.DelegatingResourceLoader;
 import org.springframework.cloud.deployer.resource.support.LRUCleaningResourceLoaderBeanPostProcessor;
 import org.springframework.cloud.deployer.spi.local.LocalDeployerProperties;
+import org.springframework.cloud.scheduler.spi.core.ScheduleInfo;
+import org.springframework.cloud.scheduler.spi.core.ScheduleRequest;
+import org.springframework.cloud.scheduler.spi.core.Scheduler;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.io.ResourceLoader;
@@ -58,5 +62,30 @@ public class LocalDataFlowServerAutoConfiguration {
 		File repositoryCache = new File(mavenProperties.getLocalRepository());
 		float fRatio = localDeployerProperties.getFreeDiskSpacePercentage() / 100F;
 		return new LRUCleaningResourceLoaderBeanPostProcessor(fRatio, repositoryCache);
+	}
+
+	@Bean
+	public Scheduler localScheduler() {
+		return new Scheduler() {
+			@Override
+			public void schedule(ScheduleRequest scheduleRequest) {
+				throw new UnsupportedOperationException("Interface is not implemented for schedule method.");
+			}
+
+			@Override
+			public void unschedule(String scheduleName) {
+				throw new UnsupportedOperationException("Interface is not implemented for unschedule method.");
+			}
+
+			@Override
+			public  List<ScheduleInfo> list(String taskDefinitionName) {
+				throw new UnsupportedOperationException("Interface is not implemented for list method.");
+			}
+
+			@Override
+			public  List<ScheduleInfo> list() {
+				throw new UnsupportedOperationException("Interface is not implemented for list method.");
+			}
+		};
 	}
 }
