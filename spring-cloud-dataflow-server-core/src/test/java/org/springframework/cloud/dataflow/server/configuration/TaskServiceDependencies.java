@@ -16,6 +16,10 @@
 
 package org.springframework.cloud.dataflow.server.configuration;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
+
 import javax.sql.DataSource;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,9 +32,15 @@ import org.springframework.cloud.dataflow.server.repository.InMemoryDeploymentId
 import org.springframework.cloud.dataflow.server.repository.RdbmsTaskDefinitionRepository;
 import org.springframework.cloud.dataflow.server.repository.TaskDefinitionRepository;
 import org.springframework.cloud.dataflow.server.repository.support.DataflowRdbmsInitializer;
+import org.springframework.cloud.dataflow.server.service.SchedulerService;
+import org.springframework.cloud.dataflow.server.service.impl.DefaultSchedulerService;
 import org.springframework.cloud.dataflow.server.service.impl.DefaultTaskService;
 import org.springframework.cloud.dataflow.server.service.impl.TaskConfigurationProperties;
 import org.springframework.cloud.deployer.spi.task.TaskLauncher;
+import org.springframework.cloud.scheduler.spi.core.CreateScheduleException;
+import org.springframework.cloud.scheduler.spi.core.ScheduleInfo;
+import org.springframework.cloud.scheduler.spi.core.ScheduleRequest;
+import org.springframework.cloud.scheduler.spi.core.Scheduler;
 import org.springframework.cloud.task.repository.TaskExplorer;
 import org.springframework.cloud.task.repository.TaskRepository;
 import org.springframework.cloud.task.repository.support.SimpleTaskExplorer;
@@ -133,6 +143,68 @@ public class TaskServiceDependencies {
 		return new DefaultTaskService(dataSourceProperties, taskDefinitionRepository, taskExplorer,
 				taskExecutionRepository, appRegistry, resourceLoader, taskLauncher, metadataResolver,
 				new TaskConfigurationProperties(), new InMemoryDeploymentIdRepository(), null, commonApplicationProperties);
+	}
 
+	@Bean
+	public SchedulerService schedulerService(CommonApplicationProperties commonApplicationProperties,
+			Scheduler scheduler, TaskDefinitionRepository taskDefinitionRepository,
+			AppRegistry registry, ResourceLoader resourceLoader,
+			DataSourceProperties dataSourceProperties,
+			ApplicationConfigurationMetadataResolver metaDataResolver) {
+		return new DefaultSchedulerService(commonApplicationProperties,
+				scheduler, taskDefinitionRepository,
+				registry, resourceLoader,
+				new TaskConfigurationProperties(),
+				dataSourceProperties, null,
+				metaDataResolver);
+	}
+
+	@Bean
+	Scheduler scheduler() {
+		return new SimpleTestScheduler();
+	}
+	public static class SimpleTestScheduler implements Scheduler {
+		List<ScheduleInfo> schedules = new ArrayList<>();
+
+		@Override
+		public void schedule(ScheduleRequest scheduleRequest) {
+			ScheduleInfo schedule = new ScheduleInfo();
+			schedule.setScheduleName(scheduleRequest.getScheduleName());
+			schedule.setScheduleProperties(scheduleRequest.getSchedulerProperties());
+			schedule.setTaskDefinitionName(scheduleRequest.getDefinition().getName());
+			List<ScheduleInfo> scheduleInfos = schedules.stream().filter(s -> s.getScheduleName().
+					equals(scheduleRequest.getScheduleName())).
+					collect(Collectors.toList());
+			if(scheduleInfos.size() > 0) {
+				throw new CreateScheduleException(
+						String.format("Schedule %s already exists",
+								scheduleRequest.getScheduleName()), null);
+			}
+			schedules.add(schedule);
+
+		}
+
+		@Override
+		public void unschedule(String scheduleName) {
+			schedules = schedules.stream().filter(
+					s -> !s.getScheduleName().equals(scheduleName)).
+					collect(Collectors.toList());
+		}
+
+		@Override
+		public List<ScheduleInfo> list(String taskDefinitionName) {
+			return schedules.stream().filter(
+					s -> s.getTaskDefinitionName().equals(taskDefinitionName)).
+					collect(Collectors.toList());
+		}
+
+		@Override
+		public List<ScheduleInfo> list() {
+			return schedules;
+		}
+
+		public List<ScheduleInfo> getSchedules() {
+			return schedules;
+		}
 	}
 }

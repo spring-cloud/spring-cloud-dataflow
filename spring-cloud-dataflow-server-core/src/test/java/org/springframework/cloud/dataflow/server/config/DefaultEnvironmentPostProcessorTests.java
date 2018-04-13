@@ -22,10 +22,12 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.autoconfigure.session.SessionAutoConfiguration;
 import org.springframework.cloud.dataflow.server.EnableDataFlowServer;
+import org.springframework.cloud.dataflow.server.service.SchedulerService;
 import org.springframework.cloud.dataflow.server.service.TaskService;
 import org.springframework.cloud.dataflow.server.service.impl.DefaultTaskService;
 import org.springframework.cloud.deployer.spi.app.AppDeployer;
 import org.springframework.cloud.deployer.spi.task.TaskLauncher;
+import org.springframework.cloud.scheduler.spi.core.Scheduler;
 import org.springframework.cloud.task.repository.TaskRepository;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.Bean;
@@ -94,6 +96,16 @@ public class DefaultEnvironmentPostProcessorTests {
 		@Bean
 		public TaskRepository taskRepository() {
 			return mock(TaskRepository.class);
+		}
+
+		@Bean
+		public SchedulerService schedulerService() {
+			return mock(SchedulerService.class);
+		}
+
+		@Bean
+		public Scheduler scheduler() {
+			return mock(Scheduler.class);
 		}
 	}
 }
