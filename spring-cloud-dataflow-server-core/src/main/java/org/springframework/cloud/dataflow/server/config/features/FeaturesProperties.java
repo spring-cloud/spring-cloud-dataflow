@@ -31,6 +31,8 @@ public class FeaturesProperties {
 
 	public static final String STREAMS_ENABLED = "streams-enabled";
 
+	public static final String SCHEDULES_ENABLED = "schedules-enabled";
+
 	public static final String TASKS_ENABLED = "tasks-enabled";
 
 	public static final String ANALYTICS_ENABLED = "analytics-enabled";
@@ -44,6 +46,8 @@ public class FeaturesProperties {
 	private boolean tasksEnabled = true;
 
 	private boolean skipperEnabled = false;
+
+	private boolean schedulesEnabled = true;
 
 	public boolean isAnalyticsEnabled() {
 		return this.analyticsEnabled;
@@ -75,5 +79,13 @@ public class FeaturesProperties {
 
 	public void setSkipperEnabled(boolean skipperEnabled) {
 		this.skipperEnabled = skipperEnabled;
+	}
+
+	public boolean isSchedulesEnabled() {
+		return schedulesEnabled;
+	}
+
+	public void setSchedulesEnabled(boolean schedulesEnabled) {
+		this.schedulesEnabled = schedulesEnabled;
 	}
 }

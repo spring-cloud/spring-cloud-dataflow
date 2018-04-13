@@ -102,6 +102,10 @@ public class ApiDocumentation extends BaseDocumentation {
 						.description("Returns all task executions for a " + "given Task name"),
 				linkWithRel("tasks/executions/execution")
 						.description("Provides details for a " + "specific task execution"),
+				linkWithRel("tasks/schedules")
+						.description("Returns Task schedules and allows " + "scheduling of tasks"),
+				linkWithRel("tasks/schedules/instances")
+						.description("Returns all task schedules for a " + "given Task definition name"),
 				linkWithRel("streams/definitions").description("Exposes the Streams resource"),
 				linkWithRel("streams/definitions/definition").description("Handle a specific Stream " + "definition"),
 				linkWithRel("streams/deployments").description("Provides Stream deployment operations"),

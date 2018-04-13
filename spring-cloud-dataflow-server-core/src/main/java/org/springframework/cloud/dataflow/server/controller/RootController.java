@@ -29,6 +29,7 @@ import org.springframework.cloud.dataflow.rest.resource.CompletionProposalsResou
 import org.springframework.cloud.dataflow.rest.resource.JobExecutionResource;
 import org.springframework.cloud.dataflow.rest.resource.JobInstanceResource;
 import org.springframework.cloud.dataflow.rest.resource.RootResource;
+import org.springframework.cloud.dataflow.rest.resource.ScheduleInfoResource;
 import org.springframework.cloud.dataflow.rest.resource.StepExecutionProgressInfoResource;
 import org.springframework.cloud.dataflow.rest.resource.StepExecutionResource;
 import org.springframework.cloud.dataflow.rest.resource.StreamDefinitionResource;
@@ -131,6 +132,12 @@ public class RootController {
 			root.add(new Link(taskTemplated).withRel("tasks/executions/name"));
 			root.add(unescapeTemplateVariables(entityLinks.linkToSingleResource(TaskExecutionResource.class, "{id}")
 					.withRel("tasks/executions/execution")));
+			if(featuresProperties.isSchedulesEnabled()) {
+				root.add(entityLinks.linkToCollectionResource(ScheduleInfoResource.class).withRel("tasks/schedules"));
+				String scheduleTemplated = entityLinks.linkToCollectionResource(ScheduleInfoResource.class).getHref()
+						+ "/instances/{taskDefinitionName}";
+				root.add(new Link(scheduleTemplated).withRel("tasks/schedules/instances"));
+			}
 			root.add(entityLinks.linkToCollectionResource(JobExecutionResource.class).withRel("jobs/executions"));
 			taskTemplated = entityLinks.linkToCollectionResource(JobExecutionResource.class).getHref() + "{?name}";
 			root.add(new Link(taskTemplated).withRel("jobs/executions/name"));
