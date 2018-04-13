@@ -33,13 +33,14 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 /**
  * Tests the root URL when security with file-based user list is enabled.
+ * Task feature is enabled, while Scheduler, Stream, and Metrics feature are disabled.
  *
- * @author Gunnar Hillert
+ * @author Glenn Renfro
  */
-public class LocalServerSecurityRootWithUsersFileTests {
+public class LocalServerSecurityRootWithUsersFileTestsWithTasksAndWithoutStreamsMetricsAndSchedules {
 
 	private final static LocalDataflowResource localDataflowResource = new LocalDataflowResource(
-			"classpath:org/springframework/cloud/dataflow/server/local/security/fileBasedUsers.yml");
+			"classpath:org/springframework/cloud/dataflow/server/local/security/fileBasedUsers.yml", false, true, false, false);
 
 	@ClassRule
 	public static TestRule springDataflowAndLdapServer = RuleChain.outerRule(localDataflowResource);
@@ -52,23 +53,16 @@ public class LocalServerSecurityRootWithUsersFileTests {
 		localDataflowResource.getMockMvc()
 				.perform(get("/").header("Authorization", basicAuthorizationHeader(fullUser.getUsername(), fullUser.getPassword()))).andDo(print())
 				.andExpect(status().isOk())
-				.andExpect(jsonPath("$._links.*", hasSize(36)))
+				.andExpect(jsonPath("$._links.*", hasSize(20)))
 				.andExpect(jsonPath("$._links.dashboard.href", is("http://localhost/dashboard")))
-				.andExpect(jsonPath("$._links.streams/definitions.href", is("http://localhost/streams/definitions")))
-				.andExpect(jsonPath("$._links.streams/definitions/definition.href", is("http://localhost/streams/definitions/{name}")))
-				.andExpect(jsonPath("$._links.streams/deployments.href", is("http://localhost/streams/deployments")))
-				.andExpect(jsonPath("$._links.streams/deployments/deployment.href", is("http://localhost/streams/deployments/{name}")))
-				.andExpect(jsonPath("$._links.runtime/apps.href", is("http://localhost/runtime/apps")))
-				.andExpect(jsonPath("$._links.runtime/apps/app.href", is("http://localhost/runtime/apps/{appId}")))
-				.andExpect(jsonPath("$._links.runtime/apps/instances.href", is("http://localhost/runtime/apps/{appId}/instances")))
-				.andExpect(jsonPath("$._links.metrics/streams.href", is("http://localhost/metrics/streams")))
+				.andExpect(jsonPath("$._links.streams").doesNotExist())
+				.andExpect(jsonPath("$._links.runtime").doesNotExist())
+				.andExpect(jsonPath("$._links.metrics").doesNotExist())
 				.andExpect(jsonPath("$._links.tasks/definitions.href", is("http://localhost/tasks/definitions")))
 				.andExpect(jsonPath("$._links.tasks/definitions/definition.href", is("http://localhost/tasks/definitions/{name}")))
 				.andExpect(jsonPath("$._links.tasks/executions.href", is("http://localhost/tasks/executions")))
 				.andExpect(jsonPath("$._links.tasks/executions/name.href", is("http://localhost/tasks/executions{?name}")))
 				.andExpect(jsonPath("$._links.tasks/executions/execution.href", is("http://localhost/tasks/executions/{id}")))
-				.andExpect(jsonPath("$._links.tasks/schedules.href", is("http://localhost/tasks/schedules")))
-				.andExpect(jsonPath("$._links.tasks/schedules/instances.href", is("http://localhost/tasks/schedules/instances/{taskDefinitionName}")))
 				.andExpect(jsonPath("$._links.jobs/executions.href", is("http://localhost/jobs/executions")))
 				.andExpect(jsonPath("$._links.jobs/executions/name.href", is("http://localhost/jobs/executions{?name}")))
 				.andExpect(jsonPath("$._links.jobs/executions/execution.href", is("http://localhost/jobs/executions/{id}")))
@@ -77,14 +71,12 @@ public class LocalServerSecurityRootWithUsersFileTests {
 				.andExpect(jsonPath("$._links.jobs/executions/execution/steps/step/progress.href", is("http://localhost/jobs/executions/{jobExecutionId}/steps/{stepId}/progress")))
 				.andExpect(jsonPath("$._links.jobs/instances/name.href", is("http://localhost/jobs/instances{?name}")))
 				.andExpect(jsonPath("$._links.jobs/instances/instance.href", is("http://localhost/jobs/instances/{id}")))
+				.andExpect(jsonPath("$._links.jobs").doesNotExist())
 				.andExpect(jsonPath("$._links.tools/parseTaskTextToGraph.href", is("http://localhost/tools")))
 				.andExpect(jsonPath("$._links.tools/convertTaskGraphToText.href", is("http://localhost/tools")))
-				.andExpect(jsonPath("$._links.counters.href", is("http://localhost/metrics/counters")))
-				.andExpect(jsonPath("$._links.counters/counter.href", is("http://localhost/metrics/counters/{name}")))
-				.andExpect(jsonPath("$._links.field-value-counters.href", is("http://localhost/metrics/field-value-counters")))
-				.andExpect(jsonPath("$._links.field-value-counters/counter.href", is("http://localhost/metrics/field-value-counters/{name}")))
-				.andExpect(jsonPath("$._links.aggregate-counters.href", is("http://localhost/metrics/aggregate-counters")))
-				.andExpect(jsonPath("$._links.aggregate-counters/counter.href", is("http://localhost/metrics/aggregate-counters/{name}")))
+				.andExpect(jsonPath("$._links.counters").doesNotExist())
+				.andExpect(jsonPath("$._links.field-value-counters").doesNotExist())
+				.andExpect(jsonPath("$._links.aggregate-counters").doesNotExist())
 				.andExpect(jsonPath("$._links.apps.href", is("http://localhost/apps")))
 				.andExpect(jsonPath("$._links.about.href", is("http://localhost/about")))
 				.andExpect(jsonPath("$._links.completions/stream.href", is("http://localhost/completions/stream{?start,detailLevel}")))
@@ -96,23 +88,16 @@ public class LocalServerSecurityRootWithUsersFileTests {
 		localDataflowResource.getMockMvc()
 				.perform(get("/").header("Authorization", basicAuthorizationHeader(viewOnlyUser.getUsername(), viewOnlyUser.getPassword()))).andDo(print())
 				.andExpect(status().isOk())
-				.andExpect(jsonPath("$._links.*", hasSize(36)))
+				.andExpect(jsonPath("$._links.*", hasSize(20)))
 				.andExpect(jsonPath("$._links.dashboard.href", is("http://localhost/dashboard")))
-				.andExpect(jsonPath("$._links.streams/definitions.href", is("http://localhost/streams/definitions")))
-				.andExpect(jsonPath("$._links.streams/definitions/definition.href", is("http://localhost/streams/definitions/{name}")))
-				.andExpect(jsonPath("$._links.streams/deployments.href", is("http://localhost/streams/deployments")))
-				.andExpect(jsonPath("$._links.streams/deployments/deployment.href", is("http://localhost/streams/deployments/{name}")))
-				.andExpect(jsonPath("$._links.runtime/apps.href", is("http://localhost/runtime/apps")))
-				.andExpect(jsonPath("$._links.runtime/apps/app.href", is("http://localhost/runtime/apps/{appId}")))
-				.andExpect(jsonPath("$._links.runtime/apps/instances.href", is("http://localhost/runtime/apps/{appId}/instances")))
-				.andExpect(jsonPath("$._links.metrics/streams.href", is("http://localhost/metrics/streams")))
+				.andExpect(jsonPath("$._links.streams").doesNotExist())
+				.andExpect(jsonPath("$._links.runtime").doesNotExist())
+				.andExpect(jsonPath("$._links.metrics").doesNotExist())
 				.andExpect(jsonPath("$._links.tasks/definitions.href", is("http://localhost/tasks/definitions")))
 				.andExpect(jsonPath("$._links.tasks/definitions/definition.href", is("http://localhost/tasks/definitions/{name}")))
 				.andExpect(jsonPath("$._links.tasks/executions.href", is("http://localhost/tasks/executions")))
 				.andExpect(jsonPath("$._links.tasks/executions/name.href", is("http://localhost/tasks/executions{?name}")))
 				.andExpect(jsonPath("$._links.tasks/executions/execution.href", is("http://localhost/tasks/executions/{id}")))
-				.andExpect(jsonPath("$._links.tasks/schedules.href", is("http://localhost/tasks/schedules")))
-				.andExpect(jsonPath("$._links.tasks/schedules/instances.href", is("http://localhost/tasks/schedules/instances/{taskDefinitionName}")))
 				.andExpect(jsonPath("$._links.jobs/executions.href", is("http://localhost/jobs/executions")))
 				.andExpect(jsonPath("$._links.jobs/executions/name.href", is("http://localhost/jobs/executions{?name}")))
 				.andExpect(jsonPath("$._links.jobs/executions/execution.href", is("http://localhost/jobs/executions/{id}")))
@@ -121,14 +106,12 @@ public class LocalServerSecurityRootWithUsersFileTests {
 				.andExpect(jsonPath("$._links.jobs/executions/execution/steps/step/progress.href", is("http://localhost/jobs/executions/{jobExecutionId}/steps/{stepId}/progress")))
 				.andExpect(jsonPath("$._links.jobs/instances/name.href", is("http://localhost/jobs/instances{?name}")))
 				.andExpect(jsonPath("$._links.jobs/instances/instance.href", is("http://localhost/jobs/instances/{id}")))
+				.andExpect(jsonPath("$._links.jobs").doesNotExist())
 				.andExpect(jsonPath("$._links.tools/parseTaskTextToGraph.href", is("http://localhost/tools")))
 				.andExpect(jsonPath("$._links.tools/convertTaskGraphToText.href", is("http://localhost/tools")))
-				.andExpect(jsonPath("$._links.counters.href", is("http://localhost/metrics/counters")))
-				.andExpect(jsonPath("$._links.counters/counter.href", is("http://localhost/metrics/counters/{name}")))
-				.andExpect(jsonPath("$._links.field-value-counters.href", is("http://localhost/metrics/field-value-counters")))
-				.andExpect(jsonPath("$._links.field-value-counters/counter.href", is("http://localhost/metrics/field-value-counters/{name}")))
-				.andExpect(jsonPath("$._links.aggregate-counters.href", is("http://localhost/metrics/aggregate-counters")))
-				.andExpect(jsonPath("$._links.aggregate-counters/counter.href", is("http://localhost/metrics/aggregate-counters/{name}")))
+				.andExpect(jsonPath("$._links.counters").doesNotExist())
+				.andExpect(jsonPath("$._links.field-value-counters").doesNotExist())
+				.andExpect(jsonPath("$._links.aggregate-counters").doesNotExist())
 				.andExpect(jsonPath("$._links.apps.href", is("http://localhost/apps")))
 				.andExpect(jsonPath("$._links.about.href", is("http://localhost/about")))
 				.andExpect(jsonPath("$._links.completions/stream.href", is("http://localhost/completions/stream{?start,detailLevel}")))

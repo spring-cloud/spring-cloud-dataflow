@@ -30,13 +30,14 @@ import org.springframework.context.annotation.Import;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
 
 /**
- * Configuration class that imports analytics, stream and task configuration classes. Also
- * holds any common beans on the above configuration classes.
+ * Configuration class that imports analytics, stream, scheduler and task
+ * configuration classes. Also holds any common beans on the above configuration
+ * classes.
  *
  * @author Ilayaperumal Gopinathan
  */
 @Configuration
-@Import({ AnalyticsConfiguration.class, StreamConfiguration.class, TaskConfiguration.class })
+@Import({ AnalyticsConfiguration.class, StreamConfiguration.class, TaskConfiguration.class, SchedulerConfiguration.class })
 public class FeaturesConfiguration {
 
 	@Autowired
