@@ -55,6 +55,7 @@
 		<commons-lang.version>2.4</commons-lang.version>
 		<jacoco-maven-plugin.version>0.7.9</jacoco-maven-plugin.version>
 		<sonar-maven-plugin.version>3.0.2</sonar-maven-plugin.version>
+		<spring-cloud-scheduler-spi.version>1.0.0.BUILD-SNAPSHOT</spring-cloud-scheduler-spi.version>
 		<checkstyle.config.location>src/checkstyle/checkstyle.xml</checkstyle.config.location>
 	</properties>
 	<modules>
@@ -175,6 +176,11 @@
 				<groupId>commons-lang</groupId>
 				<artifactId>commons-lang</artifactId>
 				<version>${commons-lang.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.springframework.cloud</groupId>
+				<artifactId>spring-cloud-scheduler-spi</artifactId>
+				<version>${spring-cloud-scheduler-spi.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.springframework.data</groupId>

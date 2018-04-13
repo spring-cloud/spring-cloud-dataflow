@@ -1,0 +1,83 @@
+/*
+ * Copyright 2018 the original author or authors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package org.springframework.cloud.dataflow.rest.resource;
+
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
+
+import org.springframework.hateoas.ResourceSupport;
+import org.springframework.util.Assert;
+
+/**
+ * A HATEOAS representation of a {@link org.springframework.cloud.scheduler.spi.core.ScheduleInfo}.
+ *
+ * @author Glenn Renfro
+ */
+public class ScheduleInfoResource extends ResourceSupport {
+
+	/**
+	 * The name to be associated with the Schedule instance.
+	 */
+	private String scheduleName;
+
+	/**
+	 * The app definition name associated with Schedule instance.
+	 */
+	private String taskDefinitionName;
+
+	/**
+	 * Schedule specific information returned from the Scheduler implementation.
+	 */
+	private Map<String, String> scheduleProperties;
+
+
+	public ScheduleInfoResource(String scheduleName, String taskDefinitionName, Map<String, String> scheduleProperties) {
+		Assert.hasText(scheduleName, "scheduleName must not be null nor empty");
+		Assert.hasText(taskDefinitionName, "taskDefinitionName must not be null nor empty");
+		Assert.notNull(scheduleProperties, "schedulerProperties must not be null.");
+
+		this.scheduleName = scheduleName;
+		this.scheduleProperties = new HashMap<>();
+		this.scheduleProperties.putAll(scheduleProperties);
+	}
+
+	public String getScheduleName() {
+		return scheduleName;
+	}
+
+	public void setScheduleName(String scheduleName) {
+		this.scheduleName = scheduleName;
+	}
+
+	public String getTaskDefinitionName() {
+		return taskDefinitionName;
+	}
+
+	public void setTaskDefinitionName(String taskDefinitionName) {
+		this.taskDefinitionName = taskDefinitionName;
+	}
+
+	public Map<String, String> getScheduleProperties() {
+		return Collections.unmodifiableMap(scheduleProperties);
+	}
+
+	public void setScheduleProperties(Map<String, String> scheduleProperties) {
+		this.scheduleProperties.clear();
+		this.scheduleProperties.putAll(scheduleProperties);
+	}
+}

@@ -22,6 +22,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ForkJoinPool;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.ImportAutoConfiguration;
@@ -61,6 +62,7 @@ import org.springframework.cloud.dataflow.server.controller.StreamDefinitionCont
 import org.springframework.cloud.dataflow.server.controller.StreamDeploymentController;
 import org.springframework.cloud.dataflow.server.controller.TaskDefinitionController;
 import org.springframework.cloud.dataflow.server.controller.TaskExecutionController;
+import org.springframework.cloud.dataflow.server.controller.TaskSchedulerController;
 import org.springframework.cloud.dataflow.server.controller.ToolsController;
 import org.springframework.cloud.dataflow.server.controller.support.ApplicationsMetrics;
 import org.springframework.cloud.dataflow.server.controller.support.ApplicationsMetrics.Application;
@@ -76,11 +78,13 @@ import org.springframework.cloud.dataflow.server.repository.InMemoryTaskDefiniti
 import org.springframework.cloud.dataflow.server.repository.StreamDefinitionRepository;
 import org.springframework.cloud.dataflow.server.repository.StreamDeploymentRepository;
 import org.springframework.cloud.dataflow.server.repository.TaskDefinitionRepository;
+import org.springframework.cloud.dataflow.server.service.SchedulerService;
 import org.springframework.cloud.dataflow.server.service.SkipperStreamService;
 import org.springframework.cloud.dataflow.server.service.StreamService;
 import org.springframework.cloud.dataflow.server.service.TaskService;
 import org.springframework.cloud.dataflow.server.service.impl.AppDeployerStreamService;
 import org.springframework.cloud.dataflow.server.service.impl.AppDeploymentRequestCreator;
+import org.springframework.cloud.dataflow.server.service.impl.DefaultSchedulerService;
 import org.springframework.cloud.dataflow.server.service.impl.DefaultSkipperStreamService;
 import org.springframework.cloud.dataflow.server.service.impl.DefaultTaskService;
 import org.springframework.cloud.dataflow.server.service.impl.TaskConfigurationProperties;
@@ -95,6 +99,10 @@ import org.springframework.cloud.deployer.resource.support.DelegatingResourceLoa
 import org.springframework.cloud.deployer.spi.app.AppDeployer;
 import org.springframework.cloud.deployer.spi.core.RuntimeEnvironmentInfo;
 import org.springframework.cloud.deployer.spi.task.TaskLauncher;
+import org.springframework.cloud.scheduler.spi.core.CreateScheduleException;
+import org.springframework.cloud.scheduler.spi.core.ScheduleInfo;
+import org.springframework.cloud.scheduler.spi.core.ScheduleRequest;
+import org.springframework.cloud.scheduler.spi.core.Scheduler;
 import org.springframework.cloud.skipper.client.SkipperClient;
 import org.springframework.cloud.task.repository.TaskExplorer;
 import org.springframework.cloud.task.repository.TaskRepository;
@@ -360,6 +368,12 @@ public class TestDependencies extends WebMvcConfigurationSupport {
 	}
 
 	@Bean
+	public TaskSchedulerController taskSchedulerController(
+			SchedulerService schedulerService) {
+		return new TaskSchedulerController(schedulerService);
+	}
+
+	@Bean
 	public TaskRepository taskRepository() {
 		return new SimpleTaskRepository(new TaskExecutionDaoFactoryBean());
 	}
@@ -411,6 +425,25 @@ public class TestDependencies extends WebMvcConfigurationSupport {
 		return new DefaultTaskService(new DataSourceProperties(), taskDefinitionRepository(), taskExplorer(),
 				taskExecutionRepository, appRegistry, delegatingResourceLoader, taskLauncher(), metadataResolver,
 				new TaskConfigurationProperties(), deploymentIdRepository, null, commonApplicationProperties);
+	}
+
+	@Bean
+	Scheduler scheduler() {
+		return new SimpleTestScheduler();
+	}
+
+	@Bean
+	public SchedulerService schedulerService(CommonApplicationProperties commonApplicationProperties,
+			Scheduler scheduler, TaskDefinitionRepository taskDefinitionRepository,
+			AppRegistryCommon registry, ResourceLoader resourceLoader,
+			DataSourceProperties dataSourceProperties,
+			ApplicationConfigurationMetadataResolver metaDataResolver) {
+		return new DefaultSchedulerService(commonApplicationProperties,
+				scheduler, taskDefinitionRepository,
+				registry, resourceLoader,
+				new TaskConfigurationProperties(),
+				dataSourceProperties, null,
+				metaDataResolver);
 	}
 
 	@Bean
@@ -479,5 +512,51 @@ public class TestDependencies extends WebMvcConfigurationSupport {
 		return new AboutController(streamDeployer, taskLauncher,
 				featuresProperties, versionInfoProperties,
 				mock(SecurityStateBean.class));
+	}
+
+
+	public static class SimpleTestScheduler implements Scheduler {
+		List<ScheduleInfo> schedules = new ArrayList<>();
+
+		@Override
+		public void schedule(ScheduleRequest scheduleRequest) {
+			ScheduleInfo schedule = new ScheduleInfo();
+			schedule.setScheduleName(scheduleRequest.getScheduleName());
+			schedule.setScheduleProperties(scheduleRequest.getSchedulerProperties());
+			schedule.setTaskDefinitionName(scheduleRequest.getDefinition().getName());
+			List<ScheduleInfo> scheduleInfos = schedules.stream().filter(s -> s.getScheduleName().
+					equals(scheduleRequest.getScheduleName())).
+					collect(Collectors.toList());
+			if(scheduleInfos.size() > 0) {
+				throw new CreateScheduleException(
+						String.format("Schedule %s already exists",
+								scheduleRequest.getScheduleName()), null);
+			}
+			schedules.add(schedule);
+
+		}
+
+		@Override
+		public void unschedule(String scheduleName) {
+			schedules = schedules.stream().filter(
+					s -> !s.getScheduleName().equals(scheduleName)).
+					collect(Collectors.toList());
+		}
+
+		@Override
+		public List<ScheduleInfo> list(String taskDefinitionName) {
+			return schedules.stream().filter(
+					s -> s.getTaskDefinitionName().equals(taskDefinitionName)).
+					collect(Collectors.toList());
+		}
+
+		@Override
+		public List<ScheduleInfo> list() {
+			return schedules;
+		}
+
+		public List<ScheduleInfo> getSchedules() {
+			return schedules;
+		}
 	}
 }
