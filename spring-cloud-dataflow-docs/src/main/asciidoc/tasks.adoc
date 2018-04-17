@@ -178,8 +178,11 @@ dataflow:>task launch mytask
  Launched task 'mytask'
 
 When a task is launched, any properties that need to be passed as command line arguments to the task application can be set when launching the task, as follows:
+[source]
+dataflow:>task launch mytask --arguments "--server.port=8080 --custom=value"
 
-`dataflow:>task launch mytask --arguments "--server.port=8080,--custom=value"`
+[NOTE}
+The arguments need to be passed as `space` delimited values.
 
 Additional properties meant for a `TaskLauncher` itself can be passed in by using a `--properties` option.
 The format of this option is a comma-separated string of properties prefixed with `app.<task definition name>.<property>`.
