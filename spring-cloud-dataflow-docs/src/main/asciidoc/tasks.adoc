@@ -423,6 +423,21 @@ To have mytaskapp display 'HELLO' and set the mytimestamp timestamp format to 'Y
 task launch my-composed-task --properties "app.my-composed-task.mytaskapp.displayMessage=HELLO,app.my-composed-task.mytimestamp.timestamp.format=YYYY"
 ----
 
+===== Passing arguments to the composed task runner
+
+Command line arguments for the composed task runner can be passed using `--arguments` option.
+
+For example:
+
+[source,bash]
+----
+dataflow:>task create my-composed-task --definition "<aaa: timestamp || bbb: timestamp>"
+Created new task 'my-composed-task'
+
+dataflow:>task launch my-composed-task --arguments "--increment-instance-enabled=true --max-wait-time=50000 --split-thread-core-pool-size=4" --properties "app.my-composed-task.bbb.timestamp.format=dd/MM/yyyy HH:mm:ss"
+Launched task 'my-composed-task'
+----
+
 ===== Exit Statuses
 
 The following list shows how the Exit Status is set for each step (task) contained in the composed task following each step execution:
