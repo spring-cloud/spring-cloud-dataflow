@@ -178,8 +178,11 @@ dataflow:>task launch mytask
  Launched task 'mytask'
 
 When a task is launched, any properties that need to be passed as command line arguments to the task application can be set when launching the task, as follows:
+[source]
+dataflow:>task launch mytask --arguments "--server.port=8080 --custom=value"
 
-`dataflow:>task launch mytask --arguments "--server.port=8080,--custom=value"`
+[NOTE}
+The arguments need to be passed as `space` delimited values.
 
 Additional properties meant for a `TaskLauncher` itself can be passed in by using a `--properties` option.
 The format of this option is a comma-separated string of properties prefixed with `app.<task definition name>.<property>`.
@@ -418,6 +421,21 @@ To have mytaskapp display 'HELLO' and set the mytimestamp timestamp format to 'Y
 [source,bash]
 ----
 task launch my-composed-task --properties "app.my-composed-task.mytaskapp.displayMessage=HELLO,app.my-composed-task.mytimestamp.timestamp.format=YYYY"
+----
+
+===== Passing arguments to the composed task runner
+
+Command line arguments for the composed task runner can be passed using `--arguments` option.
+
+For example:
+
+[source,bash]
+----
+dataflow:>task create my-composed-task --definition "<aaa: timestamp || bbb: timestamp>"
+Created new task 'my-composed-task'
+
+dataflow:>task launch my-composed-task --arguments "--increment-instance-enabled=true --max-wait-time=50000 --split-thread-core-pool-size=4" --properties "app.my-composed-task.bbb.timestamp.format=dd/MM/yyyy HH:mm:ss"
+Launched task 'my-composed-task'
 ----
 
 ===== Exit Statuses
