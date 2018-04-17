@@ -53,7 +53,7 @@ Just for fun, pass in a few Boot applications options using system properties, a
 
 [source,bash]
 ----
-java -Dserver.port=8123 -Dhttp.path-pattern=/data -Dspring.cloud.stream.bindings.output.destination=sensorData -jar http-source-rabbit-1.2.0.BUILD-SNAPSHOT.jar
+java -Dserver.port=8123 -Dhttp.path-pattern=/data -Dspring.cloud.stream.bindings.output.destination=sensorData -jar http-source-rabbit-1.3.1.RELEASE.jar
 ----
 
 The `server.port` property comes from Spring Boot's Web support, and the `http.path-pattern` property comes from the HTTP source application, link:https://github.com/spring-cloud-stream-app-starters/http/blob/master/spring-cloud-starter-stream-source-http/src/main/java/org/springframework/cloud/stream/app/http/source/HttpSourceProperties.java[HttpSourceProperties].
@@ -66,7 +66,7 @@ Now you can run the log sink application and change the logging level to WARN, a
 
 [source,bash]
 ----
-java -Dlog.level=WARN -Dspring.cloud.stream.bindings.input.destination=sensorData -jar log-sink-rabbit-1.1.1.RELEASE.jar
+java -Dlog.level=WARN -Dspring.cloud.stream.bindings.input.destination=sensorData -jar log-sink-rabbit-1.3.1.RELEASE.jar
 ----
 
 The `log.level` property comes from the log sink application,  link:https://github.com/spring-cloud-stream-app-starters/log/blob/master/spring-cloud-starter-stream-sink-log/src/main/java/org/springframework/cloud/stream/app/log/sink/LogSinkProperties.java[LogSinkProperties].
@@ -97,19 +97,22 @@ You can then use the https://docs.spring.io/spring-cloud-stream/docs/current/ref
 To do so:
 
 . Visit the link:https://start.spring.io/[Spring Initialzr] site.
-. Create a new Maven project with a group name of `io.spring.stream.sample` and an artifact name of `transformer`.
-. In the Dependencies text box, type `stream rabbit` to select the Spring Cloud Stream dependency that uses the RabbitMQ binder.
+.. Create a new Maven project with a *Group* name of `io.spring.stream.sample` and an *Artifact* name of `transformer`.
+.. In the Dependencies text box, type `stream` to select the Spring Cloud Stream dependency.
+.. In the Dependencies text box, type either `kafka` or `rabbit` and select which middleware you want to use.
+.. Click the *Generate Project* button
 . Unzip the project and bring the project into your favorite IDE.
 . Create a class called Transformer in the `io.spring.stream.sample` package with the following contents:
 +
 [source,java]
 ----
-package io.spring.stream.sample;
+package io.spring.stream.sample.transformer;
 
 import org.springframework.cloud.stream.annotation.EnableBinding;
 import org.springframework.cloud.stream.annotation.Output;
 import org.springframework.cloud.stream.annotation.StreamListener;
 import org.springframework.cloud.stream.messaging.Processor;
+import org.springframework.messaging.handler.annotation.Payload;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -119,7 +122,7 @@ public class Transformer {
 
     @StreamListener(Processor.INPUT)
     @Output(Processor.OUTPUT)
-    public Map<String, Object> transform(Map<String, Object> doc) {
+    public Map<String, Object> transform(@Payload Map<String, Object> doc) {
         Map<String, Object> map = new HashMap<>();
         map.put("sensor_id", doc.getOrDefault("id", "-1"));
         map.put("temp_val", doc.getOrDefault("temperature", "-999"));
@@ -184,7 +187,7 @@ Now you can run all three applications, as shown in the following listing:
 java -Dserver.port=8123 \
      -Dhttp.path-pattern=/data \
      -Dspring.cloud.stream.bindings.output.destination=sensorData \
-     -jar http-source-rabbit-1.2.0.BUILD-SNAPSHOT.jar
+     -jar http-source-rabbit-1.3.1.RELEASE.jar
 
 java -Dserver.port=8090 \
  -Dspring.cloud.stream.bindings.input.destination=sensorData \
@@ -193,7 +196,7 @@ java -Dserver.port=8090 \
 
 java -Dlog.level=WARN \
      -Dspring.cloud.stream.bindings.input.destination=normalizedSensorData \
-     -jar log-sink-rabbit-1.1.1.RELEASE.jar
+     -jar log-sink-rabbit-1.3.1.RELEASE.jar
 ----
 
 Now you can post some content to the http source application, as follows:
