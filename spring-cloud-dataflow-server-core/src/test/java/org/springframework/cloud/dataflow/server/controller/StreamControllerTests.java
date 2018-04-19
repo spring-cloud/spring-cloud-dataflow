@@ -83,6 +83,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  * @author Janne Valkealahti
  * @author Gunnar Hillert
  * @author Glenn Renfro
+ * @author Andy Clement
  */
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = TestDependencies.class)
@@ -181,6 +182,39 @@ public class StreamControllerTests {
 		assertTrue(response.contains(":myStream1.time > log"));
 		assertTrue(response.contains("time | log"));
 		assertTrue(response.contains("\"totalElements\":3"));
+	}
+
+	@Test
+	public void testFindRelatedStreams_gh2150() throws Exception {
+		assertEquals(0, repository.count());
+		// Bad definition, recursive reference
+		mockMvc.perform(post("/streams/definitions/").param("name", "mapper")
+				.param("definition", ":mapper.time > log")
+				.accept(MediaType.APPLICATION_JSON)).andDo(print()).andExpect(status().isCreated());
+		assertEquals(1, repository.count());
+		String response = mockMvc
+				.perform(get("/streams/definitions/mapper/related").param("nested", "true").accept(MediaType.APPLICATION_JSON)).andReturn()
+				.getResponse().getContentAsString();
+		assertTrue(response.contains(":mapper.time > log"));
+		assertTrue(response.contains("\"totalElements\":1"));
+	}
+
+	@Test
+	public void testFindRelatedStreams2_gh2150() throws Exception {
+		// bad streams, recursively referencing via each other
+		mockMvc.perform(post("/streams/definitions/").param("name", "foo")
+				.param("definition", ":bar.time > log")
+				.accept(MediaType.APPLICATION_JSON)).andDo(print()).andExpect(status().isCreated());
+		mockMvc.perform(post("/streams/definitions/").param("name", "bar")
+				.param("definition", ":foo.time > log")
+				.accept(MediaType.APPLICATION_JSON)).andDo(print()).andExpect(status().isCreated());
+		assertEquals(2, repository.count());
+		String response = mockMvc
+				.perform(get("/streams/definitions/foo/related").param("nested", "true").accept(MediaType.APPLICATION_JSON)).andReturn()
+				.getResponse().getContentAsString();
+		assertTrue(response.contains(":foo.time > log"));
+		assertTrue(response.contains(":bar.time > log"));
+		assertTrue(response.contains("\"totalElements\":2"));
 	}
 
 	@Test

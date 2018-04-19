@@ -68,6 +68,7 @@ import org.springframework.web.bind.annotation.RestController;
  * @author Oleg Zhurakousky
  * @author Glenn Renfro
  * @author Christian Tzolov
+ * @author Andy Clement
  */
 @RestController
 @RequestMapping("/streams/definitions")
@@ -250,8 +251,8 @@ public class StreamDefinitionController {
 			if (sn.getSourceDestinationNode() != null) {
 				String nameComponent = sn.getSourceDestinationNode().getDestinationName();
 				if (nameComponent.equals(currentStreamName) || nameComponent.startsWith(indexedStreamName)) {
-					relatedDefinitions.add(definition);
-					if (nested) {
+					boolean isNewEntry = relatedDefinitions.add(definition);
+					if (nested && isNewEntry) {
 						findRelatedDefinitions(definition, definitions, relatedDefinitions, true);
 					}
 				}
