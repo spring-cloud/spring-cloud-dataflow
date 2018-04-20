@@ -150,6 +150,7 @@ public class DefaultTaskServiceTests {
 		Map<String, String> properties = new HashMap<>();
 		properties.put("app.foo", "bar");
 		properties.put("app.seqTask.AAA.timestamp.format", "YYYY");
+		properties.put("deployer.seqTask.AAA.memory", "1240m");
 		properties.put("app.composed-task-runner.interval-time-between-checks", "1000");
 		assertEquals(1L, this.taskService.executeTask("seqTask", properties, new LinkedList<>()));
 		ArgumentCaptor<AppDeploymentRequest> argumentCaptor = ArgumentCaptor.forClass(AppDeploymentRequest.class);
@@ -158,7 +159,8 @@ public class DefaultTaskServiceTests {
 		AppDeploymentRequest request = argumentCaptor.getValue();
 		assertEquals("seqTask", request.getDefinition().getProperties().get("spring.cloud.task.name"));
 		assertTrue(request.getDefinition().getProperties().containsKey("composed-task-properties"));
-		assertEquals("app.seqTask-AAA.app.AAA.timestamp.format=YYYY", request.getDefinition().getProperties().get("composed-task-properties"));
+		assertEquals("app.seqTask-AAA.app.AAA.timestamp.format=YYYY, deployer.seqTask-AAA.deployer.AAA.memory=1240m",
+				request.getDefinition().getProperties().get("composed-task-properties"));
 		assertTrue(request.getDefinition().getProperties().containsKey("interval-time-between-checks"));
 		assertEquals("1000", request.getDefinition().getProperties().get("interval-time-between-checks"));
 		assertFalse(request.getDefinition().getProperties().containsKey("app.foo"));

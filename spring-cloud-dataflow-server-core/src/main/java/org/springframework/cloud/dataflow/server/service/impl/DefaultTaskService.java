@@ -216,30 +216,36 @@ public class DefaultTaskService implements TaskService {
 			Map<String, String> taskDeploymentProperties,
 			TaskNode taskNode) {
 		String result = "";
-		taskDeploymentProperties = new HashMap<>(taskDeploymentProperties);
 		for (TaskApp subTask : taskNode.getTaskApps()) {
-			String subTaskName = String.format("app.%s-%s.", taskNode.getName(),
-					(subTask.getLabel() == null) ? subTask.getName() : subTask.getLabel());
-			String scdfTaskName = String.format("app.%s.%s.", taskNode.getName(),
-					(subTask.getLabel() == null) ? subTask.getName() : subTask.getLabel());
-			Set<String> propertyKeys = taskDeploymentProperties.keySet().
-					stream().filter(taskProperty -> taskProperty.startsWith(scdfTaskName))
-					.collect(Collectors.toSet());
-			for (String taskProperty : propertyKeys) {
-				if (result.length() != 0) {
-					result += ", ";
-				}
-				result += String.format("%sapp.%s.%s=%s", subTaskName,
-						subTask.getName(),
-						taskProperty.substring(subTaskName.length()),
-						taskDeploymentProperties.get(taskProperty));
-				taskDeploymentProperties.remove(taskProperty);
-			}
+			result = updateProperties(taskNode, subTask, taskDeploymentProperties, result, "app");
+			result = updateProperties(taskNode, subTask, taskDeploymentProperties, result, "deployer");
 		}
 		if (result.length() != 0) {
 			taskDeploymentProperties.put("app.composed-task-runner.composed-task-properties", result);
 		}
 		return taskDeploymentProperties;
+	}
+
+	private String updateProperties(TaskNode taskNode, TaskApp subTask, Map<String, String> taskDeploymentProperties,
+			String result, String prefix) {
+		String subTaskName = String.format("%s.%s-%s.", prefix, taskNode.getName(),
+				(subTask.getLabel() == null) ? subTask.getName() : subTask.getLabel());
+		String scdfTaskName = String.format("%s.%s.%s.", prefix, taskNode.getName(),
+				(subTask.getLabel() == null) ? subTask.getName() : subTask.getLabel());
+		Set<String> propertyKeys = taskDeploymentProperties.keySet().
+				stream().filter(taskProperty -> taskProperty.startsWith(scdfTaskName))
+				.collect(Collectors.toSet());
+		for (String taskProperty : propertyKeys) {
+			if (result.length() != 0) {
+				result += ", ";
+			}
+			result += String.format("%s%s.%s.%s=%s", subTaskName, prefix,
+					subTask.getName(),
+					taskProperty.substring(subTaskName.length()),
+					taskDeploymentProperties.get(taskProperty));
+			taskDeploymentProperties.remove(taskProperty);
+		}
+		return result;
 	}
 
 	private void updateDataFlowUriIfNeeded(Map<String, String> appDeploymentProperties, List<String> commandLineArgs) {
