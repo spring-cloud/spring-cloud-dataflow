@@ -423,6 +423,14 @@ To have mytaskapp display 'HELLO' and set the mytimestamp timestamp format to 'Y
 task launch my-composed-task --properties "app.my-composed-task.mytaskapp.displayMessage=HELLO,app.my-composed-task.mytimestamp.timestamp.format=YYYY"
 ----
 
+Similar to application properties, the `deployer` properties can also be set for child tasks using the format format of `deployer.<composed task definition name>.<child task app name>.<deployer-property>`.
+
+[source,bash]
+----
+task launch my-composed-task --properties "deployer.my-composed-task.mytaskapp.memory=2048m,app.my-composed-task.mytimestamp.timestamp.format=HH:mm:ss"
+Launched task 'a1'
+----
+
 ===== Passing arguments to the composed task runner
 
 Command line arguments for the composed task runner can be passed using `--arguments` option.
