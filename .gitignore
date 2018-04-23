@@ -16,6 +16,7 @@ build/
 dump.rdb
 out
 spring-shell.log
+spring-cloud-skipper-shell.log
 target/
 test-output
 file:/

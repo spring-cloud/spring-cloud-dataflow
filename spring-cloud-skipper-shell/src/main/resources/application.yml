@@ -1,6 +1,8 @@
 spring:
-    main:
-        banner-mode: 'off'
+  application:
+    name: spring-cloud-skipper-shell
+  main:
+    banner-mode: 'off'
 logging:
   level:
     org.springframework.boot.autoconfigure.logging.AutoConfigurationReportLoggingInitializer: 'WARN'
@@ -12,9 +14,3 @@ logging:
     org.springframework.jmx: 'WARN'
   pattern:
     console: "%clr(%-5p): %logger : %msg%n"
-
-
-
-
-
-
