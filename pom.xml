@@ -30,7 +30,7 @@
         <jopt.version>4.6</jopt.version>
 
         <spring.version>4.3.7.RELEASE</spring.version>
-        <spring-shell.version>2.0.0.RELEASE</spring-shell.version>
+        <spring-shell.version>2.0.1.RELEASE</spring-shell.version>
         <spring-statemachine.version>1.2.11.BUILD-SNAPSHOT</spring-statemachine.version>
 
         <!-- NOTE: Make sure to update `spring-cloud-build` version and `spring-cloud-dependencies` version (spring-cloud.version)
