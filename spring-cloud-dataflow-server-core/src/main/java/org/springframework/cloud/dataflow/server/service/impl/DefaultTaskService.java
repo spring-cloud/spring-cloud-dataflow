@@ -378,21 +378,32 @@ public class DefaultTaskService implements TaskService {
 				if (task.getLabel() != null) {
 					childName = task.getLabel();
 				}
-				destroyTask(childTaskPrefix + childName);
+				destroyChildTask(childTaskPrefix + childName);
 			});
 		}
 		// destroy normal task or composed parent task
-		destroyTask(name);
+		destroyPrimaryTask(name);
 	}
 
-	private void destroyTask(String name) {
+	private void destroyPrimaryTask(String name) {
 		TaskDefinition taskDefinition = taskDefinitionRepository.findOne(name);
 		if (taskDefinition == null) {
 			throw new NoSuchTaskDefinitionException(name);
 		}
-		taskLauncher.destroy(name);
+		destroyTask(taskDefinition);
+	}
+
+	private void destroyChildTask(String name) {
+		TaskDefinition taskDefinition = taskDefinitionRepository.findOne(name);
+		if (taskDefinition != null) {
+			destroyTask(taskDefinition);
+		}
+	}
+
+	private void destroyTask(TaskDefinition taskDefinition) {
+		taskLauncher.destroy(taskDefinition.getName());
 		deploymentIdRepository.delete(DeploymentKey.forTaskDefinition(taskDefinition));
-		taskDefinitionRepository.delete(name);
+		taskDefinitionRepository.delete(taskDefinition.getName());
 	}
 
 }

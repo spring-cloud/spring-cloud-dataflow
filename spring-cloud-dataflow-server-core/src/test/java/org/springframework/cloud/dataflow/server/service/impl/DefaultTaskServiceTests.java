@@ -306,6 +306,22 @@ public class DefaultTaskServiceTests {
 
 	@Test
 	@DirtiesContext
+	public void deleteComposedTaskMissingChildTasks() {
+		initializeSuccessfulRegistry();
+		String dsl = "AAA && BBB && CCC";
+		taskService.saveTaskDefinition("deleteTask", dsl);
+		verifyTaskExistsInRepo("deleteTask-AAA", "AAA");
+		verifyTaskExistsInRepo("deleteTask-BBB", "BBB");
+		verifyTaskExistsInRepo("deleteTask-CCC", "CCC");
+		verifyTaskExistsInRepo("deleteTask", dsl);
+		taskService.deleteTaskDefinition("deleteTask-BBB");
+		long preDeleteSize = taskDefinitionRepository.count();
+		taskService.deleteTaskDefinition("deleteTask");
+		assertThat(preDeleteSize - 3, is(equalTo(taskDefinitionRepository.count())));
+	}
+
+	@Test
+	@DirtiesContext
 	public void deleteComposedTaskDeleteOnlyChildren() {
 		initializeSuccessfulRegistry();
 		taskService.saveTaskDefinition("deleteTask-AAA", "AAA");
