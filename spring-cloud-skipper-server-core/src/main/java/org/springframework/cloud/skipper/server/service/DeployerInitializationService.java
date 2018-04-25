@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 the original author or authors.
+ * Copyright 2017-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,12 +15,14 @@
  */
 package org.springframework.cloud.skipper.server.service;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import org.springframework.boot.context.event.ApplicationReadyEvent;
+import org.springframework.cloud.skipper.domain.Deployer;
 import org.springframework.cloud.skipper.domain.Platform;
 import org.springframework.cloud.skipper.server.repository.DeployerRepository;
 import org.springframework.context.event.EventListener;
@@ -51,7 +53,25 @@ public class DeployerInitializationService {
 	@EventListener
 	@Transactional
 	public void initialize(ApplicationReadyEvent event) {
-		platforms.forEach(platform -> {
+		if (singleDeployerExists()) {
+			for (Platform platform: this.platforms) {
+				if (platform.getDeployers().size() == 1) {
+					List<Deployer> updatedDeployers = new ArrayList<>();
+					List<Deployer> deployers = platform.getDeployers();
+
+					Deployer existingDeployer = deployers.get(0);
+					if (existingDeployer.getName() != "default") {
+						Deployer defaultDeployer = new Deployer("default",
+								existingDeployer.getType(), existingDeployer.getAppDeployer());
+						defaultDeployer.setDescription(existingDeployer.getDescription());
+						updatedDeployers.add(defaultDeployer);
+					}
+					updatedDeployers.addAll(deployers);
+					platform.setDeployers(updatedDeployers);
+				}
+			}
+		}
+		this.platforms.forEach(platform -> {
 			platform.getDeployers().forEach(deployer -> {
 				this.deployerRepository.save(deployer);
 				logger.info(String.format(
@@ -60,5 +80,13 @@ public class DeployerInitializationService {
 						deployer.getName()));
 			});
 		});
+	}
+
+	private boolean singleDeployerExists() {
+		int deployersCount = 0;
+		for (Platform platform: this.platforms) {
+			deployersCount = deployersCount + platform.getDeployers().size();
+		}
+		return (deployersCount > 1) ? false : true;
 	}
 }

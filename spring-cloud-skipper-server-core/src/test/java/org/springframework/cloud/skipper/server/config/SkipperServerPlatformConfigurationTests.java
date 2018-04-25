@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 the original author or authors.
+ * Copyright 2017-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -44,11 +44,13 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * @author Donovan Muller
+ * @author Ilayaperumal Gopinathan
  */
 @RunWith(Suite.class)
 @Suite.SuiteClasses({
 		SkipperServerPlatformConfigurationTests.AllPlatformsConfigurationTest.class,
-		SkipperServerPlatformConfigurationTests.ExternalPlatformsOnlyConfigurationTest.class
+		SkipperServerPlatformConfigurationTests.ExternalPlatformsOnlyConfigurationTest.class,
+		SkipperServerPlatformConfigurationTests.SinglePlatformConfigurationTest.class
 })
 public class SkipperServerPlatformConfigurationTests {
 
@@ -63,6 +65,19 @@ public class SkipperServerPlatformConfigurationTests {
 		@Test
 		public void allPlatformsConfiguredTest() {
 			assertThat(platforms).extracting("name").containsExactly("Local", "Test");
+		}
+	}
+
+	@RunWith(SpringRunner.class)
+	@SpringBootTest(classes = TestConfig.class, properties = "spring.cloud.skipper.server.enableLocalPlatform=false")
+	public static class SinglePlatformConfigurationTest {
+
+		@Autowired
+		private List<Platform> platforms;
+
+		@Test
+		public void singlePlatformsConfiguredTest() {
+			assertThat(platforms.get(0).getDeployers()).extracting("name").containsExactly("default", "test");
 		}
 	}
 
