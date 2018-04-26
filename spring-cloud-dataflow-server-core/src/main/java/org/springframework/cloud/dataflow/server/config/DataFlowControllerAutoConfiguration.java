@@ -73,8 +73,8 @@ import org.springframework.cloud.dataflow.server.controller.JobStepExecutionProg
 import org.springframework.cloud.dataflow.server.controller.MetricsController;
 import org.springframework.cloud.dataflow.server.controller.RestControllerAdvice;
 import org.springframework.cloud.dataflow.server.controller.RootController;
+import org.springframework.cloud.dataflow.server.controller.RuntimeAppInstanceController;
 import org.springframework.cloud.dataflow.server.controller.RuntimeAppsController;
-import org.springframework.cloud.dataflow.server.controller.RuntimeAppsController.AppInstanceController;
 import org.springframework.cloud.dataflow.server.controller.SkipperAppRegistryController;
 import org.springframework.cloud.dataflow.server.controller.SkipperStreamDeploymentController;
 import org.springframework.cloud.dataflow.server.controller.StreamDefinitionController;
@@ -156,8 +156,8 @@ public class DataFlowControllerAutoConfiguration {
 
 	@Bean
 	@ConditionalOnBean({ StreamDefinitionRepository.class, StreamDeploymentRepository.class })
-	public AppInstanceController appInstanceController(StreamDeployer streamDeployer) {
-		return new AppInstanceController(streamDeployer);
+	public RuntimeAppInstanceController appInstanceController(StreamDeployer streamDeployer) {
+		return new RuntimeAppInstanceController(streamDeployer);
 	}
 
 	@Bean
@@ -169,7 +169,7 @@ public class DataFlowControllerAutoConfiguration {
 	@ConditionalOnBean(StreamDefinitionRepository.class)
 	public StreamDefinitionController streamDefinitionController(StreamDefinitionRepository repository,
 			StreamService streamService) {
-		return new StreamDefinitionController(repository, streamService);
+		return new StreamDefinitionController(streamService);
 	}
 
 	@Bean
@@ -191,8 +191,8 @@ public class DataFlowControllerAutoConfiguration {
 
 	@Bean
 	@ConditionalOnBean({ StreamDefinitionRepository.class, StreamDeploymentRepository.class })
-	public RuntimeAppsController runtimeAppsController(StreamDeployer streamDeployer, MetricStore metricStore) {
-		return new RuntimeAppsController(streamDeployer, metricStore);
+	public RuntimeAppsController runtimeAppsController(StreamDeployer streamDeployer) {
+		return new RuntimeAppsController(streamDeployer);
 	}
 
 	@Bean

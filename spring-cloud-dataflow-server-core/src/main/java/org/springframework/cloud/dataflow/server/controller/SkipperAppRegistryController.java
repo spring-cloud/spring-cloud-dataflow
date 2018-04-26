@@ -120,12 +120,12 @@ public class SkipperAppRegistryController {
 	}
 
 	/**
-	 * List app registrations. Optional type and search parameters can be passed to do
+	 * List app registrations. Optional type and findByNameLike parameters can be passed to do
 	 * filtering. Search parameter only filters by {@code AppRegistration} name field.
 	 *
 	 * @param pagedResourcesAssembler the resource assembler for app registrations
 	 * @param type the application type: source, sink, processor, task
-	 * @param search optional search parameter
+	 * @param search optional findByNameLike parameter
 	 * @return the list of registered applications
 	 */
 	@RequestMapping(method = RequestMethod.GET)

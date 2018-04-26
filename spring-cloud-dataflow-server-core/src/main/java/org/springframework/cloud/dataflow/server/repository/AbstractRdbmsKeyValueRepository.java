@@ -139,7 +139,12 @@ public abstract class AbstractRdbmsKeyValueRepository<D> implements PagingAndSor
 		return jdbcTemplate.query(query, rowMapper);
 	}
 
-	public Page<D> search(SearchPageable searchPageable) {
+	/**
+	 * Search for queries with a name like where clause.
+	 * @param searchPageable the pageable search query
+	 * @return pages query results
+	 */
+	public Page<D> findByNameLike(SearchPageable searchPageable) {
 		Assert.notNull(searchPageable, "searchPageable must not be null.");
 
 		final StringBuilder whereClause = new StringBuilder("WHERE ");
@@ -258,8 +263,7 @@ public abstract class AbstractRdbmsKeyValueRepository<D> implements PagingAndSor
 
 	private Page<D> queryForPageableResults(Pageable pageable, String selectClause, String tableName,
 			String whereClause, Object[] queryParam, long totalCount) {
-		// FIXME Possible performance improvement refactoring so factory isn't called
-		// every time.
+		// TODO Possible performance improvement refactoring so factory isn't called every time.
 		SqlPagingQueryProviderFactoryBean factoryBean = new SqlPagingQueryProviderFactoryBean();
 		factoryBean.setSelectClause(selectClause);
 		factoryBean.setFromClause(tableName);

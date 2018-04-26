@@ -363,13 +363,13 @@ public class LocalServerSecurityWithUsersFileTests {
 						TestUtils.toImmutableMap("page", "0", "size", "10") },
 
 				{ HttpMethod.GET, HttpStatus.FORBIDDEN, "/streams/definitions", manageOnlyUser,
-						TestUtils.toImmutableMap("search", "mysearch") },
+						TestUtils.toImmutableMap("findByNameLike", "mysearch") },
 				{ HttpMethod.GET, HttpStatus.OK, "/streams/definitions", viewOnlyUser,
-						TestUtils.toImmutableMap("search", "mysearch") },
+						TestUtils.toImmutableMap("findByNameLike", "mysearch") },
 				{ HttpMethod.GET, HttpStatus.FORBIDDEN, "/streams/definitions", createOnlyUser,
-						TestUtils.toImmutableMap("search", "mysearch") },
+						TestUtils.toImmutableMap("findByNameLike", "mysearch") },
 				{ HttpMethod.GET, HttpStatus.UNAUTHORIZED, "/streams/definitions", null,
-						TestUtils.toImmutableMap("search", "mysearch") },
+						TestUtils.toImmutableMap("findByNameLike", "mysearch") },
 
 				{ HttpMethod.POST, HttpStatus.FORBIDDEN, "/streams/definitions", manageOnlyUser,
 						TestUtils.toImmutableMap("name", "myname", "definition", "fooo | baaar") },

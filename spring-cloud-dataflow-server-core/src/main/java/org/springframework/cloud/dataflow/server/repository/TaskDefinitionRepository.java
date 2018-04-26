@@ -21,9 +21,11 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.repository.PagingAndSortingRepository;
 
 /**
+ * Repository to access {@link TaskDefinition}s.
+ *
  * @author Michael Minella
  * @author Gunnar Hillert
  */
 public interface TaskDefinitionRepository extends PagingAndSortingRepository<TaskDefinition, String> {
-	Page<TaskDefinition> search(SearchPageable searchPageable);
+	Page<TaskDefinition> findByNameLike(SearchPageable searchPageable);
 }

@@ -19,17 +19,12 @@ package org.springframework.cloud.dataflow.server.controller;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Locale;
-import java.util.Map;
 import java.util.concurrent.ExecutionException;
 
 import org.springframework.cloud.dataflow.rest.resource.AppInstanceStatusResource;
 import org.springframework.cloud.dataflow.rest.resource.AppStatusResource;
-import org.springframework.cloud.dataflow.server.controller.support.ApplicationsMetrics;
 import org.springframework.cloud.dataflow.server.controller.support.ControllerUtils;
-import org.springframework.cloud.dataflow.server.controller.support.MetricStore;
 import org.springframework.cloud.dataflow.server.stream.StreamDeployer;
 import org.springframework.cloud.deployer.spi.app.AppInstanceStatus;
 import org.springframework.cloud.deployer.spi.app.AppStatus;
@@ -44,7 +39,6 @@ import org.springframework.hateoas.ResourceAssembler;
 import org.springframework.hateoas.Resources;
 import org.springframework.hateoas.mvc.ResourceAssemblerSupport;
 import org.springframework.util.Assert;
-import org.springframework.util.ObjectUtils;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -71,26 +65,18 @@ public class RuntimeAppsController {
 		}
 	};
 
-	/**
-	 * Common stream deployer logics
-	 */
 	private final StreamDeployer streamDeployer;
 
 	private final ResourceAssembler<AppStatus, AppStatusResource> statusAssembler = new Assembler();
 
-	private final MetricStore metricStore;
-
 	/**
-	 * Instantiates a new runtime apps controller.
-	 *
-	 * @param streamDeployer the deployer this controller will use to get the status of deployed stream apps
-	 * @param metricStore the proxy to the metrics collector
+	 * Construct a new runtime apps controller.
+	 * @param streamDeployer the deployer this controller will use to get the status of
+	 * deployed stream apps
 	 */
-	public RuntimeAppsController(StreamDeployer streamDeployer, MetricStore metricStore) {
+	public RuntimeAppsController(StreamDeployer streamDeployer) {
 		Assert.notNull(streamDeployer, "StreamDeployer must not be null");
-		Assert.notNull(metricStore, "MetricStore must not be null");
 		this.streamDeployer = streamDeployer;
-		this.metricStore = metricStore;
 	}
 
 	@RequestMapping
@@ -99,50 +85,10 @@ public class RuntimeAppsController {
 
 		Page<AppStatus> statuses = streamDeployer.getAppStatuses(pageable);
 
-		enrichWithMetrics(statuses);
 		// finally, pass in pageable and tell how many items we have in all pages
-		return assembler.toResource(new PageImpl<>(statuses.getContent(), pageable, statuses.getTotalElements()), statusAssembler);
+		return assembler.toResource(new PageImpl<>(statuses.getContent(), pageable, statuses.getTotalElements()),
+				statusAssembler);
 
-	}
-
-	private void enrichWithMetrics(Page<AppStatus> statuses) {
-		List<ApplicationsMetrics> metricsIn = metricStore.getMetrics();
-		Map<String, ApplicationsMetrics.Instance> metricsInstanceMap = new HashMap<>();
-		for (ApplicationsMetrics am : metricsIn) {
-			for (ApplicationsMetrics.Application a : am.getApplications()) {
-				for (ApplicationsMetrics.Instance i : a.getInstances()) {
-					metricsInstanceMap.put(i.getGuid(), i);
-				}
-			}
-		}
-
-		for (AppStatus appStatus : statuses) {
-			Map<String, AppInstanceStatus> appInstanceStatusMap = appStatus.getInstances();
-			appInstanceStatusMap.forEach((k, appInstanceStatus) -> {
-				Map<String, String> attributes = appInstanceStatus.getAttributes();
-				if (attributes != null && !attributes.isEmpty()) {
-					String trackingKey = attributes.get("guid");
-					if (metricsInstanceMap.containsKey(trackingKey)) {
-						ApplicationsMetrics.Instance metricsAppInstance = metricsInstanceMap.get(trackingKey);
-						List<ApplicationsMetrics.Metric> metrics = metricsAppInstance.getMetrics();
-						if (metrics != null) {
-							for (ApplicationsMetrics.Metric m : metrics) {
-								if (ObjectUtils.nullSafeEquals("integration.channel.input.send.mean", m.getName())) {
-									appInstanceStatus.getAttributes()
-											.put("metrics.integration.channel.input.receiveRate",
-													String.format(Locale.US, "%.2f", m.getValue()));
-								}
-								else if (ObjectUtils
-										.nullSafeEquals("integration.channel.output.send.mean", m.getName())) {
-									appInstanceStatus.getAttributes().put("metrics.integration.channel.output.sendRate",
-											String.format(Locale.US, "%.2f", m.getValue()));
-								}
-							}
-						}
-					}
-				}
-			});
-		}
 	}
 
 	@RequestMapping("/{id}")
@@ -170,7 +116,8 @@ public class RuntimeAppsController {
 			AppStatusResource resource = new AppStatusResource(entity.getDeploymentId(),
 					ControllerUtils.mapState(entity.getState()).getKey());
 			List<AppInstanceStatusResource> instanceStatusResources = new ArrayList<>();
-			InstanceAssembler instanceAssembler = new InstanceAssembler(entity);
+			RuntimeAppInstanceController.InstanceAssembler instanceAssembler = new RuntimeAppInstanceController.InstanceAssembler(
+					entity);
 			List<AppInstanceStatus> instanceStatuses = new ArrayList<>(entity.getInstances().values());
 			Collections.sort(instanceStatuses, INSTANCE_SORTER);
 			for (AppInstanceStatus appInstanceStatus : instanceStatuses) {
@@ -181,63 +128,4 @@ public class RuntimeAppsController {
 		}
 	}
 
-	@RestController
-	@RequestMapping("/runtime/apps/{appId}/instances")
-	@ExposesResourceFor(AppInstanceStatusResource.class)
-	public static class AppInstanceController {
-
-		private final StreamDeployer streamDeployer;
-
-		public AppInstanceController(StreamDeployer streamDeployer) {
-			this.streamDeployer = streamDeployer;
-		}
-
-		@RequestMapping
-		public PagedResources<AppInstanceStatusResource> list(Pageable pageable, @PathVariable String appId,
-				PagedResourcesAssembler<AppInstanceStatus> assembler) {
-			AppStatus status = streamDeployer.getAppStatus(appId);
-			if (status.getState().equals(DeploymentState.unknown)) {
-				throw new NoSuchAppException(appId);
-			}
-			List<AppInstanceStatus> appInstanceStatuses = new ArrayList<>(status.getInstances().values());
-			Collections.sort(appInstanceStatuses, INSTANCE_SORTER);
-			return assembler.toResource(new PageImpl<>(appInstanceStatuses, pageable,
-					appInstanceStatuses.size()), new InstanceAssembler(status));
-		}
-
-		@RequestMapping("/{instanceId}")
-		public AppInstanceStatusResource display(@PathVariable String appId, @PathVariable String instanceId) {
-			AppStatus status = streamDeployer.getAppStatus(appId);
-			if (status.getState().equals(DeploymentState.unknown)) {
-				throw new NoSuchAppException(appId);
-			}
-			AppInstanceStatus appInstanceStatus = status.getInstances().get(instanceId);
-			if (appInstanceStatus == null) {
-				throw new NoSuchAppInstanceException(instanceId);
-			}
-			return new InstanceAssembler(status).toResource(appInstanceStatus);
-		}
-	}
-
-	private static class InstanceAssembler
-			extends ResourceAssemblerSupport<AppInstanceStatus, AppInstanceStatusResource> {
-
-		private final AppStatus owningApp;
-
-		InstanceAssembler(AppStatus owningApp) {
-			super(AppInstanceController.class, AppInstanceStatusResource.class);
-			this.owningApp = owningApp;
-		}
-
-		@Override
-		public AppInstanceStatusResource toResource(AppInstanceStatus entity) {
-			return createResourceWithId("/" + entity.getId(), entity, owningApp.getDeploymentId());
-		}
-
-		@Override
-		protected AppInstanceStatusResource instantiateResource(AppInstanceStatus entity) {
-			return new AppInstanceStatusResource(entity.getId(), ControllerUtils.mapState(entity.getState()).getKey(),
-					entity.getAttributes());
-		}
-	}
 }
