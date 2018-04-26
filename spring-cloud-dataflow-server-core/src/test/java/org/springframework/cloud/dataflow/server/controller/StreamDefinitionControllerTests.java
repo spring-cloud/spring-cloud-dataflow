@@ -22,7 +22,6 @@ import sun.misc.Unsafe;
 
 import org.springframework.beans.DirectFieldAccessor;
 import org.springframework.cloud.dataflow.core.StreamDefinition;
-import org.springframework.cloud.dataflow.server.repository.StreamDefinitionRepository;
 import org.springframework.cloud.dataflow.server.service.StreamService;
 
 import static org.mockito.Mockito.mock;
@@ -53,7 +52,6 @@ public class StreamDefinitionControllerTests {
 
 		DirectFieldAccessor accessor = new DirectFieldAccessor(controller);
 		accessor.setPropertyValue("streamService", streamService);
-		accessor.setPropertyValue("streamDefinitionRepository", mock(StreamDefinitionRepository.class));
 		return controller;
 	}
 

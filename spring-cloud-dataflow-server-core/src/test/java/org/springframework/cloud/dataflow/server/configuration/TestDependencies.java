@@ -53,6 +53,7 @@ import org.springframework.cloud.dataflow.server.controller.AppRegistryControlle
 import org.springframework.cloud.dataflow.server.controller.CompletionController;
 import org.springframework.cloud.dataflow.server.controller.MetricsController;
 import org.springframework.cloud.dataflow.server.controller.RestControllerAdvice;
+import org.springframework.cloud.dataflow.server.controller.RuntimeAppInstanceController;
 import org.springframework.cloud.dataflow.server.controller.RuntimeAppsController;
 import org.springframework.cloud.dataflow.server.controller.SkipperAppRegistryController;
 import org.springframework.cloud.dataflow.server.controller.SkipperStreamDeploymentController;
@@ -235,7 +236,7 @@ public class TestDependencies extends WebMvcConfigurationSupport {
 	@Bean
 	public StreamDefinitionController streamDefinitionController(StreamDefinitionRepository repository,
 			StreamService streamService) {
-		return new StreamDefinitionController(repository, streamService);
+		return new StreamDefinitionController(streamService);
 	}
 
 	@Bean
@@ -292,13 +293,13 @@ public class TestDependencies extends WebMvcConfigurationSupport {
 
 	@Bean
 	public RuntimeAppsController runtimeAppsController(MetricStore metricStore, StreamDeployer streamDeployer) {
-		return new RuntimeAppsController(streamDeployer, metricStore);
+		return new RuntimeAppsController(streamDeployer);
 	}
 
 	@Bean
 	@ConditionalOnBean({ StreamDefinitionRepository.class, StreamDeploymentRepository.class })
-	public RuntimeAppsController.AppInstanceController appInstanceController(StreamDeployer streamDeployer) {
-		return new RuntimeAppsController.AppInstanceController(streamDeployer);
+	public RuntimeAppInstanceController appInstanceController(StreamDeployer streamDeployer) {
+		return new RuntimeAppInstanceController(streamDeployer);
 	}
 
 	@Bean

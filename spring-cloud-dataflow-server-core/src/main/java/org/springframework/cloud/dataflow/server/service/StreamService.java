@@ -21,7 +21,10 @@ import java.util.Map;
 import org.springframework.cloud.dataflow.core.StreamDefinition;
 import org.springframework.cloud.dataflow.core.StreamDeployment;
 import org.springframework.cloud.dataflow.server.controller.support.InvalidStreamDefinitionException;
+import org.springframework.cloud.dataflow.server.repository.NoSuchStreamDefinitionException;
 import org.springframework.cloud.deployer.spi.app.DeploymentState;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 /**
  * Provide deploy, undeploy, info and state operations on the stream.
@@ -62,6 +65,17 @@ public interface StreamService {
 	void undeployStream(String name);
 
 	/**
+	 * Delete the stream, including undeloying.
+	 * @param name the name of the stream to delete
+	 */
+	void deleteStream(String name);
+
+	/**
+	 * Delete all streams, including undeploying.
+	 */
+	void deleteAll();
+
+	/**
 	 * Retrieve the deployment state for list of stream definitions.
 	 *
 	 * @param streamDefinitions the list of Stream definitions to calculate the deployment states.
@@ -75,4 +89,27 @@ public interface StreamService {
 	 * @return the stream deployment information
 	 */
 	StreamDeployment info(String streamName);
+
+	/**
+	 * Find streams related to the given stream name.
+	 * @param name name of the stream
+	 * @param nested if should recursively findByNameLike for related stream definitions
+	 * @return a list of related stream definitions
+	 */
+	List<StreamDefinition> findRelatedStreams(String name, boolean nested);
+
+	/**
+	 * Find stream definitions where the findByNameLike parameter
+	 * @param searchName the findByNameLike parameter to use
+	 * @return Page of stream definitions
+	 */
+	Page<StreamDefinition> findDefinitionByNameLike(Pageable pageable, String searchName);
+
+	/**
+	 * Find a stream definition by name.
+	 * @param streamDefinitionName the name of the stream definition
+	 * @return the stream definition
+	 * @throws NoSuchStreamDefinitionException if the definition can not be found.
+	 */
+	StreamDefinition findOne(String streamDefinitionName);
 }

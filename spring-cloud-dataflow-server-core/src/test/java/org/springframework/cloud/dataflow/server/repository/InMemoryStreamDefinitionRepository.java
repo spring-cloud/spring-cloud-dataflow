@@ -123,7 +123,7 @@ public class InMemoryStreamDefinitionRepository implements StreamDefinitionRepos
 	}
 
 	@Override
-	public Page<StreamDefinition> search(SearchPageable searchPageable) {
+	public Page<StreamDefinition> findByNameLike(SearchPageable searchPageable) {
 		throw new UnsupportedOperationException();
 	}
 
