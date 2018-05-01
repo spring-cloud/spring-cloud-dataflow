@@ -15,13 +15,10 @@
  */
 package org.springframework.cloud.dataflow.server.service.impl;
 
-import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.charset.Charset;
-import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -31,7 +28,6 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.yaml.snakeyaml.DumperOptions;
-import org.zeroturnaround.zip.ZipUtil;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -48,6 +44,7 @@ import org.springframework.cloud.dataflow.server.repository.StreamDefinitionRepo
 import org.springframework.cloud.dataflow.server.service.SkipperStreamService;
 import org.springframework.cloud.dataflow.server.support.MockUtils;
 import org.springframework.cloud.dataflow.server.support.PlatformUtils;
+import org.springframework.cloud.dataflow.server.support.SkipperPackageUtils;
 import org.springframework.cloud.dataflow.server.support.TestResourceUtils;
 import org.springframework.cloud.skipper.ReleaseNotFoundException;
 import org.springframework.cloud.skipper.client.SkipperClient;
@@ -58,9 +55,6 @@ import org.springframework.cloud.skipper.domain.PackageIdentifier;
 import org.springframework.cloud.skipper.domain.Release;
 import org.springframework.cloud.skipper.domain.UpgradeRequest;
 import org.springframework.cloud.skipper.domain.UploadRequest;
-import org.springframework.cloud.skipper.io.DefaultPackageReader;
-import org.springframework.cloud.skipper.io.PackageReader;
-import org.springframework.cloud.skipper.io.TempFileUtils;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
@@ -145,7 +139,7 @@ public class DefaultSkipperStreamServiceIntegrationTests {
 		ArgumentCaptor<UploadRequest> uploadRequestCaptor = ArgumentCaptor.forClass(UploadRequest.class);
 		verify(skipperClient).upload(uploadRequestCaptor.capture());
 
-		Package pkg = loadPackageFromBytes(uploadRequestCaptor);
+		Package pkg = SkipperPackageUtils.loadPackageFromBytes(uploadRequestCaptor);
 
 		// ExpectedYaml will have version: 1.2.0.RELEASE and not 1.1.1.RELEASE
 		String expectedYaml = StreamUtils.copyToString(
@@ -276,18 +270,4 @@ public class DefaultSkipperStreamServiceIntegrationTests {
 		StreamDefinition streamDefinition = new StreamDefinition("ticktock", "time | log");
 		this.streamDefinitionRepository.save(streamDefinition);
 	}
-
-	private Package loadPackageFromBytes(ArgumentCaptor<UploadRequest> uploadRequestCaptor) throws IOException {
-		PackageReader packageReader = new DefaultPackageReader();
-		String packageName = uploadRequestCaptor.getValue().getName();
-		String packageVersion = uploadRequestCaptor.getValue().getVersion();
-		byte[] packageBytes = uploadRequestCaptor.getValue().getPackageFileAsBytes();
-		Path targetPath = TempFileUtils.createTempDirectory("service" + packageName);
-		File targetFile = new File(targetPath.toFile(), packageName + "-" + packageVersion + ".zip");
-		StreamUtils.copy(packageBytes, new FileOutputStream(targetFile));
-		ZipUtil.unpack(targetFile, targetPath.toFile());
-		return packageReader
-				.read(new File(targetPath.toFile(), packageName + "-" + packageVersion));
-	}
-
 }

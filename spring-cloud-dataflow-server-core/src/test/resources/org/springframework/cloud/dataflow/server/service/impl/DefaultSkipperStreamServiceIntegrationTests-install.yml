@@ -4,8 +4,8 @@ spec:
   resource: maven://org.springframework.cloud.stream.app:log-sink-rabbit
   applicationProperties:
     spring.metrics.export.triggers.application.includes: integration**
-    spring.cloud.dataflow.stream.app.label: log
     spring.cloud.stream.metrics.key: ticktock.log.${spring.cloud.application.guid}
+    spring.cloud.dataflow.stream.app.label: log
     spring.cloud.stream.bindings.input.group: ticktock
     spring.cloud.stream.metrics.properties: spring.application.name,spring.application.index,spring.cloud.application.*,spring.cloud.dataflow.*
     spring.cloud.dataflow.stream.name: ticktock
