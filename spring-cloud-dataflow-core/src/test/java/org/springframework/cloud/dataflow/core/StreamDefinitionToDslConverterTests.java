@@ -42,7 +42,7 @@ public class StreamDefinitionToDslConverterTests {
 
 	@Test
 	public void quotesInParams2() {
-		reverseDslTest("http --port=9700 | filter --expression=payload.matches('hello world') | file", 3);
+		reverseDslTest("http --port=9700 | filter --expression=\"payload.matches('hello world')\" | file", 3);
 	}
 
 	@Test
@@ -167,7 +167,6 @@ public class StreamDefinitionToDslConverterTests {
 
 		StreamDefinition streamDefinition = new StreamDefinition("streamName", "foo | bar");
 
-
 		StreamAppDefinition foo = streamDefinition.getAppDefinitions().get(0);
 		StreamAppDefinition bar = streamDefinition.getAppDefinitions().get(1);
 
@@ -175,6 +174,8 @@ public class StreamDefinitionToDslConverterTests {
 				.setProperty("p1", "a b")
 				.setProperty("p2", "'c d'")
 				.setProperty("p3", "ef")
+				.setProperty("p4", "'i' 'j'")
+				.setProperty("p5", "\"k l\"")
 				.build("stream2");
 
 		StreamAppDefinition bar2 = StreamAppDefinition.Builder.from(bar)
@@ -183,7 +184,7 @@ public class StreamDefinitionToDslConverterTests {
 				.setProperty("p3", "ef")
 				.build("stream2");
 
-		assertEquals("foo --p1='a b' --p2='c d' --p3=ef | bar --p1='a b' --p2='c d' --p3=ef",
+		assertEquals("foo --p1='a b' --p2=\"'c d'\" --p3=ef --p4=\"'i' 'j'\" --p5=\"k l\" | bar --p1='a b' --p2=\"'c d'\" --p3=ef",
 				new StreamDefinitionToDslConverter().toDsl(Arrays.asList(foo2, bar2)));
 	}
 
