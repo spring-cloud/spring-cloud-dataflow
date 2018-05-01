@@ -105,6 +105,8 @@ public class SkipperStreamDeployer implements StreamDeployer {
 
 	private final ForkJoinPool forkJoinPool;
 
+	private final YamlEscapeUtility yamlEscapeUtility;
+
 	public SkipperStreamDeployer(SkipperClient skipperClient, StreamDefinitionRepository streamDefinitionRepository,
 			AppRegistryService appRegistryService, ForkJoinPool forkJoinPool) {
 		Assert.notNull(skipperClient, "SkipperClient can not be null");
@@ -115,6 +117,7 @@ public class SkipperStreamDeployer implements StreamDeployer {
 		this.streamDefinitionRepository = streamDefinitionRepository;
 		this.appRegistryService = appRegistryService;
 		this.forkJoinPool = forkJoinPool;
+		this.yamlEscapeUtility = new YamlEscapeUtility();
 	}
 
 	public static List<AppStatus> deserializeAppStatus(String platformStatus) {
@@ -331,8 +334,8 @@ public class SkipperStreamDeployer implements StreamDeployer {
 		// Add spec
 		String resourceWithoutVersion = ResourceUtils.getResourceWithoutVersion(appDeploymentRequest.getResource());
 		specMap.put("resource", resourceWithoutVersion);
-		specMap.put("applicationProperties", appDeploymentRequest.getDefinition().getProperties());
-		specMap.put("deploymentProperties", appDeploymentRequest.getDeploymentProperties());
+		specMap.put("applicationProperties", yamlEscapeUtility.escapeSingleBackslashInProperties(appDeploymentRequest.getDefinition().getProperties()));
+		specMap.put("deploymentProperties", yamlEscapeUtility.escapeSingleBackslashInProperties(appDeploymentRequest.getDeploymentProperties()));
 		String version = ResourceUtils.getResourceVersion(appDeploymentRequest.getResource());
 		// Add version, including possible override via deploymentProperties - hack to store version in cmdline args
 		if (appDeploymentRequest.getCommandlineArguments().size() == 1) {

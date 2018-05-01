@@ -15,6 +15,7 @@
  */
 package org.springframework.cloud.dataflow.server.stream;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -31,6 +32,7 @@ import org.springframework.cloud.dataflow.registry.service.AppRegistryService;
 import org.springframework.cloud.dataflow.rest.SkipperStream;
 import org.springframework.cloud.dataflow.server.repository.StreamDefinitionRepository;
 import org.springframework.cloud.dataflow.server.support.MockUtils;
+import org.springframework.cloud.dataflow.server.support.SkipperPackageUtils;
 import org.springframework.cloud.deployer.resource.maven.MavenResource;
 import org.springframework.cloud.deployer.spi.app.AppStatus;
 import org.springframework.cloud.deployer.spi.app.DeploymentState;
@@ -44,6 +46,7 @@ import org.springframework.cloud.skipper.domain.Dependency;
 import org.springframework.cloud.skipper.domain.Deployer;
 import org.springframework.cloud.skipper.domain.Info;
 import org.springframework.cloud.skipper.domain.InstallRequest;
+import org.springframework.cloud.skipper.domain.Package;
 import org.springframework.cloud.skipper.domain.Release;
 import org.springframework.cloud.skipper.domain.Status;
 import org.springframework.cloud.skipper.domain.UploadRequest;
@@ -63,8 +66,69 @@ import static org.mockito.Mockito.when;
  * @author Soby Chacko
  * @author Ilayaperumal Gopinathan
  * @author Glenn Renfro
+ * @author Christian Tzolov
  */
 public class SkipperStreamDeployerTests {
+
+	@Test
+	public void testEscapeBackslashProperties() throws IOException {
+
+		AppRegistryService appRegistryService = mock(AppRegistryService.class);
+
+		when(appRegistryService.appExist(eq("time"), eq(ApplicationType.source), eq("1.2.0.RELEASE")))
+				.thenReturn(true);
+		when(appRegistryService.appExist(eq("log"), eq(ApplicationType.sink), eq("1.2.0.RELEASE")))
+				.thenReturn(true);
+
+
+		HashMap<String, String> timeAppProps = new HashMap<>();
+		timeAppProps.put("spring.cloud.dataflow.stream.app.type", "source");
+
+		// Set the properties for:
+		// time --foo.expression=\d --bar=\d --complex.expression="#jsonPath(payload,'$.name') matches '\d*'"
+		timeAppProps.put("foo.expression", "\\d");
+		timeAppProps.put("bar", "\\d");
+		timeAppProps.put("complex.expression", "#jsonPath(payload,'$.name') matches '\\d*'");
+		timeAppProps.put("bar.expression", "\\d \\\\ \\0 \\a \\b \\t \\n \\v \\f \\r \\e \\N \\_ \\L \\P \\");
+
+		AppDefinition timeAppDefinition = new AppDefinition("time", timeAppProps);
+		MavenResource timeResource = new MavenResource.Builder()
+				.artifactId("time-source-rabbit").groupId("org.springframework.cloud.stream.app")
+				.version("1.2.0.RELEASE").build();
+		AppDeploymentRequest timeAppDeploymentRequest = new AppDeploymentRequest(timeAppDefinition, timeResource);
+
+		List<AppDeploymentRequest> appDeploymentRequests = Arrays.asList(timeAppDeploymentRequest);
+
+		Map<String, String> skipperDeployerProperties = new HashMap<>();
+		skipperDeployerProperties.put(SkipperStream.SKIPPER_PACKAGE_VERSION, "1.0.1");
+
+		StreamDeploymentRequest streamDeploymentRequest = new StreamDeploymentRequest("test1",
+				"time | log",
+				appDeploymentRequests,
+				skipperDeployerProperties);
+
+		SkipperClient skipperClient = MockUtils.createSkipperClientMock();
+
+		SkipperStreamDeployer skipperStreamDeployer = new SkipperStreamDeployer(skipperClient,
+				mock(StreamDefinitionRepository.class), appRegistryService, mock(ForkJoinPool.class));
+
+		skipperStreamDeployer.deployStream(streamDeploymentRequest);
+
+		ArgumentCaptor<UploadRequest> uploadRequestCaptor = ArgumentCaptor.forClass(UploadRequest.class);
+		verify(skipperClient).upload(uploadRequestCaptor.capture());
+		assertThat(uploadRequestCaptor.getValue()).isNotNull();
+		assertThat(uploadRequestCaptor.getValue().getName()).isEqualTo("test1");
+		assertThat(uploadRequestCaptor.getValue().getVersion()).isEqualTo("1.0.1");
+
+		Package pkg = SkipperPackageUtils.loadPackageFromBytes(uploadRequestCaptor);
+		Package timePackage = pkg.getDependencies().get(0);
+
+		assertThat(timePackage).isNotNull();
+		assertThat(timePackage.getConfigValues().getRaw()).contains("foo.expression: \\\\d");
+		assertThat(timePackage.getConfigValues().getRaw()).contains("bar: \\d");
+		assertThat(timePackage.getConfigValues().getRaw()).contains("complex.expression: '#jsonPath(payload,''$.name'') matches ''\\\\d*'''");
+		assertThat(timePackage.getConfigValues().getRaw()).contains("bar.expression: \\\\d \\\\ \\0 \\a \\b \\t \\n \\v \\f \\r \\e \\N \\_ \\L \\P \\");
+	}
 
 	@Test
 	public void testInstallUploadProperties() {
@@ -116,7 +180,8 @@ public class SkipperStreamDeployerTests {
 		try {
 			skipperStreamDeployer.deployStream(streamDeploymentRequest);
 			fail();
-		} catch (IllegalArgumentException expected) {
+		}
+		catch (IllegalArgumentException expected) {
 			assertThat(expected).hasMessage("No platform named 'badPlatform'");
 		}
 	}
@@ -139,7 +204,8 @@ public class SkipperStreamDeployerTests {
 		try {
 			skipperStreamDeployer.deployStream(streamDeploymentRequest);
 			fail();
-		} catch (IllegalArgumentException expected) {
+		}
+		catch (IllegalArgumentException expected) {
 			assertThat(expected).hasMessage("No platforms configured");
 		}
 	}
@@ -209,8 +275,6 @@ public class SkipperStreamDeployerTests {
 		skipperStreamDeployer.deployStream(streamDeploymentRequest);
 	}
 
-
-
 	@Test
 	public void testStateOfUndefinedUndeployedStream() {
 
@@ -262,7 +326,7 @@ public class SkipperStreamDeployerTests {
 	}
 
 	@Test
-	public void testUndepoySkippedForUndefinedStream() {
+	public void testUndeploySkippedForUndefinedStream() {
 		AppRegistryService appRegistryService = mock(AppRegistryService.class);
 		SkipperClient skipperClient = mock(SkipperClient.class);
 		StreamDefinitionRepository streamDefinitionRepository = mock(StreamDefinitionRepository.class);
@@ -280,7 +344,7 @@ public class SkipperStreamDeployerTests {
 	}
 
 	@Test
-	public void testUndepoyForDefinedStream() {
+	public void testUndeployForDefinedStream() {
 		AppRegistryService appRegistryService = mock(AppRegistryService.class);
 		SkipperClient skipperClient = mock(SkipperClient.class);
 		StreamDefinitionRepository streamDefinitionRepository = mock(StreamDefinitionRepository.class);
