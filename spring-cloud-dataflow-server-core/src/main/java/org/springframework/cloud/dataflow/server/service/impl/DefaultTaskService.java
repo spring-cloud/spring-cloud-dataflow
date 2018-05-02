@@ -70,6 +70,7 @@ import org.springframework.util.StringUtils;
  * @author Ilayaperumal Gopinathan
  * @author Michael Wirth
  */
+@Transactional
 public class DefaultTaskService implements TaskService {
 
 	private static final String DATAFLOW_SERVER_URI_KEY = "dataflowServerUri";
