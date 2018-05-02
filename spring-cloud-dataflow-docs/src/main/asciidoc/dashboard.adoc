@@ -98,6 +98,7 @@ The Streams tab has two child tabs: Definitions and Create Stream. The following
 
 * <<dashboard-stream-definitions>>
 * <<dashboard-flo-streams-designer>>
+* <<dashboard-stream-deploy>>
 
 
 
@@ -141,6 +142,29 @@ The following image shows the Flo designer in use:
 
 .Flo for Spring Cloud Data Flow
 image::{dataflow-asciidoc}/images/dataflow-flo-create-stream.png[Flo for Spring Cloud Data Flo, scaledwidth="100%"]
+
+
+
+[[dashboard-stream-deploy]]
+=== Deploying a Stream
+
+The stream deploy page include tabs that provide different ways to setup the deployment properties and deploy the stream.
+The following screenshots shows the stream deploy page for `foobar` (`time | log`).
+
+You can define deployments properties using:
+
+* Form builder tab: a builder which help you to define deployment properties (deployer, application properties...)
+* Free text tab: a free textarea (key/value pairs)
+
+You can switch between the both views, the form builder provides a more stronger validation of the inputs.
+
+.The following image shows the form builder
+image::{dataflow-asciidoc}/images/dataflow-stream-deploy-builder.png[Form builder, scaledwidth="100%"]
+
+.The following image shows the same properties in the free text
+image::{dataflow-asciidoc}/images/dataflow-stream-deploy-freetext.png[Free text, scaledwidth="100%"]
+
+
 
 [dashboard-flo-streams-designer-fanin-fanout]]
 === Creating Fan-In/Fan-Out Streams
