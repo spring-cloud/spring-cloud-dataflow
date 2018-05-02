@@ -23,11 +23,13 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.cloud.dataflow.core.StreamDefinition;
 import org.springframework.cloud.dataflow.core.StreamDeployment;
+import org.springframework.cloud.dataflow.rest.UpdateStreamRequest;
 import org.springframework.cloud.dataflow.server.ConditionalOnSkipperEnabled;
 import org.springframework.cloud.dataflow.server.config.features.FeaturesProperties;
 import org.springframework.cloud.dataflow.server.configuration.TestDependencies;
 import org.springframework.cloud.dataflow.server.repository.StreamDefinitionRepository;
 import org.springframework.cloud.dataflow.server.repository.StreamDeploymentRepository;
+import org.springframework.cloud.dataflow.server.service.SkipperStreamService;
 import org.springframework.cloud.dataflow.server.stream.SkipperStreamDeployer;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
@@ -49,7 +51,7 @@ public class DefaultSkipperStreamServiceUpgradeStreamTests {
 	private StreamDefinitionRepository streamDefinitionRepository;
 
 	@Autowired
-	private DefaultSkipperStreamService streamService;
+	private SkipperStreamService streamService;
 
 	@MockBean
 	@ConditionalOnSkipperEnabled
@@ -66,8 +68,9 @@ public class DefaultSkipperStreamServiceUpgradeStreamTests {
 	public void verifyUpgradeStream() {
 		when(streamDefinitionRepository.findOne("test2")).thenReturn(streamDefinition2);
 		when(streamDeploymentRepository.findOne(streamDeployment2.getStreamName())).thenReturn(streamDeployment2);
-		streamService.updateStream(streamDeployment2.getStreamName(), streamDeployment2.getStreamName(),
-				null, null);
+
+		final UpdateStreamRequest updateStreamRequest = new UpdateStreamRequest(streamDeployment2.getStreamName(), null, null);
+		streamService.updateStream(streamDeployment2.getStreamName(), updateStreamRequest);
 		verify(this.skipperStreamDeployer, times(1))
 				.upgradeStream(this.streamDeployment2.getStreamName(),
 						null, "log:\n" +

@@ -31,10 +31,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.cloud.dataflow.core.ApplicationType;
 import org.springframework.cloud.dataflow.core.StreamDefinition;
+import org.springframework.cloud.dataflow.registry.AppRegistryCommon;
 import org.springframework.cloud.dataflow.registry.service.AppRegistryService;
 import org.springframework.cloud.dataflow.server.config.features.FeaturesProperties;
 import org.springframework.cloud.dataflow.server.configuration.TestDependencies;
 import org.springframework.cloud.dataflow.server.repository.StreamDefinitionRepository;
+import org.springframework.cloud.dataflow.server.stream.SkipperStreamDeployer;
 import org.springframework.cloud.dataflow.server.support.PlatformUtils;
 import org.springframework.cloud.dataflow.server.support.TestResourceUtils;
 import org.springframework.test.context.TestPropertySource;
@@ -56,7 +58,13 @@ import static org.assertj.core.api.Assertions.fail;
 public class DefaultSkipperStreamServiceUpdateTests {
 
 	@Autowired
-	private DefaultSkipperStreamService streamService;
+	private SkipperStreamDeployer skipperStreamDeployer;
+
+	@Autowired
+	AppDeploymentRequestCreator appDeploymentRequestCreator;
+
+	@Autowired
+	private AppRegistryCommon appRegistry;
 
 	@Autowired
 	private StreamDefinitionRepository streamDefinitionRepository;
@@ -91,6 +99,9 @@ public class DefaultSkipperStreamServiceUpdateTests {
 
 	public void testCreateUpdateRequests() throws IOException {
 
+		DefaultSkipperStreamService streamService = new DefaultSkipperStreamService(streamDefinitionRepository,
+				skipperStreamDeployer,
+				appDeploymentRequestCreator, appRegistry);
 		StreamDefinition streamDefinition = new StreamDefinition("test", "time | log");
 		this.streamDefinitionRepository.save(streamDefinition);
 		Map<String, String> updateProperties = new HashMap<>();

@@ -30,6 +30,7 @@ import org.springframework.cloud.dataflow.server.stream.AppDeployerStreamDeploye
 import org.springframework.cloud.dataflow.server.stream.StreamDeploymentRequest;
 import org.springframework.cloud.deployer.spi.app.DeploymentState;
 import org.springframework.cloud.deployer.spi.core.AppDeploymentRequest;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Assert;
 
 /**
@@ -39,6 +40,7 @@ import org.springframework.util.Assert;
  * @author Ilayaperumal Gopinathan
  * @author Christian Tzolov
  */
+@Transactional
 public class AppDeployerStreamService extends AbstractStreamService {
 
 	/**

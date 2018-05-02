@@ -36,6 +36,7 @@ import org.springframework.cloud.dataflow.registry.AppRegistryCommon;
 import org.springframework.cloud.dataflow.rest.SkipperStream;
 import org.springframework.cloud.dataflow.rest.UpdateStreamRequest;
 import org.springframework.cloud.dataflow.rest.util.DeploymentPropertiesUtils;
+import org.springframework.cloud.dataflow.server.controller.support.ArgumentSanitizer;
 import org.springframework.cloud.dataflow.server.repository.NoSuchStreamDefinitionException;
 import org.springframework.cloud.dataflow.server.repository.StreamDefinitionRepository;
 import org.springframework.cloud.dataflow.server.service.SkipperStreamService;
@@ -49,7 +50,9 @@ import org.springframework.cloud.skipper.domain.Release;
 import org.springframework.cloud.skipper.domain.SpringCloudDeployerApplicationManifest;
 import org.springframework.cloud.skipper.domain.SpringCloudDeployerApplicationManifestReader;
 import org.springframework.cloud.skipper.domain.SpringCloudDeployerApplicationSpec;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Assert;
+import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
 /**
@@ -59,10 +62,13 @@ import org.springframework.util.StringUtils;
  * @author Ilayaperumal Gopinathan
  * @author Christian Tzolov
  */
+@Transactional
 public class DefaultSkipperStreamService extends AbstractStreamService implements SkipperStreamService {
 
 	public static final String DEFAULT_SKIPPER_PACKAGE_VERSION = "1.0.0";
+
 	private static Log logger = LogFactory.getLog(DefaultSkipperStreamService.class);
+
 	/**
 	 * The repository this controller will use for stream CRUD operations.
 	 */
@@ -70,16 +76,19 @@ public class DefaultSkipperStreamService extends AbstractStreamService implement
 
 	private final AppDeploymentRequestCreator appDeploymentRequestCreator;
 
+	private final ArgumentSanitizer argumentSanitizer;
+
 	public DefaultSkipperStreamService(StreamDefinitionRepository streamDefinitionRepository,
 			SkipperStreamDeployer skipperStreamDeployer,
-			AppDeploymentRequestCreator appDeploymentRequestCreator, AppRegistryCommon appRegistryCommon) {
+			AppDeploymentRequestCreator appDeploymentRequestCreator, AppRegistryCommon appRegistry) {
 
-		super(streamDefinitionRepository, appRegistryCommon);
+		super(streamDefinitionRepository, appRegistry);
 
 		Assert.notNull(skipperStreamDeployer, "SkipperStreamDeployer must not be null");
 		Assert.notNull(appDeploymentRequestCreator, "AppDeploymentRequestCreator must not be null");
 		this.skipperStreamDeployer = skipperStreamDeployer;
 		this.appDeploymentRequestCreator = appDeploymentRequestCreator;
+		this.argumentSanitizer = new ArgumentSanitizer();
 	}
 
 	/**
@@ -149,7 +158,7 @@ public class DefaultSkipperStreamService extends AbstractStreamService implement
 			StreamAppDefinition.Builder appDefinitionBuilder = StreamAppDefinition.Builder.from(appDefinition);
 			SpringCloudDeployerApplicationManifest applicationManifest = appManifestMap.get(appDefinition.getName());
 			// overrides app definition properties with those from the release manifest
-			appDefinitionBuilder.setProperties(applicationManifest.getSpec().getApplicationProperties());
+			appDefinitionBuilder.setProperties(sanitize(applicationManifest.getSpec().getApplicationProperties()));
 			updatedStreamAppDefinitions.addLast(appDefinitionBuilder.build(streamDefinition.getName()));
 		}
 
@@ -162,6 +171,19 @@ public class DefaultSkipperStreamService extends AbstractStreamService implement
 		// Note: Not transactional and can lead to loosing the stream definition
 		this.streamDefinitionRepository.delete(updatedStreamDefinition);
 		this.streamDefinitionRepository.save(updatedStreamDefinition);
+	}
+
+	/**
+	 * For all sensitive properties (e.g. key names containing words like password, secret,
+	 * key, token) replace the value with '*****' string
+	 */
+	private Map<String, String> sanitize(Map<String, String> properties) {
+		if (!CollectionUtils.isEmpty(properties)) {
+			for (Map.Entry<String, String> entry : properties.entrySet()) {
+				entry.setValue(this.argumentSanitizer.sanitize(entry.getKey(), entry.getValue()));
+			}
+		}
+		return properties;
 	}
 
 	@Override

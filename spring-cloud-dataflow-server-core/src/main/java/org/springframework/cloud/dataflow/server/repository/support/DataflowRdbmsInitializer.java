@@ -16,6 +16,7 @@
 
 package org.springframework.cloud.dataflow.server.repository.support;
 
+import java.sql.Connection;
 import java.sql.SQLException;
 
 import javax.sql.DataSource;
@@ -132,11 +133,25 @@ public final class DataflowRdbmsInitializer implements InitializingBean {
 	}
 
 	private String getDatabaseType(DataSource dataSource) {
+		Connection connection = null;
+
 		try {
-			return DatabaseDriver.fromJdbcUrl(dataSource.getConnection().getMetaData().getURL()).getId();
+			connection = dataSource.getConnection();
+			return DatabaseDriver.fromJdbcUrl(connection.getMetaData().getURL()).getId();
 		}
 		catch (SQLException ex) {
 			throw new IllegalStateException("Unable to detect database type", ex);
+		}
+		finally {
+			if (connection != null) {
+				try {
+					connection.close();
+				}
+				catch (SQLException e)
+				{
+					throw new IllegalStateException("Unable to detect database type", e);
+				}
+			}
 		}
 	}
 }

@@ -55,7 +55,7 @@ import org.springframework.cloud.task.repository.support.TaskRepositoryInitializ
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.io.ResourceLoader;
-import org.springframework.jdbc.datasource.DataSourceTransactionManager;
+import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 
 /**
@@ -64,6 +64,7 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
  * @author Glenn Renfro
  * @author Michael Minella
  * @author Ilayaperumal Gopinathan
+ * @author Gunnar Hillert
  */
 @Configuration
 @ConditionalOnProperty(prefix = FeaturesProperties.FEATURES_PREFIX, name = FeaturesProperties.TASKS_ENABLED, matchIfMissing = true)
@@ -132,7 +133,7 @@ public class TaskConfiguration {
 
 		@Bean
 		public JobRepositoryFactoryBean jobRepositoryFactoryBeanForServer(DataSource dataSource,
-				DataSourceTransactionManager dataSourceTransactionManager) {
+				PlatformTransactionManager dataSourceTransactionManager) {
 			JobRepositoryFactoryBean repositoryFactoryBean = new JobRepositoryFactoryBean();
 			repositoryFactoryBean.setDataSource(dataSource);
 			repositoryFactoryBean.setTransactionManager(dataSourceTransactionManager);
@@ -167,10 +168,10 @@ public class TaskConfiguration {
 
 		@Bean
 		public JobRepositoryFactoryBean jobRepositoryFactoryBean(DataSource dataSource,
-				DataSourceTransactionManager dataSourceTransactionManager) {
+				PlatformTransactionManager platformTransactionManager) {
 			JobRepositoryFactoryBean repositoryFactoryBean = new JobRepositoryFactoryBean();
 			repositoryFactoryBean.setDataSource(dataSource);
-			repositoryFactoryBean.setTransactionManager(dataSourceTransactionManager);
+			repositoryFactoryBean.setTransactionManager(platformTransactionManager);
 			return repositoryFactoryBean;
 		}
 
