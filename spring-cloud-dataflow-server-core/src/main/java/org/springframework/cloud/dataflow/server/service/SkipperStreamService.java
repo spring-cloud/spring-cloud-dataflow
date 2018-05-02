@@ -68,4 +68,5 @@ public interface SkipperStreamService extends StreamService {
 	 * @return list of supported deployment platforms
 	 */
 	Collection<Deployer> platformList();
+
 }

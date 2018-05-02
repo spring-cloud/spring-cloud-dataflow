@@ -50,6 +50,7 @@ import static org.assertj.core.api.Assertions.fail;
  * @author Mark Pollack
  * @author Christian Tzolov
  * @author Ilayaperumal Gopinathan
+ * @author Gunnar Hillert
  */
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = TestDependencies.class)

@@ -41,6 +41,7 @@ import static org.mockito.Mockito.when;
 
 /**
  * @author Mark Pollack
+ * @author Gunnar Hillert
  */
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = TestDependencies.class)
