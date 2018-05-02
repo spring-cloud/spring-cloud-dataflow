@@ -16,7 +16,9 @@
 package org.springframework.cloud.dataflow.server.service;
 
 import java.util.Collection;
+import java.util.Map;
 
+import org.springframework.cloud.dataflow.core.StreamDefinition;
 import org.springframework.cloud.dataflow.rest.UpdateStreamRequest;
 import org.springframework.cloud.skipper.domain.Deployer;
 import org.springframework.cloud.skipper.domain.Release;
@@ -68,4 +70,6 @@ public interface SkipperStreamService extends StreamService {
 	 * @return list of supported deployment platforms
 	 */
 	Collection<Deployer> platformList();
+
+	String convertPropertiesToSkipperYaml(StreamDefinition streamDefinition, Map<String, String> updateProperties);
 }

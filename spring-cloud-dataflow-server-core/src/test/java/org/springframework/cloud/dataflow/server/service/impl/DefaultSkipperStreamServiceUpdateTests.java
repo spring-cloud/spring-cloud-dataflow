@@ -35,6 +35,7 @@ import org.springframework.cloud.dataflow.registry.service.AppRegistryService;
 import org.springframework.cloud.dataflow.server.config.features.FeaturesProperties;
 import org.springframework.cloud.dataflow.server.configuration.TestDependencies;
 import org.springframework.cloud.dataflow.server.repository.StreamDefinitionRepository;
+import org.springframework.cloud.dataflow.server.service.SkipperStreamService;
 import org.springframework.cloud.dataflow.server.support.PlatformUtils;
 import org.springframework.cloud.dataflow.server.support.TestResourceUtils;
 import org.springframework.test.context.TestPropertySource;
@@ -48,6 +49,7 @@ import static org.assertj.core.api.Assertions.fail;
  * @author Mark Pollack
  * @author Christian Tzolov
  * @author Ilayaperumal Gopinathan
+ * @author Gunnar Hillert
  */
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = TestDependencies.class)
@@ -56,7 +58,7 @@ import static org.assertj.core.api.Assertions.fail;
 public class DefaultSkipperStreamServiceUpdateTests {
 
 	@Autowired
-	private DefaultSkipperStreamService streamService;
+	private SkipperStreamService streamService;
 
 	@Autowired
 	private StreamDefinitionRepository streamDefinitionRepository;

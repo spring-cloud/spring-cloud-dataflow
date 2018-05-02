@@ -217,6 +217,7 @@ public class DefaultSkipperStreamService extends AbstractStreamService implement
 		this.skipperStreamDeployer.rollbackStream(streamName, releaseVersion);
 	}
 
+	@Override
 	public String convertPropertiesToSkipperYaml(StreamDefinition streamDefinition,
 			Map<String, String> updateProperties) {
 
