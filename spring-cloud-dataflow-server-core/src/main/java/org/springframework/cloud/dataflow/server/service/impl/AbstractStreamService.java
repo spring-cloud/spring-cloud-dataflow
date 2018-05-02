@@ -46,6 +46,7 @@ import org.springframework.cloud.deployer.spi.app.DeploymentState;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
@@ -63,6 +64,7 @@ import org.springframework.util.StringUtils;
  * @author Ilayaperumal Gopinathan
  * @author Christian Tzolov
  */
+@Transactional
 public abstract class AbstractStreamService implements StreamService {
 
 	private static Log logger = LogFactory.getLog(AbstractStreamService.class);
@@ -98,6 +100,7 @@ public abstract class AbstractStreamService implements StreamService {
 			final String appName = streamAppDefinition.getRegisteredAppName();
 			try {
 				final ApplicationType appType = DataFlowServerUtil.determineApplicationType(streamAppDefinition);
+				System.out.println("==== about to call appRegistry.appExist");
 				if (!appRegistry.appExist(appName, appType)) {
 					errorMessages.add(
 							String.format("Application name '%s' with type '%s' does not exist in the app registry.",
@@ -116,8 +119,9 @@ public abstract class AbstractStreamService implements StreamService {
 					StringUtils.collectionToDelimitedString(errorMessages, "\n"));
 		}
 
+		System.out.println("==== about to call streamDefRepo.save");
 		this.streamDefinitionRepository.save(streamDefinition);
-
+		System.out.println("==== done calling streamDefRepo.save");
 		if (deploy) {
 			this.deployStream(streamName, new HashMap<>());
 		}

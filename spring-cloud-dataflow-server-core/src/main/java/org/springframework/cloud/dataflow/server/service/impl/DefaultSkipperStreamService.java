@@ -50,6 +50,7 @@ import org.springframework.cloud.skipper.domain.Release;
 import org.springframework.cloud.skipper.domain.SpringCloudDeployerApplicationManifest;
 import org.springframework.cloud.skipper.domain.SpringCloudDeployerApplicationManifestReader;
 import org.springframework.cloud.skipper.domain.SpringCloudDeployerApplicationSpec;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
@@ -61,10 +62,13 @@ import org.springframework.util.StringUtils;
  * @author Ilayaperumal Gopinathan
  * @author Christian Tzolov
  */
+@Transactional
 public class DefaultSkipperStreamService extends AbstractStreamService implements SkipperStreamService {
 
 	public static final String DEFAULT_SKIPPER_PACKAGE_VERSION = "1.0.0";
+
 	private static Log logger = LogFactory.getLog(DefaultSkipperStreamService.class);
+
 	/**
 	 * The repository this controller will use for stream CRUD operations.
 	 */
@@ -170,8 +174,8 @@ public class DefaultSkipperStreamService extends AbstractStreamService implement
 	}
 
 	/**
-	 * For all sensitive properties (e.g. key names containing words like password, secret, key, token) replace the
-	 * value with '*****' string
+	 * For all sensitive properties (e.g. key names containing words like password, secret,
+	 * key, token) replace the value with '*****' string
 	 */
 	private Map<String, String> sanitize(Map<String, String> properties) {
 		if (!CollectionUtils.isEmpty(properties)) {
