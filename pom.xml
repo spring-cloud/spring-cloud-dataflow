@@ -3,7 +3,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>org.springframework.cloud</groupId>
     <artifactId>spring-cloud-skipper-parent</artifactId>
-    <version>1.0.3.BUILD-SNAPSHOT</version>
+    <version>1.0.3.RELEASE</version>
     <name>Spring Cloud Skipper</name>
     <packaging>pom</packaging>
     <organization>
@@ -104,47 +104,47 @@
             <dependency>
                 <groupId>org.springframework.cloud</groupId>
                 <artifactId>spring-cloud-skipper-autoconfigure</artifactId>
-                <version>1.0.3.BUILD-SNAPSHOT</version>
+                <version>1.0.3.RELEASE</version>
             </dependency>
             <dependency>
                 <groupId>org.springframework.cloud</groupId>
                 <artifactId>spring-cloud-skipper-client</artifactId>
-                <version>1.0.3.BUILD-SNAPSHOT</version>
+                <version>1.0.3.RELEASE</version>
             </dependency>
             <dependency>
                 <groupId>org.springframework.cloud</groupId>
                 <artifactId>spring-cloud-skipper</artifactId>
-                <version>1.0.3.BUILD-SNAPSHOT</version>
+                <version>1.0.3.RELEASE</version>
             </dependency>
             <dependency>
                 <groupId>org.springframework.cloud</groupId>
                 <artifactId>spring-cloud-skipper-server-core</artifactId>
-                <version>1.0.3.BUILD-SNAPSHOT</version>
+                <version>1.0.3.RELEASE</version>
             </dependency>
             <dependency>
                 <groupId>org.springframework.cloud</groupId>
                 <artifactId>spring-cloud-skipper-server</artifactId>
-                <version>1.0.3.BUILD-SNAPSHOT</version>
+                <version>1.0.3.RELEASE</version>
             </dependency>
             <dependency>
                 <groupId>org.springframework.cloud</groupId>
                 <artifactId>spring-cloud-skipper-shell</artifactId>
-                <version>1.0.3.BUILD-SNAPSHOT</version>
+                <version>1.0.3.RELEASE</version>
             </dependency>
             <dependency>
                 <groupId>org.springframework.cloud</groupId>
                 <artifactId>spring-cloud-skipper-shell-commands</artifactId>
-                <version>1.0.3.BUILD-SNAPSHOT</version>
+                <version>1.0.3.RELEASE</version>
             </dependency>
             <dependency>
                 <groupId>org.springframework.cloud</groupId>
                 <artifactId>spring-cloud-skipper-platform-cloudfoundry</artifactId>
-                <version>1.0.3.BUILD-SNAPSHOT</version>
+                <version>1.0.3.RELEASE</version>
             </dependency>
             <dependency>
                 <groupId>org.springframework.cloud</groupId>
                 <artifactId>spring-cloud-skipper-platform-kubernetes</artifactId>
-                <version>1.0.3.BUILD-SNAPSHOT</version>
+                <version>1.0.3.RELEASE</version>
             </dependency>
             <dependency>
                 <groupId>org.springframework.cloud</groupId>
