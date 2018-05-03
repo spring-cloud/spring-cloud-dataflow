@@ -44,6 +44,7 @@ import org.springframework.cloud.dataflow.server.service.TaskService;
 import org.springframework.cloud.task.repository.TaskExecution;
 import org.springframework.cloud.task.repository.TaskExplorer;
 import org.springframework.data.domain.Pageable;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Assert;
 
 /**
@@ -55,6 +56,7 @@ import org.springframework.util.Assert;
  * @author Mark Fisher
  * @author Ilayaperumal Gopinathan
  */
+@Transactional
 public class DefaultTaskJobService implements TaskJobService {
 
 	private static final Logger logger = LoggerFactory.getLogger(DefaultTaskJobService.class);
