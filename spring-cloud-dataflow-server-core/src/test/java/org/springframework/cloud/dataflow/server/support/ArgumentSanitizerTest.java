@@ -24,6 +24,7 @@ import org.springframework.cloud.dataflow.server.controller.support.ArgumentSani
 
 /**
  * @author Christian Tzolov
+ * @author Ilayaperumal Gopinathan
  */
 public class ArgumentSanitizerTest {
 
@@ -56,5 +57,17 @@ public class ArgumentSanitizerTest {
 	@Test
 	public void testHierarchicalPropertyNames() {
 		Assert.assertEquals("time --password=****** | log", ArgumentSanitizer.sanitizeStream("time --password=bar | log"));
+	}
+
+	@Test
+	public void testStreamMatcherWithHyphenDotChar() {
+		Assert.assertEquals("twitterstream --twitter.credentials.consumer-key=****** --twitter.credentials.consumer-secret=****** "
+				+ "--twitter.credentials.access-token=****** --twitter.credentials.access-token-secret=****** | filter --expression=#jsonPath(payload,'$.lang')=='en' | "
+				+ "twitter-sentiment --vocabulary=http://dl.bintray.com/test --model-fetch=output/test --model=http://dl.bintray.com/test | "
+				+ "field-value-counter --field-name=sentiment --name=sentiment", ArgumentSanitizer.sanitizeStream("twitterstream "
+				+ "--twitter.credentials.consumer-key=dadadfaf --twitter.credentials.consumer-secret=dadfdasfdads "
+				+ "--twitter.credentials.access-token=58849055-dfdae --twitter.credentials.access-token-secret=deteegdssa4466 | filter --expression=#jsonPath(payload,'$.lang')=='en' | "
+				+ "twitter-sentiment --vocabulary=http://dl.bintray.com/test --model-fetch=output/test --model=http://dl.bintray.com/test | "
+				+ "field-value-counter --field-name=sentiment --name=sentiment"));
 	}
 }
