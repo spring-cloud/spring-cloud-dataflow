@@ -158,7 +158,7 @@ public class DefaultSkipperStreamService extends AbstractStreamService implement
 			StreamAppDefinition.Builder appDefinitionBuilder = StreamAppDefinition.Builder.from(appDefinition);
 			SpringCloudDeployerApplicationManifest applicationManifest = appManifestMap.get(appDefinition.getName());
 			// overrides app definition properties with those from the release manifest
-			appDefinitionBuilder.setProperties(sanitize(applicationManifest.getSpec().getApplicationProperties()));
+			appDefinitionBuilder.setProperties(applicationManifest.getSpec().getApplicationProperties());
 			updatedStreamAppDefinitions.addLast(appDefinitionBuilder.build(streamDefinition.getName()));
 		}
 
