@@ -78,7 +78,7 @@ public class SearchPageableTests {
 	@Test
 	public void addNullCollumn() throws Exception {
 		final PageRequest pageable = new PageRequest(1, 5);
-		final SearchPageable searchPageable = new SearchPageable(pageable, "search query");
+		final SearchPageable searchPageable = new SearchPageable(pageable, "findByNameLike query");
 
 		try {
 			searchPageable.addColumns(new String[] {});
@@ -94,7 +94,7 @@ public class SearchPageableTests {
 	@Test
 	public void addNullCollumn2() throws Exception {
 		final PageRequest pageable = new PageRequest(1, 5);
-		final SearchPageable searchPageable = new SearchPageable(pageable, "search query");
+		final SearchPageable searchPageable = new SearchPageable(pageable, "findByNameLike query");
 
 		try {
 			searchPageable.addColumns("c1", null);
@@ -110,7 +110,7 @@ public class SearchPageableTests {
 	@Test
 	public void addWhitespaceCollumn() throws Exception {
 		final PageRequest pageable = new PageRequest(1, 5);
-		final SearchPageable searchPageable = new SearchPageable(pageable, "search query");
+		final SearchPageable searchPageable = new SearchPageable(pageable, "findByNameLike query");
 
 		try {
 			searchPageable.addColumns("     ");
@@ -126,11 +126,11 @@ public class SearchPageableTests {
 	@Test
 	public void testSearchPageableGetters() throws Exception {
 		final PageRequest pageable = new PageRequest(1, 5);
-		final SearchPageable searchPageable = new SearchPageable(pageable, "search query");
+		final SearchPageable searchPageable = new SearchPageable(pageable, "findByNameLike query");
 
 		assertThat(searchPageable.getColumns(), is(empty()));
 		assertNotNull(searchPageable.getPageable());
-		assertEquals(searchPageable.getSearchQuery(), "search query");
+		assertEquals(searchPageable.getSearchQuery(), "findByNameLike query");
 
 		searchPageable.addColumns("c1", "c2");
 

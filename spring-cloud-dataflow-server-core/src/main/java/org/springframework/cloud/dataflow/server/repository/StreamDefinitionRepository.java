@@ -23,11 +23,13 @@ import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.stereotype.Repository;
 
 /**
+ * Repository to access {@link StreamDefinition}s.
+ *
  * @author Mark Fisher
  */
 @Repository
 public interface StreamDefinitionRepository extends PagingAndSortingRepository<StreamDefinition, String> {
 
-	Page<StreamDefinition> search(SearchPageable searchPageable);
+	Page<StreamDefinition> findByNameLike(SearchPageable searchPageable);
 
 }

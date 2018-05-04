@@ -99,7 +99,7 @@ public class DefaultSkipperStreamServiceTests {
 				mock(CommonApplicationProperties.class),
 				new BootApplicationConfigurationMetadataResolver());
 		this.defaultSkipperStreamService = new DefaultSkipperStreamService(streamDefinitionRepository,
-				this.skipperStreamDeployer, this.appDeploymentRequestCreator);
+				this.skipperStreamDeployer, this.appDeploymentRequestCreator, this.appRegistryCommon);
 		this.streamDefinitionList.add(streamDefinition1);
 		this.streamDefinitionList.add(streamDefinition2);
 		this.streamDefinitionList.add(streamDefinition3);
@@ -235,7 +235,7 @@ public class DefaultSkipperStreamServiceTests {
 		streamDefinitionRepository = mock(StreamDefinitionRepository.class);
 
 		this.defaultSkipperStreamService = new DefaultSkipperStreamService(streamDefinitionRepository,
-				this.skipperStreamDeployer, this.appDeploymentRequestCreator);
+				this.skipperStreamDeployer, this.appDeploymentRequestCreator, this.appRegistryCommon);
 
 		StreamDefinition streamDefinition = new StreamDefinition("test1", "time | log");
 

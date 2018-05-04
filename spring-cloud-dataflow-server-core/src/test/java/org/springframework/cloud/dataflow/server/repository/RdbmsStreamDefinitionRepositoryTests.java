@@ -525,7 +525,7 @@ public class RdbmsStreamDefinitionRepositoryTests {
 
 		final SearchPageable searchPageable1 = new SearchPageable(pageable1, "stream10");
 		searchPageable1.addColumns("DEFINITION_NAME", "DEFINITION");
-		Page<StreamDefinition> page = repository.search(searchPageable1);
+		Page<StreamDefinition> page = repository.findByNameLike(searchPageable1);
 
 		assertEquals(page.getTotalElements(), 1);
 		assertEquals(page.getNumber(), 0);
@@ -535,7 +535,7 @@ public class RdbmsStreamDefinitionRepositoryTests {
 
 		final SearchPageable searchPageable2 = new SearchPageable(pageable1, "stream1");
 		searchPageable2.addColumns("DEFINITION_NAME", "DEFINITION");
-		page = repository.search(searchPageable2);
+		page = repository.findByNameLike(searchPageable2);
 
 		assertEquals(page.getTotalElements(), 11);
 		assertEquals(page.getNumber(), 0);
@@ -545,7 +545,7 @@ public class RdbmsStreamDefinitionRepositoryTests {
 
 		final SearchPageable searchPageable3 = new SearchPageable(pageable2, "stream1");
 		searchPageable3.addColumns("DEFINITION_NAME", "DEFINITION");
-		page = repository.search(searchPageable3);
+		page = repository.findByNameLike(searchPageable3);
 
 		assertEquals(page.getTotalElements(), 11);
 		assertEquals(page.getNumber(), 1);
@@ -555,7 +555,7 @@ public class RdbmsStreamDefinitionRepositoryTests {
 
 		final SearchPageable searchPageable4 = new SearchPageable(pageable3, "stream");
 		searchPageable4.addColumns("DEFINITION_NAME", "DEFINITION");
-		page = repository.search(searchPageable4);
+		page = repository.findByNameLike(searchPageable4);
 
 		assertEquals(page.getTotalElements(), 25);
 		assertEquals(page.getNumber(), 2);
@@ -569,7 +569,7 @@ public class RdbmsStreamDefinitionRepositoryTests {
 		assertFalse(repository.findAll().iterator().hasNext());
 		initializeRepositoryNotInOrder();
 
-		final Iterable<StreamDefinition> items = repository.search(searchPageable);
+		final Iterable<StreamDefinition> items = repository.findByNameLike(searchPageable);
 
 		makeSortAssertions(items, expectedOrder);
 

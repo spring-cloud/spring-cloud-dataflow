@@ -53,6 +53,7 @@ import org.springframework.cloud.dataflow.server.controller.AppRegistryControlle
 import org.springframework.cloud.dataflow.server.controller.CompletionController;
 import org.springframework.cloud.dataflow.server.controller.MetricsController;
 import org.springframework.cloud.dataflow.server.controller.RestControllerAdvice;
+import org.springframework.cloud.dataflow.server.controller.RuntimeAppInstanceController;
 import org.springframework.cloud.dataflow.server.controller.RuntimeAppsController;
 import org.springframework.cloud.dataflow.server.controller.SkipperAppRegistryController;
 import org.springframework.cloud.dataflow.server.controller.SkipperStreamDeploymentController;
@@ -165,14 +166,14 @@ public class TestDependencies extends WebMvcConfigurationSupport {
 	@Bean
 	@ConditionalOnSkipperDisabled
 	public StreamDeploymentController streamDeploymentController(StreamDefinitionRepository repository,
-			StreamService streamService) {
+																 StreamService streamService) {
 		return new StreamDeploymentController(repository, streamService);
 	}
 
 	@Bean
 	@ConditionalOnSkipperEnabled
 	public SkipperStreamDeploymentController updatableStreamDeploymentController(StreamDefinitionRepository repository,
-																				SkipperStreamService skipperStreamService) {
+																				 SkipperStreamService skipperStreamService) {
 		return new SkipperStreamDeploymentController(repository, skipperStreamService);
 	}
 
@@ -184,23 +185,25 @@ public class TestDependencies extends WebMvcConfigurationSupport {
 	@Bean
 	@ConditionalOnSkipperEnabled
 	public SkipperStreamService skipperStreamService(StreamDefinitionRepository streamDefinitionRepository,
-													SkipperStreamDeployer skipperStreamDeployer,
-													AppDeploymentRequestCreator appDeploymentRequestCreator) {
-		return new DefaultSkipperStreamService(streamDefinitionRepository, skipperStreamDeployer, appDeploymentRequestCreator);
+													 SkipperStreamDeployer skipperStreamDeployer, AppDeploymentRequestCreator appDeploymentRequestCreator,
+													 AppRegistryCommon appRegistry) {
+		return new DefaultSkipperStreamService(streamDefinitionRepository, skipperStreamDeployer,
+				appDeploymentRequestCreator, appRegistry);
 	}
 
 	@Bean
 	@ConditionalOnSkipperDisabled
 	public StreamService simpleStreamService(StreamDefinitionRepository streamDefinitionRepository,
-			AppDeployerStreamDeployer appDeployerStreamDeployer, AppDeploymentRequestCreator appDeploymentRequestCreator) {
+											 AppDeployerStreamDeployer appDeployerStreamDeployer,
+											 AppDeploymentRequestCreator appDeploymentRequestCreator, AppRegistryCommon appRegistry) {
 		return new AppDeployerStreamService(streamDefinitionRepository, appDeployerStreamDeployer,
-				appDeploymentRequestCreator);
+				appDeploymentRequestCreator, appRegistry);
 	}
 
 	@Bean
 	public AppDeploymentRequestCreator streamDeploymentPropertiesUtils(AppRegistryCommon appRegistryCommon,
-			CommonApplicationProperties commonApplicationProperties,
-			ApplicationConfigurationMetadataResolver applicationConfigurationMetadataResolver) {
+																	   CommonApplicationProperties commonApplicationProperties,
+																	   ApplicationConfigurationMetadataResolver applicationConfigurationMetadataResolver) {
 		return new AppDeploymentRequestCreator(appRegistryCommon,
 				commonApplicationProperties,
 				applicationConfigurationMetadataResolver);
@@ -209,8 +212,8 @@ public class TestDependencies extends WebMvcConfigurationSupport {
 	@Bean
 	@ConditionalOnSkipperDisabled
 	public AppDeployerStreamDeployer appDeployerStreamDeployer(AppDeployer appDeployer,
-			DeploymentIdRepository deploymentIdRepository, StreamDefinitionRepository streamDefinitionRepository,
-			StreamDeploymentRepository streamDeploymentRepository) {
+															   DeploymentIdRepository deploymentIdRepository, StreamDefinitionRepository streamDefinitionRepository,
+															   StreamDeploymentRepository streamDeploymentRepository) {
 		return new AppDeployerStreamDeployer(appDeployer, deploymentIdRepository, streamDefinitionRepository,
 				streamDeploymentRepository, new ForkJoinPool(2));
 	}
@@ -218,8 +221,8 @@ public class TestDependencies extends WebMvcConfigurationSupport {
 	@Bean
 	@ConditionalOnSkipperEnabled
 	public SkipperStreamDeployer skipperStreamDeployer(SkipperClient skipperClient,
-			AppRegistryService appRegistryService,
-			StreamDefinitionRepository streamDefinitionRepository) {
+													   AppRegistryService appRegistryService,
+													   StreamDefinitionRepository streamDefinitionRepository) {
 		return new SkipperStreamDeployer(skipperClient, streamDefinitionRepository, appRegistryService,
 				new ForkJoinPool(2));
 	}
@@ -232,8 +235,8 @@ public class TestDependencies extends WebMvcConfigurationSupport {
 
 	@Bean
 	public StreamDefinitionController streamDefinitionController(StreamDefinitionRepository repository,
-			StreamService streamService, AppRegistryCommon appRegistryCommon) {
-		return new StreamDefinitionController(repository, appRegistryCommon, streamService);
+																 StreamService streamService) {
+		return new StreamDefinitionController(streamService);
 	}
 
 	@Bean
@@ -243,7 +246,7 @@ public class TestDependencies extends WebMvcConfigurationSupport {
 
 	@Bean
 	public CompletionController completionController(StreamCompletionProvider streamCompletionProvider,
-			TaskCompletionProvider taskCompletionProvider) {
+													 TaskCompletionProvider taskCompletionProvider) {
 		return new CompletionController(streamCompletionProvider, taskCompletionProvider);
 	}
 
@@ -255,7 +258,7 @@ public class TestDependencies extends WebMvcConfigurationSupport {
 	@Bean
 	@ConditionalOnSkipperDisabled
 	public AppRegistryController appRegistryController(AppRegistry registry,
-			ApplicationConfigurationMetadataResolver metadataResolver) {
+													   ApplicationConfigurationMetadataResolver metadataResolver) {
 		return new AppRegistryController(registry, metadataResolver, new ForkJoinPool(2));
 	}
 
@@ -268,7 +271,7 @@ public class TestDependencies extends WebMvcConfigurationSupport {
 	@Bean
 	@ConditionalOnSkipperEnabled
 	public AppRegistryService appRegistryService(AppRegistrationRepository appRegistrationRepository,
-			MavenProperties mavenProperties) {
+												 MavenProperties mavenProperties) {
 		return new DefaultAppRegistryService(appRegistrationRepository, resourceLoader(mavenProperties), mavenProperties);
 	}
 
@@ -290,13 +293,13 @@ public class TestDependencies extends WebMvcConfigurationSupport {
 
 	@Bean
 	public RuntimeAppsController runtimeAppsController(MetricStore metricStore, StreamDeployer streamDeployer) {
-		return new RuntimeAppsController(streamDeployer, metricStore);
+		return new RuntimeAppsController(streamDeployer);
 	}
 
 	@Bean
 	@ConditionalOnBean({ StreamDefinitionRepository.class, StreamDeploymentRepository.class })
-	public RuntimeAppsController.AppInstanceController appInstanceController(StreamDeployer streamDeployer) {
-		return new RuntimeAppsController.AppInstanceController(streamDeployer);
+	public RuntimeAppInstanceController appInstanceController(StreamDeployer streamDeployer) {
+		return new RuntimeAppInstanceController(streamDeployer);
 	}
 
 	@Bean
@@ -339,18 +342,18 @@ public class TestDependencies extends WebMvcConfigurationSupport {
 
 	@Bean
 	public TaskDefinitionController taskDefinitionController(TaskDefinitionRepository repository,
-			DeploymentIdRepository deploymentIdRepository, ApplicationConfigurationMetadataResolver metadataResolver,
-			AppRegistryCommon appRegistry, DelegatingResourceLoader delegatingResourceLoader,
-			CommonApplicationProperties commonApplicationProperties) {
+															 DeploymentIdRepository deploymentIdRepository, ApplicationConfigurationMetadataResolver metadataResolver,
+															 AppRegistryCommon appRegistry, DelegatingResourceLoader delegatingResourceLoader,
+															 CommonApplicationProperties commonApplicationProperties) {
 		return new TaskDefinitionController(repository, deploymentIdRepository, taskLauncher(), appRegistry,
 				taskService(metadataResolver, taskRepository(), deploymentIdRepository, appRegistry, delegatingResourceLoader, commonApplicationProperties));
 	}
 
 	@Bean
 	public TaskExecutionController taskExecutionController(TaskExplorer explorer,
-			ApplicationConfigurationMetadataResolver metadataResolver, DeploymentIdRepository deploymentIdRepository,
-			AppRegistryCommon appRegistry, DelegatingResourceLoader delegatingResourceLoader,
-			CommonApplicationProperties commonApplicationProperties) {
+														   ApplicationConfigurationMetadataResolver metadataResolver, DeploymentIdRepository deploymentIdRepository,
+														   AppRegistryCommon appRegistry, DelegatingResourceLoader delegatingResourceLoader,
+														   CommonApplicationProperties commonApplicationProperties) {
 		return new TaskExecutionController(explorer,
 				taskService(metadataResolver, taskRepository(), deploymentIdRepository, appRegistry, delegatingResourceLoader, commonApplicationProperties),
 				taskDefinitionRepository());
@@ -376,7 +379,7 @@ public class TestDependencies extends WebMvcConfigurationSupport {
 	@Bean
 	@ConditionalOnSkipperEnabled
 	public AppRegistryService appRegistryService(AppRegistrationRepository appRegistrationRepository,
-			DelegatingResourceLoader resourceLoader, MavenProperties mavenProperties) {
+												 DelegatingResourceLoader resourceLoader, MavenProperties mavenProperties) {
 		return new DefaultAppRegistryService(appRegistrationRepository, resourceLoader, mavenProperties);
 	}
 
@@ -402,9 +405,9 @@ public class TestDependencies extends WebMvcConfigurationSupport {
 
 	@Bean
 	public TaskService taskService(ApplicationConfigurationMetadataResolver metadataResolver,
-			TaskRepository taskExecutionRepository, DeploymentIdRepository deploymentIdRepository,
-			AppRegistryCommon appRegistry, DelegatingResourceLoader delegatingResourceLoader,
-			CommonApplicationProperties commonApplicationProperties) {
+								   TaskRepository taskExecutionRepository, DeploymentIdRepository deploymentIdRepository,
+								   AppRegistryCommon appRegistry, DelegatingResourceLoader delegatingResourceLoader,
+								   CommonApplicationProperties commonApplicationProperties) {
 		return new DefaultTaskService(new DataSourceProperties(), taskDefinitionRepository(), taskExplorer(),
 				taskExecutionRepository, appRegistry, delegatingResourceLoader, taskLauncher(), metadataResolver,
 				new TaskConfigurationProperties(), deploymentIdRepository, null, commonApplicationProperties);

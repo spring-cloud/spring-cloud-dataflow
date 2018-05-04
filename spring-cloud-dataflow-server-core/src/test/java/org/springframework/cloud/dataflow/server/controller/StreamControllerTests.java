@@ -35,18 +35,13 @@ import org.springframework.cloud.dataflow.core.BindingPropertyKeys;
 import org.springframework.cloud.dataflow.core.StreamAppDefinition;
 import org.springframework.cloud.dataflow.core.StreamDefinition;
 import org.springframework.cloud.dataflow.core.StreamPropertyKeys;
-import org.springframework.cloud.dataflow.registry.AppRegistry;
 import org.springframework.cloud.dataflow.server.config.apps.CommonApplicationProperties;
 import org.springframework.cloud.dataflow.server.configuration.TestDependencies;
 import org.springframework.cloud.dataflow.server.repository.DeploymentIdRepository;
 import org.springframework.cloud.dataflow.server.repository.DeploymentKey;
-import org.springframework.cloud.dataflow.server.repository.InMemoryStreamDefinitionRepository;
 import org.springframework.cloud.dataflow.server.repository.StreamDefinitionRepository;
 import org.springframework.cloud.dataflow.server.service.StreamService;
-import org.springframework.cloud.deployer.resource.maven.MavenProperties;
 import org.springframework.cloud.deployer.resource.maven.MavenResource;
-import org.springframework.cloud.deployer.resource.maven.MavenResourceLoader;
-import org.springframework.cloud.deployer.resource.registry.InMemoryUriRegistry;
 import org.springframework.cloud.deployer.spi.app.AppDeployer;
 import org.springframework.cloud.deployer.spi.app.AppInstanceStatus;
 import org.springframework.cloud.deployer.spi.app.AppStatus;
@@ -87,14 +82,12 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  * @author Janne Valkealahti
  * @author Gunnar Hillert
  * @author Glenn Renfro
+ * @author Andy Clement
  */
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = TestDependencies.class)
 @DirtiesContext(classMode = ClassMode.AFTER_EACH_TEST_METHOD)
 public class StreamControllerTests {
-
-	private final AppRegistry appRegistry = new AppRegistry(new InMemoryUriRegistry(),
-			new MavenResourceLoader(new MavenProperties()));
 
 	@Autowired
 	private StreamDefinitionRepository repository;
@@ -133,15 +126,8 @@ public class StreamControllerTests {
 	}
 
 	@Test(expected = IllegalArgumentException.class)
-	public void testConstructorMissingRepository() {
-		StreamDeploymentController deploymentController = new StreamDeploymentController(
-				new InMemoryStreamDefinitionRepository(), defaultStreamService);
-		new StreamDefinitionController(null, appRegistry, defaultStreamService);
-	}
-
-	@Test(expected = IllegalArgumentException.class)
 	public void testConstructorMissingStreamService() {
-		new StreamDefinitionController(new InMemoryStreamDefinitionRepository(), appRegistry, null);
+		new StreamDefinitionController(null);
 	}
 
 	@Test
@@ -188,6 +174,39 @@ public class StreamControllerTests {
 		assertTrue(response.contains(":myStream1.time > log"));
 		assertTrue(response.contains("time | log"));
 		assertTrue(response.contains("\"totalElements\":3"));
+	}
+
+	@Test
+	public void testFindRelatedStreams_gh2150() throws Exception {
+		assertEquals(0, repository.count());
+		// Bad definition, recursive reference
+		mockMvc.perform(post("/streams/definitions/").param("name", "mapper")
+				.param("definition", ":mapper.time > log")
+				.accept(MediaType.APPLICATION_JSON)).andDo(print()).andExpect(status().isCreated());
+		assertEquals(1, repository.count());
+		String response = mockMvc
+				.perform(get("/streams/definitions/mapper/related").param("nested", "true").accept(MediaType.APPLICATION_JSON)).andReturn()
+				.getResponse().getContentAsString();
+		assertTrue(response.contains(":mapper.time > log"));
+		assertTrue(response.contains("\"totalElements\":1"));
+	}
+
+	@Test
+	public void testFindRelatedStreams2_gh2150() throws Exception {
+		// bad streams, recursively referencing via each other
+		mockMvc.perform(post("/streams/definitions/").param("name", "foo")
+				.param("definition", ":bar.time > log")
+				.accept(MediaType.APPLICATION_JSON)).andDo(print()).andExpect(status().isCreated());
+		mockMvc.perform(post("/streams/definitions/").param("name", "bar")
+				.param("definition", ":foo.time > log")
+				.accept(MediaType.APPLICATION_JSON)).andDo(print()).andExpect(status().isCreated());
+		assertEquals(2, repository.count());
+		String response = mockMvc
+				.perform(get("/streams/definitions/foo/related").param("nested", "true").accept(MediaType.APPLICATION_JSON)).andReturn()
+				.getResponse().getContentAsString();
+		assertTrue(response.contains(":foo.time > log"));
+		assertTrue(response.contains(":bar.time > log"));
+		assertTrue(response.contains("\"totalElements\":2"));
 	}
 
 	@Test

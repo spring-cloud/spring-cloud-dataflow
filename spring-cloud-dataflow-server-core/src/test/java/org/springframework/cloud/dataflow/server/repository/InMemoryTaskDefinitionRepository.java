@@ -125,7 +125,7 @@ public class InMemoryTaskDefinitionRepository implements TaskDefinitionRepositor
 	}
 
 	@Override
-	public Page<TaskDefinition> search(SearchPageable searchPageable) {
+	public Page<TaskDefinition> findByNameLike(SearchPageable searchPageable) {
 		throw new UnsupportedOperationException();
 	}
 }
