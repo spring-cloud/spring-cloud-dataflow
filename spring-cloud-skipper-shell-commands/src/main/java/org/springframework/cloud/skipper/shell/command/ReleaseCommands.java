@@ -18,6 +18,7 @@ package org.springframework.cloud.skipper.shell.command;
 import javax.validation.constraints.NotNull;
 import java.io.File;
 import java.io.IOException;
+import java.time.Duration;
 import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -34,11 +35,13 @@ import org.springframework.cloud.skipper.domain.ConfigValues;
 import org.springframework.cloud.skipper.domain.Info;
 import org.springframework.cloud.skipper.domain.PackageIdentifier;
 import org.springframework.cloud.skipper.domain.Release;
+import org.springframework.cloud.skipper.domain.RollbackRequest;
 import org.springframework.cloud.skipper.domain.UpgradeProperties;
 import org.springframework.cloud.skipper.domain.UpgradeRequest;
 import org.springframework.cloud.skipper.shell.command.support.DeploymentStateDisplay;
 import org.springframework.cloud.skipper.shell.command.support.TableUtils;
 import org.springframework.cloud.skipper.shell.command.support.YmlUtils;
+import org.springframework.cloud.skipper.support.DurationUtils;
 import org.springframework.shell.standard.ShellComponent;
 import org.springframework.shell.standard.ShellMethod;
 import org.springframework.shell.standard.ShellOption;
@@ -126,13 +129,14 @@ public class ReleaseCommands extends AbstractSkipperCommand {
 			@ShellOption(help = "the name of the package to use for the upgrade") String packageName,
 			@ShellOption(help = "the version of the package to use for the upgrade, if not specified latest version will be used", defaultValue = NULL) String packageVersion,
 			@ShellOption(help = "specify values in a YAML file", defaultValue = NULL) File file,
-			@ShellOption(help = "the comma separated set of properties to override during upgrade", defaultValue = NULL) String properties)
+			@ShellOption(help = "the comma separated set of properties to override during upgrade", defaultValue = NULL) String properties,
+			@ShellOption(help = "the expression for upgrade timeout", defaultValue = NULL) String timeoutExpression)
 			throws IOException {
 		// Commented out until https://github.com/spring-cloud/spring-cloud-skipper/issues/263 is
 		// addressed
 		// assertMutuallyExclusiveFileAndProperties(file, properties);
-		Release release = skipperClient
-				.upgrade(getUpgradeRequest(releaseName, packageName, packageVersion, file, properties));
+		Release release = skipperClient.upgrade(
+				getUpgradeRequest(releaseName, packageName, packageVersion, file, properties, timeoutExpression));
 		StringBuilder sb = new StringBuilder();
 		sb.append(release.getName() + " has been upgraded.  Now at version v" + release.getVersion() + ".");
 		return sb.toString();
@@ -159,7 +163,7 @@ public class ReleaseCommands extends AbstractSkipperCommand {
 	}
 
 	private UpgradeRequest getUpgradeRequest(String releaseName, String packageName, String packageVersion,
-			File propertiesFile, String propertiesToOverride) throws IOException {
+			File propertiesFile, String propertiesToOverride, String timeoutExpression) throws IOException {
 		UpgradeRequest upgradeRequest = new UpgradeRequest();
 		UpgradeProperties upgradeProperties = new UpgradeProperties();
 		upgradeProperties.setReleaseName(releaseName);
@@ -175,6 +179,10 @@ public class ReleaseCommands extends AbstractSkipperCommand {
 		packageIdentifier.setPackageVersion(packageVersion);
 		upgradeRequest.setPackageIdentifier(packageIdentifier);
 		upgradeRequest.setPackageIdentifier(packageIdentifier);
+		Duration duration = DurationUtils.convert(timeoutExpression);
+		if (duration != null) {
+			upgradeRequest.setTimeout(duration.toMillis());
+		}
 		return upgradeRequest;
 	}
 
@@ -182,8 +190,16 @@ public class ReleaseCommands extends AbstractSkipperCommand {
 	public String rollback(
 			@ShellOption(help = "the name of the release to rollback") String releaseName,
 			@ShellOption(help = "the specific release version to rollback to. " +
-					"Not specifying the value rolls back to the previous release.", defaultValue = "0") int releaseVersion) {
-		Release release = skipperClient.rollback(releaseName, releaseVersion);
+					"Not specifying the value rolls back to the previous release.", defaultValue = "0") int releaseVersion,
+			@ShellOption(help = "the expression for rollback timeout", defaultValue = NULL) String timeoutExpression) {
+
+		RollbackRequest rollbackRequest = new RollbackRequest(releaseName, releaseVersion);
+		Duration duration = DurationUtils.convert(timeoutExpression);
+		if (duration != null) {
+			rollbackRequest.setTimeout(duration.toMillis());
+		}
+
+		Release release = skipperClient.rollback(rollbackRequest);
 		StringBuilder sb = new StringBuilder();
 		sb.append(release.getName() + " has been rolled back.  Now at version v" + release.getVersion() + ".");
 		return sb.toString();

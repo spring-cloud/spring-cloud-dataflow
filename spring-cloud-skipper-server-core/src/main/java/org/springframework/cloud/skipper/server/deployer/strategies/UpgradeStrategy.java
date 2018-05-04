@@ -32,6 +32,6 @@ public interface UpgradeStrategy {
 
 	void accept(Release existingRelease, Release replacingRelease, ReleaseAnalysisReport releaseAnalysisReport);
 
-	void cancel(Release existingRelease, Release replacingRelease, ReleaseAnalysisReport releaseAnalysisReport);
+	void cancel(Release existingRelease, Release replacingRelease, ReleaseAnalysisReport releaseAnalysisReport, Long timeout);
 
 }

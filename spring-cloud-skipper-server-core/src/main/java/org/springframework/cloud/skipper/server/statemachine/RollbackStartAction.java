@@ -22,6 +22,7 @@ import org.springframework.cloud.skipper.domain.InstallProperties;
 import org.springframework.cloud.skipper.domain.InstallRequest;
 import org.springframework.cloud.skipper.domain.PackageIdentifier;
 import org.springframework.cloud.skipper.domain.Release;
+import org.springframework.cloud.skipper.domain.RollbackRequest;
 import org.springframework.cloud.skipper.domain.StatusCode;
 import org.springframework.cloud.skipper.domain.UpgradeProperties;
 import org.springframework.cloud.skipper.domain.UpgradeRequest;
@@ -120,6 +121,11 @@ public class RollbackStartAction  extends AbstractAction {
 			upgradeProperties.setConfigValues(releaseToRollback.getConfigValues());
 			upgradeRequest.setUpgradeProperties(upgradeProperties);
 			upgradeRequest.setPackageIdentifier(packageIdentifier);
+			RollbackRequest rollbackRequest = context.getExtendedState().get(SkipperEventHeaders.ROLLBACK_REQUEST,
+					RollbackRequest.class);
+			if (rollbackRequest != null) {
+				upgradeRequest.setTimeout(rollbackRequest.getTimeout());
+			}
 			context.getExtendedState().getVariables().put(SkipperEventHeaders.UPGRADE_REQUEST, upgradeRequest);
 		}
 	}

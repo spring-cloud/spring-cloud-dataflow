@@ -35,6 +35,7 @@ import org.springframework.cloud.skipper.domain.Manifest;
 import org.springframework.cloud.skipper.domain.PackageMetadata;
 import org.springframework.cloud.skipper.domain.Release;
 import org.springframework.cloud.skipper.domain.Repository;
+import org.springframework.cloud.skipper.domain.RollbackRequest;
 import org.springframework.cloud.skipper.domain.Template;
 import org.springframework.cloud.skipper.domain.UpgradeRequest;
 import org.springframework.cloud.skipper.domain.UploadRequest;
@@ -235,9 +236,20 @@ public class DefaultSkipperClient implements SkipperClient {
 	}
 
 	@Override
+	public Release rollback(RollbackRequest rollbackRequest) {
+		ParameterizedTypeReference<Resource<Release>> typeReference =
+				new ParameterizedTypeReference<Resource<Release>>() { };
+		String url = String.format("%s/%s/%s", baseUri, "release", "rollback");
+
+		HttpEntity<RollbackRequest> httpEntity = new HttpEntity<>(rollbackRequest);
+		ResponseEntity<Resource<Release>> resourceResponseEntity =
+				restTemplate.exchange(url, HttpMethod.POST, httpEntity,	typeReference);
+		return resourceResponseEntity.getBody().getContent();
+	}
+
+	@Override
 	public Release rollback(String releaseName, int releaseVersion) {
-		String url = String.format("%s/%s/%s/%s/%s", baseUri, "release", "rollback", releaseName, releaseVersion);
-		return this.restTemplate.postForObject(url, null, Release.class);
+		return rollback(new RollbackRequest(releaseName, releaseVersion));
 	}
 
 	@Override

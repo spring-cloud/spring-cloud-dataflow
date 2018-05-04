@@ -19,6 +19,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import org.springframework.cloud.skipper.server.deployer.ReleaseAnalysisReport;
+import org.springframework.cloud.skipper.server.deployer.strategies.HealthCheckProperties;
 import org.springframework.cloud.skipper.server.deployer.strategies.UpgradeStrategy;
 import org.springframework.cloud.skipper.server.service.ReleaseReportService;
 import org.springframework.cloud.skipper.server.statemachine.SkipperStateMachineService.SkipperEventHeaders;
@@ -39,16 +40,20 @@ public class UpgradeDeployTargetAppsAction extends AbstractUpgradeStartAction {
 	private static final Logger log = LoggerFactory.getLogger(UpgradeDeployTargetAppsAction.class);
 	private static final long DEFAULT_UPGRADE_TIMEOUT = 300000L;
 	private final UpgradeStrategy upgradeStrategy;
+	private final HealthCheckProperties healthCheckProperties;
 
 	/**
 	 * Instantiates a new upgrade deploy target apps action.
 	 *
 	 * @param releaseReportService the release report service
 	 * @param upgradeStrategy the upgrade strategy
+	 * @param healthCheckProperties the health check properties
 	 */
-	public UpgradeDeployTargetAppsAction(ReleaseReportService releaseReportService, UpgradeStrategy upgradeStrategy) {
+	public UpgradeDeployTargetAppsAction(ReleaseReportService releaseReportService, UpgradeStrategy upgradeStrategy,
+			HealthCheckProperties healthCheckProperties) {
 		super(releaseReportService);
 		this.upgradeStrategy = upgradeStrategy;
+		this.healthCheckProperties = healthCheckProperties;
 	}
 
 	@Override
@@ -65,7 +70,15 @@ public class UpgradeDeployTargetAppsAction extends AbstractUpgradeStartAction {
 	private void setUpgradeCutOffTime(StateContext<SkipperStates, SkipperEvents> context) {
 		Long upgradeTimeout = context.getExtendedState().get(SkipperEventHeaders.UPGRADE_TIMEOUT, Long.class);
 		if (upgradeTimeout == null) {
-			upgradeTimeout = DEFAULT_UPGRADE_TIMEOUT;
+			if (healthCheckProperties != null && healthCheckProperties.getTimeoutInMillis() > 0) {
+				upgradeTimeout = healthCheckProperties.getTimeoutInMillis();
+			}
+			else {
+				// fallback, use hard coded default
+				upgradeTimeout = DEFAULT_UPGRADE_TIMEOUT;
+			}
+			// not given, set it so that we can use it later for reporting
+			context.getExtendedState().getVariables().put(SkipperEventHeaders.UPGRADE_TIMEOUT, upgradeTimeout);
 		}
 		long cutOffTime = System.currentTimeMillis() + upgradeTimeout;
 		context.getExtendedState().getVariables().put(SkipperVariables.UPGRADE_CUTOFF_TIME,

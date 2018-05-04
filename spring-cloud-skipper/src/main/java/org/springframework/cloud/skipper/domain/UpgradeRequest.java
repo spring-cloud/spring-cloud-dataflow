@@ -23,8 +23,8 @@ package org.springframework.cloud.skipper.domain;
 public class UpgradeRequest {
 
 	private PackageIdentifier packageIdentifier;
-
 	private UpgradeProperties upgradeProperties;
+	private Long timeout;
 
 	public PackageIdentifier getPackageIdentifier() {
 		return packageIdentifier;
@@ -42,12 +42,17 @@ public class UpgradeRequest {
 		this.upgradeProperties = upgradeProperties;
 	}
 
+	public Long getTimeout() {
+		return timeout;
+	}
+
+	public void setTimeout(Long timeout) {
+		this.timeout = timeout;
+	}
+
 	@Override
 	public String toString() {
-		final StringBuffer sb = new StringBuffer("UpgradeRequest{");
-		sb.append("packageIdentifier=").append(packageIdentifier);
-		sb.append(", upgradeProperties=").append(upgradeProperties);
-		sb.append('}');
-		return sb.toString();
+		return "UpgradeRequest [packageIdentifier=" + packageIdentifier + ", upgradeProperties=" + upgradeProperties
+				+ ", timeout=" + timeout + "]";
 	}
 }

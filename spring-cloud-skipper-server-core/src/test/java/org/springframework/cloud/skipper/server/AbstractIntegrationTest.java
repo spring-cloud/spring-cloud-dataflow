@@ -36,6 +36,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.cloud.skipper.domain.Info;
 import org.springframework.cloud.skipper.domain.InstallRequest;
 import org.springframework.cloud.skipper.domain.Release;
+import org.springframework.cloud.skipper.domain.RollbackRequest;
 import org.springframework.cloud.skipper.domain.StatusCode;
 import org.springframework.cloud.skipper.domain.UpgradeRequest;
 import org.springframework.cloud.skipper.server.config.SkipperServerConfiguration;
@@ -162,7 +163,7 @@ public abstract class AbstractIntegrationTest extends AbstractAssertReleaseDeplo
 	}
 
 	protected Release rollback(String releaseName, int releaseVersion) throws InterruptedException {
-		Release release = skipperStateMachineService.rollbackRelease(releaseName, releaseVersion);
+		Release release = skipperStateMachineService.rollbackRelease(new RollbackRequest(releaseName, releaseVersion));
 		// Need to use the value of version passed back from calling rollback,
 		// since 0 implies most recent deleted release
 		assertReleaseIsDeployedSuccessfully(release.getName(), release.getVersion());

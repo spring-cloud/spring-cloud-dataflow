@@ -278,12 +278,10 @@ public class SkipperServerConfiguration implements AsyncConfigurer {
 	@Bean
 	public HandleHealthCheckStep healthCheckAndDeleteStep(ReleaseRepository releaseRepository,
 			AppDeployerDataRepository appDeployerDataRepository,
-			DeleteStep deleteStep,
-			HealthCheckProperties healthCheckProperties) {
+			DeleteStep deleteStep) {
 		return new HandleHealthCheckStep(releaseRepository,
 				appDeployerDataRepository,
-				deleteStep,
-				healthCheckProperties);
+				deleteStep);
 	}
 
 	@Bean(name = SKIPPER_EXECUTOR)

@@ -540,9 +540,15 @@ include::{snippets}/upgrade-documentation/upgrade-release/response-fields.adoc[]
 [[resources-release-rollback]]
 ==== Rollback
 
-===== Rollback release
+===== Rollback release using uri variables
 
 The rollback link rolls back the release to a previous or a specific release.
+
+[NOTE]
+====
+This part of the api is deprecated, please use
+<<resources-release-rollback-request>>.
+====
 
 ====== Request structure
 
@@ -560,6 +566,26 @@ include::{snippets}/rollback-documentation/rollback-release/http-response.adoc[]
 
 include::{snippets}/rollback-documentation/rollback-release/response-fields.adoc[]
 
+[[resources-release-rollback-request]]
+===== Rollback release using request object
+
+The rollback link rolls back the release to a previous or a specific release.
+
+====== Request structure
+
+include::{snippets}/rollback-documentation/rollback-release-request/http-request.adoc[]
+
+====== Example request
+
+include::{snippets}/rollback-documentation/rollback-release-request/curl-request.adoc[]
+
+====== Response structure
+
+include::{snippets}/rollback-documentation/rollback-release-request/http-response.adoc[]
+
+====== Response fields
+
+include::{snippets}/rollback-documentation/rollback-release-request/response-fields.adoc[]
 
 [[resources-release-manifest]]
 ==== Manifest

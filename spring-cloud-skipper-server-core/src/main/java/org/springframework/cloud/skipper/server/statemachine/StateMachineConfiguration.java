@@ -19,6 +19,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cloud.skipper.server.deployer.strategies.HealthCheckProperties;
 import org.springframework.cloud.skipper.server.deployer.strategies.UpgradeStrategy;
 import org.springframework.cloud.skipper.server.repository.ReleaseRepository;
 import org.springframework.cloud.skipper.server.service.ReleaseReportService;
@@ -77,6 +78,9 @@ public class StateMachineConfiguration {
 
 		@Autowired
 		private UpgradeStrategy upgradeStrategy;
+
+		@Autowired
+		private HealthCheckProperties healthCheckProperties;
 
 		@Autowired
 		private StateMachineRuntimePersister<SkipperStates, SkipperEvents, String> stateMachineRuntimePersister;
@@ -317,7 +321,7 @@ public class StateMachineConfiguration {
 
 		@Bean
 		public UpgradeDeployTargetAppsAction upgradeDeployTargetAppsAction() {
-			return new UpgradeDeployTargetAppsAction(releaseReportService, upgradeStrategy);
+			return new UpgradeDeployTargetAppsAction(releaseReportService, upgradeStrategy, healthCheckProperties);
 		}
 
 		@Bean

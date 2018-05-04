@@ -18,6 +18,7 @@ package org.springframework.cloud.skipper.server.statemachine;
 import org.springframework.cloud.skipper.domain.DeleteProperties;
 import org.springframework.cloud.skipper.domain.InstallProperties;
 import org.springframework.cloud.skipper.domain.InstallRequest;
+import org.springframework.cloud.skipper.domain.RollbackRequest;
 import org.springframework.cloud.skipper.domain.UpgradeRequest;
 import org.springframework.cloud.skipper.server.statemachine.SkipperStateMachineService.SkipperEventHeaders;
 import org.springframework.cloud.skipper.server.statemachine.SkipperStateMachineService.SkipperEvents;
@@ -64,6 +65,11 @@ public class ResetVariablesAction implements Action<SkipperStates, SkipperEvents
 		Integer rollbackVersion = context.getMessageHeaders().get(SkipperEventHeaders.ROLLBACK_VERSION, Integer.class);
 		if (rollbackVersion != null) {
 			context.getExtendedState().getVariables().put(SkipperEventHeaders.ROLLBACK_VERSION, rollbackVersion);
+		}
+		RollbackRequest rollbackRequest = context.getMessageHeaders().get(SkipperEventHeaders.ROLLBACK_REQUEST,
+				RollbackRequest.class);
+		if (rollbackRequest != null) {
+			context.getExtendedState().getVariables().put(SkipperEventHeaders.ROLLBACK_REQUEST, rollbackRequest);
 		}
 
 		// for upgrade

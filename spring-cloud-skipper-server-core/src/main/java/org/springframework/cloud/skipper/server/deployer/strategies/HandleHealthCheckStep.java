@@ -50,30 +50,26 @@ public class HandleHealthCheckStep {
 
 	private final DeleteStep deleteStep;
 
-	private final HealthCheckProperties healthCheckProperties;
-
 	private ReleaseManager releaseManager;
 
 	public HandleHealthCheckStep(ReleaseRepository releaseRepository,
 			AppDeployerDataRepository appDeployerDataRepository,
-			DeleteStep deleteStep,
-			HealthCheckProperties healthCheckProperties) {
+			DeleteStep deleteStep) {
 		this.releaseRepository = releaseRepository;
 		this.appDeployerDataRepository = appDeployerDataRepository;
 		this.deleteStep = deleteStep;
-		this.healthCheckProperties = healthCheckProperties;
 	}
 
 	@Transactional
 	public void handleHealthCheck(boolean healthy, Release existingRelease,
 			List<String> applicationNamesToUpgrade,
-			Release replacingRelease) {
+			Release replacingRelease, Long timeout) {
 		if (healthy) {
 			updateReplacingReleaseState(replacingRelease);
 			deleteExistingRelease(existingRelease, applicationNamesToUpgrade);
 		}
 		else {
-			deleteReplacingRelease(replacingRelease);
+			deleteReplacingRelease(replacingRelease, timeout);
 		}
 	}
 
@@ -90,18 +86,17 @@ public class HandleHealthCheckStep {
 				replacingRelease.getVersion());
 	}
 
-	private void deleteReplacingRelease(Release replacingRelease) {
+	private void deleteReplacingRelease(Release replacingRelease, Long timeout) {
 		try {
-			logger.error("New release " + replacingRelease.getName() + " was not detected as healthy after " +
-					this.healthCheckProperties.getTimeoutInMillis() + " milliseconds.  " +
-					"Keeping existing release, and Deleting apps of replacing release");
+			logger.error("New release " + replacingRelease.getName() + " was not detected as healthy after " + timeout
+					+ " milliseconds.  " + "Keeping existing release, and Deleting apps of replacing release");
 			this.releaseManager.delete(replacingRelease);
 			Status status = new Status();
 			status.setStatusCode(StatusCode.FAILED);
 			replacingRelease.getInfo().setStatus(status);
 			replacingRelease.getInfo().setStatus(status);
-			replacingRelease.getInfo().setDescription("Did not detect apps in replacing release as healthy after " +
-					this.healthCheckProperties.getTimeoutInMillis() + " ms.");
+			replacingRelease.getInfo()
+					.setDescription("Did not detect apps in replacing release as healthy after " + timeout + " ms.");
 			this.releaseRepository.save(replacingRelease);
 		}
 		catch (DataAccessException e) {

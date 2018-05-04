@@ -25,6 +25,7 @@ import org.springframework.cloud.skipper.domain.DeleteProperties;
 import org.springframework.cloud.skipper.domain.Info;
 import org.springframework.cloud.skipper.domain.Manifest;
 import org.springframework.cloud.skipper.domain.Release;
+import org.springframework.cloud.skipper.domain.RollbackRequest;
 import org.springframework.cloud.skipper.domain.UpgradeRequest;
 import org.springframework.cloud.skipper.server.service.ReleaseService;
 import org.springframework.cloud.skipper.server.statemachine.SkipperStateMachineService;
@@ -51,6 +52,7 @@ import static org.springframework.hateoas.mvc.ControllerLinkBuilder.methodOn;
  *
  * @author Mark Pollack
  * @author Ilayaperumal Gopinathan
+ * @author Janne Valkealahti
  */
 @RestController
 @RequestMapping("/api/release")
@@ -88,7 +90,7 @@ public class ReleaseController {
 		resource.add(ControllerLinkBuilder.linkTo(methodOn(ReleaseController.class).upgrade(null))
 				.withRel("upgrade"));
 		resource.add(
-				ControllerLinkBuilder.linkTo(methodOn(ReleaseController.class).rollback(null, 123))
+				ControllerLinkBuilder.linkTo(methodOn(ReleaseController.class).rollbackWithNamedVersion(null, 123))
 						.withRel("rollback"));
 		resource.add(ControllerLinkBuilder.linkTo(methodOn(ReleaseController.class).list())
 				.withRel("list"));
@@ -131,11 +133,20 @@ public class ReleaseController {
 		return this.releaseResourceAssembler.toResource(release);
 	}
 
+	@RequestMapping(path = "/rollback", method = RequestMethod.POST)
+	@ResponseStatus(HttpStatus.CREATED)
+	public Resource<Release> rollback(@RequestBody RollbackRequest rollbackRequest) {
+		Release release = this.skipperStateMachineService.rollbackRelease(rollbackRequest);
+		return this.releaseResourceAssembler.toResource(release);
+	}
+
 	@RequestMapping(path = "/rollback/{name}/{version}", method = RequestMethod.POST)
 	@ResponseStatus(HttpStatus.CREATED)
-	public Resource<Release> rollback(@PathVariable("name") String releaseName,
+	@Deprecated
+	public Resource<Release> rollbackWithNamedVersion(@PathVariable("name") String releaseName,
 			@PathVariable("version") int rollbackVersion) {
-		Release release = this.skipperStateMachineService.rollbackRelease(releaseName, rollbackVersion);
+		Release release = this.skipperStateMachineService
+				.rollbackRelease(new RollbackRequest(releaseName, rollbackVersion));
 		return this.releaseResourceAssembler.toResource(release);
 	}
 
