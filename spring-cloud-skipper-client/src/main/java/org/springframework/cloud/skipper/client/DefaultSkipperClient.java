@@ -26,8 +26,9 @@ import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 import org.springframework.cloud.skipper.domain.AboutResource;
+import org.springframework.cloud.skipper.domain.CancelRequest;
+import org.springframework.cloud.skipper.domain.CancelResponse;
 import org.springframework.cloud.skipper.domain.Deployer;
 import org.springframework.cloud.skipper.domain.Info;
 import org.springframework.cloud.skipper.domain.InstallRequest;
@@ -235,6 +236,13 @@ public class DefaultSkipperClient implements SkipperClient {
 		this.restTemplate.delete(url, deletePackage);
 	}
 
+	@Override
+	public CancelResponse cancel(CancelRequest cancelRequest) {
+		String url = String.format("%s/%s/%s", baseUri, "release", "cancel");
+		log.debug("Posting CancelRequest to " + url + ". CancelRequest = " + cancelRequest);
+		return this.restTemplate.postForObject(url, cancelRequest, CancelResponse.class);
+	}	
+	
 	@Override
 	public Release rollback(RollbackRequest rollbackRequest) {
 		ParameterizedTypeReference<Resource<Release>> typeReference =

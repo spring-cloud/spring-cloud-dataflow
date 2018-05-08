@@ -18,6 +18,8 @@ package org.springframework.cloud.skipper.client;
 import java.util.List;
 
 import org.springframework.cloud.skipper.domain.AboutResource;
+import org.springframework.cloud.skipper.domain.CancelRequest;
+import org.springframework.cloud.skipper.domain.CancelResponse;
 import org.springframework.cloud.skipper.domain.Deployer;
 import org.springframework.cloud.skipper.domain.Info;
 import org.springframework.cloud.skipper.domain.InstallRequest;
@@ -116,6 +118,14 @@ public interface SkipperClient {
 	 */
 	@Deprecated
 	Release rollback(String releaseName, int releaseVersion);
+
+	/**
+	 * Sends a cancel request for current release operation
+	 * 
+	 * @param cancelRequest the cancel request
+	 * @return the cancel response
+	 */
+	CancelResponse cancel(CancelRequest cancelRequest);
 
 	/**
 	 * List the latest version of releases with status of deployed or failed.

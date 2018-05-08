@@ -666,3 +666,27 @@ include::{snippets}/delete-documentation/delete-release/http-response.adoc[]
 ====== Response fields
 
 include::{snippets}/delete-documentation/delete-release/response-fields.adoc[]
+
+[[resources-release-cancel]]
+==== Cancel
+
+===== Cancel a release
+
+You can use a `POST` request to cancel an existing release operation.
+
+====== Request structure
+
+include::{snippets}/cancel-documentation/cancel-release/http-request.adoc[]
+
+====== Example request
+
+include::{snippets}/cancel-documentation/cancel-release/curl-request.adoc[]
+
+====== Response structure
+
+include::{snippets}/cancel-documentation/cancel-release/http-response.adoc[]
+
+====== Response fields
+
+include::{snippets}/cancel-documentation/cancel-release/response-fields.adoc[]
+
