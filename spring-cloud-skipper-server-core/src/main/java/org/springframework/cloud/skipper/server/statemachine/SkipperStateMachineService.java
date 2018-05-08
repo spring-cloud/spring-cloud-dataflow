@@ -136,6 +136,20 @@ public class SkipperStateMachineService {
 				SkipperStates.INITIAL);
 	}
 
+	/**
+	 * Send an event to attempt a cancellation of an existing operation.
+	 *
+	 * @param releaseName the release name
+	 * @return true if event were sent
+	 */
+	public boolean cancelRelease(String releaseName) {
+		Message<SkipperEvents> message = MessageBuilder
+				.withPayload(SkipperEvents.UPGRADE_CANCEL)
+				.setHeader(SkipperEventHeaders.RELEASE_NAME, releaseName)
+				.build();
+		return handleMessageAndCheckAccept(message, releaseName);
+	}
+
 	private Release installReleaseInternal(InstallRequest installRequest, Long id, InstallProperties installProperties) {
 		String releaseName = installRequest != null ? installRequest.getInstallProperties().getReleaseName()
 				: installProperties.getReleaseName();
@@ -154,6 +168,11 @@ public class SkipperStateMachineService {
 
 	private Release handleMessageAndWait(Message<SkipperEvents> message, String machineId) {
 		return handleMessageAndWait(message, machineId, SkipperStates.INITIAL);
+	}
+
+	private boolean handleMessageAndCheckAccept(Message<SkipperEvents> message, String machineId) {
+		StateMachine<SkipperStates, SkipperEvents> stateMachine = stateMachineService.acquireStateMachine(machineId);
+		return stateMachine.sendEvent(message);
 	}
 
 	private Release handleMessageAndWait(Message<SkipperEvents> message, String machineId, SkipperStates... statesToWait) {

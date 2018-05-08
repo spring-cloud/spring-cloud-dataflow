@@ -21,6 +21,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cloud.skipper.PackageDeleteException;
 import org.springframework.cloud.skipper.ReleaseNotFoundException;
 import org.springframework.cloud.skipper.SkipperException;
+import org.springframework.cloud.skipper.domain.CancelRequest;
+import org.springframework.cloud.skipper.domain.CancelResponse;
 import org.springframework.cloud.skipper.domain.DeleteProperties;
 import org.springframework.cloud.skipper.domain.Info;
 import org.springframework.cloud.skipper.domain.Manifest;
@@ -169,6 +171,13 @@ public class ReleaseController {
 		return this.releaseResourceAssembler.toResource(release);
 	}
 
+	@RequestMapping(path = "/cancel", method = RequestMethod.POST)
+	@ResponseStatus(HttpStatus.OK)
+	public CancelResponse cancel(@RequestBody CancelRequest cancelRequest) {
+		boolean accepted = this.skipperStateMachineService.cancelRelease(cancelRequest.getReleaseName());
+		return new CancelResponse(accepted);
+	}
+	
 	@RequestMapping(path = "/list", method = RequestMethod.GET)
 	@ResponseStatus(HttpStatus.OK)
 	public Resources<Resource<Release>> list() {
