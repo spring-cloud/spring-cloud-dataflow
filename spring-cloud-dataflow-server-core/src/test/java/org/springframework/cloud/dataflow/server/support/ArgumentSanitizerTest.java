@@ -20,6 +20,7 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
+import org.springframework.cloud.dataflow.core.StreamDefinition;
 import org.springframework.cloud.dataflow.server.controller.support.ArgumentSanitizer;
 
 /**
@@ -56,18 +57,23 @@ public class ArgumentSanitizerTest {
 
 	@Test
 	public void testHierarchicalPropertyNames() {
-		Assert.assertEquals("time --password=****** | log", ArgumentSanitizer.sanitizeStream("time --password=bar | log"));
+		Assert.assertEquals("time --password='******' | log",
+				sanitizer.sanitizeStream(new StreamDefinition("stream", "time --password=bar | log")));
 	}
 
 	@Test
 	public void testStreamMatcherWithHyphenDotChar() {
-		Assert.assertEquals("twitterstream --twitter.credentials.consumer-key=****** --twitter.credentials.consumer-secret=****** "
-				+ "--twitter.credentials.access-token=****** --twitter.credentials.access-token-secret=****** | filter --expression=#jsonPath(payload,'$.lang')=='en' | "
-				+ "twitter-sentiment --vocabulary=http://dl.bintray.com/test --model-fetch=output/test --model=http://dl.bintray.com/test | "
-				+ "field-value-counter --field-name=sentiment --name=sentiment", ArgumentSanitizer.sanitizeStream("twitterstream "
-				+ "--twitter.credentials.consumer-key=dadadfaf --twitter.credentials.consumer-secret=dadfdasfdads "
-				+ "--twitter.credentials.access-token=58849055-dfdae --twitter.credentials.access-token-secret=deteegdssa4466 | filter --expression=#jsonPath(payload,'$.lang')=='en' | "
-				+ "twitter-sentiment --vocabulary=http://dl.bintray.com/test --model-fetch=output/test --model=http://dl.bintray.com/test | "
-				+ "field-value-counter --field-name=sentiment --name=sentiment"));
+		Assert.assertEquals("twitterstream --twitter.credentials.access-token-secret='******' "
+						+ "--twitter.credentials.access-token='******' --twitter.credentials.consumer-secret='******' "
+						+ "--twitter.credentials.consumer-key='******' | "
+						+ "filter --expression=#jsonPath(payload,'$.lang')=='en' | "
+						+ "twitter-sentiment --vocabulary=http://dl.bintray.com/test --model-fetch=output/test "
+						+ "--model=http://dl.bintray.com/test | field-value-counter --field-name=sentiment --name=sentiment",
+				sanitizer.sanitizeStream(new StreamDefinition("stream", "twitterstream "
+						+ "--twitter.credentials.consumer-key=dadadfaf --twitter.credentials.consumer-secret=dadfdasfdads "
+						+ "--twitter.credentials.access-token=58849055-dfdae "
+						+ "--twitter.credentials.access-token-secret=deteegdssa4466 | filter --expression=#jsonPath(payload,'$.lang')=='en' | "
+						+ "twitter-sentiment --vocabulary=http://dl.bintray.com/test --model-fetch=output/test --model=http://dl.bintray.com/test | "
+						+ "field-value-counter --field-name=sentiment --name=sentiment")));
 	}
 }
