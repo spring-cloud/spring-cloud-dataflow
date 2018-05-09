@@ -30,7 +30,6 @@ import org.mockito.ArgumentCaptor;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.cloud.dataflow.configuration.metadata.ApplicationConfigurationMetadataResolver;
 import org.springframework.cloud.dataflow.core.BindingPropertyKeys;
 import org.springframework.cloud.dataflow.core.StreamAppDefinition;
 import org.springframework.cloud.dataflow.core.StreamDefinition;
@@ -40,7 +39,6 @@ import org.springframework.cloud.dataflow.server.configuration.TestDependencies;
 import org.springframework.cloud.dataflow.server.repository.DeploymentIdRepository;
 import org.springframework.cloud.dataflow.server.repository.DeploymentKey;
 import org.springframework.cloud.dataflow.server.repository.StreamDefinitionRepository;
-import org.springframework.cloud.dataflow.server.service.StreamService;
 import org.springframework.cloud.deployer.resource.maven.MavenResource;
 import org.springframework.cloud.deployer.spi.app.AppDeployer;
 import org.springframework.cloud.deployer.spi.app.AppInstanceStatus;
@@ -95,9 +93,6 @@ public class StreamControllerTests {
 	@Autowired
 	private DeploymentIdRepository deploymentIdRepository;
 
-	@Autowired
-	private ApplicationConfigurationMetadataResolver metadataResolver;
-
 	private MockMvc mockMvc;
 
 	@Autowired
@@ -108,9 +103,6 @@ public class StreamControllerTests {
 
 	@Autowired
 	private CommonApplicationProperties appsProperties;
-
-	@Autowired
-	private StreamService defaultStreamService;
 
 	@Before
 	public void setupMocks() {
@@ -261,8 +253,8 @@ public class StreamControllerTests {
 		response = mockMvc
 				.perform(get("/streams/definitions/myStream5/related?nested=true").accept(MediaType.APPLICATION_JSON))
 				.andReturn().getResponse().getContentAsString();
-		assertTrue(response.contains(":myStream5.time > log --password=******"));
-		assertTrue(response.contains("time | log --secret=******"));
+		assertTrue(response.contains(":myStream5.time > log --password='******'"));
+		assertTrue(response.contains("time | log --secret='******'"));
 		assertTrue(response.contains("\"totalElements\":2"));
 
 		String response2 = mockMvc.perform(
@@ -313,7 +305,7 @@ public class StreamControllerTests {
 				.param("deploy", "false"))
 				.andExpect(status().isCreated());
 		mockMvc.perform(post("/streams/definitions").param("name", "timelogDoubleTick")
-				.param("definition", "time --format=\"YYYY MM DD\" | log")
+				.param("definition", "a: time --format=\"YYYY MM DD\" | log")
 				.param("deploy", "false")).andExpect(status().isCreated());
 		mockMvc.perform(post("/streams/definitions/").param("name", "twoPassword")
 				.param("definition", "time --password='foo'| log --password=bar")
@@ -332,8 +324,8 @@ public class StreamControllerTests {
 				.perform(get("/streams/definitions/").accept(MediaType.APPLICATION_JSON))
 				.andReturn().getResponse().getContentAsString();
 
-		assertTrue(response.contains("time --password=****** | log"));
-		assertTrue(response.contains("time --foo=bar| log"));
+		assertTrue(response.contains("time --password='******' | log"));
+		assertTrue(response.contains("time --foo=bar | log"));
 
 		assertTrue(response.contains(":myStream1.time > log"));
 		assertTrue(response.contains("time | log"));
@@ -346,19 +338,18 @@ public class StreamControllerTests {
 		assertTrue(response.contains(":myStream2 > log"));
 		assertTrue(response.contains(":myStream3 > log"));
 		assertTrue(response.contains("time --format='YYYY MM DD' | log"));
-		assertTrue(response.contains("time --format=\\\"YYYY MM DD\\\" | log"));
-		assertTrue(response.contains("time --password=****** | log --password=******"));
-		System.out.println(response);
-		assertTrue(response.contains("time --password=****** > :foobar"));
-		assertTrue(response.contains("time --password=****** --arg=foo | log"));
-		assertTrue(response.contains("time --password=****** --arg=bar | log"));
+		assertTrue(response.contains("a: time --format='YYYY MM DD' | log"));
+		assertTrue(response.contains("time --password='******' | log --password='******'"));
+		assertTrue(response.contains("time --password='******' > :foobar"));
+		assertTrue(response.contains("time --password='******' --arg=foo | log"));
+		assertTrue(response.contains("time --password='******' --arg=bar | log"));
 
 		assertTrue(response.contains("\"totalElements\":15"));
 
 	}
 
 	@Test
-	public void testSaveInvalidAppDefintions() throws Exception {
+	public void testSaveInvalidAppDefinitions() throws Exception {
 		mockMvc.perform(post("/streams/definitions/").param("name", "myStream").param("definition", "foo | bar")
 				.accept(MediaType.APPLICATION_JSON)).andDo(print()).andExpect(status().isBadRequest())
 				.andExpect(jsonPath("$[0].logref", is("InvalidStreamDefinitionException")))
@@ -369,7 +360,7 @@ public class StreamControllerTests {
 	}
 
 	@Test
-	public void testSaveInvalidAppDefintionsDueToParseException() throws Exception {
+	public void testSaveInvalidAppDefinitionsDueToParseException() throws Exception {
 		mockMvc.perform(post("/streams/definitions/").param("name", "myStream")
 				.param("definition", "foo --.spring.cloud.stream.metrics.properties=spring* | bar")
 				.accept(MediaType.APPLICATION_JSON)).andDo(print()).andExpect(status().isBadRequest())
@@ -619,7 +610,7 @@ public class StreamControllerTests {
 		when(appDeployer.status("myStream.log")).thenReturn(status);
 		mockMvc.perform(get("/streams/definitions/myStream").accept(MediaType.APPLICATION_JSON))
 				.andExpect(status().isOk()).andExpect(content().json("{name: \"myStream\"}"))
-				.andExpect(content().json("{dslText: \"time --secret=****** | log\"}"));
+				.andExpect(content().json("{dslText: \"time --secret='******' | log\"}"));
 	}
 
 	@Test

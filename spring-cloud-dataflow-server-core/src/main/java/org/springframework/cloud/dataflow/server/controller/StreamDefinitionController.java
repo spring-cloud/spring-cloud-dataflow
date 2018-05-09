@@ -246,7 +246,7 @@ public class StreamDefinitionController {
 		@Override
 		public StreamDefinitionResource instantiateResource(StreamDefinition stream) {
 			final StreamDefinitionResource resource = new StreamDefinitionResource(stream.getName(),
-					ArgumentSanitizer.sanitizeStream(stream.getDslText()));
+					new ArgumentSanitizer().sanitizeStream(stream));
 			DeploymentState deploymentState = streamDeploymentStates.get(stream);
 			if (deploymentState != null) {
 				final DeploymentStateResource deploymentStateResource = ControllerUtils

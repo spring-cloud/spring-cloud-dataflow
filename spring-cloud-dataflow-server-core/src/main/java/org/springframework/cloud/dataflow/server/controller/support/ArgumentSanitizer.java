@@ -16,11 +16,14 @@
 
 package org.springframework.cloud.dataflow.server.controller.support;
 
-import java.util.regex.Matcher;
+import java.util.List;
+import java.util.Map;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
-import org.springframework.util.Assert;
-import org.springframework.util.StringUtils;
+import org.springframework.cloud.dataflow.core.StreamAppDefinition;
+import org.springframework.cloud.dataflow.core.StreamDefinition;
+import org.springframework.cloud.dataflow.core.StreamDefinitionToDslConverter;
 
 /**
  * Sanitizes potentially sensitive keys for a specific command line arg.
@@ -34,24 +37,17 @@ public class ArgumentSanitizer {
 
 	private static final String[] KEYS_TO_SANITIZE = { "password", "secret", "key", "token", ".*credentials.*",
 			"vcap_services" };
-	//used to find the passwords embedded in a stream definition
-	private static Pattern passwordParameterPatternForStreams = Pattern.compile(
-			//Search for the -- characters then look for unicode letters
-			"(?i)(--[\\p{Z}]*[\\p{L}.]*[\\p{Pd}]*("
-					//that match the following strings from the KEYS_TO_SANITIZE array
-					+ StringUtils.arrayToDelimitedString(KEYS_TO_SANITIZE, "|")
-					//Following the equal sign (group1) accept any number of unicode characters(letters, open punctuation, close punctuation etc) for the value to be sanitized for group 3.
-					+ ")[\\p{L}-]*[\\p{Z}]*=[\\p{Z}]*)((\"[\\p{L}-|\\p{Pd}|\\p{Ps}|\\p{Pe}|\\p{Pc}|\\p{S}|\\p{N}|\\p{Z}]*\")|([\\p{N}|\\p{L}-|\\p{Po}|\\p{Pc}|\\p{S}]*))",
-			Pattern.UNICODE_CASE);
-
 
 	private Pattern[] keysToSanitize;
+
+	private StreamDefinitionToDslConverter dslConverter;
 
 	public ArgumentSanitizer() {
 		this.keysToSanitize = new Pattern[KEYS_TO_SANITIZE.length];
 		for (int i = 0; i < keysToSanitize.length; i++) {
 			this.keysToSanitize[i] = getPattern(KEYS_TO_SANITIZE[i]);
 		}
+		this.dslConverter = new StreamDefinitionToDslConverter();
 	}
 
 	private Pattern getPattern(String value) {
@@ -107,38 +103,24 @@ public class ArgumentSanitizer {
 	}
 
 	/**
-	 * Redacts sensitive values in a stream.
+	 * Redacts sensitive property values in a stream.
 	 *
-	 * @param definition the definition to sanitize
-	 * @return Stream definition that has sensitive data redacted.
+	 * @param streamDefinition the stream definition to sanitize
+	 * @return Stream definition text that has sensitive data redacted.
 	 */
-	public static String sanitizeStream(String definition) {
-		Assert.hasText(definition, "definition must not be null nor empty");
-		final StringBuffer output = new StringBuffer();
-		final Matcher matcher = passwordParameterPatternForStreams.matcher(definition);
-		while (matcher.find()) {
-			String passwordValue = matcher.group(3);
+	public String sanitizeStream(StreamDefinition streamDefinition) {
+		List<StreamAppDefinition> sanitizedAppDefinitions = streamDefinition.getAppDefinitions().stream()
+				.map(app -> StreamAppDefinition.Builder
+						.from(app)
+						.setProperties(this.sanitizeProperties(app.getProperties()))
+						.build(streamDefinition.getName())
+				).collect(Collectors.toList());
 
-			String maskedPasswordValue;
-			boolean isPipeAppended = false;
-			boolean isNameChannelAppended = false;
-			if (passwordValue.endsWith("|")) {
-				isPipeAppended = true;
-			}
-			if (passwordValue.endsWith(">")) {
-				isNameChannelAppended = true;
-			}
-			maskedPasswordValue = REDACTION_STRING;
-			if (isPipeAppended) {
-				maskedPasswordValue = maskedPasswordValue + " |";
-			}
-			if (isNameChannelAppended) {
-				maskedPasswordValue = maskedPasswordValue + " >";
-			}
-			matcher.appendReplacement(output, matcher.group(1) + maskedPasswordValue);
-		}
-		matcher.appendTail(output);
-		return output.toString();
+		return this.dslConverter.toDsl(sanitizedAppDefinitions);
 	}
 
+	private Map<String, String> sanitizeProperties(Map<String, String> properties) {
+		return properties.entrySet().stream()
+				.collect(Collectors.toMap(e -> e.getKey(), e -> this.sanitize(e.getKey(), e.getValue())));
+	}
 }

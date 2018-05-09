@@ -184,7 +184,7 @@ public class StreamDeploymentController {
 				deploymentProperties = streamDeployment.getDeploymentProperties();
 			}
 			return new StreamDeploymentResource(streamDeployment.getStreamName(),
-					ArgumentSanitizer.sanitizeStream(this.dslText), deploymentProperties, this.status);
+					new ArgumentSanitizer().sanitizeStream(new StreamDefinition(streamDeployment.getStreamName(), this.dslText)), deploymentProperties, this.status);
 		}
 
 		private boolean canDisplayDeploymentProperties() {
