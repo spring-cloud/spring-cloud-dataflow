@@ -17,7 +17,7 @@ services:
     environment:
       - KAFKA_ADVERTISED_HOST_NAME=zookeeper
   dataflow-server:
-    image: springcloud/spring-cloud-dataflow-server-local:1.4.0.RELEASE
+    image: springcloud/spring-cloud-dataflow-server-local:1.4.1.RELEASE
     container_name: dataflow-server
     ports:
       - "9393:9393"
