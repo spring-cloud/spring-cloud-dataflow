@@ -190,7 +190,7 @@
 				<configuration>
 				  <images>
 					<image>
-					  <name>springcloud/${project.artifactId}</name>
+					  <name>springcloud/${project.artifactId}:%v</name>
 					  <build>
 						<from>java:8-alpine</from>
 						<volumes>
