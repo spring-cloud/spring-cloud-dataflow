@@ -34,7 +34,7 @@
 
 		<spring-cloud-skipper.version>1.0.3.RELEASE</spring-cloud-skipper.version>
 		<!-- Note: Change ./spring-cloud-dataflow-server-local/pom.xml to match the spring-boot.version -->
-		<spring-boot.version>1.5.12.RELEASE</spring-boot.version>
+		<spring-boot.version>1.5.13.RELEASE</spring-boot.version>
 
 		<!-- Note: Change ./spring-cloud-dataflow-server-local/pom.xml to match the spring-cloud-task.version -->
 		<spring-cloud-task.version>1.2.2.RELEASE</spring-cloud-task.version>
