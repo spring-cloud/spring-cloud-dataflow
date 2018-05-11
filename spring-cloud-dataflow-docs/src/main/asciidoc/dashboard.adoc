@@ -241,23 +241,18 @@ On this screen, you can perform the following actions:
 * View details, such as the task app options.
 * Create a task definition from the respective app.
 
-
-
 ==== View Task App Details
 
 On this page you can view the details of a selected task app, including the list of available options (properties) for that app.
 
+==== Create a Task Definition
 
+image::{dataflow-asciidoc}/images/dataflow-task-definition-create.png[List of Task Apps, scaledwidth="100%"]
 
-==== Create a Task Definition from a Selected Task App
-
-On this screen you can create a new Task Definition.
 At a minimum, you must provide a name for the new definition.
 You also have the option to specify various properties that are used during the deployment of the app.
 
 NOTE: Each parameter is included only if the Include checkbox is selected.
-
-
 
 [[dashboard-task-definition]]
 === Definitions
@@ -270,44 +265,6 @@ The following image shows the Definitions page:
 
 .List of Task Definitions
 image::{dataflow-asciidoc}/images/dataflow-task-definitions-list.png[List of Task Definitions, scaledwidth="100%"]
-
-
-
-==== Creating Task Definitions with the Bulk Define Interface
-
-After pressing Bulk Define Tasks, the following screen appears:
-
-.Bulk Define Tasks
-image::{dataflow-asciidoc}/images/dataflow-bulk-define-tasks.png[Bulk Define Tasks, scaledwidth="100%"]
-
-It includes a textbox where one or more definitions can be entered
-and, for each definition, various actions that can be performed.
-Each line of the text input should be formatted as follows:
-
-`<task-definition-name> = <task-application> <options>`
-
-For example, the following line defines an a task called `demo-timestamp`:
-
-`demo-timestamp = timestamp --format=hhmmss`
-
-After entering any data, a validator runs asynchronously to verify the syntax, that the application name entered is a valid application, and that it supports the options specified.
-If validation fails, the editor shows the errors with more information available in tooltips.
-
-To make it easier to enter definitions into the text area, content assist is supported.
-Pressing Ctrl+Space invokes content assist to suggest simple task names (based on the line on which it is invoked), task applications, and task application options.
-Press Escape to close the content assist window without choosing a selection.
-
-If the validator should not verify the applications or the options (for example, when specifying non-whitelisted options to the applications), you can turn off that part of validation by toggling the checkbox off on the Verify Apps button.
-The validator then performs only syntax checking.
-When an app is correctly validated, the Create button becomes clickable.
-Clicking it causes the creation of each task definition.
-If there are any errors during creation, then, after creation finishes, the editor shows any lines of input that cannot be used in task definitions.
-These can then be fixed, and the creation process can be repeated.
-The Import File button opens a file browser on the local file system, for those cases where the definitions are in a file and it is easier to import than copy and paste.
-
-NOTE: Bulk loading of composed task definitions is not currently supported.
-
-
 
 ==== Creating Composed Task Definitions
 
