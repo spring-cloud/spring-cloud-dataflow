@@ -78,7 +78,7 @@ NOTE: Depending on the Spring Cloud Data Flow server implementation, you may hav
 
 === Logging
 
-Spring Cloud Data Flow is built upon several Spring projects, but ultimately the dataflow-server is a Spring Boot app, so the logging techniques that apply to any link:http://docs.spring.io/spring-boot/docs/current/reference/html/howto-logging.html#howto-logging[Spring Boot] application are applicable here as well.
+Spring Cloud Data Flow is built upon several Spring projects, but ultimately the dataflow-server is a Spring Boot app, so the logging techniques that apply to any link:{spring-boot-docs-reference}/html/howto-logging.html#howto-logging[Spring Boot] application are applicable here as well.
 
 While troubleshooting, the two primary areas where enabling the DEBUG logs could be useful are
 

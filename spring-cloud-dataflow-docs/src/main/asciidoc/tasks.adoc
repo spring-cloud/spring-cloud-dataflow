@@ -74,7 +74,7 @@ public class MyTask {
 ----
 +
 . With this class, you need one or more `CommandLineRunner` or `ApplicationRunner` implementations within your application.  You can either implement your own or use the ones provided by Spring Boot (there is one for running batch jobs, for example).
-. Packaging your application with Spring Boot into an über jar is done through the standard https://docs.spring.io/spring-boot/docs/current/reference/html/getting-started-first-application.html#getting-started-first-application-executable-jar[Spring Boot conventions].
+. Packaging your application with Spring Boot into an über jar is done through the standard {spring-boot-docs-reference}/html/getting-started-first-application.html#getting-started-first-application-executable-jar[Spring Boot conventions].
 The packaged application can be registered and deployed as noted below.
 
 
