@@ -123,19 +123,6 @@
                         </configuration>
                         <executions>
                             <execution>
-                                <id>generate-docbook</id>
-                                <phase>prepare-package</phase>
-                                <goals>
-                                    <goal>process-asciidoc</goal>
-                                </goals>
-                                <configuration>
-                                    <backend>docbook5</backend>
-                                    <attributes>
-                                        <docinfo>true</docinfo>
-                                    </attributes>
-                                </configuration>
-                            </execution>
-                            <execution>
                                 <id>generate-html5</id>
                                 <phase>prepare-package</phase>
                                 <goals>
@@ -146,74 +133,6 @@
                                     <attributes>
                                         <toc2 />
                                     </attributes>
-                                </configuration>
-                            </execution>
-                        </executions>
-                    </plugin>
-                    <plugin>
-                        <groupId>com.agilejava.docbkx</groupId>
-                        <artifactId>docbkx-maven-plugin</artifactId>
-                        <version>${docbkx-maven-plugin.version}</version>
-                        <configuration>
-                            <sourceDirectory>${basedir}/target/generated-docs</sourceDirectory>
-                            <imgSrcPath />
-                            <graphicsize.extension>0</graphicsize.extension>
-                            <includes>index.xml</includes>
-                            <xincludeSupported>true</xincludeSupported>
-                            <chunkedOutput>false</chunkedOutput>
-                            <foCustomization>${basedir}/src/main/docbook/xsl/pdf.xsl</foCustomization>
-                            <useExtensions>1</useExtensions>
-                            <admonGraphics>1</admonGraphics>
-
-                            <highlightSource>1</highlightSource>
-                            <highlightXslthlConfig>${basedir}/src/main/docbook/xsl/xslthl-config.xml
-                            </highlightXslthlConfig>
-                            <preProcess>
-                                <copy todir="${basedir}/target/generated-docs/images">
-                                    <fileset dir="${basedir}/src/main/docbook/images" />
-                                </copy>
-                            </preProcess>
-                        </configuration>
-                        <dependencies>
-                            <dependency>
-                                <groupId>net.sf.xslthl</groupId>
-                                <artifactId>xslthl</artifactId>
-                                <version>${xslthl.version}</version>
-                            </dependency>
-                            <dependency>
-                                <groupId>net.sf.docbook</groupId>
-                                <artifactId>docbook-xml</artifactId>
-                                <version>${docbook-xml.version}</version>
-                                <classifier>resources</classifier>
-                                <type>zip</type>
-                                <scope>runtime</scope>
-                            </dependency>
-                        </dependencies>
-                        <executions>
-                            <execution>
-                                <id>html</id>
-                                <goals>
-                                    <goal>generate-html</goal>
-                                </goals>
-                                <phase>prepare-package</phase>
-                                <configuration>
-                                    <htmlCustomization>${basedir}/src/main/docbook/xsl/html-multipage.xsl
-                                    </htmlCustomization>
-                                    <targetDirectory>${basedir}/target/docbook/html</targetDirectory>
-                                    <chunkedOutput>true</chunkedOutput>
-                                    <postProcess>
-                                        <copy todir="${basedir}/target/contents/reference/html">
-                                            <fileset dir="${basedir}/target/docbook/html">
-                                                <include name="**/*.html" />
-                                            </fileset>
-                                        </copy>
-                                        <copy todir="${basedir}/target/contents/reference/html/images">
-                                            <fileset dir="${basedir}/target/generated-docs/images" />
-                                        </copy>
-                                        <copy todir="${basedir}/target/contents/reference/html/css">
-                                            <fileset dir="${basedir}/src/main/docbook/css" />
-                                        </copy>
-                                    </postProcess>
                                 </configuration>
                             </execution>
                         </executions>
@@ -256,7 +175,6 @@
                                     <target>
                                         <zip destfile="${project.build.directory}/${project.artifactId}-${project.version}.zip">
                                             <zipfileset src="${project.build.directory}/${project.artifactId}-${project.version}-javadoc.jar" prefix="api" />
-                                            <fileset dir="${project.build.directory}/contents" />
                                             <zipfileset dir="${project.build.directory}/generated-docs" prefix="reference/htmlsingle">
                                                 <include name="index.html" />
                                                 <include name="images/**" />
