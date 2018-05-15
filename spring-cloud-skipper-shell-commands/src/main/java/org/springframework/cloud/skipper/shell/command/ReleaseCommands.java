@@ -30,10 +30,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.deployer.spi.app.DeploymentState;
 import org.springframework.cloud.skipper.ReleaseNotFoundException;
-import org.springframework.cloud.skipper.SkipperException;
 import org.springframework.cloud.skipper.client.SkipperClient;
-import org.springframework.cloud.skipper.domain.CancelRequest;
-import org.springframework.cloud.skipper.domain.CancelResponse;
 import org.springframework.cloud.skipper.domain.ConfigValues;
 import org.springframework.cloud.skipper.domain.Info;
 import org.springframework.cloud.skipper.domain.PackageIdentifier;
@@ -216,16 +213,6 @@ public class ReleaseCommands extends AbstractSkipperCommand {
 		StringBuilder sb = new StringBuilder();
 		sb.append(releaseName + " has been deleted.");
 		return sb.toString();
-	}
-
-	@ShellMethod(key = "release cancel", value = "Request a cancellation of current release operation.")
-	public String cancel(
-			@ShellOption(help = "the name of the release to cancel") String releaseName) {
-		CancelResponse cancelResponse = this.skipperClient.cancel(new CancelRequest(releaseName));
-		if (cancelResponse != null && cancelResponse.getAccepted() != null && cancelResponse.getAccepted()) {
-			return "Cancel request for release " + releaseName + " sent";			
-		}
-		throw new SkipperException("Cancel request for release " + releaseName + " not accepted");
 	}
 
 	@ShellMethod(key = "release list", value = "List the latest version of releases with status of deployed or failed.")

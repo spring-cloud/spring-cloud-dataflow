@@ -36,7 +36,6 @@ import org.springframework.boot.autoconfigure.orm.jpa.HibernateJpaAutoConfigurat
 import org.springframework.boot.autoconfigure.web.ErrorMvcAutoConfiguration;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.cloud.skipper.domain.CancelResponse;
 import org.springframework.cloud.skipper.domain.Info;
 import org.springframework.cloud.skipper.domain.Release;
 import org.springframework.cloud.skipper.domain.StatusCode;
@@ -123,18 +122,6 @@ public abstract class AbstractMockMvcTests extends AbstractAssertReleaseDeployed
 		objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
 		try {
 			return objectMapper.readValue(json, new TypeReference<Release>() {
-			});
-		}
-		catch (IOException e) {
-			throw new IllegalArgumentException("Can't parse JSON for Release", e);
-		}
-	}
-
-	protected CancelResponse convertContentToCancelResponse(String json) {
-		ObjectMapper objectMapper = new ObjectMapper();
-		objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-		try {
-			return objectMapper.readValue(json, new TypeReference<CancelResponse>() {
 			});
 		}
 		catch (IOException e) {

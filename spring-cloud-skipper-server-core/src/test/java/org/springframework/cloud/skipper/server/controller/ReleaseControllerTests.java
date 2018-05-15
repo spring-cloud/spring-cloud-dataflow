@@ -28,7 +28,6 @@ import org.springframework.cloud.skipper.domain.Release;
 import org.springframework.cloud.skipper.domain.Repository;
 import org.springframework.cloud.skipper.domain.StatusCode;
 import org.springframework.cloud.skipper.server.repository.RepositoryRepository;
-import org.springframework.http.HttpStatus;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
@@ -184,25 +183,6 @@ public class ReleaseControllerTests extends AbstractControllerTests {
 		release = upgrade("log", "1.1.0", releaseName);
 
 		assertThat(release.getVersion()).isEqualTo(2);
-	}
-
-	@Test
-	public void cancelNonExistingRelease() throws Exception {
-		cancel("myLog2", HttpStatus.OK.value(), false);
-	}
-
-	@Test
-	public void packageDeployAndUpgradeAndCancel() throws Exception {
-		String releaseName = "myTestapp";
-		Release release = install("testapp", "1.0.0", releaseName);
-		assertThat(release.getVersion()).isEqualTo(1);
-
-		// Upgrade
-		release = upgrade("testapp", "1.1.0", releaseName, false);
-		assertThat(release.getVersion()).isEqualTo(2);
-
-		// Cancel
-		cancel(releaseName, HttpStatus.OK.value(), true);
 	}
 
 	@Test

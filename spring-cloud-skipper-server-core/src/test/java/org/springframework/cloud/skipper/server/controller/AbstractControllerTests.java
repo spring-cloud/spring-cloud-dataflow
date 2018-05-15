@@ -21,8 +21,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cloud.skipper.domain.CancelRequest;
-import org.springframework.cloud.skipper.domain.CancelResponse;
 import org.springframework.cloud.skipper.domain.InstallProperties;
 import org.springframework.cloud.skipper.domain.InstallRequest;
 import org.springframework.cloud.skipper.domain.PackageIdentifier;
@@ -81,7 +79,7 @@ public abstract class AbstractControllerTests extends AbstractMockMvcTests {
 							.andDo(print())
 							.andExpect(status().isOk()).andReturn();
 				}
-				catch (Throwable e) {
+				catch (Exception e) {
 					logger.warn("Can not delete release {}-v{}, as it has not yet deployed.", release.getName(),
 							release.getVersion());
 				}
@@ -122,11 +120,6 @@ public abstract class AbstractControllerTests extends AbstractMockMvcTests {
 	}
 
 	protected Release upgrade(String packageName, String packageVersion, String releaseName) throws Exception {
-		return upgrade(packageName, packageVersion, releaseName, true);
-	}
-
-	protected Release upgrade(String packageName, String packageVersion, String releaseName, boolean wait)
-			throws Exception {
 		UpgradeRequest upgradeRequest = new UpgradeRequest();
 		UpgradeProperties upgradeProperties = createUpdateProperties(releaseName);
 		PackageIdentifier packageIdentifier = new PackageIdentifier();
@@ -142,13 +135,9 @@ public abstract class AbstractControllerTests extends AbstractMockMvcTests {
 				.content(convertObjectToJson(upgradeRequest))).andDo(print())
 				.andExpect(status().isCreated()).andReturn();
 		Release release = convertContentToRelease(result.getResponse().getContentAsString());
-		if (wait) {
-			assertReleaseIsDeployedSuccessfully(releaseName, release.getVersion());
-		}
+		assertReleaseIsDeployedSuccessfully(releaseName, release.getVersion());
 		Release updatedRelease = this.releaseRepository.findByNameAndVersion(releaseName, release.getVersion());
-		if (wait) {
-			commonReleaseAssertions(releaseName, updatePackageMetadata, updatedRelease);
-		}
+		commonReleaseAssertions(releaseName, updatePackageMetadata, updatedRelease);
 		return updatedRelease;
 	}
 
@@ -159,13 +148,6 @@ public abstract class AbstractControllerTests extends AbstractMockMvcTests {
 		assertReleaseIsDeployedSuccessfully(releaseName, release.getVersion());
 		Release updatedRelease = this.releaseRepository.findByNameAndVersion(releaseName, release.getVersion());
 		return updatedRelease;
-	}
-
-	protected void cancel(String releaseName, int expectStatus, boolean accepted) throws Exception {
-		MvcResult result = mockMvc.perform(post("/api/release/cancel").content(convertObjectToJson(new CancelRequest(releaseName)))).andDo(print())
-				.andExpect(status().is(expectStatus)).andReturn();
-		CancelResponse response = convertContentToCancelResponse(result.getResponse().getContentAsString());
-		assertThat(response.getAccepted()).isEqualTo(accepted);
 	}
 
 	protected void commonReleaseAssertions(String releaseName, PackageMetadata packageMetadata,
