@@ -190,9 +190,12 @@
 				<configuration>
 				  <images>
 					<image>
-					  <!-- %l = If the project version ends with -SNAPSHOT then this placeholder is latest, otherwise it is ${project.version} -->
-					  <name>springcloud/${project.artifactId}:%l</name>
+					  <name>springcloud/${project.artifactId}</name>
 					  <build>
+						  <tags>
+							  <tag>latest</tag>
+							  <tag>${project.version}</tag>
+						  </tags>
 						<from>java:8-alpine</from>
 						<volumes>
 						  <volume>/tmp</volume>
