@@ -14,6 +14,8 @@ Sabby Anandan; Marius Bogoevici; Eric Bottard; Mark Fisher; Ilayaperumal Gopinat
 :spring-cloud-stream-docs: https://docs.spring.io/spring-cloud-stream/docs/current/reference/htmlsingle/index.html
 :spring-boot-version: 1.5.13.RELEASE
 :spring-boot-docs-reference: https://docs.spring.io/spring-boot/docs/1.5.13.RELEASE/reference
+:scs-app-starters-docs: https://docs.spring.io/spring-cloud-stream-app-starters/docs/Celsius.SR2/reference/html
+:scs-app-starters-docs-htmlsingle: https://docs.spring.io/spring-cloud-stream-app-starters/docs/Celsius.SR2/reference/htmlsingle
 :github-repo: spring-cloud/spring-cloud-dataflow
 :github-code: https://github.com/{github-repo}
 

@@ -338,7 +338,7 @@ java -jar spring-cloud-dataflow-server-local/target/spring-cloud-dataflow-server
 
 Spring Cloud Data Flow internally uses `bridge-processor` to directly connect different named channel destinations.
 Since we are publishing and subscribing from two different messaging systems, you must build the `bridge-processor` with both RabbitMQ and Apache Kafka binders in the classpath.
-To do that, head over to http://start-scs.cfapps.io/ and select `Bridge Processor`, `Kafka binder starter`, and `Rabbit binder starter` as the dependencies and follow the patching procedure described in the link:http://docs.spring.io/spring-cloud-stream-app-starters/docs/Celsius.SR1/reference/html/_introduction.html#customizing-binder[reference guide].
+To do that, head over to http://start-scs.cfapps.io/ and select `Bridge Processor`, `Kafka binder starter`, and `Rabbit binder starter` as the dependencies and follow the patching procedure described in the link:{scs-app-starters-docs}/_introduction.html#customizing-binder[reference guide].
 Specifically, for the `bridge-processor`, you must import the `BridgeProcessorConfiguration` provided by the starter.
 
 Once you have the necessary adjustments, you can build the application. The following example registers the name of the
