@@ -124,9 +124,9 @@ Once the ‘ticktock’ stream is deployed, two running stream apps will appear 
 <img class="styled-image" src="img/ticktock-log-runtime.png" alt="Deploy TickTock Stream" title="Runtime app details"/>
 <br>
 
-<u><b>Step 5</b></u> - Verify that events are being written to the ticktock log every second.
+<u><b>Step 5</b></u> - Verify that events are being written to the ticktock log every second. To view the stream logs, copy the path in the "stdout" text box on the dashboard and in another console type:
 ```
-tail -f /var/folders/ ... /ticktock.log/stdout_0.log
+docker exec -it dataflow-server tail -f /var/folders/................./ticktock.log/stdout_0.log
 ```
 
 <br>
