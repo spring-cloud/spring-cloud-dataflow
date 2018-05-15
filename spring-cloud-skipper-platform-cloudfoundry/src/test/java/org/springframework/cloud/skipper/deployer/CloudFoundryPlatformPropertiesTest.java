@@ -32,6 +32,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * @author Donovan Muller
+ * @author Ilayaperumal Gopinathan
  */
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = CloudFoundryPlatformPropertiesTest.TestConfig.class)
@@ -52,11 +53,14 @@ public class CloudFoundryPlatformPropertiesTest {
 		assertThat(cfAccounts.get("dev").getDeployment().getMemory()).isEqualTo("512m");
 		assertThat(cfAccounts.get("dev").getDeployment().getDisk()).isEqualTo("2048m");
 		assertThat(cfAccounts.get("dev").getDeployment().getInstances()).isEqualTo(4);
+		assertThat(cfAccounts.get("dev").getDeployment().getAppNamePrefix().equals("dev1"));
 		assertThat(cfAccounts.get("dev").getDeployment().getServices())
 				.containsExactly("rabbit", "mysql");
+
 		assertThat(cfAccounts.get("qa").getDeployment().getMemory()).isEqualTo("756m");
 		assertThat(cfAccounts.get("qa").getDeployment().getDisk()).isEqualTo("724m");
 		assertThat(cfAccounts.get("qa").getDeployment().getInstances()).isEqualTo(2);
+		assertThat(cfAccounts.get("qa").getDeployment().getAppNamePrefix().equals("qa1"));
 		assertThat(cfAccounts.get("qa").getDeployment().getServices())
 				.containsExactly("rabbitQA", "mysqlQA");
 	}

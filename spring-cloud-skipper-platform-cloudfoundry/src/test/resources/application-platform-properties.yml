@@ -23,6 +23,7 @@ spring:
                   disk: 2048m
                   instances: 4
                   services: rabbit,mysql
+                  appNamePrefix: dev1
               qa:
                 connection:
                   url: https://api.run.pivotal.io
@@ -37,3 +38,4 @@ spring:
                   disk: 724m
                   instances: 2
                   services: rabbitQA,mysqlQA
+                  appNamePrefix: qa1

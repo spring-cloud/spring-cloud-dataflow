@@ -237,7 +237,8 @@ public class AppDeployerReleaseManager implements ReleaseManager {
 			for (String deploymentId : deploymentIds) {
 				AppStatus appStatus = appDeployer.status(deploymentId);
 
-				if (appStatus.getState().equals(DeploymentState.failed)) {
+				if (appStatus.getState().equals(DeploymentState.failed) ||
+						appStatus.getState().equals(DeploymentState.error)) {
 					// check if we have 'early' status computed via multiStateAppDeployer
 					if (deploymentStateMap.containsKey(deploymentId)) {
 						appStatus = AppStatus.of(deploymentId).generalState(deploymentStateMap.get(deploymentId))

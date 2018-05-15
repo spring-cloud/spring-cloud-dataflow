@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 the original author or authors.
+ * Copyright 2017-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,9 +16,8 @@
 package org.springframework.cloud.skipper.server.autoconfigure;
 
 import java.time.Duration;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
+import java.util.stream.Collectors;
 
 import com.github.zafarkhaja.semver.Version;
 import org.cloudfoundry.client.CloudFoundryClient;
@@ -41,6 +40,7 @@ import org.springframework.cloud.deployer.spi.cloudfoundry.CloudFoundryConnectio
 import org.springframework.cloud.deployer.spi.cloudfoundry.CloudFoundryDeploymentProperties;
 import org.springframework.cloud.deployer.spi.core.RuntimeEnvironmentInfo;
 import org.springframework.cloud.deployer.spi.util.RuntimeVersionUtils;
+import org.springframework.cloud.skipper.SkipperException;
 import org.springframework.cloud.skipper.deployer.cloudfoundry.CloudFoundryPlatformProperties;
 import org.springframework.cloud.skipper.domain.Deployer;
 import org.springframework.cloud.skipper.domain.Platform;
@@ -49,6 +49,7 @@ import org.springframework.context.annotation.Configuration;
 
 /**
  * @author Donovan Muller
+ * @author Ilayaperumal Gopinathan
  */
 @Configuration
 @EnableConfigurationProperties(CloudFoundryPlatformProperties.class)
@@ -60,21 +61,14 @@ public class CloudFoundryPlatformAutoConfiguration {
 	@Bean
 	public Platform cloudFoundryPlatform(
 			CloudFoundryPlatformProperties cloudFoundryPlatformProperties) {
-		List<Deployer> deployers = new ArrayList<>();
-		Map<String, CloudFoundryPlatformProperties.CloudFoundryProperties> cfConnectionProperties = cloudFoundryPlatformProperties
-				.getAccounts();
-		cfConnectionProperties.forEach((key, value) -> {
-			Deployer deployer = createAndSaveCFAppDeployer(key, value);
-			deployers.add(deployer);
-		});
-
+		List<Deployer> deployers = cloudFoundryPlatformProperties.getAccounts().entrySet().stream().map(
+				e -> createAndSaveCFAppDeployer(e.getKey(), e.getValue())
+		).collect(Collectors.toList());
 		return new Platform("Cloud Foundry", deployers);
 	}
 
 	private Deployer createAndSaveCFAppDeployer(String account,
 			CloudFoundryPlatformProperties.CloudFoundryProperties cloudFoundryProperties) {
-		CloudFoundryAppNameGenerator appNameGenerator = new CloudFoundryAppNameGenerator(
-				cloudFoundryProperties.getDeployment());
 		CloudFoundryDeploymentProperties deploymentProperties = cloudFoundryProperties
 				.getDeployment();
 		if (deploymentProperties == null) {
@@ -117,6 +111,9 @@ public class CloudFoundryPlatformAutoConfiguration {
 					.builder().cloudFoundryClient(cloudFoundryClient)
 					.organization(connectionProperties.getOrg())
 					.space(connectionProperties.getSpace()).build();
+			CloudFoundryAppNameGenerator appNameGenerator = new CloudFoundryAppNameGenerator(
+					cloudFoundryProperties.getDeployment());
+			appNameGenerator.afterPropertiesSet();
 			CloudFoundryAppDeployer cfAppDeployer = new CloudFoundryAppDeployer(
 					appNameGenerator, deploymentProperties, cloudFoundryOperations,
 					runtimeEnvironmentInfo);
@@ -129,7 +126,7 @@ public class CloudFoundryPlatformAutoConfiguration {
 		catch (Exception e) {
 			logger.error("Cloud Foundry platform account [{}] could not be registered: {}",
 					account, e.getMessage());
-			throw e;
+			throw new SkipperException(e.getMessage());
 		}
 	}
 }
