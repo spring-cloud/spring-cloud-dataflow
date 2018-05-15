@@ -7,133 +7,133 @@ A selection of pre-built link:http://cloud.spring.io/spring-cloud-stream-app-sta
 --
 
 == Available Applications
-[width="100%",frame="topbot",options="header"]
+[width="100%",frame="topbot",options="header",subs=attributes]
 |======================
 |Source |Processor |Sink |Task
 
-|link:https://docs.spring.io/spring-cloud-stream-app-starters/docs/Celsius.SR1/reference/htmlsingle/#spring-cloud-stream-modules-sftp-source[sftp]
-|link:https://docs.spring.io/spring-cloud-stream-app-starters/docs/Celsius.SR1/reference/htmlsingle/#spring-cloud-stream-modules-tcp-client-processor[tcp-client]
-|link:https://docs.spring.io/spring-cloud-stream-app-starters/docs/Celsius.SR1/reference/htmlsingle/#spring-cloud-stream-modules-mqtt-sink[mqtt]
+|link:{scs-app-starters-docs-htmlsingle}/#spring-cloud-stream-modules-sftp-source[sftp]
+|link:{scs-app-starters-docs-htmlsingle}/#spring-cloud-stream-modules-tcp-client-processor[tcp-client]
+|link:{scs-app-starters-docs-htmlsingle}/#spring-cloud-stream-modules-mqtt-sink[mqtt]
 |link:https://docs.spring.io/spring-cloud-task-app-starters/docs/Clark.RELEASE/reference/htmlsingle/#_spark_yarn_task[spark-yarn]
 
-|link:https://docs.spring.io/spring-cloud-stream-app-starters/docs/Celsius.SR1/reference/htmlsingle/#spring-cloud-stream-modules-jms-source[jms]
-|link:https://docs.spring.io/spring-cloud-stream-app-starters/docs/Celsius.SR1/reference/htmlsingle/#spring-cloud-stream-modules-scriptable-transform[scriptable-transform]
-|link:https://docs.spring.io/spring-cloud-stream-app-starters/docs/Celsius.SR1/reference/htmlsingle/#spring-cloud-stream-modules-log-sink[log]
+|link:{scs-app-starters-docs-htmlsingle}/#spring-cloud-stream-modules-jms-source[jms]
+|link:{scs-app-starters-docs-htmlsingle}/#spring-cloud-stream-modules-scriptable-transform[scriptable-transform]
+|link:{scs-app-starters-docs-htmlsingle}/#spring-cloud-stream-modules-log-sink[log]
 |link:https://docs.spring.io/spring-cloud-task-app-starters/docs/Clark.RELEASE/reference/htmlsingle/#_spark_cluster_task[spark-cluster]
 
-|link:https://docs.spring.io/spring-cloud-stream-app-starters/docs/Celsius.SR1/reference/htmlsingle/#spring-cloud-stream-modules-ftp-source[ftp]
-|link:https://docs.spring.io/spring-cloud-stream-app-starters/docs/Celsius.SR1/reference/htmlsingle/#spring-clound-stream-modules-transform-processor[transform]
+|link:{scs-app-starters-docs-htmlsingle}/#spring-cloud-stream-modules-ftp-source[ftp]
+|link:{scs-app-starters-docs-htmlsingle}/#spring-clound-stream-modules-transform-processor[transform]
 |task-launcher-yarn
 |link:https://docs.spring.io/spring-cloud-task-app-starters/docs/Clark.RELEASE/reference/html/spring-cloud-task-modules-spark-client.html[spark-client]
 
-|link:https://docs.spring.io/spring-cloud-stream-app-starters/docs/Celsius.SR1/reference/htmlsingle/#spring-cloud-stream-modules-time-source[time]
-|link:https://docs.spring.io/spring-cloud-stream-app-starters/docs/Celsius.SR1/reference/htmlsingle/#spring-cloud-stream-modules-header-enricher-processor[header-enricher]
-|link:https://docs.spring.io/spring-cloud-stream-app-starters/docs/Celsius.SR1/reference/htmlsingle/#spring-cloud-stream-modules-throughput-sink[throughput]
+|link:{scs-app-starters-docs-htmlsingle}/#spring-cloud-stream-modules-time-source[time]
+|link:{scs-app-starters-docs-htmlsingle}/#spring-cloud-stream-modules-header-enricher-processor[header-enricher]
+|link:{scs-app-starters-docs-htmlsingle}/#spring-cloud-stream-modules-throughput-sink[throughput]
 |link:https://docs.spring.io/spring-cloud-task-app-starters/docs/Clark.RELEASE/reference/htmlsingle/#_timestamp_task[timestamp]
 
-|link:https://docs.spring.io/spring-cloud-stream-app-starters/docs/Celsius.SR1/reference/htmlsingle/#spring-cloud-stream-modules-load-generator-source[load-generator]
-|link:https://docs.spring.io/spring-cloud-stream-app-starters/docs/Celsius.SR1/reference/htmlsingle/#spring-cloud-stream-modules-python-http-processor[python-http]
+|link:{scs-app-starters-docs-htmlsingle}/#spring-cloud-stream-modules-load-generator-source[load-generator]
+|link:{scs-app-starters-docs-htmlsingle}/#spring-cloud-stream-modules-python-http-processor[python-http]
 |task-launcher-local
 |link:https://docs.spring.io/spring-cloud-task-app-starters/docs/Clark.RELEASE/reference/htmlsingle/#_jdbchdfs_task[jdbchdfs-local]
 
-|link:https://docs.spring.io/spring-cloud-stream-app-starters/docs/Celsius.SR1/reference/htmlsingle/#spring-cloud-stream-modules-syslog-source[syslog]
-|link:https://docs.spring.io/spring-cloud-stream-app-starters/docs/Celsius.SR1/reference/htmlsingle/#spring-cloud-stream-modules-twitter-sentiment-processor[twitter-sentiment]
-|link:https://docs.spring.io/spring-cloud-stream-app-starters/docs/Celsius.SR1/reference/htmlsingle/#spring-cloud-stream-modules-mongodb-sink[mongodb]
+|link:{scs-app-starters-docs-htmlsingle}/#spring-cloud-stream-modules-syslog-source[syslog]
+|link:{scs-app-starters-docs-htmlsingle}/#spring-cloud-stream-modules-twitter-sentiment-processor[twitter-sentiment]
+|link:{scs-app-starters-docs-htmlsingle}/#spring-cloud-stream-modules-mongodb-sink[mongodb]
 |link:https://docs.spring.io/spring-cloud-task-app-starters/docs/Clark.RELEASE/reference/htmlsingle/#_composed_task_runner[composed-task-runner]
 
-|link:https://docs.spring.io/spring-cloud-stream-app-starters/docs/Celsius.SR1/reference/htmlsingle/#spring-cloud-stream-modules-aws-s3-source[s3]
-|link:https://docs.spring.io/spring-cloud-stream-app-starters/docs/Celsius.SR1/reference/htmlsingle/#spring-cloud-stream-modules-splitter[splitter]
-|link:https://docs.spring.io/spring-cloud-stream-app-starters/docs/Celsius.SR1/reference/htmlsingle/#spring-cloud-stream-modules-hdfs-dataset-sink[hdfs-dataset]
+|link:{scs-app-starters-docs-htmlsingle}/#spring-cloud-stream-modules-aws-s3-source[s3]
+|link:{scs-app-starters-docs-htmlsingle}/#spring-cloud-stream-modules-splitter[splitter]
+|link:{scs-app-starters-docs-htmlsingle}/#spring-cloud-stream-modules-hdfs-dataset-sink[hdfs-dataset]
 |link:https://docs.spring.io/spring-cloud-task-app-starters/docs/Clark.RELEASE/reference/htmlsingle/#_timestamp_batch_task[timestamp-batch]
 
 |loggregator
-|link:https://docs.spring.io/spring-cloud-stream-app-starters/docs/Celsius.SR1/reference/htmlsingle/#spring-cloud-stream-modules-bridge-processor[bridge]
-|link:https://docs.spring.io/spring-cloud-stream-app-starters/docs/Celsius.SR1/reference/htmlsingle/#spring-cloud-stream-modules-ftp-sink[ftp]
+|link:{scs-app-starters-docs-htmlsingle}/#spring-cloud-stream-modules-bridge-processor[bridge]
+|link:{scs-app-starters-docs-htmlsingle}/#spring-cloud-stream-modules-ftp-sink[ftp]
 |
 
-|link:https://docs.spring.io/spring-cloud-stream-app-starters/docs/Celsius.SR1/reference/htmlsingle/#spring-cloud-stream-modules-trigger-source[triggertask]
-|link:https://docs.spring.io/spring-cloud-stream-app-starters/docs/Celsius.SR1/reference/htmlsingle/#spring-cloud-stream-modules-pmml-processor[pmml]
-|link:https://docs.spring.io/spring-cloud-stream-app-starters/docs/Celsius.SR1/reference/htmlsingle/#spring-cloud-stream-modules-jdbc-sink[jdbc]
+|link:{scs-app-starters-docs-htmlsingle}/#spring-cloud-stream-modules-trigger-source[triggertask]
+|link:{scs-app-starters-docs-htmlsingle}/#spring-cloud-stream-modules-pmml-processor[pmml]
+|link:{scs-app-starters-docs-htmlsingle}/#spring-cloud-stream-modules-jdbc-sink[jdbc]
 |
 
-|link:https://docs.spring.io/spring-cloud-stream-app-starters/docs/Celsius.SR1/reference/htmlsingle/#spring-cloud-stream-modules-twitterstream-source[twitterstream]
-|link:https://docs.spring.io/spring-cloud-stream-app-starters/docs/Celsius.SR1/reference/htmlsingle/#spring-cloud-stream-modules-python-jython-processor[python-jython]
-|link:https://docs.spring.io/spring-cloud-stream-app-starters/docs/Celsius.SR1/reference/htmlsingle/#spring-cloud-stream-modules-aggregate-counter-sink[aggregate-counter]
+|link:{scs-app-starters-docs-htmlsingle}/#spring-cloud-stream-modules-twitterstream-source[twitterstream]
+|link:{scs-app-starters-docs-htmlsingle}/#spring-cloud-stream-modules-python-jython-processor[python-jython]
+|link:{scs-app-starters-docs-htmlsingle}/#spring-cloud-stream-modules-aggregate-counter-sink[aggregate-counter]
 |
 
-|link:https://docs.spring.io/spring-cloud-stream-app-starters/docs/Celsius.SR1/reference/htmlsingle/#spring-cloud-stream-modules-mongodb-source[mongodb]
-|link:https://docs.spring.io/spring-cloud-stream-app-starters/docs/Celsius.SR1/reference/htmlsingle/#spring-cloud-stream-modules-groovy-transform-processor[groovy-transform]
-|link:https://docs.spring.io/spring-cloud-stream-app-starters/docs/Celsius.SR1/reference/htmlsingle/#spring-cloud-stream-modules-cassandra-sink[cassandra]
+|link:{scs-app-starters-docs-htmlsingle}/#spring-cloud-stream-modules-mongodb-source[mongodb]
+|link:{scs-app-starters-docs-htmlsingle}/#spring-cloud-stream-modules-groovy-transform-processor[groovy-transform]
+|link:{scs-app-starters-docs-htmlsingle}/#spring-cloud-stream-modules-cassandra-sink[cassandra]
 |
 
-|link:https://docs.spring.io/spring-cloud-stream-app-starters/docs/Celsius.SR1/reference/htmlsingle/#spring-cloud-stream-modules-gemfire-cq-source[gemfire-cq]
-|link:https://docs.spring.io/spring-cloud-stream-app-starters/docs/Celsius.SR1/reference/htmlsingle/#spring-cloud-stream-modules-httpclient-processor[httpclient]
-|link:https://docs.spring.io/spring-cloud-stream-app-starters/docs/Celsius.SR1/reference/htmlsingle/#spring-cloud-stream-modules-router-sink[router]
+|link:{scs-app-starters-docs-htmlsingle}/#spring-cloud-stream-modules-gemfire-cq-source[gemfire-cq]
+|link:{scs-app-starters-docs-htmlsingle}/#spring-cloud-stream-modules-httpclient-processor[httpclient]
+|link:{scs-app-starters-docs-htmlsingle}/#spring-cloud-stream-modules-router-sink[router]
 |
 
-|link:https://docs.spring.io/spring-cloud-stream-app-starters/docs/Celsius.SR1/reference/htmlsingle/#spring-cloud-stream-modules-http-source[http]
-|link:https://docs.spring.io/spring-cloud-stream-app-starters/docs/Celsius.SR1/reference/htmlsingle/#spring-cloud-stream-modules-filter-processor[filter]
-|link:https://docs.spring.io/spring-cloud-stream-app-starters/docs/Celsius.SR1/reference/htmlsingle/#spring-cloud-stream-modules-redis-sink[redis-pubsub]
+|link:{scs-app-starters-docs-htmlsingle}/#spring-cloud-stream-modules-http-source[http]
+|link:{scs-app-starters-docs-htmlsingle}/#spring-cloud-stream-modules-filter-processor[filter]
+|link:{scs-app-starters-docs-htmlsingle}/#spring-cloud-stream-modules-redis-sink[redis-pubsub]
 |
 
-|link:https://docs.spring.io/spring-cloud-stream-app-starters/docs/Celsius.SR1/reference/htmlsingle/#spring-cloud-stream-modules-rabbit-source[rabbit]
-|link:https://docs.spring.io/spring-cloud-stream-app-starters/docs/Celsius.SR1/reference/htmlsingle/#spring-cloud-stream-modules-groovy-filter-processor[groovy-filter]
-|link:https://docs.spring.io/spring-cloud-stream-app-starters/docs/Celsius.SR1/reference/htmlsingle/#spring-cloud-stream-modules-file-sink[file]
+|link:{scs-app-starters-docs-htmlsingle}/#spring-cloud-stream-modules-rabbit-source[rabbit]
+|link:{scs-app-starters-docs-htmlsingle}/#spring-cloud-stream-modules-groovy-filter-processor[groovy-filter]
+|link:{scs-app-starters-docs-htmlsingle}/#spring-cloud-stream-modules-file-sink[file]
 |
 
-|link:https://docs.spring.io/spring-cloud-stream-app-starters/docs/Celsius.SR1/reference/htmlsingle/#spring-cloud-stream-modules-tcp-source[tcp]
-|link:https://docs.spring.io/spring-cloud-stream-app-starters/docs/Celsius.SR1/reference/htmlsingle/#spring-cloud-stream-modules-aggregator-processor[aggregator]
-|link:https://docs.spring.io/spring-cloud-stream-app-starters/docs/Celsius.SR1/reference/htmlsingle/#spring-cloud-stream-modules-websocket-sink[websocket]
+|link:{scs-app-starters-docs-htmlsingle}/#spring-cloud-stream-modules-tcp-source[tcp]
+|link:{scs-app-starters-docs-htmlsingle}/#spring-cloud-stream-modules-aggregator-processor[aggregator]
+|link:{scs-app-starters-docs-htmlsingle}/#spring-cloud-stream-modules-websocket-sink[websocket]
 |
 
-|link:https://docs.spring.io/spring-cloud-stream-app-starters/docs/Celsius.SR1/reference/htmlsingle/#spring-cloud-stream-modules-trigger-source[trigger]
-|link:https://docs.spring.io/spring-cloud-stream-app-starters/docs/Celsius.SR1/reference/htmlsingle/#spring-cloud-stream-modules-tensorflow-processor[tensorflow]
-|link:https://docs.spring.io/spring-cloud-stream-app-starters/docs/Celsius.SR1/reference/htmlsingle/#spring-cloud-stream-modules-aws-s3-sink[s3]
+|link:{scs-app-starters-docs-htmlsingle}/#spring-cloud-stream-modules-trigger-source[trigger]
+|link:{scs-app-starters-docs-htmlsingle}/#spring-cloud-stream-modules-tensorflow-processor[tensorflow]
+|link:{scs-app-starters-docs-htmlsingle}/#spring-cloud-stream-modules-aws-s3-sink[s3]
 |
 
-|link:https://docs.spring.io/spring-cloud-stream-app-starters/docs/Celsius.SR1/reference/htmlsingle/#spring-cloud-stream-modules-mqtt-source[mqtt]
+|link:{scs-app-starters-docs-htmlsingle}/#spring-cloud-stream-modules-mqtt-source[mqtt]
 |tasklaunchrequest-transform
-|link:https://docs.spring.io/spring-cloud-stream-app-starters/docs/Celsius.SR1/reference/htmlsingle/#spring-cloud-stream-modules-rabbit-sink[rabbit]
+|link:{scs-app-starters-docs-htmlsingle}/#spring-cloud-stream-modules-rabbit-sink[rabbit]
 |
 
-|link:https://docs.spring.io/spring-cloud-stream-app-starters/docs/Celsius.SR1/reference/htmlsingle/#spring-cloud-stream-modules-tcp-client-source[tcp-client]
+|link:{scs-app-starters-docs-htmlsingle}/#spring-cloud-stream-modules-tcp-client-source[tcp-client]
 |
-|link:https://docs.spring.io/spring-cloud-stream-app-starters/docs/Celsius.SR1/reference/htmlsingle/#spring-cloud-stream-modules-counter-sink[counter]
-|
-
-|link:https://docs.spring.io/spring-cloud-stream-app-starters/docs/Celsius.SR1/reference/htmlsingle/#spring-cloud-stream-modules-mail-source[mail]
-|
-|link:https://docs.spring.io/spring-cloud-stream-app-starters/docs/Celsius.SR1/reference/htmlsingle/#spring-cloud-stream-modules-pgcopy-sink[pgcopy]
+|link:{scs-app-starters-docs-htmlsingle}/#spring-cloud-stream-modules-counter-sink[counter]
 |
 
-|link:https://docs.spring.io/spring-cloud-stream-app-starters/docs/Celsius.SR1/reference/htmlsingle/#spring-cloud-stream-modules-jdbc-source[jdbc]
+|link:{scs-app-starters-docs-htmlsingle}/#spring-cloud-stream-modules-mail-source[mail]
 |
-|link:https://docs.spring.io/spring-cloud-stream-app-starters/docs/Celsius.SR1/reference/htmlsingle/#spring-cloud-stream-modules-gpfdist-sink[gpfdist]
-|
-
-|link:https://docs.spring.io/spring-cloud-stream-app-starters/docs/Celsius.SR1/reference/htmlsingle/#spring-cloud-stream-modules-gemfire-source[gemfire]
-|
-|link:https://docs.spring.io/spring-cloud-stream-app-starters/docs/Celsius.SR1/reference/htmlsingle/#spring-cloud-stream-modules-sftp-sink[sftp]
+|link:{scs-app-starters-docs-htmlsingle}/#spring-cloud-stream-modules-pgcopy-sink[pgcopy]
 |
 
-|link:https://docs.spring.io/spring-cloud-stream-app-starters/docs/Celsius.SR1/reference/htmlsingle/#spring-cloud-stream-modules-file-source[file]
+|link:{scs-app-starters-docs-htmlsingle}/#spring-cloud-stream-modules-jdbc-source[jdbc]
 |
-|link:https://docs.spring.io/spring-cloud-stream-app-starters/docs/Celsius.SR1/reference/htmlsingle/#spring-cloud-stream-modules-field-value-counter-sink[field-value-counter]
+|link:{scs-app-starters-docs-htmlsingle}/#spring-cloud-stream-modules-gpfdist-sink[gpfdist]
 |
 
+|link:{scs-app-starters-docs-htmlsingle}/#spring-cloud-stream-modules-gemfire-source[gemfire]
 |
+|link:{scs-app-starters-docs-htmlsingle}/#spring-cloud-stream-modules-sftp-sink[sftp]
 |
-|link:https://docs.spring.io/spring-cloud-stream-app-starters/docs/Celsius.SR1/reference/htmlsingle/#spring-cloud-stream-modules-hdfs-sink[hdfs]
+
+|link:{scs-app-starters-docs-htmlsingle}/#spring-cloud-stream-modules-file-source[file]
+|
+|link:{scs-app-starters-docs-htmlsingle}/#spring-cloud-stream-modules-field-value-counter-sink[field-value-counter]
 |
 
 |
 |
-|link:https://docs.spring.io/spring-cloud-stream-app-starters/docs/Celsius.SR1/reference/htmlsingle/#spring-cloud-stream-modules-tcp-sink[tcp]
+|link:{scs-app-starters-docs-htmlsingle}/#spring-cloud-stream-modules-hdfs-sink[hdfs]
 |
 
 |
 |
-|link:https://docs.spring.io/spring-cloud-stream-app-starters/docs/Celsius.SR1/reference/htmlsingle/#spring-cloud-stream-modules-gemfire-sink[gemfire]
+|link:{scs-app-starters-docs-htmlsingle}/#spring-cloud-stream-modules-tcp-sink[tcp]
+|
+
+|
+|
+|link:{scs-app-starters-docs-htmlsingle}/#spring-cloud-stream-modules-gemfire-sink[gemfire]
 |
 
 |

@@ -191,7 +191,7 @@ With:
       - rabbitmq
 ----
 +
-And finally, modify the `app-import` service definition `command` attribute to replace `http://bit.ly/Celsius-SR1-stream-applications-kafka-10-maven` with `http://bit.ly/Celsius-SR1-stream-applications-rabbit-maven`.
+And finally, modify the `app-import` service definition `command` attribute to replace `http://bit.ly/Celsius-SR2-stream-applications-kafka-10-maven` with `http://bit.ly/Celsius-SR2-stream-applications-rabbit-maven`.
 
 
 . To enable analytics using redis as a backend, add the following configuration under the `services` section:

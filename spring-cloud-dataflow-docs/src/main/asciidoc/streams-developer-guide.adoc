@@ -46,7 +46,7 @@ wget https://repo.spring.io/release/org/springframework/cloud/stream/app/log-sin
 
 These are Spring Boot applications that include the link:{spring-boot-docs-reference}/html/production-ready.html[Spring Boot Actuator] and the link:{spring-boot-docs-reference}/html/boot-features-security.html[Spring Security Starter].
 You can specify link:{spring-boot-docs-reference}/html/common-application-properties.html[common Spring Boot properties] to configure each application.
-The properties that are specific to each application are listed in the  link:http://docs.spring.io/spring-cloud-stream-app-starters/docs/Avogadro.SR1/reference/html/[documentation for the Spring App Starters] - for example, the link:http://docs.spring.io/spring-cloud-stream-app-starters/docs/Avogadro.SR1/reference/html/sources.html#spring-cloud-stream-modules-http-source[HTTP source] and the link:http://docs.spring.io/spring-cloud-stream-app-starters/docs/Avogadro.SR1/reference/html/spring-cloud-stream-modules-sinks.html#spring-cloud-stream-modules-log-sink[log sink]
+The properties that are specific to each application are listed in the  link:{scs-app-starters-docs}/[documentation for the Spring App Starters] - for example, the link:{scs-app-starters-docs}/sources.html#spring-cloud-stream-modules-http-source[HTTP source] and the link:{scs-app-starters-docs}/spring-cloud-stream-modules-sinks.html#spring-cloud-stream-modules-log-sink[log sink]
 
 Now you can run the http source application.
 Just for fun, pass in a few Boot applications options using system properties, as shown in the following example:
