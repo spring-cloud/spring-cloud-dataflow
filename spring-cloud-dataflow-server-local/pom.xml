@@ -192,6 +192,10 @@
 					<image>
 					  <name>springcloud/${project.artifactId}:%v</name>
 					  <build>
+						  <tags>
+							  <tag>latest</tag>
+							  <tag>${project.version}</tag>
+						  </tags>
 						<from>java:8-alpine</from>
 						<volumes>
 						  <volume>/tmp</volume>
