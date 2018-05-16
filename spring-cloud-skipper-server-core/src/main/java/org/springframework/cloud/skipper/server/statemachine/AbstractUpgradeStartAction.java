@@ -15,6 +15,7 @@
  */
 package org.springframework.cloud.skipper.server.statemachine;
 
+import org.springframework.cloud.skipper.domain.RollbackRequest;
 import org.springframework.cloud.skipper.domain.UpgradeRequest;
 import org.springframework.cloud.skipper.server.deployer.ReleaseAnalysisReport;
 import org.springframework.cloud.skipper.server.service.ReleaseReportService;
@@ -51,9 +52,11 @@ public abstract class AbstractUpgradeStartAction extends AbstractAction {
 	protected void executeInternal(StateContext<SkipperStates, SkipperEvents> context) {
 		UpgradeRequest upgradeRequest = context.getExtendedState().get(SkipperEventHeaders.UPGRADE_REQUEST,
 				UpgradeRequest.class);
+		RollbackRequest rollbackRequest = context.getExtendedState().get(SkipperEventHeaders.ROLLBACK_REQUEST,
+				RollbackRequest.class);
 		Assert.notNull(upgradeRequest, "'upgradeRequest' not known to the system in extended state");
 		ReleaseAnalysisReport releaseAnalysisReport = this.getReleaseReportService().createReport(upgradeRequest,
-				handlesInitialReport());
+				rollbackRequest, handlesInitialReport());
 		context.getExtendedState().getVariables().put(SkipperVariables.RELEASE_ANALYSIS_REPORT, releaseAnalysisReport);
 	}
 

@@ -23,6 +23,7 @@ import org.springframework.cloud.skipper.domain.Package;
 import org.springframework.cloud.skipper.domain.PackageIdentifier;
 import org.springframework.cloud.skipper.domain.PackageMetadata;
 import org.springframework.cloud.skipper.domain.Release;
+import org.springframework.cloud.skipper.domain.RollbackRequest;
 import org.springframework.cloud.skipper.domain.UpgradeProperties;
 import org.springframework.cloud.skipper.domain.UpgradeRequest;
 import org.springframework.cloud.skipper.server.deployer.ReleaseAnalysisReport;
@@ -56,18 +57,21 @@ public class ReleaseReportService {
 		this.packageService = packageService;
 		this.releaseManager = releaseManager;
 	}
-
+	
 	/**
 	 * Merges the configuration values for the replacing release, creates the manfiest, and
 	 * creates the Report for the next stage of upgrading a Release.
+	 *
 	 * @param upgradeRequest containing the {@link UpgradeProperties} and
 	 * {@link PackageIdentifier} for the update.
+	 * @param rollbackRequest containing the rollback request if available
 	 * @param initial the flag indicating this is initial report creation
 	 * @return A report of what needs to change to bring the current release to the requested
 	 * release
 	 */
 	@Transactional
-	public ReleaseAnalysisReport createReport(UpgradeRequest upgradeRequest, boolean initial) {
+	public ReleaseAnalysisReport createReport(UpgradeRequest upgradeRequest, RollbackRequest rollbackRequest,
+			boolean initial) {
 		Assert.notNull(upgradeRequest.getUpgradeProperties(), "UpgradeProperties can not be null");
 		Assert.notNull(upgradeRequest.getPackageIdentifier(), "PackageIdentifier can not be null");
 		UpgradeProperties upgradeProperties = upgradeRequest.getUpgradeProperties();
@@ -84,7 +88,7 @@ public class ReleaseReportService {
 		Release replacingRelease = null;
 		if (initial) {
 			replacingRelease = createReleaseForUpgrade(packageMetadata, latestRelease.getVersion() + 1,
-					upgradeProperties, existingRelease.getPlatformName());
+					upgradeProperties, existingRelease.getPlatformName(), rollbackRequest);
 		}
 		else {
 			replacingRelease = this.releaseRepository.findByNameAndVersion(
@@ -101,7 +105,7 @@ public class ReleaseReportService {
 	}
 
 	private Release createReleaseForUpgrade(PackageMetadata packageMetadata, Integer newVersion,
-			UpgradeProperties upgradeProperties, String platformName) {
+			UpgradeProperties upgradeProperties, String platformName, RollbackRequest rollbackRequest) {
 		Assert.notNull(upgradeProperties, "Upgrade Properties can not be null");
 		Package packageToInstall = this.packageService.downloadPackage(packageMetadata);
 		Release release = new Release();
@@ -110,7 +114,9 @@ public class ReleaseReportService {
 		release.setConfigValues(upgradeProperties.getConfigValues());
 		release.setPkg(packageToInstall);
 		release.setVersion(newVersion);
-		Info info = Info.createNewInfo("Upgrade install underway");
+		// we simply differentiate between upgrade/rollback if we know there is a rollback request
+		Info info = Info
+				.createNewInfo(rollbackRequest == null ? "Upgrade install underway" : "Rollback install underway");
 		release.setInfo(info);
 		return release;
 	}

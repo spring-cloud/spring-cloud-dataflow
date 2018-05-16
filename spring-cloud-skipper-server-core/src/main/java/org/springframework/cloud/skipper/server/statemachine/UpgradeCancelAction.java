@@ -15,12 +15,14 @@
  */
 package org.springframework.cloud.skipper.server.statemachine;
 
+import org.springframework.cloud.skipper.domain.RollbackRequest;
 import org.springframework.cloud.skipper.server.deployer.ReleaseAnalysisReport;
 import org.springframework.cloud.skipper.server.deployer.strategies.UpgradeStrategy;
 import org.springframework.cloud.skipper.server.service.ReleaseReportService;
 import org.springframework.cloud.skipper.server.statemachine.SkipperStateMachineService.SkipperEventHeaders;
 import org.springframework.cloud.skipper.server.statemachine.SkipperStateMachineService.SkipperEvents;
 import org.springframework.cloud.skipper.server.statemachine.SkipperStateMachineService.SkipperStates;
+import org.springframework.cloud.skipper.server.statemachine.SkipperStateMachineService.SkipperVariables;
 import org.springframework.statemachine.StateContext;
 import org.springframework.statemachine.action.Action;
 
@@ -31,7 +33,7 @@ import org.springframework.statemachine.action.Action;
  *
  */
 public class UpgradeCancelAction extends AbstractUpgradeStartAction {
-
+	
 	private final UpgradeStrategy upgradeStrategy;
 
 	/**
@@ -48,9 +50,27 @@ public class UpgradeCancelAction extends AbstractUpgradeStartAction {
 	@Override
 	protected void executeInternal(StateContext<SkipperStates, SkipperEvents> context) {
 		super.executeInternal(context);
-		ReleaseAnalysisReport releaseAnalysisReport = getReleaseAnalysisReport(context);
+		
 		Long upgradeTimeout = context.getExtendedState().get(SkipperEventHeaders.UPGRADE_TIMEOUT, Long.class);
+		Long cutOffTime = context.getExtendedState().get(SkipperVariables.UPGRADE_CUTOFF_TIME, Long.class);
+		SkipperEvents event = context.getEvent();
+		if (event == SkipperEvents.UPGRADE_CANCEL && cutOffTime != null) {
+			// looks like we're manually cancelling, as we have UPGRADE_CANCEL in context,
+			// calculate new timeout for reporting so that we can give number
+			// how long user waited before cancelling.
+			upgradeTimeout = System.currentTimeMillis() - (cutOffTime - upgradeTimeout);
+		}
+		else {
+			// else assume timeout upgrade is using
+			upgradeTimeout = context.getExtendedState().get(SkipperEventHeaders.UPGRADE_TIMEOUT, Long.class);
+		}
+		
+		ReleaseAnalysisReport releaseAnalysisReport = getReleaseAnalysisReport(context);
+		
+		// check if we're doing rollback and pass flag to strategy
+		RollbackRequest rollbackRequest = context.getExtendedState().get(SkipperEventHeaders.ROLLBACK_REQUEST,
+				RollbackRequest.class);
 		upgradeStrategy.cancel(releaseAnalysisReport.getExistingRelease(), releaseAnalysisReport.getReplacingRelease(),
-				releaseAnalysisReport, upgradeTimeout);
+				releaseAnalysisReport, upgradeTimeout, event == SkipperEvents.UPGRADE_CANCEL, rollbackRequest != null);
 	}
 }

@@ -15,9 +15,11 @@
  */
 package org.springframework.cloud.skipper.server.statemachine;
 
+import org.springframework.cloud.skipper.domain.RollbackRequest;
 import org.springframework.cloud.skipper.server.deployer.ReleaseAnalysisReport;
 import org.springframework.cloud.skipper.server.deployer.strategies.UpgradeStrategy;
 import org.springframework.cloud.skipper.server.service.ReleaseReportService;
+import org.springframework.cloud.skipper.server.statemachine.SkipperStateMachineService.SkipperEventHeaders;
 import org.springframework.cloud.skipper.server.statemachine.SkipperStateMachineService.SkipperEvents;
 import org.springframework.cloud.skipper.server.statemachine.SkipperStateMachineService.SkipperStates;
 import org.springframework.statemachine.StateContext;
@@ -48,7 +50,11 @@ public class UpgradeDeleteSourceAppsAction extends AbstractUpgradeStartAction {
 	protected void executeInternal(StateContext<SkipperStates, SkipperEvents> context) {
 		super.executeInternal(context);
 		ReleaseAnalysisReport releaseAnalysisReport = getReleaseAnalysisReport(context);
+		
+		// check if we're doing rollback and pass flag to strategy
+		RollbackRequest rollbackRequest = context.getExtendedState().get(SkipperEventHeaders.ROLLBACK_REQUEST,
+				RollbackRequest.class);
 		upgradeStrategy.accept(releaseAnalysisReport.getExistingRelease(), releaseAnalysisReport.getReplacingRelease(),
-				releaseAnalysisReport);
+				releaseAnalysisReport, rollbackRequest != null);
 	}
 }

@@ -63,22 +63,22 @@ public class HandleHealthCheckStep {
 	@Transactional
 	public void handleHealthCheck(boolean healthy, Release existingRelease,
 			List<String> applicationNamesToUpgrade,
-			Release replacingRelease, Long timeout) {
+			Release replacingRelease, Long timeout, boolean cancel, boolean rollback) {
 		if (healthy) {
-			updateReplacingReleaseState(replacingRelease);
+			updateReplacingReleaseState(replacingRelease, rollback);
 			deleteExistingRelease(existingRelease, applicationNamesToUpgrade);
 		}
 		else {
-			deleteReplacingRelease(replacingRelease, timeout);
+			deleteReplacingRelease(replacingRelease, timeout, cancel);
 		}
 	}
 
-	private void updateReplacingReleaseState(Release replacingRelease) {
+	private void updateReplacingReleaseState(Release replacingRelease, boolean rollback) {
 		// Update Status in DB
 		Status status = new Status();
 		status.setStatusCode(StatusCode.DEPLOYED);
 		replacingRelease.getInfo().setStatus(status);
-		replacingRelease.getInfo().setDescription("Upgrade complete");
+		replacingRelease.getInfo().setDescription(rollback ? "Rollback complete" : "Upgrade complete");
 		this.releaseRepository.save(replacingRelease);
 		logger.info("Release {}-v{} has been DEPLOYED", replacingRelease.getName(),
 				replacingRelease.getVersion());
@@ -86,17 +86,21 @@ public class HandleHealthCheckStep {
 				replacingRelease.getVersion());
 	}
 
-	private void deleteReplacingRelease(Release replacingRelease, Long timeout) {
+	private void deleteReplacingRelease(Release replacingRelease, Long timeout, boolean cancel) {
 		try {
-			logger.error("New release " + replacingRelease.getName() + " was not detected as healthy after " + timeout
-					+ " milliseconds.  " + "Keeping existing release, and Deleting apps of replacing release");
+			if (!cancel) {
+				logger.error("New release " + replacingRelease.getName() + " was not detected as healthy after " + timeout
+						+ " milliseconds.  " + "Keeping existing release, and Deleting apps of replacing release");				
+			}
 			this.releaseManager.delete(replacingRelease);
 			Status status = new Status();
 			status.setStatusCode(StatusCode.FAILED);
 			replacingRelease.getInfo().setStatus(status);
 			replacingRelease.getInfo().setStatus(status);
+			String desc = cancel ? "Cancelled after " + timeout + " ms."
+					: "Did not detect apps in replacing release as healthy after " + timeout + " ms.";
 			replacingRelease.getInfo()
-					.setDescription("Did not detect apps in replacing release as healthy after " + timeout + " ms.");
+					.setDescription(desc);
 			this.releaseRepository.save(replacingRelease);
 		}
 		catch (DataAccessException e) {
