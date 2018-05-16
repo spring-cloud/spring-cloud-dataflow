@@ -26,7 +26,11 @@ RUN curl -L https://github.com/progrium/entrykit/releases/download/v${ENTRYKIT_V
     mv entrykit /bin/entrykit && \
     entrykit --symlink
 
-ADD https://raw.githubusercontent.com/spring-cloud/spring-cloud-skipper/master/acceptance-tests/ci/images/docker-lib.sh /docker-lib.sh
+ARG BRANCH
+ARG GITHUB_REPO_RAW
+ARG BASE_PATH
+
+ADD $GITHUB_REPO_RAW/$BRANCH/$BASE_PATH/ci/images/docker-lib.sh /docker-lib.sh
 
 ENTRYPOINT [ \
     "switch", \

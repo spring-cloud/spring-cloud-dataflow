@@ -5,7 +5,7 @@ source $(dirname $0)/common.sh
 repository=$(pwd)/distribution-repository
 
 pushd git-repo > /dev/null
-pushd acceptance-tests > /dev/null
+pushd $BASE_PATH > /dev/null
 pushd custom-apps/skipper-server-with-drivers102 > /dev/null
 ./gradlew clean build install -Dmaven.repo.local=${repository}
 popd > /dev/null

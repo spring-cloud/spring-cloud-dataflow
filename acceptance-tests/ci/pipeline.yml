@@ -10,13 +10,13 @@ resources:
   source:
     uri: ((github-repo))
     branch: ((branch))
-    ignore_paths: ["ci/images/*"]
+    ignore_paths: ["((base-path))/ci/images/*"]
 - name: ci-images-git-repo
   type: git
   source:
     uri: ((github-repo))
     branch: ((branch))
-    paths: ["ci/images/*"]
+    paths: ["((base-path))/ci/images/*"]
 
 - name: artifactory-repo
   type: artifactory-resource
@@ -47,10 +47,14 @@ jobs:
 - name: spring-cloud-skipper-ci-images
   plan:
   - get: ci-images-git-repo
-    trigger: false
+    trigger: true
   - put: spring-cloud-skipper-ci-image
     params:
-      build: ci-images-git-repo/acceptance-tests/ci/images/spring-cloud-skipper-ci-image
+      build: ci-images-git-repo/((base-path))/ci/images/spring-cloud-skipper-ci-image
+      build_args:
+        BRANCH: ((branch))
+        GITHUB_REPO_RAW: ((github-repo-raw))
+        BASE_PATH: ((base-path))
 
 - name: acceptance-tests
   serial: true
@@ -64,7 +68,9 @@ jobs:
       privileged: true
       timeout: 90m
       image: spring-cloud-skipper-ci-image
-      file: git-repo/acceptance-tests/ci/tasks/build-project.yml
+      file: git-repo/((base-path))/ci/tasks/build-project.yml
+      params:
+        BASE_PATH: ((base-path))
       on_failure:
         aggregate:
         - put: acceptance-tests-reports
@@ -83,7 +89,9 @@ jobs:
       privileged: true
       timeout: 30m
       image: spring-cloud-skipper-ci-image
-      file: git-repo/acceptance-tests/ci/tasks/build-skipper-server-with-drivers100.yml
+      file: git-repo/((base-path))/ci/tasks/build-skipper-server-with-drivers100.yml
+      params:
+        BASE_PATH: ((base-path))
   - put: artifactory-repo
     params: &artifactory-params
       repo: libs-snapshot-local
@@ -110,7 +118,9 @@ jobs:
       privileged: true
       timeout: 30m
       image: spring-cloud-skipper-ci-image
-      file: git-repo/acceptance-tests/ci/tasks/build-skipper-server-with-drivers101.yml
+      file: git-repo/((base-path))/ci/tasks/build-skipper-server-with-drivers101.yml
+      params:
+        BASE_PATH: ((base-path))
   - put: artifactory-repo
     params: &artifactory-params
       repo: libs-snapshot-local
@@ -137,7 +147,9 @@ jobs:
       privileged: true
       timeout: 30m
       image: spring-cloud-skipper-ci-image
-      file: git-repo/acceptance-tests/ci/tasks/build-skipper-server-with-drivers102.yml
+      file: git-repo/((base-path))/ci/tasks/build-skipper-server-with-drivers102.yml
+      params:
+        BASE_PATH: ((base-path))
   - put: artifactory-repo
     params: &artifactory-params
       repo: libs-snapshot-local

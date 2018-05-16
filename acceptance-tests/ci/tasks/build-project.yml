@@ -14,7 +14,7 @@ run:
     - |
       source /docker-lib.sh
       start_docker
-      ${PWD}/git-repo/acceptance-tests/ci/scripts/build-project.sh
+      ${PWD}/git-repo/${BASE_PATH}/ci/scripts/build-project.sh
 params:
   ARTIFACTORY_USERNAME: ((artifactory-username))
   ARTIFACTORY_PASSWORD: ((artifactory-password))
