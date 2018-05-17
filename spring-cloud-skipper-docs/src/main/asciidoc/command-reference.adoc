@@ -10,6 +10,8 @@ Skipper commands fit into the following categories:
 * <<skipper-commands-repository>>
 * <<skipper-commands-config>>
 
+NOTE: More details about commands can be found from <<skipper-commands-generic-usage>>.
+
 [[skipper-commands-package]]
 == Package Commands
 
@@ -159,9 +161,24 @@ Skipper's release commands include the following:
 * <<skipper-commands-release-rollback>>
 * <<skipper-commands-release-history>>
 * <<skipper-commands-release-delete>>
+* <<skipper-commands-release-cancel>>
 
 [[skipper-commands-release-list]]
 === List
+
+====
+NAME::
+	release list - List the latest version of releases with status of deployed or failed.
+
+SYNOPSYS::
+	*release list* [[*--release-name*] string]
+
+OPTIONS::
+	--release-name  string:::
+		wildcard expression to search by release name +
+		*[Optional, default = <none>]* +
+
+====
 
 This command lists the latest deployed or failed release, as shown (with output) in the following example:
 
@@ -179,6 +196,24 @@ skipper:>release list
 
 [[skipper-commands-release-status]]
 === Status
+
+====
+NAME::
+	release status - Status for a last known release version.
+
+SYNOPSYS::
+	*release status* [*--release-name*] string  [[*--release-version*] integer]  
+
+OPTIONS::
+	--release-name  string:::
+		release name +
+		*[Mandatory]* +
+		*[may not be null]* +
+
+	--release-version  integer:::
+		the specific release version. +
+		*[Optional, default = <none>]* +
+====
 
 This command shows the `status` of a specific release and version, as shown (with output) in the following example:
 
@@ -209,6 +244,40 @@ skipper:>release status --release-name helloworldlocal --release-version 1
 
 [[skipper-commands-release-upgrade]]
 === Upgrade
+
+====
+NAME::
+	release upgrade - Upgrade a release.
+
+SYNOPSYS::
+	*release upgrade* [*--release-name*] string  [*--package-name*] string  [[*--package-version*] string]  [[*--file*] file]  [[*--properties*] string]  [[*--timeout-expression*] string]  
+
+OPTIONS::
+	--release-name  string:::
+		The name of the release to upgrade +
+		*[Mandatory]* +
+
+	--package-name  string:::
+		the name of the package to use for the upgrade +
+		*[Mandatory]* +
+
+	--package-version  string:::
+		the version of the package to use for the upgrade, if not specified latest version will be used +
+		*[Optional, default = <none>]* +
+
+	--file  file:::
+		specify values in a YAML file +
+		*[Optional, default = <none>]* +
+
+	--properties  string:::
+		the comma separated set of properties to override during upgrade +
+		*[Optional, default = <none>]* +
+
+	--timeout-expression  string:::
+		the expression for upgrade timeout +
+		*[Optional, default = <none>]* +
+====
+
 
 This command upgrades a package, as shown (with output) in the following example:
 
@@ -268,8 +337,39 @@ You can then use the `--properties` option in the `upgrade` command, as shown in
 skipper:>release upgrade --release-name ticktockskipper --package-name ticktock --properties log.version=1.1.1.RELEASE
 ----
 
+You can use `--timeout-expression` to alter _timeout_ setting used to wait healthy applications
+when server is in state to do that. Global setting to override is
+`spring.cloud.skipper.server.strategies.healthcheck.timeoutInMillis` mentioned earlier. More about
+expression itself, see <<skipper-commands-generic-usage-timeout-expression>>.
+
+[source,bash,options="nowrap"]
+----
+skipper:>release upgrade --release-name ticktockskipper --package-name ticktock --timeout-expression=30s
+----
+
 [[skipper-commands-release-rollback]]
 === Rollback
+
+====
+NAME::
+	release rollback - Rollback the release to a previous or a specific release.
+
+SYNOPSYS::
+	*release rollback* [*--release-name*] string  [[*--release-version*] int]  [[*--timeout-expression*] string]  
+
+OPTIONS::
+	--release-name  string:::
+		the name of the release to rollback +
+		*[Mandatory]* +
+
+	--release-version  int:::
+		the specific release version to rollback to. Not specifying the value rolls back to the previous release. +
+		*[Optional, default = 0]* +
+
+	--timeout-expression  string:::
+		the expression for rollback timeout +
+		*[Optional, default = <none>]* +
+====
 
 This command rolls back the release to a specific version, as shown (with output) in the following example:
 
@@ -282,8 +382,28 @@ helloworldlocal has been rolled back.  Now at version v3.
 If no `--release-version` is specified, then the rollback version is the previous stable release (either in `DELETED` or
 `DEPLOYED` status).
 
+You can use `--timeout-expression` to alter _timeout_ setting used to wait healthy applications
+when server is in state to do that. Global setting to override is
+`spring.cloud.skipper.server.strategies.healthcheck.timeoutInMillis` mentioned earlier. More about
+expression itself, see <<skipper-commands-generic-usage-timeout-expression>>.
+
 [[skipper-commands-release-history]]
 === History
+
+====
+NAME::
+	release history - List the history of versions for a given release.
+
+SYNOPSYS::
+	*release history* [*--release-name*] string  
+
+OPTIONS::
+	--release-name  string:::
+		wildcard expression to search by release name +
+		*[Mandatory]* +
+		*[may not be null] +
+
+====
 
 This command shows the history of a specific release, as shown (with output) in the following example:
 
@@ -302,6 +422,22 @@ skipper:>release history --release-name helloworldlocal
 [[skipper-commands-release-delete]]
 === Delete
 
+====
+NAME::
+	release delete - Delete the release.
+
+SYNOPSYS::
+	*release delete* [*--release-name*] string  [*--delete-package*]  
+
+OPTIONS::
+	--release-name  string:::
+		the name of the release to delete +
+		*[Mandatory]* +
+
+	--delete-package	delete the release package:::
+		*[Optional, default = false]* +
+====
+
 This command deletes a specific release's latest deployed revision, undeploying the application or applications, as shown (with output) in the following example:
 
 [source,bash,options="nowrap"]
@@ -310,6 +446,75 @@ skipper:>release delete --release-name helloworldlocal
 helloworldlocal has been deleted.
 ----
 
+[[skipper-commands-release-cancel]]
+=== Cancel
+
+====
+NAME::
+	release cancel - Request a cancellation of current release operation.
+
+SYNOPSYS::
+	*release cancel* [*--release-name*] string  
+
+OPTIONS::
+	--release-name  string:::
+		the name of the release to cancel +
+		*[Mandatory]* +
+====
+
+This command can be used to attempt a cancel for a running release operation if it supports it and
+release is currently in state where any type of cancellation can be attempted. For example during
+an upgrade server will delete old applications if new applications are detected healtly. Before
+state is transitioned to deleting old applications, it is possible to request cancellation of whole
+upgrade procedure.
+
+One other use case is that if new applications are failed and server will timeout waiting healtly
+applications, it's convenient to cancel operation without waiting full timeout to happen.
+
+Here is an example how cancellation is attempted when upgraded applications fail:
+
+[source,bash,options="nowrap"]
+----
+skipper:>package install --package-name testapp --package-version 1.0.0 --release-name mytestapp
+Released mytestapp. Now at version v1.
+
+skipper:>release history --release-name mytestapp
+╔═══════╤════════════════════════════╤════════╤════════════╤═══════════════╤════════════════╗
+║Version│        Last updated        │ Status │Package Name│Package Version│  Description   ║
+╠═══════╪════════════════════════════╪════════╪════════════╪═══════════════╪════════════════╣
+║1      │Thu May 17 11:18:07 BST 2018│DEPLOYED│testapp     │1.0.0          │Install complete║
+╚═══════╧════════════════════════════╧════════╧════════════╧═══════════════╧════════════════╝
+
+skipper:>release upgrade --package-name testapp --package-version 1.1.0 --release-name mytestapp
+mytestapp has been upgraded.  Now at version v2.
+
+skipper:>release history --release-name mytestapp
+╔═══════╤════════════════════════════╤════════╤════════════╤═══════════════╤════════════════════════╗
+║Version│        Last updated        │ Status │Package Name│Package Version│      Description       ║
+╠═══════╪════════════════════════════╪════════╪════════════╪═══════════════╪════════════════════════╣
+║2      │Thu May 17 11:18:52 BST 2018│UNKNOWN │testapp     │1.1.0          │Upgrade install underway║
+║1      │Thu May 17 11:18:07 BST 2018│DEPLOYED│testapp     │1.0.0          │Install complete        ║
+╚═══════╧════════════════════════════╧════════╧════════════╧═══════════════╧════════════════════════╝
+
+skipper:>release status --release-name mytestapp
+╔═══════════════╤═══════════════════════════════════════════════════════════════╗
+║Last Deployed  │Thu May 17 11:18:52 BST 2018                                   ║
+║Status         │UNKNOWN                                                        ║
+║Platform Status│All apps have failed deployment.                               ║
+║               │[mytestapp.testapp-v2], State = [mytestapp.testapp-v2-0=failed]║
+╚═══════════════╧═══════════════════════════════════════════════════════════════╝
+
+skipper:>release cancel --release-name mytestapp
+Cancel request for release mytestapp sent
+
+skipper:>release history --release-name mytestapp
+╔═══════╤════════════════════════════╤════════╤════════════╤═══════════════╤═════════════════════════╗
+║Version│        Last updated        │ Status │Package Name│Package Version│       Description       ║
+╠═══════╪════════════════════════════╪════════╪════════════╪═══════════════╪═════════════════════════╣
+║2      │Thu May 17 11:18:52 BST 2018│FAILED  │testapp     │1.1.0          │Cancelled after 39563 ms.║
+║1      │Thu May 17 11:18:07 BST 2018│DEPLOYED│testapp     │1.0.0          │Install complete         ║
+╚═══════╧════════════════════════════╧════════╧════════════╧═══════════════╧═════════════════════════╝
+----
 
 [[skipper-commands-manifest]]
 == Manifest Commands
@@ -426,3 +631,27 @@ This command shows which server version is being used, as shown (with output) in
 skipper:>info
 Spring Cloud Skipper Server v1.0.0.{project-version}
 ----
+
+[[skipper-commands-generic-usage]]
+== Generic Usage
+This section contains generic notes about commands.
+
+[[skipper-commands-generic-usage-timeout-expression]]
+=== Timeout Expression
+* A regular long representation (using milliseconds as the default unit)
+* The standard ISO-8601 format https://docs.oracle.com/javase/8/docs/api//java/time/Duration.html#parse-java.lang.CharSequence-)[used by] 
+_java.util.Duration_
+* A more readable format where the value and the unit are coupled (e.g. 10s means 10 seconds)
+
+To specify a session timeout of 30 seconds, 30, PT30S and 30s are all equivalent. A read timeout
+of 500ms can be specified in any of the following form: 500, PT0.5S and 500ms.
+
+You can also use any of the supported unit. These are:
+
+* ns for nanoseconds
+* ms for milliseconds
+* s for seconds
+* m for minutes
+* h for hours
+* d for days
+
