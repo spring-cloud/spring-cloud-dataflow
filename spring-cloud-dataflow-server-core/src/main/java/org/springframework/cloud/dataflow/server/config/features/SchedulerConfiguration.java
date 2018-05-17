@@ -32,9 +32,7 @@ import org.springframework.cloud.scheduler.spi.core.Scheduler;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Conditional;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Import;
 import org.springframework.core.io.ResourceLoader;
-import org.springframework.transaction.annotation.EnableTransactionManagement;
 
 /**
  * Establishes the {@link SchedulerService} instance to be used by SCDF.
@@ -45,8 +43,6 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 @Configuration
 @Conditional({SchedulerConfiguration.SchedulerConfigurationPropertyChecker.class})
 @EnableConfigurationProperties({TaskConfigurationProperties.class, CommonApplicationProperties.class})
-@Import(TaskConfiguration.class)
-@EnableTransactionManagement
 public class SchedulerConfiguration {
 
 	@Value("${spring.cloud.dataflow.server.uri:}")

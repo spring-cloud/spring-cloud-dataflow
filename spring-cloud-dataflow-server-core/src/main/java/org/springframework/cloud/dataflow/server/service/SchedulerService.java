@@ -21,7 +21,6 @@ import java.util.List;
 import java.util.Map;
 
 import org.springframework.cloud.scheduler.spi.core.ScheduleInfo;
-import org.springframework.cloud.scheduler.spi.core.ScheduleRequest;
 import org.springframework.data.domain.Pageable;
 
 /**
@@ -32,27 +31,34 @@ import org.springframework.data.domain.Pageable;
 public interface SchedulerService {
 
 	/**
-	 * Registers the {@link ScheduleRequest} to be executed based on the
-	 * cron expression provided.
+	 * Schedules the task specified with the taskDefinitionName with the
+	 * platform specific scheduler.  To setup the task with the scheduler set
+	 * the properties required to process the schedule within the taskProperties map.
+	 * Each scheduler property should be prefixed with
+	 * {@value org.springframework.cloud.scheduler.spi.core.SchedulerPropertyKeys#PREFIX}.
+	 * The schedule expression (cron for example)
+	 * are specified within the task properties using the
+	 * {@value org.springframework.cloud.scheduler.spi.core.SchedulerPropertyKeys#CRON_EXPRESSION} as the key
+	 * and the associated value would be the cron expression to be used.
 	 *
 	 * @param scheduleName A name to be associated with the schedule.
 	 * @param taskDefinitionName the name of the
 	 * {@link org.springframework.cloud.dataflow.core.TaskDefinition} to be scheduled.
 	 * @param taskProperties  properties required for scheduling or launching a task.
-	 * @param commandLineArgs the commands line args to be used when launching the task.
+	 * @param commandLineArgs the command line args to be used when launching the task.
 	 */
 	void schedule(String scheduleName, String taskDefinitionName,
 			Map<String, String> taskProperties, List<String> commandLineArgs);
 
 	/**
-	 *  Deletes a schedule that has been created.
+	 *  Unschedule a schedule that has been created.
 	 *
 	 * @param scheduleName the name of the schedule to be removed.
 	 */
 	void unschedule(String scheduleName);
 
 	/**
-	 * List all of the Schedules associated with the provided AppDefinition.
+	 * List all of the Schedules associated with the provided TaskDefinition.
 	 *
 	 * @param pageable Establish the pagination setup for the result set.
 	 * @param taskDefinitionName to retrieve Schedules for a specified taskDefinitionName.

@@ -21,7 +21,6 @@ import java.util.List;
 import java.util.Map;
 
 import org.springframework.boot.autoconfigure.jdbc.DataSourceProperties;
-import org.springframework.boot.bind.RelaxedNames;
 import org.springframework.cloud.dataflow.configuration.metadata.ApplicationConfigurationMetadataResolver;
 import org.springframework.cloud.dataflow.core.ApplicationType;
 import org.springframework.cloud.dataflow.core.TaskDefinition;
@@ -52,8 +51,6 @@ import org.springframework.util.StringUtils;
  * @author Glenn Renfro
  */
 public class DefaultSchedulerService implements SchedulerService {
-
-	private static final String DATAFLOW_SERVER_URI_KEY = "dataflowServerUri";
 
 	private CommonApplicationProperties commonApplicationProperties;
 	private Scheduler scheduler;
@@ -93,7 +90,7 @@ public class DefaultSchedulerService implements SchedulerService {
 	public void schedule(String scheduleName, String taskDefinitionName, Map<String, String> taskDeploymentProperties,
 			List<String> commandLineArgs) {
 		Assert.hasText(taskDefinitionName, "The provided taskName must not be null or empty.");
-		Assert.notNull(taskDeploymentProperties, "The provided runtimeProperties must not be null.");
+		Assert.notNull(taskDeploymentProperties, "The provided taskDeploymentProperties must not be null.");
 		TaskDefinition taskDefinition = this.taskDefinitionRepository.findOne(taskDefinitionName);
 		if (taskDefinition == null) {
 			throw new NoSuchTaskDefinitionException(taskDefinitionName);
@@ -123,7 +120,7 @@ public class DefaultSchedulerService implements SchedulerService {
 		Map<String, String> deployerDeploymentProperties = DeploymentPropertiesUtils
 				.extractAndQualifyDeployerProperties(taskDeploymentProperties, taskDefinition.getRegisteredAppName());
 		if (StringUtils.hasText(this.dataflowServerUri) && taskNode.isComposed()) {
-			updateDataFlowUriIfNeeded(appDeploymentProperties, commandLineArgs);
+			TaskServiceUtils.updateDataFlowUriIfNeeded(this.dataflowServerUri, appDeploymentProperties, commandLineArgs);
 		}
 		AppDefinition revisedDefinition = TaskServiceUtils.mergeAndExpandAppProperties(taskDefinition, metadataResource,
 				appDeploymentProperties, whitelistProperties);
@@ -160,24 +157,6 @@ public class DefaultSchedulerService implements SchedulerService {
 				ApplicationType.task);
 		Assert.notNull(appRegistration, "Unknown task app: " + taskDefinition.getRegisteredAppName());
 		return this.registry.getAppResource(appRegistration);
-	}
-
-	private void updateDataFlowUriIfNeeded(Map<String, String> appDeploymentProperties, List<String> commandLineArgs) {
-		if (StringUtils.isEmpty(this.dataflowServerUri)) {
-			return;
-		}
-		RelaxedNames relaxedNames = new RelaxedNames(DATAFLOW_SERVER_URI_KEY);
-		for (String dataFlowUriKey : relaxedNames) {
-			if (appDeploymentProperties.containsKey(dataFlowUriKey)) {
-				return;
-			}
-			for (String cmdLineArg : commandLineArgs) {
-				if (cmdLineArg.contains(dataFlowUriKey + "=")) {
-					return;
-				}
-			}
-		}
-		appDeploymentProperties.put(DATAFLOW_SERVER_URI_KEY, this.dataflowServerUri);
 	}
 
 }

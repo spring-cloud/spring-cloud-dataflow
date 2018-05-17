@@ -16,12 +16,9 @@
 
 package org.springframework.cloud.dataflow.server.service.impl;
 
-import java.lang.reflect.Method;
 import java.net.URI;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
-import java.util.List;
 import java.util.Map;
 
 import org.junit.Before;
@@ -55,7 +52,6 @@ import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.junit4.SpringRunner;
-import org.springframework.util.ReflectionUtils;
 
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.core.Is.is;
@@ -353,51 +349,6 @@ public class DefaultTaskServiceTests {
 		assertThat(preDeleteSize - 3, is(equalTo(taskDefinitionRepository.count())));
 	}
 
-	@Test
-	@DirtiesContext
-	public void verifyDataFlowUriProperty() throws Exception {
-		when(this.taskLauncher.launch(anyObject())).thenReturn("0");
-		TaskService taskService = new DefaultTaskService(this.dataSourceProperties,
-				mock(TaskDefinitionRepository.class), this.taskExplorer, this.taskExecutionRepository, this.appRegistry,
-				this.resourceLoader, this.taskLauncher, this.metadataResolver, new TaskConfigurationProperties(),
-				new InMemoryDeploymentIdRepository(), "http://myserver:9191", commonApplicationProperties);
-		List<String> cmdLineArgs = new ArrayList<>();
-		Method method = ReflectionUtils.findMethod(DefaultTaskService.class, "updateDataFlowUriIfNeeded", Map.class,
-				List.class);
-		ReflectionUtils.makeAccessible(method);
-		Map<String, String> appDeploymentProperties = new HashMap<>();
-		method.invoke(taskService, appDeploymentProperties, cmdLineArgs);
-		assertTrue(appDeploymentProperties.containsKey("dataflowServerUri"));
-		assertTrue("dataflowServerUri is expected to be in the app deployment properties",
-				appDeploymentProperties.get("dataflowServerUri").equals("http://myserver:9191"));
-		appDeploymentProperties.clear();
-		appDeploymentProperties.put("dataflow-server-uri", "http://localhost:8080");
-		method.invoke(taskService, appDeploymentProperties, cmdLineArgs);
-		assertTrue(!appDeploymentProperties.containsKey("dataflowServerUri"));
-		assertTrue("dataflowServerUri is incorrect",
-				appDeploymentProperties.get("dataflow-server-uri").equals("http://localhost:8080"));
-		appDeploymentProperties.clear();
-		appDeploymentProperties.put("dataflowServerUri", "http://localhost:8191");
-		method.invoke(taskService, appDeploymentProperties, cmdLineArgs);
-		assertTrue(appDeploymentProperties.containsKey("dataflowServerUri"));
-		assertTrue("dataflowServerUri is incorrect",
-				appDeploymentProperties.get("dataflowServerUri").equals("http://localhost:8191"));
-		appDeploymentProperties.clear();
-		appDeploymentProperties.put("DATAFLOW_SERVER_URI", "http://localhost:9000");
-		method.invoke(taskService, appDeploymentProperties, cmdLineArgs);
-		assertTrue(!appDeploymentProperties.containsKey("dataflowServerUri"));
-		assertTrue("dataflowServerUri is incorrect",
-				appDeploymentProperties.get("DATAFLOW_SERVER_URI").equals("http://localhost:9000"));
-		appDeploymentProperties.clear();
-		cmdLineArgs.add("--dataflowServerUri=http://localhost:8383");
-		method.invoke(taskService, appDeploymentProperties, cmdLineArgs);
-		assertTrue(!appDeploymentProperties.containsKey("dataflowServerUri"));
-		cmdLineArgs.clear();
-		cmdLineArgs.add("DATAFLOW_SERVER_URI=http://localhost:8383");
-		method.invoke(taskService, appDeploymentProperties, cmdLineArgs);
-		assertTrue(!appDeploymentProperties.containsKey("dataflowServerUri"));
-		assertTrue(!appDeploymentProperties.containsKey("DATAFLOW-SERVER-URI"));
-	}
 	@Test
 	@DirtiesContext
 	public void createFailedComposedTask() {

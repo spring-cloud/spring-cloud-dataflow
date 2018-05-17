@@ -43,16 +43,15 @@ public class ScheduleInfoResource extends ResourceSupport {
 	/**
 	 * Schedule specific information returned from the Scheduler implementation.
 	 */
-	private Map<String, String> scheduleProperties;
+	private Map<String, String> scheduleProperties = new HashMap<>();
 
 
 	public ScheduleInfoResource(String scheduleName, String taskDefinitionName, Map<String, String> scheduleProperties) {
-		Assert.hasText(scheduleName, "scheduleName must not be null nor empty");
-		Assert.hasText(taskDefinitionName, "taskDefinitionName must not be null nor empty");
+		Assert.hasText(scheduleName, "scheduleName must not be null or empty");
+		Assert.hasText(taskDefinitionName, "taskDefinitionName must not be null or empty");
 		Assert.notNull(scheduleProperties, "schedulerProperties must not be null.");
 
 		this.scheduleName = scheduleName;
-		this.scheduleProperties = new HashMap<>();
 		this.scheduleProperties.putAll(scheduleProperties);
 	}
 
