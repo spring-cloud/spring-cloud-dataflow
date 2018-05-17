@@ -107,7 +107,7 @@ wget https://raw.githubusercontent.com/spring-cloud/spring-cloud-dataflow/v1.5.0
 <br>
 
 ```
-docker-compose up
+DATAFLOW_VERSION=1.5.0.RELEASE docker-compose up
 ```
 
 <u><b>Step 3</b></u> - Open the dashboard at [http://localhost:9393/dashboard](http://localhost:9393/dashboard).
@@ -128,7 +128,7 @@ Once the ‘ticktock’ stream is deployed, two running stream apps will appear 
 <u><b>Step 5</b></u> - Verify that events are being written to the ticktock log every second. To view the stream logs, copy the path in the "stdout" text box on the dashboard and in another console type:
 
 ```
-docker exec -it dataflow-server tail -f /var/folders/ ... ... /ticktock.log/stdout_0.log
+docker exec -it dataflow-server tail -f <COPIED-STDOUT-PATH>
 ```
 
 <br>
