@@ -49,7 +49,7 @@ import org.springframework.web.bind.annotation.RestController;
 @ExposesResourceFor(ScheduleInfoResource.class)
 public class TaskSchedulerController {
 
-	private SchedulerService schedulerService;
+	private final SchedulerService schedulerService;
 	private final Assembler taskAssembler = new Assembler();
 
 	/**
@@ -89,9 +89,9 @@ public class TaskSchedulerController {
 	 * {@link org.springframework.cloud.dataflow.core.TaskDefinition} name.
 	 *
 	 * @param pageable page-able collection of {@code ScheduleResource}.
-	 * @param assembler assembler for the {@link ScheduleInfo}
 	 * @param taskDefinitionName name of the taskDefinition to search.
-	 * @return a list of Schedules
+	 * @param assembler assembler for the {@link ScheduleInfo}.
+	 * @return a list of Schedules.
 	 */
 	@RequestMapping("/instances/{taskDefinitionName}")
 	public PagedResources<ScheduleInfoResource> filteredList(Pageable pageable, @PathVariable String taskDefinitionName,
@@ -111,7 +111,6 @@ public class TaskSchedulerController {
 	 * @param properties the runtime properties for the task, as a comma-delimited list of
 	 * key=value pairs
 	 * @param arguments the runtime commandline arguments
-	 * @return instance of the schedule
 	 */
 	@RequestMapping(value = "", method = RequestMethod.POST)
 	@ResponseStatus(HttpStatus.CREATED)
@@ -125,13 +124,13 @@ public class TaskSchedulerController {
 	}
 
 	/**
-	 * Delete the schedule from the Scheduler.
+	 * Unschedule the schedule from the Scheduler.
 	 *
 	 * @param scheduleName name of the schedule to be deleted
 	 */
 	@RequestMapping(value = "/{scheduleName}", method = RequestMethod.DELETE)
 	@ResponseStatus(HttpStatus.OK)
-	public void destroyTask(@PathVariable("scheduleName") String scheduleName) {
+	public void unschedule(@PathVariable("scheduleName") String scheduleName) {
 		schedulerService.unschedule(scheduleName);
 	}
 

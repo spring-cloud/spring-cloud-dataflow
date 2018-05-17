@@ -23,7 +23,6 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.springframework.boot.autoconfigure.jdbc.DataSourceProperties;
-import org.springframework.boot.bind.RelaxedNames;
 import org.springframework.cloud.dataflow.configuration.metadata.ApplicationConfigurationMetadataResolver;
 import org.springframework.cloud.dataflow.core.ApplicationType;
 import org.springframework.cloud.dataflow.core.TaskDefinition;
@@ -69,8 +68,6 @@ import org.springframework.util.StringUtils;
  */
 @Transactional
 public class DefaultTaskService implements TaskService {
-
-	private static final String DATAFLOW_SERVER_URI_KEY = "dataflowServerUri";
 
 	private final DataSourceProperties dataSourceProperties;
 
@@ -197,7 +194,7 @@ public class DefaultTaskService implements TaskService {
 		Map<String, String> deployerDeploymentProperties = DeploymentPropertiesUtils
 				.extractAndQualifyDeployerProperties(taskDeploymentProperties, taskDefinition.getRegisteredAppName());
 		if (StringUtils.hasText(this.dataflowServerUri) && taskNode.isComposed()) {
-			updateDataFlowUriIfNeeded(appDeploymentProperties, commandLineArgs);
+			TaskServiceUtils.updateDataFlowUriIfNeeded(this.dataflowServerUri, appDeploymentProperties, commandLineArgs);
 		}
 		AppDefinition revisedDefinition = TaskServiceUtils.mergeAndExpandAppProperties(taskDefinition, metadataResource,
 				appDeploymentProperties, this.whitelistProperties);
@@ -210,24 +207,6 @@ public class DefaultTaskService implements TaskService {
 		}
 		taskExecutionRepository.updateExternalExecutionId(taskExecution.getExecutionId(), id);
 		return taskExecution.getExecutionId();
-	}
-
-	private void updateDataFlowUriIfNeeded(Map<String, String> appDeploymentProperties, List<String> commandLineArgs) {
-		if (StringUtils.isEmpty(this.dataflowServerUri)) {
-			return;
-		}
-		RelaxedNames relaxedNames = new RelaxedNames(DATAFLOW_SERVER_URI_KEY);
-		for (String dataFlowUriKey : relaxedNames) {
-			if (appDeploymentProperties.containsKey(dataFlowUriKey)) {
-				return;
-			}
-			for (String cmdLineArg : commandLineArgs) {
-				if (cmdLineArg.contains(dataFlowUriKey + "=")) {
-					return;
-				}
-			}
-		}
-		appDeploymentProperties.put(DATAFLOW_SERVER_URI_KEY, this.dataflowServerUri);
 	}
 
 

@@ -17,23 +17,27 @@
 package org.springframework.cloud.dataflow.server.service.impl;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.springframework.boot.autoconfigure.jdbc.DataSourceProperties;
+import org.springframework.boot.bind.RelaxedNames;
 import org.springframework.cloud.dataflow.core.TaskDefinition;
 import org.springframework.cloud.dataflow.core.dsl.TaskApp;
 import org.springframework.cloud.dataflow.core.dsl.TaskNode;
 import org.springframework.cloud.dataflow.server.controller.WhitelistProperties;
 import org.springframework.cloud.deployer.spi.core.AppDefinition;
 import org.springframework.core.io.Resource;
+import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
 /**
  * Provides utility methods for setting up tasks for execution.
  */
 public class TaskServiceUtils {
+	private static final String DATAFLOW_SERVER_URI_KEY = "dataflowServerUri";
 
 	/**
 	 * Creates a properly formatted CTR definition based on the graph provided.
@@ -44,6 +48,11 @@ public class TaskServiceUtils {
 	 */
 	public static  String createComposedTaskDefinition(String graph,
 			TaskConfigurationProperties taskConfigurationProperties) {
+		Assert.hasText(graph, "graph must not be empty or null");
+		Assert.notNull(taskConfigurationProperties,
+				"taskConfigurationProperties must not be null");
+		Assert.hasText(taskConfigurationProperties.getComposedTaskRunnerName(),
+				"taskConfigurationProperties.composedTaskRunnerName must not be null");
 		return String.format("%s --graph=\"%s\"", taskConfigurationProperties.getComposedTaskRunnerName(), graph);
 	}
 
@@ -56,6 +65,8 @@ public class TaskServiceUtils {
 	public static Map<String, String> establishComposedTaskProperties(
 			Map<String, String> taskDeploymentProperties,
 			TaskNode taskNode) {
+		Assert.notNull(taskDeploymentProperties, "taskDeploymentProperties must not be null");
+		Assert.notNull(taskNode, "taskNode must not be null");
 		String result = "";
 		for (TaskApp subTask : taskNode.getTaskApps()) {
 			result = updateProperties(taskNode, subTask, taskDeploymentProperties, result, "app");
@@ -75,6 +86,8 @@ public class TaskServiceUtils {
 	 */
 	public static TaskDefinition updateTaskProperties(TaskDefinition taskDefinition,
 			DataSourceProperties dataSourceProperties) {
+		Assert.notNull(taskDefinition, "taskDefinition must not be null");
+		Assert.notNull(dataSourceProperties, "dataSourceProperties must not be null");
 		TaskDefinition.TaskDefinitionBuilder builder = TaskDefinition.TaskDefinitionBuilder.from(taskDefinition);
 		builder.setProperty("spring.datasource.url", dataSourceProperties.getUrl());
 		builder.setProperty("spring.datasource.username", dataSourceProperties.getUsername());
@@ -94,6 +107,8 @@ public class TaskServiceUtils {
 	 * @return a map containing the app properties for a task.
 	 */
 	public static Map<String, String> extractAppProperties(String name, Map<String, String> taskDeploymentProperties) {
+		Assert.hasText(name, "name must not be empty or null");
+		Assert.notNull(taskDeploymentProperties, "taskDeploymentProoperties must not be null");
 		return extractPropertiesByPrefix("app", name, taskDeploymentProperties);
 	}
 
@@ -104,6 +119,8 @@ public class TaskServiceUtils {
 	 * @return a map containing the scheduler properties for a task schedule.
 	 */
 	public static Map<String, String> extractSchedulerProperties(String name, Map<String, String> taskDeploymentProperties) {
+		Assert.hasText(name, "name must not be empty or null");
+		Assert.notNull(taskDeploymentProperties, "taskDeploymentProoperties must not be null");
 		return extractPropertiesByPrefix("scheduler", name, taskDeploymentProperties);
 	}
 
@@ -121,10 +138,34 @@ public class TaskServiceUtils {
 			Resource resource,
 			Map<String, String> appDeploymentProperties,
 			WhitelistProperties whitelistProperties) {
+		Assert.notNull(original, "original must not be null");
+		Assert.notNull(appDeploymentProperties, "appDeploymentProperties must not be null");
+		Assert.notNull(whitelistProperties, "whitelistProperties must not be null");
 		Map<String, String> merged = new HashMap<>(original.getProperties());
 		merged.putAll(appDeploymentProperties);
 		merged = whitelistProperties.qualifyProperties(merged, resource);
 		return new AppDefinition(original.getName(), merged);
+	}
+
+	public static void updateDataFlowUriIfNeeded(String dataflowServerUri,
+			Map<String, String> appDeploymentProperties, List<String> commandLineArgs) {
+		Assert.notNull(appDeploymentProperties, "appDeploymentProperties must not be null");
+		Assert.notNull(commandLineArgs, "commandLineArgs must not be null");
+		if (StringUtils.isEmpty(dataflowServerUri)) {
+			return;
+		}
+		RelaxedNames relaxedNames = new RelaxedNames(DATAFLOW_SERVER_URI_KEY);
+		for (String dataFlowUriKey : relaxedNames) {
+			if (appDeploymentProperties.containsKey(dataFlowUriKey)) {
+				return;
+			}
+			for (String cmdLineArg : commandLineArgs) {
+				if (cmdLineArg.contains(dataFlowUriKey + "=")) {
+					return;
+				}
+			}
+		}
+		appDeploymentProperties.put(DATAFLOW_SERVER_URI_KEY, dataflowServerUri);
 	}
 
 	private static Map<String, String> extractPropertiesByPrefix(String type,
