@@ -59,10 +59,10 @@ export spring_datasource_driver_class_name="org.postgresql.Driver"
 
 The following example shows how to define a MySQL database connection with command Line arguments
 
-[source,bash]
+[source,bash,subs=attributes]
 ----
-java -jar spring-cloud-dataflow-server-local/target/spring-cloud-dataflow-server-local-1.0.0.BUILD-SNAPSHOT.jar \
-    --spring.datasource.url=jdbc:mysql:<db-info> \
+java -jar spring-cloud-dataflow-server-local/target/spring-cloud-dataflow-server-local-{project-version}.jar \
+    --spring.datasource.url=jdbc:mysql://localhost:3306/mydb \
     --spring.datasource.username=<user> \
     --spring.datasource.password=<password> \
     --spring.datasource.driver-class-name=org.mariadb.jdbc.Driver &
@@ -70,10 +70,10 @@ java -jar spring-cloud-dataflow-server-local/target/spring-cloud-dataflow-server
 
 The following example shows how to define a PostgreSQL database connection with command line arguments:
 
-[source,bash]
+[source,bash,subs=attributes]
 ----
-java -jar spring-cloud-dataflow-server-local/target/spring-cloud-dataflow-server-local-1.0.0.BUILD-SNAPSHOT.jar \
-    --spring.datasource.url=jdbc:postgresql:<db-info> \
+java -jar spring-cloud-dataflow-server-local/target/spring-cloud-dataflow-server-local-{project-version}.jar \
+    --spring.datasource.url=jdbc:postgresql://localhost:5432/mydb \
     --spring.datasource.username=<user> \
     --spring.datasource.password=<password> \
     --spring.datasource.driver-class-name=org.postgresql.Driver &
@@ -81,10 +81,10 @@ java -jar spring-cloud-dataflow-server-local/target/spring-cloud-dataflow-server
 
 The following example shows how to define a HSQLDB database connection with command line arguments:
 
-[source,bash]
+[source,bash,subs=attributes]
 ----
-java -jar spring-cloud-dataflow-server-local/target/spring-cloud-dataflow-server-local-1.0.0.BUILD-SNAPSHOT.jar \
-    --spring.datasource.url=jdbc:hsqldb:<db-info> \
+java -jar spring-cloud-dataflow-server-local/target/spring-cloud-dataflow-server-local-{project-version}.jar \
+    --spring.datasource.url=jdbc:hsqldb://localhost:9001/mydb \
     --spring.datasource.username=SA \
     --spring.datasource.driver-class-name=org.hsqldb.jdbc.JDBCDriver &
 ----
