@@ -78,6 +78,7 @@ public class StreamDeploymentControllerTests {
 	}
 
 	@Test
+	@SuppressWarnings("unchecked")
 	public void testDeployViaStreamService() {
 		this.controller.deploy("test", new HashMap<>());
 		ArgumentCaptor<String> argumentCaptor1 = ArgumentCaptor.forClass(String.class);

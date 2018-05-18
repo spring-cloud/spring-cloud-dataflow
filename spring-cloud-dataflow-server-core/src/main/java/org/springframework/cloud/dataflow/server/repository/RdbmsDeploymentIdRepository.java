@@ -49,7 +49,7 @@ public class RdbmsDeploymentIdRepository extends AbstractRdbmsKeyValueRepository
 	}
 
 	@Override
-	public String save(String key) {
+	public <S extends String> S save(S key) {
 		throw new UnsupportedOperationException();
 	}
 

@@ -289,6 +289,7 @@ public class ConfigCommands implements CommandMarker, InitializingBean, Applicat
 	}
 
 	@CliCommand(value = { "dataflow config info" }, help = "Show the Dataflow server being used")
+	@SuppressWarnings("unchecked")
 	public List<Object> info() {
 		Target target = targetHolder.getTarget();
 		if (target.getTargetException() != null) {

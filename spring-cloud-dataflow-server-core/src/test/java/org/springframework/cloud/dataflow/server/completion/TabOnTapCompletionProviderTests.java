@@ -57,6 +57,7 @@ import static org.junit.Assert.assertThat;
  */
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = { CompletionConfiguration.class, TabOnTapCompletionProviderTests.Mocks.class })
+@SuppressWarnings("unchecked")
 public class TabOnTapCompletionProviderTests {
 
 	@Autowired

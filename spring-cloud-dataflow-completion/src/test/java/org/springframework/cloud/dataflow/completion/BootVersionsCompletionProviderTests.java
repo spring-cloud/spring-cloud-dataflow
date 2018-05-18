@@ -50,6 +50,7 @@ import static org.junit.Assert.assertThat;
  */
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = { CompletionConfiguration.class, BootVersionsCompletionProviderTests.Mocks.class })
+@SuppressWarnings("unchecked")
 public class BootVersionsCompletionProviderTests {
 
 	@Autowired

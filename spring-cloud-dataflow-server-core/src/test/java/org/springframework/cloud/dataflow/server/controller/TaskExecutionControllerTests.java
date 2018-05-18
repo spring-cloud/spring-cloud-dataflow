@@ -83,9 +83,9 @@ public class TaskExecutionControllerTests {
 
 	private static boolean initialized = false;
 
-	private static List sampleArgumentList;
+	private static List<String> SAMPLE_ARGUMENT_LIST;
 
-	private static List sampleCleansedArgumentList;
+	private static List<String> SAMPLE_CLEANSED_ARGUMENT_LIST;
 
 	@Autowired
 	private TaskExecutionDao dao;
@@ -118,31 +118,31 @@ public class TaskExecutionControllerTests {
 		this.mockMvc = MockMvcBuilders.webAppContextSetup(wac)
 				.defaultRequest(get("/").accept(MediaType.APPLICATION_JSON)).build();
 		if (!initialized) {
-			this.sampleArgumentList = new LinkedList<String>();
-			this.sampleArgumentList.add("--password=foo");
-			this.sampleArgumentList.add("password=bar");
-			this.sampleArgumentList.add("org.woot.password=baz");
-			this.sampleArgumentList.add("foo.bar=foo");
-			this.sampleArgumentList.add("bar.baz = boo");
-			this.sampleArgumentList.add("foo.credentials.boo=bar");
-			this.sampleArgumentList.add("spring.datasource.username=dbuser");
-			this.sampleArgumentList.add("spring.datasource.password=dbpass");
+			SAMPLE_ARGUMENT_LIST = new LinkedList<String>();
+			SAMPLE_ARGUMENT_LIST.add("--password=foo");
+			SAMPLE_ARGUMENT_LIST.add("password=bar");
+			SAMPLE_ARGUMENT_LIST.add("org.woot.password=baz");
+			SAMPLE_ARGUMENT_LIST.add("foo.bar=foo");
+			SAMPLE_ARGUMENT_LIST.add("bar.baz = boo");
+			SAMPLE_ARGUMENT_LIST.add("foo.credentials.boo=bar");
+			SAMPLE_ARGUMENT_LIST.add("spring.datasource.username=dbuser");
+			SAMPLE_ARGUMENT_LIST.add("spring.datasource.password=dbpass");
 
-			this.sampleCleansedArgumentList = new LinkedList<String>();
-			this.sampleCleansedArgumentList.add("--password=******");
-			this.sampleCleansedArgumentList.add("password=******");
-			this.sampleCleansedArgumentList.add("org.woot.password=******");
-			this.sampleCleansedArgumentList.add("foo.bar=foo");
-			this.sampleCleansedArgumentList.add("bar.baz = boo");
-			this.sampleCleansedArgumentList.add("foo.credentials.boo=******");
-			this.sampleCleansedArgumentList.add("spring.datasource.username=dbuser");
-			this.sampleCleansedArgumentList.add("spring.datasource.password=******");
+			SAMPLE_CLEANSED_ARGUMENT_LIST = new LinkedList<String>();
+			SAMPLE_CLEANSED_ARGUMENT_LIST.add("--password=******");
+			SAMPLE_CLEANSED_ARGUMENT_LIST.add("password=******");
+			SAMPLE_CLEANSED_ARGUMENT_LIST.add("org.woot.password=******");
+			SAMPLE_CLEANSED_ARGUMENT_LIST.add("foo.bar=foo");
+			SAMPLE_CLEANSED_ARGUMENT_LIST.add("bar.baz = boo");
+			SAMPLE_CLEANSED_ARGUMENT_LIST.add("foo.credentials.boo=******");
+			SAMPLE_CLEANSED_ARGUMENT_LIST.add("spring.datasource.username=dbuser");
+			SAMPLE_CLEANSED_ARGUMENT_LIST.add("spring.datasource.password=******");
 
 			taskDefinitionRepository.save(new TaskDefinition(TASK_NAME_ORIG, "demo"));
-			dao.createTaskExecution(TASK_NAME_ORIG, new Date(), this.sampleArgumentList, "foobar");
-			dao.createTaskExecution(TASK_NAME_ORIG, new Date(), this.sampleArgumentList, null);
-			dao.createTaskExecution(TASK_NAME_FOO, new Date(), this.sampleArgumentList, null);
-			TaskExecution taskExecution = dao.createTaskExecution(TASK_NAME_FOOBAR, new Date(), this.sampleArgumentList,
+			dao.createTaskExecution(TASK_NAME_ORIG, new Date(), SAMPLE_ARGUMENT_LIST, "foobar");
+			dao.createTaskExecution(TASK_NAME_ORIG, new Date(), SAMPLE_ARGUMENT_LIST, null);
+			dao.createTaskExecution(TASK_NAME_FOO, new Date(), SAMPLE_ARGUMENT_LIST, null);
+			TaskExecution taskExecution = dao.createTaskExecution(TASK_NAME_FOOBAR, new Date(), SAMPLE_ARGUMENT_LIST,
 					null);
 			JobInstance instance = jobRepository.createJobInstance(TASK_NAME_FOOBAR, new JobParameters());
 			JobExecution jobExecution = jobRepository.createJobExecution(instance, new JobParameters(), null);
@@ -174,7 +174,7 @@ public class TaskExecutionControllerTests {
 
 	@Test
 	public void testGetExecution() throws Exception {
-		verifyTaskArgs(sampleCleansedArgumentList, "",
+		verifyTaskArgs(SAMPLE_CLEANSED_ARGUMENT_LIST, "",
 				mockMvc.perform(get("/tasks/executions/1").accept(MediaType.APPLICATION_JSON))
 						.andExpect(status().isOk()).andExpect(content().json("{taskName: \"" + TASK_NAME_ORIG + "\"}"))
 						.andExpect(jsonPath("jobExecutionIds", hasSize(0))));
@@ -189,7 +189,7 @@ public class TaskExecutionControllerTests {
 
 	@Test
 	public void testGetAllExecutions() throws Exception {
-		verifyTaskArgs(this.sampleCleansedArgumentList, "$.content[0].",
+		verifyTaskArgs(SAMPLE_CLEANSED_ARGUMENT_LIST, "$.content[0].",
 				mockMvc.perform(get("/tasks/executions/").accept(MediaType.APPLICATION_JSON)).andExpect(status().isOk())
 						.andExpect(jsonPath("$.content[*].executionId", containsInAnyOrder(4, 3, 2, 1)))
 						.andExpect(jsonPath("$.content", hasSize(4))));
@@ -197,7 +197,7 @@ public class TaskExecutionControllerTests {
 
 	@Test
 	public void testGetExecutionsByName() throws Exception {
-		verifyTaskArgs(this.sampleCleansedArgumentList, "$.content[0].", mockMvc
+		verifyTaskArgs(SAMPLE_CLEANSED_ARGUMENT_LIST, "$.content[0].", mockMvc
 				.perform(get("/tasks/executions/").param("name", TASK_NAME_ORIG).accept(MediaType.APPLICATION_JSON))
 				.andExpect(status().isOk()).andExpect(jsonPath("$.content[0].taskName", is(TASK_NAME_ORIG)))
 				.andExpect(jsonPath("$.content[1].taskName", is(TASK_NAME_ORIG)))
