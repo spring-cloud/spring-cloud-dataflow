@@ -62,6 +62,7 @@ import static org.mockito.Mockito.mock;
  * @author Glenn Renfro
  * @author Ilayaperumal Gopinathan
  */
+@SuppressWarnings("unchecked")
 public class DataFlowServerConfigurationTests {
 
 	private AnnotationConfigApplicationContext context;

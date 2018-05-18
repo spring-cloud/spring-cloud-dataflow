@@ -45,7 +45,7 @@ public class RdbmsTaskDefinitionRepository extends AbstractRdbmsKeyValueReposito
 	}
 
 	@Override
-	public TaskDefinition save(TaskDefinition definition) {
+	public <S extends TaskDefinition> S save(S definition) {
 		Assert.notNull(definition, "definition must not be null");
 		if (exists(definition.getName())) {
 			throw new DuplicateTaskException(String.format(
