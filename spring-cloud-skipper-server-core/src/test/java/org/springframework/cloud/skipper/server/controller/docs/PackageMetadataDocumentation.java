@@ -18,6 +18,12 @@ package org.springframework.cloud.skipper.server.controller.docs;
 
 import org.junit.Test;
 
+import org.springframework.cloud.skipper.domain.Package;
+import org.springframework.cloud.skipper.domain.PackageMetadata;
+import org.springframework.cloud.skipper.io.DefaultPackageReader;
+import org.springframework.cloud.skipper.io.PackageReader;
+import org.springframework.core.io.ClassPathResource;
+import org.springframework.core.io.Resource;
 import org.springframework.test.context.ActiveProfiles;
 
 import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.get;
@@ -33,11 +39,18 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  * @author Gunnar Hillert
  * @author Ilayaperumal Gopinathan
  */
-@ActiveProfiles("repo-test")
+@ActiveProfiles("repository")
 public class PackageMetadataDocumentation extends BaseDocumentation {
 
 	@Test
 	public void getAllPackageMetadata() throws Exception {
+		Resource resource = new ClassPathResource("/repositories/sources/test/log/log-1.0.0");
+		PackageReader packageReader = new DefaultPackageReader();
+		Package pkg = packageReader.read(resource.getFile());
+		PackageMetadata packageMetadata = pkg.getMetadata();
+		packageMetadata.setRepositoryName("local");
+		packageMetadata.setRepositoryId(this.repositoryRepository.findByName("local").getId());
+		PackageMetadata saved = this.packageMetadataRepository.save(pkg.getMetadata());
 		this.mockMvc.perform(
 				get("/api/packageMetadata")
 						.param("page", "0")
@@ -89,10 +102,15 @@ public class PackageMetadataDocumentation extends BaseDocumentation {
 
 	@Test
 	public void getPackageMetadataDetails() throws Exception {
-		install("log", "1.0.0", "test2");
-
+		Resource resource = new ClassPathResource("/repositories/sources/test/log/log-1.0.0");
+		PackageReader packageReader = new DefaultPackageReader();
+		Package pkg = packageReader.read(resource.getFile());
+		PackageMetadata packageMetadata = pkg.getMetadata();
+		packageMetadata.setRepositoryName("local");
+		packageMetadata.setRepositoryId(this.repositoryRepository.findByName("local").getId());
+		PackageMetadata saved = this.packageMetadataRepository.save(pkg.getMetadata());
 		this.mockMvc.perform(
-				get("/api/packageMetadata/{packageMetadataId}", 1))
+				get("/api/packageMetadata/{packageMetadataId}", saved.getId()))
 				.andDo(print())
 				.andExpect(status().isOk())
 				.andDo(this.documentationHandler.document(
@@ -129,6 +147,13 @@ public class PackageMetadataDocumentation extends BaseDocumentation {
 
 	@Test
 	public void getPackageMetadataSearchFindByName() throws Exception {
+		Resource resource = new ClassPathResource("/repositories/sources/test/log/log-1.0.0");
+		PackageReader packageReader = new DefaultPackageReader();
+		Package pkg = packageReader.read(resource.getFile());
+		PackageMetadata packageMetadata = pkg.getMetadata();
+		packageMetadata.setRepositoryName("local");
+		packageMetadata.setRepositoryId(this.repositoryRepository.findByName("local").getId());
+		PackageMetadata saved = this.packageMetadataRepository.save(pkg.getMetadata());
 		this.mockMvc.perform(
 				get("/api/packageMetadata/search/findByName?name=log"))
 				.andDo(print())
@@ -167,6 +192,13 @@ public class PackageMetadataDocumentation extends BaseDocumentation {
 
 	@Test
 	public void getPackageMetadataSearchFindByNameContainingIgnoreCase() throws Exception {
+		Resource resource = new ClassPathResource("/repositories/sources/test/log/log-1.0.0");
+		PackageReader packageReader = new DefaultPackageReader();
+		Package pkg = packageReader.read(resource.getFile());
+		PackageMetadata packageMetadata = pkg.getMetadata();
+		packageMetadata.setRepositoryName("local");
+		packageMetadata.setRepositoryId(this.repositoryRepository.findByName("local").getId());
+		PackageMetadata saved = this.packageMetadataRepository.save(pkg.getMetadata());
 		this.mockMvc.perform(
 				get("/api/packageMetadata/search/findByNameContainingIgnoreCase?name=LO"))
 				.andDo(print())
@@ -213,6 +245,13 @@ public class PackageMetadataDocumentation extends BaseDocumentation {
 
 	@Test
 	public void getPackageMetadataSummary() throws Exception {
+		Resource resource = new ClassPathResource("/repositories/sources/test/log/log-1.0.0");
+		PackageReader packageReader = new DefaultPackageReader();
+		Package pkg = packageReader.read(resource.getFile());
+		PackageMetadata packageMetadata = pkg.getMetadata();
+		packageMetadata.setRepositoryName("local");
+		packageMetadata.setRepositoryId(this.repositoryRepository.findByName("local").getId());
+		PackageMetadata saved = this.packageMetadataRepository.save(pkg.getMetadata());
 		this.mockMvc.perform(
 				get("/api/packageMetadata?projection=summary"))
 				.andDo(print())

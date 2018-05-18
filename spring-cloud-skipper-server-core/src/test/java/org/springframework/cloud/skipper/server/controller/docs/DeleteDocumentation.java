@@ -20,21 +20,15 @@ import java.nio.charset.Charset;
 
 import org.junit.Test;
 
-import org.springframework.cloud.skipper.domain.InstallRequest;
-import org.springframework.cloud.skipper.domain.PackageIdentifier;
+import org.springframework.cloud.skipper.domain.DeleteProperties;
+import org.springframework.cloud.skipper.domain.Release;
 import org.springframework.cloud.skipper.domain.StatusCode;
-import org.springframework.cloud.skipper.domain.UploadRequest;
-import org.springframework.core.io.ClassPathResource;
-import org.springframework.core.io.Resource;
 import org.springframework.http.MediaType;
-import org.springframework.test.context.ActiveProfiles;
-import org.springframework.util.Assert;
-import org.springframework.util.StreamUtils;
 import org.springframework.util.StringUtils;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.when;
 import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.delete;
-import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.post;
 import static org.springframework.restdocs.payload.PayloadDocumentation.fieldWithPath;
 import static org.springframework.restdocs.payload.PayloadDocumentation.responseFields;
 import static org.springframework.restdocs.payload.PayloadDocumentation.subsectionWithPath;
@@ -45,46 +39,15 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  * @author Gunnar Hillert
  * @author Ilayaperumal Gopinathan
  */
-@ActiveProfiles("repo-test")
 public class DeleteDocumentation extends BaseDocumentation {
 
 	@Test
 	public void deleteRelease() throws Exception {
-		final UploadRequest uploadProperties = new UploadRequest();
-		uploadProperties.setRepoName("local");
-		uploadProperties.setName("mylog");
-		uploadProperties.setVersion("9.9.9");
-		uploadProperties.setExtension("zip");
-		final Resource resource = new ClassPathResource(
-				"/org/springframework/cloud/skipper/server/service/mylog-9.9.9.zip");
-		assertThat(resource.exists()).isTrue();
-		final byte[] originalPackageBytes = StreamUtils.copyToByteArray(resource.getInputStream());
-		assertThat(originalPackageBytes).isNotEmpty();
-		Assert.isTrue(originalPackageBytes.length != 0,
-				"PackageServiceTests.Assert.isTrue: Package file as bytes must not be empty");
-		uploadProperties.setPackageFileAsBytes(originalPackageBytes);
-
-		final MediaType contentType = new MediaType(MediaType.APPLICATION_JSON.getType(),
-				MediaType.APPLICATION_JSON.getSubtype(), Charset.forName("utf8"));
-
-		mockMvc.perform(post("/api/package/upload").accept(MediaType.APPLICATION_JSON).contentType(contentType)
-								.content(convertObjectToJson(uploadProperties))).andDo(print())
-				.andExpect(status().isCreated());
-
-		final String releaseName = "myLogRelease";
-		final InstallRequest installRequest = new InstallRequest();
-		final PackageIdentifier packageIdentifier = new PackageIdentifier();
-		packageIdentifier.setPackageName("mylog");
-		packageIdentifier.setPackageVersion("9.9.9");
-		packageIdentifier.setRepositoryName("local");
-		installRequest.setPackageIdentifier(packageIdentifier);
-		installRequest.setInstallProperties(createInstallProperties(releaseName));
-
-		installPackage(installRequest);
-
+		Release release = createTestRelease("test", StatusCode.DELETED);
+		when(this.skipperStateMachineService.deleteRelease(any(String.class), any(DeleteProperties.class))).thenReturn(release);
 		this.mockMvc.perform(
-				delete("/api/release/{releaseName}/package", releaseName)
-						.accept(MediaType.APPLICATION_JSON).contentType(contentType))
+				delete("/api/release/{releaseName}/package", release.getName())
+						.accept(MediaType.APPLICATION_JSON).contentType(MediaType.APPLICATION_JSON))
 				.andDo(print())
 				.andExpect(status().isOk())
 				.andDo(this.documentationHandler.document(
@@ -145,22 +108,13 @@ public class DeleteDocumentation extends BaseDocumentation {
 
 	@Test
 	public void deleteReleaseDefault() throws Exception {
-		final String releaseName = "myLogRelease1";
-		final InstallRequest installRequest = new InstallRequest();
-		final PackageIdentifier packageIdentifier = new PackageIdentifier();
-		packageIdentifier.setPackageName("log");
-		packageIdentifier.setPackageVersion("1.0.0");
-		packageIdentifier.setRepositoryName("notused");
-		installRequest.setPackageIdentifier(packageIdentifier);
-		installRequest.setInstallProperties(createInstallProperties(releaseName));
-
-		installPackage(installRequest);
-
+		Release release = createTestRelease("test", StatusCode.DELETED);
+		when(this.skipperStateMachineService.deleteRelease(any(String.class), any(DeleteProperties.class))).thenReturn(release);
 		final MediaType contentType = new MediaType(MediaType.APPLICATION_JSON.getType(),
 				MediaType.APPLICATION_JSON.getSubtype(), Charset.forName("utf8"));
 
 		this.mockMvc.perform(
-				delete("/api/release/{releaseName}", releaseName)
+				delete("/api/release/{releaseName}", "test")
 						.accept(MediaType.APPLICATION_JSON).contentType(contentType))
 				.andDo(print())
 				.andExpect(status().isOk())

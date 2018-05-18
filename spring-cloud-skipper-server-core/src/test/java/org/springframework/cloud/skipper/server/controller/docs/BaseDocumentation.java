@@ -16,29 +16,57 @@
 
 package org.springframework.cloud.skipper.server.controller.docs;
 
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Before;
-import org.junit.Rule;
+import org.junit.runner.RunWith;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cloud.skipper.server.controller.AbstractControllerTests;
-import org.springframework.restdocs.JUnitRestDocumentation;
+import org.springframework.boot.test.autoconfigure.restdocs.AutoConfigureRestDocs;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.cloud.skipper.domain.Info;
+import org.springframework.cloud.skipper.domain.InstallProperties;
+import org.springframework.cloud.skipper.domain.Manifest;
+import org.springframework.cloud.skipper.domain.Package;
+import org.springframework.cloud.skipper.domain.Release;
+import org.springframework.cloud.skipper.domain.Status;
+import org.springframework.cloud.skipper.domain.StatusCode;
+import org.springframework.cloud.skipper.domain.UpgradeProperties;
+import org.springframework.cloud.skipper.io.DefaultPackageReader;
+import org.springframework.cloud.skipper.io.PackageReader;
+import org.springframework.cloud.skipper.server.repository.PackageMetadataRepository;
+import org.springframework.cloud.skipper.server.repository.ReleaseRepository;
+import org.springframework.cloud.skipper.server.repository.RepositoryRepository;
+import org.springframework.cloud.skipper.server.service.PackageService;
+import org.springframework.cloud.skipper.server.service.ReleaseService;
+import org.springframework.cloud.skipper.server.statemachine.SkipperStateMachineService;
+import org.springframework.cloud.skipper.server.util.ConfigValueUtils;
+import org.springframework.cloud.skipper.server.util.ManifestUtils;
+import org.springframework.core.io.ClassPathResource;
+import org.springframework.core.io.Resource;
 import org.springframework.restdocs.hypermedia.HypermediaDocumentation;
 import org.springframework.restdocs.hypermedia.LinkDescriptor;
 import org.springframework.restdocs.hypermedia.LinksSnippet;
+import org.springframework.restdocs.mockmvc.MockMvcRestDocumentationConfigurer;
 import org.springframework.restdocs.mockmvc.RestDocumentationResultHandler;
 import org.springframework.restdocs.payload.FieldDescriptor;
 import org.springframework.restdocs.payload.ResponseFieldsSnippet;
 import org.springframework.restdocs.request.RequestParametersSnippet;
+import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
+import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 
 import static org.springframework.restdocs.hypermedia.HypermediaDocumentation.linkWithRel;
 import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.document;
-import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.documentationConfiguration;
 import static org.springframework.restdocs.operation.preprocess.Preprocessors.preprocessRequest;
 import static org.springframework.restdocs.operation.preprocess.Preprocessors.preprocessResponse;
 import static org.springframework.restdocs.operation.preprocess.Preprocessors.prettyPrint;
@@ -52,11 +80,50 @@ import static org.springframework.restdocs.request.RequestDocumentation.requestP
  * be used by the various documentation tests.
  *
  * @author Gunnar Hillert
+ * @author Eddú Meléndez Gonzales
+ * @author Ilayaperumal Gopinathan
+ *
  */
-public abstract class BaseDocumentation extends AbstractControllerTests {
+@EnableWebMvc
+@ActiveProfiles("repo-test")
+@AutoConfigureMockMvc
+@AutoConfigureRestDocs("target/generated-snippets")
+@SpringBootTest(properties = {"spring.cloud.skipper.server.synchonizeIndexOnContextRefresh=false",
+		"spring.cloud.skipper.server.enableReleaseStateUpdateService=false" } , classes = ServerDependencies.class)
+@RunWith(SpringRunner.class)
+public abstract class BaseDocumentation {
 
-	@Rule
-	public final JUnitRestDocumentation restDocumentation = new JUnitRestDocumentation();
+	protected MockMvc mockMvc;
+
+	@Autowired
+	protected WebApplicationContext wac;
+
+	@Autowired
+	private MockMvcRestDocumentationConfigurer restDocumentationConfigurer;
+
+	@Autowired
+	public WebApplicationContext context;
+
+
+	@Autowired
+	protected RepositoryRepository repositoryRepository;
+
+	@Autowired
+	protected ReleaseRepository releaseRepository;
+
+	@Autowired
+	protected PackageMetadataRepository packageMetadataRepository;
+
+	@Autowired
+	protected ReleaseService releaseService;
+
+	@Autowired
+	protected SkipperStateMachineService skipperStateMachineService;
+
+	@Autowired
+	protected PackageService packageService;
+
+
 	/**
 	 * Snippet, documenting common pagination properties.
 	 */
@@ -85,9 +152,6 @@ public abstract class BaseDocumentation extends AbstractControllerTests {
 			parameterWithName("page").description("The zero-based page number (optional)"),
 			parameterWithName("size").description("The requested page size (optional)"));
 	protected RestDocumentationResultHandler documentationHandler;
-	protected MockMvc mockMvc;
-	@Autowired
-	WebApplicationContext context;
 
 	/**
 	 * {@link LinksSnippet} for common links. Common links are set to be ignored.
@@ -118,12 +182,69 @@ public abstract class BaseDocumentation extends AbstractControllerTests {
 				preprocessResponse(prettyPrint()));
 
 		this.mockMvc = MockMvcBuilders.webAppContextSetup(this.context)
-				.apply(documentationConfiguration(this.restDocumentation).uris()
+				.apply(this.restDocumentationConfigurer.uris()
 						.withScheme("http")
 						.withHost("localhost")
 						.withPort(7577))
 				.alwaysDo(this.documentationHandler)
 				.build();
+	}
+
+	protected InstallProperties createInstallProperties(String releaseName) {
+		InstallProperties installProperties = new InstallProperties();
+		installProperties.setReleaseName(releaseName);
+		installProperties.setPlatformName("default");
+		return installProperties;
+	}
+
+	protected UpgradeProperties createUpdateProperties(String releaseName) {
+		UpgradeProperties upgradeProperties = new UpgradeProperties();
+		upgradeProperties.setReleaseName(releaseName);
+		return upgradeProperties;
+	}
+
+	protected  Release createTestRelease() {
+		return createTestRelease("test", StatusCode.DEPLOYED);
+	}
+
+	protected Release createTestRelease(String name, StatusCode statusCode) {
+		Release release = new Release();
+		release.setName(name);
+		release.setVersion(1);
+		return updateReleaseStatus(updateReleaseManifest(release), statusCode);
+	}
+
+	protected Release updateReleaseManifest(Release release) {
+		Resource resource = new ClassPathResource("/repositories/sources/test/log/log-1.0.0");
+		PackageReader packageReader = new DefaultPackageReader();
+		try {
+			Package pkg = packageReader.read(resource.getFile());
+			release.setPkg(pkg);
+		}
+		catch (IOException e) {
+			throw new RuntimeException(e);
+		}
+		Map<String, Object> mergedMap = ConfigValueUtils.mergeConfigValues(release.getPkg(), release.getConfigValues());
+		Manifest manifest = new Manifest();
+		manifest.setData(ManifestUtils.createManifest(release.getPkg(), mergedMap));
+		release.setManifest(manifest);
+		return release;
+	}
+
+	protected Release updateReleaseStatus(Release release, StatusCode statusCode) {
+		Info releaseInfo = new Info();
+		Status status = new Status();
+		status.setStatusCode(StatusCode.DELETED);
+		releaseInfo.setStatus(status);
+		release.setInfo(releaseInfo);
+		return release;
+	}
+
+	protected static String convertObjectToJson(Object object) throws IOException {
+		ObjectMapper mapper = new ObjectMapper();
+		mapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
+		String json = mapper.writeValueAsString(object);
+		return json;
 	}
 
 }

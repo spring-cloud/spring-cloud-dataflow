@@ -18,14 +18,11 @@ package org.springframework.cloud.skipper.server.controller.docs;
 
 import org.junit.Test;
 
-import org.springframework.cloud.skipper.domain.InstallRequest;
-import org.springframework.cloud.skipper.domain.PackageIdentifier;
 import org.springframework.cloud.skipper.domain.Release;
 import org.springframework.cloud.skipper.domain.StatusCode;
-import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.TestPropertySource;
 import org.springframework.util.StringUtils;
 
+import static org.mockito.Mockito.when;
 import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.get;
 import static org.springframework.restdocs.payload.PayloadDocumentation.fieldWithPath;
 import static org.springframework.restdocs.payload.PayloadDocumentation.responseFields;
@@ -35,24 +32,14 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 /**
  * @author Gunnar Hillert
+ * @author Ilayaperumal Gopinathan
  */
-@ActiveProfiles("repo-test")
-@TestPropertySource(properties = { "spring.cloud.skipper.server.enableReleaseStateUpdateService=false" })
 public class StatusDocumentation extends BaseDocumentation {
 
 	@Test
 	public void getStatusOfRelease() throws Exception {
-		final String releaseName = "myLogRelease";
-		final InstallRequest installRequest = new InstallRequest();
-		final PackageIdentifier packageIdentifier = new PackageIdentifier();
-		packageIdentifier.setPackageName("log");
-		packageIdentifier.setPackageVersion("1.0.0");
-		packageIdentifier.setRepositoryName("notused");
-		installRequest.setPackageIdentifier(packageIdentifier);
-		installRequest.setInstallProperties(createInstallProperties(releaseName));
-
-		final Release release = installPackage(installRequest);
-
+		Release release = createTestRelease();
+		when(this.releaseService.status(release.getName())).thenReturn(release.getInfo());
 		this.mockMvc.perform(
 				get("/api/release/status/{releaseName}", release.getName())).andDo(print())
 				.andExpect(status().isOk())
@@ -73,17 +60,8 @@ public class StatusDocumentation extends BaseDocumentation {
 
 	@Test
 	public void getStatusOfReleaseForVersion() throws Exception {
-		final String releaseName = "myLogRelease2";
-		final InstallRequest installRequest = new InstallRequest();
-		final PackageIdentifier packageIdentifier = new PackageIdentifier();
-		packageIdentifier.setPackageName("log");
-		packageIdentifier.setPackageVersion("1.0.0");
-		packageIdentifier.setRepositoryName("notused");
-		installRequest.setPackageIdentifier(packageIdentifier);
-		installRequest.setInstallProperties(createInstallProperties(releaseName));
-
-		final Release release = installPackage(installRequest);
-
+		Release release = createTestRelease();
+		when(this.releaseService.status(release.getName(), release.getVersion())).thenReturn(release.getInfo());
 		this.mockMvc.perform(
 				get("/api/release/status/{releaseName}/{releaseVersion}",
 						release.getName(), release.getVersion()))

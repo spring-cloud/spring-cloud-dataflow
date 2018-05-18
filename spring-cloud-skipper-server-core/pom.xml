@@ -204,9 +204,11 @@
                 <artifactId>maven-surefire-plugin</artifactId>
                 <configuration>
                     <includes>
-                        <include>**/*Documentation.java</include>
                         <include>**/*Tests.java</include>
                     </includes>
+                    <excludes>
+                        <exclude>**/*Documentation.java</exclude>
+                    </excludes>
                 </configuration>
             </plugin>
         </plugins>

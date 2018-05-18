@@ -28,7 +28,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 /**
  * @author Gunnar Hillert
  */
-@ActiveProfiles("repo-test")
+@ActiveProfiles("repository")
 public class DeployersDocumentation extends BaseDocumentation {
 
 	@Test

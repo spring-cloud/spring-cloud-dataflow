@@ -23,13 +23,12 @@ import org.junit.Test;
 import org.springframework.cloud.skipper.domain.InstallProperties;
 import org.springframework.cloud.skipper.domain.InstallRequest;
 import org.springframework.cloud.skipper.domain.PackageIdentifier;
-import org.springframework.cloud.skipper.domain.Release;
 import org.springframework.cloud.skipper.domain.StatusCode;
 import org.springframework.http.MediaType;
-import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.util.StringUtils;
 
+import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.when;
 import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.post;
 import static org.springframework.restdocs.payload.PayloadDocumentation.fieldWithPath;
 import static org.springframework.restdocs.payload.PayloadDocumentation.responseFields;
@@ -39,14 +38,14 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 /**
  * @author Gunnar Hillert
+ * @author Ilayaperumal Gopinathan
  */
-@ActiveProfiles("repo-test")
 public class InstallDocumentation extends BaseDocumentation {
 
 	@Test
 	public void installPackage() throws Exception {
 
-		final String releaseName = "myLogRelease";
+		final String releaseName = "test";
 		final InstallRequest installRequest = new InstallRequest();
 		final PackageIdentifier packageIdentifier = new PackageIdentifier();
 		packageIdentifier.setPackageName("log");
@@ -58,7 +57,9 @@ public class InstallDocumentation extends BaseDocumentation {
 		final MediaType contentType = new MediaType(MediaType.APPLICATION_JSON.getType(),
 				MediaType.APPLICATION_JSON.getSubtype(), Charset.forName("utf8"));
 
-		MvcResult result = mockMvc.perform(post("/api/package/install").accept(MediaType.APPLICATION_JSON).contentType(contentType)
+		when(this.skipperStateMachineService.installRelease(any(InstallRequest.class)))
+				.thenReturn(createTestRelease(releaseName, StatusCode.DEPLOYED));
+		mockMvc.perform(post("/api/package/install").accept(MediaType.APPLICATION_JSON).contentType(contentType)
 				.content(convertObjectToJson(installRequest))).andDo(print())
 				.andExpect(status().isCreated())
 				.andDo(this.documentationHandler.document(
@@ -116,8 +117,6 @@ public class InstallDocumentation extends BaseDocumentation {
 								fieldWithPath("manifest.data").description("The manifest of the release"),
 								fieldWithPath("platformName").description("Platform name of the release"))))
 				.andReturn();
-		Release release = convertContentToRelease(result.getResponse().getContentAsString());
-		assertReleaseIsDeployedSuccessfully(releaseName, release.getVersion());
 	}
 
 	@Test
@@ -132,15 +131,16 @@ public class InstallDocumentation extends BaseDocumentation {
 		installRequest.setPackageIdentifier(packageIdentifier);
 		installRequest.setInstallProperties(createInstallProperties(releaseName));
 
-		final Release release = installPackage(installRequest);
-
 		final String releaseName2 = "myLogReleaseWithInstallProperties";
 		final InstallProperties installProperties2 = createInstallProperties(releaseName2);
 
 		final MediaType contentType = new MediaType(MediaType.APPLICATION_JSON.getType(),
 				MediaType.APPLICATION_JSON.getSubtype(), Charset.forName("utf8"));
 
-		MvcResult result = mockMvc.perform(post("/api/package/install/{packageMetaDataId}", release.getId()).accept(MediaType.APPLICATION_JSON)
+		when(this.skipperStateMachineService.installRelease(any(Long.class), any(InstallProperties.class)))
+				.thenReturn(createTestRelease(releaseName, StatusCode.DEPLOYED));
+
+		mockMvc.perform(post("/api/package/install/{packageMetaDataId}", 1).accept(MediaType.APPLICATION_JSON)
 				.contentType(contentType)
 				.content(convertObjectToJson(installProperties2))).andDo(print())
 				.andExpect(status().isCreated())
@@ -199,7 +199,5 @@ public class InstallDocumentation extends BaseDocumentation {
 								fieldWithPath("manifest.data").description("The manifest of the release"),
 								fieldWithPath("platformName").description("Platform name of the release"))))
 				.andReturn();
-		Release release2 = convertContentToRelease(result.getResponse().getContentAsString());
-		assertReleaseIsDeployedSuccessfully(releaseName2, release2.getVersion());
 	}
 }

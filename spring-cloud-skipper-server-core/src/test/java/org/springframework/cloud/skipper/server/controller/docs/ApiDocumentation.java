@@ -20,6 +20,8 @@ import javax.servlet.RequestDispatcher;
 
 import org.junit.Test;
 
+import org.springframework.test.context.ActiveProfiles;
+
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.springframework.restdocs.headers.HeaderDocumentation.headerWithName;
@@ -36,6 +38,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  * @author Gunnar Hillert
  * @author Ilayaperumal Gopinathan
  */
+@ActiveProfiles("repository")
 public class ApiDocumentation extends BaseDocumentation {
 
 	@Test
@@ -86,6 +89,5 @@ public class ApiDocumentation extends BaseDocumentation {
 				linkWithRel("about").description("Provides meta information about the server."),
 				linkWithRel("release").description("Exposes the release resource."),
 				linkWithRel("package").description("Exposes the package resource."))));
-
 	}
 }

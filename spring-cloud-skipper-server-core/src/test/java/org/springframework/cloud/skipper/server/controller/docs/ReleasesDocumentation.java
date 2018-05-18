@@ -18,9 +18,6 @@ package org.springframework.cloud.skipper.server.controller.docs;
 
 import org.junit.Test;
 
-import org.springframework.cloud.skipper.domain.InstallRequest;
-import org.springframework.cloud.skipper.domain.PackageIdentifier;
-import org.springframework.cloud.skipper.domain.Release;
 import org.springframework.cloud.skipper.domain.StatusCode;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.util.StringUtils;
@@ -33,23 +30,14 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 /**
  * @author Gunnar Hillert
+ * @author Ilayaperumal Gopinathan
  */
-@ActiveProfiles("repo-test")
+@ActiveProfiles("repository")
 public class ReleasesDocumentation extends BaseDocumentation {
 
 	@Test
 	public void getAllReleases() throws Exception {
-		final String releaseName = "myLogRelease";
-		final InstallRequest installRequest = new InstallRequest();
-		final PackageIdentifier packageIdentifier = new PackageIdentifier();
-		packageIdentifier.setPackageName("log");
-		packageIdentifier.setPackageVersion("1.0.0");
-		packageIdentifier.setRepositoryName("notused");
-		installRequest.setPackageIdentifier(packageIdentifier);
-		installRequest.setInstallProperties(createInstallProperties(releaseName));
-
-		final Release release = installPackage(installRequest);
-
+		this.releaseRepository.save(createTestRelease());
 		this.mockMvc.perform(
 				get("/api/releases")
 						.param("page", "0")

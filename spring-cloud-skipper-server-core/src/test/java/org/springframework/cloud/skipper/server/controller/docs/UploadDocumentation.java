@@ -20,18 +20,19 @@ import java.nio.charset.Charset;
 
 import org.junit.Test;
 
-import org.springframework.cloud.skipper.domain.Repository;
+import org.springframework.cloud.skipper.domain.Package;
 import org.springframework.cloud.skipper.domain.UploadRequest;
-import org.springframework.cloud.skipper.server.repository.RepositoryRepository;
+import org.springframework.cloud.skipper.io.DefaultPackageReader;
+import org.springframework.cloud.skipper.io.PackageReader;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import org.springframework.http.MediaType;
-import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.TestPropertySource;
 import org.springframework.util.Assert;
 import org.springframework.util.StreamUtils;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.when;
 import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.post;
 import static org.springframework.restdocs.payload.PayloadDocumentation.fieldWithPath;
 import static org.springframework.restdocs.payload.PayloadDocumentation.responseFields;
@@ -41,27 +42,22 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 /**
  * @author Gunnar Hillert
+ * @author Ilayaperumal Gopinathan
  */
-@ActiveProfiles("repo-test")
-@TestPropertySource(properties = { "spring.cloud.skipper.server.enableReleaseStateUpdateService=false" })
 public class UploadDocumentation extends BaseDocumentation {
 
 	@Test
 	public void uploadRelease() throws Exception {
 
-		final Repository repository = new Repository();
-		repository.setName("database-repo");
-		repository.setUrl("http://example.com/repository/");
-		super.context.getBean(RepositoryRepository.class).save(repository);
-
 		final UploadRequest uploadProperties = new UploadRequest();
 		uploadProperties.setRepoName("local");
 		uploadProperties.setName("log");
-		uploadProperties.setVersion("9.9.9");
+		uploadProperties.setVersion("1.0.0");
 		uploadProperties.setExtension("zip");
-		final Resource resource = new ClassPathResource(
-				"/org/springframework/cloud/skipper/server/service/log-9.9.9.zip");
+		final Resource resource = new ClassPathResource("/repositories/sources/test/log/log-1.0.0");
 		assertThat(resource.exists()).isTrue();
+		PackageReader packageReader = new DefaultPackageReader();
+		Package pkg = packageReader.read(resource.getFile());
 		final byte[] originalPackageBytes = StreamUtils.copyToByteArray(resource.getInputStream());
 		assertThat(originalPackageBytes).isNotEmpty();
 		Assert.isTrue(originalPackageBytes.length != 0,
@@ -70,6 +66,8 @@ public class UploadDocumentation extends BaseDocumentation {
 
 		final MediaType contentType = new MediaType(MediaType.APPLICATION_JSON.getType(),
 				MediaType.APPLICATION_JSON.getSubtype(), Charset.forName("utf8"));
+
+		when(this.packageService.upload(any(UploadRequest.class))).thenReturn(pkg.getMetadata());
 
 		mockMvc.perform(post("/api/package/upload").accept(MediaType.APPLICATION_JSON).contentType(contentType)
 				.content(convertObjectToJson(uploadProperties))).andDo(print())

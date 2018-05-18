@@ -20,13 +20,10 @@ import java.nio.charset.Charset;
 
 import org.junit.Test;
 
-import org.springframework.cloud.skipper.domain.InstallRequest;
-import org.springframework.cloud.skipper.domain.PackageIdentifier;
 import org.springframework.cloud.skipper.domain.Release;
 import org.springframework.http.MediaType;
-import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.TestPropertySource;
 
+import static org.mockito.Mockito.when;
 import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.get;
 import static org.springframework.restdocs.payload.PayloadDocumentation.responseBody;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
@@ -34,24 +31,14 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 /**
  * @author Gunnar Hillert
+ * @author Ilayaperumal Gopinathan
  */
-@ActiveProfiles("repo-test")
-@TestPropertySource(properties = { "spring.cloud.skipper.server.enableReleaseStateUpdateService=false" })
 public class ManifestDocumentation extends BaseDocumentation {
 
 	@Test
 	public void getManifestOfRelease() throws Exception {
-		final String releaseName = "myLogRelease";
-		final InstallRequest installRequest = new InstallRequest();
-		final PackageIdentifier packageIdentifier = new PackageIdentifier();
-		packageIdentifier.setPackageName("log");
-		packageIdentifier.setPackageVersion("1.0.0");
-		packageIdentifier.setRepositoryName("notused");
-		installRequest.setPackageIdentifier(packageIdentifier);
-		installRequest.setInstallProperties(createInstallProperties(releaseName));
-
-		final Release release = installPackage(installRequest);
-
+		Release release = createTestRelease();
+		when(this.releaseService.manifest(release.getName())).thenReturn(release.getManifest());
 		final MediaType contentType = new MediaType(MediaType.APPLICATION_JSON.getType(),
 				MediaType.APPLICATION_JSON.getSubtype(), Charset.forName("utf8"));
 
@@ -66,16 +53,9 @@ public class ManifestDocumentation extends BaseDocumentation {
 
 	@Test
 	public void getManifestOfReleaseForVersion() throws Exception {
-		final String releaseName = "myLogRelease2";
-		final InstallRequest installRequest = new InstallRequest();
-		final PackageIdentifier packageIdentifier = new PackageIdentifier();
-		packageIdentifier.setPackageName("log");
-		packageIdentifier.setPackageVersion("1.0.0");
-		packageIdentifier.setRepositoryName("notused");
-		installRequest.setPackageIdentifier(packageIdentifier);
-		installRequest.setInstallProperties(createInstallProperties(releaseName));
+		Release release = createTestRelease();
 
-		final Release release = installPackage(installRequest);
+		when(this.releaseService.manifest(release.getName(), 1)).thenReturn(release.getManifest());
 
 		this.mockMvc.perform(
 				get("/api/release/manifest/{releaseName}/{releaseVersion}",

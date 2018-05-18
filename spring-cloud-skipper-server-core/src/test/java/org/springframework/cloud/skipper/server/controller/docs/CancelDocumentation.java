@@ -16,30 +16,30 @@
 
 package org.springframework.cloud.skipper.server.controller.docs;
 
+import java.nio.charset.Charset;
+
+import org.junit.Test;
+
+import org.springframework.cloud.skipper.domain.CancelRequest;
+import org.springframework.http.MediaType;
+
+import static org.mockito.Mockito.when;
 import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.post;
 import static org.springframework.restdocs.payload.PayloadDocumentation.fieldWithPath;
 import static org.springframework.restdocs.payload.PayloadDocumentation.responseFields;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import java.nio.charset.Charset;
-
-import org.junit.Test;
-import org.springframework.cloud.skipper.domain.CancelRequest;
-import org.springframework.http.MediaType;
-import org.springframework.test.context.ActiveProfiles;
-
 /**
  * @author Janne Valkealahti
  */
-@ActiveProfiles("repo-test")
 public class CancelDocumentation extends BaseDocumentation {
 
 	@Test
 	public void cancelRelease() throws Exception {
 		final String releaseName = "myLogRelease";
-		install("testapp", "1.0.0", releaseName);
-		upgrade("testapp", "1.1.0", releaseName, false);
+
+		when(this.skipperStateMachineService.cancelRelease(releaseName)).thenReturn(Boolean.TRUE);
 
 		final MediaType contentType = new MediaType(MediaType.APPLICATION_JSON.getType(),
 				MediaType.APPLICATION_JSON.getSubtype(), Charset.forName("utf8"));
