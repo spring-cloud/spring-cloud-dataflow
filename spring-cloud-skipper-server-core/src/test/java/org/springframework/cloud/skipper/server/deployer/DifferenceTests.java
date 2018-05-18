@@ -20,7 +20,7 @@ import java.nio.charset.Charset;
 import java.util.List;
 
 import org.junit.Test;
-
+import org.springframework.cloud.skipper.SkipperException;
 import org.springframework.cloud.skipper.domain.SpringCloudDeployerApplicationManifest;
 import org.springframework.cloud.skipper.domain.SpringCloudDeployerApplicationManifestReader;
 import org.springframework.cloud.skipper.domain.deployer.ApplicationManifestDifference;
@@ -132,7 +132,7 @@ public class DifferenceTests {
 					Charset.defaultCharset());
 		}
 		catch (IOException e) {
-			e.printStackTrace();
+			throw new SkipperException("Error copying manifest", e);
 		}
 		return this.applicationManifestReader.read(manifest);
 	}

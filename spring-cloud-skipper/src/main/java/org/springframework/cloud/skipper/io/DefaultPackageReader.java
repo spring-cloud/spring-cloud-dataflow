@@ -29,7 +29,7 @@ import org.yaml.snakeyaml.Yaml;
 import org.yaml.snakeyaml.constructor.Constructor;
 import org.yaml.snakeyaml.representer.Representer;
 import org.zeroturnaround.zip.commons.FileUtils;
-
+import org.springframework.cloud.skipper.SkipperException;
 import org.springframework.cloud.skipper.domain.ConfigValues;
 import org.springframework.cloud.skipper.domain.Package;
 import org.springframework.cloud.skipper.domain.PackageMetadata;
@@ -146,7 +146,7 @@ public class DefaultPackageReader implements PackageReader {
 			fileContents = FileUtils.readFileToString(file);
 		}
 		catch (IOException e) {
-			e.printStackTrace();
+			throw new SkipperException("Error reading yaml file", e);
 		}
 		PackageMetadata pkgMetadata = (PackageMetadata) yaml.load(fileContents);
 		return pkgMetadata;

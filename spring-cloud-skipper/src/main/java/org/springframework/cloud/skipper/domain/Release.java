@@ -34,6 +34,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import org.springframework.cloud.skipper.SkipperException;
 import org.springframework.util.StringUtils;
 
 /**
@@ -123,7 +124,7 @@ public class Release extends AbstractEntity {
 			this.pkgJsonString = mapper.writeValueAsString(pkg);
 		}
 		catch (JsonProcessingException e) {
-			e.printStackTrace();
+			throw new SkipperException("Error processing pkg json string", e);
 		}
 	}
 
@@ -187,7 +188,7 @@ public class Release extends AbstractEntity {
 			}
 		}
 		catch (IOException e) {
-			e.printStackTrace();
+			throw new SkipperException("Error processing config values", e);
 		}
 	}
 }
