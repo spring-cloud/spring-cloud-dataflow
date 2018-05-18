@@ -50,6 +50,7 @@ import static org.junit.Assert.fail;
  * @author Eric Bottard
  * @author Ilayaperumal Gopinathan
  */
+@SuppressWarnings("unchecked")
 public class AppRegistryTests {
 
 	private UriRegistry uriRegistry = new InMemoryUriRegistry();

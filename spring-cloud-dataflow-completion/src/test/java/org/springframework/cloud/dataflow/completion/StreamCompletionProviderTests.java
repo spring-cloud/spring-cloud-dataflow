@@ -46,6 +46,7 @@ import static org.junit.Assert.assertThat;
  */
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = { CompletionConfiguration.class, CompletionTestsMocks.class })
+@SuppressWarnings("unchecked")
 public class StreamCompletionProviderTests {
 
 	@Autowired

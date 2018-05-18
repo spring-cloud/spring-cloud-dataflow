@@ -15,12 +15,8 @@
  */
 package org.springframework.cloud.dataflow.server.controller;
 
-import java.lang.reflect.Field;
-
 import org.junit.Test;
-import sun.misc.Unsafe;
 
-import org.springframework.beans.DirectFieldAccessor;
 import org.springframework.cloud.dataflow.core.StreamDefinition;
 import org.springframework.cloud.dataflow.server.service.StreamService;
 
@@ -39,26 +35,8 @@ public class StreamDefinitionControllerTests {
 		when(streamService.createStream("foo", "foo|bar", false))
 				.thenReturn(new StreamDefinition("foo", "foo|bar"));
 
-		StreamDefinitionController controller = buildStreamDefinitionControllerStub(streamService);
+		StreamDefinitionController controller = new StreamDefinitionController(streamService);
 		controller.save("foo", "foo|bar", false);
 	}
 
-	private static StreamDefinitionController buildStreamDefinitionControllerStub(StreamService streamService)
-			throws Exception {
-		Unsafe unsafe = getUnsafe();
-
-		StreamDefinitionController controller = (StreamDefinitionController) unsafe
-				.allocateInstance(StreamDefinitionController.class);
-
-		DirectFieldAccessor accessor = new DirectFieldAccessor(controller);
-		accessor.setPropertyValue("streamService", streamService);
-		return controller;
-	}
-
-	private static Unsafe getUnsafe() throws Exception {
-		Field f = Unsafe.class.getDeclaredField("theUnsafe");
-		f.setAccessible(true);
-		Unsafe unsafe = (Unsafe) f.get(null);
-		return unsafe;
-	}
 }

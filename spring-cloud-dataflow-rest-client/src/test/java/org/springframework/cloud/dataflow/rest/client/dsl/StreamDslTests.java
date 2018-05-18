@@ -37,6 +37,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 /**
  * @author Vinicius Carvalho
  */
+@SuppressWarnings("unchecked")
 public class StreamDslTests {
 
 	@Mock
