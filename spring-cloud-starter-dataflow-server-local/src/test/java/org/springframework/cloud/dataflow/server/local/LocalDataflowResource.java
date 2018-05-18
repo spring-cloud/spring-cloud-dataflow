@@ -41,6 +41,8 @@ public class LocalDataflowResource extends ExternalResource {
 
 	final boolean metricsEnabled;
 
+	final boolean schedulerEnabled;
+
 	private String originalConfigLocation = null;
 
 	private SpringApplication app;
@@ -58,6 +60,7 @@ public class LocalDataflowResource extends ExternalResource {
 		this.streamsEnabled = true;
 		this.tasksEnabled = true;
 		this.metricsEnabled = true;
+		schedulerEnabled = true;
 	}
 
 	public LocalDataflowResource(String configurationLocation, boolean streamsEnabled, boolean tasksEnabled) {
@@ -65,6 +68,7 @@ public class LocalDataflowResource extends ExternalResource {
 		this.streamsEnabled = streamsEnabled;
 		this.tasksEnabled = tasksEnabled;
 		this.metricsEnabled = true;
+		this.schedulerEnabled = true;
 	}
 
 	public LocalDataflowResource(String configurationLocation, boolean streamsEnabled, boolean tasksEnabled, boolean metricsEnabled) {
@@ -72,6 +76,15 @@ public class LocalDataflowResource extends ExternalResource {
 		this.streamsEnabled = streamsEnabled;
 		this.tasksEnabled = tasksEnabled;
 		this.metricsEnabled = metricsEnabled;
+		this.schedulerEnabled = true;
+	}
+
+	public LocalDataflowResource(String configurationLocation, boolean streamsEnabled, boolean tasksEnabled, boolean metricsEnabled, boolean schedulerEnabled) {
+		this.configurationLocation = configurationLocation;
+		this.streamsEnabled = streamsEnabled;
+		this.tasksEnabled = tasksEnabled;
+		this.metricsEnabled = metricsEnabled;
+		this.schedulerEnabled = schedulerEnabled;
 	}
 
 	@Override
@@ -89,7 +102,10 @@ public class LocalDataflowResource extends ExternalResource {
 				"--" + FeaturesProperties.FEATURES_PREFIX + "." + FeaturesProperties.TASKS_ENABLED + "="
 						+ this.tasksEnabled,
 				"--" + FeaturesProperties.FEATURES_PREFIX + "." + FeaturesProperties.ANALYTICS_ENABLED + "="
-						+ this.metricsEnabled
+						+ this.metricsEnabled,
+				"--" + FeaturesProperties.FEATURES_PREFIX + "." + FeaturesProperties.SCHEDULES_ENABLED + "="
+						+ this.schedulerEnabled
+
 		});
 
 		Collection<Filter> filters = configurableApplicationContext.getBeansOfType(Filter.class).values();
