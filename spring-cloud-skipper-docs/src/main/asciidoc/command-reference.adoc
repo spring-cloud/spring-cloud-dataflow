@@ -24,6 +24,27 @@ Skipper's package commands include the following:
 
 [[skipper-commands-package-search]]
 === Search
+This command searches existing packages.
+====
+NAME::
+	package search - Search for packages.
+
+SYNOPSYS::
+	package search [[*--name*] string]  [*--details*]
+
+OPTIONS::
+	--name  string:::
+		wildcard expression to search for the package name +
+		*[Optional, default = <none>]* +
+
+	--details  boolean:::
+		to set for more detailed package metadata +
+		*[Optional, default = false]* +
+
+ALSO KNOWN AS::
+	package list
+====
+
 The  `search` or its alias `list` command shows all the packages available to be installed by the Skipper server, as shown (with output) in the following example:
 
 [source,bash,options="nowrap"]
@@ -112,6 +133,24 @@ skipper:>package search --name helloworld- --details
 === Upload
 This command uploads a package .zip file, as shown (with output) in the following example:
 
+====
+NAME::
+	package upload - Upload a package.
+
+SYNOPSYS::
+	package upload [*--path*] string  [[*--repo-name*] string]
+
+OPTIONS::
+	--path  string:::
+		the package to be uploaded +
+		*[Mandatory]* +
+
+	--repo-name  string:::
+		the local repository name to upload to +
+		*[Optional, default = <none>]* +
+
+====
+
 [source,bash,options="nowrap"]
 ----
 skipper:>package upload --path /path-to-package/mypackage-1.0.0.zip
@@ -122,8 +161,40 @@ If no `--repo-name` is set, the `upload` command uses `local` as the repository 
 
 [[skipper-commands-package-install]]
 === Install
-
 This command installs a package, as shown (with output) in the following example:
+
+====
+NAME::
+	package install - Install a package.
+
+SYNOPSYS::
+	package install [*--package-name*] string  [[*--package-version*] string]  [[*--file*] file]  [[*--properties*] string]  [*--release-name*] string  [[*--platform-name*] string]
+
+OPTIONS:::
+	--package-name  string:::
+		name of the package to install +
+		*[Mandatory]* +
+
+	--package-version  string:::
+		version of the package to install, if not specified latest version will be used +
+		*[Optional, default = <none>]* +
+
+	--file  file:::
+		specify values in a YAML file +
+		*[Optional, default = <none>]* +
+
+	--properties  string:::
+		the comma separated set of properties to override during install +
+		*[Optional, default = <none>]* +
+
+	--release-name  string:::
+		the release name to use +
+		*[Mandatory]* +
+
+	--platform-name  string:::
+		the platform name to use +
+		*[Optional, default = default]* +
+====
 
 [source,bash,options="nowrap"]
 ----
@@ -140,8 +211,21 @@ file by using the `--file` option.
 
 [[skipper-commands-package-delete]]
 === Delete
-
 This command deletes a package.
+
+====
+NAME::
+	package delete - Delete a package.
+
+SYNOPSYS::
+	package delete [*--package-name*] string
+
+OPTIONS::
+	--package-name  string:::
+		the package name to be deleted +
+		*[Mandatory]* +
+====
+
 You can only delete a package that is in a local (database backed) repository, as shown (with output) in the following example:
 [source,bash,options="nowrap"]
 ----
@@ -165,6 +249,7 @@ Skipper's release commands include the following:
 
 [[skipper-commands-release-list]]
 === List
+This command lists the latest deployed or failed release.
 
 ====
 NAME::
@@ -180,7 +265,7 @@ OPTIONS::
 
 ====
 
-This command lists the latest deployed or failed release, as shown (with output) in the following example:
+Listing the latest deployed or failed release, as shown (with output) in the following example:
 
 [source,bash,options="nowrap"]
 ----
@@ -196,6 +281,7 @@ skipper:>release list
 
 [[skipper-commands-release-status]]
 === Status
+This command shows a release status.
 
 ====
 NAME::
@@ -215,7 +301,7 @@ OPTIONS::
 		*[Optional, default = <none>]* +
 ====
 
-This command shows the `status` of a specific release and version, as shown (with output) in the following example:
+Shows the `status` of a specific release and version, as shown (with output) in the following example:
 
 [source,bash,options="nowrap"]
 ----
@@ -244,6 +330,7 @@ skipper:>release status --release-name helloworldlocal --release-version 1
 
 [[skipper-commands-release-upgrade]]
 === Upgrade
+This command upgrades a package.
 
 ====
 NAME::
@@ -279,7 +366,7 @@ OPTIONS::
 ====
 
 
-This command upgrades a package, as shown (with output) in the following example:
+Upgrades a package, as shown (with output) in the following example:
 
 [source,bash,options="nowrap"]
 ----
@@ -349,6 +436,7 @@ skipper:>release upgrade --release-name ticktockskipper --package-name ticktock 
 
 [[skipper-commands-release-rollback]]
 === Rollback
+This command rolls back the release.
 
 ====
 NAME::
@@ -371,7 +459,7 @@ OPTIONS::
 		*[Optional, default = <none>]* +
 ====
 
-This command rolls back the release to a specific version, as shown (with output) in the following example:
+Rolls back the release to a specific version, as shown (with output) in the following example:
 
 [source,bash,options="nowrap"]
 ----
@@ -389,6 +477,7 @@ expression itself, see <<skipper-commands-generic-usage-timeout-expression>>.
 
 [[skipper-commands-release-history]]
 === History
+This command shows the history of a specific release.
 
 ====
 NAME::
@@ -405,7 +494,7 @@ OPTIONS::
 
 ====
 
-This command shows the history of a specific release, as shown (with output) in the following example:
+Showing the history of a specific release, as shown (with output) in the following example:
 
 [source,bash,options="nowrap"]
 ----
@@ -421,6 +510,7 @@ skipper:>release history --release-name helloworldlocal
 
 [[skipper-commands-release-delete]]
 === Delete
+This command deletes a specific release's latest deployed revision.
 
 ====
 NAME::
@@ -438,7 +528,7 @@ OPTIONS::
 		*[Optional, default = false]* +
 ====
 
-This command deletes a specific release's latest deployed revision, undeploying the application or applications, as shown (with output) in the following example:
+Deleting a specific release's latest deployed revision, undeploying the application or applications, as shown (with output) in the following example:
 
 [source,bash,options="nowrap"]
 ----
@@ -448,6 +538,7 @@ helloworldlocal has been deleted.
 
 [[skipper-commands-release-cancel]]
 === Cancel
+This command attempts cancellation of existing release operation.
 
 ====
 NAME::
@@ -523,6 +614,25 @@ Skipper's manifest has only one command: `get`.
 
 [[skipper-commands-manifest-get]]
 === Get
+Thsi command shows a manifest.
+
+====
+NAME::
+	manifest get - Get the manifest for a release
+
+SYNOPSYS::
+	manifest get [*--release-name*] string  [[*--release-version*] integer]
+
+OPTIONS::
+	--release-name  string:::
+		release name +
+		*[Mandatory]* +
+		*[may not be null]* +
+
+	--release-version  integer:::
+		specific release version. +
+		*[Optional, default = <none>]* +
+====
 
 The `manifest get` command shows the manifest used for a specific release, as shown (with output) in the following example:
 
@@ -551,6 +661,15 @@ Skipper's platform has only one command: `list`.
 
 [[skipper-commands-platform-list]]
 === List
+This command lists platforms.
+
+====
+NAME::
+	platform list - List platforms
+
+SYNOPSYS::
+	platform list
+====
 
 The `platform list` command shows the list all the available deployment platform accounts, as shown (with output) in the following example:
 
@@ -569,14 +688,73 @@ skipper:>platform list
 
 [[skipper-commands-repository]]
 == Repository Commands
+Skipper's repository commands include the following:
 
-Skipper's repository has only one command: `list`.
+* <<skipper-commands-repo-add>>
+* <<skipper-commands-repo-delete>>
+* <<skipper-commands-repo-list>>
 
+[[skipper-commands-repo-add]]
+=== Add
+This command adds a repository.
+
+====
+NAME::
+	repo add - Add package repository
+
+SYNOPSYS::
+	repo add [*--name*] string  [*--url*] string  [[*--source-url*] string]
+
+OPTIONS::
+	--name  string:::
+		name of the repository +
+		*[Mandatory]* +
+		*[may not be null]* +
+
+	--url  string:::
+		the root URL that points to index.yaml file +
+		*[Mandatory]* +
+		*[may not be null]* +
+
+	--source-url  string:::
+		the source URL to the package +
+		*[Optional, default = <none>]* +
+====
+
+[[skipper-commands-repo-delete]]
+=== Delete
+This command deletes a repository.
+
+====
+NAME::
+	repo delete - Delete a package repository
+
+SYNOPSYS::
+	repo delete [*--name*] string
+
+OPTIONS::
+	--name  string:::
+		name of the repository to delete +
+		*[Mandatory]* +
+		*[may not be null]* +
+====
+
+[[skipper-commands-repo-list]]
 === List
+This command list repositories.
 
-You can list add or delete a repository using the commands `repo add`, `repo delete` and `repo list`, as shown (with output) in the following example:
+====
+NAME::
+	repo list - List package repositories
 
-```
+SYNOPSYS::
+	repo list
+====
+
+List repositories as shown (with output) in the following example:
+
+[source,bash,options="nowrap"]
+----
 skipper:>repo list
 ╔════════════╤═══════════════════════════════════════════════════════════╤═════╤═════╗
 ║    Name    │                            URL                            │Local│Order║
@@ -584,7 +762,8 @@ skipper:>repo list
 ║experimental│http://skipper-repository.cfapps.io/repository/experimental│false│0    ║
 ║local       │http://10.55.13.45:7577                                    │true │1    ║
 ╚════════════╧═══════════════════════════════════════════════════════════╧═════╧═════╝
-```
+----
+
 If a repository is local, it is backed by Skipper's database and you can upload packages to the repository.
 If it is not local, it is a remote repository and you can only read packages.
 The packages in a remote repository are updated outside of Skipper's control.
@@ -602,8 +781,38 @@ Skipper's package commands include the following:
 
 [[skipper-commands-config-config]]
 === Config
+This command configures the shell to reference the HTTP API endpoint of the Skipper Server.
 
-This command configures the shell to reference the HTTP API endpoint of the Skipper Server, as shown in the following example:
+====
+NAME::
+	skipper config - Configure the Spring Cloud Skipper REST server to use.
+
+SYNOPSYS::
+	skipper config [[*--uri*] string]  [[*--username*] string]  [[*--password*] string]  [[*--credentials-provider-command*] string]  [*--skip-ssl-validation*]
+
+OPTIONS::
+	--uri  string:::
+		the location of the Spring Cloud Skipper REST endpoint +
+		*[Optional, default = http://localhost:7577/api]* +
+
+	--username  string:::
+		the username for authenticated access to the Admin REST endpoint +
+		*[Optional, default = <none>]* +
+
+	--password  string:::
+		the password for authenticated access to the Admin REST endpoint (valid only with a username) +
+		*[Optional, default = <none>]* +
+
+	--credentials-provider-command  string:::
+		a command to run that outputs the HTTP credentials used for authentication +
+		*[Optional, default = <none>]* +
+
+	--skip-ssl-validation :::
+		accept any SSL certificate (even self-signed) +
+		*[Optional, default = <none>]* +
+====
+
+Configures shell as shown in the following example:
 
 [source,bash]
 ----
@@ -624,8 +833,17 @@ See the "`<<configuration-security>>`" section for more information.
 
 [[skipper-commands-config-info]]
 === Info
+This command shows server info.
 
-This command shows which server version is being used, as shown (with output) in the following example:
+====
+NAME::
+	skipper info - Show the Skipper server being used.
+
+SYNOPSYS::
+	skipper info
+====
+
+Show which server version is being used, as shown (with output) in the following example:
 [source,bash,subs=attributes]
 ----
 skipper:>info
