@@ -829,7 +829,7 @@ From within the Skipper Shell you can also provide credentials, as shown in the 
 skipper:> skipper config --uri https://localhost:7577/api --username my_username --password my_password
 ----
 
-See the "`<<configuration-security>>`" section for more information.
+See the <<configuration-security>> section for more information.
 
 [[skipper-commands-config-info]]
 === Info
@@ -857,7 +857,7 @@ This section contains generic notes about commands.
 [[skipper-commands-generic-usage-timeout-expression]]
 === Timeout Expression
 * A regular long representation (using milliseconds as the default unit)
-* The standard ISO-8601 format https://docs.oracle.com/javase/8/docs/api//java/time/Duration.html#parse-java.lang.CharSequence-)[used by] 
+* The standard ISO-8601 format https://docs.oracle.com/javase/8/docs/api//java/time/Duration.html#parse-java.lang.CharSequence-[used by]
 _java.util.Duration_
 * A more readable format where the value and the unit are coupled (e.g. 10s means 10 seconds)
 
