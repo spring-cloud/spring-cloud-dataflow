@@ -81,6 +81,7 @@ import org.springframework.cloud.dataflow.server.controller.StreamDefinitionCont
 import org.springframework.cloud.dataflow.server.controller.StreamDeploymentController;
 import org.springframework.cloud.dataflow.server.controller.TaskDefinitionController;
 import org.springframework.cloud.dataflow.server.controller.TaskExecutionController;
+import org.springframework.cloud.dataflow.server.controller.TaskSchedulerController;
 import org.springframework.cloud.dataflow.server.controller.ToolsController;
 import org.springframework.cloud.dataflow.server.controller.UiController;
 import org.springframework.cloud.dataflow.server.controller.security.LoginController;
@@ -90,6 +91,7 @@ import org.springframework.cloud.dataflow.server.repository.DeploymentIdReposito
 import org.springframework.cloud.dataflow.server.repository.StreamDefinitionRepository;
 import org.springframework.cloud.dataflow.server.repository.StreamDeploymentRepository;
 import org.springframework.cloud.dataflow.server.repository.TaskDefinitionRepository;
+import org.springframework.cloud.dataflow.server.service.SchedulerService;
 import org.springframework.cloud.dataflow.server.service.SkipperStreamService;
 import org.springframework.cloud.dataflow.server.service.StreamService;
 import org.springframework.cloud.dataflow.server.service.TaskJobService;
@@ -237,6 +239,13 @@ public class DataFlowControllerAutoConfiguration {
 			TaskDefinitionRepository taskDefinitionRepository) {
 		return new TaskExecutionController(explorer, taskService, taskDefinitionRepository);
 	}
+
+	@Bean
+	@ConditionalOnBean(SchedulerService.class)
+	public TaskSchedulerController taskSchedulerController(SchedulerService schedulerService) {
+		return new TaskSchedulerController(schedulerService);
+	}
+
 
 	@Bean
 	@ConditionalOnBean(TaskDefinitionRepository.class)

@@ -2,7 +2,7 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<artifactId>spring-cloud-dataflow-parent</artifactId>
-	<version>1.5.1.BUILD-SNAPSHOT</version>
+	<version>1.6.0.BUILD-SNAPSHOT</version>
 	<packaging>pom</packaging>
 	<url>http://cloud.spring.io/spring-cloud-dataflow/</url>
 	<organization>
@@ -55,6 +55,7 @@
 		<commons-lang.version>2.4</commons-lang.version>
 		<jacoco-maven-plugin.version>0.7.9</jacoco-maven-plugin.version>
 		<sonar-maven-plugin.version>3.0.2</sonar-maven-plugin.version>
+		<spring-cloud-scheduler-spi.version>1.0.0.BUILD-SNAPSHOT</spring-cloud-scheduler-spi.version>
 		<checkstyle.config.location>src/checkstyle/checkstyle.xml</checkstyle.config.location>
 	</properties>
 	<modules>
@@ -78,7 +79,7 @@
 			<dependency>
 				<groupId>org.springframework.cloud</groupId>
 				<artifactId>spring-cloud-dataflow-dependencies</artifactId>
-				<version>1.5.1.BUILD-SNAPSHOT</version>
+				<version>${project.version}</version>
 				<type>pom</type>
 				<scope>import</scope>
 			</dependency>
@@ -175,6 +176,11 @@
 				<groupId>commons-lang</groupId>
 				<artifactId>commons-lang</artifactId>
 				<version>${commons-lang.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.springframework.cloud</groupId>
+				<artifactId>spring-cloud-scheduler-spi</artifactId>
+				<version>${spring-cloud-scheduler-spi.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.springframework.data</groupId>

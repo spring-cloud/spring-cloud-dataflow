@@ -49,12 +49,13 @@ public class DeploymentPropertiesUtilsTests {
 	@Test
 	public void testDeploymentPropertiesParsing() {
 		Map<String, String> props = DeploymentPropertiesUtils.parse("app.foo.bar=v, app.foo.wizz=v2  , deployer.foo"
-				+ ".pot=fern, app.other.key = value  , deployer.other.cow = meww");
+				+ ".pot=fern, app.other.key = value  , deployer.other.cow = meww, scheduler.other.key = baz");
 		assertThat(props, hasEntry("app.foo.bar", "v"));
 		assertThat(props, hasEntry("app.other.key", "value"));
 		assertThat(props, hasEntry("app.foo.wizz", "v2"));
 		assertThat(props, hasEntry("deployer.foo.pot", "fern"));
 		assertThat(props, hasEntry("deployer.other.cow", "meww"));
+		assertThat(props, hasEntry("scheduler.other.key", "baz"));
 
 		props = DeploymentPropertiesUtils.parse("f=v");
 		assertThat(props, hasEntry("f", "v"));

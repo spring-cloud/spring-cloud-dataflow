@@ -35,6 +35,7 @@ import org.springframework.boot.autoconfigure.security.SecurityAutoConfiguration
 import org.springframework.boot.autoconfigure.web.WebClientAutoConfiguration;
 import org.springframework.boot.test.util.EnvironmentTestUtils;
 import org.springframework.cloud.dataflow.server.EnableDataFlowServer;
+import org.springframework.cloud.dataflow.server.config.features.SchedulerConfiguration;
 import org.springframework.cloud.dataflow.server.config.web.WebConfiguration;
 import org.springframework.cloud.dataflow.server.repository.StreamDeploymentRepository;
 import org.springframework.cloud.dataflow.server.service.TaskService;
@@ -42,6 +43,7 @@ import org.springframework.cloud.dataflow.server.service.impl.DefaultTaskService
 import org.springframework.cloud.dataflow.server.support.TestUtils;
 import org.springframework.cloud.deployer.spi.app.AppDeployer;
 import org.springframework.cloud.deployer.spi.task.TaskLauncher;
+import org.springframework.cloud.scheduler.spi.core.Scheduler;
 import org.springframework.cloud.skipper.client.SkipperClient;
 import org.springframework.cloud.task.repository.TaskRepository;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
@@ -78,7 +80,8 @@ public class DataFlowServerConfigurationTests {
 				SecurityAutoConfiguration.class, DataFlowServerAutoConfiguration.class,
 				DataFlowControllerAutoConfiguration.class, DataSourceAutoConfiguration.class,
 				DataFlowServerConfiguration.class, PropertyPlaceholderAutoConfiguration.class,
-				WebClientAutoConfiguration.class, HibernateJpaAutoConfiguration.class, WebConfiguration.class);
+				WebClientAutoConfiguration.class, HibernateJpaAutoConfiguration.class, WebConfiguration.class,
+				SchedulerConfiguration.class);
 		environment = new StandardEnvironment();
 		propertySources = environment.getPropertySources();
 	}
@@ -192,6 +195,11 @@ public class DataFlowServerConfigurationTests {
 		@Bean
 		public TaskRepository taskRepository() {
 			return mock(TaskRepository.class);
+		}
+
+		@Bean
+		public Scheduler scheduler() {
+			return mock(Scheduler.class);
 		}
 	}
 }

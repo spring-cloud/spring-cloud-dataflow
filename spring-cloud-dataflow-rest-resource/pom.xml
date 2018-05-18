@@ -11,7 +11,7 @@
 	<parent>
 		<groupId>org.springframework.cloud</groupId>
 		<artifactId>spring-cloud-dataflow-parent</artifactId>
-		<version>1.5.1.BUILD-SNAPSHOT</version>
+		<version>1.6.0.BUILD-SNAPSHOT</version>
 	</parent>
 	<dependencies>
 		<dependency>
@@ -77,10 +77,14 @@
 			<artifactId>spring-boot-starter-test</artifactId>
 			<scope>test</scope>
 		</dependency>
-        <dependency>
-            <groupId>org.springframework.cloud</groupId>
-            <artifactId>spring-cloud-skipper</artifactId>
-            <version>${spring-cloud-skipper.version}</version>
-        </dependency>
+		<dependency>
+			<groupId>org.springframework.cloud</groupId>
+			<artifactId>spring-cloud-skipper</artifactId>
+			<version>${spring-cloud-skipper.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.cloud</groupId>
+			<artifactId>spring-cloud-scheduler-spi</artifactId>
+		</dependency>
     </dependencies>
 </project>
