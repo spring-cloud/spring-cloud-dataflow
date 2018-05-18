@@ -54,7 +54,7 @@ The following example shows how to define a database connection with environment
 export spring_datasource_url=jdbc:postgresql://localhost:5432/mydb
 export spring_datasource_username=myuser
 export spring_datasource_password=mypass
-export spring_datasource_driver-class-name="org.postgresql.Driver"
+export spring_datasource_driver_class_name="org.postgresql.Driver"
 ----
 
 The following example shows how to define a MySQL database connection with command Line arguments
