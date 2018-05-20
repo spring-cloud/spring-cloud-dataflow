@@ -18,15 +18,21 @@ package org.springframework.cloud.skipper.server.deployer.strategies;
 import java.util.List;
 import java.util.Map;
 
+import org.cloudfoundry.operations.applications.ApplicationManifest;
+import org.cloudfoundry.operations.applications.DeleteApplicationRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import org.springframework.cloud.deployer.spi.app.AppDeployer;
 import org.springframework.cloud.deployer.spi.app.AppStatus;
 import org.springframework.cloud.deployer.spi.app.DeploymentState;
+import org.springframework.cloud.skipper.deployer.cloudfoundry.PlatformCloudFoundryOperations;
+import org.springframework.cloud.skipper.domain.CFApplicationManifestReader;
 import org.springframework.cloud.skipper.domain.Release;
+import org.springframework.cloud.skipper.domain.SpringCloudDeployerApplicationManifestReader;
 import org.springframework.cloud.skipper.domain.Status;
 import org.springframework.cloud.skipper.domain.StatusCode;
+import org.springframework.cloud.skipper.server.deployer.CFApplicationManifestUtils;
 import org.springframework.cloud.skipper.server.domain.AppDeployerData;
 import org.springframework.cloud.skipper.server.repository.DeployerRepository;
 import org.springframework.cloud.skipper.server.repository.ReleaseRepository;
@@ -44,30 +50,56 @@ public class DeleteStep {
 
 	private final DeployerRepository deployerRepository;
 
-	public DeleteStep(ReleaseRepository releaseRepository, DeployerRepository deployerRepository) {
+	private final SpringCloudDeployerApplicationManifestReader applicationManifestReader;
+
+	private final CFApplicationManifestReader cfApplicationManifestReader;
+
+	private final PlatformCloudFoundryOperations platformCloudFoundryOperations;
+
+	public DeleteStep(ReleaseRepository releaseRepository, DeployerRepository deployerRepository,
+			SpringCloudDeployerApplicationManifestReader applicationManifestReader,
+			CFApplicationManifestReader cfApplicationManifestReader,
+			PlatformCloudFoundryOperations platformCloudFoundryOperations) {
 		this.releaseRepository = releaseRepository;
 		this.deployerRepository = deployerRepository;
+		this.applicationManifestReader = applicationManifestReader;
+		this.cfApplicationManifestReader = cfApplicationManifestReader;
+		this.platformCloudFoundryOperations = platformCloudFoundryOperations;
 	}
 
 	public Release delete(Release release, AppDeployerData existingAppDeployerData,
 			List<String> applicationNamesToDelete) {
 
-		AppDeployer appDeployer = this.deployerRepository.findByNameRequired(release.getPlatformName())
-				.getAppDeployer();
+		String releaseManifest = release.getManifest().getData();
+		if (this.applicationManifestReader.canSupport(releaseManifest)) {
+			AppDeployer appDeployer = this.deployerRepository.findByNameRequired(release.getPlatformName())
+					.getAppDeployer();
 
-		Map<String, String> appNamesAndDeploymentIds = existingAppDeployerData.getDeploymentDataAsMap();
+			Map<String, String> appNamesAndDeploymentIds = existingAppDeployerData.getDeploymentDataAsMap();
 
-		for (Map.Entry<String, String> appNameAndDeploymentId : appNamesAndDeploymentIds.entrySet()) {
-			if (applicationNamesToDelete.contains(appNameAndDeploymentId.getKey())) {
-				AppStatus appStatus = appDeployer.status(appNameAndDeploymentId.getValue());
-				if (appStatus.getState().equals(DeploymentState.deployed)) {
-					appDeployer.undeploy(appNameAndDeploymentId.getValue());
-				}
-				else {
-					logger.warn("For Release name {}, did not undeploy existing app {} as its status is not "
-									+ "'deployed'.", release.getName(), appNameAndDeploymentId.getKey());
+			for (Map.Entry<String, String> appNameAndDeploymentId : appNamesAndDeploymentIds.entrySet()) {
+				if (applicationNamesToDelete.contains(appNameAndDeploymentId.getKey())) {
+					AppStatus appStatus = appDeployer.status(appNameAndDeploymentId.getValue());
+					if (appStatus.getState().equals(DeploymentState.deployed)) {
+						appDeployer.undeploy(appNameAndDeploymentId.getValue());
+					}
+					else {
+						logger.warn("For Release name {}, did not undeploy existing app {} as its status is not "
+								+ "'deployed'.", release.getName(), appNameAndDeploymentId.getKey());
+					}
 				}
 			}
+		}
+		else if (this.cfApplicationManifestReader.canSupport(releaseManifest)) {
+			ApplicationManifest applicationManifest = CFApplicationManifestUtils.updateApplicationName(release);
+			String applicationName = applicationManifest.getName();
+			DeleteApplicationRequest deleteApplicationRequest = DeleteApplicationRequest.builder().name(applicationName)
+					.build();
+			this.platformCloudFoundryOperations.getCloudFoundryOperations(release.getPlatformName()).applications()
+					.delete(deleteApplicationRequest)
+					.doOnSuccess(v -> logger.info("Successfully undeployed app {}", applicationName))
+					.doOnError(e -> logger.error("Failed to undeploy app %s", applicationName))
+					.block();
 		}
 
 		Status deletedStatus = new Status();

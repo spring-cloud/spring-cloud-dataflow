@@ -132,14 +132,23 @@ public class ReleaseCommands extends AbstractSkipperCommand {
 			@ShellOption(help = "the name of the package to use for the upgrade") String packageName,
 			@ShellOption(help = "the version of the package to use for the upgrade, if not specified latest version will be used", defaultValue = NULL) String packageVersion,
 			@ShellOption(help = "specify values in a YAML file", defaultValue = NULL) File file,
-			@ShellOption(help = "the comma separated set of properties to override during upgrade", defaultValue = NULL) String properties,
-			@ShellOption(help = "the expression for upgrade timeout", defaultValue = NULL) String timeoutExpression)
+			@ShellOption(help = "the expression for upgrade timeout", defaultValue = NULL) String timeoutExpression,
+			@ShellOption(help = "specify CF manifest YAML file", defaultValue = NULL) File cfManifestYaml,
+			@ShellOption(help = "the comma separated set of properties to override during upgrade", defaultValue = NULL) String properties)
 			throws IOException {
 		// Commented out until https://github.com/spring-cloud/spring-cloud-skipper/issues/263 is
 		// addressed
 		// assertMutuallyExclusiveFileAndProperties(file, properties);
-		Release release = skipperClient.upgrade(
-				getUpgradeRequest(releaseName, packageName, packageVersion, file, properties, timeoutExpression));
+		if (cfManifestYaml != null && cfManifestYaml.exists()) {
+			// TODO: when cfManifestYml is specified, one can not pass properties YAML as an option
+			StringBuilder stringBuilder = new StringBuilder();
+			stringBuilder.append(properties);
+			stringBuilder.append(",");
+			stringBuilder.append("spec.cfManifest=" + YmlUtils.getYamlConfigValues(cfManifestYaml, null));
+			properties = stringBuilder.toString();
+		}
+		Release release = skipperClient
+				.upgrade(getUpgradeRequest(releaseName, packageName, packageVersion, file, properties, timeoutExpression));
 		StringBuilder sb = new StringBuilder();
 		sb.append(release.getName() + " has been upgraded.  Now at version v" + release.getVersion() + ".");
 		return sb.toString();

@@ -113,12 +113,12 @@ public class ReleaseStateUpdateService {
 	}
 
 	/**
-	 * Return next poll time in future in two minute intervals.
+	 * Return next poll time in future in 5 minute intervals.
 	 *
 	 * @return estimate of next full poll time
 	 */
 	private long getNextFullPoll() {
-		long next = System.currentTimeMillis() + 120000;
-		return next - (next % 120000);
+		long next = System.currentTimeMillis() + 600000;
+		return next - (next % 600000);
 	}
 }

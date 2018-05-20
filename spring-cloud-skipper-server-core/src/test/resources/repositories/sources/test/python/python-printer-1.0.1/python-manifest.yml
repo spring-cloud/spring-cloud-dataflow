@@ -1,0 +1,10 @@
+applications:
+- name: python-printer
+  memory: 1G
+  disk_quota: 1G
+  timeout: 180
+  instances: 1
+  path: https://github.com/ilayaperumalg/sandbox/raw/master/python/vanakkam.py.zip
+  buildpack: python_buildpack
+  command: python vanakkam.py
+  health-check-type: none

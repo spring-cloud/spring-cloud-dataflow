@@ -94,7 +94,8 @@ public class CloudFoundryPlatformAutoConfiguration {
 					.doOnNext(versionInfo -> logger.info(
 							"Connecting to Cloud Foundry with API Version {}",
 							versionInfo))
-					.block(Duration.ofSeconds(deploymentProperties.getApiTimeout()));
+					.timeout(Duration.ofSeconds(deploymentProperties.getApiTimeout()))
+					.block();
 			RuntimeEnvironmentInfo runtimeEnvironmentInfo = new RuntimeEnvironmentInfo.Builder()
 					.implementationName(CloudFoundryAppDeployer.class.getSimpleName())
 					.spiClass(AppDeployer.class)

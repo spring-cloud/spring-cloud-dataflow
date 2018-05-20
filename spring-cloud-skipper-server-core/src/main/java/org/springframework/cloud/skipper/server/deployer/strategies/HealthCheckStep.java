@@ -23,7 +23,10 @@ import org.slf4j.LoggerFactory;
 import org.springframework.cloud.deployer.spi.app.AppDeployer;
 import org.springframework.cloud.deployer.spi.app.AppStatus;
 import org.springframework.cloud.deployer.spi.app.DeploymentState;
+import org.springframework.cloud.skipper.domain.CFApplicationManifestReader;
 import org.springframework.cloud.skipper.domain.Release;
+import org.springframework.cloud.skipper.domain.SpringCloudDeployerApplicationManifestReader;
+import org.springframework.cloud.skipper.server.deployer.CFManifestApplicationDeployer;
 import org.springframework.cloud.skipper.server.domain.AppDeployerData;
 import org.springframework.cloud.skipper.server.repository.AppDeployerDataRepository;
 import org.springframework.cloud.skipper.server.repository.DeployerRepository;
@@ -32,6 +35,7 @@ import org.springframework.cloud.skipper.server.repository.DeployerRepository;
  * Checks if the apps in the Replacing release are healthy. Health polling values are set
  * using {@link HealthCheckProperties}
  * @author Mark Pollack
+ * @author Ilayaperumal Gopinathan
  */
 public class HealthCheckStep {
 
@@ -39,98 +43,51 @@ public class HealthCheckStep {
 
 	private final AppDeployerDataRepository appDeployerDataRepository;
 
-	private final HealthCheckProperties healthCheckProperties;
-
 	private final DeployerRepository deployerRepository;
+
+	private final SpringCloudDeployerApplicationManifestReader applicationManifestReader;
+
+	private final CFApplicationManifestReader cfApplicationManifestReader;
+
+	private final CFManifestApplicationDeployer cfManifestApplicationDeployer;
 
 	public HealthCheckStep(AppDeployerDataRepository appDeployerDataRepository,
 			DeployerRepository deployerRepository,
-			HealthCheckProperties healthCheckProperties) {
+			SpringCloudDeployerApplicationManifestReader applicationManifestReader,
+			CFApplicationManifestReader cfApplicationManifestReader,
+			CFManifestApplicationDeployer cfManifestApplicationDeployer) {
 		this.appDeployerDataRepository = appDeployerDataRepository;
 		this.deployerRepository = deployerRepository;
-		this.healthCheckProperties = healthCheckProperties;
+		this.applicationManifestReader = applicationManifestReader;
+		this.cfApplicationManifestReader = cfApplicationManifestReader;
+		this.cfManifestApplicationDeployer = cfManifestApplicationDeployer;
 	}
 
 	public boolean isHealthy(Release replacingRelease) {
-		AppDeployerData replacingAppDeployerData = this.appDeployerDataRepository
-				.findByReleaseNameAndReleaseVersionRequired(
-						replacingRelease.getName(), replacingRelease.getVersion());
-
-		Map<String, String> appNamesAndDeploymentIds = replacingAppDeployerData.getDeploymentDataAsMap();
-
-		AppDeployer appDeployer = this.deployerRepository
-				.findByNameRequired(replacingRelease.getPlatformName())
-				.getAppDeployer();
-
-		logger.debug("Getting status for apps in replacing release {}-v{}", replacingRelease.getName(),
-				replacingRelease.getVersion());
-		for (Map.Entry<String, String> appNameAndDeploymentId : appNamesAndDeploymentIds.entrySet()) {
-			AppStatus status = appDeployer.status(appNameAndDeploymentId.getValue());
-			if (status.getState() == DeploymentState.deployed) {
+		String releaseManifest = replacingRelease.getManifest().getData();
+		if (this.applicationManifestReader.canSupport(releaseManifest)) {
+			AppDeployerData replacingAppDeployerData = this.appDeployerDataRepository
+					.findByReleaseNameAndReleaseVersionRequired(
+							replacingRelease.getName(), replacingRelease.getVersion());
+			Map<String, String> appNamesAndDeploymentIds = replacingAppDeployerData.getDeploymentDataAsMap();
+			AppDeployer appDeployer = this.deployerRepository
+					.findByNameRequired(replacingRelease.getPlatformName())
+					.getAppDeployer();
+			logger.debug("Getting status for apps in replacing release {}-v{}", replacingRelease.getName(),
+					replacingRelease.getVersion());
+			for (Map.Entry<String, String> appNameAndDeploymentId : appNamesAndDeploymentIds.entrySet()) {
+				AppStatus status = appDeployer.status(appNameAndDeploymentId.getValue());
+				if (status.getState() == DeploymentState.deployed) {
+					return true;
+				}
+			}
+		}
+		else if (this.cfApplicationManifestReader.canSupport(releaseManifest)) {
+			AppStatus appStatus = cfManifestApplicationDeployer.status(replacingRelease);
+			if (appStatus.getState() == DeploymentState.deployed) {
 				return true;
 			}
 		}
-
 		return false;
 	}
-
-	public boolean waitForNewAppsToDeploy(Release replacingRelease) {
-		AppDeployerData replacingAppDeployerData = this.appDeployerDataRepository
-				.findByReleaseNameAndReleaseVersionRequired(
-						replacingRelease.getName(), replacingRelease.getVersion());
-
-		logger.info("Waiting for apps in release {}-v{} to be healthy.", replacingRelease.getName(),
-				replacingRelease.getVersion());
-
-		// Poll for health of replacing release.
-		return this.isHealthy(replacingRelease, replacingAppDeployerData);
-	}
-
-	private boolean isHealthy(Release replacingRelease, AppDeployerData replacingAppDeployerData) {
-		boolean isHealthy = false;
-		try {
-			long timeout = System.currentTimeMillis() + this.healthCheckProperties.getTimeoutInMillis();
-			Map<String, String> appNamesAndDeploymentIds = replacingAppDeployerData.getDeploymentDataAsMap();
-
-			while (!isHealthy && System.currentTimeMillis() < timeout) {
-				try {
-					logger.debug("Health check for replacing release {}-v{}, sleeping for {} milliseconds.",
-							replacingRelease.getName(),
-							replacingRelease.getVersion(),
-							this.healthCheckProperties.getTimeoutInMillis());
-					sleep();
-					AppDeployer appDeployer = this.deployerRepository
-							.findByNameRequired(replacingRelease.getPlatformName())
-							.getAppDeployer();
-
-					logger.debug("Getting status for apps in replacing release {}-v{}", replacingRelease.getName(),
-							replacingRelease.getVersion());
-					for (Map.Entry<String, String> appNameAndDeploymentId : appNamesAndDeploymentIds.entrySet()) {
-						AppStatus status = appDeployer.status(appNameAndDeploymentId.getValue());
-						if (status.getState() == DeploymentState.deployed) {
-							isHealthy = true;
-						}
-					}
-				}
-				catch (Exception e) {
-					logger.error("Exception while checking for replacing release status.", e);
-				}
-			}
-		}
-		catch (Exception e) {
-			logger.error("Exception while checking for replacing release status.", e);
-		}
-		return isHealthy;
-	}
-
-	private void sleep() {
-		try {
-			Thread.currentThread().sleep(healthCheckProperties.getSleepInMillis());
-		}
-		catch (InterruptedException e) {
-			logger.info("Interrupted exception ", e);
-			Thread.currentThread().interrupt();
-		}
-	}
-
 }

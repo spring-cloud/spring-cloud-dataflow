@@ -16,3 +16,4 @@ spec:
     {{#spec.deploymentProperties.entrySet}}
     "{{{key}}}": "{{{value}}}"
     {{/spec.deploymentProperties.entrySet}}
+  cfManifest: "{{{spec.cfManifest}}}"

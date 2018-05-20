@@ -1,0 +1,9 @@
+applications:
+- name: logcf
+  memory: 1G
+  disk_quota: 1G
+  timeout: 180
+  instances: 1
+  path: log-sink-rabbit-1.1.0.RELEASE.jar
+  services:
+    - rabbit

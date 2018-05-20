@@ -20,7 +20,6 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.cloud.skipper.domain.Release;
 import org.springframework.cloud.skipper.domain.Status;
 import org.springframework.cloud.skipper.domain.StatusCode;
@@ -28,7 +27,6 @@ import org.springframework.cloud.skipper.server.deployer.ReleaseManager;
 import org.springframework.cloud.skipper.server.domain.AppDeployerData;
 import org.springframework.cloud.skipper.server.repository.AppDeployerDataRepository;
 import org.springframework.cloud.skipper.server.repository.ReleaseRepository;
-import org.springframework.context.event.EventListener;
 import org.springframework.dao.DataAccessException;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -50,14 +48,16 @@ public class HandleHealthCheckStep {
 
 	private final DeleteStep deleteStep;
 
-	private ReleaseManager releaseManager;
+	private final ReleaseManager releaseManager;
 
 	public HandleHealthCheckStep(ReleaseRepository releaseRepository,
 			AppDeployerDataRepository appDeployerDataRepository,
-			DeleteStep deleteStep) {
+			DeleteStep deleteStep,
+			ReleaseManager releaseManager) {
 		this.releaseRepository = releaseRepository;
 		this.appDeployerDataRepository = appDeployerDataRepository;
 		this.deleteStep = deleteStep;
+		this.releaseManager = releaseManager;
 	}
 
 	@Transactional
@@ -147,11 +147,5 @@ public class HandleHealthCheckStep {
 			logger.info("Release {}-v{} could not be deleted.", existingRelease.getName(),
 					existingRelease.getVersion());
 		}
-	}
-
-	@EventListener
-	public void initialize(ApplicationReadyEvent event) {
-		// NOTE circular ref will go away with introduction of state machine.
-		this.releaseManager = event.getApplicationContext().getBean(ReleaseManager.class);
 	}
 }

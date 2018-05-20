@@ -31,6 +31,7 @@ import org.yaml.snakeyaml.representer.Representer;
 import org.zeroturnaround.zip.commons.FileUtils;
 import org.springframework.cloud.skipper.SkipperException;
 import org.springframework.cloud.skipper.domain.ConfigValues;
+import org.springframework.cloud.skipper.domain.FileHolder;
 import org.springframework.cloud.skipper.domain.Package;
 import org.springframework.cloud.skipper.domain.PackageMetadata;
 import org.springframework.cloud.skipper.domain.Template;
@@ -50,15 +51,20 @@ public class DefaultPackageReader implements PackageReader {
 			files = paths.map(i -> i.toAbsolutePath().toFile()).collect(Collectors.toList());
 		}
 		catch (IOException e) {
-			throw new IllegalArgumentException("Could not process files in path " + packageDirectory.getPath() + ". " + e.getMessage(), e);
+			throw new SkipperException("Could not process files in path " + packageDirectory.getPath() + ". " + e.getMessage(), e);
 		}
 		Package pkg = new Package();
+		List<FileHolder> fileHolders = new ArrayList<>();
 		// Iterate over all files and "deserialize" the package.
 		for (File file : files) {
 			// Package metadata
 			if (file.getName().equalsIgnoreCase("package.yaml") || file.getName().equalsIgnoreCase("package.yml")) {
-
 				pkg.setMetadata(loadPackageMetadata(file));
+				continue;
+			}
+
+			if (file.getName().endsWith("manifest.yaml") || file.getName().endsWith("manifest.yml")) {
+				fileHolders.add(loadManifestFile(file));
 				continue;
 			}
 
@@ -86,6 +92,9 @@ public class DefaultPackageReader implements PackageReader {
 				pkg.setDependencies(dependencies);
 			}
 		}
+		if (!fileHolders.isEmpty()) {
+			pkg.setFileHolders(fileHolders);
+		}
 		return pkg;
 	}
 
@@ -95,7 +104,7 @@ public class DefaultPackageReader implements PackageReader {
 			files = paths.map(i -> i.toAbsolutePath().toFile()).collect(Collectors.toList());
 		}
 		catch (IOException e) {
-			throw new IllegalArgumentException("Could not process files in template path " + templatePath, e);
+			throw new SkipperException("Could not process files in template path " + templatePath, e);
 		}
 
 		List<Template> templates = new ArrayList<>();
@@ -107,7 +116,7 @@ public class DefaultPackageReader implements PackageReader {
 					template.setData(new String(Files.readAllBytes(file.toPath()), "UTF-8"));
 				}
 				catch (IOException e) {
-					throw new IllegalArgumentException("Could read template file " + file.getAbsoluteFile(), e);
+					throw new SkipperException("Could read template file " + file.getAbsoluteFile(), e);
 				}
 				templates.add(template);
 			}
@@ -130,9 +139,18 @@ public class DefaultPackageReader implements PackageReader {
 			configValues.setRaw(new String(Files.readAllBytes(file.toPath()), "UTF-8"));
 		}
 		catch (IOException e) {
-			throw new IllegalArgumentException("Could read values file " + file.getAbsoluteFile(), e);
+			throw new SkipperException("Could read values file " + file.getAbsoluteFile(), e);
 		}
 		return configValues;
+	}
+
+	private FileHolder loadManifestFile(File file) {
+		try {
+			return new FileHolder(file.getName(), Files.readAllBytes(file.toPath()));
+		}
+		catch (IOException e) {
+			throw new SkipperException("Could read values file " + file.getAbsoluteFile(), e);
+		}
 	}
 
 	private PackageMetadata loadPackageMetadata(File file) {

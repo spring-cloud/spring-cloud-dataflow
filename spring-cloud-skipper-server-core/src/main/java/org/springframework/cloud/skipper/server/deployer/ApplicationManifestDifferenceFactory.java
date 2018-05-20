@@ -121,8 +121,8 @@ public class ApplicationManifestDifferenceFactory {
 				.ofNullable(replacingApplicationManifest.getSpec().getDeploymentProperties()).orElse(new HashMap<>());
 
 		// exclude deployer count from computing the difference
-		existingDeploymentProperties.remove(AppDeployerReleaseManager.SPRING_CLOUD_DEPLOYER_COUNT);
-		replacingDeploymentProperties.remove(AppDeployerReleaseManager.SPRING_CLOUD_DEPLOYER_COUNT);
+		existingDeploymentProperties.remove(DefaultReleaseManager.SPRING_CLOUD_DEPLOYER_COUNT);
+		replacingDeploymentProperties.remove(DefaultReleaseManager.SPRING_CLOUD_DEPLOYER_COUNT);
 
 		return PropertiesDiff.builder().left(existingDeploymentProperties).right(replacingDeploymentProperties).build();
 	}

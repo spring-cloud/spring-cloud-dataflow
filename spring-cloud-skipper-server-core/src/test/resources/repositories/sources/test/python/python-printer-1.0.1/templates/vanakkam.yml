@@ -1,0 +1,5 @@
+apiVersion: skipper.spring.io/v1
+kind: CFApplication
+spec:
+  resource: https://github.com/ilayaperumalg/sandbox/raw/master/python/vanakkam.py.zip
+  version:

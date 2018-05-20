@@ -40,7 +40,7 @@ public class ManifestUtils {
 	 * @return A YAML string containing all the templates with replaced values.
 	 */
 	@SuppressWarnings("unchecked")
-	public static String createManifest(Package packageToDeploy, Map<String, Object> model) {
+	public static String createManifest(Package packageToDeploy, Map<String, ?> model) {
 
 		// Aggregate all valid manifests into one big doc.
 		StringBuilder sb = new StringBuilder();
@@ -54,7 +54,6 @@ public class ManifestUtils {
 				sb.append(mustacheTemplate.execute(model));
 			}
 		}
-
 		for (Package pkg : packageToDeploy.getDependencies()) {
 			String packageName = pkg.getMetadata().getName();
 			Map<String, Object> modelForDependency;
