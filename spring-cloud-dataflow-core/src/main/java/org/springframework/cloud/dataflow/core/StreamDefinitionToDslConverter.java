@@ -119,7 +119,8 @@ public class StreamDefinitionToDslConverter {
 				}
 			}
 			else {
-				if (propertyValue.contains(" ") || propertyValue.contains(";") || propertyValue.contains("*")) {
+				if (propertyValue.startsWith("'") &&
+						(propertyValue.contains(" ") || propertyValue.contains(";") || propertyValue.contains("*"))) {
 					return "\"" + propertyValue + "\"";
 				}
 			}

@@ -41,6 +41,8 @@ public class StreamDefinitionToDslConverterTests {
 	}
 
 	@Test
+	@Ignore
+	// This DSL isn't a valid
 	public void quotesInParams2() {
 		reverseDslTest("http --port=9700 | filter --expression=\"payload.matches('hello world')\" | file", 3);
 	}
