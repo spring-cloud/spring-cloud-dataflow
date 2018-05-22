@@ -1,0 +1,16 @@
+apply plugin: 'com.palantir.docker'
+
+dependencies {
+	// version need to match one from custom-apps/skipper-server-with-drivers102
+	compile('org.springframework.cloud.skipper.acceptance.app:skipper-server-with-drivers102:1.0.2.BUILD-SNAPSHOT')
+}
+
+docker {
+	name "spring-cloud-skipper-acceptance-image-drivers102"
+	tags "${springCloudSkipper102VersionTag}"
+	dockerfile file('src/main/resources/Dockerfile')
+	files getResolvedVersionOf(configurations.compile, "skipper-server-with-drivers102").file.absolutePath[0], 'src/main/resources/entrypoint.sh'
+	buildArgs(['JAR_FILE': getResolvedVersionOf(configurations.compile, "skipper-server-with-drivers102").file.name[0], 'ENTRYPOINT_FILE': 'entrypoint.sh'])
+}
+
+build.dependsOn 'docker'

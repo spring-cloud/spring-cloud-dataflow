@@ -4,9 +4,17 @@ buildscript {
 		springCloudSkipper100VersionTag = '1.0.0'
 		springCloudSkipper100Version = "${springCloudSkipper100VersionTag}.RELEASE"
 		springCloudSkipper101VersionTag = '1.0.1'
-		springCloudSkipper101Version = "${springCloudSkipper101VersionTag}.RELEASE"
+		springCloudSkipper101Version = "${springCloudSkipper101VersionTag}.RELEASE"		
 		springCloudSkipper102VersionTag = '1.0.2'
-		springCloudSkipper102Version = "${springCloudSkipper102VersionTag}.BUILD-SNAPSHOT"
+		springCloudSkipper102Version = "${springCloudSkipper102VersionTag}.RELEASE"
+		springCloudSkipper103VersionTag = '1.0.3'
+		springCloudSkipper103Version = "${springCloudSkipper103VersionTag}.RELEASE"
+		springCloudSkipper104VersionTag = '1.0.4'
+		springCloudSkipper104Version = "${springCloudSkipper104VersionTag}.RELEASE"
+		springCloudSkipper105VersionTag = '1.0.5'
+		springCloudSkipper105Version = "${springCloudSkipper105VersionTag}.BUILD-SNAPSHOT"		
+		springCloudSkipper110VersionTag = '1.1.0'
+		springCloudSkipper110Version = "${springCloudSkipper110VersionTag}.BUILD-SNAPSHOT"
 		junitPlatformVersion = '1.1.0'
 		junitJupiterVersion = '5.1.0'
 		dockerComposeRuleJunit4Version = '0.33.0'
@@ -109,127 +117,6 @@ project('spring-cloud-skipper-acceptance-core') {
 	}
 }
 
-project('spring-cloud-skipper-acceptance-image-legacy100') {
-	apply plugin: 'com.palantir.docker'
-
-	configurations {
-		legacy100
-	}
-
-	dependencies {
-		legacy100("org.springframework.cloud:spring-cloud-skipper-server:${springCloudSkipper100Version}")
-	}
-
-	docker {
-		name "spring-cloud-skipper-acceptance-image-legacy100"
-		tags "${springCloudSkipper100VersionTag}"
-		dockerfile file('src/main/resources/Dockerfile')
-		files getResolvedVersionOf(configurations.legacy100, "spring-cloud-skipper-server").file.absolutePath[0], 'src/main/resources/entrypoint.sh'
-		buildArgs(['JAR_FILE': getResolvedVersionOf(configurations.legacy100, "spring-cloud-skipper-server").file.name[0], 'ENTRYPOINT_FILE': 'entrypoint.sh'])
-	}
-
-	build.dependsOn = ['docker', 'dockerTag']
-}
-
-project('spring-cloud-skipper-acceptance-image-legacy101') {
-	apply plugin: 'com.palantir.docker'
-
-	configurations {
-		legacy101
-	}
-
-	dependencies {
-		legacy101("org.springframework.cloud:spring-cloud-skipper-server:${springCloudSkipper101Version}")
-	}
-
-	docker {
-		name "spring-cloud-skipper-acceptance-image-legacy101"
-		tags "${springCloudSkipper101VersionTag}"
-		dockerfile file('src/main/resources/Dockerfile')
-		files getResolvedVersionOf(configurations.legacy101, "spring-cloud-skipper-server").file.absolutePath[0], 'src/main/resources/entrypoint.sh'
-		buildArgs(['JAR_FILE': getResolvedVersionOf(configurations.legacy101, "spring-cloud-skipper-server").file.name[0], 'ENTRYPOINT_FILE': 'entrypoint.sh'])
-	}
-
-	build.dependsOn = ['docker', 'dockerTag']
-}
-
-
-project('spring-cloud-skipper-acceptance-image-legacy102') {
-	apply plugin: 'com.palantir.docker'
-
-	configurations {
-		legacy102
-	}
-
-	dependencies {
-		legacy102("org.springframework.cloud:spring-cloud-skipper-server:${springCloudSkipper102Version}")
-	}
-
-	docker {
-		name "spring-cloud-skipper-acceptance-image-legacy102"
-		tags "${springCloudSkipper102VersionTag}"
-		dockerfile file('src/main/resources/Dockerfile')
-		files getResolvedVersionOf(configurations.legacy102, "spring-cloud-skipper-server").file.absolutePath[0], 'src/main/resources/entrypoint.sh'
-		buildArgs(['JAR_FILE': getResolvedVersionOf(configurations.legacy102, "spring-cloud-skipper-server").file.name[0], 'ENTRYPOINT_FILE': 'entrypoint.sh'])
-	}
-
-	build.dependsOn = ['docker', 'dockerTag']
-}
-
-project('spring-cloud-skipper-acceptance-image-drivers100') {
-	apply plugin: 'com.palantir.docker'
-
-	dependencies {
-		// version need to match one from custom-apps/skipper-server-with-drivers100
-		compile('org.springframework.cloud.skipper.acceptance.app:skipper-server-with-drivers100:1.0.0.BUILD-SNAPSHOT')
-	}
-
-	docker {
-		name "spring-cloud-skipper-acceptance-image-drivers100"
-		dockerfile file('src/main/resources/Dockerfile')
-		files getResolvedVersionOf(configurations.compile, "skipper-server-with-drivers100").file.absolutePath[0], 'src/main/resources/entrypoint.sh'
-		buildArgs(['JAR_FILE': getResolvedVersionOf(configurations.compile, "skipper-server-with-drivers100").file.name[0], 'ENTRYPOINT_FILE': 'entrypoint.sh'])
-	}
-
-	build.dependsOn 'docker'
-}
-
-project('spring-cloud-skipper-acceptance-image-drivers101') {
-	apply plugin: 'com.palantir.docker'
-
-	dependencies {
-		// version need to match one from custom-apps/skipper-server-with-drivers101
-		compile('org.springframework.cloud.skipper.acceptance.app:skipper-server-with-drivers101:1.0.1.BUILD-SNAPSHOT')
-	}
-
-	docker {
-		name "spring-cloud-skipper-acceptance-image-drivers101"
-		dockerfile file('src/main/resources/Dockerfile')
-		files getResolvedVersionOf(configurations.compile, "skipper-server-with-drivers101").file.absolutePath[0], 'src/main/resources/entrypoint.sh'
-		buildArgs(['JAR_FILE': getResolvedVersionOf(configurations.compile, "skipper-server-with-drivers101").file.name[0], 'ENTRYPOINT_FILE': 'entrypoint.sh'])
-	}
-
-	build.dependsOn 'docker'
-}
-
-project('spring-cloud-skipper-acceptance-image-drivers102') {
-	apply plugin: 'com.palantir.docker'
-
-	dependencies {
-		// version need to match one from custom-apps/skipper-server-with-drivers102
-		compile('org.springframework.cloud.skipper.acceptance.app:skipper-server-with-drivers102:1.0.2.BUILD-SNAPSHOT')
-	}
-
-	docker {
-		name "spring-cloud-skipper-acceptance-image-drivers102"
-		dockerfile file('src/main/resources/Dockerfile')
-		files getResolvedVersionOf(configurations.compile, "skipper-server-with-drivers102").file.absolutePath[0], 'src/main/resources/entrypoint.sh'
-		buildArgs(['JAR_FILE': getResolvedVersionOf(configurations.compile, "skipper-server-with-drivers102").file.name[0], 'ENTRYPOINT_FILE': 'entrypoint.sh'])
-	}
-
-	build.dependsOn 'docker'
-}
-
 project('spring-cloud-skipper-acceptance-tests') {
 	apply plugin: 'org.junit.platform.gradle.plugin'
 
@@ -242,11 +129,16 @@ project('spring-cloud-skipper-acceptance-tests') {
 	build.dependsOn ':spring-cloud-skipper-acceptance-image-legacy100:docker'
 	build.dependsOn ':spring-cloud-skipper-acceptance-image-legacy101:docker'
 	build.dependsOn ':spring-cloud-skipper-acceptance-image-legacy102:docker'
+	build.dependsOn ':spring-cloud-skipper-acceptance-image-legacy103:docker'
+	build.dependsOn ':spring-cloud-skipper-acceptance-image-legacy104:docker'
+	build.dependsOn ':spring-cloud-skipper-acceptance-image-legacy105:docker'
+	build.dependsOn ':spring-cloud-skipper-acceptance-image-legacy110:docker'
 	build.dependsOn ':spring-cloud-skipper-acceptance-image-drivers100:docker'
 	build.dependsOn ':spring-cloud-skipper-acceptance-image-drivers101:docker'
 	build.dependsOn ':spring-cloud-skipper-acceptance-image-drivers102:docker'
+	build.dependsOn ':spring-cloud-skipper-acceptance-image-drivers103:docker'
+	build.dependsOn ':spring-cloud-skipper-acceptance-image-drivers104:docker'
+	build.dependsOn ':spring-cloud-skipper-acceptance-image-drivers105:docker'
+	build.dependsOn ':spring-cloud-skipper-acceptance-image-drivers110:docker'
 }
-
-
-
 

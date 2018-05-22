@@ -82,6 +82,17 @@ You can trigger these jobs either from UI or from command line:
 $ fly -t ci trigger-job -j acceptance-tests/build-skipper-server-with-drivers100
 ```
 
+==== Develope and Test in a Separate Branch
+Time to time you may need to do bigger changes and you want to try out test and pipeline changes.
+This works pretty well by overriding parameters when pushing a new pipeline. Just replace `github-repo`
+and `branch` with your stuff.
+
+```
+fly -t ci set-pipeline -p mytest -c ci/pipeline.yml -l ci/parameters.yml \
+  -v branch=mybranch \
+  -v github-repo=https://github.com/<your_github_id>/spring-cloud-skipper.git \
+  -v github-repo-raw=https://raw.githubusercontent.com/<your_github_id>/spring-cloud-skipper
+```
 
 === Problems and Other Info
 This section contains additional info and how to track problems.
