@@ -13,7 +13,7 @@ run:
     - -exc
     - |
       source /docker-lib.sh
-      ${PWD}/git-repo/${BASE_PATH}/ci/scripts/build-skipper-server-with-drivers${APP_VERSION}.sh
+      ${PWD}/git-repo/${BASE_PATH}/ci/scripts/build-skipper-server-with-drivers.sh
 params:
   ARTIFACTORY_USERNAME: ((artifactory-username))
   ARTIFACTORY_PASSWORD: ((artifactory-password))
