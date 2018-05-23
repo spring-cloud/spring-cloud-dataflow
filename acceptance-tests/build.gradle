@@ -28,7 +28,6 @@ buildscript {
 	}
 	dependencies {
 		classpath("org.springframework.boot:spring-boot-gradle-plugin:${springBootVersion}")
-		classpath("org.junit.platform:junit-platform-gradle-plugin:${junitPlatformVersion}")
 		classpath("com.palantir.gradle.docker:gradle-docker:${gradleDockerVersion}")
 	}
 }
@@ -98,10 +97,20 @@ configure(subprojects) { subproject ->
 	jar {
 		enabled = true
 	}
+	
+	test {
+		useJUnitPlatform {
+			if (project.hasProperty('skipperIncludeTags')) {
+				includeTags = skipperIncludeTags.split(',')
+			}
+			if (project.hasProperty('skipperExcludeTags')) {
+				excludeTags = skipperExcludeTags.split(',')
+			}
+		}
+	}
 }
 
 project('spring-cloud-skipper-acceptance-core') {
-	apply plugin: 'org.junit.platform.gradle.plugin'
 	dependencies {
 		compile('com.palantir.docker.compose:docker-compose-rule-junit4')
 		compile('org.junit.jupiter:junit-jupiter-api')
@@ -118,7 +127,7 @@ project('spring-cloud-skipper-acceptance-core') {
 }
 
 project('spring-cloud-skipper-acceptance-tests') {
-	apply plugin: 'org.junit.platform.gradle.plugin'
+	//apply plugin: 'org.junit.platform.gradle.plugin'
 
 	dependencies {
 		compile project(":spring-cloud-skipper-acceptance-core")

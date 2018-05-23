@@ -21,6 +21,11 @@ import org.springframework.cloud.skipper.acceptance.core.DockerCompose;
 import org.springframework.cloud.skipper.acceptance.core.DockerComposeExtension;
 import org.springframework.cloud.skipper.acceptance.core.DockerComposeInfo;
 import org.springframework.cloud.skipper.acceptance.tests.support.AssertUtils;
+import org.springframework.cloud.skipper.acceptance.tests.support.Migration;
+import org.springframework.cloud.skipper.acceptance.tests.support.Mysql;
+import org.springframework.cloud.skipper.acceptance.tests.support.Oracle;
+import org.springframework.cloud.skipper.acceptance.tests.support.Postgres;
+import org.springframework.cloud.skipper.acceptance.tests.support.SkipperAll;
 
 import com.palantir.docker.compose.connection.DockerPort;
 
@@ -32,89 +37,82 @@ import com.palantir.docker.compose.connection.DockerPort;
  *
  */
 @ExtendWith(DockerComposeExtension.class)
-public class SkipperServerMigrationTests {
+@Migration
+public class SkipperServerMigrationTests extends AbstractSkipperServerTests {
 
 	@Test
+	@Postgres
+	@SkipperAll
 	@DockerCompose(id = "db", order = 0, locations = { "src/test/resources/postgres.yml" }, services = { "postgres" })
 	@DockerCompose(id = "skipper100", order = 1, locations = { "src/test/resources/skipper100postgres.yml" }, services = { "skipper" })
 	@DockerCompose(id = "skipper101", order = 1, locations = { "src/test/resources/skipper101postgres.yml" }, services = { "skipper" }, start = false)
 	@DockerCompose(id = "skipper102", order = 1, locations = { "src/test/resources/skipper102postgres.yml" }, services = { "skipper" }, start = false)
-	public void testMigrationFrom100To101WithPostgres(DockerComposeInfo dockerComposeInfo) throws Exception {
+	@DockerCompose(id = "skipper103", order = 1, locations = { "src/test/resources/skipper103postgres.yml" }, services = { "skipper" }, start = false)
+	@DockerCompose(id = "skipper104", order = 1, locations = { "src/test/resources/skipper104postgres.yml" }, services = { "skipper" }, start = false)
+	@DockerCompose(id = "skipper105", order = 1, locations = { "src/test/resources/skipper105postgres.yml" }, services = { "skipper" }, start = false)
+	@DockerCompose(id = "skipper110", order = 1, locations = { "src/test/resources/skipper110postgres.yml" }, services = { "skipper" }, start = false)
+	public void testMigrationFrom100ToLatestWithPostgres(DockerComposeInfo dockerComposeInfo) throws Exception {
 
 		// DB and skipper 1.0.0 are coming up automatically in different
 		// compose clusters. assert 1.0.0 gets running
-		DockerPort port1 = dockerComposeInfo.id("skipper100").getRule().containers().container("skipper").port(7577);
-		String url1 = "http://" + port1.getIp() + ":" + port1.getExternalPort() + "/api/about";
-		AssertUtils.assertServerRunning(url1);
+		assertServerRunning(dockerComposeInfo, "skipper100", "skipper");
 
 		// stop 1.0.0 and bring up 1.0.1
-		dockerComposeInfo.id("skipper100").stop();
-		dockerComposeInfo.id("skipper101").start();
-
 		// DB were kept running and now asserting that 1.0.1
 		// starts ok with schema created with 1.0.0
-		DockerPort port2 = dockerComposeInfo.id("skipper101").getRule().containers().container("skipper").port(7577);
-		String url2 = "http://" + port2.getIp() + ":" + port2.getExternalPort() + "/api/about";
-		AssertUtils.assertServerRunning(url2);
+		upgrade(dockerComposeInfo, "skipper100", "skipper101", "skipper");
 
 		// stop 1.0.1 and bring up 1.0.2
-		dockerComposeInfo.id("skipper101").stop();
-		dockerComposeInfo.id("skipper102").start();
-
 		// DB were kept running and now asserting that 1.0.2
 		// starts ok with schema created with 1.0.0 and possibly updated with 1.0.1
-		DockerPort port3 = dockerComposeInfo.id("skipper102").getRule().containers().container("skipper").port(7577);
-		String url3 = "http://" + port3.getIp() + ":" + port3.getExternalPort() + "/api/about";
-		AssertUtils.assertServerRunning(url3);
+		upgrade(dockerComposeInfo, "skipper101", "skipper102", "skipper");
+
+		// and then rest
+		upgrade(dockerComposeInfo, "skipper102", "skipper103", "skipper");
+		upgrade(dockerComposeInfo, "skipper103", "skipper104", "skipper");
+		upgrade(dockerComposeInfo, "skipper104", "skipper105", "skipper");
+		upgrade(dockerComposeInfo, "skipper105", "skipper110", "skipper");
 	}
 
 	@Test
+	@Mysql
+	@SkipperAll
 	@DockerCompose(id = "db", order = 0, locations = { "src/test/resources/mysql.yml" }, services = { "mysql" })
 	@DockerCompose(id = "skipper100", order = 1, locations = { "src/test/resources/skipper100mysql.yml" }, services = { "skipper" })
 	@DockerCompose(id = "skipper101", order = 1, locations = { "src/test/resources/skipper101mysql.yml" }, services = { "skipper" }, start = false)
 	@DockerCompose(id = "skipper102", order = 1, locations = { "src/test/resources/skipper102mysql.yml" }, services = { "skipper" }, start = false)
-	public void testMigrationFrom100To101WithMysql(DockerComposeInfo dockerComposeInfo) throws Exception {
-		DockerPort port1 = dockerComposeInfo.id("skipper100").getRule().containers().container("skipper").port(7577);
-		String url1 = "http://" + port1.getIp() + ":" + port1.getExternalPort() + "/api/about";
-		AssertUtils.assertServerRunning(url1);
-
-		dockerComposeInfo.id("skipper100").stop();
-		dockerComposeInfo.id("skipper101").start();
-
-		DockerPort port2 = dockerComposeInfo.id("skipper101").getRule().containers().container("skipper").port(7577);
-		String url2 = "http://" + port2.getIp() + ":" + port2.getExternalPort() + "/api/about";
-		AssertUtils.assertServerRunning(url2);
-
-		dockerComposeInfo.id("skipper101").stop();
-		dockerComposeInfo.id("skipper102").start();
-
-		DockerPort port3 = dockerComposeInfo.id("skipper102").getRule().containers().container("skipper").port(7577);
-		String url3 = "http://" + port3.getIp() + ":" + port3.getExternalPort() + "/api/about";
-		AssertUtils.assertServerRunning(url3);
+	@DockerCompose(id = "skipper103", order = 1, locations = { "src/test/resources/skipper103mysql.yml" }, services = { "skipper" }, start = false)
+	@DockerCompose(id = "skipper104", order = 1, locations = { "src/test/resources/skipper104mysql.yml" }, services = { "skipper" }, start = false)
+	@DockerCompose(id = "skipper105", order = 1, locations = { "src/test/resources/skipper105mysql.yml" }, services = { "skipper" }, start = false)
+	@DockerCompose(id = "skipper110", order = 1, locations = { "src/test/resources/skipper110mysql.yml" }, services = { "skipper" }, start = false)
+	public void testMigrationFrom100ToLatestWithMysql(DockerComposeInfo dockerComposeInfo) throws Exception {
+		assertServerRunning(dockerComposeInfo, "skipper100", "skipper");
+		upgrade(dockerComposeInfo, "skipper100", "skipper101", "skipper");
+		upgrade(dockerComposeInfo, "skipper101", "skipper102", "skipper");
+		upgrade(dockerComposeInfo, "skipper102", "skipper103", "skipper");
+		upgrade(dockerComposeInfo, "skipper103", "skipper104", "skipper");
+		upgrade(dockerComposeInfo, "skipper104", "skipper105", "skipper");
+		upgrade(dockerComposeInfo, "skipper105", "skipper110", "skipper");
 	}
 
 	@Test
+	@Oracle
+	@SkipperAll
 	@DockerCompose(id = "db", order = 0, locations = { "src/test/resources/oracle.yml" }, services = { "oracle" })
 	@DockerCompose(id = "skipper100", order = 1, locations = { "src/test/resources/skipper100oracle.yml" }, services = { "skipper" })
 	@DockerCompose(id = "skipper101", order = 1, locations = { "src/test/resources/skipper101oracle.yml" }, services = { "skipper" }, start = false)
 	@DockerCompose(id = "skipper102", order = 1, locations = { "src/test/resources/skipper102oracle.yml" }, services = { "skipper" }, start = false)
-	public void testMigrationFrom100To101WithOracle(DockerComposeInfo dockerComposeInfo) throws Exception {
-		DockerPort port1 = dockerComposeInfo.id("skipper100").getRule().containers().container("skipper").port(7577);
-		String url1 = "http://" + port1.getIp() + ":" + port1.getExternalPort() + "/api/about";
-		AssertUtils.assertServerRunning(url1);
-
-		dockerComposeInfo.id("skipper100").stop();
-		dockerComposeInfo.id("skipper101").start();
-
-		DockerPort port2 = dockerComposeInfo.id("skipper101").getRule().containers().container("skipper").port(7577);
-		String url2 = "http://" + port2.getIp() + ":" + port2.getExternalPort() + "/api/about";
-		AssertUtils.assertServerRunning(url2);
-
-		dockerComposeInfo.id("skipper101").stop();
-		dockerComposeInfo.id("skipper102").start();
-
-		DockerPort port3 = dockerComposeInfo.id("skipper102").getRule().containers().container("skipper").port(7577);
-		String url3 = "http://" + port3.getIp() + ":" + port3.getExternalPort() + "/api/about";
-		AssertUtils.assertServerRunning(url3);
+	@DockerCompose(id = "skipper103", order = 1, locations = { "src/test/resources/skipper103oracle.yml" }, services = { "skipper" }, start = false)
+	@DockerCompose(id = "skipper104", order = 1, locations = { "src/test/resources/skipper104oracle.yml" }, services = { "skipper" }, start = false)
+	@DockerCompose(id = "skipper105", order = 1, locations = { "src/test/resources/skipper105oracle.yml" }, services = { "skipper" }, start = false)
+	@DockerCompose(id = "skipper110", order = 1, locations = { "src/test/resources/skipper110oracle.yml" }, services = { "skipper" }, start = false)
+	public void testMigrationFrom100ToLatestWithOracle(DockerComposeInfo dockerComposeInfo) throws Exception {
+		assertServerRunning(dockerComposeInfo, "skipper100", "skipper");
+		upgrade(dockerComposeInfo, "skipper100", "skipper101", "skipper");
+		upgrade(dockerComposeInfo, "skipper101", "skipper102", "skipper");
+		upgrade(dockerComposeInfo, "skipper102", "skipper103", "skipper");
+		upgrade(dockerComposeInfo, "skipper103", "skipper104", "skipper");
+		upgrade(dockerComposeInfo, "skipper104", "skipper105", "skipper");
+		upgrade(dockerComposeInfo, "skipper105", "skipper110", "skipper");
 	}
 }
