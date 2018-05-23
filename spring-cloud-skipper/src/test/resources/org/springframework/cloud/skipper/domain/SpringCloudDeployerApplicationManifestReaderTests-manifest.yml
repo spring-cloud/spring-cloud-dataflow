@@ -10,7 +10,7 @@ spec:
   resourceMetadata: maven://org.springframework.cloud.stream.app:log-sink-rabbit:jar:metadata:1.2.0.RELEASE
   applicationProperties:
     log.level: INFO
-    log.expression: hellobaby
+    log.expression: "hello baby"
   deploymentProperties:
     memory: 1024
     disk: 2

@@ -110,7 +110,7 @@ public class SpringCloudDeployerApplicationManifestReaderTests {
 				.isEqualTo("maven://org.springframework.cloud.stream.app:log-sink-rabbit:jar:metadata:1.2.0.RELEASE");
 		assertThat(spec.getApplicationProperties()).hasSize(2);
 		assertThat(spec.getApplicationProperties()).containsEntry("log.level", "INFO");
-		assertThat(spec.getApplicationProperties()).containsEntry("log.expression", "hellobaby");
+		assertThat(spec.getApplicationProperties()).containsEntry("log.expression", "hello baby");
 
 		assertThat(spec.getDeploymentProperties()).hasSize(2);
 		assertThat(spec.getDeploymentProperties()).containsEntry("memory", "1024");
