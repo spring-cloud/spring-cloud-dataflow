@@ -124,10 +124,10 @@ public class SkipperStreamDeployerTests {
 		Package timePackage = pkg.getDependencies().get(0);
 
 		assertThat(timePackage).isNotNull();
-		assertThat(timePackage.getConfigValues().getRaw()).contains("foo.expression: \\\\d");
-		assertThat(timePackage.getConfigValues().getRaw()).contains("bar: \\d");
-		assertThat(timePackage.getConfigValues().getRaw()).contains("complex.expression: '#jsonPath(payload,''$.name'') matches ''\\\\d*'''");
-		assertThat(timePackage.getConfigValues().getRaw()).contains("bar.expression: \\\\d \\\\ \\0 \\a \\b \\t \\n \\v \\f \\r \\e \\N \\_ \\L \\P \\");
+		assertThat(timePackage.getConfigValues().getRaw()).contains("\"foo.expression\": \"\\\\d\"");
+		assertThat(timePackage.getConfigValues().getRaw()).contains("\"bar\": \"\\\\d\"");
+		assertThat(timePackage.getConfigValues().getRaw()).contains("\"complex.expression\": \"#jsonPath(payload,'$.name') matches '\\\\d*'\"");
+		assertThat(timePackage.getConfigValues().getRaw()).contains("\"bar.expression\": \"\\\\d \\\\\\\\ \\\\0 \\\\a \\\\b \\\\t \\\\n \\\\v \\\\f \\\\r \\\\e \\\\N \\\\_ \\\\L \\\\P \\\\\"");
 	}
 
 	@Test
