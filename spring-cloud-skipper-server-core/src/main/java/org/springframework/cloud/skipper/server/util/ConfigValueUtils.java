@@ -19,6 +19,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
+import org.springframework.util.Assert;
 import org.yaml.snakeyaml.Yaml;
 
 import org.springframework.cloud.skipper.SkipperException;
@@ -176,6 +177,8 @@ public class ConfigValueUtils {
 	 * @param map2 The map of values to override those of the first map argument.
 	 */
 	public static void merge(Map<String, Object> map1, Map<String, Object> map2) {
+		Assert.notNull(map1, "Base map to merge value onto must not be null.");
+		Assert.notNull(map2, "Map with values to override must not be null.");
 		for (String key : map2.keySet()) {
 			Object value2 = map2.get(key);
 			if (map1.containsKey(key)) {

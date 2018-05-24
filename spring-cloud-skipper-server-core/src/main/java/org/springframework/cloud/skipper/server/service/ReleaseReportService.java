@@ -17,6 +17,11 @@ package org.springframework.cloud.skipper.server.service;
 
 import java.util.Map;
 
+import org.yaml.snakeyaml.DumperOptions;
+import org.yaml.snakeyaml.Yaml;
+
+import org.springframework.cloud.skipper.SkipperException;
+import org.springframework.cloud.skipper.domain.ConfigValues;
 import org.springframework.cloud.skipper.domain.Info;
 import org.springframework.cloud.skipper.domain.Manifest;
 import org.springframework.cloud.skipper.domain.Package;
@@ -34,6 +39,7 @@ import org.springframework.cloud.skipper.server.util.ConfigValueUtils;
 import org.springframework.cloud.skipper.server.util.ManifestUtils;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Assert;
+import org.springframework.util.StringUtils;
 
 /**
  * @author Mark Pollack
@@ -85,23 +91,57 @@ public class ReleaseReportService {
 
 		// if we're about to save new release during this report, create
 		// or restore replacing one.
-		Release replacingRelease = null;
+		Release tempReplacingRelease = null;
 		if (initial) {
-			replacingRelease = createReleaseForUpgrade(packageMetadata, latestRelease.getVersion() + 1,
+			tempReplacingRelease = createReleaseForUpgrade(packageMetadata, latestRelease.getVersion() + 1,
 					upgradeProperties, existingRelease.getPlatformName(), rollbackRequest);
 		}
 		else {
-			replacingRelease = this.releaseRepository.findByNameAndVersion(
+			tempReplacingRelease = this.releaseRepository.findByNameAndVersion(
 					upgradeRequest.getUpgradeProperties().getReleaseName(), latestRelease.getVersion());
 		}
+		// Carry over customized config values from replacing release so updates are additive with property changes.
+		Release replacingRelease = updateReplacingReleaseConfigValues(latestRelease, tempReplacingRelease);
 
-		Map<String, Object> model = ConfigValueUtils.mergeConfigValues(replacingRelease.getPkg(),
+		Map<String, Object> mergedReplacingReleaseModel = ConfigValueUtils.mergeConfigValues(replacingRelease.getPkg(),
 				replacingRelease.getConfigValues());
-		String manifestData = ManifestUtils.createManifest(replacingRelease.getPkg(), model);
+
+		String manifestData = ManifestUtils.createManifest(replacingRelease.getPkg(), mergedReplacingReleaseModel);
 		Manifest manifest = new Manifest();
 		manifest.setData(manifestData);
 		replacingRelease.setManifest(manifest);
 		return this.releaseManager.createReport(existingRelease, replacingRelease, initial);
+	}
+
+	private Release updateReplacingReleaseConfigValues(Release targetRelease, Release replacingRelease) {
+		Map<String, Object> targetConfigValueMap = getConfigValuesAsMap(targetRelease.getConfigValues());
+		Map<String, Object> replacingRelaseConfigValueMap = getConfigValuesAsMap(replacingRelease.getConfigValues());
+		if (targetConfigValueMap != null && replacingRelaseConfigValueMap != null) {
+			ConfigValueUtils.merge(targetConfigValueMap, replacingRelaseConfigValueMap);
+			DumperOptions dumperOptions = new DumperOptions();
+			dumperOptions.setDefaultFlowStyle(DumperOptions.FlowStyle.BLOCK);
+			dumperOptions.setPrettyFlow(true);
+			Yaml yaml = new Yaml(dumperOptions);
+			ConfigValues mergedConfigValues = new ConfigValues();
+			mergedConfigValues.setRaw(yaml.dump(targetConfigValueMap));
+			replacingRelease.setConfigValues(mergedConfigValues);
+		}
+		return replacingRelease;
+	}
+
+	private Map<String, Object> getConfigValuesAsMap(ConfigValues configValues) {
+		Yaml yaml = new Yaml();
+		if (StringUtils.hasText(configValues.getRaw())) {
+			Object data = yaml.load(configValues.getRaw());
+			if (data instanceof Map) {
+				return (Map<String, Object>) yaml.load(configValues.getRaw());
+			}
+			else {
+				throw new SkipperException("Was expecting override values to produce a Map, instead got class = " +
+						data.getClass() + "overrideValues.getRaw() = " + configValues.getRaw());
+			}
+		}
+		return null;
 	}
 
 	private Release createReleaseForUpgrade(PackageMetadata packageMetadata, Integer newVersion,

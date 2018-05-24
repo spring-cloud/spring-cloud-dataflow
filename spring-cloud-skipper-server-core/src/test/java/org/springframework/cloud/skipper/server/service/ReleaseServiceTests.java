@@ -445,7 +445,7 @@ public class ReleaseServiceTests extends AbstractIntegrationTest {
 		Release upgradedRelease = upgrade(upgradeRequest);
 
 		assertThat(upgradedRelease.getVersion()).isEqualTo(2);
-		assertThat(upgradedRelease.getConfigValues()).isEqualTo(upgradeRequest.getUpgradeProperties().getConfigValues());
+		assertThat(upgradedRelease.getConfigValues().getRaw()).isEqualTo(upgradeRequest.getUpgradeProperties().getConfigValues().getRaw());
 		this.appDeployerDataRepository.findByReleaseNameAndReleaseVersionRequired(releaseName, 2);
 
 		// Delete
