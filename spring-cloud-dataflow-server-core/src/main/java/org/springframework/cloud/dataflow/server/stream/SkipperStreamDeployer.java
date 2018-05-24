@@ -334,8 +334,8 @@ public class SkipperStreamDeployer implements StreamDeployer {
 		// Add spec
 		String resourceWithoutVersion = ResourceUtils.getResourceWithoutVersion(appDeploymentRequest.getResource());
 		specMap.put("resource", resourceWithoutVersion);
-		specMap.put("applicationProperties", this.yamlEscapeUtility.escapeSingleBackslashInProperties(appDeploymentRequest.getDefinition().getProperties()));
-		specMap.put("deploymentProperties", this.yamlEscapeUtility.escapeSingleBackslashInProperties(appDeploymentRequest.getDeploymentProperties()));
+		specMap.put("applicationProperties", appDeploymentRequest.getDefinition().getProperties());
+		specMap.put("deploymentProperties", appDeploymentRequest.getDeploymentProperties());
 		String version = ResourceUtils.getResourceVersion(appDeploymentRequest.getResource());
 		// Add version, including possible override via deploymentProperties - hack to store version in cmdline args
 		if (appDeploymentRequest.getCommandlineArguments().size() == 1) {
@@ -349,9 +349,11 @@ public class SkipperStreamDeployer implements StreamDeployer {
 		configValueMap.put("spec", specMap);
 
 		DumperOptions dumperOptions = new DumperOptions();
-		//dumperOptions.setDefaultFlowStyle(DumperOptions.FlowStyle.BLOCK);
+		dumperOptions.setDefaultFlowStyle(DumperOptions.FlowStyle.BLOCK);
 		dumperOptions.setDefaultScalarStyle(DumperOptions.ScalarStyle.DOUBLE_QUOTED);
-		dumperOptions.setPrettyFlow(true);
+		dumperOptions.setPrettyFlow(false);
+		dumperOptions.setSplitLines(false);
+		dumperOptions.setExplicitStart();
 		Yaml yaml = new Yaml(dumperOptions);
 		configValues.setRaw(yaml.dump(configValueMap));
 
