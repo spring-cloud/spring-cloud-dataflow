@@ -29,9 +29,6 @@ import org.springframework.cloud.skipper.domain.UpgradeRequest;
 import org.springframework.cloud.skipper.server.AbstractIntegrationTest;
 import org.springframework.cloud.skipper.server.deployer.ReleaseAnalysisReport;
 import org.springframework.cloud.skipper.server.deployer.ReleaseAnalyzer;
-import org.springframework.cloud.skipper.server.deployer.strategies.HealthCheckProperties;
-import org.springframework.cloud.skipper.server.repository.DeployerRepository;
-import org.springframework.cloud.skipper.server.repository.ReleaseRepository;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.TestPropertySource;
 
@@ -48,22 +45,14 @@ public class ReleaseAnalyzerTests extends AbstractIntegrationTest {
 	private final Logger logger = LoggerFactory.getLogger(ReleaseAnalyzerTests.class);
 
 	@Autowired
-	DeployerRepository deployerRepository;
-
-	@Autowired
 	ReleaseService releaseService;
-
-	@Autowired
-	ReleaseRepository releaseRepository;
 
 	@Autowired
 	ReleaseAnalyzer releaseAnalyzer;
 
-	@Autowired
-	private HealthCheckProperties healthCheckProperties;
-
 	@Test
-	public void releaseAnalyzerTest() throws InterruptedException {
+	public void releaseAnalyzerAndAdditiveUpgradeTest() throws InterruptedException {
+		// NOTE must be a release that exists in a maven repo....
 		String releaseName = "logreleaseAnalyzer";
 		String packageName = "ticktock";
 		String packageVersion = "1.0.0";
@@ -74,16 +63,17 @@ public class ReleaseAnalyzerTests extends AbstractIntegrationTest {
 		packageIdentifier.setPackageName(packageName);
 		packageIdentifier.setPackageVersion(packageVersion);
 		installRequest.setPackageIdentifier(packageIdentifier);
+
+		// Install Release
 		Release installedRelease = install(installRequest);
 
 		assertThat(installedRelease.getName()).isEqualTo(releaseName);
-		logger.info("installed release \n" + installedRelease.getManifest());
+		logger.info("Initial Release Manifest: \n" + installedRelease.getManifest().getData());
 
 		UpgradeProperties upgradeProperties = new UpgradeProperties();
 		ConfigValues configValues = new ConfigValues();
 		// TODO must be a release that exists in a maven repo....
-		configValues.setRaw("log:\n  spec:\n    applicationProperties:\n      log.level: error\n");
-		// configValues.setRaw("log:\n version: 1.2.0.RELEASE\n");
+		configValues.setRaw("log:\n  spec:\n    applicationProperties:\n      log.level: error\n      foo: bar\n");
 		upgradeProperties.setConfigValues(configValues);
 		upgradeProperties.setReleaseName(releaseName);
 		UpgradeRequest upgradeRequest = new UpgradeRequest();
@@ -94,17 +84,44 @@ public class ReleaseAnalyzerTests extends AbstractIntegrationTest {
 		packageIdentifier.setPackageVersion(packageVersion);
 		upgradeRequest.setPackageIdentifier(packageIdentifier);
 
-		Release upgradedRelease = upgrade(upgradeRequest);
 
-		assertThat(upgradedRelease.getName()).isEqualTo(releaseName);
-		logger.info("upgraded release \n" + upgradedRelease.getManifest());
+		// Upgrade Release
+		Release upgradedRelease = upgrade(upgradeRequest);
 		ReleaseAnalysisReport releaseAnalysisReport = this.releaseAnalyzer.analyze(installedRelease,
 				upgradedRelease);
+		String releaseDifferenceSummary = releaseAnalysisReport.getReleaseDifferenceSummary();
+		String manifest =  upgradedRelease.getManifest().getData();
 
+
+		assertThat(upgradedRelease.getName()).isEqualTo(releaseName);
 		assertThat(releaseAnalysisReport.getReleaseDifference()).isNotNull();
-		System.out.println(releaseAnalysisReport.getReleaseDifferenceSummary());
-		assertThat(releaseAnalysisReport.getReleaseDifferenceSummary())
-				.contains("log.level=(DEBUG, error)");
+
+		logger.info("Release Manifest v2: \n" + upgradedRelease.getManifest().getData());
+
+		assertThat(releaseDifferenceSummary).contains("log.level=(DEBUG, error)");
+		assertThat(releaseDifferenceSummary).contains("foo=(bar)");
+		assertThat(manifest).contains("\"foo\": \"bar\"");
+		assertThat(manifest).contains("\"log.level\": \"error\"");
+
+
+		// Upgrade using a new property, assert that old properties are carried over.
+		configValues = new ConfigValues();
+		configValues.setRaw("log:\n  spec:\n    applicationProperties:\n      foo2: bar2\n");
+		upgradeProperties.setConfigValues(configValues);
+		upgradeRequest.setUpgradeProperties(upgradeProperties);
+
+		// Upgrade Release to V3, ensure application property foo=bar and foo2=bar2 are both present.
+		Release upgradedReleaseV3 = upgrade(upgradeRequest);
+		releaseAnalysisReport = this.releaseAnalyzer.analyze(upgradedRelease, upgradedReleaseV3);
+		releaseDifferenceSummary = releaseAnalysisReport.getReleaseDifferenceSummary();
+		manifest =  upgradedReleaseV3.getManifest().getData();
+
+		logger.info("Release Manifest v3: \n" + manifest);
+
+		assertThat(releaseDifferenceSummary).contains("foo2=(bar2)");
+		assertThat(manifest).contains("\"foo\": \"bar\"");
+		assertThat(manifest).contains("\"log.level\": \"error\"");
+		assertThat(manifest).contains("\"foo2\": \"bar2\"");
 	}
 
 }
