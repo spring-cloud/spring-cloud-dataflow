@@ -27,6 +27,7 @@ import org.springframework.cloud.skipper.domain.Release;
 import org.springframework.cloud.skipper.domain.StatusCode;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.util.StringUtils;
 
 import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.post;
@@ -57,7 +58,7 @@ public class InstallDocumentation extends BaseDocumentation {
 		final MediaType contentType = new MediaType(MediaType.APPLICATION_JSON.getType(),
 				MediaType.APPLICATION_JSON.getSubtype(), Charset.forName("utf8"));
 
-		mockMvc.perform(post("/api/package/install").accept(MediaType.APPLICATION_JSON).contentType(contentType)
+		MvcResult result = mockMvc.perform(post("/api/package/install").accept(MediaType.APPLICATION_JSON).contentType(contentType)
 				.content(convertObjectToJson(installRequest))).andDo(print())
 				.andExpect(status().isCreated())
 				.andDo(this.documentationHandler.document(
@@ -113,7 +114,10 @@ public class InstallDocumentation extends BaseDocumentation {
 								fieldWithPath("configValues.raw")
 										.description("The raw YAML string of configuration values"),
 								fieldWithPath("manifest.data").description("The manifest of the release"),
-								fieldWithPath("platformName").description("Platform name of the release"))));
+								fieldWithPath("platformName").description("Platform name of the release"))))
+				.andReturn();
+		Release release = convertContentToRelease(result.getResponse().getContentAsString());
+		assertReleaseIsDeployedSuccessfully(releaseName, release.getVersion());
 	}
 
 	@Test
@@ -136,7 +140,7 @@ public class InstallDocumentation extends BaseDocumentation {
 		final MediaType contentType = new MediaType(MediaType.APPLICATION_JSON.getType(),
 				MediaType.APPLICATION_JSON.getSubtype(), Charset.forName("utf8"));
 
-		mockMvc.perform(post("/api/package/install/{packageMetaDataId}", release.getId()).accept(MediaType.APPLICATION_JSON)
+		MvcResult result = mockMvc.perform(post("/api/package/install/{packageMetaDataId}", release.getId()).accept(MediaType.APPLICATION_JSON)
 				.contentType(contentType)
 				.content(convertObjectToJson(installProperties2))).andDo(print())
 				.andExpect(status().isCreated())
@@ -193,6 +197,9 @@ public class InstallDocumentation extends BaseDocumentation {
 								fieldWithPath("configValues.raw")
 										.description("The raw YAML string of configuration values"),
 								fieldWithPath("manifest.data").description("The manifest of the release"),
-								fieldWithPath("platformName").description("Platform name of the release"))));
+								fieldWithPath("platformName").description("Platform name of the release"))))
+				.andReturn();
+		Release release2 = convertContentToRelease(result.getResponse().getContentAsString());
+		assertReleaseIsDeployedSuccessfully(releaseName2, release2.getVersion());
 	}
 }
