@@ -45,7 +45,7 @@ public abstract class AbstractAssertReleaseDeployedTest {
 				logger.info("Stopping polling for deployed status after 3 minutes for release={} version={}",
 						releaseName, releaseVersion);
 				fail("Could not determine if release " + releaseName + "-v" + releaseVersion +
-						" was deployed successfully, timed out polling.");
+						" was deployed successfully, timed out polling after 3 minutes.");
 			}
 			Thread.sleep(10000);
 		}

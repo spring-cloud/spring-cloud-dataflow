@@ -56,6 +56,7 @@ public class ReleaseControllerTests extends AbstractControllerTests {
 	@Test
 	public void deployTickTock() throws Exception {
 		Release release = install("ticktock", "1.0.0", "myTicker");
+		assertReleaseIsDeployedSuccessfully("myTicker", 1);
 		assertThat(release.getVersion()).isEqualTo(1);
 	}
 

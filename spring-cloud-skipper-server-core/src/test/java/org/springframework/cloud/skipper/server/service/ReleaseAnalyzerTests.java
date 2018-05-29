@@ -67,6 +67,7 @@ public class ReleaseAnalyzerTests extends AbstractIntegrationTest {
 		// Install Release
 		Release installedRelease = install(installRequest);
 
+
 		assertThat(installedRelease.getName()).isEqualTo(releaseName);
 		logger.info("Initial Release Manifest: \n" + installedRelease.getManifest().getData());
 
