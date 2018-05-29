@@ -690,54 +690,7 @@ skipper:>platform list
 == Repository Commands
 Skipper's repository commands include the following:
 
-* <<skipper-commands-repo-add>>
-* <<skipper-commands-repo-delete>>
 * <<skipper-commands-repo-list>>
-
-[[skipper-commands-repo-add]]
-=== Add
-This command adds a repository.
-
-====
-NAME::
-	repo add - Add package repository
-
-SYNOPSYS::
-	repo add [*--name*] string  [*--url*] string  [[*--source-url*] string]
-
-OPTIONS::
-	--name  string:::
-		name of the repository +
-		*[Mandatory]* +
-		*[may not be null]* +
-
-	--url  string:::
-		the root URL that points to index.yaml file +
-		*[Mandatory]* +
-		*[may not be null]* +
-
-	--source-url  string:::
-		the source URL to the package +
-		*[Optional, default = <none>]* +
-====
-
-[[skipper-commands-repo-delete]]
-=== Delete
-This command deletes a repository.
-
-====
-NAME::
-	repo delete - Delete a package repository
-
-SYNOPSYS::
-	repo delete [*--name*] string
-
-OPTIONS::
-	--name  string:::
-		name of the repository to delete +
-		*[Mandatory]* +
-		*[may not be null]* +
-====
 
 [[skipper-commands-repo-list]]
 === List
