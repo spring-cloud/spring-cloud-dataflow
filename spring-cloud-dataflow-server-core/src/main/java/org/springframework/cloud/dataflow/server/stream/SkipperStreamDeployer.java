@@ -57,6 +57,7 @@ import org.springframework.cloud.deployer.spi.app.DeploymentState;
 import org.springframework.cloud.deployer.spi.core.AppDeploymentRequest;
 import org.springframework.cloud.deployer.spi.core.RuntimeEnvironmentInfo;
 import org.springframework.cloud.skipper.ReleaseNotFoundException;
+import org.springframework.cloud.skipper.SkipperException;
 import org.springframework.cloud.skipper.client.SkipperClient;
 import org.springframework.cloud.skipper.domain.AboutResource;
 import org.springframework.cloud.skipper.domain.ConfigValues;
@@ -217,7 +218,20 @@ public class SkipperStreamDeployer implements StreamDeployer {
 		installProperties.setReleaseName(streamName);
 		installProperties.setConfigValues(new ConfigValues());
 		installRequest.setInstallProperties(installProperties);
-		Release release = skipperClient.install(installRequest);
+		Release release = null;
+		try {
+			release = this.skipperClient.install(installRequest);
+		}
+		catch (Exception e) {
+			logger.error("Skipper install failed. Deleting the package: " + packageName);
+			try {
+				this.skipperClient.packageDelete(packageName);
+			}
+			catch (Exception e1) {
+				logger.error("Package delete threw exception: " + e1.getMessage());
+			}
+			throw new SkipperException(e.getMessage());
+		}
 		// TODO store releasename in deploymentIdRepository...
 		return release;
 	}
