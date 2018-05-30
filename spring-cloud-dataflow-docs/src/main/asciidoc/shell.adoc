@@ -156,12 +156,12 @@ dataflow:>stream destroy --name "something"
 
 ==== Property files rules
 Rules are relaxed when loading the properties from files.
-* The special characters used in property files (both Java and YAML) needs to be escaped. For example `\` should be replaced  by `\\`, '\t` by `\\t` and so fort.
-* For Java property files (`--propertiesFile` <FILE_PATH.properties>) the property values should not be surrounded by quotes! Even if they contain spaces. E.g.
+* The special characters used in property files (both Java and YAML) needs to be escaped. For example `\` should be replaced  by `\\`, '\t` by `\\t` and so forth.
+* For Java property files (`--propertiesFile` <FILE_PATH>.properties) the property values should not be surrounded by quotes! It is not needed even if they contain spaces.
 ----
 filter.expression=payload > 5
 ----
-* For YAML property files (`--propertiesFile` <FILE_PATH.yaml>) though the values need to be surrounded in double quotes.
+* For YAML property files (`--propertiesFile` <FILE_PATH>.yaml), though, the values need to be surrounded by double quotes.
 ----
 app:
     filter:
