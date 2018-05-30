@@ -226,7 +226,13 @@ public class SkipperStreamDeployer implements StreamDeployer {
 			release = this.skipperClient.install(installRequest);
 		}
 		catch (Exception e) {
-			this.skipperClient.packageDelete(packageName);
+			logger.error("Skipper install failed. Deleting the package: " + packageName);
+			try {
+				this.skipperClient.packageDelete(packageName);
+			}
+			catch (Exception e1) {
+				logger.error("Package delete threw exception: " + e1.getMessage());
+			}
 			throw new SkipperException(e.getMessage());
 		}
 		// TODO store releasename in deploymentIdRepository...
