@@ -30,6 +30,7 @@ import org.springframework.cloud.skipper.domain.Deployer;
 import org.springframework.cloud.skipper.domain.Release;
 import org.springframework.hateoas.ExposesResourceFor;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -49,6 +50,7 @@ import org.springframework.web.bind.annotation.RestController;
  * @author Marius Bogoevici
  * @author Janne Valkealahti
  * @author Christian Tzolov
+ * @author Gunnar Hillert
  */
 @RestController
 @RequestMapping("/streams/deployments")
@@ -73,21 +75,20 @@ public class SkipperStreamDeploymentController extends StreamDeploymentControlle
 	}
 
 	@RequestMapping(value = "/update/{name}", method = RequestMethod.POST)
-	@ResponseStatus(HttpStatus.CREATED)
-	public void update(@PathVariable("name") String name, @RequestBody UpdateStreamRequest updateStreamRequest) {
+	public ResponseEntity<Void> update(@PathVariable("name") String name, @RequestBody UpdateStreamRequest updateStreamRequest) {
 		this.skipperStreamService.updateStream(name, updateStreamRequest);
+		return new ResponseEntity<>(HttpStatus.CREATED);
 	}
 
 	@RequestMapping(value = "/rollback/{name}/{version}", method = RequestMethod.POST)
-	@ResponseStatus(HttpStatus.CREATED)
-	public void rollback(@PathVariable("name") String name, @PathVariable("version") int version) {
+	public ResponseEntity<Void> rollback(@PathVariable("name") String name, @PathVariable("version") Integer version) {
 		this.skipperStreamService.rollbackStream(name, version);
+		return new ResponseEntity<>(HttpStatus.CREATED);
 	}
 
 	@RequestMapping(value = "/manifest/{name}/{version}", method = RequestMethod.GET)
-	@ResponseStatus(HttpStatus.OK)
-	public String manifest(@PathVariable("name") String name, @PathVariable("version") int version) {
-		return this.skipperStreamService.manifest(name, version);
+	public ResponseEntity<String> manifest(@PathVariable("name") String name, @PathVariable("version") Integer version) {
+		return new ResponseEntity<String>(this.skipperStreamService.manifest(name, version), HttpStatus.OK);
 	}
 
 	@RequestMapping(path = "/history/{name}", method = RequestMethod.GET)
