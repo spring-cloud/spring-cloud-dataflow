@@ -691,8 +691,11 @@ The following topics provide more detail:
 * <<api-guide-resources-stream-deployment-deploy>>
 * <<api-guide-resources-stream-deployment-undeploy>>
 * <<api-guide-resources-stream-deployment-undeploy-all>>
-
-
+* <<api-guide-resources-stream-deployment-update>> (In Skipper mode)
+* <<api-guide-resources-stream-deployment-rollback>> (In Skipper mode)
+* <<api-guide-resources-stream-deployment-manifest>> (In Skipper mode)
+* <<api-guide-resources-stream-deployment-history>> (In Skipper mode)
+* <<api-guide-resources-stream-deployment-platform-list>> (In Skipper mode)
 
 [[api-guide-resources-stream-deployment-deploy]]
 ==== Deploying Stream Definition
@@ -705,8 +708,6 @@ The following topics provide more detail:
 * <<api-guide-resources-stream-definitions-deployment-deploy-request-parameters>>
 * <<api-guide-resources-stream-definitions-deployment-deploy-example-request>>
 * <<api-guide-resources-stream-definitions-deployment-deploy-response-structure>>
-
-
 
 [[api-guide-resources-stream-definitions-deployment-deploy-request-structure]]
 ===== Request Structure
@@ -791,8 +792,6 @@ The following topics provide more detail:
 * <<api-guide-resources-stream-definitions-deployment-undeploy-all-example-request>>
 * <<api-guide-resources-stream-definitions-deployment-undeploy-all-response-structure>>
 
-
-
 [[api-guide-resources-stream-definitions-deployment-undeploy-all-request-structure]]
 ===== Request Structure
 
@@ -819,7 +818,41 @@ include::{snippets}/stream-deployments-documentation/un-deploy-all/curl-request.
 
 include::{snippets}/stream-deployments-documentation/un-deploy-all/http-response.adoc[]
 
+[[api-guide-resources-stream-deployment-update]]
+==== Update Deployed Stream
 
+When using _Spring Cloud Data Flow_ in Skipper mode, you can update deployed
+streams, and provide additional deployment properties.
+
+IMPORTANT: In  order to use this feature, the Data Flow server must be in <<spring-cloud-dataflow-stream-lifecycle-skipper, Skipper Mode>>
+
+[[api-guide-resources-stream-deployment-rollback]]
+==== Rollback Stream Definition
+
+Rollback the stream to the previous or a specific version of the stream.
+
+IMPORTANT: In  order to use this feature, the Data Flow server must be in <<spring-cloud-dataflow-stream-lifecycle-skipper, Skipper Mode>>
+
+[[api-guide-resources-stream-deployment-manifest]]
+==== Get Manifest
+
+Return a manifest of a released version. For packages with dependencies, the manifest includes the contents of those dependencies.
+
+IMPORTANT: In  order to use this feature, the Data Flow server must be in <<spring-cloud-dataflow-stream-lifecycle-skipper, Skipper Mode>>
+
+[[api-guide-resources-stream-deployment-history]]
+==== Get Deployment History
+
+Get the stream's deployment history.
+
+IMPORTANT: In  order to use this feature, the Data Flow server must be in <<spring-cloud-dataflow-stream-lifecycle-skipper, Skipper Mode>>
+
+[[api-guide-resources-stream-deployment-platform-list]]
+==== Get Deployment Platforms
+
+Retrieve a list of supported deployment platforms.
+
+IMPORTANT: In  order to use this feature, the Data Flow server must be in <<spring-cloud-dataflow-stream-lifecycle-skipper, Skipper Mode>>
 
 [[api-guide-resources-task-definitions]]
 === Task Definitions

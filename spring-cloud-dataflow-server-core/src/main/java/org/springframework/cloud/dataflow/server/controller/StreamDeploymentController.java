@@ -36,6 +36,7 @@ import org.springframework.cloud.deployer.spi.app.DeploymentState;
 import org.springframework.hateoas.ExposesResourceFor;
 import org.springframework.hateoas.mvc.ResourceAssemblerSupport;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -55,6 +56,7 @@ import org.springframework.web.bind.annotation.RestController;
  * @author Marius Bogoevici
  * @author Janne Valkealahti
  * @author Christian Tzolov
+ * @author Gunnar Hillert
  */
 @RestController
 @RequestMapping("/streams/deployments")
@@ -94,28 +96,28 @@ public class StreamDeploymentController {
 	 * @param name the name of an existing stream (required)
 	 */
 	@RequestMapping(value = "/{name}", method = RequestMethod.DELETE)
-	@ResponseStatus(HttpStatus.OK)
-	public void undeploy(@PathVariable("name") String name) {
+	public ResponseEntity<Void> undeploy(@PathVariable("name") String name) {
 		StreamDefinition stream = this.repository.findOne(name);
 		if (stream == null) {
 			throw new NoSuchStreamDefinitionException(name);
 		}
 		this.streamService.undeployStream(name);
+		return new ResponseEntity<>(HttpStatus.OK);
 	}
 
 	/**
 	 * Request un-deployment of all streams.
 	 */
 	@RequestMapping(value = "", method = RequestMethod.DELETE)
-	@ResponseStatus(HttpStatus.OK)
-	public void undeployAll() {
+	public ResponseEntity<Void> undeployAll() {
 		for (StreamDefinition stream : this.repository.findAll()) {
 			this.streamService.undeployStream(stream.getName());
 		}
+		return new ResponseEntity<>(HttpStatus.OK);
 	}
 
 	/**
-	 * Request deployment of an existing stream definition.
+	 * Request deployment of an existing stream definition.  @FIXME
 	 * @param name the name of an existing stream definition (required)
 	 */
 	@RequestMapping(value = "/{name}", method = RequestMethod.GET)
@@ -144,10 +146,10 @@ public class StreamDeploymentController {
 	 * key=value pairs
 	 */
 	@RequestMapping(value = "/{name}", method = RequestMethod.POST)
-	@ResponseStatus(HttpStatus.CREATED)
-	public void deploy(@PathVariable("name") String name,
+	public ResponseEntity<Void> deploy(@PathVariable("name") String name,
 			@RequestBody(required = false) Map<String, String> properties) {
 		this.streamService.deployStream(name, properties);
+		return new ResponseEntity<>(HttpStatus.CREATED);
 	}
 
 	/**
