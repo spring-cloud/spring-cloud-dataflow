@@ -36,20 +36,40 @@ Docker Compose is required and it's recommended to use the link:https://docs.doc
 +
 [source,bash,subs=attributes]
 ----
-wget https://raw.githubusercontent.com/spring-cloud/spring-cloud-dataflow/{github-tag}/spring-cloud-dataflow-server-local/docker-compose.yml
+$ wget https://raw.githubusercontent.com/spring-cloud/spring-cloud-dataflow/{github-tag}/spring-cloud-dataflow-server-local/docker-compose.yml
 ----
-+
+
+NOTE: If the `wget` command is unavailable, `curl` or another platform specific utility may be used. Alternatively navigate to https://raw.githubusercontent.com/spring-cloud/spring-cloud-dataflow/{github-tag}/spring-cloud-dataflow-server-local/docker-compose.yml[https://raw.githubusercontent.com/spring-cloud/spring-cloud-dataflow/{github-tag}/spring-cloud-dataflow-server-local/docker-compose.yml] in a web browser and save the contents. Ensure the downloaded filename is `docker-compose.yml`.
+
 . Start Docker Compose
 +
 In the directory where you downloaded `docker-compose.yml`, start the system, as follows:
 +
 [source,bash,subs=attributes]
 ----
+$ export DATAFLOW_VERSION={local-server-image-tag}
+$ docker-compose up
+----
++
+The `docker-compose.yml` file defines a variable `DATAFLOW_VERSION` so that it can be changed easily. The above commands first set the `DATAFLOW_VERSION` to use in the environment and then `docker-compose` is started.
++
+A shorthand version which only exposes the `DATAFLOW_VERSION` variable to the `docker-compose` process rather than setting it in the environment would be as follows:
++
+[source,bash,subs=attributes]
+----
 $ DATAFLOW_VERSION={local-server-image-tag} docker-compose up
 ----
 +
+When using Windows, environment variables are defined by using the `set` command. To start the system on Windows, enter the following commands:
++
+[source,bash,subs=attributes]
+----
+C:\ set DATAFLOW_VERSION={local-server-image-tag}
+C:\ docker-compose up
+----
++
 NOTE: By default Docker Compose will use locally available images.
-If for example when using the `latest` tag, execute `docker-compose pull` prior to `docker-compose up` to ensure the latest image is downloaded.
+For example when using the `latest` tag, execute `docker-compose pull` prior to `docker-compose up` to ensure the latest image is downloaded.
 +
 . Launch the Spring Cloud Data Flow Dashboard
 +
