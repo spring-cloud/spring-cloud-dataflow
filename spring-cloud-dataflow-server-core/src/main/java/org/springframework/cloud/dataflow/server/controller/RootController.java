@@ -1,5 +1,5 @@
 /*
- * Copyright 2015-2017 the original author or authors.
+ * Copyright 2015-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -82,9 +82,11 @@ public class RootController {
 	 * Flow server.
 	 *
 	 * @return {@code ResourceSupport} object containing the Data Flow server's resources
+	 * @throws SecurityException
+	 * @throws NoSuchMethodException
 	 */
 	@RequestMapping("/")
-	public RootResource info() {
+	public RootResource info() throws NoSuchMethodException, SecurityException {
 		RootResource root = new RootResource(Version.REVISION);
 
 		root.add(ControllerLinkBuilder.linkTo(UiController.class).withRel("dashboard"));
@@ -94,11 +96,6 @@ public class RootController {
 			root.add(
 					unescapeTemplateVariables(entityLinks.linkToSingleResource(StreamDefinitionResource.class, "{name}")
 							.withRel("streams/definitions/definition")));
-			root.add(entityLinks.linkToCollectionResource(StreamDeploymentResource.class)
-					.withRel("streams/deployments"));
-			root.add(
-					unescapeTemplateVariables(entityLinks.linkToSingleResource(StreamDeploymentResource.class, "{name}")
-							.withRel("streams/deployments/deployment")));
 			root.add(entityLinks.linkToCollectionResource(AppStatusResource.class).withRel("runtime/apps"));
 			root.add(unescapeTemplateVariables(
 					entityLinks.linkForSingleResource(AppStatusResource.class, "{appId}").withRel("runtime/apps/app")));
@@ -106,6 +103,23 @@ public class RootController {
 					entityLinks.linkFor(AppInstanceStatusResource.class, "{appId}")
 							.withRel("runtime/apps/instances")));
 			root.add(ControllerLinkBuilder.linkTo(MetricsController.class).withRel("metrics/streams"));
+
+			if (featuresProperties.isSkipperEnabled()) {
+				root.add(ControllerLinkBuilder.linkTo(SkipperStreamDeploymentController.class).withRel("streams/deployments"));
+				root.add(ControllerLinkBuilder.linkTo(ControllerLinkBuilder.methodOn(SkipperStreamDeploymentController.class).deploy(null, null)).withRel("streams/deployments/{name}"));
+				root.add(ControllerLinkBuilder.linkTo(ControllerLinkBuilder.methodOn(SkipperStreamDeploymentController.class).history(null)).withRel("streams/deployments/history/{name}"));
+				root.add(ControllerLinkBuilder.linkTo(ControllerLinkBuilder.methodOn(SkipperStreamDeploymentController.class).manifest(null, null)).withRel("streams/deployments/manifest/{name}/{version}"));
+				root.add(ControllerLinkBuilder.linkTo(ControllerLinkBuilder.methodOn(SkipperStreamDeploymentController.class).platformList()).withRel("streams/deployments/platform/list"));
+				root.add(ControllerLinkBuilder.linkTo(ControllerLinkBuilder.methodOn(SkipperStreamDeploymentController.class).rollback(null, null)).withRel("streams/deployments/rollback/{name}/{version}"));
+				root.add(ControllerLinkBuilder.linkTo(ControllerLinkBuilder.methodOn(SkipperStreamDeploymentController.class).update(null, null)).withRel("streams/deployments/update/{name}"));
+			}
+			else {
+				root.add(ControllerLinkBuilder.linkTo(StreamDeploymentController.class).withRel("streams/deployments"));
+
+			}
+			root.add(
+					unescapeTemplateVariables(entityLinks.linkToSingleResource(StreamDeploymentResource.class, "{name}")
+							.withRel("streams/deployments/deployment")));
 		}
 		if (featuresProperties.isTasksEnabled()) {
 			root.add(entityLinks.linkToCollectionResource(TaskDefinitionResource.class).withRel("tasks/definitions"));
