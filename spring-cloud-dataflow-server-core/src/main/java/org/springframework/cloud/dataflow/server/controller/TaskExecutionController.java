@@ -1,5 +1,5 @@
 /*
- * Copyright 2016-2017 the original author or authors.
+ * Copyright 2016-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -55,6 +55,7 @@ import org.springframework.web.bind.annotation.RestController;
  * @author Glenn Renfro
  * @author Michael Minella
  * @author Ilayaperumal Gopinathan
+ * @author Christian Tzolov
  */
 @RestController
 @RequestMapping("/tasks/executions")
@@ -138,12 +139,14 @@ public class TaskExecutionController {
 	 */
 	@RequestMapping(value = "", method = RequestMethod.POST, params = "name")
 	@ResponseStatus(HttpStatus.CREATED)
-	public long launch(@RequestParam("name") String taskName, @RequestParam(required = false) String properties,
-			@RequestParam(required = false) List<String> arguments) {
+	public long launch(@RequestParam("name") String taskName,
+			@RequestParam(required = false) String properties,
+			@RequestParam(required = false) String arguments) {
 		Map<String, String> propertiesToUse = DeploymentPropertiesUtils.parse(properties);
 		DeploymentPropertiesUtils.validateDeploymentProperties(propertiesToUse);
+		List<String> argumentsToUse = DeploymentPropertiesUtils.parseParamList(arguments, " ");
 		return this.taskService.executeTask(taskName, propertiesToUse,
-				DeploymentPropertiesUtils.parseParams(arguments));
+				DeploymentPropertiesUtils.removeQuoting(argumentsToUse));
 	}
 
 	/**

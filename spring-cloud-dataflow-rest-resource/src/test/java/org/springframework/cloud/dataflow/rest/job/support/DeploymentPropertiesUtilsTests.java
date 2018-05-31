@@ -1,5 +1,5 @@
 /*
- * Copyright 2016-2017 the original author or authors.
+ * Copyright 2016-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,6 +22,7 @@ import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.junit.Test;
@@ -33,17 +34,19 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.hasEntry;
 import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
 
 /**
  * Tests for {@link DeploymentPropertiesUtils}.
  *
  * @author Janne Valkealahti
+ * @author Christian Tzolov
  */
 public class DeploymentPropertiesUtilsTests {
 
 	private static void assertArrays(String[] left, String[] right) {
 		ArrayList<String> params = new ArrayList<>(Arrays.asList(left));
-		assertThat(DeploymentPropertiesUtils.parseParams(params), containsInAnyOrder(right));
+		assertThat(DeploymentPropertiesUtils.removeQuoting(params), containsInAnyOrder(right));
 	}
 
 	@Test
@@ -101,6 +104,29 @@ public class DeploymentPropertiesUtilsTests {
 		assertThat(props, hasEntry("foo.bar2", "xxx=2"));
 	}
 
+
+	@Test
+	public void testDeploymentPropertiesParsing2() {
+		List<String> props = DeploymentPropertiesUtils.parseParamList("app.foo.bar=v, app.foo.wizz=v2  , deployer.foo"
+				+ ".pot=fern, app.other.key = value  , deployer.other.cow = meww,special=koza=boza,more", ",");
+
+		assertTrue(props.contains("app.foo.bar=v"));
+		assertTrue(props.contains(" app.other.key = value  "));
+		assertTrue(props.contains(" app.foo.wizz=v2  "));
+		assertTrue(props.contains(" deployer.foo.pot=fern"));
+		assertTrue(props.contains(" deployer.other.cow = meww"));
+		assertTrue(props.contains("special=koza=boza,more"));
+
+		props = DeploymentPropertiesUtils.parseParamList("a=b c=d", " ");
+		assertTrue(props.contains("a=b"));
+		assertTrue(props.contains("c=d"));
+
+		props = DeploymentPropertiesUtils.parseParamList("foo1=bar1 app.foo2=bar2 foo3=bar3 xxx3", " ");
+		assertTrue(props.contains("foo1=bar1"));
+		assertTrue(props.contains("app.foo2=bar2"));
+		assertTrue(props.contains("foo3=bar3 xxx3"));
+	}
+
 	@Test
 	public void testLongDeploymentPropertyValues() {
 		Map<String, String> props = DeploymentPropertiesUtils
@@ -127,6 +153,7 @@ public class DeploymentPropertiesUtilsTests {
 
 	@Test
 	public void testCommandLineParamsParsing() {
+		assertArrays(new String[] { "--format=x,y,z" }, new String[] { "--format=x,y,z" });
 		assertArrays(new String[] { "--format=yyyy-MM-dd" }, new String[] { "--format=yyyy-MM-dd" });
 		assertArrays(new String[] { "'--format=yyyy-MM-dd HH:mm:ss.SSS'" },
 				new String[] { "--format=yyyy-MM-dd HH:mm:ss" + ".SSS" });
