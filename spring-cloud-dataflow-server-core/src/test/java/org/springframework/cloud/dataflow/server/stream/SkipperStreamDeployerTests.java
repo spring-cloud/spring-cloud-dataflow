@@ -18,6 +18,7 @@ package org.springframework.cloud.dataflow.server.stream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -34,7 +35,6 @@ import org.springframework.cloud.dataflow.server.repository.StreamDefinitionRepo
 import org.springframework.cloud.dataflow.server.support.MockUtils;
 import org.springframework.cloud.dataflow.server.support.SkipperPackageUtils;
 import org.springframework.cloud.deployer.resource.maven.MavenResource;
-import org.springframework.cloud.deployer.spi.app.AppStatus;
 import org.springframework.cloud.deployer.spi.app.DeploymentState;
 import org.springframework.cloud.deployer.spi.core.AppDefinition;
 import org.springframework.cloud.deployer.spi.core.AppDeploymentRequest;
@@ -44,11 +44,10 @@ import org.springframework.cloud.skipper.client.SkipperClient;
 import org.springframework.cloud.skipper.domain.AboutResource;
 import org.springframework.cloud.skipper.domain.Dependency;
 import org.springframework.cloud.skipper.domain.Deployer;
-import org.springframework.cloud.skipper.domain.Info;
 import org.springframework.cloud.skipper.domain.InstallRequest;
 import org.springframework.cloud.skipper.domain.Package;
+import org.springframework.cloud.skipper.domain.PackageMetadata;
 import org.springframework.cloud.skipper.domain.Release;
-import org.springframework.cloud.skipper.domain.Status;
 import org.springframework.cloud.skipper.domain.UploadRequest;
 import org.springframework.cloud.skipper.domain.VersionInfo;
 import org.springframework.hateoas.Resources;
@@ -336,7 +335,8 @@ public class SkipperStreamDeployerTests {
 
 		StreamDefinition streamDefinition = new StreamDefinition("foo", "foo|bar");
 
-		when(skipperClient.status(eq(streamDefinition.getName()))).thenThrow(new ReleaseNotFoundException(""));
+		when(skipperClient.search(eq(streamDefinition.getName()), eq(false)))
+				.thenReturn(new Resources(Collections.EMPTY_LIST));
 
 		skipperStreamDeployer.undeployStream(streamDefinition.getName());
 
@@ -354,12 +354,8 @@ public class SkipperStreamDeployerTests {
 
 		StreamDefinition streamDefinition = new StreamDefinition("foo", "foo|bar");
 
-		Info info = new Info();
-		info.setStatus(new Status());
-		AppStatus fooAppStatus = AppStatus.of("foo").generalState(DeploymentState.deployed).build();
-		AppStatus barAppStatus = AppStatus.of("bar").generalState(DeploymentState.deployed).build();
-		info.getStatus().setPlatformStatusAsAppStatusList(Arrays.asList(fooAppStatus, barAppStatus));
-		when(skipperClient.status(eq(streamDefinition.getName()))).thenReturn(info);
+		when(skipperClient.search(eq(streamDefinition.getName()), eq(false)))
+				.thenReturn(new Resources(Collections.singleton(new PackageMetadata())));
 
 		skipperStreamDeployer.undeployStream(streamDefinition.getName());
 		verify(skipperClient, times(1)).delete(eq(streamDefinition.getName()), eq(true));
