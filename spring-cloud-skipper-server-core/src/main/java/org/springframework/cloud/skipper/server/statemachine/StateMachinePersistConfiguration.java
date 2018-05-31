@@ -56,7 +56,7 @@ public class StateMachinePersistConfiguration {
 		return interceptor;
 	}
 
-	private static class SkipUnwantedVariablesFunction
+	static class SkipUnwantedVariablesFunction
 			implements Function<StateMachine<SkipperStates, SkipperEvents>, Map<Object, Object>> {
 
 		@Override
@@ -65,8 +65,8 @@ public class StateMachinePersistConfiguration {
 				return !(ObjectUtils.nullSafeEquals(e.getKey(), SkipperVariables.SOURCE_RELEASE)
 						|| ObjectUtils.nullSafeEquals(e.getKey(), SkipperVariables.TARGET_RELEASE)
 						|| ObjectUtils.nullSafeEquals(e.getKey(), SkipperVariables.RELEASE)
-						|| ObjectUtils.nullSafeEquals(e.getKey(), SkipperVariables.RELEASE_ANALYSIS_REPORT))
-						|| ObjectUtils.nullSafeEquals(e.getKey(), SkipperVariables.ERROR);
+						|| ObjectUtils.nullSafeEquals(e.getKey(), SkipperVariables.RELEASE_ANALYSIS_REPORT)
+						|| ObjectUtils.nullSafeEquals(e.getKey(), SkipperVariables.ERROR));
 			}).collect(Collectors.toMap(e -> e.getKey(), e -> e.getValue()));
 		}
 	}
