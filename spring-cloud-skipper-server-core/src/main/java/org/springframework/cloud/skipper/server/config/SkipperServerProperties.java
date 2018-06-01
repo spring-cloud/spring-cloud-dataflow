@@ -54,9 +54,9 @@ public class SkipperServerProperties {
 
 	/**
 	 * The target percentage of free disk space to always aim for when cleaning downloaded
-	 * resources. Specify as an integer greater than zero and less than 100. Default is 25.
+	 * resources. Specify as an integer greater than zero and less than 100. Default is 5.
 	 */
-	private int freeDiskSpacePercentage = 25;
+	private int freeDiskSpacePercentage = 5;
 
 	public List<Repository> getPackageRepositories() {
 		return packageRepositories;
