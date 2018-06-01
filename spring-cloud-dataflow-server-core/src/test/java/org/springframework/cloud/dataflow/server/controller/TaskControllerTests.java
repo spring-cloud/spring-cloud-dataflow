@@ -239,7 +239,6 @@ public class TaskControllerTests {
 		this.registry.register("task.foo2", new URI("file:src/test/resources/apps/foo-task"));
 
 		mockMvc.perform(post("/tasks/executions").param("name", "myTask2")
-				.contentType(MediaType.APPLICATION_FORM_URLENCODED)
 				.accept(MediaType.APPLICATION_JSON))
 				.andDo(print()).andExpect(status().isCreated());
 
