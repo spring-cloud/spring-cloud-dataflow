@@ -135,6 +135,7 @@ Arguably, the most complex component when it comes to quotes is the shell. The r
 * A shell command is made of keys (`--something`) and corresponding values. There is a special, keyless mapping, though, which is described later.
 * A value cannot normally contain spaces, as space is the default delimiter for commands.
 * Spaces can be added though, by surrounding the value with quotes (either single (`'`) or double (`"`) quotes).
+* Values passed inside deployment properties (e.g. `deployment <stream-name> --properties " ..."`) should not be quoted again.
 * If surrounded with quotes, a value can embed a literal quote of the same kind by prefixing it with a backslash (`\`).
 * Other escapes are available, such as `\t`, `\n`, `\r`, `\f` and unicode escapes of the form `\uxxxx`.
 * The keyless mapping is handled in a special way such that it does not need quoting to contain spaces.
@@ -153,6 +154,20 @@ dataflow:>stream destroy "something"
 dataflow:>stream destroy --name "something"
 ----
 
+==== Property files rules
+Rules are relaxed when loading the properties from files.
+* The special characters used in property files (both Java and YAML) needs to be escaped. For example `\` should be replaced  by `\\`, '\t` by `\\t` and so forth.
+* For Java property files (`--propertiesFile` <FILE_PATH>.properties) the property values should not be surrounded by quotes! It is not needed even if they contain spaces.
+----
+filter.expression=payload > 5
+----
+* For YAML property files (`--propertiesFile` <FILE_PATH>.yaml), though, the values need to be surrounded by double quotes.
+----
+app:
+    filter:
+        filter:
+            expression: "payload > 5"
+----
 
 ==== DSL Parsing Rules
 At the parser level (that is, inside the body of a stream or task definition) the rules are as follows:
