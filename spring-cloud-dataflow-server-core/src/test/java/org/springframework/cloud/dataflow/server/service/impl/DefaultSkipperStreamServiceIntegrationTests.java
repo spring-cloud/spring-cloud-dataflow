@@ -19,6 +19,7 @@ import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.charset.Charset;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -52,9 +53,11 @@ import org.springframework.cloud.skipper.domain.InstallRequest;
 import org.springframework.cloud.skipper.domain.Manifest;
 import org.springframework.cloud.skipper.domain.Package;
 import org.springframework.cloud.skipper.domain.PackageIdentifier;
+import org.springframework.cloud.skipper.domain.PackageMetadata;
 import org.springframework.cloud.skipper.domain.Release;
 import org.springframework.cloud.skipper.domain.UpgradeRequest;
 import org.springframework.cloud.skipper.domain.UploadRequest;
+import org.springframework.hateoas.Resources;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
@@ -62,6 +65,8 @@ import org.springframework.util.StreamUtils;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.fail;
+import static org.mockito.Matchers.anyBoolean;
+import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Matchers.isA;
 import static org.mockito.Mockito.verify;
@@ -104,6 +109,8 @@ public class DefaultSkipperStreamServiceIntegrationTests {
 	public void destroyStream() {
 		appRegistryService.delete("log", ApplicationType.sink, "1.2.0.RELEASE");
 		appRegistryService.delete("time", ApplicationType.source, "1.2.0.RELEASE");
+		when(this.skipperClient.search(anyString(), anyBoolean()))
+				.thenReturn(new Resources<>(Collections.singletonList(new PackageMetadata())));
 		streamService.undeployStream("ticktock");
 		streamDefinitionRepository.deleteAll();
 	}
