@@ -65,7 +65,7 @@ public class TaskExecutionsDocumentation extends BaseDocumentation {
 				post("/tasks/executions")
 						.param("name", "taskA")
 						.param("properties", "app.my-task.foo=bar,deployer.my-task.something-else=3")
-						.param("arguments", "--server.port=8080,--foo=bar"))
+						.param("arguments", "--server.port=8080 --foo=bar"))
 				.andExpect(status().isCreated())
 				.andDo(this.documentationHandler.document(
 						requestParameters(
@@ -82,7 +82,7 @@ public class TaskExecutionsDocumentation extends BaseDocumentation {
 				post("/tasks/executions")
 						.param("name", "taskB")
 						.param("properties", "app.my-task.foo=bar,deployer.my-task.something-else=3")
-						.param("arguments", "--server.port=8080,--foo=bar"))
+						.param("arguments", "--server.port=8080 --foo=bar"))
 				.andExpect(status().isCreated()));
 
 		this.mockMvc.perform(
