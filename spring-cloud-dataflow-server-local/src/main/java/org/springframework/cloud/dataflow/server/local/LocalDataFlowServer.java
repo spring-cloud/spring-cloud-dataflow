@@ -18,6 +18,7 @@ package org.springframework.cloud.dataflow.server.local;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.autoconfigure.session.SessionAutoConfiguration;
 import org.springframework.cloud.dataflow.server.EnableDataFlowServer;
 
 /**
@@ -27,7 +28,7 @@ import org.springframework.cloud.dataflow.server.EnableDataFlowServer;
  * @author Ilayaperumal Gopinathan
  * @author Janne Valkealahti
  */
-@SpringBootApplication
+@SpringBootApplication(exclude = SessionAutoConfiguration.class)
 @EnableDataFlowServer
 public class LocalDataFlowServer {
 
