@@ -47,7 +47,7 @@ public class FeaturesProperties {
 
 	private boolean skipperEnabled = false;
 
-	private boolean schedulesEnabled = true;
+	private boolean schedulesEnabled = false;
 
 	public boolean isAnalyticsEnabled() {
 		return this.analyticsEnabled;
