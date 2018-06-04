@@ -57,6 +57,18 @@ public class StateMachineConfiguration {
 
 	private static final Logger log = LoggerFactory.getLogger(StateMachineConfiguration.class);
 
+	private static long adjustTimerPeriod(HealthCheckProperties healthCheckProperties) {
+		// keep hard coded default as 1000ms and use sleepInMillis from documented
+		// setting for now. Just make sure value is positive as otherwise
+		// machine would go crazy.
+		if (healthCheckProperties != null && healthCheckProperties.getSleepInMillis() > 0) {
+			return healthCheckProperties.getSleepInMillis();
+		}
+		else {
+			return 1000;
+		}
+	}
+
 	/**
 	 * Configuration defining {@link StateMachineFactory} for skipper release handling.
 	 */
@@ -220,7 +232,7 @@ public class StateMachineConfiguration {
 					.and()
 				.withExternal()
 					.source(SkipperStates.UPGRADE_WAIT_TARGET_APPS).target(SkipperStates.UPGRADE_CHECK_CHOICE)
-					.timer(1000)
+					.timer(adjustTimerPeriod(healthCheckProperties))
 					.and()
 				.withExternal()
 					.source(SkipperStates.UPGRADE_CHECK_TARGET_APPS).target(SkipperStates.UPGRADE_WAIT_TARGET_APPS)
