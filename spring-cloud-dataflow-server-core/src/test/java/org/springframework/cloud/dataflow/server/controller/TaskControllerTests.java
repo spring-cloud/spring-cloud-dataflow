@@ -18,7 +18,11 @@ package org.springframework.cloud.dataflow.server.controller;
 
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.Arrays;
 
+import org.apache.http.client.entity.UrlEncodedFormEntity;
+import org.apache.http.message.BasicNameValuePair;
+import org.apache.http.util.EntityUtils;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -65,6 +69,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  * @author Glenn Renfro
  * @author Gunnar Hillert
  * @author Ilayaperumal Gopinathan
+ * @author Christian Tzolov
  */
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = TestDependencies.class)
@@ -206,7 +211,8 @@ public class TaskControllerTests {
 
 	@Test
 	public void testTaskNotDefined() throws Exception {
-		mockMvc.perform(post("/tasks/executions").param("name", "myFoo").accept(MediaType.APPLICATION_JSON))
+		mockMvc.perform(post("/tasks/executions")
+				.param("name", "myFoo").accept(MediaType.APPLICATION_JSON))
 				.andDo(print()).andExpect(status().isNotFound())
 				.andExpect(content().json("[{message: \"Could not find task definition named myFoo\"}]"));
 	}
@@ -228,10 +234,12 @@ public class TaskControllerTests {
 
 	@Test
 	public void testLaunchWithAppProperties() throws Exception {
+
 		repository.save(new TaskDefinition("myTask2", "foo2 --common.prop2=wizz"));
 		this.registry.register("task.foo2", new URI("file:src/test/resources/apps/foo-task"));
 
-		mockMvc.perform(post("/tasks/executions").param("name", "myTask2").accept(MediaType.APPLICATION_JSON))
+		mockMvc.perform(post("/tasks/executions").param("name", "myTask2")
+				.accept(MediaType.APPLICATION_JSON))
 				.andDo(print()).andExpect(status().isCreated());
 
 		ArgumentCaptor<AppDeploymentRequest> argumentCaptor = ArgumentCaptor.forClass(AppDeploymentRequest.class);
@@ -247,9 +255,15 @@ public class TaskControllerTests {
 		repository.save(new TaskDefinition("myTask3", "foo3"));
 		this.registry.register("task.foo3", new URI("file:src/test/resources/apps/foo-task"));
 
-		mockMvc.perform(post("/tasks/executions").param("name", "myTask3")
-				.param("arguments", "--foobar=jee", "--foobar2=jee2", "--foobar3='jee3 jee3'")
-				.accept(MediaType.APPLICATION_JSON)).andDo(print()).andExpect(status().isCreated());
+		mockMvc.perform(post("/tasks/executions")
+				//.param("name", "myTask3")
+				.contentType(MediaType.APPLICATION_FORM_URLENCODED)
+				.content(EntityUtils.toString(new UrlEncodedFormEntity(Arrays.asList(
+						new BasicNameValuePair("name", "myTask3"),
+						new BasicNameValuePair("arguments", "--foobar=jee --foobar2=jee2,foo=bar --foobar3='jee3 jee3'")))))
+				.accept(MediaType.APPLICATION_JSON))
+				.andDo(print())
+				.andExpect(status().isCreated());
 
 		ArgumentCaptor<AppDeploymentRequest> argumentCaptor = ArgumentCaptor.forClass(AppDeploymentRequest.class);
 		verify(this.taskLauncher, atLeast(1)).launch(argumentCaptor.capture());
@@ -257,7 +271,7 @@ public class TaskControllerTests {
 		AppDeploymentRequest request = argumentCaptor.getValue();
 		assertThat(request.getCommandlineArguments().size(), is(3 + 1)); // +1 for spring.cloud.task.executionid
 		assertThat(request.getCommandlineArguments().get(0), is("--foobar=jee"));
-		assertThat(request.getCommandlineArguments().get(1), is("--foobar2=jee2"));
+		assertThat(request.getCommandlineArguments().get(1), is("--foobar2=jee2,foo=bar"));
 		assertThat(request.getCommandlineArguments().get(2), is("--foobar3=jee3 jee3"));
 		assertEquals("myTask3", request.getDefinition().getProperties().get("spring.cloud.task.name"));
 	}

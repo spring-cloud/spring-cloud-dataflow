@@ -43,6 +43,7 @@ import org.springframework.util.StringUtils;
  * @author Eric Bottard
  * @author Mark Fisher
  * @author Janne Valkealahti
+ * @author Christian Tzolov
  */
 public final class DeploymentPropertiesUtils {
 
@@ -70,11 +71,36 @@ public final class DeploymentPropertiesUtils {
 	 * @return the Map of parsed key value pairs
 	 */
 	public static Map<String, String> parse(String s) {
-		Map<String, String> deploymentProperties = new HashMap<String, String>();
+		Map<String, String> deploymentProperties = new HashMap<>();
+		List<String> pairs = parseParamList(s, ",");
+
+		// add what we got, addKeyValuePairAsProperty
+		// handles rest as trimming, etc
+		for (String pair : pairs) {
+			addKeyValuePairAsProperty(pair, deploymentProperties);
+		}
+		return deploymentProperties;
+	}
+
+	/**
+	 * Parses a String comprised of 0 or more delimited key=value pairs where each key
+	 * has the format: {@code app.[appname].[key]} or {@code deployer.[appname].[key]}. Values
+	 * may themselves contain commas, since the split points will be based upon the key
+	 * pattern.
+	 * <p>
+	 * Logic of parsing key/value pairs from a string is based on few rules and assumptions 1.
+	 * keys will not have commas or equals. 2. First raw split is done by commas which will
+	 * need to be fixed later if value is a comma-delimited list.
+	 *
+	 * @param s the string to parse
+	 * @param delimiter delimiter used to split the string into pairs
+	 * @return the List key=value pairs
+	 */
+	public static List<String> parseParamList(String s, String delimiter) {
 		ArrayList<String> pairs = new ArrayList<>();
 
 		// get raw candidates as simple comma split
-		String[] candidates = StringUtils.commaDelimitedListToStringArray(s);
+		String[] candidates = StringUtils.delimitedListToStringArray(s, delimiter);
 		for (int i = 0; i < candidates.length; i++) {
 			if (i > 0 && !candidates[i].contains("=")) {
 				// we don't have '=' so this has to be latter parts of
@@ -83,7 +109,7 @@ public final class DeploymentPropertiesUtils {
 				// we skip first as we would not have anything to append to. this
 				// would happen if dep prop string is malformed and first given
 				// key/value pair is not actually a key/value.
-				pairs.set(pairs.size() - 1, pairs.get(pairs.size() - 1) + "," + candidates[i]);
+				pairs.set(pairs.size() - 1, pairs.get(pairs.size() - 1) + delimiter + candidates[i]);
 			}
 			else {
 				// we have a key/value pair having '=', or malformed first pair
@@ -91,12 +117,7 @@ public final class DeploymentPropertiesUtils {
 			}
 		}
 
-		// add what we got, addKeyValuePairAsProperty
-		// handles rest as trimming, etc
-		for (String pair : pairs) {
-			addKeyValuePairAsProperty(pair, deploymentProperties);
-		}
-		return deploymentProperties;
+		return pairs;
 	}
 
 	/**
@@ -202,8 +223,8 @@ public final class DeploymentPropertiesUtils {
 		Map<String, String> result = new TreeMap<>(input).entrySet().stream()
 				.filter(kv -> kv.getKey().startsWith(wildcardPrefix) || kv.getKey().startsWith(appPrefix))
 				.collect(Collectors.toMap(kv -> kv.getKey().startsWith(wildcardPrefix)
-						? "spring.cloud.deployer." + kv.getKey().substring(wildcardLength)
-						: "spring.cloud.deployer." + kv.getKey().substring(appLength), kv -> kv.getValue(),
+								? "spring.cloud.deployer." + kv.getKey().substring(wildcardLength)
+								: "spring.cloud.deployer." + kv.getKey().substring(appLength), kv -> kv.getValue(),
 						(fromWildcard, fromApp) -> fromApp));
 
 		return result;
@@ -235,7 +256,7 @@ public final class DeploymentPropertiesUtils {
 	 */
 	public static Map<String, String> convert(Properties properties) {
 		Map<String, String> result = new HashMap<>(properties.size());
-		for (Enumeration<?> e = properties.propertyNames(); e.hasMoreElements();) {
+		for (Enumeration<?> e = properties.propertyNames(); e.hasMoreElements(); ) {
 			String key = (String) e.nextElement();
 			result.put(key, properties.getProperty(key));
 		}
@@ -263,7 +284,7 @@ public final class DeploymentPropertiesUtils {
 	 * @param params the params
 	 * @return the list
 	 */
-	public static List<String> parseParams(List<String> params) {
+	public static List<String> removeQuoting(List<String> params) {
 		List<String> paramsToUse = new ArrayList<>();
 		if (params != null) {
 			for (String param : params) {
