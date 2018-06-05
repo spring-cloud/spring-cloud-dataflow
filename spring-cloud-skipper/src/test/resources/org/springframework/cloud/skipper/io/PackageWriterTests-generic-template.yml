@@ -1,15 +1,20 @@
 apiVersion: skipper.spring.io/v1
 kind: SpringCloudDeployerApplication
-deployment:
-  name: log
-  count: {{deployment.count}}
+metadata:
+  {{#metadata.entrySet}}
+  "{{{key}}}": "{{{value}}}"
+  {{/metadata.entrySet}}
+spec:
+  resource: "{{{spec.resource}}}"
+  resourceMetadata: "{{{spec.resource}}}:jar:metadata:{{{spec.version}}}"
+  version: "{{{spec.version}}}"
   applicationProperties:
-    {{#deployment.applicationProperties.entrySet}}
-    {{key}}: {{value}}
-    {{/deployment.applicationProperties.entrySet}}
-  resource: maven://org.springframework.cloud.stream.app:log-sink-rabbit:{{appVersion}}
-  resourceMetadata: maven://org.springframework.cloud.stream.app:log-sink-rabbit:jar:metadata:{{appVersion}}
+    {{#spec.applicationProperties.entrySet}}
+    "{{{key}}}": "{{{value}}}"
+    {{/spec.applicationProperties.entrySet}}
   deploymentProperties:
-    {{#deployment.deploymentProperties.entrySet}}
-    {{key}}: {{value}}
-    {{/deployment.deploymentProperties.entrySet}}
+    {{#spec.deploymentProperties.entrySet}}
+    "{{{key}}}": "{{{value}}}"
+    {{/spec.deploymentProperties.entrySet}}
+  cfManifest: "{{{spec.cfManifest}}}"
+  
