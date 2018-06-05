@@ -1,5 +1,5 @@
 /*
- * Copyright 2016-2017 the original author or authors.
+ * Copyright 2016-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,10 @@
 
 package org.springframework.cloud.dataflow.server.rest.documentation;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.Callable;
 
 import javax.sql.DataSource;
@@ -24,8 +28,14 @@ import org.junit.Before;
 import org.junit.ClassRule;
 import org.junit.Rule;
 
+import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
+import org.springframework.beans.factory.support.BeanDefinitionRegistry;
+import org.springframework.beans.factory.support.GenericBeanDefinition;
 import org.springframework.cloud.dataflow.core.ApplicationType;
 import org.springframework.cloud.dataflow.server.local.LocalDataflowResource;
+import org.springframework.cloud.scheduler.spi.core.ScheduleInfo;
+import org.springframework.cloud.scheduler.spi.core.ScheduleRequest;
+import org.springframework.cloud.scheduler.spi.core.Scheduler;
 import org.springframework.restdocs.JUnitRestDocumentation;
 import org.springframework.restdocs.mockmvc.RestDocumentationResultHandler;
 import org.springframework.test.web.servlet.MockMvc;
@@ -45,12 +55,13 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 /**
  * @author Gunnar Hillert
  * @author Ilayaperumal Gopinathan
+ * @author Glenn Renfro
  */
 public abstract class BaseDocumentation {
 
 	@ClassRule
 	public final static LocalDataflowResource springDataflowServer = new LocalDataflowResource(
-			"classpath:rest-docs-config.yml");
+			"classpath:rest-docs-config.yml", true, true, true, true);
 
 	@Before
 	public void setupMocks() {
@@ -79,6 +90,9 @@ public abstract class BaseDocumentation {
 				.alwaysDo((ToggleableResultHandler)this.documentation).build();
 
 		this.dataSource = springDataflowServer.getWebApplicationContext().getBean(DataSource.class);
+
+		// This can be removed when a Local Scheduler impl is created.
+		createMockScheduler();
 	}
 
 	/**
@@ -126,6 +140,19 @@ public abstract class BaseDocumentation {
 		);
 	}
 
+	/**
+	 * Creates a mock scheduler so that we can have documentation on the scheduler
+	 * restful interfaces.  This can be removed when a Local Scheduler impl is created.
+	 */
+	private void createMockScheduler() {
+		AutowireCapableBeanFactory factory = springDataflowServer.getWebApplicationContext().getAutowireCapableBeanFactory();
+		BeanDefinitionRegistry registry = (BeanDefinitionRegistry) factory;
+		registry.removeBeanDefinition("localScheduler");
+		GenericBeanDefinition schedulerBeanDefinition = new GenericBeanDefinition();
+		schedulerBeanDefinition.setBeanClass(MockScheduler.class);
+		schedulerBeanDefinition.setScope(org.springframework.beans.factory.config.BeanDefinition.SCOPE_SINGLETON);
+		registry.registerBeanDefinition("localScheduler", schedulerBeanDefinition);
+	}
 
 	/**
 	 * A {@link ResultHandler} that can be turned off and on.
@@ -173,4 +200,42 @@ public abstract class BaseDocumentation {
 		void dontDocument(Callable action) throws Exception;
 	}
 
+	/**
+	 * Mocks a Scheduler Impl so that we can generate docs. This can be removed
+	 * when a local impl is created.
+	 */
+	public static class MockScheduler implements Scheduler {
+
+		@Override
+		public void schedule(ScheduleRequest scheduleRequest) {
+
+		}
+
+		@Override
+		public void unschedule(String scheduleName) {
+
+		}
+
+		@Override
+		public List<ScheduleInfo> list(String taskDefinitionName) {
+			return getSampleList();
+		}
+
+		@Override
+		public List<ScheduleInfo> list() {
+			return getSampleList();
+		}
+
+		public List<ScheduleInfo> getSampleList() {
+			List<ScheduleInfo> result = new ArrayList<>();
+			ScheduleInfo scheduleInfo = new ScheduleInfo();
+			scheduleInfo.setScheduleName("FOO");
+			scheduleInfo.setTaskDefinitionName("BAR");
+			Map<String, String> props = new HashMap<>(1);
+			props.put("scheduler.AAA.spring.cloud.scheduler.cron.expression", "00 41 17 ? * *");
+			scheduleInfo.setScheduleProperties(props);
+			result.add(scheduleInfo);
+			return result;
+		}
+	}
 }
