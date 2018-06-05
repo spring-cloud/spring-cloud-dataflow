@@ -114,6 +114,7 @@ The API includes the following resources:
 * <<api-guide-resources-stream-deployment>>
 * <<api-guide-resources-task-definitions>>
 * <<api-guide-resources-task-executions>>
+* <<api-guide-resources-task-scheduler>>
 * <<api-guide-resources-job-executions>>
 * <<api-guide-resources-job-instances>>
 * <<api-guide-resources-job-step-executions>>
@@ -1035,6 +1036,176 @@ include::{snippets}/task-definitions-documentation/task-definition-delete/curl-r
 include::{snippets}/task-definitions-documentation/task-definition-delete/http-response.adoc[]
 
 
+[[api-guide-resources-task-scheduler]]
+=== Task Scheduler
+
+The task scheduler endpoint provides information about the task schedules that are registered with the Scheduler Implementation.
+The following topics provide more detail:
+
+* <<api-guide-resources-task-schedule-creating>>
+* <<api-guide-resources-task-schedule-list>>
+* <<api-guide-resources-task-schedule-filtered-list>>
+* <<api-guide-resources-task-delete-schedule>>
+
+[[api-guide-resources-task-schedule-creating]]
+==== Creating a New Task Schedule
+
+The task schedule endpoint lets you create a new task schedule.
+The following topics provide more detail:
+
+* <<api-guide-resources-stream-task-schedule-creating-request-structure>>
+* <<api-guide-resources-stream-task-schedule-creating-request-parameters>>
+* <<api-guide-resources-stream-task-schedule-creating-example-request>>
+* <<api-guide-resources-stream-task-schedule-creating-response-structure>>
+
+
+[[api-guide-resources-stream-task-schedule-creating-request-structure]]
+===== Request Structure
+
+include::{snippets}/task-scheduler-documentation/create-schedule/http-request.adoc[]
+
+
+
+[[api-guide-resources-stream-task-schedule-creating-request-parameters]]
+===== Request Parameters
+
+include::{snippets}/task-scheduler-documentation/create-schedule/request-parameters.adoc[]
+
+
+
+[[api-guide-resources-stream-task-schedule-creating-example-request]]
+===== Example Request
+
+include::{snippets}/task-scheduler-documentation/create-schedule/curl-request.adoc[]
+
+
+
+[[api-guide-resources-stream-task-schedule-creating-response-structure]]
+===== Response Structure
+
+include::{snippets}/task-scheduler-documentation/create-schedule/http-response.adoc[]
+
+
+
+[[api-guide-resources-task-schedule-list]]
+==== List All Schedules
+
+The task schedules endpoint lets you get all task schedules.
+The following topics provide more detail:
+
+* <<api-guide-resources-stream-task-schedule-list-request-structure>>
+* <<api-guide-resources-stream-task-schedule-list-request-parameters>>
+* <<api-guide-resources-stream-task-schedule-list-example-request>>
+* <<api-guide-resources-stream-task-schedule-list-response-structure>>
+
+
+
+[[api-guide-resources-stream-task-schedule-list-request-structure]]
+===== Request Structure
+
+include::{snippets}/task-scheduler-documentation/list-all-schedules/http-request.adoc[]
+
+
+
+[[api-guide-resources-stream-task-schedule-list-request-parameters]]
+===== Request Parameters
+
+include::{snippets}/task-scheduler-documentation/list-all-schedules/request-parameters.adoc[]
+
+
+
+[[api-guide-resources-stream-task-schedule-list-example-request]]
+===== Example Request
+
+include::{snippets}/task-scheduler-documentation/list-all-schedules/curl-request.adoc[]
+
+
+
+[[api-guide-resources-stream-task-schedule-list-response-structure]]
+===== Response Structure
+
+include::{snippets}/task-scheduler-documentation/list-all-schedules/http-response.adoc[]
+
+[[api-guide-resources-task-schedule-filtered-list]]
+==== List Filtered Schedules
+
+The task schedules endpoint lets you get all task schedules that have the specified task definition name.
+The following topics provide more detail:
+
+* <<api-guide-resources-stream-task-schedule-list-filtered-request-structure>>
+* <<api-guide-resources-stream-task-schedule-list-filtered-request-parameters>>
+* <<api-guide-resources-stream-task-schedule-list-filtered-example-request>>
+* <<api-guide-resources-stream-task-schedule-list-filtered-response-structure>>
+
+
+
+[[api-guide-resources-stream-task-schedule-list-filtered-request-structure]]
+===== Request Structure
+
+include::{snippets}/task-scheduler-documentation/list-filtered-schedules/http-request.adoc[]
+
+include::{snippets}/task-scheduler-documentation/list-filtered-schedules/path-parameters.adoc[]
+
+
+[[api-guide-resources-stream-task-schedule-list-filtered-request-parameters]]
+===== Request Parameters
+
+include::{snippets}/task-scheduler-documentation/list-filtered-schedules/request-parameters.adoc[]
+
+
+
+[[api-guide-resources-stream-task-schedule-list-filtered-example-request]]
+===== Example Request
+
+include::{snippets}/task-scheduler-documentation/list-filtered-schedules/curl-request.adoc[]
+
+
+
+[[api-guide-resources-stream-task-schedule-list-filtered-response-structure]]
+===== Response Structure
+
+include::{snippets}/task-scheduler-documentation/list-filtered-schedules/http-response.adoc[]
+
+
+
+[[api-guide-resources-task-delete-schedule]]
+==== Delete Task Schedule
+
+The task schedule endpoint lets you delete a single task schedule.
+The following topics provide more detail:
+
+* <<api-guide-resources-delete-task-schedule-request-structure>>
+* <<api-guide-resources-delete-task-schedule-request-parameters>>
+* <<api-guide-resources-delete-task-schedule-example-request>>
+* <<api-guide-resources-delete-task-schedule-response-structure>>
+
+
+
+[[api-guide-resources-delete-task-schedule-request-structure]]
+===== Request Structure
+
+include::{snippets}/task-scheduler-documentation/delete-schedule/http-request.adoc[]
+
+include::{snippets}/task-scheduler-documentation/delete-schedule/path-parameters.adoc[]
+
+[[api-guide-resources-delete-task-schedule-request-parameters]]
+===== Request Parameters
+
+There are no request parameters for this endpoint.
+
+
+
+[[api-guide-resources-delete-task-schedule-example-request]]
+===== Example Request
+
+include::{snippets}/task-scheduler-documentation/delete-schedule/curl-request.adoc[]
+
+
+
+[[api-guide-resources-delete-task-schedule-response-structure]]
+===== Response Structure
+
+include::{snippets}/task-scheduler-documentation/delete-schedule/http-response.adoc[]
 
 [[api-guide-resources-task-executions]]
 === Task Executions
@@ -1081,7 +1252,6 @@ include::{snippets}/task-executions-documentation/launch-task/request-parameters
 ===== Example Request
 
 include::{snippets}/task-executions-documentation/launch-task/curl-request.adoc[]
-
 
 
 [[api-guide-resources-task-executions-launching-response-structure]]
