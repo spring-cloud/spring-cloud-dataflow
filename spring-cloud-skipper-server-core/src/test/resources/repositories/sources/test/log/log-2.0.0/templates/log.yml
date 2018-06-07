@@ -8,6 +8,7 @@ spec:
   resourceMetadata: maven://org.springframework.cloud.stream.app:log-sink-rabbit:jar:metadata:{{version}}
   version: {{version}}
   applicationProperties:
+    server.port: 0
     {{#spec.applicationProperties.entrySet}}
     {{key}}: {{value}}
     {{/spec.applicationProperties.entrySet}}

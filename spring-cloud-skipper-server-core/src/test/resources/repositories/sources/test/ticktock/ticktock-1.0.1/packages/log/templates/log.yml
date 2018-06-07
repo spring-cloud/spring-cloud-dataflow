@@ -11,6 +11,7 @@ spec:
   adate: {{adate}}
   array: {{array}}
   applicationProperties:
+    server.port: 0
     {{#spec.applicationProperties.entrySet}}
     {{key}}: {{value}}
     {{/spec.applicationProperties.entrySet}}

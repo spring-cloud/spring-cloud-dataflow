@@ -7,6 +7,7 @@ spec:
   resource: maven://org.springframework.cloud:spring-cloud-deployer-spi-test-app:jar:exec:{{version}}
   version: {{version}}
   applicationProperties:
+    server.port: 0
     kill-delay: 0
     {{#spec.applicationProperties.entrySet}}
     {{key}}: {{value}}
