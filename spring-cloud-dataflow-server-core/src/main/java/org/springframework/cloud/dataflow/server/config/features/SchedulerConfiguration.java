@@ -49,6 +49,7 @@ public class SchedulerConfiguration {
 	private String dataflowServerUri;
 
 	@Bean
+	@ConditionalOnProperty(prefix = FeaturesProperties.FEATURES_PREFIX, name = FeaturesProperties.SCHEDULES_ENABLED)
 	public SchedulerService schedulerService(CommonApplicationProperties commonApplicationProperties,
 			Scheduler scheduler, TaskDefinitionRepository taskDefinitionRepository,
 			AppRegistryCommon registry, ResourceLoader resourceLoader,
