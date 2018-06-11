@@ -60,7 +60,7 @@ public class LocalDataflowResource extends ExternalResource {
 		this.streamsEnabled = true;
 		this.tasksEnabled = true;
 		this.metricsEnabled = true;
-		schedulerEnabled = true;
+		schedulerEnabled = false;
 	}
 
 	public LocalDataflowResource(String configurationLocation, boolean streamsEnabled, boolean tasksEnabled) {
@@ -68,7 +68,7 @@ public class LocalDataflowResource extends ExternalResource {
 		this.streamsEnabled = streamsEnabled;
 		this.tasksEnabled = tasksEnabled;
 		this.metricsEnabled = true;
-		this.schedulerEnabled = true;
+		this.schedulerEnabled = false;
 	}
 
 	public LocalDataflowResource(String configurationLocation, boolean streamsEnabled, boolean tasksEnabled, boolean metricsEnabled) {
@@ -76,7 +76,7 @@ public class LocalDataflowResource extends ExternalResource {
 		this.streamsEnabled = streamsEnabled;
 		this.tasksEnabled = tasksEnabled;
 		this.metricsEnabled = metricsEnabled;
-		this.schedulerEnabled = true;
+		this.schedulerEnabled = false;
 	}
 
 	public LocalDataflowResource(String configurationLocation, boolean streamsEnabled, boolean tasksEnabled, boolean metricsEnabled, boolean schedulerEnabled) {

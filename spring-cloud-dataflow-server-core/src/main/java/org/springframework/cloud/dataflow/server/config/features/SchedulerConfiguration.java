@@ -18,6 +18,7 @@ package org.springframework.cloud.dataflow.server.config.features;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.AllNestedConditions;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
@@ -49,6 +50,7 @@ public class SchedulerConfiguration {
 	private String dataflowServerUri;
 
 	@Bean
+	@ConditionalOnBean(Scheduler.class)
 	public SchedulerService schedulerService(CommonApplicationProperties commonApplicationProperties,
 			Scheduler scheduler, TaskDefinitionRepository taskDefinitionRepository,
 			AppRegistryCommon registry, ResourceLoader resourceLoader,
