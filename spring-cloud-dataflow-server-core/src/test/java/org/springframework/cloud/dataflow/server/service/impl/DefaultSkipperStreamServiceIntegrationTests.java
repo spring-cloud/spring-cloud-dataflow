@@ -81,7 +81,7 @@ import static org.mockito.Mockito.when;
 @SpringBootTest(classes = TestDependencies.class)
 @TestPropertySource(properties = { "spring.main.banner-mode=off",
 		FeaturesProperties.FEATURES_PREFIX + "." + FeaturesProperties.SKIPPER_ENABLED + "=true" })
-@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
+@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
 public class DefaultSkipperStreamServiceIntegrationTests {
 
 	@Autowired
@@ -96,9 +96,6 @@ public class DefaultSkipperStreamServiceIntegrationTests {
 	@MockBean
 	private SkipperClient skipperClient;
 
-	@Autowired
-	private FeaturesProperties featuresProperties;
-
 	@Before
 	public void before() throws URISyntaxException {
 		createTickTock();
@@ -107,8 +104,6 @@ public class DefaultSkipperStreamServiceIntegrationTests {
 
 	@After
 	public void destroyStream() {
-		appRegistryService.delete("log", ApplicationType.sink, "1.2.0.RELEASE");
-		appRegistryService.delete("time", ApplicationType.source, "1.2.0.RELEASE");
 		when(this.skipperClient.search(anyString(), anyBoolean()))
 				.thenReturn(new Resources<>(Collections.singletonList(new PackageMetadata())));
 		streamService.undeployStream("ticktock");
