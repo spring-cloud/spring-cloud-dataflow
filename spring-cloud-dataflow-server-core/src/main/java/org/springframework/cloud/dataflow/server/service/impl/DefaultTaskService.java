@@ -27,6 +27,7 @@ import org.springframework.boot.autoconfigure.jdbc.DataSourceProperties;
 import org.springframework.boot.bind.RelaxedNames;
 import org.springframework.cloud.dataflow.configuration.metadata.ApplicationConfigurationMetadataResolver;
 import org.springframework.cloud.dataflow.core.ApplicationType;
+import org.springframework.cloud.dataflow.core.DefinitionUtils;
 import org.springframework.cloud.dataflow.core.TaskDefinition;
 import org.springframework.cloud.dataflow.core.TaskDefinition.TaskDefinitionBuilder;
 import org.springframework.cloud.dataflow.core.dsl.TaskApp;
@@ -333,7 +334,8 @@ public class DefaultTaskService implements TaskService {
 			taskNode.getTaskApps().stream().forEach(task -> {
 				// Add arguments to child task definitions
 				String generatedTaskDSL = task.getName() + task.getArguments().entrySet().stream()
-						.map(argument -> String.format(" --%s=%s", argument.getKey(), argument.getValue()))
+						.map(argument -> String.format(" --%s=%s", argument.getKey(),
+								DefinitionUtils.autoQuotes(argument.getValue())))
 						.collect(Collectors.joining());
 				TaskDefinition composedTaskDefinition = new TaskDefinition(task.getExecutableDSLName(),
 						generatedTaskDSL);

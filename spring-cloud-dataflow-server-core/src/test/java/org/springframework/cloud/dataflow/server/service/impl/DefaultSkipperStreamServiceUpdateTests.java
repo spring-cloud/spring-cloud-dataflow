@@ -22,7 +22,6 @@ import java.nio.charset.Charset;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.junit.After;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.yaml.snakeyaml.DumperOptions;
@@ -39,6 +38,7 @@ import org.springframework.cloud.dataflow.server.repository.StreamDefinitionRepo
 import org.springframework.cloud.dataflow.server.stream.SkipperStreamDeployer;
 import org.springframework.cloud.dataflow.server.support.PlatformUtils;
 import org.springframework.cloud.dataflow.server.support.TestResourceUtils;
+import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.util.StreamUtils;
@@ -56,6 +56,7 @@ import static org.assertj.core.api.Assertions.fail;
 @SpringBootTest(classes = TestDependencies.class)
 @TestPropertySource(properties = {
 		FeaturesProperties.FEATURES_PREFIX + "." + FeaturesProperties.SKIPPER_ENABLED + "=true" })
+@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
 public class DefaultSkipperStreamServiceUpdateTests {
 
 	@Autowired
@@ -72,12 +73,6 @@ public class DefaultSkipperStreamServiceUpdateTests {
 
 	@Autowired
 	private AppRegistryService appRegistryService;
-
-	@After
-	public void after() {
-		this.appRegistryService.delete("log", ApplicationType.sink, "1.1.1.RELEASE");
-		this.streamDefinitionRepository.deleteAll();
-	}
 
 	@Test
 	public void testCreateUpdateRequestsWithRegisteredApp() throws IOException {

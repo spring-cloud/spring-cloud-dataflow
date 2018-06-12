@@ -88,7 +88,8 @@ public class StreamDefinitionToDslConverter {
 			for (String propertyName : props.keySet()) {
 				if (!dataFlowAddedProperties.contains(propertyName)) {
 					String propertyValue = unescape(props.get(propertyName));
-					dslBuilder.append(" --").append(propertyName).append("=").append(autoQuotes(propertyValue));
+					dslBuilder.append(" --").append(propertyName).append("=").append(
+							DefinitionUtils.autoQuotes(propertyValue));
 				}
 			}
 
@@ -111,21 +112,6 @@ public class StreamDefinitionToDslConverter {
 		return dsl;
 	}
 
-	private String autoQuotes(String propertyValue) {
-		if (!propertyValue.startsWith("\"") || !propertyValue.endsWith("\"")) {
-			if (!propertyValue.contains("'")) {
-				if (propertyValue.contains(" ") || propertyValue.contains(";") || propertyValue.contains("*")) {
-					return "'" + propertyValue + "'";
-				}
-			}
-			else {
-				if (propertyValue.contains(" ") || propertyValue.contains(";") || propertyValue.contains("*")) {
-					return "\"" + propertyValue + "\"";
-				}
-			}
-		}
-		return propertyValue;
-	}
 
 	private String unescape(String text) {
 		return StringEscapeUtils.unescapeHtml(text);

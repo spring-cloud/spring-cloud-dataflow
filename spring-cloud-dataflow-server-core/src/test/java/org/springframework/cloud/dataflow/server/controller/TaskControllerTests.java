@@ -17,13 +17,11 @@
 package org.springframework.cloud.dataflow.server.controller;
 
 import java.net.URI;
-import java.net.URISyntaxException;
 import java.util.Arrays;
 
 import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.util.EntityUtils;
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -43,6 +41,7 @@ import org.springframework.cloud.deployer.resource.registry.UriRegistry;
 import org.springframework.cloud.deployer.spi.core.AppDeploymentRequest;
 import org.springframework.cloud.deployer.spi.task.TaskLauncher;
 import org.springframework.http.MediaType;
+import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
@@ -73,6 +72,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  */
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = TestDependencies.class)
+@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
 public class TaskControllerTests {
 
 	@Autowired
@@ -100,12 +100,6 @@ public class TaskControllerTests {
 		this.mockMvc = MockMvcBuilders.webAppContextSetup(wac)
 				.defaultRequest(get("/").accept(MediaType.APPLICATION_JSON)).build();
 		when(taskLauncher.launch(any(AppDeploymentRequest.class))).thenReturn("testID");
-	}
-
-	@After
-	public void tearDown() {
-		repository.deleteAll();
-		assertEquals(0, repository.count());
 	}
 
 	@Test(expected = IllegalArgumentException.class)
@@ -157,6 +151,7 @@ public class TaskControllerTests {
 
 	@Test
 	public void testSaveDuplicate() throws Exception {
+		appRegistry.save("task", ApplicationType.task, new URI("http://fake.example.com/"), null);
 		repository.save(new TaskDefinition("myTask", "task"));
 		mockMvc.perform(post("/tasks/definitions/").param("name", "myTask").param("definition", "task")
 				.accept(MediaType.APPLICATION_JSON)).andExpect(status().isConflict());
@@ -165,8 +160,8 @@ public class TaskControllerTests {
 
 	@Test
 	public void testSaveWithParameters() throws Exception {
-		assertEquals(0, repository.count());
 
+		appRegistry.save("task", ApplicationType.task, new URI("http://fake.example.com/"), null);
 		mockMvc.perform(post("/tasks/definitions/").param("name", "myTask")
 				.param("definition", "task --foo=bar --bar=baz").accept(MediaType.APPLICATION_JSON)).andDo(print())
 				.andExpect(status().isOk());
@@ -180,6 +175,29 @@ public class TaskControllerTests {
 		assertEquals("task --foo=bar --bar=baz", myTask.getDslText());
 		assertEquals("task", myTask.getRegisteredAppName());
 		assertEquals("myTask", myTask.getName());
+	}
+
+	@Test
+	public void testSaveCompositeTaskWithParameters() throws Exception {
+
+		appRegistry.save("task", ApplicationType.task, new URI("http://fake.example.com/"), null);
+		mockMvc.perform(post("/tasks/definitions/").param("name", "myTask")
+				.param("definition", "t1: task --foo='bar rab' && t2: task --foo='one two'").accept(MediaType.APPLICATION_JSON)).andDo(print())
+				.andExpect(status().isOk());
+
+		assertEquals(3, repository.count());
+
+		TaskDefinition myTask1 = repository.findOne("myTask-t1");
+		assertEquals("bar rab", myTask1.getProperties().get("foo"));
+		assertEquals("task --foo='bar rab'", myTask1.getDslText());
+		assertEquals("task", myTask1.getRegisteredAppName());
+		assertEquals("myTask-t1", myTask1.getName());
+
+		TaskDefinition myTask2 = repository.findOne("myTask-t2");
+		assertEquals("one two", myTask2.getProperties().get("foo"));
+		assertEquals("task --foo='one two'", myTask2.getDslText());
+		assertEquals("task", myTask2.getRegisteredAppName());
+		assertEquals("myTask-t2", myTask2.getName());
 	}
 
 	@Test
@@ -289,11 +307,5 @@ public class TaskControllerTests {
 	public void testDisplaySingleTaskNotFound() throws Exception {
 		mockMvc.perform(get("/tasks/definitions/myTask").accept(MediaType.APPLICATION_JSON))
 				.andExpect(status().isNotFound());
-	}
-
-	private void createTaskDefinition(String taskName) throws URISyntaxException {
-		String taskAppName = "faketask" + taskName;
-		repository.save(new TaskDefinition(taskName, taskAppName));
-		appRegistry.save(taskAppName, ApplicationType.task, new URI("http://fake.example.com/"), null);
 	}
 }
