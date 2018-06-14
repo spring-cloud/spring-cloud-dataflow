@@ -1,5 +1,5 @@
 /*
- * Copyright 2015-2017 the original author or authors.
+ * Copyright 2015-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,6 +40,7 @@ import org.springframework.cloud.dataflow.server.service.TaskService;
 import org.springframework.cloud.deployer.resource.registry.UriRegistry;
 import org.springframework.cloud.deployer.spi.core.AppDeploymentRequest;
 import org.springframework.cloud.deployer.spi.task.TaskLauncher;
+import org.springframework.cloud.task.repository.TaskExplorer;
 import org.springframework.http.MediaType;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.junit4.SpringRunner;
@@ -93,6 +94,9 @@ public class TaskControllerTests {
 	private TaskLauncher taskLauncher;
 
 	@Autowired
+	private TaskExplorer taskExplorer;
+
+	@Autowired
 	private AppRegistry appRegistry;
 
 	@Before
@@ -104,12 +108,12 @@ public class TaskControllerTests {
 
 	@Test(expected = IllegalArgumentException.class)
 	public void testTaskDefinitionControllerConstructorMissingRepository() {
-		new TaskDefinitionController(null, null, taskLauncher, appRegistry, taskService);
+		new TaskDefinitionController(taskExplorer, null, taskService);
 	}
 
 	@Test(expected = IllegalArgumentException.class)
-	public void testTaskDefinitionControllerConstructorMissingDeployer() {
-		new TaskDefinitionController(new InMemoryTaskDefinitionRepository(), null, null, appRegistry, taskService);
+	public void testTaskDefinitionControllerConstructorMissingTaskExplorer() {
+		new TaskDefinitionController(null, new InMemoryTaskDefinitionRepository(), taskService);
 	}
 
 	@Test

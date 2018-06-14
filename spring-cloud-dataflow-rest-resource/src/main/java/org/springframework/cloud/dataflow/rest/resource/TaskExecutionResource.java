@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 the original author or authors.
+ * Copyright 2016-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -118,6 +118,25 @@ public class TaskExecutionResource extends ResourceSupport {
 		}
 	}
 
+	/**
+	 * Constructor to initialize the TaskExecutionResource using a
+	 * {@link TaskExecution}.
+	 *
+	 * @param taskExecution contains the {@link TaskExecution}
+	 */
+	public TaskExecutionResource(TaskExecution taskExecution) {
+		Assert.notNull(taskExecution, "taskExecution must not be null");
+		this.executionId = taskExecution.getExecutionId();
+		this.exitCode = taskExecution.getExitCode();
+		this.taskName = taskExecution.getTaskName();
+		this.exitMessage = taskExecution.getExitMessage();
+		this.arguments = Collections.unmodifiableList(taskExecution.getArguments());
+		this.startTime = taskExecution.getStartTime();
+		this.endTime = taskExecution.getEndTime();
+		this.errorMessage = taskExecution.getErrorMessage();
+		this.externalExecutionId = taskExecution.getExternalExecutionId();
+	}
+
 	public long getExecutionId() {
 		return executionId;
 	}
@@ -160,6 +179,37 @@ public class TaskExecutionResource extends ResourceSupport {
 
 	public String getExternalExecutionId() {
 		return externalExecutionId;
+	}
+
+	/**
+	 * Returns the calculated status of this {@link TaskExecution}.
+	 *
+	 * If {@link #startTime} is
+	 * null, the {@link TaskExecution} is considered to be not running (never executed).
+	 *
+	 * If {@link #endTime} is
+	 * null, the {@link TaskExecution} is considered to be still running:
+	 * {@link TaskExecutionStatus#RUNNING}. If the {@link #endTime} is defined and the
+	 * {@link #exitCode} is non-zero, an status of {@link TaskExecutionStatus#ERROR} is assumed,
+	 * if {@link #exitCode} is zero, {@link TaskExecutionStatus#SUCCESS} is returned.
+	 *
+	 * @return TaskExecutionStatus, never null
+	 */
+	public TaskExecutionStatus getTaskExecutionStatus() {
+		if (this.startTime == null) {
+			return TaskExecutionStatus.UNKNOWN;
+		}
+		if (this.endTime == null) {
+			return TaskExecutionStatus.RUNNING;
+		}
+		else {
+			if (this.exitCode == 0) {
+				return TaskExecutionStatus.COMPLETE;
+			}
+			else {
+				return TaskExecutionStatus.ERROR;
+			}
+		}
 	}
 
 	public static class Page extends PagedResources<TaskExecutionResource> {
