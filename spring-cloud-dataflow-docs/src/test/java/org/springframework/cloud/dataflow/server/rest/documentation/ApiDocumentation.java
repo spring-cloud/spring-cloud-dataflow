@@ -1,5 +1,5 @@
 /*
- * Copyright 2016-2017 the original author or authors.
+ * Copyright 2016-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -97,6 +97,10 @@ public class ApiDocumentation extends BaseDocumentation {
 				linkWithRel("tasks/definitions/definition")
 						.description("Provides details for a " + "specific task definition"),
 				linkWithRel("tasks/executions")
+						.description("Returns Task executions and allows " + "lanching of tasks"),
+				linkWithRel("tasks/schedules")
+						.description("Returns Task executions and allows " + "lanching of tasks"),
+				linkWithRel("tasks/schedules/instances")
 						.description("Returns Task executions and allows " + "lanching of tasks"),
 				linkWithRel("tasks/executions/name")
 						.description("Returns all task executions for a " + "given Task name"),
