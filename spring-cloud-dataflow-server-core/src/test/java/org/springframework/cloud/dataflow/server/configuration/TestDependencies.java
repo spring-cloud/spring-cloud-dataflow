@@ -24,7 +24,6 @@ import java.util.Map;
 import java.util.concurrent.ForkJoinPool;
 import java.util.stream.Collectors;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.ImportAutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
@@ -144,9 +143,6 @@ import static org.mockito.Mockito.when;
 @EnableJpaRepositories(basePackages = "org.springframework.cloud.dataflow.registry.repository")
 @EnableTransactionManagement
 public class TestDependencies extends WebMvcConfigurationSupport {
-
-	@Autowired
-	private AppRegistrationRepository appRegistrationRepository;
 
 	@Bean
 	public RestControllerAdvice restControllerAdvice() {
@@ -349,11 +345,11 @@ public class TestDependencies extends WebMvcConfigurationSupport {
 	}
 
 	@Bean
-	public TaskDefinitionController taskDefinitionController(TaskDefinitionRepository repository,
+	public TaskDefinitionController taskDefinitionController(TaskExplorer explorer, TaskDefinitionRepository repository,
 			DeploymentIdRepository deploymentIdRepository, ApplicationConfigurationMetadataResolver metadataResolver,
 			AppRegistryCommon appRegistry, DelegatingResourceLoader delegatingResourceLoader,
 			CommonApplicationProperties commonApplicationProperties) {
-		return new TaskDefinitionController(repository, deploymentIdRepository, taskLauncher(), appRegistry,
+		return new TaskDefinitionController(explorer, repository,
 				taskService(metadataResolver, taskRepository(), deploymentIdRepository, appRegistry, delegatingResourceLoader, commonApplicationProperties));
 	}
 

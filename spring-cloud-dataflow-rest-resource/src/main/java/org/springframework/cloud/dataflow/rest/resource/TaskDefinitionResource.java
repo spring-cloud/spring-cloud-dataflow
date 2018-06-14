@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 the original author or authors.
+ * Copyright 2015-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 package org.springframework.cloud.dataflow.rest.resource;
 
 import org.springframework.cloud.dataflow.core.TaskDefinition;
+import org.springframework.cloud.task.repository.TaskExecution;
 import org.springframework.hateoas.PagedResources;
 import org.springframework.hateoas.ResourceSupport;
 
@@ -24,6 +25,7 @@ import org.springframework.hateoas.ResourceSupport;
  *
  * @author Michael Minella
  * @author Glenn Renfro
+ * @author Gunnar Hillert
  */
 public class TaskDefinitionResource extends ResourceSupport {
 
@@ -37,9 +39,9 @@ public class TaskDefinitionResource extends ResourceSupport {
 	private boolean composed;
 
 	/**
-	 * Stream status (i.e. running, complete, etc).
+	 * The last execution of this task execution.
 	 */
-	private String status;
+	private TaskExecutionResource lastTaskExecution;
 
 	/**
 	 * Default constructor to be used by Jackson.
@@ -80,21 +82,31 @@ public class TaskDefinitionResource extends ResourceSupport {
 	}
 
 	/**
-	 * Return the status of this task (i.e. running, complete, etc)
+	 * Return the status of this task. Returns the value of {@link TaskExecutionStatus#toString()}.
 	 *
 	 * @return task status
 	 */
 	public String getStatus() {
-		return status;
+		if (this.getLastTaskExecution() == null) {
+			return TaskExecutionStatus.UNKNOWN.toString();
+		} else {
+			return this.getLastTaskExecution().getTaskExecutionStatus().toString();
+		}
 	}
 
 	/**
-	 * Set the status of this task (i.e. running, complete, etc)
-	 *
-	 * @param status task status
+	 * @return Last {@link TaskExecution} if available, null otherwise
 	 */
-	public void setStatus(String status) {
-		this.status = status;
+	public TaskExecutionResource getLastTaskExecution() {
+		return lastTaskExecution;
+	}
+
+	/**
+	 *
+	 * @param lastTaskExecution
+	 */
+	public void setLastTaskExecution(TaskExecutionResource lastTaskExecution) {
+		this.lastTaskExecution = lastTaskExecution;
 	}
 
 	public static class Page extends PagedResources<TaskDefinitionResource> {

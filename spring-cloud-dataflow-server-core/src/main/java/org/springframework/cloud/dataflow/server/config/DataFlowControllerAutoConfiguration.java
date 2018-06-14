@@ -226,11 +226,9 @@ public class DataFlowControllerAutoConfiguration {
 
 	@Bean
 	@ConditionalOnBean(TaskDefinitionRepository.class)
-	public TaskDefinitionController taskDefinitionController(TaskDefinitionRepository repository,
-			DeploymentIdRepository deploymentIdRepository, TaskLauncher taskLauncher, AppRegistryCommon appRegistry,
+	public TaskDefinitionController taskDefinitionController(TaskExplorer taskExplorer, TaskDefinitionRepository repository,
 			TaskService taskService) {
-		return new TaskDefinitionController(repository, deploymentIdRepository, taskLauncher, appRegistry,
-				taskService);
+		return new TaskDefinitionController(taskExplorer, repository, taskService);
 	}
 
 	@Bean
