@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.springframework.cloud.skipper.server.deployer.strategies;
+package org.springframework.cloud.skipper.deployer.cloudfoundry;
 
 import java.util.Arrays;
 import java.util.Collection;
@@ -21,36 +21,40 @@ import java.util.Collection;
 import org.springframework.cloud.skipper.domain.Release;
 import org.springframework.cloud.skipper.domain.SkipperManifestKind;
 import org.springframework.cloud.skipper.server.deployer.ReleaseAnalysisReport;
+import org.springframework.cloud.skipper.server.deployer.strategies.UpgradeStrategy;
 
 /**
- * A simple approach to deploying a new application. All the new apps are deployed and a
- * health check is done to on the new apps. If they are healthy, the old apps are deleted.
- * Executes on it's own thread since it is a long lived operation. Delegates to
- * {@link DeployAppStep}, {@link HealthCheckStep} and {@link HandleHealthCheckStep}
+ * A simple approach to deploying a new application. All the new apps are
+ * deployed and a health check is done to on the new apps. If they are healthy,
+ * the old apps are deleted. Executes on it's own thread since it is a long
+ * lived operation. Delegates to {@link CloudFoundryDeployAppStep},
+ * {@link CloudFoundryHealthCheckStep} and
+ * {@link CloudFoundryHandleHealthCheckStep}
+ * 
  * @author Mark Pollack
+ * @author Janne Valkealahti
  */
-public class SimpleRedBlackUpgradeStrategy implements UpgradeStrategy {
+public class CloudFoundrySimpleRedBlackUpgradeStrategy implements UpgradeStrategy {
 
-	private final HealthCheckStep healthCheckStep;
+	private final CloudFoundryHealthCheckStep healthCheckStep;
 
-	private final HandleHealthCheckStep handleHealthCheckStep;
+	private final CloudFoundryHandleHealthCheckStep handleHealthCheckStep;
 
-	private final DeployAppStep deployAppStep;
+	private final CloudFoundryDeployAppStep deployAppStep;
 
-	public SimpleRedBlackUpgradeStrategy(HealthCheckStep healthCheckStep,
-			HandleHealthCheckStep handleHealthCheckStep,
-			DeployAppStep deployAppStep) {
+	public CloudFoundrySimpleRedBlackUpgradeStrategy(CloudFoundryHealthCheckStep healthCheckStep,
+			CloudFoundryHandleHealthCheckStep handleHealthCheckStep,
+			CloudFoundryDeployAppStep deployAppStep) {
 		this.healthCheckStep = healthCheckStep;
 		this.handleHealthCheckStep = handleHealthCheckStep;
 		this.deployAppStep = deployAppStep;
 	}
-	
+
 	@Override
 	public Collection<String> getSupportedKinds() {
-		return Arrays.asList(SkipperManifestKind.SpringBootApp.name(),
-				SkipperManifestKind.SpringCloudDeployerApplication.name());
+		return Arrays.asList(SkipperManifestKind.CFApplication.name());
 	}
-
+	
 	@Override
 	public void deployApps(Release existingRelease, Release replacingRelease, ReleaseAnalysisReport releaseAnalysisReport) {
 		this.deployAppStep.deployApps(existingRelease, replacingRelease, releaseAnalysisReport);
@@ -74,5 +78,4 @@ public class SimpleRedBlackUpgradeStrategy implements UpgradeStrategy {
 		this.handleHealthCheckStep.handleHealthCheck(false, existingRelease,
 				releaseAnalysisReport.getApplicationNamesToUpgrade(), replacingRelease, timeout, cancel, rollback);
 	}
-
 }

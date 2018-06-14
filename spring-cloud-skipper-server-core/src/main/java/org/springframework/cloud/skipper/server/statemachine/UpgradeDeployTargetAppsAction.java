@@ -21,11 +21,13 @@ import org.slf4j.LoggerFactory;
 import org.springframework.cloud.skipper.server.deployer.ReleaseAnalysisReport;
 import org.springframework.cloud.skipper.server.deployer.strategies.HealthCheckProperties;
 import org.springframework.cloud.skipper.server.deployer.strategies.UpgradeStrategy;
+import org.springframework.cloud.skipper.server.deployer.strategies.UpgradeStrategyFactory;
 import org.springframework.cloud.skipper.server.service.ReleaseReportService;
 import org.springframework.cloud.skipper.server.statemachine.SkipperStateMachineService.SkipperEventHeaders;
 import org.springframework.cloud.skipper.server.statemachine.SkipperStateMachineService.SkipperEvents;
 import org.springframework.cloud.skipper.server.statemachine.SkipperStateMachineService.SkipperStates;
 import org.springframework.cloud.skipper.server.statemachine.SkipperStateMachineService.SkipperVariables;
+import org.springframework.cloud.skipper.server.util.ManifestUtils;
 import org.springframework.statemachine.StateContext;
 import org.springframework.statemachine.action.Action;
 
@@ -39,20 +41,21 @@ public class UpgradeDeployTargetAppsAction extends AbstractUpgradeStartAction {
 
 	private static final Logger log = LoggerFactory.getLogger(UpgradeDeployTargetAppsAction.class);
 	private static final long DEFAULT_UPGRADE_TIMEOUT = 300000L;
-	private final UpgradeStrategy upgradeStrategy;
+	private final UpgradeStrategyFactory upgradeStrategyFactory;
 	private final HealthCheckProperties healthCheckProperties;
 
 	/**
 	 * Instantiates a new upgrade deploy target apps action.
 	 *
 	 * @param releaseReportService the release report service
-	 * @param upgradeStrategy the upgrade strategy
+	 * @param upgradeStrategyFactory the upgrade strategy factory
 	 * @param healthCheckProperties the health check properties
 	 */
-	public UpgradeDeployTargetAppsAction(ReleaseReportService releaseReportService, UpgradeStrategy upgradeStrategy,
+	public UpgradeDeployTargetAppsAction(ReleaseReportService releaseReportService,
+			UpgradeStrategyFactory upgradeStrategyFactory,
 			HealthCheckProperties healthCheckProperties) {
 		super(releaseReportService);
-		this.upgradeStrategy = upgradeStrategy;
+		this.upgradeStrategyFactory = upgradeStrategyFactory;
 		this.healthCheckProperties = healthCheckProperties;
 	}
 
@@ -60,9 +63,13 @@ public class UpgradeDeployTargetAppsAction extends AbstractUpgradeStartAction {
 	protected void executeInternal(StateContext<SkipperStates, SkipperEvents> context) {
 		super.executeInternal(context);
 		ReleaseAnalysisReport releaseAnalysisReport = getReleaseAnalysisReport(context);
+
+		// TODO: should check both releases
+		String kind = ManifestUtils.resolveKind(releaseAnalysisReport.getExistingRelease().getManifest().getData());
+		UpgradeStrategy upgradeStrategy = this.upgradeStrategyFactory.getUpgradeStrategy(kind);
 		log.info("Using UpgradeStrategy {}", upgradeStrategy);
 		setUpgradeCutOffTime(context);
-		this.upgradeStrategy.deployApps(releaseAnalysisReport.getExistingRelease(),
+		upgradeStrategy.deployApps(releaseAnalysisReport.getExistingRelease(),
 				releaseAnalysisReport.getReplacingRelease(), releaseAnalysisReport);
 		context.getExtendedState().getVariables().put(SkipperVariables.RELEASE, releaseAnalysisReport.getReplacingRelease());
 	}

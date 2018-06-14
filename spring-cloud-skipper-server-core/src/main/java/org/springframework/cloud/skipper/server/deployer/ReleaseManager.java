@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 the original author or authors.
+ * Copyright 2017-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,6 +15,8 @@
  */
 package org.springframework.cloud.skipper.server.deployer;
 
+import java.util.Collection;
+
 import org.springframework.cloud.skipper.domain.Release;
 
 /**
@@ -28,6 +30,13 @@ import org.springframework.cloud.skipper.domain.Release;
  */
 public interface ReleaseManager {
 
+	/**
+	 * Return a supported application kinds.
+	 * 
+	 * @return supported application kinds
+	 */
+	Collection<String> getSupportedKinds();
+	
 	/**
 	 * Install the requested release.
 	 * @param release the requested release

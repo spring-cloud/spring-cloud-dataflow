@@ -23,10 +23,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.cloud.deployer.spi.app.AppDeployer;
 import org.springframework.cloud.deployer.spi.app.AppStatus;
 import org.springframework.cloud.deployer.spi.app.DeploymentState;
-import org.springframework.cloud.skipper.domain.CFApplicationManifestReader;
 import org.springframework.cloud.skipper.domain.Release;
 import org.springframework.cloud.skipper.domain.SpringCloudDeployerApplicationManifestReader;
-import org.springframework.cloud.skipper.server.deployer.CFManifestApplicationDeployer;
 import org.springframework.cloud.skipper.server.domain.AppDeployerData;
 import org.springframework.cloud.skipper.server.repository.AppDeployerDataRepository;
 import org.springframework.cloud.skipper.server.repository.DeployerRepository;
@@ -45,49 +43,28 @@ public class HealthCheckStep {
 
 	private final DeployerRepository deployerRepository;
 
-	private final SpringCloudDeployerApplicationManifestReader applicationManifestReader;
-
-	private final CFApplicationManifestReader cfApplicationManifestReader;
-
-	private final CFManifestApplicationDeployer cfManifestApplicationDeployer;
-
-	public HealthCheckStep(AppDeployerDataRepository appDeployerDataRepository,
-			DeployerRepository deployerRepository,
-			SpringCloudDeployerApplicationManifestReader applicationManifestReader,
-			CFApplicationManifestReader cfApplicationManifestReader,
-			CFManifestApplicationDeployer cfManifestApplicationDeployer) {
+	public HealthCheckStep(AppDeployerDataRepository appDeployerDataRepository, DeployerRepository deployerRepository,
+			SpringCloudDeployerApplicationManifestReader applicationManifestReader) {
 		this.appDeployerDataRepository = appDeployerDataRepository;
 		this.deployerRepository = deployerRepository;
-		this.applicationManifestReader = applicationManifestReader;
-		this.cfApplicationManifestReader = cfApplicationManifestReader;
-		this.cfManifestApplicationDeployer = cfManifestApplicationDeployer;
 	}
 
 	public boolean isHealthy(Release replacingRelease) {
-		String releaseManifest = replacingRelease.getManifest().getData();
-		if (this.applicationManifestReader.canSupport(releaseManifest)) {
-			AppDeployerData replacingAppDeployerData = this.appDeployerDataRepository
-					.findByReleaseNameAndReleaseVersionRequired(
-							replacingRelease.getName(), replacingRelease.getVersion());
-			Map<String, String> appNamesAndDeploymentIds = replacingAppDeployerData.getDeploymentDataAsMap();
-			AppDeployer appDeployer = this.deployerRepository
-					.findByNameRequired(replacingRelease.getPlatformName())
-					.getAppDeployer();
-			logger.debug("Getting status for apps in replacing release {}-v{}", replacingRelease.getName(),
-					replacingRelease.getVersion());
-			for (Map.Entry<String, String> appNameAndDeploymentId : appNamesAndDeploymentIds.entrySet()) {
-				AppStatus status = appDeployer.status(appNameAndDeploymentId.getValue());
-				if (status.getState() == DeploymentState.deployed) {
-					return true;
-				}
-			}
-		}
-		else if (this.cfApplicationManifestReader.canSupport(releaseManifest)) {
-			AppStatus appStatus = cfManifestApplicationDeployer.status(replacingRelease);
-			if (appStatus.getState() == DeploymentState.deployed) {
+		AppDeployerData replacingAppDeployerData = this.appDeployerDataRepository
+				.findByReleaseNameAndReleaseVersionRequired(
+						replacingRelease.getName(), replacingRelease.getVersion());
+		Map<String, String> appNamesAndDeploymentIds = replacingAppDeployerData.getDeploymentDataAsMap();
+		AppDeployer appDeployer = this.deployerRepository
+				.findByNameRequired(replacingRelease.getPlatformName())
+				.getAppDeployer();
+		logger.debug("Getting status for apps in replacing release {}-v{}", replacingRelease.getName(),
+				replacingRelease.getVersion());
+		for (Map.Entry<String, String> appNameAndDeploymentId : appNamesAndDeploymentIds.entrySet()) {
+			AppStatus status = appDeployer.status(appNameAndDeploymentId.getValue());
+			if (status.getState() == DeploymentState.deployed) {
 				return true;
 			}
 		}
-		return false;
+	return false;
 	}
 }

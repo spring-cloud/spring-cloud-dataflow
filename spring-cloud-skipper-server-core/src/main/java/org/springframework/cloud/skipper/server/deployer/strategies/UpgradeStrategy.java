@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 the original author or authors.
+ * Copyright 2017-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,6 +15,8 @@
  */
 package org.springframework.cloud.skipper.server.deployer.strategies;
 
+import java.util.Collection;
+
 import org.springframework.cloud.skipper.domain.Release;
 import org.springframework.cloud.skipper.server.deployer.ReleaseAnalysisReport;
 
@@ -25,6 +27,8 @@ import org.springframework.cloud.skipper.server.deployer.ReleaseAnalysisReport;
  * @author Mark Pollack
  */
 public interface UpgradeStrategy {
+	
+	Collection<String> getSupportedKinds();
 
 	void deployApps(Release existingRelease, Release replacingRelease, ReleaseAnalysisReport releaseAnalysisReport);
 

@@ -23,7 +23,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.cloud.skipper.domain.Info;
 import org.springframework.cloud.skipper.domain.Release;
 import org.springframework.cloud.skipper.server.deployer.ReleaseManager;
+import org.springframework.cloud.skipper.server.deployer.ReleaseManagerFactory;
 import org.springframework.cloud.skipper.server.repository.ReleaseRepository;
+import org.springframework.cloud.skipper.server.util.ManifestUtils;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Assert;
@@ -40,7 +42,7 @@ public class ReleaseStateUpdateService {
 
 	private static final Logger log = LoggerFactory.getLogger(ReleaseStateUpdateService.class);
 
-	private final ReleaseManager releaseManager;
+	private final ReleaseManagerFactory releaseManagerFactory;
 
 	private final ReleaseRepository releaseRepository;
 
@@ -49,13 +51,14 @@ public class ReleaseStateUpdateService {
 	/**
 	 * Instantiates a new release state update service.
 	 *
-	 * @param releaseManager the release manager
+	 * @param releaseManagerFactory the release manager factory
 	 * @param releaseRepository the release repository
 	 */
-	public ReleaseStateUpdateService(ReleaseManager releaseManager, ReleaseRepository releaseRepository) {
-		Assert.notNull(releaseManager, "'releaseManager' must be set");
+	public ReleaseStateUpdateService(ReleaseManagerFactory releaseManagerFactory,
+			ReleaseRepository releaseRepository) {
+		Assert.notNull(releaseManagerFactory, "'releaseManagerFactory' must be set");
 		Assert.notNull(releaseRepository, "'releaseRepository' must be set");
-		this.releaseManager = releaseManager;
+		this.releaseManagerFactory = releaseManagerFactory;
 		this.releaseRepository = releaseRepository;
 		this.nextFullPoll = getNextFullPoll();
 		log.info("Setting up ReleaseStateUpdateService");
@@ -74,6 +77,10 @@ public class ReleaseStateUpdateService {
 		}
 		Iterable<Release> releases = this.releaseRepository.findLatestDeployedOrFailed();
 		for (Release release : releases) {
+			String kind = ManifestUtils.resolveKind(release.getManifest().getData());
+			ReleaseManager releaseManager = this.releaseManagerFactory.getReleaseManager(kind);
+			
+			
 			Info info = release.getInfo();
 			if (checkInfo(info)) {
 				// poll new apps every time or we do full poll anyway
@@ -83,7 +90,7 @@ public class ReleaseStateUpdateService {
 				boolean poll = fullPoll || (isNewApp);
 				if (poll) {
 					try {
-						release = this.releaseManager.status(release);
+						release = releaseManager.status(release);
 						log.debug("New Release state {} {}", release.getName(), release.getInfo().getStatus(),
 								release.getInfo().getStatus() != null
 										? release.getInfo().getStatus().getPlatformStatusPrettyPrint()

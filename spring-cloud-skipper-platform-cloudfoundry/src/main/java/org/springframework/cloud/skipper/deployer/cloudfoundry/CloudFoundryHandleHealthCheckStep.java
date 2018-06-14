@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2018 the original author or authors.
+ * Copyright 2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.springframework.cloud.skipper.server.deployer.strategies;
+package org.springframework.cloud.skipper.deployer.cloudfoundry;
 
 import java.util.List;
 
@@ -35,26 +35,26 @@ import org.springframework.transaction.annotation.Transactional;
 /**
  * Responsible for taking action based on the health of the latest deployed release. If
  * healthy, then delete applications from the previous release. Otherwise delete the
- * latest deployed release. Delegates to {@link DeleteStep}.
+ * latest deployed release. Delegates to {@link CloudFoundryDeleteStep}.
  *
  * @author Mark Pollack
  * @author Ilayaperumal Gopinathan
  */
-public class HandleHealthCheckStep {
+public class CloudFoundryHandleHealthCheckStep {
 
-	private final Logger logger = LoggerFactory.getLogger(HandleHealthCheckStep.class);
+	private final Logger logger = LoggerFactory.getLogger(CloudFoundryHandleHealthCheckStep.class);
 
 	private final ReleaseRepository releaseRepository;
 
 	private final AppDeployerDataRepository appDeployerDataRepository;
 
-	private final DeleteStep deleteStep;
+	private final CloudFoundryDeleteStep deleteStep;
 
 	private final ReleaseManagerFactory releaseManagerFactory;
 
-	public HandleHealthCheckStep(ReleaseRepository releaseRepository,
+	public CloudFoundryHandleHealthCheckStep(ReleaseRepository releaseRepository,
 			AppDeployerDataRepository appDeployerDataRepository,
-			DeleteStep deleteStep,
+			CloudFoundryDeleteStep deleteStep,
 			ReleaseManagerFactory releaseManagerFactory) {
 		this.releaseRepository = releaseRepository;
 		this.appDeployerDataRepository = appDeployerDataRepository;
@@ -95,7 +95,7 @@ public class HandleHealthCheckStep {
 						+ " milliseconds.  " + "Keeping existing release, and Deleting apps of replacing release");				
 			}
 			String kind = ManifestUtils.resolveKind(replacingRelease.getManifest().getData());
-			ReleaseManager releaseManager = this.releaseManagerFactory.getReleaseManager(kind);
+			ReleaseManager releaseManager = this.releaseManagerFactory.getReleaseManager(kind);			
 			releaseManager.delete(replacingRelease);
 			Status status = new Status();
 			status.setStatusCode(StatusCode.FAILED);

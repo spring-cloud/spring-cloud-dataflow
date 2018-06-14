@@ -20,6 +20,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import com.github.zafarkhaja.semver.Version;
+
 import org.cloudfoundry.client.CloudFoundryClient;
 import org.cloudfoundry.client.v2.info.GetInfoRequest;
 import org.cloudfoundry.operations.CloudFoundryOperations;
@@ -29,9 +30,10 @@ import org.cloudfoundry.reactor.DefaultConnectionContext;
 import org.cloudfoundry.reactor.TokenProvider;
 import org.cloudfoundry.reactor.client.ReactorCloudFoundryClient;
 import org.cloudfoundry.reactor.tokenprovider.PasswordGrantTokenProvider;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
+import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.cloud.deployer.spi.app.AppDeployer;
 import org.springframework.cloud.deployer.spi.cloudfoundry.CloudFoundryAppDeployer;
@@ -42,17 +44,23 @@ import org.springframework.cloud.deployer.spi.core.RuntimeEnvironmentInfo;
 import org.springframework.cloud.deployer.spi.util.RuntimeVersionUtils;
 import org.springframework.cloud.skipper.SkipperException;
 import org.springframework.cloud.skipper.deployer.cloudfoundry.CloudFoundryPlatformProperties;
+import org.springframework.cloud.skipper.deployer.cloudfoundry.CloudFoundrySkipperServerConfiguration;
 import org.springframework.cloud.skipper.domain.Deployer;
 import org.springframework.cloud.skipper.domain.Platform;
+import org.springframework.cloud.skipper.server.config.EnableSkipperServerConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Import;
 
 /**
  * @author Donovan Muller
  * @author Ilayaperumal Gopinathan
+ * @author Janne Valkealahti
  */
 @Configuration
+@ConditionalOnBean(EnableSkipperServerConfiguration.Marker.class)
 @EnableConfigurationProperties(CloudFoundryPlatformProperties.class)
+@Import(CloudFoundrySkipperServerConfiguration.class)
 public class CloudFoundryPlatformAutoConfiguration {
 
 	private static final Logger logger = LoggerFactory

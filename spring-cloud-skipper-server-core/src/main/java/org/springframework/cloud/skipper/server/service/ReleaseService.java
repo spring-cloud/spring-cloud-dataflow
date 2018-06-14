@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 the original author or authors.
+ * Copyright 2017-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,6 +36,7 @@ import org.springframework.cloud.skipper.domain.Release;
 import org.springframework.cloud.skipper.domain.StatusCode;
 import org.springframework.cloud.skipper.server.deployer.ReleaseAnalysisReport;
 import org.springframework.cloud.skipper.server.deployer.ReleaseManager;
+import org.springframework.cloud.skipper.server.deployer.ReleaseManagerFactory;
 import org.springframework.cloud.skipper.server.repository.DeployerRepository;
 import org.springframework.cloud.skipper.server.repository.PackageMetadataRepository;
 import org.springframework.cloud.skipper.server.repository.ReleaseRepository;
@@ -68,7 +69,7 @@ public class ReleaseService {
 
 	private final PackageService packageService;
 
-	private final ReleaseManager releaseManager;
+	private final ReleaseManagerFactory releaseManagerFactory;
 
 	private final DeployerRepository deployerRepository;
 
@@ -77,13 +78,13 @@ public class ReleaseService {
 	public ReleaseService(PackageMetadataRepository packageMetadataRepository,
 			ReleaseRepository releaseRepository,
 			PackageService packageService,
-			ReleaseManager releaseManager,
+			ReleaseManagerFactory releaseManagerFactory,
 			DeployerRepository deployerRepository,
 			PackageMetadataService packageMetadataService) {
 		this.packageMetadataRepository = packageMetadataRepository;
 		this.releaseRepository = releaseRepository;
 		this.packageService = packageService;
-		this.releaseManager = releaseManager;
+		this.releaseManagerFactory = releaseManagerFactory;
 		this.deployerRepository = deployerRepository;
 		this.packageMetadataService = packageMetadataService;
 	}
@@ -190,7 +191,9 @@ public class ReleaseService {
 		manifest.setData(manifestData);
 		release.setManifest(manifest);
 		// Deployment
-		Release releaseToReturn = this.releaseManager.install(release);
+		String kind = ManifestUtils.resolveKind(release.getManifest().getData());
+		ReleaseManager releaseManager = this.releaseManagerFactory.getReleaseManager(kind);
+		Release releaseToReturn = releaseManager.install(release);
 		return releaseToReturn;
 	}
 
@@ -236,7 +239,9 @@ public class ReleaseService {
 						return PackageMetadataService.DEFAULT_RELEASE_ACTIVITY_CHECK.test(r);
 					});
 		}
-		return this.releaseManager.delete(releaseToDelete);
+		String kind = ManifestUtils.resolveKind(releaseToDelete.getManifest().getData());
+		ReleaseManager releaseManager = this.releaseManagerFactory.getReleaseManager(kind);
+		return releaseManager.delete(releaseToDelete);
 	}
 
 	/**
@@ -295,7 +300,9 @@ public class ReleaseService {
 	}
 
 	private Release status(Release release) {
-		return this.releaseManager.status(release);
+		String kind = ManifestUtils.resolveKind(release.getManifest().getData());
+		ReleaseManager releaseManager = this.releaseManagerFactory.getReleaseManager(kind);
+		return releaseManager.status(release);
 	}
 
 	protected Info createNewInfo() {
@@ -304,7 +311,9 @@ public class ReleaseService {
 
 	@Transactional
 	public ReleaseAnalysisReport createReport(Release existingRelease, Release replacingRelease) {
-		return this.releaseManager.createReport(existingRelease, replacingRelease, true);
+		String kind = ManifestUtils.resolveKind(existingRelease.getManifest().getData());
+		ReleaseManager releaseManager = this.releaseManagerFactory.getReleaseManager(kind);
+		return releaseManager.createReport(existingRelease, replacingRelease, true);
 	}
 
 	protected Release createInitialRelease(InstallProperties installProperties, Package packageToInstall,

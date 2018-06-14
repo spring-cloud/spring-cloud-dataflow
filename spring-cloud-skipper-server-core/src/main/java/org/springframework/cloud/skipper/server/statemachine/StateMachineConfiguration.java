@@ -20,7 +20,7 @@ import org.slf4j.LoggerFactory;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.skipper.server.deployer.strategies.HealthCheckProperties;
-import org.springframework.cloud.skipper.server.deployer.strategies.UpgradeStrategy;
+import org.springframework.cloud.skipper.server.deployer.strategies.UpgradeStrategyFactory;
 import org.springframework.cloud.skipper.server.repository.ReleaseRepository;
 import org.springframework.cloud.skipper.server.service.ReleaseReportService;
 import org.springframework.cloud.skipper.server.service.ReleaseService;
@@ -89,7 +89,7 @@ public class StateMachineConfiguration {
 		private ReleaseRepository releaseRepository;
 
 		@Autowired
-		private UpgradeStrategy upgradeStrategy;
+		private UpgradeStrategyFactory upgradeStrategyFactory;
 
 		@Autowired
 		private HealthCheckProperties healthCheckProperties;
@@ -333,12 +333,12 @@ public class StateMachineConfiguration {
 
 		@Bean
 		public UpgradeDeployTargetAppsAction upgradeDeployTargetAppsAction() {
-			return new UpgradeDeployTargetAppsAction(releaseReportService, upgradeStrategy, healthCheckProperties);
+			return new UpgradeDeployTargetAppsAction(releaseReportService, upgradeStrategyFactory, healthCheckProperties);
 		}
 
 		@Bean
 		public UpgradeCheckTargetAppsAction upgradeCheckTargetAppsAction() {
-			return new UpgradeCheckTargetAppsAction(releaseReportService, upgradeStrategy);
+			return new UpgradeCheckTargetAppsAction(releaseReportService, upgradeStrategyFactory);
 		}
 
 		@Bean
@@ -363,12 +363,12 @@ public class StateMachineConfiguration {
 
 		@Bean
 		public UpgradeCancelAction upgradeCancelAction() {
-			return new UpgradeCancelAction(releaseReportService, upgradeStrategy);
+			return new UpgradeCancelAction(releaseReportService, upgradeStrategyFactory);
 		}
 
 		@Bean
 		public UpgradeDeleteSourceAppsAction upgradeDeleteSourceAppsAction() {
-			return new UpgradeDeleteSourceAppsAction(releaseReportService, upgradeStrategy);
+			return new UpgradeDeleteSourceAppsAction(releaseReportService, upgradeStrategyFactory);
 		}
 
 		@Bean

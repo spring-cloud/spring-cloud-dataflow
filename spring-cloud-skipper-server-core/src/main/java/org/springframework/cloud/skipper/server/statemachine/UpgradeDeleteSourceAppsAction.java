@@ -18,10 +18,12 @@ package org.springframework.cloud.skipper.server.statemachine;
 import org.springframework.cloud.skipper.domain.RollbackRequest;
 import org.springframework.cloud.skipper.server.deployer.ReleaseAnalysisReport;
 import org.springframework.cloud.skipper.server.deployer.strategies.UpgradeStrategy;
+import org.springframework.cloud.skipper.server.deployer.strategies.UpgradeStrategyFactory;
 import org.springframework.cloud.skipper.server.service.ReleaseReportService;
 import org.springframework.cloud.skipper.server.statemachine.SkipperStateMachineService.SkipperEventHeaders;
 import org.springframework.cloud.skipper.server.statemachine.SkipperStateMachineService.SkipperEvents;
 import org.springframework.cloud.skipper.server.statemachine.SkipperStateMachineService.SkipperStates;
+import org.springframework.cloud.skipper.server.util.ManifestUtils;
 import org.springframework.statemachine.StateContext;
 import org.springframework.statemachine.action.Action;
 
@@ -33,17 +35,17 @@ import org.springframework.statemachine.action.Action;
  */
 public class UpgradeDeleteSourceAppsAction extends AbstractUpgradeStartAction {
 
-	private final UpgradeStrategy upgradeStrategy;
+	private final UpgradeStrategyFactory upgradeStrategyFactory;
 
 	/**
 	 * Instantiates a new upgrade delete source apps action.
 	 *
 	 * @param releaseReportService the release report service
-	 * @param upgradeStrategy the upgrade strategy
+	 * @param upgradeStrategyFactory the upgrade strategy factory
 	 */
-	public UpgradeDeleteSourceAppsAction(ReleaseReportService releaseReportService, UpgradeStrategy upgradeStrategy) {
+	public UpgradeDeleteSourceAppsAction(ReleaseReportService releaseReportService, UpgradeStrategyFactory upgradeStrategyFactory) {
 		super(releaseReportService);
-		this.upgradeStrategy = upgradeStrategy;
+		this.upgradeStrategyFactory = upgradeStrategyFactory;
 	}
 
 	@Override
@@ -54,6 +56,10 @@ public class UpgradeDeleteSourceAppsAction extends AbstractUpgradeStartAction {
 		// check if we're doing rollback and pass flag to strategy
 		RollbackRequest rollbackRequest = context.getExtendedState().get(SkipperEventHeaders.ROLLBACK_REQUEST,
 				RollbackRequest.class);
+		
+		// TODO: should check both releases
+		String kind = ManifestUtils.resolveKind(releaseAnalysisReport.getExistingRelease().getManifest().getData());
+		UpgradeStrategy upgradeStrategy = this.upgradeStrategyFactory.getUpgradeStrategy(kind);		
 		upgradeStrategy.accept(releaseAnalysisReport.getExistingRelease(), releaseAnalysisReport.getReplacingRelease(),
 				releaseAnalysisReport, rollbackRequest != null);
 	}

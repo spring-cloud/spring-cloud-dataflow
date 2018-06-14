@@ -32,6 +32,7 @@ import org.yaml.snakeyaml.representer.Representer;
 
 import org.springframework.cloud.skipper.domain.Package;
 import org.springframework.cloud.skipper.domain.Template;
+import org.springframework.util.StringUtils;
 
 /**
  * Utility functions for manifest file processing.
@@ -49,6 +50,29 @@ public class ManifestUtils {
 	 */
 	private static final Pattern SINGLE_BACKSLASH = Pattern.compile("(?<!\\\\)(\\\\)(?![\\\\0abtnvfreN_LP\\s\"])");
 
+	/**
+	 * Resolve a kind from a raw manifest yaml.
+	 * 
+	 * @param manifest the raw yaml
+	 * @return the kind or {@code null} if not found
+	 */
+	public static String resolveKind(String manifest) {
+		if (!StringUtils.hasText(manifest)) {
+			return null;
+		}
+		Yaml yaml = new Yaml();
+		Iterable<Object> object = yaml.loadAll(manifest);
+		for (Object o : object) {
+			if (o != null && o instanceof Map) {
+				Object kind = ((Map<?, ?>)o).get("kind");
+				if (kind instanceof String) {
+					return (String)kind;
+				}
+			}
+		}
+		return null;
+	}
+	
 	/**
 	 * Iterate overall the template files, replacing placeholders with model values. One
 	 * string is returned that contain all the YAML of multiple files using YAML file

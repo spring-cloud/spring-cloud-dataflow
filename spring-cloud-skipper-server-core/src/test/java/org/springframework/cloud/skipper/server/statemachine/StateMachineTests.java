@@ -30,6 +30,7 @@ import org.springframework.cloud.skipper.domain.DeleteProperties;
 import org.springframework.cloud.skipper.domain.Info;
 import org.springframework.cloud.skipper.domain.InstallProperties;
 import org.springframework.cloud.skipper.domain.InstallRequest;
+import org.springframework.cloud.skipper.domain.Manifest;
 import org.springframework.cloud.skipper.domain.Package;
 import org.springframework.cloud.skipper.domain.PackageMetadata;
 import org.springframework.cloud.skipper.domain.Release;
@@ -44,6 +45,7 @@ import org.springframework.cloud.skipper.server.deployer.strategies.HandleHealth
 import org.springframework.cloud.skipper.server.deployer.strategies.HealthCheckProperties;
 import org.springframework.cloud.skipper.server.deployer.strategies.HealthCheckStep;
 import org.springframework.cloud.skipper.server.deployer.strategies.UpgradeStrategy;
+import org.springframework.cloud.skipper.server.deployer.strategies.UpgradeStrategyFactory;
 import org.springframework.cloud.skipper.server.repository.ReleaseRepository;
 import org.springframework.cloud.skipper.server.service.PackageService;
 import org.springframework.cloud.skipper.server.service.ReleaseReportService;
@@ -109,6 +111,9 @@ public class StateMachineTests {
 
 	@MockBean
 	private UpgradeStrategy upgradeStrategy;
+
+	@MockBean
+	private UpgradeStrategyFactory upgradeStrategyFactory;
 
 	@MockBean
 	private DeployAppStep deployAppStep;
@@ -212,10 +217,14 @@ public class StateMachineTests {
 
 	@Test
 	public void testRestoreFromUpgradeUsingUpgradeRequest() throws Exception {
+		Manifest manifest = new Manifest();
+		Release release = new Release();
+		release.setManifest(manifest);
 		Mockito.when(releaseReportService.createReport(any(), any(), any(boolean.class))).thenReturn(new ReleaseAnalysisReport(new ArrayList<>(),
-				new ReleaseDifference(), new Release(), new Release()));
+				new ReleaseDifference(), release, release));
 		Mockito.when(upgradeStrategy.checkStatus(any()))
 				.thenReturn(true);
+		Mockito.when(upgradeStrategyFactory.getUpgradeStrategy(any())).thenReturn(upgradeStrategy);
 
 		DefaultExtendedState extendedState = new DefaultExtendedState();
 		extendedState.getVariables().put(SkipperEventHeaders.UPGRADE_REQUEST, new UpgradeRequest());
@@ -273,11 +282,15 @@ public class StateMachineTests {
 	}
 
 	@Test
-	public void testSimpleUpgradeShouldNotError() throws Exception {
+	public void testSimpleUpgradeShouldNotError() throws Exception {		
+		Manifest manifest = new Manifest();
+		Release release = new Release();
+		release.setManifest(manifest);
 		Mockito.when(releaseReportService.createReport(any(), any(), any(boolean.class))).thenReturn(new ReleaseAnalysisReport(new ArrayList<>(),
-				new ReleaseDifference(), new Release(), new Release()));
+				new ReleaseDifference(), release, release));
 		Mockito.when(upgradeStrategy.checkStatus(any()))
 				.thenReturn(true);
+		Mockito.when(upgradeStrategyFactory.getUpgradeStrategy(any())).thenReturn(upgradeStrategy);
 
 		UpgradeRequest upgradeRequest = new UpgradeRequest();
 
@@ -310,10 +323,14 @@ public class StateMachineTests {
 
 	@Test
 	public void testUpgradeFailsNewAppFailToDeploy() throws Exception {
+		Manifest manifest = new Manifest();
+		Release release = new Release();
+		release.setManifest(manifest);
 		Mockito.when(releaseReportService.createReport(any(), any(), any(boolean.class))).thenReturn(new ReleaseAnalysisReport(new ArrayList<>(),
-				new ReleaseDifference(), new Release(), new Release()));
+				new ReleaseDifference(), release, release));
 		Mockito.when(upgradeStrategy.checkStatus(any()))
 				.thenReturn(false);
+		Mockito.when(upgradeStrategyFactory.getUpgradeStrategy(any())).thenReturn(upgradeStrategy);
 
 		UpgradeRequest upgradeRequest = new UpgradeRequest();
 
@@ -358,10 +375,14 @@ public class StateMachineTests {
 
 	@Test
 	public void testUpgradeCancelWhileCheckingApps() throws Exception {
+		Manifest manifest = new Manifest();
+		Release release = new Release();
+		release.setManifest(manifest);
 		Mockito.when(releaseReportService.createReport(any(), any(), any(boolean.class))).thenReturn(new ReleaseAnalysisReport(new ArrayList<>(),
-				new ReleaseDifference(), new Release(), new Release()));
+				new ReleaseDifference(), release, release));
 		Mockito.when(upgradeStrategy.checkStatus(any()))
 				.thenReturn(false);
+		Mockito.when(upgradeStrategyFactory.getUpgradeStrategy(any())).thenReturn(upgradeStrategy);
 
 		UpgradeRequest upgradeRequest = new UpgradeRequest();
 
@@ -552,10 +573,14 @@ public class StateMachineTests {
 
 	@Test
 	public void testInstallDeniedWhileUpgrading() throws Exception {
+		Manifest manifest = new Manifest();
+		Release release = new Release();
+		release.setManifest(manifest);
 		Mockito.when(releaseReportService.createReport(any(), any(), any(boolean.class))).thenReturn(new ReleaseAnalysisReport(new ArrayList<>(),
-				new ReleaseDifference(), new Release(), new Release()));
+				new ReleaseDifference(), release, release));
 		Mockito.when(upgradeStrategy.checkStatus(any()))
 				.thenReturn(false);
+		Mockito.when(upgradeStrategyFactory.getUpgradeStrategy(any())).thenReturn(upgradeStrategy);
 
 		UpgradeRequest upgradeRequest = new UpgradeRequest();
 

@@ -19,10 +19,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.cloud.skipper.server.deployer.ReleaseAnalysisReport;
 import org.springframework.cloud.skipper.server.deployer.strategies.UpgradeStrategy;
+import org.springframework.cloud.skipper.server.deployer.strategies.UpgradeStrategyFactory;
 import org.springframework.cloud.skipper.server.service.ReleaseReportService;
 import org.springframework.cloud.skipper.server.statemachine.SkipperStateMachineService.SkipperEvents;
 import org.springframework.cloud.skipper.server.statemachine.SkipperStateMachineService.SkipperStates;
 import org.springframework.cloud.skipper.server.statemachine.SkipperStateMachineService.SkipperVariables;
+import org.springframework.cloud.skipper.server.util.ManifestUtils;
 import org.springframework.statemachine.StateContext;
 import org.springframework.statemachine.action.Action;
 
@@ -35,17 +37,17 @@ import org.springframework.statemachine.action.Action;
 public class UpgradeCheckTargetAppsAction extends AbstractUpgradeStartAction {
 
 	private static final Logger log = LoggerFactory.getLogger(UpgradeCheckTargetAppsAction.class);
-	private final UpgradeStrategy upgradeStrategy;
+	private final UpgradeStrategyFactory upgradeStrategyFactory;
 
 	/**
 	 * Instantiates a new upgrade check target apps action.
 	 *
 	 * @param releaseReportService the release report service
-	 * @param upgradeStrategy the upgrade strategy
+	 * @param upgradeStrategyFactory the upgrade strategy factory
 	 */
-	public UpgradeCheckTargetAppsAction(ReleaseReportService releaseReportService, UpgradeStrategy upgradeStrategy) {
+	public UpgradeCheckTargetAppsAction(ReleaseReportService releaseReportService, UpgradeStrategyFactory upgradeStrategyFactory) {
 		super(releaseReportService);
-		this.upgradeStrategy = upgradeStrategy;
+		this.upgradeStrategyFactory = upgradeStrategyFactory;
 	}
 
 	@Override
@@ -54,6 +56,9 @@ public class UpgradeCheckTargetAppsAction extends AbstractUpgradeStartAction {
 		ReleaseAnalysisReport releaseAnalysisReport = getReleaseAnalysisReport(context);
 
 		int upgradeStatus = 0;
+		// TODO: should check both releases
+		String kind = ManifestUtils.resolveKind(releaseAnalysisReport.getReplacingRelease().getManifest().getData());
+		UpgradeStrategy upgradeStrategy = this.upgradeStrategyFactory.getUpgradeStrategy(kind);		
 		boolean ok = upgradeStrategy.checkStatus(releaseAnalysisReport.getReplacingRelease());
 		log.debug("upgradeStrategy checkStatus {}", ok);
 		if (ok) {

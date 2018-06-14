@@ -33,6 +33,7 @@ import org.springframework.cloud.skipper.domain.UpgradeProperties;
 import org.springframework.cloud.skipper.domain.UpgradeRequest;
 import org.springframework.cloud.skipper.server.deployer.ReleaseAnalysisReport;
 import org.springframework.cloud.skipper.server.deployer.ReleaseManager;
+import org.springframework.cloud.skipper.server.deployer.ReleaseManagerFactory;
 import org.springframework.cloud.skipper.server.repository.PackageMetadataRepository;
 import org.springframework.cloud.skipper.server.repository.ReleaseRepository;
 import org.springframework.cloud.skipper.server.util.ConfigValueUtils;
@@ -52,16 +53,16 @@ public class ReleaseReportService {
 
 	private final PackageService packageService;
 
-	private final ReleaseManager releaseManager;
+	private final ReleaseManagerFactory releaseManagerFactory;
 
 	public ReleaseReportService(PackageMetadataRepository packageMetadataRepository,
 			ReleaseRepository releaseRepository,
 			PackageService packageService,
-			ReleaseManager releaseManager) {
+			ReleaseManagerFactory releaseManagerFactory) {
 		this.packageMetadataRepository = packageMetadataRepository;
 		this.releaseRepository = releaseRepository;
 		this.packageService = packageService;
-		this.releaseManager = releaseManager;
+		this.releaseManagerFactory = releaseManagerFactory;
 	}
 	
 	/**
@@ -110,7 +111,11 @@ public class ReleaseReportService {
 		Manifest manifest = new Manifest();
 		manifest.setData(manifestData);
 		replacingRelease.setManifest(manifest);
-		return this.releaseManager.createReport(existingRelease, replacingRelease, initial);
+		
+		// TODO: should check both releases
+		String kind = ManifestUtils.resolveKind(existingRelease.getManifest().getData());
+		ReleaseManager releaseManager = this.releaseManagerFactory.getReleaseManager(kind);
+		return releaseManager.createReport(existingRelease, replacingRelease, initial);
 	}
 
 	private Release updateReplacingReleaseConfigValues(Release targetRelease, Release replacingRelease) {

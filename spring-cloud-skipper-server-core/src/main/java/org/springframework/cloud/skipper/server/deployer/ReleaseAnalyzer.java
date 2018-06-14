@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 the original author or authors.
+ * Copyright 2017-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,22 +17,18 @@ package org.springframework.cloud.skipper.server.deployer;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 
-import org.cloudfoundry.operations.applications.ApplicationManifest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import org.springframework.cloud.deployer.resource.support.DelegatingResourceLoader;
 import org.springframework.cloud.skipper.SkipperException;
-import org.springframework.cloud.skipper.domain.CFApplicationManifestReader;
 import org.springframework.cloud.skipper.domain.Release;
 import org.springframework.cloud.skipper.domain.SpringCloudDeployerApplicationManifest;
 import org.springframework.cloud.skipper.domain.SpringCloudDeployerApplicationManifestReader;
 import org.springframework.cloud.skipper.domain.deployer.ApplicationManifestDifference;
 import org.springframework.cloud.skipper.domain.deployer.ReleaseDifference;
-import org.springframework.cloud.skipper.support.PropertiesDiff;
 import org.springframework.core.io.Resource;
 import org.springframework.util.StringUtils;
 
@@ -49,23 +45,14 @@ import org.springframework.util.StringUtils;
 public class ReleaseAnalyzer {
 
 	private final SpringCloudDeployerApplicationManifestReader applicationManifestReader;
-
-	private final CFApplicationManifestReader cfApplicationManifestReader;
-
 	private final Logger logger = LoggerFactory.getLogger(ReleaseAnalyzer.class);
 	private final DelegatingResourceLoader delegatingResourceLoader;
 	private ApplicationManifestDifferenceFactory applicationManifestDifferenceFactory = new ApplicationManifestDifferenceFactory();
 
-	private final CFManifestApplicationDeployer cfManifestApplicationDeployer;
-
 	public ReleaseAnalyzer(SpringCloudDeployerApplicationManifestReader applicationManifestReader,
-			CFApplicationManifestReader cfApplicationManifestReader,
-			DelegatingResourceLoader delegatingResourceLoader,
-			CFManifestApplicationDeployer cfManifestApplicationDeployer) {
+			DelegatingResourceLoader delegatingResourceLoader) {
 		this.applicationManifestReader = applicationManifestReader;
-		this.cfApplicationManifestReader = cfApplicationManifestReader;
 		this.delegatingResourceLoader = delegatingResourceLoader;
-		this.cfManifestApplicationDeployer = cfManifestApplicationDeployer;
 	}
 
 	/**
@@ -77,55 +64,37 @@ public class ReleaseAnalyzer {
 	 * @return an analysis report describing the changes to make, if any.
 	 */
 	public ReleaseAnalysisReport analyze(Release existingRelease, Release replacingRelease) {
-		if (this.applicationManifestReader.canSupport(existingRelease.getManifest().getData())) {
-			// For now, assume single package with no deps or package with same number of deps
-			List<? extends SpringCloudDeployerApplicationManifest> existingApplicationSpecList = this.applicationManifestReader
-					.read(existingRelease.getManifest().getData());
-			List<? extends SpringCloudDeployerApplicationManifest> replacingApplicationSpecList = this.applicationManifestReader
-					.read(replacingRelease.getManifest().getData());
-			if (existingRelease.getPkg().getDependencies().size() == replacingRelease.getPkg().getDependencies()
-					.size()) {
-				if (existingRelease.getPkg().getDependencies().size() == 0) {
-					logger.info("Existing Package and Upgrade Package both have no dependent packages.");
-					return analyzeTopLevelPackagesOnly(existingApplicationSpecList,
+		// For now, assume single package with no deps or package with same number of deps
+		List<? extends SpringCloudDeployerApplicationManifest> existingApplicationSpecList = this.applicationManifestReader
+				.read(existingRelease.getManifest().getData());
+		List<? extends SpringCloudDeployerApplicationManifest> replacingApplicationSpecList = this.applicationManifestReader
+				.read(replacingRelease.getManifest().getData());
+		if (existingRelease.getPkg().getDependencies().size() == replacingRelease.getPkg().getDependencies()
+				.size()) {
+			if (existingRelease.getPkg().getDependencies().size() == 0) {
+				logger.info("Existing Package and Upgrade Package both have no dependent packages.");
+				return analyzeTopLevelPackagesOnly(existingApplicationSpecList,
+						replacingApplicationSpecList,
+						existingRelease, replacingRelease);
+			}
+			else {
+				if (existingRelease.getPkg().getTemplates().size() == 0 &&
+						replacingRelease.getPkg().getTemplates().size() == 0) {
+					logger.info("Existing Package and Upgrade package both have no top level templates");
+					return analyzeDependentPackagesOnly(existingApplicationSpecList,
 							replacingApplicationSpecList,
 							existingRelease, replacingRelease);
 				}
 				else {
-					if (existingRelease.getPkg().getTemplates().size() == 0 &&
-							replacingRelease.getPkg().getTemplates().size() == 0) {
-						logger.info("Existing Package and Upgrade package both have no top level templates");
-						return analyzeDependentPackagesOnly(existingApplicationSpecList,
-								replacingApplicationSpecList,
-								existingRelease, replacingRelease);
-					}
-					else {
-						throw new SkipperException(
-								"Can not yet compare package with top level templates and dependencies");
-					}
+					throw new SkipperException(
+							"Can not yet compare package with top level templates and dependencies");
 				}
 			}
-			else {
-				throw new SkipperException(
-						"Can not yet compare existing package and to be released packages with different sizes.");
-			}
 		}
-		else if ((this.cfApplicationManifestReader.canSupport(existingRelease.getManifest().getData()))) {
-			List<ApplicationManifestDifference> applicationManifestDifferences = new ArrayList<>();
-			ApplicationManifest existingApplicationManifest = this.cfManifestApplicationDeployer.getCFApplicationManifest(existingRelease);
-			ApplicationManifest replacingApplicationManifest = this.cfManifestApplicationDeployer.getCFApplicationManifest(replacingRelease);
-			if (!existingApplicationManifest.equals(replacingApplicationManifest)) {
-				Map<String, String> existingMap = CFApplicationManifestUtils.getCFManifestMap(existingApplicationManifest);
-				Map<String, String> replacingMap = CFApplicationManifestUtils.getCFManifestMap(replacingApplicationManifest);
-				PropertiesDiff emptyPropertiesDiff = PropertiesDiff.builder().build();
-				PropertiesDiff propertiesDiff = PropertiesDiff.builder().left(existingMap).right(replacingMap).build();
-				ApplicationManifestDifference applicationManifestDifference = new ApplicationManifestDifference(existingApplicationManifest.getName(),
-						emptyPropertiesDiff, emptyPropertiesDiff, emptyPropertiesDiff, propertiesDiff, emptyPropertiesDiff);
-				applicationManifestDifferences.add(applicationManifestDifference);
-			}
-			return createReleaseAnalysisReport(existingRelease, replacingRelease, applicationManifestDifferences);
+		else {
+			throw new SkipperException(
+					"Can not yet compare existing package and to be released packages with different sizes.");
 		}
-		return null;
 	}
 
 	private ReleaseAnalysisReport analyzeDependentPackagesOnly(

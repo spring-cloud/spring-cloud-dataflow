@@ -47,7 +47,6 @@ public class InstallInstallAction extends AbstractAction {
 	 * Instantiates a new install install action.
 	 *
 	 * @param releaseService the release service
-	 * @param releaseRepository the release repository
 	 */
 	public InstallInstallAction(ReleaseService releaseService) {
 		super();
