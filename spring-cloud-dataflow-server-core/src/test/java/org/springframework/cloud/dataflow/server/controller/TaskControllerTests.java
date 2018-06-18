@@ -294,7 +294,7 @@ public class TaskControllerTests {
 		assertThat(request.getCommandlineArguments().size(), is(3 + 1)); // +1 for spring.cloud.task.executionid
 		assertThat(request.getCommandlineArguments().get(0), is("--foobar=jee"));
 		assertThat(request.getCommandlineArguments().get(1), is("--foobar2=jee2,foo=bar"));
-		assertThat(request.getCommandlineArguments().get(2), is("--foobar3=jee3 jee3"));
+		assertThat(request.getCommandlineArguments().get(2), is("--foobar3='jee3 jee3'"));
 		assertEquals("myTask3", request.getDefinition().getProperties().get("spring.cloud.task.name"));
 	}
 

@@ -145,8 +145,7 @@ public class TaskExecutionController {
 		Map<String, String> propertiesToUse = DeploymentPropertiesUtils.parse(properties);
 		DeploymentPropertiesUtils.validateDeploymentProperties(propertiesToUse);
 		List<String> argumentsToUse = DeploymentPropertiesUtils.parseParamList(arguments, " ");
-		return this.taskService.executeTask(taskName, propertiesToUse,
-				DeploymentPropertiesUtils.removeQuoting(argumentsToUse));
+		return this.taskService.executeTask(taskName, propertiesToUse, argumentsToUse);
 	}
 
 	/**
