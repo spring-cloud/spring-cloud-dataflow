@@ -85,7 +85,7 @@ public class DefaultReleaseManager implements ReleaseManager {
 		this.appDeploymentRequestFactory = appDeploymentRequestFactory;
 		this.applicationManifestReader = applicationManifestReader;
 	}
-	
+
 	@Override
 	public Collection<String> getSupportedKinds() {
 		return Arrays.asList(SkipperManifestKind.SpringBootApp.name(),
@@ -226,8 +226,12 @@ public class DefaultReleaseManager implements ReleaseManager {
 	}
 
 	public Release status(Release release) {
+		if (release.getInfo().getStatus().getStatusCode().equals(StatusCode.DELETED)) {
+			return release;
+		}
 		AppDeployer appDeployer = this.deployerRepository.findByNameRequired(release.getPlatformName())
 				.getAppDeployer();
+
 		AppDeployerData appDeployerData = this.appDeployerDataRepository
 				.findByReleaseNameAndReleaseVersion(release.getName(), release.getVersion());
 		if (appDeployerData == null) {
@@ -282,28 +286,23 @@ public class DefaultReleaseManager implements ReleaseManager {
 			}
 			release.getInfo().getStatus().setPlatformStatusAsAppStatusList(appStatusList);
 		}
-	return release;
+		return release;
 	}
 
 	public Release delete(Release release) {
 		AppDeployer appDeployer = this.deployerRepository.findByNameRequired(release.getPlatformName())
 				.getAppDeployer();
-
 		AppDeployerData appDeployerData = this.appDeployerDataRepository
 				.findByReleaseNameAndReleaseVersionRequired(release.getName(), release.getVersion());
 		List<String> deploymentIds = appDeployerData.getDeploymentIds();
 		if (!deploymentIds.isEmpty()) {
 			for (String deploymentId : deploymentIds) {
-
-				// don't error trying trying to undeploy something
-				// which is not deployed
-				AppStatus appStatus = appDeployer.status(deploymentId);
-				if (appStatus.getState().equals(DeploymentState.deployed)) {
+				try  {
 					appDeployer.undeploy(deploymentId);
 				}
-				else {
-					logger.warn("For Release name {}, did not undeploy existing app {} as its status is not "
-							+ "'deployed'.", release.getName(), deploymentId);
+				catch (Exception e) {
+					this.logger.error(String.format("Exception undeploying the application with the deploymentId %s. "
+							+ "Exception message: %s",  deploymentId, e.getMessage()));
 				}
 			}
 			Status deletedStatus = new Status();
@@ -312,7 +311,7 @@ public class DefaultReleaseManager implements ReleaseManager {
 			release.getInfo().setDescription("Delete complete");
 			this.releaseRepository.save(release);
 		}
-	return release;
+		return release;
 	}
 
 }
