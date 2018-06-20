@@ -592,7 +592,7 @@ when specified in 'short-form' form during stream deployment as it could conflic
 specified in its fully qualified form (for example, `app.something.somethingelse.count`) during stream deployment or it can be specified by using the 'short-form' or the fully qualified form during the stream creation,
 where it is processed as an app property.
 
-IMPORTANT: See <<spring-cloud-dataflow-stream-app-labels>>.
+IMPORTANT: See <<spring-cloud-dataflow-stream-dsl-labels>>.
 
 
 ===== Inline Versus File-based Properties
