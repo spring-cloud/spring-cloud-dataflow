@@ -74,6 +74,7 @@ spring:
             - DELETE /apps/**                        => hasRole('ROLE_CREATE')
             - POST   /apps                           => hasRole('ROLE_CREATE')
             - POST   /apps/**                        => hasRole('ROLE_CREATE')
+            - PUT    /apps/**                        => hasRole('ROLE_CREATE')
 
             # Completions
 
