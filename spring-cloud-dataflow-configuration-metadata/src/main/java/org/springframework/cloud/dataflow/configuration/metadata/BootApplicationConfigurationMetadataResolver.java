@@ -98,7 +98,9 @@ public class BootApplicationConfigurationMetadataResolver extends ApplicationCon
 			}
 		}
 		catch (IOException e) {
+			throw new RuntimeException("Failed to resolve application resource: " + app.getDescription());
 		}
+
 		return Collections.emptyList();
 	}
 
@@ -150,7 +152,7 @@ public class BootApplicationConfigurationMetadataResolver extends ApplicationCon
 			return new BootClassLoaderFactory(resolveAsArchive(app), parent).createClassLoader();
 		}
 		catch (IOException e) {
-			throw new RuntimeException(e);
+			throw new RuntimeException("Failed to resolve application resource: " + app.getDescription(), e);
 		}
 	}
 
