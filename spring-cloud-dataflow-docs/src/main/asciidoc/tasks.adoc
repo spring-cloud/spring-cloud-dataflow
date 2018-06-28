@@ -329,6 +329,52 @@ The datasource properties are set with the `TaskLaunchRequest` through the use o
 This is because the Composed Task Runner monitors the `task_executions` table to check the status of the tasks that it is running.
 Using information from the table, it determines how it should navigate the graph.
 
+===== Configuration Options
+
+The ComposedTaskRunner task has the following options:
+
+* *increment-instance-enabled*
+Allows a single ComposedTaskRunner instance to be re-executed without changing the parameters. Default is false which means a ComposedTaskRunner instance can only be executed once with a given set of parameters, if true it can be re-executed. (Boolean, default: false).
+ComposedTaskRunner is built using https://github.com/spring-projects/spring-batch[Spring Batch] and thus upon a successful execution the batch job is considered complete.
+To launch the same ComposedTaskRunner definition multiple times you must set the `increment-instance-enabled` property to true or change the parameters for the definition for each launch.
+
+* *interval-time-between-checks*
+The amount of time in millis that the ComposedTaskRunner will wait between checks of the database to see if a task has completed. (Integer, default: 10000).
+ComposedTaskRunner uses the datastore to determine the status of each child tasks.  This interval indicates to ComposedTaskRunner how often it should check the status its child tasks.
+
+* *max-wait-time*
+The maximum amount of time in millis that a individual step can run before the execution of the Composed task is failed (Integer, default: 0).
+Determines the maximum time each child task is allowed to run before the CTR will terminate with a failure.  The default of `0` indicates no timeout.
+
+* *split-thread-allow-core-thread-timeout*
+Specifies whether to allow split core threads to timeout. Default is false; (Boolean, default: false)
+Sets the policy governing whether core threads may timeout and terminate if no tasks arrive within the keep-alive time, being replaced if needed when new tasks arrive.
+
+* *split-thread-core-pool-size*
+Split's core pool size. Default is 1; (Integer, default: 1)
+Each child task contained in a split requires a thread in order to execute.   So for example a definition like: `<AAA || BBB || CCC> && <DDD || EEE>` would require a split-thread-core-pool-size of 3.
+This is because the largest split contains 3 child tasks.   A count of 2 would mean that `AAA` and `BBB` would run in parallel but CCC would wait until either `AAA` or `BBB` to finish in order to run.
+Then `DDD` and `EEE` would run in parallel.
+
+* *split-thread-keep-alive-seconds*
+Split's thread keep alive seconds. Default is 60. (Integer, default: 60)
+If the pool currently has more than corePoolSize threads, excess threads will be terminated if they have been idle for more than the keepAliveTime.
+
+* *split-thread-max-pool-size*
+Split's maximum pool size. Default is {@code Integer.MAX_VALUE} (Integer, default: <none>).
+Establish the maximum number of threads allowed for the thread pool.
+
+* *split-thread-queue-capacity*
+Capacity for Split's BlockingQueue. Default is {@code Integer.MAX_VALUE}. (Integer, default: <none>)
+** If fewer than corePoolSize threads are running, the Executor always prefers adding a new thread rather than queuing.
+** If corePoolSize or more threads are running, the Executor always prefers queuing a request rather than adding a new thread.
+** If a request cannot be queued, a new thread is created unless this would exceed maximumPoolSize, in which case, the task will be rejected.
+
+* *split-thread-wait-for-tasks-to-complete-on-shutdown*
+Whether to wait for scheduled tasks to complete on shutdown, not interrupting running tasks and executing all tasks in the queue. Default is false; (Boolean, default: false)
+
+Note
+when using the options above as environment variables, convert to uppercase, remove the dash character and replace with the underscore character. For example: increment-instance-enabled would be INCREMENT_INSTANCE_ENABLED.
 
 
 === The Lifecycle of a Composed Task
