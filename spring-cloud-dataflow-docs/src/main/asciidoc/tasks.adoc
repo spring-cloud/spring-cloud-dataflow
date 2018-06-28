@@ -34,7 +34,7 @@ One may also specify the longhand version as well, as shown in the following exa
 This shorthand behavior is discussed more in the section on <<spring-cloud-dataflow-stream-app-whitelisting>>.
 If you have <<spring-cloud-dataflow-stream-app-metadata-artifact, registered application property metadata>> you can use tab completion in the shell after typing `--` to get a list of candidate property names.
 
-The shell provides tab completion for application properties. The shell command `app info <appType>:<appName>` provides additional documentation for all the supported properties.
+The shell provides tab completion for application properties. The shell command `app info --name <appName> --type <appType>` provides additional documentation for all the supported properties.
 
 NOTE: The supported Task `<appType>` is task.
 

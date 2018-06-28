@@ -33,7 +33,6 @@ import org.springframework.cloud.dataflow.rest.client.AppRegistryOperations;
 import org.springframework.cloud.dataflow.rest.client.DataFlowOperations;
 import org.springframework.cloud.dataflow.rest.resource.AppRegistrationResource;
 import org.springframework.cloud.dataflow.shell.command.classic.ClassicAppRegistryCommands;
-import org.springframework.cloud.dataflow.shell.command.common.AbstractAppRegistryCommands;
 import org.springframework.cloud.dataflow.shell.config.DataFlowShell;
 import org.springframework.hateoas.PagedResources;
 import org.springframework.shell.table.Table;
@@ -110,9 +109,7 @@ public class ClassicAppRegistryCommandsTests {
 
 	@Test
 	public void testUnknownModule() {
-		List<Object> result = appRegistryCommands
-				.info(new AbstractAppRegistryCommands.QualifiedApplicationName("unknown", ApplicationType.processor));
-
+		List<Object> result = appRegistryCommands.info(null,"unknown", ApplicationType.processor);
 		assertEquals((String) result.get(0), "Application info is not available for processor:unknown");
 	}
 
