@@ -53,6 +53,7 @@ public class ScheduleInfoResource extends ResourceSupport {
 
 		this.scheduleName = scheduleName;
 		this.scheduleProperties.putAll(scheduleProperties);
+		this.taskDefinitionName = taskDefinitionName;
 	}
 
 	public String getScheduleName() {
