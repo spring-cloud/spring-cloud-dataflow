@@ -97,7 +97,7 @@ One may also specify the longhand version as well, as shown in the following exa
 This shorthand behavior is discussed more in the section on <<spring-cloud-dataflow-stream-app-whitelisting>>.
 If you have <<spring-cloud-dataflow-stream-app-metadata-artifact, registered application property metadata>> you can use tab completion in the shell after typing `--` to get a list of candidate property names.
 
-The shell provides tab completion for application properties. The shell command `app info <appType>:<appName>` provides additional documentation for all the supported properties.
+The shell provides tab completion for application properties. The shell command `app info --name <appName> --type <appType>` provides additional documentation for all the supported properties.
 
 NOTE: Supported Stream `<appType>` possibilities are: source, processor, and sink.
 
@@ -421,14 +421,14 @@ The following stream can have application properties defined at the time of stre
 dataflow:> stream create --definition "time | log" --name ticktock
 ----
 
-The shell command `app info <appType>:<appName>` displays the white-listed application properties for the application.
+The shell command `app info --name <appName> --type <appType>` displays the white-listed application properties for the application.
 For more info on the property white listing, refer to <<spring-cloud-dataflow-stream-app-whitelisting>>
 
 The following listing shows the white_listed properties for the `time` app:
 
 [source,bash,options="nowrap"]
 ----
-dataflow:> app info source:time
+dataflow:> app info --name time --type source
 ╔══════════════════════════════╤══════════════════════════════╤══════════════════════════════╤══════════════════════════════╗
 ║         Option Name          │         Description          │           Default            │             Type             ║
 ╠══════════════════════════════╪══════════════════════════════╪══════════════════════════════╪══════════════════════════════╣
@@ -450,7 +450,7 @@ The following listing shows the white-listed properties for the `log` app:
 
 [source,bash,options="nowrap"]
 ----
-dataflow:> app info sink:log
+dataflow:> app info --name log --type sink
 ╔══════════════════════════════╤══════════════════════════════╤══════════════════════════════╤══════════════════════════════╗
 ║         Option Name          │         Description          │           Default            │             Type             ║
 ╠══════════════════════════════╪══════════════════════════════╪══════════════════════════════╪══════════════════════════════╣

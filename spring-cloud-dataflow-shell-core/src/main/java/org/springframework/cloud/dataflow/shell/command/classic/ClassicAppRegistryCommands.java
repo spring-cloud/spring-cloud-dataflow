@@ -84,15 +84,17 @@ public class ClassicAppRegistryCommands extends AbstractAppRegistryCommands impl
 
 	@CliCommand(value = APPLICATION_INFO, help = "Get information about an application")
 	public List<Object> info(
-			@CliOption(mandatory = true, key = { "", "id" },
-					help = "id of the application to query in the form of 'type:name'") QualifiedApplicationName application) {
+			@CliOption(mandatory = true, key = { "",
+					"name" }, help = "name of the application to unregister") String name,
+			@CliOption(mandatory = true, key = {
+					"type" }, help = "type of the application to unregister") ApplicationType type) {
 		List<Object> result = new ArrayList<>();
 		try {
 			DetailedAppRegistrationResource info =
-					appRegistryOperations().info(application.name, application.type);
+					appRegistryOperations().info(name, type);
 			if (info != null) {
 				List<ConfigurationMetadataProperty> options = info.getOptions();
-				result.add(String.format("Information about %s application '%s':", application.type, application.name));
+				result.add(String.format("Information about %s application '%s':", type, name));
 				if (info.getVersion() != null) {
 					result.add(String.format("Version: '%s':", info.getVersion()));
 				}
@@ -119,13 +121,11 @@ public class ClassicAppRegistryCommands extends AbstractAppRegistryCommands impl
 				}
 			}
 			else {
-				result.add(String.format("Application info is not available for %s:%s", application.type,
-						application.name));
+				result.add(String.format("Application info is not available for %s:%s", type, name));
 			}
 		}
 		catch (Exception e) {
-			result.add(
-					String.format("Application info is not available for %s:%s", application.type, application.name));
+			result.add(String.format("Application info is not available for %s:%s", type, name));
 		}
 		return result;
 	}
