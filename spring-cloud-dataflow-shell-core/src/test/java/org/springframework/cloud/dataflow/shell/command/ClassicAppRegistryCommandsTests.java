@@ -109,7 +109,7 @@ public class ClassicAppRegistryCommandsTests {
 
 	@Test
 	public void testUnknownModule() {
-		List<Object> result = appRegistryCommands.info("unknown", ApplicationType.processor);
+		List<Object> result = appRegistryCommands.info(null,"unknown", ApplicationType.processor);
 		assertEquals((String) result.get(0), "Application info is not available for processor:unknown");
 	}
 

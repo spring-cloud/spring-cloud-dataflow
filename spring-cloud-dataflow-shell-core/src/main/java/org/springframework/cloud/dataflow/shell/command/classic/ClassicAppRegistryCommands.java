@@ -39,6 +39,8 @@ import org.springframework.shell.table.CellMatchers;
 import org.springframework.shell.table.TableBuilder;
 import org.springframework.shell.table.TableModelBuilder;
 import org.springframework.stereotype.Component;
+import org.springframework.util.Assert;
+import org.springframework.util.StringUtils;
 
 /**
  * Commands for working with the application registry. Allows retrieval of information
@@ -84,10 +86,17 @@ public class ClassicAppRegistryCommands extends AbstractAppRegistryCommands impl
 
 	@CliCommand(value = APPLICATION_INFO, help = "Get information about an application")
 	public List<Object> info(
-			@CliOption(mandatory = true, key = { "",
-					"name" }, help = "name of the application to unregister") String name,
-			@CliOption(mandatory = true, key = {
-					"type" }, help = "type of the application to unregister") ApplicationType type) {
+			@CliOption(mandatory = false, key = { "", "id" },
+					help = "id of the application to query in the form of 'type:name'") QualifiedApplicationName application,
+			@CliOption(mandatory = false, key = { "",
+					"name" }, help = "name of the application to unregister") String applicationName,
+			@CliOption(mandatory = false, key = {
+					"type" }, help = "type of the application to unregister") ApplicationType applicationType) {
+		Assert.isTrue(assertAppInfoOptions(application, applicationName, applicationType),
+				"The options [<type>:<name>] and  [--name && --type] are mutually exclusive and "
+						+ "one of these should be specified to uniquely identify the application");
+		String name = (application != null) ? application.name : applicationName;
+		ApplicationType type = (application != null) ? application.type : applicationType;;
 		List<Object> result = new ArrayList<>();
 		try {
 			DetailedAppRegistrationResource info =
@@ -128,6 +137,15 @@ public class ClassicAppRegistryCommands extends AbstractAppRegistryCommands impl
 			result.add(String.format("Application info is not available for %s:%s", type, name));
 		}
 		return result;
+	}
+
+	private boolean assertAppInfoOptions(QualifiedApplicationName application, String name, ApplicationType type) {
+		if (application != null && StringUtils.hasText(application.name) && application.type != null) {
+			return !(StringUtils.hasText(name) || (type != null));
+		}
+		else {
+			return (StringUtils.hasText(name) && type != null);
+		}
 	}
 
 	@CliCommand(value = UNREGISTER_APPLICATION, help = "Unregister an application")
