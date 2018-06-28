@@ -142,9 +142,18 @@ public class TaskDefinitionController {
 		for (TaskDefinition taskDefinition : taskDefinitions) {
 			taskDefinitionMap.put(taskDefinition.getName(), taskDefinition);
 		}
-		List<TaskExecution> taskExecutions = explorer.getLatestTaskExecutionsByTaskNames(taskDefinitionMap.keySet().toArray(new String[taskDefinitionMap.size()]));
 
-		Page<TaskExecutionAwareTaskDefinition> taskExecutionAwareTaskDefinitions = taskDefinitions.map(new TaskDefinitionConverter(taskExecutions));
+		final List<TaskExecution> taskExecutions;
+
+		if (!taskDefinitionMap.isEmpty()) {
+			taskExecutions =
+					explorer.getLatestTaskExecutionsByTaskNames(taskDefinitionMap.keySet().toArray(new String[taskDefinitionMap.size()]));
+		}
+		else {
+			taskExecutions = null;
+		}
+
+		final Page<TaskExecutionAwareTaskDefinition> taskExecutionAwareTaskDefinitions = taskDefinitions.map(new TaskDefinitionConverter(taskExecutions));
 
 		return assembler.toResource(taskExecutionAwareTaskDefinitions, taskAssembler);
 	}
