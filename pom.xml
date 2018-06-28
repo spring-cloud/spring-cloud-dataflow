@@ -15,7 +15,7 @@
 		     release versions -->
 		<groupId>org.springframework.cloud</groupId>
 		<artifactId>spring-cloud-build</artifactId>
-		<version>1.3.8.RELEASE</version>
+		<version>1.3.9.RELEASE</version>
 		<relativePath />
 	</parent>
 	<scm>
@@ -33,8 +33,6 @@
 		<spring-cloud-deployer-local.version>1.3.7.BUILD-SNAPSHOT</spring-cloud-deployer-local.version>
 
 		<spring-cloud-skipper.version>1.0.5.BUILD-SNAPSHOT</spring-cloud-skipper.version>
-		<!-- Note: Change ./spring-cloud-dataflow-server-local/pom.xml to match the spring-boot.version -->
-		<spring-boot.version>1.5.13.RELEASE</spring-boot.version>
 
 		<!-- Note: Change ./spring-cloud-dataflow-server-local/pom.xml to match the spring-cloud-task.version -->
 		<spring-cloud-task.version>1.2.3.BUILD-SNAPSHOT</spring-cloud-task.version>
@@ -43,7 +41,10 @@
 		<!-- Note: Make sure to update `spring-cloud-build` version and `spring-cloud-dependencies` version (spring-cloud.version)
 		     are in sync with the https://github.com/spring-cloud/spring-cloud-release/blob/master/pom.xml updates for the respective
 		     release versions -->
+		<!-- Note: Edgware.SR3 is at 1.3.8.RELEASE while above we are using 1.3.9 !!! -->
 		<spring-cloud.version>Edgware.SR3</spring-cloud.version>
+
+		<spring-cloud-scheduler-spi.version>1.0.0.BUILD-SNAPSHOT</spring-cloud-scheduler-spi.version>
 
 		<spring-cloud-common-security-config.version>1.0.2.RELEASE</spring-cloud-common-security-config.version>
 
@@ -54,7 +55,6 @@
 		<commons-lang.version>2.4</commons-lang.version>
 		<jacoco-maven-plugin.version>0.7.9</jacoco-maven-plugin.version>
 		<sonar-maven-plugin.version>3.0.2</sonar-maven-plugin.version>
-		<spring-cloud-scheduler-spi.version>1.0.0.BUILD-SNAPSHOT</spring-cloud-scheduler-spi.version>
 		<checkstyle.config.location>src/checkstyle/checkstyle.xml</checkstyle.config.location>
 	</properties>
 	<modules>
@@ -77,15 +77,29 @@
 		<dependencies>
 			<dependency>
 				<groupId>org.springframework.cloud</groupId>
-				<artifactId>spring-cloud-dataflow-dependencies</artifactId>
-				<version>${project.version}</version>
+				<artifactId>spring-cloud-task-dependencies</artifactId>
+				<version>${spring-cloud-task.version}</version>
+				<type>pom</type>
+				<scope>import</scope>
+			</dependency>
+			<dependency>
+				<groupId>org.springframework.data</groupId>
+				<artifactId>spring-data-releasetrain</artifactId>
+				<version>Ingalls-SR13</version>
+				<scope>import</scope>
+				<type>pom</type>
+			</dependency>
+			<dependency>
+				<groupId>org.springframework.cloud</groupId>
+				<artifactId>spring-cloud-dependencies</artifactId>
+				<version>${spring-cloud.version}</version>
 				<type>pom</type>
 				<scope>import</scope>
 			</dependency>
 			<dependency>
 				<groupId>org.springframework.cloud</groupId>
-				<artifactId>spring-cloud-task-dependencies</artifactId>
-				<version>${spring-cloud-task.version}</version>
+				<artifactId>spring-cloud-dataflow-dependencies</artifactId>
+				<version>${project.version}</version>
 				<type>pom</type>
 				<scope>import</scope>
 			</dependency>
@@ -140,28 +154,6 @@
 				<version>${spring-cloud-common-security-config.version}</version>
 			</dependency>
 			<dependency>
-				<groupId>org.springframework.cloud</groupId>
-				<artifactId>spring-cloud-dependencies</artifactId>
-				<version>${spring-cloud.version}</version>
-				<type>pom</type>
-				<scope>import</scope>
-			</dependency>
-			<dependency>
-				<groupId>com.zaxxer</groupId>
-				<artifactId>HikariCP</artifactId>
-				<version>3.1.0</version>
-			</dependency>
-			<dependency>
-				<groupId>org.hibernate</groupId>
-				<artifactId>hibernate-core</artifactId>
-				<version>5.2.12.Final</version>
-			</dependency>
-			<dependency>
-				<groupId>org.hibernate</groupId>
-				<artifactId>hibernate-entitymanager</artifactId>
-				<version>5.2.12.Final</version>
-			</dependency>
-			<dependency>
 				<groupId>commons-io</groupId>
 				<artifactId>commons-io</artifactId>
 				<version>${commons-io.version}</version>
@@ -175,13 +167,6 @@
 				<groupId>org.springframework.cloud</groupId>
 				<artifactId>spring-cloud-scheduler-spi</artifactId>
 				<version>${spring-cloud-scheduler-spi.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.springframework.data</groupId>
-				<artifactId>spring-data-releasetrain</artifactId>
-				<version>Ingalls-SR10</version>
-				<scope>import</scope>
-				<type>pom</type>
 			</dependency>
 		</dependencies>
 	</dependencyManagement>
