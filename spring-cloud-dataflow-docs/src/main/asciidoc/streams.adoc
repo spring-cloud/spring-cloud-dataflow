@@ -164,27 +164,50 @@ For convenience, we have the static files with application-URIs (for both maven 
 for all the out-of-the-box stream and task/batch app-starters. You can point to this file and import
 all the application-URIs in bulk. Otherwise, as explained previously, you can register them individually or have your own custom property file with only the required application-URIs in it. It is recommended, however, to have a "`focused`" list of desired application-URIs in a custom property file.
 
-The following table lists the bit.ly links to the available Stream Application Starters:
+The following table lists the bit.ly links to the available Stream Application Starters based on Spring Boot 1.5.x:
 
 [width="100%",frame="topbot",options="header"]
 |======================
 |Artifact Type |Stable Release |SNAPSHOT Release
 
 |RabbitMQ + Maven
-|http://bit.ly/Celsius-SR2-stream-applications-rabbit-maven
+|http://bit.ly/Celsius-SR3-stream-applications-rabbit-maven
 |http://bit.ly/Celsius-BUILD-SNAPSHOT-stream-applications-rabbit-maven
 
 |RabbitMQ + Docker
-|http://bit.ly/Celsius-SR2-stream-applications-rabbit-docker
+|http://bit.ly/Celsius-SR3-stream-applications-rabbit-docker
 |http://bit.ly/Celsius-BUILD-SNAPSHOT-stream-applications-rabbit-docker
 
 |Kafka 0.10 + Maven
-|http://bit.ly/Celsius-SR2-stream-applications-kafka-10-maven
+|http://bit.ly/Celsius-SR3-stream-applications-kafka-10-maven
 |http://bit.ly/Celsius-BUILD-SNAPSHOT-stream-applications-kafka-10-maven
 
 |Kafka 0.10 + Docker
-|http://bit.ly/Celsius-SR2-stream-applications-kafka-10-docker
+|http://bit.ly/Celsius-SR3-stream-applications-kafka-10-docker
 |http://bit.ly/Celsius-BUILD-SNAPSHOT-stream-applications-kafka-10-docker
+|======================
+
+The following table lists the bit.ly links to the available Stream Application Starters based on Spring Boot 2.0.x:
+
+[width="100%",frame="topbot",options="header"]
+|======================
+|Artifact Type |Stable Release |SNAPSHOT Release
+
+|RabbitMQ + Maven
+|http://bit.ly/Darwin-GA-stream-applications-rabbit-maven
+|http://bit.ly/Darwin-BUILD-SNAPSHOT-stream-applications-rabbit-maven
+
+|RabbitMQ + Docker
+|http://bit.ly/Darwin-GA-stream-applications-rabbit-docker
+|http://bit.ly/Darwin-BUILD-SNAPSHOT-stream-applications-rabbit-docker
+
+|Kafka 0.11 and above + Maven
+|http://bit.ly/Darwin-GA-stream-applications-kafka-10-maven
+|http://bit.ly/Darwin-BUILD-SNAPSHOT-stream-applications-kafka-10-maven
+
+|Kafka 0.11 and above + Docker
+|http://bit.ly/Darwin-GA-stream-applications-kafka-10-docker
+|http://bit.ly/Darwin-BUILD-SNAPSHOT-stream-applications-kafka-10-docker
 |======================
 
 The following table lists the available Task Application Starters:
@@ -210,14 +233,14 @@ As an example, if you would like to register all out-of-the-box stream applicati
 
 [source,bash,subs=attributes]
 ----
-$ dataflow:>app import --uri http://bit.ly/Celsius-SR2-stream-applications-kafka-10-maven
+$ dataflow:>app import --uri http://bit.ly/Darwin-GA-stream-applications-kafka-10-maven
 ----
 
 Alternatively you can register all the stream applications with the Rabbit binder, as follows:
 
 [source,bash,subs=attributes]
 ----
-$ dataflow:>app import --uri http://bit.ly/Celsius-SR2-stream-applications-rabbit-maven
+$ dataflow:>app import --uri http://bit.ly/Darwin-GA-stream-applications-rabbit-maven
 ----
 
 You can also pass the `--local` option (which is `true` by default) to indicate whether the
@@ -1298,7 +1321,7 @@ Consider the following example, using the `definition` style.
 URI dataFlowUri = URI.create("http://localhost:9393");
 DataFlowOperations dataFlowOperations = new DataFlowTemplate(dataFlowUri);
 dataFlowOperations.appRegistryOperations().importFromResource(
-                     "http://bit.ly/Celsius-RC1-stream-applications-rabbit-maven", true);
+                     "http://bit.ly/Darwin-GA-stream-applications-rabbit-maven", true);
 StreamDefinition streamDefinition = Stream.builder(dataFlowOperations)
                                       .name("ticktock")
                                       .definition("time | log")
@@ -1425,7 +1448,7 @@ Attempting to create or deploy a stream that contains an unknown app throws an e
 [source,java,options="nowrap"]
 ----
 dataFlowOperations.appRegistryOperations().importFromResource(
-            "http://bit.ly/Celsius-RC1-stream-applications-rabbit-maven", true);
+            "http://bit.ly/Darwin-GA-stream-applications-rabbit-maven", true);
 ----
 
 The Stream applications can also be beans within your application that are injected in other classes to create Streams.
