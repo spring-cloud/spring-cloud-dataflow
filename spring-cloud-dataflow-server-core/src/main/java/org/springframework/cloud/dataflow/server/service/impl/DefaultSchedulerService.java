@@ -19,6 +19,8 @@ package org.springframework.cloud.dataflow.server.service.impl;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.TreeMap;
+import java.util.stream.Collectors;
 
 import org.springframework.boot.autoconfigure.jdbc.DataSourceProperties;
 import org.springframework.cloud.dataflow.configuration.metadata.ApplicationConfigurationMetadataResolver;
@@ -34,6 +36,7 @@ import org.springframework.cloud.dataflow.server.controller.WhitelistProperties;
 import org.springframework.cloud.dataflow.server.repository.NoSuchTaskDefinitionException;
 import org.springframework.cloud.dataflow.server.repository.TaskDefinitionRepository;
 import org.springframework.cloud.dataflow.server.service.SchedulerService;
+import org.springframework.cloud.dataflow.server.service.SchedulerServiceProperties;
 import org.springframework.cloud.deployer.spi.core.AppDefinition;
 import org.springframework.cloud.scheduler.spi.core.ScheduleInfo;
 import org.springframework.cloud.scheduler.spi.core.ScheduleRequest;
@@ -60,13 +63,15 @@ public class DefaultSchedulerService implements SchedulerService {
 	private final DataSourceProperties dataSourceProperties;
 	private final String dataflowServerUri;
 	private final WhitelistProperties whitelistProperties;
+	private final SchedulerServiceProperties schedulerServiceProperties;
 
 	public DefaultSchedulerService(CommonApplicationProperties commonApplicationProperties,
 			Scheduler scheduler, TaskDefinitionRepository taskDefinitionRepository,
 			AppRegistryCommon registry, ResourceLoader resourceLoader,
 			TaskConfigurationProperties taskConfigurationProperties,
 			DataSourceProperties dataSourceProperties, String dataflowServerUri,
-			ApplicationConfigurationMetadataResolver metaDataResolver) {
+			ApplicationConfigurationMetadataResolver metaDataResolver,
+			SchedulerServiceProperties schedulerServiceProperties) {
 		Assert.notNull(commonApplicationProperties, "commonApplicationProperties must not be null");
 		Assert.notNull(scheduler, "scheduler must not be null");
 		Assert.notNull(registry, "UriRegistry must not be null");
@@ -75,6 +80,7 @@ public class DefaultSchedulerService implements SchedulerService {
 		Assert.notNull(taskConfigurationProperties, "taskConfigurationProperties must not be null");
 		Assert.notNull(dataSourceProperties, "DataSourceProperties must not be null");
 		Assert.notNull(metaDataResolver, "metaDataResolver must not be null");
+		Assert.notNull(schedulerServiceProperties, "schedulerServiceProperties must not be null");
 
 		this.dataSourceProperties = dataSourceProperties;
 		this.commonApplicationProperties = commonApplicationProperties;
@@ -84,6 +90,7 @@ public class DefaultSchedulerService implements SchedulerService {
 		this.taskConfigurationProperties = taskConfigurationProperties;
 		this.dataflowServerUri = dataflowServerUri;
 		this.whitelistProperties = new WhitelistProperties(metaDataResolver);
+		this.schedulerServiceProperties = schedulerServiceProperties;
 	}
 
 	@Override
@@ -125,7 +132,7 @@ public class DefaultSchedulerService implements SchedulerService {
 		AppDefinition revisedDefinition = TaskServiceUtils.mergeAndExpandAppProperties(taskDefinition, metadataResource,
 				appDeploymentProperties, whitelistProperties);
 		ScheduleRequest scheduleRequest = new ScheduleRequest(revisedDefinition,
-				TaskServiceUtils.extractSchedulerProperties(taskDefinition.getRegisteredAppName(), taskDeploymentProperties),
+				extractAndQualifySchedulerProperties(taskDeploymentProperties),
 				deployerDeploymentProperties, scheduleName, getTaskResource(taskDefinitionName));
 		this.scheduler.schedule(scheduleRequest);
 	}
@@ -137,14 +144,52 @@ public class DefaultSchedulerService implements SchedulerService {
 
 	@Override
 	public List<ScheduleInfo> list(Pageable pageable, String taskDefinitionName) {
-		// Need to add support for pagination
-		return scheduler.list(taskDefinitionName);
+		throw new UnsupportedOperationException("method not supported");
 	}
 
 	@Override
 	public List<ScheduleInfo> list(Pageable pageable) {
-		// Need to add support for pagination
-		return scheduler.list();
+		throw new UnsupportedOperationException("method not supported");
+	}
+
+	@Override
+	public List<ScheduleInfo> list(String taskDefinitionName) {
+		return limitScheduleInfoResultSize(scheduler.list(taskDefinitionName),
+				this.schedulerServiceProperties.getMaxSchedulesReturned());
+	}
+
+	@Override
+	public List<ScheduleInfo> list() {
+		return limitScheduleInfoResultSize(scheduler.list(),
+				this.schedulerServiceProperties.getMaxSchedulesReturned());
+	}
+
+	private List<ScheduleInfo> limitScheduleInfoResultSize(List<ScheduleInfo> resultSet,
+			int schedulerLimitResultSize) {
+		if(resultSet.size() > schedulerLimitResultSize) {
+			resultSet = resultSet.subList(0, schedulerLimitResultSize);
+		}
+		return resultSet;
+	}
+
+	/**
+	 * Retain only properties that are meant for the <em>scheduler</em> of a given task(those
+	 * that start with {@code scheduler.}and qualify all
+	 * property values with the {@code spring.cloud.scheduler.} prefix.
+	 *
+	 * @param input the scheduler properties
+	 * @return scheduler properties for the task
+	 */
+	private static Map<String, String> extractAndQualifySchedulerProperties(Map<String, String> input) {
+		final String prefix = "scheduler.";
+		final int prefixLength = prefix.length();
+
+		Map<String, String> result = new TreeMap<>(input).entrySet().stream()
+				.filter(kv -> kv.getKey().startsWith(prefix))
+				.collect(Collectors.toMap(kv -> "spring.cloud.scheduler." + kv.getKey().substring(prefixLength), kv -> kv.getValue(),
+						(fromWildcard, fromApp) -> fromApp));
+
+		return result;
 	}
 
 	private Resource getTaskResource(String taskDefinitionName ) {

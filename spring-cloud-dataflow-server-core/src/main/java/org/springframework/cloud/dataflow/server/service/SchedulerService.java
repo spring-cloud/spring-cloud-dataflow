@@ -73,4 +73,21 @@ public interface SchedulerService {
 	 * @return A List of Schedules for the given system.
 	 */
 	List<ScheduleInfo> list(Pageable pageable);
+
+	/**
+	 * List all of the Schedules associated with the provided TaskDefinition up to the
+	 * established maximum as specified {@link SchedulerServiceProperties#maxSchedulesReturned}.
+	 *
+	 * @param taskDefinitionName to retrieve Schedules for a specified taskDefinitionName.
+	 * @return A List of Schedules configured for the provided taskDefinitionName.
+	 */
+	List<ScheduleInfo> list(String taskDefinitionName) ;
+
+	/**
+	 * List all of the schedules registered with the system up to the
+	 * established maximum as specified {@link SchedulerServiceProperties#maxSchedulesReturned}.
+	 *
+	 * @return A List of Schedules for the given system.
+	 */
+	List<ScheduleInfo> list();
 }

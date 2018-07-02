@@ -33,6 +33,7 @@ import org.springframework.cloud.dataflow.server.repository.RdbmsTaskDefinitionR
 import org.springframework.cloud.dataflow.server.repository.TaskDefinitionRepository;
 import org.springframework.cloud.dataflow.server.repository.support.DataflowRdbmsInitializer;
 import org.springframework.cloud.dataflow.server.service.SchedulerService;
+import org.springframework.cloud.dataflow.server.service.SchedulerServiceProperties;
 import org.springframework.cloud.dataflow.server.service.impl.DefaultSchedulerService;
 import org.springframework.cloud.dataflow.server.service.impl.DefaultTaskService;
 import org.springframework.cloud.dataflow.server.service.impl.TaskConfigurationProperties;
@@ -131,6 +132,11 @@ public class TaskServiceDependencies {
 	}
 
 	@Bean
+	public SchedulerServiceProperties schedulerServiceProperties() {
+		return new SchedulerServiceProperties();
+	}
+
+	@Bean
 	public DataSourceTransactionManager transactionManager(DataSource dataSource) {
 		return new DataSourceTransactionManager(dataSource);
 	}
@@ -150,13 +156,14 @@ public class TaskServiceDependencies {
 			Scheduler scheduler, TaskDefinitionRepository taskDefinitionRepository,
 			AppRegistry registry, ResourceLoader resourceLoader,
 			DataSourceProperties dataSourceProperties,
-			ApplicationConfigurationMetadataResolver metaDataResolver) {
+			ApplicationConfigurationMetadataResolver metaDataResolver,
+			SchedulerServiceProperties schedulerServiceProperties) {
 		return new DefaultSchedulerService(commonApplicationProperties,
 				scheduler, taskDefinitionRepository,
 				registry, resourceLoader,
 				new TaskConfigurationProperties(),
 				dataSourceProperties, null,
-				metaDataResolver);
+				metaDataResolver, schedulerServiceProperties);
 	}
 
 	@Bean

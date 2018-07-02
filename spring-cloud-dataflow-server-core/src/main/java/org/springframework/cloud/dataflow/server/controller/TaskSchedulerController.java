@@ -25,6 +25,7 @@ import org.springframework.cloud.dataflow.server.service.SchedulerService;
 import org.springframework.cloud.scheduler.spi.core.ScheduleInfo;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PagedResourcesAssembler;
 import org.springframework.hateoas.ExposesResourceFor;
@@ -69,16 +70,16 @@ public class TaskSchedulerController {
 	/**
 	 * Return a page-able list of {@link ScheduleInfo}s.
 	 *
-	 * @param pageable  page-able collection of {@code ScheduleResource}.
 	 * @param assembler assembler for the {@link ScheduleInfo}
 	 * @return a list of Schedules
 	 */
 	@RequestMapping(value = "", method = RequestMethod.GET)
 	@ResponseStatus(HttpStatus.OK)
-	public PagedResources<ScheduleInfoResource> list(Pageable pageable,
+	public PagedResources<ScheduleInfoResource> list(
 			PagedResourcesAssembler<ScheduleInfo> assembler) {
+		List<ScheduleInfo> result = this.schedulerService.list();
+		Pageable pageable = new PageRequest(0, result.size());
 
-		List<ScheduleInfo> result = this.schedulerService.list(pageable);
 		Page<ScheduleInfo> page = new PageImpl<>(result, pageable,
 				result.size());
 		return assembler.toResource(page, taskAssembler);
@@ -88,15 +89,15 @@ public class TaskSchedulerController {
 	 * Return a page-able list of {@link ScheduleInfo}s for a specific
 	 * {@link org.springframework.cloud.dataflow.core.TaskDefinition} name.
 	 *
-	 * @param pageable page-able collection of {@code ScheduleResource}.
 	 * @param taskDefinitionName name of the taskDefinition to search.
 	 * @param assembler assembler for the {@link ScheduleInfo}.
 	 * @return a list of Schedules.
 	 */
 	@RequestMapping("/instances/{taskDefinitionName}")
-	public PagedResources<ScheduleInfoResource> filteredList(Pageable pageable, @PathVariable String taskDefinitionName,
+	public PagedResources<ScheduleInfoResource> filteredList(@PathVariable String taskDefinitionName,
 			PagedResourcesAssembler<ScheduleInfo> assembler) {
-		List<ScheduleInfo> result = this.schedulerService.list(pageable, taskDefinitionName);
+		List<ScheduleInfo> result = this.schedulerService.list(taskDefinitionName);
+		Pageable pageable = new PageRequest(0, result.size());
 		Page<ScheduleInfo> page = new PageImpl<>(result, pageable,
 				result.size());
 		return assembler.toResource(page, taskAssembler);
@@ -119,7 +120,6 @@ public class TaskSchedulerController {
 			@RequestParam String properties,
 			@RequestParam(required = false) List<String> arguments) {
 		Map<String, String> propertiesToUse = DeploymentPropertiesUtils.parse(properties);
-		DeploymentPropertiesUtils.validateDeploymentProperties(propertiesToUse);
 		schedulerService.schedule(scheduleName, taskDefinitionName, propertiesToUse, arguments);
 	}
 

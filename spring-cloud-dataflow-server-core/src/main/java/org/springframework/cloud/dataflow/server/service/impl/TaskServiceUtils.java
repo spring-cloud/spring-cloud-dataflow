@@ -113,18 +113,6 @@ public class TaskServiceUtils {
 	}
 
 	/**
-	 * Extract scheduler properties from the deployment properties by task name.
-	 * @param name the task app name to search for in the deployment properties.
-	 * @param taskDeploymentProperties the properties for the task deployment.
-	 * @return a map containing the scheduler properties for a task schedule.
-	 */
-	public static Map<String, String> extractSchedulerProperties(String name, Map<String, String> taskDeploymentProperties) {
-		Assert.hasText(name, "name must not be empty or null");
-		Assert.notNull(taskDeploymentProperties, "taskDeploymentProoperties must not be null");
-		return extractPropertiesByPrefix("scheduler", name, taskDeploymentProperties);
-	}
-
-	/**
 	 * Return a copy of a given task definition where short form parameters have been expanded
 	 * to their long form (amongst the whitelisted supported properties of the app) if
 	 * applicable.

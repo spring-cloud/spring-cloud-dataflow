@@ -41,11 +41,12 @@ import org.springframework.cloud.dataflow.server.config.apps.CommonApplicationPr
 import org.springframework.cloud.dataflow.server.configuration.TaskServiceDependencies;
 import org.springframework.cloud.dataflow.server.repository.TaskDefinitionRepository;
 import org.springframework.cloud.dataflow.server.service.SchedulerService;
+import org.springframework.cloud.dataflow.server.service.SchedulerServiceProperties;
 import org.springframework.cloud.scheduler.spi.core.CreateScheduleException;
 import org.springframework.cloud.scheduler.spi.core.ScheduleInfo;
 import org.springframework.cloud.scheduler.spi.core.Scheduler;
-import org.springframework.cloud.scheduler.spi.core.SchedulerPropertyKeys;
 import org.springframework.core.io.Resource;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.junit4.SpringRunner;
 
@@ -63,7 +64,10 @@ import static org.mockito.Mockito.when;
 		"spring.cloud.dataflow.applicationProperties.stream.globalstreamkey=nothere" })
 @EnableConfigurationProperties({ CommonApplicationProperties.class })
 public class DefaultSchedulerServiceTests {
-	private static final String SCHEDULER_PREFIX = "scheduler.demo.";
+
+	private static final String DATA_FLOW_SCHEDULER_PREFIX = "scheduler.";
+
+	private static final String SCHEDULER_PREFIX = "spring.cloud.scheduler.";
 
 	private static final String BASE_SCHEDULE_NAME = "myTaskDefinition";
 
@@ -77,6 +81,9 @@ public class DefaultSchedulerServiceTests {
 
 	@Autowired
 	private TaskDefinitionRepository taskDefinitionRepository;
+
+	@Autowired
+	private SchedulerServiceProperties schedulerServiceProperties;
 
 	@Autowired
 	private AppRegistry appRegistry;
@@ -94,11 +101,11 @@ public class DefaultSchedulerServiceTests {
 		initializeSuccessfulRegistry();
 
 		this.testProperties = new HashMap<>();
-		this.testProperties.put(SCHEDULER_PREFIX + "AAAA" , "* * * * *");
-		this.testProperties.put(SCHEDULER_PREFIX + SchedulerPropertyKeys.CRON_EXPRESSION, "* * * * *");
+		this.testProperties.put(DATA_FLOW_SCHEDULER_PREFIX + "AAAA", "* * * * *");
+		this.testProperties.put(DATA_FLOW_SCHEDULER_PREFIX + "EXPRESSION", "* * * * *");
 		this.resolvedProperties = new HashMap<>();
-		this.resolvedProperties.put("AAAA", "* * * * *");
-		this.resolvedProperties.put(SchedulerPropertyKeys.CRON_EXPRESSION, "* * * * *");
+		this.resolvedProperties.put(SCHEDULER_PREFIX + "AAAA", "* * * * *");
+		this.resolvedProperties.put(SCHEDULER_PREFIX + "EXPRESSION", "* * * * *");
 		this.commandLineArgs = new ArrayList<>();
 	}
 
@@ -177,12 +184,36 @@ public class DefaultSchedulerServiceTests {
 		schedulerService.schedule(BASE_SCHEDULE_NAME + 3,
 				BASE_DEFINITION_NAME, this.testProperties, this.commandLineArgs);
 
-		List<ScheduleInfo> schedules = schedulerService.list(null);
+		List<ScheduleInfo> schedules = schedulerService.list();
 		assertThat(schedules.size()).isEqualTo(3);
 		verifyScheduleExistsInScheduler(schedules.get(0));
 		verifyScheduleExistsInScheduler(schedules.get(1));
 		verifyScheduleExistsInScheduler(schedules.get(2));
+	}
 
+	@Test
+	@DirtiesContext
+	public void testListMaxEntry() {
+		final int MAX_COUNT = 500;
+		schedulerServiceProperties.setMaxSchedulesReturned(MAX_COUNT);
+		for (int i = 0; i < MAX_COUNT + 1; i++) {
+			schedulerService.schedule(BASE_SCHEDULE_NAME + i,
+					BASE_DEFINITION_NAME, this.testProperties, this.commandLineArgs);
+		}
+		List<ScheduleInfo> schedules = schedulerService.list();
+		assertThat(schedules.size()).isEqualTo(MAX_COUNT);
+	}
+
+	@Test(expected = UnsupportedOperationException.class)
+	@DirtiesContext
+	public void testListPaginated() {
+		schedulerService.list(new PageRequest(0, 1));
+	}
+
+	@Test(expected = UnsupportedOperationException.class)
+	@DirtiesContext
+	public void testListWithParamsPaginated() {
+		schedulerService.list(new PageRequest(0, 1), BASE_DEFINITION_NAME);
 	}
 
 	@Test
@@ -196,7 +227,7 @@ public class DefaultSchedulerServiceTests {
 		schedulerService.schedule(BASE_SCHEDULE_NAME + 3,
 				BASE_DEFINITION_NAME, this.testProperties, this.commandLineArgs);
 
-		List<ScheduleInfo> schedules = schedulerService.list(null, BASE_DEFINITION_NAME + 1);
+		List<ScheduleInfo> schedules = schedulerService.list(BASE_DEFINITION_NAME + 1);
 		assertThat(schedules.size()).isEqualTo(1);
 		verifyScheduleExistsInScheduler(schedules.get(0));
 	}
@@ -205,9 +236,9 @@ public class DefaultSchedulerServiceTests {
 	@DirtiesContext
 	public void testEmptyList() {
 		taskDefinitionRepository.save(new TaskDefinition(BASE_DEFINITION_NAME + 1, "demo"));
-		List<ScheduleInfo> schedules = schedulerService.list(null, BASE_DEFINITION_NAME + 1);
+		List<ScheduleInfo> schedules = schedulerService.list(BASE_DEFINITION_NAME + 1);
 		assertThat(schedules.size()).isEqualTo(0);
-		schedules = schedulerService.list(null);
+		schedules = schedulerService.list();
 		assertThat(schedules.size()).isEqualTo(0);
 	}
 
