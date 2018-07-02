@@ -32,6 +32,8 @@ public class FeatureInfo {
 
 	private boolean skipperEnabled = false;
 
+	private boolean schedulerEnabled = false;
+
 	/**
 	 * Default constructor for serialization frameworks.
 	 */
@@ -70,4 +72,11 @@ public class FeatureInfo {
 		this.skipperEnabled = skipperEnabled;
 	}
 
+	public boolean isSchedulerEnabled() {
+		return schedulerEnabled;
+	}
+
+	public void setSchedulerEnabled(boolean schedulerEnabled) {
+		this.schedulerEnabled = schedulerEnabled;
+	}
 }

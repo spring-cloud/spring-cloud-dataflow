@@ -121,21 +121,6 @@ public class TaskServiceUtilsTests {
 	}
 
 	@Test
-	public void testExtractSchedulerProperties() {
-		Map<String, String> taskDeploymentProperties = new HashMap<>();
-		taskDeploymentProperties.put("scheduler.test.foo", "bar");
-		taskDeploymentProperties.put("app.test.none", "boo");
-		taskDeploymentProperties.put("scheduler.test.test", "baz");
-		taskDeploymentProperties.put("scheduler.none.test", "boo");
-		Map<String, String> result = TaskServiceUtils.extractSchedulerProperties("test",
-				taskDeploymentProperties);
-
-		assertThat(result.size()).isEqualTo(2);
-		assertThat(result.get("foo")).isEqualTo("bar");
-		assertThat(result.get("test")).isEqualTo("baz");
-	}
-
-	@Test
 	public void testMergeAndExpandAppProperties() {
 		TaskDefinition taskDefinition = new TaskDefinition("testTask", "testApp");
 		Map<String, String> appDeploymentProperties = new HashMap<>();

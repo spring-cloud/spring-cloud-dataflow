@@ -123,7 +123,7 @@ public class TaskSchedulerControllerTests {
 		repository.save(new TaskDefinition("testDefinition", "testApp"));
 		mockMvc.perform(post("/tasks/schedules/").param("taskDefinitionName", "testDefinition").
 				param("scheduleName", "mySchedule").
-				param("properties", "scheduler.testApp.spring.cloud.scheduler.cron.expression=* * * * *")
+				param("properties", "scheduler.cron.expression=* * * * *")
 				.accept(MediaType.APPLICATION_JSON)).andDo(print()).andExpect(status().isCreated());
 		assertEquals(1, simpleTestScheduler.list().size());
 		ScheduleInfo scheduleInfo = simpleTestScheduler.list().get(0);

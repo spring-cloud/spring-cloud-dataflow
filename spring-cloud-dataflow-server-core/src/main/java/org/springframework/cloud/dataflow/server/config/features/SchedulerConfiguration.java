@@ -26,6 +26,7 @@ import org.springframework.cloud.dataflow.registry.AppRegistryCommon;
 import org.springframework.cloud.dataflow.server.config.apps.CommonApplicationProperties;
 import org.springframework.cloud.dataflow.server.repository.TaskDefinitionRepository;
 import org.springframework.cloud.dataflow.server.service.SchedulerService;
+import org.springframework.cloud.dataflow.server.service.SchedulerServiceProperties;
 import org.springframework.cloud.dataflow.server.service.impl.DefaultSchedulerService;
 import org.springframework.cloud.dataflow.server.service.impl.TaskConfigurationProperties;
 import org.springframework.cloud.scheduler.spi.core.Scheduler;
@@ -42,7 +43,7 @@ import org.springframework.core.io.ResourceLoader;
 
 @Configuration
 @Conditional({SchedulerConfiguration.SchedulerConfigurationPropertyChecker.class})
-@EnableConfigurationProperties({TaskConfigurationProperties.class, CommonApplicationProperties.class})
+@EnableConfigurationProperties({TaskConfigurationProperties.class, CommonApplicationProperties.class, SchedulerServiceProperties.class})
 public class SchedulerConfiguration {
 
 	@Value("${spring.cloud.dataflow.server.uri:}")
@@ -55,11 +56,12 @@ public class SchedulerConfiguration {
 			AppRegistryCommon registry, ResourceLoader resourceLoader,
 			TaskConfigurationProperties taskConfigurationProperties,
 			DataSourceProperties dataSourceProperties,
-			ApplicationConfigurationMetadataResolver metaDataResolver) {
+			ApplicationConfigurationMetadataResolver metaDataResolver,
+			SchedulerServiceProperties schedulerServiceProperties) {
 		return new DefaultSchedulerService(commonApplicationProperties,
 				scheduler, taskDefinitionRepository, registry, resourceLoader,
 				taskConfigurationProperties, dataSourceProperties,
-				this.dataflowServerUri, metaDataResolver);
+				this.dataflowServerUri, metaDataResolver, schedulerServiceProperties);
 	}
 
 	public static class SchedulerConfigurationPropertyChecker extends AllNestedConditions {
