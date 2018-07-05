@@ -78,7 +78,9 @@ public class TaskSchedulerController {
 	public PagedResources<ScheduleInfoResource> list(
 			PagedResourcesAssembler<ScheduleInfo> assembler) {
 		List<ScheduleInfo> result = this.schedulerService.list();
-		Pageable pageable = new PageRequest(0, result.size());
+		int resultSize = result.size();
+		Pageable pageable = new PageRequest(0,
+				(resultSize == 0) ? resultSize = 1 : resultSize); //handle empty result set
 
 		Page<ScheduleInfo> page = new PageImpl<>(result, pageable,
 				result.size());
@@ -97,7 +99,9 @@ public class TaskSchedulerController {
 	public PagedResources<ScheduleInfoResource> filteredList(@PathVariable String taskDefinitionName,
 			PagedResourcesAssembler<ScheduleInfo> assembler) {
 		List<ScheduleInfo> result = this.schedulerService.list(taskDefinitionName);
-		Pageable pageable = new PageRequest(0, result.size());
+		int resultSize = result.size();
+		Pageable pageable = new PageRequest(0,
+				(resultSize == 0) ? resultSize = 1 : resultSize); //handle empty result set
 		Page<ScheduleInfo> page = new PageImpl<>(result, pageable,
 				result.size());
 		return assembler.toResource(page, taskAssembler);

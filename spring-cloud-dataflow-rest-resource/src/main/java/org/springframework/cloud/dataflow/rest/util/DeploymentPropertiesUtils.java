@@ -164,8 +164,8 @@ public final class DeploymentPropertiesUtils {
 	}
 
 	/**
-	 * Ensure that deployment properties only have keys starting with {@code app.} or
-	 * {@code deployer.}. In case non supported key is found {@link IllegalArgumentException}
+	 * Ensure that deployment properties only have keys starting with {@code app.},
+	 * {@code deployer.} or, {@code spring.cloud.scheduler.}. In case non supported key is found {@link IllegalArgumentException}
 	 * is thrown.
 	 *
 	 * @param properties the properties to check
@@ -176,9 +176,10 @@ public final class DeploymentPropertiesUtils {
 		}
 		for (Entry<String, String> property : properties.entrySet()) {
 			String key = property.getKey();
-			if (!key.startsWith("app.") && !key.startsWith("deployer.")) {
+			if (!key.startsWith("app.") && !key.startsWith("deployer.")
+					&& !key.startsWith("spring.cloud.scheduler.")) {
 				throw new IllegalArgumentException(
-						"Only deployment property keys starting with 'app.', 'deployer.' allowed, got '" + key + "'");
+						"Only deployment property keys starting with 'app.', 'deployer.' or, 'spring.cloud.scheduler.' allowed, got '" + key + "'");
 			}
 		}
 	}

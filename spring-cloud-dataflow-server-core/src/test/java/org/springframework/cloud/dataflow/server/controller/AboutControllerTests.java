@@ -78,7 +78,7 @@ public class AboutControllerTests {
 	@Test
 	public void testListApplications() throws Exception {
 		ResultActions result = mockMvc.perform(get("/about").accept(MediaType.APPLICATION_JSON)).andDo(print()).andExpect(status().isOk());
-				result.andExpect(jsonPath("$.featureInfo.analyticsEnabled", is(true)))
+				result.andDo(print()).andExpect(jsonPath("$.featureInfo.analyticsEnabled", is(true)))
 				.andExpect(jsonPath("$.featureInfo.skipperEnabled", is(false)))
 				.andExpect(jsonPath("$.versionInfo.implementation.name", is("${info.app.name}")))
 				.andExpect(jsonPath("$.versionInfo.implementation.version", is("1.2.3.IMPLEMENTATION.TEST")))
@@ -96,6 +96,10 @@ public class AboutControllerTests {
 				.andExpect(jsonPath("$.securityInfo.formLogin", is(false)))
 				.andExpect(jsonPath("$.securityInfo.authenticated", is(false)))
 				.andExpect(jsonPath("$.securityInfo.username", isEmptyOrNullString()))
+				.andExpect(jsonPath("$.featureInfo.streamsEnabled", is(true)))
+				.andExpect(jsonPath("$.featureInfo.tasksEnabled", is(true)))
+				.andExpect(jsonPath("$.featureInfo.skipperEnabled", is(false)))
+				.andExpect(jsonPath("$.featureInfo.schedulerEnabled", is(false)))
 				.andExpect(jsonPath("$.runtimeEnvironment.appDeployer.deployerName", not(isEmptyOrNullString())));
 	}
 

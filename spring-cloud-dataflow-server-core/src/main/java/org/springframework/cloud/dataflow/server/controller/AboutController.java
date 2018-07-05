@@ -110,6 +110,7 @@ public class AboutController {
 		featureInfo.setStreamsEnabled(featuresProperties.isStreamsEnabled());
 		featureInfo.setTasksEnabled(featuresProperties.isTasksEnabled());
 		featureInfo.setSkipperEnabled(featuresProperties.isSkipperEnabled());
+		featureInfo.setSchedulerEnabled(featuresProperties.isSchedulesEnabled());
 
 
 		final VersionInfo versionInfo = getVersionInfo();
