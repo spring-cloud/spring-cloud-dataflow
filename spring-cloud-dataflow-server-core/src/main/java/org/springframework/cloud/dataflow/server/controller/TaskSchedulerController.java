@@ -97,7 +97,7 @@ public class TaskSchedulerController {
 	@ResponseStatus(HttpStatus.OK)
 	public ScheduleInfoResource getSchedule(
 			@PathVariable("name") String scheduleName) {
-		return taskAssembler.toResource(schedulerService.getSchedule(scheduleName));
+		return taskAssembler.toResource(this.schedulerService.getSchedule(scheduleName));
 	}
 
 	/**
