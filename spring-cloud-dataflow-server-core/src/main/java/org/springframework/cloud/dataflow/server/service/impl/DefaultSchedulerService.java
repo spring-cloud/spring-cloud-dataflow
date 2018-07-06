@@ -131,8 +131,8 @@ public class DefaultSchedulerService implements SchedulerService {
 		}
 		AppDefinition revisedDefinition = TaskServiceUtils.mergeAndExpandAppProperties(taskDefinition, metadataResource,
 				appDeploymentProperties, whitelistProperties);
-		taskDeploymentProperties = extractAndQualifySchedulerProperties(taskDeploymentProperties);
 		DeploymentPropertiesUtils.validateDeploymentProperties(taskDeploymentProperties);
+		taskDeploymentProperties = extractAndQualifySchedulerProperties(taskDeploymentProperties);
 		ScheduleRequest scheduleRequest = new ScheduleRequest(revisedDefinition,
 				taskDeploymentProperties,
 				deployerDeploymentProperties, scheduleName, getTaskResource(taskDefinitionName));
