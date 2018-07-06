@@ -47,6 +47,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -100,6 +101,23 @@ public class TaskSchedulerControllerTests {
 				andDo(print()).andExpect(status().isOk()).
 				andExpect(jsonPath("$.content[*].scheduleName", containsInAnyOrder("schedule1","schedule2")))
 				.andExpect(jsonPath("$.content", hasSize(2)));
+	}
+
+	@Test
+	public void testGetSchedule() throws Exception {
+		this.registry.register("task.testApp", new URI("file:src/test/resources/apps/foo-task"));
+
+		repository.save(new TaskDefinition("testDefinition", "testApp"));
+		createSampleSchedule("schedule1");
+		createSampleSchedule("schedule2");
+		mockMvc.perform(get("/tasks/schedules/schedule1").accept(MediaType.APPLICATION_JSON))
+				.andDo(print()).andExpect(status().isOk())
+				.andExpect(content().json("{scheduleName: \"schedule1\"}"))
+				.andExpect(content().json("{taskDefinitionName: \"testDefinition\"}"));
+		mockMvc.perform(get("/tasks/schedules/schedule2").accept(MediaType.APPLICATION_JSON))
+				.andDo(print()).andExpect(status().isOk())
+				.andExpect(content().json("{scheduleName: \"schedule2\"}"))
+				.andExpect(content().json("{taskDefinitionName: \"testDefinition\"}"));
 	}
 
 	@Test

@@ -88,6 +88,19 @@ public class TaskSchedulerController {
 	}
 
 	/**
+	 * Return a {@link ScheduleInfo} for a specific Schedule.
+	 *
+	 * @param scheduleName assembler for the {@link ScheduleInfo}
+	 * @return a {@link ScheduleInfoResource} instance for the scheduleName specified.
+	 */
+	@RequestMapping(value = "/{name}", method = RequestMethod.GET)
+	@ResponseStatus(HttpStatus.OK)
+	public ScheduleInfoResource getSchedule(
+			@PathVariable("name") String scheduleName) {
+		return taskAssembler.toResource(this.schedulerService.getSchedule(scheduleName));
+	}
+
+	/**
 	 * Return a page-able list of {@link ScheduleInfo}s for a specific
 	 * {@link org.springframework.cloud.dataflow.core.TaskDefinition} name.
 	 *

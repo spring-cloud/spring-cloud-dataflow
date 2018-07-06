@@ -90,4 +90,12 @@ public interface SchedulerService {
 	 * @return A List of Schedules for the given system.
 	 */
 	List<ScheduleInfo> list();
+
+	/**
+	 * Retrieves the {@link ScheduleInfo} for the specified ScheduleName.
+	 *
+	 * @param scheduleName the name of schedule to retrieve.
+	 * @return {@link ScheduleInfo} for the scheduleName passed in.
+	 */
+	ScheduleInfo getSchedule(String scheduleName);
 }

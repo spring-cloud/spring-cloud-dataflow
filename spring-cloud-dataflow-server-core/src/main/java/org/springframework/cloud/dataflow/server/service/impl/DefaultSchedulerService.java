@@ -166,6 +166,15 @@ public class DefaultSchedulerService implements SchedulerService {
 				this.schedulerServiceProperties.getMaxSchedulesReturned());
 	}
 
+	@Override
+	public ScheduleInfo getSchedule(String scheduleName) {
+		List<ScheduleInfo> result = list().stream()
+				.filter(scheduleInfo -> scheduleInfo.getScheduleName().equals(scheduleName))
+				.collect(Collectors.toList());
+		Assert.isTrue(!(result.size() > 1), "more than one schedule was returned for scheduleName, should only be one");
+		return result.size() > 0 ? result.get(0) : null;
+	}
+
 	private List<ScheduleInfo> limitScheduleInfoResultSize(List<ScheduleInfo> resultSet,
 			int schedulerLimitResultSize) {
 		if(resultSet.size() > schedulerLimitResultSize) {
