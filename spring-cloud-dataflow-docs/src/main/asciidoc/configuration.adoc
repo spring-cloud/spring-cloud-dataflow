@@ -16,6 +16,7 @@ Sprig Cloud Data Flow Server offers specific set of features that can be enabled
 * Tasks
 * Analytics
 * Skipper
+* Task Scheduler
 
 One can enable and disable these features by setting the following boolean properties when launching the Data Flow server:
 
@@ -23,8 +24,9 @@ One can enable and disable these features by setting the following boolean prope
 * `spring.cloud.dataflow.features.tasks-enabled`
 * `spring.cloud.dataflow.features.analytics-enabled`
 * `spring.cloud.dataflow.features.skipper-enabled`
+* `spring.cloud.dataflow.features.schedules-enabled`
 
-By default, stream, tasks, and analytics are enabled and Skipper is disabled by default.
+By default, stream, tasks, and analytics are enabled and Skipper along with Task Scheduler are disabled by default.
 
 NOTE: Since the analytics feature is enabled by default, the Data Flow Server expects to have a valid Redis store available to server as the analytic repository, because Spring Cloud Data Flow provides a default implementation of analytics based on Redis.
 This also means that the Data Flow Server's `health` depends on the redis store availability as well.
