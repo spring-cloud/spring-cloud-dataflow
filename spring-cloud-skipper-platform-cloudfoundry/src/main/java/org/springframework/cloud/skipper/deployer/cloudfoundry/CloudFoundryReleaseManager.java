@@ -15,11 +15,6 @@
  */
 package org.springframework.cloud.skipper.deployer.cloudfoundry;
 
-import static org.springframework.cloud.skipper.deployer.cloudfoundry.CFManifestApplicationDeployer.PUSH_REQUEST_TIMEOUT;
-import static org.springframework.cloud.skipper.deployer.cloudfoundry.CFManifestApplicationDeployer.STAGING_TIMEOUT;
-import static org.springframework.cloud.skipper.deployer.cloudfoundry.CFManifestApplicationDeployer.STARTUP_TIMEOUT;
-import static org.springframework.cloud.skipper.deployer.cloudfoundry.CFManifestApplicationDeployer.isNotFoundError;
-
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
@@ -31,7 +26,6 @@ import org.cloudfoundry.operations.applications.PushApplicationManifestRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import org.springframework.cloud.skipper.domain.Manifest;
 import org.springframework.cloud.skipper.domain.Release;
 import org.springframework.cloud.skipper.domain.SkipperManifestKind;
 import org.springframework.cloud.skipper.domain.Status;
@@ -42,8 +36,12 @@ import org.springframework.cloud.skipper.server.domain.AppDeployerData;
 import org.springframework.cloud.skipper.server.repository.AppDeployerDataRepository;
 import org.springframework.cloud.skipper.server.repository.ReleaseRepository;
 import org.springframework.cloud.skipper.server.util.ArgumentSanitizer;
-import org.springframework.cloud.skipper.server.util.ManifestUtils;
 import org.springframework.util.Assert;
+
+import static org.springframework.cloud.skipper.deployer.cloudfoundry.CloudFoundryManifestApplicationDeployer.PUSH_REQUEST_TIMEOUT;
+import static org.springframework.cloud.skipper.deployer.cloudfoundry.CloudFoundryManifestApplicationDeployer.STAGING_TIMEOUT;
+import static org.springframework.cloud.skipper.deployer.cloudfoundry.CloudFoundryManifestApplicationDeployer.STARTUP_TIMEOUT;
+import static org.springframework.cloud.skipper.deployer.cloudfoundry.CloudFoundryManifestApplicationDeployer.isNotFoundError;
 
 /**
  * A ReleaseManager implementation that uses an CF manifest based deployer.
@@ -66,13 +64,13 @@ public class CloudFoundryReleaseManager implements ReleaseManager {
 
 	private final PlatformCloudFoundryOperations platformCloudFoundryOperations;
 
-	private final CFManifestApplicationDeployer cfManifestApplicationDeployer;
+	private final CloudFoundryManifestApplicationDeployer cfManifestApplicationDeployer;
 
 	public CloudFoundryReleaseManager(ReleaseRepository releaseRepository,
 			AppDeployerDataRepository appDeployerDataRepository,
 			CloudFoundryReleaseAnalyzer cloudFoundryReleaseAnalyzer,
 			PlatformCloudFoundryOperations platformCloudFoundryOperations,
-			CFManifestApplicationDeployer cfManifestApplicationDeployer
+			CloudFoundryManifestApplicationDeployer cfManifestApplicationDeployer
 			) {
 		this.releaseRepository = releaseRepository;
 		this.appDeployerDataRepository = appDeployerDataRepository;
@@ -83,7 +81,7 @@ public class CloudFoundryReleaseManager implements ReleaseManager {
 
 	@Override
 	public Collection<String> getSupportedKinds() {
-		return Arrays.asList(SkipperManifestKind.CFApplication.name());
+		return Arrays.asList(SkipperManifestKind.CloudFoundryApplication.name());
 	}
 	
 	public Release install(Release newRelease) {
@@ -146,14 +144,6 @@ public class CloudFoundryReleaseManager implements ReleaseManager {
 	public ReleaseAnalysisReport createReport(Release existingRelease, Release replacingRelease, boolean initial) {
 		ReleaseAnalysisReport releaseAnalysisReport = this.cloudFoundryReleaseAnalyzer
 				.analyze(existingRelease, replacingRelease);
-		ApplicationManifest applicationManifest = this.cfManifestApplicationDeployer
-				.getCFApplicationManifest(replacingRelease);
-		Map<String, ?> configValues = CFApplicationManifestUtils.getCFManifestMap(applicationManifest);
-		String manifestData = ManifestUtils.createManifest(replacingRelease.getPkg(), configValues);
-		logger.debug("Replacing Release Manifest = " + ArgumentSanitizer.sanitizeYml(manifestData));
-		Manifest manifest = new Manifest();
-		manifest.setData(manifestData);
-		replacingRelease.setManifest(manifest);
 		if (initial) {
 			this.releaseRepository.save(replacingRelease);
 		}

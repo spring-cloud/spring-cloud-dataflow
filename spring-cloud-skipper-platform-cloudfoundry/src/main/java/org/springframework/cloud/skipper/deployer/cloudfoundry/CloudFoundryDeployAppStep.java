@@ -15,7 +15,7 @@
  */
 package org.springframework.cloud.skipper.deployer.cloudfoundry;
 
-import static org.springframework.cloud.skipper.deployer.cloudfoundry.CFManifestApplicationDeployer.isNotFoundError;
+import static org.springframework.cloud.skipper.deployer.cloudfoundry.CloudFoundryManifestApplicationDeployer.isNotFoundError;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -55,11 +55,11 @@ public class CloudFoundryDeployAppStep {
 
 	private final PlatformCloudFoundryOperations platformCloudFoundryOperations;
 
-	private final CFManifestApplicationDeployer cfManifestApplicationDeployer;
+	private final CloudFoundryManifestApplicationDeployer cfManifestApplicationDeployer;
 
 	public CloudFoundryDeployAppStep(AppDeployerDataRepository appDeployerDataRepository,
 			ReleaseRepository releaseRepository, PlatformCloudFoundryOperations platformCloudFoundryOperations,
-			CFManifestApplicationDeployer cfManifestApplicationDeployer) {
+			CloudFoundryManifestApplicationDeployer cfManifestApplicationDeployer) {
 		this.appDeployerDataRepository = appDeployerDataRepository;
 		this.releaseRepository = releaseRepository;
 		this.platformCloudFoundryOperations = platformCloudFoundryOperations;
@@ -99,14 +99,14 @@ public class CloudFoundryDeployAppStep {
 				.applications().pushManifest(
 				PushApplicationManifestRequest.builder()
 						.manifest(applicationManifest)
-						.stagingTimeout(CFManifestApplicationDeployer.STAGING_TIMEOUT)
-						.startupTimeout(CFManifestApplicationDeployer.STARTUP_TIMEOUT)
+						.stagingTimeout(CloudFoundryManifestApplicationDeployer.STAGING_TIMEOUT)
+						.startupTimeout(CloudFoundryManifestApplicationDeployer.STARTUP_TIMEOUT)
 						.build())
 				.doOnSuccess(v -> logger.info("Done uploading bits for {}", applicationName))
 				.doOnError(e -> logger.error(
 						String.format("Error creating app %s.  Exception Message %s", applicationName,
 								e.getMessage())))
-				.timeout(CFManifestApplicationDeployer.PUSH_REQUEST_TIMEOUT)
+				.timeout(CloudFoundryManifestApplicationDeployer.PUSH_REQUEST_TIMEOUT)
 				.doOnSuccess(item -> {
 					logger.info("Successfully deployed {}", applicationName);
 					AppDeployerData appDeployerData = new AppDeployerData();
@@ -120,7 +120,7 @@ public class CloudFoundryDeployAppStep {
 						logger.warn("Unable to deploy application. It may have been destroyed before start completed: " + error.getMessage());
 					}
 					else {
-						logger.error(String.format("Failed to deploy %s", applicationName));
+						logger.error(String.format("Failed to deploy %s", applicationName + ". " +  error.getMessage()));
 					}
 				})
 				.block();

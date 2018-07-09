@@ -44,9 +44,9 @@ public class CloudFoundryReleaseAnalyzer {
 
 	private final Logger logger = LoggerFactory.getLogger(CloudFoundryReleaseAnalyzer.class);
 
-	private final CFManifestApplicationDeployer cfManifestApplicationDeployer;
+	private final CloudFoundryManifestApplicationDeployer cfManifestApplicationDeployer;
 
-	public CloudFoundryReleaseAnalyzer(CFManifestApplicationDeployer cfManifestApplicationDeployer) {
+	public CloudFoundryReleaseAnalyzer(CloudFoundryManifestApplicationDeployer cfManifestApplicationDeployer) {
 		this.cfManifestApplicationDeployer = cfManifestApplicationDeployer;
 	}
 

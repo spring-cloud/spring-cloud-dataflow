@@ -18,5 +18,5 @@ package org.springframework.cloud.skipper.domain;
 public enum SkipperManifestKind {
 	SpringCloudDeployerApplication,
 	SpringBootApp,
-	CFApplication
+	CloudFoundryApplication
 }

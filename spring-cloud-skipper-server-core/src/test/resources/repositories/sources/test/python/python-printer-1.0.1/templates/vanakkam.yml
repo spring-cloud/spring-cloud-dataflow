@@ -1,5 +1,9 @@
 apiVersion: skipper.spring.io/v1
-kind: CFApplication
+kind: CloudFoundryApplication
 spec:
-  resource: https://github.com/ilayaperumalg/sandbox/raw/master/python/vanakkam.py.zip
-  version:
+  resource: "{{{spec.resource}}}"
+  version: "{{{spec.version}}}"
+  manifest:
+    {{#spec.manifest.entrySet}}
+    "{{{key}}}": "{{{value}}}"
+    {{/spec.manifest.entrySet}}

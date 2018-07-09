@@ -1,5 +1,9 @@
 apiVersion: skipper.spring.io/v1
-kind: CFApplication
+kind: CloudFoundryApplication
 spec:
-  resource: maven://org.springframework.cloud.stream.app:log-sink-rabbit
-  version: 1.3.1.RELEASE
+  resource: "{{{spec.resource}}}"
+  version: "{{{spec.version}}}"
+  manifest:
+    {{#spec.manifest.entrySet}}
+    "{{{key}}}": "{{{value}}}"
+    {{/spec.manifest.entrySet}}

@@ -27,6 +27,7 @@ import java.util.Map;
 import java.util.Random;
 
 import io.jsonwebtoken.lang.Assert;
+import org.cloudfoundry.operations.applications.ApplicationHealthCheck;
 import org.cloudfoundry.operations.applications.ApplicationManifest;
 import org.cloudfoundry.operations.applications.ApplicationManifestUtils;
 import org.cloudfoundry.operations.applications.Docker;
@@ -38,6 +39,11 @@ import org.springframework.cloud.skipper.domain.Release;
 import org.springframework.core.io.Resource;
 import org.springframework.util.StringUtils;
 
+/**
+ * Utility class for Cloud Foundry Application Manifest related operations.
+ *
+ * @author Ilayaperumal Gopinathan
+ */
 public class CFApplicationManifestUtils {
 
 	public static ApplicationManifest updateApplicationPath(ApplicationManifest cfApplicationManifest, Resource application) {
@@ -85,6 +91,83 @@ public class CFApplicationManifestUtils {
 	public static ApplicationManifest updateApplicationName(Release release) {
 		String cfManifestYamlString = getCFManifestYamlStringFromPackage(release);
 		return updateApplicationName(cfManifestYamlString, release);
+	}
+
+	public static ApplicationManifest updateApplicationManifest(ApplicationManifest cfApplicationManifest,
+			Map<String, Object> manifest) {
+		ApplicationManifest.Builder applicationManifestBuilder = ApplicationManifest.builder()
+				.from(cfApplicationManifest);
+		for (Map.Entry<String, Object> manifestEntry: manifest.entrySet()) {
+			if (manifestEntry.getKey().equalsIgnoreCase("buildpack")) {
+				applicationManifestBuilder.buildpack((String) manifestEntry.getValue());
+			}
+			if (manifestEntry.getKey().equalsIgnoreCase("command")) {
+				applicationManifestBuilder.command((String) manifestEntry.getValue());
+			}
+			if (manifestEntry.getKey().equalsIgnoreCase("disk_quota")) {
+				applicationManifestBuilder.disk(Integer.valueOf((String) manifestEntry.getValue()));
+			}
+			if (manifestEntry.getKey().equalsIgnoreCase("domain")) {
+				// todo: support multiple domains
+				applicationManifestBuilder.domain((String) manifestEntry.getValue());
+			}
+			if (manifestEntry.getKey().equalsIgnoreCase("domains")) {
+				applicationManifestBuilder.domains(convertToIterableString((String)manifestEntry.getValue()));
+			}
+			if (manifestEntry.getKey().equalsIgnoreCase("env")) {
+				applicationManifestBuilder.environmentVariables(
+						(Map<String, ? extends Object>) manifestEntry.getValue());
+			}
+			if (manifestEntry.getKey().equalsIgnoreCase("health-check-http-endpoint")) {
+				applicationManifestBuilder.healthCheckHttpEndpoint((String) manifestEntry.getValue());
+			}
+			if (manifestEntry.getKey().equalsIgnoreCase("health-check-type")) {
+				applicationManifestBuilder.healthCheckType(ApplicationHealthCheck.from((String) manifestEntry.getValue()));
+			}
+			if (manifestEntry.getKey().equalsIgnoreCase("host")) {
+				applicationManifestBuilder.host((String) manifestEntry.getValue());
+			}
+			if (manifestEntry.getKey().equalsIgnoreCase("instances")) {
+				applicationManifestBuilder.instances(Integer.valueOf((String) manifestEntry.getValue()));
+			}
+			if (manifestEntry.getKey().equalsIgnoreCase("memory")) {
+				applicationManifestBuilder.memory(Integer.valueOf((String) manifestEntry.getValue()));
+			}
+			//todo: should we allow this?
+			if (manifestEntry.getKey().equalsIgnoreCase("name")) {
+				applicationManifestBuilder.name((String) manifestEntry.getValue());
+			}
+			if (manifestEntry.getKey().equalsIgnoreCase("no-hostname")) {
+				applicationManifestBuilder.noHostname(Boolean.valueOf((String) manifestEntry.getValue()));
+			}
+			if (manifestEntry.getKey().equalsIgnoreCase("no-route")) {
+				applicationManifestBuilder.noRoute(Boolean.valueOf((String) manifestEntry.getValue()));
+			}
+			//todo: should we allow this?
+//			if (manifestEntry.getKey().equalsIgnoreCase("path")) {
+//				applicationManifestBuilder.path((Path) manifestEntry.getValue());
+//			}
+			if (manifestEntry.getKey().equalsIgnoreCase("random-route")) {
+				applicationManifestBuilder.randomRoute(Boolean.valueOf((String)  manifestEntry.getValue()));
+			}
+			if (manifestEntry.getKey().equalsIgnoreCase("services")) {
+				applicationManifestBuilder.services(convertToIterableString((String) manifestEntry.getValue()));
+			}
+			if (manifestEntry.getKey().equalsIgnoreCase("service")) {
+				applicationManifestBuilder.service((String) manifestEntry.getValue());
+			}
+			if (manifestEntry.getKey().equalsIgnoreCase("stack")) {
+				applicationManifestBuilder.stack((String) manifestEntry.getValue());
+			}
+			if (manifestEntry.getKey().equalsIgnoreCase("timeout")) {
+				applicationManifestBuilder.timeout(Integer.valueOf((String) manifestEntry.getValue()));
+			}
+		}
+		return applicationManifestBuilder.build();
+	}
+
+	private static Iterable<String> convertToIterableString(String value) {
+		return StringUtils.commaDelimitedListToSet(value);
 	}
 
 	public static Map<String, String> getCFManifestMap(ApplicationManifest applicationManifest) {

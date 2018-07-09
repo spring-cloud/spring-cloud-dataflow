@@ -16,7 +16,7 @@
 package org.springframework.cloud.skipper.deployer.cloudfoundry;
 
 import org.springframework.cloud.deployer.resource.support.DelegatingResourceLoader;
-import org.springframework.cloud.skipper.domain.CFApplicationManifestReader;
+import org.springframework.cloud.skipper.domain.CloudFoundryApplicationManifestReader;
 import org.springframework.cloud.skipper.server.deployer.ReleaseManagerFactory;
 import org.springframework.cloud.skipper.server.repository.AppDeployerDataRepository;
 import org.springframework.cloud.skipper.server.repository.ReleaseRepository;
@@ -37,14 +37,14 @@ public class CloudFoundrySkipperServerConfiguration {
 			AppDeployerDataRepository appDeployerDataRepository,
 			CloudFoundryReleaseAnalyzer cloudFoundryReleaseAnalyzer,
 			PlatformCloudFoundryOperations platformCloudFoundryOperations,
-			CFManifestApplicationDeployer cfManifestApplicationDeployer) {
+			CloudFoundryManifestApplicationDeployer cfManifestApplicationDeployer) {
 		return new CloudFoundryReleaseManager(releaseRepository, appDeployerDataRepository, cloudFoundryReleaseAnalyzer,
 				platformCloudFoundryOperations, cfManifestApplicationDeployer);
 	}
 
 	@Bean
-	public CFApplicationManifestReader cfApplicationManifestReader() {
-		return new CFApplicationManifestReader();
+	public CloudFoundryApplicationManifestReader cfApplicationManifestReader() {
+		return new CloudFoundryApplicationManifestReader();
 	}
 
 	@Bean
@@ -64,7 +64,7 @@ public class CloudFoundrySkipperServerConfiguration {
 
 	@Bean
 	public CloudFoundryHealthCheckStep cloudFoundryHealthCheckStep(
-			CFManifestApplicationDeployer cfManifestApplicationDeployer) {
+			CloudFoundryManifestApplicationDeployer cfManifestApplicationDeployer) {
 		return new CloudFoundryHealthCheckStep(cfManifestApplicationDeployer);
 	}
 
@@ -77,7 +77,7 @@ public class CloudFoundrySkipperServerConfiguration {
 	@Bean
 	public CloudFoundryDeployAppStep cloudFoundryDeployAppStep(AppDeployerDataRepository appDeployerDataRepository,
 			ReleaseRepository releaseRepository, PlatformCloudFoundryOperations platformCloudFoundryOperations,
-			CFManifestApplicationDeployer cfManifestApplicationDeployer) {
+			CloudFoundryManifestApplicationDeployer cfManifestApplicationDeployer) {
 		return new CloudFoundryDeployAppStep(appDeployerDataRepository, releaseRepository,
 				platformCloudFoundryOperations, cfManifestApplicationDeployer);
 	}
@@ -89,16 +89,16 @@ public class CloudFoundrySkipperServerConfiguration {
 	}
 
 	@Bean
-	public CFManifestApplicationDeployer cfApplicationDeployer(CFApplicationManifestReader cfApplicationManifestReader,
+	public CloudFoundryManifestApplicationDeployer cfApplicationDeployer(CloudFoundryApplicationManifestReader cfApplicationManifestReader,
 			PlatformCloudFoundryOperations platformCloudFoundryOperations,
 			DelegatingResourceLoader delegatingResourceLoader) {
-		return new CFManifestApplicationDeployer(cfApplicationManifestReader, platformCloudFoundryOperations,
+		return new CloudFoundryManifestApplicationDeployer(cfApplicationManifestReader, platformCloudFoundryOperations,
 				delegatingResourceLoader);
 	}
 
 	@Bean
 	public CloudFoundryReleaseAnalyzer cloudFoundryReleaseAnalyzer(
-			CFManifestApplicationDeployer cfManifestApplicationDeployer) {
+			CloudFoundryManifestApplicationDeployer cfManifestApplicationDeployer) {
 		return new CloudFoundryReleaseAnalyzer(cfManifestApplicationDeployer);
 	}
 }

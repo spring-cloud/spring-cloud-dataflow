@@ -52,7 +52,7 @@ public class CloudFoundrySimpleRedBlackUpgradeStrategy implements UpgradeStrateg
 
 	@Override
 	public Collection<String> getSupportedKinds() {
-		return Arrays.asList(SkipperManifestKind.CFApplication.name());
+		return Arrays.asList(SkipperManifestKind.CloudFoundryApplication.name());
 	}
 	
 	@Override

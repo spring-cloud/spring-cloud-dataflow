@@ -40,21 +40,21 @@ import org.springframework.cloud.skipper.SkipperException;
  *
  * @author Ilayaperumal Gopinathan
  */
-public class CFApplicationManifestReader implements SkipperManifestReader {
+public class CloudFoundryApplicationManifestReader implements SkipperManifestReader {
 
-	private final static Logger logger = LoggerFactory.getLogger(CFApplicationManifestReader.class);
+	private final static Logger logger = LoggerFactory.getLogger(CloudFoundryApplicationManifestReader.class);
 
-	public List<CFApplicationSkipperManifest> read(String manifest) {
+	public List<CloudFoundryApplicationSkipperManifest> read(String manifest) {
 		if (canSupport(manifest)) {
-			List<CFApplicationSkipperManifest> applicationSpecs = new ArrayList<>();
+			List<CloudFoundryApplicationSkipperManifest> applicationSpecs = new ArrayList<>();
 			YAMLMapper mapper = new YAMLMapper();
 			mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
 			try {
-				MappingIterator<CFApplicationSkipperManifest> it = mapper
-																	.readerFor(CFApplicationSkipperManifest.class)
+				MappingIterator<CloudFoundryApplicationSkipperManifest> it = mapper
+																	.readerFor(CloudFoundryApplicationSkipperManifest.class)
 																	.readValues(manifest);
 				while (it.hasNextValue()) {
-					CFApplicationSkipperManifest appKind = it.next();
+					CloudFoundryApplicationSkipperManifest appKind = it.next();
 					applicationSpecs.add(appKind);
 				}
 			}
@@ -85,7 +85,7 @@ public class CFApplicationManifestReader implements SkipperManifestReader {
 	}
 
 	public String[] getSupportedKinds() {
-		return new String[] {SkipperManifestKind.CFApplication.name()};
+		return new String[] {SkipperManifestKind.CloudFoundryApplication.name()};
 	}
 
 	private boolean assertSupportedKind(Object object) {

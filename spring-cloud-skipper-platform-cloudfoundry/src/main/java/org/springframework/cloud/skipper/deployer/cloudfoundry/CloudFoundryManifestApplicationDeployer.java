@@ -35,9 +35,9 @@ import org.springframework.cloud.deployer.resource.support.DelegatingResourceLoa
 import org.springframework.cloud.deployer.spi.app.AppStatus;
 import org.springframework.cloud.deployer.spi.app.DeploymentState;
 import org.springframework.cloud.deployer.spi.cloudfoundry.CloudFoundryAppInstanceStatus;
-import org.springframework.cloud.skipper.domain.CFApplicationManifestReader;
-import org.springframework.cloud.skipper.domain.CFApplicationSkipperManifest;
-import org.springframework.cloud.skipper.domain.CFApplicationSpec;
+import org.springframework.cloud.skipper.domain.CloudFoundryApplicationManifestReader;
+import org.springframework.cloud.skipper.domain.CloudFoundryApplicationSkipperManifest;
+import org.springframework.cloud.skipper.domain.CloudFoundryApplicationSpec;
 import org.springframework.cloud.skipper.domain.ConfigValues;
 import org.springframework.cloud.skipper.domain.Release;
 import org.springframework.cloud.skipper.domain.Status;
@@ -52,7 +52,7 @@ import org.springframework.util.StringUtils;
  *
  * @author Ilayaperumal Gopinathan
  */
-public class CFManifestApplicationDeployer {
+public class CloudFoundryManifestApplicationDeployer {
 
 	public static final Duration STAGING_TIMEOUT = Duration.ofMinutes(15L);
 
@@ -62,15 +62,15 @@ public class CFManifestApplicationDeployer {
 
 	public static final Duration DELETE_REQUEST_TIMEOUT = Duration.ofSeconds(30L);
 
-	private static final Logger logger = LoggerFactory.getLogger(CFManifestApplicationDeployer.class);
+	private static final Logger logger = LoggerFactory.getLogger(CloudFoundryManifestApplicationDeployer.class);
 
-	private final CFApplicationManifestReader cfApplicationManifestReader;
+	private final CloudFoundryApplicationManifestReader cfApplicationManifestReader;
 
 	private final PlatformCloudFoundryOperations platformCloudFoundryOperations;
 
 	private final DelegatingResourceLoader delegatingResourceLoader;
 
-	public CFManifestApplicationDeployer(CFApplicationManifestReader cfApplicationManifestReader,
+	public CloudFoundryManifestApplicationDeployer(CloudFoundryApplicationManifestReader cfApplicationManifestReader,
 			PlatformCloudFoundryOperations platformCloudFoundryOperations,
 			DelegatingResourceLoader delegatingResourceLoader) {
 		this.cfApplicationManifestReader = cfApplicationManifestReader;
@@ -96,9 +96,6 @@ public class CFManifestApplicationDeployer {
 						if (specValues.containsKey("version")) {
 							specVersion = specValues.get("version");
 						}
-						if (specValues.containsKey("cfManifest")) {
-							cfManifestYamlString = specValues.get("cfManifest");
-						}
 					}
 				}
 			}
@@ -106,28 +103,29 @@ public class CFManifestApplicationDeployer {
 		return getCFApplicationManifest(release, cfManifestYamlString, specResource, specVersion);
 	}
 
-	public ApplicationManifest getCFApplicationManifest(Release release, String cfManifestYamlString,
+	private ApplicationManifest getCFApplicationManifest(Release release, String cfManifestYamlString,
 			String specResource, String specVersion) {
-		Resource application = null;
-		ApplicationManifest applicationManifest = null;
-		List<? extends CFApplicationSkipperManifest> cfApplicationManifestList = this.cfApplicationManifestReader
+		ApplicationManifest cfApplicationManifest = CFApplicationManifestUtils.updateApplicationName(cfManifestYamlString, release);
+		List<? extends CloudFoundryApplicationSkipperManifest> cfApplicationManifestList = this.cfApplicationManifestReader
 				.read(release.getManifest().getData());
-		for (CFApplicationSkipperManifest cfApplicationSkipperManifest : cfApplicationManifestList) {
-			CFApplicationSpec spec = cfApplicationSkipperManifest.getSpec();
+		for (CloudFoundryApplicationSkipperManifest cfApplicationSkipperManifest : cfApplicationManifestList) {
+			CloudFoundryApplicationSpec spec = cfApplicationSkipperManifest.getSpec();
 			try {
 				String resource = (StringUtils.hasText(specResource)) ? specResource : spec.getResource();
 				String version = (StringUtils.hasText(specVersion)) ? specVersion : spec.getVersion();
-				application = this.delegatingResourceLoader.getResource(
+				Resource application = this.delegatingResourceLoader.getResource(
 						AppDeploymentRequestFactory.getResourceLocation(resource, version));
+				cfApplicationManifest = CFApplicationManifestUtils.updateApplicationPath(cfApplicationManifest, application);
+				if (spec.getManifest() != null) {
+					cfApplicationManifest = CFApplicationManifestUtils
+							.updateApplicationManifest(cfApplicationManifest, spec.getManifest());
+				}
 			}
 			catch (Exception e) {
 				throw new IllegalArgumentException(e.getMessage());
 			}
 		}
-		ApplicationManifest cfApplicationManifest = CFApplicationManifestUtils
-				.updateApplicationName(cfManifestYamlString, release);
-		applicationManifest = CFApplicationManifestUtils.updateApplicationPath(cfApplicationManifest, application);
-		return applicationManifest;
+		return cfApplicationManifest;
 	}
 
 	public Mono<AppStatus> getStatus(String applicationName, String platformName) {

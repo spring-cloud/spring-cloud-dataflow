@@ -27,9 +27,9 @@ import org.springframework.cloud.skipper.domain.Release;
  */
 public class CloudFoundryHealthCheckStep {
 
-	private final CFManifestApplicationDeployer cfManifestApplicationDeployer;
+	private final CloudFoundryManifestApplicationDeployer cfManifestApplicationDeployer;
 
-	public CloudFoundryHealthCheckStep(CFManifestApplicationDeployer cfManifestApplicationDeployer) {
+	public CloudFoundryHealthCheckStep(CloudFoundryManifestApplicationDeployer cfManifestApplicationDeployer) {
 		this.cfManifestApplicationDeployer = cfManifestApplicationDeployer;
 	}
 

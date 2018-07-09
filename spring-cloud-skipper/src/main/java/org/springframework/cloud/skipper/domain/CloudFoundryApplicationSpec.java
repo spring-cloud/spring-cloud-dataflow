@@ -15,31 +15,26 @@
  */
 package org.springframework.cloud.skipper.domain;
 
+import java.util.Map;
+
 /**
- * Specification to handle applications that can be deployed into target platforms based
- * on their Spring Cloud Deployer implementations. Contained inside a
- * {@link CFApplicationSkipperManifest} instance.
+ * Specification to handle applications that can be deployed into Cloud Foundry platforms based
+ * on their CF manifest configuration. Contained inside a {@link CloudFoundryApplicationSkipperManifest} instance.
  *
  * @author Ilayaperumal Gopinathan
  */
-public class CFApplicationSpec {
-
-	private String manifest;
+public class CloudFoundryApplicationSpec {
 
 	private String resource;
 
 	private String version;
 
-	public String getManifest() {
-		return manifest;
-	}
+	private Map<String, Object> manifest;
 
-	public void setManifest(String manifest) {
-		this.manifest = manifest;
-	}
+	private String cfManifest;
 
 	public String getResource() {
-		return resource;
+		return this.resource;
 	}
 
 	public void setResource(String resource) {
@@ -52,6 +47,22 @@ public class CFApplicationSpec {
 
 	public void setVersion(String version) {
 		this.version = version;
+	}
+
+	public Map<String, Object> getManifest() {
+		return this.manifest;
+	}
+
+	public void setManifest(Map<String, Object> manifest) {
+		this.manifest = manifest;
+	}
+
+	public String getCfManifest() {
+		return this.cfManifest;
+	}
+
+	public void setCfManifest(String cfManifest) {
+		this.cfManifest = cfManifest;
 	}
 
 }

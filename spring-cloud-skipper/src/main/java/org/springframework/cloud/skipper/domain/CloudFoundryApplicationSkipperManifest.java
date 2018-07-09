@@ -15,10 +15,6 @@
  */
 package org.springframework.cloud.skipper.domain;
 
-import java.util.Map;
-
-import org.springframework.cloud.skipper.SkipperException;
-
 /**
  *
  * This class is commonly referred to as 'the manifest', meaning the complete list of the
@@ -27,15 +23,14 @@ import org.springframework.cloud.skipper.SkipperException;
  * An example is: {@literal
  * apiVersion: skipper.spring.io/v1
  * kind: CloudFoundryApplication
- * metadata:
- *   name: log-sink
  * spec:
  *   manifest:
+ *     memory: 2048m
  * }
  *
  * @author Ilayaperumal Gopinathan
  */
-public class CFApplicationSkipperManifest {
+public class CloudFoundryApplicationSkipperManifest {
 
 	public static final String API_VERSION_STRING = "apiVersion";
 
@@ -45,22 +40,20 @@ public class CFApplicationSkipperManifest {
 
 	public static final String SPEC_STRING = "spec";
 
-	protected CFApplicationSpec spec;
+	protected CloudFoundryApplicationSpec spec;
 
 	private String apiVersion;
 
 	private String kind;
 
-	private Map<String, String> metadata;
-
-	public CFApplicationSkipperManifest() {
+	public CloudFoundryApplicationSkipperManifest() {
 	}
 
-	public CFApplicationSpec getSpec() {
+	public CloudFoundryApplicationSpec getSpec() {
 		return spec;
 	}
 
-	public void setSpec(CFApplicationSpec spec) {
+	public void setSpec(CloudFoundryApplicationSpec spec) {
 		this.spec = spec;
 	}
 
@@ -78,25 +71,5 @@ public class CFApplicationSkipperManifest {
 
 	public void setKind(String kind) {
 		this.kind = kind;
-	}
-
-	public Map<String, String> getMetadata() {
-		return metadata;
-	}
-
-	public void setMetadata(Map<String, String> metadata) {
-		this.metadata = metadata;
-	}
-
-	/**
-	 * Return the value of the name property in the application's metadata.
-	 * @return The value of the name
-	 * @throws SkipperException if the name property can not be found in the metadata.
-	 */
-	public String getApplicationName() {
-		if (!this.metadata.containsKey("name")) {
-			throw new SkipperException("CFApplicationSkipperManifest must define a 'name' property in the metadata");
-		}
-		return this.metadata.get("name");
 	}
 }
