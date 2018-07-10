@@ -56,6 +56,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  * Tests for the {@link TaskSchedulerController}.
  *
  * @author Glenn Renfro
+ * @author Christian Tzolov
  */
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = TestDependencies.class)
@@ -118,6 +119,10 @@ public class TaskSchedulerControllerTests {
 				.andDo(print()).andExpect(status().isOk())
 				.andExpect(content().json("{scheduleName: \"schedule2\"}"))
 				.andExpect(content().json("{taskDefinitionName: \"testDefinition\"}"));
+		mockMvc.perform(get("/tasks/schedules/scheduleNotExisting").accept(MediaType.APPLICATION_JSON))
+				.andDo(print()).andExpect(status().isNotFound())
+				.andExpect(content().json("[{\"logref\":\"NoSuchTaskSchedulerException\"," +
+						"\"message\":\"Task scheduler [scheduleNotExisting] doesn't exist!\",\"links\":[]}]"));
 	}
 
 	@Test
