@@ -21,6 +21,7 @@ import java.util.Map;
 
 import org.springframework.cloud.dataflow.rest.resource.ScheduleInfoResource;
 import org.springframework.cloud.dataflow.rest.util.DeploymentPropertiesUtils;
+import org.springframework.cloud.dataflow.server.repository.NoSuchTaskSchedulerException;
 import org.springframework.cloud.dataflow.server.service.SchedulerService;
 import org.springframework.cloud.scheduler.spi.core.ScheduleInfo;
 import org.springframework.data.domain.Page;
@@ -44,6 +45,7 @@ import org.springframework.web.bind.annotation.RestController;
  * Controller for operations on {@link ScheduleInfo}. This includes CRUD operations.
  *
  * @author Glenn Renfro
+ * @author Christian Tzolov
  */
 @RestController
 @RequestMapping("/tasks/schedules")
@@ -95,9 +97,12 @@ public class TaskSchedulerController {
 	 */
 	@RequestMapping(value = "/{name}", method = RequestMethod.GET)
 	@ResponseStatus(HttpStatus.OK)
-	public ScheduleInfoResource getSchedule(
-			@PathVariable("name") String scheduleName) {
-		return taskAssembler.toResource(this.schedulerService.getSchedule(scheduleName));
+	public ScheduleInfoResource getSchedule(@PathVariable("name") String scheduleName) {
+		ScheduleInfo scheduler = this.schedulerService.getSchedule(scheduleName);
+		if (scheduler == null) {
+			throw new NoSuchTaskSchedulerException(String.format("Task scheduler [%s] doesn't exist!" , scheduleName));
+		}
+		return taskAssembler.toResource(scheduler);
 	}
 
 	/**

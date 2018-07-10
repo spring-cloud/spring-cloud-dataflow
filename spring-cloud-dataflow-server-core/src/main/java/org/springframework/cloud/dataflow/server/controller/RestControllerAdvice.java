@@ -37,6 +37,7 @@ import org.springframework.cloud.dataflow.server.repository.NoSuchStreamDefiniti
 import org.springframework.cloud.dataflow.server.repository.NoSuchTaskBatchException;
 import org.springframework.cloud.dataflow.server.repository.NoSuchTaskDefinitionException;
 import org.springframework.cloud.dataflow.server.repository.NoSuchTaskExecutionException;
+import org.springframework.cloud.dataflow.server.repository.NoSuchTaskSchedulerException;
 import org.springframework.cloud.dataflow.server.support.ApplicationDoesNotExistException;
 import org.springframework.hateoas.VndErrors;
 import org.springframework.http.HttpStatus;
@@ -56,6 +57,7 @@ import org.springframework.web.method.annotation.MethodArgumentTypeMismatchExcep
  * @author Eric Bottard
  * @author Gunnar Hillert
  * @author Ilayaperumal Gopinathan
+ * @author Christian Tzolov
  */
 @ControllerAdvice
 public class RestControllerAdvice {
@@ -143,7 +145,7 @@ public class RestControllerAdvice {
 			NoSuchTaskDefinitionException.class, NoSuchTaskExecutionException.class, NoSuchJobExecutionException.class,
 			NoSuchJobInstanceException.class, NoSuchJobException.class, NoSuchStepExecutionException.class,
 			NoSuchTaskBatchException.class, MetricsMvcEndpoint.NoSuchMetricException.class, NoSuchAppException.class,
-			NoSuchAppInstanceException.class, ApplicationDoesNotExistException.class })
+			NoSuchAppInstanceException.class, ApplicationDoesNotExistException.class, NoSuchTaskSchedulerException.class })
 	@ResponseStatus(HttpStatus.NOT_FOUND)
 	@ResponseBody
 	public VndErrors onNotFoundException(Exception e) {
