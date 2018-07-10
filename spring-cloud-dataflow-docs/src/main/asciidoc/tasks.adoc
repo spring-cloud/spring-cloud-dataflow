@@ -726,6 +726,13 @@ Using the Spring Cloud Data Flow Dashboard to create the same " `split containin
 .Split with conditional execution
 image::{dataflow-asciidoc}/images/dataflow-ctr-split-contains-conditional.png[Composed Task Split With Conditional Execution, scaledwidth="50%"]
 
+==== Establishing the proper thread count for splits
+
+Each child task contained in a split requires a thread in order to execute.  To set this properly you want to look at your graph and count the split that has the largest number of child tasks, this will be the number of threads you will need to utilize.
+To set the thread count use the split-thread-core-pool-size property (defaults to 1).   So for example a definition like: `<AAA || BBB || CCC> && <DDD || EEE>` would require a split-thread-core-pool-size of 3.
+This is because the largest split contains 3 child tasks.   A count of 2 would mean that `AAA` and `BBB` would run in parallel but CCC would wait until either `AAA` or `BBB` to finish in order to run.
+Then `DDD` and `EEE` would run in parallel.
+
 [[spring-cloud-dataflow-launch-tasks-from-stream]]
 == Launching Tasks from a Stream
 
