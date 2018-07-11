@@ -35,6 +35,7 @@ import static org.junit.Assert.fail;
  *
  * @author Glenn Renfro
  * @author Michael Minella
+ * @author David Turanski
  */
 public class TaskCommandTemplate {
 
@@ -80,6 +81,10 @@ public class TaskCommandTemplate {
 	public CommandResult taskExecutionListByName() {
 		return shell.executeCommand("task execution list --name foo");
 
+	}
+
+	public CommandResult taskExecutionCurrent() {
+		return shell.executeCommand("task execution current");
 	}
 
 	/**

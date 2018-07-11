@@ -196,6 +196,14 @@ public class TaskExecutionControllerTests {
 	}
 
 	@Test
+	public void testGetCurrentExecutions() throws Exception {
+			mockMvc.perform(get("/tasks/executions/current").accept(MediaType.APPLICATION_JSON))
+					.andExpect(status().isOk())
+					.andExpect(jsonPath("runningExecutionCount", is(4)));
+
+	}
+
+	@Test
 	public void testGetExecutionsByName() throws Exception {
 		verifyTaskArgs(SAMPLE_CLEANSED_ARGUMENT_LIST, "$.content[0].", mockMvc
 				.perform(get("/tasks/executions/").param("name", TASK_NAME_ORIG).accept(MediaType.APPLICATION_JSON))

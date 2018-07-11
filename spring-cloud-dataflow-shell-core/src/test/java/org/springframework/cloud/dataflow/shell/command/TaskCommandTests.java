@@ -41,6 +41,7 @@ import static org.junit.Assert.assertTrue;
 
 /**
  * @author Glenn Renfro
+ * @author David Turanski
  */
 public class TaskCommandTests extends AbstractShellIntegrationTest {
 
@@ -164,6 +165,22 @@ public class TaskCommandTests extends AbstractShellIntegrationTest {
 		assertEquals("Tenth value should be  " + ERROR_MESSAGE, ERROR_MESSAGE, table.getModel().getValue(9, 1));
 		assertEquals("Eleventh value should be  " + EXTERNAL_EXECUTION_ID, EXTERNAL_EXECUTION_ID,
 				table.getModel().getValue(10, 1));
+	}
+
+	@Test
+	public void currrentExecutions() {
+		template.update(
+			"INSERT into TASK_EXECUTION(TASK_EXECUTION_ID, " + "START_TIME, " + "END_TIME, " + "TASK_NAME, "
+				+ "EXIT_CODE, " + "EXIT_MESSAGE, " + "LAST_UPDATED," + "ERROR_MESSAGE, "
+				+ "EXTERNAL_EXECUTION_ID)" + "values (?, ?, ?, ?, ?, ?, ?, ?, ?)",
+			TASK_EXECUTION_ID+1, startTime, null, TASK_NAME, null, EXIT_MESSAGE, null, ERROR_MESSAGE,
+			EXTERNAL_EXECUTION_ID);
+
+		CommandResult idResult = task().taskExecutionCurrent();
+		Table result = (Table) idResult.getResult();
+
+		long value = (long) result.getModel().getValue(0, 1);
+		assertEquals(1L, value);
 	}
 
 	@Test
