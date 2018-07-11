@@ -121,8 +121,8 @@ public class TaskSchedulerControllerTests {
 				.andExpect(content().json("{taskDefinitionName: \"testDefinition\"}"));
 		mockMvc.perform(get("/tasks/schedules/scheduleNotExisting").accept(MediaType.APPLICATION_JSON))
 				.andDo(print()).andExpect(status().isNotFound())
-				.andExpect(content().json("[{\"logref\":\"NoSuchTaskSchedulerException\"," +
-						"\"message\":\"Task scheduler [scheduleNotExisting] doesn't exist!\",\"links\":[]}]"));
+				.andExpect(content().json("[{\"logref\":\"NoSuchScheduleException\"," +
+						"\"message\":\"Schedule [scheduleNotExisting] doesn't exist\",\"links\":[]}]"));
 	}
 
 	@Test

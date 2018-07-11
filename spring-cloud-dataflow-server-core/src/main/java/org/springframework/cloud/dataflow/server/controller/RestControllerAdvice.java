@@ -33,11 +33,11 @@ import org.springframework.cloud.dataflow.server.controller.support.InvalidStrea
 import org.springframework.cloud.dataflow.server.job.support.JobNotRestartableException;
 import org.springframework.cloud.dataflow.server.repository.DuplicateStreamDefinitionException;
 import org.springframework.cloud.dataflow.server.repository.DuplicateTaskException;
+import org.springframework.cloud.dataflow.server.repository.NoSuchScheduleException;
 import org.springframework.cloud.dataflow.server.repository.NoSuchStreamDefinitionException;
 import org.springframework.cloud.dataflow.server.repository.NoSuchTaskBatchException;
 import org.springframework.cloud.dataflow.server.repository.NoSuchTaskDefinitionException;
 import org.springframework.cloud.dataflow.server.repository.NoSuchTaskExecutionException;
-import org.springframework.cloud.dataflow.server.repository.NoSuchTaskSchedulerException;
 import org.springframework.cloud.dataflow.server.support.ApplicationDoesNotExistException;
 import org.springframework.hateoas.VndErrors;
 import org.springframework.http.HttpStatus;
@@ -145,7 +145,7 @@ public class RestControllerAdvice {
 			NoSuchTaskDefinitionException.class, NoSuchTaskExecutionException.class, NoSuchJobExecutionException.class,
 			NoSuchJobInstanceException.class, NoSuchJobException.class, NoSuchStepExecutionException.class,
 			NoSuchTaskBatchException.class, MetricsMvcEndpoint.NoSuchMetricException.class, NoSuchAppException.class,
-			NoSuchAppInstanceException.class, ApplicationDoesNotExistException.class, NoSuchTaskSchedulerException.class })
+			NoSuchAppInstanceException.class, ApplicationDoesNotExistException.class, NoSuchScheduleException.class })
 	@ResponseStatus(HttpStatus.NOT_FOUND)
 	@ResponseBody
 	public VndErrors onNotFoundException(Exception e) {

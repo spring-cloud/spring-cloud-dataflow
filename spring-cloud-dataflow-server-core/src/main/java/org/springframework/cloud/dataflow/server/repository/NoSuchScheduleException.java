@@ -17,14 +17,13 @@
 package org.springframework.cloud.dataflow.server.repository;
 
 /**
- * Exception is thrown if there is no mapping between a batch job execution and
- * a task execution.
+ * Exception is thrown if there is no schedule information available.
  *
  * @author Christian Tzolov
  */
-public class NoSuchTaskSchedulerException extends RuntimeException {
+public class NoSuchScheduleException extends RuntimeException {
 
-	public NoSuchTaskSchedulerException(String message) {
+	public NoSuchScheduleException(String message) {
 		super(message);
 	}
 
