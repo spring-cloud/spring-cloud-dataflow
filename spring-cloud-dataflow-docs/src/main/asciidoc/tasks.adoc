@@ -211,6 +211,12 @@ Properties configured by using this mechanism have lower precedence than task de
 They are overridden if a property with the same key is specified at task launch time (for example, `app.trigger.prop2`
 overrides the common property).
 
+[[spring-cloud-dataflow-task-limit-concurrent-executions]]
+=== Limit the number concurrent task launches
+Spring Cloud Data Flow allows a user establish the maximum number of concurrently running tasks to prevent the saturation of IaaS/hardware resources.
+This limit can be configured by setting the `spring.cloud.dataflow.task.maximum-concurrent-tasks` property.   By default it is set to `20`.
+If the number of concurrently running tasks is equal or greater than the value set by `spring.cloud.dataflow.task.maximum-concurrent-tasks` the next
+task launch request will be declined and a warning message will be returned via the RESTful API, Shell or UI.
 
 
 [[spring-cloud-dataflow-task-review-executions]]

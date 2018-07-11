@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 the original author or authors.
+ * Copyright 2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,14 +16,22 @@
 
 package org.springframework.cloud.dataflow.server.service.impl;
 
+import javax.validation.constraints.Min;
+
+import org.hibernate.validator.constraints.NotBlank;
+
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.cloud.dataflow.core.DataFlowPropertyKeys;
+import org.springframework.validation.annotation.Validated;
+
 
 /**
  * Properties used to define the behavior of tasks created by Spring Cloud Data Flow.
  *
  * @author Glenn Renfro
+ * @author David Turanski
  */
+@Validated
 @ConfigurationProperties(prefix = TaskConfigurationProperties.COMPOSED_TASK_PREFIX)
 public class TaskConfigurationProperties {
 
@@ -32,7 +40,11 @@ public class TaskConfigurationProperties {
 	/**
 	 * The task application name to be used for the composed task runner.
 	 */
+	@NotBlank
 	private String composedTaskRunnerName = "composed-task-runner";
+
+	@Min(1)
+	private long maximumConcurrentTasks = 20;
 
 	public String getComposedTaskRunnerName() {
 		return composedTaskRunnerName;
@@ -42,4 +54,11 @@ public class TaskConfigurationProperties {
 		this.composedTaskRunnerName = taskName;
 	}
 
+	public long getMaximumConcurrentTasks() {
+		return maximumConcurrentTasks;
+	}
+
+	public void setMaximumConcurrentTasks(long maximumConcurrentTasks) {
+		this.maximumConcurrentTasks = maximumConcurrentTasks;
+	}
 }

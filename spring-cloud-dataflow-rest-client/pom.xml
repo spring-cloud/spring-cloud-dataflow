@@ -44,5 +44,9 @@
             <artifactId>spring-cloud-skipper</artifactId>
 			<version>${spring-cloud-skipper.version}</version>
         </dependency>
-    </dependencies>
+		<dependency>
+			<groupId>org.springframework.cloud</groupId>
+			<artifactId>spring-cloud-dataflow-rest-resource</artifactId>
+		</dependency>
+	</dependencies>
 </project>

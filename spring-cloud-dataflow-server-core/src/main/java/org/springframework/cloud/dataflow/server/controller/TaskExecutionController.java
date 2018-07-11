@@ -22,6 +22,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.springframework.cloud.dataflow.rest.job.TaskJobExecutionRel;
+import org.springframework.cloud.dataflow.rest.resource.CurrentTaskExecutionsResource;
 import org.springframework.cloud.dataflow.rest.resource.TaskExecutionResource;
 import org.springframework.cloud.dataflow.rest.util.DeploymentPropertiesUtils;
 import org.springframework.cloud.dataflow.server.controller.support.ArgumentSanitizer;
@@ -56,6 +57,7 @@ import org.springframework.web.bind.annotation.RestController;
  * @author Michael Minella
  * @author Ilayaperumal Gopinathan
  * @author Christian Tzolov
+ * @author David Turanski
  */
 @RestController
 @RequestMapping("/tasks/executions")
@@ -165,6 +167,15 @@ public class TaskExecutionController {
 		TaskJobExecutionRel taskJobExecutionRel = new TaskJobExecutionRel(taskExecution,
 				new ArrayList<>(this.explorer.getJobExecutionIdsByTaskExecutionId(taskExecution.getExecutionId())));
 		return this.taskAssembler.toResource(taskJobExecutionRel);
+	}
+
+	@RequestMapping(value = "/current", method = RequestMethod.GET)
+	@ResponseStatus(HttpStatus.OK)
+	public CurrentTaskExecutionsResource getCurrentTaskExecutionsInfo() {
+		CurrentTaskExecutionsResource currentTaskExecutionsResource = new CurrentTaskExecutionsResource();
+		currentTaskExecutionsResource.setRunningExecutionCount(explorer.getRunningTaskExecutionCount());
+		currentTaskExecutionsResource.setMaximumTaskExecutions(taskService.getMaximumConcurrentTasks());
+		return currentTaskExecutionsResource;
 	}
 
 	/**

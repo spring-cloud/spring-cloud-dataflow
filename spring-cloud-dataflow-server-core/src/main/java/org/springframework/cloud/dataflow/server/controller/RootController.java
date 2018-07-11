@@ -130,6 +130,8 @@ public class RootController {
 			String taskTemplated = entityLinks.linkToCollectionResource(TaskExecutionResource.class).getHref()
 					+ "{?name}";
 			root.add(new Link(taskTemplated).withRel("tasks/executions/name"));
+			root.add(ControllerLinkBuilder.linkTo(ControllerLinkBuilder.methodOn(TaskExecutionController.class)
+				.getCurrentTaskExecutionsInfo()).withRel("tasks/executions/current"));
 			root.add(unescapeTemplateVariables(entityLinks.linkToSingleResource(TaskExecutionResource.class, "{id}")
 					.withRel("tasks/executions/execution")));
 			if(featuresProperties.isSchedulesEnabled()) {

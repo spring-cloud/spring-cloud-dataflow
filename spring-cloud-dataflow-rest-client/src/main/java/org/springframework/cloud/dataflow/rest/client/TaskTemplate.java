@@ -1,5 +1,5 @@
 /*
- * Copyright 2015-2017 the original author or authors.
+ * Copyright 2015-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
+import org.springframework.cloud.dataflow.rest.resource.CurrentTaskExecutionsResource;
 import org.springframework.cloud.dataflow.rest.resource.TaskDefinitionResource;
 import org.springframework.cloud.dataflow.rest.resource.TaskExecutionResource;
 import org.springframework.cloud.dataflow.rest.util.DeploymentPropertiesUtils;
@@ -38,6 +39,7 @@ import org.springframework.web.client.RestTemplate;
  * @author Glenn Renfro
  * @author Michael Minella
  * @author Gunnar Hillert
+ * @author David Turanski
  */
 public class TaskTemplate implements TaskOperations {
 
@@ -46,6 +48,8 @@ public class TaskTemplate implements TaskOperations {
 	private static final String DEFINITION_RELATION = "tasks/definitions/definition";
 
 	private static final String EXECUTIONS_RELATION = "tasks/executions";
+
+	private static final String EXECUTIONS_CURRENT_RELATION = "tasks/executions/current";
 
 	private static final String EXECUTION_RELATION = "tasks/executions/execution";
 
@@ -63,6 +67,8 @@ public class TaskTemplate implements TaskOperations {
 
 	private final Link executionByNameLink;
 
+	private final Link executionsCurrentLink;
+
 	TaskTemplate(RestTemplate restTemplate, ResourceSupport resources) {
 		Assert.notNull(resources, "URI Resources must not be be null");
 		Assert.notNull(resources.getLink(EXECUTIONS_RELATION), "Executions relation is required");
@@ -72,6 +78,7 @@ public class TaskTemplate implements TaskOperations {
 		Assert.notNull(resources.getLink(EXECUTIONS_RELATION), "Executions relation is required");
 		Assert.notNull(resources.getLink(EXECUTION_RELATION), "Execution relation is required");
 		Assert.notNull(resources.getLink(EXECUTION_RELATION_BY_NAME), "Execution by name relation is required");
+		Assert.notNull(resources.getLink(EXECUTIONS_CURRENT_RELATION), "Executions current relation is required");
 
 		this.restTemplate = restTemplate;
 		this.definitionsLink = resources.getLink(DEFINITIONS_RELATION);
@@ -79,6 +86,7 @@ public class TaskTemplate implements TaskOperations {
 		this.executionsLink = resources.getLink(EXECUTIONS_RELATION);
 		this.executionLink = resources.getLink(EXECUTION_RELATION);
 		this.executionByNameLink = resources.getLink(EXECUTION_RELATION_BY_NAME);
+		this.executionsCurrentLink = resources.getLink(EXECUTIONS_CURRENT_RELATION);
 
 	}
 
@@ -126,6 +134,11 @@ public class TaskTemplate implements TaskOperations {
 	@Override
 	public TaskExecutionResource taskExecutionStatus(long id) {
 		return restTemplate.getForObject(executionLink.expand(id).getHref(), TaskExecutionResource.class);
+	}
+
+	@Override
+	public CurrentTaskExecutionsResource currentTaskExecutions() {
+		return restTemplate.getForObject(executionsCurrentLink.getHref(), CurrentTaskExecutionsResource.class);
 	}
 
 	@Override

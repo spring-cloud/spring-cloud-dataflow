@@ -1,5 +1,5 @@
 /*
- * Copyright 2015-2017 the original author or authors.
+ * Copyright 2015-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,6 +35,7 @@ import static org.junit.Assert.fail;
  *
  * @author Glenn Renfro
  * @author Michael Minella
+ * @author David Turanski
  */
 public class TaskCommandTemplate {
 
@@ -80,6 +81,13 @@ public class TaskCommandTemplate {
 	public CommandResult taskExecutionListByName() {
 		return shell.executeCommand("task execution list --name foo");
 
+	}
+
+	/**
+	 * Returns the count of currently executing tasks and related information.
+	 */
+	public CommandResult taskExecutionCurrent() {
+		return shell.executeCommand("task execution current");
 	}
 
 	/**

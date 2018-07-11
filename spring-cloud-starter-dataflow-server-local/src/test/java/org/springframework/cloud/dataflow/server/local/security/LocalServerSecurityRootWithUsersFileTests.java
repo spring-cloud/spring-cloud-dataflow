@@ -35,6 +35,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  * Tests the root URL when security with file-based user list is enabled.
  *
  * @author Gunnar Hillert
+ * @author David Turanski
  */
 public class LocalServerSecurityRootWithUsersFileTests {
 
@@ -52,7 +53,7 @@ public class LocalServerSecurityRootWithUsersFileTests {
 		localDataflowResource.getMockMvc()
 				.perform(get("/").header("Authorization", basicAuthorizationHeader(fullUser.getUsername(), fullUser.getPassword()))).andDo(print())
 				.andExpect(status().isOk())
-				.andExpect(jsonPath("$._links.*", hasSize(34)))
+				.andExpect(jsonPath("$._links.*", hasSize(35)))
 				.andExpect(jsonPath("$._links.dashboard.href", is("http://localhost/dashboard")))
 				.andExpect(jsonPath("$._links.streams/definitions.href", is("http://localhost/streams/definitions")))
 				.andExpect(jsonPath("$._links.streams/definitions/definition.href", is("http://localhost/streams/definitions/{name}")))
@@ -66,6 +67,7 @@ public class LocalServerSecurityRootWithUsersFileTests {
 				.andExpect(jsonPath("$._links.tasks/definitions/definition.href", is("http://localhost/tasks/definitions/{name}")))
 				.andExpect(jsonPath("$._links.tasks/executions.href", is("http://localhost/tasks/executions")))
 				.andExpect(jsonPath("$._links.tasks/executions/name.href", is("http://localhost/tasks/executions{?name}")))
+				.andExpect(jsonPath("$._links.tasks/executions/current.href", is("http://localhost/tasks/executions/current")))
 				.andExpect(jsonPath("$._links.tasks/executions/execution.href", is("http://localhost/tasks/executions/{id}")))
 				.andExpect(jsonPath("$._links.jobs/executions.href", is("http://localhost/jobs/executions")))
 				.andExpect(jsonPath("$._links.jobs/executions/name.href", is("http://localhost/jobs/executions{?name}")))
@@ -94,7 +96,7 @@ public class LocalServerSecurityRootWithUsersFileTests {
 		localDataflowResource.getMockMvc()
 				.perform(get("/").header("Authorization", basicAuthorizationHeader(viewOnlyUser.getUsername(), viewOnlyUser.getPassword()))).andDo(print())
 				.andExpect(status().isOk())
-				.andExpect(jsonPath("$._links.*", hasSize(34)))
+				.andExpect(jsonPath("$._links.*", hasSize(35)))
 				.andExpect(jsonPath("$._links.dashboard.href", is("http://localhost/dashboard")))
 				.andExpect(jsonPath("$._links.streams/definitions.href", is("http://localhost/streams/definitions")))
 				.andExpect(jsonPath("$._links.streams/definitions/definition.href", is("http://localhost/streams/definitions/{name}")))
@@ -108,6 +110,7 @@ public class LocalServerSecurityRootWithUsersFileTests {
 				.andExpect(jsonPath("$._links.tasks/definitions/definition.href", is("http://localhost/tasks/definitions/{name}")))
 				.andExpect(jsonPath("$._links.tasks/executions.href", is("http://localhost/tasks/executions")))
 				.andExpect(jsonPath("$._links.tasks/executions/name.href", is("http://localhost/tasks/executions{?name}")))
+				.andExpect(jsonPath("$._links.tasks/executions/current.href", is("http://localhost/tasks/executions/current")))
 				.andExpect(jsonPath("$._links.tasks/executions/execution.href", is("http://localhost/tasks/executions/{id}")))
 				.andExpect(jsonPath("$._links.jobs/executions.href", is("http://localhost/jobs/executions")))
 				.andExpect(jsonPath("$._links.jobs/executions/name.href", is("http://localhost/jobs/executions{?name}")))
