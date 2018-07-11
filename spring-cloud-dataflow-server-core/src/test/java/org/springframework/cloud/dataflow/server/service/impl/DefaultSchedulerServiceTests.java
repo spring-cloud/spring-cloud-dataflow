@@ -62,7 +62,7 @@ import static org.mockito.Mockito.when;
 		PropertyPlaceholderAutoConfiguration.class }, properties = {
 		"spring.cloud.dataflow.applicationProperties.task.globalkey=globalvalue",
 		"spring.cloud.dataflow.applicationProperties.stream.globalstreamkey=nothere" })
-@EnableConfigurationProperties({ CommonApplicationProperties.class })
+@EnableConfigurationProperties({ CommonApplicationProperties.class, TaskConfigurationProperties.class })
 public class DefaultSchedulerServiceTests {
 
 	private static final String DATA_FLOW_SCHEDULER_PREFIX = "scheduler.";

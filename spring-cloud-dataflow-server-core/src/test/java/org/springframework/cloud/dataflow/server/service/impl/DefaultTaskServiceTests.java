@@ -27,7 +27,6 @@ import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.autoconfigure.context.PropertyPlaceholderAutoConfiguration;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceProperties;
 import org.springframework.boot.autoconfigure.jdbc.EmbeddedDataSourceConfiguration;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
@@ -51,6 +50,7 @@ import org.springframework.cloud.task.repository.TaskRepository;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.test.annotation.DirtiesContext;
+import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import static org.hamcrest.CoreMatchers.equalTo;
@@ -72,364 +72,402 @@ import static org.mockito.Mockito.when;
 /**
  * @author Glenn Renfro
  * @author Ilayaperumal Gopinathan
+ * @author David Turanski
  */
 @RunWith(SpringRunner.class)
-@SpringBootTest(classes = { EmbeddedDataSourceConfiguration.class, TaskServiceDependencies.class,
-		PropertyPlaceholderAutoConfiguration.class }, properties = {
-		"spring.cloud.dataflow.applicationProperties.task.globalkey=globalvalue",
-		"spring.cloud.dataflow.applicationProperties.stream.globalstreamkey=nothere" })
-@EnableConfigurationProperties({ CommonApplicationProperties.class })
-public class DefaultTaskServiceTests {
+@SpringBootTest(classes = { EmbeddedDataSourceConfiguration.class, TaskServiceDependencies.class })
+@EnableConfigurationProperties({ CommonApplicationProperties.class, TaskConfigurationProperties.class })
+public abstract class DefaultTaskServiceTests {
 
 	private final static String BASE_TASK_NAME = "myTask";
 
 	private final static String TASK_NAME_ORIG = BASE_TASK_NAME + "_ORIG";
 
-	@Autowired
-	TaskRepository taskExecutionRepository;
+	@TestPropertySource(properties = { "spring.cloud.dataflow.task.maximum-concurrent-tasks=10" })
+	public static class SimpleTaskTests extends DefaultTaskServiceTests {
 
-	@Autowired
-	DataSourceProperties dataSourceProperties;
+		@Autowired
+		TaskRepository taskExecutionRepository;
 
-	@Autowired
-	private TaskDefinitionRepository taskDefinitionRepository;
+		@Autowired
+		DataSourceProperties dataSourceProperties;
 
-	@Autowired
-	private TaskExplorer taskExplorer;
+		@Autowired
+		private TaskDefinitionRepository taskDefinitionRepository;
 
-	@Autowired
-	private AppRegistry appRegistry;
+		@Autowired
+		private TaskExplorer taskExplorer;
 
-	@Autowired
-	private ResourceLoader resourceLoader;
+		@Autowired
+		private AppRegistry appRegistry;
 
-	@Autowired
-	private TaskLauncher taskLauncher;
+		@Autowired
+		private ResourceLoader resourceLoader;
 
-	@Autowired
-	private ApplicationConfigurationMetadataResolver metadataResolver;
+		@Autowired
+		private TaskLauncher taskLauncher;
 
-	@Autowired
-	private TaskService taskService;
+		@Autowired
+		private ApplicationConfigurationMetadataResolver metadataResolver;
 
-	@Autowired
-	private CommonApplicationProperties commonApplicationProperties;
+		@Autowired
+		private TaskService taskService;
 
-	@Before
-	public void setupMockMVC() {
-		taskDefinitionRepository.save(new TaskDefinition(TASK_NAME_ORIG, "demo"));
-	}
+		@Autowired
+		private CommonApplicationProperties commonApplicationProperties;
 
-	@Test
-	@DirtiesContext
-	public void executeSingleTaskTest() {
-		initializeSuccessfulRegistry();
-		when(taskLauncher.launch(anyObject())).thenReturn("0");
-		assertEquals(1L, this.taskService.executeTask(TASK_NAME_ORIG, new HashMap<>(), new LinkedList<>()));
-	}
+		@Before
+		public void setupMockMVC() {
+			taskDefinitionRepository.save(new TaskDefinition(TASK_NAME_ORIG, "demo"));
+		}
 
-	@Test
-	@DirtiesContext
-	public void executeMultipleTasksTest() {
-		initializeSuccessfulRegistry();
-		when(taskLauncher.launch(anyObject())).thenReturn("0");
-		assertEquals(1L, this.taskService.executeTask(TASK_NAME_ORIG, new HashMap<>(), new LinkedList<>()));
-		assertEquals(2L, this.taskService.executeTask(TASK_NAME_ORIG, new HashMap<>(), new LinkedList<>()));
-	}
-	@Test
-	@DirtiesContext
-	public void executeComposedTask() {
-		String dsl = "AAA && BBB";
-		initializeSuccessfulRegistry();
-		taskService.saveTaskDefinition("seqTask", dsl);
-		when(taskLauncher.launch(anyObject())).thenReturn("0");
-		Map<String, String> properties = new HashMap<>();
-		properties.put("app.foo", "bar");
-		properties.put("app.seqTask.AAA.timestamp.format", "YYYY");
-		properties.put("deployer.seqTask.AAA.memory", "1240m");
-		properties.put("app.composed-task-runner.interval-time-between-checks", "1000");
-		assertEquals(1L, this.taskService.executeTask("seqTask", properties, new LinkedList<>()));
-		ArgumentCaptor<AppDeploymentRequest> argumentCaptor = ArgumentCaptor.forClass(AppDeploymentRequest.class);
-		verify(this.taskLauncher, atLeast(1)).launch(argumentCaptor.capture());
+		@Test
+		@DirtiesContext
+		public void createSimpleTask() {
+			initializeSuccessfulRegistry(appRegistry);
+			taskService.saveTaskDefinition("simpleTask", "AAA --foo=bar");
+			verifyTaskExistsInRepo("simpleTask", "AAA --foo=bar", taskDefinitionRepository);
+		}
 
-		AppDeploymentRequest request = argumentCaptor.getValue();
-		assertEquals("seqTask", request.getDefinition().getProperties().get("spring.cloud.task.name"));
-		assertTrue(request.getDefinition().getProperties().containsKey("composed-task-properties"));
-		assertEquals("app.seqTask-AAA.app.AAA.timestamp.format=YYYY, deployer.seqTask-AAA.deployer.AAA.memory=1240m",
-				request.getDefinition().getProperties().get("composed-task-properties"));
-		assertTrue(request.getDefinition().getProperties().containsKey("interval-time-between-checks"));
-		assertEquals("1000", request.getDefinition().getProperties().get("interval-time-between-checks"));
-		assertFalse(request.getDefinition().getProperties().containsKey("app.foo"));
-		assertEquals("globalvalue", request.getDefinition().getProperties().get("globalkey"));
-		assertNull(request.getDefinition().getProperties().get("globalstreamkey"));
-	}
+		@Test
+		@DirtiesContext
+		public void executeSingleTaskTest() {
+			initializeSuccessfulRegistry(appRegistry);
+			when(taskLauncher.launch(anyObject())).thenReturn("0");
+			assertEquals(1L, this.taskService.executeTask(TASK_NAME_ORIG, new HashMap<>(), new LinkedList<>()));
+		}
 
-	@Test
-	@DirtiesContext
-	public void executeComposedTaskWithLabels() {
-		String dsl = "t1: AAA && t2: BBB";
-		initializeSuccessfulRegistry();
-		taskService.saveTaskDefinition("seqTask", dsl);
-		when(taskLauncher.launch(anyObject())).thenReturn("0");
-		Map<String, String> properties = new HashMap<>();
-		properties.put("app.seqTask.t1.timestamp.format", "YYYY");
-		properties.put("app.composed-task-runner.interval-time-between-checks", "1000");
-		assertEquals(1L, this.taskService.executeTask("seqTask", properties, new LinkedList<>()));
-		ArgumentCaptor<AppDeploymentRequest> argumentCaptor = ArgumentCaptor.forClass(AppDeploymentRequest.class);
-		verify(this.taskLauncher, atLeast(1)).launch(argumentCaptor.capture());
+		@Test
+		@DirtiesContext
+		public void executeMultipleTasksTest() {
+			initializeSuccessfulRegistry(appRegistry);
+			when(taskLauncher.launch(anyObject())).thenReturn("0");
+			assertEquals(1L, this.taskService.executeTask(TASK_NAME_ORIG, new HashMap<>(), new LinkedList<>()));
+			assertEquals(2L, this.taskService.executeTask(TASK_NAME_ORIG, new HashMap<>(), new LinkedList<>()));
+		}
 
-		AppDeploymentRequest request = argumentCaptor.getValue();
-		assertEquals("seqTask", request.getDefinition().getProperties().get("spring.cloud.task.name"));
-		assertTrue(request.getDefinition().getProperties().containsKey("composed-task-properties"));
-		assertEquals("app.seqTask-t1.app.AAA.timestamp.format=YYYY", request.getDefinition().getProperties().get("composed-task-properties"));
-		assertTrue(request.getDefinition().getProperties().containsKey("interval-time-between-checks"));
-		assertEquals("1000", request.getDefinition().getProperties().get("interval-time-between-checks"));
-	}
-
-	@Test
-	@DirtiesContext
-	public void executeTaskWithNullIDReturnedTest() {
-		initializeSuccessfulRegistry();
-		boolean errorCaught = false;
-		when(this.taskLauncher.launch(anyObject())).thenReturn(null);
-		try {
+		@Test(expected = IllegalStateException.class)
+		@DirtiesContext
+		public void failOnLimitReached() {
+			initializeSuccessfulRegistry(this.appRegistry);
+			when(taskLauncher.launch(anyObject())).thenReturn("0");
+			assertEquals(10, taskService.getMaximumConcurrentTasks());
+			for (long i = 1; i <= taskService.getMaximumConcurrentTasks(); i++) {
+				assertEquals(i, taskService.executeTask(TASK_NAME_ORIG, new HashMap<>(), new LinkedList<>()));
+			}
 			taskService.executeTask(TASK_NAME_ORIG, new HashMap<>(), new LinkedList<>());
 		}
-		catch (IllegalStateException ise) {
-			errorCaught = true;
-			assertEquals("Deployment ID is null for the task:myTask_ORIG", ise.getMessage());
-		}
-		if (!errorCaught) {
-			fail();
-		}
-	}
 
-	@Test
-	@DirtiesContext
-	public void executeTaskWithNullDefinitionTest() {
-		boolean errorCaught = false;
-		when(this.taskLauncher.launch(anyObject())).thenReturn("0");
-		TaskService taskService = new DefaultTaskService(this.dataSourceProperties,
+		@Test
+		@DirtiesContext
+		public void executeTaskWithNullIDReturnedTest() {
+			initializeSuccessfulRegistry(appRegistry);
+			boolean errorCaught = false;
+			when(this.taskLauncher.launch(anyObject())).thenReturn(null);
+			try {
+				taskService.executeTask(TASK_NAME_ORIG, new HashMap<>(), new LinkedList<>());
+			}
+			catch (IllegalStateException ise) {
+				errorCaught = true;
+				assertEquals("Deployment ID is null for the task:myTask_ORIG", ise.getMessage());
+			}
+			if (!errorCaught) {
+				fail();
+			}
+		}
+
+		@Test
+		@DirtiesContext
+		public void executeTaskWithNullDefinitionTest() {
+			boolean errorCaught = false;
+			when(this.taskLauncher.launch(anyObject())).thenReturn("0");
+			TaskService taskService = new DefaultTaskService(this.dataSourceProperties,
 				mock(TaskDefinitionRepository.class), this.taskExplorer, this.taskExecutionRepository, this.appRegistry,
 				this.resourceLoader, this.taskLauncher, this.metadataResolver, new TaskConfigurationProperties(),
 				new InMemoryDeploymentIdRepository(), null, commonApplicationProperties);
-		try {
-			taskService.executeTask(TASK_NAME_ORIG, new HashMap<>(), new LinkedList<>());
+			try {
+				taskService.executeTask(TASK_NAME_ORIG, new HashMap<>(), new LinkedList<>());
+			}
+			catch (NoSuchTaskDefinitionException ise) {
+				errorCaught = true;
+				assertEquals("Could not find task definition named myTask_ORIG", ise.getMessage());
+			}
+			if (!errorCaught) {
+				fail();
+			}
 		}
-		catch (NoSuchTaskDefinitionException ise) {
-			errorCaught = true;
-			assertEquals("Could not find task definition named myTask_ORIG", ise.getMessage());
+	}
+
+	@TestPropertySource(properties = { "spring.cloud.dataflow.applicationProperties.task.globalkey=globalvalue",
+		"spring.cloud.dataflow.applicationProperties.stream.globalstreamkey=nothere" })
+	public static class ComposedTaskTests extends DefaultTaskServiceTests {
+		@Autowired
+		TaskRepository taskExecutionRepository;
+
+		@Autowired
+		DataSourceProperties dataSourceProperties;
+
+		@Autowired
+		private TaskDefinitionRepository taskDefinitionRepository;
+
+		@Autowired
+		private AppRegistry appRegistry;
+
+		@Autowired
+		private TaskLauncher taskLauncher;
+
+		@Autowired
+		private TaskService taskService;
+
+		@Test
+		@DirtiesContext
+		public void executeComposedTask() {
+			String dsl = "AAA && BBB";
+			initializeSuccessfulRegistry(appRegistry);
+			taskService.saveTaskDefinition("seqTask", dsl);
+			when(taskLauncher.launch(anyObject())).thenReturn("0");
+			Map<String, String> properties = new HashMap<>();
+			properties.put("app.foo", "bar");
+			properties.put("app.seqTask.AAA.timestamp.format", "YYYY");
+			properties.put("deployer.seqTask.AAA.memory", "1240m");
+			properties.put("app.composed-task-runner.interval-time-between-checks", "1000");
+			assertEquals(1L, this.taskService.executeTask("seqTask", properties, new LinkedList<>()));
+			ArgumentCaptor<AppDeploymentRequest> argumentCaptor = ArgumentCaptor.forClass(AppDeploymentRequest.class);
+			verify(this.taskLauncher, atLeast(1)).launch(argumentCaptor.capture());
+
+			AppDeploymentRequest request = argumentCaptor.getValue();
+			assertEquals("seqTask", request.getDefinition().getProperties().get("spring.cloud.task.name"));
+			assertTrue(request.getDefinition().getProperties().containsKey("composed-task-properties"));
+			assertEquals(
+				"app.seqTask-AAA.app.AAA.timestamp.format=YYYY, deployer.seqTask-AAA.deployer.AAA.memory=1240m",
+				request.getDefinition().getProperties().get("composed-task-properties"));
+			assertTrue(request.getDefinition().getProperties().containsKey("interval-time-between-checks"));
+			assertEquals("1000", request.getDefinition().getProperties().get("interval-time-between-checks"));
+			assertFalse(request.getDefinition().getProperties().containsKey("app.foo"));
+			assertEquals("globalvalue", request.getDefinition().getProperties().get("globalkey"));
+			assertNull(request.getDefinition().getProperties().get("globalstreamkey"));
 		}
-		if (!errorCaught) {
-			fail();
+
+		@Test
+		@DirtiesContext
+		public void executeComposedTaskWithLabels() {
+			String dsl = "t1: AAA && t2: BBB";
+			initializeSuccessfulRegistry(appRegistry);
+			taskService.saveTaskDefinition("seqTask", dsl);
+			when(taskLauncher.launch(anyObject())).thenReturn("0");
+			Map<String, String> properties = new HashMap<>();
+			properties.put("app.seqTask.t1.timestamp.format", "YYYY");
+			properties.put("app.composed-task-runner.interval-time-between-checks", "1000");
+			assertEquals(1L, this.taskService.executeTask("seqTask", properties, new LinkedList<>()));
+			ArgumentCaptor<AppDeploymentRequest> argumentCaptor = ArgumentCaptor.forClass(AppDeploymentRequest.class);
+			verify(this.taskLauncher, atLeast(1)).launch(argumentCaptor.capture());
+
+			AppDeploymentRequest request = argumentCaptor.getValue();
+			assertEquals("seqTask", request.getDefinition().getProperties().get("spring.cloud.task.name"));
+			assertTrue(request.getDefinition().getProperties().containsKey("composed-task-properties"));
+			assertEquals("app.seqTask-t1.app.AAA.timestamp.format=YYYY",
+				request.getDefinition().getProperties().get("composed-task-properties"));
+			assertTrue(request.getDefinition().getProperties().containsKey("interval-time-between-checks"));
+			assertEquals("1000", request.getDefinition().getProperties().get("interval-time-between-checks"));
 		}
-	}
 
-	@Test
-	@DirtiesContext
-	public void createSequenceComposedTask() {
-		initializeSuccessfulRegistry();
-		String dsl = "AAA && BBB";
-		taskService.saveTaskDefinition("seqTask", dsl);
-		verifyTaskExistsInRepo("seqTask", dsl);
+		@Test
+		@DirtiesContext
+		public void createSequenceComposedTask() {
+			initializeSuccessfulRegistry(appRegistry);
+			String dsl = "AAA && BBB";
+			taskService.saveTaskDefinition("seqTask", dsl);
+			verifyTaskExistsInRepo("seqTask", dsl, taskDefinitionRepository);
 
-		verifyTaskExistsInRepo("seqTask-AAA", "AAA");
-		verifyTaskExistsInRepo("seqTask-BBB", "BBB");
-	}
+			verifyTaskExistsInRepo("seqTask-AAA", "AAA", taskDefinitionRepository);
+			verifyTaskExistsInRepo("seqTask-BBB", "BBB", taskDefinitionRepository);
+		}
 
-	@Test
-	@DirtiesContext
-	public void createSplitComposedTask() {
-		initializeSuccessfulRegistry();
-		String dsl = "<AAA || BBB>";
-		taskService.saveTaskDefinition("splitTask", dsl);
-		verifyTaskExistsInRepo("splitTask", dsl);
-
-		verifyTaskExistsInRepo("splitTask-AAA", "AAA");
-		verifyTaskExistsInRepo("splitTask-BBB", "BBB");
-	}
-
-	@Test
-	@DirtiesContext
-	public void verifyComposedTaskFlag() {
-		String composedTaskDsl = "<AAA || BBB>";
-		assertTrue("Expected true for composed task", taskService.isComposedDefinition(composedTaskDsl));
-		composedTaskDsl = "AAA 'FAILED' -> BBB '*' -> CCC";
-		assertTrue("Expected true for composed task", taskService.isComposedDefinition(composedTaskDsl));
-		composedTaskDsl = "AAA && BBB && CCC";
-		assertTrue("Expected true for composed task", taskService.isComposedDefinition(composedTaskDsl));
-		String nonComposedTaskDsl = "AAA";
-		assertFalse("Expected false for non-composed task", taskService.isComposedDefinition(nonComposedTaskDsl));
-		nonComposedTaskDsl = "AAA --foo=bar";
-		assertFalse("Expected false for non-composed task", taskService.isComposedDefinition(nonComposedTaskDsl));
-	}
-
-	@Test
-	@DirtiesContext
-	public void createTransitionComposedTask() {
-		initializeSuccessfulRegistry();
-		String dsl = "AAA 'FAILED' -> BBB '*' -> CCC";
-		taskService.saveTaskDefinition("transitionTask", dsl);
-		verifyTaskExistsInRepo("transitionTask", dsl);
-
-		verifyTaskExistsInRepo("transitionTask-AAA", "AAA");
-		verifyTaskExistsInRepo("transitionTask-BBB", "BBB");
-	}
-
-	@Test
-	@DirtiesContext
-	public void createSimpleTask() {
-		initializeSuccessfulRegistry();
-		taskService.saveTaskDefinition("simpleTask", "AAA --foo=bar");
-		verifyTaskExistsInRepo("simpleTask", "AAA --foo=bar");
-	}
-
-	@Test
-	@DirtiesContext
-	public void deleteComposedTask() {
-		initializeSuccessfulRegistry();
-		String dsl = "AAA && BBB && CCC";
-		taskService.saveTaskDefinition("deleteTask", dsl);
-		verifyTaskExistsInRepo("deleteTask-AAA", "AAA");
-		verifyTaskExistsInRepo("deleteTask-BBB", "BBB");
-		verifyTaskExistsInRepo("deleteTask-CCC", "CCC");
-		verifyTaskExistsInRepo("deleteTask", dsl);
-
-		long preDeleteSize = taskDefinitionRepository.count();
-		taskService.deleteTaskDefinition("deleteTask");
-		assertThat(preDeleteSize - 4, is(equalTo(taskDefinitionRepository.count())));
-	}
-
-	@Test
-	@DirtiesContext
-	public void deleteComposedTaskMissingChildTasks() {
-		initializeSuccessfulRegistry();
-		String dsl = "AAA && BBB && CCC";
-		taskService.saveTaskDefinition("deleteTask", dsl);
-		verifyTaskExistsInRepo("deleteTask-AAA", "AAA");
-		verifyTaskExistsInRepo("deleteTask-BBB", "BBB");
-		verifyTaskExistsInRepo("deleteTask-CCC", "CCC");
-		verifyTaskExistsInRepo("deleteTask", dsl);
-		taskService.deleteTaskDefinition("deleteTask-BBB");
-		long preDeleteSize = taskDefinitionRepository.count();
-		taskService.deleteTaskDefinition("deleteTask");
-		assertThat(preDeleteSize - 3, is(equalTo(taskDefinitionRepository.count())));
-	}
-
-	@Test
-	@DirtiesContext
-	public void deleteComposedTaskDeleteOnlyChildren() {
-		initializeSuccessfulRegistry();
-		taskService.saveTaskDefinition("deleteTask-AAA", "AAA");
-		String dsl = "BBB && CCC";
-		taskService.saveTaskDefinition("deleteTask", dsl);
-		verifyTaskExistsInRepo("deleteTask-AAA", "AAA");
-		verifyTaskExistsInRepo("deleteTask-BBB", "BBB");
-		verifyTaskExistsInRepo("deleteTask-CCC", "CCC");
-		verifyTaskExistsInRepo("deleteTask", dsl);
-
-		long preDeleteSize = taskDefinitionRepository.count();
-		taskService.deleteTaskDefinition("deleteTask");
-		assertThat(preDeleteSize - 3, is(equalTo(taskDefinitionRepository.count())));
-		verifyTaskExistsInRepo("deleteTask-AAA", "AAA");
-	}
-
-	@Test
-	@DirtiesContext
-	public void deleteComposedTaskWithLabel() {
-		initializeSuccessfulRegistry();
-		String dsl = "LLL: AAA && BBB";
-		taskService.saveTaskDefinition("deleteTask", dsl);
-		verifyTaskExistsInRepo("deleteTask-LLL", "AAA");
-		verifyTaskExistsInRepo("deleteTask-BBB", "BBB");
-		verifyTaskExistsInRepo("deleteTask", dsl);
-
-		long preDeleteSize = taskDefinitionRepository.count();
-		taskService.deleteTaskDefinition("deleteTask");
-		assertThat(preDeleteSize - 3, is(equalTo(taskDefinitionRepository.count())));
-	}
-
-	@Test
-	@DirtiesContext
-	public void createFailedComposedTask() {
-		String dsl = "AAA && BBB";
-		initializeFailRegistry();
-		boolean isExceptionThrown = false;
-		try{
+		@Test
+		@DirtiesContext
+		public void createSplitComposedTask() {
+			initializeSuccessfulRegistry(appRegistry);
+			String dsl = "<AAA || BBB>";
 			taskService.saveTaskDefinition("splitTask", dsl);
-		}
-		catch (IllegalArgumentException iae) {
-			isExceptionThrown = true;
-		}
-		assertTrue("IllegalArgumentException was expected to be thrown", isExceptionThrown);
-		assertFalse(wasTaskDefinitionCreated("splitTask"));
-		assertFalse(wasTaskDefinitionCreated("splitTask-AAA"));
-		assertFalse(wasTaskDefinitionCreated("splitTask-BBB"));
-	}
+			verifyTaskExistsInRepo("splitTask", dsl, taskDefinitionRepository);
 
-	@Test
-	@DirtiesContext
-	public void createDuplicateComposedTask() {
-		String dsl = "AAA && BBB";
-		initializeSuccessfulRegistry();
-		boolean isExceptionThrown = false;
-		taskService.saveTaskDefinition("splitTask", dsl);
-		try{
+			verifyTaskExistsInRepo("splitTask-AAA", "AAA", taskDefinitionRepository);
+			verifyTaskExistsInRepo("splitTask-BBB", "BBB", taskDefinitionRepository);
+		}
+
+		@Test
+		@DirtiesContext
+		public void verifyComposedTaskFlag() {
+			String composedTaskDsl = "<AAA || BBB>";
+			assertTrue("Expected true for composed task", taskService.isComposedDefinition(composedTaskDsl));
+			composedTaskDsl = "AAA 'FAILED' -> BBB '*' -> CCC";
+			assertTrue("Expected true for composed task", taskService.isComposedDefinition(composedTaskDsl));
+			composedTaskDsl = "AAA && BBB && CCC";
+			assertTrue("Expected true for composed task", taskService.isComposedDefinition(composedTaskDsl));
+			String nonComposedTaskDsl = "AAA";
+			assertFalse("Expected false for non-composed task", taskService.isComposedDefinition(nonComposedTaskDsl));
+			nonComposedTaskDsl = "AAA --foo=bar";
+			assertFalse("Expected false for non-composed task", taskService.isComposedDefinition(nonComposedTaskDsl));
+		}
+
+		@Test
+		@DirtiesContext
+		public void createTransitionComposedTask() {
+			initializeSuccessfulRegistry(appRegistry);
+			String dsl = "AAA 'FAILED' -> BBB '*' -> CCC";
+			taskService.saveTaskDefinition("transitionTask", dsl);
+			verifyTaskExistsInRepo("transitionTask", dsl, taskDefinitionRepository);
+
+			verifyTaskExistsInRepo("transitionTask-AAA", "AAA", taskDefinitionRepository);
+			verifyTaskExistsInRepo("transitionTask-BBB", "BBB", taskDefinitionRepository);
+		}
+
+		@Test
+		@DirtiesContext
+		public void deleteComposedTask() {
+			initializeSuccessfulRegistry(appRegistry);
+			String dsl = "AAA && BBB && CCC";
+			taskService.saveTaskDefinition("deleteTask", dsl);
+			verifyTaskExistsInRepo("deleteTask-AAA", "AAA", taskDefinitionRepository);
+			verifyTaskExistsInRepo("deleteTask-BBB", "BBB", taskDefinitionRepository);
+			verifyTaskExistsInRepo("deleteTask-CCC", "CCC", taskDefinitionRepository);
+			verifyTaskExistsInRepo("deleteTask", dsl, taskDefinitionRepository);
+
+			long preDeleteSize = taskDefinitionRepository.count();
+			taskService.deleteTaskDefinition("deleteTask");
+			assertThat(preDeleteSize - 4, is(equalTo(taskDefinitionRepository.count())));
+		}
+
+		@Test
+		@DirtiesContext
+		public void deleteComposedTaskMissingChildTasks() {
+			initializeSuccessfulRegistry(appRegistry);
+			String dsl = "AAA && BBB && CCC";
+			taskService.saveTaskDefinition("deleteTask", dsl);
+			verifyTaskExistsInRepo("deleteTask-AAA", "AAA", taskDefinitionRepository);
+			verifyTaskExistsInRepo("deleteTask-BBB", "BBB", taskDefinitionRepository);
+			verifyTaskExistsInRepo("deleteTask-CCC", "CCC", taskDefinitionRepository);
+			verifyTaskExistsInRepo("deleteTask", dsl, taskDefinitionRepository);
+			taskService.deleteTaskDefinition("deleteTask-BBB");
+			long preDeleteSize = taskDefinitionRepository.count();
+			taskService.deleteTaskDefinition("deleteTask");
+			assertThat(preDeleteSize - 3, is(equalTo(taskDefinitionRepository.count())));
+		}
+
+		@Test
+		@DirtiesContext
+		public void deleteComposedTaskDeleteOnlyChildren() {
+			initializeSuccessfulRegistry(appRegistry);
+			taskService.saveTaskDefinition("deleteTask-AAA", "AAA");
+			String dsl = "BBB && CCC";
+			taskService.saveTaskDefinition("deleteTask", dsl);
+			verifyTaskExistsInRepo("deleteTask-AAA", "AAA", taskDefinitionRepository);
+			verifyTaskExistsInRepo("deleteTask-BBB", "BBB", taskDefinitionRepository);
+			verifyTaskExistsInRepo("deleteTask-CCC", "CCC", taskDefinitionRepository);
+			verifyTaskExistsInRepo("deleteTask", dsl, taskDefinitionRepository);
+
+			long preDeleteSize = taskDefinitionRepository.count();
+			taskService.deleteTaskDefinition("deleteTask");
+			assertThat(preDeleteSize - 3, is(equalTo(taskDefinitionRepository.count())));
+			verifyTaskExistsInRepo("deleteTask-AAA", "AAA", taskDefinitionRepository);
+		}
+
+		@Test
+		@DirtiesContext
+		public void deleteComposedTaskWithLabel() {
+			initializeSuccessfulRegistry(appRegistry);
+			String dsl = "LLL: AAA && BBB";
+			taskService.saveTaskDefinition("deleteTask", dsl);
+			verifyTaskExistsInRepo("deleteTask-LLL", "AAA", taskDefinitionRepository);
+			verifyTaskExistsInRepo("deleteTask-BBB", "BBB", taskDefinitionRepository);
+			verifyTaskExistsInRepo("deleteTask", dsl, taskDefinitionRepository);
+
+			long preDeleteSize = taskDefinitionRepository.count();
+			taskService.deleteTaskDefinition("deleteTask");
+			assertThat(preDeleteSize - 3, is(equalTo(taskDefinitionRepository.count())));
+		}
+
+		@Test
+		@DirtiesContext
+		public void createFailedComposedTask() {
+			String dsl = "AAA && BBB";
+			initializeFailRegistry(appRegistry);
+			boolean isExceptionThrown = false;
+			try {
+				taskService.saveTaskDefinition("splitTask", dsl);
+			}
+			catch (IllegalArgumentException iae) {
+				isExceptionThrown = true;
+			}
+			assertTrue("IllegalArgumentException was expected to be thrown", isExceptionThrown);
+			assertFalse(wasTaskDefinitionCreated("splitTask", taskDefinitionRepository));
+			assertFalse(wasTaskDefinitionCreated("splitTask-AAA", taskDefinitionRepository));
+			assertFalse(wasTaskDefinitionCreated("splitTask-BBB", taskDefinitionRepository));
+		}
+
+		@Test
+		@DirtiesContext
+		public void createDuplicateComposedTask() {
+			String dsl = "AAA && BBB";
+			initializeSuccessfulRegistry(appRegistry);
+			boolean isExceptionThrown = false;
 			taskService.saveTaskDefinition("splitTask", dsl);
+			try {
+				taskService.saveTaskDefinition("splitTask", dsl);
+			}
+			catch (DuplicateTaskException de) {
+				isExceptionThrown = true;
+			}
+			assertTrue("DuplicateTaskException was expected to be thrown", isExceptionThrown);
+			assertTrue(wasTaskDefinitionCreated("splitTask", taskDefinitionRepository));
+			assertTrue(wasTaskDefinitionCreated("splitTask-AAA", taskDefinitionRepository));
+			assertTrue(wasTaskDefinitionCreated("splitTask-BBB", taskDefinitionRepository));
 		}
-		catch (DuplicateTaskException de) {
-			isExceptionThrown = true;
+
+		@Test
+		@DirtiesContext
+		public void createDuplicateChildTaskComposedTask() {
+			String dsl = "AAA && BBB";
+			initializeSuccessfulRegistry(appRegistry);
+			boolean isExceptionThrown = false;
+			taskService.saveTaskDefinition("splitTask-BBB", "BBB");
+			try {
+				taskService.saveTaskDefinition("splitTask", dsl);
+			}
+			catch (DuplicateTaskException de) {
+				isExceptionThrown = true;
+			}
+			assertTrue("DuplicateTaskException was expected to be thrown", isExceptionThrown);
+			assertFalse(wasTaskDefinitionCreated("splitTask", taskDefinitionRepository));
+			assertFalse(wasTaskDefinitionCreated("splitTask-AAA", taskDefinitionRepository));
+			assertTrue(wasTaskDefinitionCreated("splitTask-BBB", taskDefinitionRepository));
 		}
-		assertTrue("DuplicateTaskException was expected to be thrown", isExceptionThrown);
-		assertTrue(wasTaskDefinitionCreated("splitTask"));
-		assertTrue(wasTaskDefinitionCreated("splitTask-AAA"));
-		assertTrue(wasTaskDefinitionCreated("splitTask-BBB"));
 	}
 
-	@Test
-	@DirtiesContext
-	public void createDuplicateChildTaskComposedTask() {
-		String dsl = "AAA && BBB";
-		initializeSuccessfulRegistry();
-		boolean isExceptionThrown = false;
-		taskService.saveTaskDefinition("splitTask-BBB", "BBB");
-		try{
-			taskService.saveTaskDefinition("splitTask", dsl);
-		}
-		catch (DuplicateTaskException de) {
-			isExceptionThrown = true;
-		}
-		assertTrue("DuplicateTaskException was expected to be thrown", isExceptionThrown);
-		assertFalse(wasTaskDefinitionCreated("splitTask"));
-		assertFalse(wasTaskDefinitionCreated("splitTask-AAA"));
-		assertTrue(wasTaskDefinitionCreated("splitTask-BBB"));
+	private static void initializeSuccessfulRegistry(AppRegistry appRegistry) {
+		when(appRegistry.find(anyString(), any(ApplicationType.class))).thenReturn(
+			new AppRegistration("some-name", ApplicationType.task, URI.create("http://helloworld")));
+		when(appRegistry.getAppResource(any())).thenReturn(mock(Resource.class));
+		when(appRegistry.getAppMetadataResource(any())).thenReturn(null);
 	}
 
-	private void verifyTaskExistsInRepo(String taskName, String dsl) {
+	private static void initializeFailRegistry(AppRegistry appRegistry) throws IllegalArgumentException {
+		when(appRegistry.find("BBB", ApplicationType.task)).thenThrow(new IllegalArgumentException(
+			String.format("Application name '%s' with type '%s' does not exist in the app registry.", "fake",
+				ApplicationType.task)));
+		when(appRegistry.find("AAA", ApplicationType.task)).thenReturn(mock(AppRegistration.class));
+	}
+
+	private static void verifyTaskExistsInRepo(String taskName, String dsl,
+		TaskDefinitionRepository taskDefinitionRepository) {
 		TaskDefinition taskDefinition = taskDefinitionRepository.findOne(taskName);
-
 		assertThat(taskDefinition.getName(), is(equalTo(taskName)));
 		assertThat(taskDefinition.getDslText(), is(equalTo(dsl)));
 	}
 
-	private void initializeSuccessfulRegistry() {
-		when(this.appRegistry.find(anyString(), any(ApplicationType.class)))
-				.thenReturn(new AppRegistration("some-name", ApplicationType.task, URI.create("http://helloworld")));
-		when(this.appRegistry.getAppResource(any())).thenReturn(mock(Resource.class));
-		when(this.appRegistry.getAppMetadataResource(any())).thenReturn(null);
-	}
-
-	private void initializeFailRegistry() throws IllegalArgumentException{
-		when(this.appRegistry.find("BBB", ApplicationType.task))
-				.thenThrow(new IllegalArgumentException(
-						String.format("Application name '%s' with type '%s' does not exist in the app registry.", "fake",
-								ApplicationType.task)));
-		when(this.appRegistry.find("AAA", ApplicationType.task))
-				.thenReturn(mock(AppRegistration.class));
-	}
-	private boolean wasTaskDefinitionCreated(String taskName) {
+	private static boolean wasTaskDefinitionCreated(String taskName,
+		TaskDefinitionRepository taskDefinitionRepository) {
 		TaskDefinition taskDefinition = taskDefinitionRepository.findOne(taskName);
 		return taskDefinition != null;
 	}
-
 }

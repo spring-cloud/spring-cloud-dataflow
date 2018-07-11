@@ -61,6 +61,7 @@ import static org.mockito.Mockito.when;
 
 /**
  * @author Glenn Renfro
+ * @author David Turanski
  */
 @EnableTransactionManagement
 @Configuration
@@ -68,6 +69,9 @@ public class TaskServiceDependencies {
 
 	@Autowired
 	DataSourceProperties dataSourceProperties;
+
+	@Autowired
+	TaskConfigurationProperties taskConfigurationProperties;
 
 	@Bean
 	public TaskRepositoryInitializer taskExecutionRepository(DataSource dataSource) {
@@ -145,10 +149,11 @@ public class TaskServiceDependencies {
 	public DefaultTaskService defaultTaskService(TaskDefinitionRepository taskDefinitionRepository, TaskExplorer taskExplorer,
 			TaskRepository taskExecutionRepository, AppRegistry appRegistry,
 			ResourceLoader resourceLoader, TaskLauncher taskLauncher,
-			ApplicationConfigurationMetadataResolver metadataResolver, CommonApplicationProperties commonApplicationProperties) {
+			ApplicationConfigurationMetadataResolver metadataResolver,
+			TaskConfigurationProperties taskConfigurationProperties, CommonApplicationProperties commonApplicationProperties) {
 		return new DefaultTaskService(dataSourceProperties, taskDefinitionRepository, taskExplorer,
 				taskExecutionRepository, appRegistry, resourceLoader, taskLauncher, metadataResolver,
-				new TaskConfigurationProperties(), new InMemoryDeploymentIdRepository(), null, commonApplicationProperties);
+				taskConfigurationProperties, new InMemoryDeploymentIdRepository(), null, commonApplicationProperties);
 	}
 
 	@Bean
