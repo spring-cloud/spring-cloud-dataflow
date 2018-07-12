@@ -333,7 +333,7 @@ image::{dataflow-asciidoc}/images/dataflow-job-executions-list.png[List of Job E
 
 
 [[dashboard-job-executions-details]]
-==== Job Execution Details
+=== Job Execution Details
 
 After having launched a batch job, the Job Execution Details page will show information about the job.
 
@@ -348,7 +348,7 @@ You can further drill into the details of each step's execution by clicking the 
 
 
 [[dashboard-job-executions-steps]]
-==== Step Execution Details
+=== Step Execution Details
 
 The Step Execution Details page provides information about an individual step within a job.
 
@@ -370,7 +370,7 @@ When that happens, refer to the server log files for further details.
 
 
 [[dashboard-job-executions-steps-progress]]
-==== Step Execution Progress
+=== Step Execution Progress
 
 On this screen, you can see a progress bar indicator in regards to the execution
 of the current step. Under the Step Execution History, you can also view various

@@ -59,7 +59,7 @@ public class TaskSchedulerDocumentation extends BaseDocumentation {
 	public void createSchedule() throws Exception {
 		this.mockMvc.perform(
 				post("/tasks/schedules")
-						.param("scheduleName", "my-schedule")
+						.param("scheduleName", "mySchedule")
 						.param("taskDefinitionName", "taskC")
 						.param("properties", "scheduler.AAA.spring.cloud.scheduler.cron.expression=00%2041%2017%20?%20*%20*")
 						.param("arguments", "--foo=bar"))
@@ -77,11 +77,11 @@ public class TaskSchedulerDocumentation extends BaseDocumentation {
 	@Test
 	public void deleteSchedule() throws Exception {
 		this.mockMvc.perform(
-				delete("/tasks/schedules/{my-schedule}", "my-schedule"))
+				delete("/tasks/schedules/{scheduleName}", "mytestschedule"))
 				.andDo(print())
 				.andExpect(status().isOk())
 				.andDo(this.documentationHandler.document(
-						pathParameters(parameterWithName("my-schedule")
+						pathParameters(parameterWithName("scheduleName")
 								.description("The name of an existing schedule (required)"))));
 	}
 
