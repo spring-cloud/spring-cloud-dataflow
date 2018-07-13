@@ -49,53 +49,12 @@
 			<groupId>org.springframework.cloud</groupId>
 			<artifactId>spring-cloud-dataflow-completion</artifactId>
 		</dependency>
-		<dependency>
-			<groupId>org.springframework.cloud</groupId>
-			<artifactId>spring-cloud-starter-dataflow-server-local</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.springframework.cloud</groupId>
-			<artifactId>spring-cloud-starter-dataflow-server-local</artifactId>
-			<version>1.6.0.BUILD-SNAPSHOT</version>
-			<type>test-jar</type>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.springframework.restdocs</groupId>
-			<artifactId>spring-restdocs-mockmvc</artifactId>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.springframework.restdocs</groupId>
-			<artifactId>spring-restdocs-core</artifactId>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>com.jayway.jsonpath</groupId>
-			<artifactId>json-path</artifactId>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.springframework.cloud</groupId>
-			<artifactId>spring-cloud-task-batch</artifactId>
-			<scope>test</scope>
-		</dependency>
 	</dependencies>
 	<profiles>
 		<profile>
 			<id>full</id>
 			<build>
 				<plugins>
-					<plugin>
-						<groupId>org.apache.maven.plugins</groupId>
-						<artifactId>maven-surefire-plugin</artifactId>
-						<configuration>
-							<includes>
-								<include>**/*Documentation.java</include>
-								<include>**/*Tests.java</include>
-							</includes>
-						</configuration>
-					</plugin>
 					<plugin>
 						<groupId>org.apache.maven.plugins</groupId>
 						<artifactId>maven-javadoc-plugin</artifactId>
@@ -145,7 +104,8 @@
 								<project-version>${project.version}</project-version>
 								<project-artifactId>${project.artifactId}</project-artifactId>
 								<version-type-lowercase>${version-type-lowercase}</version-type-lowercase>
-								<snippets>${basedir}/target/generated-snippets</snippets>
+								<snippets>${basedir}/../spring-cloud-dataflow-classic-docs/target/generated-snippets</snippets>
+								<skipper-snippets>${basedir}/../spring-cloud-dataflow-skipper-docs/target/generated-snippets</skipper-snippets>
 								<skipper-version>${spring-cloud-skipper.version}</skipper-version>
 								<skipper-version-type-lowercase>${skipper-version-type-lowercase}</skipper-version-type-lowercase>
 								<skipper-branch-or-tag>${skipper-branch-or-tag}</skipper-branch-or-tag>

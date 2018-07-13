@@ -66,7 +66,6 @@ public class AppRegistryDocumentation extends BaseDocumentation {
 					)
 				)
 			);
-
 		unregisterApp(ApplicationType.source, "http");
 	}
 
