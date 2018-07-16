@@ -1279,7 +1279,7 @@ refers to Maven Central.
 * version: Inserts the version of the jar/pom.
 
 For example,
-`https://myrepository/org/springframework/cloud/spring-cloud-dataflow-shell/{version}/spring-cloud-dataflow-shell-{version}.jar`
+`https://myrepository/org/springframework/cloud/spring-cloud-dataflow-shell/\{version}/spring-cloud-dataflow-shell-\{version}.jar`
 produces
 `https://myrepository/org/springframework/cloud/spring-cloud-dataflow-shell/1.2.3.RELEASE/spring-cloud-dataflow-shell-1.2.3.RELEASE.jar`
 if you were using the 1.2.3.RELEASE version of the Spring Cloud Data Flow Shell
