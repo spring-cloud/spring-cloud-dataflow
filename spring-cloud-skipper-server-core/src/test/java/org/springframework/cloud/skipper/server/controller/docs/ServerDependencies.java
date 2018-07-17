@@ -15,7 +15,6 @@
  */
 package org.springframework.cloud.skipper.server.controller.docs;
 
-import java.io.File;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -39,10 +38,8 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.cloud.common.security.AuthorizationProperties;
 import org.springframework.cloud.common.security.support.SecurityStateBean;
 import org.springframework.cloud.deployer.resource.docker.DockerResourceLoader;
-import org.springframework.cloud.deployer.resource.maven.MavenProperties;
 import org.springframework.cloud.deployer.resource.maven.MavenResourceLoader;
 import org.springframework.cloud.deployer.resource.support.DelegatingResourceLoader;
-import org.springframework.cloud.deployer.resource.support.LRUCleaningResourceLoaderBeanPostProcessor;
 import org.springframework.cloud.skipper.domain.SpringCloudDeployerApplicationManifestReader;
 import org.springframework.cloud.skipper.io.DefaultPackageReader;
 import org.springframework.cloud.skipper.io.DefaultPackageWriter;
@@ -107,7 +104,8 @@ import static org.springframework.cloud.skipper.server.config.SkipperServerConfi
  */
 @Configuration
 @EnableConfigurationProperties({ SkipperServerProperties.class, VersionInfoProperties.class,
-		LocalPlatformProperties.class, /*CloudFoundryPlatformProperties.class,*/ MavenConfigurationProperties.class, HealthCheckProperties.class })
+		LocalPlatformProperties.class, /* CloudFoundryPlatformProperties.class, */ MavenConfigurationProperties.class,
+		HealthCheckProperties.class })
 @EntityScan({ "org.springframework.cloud.skipper.domain",
 		"org.springframework.cloud.skipper.server.domain" })
 @EnableAsync
@@ -169,8 +167,6 @@ public class ServerDependencies implements AsyncConfigurer {
 		return new RootController();
 	}
 
-
-
 	// Services
 
 	@Bean
@@ -195,14 +191,6 @@ public class ServerDependencies implements AsyncConfigurer {
 		loaders.put("docker", dockerLoader);
 		loaders.put("maven", mavenResourceLoader);
 		return new DelegatingResourceLoader(loaders);
-	}
-
-	@Bean
-	public LRUCleaningResourceLoaderBeanPostProcessor lruCleaningResourceLoaderBeanPostProcessor(
-			SkipperServerProperties skipperServerProperties, MavenProperties mavenProperties) {
-		return new LRUCleaningResourceLoaderBeanPostProcessor(
-				skipperServerProperties.getFreeDiskSpacePercentage() / 100F,
-				new File(mavenProperties.getLocalRepository()));
 	}
 
 	@Bean

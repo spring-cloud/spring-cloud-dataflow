@@ -24,7 +24,6 @@ import org.slf4j.LoggerFactory;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.deployer.resource.support.DelegatingResourceLoader;
-import org.springframework.cloud.deployer.resource.support.LRUCleaningResourceLoader;
 import org.springframework.cloud.skipper.PackageDeleteException;
 import org.springframework.cloud.skipper.ReleaseNotFoundException;
 import org.springframework.cloud.skipper.SkipperException;
@@ -78,12 +77,6 @@ public class ReleaseServiceTests extends AbstractIntegrationTest {
 		Repository repo = this.repositoryRepository.findByName("test");
 		repo.setLocal(false);
 		this.repositoryRepository.save(repo);
-	}
-
-	@Test
-	public void testResourceLoaderInstance() {
-		assertThat(this.delegatingResourceLoader).isNotNull();
-		assertThat(this.delegatingResourceLoader instanceof LRUCleaningResourceLoader).isTrue();
 	}
 
 	@Test
