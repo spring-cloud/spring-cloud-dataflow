@@ -30,7 +30,7 @@
 		<spring-cloud-dataflow-ui.version>1.6.0.M2</spring-cloud-dataflow-ui.version>
 
 		<spring-cloud-deployer.version>1.3.4.BUILD-SNAPSHOT</spring-cloud-deployer.version>
-		<spring-cloud-deployer-local.version>1.3.8.BUILD-SNAPSHOT</spring-cloud-deployer-local.version>
+		<spring-cloud-deployer-local.version>1.3.7.RELEASE</spring-cloud-deployer-local.version>
 
 		<spring-cloud-skipper.version>1.0.7.RELEASE</spring-cloud-skipper.version>
 
