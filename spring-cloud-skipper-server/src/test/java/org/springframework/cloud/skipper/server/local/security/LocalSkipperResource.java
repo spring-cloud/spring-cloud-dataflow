@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 the original author or authors.
+ * Copyright 2016-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,6 +32,7 @@ import org.springframework.web.context.WebApplicationContext;
 
 /**
  * @author Gunnar Hillert
+ * @author Ilayaperumal Gopinathan
  */
 public class LocalSkipperResource extends ExternalResource {
 
@@ -41,14 +42,21 @@ public class LocalSkipperResource extends ExternalResource {
 
 	private String skipperPort;
 
-	private String[] configLocations;
-	private String[] configNames;
+	private final String[] configLocations;
+	private final String[] configNames;
+
+	private final String[] args;
 
 	private ConfigurableApplicationContext configurableApplicationContext;
 
-	public LocalSkipperResource(String[] configLocations, String[] configNames) {
+	public LocalSkipperResource(String[] configLocations, String[] configNames, String[] args) {
 		this.configLocations = configLocations;
 		this.configNames = configNames;
+		this.args = args;
+	}
+
+	public LocalSkipperResource(String[] configLocations, String[] configNames) {
+		this(configLocations, configNames, new String[] { "--server.port=0" });
 	}
 
 	@Override
@@ -72,8 +80,7 @@ public class LocalSkipperResource extends ExternalResource {
 
 
 
-		configurableApplicationContext = app.run(
-			new String[] { "--server.port=0" });
+		configurableApplicationContext = app.run(this.args);
 
 		Collection<Filter> filters = configurableApplicationContext.getBeansOfType(Filter.class).values();
 		mockMvc = MockMvcBuilders.webAppContextSetup((WebApplicationContext) configurableApplicationContext)
