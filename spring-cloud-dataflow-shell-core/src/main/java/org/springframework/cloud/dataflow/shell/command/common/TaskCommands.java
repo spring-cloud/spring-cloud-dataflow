@@ -192,8 +192,8 @@ public class TaskCommands implements CommandMarker {
 		return builder.build();
 	}
 
-	@CliCommand(value = TASK_EXECUTION_CURRENT, help = "Display count of currently execution tasks and related "
-		+ "information")
+	@CliCommand(value = TASK_EXECUTION_CURRENT,
+		help = "Display count of currently executin tasks and related information")
 	public Table currentExecutions() {
 		CurrentTaskExecutionsResource taskExecutionsResource = taskOperations().currentTaskExecutions();
 		TableModelBuilder<Object> modelBuilder = new TableModelBuilder<>();

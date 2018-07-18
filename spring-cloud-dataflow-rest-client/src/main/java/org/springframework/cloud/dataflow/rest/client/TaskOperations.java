@@ -87,7 +87,8 @@ public interface TaskOperations {
 	TaskExecutionResource taskExecutionStatus(long id);
 
 	/**
-	 *
+	 * Return information including the count of currently executing tasks and task execution limits.
+	 * @return {@link CurrentTaskExecutionsResource}
 	 */
 	CurrentTaskExecutionsResource currentTaskExecutions();
 

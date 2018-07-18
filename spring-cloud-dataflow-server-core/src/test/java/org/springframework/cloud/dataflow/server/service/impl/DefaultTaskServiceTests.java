@@ -22,7 +22,9 @@ import java.util.LinkedList;
 import java.util.Map;
 
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 
@@ -38,6 +40,7 @@ import org.springframework.cloud.dataflow.registry.AppRegistry;
 import org.springframework.cloud.dataflow.registry.domain.AppRegistration;
 import org.springframework.cloud.dataflow.server.config.apps.CommonApplicationProperties;
 import org.springframework.cloud.dataflow.server.configuration.TaskServiceDependencies;
+import org.springframework.cloud.dataflow.server.controller.support.InvalidStreamDefinitionException;
 import org.springframework.cloud.dataflow.server.repository.DuplicateTaskException;
 import org.springframework.cloud.dataflow.server.repository.InMemoryDeploymentIdRepository;
 import org.springframework.cloud.dataflow.server.repository.NoSuchTaskDefinitionException;
@@ -78,6 +81,9 @@ import static org.mockito.Mockito.when;
 @SpringBootTest(classes = { EmbeddedDataSourceConfiguration.class, TaskServiceDependencies.class })
 @EnableConfigurationProperties({ CommonApplicationProperties.class, TaskConfigurationProperties.class })
 public abstract class DefaultTaskServiceTests {
+
+	@Rule
+	public ExpectedException thrown = ExpectedException.none();
 
 	private final static String BASE_TASK_NAME = "myTask";
 
@@ -146,7 +152,7 @@ public abstract class DefaultTaskServiceTests {
 			assertEquals(2L, this.taskService.executeTask(TASK_NAME_ORIG, new HashMap<>(), new LinkedList<>()));
 		}
 
-		@Test(expected = IllegalStateException.class)
+		@Test
 		@DirtiesContext
 		public void failOnLimitReached() {
 			initializeSuccessfulRegistry(this.appRegistry);
@@ -155,6 +161,10 @@ public abstract class DefaultTaskServiceTests {
 			for (long i = 1; i <= taskService.getMaximumConcurrentTasks(); i++) {
 				assertEquals(i, taskService.executeTask(TASK_NAME_ORIG, new HashMap<>(), new LinkedList<>()));
 			}
+
+			thrown.expect(IllegalStateException.class);
+			thrown.expectMessage("The maximum concurrent task executions [10] is at its limit.");
+
 			taskService.executeTask(TASK_NAME_ORIG, new HashMap<>(), new LinkedList<>());
 		}
 
