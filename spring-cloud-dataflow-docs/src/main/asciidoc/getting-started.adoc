@@ -162,20 +162,19 @@ Update the `depends_on` attribute of the `dataflow-server` service definition to
 [source,yaml,subs=attributes]
 ----
   kafka:
-    image: wurstmeister/kafka:0.10.1.0
+    image: wurstmeister/kafka:1.10
     expose:
       - "9092"
     environment:
       - KAFKA_ADVERTISED_PORT=9092
       - KAFKA_ZOOKEEPER_CONNECT=zookeeper:2181
+      - KAFKA_ADVERTISED_HOST_NAME=kafka
     depends_on:
       - zookeeper
   zookeeper:
     image: wurstmeister/zookeeper
     expose:
       - "2181"
-    environment:
-      - KAFKA_ADVERTISED_HOST_NAME=zookeeper
 ----
 +
 With:
@@ -211,7 +210,7 @@ With:
       - rabbitmq
 ----
 +
-And finally, modify the `app-import` service definition `command` attribute to replace `http://bit.ly/Celsius-SR2-stream-applications-kafka-10-maven` with `http://bit.ly/Celsius-SR2-stream-applications-rabbit-maven`.
+And finally, modify the `app-import` service definition `command` attribute to replace `http://bit.ly/Darwin-SR1-stream-applications-kafka-maven` with `http://bit.ly/Darwin-SR1-stream-applications-rabbit-maven`.
 
 
 . To enable analytics using redis as a backend, add the following configuration under the `services` section:
