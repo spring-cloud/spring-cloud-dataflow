@@ -98,6 +98,8 @@ public class ApiDocumentation extends BaseDocumentation {
 						.description("Provides details for a " + "specific task definition"),
 				linkWithRel("tasks/executions")
 						.description("Returns Task executions and allows launching of tasks"),
+				linkWithRel("tasks/executions/current")
+						.description("Provides the current count of running tasks"),
 				linkWithRel("tasks/schedules")
 						.description("Provides schedule information of tasks"),
 				linkWithRel("tasks/schedules/instances")
