@@ -135,6 +135,11 @@ Successfully targeted https://mlp-skipper.cfapps.io/api
 skipper:>
 ----
 
+=== Database Connection Pool
+The Skipper server uses the Spring Cloud Connector library to create the DataSource with a default connection pool size of 4.
+To change the connection pool size and maximum wait time, set the following two properties `spring.cloud.skipper.server.cloudfoundry.maxPoolSize` and `spring.cloud.skipper.server.cloudfoundry.maxWaitTime`.
+The wait time is specified in milliseconds.
+
 [[skipper-installation-kubernetes]]
 == Installing on Kubernetes
 
