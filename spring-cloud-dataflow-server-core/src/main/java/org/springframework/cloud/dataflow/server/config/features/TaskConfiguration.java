@@ -25,6 +25,7 @@ import org.springframework.batch.core.launch.support.SimpleJobLauncher;
 import org.springframework.batch.core.repository.support.JobRepositoryFactoryBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.AbstractDatabaseInitializer;
 import org.springframework.boot.autoconfigure.batch.BatchDatabaseInitializer;
 import org.springframework.boot.autoconfigure.batch.BatchProperties;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
@@ -54,6 +55,7 @@ import org.springframework.cloud.task.repository.support.TaskExecutionDaoFactory
 import org.springframework.cloud.task.repository.support.TaskRepositoryInitializer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.DependsOn;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
@@ -65,6 +67,7 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
  * @author Michael Minella
  * @author Ilayaperumal Gopinathan
  * @author Gunnar Hillert
+ * @author Christian Tzolov
  */
 @Configuration
 @ConditionalOnProperty(prefix = FeaturesProperties.FEATURES_PREFIX, name = FeaturesProperties.TASKS_ENABLED, matchIfMissing = true)
@@ -186,6 +189,23 @@ public class TaskConfiguration {
 			TaskRepositoryInitializer taskRepositoryInitializer = new TaskRepositoryInitializer();
 			taskRepositoryInitializer.setDataSource(dataSource);
 			return taskRepositoryInitializer;
+		}
+
+		@Bean
+		@DependsOn({"batchRepositoryInitializerForDefaultDB", "taskRepositoryInitializerForDB"})
+		public AbstractDatabaseInitializer taskBatchRdbmsIndexInitializer(DataSource dataSource, ResourceLoader resourceLoader) {
+			return new AbstractDatabaseInitializer(dataSource, resourceLoader) {
+				@Override
+				protected boolean isEnabled() {
+					String databaseName = this.getDatabaseName();
+					return "mysql".equalsIgnoreCase(databaseName) || "postgresql".equalsIgnoreCase(databaseName);
+				}
+
+				@Override
+				protected String getSchemaLocation() {
+					return String.format("classpath:schemas/%s/batch_task_indexes.sql", this.getDatabaseName());
+				}
+			};
 		}
 
 		@Bean
