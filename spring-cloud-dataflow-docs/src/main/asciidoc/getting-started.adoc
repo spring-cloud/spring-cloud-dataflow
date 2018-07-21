@@ -239,6 +239,74 @@ Then add the following entries to the `environment` block of the `dataflow-serve
 ----
 +
 
+. To enable `app starters` registration directly from the host machine you have to mount the source host folders to the `dataflow-server` container. For example, if the `my-app.jar` is in the `/foo/bar/apps` folder on your host machine, then add the following `volumes` block to the `dataflow-server` service definition:
++
+[source,yaml,subs=attributes]
+----
+  dataflow-server:
+    image: springcloud/spring-cloud-dataflow-server-local:${DATAFLOW_VERSION}
+    container_name: dataflow-server
+    ports:
+      - "9393:9393"
+    environment:
+      - spring.cloud.dataflow.applicationProperties.stream.spring.cloud.stream.kafka.binder.brokers=kafka:9092
+      - spring.cloud.dataflow.applicationProperties.stream.spring.cloud.stream.kafka.binder.zkNodes=zookeeper:2181
+    depends_on:
+      - kafka
+    volumes:
+      - /foo/bar/apps:/root/apps
+----
++
+Later provides access to the `my-app.jar` (and the other files in the folder) from within container's `/root/apps/` folder. Check the https://docs.docker.com/compose/compose-file/compose-file-v2/[compose-file reference] for furthether configuration details.
++
+NOTE: The explicit volume mounting couples the docker-compose to your host's file system, limiting the portability to other machines and OS-es. Unlike `docker`, the `docker-compose` doesn't allow volume mounting from the command line (e.g. no `-v` like parameter). Instead you can define a placeholder environment variable such as `HOST_APP_FOLDER` in place of the hardcoded path: `- ${HOST_APP_FOLDER}:/root/apps` and set this variable before starting the docker-compose.
++
+Once the host folder is mounted, you can register the app starters (from `/root/apps`), with the SCDF  https://docs.spring.io/spring-cloud-dataflow/docs/current/reference/htmlsingle/#shell[Shell] or https://docs.spring.io/spring-cloud-dataflow/docs/current/reference/htmlsingle/#dashboard-apps[Dashboard], using the `file://` URI schema:
++
+[source,bash,subs=attributes]
+----
+dataflow:>app register --type source --name my-app --uri file://root/apps/my-app.jar
+----
++
+NOTE: Use also `--metadata-uri` if the metadata jar is available in the /root/apps. 
++
+To access host's local maven repository from within the `dataflow-server` container, you should mount host maven local repository (defaults to `~/.m2` for OSX and Linux and `C:\Documents and Settings\{your-username}\.m2` for Windows) to a `dataflow-servera` volume called `/root/.m2/`. For MacOS or Linux host machines this looks like this:
++
+[source,yaml,subs=attributes]
+----
+  dataflow-server:
+  .........
+    volumes:
+      - ~/.m2:/root/.m2
+----
++
+Now you can use the `maven://` URI schema and maven coordinates to resolve jars installed in the host's maven repository:
++
+[source,bash,subs=attributes]
+----
+dataflow:>app register --type processor --name pose-estimation --uri maven://org.springframework.cloud.stream.app:pose-estimation-processor-rabbit:2.0.2.BUILD-SNAPSHOT --metadata-uri maven://org.springframework.cloud.stream.app:pose-estimation-processor-rabbit:jar:metadata:2.0.2.BUILD-SNAPSHOT --force
+----
++
+This approach allow you to share jars build and installed on the host machine (e.g. `mvn clean install`) directly with the dataflow-server container.
++
+One can also pre-register the apps directly in the docker-compose. For every pre-registered app starer, add an additional `wget` statement to the `app-import` block configuration:
++
+[source,yaml,subs=attributes]
+----
+  app-import:
+    image: alpine:3.7
+    depends_on:
+      - dataflow-server
+    command: >
+      /bin/sh -c "
+        ....
+        wget -qO- 'http://dataflow-server:9393/apps/source/my-app' --post-data='uri=file:/root/apps/my-app.jar&metadata-uri=file:/root/apps/my-app-metadata.jar';
+        echo 'My custom apps imported'"
+----
++
+Check the https://docs.spring.io/spring-cloud-dataflow/docs/current/reference/htmlsingle/#resources-registered-applications[SCDF REST API] for further details. 
++
+
 
 [[getting-started-deploying-spring-cloud-dataflow]]
 == Getting Started with Manual Installation
