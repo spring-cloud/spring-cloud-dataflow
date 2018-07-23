@@ -73,6 +73,8 @@ public class DefaultSchedulerServiceTests {
 
 	private static final String BASE_DEFINITION_NAME = "myTaskDefinition";
 
+	private static final String CTR_DEFINITION_NAME= "myCtrDefinition";
+
 	@Autowired
 	private Scheduler simpleTestScheduler;
 
@@ -97,7 +99,10 @@ public class DefaultSchedulerServiceTests {
 	@Before
 	public void setup() throws Exception{
 		this.appRegistry.save("demo", ApplicationType.task, new URI("file:src/test/resources/apps/foo-task"), new URI("file:src/test/resources/apps/foo-task"));
+		this.appRegistry.save("demo2", ApplicationType.task, new URI("file:src/test/resources/apps/foo-task"), new URI("file:src/test/resources/apps/foo-task"));
+
 		taskDefinitionRepository.save(new TaskDefinition(BASE_DEFINITION_NAME, "demo"));
+		taskDefinitionRepository.save(new TaskDefinition(CTR_DEFINITION_NAME, "demo && demo2"));
 		initializeSuccessfulRegistry();
 
 		this.testProperties = new HashMap<>();
@@ -119,6 +124,13 @@ public class DefaultSchedulerServiceTests {
 	public void testSchedule(){
 		schedulerService.schedule(BASE_SCHEDULE_NAME, BASE_DEFINITION_NAME, this.testProperties, this.commandLineArgs);
 		verifyScheduleExistsInScheduler(createScheduleInfo(BASE_SCHEDULE_NAME));
+	}
+
+	@Test
+	@DirtiesContext
+	public void testScheduleCTR(){
+		schedulerService.schedule(BASE_SCHEDULE_NAME, CTR_DEFINITION_NAME, this.testProperties, this.commandLineArgs);
+		verifyScheduleExistsInScheduler(createScheduleInfo(BASE_SCHEDULE_NAME, CTR_DEFINITION_NAME));
 	}
 
 	@Test(expected = CreateScheduleException.class)
@@ -266,9 +278,13 @@ public class DefaultSchedulerServiceTests {
 	}
 
 	private ScheduleInfo createScheduleInfo(String scheduleName) {
+		return createScheduleInfo(scheduleName, BASE_DEFINITION_NAME);
+	}
+
+	private ScheduleInfo createScheduleInfo(String scheduleName, String taskDefinitionName) {
 		ScheduleInfo scheduleInfo = new ScheduleInfo();
 		scheduleInfo.setScheduleName(scheduleName);
-		scheduleInfo.setTaskDefinitionName(BASE_DEFINITION_NAME);
+		scheduleInfo.setTaskDefinitionName(taskDefinitionName);
 		scheduleInfo.setScheduleProperties(this.resolvedProperties);
 		return scheduleInfo;
 	}

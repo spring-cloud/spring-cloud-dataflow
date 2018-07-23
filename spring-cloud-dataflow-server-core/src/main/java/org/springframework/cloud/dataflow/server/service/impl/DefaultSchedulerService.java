@@ -203,16 +203,27 @@ public class DefaultSchedulerService implements SchedulerService {
 		return result;
 	}
 
-	private Resource getTaskResource(String taskDefinitionName ) {
+	private Resource getTaskResource(String taskDefinitionName) {
 		TaskDefinition taskDefinition = this.taskDefinitionRepository.findOne(taskDefinitionName);
 		if (taskDefinition == null) {
 			throw new NoSuchTaskDefinitionException(taskDefinitionName);
 		}
-
-		AppRegistration appRegistration = this.registry.find(taskDefinition.getRegisteredAppName(),
-				ApplicationType.task);
+		AppRegistration appRegistration = null;
+		if (isComposedDefinition(taskDefinition.getDslText())) {
+			appRegistration = this.registry.find(taskConfigurationProperties.getComposedTaskRunnerName(),
+					ApplicationType.task);
+		}
+		else {
+			appRegistration = this.registry.find(taskDefinition.getRegisteredAppName(),
+					ApplicationType.task);
+		}
 		Assert.notNull(appRegistration, "Unknown task app: " + taskDefinition.getRegisteredAppName());
 		return this.registry.getAppResource(appRegistration);
 	}
 
+	private boolean isComposedDefinition(String dsl) {
+		Assert.hasText(dsl, "dsl must not be empty nor null");
+		TaskParser taskParser = new TaskParser("__dummy", dsl, true, true);
+		return taskParser.parse().isComposed();
+	}
 }
