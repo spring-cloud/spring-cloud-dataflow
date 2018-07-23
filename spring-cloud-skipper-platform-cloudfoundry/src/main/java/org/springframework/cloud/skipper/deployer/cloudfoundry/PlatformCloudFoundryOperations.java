@@ -15,6 +15,9 @@
  */
 package org.springframework.cloud.skipper.deployer.cloudfoundry;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import org.cloudfoundry.client.CloudFoundryClient;
 import org.cloudfoundry.operations.CloudFoundryOperations;
 import org.cloudfoundry.operations.DefaultCloudFoundryOperations;
@@ -33,12 +36,26 @@ public class PlatformCloudFoundryOperations {
 	private static final Logger logger = LoggerFactory.getLogger(PlatformCloudFoundryOperations.class);
 
 	private final CloudFoundryPlatformProperties cloudFoundryPlatformProperties;
+	private final Map<String, CloudFoundryOperations> cache = new HashMap<>();
 
 	public PlatformCloudFoundryOperations(CloudFoundryPlatformProperties cloudFoundryPlatformProperties) {
 		this.cloudFoundryPlatformProperties = cloudFoundryPlatformProperties;
 	}
 
-	public CloudFoundryOperations getCloudFoundryOperations(String platformName) {
+	public synchronized CloudFoundryOperations getCloudFoundryOperations(String platformName) {
+		CloudFoundryOperations operations = cache.get(platformName);
+		if (operations == null) {
+			logger.debug("No existing CloudFoundryOperations for platformName {}, creating new");
+			operations = buildCloudFoundryOperations(platformName);
+			cache.put(platformName, operations);
+		}
+		else {
+			logger.trace("Using existing CloudFoundryOperations for platformName {}");
+		}
+		return operations;
+	}
+
+	private CloudFoundryOperations buildCloudFoundryOperations(String platformName) {
 		CloudFoundryPlatformProperties.CloudFoundryProperties cloudFoundryProperties = this.cloudFoundryPlatformProperties
 																							.getAccounts()
 																							.get(platformName);
