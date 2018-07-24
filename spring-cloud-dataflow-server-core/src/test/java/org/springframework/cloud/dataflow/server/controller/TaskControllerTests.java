@@ -18,6 +18,7 @@ package org.springframework.cloud.dataflow.server.controller;
 
 import java.net.URI;
 import java.util.Arrays;
+import java.util.Date;
 
 import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.message.BasicNameValuePair;
@@ -40,6 +41,7 @@ import org.springframework.cloud.dataflow.server.service.TaskService;
 import org.springframework.cloud.deployer.resource.registry.UriRegistry;
 import org.springframework.cloud.deployer.spi.core.AppDeploymentRequest;
 import org.springframework.cloud.deployer.spi.task.TaskLauncher;
+import org.springframework.cloud.task.repository.TaskExecution;
 import org.springframework.cloud.task.repository.TaskExplorer;
 import org.springframework.http.MediaType;
 import org.springframework.test.annotation.DirtiesContext;
@@ -104,6 +106,16 @@ public class TaskControllerTests {
 		this.mockMvc = MockMvcBuilders.webAppContextSetup(wac)
 				.defaultRequest(get("/").accept(MediaType.APPLICATION_JSON)).build();
 		when(taskLauncher.launch(any(AppDeploymentRequest.class))).thenReturn("testID");
+
+		final TaskExecution taskExecutionRunning = new TaskExecution();
+		taskExecutionRunning.setStartTime(new Date());
+		when(taskExplorer.getLatestTaskExecutionForTaskName("myTask")).thenReturn(taskExecutionRunning);
+
+		final TaskExecution taskExecutionComplete = new TaskExecution();
+		taskExecutionComplete.setStartTime(new Date());
+		taskExecutionComplete.setEndTime(new Date());
+		taskExecutionComplete.setExitCode(0);
+		when(taskExplorer.getLatestTaskExecutionForTaskName("myTask2")).thenReturn(taskExecutionComplete);
 	}
 
 	@Test(expected = IllegalArgumentException.class)
@@ -302,9 +314,21 @@ public class TaskControllerTests {
 	public void testDisplaySingleTask() throws Exception {
 		TaskDefinition taskDefinition = new TaskDefinition("myTask", "timestamp");
 		repository.save(taskDefinition);
-		assertEquals(1, repository.count());
+
+		TaskDefinition taskDefinition2 = new TaskDefinition("myTask2", "timestamp");
+		repository.save(taskDefinition2);
+
+		assertEquals(2, repository.count());
+
 		mockMvc.perform(get("/tasks/definitions/myTask").accept(MediaType.APPLICATION_JSON)).andExpect(status().isOk())
-				.andExpect(content().json("{name: \"myTask\"}")).andExpect(content().json("{dslText: \"timestamp\"}"));
+				.andExpect(content().json("{name: \"myTask\"}"))
+				.andExpect(content().json("{status: \"RUNNING\"}"))
+				.andExpect(content().json("{dslText: \"timestamp\"}"));
+
+		mockMvc.perform(get("/tasks/definitions/myTask2").accept(MediaType.APPLICATION_JSON)).andExpect(status().isOk())
+		.andExpect(content().json("{name: \"myTask2\"}"))
+		.andExpect(content().json("{status: \"COMPLETE\"}"))
+		.andExpect(content().json("{dslText: \"timestamp\"}"));
 	}
 
 	@Test

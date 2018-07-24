@@ -147,7 +147,7 @@ public class TaskDefinitionController {
 
 		if (!taskDefinitionMap.isEmpty()) {
 			taskExecutions =
-					explorer.getLatestTaskExecutionsByTaskNames(taskDefinitionMap.keySet().toArray(new String[taskDefinitionMap.size()]));
+					this.explorer.getLatestTaskExecutionsByTaskNames(taskDefinitionMap.keySet().toArray(new String[taskDefinitionMap.size()]));
 		}
 		else {
 			taskExecutions = null;
@@ -171,7 +171,14 @@ public class TaskDefinitionController {
 		if (definition == null) {
 			throw new NoSuchTaskDefinitionException(name);
 		}
-		return taskAssembler.toResource(new TaskExecutionAwareTaskDefinition(definition));
+		final TaskExecution taskExecution = this.explorer.getLatestTaskExecutionForTaskName(name);
+
+		if (taskExecution != null) {
+			return taskAssembler.toResource(new TaskExecutionAwareTaskDefinition(definition, taskExecution));
+		}
+		else {
+			return taskAssembler.toResource(new TaskExecutionAwareTaskDefinition(definition));
+		}
 	}
 
 	/**
