@@ -40,4 +40,5 @@ public abstract class SkipperStream {
 	public static final String SKIPPER_SPEC_RESOURCE = "resource";
 
 	public static final String SKIPPER_SPEC_VERSION = "version";
+
 }

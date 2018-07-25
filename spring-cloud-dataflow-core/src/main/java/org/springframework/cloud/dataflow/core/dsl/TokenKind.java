@@ -43,7 +43,8 @@ public enum TokenKind {
 	SEMICOLON(";"),
 	REFERENCE("@"),
 	DOT("."),
-	LITERAL_STRING,;
+	LITERAL_STRING,
+	COMMA(",");
 
 	char[] tokenChars;
 

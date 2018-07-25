@@ -25,7 +25,9 @@ import org.springframework.cloud.dataflow.server.DataFlowServerUtil;
  * determined.
  *
  * @author Gunnar Hillert
+ * @deprecated as of 1.7.  ApplicationType determined at parse time.
  */
+@Deprecated
 public class CannotDetermineApplicationTypeException extends RuntimeException {
 
 	private static final long serialVersionUID = 1L;

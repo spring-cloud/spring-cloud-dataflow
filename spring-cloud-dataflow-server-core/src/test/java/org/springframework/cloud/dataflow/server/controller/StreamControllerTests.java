@@ -370,16 +370,6 @@ public class StreamControllerTests {
 	}
 
 	@Test
-	public void testSaveIncorrectStream() throws Exception {
-		assertEquals(0, repository.count());
-		mockMvc.perform(post("/streams/definitions/").param("name", "myStream").param("definition", "foooooo")
-				.accept(MediaType.APPLICATION_JSON)).andDo(print()).andExpect(status().isBadRequest())
-				.andExpect(jsonPath("$[0].logref", is("InvalidStreamDefinitionException")))
-				.andExpect(jsonPath("$[0].message", is("Cannot determine application type for application 'foooooo': "
-						+ "foooooo had neither input nor output set")));
-	}
-
-	@Test
 	public void testSaveDuplicate() throws Exception {
 		repository.save(new StreamDefinition("myStream", "time | log"));
 		assertEquals(1, repository.count());
