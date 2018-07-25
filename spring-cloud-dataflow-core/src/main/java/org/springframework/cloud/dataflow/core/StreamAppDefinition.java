@@ -42,12 +42,13 @@ public class StreamAppDefinition extends DataFlowAppDefinition {
 	 *
 	 * @param registeredAppName name of app in the registry
 	 * @param label label used for app in stream definition
+	 * @param applicationType the {@link ApplicationType}
 	 * @param streamName name of the stream this app belongs to
 	 * @param properties app properties; may be {@code null}
 	 */
-	private StreamAppDefinition(String registeredAppName, String label, String streamName,
+	public StreamAppDefinition(String registeredAppName, String label, ApplicationType applicationType, String streamName,
 			Map<String, String> properties) {
-		super(registeredAppName, label, properties);
+		super(registeredAppName, label, applicationType, properties);
 		Assert.notNull(streamName, "stream name must not be null");
 		this.streamName = streamName;
 	}
@@ -90,8 +91,8 @@ public class StreamAppDefinition extends DataFlowAppDefinition {
 	@Override
 	public String toString() {
 		return "StreamAppDefinition [streamName=" + streamName + ", name=" + this.appDefinition.getName()
-				+ ", registeredAppName=" + getRegisteredAppName() + ", properties=" + this.appDefinition.getProperties()
-				+ "]";
+				+ ", type=" + getApplicationType()+", registeredAppName=" + getRegisteredAppName()
+				+ ", properties=" + this.appDefinition.getProperties() + "]";
 	}
 
 	/**
@@ -114,7 +115,12 @@ public class StreamAppDefinition extends DataFlowAppDefinition {
 		 * @see DataFlowAppDefinition#registeredAppName
 		 */
 		private String registeredAppName;
-
+		
+		/**
+		 * @see ApplicationType
+		 */
+		private ApplicationType applicationType;
+		
 		/**
 		 * @see AppDefinition#getName()
 		 */
@@ -132,6 +138,7 @@ public class StreamAppDefinition extends DataFlowAppDefinition {
 		public static Builder from(StreamAppDefinition definition) {
 			Builder builder = new Builder();
 			builder.setStreamName(definition.getStreamName()).setRegisteredAppName(definition.getRegisteredAppName())
+					.setApplicationType(definition.getApplicationType())
 					.setLabel(definition.getName()).addProperties(definition.getProperties());
 			return builder;
 		}
@@ -154,6 +161,24 @@ public class StreamAppDefinition extends DataFlowAppDefinition {
 		 */
 		public Builder setStreamName(String streamName) {
 			this.streamName = streamName;
+			return this;
+		}
+
+		/**
+		 * @return the {@link ApplicationType} of this application
+		 */
+		public ApplicationType getApplicationType() {
+			return applicationType;
+		}
+		
+		/**
+		 * Set the {@link ApplicationType} for this application.
+		 * 
+		 * @param applicationType the {@link ApplicationType}
+		 * @return this builder object
+		 */
+		public Builder setApplicationType(ApplicationType applicationType) {
+			this.applicationType = applicationType;
 			return this;
 		}
 
@@ -228,8 +253,7 @@ public class StreamAppDefinition extends DataFlowAppDefinition {
 			if (this.label == null) {
 				this.setLabel(this.registeredAppName);
 			}
-			return new StreamAppDefinition(this.registeredAppName, this.label, streamName, this.properties);
+			return new StreamAppDefinition(this.registeredAppName, this.label, this.applicationType, streamName, this.properties);
 		}
 	}
-
 }

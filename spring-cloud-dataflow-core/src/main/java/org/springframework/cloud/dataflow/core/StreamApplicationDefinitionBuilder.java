@@ -65,6 +65,9 @@ class StreamApplicationDefinitionBuilder {
 	 * Build a list of {@link StreamAppDefinition}s out of the parsed StreamNode.
 	 */
 	public List<StreamAppDefinition> build() {
+		SourceDestinationNode sourceDestination = streamNode.getSourceDestinationNode();
+		SinkDestinationNode sinkDestination = streamNode.getSinkDestinationNode();
+
 		Deque<StreamAppDefinition.Builder> builders = new LinkedList<>();
 		List<AppNode> appNodes = streamNode.getAppNodes();
 		for (int m = appNodes.size() - 1; m >= 0; m--) {
@@ -85,19 +88,48 @@ class StreamApplicationDefinitionBuilder {
 					}
 				}
 			}
-			if (m > 0) {
-				builder.setProperty(BindingPropertyKeys.INPUT_DESTINATION,
-						String.format("%s.%s", streamName, appNodes.get(m - 1).getLabelName()));
-				builder.setProperty(BindingPropertyKeys.INPUT_GROUP, streamName);
+			if (appNode.isLongLivedNonStreamApp()) {
+				builder.setApplicationType(ApplicationType.app);
 			}
-			if (m < appNodes.size() - 1) {
-				builder.setProperty(BindingPropertyKeys.OUTPUT_DESTINATION,
-						String.format("%s.%s", streamName, appNode.getLabelName()));
-				builder.setProperty(BindingPropertyKeys.OUTPUT_REQUIRED_GROUPS, streamName);
+			else {
+				if (m == 0) {
+					if (sourceDestination == null) {
+						builder.setApplicationType(ApplicationType.source);
+					}
+					else {
+						if (appNodes.size() == 1 && sinkDestination == null) {
+							builder.setApplicationType(ApplicationType.sink);
+						}
+						else {
+							builder.setApplicationType(ApplicationType.processor);
+						}
+					}
+				}
+				else {
+					if (m < appNodes.size() - 1 || sinkDestination != null) {
+						builder.setApplicationType(ApplicationType.processor);
+					}
+					else {
+						builder.setApplicationType(ApplicationType.sink);
+					}
+
+				}
+			}
+			// Add binding property keys only if the app is a source, processor or sink.
+			if (!appNode.isLongLivedNonStreamApp()) {
+				if (m > 0) {
+					builder.setProperty(BindingPropertyKeys.INPUT_DESTINATION,
+							String.format("%s.%s", streamName, appNodes.get(m - 1).getLabelName()));
+					builder.setProperty(BindingPropertyKeys.INPUT_GROUP, streamName);
+				}
+				if (m < appNodes.size() - 1) {
+					builder.setProperty(BindingPropertyKeys.OUTPUT_DESTINATION,
+							String.format("%s.%s", streamName, appNode.getLabelName()));
+					builder.setProperty(BindingPropertyKeys.OUTPUT_REQUIRED_GROUPS, streamName);
+				}
 			}
 			builders.add(builder);
 		}
-		SourceDestinationNode sourceDestination = streamNode.getSourceDestinationNode();
 		if (sourceDestination != null) {
 			StreamAppDefinition.Builder sourceAppBuilder = builders.getLast();
 			sourceAppBuilder.setProperty(BindingPropertyKeys.INPUT_DESTINATION, sourceDestination.getDestinationName());
@@ -112,7 +144,6 @@ class StreamApplicationDefinitionBuilder {
 			}
 			sourceAppBuilder.setProperty(BindingPropertyKeys.INPUT_GROUP, consumerGroupName);
 		}
-		SinkDestinationNode sinkDestination = streamNode.getSinkDestinationNode();
 		if (sinkDestination != null) {
 			builders.getFirst().setProperty(BindingPropertyKeys.OUTPUT_DESTINATION,
 					sinkDestination.getDestinationName());

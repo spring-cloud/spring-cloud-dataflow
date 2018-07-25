@@ -216,7 +216,7 @@ public abstract class AbstractTokenizer {
 	protected boolean isArgValueIdentifierTerminator(char ch, boolean quoteOpen) {
 		return (ch == '|' && !quoteOpen) || (ch == ';' && !quoteOpen) || ch == '\0' || (ch == ' ' && !quoteOpen)
 				|| (ch == '\t' && !quoteOpen) || (ch == '>' && !quoteOpen) || (ch == '\r' && !quoteOpen)
-				|| (ch == '\n' && !quoteOpen);
+				|| (ch == '\n' && !quoteOpen) || (ch == ',' && !quoteOpen);
 	}
 
 	/**

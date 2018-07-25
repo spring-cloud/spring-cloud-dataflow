@@ -27,7 +27,9 @@ import org.springframework.cloud.deployer.spi.core.AppDefinition;
  * @author Mark Fisher
  * @author Ilayaperumal Gopinathan
  * @author Gunnar Hillert
+ * @deprecated as of 1.7.  ApplicationType determined at parse time.
  */
+@Deprecated
 public class DataFlowServerUtil {
 
 	/**

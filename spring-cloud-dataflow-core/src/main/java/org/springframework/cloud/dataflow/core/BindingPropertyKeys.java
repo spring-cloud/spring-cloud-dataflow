@@ -28,7 +28,7 @@ public class BindingPropertyKeys {
 	// @formatter:off (not working...)
 	private static final String ROOT_PREFIX = StreamPropertyKeys.PREFIX;
 
-	private static final String BINDING_KEY_PREFIX = ROOT_PREFIX + "bindings.";
+	public static final String BINDING_KEY_PREFIX = ROOT_PREFIX + "bindings.";
 
 	/**
 	 * Prefix used in property keys for output binding.

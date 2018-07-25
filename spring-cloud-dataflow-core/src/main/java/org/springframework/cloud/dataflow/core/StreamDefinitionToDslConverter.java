@@ -100,7 +100,11 @@ public class StreamDefinitionToDslConverter {
 				}
 			}
 			else {
-				dslBuilder.append(" | ");
+				if (appDefinition.getApplicationType() != ApplicationType.app) {
+					dslBuilder.append(" | ");
+				} else {
+					dslBuilder.append(" , ");
+				}
 			}
 
 			appDefinitionIndex++;

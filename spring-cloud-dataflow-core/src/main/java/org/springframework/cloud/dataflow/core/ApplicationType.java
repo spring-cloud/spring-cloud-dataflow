@@ -26,6 +26,11 @@ package org.springframework.cloud.dataflow.core;
 public enum ApplicationType {
 
 	/**
+	 * A long lived application that is not part of a stream
+	 */
+	app,
+
+	/**
 	 * An application type that appears in a stream, at first position.
 	 */
 	source,

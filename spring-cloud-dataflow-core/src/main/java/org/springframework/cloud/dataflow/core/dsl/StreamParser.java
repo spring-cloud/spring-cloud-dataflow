@@ -148,13 +148,15 @@ public class StreamParser extends AppParser {
 		if (bridge) {
 			// Create a bridge app to hang the source/sink destinations off
 			tokens.decrementPosition(); // Rewind so we can nicely eat the sink destination
-			appNodes.add(new AppNode(null, "bridge", tokens.peek().startPos, tokens.peek().endPos, null));
+			AppNode bridgeAppNode = new AppNode(null, "bridge", tokens.peek().startPos, tokens.peek().endPos, null);
+			bridgeAppNode.setLongLivedNonStreamApp(false);
+			appNodes.add(bridgeAppNode);
 		}
 		else {
-			appNodes.addAll(eatAppList());
+			appNodes.addAll(eatAppList(sourceDestinationNode!=null));
 		}
 		SinkDestinationNode sinkDestinationNode = eatSinkDestination();
-
+		
 		// Further data is an error
 		if (tokens.hasNext()) {
 			Token t = tokens.peek();
@@ -329,19 +331,35 @@ public class StreamParser extends AppParser {
 	/**
 	 * Return a list of {@link AppNode} starting from the current token position.
 	 * <p>
-	 * Expected format: {@code appList: app (| app)*} A stream may end in an app (if it is
+	 * Expected formats: {@code appList: app (| app)*} A stream may end in an app (if it is
 	 * a sink) or be followed by a sink destination.
 	 *
 	 * @return a list of {@code AppNode}
 	 */
-	private List<AppNode> eatAppList() {
+	private List<AppNode> eatAppList(boolean preceedingSourceChannelSpecified) {
 		Tokens tokens = getTokens();
 		List<AppNode> appNodes = new ArrayList<AppNode>();
-
+		int usedListDelimiter = -1;
+		int usedStreamDelimiter = -1;
 		appNodes.add(eatApp());
 		while (tokens.hasNext()) {
 			Token t = tokens.peek();
 			if (t.kind == TokenKind.PIPE) {
+				if (usedListDelimiter >= 0) {
+					tokens.raiseException(t.startPos, DSLMessage.DONT_MIX_PIPE_AND_COMMA);
+				}
+				usedStreamDelimiter = t.startPos;
+				tokens.next();
+				appNodes.add(eatApp());
+			}
+			else if (t.kind == TokenKind.COMMA) {
+				if (preceedingSourceChannelSpecified) {
+					tokens.raiseException(t.startPos, DSLMessage.DONT_USE_COMMA_WITH_CHANNELS);
+				}
+				if (usedStreamDelimiter >= 0) {
+					tokens.raiseException(t.startPos, DSLMessage.DONT_MIX_PIPE_AND_COMMA);
+				}
+				usedListDelimiter = t.startPos;
 				tokens.next();
 				appNodes.add(eatApp());
 			}
@@ -349,6 +367,13 @@ public class StreamParser extends AppParser {
 				// might be followed by sink destination
 				break;
 			}
+		}
+		boolean isFollowedBySinkChannel = tokens.peek(TokenKind.GT);
+		if (isFollowedBySinkChannel && usedListDelimiter >= 0) {
+			tokens.raiseException(usedListDelimiter, DSLMessage.DONT_USE_COMMA_WITH_CHANNELS);
+		}
+		for (AppNode appNode: appNodes) {
+			appNode.setLongLivedNonStreamApp(!preceedingSourceChannelSpecified && !isFollowedBySinkChannel && (usedStreamDelimiter < 0));
 		}
 		return appNodes;
 	}

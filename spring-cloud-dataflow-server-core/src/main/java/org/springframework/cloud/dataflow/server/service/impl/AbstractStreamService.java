@@ -47,7 +47,6 @@ import org.springframework.cloud.dataflow.server.service.DefinitionAppValidation
 import org.springframework.cloud.dataflow.server.service.StreamService;
 import org.springframework.cloud.dataflow.server.service.impl.validation.AppValidationUtils;
 import org.springframework.cloud.dataflow.server.stream.StreamDeploymentRequest;
-import org.springframework.cloud.dataflow.server.support.CannotDetermineApplicationTypeException;
 import org.springframework.cloud.deployer.spi.app.DeploymentState;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -119,23 +118,15 @@ public abstract class AbstractStreamService implements StreamService {
 
 	public StreamDefinition createStream(String streamName, String dsl, boolean deploy) {
 		StreamDefinition streamDefinition = createStreamDefinition(streamName, dsl);
-
 		List<String> errorMessages = new ArrayList<>();
 
 		for (StreamAppDefinition streamAppDefinition : streamDefinition.getAppDefinitions()) {
 			final String appName = streamAppDefinition.getRegisteredAppName();
-			try {
-				final ApplicationType appType = DataFlowServerUtil.determineApplicationType(streamAppDefinition);
-				if (!appRegistry.appExist(appName, appType)) {
-					errorMessages.add(
-							String.format("Application name '%s' with type '%s' does not exist in the app registry.",
-									appName, appType));
-				}
-			}
-			catch (CannotDetermineApplicationTypeException e) {
-				errorMessages.add(String.format("Cannot determine application type for application '%s': %s",
-						appName, e.getMessage()));
-				continue;
+			ApplicationType applicationType = streamAppDefinition.getApplicationType();
+			if (!appRegistry.appExist(appName, applicationType)) {
+				errorMessages.add(
+						String.format("Application name '%s' with type '%s' does not exist in the app registry.",
+								appName, applicationType));
 			}
 		}
 
@@ -154,9 +145,11 @@ public abstract class AbstractStreamService implements StreamService {
 				streamDefinition.getName(), streamDefinition.getDslText());
 
 		return streamDefinition;
+
 	}
 
-	private StreamDefinition createStreamDefinition(String streamName, String dsl) {
+	public StreamDefinition createStreamDefinition(String streamName, String dsl) {
+
 		try {
 			return new StreamDefinition(streamName, dsl);
 		}

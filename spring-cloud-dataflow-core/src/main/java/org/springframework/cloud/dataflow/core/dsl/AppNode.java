@@ -32,6 +32,8 @@ public class AppNode extends AstNode {
 	private LabelNode label;
 
 	private ArgumentNode[] arguments;
+	
+	private boolean isLongLivedNonStreamApp = true;
 
 	public AppNode(LabelNode label, String appName, int startPos, int endPos, ArgumentNode[] arguments) {
 		super(startPos, endPos);
@@ -119,6 +121,14 @@ public class AppNode extends AstNode {
 			}
 		}
 		return props;
+	}
+
+	public void setLongLivedNonStreamApp(boolean b) {
+		isLongLivedNonStreamApp = b;
+	}
+	
+	public boolean isLongLivedNonStreamApp() {
+		return isLongLivedNonStreamApp;
 	}
 
 }

@@ -156,17 +156,16 @@ public class DefaultSkipperStreamServiceTests {
 		this.defaultSkipperStreamService.createStream("testStream", "time | log", false);
 	}
 
-	@Test
-	public void createStreamInvalidDsl() {
-		when(this.appRegistryCommon.appExist("time", ApplicationType.source)).thenReturn(true);
-		when(this.appRegistryCommon.appExist("log", ApplicationType.sink)).thenReturn(true);
+		@Test
+		public void createStreamInvalidDsl() {
+			when(this.appRegistryCommon.appExist("time", ApplicationType.source)).thenReturn(true);
+			when(this.appRegistryCommon.appExist("log", ApplicationType.sink)).thenReturn(true);
 
-		thrown.expect(InvalidStreamDefinitionException.class);
-		thrown.expectMessage("Cannot determine application type for application 'koza': koza had " +
-				"neither input nor output set");
+			thrown.expect(InvalidStreamDefinitionException.class);
+			thrown.expectMessage("Application name 'koza' with type 'app' does not exist in the app registry.");
 
-		this.defaultSkipperStreamService.createStream("testStream", "koza", false);
-	}
+			this.defaultSkipperStreamService.createStream("testStream", "koza", false);
+		}
 
 	@Test
 	public void verifyUndeployStream() {
