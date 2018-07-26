@@ -132,8 +132,6 @@ of a task.
 This H2 embedded database is not a practical solution for a production environment, since
 the H2 database goes away once the task ends.
 However, for a quick getting-started experience, we will use this in our example as well as echoing to the logs what is being updated in that repository.
-In <<features-configuration>>, we cover how to customize the configuration of the pieces provided by Spring Cloud Task.
-
 
 
 The https://docs.spring.io/spring-boot/docs/current/reference/htmlsingle/#boot-features-command-line-runner[CommandLineRunner] is a Spring Boot interface that tells Boot to execute the code in the `run` method once.
