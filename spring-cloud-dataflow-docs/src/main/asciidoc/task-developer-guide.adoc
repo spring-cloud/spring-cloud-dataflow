@@ -85,8 +85,8 @@ Maven home: /usr/local/Cellar/maven/3.2.3/libexec
 Java version: 1.8.0_31, vendor: Oracle Corporation
 
 [[task-dev-guide-creating-project]]
-=== Creating the Spring Task Project using Spring Initializer
-Now let's create and test an application that prints a timestamp to the console.
+=== Creating the Spring Task Project using Spring Initializr
+Now let's create and test an application that prints the current time to the console.
 
 To do so:
 
@@ -134,22 +134,21 @@ public class TimestampApplication {
 
 		@Override
 		public void run(String... strings) throws Exception {
-			DateFormat dateFormat = new SimpleDateFormat("YYYY-MM-dd");
+			DateFormat dateFormat = new SimpleDateFormat("YYYY-MM-dd HH:ss");
 			System.out.println(dateFormat.format(new Date()));
 		}
 	}
 }
 ----
 
-While it may seem small, quite a bit is going on. For more about Spring
-Boot specifics, see the
-http://docs.spring.io/spring-boot/docs/current/reference/html/[Spring Boot reference documentation].
+Now let's open the `application.properties` file in `src/main/resources`.
+We need to configure two properties in `application.properties`:
 
-Now let's open the `application.properties` file in `src/main/resources`. We need
-to configure two properties in `application.properties`: We need to set the application
-name (which is translated to the task name), and we need to set the logging for Spring
-Cloud Task to `DEBUG` so that we can see what's going on. The following example shows how
-to do both:
+. `application.name` to set the application name (which is translated to the task name)
+. `logging.level` to set the logging for Spring Cloud Task to `DEBUG` in order to
+get a view of what's going on.
+
+The following example shows how to do both:
 
 [source]
 ----
@@ -205,7 +204,7 @@ NOTE: Any processing bootstrapped from mechanisms other than a `CommandLineRunne
 === Running the Example
 
 At this point, our application should work.  Since this application is Spring Boot-based,
-we can run it from the command line by using `$ mvn spring-boot:run` from the root
+we can run it from the command line by using `mvn spring-boot:run` from the root
 of our application, as shown (with its output) in the following example:
 
 [source]
@@ -239,7 +238,7 @@ $ mvn clean spring-boot:run
 2018-07-25 11:11:17.786  INFO 5342 --- [           main] o.s.c.support.DefaultLifecycleProcessor  : Starting beans in phase 0
 2018-07-25 11:11:17.805 DEBUG 5342 --- [           main] o.s.c.t.r.support.SimpleTaskRepository   : Creating: TaskExecution{executionId=0, parentExecutionId=null, exitCode=null, taskName='timestamp', startTime=Wed Jul 25 11:11:17 EDT 2018, endTime=null, exitMessage='null', externalExecutionId='null', errorMessage='null', arguments=[]}
 2018-07-25 11:11:17.814  INFO 5342 --- [           main] i.s.demo.timestamp.TimestampApplication  : Started TimestampApplication in 1.605 seconds (JVM running for 5.4)
-2018-07-25
+2018-07-25 10:31
 2018-07-25 11:11:17.827 DEBUG 5342 --- [           main] o.s.c.t.r.support.SimpleTaskRepository   : Updating: TaskExecution with executionId=1 with the following {exitCode=0, endTime=Wed Jul 25 11:11:17 EDT 2018, exitMessage='null', errorMessage='null'}
 ----
 
