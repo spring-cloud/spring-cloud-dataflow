@@ -57,118 +57,175 @@ If you have debug mode turned on, you can get even more information, in a line s
 
 To build your own timestamp task, follow each of these procedures:
 
-. <<task-dev-guide-building-timestamp-task-setting-up-environment>>
-. <<task-dev-guide-building-timestamp-task-getting-started>>
-. <<task-dev-guide-building-timestamp-task-making-boot-task>>
+. <<task-dev-guide-building-timestamp-task-from-initializr>>
 . <<task-dev-guide-building-timestamp-task-recording-error>>
 . <<task-dev-guide-building-timestamp-task-adding-pre-post-processing>>
 . <<task-dev-guide-building-timestamp-task-bonus-adding-mysql>>
+. <<task-dev-guide-building-timestamp-adding-tasks-to-dataflow>>
 
-[[task-dev-guide-building-timestamp-task-setting-up-environment]]
-=== Setting up the Environment
+[[task-dev-guide-building-timestamp-task-from-initializr]]
+== Developing Your Timestamp Application
 
-Before we can do anything else, we have to set up our work environment. First, we must install RabbitMQ, as described https://github.com/cppwfs/DNDataflow/blob/master/labs/InstallRabbitnMQ.pdf[in this document].
-Then we need to create a directory and add a starter project (which we created to simplify this setup). To do so:
+So now that we've used a pre-built timestamp task application, let's create one of our own.
 
-. From the command line, run `git clone https://github.com/cppwfs/DNDataflow.git`.
-. From the command line, run `cd DNDataflow`.
+[[task-dev-guide-creating-project]]
+=== Creating the Spring Task Project using Spring Initializr
+Now let's create and test an application that prints the current time to the console.
 
-[[task-dev-guide-building-timestamp-task-getting-started]]
-=== Getting Started
+To do so:
 
-To get started on making a task, we must first make a Spring Boot application. The DNDataflow project that we cloned in the preceding section took care of that for us, but we need to build and run it, as follows:
+. Visit the link:https://start.spring.io/[Spring Initialzr] site.
+.. Create a new Maven or Gradle project with a *Group* name of `io.spring.task.sample` and an *Artifact* name of `timestamp`.
+.. In the Dependencies text box, type `task` to select the `Cloud Task` dependency.
+.. In the Dependencies text box, type `jdbc` then select the `JDBC` dependency.
+.. In the Dependencies text box, type `h2` then select the `H2`. (or your favorite database)
+.. Click the *Generate Project* button
+. Unzip the timestamp.zip file and import the project into your favorite IDE.
 
-. From the command line, run `cd labs/lab2`.
-. From the command line, run `mvn clean package`.
-+
-You should see a typical set of Maven build output for a Spring Boot application.
-. From the command line, run  `java -jar target/tasklab-0.0.1-SNAPSHOT.jar`.
-+
-You should see a Spring application start, print "`Hello World`" to the console, and stop.
 
-[[task-dev-guide-building-timestamp-task-making-boot-task]]
-=== Making a Spring Boot Application into a Spring Cloud Task
+[[getting-started-writing-the-code]]
+=== Writing the Code
 
-Now that we have a Boot Application, we can turn it into a Spring Cloud Task, to make the following changes:
-
-* Add a `starter-task` dependency (which makes a Spring Boot application into a Spring Cloud Task in the `pom.xml` file).
-* Add an H2 (in-memory database), because all Spring Cloud Task applications require a database.
-* Add the `@EnableTask` annotation (which makes a Spring Boot application into a Spring Cloud Task in Java).
-
-To do all that:
-
-. Open the `pom.xml` file.
-. At line 34, add the following block:
-+
-[source,xml]
+To finish our application, we need to modify the generated `TimestampApplication` code with the following contents so that it will launch a Task.
+[source,java]
 ----
-<dependency>
-  <groupId>org.springframework.cloud</groupId>
-  <artifactId>spring-cloud-starter-task</artifactId>
-</dependency>
-<dependency>
-  <groupId>com.h2database</groupId>
-  <artifactId>h2</artifactId>
-</dependency>
-<dependency>
-  <groupId>org.springframework.boot</groupId>
-  <artifactId>spring-boot-starter-jdbc</artifactId>
-</dependency>
+package io.spring.task.sample.timestamp;
+
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+
+import org.springframework.boot.CommandLineRunner;
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.cloud.task.configuration.EnableTask;
+import org.springframework.context.annotation.Bean;
+
+@SpringBootApplication
+@EnableTask
+public class TimestampApplication {
+
+	@Bean
+	public CommandLineRunner commandLineRunner() {
+		return new TimestampCommandLineRunner();
+	}
+
+	public static void main(String[] args) {
+		SpringApplication.run(TimestampApplication.class, args);
+	}
+
+	public static class TimestampCommandLineRunner implements CommandLineRunner {
+
+		@Override
+		public void run(String... strings) throws Exception {
+			DateFormat dateFormat = new SimpleDateFormat("YYYY-MM-dd HH:ss");
+			System.out.println(dateFormat.format(new Date()));
+		}
+	}
+}
 ----
-. Save your changes to `pom.xml`.
-. Open `src/main/java/io/spring/TasklabApplication.java` in either an IDE or a text editor.
-. On Line 13, add the `@EnableTask` annotation.
-+
-NOTE: If you do not use an IDE, you also need to un-comment lines 6 through 9.
-. Save your changes to `TasklabApplication.java`.
-. Open `src/main/resources/application.properties`.
-. Add the following properties:
-+
+
+The https://docs.spring.io/spring-cloud-task/docs/2.0.0.RELEASE/reference/htmlsingle/#getting-started-at-task[@EnableTask] annotation sets up `TaskRepository` which stores information about the task execution such as the start and end time of the task and the exit code.
+
+In our demo, the `TaskRepository` uses an embedded H2 database to record the results
+of a task.
+This H2 embedded database is not a practical solution for a production environment, since
+the H2 database goes away once the task ends.
+However, for a quick getting-started experience, we will use this in our example as well as echoing to the logs what is being updated in that repository.
+
+
+The https://docs.spring.io/spring-boot/docs/current/reference/htmlsingle/#boot-features-command-line-runner[CommandLineRunner] is a Spring Boot interface that tells Boot to execute the code in the `run` method once.
+When our sample application runs, Spring Boot launches our `TimestampCommandLineRunner`
+and outputs our timestamp message to standard out.
+
+NOTE: Any processing bootstrapped from mechanisms other than a `CommandLineRunner` or
+`ApplicationRunner` (by using `InitializingBean#afterPropertiesSet` for example) is not
+ recorded by Spring Cloud Task.
+
+Now let's open the `application.properties` file in `src/main/resources` and configure two properties, the application name and logging.
+The application name is also used as the name of the task.
+The logging level is set to `DEBUG` so we can see more information on what is going on internally.
+
+[source]
 ----
 logging.level.org.springframework.cloud.task=DEBUG
-spring.application.name=lab2-task
+spring.application.name=timestamp
 ----
-+
-Setting the logging level for the task to `DEBUG` creates output to let us know that the task works.
-Setting the application name lets us store a meaningful name in the database, so that we can find our task in the `TASK_EXECUTION` table.
-. Save your change to `application.properties`.
 
-Now that we have made our changes, we naturally want to run it and see it work. To do so:
+[[getting-started-running-the-example]]
+=== Running the Example
 
-. From the command line, run `mvn clean package`.
-+
-You should see a typical set of Maven build output for a Spring Boot application (with some additional output, because it is now a Spring Cloud Task).
-. From the command line, run `java -jar target/tasklab-0.0.1-SNAPSHOT.jar`.
-+
-You should see output for a typical (though very basic) Spring Cloud Task, including a line similar to (differing only by its timestamp) the following:
-+
-`2018-03-12 15:13:48.930 DEBUG 5202 --- [           main] o.s.c.t.r.support.SimpleTaskRepository   : Creating: TaskExecution{executionId=0, exitCode=null, taskName='lab2-task', startTime=Mon Mar 12 15:13:48 CDT 2018, endTime=null, exitMessage='null', errorMessage='null', arguments=[]}`
+At this point, our application should work.  Since this application is Spring Boot-based,
+we can run it from the command line by using `./mvnw spring-boot:run` from the root
+of our application, as shown (with its output) in the following example:
+
+[source]
+----
+$ ./mvnw clean spring-boot:run
+....... . . .
+....... . . . (Maven log output here)
+....... . . .
+
+  .   ____          _            __ _ _
+ /\\ / ___'_ __ _ _(_)_ __  __ _ \ \ \ \
+( ( )\___ | '_ | '_| | '_ \/ _` | \ \ \ \
+ \\/  ___)| |_)| | | | | || (_| |  ) ) ) )
+  '  |____| .__|_| |_|_| |_\__, | / / / /
+ =========|_|==============|___/=/_/_/_/
+ :: Spring Boot ::        (v2.0.3.RELEASE)
+
+2018-07-26 12:01:47.236  INFO 93883 --- [           main] i.s.t.s.timestamp.TimestampApplication   : Starting TimestampApplication on Glenns-MacBook-Pro-2.local with PID 93883 (/Users/glennrenfro/project/timestamp/target/classes started by glennrenfro in /Users/glennrenfro/project/timestamp)
+2018-07-26 12:01:47.241  INFO 93883 --- [           main] i.s.t.s.timestamp.TimestampApplication   : No active profile set, falling back to default profiles: default
+2018-07-26 12:01:47.280  INFO 93883 --- [           main] s.c.a.AnnotationConfigApplicationContext : Refreshing org.springframework.context.annotation.AnnotationConfigApplicationContext@50b87e67: startup date [Thu Jul 26 12:01:47 EDT 2018]; root of context hierarchy
+2018-07-26 12:01:47.989  INFO 93883 --- [           main] o.s.j.d.e.EmbeddedDatabaseFactory        : Starting embedded database: url='jdbc:h2:mem:testdb;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=false', username='sa'
+2018-07-26 12:01:48.144 DEBUG 93883 --- [           main] o.s.c.t.c.SimpleTaskConfiguration        : Using org.springframework.cloud.task.configuration.DefaultTaskConfigurer TaskConfigurer
+2018-07-26 12:01:48.145 DEBUG 93883 --- [           main] o.s.c.t.c.DefaultTaskConfigurer          : No EntityManager was found, using DataSourceTransactionManager
+2018-07-26 12:01:48.227 DEBUG 93883 --- [           main] o.s.c.t.r.s.TaskRepositoryInitializer    : Initializing task schema for h2 database
+2018-07-26 12:01:48.229  INFO 93883 --- [           main] o.s.jdbc.datasource.init.ScriptUtils     : Executing SQL script from class path resource [org/springframework/cloud/task/schema-h2.sql]
+2018-07-26 12:01:48.261  INFO 93883 --- [           main] o.s.jdbc.datasource.init.ScriptUtils     : Executed SQL script from class path resource [org/springframework/cloud/task/schema-h2.sql] in 32 ms.
+2018-07-26 12:01:48.407  INFO 93883 --- [           main] o.s.j.e.a.AnnotationMBeanExporter        : Registering beans for JMX exposure on startup
+2018-07-26 12:01:48.412  INFO 93883 --- [           main] o.s.c.support.DefaultLifecycleProcessor  : Starting beans in phase 0
+2018-07-26 12:01:48.428 DEBUG 93883 --- [           main] o.s.c.t.r.support.SimpleTaskRepository   : Creating: TaskExecution{executionId=0, parentExecutionId=null, exitCode=null, taskName='timestamp', startTime=Thu Jul 26 12:01:48 EDT 2018, endTime=null, exitMessage='null', externalExecutionId='null', errorMessage='null', arguments=[]}
+2018-07-26 12:01:48.439  INFO 93883 --- [           main] i.s.t.s.timestamp.TimestampApplication   : Started TimestampApplication in 1.464 seconds (JVM running for 4.233)
+2018-07-26 12:48
+2018-07-26 12:01:48.457 DEBUG 93883 --- [           main] o.s.c.t.r.support.SimpleTaskRepository   : Updating: TaskExecution with executionId=1 with the following {exitCode=0, endTime=Thu Jul 26 12:01:48 EDT 2018, exitMessage='null', errorMessage='null'}
+----
+
+The preceding output has three lines that of interest to us here:
+
+* `SimpleTaskRepository` logged the creation of the entry in the `TaskRepository`.
+* The execution of our `CommandLineRunner`, demonstrated by the timestamp output.
+* `SimpleTaskRepository` logs the completion of the task in the `TaskRepository`.
 
 [[task-dev-guide-building-timestamp-task-recording-error]]
 === Recording an Error
 
 Now that we have a working task, we can intentionally create an error, to show how a Spring Cloud Task handles errors. To do so:
 
-. Open `src/main/java/io/spring/TasklabApplication.java` in either an IDE or a text editor.
-. Copy the following line into the file at line 26:
+. Open `src/main/java/io/spring/task/sample/timestamp/TimestampApplication.java` and insert the following line into the run method:
 +
 [source,java]
 throw new IllegalStateException("No Task For You!");
-. From the command line, run `mvn clean package -DSkipTests`.
+. From the command line, run `./mvnw clean spring-boot:run -DskipTests`.
 +
-NOTE: We must add `-DSkipTests`, because the tests would catch the Exception we added and prevent us from seeing it.
-. From the command line, run `java -jar target/tasklab-0.0.1-SNAPSHOT.jar`.
+NOTE: We must add `-DskipTests`, because the tests would catch the Exception we added and prevent us from seeing it.
 +
-Now we can see the Exception we added coming through in the output, as an Exception with a stack trace.
-. Remove or comment out the Exception that we throw on line 26 (so that the next lessons work correctly).
+Now we can see the Exception we added coming through in the output, as an Exception with a stack trace.  Task has now captured this exception and recorded it to the database. This can be seen in the console as shown here:
++
+[source]
+----
+Updating: TaskExecution with executionId=1 with the following {exitCode=1, endTime=Wed Jul 25 12:42:15 EDT 2018, exitMessage='null', errorMessage='java.lang.IllegalStateException: Failed to execute CommandLineRunner
+...
+----
++
+. Remove or comment out the Exception so that the next lessons work correctly.
 
 [[task-dev-guide-building-timestamp-task-adding-pre-post-processing]]
 === Adding Pre- and Post-processing
 
 Spring Cloud Task includes the ability to run additional processing both before and after the task. To add both features to our current sample application:
 
-. Open `src/main/java/io/spring/TasklabApplication.java` in either an IDE or a text editor.
-. Copy the following code below line 30:
+. Open `src/main/java/io/spring/TimestampApplication.java` and add the following code to the TimestampCommandLineRunner:
 +
 [source,java]
 ----
@@ -182,20 +239,19 @@ public void afterTask(TaskExecution taskExecution) {
   System. out.println("After TASK");
 }
 ----
-. From the command line, run `mvn clean package`.
-. From the command line, run `java -jar target/tasklab-0.0.1-SNAPSHOT.jar`.
+. From the command line, run `./mvnw clean spring-boot:run`.
 +
 Now the output includes lines that print both `BEFORE TASK` and `AFTER TASK`.
 
 [[task-dev-guide-building-timestamp-task-bonus-adding-mysql]]
-=== Bonus Step: Adding a MySQL Database
+=== Adding a MySQL Database
 
 Nearly always, a real-world Spring Cloud Task needs to use a persistent (rather than an in-memory) database.
 In this example, we show how to add a MySQL database (MariaDB) to our Task.
 To do so:
 
 . Open the `pom.xml` file.
-. On line 46, add the following dependency:
+. Add the following dependency:
 +
 [source,xml]
 ----
@@ -204,40 +260,30 @@ To do so:
   <artifactId>mariadb-java-client</artifactId>
 </dependency>
 ----
-. From the command line, run `mvn clean package`.
-. From the command line, run `java -jar target/tasklab-0.0.1-SNAPSHOT.jar`.
+. From your command line set up the database connection properties for MySql for example
++
+[source]
+----
+export spring_datasource_url=jdbc:mysql://localhost:3306/practice
+export spring_datasource_username=root
+export spring_datasource_password=password
+export spring_datasource_driverClassName=org.mysql.jdbc.Driver
+----
+. From the command line, run `./mvnw clean spring-boot:run`.
 +
 If you examine the contents of your database, you should now see the task in the `TASK_EXECUTION` table.
 
-== Adding Spring Cloud Task to a Spring Batch Application
+[[task-dev-guide-building-timestamp-adding-tasks-to-dataflow]]
+== Adding and Launching Spring Cloud Tasks with Data Flow
 
-NOTE: This project expects that you have completed the <<task-dev-guide-building-timestamp-task,previous project>>.
-
-You can use Spring Cloud Task within a Spring Batch application.
-In fact, that was a key goal of Spring Could Task.
-Because a Task has a finite duration (that is, it is not a continuing process), it is a natural fit for Spring Batch, which naturally deals with processes that have finite durations.
-
-This guide walks through integrating Spring Cloud Task with Spring Batch in a sample application.
+This guide walks through registering and launching a Spring Cloud Task application.
 It consists of the following procedures:
 
-. <<task-dev-guide-building-batch-task-setting-up-environment>>
 . <<task-dev-guide-building-batch-task-creating-first-task>>
 . <<task-dev-guide-building-batch-task-creating-first-batch-task>>
 
-[[task-dev-guide-building-batch-task-setting-up-environment]]
-=== Setting up the Environment
-
-Before we can do anything else, we have to set up our work environment. First, we must install RabbitMQ, as described https://github.com/cppwfs/DNDataflow/blob/master/labs/InstallRabbitnMQ.pdf[in this document].
-Then we need to create a directory and add a starter project (which we created to simplify this setup). To do so:
-
-. From the command line, run `git clone https://github.com/cppwfs/DNDataflow.git`.
-. From the command line, run `cd DNDataflow`.
-
 [[task-dev-guide-building-batch-task-creating-first-task]]
-=== Creating Your First Task
-
-If you have not already done so, install Spring Cloud Data Flow.
-https://github.com/cppwfs/DNDataflow/blob/master/labs/lab3/Lab3-InstallDataFlow.pdf[This document] walks through how to do so.
+=== Registering and Launching Your First Task
 
 Once you have Spring Cloud Data Flow Server and Shell running, you can use the following procedure to create your first task:
 
@@ -273,21 +319,17 @@ image:images/dataflow-task-execution-list-timestamp.png[]
 The exit code of 0 tells us that the task ran without errors.
 
 [[task-dev-guide-building-batch-task-creating-first-batch-task]]
-=== Creating Your First Batch-Task
+=== Registering and Launching Your First Spring Batch-Task
 
 Essentially, a Batch-Task is a Spring Batch application that includes the `@EnableTask` annotation, which serves as an indicator that the Spring Batch application uses Spring Cloud Task.
 Spring Boot takes care of the rest of the set up for us.
-We often call it "`Taskifying a Batch.`"
-To taskify your first batch:
 
-. In Spring Cloud Data Flow Shell, register a Spring Batch-Task application by using the following command:
+To register your first Spring Batch Task:
+
+. In Spring Cloud Data Flow Shell, register a Spring Batch Task application by using the following command:
 +
-`app register --name batch-events --type task --uri file:///<FOLDER>/DNDataflow/labs/jars/simplebatch-0.0.1-SNAPSHOT.jar`
+`app register --name batch-events --type task --uri maven://org.springframework.cloud.task.app:timestamp-batch-task:2.0.0.RELEASE`
 +
-where `<Folder>` is where you stored your work from the <<task-dev-guide-building-timestamp-task,previous project>>.
-+
-NOTE: This example shows how to use the `file` protocol.
-When you do so, you must use the fully qualified path.
 . To verify that your application has been registered, run the following command in the Spring Cloud Data Flow Shell:
 +
 `app list`
@@ -296,8 +338,6 @@ You should see output similar to the following:
 +
 image:images/dataflow-app-list-batch-event.png[]
 +
-NOTE: Timestamp still appears because we did not clear the database after the previous exercise.
-Its presence does no harm, and having multiple applications is more realistic.
 . Create a task definition that uses the batch-events task, by running the following command:
 +
 `task create --name myBatchTask --definition "batch-events"`
@@ -322,7 +362,7 @@ We can now verify that the task worked as a batch job. The <<task-dev-guide-buil
 ==== Verifying that Your Task is a Batch
 
 When you create and run a Batch-Task, it is both a Spring Cloud Task instance and a Spring Batch instance.
-In the <<task-dev-guide-building-batch-task-creating-first-batch-task,previous section>>, we saw how to verify that your first batch-task worked as a batch.
+In the <<task-dev-guide-building-batch-task-creating-first-batch-task,previous section>>, we saw how to verify that your first batch-task worked as a task.
 This section steps through how to verify that it also worked as a batch.
 To do so:
 
@@ -336,20 +376,15 @@ image:images/dataflow-job-execution-list.png[]
 . Note the Job ID from the ID column (in this case, we want to look at `2`).
 . To get the details of the job execution, we can use the Job ID in the following command:
 +
-`job execution display --id 2`
+`job execution display --id 1`
 +
 You should see output similar to the following:
 +
 image:images/dataflow-job-execution-details.png[]
 
-NOTE: We built the demo from which this documentation gets its images such that it creates two jobs.
-The first of those jobs always fails, because we intentionally throw an exception in it.
-Doing so lets us test the job output, and it lets us show you what a failed job looks like.
-
-To see the failed job's details, run the following command in the Spring Cloud Data Flow Shell:
-
-`job execution display --id 1`
-
-You should see output similar to the following:
-
-image:images/dataflow-job-execution-failed.png[]
+[[task-dev-guide-database-requirement]]
+== Database Requirement for running tasks in Spring Cloud Data Flow
+As previously discussed Spring Cloud Task records the state of each task execution to a relational database.
+And as such Spring Cloud Data Flow uses this recorded information when users request task or batch job execution information.
+Also Spring Batch and Spring Cloud Task offer features that allow Spring Cloud Data Flow to communicate certain start or stop behaviors.
+One example is when a user utilizes the Spring Cloud Data Flow UI to stop a Spring Batch app execution.
