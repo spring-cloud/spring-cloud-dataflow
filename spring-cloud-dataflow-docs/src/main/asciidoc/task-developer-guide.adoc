@@ -67,22 +67,6 @@ To build your own timestamp task, follow each of these procedures:
 == Developing Your Timestamp Application
 
 So now that we've used a pre-built timestamp task application, let's create one of our own.
-Most IDEs have good support for Apache Maven, so we use it as the build tool for this project.
-
-Before we begin, open a terminal to check that you have valid versions of Java and Maven
-installed, as shown in the following two listings:
-
-[source]
-$ java -version
-java version "1.8.0_31"
-Java(TM) SE Runtime Environment (build 1.8.0_31-b13)
-Java HotSpot(TM) 64-Bit Server VM (build 25.31-b07, mixed mode)
-
-[source]
-$ mvn -v
-Apache Maven 3.2.3 (33f8c3e1027c3ddde99d3cdebad2656a31e8fdf4; 2014-08-11T15:58:10-05:00)
-Maven home: /usr/local/Cellar/maven/3.2.3/libexec
-Java version: 1.8.0_31, vendor: Oracle Corporation
 
 [[task-dev-guide-creating-project]]
 === Creating the Spring Task Project using Spring Initializr
@@ -169,9 +153,8 @@ In our demo, the `TaskRepository` uses an embedded H2 database to record the res
 of a task. This H2 embedded database is not a practical solution for a production environment, since
 the H2 DB goes away once the task ends. However, for a quick getting-started
 experience, we will use this in our example as well as echoing to the logs what is being updated
-in that repository. In the <<features-configuration>> section (later in this
-documentation), we cover how to customize the configuration of the pieces provided by
-Spring Cloud Task.
+in that repository. In the <<features-configuration>> section , we cover how to
+customize the configuration of the pieces provided by Spring Cloud Task.
 
 When our sample application runs, Spring Boot launches our `TimestampCommandLineRunner`
 and outputs our timestamp message to standard out. The `TaskLifecycleListener`
@@ -181,15 +164,14 @@ records the start of the task and the end of the task in the repository.
 ==== The main method
 
 The main method serves as the entry point to any java application.  Our main method
-delegates to Spring Boot's `SpringApplication` class.  You can read more about it in the
-Spring Boot documentation.
+delegates to Spring Boot's https://docs.spring.io/spring-boot/docs/current/reference/html/boot-features-spring-application.html[SpringApplication] class.
 
 [[getting-started-clr]]
 ==== The CommandLineRunner
 
 Spring includes many ways to bootstrap an application's logic. Spring Boot provides
 a convenient method of doing so in an organized manner through its `*Runner` interfaces
-(`CommandLineRunner` or `ApplicationRunner`). A well behaved task can bootstrap any
+(`CommandLineRunner` or `ApplicationRunner`). A well behaved task will bootstrap any
 logic by using one of these two runners.
 
 The lifecycle of a task is considered from before the `*Runner#run` methods are executed
@@ -204,12 +186,12 @@ NOTE: Any processing bootstrapped from mechanisms other than a `CommandLineRunne
 === Running the Example
 
 At this point, our application should work.  Since this application is Spring Boot-based,
-we can run it from the command line by using `mvn spring-boot:run` from the root
+we can run it from the command line by using `./mvnw spring-boot:run` from the root
 of our application, as shown (with its output) in the following example:
 
 [source]
 ----
-$ mvn clean spring-boot:run
+$ ./mvnw clean spring-boot:run
 ....... . . .
 ....... . . . (Maven log output here)
 ....... . . .
@@ -222,7 +204,7 @@ $ mvn clean spring-boot:run
  =========|_|==============|___/=/_/_/_/
  :: Spring Boot ::        (v2.0.3.RELEASE)
 
-2018-07-25 11:11:16.695  INFO 5342 --- [           main] i.s.demo.timestamp.TimestampApplication  : Starting TimestampApplication on Glenns-MacBook-Pro-2.local with PID 5342 (/Users/glennrenfro/project/crap/timestamp/target/classes started by glennrenfro in /Users/glennrenfro/project/crap/timestamp)
+2018-07-25 11:11:16.695  INFO 5342 --- [           main] i.s.demo.timestamp.TimestampApplication  : Starting TimestampApplication on Glenns-MacBook-Pro-2.local with PID 5342 (/Users/glennrenfro/project/timestamp/target/classes started by glennrenfro in /Users/glennrenfro/project/timestamp)
 2018-07-25 11:11:16.698  INFO 5342 --- [           main] i.s.demo.timestamp.TimestampApplication  : No active profile set, falling back to default profiles: default
 2018-07-25 11:11:16.737  INFO 5342 --- [           main] s.c.a.AnnotationConfigApplicationContext : Refreshing org.springframework.context.annotation.AnnotationConfigApplicationContext@1ac857be: startup date [Wed Jul 25 11:11:16 EDT 2018]; root of context hierarchy
 2018-07-25 11:11:17.373  INFO 5342 --- [           main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Starting...
@@ -262,7 +244,7 @@ Now that we have a working task, we can intentionally create an error, to show h
 +
 [source,java]
 throw new IllegalStateException("No Task For You!");
-. From the command line, run `mvn clean spring-boot:run -DskipTests`.
+. From the command line, run `./mvnw clean spring-boot:run -DskipTests`.
 +
 NOTE: We must add `-DSkipTests`, because the tests would catch the Exception we added and prevent us from seeing it.
 +
@@ -296,7 +278,7 @@ public void afterTask(TaskExecution taskExecution) {
   System. out.println("After TASK");
 }
 ----
-. From the command line, run `mvn clean spring-boot:run`.
+. From the command line, run `./mvnw clean spring-boot:run`.
 +
 Now the output includes lines that print both `BEFORE TASK` and `AFTER TASK`.
 
@@ -321,12 +303,12 @@ To do so:
 +
 [source]
 ----
-export spring_datasource_url=jdbc:mariadb://localhost:3306/practice
+export spring_datasource_url=jdbc:mysql://localhost:3306/practice
 export spring_datasource_username=root
 export spring_datasource_password=password
-export spring_datasource_driverClassName=org.mariadb.jdbc.Driver
+export spring_datasource_driverClassName=org.mysql.jdbc.Driver
 ----
-. From the command line, run `mvn clean spring-boot:run`.
+. From the command line, run `./mvnw clean spring-boot:run`.
 +
 If you examine the contents of your database, you should now see the task in the `TASK_EXECUTION` table.
 
