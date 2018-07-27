@@ -75,4 +75,9 @@ public interface DataFlowOperations {
 	 * @return "About" related operations.
 	 */
 	AboutOperations aboutOperation();
+
+	/**
+	 * @return Scheduler related operations.
+	 */
+	SchedulerOperations schedulerOperations();
 }

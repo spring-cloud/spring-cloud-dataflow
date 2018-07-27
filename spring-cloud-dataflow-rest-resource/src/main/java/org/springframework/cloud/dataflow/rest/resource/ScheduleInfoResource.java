@@ -20,6 +20,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.springframework.hateoas.PagedResources;
 import org.springframework.hateoas.ResourceSupport;
 import org.springframework.util.Assert;
 
@@ -45,6 +46,12 @@ public class ScheduleInfoResource extends ResourceSupport {
 	 */
 	private Map<String, String> scheduleProperties = new HashMap<>();
 
+	/**
+	 * Default constructor to be used by Jackson.
+	 */
+	@SuppressWarnings("unused")
+	protected ScheduleInfoResource() {
+	}
 
 	public ScheduleInfoResource(String scheduleName, String taskDefinitionName, Map<String, String> scheduleProperties) {
 		Assert.hasText(scheduleName, "scheduleName must not be null or empty");
@@ -79,5 +86,8 @@ public class ScheduleInfoResource extends ResourceSupport {
 	public void setScheduleProperties(Map<String, String> scheduleProperties) {
 		this.scheduleProperties.clear();
 		this.scheduleProperties.putAll(scheduleProperties);
+	}
+
+	public static class Page extends PagedResources<ScheduleInfoResource> {
 	}
 }

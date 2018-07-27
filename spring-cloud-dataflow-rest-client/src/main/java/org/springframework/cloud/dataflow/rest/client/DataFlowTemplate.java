@@ -121,6 +121,13 @@ public class DataFlowTemplate implements DataFlowOperations {
 	 */
 	private final AboutOperations aboutOperations;
 
+
+	/**
+	 * REST Client for "scheduler" operations.
+	 */
+	private final SchedulerOperations schedulerOperations;
+
+
 	/**
 	 * Setup a {@link DataFlowTemplate} using the provided baseURI. Will build a
 	 * {@link RestTemplate} implicitly with the required set of Jackson MixIns. For more
@@ -203,10 +210,17 @@ public class DataFlowTemplate implements DataFlowOperations {
 			if (resourceSupport.hasLink(TaskTemplate.DEFINITIONS_RELATION)) {
 				this.taskOperations = new TaskTemplate(restTemplate, resourceSupport);
 				this.jobOperations = new JobTemplate(restTemplate, resourceSupport);
+				if(resourceSupport.hasLink(SchedulerTemplate.SCHEDULES_RELATION)) {
+					this.schedulerOperations = new SchedulerTemplate(restTemplate, resourceSupport);
+				}
+				else {
+					schedulerOperations = null;
+				}
 			}
 			else {
 				this.taskOperations = null;
 				this.jobOperations = null;
+				this.schedulerOperations = null;
 			}
 			this.appRegistryOperations = new AppRegistryTemplate(restTemplate, resourceSupport);
 			this.completionOperations = new CompletionTemplate(restTemplate,
@@ -223,6 +237,7 @@ public class DataFlowTemplate implements DataFlowOperations {
 			this.jobOperations = null;
 			this.appRegistryOperations = null;
 			this.completionOperations = null;
+			this.schedulerOperations = null;
 		}
 	}
 
@@ -344,6 +359,11 @@ public class DataFlowTemplate implements DataFlowOperations {
 	@Override
 	public AboutOperations aboutOperation() {
 		return aboutOperations;
+	}
+
+	@Override
+	public SchedulerOperations schedulerOperations() {
+		return schedulerOperations;
 	}
 
 	/**
