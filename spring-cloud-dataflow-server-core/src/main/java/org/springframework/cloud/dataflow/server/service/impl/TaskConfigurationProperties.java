@@ -44,7 +44,7 @@ public class TaskConfigurationProperties {
 	private String composedTaskRunnerName = "composed-task-runner";
 
 	@Min(1)
-	private long maximumConcurrentTasks = Long.MAX_VALUE;
+	private long maximumConcurrentTasks =20;
 
 	public String getComposedTaskRunnerName() {
 		return composedTaskRunnerName;
