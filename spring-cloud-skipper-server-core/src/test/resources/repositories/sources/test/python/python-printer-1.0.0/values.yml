@@ -3,3 +3,11 @@
 # Declare variables to be passed into your templates
 spec:
   resource: https://github.com/ilayaperumalg/sandbox/raw/master/python/hello.py.zip
+  manifest:
+    memory: 1024
+    disk-quota: 1024
+    timeout: 180
+    instances: 1
+    buildpack: python_buildpack
+    command: python hello.py
+    health-check-type: process

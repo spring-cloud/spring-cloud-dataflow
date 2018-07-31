@@ -63,8 +63,8 @@ public class CloudFoundryReleaseAnalyzer {
 		ApplicationManifest existingApplicationManifest = this.cfManifestApplicationDeployer.getCFApplicationManifest(existingRelease);
 		ApplicationManifest replacingApplicationManifest = this.cfManifestApplicationDeployer.getCFApplicationManifest(replacingRelease);
 		if (!existingApplicationManifest.equals(replacingApplicationManifest)) {
-			Map<String, String> existingMap = CFApplicationManifestUtils.getCFManifestMap(existingApplicationManifest);
-			Map<String, String> replacingMap = CFApplicationManifestUtils.getCFManifestMap(replacingApplicationManifest);
+			Map<String, String> existingMap = CloudFoundryApplicationManifestUtils.getCFManifestMap(existingApplicationManifest);
+			Map<String, String> replacingMap = CloudFoundryApplicationManifestUtils.getCFManifestMap(replacingApplicationManifest);
 			PropertiesDiff emptyPropertiesDiff = PropertiesDiff.builder().build();
 			PropertiesDiff propertiesDiff = PropertiesDiff.builder().left(existingMap).right(replacingMap).build();
 			ApplicationManifestDifference applicationManifestDifference = new ApplicationManifestDifference(existingApplicationManifest.getName(),

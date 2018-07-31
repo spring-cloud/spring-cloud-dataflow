@@ -49,7 +49,7 @@ public class CloudFoundryDeleteStep {
 
 	public Release delete(Release release, AppDeployerData existingAppDeployerData,
 			List<String> applicationNamesToDelete) {
-		ApplicationManifest applicationManifest = CFApplicationManifestUtils.updateApplicationName(release);
+		ApplicationManifest applicationManifest = CloudFoundryApplicationManifestUtils.updateApplicationName(release);
 		String applicationName = applicationManifest.getName();
 		DeleteApplicationRequest deleteApplicationRequest = DeleteApplicationRequest.builder().name(applicationName)
 				.build();

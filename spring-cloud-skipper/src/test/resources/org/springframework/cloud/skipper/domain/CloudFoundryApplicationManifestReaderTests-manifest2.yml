@@ -1,0 +1,6 @@
+kind: CloudFoundryApplication
+spec:
+  resource: https://github.com/my/entry
+  version: 1.0.0
+  manifest:
+    services: [rabbit]

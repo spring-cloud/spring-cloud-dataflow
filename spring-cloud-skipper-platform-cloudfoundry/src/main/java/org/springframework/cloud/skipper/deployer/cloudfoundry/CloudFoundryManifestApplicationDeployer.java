@@ -16,21 +16,19 @@
 package org.springframework.cloud.skipper.deployer.cloudfoundry;
 
 import java.time.Duration;
+import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.function.Predicate;
 
 import org.cloudfoundry.AbstractCloudFoundryException;
 import org.cloudfoundry.operations.applications.ApplicationDetail;
+import org.cloudfoundry.operations.applications.ApplicationHealthCheck;
 import org.cloudfoundry.operations.applications.ApplicationManifest;
 import org.cloudfoundry.operations.applications.DeleteApplicationRequest;
 import org.cloudfoundry.operations.applications.GetApplicationRequest;
 import org.cloudfoundry.operations.applications.InstanceDetail;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.yaml.snakeyaml.Yaml;
-import reactor.core.publisher.Mono;
-
 import org.springframework.cloud.deployer.resource.support.DelegatingResourceLoader;
 import org.springframework.cloud.deployer.spi.app.AppStatus;
 import org.springframework.cloud.deployer.spi.app.DeploymentState;
@@ -38,19 +36,21 @@ import org.springframework.cloud.deployer.spi.cloudfoundry.CloudFoundryAppInstan
 import org.springframework.cloud.skipper.domain.CloudFoundryApplicationManifestReader;
 import org.springframework.cloud.skipper.domain.CloudFoundryApplicationSkipperManifest;
 import org.springframework.cloud.skipper.domain.CloudFoundryApplicationSpec;
-import org.springframework.cloud.skipper.domain.ConfigValues;
+import org.springframework.cloud.skipper.domain.CloudFoundryApplicationSpec.Manifest;
 import org.springframework.cloud.skipper.domain.Release;
 import org.springframework.cloud.skipper.domain.Status;
 import org.springframework.cloud.skipper.domain.StatusCode;
 import org.springframework.cloud.skipper.server.deployer.AppDeploymentRequestFactory;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpStatus;
-import org.springframework.util.StringUtils;
+
+import reactor.core.publisher.Mono;
 
 /**
  * The helper class that handles the deployment related operation for CF manifest based application deployment.
  *
  * @author Ilayaperumal Gopinathan
+ * @author Janne Valkealahti
  */
 public class CloudFoundryManifestApplicationDeployer {
 
@@ -79,52 +79,49 @@ public class CloudFoundryManifestApplicationDeployer {
 	}
 
 	public ApplicationManifest getCFApplicationManifest(Release release) {
-		ConfigValues configValues = release.getConfigValues();
-		String specResource = null;
-		String specVersion = null;
-		String cfManifestYamlString = CFApplicationManifestUtils.getCFManifestYamlStringFromPackage(release);
-		if (StringUtils.hasText(configValues.getRaw())) {
-			Object object = new Yaml().load(configValues.getRaw());
-			if (object instanceof Map) {
-				Map<String, Object> configValuesMap = (Map<String, Object>) object;
-				for (Map.Entry<String, Object> entry : configValuesMap.entrySet()) {
-					if (entry.getKey().equals("spec")) {
-						Map<String, String> specValues = (Map<String, String>) entry.getValue();
-						if (specValues.containsKey("resource")) {
-							specResource = specValues.get("resource");
-						}
-						if (specValues.containsKey("version")) {
-							specVersion = specValues.get("version");
-						}
-					}
-				}
-			}
-		}
-		return getCFApplicationManifest(release, cfManifestYamlString, specResource, specVersion);
-	}
+		ApplicationManifest cfApplicationManifest = CloudFoundryApplicationManifestUtils.updateApplicationName(release);
+		cfApplicationManifest = ApplicationManifest.builder()
+				.from(cfApplicationManifest)
+				.build();
 
-	private ApplicationManifest getCFApplicationManifest(Release release, String cfManifestYamlString,
-			String specResource, String specVersion) {
-		ApplicationManifest cfApplicationManifest = CFApplicationManifestUtils.updateApplicationName(cfManifestYamlString, release);
 		List<? extends CloudFoundryApplicationSkipperManifest> cfApplicationManifestList = this.cfApplicationManifestReader
 				.read(release.getManifest().getData());
 		for (CloudFoundryApplicationSkipperManifest cfApplicationSkipperManifest : cfApplicationManifestList) {
 			CloudFoundryApplicationSpec spec = cfApplicationSkipperManifest.getSpec();
-			try {
-				String resource = (StringUtils.hasText(specResource)) ? specResource : spec.getResource();
-				String version = (StringUtils.hasText(specVersion)) ? specVersion : spec.getVersion();
-				Resource application = this.delegatingResourceLoader.getResource(
-						AppDeploymentRequestFactory.getResourceLocation(resource, version));
-				cfApplicationManifest = CFApplicationManifestUtils.updateApplicationPath(cfApplicationManifest, application);
-				if (spec.getManifest() != null) {
-					cfApplicationManifest = CFApplicationManifestUtils
-							.updateApplicationManifest(cfApplicationManifest, spec.getManifest());
-				}
-			}
-			catch (Exception e) {
-				throw new IllegalArgumentException(e.getMessage());
-			}
+			String resource = spec.getResource();
+			String version = spec.getVersion();
+
+			Manifest manifest = spec.getManifest();
+			cfApplicationManifest = ApplicationManifest.builder()
+					.from(cfApplicationManifest)
+					.buildpack(manifest.getBuildpack())
+					.command(manifest.getCommand())
+					.disk(CloudFoundryApplicationManifestUtils.memoryInteger(manifest.getDiskQuota()))
+					.domains(manifest.getDomains() != null && !manifest.getDomains().isEmpty() ? manifest.getDomains()
+							: null)
+					.environmentVariables(new HashMap<>())
+					.healthCheckHttpEndpoint(manifest.getHealthCheckHttpEndpoint())
+					.healthCheckType(manifest.getHealthCheckType() != null
+							? ApplicationHealthCheck.from(manifest.getHealthCheckType().name())
+							: null)
+					.hosts(manifest.getHosts() != null && !manifest.getHosts().isEmpty() ? manifest.getHosts() : null)
+					.instances(manifest.getInstances())
+					.memory(CloudFoundryApplicationManifestUtils.memoryInteger(manifest.getMemory()))
+					.noHostname(manifest.getNoHostname())
+					.noRoute(manifest.getNoRoute())
+					.randomRoute(manifest.getRandomRoute())
+					.services(manifest.getServices())
+					.stack(manifest.getStack())
+					.timeout(manifest.getTimeout())
+					.build();
+
+
+			Resource application = this.delegatingResourceLoader.getResource(
+					AppDeploymentRequestFactory.getResourceLocation(resource, version));
+			cfApplicationManifest = CloudFoundryApplicationManifestUtils.updateApplicationPath(cfApplicationManifest, application);
+
 		}
+
 		return cfApplicationManifest;
 	}
 
@@ -173,7 +170,7 @@ public class CloudFoundryManifestApplicationDeployer {
 
 	public AppStatus status(Release release) {
 		logger.info("Checking application status for the release: " + release.getName());
-		ApplicationManifest applicationManifest = CFApplicationManifestUtils.updateApplicationName(release);
+		ApplicationManifest applicationManifest = CloudFoundryApplicationManifestUtils.updateApplicationName(release);
 		String applicationName = applicationManifest.getName();
 		AppStatus appStatus = null;
 		try {
@@ -192,7 +189,7 @@ public class CloudFoundryManifestApplicationDeployer {
 	}
 
 	public Release delete(Release release) {
-		ApplicationManifest applicationManifest = CFApplicationManifestUtils.updateApplicationName(release);
+		ApplicationManifest applicationManifest = CloudFoundryApplicationManifestUtils.updateApplicationName(release);
 		String applicationName = applicationManifest.getName();
 		DeleteApplicationRequest deleteApplicationRequest = DeleteApplicationRequest.builder().name(applicationName)
 				.build();

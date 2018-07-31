@@ -5,5 +5,5 @@ spec:
   version: "{{{spec.version}}}"
   manifest:
     {{#spec.manifest.entrySet}}
-    "{{{key}}}": "{{{value}}}"
+    {{key}}: {{value}}
     {{/spec.manifest.entrySet}}

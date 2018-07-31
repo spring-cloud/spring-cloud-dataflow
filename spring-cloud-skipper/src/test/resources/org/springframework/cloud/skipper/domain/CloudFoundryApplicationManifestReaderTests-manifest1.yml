@@ -1,0 +1,28 @@
+kind: CloudFoundryApplication
+spec:
+  resource: https://github.com/my/entry
+  version: 1.0.0
+  manifest:
+    buildpack: buildpack
+    command: my command
+    disk-quota: '2048'
+    domains:
+    - domain1
+    - domain2
+    env:
+      key1: value1
+      key2: value2
+    health-check-http-endpoint: endpoint
+    health-check-type: process
+    hosts:
+    - host1
+    - host2
+    instances: '1'
+    memory: '1024'
+    timeout: '180'
+    no-hostname: false
+    no-route: false
+    random-route: true
+    stack: stack
+    services:
+    - rabbit
