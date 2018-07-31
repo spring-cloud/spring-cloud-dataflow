@@ -25,6 +25,7 @@ import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.dataflow.rest.client.TaskOperations;
+import org.springframework.cloud.dataflow.rest.resource.CurrentTaskExecutionsResource;
 import org.springframework.cloud.dataflow.rest.resource.TaskDefinitionResource;
 import org.springframework.cloud.dataflow.rest.resource.TaskExecutionResource;
 import org.springframework.cloud.dataflow.rest.util.DeploymentPropertiesUtils;
@@ -51,6 +52,7 @@ import org.springframework.util.StringUtils;
  * @author Gunnar Hillert
  * @author Ilayaperumal Gopinathan
  * @author Janne Valkealahti
+ * @author David Turanski
  */
 @Component
 public class TaskCommands implements CommandMarker {
@@ -64,6 +66,8 @@ public class TaskCommands implements CommandMarker {
 	private static final String DESTROY = "task destroy";
 
 	private static final String TASK_EXECUTION_STATUS = "task execution status";
+
+	private static final String TASK_EXECUTION_CURRENT = "task execution current";
 
 	private static final String TASK_EXECUTION_CLEANUP = "task execution cleanup";
 
@@ -185,6 +189,19 @@ public class TaskCommands implements CommandMarker {
 
 		DataFlowTables.applyStyle(builder);
 
+		return builder.build();
+	}
+
+	@CliCommand(value = TASK_EXECUTION_CURRENT,
+		help = "Display count of currently executin tasks and related information")
+	public Table currentExecutions() {
+		CurrentTaskExecutionsResource taskExecutionsResource = taskOperations().currentTaskExecutions();
+		TableModelBuilder<Object> modelBuilder = new TableModelBuilder<>();
+		modelBuilder.addRow().addValue("Current Running Tasks").addValue(taskExecutionsResource.getRunningExecutionCount());
+		modelBuilder.addRow().addValue("Maximum Concurrent Executions").addValue(taskExecutionsResource
+			.getMaximumTaskExecutions());
+		TableBuilder builder = new TableBuilder(modelBuilder.build());
+		DataFlowTables.applyStyle(builder);
 		return builder.build();
 	}
 

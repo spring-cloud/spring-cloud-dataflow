@@ -137,6 +137,14 @@ public class TaskExecutionsDocumentation extends BaseDocumentation {
 								.description("The id of an existing task execution (required)"))));
 	}
 
+	@Test
+	public void launchTaskCurrentCount() throws Exception {
+		this.mockMvc.perform(
+				get("/tasks/executions/current"))
+				.andDo(print())
+				.andExpect(status().isOk())
+				.andDo(this.documentationHandler.document());
+	}
 
 	@Test
 	public void removeTaskExecution() throws Exception {

@@ -66,6 +66,7 @@ import org.springframework.util.StringUtils;
  * @author Thomas Risberg
  * @author Ilayaperumal Gopinathan
  * @author Michael Wirth
+ * @author David Turanski
  */
 @Transactional
 public class DefaultTaskService implements TaskService {
@@ -163,6 +164,13 @@ public class DefaultTaskService implements TaskService {
 			List<String> commandLineArgs) {
 		Assert.hasText(taskName, "The provided taskName must not be null or empty.");
 		Assert.notNull(taskDeploymentProperties, "The provided runtimeProperties must not be null.");
+
+		if (maxConcurrentExecutionsReached()) {
+			throw new IllegalStateException(String.format(
+				"The maximum concurrent task executions [%d] is at its limit.",
+				taskConfigurationProperties.getMaximumConcurrentTasks()));
+		}
+
 		TaskDefinition taskDefinition = this.taskDefinitionRepository.findOne(taskName);
 		if (taskDefinition == null) {
 			throw new NoSuchTaskDefinitionException(taskName);
@@ -210,6 +218,10 @@ public class DefaultTaskService implements TaskService {
 		return taskExecution.getExecutionId();
 	}
 
+	private synchronized boolean maxConcurrentExecutionsReached() {
+		return this.taskExplorer.getRunningTaskExecutionCount() >=
+			this.taskConfigurationProperties.getMaximumConcurrentTasks();
+	}
 
 	private List<String> updateCommandLineArgs(List<String> commandLineArgs, TaskExecution taskExecution) {
 		return Stream
@@ -223,6 +235,11 @@ public class DefaultTaskService implements TaskService {
 		Assert.hasText(dsl, "dsl must not be empty nor null");
 		TaskParser taskParser = new TaskParser("__dummy", dsl, true, true);
 		return taskParser.parse().isComposed();
+	}
+
+	@Override
+	public long getMaximumConcurrentTasks() {
+		return taskConfigurationProperties.getMaximumConcurrentTasks();
 	}
 
 	@Override

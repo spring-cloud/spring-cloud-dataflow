@@ -1,5 +1,5 @@
 /*
- * Copyright 2015-2017 the original author or authors.
+ * Copyright 2015-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,7 @@ package org.springframework.cloud.dataflow.rest.client;
 import java.util.List;
 import java.util.Map;
 
+import org.springframework.cloud.dataflow.rest.resource.CurrentTaskExecutionsResource;
 import org.springframework.cloud.dataflow.rest.resource.TaskDefinitionResource;
 import org.springframework.cloud.dataflow.rest.resource.TaskExecutionResource;
 import org.springframework.hateoas.PagedResources;
@@ -29,6 +30,7 @@ import org.springframework.hateoas.PagedResources;
  * @author Glenn Renfro
  * @author Michael Minella
  * @author Gunnar Hillert
+ * @author David Turanski
  */
 public interface TaskOperations {
 
@@ -83,6 +85,12 @@ public interface TaskOperations {
 	 * @return {@link TaskExecutionResource}
 	 */
 	TaskExecutionResource taskExecutionStatus(long id);
+
+	/**
+	 * Return information including the count of currently executing tasks and task execution limits.
+	 * @return {@link CurrentTaskExecutionsResource}
+	 */
+	CurrentTaskExecutionsResource currentTaskExecutions();
 
 	/**
 	 * Cleanup any resources associated with the execution for the id specified.

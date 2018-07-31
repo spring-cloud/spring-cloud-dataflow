@@ -27,6 +27,7 @@ import java.util.Map;
  * @author Mark Fisher
  * @author Janne Valkealahti
  * @author Gunnar Hillert
+ * @author David Turanski
  */
 public interface TaskService {
 
@@ -71,5 +72,11 @@ public interface TaskService {
 	 * @return true if it is composed task definition else false.
 	 */
 	boolean isComposedDefinition(String dsl);
+
+	/**
+	 * Provide the maximum number of concurrent tasks.
+	 * @return the maximum number of concurrent tasks.
+	 */
+	long getMaximumConcurrentTasks();
 
 }
