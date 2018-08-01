@@ -23,6 +23,7 @@ import javax.sql.DataSource;
 
 import org.junit.Before;
 import org.junit.BeforeClass;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -167,6 +168,7 @@ public class TaskCommandTests extends AbstractShellIntegrationTest {
 				table.getModel().getValue(10, 1));
 	}
 
+	@Ignore
 	@Test
 	public void currentExecutions() {
 		template.update(
