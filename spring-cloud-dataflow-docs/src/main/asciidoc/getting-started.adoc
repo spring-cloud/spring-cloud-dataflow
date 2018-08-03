@@ -84,7 +84,7 @@ Enter `time | log` into the "Create Stream" textarea then click the "CREATE STRE
 Enter "ticktock" for the stream name and click the "Deploy Stream(s) checkbox as show in the following image:
 +
 .Creating a Stream
-image::{dataflow-asciidoc}/images/dataflow-stream-create.png[Creating a Stream, scaledwidth="60%"]
+image::images/dataflow-stream-create.png[Creating a Stream, scaledwidth="60%"]
 +
 Then click "OK" which will return back to the Definitions page.
 The stream will be in "deploying" status and move to "deployed" when finished.
