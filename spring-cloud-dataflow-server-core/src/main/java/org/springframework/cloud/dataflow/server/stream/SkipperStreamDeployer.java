@@ -43,6 +43,7 @@ import org.yaml.snakeyaml.Yaml;
 
 import org.springframework.cloud.dataflow.core.ApplicationType;
 import org.springframework.cloud.dataflow.core.DataFlowPropertyKeys;
+import org.springframework.cloud.dataflow.core.StreamAppDefinition;
 import org.springframework.cloud.dataflow.core.StreamDefinition;
 import org.springframework.cloud.dataflow.core.StreamDeployment;
 import org.springframework.cloud.dataflow.registry.service.AppRegistryService;
@@ -263,20 +264,34 @@ public class SkipperStreamDeployer implements StreamDeployer {
 	}
 
 	private void validateAllAppsRegistered(StreamDeploymentRequest streamDeploymentRequest) {
+		StreamDefinition streamDefinition = this.streamDefinitionRepository.findOne(streamDeploymentRequest.getStreamName());
 		for (AppDeploymentRequest adr : streamDeploymentRequest.getAppDeploymentRequests()) {
 			String version = ResourceUtils.getResourceVersion(adr.getResource());
-			validateAppVersionIsRegistered(adr, version);
+			validateAppVersionIsRegistered(getRegisteredName(streamDefinition, adr.getDefinition().getName()), adr, version);
 		}
 	}
 
-	public void validateAppVersionIsRegistered(AppDeploymentRequest appDeploymentRequest, String appVersion) {
-		String name = appDeploymentRequest.getDefinition().getName();
+	private String getRegisteredName(StreamDefinition streamDefinition, String adrAppName) {
+		for (StreamAppDefinition appDefinition: streamDefinition.getAppDefinitions()) {
+			if (appDefinition.getName().equals(adrAppName)) {
+				return appDefinition.getRegisteredAppName();
+			}
+		}
+		return adrAppName;
+	}
+
+	public void validateAppVersionIsRegistered(StreamDefinition streamDefinition, AppDeploymentRequest appDeploymentRequest, String appVersion) {
+		String registeredAppName = getRegisteredName(streamDefinition, appDeploymentRequest.getDefinition().getName());
+		this.validateAppVersionIsRegistered(registeredAppName, appDeploymentRequest, appVersion);
+	}
+
+	private void validateAppVersionIsRegistered(String registeredAppName, AppDeploymentRequest appDeploymentRequest, String appVersion) {
 		String appTypeString = appDeploymentRequest.getDefinition().getProperties()
 				.get(DataFlowPropertyKeys.STREAM_APP_TYPE);
 		ApplicationType applicationType = ApplicationType.valueOf(appTypeString);
-		if (!this.appRegistryService.appExist(name, applicationType, appVersion)) {
+		if (!this.appRegistryService.appExist(registeredAppName, applicationType, appVersion)) {
 			throw new IllegalStateException(String.format("The %s:%s:%s app is not registered!",
-					name, appTypeString, appVersion));
+					registeredAppName, appTypeString, appVersion));
 		}
 	}
 

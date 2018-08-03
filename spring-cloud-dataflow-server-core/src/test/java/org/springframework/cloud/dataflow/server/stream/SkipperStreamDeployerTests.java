@@ -102,15 +102,17 @@ public class SkipperStreamDeployerTests {
 		skipperDeployerProperties.put(SkipperStream.SKIPPER_PACKAGE_VERSION, "1.0.1");
 
 		StreamDeploymentRequest streamDeploymentRequest = new StreamDeploymentRequest("test1",
-				"time | log",
+				"t1: time | log",
 				appDeploymentRequests,
 				skipperDeployerProperties);
 
 		SkipperClient skipperClient = MockUtils.createSkipperClientMock();
 
+		StreamDefinitionRepository streamDefinitionRepository = mock(StreamDefinitionRepository.class);
 		SkipperStreamDeployer skipperStreamDeployer = new SkipperStreamDeployer(skipperClient,
-				mock(StreamDefinitionRepository.class), appRegistryService, mock(ForkJoinPool.class));
+				streamDefinitionRepository, appRegistryService, mock(ForkJoinPool.class));
 
+		when(streamDefinitionRepository.findOne("test1")).thenReturn(new StreamDefinition("test1", "t1: time | log"));
 		skipperStreamDeployer.deployStream(streamDeploymentRequest);
 
 		ArgumentCaptor<UploadRequest> uploadRequestCaptor = ArgumentCaptor.forClass(UploadRequest.class);
@@ -267,9 +269,11 @@ public class SkipperStreamDeployerTests {
 
 		SkipperClient skipperClient = MockUtils.createSkipperClientMock();
 
+		StreamDefinitionRepository streamDefinitionRepository = mock(StreamDefinitionRepository.class);
 		SkipperStreamDeployer skipperStreamDeployer = new SkipperStreamDeployer(skipperClient,
-				mock(StreamDefinitionRepository.class),
-				appRegistryService, mock(ForkJoinPool.class));
+				streamDefinitionRepository, appRegistryService, mock(ForkJoinPool.class));
+
+		when(streamDefinitionRepository.findOne("test1")).thenReturn(new StreamDefinition("test1", "t1: time | log"));
 
 		skipperStreamDeployer.deployStream(streamDeploymentRequest);
 	}
