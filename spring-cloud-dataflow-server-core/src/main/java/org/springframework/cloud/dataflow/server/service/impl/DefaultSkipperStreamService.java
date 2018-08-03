@@ -242,7 +242,7 @@ public class DefaultSkipperStreamService extends AbstractStreamService implement
 			if (appDeploymentRequest.getCommandlineArguments().size() == 1) {
 				hasProps = true;
 				String version = appDeploymentRequest.getCommandlineArguments().get(0);
-				this.skipperStreamDeployer.validateAppVersionIsRegistered(appDeploymentRequest, version);
+				this.skipperStreamDeployer.validateAppVersionIsRegistered(streamDefinition, appDeploymentRequest, version);
 				specMap.put("version", version);
 			}
 			if (hasProps) {
