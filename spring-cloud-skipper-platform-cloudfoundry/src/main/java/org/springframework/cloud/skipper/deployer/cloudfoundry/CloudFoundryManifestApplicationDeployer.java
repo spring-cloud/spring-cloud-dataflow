@@ -16,7 +16,6 @@
 package org.springframework.cloud.skipper.deployer.cloudfoundry;
 
 import java.time.Duration;
-import java.util.HashMap;
 import java.util.List;
 import java.util.function.Predicate;
 
@@ -29,6 +28,8 @@ import org.cloudfoundry.operations.applications.GetApplicationRequest;
 import org.cloudfoundry.operations.applications.InstanceDetail;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import reactor.core.publisher.Mono;
+
 import org.springframework.cloud.deployer.resource.support.DelegatingResourceLoader;
 import org.springframework.cloud.deployer.spi.app.AppStatus;
 import org.springframework.cloud.deployer.spi.app.DeploymentState;
@@ -43,8 +44,6 @@ import org.springframework.cloud.skipper.domain.StatusCode;
 import org.springframework.cloud.skipper.server.deployer.AppDeploymentRequestFactory;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpStatus;
-
-import reactor.core.publisher.Mono;
 
 /**
  * The helper class that handles the deployment related operation for CF manifest based application deployment.
@@ -99,7 +98,7 @@ public class CloudFoundryManifestApplicationDeployer {
 					.disk(CloudFoundryApplicationManifestUtils.memoryInteger(manifest.getDiskQuota()))
 					.domains(manifest.getDomains() != null && !manifest.getDomains().isEmpty() ? manifest.getDomains()
 							: null)
-					.environmentVariables(new HashMap<>())
+					.environmentVariables(manifest.getEnv() != null ? manifest.getEnv() : null)
 					.healthCheckHttpEndpoint(manifest.getHealthCheckHttpEndpoint())
 					.healthCheckType(manifest.getHealthCheckType() != null
 							? ApplicationHealthCheck.from(manifest.getHealthCheckType().name())
