@@ -2,7 +2,6 @@
 # This is a YAML-formatted file.
 # Declare variables to be passed into your templates
 spec:
-  resource: https://github.com/ilayaperumalg/sandbox/raw/master/python/hello.py.zip
   manifest:
     memory: 1024
     disk-quota: 1024
@@ -11,3 +10,4 @@ spec:
     buildpack: python_buildpack
     command: python hello.py
     health-check-type: process
+  version: 1.0.0

@@ -2,7 +2,7 @@
 # This is a YAML-formatted file.
 # Declare variables to be passed into your templates
 spec:
-  resource: https://github.com/ilayaperumalg/sandbox/raw/master/python/vanakkam.py.zip
+  version: 1.0.1
   manifest:
     memory: 1024
     disk-quota: 1024

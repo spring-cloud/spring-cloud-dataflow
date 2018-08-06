@@ -59,16 +59,15 @@ public class AppDeploymentRequestFactory {
 		if (specVersion != null) {
 			if ((specResource.startsWith("maven") || specResource.startsWith("docker"))) {
 				if (specResource.endsWith(":" + specVersion)) {
-					// May still be consume 1.0 M1 based package artifacts
 					return specResource;
 				}
 				else {
 					return String.format("%s:%s", specResource, specVersion);
 				}
 			}
-			// Assume the resource extension is JAR when it is neither maven nor docker.
+			// When it is neither maven nor docker, the version is expected to have been embedded into resource value.
 			else {
-				return String.format("%s-%s.jar", specResource, specVersion);
+				return specResource;
 			}
 		}
 		else {
