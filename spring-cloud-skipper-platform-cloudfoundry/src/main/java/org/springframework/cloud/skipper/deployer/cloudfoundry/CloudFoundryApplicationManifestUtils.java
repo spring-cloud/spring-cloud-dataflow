@@ -16,10 +16,9 @@
 package org.springframework.cloud.skipper.deployer.cloudfoundry;
 
 import java.io.IOException;
-import java.util.Arrays;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import org.cloudfoundry.operations.applications.ApplicationManifest;
 import org.cloudfoundry.operations.applications.Docker;
@@ -68,17 +67,71 @@ public class CloudFoundryApplicationManifestUtils {
 	}
 
 	public static Map<String, String> getCFManifestMap(ApplicationManifest applicationManifest) {
-		String applicationManifestString = applicationManifest.toString();
-		applicationManifestString = applicationManifestString.substring(("ApplicationManifest{").length(),
-				applicationManifestString.length() - 1);
-		List<String> applicationManifestProperties = Arrays.asList(
-				StringUtils.commaDelimitedListToStringArray(applicationManifestString));
 		Map<String, String> applicationManifestMap = new HashMap<>();
-		for (String applicationManifestProperty: applicationManifestProperties) {
-			String[] splitString = StringUtils.split(applicationManifestProperty, "=");
-			String valueString = splitString[1].replaceAll("\\[", "").replaceAll("\\]", "");
-			applicationManifestMap.put(splitString[0], valueString);
+
+		if (applicationManifest.getName() != null) {
+			applicationManifestMap.put("spec.manifest.name", applicationManifest.getName());
 		}
+		if (applicationManifest.getBuildpack() != null) {
+			applicationManifestMap.put("spec.manifest.buildpack", applicationManifest.getBuildpack());
+		}
+		if (applicationManifest.getCommand() != null) {
+			applicationManifestMap.put("spec.manifest.command", applicationManifest.getCommand());
+		}
+		if (applicationManifest.getMemory() != null) {
+			applicationManifestMap.put("spec.manifest.memory", applicationManifest.getMemory().toString());
+		}
+		if (applicationManifest.getDisk() != null) {
+			applicationManifestMap.put("spec.manifest.disk-quota", applicationManifest.getDisk().toString());
+		}
+		if (applicationManifest.getTimeout() != null) {
+			applicationManifestMap.put("spec.manifest.timeout", applicationManifest.getTimeout().toString());
+		}
+		if (applicationManifest.getInstances() != null) {
+			applicationManifestMap.put("spec.manifest.instances", applicationManifest.getInstances().toString());
+		}
+		if (applicationManifest.getNoHostname() != null) {
+			applicationManifestMap.put("spec.manifest.no-hostname", applicationManifest.getNoHostname().toString());
+		}
+		if (applicationManifest.getNoRoute() != null) {
+			applicationManifestMap.put("spec.manifest.no-route", applicationManifest.getNoRoute().toString());
+		}
+		if (applicationManifest.getRandomRoute() != null) {
+			applicationManifestMap.put("spec.manifest.random-route", applicationManifest.getRandomRoute().toString());
+		}
+		if (applicationManifest.getHealthCheckType() != null) {
+			applicationManifestMap.put("spec.manifest.health-check-type", applicationManifest.getHealthCheckType().toString());
+		}
+		if (applicationManifest.getHealthCheckHttpEndpoint() != null) {
+			applicationManifestMap.put("spec.manifest.health-check-http-endpoint", applicationManifest.getHealthCheckHttpEndpoint());
+		}
+		if (applicationManifest.getStack() != null) {
+			applicationManifestMap.put("spec.manifest.stack", applicationManifest.getStack());
+		}
+		if (applicationManifest.getServices() != null) {
+			int i = 0;
+			for (String service : applicationManifest.getServices()) {
+				applicationManifestMap.put("spec.manifest.services[" + i++ + "]", service);
+			}
+		}
+		if (applicationManifest.getDomains() != null) {
+			int i = 0;
+			for (String domain : applicationManifest.getDomains()) {
+				applicationManifestMap.put("spec.manifest.domains[" + i++ + "]", domain);
+			}
+		}
+		if (applicationManifest.getHosts() != null) {
+			int i = 0;
+			for (String host : applicationManifest.getHosts()) {
+				applicationManifestMap.put("spec.manifest.hosts[" + i++ + "]", host);
+			}
+		}
+		if (applicationManifest.getEnvironmentVariables() != null) {
+			for (Entry<String,Object> entry : applicationManifest.getEnvironmentVariables().entrySet()) {
+				applicationManifestMap.put("spec.manifest.env." + entry.getKey(), entry.getValue().toString());
+			}
+		}
+
 		return applicationManifestMap;
 	}
 
