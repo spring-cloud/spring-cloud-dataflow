@@ -21,9 +21,9 @@ import java.util.UUID;
 
 import javax.sql.DataSource;
 
+import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -79,6 +79,21 @@ public class TaskCommandTests extends AbstractShellIntegrationTest {
 						+ "EXTERNAL_EXECUTION_ID)" + "values (?, ?, ?, ?, ?, ?, ?, ?, ?)",
 				TASK_EXECUTION_ID, startTime, endTime, TASK_NAME, EXIT_CODE, EXIT_MESSAGE, endTime, ERROR_MESSAGE,
 				EXTERNAL_EXECUTION_ID);
+		template.update(
+				"INSERT into TASK_EXECUTION(TASK_EXECUTION_ID, " + "START_TIME, " + "END_TIME, " + "TASK_NAME, "
+						+ "EXIT_CODE, " + "EXIT_MESSAGE, " + "LAST_UPDATED," + "ERROR_MESSAGE, "
+						+ "EXTERNAL_EXECUTION_ID)" + "values (?, ?, ?, ?, ?, ?, ?, ?, ?)",
+				TASK_EXECUTION_ID - 1, startTime, null, TASK_NAME, null, EXIT_MESSAGE, null, ERROR_MESSAGE,
+				EXTERNAL_EXECUTION_ID);
+	}
+
+	@AfterClass
+	public static void tearDown() throws Exception {
+		JdbcTemplate template = new JdbcTemplate(applicationContext.getBean(DataSource.class));
+		template.afterPropertiesSet();
+		final String TASK_EXECUTION_FORMAT = "DELETE FROM task_execution WHERE task_execution_id = %d";
+		template.execute(String.format(TASK_EXECUTION_FORMAT, TASK_EXECUTION_ID - 1));
+		template.execute(String.format(TASK_EXECUTION_FORMAT, TASK_EXECUTION_ID));
 	}
 
 	@Before
@@ -168,19 +183,10 @@ public class TaskCommandTests extends AbstractShellIntegrationTest {
 				table.getModel().getValue(10, 1));
 	}
 
-	@Ignore
 	@Test
-	public void currentExecutions() {
-		template.update(
-			"INSERT into TASK_EXECUTION(TASK_EXECUTION_ID, " + "START_TIME, " + "END_TIME, " + "TASK_NAME, "
-				+ "EXIT_CODE, " + "EXIT_MESSAGE, " + "LAST_UPDATED," + "ERROR_MESSAGE, "
-				+ "EXTERNAL_EXECUTION_ID)" + "values (?, ?, ?, ?, ?, ?, ?, ?, ?)",
-			TASK_EXECUTION_ID+1, startTime, null, TASK_NAME, null, EXIT_MESSAGE, null, ERROR_MESSAGE,
-			EXTERNAL_EXECUTION_ID);
-
+	public void testCurrentExecutions() {
 		CommandResult idResult = task().taskExecutionCurrent();
 		Table result = (Table) idResult.getResult();
-
 		long value = (long) result.getModel().getValue(0, 1);
 		assertEquals(1L, value);
 	}

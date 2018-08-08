@@ -24,6 +24,7 @@ import java.util.Map;
 
 import javax.sql.DataSource;
 
+import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.slf4j.Logger;
@@ -42,6 +43,7 @@ import org.springframework.cloud.task.batch.listener.support.JdbcTaskBatchDao;
 import org.springframework.cloud.task.repository.TaskExecution;
 import org.springframework.cloud.task.repository.dao.TaskExecutionDao;
 import org.springframework.cloud.task.repository.support.TaskExecutionDaoFactoryBean;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.datasource.DataSourceTransactionManager;
 import org.springframework.shell.core.CommandResult;
 import org.springframework.shell.table.Table;
@@ -74,6 +76,8 @@ public class JobCommandTests extends AbstractShellIntegrationTest {
 
 	private static List<JobInstance> jobInstances = new ArrayList<>();
 
+	private static List<Long> taskExecutionIds = new ArrayList(3);
+
 	@BeforeClass
 	public static void setUp() throws Exception {
 		dataSource = applicationContext.getBean(DataSource.class);
@@ -84,13 +88,25 @@ public class JobCommandTests extends AbstractShellIntegrationTest {
 		jobRepository = repositoryFactoryBean.getObject();
 		TaskExecutionDaoFactoryBean taskExecutionDaoFactoryBean = new TaskExecutionDaoFactoryBean(dataSource);
 		dao = taskExecutionDaoFactoryBean.getObject();
-		createSampleJob(JOB_NAME_ORIG, 1);
-		createSampleJob(JOB_NAME_FOO, 1);
-		createSampleJob(JOB_NAME_FOOBAR, 2);
-
+		taskExecutionIds.add(createSampleJob(JOB_NAME_ORIG, 1));
+		taskExecutionIds.add(createSampleJob(JOB_NAME_FOO, 1));
+		taskExecutionIds.add(createSampleJob(JOB_NAME_FOOBAR, 2));
 	}
 
-	private static void createSampleJob(String jobName, int jobExecutionCount) {
+	@AfterClass
+	public static void tearDown() throws Exception {
+		JdbcTemplate template = new JdbcTemplate(applicationContext.getBean(DataSource.class));
+		template.afterPropertiesSet();
+		final String TASK_EXECUTION_FORMAT = "DELETE FROM task_execution WHERE task_execution_id = %d";
+		final String TASK_BATCH_FORMAT = "DELETE FROM task_task_batch WHERE task_execution_id = %d";
+
+		for (Long id : taskExecutionIds) {
+			template.execute(String.format(TASK_BATCH_FORMAT, id));
+			template.execute(String.format(TASK_EXECUTION_FORMAT, id));
+		}
+	}
+
+	private static long createSampleJob(String jobName, int jobExecutionCount) {
 		JobInstance instance = jobRepository.createJobInstance(jobName, new JobParameters());
 		jobInstances.add(instance);
 		TaskExecution taskExecution = dao.createTaskExecution(jobName, new Date(), new ArrayList<String>(), null);
@@ -105,6 +121,7 @@ public class JobCommandTests extends AbstractShellIntegrationTest {
 			StepExecution stepExecution = new StepExecution("foobar", jobExecution);
 			jobRepository.add(stepExecution);
 		}
+		return taskExecution.getExecutionId();
 	}
 
 	@Test
