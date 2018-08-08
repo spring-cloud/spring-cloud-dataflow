@@ -100,10 +100,10 @@ public interface StreamService {
 
 	/**
 	 * Find stream definitions where the findByNameLike parameter
-	 * @param searchName the findByNameLike parameter to use
+	 * @param search the findByNameLike parameter to use
 	 * @return Page of stream definitions
 	 */
-	Page<StreamDefinition> findDefinitionByNameLike(Pageable pageable, String searchName);
+	Page<StreamDefinition> findDefinitionByNameLike(Pageable pageable, String search);
 
 	/**
 	 * Find a stream definition by name.

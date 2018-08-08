@@ -132,14 +132,14 @@ public class StreamDefinitionController {
 	 *
 	 * @param pageable Pagination information
 	 * @param assembler assembler for {@link StreamDefinition}
-	 * @param searchName optional findByNameLike parameter
+	 * @param search optional findByNameLike parameter
 	 * @return list of stream definitions
 	 */
 	@RequestMapping(value = "", method = RequestMethod.GET)
 	@ResponseStatus(HttpStatus.OK)
 	public PagedResources<StreamDefinitionResource> list(Pageable pageable,
-			@RequestParam(required = false) String searchName, PagedResourcesAssembler<StreamDefinition> assembler) {
-		Page<StreamDefinition> streamDefinitions = this.streamService.findDefinitionByNameLike(pageable, searchName);
+			@RequestParam(required = false) String search, PagedResourcesAssembler<StreamDefinition> assembler) {
+		Page<StreamDefinition> streamDefinitions = this.streamService.findDefinitionByNameLike(pageable, search);
 		return assembler.toResource(streamDefinitions, new Assembler(streamDefinitions));
 	}
 

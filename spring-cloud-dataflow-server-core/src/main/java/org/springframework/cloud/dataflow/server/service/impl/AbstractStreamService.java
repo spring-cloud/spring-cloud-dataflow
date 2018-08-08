@@ -213,10 +213,10 @@ public abstract class AbstractStreamService implements StreamService {
 	}
 
 	@Override
-	public Page<StreamDefinition> findDefinitionByNameLike(Pageable pageable, String searchName) {
+	public Page<StreamDefinition> findDefinitionByNameLike(Pageable pageable, String search) {
 		Page<StreamDefinition> streamDefinitions;
-		if (searchName != null) {
-			final SearchPageable searchPageable = new SearchPageable(pageable, searchName);
+		if (search != null) {
+			final SearchPageable searchPageable = new SearchPageable(pageable, search);
 			searchPageable.addColumns("DEFINITION_NAME", "DEFINITION");
 			streamDefinitions = streamDefinitionRepository.findByNameLike(searchPageable);
 			long count = streamDefinitions.getContent().size();
