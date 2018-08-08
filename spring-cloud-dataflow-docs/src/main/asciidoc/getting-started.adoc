@@ -117,6 +117,8 @@ To destroy the Quick Start environment, in another console from where the `docke
 $ docker-compose down
 ----
 +
+NOTE: Some stream applications may open a port, for example `http --server.port=`. By default, a port range of `9000-9010` is exposed from the container to the host. If you would like to change this range, modify the `ports` block of the `dataflow-server` service in the `docker-compose.yml` file.
++
 
 
 [[getting-started-customizing-spring-cloud-dataflow-docker]]
@@ -210,7 +212,7 @@ With:
       - rabbitmq
 ----
 +
-And finally, modify the `app-import` service definition `command` attribute to replace `http://bit.ly/Darwin-SR1-stream-applications-kafka-maven` with `http://bit.ly/Darwin-SR1-stream-applications-rabbit-maven`.
+And finally, modify the `app-import` service definition `command` attribute to replace `http://bit.ly/Celsius-SR3-stream-applications-kafka-10-maven` with `http://bit.ly/Celsius-SR3-stream-applications-rabbit-maven`.
 
 
 . To enable analytics using redis as a backend, add the following configuration under the `services` section:
