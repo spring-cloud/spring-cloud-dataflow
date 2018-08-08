@@ -157,6 +157,19 @@ public class RdbmsTaskDefinitionRepositoryTests extends AbstractTaskDefinitionTe
 		findAllPageable(pageable, names);
 	}
 
+	@Test
+	public void initializeRepositoryLargeDefinition() {
+		String name = "task2";
+		String definition = new String(new char[4500]).replace("\0", "t");
+		TaskDefinition defOne = new TaskDefinition(name, definition);
+		this.repository.save(defOne);
+		Iterable<TaskDefinition> items = this.repository.findAll();
+		items.forEach(item -> {
+			assertEquals(definition, item.getDslText());
+			assertEquals(name, item.getName());
+		});
+	}
+
 	private void findAllPageable(Pageable pageable, String[] expectedOrder) {
 
 		assertFalse(repository.findAll().iterator().hasNext());
