@@ -20,6 +20,7 @@ services:
     container_name: dataflow-server
     ports:
       - "9393:9393"
+      - "9000-9010:9000-9010"
     environment:
       - spring.cloud.dataflow.applicationProperties.stream.spring.cloud.stream.kafka.binder.brokers=kafka:9092
       - spring.cloud.dataflow.applicationProperties.stream.spring.cloud.stream.kafka.binder.zkNodes=zookeeper:2181
@@ -35,8 +36,8 @@ services:
         do
           sleep 1;
         done;
-        wget -qO- 'http://dataflow-server:9393/apps' --post-data='uri=http://bit.ly/Darwin-SR1-stream-applications-kafka-maven&force=true';
+        wget -qO- 'http://dataflow-server:9393/apps' --post-data='uri=http://bit.ly/Celsius-SR3-stream-applications-kafka-10-maven&force=true';
         echo 'Stream apps imported'
-        wget -qO- 'http://dataflow-server:9393/apps'  --post-data='uri=http://bit.ly/Dearborn-GA-task-applications-maven&force=true';
+        wget -qO- 'http://dataflow-server:9393/apps' --post-data='uri=http://bit.ly/Clark-GA-task-applications-maven&force=true';
         echo 'Task apps imported'"
 
