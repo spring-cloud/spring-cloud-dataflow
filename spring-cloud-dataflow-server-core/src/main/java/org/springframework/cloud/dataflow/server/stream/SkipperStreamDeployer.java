@@ -160,6 +160,9 @@ public class SkipperStreamDeployer implements StreamDeployer {
 		DeploymentState state = null;
 		try {
 			Info info = this.skipperClient.status(streamName);
+			if (info.getStatus().getPlatformStatus() == null) {
+				return getDeploymentStateFromStatusInfo(info);
+			}
 			List<AppStatus> appStatusList = deserializeAppStatus(info.getStatus().getPlatformStatus());
 			Set<DeploymentState> deploymentStateList = appStatusList.stream().map(appStatus -> appStatus.getState())
 					.collect(Collectors.toSet());
@@ -173,6 +176,20 @@ public class SkipperStreamDeployer implements StreamDeployer {
 			}
 		}
 		return state;
+	}
+
+	private DeploymentState getDeploymentStateFromStatusInfo(Info info) {
+		switch (info.getStatus().getStatusCode()) {
+		case FAILED:
+			return DeploymentState.failed;
+		case DELETED:
+			return DeploymentState.undeployed;
+		case UNKNOWN:
+			return DeploymentState.unknown;
+		case DEPLOYED:
+			return DeploymentState.deployed;
+		}
+		return DeploymentState.unknown;
 	}
 
 	private boolean streamDefinitionExists(String streamName) {
