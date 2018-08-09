@@ -120,22 +120,26 @@ public class SkipperStreamDeployer implements StreamDeployer {
 
 	public static List<AppStatus> deserializeAppStatus(String platformStatus) {
 		try {
-			ObjectMapper mapper = new ObjectMapper();
-			mapper.addMixIn(AppStatus.class, AppStatusMixin.class);
-			mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-			SimpleModule module = new SimpleModule("CustomModel", Version.unknownVersion());
-			SimpleAbstractTypeResolver resolver = new SimpleAbstractTypeResolver();
-			resolver.addMapping(AppInstanceStatus.class, AppInstanceStatusImpl.class);
-			module.setAbstractTypes(resolver);
-			mapper.registerModule(module);
-			TypeReference<List<AppStatus>> typeRef = new TypeReference<List<AppStatus>>() {
-			};
-			List<AppStatus> result = mapper.readValue(platformStatus, typeRef);
-			return result;
+			if (platformStatus != null) {
+				ObjectMapper mapper = new ObjectMapper();
+				mapper.addMixIn(AppStatus.class, AppStatusMixin.class);
+				mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+				SimpleModule module = new SimpleModule("CustomModel", Version.unknownVersion());
+				SimpleAbstractTypeResolver resolver = new SimpleAbstractTypeResolver();
+				resolver.addMapping(AppInstanceStatus.class, AppInstanceStatusImpl.class);
+				module.setAbstractTypes(resolver);
+				mapper.registerModule(module);
+				TypeReference<List<AppStatus>> typeRef = new TypeReference<List<AppStatus>>() {
+				};
+				return mapper.readValue(platformStatus, typeRef);
+			}
+			return new ArrayList<AppStatus>();
 		}
 		catch (Exception e) {
-			throw new IllegalArgumentException("Could not parse Skipper Platform Status JSON:" + platformStatus, e);
-		}
+			logger.error("Could not parse Skipper Platform Status JSON [" + platformStatus + "]. " +
+					"Exception message = " + e.getMessage());
+			return new ArrayList<AppStatus>();
+		} 
 	}
 
 	@Override
@@ -159,6 +163,9 @@ public class SkipperStreamDeployer implements StreamDeployer {
 		DeploymentState state = null;
 		try {
 			Info info = this.skipperClient.status(streamName);
+			if (info.getStatus().getPlatformStatus() == null) {
+				return getDeploymentStateFromStatusInfo(info);
+			}
 			List<AppStatus> appStatusList = deserializeAppStatus(info.getStatus().getPlatformStatus());
 			Set<DeploymentState> deploymentStateList = appStatusList.stream().map(appStatus -> appStatus.getState())
 					.collect(Collectors.toSet());
@@ -172,6 +179,20 @@ public class SkipperStreamDeployer implements StreamDeployer {
 			}
 		}
 		return state;
+	}
+
+	private DeploymentState getDeploymentStateFromStatusInfo(Info info) {
+		switch (info.getStatus().getStatusCode()) {
+		case FAILED:
+			return DeploymentState.failed;
+		case DELETED:
+			return DeploymentState.undeployed;
+		case UNKNOWN:
+			return DeploymentState.unknown;
+		case DEPLOYED:
+			return DeploymentState.deployed;
+		}
+		return DeploymentState.unknown;
 	}
 
 	private boolean streamDefinitionExists(String streamName) {

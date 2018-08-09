@@ -35,6 +35,7 @@ import org.springframework.cloud.dataflow.server.repository.StreamDefinitionRepo
 import org.springframework.cloud.dataflow.server.support.MockUtils;
 import org.springframework.cloud.dataflow.server.support.SkipperPackageUtils;
 import org.springframework.cloud.deployer.resource.maven.MavenResource;
+import org.springframework.cloud.deployer.spi.app.AppStatus;
 import org.springframework.cloud.deployer.spi.app.DeploymentState;
 import org.springframework.cloud.deployer.spi.core.AppDefinition;
 import org.springframework.cloud.deployer.spi.core.AppDeploymentRequest;
@@ -44,10 +45,13 @@ import org.springframework.cloud.skipper.client.SkipperClient;
 import org.springframework.cloud.skipper.domain.AboutResource;
 import org.springframework.cloud.skipper.domain.Dependency;
 import org.springframework.cloud.skipper.domain.Deployer;
+import org.springframework.cloud.skipper.domain.Info;
 import org.springframework.cloud.skipper.domain.InstallRequest;
 import org.springframework.cloud.skipper.domain.Package;
 import org.springframework.cloud.skipper.domain.PackageMetadata;
 import org.springframework.cloud.skipper.domain.Release;
+import org.springframework.cloud.skipper.domain.Status;
+import org.springframework.cloud.skipper.domain.StatusCode;
 import org.springframework.cloud.skipper.domain.UploadRequest;
 import org.springframework.cloud.skipper.domain.VersionInfo;
 import org.springframework.hateoas.Resources;
@@ -296,6 +300,76 @@ public class SkipperStreamDeployerTests {
 
 		assertThat(state).isNotNull();
 		assertThat(state.size()).isEqualTo(0);
+	}
+
+	@Test
+	public void testNullCheckOnDeserializeAppStatus() {
+		List<AppStatus> appStatusList = SkipperStreamDeployer.deserializeAppStatus(null);
+		assertThat(appStatusList).isNotNull();
+		assertThat(appStatusList.size()).isEqualTo(0);
+
+		appStatusList = SkipperStreamDeployer.deserializeAppStatus("blah");
+		assertThat(appStatusList).isNotNull();
+		assertThat(appStatusList.size()).isEqualTo(0);
+	}
+
+	@Test
+	public void testStateOfUndeployedStream() {
+
+		AppRegistryService appRegistryService = mock(AppRegistryService.class);
+		SkipperClient skipperClient = mock(SkipperClient.class);
+		StreamDefinitionRepository streamDefinitionRepository = mock(StreamDefinitionRepository.class);
+
+		SkipperStreamDeployer skipperStreamDeployer = new SkipperStreamDeployer(skipperClient,
+				streamDefinitionRepository, appRegistryService, mock(ForkJoinPool.class));
+
+		StreamDefinition streamDefinition = new StreamDefinition("foo", "foo|bar");
+
+		// Stream is undeployed
+		Info info = createInfo(StatusCode.DELETED);
+		when(skipperClient.status(eq(streamDefinition.getName()))).thenReturn(info);
+
+		Map<StreamDefinition, DeploymentState> state = skipperStreamDeployer.streamsStates(Arrays.asList(streamDefinition));
+		assertThat(state).isNotNull();
+		assertThat(state.size()).isEqualTo(1);
+		assertThat(state.get(streamDefinition).equals(DeploymentState.undeployed));
+
+		// Stream is in failed state
+		info = createInfo(StatusCode.FAILED);
+		when(skipperClient.status(eq(streamDefinition.getName()))).thenReturn(info);
+
+		state = skipperStreamDeployer.streamsStates(Arrays.asList(streamDefinition));
+		assertThat(state).isNotNull();
+		assertThat(state.size()).isEqualTo(1);
+		assertThat(state.get(streamDefinition).equals(DeploymentState.failed));
+
+		// Stream is deployed (rare case if ever...)
+		info = createInfo(StatusCode.DEPLOYED);
+		when(skipperClient.status(eq(streamDefinition.getName()))).thenReturn(info);
+
+		state = skipperStreamDeployer.streamsStates(Arrays.asList(streamDefinition));
+		assertThat(state).isNotNull();
+		assertThat(state.size()).isEqualTo(1);
+		assertThat(state.get(streamDefinition).equals(DeploymentState.deployed));
+
+		// Stream is in unknown state
+		info = createInfo(StatusCode.UNKNOWN);
+		when(skipperClient.status(eq(streamDefinition.getName()))).thenReturn(info);
+
+		state = skipperStreamDeployer.streamsStates(Arrays.asList(streamDefinition));
+		assertThat(state).isNotNull();
+		assertThat(state.size()).isEqualTo(1);
+		assertThat(state.get(streamDefinition).equals(DeploymentState.unknown));
+
+	}
+
+	private Info createInfo(StatusCode statusCode) {
+		Info info = new Info();
+		Status status = new Status();
+		status.setStatusCode(statusCode);
+		status.setPlatformStatus(null);
+		info.setStatus(status);
+		return info;
 	}
 
 	@Test
