@@ -44,10 +44,13 @@ import org.springframework.cloud.skipper.client.SkipperClient;
 import org.springframework.cloud.skipper.domain.AboutResource;
 import org.springframework.cloud.skipper.domain.Dependency;
 import org.springframework.cloud.skipper.domain.Deployer;
+import org.springframework.cloud.skipper.domain.Info;
 import org.springframework.cloud.skipper.domain.InstallRequest;
 import org.springframework.cloud.skipper.domain.Package;
 import org.springframework.cloud.skipper.domain.PackageMetadata;
 import org.springframework.cloud.skipper.domain.Release;
+import org.springframework.cloud.skipper.domain.Status;
+import org.springframework.cloud.skipper.domain.StatusCode;
 import org.springframework.cloud.skipper.domain.UploadRequest;
 import org.springframework.cloud.skipper.domain.VersionInfo;
 import org.springframework.hateoas.Resources;
@@ -300,6 +303,36 @@ public class SkipperStreamDeployerTests {
 
 		assertThat(state).isNotNull();
 		assertThat(state.size()).isEqualTo(0);
+	}
+
+	@Test
+	public void testStateOfUndeployedStream() {
+
+		AppRegistryService appRegistryService = mock(AppRegistryService.class);
+		SkipperClient skipperClient = mock(SkipperClient.class);
+		StreamDefinitionRepository streamDefinitionRepository = mock(StreamDefinitionRepository.class);
+
+		SkipperStreamDeployer skipperStreamDeployer = new SkipperStreamDeployer(skipperClient,
+				streamDefinitionRepository, appRegistryService, mock(ForkJoinPool.class));
+
+		StreamDefinition streamDefinition = new StreamDefinition("foo", "foo|bar");
+
+		// Stream is defined
+		when(streamDefinitionRepository.findOne(streamDefinition.getName())).thenReturn(null);
+
+		// Stream is undeployed
+		Info info = new Info();
+		Status status = new Status();
+		status.setStatusCode(StatusCode.DELETED);
+		status.setPlatformStatus(null);
+		info.setStatus(status);
+		when(skipperClient.status(eq(streamDefinition.getName()))).thenReturn(info);
+
+		Map<StreamDefinition, DeploymentState> state = skipperStreamDeployer.streamsStates(Arrays.asList(streamDefinition));
+
+		assertThat(state).isNotNull();
+		assertThat(state.size()).isEqualTo(1);
+		assertThat(state.get(streamDefinition).equals(DeploymentState.undeployed));
 	}
 
 	@Test
