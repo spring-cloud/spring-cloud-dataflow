@@ -53,7 +53,7 @@ public class RdbmsTaskDefinitionRepository extends AbstractRdbmsKeyValueReposito
 					definition.getName()));
 		}
 		Object[] insertParameters = new Object[] { definition.getName(), definition.getDslText() };
-		jdbcTemplate.update(saveRow, insertParameters, new int[] { Types.VARCHAR, Types.CLOB });
+		jdbcTemplate.update(saveRow, insertParameters, new int[] { Types.VARCHAR, Types.LONGVARCHAR });
 		return definition;
 	}
 
