@@ -22,16 +22,27 @@ import org.springframework.cloud.dataflow.core.DataFlowPropertyKeys;
  * Configuration properties used in {@link DataFlowClientAutoConfiguration}
  *
  * @author Vinicius Carvalho
+ * @author David Turanski
  */
 @ConfigurationProperties(prefix = DataFlowPropertyKeys.PREFIX + "client")
 public class DataFlowClientProperties {
 
+	/**
+	 * The Data Flow server URI.
+	 */
 	private String serverUri = "http://localhost:9393";
 
 	private Authentication authentication = new Authentication();
 
+	/**
+	 * Skip Ssl validation.
+	 */
 	private boolean skipSslValidation = true;
 
+
+	/**
+	 * Enable Data Flow DSL access.
+	 */
 	private boolean enableDsl = false;
 
 	public boolean isEnableDsl() {
@@ -80,8 +91,14 @@ public class DataFlowClientProperties {
 
 		public static class Basic {
 
+			/**
+			 * The login username.
+			 */
 			private String username;
 
+			/**
+			 * The login password.
+			 */
 			private String password;
 
 			public String getUsername() {
