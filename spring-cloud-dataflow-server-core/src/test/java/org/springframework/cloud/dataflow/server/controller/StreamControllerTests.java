@@ -39,6 +39,7 @@ import org.springframework.cloud.dataflow.server.configuration.TestDependencies;
 import org.springframework.cloud.dataflow.server.repository.DeploymentIdRepository;
 import org.springframework.cloud.dataflow.server.repository.DeploymentKey;
 import org.springframework.cloud.dataflow.server.repository.StreamDefinitionRepository;
+import org.springframework.cloud.dataflow.server.stream.StreamDeployerUtil;
 import org.springframework.cloud.deployer.resource.maven.MavenResource;
 import org.springframework.cloud.deployer.spi.app.AppDeployer;
 import org.springframework.cloud.deployer.spi.app.AppInstanceStatus;
@@ -891,13 +892,13 @@ public class StreamControllerTests {
 
 	@Test
 	public void testAggregateState() {
-		assertThat(StreamDefinitionController.aggregateState(EnumSet.of(DeploymentState.deployed, DeploymentState.failed)), is(DeploymentState.partial));
-		assertThat(StreamDefinitionController.aggregateState(EnumSet.of(DeploymentState.unknown, DeploymentState.failed)), is(DeploymentState.failed));
-		assertThat(StreamDefinitionController.aggregateState(EnumSet.of(DeploymentState.deployed, DeploymentState.failed, DeploymentState.error)), is(DeploymentState.error));
-		assertThat(StreamDefinitionController.aggregateState(EnumSet.of(DeploymentState.deployed, DeploymentState.undeployed)), is(DeploymentState.partial));
-		assertThat(StreamDefinitionController.aggregateState(EnumSet.of(DeploymentState.deployed, DeploymentState.unknown)), is(DeploymentState.partial));
-		assertThat(StreamDefinitionController.aggregateState(EnumSet.of(DeploymentState.undeployed, DeploymentState.unknown)), is(DeploymentState.partial));
-		assertThat(StreamDefinitionController.aggregateState(EnumSet.of(DeploymentState.unknown)), is(DeploymentState.undeployed));
+		assertThat(StreamDeployerUtil.aggregateState(EnumSet.of(DeploymentState.deployed, DeploymentState.failed)), is(DeploymentState.partial));
+		assertThat(StreamDeployerUtil.aggregateState(EnumSet.of(DeploymentState.unknown, DeploymentState.failed)), is(DeploymentState.failed));
+		assertThat(StreamDeployerUtil.aggregateState(EnumSet.of(DeploymentState.deployed, DeploymentState.failed, DeploymentState.error)), is(DeploymentState.error));
+		assertThat(StreamDeployerUtil.aggregateState(EnumSet.of(DeploymentState.deployed, DeploymentState.undeployed)), is(DeploymentState.partial));
+		assertThat(StreamDeployerUtil.aggregateState(EnumSet.of(DeploymentState.deployed, DeploymentState.unknown)), is(DeploymentState.partial));
+		assertThat(StreamDeployerUtil.aggregateState(EnumSet.of(DeploymentState.undeployed, DeploymentState.unknown)), is(DeploymentState.partial));
+		assertThat(StreamDeployerUtil.aggregateState(EnumSet.of(DeploymentState.unknown)), is(DeploymentState.undeployed));
 	}
 
 	@Test
