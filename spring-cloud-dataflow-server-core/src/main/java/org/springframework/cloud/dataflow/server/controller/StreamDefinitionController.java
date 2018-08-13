@@ -19,7 +19,6 @@ package org.springframework.cloud.dataflow.server.controller;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -83,48 +82,6 @@ public class StreamDefinitionController {
 	public StreamDefinitionController(StreamService streamService) {
 		Assert.notNull(streamService, "StreamService must not be null");
 		this.streamService = streamService;
-	}
-
-	/**
-	 * Aggregate the set of app states into a single state for a stream.
-	 *
-	 * @param states set of states for apps of a stream
-	 * @return the stream state based on app states
-	 */
-	public static DeploymentState aggregateState(Set<DeploymentState> states) {
-		if (states.size() == 1) {
-			DeploymentState state = states.iterator().next();
-			logger.debug("aggregateState: Deployment State Set Size = 1.  Deployment State " + state);
-			// a stream which is known to the stream definition streamDefinitionRepository
-			// but unknown to deployers is undeployed
-			if (state == DeploymentState.unknown) {
-				logger.debug("aggregateState: Returning " + DeploymentState.undeployed);
-				return DeploymentState.undeployed;
-			}
-			else {
-				logger.debug("aggregateState: Returning " + state);
-				return state;
-			}
-		}
-		if (states.isEmpty() || states.contains(DeploymentState.error)) {
-			logger.debug("aggregateState: Returning " + DeploymentState.error);
-			return DeploymentState.error;
-		}
-		if (states.contains(DeploymentState.deployed) && states.contains(DeploymentState.failed)) {
-			logger.debug("aggregateState: Returning " + DeploymentState.partial);
-			return DeploymentState.partial;
-		}
-		if (states.contains(DeploymentState.failed)) {
-			logger.debug("aggregateState: Returning " + DeploymentState.failed);
-			return DeploymentState.failed;
-		}
-		if (states.contains(DeploymentState.deploying)) {
-			logger.debug("aggregateState: Returning " + DeploymentState.deploying);
-			return DeploymentState.deploying;
-		}
-
-		logger.debug("aggregateState: Returing " + DeploymentState.partial);
-		return DeploymentState.partial;
 	}
 
 	/**

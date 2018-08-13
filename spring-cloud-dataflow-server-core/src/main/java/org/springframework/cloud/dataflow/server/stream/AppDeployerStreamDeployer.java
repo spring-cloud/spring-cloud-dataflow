@@ -39,7 +39,6 @@ import org.springframework.cloud.dataflow.core.StreamAppDefinition;
 import org.springframework.cloud.dataflow.core.StreamDefinition;
 import org.springframework.cloud.dataflow.core.StreamDeployment;
 import org.springframework.cloud.dataflow.registry.support.ResourceUtils;
-import org.springframework.cloud.dataflow.server.controller.StreamDefinitionController;
 import org.springframework.cloud.dataflow.server.repository.DeploymentIdRepository;
 import org.springframework.cloud.dataflow.server.repository.DeploymentKey;
 import org.springframework.cloud.dataflow.server.repository.NoSuchStreamDefinitionException;
@@ -175,7 +174,7 @@ public class AppDeployerStreamDeployer implements StreamDeployer {
 				appStates.add(DeploymentState.undeployed);
 			}
 		}
-		return StreamDefinitionController.aggregateState(appStates);
+		return StreamDeployerUtil.aggregateState(appStates);
 	}
 
 	@Override
@@ -193,7 +192,7 @@ public class AppDeployerStreamDeployer implements StreamDeployer {
 		// Map from SCDF Stream to aggregate streamsStates
 		return deploymentIdsPerStream.entrySet().stream()
 				.map(kv -> new AbstractMap.SimpleImmutableEntry<>(kv.getKey(),
-						StreamDefinitionController.aggregateState(kv.getValue().stream()
+						StreamDeployerUtil.aggregateState(kv.getValue().stream()
 								.map(deploymentId -> statePerApp.getOrDefault(deploymentId, DeploymentState.unknown))
 								.collect(Collectors.toSet()))))
 				.collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));

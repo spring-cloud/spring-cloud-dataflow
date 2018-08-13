@@ -50,7 +50,6 @@ import org.springframework.cloud.dataflow.registry.service.AppRegistryService;
 import org.springframework.cloud.dataflow.registry.support.ResourceUtils;
 import org.springframework.cloud.dataflow.rest.SkipperStream;
 import org.springframework.cloud.dataflow.server.controller.NoSuchAppException;
-import org.springframework.cloud.dataflow.server.controller.StreamDefinitionController;
 import org.springframework.cloud.dataflow.server.repository.StreamDefinitionRepository;
 import org.springframework.cloud.deployer.spi.app.AppInstanceStatus;
 import org.springframework.cloud.deployer.spi.app.AppStatus;
@@ -170,7 +169,7 @@ public class SkipperStreamDeployer implements StreamDeployer {
 			List<AppStatus> appStatusList = deserializeAppStatus(info.getStatus().getPlatformStatus());
 			Set<DeploymentState> deploymentStateList = appStatusList.stream().map(appStatus -> appStatus.getState())
 					.collect(Collectors.toSet());
-			DeploymentState aggregateState = StreamDefinitionController.aggregateState(deploymentStateList);
+			DeploymentState aggregateState = StreamDeployerUtil.aggregateState(deploymentStateList);
 			state = aggregateState;
 		}
 		catch (ReleaseNotFoundException e) {
