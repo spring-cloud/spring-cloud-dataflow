@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 the original author or authors.
+ * Copyright 2017-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,6 +25,7 @@ import java.util.Map;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.MappingIterator;
+import com.fasterxml.jackson.databind.RuntimeJsonMappingException;
 import com.fasterxml.jackson.dataformat.yaml.YAMLMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -59,6 +60,11 @@ public class SpringCloudDeployerApplicationManifestReader implements SkipperMani
 				}
 			}
 			catch (JsonMappingException e) {
+				logger.error("Can't parse Package's manifest YAML = " + manifest);
+				throw new SkipperException("JsonMappingException - Can't parse Package's manifest YAML = " + manifest,
+						e);
+			}
+			catch (RuntimeJsonMappingException e) {
 				logger.error("Can't parse Package's manifest YAML = " + manifest);
 				throw new SkipperException("JsonMappingException - Can't parse Package's manifest YAML = " + manifest,
 						e);
