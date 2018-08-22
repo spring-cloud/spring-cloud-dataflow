@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 the original author or authors.
+ * Copyright 2017-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,18 +16,16 @@
 package org.springframework.cloud.common.security;
 
 import org.slf4j.LoggerFactory;
-
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.actuate.autoconfigure.ManagementServerProperties;
 import org.springframework.boot.autoconfigure.security.SecurityProperties;
 import org.springframework.boot.autoconfigure.security.SecurityProperties.User;
+import org.springframework.cloud.common.security.support.CoreSecurityRoles;
 import org.springframework.cloud.common.security.support.OnDefaultBootUserAuthenticationEnabled;
 import org.springframework.cloud.common.security.support.OnSecurityEnabledAndOAuth2Disabled;
 import org.springframework.context.annotation.Conditional;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.cloud.common.security.support.CoreSecurityRoles;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
-import org.springframework.security.config.annotation.authentication.configurers.GlobalAuthenticationConfigurerAdapter;
+import org.springframework.security.config.annotation.authentication.configuration.GlobalAuthenticationConfigurerAdapter;
 import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 import org.springframework.util.StringUtils;
 
@@ -50,9 +48,6 @@ public class DefaultBootUserAuthenticationConfiguration extends GlobalAuthentica
 	@Autowired
 	private SecurityProperties securityProperties;
 
-	@Autowired(required = false)
-	private ManagementServerProperties managementServerProperties;
-
 	/**
 	 * Initializes the {@link AuthenticationManagerBuilder}. Creates an
 	 * {@link InMemoryUserDetailsManager} with the provided
@@ -72,15 +67,9 @@ public class DefaultBootUserAuthenticationConfiguration extends GlobalAuthentica
 
 		final boolean hasDefaultRoles;
 
-		if (this.managementServerProperties != null
-				&& this.managementServerProperties.getSecurity().getRoles().size() == 1
-				&& "MANAGE".equals(this.managementServerProperties.getSecurity().getRoles().get(0))) {
-			defaultSpringBootUser.getRole().add("MANAGE");
-		}
-
 		if (defaultSpringBootUser.getName().equals(user.getName())
-				&& user.getRole().size() == defaultSpringBootUser.getRole().size()
-				&& defaultSpringBootUser.getRole().equals(user.getRole())) {
+				&& user.getRoles().size() == defaultSpringBootUser.getRoles().size()
+				&& defaultSpringBootUser.getRoles().equals(user.getRoles())) {
 			hasDefaultRoles = true;
 		}
 		else {
@@ -91,11 +80,11 @@ public class DefaultBootUserAuthenticationConfiguration extends GlobalAuthentica
 			rolesToPopulate = CoreSecurityRoles.getAllRolesAsStringArray();
 		}
 		else {
-			rolesToPopulate = user.getRole().toArray(new String[user.getRole().size()]);
+			rolesToPopulate = user.getRoles().toArray(new String[user.getRoles().size()]);
 		}
 
-		if (user.isDefaultPassword()) {
-			logger.info(String.format("%n%nUsing default security password: %s with roles '%s'%n", user.getPassword(),
+		if (user.isPasswordGenerated()) {
+			logger.info(String.format("%n%nUsing generated security password: %s with roles '%s'%n", user.getPassword(),
 					StringUtils.arrayToCommaDelimitedString(rolesToPopulate)));
 		}
 

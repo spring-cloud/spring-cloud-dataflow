@@ -39,6 +39,8 @@ public class SecurityConfigUtils {
 
 	public static final Pattern AUTHORIZATION_RULE;
 
+	public static final String BASIC_AUTH_REALM_NAME = "Spring";
+
 	static {
 		String methodsRegex = StringUtils.arrayToDelimitedString(HttpMethod.values(), "|");
 		AUTHORIZATION_RULE = Pattern.compile("(" + methodsRegex + ")\\s+(.+)\\s+=>\\s+(.+)");

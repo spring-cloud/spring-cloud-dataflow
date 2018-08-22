@@ -109,7 +109,7 @@ public class OAuthSecurityConfiguration extends WebSecurityConfigurerAdapter {
 				new BrowserDetectingContentNegotiationStrategy(),
 				MediaType.TEXT_HTML);
 		final BasicAuthenticationEntryPoint basicAuthenticationEntryPoint = new BasicAuthenticationEntryPoint();
-		basicAuthenticationEntryPoint.setRealmName(securityProperties.getBasic().getRealm());
+		basicAuthenticationEntryPoint.setRealmName(SecurityConfigUtils.BASIC_AUTH_REALM_NAME);
 		basicAuthenticationEntryPoint.afterPropertiesSet();
 		final Filter oauthFilter = oauthFilter();
 		BasicAuthenticationFilter basicAuthenticationFilter = new BasicAuthenticationFilter(

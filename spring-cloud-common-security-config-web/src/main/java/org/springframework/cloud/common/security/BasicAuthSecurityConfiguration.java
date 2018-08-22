@@ -1,5 +1,5 @@
 /*
- * Copyright 2016-2017 the original author or authors.
+ * Copyright 2016-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 package org.springframework.cloud.common.security;
+
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.security.SecurityProperties;
@@ -36,10 +38,10 @@ import org.springframework.security.web.authentication.www.BasicAuthenticationEn
 import org.springframework.security.web.util.matcher.AnyRequestMatcher;
 import org.springframework.security.web.util.matcher.MediaTypeRequestMatcher;
 import org.springframework.security.web.util.matcher.RequestMatcher;
-import org.springframework.session.ExpiringSession;
 import org.springframework.session.MapSessionRepository;
+import org.springframework.session.Session;
 import org.springframework.session.SessionRepository;
-import org.springframework.session.web.http.HeaderHttpSessionStrategy;
+import org.springframework.session.web.http.HeaderHttpSessionIdResolver;
 import org.springframework.session.web.http.SessionRepositoryFilter;
 import org.springframework.web.accept.ContentNegotiationStrategy;
 
@@ -64,17 +66,14 @@ public class BasicAuthSecurityConfiguration extends WebSecurityConfigurerAdapter
 	private ContentNegotiationStrategy contentNegotiationStrategy;
 
 	@Autowired
-	private SecurityProperties securityProperties;
-
-	@Autowired
 	private AuthorizationProperties authorizationProperties;
 
 	@Autowired
 	private SecurityStateBean securityStateBean;
 
 	@Bean
-	public SessionRepository<ExpiringSession> sessionRepository() {
-		return new MapSessionRepository();
+	public SessionRepository<? extends Session> sessionRepository() {
+		return new MapSessionRepository(new ConcurrentHashMap<>());
 	}
 
 	@Override
@@ -82,7 +81,7 @@ public class BasicAuthSecurityConfiguration extends WebSecurityConfigurerAdapter
 		final RequestMatcher textHtmlMatcher = new MediaTypeRequestMatcher(contentNegotiationStrategy,
 				MediaType.TEXT_HTML);
 		final BasicAuthenticationEntryPoint basicAuthenticationEntryPoint = new BasicAuthenticationEntryPoint();
-		basicAuthenticationEntryPoint.setRealmName(securityProperties.getBasic().getRealm());
+		basicAuthenticationEntryPoint.setRealmName(SecurityConfigUtils.BASIC_AUTH_REALM_NAME);
 		basicAuthenticationEntryPoint.afterPropertiesSet();
 		this.authorizationProperties.getAuthenticatedPaths().add("/");
 		this.authorizationProperties.getPermitAllPaths().add(this.authorizationProperties.getDashboardUrl());
@@ -111,9 +110,9 @@ public class BasicAuthSecurityConfiguration extends WebSecurityConfigurerAdapter
 		else {
 			security.anyRequest().authenticated();
 		}
-		final SessionRepositoryFilter<ExpiringSession> sessionRepositoryFilter = new SessionRepositoryFilter<ExpiringSession>(
+		final SessionRepositoryFilter sessionRepositoryFilter = new SessionRepositoryFilter(
 				sessionRepository());
-		sessionRepositoryFilter.setHttpSessionStrategy(new HeaderHttpSessionStrategy());
+		sessionRepositoryFilter.setHttpSessionIdResolver(HeaderHttpSessionIdResolver.xAuthToken());
 
 		http.addFilterBefore(sessionRepositoryFilter, ChannelProcessingFilter.class).csrf().disable();
 		http.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED);
