@@ -33,13 +33,16 @@ import org.springframework.cloud.dataflow.registry.AppRegistry;
 import org.springframework.cloud.dataflow.registry.AppRegistryCommon;
 import org.springframework.cloud.dataflow.registry.domain.AppRegistration;
 import org.springframework.cloud.dataflow.rest.util.DeploymentPropertiesUtils;
+import org.springframework.cloud.dataflow.server.DockerValidatorProperties;
 import org.springframework.cloud.dataflow.server.config.apps.CommonApplicationProperties;
 import org.springframework.cloud.dataflow.server.controller.WhitelistProperties;
 import org.springframework.cloud.dataflow.server.repository.DeploymentIdRepository;
 import org.springframework.cloud.dataflow.server.repository.DeploymentKey;
 import org.springframework.cloud.dataflow.server.repository.NoSuchTaskDefinitionException;
 import org.springframework.cloud.dataflow.server.repository.TaskDefinitionRepository;
+import org.springframework.cloud.dataflow.server.service.DefinitionAppValidationStatus;
 import org.springframework.cloud.dataflow.server.service.TaskService;
+import org.springframework.cloud.dataflow.server.service.impl.validation.AppValidationUtils;
 import org.springframework.cloud.dataflow.server.support.ApplicationDoesNotExistException;
 import org.springframework.cloud.deployer.spi.core.AppDefinition;
 import org.springframework.cloud.deployer.spi.core.AppDeploymentRequest;
@@ -110,6 +113,8 @@ public class DefaultTaskService implements TaskService {
 
 	private final CommonApplicationProperties commonApplicationProperties;
 
+	private final DockerValidatorProperties dockerValidatorProperties;
+
 	/**
 	 * Initializes the {@link DefaultTaskService}.
 	 *
@@ -133,7 +138,8 @@ public class DefaultTaskService implements TaskService {
 			TaskRepository taskExecutionRepository, AppRegistryCommon registry, ResourceLoader resourceLoader,
 			TaskLauncher taskLauncher, ApplicationConfigurationMetadataResolver metaDataResolver,
 			TaskConfigurationProperties taskConfigurationProperties, DeploymentIdRepository deploymentIdRepository,
-			String dataflowServerUri, CommonApplicationProperties commonApplicationProperties) {
+			String dataflowServerUri, CommonApplicationProperties commonApplicationProperties,
+			DockerValidatorProperties dockerValidatorProperties) {
 		Assert.notNull(dataSourceProperties, "DataSourceProperties must not be null");
 		Assert.notNull(taskDefinitionRepository, "TaskDefinitionRepository must not be null");
 		Assert.notNull(taskExecutionRepository, "TaskExecutionRepository must not be null");
@@ -145,6 +151,7 @@ public class DefaultTaskService implements TaskService {
 		Assert.notNull(taskConfigurationProperties, "taskConfigurationProperties must not be null");
 		Assert.notNull(deploymentIdRepository, "deploymentIdRepository must not be null");
 		Assert.notNull(commonApplicationProperties, "commonApplicationProperties must not be null");
+		Assert.notNull(dockerValidatorProperties, "DockerValidatorProperties must not be null");
 		this.dataSourceProperties = dataSourceProperties;
 		this.taskDefinitionRepository = taskDefinitionRepository;
 		this.taskExecutionRepository = taskExecutionRepository;
@@ -157,6 +164,7 @@ public class DefaultTaskService implements TaskService {
 		this.deploymentIdRepository = deploymentIdRepository;
 		this.dataflowServerUri = dataflowServerUri;
 		this.commonApplicationProperties = commonApplicationProperties;
+		this.dockerValidatorProperties = dockerValidatorProperties;
 	}
 
 	@Override
@@ -240,6 +248,48 @@ public class DefaultTaskService implements TaskService {
 	@Override
 	public long getMaximumConcurrentTasks() {
 		return taskConfigurationProperties.getMaximumConcurrentTasks();
+	}
+
+	@Override
+	public DefinitionAppValidationStatus validateTask(String name) {
+		TaskDefinition definition = getTaskDefinition(name);
+		DefinitionAppValidationStatus definitionAppValidationStatus =
+				new DefinitionAppValidationStatus(definition.getName(),
+						definition.getDslText());
+		ApplicationType appType = ApplicationType.task;
+		if (isComposedDefinition(definition.getDslText())) {
+			// First verify that CTR is valid
+			if(AppValidationUtils.validateApp(dockerValidatorProperties, registry, taskConfigurationProperties.getComposedTaskRunnerName(), ApplicationType.task)) {
+				TaskParser taskParser = new TaskParser(name, definition.getDslText(), true, true);
+				TaskNode taskNode = taskParser.parse();
+				String childTaskPrefix = TaskNode.getTaskPrefix(name);
+				taskNode.getTaskApps().stream().forEach(task -> {
+					TaskDefinition childDefinition = getTaskDefinition(childTaskPrefix + task.getName());
+					boolean status = AppValidationUtils.validateApp(dockerValidatorProperties, registry, childDefinition.getRegisteredAppName(), ApplicationType.task);
+					definitionAppValidationStatus.getAppsStatuses().put(String.format("%s:%s", appType.name(), childDefinition.getName()),
+							(status) ? NodeStatus.valid.name() : NodeStatus.invalid.name());
+				});
+			}
+			else {
+				definitionAppValidationStatus.getAppsStatuses().put(
+						String.format("%s:%s", appType.name(),
+								taskConfigurationProperties.getComposedTaskRunnerName()),
+						NodeStatus.invalid.name());
+			}
+		}
+		else {
+			boolean status = AppValidationUtils.validateApp(dockerValidatorProperties, registry, definition.getRegisteredAppName(), ApplicationType.task);
+			definitionAppValidationStatus.getAppsStatuses().put(String.format("%s:%s", appType.name(), definition.getName()),
+					(status) ? NodeStatus.valid.name() : NodeStatus.invalid.name());
+		}
+		return definitionAppValidationStatus;
+	}
+	private TaskDefinition getTaskDefinition (String name){
+		TaskDefinition definition = taskDefinitionRepository.findOne(name);
+		if (definition == null) {
+			throw new NoSuchTaskDefinitionException(name);
+		}
+		return definition;
 	}
 
 	@Override

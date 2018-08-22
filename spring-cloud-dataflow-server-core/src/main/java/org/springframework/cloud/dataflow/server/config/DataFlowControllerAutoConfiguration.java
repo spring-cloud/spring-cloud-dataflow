@@ -64,6 +64,8 @@ import org.springframework.cloud.dataflow.server.ConditionalOnSkipperEnabled;
 import org.springframework.cloud.dataflow.server.audit.repository.AuditRecordRepository;
 import org.springframework.cloud.dataflow.server.audit.service.AuditRecordService;
 import org.springframework.cloud.dataflow.server.audit.service.DefaultAuditRecordService;
+import org.springframework.cloud.dataflow.server.DockerValidatorProperties;
+import org.springframework.cloud.dataflow.server.TaskValidationController;
 import org.springframework.cloud.dataflow.server.config.apps.CommonApplicationProperties;
 import org.springframework.cloud.dataflow.server.config.features.FeaturesProperties;
 import org.springframework.cloud.dataflow.server.controller.AboutController;
@@ -82,6 +84,7 @@ import org.springframework.cloud.dataflow.server.controller.SkipperAppRegistryCo
 import org.springframework.cloud.dataflow.server.controller.SkipperStreamDeploymentController;
 import org.springframework.cloud.dataflow.server.controller.StreamDefinitionController;
 import org.springframework.cloud.dataflow.server.controller.StreamDeploymentController;
+import org.springframework.cloud.dataflow.server.controller.StreamValidationController;
 import org.springframework.cloud.dataflow.server.controller.TaskDefinitionController;
 import org.springframework.cloud.dataflow.server.controller.TaskExecutionController;
 import org.springframework.cloud.dataflow.server.controller.TaskSchedulerController;
@@ -145,7 +148,7 @@ import org.springframework.web.client.RestTemplate;
 @Configuration
 @Import(CompletionConfiguration.class)
 @ConditionalOnBean({ EnableDataFlowServerConfiguration.Marker.class, TaskLauncher.class })
-@EnableConfigurationProperties({ FeaturesProperties.class, VersionInfoProperties.class, MetricsProperties.class })
+@EnableConfigurationProperties({ FeaturesProperties.class, VersionInfoProperties.class, MetricsProperties.class, DockerValidatorProperties.class})
 @ConditionalOnProperty(prefix = "dataflow.server", name = "enabled", havingValue = "true", matchIfMissing = true)
 @EnableCircuitBreaker
 @EntityScan({
@@ -189,6 +192,19 @@ public class DataFlowControllerAutoConfiguration {
 	public StreamDefinitionController streamDefinitionController(StreamDefinitionRepository repository,
 			StreamService streamService) {
 		return new StreamDefinitionController(streamService);
+	}
+
+	@Bean
+	@ConditionalOnBean(StreamDefinitionRepository.class)
+	public StreamValidationController streamValidationController(StreamService streamService) {
+		return new StreamValidationController(streamService);
+	}
+
+
+	@Bean
+	@ConditionalOnBean(TaskDefinitionRepository.class)
+	public TaskValidationController taskValidationController(TaskService taskService) {
+		return new TaskValidationController(taskService);
 	}
 
 	@Bean
@@ -420,9 +436,9 @@ public class DataFlowControllerAutoConfiguration {
 				StreamDefinitionRepository streamDefinitionRepository,
 				SkipperStreamDeployer skipperStreamDeployer, AppDeploymentRequestCreator appDeploymentRequestCreator,
 				AppRegistryCommon appRegistry,
-				AuditRecordService auditRecordService) {
+				AuditRecordService auditRecordService, DockerValidatorProperties dockerValidatorProperties) {
 			return new DefaultSkipperStreamService(streamDefinitionRepository, skipperStreamDeployer,
-					appDeploymentRequestCreator, appRegistry, auditRecordService);
+					appDeploymentRequestCreator, appRegistry, auditRecordService, dockerValidatorProperties);
 		}
 
 		@Bean
@@ -461,9 +477,10 @@ public class DataFlowControllerAutoConfiguration {
 		public StreamService simpleStreamDeploymentService(StreamDefinitionRepository streamDefinitionRepository,
 				AppDeployerStreamDeployer appDeployerStreamDeployer,
 				AppDeploymentRequestCreator appDeploymentRequestCreator, AppRegistryCommon appRegistry,
-				AuditRecordService auditRecordService) {
+				AuditRecordService auditRecordService, DockerValidatorProperties dockerValidatorProperties) {
 			return new AppDeployerStreamService(streamDefinitionRepository,
-					appDeployerStreamDeployer, appDeploymentRequestCreator, appRegistry, auditRecordService);
+					appDeployerStreamDeployer, appDeploymentRequestCreator, appRegistry,
+					auditRecordService, dockerValidatorProperties);
 		}
 
 		@Bean

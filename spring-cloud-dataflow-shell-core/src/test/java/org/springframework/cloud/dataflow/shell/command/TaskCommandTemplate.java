@@ -91,6 +91,13 @@ public class TaskCommandTemplate {
 	}
 
 	/**
+	 * Validates the task definition.
+	 */
+	public CommandResult taskValidate(String taskDefinitionName) {
+		return shell.executeCommand("task validate " + taskDefinitionName);
+	}
+
+	/**
 	 * Lists task executions by given name.
 	 */
 	public CommandResult taskExecutionListByName(String name) {

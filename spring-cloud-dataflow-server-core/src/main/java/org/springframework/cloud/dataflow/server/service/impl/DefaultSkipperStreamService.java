@@ -36,6 +36,7 @@ import org.springframework.cloud.dataflow.registry.AppRegistryCommon;
 import org.springframework.cloud.dataflow.rest.SkipperStream;
 import org.springframework.cloud.dataflow.rest.UpdateStreamRequest;
 import org.springframework.cloud.dataflow.rest.util.DeploymentPropertiesUtils;
+import org.springframework.cloud.dataflow.server.DockerValidatorProperties;
 import org.springframework.cloud.dataflow.server.audit.domain.AuditActionType;
 import org.springframework.cloud.dataflow.server.audit.domain.AuditOperationType;
 import org.springframework.cloud.dataflow.server.audit.service.AuditRecordService;
@@ -86,9 +87,10 @@ public class DefaultSkipperStreamService extends AbstractStreamService implement
 			SkipperStreamDeployer skipperStreamDeployer,
 			AppDeploymentRequestCreator appDeploymentRequestCreator,
 			AppRegistryCommon appRegistry,
-			AuditRecordService auditRecordService) {
+			AuditRecordService auditRecordService,
+			DockerValidatorProperties dockerValidatorProperties) {
 
-		super(streamDefinitionRepository, appRegistry, auditRecordService);
+		super(streamDefinitionRepository, appRegistry, auditRecordService, dockerValidatorProperties);
 
 		Assert.notNull(skipperStreamDeployer, "SkipperStreamDeployer must not be null");
 		Assert.notNull(appDeploymentRequestCreator, "AppDeploymentRequestCreator must not be null");

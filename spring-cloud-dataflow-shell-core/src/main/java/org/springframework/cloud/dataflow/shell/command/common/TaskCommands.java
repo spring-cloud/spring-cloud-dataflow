@@ -26,6 +26,7 @@ import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.dataflow.rest.client.TaskOperations;
 import org.springframework.cloud.dataflow.rest.resource.CurrentTaskExecutionsResource;
+import org.springframework.cloud.dataflow.rest.resource.TaskAppStatusResource;
 import org.springframework.cloud.dataflow.rest.resource.TaskDefinitionResource;
 import org.springframework.cloud.dataflow.rest.resource.TaskExecutionResource;
 import org.springframework.cloud.dataflow.rest.util.DeploymentPropertiesUtils;
@@ -65,6 +66,8 @@ public class TaskCommands implements CommandMarker {
 
 	private static final String DESTROY = "task destroy";
 
+	private static final String VALIDATE = "task validate";
+
 	private static final String TASK_EXECUTION_STATUS = "task execution status";
 
 	private static final String TASK_EXECUTION_CURRENT = "task execution current";
@@ -87,7 +90,7 @@ public class TaskCommands implements CommandMarker {
 		return dataFlowShell.hasAccess(RoleType.VIEW, OpsType.TASK);
 	}
 
-	@CliAvailabilityIndicator({ CREATE, LAUNCH, TASK_EXECUTION_CLEANUP, DESTROY })
+	@CliAvailabilityIndicator({ CREATE, LAUNCH, TASK_EXECUTION_CLEANUP, DESTROY, VALIDATE })
 	public boolean availableWithCreateRole() {
 		return dataFlowShell.hasAccess(RoleType.CREATE, OpsType.TASK);
 	}
@@ -101,6 +104,39 @@ public class TaskCommands implements CommandMarker {
 		headers.put("status", "Task Status");
 		final TableBuilder builder = new TableBuilder(new BeanListTableModel<>(tasks, headers));
 		return DataFlowTables.applyStyle(builder).build();
+	}
+
+	@CliCommand(value = VALIDATE, help = "Validate apps contained in task definitions")
+	public List<Object> validate(@CliOption(key = { "", "name" }, help = "the task definition name", mandatory = true) String name) {
+		final TaskAppStatusResource task = taskOperations().validateTaskDefinition(name);
+		List<Object> result = new ArrayList<>();
+		TableModelBuilder<Object> modelBuilder = new TableModelBuilder<>();
+		modelBuilder.addRow().addValue("Task Name").addValue("Task Definition");
+		modelBuilder.addRow().addValue(task.getAppName())
+				.addValue(task.getDsl());
+		TableBuilder builder = DataFlowTables.applyStyle(new TableBuilder(modelBuilder.build()));
+		result.add(builder.build());
+
+		modelBuilder = new TableModelBuilder<>();
+		modelBuilder.addRow().addValue("App Name").addValue("Validation Status");
+		boolean isValidStream = true;
+		for(Map.Entry<String,String> entry : task.getAppStatuses().entrySet()) {
+			modelBuilder.addRow().addValue(entry.getKey())
+					.addValue(entry.getValue());
+			if (entry.getValue().equals("invalid")) {
+				isValidStream = false;
+			}
+		}
+		builder = DataFlowTables.applyStyle(new TableBuilder(modelBuilder.build()));
+
+		if(isValidStream) {
+			result.add(String.format("\n%s is a valid task.", task.getAppName()));
+		}
+		else {
+			result.add(String.format("\n%s is an invalid task.", task.getAppName()));
+		}
+		result.add(builder.build());
+		return result;
 	}
 
 	@CliCommand(value = CREATE, help = "Create a new task definition")

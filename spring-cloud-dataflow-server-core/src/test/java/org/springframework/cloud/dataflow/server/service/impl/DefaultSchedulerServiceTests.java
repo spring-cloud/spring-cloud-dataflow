@@ -37,6 +37,7 @@ import org.springframework.cloud.dataflow.core.ApplicationType;
 import org.springframework.cloud.dataflow.core.TaskDefinition;
 import org.springframework.cloud.dataflow.registry.AppRegistry;
 import org.springframework.cloud.dataflow.registry.domain.AppRegistration;
+import org.springframework.cloud.dataflow.server.DockerValidatorProperties;
 import org.springframework.cloud.dataflow.server.config.apps.CommonApplicationProperties;
 import org.springframework.cloud.dataflow.server.configuration.TaskServiceDependencies;
 import org.springframework.cloud.dataflow.server.repository.TaskDefinitionRepository;
@@ -62,7 +63,7 @@ import static org.mockito.Mockito.when;
 		PropertyPlaceholderAutoConfiguration.class }, properties = {
 		"spring.cloud.dataflow.applicationProperties.task.globalkey=globalvalue",
 		"spring.cloud.dataflow.applicationProperties.stream.globalstreamkey=nothere" })
-@EnableConfigurationProperties({ CommonApplicationProperties.class, TaskConfigurationProperties.class })
+@EnableConfigurationProperties({ CommonApplicationProperties.class, TaskConfigurationProperties.class, DockerValidatorProperties.class})
 public class DefaultSchedulerServiceTests {
 
 	private static final String DATA_FLOW_SCHEDULER_PREFIX = "scheduler.";

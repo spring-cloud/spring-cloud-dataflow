@@ -20,6 +20,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.springframework.cloud.dataflow.rest.resource.CurrentTaskExecutionsResource;
+import org.springframework.cloud.dataflow.rest.resource.TaskAppStatusResource;
 import org.springframework.cloud.dataflow.rest.resource.TaskDefinitionResource;
 import org.springframework.cloud.dataflow.rest.resource.TaskExecutionResource;
 import org.springframework.hateoas.PagedResources;
@@ -98,4 +99,11 @@ public interface TaskOperations {
 	 * @param id identifier of the task execution
 	 */
 	void cleanup(long id);
+
+	/**
+	 * Return the validation status for the tasks in an definition.
+	 * @param taskDefinitionName The name of the task definition to be validated.
+	 * @return {@link TaskAppStatusResource} containing the task app statuses.
+	 */
+	TaskAppStatusResource validateTaskDefinition(String taskDefinitionName);
 }
