@@ -96,6 +96,7 @@ public class ApiDocumentation extends BaseDocumentation {
 				linkWithRel("tasks/definitions").description("Provides the task definition resource"),
 				linkWithRel("tasks/definitions/definition")
 						.description("Provides details for a " + "specific task definition"),
+				linkWithRel("tasks/validation").description("Provides the validation for a task definition"),
 				linkWithRel("tasks/executions")
 						.description("Returns Task executions and allows launching of tasks"),
 				linkWithRel("tasks/executions/current")
@@ -110,6 +111,7 @@ public class ApiDocumentation extends BaseDocumentation {
 						.description("Provides details for a " + "specific task execution"),
 				linkWithRel("streams/definitions").description("Exposes the Streams resource"),
 				linkWithRel("streams/definitions/definition").description("Handle a specific Stream " + "definition"),
+				linkWithRel("streams/validation").description("Provides the validation for a stream definition"),
 				linkWithRel("streams/deployments").description("Provides Stream deployment operations"),
 				linkWithRel("streams/deployments/deployment")
 						.description("Request (un-)deployment of" + " an existing stream definition"),

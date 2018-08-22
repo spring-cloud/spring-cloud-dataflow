@@ -34,6 +34,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.cloud.dataflow.core.ApplicationType;
 import org.springframework.cloud.dataflow.core.TaskDefinition;
 import org.springframework.cloud.dataflow.registry.AppRegistry;
+import org.springframework.cloud.dataflow.server.TaskValidationController;
 import org.springframework.cloud.dataflow.server.configuration.TestDependencies;
 import org.springframework.cloud.dataflow.server.repository.InMemoryTaskDefinitionRepository;
 import org.springframework.cloud.dataflow.server.repository.TaskDefinitionRepository;
@@ -104,6 +105,9 @@ public class TaskControllerTests {
 
 	@Autowired
 	private AppRegistry appRegistry;
+
+	@Autowired
+	private TaskValidationController taskValidationController;
 
 	@Before
 	public void setupMockMVC() {
@@ -371,5 +375,15 @@ public class TaskControllerTests {
 				.andExpect(jsonPath("$.content[*].name", containsInAnyOrder("myTask", "myTask2", "myTask3")))
 				.andExpect(jsonPath("$.content[*].dslText", containsInAnyOrder("timestamp", "timestamp", "timestamp")))
 				.andExpect(jsonPath("$.content[*].status", containsInAnyOrder("RUNNING", "COMPLETE", "UNKNOWN")));
+	}
+
+	@Test
+	public void testValidate() throws Exception {
+		repository.save(new TaskDefinition("myTask", "foo"));
+		this.registry.register("task.foo", new URI("file:src/test/resources/apps/foo-task"));
+
+		mockMvc.perform(get("/tasks/validation/myTask")).andExpect(status().isOk())
+				.andDo(print()).andExpect(content().json("{\"appName\":\"myTask\",\"appStatuses\":{\"task:myTask\":\"valid\"},\"dsl\":\"foo\",\"links\":[]}"));
+
 	}
 }

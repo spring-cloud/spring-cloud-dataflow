@@ -46,6 +46,8 @@ import org.springframework.cloud.dataflow.registry.service.AppRegistryService;
 import org.springframework.cloud.dataflow.registry.service.DefaultAppRegistryService;
 import org.springframework.cloud.dataflow.server.ConditionalOnSkipperDisabled;
 import org.springframework.cloud.dataflow.server.ConditionalOnSkipperEnabled;
+import org.springframework.cloud.dataflow.server.DockerValidatorProperties;
+import org.springframework.cloud.dataflow.server.TaskValidationController;
 import org.springframework.cloud.dataflow.server.audit.repository.AuditRecordRepository;
 import org.springframework.cloud.dataflow.server.audit.service.AuditRecordService;
 import org.springframework.cloud.dataflow.server.audit.service.DefaultAuditRecordService;
@@ -64,6 +66,7 @@ import org.springframework.cloud.dataflow.server.controller.SkipperAppRegistryCo
 import org.springframework.cloud.dataflow.server.controller.SkipperStreamDeploymentController;
 import org.springframework.cloud.dataflow.server.controller.StreamDefinitionController;
 import org.springframework.cloud.dataflow.server.controller.StreamDeploymentController;
+import org.springframework.cloud.dataflow.server.controller.StreamValidationController;
 import org.springframework.cloud.dataflow.server.controller.TaskDefinitionController;
 import org.springframework.cloud.dataflow.server.controller.TaskExecutionController;
 import org.springframework.cloud.dataflow.server.controller.TaskSchedulerController;
@@ -145,7 +148,8 @@ import static org.mockito.Mockito.when;
 @EnableWebMvc
 @EnableConfigurationProperties({ CommonApplicationProperties.class,
 		MetricsProperties.class,
-		VersionInfoProperties.class })
+		VersionInfoProperties.class,
+		DockerValidatorProperties.class})
 @EntityScan({
 	"org.springframework.cloud.dataflow.registry.domain",
 	"org.springframework.cloud.dataflow.server.audit.domain"
@@ -210,9 +214,10 @@ public class TestDependencies extends WebMvcConfigurationSupport {
 	@ConditionalOnSkipperEnabled
 	public SkipperStreamService skipperStreamService(StreamDefinitionRepository streamDefinitionRepository,
 			SkipperStreamDeployer skipperStreamDeployer, AppDeploymentRequestCreator appDeploymentRequestCreator,
-			AppRegistryCommon appRegistry, AuditRecordService auditRecordService) {
+			AppRegistryCommon appRegistry, AuditRecordService auditRecordService,
+			DockerValidatorProperties dockerValidatorProperties) {
 		return new DefaultSkipperStreamService(streamDefinitionRepository, skipperStreamDeployer,
-				appDeploymentRequestCreator, appRegistry, auditRecordService);
+				appDeploymentRequestCreator, appRegistry, auditRecordService, dockerValidatorProperties);
 	}
 
 	@Bean
@@ -220,9 +225,9 @@ public class TestDependencies extends WebMvcConfigurationSupport {
 	public StreamService simpleStreamService(StreamDefinitionRepository streamDefinitionRepository,
 			AppDeployerStreamDeployer appDeployerStreamDeployer,
 			AppDeploymentRequestCreator appDeploymentRequestCreator, AppRegistryCommon appRegistry,
-			AuditRecordService auditRecordService) {
+			AuditRecordService auditRecordService, DockerValidatorProperties dockerValidatorProperties) {
 		return new AppDeployerStreamService(streamDefinitionRepository, appDeployerStreamDeployer,
-				appDeploymentRequestCreator, appRegistry, auditRecordService);
+				appDeploymentRequestCreator, appRegistry, auditRecordService, dockerValidatorProperties);
 	}
 
 	@Bean
@@ -263,6 +268,12 @@ public class TestDependencies extends WebMvcConfigurationSupport {
 			StreamService streamService) {
 		return new StreamDefinitionController(streamService);
 	}
+
+	@Bean
+	public StreamValidationController streamValidationController(StreamService streamService) {
+		return new StreamValidationController(streamService);
+	}
+
 
 	@Bean
 	public MethodValidationPostProcessor methodValidationPostProcessor() {
@@ -369,18 +380,24 @@ public class TestDependencies extends WebMvcConfigurationSupport {
 	public TaskDefinitionController taskDefinitionController(TaskExplorer explorer, TaskDefinitionRepository repository,
 			DeploymentIdRepository deploymentIdRepository, ApplicationConfigurationMetadataResolver metadataResolver,
 			AppRegistryCommon appRegistry, DelegatingResourceLoader delegatingResourceLoader,
-			CommonApplicationProperties commonApplicationProperties) {
+			CommonApplicationProperties commonApplicationProperties,
+			DockerValidatorProperties dockerValidatorProperties) {
 		return new TaskDefinitionController(explorer, repository,
-				taskService(metadataResolver, taskRepository(), deploymentIdRepository, appRegistry, delegatingResourceLoader, commonApplicationProperties));
+				taskService(metadataResolver, taskRepository(), deploymentIdRepository,
+						appRegistry, delegatingResourceLoader, commonApplicationProperties,
+						dockerValidatorProperties));
 	}
 
 	@Bean
 	public TaskExecutionController taskExecutionController(TaskExplorer explorer,
 			ApplicationConfigurationMetadataResolver metadataResolver, DeploymentIdRepository deploymentIdRepository,
 			AppRegistryCommon appRegistry, DelegatingResourceLoader delegatingResourceLoader,
-			CommonApplicationProperties commonApplicationProperties) {
+			CommonApplicationProperties commonApplicationProperties,
+			DockerValidatorProperties dockerValidatorProperties) {
 		return new TaskExecutionController(explorer,
-				taskService(metadataResolver, taskRepository(), deploymentIdRepository, appRegistry, delegatingResourceLoader, commonApplicationProperties),
+				taskService(metadataResolver, taskRepository(), deploymentIdRepository,
+						appRegistry, delegatingResourceLoader, commonApplicationProperties,
+						dockerValidatorProperties),
 				taskDefinitionRepository());
 	}
 
@@ -388,6 +405,11 @@ public class TestDependencies extends WebMvcConfigurationSupport {
 	public TaskSchedulerController taskSchedulerController(
 			SchedulerService schedulerService) {
 		return new TaskSchedulerController(schedulerService);
+	}
+
+	@Bean
+	public TaskValidationController taskValidationController(TaskService taskService) {
+		return new TaskValidationController(taskService);
 	}
 
 	@Bean
@@ -438,10 +460,12 @@ public class TestDependencies extends WebMvcConfigurationSupport {
 	public TaskService taskService(ApplicationConfigurationMetadataResolver metadataResolver,
 			TaskRepository taskExecutionRepository, DeploymentIdRepository deploymentIdRepository,
 			AppRegistryCommon appRegistry, DelegatingResourceLoader delegatingResourceLoader,
-			CommonApplicationProperties commonApplicationProperties) {
+			CommonApplicationProperties commonApplicationProperties,
+			DockerValidatorProperties dockerValidatorProperties) {
 		return new DefaultTaskService(new DataSourceProperties(), taskDefinitionRepository(), taskExplorer(),
 				taskExecutionRepository, appRegistry, delegatingResourceLoader, taskLauncher(), metadataResolver,
-				new TaskConfigurationProperties(), deploymentIdRepository, null, commonApplicationProperties);
+				new TaskConfigurationProperties(), deploymentIdRepository, null,
+				commonApplicationProperties, dockerValidatorProperties);
 	}
 
 	@Bean

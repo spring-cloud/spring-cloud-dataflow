@@ -36,6 +36,7 @@ import org.springframework.boot.autoconfigure.jdbc.DataSourceProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.cloud.dataflow.configuration.metadata.ApplicationConfigurationMetadataResolver;
 import org.springframework.cloud.dataflow.registry.AppRegistryCommon;
+import org.springframework.cloud.dataflow.server.DockerValidatorProperties;
 import org.springframework.cloud.dataflow.server.config.apps.CommonApplicationProperties;
 import org.springframework.cloud.dataflow.server.job.TaskExplorerFactoryBean;
 import org.springframework.cloud.dataflow.server.repository.DeploymentIdRepository;
@@ -71,7 +72,7 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
  */
 @Configuration
 @ConditionalOnProperty(prefix = FeaturesProperties.FEATURES_PREFIX, name = FeaturesProperties.TASKS_ENABLED, matchIfMissing = true)
-@EnableConfigurationProperties({ TaskConfigurationProperties.class, CommonApplicationProperties.class })
+@EnableConfigurationProperties({ TaskConfigurationProperties.class, CommonApplicationProperties.class, DockerValidatorProperties.class})
 @EnableTransactionManagement
 public class TaskConfiguration {
 
@@ -97,10 +98,11 @@ public class TaskConfiguration {
 			TaskRepository taskExecutionRepository, AppRegistryCommon registry, DelegatingResourceLoader resourceLoader,
 			TaskLauncher taskLauncher, ApplicationConfigurationMetadataResolver metadataResolver,
 			TaskConfigurationProperties taskConfigurationProperties, DeploymentIdRepository deploymentIdRepository,
-			CommonApplicationProperties commonApplicationProperties) {
+			CommonApplicationProperties commonApplicationProperties,
+			DockerValidatorProperties dockerValidatorProperties) {
 		return new DefaultTaskService(dataSourceProperties, repository, taskExplorer, taskExecutionRepository, registry,
 				resourceLoader, taskLauncher, metadataResolver, taskConfigurationProperties, deploymentIdRepository,
-				this.dataflowServerUri, commonApplicationProperties);
+				this.dataflowServerUri, commonApplicationProperties, dockerValidatorProperties);
 	}
 
 	@Bean

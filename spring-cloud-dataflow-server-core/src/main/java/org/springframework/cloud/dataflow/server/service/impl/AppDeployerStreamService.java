@@ -25,6 +25,7 @@ import org.springframework.cloud.dataflow.core.StreamDeployment;
 import org.springframework.cloud.dataflow.registry.AppRegistryCommon;
 import org.springframework.cloud.dataflow.rest.SkipperStream;
 import org.springframework.cloud.dataflow.rest.util.DeploymentPropertiesUtils;
+import org.springframework.cloud.dataflow.server.DockerValidatorProperties;
 import org.springframework.cloud.dataflow.server.audit.domain.AuditActionType;
 import org.springframework.cloud.dataflow.server.audit.domain.AuditOperationType;
 import org.springframework.cloud.dataflow.server.audit.service.AuditRecordService;
@@ -58,8 +59,8 @@ public class AppDeployerStreamService extends AbstractStreamService {
 	public AppDeployerStreamService(StreamDefinitionRepository streamDefinitionRepository,
 			AppDeployerStreamDeployer appDeployerStreamDeployer,
 			AppDeploymentRequestCreator appDeploymentRequestCreator, AppRegistryCommon appRegistry,
-			AuditRecordService auditRecordService) {
-		super(streamDefinitionRepository, appRegistry, auditRecordService);
+			AuditRecordService auditRecordService, DockerValidatorProperties dockerValidatorProperties) {
+		super(streamDefinitionRepository, appRegistry, auditRecordService, dockerValidatorProperties);
 		Assert.notNull(appDeployerStreamDeployer, "AppDeployerStreamDeployer must not be null");
 		Assert.notNull(appDeploymentRequestCreator, "AppDeploymentRequestCreator must not be null");
 		this.appDeployerStreamDeployer = appDeployerStreamDeployer;

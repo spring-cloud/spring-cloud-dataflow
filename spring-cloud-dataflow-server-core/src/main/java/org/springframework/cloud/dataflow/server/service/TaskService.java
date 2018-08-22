@@ -1,5 +1,5 @@
 /*
- * Copyright 2016-2017 the original author or authors.
+ * Copyright 2016-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -78,5 +78,12 @@ public interface TaskService {
 	 * @return the maximum number of concurrent tasks.
 	 */
 	long getMaximumConcurrentTasks();
+
+	/**
+	 * Verifies that all apps in the task are valid.
+	 * @param name the name of the definition
+	 * @return  {@link DefinitionAppValidationStatus} for a task.
+	 */
+	DefinitionAppValidationStatus validateTask(String name);
 
 }

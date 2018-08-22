@@ -22,6 +22,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.springframework.cloud.dataflow.rest.UpdateStreamRequest;
+import org.springframework.cloud.dataflow.rest.resource.StreamAppStatusResource;
 import org.springframework.cloud.dataflow.rest.resource.StreamDefinitionResource;
 import org.springframework.cloud.dataflow.rest.resource.StreamDeploymentResource;
 import org.springframework.cloud.skipper.domain.Deployer;
@@ -53,6 +54,8 @@ public class StreamTemplate implements StreamOperations {
 
 	private static final String DEPLOYMENT_REL = "streams/deployments/deployment";
 
+	private static final String VALIDATION_REL = "streams/validation";
+
 	private final RestTemplate restTemplate;
 
 	private final Link definitionsLink;
@@ -63,17 +66,23 @@ public class StreamTemplate implements StreamOperations {
 
 	private final Link deploymentLink;
 
+	private final Link validationLink;
+
 	StreamTemplate(RestTemplate restTemplate, ResourceSupport resources) {
 		Assert.notNull(resources, "URI Resources can't be null");
 		Assert.notNull(resources.getLink(DEFINITIONS_REL), "Definitions relation is required");
 		Assert.notNull(resources.getLink(DEFINITION_REL), "Definition relation is required");
 		Assert.notNull(resources.getLink(DEPLOYMENTS_REL), "Deployments relation is required");
 		Assert.notNull(resources.getLink(DEPLOYMENT_REL), "Deployment relation is required");
+		Assert.notNull(resources.getLink(VALIDATION_REL), "Validation relation is required");
+
 		this.restTemplate = restTemplate;
 		this.definitionsLink = resources.getLink(DEFINITIONS_REL);
 		this.deploymentsLink = resources.getLink(DEPLOYMENTS_REL);
 		this.definitionLink = resources.getLink(DEFINITION_REL);
 		this.deploymentLink = resources.getLink(DEPLOYMENT_REL);
+		this.validationLink = resources.getLink(VALIDATION_REL);
+
 	}
 
 	@Override
@@ -198,5 +207,11 @@ public class StreamTemplate implements StreamOperations {
 	public StreamDefinitionResource getStreamDefinition(String streamName) {
 		String uriTemplate = this.definitionLink.expand(streamName).getHref();
 		return restTemplate.getForObject(uriTemplate, StreamDefinitionResource.class);
+	}
+
+	@Override
+	public StreamAppStatusResource validateStreamDefinition(String streamDefinitionName) {
+		String uriTemplate = this.validationLink.expand(streamDefinitionName).getHref();
+		return restTemplate.getForObject(uriTemplate, StreamAppStatusResource.class);
 	}
 }
