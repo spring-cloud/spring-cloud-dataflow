@@ -35,6 +35,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.cloud.dataflow.core.ApplicationType;
 import org.springframework.cloud.dataflow.registry.domain.AppRegistration;
 import org.springframework.cloud.dataflow.registry.support.ResourceUtils;
+import org.springframework.cloud.deployer.resource.docker.DockerResource;
 import org.springframework.cloud.deployer.resource.maven.MavenProperties;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
@@ -72,7 +73,7 @@ public abstract class AbstractAppRegistryCommon implements AppRegistryCommon {
 
 	@Override
 	public Resource getAppResource(AppRegistration appRegistration) {
-		return ResourceUtils.getResource(appRegistration.getUri().toString(), this.mavenProperties);
+		return getResourceFromCache(appRegistration);
 	}
 
 	@Override
@@ -81,10 +82,17 @@ public abstract class AbstractAppRegistryCommon implements AppRegistryCommon {
 			return this.resourceLoader.getResource(appRegistration.getMetadataUri().toString());
 		}
 		else {
-			appRegistrationResourceCache.putIfAbsent(appRegistration.getUri(),
-					getAppResource(appRegistration));
-			return appRegistrationResourceCache.get(appRegistration.getUri());
+			Resource appResource = getResourceFromCache(appRegistration);
+			return (appResource instanceof DockerResource) ? null : appResource;
 		}
+	}
+
+	private Resource getResourceFromCache(AppRegistration appRegistration) {
+		if (this.appRegistrationResourceCache.get(appRegistration.getUri()) == null) {
+			Resource appResource = ResourceUtils.getResource(appRegistration.getUri().toString(), this.mavenProperties);
+			this.appRegistrationResourceCache.put(appRegistration.getUri(), appResource);
+		}
+		return this.appRegistrationResourceCache.get(appRegistration.getUri());
 	}
 
 	protected Properties loadProperties(Resource resource) {
