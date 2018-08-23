@@ -61,6 +61,9 @@ import org.springframework.cloud.dataflow.registry.service.AppRegistryService;
 import org.springframework.cloud.dataflow.registry.service.DefaultAppRegistryService;
 import org.springframework.cloud.dataflow.server.ConditionalOnSkipperDisabled;
 import org.springframework.cloud.dataflow.server.ConditionalOnSkipperEnabled;
+import org.springframework.cloud.dataflow.server.audit.repository.AuditRecordRepository;
+import org.springframework.cloud.dataflow.server.audit.service.AuditRecordService;
+import org.springframework.cloud.dataflow.server.audit.service.DefaultAuditRecordService;
 import org.springframework.cloud.dataflow.server.config.apps.CommonApplicationProperties;
 import org.springframework.cloud.dataflow.server.config.features.FeaturesProperties;
 import org.springframework.cloud.dataflow.server.controller.AboutController;
@@ -118,6 +121,7 @@ import org.springframework.context.annotation.Conditional;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.core.io.ResourceLoader;
+import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.hateoas.EntityLinks;
 import org.springframework.hateoas.hal.Jackson2HalModule;
@@ -144,8 +148,15 @@ import org.springframework.web.client.RestTemplate;
 @EnableConfigurationProperties({ FeaturesProperties.class, VersionInfoProperties.class, MetricsProperties.class })
 @ConditionalOnProperty(prefix = "dataflow.server", name = "enabled", havingValue = "true", matchIfMissing = true)
 @EnableCircuitBreaker
-@EntityScan({ "org.springframework.cloud.dataflow.registry.domain" })
-@EnableJpaRepositories(basePackages = "org.springframework.cloud.dataflow.registry.repository")
+@EntityScan({
+	"org.springframework.cloud.dataflow.registry.domain",
+	"org.springframework.cloud.dataflow.server.audit.domain"
+})
+@EnableJpaRepositories(basePackages = {
+	"org.springframework.cloud.dataflow.registry.repository",
+	"org.springframework.cloud.dataflow.server.audit.repository"
+})
+@EnableJpaAuditing
 @EnableTransactionManagement
 public class DataFlowControllerAutoConfiguration {
 
@@ -154,6 +165,12 @@ public class DataFlowControllerAutoConfiguration {
 	@Bean
 	public RootController rootController(EntityLinks entityLinks) {
 		return new RootController(entityLinks);
+	}
+
+	@Bean
+	public AuditRecordService auditRecordService(AuditRecordRepository auditRecordRepository,
+			ObjectMapper objectMapper) {
+		return new DefaultAuditRecordService(auditRecordRepository);
 	}
 
 	@Bean
@@ -402,9 +419,10 @@ public class DataFlowControllerAutoConfiguration {
 		public SkipperStreamService skipperStreamDeploymentService(
 				StreamDefinitionRepository streamDefinitionRepository,
 				SkipperStreamDeployer skipperStreamDeployer, AppDeploymentRequestCreator appDeploymentRequestCreator,
-				AppRegistryCommon appRegistry) {
+				AppRegistryCommon appRegistry,
+				AuditRecordService auditRecordService) {
 			return new DefaultSkipperStreamService(streamDefinitionRepository, skipperStreamDeployer,
-					appDeploymentRequestCreator, appRegistry);
+					appDeploymentRequestCreator, appRegistry, auditRecordService);
 		}
 
 		@Bean
@@ -442,9 +460,10 @@ public class DataFlowControllerAutoConfiguration {
 		@ConditionalOnBean({ StreamDefinitionRepository.class, StreamDeploymentRepository.class })
 		public StreamService simpleStreamDeploymentService(StreamDefinitionRepository streamDefinitionRepository,
 				AppDeployerStreamDeployer appDeployerStreamDeployer,
-				AppDeploymentRequestCreator appDeploymentRequestCreator, AppRegistryCommon appRegistry) {
+				AppDeploymentRequestCreator appDeploymentRequestCreator, AppRegistryCommon appRegistry,
+				AuditRecordService auditRecordService) {
 			return new AppDeployerStreamService(streamDefinitionRepository,
-					appDeployerStreamDeployer, appDeploymentRequestCreator, appRegistry);
+					appDeployerStreamDeployer, appDeploymentRequestCreator, appRegistry, auditRecordService);
 		}
 
 		@Bean

@@ -53,8 +53,14 @@ import org.springframework.test.context.junit4.SpringRunner;
 		HibernateJpaAutoConfiguration.class,
 		EmbeddedDataSourceConfiguration.class
 })
-@EntityScan({"org.springframework.cloud.dataflow.registry.domain"})
-@EnableJpaRepositories(basePackages = "org.springframework.cloud.dataflow.registry.repository")
+@EntityScan({
+	"org.springframework.cloud.dataflow.registry.domain",
+	"org.springframework.cloud.dataflow.server.audit.domain"
+})
+@EnableJpaRepositories(basePackages = {
+	"org.springframework.cloud.dataflow.registry.repository",
+	"org.springframework.cloud.dataflow.server.audit.repository"
+})
 public class SchemaGenerationTests {
 
 	private static final Logger logger = LoggerFactory.getLogger(SchemaGenerationTests.class);

@@ -128,7 +128,8 @@ public class RuntimeAppsControllerTests {
 		MockHttpServletResponse responseString = mockMvc
 				.perform(get("/runtime/apps/valid/instances/valid-0").accept(MediaType.APPLICATION_JSON)).andDo(print())
 				.andExpect(status().is4xxClientError()).andReturn().getResponse();
-		Assert.assertTrue(responseString.getContentAsString().contains("NoSuchAppInstanceException"));
+		Assert.assertTrue("Was expecting a NoSuchAppInstanceException but got: " + responseString.getContentAsString(),
+			responseString.getContentAsString().contains("NoSuchAppInstanceException"));
 	}
 
 	@Test

@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 the original author or authors.
+ * Copyright 2017-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,6 +33,9 @@ import org.springframework.cloud.dataflow.core.dsl.StreamNode;
 import org.springframework.cloud.dataflow.core.dsl.StreamParser;
 import org.springframework.cloud.dataflow.registry.AppRegistryCommon;
 import org.springframework.cloud.dataflow.server.DataFlowServerUtil;
+import org.springframework.cloud.dataflow.server.audit.domain.AuditActionType;
+import org.springframework.cloud.dataflow.server.audit.domain.AuditOperationType;
+import org.springframework.cloud.dataflow.server.audit.service.AuditRecordService;
 import org.springframework.cloud.dataflow.server.controller.StreamAlreadyDeployedException;
 import org.springframework.cloud.dataflow.server.controller.StreamAlreadyDeployingException;
 import org.springframework.cloud.dataflow.server.controller.support.InvalidStreamDefinitionException;
@@ -63,6 +66,7 @@ import org.springframework.util.StringUtils;
  * @author Mark Pollack
  * @author Ilayaperumal Gopinathan
  * @author Christian Tzolov
+ * @author Gunnar Hillert
  */
 @Transactional
 public abstract class AbstractStreamService implements StreamService {
@@ -79,16 +83,25 @@ public abstract class AbstractStreamService implements StreamService {
 	 */
 	private final AppRegistryCommon appRegistry;
 
+	protected final AuditRecordService auditRecordService;
+
+	public static final String STREAM_DEFINITION_DSL_TEXT = "streamDefinitionDslText";
+	public static final String DEPLOYMENT_PROPERTIES = "deploymentProperties";
+
 	/**
 	 * Constructor for implementations of the {@link StreamService}.
 	 * @param streamDefinitionRepository the stream definition repository to use
 	 * @param appRegistry the application registry to use
 	 */
-	public AbstractStreamService(StreamDefinitionRepository streamDefinitionRepository, AppRegistryCommon appRegistry) {
+	public AbstractStreamService(StreamDefinitionRepository streamDefinitionRepository,
+			AppRegistryCommon appRegistry,
+			AuditRecordService auditRecordService) {
 		Assert.notNull(streamDefinitionRepository, "StreamDefinitionRepository must not be null");
 		Assert.notNull(appRegistry, "AppRegistryCommon must not be null");
+		Assert.notNull(auditRecordService, "AuditRecordService must not be null");
 		this.streamDefinitionRepository = streamDefinitionRepository;
 		this.appRegistry = appRegistry;
+		this.auditRecordService = auditRecordService;
 	}
 
 	public StreamDefinition createStream(String streamName, String dsl, boolean deploy) {
@@ -123,6 +136,10 @@ public abstract class AbstractStreamService implements StreamService {
 			this.deployStream(streamName, new HashMap<>());
 		}
 
+		auditRecordService.populateAndSaveAuditRecord(
+				AuditOperationType.STREAM, AuditActionType.CREATE,
+				streamDefinition.getName(), streamDefinition.getDslText());
+
 		return streamDefinition;
 	}
 
@@ -154,6 +171,14 @@ public abstract class AbstractStreamService implements StreamService {
 			throw new StreamAlreadyDeployingException(name);
 		}
 		doDeployStream(streamDefinition, deploymentProperties);
+
+		final Map<String, Object> auditedData = new HashMap<>(2);
+		auditedData.put(STREAM_DEFINITION_DSL_TEXT, streamDefinition.getDslText());
+		auditedData.put(DEPLOYMENT_PROPERTIES, deploymentProperties);
+
+		auditRecordService.populateAndSaveAuditRecordUsingMapData(
+				AuditOperationType.STREAM, AuditActionType.DEPLOY,
+				streamDefinition.getName(), auditedData);
 	}
 
 	protected abstract void doDeployStream(StreamDefinition streamDefinition, Map<String, String> deploymentProperties);
@@ -162,19 +187,31 @@ public abstract class AbstractStreamService implements StreamService {
 
 	@Override
 	public void deleteStream(String name) {
-		if (this.streamDefinitionRepository.findOne(name) == null) {
+		final StreamDefinition streamDefinition = this.streamDefinitionRepository.findOne(name);
+		if (streamDefinition == null) {
 			throw new NoSuchStreamDefinitionException(name);
 		}
 		this.undeployStream(name);
 		this.streamDefinitionRepository.delete(name);
+
+		auditRecordService.populateAndSaveAuditRecord(
+				AuditOperationType.STREAM, AuditActionType.DELETE,
+				streamDefinition.getName(), streamDefinition.getDslText());
 	}
 
 	@Override
 	public void deleteAll() {
-		for (StreamDefinition streamDefinition : this.streamDefinitionRepository.findAll()) {
+		final Iterable<StreamDefinition> streamDefinitions = this.streamDefinitionRepository.findAll();
+		for (StreamDefinition streamDefinition : streamDefinitions) {
 			this.undeployStream(streamDefinition.getName());
 		}
 		this.streamDefinitionRepository.deleteAll();
+
+		for (StreamDefinition streamDefinition : streamDefinitions) {
+			auditRecordService.populateAndSaveAuditRecord(
+					AuditOperationType.STREAM, AuditActionType.DELETE,
+					streamDefinition.getName(), streamDefinition.getDslText());
+		}
 	}
 
 	@Override
