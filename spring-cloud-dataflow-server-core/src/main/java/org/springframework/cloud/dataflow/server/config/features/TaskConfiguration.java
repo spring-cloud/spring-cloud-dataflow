@@ -25,8 +25,9 @@ import org.springframework.batch.core.launch.support.SimpleJobLauncher;
 import org.springframework.batch.core.repository.support.JobRepositoryFactoryBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.autoconfigure.AbstractDatabaseInitializer;
-import org.springframework.boot.autoconfigure.batch.BatchDatabaseInitializer;
+import org.springframework.boot.autoconfigure.batch.BatchDataSourceInitializer;
+//import org.springframework.boot.autoconfigure.AbstractDatabaseInitializer;
+//import org.springframework.boot.autoconfigure.batch.BatchDatabaseInitializer;
 import org.springframework.boot.autoconfigure.batch.BatchProperties;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
@@ -144,9 +145,9 @@ public class TaskConfiguration {
 		}
 
 		@Bean
-		public BatchDatabaseInitializer batchRepositoryInitializerForDefaultDBForServer(DataSource dataSource,
+		public BatchDataSourceInitializer batchRepositoryInitializerForDefaultDBForServer(DataSource dataSource,
 				ResourceLoader resourceLoader, BatchProperties properties) {
-			return new BatchDatabaseInitializer(dataSource, resourceLoader, properties);
+			return new BatchDataSourceInitializer(dataSource, resourceLoader, properties);
 		}
 
 		@Bean
@@ -179,9 +180,9 @@ public class TaskConfiguration {
 		}
 
 		@Bean
-		public BatchDatabaseInitializer batchRepositoryInitializerForDefaultDB(DataSource dataSource,
+		public BatchDataSourceInitializer batchRepositoryInitializerForDefaultDB(DataSource dataSource,
 				ResourceLoader resourceLoader, BatchProperties properties) {
-			return new BatchDatabaseInitializer(dataSource, resourceLoader, properties);
+			return new BatchDataSourceInitializer(dataSource, resourceLoader, properties);
 		}
 
 		@Bean
@@ -190,13 +191,13 @@ public class TaskConfiguration {
 			taskRepositoryInitializer.setDataSource(dataSource);
 			return taskRepositoryInitializer;
 		}
-
-		@Bean
-		@DependsOn({ "batchRepositoryInitializerForDefaultDB", "taskRepositoryInitializerForDB" })
-		public AbstractDatabaseInitializer batchTaskIndexesDatabaseInitializer(DataSource dataSource,
-				ResourceLoader resourceLoader) {
-			return new BatchTaskIndexesDatabaseInitializer(dataSource, resourceLoader);
-		}
+		// TODO: BOOT2 handle this custom ddl stuff
+//		@Bean
+//		@DependsOn({ "batchRepositoryInitializerForDefaultDB", "taskRepositoryInitializerForDB" })
+//		public AbstractDatabaseInitializer batchTaskIndexesDatabaseInitializer(DataSource dataSource,
+//				ResourceLoader resourceLoader) {
+//			return new BatchTaskIndexesDatabaseInitializer(dataSource, resourceLoader);
+//		}
 
 		@Bean
 		@ConditionalOnMissingBean
