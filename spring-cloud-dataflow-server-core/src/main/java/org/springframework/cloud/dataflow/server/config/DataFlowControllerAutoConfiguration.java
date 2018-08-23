@@ -30,12 +30,12 @@ import org.apache.commons.logging.LogFactory;
 
 import org.springframework.analytics.metrics.AggregateCounterRepository;
 import org.springframework.analytics.metrics.FieldValueCounterRepository;
+import org.springframework.analytics.metrics.redis.RedisMetricRepository;
 import org.springframework.analytics.rest.controller.AggregateCounterController;
 import org.springframework.analytics.rest.controller.CounterController;
 import org.springframework.analytics.rest.controller.FieldValueCounterController;
 import org.springframework.batch.admin.service.JobService;
 import org.springframework.beans.factory.ObjectProvider;
-import org.springframework.boot.actuate.metrics.repository.MetricRepository;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
@@ -270,8 +270,8 @@ public class DataFlowControllerAutoConfiguration {
 	}
 
 	@Bean
-	@ConditionalOnBean(MetricRepository.class)
-	public CounterController counterController(MetricRepository metricRepository) {
+	@ConditionalOnBean(RedisMetricRepository.class)
+	public CounterController counterController(RedisMetricRepository metricRepository) {
 		return new CounterController(metricRepository);
 	}
 
