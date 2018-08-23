@@ -25,6 +25,10 @@ import org.springframework.cloud.dataflow.core.StreamDeployment;
 import org.springframework.cloud.dataflow.registry.AppRegistryCommon;
 import org.springframework.cloud.dataflow.rest.SkipperStream;
 import org.springframework.cloud.dataflow.rest.util.DeploymentPropertiesUtils;
+import org.springframework.cloud.dataflow.server.audit.domain.AuditActionType;
+import org.springframework.cloud.dataflow.server.audit.domain.AuditOperationType;
+import org.springframework.cloud.dataflow.server.audit.service.AuditRecordService;
+import org.springframework.cloud.dataflow.server.repository.NoSuchStreamDefinitionException;
 import org.springframework.cloud.dataflow.server.repository.StreamDefinitionRepository;
 import org.springframework.cloud.dataflow.server.stream.AppDeployerStreamDeployer;
 import org.springframework.cloud.dataflow.server.stream.StreamDeploymentRequest;
@@ -39,6 +43,7 @@ import org.springframework.util.Assert;
  * @author Mark Pollack
  * @author Ilayaperumal Gopinathan
  * @author Christian Tzolov
+ * @author Gunnar Hillert
  */
 @Transactional
 public class AppDeployerStreamService extends AbstractStreamService {
@@ -52,8 +57,9 @@ public class AppDeployerStreamService extends AbstractStreamService {
 
 	public AppDeployerStreamService(StreamDefinitionRepository streamDefinitionRepository,
 			AppDeployerStreamDeployer appDeployerStreamDeployer,
-			AppDeploymentRequestCreator appDeploymentRequestCreator, AppRegistryCommon appRegistry) {
-		super(streamDefinitionRepository, appRegistry);
+			AppDeploymentRequestCreator appDeploymentRequestCreator, AppRegistryCommon appRegistry,
+			AuditRecordService auditRecordService) {
+		super(streamDefinitionRepository, appRegistry, auditRecordService);
 		Assert.notNull(appDeployerStreamDeployer, "AppDeployerStreamDeployer must not be null");
 		Assert.notNull(appDeploymentRequestCreator, "AppDeploymentRequestCreator must not be null");
 		this.appDeployerStreamDeployer = appDeployerStreamDeployer;
@@ -82,7 +88,14 @@ public class AppDeployerStreamService extends AbstractStreamService {
 
 	@Override
 	public void undeployStream(String streamName) {
+		final StreamDefinition streamDefinition = this.streamDefinitionRepository.findOne(streamName);
+		if (streamDefinition == null) {
+			throw new NoSuchStreamDefinitionException(streamName);
+		}
 		this.appDeployerStreamDeployer.undeployStream(streamName);
+		auditRecordService.populateAndSaveAuditRecord(
+				AuditActionType.UNDEPLOY, AuditOperationType.STREAM_DEFINITIONS,
+				streamDefinition.getName(), streamDefinition.getDslText());
 	}
 
 	@Override

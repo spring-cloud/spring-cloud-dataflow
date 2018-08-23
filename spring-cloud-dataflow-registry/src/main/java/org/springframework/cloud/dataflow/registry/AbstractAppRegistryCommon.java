@@ -44,7 +44,7 @@ import org.springframework.util.StringUtils;
 
 /**
  * {@link AppRegistryCommon} implementation common for the Classic and the Skipper modes.
- * 
+ *
  * @author Christian Tzolov
  * @author Ilayaperumal Gopinathan
  * @author Soby Chacko
