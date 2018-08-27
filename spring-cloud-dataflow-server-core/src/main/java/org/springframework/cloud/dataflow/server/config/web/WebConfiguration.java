@@ -33,7 +33,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
-import org.springframework.boot.autoconfigure.web.HttpMessageConverters;
+import org.springframework.boot.autoconfigure.http.HttpMessageConverters;
 import org.springframework.boot.web.servlet.ServletContextInitializer;
 import org.springframework.cloud.dataflow.rest.job.support.ISO8601DateFormatWithMilliSeconds;
 import org.springframework.cloud.dataflow.server.job.support.ExecutionContextJacksonMixIn;
@@ -51,7 +51,6 @@ import org.springframework.util.StringUtils;
 import org.springframework.validation.beanvalidation.MethodValidationPostProcessor;
 import org.springframework.web.servlet.config.annotation.PathMatchConfigurer;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
-import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter;
 
 /**
  * @author Mark Fisher
@@ -135,7 +134,7 @@ public class WebConfiguration implements ServletContextInitializer, ApplicationL
 
 	@Bean
 	public WebMvcConfigurer configurer() {
-		return new WebMvcConfigurerAdapter() {
+		return new WebMvcConfigurer() {
 
 			@Override
 			public void configurePathMatch(PathMatchConfigurer configurer) {
