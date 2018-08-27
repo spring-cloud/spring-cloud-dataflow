@@ -21,13 +21,12 @@ import javax.validation.ConstraintViolationException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
+import org.springframework.analytics.rest.controller.NoSuchMetricException;
 import org.springframework.batch.admin.service.NoSuchStepExecutionException;
 import org.springframework.batch.core.launch.JobExecutionNotRunningException;
 import org.springframework.batch.core.launch.NoSuchJobException;
 import org.springframework.batch.core.launch.NoSuchJobExecutionException;
 import org.springframework.batch.core.launch.NoSuchJobInstanceException;
-import org.springframework.boot.actuate.endpoint.mvc.MetricsMvcEndpoint;
 import org.springframework.cloud.dataflow.registry.support.NoSuchAppRegistrationException;
 import org.springframework.cloud.dataflow.server.controller.support.InvalidStreamDefinitionException;
 import org.springframework.cloud.dataflow.server.job.support.JobNotRestartableException;
@@ -144,7 +143,7 @@ public class RestControllerAdvice {
 	@ExceptionHandler({ NoSuchStreamDefinitionException.class, NoSuchAppRegistrationException.class,
 			NoSuchTaskDefinitionException.class, NoSuchTaskExecutionException.class, NoSuchJobExecutionException.class,
 			NoSuchJobInstanceException.class, NoSuchJobException.class, NoSuchStepExecutionException.class,
-			NoSuchTaskBatchException.class, MetricsMvcEndpoint.NoSuchMetricException.class, NoSuchAppException.class,
+			NoSuchTaskBatchException.class, NoSuchMetricException.class, NoSuchAppException.class,
 			NoSuchAppInstanceException.class, ApplicationDoesNotExistException.class, NoSuchScheduleException.class })
 	@ResponseStatus(HttpStatus.NOT_FOUND)
 	@ResponseBody
