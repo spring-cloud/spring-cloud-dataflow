@@ -23,11 +23,11 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.springframework.boot.autoconfigure.jdbc.DataSourceProperties;
-import org.springframework.boot.bind.RelaxedNames;
 import org.springframework.cloud.dataflow.core.TaskDefinition;
 import org.springframework.cloud.dataflow.core.dsl.TaskApp;
 import org.springframework.cloud.dataflow.core.dsl.TaskNode;
 import org.springframework.cloud.dataflow.server.controller.WhitelistProperties;
+import org.springframework.cloud.dataflow.server.support.RelaxedNames;
 import org.springframework.cloud.deployer.spi.core.AppDefinition;
 import org.springframework.core.io.Resource;
 import org.springframework.util.Assert;
@@ -116,7 +116,7 @@ public class TaskServiceUtils {
 	 * Return a copy of a given task definition where short form parameters have been expanded
 	 * to their long form (amongst the whitelisted supported properties of the app) if
 	 * applicable.
- 	 * @param original the task definition with the original set of properties.
+	 * @param original the task definition with the original set of properties.
 	 * @param resource the resource to be used for identifying white listed properties.
 	 * @param appDeploymentProperties the app deployment properties to be added to the {@link AppDefinition}.
 	 * @param whitelistProperties util for formatting white listed properties properly.
@@ -142,6 +142,7 @@ public class TaskServiceUtils {
 		if (StringUtils.isEmpty(dataflowServerUri)) {
 			return;
 		}
+
 		RelaxedNames relaxedNames = new RelaxedNames(DATAFLOW_SERVER_URI_KEY);
 		for (String dataFlowUriKey : relaxedNames) {
 			if (appDeploymentProperties.containsKey(dataFlowUriKey)) {
