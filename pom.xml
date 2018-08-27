@@ -40,7 +40,7 @@
 		<!-- Note: Make sure to update `spring-cloud-build` version and `spring-cloud-dependencies` version (spring-cloud.version)
 		     are in sync with the https://github.com/spring-cloud/spring-cloud-release/blob/master/pom.xml updates for the respective
 		     release versions -->
-		<spring-cloud.version>Edgware.SR4</spring-cloud.version>
+		<spring-cloud.version>Finchley.SR1</spring-cloud.version>
 
 		<spring-cloud-scheduler-spi.version>1.0.0.RELEASE</spring-cloud-scheduler-spi.version>
 
@@ -99,7 +99,7 @@
 			<dependency>
 				<groupId>org.springframework.cloud</groupId>
 				<artifactId>spring-cloud-dataflow-dependencies</artifactId>
-				<version>1.7.0.BUILD-SNAPSHOT</version>
+				<version>2.0.0.BUILD-SNAPSHOT</version>
 				<type>pom</type>
 				<scope>import</scope>
 			</dependency>
