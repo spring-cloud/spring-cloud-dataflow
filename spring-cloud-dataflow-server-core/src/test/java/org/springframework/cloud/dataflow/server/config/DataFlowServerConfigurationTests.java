@@ -31,8 +31,8 @@ import org.springframework.boot.autoconfigure.context.PropertyPlaceholderAutoCon
 import org.springframework.boot.autoconfigure.data.redis.RedisAutoConfiguration;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
 import org.springframework.boot.autoconfigure.orm.jpa.HibernateJpaAutoConfiguration;
-import org.springframework.boot.autoconfigure.security.SecurityAutoConfiguration;
-import org.springframework.boot.autoconfigure.web.WebClientAutoConfiguration;
+import org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration;
+import org.springframework.boot.autoconfigure.web.client.RestTemplateAutoConfiguration;
 import org.springframework.boot.test.util.EnvironmentTestUtils;
 import org.springframework.cloud.dataflow.server.EnableDataFlowServer;
 import org.springframework.cloud.dataflow.server.config.features.SchedulerConfiguration;
@@ -81,7 +81,7 @@ public class DataFlowServerConfigurationTests {
 				SecurityAutoConfiguration.class, DataFlowServerAutoConfiguration.class,
 				DataFlowControllerAutoConfiguration.class, DataSourceAutoConfiguration.class,
 				DataFlowServerConfiguration.class, PropertyPlaceholderAutoConfiguration.class,
-				WebClientAutoConfiguration.class, HibernateJpaAutoConfiguration.class, WebConfiguration.class,
+				RestTemplateAutoConfiguration.class, HibernateJpaAutoConfiguration.class, WebConfiguration.class,
 				SchedulerConfiguration.class);
 		environment = new StandardEnvironment();
 		propertySources = environment.getPropertySources();
