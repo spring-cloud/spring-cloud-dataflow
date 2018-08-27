@@ -34,7 +34,7 @@ import org.springframework.cloud.dataflow.autoconfigure.local.LocalDataFlowServe
 import org.springframework.cloud.dataflow.configuration.metadata.ApplicationConfigurationMetadataResolverAutoConfiguration;
 import org.springframework.cloud.deployer.spi.local.LocalDeployerAutoConfiguration;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.oauth2.config.annotation.web.configuration.EnableAuthorizationServer;
 import org.springframework.security.oauth2.config.annotation.web.configuration.EnableResourceServer;
@@ -78,10 +78,16 @@ public class OAuth2TestServer {
 	@Configuration
 	@EnableAuthorizationServer
 	protected static class MyOAuth2AuthorizationServerConfiguration extends OAuth2AuthorizationServerConfiguration {
+//		public MyOAuth2AuthorizationServerConfiguration(BaseClientDetails details,
+//				AuthenticationManager authenticationManager, ObjectProvider<TokenStore> tokenStore,
+//				ObjectProvider<AccessTokenConverter> tokenConverter, AuthorizationServerProperties properties) {
+//			super(details, authenticationManager, tokenStore, tokenConverter, properties);
+//		}
 		public MyOAuth2AuthorizationServerConfiguration(BaseClientDetails details,
-				AuthenticationManager authenticationManager, ObjectProvider<TokenStore> tokenStore,
-				ObjectProvider<AccessTokenConverter> tokenConverter, AuthorizationServerProperties properties) {
-			super(details, authenticationManager, tokenStore, tokenConverter, properties);
+				AuthenticationConfiguration authenticationConfiguration, ObjectProvider<TokenStore> tokenStore,
+				ObjectProvider<AccessTokenConverter> tokenConverter, AuthorizationServerProperties properties)
+				throws Exception {
+			super(details, authenticationConfiguration, tokenStore, tokenConverter, properties);
 		}
 
 		@Override
