@@ -20,6 +20,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.springframework.cloud.dataflow.core.StreamDefinition;
@@ -51,7 +52,7 @@ public class InMemoryStreamDefinitionRepository implements StreamDefinitionRepos
 	}
 
 	@Override
-	public <S extends StreamDefinition> Iterable<S> save(Iterable<S> iterableDefinitions) {
+	public <S extends StreamDefinition> Iterable<S> saveAll(Iterable<S> iterableDefinitions) {
 		for (S definition : iterableDefinitions) {
 			save(definition);
 		}
@@ -70,12 +71,17 @@ public class InMemoryStreamDefinitionRepository implements StreamDefinitionRepos
 	}
 
 	@Override
+	public Optional<StreamDefinition> findById(String name) {
+		return Optional.ofNullable(definitions.get(name));
+	}
+
+	@Override
 	public StreamDefinition findOne(String name) {
 		return definitions.get(name);
 	}
 
 	@Override
-	public boolean exists(String name) {
+	public boolean existsById(String name) {
 		return definitions.containsKey(name);
 	}
 
@@ -85,7 +91,7 @@ public class InMemoryStreamDefinitionRepository implements StreamDefinitionRepos
 	}
 
 	@Override
-	public Iterable<StreamDefinition> findAll(Iterable<String> names) {
+	public Iterable<StreamDefinition> findAllById(Iterable<String> names) {
 		List<StreamDefinition> results = new ArrayList<>();
 		for (String s : names) {
 			if (definitions.containsKey(s)) {
@@ -101,6 +107,11 @@ public class InMemoryStreamDefinitionRepository implements StreamDefinitionRepos
 	}
 
 	@Override
+	public void deleteById(String name) {
+		definitions.remove(name);
+	}
+
+	@Override
 	public void delete(String name) {
 		definitions.remove(name);
 	}
@@ -111,7 +122,7 @@ public class InMemoryStreamDefinitionRepository implements StreamDefinitionRepos
 	}
 
 	@Override
-	public void delete(Iterable<? extends StreamDefinition> definitions) {
+	public void deleteAll(Iterable<? extends StreamDefinition> definitions) {
 		for (StreamDefinition definition : definitions) {
 			delete(definition);
 		}

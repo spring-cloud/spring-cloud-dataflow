@@ -28,7 +28,7 @@ public class Db2PagingQueryProvider extends AbstractSqlPagingQueryProvider {
 
 	@Override
 	public String getPageQuery(Pageable pageable) {
-		int offset = pageable.getOffset() + 1;
+		long offset = pageable.getOffset() + 1;
 		return generateRowNumSqlQueryWithNesting(getSelectClause(), false,
 				"TMP_ROW_NUM BETWEEN " + offset + " AND " + (offset + pageable.getPageSize()));
 	}

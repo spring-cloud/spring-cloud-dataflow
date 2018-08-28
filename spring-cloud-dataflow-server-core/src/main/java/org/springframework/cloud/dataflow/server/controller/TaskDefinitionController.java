@@ -19,6 +19,7 @@ package org.springframework.cloud.dataflow.server.controller;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Function;
 
 import org.springframework.cloud.dataflow.core.TaskDefinition;
 import org.springframework.cloud.dataflow.rest.resource.TaskDefinitionResource;
@@ -209,7 +210,9 @@ public class TaskDefinitionController {
 		}
 	}
 
-	class TaskDefinitionConverter implements Converter<TaskDefinition, TaskExecutionAwareTaskDefinition> {
+	// TODO: BOOT2 spring data now using Function instead of Converter, should remove latter
+	class TaskDefinitionConverter implements Converter<TaskDefinition, TaskExecutionAwareTaskDefinition>,
+			Function<TaskDefinition, TaskExecutionAwareTaskDefinition> {
 		final Map<String, TaskExecution> taskExecutions;
 
 		public TaskDefinitionConverter(List<TaskExecution> taskExecutions) {
@@ -223,6 +226,11 @@ public class TaskDefinitionController {
 			else {
 				this.taskExecutions = null;
 			}
+		}
+
+		@Override
+		public TaskExecutionAwareTaskDefinition apply(TaskDefinition source) {
+			return convert(source);
 		}
 
 		@Override

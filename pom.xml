@@ -42,6 +42,7 @@
 		     release versions -->
 		<spring-cloud.version>Finchley.SR1</spring-cloud.version>
 
+		<spring-data.version>Kay-SR9</spring-data.version>
 		<spring-cloud-scheduler-spi.version>1.0.0.RELEASE</spring-cloud-scheduler-spi.version>
 
 		<spring-cloud-common-security-config.version>1.1.0.BUILD-SNAPSHOT</spring-cloud-common-security-config.version>
@@ -85,7 +86,7 @@
 			<dependency>
 				<groupId>org.springframework.data</groupId>
 				<artifactId>spring-data-releasetrain</artifactId>
-				<version>Ingalls-SR13</version>
+				<version>${spring-data.version}</version>
 				<scope>import</scope>
 				<type>pom</type>
 			</dependency>

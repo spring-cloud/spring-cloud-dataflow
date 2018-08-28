@@ -120,7 +120,7 @@ public class AppRegistry extends AbstractAppRegistryCommon implements AppRegistr
 		// building new page.
 		// all this is done because we don't use a proper repository which would
 		// handle all these automatically.
-		int offset = 0;
+		long offset = 0;
 		int page = 0;
 		if (pageable.getOffset() <= to) {
 			offset = pageable.getOffset();
@@ -130,7 +130,7 @@ public class AppRegistry extends AbstractAppRegistryCommon implements AppRegistr
 			offset = pageable.getOffset();
 		}
 
-		return new PageImpl<>(appRegistrations.subList(offset, (int) to), new PageRequest(page, pageable.getPageSize()),
+		return new PageImpl<>(appRegistrations.subList((int) offset, (int) to), new PageRequest(page, pageable.getPageSize()),
 				appRegistrations.size());
 	}
 

@@ -28,4 +28,28 @@ import org.springframework.data.repository.PagingAndSortingRepository;
  */
 public interface TaskDefinitionRepository extends PagingAndSortingRepository<TaskDefinition, String> {
 	Page<TaskDefinition> findByNameLike(SearchPageable searchPageable);
+
+	default TaskDefinition findOne(String id) {
+		return (TaskDefinition) findById(id).orElse(null);
+	}
+
+	default void delete(String id) {
+		deleteById(id);
+	}
+
+	default boolean exists(String id) {
+		return existsById(id);
+	}
+
+	default Iterable<TaskDefinition> save(Iterable<TaskDefinition> entities) {
+		return saveAll(entities);
+	}
+
+	default Iterable<TaskDefinition> findAll(Iterable<String> ids) {
+		return findAllById(ids);
+	}
+
+	default void delete(Iterable<TaskDefinition> entities) {
+		deleteAll(entities);
+	}
 }
