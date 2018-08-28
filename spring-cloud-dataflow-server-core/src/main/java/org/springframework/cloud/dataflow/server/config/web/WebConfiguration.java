@@ -111,17 +111,18 @@ public class WebConfiguration implements ServletContextInitializer, ApplicationL
 	 * ignore the JobExecution in StepExecution to prevent infinite loop.
 	 * {@see https://github.com/spring-projects/spring-hateoas/issues/333}
 	 */
-	@Autowired
-	@Qualifier(SPRING_HATEOAS_OBJECT_MAPPER)
-	private ObjectMapper springHateoasObjectMapper;
-
-	@Bean
-	@Primary
-	public ObjectMapper objectMapper() {
-		ObjectMapper objectMapper = springHateoasObjectMapper;
-		setupObjectMapper(objectMapper);
-		return objectMapper;
-	}
+	// TODO: BOOT2 disable hateoas mapper handling for now as 0.25 don't have it
+//	@Autowired
+//	@Qualifier(SPRING_HATEOAS_OBJECT_MAPPER)
+//	private ObjectMapper springHateoasObjectMapper;
+//
+//	@Bean
+//	@Primary
+//	public ObjectMapper objectMapper() {
+//		ObjectMapper objectMapper = springHateoasObjectMapper;
+//		setupObjectMapper(objectMapper);
+//		return objectMapper;
+//	}
 
 	@Bean
 	public HttpMessageConverters messageConverters(ObjectMapper objectMapper) {
