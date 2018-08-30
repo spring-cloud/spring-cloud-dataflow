@@ -17,7 +17,11 @@ package org.springframework.cloud.dataflow.server.audit.repository;
 
 import java.util.List;
 
+import org.springframework.cloud.dataflow.server.audit.domain.AuditActionType;
+import org.springframework.cloud.dataflow.server.audit.domain.AuditOperationType;
 import org.springframework.cloud.dataflow.server.audit.domain.AuditRecord;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -35,4 +39,9 @@ public interface AuditRecordRepository
 	@Override
 	List<AuditRecord> findAll();
 
+	Page<AuditRecord> findByAuditAction(AuditActionType action, Pageable page);
+
+	Page<AuditRecord> findByAuditOperation(AuditOperationType operation, Pageable pageable);
+
+	Page<AuditRecord> findByAuditOperationAndAuditAction(AuditOperationType operation, AuditActionType action, Pageable pageable);
 }

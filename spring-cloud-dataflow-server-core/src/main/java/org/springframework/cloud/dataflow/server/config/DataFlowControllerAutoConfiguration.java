@@ -70,6 +70,7 @@ import org.springframework.cloud.dataflow.server.config.apps.CommonApplicationPr
 import org.springframework.cloud.dataflow.server.config.features.FeaturesProperties;
 import org.springframework.cloud.dataflow.server.controller.AboutController;
 import org.springframework.cloud.dataflow.server.controller.AppRegistryController;
+import org.springframework.cloud.dataflow.server.controller.AuditRecordController;
 import org.springframework.cloud.dataflow.server.controller.CompletionController;
 import org.springframework.cloud.dataflow.server.controller.JobExecutionController;
 import org.springframework.cloud.dataflow.server.controller.JobInstanceController;
@@ -174,6 +175,12 @@ public class DataFlowControllerAutoConfiguration {
 	public AuditRecordService auditRecordService(AuditRecordRepository auditRecordRepository,
 			ObjectMapper objectMapper) {
 		return new DefaultAuditRecordService(auditRecordRepository);
+	}
+	@Bean
+	@ConditionalOnBean(AuditRecordService.class)
+	public AuditRecordController auditController(
+			AuditRecordService auditRecordService) {
+		return new AuditRecordController(auditRecordService);
 	}
 
 	@Bean

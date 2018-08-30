@@ -27,7 +27,8 @@ import org.springframework.cloud.dataflow.server.audit.domain.AuditActionType;
 import org.springframework.cloud.dataflow.server.audit.domain.AuditOperationType;
 import org.springframework.cloud.dataflow.server.audit.domain.AuditRecord;
 import org.springframework.cloud.dataflow.server.audit.repository.AuditRecordRepository;
-import org.springframework.cloud.dataflow.server.service.impl.DefaultTaskJobService;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.util.Assert;
 
 /**
@@ -38,7 +39,7 @@ import org.springframework.util.Assert;
  */
 public class DefaultAuditRecordService implements AuditRecordService {
 
-	private static final Logger logger = LoggerFactory.getLogger(DefaultTaskJobService.class);
+	private static final Logger logger = LoggerFactory.getLogger(DefaultAuditRecordService.class);
 
 	private final AuditRecordRepository auditRecordRepository;
 
@@ -90,4 +91,23 @@ public class DefaultAuditRecordService implements AuditRecordService {
 		return this.populateAndSaveAuditRecord(auditOperationType, auditActionType, correlationId, dataAsString);
 	}
 
+	@Override
+	public Page<AuditRecord> findAuditRecordByAuditOperationTypeAndAuditActionType(
+			Pageable pageable,
+			AuditActionType action,
+			AuditOperationType operation) {
+
+		if (action != null && operation == null) {
+			return this.auditRecordRepository.findByAuditAction(action, pageable);
+		}
+		else if (action == null && operation != null) {
+			return this.auditRecordRepository.findByAuditOperation(operation, pageable);
+		}
+		else if (action != null && operation != null) {
+			return this.auditRecordRepository.findByAuditOperationAndAuditAction(operation, action, pageable);
+		}
+		else {
+			return this.auditRecordRepository.findAll(pageable);
+		}
+	}
 }

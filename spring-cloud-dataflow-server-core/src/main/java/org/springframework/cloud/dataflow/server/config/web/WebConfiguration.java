@@ -22,6 +22,7 @@ import javax.servlet.ServletContext;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.h2.tools.Server;
 import org.slf4j.LoggerFactory;
 
@@ -149,6 +150,7 @@ public class WebConfiguration implements ServletContextInitializer, ApplicationL
 		objectMapper.setDateFormat(new ISO8601DateFormatWithMilliSeconds());
 		objectMapper.addMixIn(StepExecution.class, StepExecutionJacksonMixIn.class);
 		objectMapper.addMixIn(ExecutionContext.class, ExecutionContextJacksonMixIn.class);
+		objectMapper.registerModule(new JavaTimeModule());
 	}
 
 	@Bean

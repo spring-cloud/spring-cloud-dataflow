@@ -144,6 +144,13 @@ public class LocalServerSecurityWithUsersFileTests {
 				{ HttpMethod.POST, HttpStatus.UNAUTHORIZED, "/apps", null,
 						TestUtils.toImmutableMap("uri", "???", "apps", "??", "force", "true") },
 
+				/* AuditController */
+
+				{ HttpMethod.GET, HttpStatus.FORBIDDEN, "/audit-records", manageOnlyUser, null },
+				{ HttpMethod.GET, HttpStatus.OK, "/audit-records", viewOnlyUser, null },
+				{ HttpMethod.GET, HttpStatus.FORBIDDEN, "/audit-records", createOnlyUser, null },
+				{ HttpMethod.GET, HttpStatus.UNAUTHORIZED, "/audit-records", null, null },
+
 				/* CompletionController */
 
 				{ HttpMethod.GET, HttpStatus.FORBIDDEN, "/completions/stream", manageOnlyUser, null },
