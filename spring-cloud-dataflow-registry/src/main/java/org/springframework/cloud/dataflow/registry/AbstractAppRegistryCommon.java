@@ -73,7 +73,7 @@ public abstract class AbstractAppRegistryCommon implements AppRegistryCommon {
 
 	@Override
 	public Resource getAppResource(AppRegistration appRegistration) {
-		return getResourceFromCache(appRegistration);
+		return ResourceUtils.getResource(appRegistration.getUri().toString(), this.mavenProperties);
 	}
 
 	@Override
@@ -82,17 +82,11 @@ public abstract class AbstractAppRegistryCommon implements AppRegistryCommon {
 			return this.resourceLoader.getResource(appRegistration.getMetadataUri().toString());
 		}
 		else {
-			Resource appResource = getResourceFromCache(appRegistration);
+			this.appRegistrationResourceCache.putIfAbsent(appRegistration.getUri(), getAppResource(appRegistration));
+			Resource appResource = this.appRegistrationResourceCache.get(appRegistration.getUri());
+			// If the metadata URI is not set, only the archive type app resource can serve as the metadata resource
 			return (appResource instanceof DockerResource) ? null : appResource;
 		}
-	}
-
-	private Resource getResourceFromCache(AppRegistration appRegistration) {
-		if (this.appRegistrationResourceCache.get(appRegistration.getUri()) == null) {
-			Resource appResource = ResourceUtils.getResource(appRegistration.getUri().toString(), this.mavenProperties);
-			this.appRegistrationResourceCache.put(appRegistration.getUri(), appResource);
-		}
-		return this.appRegistrationResourceCache.get(appRegistration.getUri());
 	}
 
 	protected Properties loadProperties(Resource resource) {
