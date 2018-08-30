@@ -72,6 +72,7 @@ public class ApiDocumentation extends BaseDocumentation {
 				linkWithRel("about").description(
 						"Access meta information, including enabled " + "features, security info, version information"),
 				linkWithRel("dashboard").description("Access the dashboard UI"),
+				linkWithRel("audit-records").description("Provides audit trail information"),
 				linkWithRel("apps").description("Handle registered applications"),
 				linkWithRel("completions/stream").description("Exposes the DSL completion features " + "for Stream"),
 				linkWithRel("completions/task").description("Exposes the DSL completion features for " + "Task"),

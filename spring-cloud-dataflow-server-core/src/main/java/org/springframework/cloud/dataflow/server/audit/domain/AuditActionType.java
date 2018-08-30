@@ -15,6 +15,8 @@
  */
 package org.springframework.cloud.dataflow.server.audit.domain;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
+
 import org.springframework.util.Assert;
 
 /**
@@ -23,14 +25,15 @@ import org.springframework.util.Assert;
  * @author Gunnar Hillert
  *
  */
+@JsonFormat(shape = JsonFormat.Shape.OBJECT)
 public enum AuditActionType {
 
 	CREATE(100L, "Create", "Create an Entity"),
-	UPDATE(200L, "Update", "Update an Entity"),
-	ROLLBACK(210L, "Rollback", "Rollback an Entity"),
-	DELETE(300L, "Delete", "Delete an Entity"),
-	DEPLOY(400L, "Deploy", "Deploy an Entity"),
-	UNDEPLOY(500L, "Undeploy", "Undeploy an Entity");
+	DELETE(200L, "Delete", "Delete an Entity"),
+	DEPLOY(300L, "Deploy", "Deploy an Entity"),
+	ROLLBACK(400L, "Rollback", "Rollback an Entity"),
+	UNDEPLOY(500L, "Undeploy", "Undeploy an Entity"),
+	UPDATE(600L, "Update", "Update an Entity");
 
 	private Long id;
 
@@ -48,19 +51,6 @@ public enum AuditActionType {
 		this.description = description;
 	}
 
-	public static AuditActionType fromId(Long auditTypeId) {
-
-		Assert.notNull(auditTypeId, "Parameter auditTypeId, must not be null.");
-
-		for (AuditActionType auditActionType : AuditActionType.values()) {
-			if (auditActionType.getId().equals(auditTypeId)) {
-				return auditActionType;
-			}
-		}
-
-		return null;
-	}
-
 	public Long getId() {
 		return id;
 	}
@@ -69,12 +59,29 @@ public enum AuditActionType {
 		return name;
 	}
 
+	public String getKey() {
+		return name();
+	}
+
 	public String getDescription() {
 		return description;
 	}
 
 	public String getNameWithDescription() {
 		return name + " (" + description + ")";
+	}
+
+	public static AuditActionType fromId(Long auditActionTypeId) {
+
+		Assert.notNull(auditActionTypeId, "Parameter auditActionTypeId, must not be null.");
+
+		for (AuditActionType auditActionType : AuditActionType.values()) {
+			if (auditActionType.getId().equals(auditActionTypeId)) {
+				return auditActionType;
+			}
+		}
+
+		return null;
 	}
 
 }

@@ -53,7 +53,7 @@ public class LocalServerSecurityRootWithUsersFileTests {
 		localDataflowResource.getMockMvc()
 				.perform(get("/").header("Authorization", basicAuthorizationHeader(fullUser.getUsername(), fullUser.getPassword()))).andDo(print())
 				.andExpect(status().isOk())
-				.andExpect(jsonPath("$._links.*", hasSize(37)))
+				.andExpect(jsonPath("$._links.*", hasSize(38)))
 				.andExpect(jsonPath("$._links.dashboard.href", is("http://localhost/dashboard")))
 				.andExpect(jsonPath("$._links.streams/definitions.href", is("http://localhost/streams/definitions")))
 				.andExpect(jsonPath("$._links.streams/definitions/definition.href", is("http://localhost/streams/definitions/{name}")))
@@ -89,6 +89,7 @@ public class LocalServerSecurityRootWithUsersFileTests {
 				.andExpect(jsonPath("$._links.aggregate-counters/counter.href", is("http://localhost/metrics/aggregate-counters/{name}")))
 				.andExpect(jsonPath("$._links.apps.href", is("http://localhost/apps")))
 				.andExpect(jsonPath("$._links.about.href", is("http://localhost/about")))
+				.andExpect(jsonPath("$._links.audit-records.href", is("http://localhost/audit-records")))
 				.andExpect(jsonPath("$._links.completions/stream.href", is("http://localhost/completions/stream{?start,detailLevel}")))
 				.andExpect(jsonPath("$._links.completions/task.href", is("http://localhost/completions/task{?start,detailLevel}")));
 	}
@@ -98,7 +99,7 @@ public class LocalServerSecurityRootWithUsersFileTests {
 		localDataflowResource.getMockMvc()
 				.perform(get("/").header("Authorization", basicAuthorizationHeader(viewOnlyUser.getUsername(), viewOnlyUser.getPassword()))).andDo(print())
 				.andExpect(status().isOk())
-				.andExpect(jsonPath("$._links.*", hasSize(37)))
+				.andExpect(jsonPath("$._links.*", hasSize(38)))
 				.andExpect(jsonPath("$._links.dashboard.href", is("http://localhost/dashboard")))
 				.andExpect(jsonPath("$._links.streams/definitions.href", is("http://localhost/streams/definitions")))
 				.andExpect(jsonPath("$._links.streams/definitions/definition.href", is("http://localhost/streams/definitions/{name}")))
@@ -134,6 +135,7 @@ public class LocalServerSecurityRootWithUsersFileTests {
 				.andExpect(jsonPath("$._links.aggregate-counters/counter.href", is("http://localhost/metrics/aggregate-counters/{name}")))
 				.andExpect(jsonPath("$._links.apps.href", is("http://localhost/apps")))
 				.andExpect(jsonPath("$._links.about.href", is("http://localhost/about")))
+				.andExpect(jsonPath("$._links.audit-records.href", is("http://localhost/audit-records")))
 				.andExpect(jsonPath("$._links.completions/stream.href", is("http://localhost/completions/stream{?start,detailLevel}")))
 				.andExpect(jsonPath("$._links.completions/task.href", is("http://localhost/completions/task{?start,detailLevel}")));
 	}

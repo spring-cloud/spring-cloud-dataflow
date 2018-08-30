@@ -93,6 +93,8 @@ public class RootController {
 		RootResource root = new RootResource(Version.REVISION);
 
 		root.add(ControllerLinkBuilder.linkTo(UiController.class).withRel("dashboard"));
+		root.add(ControllerLinkBuilder.linkTo(AuditRecordController.class).withRel("audit-records"));
+
 		if (featuresProperties.isStreamsEnabled()) {
 			root.add(entityLinks.linkToCollectionResource(StreamDefinitionResource.class)
 					.withRel("streams/definitions"));

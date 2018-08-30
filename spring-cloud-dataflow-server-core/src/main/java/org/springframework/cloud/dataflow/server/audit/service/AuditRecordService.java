@@ -21,6 +21,8 @@ import org.springframework.cloud.dataflow.server.audit.domain.AuditActionType;
 import org.springframework.cloud.dataflow.server.audit.domain.AuditOperationType;
 import org.springframework.cloud.dataflow.server.audit.domain.AuditRecord;
 import org.springframework.cloud.dataflow.server.audit.repository.AuditRecordRepository;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 /**
  * Main interface to interact with the Spring Cloud Data Flow auditing service. Methods
@@ -73,4 +75,24 @@ public interface AuditRecordService {
 			String correlationId,
 			Map<String, Object> data);
 
+	/**
+	 * Allows for querying of {@link AuditRecord}s.
+	 *
+	 * @param pageable Contains pagination information. If null, all {@link AuditRecord}s will be returned
+	 * @param actions Can be null. For which {@link AuditActionType}s shall {@link AuditRecord}s be returned
+	 * @param operations Can be null. For which {@link AuditOperationType}s shall {@link AuditRecord}s be returned
+	 * @return a {@link Page} of {@link AuditRecord}s
+	 */
+	Page<AuditRecord> findAuditRecordByAuditOperationTypeAndAuditActionType(
+			Pageable pageable,
+			AuditActionType[] actions,
+			AuditOperationType[] operations);
+
+	/**
+	 * Find a single {@link AuditRecord} by providing a mandatory id.
+	 *
+	 * @param id Must not be null/
+	 * @return Audit Record
+	 */
+	AuditRecord findOne(Long id);
 }

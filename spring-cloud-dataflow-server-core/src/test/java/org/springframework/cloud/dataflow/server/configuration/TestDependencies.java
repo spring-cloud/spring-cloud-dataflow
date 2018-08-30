@@ -57,6 +57,7 @@ import org.springframework.cloud.dataflow.server.config.apps.CommonApplicationPr
 import org.springframework.cloud.dataflow.server.config.features.FeaturesProperties;
 import org.springframework.cloud.dataflow.server.controller.AboutController;
 import org.springframework.cloud.dataflow.server.controller.AppRegistryController;
+import org.springframework.cloud.dataflow.server.controller.AuditRecordController;
 import org.springframework.cloud.dataflow.server.controller.CompletionController;
 import org.springframework.cloud.dataflow.server.controller.MetricsController;
 import org.springframework.cloud.dataflow.server.controller.RestControllerAdvice;
@@ -274,6 +275,10 @@ public class TestDependencies extends WebMvcConfigurationSupport {
 		return new StreamValidationController(streamService);
 	}
 
+	@Bean
+	public AuditRecordController auditRecordController(AuditRecordService auditRecordService) {
+		return new AuditRecordController(auditRecordService);
+	}
 
 	@Bean
 	public MethodValidationPostProcessor methodValidationPostProcessor() {

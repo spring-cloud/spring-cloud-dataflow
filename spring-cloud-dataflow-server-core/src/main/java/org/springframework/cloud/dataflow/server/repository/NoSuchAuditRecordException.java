@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 the original author or authors.
+ * Copyright 2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,25 +14,16 @@
  * limitations under the License.
  */
 
-package org.springframework.cloud.dataflow.rest;
+package org.springframework.cloud.dataflow.server.repository;
 
 /**
- * Used by clients and servers to assert API compatibility.
+ * Thrown when an audit record of a given id was expected but did not exist.
  *
- * @author Eric Bottard
+ * @author Gunnar Hillert
  */
-public class Version {
+public class NoSuchAuditRecordException extends RuntimeException {
 
-	/**
-	 * Should be incremented each time the API evolves whether it's a breaking change or
-	 * not.
-	 */
-	public static final int REVISION = 15;
-
-	public static final String REVISION_KEY = "api.revision";
-
-	private Version() {
-
+	public NoSuchAuditRecordException(Long id) {
+		super(String.format("Could not find audit record for id %s", id));
 	}
-
 }

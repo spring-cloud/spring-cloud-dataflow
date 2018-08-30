@@ -58,6 +58,11 @@ spring:
 
             - GET    /about                          => hasRole('ROLE_VIEW')
 
+            # Audit
+
+            - GET /audit-records                     => hasRole('ROLE_VIEW')
+            - GET /audit-records/**                  => hasRole('ROLE_VIEW')
+
             # Metrics
 
             - GET    /metrics/**                     => hasRole('ROLE_VIEW')
