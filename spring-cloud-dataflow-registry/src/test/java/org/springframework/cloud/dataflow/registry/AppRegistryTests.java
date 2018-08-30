@@ -199,4 +199,20 @@ public class AppRegistryTests {
 			assertThat(expected.getMessage(), is("The 'source:foo' application could not be found."));
 		}
 	}
+
+	@Test
+	public void testGetAppResource() {
+		AppRegistration appRegistration1 = new AppRegistration("foo", ApplicationType.source, URI.create("docker:/foo-source"));
+		appRegistry.save(appRegistration1);
+		assertThat(appRegistry.getAppMetadataResource(appRegistration1), nullValue());
+		assertThat(appRegistry.getAppResource(appRegistration1), notNullValue());
+		AppRegistration appRegistration2 = new AppRegistration("bar", ApplicationType.source, URI.create("classpath:/foo-source"));
+		appRegistry.save(appRegistration2);
+		assertThat(appRegistry.getAppResource(appRegistration2), notNullValue());
+		assertThat(appRegistry.getAppMetadataResource(appRegistration2), notNullValue());
+		AppRegistration appRegistration3 = new AppRegistration("bar", ApplicationType.source, URI.create("maven:/org.springframework.cloud:foo-source:1.0.0"));
+		appRegistry.save(appRegistration3);
+		assertThat(appRegistry.getAppResource(appRegistration3), notNullValue());
+		assertThat(appRegistry.getAppMetadataResource(appRegistration3), notNullValue());
+	}
 }
