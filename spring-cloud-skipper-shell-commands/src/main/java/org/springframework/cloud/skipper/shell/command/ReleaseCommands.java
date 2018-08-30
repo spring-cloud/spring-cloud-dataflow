@@ -19,6 +19,7 @@ import javax.validation.constraints.NotNull;
 import java.io.File;
 import java.io.IOException;
 import java.time.Duration;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -133,13 +134,18 @@ public class ReleaseCommands extends AbstractSkipperCommand {
 			@ShellOption(help = "the version of the package to use for the upgrade, if not specified latest version will be used", defaultValue = NULL) String packageVersion,
 			@ShellOption(help = "specify values in a YAML file", defaultValue = NULL) File file,
 			@ShellOption(help = "the expression for upgrade timeout", defaultValue = NULL) String timeoutExpression,
-			@ShellOption(help = "the comma separated set of properties to override during upgrade", defaultValue = NULL) String properties)
+			@ShellOption(help = "the comma separated set of properties to override during upgrade", defaultValue = NULL) String properties,
+			@ShellOption(help = "force upgrade") boolean force,
+			@ShellOption(help = "application names to force upgrade. If no specific list is provided, all the apps in the packages are force upgraded", defaultValue = NULL) String appNames)
 			throws IOException {
 		// Commented out until https://github.com/spring-cloud/spring-cloud-skipper/issues/263 is
 		// addressed
 		// assertMutuallyExclusiveFileAndProperties(file, properties);
+		if (StringUtils.hasText(appNames)) {
+			Assert.isTrue(force, "App names can be used only when the stream update is forced.");
+		}
 		Release release = skipperClient
-				.upgrade(getUpgradeRequest(releaseName, packageName, packageVersion, file, properties, timeoutExpression));
+				.upgrade(getUpgradeRequest(releaseName, packageName, packageVersion, file, properties, timeoutExpression, force, appNames));
 		StringBuilder sb = new StringBuilder();
 		sb.append(release.getName() + " has been upgraded.  Now at version v" + release.getVersion() + ".");
 		return sb.toString();
@@ -166,8 +172,10 @@ public class ReleaseCommands extends AbstractSkipperCommand {
 	}
 
 	private UpgradeRequest getUpgradeRequest(String releaseName, String packageName, String packageVersion,
-			File propertiesFile, String propertiesToOverride, String timeoutExpression) throws IOException {
+			File propertiesFile, String propertiesToOverride, String timeoutExpression, boolean forceUpgrade, String appNames) throws IOException {
 		UpgradeRequest upgradeRequest = new UpgradeRequest();
+		upgradeRequest.setForce(forceUpgrade);
+		upgradeRequest.setAppNames(new ArrayList<>(StringUtils.commaDelimitedListToSet(appNames)));
 		UpgradeProperties upgradeProperties = new UpgradeProperties();
 		upgradeProperties.setReleaseName(releaseName);
 		String configValuesYML = YmlUtils.getYamlConfigValues(propertiesFile, propertiesToOverride);

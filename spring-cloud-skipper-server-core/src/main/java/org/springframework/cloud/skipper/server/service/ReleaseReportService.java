@@ -115,7 +115,8 @@ public class ReleaseReportService {
 		// TODO: should check both releases
 		String kind = ManifestUtils.resolveKind(existingRelease.getManifest().getData());
 		ReleaseManager releaseManager = this.releaseManagerFactory.getReleaseManager(kind);
-		return releaseManager.createReport(existingRelease, replacingRelease, initial);
+		return releaseManager.createReport(existingRelease, replacingRelease, initial, upgradeRequest.isForce(),
+				upgradeRequest.getAppNames());
 	}
 
 	private Release updateReplacingReleaseConfigValues(Release targetRelease, Release replacingRelease) {

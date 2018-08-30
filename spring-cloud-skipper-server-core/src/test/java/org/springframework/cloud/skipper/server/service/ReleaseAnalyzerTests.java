@@ -89,7 +89,7 @@ public class ReleaseAnalyzerTests extends AbstractIntegrationTest {
 		// Upgrade Release
 		Release upgradedRelease = upgrade(upgradeRequest);
 		ReleaseAnalysisReport releaseAnalysisReport = this.releaseAnalyzer.analyze(installedRelease,
-				upgradedRelease);
+				upgradedRelease, false, null);
 		String releaseDifferenceSummary = releaseAnalysisReport.getReleaseDifferenceSummary();
 		String manifest =  upgradedRelease.getManifest().getData();
 
@@ -113,7 +113,7 @@ public class ReleaseAnalyzerTests extends AbstractIntegrationTest {
 
 		// Upgrade Release to V3, ensure application property foo=bar and foo2=bar2 are both present.
 		Release upgradedReleaseV3 = upgrade(upgradeRequest);
-		releaseAnalysisReport = this.releaseAnalyzer.analyze(upgradedRelease, upgradedReleaseV3);
+		releaseAnalysisReport = this.releaseAnalyzer.analyze(upgradedRelease, upgradedReleaseV3, false, null);
 		releaseDifferenceSummary = releaseAnalysisReport.getReleaseDifferenceSummary();
 		manifest =  upgradedReleaseV3.getManifest().getData();
 
@@ -123,6 +123,16 @@ public class ReleaseAnalyzerTests extends AbstractIntegrationTest {
 		assertThat(manifest).contains("\"foo\": \"bar\"");
 		assertThat(manifest).contains("\"log.level\": \"error\"");
 		assertThat(manifest).contains("\"foo2\": \"bar2\"");
+
+		// Upgrade Release to V4, ensure `force` upgrade is set.
+		upgradeRequest.setForce(true);
+		Release upgradedReleaseV4 = upgrade(upgradeRequest);
+		releaseAnalysisReport = this.releaseAnalyzer.analyze(upgradedReleaseV3, upgradedReleaseV4, true, null);
+		manifest =  upgradedReleaseV4.getManifest().getData();
+
+		logger.info("Release Manifest v4: \n" + manifest);
+
+		assertThat(releaseAnalysisReport.getReleaseDifference().areEqual()).isTrue();
 	}
 
 }

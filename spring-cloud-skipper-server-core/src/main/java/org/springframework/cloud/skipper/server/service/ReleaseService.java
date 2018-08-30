@@ -313,7 +313,7 @@ public class ReleaseService {
 	public ReleaseAnalysisReport createReport(Release existingRelease, Release replacingRelease) {
 		String kind = ManifestUtils.resolveKind(existingRelease.getManifest().getData());
 		ReleaseManager releaseManager = this.releaseManagerFactory.getReleaseManager(kind);
-		return releaseManager.createReport(existingRelease, replacingRelease, true);
+		return releaseManager.createReport(existingRelease, replacingRelease, true, false, null);
 	}
 
 	protected Release createInitialRelease(InstallProperties installProperties, Package packageToInstall,

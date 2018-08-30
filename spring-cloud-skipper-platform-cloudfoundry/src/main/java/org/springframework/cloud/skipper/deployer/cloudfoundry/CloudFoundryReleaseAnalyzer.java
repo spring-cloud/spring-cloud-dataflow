@@ -16,8 +16,11 @@
 package org.springframework.cloud.skipper.deployer.cloudfoundry;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.cloudfoundry.operations.applications.ApplicationManifest;
 import org.slf4j.Logger;
@@ -56,28 +59,36 @@ public class CloudFoundryReleaseAnalyzer {
 	 * @param existingRelease the release that is currently deployed
 	 * @param replacingRelease the proposed release to be deployed that will replace the
 	 * existing release.
+	 * @param isForceUpdate flag to indicate if the update is forced
 	 * @return an analysis report describing the changes to make, if any.
 	 */
-	public ReleaseAnalysisReport analyze(Release existingRelease, Release replacingRelease) {
+	public ReleaseAnalysisReport analyze(Release existingRelease, Release replacingRelease, boolean isForceUpdate) {
 		List<ApplicationManifestDifference> applicationManifestDifferences = new ArrayList<>();
-		ApplicationManifest existingApplicationManifest = this.cfManifestApplicationDeployer.getCFApplicationManifest(existingRelease);
-		ApplicationManifest replacingApplicationManifest = this.cfManifestApplicationDeployer.getCFApplicationManifest(replacingRelease);
+		ApplicationManifest existingApplicationManifest = this.cfManifestApplicationDeployer
+				.getCFApplicationManifest(existingRelease);
+		ApplicationManifest replacingApplicationManifest = this.cfManifestApplicationDeployer
+				.getCFApplicationManifest(replacingRelease);
 		if (!existingApplicationManifest.equals(replacingApplicationManifest)) {
-			Map<String, String> existingMap = CloudFoundryApplicationManifestUtils.getCFManifestMap(existingApplicationManifest);
-			Map<String, String> replacingMap = CloudFoundryApplicationManifestUtils.getCFManifestMap(replacingApplicationManifest);
+			Map<String, String> existingMap = CloudFoundryApplicationManifestUtils
+					.getCFManifestMap(existingApplicationManifest);
+			Map<String, String> replacingMap = CloudFoundryApplicationManifestUtils
+					.getCFManifestMap(replacingApplicationManifest);
 			PropertiesDiff emptyPropertiesDiff = PropertiesDiff.builder().build();
 			PropertiesDiff propertiesDiff = PropertiesDiff.builder().left(existingMap).right(replacingMap).build();
-			ApplicationManifestDifference applicationManifestDifference = new ApplicationManifestDifference(existingApplicationManifest.getName(),
+			ApplicationManifestDifference applicationManifestDifference = new ApplicationManifestDifference(
+					existingApplicationManifest.getName(),
 					emptyPropertiesDiff, emptyPropertiesDiff, emptyPropertiesDiff, propertiesDiff, emptyPropertiesDiff);
 			applicationManifestDifferences.add(applicationManifestDifference);
 		}
-		return createReleaseAnalysisReport(existingRelease, replacingRelease, applicationManifestDifferences);
+		return createReleaseAnalysisReport(existingRelease, replacingRelease, applicationManifestDifferences,
+				Arrays.asList(existingApplicationManifest.getName()), isForceUpdate);
 	}
 
 	private ReleaseAnalysisReport createReleaseAnalysisReport(Release existingRelease,
 			Release replacingRelease,
-			List<ApplicationManifestDifference> applicationManifestDifferences) {
-		List<String> appsToUpgrade = new ArrayList<>();
+			List<ApplicationManifestDifference> applicationManifestDifferences, List<String> allApplicationNames,
+			boolean isForceUpdate) {
+		Set<String> appsToUpgrade = new LinkedHashSet<String>();
 		ReleaseDifference releaseDifference = new ReleaseDifference();
 		releaseDifference.setDifferences(applicationManifestDifferences);
 		if (!releaseDifference.areEqual()) {
@@ -86,6 +97,10 @@ public class CloudFoundryReleaseAnalyzer {
 					StringUtils.collectionToCommaDelimitedString(releaseDifference.getChangedApplicationNames()) + "]");
 			appsToUpgrade.addAll(releaseDifference.getChangedApplicationNames());
 		}
-		return new ReleaseAnalysisReport(appsToUpgrade, releaseDifference, existingRelease, replacingRelease);
+		if (isForceUpdate) {
+			appsToUpgrade.addAll(allApplicationNames);
+		}
+		return new ReleaseAnalysisReport(new ArrayList(appsToUpgrade), releaseDifference, existingRelease,
+				replacingRelease);
 	}
 }

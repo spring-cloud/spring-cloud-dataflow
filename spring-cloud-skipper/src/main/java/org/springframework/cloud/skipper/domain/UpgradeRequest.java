@@ -15,6 +15,8 @@
  */
 package org.springframework.cloud.skipper.domain;
 
+import java.util.List;
+
 /**
  * This contains all the request attributes for upgrade operation.
  *
@@ -23,8 +25,14 @@ package org.springframework.cloud.skipper.domain;
 public class UpgradeRequest {
 
 	private PackageIdentifier packageIdentifier;
+
 	private UpgradeProperties upgradeProperties;
+
 	private Long timeout;
+
+	private boolean force;
+
+	private List<String> appNames;
 
 	public PackageIdentifier getPackageIdentifier() {
 		return packageIdentifier;
@@ -50,9 +58,31 @@ public class UpgradeRequest {
 		this.timeout = timeout;
 	}
 
+	public boolean isForce() {
+		return force;
+	}
+
+	public void setForce(boolean force) {
+		this.force = force;
+	}
+
+	public List<String> getAppNames() {
+		return appNames;
+	}
+
+	public void setAppNames(List<String> appNames) {
+		this.appNames = appNames;
+	}
+
 	@Override
 	public String toString() {
-		return "UpgradeRequest [packageIdentifier=" + packageIdentifier + ", upgradeProperties=" + upgradeProperties
-				+ ", timeout=" + timeout + "]";
+		final StringBuffer sb = new StringBuffer("UpgradeRequest{");
+		sb.append("packageIdentifier=").append(packageIdentifier);
+		sb.append(", upgradeProperties=").append(upgradeProperties);
+		sb.append(", timeout=").append(timeout);
+		sb.append(", force=").append(force);
+		sb.append(", appNames=").append(appNames);
+		sb.append('}');
+		return sb.toString();
 	}
 }

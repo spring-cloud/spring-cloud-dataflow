@@ -150,10 +150,12 @@ public class DefaultReleaseManager implements ReleaseManager {
 	}
 
 	@Override
-	public ReleaseAnalysisReport createReport(Release existingRelease, Release replacingRelease, boolean initial) {
+	public ReleaseAnalysisReport createReport(Release existingRelease, Release replacingRelease, boolean initial,
+			boolean isForceUpdate, List<String> appNamesToUpgrade) {
 		ReleaseAnalysisReport releaseAnalysisReport = this.releaseAnalyzer
-				.analyze(existingRelease, replacingRelease);
-		if (releaseAnalysisReport.getReleaseDifference().areEqual()) {
+				.analyze(existingRelease, replacingRelease, isForceUpdate, appNamesToUpgrade);
+		List<String> applicationNamesToUpgrade = releaseAnalysisReport.getApplicationNamesToUpgrade();
+		if (releaseAnalysisReport.getReleaseDifference().areEqual() && !isForceUpdate) {
 			throw new SkipperException(
 					"Package to upgrade has no difference than existing deployed/deleted package. Not upgrading.");
 		}
@@ -161,7 +163,6 @@ public class DefaultReleaseManager implements ReleaseManager {
 				.findByReleaseNameAndReleaseVersionRequired(
 						existingRelease.getName(), existingRelease.getVersion());
 		Map<String, String> existingAppNamesAndDeploymentIds = existingAppDeployerData.getDeploymentDataAsMap();
-		List<String> applicationNamesToUpgrade = releaseAnalysisReport.getApplicationNamesToUpgrade();
 		List<AppStatus> appStatuses = status(existingRelease).getInfo().getStatus().getAppStatusList();
 
 		Map<String, Object> model = calculateAppCountsForRelease(replacingRelease, existingAppNamesAndDeploymentIds,

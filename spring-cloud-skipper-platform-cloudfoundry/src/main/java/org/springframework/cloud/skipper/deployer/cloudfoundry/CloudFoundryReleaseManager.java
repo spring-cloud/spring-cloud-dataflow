@@ -19,6 +19,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.cloudfoundry.operations.applications.ApplicationManifest;
@@ -141,14 +142,14 @@ public class CloudFoundryReleaseManager implements ReleaseManager {
 	}
 
 	@Override
-	public ReleaseAnalysisReport createReport(Release existingRelease, Release replacingRelease, boolean initial) {
+	public ReleaseAnalysisReport createReport(Release existingRelease, Release replacingRelease, boolean initial,
+			boolean isForceUpdate, List<String> appNamesToUpgrade) {
 		ReleaseAnalysisReport releaseAnalysisReport = this.cloudFoundryReleaseAnalyzer
-				.analyze(existingRelease, replacingRelease);
+				.analyze(existingRelease, replacingRelease, isForceUpdate);
 		if (initial) {
 			this.releaseRepository.save(replacingRelease);
 		}
-		return new ReleaseAnalysisReport(releaseAnalysisReport.getApplicationNamesToUpgrade(),
-				releaseAnalysisReport.getReleaseDifference(), existingRelease, replacingRelease);
+		return releaseAnalysisReport;
 	}
 
 	public Release status(Release release) {

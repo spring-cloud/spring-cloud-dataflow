@@ -220,8 +220,8 @@ public class StateMachineTests {
 		Manifest manifest = new Manifest();
 		Release release = new Release();
 		release.setManifest(manifest);
-		Mockito.when(releaseReportService.createReport(any(), any(), any(boolean.class))).thenReturn(new ReleaseAnalysisReport(new ArrayList<>(),
-				new ReleaseDifference(), release, release));
+		Mockito.when(releaseReportService.createReport(any(), any(), any(boolean.class))).thenReturn(new ReleaseAnalysisReport(
+				new ArrayList<>(), new ReleaseDifference(), release, release));
 		Mockito.when(upgradeStrategy.checkStatus(any()))
 				.thenReturn(true);
 		Mockito.when(upgradeStrategyFactory.getUpgradeStrategy(any())).thenReturn(upgradeStrategy);
@@ -286,8 +286,8 @@ public class StateMachineTests {
 		Manifest manifest = new Manifest();
 		Release release = new Release();
 		release.setManifest(manifest);
-		Mockito.when(releaseReportService.createReport(any(), any(), any(boolean.class))).thenReturn(new ReleaseAnalysisReport(new ArrayList<>(),
-				new ReleaseDifference(), release, release));
+		Mockito.when(releaseReportService.createReport(any(), any(), any(boolean.class))).thenReturn(new ReleaseAnalysisReport(
+				new ArrayList<>(), new ReleaseDifference(), release, release));
 		Mockito.when(upgradeStrategy.checkStatus(any()))
 				.thenReturn(true);
 		Mockito.when(upgradeStrategyFactory.getUpgradeStrategy(any())).thenReturn(upgradeStrategy);
@@ -326,8 +326,8 @@ public class StateMachineTests {
 		Manifest manifest = new Manifest();
 		Release release = new Release();
 		release.setManifest(manifest);
-		Mockito.when(releaseReportService.createReport(any(), any(), any(boolean.class))).thenReturn(new ReleaseAnalysisReport(new ArrayList<>(),
-				new ReleaseDifference(), release, release));
+		Mockito.when(releaseReportService.createReport(any(), any(), any(boolean.class))).thenReturn(new ReleaseAnalysisReport(
+				new ArrayList<>(), new ReleaseDifference(), release, release));
 		Mockito.when(upgradeStrategy.checkStatus(any()))
 				.thenReturn(false);
 		Mockito.when(upgradeStrategyFactory.getUpgradeStrategy(any())).thenReturn(upgradeStrategy);
@@ -378,8 +378,8 @@ public class StateMachineTests {
 		Manifest manifest = new Manifest();
 		Release release = new Release();
 		release.setManifest(manifest);
-		Mockito.when(releaseReportService.createReport(any(), any(), any(boolean.class))).thenReturn(new ReleaseAnalysisReport(new ArrayList<>(),
-				new ReleaseDifference(), release, release));
+		Mockito.when(releaseReportService.createReport(any(), any(), any(boolean.class))).thenReturn(new ReleaseAnalysisReport(
+				new ArrayList<>(), new ReleaseDifference(), release, release));
 		Mockito.when(upgradeStrategy.checkStatus(any()))
 				.thenReturn(false);
 		Mockito.when(upgradeStrategyFactory.getUpgradeStrategy(any())).thenReturn(upgradeStrategy);
@@ -576,8 +576,8 @@ public class StateMachineTests {
 		Manifest manifest = new Manifest();
 		Release release = new Release();
 		release.setManifest(manifest);
-		Mockito.when(releaseReportService.createReport(any(), any(), any(boolean.class))).thenReturn(new ReleaseAnalysisReport(new ArrayList<>(),
-				new ReleaseDifference(), release, release));
+		Mockito.when(releaseReportService.createReport(any(), any(), any(boolean.class))).thenReturn(new ReleaseAnalysisReport(
+				new ArrayList<>(), new ReleaseDifference(), release, release));
 		Mockito.when(upgradeStrategy.checkStatus(any()))
 				.thenReturn(false);
 		Mockito.when(upgradeStrategyFactory.getUpgradeStrategy(any())).thenReturn(upgradeStrategy);

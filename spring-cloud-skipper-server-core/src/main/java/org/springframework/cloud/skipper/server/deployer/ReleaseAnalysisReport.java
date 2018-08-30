@@ -29,6 +29,7 @@ import org.springframework.util.Assert;
  * report. The reports dictates what needs to change, and the strategies determine how to
  * make the change.
  * @author Mark Pollack
+ * @author Ilayaperumal Gopinathan
  */
 public class ReleaseAnalysisReport {
 
@@ -60,6 +61,9 @@ public class ReleaseAnalysisReport {
 		this.replacingRelease = replacingRelease;
 	}
 
+	/**
+	 * @return the names of applications to upgrade
+	 */
 	public List<String> getApplicationNamesToUpgrade() {
 		return this.applicationNamesToUpgrade;
 	}
@@ -68,6 +72,9 @@ public class ReleaseAnalysisReport {
 		return this.releaseDifference;
 	}
 
+	/**
+	 * @return a textual summary of the ReleaseDifference
+	 */
 	public String getReleaseDifferenceSummary() {
 		ReleaseDifferenceSummaryGenerator releaseDifferenceSummaryGenerator = new ReleaseDifferenceSummaryGenerator();
 		return releaseDifferenceSummaryGenerator.generateSummary(existingRelease.getName(),

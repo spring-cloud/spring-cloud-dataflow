@@ -16,6 +16,7 @@
 package org.springframework.cloud.skipper.server.deployer;
 
 import java.util.Collection;
+import java.util.List;
 
 import org.springframework.cloud.skipper.domain.Release;
 
@@ -51,9 +52,12 @@ public interface ReleaseManager {
 	 * @param replacingRelease the release that is to be deployed in place of the existing
 	 * release
 	 * @param initial the flag indicating this is initial report creation
+	 * @param isForceUpdate the flag indicating the upgrade is by force
+	 * @param appNamesToUpgrade the application names to force upgrade
 	 * @return a report describing the actions to take to update
 	 */
-	ReleaseAnalysisReport createReport(Release existingRelease, Release replacingRelease, boolean initial);
+	ReleaseAnalysisReport createReport(Release existingRelease, Release replacingRelease, boolean initial,
+			boolean isForceUpdate, List<String> appNamesToUpgrade);
 
 	/**
 	 * Delete the release
