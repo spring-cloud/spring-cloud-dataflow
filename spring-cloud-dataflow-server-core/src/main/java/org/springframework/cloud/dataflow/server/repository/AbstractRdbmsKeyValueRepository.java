@@ -192,7 +192,7 @@ public abstract class AbstractRdbmsKeyValueRepository<D> implements PagingAndSor
 			return Optional.of(jdbcTemplate.queryForObject(findAllWhereClauseByKey, rowMapper, name));
 		}
 		catch (EmptyResultDataAccessException e) {
-			return Optional.of(null);
+			return Optional.ofNullable(null);
 		}
 	}
 
