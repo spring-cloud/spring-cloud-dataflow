@@ -19,6 +19,7 @@ package org.springframework.cloud.dataflow.rest.client;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.StringTokenizer;
 
 import org.springframework.cloud.dataflow.rest.resource.CurrentTaskExecutionsResource;
 import org.springframework.cloud.dataflow.rest.resource.TaskDefinitionResource;
@@ -47,6 +48,8 @@ public class TaskTemplate implements TaskOperations {
 
 	private static final String DEFINITION_RELATION = "tasks/definitions/definition";
 
+	private static final String EXECUTIONS_CURRENT_RELATION_VERSION = "1.7.0";
+
 	private static final String EXECUTIONS_RELATION = "tasks/executions";
 
 	private static final String EXECUTIONS_CURRENT_RELATION = "tasks/executions/current";
@@ -69,7 +72,7 @@ public class TaskTemplate implements TaskOperations {
 
 	private final Link executionsCurrentLink;
 
-	TaskTemplate(RestTemplate restTemplate, ResourceSupport resources) {
+	TaskTemplate(RestTemplate restTemplate, ResourceSupport resources, String dataFlowVersion) {
 		Assert.notNull(resources, "URI Resources must not be be null");
 		Assert.notNull(resources.getLink(EXECUTIONS_RELATION), "Executions relation is required");
 		Assert.notNull(resources.getLink(DEFINITIONS_RELATION), "Definitions relation is required");
@@ -78,8 +81,11 @@ public class TaskTemplate implements TaskOperations {
 		Assert.notNull(resources.getLink(EXECUTIONS_RELATION), "Executions relation is required");
 		Assert.notNull(resources.getLink(EXECUTION_RELATION), "Execution relation is required");
 		Assert.notNull(resources.getLink(EXECUTION_RELATION_BY_NAME), "Execution by name relation is required");
-		Assert.notNull(resources.getLink(EXECUTIONS_CURRENT_RELATION), "Executions current relation is required");
+		Assert.notNull(dataFlowVersion, "dataFlowVersion must not be null");
 
+		if(isDataFlowServerVersionViable(EXECUTIONS_CURRENT_RELATION_VERSION, getVersion(dataFlowVersion))) {
+			Assert.notNull(resources.getLink(EXECUTIONS_CURRENT_RELATION), "Executions current relation is required");
+		}
 		this.restTemplate = restTemplate;
 		this.definitionsLink = resources.getLink(DEFINITIONS_RELATION);
 		this.definitionLink = resources.getLink(DEFINITION_RELATION);
@@ -144,5 +150,46 @@ public class TaskTemplate implements TaskOperations {
 	@Override
 	public void cleanup(long id) {
 		restTemplate.delete(executionLink.expand(id).getHref());
+	}
+
+	private String getVersion(String fullVersion) {
+		final String separator = ".";
+		String versionPrefix = "";
+
+			String[] versionTokens = StringUtils.delimitedListToStringArray(fullVersion, separator);
+
+			for (int offset = 0; versionTokens.length > offset; offset++) {
+				String token = versionTokens[offset];
+				if (StringUtils.hasLength(token) && !Character.isAlphabetic(token.charAt(0))) {
+					if (offset != 0) {
+						versionPrefix += separator;
+					}
+					versionPrefix += token;
+				}
+			}
+		return versionPrefix;
+	}
+
+	private boolean isDataFlowServerVersionViable(String expectedVersion, String serverVersion) {
+		StringTokenizer expectedVersionTokenizer = new StringTokenizer(expectedVersion, ".");
+		StringTokenizer serverVersionTokenizer = new StringTokenizer(serverVersion,  ".");
+		boolean result = true;
+		while(expectedVersionTokenizer.hasMoreTokens()) {
+			if(serverVersionTokenizer.hasMoreTokens()) {
+				int expectedCurrentNum = Integer.valueOf(expectedVersionTokenizer.nextToken());
+				int serverCurrentNum = Integer.valueOf(serverVersionTokenizer.nextToken());
+				if (serverCurrentNum < expectedCurrentNum ) { //serverVersion is below the minimum expected
+					result = false;
+					break;
+				}
+				else if(serverCurrentNum > expectedCurrentNum) { //serverVersion is greater than minimum expected
+					break;
+				}
+			}
+			else {  //reached the end of the server tokens.
+				break;
+			}
+		}
+		return result;
 	}
 }
