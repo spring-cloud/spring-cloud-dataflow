@@ -34,6 +34,7 @@ import org.springframework.cloud.dataflow.core.StreamDefinition;
 import org.springframework.cloud.dataflow.core.StreamDeployment;
 import org.springframework.cloud.dataflow.registry.AppRegistry;
 import org.springframework.cloud.dataflow.registry.AppRegistryCommon;
+import org.springframework.cloud.dataflow.server.audit.service.AuditRecordService;
 import org.springframework.cloud.dataflow.server.config.apps.CommonApplicationProperties;
 import org.springframework.cloud.dataflow.server.repository.StreamDefinitionRepository;
 import org.springframework.cloud.dataflow.server.repository.StreamDeploymentRepository;
@@ -53,6 +54,7 @@ import static org.mockito.Mockito.when;
  * @author Ilayaperumal Gopinathan
  * @author Eric Bottard
  * @author Christian Tzolov
+ * @author Gunnar Hillert
  */
 @RunWith(SpringRunner.class)
 public class AppDeployerStreamServiceTests {
@@ -92,6 +94,8 @@ public class AppDeployerStreamServiceTests {
 
 	private AppRegistryCommon appRegistryCommon;
 
+	private AuditRecordService auditRecordService;
+
 	@Before
 	public void setupMock() {
 		this.streamDeploymentRepository = mock(StreamDeploymentRepository.class);
@@ -102,8 +106,9 @@ public class AppDeployerStreamServiceTests {
 				mock(CommonApplicationProperties.class),
 				new BootApplicationConfigurationMetadataResolver());
 		this.appRegistryCommon = mock(AppRegistryCommon.class);
-		this.simpleStreamService = new AppDeployerStreamService(mock(StreamDefinitionRepository.class),
-				this.appDeployerStreamDeployer, this.appDeploymentRequestCreator, this.appRegistryCommon);
+		this.auditRecordService = mock(AuditRecordService.class);
+		this.simpleStreamService = new AppDeployerStreamService(this.streamDefinitionRepository,
+				this.appDeployerStreamDeployer, this.appDeploymentRequestCreator, this.appRegistryCommon, auditRecordService);
 		this.streamDefinitionList.add(streamDefinition1);
 		this.appDeployerStreamDefinitions.add(streamDefinition1);
 		this.streamDefinitionList.add(streamDefinition2);
@@ -119,12 +124,15 @@ public class AppDeployerStreamServiceTests {
 	@Test
 	public void verifyUndeployStream() {
 		StreamDefinition streamDefinition1 = new StreamDefinition("test1", "time | log");
+		when(streamDefinitionRepository.findOne("test1")).thenReturn(streamDefinition1);
 		StreamDeployment streamDeployment1 = new StreamDeployment(streamDefinition1.getName(),
 				StreamDeployers.appdeployer.name());
 		when(this.streamDeploymentRepository.findOne(streamDeployment1.getStreamName())).thenReturn(streamDeployment1);
 		this.simpleStreamService.undeployStream(streamDefinition1.getName());
 		verify(this.appDeployerStreamDeployer, times(1)).undeployStream(streamDefinition1.getName());
+		verify(this.streamDefinitionRepository, times(1)).findOne(streamDefinition1.getName());
 		verifyNoMoreInteractions(this.appDeployerStreamDeployer);
+		verifyNoMoreInteractions(this.streamDefinitionRepository);
 		verify(this.skipperStreamDeployer, never()).undeployStream(streamDefinition1.getName());
 	}
 
