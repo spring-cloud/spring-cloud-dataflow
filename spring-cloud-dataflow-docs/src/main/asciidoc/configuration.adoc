@@ -803,6 +803,13 @@ spring:
             - GET    /tasks/executions/*             => hasRole('ROLE_VIEW')
             - POST   /tasks/executions               => hasRole('ROLE_CREATE')
             - DELETE /tasks/executions/*             => hasRole('ROLE_CREATE')
+
+            # Task Schedules
+
+            - GET    /tasks/schedules                => hasRole('ROLE_VIEW')
+            - GET    /tasks/schedules/*              => hasRole('ROLE_VIEW')
+            - POST   /tasks/schedules                => hasRole('ROLE_CREATE')
+            - DELETE /tasks/schedules/*              => hasRole('ROLE_CREATE')
 ----
 
 The format of each line is the following:
