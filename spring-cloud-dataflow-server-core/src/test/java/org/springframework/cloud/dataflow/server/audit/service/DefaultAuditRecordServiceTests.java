@@ -80,7 +80,7 @@ public class DefaultAuditRecordServiceTests {
 	@Test
 	public void testPopulateAndSaveAuditRecord() {
 		final AuditRecordService auditRecordService = new DefaultAuditRecordService(this.auditRecordRepository, new ObjectMapper());
-		auditRecordService.populateAndSaveAuditRecord(AuditActionType.CREATE, AuditOperationType.SCHEDULES, "1234", "my data");
+		auditRecordService.populateAndSaveAuditRecord(AuditOperationType.SCHEDULE, AuditActionType.CREATE, "1234", "my data");
 
 		final ArgumentCaptor<AuditRecord> argument = ArgumentCaptor.forClass(AuditRecord.class);
 		verify(this.auditRecordRepository, times(1)).save(argument.capture());
@@ -89,7 +89,7 @@ public class DefaultAuditRecordServiceTests {
 		AuditRecord auditRecord = argument.getValue();
 
 		assertEquals(AuditActionType.CREATE, auditRecord.getAuditAction());
-		assertEquals(AuditOperationType.SCHEDULES, auditRecord.getAuditOperation());
+		assertEquals(AuditOperationType.SCHEDULE, auditRecord.getAuditOperation());
 		assertEquals("1234", auditRecord.getCorrelationId());
 		assertEquals("my data", auditRecord.getAuditData());
 	}
@@ -99,7 +99,7 @@ public class DefaultAuditRecordServiceTests {
 		final AuditRecordService auditRecordService = new DefaultAuditRecordService(this.auditRecordRepository, new ObjectMapper());
 
 		try {
-			auditRecordService.populateAndSaveAuditRecord(AuditActionType.CREATE, AuditOperationType.SCHEDULES, "1234", null);
+			auditRecordService.populateAndSaveAuditRecord(AuditOperationType.SCHEDULE, AuditActionType.CREATE, "1234", null);
 		}
 		catch (IllegalArgumentException e) {
 			assertEquals("data must not be null nor empty.", e.getMessage());
@@ -113,7 +113,7 @@ public class DefaultAuditRecordServiceTests {
 		final AuditRecordService auditRecordService = new DefaultAuditRecordService(this.auditRecordRepository, new ObjectMapper());
 
 		try {
-			auditRecordService.populateAndSaveAuditRecord(AuditActionType.CREATE, AuditOperationType.SCHEDULES, "1234", " ");
+			auditRecordService.populateAndSaveAuditRecord(AuditOperationType.SCHEDULE, AuditActionType.CREATE, "1234", " ");
 		}
 		catch (IllegalArgumentException e) {
 			assertEquals("data must not be null nor empty.", e.getMessage());
@@ -127,7 +127,7 @@ public class DefaultAuditRecordServiceTests {
 		final AuditRecordService auditRecordService = new DefaultAuditRecordService(this.auditRecordRepository, new ObjectMapper());
 
 		try {
-			auditRecordService.populateAndSaveAuditRecord(null, AuditOperationType.SCHEDULES, "1234", "my audit data");
+			auditRecordService.populateAndSaveAuditRecord(AuditOperationType.SCHEDULE, null, "1234", "my audit data");
 		}
 		catch (IllegalArgumentException e) {
 			assertEquals("auditActionType must not be null.", e.getMessage());
@@ -141,7 +141,7 @@ public class DefaultAuditRecordServiceTests {
 		final AuditRecordService auditRecordService = new DefaultAuditRecordService(this.auditRecordRepository, new ObjectMapper());
 
 		try {
-			auditRecordService.populateAndSaveAuditRecord(AuditActionType.CREATE, null, "1234", "my audit data");
+			auditRecordService.populateAndSaveAuditRecord(null, AuditActionType.CREATE, "1234", "my audit data");
 		}
 		catch (IllegalArgumentException e) {
 			assertEquals("auditOperationType must not be null.", e.getMessage());
@@ -155,7 +155,7 @@ public class DefaultAuditRecordServiceTests {
 		final AuditRecordService auditRecordService = new DefaultAuditRecordService(this.auditRecordRepository, new ObjectMapper());
 
 		try {
-			auditRecordService.populateAndSaveAuditRecord(AuditActionType.CREATE, AuditOperationType.SCHEDULES, null, "my audit data");
+			auditRecordService.populateAndSaveAuditRecord(AuditOperationType.SCHEDULE, AuditActionType.CREATE, null, "my audit data");
 		}
 		catch (IllegalArgumentException e) {
 			assertEquals("correlationId must not be null nor empty.", e.getMessage());
@@ -169,7 +169,7 @@ public class DefaultAuditRecordServiceTests {
 		final AuditRecordService auditRecordService = new DefaultAuditRecordService(this.auditRecordRepository, new ObjectMapper());
 
 		try {
-			auditRecordService.populateAndSaveAuditRecord(AuditActionType.CREATE, AuditOperationType.SCHEDULES, " ", "my audit data");
+			auditRecordService.populateAndSaveAuditRecord(AuditOperationType.SCHEDULE, AuditActionType.CREATE, " ", "my audit data");
 		}
 		catch (IllegalArgumentException e) {
 			assertEquals("correlationId must not be null nor empty.", e.getMessage());
@@ -186,7 +186,7 @@ public class DefaultAuditRecordServiceTests {
 		mapAuditData.put("foo1", "bar1");
 		mapAuditData.put("foofoo", "barbar");
 
-		auditRecordService.populateAndSaveAuditRecordUsingMapData(AuditActionType.CREATE, AuditOperationType.SCHEDULES, "1234", mapAuditData);
+		auditRecordService.populateAndSaveAuditRecordUsingMapData(AuditOperationType.SCHEDULE, AuditActionType.CREATE, "1234", mapAuditData);
 
 		final ArgumentCaptor<AuditRecord> argument = ArgumentCaptor.forClass(AuditRecord.class);
 		verify(this.auditRecordRepository, times(1)).save(argument.capture());
@@ -195,7 +195,7 @@ public class DefaultAuditRecordServiceTests {
 		final AuditRecord auditRecord = argument.getValue();
 
 		assertEquals(AuditActionType.CREATE, auditRecord.getAuditAction());
-		assertEquals(AuditOperationType.SCHEDULES, auditRecord.getAuditOperation());
+		assertEquals(AuditOperationType.SCHEDULE, auditRecord.getAuditOperation());
 		assertEquals("1234", auditRecord.getCorrelationId());
 		assertEquals("{\"foofoo\":\"barbar\",\"foo1\":\"bar1\"}", auditRecord.getAuditData());
 	}
@@ -205,7 +205,7 @@ public class DefaultAuditRecordServiceTests {
 		final AuditRecordService auditRecordService = new DefaultAuditRecordService(this.auditRecordRepository, new ObjectMapper());
 
 		try {
-			auditRecordService.populateAndSaveAuditRecordUsingMapData(AuditActionType.CREATE, AuditOperationType.SCHEDULES, "1234", null);
+			auditRecordService.populateAndSaveAuditRecordUsingMapData(AuditOperationType.SCHEDULE, AuditActionType.CREATE, "1234", null);
 		}
 		catch (IllegalArgumentException e) {
 			assertEquals("data map must not be null and must contain at least 1 entry.", e.getMessage());
@@ -221,7 +221,7 @@ public class DefaultAuditRecordServiceTests {
 		final Map<String, Object> mapAuditData = new HashMap<>(2);
 
 		try {
-			auditRecordService.populateAndSaveAuditRecordUsingMapData(AuditActionType.CREATE, AuditOperationType.SCHEDULES, "1234", mapAuditData);
+			auditRecordService.populateAndSaveAuditRecordUsingMapData(AuditOperationType.SCHEDULE, AuditActionType.CREATE, "1234", mapAuditData);
 		}
 		catch (IllegalArgumentException e) {
 			assertEquals("data map must not be null and must contain at least 1 entry.", e.getMessage());
@@ -238,7 +238,7 @@ public class DefaultAuditRecordServiceTests {
 		mapAuditData.put("foo", "bar");
 
 		try {
-			auditRecordService.populateAndSaveAuditRecordUsingMapData(null, AuditOperationType.SCHEDULES, "1234", mapAuditData);
+			auditRecordService.populateAndSaveAuditRecordUsingMapData(AuditOperationType.SCHEDULE, null, "1234", mapAuditData);
 		}
 		catch (IllegalArgumentException e) {
 			assertEquals("auditActionType must not be null.", e.getMessage());
@@ -255,7 +255,7 @@ public class DefaultAuditRecordServiceTests {
 		mapAuditData.put("foo", "bar");
 
 		try {
-			auditRecordService.populateAndSaveAuditRecordUsingMapData(AuditActionType.CREATE, null, "1234", mapAuditData);
+			auditRecordService.populateAndSaveAuditRecordUsingMapData(null, AuditActionType.CREATE, "1234", mapAuditData);
 		}
 		catch (IllegalArgumentException e) {
 			assertEquals("auditOperationType must not be null.", e.getMessage());
@@ -272,7 +272,7 @@ public class DefaultAuditRecordServiceTests {
 		mapAuditData.put("foo", "bar");
 
 		try {
-			auditRecordService.populateAndSaveAuditRecordUsingMapData(AuditActionType.CREATE, AuditOperationType.SCHEDULES, null, mapAuditData);
+			auditRecordService.populateAndSaveAuditRecordUsingMapData(AuditOperationType.SCHEDULE, AuditActionType.CREATE, null, mapAuditData);
 		}
 		catch (IllegalArgumentException e) {
 			assertEquals("correlationId must not be null nor empty.", e.getMessage());
@@ -289,7 +289,7 @@ public class DefaultAuditRecordServiceTests {
 		mapAuditData.put("foo", "bar");
 
 		try {
-			auditRecordService.populateAndSaveAuditRecordUsingMapData(AuditActionType.CREATE, AuditOperationType.SCHEDULES, " ", mapAuditData);
+			auditRecordService.populateAndSaveAuditRecordUsingMapData(AuditOperationType.SCHEDULE, AuditActionType.CREATE, " ", mapAuditData);
 		}
 		catch (IllegalArgumentException e) {
 			assertEquals("correlationId must not be null nor empty.", e.getMessage());
@@ -311,7 +311,7 @@ public class DefaultAuditRecordServiceTests {
 		mapAuditData.put("foo", "bar");
 
 		try {
-			auditRecordService.populateAndSaveAuditRecordUsingMapData(AuditActionType.CREATE, AuditOperationType.SCHEDULES, "1234", mapAuditData);
+			auditRecordService.populateAndSaveAuditRecordUsingMapData(AuditOperationType.SCHEDULE, AuditActionType.CREATE, "1234", mapAuditData);
 		}
 		catch (IllegalStateException e) {
 			assertEquals("Error serializing audit record data.", e.getMessage());

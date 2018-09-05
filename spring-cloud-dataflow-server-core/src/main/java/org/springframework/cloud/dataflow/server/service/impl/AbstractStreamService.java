@@ -137,7 +137,7 @@ public abstract class AbstractStreamService implements StreamService {
 		}
 
 		auditRecordService.populateAndSaveAuditRecord(
-				AuditActionType.CREATE, AuditOperationType.STREAM_DEFINITIONS,
+				AuditOperationType.STREAM, AuditActionType.CREATE,
 				streamDefinition.getName(), streamDefinition.getDslText());
 
 		return streamDefinition;
@@ -177,7 +177,7 @@ public abstract class AbstractStreamService implements StreamService {
 		auditedData.put(DEPLOYMENT_PROPERTIES, deploymentProperties);
 
 		auditRecordService.populateAndSaveAuditRecordUsingMapData(
-				AuditActionType.DEPLOY, AuditOperationType.STREAM_DEFINITIONS,
+				AuditOperationType.STREAM, AuditActionType.DEPLOY,
 				streamDefinition.getName(), auditedData);
 	}
 
@@ -195,7 +195,7 @@ public abstract class AbstractStreamService implements StreamService {
 		this.streamDefinitionRepository.delete(name);
 
 		auditRecordService.populateAndSaveAuditRecord(
-				AuditActionType.DELETE, AuditOperationType.STREAM_DEFINITIONS,
+				AuditOperationType.STREAM, AuditActionType.DELETE,
 				streamDefinition.getName(), streamDefinition.getDslText());
 	}
 
@@ -209,7 +209,7 @@ public abstract class AbstractStreamService implements StreamService {
 
 		for (StreamDefinition streamDefinition : streamDefinitions) {
 			auditRecordService.populateAndSaveAuditRecord(
-					AuditActionType.DELETE, AuditOperationType.STREAM_DEFINITIONS,
+					AuditOperationType.STREAM, AuditActionType.DELETE,
 					streamDefinition.getName(), streamDefinition.getDslText());
 		}
 	}

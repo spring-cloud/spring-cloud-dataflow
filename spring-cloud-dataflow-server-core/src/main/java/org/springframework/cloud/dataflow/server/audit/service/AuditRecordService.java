@@ -38,34 +38,33 @@ public interface AuditRecordService {
 	 * With a mandatory set of parameters, this method will create a {@link AuditRecord} instance and
 	 * persist it to the underlying data store, e.g. {@link AuditRecordRepository}.
 	 *
-	 * @param auditActionType Must not be null
 	 * @param auditOperationType Must not be null
+	 * @param auditActionType Must not be null
 	 * @param correlationId Id to identify the record. Must not be null or empty
 	 * @param data The data as String to be audited. Must not be null or empty
 	 */
 	void populateAndSaveAuditRecord(
-			AuditActionType auditActionType,
 			AuditOperationType auditOperationType,
+			AuditActionType auditActionType,
 			String correlationId,
 			String data);
 
 	/**
-	 * Similar to {@link #populateAndSaveAuditRecord(AuditActionType, AuditOperationType, String, String)} but
+	 * Similar to {@link #populateAndSaveAuditRecord(AuditOperationType, AuditActionType, String, String)} but
 	 * instead of a String users can provide a {@link Map} as the Audit Data parameter, which will be persisted
 	 * as a JSON a structure. Callers should therefore make sure that the provided Map can indeed be serialized
 	 * to JSON via Jackson.
 	 *
-	 * @param auditActionType Must not be null
 	 * @param auditOperationType Must not be null
+	 * @param auditActionType Must not be null
 	 * @param correlationId Id to identify the record. Must not be null or empty
 	 * @param data The data as String to be audited. Must not be null or empty
 	 *
 	 * @throws IllegalStateException In case the Map containing the audit data cannot be serialized to JSON.
 	 */
 	void populateAndSaveAuditRecordUsingMapData(
-			AuditActionType auditActionType,
 			AuditOperationType auditOperationType,
+			AuditActionType auditActionType,
 			String correlationId,
 			Map<String, Object> data);
-
 }

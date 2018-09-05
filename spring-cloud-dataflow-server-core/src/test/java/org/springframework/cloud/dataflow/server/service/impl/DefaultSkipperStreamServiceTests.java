@@ -132,7 +132,7 @@ public class DefaultSkipperStreamServiceTests {
 		verify(this.appRegistryCommon).appExist("log", ApplicationType.sink);
 		verify(this.streamDefinitionRepository).save(new StreamDefinition("testStream", "time | log"));
 		verify(this.auditRecordService).populateAndSaveAuditRecord(
-			AuditActionType.CREATE, AuditOperationType.STREAM_DEFINITIONS, "testStream", "time | log");
+			AuditOperationType.STREAM, AuditActionType.CREATE, "testStream", "time | log");
 
 		verifyNoMoreInteractions(this.skipperStreamDeployer);
 		verifyNoMoreInteractions(this.appRegistryCommon);
@@ -174,7 +174,7 @@ public class DefaultSkipperStreamServiceTests {
 		this.defaultSkipperStreamService.undeployStream(streamDefinition2.getName());
 		verify(this.skipperStreamDeployer, times(1)).undeployStream(streamDefinition2.getName());
 		verify(this.auditRecordService).populateAndSaveAuditRecord(
-				AuditActionType.UNDEPLOY, AuditOperationType.STREAM_DEFINITIONS, "test2", "time | log");
+				AuditOperationType.STREAM, AuditActionType.UNDEPLOY, "test2", "time | log");
 		verifyNoMoreInteractions(this.skipperStreamDeployer);
 		verifyNoMoreInteractions(this.auditRecordService);
 	}

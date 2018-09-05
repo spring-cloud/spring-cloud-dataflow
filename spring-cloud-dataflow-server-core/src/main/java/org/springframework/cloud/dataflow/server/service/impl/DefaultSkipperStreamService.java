@@ -130,7 +130,7 @@ public class DefaultSkipperStreamService extends AbstractStreamService implement
 		final Map<String, Object> auditedData = new HashMap<>(2);
 		auditedData.put("deploymentProperties", deploymentProperties);
 
-		this.auditRecordService.populateAndSaveAuditRecordUsingMapData(AuditActionType.DEPLOY, AuditOperationType.STREAM_DEFINITIONS,
+		this.auditRecordService.populateAndSaveAuditRecordUsingMapData(AuditOperationType.STREAM, AuditActionType.DEPLOY,
 				streamDefinition.getName(), auditedData);
 
 		if (release != null) {
@@ -151,7 +151,7 @@ public class DefaultSkipperStreamService extends AbstractStreamService implement
 		final StreamDefinition streamDefinition = this.streamDefinitionRepository.findOne(streamName);
 		this.skipperStreamDeployer.undeployStream(streamName);
 		auditRecordService.populateAndSaveAuditRecord(
-				AuditActionType.UNDEPLOY, AuditOperationType.STREAM_DEFINITIONS,
+				AuditOperationType.STREAM, AuditActionType.UNDEPLOY,
 				streamDefinition.getName(), streamDefinition.getDslText());
 	}
 
@@ -188,7 +188,7 @@ public class DefaultSkipperStreamService extends AbstractStreamService implement
 		this.streamDefinitionRepository.delete(updatedStreamDefinition);
 		this.streamDefinitionRepository.save(updatedStreamDefinition);
 		this.auditRecordService.populateAndSaveAuditRecord(
-			AuditActionType.UPDATE, AuditOperationType.STREAM_DEFINITIONS, streamName, dslText);
+			AuditOperationType.STREAM, AuditActionType.UPDATE, streamName, dslText);
 	}
 
 	/**
@@ -229,7 +229,7 @@ public class DefaultSkipperStreamService extends AbstractStreamService implement
 			auditedData.put("yamlProperties", yamlProperties);
 
 			this.auditRecordService.populateAndSaveAuditRecordUsingMapData(
-				AuditActionType.UPDATE, AuditOperationType.STREAM_DEFINITIONS,
+				AuditOperationType.STREAM, AuditActionType.UPDATE,
 				streamName, auditedData
 			);
 		}
@@ -243,7 +243,7 @@ public class DefaultSkipperStreamService extends AbstractStreamService implement
 	public void rollbackStream(String streamName, int releaseVersion) {
 		Assert.isTrue(StringUtils.hasText(streamName), "Stream name must not be null");
 		this.skipperStreamDeployer.rollbackStream(streamName, releaseVersion);
-		this.auditRecordService.populateAndSaveAuditRecord(AuditActionType.ROLLBACK, AuditOperationType.STREAM_DEFINITIONS, streamName, "Rollback to version: " + releaseVersion);
+		this.auditRecordService.populateAndSaveAuditRecord(AuditOperationType.STREAM, AuditActionType.ROLLBACK, streamName, "Rollback to version: " + releaseVersion);
 	}
 
 

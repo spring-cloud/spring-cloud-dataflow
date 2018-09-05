@@ -25,10 +25,10 @@ import org.springframework.util.Assert;
  */
 public enum AuditOperationType {
 
-	STREAM_DEFINITIONS(100L, "Stream Definitions"),
-	TASK_DEFINITIONS(  200L, "Task Definitions"),
-	APP_REGISTRATIONS( 300L, "App Registrations"),
-	SCHEDULES(         400L, "Schedules");
+	STREAM   ( 100L, "Streams"),
+	TASK     ( 200L, "Task"),
+	APP      ( 300L, "App"),
+	SCHEDULE ( 400L, "Schedule");
 
 	private Long id;
 	private String name;
