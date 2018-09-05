@@ -45,7 +45,6 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.ProviderManager;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.config.annotation.web.configurers.ExpressionUrlAuthorizationConfigurer;
 import org.springframework.security.oauth2.client.OAuth2ClientContext;
@@ -74,7 +73,6 @@ import org.springframework.web.context.request.NativeWebRequest;
  * @author Ilayaperumal Gopinathan
  */
 @EnableOAuth2Client
-@EnableWebSecurity
 @Configuration
 @Conditional(OnSecurityEnabledAndOAuth2Enabled.class)
 public class OAuthSecurityConfiguration extends WebSecurityConfigurerAdapter {

@@ -18,7 +18,6 @@ package org.springframework.cloud.common.security;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.autoconfigure.security.SecurityProperties;
 import org.springframework.cloud.common.security.support.OnSecurityEnabledAndOAuth2Disabled;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Conditional;
@@ -27,7 +26,6 @@ import org.springframework.http.MediaType;
 import org.springframework.cloud.common.security.support.SecurityConfigUtils;
 import org.springframework.cloud.common.security.support.SecurityStateBean;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.config.annotation.web.configurers.ExpressionUrlAuthorizationConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
@@ -59,7 +57,6 @@ import org.springframework.web.accept.ContentNegotiationStrategy;
  */
 @Configuration
 @Conditional(OnSecurityEnabledAndOAuth2Disabled.class)
-@EnableWebSecurity
 public class BasicAuthSecurityConfiguration extends WebSecurityConfigurerAdapter {
 
 	@Autowired
