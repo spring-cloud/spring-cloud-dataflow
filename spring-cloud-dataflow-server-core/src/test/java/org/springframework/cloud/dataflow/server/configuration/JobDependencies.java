@@ -21,6 +21,7 @@ import javax.sql.DataSource;
 import org.springframework.batch.admin.service.JobService;
 import org.springframework.batch.admin.service.SimpleJobServiceFactoryBean;
 import org.springframework.batch.core.configuration.support.MapJobRegistry;
+import org.springframework.batch.core.explore.JobExplorer;
 import org.springframework.batch.core.explore.support.JobExplorerFactoryBean;
 import org.springframework.batch.core.launch.support.SimpleJobLauncher;
 import org.springframework.batch.core.repository.support.JobRepositoryFactoryBean;
@@ -64,6 +65,7 @@ import org.springframework.core.io.ResourceLoader;
 import org.springframework.data.web.config.EnableSpringDataWebSupport;
 import org.springframework.hateoas.config.EnableHypermediaSupport;
 import org.springframework.jdbc.datasource.DataSourceTransactionManager;
+import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 
 import static org.mockito.Mockito.mock;
@@ -149,13 +151,16 @@ public class JobDependencies {
 
 	@Bean
 	public SimpleJobServiceFactoryBean simpleJobServiceFactoryBean(DataSource dataSource,
-			JobRepositoryFactoryBean repositoryFactoryBean) {
+			JobRepositoryFactoryBean repositoryFactoryBean, JobExplorer jobExplorer,
+			PlatformTransactionManager dataSourceTransactionManager) {
 		SimpleJobServiceFactoryBean factoryBean = new SimpleJobServiceFactoryBean();
 		factoryBean.setDataSource(dataSource);
 		try {
 			factoryBean.setJobRepository(repositoryFactoryBean.getObject());
 			factoryBean.setJobLocator(new MapJobRegistry());
 			factoryBean.setJobLauncher(new SimpleJobLauncher());
+			factoryBean.setJobExplorer(jobExplorer);
+			factoryBean.setTransactionManager(dataSourceTransactionManager);
 		}
 		catch (Exception e) {
 			throw new IllegalStateException(e);

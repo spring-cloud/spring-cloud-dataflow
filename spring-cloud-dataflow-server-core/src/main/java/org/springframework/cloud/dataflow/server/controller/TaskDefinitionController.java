@@ -16,6 +16,8 @@
 
 package org.springframework.cloud.dataflow.server.controller;
 
+import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
+
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
