@@ -95,9 +95,12 @@ public interface StreamOperations {
 	 * @param releaseName the corresponding release name of the stream in skipper
 	 * @param packageIdentifier the package that corresponds to this stream
 	 * @param updateProperties a map of properties to use for updating the stream
+	 * @param force boolean flag to indicate if the stream update is enforced irrespective of
+*                 differences from the existing stream
+	 * @param appNames app names to use for the stream update when update is enforced
 	 */
 	void updateStream(String streamName, String releaseName, PackageIdentifier packageIdentifier,
-			Map<String, String> updateProperties);
+			Map<String, String> updateProperties, boolean force, String[] appNames);
 
 	/**
 	 * Rollback the stream to the previous or a specific release version.

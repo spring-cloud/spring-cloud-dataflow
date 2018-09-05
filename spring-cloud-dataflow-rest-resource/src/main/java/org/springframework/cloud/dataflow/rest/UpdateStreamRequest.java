@@ -21,7 +21,9 @@ import org.springframework.cloud.skipper.domain.PackageIdentifier;
 
 /**
  * Captures the required data for updating a stream using Skipper.
+ *
  * @author Mark Pollack
+ * @author Ilayaperumal Gopinathan
  */
 public class UpdateStreamRequest {
 
@@ -31,15 +33,26 @@ public class UpdateStreamRequest {
 
 	private Map<String, String> updateProperties;
 
+	private boolean force;
+
+	private String[] appNames;
+
 	public UpdateStreamRequest() {
 	}
 	
 
 	public UpdateStreamRequest(String releaseName, PackageIdentifier packageIdentifier,
 			Map<String, String> updateProperties) {
+		this(releaseName, packageIdentifier, updateProperties, false, null);
+	}
+
+	public UpdateStreamRequest(String releaseName, PackageIdentifier packageIdentifier,
+			Map<String, String> updateProperties, boolean force, String[] appNames) {
 		this.releaseName = releaseName;
 		this.packageIdentifier = packageIdentifier;
 		this.updateProperties = updateProperties;
+		this.force = force;
+		this.appNames = appNames;
 	}
 
 	public String getReleaseName() {
@@ -66,12 +79,30 @@ public class UpdateStreamRequest {
 		this.updateProperties = updateProperties;
 	}
 
+	public boolean isForce() {
+		return force;
+	}
+
+	public void setForce(boolean force) {
+		this.force = force;
+	}
+
+	public String[] getAppNames() {
+		return appNames;
+	}
+
+	public void setAppNames(String[] appNames) {
+		this.appNames = appNames;
+	}
+
 	@Override
 	public String toString() {
 		return "UpdateStreamRequest{" +
 				"releaseName='" + releaseName + '\'' +
 				", packageIdentifier=" + packageIdentifier +
 				", updateProperties=" + updateProperties +
+				", force=" + this.force +
+				", appNames=" + this.appNames +
 				'}';
 	}
 }
