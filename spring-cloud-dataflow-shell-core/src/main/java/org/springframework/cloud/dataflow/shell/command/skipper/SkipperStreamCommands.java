@@ -169,10 +169,15 @@ public class SkipperStreamCommands extends AbstractStreamCommands implements Com
 			@CliOption(key = "packageVersion", help = "the package version of the package to update when using "
 					+ "Skipper") String packageVersion,
 			@CliOption(key = "repoName", help = "the name of the local repository to upload the package when using "
-					+ "Skipper") String repoName)
+					+ "Skipper") String repoName,
+			@CliOption(key = "force", help = "force the update", mandatory = false, specifiedDefaultValue = "true", unspecifiedDefaultValue = "false") boolean force,
+			@CliOption(key = "appNames", help = "the application names to force update", mandatory = false) String appNames)
 			throws IOException {
 		int which = Assertions.atMostOneOf(PROPERTIES_OPTION, properties, PROPERTIES_FILE_OPTION,
 				propertiesFile);
+		if (StringUtils.hasText(appNames)) {
+			Assert.isTrue(force, "App names can be used only when the stream update is forced.");
+		}
 		Map<String, String> propertiesToUse = DeploymentPropertiesUtils.parseDeploymentProperties(properties,
 				propertiesFile, which);
 
@@ -184,7 +189,7 @@ public class SkipperStreamCommands extends AbstractStreamCommands implements Com
 		if (StringUtils.hasText(repoName)) {
 			packageIdentifier.setRepositoryName(repoName);
 		}
-		streamOperations().updateStream(name, name, packageIdentifier, propertiesToUse);
+		streamOperations().updateStream(name, name, packageIdentifier, propertiesToUse, force, StringUtils.commaDelimitedListToStringArray(appNames));
 		return String.format("Update request has been sent for the stream '%s'", name);
 	}
 
