@@ -21,6 +21,7 @@ import java.net.UnknownHostException;
 import java.time.Instant;
 
 import javax.persistence.Column;
+import javax.persistence.Convert;
 import javax.persistence.Entity;
 import javax.persistence.EntityListeners;
 import javax.persistence.GeneratedValue;
@@ -33,7 +34,6 @@ import javax.persistence.PreUpdate;
 import javax.persistence.Table;
 import javax.validation.constraints.NotNull;
 
-import org.hibernate.annotations.Parameter;
 import org.hibernate.annotations.Type;
 
 import org.springframework.data.annotation.CreatedBy;
@@ -50,7 +50,7 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 @EntityListeners(AuditingEntityListener.class)
 public class AuditRecord {
 
-	private static final String UNKNOW_SERVER_HOST = "unknown";
+	public static final String UNKNOW_SERVER_HOST = "unknown";
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.AUTO)
@@ -75,17 +75,11 @@ public class AuditRecord {
 	private Instant createdOn;
 
 	@NotNull
-	@Type(type = "org.springframework.cloud.dataflow.server.hibernate.GenericEnumUserType", parameters = {
-			@Parameter(name = "enumClass", value = "org.springframework.cloud.dataflow.server.audit.domain.AuditActionType"),
-			@Parameter(name = "identifierMethod", value = "getId"),
-			@Parameter(name = "valueOfMethod", value = "fromId") })
+	@Convert(converter=AuditActionTypeConverter.class)
 	private AuditActionType auditAction;
 
 	@NotNull
-	@Type(type = "org.springframework.cloud.dataflow.server.hibernate.GenericEnumUserType", parameters = {
-			@Parameter(name = "enumClass", value = "org.springframework.cloud.dataflow.server.audit.domain.AuditOperationType"),
-			@Parameter(name = "identifierMethod", value = "getId"),
-			@Parameter(name = "valueOfMethod", value = "fromId") })
+	@Convert(converter=AuditOperationTypeConverter.class)
 	private AuditOperationType auditOperation;
 
 	public Long getId() {

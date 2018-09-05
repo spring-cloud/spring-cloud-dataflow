@@ -62,7 +62,7 @@ public interface AuditRecordService {
 	 *
 	 * @throws IllegalStateException In case the Map containing the audit data cannot be serialized to JSON.
 	 */
-	void populateAndSaveAuditRecord(
+	void populateAndSaveAuditRecordUsingMapData(
 			AuditActionType auditActionType,
 			AuditOperationType auditOperationType,
 			String correlationId,

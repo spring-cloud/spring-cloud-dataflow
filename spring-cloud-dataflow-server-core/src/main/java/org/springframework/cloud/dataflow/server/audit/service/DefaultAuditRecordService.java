@@ -40,9 +40,8 @@ public class DefaultAuditRecordService implements AuditRecordService {
 	private final ObjectMapper objectMapper;
 
 	public DefaultAuditRecordService(AuditRecordRepository auditRecordRepository, ObjectMapper objectMapper) {
-		super();
 		Assert.notNull(auditRecordRepository, "auditRecordRepository must not be null.");
-		Assert.notNull(auditRecordRepository, "objectMapper must not be null.");
+		Assert.notNull(objectMapper, "objectMapper must not be null.");
 		this.auditRecordRepository = auditRecordRepository;
 		this.objectMapper = objectMapper;
 	}
@@ -64,24 +63,21 @@ public class DefaultAuditRecordService implements AuditRecordService {
 	}
 
 	@Override
-	public void populateAndSaveAuditRecord(AuditActionType auditActionType, AuditOperationType auditOperationType,
+	public void populateAndSaveAuditRecordUsingMapData(AuditActionType auditActionType, AuditOperationType auditOperationType,
 			String correlationId, Map<String, Object> data) {
-		Assert.notNull(auditActionType, "auditActionType must not be null.");
-		Assert.notNull(auditOperationType, "auditOperationType must not be null.");
-		Assert.hasText(correlationId, "correlationId must not be null nor empty.");
+
 		Assert.notEmpty(data, "data map must not be null and must contain at least 1 entry.");
 
-		final AuditRecord auditRecord = new AuditRecord();
-		auditRecord.setAuditAction(auditActionType);;
-		auditRecord.setAuditOperation(auditOperationType);;
-		auditRecord.setCorrelationId(correlationId);
+		final String dataAsString;
 
 		try {
-			auditRecord.setAuditData(objectMapper.writeValueAsString(data));
-		} catch (JsonProcessingException e) {
+			dataAsString = objectMapper.writeValueAsString(data);
+		}
+		catch (JsonProcessingException e) {
 			throw new IllegalStateException("Error serializing audit record data.", e);
 		}
-		this.auditRecordRepository.save(auditRecord);
+
+		this.populateAndSaveAuditRecord(auditActionType, auditOperationType, correlationId, dataAsString);
 	}
 
 }

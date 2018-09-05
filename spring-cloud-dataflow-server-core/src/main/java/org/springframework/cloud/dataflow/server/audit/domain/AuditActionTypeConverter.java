@@ -13,14 +13,34 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.springframework.cloud.dataflow.server.audit.repository;
+package org.springframework.cloud.dataflow.server.audit.domain;
 
-import org.springframework.data.repository.NoRepositoryBean;
+import javax.persistence.AttributeConverter;
+import javax.persistence.Converter;
 
 /**
+ * JPA 2.1 {@link AttributeConverter} for the {@link AuditActionType} enumeration.
+ *
  * @author Gunnar Hillert
  */
-@NoRepositoryBean
-public interface AuditRecordRepositoryCustom {
+@Converter
+public class AuditActionTypeConverter implements AttributeConverter<AuditActionType, Long> {
 
+	@Override
+	public Long convertToDatabaseColumn( AuditActionType value ) {
+		if ( value == null ) {
+			return null;
+		}
+
+		return value.getId();
+	}
+
+	@Override
+	public AuditActionType convertToEntityAttribute( Long value ) {
+		if ( value == null ) {
+			return null;
+		}
+
+		return AuditActionType.fromId( value );
+	}
 }

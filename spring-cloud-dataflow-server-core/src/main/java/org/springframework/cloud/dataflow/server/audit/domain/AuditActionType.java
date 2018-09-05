@@ -25,11 +25,11 @@ import org.springframework.util.Assert;
  */
 public enum AuditActionType {
 
-	CREATE(100L,   "Create", "Create an Entity"),
-	UPDATE(200L,   "Update", "Update an Entity"),
+	CREATE(100L,   "Create",   "Create an Entity"),
+	UPDATE(200L,   "Update",   "Update an Entity"),
 	ROLLBACK(210L, "Rollback", "Rollback an Entity"),
-	DELETE(300L,   "Delete", "Delete an Entity"),
-	DEPLOY(400L,   "Deploy", "Deploy an Entity"),
+	DELETE(300L,   "Delete",   "Delete an Entity"),
+	DEPLOY(400L,   "Deploy",   "Deploy an Entity"),
 	UNDEPLOY(500L, "Undeploy", "Undeploy an Entity");
 
 	private Long id;
@@ -40,7 +40,7 @@ public enum AuditActionType {
 	 * Constructor.
 	 *
 	 */
-	AuditActionType(final Long id, final String name, final String description) {
+	private AuditActionType(final Long id, final String name, final String description) {
 		this.id = id;
 		this.name = name;
 		this.description = description;

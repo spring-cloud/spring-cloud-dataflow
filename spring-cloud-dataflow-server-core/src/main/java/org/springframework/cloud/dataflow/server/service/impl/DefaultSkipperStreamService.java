@@ -130,7 +130,7 @@ public class DefaultSkipperStreamService extends AbstractStreamService implement
 		final Map<String, Object> auditedData = new HashMap<>(2);
 		auditedData.put("deploymentProperties", deploymentProperties);
 
-		this.auditRecordService.populateAndSaveAuditRecord(AuditActionType.DEPLOY, AuditOperationType.STREAM_DEFINITIONS,
+		this.auditRecordService.populateAndSaveAuditRecordUsingMapData(AuditActionType.DEPLOY, AuditOperationType.STREAM_DEFINITIONS,
 				streamDefinition.getName(), auditedData);
 
 		if (release != null) {
@@ -228,7 +228,7 @@ public class DefaultSkipperStreamService extends AbstractStreamService implement
 			auditedData.put("packageIdentifier", packageIdentifier);
 			auditedData.put("yamlProperties", yamlProperties);
 
-			this.auditRecordService.populateAndSaveAuditRecord(
+			this.auditRecordService.populateAndSaveAuditRecordUsingMapData(
 				AuditActionType.UPDATE, AuditOperationType.STREAM_DEFINITIONS,
 				streamName, auditedData
 			);

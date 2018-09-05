@@ -13,26 +13,34 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.springframework.cloud.dataflow.server.audit.repository;
+package org.springframework.cloud.dataflow.server.audit.domain;
 
-import java.util.List;
-
-import org.springframework.cloud.dataflow.server.audit.domain.AuditRecord;
-import org.springframework.data.repository.PagingAndSortingRepository;
-import org.springframework.transaction.annotation.Transactional;
+import javax.persistence.AttributeConverter;
+import javax.persistence.Converter;
 
 /**
- * Repository interface for managing the {@link AuditRecord} class.
+ * JPA 2.1 {@link AttributeConverter} for the {@link AuditOperationType} enumeration.
+ *
  * @author Gunnar Hillert
  */
-@Transactional
-public interface AuditRecordRepository
-	extends PagingAndSortingRepository<AuditRecord, Long> {
+@Converter
+public class AuditOperationTypeConverter implements AttributeConverter<AuditOperationType, Long> {
 
 	@Override
-	<S extends AuditRecord> S save(S s);
+	public Long convertToDatabaseColumn( AuditOperationType value ) {
+		if ( value == null ) {
+			return null;
+		}
+
+		return value.getId();
+	}
 
 	@Override
-	List<AuditRecord> findAll();
+	public AuditOperationType convertToEntityAttribute( Long value ) {
+		if ( value == null ) {
+			return null;
+		}
 
+		return AuditOperationType.fromId( value );
+	}
 }

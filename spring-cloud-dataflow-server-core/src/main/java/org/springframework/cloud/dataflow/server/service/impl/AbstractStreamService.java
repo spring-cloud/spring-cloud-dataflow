@@ -85,6 +85,9 @@ public abstract class AbstractStreamService implements StreamService {
 
 	protected final AuditRecordService auditRecordService;
 
+	public static final String STREAM_DEFINITION_DSL_TEXT = "streamDefinitionDslText";
+	public static final String DEPLOYMENT_PROPERTIES = "streamDefinitionDslText";
+
 	/**
 	 * Constructor for implementations of the {@link StreamService}.
 	 * @param streamDefinitionRepository the stream definition repository to use
@@ -170,10 +173,10 @@ public abstract class AbstractStreamService implements StreamService {
 		doDeployStream(streamDefinition, deploymentProperties);
 
 		final Map<String, Object> auditedData = new HashMap<>(2);
-		auditedData.put("streamDefinitionDslText", streamDefinition.getDslText());
-		auditedData.put("deploymentProperties", deploymentProperties);
+		auditedData.put(STREAM_DEFINITION_DSL_TEXT, streamDefinition.getDslText());
+		auditedData.put(DEPLOYMENT_PROPERTIES, deploymentProperties);
 
-		auditRecordService.populateAndSaveAuditRecord(
+		auditRecordService.populateAndSaveAuditRecordUsingMapData(
 				AuditActionType.DEPLOY, AuditOperationType.STREAM_DEFINITIONS,
 				streamDefinition.getName(), auditedData);
 	}
