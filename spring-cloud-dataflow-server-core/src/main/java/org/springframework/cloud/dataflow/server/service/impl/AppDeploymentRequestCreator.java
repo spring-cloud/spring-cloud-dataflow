@@ -15,7 +15,6 @@
  */
 package org.springframework.cloud.dataflow.server.service.impl;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -103,11 +102,6 @@ public class AppDeploymentRequestCreator {
 					.extractAndQualifyDeployerProperties(updateProperties, currentApp.getName());
 
 			Resource appResource = appRegistry.getAppResource(appRegistration);
-			try {
-				logger.info(String.format("Downloading resource URI [%s]", appResource.getURI()));
-			}
-			catch (IOException e) {
-			}
 			Resource metadataResource = appRegistry.getAppMetadataResource(appRegistration);
 
 			Map<String, String> expandedAppUpdateTimeProperties = this.whitelistProperties
