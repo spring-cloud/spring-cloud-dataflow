@@ -19,7 +19,8 @@ package org.springframework.cloud.dataflow.rest.client;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.StringTokenizer;
+
+import com.vdurmont.semver4j.Semver;
 
 import org.springframework.cloud.dataflow.rest.resource.CurrentTaskExecutionsResource;
 import org.springframework.cloud.dataflow.rest.resource.TaskDefinitionResource;
@@ -171,24 +172,11 @@ public class TaskTemplate implements TaskOperations {
 	}
 
 	private boolean isDataFlowServerVersionViable(String expectedVersion, String serverVersion) {
-		StringTokenizer expectedVersionTokenizer = new StringTokenizer(expectedVersion, ".");
-		StringTokenizer serverVersionTokenizer = new StringTokenizer(serverVersion,  ".");
-		boolean result = true;
-		while(expectedVersionTokenizer.hasMoreTokens()) {
-			if(serverVersionTokenizer.hasMoreTokens()) {
-				int expectedCurrentNum = Integer.valueOf(expectedVersionTokenizer.nextToken());
-				int serverCurrentNum = Integer.valueOf(serverVersionTokenizer.nextToken());
-				if (serverCurrentNum < expectedCurrentNum ) { //serverVersion is below the minimum expected
-					result = false;
-					break;
-				}
-				else if(serverCurrentNum > expectedCurrentNum) { //serverVersion is greater than minimum expected
-					break;
-				}
-			}
-			else {  //reached the end of the server tokens.
-				break;
-			}
+		boolean result =  false;
+		if(!StringUtils.isEmpty(serverVersion)) {
+			Semver minRequiredVersion = new Semver(expectedVersion);
+			Semver currentVersion = new Semver(serverVersion);
+			result = currentVersion.isGreaterThanOrEqualTo(minRequiredVersion);
 		}
 		return result;
 	}

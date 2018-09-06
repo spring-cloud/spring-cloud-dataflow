@@ -63,16 +63,6 @@ public class TaskTemplateTests {
 		validateExecutionLinkPresent("2.0.0");
 	}
 
-	@Test
-	public void testLongerDataFlowVersion() {
-		validateExecutionLinkPresent("1.7.0.5");
-	}
-
-	@Test
-	public void testShorterDataFlowVersion() {
-		validateExecutionLinkNotPresent("1.6");
-		validateExecutionLinkPresent("1.7");
-	}
 
 	private void validateExecutionLinkPresent(String version) {
 		TestResource testResource = new TestResource();
