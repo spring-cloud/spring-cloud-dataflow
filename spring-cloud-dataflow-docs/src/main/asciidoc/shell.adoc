@@ -34,8 +34,12 @@ Data Flow Options:
 ----
 
 The `spring.shell.commandFile` option can be used to point to an existing file that contains
-all the shell commands to deploy one or many related streams and tasks.  This is useful when creating some scripts to
-help automate deployment.
+all the shell commands to deploy one or many related streams and tasks. +
+Multiple files execution is also supported, they should be passed as comma delimited string : +
+
+`--spring.shell.commandFile=file1.txt,file2.txt`
+
+This is useful when creating some scripts to help automate deployment.
 
 Also, the following shell command helps to modularize a complex script into multiple independent files:
 

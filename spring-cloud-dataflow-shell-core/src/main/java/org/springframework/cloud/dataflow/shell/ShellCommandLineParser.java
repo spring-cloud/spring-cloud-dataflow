@@ -15,18 +15,17 @@
  */
 package org.springframework.cloud.dataflow.shell;
 
+import org.apache.commons.io.FileUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.boot.ApplicationArguments;
+import org.springframework.shell.CommandLine;
+import org.springframework.shell.SimpleShellCommandLineOptions;
+
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-
-import org.apache.commons.io.FileUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import org.springframework.boot.ApplicationArguments;
-import org.springframework.shell.CommandLine;
-import org.springframework.shell.SimpleShellCommandLineOptions;
 
 /**
  * Parses the {@link ShellProperties} and {@link ApplicationArguments} to create an
@@ -57,12 +56,13 @@ public class ShellCommandLineParser {
 	public CommandLine parse(ShellProperties shellProperties, String[] applicationArguments) {
 		List<String> commands = new ArrayList<String>();
 		if (shellProperties.getCommandFile() != null) {
-			File f = new File(shellProperties.getCommandFile());
-			try {
-				commands.addAll(FileUtils.readLines(f));
-			}
-			catch (IOException e) {
-				logger.error("Unable to read from " + f.toString(), e);
+			for(String filePath:shellProperties.getCommandFile().split(",")) {
+				File f = new File(filePath);
+				try {
+					commands.addAll(FileUtils.readLines(f));
+				} catch (IOException e) {
+					logger.error("Unable to read from " + f.toString(), e);
+				}
 			}
 		}
 		String[] commandsToExecute = (commands.size() > 0) ? commands.toArray(new String[commands.size()]) : null;
