@@ -15,17 +15,19 @@
  */
 package org.springframework.cloud.dataflow.shell;
 
-import org.apache.commons.io.FileUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.boot.ApplicationArguments;
-import org.springframework.shell.CommandLine;
-import org.springframework.shell.SimpleShellCommandLineOptions;
-
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+
+import org.apache.commons.io.FileUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import org.springframework.boot.ApplicationArguments;
+import org.springframework.shell.CommandLine;
+import org.springframework.shell.SimpleShellCommandLineOptions;
+
 
 /**
  * Parses the {@link ShellProperties} and {@link ApplicationArguments} to create an
