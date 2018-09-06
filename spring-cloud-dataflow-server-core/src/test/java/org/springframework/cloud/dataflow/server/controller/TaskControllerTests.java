@@ -23,6 +23,7 @@ import java.util.Date;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.util.EntityUtils;
+import org.hamcrest.Matchers;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -50,12 +51,20 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 
+import static org.hamcrest.Matchers.containsInAnyOrder;
+import static org.hamcrest.Matchers.emptyArray;
 import static org.hamcrest.Matchers.hasEntry;
+import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.not;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyString;
+import static org.mockito.Matchers.anyVararg;
 import static org.mockito.Mockito.atLeast;
+import static org.mockito.Mockito.timeout;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
@@ -63,6 +72,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 /**
@@ -108,14 +118,18 @@ public class TaskControllerTests {
 		when(taskLauncher.launch(any(AppDeploymentRequest.class))).thenReturn("testID");
 
 		final TaskExecution taskExecutionRunning = new TaskExecution();
+		taskExecutionRunning.setTaskName("myTask");
 		taskExecutionRunning.setStartTime(new Date());
 		when(taskExplorer.getLatestTaskExecutionForTaskName("myTask")).thenReturn(taskExecutionRunning);
 
 		final TaskExecution taskExecutionComplete = new TaskExecution();
+		taskExecutionComplete.setTaskName("myTask2");
 		taskExecutionComplete.setStartTime(new Date());
 		taskExecutionComplete.setEndTime(new Date());
 		taskExecutionComplete.setExitCode(0);
 		when(taskExplorer.getLatestTaskExecutionForTaskName("myTask2")).thenReturn(taskExecutionComplete);
+
+		when(taskExplorer.getLatestTaskExecutionsByTaskNames(anyVararg())).thenReturn(Arrays.asList(taskExecutionRunning, taskExecutionComplete));
 	}
 
 	@Test(expected = IllegalArgumentException.class)
@@ -318,7 +332,10 @@ public class TaskControllerTests {
 		TaskDefinition taskDefinition2 = new TaskDefinition("myTask2", "timestamp");
 		repository.save(taskDefinition2);
 
-		assertEquals(2, repository.count());
+		TaskDefinition taskDefinition3= new TaskDefinition("myTask3", "timestamp");
+		repository.save(taskDefinition3);
+
+		assertEquals(3, repository.count());
 
 		mockMvc.perform(get("/tasks/definitions/myTask").accept(MediaType.APPLICATION_JSON)).andExpect(status().isOk())
 				.andExpect(content().json("{name: \"myTask\"}"))
@@ -326,14 +343,39 @@ public class TaskControllerTests {
 				.andExpect(content().json("{dslText: \"timestamp\"}"));
 
 		mockMvc.perform(get("/tasks/definitions/myTask2").accept(MediaType.APPLICATION_JSON)).andExpect(status().isOk())
-		.andExpect(content().json("{name: \"myTask2\"}"))
-		.andExpect(content().json("{status: \"COMPLETE\"}"))
-		.andExpect(content().json("{dslText: \"timestamp\"}"));
+				.andExpect(content().json("{name: \"myTask2\"}"))
+				.andExpect(content().json("{status: \"COMPLETE\"}"))
+				.andExpect(content().json("{dslText: \"timestamp\"}"));
+
+		mockMvc.perform(get("/tasks/definitions/myTask3").accept(MediaType.APPLICATION_JSON)).andExpect(status().isOk())
+				.andExpect(content().json("{name: \"myTask3\"}"))
+				.andExpect(content().json("{status: \"UNKNOWN\"}"))
+				.andExpect(content().json("{dslText: \"timestamp\"}"));
 	}
 
 	@Test
 	public void testDisplaySingleTaskNotFound() throws Exception {
 		mockMvc.perform(get("/tasks/definitions/myTask").accept(MediaType.APPLICATION_JSON))
 				.andExpect(status().isNotFound());
+	}
+
+	@Test
+	public void testGetAllTasks() throws Exception {
+		TaskDefinition taskDefinition = new TaskDefinition("myTask", "timestamp");
+		repository.save(taskDefinition);
+
+		TaskDefinition taskDefinition2 = new TaskDefinition("myTask2", "timestamp");
+		repository.save(taskDefinition2);
+
+		TaskDefinition taskDefinition3= new TaskDefinition("myTask3", "timestamp");
+		repository.save(taskDefinition3);
+
+		assertEquals(3, repository.count());
+
+		mockMvc.perform(get("/tasks/definitions/").accept(MediaType.APPLICATION_JSON)).andExpect(status().isOk())
+				.andExpect(jsonPath("$.content", hasSize(3)))
+				.andExpect(jsonPath("$.content[*].name", containsInAnyOrder("myTask", "myTask2", "myTask3")))
+				.andExpect(jsonPath("$.content[*].dslText", containsInAnyOrder("timestamp", "timestamp", "timestamp")))
+				.andExpect(jsonPath("$.content[*].status", containsInAnyOrder("RUNNING", "COMPLETE", "UNKNOWN")));
 	}
 }
