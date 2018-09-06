@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 the original author or authors.
+ * Copyright 2015-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,6 +28,7 @@ import org.springframework.boot.ApplicationArguments;
 import org.springframework.shell.CommandLine;
 import org.springframework.shell.SimpleShellCommandLineOptions;
 
+
 /**
  * Parses the {@link ShellProperties} and {@link ApplicationArguments} to create an
  * instance of the Spring Shell's CommandLine class.
@@ -40,6 +41,7 @@ import org.springframework.shell.SimpleShellCommandLineOptions;
  * quit.
  *
  * @author Mark Pollack
+ * @author Furer Alexander
  */
 public class ShellCommandLineParser {
 
@@ -57,12 +59,14 @@ public class ShellCommandLineParser {
 	public CommandLine parse(ShellProperties shellProperties, String[] applicationArguments) {
 		List<String> commands = new ArrayList<String>();
 		if (shellProperties.getCommandFile() != null) {
-			File f = new File(shellProperties.getCommandFile());
-			try {
-				commands.addAll(FileUtils.readLines(f));
-			}
-			catch (IOException e) {
-				logger.error("Unable to read from " + f.toString(), e);
+			for (String filePath : shellProperties.getCommandFile()) {
+				File f = new File(filePath);
+				try {
+					commands.addAll(FileUtils.readLines(f));
+				}
+				catch (IOException e) {
+					logger.error("Unable to read from " + f.toString(), e);
+				}
 			}
 		}
 		String[] commandsToExecute = (commands.size() > 0) ? commands.toArray(new String[commands.size()]) : null;
