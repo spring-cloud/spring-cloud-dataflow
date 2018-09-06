@@ -94,20 +94,25 @@ public class DefaultAuditRecordService implements AuditRecordService {
 	@Override
 	public Page<AuditRecord> findAuditRecordByAuditOperationTypeAndAuditActionType(
 			Pageable pageable,
-			AuditActionType action,
-			AuditOperationType operation) {
+			AuditActionType[] actions,
+			AuditOperationType[] operations) {
 
-		if (action != null && operation == null) {
-			return this.auditRecordRepository.findByAuditAction(action, pageable);
+		if (actions != null && operations == null) {
+			return this.auditRecordRepository.findByAuditActionIn(actions, pageable);
 		}
-		else if (action == null && operation != null) {
-			return this.auditRecordRepository.findByAuditOperation(operation, pageable);
+		else if (actions == null && operations != null) {
+			return this.auditRecordRepository.findByAuditOperationIn(operations, pageable);
 		}
-		else if (action != null && operation != null) {
-			return this.auditRecordRepository.findByAuditOperationAndAuditAction(operation, action, pageable);
+		else if (actions != null && operations != null) {
+			return this.auditRecordRepository.findByAuditOperationInAndAuditActionIn(operations, actions, pageable);
 		}
 		else {
 			return this.auditRecordRepository.findAll(pageable);
 		}
+	}
+
+	@Override
+	public AuditRecord findOne(Long id) {
+		return this.auditRecordRepository.findOne(id);
 	}
 }

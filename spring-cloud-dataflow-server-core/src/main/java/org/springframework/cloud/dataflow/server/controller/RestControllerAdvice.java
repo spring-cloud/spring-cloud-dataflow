@@ -33,6 +33,7 @@ import org.springframework.cloud.dataflow.server.controller.support.InvalidStrea
 import org.springframework.cloud.dataflow.server.job.support.JobNotRestartableException;
 import org.springframework.cloud.dataflow.server.repository.DuplicateStreamDefinitionException;
 import org.springframework.cloud.dataflow.server.repository.DuplicateTaskException;
+import org.springframework.cloud.dataflow.server.repository.NoSuchAuditRecordException;
 import org.springframework.cloud.dataflow.server.repository.NoSuchScheduleException;
 import org.springframework.cloud.dataflow.server.repository.NoSuchStreamDefinitionException;
 import org.springframework.cloud.dataflow.server.repository.NoSuchTaskBatchException;
@@ -131,7 +132,8 @@ public class RestControllerAdvice {
 	 * Log the exception message at warn level and stack trace as trace level. Return
 	 * response status HttpStatus.NOT_FOUND
 	 *
-	 * @param e one of the exceptions, {@link NoSuchStreamDefinitionException},
+	 * @param e one of the exceptions, {@link NoSuchAuditRecordException},
+	 * {@link NoSuchStreamDefinitionException},
 	 * {@link NoSuchAppRegistrationException}, {@link NoSuchTaskDefinitionException},
 	 * {@link NoSuchTaskExecutionException}, {@link NoSuchJobExecutionException},
 	 * {@link NoSuchJobInstanceException}, {@link NoSuchJobException},
@@ -141,7 +143,8 @@ public class RestControllerAdvice {
 	 * @return the error response in JSON format with media type
 	 * application/vnd.error+json
 	 */
-	@ExceptionHandler({ NoSuchStreamDefinitionException.class, NoSuchAppRegistrationException.class,
+	@ExceptionHandler({ NoSuchAuditRecordException.class,
+			NoSuchStreamDefinitionException.class, NoSuchAppRegistrationException.class,
 			NoSuchTaskDefinitionException.class, NoSuchTaskExecutionException.class, NoSuchJobExecutionException.class,
 			NoSuchJobInstanceException.class, NoSuchJobException.class, NoSuchStepExecutionException.class,
 			NoSuchTaskBatchException.class, MetricsMvcEndpoint.NoSuchMetricException.class, NoSuchAppException.class,

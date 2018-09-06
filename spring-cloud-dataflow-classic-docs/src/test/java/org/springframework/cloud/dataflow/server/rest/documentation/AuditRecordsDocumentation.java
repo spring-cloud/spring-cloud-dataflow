@@ -68,7 +68,9 @@ public class AuditRecordsDocumentation extends BaseDocumentation {
 		this.mockMvc.perform(
 			get("/audit-records")
 				.param("page", "0")
-				.param("size", "10"))
+				.param("size", "10")
+				.param("operations", "STREAM")
+				.param("actions", "CREATE"))
 			.andDo(print())
 			.andExpect(status().isOk())
 			.andDo(this.documentationHandler.document(
@@ -76,7 +78,11 @@ public class AuditRecordsDocumentation extends BaseDocumentation {
 					parameterWithName("page")
 						.description("The zero-based page number (optional)"),
 					parameterWithName("size")
-						.description("The requested page size (optional)")),
+						.description("The requested page size (optional)"),
+					parameterWithName("operations")
+						.description("Comma-separated list of Audit Operations (optional)"),
+					parameterWithName("actions")
+						.description("Comma-separated list of Audit Actions (optional)")),
 				responseFields(
 				fieldWithPath("_embedded.auditRecordResourceList")
 					.description("Contains a collection of Audit Records"),

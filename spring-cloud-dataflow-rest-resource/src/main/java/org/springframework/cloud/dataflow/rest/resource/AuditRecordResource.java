@@ -31,6 +31,11 @@ import org.springframework.hateoas.ResourceSupport;
 public class AuditRecordResource extends ResourceSupport {
 
 	/**
+	 * The id of the audit record
+	 */
+	private Long auditRecordId;
+
+	/**
 	 * By whom was the audit record created. Can be null, in cases of disabled security.
 	 */
 	private String createdBy;
@@ -125,6 +130,14 @@ public class AuditRecordResource extends ResourceSupport {
 
 	public void setAuditOperation(String auditOperation) {
 		this.auditOperation = auditOperation;
+	}
+
+	public Long getAuditRecordId() {
+		return auditRecordId;
+	}
+
+	public void setAuditRecordId(Long auditRecordId) {
+		this.auditRecordId = auditRecordId;
 	}
 
 	public static class Page extends PagedResources<AuditRecordResource> {

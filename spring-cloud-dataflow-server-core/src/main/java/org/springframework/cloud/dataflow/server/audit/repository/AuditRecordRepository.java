@@ -27,6 +27,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 /**
  * Repository interface for managing the {@link AuditRecord} class.
+ *
  * @author Gunnar Hillert
  */
 @Transactional
@@ -39,9 +40,9 @@ public interface AuditRecordRepository
 	@Override
 	List<AuditRecord> findAll();
 
-	Page<AuditRecord> findByAuditAction(AuditActionType action, Pageable page);
+	Page<AuditRecord> findByAuditActionIn(AuditActionType[] actions, Pageable page);
 
-	Page<AuditRecord> findByAuditOperation(AuditOperationType operation, Pageable pageable);
+	Page<AuditRecord> findByAuditOperationIn(AuditOperationType[] operations, Pageable pageable);
 
-	Page<AuditRecord> findByAuditOperationAndAuditAction(AuditOperationType operation, AuditActionType action, Pageable pageable);
+	Page<AuditRecord> findByAuditOperationInAndAuditActionIn(AuditOperationType[] operations, AuditActionType[] actions, Pageable pageable);
 }

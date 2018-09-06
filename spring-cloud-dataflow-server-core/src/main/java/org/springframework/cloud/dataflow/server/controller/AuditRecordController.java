@@ -16,6 +16,8 @@
 
 package org.springframework.cloud.dataflow.server.controller;
 
+import java.util.Collections;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -24,7 +26,9 @@ import org.springframework.cloud.dataflow.server.audit.domain.AuditActionType;
 import org.springframework.cloud.dataflow.server.audit.domain.AuditOperationType;
 import org.springframework.cloud.dataflow.server.audit.domain.AuditRecord;
 import org.springframework.cloud.dataflow.server.audit.service.AuditRecordService;
+import org.springframework.cloud.dataflow.server.repository.NoSuchAuditRecordException;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PagedResourcesAssembler;
 import org.springframework.hateoas.ExposesResourceFor;
@@ -32,6 +36,7 @@ import org.springframework.hateoas.PagedResources;
 import org.springframework.hateoas.mvc.ResourceAssemblerSupport;
 import org.springframework.http.HttpStatus;
 import org.springframework.util.Assert;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -70,19 +75,35 @@ public class AuditRecordController {
 	 *
 	 * @param pageable Pagination information
 	 * @param assembler assembler for {@link AuditRecord}
-	 * @param action Optional. For which {@link AuditActionType} do you want to retrieve {@link AuditRecord}s
-	 * @param operation Optional. For which {@link AuditOperationType} do you want to retrieve {@link AuditRecord}s
+	 * @param actions Optional. For which {@link AuditActionType}s do you want to retrieve {@link AuditRecord}s
+	 * @param operations Optional. For which {@link AuditOperationType}s do you want to retrieve {@link AuditRecord}s
 	 * @return list of audit records
 	 */
 	@RequestMapping(value = "", method = RequestMethod.GET)
 	@ResponseStatus(HttpStatus.OK)
 	public PagedResources<AuditRecordResource> list(Pageable pageable,
-			@RequestParam(required = false) AuditActionType action,
-			@RequestParam(required = false) AuditOperationType operation,
+			@RequestParam(required = false) AuditActionType[] actions,
+			@RequestParam(required = false) AuditOperationType[] operations,
 			PagedResourcesAssembler<AuditRecord> assembler) {
 		Page<AuditRecord> auditRecords = this.auditRecordService
-			.findAuditRecordByAuditOperationTypeAndAuditActionType(pageable, action, operation);
+			.findAuditRecordByAuditOperationTypeAndAuditActionType(pageable, actions, operations);
 		return assembler.toResource(auditRecords, new Assembler(auditRecords));
+	}
+
+	/**
+	 * Return a given {@link AuditRecordResource}.
+	 *
+	 * @param id the id of an existing audit record (required)
+	 * @return the audit record or null if the audit record does not exist
+	 */
+	@RequestMapping(value = "/{id}", method = RequestMethod.GET)
+	@ResponseStatus(HttpStatus.OK)
+	public AuditRecordResource display(@PathVariable("id") Long id) {
+		AuditRecord auditRecord = this.auditRecordService.findOne(id);
+		if (auditRecord == null) {
+			throw new NoSuchAuditRecordException(id);
+		}
+		return new Assembler(new PageImpl<>(Collections.singletonList(auditRecord))).toResource(auditRecord);
 	}
 
 	/**
@@ -109,9 +130,10 @@ public class AuditRecordController {
 		@Override
 		public AuditRecordResource instantiateResource(AuditRecord auditRecord) {
 			final AuditRecordResource resource = new AuditRecordResource();
-			resource.setAuditAction(auditRecord.getAuditAction().getName());
+			resource.setAuditRecordId(auditRecord.getId());
+			resource.setAuditAction(auditRecord.getAuditAction() != null ? auditRecord.getAuditAction().name() : null);
 			resource.setAuditData(auditRecord.getAuditData());
-			resource.setAuditOperation(auditRecord.getAuditOperation().getName());
+			resource.setAuditOperation(auditRecord.getAuditOperation() != null ? auditRecord.getAuditOperation().name() : null);
 			resource.setCorrelationId(auditRecord.getCorrelationId());
 			resource.setCreatedBy(auditRecord.getCreatedBy());
 			resource.setCreatedOn(auditRecord.getCreatedOn());
