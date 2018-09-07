@@ -76,8 +76,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  * @author Ilayaperumal Gopinathan
  */
 @RunWith(SpringRunner.class)
-@SpringBootTest(classes = TestDependencies.class, properties = {"spring.cloud.dataflow.features.skipper-enabled=true",
-		"spring.datasource.url=jdbc:h2:tcp://localhost:19092/mem:dataflow"})
+@SpringBootTest(classes = TestDependencies.class, properties = { "spring.cloud.dataflow.features.skipper-enabled=true",
+		"spring.datasource.url=jdbc:h2:tcp://localhost:19092/mem:dataflow" })
 @DirtiesContext(classMode = ClassMode.AFTER_EACH_TEST_METHOD)
 @Transactional
 public class SkipperAppRegistryControllerTests {
@@ -255,7 +255,16 @@ public class SkipperAppRegistryControllerTests {
 	public void testListSingleApplication() throws Exception {
 		mockMvc.perform(get("/apps/source/time").accept(MediaType.APPLICATION_JSON))
 				.andExpect(status().isOk()).andExpect(jsonPath("name", is("time")))
-				.andExpect(jsonPath("type", is("source")));
+				.andExpect(jsonPath("type", is("source")))
+				.andExpect(jsonPath("$.options[*]", hasSize(6)));
+	}
+
+	@Test
+	public void testListSingleApplicationExhaustive() throws Exception {
+		mockMvc.perform(get("/apps/source/time?exhaustive=true").accept(MediaType.APPLICATION_JSON))
+				.andExpect(status().isOk()).andExpect(jsonPath("name", is("time")))
+				.andExpect(jsonPath("type", is("source")))
+				.andExpect(jsonPath("$.options[*]", hasSize(905)));
 	}
 
 	@Test

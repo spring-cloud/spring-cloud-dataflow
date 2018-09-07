@@ -56,13 +56,18 @@ public class AppRegistryDocumentation extends BaseDocumentation {
 	public void getSingleApplication() throws Exception {
 		registerApp(ApplicationType.source, "http");
 
-		this.mockMvc.perform(get("/apps/{type}/{name}", ApplicationType.source, "http").accept(MediaType.APPLICATION_JSON))
+		this.mockMvc.perform(
+			get("/apps/{type}/{name}", ApplicationType.source, "http").accept(MediaType.APPLICATION_JSON)
+				.param("exhaustive", "false"))
 			.andExpect(status().isOk())
 			.andDo(
 				this.documentationHandler.document(
 					pathParameters(
 						parameterWithName("type").description("The type of application to query. One of " + Arrays.asList(ApplicationType.values())),
 						parameterWithName("name").description("The name of the application to query")
+					),
+					requestParameters(
+						parameterWithName("exhaustive").optional().description("Return all application properties, including common Spring Boot properties")
 					)
 				)
 			);

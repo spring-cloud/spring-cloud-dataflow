@@ -194,7 +194,16 @@ public class AppRegistryControllerTests {
 	public void testListSingleApplication() throws Exception {
 		mockMvc.perform(get("/apps/source/time").accept(MediaType.APPLICATION_JSON))
 				.andExpect(status().isOk()).andExpect(jsonPath("name", is("time")))
-				.andExpect(jsonPath("type", is("source")));
+				.andExpect(jsonPath("type", is("source")))
+				.andExpect(jsonPath("$.options[*]", hasSize(6))); // white-listed properties anly
+	}
+
+	@Test
+	public void testListSingleApplicationExhaustive() throws Exception {
+		mockMvc.perform(get("/apps/source/time?exhaustive=true").accept(MediaType.APPLICATION_JSON))
+				.andExpect(status().isOk()).andExpect(jsonPath("name", is("time")))
+				.andExpect(jsonPath("type", is("source")))
+				.andExpect(jsonPath("$.options[*]", hasSize(905)));
 	}
 
 	@Test

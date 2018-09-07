@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 the original author or authors.
+ * Copyright 2016-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -112,15 +112,13 @@ public class BootApplicationConfigurationMetadataResolver extends ApplicationCon
 			Collection<String> whiteListedClasses = new HashSet<>(globalWhiteListedClasses);
 			Collection<String> whiteListedProperties = new HashSet<>(globalWhiteListedProperties);
 			Resource[] whitelistDescriptors = moduleResourceLoader.getResources(WHITELIST_PROPERTIES);
-			boolean include = (whitelistDescriptors.length == 0) || exhaustive;
-			// when no descriptors return everything
 			loadWhiteLists(whitelistDescriptors, whiteListedClasses, whiteListedProperties);
 			ConfigurationMetadataRepositoryJsonBuilder builder = ConfigurationMetadataRepositoryJsonBuilder.create();
 			for (Resource r : moduleResourceLoader.getResources(CONFIGURATION_METADATA_PATTERN)) {
 				builder.withJsonResource(r.getInputStream());
 			}
 			for (ConfigurationMetadataGroup group : builder.build().getAllGroups().values()) {
-				if (include || isWhiteListed(group, whiteListedClasses)) {
+				if (exhaustive || isWhiteListed(group, whiteListedClasses)) {
 					for (ConfigurationMetadataProperty property : group.getProperties().values()) {
 						if (!isDeprecatedError(property)) {
 							result.add(property);
