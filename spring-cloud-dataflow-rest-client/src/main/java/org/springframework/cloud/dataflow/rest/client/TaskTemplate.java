@@ -87,7 +87,6 @@ public class TaskTemplate implements TaskOperations {
 		Assert.notNull(resources.getLink(EXECUTION_RELATION), "Execution relation is required");
 		Assert.notNull(resources.getLink(EXECUTION_RELATION_BY_NAME), "Execution by name relation is required");
 		Assert.notNull(dataFlowVersion, "dataFlowVersion must not be null");
-		Assert.notNull(resources.getLink(EXECUTIONS_CURRENT_RELATION), "Executions current relation is required");
 		Assert.notNull(resources.getLink(VALIDATION_REL), "Validation relation is required");
 
 		if(VersionUtils.isDataFlowServerVersionGreaterThanOrEqualToRequiredVersion(

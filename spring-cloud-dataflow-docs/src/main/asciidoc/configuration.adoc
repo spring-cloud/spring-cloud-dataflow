@@ -790,6 +790,11 @@ spring:
             - DELETE /streams/deployments            => hasRole('ROLE_CREATE')
             - POST   /streams/deployments/*          => hasRole('ROLE_CREATE')
 
+            # Stream Validations
+
+            - GET /streams/validation/               => hasRole('ROLE_VIEW')
+            - GET /streams/validation/*              => hasRole('ROLE_VIEW')
+
             # Task Definitions
 
             - POST   /tasks/definitions              => hasRole('ROLE_CREATE')
@@ -810,6 +815,15 @@ spring:
             - GET    /tasks/schedules/*              => hasRole('ROLE_VIEW')
             - POST   /tasks/schedules                => hasRole('ROLE_CREATE')
             - DELETE /tasks/schedules/*              => hasRole('ROLE_CREATE')
+
+            # Task Validations
+
+            - GET    /tasks/validation/               => hasRole('ROLE_VIEW')
+            - GET    /tasks/validation/*              => hasRole('ROLE_VIEW')
+
+            # Tools
+
+            - POST   /tools/**                       => hasRole('ROLE_CREATE')
 ----
 
 The format of each line is the following:

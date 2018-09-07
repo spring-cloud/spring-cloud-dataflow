@@ -40,135 +40,135 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 
+/**
+ * Provides operations to query the Docker repository for tags for a given
+ * image URI.
+ *
+ * @author Glenn Renfro
+ * @author Chris Schaefer
+ */
+public class DockerRegistryValidator {
+	private static final Logger logger = LoggerFactory.getLogger(DockerRegistryValidator.class);
+	private static final String DOCKER_REGISTRY_AUTH_TYPE = "JWT";
+	private static final String DOCKER_REGISTRY_TAGS_PATH = "/%s/tags/";
+	private static final String USER_NAME_KEY = "username";
+	private static final String PASSWORD_KEY = "password";
+
+	private DockerAuth dockerAuth;
+	private RestTemplate restTemplate;
+
+	private DockerResource dockerResource;
+	private DockerValidatorProperties dockerValidatiorProperties;
+
+	public DockerRegistryValidator(DockerValidatorProperties dockerValidatorProperties,
+			DockerResource dockerResource) {
+		this.dockerValidatiorProperties = dockerValidatorProperties;
+		this.dockerResource = dockerResource;
+		this.restTemplate = configureRestTemplate();
+		this.dockerAuth = getDockerAuth();
+	}
+
 	/**
-	 * Provides operations to query the Docker repository for tags for a given
-	 * image URI.
+	 * Verifies that the image is present.
 	 *
-	 * @author Glenn Renfro
-	 * @author Chris Schaefer
+	 * @return true if image is present.
 	 */
-	public class DockerRegistryValidator {
-		private static final Logger logger = LoggerFactory.getLogger(DockerRegistryValidator.class);
-		private static final String DOCKER_REGISTRY_AUTH_TYPE = "JWT";
-		private static final String DOCKER_REGISTRY_TAGS_PATH = "/%s/tags/";
-		private static final String USER_NAME_KEY = "username";
-		private static final String PASSWORD_KEY = "password";
-
-		private DockerAuth dockerAuth;
-		private RestTemplate restTemplate;
-
-		private DockerResource dockerResource;
-		private DockerValidatorProperties dockerValidatiorProperties;
-
-		public DockerRegistryValidator(DockerValidatorProperties dockerValidatorProperties,
-				DockerResource dockerResource) {
-			this.dockerValidatiorProperties = dockerValidatorProperties;
-			this.dockerResource = dockerResource;
-			this.restTemplate = configureRestTemplate();
-			this.dockerAuth = getDockerAuth();
-		}
-
-		/**
-		 * Verifies that the image is present.
-		 *
-		 * @return true if image is present.
-		 */
-		public boolean isImagePresent() {
-			boolean result = false;
-			try {
-				DockerResult dockerResult = getDockerImageInfo();
-				String resourceTag = ResourceUtils.getResourceVersion(this.dockerResource);
-				if (dockerResult.getCount() > 0) {
-					for (DockerTag tag : dockerResult.getResults()) {
-						if (tag.getName().equals(resourceTag)) {
-							result = true;
-							break;
-						}
+	public boolean isImagePresent() {
+		boolean result = false;
+		try {
+			DockerResult dockerResult = getDockerImageInfo();
+			String resourceTag = ResourceUtils.getResourceVersion(this.dockerResource);
+			if (dockerResult.getCount() > 0) {
+				for (DockerTag tag : dockerResult.getResults()) {
+					if (tag.getName().equals(resourceTag)) {
+						result = true;
+						break;
 					}
 				}
 			}
-			catch (HttpClientErrorException hcee) {
-				//when attempting to access an invalid docker image or if you
-				//don't have proper credentials docker returns a 404.
-				logger.info("Unable to find image because of the following exception:", hcee);
-				result = false;
-			}
-			return result;
 		}
-
-		private RestTemplate configureRestTemplate() {
-			CloseableHttpClient httpClient
-					= HttpClients.custom()
-					.setSSLHostnameVerifier(new NoopHostnameVerifier())
-					.build();
-			HttpComponentsClientHttpRequestFactory requestFactory
-					= new HttpComponentsClientHttpRequestFactory();
-			requestFactory.setHttpClient(httpClient);
-			requestFactory.setConnectTimeout(dockerValidatiorProperties.getConnectTimeoutInMillis());
-			requestFactory.setReadTimeout(dockerValidatiorProperties.getReadTimeoutInMillis());
-
-			RestTemplate restTemplate = new RestTemplate(requestFactory);
-			return restTemplate;
+		catch (HttpClientErrorException hcee) {
+			//when attempting to access an invalid docker image or if you
+			//don't have proper credentials docker returns a 404.
+			logger.info("Unable to find image because of the following exception:", hcee);
+			result = false;
 		}
+		return result;
+	}
 
-		private DockerAuth getDockerAuth() {
-			DockerAuth result = null;
-			String userName = dockerValidatiorProperties.getUserName();
-			String password = dockerValidatiorProperties.getPassword();
-			if(StringUtils.hasText(userName) && password != null) {
-				HttpHeaders headers = new HttpHeaders();
-				headers.setContentType(MediaType.APPLICATION_JSON);
-				HttpEntity httpEntity;
-				JSONObject request = new JSONObject();
-				try {
-					request.put(USER_NAME_KEY, userName);
-					request.put(PASSWORD_KEY, password);
-				}
-				catch (JSONException ie) {
-					throw new IllegalStateException(ie);
-				}
-				httpEntity = new HttpEntity(request.toString(), headers);
-				ResponseEntity dockerAuth = restTemplate.exchange(
-						dockerValidatiorProperties.getDockerAuthUrl(),
-						HttpMethod.POST, httpEntity, DockerAuth.class);
-				result =  (DockerAuth) dockerAuth.getBody();
-			}
-			return result;
-		}
+	private RestTemplate configureRestTemplate() {
+		CloseableHttpClient httpClient
+				= HttpClients.custom()
+				.setSSLHostnameVerifier(new NoopHostnameVerifier())
+				.build();
+		HttpComponentsClientHttpRequestFactory requestFactory
+				= new HttpComponentsClientHttpRequestFactory();
+		requestFactory.setHttpClient(httpClient);
+		requestFactory.setConnectTimeout(dockerValidatiorProperties.getConnectTimeoutInMillis());
+		requestFactory.setReadTimeout(dockerValidatiorProperties.getReadTimeoutInMillis());
 
-		private DockerResult getDockerImageInfo() {
+		RestTemplate restTemplate = new RestTemplate(requestFactory);
+		return restTemplate;
+	}
+
+	private DockerAuth getDockerAuth() {
+		DockerAuth result = null;
+		String userName = dockerValidatiorProperties.getUserName();
+		String password = dockerValidatiorProperties.getPassword();
+		if (StringUtils.hasText(userName) && password != null) {
 			HttpHeaders headers = new HttpHeaders();
-			if(this.dockerAuth != null) {
-				headers.add(HttpHeaders.AUTHORIZATION, DOCKER_REGISTRY_AUTH_TYPE + " " + this.dockerAuth.getToken());
-			}
-			HttpEntity httpEntity = new HttpEntity(headers);
-			String result = getDockerTagsEndpointUrl();
-			ResponseEntity tags = this.restTemplate.exchange(getDockerTagsEndpointUrl(), HttpMethod.GET, httpEntity,
-					DockerResult.class);
-
-			return (DockerResult) tags.getBody();
-		}
-
-		private String getDockerTagsEndpointUrl() {
-			return String.format(dockerValidatiorProperties.getDockerRegistryUrl() + DOCKER_REGISTRY_TAGS_PATH, getDockerImageWithoutVersion(dockerResource));
-		}
-
-		private String getDockerImageWithoutVersion(DockerResource dockerResource) {
+			headers.setContentType(MediaType.APPLICATION_JSON);
+			HttpEntity httpEntity;
+			JSONObject request = new JSONObject();
 			try {
-				String uri = dockerResource.getURI().toString().substring("docker:".length());
-				DockerImage dockerImage = DockerImage.fromImageName(uri);
-				StringBuilder sb = new StringBuilder();
-				if (StringUtils.hasText(dockerImage.getHost())) {
-					sb.append(dockerImage.getHost());
-					sb.append(DockerImage.SECTION_SEPARATOR);
-				}
-				sb.append(dockerImage.getNamespaceAndRepo());
-				return sb.toString();
+				request.put(USER_NAME_KEY, userName);
+				request.put(PASSWORD_KEY, password);
 			}
-			catch (IOException e) {
-				throw new IllegalArgumentException(
-						"Docker Resource URI is not in expected format to extract version. " +
-								dockerResource.getDescription(), e);
+			catch (JSONException ie) {
+				throw new IllegalStateException(ie);
 			}
+			httpEntity = new HttpEntity(request.toString(), headers);
+			ResponseEntity dockerAuth = restTemplate.exchange(
+					dockerValidatiorProperties.getDockerAuthUrl(),
+					HttpMethod.POST, httpEntity, DockerAuth.class);
+			result = (DockerAuth) dockerAuth.getBody();
+		}
+		return result;
+	}
+
+	private DockerResult getDockerImageInfo() {
+		HttpHeaders headers = new HttpHeaders();
+		if (this.dockerAuth != null) {
+			headers.add(HttpHeaders.AUTHORIZATION, DOCKER_REGISTRY_AUTH_TYPE + " " + this.dockerAuth.getToken());
+		}
+		HttpEntity httpEntity = new HttpEntity(headers);
+		String result = getDockerTagsEndpointUrl();
+		ResponseEntity tags = this.restTemplate.exchange(getDockerTagsEndpointUrl(), HttpMethod.GET, httpEntity,
+				DockerResult.class);
+
+		return (DockerResult) tags.getBody();
+	}
+
+	private String getDockerTagsEndpointUrl() {
+		return String.format(dockerValidatiorProperties.getDockerRegistryUrl() + DOCKER_REGISTRY_TAGS_PATH, getDockerImageWithoutVersion(dockerResource));
+	}
+
+	private String getDockerImageWithoutVersion(DockerResource dockerResource) {
+		try {
+			String uri = dockerResource.getURI().toString().substring("docker:".length());
+			DockerImage dockerImage = DockerImage.fromImageName(uri);
+			StringBuilder sb = new StringBuilder();
+			if (StringUtils.hasText(dockerImage.getHost())) {
+				sb.append(dockerImage.getHost());
+				sb.append(DockerImage.SECTION_SEPARATOR);
+			}
+			sb.append(dockerImage.getNamespaceAndRepo());
+			return sb.toString();
+		}
+		catch (IOException e) {
+			throw new IllegalArgumentException(
+					"Docker Resource URI is not in expected format to extract version. " +
+							dockerResource.getDescription(), e);
 		}
 	}
+}

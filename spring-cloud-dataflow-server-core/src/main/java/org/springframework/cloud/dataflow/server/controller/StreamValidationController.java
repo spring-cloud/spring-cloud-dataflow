@@ -61,7 +61,7 @@ public class StreamValidationController {
 	}
 
 	/**
-	 * Return {@link StreamAppStatusResource} showing the validation status the apps in a stream.
+	 * Return {@link StreamAppStatusResource} showing the validation status of the apps in a stream.
 	 *
 	 * @param name name of the stream definition
 	 * @return The status for the apps in a stream definition.
