@@ -38,18 +38,20 @@ import org.springframework.cloud.dataflow.core.ApplicationType;
 import org.springframework.cloud.dataflow.core.TaskDefinition;
 import org.springframework.cloud.dataflow.registry.AppRegistry;
 import org.springframework.cloud.dataflow.registry.domain.AppRegistration;
+import org.springframework.cloud.dataflow.server.DockerValidatorProperties;
 import org.springframework.cloud.dataflow.server.config.apps.CommonApplicationProperties;
 import org.springframework.cloud.dataflow.server.configuration.TaskServiceDependencies;
 import org.springframework.cloud.dataflow.server.repository.DuplicateTaskException;
 import org.springframework.cloud.dataflow.server.repository.InMemoryDeploymentIdRepository;
 import org.springframework.cloud.dataflow.server.repository.NoSuchTaskDefinitionException;
 import org.springframework.cloud.dataflow.server.repository.TaskDefinitionRepository;
+import org.springframework.cloud.dataflow.server.service.DefinitionAppValidationStatus;
 import org.springframework.cloud.dataflow.server.service.TaskService;
 import org.springframework.cloud.deployer.spi.core.AppDeploymentRequest;
 import org.springframework.cloud.deployer.spi.task.TaskLauncher;
 import org.springframework.cloud.task.repository.TaskExplorer;
 import org.springframework.cloud.task.repository.TaskRepository;
-import org.springframework.core.io.Resource;
+import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.TestPropertySource;
@@ -78,7 +80,7 @@ import static org.mockito.Mockito.when;
  */
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = { EmbeddedDataSourceConfiguration.class, TaskServiceDependencies.class })
-@EnableConfigurationProperties({ CommonApplicationProperties.class, TaskConfigurationProperties.class })
+@EnableConfigurationProperties({ CommonApplicationProperties.class, TaskConfigurationProperties.class, DockerValidatorProperties.class})
 public abstract class DefaultTaskServiceTests {
 
 	@Rule
@@ -120,6 +122,9 @@ public abstract class DefaultTaskServiceTests {
 
 		@Autowired
 		private CommonApplicationProperties commonApplicationProperties;
+
+		@Autowired
+		private DockerValidatorProperties dockerValidatorProperties;
 
 		@Before
 		public void setupMockMVC() {
@@ -193,7 +198,7 @@ public abstract class DefaultTaskServiceTests {
 			TaskService taskService = new DefaultTaskService(this.dataSourceProperties,
 				mock(TaskDefinitionRepository.class), this.taskExplorer, this.taskExecutionRepository, this.appRegistry,
 				this.resourceLoader, this.taskLauncher, this.metadataResolver, new TaskConfigurationProperties(),
-				new InMemoryDeploymentIdRepository(), null, commonApplicationProperties);
+				new InMemoryDeploymentIdRepository(), null, this.commonApplicationProperties, this.dockerValidatorProperties);
 			try {
 				taskService.executeTask(TASK_NAME_ORIG, new HashMap<>(), new LinkedList<>());
 			}
@@ -204,6 +209,24 @@ public abstract class DefaultTaskServiceTests {
 			if (!errorCaught) {
 				fail();
 			}
+		}
+
+		@Test
+		@DirtiesContext
+		public void validateValidTaskTest() {
+			initializeSuccessfulRegistry(appRegistry);
+			taskService.saveTaskDefinition("simpleTask", "AAA --foo=bar");
+			DefinitionAppValidationStatus validationStatus = taskService.validateTask("simpleTask");
+			assertEquals("valid", validationStatus.getAppsStatuses().get("task:simpleTask"));
+		}
+
+		@Test
+		@DirtiesContext
+		public void validateInvalidTaskTest() {
+			initializeFailRegistry(appRegistry);
+			taskService.saveTaskDefinition("simpleTask", "AAA --foo=bar");
+			DefinitionAppValidationStatus validationStatus = taskService.validateTask("simpleTask");
+			assertEquals("invalid", validationStatus.getAppsStatuses().get("task:simpleTask"));
 		}
 	}
 
@@ -456,7 +479,7 @@ public abstract class DefaultTaskServiceTests {
 	private static void initializeSuccessfulRegistry(AppRegistry appRegistry) {
 		when(appRegistry.find(anyString(), any(ApplicationType.class))).thenReturn(
 			new AppRegistration("some-name", ApplicationType.task, URI.create("http://helloworld")));
-		when(appRegistry.getAppResource(any())).thenReturn(mock(Resource.class));
+		when(appRegistry.getAppResource(any())).thenReturn(new FileSystemResource("src/test/resources/apps/foo-task"));
 		when(appRegistry.getAppMetadataResource(any())).thenReturn(null);
 	}
 

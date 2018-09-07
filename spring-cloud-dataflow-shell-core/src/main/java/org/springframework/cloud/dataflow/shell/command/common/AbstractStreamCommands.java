@@ -19,8 +19,10 @@ package org.springframework.cloud.dataflow.shell.command.common;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.cloud.dataflow.rest.client.StreamOperations;
+import org.springframework.cloud.dataflow.rest.resource.StreamAppStatusResource;
 import org.springframework.cloud.dataflow.rest.resource.StreamDefinitionResource;
 import org.springframework.cloud.dataflow.rest.resource.StreamDeploymentResource;
 import org.springframework.cloud.dataflow.shell.command.support.OpsType;
@@ -67,6 +69,8 @@ public abstract class AbstractStreamCommands implements CommandMarker {
 	protected static final String PROPERTIES_OPTION = "properties";
 
 	protected static final String PROPERTIES_FILE_OPTION = "propertiesFile";
+
+	protected static final String VALIDATE_STREAM = "stream validate";
 
 	protected DataFlowShell dataFlowShell;
 
@@ -164,6 +168,41 @@ public abstract class AbstractStreamCommands implements CommandMarker {
 			return "";
 		}
 	}
+
+	@CliCommand(value = VALIDATE_STREAM, help = "Verify that apps contained in the stream are valid.")
+	public List<Object> validateStream(@CliOption(key = { "",
+			"name" }, help = "the name of the stream to validate", mandatory = true, optionContext = "existing-stream disable-string-converter") String name) {
+		List<Object> result = new ArrayList<>();
+		final StreamAppStatusResource stream = streamOperations().validateStreamDefinition(name);
+		TableModelBuilder<Object> modelBuilder = new TableModelBuilder<>();
+		modelBuilder.addRow().addValue("Stream Name").addValue("Stream Definition");
+		modelBuilder.addRow().addValue(stream.getAppName())
+				.addValue(stream.getDsl());
+		TableBuilder builder = DataFlowTables.applyStyle(new TableBuilder(modelBuilder.build()));
+		result.add(builder.build());
+
+		modelBuilder = new TableModelBuilder<>();
+		modelBuilder.addRow().addValue("App Name").addValue("Validation Status");
+		boolean isValidStream = true;
+		for(Map.Entry<String,String> entry : stream.getAppStatuses().entrySet()) {
+			modelBuilder.addRow().addValue(entry.getKey())
+					.addValue(entry.getValue());
+			if (entry.getValue().equals("invalid")) {
+				isValidStream = false;
+			}
+		}
+		builder = DataFlowTables.applyStyle(new TableBuilder(modelBuilder.build()));
+
+		if(isValidStream) {
+			result.add(String.format("\n%s is a valid stream.", stream.getAppName()));
+		}
+		else {
+			result.add(String.format("\n%s is an invalid stream.", stream.getAppName()));
+		}
+		result.add(builder.build());
+		return result;
+	}
+
 
 	protected StreamOperations streamOperations() {
 		return dataFlowShell.getDataFlowOperations().streamOperations();

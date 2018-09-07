@@ -22,6 +22,7 @@ import java.util.Map;
 
 import org.springframework.cloud.dataflow.rest.client.support.VersionUtils;
 import org.springframework.cloud.dataflow.rest.resource.CurrentTaskExecutionsResource;
+import org.springframework.cloud.dataflow.rest.resource.TaskAppStatusResource;
 import org.springframework.cloud.dataflow.rest.resource.TaskDefinitionResource;
 import org.springframework.cloud.dataflow.rest.resource.TaskExecutionResource;
 import org.springframework.cloud.dataflow.rest.util.DeploymentPropertiesUtils;
@@ -58,6 +59,8 @@ public class TaskTemplate implements TaskOperations {
 
 	private static final String EXECUTION_RELATION_BY_NAME = "tasks/executions/name";
 
+	private static final String VALIDATION_REL = "tasks/validation";
+
 	private final RestTemplate restTemplate;
 
 	private final Link definitionsLink;
@@ -72,6 +75,8 @@ public class TaskTemplate implements TaskOperations {
 
 	private final Link executionsCurrentLink;
 
+	private final Link validationLink;
+
 	TaskTemplate(RestTemplate restTemplate, ResourceSupport resources, String dataFlowVersion) {
 		Assert.notNull(resources, "URI Resources must not be be null");
 		Assert.notNull(resources.getLink(EXECUTIONS_RELATION), "Executions relation is required");
@@ -82,6 +87,7 @@ public class TaskTemplate implements TaskOperations {
 		Assert.notNull(resources.getLink(EXECUTION_RELATION), "Execution relation is required");
 		Assert.notNull(resources.getLink(EXECUTION_RELATION_BY_NAME), "Execution by name relation is required");
 		Assert.notNull(dataFlowVersion, "dataFlowVersion must not be null");
+		Assert.notNull(resources.getLink(VALIDATION_REL), "Validation relation is required");
 
 		if(VersionUtils.isDataFlowServerVersionGreaterThanOrEqualToRequiredVersion(
 				VersionUtils.getThreePartVersion(dataFlowVersion),
@@ -95,6 +101,8 @@ public class TaskTemplate implements TaskOperations {
 		this.executionLink = resources.getLink(EXECUTION_RELATION);
 		this.executionByNameLink = resources.getLink(EXECUTION_RELATION_BY_NAME);
 		this.executionsCurrentLink = resources.getLink(EXECUTIONS_CURRENT_RELATION);
+		this.validationLink = resources.getLink(VALIDATION_REL);
+
 
 	}
 
@@ -154,4 +162,10 @@ public class TaskTemplate implements TaskOperations {
 		restTemplate.delete(executionLink.expand(id).getHref());
 	}
 
+	@Override
+	public TaskAppStatusResource validateTaskDefinition(String taskDefinitionName) {
+		String uriTemplate = this.validationLink.expand(taskDefinitionName).getHref();
+		return restTemplate.getForObject(uriTemplate, TaskAppStatusResource.class);
+
+	}
 }

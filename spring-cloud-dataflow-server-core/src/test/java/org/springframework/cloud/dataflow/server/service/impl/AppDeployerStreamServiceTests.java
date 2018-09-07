@@ -34,6 +34,7 @@ import org.springframework.cloud.dataflow.core.StreamDefinition;
 import org.springframework.cloud.dataflow.core.StreamDeployment;
 import org.springframework.cloud.dataflow.registry.AppRegistry;
 import org.springframework.cloud.dataflow.registry.AppRegistryCommon;
+import org.springframework.cloud.dataflow.server.DockerValidatorProperties;
 import org.springframework.cloud.dataflow.server.audit.service.AuditRecordService;
 import org.springframework.cloud.dataflow.server.config.apps.CommonApplicationProperties;
 import org.springframework.cloud.dataflow.server.repository.StreamDefinitionRepository;
@@ -96,19 +97,24 @@ public class AppDeployerStreamServiceTests {
 
 	private AuditRecordService auditRecordService;
 
+	private DockerValidatorProperties dockerValidatorProperties;
+
 	@Before
 	public void setupMock() {
 		this.streamDeploymentRepository = mock(StreamDeploymentRepository.class);
 		this.streamDefinitionRepository = mock(StreamDefinitionRepository.class);
 		this.appDeployerStreamDeployer = mock(AppDeployerStreamDeployer.class);
 		this.skipperStreamDeployer = mock(SkipperStreamDeployer.class);
+		this.dockerValidatorProperties = new DockerValidatorProperties();
 		this.appDeploymentRequestCreator = new AppDeploymentRequestCreator(mock(AppRegistry.class),
 				mock(CommonApplicationProperties.class),
 				new BootApplicationConfigurationMetadataResolver());
 		this.appRegistryCommon = mock(AppRegistryCommon.class);
 		this.auditRecordService = mock(AuditRecordService.class);
 		this.simpleStreamService = new AppDeployerStreamService(this.streamDefinitionRepository,
-				this.appDeployerStreamDeployer, this.appDeploymentRequestCreator, this.appRegistryCommon, auditRecordService);
+				this.appDeployerStreamDeployer, this.appDeploymentRequestCreator,
+				this.appRegistryCommon, auditRecordService,
+				dockerValidatorProperties);
 		this.streamDefinitionList.add(streamDefinition1);
 		this.appDeployerStreamDefinitions.add(streamDefinition1);
 		this.streamDefinitionList.add(streamDefinition2);

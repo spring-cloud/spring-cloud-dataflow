@@ -20,6 +20,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
+import org.springframework.cloud.dataflow.rest.resource.StreamAppStatusResource;
 import org.springframework.cloud.dataflow.rest.resource.StreamDefinitionResource;
 import org.springframework.cloud.dataflow.rest.resource.StreamDeploymentResource;
 import org.springframework.cloud.skipper.domain.Deployer;
@@ -139,4 +140,11 @@ public interface StreamOperations {
 	 * @return the list of all Skipper platforms
 	 */
 	Collection<Deployer> listPlatforms();
+
+	/**
+	 * Return the validation status for the apps in an stream.
+	 * @param streamDefinitionName The name of the stream definition to be validated.
+	 * @return {@link StreamAppStatusResource} containing the stream app statuses.
+	 */
+	StreamAppStatusResource validateStreamDefinition(String streamDefinitionName);
 }

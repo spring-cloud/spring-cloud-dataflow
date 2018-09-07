@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,6 +40,7 @@ import static org.junit.Assert.fail;
  * @author Mark Fisher
  * @author David Turanski
  * @author Ilayaperumal Gopinathan
+ * @author Glenn Renfro
  */
 public class StreamCommandTemplate {
 
@@ -119,6 +120,17 @@ public class StreamCommandTemplate {
 		// stateVerifier.waitForDeploy(streamname);
 		assertTrue("Failure.  CommandResult = " + cr.toString(), cr.isSuccess());
 		assertEquals("Deployed stream '" + streamname + "'", cr.getResult());
+	}
+
+	/**
+	 * Validate the given stream
+	 *
+	 * @param streamName name of the stream
+	 */
+	public CommandResult validate(String streamName) {
+		CommandResult cr = shell.executeCommand("stream validate --name " + streamName);
+		assertTrue("Failure.  CommandResult = " + cr.toString(), cr.isSuccess());
+		return cr;
 	}
 
 	/**

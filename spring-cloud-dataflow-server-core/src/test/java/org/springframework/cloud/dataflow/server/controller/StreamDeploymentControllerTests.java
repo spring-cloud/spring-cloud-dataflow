@@ -98,7 +98,7 @@ public class StreamDeploymentControllerTests {
 	}
 
 	@Test
-	public void tesPlatformsListViaSkipperClient() {
+	public void testPlatformsListViaSkipperClient() {
 		when(skipperStreamService.platformList()).thenReturn(Arrays.asList(deployer));
 		this.controller.platformList();
 		verify(skipperStreamService, times(1)).platformList();

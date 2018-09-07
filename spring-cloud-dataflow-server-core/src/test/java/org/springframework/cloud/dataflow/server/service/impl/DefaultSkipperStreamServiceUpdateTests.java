@@ -32,6 +32,7 @@ import org.springframework.cloud.dataflow.core.ApplicationType;
 import org.springframework.cloud.dataflow.core.StreamDefinition;
 import org.springframework.cloud.dataflow.registry.AppRegistryCommon;
 import org.springframework.cloud.dataflow.registry.service.AppRegistryService;
+import org.springframework.cloud.dataflow.server.DockerValidatorProperties;
 import org.springframework.cloud.dataflow.server.audit.service.AuditRecordService;
 import org.springframework.cloud.dataflow.server.config.features.FeaturesProperties;
 import org.springframework.cloud.dataflow.server.configuration.TestDependencies;
@@ -101,7 +102,7 @@ public class DefaultSkipperStreamServiceUpdateTests {
 
 		DefaultSkipperStreamService streamService = new DefaultSkipperStreamService(streamDefinitionRepository,
 				skipperStreamDeployer,
-				appDeploymentRequestCreator, appRegistry, auditRecordService);
+				appDeploymentRequestCreator, appRegistry, auditRecordService, new DockerValidatorProperties());
 		StreamDefinition streamDefinition = new StreamDefinition("test", "time | log");
 		this.streamDefinitionRepository.save(streamDefinition);
 		Map<String, String> updateProperties = new HashMap<>();
