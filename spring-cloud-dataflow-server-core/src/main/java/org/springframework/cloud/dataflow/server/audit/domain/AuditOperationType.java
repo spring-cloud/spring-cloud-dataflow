@@ -15,6 +15,8 @@
  */
 package org.springframework.cloud.dataflow.server.audit.domain;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
+
 import org.springframework.util.Assert;
 
 /**
@@ -23,12 +25,13 @@ import org.springframework.util.Assert;
  * @author Gunnar Hillert
  *
  */
+@JsonFormat(shape = JsonFormat.Shape.OBJECT)
 public enum AuditOperationType {
 
-	STREAM(100L, "Stream"),
-	TASK(200L, "Task"),
-	APP_REGISTRATION(300L, "App Registration"),
-	SCHEDULE(400L, "Schedule");
+	APP_REGISTRATION(100L, "App Registration"),
+	SCHEDULE(200L, "Schedule"),
+	STREAM(300L, "Stream"),
+	TASK(400L, "Task");
 
 	private Long id;
 
@@ -43,6 +46,18 @@ public enum AuditOperationType {
 		this.name = name;
 	}
 
+	public Long getId() {
+		return id;
+	}
+
+	public String getKey() {
+		return name();
+	}
+
+	public String getName() {
+		return name;
+	}
+
 	public static AuditOperationType fromId(Long auditOperationTypeId) {
 
 		Assert.notNull(auditOperationTypeId, "Parameter auditOperationTypeId, must not be null.");
@@ -55,13 +70,4 @@ public enum AuditOperationType {
 
 		return null;
 	}
-
-	public Long getId() {
-		return id;
-	}
-
-	public String getName() {
-		return name;
-	}
-
 }

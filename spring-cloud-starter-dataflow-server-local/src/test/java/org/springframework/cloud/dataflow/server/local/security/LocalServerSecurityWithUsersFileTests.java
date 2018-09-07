@@ -156,6 +156,16 @@ public class LocalServerSecurityWithUsersFileTests {
 				{ HttpMethod.GET, HttpStatus.FORBIDDEN, "/audit-records/1", createOnlyUser, null },
 				{ HttpMethod.GET, HttpStatus.UNAUTHORIZED, "/audit-records/1", null, null },
 
+				{ HttpMethod.GET, HttpStatus.FORBIDDEN, "/audit-records/audit-action-types", manageOnlyUser, null },
+				{ HttpMethod.GET, HttpStatus.OK, "/audit-records/audit-action-types", viewOnlyUser, null },
+				{ HttpMethod.GET, HttpStatus.FORBIDDEN, "/audit-records/audit-action-types", createOnlyUser, null },
+				{ HttpMethod.GET, HttpStatus.UNAUTHORIZED, "/audit-records/audit-action-types", null, null },
+
+				{ HttpMethod.GET, HttpStatus.FORBIDDEN, "/audit-records/audit-operation-types", manageOnlyUser, null },
+				{ HttpMethod.GET, HttpStatus.OK, "/audit-records/audit-operation-types", viewOnlyUser, null },
+				{ HttpMethod.GET, HttpStatus.FORBIDDEN, "/audit-records/audit-operation-types", createOnlyUser, null },
+				{ HttpMethod.GET, HttpStatus.UNAUTHORIZED, "/audit-records/audit-operation-types", null, null },
+
 				/* CompletionController */
 
 				{ HttpMethod.GET, HttpStatus.FORBIDDEN, "/completions/stream", manageOnlyUser, null },

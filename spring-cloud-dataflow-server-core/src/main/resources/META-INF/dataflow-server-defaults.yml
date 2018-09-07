@@ -61,7 +61,7 @@ spring:
             # Audit
 
             - GET /audit-records                     => hasRole('ROLE_VIEW')
-            - GET /audit-records/1                   => hasRole('ROLE_VIEW')
+            - GET /audit-records/**                  => hasRole('ROLE_VIEW')
 
             # Metrics
 

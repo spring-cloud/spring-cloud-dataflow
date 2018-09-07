@@ -107,6 +107,28 @@ public class AuditRecordController {
 	}
 
 	/**
+	 * Return an array of {@link AuditOperationType}s.
+	 *
+	 * @return Array of AuditOperationTypes
+	 */
+	@RequestMapping(value = "/audit-operation-types", method = RequestMethod.GET)
+	@ResponseStatus(HttpStatus.OK)
+	public AuditOperationType[] getAuditOperationTypes() {
+		return AuditOperationType.values();
+	}
+
+	/**
+	 * Return an array of {@link AuditActionType}s.
+	 *
+	 * @return Array of AuditActionTypes
+	 */
+	@RequestMapping(value = "/audit-action-types", method = RequestMethod.GET)
+	@ResponseStatus(HttpStatus.OK)
+	public AuditActionType[] getAuditActionTypes() {
+		return AuditActionType.values();
+	}
+
+	/**
 	 * {@link org.springframework.hateoas.ResourceAssembler} implementation that converts
 	 * {@link AuditRecord}s to {@link AuditRecordResource}s.
 	 */
