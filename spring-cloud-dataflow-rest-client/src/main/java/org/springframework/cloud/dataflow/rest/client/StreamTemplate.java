@@ -18,6 +18,7 @@ package org.springframework.cloud.dataflow.rest.client;
 
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.springframework.cloud.dataflow.rest.UpdateStreamRequest;
@@ -126,14 +127,14 @@ public class StreamTemplate implements StreamOperations {
 
 	@Override
 	public void updateStream(String streamName, String releaseName, PackageIdentifier packageIdentifier,
-			Map<String, String> updateProperties) {
+			Map<String, String> updateProperties, boolean force, List<String> appNames) {
 		Assert.hasText(streamName, "Stream name cannot be null or empty");
 		Assert.notNull(packageIdentifier, "PackageIdentifier cannot be null");
 		Assert.hasText(packageIdentifier.getPackageName(), "Package Name cannot be null or empty");
 		Assert.hasText(releaseName, "Release name cannot be null or empty");
 		Assert.notNull(updateProperties, "UpdateProperties cannot be null");
 		UpdateStreamRequest updateStreamRequest = new UpdateStreamRequest(releaseName, packageIdentifier,
-				updateProperties);
+				updateProperties, force, appNames);
 		String url = deploymentsLink.getHref() + "/update/" + streamName;
 		restTemplate.postForObject(url, updateStreamRequest, Object.class);
 	}

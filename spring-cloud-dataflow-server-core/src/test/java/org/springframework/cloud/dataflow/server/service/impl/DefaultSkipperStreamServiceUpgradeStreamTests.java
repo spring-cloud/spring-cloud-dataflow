@@ -83,7 +83,7 @@ public class DefaultSkipperStreamServiceUpgradeStreamTests {
 								"time:\n" +
 								"  spec:\n" +
 								"    applicationProperties:\n" +
-								"      spring.cloud.dataflow.stream.app.type: source\n");
+								"      spring.cloud.dataflow.stream.app.type: source\n", false, null);
 		verifyNoMoreInteractions(this.skipperStreamDeployer);
 	}
 

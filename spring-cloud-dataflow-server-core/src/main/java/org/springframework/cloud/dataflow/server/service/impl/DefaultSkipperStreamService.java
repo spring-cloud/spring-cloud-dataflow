@@ -207,11 +207,12 @@ public class DefaultSkipperStreamService extends AbstractStreamService implement
 	@Override
 	public void updateStream(String streamName, UpdateStreamRequest updateStreamRequest) {
 		updateStream(streamName, updateStreamRequest.getReleaseName(),
-				updateStreamRequest.getPackageIdentifier(), updateStreamRequest.getUpdateProperties());
+				updateStreamRequest.getPackageIdentifier(), updateStreamRequest.getUpdateProperties(),
+				updateStreamRequest.isForce(), updateStreamRequest.getAppNames());
 	}
 
 	public void updateStream(String streamName, String releaseName, PackageIdentifier packageIdentifier,
-			Map<String, String> updateProperties) {
+			Map<String, String> updateProperties, boolean force, List<String> appNames) {
 
 		StreamDefinition streamDefinition = this.streamDefinitionRepository.findOne(streamName);
 		if (streamDefinition == null) {
@@ -219,7 +220,8 @@ public class DefaultSkipperStreamService extends AbstractStreamService implement
 		}
 
 		String updateYaml = convertPropertiesToSkipperYaml(streamDefinition, updateProperties);
-		Release release = this.skipperStreamDeployer.upgradeStream(releaseName, packageIdentifier, updateYaml);
+		Release release = this.skipperStreamDeployer.upgradeStream(releaseName, packageIdentifier, updateYaml,
+				force, appNames);
 		if (release != null) {
 			updateStreamDefinitionFromReleaseManifest(streamName, release.getManifest().getData());
 
