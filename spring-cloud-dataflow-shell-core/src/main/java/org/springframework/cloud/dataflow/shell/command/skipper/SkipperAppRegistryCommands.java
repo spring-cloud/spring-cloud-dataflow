@@ -94,15 +94,17 @@ public class SkipperAppRegistryCommands extends AbstractAppRegistryCommands impl
 	@CliCommand(value = APPLICATION_INFO, help = "Get information about an application")
 	public List<Object> info(
 			@CliOption(mandatory = true, key = { "",
-					"name" }, help = "name of the application to unregister") String name,
+					"name" }, help = "name of the application to query") String name,
 			@CliOption(mandatory = true, key = {
-					"type" }, help = "type of the application to unregister") ApplicationType type,
-			@CliOption(key = { "version" }, help = "the version for the registered application") String version) {
+					"type" }, help = "type of the application to query") ApplicationType type,
+			@CliOption(key = { "version" }, help = "the version for the registered application") String version,
+			@CliOption(key = { "exhaustive" }, help = "return all metadata, including common Spring Boot properties",
+					specifiedDefaultValue = "true", unspecifiedDefaultValue = "false") boolean exhaustive) {
 		List<Object> result = new ArrayList<>();
 		try {
 			DetailedAppRegistrationResource info = StringUtils.hasText(version) ?
-					appRegistryOperations().info(name, type, version) :
-					appRegistryOperations().info(name, type);
+					appRegistryOperations().info(name, type, version, exhaustive) :
+					appRegistryOperations().info(name, type, exhaustive);
 			if (info != null) {
 				List<ConfigurationMetadataProperty> options = info.getOptions();
 				result.add(String.format("Information about %s application '%s':", type, name));

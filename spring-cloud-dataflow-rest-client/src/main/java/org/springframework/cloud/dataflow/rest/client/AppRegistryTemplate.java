@@ -86,15 +86,15 @@ public class AppRegistryTemplate implements AppRegistryOperations {
 	}
 
 	@Override
-	public DetailedAppRegistrationResource info(String name, ApplicationType type) {
-		String uri = uriTemplate.toString() + "/{type}/{name}";
-		return restTemplate.getForObject(uri, DetailedAppRegistrationResource.class, type, name);
+	public DetailedAppRegistrationResource info(String name, ApplicationType type, boolean exhaustive) {
+		String uri = uriTemplate.toString() + "/{type}/{name}?exhaustive={exhaustive}";
+		return restTemplate.getForObject(uri, DetailedAppRegistrationResource.class, type, name, exhaustive);
 	}
 
 	@Override
-	public DetailedAppRegistrationResource info(String name, ApplicationType type, String version) {
-		String uri = uriTemplate.toString() + "/{type}/{name}/{version}";
-		return restTemplate.getForObject(uri, DetailedAppRegistrationResource.class, type, name, version);
+	public DetailedAppRegistrationResource info(String name, ApplicationType type, String version, boolean exhaustive) {
+		String uri = uriTemplate.toString() + "/{type}/{name}/{version}?exhaustive={exhaustive}";
+		return restTemplate.getForObject(uri, DetailedAppRegistrationResource.class, type, name, version, exhaustive);
 	}
 
 	@Override

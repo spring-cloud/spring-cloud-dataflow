@@ -56,7 +56,7 @@ public interface AppRegistryCommon {
 	/**
 	 * @param name application name
 	 * @param type application type
-	 * @param type application version
+	 * @param version application version
 	 * @return the application with those name and type and default version
 	 */
 	default AppRegistration find(String name, ApplicationType type, String version) {

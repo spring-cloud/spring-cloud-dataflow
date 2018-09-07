@@ -40,6 +40,8 @@ import org.springframework.shell.table.TableModel;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
+import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 /**
@@ -109,8 +111,24 @@ public class ClassicAppRegistryCommandsTests {
 
 	@Test
 	public void testUnknownModule() {
-		List<Object> result = appRegistryCommands.info(null,"unknown", ApplicationType.processor);
-		assertEquals((String) result.get(0), "Application info is not available for processor:unknown");
+		List<Object> result = appRegistryCommands.info(null, "unknown", ApplicationType.processor, false);
+		assertEquals(result.get(0), "Application info is not available for processor:unknown");
+	}
+
+	@Test
+	public void testInfoExhaustive() {
+		String name = "foo";
+		ApplicationType type = ApplicationType.sink;
+		appRegistryCommands.info(null, name, type, true);
+		verify(appRegistryOperations).info(eq(name), eq(type), eq(true));
+	}
+
+	@Test
+	public void testInfoNotExhaustive() {
+		String name = "foo";
+		ApplicationType type = ApplicationType.sink;
+		appRegistryCommands.info(null, name, type, false);
+		verify(appRegistryOperations).info(eq(name), eq(type), eq(false));
 	}
 
 	@Test
