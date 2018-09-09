@@ -15,6 +15,8 @@
  */
 package org.springframework.cloud.dataflow.shell;
 
+import java.util.List;
+
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.shell.SimpleShellCommandLineOptions;
 
@@ -33,9 +35,9 @@ public class ShellProperties {
 	private int historySize = SimpleShellCommandLineOptions.DEFAULT_HISTORY_SIZE;
 
 	/**
-	 * The file to read that contains shell commands
+	 * The file(s) to read that contains shell commands
 	 */
-	private String commandFile;
+	private List<String> commandFile;
 
 	public int getHistorySize() {
 		return historySize;
@@ -45,11 +47,11 @@ public class ShellProperties {
 		this.historySize = historySize;
 	}
 
-	public String getCommandFile() {
+	public List<String> getCommandFile() {
 		return commandFile;
 	}
 
-	public void setCommandFile(String commandFile) {
+	public void setCommandFile(List<String> commandFile) {
 		this.commandFile = commandFile;
 	}
 }
