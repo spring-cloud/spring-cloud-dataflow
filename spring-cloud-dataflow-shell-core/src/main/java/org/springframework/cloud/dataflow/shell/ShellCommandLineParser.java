@@ -58,7 +58,7 @@ public class ShellCommandLineParser {
 	public CommandLine parse(ShellProperties shellProperties, String[] applicationArguments) {
 		List<String> commands = new ArrayList<String>();
 		if (shellProperties.getCommandFile() != null) {
-			for(String filePath:shellProperties.getCommandFile().split(",")) {
+			for(String filePath:shellProperties.getCommandFile()) {
 				File f = new File(filePath);
 				try {
 					commands.addAll(FileUtils.readLines(f));

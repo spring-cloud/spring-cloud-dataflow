@@ -24,6 +24,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import org.hamcrest.Matchers;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -41,6 +42,7 @@ import org.springframework.cloud.dataflow.shell.app.ShellApp;
 import org.springframework.util.ResourceUtils;
 
 
+import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 
 /**
@@ -70,25 +72,31 @@ public class ShellCommandsTests extends AbstractShellIntegrationTest{
 
     }
 
+    @Test
+    public void testMultiFileCommandOrderPreserved() {
+        String commandFiles = toAbsolutePaths(
+                "commands/registerTask_timestamp.txt,commands/unregisterTask_timestamp.txt,commands/registerSink_log.txt,commands/unregisterSink_log.txt");
+        assertTrue(runShell(commandFiles));
+
+        assertThat("Registry should be empty",AbstractShellIntegrationTest.applicationContext.getBean(AppRegistry.class).findAll(),
+                Matchers.empty());
+
+    }
+
 
 
     @Test
     public void testMultiFileCommand() {
-
-
         String commandFiles = toAbsolutePaths("commands/registerTask_timestamp.txt,commands/registerSink_log.txt");
         assertTrue(runShell(commandFiles));
 
         assertAppExists("timestamp", ApplicationType.task);
         assertAppExists("log", ApplicationType.sink);
-
-
-
     }
 
     private void assertAppExists(String name,ApplicationType type){
         AppRegistry registry = AbstractShellIntegrationTest.applicationContext.getBean(AppRegistry.class);
-        assertTrue(String.format("'%s' task should be registered",name),registry.appExist(name, type));
+        assertTrue(String.format("'%s' application should be registered",name),registry.appExist(name, type));
     }
     /**
      * Convert comma separated resources locations to comma separated absolute paths string
