@@ -29,6 +29,7 @@ import org.springframework.beans.factory.BeanCreationException;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.boot.autoconfigure.context.PropertyPlaceholderAutoConfiguration;
 import org.springframework.boot.autoconfigure.data.redis.RedisAutoConfiguration;
+import org.springframework.boot.autoconfigure.jackson.JacksonAutoConfiguration;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
 import org.springframework.boot.autoconfigure.orm.jpa.HibernateJpaAutoConfiguration;
 import org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration;
@@ -82,7 +83,7 @@ public class DataFlowServerConfigurationTests {
 				DataFlowControllerAutoConfiguration.class, DataSourceAutoConfiguration.class,
 				DataFlowServerConfiguration.class, PropertyPlaceholderAutoConfiguration.class,
 				RestTemplateAutoConfiguration.class, HibernateJpaAutoConfiguration.class, WebConfiguration.class,
-				SchedulerConfiguration.class);
+				SchedulerConfiguration.class, JacksonAutoConfiguration.class);
 		environment = new StandardEnvironment();
 		propertySources = environment.getPropertySources();
 	}
