@@ -25,6 +25,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.http.MediaType;
 import org.springframework.cloud.common.security.support.SecurityConfigUtils;
 import org.springframework.cloud.common.security.support.SecurityStateBean;
+import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.config.annotation.web.configurers.ExpressionUrlAuthorizationConfigurer;
@@ -71,6 +72,12 @@ public class BasicAuthSecurityConfiguration extends WebSecurityConfigurerAdapter
 	@Bean
 	public SessionRepository<? extends Session> sessionRepository() {
 		return new MapSessionRepository(new ConcurrentHashMap<>());
+	}
+
+	@Bean
+	@Override
+	public AuthenticationManager authenticationManagerBean() throws Exception {
+		return super.authenticationManagerBean();
 	}
 
 	@Override
