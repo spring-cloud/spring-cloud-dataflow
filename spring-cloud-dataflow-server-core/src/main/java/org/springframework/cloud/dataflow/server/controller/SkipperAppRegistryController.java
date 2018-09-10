@@ -43,7 +43,6 @@ import org.springframework.cloud.dataflow.registry.domain.AppRegistration;
 import org.springframework.cloud.dataflow.registry.service.AppRegistryService;
 import org.springframework.cloud.dataflow.registry.service.DefaultAppRegistryService;
 import org.springframework.cloud.dataflow.registry.support.NoSuchAppRegistrationException;
-import org.springframework.cloud.dataflow.registry.support.ResourceUtils;
 import org.springframework.cloud.dataflow.rest.SkipperStream;
 import org.springframework.cloud.dataflow.rest.resource.AppRegistrationResource;
 import org.springframework.cloud.dataflow.rest.resource.DetailedAppRegistrationResource;
@@ -217,7 +216,7 @@ public class SkipperAppRegistryController {
 	public void register(@PathVariable("type") ApplicationType type, @PathVariable("name") String name,
 			@RequestParam("uri") String uri, @RequestParam(name = "metadata-uri", required = false) String metadataUri,
 			@RequestParam(value = "force", defaultValue = "false") boolean force) {
-		String version = ResourceUtils.getResourceVersion(uri, this.mavenProperties);
+		String version = this.appRegistryService.getResourceVersion(uri);
 		this.register(type, name, version, uri, metadataUri, force);
 	}
 

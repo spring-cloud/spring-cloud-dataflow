@@ -42,6 +42,7 @@ import org.springframework.cloud.dataflow.registry.AppRegistryCommon;
 import org.springframework.cloud.dataflow.registry.repository.AppRegistrationRepository;
 import org.springframework.cloud.dataflow.registry.service.AppRegistryService;
 import org.springframework.cloud.dataflow.registry.service.DefaultAppRegistryService;
+import org.springframework.cloud.dataflow.registry.support.AppResourceCommon;
 import org.springframework.cloud.dataflow.server.ConditionalOnSkipperDisabled;
 import org.springframework.cloud.dataflow.server.ConditionalOnSkipperEnabled;
 import org.springframework.cloud.dataflow.server.DockerValidatorProperties;
@@ -197,6 +198,11 @@ public class TestDependencies extends WebMvcConfigurationSupport {
 	}
 
 	@Bean
+	public AppResourceCommon appResourceService(MavenProperties mavenProperties, DelegatingResourceLoader delegatingResourceLoader) {
+		return new AppResourceCommon(mavenProperties, delegatingResourceLoader);
+	}
+
+	@Bean
 	@ConditionalOnSkipperDisabled
 	public StreamDeploymentController streamDeploymentController(StreamDefinitionRepository repository,
 			StreamService streamService) {
@@ -272,9 +278,10 @@ public class TestDependencies extends WebMvcConfigurationSupport {
 	@ConditionalOnSkipperDisabled
 	public AppDeployerStreamDeployer appDeployerStreamDeployer(AppDeployer appDeployer,
 			DeploymentIdRepository deploymentIdRepository, StreamDefinitionRepository streamDefinitionRepository,
-			StreamDeploymentRepository streamDeploymentRepository) {
+			StreamDeploymentRepository streamDeploymentRepository,
+			AppRegistry appRegistry) {
 		return new AppDeployerStreamDeployer(appDeployer, deploymentIdRepository, streamDefinitionRepository,
-				streamDeploymentRepository, new ForkJoinPool(2));
+				streamDeploymentRepository, new ForkJoinPool(2), appRegistry);
 	}
 
 	@Bean
@@ -332,15 +339,15 @@ public class TestDependencies extends WebMvcConfigurationSupport {
 
 	@Bean
 	@ConditionalOnSkipperDisabled
-	public AppRegistry appRegistry(UriRegistry uriRegistry, DelegatingResourceLoader resourceLoader) {
-		return new AppRegistry(uriRegistry, resourceLoader);
+	public AppRegistry appRegistry(UriRegistry uriRegistry, AppResourceCommon appResourceService) {
+		return new AppRegistry(uriRegistry, appResourceService);
 	}
 
 	@Bean
 	@ConditionalOnSkipperEnabled
 	public AppRegistryService appRegistryService(AppRegistrationRepository appRegistrationRepository,
-			MavenProperties mavenProperties) {
-		return new DefaultAppRegistryService(appRegistrationRepository, resourceLoader(mavenProperties), mavenProperties);
+			AppResourceCommon appResourceService) {
+		return new DefaultAppRegistryService(appRegistrationRepository, appResourceService);
 	}
 
 	@Bean
@@ -454,15 +461,8 @@ public class TestDependencies extends WebMvcConfigurationSupport {
 
 	@Bean
 	@ConditionalOnSkipperDisabled
-	public AppRegistry appRegistry(DelegatingResourceLoader resourceLoader) {
-		return new AppRegistry(uriRegistry(), resourceLoader);
-	}
-
-	@Bean
-	@ConditionalOnSkipperEnabled
-	public AppRegistryService appRegistryService(AppRegistrationRepository appRegistrationRepository,
-			DelegatingResourceLoader resourceLoader, MavenProperties mavenProperties) {
-		return new DefaultAppRegistryService(appRegistrationRepository, resourceLoader, mavenProperties);
+	public AppRegistry appRegistry(AppResourceCommon appResourceService) {
+		return new AppRegistry(uriRegistry(), appResourceService);
 	}
 
 	@Bean

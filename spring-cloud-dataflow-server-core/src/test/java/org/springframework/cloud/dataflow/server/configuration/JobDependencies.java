@@ -36,6 +36,7 @@ import org.springframework.cloud.dataflow.configuration.metadata.ApplicationConf
 import org.springframework.cloud.dataflow.configuration.metadata.BootApplicationConfigurationMetadataResolver;
 import org.springframework.cloud.dataflow.registry.AppRegistry;
 import org.springframework.cloud.dataflow.registry.AppRegistryCommon;
+import org.springframework.cloud.dataflow.registry.support.AppResourceCommon;
 import org.springframework.cloud.dataflow.server.DockerValidatorProperties;
 import org.springframework.cloud.dataflow.server.audit.repository.AuditRecordRepository;
 import org.springframework.cloud.dataflow.server.audit.service.AuditRecordService;
@@ -257,7 +258,7 @@ public class JobDependencies {
 
 	@Bean
 	public AppRegistry appRegistry() {
-		return new AppRegistry(uriRegistry(), new DefaultResourceLoader());
+		return new AppRegistry(uriRegistry(), new AppResourceCommon(null, new DefaultResourceLoader()));
 	}
 
 	@Bean

@@ -24,6 +24,7 @@ import org.junit.Test;
 
 import org.springframework.cloud.dataflow.core.ApplicationType;
 import org.springframework.cloud.dataflow.registry.domain.AppRegistration;
+import org.springframework.cloud.dataflow.registry.support.AppResourceCommon;
 import org.springframework.cloud.dataflow.registry.support.NoSuchAppRegistrationException;
 import org.springframework.cloud.deployer.resource.registry.InMemoryUriRegistry;
 import org.springframework.cloud.deployer.resource.registry.UriRegistry;
@@ -57,7 +58,7 @@ public class AppRegistryTests {
 
 	private ResourceLoader resourceLoader = new DefaultResourceLoader();
 
-	private AppRegistry appRegistry = new AppRegistry(uriRegistry, resourceLoader);
+	private AppRegistry appRegistry = new AppRegistry(uriRegistry, new AppResourceCommon(null, resourceLoader));
 
 	@Test
 	public void testNotFound() {

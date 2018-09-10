@@ -95,4 +95,25 @@ public interface AppRegistryCommon {
 	 * @return the saved appRegistration
 	 */
 	AppRegistration save(AppRegistration app);
+
+	/**
+	 * @param resource
+	 * @return Returns the version for the provided resource
+	 */
+	String getResourceVersion(Resource resource);
+
+	/**
+	 * TODO
+	 * @param resource
+	 * @return
+	 */
+	String getResourceWithoutVersion(Resource resource);
+
+	/**
+	 * Returns the version for the given resource URI string.
+	 *
+	 * @param uriString String representation of the resource URI
+	 * @return the resource version
+	 */
+	String getResourceVersion(String uriString);
 }

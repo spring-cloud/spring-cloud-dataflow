@@ -19,7 +19,7 @@ import java.net.MalformedURLException;
 
 import org.junit.Test;
 
-import org.springframework.cloud.dataflow.registry.support.ResourceUtils;
+import org.springframework.cloud.dataflow.registry.support.AppResourceCommon;
 import org.springframework.cloud.deployer.resource.docker.DockerResource;
 import org.springframework.cloud.deployer.resource.maven.MavenResource;
 import org.springframework.core.io.Resource;
@@ -35,6 +35,8 @@ import static org.assertj.core.api.Assertions.assertThat;
  */
 public class ResourceUtilsTests {
 
+	private AppResourceCommon appResourceService = new AppResourceCommon(null, null);
+
 	@Test
 	public void testMavenResourceProcessing() {
 		MavenResource mavenResource = new MavenResource.Builder()
@@ -42,49 +44,49 @@ public class ResourceUtilsTests {
 				.groupId("org.springframework.cloud.task.app")
 				.version("1.0.0.RELEASE")
 				.build();
-		String resourceWithoutVersion = ResourceUtils.getResourceWithoutVersion(mavenResource);
+		String resourceWithoutVersion = appResourceService.getResourceWithoutVersion(mavenResource);
 		assertThat(resourceWithoutVersion).isEqualTo("maven://org.springframework.cloud.task.app:timestamp-task");
-		assertThat(ResourceUtils.getResourceVersion(mavenResource)).isEqualTo("1.0.0.RELEASE");
+		assertThat(appResourceService.getResourceVersion(mavenResource)).isEqualTo("1.0.0.RELEASE");
 	}
 
 	@Test
 	public void testDockerResourceProcessing() {
 		DockerResource dockerResource = new DockerResource("springcloudstream/file-source-kafka-10:1.2.0.RELEASE");
-		assertThat(ResourceUtils.getResourceWithoutVersion(dockerResource)).isEqualTo("docker:springcloudstream/file-source-kafka-10");
-		assertThat(ResourceUtils.getResourceVersion(dockerResource)).isEqualTo("1.2.0.RELEASE");
+		assertThat(appResourceService.getResourceWithoutVersion(dockerResource)).isEqualTo("docker:springcloudstream/file-source-kafka-10");
+		assertThat(appResourceService.getResourceVersion(dockerResource)).isEqualTo("1.2.0.RELEASE");
 	}
 
 	@Test
 	public void testDockerResourceProcessingWithHostIP() {
 		DockerResource dockerResource = new DockerResource("192.168.99.100:80/myrepo/rabbitsink:current");
-		assertThat(ResourceUtils.getResourceWithoutVersion(dockerResource)).isEqualTo("docker:192.168.99.100:80/myrepo/rabbitsink");
-		assertThat(ResourceUtils.getResourceVersion(dockerResource)).isEqualTo("current");
+		assertThat(appResourceService.getResourceWithoutVersion(dockerResource)).isEqualTo("docker:192.168.99.100:80/myrepo/rabbitsink");
+		assertThat(appResourceService.getResourceVersion(dockerResource)).isEqualTo("current");
 	}
 
 	@Test(expected = IllegalArgumentException.class)
 	public void testInvalidDockerResourceProcessing() {
 		DockerResource dockerResource = new DockerResource("springcloudstream:file-source-kafka-10:1.2.0.RELEASE");
-		ResourceUtils.getResourceWithoutVersion(dockerResource);
+		appResourceService.getResourceWithoutVersion(dockerResource);
 	}
 
 	@Test
 	public void testFileResourceProcessing() throws MalformedURLException {
 		Resource resource = new UrlResource("file:/springcloudstream/file-source-kafka-10-1.2.0.RELEASE.jar");
-		assertThat(ResourceUtils.getResourceWithoutVersion(resource)).isEqualTo("file:/springcloudstream/file-source-kafka-10");
-		assertThat(ResourceUtils.getResourceVersion(resource)).isEqualTo("1.2.0.RELEASE");
+		assertThat(appResourceService.getResourceWithoutVersion(resource)).isEqualTo("file:/springcloudstream/file-source-kafka-10");
+		assertThat(appResourceService.getResourceVersion(resource)).isEqualTo("1.2.0.RELEASE");
 
 		resource = new UrlResource("file:/springcloudstream/file-source-kafka-10-1.2.0.BUILD-SNAPSHOT.jar");
-		assertThat(ResourceUtils.getResourceWithoutVersion(resource)).isEqualTo("file:/springcloudstream/file-source-kafka-10");
-		assertThat(ResourceUtils.getResourceVersion(resource)).isEqualTo("1.2.0.BUILD-SNAPSHOT");
+		assertThat(appResourceService.getResourceWithoutVersion(resource)).isEqualTo("file:/springcloudstream/file-source-kafka-10");
+		assertThat(appResourceService.getResourceVersion(resource)).isEqualTo("1.2.0.BUILD-SNAPSHOT");
 
 		resource = new UrlResource("http://springcloudstream/file-source-kafka-10-1.2.0.RELEASE.jar");
-		assertThat(ResourceUtils.getResourceWithoutVersion(resource)).isEqualTo("http://springcloudstream/file-source-kafka-10");
-		assertThat(ResourceUtils.getResourceVersion(resource)).isEqualTo("1.2.0.RELEASE");
+		assertThat(appResourceService.getResourceWithoutVersion(resource)).isEqualTo("http://springcloudstream/file-source-kafka-10");
+		assertThat(appResourceService.getResourceVersion(resource)).isEqualTo("1.2.0.RELEASE");
 	}
 
 	@Test(expected = IllegalArgumentException.class)
 	public void testFileResourceWithoutVersion() throws MalformedURLException {
 		Resource resource = new UrlResource("http://springcloudstream/filesourcekafkacrap.jar");
-		assertThat(ResourceUtils.getResourceWithoutVersion(resource)).isEqualTo("http://springcloudstream/filesourcekafkacrap.jar");
+		assertThat(appResourceService.getResourceWithoutVersion(resource)).isEqualTo("http://springcloudstream/filesourcekafkacrap.jar");
 	}
 }

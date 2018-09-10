@@ -28,6 +28,7 @@ import org.springframework.cloud.dataflow.configuration.metadata.BootApplication
 import org.springframework.cloud.dataflow.core.ApplicationType;
 import org.springframework.cloud.dataflow.registry.AppRegistry;
 import org.springframework.cloud.dataflow.registry.domain.AppRegistration;
+import org.springframework.cloud.dataflow.registry.support.AppResourceCommon;
 import org.springframework.cloud.deployer.resource.registry.InMemoryUriRegistry;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -58,7 +59,7 @@ public class CompletionTestsMocks {
 	@Bean
 	public AppRegistry appRegistry() {
 		final ResourceLoader resourceLoader = new FileSystemResourceLoader();
-		return new AppRegistry(new InMemoryUriRegistry(), resourceLoader) {
+		return new AppRegistry(new InMemoryUriRegistry(), new AppResourceCommon(null, resourceLoader)) {
 			@Override
 			public AppRegistration find(String name, ApplicationType type) {
 				String filename = name + "-" + type;

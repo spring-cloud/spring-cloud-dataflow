@@ -59,6 +59,7 @@ import org.springframework.cloud.dataflow.registry.RdbmsUriRegistry;
 import org.springframework.cloud.dataflow.registry.repository.AppRegistrationRepository;
 import org.springframework.cloud.dataflow.registry.service.AppRegistryService;
 import org.springframework.cloud.dataflow.registry.service.DefaultAppRegistryService;
+import org.springframework.cloud.dataflow.registry.support.AppResourceCommon;
 import org.springframework.cloud.dataflow.server.ConditionalOnSkipperDisabled;
 import org.springframework.cloud.dataflow.server.ConditionalOnSkipperEnabled;
 import org.springframework.cloud.dataflow.server.DockerValidatorProperties;
@@ -293,6 +294,11 @@ public class DataFlowControllerAutoConfiguration {
 	}
 
 	@Bean
+	public AppResourceCommon appResourceCommon(MavenProperties mavenProperties, DelegatingResourceLoader delegatingResourceLoader) {
+		return new AppResourceCommon(mavenProperties, delegatingResourceLoader);
+	}
+
+	@Bean
 	@ConditionalOnBean(TaskDefinitionRepository.class)
 	public TaskDefinitionController taskDefinitionController(TaskExplorer taskExplorer,
 			TaskDefinitionRepository repository,
@@ -479,8 +485,8 @@ public class DataFlowControllerAutoConfiguration {
 
 		@Bean
 		public AppRegistryService appRegistryService(AppRegistrationRepository appRegistrationRepository,
-				DelegatingResourceLoader resourceLoader, MavenProperties mavenProperties) {
-			return new DefaultAppRegistryService(appRegistrationRepository, resourceLoader, mavenProperties);
+				AppResourceCommon appResourceService) {
+			return new DefaultAppRegistryService(appRegistrationRepository, appResourceService);
 		}
 
 		@Bean
@@ -525,9 +531,10 @@ public class DataFlowControllerAutoConfiguration {
 		public AppDeployerStreamDeployer appDeployerStreamDeployer(AppDeployer appDeployer,
 				DeploymentIdRepository deploymentIdRepository,
 				StreamDefinitionRepository streamDefinitionRepository,
-				StreamDeploymentRepository streamDeploymentRepository, ForkJoinPool appRegistryFJPFB) {
+				StreamDeploymentRepository streamDeploymentRepository, ForkJoinPool appRegistryFJPFB,
+				AppRegistry appRegistry) {
 			return new AppDeployerStreamDeployer(appDeployer, deploymentIdRepository, streamDefinitionRepository,
-					streamDeploymentRepository, appRegistryFJPFB);
+					streamDeploymentRepository, appRegistryFJPFB, appRegistry);
 		}
 
 		@Bean
@@ -542,9 +549,8 @@ public class DataFlowControllerAutoConfiguration {
 		}
 
 		@Bean
-		public AppRegistry appRegistry(UriRegistry uriRegistry, DelegatingResourceLoader resourceLoader,
-				MavenProperties mavenProperties) {
-			return new AppRegistry(uriRegistry, resourceLoader, mavenProperties);
+		public AppRegistry appRegistry(UriRegistry uriRegistry, AppResourceCommon appResourceService) {
+			return new AppRegistry(uriRegistry, appResourceService);
 		}
 	}
 
