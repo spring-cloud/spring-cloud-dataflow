@@ -23,8 +23,6 @@ import java.util.AbstractMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -34,11 +32,8 @@ import org.slf4j.LoggerFactory;
 
 import org.springframework.cloud.dataflow.core.ApplicationType;
 import org.springframework.cloud.dataflow.registry.domain.AppRegistration;
-import org.springframework.cloud.dataflow.registry.support.ResourceUtils;
-import org.springframework.cloud.deployer.resource.docker.DockerResource;
-import org.springframework.cloud.deployer.resource.maven.MavenProperties;
+import org.springframework.cloud.dataflow.registry.support.AppResourceCommon;
 import org.springframework.core.io.Resource;
-import org.springframework.core.io.ResourceLoader;
 import org.springframework.core.io.support.PropertiesLoaderUtils;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
@@ -56,36 +51,51 @@ public abstract class AbstractAppRegistryCommon implements AppRegistryCommon {
 
 	public static final String METADATA_KEY_SUFFIX = "metadata";
 
-	protected ResourceLoader resourceLoader;
+	private AppResourceCommon appResourceCommon;
 
-	protected MavenProperties mavenProperties;
-
-	private volatile ConcurrentMap<URI, Resource> appRegistrationResourceCache = new ConcurrentHashMap<>();
-
-	public AbstractAppRegistryCommon(ResourceLoader resourceLoader) {
-		this.resourceLoader = resourceLoader;
-	}
-
-	public AbstractAppRegistryCommon(ResourceLoader resourceLoader, MavenProperties mavenProperties) {
-		this.resourceLoader = resourceLoader;
-		this.mavenProperties = mavenProperties;
+	public AbstractAppRegistryCommon(AppResourceCommon appResourceService) {
+		this.appResourceCommon = appResourceService;
 	}
 
 	@Override
 	public Resource getAppResource(AppRegistration appRegistration) {
-		return ResourceUtils.getResource(appRegistration.getUri().toString(), this.mavenProperties);
+		return this.appResourceCommon.getResource(appRegistration.getUri().toString());
 	}
 
 	@Override
 	public Resource getAppMetadataResource(AppRegistration appRegistration) {
-		if (appRegistration.getMetadataUri() != null) {
-			return this.resourceLoader.getResource(appRegistration.getMetadataUri().toString());
+		return this.appResourceCommon.getMetadataResource(appRegistration.getUri(), appRegistration.getMetadataUri());
+	}
+
+	@Override
+	public String getResourceVersion(Resource resource) {
+		return this.appResourceCommon.getResourceVersion(resource);
+	}
+
+	@Override
+	public String getResourceWithoutVersion(Resource resource) {
+		return this.appResourceCommon.getResourceWithoutVersion(resource);
+	}
+
+	/**
+	 * Returns the version for the given resource URI string.
+	 *
+	 * @param uriString String representation of the resource URI
+	 * @return the resource version
+	 */
+	@Override
+	public String getResourceVersion(String uriString) {
+		return this.getResourceVersion(this.appResourceCommon.getResource(uriString));
+	}
+
+
+	private String getVersionOrBroken(String uri) {
+		try {
+			return this.getResourceVersion(uri);
 		}
-		else {
-			this.appRegistrationResourceCache.putIfAbsent(appRegistration.getUri(), getAppResource(appRegistration));
-			Resource appResource = this.appRegistrationResourceCache.get(appRegistration.getUri());
-			// If the metadata URI is not set, only the archive type app resource can serve as the metadata resource
-			return (appResource instanceof DockerResource) ? null : appResource;
+		catch (IllegalStateException ise) {
+			logger.warn("", ise);
+			return "broken";
 		}
 	}
 
@@ -150,16 +160,6 @@ public abstract class AbstractAppRegistryCommon implements AppRegistryCommon {
 					"Invalid format for app key '" + key + "'in file. Must be <type>.<name> or <type>.<name>"
 							+ ".metadata");
 			return Stream.empty();
-		}
-	}
-
-	private String getVersionOrBroken(String uri) {
-		try {
-			return ResourceUtils.getResourceVersion(uri, this.mavenProperties);
-		}
-		catch (IllegalStateException ise) {
-			logger.warn("", ise);
-			return "broken";
 		}
 	}
 

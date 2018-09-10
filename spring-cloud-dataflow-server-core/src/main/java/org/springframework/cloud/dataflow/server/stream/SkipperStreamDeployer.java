@@ -47,7 +47,6 @@ import org.springframework.cloud.dataflow.core.StreamAppDefinition;
 import org.springframework.cloud.dataflow.core.StreamDefinition;
 import org.springframework.cloud.dataflow.core.StreamDeployment;
 import org.springframework.cloud.dataflow.registry.service.AppRegistryService;
-import org.springframework.cloud.dataflow.registry.support.ResourceUtils;
 import org.springframework.cloud.dataflow.rest.SkipperStream;
 import org.springframework.cloud.dataflow.server.controller.NoSuchAppException;
 import org.springframework.cloud.dataflow.server.repository.StreamDefinitionRepository;
@@ -286,7 +285,7 @@ public class SkipperStreamDeployer implements StreamDeployer {
 	private void validateAllAppsRegistered(StreamDeploymentRequest streamDeploymentRequest) {
 		StreamDefinition streamDefinition = this.streamDefinitionRepository.findOne(streamDeploymentRequest.getStreamName());
 		for (AppDeploymentRequest adr : streamDeploymentRequest.getAppDeploymentRequests()) {
-			String version = ResourceUtils.getResourceVersion(adr.getResource());
+			String version = this.appRegistryService.getResourceVersion(adr.getResource());
 			validateAppVersionIsRegistered(getRegisteredName(streamDefinition, adr.getDefinition().getName()), adr, version);
 		}
 	}
@@ -378,11 +377,11 @@ public class SkipperStreamDeployer implements StreamDeployer {
 		metadataMap.put("name", packageName);
 
 		// Add spec
-		String resourceWithoutVersion = ResourceUtils.getResourceWithoutVersion(appDeploymentRequest.getResource());
+		String resourceWithoutVersion = this.appRegistryService.getResourceWithoutVersion(appDeploymentRequest.getResource());
 		specMap.put("resource", resourceWithoutVersion);
 		specMap.put("applicationProperties", appDeploymentRequest.getDefinition().getProperties());
 		specMap.put("deploymentProperties", appDeploymentRequest.getDeploymentProperties());
-		String version = ResourceUtils.getResourceVersion(appDeploymentRequest.getResource());
+		String version = this.appRegistryService.getResourceVersion(appDeploymentRequest.getResource());
 		// Add version, including possible override via deploymentProperties - hack to store version in cmdline args
 		if (appDeploymentRequest.getCommandlineArguments().size() == 1) {
 			specMap.put("version", appDeploymentRequest.getCommandlineArguments().get(0));

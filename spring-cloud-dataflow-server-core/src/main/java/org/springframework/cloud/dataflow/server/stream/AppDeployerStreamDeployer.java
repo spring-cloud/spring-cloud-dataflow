@@ -38,7 +38,7 @@ import org.json.JSONObject;
 import org.springframework.cloud.dataflow.core.StreamAppDefinition;
 import org.springframework.cloud.dataflow.core.StreamDefinition;
 import org.springframework.cloud.dataflow.core.StreamDeployment;
-import org.springframework.cloud.dataflow.registry.support.ResourceUtils;
+import org.springframework.cloud.dataflow.registry.AppRegistry;
 import org.springframework.cloud.dataflow.server.repository.DeploymentIdRepository;
 import org.springframework.cloud.dataflow.server.repository.DeploymentKey;
 import org.springframework.cloud.dataflow.server.repository.NoSuchStreamDefinitionException;
@@ -94,19 +94,27 @@ public class AppDeployerStreamDeployer implements StreamDeployer {
 	 */
 	private final ForkJoinPool forkJoinPool;
 
+	/**
+	 *
+	 */
+	private final AppRegistry appRegistry;
+
 	public AppDeployerStreamDeployer(AppDeployer appDeployer, DeploymentIdRepository deploymentIdRepository,
 			StreamDefinitionRepository streamDefinitionRepository,
-			StreamDeploymentRepository streamDeploymentRepository, ForkJoinPool forkJoinPool) {
+			StreamDeploymentRepository streamDeploymentRepository, ForkJoinPool forkJoinPool,
+			AppRegistry appRegistry) {
 		Assert.notNull(appDeployer, "AppDeployer must not be null");
 		Assert.notNull(deploymentIdRepository, "DeploymentIdRepository must not be null");
 		Assert.notNull(streamDefinitionRepository, "StreamDefinitionRepository must not be null");
 		Assert.notNull(streamDeploymentRepository, "StreamDeploymentRepository must not be null");
 		Assert.notNull(forkJoinPool, "ForkJoinPool must not be null");
+		Assert.notNull(appRegistry, "AppRegistryService must not be null");
 		this.appDeployer = appDeployer;
 		this.deploymentIdRepository = deploymentIdRepository;
 		this.streamDefinitionRepository = streamDefinitionRepository;
 		this.streamDeploymentRepository = streamDeploymentRepository;
 		this.forkJoinPool = forkJoinPool;
+		this.appRegistry = appRegistry;
 	}
 
 	public void deployStream(StreamDeploymentRequest streamDeploymentRequest) {
@@ -135,7 +143,7 @@ public class AppDeployerStreamDeployer implements StreamDeployer {
 		Map<String, String> appVersions = new HashMap<>();
 		for (AppDeploymentRequest appDeploymentRequest : streamDeploymentRequest.getAppDeploymentRequests()) {
 			deploymentProperties.put(appDeploymentRequest.getDefinition().getName(), appDeploymentRequest.getDeploymentProperties());
-			appVersions.put(appDeploymentRequest.getDefinition().getName(), ResourceUtils.getResourceVersion(appDeploymentRequest.getResource()));
+			appVersions.put(appDeploymentRequest.getDefinition().getName(), this.appRegistry.getResourceVersion(appDeploymentRequest.getResource()));
 		}
 		StreamDeployment streamDeployment = new StreamDeployment(streamDeploymentRequest.getStreamName(),
 				new JSONObject(deploymentProperties).toString());

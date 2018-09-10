@@ -38,8 +38,10 @@ import org.springframework.cloud.dataflow.core.ApplicationType;
 import org.springframework.cloud.dataflow.core.StreamDefinition;
 import org.springframework.cloud.dataflow.registry.AppRegistry;
 import org.springframework.cloud.dataflow.registry.domain.AppRegistration;
+import org.springframework.cloud.dataflow.registry.support.AppResourceCommon;
 import org.springframework.cloud.dataflow.server.repository.InMemoryStreamDefinitionRepository;
 import org.springframework.cloud.dataflow.server.repository.StreamDefinitionRepository;
+import org.springframework.cloud.deployer.resource.maven.MavenProperties;
 import org.springframework.cloud.deployer.resource.registry.InMemoryUriRegistry;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -123,7 +125,7 @@ public class TabOnTapCompletionProviderTests {
 		@Bean
 		public AppRegistry appRegistry() {
 			final ResourceLoader resourceLoader = new FileSystemResourceLoader();
-			return new AppRegistry(new InMemoryUriRegistry(), resourceLoader) {
+			return new AppRegistry(new InMemoryUriRegistry(), new AppResourceCommon(new MavenProperties(), resourceLoader)) {
 				@Override
 				public AppRegistration find(String name, ApplicationType type) {
 					String filename = name + "-" + type;

@@ -36,6 +36,7 @@ import org.springframework.cloud.dataflow.configuration.metadata.ApplicationConf
 import org.springframework.cloud.dataflow.configuration.metadata.BootApplicationConfigurationMetadataResolver;
 import org.springframework.cloud.dataflow.registry.AppRegistry;
 import org.springframework.cloud.dataflow.registry.AppRegistryCommon;
+import org.springframework.cloud.dataflow.registry.support.AppResourceCommon;
 import org.springframework.cloud.dataflow.server.DockerValidatorProperties;
 import org.springframework.cloud.dataflow.server.audit.repository.AuditRecordRepository;
 import org.springframework.cloud.dataflow.server.audit.service.AuditRecordService;
@@ -58,6 +59,7 @@ import org.springframework.cloud.dataflow.server.service.impl.DefaultTaskJobServ
 import org.springframework.cloud.dataflow.server.service.impl.DefaultTaskService;
 import org.springframework.cloud.dataflow.server.service.impl.TaskConfigurationProperties;
 import org.springframework.cloud.dataflow.server.service.impl.validation.DefaultTaskValidationService;
+import org.springframework.cloud.deployer.resource.maven.MavenProperties;
 import org.springframework.cloud.deployer.resource.registry.InMemoryUriRegistry;
 import org.springframework.cloud.deployer.resource.registry.UriRegistry;
 import org.springframework.cloud.deployer.spi.task.TaskLauncher;
@@ -257,7 +259,7 @@ public class JobDependencies {
 
 	@Bean
 	public AppRegistry appRegistry() {
-		return new AppRegistry(uriRegistry(), new DefaultResourceLoader());
+		return new AppRegistry(uriRegistry(), new AppResourceCommon(new MavenProperties(), new DefaultResourceLoader()));
 	}
 
 	@Bean

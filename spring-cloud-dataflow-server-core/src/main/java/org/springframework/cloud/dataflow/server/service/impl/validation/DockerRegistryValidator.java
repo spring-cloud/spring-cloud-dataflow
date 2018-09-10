@@ -26,10 +26,11 @@ import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import org.springframework.cloud.dataflow.registry.support.AppResourceCommon;
 import org.springframework.cloud.dataflow.registry.support.DockerImage;
-import org.springframework.cloud.dataflow.registry.support.ResourceUtils;
 import org.springframework.cloud.dataflow.server.DockerValidatorProperties;
 import org.springframework.cloud.deployer.resource.docker.DockerResource;
+import org.springframework.cloud.deployer.resource.maven.MavenProperties;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -53,6 +54,7 @@ public class DockerRegistryValidator {
 	private static final String DOCKER_REGISTRY_TAGS_PATH = "/%s/tags/";
 	private static final String USER_NAME_KEY = "username";
 	private static final String PASSWORD_KEY = "password";
+	private final AppResourceCommon appResourceCommon;
 
 	private DockerAuth dockerAuth;
 	private RestTemplate restTemplate;
@@ -66,18 +68,19 @@ public class DockerRegistryValidator {
 		this.dockerResource = dockerResource;
 		this.restTemplate = configureRestTemplate();
 		this.dockerAuth = getDockerAuth();
+		this.appResourceCommon =  new AppResourceCommon(new MavenProperties(), null);
 	}
 
 	/**
 	 * Verifies that the image is present.
-	 *
+	 *JobDependencies.java
 	 * @return true if image is present.
 	 */
 	public boolean isImagePresent() {
 		boolean result = false;
 		try {
 			DockerResult dockerResult = getDockerImageInfo();
-			String resourceTag = ResourceUtils.getResourceVersion(this.dockerResource);
+			String resourceTag = this.appResourceCommon.getResourceVersion(this.dockerResource);
 			if (dockerResult.getCount() > 0) {
 				for (DockerTag tag : dockerResult.getResults()) {
 					if (tag.getName().equals(resourceTag)) {
