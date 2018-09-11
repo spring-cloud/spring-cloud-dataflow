@@ -57,6 +57,18 @@ public class StreamDefinitionTests {
 		assertEquals("ticktock", log.getProperties().get(BindingPropertyKeys.INPUT_GROUP));
 		assertFalse(log.getProperties().containsKey(BindingPropertyKeys.OUTPUT_DESTINATION));
 	}
+	
+	@Test
+	public void testLongRunningNonStreamApps() {
+		StreamDefinition sd = new StreamDefinition("something","aaa");
+		assertEquals(ApplicationType.app, sd.getAppDefinitions().get(0).getApplicationType());
+		sd = new StreamDefinition("something","aaa, bbb");
+		assertEquals(ApplicationType.app, sd.getAppDefinitions().get(0).getApplicationType());
+		assertEquals(ApplicationType.app, sd.getAppDefinitions().get(1).getApplicationType());
+		sd = new StreamDefinition("something","aaa --aaa=bbb , bbb");
+		assertEquals(ApplicationType.app, sd.getAppDefinitions().get(0).getApplicationType());
+		assertEquals(ApplicationType.app, sd.getAppDefinitions().get(1).getApplicationType());
+	}
 
 	@Test
 	public void simpleStream() {
@@ -115,6 +127,7 @@ public class StreamDefinitionTests {
 		StreamAppDefinition sink = requests.get(1);
 		assertEquals("foo", source.getName());
 		assertEquals("test", source.getStreamName());
+		assertEquals(ApplicationType.source, source.getApplicationType());
 		Map<String, String> sourceParameters = source.getProperties();
 		assertEquals(4, sourceParameters.size());
 		assertEquals("1", sourceParameters.get("x"));
@@ -124,6 +137,7 @@ public class StreamDefinitionTests {
 		Map<String, String> sinkParameters = sink.getProperties();
 		assertEquals(3, sinkParameters.size());
 		assertEquals("3", sinkParameters.get("z"));
+		assertEquals(ApplicationType.sink, sink.getApplicationType());
 	}
 
 	@Test
@@ -133,6 +147,9 @@ public class StreamDefinitionTests {
 		assertEquals(3, requests.size());
 		assertEquals("foo", requests.get(0).getProperties().get(BindingPropertyKeys.INPUT_DESTINATION));
 		assertEquals("test", requests.get(0).getProperties().get(BindingPropertyKeys.INPUT_GROUP));
+		assertEquals(ApplicationType.processor, requests.get(0).getApplicationType());
+		assertEquals(ApplicationType.processor, requests.get(1).getApplicationType());
+		assertEquals(ApplicationType.sink, requests.get(2).getApplicationType());
 	}
 
 	@Test

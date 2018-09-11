@@ -191,10 +191,11 @@ public class TaskParserTests {
 		assertEquals("'Hello, world!'", props.get("expression"));
 		// Prior to the change for XD-1613, this error should point to the comma:
 		// checkForParseError("foo | transform --expression=''Hello, world!'' | bar",
-		// DSLMessage.UNEXPECTED_DATA,
-		// 37);
+		// DSLMessage.UNEXPECTED_DATA, 37);
 		// but now it points to the !
-		checkForParseError("transform --expression=''Hello, world!''", DSLMessage.TASK_UNEXPECTED_DATA, 37);
+		// But with the changes to have comma as a character that can terminate a non
+		// quoted literal (for supporting app lists), it now points to 30 again.
+		checkForParseError("transform --expression=''Hello, world!''", DSLMessage.TASK_UNEXPECTED_DATA, 30);
 	}
 
 	@Test

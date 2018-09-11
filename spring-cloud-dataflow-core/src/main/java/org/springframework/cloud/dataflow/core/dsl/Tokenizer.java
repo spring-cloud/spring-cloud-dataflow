@@ -80,6 +80,9 @@ class Tokenizer extends AbstractTokenizer {
 				case '>':
 					pushCharToken(TokenKind.GT);
 					break;
+				case ',':
+					pushCharToken(TokenKind.COMMA);
+					break;
 				case ':':
 					pushCharToken(TokenKind.COLON);
 					break;

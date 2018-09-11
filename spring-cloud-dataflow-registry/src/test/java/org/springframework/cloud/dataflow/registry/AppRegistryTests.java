@@ -149,6 +149,16 @@ public class AppRegistryTests {
 	}
 
 	@Test
+	public void testSaveApp() {
+		appRegistry.save("fooApp", ApplicationType.app, URI.create("classpath:/foo"), URI.create("foo-metadata"));
+
+		AppRegistration registration = appRegistry.find("fooApp", ApplicationType.app);
+
+		assertThat(registration.getName(), is("fooApp"));
+		assertThat(registration.getType(), is(ApplicationType.app));
+	}
+
+	@Test
 	public void testImportAll() {
 		// pre-register an app
 		appRegistry.save("foo", ApplicationType.source, URI.create("classpath:/previous-foo-source"), null);

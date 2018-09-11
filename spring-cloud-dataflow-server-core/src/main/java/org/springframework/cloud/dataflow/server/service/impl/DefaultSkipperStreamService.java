@@ -120,7 +120,7 @@ public class DefaultSkipperStreamService extends AbstractStreamService implement
 				.collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
 
 		List<AppDeploymentRequest> appDeploymentRequests = this.appDeploymentRequestCreator
-				.createRequests(streamDefinition, deploymentPropertiesToUse);
+					.createRequests(streamDefinition, deploymentPropertiesToUse);
 
 		DeploymentPropertiesUtils.validateSkipperDeploymentProperties(deploymentPropertiesToUse);
 

@@ -47,10 +47,8 @@ import org.springframework.cloud.dataflow.registry.support.ResourceUtils;
 import org.springframework.cloud.dataflow.rest.SkipperStream;
 import org.springframework.cloud.dataflow.rest.resource.AppRegistrationResource;
 import org.springframework.cloud.dataflow.rest.resource.DetailedAppRegistrationResource;
-import org.springframework.cloud.dataflow.server.DataFlowServerUtil;
 import org.springframework.cloud.dataflow.server.repository.StreamDefinitionRepository;
 import org.springframework.cloud.dataflow.server.service.StreamService;
-import org.springframework.cloud.dataflow.server.support.CannotDetermineApplicationTypeException;
 import org.springframework.cloud.deployer.resource.maven.MavenProperties;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.DefaultResourceLoader;
@@ -276,14 +274,7 @@ public class SkipperAppRegistryController {
 			StreamDeployment streamDeployment = this.streamService.info(streamDefinition.getName());
 			for (StreamAppDefinition streamAppDefinition : streamDefinition.getAppDefinitions()) {
 				final String streamAppName = streamAppDefinition.getRegisteredAppName();
-				final ApplicationType streamAppType;
-				try {
-					streamAppType = DataFlowServerUtil.determineApplicationType(streamAppDefinition);
-				}
-				catch (CannotDetermineApplicationTypeException e) {
-					logger.warn("Can not determine ApplicationType for " + streamAppDefinition);
-					continue;
-				}
+				final ApplicationType streamAppType =streamAppDefinition.getApplicationType();
 				if (appType != streamAppType) {
 					continue;
 				}
