@@ -15,6 +15,8 @@
  */
 package org.springframework.cloud.common.security;
 
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -82,8 +84,10 @@ public class BasicAuthSecurityConfiguration extends WebSecurityConfigurerAdapter
 
 	@Override
 	protected void configure(HttpSecurity http) throws Exception {
-		final RequestMatcher textHtmlMatcher = new MediaTypeRequestMatcher(contentNegotiationStrategy,
+		final MediaTypeRequestMatcher textHtmlMatcher = new MediaTypeRequestMatcher(contentNegotiationStrategy,
 				MediaType.TEXT_HTML);
+		// need to ignore */* as framework is now passing that throught
+		textHtmlMatcher.setIgnoredMediaTypes(new HashSet<>(Arrays.asList(MediaType.ALL)));
 		final BasicAuthenticationEntryPoint basicAuthenticationEntryPoint = new BasicAuthenticationEntryPoint();
 		basicAuthenticationEntryPoint.setRealmName(SecurityConfigUtils.BASIC_AUTH_REALM_NAME);
 		basicAuthenticationEntryPoint.afterPropertiesSet();
