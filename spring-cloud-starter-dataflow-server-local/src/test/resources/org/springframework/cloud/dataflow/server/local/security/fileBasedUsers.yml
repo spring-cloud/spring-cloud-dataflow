@@ -10,7 +10,7 @@ spring:
           file:
             enabled: true
             users:
-              bob: bobspassword, ROLE_VIEW
-              alice: alicepwd, ROLE_MANAGE
-              cartman: cartmanpwd, ROLE_CREATE
-              fulluser: fullpassword, ROLE_VIEW, ROLE_MANAGE, ROLE_CREATE
+              bob: "{noop}bobspassword, ROLE_VIEW"
+              alice: "{noop}alicepwd, ROLE_MANAGE"
+              cartman: "{noop}cartmanpwd, ROLE_CREATE"
+              fulluser: "{noop}fullpassword, ROLE_VIEW, ROLE_MANAGE, ROLE_CREATE"
