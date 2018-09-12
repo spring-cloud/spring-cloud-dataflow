@@ -363,6 +363,14 @@ OPTIONS::
 	--timeout-expression  string:::
 		the expression for upgrade timeout +
 		*[Optional, default = <none>]* +
+
+	--force	force upgrade
+		[Optional, default = false]
+
+	--app-names  string
+		application names to force upgrade. If no specific list is provided, all the apps in the packages are force upgraded
+		[Optional, default = <none>]
+
 ====
 
 
@@ -433,6 +441,13 @@ expression itself, see <<skipper-commands-generic-usage-timeout-expression>>.
 ----
 skipper:>release upgrade --release-name ticktockskipper --package-name ticktock --timeout-expression=30s
 ----
+
+The `--force` option is used to deploy new instances of currently deployed applications.
+In other words, Skipper will upgrade the application again even if the manifest is unchanged.
+This behavior is needed in the case when configuration information is obtained by the application itself at startup time, for example from https://cloud.spring.io/spring-cloud-config/[Spring Cloud Config Server].
+You can specify which applications for force upgrade by using the option `--app-names`.
+If you do not specify any application names, all the applications will be force upgraded.
+You can specify `--force` and `--app-names` options together with `--properties` or `--file` options.
 
 [[skipper-commands-release-rollback]]
 === Rollback
