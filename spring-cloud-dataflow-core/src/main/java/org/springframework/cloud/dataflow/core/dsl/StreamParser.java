@@ -149,7 +149,7 @@ public class StreamParser extends AppParser {
 			// Create a bridge app to hang the source/sink destinations off
 			tokens.decrementPosition(); // Rewind so we can nicely eat the sink destination
 			AppNode bridgeAppNode = new AppNode(null, "bridge", tokens.peek().startPos, tokens.peek().endPos, null);
-			bridgeAppNode.setLongLivedNonStreamApp(false);
+			bridgeAppNode.setUnboundStreamApp(false);
 			appNodes.add(bridgeAppNode);
 		}
 		else {
@@ -373,7 +373,7 @@ public class StreamParser extends AppParser {
 			tokens.raiseException(usedListDelimiter, DSLMessage.DONT_USE_COMMA_WITH_CHANNELS);
 		}
 		for (AppNode appNode: appNodes) {
-			appNode.setLongLivedNonStreamApp(!preceedingSourceChannelSpecified && !isFollowedBySinkChannel && (usedStreamDelimiter < 0));
+			appNode.setUnboundStreamApp(!preceedingSourceChannelSpecified && !isFollowedBySinkChannel && (usedStreamDelimiter < 0));
 		}
 		return appNodes;
 	}

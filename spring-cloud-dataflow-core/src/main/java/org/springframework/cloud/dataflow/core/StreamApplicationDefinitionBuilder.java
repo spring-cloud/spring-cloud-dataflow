@@ -88,7 +88,7 @@ class StreamApplicationDefinitionBuilder {
 					}
 				}
 			}
-			if (appNode.isLongLivedNonStreamApp()) {
+			if (appNode.isUnboundStreamApp()) {
 				builder.setApplicationType(ApplicationType.app);
 			}
 			else {
@@ -116,7 +116,7 @@ class StreamApplicationDefinitionBuilder {
 				}
 			}
 			// Add binding property keys only if the app is a source, processor or sink.
-			if (!appNode.isLongLivedNonStreamApp()) {
+			if (!appNode.isUnboundStreamApp()) {
 				if (m > 0) {
 					builder.setProperty(BindingPropertyKeys.INPUT_DESTINATION,
 							String.format("%s.%s", streamName, appNodes.get(m - 1).getLabelName()));

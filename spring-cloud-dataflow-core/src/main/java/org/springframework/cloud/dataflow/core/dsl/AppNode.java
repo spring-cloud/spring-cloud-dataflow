@@ -33,7 +33,7 @@ public class AppNode extends AstNode {
 
 	private ArgumentNode[] arguments;
 	
-	private boolean isLongLivedNonStreamApp = true;
+	private boolean isUnboundStreamApp = true;
 
 	public AppNode(LabelNode label, String appName, int startPos, int endPos, ArgumentNode[] arguments) {
 		super(startPos, endPos);
@@ -123,12 +123,12 @@ public class AppNode extends AstNode {
 		return props;
 	}
 
-	public void setLongLivedNonStreamApp(boolean b) {
-		isLongLivedNonStreamApp = b;
+	public void setUnboundStreamApp(boolean b) {
+		isUnboundStreamApp = b;
 	}
 	
-	public boolean isLongLivedNonStreamApp() {
-		return isLongLivedNonStreamApp;
+	public boolean isUnboundStreamApp() {
+		return isUnboundStreamApp;
 	}
 
 }

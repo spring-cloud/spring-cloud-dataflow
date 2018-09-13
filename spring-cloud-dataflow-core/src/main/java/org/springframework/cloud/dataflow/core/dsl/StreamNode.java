@@ -80,7 +80,7 @@ public class StreamNode extends AstNode {
 			AppNode appNode = appNodes.get(m);
 			s.append(appNode.toString());
 			if (m + 1 < appNodes.size()) {
-				if (appNode.isLongLivedNonStreamApp()) {
+				if (appNode.isUnboundStreamApp()) {
 					s.append(" , ");
 				}
 				else {

@@ -534,33 +534,33 @@ public class StreamParserTests {
 	}
 
 	@Test
-	public void testParseLongRunningApp() {
+	public void testParseUnboundStreamApp() {
 		StreamNode ast = parse("foo");
 		System.out.println(ast);
 	}
 	
 	@Test
-	public void testParseLongRunningApps() {
+	public void testParseUnboundStreamApps() {
 		sn = parse("foo, bar, baz");
 		List<AppNode> appNodes = sn.getAppNodes();
 		assertEquals(3,appNodes.size());
 		assertEquals("foo", appNodes.get(0).getName());
 		assertEquals("baz", appNodes.get(2).getName());
-		assertTrue(appNodes.get(0).isLongLivedNonStreamApp());
+		assertTrue(appNodes.get(0).isUnboundStreamApp());
 
 		sn = parse("foo | bar");
 		appNodes = sn.getAppNodes();
 		assertEquals(2,appNodes.size());
 		assertEquals("foo", appNodes.get(0).getName());
 		assertEquals("bar", appNodes.get(1).getName());
-		assertFalse(appNodes.get(0).isLongLivedNonStreamApp());
+		assertFalse(appNodes.get(0).isUnboundStreamApp());
 		
 		checkForParseError("foo,",DSLMessage.OOD, 4);
 		// TODO need some stream tests that have comma at end of options
 	}
 
 	@Test
-	public void testParseLongRunningAppsWithParams() {
+	public void testParseUnboundStreamAppsWithParams() {
 		// TODO should have special message for this occurrence... ? need the space before the comma			
 		
 		//		sn = parse("foo --aaa=bbb, bar");
