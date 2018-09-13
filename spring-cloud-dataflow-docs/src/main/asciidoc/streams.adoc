@@ -135,7 +135,7 @@ For example
 app.baristaApp.spring.cloud.stream.bindings.hotDrinks.destination=hotDrinksDest
 app.baristaApp.spring.cloud.stream.bindings.coldDrinks.destination=coldDrinksDest
 app.hotDrinkDeliveryApp.spring.cloud.stream.bindings.input.destination=hotDrinksDest
-app.coldDrinkDeliveryApp..spring.cloud.stream.bindings.input.destination=coldDrinksDest
+app.coldDrinkDeliveryApp.spring.cloud.stream.bindings.input.destination=coldDrinksDest
 ----
 
 If you want to use consumer groups, you will need to set the Spring Cloud Stream application property `spring.cloud.stream.bindings.<channelName>.producer.requiredGroups` and `spring.cloud.stream.bindings.<channelName>.group` on the producer and consumer applications respectively.
