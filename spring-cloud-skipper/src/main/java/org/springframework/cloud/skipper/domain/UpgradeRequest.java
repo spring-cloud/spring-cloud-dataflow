@@ -15,6 +15,7 @@
  */
 package org.springframework.cloud.skipper.domain;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -32,7 +33,7 @@ public class UpgradeRequest {
 
 	private boolean force;
 
-	private List<String> appNames;
+	private List<String> appNames = new ArrayList<>();
 
 	public PackageIdentifier getPackageIdentifier() {
 		return packageIdentifier;

@@ -192,7 +192,7 @@ public class ReleaseAnalyzer {
 			appsToUpgrade.addAll(releaseDifference.getChangedApplicationNames());
 		}
 		List<String> allApplicationNames = getAllApplicationNames(existingRelease);
-		if (isForceUpdate && appNamesToUpdate == null) {
+		if (isForceUpdate && (appNamesToUpdate == null || appNamesToUpdate.isEmpty())) {
 			appsToUpgrade.addAll(allApplicationNames);
 		}
 		// Set explicit app names from the client only if the update is enforced.
