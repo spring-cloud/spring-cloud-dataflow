@@ -449,6 +449,83 @@ You can specify which applications for force upgrade by using the option `--app-
 If you do not specify any application names, all the applications will be force upgraded.
 You can specify `--force` and `--app-names` options together with `--properties` or `--file` options.
 
+Following example describes `force` upgrade:
+
+First, install the package `ticktock` that has `time` and `log` apps.
+
+[source,bash,options="nowrap"]
+----
+skipper:>package upload --repo-name local --path spring-cloud-skipper-server-core/src/test/resources/repositories/binaries/test/ticktock/ticktock-1.0.0.zip
+Package uploaded successfully:[ticktock:1.0.0]
+
+skipper:>package install --package-name ticktock --release-name a1
+Released a1. Now at version v1.
+
+skipper:>release list
+╔════╤═══════╤════════════════════════════╤════════╤════════════╤═══════════════╤═════════════╤═════════════════════════════════════════════╗
+║Name│Version│        Last updated        │ Status │Package Name│Package Version│Platform Name│               Platform Status               ║
+╠════╪═══════╪════════════════════════════╪════════╪════════════╪═══════════════╪═════════════╪═════════════════════════════════════════════╣
+║a1  │1      │Thu Sep 13 08:34:50 IST 2018│DEPLOYED│ticktock    │1.0.0          │default      │[a1.log-v1], State = [a1.log-v1-0=deployed]  ║
+║    │       │                            │        │            │               │             │[a1.time-v1], State = [a1.time-v1-0=deployed]║
+╚════╧═══════╧════════════════════════════╧════════╧════════════╧═══════════════╧═════════════╧═════════════════════════════════════════════╝
+
+skipper:>release history --release-name a1
+╔═══════╤════════════════════════════╤════════╤════════════╤═══════════════╤════════════════╗
+║Version│        Last updated        │ Status │Package Name│Package Version│  Description   ║
+╠═══════╪════════════════════════════╪════════╪════════════╪═══════════════╪════════════════╣
+║1      │Thu Sep 13 08:34:50 IST 2018│DEPLOYED│ticktock    │1.0.0          │Install complete║
+╚═══════╧════════════════════════════╧════════╧════════════╧═══════════════╧════════════════╝
+
+----
+
+Now, perform the upgrade even though there are no explicit differences between the `latest` and the `current` package.
+
+[source,bash,options="nowrap"]
+----
+skipper:>release upgrade --release-name a1 --package-name ticktock
+Package to upgrade has no difference than existing deployed/deleted package. Not upgrading.
+----
+
+If the upgrade needs to be forced for all the apps of `ticktock` (for both `time` and `log`)
+
+[source,bash,options="nowrap"]
+----
+skipper:>release upgrade --release-name a1 --package-name ticktock --force
+a1 has been upgraded.  Now at version v2.
+skipper:>release history --release-name a1
+╔═══════╤════════════════════════════╤════════╤════════════╤═══════════════╤════════════════════════╗
+║Version│        Last updated        │ Status │Package Name│Package Version│      Description       ║
+╠═══════╪════════════════════════════╪════════╪════════════╪═══════════════╪════════════════════════╣
+║2      │Thu Sep 13 08:35:53 IST 2018│UNKNOWN │ticktock    │1.0.0          │Upgrade install underway║
+║1      │Thu Sep 13 08:34:50 IST 2018│DEPLOYED│ticktock    │1.0.0          │Install complete        ║
+╚═══════╧════════════════════════════╧════════╧════════════╧═══════════════╧════════════════════════╝
+
+skipper:>release history --release-name a1
+╔═══════╤════════════════════════════╤════════╤════════════╤═══════════════╤════════════════╗
+║Version│        Last updated        │ Status │Package Name│Package Version│  Description   ║
+╠═══════╪════════════════════════════╪════════╪════════════╪═══════════════╪════════════════╣
+║2      │Thu Sep 13 08:35:53 IST 2018│DEPLOYED│ticktock    │1.0.0          │Upgrade complete║
+║1      │Thu Sep 13 08:34:50 IST 2018│DELETED │ticktock    │1.0.0          │Delete complete ║
+╚═══════╧════════════════════════════╧════════╧════════════╧═══════════════╧════════════════╝
+
+----
+
+If the `force` upgrade needs to be done for a specific list of applications, then `--app-names` option can be used.
+
+[source,bash,options="nowrap"]
+----
+skipper:>release upgrade --release-name a1 --package-name ticktock --force --app-names log
+a1 has been upgraded.  Now at version v3.
+skipper:>release history a1
+╔═══════╤════════════════════════════╤════════╤════════════╤═══════════════╤════════════════╗
+║Version│        Last updated        │ Status │Package Name│Package Version│  Description   ║
+╠═══════╪════════════════════════════╪════════╪════════════╪═══════════════╪════════════════╣
+║3      │Thu Sep 13 08:36:51 IST 2018│DEPLOYED│ticktock    │1.0.0          │Upgrade complete║
+║2      │Thu Sep 13 08:35:53 IST 2018│DELETED │ticktock    │1.0.0          │Delete complete ║
+║1      │Thu Sep 13 08:34:50 IST 2018│DELETED │ticktock    │1.0.0          │Delete complete ║
+╚═══════╧════════════════════════════╧════════╧════════════╧═══════════════╧════════════════╝
+----
+
 [[skipper-commands-release-rollback]]
 === Rollback
 This command rolls back the release.
