@@ -21,7 +21,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.naming.OperationNotSupportedException;
+
 import org.springframework.cloud.dataflow.rest.UpdateStreamRequest;
+import org.springframework.cloud.dataflow.rest.client.support.VersionUtils;
 import org.springframework.cloud.dataflow.rest.resource.StreamAppStatusResource;
 import org.springframework.cloud.dataflow.rest.resource.StreamDefinitionResource;
 import org.springframework.cloud.dataflow.rest.resource.StreamDeploymentResource;
@@ -56,6 +59,8 @@ public class StreamTemplate implements StreamOperations {
 
 	private static final String VALIDATION_REL = "streams/validation";
 
+	private static final String VALIDATION_RELATION_VERSION = "1.7.0";
+
 	private final RestTemplate restTemplate;
 
 	private final Link definitionsLink;
@@ -68,14 +73,22 @@ public class StreamTemplate implements StreamOperations {
 
 	private final Link validationLink;
 
-	StreamTemplate(RestTemplate restTemplate, ResourceSupport resources) {
+	private final String dataFlowServerVersion;
+
+	StreamTemplate(RestTemplate restTemplate, ResourceSupport resources, String dataFlowServerVersion) {
 		Assert.notNull(resources, "URI Resources can't be null");
 		Assert.notNull(resources.getLink(DEFINITIONS_REL), "Definitions relation is required");
 		Assert.notNull(resources.getLink(DEFINITION_REL), "Definition relation is required");
 		Assert.notNull(resources.getLink(DEPLOYMENTS_REL), "Deployments relation is required");
 		Assert.notNull(resources.getLink(DEPLOYMENT_REL), "Deployment relation is required");
-		Assert.notNull(resources.getLink(VALIDATION_REL), "Validation relation is required");
 
+		if (VersionUtils.isDataFlowServerVersionGreaterThanOrEqualToRequiredVersion(
+				VersionUtils.getThreePartVersion(dataFlowServerVersion),
+				VALIDATION_RELATION_VERSION)) {
+			Assert.notNull(resources.getLink(VALIDATION_REL), "Validation relation for streams is required");
+		}
+
+		this.dataFlowServerVersion = dataFlowServerVersion;
 		this.restTemplate = restTemplate;
 		this.definitionsLink = resources.getLink(DEFINITIONS_REL);
 		this.deploymentsLink = resources.getLink(DEPLOYMENTS_REL);
@@ -155,27 +168,28 @@ public class StreamTemplate implements StreamOperations {
 		restTemplate.postForObject(url, null, Object.class);
 	}
 
-
 	@Override
 	public String getManifest(String streamName, int version) {
 		Assert.hasText(streamName, "Release name cannot be null or empty");
 		String url = String.format("%s/%s/%s/%s", deploymentsLink.getHref(), "manifest", streamName, version);
 		String manifest = restTemplate.getForObject(url, String.class);
-		// TODO - DataFlow only uses Jackson Marshaller, which does strange things to Strings as return values.
+		// TODO - DataFlow only uses Jackson Marshaller, which does strange things to Strings as
+		// return values.
 		// \n is converted to two ascii characters 92 and 110...
 		String prunedManifest = manifest.substring(1, manifest.length() - 1);
 		StringBuilder sb = new StringBuilder();
 		for (int i = 0; i < prunedManifest.length(); i++) {
 			char testChar = prunedManifest.charAt(i);
-			if ( (int)testChar == 92) {
-				if (i != prunedManifest.length() -1) {
-					char nChar = prunedManifest.charAt(i+1);
-					if ( (int)nChar == 110) {
+			if ((int) testChar == 92) {
+				if (i != prunedManifest.length() - 1) {
+					char nChar = prunedManifest.charAt(i + 1);
+					if ((int) nChar == 110) {
 						sb.append("\n");
 						i++;
 					}
 				}
-			} else {
+			}
+			else {
 				sb.append(testChar);
 			}
 		}
@@ -185,8 +199,7 @@ public class StreamTemplate implements StreamOperations {
 	@Override
 	public Collection<Release> history(String streamName) {
 		Assert.hasText(streamName, "Release name cannot be null or empty");
-		ParameterizedTypeReference<Collection<Release>> typeReference = new ParameterizedTypeReference<Collection<Release>>
-				() {
+		ParameterizedTypeReference<Collection<Release>> typeReference = new ParameterizedTypeReference<Collection<Release>>() {
 		};
 		Map<String, Object> parameters = new HashMap<>();
 		String url = String.format("%s/%s/%s", deploymentsLink.getHref(), "history", streamName);
@@ -195,8 +208,7 @@ public class StreamTemplate implements StreamOperations {
 
 	@Override
 	public Collection<Deployer> listPlatforms() {
-		ParameterizedTypeReference<Collection<Deployer>> typeReference = new ParameterizedTypeReference<Collection<Deployer>>
-				() {
+		ParameterizedTypeReference<Collection<Deployer>> typeReference = new ParameterizedTypeReference<Collection<Deployer>>() {
 		};
 		Map<String, Object> parameters = new HashMap<>();
 		String url = url = deploymentsLink.getHref() + "/platform/list";
@@ -210,7 +222,12 @@ public class StreamTemplate implements StreamOperations {
 	}
 
 	@Override
-	public StreamAppStatusResource validateStreamDefinition(String streamDefinitionName) {
+	public StreamAppStatusResource validateStreamDefinition(String streamDefinitionName)
+			throws OperationNotSupportedException {
+		if (validationLink == null) {
+			throw new OperationNotSupportedException("Stream Validation not supported on Data Flow Server version "
+					+ dataFlowServerVersion);
+		}
 		String uriTemplate = this.validationLink.expand(streamDefinitionName).getHref();
 		return restTemplate.getForObject(uriTemplate, StreamAppStatusResource.class);
 	}

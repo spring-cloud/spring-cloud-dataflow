@@ -21,6 +21,8 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.naming.OperationNotSupportedException;
+
 import org.springframework.cloud.dataflow.rest.client.StreamOperations;
 import org.springframework.cloud.dataflow.rest.resource.StreamAppStatusResource;
 import org.springframework.cloud.dataflow.rest.resource.StreamDefinitionResource;
@@ -171,7 +173,7 @@ public abstract class AbstractStreamCommands implements CommandMarker {
 
 	@CliCommand(value = VALIDATE_STREAM, help = "Verify that apps contained in the stream are valid.")
 	public List<Object> validateStream(@CliOption(key = { "",
-			"name" }, help = "the name of the stream to validate", mandatory = true, optionContext = "existing-stream disable-string-converter") String name) {
+			"name" }, help = "the name of the stream to validate", mandatory = true, optionContext = "existing-stream disable-string-converter") String name) throws OperationNotSupportedException {
 		List<Object> result = new ArrayList<>();
 		final StreamAppStatusResource stream = streamOperations().validateStreamDefinition(name);
 		TableModelBuilder<Object> modelBuilder = new TableModelBuilder<>();

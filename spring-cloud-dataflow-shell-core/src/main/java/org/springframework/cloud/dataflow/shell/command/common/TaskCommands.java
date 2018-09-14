@@ -23,6 +23,8 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.naming.OperationNotSupportedException;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.dataflow.rest.client.TaskOperations;
 import org.springframework.cloud.dataflow.rest.resource.CurrentTaskExecutionsResource;
@@ -107,7 +109,7 @@ public class TaskCommands implements CommandMarker {
 	}
 
 	@CliCommand(value = VALIDATE, help = "Validate apps contained in task definitions")
-	public List<Object> validate(@CliOption(key = { "", "name" }, help = "the task definition name", mandatory = true) String name) {
+	public List<Object> validate(@CliOption(key = { "", "name" }, help = "the task definition name", mandatory = true) String name) throws OperationNotSupportedException {
 		final TaskAppStatusResource task = taskOperations().validateTaskDefinition(name);
 		List<Object> result = new ArrayList<>();
 		TableModelBuilder<Object> modelBuilder = new TableModelBuilder<>();

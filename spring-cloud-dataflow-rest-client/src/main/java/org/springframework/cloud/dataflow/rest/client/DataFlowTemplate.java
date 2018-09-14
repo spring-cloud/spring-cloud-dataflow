@@ -191,7 +191,7 @@ public class DataFlowTemplate implements DataFlowOperations {
 			this.aboutOperations = new AboutTemplate(restTemplate, resourceSupport.getLink(AboutTemplate.ABOUT_REL));
 
 			if (resourceSupport.hasLink(StreamTemplate.DEFINITIONS_REL)) {
-				this.streamOperations = new StreamTemplate(restTemplate, resourceSupport);
+				this.streamOperations = new StreamTemplate(restTemplate, resourceSupport, getVersion());
 				this.runtimeOperations = new RuntimeTemplate(restTemplate, resourceSupport);
 			}
 			else {
