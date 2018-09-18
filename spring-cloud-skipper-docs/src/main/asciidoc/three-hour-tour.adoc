@@ -622,7 +622,7 @@ log:
 The preceding `values.yml` file sets `hello` as a variable available to be used as a placeholder in the
 `packages\log\values.yml` file and the `packages\time\values.yml`. However, the YML section under `time:` is applied
 only to the `packages\time\values.yml` file and the YML section under `log:` is applied only to the
-`packages\time\values.yml` file.
+`packages\log\values.yml` file.
 
 [[using-package-upload]]
 === Package Upload
