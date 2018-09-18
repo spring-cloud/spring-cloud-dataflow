@@ -208,8 +208,8 @@ public class PackageMetadataService implements ResourceLoaderAware {
 						}
 					}
 				}
-				catch (IOException e) {
-					throw new SkipperException("Could not process package file from " + packageRepository.getName(), e);
+				catch (Exception e) {
+					logger.warn("Could not process package file from " + packageRepository.getName(), e.getMessage());
 				}
 			}
 		}
