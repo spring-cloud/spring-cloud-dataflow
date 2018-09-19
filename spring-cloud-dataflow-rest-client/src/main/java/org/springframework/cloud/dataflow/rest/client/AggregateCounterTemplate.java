@@ -16,7 +16,9 @@
 
 package org.springframework.cloud.dataflow.rest.client;
 
+import java.net.URI;
 import java.util.Date;
+import java.util.HashMap;
 
 import org.joda.time.DateTime;
 
@@ -55,11 +57,15 @@ public class AggregateCounterTemplate implements AggregateCounterOperations {
 		DateTime fromParam = from == null ? null : new DateTime(from.getTime());
 		DateTime toParam = to == null ? null : new DateTime(to.getTime());
 		String url = links.getLink(AGGREGATE_COUNTER_RELATION).expand(name).getHref();
-		String uriString = UriComponentsBuilder.fromUriString(url)
-				.queryParam("resolution", new Object[] { resolution.toString() })
-				.queryParam("from", new Object[] { fromParam }).queryParam("to", new Object[] { toParam }).build()
-				.toUriString();
-		return restTemplate.getForObject(uriString, AggregateCounterResource.class);
+
+		HashMap<String, Object> uriVariables = new HashMap<>();
+		uriVariables.put("resolution", resolution.toString());
+		uriVariables.put("from", fromParam);
+		uriVariables.put("to", toParam);
+
+		URI uri = UriComponentsBuilder.fromUriString(url + "resolution={resolution}&from={from}&to={to}")
+				.build(resolution.toString(), fromParam, toParam);
+		return restTemplate.getForObject(uri, AggregateCounterResource.class);
 	}
 
 	@Override
