@@ -21,6 +21,7 @@ import javax.servlet.RequestDispatcher;
 import org.junit.Test;
 
 import org.springframework.cloud.dataflow.rest.Version;
+import org.springframework.restdocs.payload.JsonFieldType;
 
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
@@ -71,7 +72,9 @@ public class ApiDocumentation extends BaseDocumentation {
 		this.mockMvc.perform(get("/")).andExpect(status().isOk()).andDo(this.documentationHandler.document(links(
 				linkWithRel("about").description(
 						"Access meta information, including enabled " + "features, security info, version information"),
+
 				linkWithRel("dashboard").description("Access the dashboard UI"),
+
 				linkWithRel("apps").description("Handle registered applications"),
 				linkWithRel("completions/stream").description("Exposes the DSL completion features " + "for Stream"),
 				linkWithRel("completions/task").description("Exposes the DSL completion features for " + "Task"),
@@ -127,8 +130,84 @@ public class ApiDocumentation extends BaseDocumentation {
 						.description("Convert a graph format into " + "DSL text format")),
 				responseFields(fieldWithPath("_links").description("Links to other resources"),
 						fieldWithPath("['" + Version.REVISION_KEY + "']")
-								.description("Incremented each time " + "a change is implemented in this REST API")
-
+								.description("Incremented each time " + "a change is implemented in this REST API"),
+						fieldWithPath("_links.dashboard.href").description("Link to the dashboard"),
+						fieldWithPath("_links.streams/definitions.href").description("Link to the streams/definitions"),
+						fieldWithPath("_links.streams/definitions/definition.href").description("Link to the streams/definitions/definition"),
+						fieldWithPath("_links.streams/definitions/definition.templated").type(JsonFieldType.BOOLEAN).optional()
+							.description("Link streams/definitions/definition is templated"),
+						fieldWithPath("_links.runtime/apps.href").description("Link to the runtime/apps"),
+						fieldWithPath("_links.runtime/apps/app.href").description("Link to the runtime/apps/app"),
+						fieldWithPath("_links.runtime/apps/app.templated").type(JsonFieldType.BOOLEAN).optional()
+							.description("Link runtime/apps/app is templated"),
+						fieldWithPath("_links.runtime/apps/instances.href").description("Link to the runtime/apps/instances"),
+						fieldWithPath("_links.runtime/apps/instances.templated").type(JsonFieldType.BOOLEAN).optional()
+							.description("Link runtime/apps/instances is templated"),
+						fieldWithPath("_links.metrics/streams.href").description("Link to the metrics/streams"),
+						fieldWithPath("_links.streams/deployments.href").description("Link to the streams/deployments"),
+						fieldWithPath("_links.streams/deployments/deployment.href").description("Link to the streams/deployments/deployment"),
+						fieldWithPath("_links.streams/deployments/deployment.templated").type(JsonFieldType.BOOLEAN).optional()
+							.description("Link streams/deployments/deployment is templated"),
+						fieldWithPath("_links.tasks/definitions.href").description("Link to the tasks/definitions"),
+						fieldWithPath("_links.tasks/definitions/definition.href").description("Link to the tasks/definitions/definition"),
+						fieldWithPath("_links.tasks/definitions/definition.templated").type(JsonFieldType.BOOLEAN).optional()
+							.description("Link tasks/definitions/definition is templated"),
+						fieldWithPath("_links.tasks/executions.href").description("Link to the tasks/executions"),
+						fieldWithPath("_links.tasks/executions/name.href").description("Link to the tasks/executions/name"),
+						fieldWithPath("_links.tasks/executions/name.templated").type(JsonFieldType.BOOLEAN).optional()
+							.description("Link tasks/executions/name is templated"),
+						fieldWithPath("_links.tasks/executions/current.href").description("Link to the tasks/executions/current"),
+						fieldWithPath("_links.tasks/executions/execution.href").description("Link to the tasks/executions/execution"),
+						fieldWithPath("_links.tasks/executions/execution.templated").type(JsonFieldType.BOOLEAN).optional()
+							.description("Link tasks/executions/execution is templated"),
+						fieldWithPath("_links.tasks/schedules.href").description("Link to the tasks/executions/schedules"),
+						fieldWithPath("_links.tasks/schedules/instances.href").description("Link to the tasks/schedules/instances"),
+						fieldWithPath("_links.tasks/schedules/instances.templated").type(JsonFieldType.BOOLEAN).optional()
+							.description("Link tasks/schedules/instances is templated"),
+						fieldWithPath("_links.jobs/executions.href").description("Link to the jobs/executions"),
+						fieldWithPath("_links.jobs/executions/name.href").description("Link to the jobs/executions/name"),
+						fieldWithPath("_links.jobs/executions/name.templated").type(JsonFieldType.BOOLEAN).optional()
+							.description("Link jobs/executions/name is templated"),
+						fieldWithPath("_links.jobs/executions/execution.href").description("Link to the jobs/executions/execution"),
+						fieldWithPath("_links.jobs/executions/execution.templated").type(JsonFieldType.BOOLEAN).optional()
+							.description("Link jobs/executions/execution is templated"),
+						fieldWithPath("_links.jobs/executions/execution/steps.href").description("Link to the jobs/executions/execution/steps"),
+						fieldWithPath("_links.jobs/executions/execution/steps.templated").type(JsonFieldType.BOOLEAN).optional()
+							.description("Link jobs/executions/execution/steps is templated"),
+						fieldWithPath("_links.jobs/executions/execution/steps/step.href").description("Link to the jobs/executions/execution/steps/step"),
+						fieldWithPath("_links.jobs/executions/execution/steps/step.templated").type(JsonFieldType.BOOLEAN).optional()
+							.description("Link jobs/executions/execution/steps/step is templated"),
+						fieldWithPath("_links.jobs/executions/execution/steps/step/progress.href").description("Link to the jobs/executions/execution/steps/step/progress"),
+						fieldWithPath("_links.jobs/executions/execution/steps/step/progress.templated").type(JsonFieldType.BOOLEAN).optional()
+							.description("Link jobs/executions/execution/steps/step/progress is templated"),
+						fieldWithPath("_links.jobs/instances/name.href").description("Link to the jobs/instances/name"),
+						fieldWithPath("_links.jobs/instances/name.templated").type(JsonFieldType.BOOLEAN).optional()
+							.description("Link jobs/instances/name is templated"),
+						fieldWithPath("_links.jobs/instances/instance.href").description("Link to the jobs/instances/instance"),
+						fieldWithPath("_links.jobs/instances/instance.templated").type(JsonFieldType.BOOLEAN).optional()
+							.description("Link jobs/instances/instance is templated"),
+						fieldWithPath("_links.tools/parseTaskTextToGraph.href").description("Link to the tools/parseTaskTextToGraph"),
+						fieldWithPath("_links.tools/convertTaskGraphToText.href").description("Link to the tools/convertTaskGraphToText"),
+						fieldWithPath("_links.counters.href").description("Link to the counters"),
+						fieldWithPath("_links.counters/counter.href").description("Link to the counters/counter"),
+						fieldWithPath("_links.counters/counter.templated").type(JsonFieldType.BOOLEAN).optional()
+							.description("Link counters/counter is templated"),
+						fieldWithPath("_links.field-value-counters.href").description("Link to the field-value-counters"),
+						fieldWithPath("_links.field-value-counters/counter.href").description("Link to the field-value-counters/counter"),
+						fieldWithPath("_links.field-value-counters/counter.templated").type(JsonFieldType.BOOLEAN).optional()
+							.description("Link field-value-counters/counter is templated"),
+						fieldWithPath("_links.aggregate-counters.href").description("Link to the aggregate-counters"),
+						fieldWithPath("_links.aggregate-counters/counter.href").description("Link to the aggregate-counters/counter"),
+						fieldWithPath("_links.aggregate-counters/counter.templated").type(JsonFieldType.BOOLEAN).optional()
+							.description("Link aggregate-counters/counter is templated"),
+						fieldWithPath("_links.apps.href").description("Link to the apps"),
+						fieldWithPath("_links.about.href").description("Link to the about"),
+						fieldWithPath("_links.completions/stream.href").description("Link to the completions/stream"),
+						fieldWithPath("_links.completions/stream.templated").type(JsonFieldType.BOOLEAN).optional()
+							.description("Link completions/stream is templated"),
+						fieldWithPath("_links.completions/task.href").description("Link to the completions/task"),
+						fieldWithPath("_links.completions/task.templated").type(JsonFieldType.BOOLEAN).optional()
+							.description("Link completions/task is templated")
 		)));
 	}
 }

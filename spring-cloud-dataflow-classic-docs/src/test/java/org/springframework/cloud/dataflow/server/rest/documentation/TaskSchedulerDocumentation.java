@@ -27,8 +27,8 @@ import org.springframework.cloud.dataflow.core.ApplicationType;
 import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.delete;
 import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.get;
 import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.post;
-import static org.springframework.restdocs.payload.PayloadDocumentation.fieldWithPath;
 import static org.springframework.restdocs.payload.PayloadDocumentation.responseFields;
+import static org.springframework.restdocs.payload.PayloadDocumentation.subsectionWithPath;
 import static org.springframework.restdocs.request.RequestDocumentation.parameterWithName;
 import static org.springframework.restdocs.request.RequestDocumentation.pathParameters;
 import static org.springframework.restdocs.request.RequestDocumentation.requestParameters;
@@ -102,10 +102,10 @@ public class TaskSchedulerDocumentation extends BaseDocumentation {
 								parameterWithName("size")
 										.description("The requested page size (optional)")),
 						responseFields(
-								fieldWithPath("_embedded.scheduleInfoResourceList")
+								subsectionWithPath("_embedded.scheduleInfoResourceList")
 										.description("Contains a collection of Schedules/"),
-								fieldWithPath("_links.self").description("Link to the schedule resource"),
-								fieldWithPath("page").description("Pagination properties"))));
+								subsectionWithPath("_links.self").description("Link to the schedule resource"),
+								subsectionWithPath("page").description("Pagination properties"))));
 	}
 
 	@Test
@@ -123,10 +123,10 @@ public class TaskSchedulerDocumentation extends BaseDocumentation {
 								parameterWithName("size")
 										.description("The requested page size (optional)")),
 						responseFields(
-								fieldWithPath("_embedded.scheduleInfoResourceList")
+								subsectionWithPath("_embedded.scheduleInfoResourceList")
 										.description("Contains a collection of Schedules/"),
-								fieldWithPath("_links.self").description("Link to the schedule resource"),
-								fieldWithPath("page").description("Pagination properties"))));
+								subsectionWithPath("_links.self").description("Link to the schedule resource"),
+								subsectionWithPath("page").description("Pagination properties"))));
 	}
 
 	private void createTaskDefinition(String taskName) throws Exception{
