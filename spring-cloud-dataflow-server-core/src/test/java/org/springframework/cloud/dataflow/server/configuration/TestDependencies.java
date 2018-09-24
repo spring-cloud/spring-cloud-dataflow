@@ -24,8 +24,6 @@ import java.util.Map;
 import java.util.concurrent.ForkJoinPool;
 import java.util.stream.Collectors;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-
 import org.springframework.boot.autoconfigure.ImportAutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
@@ -140,6 +138,7 @@ import static org.mockito.Mockito.when;
  * @author Gunnar Hillert
  * @author Ilayaperumal Gopinathan
  * @author Christian Tzolov
+ * @author Gunnar Hillert
  */
 @Configuration
 @EnableSpringDataWebSupport
@@ -169,8 +168,7 @@ public class TestDependencies extends WebMvcConfigurationSupport {
 	}
 
 	@Bean
-	public AuditRecordService auditRecordService(AuditRecordRepository auditRecordRepository,
-			ObjectMapper objectMapper) {
+	public AuditRecordService auditRecordService(AuditRecordRepository auditRecordRepository) {
 		return new DefaultAuditRecordService(auditRecordRepository);
 	}
 
@@ -384,24 +382,26 @@ public class TestDependencies extends WebMvcConfigurationSupport {
 	@Bean
 	public TaskDefinitionController taskDefinitionController(TaskExplorer explorer, TaskDefinitionRepository repository,
 			DeploymentIdRepository deploymentIdRepository, ApplicationConfigurationMetadataResolver metadataResolver,
-			AppRegistryCommon appRegistry, DelegatingResourceLoader delegatingResourceLoader,
+			AppRegistryCommon appRegistry,
+			AuditRecordService auditRecordService,
 			CommonApplicationProperties commonApplicationProperties,
 			DockerValidatorProperties dockerValidatorProperties) {
 		return new TaskDefinitionController(explorer, repository,
 				taskService(metadataResolver, taskRepository(), deploymentIdRepository,
-						appRegistry, delegatingResourceLoader, commonApplicationProperties,
+						appRegistry, auditRecordService, commonApplicationProperties,
 						dockerValidatorProperties));
 	}
 
 	@Bean
 	public TaskExecutionController taskExecutionController(TaskExplorer explorer,
 			ApplicationConfigurationMetadataResolver metadataResolver, DeploymentIdRepository deploymentIdRepository,
-			AppRegistryCommon appRegistry, DelegatingResourceLoader delegatingResourceLoader,
+			AppRegistryCommon appRegistry,
+			AuditRecordService auditRecordService,
 			CommonApplicationProperties commonApplicationProperties,
 			DockerValidatorProperties dockerValidatorProperties) {
 		return new TaskExecutionController(explorer,
 				taskService(metadataResolver, taskRepository(), deploymentIdRepository,
-						appRegistry, delegatingResourceLoader, commonApplicationProperties,
+						appRegistry, auditRecordService, commonApplicationProperties,
 						dockerValidatorProperties),
 				taskDefinitionRepository());
 	}
@@ -464,12 +464,13 @@ public class TestDependencies extends WebMvcConfigurationSupport {
 	@Bean
 	public TaskService taskService(ApplicationConfigurationMetadataResolver metadataResolver,
 			TaskRepository taskExecutionRepository, DeploymentIdRepository deploymentIdRepository,
-			AppRegistryCommon appRegistry, DelegatingResourceLoader delegatingResourceLoader,
+			AppRegistryCommon appRegistry,
+			AuditRecordService auditRecordService,
 			CommonApplicationProperties commonApplicationProperties,
 			DockerValidatorProperties dockerValidatorProperties) {
 		return new DefaultTaskService(new DataSourceProperties(), taskDefinitionRepository(), taskExplorer(),
-				taskExecutionRepository, appRegistry, delegatingResourceLoader, taskLauncher(), metadataResolver,
-				new TaskConfigurationProperties(), deploymentIdRepository, null,
+				taskExecutionRepository, appRegistry, taskLauncher(), metadataResolver,
+				new TaskConfigurationProperties(), deploymentIdRepository, auditRecordService, null,
 				commonApplicationProperties, dockerValidatorProperties);
 	}
 

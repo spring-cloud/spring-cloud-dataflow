@@ -27,6 +27,8 @@ import org.springframework.boot.autoconfigure.jdbc.DataSourceProperties;
 import org.springframework.cloud.dataflow.configuration.metadata.ApplicationConfigurationMetadataResolver;
 import org.springframework.cloud.dataflow.registry.AppRegistry;
 import org.springframework.cloud.dataflow.server.DockerValidatorProperties;
+import org.springframework.cloud.dataflow.server.audit.service.AuditRecordService;
+import org.springframework.cloud.dataflow.server.audit.service.DefaultAuditRecordService;
 import org.springframework.cloud.dataflow.server.config.apps.CommonApplicationProperties;
 import org.springframework.cloud.dataflow.server.config.features.FeaturesProperties;
 import org.springframework.cloud.dataflow.server.repository.InMemoryDeploymentIdRepository;
@@ -63,6 +65,7 @@ import static org.mockito.Mockito.when;
 /**
  * @author Glenn Renfro
  * @author David Turanski
+ * @author Gunnar Hillert
  */
 @EnableTransactionManagement
 @Configuration
@@ -76,6 +79,7 @@ public class TaskServiceDependencies {
 
 	@Autowired
 	DockerValidatorProperties dockerValidatorProperties;
+
 
 	@Bean
 	public TaskRepositoryInitializer taskExecutionRepository(DataSource dataSource) {
@@ -92,6 +96,11 @@ public class TaskServiceDependencies {
 	@Bean
 	public TaskRepository taskRepository(TaskExecutionDaoFactoryBean daoFactoryBean) {
 		return new SimpleTaskRepository(daoFactoryBean);
+	}
+
+	@Bean
+	public AuditRecordService auditRecordService() {
+		return mock(DefaultAuditRecordService.class);
 	}
 
 	@Bean
@@ -152,13 +161,15 @@ public class TaskServiceDependencies {
 	@Bean
 	public DefaultTaskService defaultTaskService(TaskDefinitionRepository taskDefinitionRepository, TaskExplorer taskExplorer,
 			TaskRepository taskExecutionRepository, AppRegistry appRegistry,
-			ResourceLoader resourceLoader, TaskLauncher taskLauncher,
+			TaskLauncher taskLauncher,
 			ApplicationConfigurationMetadataResolver metadataResolver,
 			TaskConfigurationProperties taskConfigurationProperties,
+			AuditRecordService auditRecordService,
 			CommonApplicationProperties commonApplicationProperties) {
 		return new DefaultTaskService(this.dataSourceProperties, taskDefinitionRepository, taskExplorer,
-				taskExecutionRepository, appRegistry, resourceLoader, taskLauncher, metadataResolver,
+				taskExecutionRepository, appRegistry, taskLauncher, metadataResolver,
 				taskConfigurationProperties, new InMemoryDeploymentIdRepository(),
+				auditRecordService,
 				null, commonApplicationProperties, this.dockerValidatorProperties);
 	}
 

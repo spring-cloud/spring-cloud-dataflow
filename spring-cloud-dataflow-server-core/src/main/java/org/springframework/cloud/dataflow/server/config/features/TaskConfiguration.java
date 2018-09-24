@@ -37,6 +37,7 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.cloud.dataflow.configuration.metadata.ApplicationConfigurationMetadataResolver;
 import org.springframework.cloud.dataflow.registry.AppRegistryCommon;
 import org.springframework.cloud.dataflow.server.DockerValidatorProperties;
+import org.springframework.cloud.dataflow.server.audit.service.AuditRecordService;
 import org.springframework.cloud.dataflow.server.config.apps.CommonApplicationProperties;
 import org.springframework.cloud.dataflow.server.job.TaskExplorerFactoryBean;
 import org.springframework.cloud.dataflow.server.repository.DeploymentIdRepository;
@@ -47,7 +48,6 @@ import org.springframework.cloud.dataflow.server.service.TaskService;
 import org.springframework.cloud.dataflow.server.service.impl.DefaultTaskJobService;
 import org.springframework.cloud.dataflow.server.service.impl.DefaultTaskService;
 import org.springframework.cloud.dataflow.server.service.impl.TaskConfigurationProperties;
-import org.springframework.cloud.deployer.resource.support.DelegatingResourceLoader;
 import org.springframework.cloud.deployer.spi.task.TaskLauncher;
 import org.springframework.cloud.task.repository.TaskExplorer;
 import org.springframework.cloud.task.repository.TaskRepository;
@@ -95,13 +95,15 @@ public class TaskConfiguration {
 	@Bean
 	@ConditionalOnBean(TaskDefinitionRepository.class)
 	public TaskService taskService(TaskDefinitionRepository repository, TaskExplorer taskExplorer,
-			TaskRepository taskExecutionRepository, AppRegistryCommon registry, DelegatingResourceLoader resourceLoader,
+			TaskRepository taskExecutionRepository, AppRegistryCommon registry,
 			TaskLauncher taskLauncher, ApplicationConfigurationMetadataResolver metadataResolver,
 			TaskConfigurationProperties taskConfigurationProperties, DeploymentIdRepository deploymentIdRepository,
+			AuditRecordService auditRecordService,
 			CommonApplicationProperties commonApplicationProperties,
 			DockerValidatorProperties dockerValidatorProperties) {
 		return new DefaultTaskService(dataSourceProperties, repository, taskExplorer, taskExecutionRepository, registry,
-				resourceLoader, taskLauncher, metadataResolver, taskConfigurationProperties, deploymentIdRepository,
+				taskLauncher, metadataResolver, taskConfigurationProperties, deploymentIdRepository,
+				auditRecordService,
 				this.dataflowServerUri, commonApplicationProperties, dockerValidatorProperties);
 	}
 

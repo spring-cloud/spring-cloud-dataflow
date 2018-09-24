@@ -39,6 +39,7 @@ import org.springframework.cloud.dataflow.core.TaskDefinition;
 import org.springframework.cloud.dataflow.registry.AppRegistry;
 import org.springframework.cloud.dataflow.registry.domain.AppRegistration;
 import org.springframework.cloud.dataflow.server.DockerValidatorProperties;
+import org.springframework.cloud.dataflow.server.audit.service.AuditRecordService;
 import org.springframework.cloud.dataflow.server.config.apps.CommonApplicationProperties;
 import org.springframework.cloud.dataflow.server.configuration.TaskServiceDependencies;
 import org.springframework.cloud.dataflow.server.repository.DuplicateTaskException;
@@ -52,7 +53,6 @@ import org.springframework.cloud.deployer.spi.task.TaskLauncher;
 import org.springframework.cloud.task.repository.TaskExplorer;
 import org.springframework.cloud.task.repository.TaskRepository;
 import org.springframework.core.io.FileSystemResource;
-import org.springframework.core.io.ResourceLoader;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
@@ -77,6 +77,7 @@ import static org.mockito.Mockito.when;
  * @author Glenn Renfro
  * @author Ilayaperumal Gopinathan
  * @author David Turanski
+ * @author Gunnar Hillert
  */
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = { EmbeddedDataSourceConfiguration.class, TaskServiceDependencies.class })
@@ -109,9 +110,6 @@ public abstract class DefaultTaskServiceTests {
 		private AppRegistry appRegistry;
 
 		@Autowired
-		private ResourceLoader resourceLoader;
-
-		@Autowired
 		private TaskLauncher taskLauncher;
 
 		@Autowired
@@ -125,6 +123,9 @@ public abstract class DefaultTaskServiceTests {
 
 		@Autowired
 		private DockerValidatorProperties dockerValidatorProperties;
+
+		@Autowired
+		private AuditRecordService auditRecordService;
 
 		@Before
 		public void setupMockMVC() {
@@ -197,8 +198,9 @@ public abstract class DefaultTaskServiceTests {
 			when(this.taskLauncher.launch(anyObject())).thenReturn("0");
 			TaskService taskService = new DefaultTaskService(this.dataSourceProperties,
 				mock(TaskDefinitionRepository.class), this.taskExplorer, this.taskExecutionRepository, this.appRegistry,
-				this.resourceLoader, this.taskLauncher, this.metadataResolver, new TaskConfigurationProperties(),
-				new InMemoryDeploymentIdRepository(), null, this.commonApplicationProperties, this.dockerValidatorProperties);
+				this.taskLauncher, this.metadataResolver, new TaskConfigurationProperties(),
+				new InMemoryDeploymentIdRepository(),
+				auditRecordService, null, this.commonApplicationProperties, this.dockerValidatorProperties);
 			try {
 				taskService.executeTask(TASK_NAME_ORIG, new HashMap<>(), new LinkedList<>());
 			}
