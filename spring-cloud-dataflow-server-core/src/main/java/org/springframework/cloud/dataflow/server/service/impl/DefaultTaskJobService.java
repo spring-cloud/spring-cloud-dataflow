@@ -22,8 +22,6 @@ import java.util.List;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import org.springframework.batch.admin.service.JobService;
 import org.springframework.batch.core.JobExecution;
 import org.springframework.batch.core.JobInstance;
 import org.springframework.batch.core.StepExecution;
@@ -35,6 +33,7 @@ import org.springframework.cloud.dataflow.core.TaskDefinition;
 import org.springframework.cloud.dataflow.rest.job.JobInstanceExecutions;
 import org.springframework.cloud.dataflow.rest.job.TaskJobExecution;
 import org.springframework.cloud.dataflow.rest.job.support.JobUtils;
+import org.springframework.cloud.dataflow.server.batch.JobService;
 import org.springframework.cloud.dataflow.server.job.support.JobNotRestartableException;
 import org.springframework.cloud.dataflow.server.repository.NoSuchTaskBatchException;
 import org.springframework.cloud.dataflow.server.repository.NoSuchTaskDefinitionException;

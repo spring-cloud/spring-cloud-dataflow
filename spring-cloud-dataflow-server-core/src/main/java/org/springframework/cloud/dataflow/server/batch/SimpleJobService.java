@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.springframework.batch.admin.service;
+package org.springframework.cloud.dataflow.server.batch;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -193,7 +193,7 @@ public class SimpleJobService implements JobService, DisposableBean {
 	}
 
 	/**
-	 * Delegates launching to {@link org.springframework.batch.admin.service.SimpleJobService#restart(Long, org.springframework.batch.core.JobParameters)}
+	 * Delegates launching to {@link org.springframework.cloud.dataflow.server.batch.SimpleJobService#restart(Long, org.springframework.batch.core.JobParameters)}
 	 *
 	 * @param jobExecutionId the job execution to restart
 	 * @return

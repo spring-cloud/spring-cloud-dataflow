@@ -17,8 +17,6 @@ package org.springframework.cloud.dataflow.server.config.features;
 
 import javax.sql.DataSource;
 
-import org.springframework.batch.admin.service.JobService;
-import org.springframework.batch.admin.service.SimpleJobServiceFactoryBean;
 import org.springframework.batch.core.configuration.support.MapJobRegistry;
 import org.springframework.batch.core.explore.JobExplorer;
 import org.springframework.batch.core.explore.support.JobExplorerFactoryBean;
@@ -39,6 +37,8 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.cloud.dataflow.configuration.metadata.ApplicationConfigurationMetadataResolver;
 import org.springframework.cloud.dataflow.registry.AppRegistryCommon;
 import org.springframework.cloud.dataflow.server.DockerValidatorProperties;
+import org.springframework.cloud.dataflow.server.batch.JobService;
+import org.springframework.cloud.dataflow.server.batch.SimpleJobServiceFactoryBean;
 import org.springframework.cloud.dataflow.server.config.apps.CommonApplicationProperties;
 import org.springframework.cloud.dataflow.server.job.TaskExplorerFactoryBean;
 import org.springframework.cloud.dataflow.server.repository.DeploymentIdRepository;

@@ -19,7 +19,6 @@ package org.springframework.cloud.dataflow.server.controller;
 import java.util.List;
 import java.util.TimeZone;
 
-import org.springframework.batch.admin.service.JobService;
 import org.springframework.batch.core.JobExecution;
 import org.springframework.batch.core.launch.JobExecutionNotRunningException;
 import org.springframework.batch.core.launch.NoSuchJobException;
@@ -29,6 +28,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.cloud.dataflow.rest.job.TaskJobExecution;
 import org.springframework.cloud.dataflow.rest.job.support.TimeUtils;
 import org.springframework.cloud.dataflow.rest.resource.JobExecutionResource;
+import org.springframework.cloud.dataflow.server.batch.JobService;
 import org.springframework.cloud.dataflow.server.service.TaskJobService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;

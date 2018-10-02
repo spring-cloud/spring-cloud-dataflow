@@ -19,13 +19,13 @@ package org.springframework.cloud.dataflow.server.controller;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.springframework.batch.admin.service.JobService;
-import org.springframework.batch.admin.service.NoSuchStepExecutionException;
 import org.springframework.batch.core.JobExecution;
 import org.springframework.batch.core.StepExecution;
 import org.springframework.batch.core.launch.NoSuchJobExecutionException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.dataflow.rest.resource.StepExecutionResource;
+import org.springframework.cloud.dataflow.server.batch.JobService;
+import org.springframework.cloud.dataflow.server.batch.NoSuchStepExecutionException;
 import org.springframework.cloud.dataflow.server.job.support.StepExecutionResourceBuilder;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
