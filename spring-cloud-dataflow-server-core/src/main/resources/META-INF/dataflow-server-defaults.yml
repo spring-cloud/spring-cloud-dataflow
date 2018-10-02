@@ -61,6 +61,11 @@ spring:
 
             - GET    /about                          => hasRole('ROLE_VIEW')
 
+            # Audit
+
+            - GET /audit-records                     => hasRole('ROLE_VIEW')
+            - GET /audit-records/**                  => hasRole('ROLE_VIEW')
+
             # Metrics
 
             - GET    /metrics/**                     => hasRole('ROLE_VIEW')
@@ -115,6 +120,11 @@ spring:
             - POST   /streams/deployments/**         => hasRole('ROLE_CREATE')
             - GET    /streams/deployments/**         => hasRole('ROLE_VIEW')
 
+            # Stream Validations
+
+            - GET /streams/validation/               => hasRole('ROLE_VIEW')
+            - GET /streams/validation/*              => hasRole('ROLE_VIEW')
+
             # Task Definitions
 
             - POST   /tasks/definitions              => hasRole('ROLE_CREATE')
@@ -128,6 +138,18 @@ spring:
             - GET    /tasks/executions/*             => hasRole('ROLE_VIEW')
             - POST   /tasks/executions               => hasRole('ROLE_CREATE')
             - DELETE /tasks/executions/*             => hasRole('ROLE_CREATE')
+
+            # Task Schedules
+
+            - GET    /tasks/schedules                => hasRole('ROLE_VIEW')
+            - GET    /tasks/schedules/*              => hasRole('ROLE_VIEW')
+            - POST   /tasks/schedules                => hasRole('ROLE_CREATE')
+            - DELETE /tasks/schedules/*              => hasRole('ROLE_CREATE')
+
+            # Task Validations
+
+            - GET    /tasks/validation/               => hasRole('ROLE_VIEW')
+            - GET    /tasks/validation/*              => hasRole('ROLE_VIEW')
 
             # Tools
 

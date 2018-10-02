@@ -31,6 +31,7 @@ import org.springframework.boot.autoconfigure.jdbc.DataSourceProperties;
 import org.springframework.cloud.dataflow.configuration.metadata.ApplicationConfigurationMetadataResolver;
 import org.springframework.cloud.dataflow.configuration.metadata.BootApplicationConfigurationMetadataResolver;
 import org.springframework.cloud.dataflow.registry.AppRegistry;
+import org.springframework.cloud.dataflow.server.DockerValidatorProperties;
 import org.springframework.cloud.dataflow.server.config.apps.CommonApplicationProperties;
 import org.springframework.cloud.dataflow.server.controller.JobExecutionController;
 import org.springframework.cloud.dataflow.server.controller.JobInstanceController;
@@ -136,7 +137,7 @@ public class JobDependencies {
 			CommonApplicationProperties commonApplicationProperties) {
 		return new DefaultTaskService(new DataSourceProperties(), repository, explorer, taskRepository(), registry,
 				resourceLoader, taskLauncher, metadataResolver, new TaskConfigurationProperties(),
-				deploymentIdRepository, null, commonApplicationProperties);
+				deploymentIdRepository, null, commonApplicationProperties, new DockerValidatorProperties());
 	}
 
 	@Bean

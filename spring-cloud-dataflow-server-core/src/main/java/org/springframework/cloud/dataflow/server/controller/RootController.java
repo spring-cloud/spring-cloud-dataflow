@@ -32,8 +32,10 @@ import org.springframework.cloud.dataflow.rest.resource.RootResource;
 import org.springframework.cloud.dataflow.rest.resource.ScheduleInfoResource;
 import org.springframework.cloud.dataflow.rest.resource.StepExecutionProgressInfoResource;
 import org.springframework.cloud.dataflow.rest.resource.StepExecutionResource;
+import org.springframework.cloud.dataflow.rest.resource.StreamAppStatusResource;
 import org.springframework.cloud.dataflow.rest.resource.StreamDefinitionResource;
 import org.springframework.cloud.dataflow.rest.resource.StreamDeploymentResource;
+import org.springframework.cloud.dataflow.rest.resource.TaskAppStatusResource;
 import org.springframework.cloud.dataflow.rest.resource.TaskDefinitionResource;
 import org.springframework.cloud.dataflow.rest.resource.TaskExecutionResource;
 import org.springframework.cloud.dataflow.rest.resource.TaskToolsResource;
@@ -91,12 +93,16 @@ public class RootController {
 		RootResource root = new RootResource(Version.REVISION);
 
 		root.add(ControllerLinkBuilder.linkTo(UiController.class).withRel("dashboard"));
+		root.add(ControllerLinkBuilder.linkTo(AuditRecordController.class).withRel("audit-records"));
+
 		if (featuresProperties.isStreamsEnabled()) {
 			root.add(entityLinks.linkToCollectionResource(StreamDefinitionResource.class)
 					.withRel("streams/definitions"));
 			root.add(
 					unescapeTemplateVariables(entityLinks.linkToSingleResource(StreamDefinitionResource.class, "{name}")
 							.withRel("streams/definitions/definition")));
+			root.add(unescapeTemplateVariables(entityLinks.linkToSingleResource(StreamAppStatusResource.class, "{name}")
+					.withRel("streams/validation")));
 			root.add(entityLinks.linkToCollectionResource(AppStatusResource.class).withRel("runtime/apps"));
 			root.add(unescapeTemplateVariables(
 					entityLinks.linkForSingleResource(AppStatusResource.class, "{appId}").withRel("runtime/apps/app")));
@@ -134,6 +140,9 @@ public class RootController {
 				.getCurrentTaskExecutionsInfo()).withRel("tasks/executions/current"));
 			root.add(unescapeTemplateVariables(entityLinks.linkToSingleResource(TaskExecutionResource.class, "{id}")
 					.withRel("tasks/executions/execution")));
+			root.add(unescapeTemplateVariables(entityLinks.linkToSingleResource(TaskAppStatusResource.class, "{name}")
+					.withRel("tasks/validation")));
+
 			if(featuresProperties.isSchedulesEnabled()) {
 				root.add(entityLinks.linkToCollectionResource(ScheduleInfoResource.class).withRel("tasks/schedules"));
 				String scheduleTemplated = entityLinks.linkToCollectionResource(ScheduleInfoResource.class).getHref()

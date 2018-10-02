@@ -31,6 +31,7 @@ import java.util.Set;
 import org.springframework.boot.configurationmetadata.ConfigurationMetadataGroup;
 import org.springframework.boot.configurationmetadata.ConfigurationMetadataProperty;
 import org.springframework.boot.configurationmetadata.ConfigurationMetadataRepositoryJsonBuilder;
+import org.springframework.boot.configurationmetadata.Deprecation.Level;
 import org.springframework.boot.loader.archive.Archive;
 import org.springframework.boot.loader.archive.ExplodedArchive;
 import org.springframework.boot.loader.archive.JarFileArchive;
@@ -120,20 +121,29 @@ public class BootApplicationConfigurationMetadataResolver extends ApplicationCon
 			}
 			for (ConfigurationMetadataGroup group : builder.build().getAllGroups().values()) {
 				if (include || isWhiteListed(group, whiteListedClasses)) {
-					result.addAll(group.getProperties().values());
+					for (ConfigurationMetadataProperty property : group.getProperties().values()) {
+						if (!isDeprecatedError(property)) {
+							result.add(property);
+						}
+					}
+
 				} // Props in the root group have an id that looks prefixed itself. Handle
 				// here
 				else if ("_ROOT_GROUP_".equals(group.getId())) {
 					for (ConfigurationMetadataProperty property : group.getProperties().values()) {
 						if (isWhiteListed(property, whiteListedProperties)) {
-							result.add(property);
+							if (!isDeprecatedError(property)) {
+								result.add(property);
+							}
 						}
 					}
 				}
 				else { // Look for per property WL
 					for (ConfigurationMetadataProperty property : group.getProperties().values()) {
 						if (isWhiteListed(property, whiteListedProperties)) {
-							result.add(property);
+							if (!isDeprecatedError(property)) {
+								result.add(property);
+							}
 						}
 					}
 				}
@@ -183,6 +193,16 @@ public class BootApplicationConfigurationMetadataResolver extends ApplicationCon
 	 */
 	private boolean isWhiteListed(ConfigurationMetadataProperty property, Collection<String> properties) {
 		return properties.contains(property.getId());
+	}
+
+	/**
+	 * Checks if property is error deprecated.
+	 *
+	 * @param property the configuration property
+	 * @return if property is error deprecated
+	 */
+	private boolean isDeprecatedError(ConfigurationMetadataProperty property) {
+		return property.getDeprecation() != null && property.getDeprecation().getLevel() == Level.ERROR;
 	}
 
 	/**

@@ -39,6 +39,12 @@
 			<artifactId>json-path</artifactId>
 			<scope>test</scope>
 		</dependency>
+		<dependency>
+			<groupId>io.projectreactor</groupId>
+			<artifactId>reactor-core</artifactId>
+			<version>3.1.8.RELEASE</version>
+			<scope>test</scope>
+		</dependency>
 	</dependencies>
     <build>
         <plugins>

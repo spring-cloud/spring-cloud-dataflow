@@ -38,6 +38,10 @@ import org.springframework.cloud.dataflow.core.StreamDefinition;
 import org.springframework.cloud.dataflow.core.StreamDeployment;
 import org.springframework.cloud.dataflow.registry.AppRegistryCommon;
 import org.springframework.cloud.dataflow.rest.SkipperStream;
+import org.springframework.cloud.dataflow.server.DockerValidatorProperties;
+import org.springframework.cloud.dataflow.server.audit.domain.AuditActionType;
+import org.springframework.cloud.dataflow.server.audit.domain.AuditOperationType;
+import org.springframework.cloud.dataflow.server.audit.service.AuditRecordService;
 import org.springframework.cloud.dataflow.server.config.apps.CommonApplicationProperties;
 import org.springframework.cloud.dataflow.server.controller.support.InvalidStreamDefinitionException;
 import org.springframework.cloud.dataflow.server.repository.StreamDefinitionRepository;
@@ -64,6 +68,7 @@ import static org.mockito.Mockito.when;
  * @author Ilayaperumal Gopinathan
  * @author Eric Bottard
  * @author Christian Tzolov
+ * @author Gunnar Hillert
  */
 @RunWith(SpringRunner.class)
 public class DefaultSkipperStreamServiceTests {
@@ -90,6 +95,9 @@ public class DefaultSkipperStreamServiceTests {
 
 	private DefaultSkipperStreamService defaultSkipperStreamService;
 	private AppRegistryCommon appRegistryCommon;
+	private AuditRecordService auditRecordService;
+
+	private DockerValidatorProperties dockerValidatorProperties;
 
 	@Before
 	public void setupMock() {
@@ -97,11 +105,14 @@ public class DefaultSkipperStreamServiceTests {
 		this.streamDefinitionRepository = mock(StreamDefinitionRepository.class);
 		this.skipperStreamDeployer = mock(SkipperStreamDeployer.class);
 		this.appRegistryCommon = mock(AppRegistryCommon.class);
+		this.auditRecordService = mock(AuditRecordService.class); //FIXME
+		this.dockerValidatorProperties = new DockerValidatorProperties();
 		this.appDeploymentRequestCreator = new AppDeploymentRequestCreator(this.appRegistryCommon,
 				mock(CommonApplicationProperties.class),
 				new BootApplicationConfigurationMetadataResolver());
 		this.defaultSkipperStreamService = new DefaultSkipperStreamService(streamDefinitionRepository,
-				this.skipperStreamDeployer, this.appDeploymentRequestCreator, this.appRegistryCommon);
+				this.skipperStreamDeployer, this.appDeploymentRequestCreator, this.appRegistryCommon,
+				this.auditRecordService, dockerValidatorProperties);
 		this.streamDefinitionList.add(streamDefinition1);
 		this.streamDefinitionList.add(streamDefinition2);
 		this.streamDefinitionList.add(streamDefinition3);
@@ -124,10 +135,13 @@ public class DefaultSkipperStreamServiceTests {
 		verify(this.appRegistryCommon).appExist("time", ApplicationType.source);
 		verify(this.appRegistryCommon).appExist("log", ApplicationType.sink);
 		verify(this.streamDefinitionRepository).save(new StreamDefinition("testStream", "time | log"));
+		verify(this.auditRecordService).populateAndSaveAuditRecord(
+				AuditOperationType.STREAM, AuditActionType.CREATE, "testStream", "time | log");
 
 		verifyNoMoreInteractions(this.skipperStreamDeployer);
 		verifyNoMoreInteractions(this.appRegistryCommon);
 		verifyNoMoreInteractions(this.skipperStreamDeployer);
+		verifyNoMoreInteractions(this.auditRecordService);
 	}
 
 	@Test
@@ -142,17 +156,16 @@ public class DefaultSkipperStreamServiceTests {
 		this.defaultSkipperStreamService.createStream("testStream", "time | log", false);
 	}
 
-	@Test
-	public void createStreamInvalidDsl() {
-		when(this.appRegistryCommon.appExist("time", ApplicationType.source)).thenReturn(true);
-		when(this.appRegistryCommon.appExist("log", ApplicationType.sink)).thenReturn(true);
+		@Test
+		public void createStreamInvalidDsl() {
+			when(this.appRegistryCommon.appExist("time", ApplicationType.source)).thenReturn(true);
+			when(this.appRegistryCommon.appExist("log", ApplicationType.sink)).thenReturn(true);
 
-		thrown.expect(InvalidStreamDefinitionException.class);
-		thrown.expectMessage("Cannot determine application type for application 'koza': koza had " +
-				"neither input nor output set");
+			thrown.expect(InvalidStreamDefinitionException.class);
+			thrown.expectMessage("Application name 'koza' with type 'app' does not exist in the app registry.");
 
-		this.defaultSkipperStreamService.createStream("testStream", "koza", false);
-	}
+			this.defaultSkipperStreamService.createStream("testStream", "koza", false);
+		}
 
 	@Test
 	public void verifyUndeployStream() {
@@ -163,7 +176,10 @@ public class DefaultSkipperStreamServiceTests {
 
 		this.defaultSkipperStreamService.undeployStream(streamDefinition2.getName());
 		verify(this.skipperStreamDeployer, times(1)).undeployStream(streamDefinition2.getName());
+		verify(this.auditRecordService).populateAndSaveAuditRecord(
+				AuditOperationType.STREAM, AuditActionType.UNDEPLOY, "test2", "time | log");
 		verifyNoMoreInteractions(this.skipperStreamDeployer);
+		verifyNoMoreInteractions(this.auditRecordService);
 	}
 
 	@Test
@@ -277,7 +293,8 @@ public class DefaultSkipperStreamServiceTests {
 		streamDefinitionRepository = mock(StreamDefinitionRepository.class);
 
 		this.defaultSkipperStreamService = new DefaultSkipperStreamService(streamDefinitionRepository,
-				this.skipperStreamDeployer, this.appDeploymentRequestCreator, this.appRegistryCommon);
+				this.skipperStreamDeployer, this.appDeploymentRequestCreator, this.appRegistryCommon,
+				this.auditRecordService, this.dockerValidatorProperties);
 
 		StreamDefinition streamDefinition = new StreamDefinition("test1", "time | log");
 

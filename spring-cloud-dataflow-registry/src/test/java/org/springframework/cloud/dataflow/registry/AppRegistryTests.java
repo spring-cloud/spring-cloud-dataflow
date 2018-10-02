@@ -149,6 +149,16 @@ public class AppRegistryTests {
 	}
 
 	@Test
+	public void testSaveApp() {
+		appRegistry.save("fooApp", ApplicationType.app, URI.create("classpath:/foo"), URI.create("foo-metadata"));
+
+		AppRegistration registration = appRegistry.find("fooApp", ApplicationType.app);
+
+		assertThat(registration.getName(), is("fooApp"));
+		assertThat(registration.getType(), is(ApplicationType.app));
+	}
+
+	@Test
 	public void testImportAll() {
 		// pre-register an app
 		appRegistry.save("foo", ApplicationType.source, URI.create("classpath:/previous-foo-source"), null);
@@ -198,5 +208,21 @@ public class AppRegistryTests {
 		catch (NoSuchAppRegistrationException expected) {
 			assertThat(expected.getMessage(), is("The 'source:foo' application could not be found."));
 		}
+	}
+
+	@Test
+	public void testGetAppResource() {
+		AppRegistration appRegistration1 = new AppRegistration("foo", ApplicationType.source, URI.create("docker:/foo-source"));
+		appRegistry.save(appRegistration1);
+		assertThat(appRegistry.getAppMetadataResource(appRegistration1), nullValue());
+		assertThat(appRegistry.getAppResource(appRegistration1), notNullValue());
+		AppRegistration appRegistration2 = new AppRegistration("bar", ApplicationType.source, URI.create("classpath:/foo-source"));
+		appRegistry.save(appRegistration2);
+		assertThat(appRegistry.getAppResource(appRegistration2), notNullValue());
+		assertThat(appRegistry.getAppMetadataResource(appRegistration2), notNullValue());
+		AppRegistration appRegistration3 = new AppRegistration("bar", ApplicationType.source, URI.create("maven:/org.springframework.cloud:foo-source:1.0.0"));
+		appRegistry.save(appRegistration3);
+		assertThat(appRegistry.getAppResource(appRegistration3), notNullValue());
+		assertThat(appRegistry.getAppMetadataResource(appRegistration3), notNullValue());
 	}
 }

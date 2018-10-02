@@ -23,8 +23,10 @@ import org.junit.Test;
 
 import static org.hamcrest.Matchers.equalTo;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 /**
@@ -57,6 +59,26 @@ public class StreamParserTests {
 	public void hyphenatedAppName() {
 		sn = parse("gemfire-cq");
 		assertEquals("[(AppNode:gemfire-cq:0>10)]", sn.stringify(true));
+	}
+
+	@Test
+	public void listApps() {
+		checkForParseError(":aaa > fff,bbb", DSLMessage.DONT_USE_COMMA_WITH_CHANNELS, 10);
+		checkForParseError("fff,bbb > :zzz", DSLMessage.DONT_USE_COMMA_WITH_CHANNELS, 3);
+		checkForParseError("aaa | bbb, ccc", DSLMessage.DONT_MIX_PIPE_AND_COMMA, 9);
+		checkForParseError("aaa , bbb| ccc", DSLMessage.DONT_MIX_PIPE_AND_COMMA, 9);
+		sn = parse("aaa | filter --expression='#jsonPath(payload,''$.lang'')==''en'''");
+		System.out.println(sn.getAppNodes().get(1).getArguments()[0]);
+	}
+
+	@Test
+	public void commaEndingArgs() {
+		checkForParseError("aaa --bbb=ccc,", DSLMessage.OOD, 14);
+		checkForParseError("aaa --bbb='ccc',", DSLMessage.OOD, 16);
+		sn = parse("aaa --bbb='ccc', bbb");
+		assertEquals("[(AppNode:aaa --bbb=ccc:0>15)(AppNode:bbb:17>20)]", sn.stringify(true));
+		ArgumentNode argumentNode = sn.getAppNodes().get(0).getArguments()[0];
+		assertEquals("ccc", argumentNode.getValue());
 	}
 
 	// Just to make the testing easier the parser supports stream naming easier.
@@ -511,8 +533,58 @@ public class StreamParserTests {
 				equalTo("payload" + ".replace(\"abc\", '')"));
 	}
 
+	@Test
+	public void testParseUnboundStreamApp() {
+		StreamNode ast = parse("foo");
+		System.out.println(ast);
+	}
+	
+	@Test
+	public void testParseUnboundStreamApps() {
+		sn = parse("foo, bar, baz");
+		List<AppNode> appNodes = sn.getAppNodes();
+		assertEquals(3,appNodes.size());
+		assertEquals("foo", appNodes.get(0).getName());
+		assertEquals("baz", appNodes.get(2).getName());
+		assertTrue(appNodes.get(0).isUnboundStreamApp());
 
-	// ---
+		sn = parse("foo | bar");
+		appNodes = sn.getAppNodes();
+		assertEquals(2,appNodes.size());
+		assertEquals("foo", appNodes.get(0).getName());
+		assertEquals("bar", appNodes.get(1).getName());
+		assertFalse(appNodes.get(0).isUnboundStreamApp());
+		
+		checkForParseError("foo,",DSLMessage.OOD, 4);
+		// TODO need some stream tests that have comma at end of options
+	}
+
+	@Test
+	public void testParseUnboundStreamAppsWithParams() {
+		// TODO should have special message for this occurrence... ? need the space before the comma			
+		
+		//		sn = parse("foo --aaa=bbb, bar");
+		//		System.out.println(sn);
+		//		sn = parse("foo --aaa=\"bbb\", bar");
+		//		System.out.println(sn);
+
+		sn = parse("foo --aaa=bbb , bar");
+		List<AppNode> appNodes = sn.getAppNodes();
+		assertEquals(2,appNodes.size());
+		assertEquals("foo --aaa=bbb",appNodes.get(0).toString());
+		assertEquals("bar",appNodes.get(1).toString());
+		
+		
+		//		sn = parse("foo --aaa=\"bbb\" , bar");
+		//		System.out.println(sn);
+		//		sn = parse("foo --aaa=\"bbb\",");
+		//		System.out.println(sn);
+		//		sn = parse("foo --aaa=\"bbb\" ,");
+		//		System.out.println(sn);
+	}
+
+	
+	// --- 
 
 	StreamNode parse(String streamDefinition) {
 		return new StreamParser(streamDefinition).parse();

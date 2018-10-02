@@ -82,6 +82,70 @@ The xref:getting-started#getting-started[Getting Started] section shows you how 
 
 Note that the shell calls the Data Flow Servers' REST API. For more information on making HTTP requests directly to the server, consult the <<api-guide, REST API Guide>>.
 
+[[spring-cloud-dataflow-stream-app-dsl]]
+=== Stream Application DSL
+
+The Stream Pipeline DSL described in the previous section automatically sets the input and output binding properties of each Spring Cloud Stream application.
+This can be done because there is only one input and/or output destination in a Spring Cloud Stream application that uses the provided binding interface of a `Source`, `Processor`, or `Sink`.
+However, a Spring Cloud Stream application can define a custom binding interface such as the one shown below
+
+[source,java]
+----
+public interface Barista {
+
+    @Input
+    SubscribableChannel orders();
+
+    @Output
+    MessageChannel hotDrinks();
+
+    @Output
+    MessageChannel coldDrinks();
+}
+----
+
+or as is common when creating a Kafka Streams application,
+
+[source,java]
+----
+interface KStreamKTableBinding {
+
+    @Input
+    KStream<?, ?> inputStream();
+
+    @Input
+    KTable<?, ?> inputTable();
+}
+----
+
+In these cases with multiple input and output bindings, Data Flow cannot make any assumptions about the flow of data from one application to another.
+Therefore the developer needs to set the binding properties to 'wire up' the application.
+The *Stream Application DSL* uses a `comma`, instead of the `pipe symbol`, to indicate that Data Flow should not configure the binding properties of the application.
+For example:
+
+`dataflow:> stream create --definition "orderGeneratorApp, baristaApp, hotDrinkDeliveryApp, coldDrinkDeliveryApp" --name myCafeStream`
+
+There are four applications in this stream.
+ The baristaApp has two output destinations, `hotDrinks` and `coldDrinks` intended to be consumed by the `hotDrinkDeliveryApp` and `coldDrinkDeliveryApp` respectively.
+When deploying this stream, you need to set the binding properties so that the `baristaApp` sends hot drink messages to the `hotDrinkDeliveryApp` destination and cold drink messages to the `coldDrinkDeliveryApp` destination.
+For example
+
+[source,bash,subs=attributes]
+----
+app.baristaApp.spring.cloud.stream.bindings.hotDrinks.destination=hotDrinksDest
+app.baristaApp.spring.cloud.stream.bindings.coldDrinks.destination=coldDrinksDest
+app.hotDrinkDeliveryApp.spring.cloud.stream.bindings.input.destination=hotDrinksDest
+app.coldDrinkDeliveryApp.spring.cloud.stream.bindings.input.destination=coldDrinksDest
+----
+
+If you want to use consumer groups, you will need to set the Spring Cloud Stream application property `spring.cloud.stream.bindings.<channelName>.producer.requiredGroups` and `spring.cloud.stream.bindings.<channelName>.group` on the producer and consumer applications respectively.
+
+Another common use case for the Stream Application DSL is to deploy a http gateway application that sends a synchronous request/reply message to a Kafka or RabbitMQ application.
+In this case both the http gateway application and the Kafka or RabbitMQ application can be a Spring Integration application that does not make use of the Spring Cloud Stream library.
+
+It is also possible to deploy just a single application using the Stream application DSL.
+
+
 === Application properties
 
 Each application takes properties to customize its behavior.  As an example, the `http` source module exposes a `port` setting that allows the data ingestion port to be changed from the default value.
@@ -101,6 +165,9 @@ The shell provides tab completion for application properties. The shell command 
 
 NOTE: Supported Stream `<appType>` possibilities are: source, processor, and sink.
 
+
+
+
 [[spring-cloud-dataflow-stream-lifecycle]]
 == Stream Lifecycle
 
@@ -116,8 +183,8 @@ The lifecycle of a stream, in "classic" mode, goes through the following stages:
 
 You can register a Stream App with the App Registry by using the Spring Cloud Data Flow Shell
 `app register` command. You must provide a unique name, an application type, and a URI that can be
-resolved to the app artifact. For the type, specify `source`, `processor`, or `sink`.
-Here are a few examples:
+resolved to the app artifact. For the type, specify `source`, `processor`, `sink`, or `app`.
+Here are a few examples for `source`, `processor` and `sink`:
 
 ```
 dataflow:>app register --name mysource --type source --uri maven://com.example:mysource:0.0.1-SNAPSHOT
@@ -157,6 +224,12 @@ Then to import the apps in bulk, use the `app import` command and provide the lo
 ```
 dataflow:>app import --uri file:///<YOUR_FILE_LOCATION>/stream-apps.properties
 ```
+
+Registering an application using `--type app` is the same as registering a `source`, `processor` or `sink`.
+Applications of the type `app` are only allowed to be used in the Stream Application DSL, which uses a comma instead of the pipe symbol in the DSL, and instructs Data Flow not to configure the Spring Cloud Stream binding properties of the application.
+The application that is registered using `--type app` does not have to be a Spring Cloud Stream app, it can be any Spring Boot application.
+See the <<spring-cloud-dataflow-stream-app-dsl,Stream Application DSL introduction>> for more information on using this application type.
+
 
 [[supported-apps-and-tasks]]
 ==== Register Supported Applications and Tasks

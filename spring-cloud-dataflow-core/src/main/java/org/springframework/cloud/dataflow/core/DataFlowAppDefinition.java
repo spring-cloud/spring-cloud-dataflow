@@ -37,6 +37,11 @@ abstract class DataFlowAppDefinition {
 	 * The name of the registered app.
 	 */
 	private volatile String registeredAppName;
+	
+	/**
+	 * The {@link ApplicationType}
+	 */
+	private volatile ApplicationType applicationType;
 
 	/**
 	 * Construct a {@code DataFlowAppDefinition}.
@@ -49,12 +54,15 @@ abstract class DataFlowAppDefinition {
 	 *
 	 * @param registeredAppName name of application in registry
 	 * @param label label used for application
+	 * @param applicationType the application type if already determined
 	 * @param properties app properties; may be {@code null}
 	 */
-	protected DataFlowAppDefinition(String registeredAppName, String label, Map<String, String> properties) {
+	protected DataFlowAppDefinition(String registeredAppName, String label, ApplicationType applicationType, Map<String, String> properties) {
 		Assert.notNull(registeredAppName, "registeredAppName must not be null");
+		Assert.notNull(applicationType, "applicationType must not be null");
 		Assert.notNull(label, "label must not be null");
 		this.registeredAppName = registeredAppName;
+		this.applicationType = applicationType;
 		this.appDefinition = new AppDefinition(label, properties);
 	}
 
@@ -92,6 +100,13 @@ abstract class DataFlowAppDefinition {
 	 */
 	public Map<String, String> getProperties() {
 		return this.appDefinition.getProperties();
+	}
+
+	/**
+	 * @return the {@link ApplicationType} of this application
+	 */
+	public ApplicationType getApplicationType() {
+		return applicationType;
 	}
 
 }

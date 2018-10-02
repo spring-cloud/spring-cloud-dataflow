@@ -370,16 +370,6 @@ public class StreamControllerTests {
 	}
 
 	@Test
-	public void testSaveIncorrectStream() throws Exception {
-		assertEquals(0, repository.count());
-		mockMvc.perform(post("/streams/definitions/").param("name", "myStream").param("definition", "foooooo")
-				.accept(MediaType.APPLICATION_JSON)).andDo(print()).andExpect(status().isBadRequest())
-				.andExpect(jsonPath("$[0].logref", is("InvalidStreamDefinitionException")))
-				.andExpect(jsonPath("$[0].message", is("Cannot determine application type for application 'foooooo': "
-						+ "foooooo had neither input nor output set")));
-	}
-
-	@Test
 	public void testSaveDuplicate() throws Exception {
 		repository.save(new StreamDefinition("myStream", "time | log"));
 		assertEquals(1, repository.count());
@@ -910,4 +900,15 @@ public class StreamControllerTests {
 		ArgumentCaptor<AppDeploymentRequest> captor = ArgumentCaptor.forClass(AppDeploymentRequest.class);
 		verify(appDeployer, times(2)).deploy(captor.capture());
 	}
+
+	@Test
+	public void testValidateStream() throws Exception {
+		assertEquals(0, repository.count());
+		mockMvc.perform(post("/streams/definitions/").param("name", "myStream1").param("definition", "time | log")
+				.accept(MediaType.APPLICATION_JSON)).andDo(print()).andExpect(status().isCreated());
+		mockMvc.perform(get("/streams/validation/myStream1").accept(MediaType.APPLICATION_JSON))
+				.andExpect(status().isOk()).andDo(print()).andExpect(content()
+				.json("{\"appName\":\"myStream1\",\"appStatuses\":{\"source:time\":\"valid\",\"sink:log\":\"valid\"},\"dsl\":\"time | log\",\"links\":[]}"));
+	}
+
 }

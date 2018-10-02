@@ -522,8 +522,12 @@ public class SkipperStreamDeployer implements StreamDeployer {
 	 * @param streamName the name of the stream to upgrade
 	 * @param packageIdentifier the name of the package in skipper
 	 * @param configYml the YML formatted configuration values to use when upgrading
+	 * @param force the flag to indicate if the stream update is forced even if there are no differences from the existing stream
+	 * @param appNames the app names to update
+	 * @return release the upgraded release
 	 */
-	public Release upgradeStream(String streamName, PackageIdentifier packageIdentifier, String configYml) {
+	public Release upgradeStream(String streamName, PackageIdentifier packageIdentifier, String configYml,
+			boolean force, List<String> appNames) {
 		UpgradeRequest upgradeRequest = new UpgradeRequest();
 		upgradeRequest.setPackageIdentifier(packageIdentifier);
 		UpgradeProperties upgradeProperties = new UpgradeProperties();
@@ -532,6 +536,8 @@ public class SkipperStreamDeployer implements StreamDeployer {
 		upgradeProperties.setConfigValues(configValues);
 		upgradeProperties.setReleaseName(streamName);
 		upgradeRequest.setUpgradeProperties(upgradeProperties);
+		upgradeRequest.setForce(force);
+		upgradeRequest.setAppNames(appNames);
 		return this.skipperClient.upgrade(upgradeRequest);
 	}
 

@@ -25,7 +25,6 @@ import org.springframework.cloud.dataflow.core.StreamAppDefinition;
 import org.springframework.cloud.dataflow.core.StreamDefinition;
 import org.springframework.cloud.dataflow.core.dsl.DSLMessage;
 import org.springframework.cloud.dataflow.core.dsl.ParseException;
-import org.springframework.cloud.dataflow.server.DataFlowServerUtil;
 import org.springframework.cloud.dataflow.server.repository.StreamDefinitionRepository;
 import org.springframework.util.StringUtils;
 
@@ -75,7 +74,7 @@ public class TapOnDestinationRecoveryStrategy implements RecoveryStrategy<ParseE
 		if (streamDefinition != null) {
 			CompletionProposal.Factory proposals = CompletionProposal.expanding(":" + streamName + ".");
 			for (StreamAppDefinition streamAppDefinition : streamDefinition.getAppDefinitions()) {
-				ApplicationType applicationType = DataFlowServerUtil.determineApplicationType(streamAppDefinition);
+				ApplicationType applicationType = streamAppDefinition.getApplicationType();
 				if (streamAppDefinition.getName().startsWith(appName)
 						&& !applicationType.equals(ApplicationType.sink)) {
 					collector.add(proposals.withSuffix(streamAppDefinition.getName()));

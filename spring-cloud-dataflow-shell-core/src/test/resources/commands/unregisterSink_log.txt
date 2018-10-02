@@ -1,0 +1,1 @@
+app unregister --type sink --name log

@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 the original author or authors.
+ * Copyright 2017-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,15 +33,20 @@ import org.springframework.cloud.dataflow.core.dsl.StreamNode;
 import org.springframework.cloud.dataflow.core.dsl.StreamParser;
 import org.springframework.cloud.dataflow.registry.AppRegistryCommon;
 import org.springframework.cloud.dataflow.server.DataFlowServerUtil;
+import org.springframework.cloud.dataflow.server.DockerValidatorProperties;
+import org.springframework.cloud.dataflow.server.audit.domain.AuditActionType;
+import org.springframework.cloud.dataflow.server.audit.domain.AuditOperationType;
+import org.springframework.cloud.dataflow.server.audit.service.AuditRecordService;
 import org.springframework.cloud.dataflow.server.controller.StreamAlreadyDeployedException;
 import org.springframework.cloud.dataflow.server.controller.StreamAlreadyDeployingException;
 import org.springframework.cloud.dataflow.server.controller.support.InvalidStreamDefinitionException;
 import org.springframework.cloud.dataflow.server.repository.NoSuchStreamDefinitionException;
 import org.springframework.cloud.dataflow.server.repository.StreamDefinitionRepository;
 import org.springframework.cloud.dataflow.server.repository.support.SearchPageable;
+import org.springframework.cloud.dataflow.server.service.DefinitionAppValidationStatus;
 import org.springframework.cloud.dataflow.server.service.StreamService;
+import org.springframework.cloud.dataflow.server.service.impl.validation.AppValidationUtils;
 import org.springframework.cloud.dataflow.server.stream.StreamDeploymentRequest;
-import org.springframework.cloud.dataflow.server.support.CannotDetermineApplicationTypeException;
 import org.springframework.cloud.deployer.spi.app.DeploymentState;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -63,6 +68,8 @@ import org.springframework.util.StringUtils;
  * @author Mark Pollack
  * @author Ilayaperumal Gopinathan
  * @author Christian Tzolov
+ * @author Gunnar Hillert
+ * @author Glenn Renfro
  */
 @Transactional
 public abstract class AbstractStreamService implements StreamService {
@@ -79,37 +86,47 @@ public abstract class AbstractStreamService implements StreamService {
 	 */
 	private final AppRegistryCommon appRegistry;
 
+	protected final AuditRecordService auditRecordService;
+
+	public static final String STREAM_DEFINITION_DSL_TEXT = "streamDefinitionDslText";
+	public static final String DEPLOYMENT_PROPERTIES = "deploymentProperties";
+
+	/**
+	 * The urls and credentials to required to validate access docker resources.
+	 */
+	private DockerValidatorProperties dockerValidatorProperties;
+
 	/**
 	 * Constructor for implementations of the {@link StreamService}.
 	 * @param streamDefinitionRepository the stream definition repository to use
 	 * @param appRegistry the application registry to use
 	 */
-	public AbstractStreamService(StreamDefinitionRepository streamDefinitionRepository, AppRegistryCommon appRegistry) {
+	public AbstractStreamService(StreamDefinitionRepository streamDefinitionRepository,
+			AppRegistryCommon appRegistry,
+			AuditRecordService auditRecordService,
+			DockerValidatorProperties dockerValidatorProperties) {
 		Assert.notNull(streamDefinitionRepository, "StreamDefinitionRepository must not be null");
 		Assert.notNull(appRegistry, "AppRegistryCommon must not be null");
+		Assert.notNull(auditRecordService, "AuditRecordService must not be null");
+		Assert.notNull(dockerValidatorProperties, "DockerValidationResources must not be null");
+
 		this.streamDefinitionRepository = streamDefinitionRepository;
 		this.appRegistry = appRegistry;
+		this.auditRecordService = auditRecordService;
+		this.dockerValidatorProperties = dockerValidatorProperties;
 	}
 
 	public StreamDefinition createStream(String streamName, String dsl, boolean deploy) {
 		StreamDefinition streamDefinition = createStreamDefinition(streamName, dsl);
-
 		List<String> errorMessages = new ArrayList<>();
 
 		for (StreamAppDefinition streamAppDefinition : streamDefinition.getAppDefinitions()) {
 			final String appName = streamAppDefinition.getRegisteredAppName();
-			try {
-				final ApplicationType appType = DataFlowServerUtil.determineApplicationType(streamAppDefinition);
-				if (!appRegistry.appExist(appName, appType)) {
-					errorMessages.add(
-							String.format("Application name '%s' with type '%s' does not exist in the app registry.",
-									appName, appType));
-				}
-			}
-			catch (CannotDetermineApplicationTypeException e) {
-				errorMessages.add(String.format("Cannot determine application type for application '%s': %s",
-						appName, e.getMessage()));
-				continue;
+			ApplicationType applicationType = streamAppDefinition.getApplicationType();
+			if (!appRegistry.appExist(appName, applicationType)) {
+				errorMessages.add(
+						String.format("Application name '%s' with type '%s' does not exist in the app registry.",
+								appName, applicationType));
 			}
 		}
 
@@ -123,10 +140,16 @@ public abstract class AbstractStreamService implements StreamService {
 			this.deployStream(streamName, new HashMap<>());
 		}
 
+		auditRecordService.populateAndSaveAuditRecord(
+				AuditOperationType.STREAM, AuditActionType.CREATE,
+				streamDefinition.getName(), streamDefinition.getDslText());
+
 		return streamDefinition;
+
 	}
 
-	private StreamDefinition createStreamDefinition(String streamName, String dsl) {
+	public StreamDefinition createStreamDefinition(String streamName, String dsl) {
+
 		try {
 			return new StreamDefinition(streamName, dsl);
 		}
@@ -154,6 +177,14 @@ public abstract class AbstractStreamService implements StreamService {
 			throw new StreamAlreadyDeployingException(name);
 		}
 		doDeployStream(streamDefinition, deploymentProperties);
+
+		final Map<String, Object> auditedData = new HashMap<>(2);
+		auditedData.put(STREAM_DEFINITION_DSL_TEXT, streamDefinition.getDslText());
+		auditedData.put(DEPLOYMENT_PROPERTIES, deploymentProperties);
+
+		auditRecordService.populateAndSaveAuditRecordUsingMapData(
+				AuditOperationType.STREAM, AuditActionType.DEPLOY,
+				streamDefinition.getName(), auditedData);
 	}
 
 	protected abstract void doDeployStream(StreamDefinition streamDefinition, Map<String, String> deploymentProperties);
@@ -162,19 +193,31 @@ public abstract class AbstractStreamService implements StreamService {
 
 	@Override
 	public void deleteStream(String name) {
-		if (this.streamDefinitionRepository.findOne(name) == null) {
+		final StreamDefinition streamDefinition = this.streamDefinitionRepository.findOne(name);
+		if (streamDefinition == null) {
 			throw new NoSuchStreamDefinitionException(name);
 		}
 		this.undeployStream(name);
 		this.streamDefinitionRepository.delete(name);
+
+		auditRecordService.populateAndSaveAuditRecord(
+				AuditOperationType.STREAM, AuditActionType.DELETE,
+				streamDefinition.getName(), streamDefinition.getDslText());
 	}
 
 	@Override
 	public void deleteAll() {
-		for (StreamDefinition streamDefinition : this.streamDefinitionRepository.findAll()) {
+		final Iterable<StreamDefinition> streamDefinitions = this.streamDefinitionRepository.findAll();
+		for (StreamDefinition streamDefinition : streamDefinitions) {
 			this.undeployStream(streamDefinition.getName());
 		}
 		this.streamDefinitionRepository.deleteAll();
+
+		for (StreamDefinition streamDefinition : streamDefinitions) {
+			auditRecordService.populateAndSaveAuditRecord(
+					AuditOperationType.STREAM, AuditActionType.DELETE,
+					streamDefinition.getName(), streamDefinition.getDslText());
+		}
 	}
 
 	@Override
@@ -237,5 +280,23 @@ public abstract class AbstractStreamService implements StreamService {
 			throw new NoSuchStreamDefinitionException(streamDefinitionName);
 		}
 		return definition;
+	}
+
+	@Override
+	public DefinitionAppValidationStatus validateStream(String name) {
+		StreamDefinition definition = streamDefinitionRepository.findOne(name);
+		if (definition == null) {
+			throw new NoSuchStreamDefinitionException(name);
+		}
+		DefinitionAppValidationStatus definitionAppValidationStatus =
+				new DefinitionAppValidationStatus(definition.getName(),
+						definition.getDslText());
+		for (StreamAppDefinition streamAppDefinition : definition.getAppDefinitions()) {
+			ApplicationType appType = DataFlowServerUtil.determineApplicationType(streamAppDefinition);
+			boolean status = AppValidationUtils.validateApp(dockerValidatorProperties, appRegistry, streamAppDefinition.getName(), appType);
+			definitionAppValidationStatus.getAppsStatuses().put(String.format("%s:%s", appType.name(), streamAppDefinition.getName()),
+					(status) ? NodeStatus.valid.name() : NodeStatus.invalid.name());
+		}
+		return definitionAppValidationStatus;
 	}
 }

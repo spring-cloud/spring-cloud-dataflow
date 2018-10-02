@@ -20,7 +20,11 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
+import javax.naming.OperationNotSupportedException;
+
+import org.springframework.cloud.dataflow.rest.client.support.VersionUtils;
 import org.springframework.cloud.dataflow.rest.resource.CurrentTaskExecutionsResource;
+import org.springframework.cloud.dataflow.rest.resource.TaskAppStatusResource;
 import org.springframework.cloud.dataflow.rest.resource.TaskDefinitionResource;
 import org.springframework.cloud.dataflow.rest.resource.TaskExecutionResource;
 import org.springframework.cloud.dataflow.rest.util.DeploymentPropertiesUtils;
@@ -47,6 +51,10 @@ public class TaskTemplate implements TaskOperations {
 
 	private static final String DEFINITION_RELATION = "tasks/definitions/definition";
 
+	private static final String EXECUTIONS_CURRENT_RELATION_VERSION = "1.7.0";
+
+	private static final String VALIDATION_RELATION_VERSION = "1.7.0";
+
 	private static final String EXECUTIONS_RELATION = "tasks/executions";
 
 	private static final String EXECUTIONS_CURRENT_RELATION = "tasks/executions/current";
@@ -54,6 +62,8 @@ public class TaskTemplate implements TaskOperations {
 	private static final String EXECUTION_RELATION = "tasks/executions/execution";
 
 	private static final String EXECUTION_RELATION_BY_NAME = "tasks/executions/name";
+
+	private static final String VALIDATION_REL = "tasks/validation";
 
 	private final RestTemplate restTemplate;
 
@@ -69,7 +79,11 @@ public class TaskTemplate implements TaskOperations {
 
 	private final Link executionsCurrentLink;
 
-	TaskTemplate(RestTemplate restTemplate, ResourceSupport resources) {
+	private final Link validationLink;
+
+	private final String dataFlowServerVersion;
+
+	TaskTemplate(RestTemplate restTemplate, ResourceSupport resources, String dataFlowServerVersion) {
 		Assert.notNull(resources, "URI Resources must not be be null");
 		Assert.notNull(resources.getLink(EXECUTIONS_RELATION), "Executions relation is required");
 		Assert.notNull(resources.getLink(DEFINITIONS_RELATION), "Definitions relation is required");
@@ -78,7 +92,21 @@ public class TaskTemplate implements TaskOperations {
 		Assert.notNull(resources.getLink(EXECUTIONS_RELATION), "Executions relation is required");
 		Assert.notNull(resources.getLink(EXECUTION_RELATION), "Execution relation is required");
 		Assert.notNull(resources.getLink(EXECUTION_RELATION_BY_NAME), "Execution by name relation is required");
-		Assert.notNull(resources.getLink(EXECUTIONS_CURRENT_RELATION), "Executions current relation is required");
+		Assert.notNull(dataFlowServerVersion, "dataFlowVersion must not be null");
+
+		this.dataFlowServerVersion = dataFlowServerVersion;
+
+		if (VersionUtils.isDataFlowServerVersionGreaterThanOrEqualToRequiredVersion(
+				VersionUtils.getThreePartVersion(dataFlowServerVersion),
+				VALIDATION_RELATION_VERSION)) {
+			Assert.notNull(resources.getLink(VALIDATION_REL), "Validiation relation for tasks is required");
+		}
+
+		if (VersionUtils.isDataFlowServerVersionGreaterThanOrEqualToRequiredVersion(
+				VersionUtils.getThreePartVersion(dataFlowServerVersion),
+				EXECUTIONS_CURRENT_RELATION_VERSION)) {
+			Assert.notNull(resources.getLink(EXECUTIONS_CURRENT_RELATION), "Executions current relation is required");
+		}
 
 		this.restTemplate = restTemplate;
 		this.definitionsLink = resources.getLink(DEFINITIONS_RELATION);
@@ -87,7 +115,7 @@ public class TaskTemplate implements TaskOperations {
 		this.executionLink = resources.getLink(EXECUTION_RELATION);
 		this.executionByNameLink = resources.getLink(EXECUTION_RELATION_BY_NAME);
 		this.executionsCurrentLink = resources.getLink(EXECUTIONS_CURRENT_RELATION);
-
+		this.validationLink = resources.getLink(VALIDATION_REL);
 	}
 
 	@Override
@@ -144,5 +172,17 @@ public class TaskTemplate implements TaskOperations {
 	@Override
 	public void cleanup(long id) {
 		restTemplate.delete(executionLink.expand(id).getHref());
+	}
+
+	@Override
+	public TaskAppStatusResource validateTaskDefinition(String taskDefinitionName)
+			throws OperationNotSupportedException {
+		if (validationLink == null) {
+			throw new OperationNotSupportedException("Task Validation not supported on Data Flow Server version "
+					+ dataFlowServerVersion);
+		}
+		String uriTemplate = this.validationLink.expand(taskDefinitionName).getHref();
+		return restTemplate.getForObject(uriTemplate, TaskAppStatusResource.class);
+
 	}
 }

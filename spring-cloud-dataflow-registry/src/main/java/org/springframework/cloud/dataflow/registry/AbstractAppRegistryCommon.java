@@ -35,6 +35,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.cloud.dataflow.core.ApplicationType;
 import org.springframework.cloud.dataflow.registry.domain.AppRegistration;
 import org.springframework.cloud.dataflow.registry.support.ResourceUtils;
+import org.springframework.cloud.deployer.resource.docker.DockerResource;
 import org.springframework.cloud.deployer.resource.maven.MavenProperties;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
@@ -44,7 +45,7 @@ import org.springframework.util.StringUtils;
 
 /**
  * {@link AppRegistryCommon} implementation common for the Classic and the Skipper modes.
- * 
+ *
  * @author Christian Tzolov
  * @author Ilayaperumal Gopinathan
  * @author Soby Chacko
@@ -81,9 +82,10 @@ public abstract class AbstractAppRegistryCommon implements AppRegistryCommon {
 			return this.resourceLoader.getResource(appRegistration.getMetadataUri().toString());
 		}
 		else {
-			appRegistrationResourceCache.putIfAbsent(appRegistration.getUri(),
-					getAppResource(appRegistration));
-			return appRegistrationResourceCache.get(appRegistration.getUri());
+			this.appRegistrationResourceCache.putIfAbsent(appRegistration.getUri(), getAppResource(appRegistration));
+			Resource appResource = this.appRegistrationResourceCache.get(appRegistration.getUri());
+			// If the metadata URI is not set, only the archive type app resource can serve as the metadata resource
+			return (appResource instanceof DockerResource) ? null : appResource;
 		}
 	}
 

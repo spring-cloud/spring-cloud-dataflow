@@ -52,6 +52,7 @@ import org.springframework.util.StringUtils;
  * for Scheduling tasks.
  *
  * @author Glenn Renfro
+ * @author Chris Schaefer
  */
 public class DefaultSchedulerService implements SchedulerService {
 
@@ -133,9 +134,8 @@ public class DefaultSchedulerService implements SchedulerService {
 				appDeploymentProperties, whitelistProperties);
 		DeploymentPropertiesUtils.validateDeploymentProperties(taskDeploymentProperties);
 		taskDeploymentProperties = extractAndQualifySchedulerProperties(taskDeploymentProperties);
-		ScheduleRequest scheduleRequest = new ScheduleRequest(revisedDefinition,
-				taskDeploymentProperties,
-				deployerDeploymentProperties, scheduleName, getTaskResource(taskDefinitionName));
+		ScheduleRequest scheduleRequest = new ScheduleRequest(revisedDefinition, taskDeploymentProperties,
+				deployerDeploymentProperties, commandLineArgs, scheduleName, getTaskResource(taskDefinitionName));
 		this.scheduler.schedule(scheduleRequest);
 	}
 
@@ -203,7 +203,7 @@ public class DefaultSchedulerService implements SchedulerService {
 		return result;
 	}
 
-	private Resource getTaskResource(String taskDefinitionName) {
+	protected Resource getTaskResource(String taskDefinitionName) {
 		TaskDefinition taskDefinition = this.taskDefinitionRepository.findOne(taskDefinitionName);
 		if (taskDefinition == null) {
 			throw new NoSuchTaskDefinitionException(taskDefinitionName);

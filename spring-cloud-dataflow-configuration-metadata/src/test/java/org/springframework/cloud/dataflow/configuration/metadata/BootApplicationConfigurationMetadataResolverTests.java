@@ -67,6 +67,16 @@ public class BootApplicationConfigurationMetadataResolverTests {
 		assertThat(properties.size(), is(full.size()));
 	}
 
+	@Test
+	public void deprecatedErrorPropertiesShouldNotBeVisible() {
+		List<ConfigurationMetadataProperty> properties = resolver
+				.listProperties(new ClassPathResource("apps/deprecated-error", getClass()));
+		List<ConfigurationMetadataProperty> full = resolver
+				.listProperties(new ClassPathResource("apps/deprecated-error", getClass()), true);
+		assertThat(properties.size(), is(2));
+		assertThat(full.size(), is(2));
+	}
+
 	private Matcher<ConfigurationMetadataProperty> configPropertyIdentifiedAs(String name) {
 		return hasProperty("id", is(name));
 	}

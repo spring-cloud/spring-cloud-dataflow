@@ -38,6 +38,7 @@ import org.springframework.cloud.dataflow.rest.client.support.StepExecutionHisto
 import org.springframework.cloud.dataflow.rest.client.support.StepExecutionJacksonMixIn;
 import org.springframework.cloud.dataflow.rest.job.StepExecutionHistory;
 import org.springframework.cloud.dataflow.rest.resource.RootResource;
+import org.springframework.cloud.dataflow.rest.resource.about.AboutResource;
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.ResourceSupport;
 import org.springframework.hateoas.UriTemplate;
@@ -190,7 +191,7 @@ public class DataFlowTemplate implements DataFlowOperations {
 			this.aboutOperations = new AboutTemplate(restTemplate, resourceSupport.getLink(AboutTemplate.ABOUT_REL));
 
 			if (resourceSupport.hasLink(StreamTemplate.DEFINITIONS_REL)) {
-				this.streamOperations = new StreamTemplate(restTemplate, resourceSupport);
+				this.streamOperations = new StreamTemplate(restTemplate, resourceSupport, getVersion());
 				this.runtimeOperations = new RuntimeTemplate(restTemplate, resourceSupport);
 			}
 			else {
@@ -208,7 +209,7 @@ public class DataFlowTemplate implements DataFlowOperations {
 				this.aggregateCounterOperations = null;
 			}
 			if (resourceSupport.hasLink(TaskTemplate.DEFINITIONS_RELATION)) {
-				this.taskOperations = new TaskTemplate(restTemplate, resourceSupport);
+				this.taskOperations = new TaskTemplate(restTemplate, resourceSupport, getVersion());
 				this.jobOperations = new JobTemplate(restTemplate, resourceSupport);
 				if(resourceSupport.hasLink(SchedulerTemplate.SCHEDULES_RELATION)) {
 					this.schedulerOperations = new SchedulerTemplate(restTemplate, resourceSupport);
@@ -239,6 +240,15 @@ public class DataFlowTemplate implements DataFlowOperations {
 			this.completionOperations = null;
 			this.schedulerOperations = null;
 		}
+	}
+
+	private String getVersion() {
+		String version = "";
+		AboutResource aboutResource = this.aboutOperations.get();
+		if(aboutResource != null) {
+			version = aboutResource.getVersionInfo().getCore().getVersion();
+		}
+		return version;
 	}
 
 	/**

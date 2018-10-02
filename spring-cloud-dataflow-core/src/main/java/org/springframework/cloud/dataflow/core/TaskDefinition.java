@@ -43,7 +43,7 @@ public class TaskDefinition extends DataFlowAppDefinition {
 	private final String dslText;
 
 	TaskDefinition(String registeredAppName, String label, Map<String, String> properties) {
-		super(registeredAppName, label, properties);
+		super(registeredAppName, label, ApplicationType.task, properties);
 		this.dslText = "";
 	}
 

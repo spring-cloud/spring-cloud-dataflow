@@ -74,7 +74,7 @@ public class ApiDocumentation extends BaseDocumentation {
 						"Access meta information, including enabled " + "features, security info, version information"),
 
 				linkWithRel("dashboard").description("Access the dashboard UI"),
-
+				linkWithRel("audit-records").description("Provides audit trail information"),
 				linkWithRel("apps").description("Handle registered applications"),
 				linkWithRel("completions/stream").description("Exposes the DSL completion features " + "for Stream"),
 				linkWithRel("completions/task").description("Exposes the DSL completion features for " + "Task"),
@@ -99,6 +99,7 @@ public class ApiDocumentation extends BaseDocumentation {
 				linkWithRel("tasks/definitions").description("Provides the task definition resource"),
 				linkWithRel("tasks/definitions/definition")
 						.description("Provides details for a " + "specific task definition"),
+				linkWithRel("tasks/validation").description("Provides the validation for a task definition"),
 				linkWithRel("tasks/executions")
 						.description("Returns Task executions and allows launching of tasks"),
 				linkWithRel("tasks/executions/current")
@@ -113,6 +114,7 @@ public class ApiDocumentation extends BaseDocumentation {
 						.description("Provides details for a " + "specific task execution"),
 				linkWithRel("streams/definitions").description("Exposes the Streams resource"),
 				linkWithRel("streams/definitions/definition").description("Handle a specific Stream " + "definition"),
+				linkWithRel("streams/validation").description("Provides the validation for a stream definition"),
 				linkWithRel("streams/deployments").description("Provides Stream deployment operations"),
 				linkWithRel("streams/deployments/deployment")
 						.description("Request (un-)deployment of" + " an existing stream definition"),
@@ -131,6 +133,7 @@ public class ApiDocumentation extends BaseDocumentation {
 				responseFields(fieldWithPath("_links").description("Links to other resources"),
 						fieldWithPath("['" + Version.REVISION_KEY + "']")
 								.description("Incremented each time " + "a change is implemented in this REST API"),
+						fieldWithPath("_links.audit-records.href").description("Link to the audit records"),
 						fieldWithPath("_links.dashboard.href").description("Link to the dashboard"),
 						fieldWithPath("_links.streams/definitions.href").description("Link to the streams/definitions"),
 						fieldWithPath("_links.streams/definitions/definition.href").description("Link to the streams/definitions/definition"),
@@ -148,6 +151,9 @@ public class ApiDocumentation extends BaseDocumentation {
 						fieldWithPath("_links.streams/deployments/deployment.href").description("Link to the streams/deployments/deployment"),
 						fieldWithPath("_links.streams/deployments/deployment.templated").type(JsonFieldType.BOOLEAN).optional()
 							.description("Link streams/deployments/deployment is templated"),
+						fieldWithPath("_links.streams/validation.href").description("Link to the streams/validation"),
+						fieldWithPath("_links.streams/validation.templated").type(JsonFieldType.BOOLEAN).optional()
+							.description("Link streams/validation is templated"),
 						fieldWithPath("_links.tasks/definitions.href").description("Link to the tasks/definitions"),
 						fieldWithPath("_links.tasks/definitions/definition.href").description("Link to the tasks/definitions/definition"),
 						fieldWithPath("_links.tasks/definitions/definition.templated").type(JsonFieldType.BOOLEAN).optional()
@@ -164,6 +170,9 @@ public class ApiDocumentation extends BaseDocumentation {
 						fieldWithPath("_links.tasks/schedules/instances.href").description("Link to the tasks/schedules/instances"),
 						fieldWithPath("_links.tasks/schedules/instances.templated").type(JsonFieldType.BOOLEAN).optional()
 							.description("Link tasks/schedules/instances is templated"),
+						fieldWithPath("_links.tasks/validation.href").description("Link to the tasks/validation"),
+						fieldWithPath("_links.tasks/validation.templated").type(JsonFieldType.BOOLEAN).optional()
+							.description("Link tasks/validation is templated"),
 						fieldWithPath("_links.jobs/executions.href").description("Link to the jobs/executions"),
 						fieldWithPath("_links.jobs/executions/name.href").description("Link to the jobs/executions/name"),
 						fieldWithPath("_links.jobs/executions/name.templated").type(JsonFieldType.BOOLEAN).optional()
