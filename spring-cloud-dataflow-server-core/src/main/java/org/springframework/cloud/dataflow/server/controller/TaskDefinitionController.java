@@ -16,8 +16,6 @@
 
 package org.springframework.cloud.dataflow.server.controller;
 
-import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
-
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -34,7 +32,6 @@ import org.springframework.cloud.dataflow.server.service.TaskService;
 import org.springframework.cloud.deployer.spi.task.TaskLauncher;
 import org.springframework.cloud.task.repository.TaskExecution;
 import org.springframework.cloud.task.repository.TaskExplorer;
-import org.springframework.core.convert.converter.Converter;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PagedResourcesAssembler;
@@ -212,9 +209,7 @@ public class TaskDefinitionController {
 		}
 	}
 
-	// TODO: BOOT2 spring data now using Function instead of Converter, should remove latter
-	class TaskDefinitionConverter implements Converter<TaskDefinition, TaskExecutionAwareTaskDefinition>,
-			Function<TaskDefinition, TaskExecutionAwareTaskDefinition> {
+	class TaskDefinitionConverter implements Function<TaskDefinition, TaskExecutionAwareTaskDefinition> {
 		final Map<String, TaskExecution> taskExecutions;
 
 		public TaskDefinitionConverter(List<TaskExecution> taskExecutions) {
@@ -232,12 +227,6 @@ public class TaskDefinitionController {
 
 		@Override
 		public TaskExecutionAwareTaskDefinition apply(TaskDefinition source) {
-			return convert(source);
-		}
-
-		@Override
-		public TaskExecutionAwareTaskDefinition convert(TaskDefinition source) {
-
 			TaskExecution lastTaskExecution = null;
 
 			if (taskExecutions != null) {
