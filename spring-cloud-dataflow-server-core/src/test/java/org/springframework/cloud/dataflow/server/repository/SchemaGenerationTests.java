@@ -29,7 +29,6 @@ import org.hibernate.boot.MetadataSources;
 import org.hibernate.boot.registry.StandardServiceRegistryBuilder;
 import org.hibernate.tool.hbm2ddl.SchemaExport;
 import org.hibernate.tool.schema.TargetType;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.slf4j.Logger;
@@ -49,11 +48,10 @@ import org.springframework.test.context.junit4.SpringRunner;
 /**
  * @author Gunnar Hillert
  */
-@Ignore
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = {
-		HibernateJpaAutoConfiguration.class,
-		EmbeddedDataSourceConfiguration.class
+		EmbeddedDataSourceConfiguration.class,
+		HibernateJpaAutoConfiguration.class
 })
 @EntityScan({
 	"org.springframework.cloud.dataflow.registry.domain",
