@@ -63,7 +63,7 @@ public class AggregateCounterTemplate implements AggregateCounterOperations {
 		uriVariables.put("from", fromParam);
 		uriVariables.put("to", toParam);
 
-		URI uri = UriComponentsBuilder.fromUriString(url + "resolution={resolution}&from={from}&to={to}")
+		URI uri = UriComponentsBuilder.fromUriString(url + "?resolution={resolution}&from={from}&to={to}")
 				.build(resolution.toString(), fromParam, toParam);
 		return restTemplate.getForObject(uri, AggregateCounterResource.class);
 	}
