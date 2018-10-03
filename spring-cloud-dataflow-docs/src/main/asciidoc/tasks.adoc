@@ -256,6 +256,51 @@ The task execution information for previously launched tasks for the definition 
 
 NOTE: This does not stop any currently executing tasks for this definition. Instead, it removes the task definition from the database.
 
+[[spring-cloud-dataflow-validate-task]]
+=== Validating a Task
+
+Sometimes the one or more of the apps contained within a task definition contain an invalid URI in its registration.
+This can be caused by an invalid URI entered at app registration time or the app was removed from the repository from which it was to be drawn.
+To verify that all the apps contained in a task are resolve-able, a user can use the `validate` command.
+For example:
+[source,bash]
+----
+dataflow:>task validate time-stamp
+╔══════════╤═══════════════╗
+║Task Name │Task Definition║
+╠══════════╪═══════════════╣
+║time-stamp│timestamp      ║
+╚══════════╧═══════════════╝
+
+
+time-stamp is a valid task.
+╔═══════════════╤═════════════════╗
+║   App Name    │Validation Status║
+╠═══════════════╪═════════════════╣
+║task:timestamp │valid            ║
+╚═══════════════╧═════════════════╝
+----
+In the example above the user validated their time-stamp task.   As we see `task:timestamp` app is valid.
+Now let's see what happens if we have a stream definition with a registered app with an invalid URI.
+[source,bash]
+----
+dataflow:>task validate bad-timestamp
+╔═════════════╤═══════════════╗
+║  Task Name  │Task Definition║
+╠═════════════╪═══════════════╣
+║bad-timestamp│badtimestamp   ║
+╚═════════════╧═══════════════╝
+
+
+bad-timestamp is an invalid task.
+╔══════════════════╤═════════════════╗
+║     App Name     │Validation Status║
+╠══════════════════╪═════════════════╣
+║task:badtimestamp │invalid          ║
+╚══════════════════╧═════════════════╝
+----
+In this case Spring Cloud Data Flow states that the task is invalid because task:badtimestamp has an invalid URI.
+
 
 
 [[spring-cloud-dataflow-task-events]]

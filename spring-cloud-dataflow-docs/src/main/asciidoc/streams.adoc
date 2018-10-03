@@ -941,6 +941,53 @@ You can issue the `deploy` command at a later time to restart it.
 
 `dataflow:> stream deploy --name ticktock`
 
+[[spring-cloud-dataflow-validate-stream]]
+=== Validating a Stream
+
+Sometimes the one or more of the apps contained within a stream definition contain an invalid URI in its registration.
+This can caused by an invalid URI entered at app registration time or the app was removed from the repository from which it was to be drawn.
+To verify that all the apps contained in a stream are resolve-able, a user can use the `validate` command.
+For example:
+[source,bash]
+----
+dataflow:>stream validate ticktock
+╔═══════════╤═════════════════╗
+║Stream Name│Stream Definition║
+╠═══════════╪═════════════════╣
+║ticktock   │time | log       ║
+╚═══════════╧═════════════════╝
+
+
+ticktock is a valid stream.
+╔═══════════╤═════════════════╗
+║ App Name  │Validation Status║
+╠═══════════╪═════════════════╣
+║source:time│valid            ║
+║sink:log   │valid            ║
+╚═══════════╧═════════════════╝
+----
+In the example above the user validated their ticktock stream.   As we see that both the `source:time` and `sink:log` are valid.
+Now let's see what happens if we have a stream definition with a registered app with an invalid URI.
+[source,bash]
+----
+dataflow:>stream validate bad-ticktock
+╔════════════╤═════════════════╗
+║Stream Name │Stream Definition║
+╠════════════╪═════════════════╣
+║bad-ticktock│bad-time | log   ║
+╚════════════╧═════════════════╝
+
+
+bad-ticktock is an invalid stream.
+╔═══════════════╤═════════════════╗
+║   App Name    │Validation Status║
+╠═══════════════╪═════════════════╣
+║source:bad-time│invalid          ║
+║sink:log       │valid            ║
+╚═══════════════╧═════════════════╝
+----
+In this case Spring Cloud Data Flow states that the stream is invalid because source:bad-time has an invalid URI.
+
 [[spring-cloud-dataflow-stream-lifecycle-skipper]]
 == Stream Lifecycle with Skipper
 
