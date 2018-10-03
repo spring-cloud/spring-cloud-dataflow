@@ -78,11 +78,6 @@ public class OAuth2TestServer {
 	@Configuration
 	@EnableAuthorizationServer
 	protected static class MyOAuth2AuthorizationServerConfiguration extends OAuth2AuthorizationServerConfiguration {
-//		public MyOAuth2AuthorizationServerConfiguration(BaseClientDetails details,
-//				AuthenticationManager authenticationManager, ObjectProvider<TokenStore> tokenStore,
-//				ObjectProvider<AccessTokenConverter> tokenConverter, AuthorizationServerProperties properties) {
-//			super(details, authenticationManager, tokenStore, tokenConverter, properties);
-//		}
 		public MyOAuth2AuthorizationServerConfiguration(BaseClientDetails details,
 				AuthenticationConfiguration authenticationConfiguration, ObjectProvider<TokenStore> tokenStore,
 				ObjectProvider<AccessTokenConverter> tokenConverter, AuthorizationServerProperties properties)

@@ -19,16 +19,16 @@ package org.springframework.cloud.dataflow.shell.command;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.BeforeClass;
-import org.junit.Test;
+//import org.junit.Test;
 
 //import org.springframework.boot.actuate.metrics.Metric;
 //import org.springframework.boot.actuate.metrics.repository.MetricRepository;
 import org.springframework.cloud.dataflow.shell.AbstractShellIntegrationTest;
 import org.springframework.cloud.dataflow.shell.command.common.CounterCommands;
-import org.springframework.shell.table.Table;
-
-import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertThat;
+//import org.springframework.shell.table.Table;
+//
+//import static org.hamcrest.Matchers.is;
+//import static org.junit.Assert.assertThat;
 
 /**
  * Integration tests for {@link CounterCommands}.
@@ -38,43 +38,42 @@ import static org.junit.Assert.assertThat;
 public class CounterCommandsTests extends AbstractShellIntegrationTest {
 
 	// TODO: BOOT2 disabled metric stuff
-
-//	private static MetricRepository repository;
+	//	private static MetricRepository repository;
 
 	@BeforeClass
 	public static void setUpOnce() {
-//		repository = applicationContext.getBean(MetricRepository.class);
+		//		repository = applicationContext.getBean(MetricRepository.class);
 	}
 
 	@Before
 	@After
 	public void cleanSlate() {
-//		repository.findAll().forEach(m -> repository.reset(m.getName()));
+		//		repository.findAll().forEach(m -> repository.reset(m.getName()));
 	}
 
-//	@Test
-//	public void testCounterInteractions() {
-//		Table table = metrics().listCounters();
-//		assertThat(table.getModel().getColumnCount(), is(1));
-//		assertThat(table.getModel().getRowCount(), is(1));
-//
-//		repository.set(new Metric<>("counter.foo", 12.0d));
-//		repository.set(new Metric<>("counter.bar", 42.0d));
-//		table = metrics().listCounters();
-//		// Test alphabetical order
-//		assertThat(table.getModel().getColumnCount(), is(1));
-//		assertThat(table.getModel().getValue(1, 0), is("bar"));
-//		assertThat(table.getModel().getValue(2, 0), is("foo"));
-//
-//		String value = metrics().displayCounter("foo");
-//		assertThat(value, is("12"));
-//
-//		String message = metrics().resetCounter("foo");
-//		assertThat(message, is("Deleted counter 'foo'"));
-//
-//		table = metrics().listCounters();
-//		assertThat(table.getModel().getColumnCount(), is(1));
-//		assertThat(table.getModel().getRowCount(), is(2));
-//	}
+	//	@Test
+	//	public void testCounterInteractions() {
+	//		Table table = metrics().listCounters();
+	//		assertThat(table.getModel().getColumnCount(), is(1));
+	//		assertThat(table.getModel().getRowCount(), is(1));
+	//
+	//		repository.set(new Metric<>("counter.foo", 12.0d));
+	//		repository.set(new Metric<>("counter.bar", 42.0d));
+	//		table = metrics().listCounters();
+	//		// Test alphabetical order
+	//		assertThat(table.getModel().getColumnCount(), is(1));
+	//		assertThat(table.getModel().getValue(1, 0), is("bar"));
+	//		assertThat(table.getModel().getValue(2, 0), is("foo"));
+	//
+	//		String value = metrics().displayCounter("foo");
+	//		assertThat(value, is("12"));
+	//
+	//		String message = metrics().resetCounter("foo");
+	//		assertThat(message, is("Deleted counter 'foo'"));
+	//
+	//		table = metrics().listCounters();
+	//		assertThat(table.getModel().getColumnCount(), is(1));
+	//		assertThat(table.getModel().getRowCount(), is(2));
+	//	}
 
 }

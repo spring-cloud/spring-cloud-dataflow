@@ -111,7 +111,6 @@ public class DefaultAuditRecordService implements AuditRecordService {
 
 	@Override
 	public AuditRecord findOne(Long id) {
-//		return this.auditRecordRepository.findOne(id);
 		return this.auditRecordRepository.findById(id).orElse(null);
 	}
 }

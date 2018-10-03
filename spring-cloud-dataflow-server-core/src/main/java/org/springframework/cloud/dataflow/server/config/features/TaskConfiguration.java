@@ -25,8 +25,6 @@ import org.springframework.batch.core.repository.support.JobRepositoryFactoryBea
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.batch.BatchDataSourceInitializer;
-//import org.springframework.boot.autoconfigure.AbstractDatabaseInitializer;
-//import org.springframework.boot.autoconfigure.batch.BatchDatabaseInitializer;
 import org.springframework.boot.autoconfigure.batch.BatchProperties;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
@@ -58,7 +56,6 @@ import org.springframework.cloud.task.repository.support.TaskExecutionDaoFactory
 import org.springframework.cloud.task.repository.support.TaskRepositoryInitializer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.DependsOn;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
@@ -198,12 +195,12 @@ public class TaskConfiguration {
 			return taskRepositoryInitializer;
 		}
 		// TODO: BOOT2 handle this custom ddl stuff
-//		@Bean
-//		@DependsOn({ "batchRepositoryInitializerForDefaultDB", "taskRepositoryInitializerForDB" })
-//		public AbstractDatabaseInitializer batchTaskIndexesDatabaseInitializer(DataSource dataSource,
-//				ResourceLoader resourceLoader) {
-//			return new BatchTaskIndexesDatabaseInitializer(dataSource, resourceLoader);
-//		}
+		//@Bean
+		//@DependsOn({ "batchRepositoryInitializerForDefaultDB", "taskRepositoryInitializerForDB" })
+		//public AbstractDatabaseInitializer batchTaskIndexesDatabaseInitializer(DataSource dataSource,
+		//		ResourceLoader resourceLoader) {
+		//	return new BatchTaskIndexesDatabaseInitializer(dataSource, resourceLoader);
+		//}
 
 		@Bean
 		@ConditionalOnMissingBean

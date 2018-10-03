@@ -65,10 +65,10 @@ public class LocalServerSecurityWithLdapSearchAndBindTests {
 	}
 
 	// TODO: BOOT2, handle this test when we have something from micrometrics
-//	@Test
-//	public void testAuthenticatedAccessToManagementEndpointSucceeds() throws Exception {
-//		localDataflowResource.getMockMvc().perform(
-//				get("/management/metrics").header("Authorization", basicAuthorizationHeader("joe", "joespassword")))
-//				.andDo(print()).andExpect(status().isOk());
-//	}
+	//	@Test
+	//	public void testAuthenticatedAccessToManagementEndpointSucceeds() throws Exception {
+	//		localDataflowResource.getMockMvc().perform(
+	//				get("/management/metrics").header("Authorization", basicAuthorizationHeader("joe", "joespassword")))
+	//				.andDo(print()).andExpect(status().isOk());
+	//	}
 }

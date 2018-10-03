@@ -15,8 +15,6 @@
  */
 package org.springframework.cloud.dataflow.server.batch;
 
-import static org.springframework.batch.support.DatabaseType.SYBASE;
-
 import java.sql.Types;
 
 import javax.sql.DataSource;
@@ -193,6 +191,7 @@ public class SimpleJobServiceFactoryBean implements FactoryBean<JobService>, Ini
 		this.serializer = serializer;
 	}
 
+	@Override
 	public void afterPropertiesSet() throws Exception {
 
 		Assert.notNull(dataSource, "DataSource must not be null.");
@@ -279,7 +278,7 @@ public class SimpleJobServiceFactoryBean implements FactoryBean<JobService>, Ini
 	}
 
 	private int determineClobTypeToUse(String databaseType) {
-		if (SYBASE == DatabaseType.valueOf(databaseType.toUpperCase())) {
+		if (DatabaseType.SYBASE == DatabaseType.valueOf(databaseType.toUpperCase())) {
 			return Types.LONGVARCHAR;
 		}
 		else {
@@ -292,6 +291,7 @@ public class SimpleJobServiceFactoryBean implements FactoryBean<JobService>, Ini
 	 *
 	 * @see FactoryBean#getObject()
 	 */
+	@Override
 	public JobService getObject() throws Exception {
 		JsrJobParametersConverter jobParametersConverter = new JsrJobParametersConverter(dataSource);
 		jobParametersConverter.afterPropertiesSet();
@@ -308,6 +308,7 @@ public class SimpleJobServiceFactoryBean implements FactoryBean<JobService>, Ini
 	 * @return SimpleJobService
 	 * @see FactoryBean#getObjectType()
 	 */
+	@Override
 	public Class<? extends JobService> getObjectType() {
 		return SimpleJobService.class;
 	}
@@ -318,6 +319,7 @@ public class SimpleJobServiceFactoryBean implements FactoryBean<JobService>, Ini
 	 * @return true
 	 * @see FactoryBean#isSingleton()
 	 */
+	@Override
 	public boolean isSingleton() {
 		return true;
 	}
