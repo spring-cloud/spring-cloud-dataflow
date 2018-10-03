@@ -30,13 +30,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.cloud.dataflow.core.ApplicationType;
 import org.springframework.cloud.dataflow.core.StreamDefinition;
-import org.springframework.cloud.dataflow.registry.AppRegistryCommon;
 import org.springframework.cloud.dataflow.registry.service.AppRegistryService;
-import org.springframework.cloud.dataflow.server.DockerValidatorProperties;
 import org.springframework.cloud.dataflow.server.audit.service.AuditRecordService;
 import org.springframework.cloud.dataflow.server.config.features.FeaturesProperties;
 import org.springframework.cloud.dataflow.server.configuration.TestDependencies;
 import org.springframework.cloud.dataflow.server.repository.StreamDefinitionRepository;
+import org.springframework.cloud.dataflow.server.service.StreamValidationService;
 import org.springframework.cloud.dataflow.server.stream.SkipperStreamDeployer;
 import org.springframework.cloud.dataflow.server.support.PlatformUtils;
 import org.springframework.cloud.dataflow.server.support.TestResourceUtils;
@@ -68,9 +67,6 @@ public class DefaultSkipperStreamServiceUpdateTests {
 	AppDeploymentRequestCreator appDeploymentRequestCreator;
 
 	@Autowired
-	private AppRegistryCommon appRegistry;
-
-	@Autowired
 	private AuditRecordService auditRecordService;
 
 	@Autowired
@@ -78,6 +74,9 @@ public class DefaultSkipperStreamServiceUpdateTests {
 
 	@Autowired
 	private AppRegistryService appRegistryService;
+
+	@Autowired
+	private StreamValidationService streamValidationService;
 
 	@Test
 	public void testCreateUpdateRequestsWithRegisteredApp() throws IOException {
@@ -102,7 +101,7 @@ public class DefaultSkipperStreamServiceUpdateTests {
 
 		DefaultSkipperStreamService streamService = new DefaultSkipperStreamService(streamDefinitionRepository,
 				skipperStreamDeployer,
-				appDeploymentRequestCreator, appRegistry, auditRecordService, new DockerValidatorProperties());
+				appDeploymentRequestCreator, streamValidationService, auditRecordService);
 		StreamDefinition streamDefinition = new StreamDefinition("test", "time | log");
 		this.streamDefinitionRepository.save(streamDefinition);
 		Map<String, String> updateProperties = new HashMap<>();

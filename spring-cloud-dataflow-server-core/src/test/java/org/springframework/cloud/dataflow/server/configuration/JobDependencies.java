@@ -27,9 +27,11 @@ import org.springframework.batch.core.repository.support.JobRepositoryFactoryBea
 import org.springframework.boot.autoconfigure.batch.BatchDatabaseInitializer;
 import org.springframework.boot.autoconfigure.batch.BatchProperties;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceProperties;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.cloud.dataflow.configuration.metadata.ApplicationConfigurationMetadataResolver;
 import org.springframework.cloud.dataflow.configuration.metadata.BootApplicationConfigurationMetadataResolver;
 import org.springframework.cloud.dataflow.registry.AppRegistry;
+import org.springframework.cloud.dataflow.registry.AppRegistryCommon;
 import org.springframework.cloud.dataflow.server.DockerValidatorProperties;
 import org.springframework.cloud.dataflow.server.config.apps.CommonApplicationProperties;
 import org.springframework.cloud.dataflow.server.controller.JobExecutionController;
@@ -44,9 +46,11 @@ import org.springframework.cloud.dataflow.server.repository.InMemoryTaskDefiniti
 import org.springframework.cloud.dataflow.server.repository.TaskDefinitionRepository;
 import org.springframework.cloud.dataflow.server.service.TaskJobService;
 import org.springframework.cloud.dataflow.server.service.TaskService;
+import org.springframework.cloud.dataflow.server.service.TaskValidationService;
 import org.springframework.cloud.dataflow.server.service.impl.DefaultTaskJobService;
 import org.springframework.cloud.dataflow.server.service.impl.DefaultTaskService;
 import org.springframework.cloud.dataflow.server.service.impl.TaskConfigurationProperties;
+import org.springframework.cloud.dataflow.server.service.impl.validation.DefaultTaskValidationService;
 import org.springframework.cloud.deployer.resource.registry.InMemoryUriRegistry;
 import org.springframework.cloud.deployer.resource.registry.UriRegistry;
 import org.springframework.cloud.deployer.spi.task.TaskLauncher;
@@ -77,7 +81,19 @@ import static org.mockito.Mockito.mock;
 @EnableSpringDataWebSupport
 @EnableHypermediaSupport(type = EnableHypermediaSupport.HypermediaType.HAL)
 @EnableWebMvc
+@EnableConfigurationProperties({ DockerValidatorProperties.class, TaskConfigurationProperties.class})
 public class JobDependencies {
+
+	@Bean
+	public TaskValidationService taskValidationService(AppRegistryCommon appRegistryCommon,
+													  DockerValidatorProperties dockerValidatorProperties,
+													  TaskDefinitionRepository taskDefinitionRepository,
+													  TaskConfigurationProperties taskConfigurationProperties) {
+		return new DefaultTaskValidationService(appRegistryCommon,
+				dockerValidatorProperties,
+				taskDefinitionRepository,
+				taskConfigurationProperties.getComposedTaskRunnerName());
+	}
 
 	@Bean
 	public ApplicationConfigurationMetadataResolver metadataResolver() {
@@ -132,10 +148,10 @@ public class JobDependencies {
 	public TaskService taskService(TaskDefinitionRepository repository, TaskExplorer explorer, AppRegistry registry,
 			ResourceLoader resourceLoader, TaskLauncher taskLauncher,
 			ApplicationConfigurationMetadataResolver metadataResolver, DeploymentIdRepository deploymentIdRepository,
-			CommonApplicationProperties commonApplicationProperties) {
+			CommonApplicationProperties commonApplicationProperties, TaskValidationService taskValidationService) {
 		return new DefaultTaskService(new DataSourceProperties(), repository, explorer, taskRepository(), registry,
 				resourceLoader, taskLauncher, metadataResolver, new TaskConfigurationProperties(),
-				deploymentIdRepository, null, commonApplicationProperties, new DockerValidatorProperties());
+				deploymentIdRepository, null, commonApplicationProperties, taskValidationService);
 	}
 
 	@Bean

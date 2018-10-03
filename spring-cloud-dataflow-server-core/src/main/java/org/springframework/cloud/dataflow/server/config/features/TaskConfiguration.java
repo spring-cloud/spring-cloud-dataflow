@@ -44,6 +44,7 @@ import org.springframework.cloud.dataflow.server.repository.RdbmsTaskDefinitionR
 import org.springframework.cloud.dataflow.server.repository.TaskDefinitionRepository;
 import org.springframework.cloud.dataflow.server.service.TaskJobService;
 import org.springframework.cloud.dataflow.server.service.TaskService;
+import org.springframework.cloud.dataflow.server.service.TaskValidationService;
 import org.springframework.cloud.dataflow.server.service.impl.DefaultTaskJobService;
 import org.springframework.cloud.dataflow.server.service.impl.DefaultTaskService;
 import org.springframework.cloud.dataflow.server.service.impl.TaskConfigurationProperties;
@@ -99,10 +100,10 @@ public class TaskConfiguration {
 			TaskLauncher taskLauncher, ApplicationConfigurationMetadataResolver metadataResolver,
 			TaskConfigurationProperties taskConfigurationProperties, DeploymentIdRepository deploymentIdRepository,
 			CommonApplicationProperties commonApplicationProperties,
-			DockerValidatorProperties dockerValidatorProperties) {
+			TaskValidationService taskValidationService) {
 		return new DefaultTaskService(dataSourceProperties, repository, taskExplorer, taskExecutionRepository, registry,
 				resourceLoader, taskLauncher, metadataResolver, taskConfigurationProperties, deploymentIdRepository,
-				this.dataflowServerUri, commonApplicationProperties, dockerValidatorProperties);
+				this.dataflowServerUri, commonApplicationProperties, taskValidationService);
 	}
 
 	@Bean

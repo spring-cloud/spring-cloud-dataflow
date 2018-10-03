@@ -39,6 +39,7 @@ import org.springframework.cloud.dataflow.server.audit.service.AuditRecordServic
 import org.springframework.cloud.dataflow.server.config.apps.CommonApplicationProperties;
 import org.springframework.cloud.dataflow.server.repository.StreamDefinitionRepository;
 import org.springframework.cloud.dataflow.server.repository.StreamDeploymentRepository;
+import org.springframework.cloud.dataflow.server.service.impl.validation.DefaultStreamValidationService;
 import org.springframework.cloud.dataflow.server.stream.AppDeployerStreamDeployer;
 import org.springframework.cloud.dataflow.server.stream.SkipperStreamDeployer;
 import org.springframework.cloud.dataflow.server.stream.StreamDeployers;
@@ -99,6 +100,8 @@ public class AppDeployerStreamServiceTests {
 
 	private DockerValidatorProperties dockerValidatorProperties;
 
+	private DefaultStreamValidationService streamValidationService;
+
 	@Before
 	public void setupMock() {
 		this.streamDeploymentRepository = mock(StreamDeploymentRepository.class);
@@ -111,10 +114,12 @@ public class AppDeployerStreamServiceTests {
 				new BootApplicationConfigurationMetadataResolver());
 		this.appRegistryCommon = mock(AppRegistryCommon.class);
 		this.auditRecordService = mock(AuditRecordService.class);
+		this.streamValidationService = new DefaultStreamValidationService(this.appRegistryCommon,
+				this.dockerValidatorProperties,
+				this.streamDefinitionRepository);
 		this.simpleStreamService = new AppDeployerStreamService(this.streamDefinitionRepository,
 				this.appDeployerStreamDeployer, this.appDeploymentRequestCreator,
-				this.appRegistryCommon, auditRecordService,
-				dockerValidatorProperties);
+				this.streamValidationService, auditRecordService);
 		this.streamDefinitionList.add(streamDefinition1);
 		this.appDeployerStreamDefinitions.add(streamDefinition1);
 		this.streamDefinitionList.add(streamDefinition2);

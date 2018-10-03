@@ -32,11 +32,9 @@ import org.springframework.cloud.dataflow.core.StreamAppDefinition;
 import org.springframework.cloud.dataflow.core.StreamDefinition;
 import org.springframework.cloud.dataflow.core.StreamDefinitionToDslConverter;
 import org.springframework.cloud.dataflow.core.StreamDeployment;
-import org.springframework.cloud.dataflow.registry.AppRegistryCommon;
 import org.springframework.cloud.dataflow.rest.SkipperStream;
 import org.springframework.cloud.dataflow.rest.UpdateStreamRequest;
 import org.springframework.cloud.dataflow.rest.util.DeploymentPropertiesUtils;
-import org.springframework.cloud.dataflow.server.DockerValidatorProperties;
 import org.springframework.cloud.dataflow.server.audit.domain.AuditActionType;
 import org.springframework.cloud.dataflow.server.audit.domain.AuditOperationType;
 import org.springframework.cloud.dataflow.server.audit.service.AuditRecordService;
@@ -44,6 +42,7 @@ import org.springframework.cloud.dataflow.server.controller.support.ArgumentSani
 import org.springframework.cloud.dataflow.server.repository.NoSuchStreamDefinitionException;
 import org.springframework.cloud.dataflow.server.repository.StreamDefinitionRepository;
 import org.springframework.cloud.dataflow.server.service.SkipperStreamService;
+import org.springframework.cloud.dataflow.server.service.StreamValidationService;
 import org.springframework.cloud.dataflow.server.stream.SkipperStreamDeployer;
 import org.springframework.cloud.dataflow.server.stream.StreamDeploymentRequest;
 import org.springframework.cloud.deployer.spi.app.DeploymentState;
@@ -86,12 +85,9 @@ public class DefaultSkipperStreamService extends AbstractStreamService implement
 	public DefaultSkipperStreamService(StreamDefinitionRepository streamDefinitionRepository,
 			SkipperStreamDeployer skipperStreamDeployer,
 			AppDeploymentRequestCreator appDeploymentRequestCreator,
-			AppRegistryCommon appRegistry,
-			AuditRecordService auditRecordService,
-			DockerValidatorProperties dockerValidatorProperties) {
-
-		super(streamDefinitionRepository, appRegistry, auditRecordService, dockerValidatorProperties);
-
+			StreamValidationService streamValidationService,
+			AuditRecordService auditRecordService) {
+		super(streamDefinitionRepository, streamValidationService, auditRecordService);
 		Assert.notNull(skipperStreamDeployer, "SkipperStreamDeployer must not be null");
 		Assert.notNull(appDeploymentRequestCreator, "AppDeploymentRequestCreator must not be null");
 		this.skipperStreamDeployer = skipperStreamDeployer;
@@ -120,7 +116,7 @@ public class DefaultSkipperStreamService extends AbstractStreamService implement
 				.collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
 
 		List<AppDeploymentRequest> appDeploymentRequests = this.appDeploymentRequestCreator
-					.createRequests(streamDefinition, deploymentPropertiesToUse);
+				.createRequests(streamDefinition, deploymentPropertiesToUse);
 
 		DeploymentPropertiesUtils.validateSkipperDeploymentProperties(deploymentPropertiesToUse);
 
@@ -132,7 +128,8 @@ public class DefaultSkipperStreamService extends AbstractStreamService implement
 		final Map<String, Object> auditedData = new HashMap<>(2);
 		auditedData.put("deploymentProperties", deploymentProperties);
 
-		this.auditRecordService.populateAndSaveAuditRecordUsingMapData(AuditOperationType.STREAM, AuditActionType.DEPLOY,
+		this.auditRecordService.populateAndSaveAuditRecordUsingMapData(AuditOperationType.STREAM,
+				AuditActionType.DEPLOY,
 				streamDefinition.getName(), auditedData);
 
 		if (release != null) {
@@ -246,9 +243,9 @@ public class DefaultSkipperStreamService extends AbstractStreamService implement
 	public void rollbackStream(String streamName, int releaseVersion) {
 		Assert.isTrue(StringUtils.hasText(streamName), "Stream name must not be null");
 		this.skipperStreamDeployer.rollbackStream(streamName, releaseVersion);
-		this.auditRecordService.populateAndSaveAuditRecord(AuditOperationType.STREAM, AuditActionType.ROLLBACK, streamName, "Rollback to version: " + releaseVersion);
+		this.auditRecordService.populateAndSaveAuditRecord(AuditOperationType.STREAM, AuditActionType.ROLLBACK,
+				streamName, "Rollback to version: " + releaseVersion);
 	}
-
 
 	String convertPropertiesToSkipperYaml(StreamDefinition streamDefinition,
 			Map<String, String> updateProperties) {
@@ -274,7 +271,8 @@ public class DefaultSkipperStreamService extends AbstractStreamService implement
 			if (appDeploymentRequest.getCommandlineArguments().size() == 1) {
 				hasProps = true;
 				String version = appDeploymentRequest.getCommandlineArguments().get(0);
-				this.skipperStreamDeployer.validateAppVersionIsRegistered(streamDefinition, appDeploymentRequest, version);
+				this.skipperStreamDeployer.validateAppVersionIsRegistered(streamDefinition, appDeploymentRequest,
+						version);
 				specMap.put("version", version);
 			}
 			if (hasProps) {

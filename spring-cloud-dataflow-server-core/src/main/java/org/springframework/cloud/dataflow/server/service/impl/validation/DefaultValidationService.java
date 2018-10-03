@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.springframework.cloud.dataflow.server.service.impl.validation;
 
 import java.io.File;
@@ -30,31 +29,43 @@ import org.springframework.cloud.dataflow.core.ApplicationType;
 import org.springframework.cloud.dataflow.registry.AppRegistryCommon;
 import org.springframework.cloud.dataflow.registry.domain.AppRegistration;
 import org.springframework.cloud.dataflow.server.DockerValidatorProperties;
+import org.springframework.cloud.dataflow.server.service.ValidationService;
 import org.springframework.cloud.deployer.resource.docker.DockerResource;
 import org.springframework.core.io.Resource;
 import org.springframework.util.Assert;
 
 /**
- * Offers utilities that validate if the URI of the application are valid.
+ * Implementation of Validation Service that delegates to the application registry.
  *
- * @author Glenn Renfro
+ * @author Glenn Renfo
+ * @author Mark Pollack
  */
-public class AppValidationUtils {
-	private static Log logger = LogFactory.getLog(AppValidationUtils.class);
+public class DefaultValidationService implements ValidationService {
+
+	private static Log logger = LogFactory.getLog(DefaultValidationService.class);
 
 	/**
-	 * Verifies the attributes that an app in the registry can be resolved to a
-	 * a real jar or container.
-	 * @param dockerValidatorProperties Properties required to connect to a docker registry.
-	 * @param appRegistry Registry containing data for the apps.
-	 * @param name The name of the app to validate.
-	 * @param appType The type of app to be validated (source, sink, processor or, task)
-	 * @return true if the app can be resolve-able.  Else false.
+	 * The urls and credentials to required to validate access docker resources.
 	 */
-	public static boolean validateApp(DockerValidatorProperties dockerValidatorProperties,
-			AppRegistryCommon appRegistry, String name, ApplicationType appType) {
+	private final DockerValidatorProperties dockerValidatorProperties;
+
+	private final AppRegistryCommon appRegistry;
+
+	public DefaultValidationService(AppRegistryCommon appRegistry,
+									DockerValidatorProperties dockerValidatorProperties) {
 		Assert.notNull(dockerValidatorProperties, "DockerValidatorProperties must not be null");
 		Assert.notNull(appRegistry, "AppRegistryCommon must not be null");
+		this.dockerValidatorProperties = dockerValidatorProperties;
+		this.appRegistry = appRegistry;
+	}
+
+	@Override
+	public boolean isRegistered(String name, ApplicationType applicationType) {
+		return appRegistry.appExist(name, applicationType);
+	}
+
+	@Override
+	public boolean validate(String name, ApplicationType appType) {
 		Assert.hasText(name, "name must not be null or empty");
 		Assert.notNull(appType, "ApplicationType must not be null");
 		boolean result = false;
@@ -67,7 +78,8 @@ public class AppValidationUtils {
 					result = validateDockerResource(dockerValidatorProperties, (DockerResource) resource);
 				}
 				else {
-					new BootClassLoaderFactory(resolveAsArchive(appRegistry.getAppResource(registration)), null).createClassLoader();
+					new BootClassLoaderFactory(resolveAsArchive(appRegistry.getAppResource(registration)), null)
+							.createClassLoader();
 					result = true;
 				}
 			}
@@ -78,7 +90,8 @@ public class AppValidationUtils {
 		return result;
 	}
 
-	private static boolean validateDockerResource(DockerValidatorProperties dockerValidatorProperties, DockerResource resource) throws Exception {
+	private static boolean validateDockerResource(DockerValidatorProperties dockerValidatorProperties,
+			DockerResource resource) throws Exception {
 		DockerRegistryValidator info = new DockerRegistryValidator(dockerValidatorProperties, resource);
 		return info.isImagePresent();
 	}
@@ -87,4 +100,6 @@ public class AppValidationUtils {
 		File moduleFile = app.getFile();
 		return moduleFile.isDirectory() ? new ExplodedArchive(moduleFile) : new JarFileArchive(moduleFile);
 	}
+
+
 }

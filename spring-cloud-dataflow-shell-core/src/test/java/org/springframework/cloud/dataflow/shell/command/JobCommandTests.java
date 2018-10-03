@@ -76,7 +76,7 @@ public class JobCommandTests extends AbstractShellIntegrationTest {
 
 	private static List<JobInstance> jobInstances = new ArrayList<>();
 
-	private static List<Long> taskExecutionIds = new ArrayList(3);
+	private static List<Long> taskExecutionIds = new ArrayList<>(3);
 
 	@BeforeClass
 	public static void setUp() throws Exception {
