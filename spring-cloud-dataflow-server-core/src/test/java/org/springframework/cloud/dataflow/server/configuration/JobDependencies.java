@@ -31,9 +31,11 @@ import org.springframework.boot.autoconfigure.domain.EntityScan;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceProperties;
 import org.springframework.boot.autoconfigure.jdbc.EmbeddedDataSourceConfiguration;
 import org.springframework.boot.autoconfigure.orm.jpa.HibernateJpaAutoConfiguration;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.cloud.dataflow.configuration.metadata.ApplicationConfigurationMetadataResolver;
 import org.springframework.cloud.dataflow.configuration.metadata.BootApplicationConfigurationMetadataResolver;
 import org.springframework.cloud.dataflow.registry.AppRegistry;
+import org.springframework.cloud.dataflow.registry.AppRegistryCommon;
 import org.springframework.cloud.dataflow.server.DockerValidatorProperties;
 import org.springframework.cloud.dataflow.server.audit.repository.AuditRecordRepository;
 import org.springframework.cloud.dataflow.server.audit.service.AuditRecordService;
@@ -51,9 +53,11 @@ import org.springframework.cloud.dataflow.server.repository.InMemoryTaskDefiniti
 import org.springframework.cloud.dataflow.server.repository.TaskDefinitionRepository;
 import org.springframework.cloud.dataflow.server.service.TaskJobService;
 import org.springframework.cloud.dataflow.server.service.TaskService;
+import org.springframework.cloud.dataflow.server.service.TaskValidationService;
 import org.springframework.cloud.dataflow.server.service.impl.DefaultTaskJobService;
 import org.springframework.cloud.dataflow.server.service.impl.DefaultTaskService;
 import org.springframework.cloud.dataflow.server.service.impl.TaskConfigurationProperties;
+import org.springframework.cloud.dataflow.server.service.impl.validation.DefaultTaskValidationService;
 import org.springframework.cloud.deployer.resource.registry.InMemoryUriRegistry;
 import org.springframework.cloud.deployer.resource.registry.UriRegistry;
 import org.springframework.cloud.deployer.spi.task.TaskLauncher;
@@ -90,19 +94,28 @@ import static org.mockito.Mockito.mock;
 @EnableWebMvc
 @EnableTransactionManagement
 @EnableJpaRepositories(basePackages = {
-		"org.springframework.cloud.dataflow.registry.repository",
-		"org.springframework.cloud.dataflow.server.audit.repository"
-	})
+	"org.springframework.cloud.dataflow.registry.repository",
+	"org.springframework.cloud.dataflow.server.audit.repository"
+})
 @EnableJpaAuditing
 @EntityScan({
 	"org.springframework.cloud.dataflow.registry.domain",
 	"org.springframework.cloud.dataflow.server.audit.domain"
 })
+@EnableConfigurationProperties({ DockerValidatorProperties.class, TaskConfigurationProperties.class})
 public class JobDependencies {
 
 	@Bean
 	public AuditRecordService auditRecordService(AuditRecordRepository auditRecordRepository) {
 		return new DefaultAuditRecordService(auditRecordRepository);
+	}
+
+	@Bean
+	public TaskValidationService taskValidationService(AppRegistryCommon appRegistryCommon,
+			DockerValidatorProperties dockerValidatorProperties, TaskDefinitionRepository taskDefinitionRepository,
+			TaskConfigurationProperties taskConfigurationProperties) {
+		return new DefaultTaskValidationService(appRegistryCommon, dockerValidatorProperties, taskDefinitionRepository,
+				taskConfigurationProperties.getComposedTaskRunnerName());
 	}
 
 	@Bean
@@ -156,13 +169,12 @@ public class JobDependencies {
 
 	@Bean
 	public TaskService taskService(TaskDefinitionRepository repository, TaskExplorer explorer, AppRegistry registry,
-			TaskLauncher taskLauncher,
-			ApplicationConfigurationMetadataResolver metadataResolver, DeploymentIdRepository deploymentIdRepository,
-			AuditRecordService auditRecordService,
-			CommonApplicationProperties commonApplicationProperties) {
+			TaskLauncher taskLauncher, ApplicationConfigurationMetadataResolver metadataResolver,
+			DeploymentIdRepository deploymentIdRepository, AuditRecordService auditRecordService,
+			CommonApplicationProperties commonApplicationProperties, TaskValidationService taskValidationService) {
 		return new DefaultTaskService(new DataSourceProperties(), repository, explorer, taskRepository(), registry,
-				taskLauncher, metadataResolver, new TaskConfigurationProperties(),
-				deploymentIdRepository, auditRecordService, null, commonApplicationProperties, new DockerValidatorProperties());
+				taskLauncher, metadataResolver, new TaskConfigurationProperties(), deploymentIdRepository,
+				auditRecordService, null, commonApplicationProperties, taskValidationService);
 	}
 
 	@Bean

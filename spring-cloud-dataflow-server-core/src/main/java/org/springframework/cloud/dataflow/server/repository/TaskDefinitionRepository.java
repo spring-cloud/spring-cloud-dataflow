@@ -27,5 +27,13 @@ import org.springframework.data.repository.PagingAndSortingRepository;
  * @author Gunnar Hillert
  */
 public interface TaskDefinitionRepository extends PagingAndSortingRepository<TaskDefinition, String> {
+
 	Page<TaskDefinition> findByNameLike(SearchPageable searchPageable);
+
+	/**
+	 * Performs a findByName query and throws an exception if the name is not found.
+	 * @param name the name of the task definition
+	 * @return The task definition instance or {@link NoSuchTaskDefinitionException} if not found.
+	 */
+	TaskDefinition findByNameRequired(String name);
 }

@@ -20,8 +20,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import org.springframework.cloud.dataflow.rest.resource.TaskAppStatusResource;
-import org.springframework.cloud.dataflow.server.service.DefinitionAppValidationStatus;
 import org.springframework.cloud.dataflow.server.service.TaskService;
+import org.springframework.cloud.dataflow.server.service.ValidationStatus;
 import org.springframework.hateoas.ExposesResourceFor;
 import org.springframework.hateoas.mvc.ResourceAssemblerSupport;
 import org.springframework.http.HttpStatus;
@@ -33,7 +33,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
- * Controller for operations on {@link DefinitionAppValidationStatus}.
+ * Controller for operations on {@link ValidationStatus}.
  *
  * @author Glenn Renfro
 
@@ -70,23 +70,23 @@ public class TaskValidationController {
 	@ResponseStatus(HttpStatus.OK)
 	public TaskAppStatusResource validate(
 			@PathVariable("name") String name) {
-		DefinitionAppValidationStatus result = this.taskService.validateTask(name);
+		ValidationStatus result = this.taskService.validateTask(name);
 		return new Assembler().toResource(result);
 	}
 
 	/**
 	 * {@link org.springframework.hateoas.ResourceAssembler} implementation that converts
-	 * {@link DefinitionAppValidationStatus}s to {@link TaskAppStatusResource}s.
+	 * {@link ValidationStatus}s to {@link TaskAppStatusResource}s.
 	 */
-	class Assembler extends ResourceAssemblerSupport<DefinitionAppValidationStatus, TaskAppStatusResource> {
+	class Assembler extends ResourceAssemblerSupport<ValidationStatus, TaskAppStatusResource> {
 
 		public Assembler() {
 			super(TaskValidationController.class, TaskAppStatusResource.class);
 		}
 
 		@Override
-		public TaskAppStatusResource toResource(DefinitionAppValidationStatus entity) {
-			return new TaskAppStatusResource(entity.getDefinitionName(), entity.getDefinitionDSL(), entity.getAppsStatuses());
+		public TaskAppStatusResource toResource(ValidationStatus entity) {
+			return new TaskAppStatusResource(entity.getDefinitionName(), entity.getDefinitionDsl(), entity.getAppsStatuses());
 		}
 	}
 }

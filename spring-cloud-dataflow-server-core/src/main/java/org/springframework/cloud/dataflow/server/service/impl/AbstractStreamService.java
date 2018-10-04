@@ -22,18 +22,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
 import org.springframework.cloud.dataflow.core.ApplicationType;
 import org.springframework.cloud.dataflow.core.StreamAppDefinition;
 import org.springframework.cloud.dataflow.core.StreamDefinition;
 import org.springframework.cloud.dataflow.core.dsl.ParseException;
 import org.springframework.cloud.dataflow.core.dsl.StreamNode;
 import org.springframework.cloud.dataflow.core.dsl.StreamParser;
-import org.springframework.cloud.dataflow.registry.AppRegistryCommon;
-import org.springframework.cloud.dataflow.server.DataFlowServerUtil;
-import org.springframework.cloud.dataflow.server.DockerValidatorProperties;
 import org.springframework.cloud.dataflow.server.audit.domain.AuditActionType;
 import org.springframework.cloud.dataflow.server.audit.domain.AuditOperationType;
 import org.springframework.cloud.dataflow.server.audit.service.AuditRecordService;
@@ -43,9 +37,9 @@ import org.springframework.cloud.dataflow.server.controller.support.InvalidStrea
 import org.springframework.cloud.dataflow.server.repository.NoSuchStreamDefinitionException;
 import org.springframework.cloud.dataflow.server.repository.StreamDefinitionRepository;
 import org.springframework.cloud.dataflow.server.repository.support.SearchPageable;
-import org.springframework.cloud.dataflow.server.service.DefinitionAppValidationStatus;
 import org.springframework.cloud.dataflow.server.service.StreamService;
-import org.springframework.cloud.dataflow.server.service.impl.validation.AppValidationUtils;
+import org.springframework.cloud.dataflow.server.service.StreamValidationService;
+import org.springframework.cloud.dataflow.server.service.ValidationStatus;
 import org.springframework.cloud.dataflow.server.stream.StreamDeploymentRequest;
 import org.springframework.cloud.deployer.spi.app.DeploymentState;
 import org.springframework.data.domain.Page;
@@ -74,46 +68,35 @@ import org.springframework.util.StringUtils;
 @Transactional
 public abstract class AbstractStreamService implements StreamService {
 
-	private static Log logger = LogFactory.getLog(AbstractStreamService.class);
-
 	/**
 	 * The repository this controller will use for stream CRUD operations.
 	 */
 	protected final StreamDefinitionRepository streamDefinitionRepository;
 
-	/**
-	 * The app registry this controller will use to lookup apps.
-	 */
-	private final AppRegistryCommon appRegistry;
-
 	protected final AuditRecordService auditRecordService;
 
-	public static final String STREAM_DEFINITION_DSL_TEXT = "streamDefinitionDslText";
-	public static final String DEPLOYMENT_PROPERTIES = "deploymentProperties";
+	protected final StreamValidationService streamValidationService;
 
-	/**
-	 * The urls and credentials to required to validate access docker resources.
-	 */
-	private DockerValidatorProperties dockerValidatorProperties;
+	public static final String STREAM_DEFINITION_DSL_TEXT = "streamDefinitionDslText";
+
+	public static final String DEPLOYMENT_PROPERTIES = "deploymentProperties";
 
 	/**
 	 * Constructor for implementations of the {@link StreamService}.
 	 * @param streamDefinitionRepository the stream definition repository to use
-	 * @param appRegistry the application registry to use
+	 * @param streamValidationService the application validation service to use
+	 * @param auditRecordService the audit service to use
 	 */
 	public AbstractStreamService(StreamDefinitionRepository streamDefinitionRepository,
-			AppRegistryCommon appRegistry,
-			AuditRecordService auditRecordService,
-			DockerValidatorProperties dockerValidatorProperties) {
+			StreamValidationService streamValidationService,
+			AuditRecordService auditRecordService) {
 		Assert.notNull(streamDefinitionRepository, "StreamDefinitionRepository must not be null");
-		Assert.notNull(appRegistry, "AppRegistryCommon must not be null");
+		Assert.notNull(streamValidationService, "StreamValidationService must not be null");
 		Assert.notNull(auditRecordService, "AuditRecordService must not be null");
-		Assert.notNull(dockerValidatorProperties, "DockerValidationResources must not be null");
 
 		this.streamDefinitionRepository = streamDefinitionRepository;
-		this.appRegistry = appRegistry;
+		this.streamValidationService = streamValidationService;
 		this.auditRecordService = auditRecordService;
-		this.dockerValidatorProperties = dockerValidatorProperties;
 	}
 
 	public StreamDefinition createStream(String streamName, String dsl, boolean deploy) {
@@ -123,7 +106,7 @@ public abstract class AbstractStreamService implements StreamService {
 		for (StreamAppDefinition streamAppDefinition : streamDefinition.getAppDefinitions()) {
 			final String appName = streamAppDefinition.getRegisteredAppName();
 			ApplicationType applicationType = streamAppDefinition.getApplicationType();
-			if (!appRegistry.appExist(appName, applicationType)) {
+			if (!streamValidationService.isRegistered(appName, applicationType)) {
 				errorMessages.add(
 						String.format("Application name '%s' with type '%s' does not exist in the app registry.",
 								appName, applicationType));
@@ -283,20 +266,7 @@ public abstract class AbstractStreamService implements StreamService {
 	}
 
 	@Override
-	public DefinitionAppValidationStatus validateStream(String name) {
-		StreamDefinition definition = streamDefinitionRepository.findOne(name);
-		if (definition == null) {
-			throw new NoSuchStreamDefinitionException(name);
-		}
-		DefinitionAppValidationStatus definitionAppValidationStatus =
-				new DefinitionAppValidationStatus(definition.getName(),
-						definition.getDslText());
-		for (StreamAppDefinition streamAppDefinition : definition.getAppDefinitions()) {
-			ApplicationType appType = DataFlowServerUtil.determineApplicationType(streamAppDefinition);
-			boolean status = AppValidationUtils.validateApp(dockerValidatorProperties, appRegistry, streamAppDefinition.getName(), appType);
-			definitionAppValidationStatus.getAppsStatuses().put(String.format("%s:%s", appType.name(), streamAppDefinition.getName()),
-					(status) ? NodeStatus.valid.name() : NodeStatus.invalid.name());
-		}
-		return definitionAppValidationStatus;
+	public ValidationStatus validateStream(String name) {
+		return this.streamValidationService.validateStream(name);
 	}
 }

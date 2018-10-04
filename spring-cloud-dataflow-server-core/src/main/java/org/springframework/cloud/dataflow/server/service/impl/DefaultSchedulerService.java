@@ -209,7 +209,7 @@ public class DefaultSchedulerService implements SchedulerService {
 			throw new NoSuchTaskDefinitionException(taskDefinitionName);
 		}
 		AppRegistration appRegistration = null;
-		if (isComposedDefinition(taskDefinition.getDslText())) {
+		if (TaskServiceUtils.isComposedTaskDefinition(taskDefinition.getDslText())) {
 			appRegistration = this.registry.find(taskConfigurationProperties.getComposedTaskRunnerName(),
 					ApplicationType.task);
 		}
@@ -221,9 +221,4 @@ public class DefaultSchedulerService implements SchedulerService {
 		return this.registry.getAppResource(appRegistration);
 	}
 
-	private boolean isComposedDefinition(String dsl) {
-		Assert.hasText(dsl, "dsl must not be empty nor null");
-		TaskParser taskParser = new TaskParser("__dummy", dsl, true, true);
-		return taskParser.parse().isComposed();
-	}
 }

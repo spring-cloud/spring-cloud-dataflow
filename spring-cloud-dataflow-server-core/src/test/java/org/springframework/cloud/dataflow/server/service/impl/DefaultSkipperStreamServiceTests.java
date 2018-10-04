@@ -38,7 +38,6 @@ import org.springframework.cloud.dataflow.core.StreamDefinition;
 import org.springframework.cloud.dataflow.core.StreamDeployment;
 import org.springframework.cloud.dataflow.registry.AppRegistryCommon;
 import org.springframework.cloud.dataflow.rest.SkipperStream;
-import org.springframework.cloud.dataflow.server.DockerValidatorProperties;
 import org.springframework.cloud.dataflow.server.audit.domain.AuditActionType;
 import org.springframework.cloud.dataflow.server.audit.domain.AuditOperationType;
 import org.springframework.cloud.dataflow.server.audit.service.AuditRecordService;
@@ -46,6 +45,7 @@ import org.springframework.cloud.dataflow.server.config.apps.CommonApplicationPr
 import org.springframework.cloud.dataflow.server.controller.support.InvalidStreamDefinitionException;
 import org.springframework.cloud.dataflow.server.repository.StreamDefinitionRepository;
 import org.springframework.cloud.dataflow.server.repository.StreamDeploymentRepository;
+import org.springframework.cloud.dataflow.server.service.impl.validation.DefaultStreamValidationService;
 import org.springframework.cloud.dataflow.server.stream.SkipperStreamDeployer;
 import org.springframework.cloud.dataflow.server.stream.StreamDeploymentRequest;
 import org.springframework.cloud.deployer.spi.app.DeploymentState;
@@ -97,7 +97,7 @@ public class DefaultSkipperStreamServiceTests {
 	private AppRegistryCommon appRegistryCommon;
 	private AuditRecordService auditRecordService;
 
-	private DockerValidatorProperties dockerValidatorProperties;
+	private DefaultStreamValidationService streamValidationService;
 
 	@Before
 	public void setupMock() {
@@ -106,13 +106,13 @@ public class DefaultSkipperStreamServiceTests {
 		this.skipperStreamDeployer = mock(SkipperStreamDeployer.class);
 		this.appRegistryCommon = mock(AppRegistryCommon.class);
 		this.auditRecordService = mock(AuditRecordService.class); //FIXME
-		this.dockerValidatorProperties = new DockerValidatorProperties();
 		this.appDeploymentRequestCreator = new AppDeploymentRequestCreator(this.appRegistryCommon,
 				mock(CommonApplicationProperties.class),
 				new BootApplicationConfigurationMetadataResolver());
+		this.streamValidationService = mock(DefaultStreamValidationService.class);
 		this.defaultSkipperStreamService = new DefaultSkipperStreamService(streamDefinitionRepository,
-				this.skipperStreamDeployer, this.appDeploymentRequestCreator, this.appRegistryCommon,
-				this.auditRecordService, dockerValidatorProperties);
+				this.skipperStreamDeployer, this.appDeploymentRequestCreator, this.streamValidationService,
+				this.auditRecordService);
 		this.streamDefinitionList.add(streamDefinition1);
 		this.streamDefinitionList.add(streamDefinition2);
 		this.streamDefinitionList.add(streamDefinition3);
@@ -127,13 +127,13 @@ public class DefaultSkipperStreamServiceTests {
 
 	@Test
 	public void createStream() {
-		when(this.appRegistryCommon.appExist("time", ApplicationType.source)).thenReturn(true);
-		when(this.appRegistryCommon.appExist("log", ApplicationType.sink)).thenReturn(true);
+		when(this.streamValidationService.isRegistered("time", ApplicationType.source)).thenReturn(true);
+		when(this.streamValidationService.isRegistered("log", ApplicationType.sink)).thenReturn(true);
 
 		this.defaultSkipperStreamService.createStream("testStream", "time | log", false);
 
-		verify(this.appRegistryCommon).appExist("time", ApplicationType.source);
-		verify(this.appRegistryCommon).appExist("log", ApplicationType.sink);
+		verify(this.streamValidationService).isRegistered("time", ApplicationType.source);
+		verify(this.streamValidationService).isRegistered("log", ApplicationType.sink);
 		verify(this.streamDefinitionRepository).save(new StreamDefinition("testStream", "time | log"));
 		verify(this.auditRecordService).populateAndSaveAuditRecord(
 				AuditOperationType.STREAM, AuditActionType.CREATE, "testStream", "time | log");
@@ -293,8 +293,8 @@ public class DefaultSkipperStreamServiceTests {
 		streamDefinitionRepository = mock(StreamDefinitionRepository.class);
 
 		this.defaultSkipperStreamService = new DefaultSkipperStreamService(streamDefinitionRepository,
-				this.skipperStreamDeployer, this.appDeploymentRequestCreator, this.appRegistryCommon,
-				this.auditRecordService, this.dockerValidatorProperties);
+				this.skipperStreamDeployer, this.appDeploymentRequestCreator,
+				this.streamValidationService, this.auditRecordService);
 
 		StreamDefinition streamDefinition = new StreamDefinition("test1", "time | log");
 

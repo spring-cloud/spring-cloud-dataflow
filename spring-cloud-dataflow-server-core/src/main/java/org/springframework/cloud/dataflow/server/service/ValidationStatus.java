@@ -20,21 +20,21 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * Contains the validation status of a node within a stream definition.
+ * Contains the validation status of task, composed task, or stream definition.
  *
  * @author Glenn Renfro
  */
-public class DefinitionAppValidationStatus {
+public class ValidationStatus {
 
 	private String definitionName;
 
-	private String definitionDSL;
+	private String definitionDsl;
 
 	private Map<String, String> appsStatuses;
 
-	public DefinitionAppValidationStatus(String definitionName, String definitionDSL) {
+	public ValidationStatus(String definitionName, String definitionDsl) {
 		this.definitionName = definitionName;
-		this.definitionDSL = definitionDSL;
+		this.definitionDsl = definitionDsl;
 		this.appsStatuses = new HashMap<>();
 	}
 
@@ -46,12 +46,12 @@ public class DefinitionAppValidationStatus {
 		this.definitionName = definitionName;
 	}
 
-	public String getDefinitionDSL() {
-		return definitionDSL;
+	public String getDefinitionDsl() {
+		return definitionDsl;
 	}
 
-	public void setDefinitionDSL(String definitionDSL) {
-		this.definitionDSL = definitionDSL;
+	public void setDefinitionDsl(String definitionDsl) {
+		this.definitionDsl = definitionDsl;
 	}
 
 	public Map<String, String> getAppsStatuses() {

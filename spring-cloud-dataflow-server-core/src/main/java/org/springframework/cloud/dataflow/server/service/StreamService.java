@@ -117,7 +117,7 @@ public interface StreamService {
 	/**
 	 * Verifies that all apps in the stream are valid.
 	 * @param name the name of the definition
-	 * @return  {@link DefinitionAppValidationStatus} for a stream.
+	 * @return  {@link ValidationStatus} for a stream.
 	 */
-	DefinitionAppValidationStatus validateStream(String name);
+	ValidationStatus validateStream(String name);
 }

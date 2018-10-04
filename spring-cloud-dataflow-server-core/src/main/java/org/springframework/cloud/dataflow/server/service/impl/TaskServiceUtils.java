@@ -27,6 +27,7 @@ import org.springframework.boot.bind.RelaxedNames;
 import org.springframework.cloud.dataflow.core.TaskDefinition;
 import org.springframework.cloud.dataflow.core.dsl.TaskApp;
 import org.springframework.cloud.dataflow.core.dsl.TaskNode;
+import org.springframework.cloud.dataflow.core.dsl.TaskParser;
 import org.springframework.cloud.dataflow.server.controller.WhitelistProperties;
 import org.springframework.cloud.deployer.spi.core.AppDefinition;
 import org.springframework.core.io.Resource;
@@ -39,6 +40,16 @@ import org.springframework.util.StringUtils;
 public class TaskServiceUtils {
 	private static final String DATAFLOW_SERVER_URI_KEY = "dataflowServerUri";
 
+	/**
+	 * Parses the task DSL to see if it is a composed task definition
+	 * @param dsl task DSL
+	 * @return true if composed, false otherwise.
+	 */
+	public static boolean isComposedTaskDefinition(String dsl) {
+		Assert.hasText(dsl, "dsl must not be empty nor null");
+		TaskParser taskParser = new TaskParser("__dummy", dsl, true, true);
+		return taskParser.parse().isComposed();
+	}
 	/**
 	 * Creates a properly formatted CTR definition based on the graph provided.
 	 * @param graph the graph for the CTR to execute.

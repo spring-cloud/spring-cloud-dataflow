@@ -46,8 +46,9 @@ import org.springframework.cloud.dataflow.server.repository.DuplicateTaskExcepti
 import org.springframework.cloud.dataflow.server.repository.InMemoryDeploymentIdRepository;
 import org.springframework.cloud.dataflow.server.repository.NoSuchTaskDefinitionException;
 import org.springframework.cloud.dataflow.server.repository.TaskDefinitionRepository;
-import org.springframework.cloud.dataflow.server.service.DefinitionAppValidationStatus;
 import org.springframework.cloud.dataflow.server.service.TaskService;
+import org.springframework.cloud.dataflow.server.service.TaskValidationService;
+import org.springframework.cloud.dataflow.server.service.ValidationStatus;
 import org.springframework.cloud.deployer.spi.core.AppDeploymentRequest;
 import org.springframework.cloud.deployer.spi.task.TaskLauncher;
 import org.springframework.cloud.task.repository.TaskExplorer;
@@ -122,7 +123,7 @@ public abstract class DefaultTaskServiceTests {
 		private CommonApplicationProperties commonApplicationProperties;
 
 		@Autowired
-		private DockerValidatorProperties dockerValidatorProperties;
+		private TaskValidationService taskValidationService;
 
 		@Autowired
 		private AuditRecordService auditRecordService;
@@ -197,10 +198,10 @@ public abstract class DefaultTaskServiceTests {
 			boolean errorCaught = false;
 			when(this.taskLauncher.launch(anyObject())).thenReturn("0");
 			TaskService taskService = new DefaultTaskService(this.dataSourceProperties,
-				mock(TaskDefinitionRepository.class), this.taskExplorer, this.taskExecutionRepository, this.appRegistry,
-				this.taskLauncher, this.metadataResolver, new TaskConfigurationProperties(),
-				new InMemoryDeploymentIdRepository(),
-				auditRecordService, null, this.commonApplicationProperties, this.dockerValidatorProperties);
+					mock(TaskDefinitionRepository.class), this.taskExplorer, this.taskExecutionRepository,
+					this.appRegistry, this.taskLauncher, this.metadataResolver, new TaskConfigurationProperties(),
+					new InMemoryDeploymentIdRepository(), auditRecordService, null, this.commonApplicationProperties,
+					this.taskValidationService);
 			try {
 				taskService.executeTask(TASK_NAME_ORIG, new HashMap<>(), new LinkedList<>());
 			}
@@ -218,7 +219,7 @@ public abstract class DefaultTaskServiceTests {
 		public void validateValidTaskTest() {
 			initializeSuccessfulRegistry(appRegistry);
 			taskService.saveTaskDefinition("simpleTask", "AAA --foo=bar");
-			DefinitionAppValidationStatus validationStatus = taskService.validateTask("simpleTask");
+			ValidationStatus validationStatus = taskService.validateTask("simpleTask");
 			assertEquals("valid", validationStatus.getAppsStatuses().get("task:simpleTask"));
 		}
 
@@ -227,7 +228,7 @@ public abstract class DefaultTaskServiceTests {
 		public void validateInvalidTaskTest() {
 			initializeFailRegistry(appRegistry);
 			taskService.saveTaskDefinition("simpleTask", "AAA --foo=bar");
-			DefinitionAppValidationStatus validationStatus = taskService.validateTask("simpleTask");
+			ValidationStatus validationStatus = taskService.validateTask("simpleTask");
 			assertEquals("invalid", validationStatus.getAppsStatuses().get("task:simpleTask"));
 		}
 	}

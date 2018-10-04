@@ -34,7 +34,8 @@ import org.springframework.cloud.dataflow.registry.domain.AppRegistration;
 import org.springframework.cloud.dataflow.server.DockerValidatorProperties;
 import org.springframework.cloud.dataflow.server.config.apps.CommonApplicationProperties;
 import org.springframework.cloud.dataflow.server.configuration.TaskServiceDependencies;
-import org.springframework.cloud.dataflow.server.service.TaskService;
+import org.springframework.cloud.dataflow.server.repository.TaskDefinitionRepository;
+import org.springframework.cloud.dataflow.server.service.ValidationService;
 import org.springframework.cloud.dataflow.server.service.impl.TaskConfigurationProperties;
 import org.springframework.cloud.deployer.resource.docker.DockerResource;
 import org.springframework.core.io.FileSystemResource;
@@ -53,39 +54,39 @@ import static org.mockito.Mockito.when;
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = {EmbeddedDataSourceConfiguration.class, TaskServiceDependencies.class})
 @EnableConfigurationProperties({CommonApplicationProperties.class, TaskConfigurationProperties.class, DockerValidatorProperties.class})
-public class AppValidationUtilTests {
+public class DefaultAppValidationServiceTests {
 
 	@Autowired
 	private AppRegistry appRegistry;
 
 	@Autowired
-	private TaskService taskService;
+	DockerValidatorProperties dockerValidatorProperties;
 
 	@Autowired
-	DockerValidatorProperties dockerValidatorProperties;
+	TaskDefinitionRepository taskDefinitionRepository;
+
+	@Autowired
+	public ValidationService appValidationService;
 
 	@Test
 	@DirtiesContext
 	public void validateValidTaskTest() {
 		initializeSuccessfulRegistry(this.appRegistry);
-		assertTrue(AppValidationUtils.validateApp(this.dockerValidatorProperties,
-				this.appRegistry, "AAA", ApplicationType.task));
+		assertTrue(appValidationService.validate("AAA", ApplicationType.task));
 	}
 
 	@Test
 	@DirtiesContext
 	public void validateInvalidTaskTest() {
 		initializeFailRegistry(appRegistry);
-		assertFalse(AppValidationUtils.validateApp(this.dockerValidatorProperties,
-				this.appRegistry, "AAA", ApplicationType.task));
+		assertFalse(appValidationService.validate("AAA", ApplicationType.task));
 	}
 
 	@Test
 	@DirtiesContext
 	public void validateInvalidDockerTest() {
 		initializeDockerRegistry(appRegistry,"notThere/log-sink-rabbit:1.3.1.RELEASE");
-		assertFalse(AppValidationUtils.validateApp(this.dockerValidatorProperties,
-				this.appRegistry, "AAA", ApplicationType.task));
+		assertFalse(appValidationService.validate("AAA", ApplicationType.task));
 	}
 
 	@Test
@@ -93,40 +94,31 @@ public class AppValidationUtilTests {
 	public void validateDockerTest() {
 		org.junit.Assume.assumeTrue(dockerCheck());
 		initializeDockerRegistry(appRegistry, "springcloudstream/log-sink-rabbit:1.3.1.RELEASE");
-		assertTrue(AppValidationUtils.validateApp(this.dockerValidatorProperties,
-				this.appRegistry, "AAA", ApplicationType.task));
+		assertTrue(appValidationService.validate("AAA", ApplicationType.task));
 	}
 
 	@Test
 	@DirtiesContext
 	public void validateMissingTagDockerTest() {
 		initializeDockerRegistry(appRegistry,"springcloudstream/log-sink-rabbit:1.3.1.NOTHERE");
-		assertFalse(AppValidationUtils.validateApp(this.dockerValidatorProperties,
-				this.appRegistry, "AAA", ApplicationType.task));
+		assertFalse(appValidationService.validate("AAA", ApplicationType.task));
 	}
 
-	private static void initializeSuccessfulRegistry(AppRegistry appRegistry) {
+	private void initializeSuccessfulRegistry(AppRegistry appRegistry) {
 		when(appRegistry.find(anyString(), any(ApplicationType.class))).thenReturn(
 				new AppRegistration("some-name", ApplicationType.task, URI.create("http://helloworld")));
 		when(appRegistry.getAppResource(any())).thenReturn(new FileSystemResource("src/test/resources/apps/foo-task"));
 		when(appRegistry.getAppMetadataResource(any())).thenReturn(null);
 	}
 
-	private static void initializeDockerRegistry(AppRegistry appRegistry, String imageUrl) {
+	private void initializeDockerRegistry(AppRegistry appRegistry, String imageUrl) {
 		when(appRegistry.find(anyString(), any(ApplicationType.class))).thenReturn(
 				new AppRegistration("some-name", ApplicationType.task, URI.create(imageUrl)));
 		when(appRegistry.getAppResource(any())).thenReturn(new DockerResource(imageUrl));
 		when(appRegistry.getAppMetadataResource(any())).thenReturn(null);
 	}
 
-	private static void initializeInvalidDockerRegistry(AppRegistry appRegistry) {
-		when(appRegistry.find(anyString(), any(ApplicationType.class))).thenReturn(
-				new AppRegistration("some-name", ApplicationType.task, URI.create("docker:nothere/timestamp‑task:1.3.0.RELEASE")));
-		when(appRegistry.getAppResource(any())).thenReturn(new DockerResource("docker:nothere/timestamp‑task:1.3.0.RELEASE"));
-		when(appRegistry.getAppMetadataResource(any())).thenReturn(null);
-	}
-
-	private static void initializeFailRegistry(AppRegistry appRegistry) throws IllegalArgumentException {
+	private void initializeFailRegistry(AppRegistry appRegistry) throws IllegalArgumentException {
 		when(appRegistry.find("BBB", ApplicationType.task)).thenThrow(new IllegalArgumentException(
 				String.format("Application name '%s' with type '%s' does not exist in the app registry.", "fake",
 						ApplicationType.task)));
@@ -147,12 +139,13 @@ public class AppValidationUtilTests {
 			requestFactory.setReadTimeout(10000);
 
 			RestTemplate restTemplate = new RestTemplate(requestFactory);
-			System.out.println(DockerValidatorProperties.DOCKER_REGISTRY_URL
+			System.out.println("Testing access to " + DockerValidatorProperties.DOCKER_REGISTRY_URL
 					+ "springcloudstream/log-sink-rabbit/tags");
 			restTemplate.getForObject(DockerValidatorProperties.DOCKER_REGISTRY_URL
 					+ "/springcloudstream/log-sink-rabbit/tags", String.class);
 		}
 		catch(Exception ex) {
+			System.out.println("dockerCheck() failed. " + ex.getMessage());
 			result = false;
 		}
 		return result;

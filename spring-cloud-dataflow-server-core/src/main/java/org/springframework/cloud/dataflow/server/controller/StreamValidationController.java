@@ -20,8 +20,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import org.springframework.cloud.dataflow.rest.resource.StreamAppStatusResource;
-import org.springframework.cloud.dataflow.server.service.DefinitionAppValidationStatus;
 import org.springframework.cloud.dataflow.server.service.StreamService;
+import org.springframework.cloud.dataflow.server.service.ValidationStatus;
 import org.springframework.hateoas.ExposesResourceFor;
 import org.springframework.hateoas.mvc.ResourceAssemblerSupport;
 import org.springframework.http.HttpStatus;
@@ -33,7 +33,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
- * Controller for operations on {@link DefinitionAppValidationStatus}.
+ * Controller for operations on {@link ValidationStatus}.
  *
  * @author Glenn Renfro
 
@@ -70,23 +70,23 @@ public class StreamValidationController {
 	@ResponseStatus(HttpStatus.OK)
 	public StreamAppStatusResource validate(
 			@PathVariable("name") String name) {
-		DefinitionAppValidationStatus result = this.streamService.validateStream(name);
+		ValidationStatus result = this.streamService.validateStream(name);
 		return new Assembler().toResource(result);
 	}
 
 	/**
 	 * {@link org.springframework.hateoas.ResourceAssembler} implementation that converts
-	 * {@link DefinitionAppValidationStatus}s to {@link StreamAppStatusResource}s.
+	 * {@link ValidationStatus}s to {@link StreamAppStatusResource}s.
 	 */
-	class Assembler extends ResourceAssemblerSupport<DefinitionAppValidationStatus, StreamAppStatusResource> {
+	class Assembler extends ResourceAssemblerSupport<ValidationStatus, StreamAppStatusResource> {
 
 		public Assembler() {
 			super(StreamValidationController.class, StreamAppStatusResource.class);
 		}
 
 		@Override
-		public StreamAppStatusResource toResource(DefinitionAppValidationStatus entity) {
-			return new StreamAppStatusResource(entity.getDefinitionName(), entity.getDefinitionDSL(), entity.getAppsStatuses());
+		public StreamAppStatusResource toResource(ValidationStatus entity) {
+			return new StreamAppStatusResource(entity.getDefinitionName(), entity.getDefinitionDsl(), entity.getAppsStatuses());
 		}
 	}
 }

@@ -82,8 +82,8 @@ public interface TaskService {
 	/**
 	 * Verifies that all apps in the task are valid.
 	 * @param name the name of the definition
-	 * @return  {@link DefinitionAppValidationStatus} for a task.
+	 * @return  {@link ValidationStatus} for a task.
 	 */
-	DefinitionAppValidationStatus validateTask(String name);
+	ValidationStatus validateTask(String name);
 
 }

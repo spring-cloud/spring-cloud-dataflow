@@ -62,4 +62,13 @@ public class RdbmsTaskDefinitionRepository extends AbstractRdbmsKeyValueReposito
 		Assert.notNull(definition, "definition must not null");
 		delete(definition.getName());
 	}
+
+	@Override
+	public TaskDefinition findByNameRequired(String name) {
+		TaskDefinition definition = this.findOne(name);
+		if (definition == null) {
+			throw new NoSuchTaskDefinitionException(name);
+		}
+		return definition;
+	}
 }
