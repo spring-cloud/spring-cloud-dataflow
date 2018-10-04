@@ -45,14 +45,15 @@ public class AppResourceCommon {
 	private MavenProperties mavenProperties;
 
 	/**
-	 *
+	 * Delegated resource loader for resolving metadata from the metadata URI
 	 */
-	private ResourceLoader resourceLoader;
+	private ResourceLoader metadataResourceLoader;
 
 
 	public AppResourceCommon(MavenProperties mavenProperties, ResourceLoader resourceLoader) {
+		Assert.notNull(mavenProperties, "Non null Maven Properties are required!");
 		this.mavenProperties = mavenProperties;
-		this.resourceLoader = resourceLoader;
+		this.metadataResourceLoader = resourceLoader;
 	}
 
 	/**
@@ -89,10 +90,8 @@ public class AppResourceCommon {
 			return tag;
 		}
 		catch (IOException e) {
-			throw new IllegalArgumentException(
-					"Docker Resource URI is not in expected format to extract version. " +
-							dockerResource.getDescription(),
-					e);
+			throw new IllegalArgumentException("Docker Resource URI is not in expected format to extract version. " +
+					dockerResource.getDescription(), e);
 		}
 	}
 
@@ -150,27 +149,21 @@ public class AppResourceCommon {
 	public Resource getResource(String resourceUri) {
 		Assert.isTrue(StringUtils.hasText(resourceUri), "Resource URI must not be empty");
 		try {
-			URI uri = new URI(resourceUri);
-			String scheme = uri.getScheme();
+			String scheme = new URI(resourceUri).getScheme().toLowerCase();
 			Assert.notNull(scheme, "a scheme (prefix) is required");
-			if (scheme.equals("maven")) {
+
+			switch (scheme) {
+			case "maven":
 				String coordinates = resourceUri.replaceFirst("maven:\\/*", "");
-				MavenResource mavenResource = MavenResource.parse(coordinates, mavenProperties);
-				return mavenResource;
-			}
-			else if (scheme.equals("docker")) {
+				return MavenResource.parse(coordinates, mavenProperties);
+			case "docker":
 				String dockerUri = resourceUri.replaceFirst("docker:\\/*", "");
 				return new DockerResource(dockerUri);
-			}
-			else {
-				ResourceLoader resourceLoader = null;
-				if (!scheme.equalsIgnoreCase("http") && !scheme.equalsIgnoreCase("https")) {
-					resourceLoader = new DefaultResourceLoader();
-				}
-				else {
-					resourceLoader = new DownloadingUrlResourceLoader();
-				}
-				return resourceLoader.getResource(resourceUri);
+			case "http":
+			case "https":
+				return new DownloadingUrlResourceLoader().getResource(resourceUri);
+			default:
+				return new DefaultResourceLoader().getResource(resourceUri);
 			}
 		}
 		catch (URISyntaxException e) {
@@ -179,8 +172,8 @@ public class AppResourceCommon {
 	}
 
 	/**
-	 * Extracts the string representing the resource with the version number extracted.
-	 * @param resource to be used.
+	 * Returns a string representing the resource with version subtracted
+	 * @param resource to be represented as string.
 	 * @return String representation of the resource.
 	 */
 	public String getResourceWithoutVersion(Resource resource) {
@@ -234,7 +227,7 @@ public class AppResourceCommon {
 
 	public Resource getMetadataResource(URI appUri, URI metadataUri) {
 		if (metadataUri != null) {
-			return this.resourceLoader.getResource(metadataUri.toString());
+			return this.metadataResourceLoader.getResource(metadataUri.toString());
 		}
 		else {
 			Resource appResource = this.getResource(appUri.toString());

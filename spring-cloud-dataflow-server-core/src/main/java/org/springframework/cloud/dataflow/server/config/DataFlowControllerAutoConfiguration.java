@@ -485,8 +485,8 @@ public class DataFlowControllerAutoConfiguration {
 
 		@Bean
 		public AppRegistryService appRegistryService(AppRegistrationRepository appRegistrationRepository,
-				AppResourceCommon appResourceService) {
-			return new DefaultAppRegistryService(appRegistrationRepository, appResourceService);
+				AppResourceCommon appResourceCommon) {
+			return new DefaultAppRegistryService(appRegistrationRepository, appResourceCommon);
 		}
 
 		@Bean
@@ -549,8 +549,8 @@ public class DataFlowControllerAutoConfiguration {
 		}
 
 		@Bean
-		public AppRegistry appRegistry(UriRegistry uriRegistry, AppResourceCommon appResourceService) {
-			return new AppRegistry(uriRegistry, appResourceService);
+		public AppRegistry appRegistry(UriRegistry uriRegistry, AppResourceCommon appResourceCommon) {
+			return new AppRegistry(uriRegistry, appResourceCommon);
 		}
 	}
 

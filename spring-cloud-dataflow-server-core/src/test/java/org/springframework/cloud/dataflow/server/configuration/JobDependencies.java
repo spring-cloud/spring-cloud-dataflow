@@ -59,6 +59,7 @@ import org.springframework.cloud.dataflow.server.service.impl.DefaultTaskJobServ
 import org.springframework.cloud.dataflow.server.service.impl.DefaultTaskService;
 import org.springframework.cloud.dataflow.server.service.impl.TaskConfigurationProperties;
 import org.springframework.cloud.dataflow.server.service.impl.validation.DefaultTaskValidationService;
+import org.springframework.cloud.deployer.resource.maven.MavenProperties;
 import org.springframework.cloud.deployer.resource.registry.InMemoryUriRegistry;
 import org.springframework.cloud.deployer.resource.registry.UriRegistry;
 import org.springframework.cloud.deployer.spi.task.TaskLauncher;
@@ -258,7 +259,7 @@ public class JobDependencies {
 
 	@Bean
 	public AppRegistry appRegistry() {
-		return new AppRegistry(uriRegistry(), new AppResourceCommon(null, new DefaultResourceLoader()));
+		return new AppRegistry(uriRegistry(), new AppResourceCommon(new MavenProperties(), new DefaultResourceLoader()));
 	}
 
 	@Bean

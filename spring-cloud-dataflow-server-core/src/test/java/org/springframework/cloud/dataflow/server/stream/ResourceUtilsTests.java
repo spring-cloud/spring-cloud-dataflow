@@ -21,6 +21,7 @@ import org.junit.Test;
 
 import org.springframework.cloud.dataflow.registry.support.AppResourceCommon;
 import org.springframework.cloud.deployer.resource.docker.DockerResource;
+import org.springframework.cloud.deployer.resource.maven.MavenProperties;
 import org.springframework.cloud.deployer.resource.maven.MavenResource;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
@@ -35,7 +36,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  */
 public class ResourceUtilsTests {
 
-	private AppResourceCommon appResourceService = new AppResourceCommon(null, null);
+	private AppResourceCommon appResourceService = new AppResourceCommon(new MavenProperties(), null);
 
 	@Test
 	public void testMavenResourceProcessing() {

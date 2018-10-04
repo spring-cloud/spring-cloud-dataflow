@@ -31,10 +31,11 @@ import static org.assertj.core.api.Assertions.fail;
 /**
  * @author Mark Pollack
  * @author Ilayaperumal Gopinathan
+ * @author Christian Tzolov
  */
-public class ResourceUtilsTests {
+public class AppResourceCommonTests {
 
-	AppResourceCommon appResourceCommon = new AppResourceCommon(new MavenProperties(), null);
+	private AppResourceCommon appResourceCommon = new AppResourceCommon(new MavenProperties(), null);
 
 	@Test(expected = IllegalArgumentException.class)
 	public void testBadNamedJars() throws Exception {
