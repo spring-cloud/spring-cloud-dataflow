@@ -1,5 +1,5 @@
 /*
- * Copyright 2015-2017 the original author or authors.
+ * Copyright 2015-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -288,6 +288,24 @@ public class StreamParser extends AppParser {
 		return SinkDestinationNode;
 	}
 
+	private Token peekDestinationComponentToken() {
+		Token t = getTokens().peek();
+		if (t == null) {
+			return null;
+		}
+		if (t.kind == TokenKind.IDENTIFIER || t.kind == TokenKind.STAR || t.kind == TokenKind.SLASH
+				|| t.kind == TokenKind.HASH) {
+			return t;
+		}
+		else {
+			return null;
+		}
+	}
+
+	private String getTokenData(Token token) {
+		return token.kind.hasPayload() ? token.data : new String(token.kind.getTokenChars());
+	}
+
 	/**
 	 * Return a {@link DestinationNode} for the token at the current position.
 	 * <p>
@@ -306,26 +324,41 @@ public class StreamParser extends AppParser {
 			tokens.decrementPosition();
 			return null;
 		}
-		List<Token> destinationNameComponents = new ArrayList<Token>();
-		Token identifierToken = tokens.next();
-		destinationNameComponents.add(identifierToken);
+		StringBuilder destinationName = new StringBuilder();
+		Token token = peekDestinationComponentToken();
+		if (token == null) {
+			if (tokens.peek() == null) {
+				tokens.raiseException(firstToken.startPos, DSLMessage.OOD);
+			}
+			else {
+				tokens.raiseException(tokens.peek().startPos, DSLMessage.UNEXPECTED_DATA_IN_DESTINATION_NAME,
+						getTokenData(tokens.peek()));
+			}
+		}
+		int startpos = token.startPos;
+		destinationName.append(getTokenData(token));
+		tokens.next();
+		while (tokens.isNextAdjacent() && (token = peekDestinationComponentToken()) != null) {
+			destinationName.append(getTokenData(token));
+			tokens.next();
+		}
 		while (tokens.peek(TokenKind.DOT)) {
 			if (!tokens.isNextAdjacent()) {
 				tokens.raiseException(tokens.peek().startPos, DSLMessage.NO_WHITESPACE_IN_DESTINATION_DEFINITION);
 			}
 			tokens.next(); // skip dot
+			destinationName.append(TokenKind.DOT.getTokenChars());
 			if (!tokens.isNextAdjacent()) {
 				tokens.raiseException(tokens.peek().startPos, DSLMessage.NO_WHITESPACE_IN_DESTINATION_DEFINITION);
 			}
-			destinationNameComponents.add(tokens.eat(TokenKind.IDENTIFIER));
+			while (tokens.isNextAdjacent() && (token = peekDestinationComponentToken()) != null) {
+				destinationName.append(getTokenData(token));
+				tokens.next();
+			}
 		}
-		int endPos = identifierToken.endPos;
-		if (!destinationNameComponents.isEmpty()) {
-			endPos = destinationNameComponents.get(destinationNameComponents.size() - 1).endPos;
-		}
+		int endPos = token.endPos;
 		ArgumentNode[] argumentNodes = eatAppArgs();
-		return new DestinationNode(identifierToken.startPos, endPos, tokenListToStringList(destinationNameComponents),
-				argumentNodes);
+		return new DestinationNode(startpos, endPos, destinationName.toString(), argumentNodes);
 	}
 
 	/**

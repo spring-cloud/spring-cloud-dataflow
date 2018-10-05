@@ -1,5 +1,5 @@
 /*
- * Copyright 2015-2017 the original author or authors.
+ * Copyright 2015-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,8 +16,6 @@
 
 package org.springframework.cloud.dataflow.core.dsl;
 
-import java.util.List;
-
 import org.springframework.util.Assert;
 
 /**
@@ -29,25 +27,15 @@ import org.springframework.util.Assert;
  */
 public class DestinationNode extends AstNode {
 
-	private final List<String> nameComponents;
+	private final String destinationName;
 
 	private final ArgumentNode[] arguments;
 
-	private final String destinationName;
-
-	public DestinationNode(int startPos, int endPos, List<String> nameComponents, ArgumentNode[] arguments) {
+	public DestinationNode(int startPos, int endPos, String destinationName, ArgumentNode[] arguments) {
 		super(startPos, endPos);
-		Assert.notEmpty(nameComponents, "'nameComponents' must not be null or empty");
-		this.nameComponents = nameComponents;
+		Assert.notNull(destinationName, "'destinationName' must not be null");
 		this.arguments = arguments;
-		StringBuilder s = new StringBuilder();
-		for (int t = 0, max = nameComponents.size(); t < max; t++) {
-			if (t != 0) {
-				s.append(".");
-			}
-			s.append(nameComponents.get(t));
-		}
-		this.destinationName = s.toString();
+		this.destinationName = destinationName;
 	}
 
 	@Override
@@ -78,7 +66,7 @@ public class DestinationNode extends AstNode {
 	}
 
 	public DestinationNode copyOf() {
-		return new DestinationNode(super.startPos, super.endPos, nameComponents, arguments);
+		return new DestinationNode(super.startPos, super.endPos, destinationName, arguments);
 	}
 
 	ArgumentNode[] getArguments() {

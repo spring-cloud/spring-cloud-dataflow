@@ -1,5 +1,5 @@
 /*
- * Copyright 2015-2017 the original author or authors.
+ * Copyright 2015-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -115,6 +115,7 @@ public enum DSLMessage {
 	TASK_ARGUMENTS_NOT_ALLOWED_UNLESS_IN_APP_MODE(Kind.ERROR, 168, "arguments not allowed unless parser is in app mode"), //
 	DONT_MIX_PIPE_AND_COMMA(Kind.ERROR, 169, "do not mix '|' and ',' when specifying a set of applications"), //
 	DONT_USE_COMMA_WITH_CHANNELS(Kind.ERROR, 170, "do not use comma delimiter between apps in a stream, use '|'"), //
+	UNEXPECTED_DATA_IN_DESTINATION_NAME(Kind.ERROR, 171, "unexpected data in destination name ''{0}''"), //
 	;
 
 	private Kind kind;
