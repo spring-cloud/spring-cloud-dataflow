@@ -33,6 +33,7 @@ import org.springframework.cloud.dataflow.server.audit.domain.AuditOperationType
 import org.springframework.cloud.dataflow.server.audit.service.AuditRecordService;
 import org.springframework.cloud.dataflow.server.controller.StreamAlreadyDeployedException;
 import org.springframework.cloud.dataflow.server.controller.StreamAlreadyDeployingException;
+import org.springframework.cloud.dataflow.server.controller.support.ArgumentSanitizer;
 import org.springframework.cloud.dataflow.server.controller.support.InvalidStreamDefinitionException;
 import org.springframework.cloud.dataflow.server.repository.NoSuchStreamDefinitionException;
 import org.springframework.cloud.dataflow.server.repository.StreamDefinitionRepository;
@@ -72,6 +73,8 @@ public abstract class AbstractStreamService implements StreamService {
 	 */
 	protected final StreamDefinitionRepository streamDefinitionRepository;
 
+	protected final ArgumentSanitizer argumentSanitizer;
+
 	protected final AuditRecordService auditRecordService;
 
 	protected final StreamValidationService streamValidationService;
@@ -96,6 +99,7 @@ public abstract class AbstractStreamService implements StreamService {
 		this.streamDefinitionRepository = streamDefinitionRepository;
 		this.streamValidationService = streamValidationService;
 		this.auditRecordService = auditRecordService;
+		this.argumentSanitizer = new ArgumentSanitizer();
 	}
 
 	public StreamDefinition createStream(String streamName, String dsl, boolean deploy) {
@@ -117,14 +121,15 @@ public abstract class AbstractStreamService implements StreamService {
 					StringUtils.collectionToDelimitedString(errorMessages, "\n"));
 		}
 
-		this.streamDefinitionRepository.save(streamDefinition);
+		final StreamDefinition savedStreamDefintion = this.streamDefinitionRepository.save(streamDefinition);
+
 		if (deploy) {
 			this.deployStream(streamName, new HashMap<>());
 		}
 
 		auditRecordService.populateAndSaveAuditRecord(
 				AuditOperationType.STREAM, AuditActionType.CREATE,
-				streamDefinition.getName(), streamDefinition.getDslText());
+				streamDefinition.getName(), this.argumentSanitizer.sanitizeStream(savedStreamDefintion));
 
 		return streamDefinition;
 
@@ -161,8 +166,8 @@ public abstract class AbstractStreamService implements StreamService {
 		doDeployStream(streamDefinition, deploymentProperties);
 
 		final Map<String, Object> auditedData = new HashMap<>(2);
-		auditedData.put(STREAM_DEFINITION_DSL_TEXT, streamDefinition.getDslText());
-		auditedData.put(DEPLOYMENT_PROPERTIES, deploymentProperties);
+		auditedData.put(STREAM_DEFINITION_DSL_TEXT, this.argumentSanitizer.sanitizeStream(streamDefinition));
+		auditedData.put(DEPLOYMENT_PROPERTIES, this.argumentSanitizer.sanitizeProperties(deploymentProperties));
 
 		auditRecordService.populateAndSaveAuditRecordUsingMapData(
 				AuditOperationType.STREAM, AuditActionType.DEPLOY,
@@ -184,7 +189,7 @@ public abstract class AbstractStreamService implements StreamService {
 
 		auditRecordService.populateAndSaveAuditRecord(
 				AuditOperationType.STREAM, AuditActionType.DELETE,
-				streamDefinition.getName(), streamDefinition.getDslText());
+				streamDefinition.getName(), this.argumentSanitizer.sanitizeStream(streamDefinition));
 	}
 
 	@Override
@@ -198,7 +203,7 @@ public abstract class AbstractStreamService implements StreamService {
 		for (StreamDefinition streamDefinition : streamDefinitions) {
 			auditRecordService.populateAndSaveAuditRecord(
 					AuditOperationType.STREAM, AuditActionType.DELETE,
-					streamDefinition.getName(), streamDefinition.getDslText());
+					streamDefinition.getName(), this.argumentSanitizer.sanitizeStream(streamDefinition));
 		}
 	}
 

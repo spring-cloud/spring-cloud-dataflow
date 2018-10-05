@@ -130,11 +130,14 @@ public class DefaultSkipperStreamServiceTests {
 		when(this.streamValidationService.isRegistered("time", ApplicationType.source)).thenReturn(true);
 		when(this.streamValidationService.isRegistered("log", ApplicationType.sink)).thenReturn(true);
 
+		final StreamDefinition expectedStreamDefinition = new StreamDefinition("testStream", "time | log");
+		when(streamDefinitionRepository.save(expectedStreamDefinition)).thenReturn(expectedStreamDefinition);
+
 		this.defaultSkipperStreamService.createStream("testStream", "time | log", false);
 
 		verify(this.streamValidationService).isRegistered("time", ApplicationType.source);
 		verify(this.streamValidationService).isRegistered("log", ApplicationType.sink);
-		verify(this.streamDefinitionRepository).save(new StreamDefinition("testStream", "time | log"));
+		verify(this.streamDefinitionRepository).save(expectedStreamDefinition);
 		verify(this.auditRecordService).populateAndSaveAuditRecord(
 				AuditOperationType.STREAM, AuditActionType.CREATE, "testStream", "time | log");
 

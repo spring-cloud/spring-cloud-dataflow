@@ -62,6 +62,12 @@ public class ArgumentSanitizerTest {
 	}
 
 	@Test
+	public void testStreamPropertyOrder() {
+		Assert.assertEquals("time --another-secret='******' --some.password='******' | log",  //FIXME Order should be "time --some.password='******' --another-secret='******' | log"
+				sanitizer.sanitizeStream(new StreamDefinition("stream", "time --some.password=foobar --another-secret=kenny | log")));
+	}
+
+	@Test
 	public void testStreamMatcherWithHyphenDotChar() {
 		Assert.assertEquals("twitterstream --twitter.credentials.access-token-secret='******' "
 						+ "--twitter.credentials.access-token='******' --twitter.credentials.consumer-secret='******' "

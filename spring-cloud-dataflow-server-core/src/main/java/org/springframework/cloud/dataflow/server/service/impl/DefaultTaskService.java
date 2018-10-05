@@ -38,6 +38,7 @@ import org.springframework.cloud.dataflow.server.audit.domain.AuditOperationType
 import org.springframework.cloud.dataflow.server.audit.service.AuditRecordService;
 import org.springframework.cloud.dataflow.server.config.apps.CommonApplicationProperties;
 import org.springframework.cloud.dataflow.server.controller.WhitelistProperties;
+import org.springframework.cloud.dataflow.server.controller.support.ArgumentSanitizer;
 import org.springframework.cloud.dataflow.server.repository.DeploymentIdRepository;
 import org.springframework.cloud.dataflow.server.repository.DeploymentKey;
 import org.springframework.cloud.dataflow.server.repository.NoSuchTaskDefinitionException;
@@ -96,6 +97,8 @@ public class DefaultTaskService implements TaskService {
 	 * The {@link AppRegistry} this service will use to look up task app URIs.
 	 */
 	private final AppRegistryCommon registry;
+
+	protected final ArgumentSanitizer argumentSanitizer;
 
 	private final TaskDefinitionRepository taskDefinitionRepository;
 
@@ -168,6 +171,7 @@ public class DefaultTaskService implements TaskService {
 		this.commonApplicationProperties = commonApplicationProperties;
 		this.auditRecordService = auditRecordService;
 		this.taskValidationService = taskValidationService;
+		this.argumentSanitizer = new ArgumentSanitizer();
 	}
 
 	@Override
@@ -234,6 +238,10 @@ public class DefaultTaskService implements TaskService {
 		auditedData.put(TASK_DEPLOYMENT_PROPERTIES, taskDeploymentProperties);
 		auditedData.put(COMMAND_LINE_ARGS, commandLineArgs);
 
+		// auditedData.put(TASK_DEFINITION_DSL_TEXT, this.argumentSanitizer.sanitizeTask(taskDefinition));
+		// auditedData.put(TASK_DEPLOYMENT_PROPERTIES, this.argumentSanitizer.sanitizeProperties(taskDeploymentProperties));
+		// auditedData.put(COMMAND_LINE_ARGS, commandLineArgs); //TODO see gh-2469
+
 		auditRecordService.populateAndSaveAuditRecordUsingMapData(
 				AuditOperationType.TASK, AuditActionType.DEPLOY,
 				taskDefinition.getName(), auditedData);
@@ -282,6 +290,7 @@ public class DefaultTaskService implements TaskService {
 	public void saveTaskDefinition(String name, String dsl) {
 		TaskParser taskParser = new TaskParser(name, dsl, true, true);
 		TaskNode taskNode = taskParser.parse();
+		TaskDefinition taskDefinition = new TaskDefinition(name, dsl);
 		if (taskNode.isComposed()) {
 			// Create the child task definitions needed for the composed task
 			taskNode.getTaskApps().stream().forEach(task -> {
@@ -294,15 +303,16 @@ public class DefaultTaskService implements TaskService {
 						generatedTaskDSL);
 				saveStandardTaskDefinition(composedTaskDefinition);
 			});
-			taskDefinitionRepository.save(new TaskDefinition(name, dsl));
+			taskDefinitionRepository.save(taskDefinition);
 		}
 		else {
-			saveStandardTaskDefinition(new TaskDefinition(name, dsl));
+			saveStandardTaskDefinition(taskDefinition);
 		}
 
 		auditRecordService.populateAndSaveAuditRecord(
 				AuditOperationType.TASK, AuditActionType.CREATE,
 				name, dsl);
+		// name, this.argumentSanitizer.sanitizeTask(taskDefinition)); //FIXME depends on gh-2469
 
 	}
 
@@ -343,6 +353,7 @@ public class DefaultTaskService implements TaskService {
 		auditRecordService.populateAndSaveAuditRecord(
 				AuditOperationType.TASK, AuditActionType.DELETE,
 				name, taskDefinition.getDslText());
+		// name, this.argumentSanitizer.sanitizeTask(taskDefinition)); // FIXME depends on gh-2469
 	}
 
 	private void destroyPrimaryTask(String name) {

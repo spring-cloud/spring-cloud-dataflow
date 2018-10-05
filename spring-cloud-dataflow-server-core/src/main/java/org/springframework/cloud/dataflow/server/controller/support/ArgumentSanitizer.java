@@ -24,6 +24,8 @@ import java.util.stream.Collectors;
 import org.springframework.cloud.dataflow.core.StreamAppDefinition;
 import org.springframework.cloud.dataflow.core.StreamDefinition;
 import org.springframework.cloud.dataflow.core.StreamDefinitionToDslConverter;
+import org.springframework.cloud.dataflow.core.TaskDefinition;
+import org.springframework.util.CollectionUtils;
 
 /**
  * Sanitizes potentially sensitive keys for a specific command line arg.
@@ -119,8 +121,29 @@ public class ArgumentSanitizer {
 		return this.dslConverter.toDsl(sanitizedAppDefinitions);
 	}
 
-	private Map<String, String> sanitizeProperties(Map<String, String> properties) {
-		return properties.entrySet().stream()
-				.collect(Collectors.toMap(e -> e.getKey(), e -> this.sanitize(e.getKey(), e.getValue())));
+	/**
+	 * Redacts sensitive property values in a task.
+	 *
+	 * @param taskDefinition the task definition to sanitize
+	 * @return Task definition text that has sensitive data redacted.
+	 */
+	public String sanitizeTask(TaskDefinition taskDefinition) {
+		final TaskDefinition sanitizedTaskDefinition = TaskDefinition.TaskDefinitionBuilder.from(taskDefinition)
+			.setProperties(this.sanitizeProperties(taskDefinition.getProperties()))
+			.build();
+		return sanitizedTaskDefinition.getDslText(); //TODO gh-2469
 	}
+
+	/**
+	 * For all sensitive properties (e.g. key names containing words like password, secret,
+	 * key, token) replace the value with '*****' string
+	 */
+	public Map<String, String> sanitizeProperties(Map<String, String> properties) {
+		if (!CollectionUtils.isEmpty(properties)) {
+			return properties.entrySet().stream()
+					.collect(Collectors.toMap(e -> e.getKey(), e -> this.sanitize(e.getKey(), e.getValue())));
+		}
+		return properties;
+	}
+
 }
