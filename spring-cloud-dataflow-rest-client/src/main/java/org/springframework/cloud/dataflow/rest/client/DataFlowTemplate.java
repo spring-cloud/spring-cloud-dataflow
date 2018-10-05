@@ -133,16 +133,13 @@ public class DataFlowTemplate implements DataFlowOperations {
 	 * Setup a {@link DataFlowTemplate} using the provided baseURI. Will build a
 	 * {@link RestTemplate} implicitly with the required set of Jackson MixIns. For more
 	 * information, please see {@link #prepareRestTemplate(RestTemplate)}.
-	 * <p>
 	 * Please be aware that the created RestTemplate will use the JDK's default timeout
 	 * values. Consider passing in a custom {@link RestTemplate} or, depending on your JDK
 	 * implementation, set System properties such as:
-	 * <p>
 	 * <ul>
 	 * <li>sun.net.client.defaultConnectTimeout
 	 * <li>sun.net.client.defaultReadTimeout
 	 * </ul>
-	 * <p>
 	 * For more information see <a href=
 	 * "http://docs.oracle.com/javase/7/docs/technotes/guides/net/properties.html">this
 	 * link</a>
@@ -254,7 +251,6 @@ public class DataFlowTemplate implements DataFlowOperations {
 	/**
 	 * Will augment the provided {@link RestTemplate} with the Jackson Mixins required by
 	 * Spring Cloud Data Flow, specifically:
-	 * <p>
 	 * <ul>
 	 * <li>{@link JobExecutionJacksonMixIn}
 	 * <li>{@link JobParametersJacksonMixIn}
@@ -265,7 +261,7 @@ public class DataFlowTemplate implements DataFlowOperations {
 	 * <li>{@link ExecutionContextJacksonMixIn}
 	 * <li>{@link StepExecutionHistoryJacksonMixIn}
 	 * </ul>
-	 * <p>
+	 *
 	 * Furthermore, this method will also register the {@link Jackson2HalModule}
 	 *
 	 * @param restTemplate Can be null. Instantiates a new {@link RestTemplate} if null

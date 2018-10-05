@@ -101,6 +101,7 @@ public interface StreamService {
 
 	/**
 	 * Find stream definitions where the findByNameLike parameter
+	 * @param pageable Pagination information
 	 * @param search the findByNameLike parameter to use
 	 * @return Page of stream definitions
 	 */

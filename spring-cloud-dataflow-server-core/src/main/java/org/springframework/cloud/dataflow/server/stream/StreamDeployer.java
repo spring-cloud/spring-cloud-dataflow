@@ -45,17 +45,17 @@ public interface StreamDeployer {
 
 	/**
 	 * Get the deployment states for a list of stream definitions
-	 * @param content
+	 * @param streamDefinitions list of stream definitions
 	 * @return map of stream definition and its corresponding deployment state
 	 */
-	Map<StreamDefinition, DeploymentState> streamsStates(List<StreamDefinition> content);
+	Map<StreamDefinition, DeploymentState> streamsStates(List<StreamDefinition> streamDefinitions);
 
 	/**
 	 * Returns application statuses of all deployed applications
-	 * @param pageable
+	 * @param pageable Pagination information
 	 * @return pagable list of all app statuses
-	 * @throws ExecutionException
-	 * @throws InterruptedException
+	 * @throws ExecutionException if the computation threw an exception
+	 * @throws InterruptedException if the current thread was interrupted while waiting
 	 */
 	Page<AppStatus> getAppStatuses(Pageable pageable) throws ExecutionException, InterruptedException;
 

@@ -103,7 +103,7 @@ public class TaskDefinitionResource extends ResourceSupport {
 
 	/**
 	 *
-	 * @param lastTaskExecution
+	 * @param lastTaskExecution the last Task Execution
 	 */
 	public void setLastTaskExecution(TaskExecutionResource lastTaskExecution) {
 		this.lastTaskExecution = lastTaskExecution;

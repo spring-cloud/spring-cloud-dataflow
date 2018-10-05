@@ -53,11 +53,10 @@ import org.springframework.util.StringUtils;
  * Performs manipulation on application and deployment properties, expanding shorthand
  * application property values, resolving wildcard deployment properties, and creates a
  * {@link StreamDeploymentRequest}.
- * </p>
+ * <p>
  * The {@link AbstractStreamService} deployer is agnostic. For deploying streams on
  * Skipper use the {@link DefaultSkipperStreamService} and for the AppDeploy stream
  * deployment use the {@link AppDeployerStreamService}.
- * </p>
  *
  * @author Mark Pollack
  * @author Ilayaperumal Gopinathan

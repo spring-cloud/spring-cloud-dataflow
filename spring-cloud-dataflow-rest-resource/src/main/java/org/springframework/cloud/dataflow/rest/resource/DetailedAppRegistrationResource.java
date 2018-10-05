@@ -54,7 +54,9 @@ public class DetailedAppRegistrationResource extends AppRegistrationResource {
 	 *
 	 * @param name application name
 	 * @param type application type
+	 * @param version application version
 	 * @param coordinates Maven coordinates for the application artifact
+	 * @param isDefault is this the default app
 	 */
 	public DetailedAppRegistrationResource(String name, String type, String version, String coordinates, Boolean isDefault) {
 		super(name, type, version, coordinates, isDefault);

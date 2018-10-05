@@ -16,7 +16,7 @@
 package org.springframework.cloud.dataflow.rest.resource;
 
 /**
- * Represents the status of an {@link TaskExecution}.
+ * Represents the status of an {@link TaskExecutionResource}.
  *
  * @author Gunnar Hillert
  *

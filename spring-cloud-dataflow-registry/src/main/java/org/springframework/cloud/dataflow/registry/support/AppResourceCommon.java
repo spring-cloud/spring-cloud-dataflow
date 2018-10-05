@@ -58,8 +58,9 @@ public class AppResourceCommon {
 
 	/**
 	 * Extracts the version from the resource. Supported resource types are
-	 * MavenResource, {@link DockerResource}, and {@link UrlResource}. @param resource to be
-	 * used. @return the version the resource. @throws
+	 * MavenResource, {@link DockerResource}, and {@link UrlResource}.
+	 * @param resource the resource to use.
+	 * @return the version the resource.
 	 */
 	public String getResourceVersion(Resource resource) {
 		Assert.notNull(resource, "resource must not be null");

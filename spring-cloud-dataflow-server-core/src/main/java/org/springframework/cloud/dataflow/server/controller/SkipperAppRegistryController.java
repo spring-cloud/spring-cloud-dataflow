@@ -120,6 +120,7 @@ public class SkipperAppRegistryController {
 	 * List app registrations. Optional type and findByNameLike parameters can be passed to do
 	 * filtering. Search parameter only filters by {@code AppRegistration} name field.
 	 *
+	 * @param pageable Pagination information
 	 * @param pagedResourcesAssembler the resource assembler for app registrations
 	 * @param type the application type: source, sink, processor, task
 	 * @param search optional findByNameLike parameter
@@ -323,6 +324,7 @@ public class SkipperAppRegistryController {
 	/**
 	 * Register all applications listed in a properties file or provided as key/value pairs.
 	 *
+	 * @param pageable Pagination information
 	 * @param pagedResourcesAssembler the resource asembly for app registrations
 	 * @param uri URI for the properties file
 	 * @param apps key/value pairs representing applications, separated by newlines

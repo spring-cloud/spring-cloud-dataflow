@@ -121,7 +121,7 @@ public class DockerRegistryValidator {
 		if (StringUtils.hasText(userName) && password != null) {
 			HttpHeaders headers = new HttpHeaders();
 			headers.setContentType(MediaType.APPLICATION_JSON);
-			HttpEntity httpEntity;
+			HttpEntity<String> httpEntity;
 			JSONObject request = new JSONObject();
 			try {
 				request.put(USER_NAME_KEY, userName);
@@ -130,7 +130,7 @@ public class DockerRegistryValidator {
 			catch (JSONException ie) {
 				throw new IllegalStateException(ie);
 			}
-			httpEntity = new HttpEntity(request.toString(), headers);
+			httpEntity = new HttpEntity<>(request.toString(), headers);
 			ResponseEntity dockerAuth = restTemplate.exchange(
 					dockerValidatiorProperties.getDockerAuthUrl(),
 					HttpMethod.POST, httpEntity, DockerAuth.class);
@@ -144,8 +144,7 @@ public class DockerRegistryValidator {
 		if (this.dockerAuth != null) {
 			headers.add(HttpHeaders.AUTHORIZATION, DOCKER_REGISTRY_AUTH_TYPE + " " + this.dockerAuth.getToken());
 		}
-		HttpEntity httpEntity = new HttpEntity(headers);
-		String result = getDockerTagsEndpointUrl();
+		HttpEntity<String> httpEntity = new HttpEntity<>(headers);
 		ResponseEntity tags = this.restTemplate.exchange(getDockerTagsEndpointUrl(), HttpMethod.GET, httpEntity,
 				DockerResult.class);
 

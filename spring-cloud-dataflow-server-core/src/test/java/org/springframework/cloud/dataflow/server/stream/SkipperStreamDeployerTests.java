@@ -406,6 +406,7 @@ public class SkipperStreamDeployerTests {
 	}
 
 	@Test
+	@SuppressWarnings("unchecked")
 	public void testUndeploySkippedForUndefinedStream() {
 		AppRegistryService appRegistryService = mock(AppRegistryService.class);
 		SkipperClient skipperClient = mock(SkipperClient.class);
@@ -425,6 +426,7 @@ public class SkipperStreamDeployerTests {
 	}
 
 	@Test
+	@SuppressWarnings("unchecked")
 	public void testUndeployForDefinedStream() {
 		AppRegistryService appRegistryService = mock(AppRegistryService.class);
 		SkipperClient skipperClient = mock(SkipperClient.class);

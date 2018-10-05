@@ -93,7 +93,7 @@ public class TaskServiceUtils {
 	 * Updates the task definition with the datasource properties.
 	 * @param taskDefinition the {@link TaskDefinition} to be updated.
 	 * @param dataSourceProperties the dataSource properties used by SCDF.
-	 * @return
+	 * @return the updated {@link TaskDefinition}
 	 */
 	public static TaskDefinition updateTaskProperties(TaskDefinition taskDefinition,
 			DataSourceProperties dataSourceProperties) {

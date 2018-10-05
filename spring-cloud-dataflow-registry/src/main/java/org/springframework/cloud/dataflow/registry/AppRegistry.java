@@ -43,10 +43,7 @@ import org.springframework.util.Assert;
 /**
  * Convenience wrapper for the {@link UriRegistry} that operates on higher level
  * {@link AppRegistration} objects and supports on-demand loading of {@link Resource}s.
- * <p>
- * <p>
  * Stores AppRegistration with up to two keys:
- * </p>
  * <ul>
  * <li>{@literal <type>.<name>}: URI for the actual app</li>
  * <li>{@literal <type>.<name>.metadata}: Optional URI for the app metadata</li>

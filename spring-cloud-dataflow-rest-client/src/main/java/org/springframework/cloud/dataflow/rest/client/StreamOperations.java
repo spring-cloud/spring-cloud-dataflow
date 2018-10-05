@@ -147,6 +147,7 @@ public interface StreamOperations {
 	 * Return the validation status for the apps in an stream.
 	 * @param streamDefinitionName The name of the stream definition to be validated.
 	 * @return {@link StreamAppStatusResource} containing the stream app statuses.
+	 * @throws OperationNotSupportedException if the server does not support stream validation
 	 */
 	StreamAppStatusResource validateStreamDefinition(String streamDefinitionName) throws OperationNotSupportedException;
 }

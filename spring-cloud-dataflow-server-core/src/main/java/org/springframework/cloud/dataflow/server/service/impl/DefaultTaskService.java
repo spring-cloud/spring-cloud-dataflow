@@ -130,6 +130,7 @@ public class DefaultTaskService implements TaskService {
 	 * @param metaDataResolver the metadata resolver
 	 * @param taskConfigurationProperties the properties used to define the behavior of tasks
 	 * @param deploymentIdRepository the repository that maps deployment keys to IDs
+	 * @param auditRecordService the audit record service
 	 * @param dataflowServerUri the data flow server URI
 	 * @param commonApplicationProperties the common application properties
 	 * @param taskValidationService the task validation service

@@ -51,8 +51,8 @@ public class DockerImage {
 	/**
 	 * parse a full image name (myhost:300/namespace/repo:tag) into its components
 	 *
-	 * @param imageName
-	 * @return
+	 * @param imageName the image name
+	 * @return the corresponding DockerImage instance
 	 */
 	public static DockerImage fromImageName(String imageName) {
 		String[] parts = imageName.split(SECTION_SEPARATOR);
@@ -124,8 +124,8 @@ public class DockerImage {
 	 * When a image name part can be ambiguously either host or namespace, check which one it
 	 * is based on a regex of valid characters for the namespace part
 	 *
-	 * @param namespaceCandidate
-	 * @return
+	 * @param namespaceCandidate candidate string for host or namespace
+	 * @return true if namespace, false otherwise
 	 */
 	public static boolean isValidNamespace(String namespaceCandidate) {
 		return NAMESPACE_PATTERN.matcher(namespaceCandidate).matches();
@@ -175,15 +175,14 @@ public class DockerImage {
 	}
 
 	/**
-	 * Convert to a canonical single string representation
+	 * Convert to a canonical string representation.  E.g.
 	 *
-	 * @return E.g.:
-	 * <p/>
-	 * registry.hub.docker.com/library/alpine -> alpine
-	 * <p/>
-	 * registry.hub.docker.com/mongons/mongo -> mongons/mongo
-	 * <p/>
-	 * registry.local.corp/proj/image -> registry.local.corp/proj/image
+	 * <ul>
+	 *   <li>from registry.hub.docker.com/library/alpine to alpine</li>
+	 * 	 <li>from registry.hub.docker.com/mongons/mongo to mongons/mongo</li>
+	 *   <li>from registry.local.corp/proj/image to registry.local.corp/proj/image</li>
+	 * </ul>
+	 * @return canonical string representation
 	 */
 	@Override
 	public String toString() {

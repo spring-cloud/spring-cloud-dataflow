@@ -40,7 +40,6 @@ import org.springframework.util.StringUtils;
  * {@link DefaultAppRegistryService} objects and supports on-demand loading of
  * {@link Resource}s.
  * <p>
- * <p>
  * Stores AppRegistration with up to two keys:
  * </p>
  * <ul>
