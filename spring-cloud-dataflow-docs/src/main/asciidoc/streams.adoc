@@ -198,19 +198,19 @@ NOTE: App Starter actuator endpoints are secured by default.  You can disable se
 |Artifact Type |Stable Release |SNAPSHOT Release
 
 |RabbitMQ + Maven
-|http://bit.ly/Darwin-GA-stream-applications-rabbit-maven
+|http://bit.ly/Darwin-SR1-stream-applications-rabbit-maven
 |http://bit.ly/Darwin-BUILD-SNAPSHOT-stream-applications-rabbit-maven
 
 |RabbitMQ + Docker
-|http://bit.ly/Darwin-GA-stream-applications-rabbit-docker
+|http://bit.ly/Darwin-SR1-stream-applications-rabbit-docker
 |http://bit.ly/Darwin-BUILD-SNAPSHOT-stream-applications-rabbit-docker
 
 |Kafka 0.11 and above + Maven
-|http://bit.ly/Darwin-GA-stream-applications-kafka-10-maven
+|http://bit.ly/Darwin-SR1-stream-applications-kafka-10-maven
 |http://bit.ly/Darwin-BUILD-SNAPSHOT-stream-applications-kafka-10-maven
 
 |Kafka 0.11 and above + Docker
-|http://bit.ly/Darwin-GA-stream-applications-kafka-10-docker
+|http://bit.ly/Darwin-SR1-stream-applications-kafka-10-docker
 |http://bit.ly/Darwin-BUILD-SNAPSHOT-stream-applications-kafka-10-docker
 |======================
 
@@ -221,11 +221,11 @@ The following table lists the available Task Application Starters:
 |Artifact Type |Stable Release |SNAPSHOT Release
 
 |Maven
-|http://bit.ly/Clark-GA-task-applications-maven
+|http://bit.ly/Clark-SR3-task-applications-maven
 |http://bit.ly/Clark-BUILD-SNAPSHOT-task-applications-maven
 
 |Docker
-|http://bit.ly/Clark-GA-task-applications-docker
+|http://bit.ly/Clark-SR3-task-applications-docker
 |http://bit.ly/Clark-BUILD-SNAPSHOT-task-applications-docker
 |======================
 
@@ -237,14 +237,14 @@ As an example, if you would like to register all out-of-the-box stream applicati
 
 [source,bash,subs=attributes]
 ----
-$ dataflow:>app import --uri http://bit.ly/Darwin-GA-stream-applications-kafka-10-maven
+$ dataflow:>app import --uri http://bit.ly/Darwin-SR1-stream-applications-kafka-maven
 ----
 
 Alternatively you can register all the stream applications with the Rabbit binder, as follows:
 
 [source,bash,subs=attributes]
 ----
-$ dataflow:>app import --uri http://bit.ly/Darwin-GA-stream-applications-rabbit-maven
+$ dataflow:>app import --uri http://bit.ly/Darwin-SR1-stream-applications-rabbit-maven
 ----
 
 You can also pass the `--local` option (which is `true` by default) to indicate whether the
