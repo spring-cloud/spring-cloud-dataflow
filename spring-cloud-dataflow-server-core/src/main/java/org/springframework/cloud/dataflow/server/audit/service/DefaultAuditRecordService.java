@@ -15,6 +15,7 @@
  */
 package org.springframework.cloud.dataflow.server.audit.service;
 
+import java.util.HashMap;
 import java.util.Map;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -27,6 +28,9 @@ import org.springframework.cloud.dataflow.server.audit.domain.AuditActionType;
 import org.springframework.cloud.dataflow.server.audit.domain.AuditOperationType;
 import org.springframework.cloud.dataflow.server.audit.domain.AuditRecord;
 import org.springframework.cloud.dataflow.server.audit.repository.AuditRecordRepository;
+import org.springframework.cloud.dataflow.server.controller.support.ArgumentSanitizer;
+import org.springframework.cloud.scheduler.spi.core.ScheduleInfo;
+import org.springframework.cloud.scheduler.spi.core.ScheduleRequest;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.util.Assert;
@@ -39,16 +43,26 @@ import org.springframework.util.Assert;
  */
 public class DefaultAuditRecordService implements AuditRecordService {
 
+	public static final String STREAM_DEFINITION_DSL_TEXT = "streamDefinitionDslText";
+	public static final String TASK_DEFINITION_DSL_TEXT = "taskDefinitionDslText";
+	public static final String TASK_DEFINITION_NAME = "taskDefinitionName";
+	public static final String TASK_DEFINITION_PROPERTIES = "taskDefinitionProperties";
+
+	public static final String DEPLOYMENT_PROPERTIES = "deploymentProperties";
+	public static final String COMMANDLINE_ARGUMENTS = "commandlineArguments";
+
 	private static final Logger logger = LoggerFactory.getLogger(DefaultAuditRecordService.class);
 
 	private final AuditRecordRepository auditRecordRepository;
 
 	private final ObjectMapper objectMapper;
+	private final ArgumentSanitizer argumentSanitizer;
 
 	public DefaultAuditRecordService(AuditRecordRepository auditRecordRepository) {
 		Assert.notNull(auditRecordRepository, "auditRecordRepository must not be null.");
 		this.auditRecordRepository = auditRecordRepository;
 		this.objectMapper = new ObjectMapper();
+		this.argumentSanitizer = new ArgumentSanitizer();
 		this.objectMapper.configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false);
 	}
 
@@ -56,6 +70,7 @@ public class DefaultAuditRecordService implements AuditRecordService {
 		Assert.notNull(auditRecordRepository, "auditRecordRepository must not be null.");
 		Assert.notNull(objectMapper, "objectMapper must not be null.");
 		this.auditRecordRepository = auditRecordRepository;
+		this.argumentSanitizer = new ArgumentSanitizer();
 		this.objectMapper = objectMapper;
 	}
 
@@ -112,5 +127,36 @@ public class DefaultAuditRecordService implements AuditRecordService {
 	@Override
 	public AuditRecord findOne(Long id) {
 		return this.auditRecordRepository.findOne(id);
+	}
+
+	public void recordScheduleCreate(ScheduleRequest scheduleRequest) {
+		Assert.notNull(scheduleRequest, "scheduleRequest must not be null");
+		Assert.hasText(scheduleRequest.getScheduleName(), "The scheduleName of the scheduleRequest must not be null or empty");
+		Assert.notNull(scheduleRequest.getDefinition(), "The appDefinition of the scheduleRequest must not be null");
+
+		final Map<String, Object> auditedData = new HashMap<>(3);
+		auditedData.put(TASK_DEFINITION_NAME, scheduleRequest.getDefinition().getName());
+
+		if (scheduleRequest.getDefinition().getProperties() != null) {
+			auditedData.put(TASK_DEFINITION_PROPERTIES, argumentSanitizer.sanitizeProperties(scheduleRequest.getDefinition().getProperties()));
+		}
+
+		if (scheduleRequest.getDeploymentProperties() != null) {
+			auditedData.put(DEPLOYMENT_PROPERTIES, argumentSanitizer.sanitizeProperties(scheduleRequest.getDeploymentProperties()));
+		}
+
+		if (scheduleRequest.getCommandlineArguments() != null) {
+			auditedData.put(COMMANDLINE_ARGUMENTS, argumentSanitizer.sanitizeArguments(scheduleRequest.getCommandlineArguments()));
+		}
+
+		this.populateAndSaveAuditRecordUsingMapData(AuditOperationType.SCHEDULE, AuditActionType.CREATE, scheduleRequest.getScheduleName(), auditedData);
+	}
+
+	@Override
+	public void recordScheduleDelete(ScheduleInfo scheduleInfo) {
+		this.populateAndSaveAuditRecord(
+				AuditOperationType.SCHEDULE,
+				AuditActionType.DELETE, scheduleInfo.getScheduleName(),
+				scheduleInfo.getTaskDefinitionName());
 	}
 }

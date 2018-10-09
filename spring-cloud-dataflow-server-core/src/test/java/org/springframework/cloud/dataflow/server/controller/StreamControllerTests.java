@@ -163,8 +163,8 @@ public class StreamControllerTests {
 
 		final AuditRecord auditRecord = auditRecords.get(0);
 
-		assertEquals("time --some.password=foobar --another-secret=kenny | log", myStream.getDslText()); //FIXME ordering issue
-		assertEquals("time --another-secret='******' --some.password='******' | log", auditRecord.getAuditData());
+		assertEquals("time --some.password=foobar --another-secret=kenny | log", myStream.getDslText());
+		assertEquals("time --some.password='******' --another-secret='******' | log", auditRecord.getAuditData());
 		assertEquals("myStream2", auditRecord.getCorrelationId());
 		assertEquals(AuditOperationType.STREAM, auditRecord.getAuditOperation());
 		assertEquals(AuditActionType.CREATE, auditRecord.getAuditAction());
@@ -601,8 +601,8 @@ public class StreamControllerTests {
 		final AuditRecord auditRecord1 = auditRecords.get(0);
 		final AuditRecord auditRecord2 = auditRecords.get(1);
 
-		assertEquals("time --another-secret='******' --some.password='******' | log", auditRecord1.getAuditData()); //FIXME ordering issue
-		assertEquals("time --another-secret='******' --some.password='******' | log", auditRecord2.getAuditData()); //FIXME ordering issue
+		assertEquals("time --some.password='******' --another-secret='******' | log", auditRecord1.getAuditData());
+		assertEquals("time --some.password='******' --another-secret='******' | log", auditRecord2.getAuditData());
 		assertEquals("myStream1234", auditRecord1.getCorrelationId());
 		assertEquals("myStream1234", auditRecord2.getCorrelationId());
 
@@ -721,7 +721,7 @@ public class StreamControllerTests {
 		assertEquals(1, auditRecords.size());
 		final AuditRecord auditRecord = auditRecords.get(0);
 
-		assertEquals("{\"streamDefinitionDslText\":\"time --another-secret='******' --some.password='******' | log\",\"deploymentProperties\":{}}", auditRecord.getAuditData()); //FIXME ordering issue
+		assertEquals("{\"streamDefinitionDslText\":\"time --some.password='******' --another-secret='******' | log\",\"deploymentProperties\":{}}", auditRecord.getAuditData());
 
 		assertEquals("myStreamDeploy", auditRecord.getCorrelationId());
 
