@@ -1,29 +1,33 @@
+CREATE TABLE APP_REGISTRATION (
+   ID BIGINT NOT NULL,
+    OBJECT_VERSION BIGINT,
+    DEFAULT_VERSION BIT,
+    METADATA_URI LONGTEXT,
+    NAME VARCHAR(255),
+    TYPE INTEGER,
+    URI LONGTEXT,
+    VERSION VARCHAR(255),
+    PRIMARY KEY (ID)
+);
 
-    create table APP_REGISTRATION (
-       id bigint not null,
-        object_Version bigint,
-        default_Version bit,
-        metadata_Uri longtext,
-        name varchar(255),
-        type integer,
-        uri longtext,
-        version varchar(255),
-        primary key (id)
-    );
+CREATE TABLE AUDIT_RECORDS (
+   ID BIGINT NOT NULL,
+    AUDIT_ACTION BIGINT NOT NULL,
+    AUDIT_DATA LONGTEXT,
+    AUDIT_OPERATION BIGINT NOT NULL,
+    CORRELATION_ID VARCHAR(255),
+    CREATED_BY VARCHAR(255),
+    CREATED_ON DATETIME,
+    PRIMARY KEY (ID)
+);
 
-    create table AUDIT_RECORDS (
-       id bigint not null,
-        audit_Action bigint,
-        audit_data longtext,
-        audit_Operation bigint,
-        correlation_id varchar(255),
-        created_by varchar(255),
-        created_On datetime,
-        primary key (id)
-    );
+CREATE INDEX AUDIT_RECORDS_AUDIT_ACTION_IDX ON AUDIT_RECORDS (AUDIT_ACTION) ;
+CREATE INDEX AUDIT_RECORDS_AUDIT_OPERATION_IDX ON AUDIT_RECORDS (AUDIT_OPERATION) ;
+CREATE INDEX AUDIT_RECORDS_CORRELATION_ID_IDX ON AUDIT_RECORDS (CORRELATION_ID) ;
+CREATE INDEX AUDIT_RECORDS_CREATED_ON_IDX ON AUDIT_RECORDS (CREATED_ON) ;
 
-    create table hibernate_sequence (
-        next_val bigint
-    );
+CREATE TABLE HIBERNATE_SEQUENCE (
+    NEXT_VAL BIGINT
+);
 
-    insert into hibernate_sequence(next_val) select * from (select 1) as tmp where not exists ( select next_val from hibernate_sequence) limit 1;
+INSERT INTO HIBERNATE_SEQUENCE(NEXT_VAL) SELECT * FROM (SELECT 1) AS TMP WHERE NOT EXISTS ( SELECT NEXT_VAL FROM HIBERNATE_SEQUENCE) LIMIT 1;
