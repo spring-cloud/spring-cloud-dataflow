@@ -21,6 +21,8 @@ import org.springframework.cloud.dataflow.server.audit.domain.AuditActionType;
 import org.springframework.cloud.dataflow.server.audit.domain.AuditOperationType;
 import org.springframework.cloud.dataflow.server.audit.domain.AuditRecord;
 import org.springframework.cloud.dataflow.server.audit.repository.AuditRecordRepository;
+import org.springframework.cloud.scheduler.spi.core.ScheduleInfo;
+import org.springframework.cloud.scheduler.spi.core.ScheduleRequest;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
@@ -95,4 +97,8 @@ public interface AuditRecordService {
 	 * @return Audit Record
 	 */
 	AuditRecord findOne(Long id);
+
+	void recordScheduleDelete(ScheduleInfo scheduleInfo);
+
+	void recordScheduleCreate(ScheduleRequest scheduleRequest);
 }
