@@ -1220,6 +1220,14 @@ Stream Deployment properties: {
 }
 
 ----
+[[spring-cloud-dataflow-stream-lifecycle-skipper-force-update]]
+=== Force update of a Stream
+When upgrading a stream, the `--force` option can be used to deploy new instances of currently deployed applications even if no applicaton or deployment properties have changed.
+This behavior is needed in the case when configuration information is obtained by the application itself at startup time, for example from Spring Cloud Config Server.
+You can specify which applications to force upgrade by using the option `--app-names`.
+If you do not specify any application names, all the applications will be force upgraded.
+You can specify `--force` and `--app-names` options together with `--properties` or `--propertiesFile` options.
+
 === Stream versions
 Skipper keeps a history of the streams that were deployed.
 After updating a Stream, there will be a second version of the stream.
