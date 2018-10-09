@@ -506,13 +506,13 @@ public class TestDependencies extends WebMvcConfigurationSupport {
 			Scheduler scheduler, TaskDefinitionRepository taskDefinitionRepository,
 			AppRegistryCommon registry, ResourceLoader resourceLoader,
 			DataSourceProperties dataSourceProperties,
-			ApplicationConfigurationMetadataResolver metaDataResolver) {
+			ApplicationConfigurationMetadataResolver metaDataResolver, AuditRecordService auditRecordService) {
 		return new DefaultSchedulerService(commonApplicationProperties,
 				scheduler, taskDefinitionRepository,
 				registry, resourceLoader,
 				new TaskConfigurationProperties(),
 				dataSourceProperties, null,
-				metaDataResolver, new SchedulerServiceProperties());
+				metaDataResolver, new SchedulerServiceProperties(), auditRecordService);
 	}
 
 	@Bean
