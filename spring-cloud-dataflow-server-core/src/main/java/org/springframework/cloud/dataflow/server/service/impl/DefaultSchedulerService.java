@@ -31,6 +31,10 @@ import org.springframework.cloud.dataflow.core.dsl.TaskParser;
 import org.springframework.cloud.dataflow.registry.AppRegistryCommon;
 import org.springframework.cloud.dataflow.registry.domain.AppRegistration;
 import org.springframework.cloud.dataflow.rest.util.DeploymentPropertiesUtils;
+import org.springframework.cloud.dataflow.server.audit.domain.AuditActionType;
+import org.springframework.cloud.dataflow.server.audit.domain.AuditOperationType;
+import org.springframework.cloud.dataflow.server.audit.service.AuditRecordService;
+import org.springframework.cloud.dataflow.server.audit.service.AuditServiceUtils;
 import org.springframework.cloud.dataflow.server.config.apps.CommonApplicationProperties;
 import org.springframework.cloud.dataflow.server.controller.WhitelistProperties;
 import org.springframework.cloud.dataflow.server.repository.NoSuchTaskDefinitionException;
@@ -65,6 +69,8 @@ public class DefaultSchedulerService implements SchedulerService {
 	private final String dataflowServerUri;
 	private final WhitelistProperties whitelistProperties;
 	private final SchedulerServiceProperties schedulerServiceProperties;
+	private final AuditRecordService auditRecordService;
+	private final AuditServiceUtils auditServiceUtils;
 
 	public DefaultSchedulerService(CommonApplicationProperties commonApplicationProperties,
 			Scheduler scheduler, TaskDefinitionRepository taskDefinitionRepository,
@@ -72,7 +78,8 @@ public class DefaultSchedulerService implements SchedulerService {
 			TaskConfigurationProperties taskConfigurationProperties,
 			DataSourceProperties dataSourceProperties, String dataflowServerUri,
 			ApplicationConfigurationMetadataResolver metaDataResolver,
-			SchedulerServiceProperties schedulerServiceProperties) {
+			SchedulerServiceProperties schedulerServiceProperties,
+			AuditRecordService auditRecordService) {
 		Assert.notNull(commonApplicationProperties, "commonApplicationProperties must not be null");
 		Assert.notNull(scheduler, "scheduler must not be null");
 		Assert.notNull(registry, "UriRegistry must not be null");
@@ -82,6 +89,7 @@ public class DefaultSchedulerService implements SchedulerService {
 		Assert.notNull(dataSourceProperties, "DataSourceProperties must not be null");
 		Assert.notNull(metaDataResolver, "metaDataResolver must not be null");
 		Assert.notNull(schedulerServiceProperties, "schedulerServiceProperties must not be null");
+		Assert.notNull(auditRecordService, "AuditRecordService must not be null");
 
 		this.dataSourceProperties = dataSourceProperties;
 		this.commonApplicationProperties = commonApplicationProperties;
@@ -92,6 +100,8 @@ public class DefaultSchedulerService implements SchedulerService {
 		this.dataflowServerUri = dataflowServerUri;
 		this.whitelistProperties = new WhitelistProperties(metaDataResolver);
 		this.schedulerServiceProperties = schedulerServiceProperties;
+		this.auditRecordService = auditRecordService;
+		this.auditServiceUtils = new AuditServiceUtils();
 	}
 
 	@Override
@@ -137,11 +147,23 @@ public class DefaultSchedulerService implements SchedulerService {
 		ScheduleRequest scheduleRequest = new ScheduleRequest(revisedDefinition, taskDeploymentProperties,
 				deployerDeploymentProperties, commandLineArgs, scheduleName, getTaskResource(taskDefinitionName));
 		this.scheduler.schedule(scheduleRequest);
+		this.auditRecordService.populateAndSaveAuditRecordUsingMapData(AuditOperationType.SCHEDULE, AuditActionType.CREATE,
+			scheduleRequest.getScheduleName(), this.auditServiceUtils.convertScheduleRequestToAuditData(scheduleRequest));
 	}
+	public static final String STREAM_DEFINITION_DSL_TEXT = "streamDefinitionDslText";
+
+	public static final String DEPLOYMENT_PROPERTIES = "deploymentProperties";
 
 	@Override
 	public void unschedule(String scheduleName) {
-		this.scheduler.unschedule(scheduleName);
+		final ScheduleInfo scheduleInfo = getSchedule(scheduleName);
+		if (scheduleInfo != null) {
+			this.scheduler.unschedule(scheduleInfo.getScheduleName());
+			this.auditRecordService.populateAndSaveAuditRecord(
+					AuditOperationType.SCHEDULE,
+					AuditActionType.DELETE, scheduleInfo.getScheduleName(),
+					scheduleInfo.getTaskDefinitionName());
+		}
 	}
 
 	@Override

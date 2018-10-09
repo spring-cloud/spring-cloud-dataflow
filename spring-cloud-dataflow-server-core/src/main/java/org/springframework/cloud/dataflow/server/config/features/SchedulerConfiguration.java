@@ -24,6 +24,7 @@ import org.springframework.boot.autoconfigure.jdbc.DataSourceProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.cloud.dataflow.configuration.metadata.ApplicationConfigurationMetadataResolver;
 import org.springframework.cloud.dataflow.registry.AppRegistryCommon;
+import org.springframework.cloud.dataflow.server.audit.service.AuditRecordService;
 import org.springframework.cloud.dataflow.server.config.apps.CommonApplicationProperties;
 import org.springframework.cloud.dataflow.server.repository.TaskDefinitionRepository;
 import org.springframework.cloud.dataflow.server.service.SchedulerService;
@@ -40,6 +41,7 @@ import org.springframework.core.io.ResourceLoader;
  * Establishes the {@link SchedulerService} instance to be used by SCDF.
  *
  * @author Glenn Renfro
+ * @author Gunnar Hillert
  */
 
 @Configuration
@@ -58,11 +60,12 @@ public class SchedulerConfiguration {
 			TaskConfigurationProperties taskConfigurationProperties,
 			DataSourceProperties dataSourceProperties,
 			ApplicationConfigurationMetadataResolver metaDataResolver,
-			SchedulerServiceProperties schedulerServiceProperties) {
+			SchedulerServiceProperties schedulerServiceProperties,
+			AuditRecordService auditRecordService) {
 		return new DefaultSchedulerService(commonApplicationProperties,
 				scheduler, taskDefinitionRepository, registry, resourceLoader,
 				taskConfigurationProperties, dataSourceProperties,
-				this.dataflowServerUri, metaDataResolver, schedulerServiceProperties);
+				this.dataflowServerUri, metaDataResolver, schedulerServiceProperties, auditRecordService);
 	}
 
 	public static class SchedulerConfigurationPropertyChecker extends AllNestedConditions {

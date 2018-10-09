@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 the original author or authors.
+ * Copyright 2017-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,8 @@
 
 package org.springframework.cloud.dataflow.server.controller.support;
 
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
@@ -26,11 +28,13 @@ import org.springframework.cloud.dataflow.core.StreamDefinition;
 import org.springframework.cloud.dataflow.core.StreamDefinitionToDslConverter;
 import org.springframework.cloud.dataflow.core.TaskDefinition;
 import org.springframework.util.CollectionUtils;
+import org.springframework.util.StringUtils;
 
 /**
  * Sanitizes potentially sensitive keys for a specific command line arg.
  *
  * @author Glenn Renfro
+ * @author Gunnar Hillert
  */
 public class ArgumentSanitizer {
 	private static final String[] REGEX_PARTS = { "*", "$", "^", "+" };
@@ -95,10 +99,12 @@ public class ArgumentSanitizer {
 	 * @return the argument with a potentially sanitized value
 	 */
 	public String sanitize(String key, String value) {
-		for (Pattern pattern : this.keysToSanitize) {
-			if (pattern.matcher(key).matches()) {
-				value = REDACTION_STRING;
-				break;
+		if (StringUtils.hasText(value)) {
+			for (Pattern pattern : this.keysToSanitize) {
+				if (pattern.matcher(key).matches()) {
+					value = REDACTION_STRING;
+					break;
+				}
 			}
 		}
 		return value;
@@ -140,10 +146,28 @@ public class ArgumentSanitizer {
 	 */
 	public Map<String, String> sanitizeProperties(Map<String, String> properties) {
 		if (!CollectionUtils.isEmpty(properties)) {
-			return properties.entrySet().stream()
-					.collect(Collectors.toMap(e -> e.getKey(), e -> this.sanitize(e.getKey(), e.getValue())));
+			final Map<String, String> sanitizedProperties = new LinkedHashMap<>(properties.size());
+			for (Map.Entry<String, String > property : properties.entrySet()) {
+				sanitizedProperties.put(property.getKey(), this.sanitize(property.getKey(), property.getValue()));
+			}
+			return sanitizedProperties;
 		}
 		return properties;
+	}
+
+	/**
+	 * For all sensitive arguments (e.g. key names containing words like password, secret,
+	 * key, token) replace the value with '*****' string
+	 */
+	public List<String> sanitizeArguments(List<String> arguments) {
+		if (!CollectionUtils.isEmpty(arguments)) {
+			final List<String> sanitizedArguments = new ArrayList<>(arguments.size());
+			for (String argument : arguments) {
+				sanitizedArguments.add(this.sanitize(argument));
+			}
+			return sanitizedArguments;
+		}
+		return arguments;
 	}
 
 }

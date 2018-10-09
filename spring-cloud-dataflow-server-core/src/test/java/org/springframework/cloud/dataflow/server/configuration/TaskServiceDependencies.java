@@ -191,13 +191,14 @@ public class TaskServiceDependencies {
 			AppRegistry registry, ResourceLoader resourceLoader,
 			DataSourceProperties dataSourceProperties,
 			ApplicationConfigurationMetadataResolver metaDataResolver,
-			SchedulerServiceProperties schedulerServiceProperties) {
+			SchedulerServiceProperties schedulerServiceProperties,
+			AuditRecordService auditRecordService) {
 		return new DefaultSchedulerService(commonApplicationProperties,
 				scheduler, taskDefinitionRepository,
 				registry, resourceLoader,
 				new TaskConfigurationProperties(),
 				dataSourceProperties, null,
-				metaDataResolver, schedulerServiceProperties);
+				metaDataResolver, schedulerServiceProperties, auditRecordService);
 	}
 
 	@Bean

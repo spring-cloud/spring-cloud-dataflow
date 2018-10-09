@@ -95,4 +95,5 @@ public interface AuditRecordService {
 	 * @return Audit Record
 	 */
 	AuditRecord findOne(Long id);
+
 }

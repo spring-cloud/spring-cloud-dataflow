@@ -96,7 +96,7 @@ public class AppDeployerStreamService extends AbstractStreamService {
 		this.appDeployerStreamDeployer.undeployStream(streamName);
 		auditRecordService.populateAndSaveAuditRecord(
 				AuditOperationType.STREAM, AuditActionType.UNDEPLOY,
-				streamDefinition.getName(), this.argumentSanitizer.sanitizeStream(streamDefinition));
+				streamDefinition.getName(), this.auditServiceUtils.convertStreamDefinitionToAuditData(streamDefinition));
 	}
 
 	@Override
