@@ -40,6 +40,7 @@ import org.springframework.cloud.dataflow.server.repository.NoSuchTaskBatchExcep
 import org.springframework.cloud.dataflow.server.repository.NoSuchTaskDefinitionException;
 import org.springframework.cloud.dataflow.server.repository.NoSuchTaskExecutionException;
 import org.springframework.cloud.dataflow.server.support.ApplicationDoesNotExistException;
+import org.springframework.cloud.scheduler.spi.core.CreateScheduleException;
 import org.springframework.hateoas.VndErrors;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.converter.HttpMessageNotReadableException;
@@ -174,7 +175,7 @@ public class RestControllerAdvice {
 	 */
 	@ExceptionHandler({ MissingServletRequestParameterException.class, HttpMessageNotReadableException.class,
 			UnsatisfiedServletRequestParameterException.class, MethodArgumentTypeMismatchException.class,
-			InvalidStreamDefinitionException.class })
+			InvalidStreamDefinitionException.class, CreateScheduleException.class })
 	@ResponseStatus(HttpStatus.BAD_REQUEST)
 	@ResponseBody
 	public VndErrors onClientGenericBadRequest(Exception e) {

@@ -585,6 +585,8 @@ public class TestDependencies extends WebMvcConfigurationSupport {
 
 
 	public static class SimpleTestScheduler implements Scheduler {
+		public static final String INVALID_CRON_EXPRESSION = "BAD";
+
 		List<ScheduleInfo> schedules = new ArrayList<>();
 
 		@Override
@@ -593,6 +595,10 @@ public class TestDependencies extends WebMvcConfigurationSupport {
 			schedule.setScheduleName(scheduleRequest.getScheduleName());
 			schedule.setScheduleProperties(scheduleRequest.getSchedulerProperties());
 			schedule.setTaskDefinitionName(scheduleRequest.getDefinition().getName());
+			if(schedule.getScheduleProperties().containsKey("spring.cloud.scheduler.cron.expression") &&
+					schedule.getScheduleProperties().get("spring.cloud.scheduler.cron.expression").equals(INVALID_CRON_EXPRESSION)) {
+				throw new CreateScheduleException("Invalid Cron Expression",new IllegalArgumentException());
+			}
 			List<ScheduleInfo> scheduleInfos = schedules.stream().filter(s -> s.getScheduleName().
 					equals(scheduleRequest.getScheduleName())).
 					collect(Collectors.toList());

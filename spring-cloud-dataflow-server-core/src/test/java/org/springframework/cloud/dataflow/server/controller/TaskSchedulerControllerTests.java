@@ -156,6 +156,16 @@ public class TaskSchedulerControllerTests {
 	}
 
 	@Test
+	public void testCreateScheduleBadCron() throws Exception {
+		this.registry.register("task.testApp", new URI("file:src/test/resources/apps/foo-task"));
+		repository.save(new TaskDefinition("testDefinition", "testApp"));
+		mockMvc.perform(post("/tasks/schedules/").param("taskDefinitionName", "testDefinition").
+				param("scheduleName", "myScheduleBadCron").
+				param("properties", "scheduler.cron.expression="+TestDependencies.SimpleTestScheduler.INVALID_CRON_EXPRESSION)
+				.accept(MediaType.APPLICATION_JSON)).andExpect(status().isBadRequest());
+	}
+
+	@Test
 	public void testRemoveSchedule() throws Exception {
 		this.registry.register("task.testApp", new URI("file:src/test/resources/apps/foo-task"));
 		repository.save(new TaskDefinition("testDefinition", "testApp"));
