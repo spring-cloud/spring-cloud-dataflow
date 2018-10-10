@@ -129,10 +129,11 @@ public class DefaultAuditRecordService implements AuditRecordService {
 		return this.auditRecordRepository.findOne(id);
 	}
 
+	@Override
 	public void recordScheduleCreate(ScheduleRequest scheduleRequest) {
 		Assert.notNull(scheduleRequest, "scheduleRequest must not be null");
 		Assert.hasText(scheduleRequest.getScheduleName(), "The scheduleName of the scheduleRequest must not be null or empty");
-		Assert.notNull(scheduleRequest.getDefinition(), "The appDefinition of the scheduleRequest must not be null");
+		Assert.notNull(scheduleRequest.getDefinition(), "The task definition of the scheduleRequest must not be null");
 
 		final Map<String, Object> auditedData = new HashMap<>(3);
 		auditedData.put(TASK_DEFINITION_NAME, scheduleRequest.getDefinition().getName());

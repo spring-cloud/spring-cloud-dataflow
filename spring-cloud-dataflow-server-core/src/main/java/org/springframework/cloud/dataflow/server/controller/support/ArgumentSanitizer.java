@@ -99,7 +99,7 @@ public class ArgumentSanitizer {
 	 * @return the argument with a potentially sanitized value
 	 */
 	public String sanitize(String key, String value) {
-		if (value != null && StringUtils.hasText(value)) {
+		if (StringUtils.hasText(value)) {
 			for (Pattern pattern : this.keysToSanitize) {
 				if (pattern.matcher(key).matches()) {
 					value = REDACTION_STRING;
