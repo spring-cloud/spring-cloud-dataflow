@@ -201,22 +201,24 @@ public class AuditRecordControllerTests {
 		mockMvc.perform(get("/audit-records/audit-operation-types").accept(MediaType.APPLICATION_JSON))
 		.andDo(print())
 		.andExpect(status().isOk())
-		.andExpect(jsonPath("$.*", hasSize(4)))
+		.andExpect(jsonPath("$.*", hasSize(3)))
 
+		/* Commented out until the implementation of gh-2486
 		.andExpect(jsonPath("$[0].id", is(100)))
 		.andExpect(jsonPath("$[0].name", is("App Registration")))
 		.andExpect(jsonPath("$[0].key", is("APP_REGISTRATION")))
+		*/
 
-		.andExpect(jsonPath("$[1].id", is(200)))
-		.andExpect(jsonPath("$[1].name", is("Schedule")))
-		.andExpect(jsonPath("$[1].key", is("SCHEDULE")))
+		.andExpect(jsonPath("$[0].id", is(200)))
+		.andExpect(jsonPath("$[0].name", is("Schedule")))
+		.andExpect(jsonPath("$[0].key", is("SCHEDULE")))
 
-		.andExpect(jsonPath("$[2].id", is(300)))
-		.andExpect(jsonPath("$[2].name", is("Stream")))
-		.andExpect(jsonPath("$[2].key", is("STREAM")))
+		.andExpect(jsonPath("$[1].id", is(300)))
+		.andExpect(jsonPath("$[1].name", is("Stream")))
+		.andExpect(jsonPath("$[1].key", is("STREAM")))
 
-		.andExpect(jsonPath("$[3].id", is(400)))
-		.andExpect(jsonPath("$[3].name", is("Task")))
-		.andExpect(jsonPath("$[3].key", is("TASK")));
+		.andExpect(jsonPath("$[2].id", is(400)))
+		.andExpect(jsonPath("$[2].name", is("Task")))
+		.andExpect(jsonPath("$[2].key", is("TASK")));
 	}
 }
