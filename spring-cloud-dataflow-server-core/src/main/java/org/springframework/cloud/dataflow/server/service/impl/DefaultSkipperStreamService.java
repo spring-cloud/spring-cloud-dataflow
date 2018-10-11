@@ -38,6 +38,7 @@ import org.springframework.cloud.dataflow.rest.util.DeploymentPropertiesUtils;
 import org.springframework.cloud.dataflow.server.audit.domain.AuditActionType;
 import org.springframework.cloud.dataflow.server.audit.domain.AuditOperationType;
 import org.springframework.cloud.dataflow.server.audit.service.AuditRecordService;
+import org.springframework.cloud.dataflow.server.controller.support.ArgumentSanitizer;
 import org.springframework.cloud.dataflow.server.repository.NoSuchStreamDefinitionException;
 import org.springframework.cloud.dataflow.server.repository.StreamDefinitionRepository;
 import org.springframework.cloud.dataflow.server.service.SkipperStreamService;
@@ -71,6 +72,8 @@ public class DefaultSkipperStreamService extends AbstractStreamService implement
 
 	private static Log logger = LogFactory.getLog(DefaultSkipperStreamService.class);
 
+	private final ArgumentSanitizer argumentSanitizer;
+
 	/**
 	 * The repository this controller will use for stream CRUD operations.
 	 */
@@ -88,6 +91,7 @@ public class DefaultSkipperStreamService extends AbstractStreamService implement
 		Assert.notNull(appDeploymentRequestCreator, "AppDeploymentRequestCreator must not be null");
 		this.skipperStreamDeployer = skipperStreamDeployer;
 		this.appDeploymentRequestCreator = appDeploymentRequestCreator;
+		this.argumentSanitizer = new ArgumentSanitizer();
 	}
 
 	/**
@@ -120,12 +124,9 @@ public class DefaultSkipperStreamService extends AbstractStreamService implement
 
 		Release release = this.skipperStreamDeployer.deployStream(streamDeploymentRequest);
 
-		final Map<String, Object> auditedData = new HashMap<>(1);
-		auditedData.put("deploymentProperties", this.argumentSanitizer.sanitizeProperties(deploymentProperties));
-
 		this.auditRecordService.populateAndSaveAuditRecordUsingMapData(AuditOperationType.STREAM,
 				AuditActionType.DEPLOY,
-				streamDefinition.getName(), auditedData);
+				streamDefinition.getName(), this.auditServiceUtils.convertStreamDefinitionToAuditData(streamDefinition, deploymentProperties));
 
 		if (release != null) {
 			updateStreamDefinitionFromReleaseManifest(streamDefinition.getName(), release.getManifest().getData());
@@ -148,7 +149,7 @@ public class DefaultSkipperStreamService extends AbstractStreamService implement
 
 		auditRecordService.populateAndSaveAuditRecord(
 				AuditOperationType.STREAM, AuditActionType.UNDEPLOY,
-				streamDefinition.getName(), this.argumentSanitizer.sanitizeStream(streamDefinition));
+				streamDefinition.getName(), this.auditServiceUtils.convertStreamDefinitionToAuditData(streamDefinition));
 	}
 
 	private void updateStreamDefinitionFromReleaseManifest(String streamName, String releaseManifest) {
@@ -184,7 +185,7 @@ public class DefaultSkipperStreamService extends AbstractStreamService implement
 		this.streamDefinitionRepository.delete(updatedStreamDefinition);
 		this.streamDefinitionRepository.save(updatedStreamDefinition);
 		this.auditRecordService.populateAndSaveAuditRecord(
-				AuditOperationType.STREAM, AuditActionType.UPDATE, streamName, this.argumentSanitizer.sanitizeStream(updatedStreamDefinition));
+				AuditOperationType.STREAM, AuditActionType.UPDATE, streamName, this.auditServiceUtils.convertStreamDefinitionToAuditData(streamDefinition));
 	}
 
 	@Override

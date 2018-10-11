@@ -31,9 +31,9 @@ import org.springframework.cloud.dataflow.core.dsl.StreamParser;
 import org.springframework.cloud.dataflow.server.audit.domain.AuditActionType;
 import org.springframework.cloud.dataflow.server.audit.domain.AuditOperationType;
 import org.springframework.cloud.dataflow.server.audit.service.AuditRecordService;
+import org.springframework.cloud.dataflow.server.audit.service.AuditServiceUtils;
 import org.springframework.cloud.dataflow.server.controller.StreamAlreadyDeployedException;
 import org.springframework.cloud.dataflow.server.controller.StreamAlreadyDeployingException;
-import org.springframework.cloud.dataflow.server.controller.support.ArgumentSanitizer;
 import org.springframework.cloud.dataflow.server.controller.support.InvalidStreamDefinitionException;
 import org.springframework.cloud.dataflow.server.repository.NoSuchStreamDefinitionException;
 import org.springframework.cloud.dataflow.server.repository.StreamDefinitionRepository;
@@ -73,15 +73,10 @@ public abstract class AbstractStreamService implements StreamService {
 	 */
 	protected final StreamDefinitionRepository streamDefinitionRepository;
 
-	protected final ArgumentSanitizer argumentSanitizer;
-
 	protected final AuditRecordService auditRecordService;
+	protected final AuditServiceUtils auditServiceUtils;
 
 	protected final StreamValidationService streamValidationService;
-
-	public static final String STREAM_DEFINITION_DSL_TEXT = "streamDefinitionDslText";
-
-	public static final String DEPLOYMENT_PROPERTIES = "deploymentProperties";
 
 	/**
 	 * Constructor for implementations of the {@link StreamService}.
@@ -99,7 +94,7 @@ public abstract class AbstractStreamService implements StreamService {
 		this.streamDefinitionRepository = streamDefinitionRepository;
 		this.streamValidationService = streamValidationService;
 		this.auditRecordService = auditRecordService;
-		this.argumentSanitizer = new ArgumentSanitizer();
+		this.auditServiceUtils = new AuditServiceUtils();
 	}
 
 	public StreamDefinition createStream(String streamName, String dsl, boolean deploy) {
@@ -128,8 +123,8 @@ public abstract class AbstractStreamService implements StreamService {
 		}
 
 		auditRecordService.populateAndSaveAuditRecord(
-				AuditOperationType.STREAM, AuditActionType.CREATE,
-				streamDefinition.getName(), this.argumentSanitizer.sanitizeStream(savedStreamDefintion));
+				AuditOperationType.STREAM, AuditActionType.CREATE, streamDefinition.getName(),
+				this.auditServiceUtils.convertStreamDefinitionToAuditData(savedStreamDefintion));
 
 		return streamDefinition;
 
@@ -165,13 +160,10 @@ public abstract class AbstractStreamService implements StreamService {
 		}
 		doDeployStream(streamDefinition, deploymentProperties);
 
-		final Map<String, Object> auditedData = new HashMap<>(2);
-		auditedData.put(STREAM_DEFINITION_DSL_TEXT, this.argumentSanitizer.sanitizeStream(streamDefinition));
-		auditedData.put(DEPLOYMENT_PROPERTIES, this.argumentSanitizer.sanitizeProperties(deploymentProperties));
-
 		auditRecordService.populateAndSaveAuditRecordUsingMapData(
 				AuditOperationType.STREAM, AuditActionType.DEPLOY,
-				streamDefinition.getName(), auditedData);
+				streamDefinition.getName(),
+				this.auditServiceUtils.convertStreamDefinitionToAuditData(streamDefinition, deploymentProperties));
 	}
 
 	protected abstract void doDeployStream(StreamDefinition streamDefinition, Map<String, String> deploymentProperties);
@@ -189,7 +181,7 @@ public abstract class AbstractStreamService implements StreamService {
 
 		auditRecordService.populateAndSaveAuditRecord(
 				AuditOperationType.STREAM, AuditActionType.DELETE,
-				streamDefinition.getName(), this.argumentSanitizer.sanitizeStream(streamDefinition));
+				streamDefinition.getName(), this.auditServiceUtils.convertStreamDefinitionToAuditData(streamDefinition));
 	}
 
 	@Override
@@ -203,7 +195,7 @@ public abstract class AbstractStreamService implements StreamService {
 		for (StreamDefinition streamDefinition : streamDefinitions) {
 			auditRecordService.populateAndSaveAuditRecord(
 					AuditOperationType.STREAM, AuditActionType.DELETE,
-					streamDefinition.getName(), this.argumentSanitizer.sanitizeStream(streamDefinition));
+					streamDefinition.getName(), this.auditServiceUtils.convertStreamDefinitionToAuditData(streamDefinition));
 		}
 	}
 

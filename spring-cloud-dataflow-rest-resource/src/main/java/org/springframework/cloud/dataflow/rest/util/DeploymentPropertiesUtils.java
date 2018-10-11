@@ -22,6 +22,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -44,6 +45,7 @@ import org.springframework.util.StringUtils;
  * @author Mark Fisher
  * @author Janne Valkealahti
  * @author Christian Tzolov
+ * @author Gunnar Hillert
  */
 public final class DeploymentPropertiesUtils {
 
@@ -71,7 +73,7 @@ public final class DeploymentPropertiesUtils {
 	 * @return the Map of parsed key value pairs
 	 */
 	public static Map<String, String> parse(String s) {
-		Map<String, String> deploymentProperties = new HashMap<>();
+		Map<String, String> deploymentProperties = new LinkedHashMap<>();
 		List<String> pairs = parseParamList(s, ",");
 
 		// add what we got, addKeyValuePairAsProperty

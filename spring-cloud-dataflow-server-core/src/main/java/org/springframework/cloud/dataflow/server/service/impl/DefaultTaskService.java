@@ -38,7 +38,6 @@ import org.springframework.cloud.dataflow.server.audit.domain.AuditOperationType
 import org.springframework.cloud.dataflow.server.audit.service.AuditRecordService;
 import org.springframework.cloud.dataflow.server.config.apps.CommonApplicationProperties;
 import org.springframework.cloud.dataflow.server.controller.WhitelistProperties;
-import org.springframework.cloud.dataflow.server.controller.support.ArgumentSanitizer;
 import org.springframework.cloud.dataflow.server.repository.DeploymentIdRepository;
 import org.springframework.cloud.dataflow.server.repository.DeploymentKey;
 import org.springframework.cloud.dataflow.server.repository.NoSuchTaskDefinitionException;
@@ -97,8 +96,6 @@ public class DefaultTaskService implements TaskService {
 	 * The {@link AppRegistry} this service will use to look up task app URIs.
 	 */
 	private final AppRegistryCommon registry;
-
-	protected final ArgumentSanitizer argumentSanitizer;
 
 	private final TaskDefinitionRepository taskDefinitionRepository;
 
@@ -171,7 +168,6 @@ public class DefaultTaskService implements TaskService {
 		this.commonApplicationProperties = commonApplicationProperties;
 		this.auditRecordService = auditRecordService;
 		this.taskValidationService = taskValidationService;
-		this.argumentSanitizer = new ArgumentSanitizer();
 	}
 
 	@Override

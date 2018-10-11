@@ -18,6 +18,7 @@ package org.springframework.cloud.dataflow.server.controller;
 
 import java.net.URI;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.junit.Before;
@@ -27,12 +28,17 @@ import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.cloud.dataflow.core.TaskDefinition;
+import org.springframework.cloud.dataflow.server.audit.domain.AuditActionType;
+import org.springframework.cloud.dataflow.server.audit.domain.AuditOperationType;
+import org.springframework.cloud.dataflow.server.audit.domain.AuditRecord;
+import org.springframework.cloud.dataflow.server.audit.repository.AuditRecordRepository;
 import org.springframework.cloud.dataflow.server.configuration.TestDependencies;
 import org.springframework.cloud.dataflow.server.repository.TaskDefinitionRepository;
 import org.springframework.cloud.dataflow.server.service.SchedulerService;
 import org.springframework.cloud.deployer.resource.registry.UriRegistry;
 import org.springframework.cloud.scheduler.spi.core.ScheduleInfo;
 import org.springframework.cloud.scheduler.spi.core.SchedulerPropertyKeys;
+import org.springframework.data.domain.Page;
 import org.springframework.http.MediaType;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.junit4.SpringRunner;
@@ -77,6 +83,9 @@ public class TaskSchedulerControllerTests {
 
 	@Autowired
 	private TestDependencies.SimpleTestScheduler simpleTestScheduler;
+
+	@Autowired
+	private AuditRecordRepository auditRecordRepository;
 
 	private MockMvc mockMvc;
 
@@ -153,6 +162,50 @@ public class TaskSchedulerControllerTests {
 		assertEquals("mySchedule", scheduleInfo.getScheduleName());
 		assertEquals(1, scheduleInfo.getScheduleProperties().size());
 		assertEquals("* * * * *", scheduleInfo.getScheduleProperties().get("spring.cloud.scheduler.cron.expression"));
+
+		final List<AuditRecord> auditRecords = auditRecordRepository.findAll();
+
+		assertEquals(1, auditRecords.size());
+		final AuditRecord auditRecord = auditRecords.get(0);
+
+		assertEquals(AuditOperationType.SCHEDULE, auditRecord.getAuditOperation());
+		assertEquals(AuditActionType.CREATE, auditRecord.getAuditAction());
+		assertEquals("mySchedule", auditRecord.getCorrelationId());
+
+		assertEquals("{\"commandlineArguments\":[],\"taskDefinitionName\":\"testDefinition\","
+				+ "\"taskDefinitionProperties\":{\"spring.datasource.username\":null,\"spring.cloud.task.name\":\"testDefinition\",\"spring.datasource.url\":null,\"spring.datasource.driverClassName\":null},"
+				+ "\"deploymentProperties\":{}}", auditRecord.getAuditData());
+
+	}
+
+	@Test
+	public void testCreateScheduleWithSensitiveFields() throws Exception {
+		this.registry.register("task.testApp", new URI("file:src/test/resources/apps/foo-task"));
+		repository.save(new TaskDefinition("testDefinition", "testApp"));
+		mockMvc.perform(post("/tasks/schedules/").param("taskDefinitionName", "testDefinition").
+				param("scheduleName", "mySchedule").
+				param("properties", "scheduler.cron.expression=* * * * *,app.testApp.prop1=foo,app.testApp.prop2.secret=kenny,deployer.*.prop1.secret=cartman,deployer.*.prop2.password=kyle").
+				param("arguments", "argument1=foo,password=secret")
+				.accept(MediaType.APPLICATION_JSON)).andDo(print()).andExpect(status().isCreated());
+		assertEquals(1, simpleTestScheduler.list().size());
+		ScheduleInfo scheduleInfo = simpleTestScheduler.list().get(0);
+		assertEquals("mySchedule", scheduleInfo.getScheduleName());
+		assertEquals(1, scheduleInfo.getScheduleProperties().size());
+		assertEquals("* * * * *", scheduleInfo.getScheduleProperties().get("spring.cloud.scheduler.cron.expression"));
+
+		final List<AuditRecord> auditRecords = auditRecordRepository.findAll();
+
+		assertEquals(1, auditRecords.size());
+		final AuditRecord auditRecord = auditRecords.get(0);
+
+		assertEquals(AuditOperationType.SCHEDULE, auditRecord.getAuditOperation());
+		assertEquals(AuditActionType.CREATE, auditRecord.getAuditAction());
+		assertEquals("mySchedule", auditRecord.getCorrelationId());
+
+		assertEquals("{\"commandlineArguments\":[\"argument1=foo\",\"password=******\"],\"taskDefinitionName\":\"testDefinition\","
+				+ "\"taskDefinitionProperties\":{\"prop1\":\"foo\",\"spring.datasource.username\":null,\"prop2.secret\":\"******\",\"spring.datasource.url\":null,\"spring.datasource.driverClassName\":null,\"spring.cloud.task.name\":\"testDefinition\"},"
+				+ "\"deploymentProperties\":{\"spring.cloud.deployer.prop1.secret\":\"******\",\"spring.cloud.deployer.prop2.password\":\"******\"}}", auditRecord.getAuditData());
+
 	}
 
 	@Test
@@ -174,6 +227,21 @@ public class TaskSchedulerControllerTests {
 		mockMvc.perform(delete("/tasks/schedules/"+"mySchedule" ).accept(MediaType.APPLICATION_JSON)).andDo(print())
 				.andExpect(status().isOk());
 		assertEquals(0, simpleTestScheduler.list().size());
+
+		AuditActionType[] auditActionTypesCreate = {  AuditActionType.CREATE };
+		final Page<AuditRecord> auditRecordsCreate = auditRecordRepository.findByAuditActionIn(auditActionTypesCreate, null);
+
+		AuditActionType[] auditActionTypesDelete = {  AuditActionType.DELETE };
+		final Page<AuditRecord> auditRecordsDelete = auditRecordRepository.findByAuditActionIn(auditActionTypesDelete, null);
+
+		assertEquals(1, auditRecordsCreate.getContent().size());
+		assertEquals(1, auditRecordsDelete.getContent().size());
+		final AuditRecord auditRecord = auditRecordsDelete.getContent().get(0);
+
+		assertEquals(AuditOperationType.SCHEDULE, auditRecord.getAuditOperation());
+		assertEquals(AuditActionType.DELETE, auditRecord.getAuditAction());
+		assertEquals("mySchedule", auditRecord.getCorrelationId());
+		assertEquals("testDefinition", auditRecord.getAuditData());
 	}
 
 	private void createSampleSchedule(String scheduleName) {
