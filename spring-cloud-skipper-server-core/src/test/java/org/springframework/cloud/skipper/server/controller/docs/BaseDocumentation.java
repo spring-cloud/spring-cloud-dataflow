@@ -18,6 +18,7 @@ package org.springframework.cloud.skipper.server.controller.docs;
 
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -25,11 +26,14 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Before;
 import org.junit.runner.RunWith;
+import org.yaml.snakeyaml.DumperOptions;
+import org.yaml.snakeyaml.Yaml;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.restdocs.AutoConfigureRestDocs;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.cloud.skipper.domain.ConfigValues;
 import org.springframework.cloud.skipper.domain.Info;
 import org.springframework.cloud.skipper.domain.InstallProperties;
 import org.springframework.cloud.skipper.domain.Manifest;
@@ -194,12 +198,27 @@ public abstract class BaseDocumentation {
 		InstallProperties installProperties = new InstallProperties();
 		installProperties.setReleaseName(releaseName);
 		installProperties.setPlatformName("default");
+		installProperties.setConfigValues(getSampleConfigValues());
 		return installProperties;
+	}
+
+	private ConfigValues getSampleConfigValues() {
+		ConfigValues configValues = new ConfigValues();
+		DumperOptions dumperOptions = new DumperOptions();
+		dumperOptions.setDefaultFlowStyle(DumperOptions.FlowStyle.BLOCK);
+		dumperOptions.setPrettyFlow(true);
+		Yaml yaml = new Yaml(dumperOptions);
+		Map<String, String> configMap = new HashMap<>();
+		configMap.put("config1", "value1");
+		configMap.put("config2", "value2");
+		configValues.setRaw(yaml.dump(configMap));
+		return configValues;
 	}
 
 	protected UpgradeProperties createUpdateProperties(String releaseName) {
 		UpgradeProperties upgradeProperties = new UpgradeProperties();
 		upgradeProperties.setReleaseName(releaseName);
+		upgradeProperties.setConfigValues(getSampleConfigValues());
 		return upgradeProperties;
 	}
 
@@ -211,6 +230,8 @@ public abstract class BaseDocumentation {
 		Release release = new Release();
 		release.setName(name);
 		release.setVersion(1);
+		release.setPlatformName("default");
+		release.setConfigValues(getSampleConfigValues());
 		return updateReleaseStatus(updateReleaseManifest(release), statusCode);
 	}
 
