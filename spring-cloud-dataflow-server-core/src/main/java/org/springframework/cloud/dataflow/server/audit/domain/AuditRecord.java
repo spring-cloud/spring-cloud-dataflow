@@ -16,8 +16,6 @@
 
 package org.springframework.cloud.dataflow.server.audit.domain;
 
-import java.net.InetAddress;
-import java.net.UnknownHostException;
 import java.time.Instant;
 
 import javax.persistence.Column;
@@ -28,9 +26,6 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Lob;
-import javax.persistence.PrePersist;
-import javax.persistence.PreRemove;
-import javax.persistence.PreUpdate;
 import javax.persistence.Table;
 import javax.validation.constraints.NotNull;
 
@@ -50,8 +45,6 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 @EntityListeners(AuditingEntityListener.class)
 public class AuditRecord {
 
-	public static final String UNKNOW_SERVER_HOST = "unknown";
-
 	@Id
 	@GeneratedValue(strategy = GenerationType.AUTO)
 	private Long id;
@@ -59,9 +52,6 @@ public class AuditRecord {
 	@Column(name = "created_by")
 	@CreatedBy
 	private String createdBy;
-
-	@Column(name = "server_host")
-	private String serverHost;
 
 	@Column(name = "correlation_id")
 	private String correlationId;
@@ -118,10 +108,6 @@ public class AuditRecord {
 		this.auditOperation = auditOperation;
 	}
 
-	public String getServerHost() {
-		return serverHost;
-	}
-
 	public String getCorrelationId() {
 		return correlationId;
 	}
@@ -144,20 +130,5 @@ public class AuditRecord {
 
 	public void setCreatedOn(Instant createdOn) {
 		this.createdOn = createdOn;
-	}
-
-	/**
-	 * Automatically populate the server host for auditing purposes.
-	 */
-	@PrePersist
-	@PreUpdate
-	@PreRemove
-	public void populateServerHost() {
-		try {
-			this.serverHost = InetAddress.getLocalHost().getHostName();
-		}
-		catch (UnknownHostException e) {
-			this.serverHost = UNKNOW_SERVER_HOST;
-		}
 	}
 }
