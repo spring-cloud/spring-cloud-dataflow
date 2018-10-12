@@ -49,6 +49,10 @@ public class AuditServiceUtils {
 		return this.argumentSanitizer.sanitizeStream(streamDefinition);
 	}
 
+	public Map<String, String> sanitizeProperties(Map<String, String> properties) {
+		return this.argumentSanitizer.sanitizeProperties(properties);
+	}
+
 	public Map<String, Object> convertStreamDefinitionToAuditData(
 			StreamDefinition streamDefinition,
 			Map<String, String> deploymentProperties) {

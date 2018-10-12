@@ -38,7 +38,6 @@ import org.springframework.cloud.dataflow.rest.util.DeploymentPropertiesUtils;
 import org.springframework.cloud.dataflow.server.audit.domain.AuditActionType;
 import org.springframework.cloud.dataflow.server.audit.domain.AuditOperationType;
 import org.springframework.cloud.dataflow.server.audit.service.AuditRecordService;
-import org.springframework.cloud.dataflow.server.controller.support.ArgumentSanitizer;
 import org.springframework.cloud.dataflow.server.repository.NoSuchStreamDefinitionException;
 import org.springframework.cloud.dataflow.server.repository.StreamDefinitionRepository;
 import org.springframework.cloud.dataflow.server.service.SkipperStreamService;
@@ -72,8 +71,6 @@ public class DefaultSkipperStreamService extends AbstractStreamService implement
 
 	private static Log logger = LogFactory.getLog(DefaultSkipperStreamService.class);
 
-	private final ArgumentSanitizer argumentSanitizer;
-
 	/**
 	 * The repository this controller will use for stream CRUD operations.
 	 */
@@ -91,7 +88,6 @@ public class DefaultSkipperStreamService extends AbstractStreamService implement
 		Assert.notNull(appDeploymentRequestCreator, "AppDeploymentRequestCreator must not be null");
 		this.skipperStreamDeployer = skipperStreamDeployer;
 		this.appDeploymentRequestCreator = appDeploymentRequestCreator;
-		this.argumentSanitizer = new ArgumentSanitizer();
 	}
 
 	/**
@@ -210,7 +206,7 @@ public class DefaultSkipperStreamService extends AbstractStreamService implement
 			updateStreamDefinitionFromReleaseManifest(streamName, release.getManifest().getData());
 
 			final String sanatizedUpdateYaml = convertPropertiesToSkipperYaml(streamDefinition,
-					this.argumentSanitizer.sanitizeProperties(updateProperties));
+					this.auditServiceUtils.sanitizeProperties(updateProperties));
 
 			final Map<String, Object> auditedData = new HashMap<>(3);
 			auditedData.put("releaseName", releaseName);

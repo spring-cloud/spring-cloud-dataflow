@@ -150,9 +150,6 @@ public class DefaultSchedulerService implements SchedulerService {
 		this.auditRecordService.populateAndSaveAuditRecordUsingMapData(AuditOperationType.SCHEDULE, AuditActionType.CREATE,
 			scheduleRequest.getScheduleName(), this.auditServiceUtils.convertScheduleRequestToAuditData(scheduleRequest));
 	}
-	public static final String STREAM_DEFINITION_DSL_TEXT = "streamDefinitionDslText";
-
-	public static final String DEPLOYMENT_PROPERTIES = "deploymentProperties";
 
 	@Override
 	public void unschedule(String scheduleName) {
