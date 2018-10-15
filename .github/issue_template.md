@@ -12,7 +12,7 @@ A clear and concise description of what the bug is. Additionally, it'd help if y
 There's an [API](http://docs.spring.io/spring-cloud-dataflow/docs/current/reference/htmlsingle/#api-guide-resources-server-meta-retrieving) to gather SCDF's system information including the dependent projects and the associated versions. Alternatively, you can capture this information from the Dashboard's [About](http://docs.spring.io/spring-cloud-dataflow/docs/current/reference/htmlsingle/#dashboard) tab, so make sure to include the copied JSON in the bug report.
 
 **Custom Apps**
-If your Stream or Task data pipeline include custom apps and there's a problem associated with it, it'd be good to review the sample App and the release versions in use. Make sure to include the register, create, and deploy/launch DSL commands for completeness.
+If your Stream or Task data pipeline includes custom apps and there's a problem associated with it, it'd be good to review the sample-app (add a link to GitHub repo) and the release versions in use. Make sure to also share the register, create, and deploy/launch DSL commands for completeness.
 
 **To Reproduce**
 Include the steps to reproduce the behavior. Better yet, if you have a reproducible sample, please attach it in the issue. It'd help us to relate to the problem more easily. 
