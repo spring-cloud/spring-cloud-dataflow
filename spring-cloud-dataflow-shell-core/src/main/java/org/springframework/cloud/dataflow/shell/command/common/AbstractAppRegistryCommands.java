@@ -234,6 +234,9 @@ public abstract class AbstractAppRegistryCommands implements CommandMarker {
 	/**
 	 * Escapes some special values so that they don't disturb console rendering and are easier
 	 * to read.
+	 *
+	 * @param o the configurationMetadataProperty to pretty print
+	 * @return the pretty printed value
 	 */
 	protected String prettyPrintDefaultValue(ConfigurationMetadataProperty o) {
 		if (o.getDefaultValue() == null) {

@@ -30,11 +30,10 @@ import org.slf4j.LoggerFactory;
 
 import org.springframework.cloud.dataflow.core.ApplicationType;
 import org.springframework.cloud.dataflow.registry.domain.AppRegistration;
+import org.springframework.cloud.dataflow.registry.support.AppResourceCommon;
 import org.springframework.cloud.dataflow.registry.support.NoSuchAppRegistrationException;
-import org.springframework.cloud.deployer.resource.maven.MavenProperties;
 import org.springframework.cloud.deployer.resource.registry.UriRegistry;
 import org.springframework.core.io.Resource;
-import org.springframework.core.io.ResourceLoader;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
@@ -44,10 +43,7 @@ import org.springframework.util.Assert;
 /**
  * Convenience wrapper for the {@link UriRegistry} that operates on higher level
  * {@link AppRegistration} objects and supports on-demand loading of {@link Resource}s.
- * <p>
- * <p>
  * Stores AppRegistration with up to two keys:
- * </p>
  * <ul>
  * <li>{@literal <type>.<name>}: URI for the actual app</li>
  * <li>{@literal <type>.<name>.metadata}: Optional URI for the app metadata</li>
@@ -76,16 +72,9 @@ public class AppRegistry extends AbstractAppRegistryCommon implements AppRegistr
 		}
 	};
 
-	public AppRegistry(UriRegistry uriRegistry, ResourceLoader resourceLoader) {
-		super(resourceLoader);
+	public AppRegistry(UriRegistry uriRegistry, AppResourceCommon appResourceService) {
+		super(appResourceService);
 		Assert.notNull(uriRegistry, "'uriRegistry' must not be null");
-		this.uriRegistry = uriRegistry;
-	}
-
-	public AppRegistry(UriRegistry uriRegistry, ResourceLoader resourceLoader, MavenProperties mavenProperties) {
-		super(resourceLoader, mavenProperties);
-		Assert.notNull(uriRegistry, "'uriRegistry' must not be null");
-		Assert.notNull(resourceLoader, "'resourceLoader' must not be null");
 		this.uriRegistry = uriRegistry;
 	}
 

@@ -16,6 +16,9 @@
 
 package org.springframework.cloud.dataflow.server.support;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -47,6 +50,24 @@ public class ArgumentSanitizerTest {
 		}
 	}
 
+	@Test
+	public void testSanitizeArguments() {
+		final List<String> arguments = new ArrayList<>();
+
+		for (String key : keys) {
+			arguments.add("--" + key + "=foo");
+		}
+
+		final List<String> sanitizedArguments = sanitizer.sanitizeArguments(arguments);
+
+		Assert.assertEquals(keys.length, sanitizedArguments.size());
+
+		int order = 0;
+		for(String sanitizedString : sanitizedArguments) {
+			Assert.assertEquals("--" + keys[order] + "=******", sanitizedString);
+			order++;
+		}
+	}
 
 	@Test
 	public void testMultipartProperty() {
@@ -59,6 +80,12 @@ public class ArgumentSanitizerTest {
 	public void testHierarchicalPropertyNames() {
 		Assert.assertEquals("time --password='******' | log",
 				sanitizer.sanitizeStream(new StreamDefinition("stream", "time --password=bar | log")));
+	}
+
+	@Test
+	public void testStreamPropertyOrder() {
+		Assert.assertEquals("time --some.password='******' --another-secret='******' | log",
+				sanitizer.sanitizeStream(new StreamDefinition("stream", "time --some.password=foobar --another-secret=kenny | log")));
 	}
 
 	@Test

@@ -1,5 +1,5 @@
 /*
- * Copyright 2015-2016 the original author or authors.
+ * Copyright 2015-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -68,7 +68,7 @@ public class StreamParserTests {
 		checkForParseError("aaa | bbb, ccc", DSLMessage.DONT_MIX_PIPE_AND_COMMA, 9);
 		checkForParseError("aaa , bbb| ccc", DSLMessage.DONT_MIX_PIPE_AND_COMMA, 9);
 		sn = parse("aaa | filter --expression='#jsonPath(payload,''$.lang'')==''en'''");
-		System.out.println(sn.getAppNodes().get(1).getArguments()[0]);
+		assertEquals("--expression=#jsonPath(payload,'$.lang')=='en'",sn.getAppNodes().get(1).getArguments()[0].toString());
 	}
 
 	@Test
@@ -378,12 +378,34 @@ public class StreamParserTests {
 	public void sourceDestination() {
 		StreamNode sn = parse(":foobar > file");
 		assertEquals("[(foobar:1>7)>(AppNode:file:10>14)]", sn.stringify(true));
+    }
+
+    @Test
+	public void sourceDestinationsWithExtraWildcards() {
+		StreamNode sn = parse(":a/ > file");
+		assertEquals("[(a/:1>3)>(AppNode:file:6>10)]", sn.stringify(true));
+		sn = parse(":a/*# > file");
+		assertEquals("[(a/*#:1>5)>(AppNode:file:8>12)]", sn.stringify(true));
+		sn = parse(":foo.* > file");
+		assertEquals("[(foo.*:1>6)>(AppNode:file:9>13)]", sn.stringify(true));
+		sn = parse(":*foo > file");
+		assertEquals("[(*foo:1>5)>(AppNode:file:8>12)]", sn.stringify(true));
 	}
 
 	@Test
 	public void sinkDestination() {
 		StreamNode sn = parse("http > :foo");
 		assertEquals("[(AppNode:http:0>4)>(foo:8>11)]", sn.stringify(true));
+    }
+
+    @Test
+    public void sinkDestinationsWithExtraWildcards() {
+		StreamNode sn = parse("http > :foo/");
+		assertEquals("[(AppNode:http:0>4)>(foo/:8>12)]", sn.stringify(true));
+		sn = parse("http > :foo/*#");
+		assertEquals("[(AppNode:http:0>4)>(foo/*#:8>14)]", sn.stringify(true));
+		sn = parse("http > :foo.*");
+		assertEquals("[(AppNode:http:0>4)>(foo.*:8>13)]", sn.stringify(true));
 	}
 
 	@Test
@@ -451,7 +473,10 @@ public class StreamParserTests {
 		checkForParseError("foo > bar", DSLMessage.EXPECTED_DESTINATION_PREFIX, 6, "bar");
 		checkForParseError(":foo >", DSLMessage.OOD, 6);
 		checkForParseError(":foo > --2323", DSLMessage.EXPECTED_APPNAME, 7, "--");
-		checkForParseError(":foo > *", DSLMessage.UNEXPECTED_DATA, 7, "*");
+		checkForParseError(":foo > (", DSLMessage.UNEXPECTED_DATA, 7, "(");
+		checkForParseError(":foo > *", DSLMessage.EXPECTED_APPNAME, 7, "*");
+		checkForParseError("::foo > *", DSLMessage.UNEXPECTED_DATA_IN_DESTINATION_NAME, 1, ":");
+		checkForParseError(":foo > :", DSLMessage.OOD, 7);
 	}
 
 	@Test
@@ -461,7 +486,8 @@ public class StreamParserTests {
 
 	@Test
 	public void errorCases09() {
-		checkForParseError("* = http | file", DSLMessage.UNEXPECTED_DATA, 0, "*");
+		checkForParseError("( = http | file", DSLMessage.UNEXPECTED_DATA, 0, "(");
+		checkForParseError("* = http | file", DSLMessage.ILLEGAL_STREAM_NAME, 0, "*");
 		checkForParseError(": = http | file", DSLMessage.ILLEGAL_STREAM_NAME, 0, ":");
 	}
 
@@ -535,8 +561,9 @@ public class StreamParserTests {
 
 	@Test
 	public void testParseUnboundStreamApp() {
-		StreamNode ast = parse("foo");
-		System.out.println(ast);
+		StreamNode sn = parse("foo");
+		List<AppNode> appNodes = sn.getAppNodes();
+		assertTrue(appNodes.get(0).isUnboundStreamApp());
 	}
 	
 	@Test

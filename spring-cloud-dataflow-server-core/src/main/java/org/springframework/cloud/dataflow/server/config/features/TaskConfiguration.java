@@ -35,6 +35,7 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.cloud.dataflow.configuration.metadata.ApplicationConfigurationMetadataResolver;
 import org.springframework.cloud.dataflow.registry.AppRegistryCommon;
 import org.springframework.cloud.dataflow.server.DockerValidatorProperties;
+import org.springframework.cloud.dataflow.server.audit.service.AuditRecordService;
 import org.springframework.cloud.dataflow.server.batch.JobService;
 import org.springframework.cloud.dataflow.server.batch.SimpleJobServiceFactoryBean;
 import org.springframework.cloud.dataflow.server.config.apps.CommonApplicationProperties;
@@ -44,10 +45,10 @@ import org.springframework.cloud.dataflow.server.repository.RdbmsTaskDefinitionR
 import org.springframework.cloud.dataflow.server.repository.TaskDefinitionRepository;
 import org.springframework.cloud.dataflow.server.service.TaskJobService;
 import org.springframework.cloud.dataflow.server.service.TaskService;
+import org.springframework.cloud.dataflow.server.service.TaskValidationService;
 import org.springframework.cloud.dataflow.server.service.impl.DefaultTaskJobService;
 import org.springframework.cloud.dataflow.server.service.impl.DefaultTaskService;
 import org.springframework.cloud.dataflow.server.service.impl.TaskConfigurationProperties;
-import org.springframework.cloud.deployer.resource.support.DelegatingResourceLoader;
 import org.springframework.cloud.deployer.spi.task.TaskLauncher;
 import org.springframework.cloud.task.repository.TaskExplorer;
 import org.springframework.cloud.task.repository.TaskRepository;
@@ -94,14 +95,14 @@ public class TaskConfiguration {
 	@Bean
 	@ConditionalOnBean(TaskDefinitionRepository.class)
 	public TaskService taskService(TaskDefinitionRepository repository, TaskExplorer taskExplorer,
-			TaskRepository taskExecutionRepository, AppRegistryCommon registry, DelegatingResourceLoader resourceLoader,
-			TaskLauncher taskLauncher, ApplicationConfigurationMetadataResolver metadataResolver,
+			TaskRepository taskExecutionRepository, AppRegistryCommon registry, TaskLauncher taskLauncher,
+			ApplicationConfigurationMetadataResolver metadataResolver,
 			TaskConfigurationProperties taskConfigurationProperties, DeploymentIdRepository deploymentIdRepository,
-			CommonApplicationProperties commonApplicationProperties,
-			DockerValidatorProperties dockerValidatorProperties) {
+			AuditRecordService auditRecordService, CommonApplicationProperties commonApplicationProperties,
+			TaskValidationService taskValidationService) {
 		return new DefaultTaskService(dataSourceProperties, repository, taskExplorer, taskExecutionRepository, registry,
-				resourceLoader, taskLauncher, metadataResolver, taskConfigurationProperties, deploymentIdRepository,
-				this.dataflowServerUri, commonApplicationProperties, dockerValidatorProperties);
+				taskLauncher, metadataResolver, taskConfigurationProperties, deploymentIdRepository, auditRecordService,
+				dataflowServerUri, commonApplicationProperties, taskValidationService);
 	}
 
 	@Bean

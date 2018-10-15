@@ -137,6 +137,7 @@ public class StreamDefinitionController {
 	 * Return a list of related stream definition resources based on the given stream name.
 	 * Related streams include the main stream and the tap stream(s) on the main stream.
 	 *
+	 * @param pageable Pagination information
 	 * @param name the name of an existing stream definition (required)
 	 * @param nested if should recursively findByNameLike for related stream definitions
 	 * @param assembler resource assembler for stream definition

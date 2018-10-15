@@ -13,34 +13,20 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.springframework.cloud.dataflow.rest.resource;
+package org.springframework.cloud.dataflow.server.service;
 
 /**
- * Represents the status of an {@link TaskExecutionResource}.
+ * Validate Streams
  *
- * @author Gunnar Hillert
- *
+ * @author Mark Pollack
  */
-public enum TaskExecutionStatus {
+public interface StreamValidationService extends ValidationService {
 
 	/**
-	 * The task execution did not complete successfully.
+	 * Validate the stream given the registered name
+	 * @param name then name of the stream
+	 * @return the validation status
 	 */
-	ERROR,
-
-	/**
-	 * The task execution is still executing.
-	 */
-	RUNNING,
-
-	/**
-	 * The task execution completed successfully.
-	 */
-	COMPLETE,
-
-	/**
-	 * The task execution was never executed.
-	 */
-	UNKNOWN,
+	ValidationStatus validateStream(String name);
 
 }

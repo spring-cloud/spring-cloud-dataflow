@@ -41,11 +41,6 @@ public class AuditRecordResource extends ResourceSupport {
 	private String createdBy;
 
 	/**
-	 * The server host of the Spring Cloud Dataflow Server.
-	 */
-	private String serverHost;
-
-	/**
 	 * An identifier that identifies (in combination with the {@link #auditOperation}) the audited operation.
 	 */
 	private String correlationId;
@@ -82,14 +77,6 @@ public class AuditRecordResource extends ResourceSupport {
 
 	public void setCreatedBy(String createdBy) {
 		this.createdBy = createdBy;
-	}
-
-	public String getServerHost() {
-		return serverHost;
-	}
-
-	public void setServerHost(String serverHost) {
-		this.serverHost = serverHost;
 	}
 
 	public String getCorrelationId() {

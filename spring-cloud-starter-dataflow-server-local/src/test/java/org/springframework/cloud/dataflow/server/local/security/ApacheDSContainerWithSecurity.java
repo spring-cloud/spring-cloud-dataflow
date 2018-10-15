@@ -63,7 +63,6 @@ import org.springframework.util.Assert;
  * intended for temporary embedded use and will not retain changes across start/stop
  * boundaries. The working directory is deleted on shutdown.
  * <p>
- * <p>
  * If used repeatedly in a single JVM process with the same configuration (for example,
  * when repeatedly loading an application context during testing), it's important that the
  * application context is closed to allow the bean to be disposed of and the server

@@ -45,7 +45,7 @@ public class DeploymentPropertiesBuilder extends AbstractPropertiesBuilder{
 	 * @param label - The application name or label to configure the number of instances
 	 * @param memory - Memory size in Mb, must be greater or equal 128
 	 *
-	 * @return
+	 * @return the instance of this DeploymentPropertiesBuilder
 	 */
 	public DeploymentPropertiesBuilder memory(String label, Integer memory){
 		Assert.notNull(memory, "Memory value can't be null");
@@ -61,7 +61,7 @@ public class DeploymentPropertiesBuilder extends AbstractPropertiesBuilder{
 	 * @param label - The application name or label to configure the number of instances
 	 * @param instances - Number of instances, must be greater than zero
 	 *
-	 * @return
+	 * @return the instance of this DeploymentPropertiesBuilder
 	 */
 	public DeploymentPropertiesBuilder count(String label, Integer instances) {
 		Assert.notNull(instances, "Number of instances can't be null");

@@ -56,7 +56,7 @@ public interface AppRegistryCommon {
 	/**
 	 * @param name application name
 	 * @param type application type
-	 * @param type application version
+	 * @param version application version
 	 * @return the application with those name and type and default version
 	 */
 	default AppRegistration find(String name, ApplicationType type, String version) {
@@ -76,7 +76,7 @@ public interface AppRegistryCommon {
 	/**
 	 * Converts application's URI into Spring resource object. Supports File:, Http:, Maven:
 	 * and Docker: schemas
-	 * @param appRegistration
+	 * @param appRegistration the application registration
 	 * @return Returns {@link Resource} instance that corresponds to application's URI
 	 */
 	Resource getAppResource(AppRegistration appRegistration);
@@ -84,7 +84,7 @@ public interface AppRegistryCommon {
 	/**
 	 * Converts application's metadata URI into Spring resource object. Supports File:, Http:,
 	 * Maven: and Docker: schemas
-	 * @param appRegistration
+	 * @param appRegistration the application registration
 	 * @return Returns {@link Resource} instance that corresponds to application's metdata URI
 	 */
 	Resource getAppMetadataResource(AppRegistration appRegistration);
@@ -95,4 +95,24 @@ public interface AppRegistryCommon {
 	 * @return the saved appRegistration
 	 */
 	AppRegistration save(AppRegistration app);
+
+	/**
+	 * @param resource to retrieve the version for
+	 * @return Returns the version for the provided resource
+	 */
+	String getResourceVersion(Resource resource);
+
+	/**
+	 * Returns a string representing the resource with version subtracted
+	 * @param resource to be represented as string.
+	 * @return String representation of the resource.
+	 */
+	String getResourceWithoutVersion(Resource resource);
+
+	/**
+	 * Returns the version for the given resource URI string.
+	 * @param uriString String representation of the resource URI
+	 * @return the resource version
+	 */
+	String getResourceVersion(String uriString);
 }

@@ -6,6 +6,5 @@
         correlation_id varchar(255),
         created_by varchar(255),
         created_On datetime,
-        server_host varchar(255),
         primary key (id)
     );

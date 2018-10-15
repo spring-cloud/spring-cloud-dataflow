@@ -86,21 +86,22 @@ public class ClassicAppRegistryCommands extends AbstractAppRegistryCommands impl
 
 	@CliCommand(value = APPLICATION_INFO, help = "Get information about an application")
 	public List<Object> info(
-			@CliOption(mandatory = false, key = { "", "id" },
+			@CliOption(key = { "", "id" },
 					help = "id of the application to query in the form of 'type:name'") QualifiedApplicationName application,
-			@CliOption(mandatory = false, key = { "",
-					"name" }, help = "name of the application to unregister") String applicationName,
-			@CliOption(mandatory = false, key = {
-					"type" }, help = "type of the application to unregister") ApplicationType applicationType) {
+			@CliOption(key = { "",
+					"name" }, help = "name of the application to query") String applicationName,
+			@CliOption(key = {
+					"type" }, help = "type of the application to query") ApplicationType applicationType,
+			@CliOption(key = { "exhaustive" }, help = "return all metadata, including common Spring Boot properties",
+					specifiedDefaultValue = "true", unspecifiedDefaultValue = "false") boolean exhaustive) {
 		Assert.isTrue(assertAppInfoOptions(application, applicationName, applicationType),
 				"The options [<type>:<name>] and  [--name && --type] are mutually exclusive and "
 						+ "one of these should be specified to uniquely identify the application");
 		String name = (application != null) ? application.name : applicationName;
-		ApplicationType type = (application != null) ? application.type : applicationType;;
+		ApplicationType type = (application != null) ? application.type : applicationType;
 		List<Object> result = new ArrayList<>();
 		try {
-			DetailedAppRegistrationResource info =
-					appRegistryOperations().info(name, type);
+			DetailedAppRegistrationResource info = appRegistryOperations().info(name, type, exhaustive);
 			if (info != null) {
 				List<ConfigurationMetadataProperty> options = info.getOptions();
 				result.add(String.format("Information about %s application '%s':", type, name));

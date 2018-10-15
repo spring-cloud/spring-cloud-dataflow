@@ -107,6 +107,7 @@ public interface TaskOperations {
 	 * Return the validation status for the tasks in an definition.
 	 * @param taskDefinitionName The name of the task definition to be validated.
 	 * @return {@link TaskAppStatusResource} containing the task app statuses.
+	 * @throws OperationNotSupportedException if the server does not support task validation
 	 */
 	TaskAppStatusResource validateTaskDefinition(String taskDefinitionName) throws OperationNotSupportedException;
 }

@@ -191,7 +191,7 @@ public class TaskExecutionResource extends ResourceSupport {
 	 * null, the {@link TaskExecution} is considered to be still running:
 	 * {@link TaskExecutionStatus#RUNNING}. If the {@link #endTime} is defined and the
 	 * {@link #exitCode} is non-zero, an status of {@link TaskExecutionStatus#ERROR} is assumed,
-	 * if {@link #exitCode} is zero, {@link TaskExecutionStatus#SUCCESS} is returned.
+	 * if {@link #exitCode} is zero, {@link TaskExecutionStatus#COMPLETE} is returned.
 	 *
 	 * @return TaskExecutionStatus, never null
 	 */

@@ -39,6 +39,7 @@ import org.springframework.cloud.dataflow.server.EnableDataFlowServer;
 import org.springframework.cloud.dataflow.server.config.features.SchedulerConfiguration;
 import org.springframework.cloud.dataflow.server.config.web.WebConfiguration;
 import org.springframework.cloud.dataflow.server.repository.StreamDeploymentRepository;
+import org.springframework.cloud.dataflow.server.service.StreamValidationService;
 import org.springframework.cloud.dataflow.server.service.TaskService;
 import org.springframework.cloud.dataflow.server.service.impl.DefaultTaskService;
 import org.springframework.cloud.dataflow.server.support.TestUtils;
@@ -202,6 +203,11 @@ public class DataFlowServerConfigurationTests {
 		@Bean
 		public Scheduler scheduler() {
 			return mock(Scheduler.class);
+		}
+
+		@Bean
+		public StreamValidationService streamValidationService() {
+			return mock(StreamValidationService.class);
 		}
 	}
 }

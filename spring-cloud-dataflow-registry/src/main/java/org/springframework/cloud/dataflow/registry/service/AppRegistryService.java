@@ -54,6 +54,7 @@ public interface AppRegistryService extends AppRegistryCommon {
 	 * @param version Version of the AppRegistration to save
 	 * @param uri Resource uri of the AppRegistration to save
 	 * @param metadataUri metadata of the AppRegistration to save
+	 * @return the saved AppRegistration
 	 */
 	AppRegistration save(String name, ApplicationType type, String version, URI uri, URI metadataUri);
 
@@ -72,16 +73,21 @@ public interface AppRegistryService extends AppRegistryCommon {
 	 * @param name application name
 	 * @param type application type
 	 * @param version application version.
+	 * @return true if the AppRegistration exists, false otherwise.
 	 */
 	boolean appExist(String name, ApplicationType type, String version);
 
 	/**
+	 * @param pageable Pagination information
 	 * @return returns all {@link AppRegistration}'s including multiple version for the same
 	 * application. Uses the pagination.
 	 */
 	Page<AppRegistration> findAll(Pageable pageable);
 
 	/**
+	 * @param type appliation type
+	 * @param name application name
+	 * @param pageable Pagination information
 	 * @return returns all {@link AppRegistration} versions for given name and type. Uses the pagination.
 	 */
 	Page<AppRegistration> findAllByTypeAndNameIsLike(ApplicationType type, String name, Pageable pageable);

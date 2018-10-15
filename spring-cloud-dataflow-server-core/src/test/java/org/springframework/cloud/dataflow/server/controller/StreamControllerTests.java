@@ -34,6 +34,10 @@ import org.springframework.cloud.dataflow.core.BindingPropertyKeys;
 import org.springframework.cloud.dataflow.core.StreamAppDefinition;
 import org.springframework.cloud.dataflow.core.StreamDefinition;
 import org.springframework.cloud.dataflow.core.StreamPropertyKeys;
+import org.springframework.cloud.dataflow.server.audit.domain.AuditActionType;
+import org.springframework.cloud.dataflow.server.audit.domain.AuditOperationType;
+import org.springframework.cloud.dataflow.server.audit.domain.AuditRecord;
+import org.springframework.cloud.dataflow.server.audit.repository.AuditRecordRepository;
 import org.springframework.cloud.dataflow.server.config.apps.CommonApplicationProperties;
 import org.springframework.cloud.dataflow.server.configuration.TestDependencies;
 import org.springframework.cloud.dataflow.server.repository.DeploymentIdRepository;
@@ -92,6 +96,9 @@ public class StreamControllerTests {
 	private StreamDefinitionRepository repository;
 
 	@Autowired
+	private AuditRecordRepository auditRecordRepository;
+
+	@Autowired
 	private DeploymentIdRepository deploymentIdRepository;
 
 	private MockMvc mockMvc;
@@ -141,6 +148,26 @@ public class StreamControllerTests {
 		assertEquals(2, logDefinition.getProperties().size());
 		assertEquals("myStream.time", logDefinition.getProperties().get(BindingPropertyKeys.INPUT_DESTINATION));
 		assertEquals("myStream", logDefinition.getProperties().get(BindingPropertyKeys.INPUT_GROUP));
+	}
+
+	@Test
+	public void testSaveWithSensitiveProperties() throws Exception {
+		assertEquals(0, repository.count());
+		mockMvc.perform(post("/streams/definitions/").param("name", "myStream2").param("definition", "time --some.password=foobar --another-secret=kenny | log")
+				.accept(MediaType.APPLICATION_JSON)).andDo(print()).andExpect(status().isCreated());
+		assertEquals(1, repository.count());
+		StreamDefinition myStream = repository.findOne("myStream2");
+		final List<AuditRecord> auditRecords = auditRecordRepository.findAll();
+
+		assertEquals(1, auditRecords.size());
+
+		final AuditRecord auditRecord = auditRecords.get(0);
+
+		assertEquals("time --some.password=foobar --another-secret=kenny | log", myStream.getDslText());
+		assertEquals("time --some.password='******' --another-secret='******' | log", auditRecord.getAuditData());
+		assertEquals("myStream2", auditRecord.getCorrelationId());
+		assertEquals(AuditOperationType.STREAM, auditRecord.getAuditOperation());
+		assertEquals(AuditActionType.CREATE, auditRecord.getAuditAction());
 	}
 
 	@Test
@@ -549,6 +576,55 @@ public class StreamControllerTests {
 	}
 
 	@Test
+	public void testDestroyWithSensitiveProperties() throws Exception {
+		assertEquals(0, repository.count());
+
+		StreamDefinition streamDefinition1 = new StreamDefinition("myStream1234", "time --some.password=foobar --another-secret=kenny | log");
+		repository.save(streamDefinition1);
+		for (StreamAppDefinition appDefinition : streamDefinition1.getAppDefinitions()) {
+			deploymentIdRepository.save(DeploymentKey.forStreamAppDefinition(appDefinition),
+					streamDefinition1.getName() + "." + appDefinition.getName());
+		}
+		assertEquals(1, repository.count());
+		AppStatus status = mock(AppStatus.class);
+		when(status.getState()).thenReturn(DeploymentState.unknown);
+		when(appDeployer.status("myStream1234.time")).thenReturn(status);
+		when(appDeployer.status("myStream1234.log")).thenReturn(status);
+		mockMvc.perform(delete("/streams/definitions/myStream1234").accept(MediaType.APPLICATION_JSON)).andDo(print())
+				.andExpect(status().isOk());
+		assertEquals(0, repository.count());
+		assertEquals("time --some.password=foobar --another-secret=kenny | log", streamDefinition1.getDslText());
+
+		final List<AuditRecord> auditRecords = auditRecordRepository.findAll();
+
+		assertEquals(2, auditRecords.size());
+		final AuditRecord auditRecord1 = auditRecords.get(0);
+		final AuditRecord auditRecord2 = auditRecords.get(1);
+
+		assertEquals("time --some.password='******' --another-secret='******' | log", auditRecord1.getAuditData());
+		assertEquals("time --some.password='******' --another-secret='******' | log", auditRecord2.getAuditData());
+		assertEquals("myStream1234", auditRecord1.getCorrelationId());
+		assertEquals("myStream1234", auditRecord2.getCorrelationId());
+
+		assertEquals(AuditOperationType.STREAM, auditRecord1.getAuditOperation());
+		assertEquals(AuditOperationType.STREAM, auditRecord2.getAuditOperation());
+
+		if (AuditActionType.UNDEPLOY.equals(auditRecord1.getAuditAction())) {
+			assertEquals(AuditActionType.UNDEPLOY, auditRecord1.getAuditAction());
+		}
+		else {
+			assertEquals(AuditActionType.DELETE, auditRecord1.getAuditAction());
+		}
+
+		if (AuditActionType.UNDEPLOY.equals(auditRecord2.getAuditAction())) {
+			assertEquals(AuditActionType.UNDEPLOY, auditRecord2.getAuditAction());
+		}
+		else {
+			assertEquals(AuditActionType.DELETE, auditRecord2.getAuditAction());
+		}
+	}
+
+	@Test
 	public void testDestroySingleStream() throws Exception {
 		StreamDefinition streamDefinition1 = new StreamDefinition("myStream", "time | log");
 		StreamDefinition streamDefinition2 = new StreamDefinition("myStream1", "time | log");
@@ -624,6 +700,33 @@ public class StreamControllerTests {
 		assertThat(logRequest.getDefinition().getName(), is("log"));
 		AppDeploymentRequest timeRequest = requests.get(1);
 		assertThat(timeRequest.getDefinition().getName(), is("time"));
+	}
+
+	@Test
+	public void testDeployWithSensitiveData() throws Exception {
+		repository.save(new StreamDefinition("myStreamDeploy", "time --some.password=foobar --another-secret=kenny | log"));
+		mockMvc.perform(post("/streams/deployments/myStreamDeploy").accept(MediaType.APPLICATION_JSON)).andDo(print())
+				.andExpect(status().isCreated());
+		ArgumentCaptor<AppDeploymentRequest> captor = ArgumentCaptor.forClass(AppDeploymentRequest.class);
+		verify(appDeployer, times(2)).deploy(captor.capture());
+		List<AppDeploymentRequest> requests = captor.getAllValues();
+		assertEquals(2, requests.size());
+		AppDeploymentRequest logRequest = requests.get(0);
+		assertThat(logRequest.getDefinition().getName(), is("log"));
+		AppDeploymentRequest timeRequest = requests.get(1);
+		assertThat(timeRequest.getDefinition().getName(), is("time"));
+
+		final List<AuditRecord> auditRecords = auditRecordRepository.findAll();
+
+		assertEquals(1, auditRecords.size());
+		final AuditRecord auditRecord = auditRecords.get(0);
+
+		assertEquals("{\"streamDefinitionDslText\":\"time --some.password='******' --another-secret='******' | log\",\"deploymentProperties\":{}}", auditRecord.getAuditData());
+
+		assertEquals("myStreamDeploy", auditRecord.getCorrelationId());
+
+		assertEquals(AuditOperationType.STREAM, auditRecord.getAuditOperation());
+		assertEquals(AuditActionType.DEPLOY, auditRecord.getAuditAction());
 	}
 
 	@Test

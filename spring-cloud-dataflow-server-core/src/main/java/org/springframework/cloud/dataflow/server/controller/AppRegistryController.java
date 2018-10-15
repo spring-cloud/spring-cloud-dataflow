@@ -1,5 +1,5 @@
 /*
- * Copyright 2015-2017 the original author or authors.
+ * Copyright 2015-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -71,6 +71,7 @@ import org.springframework.web.bind.annotation.RestController;
  * @author Gary Russell
  * @author Patrick Peralta
  * @author Thomas Risberg
+ * @author Christian Tzolov
  */
 @RestController
 @RequestMapping("/apps")
@@ -101,6 +102,7 @@ public class AppRegistryController implements ResourceLoaderAware {
 	 * passed to do filtering. Search parameter only filters by {@code AppRegistration}
 	 * name field.
 	 *
+	 * @param pageable Pagination information
 	 * @param pagedResourcesAssembler the resource assembler for app registrations
 	 * @param type the application type: source, sink, processor, task
 	 * @param search optional findByNameLike parameter
@@ -154,12 +156,13 @@ public class AppRegistryController implements ResourceLoaderAware {
 	 *
 	 * @param type application type
 	 * @param name application name
+	 * @param exhaustive return all metadata, including common Spring Boot properties
 	 * @return detailed application information
 	 */
 	@RequestMapping(value = "/{type}/{name}", method = RequestMethod.GET)
 	@ResponseStatus(HttpStatus.OK)
 	public DetailedAppRegistrationResource info(@PathVariable("type") ApplicationType type,
-			@PathVariable("name") String name) {
+			@PathVariable("name") String name, @RequestParam(required = false, name = "exhaustive") boolean exhaustive) {
 		AppRegistration registration = appRegistry.find(name, type);
 		if (registration == null) {
 			throw new NoSuchAppRegistrationException(name, type);
@@ -167,7 +170,7 @@ public class AppRegistryController implements ResourceLoaderAware {
 		DetailedAppRegistrationResource result = new DetailedAppRegistrationResource(
 				assembler.toResource(registration));
 		List<ConfigurationMetadataProperty> properties = metadataResolver
-				.listProperties(appRegistry.getAppMetadataResource(registration));
+				.listProperties(appRegistry.getAppMetadataResource(registration), exhaustive);
 		for (ConfigurationMetadataProperty property : properties) {
 			result.addOption(property);
 		}
@@ -220,6 +223,7 @@ public class AppRegistryController implements ResourceLoaderAware {
 	 * Register all applications listed in a properties file or provided as key/value
 	 * pairs.
 	 *
+	 * @param pageable Pagination information
 	 * @param pagedResourcesAssembler the resource asembly for app registrations
 	 * @param uri URI for the properties file
 	 * @param apps key/value pairs representing applications, separated by newlines

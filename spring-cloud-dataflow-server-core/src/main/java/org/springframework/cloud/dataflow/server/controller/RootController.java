@@ -85,11 +85,9 @@ public class RootController {
 	 * Flow server.
 	 *
 	 * @return {@code ResourceSupport} object containing the Data Flow server's resources
-	 * @throws SecurityException
-	 * @throws NoSuchMethodException
 	 */
 	@RequestMapping("/")
-	public RootResource info() throws NoSuchMethodException, SecurityException {
+	public RootResource info() {
 		RootResource root = new RootResource(Version.REVISION);
 
 		root.add(ControllerLinkBuilder.linkTo(UiController.class).withRel("dashboard"));

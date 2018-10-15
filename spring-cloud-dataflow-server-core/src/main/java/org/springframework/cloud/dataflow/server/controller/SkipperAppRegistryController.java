@@ -43,7 +43,6 @@ import org.springframework.cloud.dataflow.registry.domain.AppRegistration;
 import org.springframework.cloud.dataflow.registry.service.AppRegistryService;
 import org.springframework.cloud.dataflow.registry.service.DefaultAppRegistryService;
 import org.springframework.cloud.dataflow.registry.support.NoSuchAppRegistrationException;
-import org.springframework.cloud.dataflow.registry.support.ResourceUtils;
 import org.springframework.cloud.dataflow.rest.SkipperStream;
 import org.springframework.cloud.dataflow.rest.resource.AppRegistrationResource;
 import org.springframework.cloud.dataflow.rest.resource.DetailedAppRegistrationResource;
@@ -121,6 +120,7 @@ public class SkipperAppRegistryController {
 	 * List app registrations. Optional type and findByNameLike parameters can be passed to do
 	 * filtering. Search parameter only filters by {@code AppRegistration} name field.
 	 *
+	 * @param pageable Pagination information
 	 * @param pagedResourcesAssembler the resource assembler for app registrations
 	 * @param type the application type: source, sink, processor, task
 	 * @param search optional findByNameLike parameter
@@ -151,26 +151,18 @@ public class SkipperAppRegistryController {
 	@RequestMapping(value = "/{type}/{name}/{version:.+}", method = RequestMethod.GET)
 	@ResponseStatus(HttpStatus.OK)
 	public DetailedAppRegistrationResource info(@PathVariable("type") ApplicationType type,
-			@PathVariable("name") String name, @PathVariable("version") String version) {
-		AppRegistration registration = appRegistryService.find(name, type, version);
-		if (registration == null) {
-			throw new NoSuchAppRegistrationException(name, type, version);
-		}
-		DetailedAppRegistrationResource result = new DetailedAppRegistrationResource(
-				assembler.toResource(registration));
-		List<ConfigurationMetadataProperty> properties = metadataResolver
-				.listProperties(appRegistryService.getAppMetadataResource(registration));
-		for (ConfigurationMetadataProperty property : properties) {
-			result.addOption(property);
-		}
-		return result;
+			@PathVariable("name") String name, @PathVariable("version") String version,
+			@RequestParam(required = false, name = "exhaustive") boolean exhaustive) {
+
+		return getInfo(type, name, version, exhaustive);
 	}
 
 	@Deprecated
 	@RequestMapping(value = "/{type}/{name}", method = RequestMethod.GET)
 	@ResponseStatus(HttpStatus.OK)
-	public DetailedAppRegistrationResource info(@PathVariable("type") ApplicationType type,
-			@PathVariable("name") String name) {
+	public DetailedAppRegistrationResource info(
+			@PathVariable("type") ApplicationType type, @PathVariable("name") String name,
+			@RequestParam(required = false, name = "exhaustive") boolean exhaustive) {
 		if (!this.appRegistryService.appExist(name, type)) {
 			throw new NoSuchAppRegistrationException(name, type);
 		}
@@ -178,7 +170,24 @@ public class SkipperAppRegistryController {
 			throw new RuntimeException(String.format("No default version exists for the app [%s:%s]", name, type));
 		}
 		String defaultVersion = this.appRegistryService.getDefaultApp(name, type).getVersion();
-		return info(type, name, defaultVersion);
+		return getInfo(type, name, defaultVersion, exhaustive);
+	}
+
+	private DetailedAppRegistrationResource getInfo(ApplicationType type,
+			String name, String version, Boolean allProperties) {
+
+		AppRegistration registration = appRegistryService.find(name, type, version);
+		if (registration == null) {
+			throw new NoSuchAppRegistrationException(name, type, version);
+		}
+		DetailedAppRegistrationResource result = new DetailedAppRegistrationResource(
+				assembler.toResource(registration));
+		List<ConfigurationMetadataProperty> properties = metadataResolver
+				.listProperties(appRegistryService.getAppMetadataResource(registration), allProperties);
+		for (ConfigurationMetadataProperty property : properties) {
+			result.addOption(property);
+		}
+		return result;
 	}
 
 	/**
@@ -217,7 +226,7 @@ public class SkipperAppRegistryController {
 	public void register(@PathVariable("type") ApplicationType type, @PathVariable("name") String name,
 			@RequestParam("uri") String uri, @RequestParam(name = "metadata-uri", required = false) String metadataUri,
 			@RequestParam(value = "force", defaultValue = "false") boolean force) {
-		String version = ResourceUtils.getResourceVersion(uri, this.mavenProperties);
+		String version = this.appRegistryService.getResourceVersion(uri);
 		this.register(type, name, version, uri, metadataUri, force);
 	}
 
@@ -324,6 +333,7 @@ public class SkipperAppRegistryController {
 	/**
 	 * Register all applications listed in a properties file or provided as key/value pairs.
 	 *
+	 * @param pageable Pagination information
 	 * @param pagedResourcesAssembler the resource asembly for app registrations
 	 * @param uri URI for the properties file
 	 * @param apps key/value pairs representing applications, separated by newlines

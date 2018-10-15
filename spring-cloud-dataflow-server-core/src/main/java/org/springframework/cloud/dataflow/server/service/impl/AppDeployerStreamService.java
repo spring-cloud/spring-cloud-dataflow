@@ -22,15 +22,14 @@ import java.util.stream.Collectors;
 
 import org.springframework.cloud.dataflow.core.StreamDefinition;
 import org.springframework.cloud.dataflow.core.StreamDeployment;
-import org.springframework.cloud.dataflow.registry.AppRegistryCommon;
 import org.springframework.cloud.dataflow.rest.SkipperStream;
 import org.springframework.cloud.dataflow.rest.util.DeploymentPropertiesUtils;
-import org.springframework.cloud.dataflow.server.DockerValidatorProperties;
 import org.springframework.cloud.dataflow.server.audit.domain.AuditActionType;
 import org.springframework.cloud.dataflow.server.audit.domain.AuditOperationType;
 import org.springframework.cloud.dataflow.server.audit.service.AuditRecordService;
 import org.springframework.cloud.dataflow.server.repository.NoSuchStreamDefinitionException;
 import org.springframework.cloud.dataflow.server.repository.StreamDefinitionRepository;
+import org.springframework.cloud.dataflow.server.service.StreamValidationService;
 import org.springframework.cloud.dataflow.server.stream.AppDeployerStreamDeployer;
 import org.springframework.cloud.dataflow.server.stream.StreamDeploymentRequest;
 import org.springframework.cloud.deployer.spi.app.DeploymentState;
@@ -57,10 +56,11 @@ public class AppDeployerStreamService extends AbstractStreamService {
 	private final AppDeploymentRequestCreator appDeploymentRequestCreator;
 
 	public AppDeployerStreamService(StreamDefinitionRepository streamDefinitionRepository,
-			AppDeployerStreamDeployer appDeployerStreamDeployer,
-			AppDeploymentRequestCreator appDeploymentRequestCreator, AppRegistryCommon appRegistry,
-			AuditRecordService auditRecordService, DockerValidatorProperties dockerValidatorProperties) {
-		super(streamDefinitionRepository, appRegistry, auditRecordService, dockerValidatorProperties);
+									AppDeployerStreamDeployer appDeployerStreamDeployer,
+									AppDeploymentRequestCreator appDeploymentRequestCreator,
+									StreamValidationService streamValidationService,
+									AuditRecordService auditRecordService) {
+		super(streamDefinitionRepository, streamValidationService, auditRecordService);
 		Assert.notNull(appDeployerStreamDeployer, "AppDeployerStreamDeployer must not be null");
 		Assert.notNull(appDeploymentRequestCreator, "AppDeploymentRequestCreator must not be null");
 		this.appDeployerStreamDeployer = appDeployerStreamDeployer;
@@ -96,7 +96,7 @@ public class AppDeployerStreamService extends AbstractStreamService {
 		this.appDeployerStreamDeployer.undeployStream(streamName);
 		auditRecordService.populateAndSaveAuditRecord(
 				AuditOperationType.STREAM, AuditActionType.UNDEPLOY,
-				streamDefinition.getName(), streamDefinition.getDslText());
+				streamDefinition.getName(), this.auditServiceUtils.convertStreamDefinitionToAuditData(streamDefinition));
 	}
 
 	@Override

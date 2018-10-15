@@ -21,6 +21,5 @@
         correlation_id varchar2(255 char),
         created_by varchar2(255 char),
         created_On timestamp,
-        server_host varchar2(255 char),
         primary key (id)
     );

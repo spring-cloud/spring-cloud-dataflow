@@ -24,7 +24,6 @@ import org.junit.Test;
 import org.springframework.boot.configurationmetadata.ConfigurationMetadataProperty;
 import org.springframework.core.io.ClassPathResource;
 
-import static org.hamcrest.Matchers.greaterThan;
 import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.hasProperty;
 import static org.hamcrest.Matchers.is;
@@ -63,8 +62,8 @@ public class BootApplicationConfigurationMetadataResolverTests {
 				.listProperties(new ClassPathResource("apps/no-whitelist", getClass()));
 		List<ConfigurationMetadataProperty> full = resolver
 				.listProperties(new ClassPathResource("apps/no-whitelist", getClass()), true);
-		assertThat(properties.size(), greaterThan(0));
-		assertThat(properties.size(), is(full.size()));
+		assertThat(properties.size(), is(0));
+		assertThat(full.size(), is(3));
 	}
 
 	@Test
@@ -73,7 +72,7 @@ public class BootApplicationConfigurationMetadataResolverTests {
 				.listProperties(new ClassPathResource("apps/deprecated-error", getClass()));
 		List<ConfigurationMetadataProperty> full = resolver
 				.listProperties(new ClassPathResource("apps/deprecated-error", getClass()), true);
-		assertThat(properties.size(), is(2));
+		assertThat(properties.size(), is(0));
 		assertThat(full.size(), is(2));
 	}
 

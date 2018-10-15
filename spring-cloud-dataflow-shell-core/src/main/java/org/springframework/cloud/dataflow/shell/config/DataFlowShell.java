@@ -55,17 +55,13 @@ public class DataFlowShell {
 	/**
 	 * This method performs various access checks and only if {@code true} is returned,
 	 * the shell should show the associated commands. 2 checks are performed:
-	 * <p>
 	 * <ul>
 	 * <li>Does the desired operation indicated by the {@link OpsType} exist?
 	 * <li>If the operation exist, does the user have the necessary credentials?
 	 * </ul>
-	 * <p>
 	 * <b>What are valid credentials?</b>
-	 * <p>
 	 * The way the passed-in {@link RoleType}s are treated depends on the servers security
 	 * settings:
-	 * <p>
 	 * <ul>
 	 * <li>{@link Target#isAuthenticationEnabled()} Is authentication enabled?
 	 * <li>{@link Target#isAuthorizationEnabled()} If authentication is enabled, is

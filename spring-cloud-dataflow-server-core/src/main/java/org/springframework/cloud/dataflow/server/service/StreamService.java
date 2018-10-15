@@ -101,6 +101,7 @@ public interface StreamService {
 
 	/**
 	 * Find stream definitions where the findByNameLike parameter
+	 * @param pageable Pagination information
 	 * @param search the findByNameLike parameter to use
 	 * @return Page of stream definitions
 	 */
@@ -117,7 +118,7 @@ public interface StreamService {
 	/**
 	 * Verifies that all apps in the stream are valid.
 	 * @param name the name of the definition
-	 * @return  {@link DefinitionAppValidationStatus} for a stream.
+	 * @return  {@link ValidationStatus} for a stream.
 	 */
-	DefinitionAppValidationStatus validateStream(String name);
+	ValidationStatus validateStream(String name);
 }

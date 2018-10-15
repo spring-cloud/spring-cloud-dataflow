@@ -139,4 +139,14 @@ public class InMemoryTaskDefinitionRepository implements TaskDefinitionRepositor
 	public Page<TaskDefinition> findByNameLike(SearchPageable searchPageable) {
 		throw new UnsupportedOperationException();
 	}
+
+	@Override
+	public TaskDefinition findByNameRequired(String name) {
+		TaskDefinition definition = this.findOne(name);
+		if (definition == null) {
+			throw new NoSuchTaskDefinitionException(name);
+		}
+		return definition;
+	}
+
 }

@@ -49,6 +49,7 @@ import org.springframework.cloud.dataflow.registry.AppRegistryCommon;
 import org.springframework.cloud.dataflow.registry.repository.AppRegistrationRepository;
 import org.springframework.cloud.dataflow.registry.service.AppRegistryService;
 import org.springframework.cloud.dataflow.registry.service.DefaultAppRegistryService;
+import org.springframework.cloud.dataflow.registry.support.AppResourceCommon;
 import org.springframework.cloud.dataflow.rest.job.support.ISO8601DateFormatWithMilliSeconds;
 import org.springframework.cloud.dataflow.server.ConditionalOnSkipperDisabled;
 import org.springframework.cloud.dataflow.server.ConditionalOnSkipperEnabled;
@@ -98,13 +99,17 @@ import org.springframework.cloud.dataflow.server.service.SchedulerService;
 import org.springframework.cloud.dataflow.server.service.SchedulerServiceProperties;
 import org.springframework.cloud.dataflow.server.service.SkipperStreamService;
 import org.springframework.cloud.dataflow.server.service.StreamService;
+import org.springframework.cloud.dataflow.server.service.StreamValidationService;
 import org.springframework.cloud.dataflow.server.service.TaskService;
+import org.springframework.cloud.dataflow.server.service.TaskValidationService;
 import org.springframework.cloud.dataflow.server.service.impl.AppDeployerStreamService;
 import org.springframework.cloud.dataflow.server.service.impl.AppDeploymentRequestCreator;
 import org.springframework.cloud.dataflow.server.service.impl.DefaultSchedulerService;
 import org.springframework.cloud.dataflow.server.service.impl.DefaultSkipperStreamService;
 import org.springframework.cloud.dataflow.server.service.impl.DefaultTaskService;
 import org.springframework.cloud.dataflow.server.service.impl.TaskConfigurationProperties;
+import org.springframework.cloud.dataflow.server.service.impl.validation.DefaultStreamValidationService;
+import org.springframework.cloud.dataflow.server.service.impl.validation.DefaultTaskValidationService;
 import org.springframework.cloud.dataflow.server.stream.AppDeployerStreamDeployer;
 import org.springframework.cloud.dataflow.server.stream.SkipperStreamDeployer;
 import org.springframework.cloud.dataflow.server.stream.StreamDeployer;
@@ -148,6 +153,7 @@ import static org.mockito.Mockito.when;
  * @author Gunnar Hillert
  * @author Ilayaperumal Gopinathan
  * @author Christian Tzolov
+ * @author Gunnar Hillert
  */
 @Configuration
 @EnableSpringDataWebSupport
@@ -159,6 +165,8 @@ import static org.mockito.Mockito.when;
 @EnableConfigurationProperties({ CommonApplicationProperties.class,
 		MetricsProperties.class,
 		VersionInfoProperties.class,
+		DockerValidatorProperties.class,
+		TaskConfigurationProperties.class,
 		DockerValidatorProperties.class})
 @EntityScan({
 	"org.springframework.cloud.dataflow.registry.domain",
@@ -212,6 +220,11 @@ public class TestDependencies extends WebMvcConfigurationSupport {
 	}
 
 	@Bean
+	public AppResourceCommon appResourceService(MavenProperties mavenProperties, DelegatingResourceLoader delegatingResourceLoader) {
+		return new AppResourceCommon(mavenProperties, delegatingResourceLoader);
+	}
+
+	@Bean
 	@ConditionalOnSkipperDisabled
 	public StreamDeploymentController streamDeploymentController(StreamDefinitionRepository repository,
 			StreamService streamService) {
@@ -230,24 +243,48 @@ public class TestDependencies extends WebMvcConfigurationSupport {
 		return new FeaturesProperties();
 	}
 
+
+	@Bean
+	public StreamValidationService streamValidationService(AppRegistryCommon appRegistryCommon,
+														   DockerValidatorProperties dockerValidatorProperties,
+														   StreamDefinitionRepository streamDefinitionRepository) {
+		return new DefaultStreamValidationService(appRegistryCommon,
+				dockerValidatorProperties,
+				streamDefinitionRepository);
+	}
+
+	@Bean
+	public TaskValidationService taskValidationService(AppRegistryCommon appRegistryCommon,
+													   DockerValidatorProperties dockerValidatorProperties,
+													   TaskDefinitionRepository taskDefinitionRepository,
+													   TaskConfigurationProperties taskConfigurationProperties) {
+		return new DefaultTaskValidationService(appRegistryCommon,
+				dockerValidatorProperties,
+				taskDefinitionRepository,
+				taskConfigurationProperties.getComposedTaskRunnerName());
+	}
+
+
 	@Bean
 	@ConditionalOnSkipperEnabled
 	public SkipperStreamService skipperStreamService(StreamDefinitionRepository streamDefinitionRepository,
-			SkipperStreamDeployer skipperStreamDeployer, AppDeploymentRequestCreator appDeploymentRequestCreator,
-			AppRegistryCommon appRegistry, AuditRecordService auditRecordService,
-			DockerValidatorProperties dockerValidatorProperties) {
+													 SkipperStreamDeployer skipperStreamDeployer,
+													 AppDeploymentRequestCreator appDeploymentRequestCreator,
+													 StreamValidationService streamValidationService,
+													 AuditRecordService auditRecordService) {
 		return new DefaultSkipperStreamService(streamDefinitionRepository, skipperStreamDeployer,
-				appDeploymentRequestCreator, appRegistry, auditRecordService, dockerValidatorProperties);
+				appDeploymentRequestCreator, streamValidationService, auditRecordService);
 	}
 
 	@Bean
 	@ConditionalOnSkipperDisabled
 	public StreamService simpleStreamService(StreamDefinitionRepository streamDefinitionRepository,
-			AppDeployerStreamDeployer appDeployerStreamDeployer,
-			AppDeploymentRequestCreator appDeploymentRequestCreator, AppRegistryCommon appRegistry,
-			AuditRecordService auditRecordService, DockerValidatorProperties dockerValidatorProperties) {
+											 AppDeployerStreamDeployer appDeployerStreamDeployer,
+											 AppDeploymentRequestCreator appDeploymentRequestCreator,
+											 StreamValidationService streamValidationService,
+											 AuditRecordService auditRecordService) {
 		return new AppDeployerStreamService(streamDefinitionRepository, appDeployerStreamDeployer,
-				appDeploymentRequestCreator, appRegistry, auditRecordService, dockerValidatorProperties);
+				appDeploymentRequestCreator, streamValidationService, auditRecordService);
 	}
 
 	@Bean
@@ -263,9 +300,10 @@ public class TestDependencies extends WebMvcConfigurationSupport {
 	@ConditionalOnSkipperDisabled
 	public AppDeployerStreamDeployer appDeployerStreamDeployer(AppDeployer appDeployer,
 			DeploymentIdRepository deploymentIdRepository, StreamDefinitionRepository streamDefinitionRepository,
-			StreamDeploymentRepository streamDeploymentRepository) {
+			StreamDeploymentRepository streamDeploymentRepository,
+			AppRegistry appRegistry) {
 		return new AppDeployerStreamDeployer(appDeployer, deploymentIdRepository, streamDefinitionRepository,
-				streamDeploymentRepository, new ForkJoinPool(2));
+				streamDeploymentRepository, new ForkJoinPool(2), appRegistry);
 	}
 
 	@Bean
@@ -284,8 +322,7 @@ public class TestDependencies extends WebMvcConfigurationSupport {
 	}
 
 	@Bean
-	public StreamDefinitionController streamDefinitionController(StreamDefinitionRepository repository,
-			StreamService streamService) {
+	public StreamDefinitionController streamDefinitionController(StreamService streamService) {
 		return new StreamDefinitionController(streamService);
 	}
 
@@ -324,15 +361,15 @@ public class TestDependencies extends WebMvcConfigurationSupport {
 
 	@Bean
 	@ConditionalOnSkipperDisabled
-	public AppRegistry appRegistry(UriRegistry uriRegistry, DelegatingResourceLoader resourceLoader) {
-		return new AppRegistry(uriRegistry, resourceLoader);
+	public AppRegistry appRegistry(UriRegistry uriRegistry, AppResourceCommon appResourceService) {
+		return new AppRegistry(uriRegistry, appResourceService);
 	}
 
 	@Bean
 	@ConditionalOnSkipperEnabled
 	public AppRegistryService appRegistryService(AppRegistrationRepository appRegistrationRepository,
-			MavenProperties mavenProperties) {
-		return new DefaultAppRegistryService(appRegistrationRepository, resourceLoader(mavenProperties), mavenProperties);
+			AppResourceCommon appResourceService) {
+		return new DefaultAppRegistryService(appRegistrationRepository, appResourceService);
 	}
 
 	@Bean
@@ -403,25 +440,22 @@ public class TestDependencies extends WebMvcConfigurationSupport {
 	@Bean
 	public TaskDefinitionController taskDefinitionController(TaskExplorer explorer, TaskDefinitionRepository repository,
 			DeploymentIdRepository deploymentIdRepository, ApplicationConfigurationMetadataResolver metadataResolver,
-			AppRegistryCommon appRegistry, DelegatingResourceLoader delegatingResourceLoader,
-			CommonApplicationProperties commonApplicationProperties,
-			DockerValidatorProperties dockerValidatorProperties) {
+			AppRegistryCommon appRegistry, AuditRecordService auditRecordService,
+			CommonApplicationProperties commonApplicationProperties, TaskValidationService taskValidationService) {
 		return new TaskDefinitionController(explorer, repository,
-				taskService(metadataResolver, taskRepository(), deploymentIdRepository,
-						appRegistry, delegatingResourceLoader, commonApplicationProperties,
-						dockerValidatorProperties));
+				taskService(metadataResolver, taskRepository(), deploymentIdRepository, appRegistry,
+						/* delegatingResourceLoader, */auditRecordService, commonApplicationProperties,
+						taskValidationService));
 	}
 
 	@Bean
 	public TaskExecutionController taskExecutionController(TaskExplorer explorer,
 			ApplicationConfigurationMetadataResolver metadataResolver, DeploymentIdRepository deploymentIdRepository,
-			AppRegistryCommon appRegistry, DelegatingResourceLoader delegatingResourceLoader,
-			CommonApplicationProperties commonApplicationProperties,
-			DockerValidatorProperties dockerValidatorProperties) {
-		return new TaskExecutionController(explorer,
-				taskService(metadataResolver, taskRepository(), deploymentIdRepository,
-						appRegistry, delegatingResourceLoader, commonApplicationProperties,
-						dockerValidatorProperties),
+			AppRegistryCommon appRegistry, AuditRecordService auditRecordService,
+			CommonApplicationProperties commonApplicationProperties, TaskValidationService taskValidationService) {
+		return new TaskExecutionController(
+				explorer, taskService(metadataResolver, taskRepository(), deploymentIdRepository, appRegistry,
+						auditRecordService, commonApplicationProperties, taskValidationService),
 				taskDefinitionRepository());
 	}
 
@@ -449,15 +483,8 @@ public class TestDependencies extends WebMvcConfigurationSupport {
 
 	@Bean
 	@ConditionalOnSkipperDisabled
-	public AppRegistry appRegistry(DelegatingResourceLoader resourceLoader) {
-		return new AppRegistry(uriRegistry(), resourceLoader);
-	}
-
-	@Bean
-	@ConditionalOnSkipperEnabled
-	public AppRegistryService appRegistryService(AppRegistrationRepository appRegistrationRepository,
-			DelegatingResourceLoader resourceLoader, MavenProperties mavenProperties) {
-		return new DefaultAppRegistryService(appRegistrationRepository, resourceLoader, mavenProperties);
+	public AppRegistry appRegistry(AppResourceCommon appResourceService) {
+		return new AppRegistry(uriRegistry(), appResourceService);
 	}
 
 	@Bean
@@ -483,13 +510,12 @@ public class TestDependencies extends WebMvcConfigurationSupport {
 	@Bean
 	public TaskService taskService(ApplicationConfigurationMetadataResolver metadataResolver,
 			TaskRepository taskExecutionRepository, DeploymentIdRepository deploymentIdRepository,
-			AppRegistryCommon appRegistry, DelegatingResourceLoader delegatingResourceLoader,
-			CommonApplicationProperties commonApplicationProperties,
-			DockerValidatorProperties dockerValidatorProperties) {
+			AppRegistryCommon appRegistry, AuditRecordService auditRecordService,
+			CommonApplicationProperties commonApplicationProperties, TaskValidationService taskValidationService) {
 		return new DefaultTaskService(new DataSourceProperties(), taskDefinitionRepository(), taskExplorer(),
-				taskExecutionRepository, appRegistry, delegatingResourceLoader, taskLauncher(), metadataResolver,
-				new TaskConfigurationProperties(), deploymentIdRepository, null,
-				commonApplicationProperties, dockerValidatorProperties);
+				taskExecutionRepository, appRegistry, taskLauncher(), metadataResolver,
+				new TaskConfigurationProperties(), deploymentIdRepository, auditRecordService, null,
+				commonApplicationProperties, taskValidationService);
 	}
 
 	@Bean
@@ -502,13 +528,13 @@ public class TestDependencies extends WebMvcConfigurationSupport {
 			Scheduler scheduler, TaskDefinitionRepository taskDefinitionRepository,
 			AppRegistryCommon registry, ResourceLoader resourceLoader,
 			DataSourceProperties dataSourceProperties,
-			ApplicationConfigurationMetadataResolver metaDataResolver) {
+			ApplicationConfigurationMetadataResolver metaDataResolver, AuditRecordService auditRecordService) {
 		return new DefaultSchedulerService(commonApplicationProperties,
 				scheduler, taskDefinitionRepository,
 				registry, resourceLoader,
 				new TaskConfigurationProperties(),
 				dataSourceProperties, null,
-				metaDataResolver, new SchedulerServiceProperties());
+				metaDataResolver, new SchedulerServiceProperties(), auditRecordService);
 	}
 
 	@Bean
@@ -581,6 +607,8 @@ public class TestDependencies extends WebMvcConfigurationSupport {
 
 
 	public static class SimpleTestScheduler implements Scheduler {
+		public static final String INVALID_CRON_EXPRESSION = "BAD";
+
 		List<ScheduleInfo> schedules = new ArrayList<>();
 
 		@Override
@@ -589,6 +617,10 @@ public class TestDependencies extends WebMvcConfigurationSupport {
 			schedule.setScheduleName(scheduleRequest.getScheduleName());
 			schedule.setScheduleProperties(scheduleRequest.getSchedulerProperties());
 			schedule.setTaskDefinitionName(scheduleRequest.getDefinition().getName());
+			if(schedule.getScheduleProperties().containsKey("spring.cloud.scheduler.cron.expression") &&
+					schedule.getScheduleProperties().get("spring.cloud.scheduler.cron.expression").equals(INVALID_CRON_EXPRESSION)) {
+				throw new CreateScheduleException("Invalid Cron Expression",new IllegalArgumentException());
+			}
 			List<ScheduleInfo> scheduleInfos = schedules.stream().filter(s -> s.getScheduleName().
 					equals(scheduleRequest.getScheduleName())).
 					collect(Collectors.toList());

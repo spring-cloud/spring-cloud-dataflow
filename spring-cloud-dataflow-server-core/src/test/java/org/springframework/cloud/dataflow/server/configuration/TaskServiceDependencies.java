@@ -26,7 +26,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceProperties;
 import org.springframework.cloud.dataflow.configuration.metadata.ApplicationConfigurationMetadataResolver;
 import org.springframework.cloud.dataflow.registry.AppRegistry;
+import org.springframework.cloud.dataflow.registry.AppRegistryCommon;
 import org.springframework.cloud.dataflow.server.DockerValidatorProperties;
+import org.springframework.cloud.dataflow.server.audit.service.AuditRecordService;
+import org.springframework.cloud.dataflow.server.audit.service.DefaultAuditRecordService;
 import org.springframework.cloud.dataflow.server.config.apps.CommonApplicationProperties;
 import org.springframework.cloud.dataflow.server.config.features.FeaturesProperties;
 import org.springframework.cloud.dataflow.server.repository.InMemoryDeploymentIdRepository;
@@ -35,9 +38,11 @@ import org.springframework.cloud.dataflow.server.repository.TaskDefinitionReposi
 import org.springframework.cloud.dataflow.server.repository.support.DataflowRdbmsInitializer;
 import org.springframework.cloud.dataflow.server.service.SchedulerService;
 import org.springframework.cloud.dataflow.server.service.SchedulerServiceProperties;
+import org.springframework.cloud.dataflow.server.service.TaskValidationService;
 import org.springframework.cloud.dataflow.server.service.impl.DefaultSchedulerService;
 import org.springframework.cloud.dataflow.server.service.impl.DefaultTaskService;
 import org.springframework.cloud.dataflow.server.service.impl.TaskConfigurationProperties;
+import org.springframework.cloud.dataflow.server.service.impl.validation.DefaultTaskValidationService;
 import org.springframework.cloud.deployer.spi.task.TaskLauncher;
 import org.springframework.cloud.scheduler.spi.core.CreateScheduleException;
 import org.springframework.cloud.scheduler.spi.core.ScheduleInfo;
@@ -63,6 +68,7 @@ import static org.mockito.Mockito.when;
 /**
  * @author Glenn Renfro
  * @author David Turanski
+ * @author Gunnar Hillert
  */
 @EnableTransactionManagement
 @Configuration
@@ -77,6 +83,7 @@ public class TaskServiceDependencies {
 	@Autowired
 	DockerValidatorProperties dockerValidatorProperties;
 
+
 	@Bean
 	public TaskRepositoryInitializer taskExecutionRepository(DataSource dataSource) {
 		TaskRepositoryInitializer taskRepositoryInitializer = new TaskRepositoryInitializer();
@@ -90,8 +97,25 @@ public class TaskServiceDependencies {
 	}
 
 	@Bean
+	public TaskValidationService taskValidationService(AppRegistryCommon appRegistryCommon,
+													   DockerValidatorProperties dockerValidatorProperties,
+													   TaskDefinitionRepository taskDefinitionRepository,
+													   TaskConfigurationProperties taskConfigurationProperties) {
+		return new DefaultTaskValidationService(appRegistryCommon,
+				dockerValidatorProperties,
+				taskDefinitionRepository,
+				taskConfigurationProperties.getComposedTaskRunnerName());
+	}
+
+
+	@Bean
 	public TaskRepository taskRepository(TaskExecutionDaoFactoryBean daoFactoryBean) {
 		return new SimpleTaskRepository(daoFactoryBean);
+	}
+
+	@Bean
+	public AuditRecordService auditRecordService() {
+		return mock(DefaultAuditRecordService.class);
 	}
 
 	@Bean
@@ -150,16 +174,15 @@ public class TaskServiceDependencies {
 	}
 
 	@Bean
-	public DefaultTaskService defaultTaskService(TaskDefinitionRepository taskDefinitionRepository, TaskExplorer taskExplorer,
-			TaskRepository taskExecutionRepository, AppRegistry appRegistry,
-			ResourceLoader resourceLoader, TaskLauncher taskLauncher,
-			ApplicationConfigurationMetadataResolver metadataResolver,
-			TaskConfigurationProperties taskConfigurationProperties,
-			CommonApplicationProperties commonApplicationProperties) {
+	public DefaultTaskService defaultTaskService(TaskDefinitionRepository taskDefinitionRepository,
+			TaskExplorer taskExplorer, TaskRepository taskExecutionRepository, AppRegistry appRegistry,
+			TaskLauncher taskLauncher, ApplicationConfigurationMetadataResolver metadataResolver,
+			TaskConfigurationProperties taskConfigurationProperties, AuditRecordService auditRecordService,
+			CommonApplicationProperties commonApplicationProperties, TaskValidationService taskValidationService) {
 		return new DefaultTaskService(this.dataSourceProperties, taskDefinitionRepository, taskExplorer,
-				taskExecutionRepository, appRegistry, resourceLoader, taskLauncher, metadataResolver,
-				taskConfigurationProperties, new InMemoryDeploymentIdRepository(),
-				null, commonApplicationProperties, this.dockerValidatorProperties);
+				taskExecutionRepository, appRegistry, taskLauncher, metadataResolver, taskConfigurationProperties,
+				new InMemoryDeploymentIdRepository(), auditRecordService, null, commonApplicationProperties,
+				taskValidationService);
 	}
 
 	@Bean
@@ -168,13 +191,14 @@ public class TaskServiceDependencies {
 			AppRegistry registry, ResourceLoader resourceLoader,
 			DataSourceProperties dataSourceProperties,
 			ApplicationConfigurationMetadataResolver metaDataResolver,
-			SchedulerServiceProperties schedulerServiceProperties) {
+			SchedulerServiceProperties schedulerServiceProperties,
+			AuditRecordService auditRecordService) {
 		return new DefaultSchedulerService(commonApplicationProperties,
 				scheduler, taskDefinitionRepository,
 				registry, resourceLoader,
 				new TaskConfigurationProperties(),
 				dataSourceProperties, null,
-				metaDataResolver, schedulerServiceProperties);
+				metaDataResolver, schedulerServiceProperties, auditRecordService);
 	}
 
 	@Bean

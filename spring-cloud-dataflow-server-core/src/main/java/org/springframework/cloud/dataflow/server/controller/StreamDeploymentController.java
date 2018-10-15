@@ -94,6 +94,7 @@ public class StreamDeploymentController {
 	 * Request un-deployment of an existing stream.
 	 *
 	 * @param name the name of an existing stream (required)
+	 * @return response without a body
 	 */
 	@RequestMapping(value = "/{name}", method = RequestMethod.DELETE)
 	public ResponseEntity<Void> undeploy(@PathVariable("name") String name) {
@@ -117,8 +118,9 @@ public class StreamDeploymentController {
 	}
 
 	/**
-	 * Request deployment of an existing stream definition.  @FIXME
+	 * Request deployment of an existing stream definition.
 	 * @param name the name of an existing stream definition (required)
+	 * @return The stream deployment
 	 */
 	@RequestMapping(value = "/{name}", method = RequestMethod.GET)
 	@ResponseStatus(HttpStatus.CREATED)
@@ -144,6 +146,7 @@ public class StreamDeploymentController {
 	 * @param name the name of an existing stream definition (required)
 	 * @param properties the deployment properties for the stream as a comma-delimited list of
 	 * key=value pairs
+	 * @return response without a body
 	 */
 	@RequestMapping(value = "/{name}", method = RequestMethod.POST)
 	public ResponseEntity<Void> deploy(@PathVariable("name") String name,

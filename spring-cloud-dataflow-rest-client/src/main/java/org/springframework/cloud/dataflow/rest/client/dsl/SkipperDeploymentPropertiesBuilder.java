@@ -49,7 +49,7 @@ public class SkipperDeploymentPropertiesBuilder extends AbstractPropertiesBuilde
 	 * @param label - The application name or label to configure the number of instances
 	 * @param memory - Memory size in Mb, must be greater or equal 128
 	 *
-	 * @return
+	 * @return the instance of this SkipperDeploymentPropertiesBuilder
 	 */
 	public SkipperDeploymentPropertiesBuilder memory(String label, Integer memory){
 		Assert.notNull(memory, "Memory value can't be null");
@@ -62,10 +62,10 @@ public class SkipperDeploymentPropertiesBuilder extends AbstractPropertiesBuilde
 	/**
 	 * Sets the number of instances of the target application.
 	 *
-	 * @param label - The application name or label to configure the number of instances
-	 * @param instances - Number of instances, must be greater than zero
+	 * @param label The application name or label to configure the number of instances
+	 * @param instances Number of instances, must be greater than zero
 	 *
-	 * @return
+	 * @return the instance of this SkipperDeploymentPropertiesBuilder
 	 */
 	public SkipperDeploymentPropertiesBuilder count(String label, Integer instances) {
 		Assert.notNull(instances, "Number of instances can't be null");
@@ -78,8 +78,8 @@ public class SkipperDeploymentPropertiesBuilder extends AbstractPropertiesBuilde
 
 	/**
 	 * Sets the target platform to be used by skipper
-	 * @param platformName
-	 * @return
+	 * @param platformName the platform name
+	 * @return the instance of this SkipperDeploymentPropertiesBuilder
 	 */
 	public SkipperDeploymentPropertiesBuilder platformName(String platformName){
 		Assert.hasLength(platformName, "Platform can't be empty");
@@ -89,8 +89,8 @@ public class SkipperDeploymentPropertiesBuilder extends AbstractPropertiesBuilde
 
 	/**
 	 * Sets the package version to be used by skipper
-	 * @param packageVersion
-	 * @return
+	 * @param packageVersion the package version
+	 * @return the instance of this SkipperDeploymentPropertiesBuilder
 	 */
 	public SkipperDeploymentPropertiesBuilder packageVersion(String packageVersion){
 		Assert.hasLength(packageVersion, "Package version can't be empty");
@@ -100,8 +100,8 @@ public class SkipperDeploymentPropertiesBuilder extends AbstractPropertiesBuilde
 
 	/**
 	 * Sets the repo name platform to be used by skipper
-	 * @param repoName
-	 * @return
+	 * @param repoName the repo name
+	 * @return the instance of this SkipperDeploymentPropertiesBuilder
 	 */
 	public SkipperDeploymentPropertiesBuilder repoName(String repoName){
 		Assert.hasLength(repoName, "Repository name can't be empty");

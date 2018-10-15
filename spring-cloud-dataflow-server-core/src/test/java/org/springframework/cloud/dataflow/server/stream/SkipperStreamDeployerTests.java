@@ -98,6 +98,7 @@ public class SkipperStreamDeployerTests {
 		MavenResource timeResource = new MavenResource.Builder()
 				.artifactId("time-source-rabbit").groupId("org.springframework.cloud.stream.app")
 				.version("1.2.0.RELEASE").build();
+		when(appRegistryService.getResourceVersion(timeResource)).thenReturn(timeResource.getVersion());
 		AppDeploymentRequest timeAppDeploymentRequest = new AppDeploymentRequest(timeAppDefinition, timeResource);
 
 		List<AppDeploymentRequest> appDeploymentRequests = Arrays.asList(timeAppDeploymentRequest);
@@ -250,6 +251,7 @@ public class SkipperStreamDeployerTests {
 		MavenResource timeResource = new MavenResource.Builder()
 				.artifactId("time-source-rabbit").groupId("org.springframework.cloud.stream.app")
 				.version("1.2.0.RELEASE").build();
+		when(appRegistryService.getResourceVersion(timeResource)).thenReturn(timeResource.getVersion());
 		AppDeploymentRequest timeAppDeploymentRequest = new AppDeploymentRequest(timeAppDefinition, timeResource);
 
 		HashMap<String, String> logAppProps = new HashMap<>();
@@ -258,6 +260,7 @@ public class SkipperStreamDeployerTests {
 		MavenResource logResource = new MavenResource.Builder()
 				.artifactId("log-sink-rabbit").groupId("org.springframework.cloud.stream.app")
 				.version("1.2.0.RELEASE").build();
+		when(appRegistryService.getResourceVersion(logResource)).thenReturn(logResource.getVersion());
 		AppDeploymentRequest logAppDeploymentRequest = new AppDeploymentRequest(logAppDefinition, logResource);
 
 		List<AppDeploymentRequest> appDeploymentRequests = Arrays.asList(logAppDeploymentRequest, timeAppDeploymentRequest);
@@ -403,6 +406,7 @@ public class SkipperStreamDeployerTests {
 	}
 
 	@Test
+	@SuppressWarnings("unchecked")
 	public void testUndeploySkippedForUndefinedStream() {
 		AppRegistryService appRegistryService = mock(AppRegistryService.class);
 		SkipperClient skipperClient = mock(SkipperClient.class);
@@ -422,6 +426,7 @@ public class SkipperStreamDeployerTests {
 	}
 
 	@Test
+	@SuppressWarnings("unchecked")
 	public void testUndeployForDefinedStream() {
 		AppRegistryService appRegistryService = mock(AppRegistryService.class);
 		SkipperClient skipperClient = mock(SkipperClient.class);

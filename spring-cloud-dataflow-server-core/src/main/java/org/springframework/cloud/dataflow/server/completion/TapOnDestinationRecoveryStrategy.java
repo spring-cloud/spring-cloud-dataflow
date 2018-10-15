@@ -30,10 +30,7 @@ import org.springframework.util.StringUtils;
 
 /**
  * Expands constructs that start with {@literal :} to add stream name and app identifiers.
- * <p>
- * <p>
  * Lives in this package as it needs access to a {@link StreamDefinitionRepository}.
- * </p>
  *
  * @author Eric Bottard
  * @author Ilayaperumal Gopinathan

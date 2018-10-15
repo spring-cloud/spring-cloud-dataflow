@@ -55,9 +55,10 @@ public interface AppRegistryOperations {
 	 *
 	 * @param name name of application
 	 * @param type application type
+	 * @param exhaustive return all metadata, including common Spring Boot properties
 	 * @return detailed information about an application registration
 	 */
-	DetailedAppRegistrationResource info(String name, ApplicationType type);
+	DetailedAppRegistrationResource info(String name, ApplicationType type, boolean exhaustive);
 
 	/**
 	 * Retrieve information about an application registration.
@@ -65,9 +66,10 @@ public interface AppRegistryOperations {
 	 * @param name name of application
 	 * @param type application type
 	 * @param version application version
+	 * @param exhaustive return all metadata, including common Spring Boot properties
 	 * @return detailed information about an application registration
 	 */
-	DetailedAppRegistrationResource info(String name, ApplicationType type, String version);
+	DetailedAppRegistrationResource info(String name, ApplicationType type, String version, boolean exhaustive);
 
 	/**
 	 * Register an application name and type with its Maven coordinates.

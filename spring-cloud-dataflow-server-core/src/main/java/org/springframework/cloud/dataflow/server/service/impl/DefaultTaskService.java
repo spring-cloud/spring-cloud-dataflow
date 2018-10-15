@@ -33,16 +33,18 @@ import org.springframework.cloud.dataflow.registry.AppRegistry;
 import org.springframework.cloud.dataflow.registry.AppRegistryCommon;
 import org.springframework.cloud.dataflow.registry.domain.AppRegistration;
 import org.springframework.cloud.dataflow.rest.util.DeploymentPropertiesUtils;
-import org.springframework.cloud.dataflow.server.DockerValidatorProperties;
+import org.springframework.cloud.dataflow.server.audit.domain.AuditActionType;
+import org.springframework.cloud.dataflow.server.audit.domain.AuditOperationType;
+import org.springframework.cloud.dataflow.server.audit.service.AuditRecordService;
 import org.springframework.cloud.dataflow.server.config.apps.CommonApplicationProperties;
 import org.springframework.cloud.dataflow.server.controller.WhitelistProperties;
 import org.springframework.cloud.dataflow.server.repository.DeploymentIdRepository;
 import org.springframework.cloud.dataflow.server.repository.DeploymentKey;
 import org.springframework.cloud.dataflow.server.repository.NoSuchTaskDefinitionException;
 import org.springframework.cloud.dataflow.server.repository.TaskDefinitionRepository;
-import org.springframework.cloud.dataflow.server.service.DefinitionAppValidationStatus;
 import org.springframework.cloud.dataflow.server.service.TaskService;
-import org.springframework.cloud.dataflow.server.service.impl.validation.AppValidationUtils;
+import org.springframework.cloud.dataflow.server.service.TaskValidationService;
+import org.springframework.cloud.dataflow.server.service.ValidationStatus;
 import org.springframework.cloud.dataflow.server.support.ApplicationDoesNotExistException;
 import org.springframework.cloud.deployer.spi.core.AppDefinition;
 import org.springframework.cloud.deployer.spi.core.AppDeploymentRequest;
@@ -51,7 +53,6 @@ import org.springframework.cloud.task.repository.TaskExecution;
 import org.springframework.cloud.task.repository.TaskExplorer;
 import org.springframework.cloud.task.repository.TaskRepository;
 import org.springframework.core.io.Resource;
-import org.springframework.core.io.ResourceLoader;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
@@ -96,11 +97,6 @@ public class DefaultTaskService implements TaskService {
 	 */
 	private final AppRegistryCommon registry;
 
-	/**
-	 * The {@link ResourceLoader} that will resolve URIs to {@link Resource}s.
-	 */
-	private final ResourceLoader resourceLoader;
-
 	private final TaskDefinitionRepository taskDefinitionRepository;
 
 	private final WhitelistProperties whitelistProperties;
@@ -113,7 +109,13 @@ public class DefaultTaskService implements TaskService {
 
 	private final CommonApplicationProperties commonApplicationProperties;
 
-	private final DockerValidatorProperties dockerValidatorProperties;
+	private final TaskValidationService taskValidationService;
+
+	protected final AuditRecordService auditRecordService;
+
+	public static final String TASK_DEFINITION_DSL_TEXT = "taskDefinitionDslText";
+	public static final String TASK_DEPLOYMENT_PROPERTIES = "taskDeploymentProperties";
+	public static final String COMMAND_LINE_ARGS = "commandLineArgs";
 
 	/**
 	 * Initializes the {@link DefaultTaskService}.
@@ -124,47 +126,48 @@ public class DefaultTaskService implements TaskService {
 	 * @param taskExecutionRepository the repository this service will use for deployment IDs.
 	 * @param taskExplorer the explorer this service will use to lookup task executions
 	 * @param registry URI registry this service will use to look up app URIs.
-	 * @param resourceLoader the {@link ResourceLoader} that will resolve URIs to
-	 * {@link Resource}s.
 	 * @param taskLauncher the launcher this service will use to launch task apps.
 	 * @param metaDataResolver the metadata resolver
 	 * @param taskConfigurationProperties the properties used to define the behavior of tasks
 	 * @param deploymentIdRepository the repository that maps deployment keys to IDs
+	 * @param auditRecordService the audit record service
 	 * @param dataflowServerUri the data flow server URI
 	 * @param commonApplicationProperties the common application properties
+	 * @param taskValidationService the task validation service
 	 */
 	public DefaultTaskService(DataSourceProperties dataSourceProperties,
 			TaskDefinitionRepository taskDefinitionRepository, TaskExplorer taskExplorer,
-			TaskRepository taskExecutionRepository, AppRegistryCommon registry, ResourceLoader resourceLoader,
+			TaskRepository taskExecutionRepository, AppRegistryCommon registry,
 			TaskLauncher taskLauncher, ApplicationConfigurationMetadataResolver metaDataResolver,
 			TaskConfigurationProperties taskConfigurationProperties, DeploymentIdRepository deploymentIdRepository,
+			AuditRecordService auditRecordService,
 			String dataflowServerUri, CommonApplicationProperties commonApplicationProperties,
-			DockerValidatorProperties dockerValidatorProperties) {
+			TaskValidationService taskValidationService) {
 		Assert.notNull(dataSourceProperties, "DataSourceProperties must not be null");
 		Assert.notNull(taskDefinitionRepository, "TaskDefinitionRepository must not be null");
 		Assert.notNull(taskExecutionRepository, "TaskExecutionRepository must not be null");
 		Assert.notNull(taskExplorer, "TaskExplorer must not be null");
 		Assert.notNull(registry, "UriRegistry must not be null");
-		Assert.notNull(resourceLoader, "ResourceLoader must not be null");
 		Assert.notNull(taskLauncher, "TaskLauncher must not be null");
 		Assert.notNull(metaDataResolver, "metaDataResolver must not be null");
 		Assert.notNull(taskConfigurationProperties, "taskConfigurationProperties must not be null");
 		Assert.notNull(deploymentIdRepository, "deploymentIdRepository must not be null");
 		Assert.notNull(commonApplicationProperties, "commonApplicationProperties must not be null");
-		Assert.notNull(dockerValidatorProperties, "DockerValidatorProperties must not be null");
+		Assert.notNull(auditRecordService, "auditRecordService must not be null");
+		Assert.notNull(taskValidationService, "TaskValidationService must not be null");
 		this.dataSourceProperties = dataSourceProperties;
 		this.taskDefinitionRepository = taskDefinitionRepository;
 		this.taskExecutionRepository = taskExecutionRepository;
 		this.taskExplorer = taskExplorer;
 		this.registry = registry;
 		this.taskLauncher = taskLauncher;
-		this.resourceLoader = resourceLoader;
 		this.whitelistProperties = new WhitelistProperties(metaDataResolver);
 		this.taskConfigurationProperties = taskConfigurationProperties;
 		this.deploymentIdRepository = deploymentIdRepository;
 		this.dataflowServerUri = dataflowServerUri;
 		this.commonApplicationProperties = commonApplicationProperties;
-		this.dockerValidatorProperties = dockerValidatorProperties;
+		this.auditRecordService = auditRecordService;
+		this.taskValidationService = taskValidationService;
 	}
 
 	@Override
@@ -175,8 +178,8 @@ public class DefaultTaskService implements TaskService {
 
 		if (maxConcurrentExecutionsReached()) {
 			throw new IllegalStateException(String.format(
-				"The maximum concurrent task executions [%d] is at its limit.",
-				taskConfigurationProperties.getMaximumConcurrentTasks()));
+					"The maximum concurrent task executions [%d] is at its limit.",
+					taskConfigurationProperties.getMaximumConcurrentTasks()));
 		}
 
 		TaskDefinition taskDefinition = this.taskDefinitionRepository.findOne(taskName);
@@ -191,7 +194,8 @@ public class DefaultTaskService implements TaskService {
 			taskDefinition = new TaskDefinition(taskDefinition.getName(),
 					TaskServiceUtils.createComposedTaskDefinition(
 							taskNode.toExecutableDSL(), taskConfigurationProperties));
-			taskDeploymentProperties = TaskServiceUtils.establishComposedTaskProperties(taskDeploymentProperties, taskNode);
+			taskDeploymentProperties = TaskServiceUtils.establishComposedTaskProperties(taskDeploymentProperties,
+					taskNode);
 		}
 
 		AppRegistration appRegistration = this.registry.find(taskDefinition.getRegisteredAppName(),
@@ -206,12 +210,13 @@ public class DefaultTaskService implements TaskService {
 
 		Map<String, String> appDeploymentProperties = new HashMap<>(commonApplicationProperties.getTask());
 		appDeploymentProperties.putAll(
-			TaskServiceUtils.extractAppProperties(taskDefinition.getRegisteredAppName(), taskDeploymentProperties));
+				TaskServiceUtils.extractAppProperties(taskDefinition.getRegisteredAppName(), taskDeploymentProperties));
 
 		Map<String, String> deployerDeploymentProperties = DeploymentPropertiesUtils
 				.extractAndQualifyDeployerProperties(taskDeploymentProperties, taskDefinition.getRegisteredAppName());
 		if (StringUtils.hasText(this.dataflowServerUri) && taskNode.isComposed()) {
-			TaskServiceUtils.updateDataFlowUriIfNeeded(this.dataflowServerUri, appDeploymentProperties, commandLineArgs);
+			TaskServiceUtils.updateDataFlowUriIfNeeded(this.dataflowServerUri, appDeploymentProperties,
+					commandLineArgs);
 		}
 		AppDefinition revisedDefinition = TaskServiceUtils.mergeAndExpandAppProperties(taskDefinition, metadataResource,
 				appDeploymentProperties, this.whitelistProperties);
@@ -223,12 +228,26 @@ public class DefaultTaskService implements TaskService {
 			throw new IllegalStateException("Deployment ID is null for the task:" + taskName);
 		}
 		taskExecutionRepository.updateExternalExecutionId(taskExecution.getExecutionId(), id);
+
+		final Map<String, Object> auditedData = new HashMap<>(3);
+		auditedData.put(TASK_DEFINITION_DSL_TEXT, taskDefinition.getDslText());
+		auditedData.put(TASK_DEPLOYMENT_PROPERTIES, taskDeploymentProperties);
+		auditedData.put(COMMAND_LINE_ARGS, commandLineArgs);
+
+		// auditedData.put(TASK_DEFINITION_DSL_TEXT, this.argumentSanitizer.sanitizeTask(taskDefinition));
+		// auditedData.put(TASK_DEPLOYMENT_PROPERTIES, this.argumentSanitizer.sanitizeProperties(taskDeploymentProperties));
+		// auditedData.put(COMMAND_LINE_ARGS, commandLineArgs); //TODO see gh-2469
+
+		auditRecordService.populateAndSaveAuditRecordUsingMapData(
+				AuditOperationType.TASK, AuditActionType.DEPLOY,
+				taskDefinition.getName(), auditedData);
+
 		return taskExecution.getExecutionId();
 	}
 
 	private synchronized boolean maxConcurrentExecutionsReached() {
-		return this.taskExplorer.getRunningTaskExecutionCount() >=
-			this.taskConfigurationProperties.getMaximumConcurrentTasks();
+		return this.taskExplorer.getRunningTaskExecutionCount() >= this.taskConfigurationProperties
+				.getMaximumConcurrentTasks();
 	}
 
 	private List<String> updateCommandLineArgs(List<String> commandLineArgs, TaskExecution taskExecution) {
@@ -240,9 +259,7 @@ public class DefaultTaskService implements TaskService {
 
 	@Override
 	public boolean isComposedDefinition(String dsl) {
-		Assert.hasText(dsl, "dsl must not be empty nor null");
-		TaskParser taskParser = new TaskParser("__dummy", dsl, true, true);
-		return taskParser.parse().isComposed();
+		return TaskServiceUtils.isComposedTaskDefinition(dsl);
 	}
 
 	@Override
@@ -251,45 +268,8 @@ public class DefaultTaskService implements TaskService {
 	}
 
 	@Override
-	public DefinitionAppValidationStatus validateTask(String name) {
-		TaskDefinition definition = getTaskDefinition(name);
-		DefinitionAppValidationStatus definitionAppValidationStatus =
-				new DefinitionAppValidationStatus(definition.getName(),
-						definition.getDslText());
-		ApplicationType appType = ApplicationType.task;
-		if (isComposedDefinition(definition.getDslText())) {
-			// First verify that CTR is valid
-			if(AppValidationUtils.validateApp(dockerValidatorProperties, registry, taskConfigurationProperties.getComposedTaskRunnerName(), ApplicationType.task)) {
-				TaskParser taskParser = new TaskParser(name, definition.getDslText(), true, true);
-				TaskNode taskNode = taskParser.parse();
-				String childTaskPrefix = TaskNode.getTaskPrefix(name);
-				taskNode.getTaskApps().stream().forEach(task -> {
-					TaskDefinition childDefinition = getTaskDefinition(childTaskPrefix + task.getName());
-					boolean status = AppValidationUtils.validateApp(dockerValidatorProperties, registry, childDefinition.getRegisteredAppName(), ApplicationType.task);
-					definitionAppValidationStatus.getAppsStatuses().put(String.format("%s:%s", appType.name(), childDefinition.getName()),
-							(status) ? NodeStatus.valid.name() : NodeStatus.invalid.name());
-				});
-			}
-			else {
-				definitionAppValidationStatus.getAppsStatuses().put(
-						String.format("%s:%s", appType.name(),
-								taskConfigurationProperties.getComposedTaskRunnerName()),
-						NodeStatus.invalid.name());
-			}
-		}
-		else {
-			boolean status = AppValidationUtils.validateApp(dockerValidatorProperties, registry, definition.getRegisteredAppName(), ApplicationType.task);
-			definitionAppValidationStatus.getAppsStatuses().put(String.format("%s:%s", appType.name(), definition.getName()),
-					(status) ? NodeStatus.valid.name() : NodeStatus.invalid.name());
-		}
-		return definitionAppValidationStatus;
-	}
-	private TaskDefinition getTaskDefinition (String name){
-		TaskDefinition definition = taskDefinitionRepository.findOne(name);
-		if (definition == null) {
-			throw new NoSuchTaskDefinitionException(name);
-		}
-		return definition;
+	public ValidationStatus validateTask(String name) {
+		return this.taskValidationService.validateTask(name);
 	}
 
 	@Override
@@ -306,6 +286,7 @@ public class DefaultTaskService implements TaskService {
 	public void saveTaskDefinition(String name, String dsl) {
 		TaskParser taskParser = new TaskParser(name, dsl, true, true);
 		TaskNode taskNode = taskParser.parse();
+		TaskDefinition taskDefinition = new TaskDefinition(name, dsl);
 		if (taskNode.isComposed()) {
 			// Create the child task definitions needed for the composed task
 			taskNode.getTaskApps().stream().forEach(task -> {
@@ -318,11 +299,17 @@ public class DefaultTaskService implements TaskService {
 						generatedTaskDSL);
 				saveStandardTaskDefinition(composedTaskDefinition);
 			});
-			taskDefinitionRepository.save(new TaskDefinition(name, dsl));
+			taskDefinitionRepository.save(taskDefinition);
 		}
 		else {
-			saveStandardTaskDefinition(new TaskDefinition(name, dsl));
+			saveStandardTaskDefinition(taskDefinition);
 		}
+
+		auditRecordService.populateAndSaveAuditRecord(
+				AuditOperationType.TASK, AuditActionType.CREATE,
+				name, dsl);
+		// name, this.argumentSanitizer.sanitizeTask(taskDefinition)); //FIXME depends on gh-2469
+
 	}
 
 	private void saveStandardTaskDefinition(TaskDefinition taskDefinition) {
@@ -358,6 +345,11 @@ public class DefaultTaskService implements TaskService {
 		}
 		// destroy normal task or composed parent task
 		destroyPrimaryTask(name);
+
+		auditRecordService.populateAndSaveAuditRecord(
+				AuditOperationType.TASK, AuditActionType.DELETE,
+				name, taskDefinition.getDslText());
+		// name, this.argumentSanitizer.sanitizeTask(taskDefinition)); // FIXME depends on gh-2469
 	}
 
 	private void destroyPrimaryTask(String name) {
@@ -382,4 +374,3 @@ public class DefaultTaskService implements TaskService {
 	}
 
 }
-

@@ -53,7 +53,7 @@ import org.springframework.util.SocketUtils;
  * Base class for shell integration tests. This class sets up and tears down the
  * infrastructure required for executing shell tests - in particular, the Data Flow
  * server.
- * <p>
+ *
  * Extensions of this class may obtain instances of command templates. For example, call
  * {@link #stream} to obtain a {@link StreamCommandTemplate} in order to perform stream
  * operations.

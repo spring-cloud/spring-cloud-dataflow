@@ -21,6 +21,7 @@ import org.junit.Test;
 
 import org.springframework.cloud.dataflow.core.StreamDefinition;
 import org.springframework.cloud.dataflow.core.StreamDeployment;
+import org.springframework.cloud.dataflow.registry.AppRegistry;
 import org.springframework.cloud.dataflow.server.repository.DeploymentIdRepository;
 import org.springframework.cloud.dataflow.server.repository.NoSuchStreamDefinitionException;
 import org.springframework.cloud.dataflow.server.repository.StreamDefinitionRepository;
@@ -46,7 +47,8 @@ public class AppDeployerStreamDeployerTests {
 				appDeployer, mock(DeploymentIdRepository.class),
 				mock(StreamDefinitionRepository.class),
 				mock(StreamDeploymentRepository.class),
-				mock(ForkJoinPool.class));
+				mock(ForkJoinPool.class),
+				mock(AppRegistry.class));
 
 		RuntimeEnvironmentInfo info = appDeployerStreamDeployer.environmentInfo();
 
@@ -59,7 +61,8 @@ public class AppDeployerStreamDeployerTests {
 				mock(AppDeployer.class), mock(DeploymentIdRepository.class),
 				mock(StreamDefinitionRepository.class),
 				mock(StreamDeploymentRepository.class),
-				mock(ForkJoinPool.class));
+				mock(ForkJoinPool.class),
+				mock(AppRegistry.class));
 
 		appDeployerStreamDeployer.getStreamInfo("myStream");
 	}
@@ -76,7 +79,8 @@ public class AppDeployerStreamDeployerTests {
 				mock(AppDeployer.class), mock(DeploymentIdRepository.class),
 				streamDefinitionRepository,
 				streamDeploymentRepository,
-				mock(ForkJoinPool.class));
+				mock(ForkJoinPool.class),
+				mock(AppRegistry.class));
 
 		appDeployerStreamDeployer.getStreamInfo("myStream");
 
