@@ -17,7 +17,7 @@ If your Stream or Task data pipeline includes custom apps and there's a problem 
 To Reproduce:
 Include the steps to reproduce the behavior. Better yet, if you have a reproducible sample, please attach it in the issue. It'd help us to relate to the problem more easily. 
 
-creenshots:
+Screenshots:
 Where applicable, add screenshots to help explain your problem.
 
 Additional context:
