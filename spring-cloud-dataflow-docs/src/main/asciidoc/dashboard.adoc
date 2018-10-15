@@ -6,8 +6,6 @@
 This section describes how to use the dashboard of Spring Cloud Data Flow.
 --
 
-
-
 [[dashboard-introduction]]
 == Introduction
 
@@ -427,3 +425,57 @@ To do so:
 . Under `Visualization`, select the desired chart option, `Bar Chart`.
 
 Using the icons to the right, you can add additional charts to the Dashboard, re-arange the order of created dashboards, or remove data visualizations.
+
+[[dashboard-auditing]]
+== Auditing
+
+The Auditing page of the Dashboard gives you access to recorded audit events. Currently audit event
+are recorded for:
+
+* Streams
+  - Create
+  - Delete
+  - Deploy
+  - Undeploy
+* Tasks
+  - Create
+  - Delete
+  - Launch
+* Scheduling of Tasks
+  - Create Schedule
+  - Delete Schedule
+
+.List Overview of Audit Records
+image::{dataflow-asciidoc}/images/dataflow-audit-records-list.png[List Available Audit Records, scaledwidth="100%"]
+
+By clicking on the _Show Details_ icon, you can obtain further details regarding
+the auditing details:
+
+.List Details of an Audit Record
+image::{dataflow-asciidoc}/images/dataflow-audit-records-details.png[Details of a single Audit Record, scaledwidth="100%"]
+
+Generally, auditing provides the following information:
+
+* When was the record created?
+* Username that triggered the audit event (if security is enabled)
+* Audit operation (Schedule, Stresm, Task)
+* Performed action (Create, Delete, Deploy, Rollback, Undeploy, Update)
+* Correlation Id, e.g. Stream/Task name
+* Audit Data
+
+The written value of the property _Audit Data_ depends on the performed _Audit Operation_ and the _ActionType_.
+For example, when a Schedule is being created, the name of the task definition,
+task definition properties, deployment properties, as well as command line arguments are written
+to the persistence store.
+
+Sensitive information is sanitized prior to saving the Audit Record, in an _best-effort-manner_.
+Any of the following keys are being detected and its sensitive values are
+masked:
+
+- password
+- secret
+- key
+- token
+- .\*credentials.*
+- vcap_services
+
