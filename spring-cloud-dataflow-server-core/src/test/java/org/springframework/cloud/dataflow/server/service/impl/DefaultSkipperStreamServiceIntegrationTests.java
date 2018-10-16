@@ -29,6 +29,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.yaml.snakeyaml.DumperOptions;
+import org.yaml.snakeyaml.Yaml;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -44,7 +45,6 @@ import org.springframework.cloud.dataflow.server.configuration.TestDependencies;
 import org.springframework.cloud.dataflow.server.repository.StreamDefinitionRepository;
 import org.springframework.cloud.dataflow.server.service.SkipperStreamService;
 import org.springframework.cloud.dataflow.server.support.MockUtils;
-import org.springframework.cloud.dataflow.server.support.PlatformUtils;
 import org.springframework.cloud.dataflow.server.support.SkipperPackageUtils;
 import org.springframework.cloud.dataflow.server.support.TestResourceUtils;
 import org.springframework.cloud.skipper.ReleaseNotFoundException;
@@ -155,10 +155,17 @@ public class DefaultSkipperStreamServiceIntegrationTests {
 		}
 		assertThat(logPackage).isNotNull();
 		String actualYaml = logPackage.getConfigValues().getRaw();
-		if (PlatformUtils.isWindows()) {
-			expectedYaml = expectedYaml + DumperOptions.LineBreak.WIN.getString();
-		}
-		assertThat(actualYaml).isEqualTo(expectedYaml);
+
+		DumperOptions dumperOptions = new DumperOptions();
+		dumperOptions.setDefaultFlowStyle(DumperOptions.FlowStyle.BLOCK);
+		dumperOptions.setPrettyFlow(true);
+		Yaml yaml = new Yaml(dumperOptions);
+
+		Object actualYamlLoaded = yaml.load(actualYaml);
+		Object expectedYamlLoaded = yaml.load(expectedYaml);
+
+
+		assertThat(actualYamlLoaded).isEqualTo(expectedYamlLoaded);
 	}
 
 	@Test
