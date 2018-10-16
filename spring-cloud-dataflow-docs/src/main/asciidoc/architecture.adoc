@@ -116,6 +116,10 @@ The Data Flow Server uses an embedded servlet container and exposes REST endpoin
 .The Spring Cloud Data Flow Server
 image::{dataflow-asciidoc}/images/dataflow-server-arch.png[The Spring Cloud Data Flow Server Architecture, scaledwidth="100%"]
 
+[NOTE] The Data Flow Server that deploys applications to the  local machine is not intended to be used in production for streaming use cases but for the development and testing of stream based applications.
+The local Data Flow  *is* intended to be used in production for batch use cases as a replacement for the Spring Batch Admin project.
+Both streaming and batch use cases are intended to be used in production when deploying to Cloud Foundry or Kuberenetes.
+
 [[arch-data-flow-server-security]]
 === Security
 
@@ -179,7 +183,7 @@ Additional messaging delivery guarantees are those provided by the underlying me
 
 While Spring Boot provides the foundation for creating DevOps-friendly microservice applications, other libraries in the Spring ecosystem help create Stream-based microservice applications.  The most important of these is Spring Cloud Stream.
 
-The essence of the Spring Cloud Stream programming model is to provide an easy way to describe multiple inputs and outputs of an application that communicate over messaging middleware. These input and outputs map onto Kafka topics or Rabbit exchanges and queues.  Common application configuration for a Source that generates data, a Processor that consumes and produces data, and a Sink that consumes data is provided as part of the library.
+The essence of the Spring Cloud Stream programming model is to provide an easy way to describe multiple inputs and outputs of an application that communicate over messaging middleware. These input and outputs map onto Kafka topics or Rabbit exchanges and queues as well as the KStream/KTable programming model.  Common application configuration for a Source that generates data, a Processor that consumes and produces data, and a Sink that consumes data is provided as part of the library.
 
 [[arch-streaming-imperative-programming]]
 === Imperative Programming Model
