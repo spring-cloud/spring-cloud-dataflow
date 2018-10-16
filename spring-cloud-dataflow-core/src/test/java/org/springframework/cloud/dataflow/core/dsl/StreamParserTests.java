@@ -583,7 +583,14 @@ public class StreamParserTests {
 		assertFalse(appNodes.get(0).isUnboundStreamApp());
 		
 		checkForParseError("foo,",DSLMessage.OOD, 4);
-		// TODO need some stream tests that have comma at end of options
+
+		// value of the aaa option is a comma.
+		sn = parse("foo --aaa=,, bar");
+		appNodes = sn.getAppNodes();
+		assertEquals(2,appNodes.size());
+		assertEquals("foo --aaa=,",appNodes.get(0).toString());
+		assertEquals("bar",appNodes.get(1).toString());
+
 	}
 
 	@Test
@@ -600,8 +607,15 @@ public class StreamParserTests {
 		assertEquals(2,appNodes.size());
 		assertEquals("foo --aaa=bbb",appNodes.get(0).toString());
 		assertEquals("bar",appNodes.get(1).toString());
-		
-		
+
+		// No space after bbb argument
+		sn = parse("foo --aaa=bbb, bar");
+		appNodes = sn.getAppNodes();
+		assertEquals(2,appNodes.size());
+		assertEquals("foo --aaa=bbb",appNodes.get(0).toString());
+		assertEquals("bar",appNodes.get(1).toString());
+
+
 		//		sn = parse("foo --aaa=\"bbb\" , bar");
 		//		System.out.println(sn);
 		//		sn = parse("foo --aaa=\"bbb\",");
