@@ -1,30 +1,29 @@
+CREATE SEQUENCE HIBERNATE_SEQUENCE START 1 INCREMENT 1;
 
-    create sequence hibernate_sequence start 1 increment 1;
+CREATE TABLE APP_REGISTRATION (
+   ID INT8 NOT NULL,
+    OBJECT_VERSION INT8,
+    DEFAULT_VERSION BOOLEAN,
+    METADATA_URI TEXT,
+    NAME VARCHAR(255),
+    TYPE INT4,
+    URI TEXT,
+    VERSION VARCHAR(255),
+    PRIMARY KEY (ID)
+);
 
-    create table APP_REGISTRATION (
-       id int8 not null,
-        object_Version int8,
-        default_Version boolean,
-        metadata_Uri text,
-        name varchar(255),
-        type int4,
-        uri text,
-        version varchar(255),
-        primary key (id)
-    );
+CREATE TABLE AUDIT_RECORDS (
+   ID INT8 NOT NULL,
+    AUDIT_ACTION INT8 NOT NULL,
+    AUDIT_DATA TEXT,
+    AUDIT_OPERATION INT8 NOT NULL,
+    CORRELATION_ID VARCHAR(255),
+    CREATED_BY VARCHAR(255),
+    CREATED_ON TIMESTAMP,
+    PRIMARY KEY (ID)
+);
 
-    create table AUDIT_RECORDS (
-       id int8 not null,
-        audit_Action int8 not null,
-        audit_data text,
-        audit_Operation int8 not null,
-        correlation_id varchar(255),
-        created_by varchar(255),
-        created_On timestamp,
-        primary key (id)
-    );
-
-    CREATE INDEX IF NOT EXISTS AUDIT_RECORDS_AUDIT_ACTION_IDX ON AUDIT_RECORDS (audit_Action) ;
-    CREATE INDEX IF NOT EXISTS AUDIT_RECORDS_AUDIT_OPERATION_IDX ON AUDIT_RECORDS (audit_Operation) ;
-    CREATE INDEX IF NOT EXISTS AUDIT_RECORDS_CORRELATION_ID_IDX ON AUDIT_RECORDS (correlation_id) ;
-    CREATE INDEX IF NOT EXISTS AUDIT_RECORDS_CREATED_ON_IDX ON AUDIT_RECORDS (created_On) ;
+CREATE INDEX IF NOT EXISTS AUDIT_RECORDS_AUDIT_ACTION_IDX ON AUDIT_RECORDS (AUDIT_ACTION) ;
+CREATE INDEX IF NOT EXISTS AUDIT_RECORDS_AUDIT_OPERATION_IDX ON AUDIT_RECORDS (AUDIT_OPERATION) ;
+CREATE INDEX IF NOT EXISTS AUDIT_RECORDS_CORRELATION_ID_IDX ON AUDIT_RECORDS (CORRELATION_ID) ;
+CREATE INDEX IF NOT EXISTS AUDIT_RECORDS_CREATED_ON_IDX ON AUDIT_RECORDS (CREATED_ON) ;
