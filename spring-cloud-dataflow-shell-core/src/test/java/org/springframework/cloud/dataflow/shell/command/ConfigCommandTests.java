@@ -90,26 +90,34 @@ public class ConfigCommandTests {
 		configCommands.setServerUri("http://localhost:9393");
 	}
 
+	public static boolean isWindows() {
+		String osName = System.getProperty("os.name");
+
+		return osName != null && osName.toLowerCase().startsWith("windows");
+	}
+
 	@Test
 	public void testInfo() throws IOException {
-		DataFlowOperations dataFlowOperations = mock(DataFlowOperations.class);
-		AboutOperations aboutOperations = mock(AboutOperations.class);
-		when(dataFlowOperations.aboutOperation()).thenReturn(aboutOperations);
-		AboutResource aboutResource = new AboutResource();
-		when(aboutOperations.get()).thenReturn(aboutResource);
-		dataFlowShell.setDataFlowOperations(dataFlowOperations);
+		if (!isWindows()) {
+			DataFlowOperations dataFlowOperations = mock(DataFlowOperations.class);
+			AboutOperations aboutOperations = mock(AboutOperations.class);
+			when(dataFlowOperations.aboutOperation()).thenReturn(aboutOperations);
+			AboutResource aboutResource = new AboutResource();
+			when(aboutOperations.get()).thenReturn(aboutResource);
+			dataFlowShell.setDataFlowOperations(dataFlowOperations);
 
-		aboutResource.getFeatureInfo().setTasksEnabled(false);
-		aboutResource.getVersionInfo().getCore().setName("Foo Core");
-		aboutResource.getVersionInfo().getCore().setVersion("1.2.3.BUILD-SNAPSHOT");
-		aboutResource.getSecurityInfo().setAuthenticationEnabled(true);
-		aboutResource.getRuntimeEnvironment().getAppDeployer().setJavaVersion("1.8");
-		aboutResource.getRuntimeEnvironment().getAppDeployer().getPlatformSpecificInfo().put("Some", "Stuff");
-		aboutResource.getRuntimeEnvironment().getTaskLauncher().setDeployerSpiVersion("6.4");
-		final Table infoResult = (Table) configCommands.info().get(0);
-		String expectedOutput = FileCopyUtils.copyToString(new InputStreamReader(
-				getClass().getResourceAsStream(ConfigCommandTests.class.getSimpleName() + "-testInfo.txt"), "UTF-8"));
-		assertThat(infoResult.render(80), is(expectedOutput));
+			aboutResource.getFeatureInfo().setTasksEnabled(false);
+			aboutResource.getVersionInfo().getCore().setName("Foo Core");
+			aboutResource.getVersionInfo().getCore().setVersion("1.2.3.BUILD-SNAPSHOT");
+			aboutResource.getSecurityInfo().setAuthenticationEnabled(true);
+			aboutResource.getRuntimeEnvironment().getAppDeployer().setJavaVersion("1.8");
+			aboutResource.getRuntimeEnvironment().getAppDeployer().getPlatformSpecificInfo().put("Some", "Stuff");
+			aboutResource.getRuntimeEnvironment().getTaskLauncher().setDeployerSpiVersion("6.4");
+			final Table infoResult = (Table) configCommands.info().get(0);
+			String expectedOutput = FileCopyUtils.copyToString(new InputStreamReader(
+					getClass().getResourceAsStream(ConfigCommandTests.class.getSimpleName() + "-testInfo.txt"), "UTF-8"));
+			assertThat(infoResult.render(80), is(expectedOutput));
+		}
 	}
 
 	@Test
