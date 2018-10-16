@@ -382,6 +382,24 @@ skipper:>release upgrade --release-name helloworldlocal --package-name helloworl
 helloworldpcf has been upgraded.  Now at version v2.
 ----
 
+The manifest for this release would look like this:
+
+[source,bash,options="nowrap"]
+----
+"apiVersion": "skipper.spring.io/v1"
+"kind": "SpringCloudDeployerApplication"
+"metadata":
+  "name": "helloworld"
+  "type": "demo"
+"spec":
+  "resource": "maven://org.springframework.cloud.samples:spring-cloud-skipper-samples-helloworld"
+  "version": "1.0.0.RELEASE"
+  "applicationProperties":
+    "server.port": "9090"
+  "deploymentProperties": !!null "null"
+----
+
+
 If no `package-version` is specified, the latest package version by the given `--package-name` option is considered.
 The properties can either be provided through comma separated YAML string by using the `--properties` option or through a YAML
 file by using the `--file` option.
@@ -389,6 +407,55 @@ file by using the `--file` option.
 NOTE: An upgrade can be done by overriding the package version or by keeping the existing package version but overriding the properties.
 When overriding the package version, it needs to accompany with the corresponding properties as the existing properties are not carried over.
 In a future release, we plan to introduce a `--reuse-properties` command that will carry the current release properties over to the next release to be made.
+
+For instance, if the package version is not changed but only other properties are changed, the manifest would add the new properties with the existing properties of the same package version.
+
+[source,bash,options="nowrap"]
+----
+skipper:>release upgrade --release-name helloworldlocal --package-name helloworld --package-version 1.0.0 --properties spec.applicationProperties.log.level=DEBUG
+helloworldpcf has been upgraded.  Now at version v3.
+----
+
+[source,bash,options="nowrap"]
+----
+"apiVersion": "skipper.spring.io/v1"
+"kind": "SpringCloudDeployerApplication"
+"metadata":
+  "name": "helloworld"
+  "type": "demo"
+"spec":
+  "resource": "maven://org.springframework.cloud.samples:spring-cloud-skipper-samples-helloworld"
+  "version": "1.0.0.RELEASE"
+  "applicationProperties":
+    "server.port": "9090"
+    "log.level": "DEBUG"
+  "deploymentProperties": !!null "null"
+----
+
+Instead, if the upgrade is performed with a new package version as follows,
+
+[source,bash,options="nowrap"]
+----
+skipper:>release upgrade --release-name helloworldlocal --package-name helloworld --package-version 1.0.1
+helloworldpcf has been upgraded.  Now at version v3.
+----
+
+Since the package version is changed, the manifest wouldn't carry the properties from the existing release.
+
+[source,bash,options="nowrap"]
+----
+skipper:>manifest get helloworldlocal
+"apiVersion": "skipper.spring.io/v1"
+"kind": "SpringCloudDeployerApplication"
+"metadata":
+  "name": "helloworld"
+  "type": "demo"
+"spec":
+  "resource": "maven://org.springframework.cloud.samples:spring-cloud-skipper-samples-helloworld"
+  "version": "1.0.1.RELEASE"
+  "applicationProperties": !!null "null"
+  "deploymentProperties": !!null "null"
+----
 
 
 When performing an update on a package that contains nested packages, use the name of the package as a prefix in the property string or as the first level in the YAML document.
@@ -441,6 +508,8 @@ expression itself, see <<skipper-commands-generic-usage-timeout-expression>>.
 ----
 skipper:>release upgrade --release-name ticktockskipper --package-name ticktock --timeout-expression=30s
 ----
+
+
 
 The `--force` option is used to deploy new instances of currently deployed applications.
 In other words, Skipper will upgrade the application again even if the manifest is unchanged.
