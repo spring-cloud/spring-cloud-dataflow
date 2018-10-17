@@ -1,24 +1,24 @@
-CREATE SEQUENCE HIBERNATE_SEQUENCE START WITH 1 INCREMENT BY 1;
+create sequence hibernate_sequence start with 1 increment by 1;
 
-CREATE TABLE APP_REGISTRATION (
-    ID BIGINT NOT NULL,
-    OBJECT_VERSION BIGINT,
-    DEFAULT_VERSION BOOLEAN,
-    METADATA_URI CLOB,
-    NAME VARCHAR(255),
-    TYPE INTEGER,
-    URI CLOB,
-    VERSION VARCHAR(255),
-    PRIMARY KEY (ID)
+create table APP_REGISTRATION (
+    id bigint not null,
+    object_Version bigint,
+    default_Version boolean,
+    metadata_Uri clob,
+    name varchar(255),
+    type integer,
+    uri clob,
+    version varchar(255),
+    primary key (id)
 );
 
-CREATE TABLE AUDIT_RECORDS (
-    ID BIGINT NOT NULL,
-    AUDIT_ACTION BIGINT NOT NULL,
-    AUDIT_DATA VARCHAR(2147483647),
-    AUDIT_OPERATION BIGINT NOT NULL,
-    CORRELATION_ID VARCHAR(255),
-    CREATED_BY VARCHAR(255),
-    CREATED_ON TIMESTAMP,
-    PRIMARY KEY (ID)
+create table AUDIT_RECORDS (
+    id bigint not null,
+    audit_Action bigint not null,
+    audit_data varchar(2147483647),
+    audit_Operation bigint not null,
+    correlation_id varchar(255),
+    created_by varchar(255),
+    created_On timestamp,
+    primary key (id)
 );

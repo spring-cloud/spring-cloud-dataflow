@@ -1,33 +1,33 @@
-CREATE TABLE HIBERNATE_SEQUENCE (
- NEXT_VAL BIGINT
-);
+    create table hibernate_sequence (
+     next_val bigint
+    );
 
-INSERT INTO HIBERNATE_SEQUENCE WITH (ROWLOCK) (NEXT_VAL) SELECT 1 WHERE NOT EXISTS (SELECT NEXT_VAL FROM HIBERNATE_SEQUENCE);
+    insert into hibernate_sequence with (rowlock) (next_val) select 1 where not exists (select next_val from hibernate_sequence);
 
-CREATE TABLE APP_REGISTRATION (
-   ID BIGINT NOT NULL,
-    OBJECT_VERSION BIGINT,
-    DEFAULT_VERSION BIT,
-    METADATA_URI VARCHAR(MAX),
-    NAME VARCHAR(255),
-    TYPE INT,
-    URI VARCHAR(MAX),
-    VERSION VARCHAR(255),
-    PRIMARY KEY (ID)
-);
+    create table APP_REGISTRATION (
+       id bigint not null,
+        object_Version bigint,
+        default_Version bit,
+        metadata_Uri varchar(MAX),
+        name varchar(255),
+        type int,
+        uri varchar(MAX),
+        version varchar(255),
+        primary key (id)
+    );
 
-CREATE TABLE AUDIT_RECORDS (
-   ID BIGINT NOT NULL,
-    AUDIT_ACTION BIGINT NOT NULL,
-    AUDIT_DATA VARCHAR(MAX),
-    AUDIT_OPERATION BIGINT NOT NULL,
-    CORRELATION_ID VARCHAR(255),
-    CREATED_BY VARCHAR(255),
-    CREATED_ON DATETIME2,
-    PRIMARY KEY (ID)
-);
+    create table AUDIT_RECORDS (
+       id bigint not null,
+        audit_Action bigint not null,
+        audit_data varchar(MAX),
+        audit_Operation bigint not null,
+        correlation_id varchar(255),
+        created_by varchar(255),
+        created_On datetime2,
+        primary key (id)
+    );
 
-CREATE INDEX AUDIT_RECORDS_AUDIT_ACTION_IDX ON AUDIT_RECORDS (AUDIT_ACTION) ;
-CREATE INDEX AUDIT_RECORDS_AUDIT_OPERATION_IDX ON AUDIT_RECORDS (AUDIT_OPERATION) ;
-CREATE INDEX AUDIT_RECORDS_CORRELATION_ID_IDX ON AUDIT_RECORDS (CORRELATION_ID) ;
-CREATE INDEX AUDIT_RECORDS_CREATED_ON_IDX ON AUDIT_RECORDS (CREATED_ON) ;
+    CREATE INDEX AUDIT_RECORDS_AUDIT_ACTION_IDX ON AUDIT_RECORDS (audit_Action) ;
+    CREATE INDEX AUDIT_RECORDS_AUDIT_OPERATION_IDX ON AUDIT_RECORDS (audit_Operation) ;
+    CREATE INDEX AUDIT_RECORDS_CORRELATION_ID_IDX ON AUDIT_RECORDS (correlation_id) ;
+    CREATE INDEX AUDIT_RECORDS_CREATED_ON_IDX ON AUDIT_RECORDS (created_On) ;
