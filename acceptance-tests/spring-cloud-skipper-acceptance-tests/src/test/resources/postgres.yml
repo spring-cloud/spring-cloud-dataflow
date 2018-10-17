@@ -11,7 +11,7 @@ services:
     ports:
       - 5432
     healthcheck:
-      test: ["CMD", "psql", "-U", "postgres", "-w", "-c", "SELECT version();"]
+      test: ["CMD", "psql", "-U", "spring", "-d", "skipper", "-w", "-c", "SELECT version();"]
       interval: 1s
       timeout: 5s
       retries: 12
