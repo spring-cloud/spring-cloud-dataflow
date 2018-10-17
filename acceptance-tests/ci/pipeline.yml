@@ -11,7 +11,6 @@ resources:
   source:
     uri: ((github-repo))
     branch: ((branch))
-    ignore_paths: ["((base-path))/*"]
 
 - name: ci-git-repo
   type: git
