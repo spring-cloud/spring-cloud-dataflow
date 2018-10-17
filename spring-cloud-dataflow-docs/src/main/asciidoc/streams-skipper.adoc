@@ -96,6 +96,246 @@ $ curl http://localhost:9002/info
 {"app":{"description":"Spring Cloud Stream Log Sink Rabbit Binder Application","name":"log-sink-rabbit","version":"1.2.0.RELEASE"}}
 ----
 
+=== Force upgrade of a Stream
+
+When upgrading a stream, the --force option can be used to deploy new instances of currently deployed applications even if no applicaton or deployment properties have changed.
+This behavior is needed in the case when configuration information is obtained by the application itself at startup time, for example from Spring Cloud Config Server.
+You can specify which applications to force upgrade by using the option --app-names.
+If you do not specify any application names, all the applications will be force upgraded.
+You can specify --force and --app-names options together with --properties or --propertiesFile options.
+
+=== Overriding properties during Stream update
+
+The properties that are passed during stream update are added on top of the existing properties for the same stream.
+
+For instance, the stream `ticktock` is deployed without any explicit properties as follows:
+
+[source,bash]
+----
+dataflow:>stream create --name ticktock --definition "time | log --name=mylogger"
+Created new stream 'ticktock'
+
+dataflow:>stream deploy --name ticktock
+Deployment request has been sent for stream 'ticktock'
+----
+
+[source,bash]
+----
+dataflow:>stream manifest --name ticktock
+"apiVersion": "skipper.spring.io/v1"
+"kind": "SpringCloudDeployerApplication"
+"metadata":
+  "name": "time"
+"spec":
+  "resource": "maven://org.springframework.cloud.stream.app:time-source-rabbit"
+  "resourceMetadata": "maven://org.springframework.cloud.stream.app:time-source-rabbit:jar:metadata:1.3.1.RELEASE"
+  "version": "1.3.1.RELEASE"
+  "applicationProperties":
+    "spring.metrics.export.triggers.application.includes": "integration**"
+    "spring.cloud.dataflow.stream.app.label": "time"
+    "spring.cloud.stream.metrics.key": "ticktock.time.${spring.cloud.application.guid}"
+    "spring.cloud.stream.bindings.output.producer.requiredGroups": "ticktock"
+    "spring.cloud.stream.metrics.properties": "spring.application.name,spring.application.index,spring.cloud.application.*,spring.cloud.dataflow.*"
+    "spring.cloud.stream.bindings.output.destination": "ticktock.time"
+    "spring.cloud.dataflow.stream.name": "ticktock"
+    "spring.cloud.dataflow.stream.app.type": "source"
+  "deploymentProperties":
+    "spring.cloud.deployer.group": "ticktock"
+---
+"apiVersion": "skipper.spring.io/v1"
+"kind": "SpringCloudDeployerApplication"
+"metadata":
+  "name": "log"
+"spec":
+  "resource": "maven://org.springframework.cloud.stream.app:log-sink-rabbit"
+  "resourceMetadata": "maven://org.springframework.cloud.stream.app:log-sink-rabbit:jar:metadata:1.3.1.RELEASE"
+  "version": "1.3.1.RELEASE"
+  "applicationProperties":
+    "spring.metrics.export.triggers.application.includes": "integration**"
+    "spring.cloud.dataflow.stream.app.label": "log"
+    "spring.cloud.stream.metrics.key": "ticktock.log.${spring.cloud.application.guid}"
+    "spring.cloud.stream.bindings.input.group": "ticktock"
+    "log.name": "mylogger"
+    "spring.cloud.stream.metrics.properties": "spring.application.name,spring.application.index,spring.cloud.application.*,spring.cloud.dataflow.*"
+    "spring.cloud.dataflow.stream.name": "ticktock"
+    "spring.cloud.dataflow.stream.app.type": "sink"
+    "spring.cloud.stream.bindings.input.destination": "ticktock.time"
+  "deploymentProperties":
+    "spring.cloud.deployer.group": "ticktock"
+----
+
+In the second update, we try to add a new property for `log` application `foo2=bar2`.
+
+[source,bash]
+----
+dataflow:>stream update --name ticktock --properties app.log.foo2=bar2
+Update request has been sent for the stream 'ticktock'
+
+dataflow:>stream manifest --name ticktock
+"apiVersion": "skipper.spring.io/v1"
+"kind": "SpringCloudDeployerApplication"
+"metadata":
+  "name": "time"
+"spec":
+  "resource": "maven://org.springframework.cloud.stream.app:time-source-rabbit"
+  "resourceMetadata": "maven://org.springframework.cloud.stream.app:time-source-rabbit:jar:metadata:1.3.1.RELEASE"
+  "version": "1.3.1.RELEASE"
+  "applicationProperties":
+    "spring.metrics.export.triggers.application.includes": "integration**"
+    "spring.cloud.dataflow.stream.app.label": "time"
+    "spring.cloud.stream.metrics.key": "ticktock.time.${spring.cloud.application.guid}"
+    "spring.cloud.stream.bindings.output.producer.requiredGroups": "ticktock"
+    "spring.cloud.stream.metrics.properties": "spring.application.name,spring.application.index,spring.cloud.application.*,spring.cloud.dataflow.*"
+    "spring.cloud.stream.bindings.output.destination": "ticktock.time"
+    "spring.cloud.dataflow.stream.name": "ticktock"
+    "spring.cloud.dataflow.stream.app.type": "source"
+  "deploymentProperties":
+    "spring.cloud.deployer.group": "ticktock"
+---
+"apiVersion": "skipper.spring.io/v1"
+"kind": "SpringCloudDeployerApplication"
+"metadata":
+  "name": "log"
+"spec":
+  "resource": "maven://org.springframework.cloud.stream.app:log-sink-rabbit"
+  "resourceMetadata": "maven://org.springframework.cloud.stream.app:log-sink-rabbit:jar:metadata:1.3.1.RELEASE"
+  "version": "1.3.1.RELEASE"
+  "applicationProperties":
+    "spring.metrics.export.triggers.application.includes": "integration**"
+    "spring.cloud.dataflow.stream.app.label": "log"
+    "spring.cloud.stream.metrics.key": "ticktock.log.${spring.cloud.application.guid}"
+    "spring.cloud.stream.bindings.input.group": "ticktock"
+    "log.name": "mylogger"
+    "spring.cloud.stream.metrics.properties": "spring.application.name,spring.application.index,spring.cloud.application.*,spring.cloud.dataflow.*"
+    "spring.cloud.dataflow.stream.name": "ticktock"
+    "spring.cloud.dataflow.stream.app.type": "sink"
+    "foo2": "bar2" // <1>
+    "spring.cloud.stream.bindings.input.destination": "ticktock.time"
+  "deploymentProperties":
+    "spring.cloud.deployer.count": "1"
+    "spring.cloud.deployer.group": "ticktock"
+
+dataflow:>stream list
+╔═══════════╤══════════════════════════════════════════╤═════════════════════════════════════════╗
+║Stream Name│            Stream Definition             │                 Status                  ║
+╠═══════════╪══════════════════════════════════════════╪═════════════════════════════════════════╣
+║ticktock   │time | log --log.name=mylogger --foo2=bar2│The stream has been successfully deployed║
+╚═══════════╧══════════════════════════════════════════╧═════════════════════════════════════════╝
+
+----
+
+<1> Property `foo2=bar2` is applied for the `log` application.
+
+Now, when we add another property `foo3=bar3` to `log` application, this new property is added on top of the existing properties for the stream `ticktock`.
+
+[source,bash]
+----
+dataflow:>stream update --name ticktock --properties app.log.foo3=bar3
+Update request has been sent for the stream 'ticktock'
+
+dataflow:>stream manifest --name ticktock
+"apiVersion": "skipper.spring.io/v1"
+"kind": "SpringCloudDeployerApplication"
+"metadata":
+  "name": "time"
+"spec":
+  "resource": "maven://org.springframework.cloud.stream.app:time-source-rabbit"
+  "resourceMetadata": "maven://org.springframework.cloud.stream.app:time-source-rabbit:jar:metadata:1.3.1.RELEASE"
+  "version": "1.3.1.RELEASE"
+  "applicationProperties":
+    "spring.metrics.export.triggers.application.includes": "integration**"
+    "spring.cloud.dataflow.stream.app.label": "time"
+    "spring.cloud.stream.metrics.key": "ticktock.time.${spring.cloud.application.guid}"
+    "spring.cloud.stream.bindings.output.producer.requiredGroups": "ticktock"
+    "spring.cloud.stream.metrics.properties": "spring.application.name,spring.application.index,spring.cloud.application.*,spring.cloud.dataflow.*"
+    "spring.cloud.stream.bindings.output.destination": "ticktock.time"
+    "spring.cloud.dataflow.stream.name": "ticktock"
+    "spring.cloud.dataflow.stream.app.type": "source"
+  "deploymentProperties":
+    "spring.cloud.deployer.group": "ticktock"
+---
+"apiVersion": "skipper.spring.io/v1"
+"kind": "SpringCloudDeployerApplication"
+"metadata":
+  "name": "log"
+"spec":
+  "resource": "maven://org.springframework.cloud.stream.app:log-sink-rabbit"
+  "resourceMetadata": "maven://org.springframework.cloud.stream.app:log-sink-rabbit:jar:metadata:1.3.1.RELEASE"
+  "version": "1.3.1.RELEASE"
+  "applicationProperties":
+    "spring.metrics.export.triggers.application.includes": "integration**"
+    "spring.cloud.dataflow.stream.app.label": "log"
+    "spring.cloud.stream.metrics.key": "ticktock.log.${spring.cloud.application.guid}"
+    "spring.cloud.stream.bindings.input.group": "ticktock"
+    "log.name": "mylogger"
+    "spring.cloud.stream.metrics.properties": "spring.application.name,spring.application.index,spring.cloud.application.*,spring.cloud.dataflow.*"
+    "spring.cloud.dataflow.stream.name": "ticktock"
+    "spring.cloud.dataflow.stream.app.type": "sink"
+    "foo2": "bar2" <1>
+    "spring.cloud.stream.bindings.input.destination": "ticktock.time"
+    "foo3": "bar3" <1>
+  "deploymentProperties":
+    "spring.cloud.deployer.count": "1"
+    "spring.cloud.deployer.group": "ticktock"
+----
+
+<1> The property `foo3=bar3` is added along with the existing `foo2=bar2` for the `log` application.
+
+We can still override the existing properties as follows:
+
+[source,bash]
+----
+dataflow:>stream update --name ticktock --properties app.log.foo3=bar4
+Update request has been sent for the stream 'ticktock'
+
+dataflow:>stream manifest ticktock
+"apiVersion": "skipper.spring.io/v1"
+"kind": "SpringCloudDeployerApplication"
+"metadata":
+  "name": "time"
+"spec":
+  "resource": "maven://org.springframework.cloud.stream.app:time-source-rabbit"
+  "resourceMetadata": "maven://org.springframework.cloud.stream.app:time-source-rabbit:jar:metadata:1.3.1.RELEASE"
+  "version": "1.3.1.RELEASE"
+  "applicationProperties":
+    "spring.metrics.export.triggers.application.includes": "integration**"
+    "spring.cloud.dataflow.stream.app.label": "time"
+    "spring.cloud.stream.metrics.key": "ticktock.time.${spring.cloud.application.guid}"
+    "spring.cloud.stream.bindings.output.producer.requiredGroups": "ticktock"
+    "spring.cloud.stream.metrics.properties": "spring.application.name,spring.application.index,spring.cloud.application.*,spring.cloud.dataflow.*"
+    "spring.cloud.stream.bindings.output.destination": "ticktock.time"
+    "spring.cloud.dataflow.stream.name": "ticktock"
+    "spring.cloud.dataflow.stream.app.type": "source"
+  "deploymentProperties":
+    "spring.cloud.deployer.group": "ticktock"
+---
+"apiVersion": "skipper.spring.io/v1"
+"kind": "SpringCloudDeployerApplication"
+"metadata":
+  "name": "log"
+"spec":
+  "resource": "maven://org.springframework.cloud.stream.app:log-sink-rabbit"
+  "resourceMetadata": "maven://org.springframework.cloud.stream.app:log-sink-rabbit:jar:metadata:1.3.1.RELEASE"
+  "version": "1.3.1.RELEASE"
+  "applicationProperties":
+    "spring.metrics.export.triggers.application.includes": "integration**"
+    "spring.cloud.dataflow.stream.app.label": "log"
+    "spring.cloud.stream.metrics.key": "ticktock.log.${spring.cloud.application.guid}"
+    "spring.cloud.stream.bindings.input.group": "ticktock"
+    "log.name": "mylogger"
+    "spring.cloud.stream.metrics.properties": "spring.application.name,spring.application.index,spring.cloud.application.*,spring.cloud.dataflow.*"
+    "spring.cloud.dataflow.stream.name": "ticktock"
+    "spring.cloud.dataflow.stream.app.type": "sink"
+    "foo2": "bar2" <1>
+    "spring.cloud.stream.bindings.input.destination": "ticktock.time"
+    "foo3": "bar4" <1>
+  "deploymentProperties":
+    "spring.cloud.deployer.count": "1"
+    "spring.cloud.deployer.group": "ticktock"
+----
+
+<1> The property `foo3` is replaced with the new value` bar4` and the existing property `foo2=bar2` remains.
+
 === Stream History
 
 The history of the stream can be viewed by running the `stream history` command, as shown (with its output), in the following example:
