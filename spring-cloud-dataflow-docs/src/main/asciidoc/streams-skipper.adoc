@@ -96,7 +96,7 @@ $ curl http://localhost:9002/info
 {"app":{"description":"Spring Cloud Stream Log Sink Rabbit Binder Application","name":"log-sink-rabbit","version":"1.2.0.RELEASE"}}
 ----
 
-=== Force update of a Stream
+=== Force upgrade of a Stream
 
 When upgrading a stream, the --force option can be used to deploy new instances of currently deployed applications even if no applicaton or deployment properties have changed.
 This behavior is needed in the case when configuration information is obtained by the application itself at startup time, for example from Spring Cloud Config Server.
@@ -209,7 +209,7 @@ dataflow:>stream manifest --name ticktock
     "spring.cloud.stream.metrics.properties": "spring.application.name,spring.application.index,spring.cloud.application.*,spring.cloud.dataflow.*"
     "spring.cloud.dataflow.stream.name": "ticktock"
     "spring.cloud.dataflow.stream.app.type": "sink"
-    "foo2": "bar2"
+    "foo2": "bar2" // <1>
     "spring.cloud.stream.bindings.input.destination": "ticktock.time"
   "deploymentProperties":
     "spring.cloud.deployer.count": "1"
@@ -223,6 +223,8 @@ dataflow:>stream list
 ╚═══════════╧══════════════════════════════════════════╧═════════════════════════════════════════╝
 
 ----
+
+<1> Property `foo2=bar2` is applied for the `log` application.
 
 Now, when we add another property `foo3=bar3` to `log` application, this new property is added on top of the existing properties for the stream `ticktock`.
 
@@ -269,13 +271,15 @@ dataflow:>stream manifest --name ticktock
     "spring.cloud.stream.metrics.properties": "spring.application.name,spring.application.index,spring.cloud.application.*,spring.cloud.dataflow.*"
     "spring.cloud.dataflow.stream.name": "ticktock"
     "spring.cloud.dataflow.stream.app.type": "sink"
-    "foo2": "bar2"
+    "foo2": "bar2" <1>
     "spring.cloud.stream.bindings.input.destination": "ticktock.time"
-    "foo3": "bar3"
+    "foo3": "bar3" <1>
   "deploymentProperties":
     "spring.cloud.deployer.count": "1"
     "spring.cloud.deployer.group": "ticktock"
 ----
+
+<1> The property `foo3=bar3` is added along with the existing `foo2=bar2` for the `log` application.
 
 We can still override the existing properties as follows:
 
@@ -322,13 +326,15 @@ dataflow:>stream manifest ticktock
     "spring.cloud.stream.metrics.properties": "spring.application.name,spring.application.index,spring.cloud.application.*,spring.cloud.dataflow.*"
     "spring.cloud.dataflow.stream.name": "ticktock"
     "spring.cloud.dataflow.stream.app.type": "sink"
-    "foo2": "bar2"
+    "foo2": "bar2" <1>
     "spring.cloud.stream.bindings.input.destination": "ticktock.time"
-    "foo3": "bar4"
+    "foo3": "bar4" <1>
   "deploymentProperties":
     "spring.cloud.deployer.count": "1"
     "spring.cloud.deployer.group": "ticktock"
 ----
+
+<1> The property `foo3` is replaced with the new value` bar4` and the existing property `foo2=bar2` remains.
 
 === Stream History
 
