@@ -583,31 +583,51 @@ public class StreamParserTests {
 		assertFalse(appNodes.get(0).isUnboundStreamApp());
 		
 		checkForParseError("foo,",DSLMessage.OOD, 4);
-		// TODO need some stream tests that have comma at end of options
+
+		// TODO should have special message for this occurrence... ? need the space before the comma
+		// value of the aaa option is a comma.
+		sn = parse("foo --aaa=,, bar");
+		appNodes = sn.getAppNodes();
+		assertEquals(2,appNodes.size());
+		assertEquals("foo --aaa=,",appNodes.get(0).toString());
+		assertEquals("bar",appNodes.get(1).toString());
+
 	}
 
 	@Test
 	public void testParseUnboundStreamAppsWithParams() {
-		// TODO should have special message for this occurrence... ? need the space before the comma			
-		
-		//		sn = parse("foo --aaa=bbb, bar");
-		//		System.out.println(sn);
-		//		sn = parse("foo --aaa=\"bbb\", bar");
-		//		System.out.println(sn);
+
 
 		sn = parse("foo --aaa=bbb , bar");
 		List<AppNode> appNodes = sn.getAppNodes();
 		assertEquals(2,appNodes.size());
 		assertEquals("foo --aaa=bbb",appNodes.get(0).toString());
 		assertEquals("bar",appNodes.get(1).toString());
-		
-		
-		//		sn = parse("foo --aaa=\"bbb\" , bar");
-		//		System.out.println(sn);
-		//		sn = parse("foo --aaa=\"bbb\",");
-		//		System.out.println(sn);
-		//		sn = parse("foo --aaa=\"bbb\" ,");
-		//		System.out.println(sn);
+
+		// No space after bbb argument
+		sn = parse("foo --aaa=bbb, bar");
+		appNodes = sn.getAppNodes();
+		assertEquals(2,appNodes.size());
+		assertEquals("foo --aaa=bbb",appNodes.get(0).toString());
+		assertEquals("bar",appNodes.get(1).toString());
+
+		sn = parse("foo --aaa=\"bbb\", bar");
+		appNodes = sn.getAppNodes();
+		assertEquals(2,appNodes.size());
+		assertEquals("foo --aaa=bbb",appNodes.get(0).toString());
+		assertEquals("bar",appNodes.get(1).toString());
+
+		sn = parse("foo --aaa=\"bbb\" , bar");
+		appNodes = sn.getAppNodes();
+		assertEquals(2,appNodes.size());
+		assertEquals("foo --aaa=bbb",appNodes.get(0).toString());
+		assertEquals("bar",appNodes.get(1).toString());
+
+
+		checkForParseError("foo --aaa=\"bbb\",",DSLMessage.OOD, 16);
+
+		checkForParseError("foo --aaa=\"bbb\" ,",DSLMessage.OOD, 17);
+
 	}
 
 	

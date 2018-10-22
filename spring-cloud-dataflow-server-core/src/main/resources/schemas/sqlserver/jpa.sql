@@ -18,11 +18,16 @@
 
     create table AUDIT_RECORDS (
        id bigint not null,
-        audit_Action bigint,
+        audit_Action bigint not null,
         audit_data varchar(MAX),
-        audit_Operation bigint,
+        audit_Operation bigint not null,
         correlation_id varchar(255),
         created_by varchar(255),
         created_On datetime2,
         primary key (id)
     );
+
+    CREATE INDEX AUDIT_RECORDS_AUDIT_ACTION_IDX ON AUDIT_RECORDS (audit_Action) ;
+    CREATE INDEX AUDIT_RECORDS_AUDIT_OPERATION_IDX ON AUDIT_RECORDS (audit_Operation) ;
+    CREATE INDEX AUDIT_RECORDS_CORRELATION_ID_IDX ON AUDIT_RECORDS (correlation_id) ;
+    CREATE INDEX AUDIT_RECORDS_CREATED_ON_IDX ON AUDIT_RECORDS (created_On) ;

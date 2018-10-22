@@ -88,8 +88,7 @@ public class ClassicAppRegistryCommands extends AbstractAppRegistryCommands impl
 	public List<Object> info(
 			@CliOption(key = { "", "id" },
 					help = "id of the application to query in the form of 'type:name'") QualifiedApplicationName application,
-			@CliOption(key = { "",
-					"name" }, help = "name of the application to query") String applicationName,
+			@CliOption(key = { "", "name" }, help = "name of the application to query") String applicationName,
 			@CliOption(key = {
 					"type" }, help = "type of the application to query") ApplicationType applicationType,
 			@CliOption(key = { "exhaustive" }, help = "return all metadata, including common Spring Boot properties",
@@ -142,7 +141,7 @@ public class ClassicAppRegistryCommands extends AbstractAppRegistryCommands impl
 
 	private boolean assertAppInfoOptions(QualifiedApplicationName application, String name, ApplicationType type) {
 		if (application != null && StringUtils.hasText(application.name) && application.type != null) {
-			return !(StringUtils.hasText(name) || (type != null));
+			return type == null;
 		}
 		else {
 			return (StringUtils.hasText(name) && type != null);

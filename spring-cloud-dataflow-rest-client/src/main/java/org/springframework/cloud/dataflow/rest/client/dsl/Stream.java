@@ -24,15 +24,15 @@ import org.springframework.cloud.dataflow.rest.resource.StreamDefinitionResource
 import org.springframework.util.Assert;
 
 /**
- * Represents a Stream deployed on DataFlow server. Instances of this class are created using a fluent style builder {@link Builder}.
- * for instance
+ * Represents a Stream deployed on DataFlow server. Instances of this class are created using a fluent style builder
+ * pattern.  For for instance:
  * <pre>
  *     {@code
  *     Stream stream = Stream.builder(dataflowOperations).definition("time | log").create().deploy();
  *     }
  * </pre>
  *
- * A fluent style can also be used via
+ * A fluent style that separates source, processor and sink parts can also be used via
  * <pre>
  *     {@code
  *     Stream stream = Stream.builder(dataflowOperations).source("time").sink("log").create().deploy();

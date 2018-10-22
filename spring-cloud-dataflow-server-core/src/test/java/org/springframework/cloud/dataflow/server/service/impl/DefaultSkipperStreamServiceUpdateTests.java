@@ -25,6 +25,7 @@ import java.util.Map;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.yaml.snakeyaml.DumperOptions;
+import org.yaml.snakeyaml.Yaml;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -118,6 +119,14 @@ public class DefaultSkipperStreamServiceUpdateTests {
 		if (PlatformUtils.isWindows()) {
 			expectedYaml = expectedYaml + DumperOptions.LineBreak.WIN.getString();
 		}
-		assertThat(yml).isEqualTo(expectedYaml);
+
+		DumperOptions dumperOptions = new DumperOptions();
+		dumperOptions.setDefaultFlowStyle(DumperOptions.FlowStyle.BLOCK);
+		dumperOptions.setPrettyFlow(true);
+		Yaml yaml = new Yaml(dumperOptions);
+
+		Object actualYamlLoaded = yaml.load(yml);
+		Object expectedYamlLoaded = yaml.load(expectedYaml);
+		assertThat(actualYamlLoaded).isEqualTo(expectedYamlLoaded);
 	}
 }

@@ -39,6 +39,7 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
  * Represents an audit entry. Used to record audit trail information.
  *
  * @author Gunnar Hillert
+ * @author Christian Tzolov
  */
 @Entity
 @Table(name = "AUDIT_RECORDS")

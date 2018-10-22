@@ -13,14 +13,19 @@
 
     create table AUDIT_RECORDS (
        id bigint not null,
-        audit_Action bigint,
+        audit_Action bigint NOT NULL,
         audit_data longtext,
-        audit_Operation bigint,
+        audit_Operation bigint NOT NULL,
         correlation_id varchar(255),
         created_by varchar(255),
         created_On datetime,
         primary key (id)
     );
+
+    CREATE INDEX AUDIT_RECORDS_AUDIT_ACTION_IDX ON AUDIT_RECORDS (audit_Action) ;
+    CREATE INDEX AUDIT_RECORDS_AUDIT_OPERATION_IDX ON AUDIT_RECORDS (audit_Operation) ;
+    CREATE INDEX AUDIT_RECORDS_CORRELATION_ID_IDX ON AUDIT_RECORDS (correlation_id) ;
+    CREATE INDEX AUDIT_RECORDS_CREATED_ON_IDX ON AUDIT_RECORDS (created_On) ;
 
     create table hibernate_sequence (
         next_val bigint
