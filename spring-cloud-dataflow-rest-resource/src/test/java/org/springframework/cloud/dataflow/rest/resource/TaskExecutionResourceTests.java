@@ -23,6 +23,7 @@ import org.junit.Test;
 import org.springframework.cloud.task.repository.TaskExecution;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 
 /**
  * Provides tests for the {@link TaskExecutionResourceTests} class.
@@ -50,6 +51,7 @@ public class TaskExecutionResourceTests {
 		taskExecution.setStartTime(new Date());
 		final TaskExecutionResource taskExecutionResource = new TaskExecutionResource(taskExecution);
 		assertEquals(TaskExecutionStatus.RUNNING, taskExecutionResource.getTaskExecutionStatus());
+		assertNull(taskExecutionResource.getExitCode());
 	}
 
 	@Test
