@@ -153,7 +153,7 @@
 							  <tag>latest</tag>
 							  <tag>${project.version}</tag>
 						  </tags>
-						<from>ubuntu:18.10</from>
+						<from>java:8-alpine</from>
 						<volumes>
 						  <volume>/tmp</volume>
 						</volumes>
