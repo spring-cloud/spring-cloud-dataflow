@@ -43,7 +43,7 @@
 		     release versions -->
 		<spring-cloud.version>Edgware.SR5</spring-cloud.version>
 
-		<spring-cloud-scheduler-spi.version>1.0.0.RELEASE</spring-cloud-scheduler-spi.version>
+		<spring-cloud-scheduler-spi.version>1.0.1.RELEASE</spring-cloud-scheduler-spi.version>
 
 		<spring-cloud-common-security-config.version>1.0.2.RELEASE</spring-cloud-common-security-config.version>
 
