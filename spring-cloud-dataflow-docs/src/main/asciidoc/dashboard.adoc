@@ -302,7 +302,21 @@ The following image shows the Executions tab:
 .List of Task Executions
 image::{dataflow-asciidoc}/images/dataflow-task-executions-list.png[List of Task Executions, scaledwidth="100%"]
 
+[[dashboard-tasks-execution-detail]]
+=== Execution Detail
+For each task execution on the Executions page, a user can retrieve detailed information about a specific execution by clicking the information icon located to the right of the task execution.
 
+image::{dataflow-asciidoc}/images/dataflow-task-execution-detail.png[List of Task Executions, scaledwidth="100%"]
+
+
+On this screen the user can view not only the information from the Task Executions page but also:
+
+* Task Arguments
+* External Execution Id
+* Batch Job Indicator (indicates if the task execution contained Spring Batch jobs.)
+* Job Execution Ids links (Clicking the Job Execution Id will take you to the Job Execution page for that Job Execution Id.)
+* Task Execution Duration
+* Task Execution Exit Message
 
 [[dashboard-jobs]]
 == Jobs
