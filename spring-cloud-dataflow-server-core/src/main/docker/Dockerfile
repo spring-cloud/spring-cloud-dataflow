@@ -1,4 +1,4 @@
-FROM java:8
+FROM springcloud/openjdk:latest
 VOLUME /tmp
 ADD *.jar data-admin.jar
 RUN bash -c 'touch /data-admin.jar'
