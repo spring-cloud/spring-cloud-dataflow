@@ -38,7 +38,7 @@ public interface DeployerRepository extends PagingAndSortingRepository<Deployer,
 
 	@Override
 	@RestResource(exported = false)
-	void delete(String s);
+	void deleteById(String s);
 
 	@Override
 	@RestResource(exported = false)

@@ -40,7 +40,7 @@ public interface ReleaseRepository extends PagingAndSortingRepository<Release, L
 
 	@Override
 	@RestResource(exported = false)
-	void delete(Long id);
+	void deleteById(Long id);
 
 	@Override
 	@RestResource(exported = false)

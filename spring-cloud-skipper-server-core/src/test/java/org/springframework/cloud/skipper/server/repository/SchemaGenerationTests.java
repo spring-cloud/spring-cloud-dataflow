@@ -18,6 +18,7 @@ package org.springframework.cloud.skipper.server.repository;
 import java.io.File;
 import java.nio.file.Files;
 import java.util.ArrayList;
+import java.util.EnumSet;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -26,10 +27,8 @@ import javax.persistence.spi.PersistenceUnitInfo;
 import org.hibernate.HibernateException;
 import org.hibernate.boot.MetadataSources;
 import org.hibernate.boot.registry.StandardServiceRegistryBuilder;
-import org.hibernate.boot.spi.MetadataImplementor;
 import org.hibernate.tool.hbm2ddl.SchemaExport;
-import org.hibernate.tool.hbm2ddl.SchemaExport.Type;
-import org.hibernate.tool.hbm2ddl.Target;
+import org.hibernate.tool.schema.TargetType;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -99,7 +98,7 @@ public class SchemaGenerationTests extends AbstractIntegrationTest {
 
 		final SchemaExport export;
 		try {
-			export = new SchemaExport((MetadataImplementor) metadata.buildMetadata());
+			export = new SchemaExport();
 			export.setDelimiter(";");
 			export.setFormat(true);
 			export.setOutputFile(new File(tempDir, "schema-" + dialect.toLowerCase() + ".sql").getAbsolutePath());
@@ -107,6 +106,7 @@ public class SchemaGenerationTests extends AbstractIntegrationTest {
 		catch (HibernateException e) {
 			throw new IllegalStateException(e);
 		}
-		export.execute(Target.SCRIPT, Type.BOTH);
+		EnumSet<TargetType> targetTypes = EnumSet.of(TargetType.SCRIPT);
+		export.execute(targetTypes, SchemaExport.Action.BOTH, metadata.buildMetadata());
 	}
 }

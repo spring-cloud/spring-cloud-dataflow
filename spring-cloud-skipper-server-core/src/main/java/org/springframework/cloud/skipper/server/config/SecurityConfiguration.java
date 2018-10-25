@@ -26,5 +26,4 @@ import org.springframework.context.annotation.Import;
 @Configuration
 @Import({ SkipperOAuthSecurityConfiguration.class })
 public class SecurityConfiguration {
-
 }

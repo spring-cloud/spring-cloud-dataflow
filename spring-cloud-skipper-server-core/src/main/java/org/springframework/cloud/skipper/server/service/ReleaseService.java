@@ -102,7 +102,7 @@ public class ReleaseService {
 	public Release install(Long id, InstallProperties installProperties) {
 		Assert.notNull(installProperties, "Deploy properties can not be null");
 		Assert.notNull(id, "Package id can not be null");
-		PackageMetadata packageMetadata = this.packageMetadataRepository.findOne(id);
+		PackageMetadata packageMetadata = this.packageMetadataRepository.findById(id).orElse(null);
 		if (packageMetadata == null) {
 			throw new SkipperException(String.format("Package with id='%s' can not be found.", id));
 		}

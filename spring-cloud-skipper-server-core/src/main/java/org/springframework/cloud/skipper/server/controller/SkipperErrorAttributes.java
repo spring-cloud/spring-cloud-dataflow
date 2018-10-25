@@ -17,12 +17,11 @@ package org.springframework.cloud.skipper.server.controller;
 
 import java.util.Map;
 
-import org.springframework.boot.autoconfigure.web.DefaultErrorAttributes;
-import org.springframework.boot.autoconfigure.web.ErrorAttributes;
+import org.springframework.boot.web.servlet.error.DefaultErrorAttributes;
 import org.springframework.cloud.skipper.PackageDeleteException;
 import org.springframework.cloud.skipper.ReleaseNotFoundException;
 import org.springframework.cloud.skipper.SkipperException;
-import org.springframework.web.context.request.RequestAttributes;
+import org.springframework.web.context.request.WebRequest;
 
 /**
  * Custom {@link ErrorAttributes} adding skipper specific fields for its own errors.
@@ -32,10 +31,18 @@ import org.springframework.web.context.request.RequestAttributes;
  */
 public class SkipperErrorAttributes extends DefaultErrorAttributes {
 
+	/**
+	 * Instantiate a new skipper error attributes. Forces to include error via
+	 * constructor.
+	 */
+	public SkipperErrorAttributes() {
+		super(true);
+	}
+
 	@Override
-	public Map<String, Object> getErrorAttributes(RequestAttributes requestAttributes, boolean includeStackTrace) {
-		Map<String, Object> errorAttributes = super.getErrorAttributes(requestAttributes, includeStackTrace);
-		Throwable error = getError(requestAttributes);
+	public Map<String, Object> getErrorAttributes(WebRequest webRequest, boolean includeStackTrace) {
+		Map<String, Object> errorAttributes = super.getErrorAttributes(webRequest, includeStackTrace);
+		Throwable error = getError(webRequest);
 		// if we're in our skipper related exceptions, reset message as available from there
 		// as otherwise super method above will resolve message as one possibly set from exception handler
 		if (error != null) {

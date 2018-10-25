@@ -49,7 +49,7 @@ public interface RepositoryRepository extends PagingAndSortingRepository<Reposit
 
 	@Override
 	@RestResource(exported = false)
-	void delete(Long id);
+	void deleteById(Long id);
 
 	@Override
 	@RestResource(exported = false)

@@ -3,11 +3,15 @@ spring:
     name: my-app-name
   jmx:
     default-domain: my-app-name
+  flyway:
+    locations: /db/migration/{vendor}
+    check-location: false
+  security:
+    user:
+      password: "{noop}secret10"
 server:
   port: ${oauth2.port}
 security:
-  user:
-    password: secret10
   oauth2:
     client:
       clientId: myclient

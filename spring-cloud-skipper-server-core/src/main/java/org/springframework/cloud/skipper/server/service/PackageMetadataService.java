@@ -117,7 +117,7 @@ public class PackageMetadataService implements ResourceLoaderAware {
 				}
 			}
 			if (!canDelete) {
-				Repository repository = this.repositoryRepository.findOne(packageMetadata.getRepositoryId());
+				Repository repository = this.repositoryRepository.findById(packageMetadata.getRepositoryId()).get();
 				errorMessages.add(String.format("Can not delete Package Metadata [%s:%s] in Repository [%s]. " +
 								"Not all releases of this package have the status DELETED. Active Releases [%s]",
 						packageMetadata.getName(), packageMetadata.getVersion(), repository.getName(),
@@ -136,7 +136,7 @@ public class PackageMetadataService implements ResourceLoaderAware {
 	}
 
 	private boolean checkIfPackageIsFromLocalRepo(List<String> errorMessages, PackageMetadata packageMetadata) {
-		Repository repository = this.repositoryRepository.findOne(packageMetadata.getRepositoryId());
+		Repository repository = this.repositoryRepository.findById(packageMetadata.getRepositoryId()).orElse(null);
 		if (repository != null) {
 			if (!repository.isLocal()) {
 				errorMessages.add(String.format("Can not delete package [%s], associated repository [%s] is remote.",
@@ -161,7 +161,7 @@ public class PackageMetadataService implements ResourceLoaderAware {
 	public List<Release> filterReleasesFromLocalRepos(List<Release> releases, String packageMetadataName) {
 		List<Release> releasesFromLocalRepositories = new ArrayList<>();
 		for (Release release : releases) {
-			Repository repository = this.repositoryRepository.findOne(release.getRepositoryId());
+			Repository repository = this.repositoryRepository.findById(release.getRepositoryId()).orElse(null);
 			if (repository == null) {
 				throw new SkipperException("Can not delete Package Metadata [" + packageMetadataName + "]. " +
 						"Associated repository not found.");

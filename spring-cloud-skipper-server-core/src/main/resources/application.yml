@@ -129,6 +129,9 @@ spring:
 
             - GET  /actuator/**                     => hasRole('ROLE_MANAGE')
 
+  flyway:
+    locations: /db/migration/{vendor}
+    check-location: false
   mustache:
     check-template-location: false
 
@@ -154,5 +157,3 @@ logging:
     org.springframework.boot.autoconfigure.security: 'INFO'
     org.springframework.cloud.skipper: 'INFO'
     org.springframework.statemachine: 'INFO'
-flyway:
-  locations: /db/migration/{vendor}

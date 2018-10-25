@@ -20,7 +20,8 @@ import org.junit.runner.RunWith;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.ImportAutoConfiguration;
-import org.springframework.boot.autoconfigure.web.WebClientAutoConfiguration;
+import org.springframework.boot.autoconfigure.jackson.JacksonAutoConfiguration;
+import org.springframework.boot.autoconfigure.web.client.RestTemplateAutoConfiguration;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Configuration;
@@ -48,7 +49,8 @@ public class SkipperClientConfigurationTests {
 	}
 
 	@Configuration
-	@ImportAutoConfiguration(classes = { WebClientAutoConfiguration.class, SkipperClientConfiguration.class })
+	@ImportAutoConfiguration(classes = { JacksonAutoConfiguration.class, RestTemplateAutoConfiguration.class,
+			SkipperClientConfiguration.class })
 	static class TestConfig {
 	}
 }

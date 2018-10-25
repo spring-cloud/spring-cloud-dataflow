@@ -85,7 +85,6 @@
             <groupId>org.postgresql</groupId>
             <artifactId>postgresql</artifactId>
         </dependency>
-       
         <dependency>
             <groupId>com.microsoft.sqlserver</groupId>
             <artifactId>mssql-jdbc</artifactId>
@@ -97,9 +96,6 @@
                 </exclusion>
             </exclusions>
         </dependency>
-
-
-
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-web</artifactId>
@@ -124,7 +120,7 @@
         </dependency>
         <dependency>
             <groupId>org.springframework.statemachine</groupId>
-            <artifactId>spring-statemachine-boot</artifactId>
+            <artifactId>spring-statemachine-autoconfigure</artifactId>
         </dependency>
         <dependency>
             <groupId>org.springframework.statemachine</groupId>
@@ -156,9 +152,19 @@
             <version>${spring-cloud-deployer.version}</version>
         </dependency>
         <dependency>
+            <groupId>io.pivotal.spring.cloud</groupId>
+            <artifactId>spring-cloud-services-starter-config-client</artifactId>
+            <scope>runtime</scope>
+        </dependency>
+        <dependency>
             <groupId>org.springframework.cloud</groupId>
-            <artifactId>spring-cloud-common-security-config-web</artifactId>
-            <version>${spring-common-security}</version>
+            <artifactId>spring-cloud-starter-common-security-config-web</artifactId>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.codehaus.jackson</groupId>
+                    <artifactId>jackson-mapper-asl</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -182,11 +188,6 @@
         </dependency>
         <dependency>
             <groupId>io.pivotal.spring.cloud</groupId>
-            <artifactId>spring-cloud-services-starter-config-client</artifactId>
-            <scope>runtime</scope>
-        </dependency>
-        <dependency>
-            <groupId>io.pivotal.spring.cloud</groupId>
             <artifactId>spring-cloud-sso-connector</artifactId>
         </dependency>
          <dependency>
@@ -200,10 +201,6 @@
             <artifactId>spring-restdocs-core</artifactId>
             <version>${spring-restdocs.version}</version>
             <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework.security.oauth</groupId>
-            <artifactId>spring-security-oauth2</artifactId>
         </dependency>
     </dependencies>
     <build>

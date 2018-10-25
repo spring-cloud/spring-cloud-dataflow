@@ -42,7 +42,7 @@ public class LocalServerSecurityWithOAuth2Tests {
 
 	private final static LocalSkipperResource localSkipperResource = new LocalSkipperResource(
 			new String[]{
-				"spring.config.location:classpath:/",
+				"classpath:/",
 				"classpath:/org/springframework/cloud/skipper/server/local/security/"
 			},
 			new String[]{

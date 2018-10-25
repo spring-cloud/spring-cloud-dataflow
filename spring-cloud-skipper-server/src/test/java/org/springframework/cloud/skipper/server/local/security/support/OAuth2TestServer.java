@@ -16,7 +16,6 @@
 
 package org.springframework.cloud.skipper.server.local.security.support;
 
-import java.io.FileNotFoundException;
 import java.security.Principal;
 import java.util.Collections;
 import java.util.Map;
@@ -33,7 +32,7 @@ import org.springframework.cloud.deployer.spi.cloudfoundry.CloudFoundryDeployerA
 import org.springframework.cloud.deployer.spi.kubernetes.KubernetesAutoConfiguration;
 import org.springframework.cloud.deployer.spi.local.LocalDeployerAutoConfiguration;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.oauth2.config.annotation.web.configuration.EnableAuthorizationServer;
 import org.springframework.security.oauth2.config.annotation.web.configuration.EnableResourceServer;
@@ -50,22 +49,21 @@ import org.springframework.web.bind.annotation.RestController;
  * @author Gunnar Hillert
  */
 @RestController
-@SpringBootApplication(excludeName = {}, exclude = {
+@SpringBootApplication(excludeName = { }, exclude = {
 		JmxAutoConfiguration.class,
 		LocalDeployerAutoConfiguration.class,
 		IntegrationAutoConfiguration.class,
 		CloudFoundryDeployerAutoConfiguration.class,
 		KubernetesAutoConfiguration.class,
 		SessionAutoConfiguration.class
-})
+		})
 public class OAuth2TestServer {
 
-	public static void main(String[] args) throws FileNotFoundException {
-		final int oauth2ServerPort = SocketUtils.findAvailableTcpPort();
+	public static void main(String[] args) {
 		new SpringApplicationBuilder(OAuth2TestServer.class)
-				.properties("oauth2.port:" + oauth2ServerPort).build()
-				.run("--spring.config.location=classpath:" +
-						"org/springframework/cloud/skipper/server/local/security/support/oauth2TestServerConfig.yml");
+				.properties("server.port:" + SocketUtils.findAvailableTcpPort()).build()
+				.run("--debug --spring.config.location=classpath:/org/springframework/cloud/skipper/server/local"
+						+ "/security/support/oauth2TestServerConfig.yml");
 	}
 
 	@RequestMapping({ "/user", "/me" })
@@ -77,9 +75,10 @@ public class OAuth2TestServer {
 	@EnableAuthorizationServer
 	protected static class MyOAuth2AuthorizationServerConfiguration extends OAuth2AuthorizationServerConfiguration {
 		public MyOAuth2AuthorizationServerConfiguration(BaseClientDetails details,
-				AuthenticationManager authenticationManager, ObjectProvider<TokenStore> tokenStore,
-				ObjectProvider<AccessTokenConverter> tokenConverter, AuthorizationServerProperties properties) {
-			super(details, authenticationManager, tokenStore, tokenConverter, properties);
+				AuthenticationConfiguration authenticationConfiguration, ObjectProvider<TokenStore> tokenStore,
+				ObjectProvider<AccessTokenConverter> tokenConverter, AuthorizationServerProperties properties)
+				throws Exception {
+			super(details, authenticationConfiguration, tokenStore, tokenConverter, properties);
 		}
 
 		@Override

@@ -34,11 +34,10 @@ import static org.mockito.Mockito.when;
 public class AppDeploymentRequestFactoryTests {
 
 	@Test
-	@SuppressWarnings("unchecked")
 	public void testGetResourceExceptionHandler() {
 		DelegatingResourceLoader resourceLoader = mock(DelegatingResourceLoader.class);
 		AppDeploymentRequestFactory appDeploymentRequestFactory = new AppDeploymentRequestFactory(resourceLoader);
-		when(resourceLoader.getResource(anyString())).thenThrow(Exception.class);
+		when(resourceLoader.getResource(anyString())).thenThrow(RuntimeException.class);
 		SpringCloudDeployerApplicationManifest applicationSpec = mock(SpringCloudDeployerApplicationManifest.class);
 		SpringCloudDeployerApplicationSpec springCloudDeployerApplicationSpec = mock(SpringCloudDeployerApplicationSpec.class);
 		when(applicationSpec.getSpec()).thenReturn(springCloudDeployerApplicationSpec);

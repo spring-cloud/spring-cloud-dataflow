@@ -77,6 +77,7 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.util.ReflectionUtils;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.nullable;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.never;
 
@@ -282,7 +283,7 @@ public class StateMachineTests {
 	}
 
 	@Test
-	public void testSimpleUpgradeShouldNotError() throws Exception {		
+	public void testSimpleUpgradeShouldNotError() throws Exception {
 		Manifest manifest = new Manifest();
 		Release release = new Release();
 		release.setManifest(manifest);
@@ -419,11 +420,23 @@ public class StateMachineTests {
 					.step()
 						.sendEvent(message2)
 						.expectStateChanged(2)
-						.expectStateEntered(SkipperStates.UPGRADE_CANCEL,
-								SkipperStates.INITIAL)
+						// for now need to do a trick to wait this later
+						//.expectStateEntered(SkipperStates.UPGRADE_CANCEL,
+						//		SkipperStates.INITIAL)
 						.and()
 					.build();
 		plan.test();
+
+		SkipperStates result = null;
+		for (int i = 0; i < 10; i++) {
+			SkipperStates s = stateMachine.getState().getId();
+			if (s == SkipperStates.INITIAL) {
+				result = s;
+				break;
+			}
+			Thread.sleep(200);
+		}
+		assertThat(result).isEqualTo(SkipperStates.INITIAL);
 
 		Mockito.verify(upgradeCancelAction).execute(any());
 		Mockito.verify(errorAction, never()).execute(any());
@@ -514,7 +527,7 @@ public class StateMachineTests {
 
 	@Test
 	public void testRestoreFromDeleteUsingDeleteProperties() throws Exception {
-		Mockito.when(releaseService.delete(any(String.class), any(boolean.class))).thenReturn(new Release());
+		Mockito.when(releaseService.delete(nullable(String.class), any(boolean.class))).thenReturn(new Release());
 		DeleteProperties deleteProperties = new DeleteProperties();
 
 		DefaultExtendedState extendedState = new DefaultExtendedState();

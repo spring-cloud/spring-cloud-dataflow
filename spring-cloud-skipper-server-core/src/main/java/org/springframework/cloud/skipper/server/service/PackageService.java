@@ -99,7 +99,7 @@ public class PackageService implements ResourceLoaderAware {
 			targetPath = TempFileUtils.createTempDirectory("skipper" + packageMetadata.getName());
 			File targetFile = PackageFileUtils.calculatePackageZipFile(packageMetadata, targetPath.toFile());
 			logger.debug("Finding repository for package  {}", packageMetadata.getName());
-			Repository packageRepository = repositoryRepository.findOne(packageMetadata.getRepositoryId());
+			Repository packageRepository = repositoryRepository.findById(packageMetadata.getRepositoryId()).orElse(null);
 			if (packageRepository == null) {
 				return throwDescriptiveException(packageMetadata);
 			}

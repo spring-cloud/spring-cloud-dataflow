@@ -18,7 +18,6 @@ package org.springframework.cloud.skipper.server.config.security;
 import javax.servlet.Filter;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.autoconfigure.security.SecurityProperties;
 import org.springframework.cloud.common.security.AuthorizationProperties;
 import org.springframework.cloud.common.security.OAuthSecurityConfiguration;
 import org.springframework.cloud.common.security.support.OnSecurityEnabledAndOAuth2Enabled;
@@ -27,7 +26,6 @@ import org.springframework.cloud.common.security.support.SecurityStateBean;
 import org.springframework.context.annotation.Conditional;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.ExpressionUrlAuthorizationConfigurer;
 import org.springframework.security.oauth2.config.annotation.web.configuration.EnableOAuth2Client;
 import org.springframework.security.web.authentication.LoginUrlAuthenticationEntryPoint;
@@ -43,7 +41,6 @@ import org.springframework.security.web.util.matcher.AnyRequestMatcher;
  * @author Ilayaperumal Gopinathan
  */
 @EnableOAuth2Client
-@EnableWebSecurity
 @Configuration
 @Conditional(OnSecurityEnabledAndOAuth2Enabled.class)
 public class SkipperOAuthSecurityConfiguration extends OAuthSecurityConfiguration {
@@ -52,16 +49,13 @@ public class SkipperOAuthSecurityConfiguration extends OAuthSecurityConfiguratio
 	private SecurityStateBean securityStateBean;
 
 	@Autowired
-	private SecurityProperties securityProperties;
-
-	@Autowired
 	private AuthorizationProperties authorizationProperties;
 
 	@Override
 	protected void configure(HttpSecurity http) throws Exception {
 
 		final BasicAuthenticationEntryPoint basicAuthenticationEntryPoint = new BasicAuthenticationEntryPoint();
-		basicAuthenticationEntryPoint.setRealmName(securityProperties.getBasic().getRealm());
+		basicAuthenticationEntryPoint.setRealmName(SecurityConfigUtils.BASIC_AUTH_REALM_NAME);
 		basicAuthenticationEntryPoint.afterPropertiesSet();
 		final Filter oauthFilter = oauthFilter();
 		final BasicAuthenticationFilter basicAuthenticationFilter = new BasicAuthenticationFilter(
