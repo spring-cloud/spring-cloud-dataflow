@@ -27,7 +27,7 @@ services:
     depends_on:
       - kafka
   app-import:
-    image: alpine:3.7
+    image: springcloud/openjdk:latest
     depends_on:
       - dataflow-server
     command: >
