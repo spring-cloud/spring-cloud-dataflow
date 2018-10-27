@@ -64,7 +64,7 @@ Pipelines consist of [Spring Boot](http://projects.spring.io/spring-boot/) apps,
 
 ## Overview
 
-The Spring Cloud Data Flow server uses [Spring Cloud Deployer](https://github.com/spring-cloud/spring-cloud-deployer/), to deploy pipelines onto modern runtimes such as Cloud Foundry, Kubernetes, Apache Mesos or Apache YARN.
+The Spring Cloud Data Flow server uses [Spring Cloud Deployer](https://github.com/spring-cloud/spring-cloud-deployer/), to deploy data pipelines onto modern runtimes such as Cloud Foundry and Kubernetes.
 
 A selection of pre-built [stream](http://cloud.spring.io/spring-cloud-stream-app-starters/) and [task/batch](http://cloud.spring.io/spring-cloud-task-app-starters/) starter apps for various data integration and processing scenarios facilitate learning and experimentation.
 
@@ -112,7 +112,7 @@ DATAFLOW_VERSION=1.7.0.RELEASE docker-compose up
 
 <u><b>Step 3</b></u> - Open the dashboard at [http://localhost:9393/dashboard](http://localhost:9393/dashboard).
 
-<u><b>Step 4</b></u> - Use 'Create Stream(s)' under "Streams" Tab to define and deploy a stream `time | log` called 'ticktock'.
+<u><b>Step 4</b></u> - Use 'Create Stream(s)' under "Streams" Tab to define and deploy a stream `time | log` with the name 'ticktock'.
 
 <img class="styled-image" src="img/create-ticktock-stream.png" alt="Create TickTock Stream" title="The Create Stream Flo Canvas"/>
 <br>
@@ -120,12 +120,12 @@ DATAFLOW_VERSION=1.7.0.RELEASE docker-compose up
 <img class="styled-image" src="img/deploy-ticktock-stream.png" alt="Deploy TickTock Stream" title="Name and deploy the stream"/>
 <br>
 
-Once the ‘ticktock’ stream is deployed, you will notice two stream-apps (`ticktock.log` and `ticktock.time`) under the "Runtime" tab. Click the `i` icon across the 'ticktock.log' row to find the location of the logs.
+Once the ‘ticktock’ stream is deployed, you will notice two stream-apps (`ticktock.log` and `ticktock.time`) under the "Runtime" tab. Click the `i` icon of the 'ticktock.log' app to copy the path of the streamed logs.
 
 <img class="styled-image" src="img/ticktock-log-runtime.png" alt="Deploy TickTock Stream" title="Runtime app details"/>
 <br>
 
-<u><b>Step 5</b></u> - To verify the deployed stream and to view the logs, copy the path in the "stdout" text box from the dashboard and in another console type:
+<u><b>Step 5</b></u> - To verify the deployed stream and the results, copy the path in the "stdout" text box from the dashboard. From another terminal-console type:
 
 ```
 docker exec -it dataflow-server tail -f <COPIED-STDOUT-PATH>
