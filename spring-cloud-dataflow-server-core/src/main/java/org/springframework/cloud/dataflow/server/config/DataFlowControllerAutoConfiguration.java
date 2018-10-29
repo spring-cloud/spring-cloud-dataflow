@@ -66,6 +66,7 @@ import org.springframework.cloud.dataflow.server.TaskValidationController;
 import org.springframework.cloud.dataflow.server.audit.repository.AuditRecordRepository;
 import org.springframework.cloud.dataflow.server.audit.service.AuditRecordService;
 import org.springframework.cloud.dataflow.server.audit.service.DefaultAuditRecordService;
+import org.springframework.cloud.dataflow.server.audit.service.SpringSecurityAuditorAware;
 import org.springframework.cloud.dataflow.server.batch.JobService;
 import org.springframework.cloud.dataflow.server.config.apps.CommonApplicationProperties;
 import org.springframework.cloud.dataflow.server.config.features.FeaturesProperties;
@@ -182,6 +183,11 @@ public class DataFlowControllerAutoConfiguration {
 	public AuditRecordService auditRecordService(AuditRecordRepository auditRecordRepository,
 			ObjectMapper objectMapper) {
 		return new DefaultAuditRecordService(auditRecordRepository);
+	}
+
+	@Bean
+	public SpringSecurityAuditorAware springSecurityAuditorAware(SecurityStateBean securityStateBean) {
+		return new SpringSecurityAuditorAware(securityStateBean);
 	}
 
 	@Bean
