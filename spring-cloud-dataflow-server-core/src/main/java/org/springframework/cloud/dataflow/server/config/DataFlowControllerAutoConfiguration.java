@@ -198,7 +198,7 @@ public class DataFlowControllerAutoConfiguration {
 	}
 
 	@Bean
-	@ConditionalOnBean({ StreamDefinitionRepository.class, StreamDeploymentRepository.class })
+	@ConditionalOnBean({ StreamDefinitionRepository.class })
 	public StreamValidationService streamValidationService(AppRegistryCommon appRegistryCommon,
 			DockerValidatorProperties dockerValidatorProperties,
 			StreamDefinitionRepository streamDefinitionRepository) {
@@ -208,7 +208,7 @@ public class DataFlowControllerAutoConfiguration {
 	}
 
 	@Bean
-	@ConditionalOnBean({ StreamDefinitionRepository.class, StreamDeploymentRepository.class })
+	@ConditionalOnBean({ StreamDefinitionRepository.class })
 	public RuntimeAppInstanceController appInstanceController(StreamDeployer streamDeployer) {
 		return new RuntimeAppInstanceController(streamDeployer);
 	}
@@ -267,7 +267,7 @@ public class DataFlowControllerAutoConfiguration {
 	}
 
 	@Bean
-	@ConditionalOnBean({ StreamDefinitionRepository.class, StreamDeploymentRepository.class })
+	@ConditionalOnBean({ StreamDefinitionRepository.class })
 	public RuntimeAppsController runtimeAppsController(StreamDeployer streamDeployer) {
 		return new RuntimeAppsController(streamDeployer);
 	}
@@ -278,7 +278,7 @@ public class DataFlowControllerAutoConfiguration {
 	}
 
 	@Bean
-	@ConditionalOnBean({ StreamDefinitionRepository.class, StreamDeploymentRepository.class })
+	@ConditionalOnBean({ StreamDefinitionRepository.class })
 	@ConditionalOnMissingBean(name = "runtimeAppsStatusFJPFB")
 	public ForkJoinPoolFactoryBean runtimeAppsStatusFJPFB() {
 		ForkJoinPoolFactoryBean forkJoinPoolFactoryBean = new ForkJoinPoolFactoryBean();
@@ -444,7 +444,7 @@ public class DataFlowControllerAutoConfiguration {
 	public static class SkipperDeploymentConfiguration {
 
 		@Bean
-		@ConditionalOnBean({ StreamDefinitionRepository.class, StreamDeploymentRepository.class })
+		@ConditionalOnBean({ StreamDefinitionRepository.class })
 		public SkipperStreamDeploymentController updatableStreamDeploymentController(
 				StreamDefinitionRepository repository, SkipperStreamService streamService) {
 			return new SkipperStreamDeploymentController(repository, streamService);
@@ -514,14 +514,14 @@ public class DataFlowControllerAutoConfiguration {
 	public static class AppDeploymentConfiguration {
 
 		@Bean
-		@ConditionalOnBean({ StreamDefinitionRepository.class, StreamDeploymentRepository.class })
+		@ConditionalOnBean({ StreamDefinitionRepository.class })
 		public StreamDeploymentController streamDeploymentController(StreamDefinitionRepository repository,
 				StreamService streamService) {
 			return new StreamDeploymentController(repository, streamService);
 		}
 
 		@Bean
-		@ConditionalOnBean({ StreamDefinitionRepository.class, StreamDeploymentRepository.class })
+		@ConditionalOnBean({ StreamDefinitionRepository.class })
 		public StreamService simpleStreamDeploymentService(StreamDefinitionRepository streamDefinitionRepository,
 				AppDeployerStreamDeployer appDeployerStreamDeployer,
 				AppDeploymentRequestCreator appDeploymentRequestCreator,
