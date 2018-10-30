@@ -1,4 +1,4 @@
-FROM java:8-alpine
+FROM springcloud/openjdk:latest
 
 ARG JAR_FILE
 
