@@ -314,7 +314,7 @@ On this screen the user can view not only the information from the Task Executio
 * Task Arguments
 * External Execution Id
 * Batch Job Indicator (indicates if the task execution contained Spring Batch jobs.)
-* Job Execution Ids links (Clicking the Job Execution Id will take you to the Job Execution page for that Job Execution Id.)
+* Job Execution Ids links (Clicking the Job Execution Id will take you to the <<dashboard-job-executions-details>> for that Job Execution Id.)
 * Task Execution Duration
 * Task Execution Exit Message
 
