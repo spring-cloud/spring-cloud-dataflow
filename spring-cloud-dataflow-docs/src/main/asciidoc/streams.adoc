@@ -294,11 +294,11 @@ The following table lists the available Task Application Starters:
 |Artifact Type |Stable Release |SNAPSHOT Release
 
 |Maven
-|http://bit.ly/Clark-SR3-task-applications-maven
+|http://bit.ly/Clark-SR1-task-applications-maven
 |http://bit.ly/Clark-BUILD-SNAPSHOT-task-applications-maven
 
 |Docker
-|http://bit.ly/Clark-SR3-task-applications-docker
+|http://bit.ly/Clark-SR1-task-applications-docker
 |http://bit.ly/Clark-BUILD-SNAPSHOT-task-applications-docker
 |======================
 
