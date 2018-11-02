@@ -1,4 +1,7 @@
 management:
+  endpoints:
+    web:
+      base-path: /management  
   security:
     roles: MANAGE
 logging:

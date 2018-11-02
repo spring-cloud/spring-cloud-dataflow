@@ -57,8 +57,6 @@ import org.springframework.context.ApplicationListener;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.env.Environment;
-import org.springframework.hateoas.config.EnableHypermediaSupport;
-import org.springframework.hateoas.config.EnableHypermediaSupport.HypermediaType;
 import org.springframework.shell.core.CommandMarker;
 import org.springframework.shell.core.annotation.CliCommand;
 import org.springframework.shell.core.annotation.CliOption;
@@ -94,7 +92,6 @@ import org.springframework.web.client.RestTemplate;
  */
 @Component
 @Configuration
-@EnableHypermediaSupport(type = HypermediaType.HAL)
 public class ConfigCommands implements CommandMarker, InitializingBean, ApplicationListener<ApplicationReadyEvent>,
 		ApplicationContextAware {
 

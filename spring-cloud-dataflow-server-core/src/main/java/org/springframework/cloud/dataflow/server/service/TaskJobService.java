@@ -142,7 +142,7 @@ public interface TaskJobService {
 	 * @throws NoSuchJobExecutionException if no job execution exists for the jobExecutionId.
 	 * @throws JobExecutionNotRunningException if a stop is requested on a job that is not
 	 * running.
-	 * @see org.springframework.batch.admin.service.JobService#stop(Long)
+	 * @see org.springframework.cloud.dataflow.server.batch.JobService#stop(Long)
 	 */
 	void stopJobExecution(long jobExecutionId) throws NoSuchJobExecutionException, JobExecutionNotRunningException;
 }

@@ -23,7 +23,6 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import org.springframework.batch.admin.service.JobService;
 import org.springframework.batch.core.JobExecution;
 import org.springframework.batch.core.JobInstance;
 import org.springframework.batch.core.StepExecution;
@@ -35,6 +34,7 @@ import org.springframework.cloud.dataflow.core.TaskDefinition;
 import org.springframework.cloud.dataflow.rest.job.JobInstanceExecutions;
 import org.springframework.cloud.dataflow.rest.job.TaskJobExecution;
 import org.springframework.cloud.dataflow.rest.job.support.JobUtils;
+import org.springframework.cloud.dataflow.server.batch.JobService;
 import org.springframework.cloud.dataflow.server.job.support.JobNotRestartableException;
 import org.springframework.cloud.dataflow.server.repository.NoSuchTaskBatchException;
 import org.springframework.cloud.dataflow.server.repository.NoSuchTaskDefinitionException;
@@ -91,8 +91,9 @@ public class DefaultTaskJobService implements TaskJobService {
 	@Override
 	public List<TaskJobExecution> listJobExecutions(Pageable pageable) throws NoSuchJobExecutionException {
 		Assert.notNull(pageable, "pageable must not be null");
+		// TODO: BOOT2 check what to do with long to int cast for offset
 		List<JobExecution> jobExecutions = new ArrayList<>(
-				jobService.listJobExecutions(pageable.getOffset(), pageable.getPageSize()));
+				jobService.listJobExecutions((int) pageable.getOffset(), pageable.getPageSize()));
 		for (JobExecution jobExecution : jobExecutions) {
 			Collection<StepExecution> stepExecutions = jobService.getStepExecutions(jobExecution.getId());
 			List<StepExecution> validStepExecutions = new ArrayList<>();
@@ -118,8 +119,9 @@ public class DefaultTaskJobService implements TaskJobService {
 	public List<TaskJobExecution> listJobExecutionsForJob(Pageable pageable, String jobName) throws NoSuchJobException {
 		Assert.notNull(pageable, "pageable must not be null");
 		Assert.notNull(jobName, "jobName must not be null");
+		// TODO: BOOT2 check what to do with long to int cast for offset
 		return getTaskJobExecutionsForList(
-				jobService.listJobExecutionsForJob(jobName, pageable.getOffset(), pageable.getPageSize()));
+				jobService.listJobExecutionsForJob(jobName, (int) pageable.getOffset(), pageable.getPageSize()));
 	}
 
 	/**
@@ -148,7 +150,8 @@ public class DefaultTaskJobService implements TaskJobService {
 		Assert.notNull(pageable, "pageable must not be null");
 		Assert.notNull(jobName, "jobName must not be null");
 		List<JobInstanceExecutions> taskJobInstances = new ArrayList<>();
-		for (JobInstance jobInstance : jobService.listJobInstances(jobName, pageable.getOffset(),
+		// TODO: BOOT2 check what to do with long to int cast for offset
+		for (JobInstance jobInstance : jobService.listJobInstances(jobName, (int) pageable.getOffset(),
 				pageable.getPageSize())) {
 			taskJobInstances.add(getJobInstanceExecution(jobInstance));
 		}

@@ -20,6 +20,7 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.cloud.common.security.BasicAuthSecurityConfiguration;
 import org.springframework.cloud.common.security.DefaultBootUserAuthenticationConfiguration;
 import org.springframework.cloud.common.security.FileAuthenticationConfiguration;
+import org.springframework.cloud.common.security.IgnoreAllSecurityConfiguration;
 import org.springframework.cloud.common.security.LdapAuthenticationConfiguration;
 import org.springframework.cloud.common.security.OAuthSecurityConfiguration;
 import org.springframework.context.annotation.Configuration;
@@ -30,7 +31,7 @@ import org.springframework.context.annotation.Import;
  */
 @Configuration
 @Import({ BasicAuthSecurityConfiguration.class, DefaultBootUserAuthenticationConfiguration.class,
-		OAuthSecurityConfiguration.class })
+		OAuthSecurityConfiguration.class, IgnoreAllSecurityConfiguration.class })
 public class SecurityConfiguration {
 
 	@Configuration

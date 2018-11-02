@@ -17,16 +17,14 @@ package org.springframework.cloud.dataflow.server.config.features;
 
 import javax.sql.DataSource;
 
-import org.springframework.batch.admin.service.JobService;
-import org.springframework.batch.admin.service.SimpleJobServiceFactoryBean;
 import org.springframework.batch.core.configuration.support.MapJobRegistry;
+import org.springframework.batch.core.explore.JobExplorer;
 import org.springframework.batch.core.explore.support.JobExplorerFactoryBean;
 import org.springframework.batch.core.launch.support.SimpleJobLauncher;
 import org.springframework.batch.core.repository.support.JobRepositoryFactoryBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.autoconfigure.AbstractDatabaseInitializer;
-import org.springframework.boot.autoconfigure.batch.BatchDatabaseInitializer;
+import org.springframework.boot.autoconfigure.batch.BatchDataSourceInitializer;
 import org.springframework.boot.autoconfigure.batch.BatchProperties;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
@@ -38,6 +36,8 @@ import org.springframework.cloud.dataflow.configuration.metadata.ApplicationConf
 import org.springframework.cloud.dataflow.registry.AppRegistryCommon;
 import org.springframework.cloud.dataflow.server.DockerValidatorProperties;
 import org.springframework.cloud.dataflow.server.audit.service.AuditRecordService;
+import org.springframework.cloud.dataflow.server.batch.JobService;
+import org.springframework.cloud.dataflow.server.batch.SimpleJobServiceFactoryBean;
 import org.springframework.cloud.dataflow.server.config.apps.CommonApplicationProperties;
 import org.springframework.cloud.dataflow.server.job.TaskExplorerFactoryBean;
 import org.springframework.cloud.dataflow.server.repository.DeploymentIdRepository;
@@ -57,7 +57,6 @@ import org.springframework.cloud.task.repository.support.TaskExecutionDaoFactory
 import org.springframework.cloud.task.repository.support.TaskRepositoryInitializer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.DependsOn;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
@@ -115,13 +114,16 @@ public class TaskConfiguration {
 
 	@Bean
 	public SimpleJobServiceFactoryBean simpleJobServiceFactoryBean(DataSource dataSource,
-			JobRepositoryFactoryBean repositoryFactoryBean) throws Exception {
+			JobRepositoryFactoryBean repositoryFactoryBean, JobExplorer jobExplorer,
+			PlatformTransactionManager dataSourceTransactionManager) throws Exception {
 		SimpleJobServiceFactoryBean factoryBean = new SimpleJobServiceFactoryBean();
 		factoryBean.setDataSource(dataSource);
 		factoryBean.setJobRepository(repositoryFactoryBean.getObject());
 		factoryBean.setJobLocator(new MapJobRegistry());
 		factoryBean.setJobLauncher(new SimpleJobLauncher());
 		factoryBean.setDataSource(dataSource);
+		factoryBean.setJobExplorer(jobExplorer);
+		factoryBean.setTransactionManager(dataSourceTransactionManager);
 		return factoryBean;
 	}
 
@@ -147,9 +149,9 @@ public class TaskConfiguration {
 		}
 
 		@Bean
-		public BatchDatabaseInitializer batchRepositoryInitializerForDefaultDBForServer(DataSource dataSource,
+		public BatchDataSourceInitializer batchRepositoryInitializerForDefaultDBForServer(DataSource dataSource,
 				ResourceLoader resourceLoader, BatchProperties properties) {
-			return new BatchDatabaseInitializer(dataSource, resourceLoader, properties);
+			return new BatchDataSourceInitializer(dataSource, resourceLoader, properties);
 		}
 
 		@Bean
@@ -182,9 +184,9 @@ public class TaskConfiguration {
 		}
 
 		@Bean
-		public BatchDatabaseInitializer batchRepositoryInitializerForDefaultDB(DataSource dataSource,
+		public BatchDataSourceInitializer batchRepositoryInitializerForDefaultDB(DataSource dataSource,
 				ResourceLoader resourceLoader, BatchProperties properties) {
-			return new BatchDatabaseInitializer(dataSource, resourceLoader, properties);
+			return new BatchDataSourceInitializer(dataSource, resourceLoader, properties);
 		}
 
 		@Bean
@@ -193,13 +195,13 @@ public class TaskConfiguration {
 			taskRepositoryInitializer.setDataSource(dataSource);
 			return taskRepositoryInitializer;
 		}
-
-		@Bean
-		@DependsOn({ "batchRepositoryInitializerForDefaultDB", "taskRepositoryInitializerForDB" })
-		public AbstractDatabaseInitializer batchTaskIndexesDatabaseInitializer(DataSource dataSource,
-				ResourceLoader resourceLoader) {
-			return new BatchTaskIndexesDatabaseInitializer(dataSource, resourceLoader);
-		}
+		// TODO: BOOT2 handle this custom ddl stuff
+		//@Bean
+		//@DependsOn({ "batchRepositoryInitializerForDefaultDB", "taskRepositoryInitializerForDB" })
+		//public AbstractDatabaseInitializer batchTaskIndexesDatabaseInitializer(DataSource dataSource,
+		//		ResourceLoader resourceLoader) {
+		//	return new BatchTaskIndexesDatabaseInitializer(dataSource, resourceLoader);
+		//}
 
 		@Bean
 		@ConditionalOnMissingBean

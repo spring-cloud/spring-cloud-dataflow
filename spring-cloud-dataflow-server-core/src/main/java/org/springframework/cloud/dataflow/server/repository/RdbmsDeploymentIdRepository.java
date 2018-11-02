@@ -58,4 +58,9 @@ public class RdbmsDeploymentIdRepository extends AbstractRdbmsKeyValueRepository
 		Assert.hasText(name, "name must not be empty nor null");
 		jdbcTemplate.update(deleteFromTableByKey, name);
 	}
+
+	@Override
+	public String findOne(String key) {
+		return findById(key).orElse(null);
+	}
 }

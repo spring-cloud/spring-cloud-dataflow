@@ -50,8 +50,8 @@ import org.springframework.test.context.junit4.SpringRunner;
  */
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = {
-		HibernateJpaAutoConfiguration.class,
-		EmbeddedDataSourceConfiguration.class
+		EmbeddedDataSourceConfiguration.class,
+		HibernateJpaAutoConfiguration.class
 })
 @EntityScan({
 	"org.springframework.cloud.dataflow.registry.domain",

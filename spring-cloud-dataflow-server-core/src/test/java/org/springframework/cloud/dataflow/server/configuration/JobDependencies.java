@@ -18,14 +18,13 @@ package org.springframework.cloud.dataflow.server.configuration;
 
 import javax.sql.DataSource;
 
-import org.springframework.batch.admin.service.JobService;
-import org.springframework.batch.admin.service.SimpleJobServiceFactoryBean;
 import org.springframework.batch.core.configuration.support.MapJobRegistry;
+import org.springframework.batch.core.explore.JobExplorer;
 import org.springframework.batch.core.explore.support.JobExplorerFactoryBean;
 import org.springframework.batch.core.launch.support.SimpleJobLauncher;
 import org.springframework.batch.core.repository.support.JobRepositoryFactoryBean;
 import org.springframework.boot.autoconfigure.ImportAutoConfiguration;
-import org.springframework.boot.autoconfigure.batch.BatchDatabaseInitializer;
+import org.springframework.boot.autoconfigure.batch.BatchDataSourceInitializer;
 import org.springframework.boot.autoconfigure.batch.BatchProperties;
 import org.springframework.boot.autoconfigure.domain.EntityScan;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceProperties;
@@ -41,6 +40,8 @@ import org.springframework.cloud.dataflow.server.DockerValidatorProperties;
 import org.springframework.cloud.dataflow.server.audit.repository.AuditRecordRepository;
 import org.springframework.cloud.dataflow.server.audit.service.AuditRecordService;
 import org.springframework.cloud.dataflow.server.audit.service.DefaultAuditRecordService;
+import org.springframework.cloud.dataflow.server.batch.JobService;
+import org.springframework.cloud.dataflow.server.batch.SimpleJobServiceFactoryBean;
 import org.springframework.cloud.dataflow.server.config.apps.CommonApplicationProperties;
 import org.springframework.cloud.dataflow.server.controller.JobExecutionController;
 import org.springframework.cloud.dataflow.server.controller.JobInstanceController;
@@ -80,6 +81,7 @@ import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.data.web.config.EnableSpringDataWebSupport;
 import org.springframework.hateoas.config.EnableHypermediaSupport;
 import org.springframework.jdbc.datasource.DataSourceTransactionManager;
+import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 
@@ -191,13 +193,16 @@ public class JobDependencies {
 
 	@Bean
 	public SimpleJobServiceFactoryBean simpleJobServiceFactoryBean(DataSource dataSource,
-			JobRepositoryFactoryBean repositoryFactoryBean) {
+			JobRepositoryFactoryBean repositoryFactoryBean, JobExplorer jobExplorer,
+			PlatformTransactionManager dataSourceTransactionManager) {
 		SimpleJobServiceFactoryBean factoryBean = new SimpleJobServiceFactoryBean();
 		factoryBean.setDataSource(dataSource);
 		try {
 			factoryBean.setJobRepository(repositoryFactoryBean.getObject());
 			factoryBean.setJobLocator(new MapJobRegistry());
 			factoryBean.setJobLauncher(new SimpleJobLauncher());
+			factoryBean.setJobExplorer(jobExplorer);
+			factoryBean.setTransactionManager(dataSourceTransactionManager);
 		}
 		catch (Exception e) {
 			throw new IllegalStateException(e);
@@ -227,9 +232,9 @@ public class JobDependencies {
 	}
 
 	@Bean
-	public BatchDatabaseInitializer batchRepositoryInitializerForDefaultDBForServer(DataSource dataSource,
+	public BatchDataSourceInitializer batchRepositoryInitializerForDefaultDBForServer(DataSource dataSource,
 			ResourceLoader resourceLoader, BatchProperties properties) {
-		return new BatchDatabaseInitializer(dataSource, resourceLoader, properties);
+		return new BatchDataSourceInitializer(dataSource, resourceLoader, properties);
 	}
 
 	@Bean

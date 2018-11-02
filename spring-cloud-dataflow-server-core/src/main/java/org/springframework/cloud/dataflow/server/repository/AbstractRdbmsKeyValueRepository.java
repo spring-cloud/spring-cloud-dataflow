@@ -20,6 +20,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Optional;
 
 import javax.sql.DataSource;
 
@@ -176,7 +177,7 @@ public abstract class AbstractRdbmsKeyValueRepository<D> implements PagingAndSor
 	}
 
 	@Override
-	public <S extends D> Iterable<S> save(Iterable<S> iterableDefinitions) {
+	public <S extends D> Iterable<S> saveAll(Iterable<S> iterableDefinitions) {
 		Assert.notNull(iterableDefinitions, "iterableDefinitions must not be null");
 		for (S definition : iterableDefinitions) {
 			save(definition);
@@ -185,18 +186,18 @@ public abstract class AbstractRdbmsKeyValueRepository<D> implements PagingAndSor
 	}
 
 	@Override
-	public D findOne(String name) {
+	public Optional<D> findById(String name) {
 		Assert.hasText(name, "name must not be empty nor null");
 		try {
-			return jdbcTemplate.queryForObject(findAllWhereClauseByKey, rowMapper, name);
+			return Optional.of(jdbcTemplate.queryForObject(findAllWhereClauseByKey, rowMapper, name));
 		}
 		catch (EmptyResultDataAccessException e) {
-			return null;
+			return Optional.ofNullable(null);
 		}
 	}
 
 	@Override
-	public boolean exists(String name) {
+	public boolean existsById(String name) {
 		Assert.hasText(name, "name must not be empty nor null");
 		boolean result;
 		try {
@@ -214,7 +215,7 @@ public abstract class AbstractRdbmsKeyValueRepository<D> implements PagingAndSor
 	}
 
 	@Override
-	public Iterable<D> findAll(Iterable<String> names) {
+	public Iterable<D> findAllById(Iterable<String> names) {
 		Assert.notNull(names, "names must not be null");
 		List<String> listOfNames = new ArrayList<String>();
 		for (String name : names) {
@@ -238,13 +239,13 @@ public abstract class AbstractRdbmsKeyValueRepository<D> implements PagingAndSor
 	}
 
 	@Override
-	public void delete(String name) {
+	public void deleteById(String name) {
 		Assert.hasText(name, "name must not be empty nor null");
 		jdbcTemplate.update(deleteFromTableByKey, name);
 	}
 
 	@Override
-	public void delete(Iterable<? extends D> definitions) {
+	public void deleteAll(Iterable<? extends D> definitions) {
 		Assert.notNull(definitions, "definitions must not null");
 		for (D definition : definitions) {
 			delete(definition);

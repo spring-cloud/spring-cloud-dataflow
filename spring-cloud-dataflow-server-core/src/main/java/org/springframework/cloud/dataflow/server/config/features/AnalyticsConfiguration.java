@@ -19,8 +19,7 @@ import org.springframework.analytics.metrics.AggregateCounterRepository;
 import org.springframework.analytics.metrics.FieldValueCounterRepository;
 import org.springframework.analytics.metrics.redis.RedisAggregateCounterRepository;
 import org.springframework.analytics.metrics.redis.RedisFieldValueCounterRepository;
-import org.springframework.boot.actuate.metrics.repository.MetricRepository;
-import org.springframework.boot.actuate.metrics.repository.redis.RedisMetricRepository;
+import org.springframework.analytics.metrics.redis.RedisMetricRepository;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
@@ -37,7 +36,7 @@ public class AnalyticsConfiguration {
 
 	@Bean
 	@ConditionalOnMissingBean
-	public MetricRepository metricRepository(RedisConnectionFactory redisConnectionFactory) {
+	public RedisMetricRepository metricRepository(RedisConnectionFactory redisConnectionFactory) {
 		return new RedisMetricRepository(redisConnectionFactory);
 	}
 

@@ -30,12 +30,11 @@ import org.apache.commons.logging.LogFactory;
 
 import org.springframework.analytics.metrics.AggregateCounterRepository;
 import org.springframework.analytics.metrics.FieldValueCounterRepository;
+import org.springframework.analytics.metrics.redis.RedisMetricRepository;
 import org.springframework.analytics.rest.controller.AggregateCounterController;
 import org.springframework.analytics.rest.controller.CounterController;
 import org.springframework.analytics.rest.controller.FieldValueCounterController;
-import org.springframework.batch.admin.service.JobService;
 import org.springframework.beans.factory.ObjectProvider;
-import org.springframework.boot.actuate.metrics.repository.MetricRepository;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
@@ -68,6 +67,7 @@ import org.springframework.cloud.dataflow.server.audit.repository.AuditRecordRep
 import org.springframework.cloud.dataflow.server.audit.service.AuditRecordService;
 import org.springframework.cloud.dataflow.server.audit.service.DefaultAuditRecordService;
 import org.springframework.cloud.dataflow.server.audit.service.SpringSecurityAuditorAware;
+import org.springframework.cloud.dataflow.server.batch.JobService;
 import org.springframework.cloud.dataflow.server.config.apps.CommonApplicationProperties;
 import org.springframework.cloud.dataflow.server.config.features.FeaturesProperties;
 import org.springframework.cloud.dataflow.server.controller.AboutController;
@@ -198,7 +198,7 @@ public class DataFlowControllerAutoConfiguration {
 	}
 
 	@Bean
-	@ConditionalOnBean({ StreamDefinitionRepository.class, StreamDeploymentRepository.class })
+	@ConditionalOnBean({ StreamDefinitionRepository.class })
 	public StreamValidationService streamValidationService(AppRegistryCommon appRegistryCommon,
 			DockerValidatorProperties dockerValidatorProperties,
 			StreamDefinitionRepository streamDefinitionRepository) {
@@ -208,7 +208,7 @@ public class DataFlowControllerAutoConfiguration {
 	}
 
 	@Bean
-	@ConditionalOnBean({ StreamDefinitionRepository.class, StreamDeploymentRepository.class })
+	@ConditionalOnBean({ StreamDefinitionRepository.class })
 	public RuntimeAppInstanceController appInstanceController(StreamDeployer streamDeployer) {
 		return new RuntimeAppInstanceController(streamDeployer);
 	}
@@ -267,7 +267,7 @@ public class DataFlowControllerAutoConfiguration {
 	}
 
 	@Bean
-	@ConditionalOnBean({ StreamDefinitionRepository.class, StreamDeploymentRepository.class })
+	@ConditionalOnBean({ StreamDefinitionRepository.class })
 	public RuntimeAppsController runtimeAppsController(StreamDeployer streamDeployer) {
 		return new RuntimeAppsController(streamDeployer);
 	}
@@ -278,7 +278,7 @@ public class DataFlowControllerAutoConfiguration {
 	}
 
 	@Bean
-	@ConditionalOnBean({ StreamDefinitionRepository.class, StreamDeploymentRepository.class })
+	@ConditionalOnBean({ StreamDefinitionRepository.class })
 	@ConditionalOnMissingBean(name = "runtimeAppsStatusFJPFB")
 	public ForkJoinPoolFactoryBean runtimeAppsStatusFJPFB() {
 		ForkJoinPoolFactoryBean forkJoinPoolFactoryBean = new ForkJoinPoolFactoryBean();
@@ -350,8 +350,8 @@ public class DataFlowControllerAutoConfiguration {
 	}
 
 	@Bean
-	@ConditionalOnBean(MetricRepository.class)
-	public CounterController counterController(MetricRepository metricRepository) {
+	@ConditionalOnBean(RedisMetricRepository.class)
+	public CounterController counterController(RedisMetricRepository metricRepository) {
 		return new CounterController(metricRepository);
 	}
 
@@ -444,7 +444,7 @@ public class DataFlowControllerAutoConfiguration {
 	public static class SkipperDeploymentConfiguration {
 
 		@Bean
-		@ConditionalOnBean({ StreamDefinitionRepository.class, StreamDeploymentRepository.class })
+		@ConditionalOnBean({ StreamDefinitionRepository.class })
 		public SkipperStreamDeploymentController updatableStreamDeploymentController(
 				StreamDefinitionRepository repository, SkipperStreamService streamService) {
 			return new SkipperStreamDeploymentController(repository, streamService);
@@ -514,14 +514,14 @@ public class DataFlowControllerAutoConfiguration {
 	public static class AppDeploymentConfiguration {
 
 		@Bean
-		@ConditionalOnBean({ StreamDefinitionRepository.class, StreamDeploymentRepository.class })
+		@ConditionalOnBean({ StreamDefinitionRepository.class })
 		public StreamDeploymentController streamDeploymentController(StreamDefinitionRepository repository,
 				StreamService streamService) {
 			return new StreamDeploymentController(repository, streamService);
 		}
 
 		@Bean
-		@ConditionalOnBean({ StreamDefinitionRepository.class, StreamDeploymentRepository.class })
+		@ConditionalOnBean({ StreamDefinitionRepository.class })
 		public StreamService simpleStreamDeploymentService(StreamDefinitionRepository streamDefinitionRepository,
 				AppDeployerStreamDeployer appDeployerStreamDeployer,
 				AppDeploymentRequestCreator appDeploymentRequestCreator,

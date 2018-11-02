@@ -27,8 +27,8 @@ import org.springframework.cloud.dataflow.core.ApplicationType;
 import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.delete;
 import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.get;
 import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.post;
-import static org.springframework.restdocs.payload.PayloadDocumentation.fieldWithPath;
 import static org.springframework.restdocs.payload.PayloadDocumentation.responseFields;
+import static org.springframework.restdocs.payload.PayloadDocumentation.subsectionWithPath;
 import static org.springframework.restdocs.request.RequestDocumentation.parameterWithName;
 import static org.springframework.restdocs.request.RequestDocumentation.pathParameters;
 import static org.springframework.restdocs.request.RequestDocumentation.requestParameters;
@@ -97,10 +97,10 @@ public class TaskExecutionsDocumentation extends BaseDocumentation {
 						parameterWithName("size")
 								.description("The requested page size (optional)")),
 				responseFields(
-						fieldWithPath("_embedded.taskExecutionResourceList")
+						subsectionWithPath("_embedded.taskExecutionResourceList")
 								.description("Contains a collection of Task Executions/"),
-						fieldWithPath("_links.self").description("Link to the task execution resource"),
-						fieldWithPath("page").description("Pagination properties"))));
+						subsectionWithPath("_links.self").description("Link to the task execution resource"),
+						subsectionWithPath("page").description("Pagination properties"))));
 	}
 
 	@Test
@@ -120,10 +120,10 @@ public class TaskExecutionsDocumentation extends BaseDocumentation {
 						parameterWithName("name")
 								.description("The name associated with the task execution")),
 				responseFields(
-						fieldWithPath("_embedded.taskExecutionResourceList")
+						subsectionWithPath("_embedded.taskExecutionResourceList")
 								.description("Contains a collection of Task Executions/"),
-						fieldWithPath("_links.self").description("Link to the task execution resource"),
-						fieldWithPath("page").description("Pagination properties"))));
+						subsectionWithPath("_links.self").description("Link to the task execution resource"),
+						subsectionWithPath("page").description("Pagination properties"))));
 	}
 
 	@Test

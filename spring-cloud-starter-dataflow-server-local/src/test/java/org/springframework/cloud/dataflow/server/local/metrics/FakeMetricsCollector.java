@@ -22,7 +22,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.actuate.autoconfigure.MetricExportAutoConfiguration;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.data.redis.RedisAutoConfiguration;
 import org.springframework.boot.autoconfigure.data.redis.RedisRepositoriesAutoConfiguration;
@@ -32,8 +31,8 @@ import org.springframework.boot.autoconfigure.jdbc.DataSourceTransactionManagerA
 import org.springframework.boot.autoconfigure.jmx.JmxAutoConfiguration;
 import org.springframework.boot.autoconfigure.ldap.LdapAutoConfiguration;
 import org.springframework.boot.autoconfigure.orm.jpa.HibernateJpaAutoConfiguration;
-import org.springframework.boot.autoconfigure.security.SecurityAutoConfiguration;
 import org.springframework.boot.autoconfigure.security.oauth2.OAuth2AutoConfiguration;
+import org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration;
 import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.cloud.dataflow.autoconfigure.local.LocalDataFlowServerAutoConfiguration;
 import org.springframework.cloud.deployer.spi.local.LocalDeployerAutoConfiguration;
@@ -57,7 +56,6 @@ import org.springframework.web.bind.annotation.RestController;
 				LdapAutoConfiguration.class,
 				LocalDataFlowServerAutoConfiguration.class,
 				LocalDeployerAutoConfiguration.class,
-				MetricExportAutoConfiguration.class,
 				OAuth2AutoConfiguration.class,
 				RedisAutoConfiguration.class,
 				RedisRepositoriesAutoConfiguration.class,

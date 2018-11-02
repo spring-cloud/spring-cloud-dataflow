@@ -22,9 +22,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.springframework.boot.bind.RelaxedNames;
 import org.springframework.boot.configurationmetadata.ConfigurationMetadataProperty;
 import org.springframework.cloud.dataflow.configuration.metadata.ApplicationConfigurationMetadataResolver;
+import org.springframework.cloud.dataflow.server.support.RelaxedNames;
 import org.springframework.core.io.Resource;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;

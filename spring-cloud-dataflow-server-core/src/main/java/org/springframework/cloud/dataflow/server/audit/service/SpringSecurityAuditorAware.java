@@ -15,6 +15,8 @@
  */
 package org.springframework.cloud.dataflow.server.audit.service;
 
+import java.util.Optional;
+
 import org.springframework.cloud.common.security.support.SecurityStateBean;
 import org.springframework.data.domain.AuditorAware;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
@@ -35,14 +37,14 @@ public class SpringSecurityAuditorAware implements AuditorAware<String> {
 	}
 
 	@Override
-	public String getCurrentAuditor() {
+	public Optional<String> getCurrentAuditor() {
 		final boolean authenticationEnabled = securityStateBean.isAuthenticationEnabled();
 		if (authenticationEnabled && SecurityContextHolder.getContext() != null) {
 			final Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 			if (!(authentication instanceof AnonymousAuthenticationToken)) {
-				return authentication.getName();
+				return Optional.of(authentication.getName());
 			}
 		}
-		return null;
+		return Optional.ofNullable(null);
 	}
 }

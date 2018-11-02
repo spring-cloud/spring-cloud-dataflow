@@ -17,27 +17,28 @@ package org.springframework.cloud.dataflow.server.config.features;
 
 import javax.sql.DataSource;
 
-import org.springframework.boot.autoconfigure.AbstractDatabaseInitializer;
+//import org.springframework.boot.autoconfigure.AbstractDatabaseInitializer;
 import org.springframework.core.io.ResourceLoader;
 
 /**
  * Add indexes to task and batch tables
  * @author Christian Tzolov
  */
-public class BatchTaskIndexesDatabaseInitializer extends AbstractDatabaseInitializer {
+public class BatchTaskIndexesDatabaseInitializer /*extends AbstractDatabaseInitializer*/ {
+	// TODO: BOOT2 handle this custom ddl stuff
 
 	public BatchTaskIndexesDatabaseInitializer(DataSource dataSource, ResourceLoader resourceLoader) {
-		super(dataSource, resourceLoader);
+		//	super(dataSource, resourceLoader);
 	}
 
-	@Override
-	protected boolean isEnabled() {
-		String databaseName = this.getDatabaseName();
-		return "mysql".equalsIgnoreCase(databaseName) || "postgresql".equalsIgnoreCase(databaseName);
-	}
-
-	@Override
-	protected String getSchemaLocation() {
-		return String.format("classpath:schemas/%s/batch_task_indexes.sql", this.getDatabaseName());
-	}
+	//	@Override
+	//	protected boolean isEnabled() {
+	//		String databaseName = this.getDatabaseName();
+	//		return "mysql".equalsIgnoreCase(databaseName) || "postgresql".equalsIgnoreCase(databaseName);
+	//	}
+	//
+	//	@Override
+	//	protected String getSchemaLocation() {
+	//		return String.format("classpath:schemas/%s/batch_task_indexes.sql", this.getDatabaseName());
+	//	}
 }

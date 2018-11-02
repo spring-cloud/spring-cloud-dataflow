@@ -21,7 +21,6 @@ import java.util.Arrays;
 import javax.servlet.ServletContext;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.h2.tools.Server;
 import org.slf4j.LoggerFactory;
@@ -29,12 +28,11 @@ import org.slf4j.LoggerFactory;
 import org.springframework.batch.core.StepExecution;
 import org.springframework.batch.item.ExecutionContext;
 import org.springframework.beans.BeansException;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
-import org.springframework.boot.autoconfigure.web.HttpMessageConverters;
+import org.springframework.boot.autoconfigure.http.HttpMessageConverters;
+import org.springframework.boot.autoconfigure.jackson.Jackson2ObjectMapperBuilderCustomizer;
 import org.springframework.boot.web.servlet.ServletContextInitializer;
 import org.springframework.cloud.dataflow.rest.job.support.ISO8601DateFormatWithMilliSeconds;
 import org.springframework.cloud.dataflow.server.job.support.ExecutionContextJacksonMixIn;
@@ -42,7 +40,6 @@ import org.springframework.cloud.dataflow.server.job.support.StepExecutionJackso
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Primary;
 import org.springframework.context.event.ContextClosedEvent;
 import org.springframework.hateoas.core.DefaultRelProvider;
 import org.springframework.http.converter.HttpMessageConverter;
@@ -52,7 +49,6 @@ import org.springframework.util.StringUtils;
 import org.springframework.validation.beanvalidation.MethodValidationPostProcessor;
 import org.springframework.web.servlet.config.annotation.PathMatchConfigurer;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
-import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter;
 
 /**
  * @author Mark Fisher
@@ -108,23 +104,6 @@ public class WebConfiguration implements ServletContextInitializer, ApplicationL
 		}
 	}
 
-	/**
-	 * Obtains the Spring Hateos Object Mapper so that we can apply SCDF Batch Mixins to
-	 * ignore the JobExecution in StepExecution to prevent infinite loop.
-	 * {@see https://github.com/spring-projects/spring-hateoas/issues/333}
-	 */
-	@Autowired
-	@Qualifier(SPRING_HATEOAS_OBJECT_MAPPER)
-	private ObjectMapper springHateoasObjectMapper;
-
-	@Bean
-	@Primary
-	public ObjectMapper objectMapper() {
-		ObjectMapper objectMapper = springHateoasObjectMapper;
-		setupObjectMapper(objectMapper);
-		return objectMapper;
-	}
-
 	@Bean
 	public HttpMessageConverters messageConverters(ObjectMapper objectMapper) {
 		return new HttpMessageConverters(
@@ -136,7 +115,7 @@ public class WebConfiguration implements ServletContextInitializer, ApplicationL
 
 	@Bean
 	public WebMvcConfigurer configurer() {
-		return new WebMvcConfigurerAdapter() {
+		return new WebMvcConfigurer() {
 
 			@Override
 			public void configurePathMatch(PathMatchConfigurer configurer) {
@@ -145,12 +124,17 @@ public class WebConfiguration implements ServletContextInitializer, ApplicationL
 		};
 	}
 
-	private void setupObjectMapper(ObjectMapper objectMapper) {
-		objectMapper.configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false);
-		objectMapper.setDateFormat(new ISO8601DateFormatWithMilliSeconds());
-		objectMapper.addMixIn(StepExecution.class, StepExecutionJacksonMixIn.class);
-		objectMapper.addMixIn(ExecutionContext.class, ExecutionContextJacksonMixIn.class);
-		objectMapper.registerModule(new JavaTimeModule());
+	@Bean
+	public Jackson2ObjectMapperBuilderCustomizer dataflowObjectMapperBuilderCustomizer() {
+		return (builder) -> {
+			builder.dateFormat(new ISO8601DateFormatWithMilliSeconds());
+			// apply SCDF Batch Mixins to
+			// ignore the JobExecution in StepExecution to prevent infinite loop.
+			// https://github.com/spring-projects/spring-hateoas/issues/333
+			builder.mixIn(StepExecution.class, StepExecutionJacksonMixIn.class);
+			builder.mixIn(ExecutionContext.class, ExecutionContextJacksonMixIn.class);
+			builder.modules(new JavaTimeModule());
+		};
 	}
 
 	@Bean

@@ -30,8 +30,6 @@ import org.springframework.analytics.metrics.FieldValueCounterRepository;
 import org.springframework.analytics.metrics.memory.InMemoryAggregateCounterRepository;
 import org.springframework.analytics.metrics.memory.InMemoryFieldValueCounterRepository;
 import org.springframework.boot.SpringApplication;
-import org.springframework.boot.actuate.metrics.repository.InMemoryMetricRepository;
-import org.springframework.boot.actuate.metrics.repository.MetricRepository;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.cloud.dataflow.rest.client.config.DataFlowClientAutoConfiguration;
@@ -65,6 +63,8 @@ import org.springframework.util.SocketUtils;
  * @author Glenn Renfro
  */
 public abstract class AbstractShellIntegrationTest {
+
+	// TODO: BOOT2 disabled metric stuff
 
 	/**
 	 * System property indicating whether the test infrastructure should be shut down
@@ -215,6 +215,7 @@ public abstract class AbstractShellIntegrationTest {
 			this.shell = shell;
 		}
 
+		@Override
 		public CommandResult executeCommand(String command) {
 			CommandResult cr = this.shell.executeCommand(command);
 			if (cr.getException() != null) {
@@ -230,10 +231,10 @@ public abstract class AbstractShellIntegrationTest {
 	@Configuration
 	public static class TestConfig {
 
-		@Bean
-		public MetricRepository metricRepository() {
-			return new InMemoryMetricRepository();
-		}
+		//		@Bean
+		//		public MetricRepository metricRepository() {
+		//			return new InMemoryMetricRepository();
+		//		}
 
 		@Bean
 		public FieldValueCounterRepository fieldValueCounterReader() {

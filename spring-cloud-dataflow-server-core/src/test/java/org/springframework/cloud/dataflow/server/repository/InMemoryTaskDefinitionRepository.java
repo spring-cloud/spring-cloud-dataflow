@@ -20,6 +20,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.springframework.cloud.dataflow.core.TaskDefinition;
@@ -53,7 +54,7 @@ public class InMemoryTaskDefinitionRepository implements TaskDefinitionRepositor
 	}
 
 	@Override
-	public <S extends TaskDefinition> Iterable<S> save(Iterable<S> iterableDefinitions) {
+	public <S extends TaskDefinition> Iterable<S> saveAll(Iterable<S> iterableDefinitions) {
 		for (S definition : iterableDefinitions) {
 			save(definition);
 		}
@@ -72,12 +73,17 @@ public class InMemoryTaskDefinitionRepository implements TaskDefinitionRepositor
 	}
 
 	@Override
+	public Optional<TaskDefinition> findById(String name) {
+		return Optional.ofNullable(definitions.get(name));
+	}
+
+	@Override
 	public TaskDefinition findOne(String name) {
 		return definitions.get(name);
 	}
 
 	@Override
-	public boolean exists(String name) {
+	public boolean existsById(String name) {
 		return definitions.containsKey(name);
 	}
 
@@ -87,7 +93,7 @@ public class InMemoryTaskDefinitionRepository implements TaskDefinitionRepositor
 	}
 
 	@Override
-	public Iterable<TaskDefinition> findAll(Iterable<String> names) {
+	public Iterable<TaskDefinition> findAllById(Iterable<String> names) {
 		List<TaskDefinition> results = new ArrayList<>();
 		for (String s : names) {
 			if (definitions.containsKey(s)) {
@@ -103,6 +109,11 @@ public class InMemoryTaskDefinitionRepository implements TaskDefinitionRepositor
 	}
 
 	@Override
+	public void deleteById(String name) {
+		definitions.remove(name);
+	}
+
+	@Override
 	public void delete(String name) {
 		definitions.remove(name);
 	}
@@ -113,7 +124,7 @@ public class InMemoryTaskDefinitionRepository implements TaskDefinitionRepositor
 	}
 
 	@Override
-	public void delete(Iterable<? extends TaskDefinition> definitions) {
+	public void deleteAll(Iterable<? extends TaskDefinition> definitions) {
 		for (TaskDefinition definition : definitions) {
 			delete(definition);
 		}

@@ -1,3 +1,9 @@
+management:
+  endpoints:
+    web:
+      base-path: /management
+      exposure:
+        include: "*"
 security:
   oauth2:
     client:

@@ -23,8 +23,8 @@ import org.junit.runners.MethodSorters;
 
 import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.get;
 import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.post;
-import static org.springframework.restdocs.payload.PayloadDocumentation.fieldWithPath;
 import static org.springframework.restdocs.payload.PayloadDocumentation.responseFields;
+import static org.springframework.restdocs.payload.PayloadDocumentation.subsectionWithPath;
 import static org.springframework.restdocs.request.RequestDocumentation.parameterWithName;
 import static org.springframework.restdocs.request.RequestDocumentation.requestParameters;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
@@ -84,10 +84,10 @@ public class AuditRecordsDocumentation extends BaseDocumentation {
 					parameterWithName("actions")
 						.description("Comma-separated list of Audit Actions (optional)")),
 				responseFields(
-				fieldWithPath("_embedded.auditRecordResourceList")
-					.description("Contains a collection of Audit Records"),
-				fieldWithPath("_links.self").description("Link to the audit record resource"),
-				fieldWithPath("page").description("Pagination properties"))));
+					subsectionWithPath("_embedded.auditRecordResourceList")
+						.description("Contains a collection of Audit Records"),
+					subsectionWithPath("_links.self").description("Link to the audit record resource"),
+					subsectionWithPath("page").description("Pagination properties"))));
 	}
 
 }
