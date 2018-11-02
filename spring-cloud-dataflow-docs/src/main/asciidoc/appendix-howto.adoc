@@ -124,7 +124,7 @@ $ cf restage dataflow-server
 
 (where `reactor.ipc.netty` is the global package for everything `reactor-netty` related.)
 
-NOTE: Similar to the `local-deployer` and `cloudfoundry-deployer` options as discussed above, there are equivalent settings available for Apache YARN, Apache Mesos, and Kubernetes variants.
+NOTE: Similar to the `local-deployer` and `cloudfoundry-deployer` options as discussed above, there are equivalent settings available for Kubernetes.
 See the respective link:https://github.com/spring-cloud?utf8=%E2%9C%93&q=spring-cloud-deployer[SPI implementations] for more detail about the packages to configure for logging.
 
 
