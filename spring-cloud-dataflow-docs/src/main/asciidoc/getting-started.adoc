@@ -145,10 +145,10 @@ The following entries need to be added to the `environment` block of the `datafl
 +
 [source,yaml,subs=attributes]
 ----
-      - spring_datasource_url=jdbc:mysql://mysql:3306/dataflow
-      - spring_datasource_username=root
-      - spring_datasource_password=rootpw
-      - spring_datasource_driver-class-name=org.mariadb.jdbc.Driver
+      - spring.datasource.url=jdbc:mysql://mysql:3306/dataflow
+      - spring.datasource.username=root
+      - spring.datasource.password=rootpw
+      - spring.datasource.driver-class-name=org.mariadb.jdbc.Driver
 ----
 +
 
@@ -205,7 +205,7 @@ Then add the following entries to the `environment` block of the `dataflow-serve
 [source,yaml,subs=attributes]
 ----
       - spring.cloud.dataflow.applicationProperties.stream.spring.redis.host=redis
-      - spring_redis_host=redis
+      - spring.redis.host=redis
 ----
 +
 
@@ -291,10 +291,10 @@ Then add Skipper and Metrics under the `dataflow-server` service definition:
       - "7577:7577"
       - "9000-9010:9000-9010"
     environment:
-      - spring_datasource_url=jdbc:mysql://mysql:3306/dataflow
-      - spring_datasource_username=root
-      - spring_datasource_password=rootpw
-      - spring_datasource_driver-class-name=org.mariadb.jdbc.Driver
+      - spring.datasource.url=jdbc:mysql://mysql:3306/dataflow
+      - spring.datasource.username=root
+      - spring.datasource.password=rootpw
+      - spring.datasource.driver-class-name=org.mariadb.jdbc.Driver
 
   metrics-collector:
     image: springcloud/metrics-collector-kafka:2.0.0.RELEASE
