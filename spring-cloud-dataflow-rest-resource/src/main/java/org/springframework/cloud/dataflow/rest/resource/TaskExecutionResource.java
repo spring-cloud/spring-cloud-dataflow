@@ -33,7 +33,6 @@ import org.springframework.util.Assert;
  *
  * @author Glenn Renfro
  * @author Gunnar Hillert
- * @author Ilayaperumal Gopinathan
  */
 public class TaskExecutionResource extends ResourceSupport {
 
@@ -45,7 +44,7 @@ public class TaskExecutionResource extends ResourceSupport {
 	/**
 	 * The recorded exit code for the task.
 	 */
-	private Integer exitCode;
+	private int exitCode;
 
 	/**
 	 * User defined name for the task.
@@ -146,7 +145,7 @@ public class TaskExecutionResource extends ResourceSupport {
 	 * @return the int containing the exit code of the task application upon completion.
 	 * Default is 0.
 	 */
-	public Integer getExitCode() {
+	public int getExitCode() {
 		return exitCode;
 	}
 
@@ -204,8 +203,12 @@ public class TaskExecutionResource extends ResourceSupport {
 			return TaskExecutionStatus.RUNNING;
 		}
 		else {
-			return (this.exitCode == null) ? TaskExecutionStatus.RUNNING :
-					((this.exitCode == 0) ? TaskExecutionStatus.COMPLETE : TaskExecutionStatus.ERROR);
+			if (this.exitCode == 0) {
+				return TaskExecutionStatus.COMPLETE;
+			}
+			else {
+				return TaskExecutionStatus.ERROR;
+			}
 		}
 	}
 
