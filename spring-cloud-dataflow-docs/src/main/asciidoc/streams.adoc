@@ -537,7 +537,7 @@ allowing quicker feedback when using, for example, `app info` or the Dashboard U
 * As a consequence of being lighter, they can be used in resource constrained environments (such as PaaS) when metadata is
 the only piece of information needed.
 * For environments that do not deal with Spring Boot uber jars directly (for example, Docker-based runtimes such as
-Kubernetes or Mesos), this is the only way to provide metadata about the properties supported by the app.
+Kubernetes or Cloud Foundry), this is the only way to provide metadata about the properties supported by the app.
 
 Remember, though, that this is entirely optional when dealing with uber jars. The uber jar itself also includes the
 metadata in it already.

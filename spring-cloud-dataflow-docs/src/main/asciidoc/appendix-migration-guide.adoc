@@ -13,7 +13,7 @@ The following table describes the changes in terminology from Spring XD to Sprin
 [width="100%",frame="topbot",options="header"]
 |======================
 |Old |New
-|XD-Admin        |Server (implementations: local, Cloud Foundry, Apache Yarn, Kubernetes, and Apache Mesos)
+|XD-Admin        |Server (implementations: local, Cloud Foundry, and Kubernetes)
 |XD-Container       |N/A
 |Modules       |Applications
 |Admin UI        |Dashboard
@@ -46,7 +46,7 @@ These applications can be used as the reference while refactoring Spring XD modu
 
 As you register your applications, keep the following information in mind:
 
-* Custom Stream/Task applications require being installed to a Maven repository for local, Yarn, and Cloud Foundry implementations or, as docker images, when deploying to Kubernetes or Mesos. Other than Maven and docker resolution, you can also resolve application artifacts from `http`, `file`, or as `hdfs` coordinates.
+* Custom Stream/Task applications can be registered as Spring Boot uber-jar for Cloud Foundry or local implementations.  They can also be registerd as a docker image for Local, Cloud Foundry, or Kuberenetes implementations.  Other than Maven and docker resolution, you can also resolve application artifacts from `http(s)` and `file` coordinates.
 * Unlike Spring XD, you do not have to upload the application bits while registering custom applications anymore.
 Instead, you need to <<spring-cloud-dataflow-register-stream-apps, register>> the application coordinates that are hosted in the Maven repository or by other means as discussed in the previous bullet.
 * By default, none of the out-of-the-box applications are preloaded. It is intentionally designed to provide the flexibility to register apps as you find appropriate for the given use-case requirement.
@@ -202,8 +202,7 @@ The Admin-UI is now named Dashboard. The URI for accessing the Dashboard is chan
 This view includes details such as the URI and the properties supported by each application.
 You can also register/unregister applications from this view.
 * Runtime (was Container): Container changes to Runtime. The notion of `xd-container` is gone, replaced by out-of-the-box applications running as autonomous Spring Boot applications.
-The Runtime tab displays the applications running in the runtime platforms (implementations: Cloud Foundry, Apache Yarn, Apache Mesos, or
-Kubernetes). You can click on each application to review relevant details, such
+The Runtime tab displays the applications running in the runtime platforms (implementations: Local, Cloud Foundry, or Kubernetes). You can click on each application to review relevant details, such
 as where it is running, what resources it uses, and other details.
 * link:https://github.com/spring-projects/spring-flo[Spring Flo] is now an OSS product. Flo for
 Spring Cloud Data Flow’s "`Create Stream`" is now the designer-tab in the Dashboard.
@@ -244,7 +243,7 @@ Specifically, when you use the `counter-sink`, `field-value-counter-sink`, or `a
 ==== Cluster Topology
 
 Spring XD’s `xd-admin` and `xd-container` server components are replaced by stream and task applications that are themselves running as autonomous Spring Boot applications.
-The applications run natively on various platforms, including Cloud Foundry, Apache YARN, Apache Mesos, and Kubernetes.
+The applications run natively on various platforms, including Cloud Foundry and Kubernetes.
 You can develop, test, deploy, scale up or down, and interact with (Spring Boot) applications individually, and they can evolve in isolation.
 
 
@@ -257,7 +256,7 @@ To support centralized and consistent management of an application’s configura
 
 === Distribution
 
-Spring Cloud Data Flow is a Spring Boot application. Depending on the platform of your choice, you can download the respective release uber jar and deploy or push it to the runtime platform (Cloud Foundry, Apache Yarn, Kubernetes, or Apache Mesos). For example, if you run Spring Cloud Data Flow on Cloud Foundry, you can download the Cloud Foundry server implementation and do a `cf push`, as explained in the link:http://docs.spring.io/spring-cloud-dataflow-server-cloudfoundry/docs/current-SNAPSHOT/reference/htmlsingle/#getting-started[Cloud Foundry Reference Guide].
+Spring Cloud Data Flow is a Spring Boot application. Depending on the platform of your choice, you can download the respective release uber jar and deploy or push it to the runtime platform (Cloud Foundry or Kubernetes). For example, if you run Spring Cloud Data Flow on Cloud Foundry, you can download the Cloud Foundry server implementation and do a `cf push`, as explained in the link:http://docs.spring.io/spring-cloud-dataflow-server-cloudfoundry/docs/current-SNAPSHOT/reference/htmlsingle/#getting-started[Cloud Foundry Reference Guide].
 
 
 
@@ -272,16 +271,6 @@ with the following Hadoop distributions:
 * Hortonworks Hadoop: hdp23
 * Vanilla Hadoop: hadoop26
 * Vanilla Hadoop: 2.7.x (default)
-
-
-
-=== YARN Deployment
-
-Spring Cloud Data Flow can be deployed and used with Apche YARN in two different ways:
-
-* Deploy the server link:http://docs.spring.io/spring-cloud-dataflow-server-yarn/docs/current-SNAPSHOT/reference/htmlsingle/#yarn-deploying-on-yarn[directly] in a YARN cluster.
-* Use the Apache Ambari link:http://docs.spring.io/spring-cloud-dataflow-server-yarn/docs/current-SNAPSHOT/reference/htmlsingle/#yarn-deploying-on-ambari[plugin] to provision Spring Cloud Data Flow as a service.
-
 
 
 === Use Case Comparison

@@ -32,10 +32,14 @@ deployer SPI implementation for that environment. The github locations for these
 * https://github.com/spring-cloud/spring-cloud-dataflow/tree/master/spring-cloud-dataflow-server-local[Local]
 * https://github.com/spring-cloud/spring-cloud-dataflow-server-cloudfoundry[Cloud Foundry]
 * https://github.com/spring-cloud/spring-cloud-dataflow-server-kubernetes[Kubernetes]
-* https://github.com/spring-cloud/spring-cloud-dataflow-server-yarn[Apache YARN]
-* https://github.com/spring-cloud/spring-cloud-dataflow-server-mesos[Apache Mesos]
 
-_There are also community maintained Spring Cloud Data Flow implementations for Hashicorp's https://github.com/donovanmuller/spring-cloud-dataflow-server-nomad[Nomad] and RedHat's https://github.com/donovanmuller/spring-cloud-dataflow-server-openshift[Openshift]._
+There are also community maintained Spring Cloud Data Flow implementations.
+
+ * https://github.com/donovanmuller/spring-cloud-dataflow-server-nomad[HashiCorp Nomad]
+ * https://github.com/donovanmuller/spring-cloud-dataflow-server-openshift[OpenShift]
+ * https://github.com/trustedchoice/spring-cloud-dataflow-server-mesos[Apache Mesos]
+
+The https://github.com/spring-cloud/spring-cloud-dataflow-server-yarn[Apache YARN] implementation has reached end-of-line status. Let us know at https://gitter.im/spring-cloud/spring-cloud-dataflow[Gitter] if youare interested in forking the project to continue developing and maintaining it.
 
 The deployer SPI mentioned above is defined within the https://github.com/spring-cloud/spring-cloud-deployer[Spring Cloud Deployer]
 project. That provides an abstraction layer for deploying the apps of a given stream or task and managing their lifecycle.
@@ -44,8 +48,7 @@ The github locations for the corresponding Spring Cloud Deployer SPI implementat
 * https://github.com/spring-cloud/spring-cloud-deployer-local[Local]
 * https://github.com/spring-cloud/spring-cloud-deployer-cloudfoundry[Cloud Foundry]
 * https://github.com/spring-cloud/spring-cloud-deployer-kubernetes[Kubernetes]
-* https://github.com/spring-cloud/spring-cloud-deployer-yarn[Apache YARN]
-* https://github.com/spring-cloud/spring-cloud-deployer-mesos[Apache Mesos]
+
 
 The https://github.com/spring-cloud/spring-cloud-dataflow/tree/master/spring-cloud-dataflow-shell[Shell]
 connects to the Data Flow Server's REST API and supports a DSL that simplifies the process of

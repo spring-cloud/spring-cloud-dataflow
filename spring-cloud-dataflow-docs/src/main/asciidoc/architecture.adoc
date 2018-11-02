@@ -28,13 +28,20 @@ The target runtimes for applications are platforms that you may already be using
 The supported platforms are:
 
 * Cloud Foundry
-* Apache YARN
 * Kubernetes
-* Apache Mesos
-* Local Server for development
+* Local Server
+
+NOTE: The local server is supported in production for Task deployment as a replacement for the Spring Batch Admin project.  The local server is not supported in production for Stream deployments.
 
 There is a deployer Service Provider Interface (SPI) that lets you extend Data Flow to deploy onto other runtimes.
-There are community implementations of Hashicorp's Nomad and RedHat Openshift. We look forward to working with the community for further contributions!
+There are community implementations
+
+* https://github.com/donovanmuller/spring-cloud-dataflow-server-nomad[HashiCorp Nomad]
+* https://github.com/donovanmuller/spring-cloud-dataflow-server-openshift[OpenShift]
+* https://github.com/trustedchoice/spring-cloud-dataflow-server-mesos[Apache Mesos]
+
+The https://github.com/spring-cloud/spring-cloud-dataflow-server-yarn[Apache YARN] implementation has reached end-of-line status.
+Let us know at https://gitter.im/spring-cloud/spring-cloud-dataflow[Gitter] if youare interested in forking the project to continue developing and maintaining it.
 
 The Spring Cloud Data Flow Server delegates the deployment and runtime status of stream applications to the Spring Cloud Skipper Server.
 Later has the capabilities to update and rollback applications in a Stream at runtime as well as the ability to deploy applications to multiple platforms.
