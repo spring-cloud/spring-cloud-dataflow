@@ -29,7 +29,7 @@
 		<java.version>1.8</java.version>
 		<javadoc.opts>-Xdoclint:none</javadoc.opts>
 
-		<spring-cloud-dataflow-ui.version>1.7.0.RC1</spring-cloud-dataflow-ui.version>
+		<spring-cloud-dataflow-ui.version>1.7.0.RELEASE</spring-cloud-dataflow-ui.version>
 
 		<spring-cloud-deployer.version>1.3.4.RELEASE</spring-cloud-deployer.version>
 		<spring-cloud-deployer-local.version>1.3.9.RELEASE</spring-cloud-deployer-local.version>
@@ -44,7 +44,7 @@
 		<spring-cloud.version>Finchley.SR1</spring-cloud.version>
 
 		<spring-data.version>Kay-SR9</spring-data.version>
-		<spring-cloud-scheduler-spi.version>1.0.0.RELEASE</spring-cloud-scheduler-spi.version>
+		<spring-cloud-scheduler-spi.version>1.0.1.RELEASE</spring-cloud-scheduler-spi.version>
 
 		<spring-cloud-common-security-config.version>1.1.0.BUILD-SNAPSHOT</spring-cloud-common-security-config.version>
 
@@ -135,13 +135,6 @@
 				<artifactId>spring-cloud-deployer-local</artifactId>
 				<version>${spring-cloud-deployer-local.version}</version>
 			</dependency>
-<!--
-			<dependency>
-				<groupId>org.springframework.batch</groupId>
-				<artifactId>spring-batch-admin-manager</artifactId>
-				<version>${spring-batch-admin-manager.version}</version>
-			</dependency>
--->
 			<dependency>
 				<groupId>org.springframework.analytics</groupId>
 				<artifactId>spring-analytics</artifactId>

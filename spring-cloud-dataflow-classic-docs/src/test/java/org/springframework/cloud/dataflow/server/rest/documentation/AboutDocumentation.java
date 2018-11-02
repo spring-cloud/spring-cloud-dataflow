@@ -53,11 +53,11 @@ public class AboutDocumentation extends BaseDocumentation {
 						fieldWithPath("versionInfo").type(JsonFieldType.OBJECT).description(
 								"Provides details of the Spring Cloud Data Flow Server " + "dependencies."),
 						fieldWithPath("versionInfo.implementation").type(JsonFieldType.OBJECT).description(
-								"Provides details of the implementation dependency."),
+								"Provides details of the Spring Cloud Data Flow Server implementation dependency."),
 						fieldWithPath("versionInfo.implementation.name").type(JsonFieldType.STRING).description(
-								"Provides details of the implementation name."),
+								"Provides details of the Spring Cloud Data Flow Server implementation name."),
 						fieldWithPath("versionInfo.implementation.version").type(JsonFieldType.STRING).description(
-								"Provides details of the implementation version."),
+								"Provides details of the Spring Cloud Data Flow Server implementation version."),
 
 						fieldWithPath("versionInfo.core").type(JsonFieldType.OBJECT).description(
 								"Provides details of the core dependency."),
@@ -106,7 +106,7 @@ public class AboutDocumentation extends BaseDocumentation {
 						fieldWithPath("runtimeEnvironment.appDeployer.deployerName").type(JsonFieldType.STRING)
 								.description("Provides details of the appDeployer deployer name."),
 						fieldWithPath("runtimeEnvironment.appDeployer.deployerSpiVersion").type(JsonFieldType.STRING)
-								.description("Provides details of the appDeployer deployer spi version."),
+								.description("Provides details of the appDeployer deployer SPI version."),
 						fieldWithPath("runtimeEnvironment.appDeployer.javaVersion").type(JsonFieldType.STRING)
 								.description("Provides details of the appDeployer java version."),
 						fieldWithPath("runtimeEnvironment.appDeployer.platformApiVersion").type(JsonFieldType.STRING)
@@ -131,7 +131,7 @@ public class AboutDocumentation extends BaseDocumentation {
 						fieldWithPath("runtimeEnvironment.taskLauncher.deployerName").type(JsonFieldType.STRING)
 								.description("Provides details of the taskLauncher deployer name."),
 						fieldWithPath("runtimeEnvironment.taskLauncher.deployerSpiVersion").type(JsonFieldType.STRING)
-								.description("Provides details of the taskLauncher deployer spi version."),
+								.description("Provides details of the taskLauncher deployer SPI version."),
 						fieldWithPath("runtimeEnvironment.taskLauncher.javaVersion").type(JsonFieldType.STRING)
 								.description("Provides details of the taskLauncher java version."),
 						fieldWithPath("runtimeEnvironment.taskLauncher.platformApiVersion").type(JsonFieldType.STRING)
