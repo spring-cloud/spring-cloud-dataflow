@@ -151,12 +151,6 @@
 				<artifactId>spring-cloud-starter-common-security-config-web</artifactId>
 				<version>${spring-cloud-common-security-config.version}</version>
 			</dependency>
-			<!-- looks like starter doesn't override version pulled by skipper? do this temporarily for now -->
-			<dependency>
-				<groupId>org.springframework.cloud</groupId>
-				<artifactId>spring-cloud-common-security-config-web</artifactId>
-				<version>${spring-cloud-common-security-config.version}</version>
-			</dependency>
 			<dependency>
 				<groupId>commons-io</groupId>
 				<artifactId>commons-io</artifactId>
