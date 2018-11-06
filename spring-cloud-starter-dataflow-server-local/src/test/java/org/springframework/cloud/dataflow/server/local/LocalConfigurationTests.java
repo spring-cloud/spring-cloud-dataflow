@@ -24,7 +24,7 @@ import org.junit.Test;
 import org.springframework.analytics.metrics.FieldValueCounterRepository;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.boot.SpringApplication;
-import org.springframework.cloud.dataflow.registry.AppRegistry;
+import org.springframework.cloud.dataflow.registry.AppRegistryCommon;
 import org.springframework.cloud.dataflow.server.config.features.FeaturesProperties;
 import org.springframework.cloud.dataflow.server.local.dataflowapp.LocalTestDataFlowServer;
 import org.springframework.cloud.dataflow.server.local.nodataflowapp.LocalTestNoDataFlowServer;
@@ -63,7 +63,9 @@ public class LocalConfigurationTests {
 
 	@After
 	public void tearDown() {
-		context.close();
+		if (context != null) {
+			context.close();
+		}
 	}
 
 	@Test
@@ -76,7 +78,7 @@ public class LocalConfigurationTests {
 		assertThat(context.getBean(APP_DEPLOYER_BEAN_NAME), instanceOf(LocalAppDeployer.class));
 		assertThat(context.containsBean(TASK_LAUNCHER_BEAN_NAME), is(true));
 		assertThat(context.getBean(TASK_LAUNCHER_BEAN_NAME), instanceOf(LocalTaskLauncher.class));
-		assertNotNull(context.getBean(AppRegistry.class));
+		assertNotNull(context.getBean(AppRegistryCommon.class));
 	}
 
 	@Test
@@ -97,7 +99,7 @@ public class LocalConfigurationTests {
 	public void testConfigWithStreamsDisabled() {
 		SpringApplication app = new SpringApplication(LocalTestDataFlowServer.class);
 		context = app.run(new String[] { "--server.port=0",
-				"--" + FeaturesProperties.FEATURES_PREFIX + "." + FeaturesProperties.STREAMS_ENABLED + "=false" });
+				"--" + FeaturesProperties.FEATURES_PREFIX + "." + FeaturesProperties.STREAMS_ENABLED + "=false"});
 		assertNotNull(context.getBean(TaskDefinitionRepository.class));
 		assertNotNull(context.getBean(DeploymentIdRepository.class));
 		assertNotNull(context.getBean(FieldValueCounterRepository.class));
@@ -130,7 +132,6 @@ public class LocalConfigurationTests {
 		SpringApplication app = new SpringApplication(LocalTestDataFlowServer.class);
 		context = app.run(new String[] { "--server.port=0",
 				"--" + FeaturesProperties.FEATURES_PREFIX + "." + FeaturesProperties.ANALYTICS_ENABLED + "=false" });
-		;
 		assertNotNull(context.getBean(StreamDefinitionRepository.class));
 		assertNotNull(context.getBean(TaskDefinitionRepository.class));
 		assertNotNull(context.getBean(DeploymentIdRepository.class));

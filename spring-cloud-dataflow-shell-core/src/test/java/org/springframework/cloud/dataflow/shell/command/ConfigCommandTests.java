@@ -34,7 +34,6 @@ import org.springframework.cloud.dataflow.rest.client.DataFlowOperations;
 import org.springframework.cloud.dataflow.rest.resource.RootResource;
 import org.springframework.cloud.dataflow.rest.resource.about.AboutResource;
 import org.springframework.cloud.dataflow.rest.resource.security.SecurityInfoResource;
-import org.springframework.cloud.dataflow.shell.DataFlowMode;
 import org.springframework.cloud.dataflow.shell.Target;
 import org.springframework.cloud.dataflow.shell.TargetHolder;
 import org.springframework.cloud.dataflow.shell.command.common.ConfigCommands;
@@ -133,37 +132,10 @@ public class ConfigCommandTests {
 	}
 
 	@Test
-	public void testModeWithSkipperShellAndClassicServer() {
-		testDataFlowMode(DataFlowMode.skipper, DataFlowMode.classic,
-				"You must re-start the Shell with --dataflow.mode=classic");
-	}
-
-	@Test
 	public void testModeWithSkipperShellAndSkipperServer() {
-		testDataFlowMode(DataFlowMode.skipper, DataFlowMode.skipper,
-				"Shell mode: skipper, Server mode: skipper");
-	}
-
-	@Test
-	public void testModeWithClassicShellAndSkipperServer() {
-		testDataFlowMode(DataFlowMode.classic, DataFlowMode.skipper,
-				"You must re-start the Shell with --dataflow.mode=skipper");
-	}
-
-	@Test
-	public void testModeWithClassicShellAndClassicServer() {
-		testDataFlowMode(DataFlowMode.classic, DataFlowMode.classic,
-				"Shell mode: classic, Server mode: classic");
-	}
-
-	public void testDataFlowMode(DataFlowMode shellDataFlowMode, DataFlowMode serverDataFlowMode, String expectedTargetMessage) {
-
-		configCommands.setShellDataflowMode(shellDataFlowMode);
-
+		String expectedTargetMessage = "Successfully targeted http://localhost:9393/";
 		AboutResource aboutResource = new AboutResource();
-		if (serverDataFlowMode == DataFlowMode.skipper) {
-			aboutResource.getFeatureInfo().setSkipperEnabled(true);
-		}
+
 		when(restTemplate.getForObject(Mockito.any(String.class), Mockito.eq(AboutResource.class))).thenReturn(aboutResource);
 
 		RootResource value = new RootResource(Version.REVISION);

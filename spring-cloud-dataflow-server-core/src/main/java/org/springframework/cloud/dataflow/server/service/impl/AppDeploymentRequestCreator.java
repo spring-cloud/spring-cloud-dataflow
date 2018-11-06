@@ -68,7 +68,7 @@ public class AppDeploymentRequestCreator {
 	public AppDeploymentRequestCreator(AppRegistryCommon appRegistry,
 			CommonApplicationProperties commonApplicationProperties,
 			ApplicationConfigurationMetadataResolver metadataResolver) {
-		Assert.notNull(appRegistry, "AppRegistry must not be null");
+		Assert.notNull(appRegistry, "AppRegistryCommon must not be null");
 		Assert.notNull(commonApplicationProperties, "CommonApplicationProperties must not be null");
 		Assert.notNull(metadataResolver, "MetadataResolver must not be null");
 		this.appRegistry = appRegistry;

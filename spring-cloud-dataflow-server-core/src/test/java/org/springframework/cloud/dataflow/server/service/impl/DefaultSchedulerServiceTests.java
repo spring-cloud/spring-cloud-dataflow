@@ -39,9 +39,9 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.cloud.dataflow.configuration.metadata.ApplicationConfigurationMetadataResolver;
 import org.springframework.cloud.dataflow.core.ApplicationType;
 import org.springframework.cloud.dataflow.core.TaskDefinition;
-import org.springframework.cloud.dataflow.registry.AppRegistry;
 import org.springframework.cloud.dataflow.registry.AppRegistryCommon;
 import org.springframework.cloud.dataflow.registry.domain.AppRegistration;
+import org.springframework.cloud.dataflow.registry.service.AppRegistryService;
 import org.springframework.cloud.dataflow.server.DockerValidatorProperties;
 import org.springframework.cloud.dataflow.server.audit.service.AuditRecordService;
 import org.springframework.cloud.dataflow.server.config.apps.CommonApplicationProperties;
@@ -73,7 +73,7 @@ import static org.mockito.Mockito.when;
 @SpringBootTest(classes = { EmbeddedDataSourceConfiguration.class, TaskServiceDependencies.class,
 		PropertyPlaceholderAutoConfiguration.class }, properties = {
 		"spring.cloud.dataflow.applicationProperties.task.globalkey=globalvalue",
-		"spring.cloud.dataflow.applicationProperties.stream.globalstreamkey=nothere" })
+		"spring.cloud.dataflow.applicationProperties.stream.globalstreamkey=nothere"})
 @EnableConfigurationProperties({ CommonApplicationProperties.class, TaskConfigurationProperties.class, DockerValidatorProperties.class})
 public class DefaultSchedulerServiceTests {
 
@@ -100,7 +100,7 @@ public class DefaultSchedulerServiceTests {
 	private SchedulerServiceProperties schedulerServiceProperties;
 
 	@Autowired
-	private AppRegistry appRegistry;
+	private AppRegistryService appRegistry;
 
 	private Map<String, String> testProperties;
 
@@ -110,8 +110,8 @@ public class DefaultSchedulerServiceTests {
 
 	@Before
 	public void setup() throws Exception{
-		this.appRegistry.save("demo", ApplicationType.task, new URI("file:src/test/resources/apps/foo-task"), new URI("file:src/test/resources/apps/foo-task"));
-		this.appRegistry.save("demo2", ApplicationType.task, new URI("file:src/test/resources/apps/foo-task"), new URI("file:src/test/resources/apps/foo-task"));
+		this.appRegistry.save("demo", ApplicationType.task, "1.0.0.", new URI("file:src/test/resources/apps/foo-task"), new URI("file:src/test/resources/apps/foo-task"));
+		this.appRegistry.save("demo2", ApplicationType.task, "1.0.0", new URI("file:src/test/resources/apps/foo-task"), new URI("file:src/test/resources/apps/foo-task"));
 
 		taskDefinitionRepository.save(new TaskDefinition(BASE_DEFINITION_NAME, "demo"));
 		taskDefinitionRepository.save(new TaskDefinition(CTR_DEFINITION_NAME, "demo && demo2"));

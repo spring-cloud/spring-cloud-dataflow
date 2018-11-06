@@ -29,7 +29,6 @@ import org.springframework.cloud.dataflow.core.DefinitionUtils;
 import org.springframework.cloud.dataflow.core.TaskDefinition;
 import org.springframework.cloud.dataflow.core.dsl.TaskNode;
 import org.springframework.cloud.dataflow.core.dsl.TaskParser;
-import org.springframework.cloud.dataflow.registry.AppRegistry;
 import org.springframework.cloud.dataflow.registry.AppRegistryCommon;
 import org.springframework.cloud.dataflow.registry.domain.AppRegistration;
 import org.springframework.cloud.dataflow.rest.util.DeploymentPropertiesUtils;
@@ -93,7 +92,7 @@ public class DefaultTaskService implements TaskService {
 	private final TaskLauncher taskLauncher;
 
 	/**
-	 * The {@link AppRegistry} this service will use to look up task app URIs.
+	 * The {@link AppRegistryCommon} this service will use to look up task app URIs.
 	 */
 	private final AppRegistryCommon registry;
 

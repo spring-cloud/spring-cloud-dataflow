@@ -22,7 +22,7 @@ import org.springframework.cloud.dataflow.registry.domain.AppRegistration;
 import org.springframework.core.io.Resource;
 
 /**
- * Common interface (bridge) for the legacy {@link AppRegistry} and the new
+ * Common interface (bridge) for the legacy {@link AppRegistryCommon} and the new
  * {@link org.springframework.cloud.dataflow.registry.service.DefaultAppRegistryService}
  *
  * This interface bride is required to enable SCDF working both in classic or skipper

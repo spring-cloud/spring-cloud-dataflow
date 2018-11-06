@@ -19,6 +19,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Map;
 
+import org.junit.Before;
 import org.junit.ClassRule;
 import org.junit.Test;
 import org.junit.rules.RuleChain;
@@ -60,7 +61,7 @@ public class LocalServerSecurityWithUsersFileTests {
 	private final static Logger logger = LoggerFactory.getLogger(LocalServerSecurityWithUsersFileTests.class);
 
 	private final static LocalDataflowResource localDataflowResource = new LocalDataflowResource(
-			"classpath:org/springframework/cloud/dataflow/server/local/security" + "/fileBasedUsers.yml");
+			"classpath:org/springframework/cloud/dataflow/server/local/security/fileBasedUsers.yml");
 
 	@ClassRule
 	public static TestRule springDataflowAndLdapServer = RuleChain.outerRule(localDataflowResource);
@@ -85,6 +86,11 @@ public class LocalServerSecurityWithUsersFileTests {
 
 	@Parameter(4)
 	public Map<String, String> urlParameters;
+
+	@Before
+	public void before() {
+		localDataflowResource.mockSkipperAboutInfo();
+	}
 
 	@Parameters(name = "Authentication Test {index} - {0} {2} - Returns: {1}")
 	public static Collection<Object[]> data() {
@@ -542,6 +548,7 @@ public class LocalServerSecurityWithUsersFileTests {
 				{ HttpMethod.GET, HttpStatus.FOUND, "/dashboard", null, null },
 
 				{ HttpMethod.GET, HttpStatus.FORBIDDEN, "/about", manageOnlyUser, null },
+
 				{ HttpMethod.GET, HttpStatus.OK, "/about", viewOnlyUser, null },
 				{ HttpMethod.GET, HttpStatus.FORBIDDEN, "/about", createOnlyUser, null },
 				{ HttpMethod.GET, HttpStatus.UNAUTHORIZED, "/about", null, null },

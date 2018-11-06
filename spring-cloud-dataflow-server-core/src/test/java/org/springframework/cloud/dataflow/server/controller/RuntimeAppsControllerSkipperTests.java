@@ -16,21 +16,22 @@
 
 package org.springframework.cloud.dataflow.server.controller;
 
+import java.util.Arrays;
+
 import org.junit.Assert;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.cloud.dataflow.core.StreamDefinition;
-import org.springframework.cloud.dataflow.core.StreamDeployment;
 import org.springframework.cloud.dataflow.registry.domain.AppRegistration;
 import org.springframework.cloud.dataflow.registry.repository.AppRegistrationRepository;
 import org.springframework.cloud.dataflow.server.configuration.TestDependencies;
 import org.springframework.cloud.dataflow.server.repository.StreamDefinitionRepository;
-import org.springframework.cloud.dataflow.server.repository.StreamDeploymentRepository;
+import org.springframework.cloud.deployer.spi.app.AppStatus;
+import org.springframework.cloud.deployer.spi.app.DeploymentState;
 import org.springframework.cloud.skipper.client.SkipperClient;
 import org.springframework.cloud.skipper.domain.Info;
 import org.springframework.cloud.skipper.domain.Status;
@@ -56,7 +57,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  * @author Christian Tzolov
  */
 @RunWith(SpringRunner.class)
-@SpringBootTest(classes = TestDependencies.class, properties = { "spring.cloud.dataflow.features.skipper-enabled=true",
+@SpringBootTest(classes = TestDependencies.class, properties = {
 		"spring.datasource.url=jdbc:h2:tcp://localhost:19092/mem:dataflow" })
 @DirtiesContext(classMode = ClassMode.AFTER_EACH_TEST_METHOD)
 public class RuntimeAppsControllerSkipperTests {
@@ -68,9 +69,6 @@ public class RuntimeAppsControllerSkipperTests {
 
 	@Autowired
 	private AppRegistrationRepository appRegistrationRepository;
-
-	@Autowired
-	private StreamDeploymentRepository streamDeploymentRepository;
 
 	@Autowired
 	private StreamDefinitionRepository streamDefinitionRepository;
@@ -90,11 +88,6 @@ public class RuntimeAppsControllerSkipperTests {
 		StreamDefinition streamDefinition4 = new StreamDefinition("ticktock4", "time|log");
 		streamDefinitionRepository.save(streamDefinition3);
 		streamDefinitionRepository.save(streamDefinition4);
-
-		StreamDeployment streamDeployment3 = new StreamDeployment(streamDefinition3.getName());
-		StreamDeployment streamDeployment4 = new StreamDeployment(streamDefinition4.getName());
-		this.streamDeploymentRepository.save(streamDeployment3);
-		this.streamDeploymentRepository.save(streamDeployment4);
 
 		Info ticktock3Info = new Info();
 		Status ticktock3Status = new Status();
@@ -130,14 +123,58 @@ public class RuntimeAppsControllerSkipperTests {
 		Assert.assertTrue(responseString.getContentAsString().contains("NoSuchAppException"));
 	}
 
-	// TODO
 	@Test
-	@Ignore
-	public void testFindNonExistentAppInstance() throws Exception {
+	public void testFindNonExistentAppUnknownState() throws Exception {
+		Info info = new Info();
+		info.setStatus(new Status());
+		info.getStatus().setStatusCode(StatusCode.UNKNOWN);
+		info.getStatus().setPlatformStatusAsAppStatusList(
+				Arrays.asList(AppStatus.of("ticktock5.log2-v1").generalState(DeploymentState.unknown).build()));
+
+		when(this.skipperClient.status("ticktock5")).thenReturn(info);
+		streamDefinitionRepository.save(new StreamDefinition("ticktock5", "time2|log2"));
+
 		MockHttpServletResponse responseString = mockMvc
-				.perform(get("/runtime/apps/valid/instances/valid-0").accept(MediaType.APPLICATION_JSON)).andDo(print())
+				.perform(get("/runtime/apps/ticktock5.log2-v1.").accept(MediaType.APPLICATION_JSON)).andDo(print())
+				.andExpect(status().isNotFound()).andReturn().getResponse();
+		Assert.assertTrue(responseString.getContentAsString().contains("NoSuchAppException"));
+	}
+
+	@Test
+	public void testFindNonExistentAppInstance() throws Exception {
+		Info info = new Info();
+		info.setStatus(new Status());
+		info.getStatus().setStatusCode(StatusCode.UNKNOWN);
+		info.getStatus().setPlatformStatusAsAppStatusList(
+				Arrays.asList(AppStatus.of("ticktock5.log2-v1").generalState(DeploymentState.unknown).build()));
+
+		when(this.skipperClient.status("ticktock5")).thenReturn(info);
+		streamDefinitionRepository.save(new StreamDefinition("ticktock5", "time2|log2"));
+
+		MockHttpServletResponse responseString = mockMvc
+				.perform(get("/runtime/apps/ticktock5.log2-v1/instances/log2-0").accept(MediaType.APPLICATION_JSON)).andDo(print())
+				.andExpect(status().is4xxClientError()).andReturn().getResponse();
+		Assert.assertTrue(responseString.getContentAsString().contains("NoSuchAppException"));
+
+
+		info.getStatus().setPlatformStatusAsAppStatusList(
+				Arrays.asList(AppStatus.of("ticktock5.log2-v1").generalState(DeploymentState.deployed).build()));
+
+		responseString = mockMvc
+				.perform(get("/runtime/apps/ticktock5.log2-v1/instances/log2-0").accept(MediaType.APPLICATION_JSON)).andDo(print())
 				.andExpect(status().is4xxClientError()).andReturn().getResponse();
 		Assert.assertTrue(responseString.getContentAsString().contains("NoSuchAppInstanceException"));
+	}
+
+	@Test
+	public void testFindNonExistentAppInstance2() throws Exception {
+		MockHttpServletResponse response = mockMvc
+				.perform(get("/runtime/apps/ticktock4.log-v1/instances/ticktock4.log-v1-0.").accept(MediaType.APPLICATION_JSON)).andDo(print())
+				.andExpect(status().isOk()).andReturn().getResponse();
+		assertThat(response.getContentAsString(),
+				is("{\"instanceId\":\"ticktock4.log-v1-0\",\"state\":\"deployed\",\"attributes\":null,\"links\":[{\"rel\":\"self\",\"href\":" +
+						"\"http://localhost/runtime/apps/ticktock4.log-v1/instances/ticktock4.log-v1-0\",\"hreflang\":null,\"media\":null,\"title\":null," +
+						"\"type\":null,\"deprecation\":null}]}"));
 	}
 
 	@Test

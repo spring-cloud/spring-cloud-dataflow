@@ -33,8 +33,10 @@ import org.springframework.boot.autoconfigure.orm.jpa.HibernateJpaAutoConfigurat
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.cloud.dataflow.configuration.metadata.ApplicationConfigurationMetadataResolver;
 import org.springframework.cloud.dataflow.configuration.metadata.BootApplicationConfigurationMetadataResolver;
-import org.springframework.cloud.dataflow.registry.AppRegistry;
 import org.springframework.cloud.dataflow.registry.AppRegistryCommon;
+import org.springframework.cloud.dataflow.registry.repository.AppRegistrationRepository;
+import org.springframework.cloud.dataflow.registry.service.AppRegistryService;
+import org.springframework.cloud.dataflow.registry.service.DefaultAppRegistryService;
 import org.springframework.cloud.dataflow.registry.support.AppResourceCommon;
 import org.springframework.cloud.dataflow.server.DockerValidatorProperties;
 import org.springframework.cloud.dataflow.server.audit.repository.AuditRecordRepository;
@@ -61,8 +63,6 @@ import org.springframework.cloud.dataflow.server.service.impl.DefaultTaskService
 import org.springframework.cloud.dataflow.server.service.impl.TaskConfigurationProperties;
 import org.springframework.cloud.dataflow.server.service.impl.validation.DefaultTaskValidationService;
 import org.springframework.cloud.deployer.resource.maven.MavenProperties;
-import org.springframework.cloud.deployer.resource.registry.InMemoryUriRegistry;
-import org.springframework.cloud.deployer.resource.registry.UriRegistry;
 import org.springframework.cloud.deployer.spi.task.TaskLauncher;
 import org.springframework.cloud.task.batch.listener.TaskBatchDao;
 import org.springframework.cloud.task.batch.listener.support.JdbcTaskBatchDao;
@@ -98,15 +98,15 @@ import static org.mockito.Mockito.mock;
 @EnableWebMvc
 @EnableTransactionManagement
 @EnableJpaRepositories(basePackages = {
-	"org.springframework.cloud.dataflow.registry.repository",
-	"org.springframework.cloud.dataflow.server.audit.repository"
+		"org.springframework.cloud.dataflow.registry.repository",
+		"org.springframework.cloud.dataflow.server.audit.repository"
 })
 @EnableJpaAuditing
 @EntityScan({
-	"org.springframework.cloud.dataflow.registry.domain",
-	"org.springframework.cloud.dataflow.server.audit.domain"
+		"org.springframework.cloud.dataflow.registry.domain",
+		"org.springframework.cloud.dataflow.server.audit.domain"
 })
-@EnableConfigurationProperties({ DockerValidatorProperties.class, TaskConfigurationProperties.class})
+@EnableConfigurationProperties({ DockerValidatorProperties.class, TaskConfigurationProperties.class })
 public class JobDependencies {
 
 	@Bean
@@ -172,7 +172,7 @@ public class JobDependencies {
 	}
 
 	@Bean
-	public TaskService taskService(TaskDefinitionRepository repository, TaskExplorer explorer, AppRegistry registry,
+	public TaskService taskService(TaskDefinitionRepository repository, TaskExplorer explorer, AppRegistryCommon registry,
 			TaskLauncher taskLauncher, ApplicationConfigurationMetadataResolver metadataResolver,
 			DeploymentIdRepository deploymentIdRepository, AuditRecordService auditRecordService,
 			CommonApplicationProperties commonApplicationProperties, TaskValidationService taskValidationService) {
@@ -258,13 +258,8 @@ public class JobDependencies {
 	}
 
 	@Bean
-	public UriRegistry uriRegistry() {
-		return new InMemoryUriRegistry();
-	}
-
-	@Bean
-	public AppRegistry appRegistry() {
-		return new AppRegistry(uriRegistry(), new AppResourceCommon(new MavenProperties(), new DefaultResourceLoader()));
+	public AppRegistryService appRegistryService(AppRegistrationRepository appRegistrationRepository) {
+		return new DefaultAppRegistryService(appRegistrationRepository, new AppResourceCommon(new MavenProperties(), new DefaultResourceLoader()));
 	}
 
 	@Bean

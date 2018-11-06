@@ -25,8 +25,8 @@ import javax.sql.DataSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceProperties;
 import org.springframework.cloud.dataflow.configuration.metadata.ApplicationConfigurationMetadataResolver;
-import org.springframework.cloud.dataflow.registry.AppRegistry;
 import org.springframework.cloud.dataflow.registry.AppRegistryCommon;
+import org.springframework.cloud.dataflow.registry.service.AppRegistryService;
 import org.springframework.cloud.dataflow.server.DockerValidatorProperties;
 import org.springframework.cloud.dataflow.server.audit.service.AuditRecordService;
 import org.springframework.cloud.dataflow.server.audit.service.DefaultAuditRecordService;
@@ -129,8 +129,8 @@ public class TaskServiceDependencies {
 	}
 
 	@Bean
-	public AppRegistry appRegistry() {
-		return mock(AppRegistry.class);
+	public AppRegistryService appRegistry() {
+		return mock(AppRegistryService.class);
 	}
 
 	@Bean
@@ -175,7 +175,7 @@ public class TaskServiceDependencies {
 
 	@Bean
 	public DefaultTaskService defaultTaskService(TaskDefinitionRepository taskDefinitionRepository,
-			TaskExplorer taskExplorer, TaskRepository taskExecutionRepository, AppRegistry appRegistry,
+			TaskExplorer taskExplorer, TaskRepository taskExecutionRepository, AppRegistryCommon appRegistry,
 			TaskLauncher taskLauncher, ApplicationConfigurationMetadataResolver metadataResolver,
 			TaskConfigurationProperties taskConfigurationProperties, AuditRecordService auditRecordService,
 			CommonApplicationProperties commonApplicationProperties, TaskValidationService taskValidationService) {
@@ -188,7 +188,7 @@ public class TaskServiceDependencies {
 	@Bean
 	public SchedulerService schedulerService(CommonApplicationProperties commonApplicationProperties,
 			Scheduler scheduler, TaskDefinitionRepository taskDefinitionRepository,
-			AppRegistry registry, ResourceLoader resourceLoader,
+			AppRegistryCommon registry, ResourceLoader resourceLoader,
 			DataSourceProperties dataSourceProperties,
 			ApplicationConfigurationMetadataResolver metaDataResolver,
 			SchedulerServiceProperties schedulerServiceProperties,

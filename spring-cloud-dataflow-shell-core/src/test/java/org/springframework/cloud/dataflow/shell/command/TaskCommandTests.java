@@ -29,7 +29,7 @@ import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import org.springframework.cloud.dataflow.registry.AppRegistry;
+import org.springframework.cloud.dataflow.registry.AppRegistryCommon;
 import org.springframework.cloud.dataflow.shell.AbstractShellIntegrationTest;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -89,7 +89,7 @@ public class TaskCommandTests extends AbstractShellIntegrationTest {
 	}
 
 	@AfterClass
-	public static void tearDown() throws Exception {
+	public static void tearDown() {
 		JdbcTemplate template = new JdbcTemplate(applicationContext.getBean(DataSource.class));
 		template.afterPropertiesSet();
 		final String TASK_EXECUTION_FORMAT = "DELETE FROM task_execution WHERE task_execution_id = %d";
@@ -99,19 +99,19 @@ public class TaskCommandTests extends AbstractShellIntegrationTest {
 
 	@Before
 	public void registerApps() {
-		AppRegistry registry = applicationContext.getBean(AppRegistry.class);
+		AppRegistryCommon registry = applicationContext.getBean(AppRegistryCommon.class);
 		registry.importAll(true, new ClassPathResource(APPS_URI));
 	}
 
 	@Test
-	public void testCreateTask() throws InterruptedException {
+	public void testCreateTask() {
 		logger.info("Create Task Test");
 		String taskName = generateUniqueName();
 		task().create(taskName, "timestamp");
 	}
 
 	@Test
-	public void testTaskExecutionList() throws InterruptedException {
+	public void testTaskExecutionList() {
 		logger.info("Retrieve Task Execution List Test");
 		CommandResult cr = task().taskExecutionList();
 		assertTrue("task execution list command must be successful", cr.isSuccess());
@@ -133,7 +133,7 @@ public class TaskCommandTests extends AbstractShellIntegrationTest {
 	}
 
 	@Test
-	public void testTaskExecutionListByName() throws InterruptedException {
+	public void testTaskExecutionListByName() {
 		logger.info("Retrieve Task Execution List By Name Test");
 		task().create("mytask", "timestamp");
 		CommandResult cr = task().taskExecutionListByName("mytask");
@@ -148,7 +148,7 @@ public class TaskCommandTests extends AbstractShellIntegrationTest {
 	}
 
 	@Test
-	public void testViewExecution() throws InterruptedException {
+	public void testViewExecution() {
 		logger.info("Retrieve Task Execution Status by Id");
 
 		CommandResult idResult = task().taskExecutionList();
@@ -185,7 +185,7 @@ public class TaskCommandTests extends AbstractShellIntegrationTest {
 	}
 
 	@Test
-	public void testValidate() throws InterruptedException {
+	public void testValidate() {
 		String taskName = generateUniqueName();
 		task().create(taskName, "timestamp");
 
@@ -219,7 +219,7 @@ public class TaskCommandTests extends AbstractShellIntegrationTest {
 	}
 
 	@Test
-	public void testTaskExecutionCleanup() throws InterruptedException {
+	public void testTaskExecutionCleanup() {
 		CommandResult cr = task().taskExecutionCleanup(10000);
 		assertThat(cr.getResult(), is("Request to clean up resources for task execution 10000 has been submitted"));
 	}

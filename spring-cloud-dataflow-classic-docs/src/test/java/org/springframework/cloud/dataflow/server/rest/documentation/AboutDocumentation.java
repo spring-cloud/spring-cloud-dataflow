@@ -43,8 +43,6 @@ public class AboutDocumentation extends BaseDocumentation {
 								.description("Describes if analytics feature is enabled."),
 						fieldWithPath("featureInfo.schedulerEnabled").type(JsonFieldType.BOOLEAN)
 								.description("Describes if scheduler feature is enabled."),
-						fieldWithPath("featureInfo.skipperEnabled").type(JsonFieldType.BOOLEAN)
-								.description("Describes if skipper feature is enabled."),
 						fieldWithPath("featureInfo.streamsEnabled").type(JsonFieldType.BOOLEAN)
 								.description("Describes if streams feature is enabled."),
 						fieldWithPath("featureInfo.tasksEnabled").type(JsonFieldType.BOOLEAN)
@@ -117,6 +115,8 @@ public class AboutDocumentation extends BaseDocumentation {
 								.description("Provides details of the appDeployer platform host version."),
 						fieldWithPath("runtimeEnvironment.appDeployer.platformSpecificInfo").type(JsonFieldType.OBJECT)
 								.description("Provides details of the appDeployer specific info."),
+						fieldWithPath("runtimeEnvironment.appDeployer.platformSpecificInfo.default").type(JsonFieldType.STRING)
+								.description("Provides details of the name of appDeployer used by the platformSpecificInfo."),
 						fieldWithPath("runtimeEnvironment.appDeployer.platformType").type(JsonFieldType.STRING)
 								.description("Provides details of the appDeployer platform type."),
 						fieldWithPath("runtimeEnvironment.appDeployer.springBootVersion").type(JsonFieldType.STRING)

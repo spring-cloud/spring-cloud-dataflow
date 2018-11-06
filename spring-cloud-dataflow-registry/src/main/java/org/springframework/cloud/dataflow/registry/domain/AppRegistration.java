@@ -155,7 +155,7 @@ public class AppRegistration extends AbstractEntity implements Comparable<AppReg
 	 * @return the URI of the app
 	 */
 	public URI getUri() {
-		return uri;
+		return this.uri;
 	}
 
 	public void setUri(URI uri) {
@@ -163,7 +163,7 @@ public class AppRegistration extends AbstractEntity implements Comparable<AppReg
 	}
 
 	public URI getMetadataUri() {
-		return metadataUri;
+		return this.metadataUri;
 	}
 
 	public void setMetadataUri(URI metadataUri) {
@@ -171,7 +171,7 @@ public class AppRegistration extends AbstractEntity implements Comparable<AppReg
 	}
 
 	public Boolean isDefaultVersion() {
-		return defaultVersion;
+		return this.defaultVersion;
 	}
 
 	public void setDefaultVersion(Boolean defaultVersion) {
@@ -180,18 +180,19 @@ public class AppRegistration extends AbstractEntity implements Comparable<AppReg
 
 	@Override
 	public String toString() {
-		return "AppRegistration{" + "name='" + name + '\'' + ", type='" + type + '\'' + ", version='" + version + '\''
-				+ ", uri=" + uri + ", metadataUri=" + metadataUri + '}';
+		return "AppRegistration{" + "name='" + this.getName() + '\'' + ", type='" + this.getType()
+				+ '\'' + ", version='" + this.getVersion() + '\'' + ", uri=" + this.getUri()
+				+ ", metadataUri=" + this.getMetadataUri() + '}';
 	}
 
 	@Override
 	public int compareTo(AppRegistration that) {
-		int i = this.type.compareTo(that.type);
+		int i = this.getType().compareTo(that.getType());
 		if (i == 0) {
-			i = this.name.compareTo(that.name);
+			i = this.getName().compareTo(that.getName());
 		}
 		if (i == 0) {
-			i = this.version.compareTo(that.version);
+			i = this.getVersion().compareTo(that.getVersion());
 		}
 		return i;
 	}

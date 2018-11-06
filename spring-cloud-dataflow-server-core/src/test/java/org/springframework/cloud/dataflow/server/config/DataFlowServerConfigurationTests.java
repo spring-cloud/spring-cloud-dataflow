@@ -26,7 +26,6 @@ import org.junit.Ignore;
 import org.junit.Test;
 
 import org.springframework.beans.factory.BeanCreationException;
-import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.boot.autoconfigure.context.PropertyPlaceholderAutoConfiguration;
 import org.springframework.boot.autoconfigure.data.redis.RedisAutoConfiguration;
 import org.springframework.boot.autoconfigure.jackson.JacksonAutoConfiguration;
@@ -38,7 +37,6 @@ import org.springframework.boot.test.util.EnvironmentTestUtils;
 import org.springframework.cloud.dataflow.server.EnableDataFlowServer;
 import org.springframework.cloud.dataflow.server.config.features.SchedulerConfiguration;
 import org.springframework.cloud.dataflow.server.config.web.WebConfiguration;
-import org.springframework.cloud.dataflow.server.repository.StreamDeploymentRepository;
 import org.springframework.cloud.dataflow.server.service.StreamValidationService;
 import org.springframework.cloud.dataflow.server.service.TaskService;
 import org.springframework.cloud.dataflow.server.service.impl.DefaultTaskService;
@@ -59,7 +57,6 @@ import org.springframework.security.authentication.AuthenticationManager;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 import static org.mockito.Mockito.mock;
 
 /**
@@ -149,27 +146,12 @@ public class DataFlowServerConfigurationTests {
 
 	@Test
 	public void testSkipperConfig() throws Exception {
-		EnvironmentTestUtils.addEnvironment(context, "spring.cloud.skipper.client.serverUri:http://fakehost:1234/api",
-				"spring.cloud.dataflow.features.skipper-enabled:true");
+		EnvironmentTestUtils.addEnvironment(context, "spring.cloud.skipper.client.serverUri:http://fakehost:1234/api");
 		this.context.refresh();
 		SkipperClient skipperClient = context.getBean(SkipperClient.class);
 		Object baseUri = TestUtils.readField("baseUri", skipperClient);
 		assertNotNull(baseUri);
 		assertTrue(baseUri.equals("http://fakehost:1234/api"));
-		try {
-			this.context.getBean(StreamDeploymentRepository.class);
-			fail("StreamDeploymentRepository shouldn't exist. Exception expected");
-		}
-		catch (NoSuchBeanDefinitionException e) {
-		}
-	}
-
-	@Test
-	public void testAppDeployerConfig() throws Exception {
-		EnvironmentTestUtils.addEnvironment(this.context, "spring.cloud.dataflow.features.skipper-enabled:false");
-		this.context.refresh();
-		StreamDeploymentRepository streamDeploymentRepository = this.context.getBean(StreamDeploymentRepository.class);
-		assertNotNull(streamDeploymentRepository);
 	}
 
 	@EnableDataFlowServer

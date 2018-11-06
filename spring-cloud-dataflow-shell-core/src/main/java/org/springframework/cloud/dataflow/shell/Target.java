@@ -154,7 +154,7 @@ public class Target {
 
 	/**
 	 * Set the result messages indicating the success or failure while targeting the
-	 * Spring XD Admin Server.
+	 * Spring Cloud Data Flow Server.
 	 *
 	 * @param targetResultMessage Must not be empty.
 	 */

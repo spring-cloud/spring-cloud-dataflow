@@ -26,11 +26,11 @@ import java.util.regex.Pattern;
 import org.springframework.cloud.dataflow.configuration.metadata.ApplicationConfigurationMetadataResolver;
 import org.springframework.cloud.dataflow.configuration.metadata.BootApplicationConfigurationMetadataResolver;
 import org.springframework.cloud.dataflow.core.ApplicationType;
-import org.springframework.cloud.dataflow.registry.AppRegistry;
+import org.springframework.cloud.dataflow.registry.AbstractAppRegistryCommon;
+import org.springframework.cloud.dataflow.registry.AppRegistryCommon;
 import org.springframework.cloud.dataflow.registry.domain.AppRegistration;
 import org.springframework.cloud.dataflow.registry.support.AppResourceCommon;
 import org.springframework.cloud.deployer.resource.maven.MavenProperties;
-import org.springframework.cloud.deployer.resource.registry.InMemoryUriRegistry;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.io.FileSystemResourceLoader;
@@ -50,17 +50,26 @@ public class CompletionTestsMocks {
 	private static final File ROOT = new File("src/test/resources",
 			CompletionTestsMocks.class.getPackage().getName().replace('.', '/') + "/apps");
 
-	private static final FileFilter FILTER = new FileFilter() {
-		@Override
-		public boolean accept(File pathname) {
-			return pathname.isDirectory() && pathname.getName().matches(".+-.+");
-		}
-	};
+	private static final FileFilter FILTER = pathname -> pathname.isDirectory() && pathname.getName().matches(".+-.+");
 
 	@Bean
-	public AppRegistry appRegistry() {
+	public AppRegistryCommon appRegistry() {
 		final ResourceLoader resourceLoader = new FileSystemResourceLoader();
-		return new AppRegistry(new InMemoryUriRegistry(), new AppResourceCommon(new MavenProperties(), resourceLoader)) {
+		return new AbstractAppRegistryCommon(new AppResourceCommon(new MavenProperties(), resourceLoader)) {
+			@Override
+			public boolean appExist(String name, ApplicationType type) {
+				return false;
+			}
+
+			@Override
+			public List<AppRegistration> findAll() {
+				List<AppRegistration> result = new ArrayList<>();
+				for (File file : ROOT.listFiles(FILTER)) {
+					result.add(makeAppRegistration(file));
+				}
+				return result;
+			}
+
 			@Override
 			public AppRegistration find(String name, ApplicationType type) {
 				String filename = name + "-" + type;
@@ -73,15 +82,6 @@ public class CompletionTestsMocks {
 				}
 			}
 
-			@Override
-			public List<AppRegistration> findAll() {
-				List<AppRegistration> result = new ArrayList<>();
-				for (File file : ROOT.listFiles(FILTER)) {
-					result.add(makeAppRegistration(file));
-				}
-				return result;
-			}
-
 			private AppRegistration makeAppRegistration(File file) {
 				String fileName = file.getName();
 				Matcher matcher = Pattern.compile("(?<name>.+)-(?<type>.+)").matcher(fileName);
@@ -89,6 +89,16 @@ public class CompletionTestsMocks {
 				String name = matcher.group("name");
 				ApplicationType type = ApplicationType.valueOf(matcher.group("type"));
 				return new AppRegistration(name, type, file.toURI());
+			}
+
+			@Override
+			public AppRegistration save(AppRegistration app) {
+				return null;
+			}
+
+			@Override
+			protected boolean isOverwrite(AppRegistration app, boolean overwrite) {
+				return false;
 			}
 		};
 	}

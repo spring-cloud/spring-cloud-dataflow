@@ -25,6 +25,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Properties;
 import java.util.concurrent.ForkJoinPool;
 
@@ -103,13 +104,13 @@ public class SkipperAppRegistryController {
 
 	private ResourceLoader resourceLoader = new DefaultResourceLoader();
 
-	public SkipperAppRegistryController(StreamDefinitionRepository streamDefinitionRepository,
-			StreamService streamService,
+	public SkipperAppRegistryController(Optional<StreamDefinitionRepository> streamDefinitionRepository,
+			Optional<StreamService> streamService,
 			AppRegistryService appRegistryService,
 			ApplicationConfigurationMetadataResolver metadataResolver,
 			ForkJoinPool forkJoinPool, MavenProperties mavenProperties) {
-		this.streamDefinitionRepository = streamDefinitionRepository;
-		this.streamService = streamService;
+		this.streamDefinitionRepository = streamDefinitionRepository.isPresent() ? streamDefinitionRepository.get() : null;
+		this.streamService = streamService.isPresent() ? streamService.get() : null;
 		this.appRegistryService = appRegistryService;
 		this.metadataResolver = metadataResolver;
 		this.forkJoinPool = forkJoinPool;
@@ -166,9 +167,7 @@ public class SkipperAppRegistryController {
 		if (!this.appRegistryService.appExist(name, type)) {
 			throw new NoSuchAppRegistrationException(name, type);
 		}
-		if (this.appRegistryService.getDefaultApp(name, type) == null) {
-			throw new RuntimeException(String.format("No default version exists for the app [%s:%s]", name, type));
-		}
+
 		String defaultVersion = this.appRegistryService.getDefaultApp(name, type).getVersion();
 		return getInfo(type, name, defaultVersion, exhaustive);
 	}
@@ -265,6 +264,10 @@ public class SkipperAppRegistryController {
 			}
 		}
 
+		if (!this.appRegistryService.appExist(name, type, version)) {
+			throw new NoSuchAppRegistrationException(name, type, version);
+		}
+
 		appRegistryService.delete(name, type, version);
 	}
 
@@ -278,12 +281,15 @@ public class SkipperAppRegistryController {
 	 * return {@code null}.
 	 */
 	private String findStreamContainingAppOf(ApplicationType appType, String appName, String appVersion) {
+		if (this.streamDefinitionRepository == null || this.streamService == null) {
+			return null;
+		}
 		Iterable<StreamDefinition> streamDefinitions = streamDefinitionRepository.findAll();
 		for (StreamDefinition streamDefinition : streamDefinitions) {
 			StreamDeployment streamDeployment = this.streamService.info(streamDefinition.getName());
 			for (StreamAppDefinition streamAppDefinition : streamDefinition.getAppDefinitions()) {
 				final String streamAppName = streamAppDefinition.getRegisteredAppName();
-				final ApplicationType streamAppType =streamAppDefinition.getApplicationType();
+				final ApplicationType streamAppType = streamAppDefinition.getApplicationType();
 				if (appType != streamAppType) {
 					continue;
 				}

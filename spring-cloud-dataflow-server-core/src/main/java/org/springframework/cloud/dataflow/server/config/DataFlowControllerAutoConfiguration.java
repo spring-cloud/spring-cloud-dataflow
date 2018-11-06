@@ -19,9 +19,8 @@ package org.springframework.cloud.dataflow.server.config;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.ForkJoinPool;
-
-import javax.sql.DataSource;
 
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -52,15 +51,11 @@ import org.springframework.cloud.dataflow.completion.CompletionConfiguration;
 import org.springframework.cloud.dataflow.completion.StreamCompletionProvider;
 import org.springframework.cloud.dataflow.completion.TaskCompletionProvider;
 import org.springframework.cloud.dataflow.configuration.metadata.ApplicationConfigurationMetadataResolver;
-import org.springframework.cloud.dataflow.registry.AppRegistry;
 import org.springframework.cloud.dataflow.registry.AppRegistryCommon;
-import org.springframework.cloud.dataflow.registry.RdbmsUriRegistry;
 import org.springframework.cloud.dataflow.registry.repository.AppRegistrationRepository;
 import org.springframework.cloud.dataflow.registry.service.AppRegistryService;
 import org.springframework.cloud.dataflow.registry.service.DefaultAppRegistryService;
 import org.springframework.cloud.dataflow.registry.support.AppResourceCommon;
-import org.springframework.cloud.dataflow.server.ConditionalOnSkipperDisabled;
-import org.springframework.cloud.dataflow.server.ConditionalOnSkipperEnabled;
 import org.springframework.cloud.dataflow.server.DockerValidatorProperties;
 import org.springframework.cloud.dataflow.server.TaskValidationController;
 import org.springframework.cloud.dataflow.server.audit.repository.AuditRecordRepository;
@@ -71,7 +66,6 @@ import org.springframework.cloud.dataflow.server.batch.JobService;
 import org.springframework.cloud.dataflow.server.config.apps.CommonApplicationProperties;
 import org.springframework.cloud.dataflow.server.config.features.FeaturesProperties;
 import org.springframework.cloud.dataflow.server.controller.AboutController;
-import org.springframework.cloud.dataflow.server.controller.AppRegistryController;
 import org.springframework.cloud.dataflow.server.controller.AuditRecordController;
 import org.springframework.cloud.dataflow.server.controller.CompletionController;
 import org.springframework.cloud.dataflow.server.controller.JobExecutionController;
@@ -86,7 +80,6 @@ import org.springframework.cloud.dataflow.server.controller.RuntimeAppsControlle
 import org.springframework.cloud.dataflow.server.controller.SkipperAppRegistryController;
 import org.springframework.cloud.dataflow.server.controller.SkipperStreamDeploymentController;
 import org.springframework.cloud.dataflow.server.controller.StreamDefinitionController;
-import org.springframework.cloud.dataflow.server.controller.StreamDeploymentController;
 import org.springframework.cloud.dataflow.server.controller.StreamValidationController;
 import org.springframework.cloud.dataflow.server.controller.TaskDefinitionController;
 import org.springframework.cloud.dataflow.server.controller.TaskExecutionController;
@@ -96,9 +89,7 @@ import org.springframework.cloud.dataflow.server.controller.UiController;
 import org.springframework.cloud.dataflow.server.controller.security.LoginController;
 import org.springframework.cloud.dataflow.server.controller.security.SecurityController;
 import org.springframework.cloud.dataflow.server.controller.support.MetricStore;
-import org.springframework.cloud.dataflow.server.repository.DeploymentIdRepository;
 import org.springframework.cloud.dataflow.server.repository.StreamDefinitionRepository;
-import org.springframework.cloud.dataflow.server.repository.StreamDeploymentRepository;
 import org.springframework.cloud.dataflow.server.repository.TaskDefinitionRepository;
 import org.springframework.cloud.dataflow.server.service.SchedulerService;
 import org.springframework.cloud.dataflow.server.service.SkipperStreamService;
@@ -107,20 +98,16 @@ import org.springframework.cloud.dataflow.server.service.StreamValidationService
 import org.springframework.cloud.dataflow.server.service.TaskJobService;
 import org.springframework.cloud.dataflow.server.service.TaskService;
 import org.springframework.cloud.dataflow.server.service.TaskValidationService;
-import org.springframework.cloud.dataflow.server.service.impl.AppDeployerStreamService;
 import org.springframework.cloud.dataflow.server.service.impl.AppDeploymentRequestCreator;
 import org.springframework.cloud.dataflow.server.service.impl.DefaultSkipperStreamService;
 import org.springframework.cloud.dataflow.server.service.impl.TaskConfigurationProperties;
 import org.springframework.cloud.dataflow.server.service.impl.validation.DefaultStreamValidationService;
 import org.springframework.cloud.dataflow.server.service.impl.validation.DefaultTaskValidationService;
-import org.springframework.cloud.dataflow.server.stream.AppDeployerStreamDeployer;
 import org.springframework.cloud.dataflow.server.stream.SkipperStreamDeployer;
 import org.springframework.cloud.dataflow.server.stream.StreamDeployer;
 import org.springframework.cloud.deployer.resource.maven.MavenProperties;
 import org.springframework.cloud.deployer.resource.maven.MavenResourceLoader;
-import org.springframework.cloud.deployer.resource.registry.UriRegistry;
 import org.springframework.cloud.deployer.resource.support.DelegatingResourceLoader;
-import org.springframework.cloud.deployer.spi.app.AppDeployer;
 import org.springframework.cloud.deployer.spi.task.TaskLauncher;
 import org.springframework.cloud.skipper.client.DefaultSkipperClient;
 import org.springframework.cloud.skipper.client.SkipperClient;
@@ -135,6 +122,8 @@ import org.springframework.core.io.ResourceLoader;
 import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.hateoas.EntityLinks;
+import org.springframework.hateoas.core.AnnotationRelProvider;
+import org.springframework.hateoas.hal.HalConfiguration;
 import org.springframework.hateoas.hal.Jackson2HalModule;
 import org.springframework.http.converter.StringHttpMessageConverter;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
@@ -439,7 +428,6 @@ public class DataFlowControllerAutoConfiguration {
 	}
 
 	@Configuration
-	@ConditionalOnSkipperEnabled
 	@EnableConfigurationProperties(SkipperClientProperties.class)
 	public static class SkipperDeploymentConfiguration {
 
@@ -454,14 +442,20 @@ public class DataFlowControllerAutoConfiguration {
 		@ConditionalOnBean(StreamDefinitionRepository.class)
 		public SkipperClient skipperClient(SkipperClientProperties properties,
 				RestTemplateBuilder restTemplateBuilder, ObjectMapper objectMapper) {
+
+			// TODO (Tzolov) review the manual Hal convertion configuration
 			objectMapper.registerModule(new Jackson2HalModule());
+			objectMapper.setHandlerInstantiator(new Jackson2HalModule.HalHandlerInstantiator(
+					new AnnotationRelProvider(), null, null, new HalConfiguration()));
 			objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+
 			RestTemplate restTemplate = restTemplateBuilder
 					.errorHandler(new SkipperClientResponseErrorHandler(objectMapper))
 					.interceptors(new OAuth2AccessTokenProvidingClientHttpRequestInterceptor())
 					.messageConverters(Arrays.asList(new StringHttpMessageConverter(),
 							new MappingJackson2HttpMessageConverter(objectMapper)))
 					.build();
+
 			return new DefaultSkipperClient(properties.getServerUri(), restTemplate);
 		}
 
@@ -497,66 +491,14 @@ public class DataFlowControllerAutoConfiguration {
 
 		@Bean
 		public SkipperAppRegistryController skipperAppRegistryController(
-				StreamDefinitionRepository streamDefinitionRepository,
-				StreamService streamService,
+				Optional<StreamDefinitionRepository> streamDefinitionRepository,
+				Optional<StreamService> streamService,
 				AppRegistryService appRegistry, ApplicationConfigurationMetadataResolver metadataResolver,
 				ForkJoinPool appRegistryFJPFB, MavenProperties mavenProperties) {
 			return new SkipperAppRegistryController(streamDefinitionRepository,
 					streamService,
 					appRegistry,
 					metadataResolver, appRegistryFJPFB, mavenProperties);
-		}
-	}
-
-	@Configuration
-	@ConditionalOnSkipperDisabled
-	@ConditionalOnBean({ AppDeployer.class })
-	public static class AppDeploymentConfiguration {
-
-		@Bean
-		@ConditionalOnBean({ StreamDefinitionRepository.class })
-		public StreamDeploymentController streamDeploymentController(StreamDefinitionRepository repository,
-				StreamService streamService) {
-			return new StreamDeploymentController(repository, streamService);
-		}
-
-		@Bean
-		@ConditionalOnBean({ StreamDefinitionRepository.class })
-		public StreamService simpleStreamDeploymentService(StreamDefinitionRepository streamDefinitionRepository,
-				AppDeployerStreamDeployer appDeployerStreamDeployer,
-				AppDeploymentRequestCreator appDeploymentRequestCreator,
-				StreamValidationService streamValidationService,
-				AuditRecordService auditRecordService) {
-			return new AppDeployerStreamService(streamDefinitionRepository,
-					appDeployerStreamDeployer, appDeploymentRequestCreator,
-					streamValidationService, auditRecordService);
-		}
-
-		@Bean
-		@ConditionalOnBean({ StreamDefinitionRepository.class, StreamDeploymentRepository.class })
-		public AppDeployerStreamDeployer appDeployerStreamDeployer(AppDeployer appDeployer,
-				DeploymentIdRepository deploymentIdRepository,
-				StreamDefinitionRepository streamDefinitionRepository,
-				StreamDeploymentRepository streamDeploymentRepository, ForkJoinPool appRegistryFJPFB,
-				AppRegistry appRegistry) {
-			return new AppDeployerStreamDeployer(appDeployer, deploymentIdRepository, streamDefinitionRepository,
-					streamDeploymentRepository, appRegistryFJPFB, appRegistry);
-		}
-
-		@Bean
-		public AppRegistryController appRegistryController(AppRegistry appRegistry,
-				ApplicationConfigurationMetadataResolver metadataResolver, ForkJoinPool appRegistryFJPFB) {
-			return new AppRegistryController(appRegistry, metadataResolver, appRegistryFJPFB);
-		}
-
-		@Bean
-		public UriRegistry uriRegistry(DataSource dataSource) {
-			return new RdbmsUriRegistry(dataSource);
-		}
-
-		@Bean
-		public AppRegistry appRegistry(UriRegistry uriRegistry, AppResourceCommon appResourceCommon) {
-			return new AppRegistry(uriRegistry, appResourceCommon);
 		}
 	}
 

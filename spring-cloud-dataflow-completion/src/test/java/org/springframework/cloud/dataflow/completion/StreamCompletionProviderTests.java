@@ -22,7 +22,6 @@ import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.cloud.dataflow.configuration.metadata.ApplicationConfigurationMetadataResolver;
-import org.springframework.cloud.dataflow.registry.AppRegistry;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import static org.hamcrest.Matchers.empty;
@@ -36,7 +35,7 @@ import static org.junit.Assert.assertThat;
  * Integration tests for StreamCompletionProvider.
  * <p>
  * <p>
- * These tests work hand in hand with a custom {@link AppRegistry} and
+ * These tests work hand in hand with a custom {@link org.springframework.cloud.dataflow.registry.AppRegistryCommon} and
  * {@link ApplicationConfigurationMetadataResolver} to provide completions for a fictional
  * set of well known apps.
  * </p>

@@ -44,8 +44,6 @@ import org.springframework.cloud.dataflow.rest.util.CheckableResource;
 import org.springframework.cloud.dataflow.rest.util.HttpClientConfigurer;
 import org.springframework.cloud.dataflow.rest.util.ProcessOutputResource;
 import org.springframework.cloud.dataflow.rest.util.ResourceBasedAuthorizationInterceptor;
-import org.springframework.cloud.dataflow.shell.DataFlowMode;
-import org.springframework.cloud.dataflow.shell.IncompatibleDataFlowMode;
 import org.springframework.cloud.dataflow.shell.Target;
 import org.springframework.cloud.dataflow.shell.TargetCredentials;
 import org.springframework.cloud.dataflow.shell.TargetHolder;
@@ -104,9 +102,6 @@ public class ConfigCommands implements CommandMarker, InitializingBean, Applicat
 
 	@Autowired
 	private RestTemplate restTemplate;
-
-	@Value("${dataflow.mode:classic}")
-	private DataFlowMode shellDataflowMode = DataFlowMode.classic;
 
 	@Value("${dataflow.uri:" + Target.DEFAULT_TARGET + "}")
 	private String serverUri;
@@ -171,10 +166,6 @@ public class ConfigCommands implements CommandMarker, InitializingBean, Applicat
 
 	public void setServerUri(String serverUri) {
 		this.serverUri = serverUri;
-	}
-
-	public void setShellDataflowMode(DataFlowMode shellDataflowMode) {
-		this.shellDataflowMode = shellDataflowMode;
 	}
 
 	@CliCommand(value = { "dataflow config server" }, help = "Configure the Spring Cloud Data Flow REST server to use")
@@ -250,18 +241,8 @@ public class ConfigCommands implements CommandMarker, InitializingBean, Applicat
 			this.targetHolder.getTarget().setAuthenticationEnabled(securityInfoResource.isAuthenticationEnabled());
 			this.targetHolder.getTarget().setAuthorizationEnabled(securityInfoResource.isAuthorizationEnabled());
 
-			DataFlowMode serverDataFlowMode = getServerDataFlowMode();
+			this.targetHolder.getTarget().setTargetResultMessage(String.format("Successfully targeted %s", targetUriString));
 
-			logger.info(String.format("Shell mode: %s, Server mode: %s", shellDataflowMode, serverDataFlowMode));
-
-			if (shellDataflowMode == serverDataFlowMode) {
-				this.targetHolder.getTarget()
-						.setTargetResultMessage(String.format("Shell mode: %s, Server mode: %s",
-								shellDataflowMode, serverDataFlowMode));
-			} else {
-				throw new IncompatibleDataFlowMode(String.format("You must re-start the Shell with " +
-						"--dataflow.mode=%s", serverDataFlowMode));
-			}
 		}
 		catch (Exception e) {
 			this.targetHolder.getTarget().setTargetException(e);
@@ -270,19 +251,6 @@ public class ConfigCommands implements CommandMarker, InitializingBean, Applicat
 		}
 		return (this.targetHolder.getTarget().getTargetResultMessage());
 
-	}
-
-	private DataFlowMode getServerDataFlowMode() {
-		if (shell.getDataFlowOperations() == null
-				|| shell.getDataFlowOperations().aboutOperation() == null) {
-			throw new IllegalStateException("If the server is available the about operation should be present");
-		}
-
-		if (shell.getDataFlowOperations().aboutOperation().get().getFeatureInfo().isSkipperEnabled()) {
-			return DataFlowMode.skipper;
-		}
-
-		return DataFlowMode.classic;
 	}
 
 	@CliCommand(value = { "dataflow config info" }, help = "Show the Dataflow server being used")
@@ -333,7 +301,7 @@ public class ConfigCommands implements CommandMarker, InitializingBean, Applicat
 
 		RuntimeEnvironmentDetails appDeployer = about.getRuntimeEnvironment().getAppDeployer();
 		RuntimeEnvironmentDetails taskLauncher = about.getRuntimeEnvironment().getTaskLauncher();
-		String deployerColumnName = this.shellDataflowMode == DataFlowMode.skipper ? "Skipper Deployer" : "App Deployer";
+		String deployerColumnName = "Skipper Deployer";
 		modelBuilder.addRow().addValue(deployerColumnName).addValue(appDeployer);
 		rowIndex++;
 		if (!appDeployer.getPlatformSpecificInfo().isEmpty()) {
@@ -400,16 +368,6 @@ public class ConfigCommands implements CommandMarker, InitializingBean, Applicat
 			}
 			this.targetHolder.getTarget().setTargetResultMessage(message);
 		}
-		else if (targetException instanceof IncompatibleDataFlowMode) {
-			String message = targetException.getMessage();
-			if (logger.isDebugEnabled()) {
-				logger.debug(message, targetException);
-			}
-			else {
-				logger.warn(message);
-			}
-			this.targetHolder.getTarget().setTargetResultMessage(message);
-		}
 		else {
 			if (targetException instanceof HttpClientErrorException && targetException.getMessage().startsWith("401")) {
 				this.targetHolder.getTarget()
@@ -428,37 +386,35 @@ public class ConfigCommands implements CommandMarker, InitializingBean, Applicat
 
 	@Override
 	public void onApplicationEvent(ApplicationReadyEvent event) {
-		// Only invoke if the shell is executing in the same application context as the
-		// data flow server.
+		// Only invoke if the shell is executing in the same application context as the data flow server.
 		if (!initialized) {
 			target(
-				this.serverUri,
-				this.userName,
-				this.password,
-				this.credentialsProviderCommand,
-				this.skipSslValidation,
-				this.proxyUri,
-				this.proxyUsername,
-				this.proxyPassword
+					this.serverUri,
+					this.userName,
+					this.password,
+					this.credentialsProviderCommand,
+					this.skipSslValidation,
+					this.proxyUri,
+					this.proxyUsername,
+					this.proxyPassword
 			);
 		}
 	}
 
 	@Override
 	public void afterPropertiesSet() throws Exception {
-		// Only invoke this lifecycle method if the shell is executing in stand-alone
-		// mode.
+		// Only invoke this lifecycle method if the shell is executing in stand-alone mode.
 		if (applicationContext != null && !applicationContext.containsBean("streamDefinitionRepository")) {
 			initialized = true;
 			target(
-				this.serverUri,
-				this.userName,
-				this.password,
-				this.credentialsProviderCommand,
-				this.skipSslValidation,
-				this.proxyUri,
-				this.proxyUsername,
-				this.proxyPassword
+					this.serverUri,
+					this.userName,
+					this.password,
+					this.credentialsProviderCommand,
+					this.skipSslValidation,
+					this.proxyUri,
+					this.proxyUsername,
+					this.proxyPassword
 			);
 		}
 	}

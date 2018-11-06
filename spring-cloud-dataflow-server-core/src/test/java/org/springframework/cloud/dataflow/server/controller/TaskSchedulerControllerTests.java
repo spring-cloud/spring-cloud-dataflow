@@ -27,7 +27,10 @@ import org.junit.runner.RunWith;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.cloud.dataflow.core.ApplicationType;
 import org.springframework.cloud.dataflow.core.TaskDefinition;
+import org.springframework.cloud.dataflow.registry.domain.AppRegistration;
+import org.springframework.cloud.dataflow.registry.service.AppRegistryService;
 import org.springframework.cloud.dataflow.server.audit.domain.AuditActionType;
 import org.springframework.cloud.dataflow.server.audit.domain.AuditOperationType;
 import org.springframework.cloud.dataflow.server.audit.domain.AuditRecord;
@@ -35,7 +38,6 @@ import org.springframework.cloud.dataflow.server.audit.repository.AuditRecordRep
 import org.springframework.cloud.dataflow.server.configuration.TestDependencies;
 import org.springframework.cloud.dataflow.server.repository.TaskDefinitionRepository;
 import org.springframework.cloud.dataflow.server.service.SchedulerService;
-import org.springframework.cloud.deployer.resource.registry.UriRegistry;
 import org.springframework.cloud.scheduler.spi.core.ScheduleInfo;
 import org.springframework.cloud.scheduler.spi.core.SchedulerPropertyKeys;
 import org.springframework.data.domain.Page;
@@ -79,7 +81,7 @@ public class TaskSchedulerControllerTests {
 	private TaskDefinitionRepository repository;
 
 	@Autowired
-	private UriRegistry registry;
+	private AppRegistryService registry;
 
 	@Autowired
 	private TestDependencies.SimpleTestScheduler simpleTestScheduler;
@@ -102,20 +104,23 @@ public class TaskSchedulerControllerTests {
 
 	@Test
 	public void testListSchedules() throws Exception {
-		this.registry.register("task.testApp", new URI("file:src/test/resources/apps/foo-task"));
+		this.registry.save("testApp", ApplicationType.task,
+				"1.0.0", new URI("file:src/test/resources/apps/foo-task"), null);
 
 		repository.save(new TaskDefinition("testDefinition", "testApp"));
 		createSampleSchedule("schedule1");
 		createSampleSchedule("schedule2");
 		mockMvc.perform(get("/tasks/schedules").accept(MediaType.APPLICATION_JSON)).
 				andDo(print()).andExpect(status().isOk()).
-				andExpect(jsonPath("$.content[*].scheduleName", containsInAnyOrder("schedule1","schedule2")))
+				andExpect(jsonPath("$.content[*].scheduleName", containsInAnyOrder("schedule1", "schedule2")))
 				.andExpect(jsonPath("$.content", hasSize(2)));
 	}
 
 	@Test
 	public void testGetSchedule() throws Exception {
-		this.registry.register("task.testApp", new URI("file:src/test/resources/apps/foo-task"));
+
+		this.registry.save("testApp", ApplicationType.task,
+				"1.0.0", new URI("file:src/test/resources/apps/foo-task"), null);
 
 		repository.save(new TaskDefinition("testDefinition", "testApp"));
 		createSampleSchedule("schedule1");
@@ -136,7 +141,8 @@ public class TaskSchedulerControllerTests {
 
 	@Test
 	public void testListSchedulesByTaskDefinitionName() throws Exception {
-		this.registry.register("task.testApp", new URI("file:src/test/resources/apps/foo-task"));
+		this.registry.save("testApp", ApplicationType.task,
+				"1.0.0", new URI("file:src/test/resources/apps/foo-task"), null);
 
 		repository.save(new TaskDefinition("foo", "testApp"));
 		repository.save(new TaskDefinition("bar", "testApp"));
@@ -151,7 +157,9 @@ public class TaskSchedulerControllerTests {
 
 	@Test
 	public void testCreateSchedule() throws Exception {
-		this.registry.register("task.testApp", new URI("file:src/test/resources/apps/foo-task"));
+		AppRegistration registration = this.registry.save("testApp", ApplicationType.task,
+				"1.0.0", new URI("file:src/test/resources/apps/foo-task"), null);
+
 		repository.save(new TaskDefinition("testDefinition", "testApp"));
 		mockMvc.perform(post("/tasks/schedules/").param("taskDefinitionName", "testDefinition").
 				param("scheduleName", "mySchedule").
@@ -180,7 +188,9 @@ public class TaskSchedulerControllerTests {
 
 	@Test
 	public void testCreateScheduleWithSensitiveFields() throws Exception {
-		this.registry.register("task.testApp", new URI("file:src/test/resources/apps/foo-task"));
+		AppRegistration registration = this.registry.save("testApp", ApplicationType.task,
+				"1.0.0", new URI("file:src/test/resources/apps/foo-task"), null);
+
 		repository.save(new TaskDefinition("testDefinition", "testApp"));
 		mockMvc.perform(post("/tasks/schedules/").param("taskDefinitionName", "testDefinition").
 				param("scheduleName", "mySchedule").
@@ -210,28 +220,32 @@ public class TaskSchedulerControllerTests {
 
 	@Test
 	public void testCreateScheduleBadCron() throws Exception {
-		this.registry.register("task.testApp", new URI("file:src/test/resources/apps/foo-task"));
+		AppRegistration registration = this.registry.save("testApp", ApplicationType.task,
+				"1.0.0", new URI("file:src/test/resources/apps/foo-task"), null);
+
 		repository.save(new TaskDefinition("testDefinition", "testApp"));
 		mockMvc.perform(post("/tasks/schedules/").param("taskDefinitionName", "testDefinition").
 				param("scheduleName", "myScheduleBadCron").
-				param("properties", "scheduler.cron.expression="+TestDependencies.SimpleTestScheduler.INVALID_CRON_EXPRESSION)
+				param("properties", "scheduler.cron.expression=" + TestDependencies.SimpleTestScheduler.INVALID_CRON_EXPRESSION)
 				.accept(MediaType.APPLICATION_JSON)).andExpect(status().isBadRequest());
 	}
 
 	@Test
 	public void testRemoveSchedule() throws Exception {
-		this.registry.register("task.testApp", new URI("file:src/test/resources/apps/foo-task"));
+		AppRegistration registration = this.registry.save("testApp", ApplicationType.task,
+				"1.0.0", new URI("file:src/test/resources/apps/foo-task"), null);
+
 		repository.save(new TaskDefinition("testDefinition", "testApp"));
 		createSampleSchedule("mySchedule");
 		assertEquals(1, simpleTestScheduler.list().size());
-		mockMvc.perform(delete("/tasks/schedules/"+"mySchedule" ).accept(MediaType.APPLICATION_JSON)).andDo(print())
+		mockMvc.perform(delete("/tasks/schedules/" + "mySchedule").accept(MediaType.APPLICATION_JSON)).andDo(print())
 				.andExpect(status().isOk());
 		assertEquals(0, simpleTestScheduler.list().size());
 
-		AuditActionType[] auditActionTypesCreate = {  AuditActionType.CREATE };
+		AuditActionType[] auditActionTypesCreate = { AuditActionType.CREATE };
 		final Page<AuditRecord> auditRecordsCreate = auditRecordRepository.findByAuditActionIn(auditActionTypesCreate, null);
 
-		AuditActionType[] auditActionTypesDelete = {  AuditActionType.DELETE };
+		AuditActionType[] auditActionTypesDelete = { AuditActionType.DELETE };
 		final Page<AuditRecord> auditRecordsDelete = auditRecordRepository.findByAuditActionIn(auditActionTypesDelete, null);
 
 		assertEquals(1, auditRecordsCreate.getContent().size());
@@ -251,7 +265,7 @@ public class TaskSchedulerControllerTests {
 	private void createSampleSchedule(String taskDefinitionName, String scheduleName) {
 		Map<String, String> properties = new HashMap<>();
 		properties.put("scheduler.testApp." + SchedulerPropertyKeys.CRON_EXPRESSION, "* * * * *");
-		schedulerService.schedule(scheduleName, taskDefinitionName,properties, null);
+		schedulerService.schedule(scheduleName, taskDefinitionName, properties, null);
 	}
 
 }

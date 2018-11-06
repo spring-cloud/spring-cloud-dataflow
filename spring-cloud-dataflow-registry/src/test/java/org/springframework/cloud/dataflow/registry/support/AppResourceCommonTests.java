@@ -16,17 +16,24 @@
 package org.springframework.cloud.dataflow.registry.support;
 
 import java.net.MalformedURLException;
+import java.net.URI;
 
 import org.junit.Test;
 
 import org.springframework.cloud.deployer.resource.docker.DockerResource;
 import org.springframework.cloud.deployer.resource.maven.MavenProperties;
 import org.springframework.cloud.deployer.resource.maven.MavenResource;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
+import org.springframework.core.io.ResourceLoader;
 import org.springframework.core.io.UrlResource;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.fail;
+import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 
 /**
  * @author Mark Pollack
@@ -35,7 +42,8 @@ import static org.assertj.core.api.Assertions.fail;
  */
 public class AppResourceCommonTests {
 
-	private AppResourceCommon appResourceCommon = new AppResourceCommon(new MavenProperties(), null);
+	private ResourceLoader resourceLoader = mock(ResourceLoader.class);
+	private AppResourceCommon appResourceCommon = new AppResourceCommon(new MavenProperties(), resourceLoader);
 
 	@Test(expected = IllegalArgumentException.class)
 	public void testBadNamedJars() throws Exception {
@@ -43,10 +51,11 @@ public class AppResourceCommonTests {
 		appResourceCommon.getUrlResourceVersion(urlResource);
 	}
 
+	@Test
 	public void testInvalidUrlResourceWithoutVersion() throws Exception {
-		UrlResource urlResource = new UrlResource("http://repo.spring"
-				+ ".io/libs-release/org/springframework/cloud/stream/app/file-sink-rabbit/1.2.0.RELEASE/file-sink-rabbit-1.2.0.RELEASE.jar");
-		assertThat(appResourceCommon.getUrlResourceWithoutVersion(urlResource)).isEqualTo("1.2.0.RELEASE");
+		assertThat(appResourceCommon.getUrlResourceWithoutVersion(
+				new UrlResource("http://repo.spring.io/libs-release/org/springframework/cloud/stream/app/file-sink-rabbit/1.2.0.RELEASE/file-sink-rabbit-1.2.0.RELEASE.jar")))
+				.isEqualTo("http://repo.spring.io/libs-release/org/springframework/cloud/stream/app/file-sink-rabbit/1.2.0.RELEASE/file-sink-rabbit");
 	}
 
 	@Test
@@ -62,11 +71,41 @@ public class AppResourceCommonTests {
 	}
 
 	@Test
+	public void testDefaultResource() {
+		String classpathUri = "classpath:AppRegistryTests-importAll.properties";
+		Resource resource = appResourceCommon.getResource(classpathUri);
+		assertTrue(resource instanceof ClassPathResource);
+	}
+
+	@Test
 	public void testDockerUriString() throws Exception {
 		String dockerUri = "docker:springcloudstream/log-sink-rabbit:1.2.0.RELEASE";
 		Resource resource = appResourceCommon.getResource(dockerUri);
-		assertThat(resource instanceof DockerResource);
+		assertTrue(resource instanceof DockerResource);
 		assertThat(resource.getURI().toString().equals(dockerUri));
+	}
+
+	@Test
+	public void testMetadataUriHttpApp2() throws Exception {
+		String appUri = "docker:springcloudstream/log-sink-rabbit:1.2.0.RELEASE";
+		String metadataUri = "http://repo.spring.io/libs-release/org/springframework/cloud/stream/app/file-sink-rabbit/1.2.0.RELEASE/file-sink-rabbit-1.2.0.RELEASE.jar";
+		Resource metadataResource = appResourceCommon.getMetadataResource(new URI(appUri), new URI(metadataUri));
+		verify(resourceLoader).getResource(eq(metadataUri));
+	}
+
+	@Test
+	public void testMetadataUriHttpApp() throws Exception {
+		String appUri = "http://repo.spring.io/libs-release/org/springframework/cloud/stream/app/file-sink-rabbit/1.2.0.RELEASE/file-sink-rabbit-1.2.0.RELEASE.jar";
+		Resource metadataResource = appResourceCommon.getMetadataResource(new URI(appUri), null);
+		assertTrue(metadataResource instanceof UrlResource);
+		assertThat(metadataResource.getURI().toString().equals(appUri));
+	}
+
+	@Test
+	public void testMetadataUriDockerApp() throws Exception {
+		String appUri = "docker:springcloudstream/log-sink-rabbit:1.2.0.RELEASE";
+		Resource metadataResource = appResourceCommon.getMetadataResource(new URI(appUri), null);
+		assertThat(metadataResource).isNull();
 	}
 
 	@Test

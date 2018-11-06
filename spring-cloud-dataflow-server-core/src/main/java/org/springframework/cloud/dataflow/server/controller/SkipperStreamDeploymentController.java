@@ -52,6 +52,7 @@ import org.springframework.web.bind.annotation.RestController;
  * @author Christian Tzolov
  * @author Gunnar Hillert
  */
+// TODO (Tzolov) Merge StreamDeploymentController with SkipperStreamDeploymentController
 @RestController
 @RequestMapping("/streams/deployments")
 @ExposesResourceFor(StreamDeploymentResource.class)
@@ -88,7 +89,7 @@ public class SkipperStreamDeploymentController extends StreamDeploymentControlle
 
 	@RequestMapping(value = "/manifest/{name}/{version}", method = RequestMethod.GET)
 	public ResponseEntity<String> manifest(@PathVariable("name") String name, @PathVariable("version") Integer version) {
-		return new ResponseEntity<String>(this.skipperStreamService.manifest(name, version), HttpStatus.OK);
+		return new ResponseEntity<>(this.skipperStreamService.manifest(name, version), HttpStatus.OK);
 	}
 
 	@RequestMapping(path = "/history/{name}", method = RequestMethod.GET)

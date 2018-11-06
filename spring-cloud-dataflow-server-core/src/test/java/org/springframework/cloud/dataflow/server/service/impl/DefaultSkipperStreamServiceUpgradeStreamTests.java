@@ -24,16 +24,12 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.cloud.dataflow.core.StreamDefinition;
 import org.springframework.cloud.dataflow.core.StreamDeployment;
 import org.springframework.cloud.dataflow.rest.UpdateStreamRequest;
-import org.springframework.cloud.dataflow.server.ConditionalOnSkipperEnabled;
-import org.springframework.cloud.dataflow.server.config.features.FeaturesProperties;
 import org.springframework.cloud.dataflow.server.configuration.TestDependencies;
 import org.springframework.cloud.dataflow.server.repository.StreamDefinitionRepository;
-import org.springframework.cloud.dataflow.server.repository.StreamDeploymentRepository;
 import org.springframework.cloud.dataflow.server.service.SkipperStreamService;
 import org.springframework.cloud.dataflow.server.stream.SkipperStreamDeployer;
 import org.springframework.cloud.dataflow.server.support.PlatformUtils;
 import org.springframework.test.annotation.DirtiesContext;
-import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import static org.mockito.Mockito.times;
@@ -47,7 +43,6 @@ import static org.mockito.Mockito.when;
  */
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = TestDependencies.class)
-@TestPropertySource(properties = { FeaturesProperties.FEATURES_PREFIX + "." + FeaturesProperties.SKIPPER_ENABLED + "=true" })
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
 public class DefaultSkipperStreamServiceUpgradeStreamTests {
 
@@ -58,11 +53,7 @@ public class DefaultSkipperStreamServiceUpgradeStreamTests {
 	private SkipperStreamService streamService;
 
 	@MockBean
-	@ConditionalOnSkipperEnabled
 	private SkipperStreamDeployer skipperStreamDeployer;
-
-	@MockBean
-	private StreamDeploymentRepository streamDeploymentRepository;
 
 	private StreamDefinition streamDefinition2 = new StreamDefinition("test2", "time | log");
 
@@ -72,7 +63,6 @@ public class DefaultSkipperStreamServiceUpgradeStreamTests {
 	public void verifyUpgradeStream() {
 		if (!PlatformUtils.isWindows()) {
 			when(streamDefinitionRepository.findOne("test2")).thenReturn(streamDefinition2);
-			when(streamDeploymentRepository.findOne(streamDeployment2.getStreamName())).thenReturn(streamDeployment2);
 
 			final UpdateStreamRequest updateStreamRequest = new UpdateStreamRequest(streamDeployment2.getStreamName(), null, null);
 			streamService.updateStream(streamDeployment2.getStreamName(), updateStreamRequest);

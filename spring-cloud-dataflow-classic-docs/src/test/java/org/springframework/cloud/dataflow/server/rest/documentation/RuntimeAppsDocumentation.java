@@ -21,8 +21,14 @@ import org.junit.Before;
 import org.junit.Test;
 
 import org.springframework.cloud.dataflow.core.ApplicationType;
+import org.springframework.cloud.skipper.domain.Info;
+import org.springframework.cloud.skipper.domain.Status;
+import org.springframework.cloud.skipper.domain.StatusCode;
 import org.springframework.http.MediaType;
+import org.springframework.test.annotation.DirtiesContext;
 
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.when;
 import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -32,6 +38,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  * @author Eric Bottard
  * @author Ilayaperumal Gopinathan
  */
+@DirtiesContext
 public class RuntimeAppsDocumentation extends BaseDocumentation {
 
 	@Before
@@ -51,30 +58,58 @@ public class RuntimeAppsDocumentation extends BaseDocumentation {
 	@Test
 	public void listAllApps() throws Exception {
 		this.mockMvc.perform(
-			get("/runtime/apps")
-				.accept(MediaType.APPLICATION_JSON)
+				get("/runtime/apps")
+						.accept(MediaType.APPLICATION_JSON)
 		)
-		.andExpect(status().isOk())
-		.andDo(this.documentationHandler.document());
+				.andExpect(status().isOk())
+				.andDo(this.documentationHandler.document());
 	}
 
 	@Test
 	public void listSingleAppAllInstances() throws Exception {
+
+		Info info = new Info();
+		info.setStatus(new Status());
+		info.getStatus().setStatusCode(StatusCode.DEPLOYED);
+		info.getStatus().setPlatformStatus("[{\"deploymentId\":\"mystream.log\","
+				+ "\"instances\":{\"mystream.log-0\":{\"instanceNumber\":0,\"id\":\"mystream.log-0\","
+				+ "\"state\":\"deployed\"}},\"state\":\"deployed\"},"
+				+ "{\"deploymentId\":\"mystream.http\",\"instances\":{\"mystream.http-0\":{\"instanceNumber\":0,"
+				+ "\"baseUrl\":\"http://192.168.1.100:32451\","
+				+ "\"process\":{\"alive\":true,\"inputStream\":{},\"outputStream\":{},\"errorStream\":{}},"
+				+ "\"attributes\":{\"guid\":\"32451\",\"pid\":\"53492\",\"port\":\"32451\"},"
+				+ "\"id\":\"mystream.http-0\",\"state\":\"deployed\"}},\"state\":\"deployed\"}]");
+		when(springDataflowServer.getSkipperClient().status(eq("mystream"))).thenReturn(info);
+
 		this.mockMvc.perform(
-			get("/runtime/apps/mystream.http/instances")
-				.accept(MediaType.APPLICATION_JSON)
+				get("/runtime/apps/mystream.http/instances")
+						.accept(MediaType.APPLICATION_JSON)
 		)
-		.andExpect(status().isOk())
-			.andDo(this.documentationHandler.document());
+				.andExpect(status().isOk())
+				.andDo(this.documentationHandler.document());
 	}
 
 	@Test
 	public void getSingleAppSingleInstance() throws Exception {
+
+		Info info = new Info();
+		info.setStatus(new Status());
+		info.getStatus().setStatusCode(StatusCode.DEPLOYED);
+		info.getStatus().setPlatformStatus("[{\"deploymentId\":\"mystream.log\","
+				+ "\"instances\":{\"mystream.log-0\":{\"instanceNumber\":0,\"id\":\"mystream.log-0\","
+				+ "\"state\":\"deployed\"}},\"state\":\"deployed\"},"
+				+ "{\"deploymentId\":\"mystream.http\",\"instances\":{\"mystream.http-0\":{\"instanceNumber\":0,"
+				+ "\"baseUrl\":\"http://192.168.1.100:32451\","
+				+ "\"process\":{\"alive\":true,\"inputStream\":{},\"outputStream\":{},\"errorStream\":{}},"
+				+ "\"attributes\":{\"guid\":\"32451\",\"pid\":\"53492\",\"port\":\"32451\"},"
+				+ "\"id\":\"mystream.http-0\",\"state\":\"deployed\"}},\"state\":\"deployed\"}]");
+		when(springDataflowServer.getSkipperClient().status(eq("mystream"))).thenReturn(info);
+
 		this.mockMvc.perform(
-			get("/runtime/apps/mystream.http/instances/mystream.http-0")
-				.accept(MediaType.APPLICATION_JSON)
+				get("/runtime/apps/mystream.http/instances/mystream.http-0")
+						.accept(MediaType.APPLICATION_JSON)
 		)
-		.andExpect(status().isOk())
-		.andDo(this.documentationHandler.document());
+				.andExpect(status().isOk())
+				.andDo(this.documentationHandler.document());
 	}
 }

@@ -66,7 +66,7 @@ public abstract class BaseSkipperDocumentation {
 	@ClassRule
 	public static LocalDataflowResource setupSCDFAndSkipperServer() {
 		springDataflowServer = new LocalDataflowResource(
-				"classpath:rest-docs-config-scdf-skipper-mode.yml", true, true, true, true, true, skipperServerPort);
+				"classpath:rest-docs-config-scdf-skipper-mode.yml", true, true, true, true, skipperServerPort);
 		return springDataflowServer;
 	}
 

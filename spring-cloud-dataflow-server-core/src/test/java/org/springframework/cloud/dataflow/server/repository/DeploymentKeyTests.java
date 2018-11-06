@@ -16,11 +16,14 @@
 
 package org.springframework.cloud.dataflow.server.repository;
 
+import java.util.HashMap;
+
 import org.junit.Test;
 
 import org.springframework.cloud.dataflow.core.StreamAppDefinition;
 import org.springframework.cloud.dataflow.core.StreamDefinition;
 import org.springframework.cloud.dataflow.core.TaskDefinition;
+import org.springframework.cloud.deployer.spi.core.AppDefinition;
 
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
@@ -61,5 +64,12 @@ public class DeploymentKeyTests {
 		assertThat(taskDefinition1.equals(taskDefinition2), is(true));
 		assertThat(appDeploymentKey1.equals(appDeploymentKey3), is(true));
 		assertThat(appDeploymentKey2.equals(appDeploymentKey4), is(true));
+	}
+
+	@Test
+	public void forAppDeploymentRequestTest() {
+		AppDefinition appDefinition = new AppDefinition("myApp", new HashMap<>());
+		String appDeploymentKey = DeploymentKey.forAppDeploymentRequest("myStream", appDefinition);
+		assertThat(appDeploymentKey, is("myStream.myApp"));
 	}
 }

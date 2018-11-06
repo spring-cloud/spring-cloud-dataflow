@@ -56,8 +56,7 @@ import org.springframework.util.StringUtils;
  * {@link StreamDeploymentRequest}.
  * <p>
  * The {@link AbstractStreamService} deployer is agnostic. For deploying streams on
- * Skipper use the {@link DefaultSkipperStreamService} and for the AppDeploy stream
- * deployment use the {@link AppDeployerStreamService}.
+ * Skipper use the {@link DefaultSkipperStreamService}.
  *
  * @author Mark Pollack
  * @author Ilayaperumal Gopinathan

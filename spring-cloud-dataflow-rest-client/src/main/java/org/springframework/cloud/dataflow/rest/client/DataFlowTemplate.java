@@ -280,7 +280,8 @@ public class DataFlowTemplate implements DataFlowOperations {
 			if (converter instanceof MappingJackson2HttpMessageConverter) {
 				containsMappingJackson2HttpMessageConverter = true;
 				final MappingJackson2HttpMessageConverter jacksonConverter = (MappingJackson2HttpMessageConverter) converter;
-				jacksonConverter.getObjectMapper().registerModule(new Jackson2HalModule())
+				jacksonConverter.getObjectMapper()
+						.registerModule(new Jackson2HalModule())
 						.addMixIn(JobExecution.class, JobExecutionJacksonMixIn.class)
 						.addMixIn(JobParameters.class, JobParametersJacksonMixIn.class)
 						.addMixIn(JobParameter.class, JobParameterJacksonMixIn.class)

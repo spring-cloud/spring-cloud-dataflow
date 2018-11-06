@@ -30,8 +30,6 @@ public class FeatureInfo {
 
 	private boolean tasksEnabled = true;
 
-	private boolean skipperEnabled = false;
-
 	private boolean schedulerEnabled = false;
 
 	/**
@@ -62,14 +60,6 @@ public class FeatureInfo {
 
 	public void setTasksEnabled(boolean tasksEnabled) {
 		this.tasksEnabled = tasksEnabled;
-	}
-
-	public boolean isSkipperEnabled() {
-		return skipperEnabled;
-	}
-
-	public void setSkipperEnabled(boolean skipperEnabled) {
-		this.skipperEnabled = skipperEnabled;
 	}
 
 	public boolean isSchedulerEnabled() {

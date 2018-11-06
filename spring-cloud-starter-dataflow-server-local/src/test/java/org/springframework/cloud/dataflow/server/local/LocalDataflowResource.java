@@ -15,19 +15,37 @@
  */
 package org.springframework.cloud.dataflow.server.local;
 
+import java.util.ArrayList;
 import java.util.Collection;
 
 import javax.servlet.Filter;
 
 import org.junit.rules.ExternalResource;
 
+import org.springframework.analytics.metrics.AggregateCounterRepository;
+import org.springframework.analytics.metrics.FieldValueCounterRepository;
+import org.springframework.analytics.metrics.memory.InMemoryAggregateCounterRepository;
+import org.springframework.analytics.metrics.memory.InMemoryFieldValueCounterRepository;
 import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
+import org.springframework.cloud.dataflow.server.EnableDataFlowServer;
 import org.springframework.cloud.dataflow.server.config.features.FeaturesProperties;
-import org.springframework.cloud.dataflow.server.local.dataflowapp.LocalTestDataFlowServer;
+import org.springframework.cloud.skipper.client.SkipperClient;
+import org.springframework.cloud.skipper.domain.AboutResource;
+import org.springframework.cloud.skipper.domain.Dependency;
+import org.springframework.cloud.skipper.domain.VersionInfo;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Primary;
+import org.springframework.data.redis.connection.RedisConnectionFactory;
+import org.springframework.hateoas.Resources;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.util.StringUtils;
 import org.springframework.web.context.WebApplicationContext;
+
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 /**
  * @author Marius Bogoevici
@@ -43,8 +61,6 @@ public class LocalDataflowResource extends ExternalResource {
 
 	final boolean schedulerEnabled;
 
-	final boolean skipperEnabled;
-
 	private String originalConfigLocation = null;
 
 	private SpringApplication app;
@@ -59,13 +75,18 @@ public class LocalDataflowResource extends ExternalResource {
 
 	private WebApplicationContext configurableApplicationContext;
 
+	private SkipperClient skipperClient;
+
+	public SkipperClient getSkipperClient() {
+		return skipperClient;
+	}
+
 	public LocalDataflowResource(String configurationLocation) {
 		this.configurationLocation = configurationLocation;
 		this.streamsEnabled = true;
 		this.tasksEnabled = true;
 		this.metricsEnabled = true;
 		this.schedulerEnabled = false;
-		this.skipperEnabled = false;
 	}
 
 	public LocalDataflowResource(String configurationLocation, boolean streamsEnabled, boolean tasksEnabled) {
@@ -74,7 +95,6 @@ public class LocalDataflowResource extends ExternalResource {
 		this.tasksEnabled = tasksEnabled;
 		this.metricsEnabled = true;
 		this.schedulerEnabled = false;
-		this.skipperEnabled = false;
 	}
 
 	public LocalDataflowResource(String configurationLocation, boolean streamsEnabled, boolean tasksEnabled, boolean metricsEnabled) {
@@ -83,7 +103,6 @@ public class LocalDataflowResource extends ExternalResource {
 		this.tasksEnabled = tasksEnabled;
 		this.metricsEnabled = metricsEnabled;
 		this.schedulerEnabled = false;
-		this.skipperEnabled = false;
 	}
 
 	public LocalDataflowResource(String configurationLocation, boolean streamsEnabled, boolean tasksEnabled, boolean metricsEnabled, boolean schedulerEnabled) {
@@ -92,29 +111,27 @@ public class LocalDataflowResource extends ExternalResource {
 		this.tasksEnabled = tasksEnabled;
 		this.metricsEnabled = metricsEnabled;
 		this.schedulerEnabled = schedulerEnabled;
-		this.skipperEnabled = false;
 	}
 
 	public LocalDataflowResource(String configurationLocation, boolean streamsEnabled, boolean tasksEnabled,
-			boolean metricsEnabled, boolean schedulerEnabled, boolean skipperEnabled, String skipperServerPort) {
+			boolean metricsEnabled, boolean schedulerEnabled, String skipperServerPort) {
 		this.configurationLocation = configurationLocation;
 		this.streamsEnabled = streamsEnabled;
 		this.tasksEnabled = tasksEnabled;
 		this.metricsEnabled = metricsEnabled;
 		this.schedulerEnabled = schedulerEnabled;
-		this.skipperEnabled = skipperEnabled;
 		this.skipperServerPort = skipperServerPort;
 	}
 
 	@Override
-	protected void before() throws Throwable {
+	protected void before() {
 		originalConfigLocation = System.getProperty("spring.config.location");
 
 		if (!StringUtils.isEmpty(configurationLocation)) {
 			System.setProperty("spring.config.location", configurationLocation);
 		}
 
-		app = new SpringApplication(LocalTestDataFlowServer.class);
+		app = new SpringApplication(TestConfig.class);
 
 		configurableApplicationContext = (WebApplicationContext) app.run(new String[] { "--server.port=0",
 				"--" + FeaturesProperties.FEATURES_PREFIX + "." + FeaturesProperties.STREAMS_ENABLED + "="
@@ -125,11 +142,9 @@ public class LocalDataflowResource extends ExternalResource {
 						+ this.metricsEnabled,
 				"--" + FeaturesProperties.FEATURES_PREFIX + "." + FeaturesProperties.SCHEDULES_ENABLED + "="
 						+ this.schedulerEnabled,
-				"--" + FeaturesProperties.FEATURES_PREFIX + "." + FeaturesProperties.SKIPPER_ENABLED + "="
-						+ this.skipperEnabled,
 				"--spring.cloud.skipper.client.serverUri=http://localhost:" + this.skipperServerPort + "/api"
 		});
-
+		skipperClient = configurableApplicationContext.getBean(SkipperClient.class);
 		Collection<Filter> filters = configurableApplicationContext.getBeansOfType(Filter.class).values();
 		mockMvc = MockMvcBuilders.webAppContextSetup(configurableApplicationContext)
 				.addFilters(filters.toArray(new Filter[filters.size()])).build();
@@ -161,6 +176,40 @@ public class LocalDataflowResource extends ExternalResource {
 
 	public WebApplicationContext getWebApplicationContext() {
 		return configurableApplicationContext;
+	}
+
+	public void mockSkipperAboutInfo() {
+		AboutResource about = new AboutResource();
+		about.setVersionInfo(new VersionInfo());
+		about.getVersionInfo().setServer(new Dependency());
+		about.getVersionInfo().getServer().setName("Test Server");
+		about.getVersionInfo().getServer().setVersion("Test Version");
+		when(this.skipperClient.info()).thenReturn(about);
+		when(this.skipperClient.listDeployers()).thenReturn(new Resources<>(new ArrayList<>(), new ArrayList<>()));
+	}
+
+	@EnableAutoConfiguration(excludeName = "org.springframework.cloud.dataflow.rest.client.config.DataFlowClientAutoConfiguration")
+	@EnableDataFlowServer
+	@Configuration
+	public static class TestConfig {
+
+		@Bean
+		@Primary
+		public SkipperClient skipperClientMock() {
+			SkipperClient skipperClient = mock(SkipperClient.class);
+			return skipperClient;
+		}
+
+		@Bean
+		public FieldValueCounterRepository fieldValueCounterReader() {
+			return new InMemoryFieldValueCounterRepository();
+		}
+
+		@Bean
+		public AggregateCounterRepository aggregateCounterReader(RedisConnectionFactory redisConnectionFactory) {
+			return new InMemoryAggregateCounterRepository();
+		}
+
 	}
 
 }
