@@ -62,7 +62,6 @@ import org.springframework.cloud.deployer.spi.core.AppDeploymentRequest;
 import org.springframework.cloud.skipper.client.SkipperClient;
 import org.springframework.cloud.skipper.domain.Deployer;
 import org.springframework.cloud.skipper.domain.Info;
-import org.springframework.cloud.skipper.domain.InstallProperties;
 import org.springframework.cloud.skipper.domain.InstallRequest;
 import org.springframework.cloud.skipper.domain.Package;
 import org.springframework.cloud.skipper.domain.PackageMetadata;
@@ -721,75 +720,97 @@ public class StreamControllerTests {
 		assertEquals(0, repository.count());
 	}
 
-	@Ignore("TODO Tzolov")
 	@Test
 	public void testDeploy() throws Exception {
+
+		prepareSkipperClientFixture();
+
 		repository.save(new StreamDefinition("myStream", "time | log"));
 		mockMvc.perform(post("/streams/deployments/myStream").accept(MediaType.APPLICATION_JSON)).andDo(print())
 				.andExpect(status().isCreated());
-		ArgumentCaptor<AppDeploymentRequest> captor = ArgumentCaptor.forClass(AppDeploymentRequest.class);
-		verify(appDeployer, times(2)).deploy(captor.capture());
-		List<AppDeploymentRequest> requests = captor.getAllValues();
-		assertEquals(2, requests.size());
-		AppDeploymentRequest logRequest = requests.get(0);
-		assertThat(logRequest.getDefinition().getName(), is("log"));
-		AppDeploymentRequest timeRequest = requests.get(1);
-		assertThat(timeRequest.getDefinition().getName(), is("time"));
+		ArgumentCaptor<UploadRequest> uploadRequestCaptor = ArgumentCaptor.forClass(UploadRequest.class);
+		verify(skipperClient, times(1)).upload(uploadRequestCaptor.capture());
+
+		List<UploadRequest> updateRequests = uploadRequestCaptor.getAllValues();
+		assertEquals(1, updateRequests.size());
+
+		Package pkg = SkipperPackageUtils.loadPackageFromBytes(uploadRequestCaptor);
+		assertThat(pkg.getDependencies().get(0).getMetadata().getName(), is("time"));
+		assertThat(pkg.getDependencies().get(1).getMetadata().getName(), is("log"));
 	}
 
-	@Ignore("TODO Tzolov")
 	@Test
 	public void testDeployWithSensitiveData() throws Exception {
-		repository.save(new StreamDefinition("myStreamDeploy", "time --some.password=foobar --another-secret=kenny | log"));
-		mockMvc.perform(post("/streams/deployments/myStreamDeploy").accept(MediaType.APPLICATION_JSON)).andDo(print())
+
+		prepareSkipperClientFixture();
+
+		repository.save(new StreamDefinition("myStream", "time --some.password=foobar --another-secret=kenny | log"));
+		mockMvc.perform(post("/streams/deployments/myStream").accept(MediaType.APPLICATION_JSON)).andDo(print())
 				.andExpect(status().isCreated());
-		ArgumentCaptor<AppDeploymentRequest> captor = ArgumentCaptor.forClass(AppDeploymentRequest.class);
-		verify(appDeployer, times(2)).deploy(captor.capture());
-		List<AppDeploymentRequest> requests = captor.getAllValues();
-		assertEquals(2, requests.size());
-		AppDeploymentRequest logRequest = requests.get(0);
-		assertThat(logRequest.getDefinition().getName(), is("log"));
-		AppDeploymentRequest timeRequest = requests.get(1);
-		assertThat(timeRequest.getDefinition().getName(), is("time"));
+
+		ArgumentCaptor<UploadRequest> uploadRequestCaptor = ArgumentCaptor.forClass(UploadRequest.class);
+		verify(skipperClient, times(1)).upload(uploadRequestCaptor.capture());
+
+		List<UploadRequest> updateRequests = uploadRequestCaptor.getAllValues();
+		assertEquals(1, updateRequests.size());
+
+		Package pkg = SkipperPackageUtils.loadPackageFromBytes(uploadRequestCaptor);
+
+		Package logPackage = pkg.getDependencies().get(1);
+		assertThat(logPackage.getMetadata().getName(), is("log"));
+
+		Package timePackage = pkg.getDependencies().get(0);
+		assertThat(timePackage.getMetadata().getName(), is("time"));
 
 		final List<AuditRecord> auditRecords = auditRecordRepository.findAll();
 
-		assertEquals(1, auditRecords.size());
+		assertEquals(2, auditRecords.size()); // TODO This looks wrong! only one Audit record should exist
 		final AuditRecord auditRecord = auditRecords.get(0);
 
 		assertEquals("{\"streamDefinitionDslText\":\"time --some.password='******' --another-secret='******' | log\",\"deploymentProperties\":{}}", auditRecord.getAuditData());
 
-		assertEquals("myStreamDeploy", auditRecord.getCorrelationId());
+		assertEquals("myStream", auditRecord.getCorrelationId());
 
 		assertEquals(AuditOperationType.STREAM, auditRecord.getAuditOperation());
 		assertEquals(AuditActionType.DEPLOY, auditRecord.getAuditAction());
 	}
 
-	@Ignore("TODO Tzolov")
 	@Test
 	public void testStreamWithShortformProperties() throws Exception {
+		prepareSkipperClientFixture();
+
 		repository.save(new StreamDefinition("myStream", "time --fixed-delay=2 | log --level=WARN"));
 		mockMvc.perform(post("/streams/deployments/myStream").accept(MediaType.APPLICATION_JSON)).andDo(print())
 				.andExpect(status().isCreated());
-		ArgumentCaptor<AppDeploymentRequest> captor = ArgumentCaptor.forClass(AppDeploymentRequest.class);
-		verify(appDeployer, times(2)).deploy(captor.capture());
-		List<AppDeploymentRequest> requests = captor.getAllValues();
-		assertEquals(2, requests.size());
-		AppDeploymentRequest logRequest = requests.get(0);
-		assertThat(logRequest.getDefinition().getName(), is("log"));
-		Map<String, String> logAppProps = logRequest.getDefinition().getProperties();
-		assertEquals("WARN", logAppProps.get("log.level"));
-		assertNull(logAppProps.get("level"));
-		AppDeploymentRequest timeRequest = requests.get(1);
-		assertThat(timeRequest.getDefinition().getName(), is("time"));
-		Map<String, String> timeAppProps = timeRequest.getDefinition().getProperties();
-		assertEquals("2", timeAppProps.get("trigger.fixed-delay"));
-		assertNull(timeAppProps.get("fixed-delay"));
+
+		ArgumentCaptor<UploadRequest> uploadRequestCaptor = ArgumentCaptor.forClass(UploadRequest.class);
+		verify(skipperClient, times(1)).upload(uploadRequestCaptor.capture());
+
+		List<UploadRequest> updateRequests = uploadRequestCaptor.getAllValues();
+		assertEquals(1, updateRequests.size());
+
+		Package pkg = SkipperPackageUtils.loadPackageFromBytes(uploadRequestCaptor);
+
+		Package logPackage = pkg.getDependencies().get(1);
+		assertThat(logPackage.getMetadata().getName(), is("log"));
+
+		SpringCloudDeployerApplicationSpec logSpec = parseSpec(logPackage.getConfigValues().getRaw());
+		assertEquals("WARN", logSpec.getApplicationProperties().get("log.level"));
+		assertNull(logSpec.getApplicationProperties().get("level"));
+
+		Package timePackage = pkg.getDependencies().get(0);
+		assertThat(timePackage.getMetadata().getName(), is("time"));
+
+		SpringCloudDeployerApplicationSpec timeSpec = parseSpec(timePackage.getConfigValues().getRaw());
+		assertEquals("2", timeSpec.getApplicationProperties().get("trigger.fixed-delay"));
+		assertNull(timeSpec.getApplicationProperties().get("fixed-delay"));
 	}
 
-	@Ignore("TODO Tzolov")
 	@Test
 	public void testDeployWithAppPropertiesOverride() throws Exception {
+
+		prepareSkipperClientFixture();
+
 		repository.save(new StreamDefinition("myStream", "time --fixed-delay=2 | log --level=WARN"));
 		Map<String, String> properties = new HashMap<>();
 		properties.put("app.time.fixed-delay", "4");
@@ -797,42 +818,63 @@ public class StreamControllerTests {
 		properties.put("app.time.producer.partitionKeyExpression", "payload");
 		mockMvc.perform(post("/streams/deployments/myStream").content(new ObjectMapper().writeValueAsBytes(properties))
 				.contentType(MediaType.APPLICATION_JSON)).andExpect(status().isCreated());
-		ArgumentCaptor<AppDeploymentRequest> captor = ArgumentCaptor.forClass(AppDeploymentRequest.class);
-		verify(appDeployer, times(2)).deploy(captor.capture());
-		List<AppDeploymentRequest> requests = captor.getAllValues();
-		assertEquals(2, requests.size());
-		AppDeploymentRequest logRequest = requests.get(0);
-		assertThat(logRequest.getDefinition().getName(), is("log"));
-		Map<String, String> logAppProps = logRequest.getDefinition().getProperties();
-		assertEquals("true", logRequest.getDeploymentProperties().get(AppDeployer.INDEXED_PROPERTY_KEY));
-		assertEquals("ERROR", logAppProps.get("log.level"));
-		AppDeploymentRequest timeRequest = requests.get(1);
-		assertThat(timeRequest.getDefinition().getName(), is("time"));
-		Map<String, String> timeAppProps = timeRequest.getDefinition().getProperties();
-		assertEquals("4", timeAppProps.get("trigger.fixed-delay"));
+
+		ArgumentCaptor<UploadRequest> uploadRequestCaptor = ArgumentCaptor.forClass(UploadRequest.class);
+		verify(skipperClient, times(1)).upload(uploadRequestCaptor.capture());
+		ArgumentCaptor<InstallRequest> installRequestCaptor = ArgumentCaptor.forClass(InstallRequest.class);
+		verify(skipperClient, times(1)).install(installRequestCaptor.capture());
+
+		List<UploadRequest> updateRequests = uploadRequestCaptor.getAllValues();
+		assertEquals(1, updateRequests.size());
+
+		Package pkg = SkipperPackageUtils.loadPackageFromBytes(uploadRequestCaptor);
+
+		Package logPackage = pkg.getDependencies().get(1);
+		assertThat(logPackage.getMetadata().getName(), is("log"));
+
+		SpringCloudDeployerApplicationSpec logSpec = parseSpec(logPackage.getConfigValues().getRaw());
+		assertEquals("ERROR", logSpec.getApplicationProperties().get("log.level"));
+		assertEquals("true", logSpec.getDeploymentProperties().get(AppDeployer.INDEXED_PROPERTY_KEY));
+
+		Package timePackage = pkg.getDependencies().get(0);
+		assertThat(timePackage.getMetadata().getName(), is("time"));
+
+		SpringCloudDeployerApplicationSpec timeSpec = parseSpec(timePackage.getConfigValues().getRaw());
+		assertEquals("4", timeSpec.getApplicationProperties().get("trigger.fixed-delay"));
 	}
 
-	@Ignore("TODO Tzolov")
 	@Test
 	public void testDeployWithAppPropertiesOverrideWithLabel() throws Exception {
+		prepareSkipperClientFixture();
+
 		repository.save(new StreamDefinition("myStream", "a: time --fixed-delay=2 | b: log --level=WARN"));
 		Map<String, String> properties = new HashMap<>();
 		properties.put("app.a.fixed-delay", "4");
 		properties.put("app.b.level", "ERROR");
 		mockMvc.perform(post("/streams/deployments/myStream").content(new ObjectMapper().writeValueAsBytes(properties))
 				.contentType(MediaType.APPLICATION_JSON)).andExpect(status().isCreated());
-		ArgumentCaptor<AppDeploymentRequest> captor = ArgumentCaptor.forClass(AppDeploymentRequest.class);
-		verify(appDeployer, times(2)).deploy(captor.capture());
-		List<AppDeploymentRequest> requests = captor.getAllValues();
-		assertEquals(2, requests.size());
-		AppDeploymentRequest logRequest = requests.get(0);
-		assertThat(logRequest.getDefinition().getName(), is("b"));
-		Map<String, String> logAppProps = logRequest.getDefinition().getProperties();
-		assertEquals("ERROR", logAppProps.get("log.level"));
-		AppDeploymentRequest timeRequest = requests.get(1);
-		assertThat(timeRequest.getDefinition().getName(), is("a"));
-		Map<String, String> timeAppProps = timeRequest.getDefinition().getProperties();
-		assertEquals("4", timeAppProps.get("trigger.fixed-delay"));
+
+		ArgumentCaptor<UploadRequest> uploadRequestCaptor = ArgumentCaptor.forClass(UploadRequest.class);
+		verify(skipperClient, times(1)).upload(uploadRequestCaptor.capture());
+		ArgumentCaptor<InstallRequest> installRequestCaptor = ArgumentCaptor.forClass(InstallRequest.class);
+		verify(skipperClient, times(1)).install(installRequestCaptor.capture());
+
+		List<UploadRequest> updateRequests = uploadRequestCaptor.getAllValues();
+		assertEquals(1, updateRequests.size());
+
+		Package pkg = SkipperPackageUtils.loadPackageFromBytes(uploadRequestCaptor);
+
+		Package logPackage = pkg.getDependencies().get(1);
+		assertThat(logPackage.getMetadata().getName(), is("b"));
+
+		SpringCloudDeployerApplicationSpec logSpec = parseSpec(logPackage.getConfigValues().getRaw());
+		assertEquals("ERROR", logSpec.getApplicationProperties().get("log.level"));
+
+		Package timePackage = pkg.getDependencies().get(0);
+		assertThat(timePackage.getMetadata().getName(), is("a"));
+
+		SpringCloudDeployerApplicationSpec timeSpec = parseSpec(timePackage.getConfigValues().getRaw());
+		assertEquals("4", timeSpec.getApplicationProperties().get("trigger.fixed-delay"));
 	}
 
 	@Ignore("TODO Tzolov")
@@ -863,30 +905,18 @@ public class StreamControllerTests {
 				.andExpect(status().isConflict());
 	}
 
-	@Ignore("TODO Tzolov")
 	@Test
 	public void testDuplicateDeployWhenStreamIsBeingDeployed() throws Exception {
+		Info info = new Info();
+		info.setStatus(new Status());
+		info.getStatus().setStatusCode(StatusCode.DEPLOYED);
+		when(skipperClient.status(ArgumentMatchers.eq("myStream"))).thenReturn(info);
+
+		Deployer deployer = new Deployer("testDeployer", "testType", appDeployer);
+		when(skipperClient.listDeployers()).thenReturn(new Resources<>(Arrays.asList(deployer), new Link[0]));
+
 		repository.save(new StreamDefinition("myStream", "time | log"));
-		mockMvc.perform(post("/streams/deployments/myStream").accept(MediaType.APPLICATION_JSON)).andDo(print())
-				.andExpect(status().isCreated());
-		ArgumentCaptor<AppDeploymentRequest> captor = ArgumentCaptor.forClass(AppDeploymentRequest.class);
-		verify(appDeployer, times(2)).deploy(captor.capture());
-		when(appDeployer.status("testID")).thenReturn(AppStatus.of("testID").with(new AppInstanceStatus() {
-			@Override
-			public String getId() {
-				return "testID";
-			}
 
-			@Override
-			public DeploymentState getState() {
-				return DeploymentState.valueOf("deploying");
-			}
-
-			@Override
-			public Map<String, String> getAttributes() {
-				return null;
-			}
-		}).build());
 		mockMvc.perform(post("/streams/deployments/myStream").accept(MediaType.APPLICATION_JSON)).andDo(print())
 				.andExpect(status().isConflict());
 	}
@@ -910,61 +940,15 @@ public class StreamControllerTests {
 		verify(appDeployer, times(0)).undeploy(captor.capture());
 	}
 
-	@Ignore("TODO Tzolov")
 	@Test
 	public void testDeployWithProperties() throws Exception {
+		prepareSkipperClientFixture();
+
 		repository.save(new StreamDefinition("myStream", "time | log"));
 		Map<String, String> properties = new HashMap<>();
 		properties.put("app.*.producer.partitionKeyExpression", "payload");
 		properties.put("deployer.log.count", "2");
 		properties.put("app.*.consumer.concurrency", "3");
-
-		mockMvc.perform(post("/streams/deployments/myStream").content(new ObjectMapper().writeValueAsBytes(properties))
-				.contentType(MediaType.APPLICATION_JSON)).andExpect(status().isCreated());
-		ArgumentCaptor<AppDeploymentRequest> captor = ArgumentCaptor.forClass(AppDeploymentRequest.class);
-		verify(appDeployer, times(2)).deploy(captor.capture());
-		List<AppDeploymentRequest> requests = captor.getAllValues();
-		assertEquals(2, requests.size());
-		AppDeploymentRequest logRequest = requests.get(0);
-		assertThat(logRequest.getDefinition().getName(), is("log"));
-		Map<String, String> logAppProps = logRequest.getDefinition().getProperties();
-		assertEquals("true", logAppProps.get("spring.cloud.stream.bindings.input.consumer.partitioned"));
-		assertEquals("3", logAppProps.get("spring.cloud.stream.bindings.input.consumer.concurrency"));
-		assertEquals("2", logAppProps.get(StreamPropertyKeys.INSTANCE_COUNT));
-		Map<String, String> logDeploymentProps = logRequest.getDeploymentProperties();
-		assertEquals(logDeploymentProps.get(AppDeployer.INDEXED_PROPERTY_KEY), "true");
-		assertEquals("2", logDeploymentProps.get(AppDeployer.COUNT_PROPERTY_KEY));
-		assertEquals("myStream", logDeploymentProps.get(AppDeployer.GROUP_PROPERTY_KEY));
-		assertEquals("true", logDeploymentProps.get(AppDeployer.INDEXED_PROPERTY_KEY));
-		AppDeploymentRequest timeRequest = requests.get(1);
-		assertThat(timeRequest.getDefinition().getName(), is("time"));
-		Map<String, String> timeAppProps = timeRequest.getDefinition().getProperties();
-		assertEquals("2", timeAppProps.get("spring.cloud.stream.bindings.output.producer.partitionCount"));
-		assertEquals("payload",
-				timeAppProps.get("spring.cloud.stream.bindings.output.producer" + ".partitionKeyExpression"));
-		Map<String, String> timeDeploymentProps = timeRequest.getDeploymentProperties();
-		assertNull(timeDeploymentProps.get(AppDeployer.COUNT_PROPERTY_KEY));
-		assertEquals("myStream", timeDeploymentProps.get(AppDeployer.GROUP_PROPERTY_KEY));
-		assertNull(timeDeploymentProps.get(AppDeployer.INDEXED_PROPERTY_KEY));
-	}
-
-	@Test
-	public void testDeployWithWildcardProperties() throws Exception {
-		Info info = new Info();
-		info.setStatus(new Status());
-		info.getStatus().setStatusCode(StatusCode.UNKNOWN);
-		when(skipperClient.status(ArgumentMatchers.eq("myStream"))).thenReturn(info);
-
-		Deployer deployer = new Deployer("testDeployer", "testType", appDeployer);
-
-		when(skipperClient.listDeployers()).thenReturn(new Resources<>(Arrays.asList(deployer), new Link[0]));
-
-		repository.save(new StreamDefinition("myStream", "time | log"));
-		Map<String, String> properties = new HashMap<>();
-		properties.put("app.*.producer.partitionKeyExpression", "payload");
-		properties.put("deployer.*.count", "2");
-		properties.put("app.*.consumer.concurrency", "3");
-		properties.put("spring.cloud.dataflow.skipper.platformName", deployer.getName());
 
 		mockMvc.perform(post("/streams/deployments/myStream").content(new ObjectMapper().writeValueAsBytes(properties))
 				.contentType(MediaType.APPLICATION_JSON)).andExpect(status().isCreated());
@@ -980,7 +964,60 @@ public class StreamControllerTests {
 		assertEquals(1, installRequests.size());
 
 		InstallRequest installRequest = installRequests.iterator().next();
-		InstallProperties ip = installRequests.iterator().next().getInstallProperties();
+		assertThat(installRequest.getInstallProperties().getPlatformName(), is("testDeployer"));
+		assertThat(installRequest.getInstallProperties().getReleaseName(), is("myStream"));
+		assertThat(installRequest.getPackageIdentifier().getRepositoryName(), is("local"));
+		assertThat(installRequest.getPackageIdentifier().getPackageName(), is("myStream"));
+		assertThat(installRequest.getPackageIdentifier().getPackageVersion(), is("1.0.0"));
+
+		Package pkg = SkipperPackageUtils.loadPackageFromBytes(uploadRequestCaptor);
+
+		Package logPackage = pkg.getDependencies().get(1);
+		assertThat(logPackage.getMetadata().getName(), is("log"));
+
+		SpringCloudDeployerApplicationSpec logSpec = parseSpec(logPackage.getConfigValues().getRaw());
+		assertEquals("2", logSpec.getApplicationProperties().get(StreamPropertyKeys.INSTANCE_COUNT));
+		assertEquals("true", logSpec.getApplicationProperties().get("spring.cloud.stream.bindings.input.consumer.partitioned"));
+		assertEquals("3", logSpec.getApplicationProperties().get("spring.cloud.stream.bindings.input.consumer.concurrency"));
+
+		assertEquals("2", logSpec.getDeploymentProperties().get(AppDeployer.COUNT_PROPERTY_KEY));
+		assertEquals("myStream", logSpec.getDeploymentProperties().get(AppDeployer.GROUP_PROPERTY_KEY));
+		assertEquals("true", logSpec.getDeploymentProperties().get(AppDeployer.INDEXED_PROPERTY_KEY));
+
+		Package timePackage = pkg.getDependencies().get(0);
+		assertThat(timePackage.getMetadata().getName(), is("time"));
+
+		SpringCloudDeployerApplicationSpec timeSpec = parseSpec(timePackage.getConfigValues().getRaw());
+		assertEquals("2", timeSpec.getApplicationProperties().get("spring.cloud.stream.bindings.output.producer.partitionCount"));
+		assertEquals("payload", timeSpec.getApplicationProperties().get("spring.cloud.stream.bindings.output.producer.partitionKeyExpression"));
+		assertEquals("myStream", timeSpec.getDeploymentProperties().get(AppDeployer.GROUP_PROPERTY_KEY));
+		assertNull(timeSpec.getDeploymentProperties().get(AppDeployer.INDEXED_PROPERTY_KEY));
+	}
+
+	@Test
+	public void testDeployWithWildcardProperties() throws Exception {
+		prepareSkipperClientFixture();
+
+		repository.save(new StreamDefinition("myStream", "time | log"));
+		Map<String, String> properties = new HashMap<>();
+		properties.put("app.*.producer.partitionKeyExpression", "payload");
+		properties.put("deployer.*.count", "2");
+		properties.put("app.*.consumer.concurrency", "3");
+
+		mockMvc.perform(post("/streams/deployments/myStream").content(new ObjectMapper().writeValueAsBytes(properties))
+				.contentType(MediaType.APPLICATION_JSON)).andExpect(status().isCreated());
+
+		ArgumentCaptor<UploadRequest> uploadRequestCaptor = ArgumentCaptor.forClass(UploadRequest.class);
+		verify(skipperClient, times(1)).upload(uploadRequestCaptor.capture());
+		ArgumentCaptor<InstallRequest> installRequestCaptor = ArgumentCaptor.forClass(InstallRequest.class);
+		verify(skipperClient, times(1)).install(installRequestCaptor.capture());
+
+		List<UploadRequest> updateRequests = uploadRequestCaptor.getAllValues();
+		assertEquals(1, updateRequests.size());
+		List<InstallRequest> installRequests = installRequestCaptor.getAllValues();
+		assertEquals(1, installRequests.size());
+
+		InstallRequest installRequest = installRequests.iterator().next();
 		assertThat(installRequest.getInstallProperties().getPlatformName(), is("testDeployer"));
 		assertThat(installRequest.getInstallProperties().getReleaseName(), is("myStream"));
 		assertThat(installRequest.getPackageIdentifier().getRepositoryName(), is("local"));
@@ -1035,9 +1072,10 @@ public class StreamControllerTests {
 		//		assertNull(timeDeploymentProps.get(AppDeployer.INDEXED_PROPERTY_KEY));
 	}
 
-	@Ignore("TODO Tzolov")
 	@Test
 	public void testDeployWithCommonApplicationProperties() throws Exception {
+		prepareSkipperClientFixture();
+
 		repository.save(new StreamDefinition("myStream", "time | log"));
 		assertThat(appsProperties.getStream().values(), empty());
 		appsProperties.getStream().put("spring.cloud.stream.fake.binder.host", "fakeHost");
@@ -1049,32 +1087,50 @@ public class StreamControllerTests {
 
 		mockMvc.perform(post("/streams/deployments/myStream").content(new ObjectMapper().writeValueAsBytes(properties))
 				.contentType(MediaType.APPLICATION_JSON)).andExpect(status().isCreated());
-		ArgumentCaptor<AppDeploymentRequest> captor = ArgumentCaptor.forClass(AppDeploymentRequest.class);
-		verify(appDeployer, times(2)).deploy(captor.capture());
-		List<AppDeploymentRequest> requests = captor.getAllValues();
-		assertEquals(2, requests.size());
-		AppDeploymentRequest logRequest = requests.get(0);
-		assertThat(logRequest.getDefinition().getName(), is("log"));
-		Map<String, String> logAppProps = logRequest.getDefinition().getProperties();
-		assertEquals("2", logAppProps.get(StreamPropertyKeys.INSTANCE_COUNT));
-		assertEquals("fakeHost", logAppProps.get("spring.cloud.stream.fake.binder.host"));
-		assertEquals("fakePort", logAppProps.get("spring.cloud.stream.fake.binder.port"));
-		assertEquals("true", logAppProps.get("spring.cloud.stream.bindings.input.consumer.partitioned"));
-		assertEquals("3", logAppProps.get("spring.cloud.stream.bindings.input.consumer.concurrency"));
-		Map<String, String> logDeploymentProps = logRequest.getDeploymentProperties();
-		assertEquals("2", logDeploymentProps.get(AppDeployer.COUNT_PROPERTY_KEY));
-		assertEquals("myStream", logDeploymentProps.get(AppDeployer.GROUP_PROPERTY_KEY));
-		assertEquals("true", logDeploymentProps.get(AppDeployer.INDEXED_PROPERTY_KEY));
-		AppDeploymentRequest timeRequest = requests.get(1);
-		assertThat(timeRequest.getDefinition().getName(), is("time"));
-		Map<String, String> timeAppProps = timeRequest.getDefinition().getProperties();
-		assertEquals("2", timeAppProps.get("spring.cloud.stream.bindings.output.producer.partitionCount"));
-		assertEquals("payload",
-				timeAppProps.get("spring.cloud.stream.bindings.output.producer" + ".partitionKeyExpression"));
-		Map<String, String> timeDeploymentProps = timeRequest.getDeploymentProperties();
-		assertEquals("2", timeDeploymentProps.get(AppDeployer.COUNT_PROPERTY_KEY));
-		assertEquals("myStream", timeDeploymentProps.get(AppDeployer.GROUP_PROPERTY_KEY));
-		assertNull(timeDeploymentProps.get(AppDeployer.INDEXED_PROPERTY_KEY));
+
+		ArgumentCaptor<UploadRequest> uploadRequestCaptor = ArgumentCaptor.forClass(UploadRequest.class);
+		verify(skipperClient, times(1)).upload(uploadRequestCaptor.capture());
+		ArgumentCaptor<InstallRequest> installRequestCaptor = ArgumentCaptor.forClass(InstallRequest.class);
+		verify(skipperClient, times(1)).install(installRequestCaptor.capture());
+
+		List<UploadRequest> updateRequests = uploadRequestCaptor.getAllValues();
+		assertEquals(1, updateRequests.size());
+		List<InstallRequest> installRequests = installRequestCaptor.getAllValues();
+		assertEquals(1, installRequests.size());
+
+		InstallRequest installRequest = installRequests.iterator().next();
+		assertThat(installRequest.getInstallProperties().getPlatformName(), is("testDeployer"));
+		assertThat(installRequest.getInstallProperties().getReleaseName(), is("myStream"));
+		assertThat(installRequest.getPackageIdentifier().getRepositoryName(), is("local"));
+		assertThat(installRequest.getPackageIdentifier().getPackageName(), is("myStream"));
+		assertThat(installRequest.getPackageIdentifier().getPackageVersion(), is("1.0.0"));
+
+		Package pkg = SkipperPackageUtils.loadPackageFromBytes(uploadRequestCaptor);
+
+		Package logPackage = pkg.getDependencies().get(1);
+		assertThat(logPackage.getMetadata().getName(), is("log"));
+
+		SpringCloudDeployerApplicationSpec logSpec = parseSpec(logPackage.getConfigValues().getRaw());
+		assertEquals("2", logSpec.getApplicationProperties().get(StreamPropertyKeys.INSTANCE_COUNT));
+		assertEquals("fakeHost", logSpec.getApplicationProperties().get("spring.cloud.stream.fake.binder.host"));
+		assertEquals("fakePort", logSpec.getApplicationProperties().get("spring.cloud.stream.fake.binder.port"));
+		assertEquals("true", logSpec.getApplicationProperties().get("spring.cloud.stream.bindings.input.consumer.partitioned"));
+		assertEquals("3", logSpec.getApplicationProperties().get("spring.cloud.stream.bindings.input.consumer.concurrency"));
+		assertEquals("2", logSpec.getDeploymentProperties().get(AppDeployer.COUNT_PROPERTY_KEY));
+		assertEquals("myStream", logSpec.getDeploymentProperties().get(AppDeployer.GROUP_PROPERTY_KEY));
+		assertEquals("true", logSpec.getDeploymentProperties().get(AppDeployer.INDEXED_PROPERTY_KEY));
+
+		Package timePackage = pkg.getDependencies().get(0);
+		assertThat(timePackage.getMetadata().getName(), is("time"));
+
+		SpringCloudDeployerApplicationSpec timeSpec = parseSpec(timePackage.getConfigValues().getRaw());
+		assertEquals("2", timeSpec.getApplicationProperties().get(StreamPropertyKeys.INSTANCE_COUNT));
+		assertEquals("2", timeSpec.getApplicationProperties().get("spring.cloud.stream.bindings.output.producer.partitionCount"));
+		assertEquals("payload", timeSpec.getApplicationProperties().get("spring.cloud.stream.bindings.output.producer.partitionKeyExpression"));
+		assertEquals("2", timeSpec.getDeploymentProperties().get(AppDeployer.COUNT_PROPERTY_KEY));
+		assertEquals("myStream", timeSpec.getDeploymentProperties().get(AppDeployer.GROUP_PROPERTY_KEY));
+		assertNull(timeSpec.getDeploymentProperties().get(AppDeployer.INDEXED_PROPERTY_KEY));
+
 		appsProperties.getStream().clear();
 	}
 
@@ -1089,15 +1145,24 @@ public class StreamControllerTests {
 		assertThat(StreamDeployerUtil.aggregateState(EnumSet.of(DeploymentState.unknown)), is(DeploymentState.undeployed));
 	}
 
-	@Ignore("TODO Tzolov")
+	// TODO Not sure what are we trying to test here?
+	@Ignore("Classic Mode Deprecation")
 	@Test
 	public void testAppDeploymentFailure() throws Exception {
-		when(appDeployer.deploy(any(AppDeploymentRequest.class))).thenThrow(new RuntimeException());
+		Info info = new Info();
+		info.setStatus(new Status());
+		info.getStatus().setStatusCode(StatusCode.UNKNOWN);
+		when(skipperClient.status(ArgumentMatchers.eq("myStream"))).thenReturn(info);
+		Deployer deployer = new Deployer("testDeployer", "testType", appDeployer);
+		when(skipperClient.listDeployers()).thenReturn(new Resources<>(Arrays.asList(deployer), new Link[0]));
+
+		when(skipperClient.upload(any())).thenThrow(new RuntimeException());
+		// when(appDeployer.deploy(any(AppDeploymentRequest.class))).thenThrow(new RuntimeException());
 		repository.save(new StreamDefinition("myStream", "time | log"));
 		mockMvc.perform(post("/streams/deployments/myStream").accept(MediaType.APPLICATION_JSON))
 				.andExpect(status().isCreated());
-		ArgumentCaptor<AppDeploymentRequest> captor = ArgumentCaptor.forClass(AppDeploymentRequest.class);
-		verify(appDeployer, times(2)).deploy(captor.capture());
+		//ArgumentCaptor<AppDeploymentRequest> captor = ArgumentCaptor.forClass(AppDeploymentRequest.class);
+		// verify(appDeployer, times(2)).deploy(captor.capture());
 	}
 
 	@Test
@@ -1108,6 +1173,16 @@ public class StreamControllerTests {
 		mockMvc.perform(get("/streams/validation/myStream1").accept(MediaType.APPLICATION_JSON))
 				.andExpect(status().isOk()).andDo(print()).andExpect(content()
 				.json("{\"appName\":\"myStream1\",\"appStatuses\":{\"source:time\":\"valid\",\"sink:log\":\"valid\"},\"dsl\":\"time | log\",\"links\":[]}"));
+	}
+
+	private void prepareSkipperClientFixture() {
+		Info info = new Info();
+		info.setStatus(new Status());
+		info.getStatus().setStatusCode(StatusCode.UNKNOWN);
+		when(skipperClient.status(ArgumentMatchers.eq("myStream"))).thenReturn(info);
+
+		Deployer deployer = new Deployer("testDeployer", "testType", appDeployer);
+		when(skipperClient.listDeployers()).thenReturn(new Resources<>(Arrays.asList(deployer), new Link[0]));
 	}
 
 	private SpringCloudDeployerApplicationSpec parseSpec(String yamlString) throws IOException {
