@@ -49,6 +49,7 @@ import org.springframework.cloud.dataflow.core.StreamDeployment;
 import org.springframework.cloud.dataflow.registry.service.AppRegistryService;
 import org.springframework.cloud.dataflow.rest.SkipperStream;
 import org.springframework.cloud.dataflow.server.controller.NoSuchAppException;
+import org.springframework.cloud.dataflow.server.repository.NoSuchStreamDefinitionException;
 import org.springframework.cloud.dataflow.server.repository.StreamDefinitionRepository;
 import org.springframework.cloud.deployer.spi.app.AppInstanceStatus;
 import org.springframework.cloud.deployer.spi.app.AppStatus;
@@ -138,7 +139,7 @@ public class SkipperStreamDeployer implements StreamDeployer {
 			logger.error("Could not parse Skipper Platform Status JSON [" + platformStatus + "]. " +
 					"Exception message = " + e.getMessage());
 			return new ArrayList<AppStatus>();
-		} 
+		}
 	}
 
 	@Override
@@ -195,7 +196,7 @@ public class SkipperStreamDeployer implements StreamDeployer {
 	}
 
 	private boolean streamDefinitionExists(String streamName) {
-		return this.streamDefinitionRepository.findOne(streamName) != null;
+		return this.streamDefinitionRepository.findById(streamName).isPresent();
 	}
 
 	public Release deployStream(StreamDeploymentRequest streamDeploymentRequest) {
@@ -283,7 +284,17 @@ public class SkipperStreamDeployer implements StreamDeployer {
 	}
 
 	private void validateAllAppsRegistered(StreamDeploymentRequest streamDeploymentRequest) {
-		StreamDefinition streamDefinition = this.streamDefinitionRepository.findOne(streamDeploymentRequest.getStreamName());
+		if (streamDeploymentRequest.getAppDeploymentRequests() == null
+				|| streamDeploymentRequest.getAppDeploymentRequests().isEmpty()) {
+			// nothing to validate.
+			return;
+		}
+
+		// throw as at this point we should have definition
+		StreamDefinition streamDefinition = this.streamDefinitionRepository
+				.findById(streamDeploymentRequest.getStreamName())
+				.orElseThrow(() -> new NoSuchStreamDefinitionException(streamDeploymentRequest.getStreamName()));
+
 		for (AppDeploymentRequest adr : streamDeploymentRequest.getAppDeploymentRequests()) {
 			String version = this.appRegistryService.getResourceVersion(adr.getResource());
 			validateAppVersionIsRegistered(getRegisteredName(streamDefinition, adr.getDefinition().getName()), adr, version);

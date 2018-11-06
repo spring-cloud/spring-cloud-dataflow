@@ -63,7 +63,7 @@ public class RdbmsDeploymentIdRepositoryTests {
 		repository.save("key1", "time.1");
 		repository.save("key2", "log.0");
 
-		assertEquals("log.0", repository.findOne("key2"));
+		assertEquals("log.0", repository.findByKey("key2").get());
 	}
 
 	@Test
@@ -71,9 +71,9 @@ public class RdbmsDeploymentIdRepositoryTests {
 		repository.save("key1", "time.1");
 		repository.save("key2", "log.0");
 
-		assertEquals("log.0", repository.findOne("key2"));
+		assertEquals("log.0", repository.findByKey("key2").get());
 		repository.delete("key2");
-		assertNull(repository.findOne("key2"));
+		assertNull(repository.findByKey("key2").orElse(null));
 	}
 
 	@Configuration

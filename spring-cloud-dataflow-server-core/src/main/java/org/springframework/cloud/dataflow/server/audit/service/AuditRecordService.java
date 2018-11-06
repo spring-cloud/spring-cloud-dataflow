@@ -16,6 +16,7 @@
 package org.springframework.cloud.dataflow.server.audit.service;
 
 import java.util.Map;
+import java.util.Optional;
 
 import org.springframework.cloud.dataflow.server.audit.domain.AuditActionType;
 import org.springframework.cloud.dataflow.server.audit.domain.AuditOperationType;
@@ -94,6 +95,6 @@ public interface AuditRecordService {
 	 * @param id Must not be null/
 	 * @return Audit Record
 	 */
-	AuditRecord findOne(Long id);
+	Optional<AuditRecord> findById(Long id);
 
 }

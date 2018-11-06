@@ -30,30 +30,6 @@ public interface TaskDefinitionRepository extends PagingAndSortingRepository<Tas
 
 	Page<TaskDefinition> findByNameLike(SearchPageable searchPageable);
 
-	default TaskDefinition findOne(String id) {
-		return findById(id).orElse(null);
-	}
-
-	default void delete(String id) {
-		deleteById(id);
-	}
-
-	default boolean exists(String id) {
-		return existsById(id);
-	}
-
-	default Iterable<TaskDefinition> save(Iterable<TaskDefinition> entities) {
-		return saveAll(entities);
-	}
-
-	default Iterable<TaskDefinition> findAll(Iterable<String> ids) {
-		return findAllById(ids);
-	}
-
-	default void delete(Iterable<TaskDefinition> entities) {
-		deleteAll(entities);
-	}
-
 	/**
 	 * Performs a findByName query and throws an exception if the name is not found.
 	 * @param name the name of the task definition

@@ -167,10 +167,8 @@ public class TaskDefinitionController {
 	@RequestMapping(value = "/{name}", method = RequestMethod.GET)
 	@ResponseStatus(HttpStatus.OK)
 	public TaskDefinitionResource display(@PathVariable("name") String name) {
-		TaskDefinition definition = repository.findOne(name);
-		if (definition == null) {
-			throw new NoSuchTaskDefinitionException(name);
-		}
+		TaskDefinition definition = this.repository.findById(name)
+				.orElseThrow(() -> new NoSuchTaskDefinitionException(name));
 		final TaskExecution taskExecution = this.explorer.getLatestTaskExecutionForTaskName(name);
 
 		if (taskExecution != null) {

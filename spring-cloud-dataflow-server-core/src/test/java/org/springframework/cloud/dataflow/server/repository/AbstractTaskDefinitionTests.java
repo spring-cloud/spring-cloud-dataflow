@@ -27,10 +27,9 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 /**
@@ -50,7 +49,7 @@ public abstract class AbstractTaskDefinitionTests {
 		repository.save(new TaskDefinition("task2", "myTask"));
 		repository.save(new TaskDefinition("task3", "myTask"));
 
-		assertEquals(definition, repository.findOne("task1"));
+		assertThat(repository.findById("task1")).hasValue(definition);
 	}
 
 	@Test
@@ -92,26 +91,26 @@ public abstract class AbstractTaskDefinitionTests {
 		definitions.add(new TaskDefinition("task1", "myTask"));
 
 		repository.save(new TaskDefinition("task1", "myTask"));
-		repository.save(definitions);
+		repository.saveAll(definitions);
 	}
 
 	@Test
 	public void testFindOneNoneFound() {
-		assertNull(repository.findOne("notFound"));
+		assertThat(repository.findById("notfound")).isEmpty();
 
 		initializeRepository();
 
-		assertNull(repository.findOne("notFound"));
+		assertThat(repository.findById("notfound")).isEmpty();
 	}
 
 	@Test
 	public void testExists() {
-		assertFalse(repository.exists("exists"));
+		assertFalse(repository.existsById("exists"));
 
 		repository.save(new TaskDefinition("exists", "myExists"));
 
-		assertTrue(repository.exists("exists"));
-		assertFalse(repository.exists("nothere"));
+		assertTrue(repository.existsById("exists"));
+		assertFalse(repository.existsById("nothere"));
 	}
 
 	@Test
@@ -141,7 +140,7 @@ public abstract class AbstractTaskDefinitionTests {
 		names.add("task1");
 		names.add("task2");
 
-		Iterable<TaskDefinition> items = repository.findAll(names);
+		Iterable<TaskDefinition> items = repository.findAllById(names);
 
 		int count = 0;
 		for (@SuppressWarnings("unused")
@@ -163,42 +162,42 @@ public abstract class AbstractTaskDefinitionTests {
 
 	@Test
 	public void testDeleteNotFound() {
-		repository.delete("notFound");
+		repository.deleteById("notFound");
 	}
 
 	@Test
 	public void testDelete() {
 		initializeRepository();
 
-		assertNotNull(repository.findOne("task2"));
+		assertThat(repository.findById("task2")).isNotEmpty();
 
-		repository.delete("task2");
+		repository.deleteById("task2");
 
-		assertNull(repository.findOne("task2"));
+		assertThat(repository.findById("task2")).isEmpty();
 	}
 
 	@Test
 	public void testDeleteDefinition() {
 		initializeRepository();
 
-		assertNotNull(repository.findOne("task2"));
+		assertThat(repository.findById("task2")).isNotEmpty();
 
 		repository.delete(new TaskDefinition("task2", "myTask"));
 
-		assertNull(repository.findOne("task2"));
+		assertThat(repository.findById("task2")).isEmpty();
 	}
 
 	@Test
 	public void testDeleteMultipleDefinitions() {
 		initializeRepository();
 
-		assertNotNull(repository.findOne("task1"));
-		assertNotNull(repository.findOne("task2"));
+		assertThat(repository.findById("task1")).isNotEmpty();
+		assertThat(repository.findById("task2")).isNotEmpty();
 
-		repository.delete(Arrays.asList(new TaskDefinition("task1", "myTask"), new TaskDefinition("task2", "myTask")));
+		repository.deleteAll(Arrays.asList(new TaskDefinition("task1", "myTask"), new TaskDefinition("task2", "myTask")));
 
-		assertNull(repository.findOne("task1"));
-		assertNull(repository.findOne("task2"));
+		assertThat(repository.findById("task1")).isEmpty();
+		assertThat(repository.findById("task2")).isEmpty();
 	}
 
 	@Test

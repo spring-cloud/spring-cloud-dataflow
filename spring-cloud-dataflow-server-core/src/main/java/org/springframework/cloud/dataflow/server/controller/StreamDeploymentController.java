@@ -98,10 +98,8 @@ public class StreamDeploymentController {
 	 */
 	@RequestMapping(value = "/{name}", method = RequestMethod.DELETE)
 	public ResponseEntity<Void> undeploy(@PathVariable("name") String name) {
-		StreamDefinition stream = this.repository.findOne(name);
-		if (stream == null) {
-			throw new NoSuchStreamDefinitionException(name);
-		}
+		this.repository.findById(name)
+				.orElseThrow(() -> new NoSuchStreamDefinitionException(name));
 		this.streamService.undeployStream(name);
 		return new ResponseEntity<>(HttpStatus.OK);
 	}
@@ -125,10 +123,8 @@ public class StreamDeploymentController {
 	@RequestMapping(value = "/{name}", method = RequestMethod.GET)
 	@ResponseStatus(HttpStatus.CREATED)
 	public StreamDeploymentResource info(@PathVariable("name") String name) {
-		StreamDefinition streamDefinition = this.repository.findOne(name);
-		if (streamDefinition == null) {
-			throw new NoSuchStreamDefinitionException(name);
-		}
+		StreamDefinition streamDefinition = this.repository.findById(name)
+				.orElseThrow(() -> new NoSuchStreamDefinitionException(name));
 		StreamDeployment streamDeployment = this.streamService.info(name);
 		Map<StreamDefinition, DeploymentState> streamDeploymentStates =
 				this.streamService.state(Arrays.asList(streamDefinition));

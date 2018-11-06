@@ -139,7 +139,8 @@ public class DefaultSkipperStreamService extends AbstractStreamService implement
 
 	@Override
 	public void undeployStream(String streamName) {
-		final StreamDefinition streamDefinition = this.streamDefinitionRepository.findOne(streamName);
+		StreamDefinition streamDefinition = this.streamDefinitionRepository.findById(streamName)
+				.orElseThrow(() -> new NoSuchStreamDefinitionException(streamName));
 
 		this.skipperStreamDeployer.undeployStream(streamName);
 
@@ -160,7 +161,8 @@ public class DefaultSkipperStreamService extends AbstractStreamService implement
 			appManifestMap.put(name, am);
 		}
 
-		StreamDefinition streamDefinition = this.streamDefinitionRepository.findOne(streamName);
+		StreamDefinition streamDefinition = this.streamDefinitionRepository.findById(streamName)
+				.orElseThrow(() -> new NoSuchStreamDefinitionException(streamName));
 
 		LinkedList<StreamAppDefinition> updatedStreamAppDefinitions = new LinkedList<>();
 		for (StreamAppDefinition appDefinition : streamDefinition.getAppDefinitions()) {
@@ -194,10 +196,8 @@ public class DefaultSkipperStreamService extends AbstractStreamService implement
 	public void updateStream(String streamName, String releaseName, PackageIdentifier packageIdentifier,
 			Map<String, String> updateProperties, boolean force, List<String> appNames) {
 
-		StreamDefinition streamDefinition = this.streamDefinitionRepository.findOne(streamName);
-		if (streamDefinition == null) {
-			throw new NoSuchStreamDefinitionException(streamName);
-		}
+		StreamDefinition streamDefinition = this.streamDefinitionRepository.findById(streamName)
+				.orElseThrow(() -> new NoSuchStreamDefinitionException(streamName));
 
 		String updateYaml = convertPropertiesToSkipperYaml(streamDefinition, updateProperties);
 		Release release = this.skipperStreamDeployer.upgradeStream(releaseName, packageIdentifier, updateYaml,

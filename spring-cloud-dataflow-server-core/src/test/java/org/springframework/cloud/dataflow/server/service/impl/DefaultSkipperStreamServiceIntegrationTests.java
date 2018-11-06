@@ -172,10 +172,10 @@ public class DefaultSkipperStreamServiceIntegrationTests {
 		// Create stream
 		StreamDefinition streamDefinition = new StreamDefinition("ticktock",
 				"time --fixed-delay=100 | log --level=DEBUG");
-		this.streamDefinitionRepository.delete(streamDefinition.getName());
+		this.streamDefinitionRepository.deleteById(streamDefinition.getName());
 		this.streamDefinitionRepository.save(streamDefinition);
 
-		StreamDefinition streamDefinitionBeforeDeploy = this.streamDefinitionRepository.findOne("ticktock");
+		StreamDefinition streamDefinitionBeforeDeploy = this.streamDefinitionRepository.findById("ticktock").get();
 		assertThat(streamDefinitionBeforeDeploy.getDslText())
 				.isEqualTo("time --fixed-delay=100 | log --level=DEBUG");
 
@@ -194,7 +194,7 @@ public class DefaultSkipperStreamServiceIntegrationTests {
 
 		streamService.deployStream("ticktock", deploymentProperties);
 
-		StreamDefinition streamDefinitionAfterDeploy = this.streamDefinitionRepository.findOne("ticktock");
+		StreamDefinition streamDefinitionAfterDeploy = this.streamDefinitionRepository.findById("ticktock").get();
 		assertThat(streamDefinitionAfterDeploy.getDslText())
 				.isEqualTo("time --trigger.fixed-delay=100 | log --log.level=DEBUG");
 	}
@@ -205,14 +205,14 @@ public class DefaultSkipperStreamServiceIntegrationTests {
 		// Create stream
 		StreamDefinition streamDefinition = new StreamDefinition("ticktock",
 				"time --fixed-delay=100 | log --level=DEBUG");
-		this.streamDefinitionRepository.delete(streamDefinition.getName());
+		this.streamDefinitionRepository.deleteById(streamDefinition.getName());
 		this.streamDefinitionRepository.save(streamDefinition);
 
 		when(skipperClient.status(eq("ticktock"))).thenThrow(new ReleaseNotFoundException(""));
 
 		streamService.deployStream("ticktock", createSkipperDeploymentProperties());
 
-		StreamDefinition streamDefinitionBeforeDeploy = this.streamDefinitionRepository.findOne("ticktock");
+		StreamDefinition streamDefinitionBeforeDeploy = this.streamDefinitionRepository.findById("ticktock").get();
 		assertThat(streamDefinitionBeforeDeploy.getDslText())
 				.isEqualTo("time --fixed-delay=100 | log --level=DEBUG");
 
@@ -230,7 +230,7 @@ public class DefaultSkipperStreamServiceIntegrationTests {
 		streamService.updateStream("ticktock",
 				new UpdateStreamRequest("ticktock", new PackageIdentifier(), deploymentProperties));
 
-		StreamDefinition streamDefinitionAfterDeploy = this.streamDefinitionRepository.findOne("ticktock");
+		StreamDefinition streamDefinitionAfterDeploy = this.streamDefinitionRepository.findById("ticktock").get();
 		assertThat(streamDefinitionAfterDeploy.getDslText())
 				.isEqualTo("time --trigger.fixed-delay=200 | log --log.level=INFO");
 	}
@@ -241,7 +241,7 @@ public class DefaultSkipperStreamServiceIntegrationTests {
 		// Create stream
 		StreamDefinition streamDefinition = new StreamDefinition("ticktock",
 				"time --fixed-delay=100 | log --level=DEBUG");
-		this.streamDefinitionRepository.delete(streamDefinition.getName());
+		this.streamDefinitionRepository.deleteById(streamDefinition.getName());
 		this.streamDefinitionRepository.save(streamDefinition);
 
 		when(skipperClient.status(eq("ticktock"))).thenThrow(new ReleaseNotFoundException(""));

@@ -16,6 +16,8 @@
 
 package org.springframework.cloud.dataflow.server.repository;
 
+import java.util.Optional;
+
 import org.springframework.stereotype.Repository;
 
 /**
@@ -42,7 +44,7 @@ public interface DeploymentIdRepository extends org.springframework.data.reposit
 	 * @param key the app deployment key
 	 * @return the identifier
 	 */
-	String findOne(String key);
+	Optional<String> findByKey(String key);
 
 	/**
 	 * Delete the entries associated with the app deployment key.

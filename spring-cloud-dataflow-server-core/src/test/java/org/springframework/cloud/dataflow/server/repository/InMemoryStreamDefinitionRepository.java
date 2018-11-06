@@ -76,11 +76,6 @@ public class InMemoryStreamDefinitionRepository implements StreamDefinitionRepos
 	}
 
 	@Override
-	public StreamDefinition findOne(String name) {
-		return definitions.get(name);
-	}
-
-	@Override
 	public boolean existsById(String name) {
 		return definitions.containsKey(name);
 	}
@@ -112,13 +107,8 @@ public class InMemoryStreamDefinitionRepository implements StreamDefinitionRepos
 	}
 
 	@Override
-	public void delete(String name) {
-		definitions.remove(name);
-	}
-
-	@Override
 	public void delete(StreamDefinition definition) {
-		delete(definition.getName());
+		deleteById(definition.getName());
 	}
 
 	@Override

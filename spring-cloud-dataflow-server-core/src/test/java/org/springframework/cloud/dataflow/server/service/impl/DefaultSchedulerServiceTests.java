@@ -22,6 +22,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.junit.After;
@@ -299,7 +300,7 @@ public class DefaultSchedulerServiceTests {
 
 		TaskDefinition taskDefinition = new TaskDefinition(BASE_DEFINITION_NAME, "timestamp");
 
-		when(mockTaskDefinitionRepository.findOne(BASE_DEFINITION_NAME)).thenReturn(taskDefinition);
+		when(mockTaskDefinitionRepository.findById(BASE_DEFINITION_NAME)).thenReturn(Optional.of(taskDefinition));
 		when(mockAppRegistryCommon.find(taskDefinition.getRegisteredAppName(), ApplicationType.task))
 				.thenReturn(new AppRegistration());
 		when(((DefaultSchedulerService)mockSchedulerService).getTaskResource(BASE_DEFINITION_NAME))

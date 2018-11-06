@@ -46,7 +46,7 @@ public class RdbmsStreamDefinitionRepository extends AbstractRdbmsKeyValueReposi
 	@Override
 	public <S extends StreamDefinition> S save(S definition) {
 		Assert.notNull(definition, "definition must not be null");
-		if (exists(definition.getName())) {
+		if (existsById(definition.getName())) {
 			throw new DuplicateStreamDefinitionException(String.format(
 					"Cannot create stream %s because another one has already " + "been created with the same name",
 					definition.getName()));
@@ -59,6 +59,6 @@ public class RdbmsStreamDefinitionRepository extends AbstractRdbmsKeyValueReposi
 	@Override
 	public void delete(StreamDefinition definition) {
 		Assert.notNull(definition, "definition must not null");
-		delete(definition.getName());
+		deleteById(definition.getName());
 	}
 }

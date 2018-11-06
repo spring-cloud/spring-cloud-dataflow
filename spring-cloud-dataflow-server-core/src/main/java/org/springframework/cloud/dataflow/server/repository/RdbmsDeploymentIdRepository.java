@@ -19,6 +19,7 @@ package org.springframework.cloud.dataflow.server.repository;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Types;
+import java.util.Optional;
 
 import javax.sql.DataSource;
 
@@ -60,7 +61,7 @@ public class RdbmsDeploymentIdRepository extends AbstractRdbmsKeyValueRepository
 	}
 
 	@Override
-	public String findOne(String key) {
-		return findById(key).orElse(null);
+	public Optional<String> findByKey(String key) {
+		return findById(key);
 	}
 }

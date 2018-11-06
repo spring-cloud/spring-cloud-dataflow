@@ -109,10 +109,8 @@ public class DefaultSchedulerService implements SchedulerService {
 			List<String> commandLineArgs) {
 		Assert.hasText(taskDefinitionName, "The provided taskName must not be null or empty.");
 		Assert.notNull(taskDeploymentProperties, "The provided taskDeploymentProperties must not be null.");
-		TaskDefinition taskDefinition = this.taskDefinitionRepository.findOne(taskDefinitionName);
-		if (taskDefinition == null) {
-			throw new NoSuchTaskDefinitionException(taskDefinitionName);
-		}
+		TaskDefinition taskDefinition = this.taskDefinitionRepository.findById(taskDefinitionName)
+				.orElseThrow(() -> new NoSuchTaskDefinitionException(taskDefinitionName));
 		TaskParser taskParser = new TaskParser(taskDefinition.getName(), taskDefinition.getDslText(), true, true);
 		TaskNode taskNode = taskParser.parse();
 		// if composed task definition replace definition with one composed task
@@ -223,10 +221,8 @@ public class DefaultSchedulerService implements SchedulerService {
 	}
 
 	protected Resource getTaskResource(String taskDefinitionName) {
-		TaskDefinition taskDefinition = this.taskDefinitionRepository.findOne(taskDefinitionName);
-		if (taskDefinition == null) {
-			throw new NoSuchTaskDefinitionException(taskDefinitionName);
-		}
+		TaskDefinition taskDefinition = this.taskDefinitionRepository.findById(taskDefinitionName)
+				.orElseThrow(() -> new NoSuchTaskDefinitionException(taskDefinitionName));
 		AppRegistration appRegistration = null;
 		if (TaskServiceUtils.isComposedTaskDefinition(taskDefinition.getDslText())) {
 			appRegistration = this.registry.find(taskConfigurationProperties.getComposedTaskRunnerName(),

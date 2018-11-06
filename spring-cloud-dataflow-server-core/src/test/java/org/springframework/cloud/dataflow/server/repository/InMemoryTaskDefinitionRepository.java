@@ -78,11 +78,6 @@ public class InMemoryTaskDefinitionRepository implements TaskDefinitionRepositor
 	}
 
 	@Override
-	public TaskDefinition findOne(String name) {
-		return definitions.get(name);
-	}
-
-	@Override
 	public boolean existsById(String name) {
 		return definitions.containsKey(name);
 	}
@@ -114,13 +109,8 @@ public class InMemoryTaskDefinitionRepository implements TaskDefinitionRepositor
 	}
 
 	@Override
-	public void delete(String name) {
-		definitions.remove(name);
-	}
-
-	@Override
 	public void delete(TaskDefinition definition) {
-		delete(definition.getName());
+		deleteById(definition.getName());
 	}
 
 	@Override
@@ -142,11 +132,6 @@ public class InMemoryTaskDefinitionRepository implements TaskDefinitionRepositor
 
 	@Override
 	public TaskDefinition findByNameRequired(String name) {
-		TaskDefinition definition = this.findOne(name);
-		if (definition == null) {
-			throw new NoSuchTaskDefinitionException(name);
-		}
-		return definition;
+		return this.findById(name).orElseThrow(() -> new NoSuchTaskDefinitionException(name));
 	}
-
 }
