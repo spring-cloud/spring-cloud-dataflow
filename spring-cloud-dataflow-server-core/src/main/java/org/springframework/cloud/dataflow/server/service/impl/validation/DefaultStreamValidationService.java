@@ -45,10 +45,8 @@ public class DefaultStreamValidationService extends DefaultValidationService imp
 
 	@Override
 	public ValidationStatus validateStream(String name) {
-		StreamDefinition definition = streamDefinitionRepository.findOne(name);
-		if (definition == null) {
-			throw new NoSuchStreamDefinitionException(name);
-		}
+		StreamDefinition definition = streamDefinitionRepository.findById(name)
+				.orElseThrow(() -> new NoSuchStreamDefinitionException(name));
 		ValidationStatus validationStatus = new ValidationStatus(
 				definition.getName(),
 				definition.getDslText());

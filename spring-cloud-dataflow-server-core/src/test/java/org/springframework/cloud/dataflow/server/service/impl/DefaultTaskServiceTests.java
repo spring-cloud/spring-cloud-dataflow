@@ -495,14 +495,13 @@ public abstract class DefaultTaskServiceTests {
 
 	private static void verifyTaskExistsInRepo(String taskName, String dsl,
 		TaskDefinitionRepository taskDefinitionRepository) {
-		TaskDefinition taskDefinition = taskDefinitionRepository.findOne(taskName);
+		TaskDefinition taskDefinition = taskDefinitionRepository.findById(taskName).get();
 		assertThat(taskDefinition.getName(), is(equalTo(taskName)));
 		assertThat(taskDefinition.getDslText(), is(equalTo(dsl)));
 	}
 
 	private static boolean wasTaskDefinitionCreated(String taskName,
 		TaskDefinitionRepository taskDefinitionRepository) {
-		TaskDefinition taskDefinition = taskDefinitionRepository.findOne(taskName);
-		return taskDefinition != null;
+		return taskDefinitionRepository.findById(taskName).isPresent();
 	}
 }

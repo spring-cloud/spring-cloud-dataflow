@@ -22,6 +22,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import org.json.JSONObject;
 import org.junit.Assert;
@@ -112,7 +113,7 @@ public class DefaultSkipperStreamServiceTests {
 		this.skipperStreamDefinitions.add(streamDefinition2);
 		this.skipperStreamDefinitions.add(streamDefinition3);
 		this.skipperStreamDefinitions.add(streamDefinition4);
-		when(streamDefinitionRepository.findOne("test2")).thenReturn(streamDefinition2);
+		when(streamDefinitionRepository.findById("test2")).thenReturn(Optional.of(streamDefinition2));
 	}
 
 	@Test
@@ -286,7 +287,7 @@ public class DefaultSkipperStreamServiceTests {
 
 		StreamDefinition streamDefinition = new StreamDefinition("test1", "time | log");
 
-		when(streamDefinitionRepository.findOne(streamDefinition.getName())).thenReturn(streamDefinition);
+		when(streamDefinitionRepository.findById(streamDefinition.getName())).thenReturn(Optional.of(streamDefinition));
 
 		List<AppDeploymentRequest> appDeploymentRequests = Arrays.asList(mock(AppDeploymentRequest.class));
 		when(appDeploymentRequestCreator.createRequests(streamDefinition, new HashMap<>()))

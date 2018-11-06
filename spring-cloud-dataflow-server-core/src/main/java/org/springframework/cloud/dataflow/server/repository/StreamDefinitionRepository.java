@@ -31,28 +31,4 @@ import org.springframework.stereotype.Repository;
 public interface StreamDefinitionRepository extends PagingAndSortingRepository<StreamDefinition, String> {
 
 	Page<StreamDefinition> findByNameLike(SearchPageable searchPageable);
-
-	default StreamDefinition findOne(String id) {
-		return (StreamDefinition) findById(id).orElse(null);
-	}
-
-	default void delete(String id) {
-		deleteById(id);
-	}
-
-	default boolean exists(String id) {
-		return existsById(id);
-	}
-
-	default Iterable<StreamDefinition> save(Iterable<StreamDefinition> entities) {
-		return saveAll(entities);
-	}
-
-	default Iterable<StreamDefinition> findAll(Iterable<String> ids) {
-		return findAllById(ids);
-	}
-
-	default void delete(Iterable<StreamDefinition> entities) {
-		deleteAll(entities);
-	}
 }

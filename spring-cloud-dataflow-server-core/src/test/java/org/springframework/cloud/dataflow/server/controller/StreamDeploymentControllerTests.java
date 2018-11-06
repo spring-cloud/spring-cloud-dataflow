@@ -19,6 +19,7 @@ package org.springframework.cloud.dataflow.server.controller;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 import org.json.JSONObject;
 import org.junit.Assert;
@@ -152,7 +153,7 @@ public class StreamDeploymentControllerTests {
 				new JSONObject(streamDeploymentProperties).toString());
 		Map<StreamDefinition, DeploymentState> streamDeploymentStates = new HashMap<>();
 		streamDeploymentStates.put(streamDefinition, DeploymentState.deployed);
-		when(this.streamDefinitionRepository.findOne(streamDefinition.getName())).thenReturn(streamDefinition);
+		when(this.streamDefinitionRepository.findById(streamDefinition.getName())).thenReturn(Optional.of(streamDefinition));
 		when(this.skipperStreamService.info(streamDefinition.getName())).thenReturn(streamDeployment);
 		when(this.skipperStreamService.state(anyListOf(StreamDefinition.class))).thenReturn(streamDeploymentStates);
 		StreamDeploymentResource streamDeploymentResource = this.controller.info(streamDefinition.getName());

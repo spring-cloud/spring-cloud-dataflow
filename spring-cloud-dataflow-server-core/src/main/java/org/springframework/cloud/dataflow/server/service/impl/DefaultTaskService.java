@@ -19,6 +19,7 @@ package org.springframework.cloud.dataflow.server.service.impl;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -181,10 +182,8 @@ public class DefaultTaskService implements TaskService {
 					taskConfigurationProperties.getMaximumConcurrentTasks()));
 		}
 
-		TaskDefinition taskDefinition = this.taskDefinitionRepository.findOne(taskName);
-		if (taskDefinition == null) {
-			throw new NoSuchTaskDefinitionException(taskName);
-		}
+		TaskDefinition taskDefinition = this.taskDefinitionRepository.findById(taskName)
+				.orElseThrow(() -> new NoSuchTaskDefinitionException(taskName));
 		TaskParser taskParser = new TaskParser(taskDefinition.getName(), taskDefinition.getDslText(), true, true);
 		TaskNode taskNode = taskParser.parse();
 		// if composed task definition replace definition with one composed task
@@ -323,10 +322,8 @@ public class DefaultTaskService implements TaskService {
 
 	@Override
 	public void deleteTaskDefinition(String name) {
-		TaskDefinition taskDefinition = taskDefinitionRepository.findOne(name);
-		if (taskDefinition == null) {
-			throw new NoSuchTaskDefinitionException(name);
-		}
+		TaskDefinition taskDefinition = this.taskDefinitionRepository.findById(name)
+				.orElseThrow(() -> new NoSuchTaskDefinitionException(name));
 		TaskParser taskParser = new TaskParser(taskDefinition.getName(), taskDefinition.getDslText(), true, true);
 		TaskNode taskNode = taskParser.parse();
 		// if composed-task-runner definition then destroy all child tasks associated with
@@ -352,24 +349,22 @@ public class DefaultTaskService implements TaskService {
 	}
 
 	private void destroyPrimaryTask(String name) {
-		TaskDefinition taskDefinition = taskDefinitionRepository.findOne(name);
-		if (taskDefinition == null) {
-			throw new NoSuchTaskDefinitionException(name);
-		}
+		TaskDefinition taskDefinition = this.taskDefinitionRepository.findById(name)
+				.orElseThrow(() -> new NoSuchTaskDefinitionException(name));
 		destroyTask(taskDefinition);
 	}
 
 	private void destroyChildTask(String name) {
-		TaskDefinition taskDefinition = taskDefinitionRepository.findOne(name);
-		if (taskDefinition != null) {
-			destroyTask(taskDefinition);
+		Optional<TaskDefinition> taskDefinition = this.taskDefinitionRepository.findById(name);
+		if (taskDefinition.isPresent()) {
+			destroyTask(taskDefinition.get());
 		}
 	}
 
 	private void destroyTask(TaskDefinition taskDefinition) {
 		taskLauncher.destroy(taskDefinition.getName());
 		deploymentIdRepository.delete(DeploymentKey.forTaskDefinition(taskDefinition));
-		taskDefinitionRepository.delete(taskDefinition.getName());
+		taskDefinitionRepository.deleteById(taskDefinition.getName());
 	}
 
 }

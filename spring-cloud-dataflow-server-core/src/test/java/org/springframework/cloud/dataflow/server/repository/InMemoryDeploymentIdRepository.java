@@ -17,6 +17,7 @@
 package org.springframework.cloud.dataflow.server.repository;
 
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.springframework.util.Assert;
@@ -42,8 +43,8 @@ public class InMemoryDeploymentIdRepository implements DeploymentIdRepository {
 	}
 
 	@Override
-	public String findOne(String key) {
-		return deployments.get(key);
+	public Optional<String> findByKey(String key) {
+		return Optional.ofNullable(deployments.get(key));
 	}
 
 	@Override

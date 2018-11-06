@@ -44,11 +44,9 @@ import org.springframework.data.domain.Sort;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.junit4.SpringRunner;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
 
 /**
  * @author Glenn Renfro
@@ -84,9 +82,9 @@ public class RdbmsStreamDefinitionRepositoryTests {
 		repository.save(definition2);
 		repository.save(definition3);
 
-		assertEquals(definition1, repository.findOne("stream1"));
-		assertEquals(definition2, repository.findOne("stream2"));
-		assertEquals(definition3, repository.findOne("stream3"));
+		assertThat(repository.findById("stream1")).hasValue(definition1);
+		assertThat(repository.findById("stream2")).hasValue(definition2);
+		assertThat(repository.findById("stream3")).hasValue(definition3);
 	}
 
 	@Test
@@ -128,26 +126,26 @@ public class RdbmsStreamDefinitionRepositoryTests {
 		definitions.add(new StreamDefinition("stream1", "time | log"));
 
 		repository.save(new StreamDefinition("stream1", "time | log"));
-		repository.save(definitions);
+		repository.saveAll(definitions);
 	}
 
 	@Test
 	public void testFindOneNoneFound() {
-		assertNull(repository.findOne("notFound"));
+		assertThat(repository.findById("notfound")).isEmpty();
 
 		initializeRepository();
 
-		assertNull(repository.findOne("notFound"));
+		assertThat(repository.findById("notfound")).isEmpty();
 	}
 
 	@Test
 	public void testExists() {
-		assertFalse(repository.exists("exists"));
+		assertThat(repository.existsById("exists")).isFalse();
 
 		repository.save(new StreamDefinition("exists", "time | log"));
 
-		assertTrue(repository.exists("exists"));
-		assertFalse(repository.exists("nothere"));
+		assertThat(repository.existsById("exists")).isTrue();
+		assertThat(repository.existsById("nothere")).isFalse();
 	}
 
 	@Test
@@ -177,7 +175,7 @@ public class RdbmsStreamDefinitionRepositoryTests {
 		names.add("stream1");
 		names.add("stream2");
 
-		Iterable<StreamDefinition> items = repository.findAll(names);
+		Iterable<StreamDefinition> items = repository.findAllById(names);
 
 		int count = 0;
 		for (@SuppressWarnings("unused")
@@ -199,43 +197,43 @@ public class RdbmsStreamDefinitionRepositoryTests {
 
 	@Test
 	public void testDeleteNotFound() {
-		repository.delete("notFound");
+		repository.deleteById("notFound");
 	}
 
 	@Test
 	public void testDelete() {
 		initializeRepository();
 
-		assertNotNull(repository.findOne("stream2"));
+		assertThat(repository.findById("stream2")).isNotEmpty();
 
-		repository.delete("stream2");
+		repository.deleteById("stream2");
 
-		assertNull(repository.findOne("stream2"));
+		assertThat(repository.findById("stream2")).isEmpty();
 	}
 
 	@Test
 	public void testDeleteDefinition() {
 		initializeRepository();
 
-		assertNotNull(repository.findOne("stream2"));
+		assertThat(repository.findById("stream2")).isNotEmpty();
 
 		repository.delete(new StreamDefinition("stream2", "time | log"));
 
-		assertNull(repository.findOne("stream2"));
+		assertThat(repository.findById("stream2")).isEmpty();
 	}
 
 	@Test
 	public void testDeleteMultipleDefinitions() {
 		initializeRepository();
 
-		assertNotNull(repository.findOne("stream1"));
-		assertNotNull(repository.findOne("stream2"));
+		assertThat(repository.findById("stream1")).isNotEmpty();
+		assertThat(repository.findById("stream2")).isNotEmpty();
 
-		repository.delete(Arrays.asList(new StreamDefinition("stream1", "time | log"),
+		repository.deleteAll(Arrays.asList(new StreamDefinition("stream1", "time | log"),
 				new StreamDefinition("stream2", "time | log")));
 
-		assertNull(repository.findOne("stream1"));
-		assertNull(repository.findOne("stream2"));
+		assertThat(repository.findById("stream1")).isEmpty();
+		assertThat(repository.findById("stream2")).isEmpty();
 	}
 
 	@Test

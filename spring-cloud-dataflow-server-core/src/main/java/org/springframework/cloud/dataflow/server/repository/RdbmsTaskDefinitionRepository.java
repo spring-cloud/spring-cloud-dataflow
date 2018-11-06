@@ -47,7 +47,7 @@ public class RdbmsTaskDefinitionRepository extends AbstractRdbmsKeyValueReposito
 	@Override
 	public <S extends TaskDefinition> S save(S definition) {
 		Assert.notNull(definition, "definition must not be null");
-		if (exists(definition.getName())) {
+		if (existsById(definition.getName())) {
 			throw new DuplicateTaskException(String.format(
 					"Cannot register task %s because another one has already " + "been registered with the same name",
 					definition.getName()));
@@ -60,15 +60,13 @@ public class RdbmsTaskDefinitionRepository extends AbstractRdbmsKeyValueReposito
 	@Override
 	public void delete(TaskDefinition definition) {
 		Assert.notNull(definition, "definition must not null");
-		delete(definition.getName());
+		deleteById(definition.getName());
 	}
 
 	@Override
 	public TaskDefinition findByNameRequired(String name) {
-		TaskDefinition definition = this.findOne(name);
-		if (definition == null) {
-			throw new NoSuchTaskDefinitionException(name);
-		}
-		return definition;
+		return this.findById(name).orElseThrow(() ->
+			new NoSuchTaskDefinitionException(name)
+		);
 	}
 }

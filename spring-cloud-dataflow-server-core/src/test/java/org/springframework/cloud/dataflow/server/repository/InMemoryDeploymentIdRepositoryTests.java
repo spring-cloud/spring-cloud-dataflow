@@ -56,24 +56,24 @@ public class InMemoryDeploymentIdRepositoryTests {
 		repository.save(appDeploymentKey2, "id2");
 		repository.save(appDeploymentKey5, "id3");
 
-		String findOne1 = repository.findOne(appDeploymentKey1);
+		String findOne1 = repository.findByKey(appDeploymentKey1).get();
 		assertThat(findOne1, notNullValue());
 		assertThat(findOne1, is("id1"));
-		String findOne2 = repository.findOne(appDeploymentKey3);
+		String findOne2 = repository.findByKey(appDeploymentKey3).get();
 		assertThat(findOne2, notNullValue());
 		assertThat(findOne2, is("id1"));
 
-		String findOne3 = repository.findOne(appDeploymentKey2);
+		String findOne3 = repository.findByKey(appDeploymentKey2).get();
 		assertThat(findOne3, notNullValue());
 		assertThat(findOne3, is("id2"));
-		String findOne4 = repository.findOne(appDeploymentKey4);
+		String findOne4 = repository.findByKey(appDeploymentKey4).get();
 		assertThat(findOne4, notNullValue());
 		assertThat(findOne4, is("id2"));
 
-		String findOne5 = repository.findOne(appDeploymentKey5);
+		String findOne5 = repository.findByKey(appDeploymentKey5).get();
 		assertThat(findOne5, notNullValue());
 		assertThat(findOne5, is("id3"));
-		String findOne6 = repository.findOne(appDeploymentKey6);
+		String findOne6 = repository.findByKey(appDeploymentKey6).get();
 		assertThat(findOne6, notNullValue());
 		assertThat(findOne6, is("id3"));
 	}
@@ -93,8 +93,8 @@ public class InMemoryDeploymentIdRepositoryTests {
 		repository.save(appDeploymentKey2, "id2");
 		repository.save(appDeploymentKey3, "id3");
 		repository.delete(appDeploymentKey1);
-		assertThat(repository.findOne(appDeploymentKey1), nullValue());
-		assertThat(repository.findOne(appDeploymentKey2), notNullValue());
-		assertThat(repository.findOne(appDeploymentKey3), notNullValue());
+		assertThat(repository.findByKey(appDeploymentKey1).orElse(null), nullValue());
+		assertThat(repository.findByKey(appDeploymentKey2).get(), notNullValue());
+		assertThat(repository.findByKey(appDeploymentKey3).get(), notNullValue());
 	}
 }

@@ -96,6 +96,7 @@ public abstract class AbstractStreamService implements StreamService {
 		this.auditServiceUtils = new AuditServiceUtils();
 	}
 
+	@Override
 	public StreamDefinition createStream(String streamName, String dsl, boolean deploy) {
 		StreamDefinition streamDefinition = createStreamDefinition(streamName, dsl);
 		List<String> errorMessages = new ArrayList<>();
@@ -144,10 +145,8 @@ public abstract class AbstractStreamService implements StreamService {
 		if (deploymentProperties == null) {
 			deploymentProperties = new HashMap<>();
 		}
-		StreamDefinition streamDefinition = this.streamDefinitionRepository.findOne(name);
-		if (streamDefinition == null) {
-			throw new NoSuchStreamDefinitionException(name);
-		}
+		StreamDefinition streamDefinition = this.streamDefinitionRepository.findById(name)
+				.orElseThrow(() -> new NoSuchStreamDefinitionException(name));
 
 		DeploymentState status = this.doCalculateStreamState(name);
 
@@ -171,12 +170,10 @@ public abstract class AbstractStreamService implements StreamService {
 
 	@Override
 	public void deleteStream(String name) {
-		final StreamDefinition streamDefinition = this.streamDefinitionRepository.findOne(name);
-		if (streamDefinition == null) {
-			throw new NoSuchStreamDefinitionException(name);
-		}
+		final StreamDefinition streamDefinition = this.streamDefinitionRepository.findById(name)
+				.orElseThrow(() -> new NoSuchStreamDefinitionException(name));
 		this.undeployStream(name);
-		this.streamDefinitionRepository.delete(name);
+		this.streamDefinitionRepository.deleteById(name);
 
 		auditRecordService.populateAndSaveAuditRecord(
 				AuditOperationType.STREAM, AuditActionType.DELETE,
@@ -201,10 +198,8 @@ public abstract class AbstractStreamService implements StreamService {
 	@Override
 	public List<StreamDefinition> findRelatedStreams(String name, boolean nested) {
 		Set<StreamDefinition> relatedDefinitions = new LinkedHashSet<>();
-		StreamDefinition currentStreamDefinition = streamDefinitionRepository.findOne(name);
-		if (currentStreamDefinition == null) {
-			throw new NoSuchStreamDefinitionException(name);
-		}
+		StreamDefinition currentStreamDefinition = streamDefinitionRepository.findById(name)
+				.orElseThrow(() -> new NoSuchStreamDefinitionException(name));
 		Iterable<StreamDefinition> definitions = streamDefinitionRepository.findAll();
 		List<StreamDefinition> result = new ArrayList<>(findRelatedDefinitions(currentStreamDefinition, definitions,
 				relatedDefinitions, nested));
@@ -253,11 +248,8 @@ public abstract class AbstractStreamService implements StreamService {
 
 	@Override
 	public StreamDefinition findOne(String streamDefinitionName) {
-		StreamDefinition definition = streamDefinitionRepository.findOne(streamDefinitionName);
-		if (definition == null) {
-			throw new NoSuchStreamDefinitionException(streamDefinitionName);
-		}
-		return definition;
+		return streamDefinitionRepository.findById(streamDefinitionName)
+				.orElseThrow(() -> new NoSuchStreamDefinitionException(streamDefinitionName));
 	}
 
 	@Override

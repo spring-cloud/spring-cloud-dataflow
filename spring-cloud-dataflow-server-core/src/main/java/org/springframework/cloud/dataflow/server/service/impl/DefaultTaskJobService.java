@@ -216,13 +216,8 @@ public class DefaultTaskJobService implements TaskJobService {
 		}
 
 		TaskExecution taskExecution = this.taskExplorer.getTaskExecution(taskJobExecution.getTaskId());
-
-		TaskDefinition taskDefinition = this.taskDefinitionRepository.findOne(taskExecution.getTaskName());
-
-		if (taskDefinition == null) {
-			throw new NoSuchTaskDefinitionException(taskExecution.getTaskName());
-		}
-
+		TaskDefinition taskDefinition = this.taskDefinitionRepository.findById(taskExecution.getTaskName())
+				.orElseThrow(() -> new NoSuchTaskDefinitionException(taskExecution.getTaskName()));
 		taskService.executeTask(taskDefinition.getName(), taskDefinition.getProperties(), taskExecution.getArguments());
 	}
 
@@ -267,7 +262,6 @@ public class DefaultTaskJobService implements TaskJobService {
 	private boolean isTaskDefined(JobExecution jobExecution) {
 		TaskExecution taskExecution = taskExplorer
 				.getTaskExecution(taskExplorer.getTaskExecutionIdByJobExecutionId(jobExecution.getId()));
-		TaskDefinition definition = taskDefinitionRepository.findOne(taskExecution.getTaskName());
-		return (definition != null);
+		return taskDefinitionRepository.findById(taskExecution.getTaskName()).isPresent();
 	}
 }

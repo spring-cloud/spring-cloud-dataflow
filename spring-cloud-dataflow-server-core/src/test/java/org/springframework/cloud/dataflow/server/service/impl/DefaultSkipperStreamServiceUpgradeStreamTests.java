@@ -15,6 +15,8 @@
  */
 package org.springframework.cloud.dataflow.server.service.impl;
 
+import java.util.Optional;
+
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -62,7 +64,7 @@ public class DefaultSkipperStreamServiceUpgradeStreamTests {
 	@Test
 	public void verifyUpgradeStream() {
 		if (!PlatformUtils.isWindows()) {
-			when(streamDefinitionRepository.findOne("test2")).thenReturn(streamDefinition2);
+			when(streamDefinitionRepository.findById("test2")).thenReturn(Optional.of(streamDefinition2));
 
 			final UpdateStreamRequest updateStreamRequest = new UpdateStreamRequest(streamDeployment2.getStreamName(), null, null);
 			streamService.updateStream(streamDeployment2.getStreamName(), updateStreamRequest);

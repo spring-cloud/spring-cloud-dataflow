@@ -65,7 +65,8 @@ public class TapOnDestinationRecoveryStrategy implements RecoveryStrategy<ParseE
 
 		StreamDefinition streamDefinition = null;
 		if (StringUtils.hasText(streamName)) {
-			streamDefinition = streamDefinitionRepository.findOne(streamName);
+			// streamDefinition = streamDefinitionRepository.findOne(streamName);
+			streamDefinition = streamDefinitionRepository.findById(streamName).orElse(null);
 		}
 		// User has started to type an app name, or at least the stream name is valid
 		if (streamDefinition != null) {

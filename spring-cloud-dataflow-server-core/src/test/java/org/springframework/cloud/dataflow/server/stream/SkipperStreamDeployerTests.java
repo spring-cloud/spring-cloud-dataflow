@@ -22,6 +22,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.ForkJoinPool;
 
 import org.junit.Test;
@@ -117,7 +118,7 @@ public class SkipperStreamDeployerTests {
 		SkipperStreamDeployer skipperStreamDeployer = new SkipperStreamDeployer(skipperClient,
 				streamDefinitionRepository, appRegistryService, mock(ForkJoinPool.class));
 
-		when(streamDefinitionRepository.findOne("test1")).thenReturn(new StreamDefinition("test1", "t1: time | log"));
+		when(streamDefinitionRepository.findById("test1")).thenReturn(Optional.of(new StreamDefinition("test1", "t1: time | log")));
 		skipperStreamDeployer.deployStream(streamDeploymentRequest);
 
 		ArgumentCaptor<UploadRequest> uploadRequestCaptor = ArgumentCaptor.forClass(UploadRequest.class);
@@ -280,7 +281,7 @@ public class SkipperStreamDeployerTests {
 		SkipperStreamDeployer skipperStreamDeployer = new SkipperStreamDeployer(skipperClient,
 				streamDefinitionRepository, appRegistryService, mock(ForkJoinPool.class));
 
-		when(streamDefinitionRepository.findOne("test1")).thenReturn(new StreamDefinition("test1", "t1: time | log"));
+		when(streamDefinitionRepository.findById("test1")).thenReturn(Optional.of(new StreamDefinition("test1", "t1: time | log")));
 
 		skipperStreamDeployer.deployStream(streamDeploymentRequest);
 	}
@@ -298,7 +299,7 @@ public class SkipperStreamDeployerTests {
 		StreamDefinition streamDefinition = new StreamDefinition("foo", "foo|bar");
 
 		// Stream is defined
-		when(streamDefinitionRepository.findOne(streamDefinition.getName())).thenReturn(null);
+		when(streamDefinitionRepository.findById(streamDefinition.getName())).thenReturn(Optional.ofNullable(null));
 
 		// Stream is undeployed
 		when(skipperClient.status(eq(streamDefinition.getName()))).thenThrow(new ReleaseNotFoundException(""));
@@ -392,7 +393,7 @@ public class SkipperStreamDeployerTests {
 		StreamDefinition streamDefinition = new StreamDefinition("foo", "foo|bar");
 
 		// Stream is defined
-		when(streamDefinitionRepository.findOne(streamDefinition.getName())).thenReturn(streamDefinition);
+		when(streamDefinitionRepository.findById(streamDefinition.getName())).thenReturn(Optional.of(streamDefinition));
 
 		// Stream is undeployed
 		when(skipperClient.status(eq(streamDefinition.getName()))).thenThrow(new ReleaseNotFoundException(""));

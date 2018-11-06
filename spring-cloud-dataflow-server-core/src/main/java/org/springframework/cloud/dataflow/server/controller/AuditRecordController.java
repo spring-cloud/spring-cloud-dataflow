@@ -99,10 +99,8 @@ public class AuditRecordController {
 	@RequestMapping(value = "/{id}", method = RequestMethod.GET)
 	@ResponseStatus(HttpStatus.OK)
 	public AuditRecordResource display(@PathVariable("id") Long id) {
-		AuditRecord auditRecord = this.auditRecordService.findOne(id);
-		if (auditRecord == null) {
-			throw new NoSuchAuditRecordException(id);
-		}
+		AuditRecord auditRecord = this.auditRecordService.findById(id)
+				.orElseThrow(() -> new NoSuchAuditRecordException(id));
 		return new Assembler(new PageImpl<>(Collections.singletonList(auditRecord))).toResource(auditRecord);
 	}
 

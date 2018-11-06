@@ -16,6 +16,7 @@
 package org.springframework.cloud.dataflow.server.audit.service;
 
 import java.util.Map;
+import java.util.Optional;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -110,7 +111,7 @@ public class DefaultAuditRecordService implements AuditRecordService {
 	}
 
 	@Override
-	public AuditRecord findOne(Long id) {
-		return this.auditRecordRepository.findById(id).orElse(null);
+	public Optional<AuditRecord> findById(Long id) {
+		return this.auditRecordRepository.findById(id);
 	}
 }

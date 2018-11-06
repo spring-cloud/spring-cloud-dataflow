@@ -121,9 +121,8 @@ public class TaskExecutionController {
 	@ResponseStatus(HttpStatus.OK)
 	public PagedResources<TaskExecutionResource> retrieveTasksByName(@RequestParam("name") String taskName,
 			Pageable pageable, PagedResourcesAssembler<TaskJobExecutionRel> assembler) {
-		if (this.taskDefinitionRepository.findOne(taskName) == null) {
-			throw new NoSuchTaskDefinitionException(taskName);
-		}
+		this.taskDefinitionRepository.findById(taskName)
+				.orElseThrow(() -> new NoSuchTaskDefinitionException(taskName));
 		Page<TaskExecution> taskExecutions = this.explorer.findTaskExecutionsByName(taskName, pageable);
 		Page<TaskJobExecutionRel> result = getPageableRelationships(taskExecutions, pageable);
 		return assembler.toResource(result, this.taskAssembler);

@@ -170,7 +170,7 @@ public class StreamControllerTests {
 		mockMvc.perform(post("/streams/definitions/").param("name", "myStream").param("definition", "time | log")
 				.accept(MediaType.APPLICATION_JSON)).andDo(print()).andExpect(status().isCreated());
 		assertEquals(1, repository.count());
-		StreamDefinition myStream = repository.findOne("myStream");
+		StreamDefinition myStream = repository.findById("myStream").get();
 		assertEquals("time | log", myStream.getDslText());
 		assertEquals("myStream", myStream.getName());
 		assertEquals(2, myStream.getAppDefinitions().size());
@@ -191,7 +191,7 @@ public class StreamControllerTests {
 				.param("definition", "time --some.password=foobar --another-secret=kenny | log")
 				.accept(MediaType.APPLICATION_JSON)).andDo(print()).andExpect(status().isCreated());
 		assertEquals(1, repository.count());
-		StreamDefinition myStream = repository.findOne("myStream2");
+		StreamDefinition myStream = repository.findById("myStream2").get();
 		final List<AuditRecord> auditRecords = auditRecordRepository.findAll();
 
 		assertEquals(1, auditRecords.size());
@@ -463,7 +463,7 @@ public class StreamControllerTests {
 				.param("definition", definition)
 				.accept(MediaType.APPLICATION_JSON)).andDo(print()).andExpect(status().isCreated());
 		assertEquals(1, repository.count());
-		StreamDefinition myStream = repository.findOne("myStream");
+		StreamDefinition myStream = repository.findById("myStream").get();
 		StreamAppDefinition timeDefinition = myStream.getAppDefinitions().get(0);
 		StreamAppDefinition logDefinition = myStream.getAppDefinitions().get(1);
 		assertEquals("time", timeDefinition.getName());
@@ -483,7 +483,7 @@ public class StreamControllerTests {
 				.param("definition", definition)
 				.accept(MediaType.APPLICATION_JSON)).andDo(print()).andExpect(status().isCreated());
 		assertEquals(1, repository.count());
-		StreamDefinition myStream = repository.findOne("myStream");
+		StreamDefinition myStream = repository.findById("myStream").get();
 		assertEquals(definition, myStream.getDslText());
 		assertEquals("myStream", myStream.getName());
 		assertEquals(3, myStream.getAppDefinitions().size());
@@ -512,7 +512,7 @@ public class StreamControllerTests {
 				.param("definition", definition)
 				.accept(MediaType.APPLICATION_JSON)).andDo(print()).andExpect(status().isCreated());
 		assertEquals(1, repository.count());
-		StreamDefinition myStream = repository.findOne("myStream");
+		StreamDefinition myStream = repository.findById("myStream").get();
 		assertEquals(definition, myStream.getDslText());
 		assertEquals("myStream", myStream.getName());
 		assertEquals(1, myStream.getAppDefinitions().size());
@@ -531,7 +531,7 @@ public class StreamControllerTests {
 				.param("definition", definition)
 				.accept(MediaType.APPLICATION_JSON)).andDo(print()).andExpect(status().isCreated());
 		assertEquals(1, repository.count());
-		StreamDefinition myStream = repository.findOne("myStream");
+		StreamDefinition myStream = repository.findById("myStream").get();
 		assertEquals(definition, myStream.getDslText());
 		assertEquals("myStream", myStream.getName());
 		assertEquals(2, myStream.getAppDefinitions().size());
@@ -556,7 +556,7 @@ public class StreamControllerTests {
 				.param("definition", definition)
 				.accept(MediaType.APPLICATION_JSON)).andDo(print()).andExpect(status().isCreated());
 		assertEquals(1, repository.count());
-		StreamDefinition myStream = repository.findOne("myStream");
+		StreamDefinition myStream = repository.findById("myStream").get();
 		assertEquals(definition, myStream.getDslText());
 		assertEquals("myStream", myStream.getName());
 		assertEquals(1, myStream.getAppDefinitions().size());
@@ -574,7 +574,7 @@ public class StreamControllerTests {
 				.param("definition", definition)
 				.accept(MediaType.APPLICATION_JSON)).andDo(print()).andExpect(status().isCreated());
 		assertEquals(1, repository.count());
-		StreamDefinition myStream = repository.findOne("myStream");
+		StreamDefinition myStream = repository.findById("myStream").get();
 		assertEquals(definition, myStream.getDslText());
 		assertEquals("myStream", myStream.getName());
 		assertEquals(2, myStream.getAppDefinitions().size());
@@ -601,7 +601,7 @@ public class StreamControllerTests {
 				.param("deploy", "true").accept(MediaType.APPLICATION_JSON)).andDo(print())
 				.andExpect(status().isCreated());
 		assertEquals(1, repository.count());
-		StreamDefinition myStream = repository.findOne("myStream");
+		StreamDefinition myStream = repository.findById("myStream").get();
 		assertEquals(definition, myStream.getDslText());
 		assertEquals("myStream", myStream.getName());
 		assertEquals(1, myStream.getAppDefinitions().size());

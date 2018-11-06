@@ -166,7 +166,7 @@ public class TaskControllerTests {
 
 		assertEquals(1, repository.count());
 
-		TaskDefinition myTask = repository.findOne("myTask");
+		TaskDefinition myTask = repository.findById("myTask").get();
 
 		assertEquals(1, myTask.getProperties().size());
 		assertEquals("myTask", myTask.getProperties().get("spring.cloud.task.name"));
@@ -193,7 +193,7 @@ public class TaskControllerTests {
 
 		assertEquals(1, repository.count());
 
-		TaskDefinition myTask = repository.findOne("myTask");
+		TaskDefinition myTask = repository.findById("myTask").get();
 
 		assertEquals("bar", myTask.getProperties().get("foo"));
 		assertEquals("baz", myTask.getProperties().get("bar"));
@@ -212,13 +212,13 @@ public class TaskControllerTests {
 
 		assertEquals(3, repository.count());
 
-		TaskDefinition myTask1 = repository.findOne("myTask-t1");
+		TaskDefinition myTask1 = repository.findById("myTask-t1").get();
 		assertEquals("bar rab", myTask1.getProperties().get("foo"));
 		assertEquals("task --foo='bar rab'", myTask1.getDslText());
 		assertEquals("task", myTask1.getRegisteredAppName());
 		assertEquals("myTask-t1", myTask1.getName());
 
-		TaskDefinition myTask2 = repository.findOne("myTask-t2");
+		TaskDefinition myTask2 = repository.findById("myTask-t2").get();
 		assertEquals("one two", myTask2.getProperties().get("foo"));
 		assertEquals("task --foo='one two'", myTask2.getDslText());
 		assertEquals("task", myTask2.getRegisteredAppName());
