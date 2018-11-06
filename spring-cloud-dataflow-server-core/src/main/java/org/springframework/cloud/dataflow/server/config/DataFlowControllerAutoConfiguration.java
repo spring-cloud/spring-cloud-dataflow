@@ -122,6 +122,9 @@ import org.springframework.core.io.ResourceLoader;
 import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.hateoas.EntityLinks;
+import org.springframework.hateoas.core.AnnotationRelProvider;
+import org.springframework.hateoas.hal.HalConfiguration;
+import org.springframework.hateoas.hal.Jackson2HalModule;
 import org.springframework.http.converter.StringHttpMessageConverter;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.scheduling.concurrent.ForkJoinPoolFactoryBean;
@@ -439,14 +442,20 @@ public class DataFlowControllerAutoConfiguration {
 		@ConditionalOnBean(StreamDefinitionRepository.class)
 		public SkipperClient skipperClient(SkipperClientProperties properties,
 				RestTemplateBuilder restTemplateBuilder, ObjectMapper objectMapper) {
-			//objectMapper.registerModule(new Jackson2HalModule());
+
+			// TODO (Tzolov) review the manual Hal convertion configuration
+			objectMapper.registerModule(new Jackson2HalModule());
+			objectMapper.setHandlerInstantiator(new Jackson2HalModule.HalHandlerInstantiator(
+					new AnnotationRelProvider(), null, null, new HalConfiguration()));
 			objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+
 			RestTemplate restTemplate = restTemplateBuilder
 					.errorHandler(new SkipperClientResponseErrorHandler(objectMapper))
 					.interceptors(new OAuth2AccessTokenProvidingClientHttpRequestInterceptor())
 					.messageConverters(Arrays.asList(new StringHttpMessageConverter(),
 							new MappingJackson2HttpMessageConverter(objectMapper)))
 					.build();
+
 			return new DefaultSkipperClient(properties.getServerUri(), restTemplate);
 		}
 
