@@ -61,7 +61,8 @@ public class LocalServerSecurityWithSingleUserTests {
 	private final static Logger logger = LoggerFactory.getLogger(LocalServerSecurityWithSingleUserTests.class);
 
 	private final static LocalDataflowResource localDataflowResource = new LocalDataflowResource(
-			"classpath:org/springframework/cloud/dataflow/server/local/security/singleUser.yml");
+			"classpath:org/springframework/cloud/dataflow/server/local/security/singleUser.yml",
+			true, true, true, true, "7577");
 
 	@ClassRule
 	public static TestRule springDataflowAndLdapServer = RuleChain.outerRule(localDataflowResource);
@@ -101,7 +102,7 @@ public class LocalServerSecurityWithSingleUserTests {
 
 				{ HttpMethod.POST, HttpStatus.BAD_REQUEST, "/apps/task/taskname", singleUser, null },
 				{ HttpMethod.POST, HttpStatus.CREATED, "/apps/task/taskname", singleUser,
-						TestUtils.toImmutableMap("uri", "maven://io.spring.cloud:scdf-sample-app:jar:1.0.0.BUILD-SNAPSHOT","force", "false")},
+						TestUtils.toImmutableMap("uri", "maven://io.spring.cloud:scdf-sample-app:jar:1.0.0.BUILD-SNAPSHOT", "force", "false") },
 				{ HttpMethod.POST, HttpStatus.UNAUTHORIZED, "/apps/task/taskname", null, null },
 
 				{ HttpMethod.DELETE, HttpStatus.OK, "/apps/task/taskname", singleUser, null }, // Should be 404 -
@@ -170,10 +171,10 @@ public class LocalServerSecurityWithSingleUserTests {
 						TestUtils.toImmutableMap("detailLevel", "2") },
 
 				{ HttpMethod.POST, HttpStatus.BAD_REQUEST, "/tools/parseTaskTextToGraph", singleUser,
-						TestUtils.toImmutableMap("name", "foo", "dsl", "t1 && t2")},
+						TestUtils.toImmutableMap("name", "foo", "dsl", "t1 && t2") },
 				{ HttpMethod.POST, HttpStatus.UNAUTHORIZED, "/tools/parseTaskTextToGraph", null, null },
 
-				{ HttpMethod.POST, HttpStatus.BAD_REQUEST, "/tools/convertTaskGraphToText", singleUser, null},
+				{ HttpMethod.POST, HttpStatus.BAD_REQUEST, "/tools/convertTaskGraphToText", singleUser, null },
 				{ HttpMethod.POST, HttpStatus.UNAUTHORIZED, "/tools/convertTaskGraphToText", null, null },
 
 				/* JobExecutionController */
@@ -368,7 +369,7 @@ public class LocalServerSecurityWithSingleUserTests {
 				{ HttpMethod.GET, HttpStatus.FOUND, "/dashboard", singleUser, null },
 				{ HttpMethod.GET, HttpStatus.FOUND, "/dashboard", null, null },
 
-				{ HttpMethod.GET, HttpStatus.OK, "/about", singleUser, null },
+				// TODO (Tzolov) Find way to mock skpperClietn.info { HttpMethod.GET, HttpStatus.OK, "/about", singleUser, null },
 				{ HttpMethod.GET, HttpStatus.UNAUTHORIZED, "/about", null, null },
 
 				{ HttpMethod.GET, HttpStatus.OK, "/management", singleUser, null },

@@ -43,8 +43,6 @@ public class LocalDataflowResource extends ExternalResource {
 
 	final boolean schedulerEnabled;
 
-	final boolean skipperEnabled;
-
 	private String originalConfigLocation = null;
 
 	private SpringApplication app;
@@ -65,7 +63,6 @@ public class LocalDataflowResource extends ExternalResource {
 		this.tasksEnabled = true;
 		this.metricsEnabled = true;
 		this.schedulerEnabled = false;
-		this.skipperEnabled = false;
 	}
 
 	public LocalDataflowResource(String configurationLocation, boolean streamsEnabled, boolean tasksEnabled) {
@@ -74,7 +71,6 @@ public class LocalDataflowResource extends ExternalResource {
 		this.tasksEnabled = tasksEnabled;
 		this.metricsEnabled = true;
 		this.schedulerEnabled = false;
-		this.skipperEnabled = false;
 	}
 
 	public LocalDataflowResource(String configurationLocation, boolean streamsEnabled, boolean tasksEnabled, boolean metricsEnabled) {
@@ -83,7 +79,6 @@ public class LocalDataflowResource extends ExternalResource {
 		this.tasksEnabled = tasksEnabled;
 		this.metricsEnabled = metricsEnabled;
 		this.schedulerEnabled = false;
-		this.skipperEnabled = false;
 	}
 
 	public LocalDataflowResource(String configurationLocation, boolean streamsEnabled, boolean tasksEnabled, boolean metricsEnabled, boolean schedulerEnabled) {
@@ -92,17 +87,15 @@ public class LocalDataflowResource extends ExternalResource {
 		this.tasksEnabled = tasksEnabled;
 		this.metricsEnabled = metricsEnabled;
 		this.schedulerEnabled = schedulerEnabled;
-		this.skipperEnabled = false;
 	}
 
 	public LocalDataflowResource(String configurationLocation, boolean streamsEnabled, boolean tasksEnabled,
-			boolean metricsEnabled, boolean schedulerEnabled, boolean skipperEnabled, String skipperServerPort) {
+			boolean metricsEnabled, boolean schedulerEnabled, String skipperServerPort) {
 		this.configurationLocation = configurationLocation;
 		this.streamsEnabled = streamsEnabled;
 		this.tasksEnabled = tasksEnabled;
 		this.metricsEnabled = metricsEnabled;
 		this.schedulerEnabled = schedulerEnabled;
-		this.skipperEnabled = skipperEnabled;
 		this.skipperServerPort = skipperServerPort;
 	}
 
@@ -125,8 +118,6 @@ public class LocalDataflowResource extends ExternalResource {
 						+ this.metricsEnabled,
 				"--" + FeaturesProperties.FEATURES_PREFIX + "." + FeaturesProperties.SCHEDULES_ENABLED + "="
 						+ this.schedulerEnabled,
-				"--" + FeaturesProperties.FEATURES_PREFIX + "." + FeaturesProperties.SKIPPER_ENABLED + "="
-						+ this.skipperEnabled,
 				"--spring.cloud.skipper.client.serverUri=http://localhost:" + this.skipperServerPort + "/api"
 		});
 

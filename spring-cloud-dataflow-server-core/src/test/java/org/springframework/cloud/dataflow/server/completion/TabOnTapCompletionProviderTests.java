@@ -36,13 +36,13 @@ import org.springframework.cloud.dataflow.configuration.metadata.ApplicationConf
 import org.springframework.cloud.dataflow.configuration.metadata.BootApplicationConfigurationMetadataResolver;
 import org.springframework.cloud.dataflow.core.ApplicationType;
 import org.springframework.cloud.dataflow.core.StreamDefinition;
-import org.springframework.cloud.dataflow.registry.AppRegistry;
+import org.springframework.cloud.dataflow.registry.AbstractAppRegistryCommon;
+import org.springframework.cloud.dataflow.registry.AppRegistryCommon;
 import org.springframework.cloud.dataflow.registry.domain.AppRegistration;
 import org.springframework.cloud.dataflow.registry.support.AppResourceCommon;
 import org.springframework.cloud.dataflow.server.repository.InMemoryStreamDefinitionRepository;
 import org.springframework.cloud.dataflow.server.repository.StreamDefinitionRepository;
 import org.springframework.cloud.deployer.resource.maven.MavenProperties;
-import org.springframework.cloud.deployer.resource.registry.InMemoryUriRegistry;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.io.FileSystemResourceLoader;
@@ -123,9 +123,24 @@ public class TabOnTapCompletionProviderTests {
 		};
 
 		@Bean
-		public AppRegistry appRegistry() {
+		public AppRegistryCommon appRegistry() {
 			final ResourceLoader resourceLoader = new FileSystemResourceLoader();
-			return new AppRegistry(new InMemoryUriRegistry(), new AppResourceCommon(new MavenProperties(), resourceLoader)) {
+			return new AbstractAppRegistryCommon(new AppResourceCommon(new MavenProperties(), resourceLoader)) {
+
+				@Override
+				public boolean appExist(String name, ApplicationType type) {
+					return false;
+				}
+
+				@Override
+				public List<AppRegistration> findAll() {
+					List<AppRegistration> result = new ArrayList<>();
+					for (File file : ROOT.listFiles(FILTER)) {
+						result.add(makeAppRegistration(file));
+					}
+					return result;
+				}
+
 				@Override
 				public AppRegistration find(String name, ApplicationType type) {
 					String filename = name + "-" + type;
@@ -138,15 +153,6 @@ public class TabOnTapCompletionProviderTests {
 					}
 				}
 
-				@Override
-				public List<AppRegistration> findAll() {
-					List<AppRegistration> result = new ArrayList<>();
-					for (File file : ROOT.listFiles(FILTER)) {
-						result.add(makeAppRegistration(file));
-					}
-					return result;
-				}
-
 				private AppRegistration makeAppRegistration(File file) {
 					String fileName = file.getName();
 					Matcher matcher = Pattern.compile("(?<name>.+)-(?<type>.+)").matcher(fileName);
@@ -155,7 +161,18 @@ public class TabOnTapCompletionProviderTests {
 					ApplicationType type = ApplicationType.valueOf(matcher.group("type"));
 					return new AppRegistration(name, type, file.toURI());
 				}
+
+				@Override
+				public AppRegistration save(AppRegistration app) {
+					return null;
+				}
+
+				@Override
+				protected boolean isOverwrite(AppRegistration app, boolean overwrite) {
+					return false;
+				}
 			};
+
 		}
 
 		@Bean

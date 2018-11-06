@@ -75,7 +75,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  * @author Ilayaperumal Gopinathan
  */
 @RunWith(SpringRunner.class)
-@SpringBootTest(classes = TestDependencies.class, properties = { "spring.cloud.dataflow.features.skipper-enabled=true",
+@SpringBootTest(classes = TestDependencies.class, properties = {
 		"spring.datasource.url=jdbc:h2:tcp://localhost:19092/mem:dataflow" })
 @DirtiesContext(classMode = ClassMode.AFTER_EACH_TEST_METHOD)
 @Transactional

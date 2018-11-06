@@ -1,0 +1,5 @@
+spring:
+  jmx:
+    enabled: false
+  datasource:
+    url: jdbc:h2:tcp://localhost:19094/mem:dataflow

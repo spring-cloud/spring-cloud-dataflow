@@ -16,21 +16,32 @@
 
 package org.springframework.cloud.dataflow.shell.command;
 
+import java.util.Arrays;
 import java.util.List;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.ArgumentMatchers;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import org.springframework.cloud.dataflow.registry.AppRegistry;
+import org.springframework.cloud.dataflow.registry.AppRegistryCommon;
 import org.springframework.cloud.dataflow.shell.AbstractShellIntegrationTest;
+import org.springframework.cloud.deployer.spi.app.AppDeployer;
+import org.springframework.cloud.skipper.domain.Deployer;
+import org.springframework.cloud.skipper.domain.Info;
+import org.springframework.cloud.skipper.domain.Status;
+import org.springframework.cloud.skipper.domain.StatusCode;
 import org.springframework.core.io.ClassPathResource;
+import org.springframework.hateoas.Link;
+import org.springframework.hateoas.Resources;
 import org.springframework.shell.core.CommandResult;
 import org.springframework.shell.table.Table;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.when;
+
 
 /**
  * @author Ilayaperumal Gopinathan
@@ -45,21 +56,34 @@ public class StreamCommandTests extends AbstractShellIntegrationTest {
 
 	@Before
 	public void registerApps() {
-		AppRegistry registry = applicationContext.getBean(AppRegistry.class);
+		AppRegistryCommon registry = applicationContext.getBean(AppRegistryCommon.class);
 		registry.importAll(true, new ClassPathResource(APPS_URI));
 	}
 
 	@Test
-	public void testStreamLifecycleForTickTock() throws InterruptedException {
+	public void testStreamLifecycleForTickTock() {
 		logger.info("Starting Stream Test for TickTock");
 		String streamName = generateUniqueName();
 		stream().create(streamName, "time | log");
 	}
 
 	@Test
-	public void testValidate() throws InterruptedException {
+	public void testValidate() {
+
 		String streamName = generateUniqueName();
-		stream().create(streamName, "time | log");
+		Info info = new Info();
+		Status status = new Status();
+		status.setStatusCode(StatusCode.UNKNOWN);
+		status.setPlatformStatus(null);
+		info.setStatus(status);
+
+		when(skipperClient.status(ArgumentMatchers.anyString())).thenReturn(info);
+		AppDeployer appDeployer = applicationContext.getBean(AppDeployer.class);
+		Deployer deployer = new Deployer("testDeployer", "testType", appDeployer);
+		when(skipperClient.listDeployers()).thenReturn(new Resources<>(Arrays.asList(deployer), new Link[0]));
+
+		//stream().create(streamName, "time | log");
+		stream().createDontDeploy(streamName, "time | log");
 
 		CommandResult cr = stream().validate(streamName);
 		assertTrue("task validate status command must be successful", cr.isSuccess());

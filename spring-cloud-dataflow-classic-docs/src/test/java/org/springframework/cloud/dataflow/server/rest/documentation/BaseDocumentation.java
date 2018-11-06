@@ -36,12 +36,14 @@ import org.springframework.cloud.dataflow.server.local.LocalDataflowResource;
 import org.springframework.cloud.scheduler.spi.core.ScheduleInfo;
 import org.springframework.cloud.scheduler.spi.core.ScheduleRequest;
 import org.springframework.cloud.scheduler.spi.core.Scheduler;
+import org.springframework.cloud.skipper.server.local.security.LocalSkipperResource;
 import org.springframework.restdocs.JUnitRestDocumentation;
 import org.springframework.restdocs.mockmvc.RestDocumentationResultHandler;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.ResultHandler;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+import org.springframework.util.SocketUtils;
 import org.springframework.web.context.WebApplicationContext;
 
 import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.document;
@@ -59,10 +61,21 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  */
 public abstract class BaseDocumentation {
 
+	private static String skipperServerPort;
+	private static LocalSkipperResource skipperServer;
+
+	@ClassRule
+	public static LocalSkipperResource setupSkipperServer() {
+		skipperServerPort = String.valueOf(SocketUtils.findAvailableTcpPort());
+		skipperServer = new LocalSkipperResource(
+				new String[] {"classpath:rest-docs-config-skipper.yml"}, null,
+				new String[] {"--server.port="+ skipperServerPort});
+		return skipperServer;
+	}
+
 	@ClassRule
 	public final static LocalDataflowResource springDataflowServer = new LocalDataflowResource(
-			"classpath:rest-docs-config.yml", true, true, true, true);
-
+				"classpath:rest-docs-config.yml", true, true, true, true, skipperServerPort);
 	@Before
 	public void setupMocks() {
 		this.prepareDocumentationTests(springDataflowServer.getWebApplicationContext());

@@ -109,19 +109,14 @@ public class RootController {
 							.withRel("runtime/apps/instances")));
 			root.add(ControllerLinkBuilder.linkTo(MetricsController.class).withRel("metrics/streams"));
 
-			if (featuresProperties.isSkipperEnabled()) {
-				root.add(ControllerLinkBuilder.linkTo(SkipperStreamDeploymentController.class).withRel("streams/deployments"));
-				root.add(ControllerLinkBuilder.linkTo(ControllerLinkBuilder.methodOn(SkipperStreamDeploymentController.class).deploy(null, null)).withRel("streams/deployments/{name}"));
-				root.add(ControllerLinkBuilder.linkTo(ControllerLinkBuilder.methodOn(SkipperStreamDeploymentController.class).history(null)).withRel("streams/deployments/history/{name}"));
-				root.add(ControllerLinkBuilder.linkTo(ControllerLinkBuilder.methodOn(SkipperStreamDeploymentController.class).manifest(null, null)).withRel("streams/deployments/manifest/{name}/{version}"));
-				root.add(ControllerLinkBuilder.linkTo(ControllerLinkBuilder.methodOn(SkipperStreamDeploymentController.class).platformList()).withRel("streams/deployments/platform/list"));
-				root.add(ControllerLinkBuilder.linkTo(ControllerLinkBuilder.methodOn(SkipperStreamDeploymentController.class).rollback(null, null)).withRel("streams/deployments/rollback/{name}/{version}"));
-				root.add(ControllerLinkBuilder.linkTo(ControllerLinkBuilder.methodOn(SkipperStreamDeploymentController.class).update(null, null)).withRel("streams/deployments/update/{name}"));
-			}
-			else {
-				root.add(ControllerLinkBuilder.linkTo(StreamDeploymentController.class).withRel("streams/deployments"));
+			root.add(ControllerLinkBuilder.linkTo(SkipperStreamDeploymentController.class).withRel("streams/deployments"));
+			root.add(ControllerLinkBuilder.linkTo(ControllerLinkBuilder.methodOn(SkipperStreamDeploymentController.class).deploy(null, null)).withRel("streams/deployments/{name}"));
+			root.add(ControllerLinkBuilder.linkTo(ControllerLinkBuilder.methodOn(SkipperStreamDeploymentController.class).history(null)).withRel("streams/deployments/history/{name}"));
+			root.add(ControllerLinkBuilder.linkTo(ControllerLinkBuilder.methodOn(SkipperStreamDeploymentController.class).manifest(null, null)).withRel("streams/deployments/manifest/{name}/{version}"));
+			root.add(ControllerLinkBuilder.linkTo(ControllerLinkBuilder.methodOn(SkipperStreamDeploymentController.class).platformList()).withRel("streams/deployments/platform/list"));
+			root.add(ControllerLinkBuilder.linkTo(ControllerLinkBuilder.methodOn(SkipperStreamDeploymentController.class).rollback(null, null)).withRel("streams/deployments/rollback/{name}/{version}"));
+			root.add(ControllerLinkBuilder.linkTo(ControllerLinkBuilder.methodOn(SkipperStreamDeploymentController.class).update(null, null)).withRel("streams/deployments/update/{name}"));
 
-			}
 			root.add(
 					unescapeTemplateVariables(entityLinks.linkToSingleResource(StreamDeploymentResource.class, "{name}")
 							.withRel("streams/deployments/deployment")));
@@ -135,13 +130,13 @@ public class RootController {
 					+ "{?name}";
 			root.add(new Link(taskTemplated).withRel("tasks/executions/name"));
 			root.add(ControllerLinkBuilder.linkTo(ControllerLinkBuilder.methodOn(TaskExecutionController.class)
-				.getCurrentTaskExecutionsInfo()).withRel("tasks/executions/current"));
+					.getCurrentTaskExecutionsInfo()).withRel("tasks/executions/current"));
 			root.add(unescapeTemplateVariables(entityLinks.linkToSingleResource(TaskExecutionResource.class, "{id}")
 					.withRel("tasks/executions/execution")));
 			root.add(unescapeTemplateVariables(entityLinks.linkToSingleResource(TaskAppStatusResource.class, "{name}")
 					.withRel("tasks/validation")));
 
-			if(featuresProperties.isSchedulesEnabled()) {
+			if (featuresProperties.isSchedulesEnabled()) {
 				root.add(entityLinks.linkToCollectionResource(ScheduleInfoResource.class).withRel("tasks/schedules"));
 				String scheduleTemplated = entityLinks.linkToCollectionResource(ScheduleInfoResource.class).getHref()
 						+ "/instances/{taskDefinitionName}";

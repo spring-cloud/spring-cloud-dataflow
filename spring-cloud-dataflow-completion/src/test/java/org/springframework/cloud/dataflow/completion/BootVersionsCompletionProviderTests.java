@@ -28,11 +28,11 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.cloud.dataflow.configuration.metadata.ApplicationConfigurationMetadataResolver;
 import org.springframework.cloud.dataflow.configuration.metadata.BootApplicationConfigurationMetadataResolver;
 import org.springframework.cloud.dataflow.core.ApplicationType;
-import org.springframework.cloud.dataflow.registry.AppRegistry;
+import org.springframework.cloud.dataflow.registry.AbstractAppRegistryCommon;
+import org.springframework.cloud.dataflow.registry.AppRegistryCommon;
 import org.springframework.cloud.dataflow.registry.domain.AppRegistration;
 import org.springframework.cloud.dataflow.registry.support.AppResourceCommon;
 import org.springframework.cloud.deployer.resource.maven.MavenProperties;
-import org.springframework.cloud.deployer.resource.registry.InMemoryUriRegistry;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.io.FileSystemResourceLoader;
@@ -103,13 +103,23 @@ public class BootVersionsCompletionProviderTests {
 						+ "/boot_versions");
 
 		@Bean
-		public AppRegistry appRegistry() {
+		public AppRegistryCommon appRegistry() {
 			final ResourceLoader resourceLoader = new FileSystemResourceLoader();
-			return new AppRegistry(new InMemoryUriRegistry(), new AppResourceCommon(new MavenProperties(), resourceLoader)) {
+			return new AbstractAppRegistryCommon(new AppResourceCommon(new MavenProperties(), resourceLoader)) {
 
-				/*
-				 * Pretend there is a boot13 and boot14 source.
-				 */
+				@Override
+				public boolean appExist(String name, ApplicationType type) {
+					return false;
+				}
+
+				@Override
+				public List<AppRegistration> findAll() {
+					List<AppRegistration> result = new ArrayList<>();
+					result.add(find("boot13", ApplicationType.source));
+					result.add(find("boot14", ApplicationType.source));
+					return result;
+				}
+
 				@Override
 				public AppRegistration find(String name, ApplicationType type) {
 					String filename = name + "-1.0.0.BUILD-SNAPSHOT.jar";
@@ -123,11 +133,13 @@ public class BootVersionsCompletionProviderTests {
 				}
 
 				@Override
-				public List<AppRegistration> findAll() {
-					List<AppRegistration> result = new ArrayList<>();
-					result.add(find("boot13", ApplicationType.source));
-					result.add(find("boot14", ApplicationType.source));
-					return result;
+				public AppRegistration save(AppRegistration app) {
+					return null;
+				}
+
+				@Override
+				protected boolean isOverwrite(AppRegistration app, boolean overwrite) {
+					return false;
 				}
 			};
 		}

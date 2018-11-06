@@ -16,7 +16,7 @@
 
 package org.springframework.cloud.dataflow.shell;
 
-import java.io.IOException;
+import java.util.ArrayList;
 
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
@@ -38,16 +38,25 @@ import org.springframework.cloud.dataflow.shell.command.JobCommandTemplate;
 import org.springframework.cloud.dataflow.shell.command.MetricsCommandTemplate;
 import org.springframework.cloud.dataflow.shell.command.StreamCommandTemplate;
 import org.springframework.cloud.dataflow.shell.command.TaskCommandTemplate;
+import org.springframework.cloud.skipper.client.SkipperClient;
+import org.springframework.cloud.skipper.domain.AboutResource;
+import org.springframework.cloud.skipper.domain.Dependency;
+import org.springframework.cloud.skipper.domain.VersionInfo;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Primary;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
+import org.springframework.hateoas.Resources;
 import org.springframework.shell.core.CommandResult;
 import org.springframework.shell.core.JLineShellComponent;
 import org.springframework.util.AlternativeJdkIdGenerator;
 import org.springframework.util.Assert;
 import org.springframework.util.IdGenerator;
 import org.springframework.util.SocketUtils;
+
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 /**
  * Base class for shell integration tests. This class sets up and tears down the
@@ -87,6 +96,11 @@ public abstract class AbstractShellIntegrationTest {
 	protected static ApplicationContext applicationContext;
 
 	/**
+	 * Skipper client mock
+	 */
+	protected static SkipperClient skipperClient;
+
+	/**
 	 * Indicates whether the test infrastructure should be shut down after all tests are
 	 * executed.
 	 *
@@ -111,7 +125,7 @@ public abstract class AbstractShellIntegrationTest {
 	public TestName name = new TestName();
 
 	@BeforeClass
-	public static void startUp() throws InterruptedException, IOException {
+	public static void startUp() {
 		if (applicationContext == null) {
 			if (System.getProperty(SHUTDOWN_AFTER_RUN) != null) {
 				shutdownAfterRun = Boolean.getBoolean(SHUTDOWN_AFTER_RUN);
@@ -131,6 +145,9 @@ public abstract class AbstractShellIntegrationTest {
 					"--spring.datasource.url=" + dataSourceUrl);
 
 			JLineShellComponent shell = applicationContext.getBean(JLineShellComponent.class);
+
+			skipperClient = applicationContext.getBean(SkipperClient.class);
+
 			if (!shell.isRunning()) {
 				shell.start();
 			}
@@ -231,10 +248,22 @@ public abstract class AbstractShellIntegrationTest {
 	@Configuration
 	public static class TestConfig {
 
-		//		@Bean
-		//		public MetricRepository metricRepository() {
-		//			return new InMemoryMetricRepository();
-		//		}
+		// CLASSIC MODE REMOVAL
+		// - Override skipperClient with mock
+		// - Add mock About response
+		@Bean
+		@Primary
+		public SkipperClient skipperClientMock() {
+			SkipperClient skipperClient = mock(SkipperClient.class);
+			AboutResource about = new AboutResource();
+			about.setVersionInfo(new VersionInfo());
+			about.getVersionInfo().setServer(new Dependency());
+			about.getVersionInfo().getServer().setName("Test Server");
+			about.getVersionInfo().getServer().setVersion("Test Version");
+			when(skipperClient.info()).thenReturn(about);
+			when(skipperClient.listDeployers()).thenReturn(new Resources<>(new ArrayList<>(), new ArrayList<>()));
+			return skipperClient;
+		}
 
 		@Bean
 		public FieldValueCounterRepository fieldValueCounterReader() {

@@ -149,8 +149,7 @@ public class DataFlowServerConfigurationTests {
 
 	@Test
 	public void testSkipperConfig() throws Exception {
-		EnvironmentTestUtils.addEnvironment(context, "spring.cloud.skipper.client.serverUri:http://fakehost:1234/api",
-				"spring.cloud.dataflow.features.skipper-enabled:true");
+		EnvironmentTestUtils.addEnvironment(context, "spring.cloud.skipper.client.serverUri:http://fakehost:1234/api");
 		this.context.refresh();
 		SkipperClient skipperClient = context.getBean(SkipperClient.class);
 		Object baseUri = TestUtils.readField("baseUri", skipperClient);
@@ -162,14 +161,6 @@ public class DataFlowServerConfigurationTests {
 		}
 		catch (NoSuchBeanDefinitionException e) {
 		}
-	}
-
-	@Test
-	public void testAppDeployerConfig() throws Exception {
-		EnvironmentTestUtils.addEnvironment(this.context, "spring.cloud.dataflow.features.skipper-enabled:false");
-		this.context.refresh();
-		StreamDeploymentRepository streamDeploymentRepository = this.context.getBean(StreamDeploymentRepository.class);
-		assertNotNull(streamDeploymentRepository);
 	}
 
 	@EnableDataFlowServer

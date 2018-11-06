@@ -43,8 +43,6 @@ public class AboutDocumentation extends BaseDocumentation {
 								.description("Describes if analytics feature is enabled."),
 						fieldWithPath("featureInfo.schedulerEnabled").type(JsonFieldType.BOOLEAN)
 								.description("Describes if scheduler feature is enabled."),
-						fieldWithPath("featureInfo.skipperEnabled").type(JsonFieldType.BOOLEAN)
-								.description("Describes if skipper feature is enabled."),
 						fieldWithPath("featureInfo.streamsEnabled").type(JsonFieldType.BOOLEAN)
 								.description("Describes if streams feature is enabled."),
 						fieldWithPath("featureInfo.tasksEnabled").type(JsonFieldType.BOOLEAN)

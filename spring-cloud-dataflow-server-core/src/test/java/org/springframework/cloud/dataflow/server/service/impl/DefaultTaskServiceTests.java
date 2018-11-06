@@ -36,8 +36,8 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.cloud.dataflow.configuration.metadata.ApplicationConfigurationMetadataResolver;
 import org.springframework.cloud.dataflow.core.ApplicationType;
 import org.springframework.cloud.dataflow.core.TaskDefinition;
-import org.springframework.cloud.dataflow.registry.AppRegistry;
 import org.springframework.cloud.dataflow.registry.domain.AppRegistration;
+import org.springframework.cloud.dataflow.registry.service.AppRegistryService;
 import org.springframework.cloud.dataflow.server.DockerValidatorProperties;
 import org.springframework.cloud.dataflow.server.audit.service.AuditRecordService;
 import org.springframework.cloud.dataflow.server.config.apps.CommonApplicationProperties;
@@ -108,7 +108,7 @@ public abstract class DefaultTaskServiceTests {
 		private TaskExplorer taskExplorer;
 
 		@Autowired
-		private AppRegistry appRegistry;
+		private AppRegistryService appRegistry;
 
 		@Autowired
 		private TaskLauncher taskLauncher;
@@ -246,7 +246,7 @@ public abstract class DefaultTaskServiceTests {
 		private TaskDefinitionRepository taskDefinitionRepository;
 
 		@Autowired
-		private AppRegistry appRegistry;
+		private AppRegistryService appRegistry;
 
 		@Autowired
 		private TaskLauncher taskLauncher;
@@ -479,14 +479,14 @@ public abstract class DefaultTaskServiceTests {
 		}
 	}
 
-	private static void initializeSuccessfulRegistry(AppRegistry appRegistry) {
+	private static void initializeSuccessfulRegistry(AppRegistryService appRegistry) {
 		when(appRegistry.find(anyString(), any(ApplicationType.class))).thenReturn(
 			new AppRegistration("some-name", ApplicationType.task, URI.create("http://helloworld")));
 		when(appRegistry.getAppResource(any())).thenReturn(new FileSystemResource("src/test/resources/apps/foo-task"));
 		when(appRegistry.getAppMetadataResource(any())).thenReturn(null);
 	}
 
-	private static void initializeFailRegistry(AppRegistry appRegistry) throws IllegalArgumentException {
+	private static void initializeFailRegistry(AppRegistryService appRegistry) throws IllegalArgumentException {
 		when(appRegistry.find("BBB", ApplicationType.task)).thenThrow(new IllegalArgumentException(
 			String.format("Application name '%s' with type '%s' does not exist in the app registry.", "fake",
 				ApplicationType.task)));

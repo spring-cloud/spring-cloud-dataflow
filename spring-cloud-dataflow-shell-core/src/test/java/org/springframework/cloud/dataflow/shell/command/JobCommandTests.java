@@ -94,7 +94,7 @@ public class JobCommandTests extends AbstractShellIntegrationTest {
 	}
 
 	@AfterClass
-	public static void tearDown() throws Exception {
+	public static void tearDown() {
 		JdbcTemplate template = new JdbcTemplate(applicationContext.getBean(DataSource.class));
 		template.afterPropertiesSet();
 		final String TASK_EXECUTION_FORMAT = "DELETE FROM task_execution WHERE task_execution_id = %d";
@@ -125,7 +125,7 @@ public class JobCommandTests extends AbstractShellIntegrationTest {
 	}
 
 	@Test
-	public void testJobExecutionList() throws InterruptedException {
+	public void testJobExecutionList() {
 		logger.info("Retrieve Job Execution List Test");
 		Table table = getTable(job().jobExecutionList());
 		verifyColumnNumber(table, 6);
@@ -138,7 +138,7 @@ public class JobCommandTests extends AbstractShellIntegrationTest {
 	}
 
 	@Test
-	public void testJobExecutionListByName() throws InterruptedException {
+	public void testJobExecutionListByName() {
 		logger.info("Retrieve Job Execution List By Name Test");
 		Table table = getTable(job().jobExecutionListByName(JOB_NAME_FOOBAR));
 		verifyColumnNumber(table, 6);
@@ -151,7 +151,7 @@ public class JobCommandTests extends AbstractShellIntegrationTest {
 	}
 
 	@Test
-	public void testViewExecution() throws InterruptedException {
+	public void testViewExecution() {
 		logger.info("Retrieve Job Execution Detail by Id");
 
 		Table table = getTable(job().executionDisplay(getFirstJobExecutionIdFromTable()));
@@ -188,7 +188,7 @@ public class JobCommandTests extends AbstractShellIntegrationTest {
 	}
 
 	@Test
-	public void testViewInstance() throws InterruptedException {
+	public void testViewInstance() {
 		logger.info("Retrieve Job Instance Detail by Id");
 
 		Table table = getTable(job().instanceDisplay(jobInstances.get(0).getInstanceId()));
@@ -207,7 +207,7 @@ public class JobCommandTests extends AbstractShellIntegrationTest {
 	}
 
 	@Test
-	public void testJobStepExecutionList() throws InterruptedException {
+	public void testJobStepExecutionList() {
 		logger.info("Retrieve Job Step Execution List Test");
 
 		Table table = getTable(job().jobStepExecutionList(getFirstJobExecutionIdFromTable()));
@@ -221,7 +221,7 @@ public class JobCommandTests extends AbstractShellIntegrationTest {
 	}
 
 	@Test
-	public void testJobStepExecutionProgress() throws InterruptedException {
+	public void testJobStepExecutionProgress() {
 		logger.info("Retrieve Job Step Execution Progress Test");
 
 		long jobExecutionId = getFirstJobExecutionIdFromTable();
@@ -237,7 +237,7 @@ public class JobCommandTests extends AbstractShellIntegrationTest {
 	}
 
 	@Test
-	public void testStepExecutionView() throws InterruptedException {
+	public void testStepExecutionView() {
 		logger.info("Retrieve Job Execution Detail by Id");
 
 		long jobExecutionId = getFirstJobExecutionIdFromTable();

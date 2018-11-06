@@ -79,7 +79,6 @@ public class AboutControllerTests {
 	public void testListApplications() throws Exception {
 		ResultActions result = mockMvc.perform(get("/about").accept(MediaType.APPLICATION_JSON)).andDo(print()).andExpect(status().isOk());
 				result.andDo(print()).andExpect(jsonPath("$.featureInfo.analyticsEnabled", is(true)))
-				.andExpect(jsonPath("$.featureInfo.skipperEnabled", is(false)))
 				.andExpect(jsonPath("$.versionInfo.implementation.name", is("${info.app.name}")))
 				.andExpect(jsonPath("$.versionInfo.implementation.version", is("1.2.3.IMPLEMENTATION.TEST")))
 				.andExpect(jsonPath("$.versionInfo.core.name", is("Spring Cloud Data Flow Core")))
@@ -98,7 +97,6 @@ public class AboutControllerTests {
 				.andExpect(jsonPath("$.securityInfo.username", isEmptyOrNullString()))
 				.andExpect(jsonPath("$.featureInfo.streamsEnabled", is(true)))
 				.andExpect(jsonPath("$.featureInfo.tasksEnabled", is(true)))
-				.andExpect(jsonPath("$.featureInfo.skipperEnabled", is(false)))
 				.andExpect(jsonPath("$.featureInfo.schedulerEnabled", is(false)))
 				.andExpect(jsonPath("$.runtimeEnvironment.appDeployer.deployerName", not(isEmptyOrNullString())));
 	}
@@ -323,7 +321,6 @@ public class AboutControllerTests {
 	@SpringBootTest(classes = TestDependencies.class)
 	@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
 	@TestPropertySource(properties = {
-			"spring.cloud.dataflow.features.skipper-enabled=true",
 			"spring.cloud.dataflow.version-info.dependencies.spring-cloud-dataflow-implementation.version=1.2.3.IMPLEMENTATION.TEST",
 			"spring.cloud.dataflow.version-info.dependencies.spring-cloud-dataflow-core.version=1.2.3.CORE.TEST",
 			"spring.cloud.dataflow.version-info.dependencies.spring-cloud-dataflow-dashboard.version=1.2.3.UI.TEST",
@@ -354,7 +351,6 @@ public class AboutControllerTests {
 		public void testAboutInSkipperMode() throws Exception {
 			ResultActions result = mockMvc.perform(get("/about").accept(MediaType.APPLICATION_JSON)).andDo(print()).andExpect(status().isOk());
 			result.andExpect(jsonPath("$.featureInfo.analyticsEnabled", is(true)))
-					.andExpect(jsonPath("$.featureInfo.skipperEnabled", is(true)))
 					.andExpect(jsonPath("$.versionInfo.implementation.name", is("${info.app.name}")))
 					.andExpect(jsonPath("$.versionInfo.implementation.version", is("1.2.3.IMPLEMENTATION.TEST")))
 					.andExpect(jsonPath("$.versionInfo.core.name", is("Spring Cloud Data Flow Core")))

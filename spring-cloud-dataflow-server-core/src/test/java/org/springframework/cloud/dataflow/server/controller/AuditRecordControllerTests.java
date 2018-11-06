@@ -15,10 +15,13 @@
  */
 package org.springframework.cloud.dataflow.server.controller;
 
+import java.util.ArrayList;
+
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentMatchers;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -27,8 +30,13 @@ import org.springframework.cloud.dataflow.server.audit.repository.AuditRecordRep
 import org.springframework.cloud.dataflow.server.configuration.TestDependencies;
 import org.springframework.cloud.dataflow.server.repository.StreamDefinitionRepository;
 import org.springframework.cloud.dataflow.server.service.impl.AbstractStreamService;
-import org.springframework.cloud.deployer.spi.app.AppDeployer;
-import org.springframework.cloud.deployer.spi.core.AppDeploymentRequest;
+import org.springframework.cloud.skipper.client.SkipperClient;
+import org.springframework.cloud.skipper.domain.Info;
+import org.springframework.cloud.skipper.domain.PackageMetadata;
+import org.springframework.cloud.skipper.domain.Status;
+import org.springframework.cloud.skipper.domain.StatusCode;
+import org.springframework.hateoas.Link;
+import org.springframework.hateoas.Resources;
 import org.springframework.http.MediaType;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.annotation.DirtiesContext.ClassMode;
@@ -40,7 +48,6 @@ import org.springframework.web.context.WebApplicationContext;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertEquals;
-import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -71,13 +78,19 @@ public class AuditRecordControllerTests {
 	private WebApplicationContext wac;
 
 	@Autowired
-	private AppDeployer appDeployer;
+	private SkipperClient skipperClient;
 
 	@Before
 	public void setupMocks() throws Exception {
 		this.mockMvc = MockMvcBuilders.webAppContextSetup(wac)
 				.defaultRequest(get("/").accept(MediaType.APPLICATION_JSON)).build();
-		when(appDeployer.deploy(any(AppDeploymentRequest.class))).thenReturn("testID");
+
+		Info info = new Info();
+		info.setStatus(new Status());
+		info.getStatus().setStatusCode(StatusCode.DEPLOYED);
+		when(skipperClient.status(ArgumentMatchers.anyString())).thenReturn(info);
+
+		when(skipperClient.search(ArgumentMatchers.anyString(), ArgumentMatchers.eq(false))).thenReturn(new Resources(new ArrayList<PackageMetadata>(), new Link[0]));
 
 		mockMvc.perform(post("/streams/definitions/").param("name", "myStream").param("definition", "time | log")
 				.accept(MediaType.APPLICATION_JSON)).andExpect(status().isCreated());

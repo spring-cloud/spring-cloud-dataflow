@@ -52,6 +52,7 @@ import org.springframework.web.bind.annotation.RestController;
  * @author Christian Tzolov
  * @author Gunnar Hillert
  */
+// TODO (Tzolov) Merge StreamDeploymentController with SkipperStreamDeploymentController
 @RestController
 @RequestMapping("/streams/deployments")
 @ExposesResourceFor(StreamDeploymentResource.class)
