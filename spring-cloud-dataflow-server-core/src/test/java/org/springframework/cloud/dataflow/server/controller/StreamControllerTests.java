@@ -85,6 +85,7 @@ import static org.hamcrest.Matchers.instanceOf;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.startsWith;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
@@ -735,8 +736,8 @@ public class StreamControllerTests {
 		assertEquals(1, updateRequests.size());
 
 		Package pkg = SkipperPackageUtils.loadPackageFromBytes(uploadRequestCaptor);
-		assertThat(pkg.getDependencies().get(0).getMetadata().getName(), is("time"));
-		assertThat(pkg.getDependencies().get(1).getMetadata().getName(), is("log"));
+		assertNotNull(findChildPackageByName(pkg, "log"));
+		assertNotNull(findChildPackageByName(pkg, "time"));
 	}
 
 	@Test
@@ -756,11 +757,8 @@ public class StreamControllerTests {
 
 		Package pkg = SkipperPackageUtils.loadPackageFromBytes(uploadRequestCaptor);
 
-		Package logPackage = pkg.getDependencies().get(1);
-		assertThat(logPackage.getMetadata().getName(), is("log"));
-
-		Package timePackage = pkg.getDependencies().get(0);
-		assertThat(timePackage.getMetadata().getName(), is("time"));
+		assertNotNull(findChildPackageByName(pkg, "log"));
+		assertNotNull(findChildPackageByName(pkg, "time"));
 
 		final List<AuditRecord> auditRecords = auditRecordRepository.findAll();
 
@@ -791,15 +789,14 @@ public class StreamControllerTests {
 
 		Package pkg = SkipperPackageUtils.loadPackageFromBytes(uploadRequestCaptor);
 
-		Package logPackage = pkg.getDependencies().get(1);
-		assertThat(logPackage.getMetadata().getName(), is("log"));
+		Package logPackage = findChildPackageByName(pkg, "log");
+		assertNotNull(logPackage);
+		Package timePackage = findChildPackageByName(pkg, "time");
+		assertNotNull(timePackage);
 
 		SpringCloudDeployerApplicationSpec logSpec = parseSpec(logPackage.getConfigValues().getRaw());
 		assertEquals("WARN", logSpec.getApplicationProperties().get("log.level"));
 		assertNull(logSpec.getApplicationProperties().get("level"));
-
-		Package timePackage = pkg.getDependencies().get(0);
-		assertThat(timePackage.getMetadata().getName(), is("time"));
 
 		SpringCloudDeployerApplicationSpec timeSpec = parseSpec(timePackage.getConfigValues().getRaw());
 		assertEquals("2", timeSpec.getApplicationProperties().get("trigger.fixed-delay"));
@@ -829,15 +826,14 @@ public class StreamControllerTests {
 
 		Package pkg = SkipperPackageUtils.loadPackageFromBytes(uploadRequestCaptor);
 
-		Package logPackage = pkg.getDependencies().get(1);
-		assertThat(logPackage.getMetadata().getName(), is("log"));
+		Package logPackage = findChildPackageByName(pkg, "log");
+		assertNotNull(logPackage);
+		Package timePackage = findChildPackageByName(pkg, "time");
+		assertNotNull(timePackage);
 
 		SpringCloudDeployerApplicationSpec logSpec = parseSpec(logPackage.getConfigValues().getRaw());
 		assertEquals("ERROR", logSpec.getApplicationProperties().get("log.level"));
 		assertEquals("true", logSpec.getDeploymentProperties().get(AppDeployer.INDEXED_PROPERTY_KEY));
-
-		Package timePackage = pkg.getDependencies().get(0);
-		assertThat(timePackage.getMetadata().getName(), is("time"));
 
 		SpringCloudDeployerApplicationSpec timeSpec = parseSpec(timePackage.getConfigValues().getRaw());
 		assertEquals("4", timeSpec.getApplicationProperties().get("trigger.fixed-delay"));
@@ -864,14 +860,13 @@ public class StreamControllerTests {
 
 		Package pkg = SkipperPackageUtils.loadPackageFromBytes(uploadRequestCaptor);
 
-		Package logPackage = pkg.getDependencies().get(1);
-		assertThat(logPackage.getMetadata().getName(), is("b"));
+		Package logPackage = findChildPackageByName(pkg, "b");
+		assertNotNull(logPackage);
+		Package timePackage = findChildPackageByName(pkg, "a");
+		assertNotNull(timePackage);
 
 		SpringCloudDeployerApplicationSpec logSpec = parseSpec(logPackage.getConfigValues().getRaw());
 		assertEquals("ERROR", logSpec.getApplicationProperties().get("log.level"));
-
-		Package timePackage = pkg.getDependencies().get(0);
-		assertThat(timePackage.getMetadata().getName(), is("a"));
 
 		SpringCloudDeployerApplicationSpec timeSpec = parseSpec(timePackage.getConfigValues().getRaw());
 		assertEquals("4", timeSpec.getApplicationProperties().get("trigger.fixed-delay"));
@@ -972,8 +967,10 @@ public class StreamControllerTests {
 
 		Package pkg = SkipperPackageUtils.loadPackageFromBytes(uploadRequestCaptor);
 
-		Package logPackage = pkg.getDependencies().get(1);
-		assertThat(logPackage.getMetadata().getName(), is("log"));
+		Package logPackage = findChildPackageByName(pkg, "log");
+		assertNotNull(logPackage);
+		Package timePackage = findChildPackageByName(pkg, "time");
+		assertNotNull(timePackage);
 
 		SpringCloudDeployerApplicationSpec logSpec = parseSpec(logPackage.getConfigValues().getRaw());
 		assertEquals("2", logSpec.getApplicationProperties().get(StreamPropertyKeys.INSTANCE_COUNT));
@@ -983,9 +980,6 @@ public class StreamControllerTests {
 		assertEquals("2", logSpec.getDeploymentProperties().get(AppDeployer.COUNT_PROPERTY_KEY));
 		assertEquals("myStream", logSpec.getDeploymentProperties().get(AppDeployer.GROUP_PROPERTY_KEY));
 		assertEquals("true", logSpec.getDeploymentProperties().get(AppDeployer.INDEXED_PROPERTY_KEY));
-
-		Package timePackage = pkg.getDependencies().get(0);
-		assertThat(timePackage.getMetadata().getName(), is("time"));
 
 		SpringCloudDeployerApplicationSpec timeSpec = parseSpec(timePackage.getConfigValues().getRaw());
 		assertEquals("2", timeSpec.getApplicationProperties().get("spring.cloud.stream.bindings.output.producer.partitionCount"));
@@ -1026,8 +1020,10 @@ public class StreamControllerTests {
 
 		Package pkg = SkipperPackageUtils.loadPackageFromBytes(uploadRequestCaptor);
 
-		Package logPackage = pkg.getDependencies().get(1);
-		assertThat(logPackage.getMetadata().getName(), is("log"));
+		Package logPackage = findChildPackageByName(pkg, "log");
+		assertNotNull(logPackage);
+		Package timePackage = findChildPackageByName(pkg, "time");
+		assertNotNull(timePackage);
 
 		SpringCloudDeployerApplicationSpec logSpec = parseSpec(logPackage.getConfigValues().getRaw());
 		assertEquals("2", logSpec.getApplicationProperties().get(StreamPropertyKeys.INSTANCE_COUNT));
@@ -1038,9 +1034,6 @@ public class StreamControllerTests {
 		assertEquals("myStream", logSpec.getDeploymentProperties().get(AppDeployer.GROUP_PROPERTY_KEY));
 		assertEquals("true", logSpec.getDeploymentProperties().get(AppDeployer.INDEXED_PROPERTY_KEY));
 
-		Package timePackage = pkg.getDependencies().get(0);
-		assertThat(timePackage.getMetadata().getName(), is("time"));
-
 		SpringCloudDeployerApplicationSpec timeSpec = parseSpec(timePackage.getConfigValues().getRaw());
 		assertEquals("2", timeSpec.getApplicationProperties().get(StreamPropertyKeys.INSTANCE_COUNT));
 		assertEquals("2", timeSpec.getApplicationProperties().get("spring.cloud.stream.bindings.output.producer.partitionCount"));
@@ -1048,28 +1041,6 @@ public class StreamControllerTests {
 		assertEquals("2", timeSpec.getDeploymentProperties().get(AppDeployer.COUNT_PROPERTY_KEY));
 		assertEquals("myStream", timeSpec.getDeploymentProperties().get(AppDeployer.GROUP_PROPERTY_KEY));
 		assertNull(timeSpec.getDeploymentProperties().get(AppDeployer.INDEXED_PROPERTY_KEY));
-
-		//TODO (Tzolov) Compare with the original asserts below
-		//		AppDeploymentRequest logRequest = requests.get(0);
-		//		assertThat(logRequest.getDefinition().getName(), is("log"));
-		//		Map<String, String> logAppProps = logRequest.getDefinition().getProperties();
-		//		assertEquals("2", logAppProps.get(StreamPropertyKeys.INSTANCE_COUNT));
-		//		assertEquals("true", logAppProps.get("spring.cloud.stream.bindings.input.consumer.partitioned"));
-		//		assertEquals("3", logAppProps.get("spring.cloud.stream.bindings.input.consumer.concurrency"));
-		//		Map<String, String> logDeploymentProps = logRequest.getDeploymentProperties();
-		//		assertEquals("2", logDeploymentProps.get(AppDeployer.COUNT_PROPERTY_KEY));
-		//		assertEquals("myStream", logDeploymentProps.get(AppDeployer.GROUP_PROPERTY_KEY));
-		//		assertEquals("true", logDeploymentProps.get(AppDeployer.INDEXED_PROPERTY_KEY));
-		//		AppDeploymentRequest timeRequest = requests.get(1);
-		//		assertThat(timeRequest.getDefinition().getName(), is("time"));
-		//		Map<String, String> timeAppProps = timeRequest.getDefinition().getProperties();
-		//		assertEquals("2", timeAppProps.get("spring.cloud.stream.bindings.output.producer.partitionCount"));
-		//		assertEquals("payload",
-		//				timeAppProps.get("spring.cloud.stream.bindings.output.producer" + ".partitionKeyExpression"));
-		//		Map<String, String> timeDeploymentProps = timeRequest.getDeploymentProperties();
-		//		assertEquals("2", timeDeploymentProps.get(AppDeployer.COUNT_PROPERTY_KEY));
-		//		assertEquals("myStream", timeDeploymentProps.get(AppDeployer.GROUP_PROPERTY_KEY));
-		//		assertNull(timeDeploymentProps.get(AppDeployer.INDEXED_PROPERTY_KEY));
 	}
 
 	@Test
@@ -1107,8 +1078,8 @@ public class StreamControllerTests {
 
 		Package pkg = SkipperPackageUtils.loadPackageFromBytes(uploadRequestCaptor);
 
-		Package logPackage = pkg.getDependencies().get(1);
-		assertThat(logPackage.getMetadata().getName(), is("log"));
+		Package logPackage = findChildPackageByName(pkg, "log");
+		assertNotNull(logPackage);
 
 		SpringCloudDeployerApplicationSpec logSpec = parseSpec(logPackage.getConfigValues().getRaw());
 		assertEquals("2", logSpec.getApplicationProperties().get(StreamPropertyKeys.INSTANCE_COUNT));
@@ -1120,8 +1091,8 @@ public class StreamControllerTests {
 		assertEquals("myStream", logSpec.getDeploymentProperties().get(AppDeployer.GROUP_PROPERTY_KEY));
 		assertEquals("true", logSpec.getDeploymentProperties().get(AppDeployer.INDEXED_PROPERTY_KEY));
 
-		Package timePackage = pkg.getDependencies().get(0);
-		assertThat(timePackage.getMetadata().getName(), is("time"));
+		Package timePackage = findChildPackageByName(pkg, "time");
+		assertNotNull(timePackage);
 
 		SpringCloudDeployerApplicationSpec timeSpec = parseSpec(timePackage.getConfigValues().getRaw());
 		assertEquals("2", timeSpec.getApplicationProperties().get(StreamPropertyKeys.INSTANCE_COUNT));
@@ -1190,6 +1161,12 @@ public class StreamControllerTests {
 		mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
 		MappingIterator<SpringCloudDeployerApplicationManifest> it = mapper.readerFor(SpringCloudDeployerApplicationManifest.class).readValues(yamlString);
 		return it.next().getSpec();
+	}
 
+	private Package findChildPackageByName(Package pkg, String childPackageName) {
+		return pkg.getDependencies().stream()
+				.filter(p -> p.getMetadata().getName().equalsIgnoreCase(childPackageName))
+				.findFirst()
+				.get();
 	}
 }
