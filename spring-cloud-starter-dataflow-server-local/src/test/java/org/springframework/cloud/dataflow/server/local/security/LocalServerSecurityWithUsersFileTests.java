@@ -60,7 +60,7 @@ public class LocalServerSecurityWithUsersFileTests {
 	private final static Logger logger = LoggerFactory.getLogger(LocalServerSecurityWithUsersFileTests.class);
 
 	private final static LocalDataflowResource localDataflowResource = new LocalDataflowResource(
-			"classpath:org/springframework/cloud/dataflow/server/local/security" + "/fileBasedUsers.yml");
+			"classpath:org/springframework/cloud/dataflow/server/local/security/fileBasedUsers.yml");
 
 	@ClassRule
 	public static TestRule springDataflowAndLdapServer = RuleChain.outerRule(localDataflowResource);
@@ -542,7 +542,8 @@ public class LocalServerSecurityWithUsersFileTests {
 				{ HttpMethod.GET, HttpStatus.FOUND, "/dashboard", null, null },
 
 				{ HttpMethod.GET, HttpStatus.FORBIDDEN, "/about", manageOnlyUser, null },
-				// TODO (Tzolov) handle mock skipper.info() { HttpMethod.GET, HttpStatus.OK, "/about", viewOnlyUser, null },
+
+				{ HttpMethod.GET, HttpStatus.OK, "/about", viewOnlyUser, null },
 				{ HttpMethod.GET, HttpStatus.FORBIDDEN, "/about", createOnlyUser, null },
 				{ HttpMethod.GET, HttpStatus.UNAUTHORIZED, "/about", null, null },
 

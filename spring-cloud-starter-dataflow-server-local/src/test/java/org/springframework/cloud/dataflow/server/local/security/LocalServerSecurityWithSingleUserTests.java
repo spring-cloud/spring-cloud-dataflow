@@ -369,7 +369,7 @@ public class LocalServerSecurityWithSingleUserTests {
 				{ HttpMethod.GET, HttpStatus.FOUND, "/dashboard", singleUser, null },
 				{ HttpMethod.GET, HttpStatus.FOUND, "/dashboard", null, null },
 
-				// TODO (Tzolov) Find way to mock skpperClietn.info { HttpMethod.GET, HttpStatus.OK, "/about", singleUser, null },
+				{ HttpMethod.GET, HttpStatus.OK, "/about", singleUser, null },
 				{ HttpMethod.GET, HttpStatus.UNAUTHORIZED, "/about", null, null },
 
 				{ HttpMethod.GET, HttpStatus.OK, "/management", singleUser, null },
