@@ -27,7 +27,7 @@ dataflow:>app register --name log --type sink --uri maven://org.springframework.
 Successfully registered application 'sink:log'
 ----
 
-Since we are using the local server, we need to set the port to a different value (9001) than the currently running log sink's value of 9000 to avoid a conflict.
+Since we are using the local server, we need to set the port to a different value (9002) than the currently running log sink's value of 9000 to avoid a conflict.
 While we are at it, we update log level to be `ERROR`.
 To do so, we create a YAML file, named `local-log-update.yml`, with the following contents:
 

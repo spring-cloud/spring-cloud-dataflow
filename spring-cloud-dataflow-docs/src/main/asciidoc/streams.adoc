@@ -271,20 +271,20 @@ NOTE: App Starter actuator endpoints are secured by default.  You can disable se
 |Artifact Type |Stable Release |SNAPSHOT Release
 
 |RabbitMQ + Maven
-|http://bit.ly/Darwin-SR1-stream-applications-rabbit-maven
+|http://bit.ly/Darwin-SR2-stream-applications-rabbit-maven
 |http://bit.ly/Darwin-BUILD-SNAPSHOT-stream-applications-rabbit-maven
 
 |RabbitMQ + Docker
-|http://bit.ly/Darwin-SR1-stream-applications-rabbit-docker
+|http://bit.ly/Darwin-SR2-stream-applications-rabbit-docker
 |http://bit.ly/Darwin-BUILD-SNAPSHOT-stream-applications-rabbit-docker
 
 |Kafka 0.11 and above + Maven
-|http://bit.ly/Darwin-SR1-stream-applications-kafka-10-maven
-|http://bit.ly/Darwin-BUILD-SNAPSHOT-stream-applications-kafka-10-maven
+|http://bit.ly/Darwin-SR2-stream-applications-kafka-maven
+|http://bit.ly/Darwin-BUILD-SNAPSHOT-stream-applications-kafka-maven
 
 |Kafka 0.11 and above + Docker
-|http://bit.ly/Darwin-SR1-stream-applications-kafka-10-docker
-|http://bit.ly/Darwin-BUILD-SNAPSHOT-stream-applications-kafka-10-docker
+|http://bit.ly/Darwin-SR2-stream-applications-kafka-docker
+|http://bit.ly/Darwin-BUILD-SNAPSHOT-stream-applications-kafka-docker
 |======================
 
 The following table lists the available Task Application Starters:
@@ -310,14 +310,14 @@ As an example, if you would like to register all out-of-the-box stream applicati
 
 [source,bash,subs=attributes]
 ----
-$ dataflow:>app import --uri http://bit.ly/Darwin-SR1-stream-applications-kafka-maven
+$ dataflow:>app import --uri http://bit.ly/Darwin-SR2-stream-applications-kafka-maven
 ----
 
 Alternatively you can register all the stream applications with the Rabbit binder, as follows:
 
 [source,bash,subs=attributes]
 ----
-$ dataflow:>app import --uri http://bit.ly/Darwin-SR1-stream-applications-rabbit-maven
+$ dataflow:>app import --uri http://bit.ly/Darwin-SR2-stream-applications-rabbit-maven
 ----
 
 You can also pass the `--local` option (which is `true` by default) to indicate whether the
@@ -444,7 +444,7 @@ When registering a single app with `app register`, you can use the optional `--m
 ----
 dataflow:>app register --name log --type sink
     --uri maven://org.springframework.cloud.stream.app:log-sink-kafka-10:1.2.1.BUILD-SNAPSHOT
-    --metadata-uri=maven://org.springframework.cloud.stream.app:log-sink-kafka-10:jar:metadata:1.2.1.BUILD-SNAPSHOT
+    --metadata-uri maven://org.springframework.cloud.stream.app:log-sink-kafka-10:jar:metadata:1.2.1.BUILD-SNAPSHOT
 ----
 
 When registering several files by using the `app import` command, the file should contain a `<type>.<name>.metadata` line
@@ -1018,13 +1018,13 @@ dataflow:>app register --name mysource --type source --uri maven://com.example:m
 dataflow:>app register --name mysource --type source --uri maven://com.example:mysource:0.0.3
 
 dataflow:>app list --id source:mysource
-╔══════════════════╤═════════╤════╤════╗
-║     source       │processor│sink│task║
-╠══════════════════╪═════════╪════╪════╣
-║> mysource-0.0.1 <│         │    │    ║
-║mysource-0.0.2    │         │    │    ║
-║mysource-0.0.3    │         │    │    ║
-╚══════════════════╧═════════╧════╧════╝
+╔═══╤══════════════════╤═════════╤════╤════╗
+║app│      source      │processor│sink│task║
+╠═══╪══════════════════╪═════════╪════╪════╣
+║   │> mysource-0.0.1 <│         │    │    ║
+║   │mysource-0.0.2    │         │    │    ║
+║   │mysource-0.0.3    │         │    │    ║
+╚═══╧══════════════════╧═════════╧════╧════╝
 ----
 
 The application URI should conform to one the following schema formats:
@@ -1061,13 +1061,13 @@ The first time an application is registered it will be marked as default. The de
 ----
 dataflow:>app default --id source:mysource --version 0.0.2
 dataflow:>app list --id source:mysource
-╔══════════════════╤═════════╤════╤════╗
-║     source       │processor│sink│task║
-╠══════════════════╪═════════╪════╪════╣
-║mysource-0.0.1    │         │    │    ║
-║> mysource-0.0.2 <│         │    │    ║
-║mysource-0.0.3    │         │    │    ║
-╚══════════════════╧═════════╧════╧════╝
+╔═══╤══════════════════╤═════════╤════╤════╗
+║app│      source      │processor│sink│task║
+╠═══╪══════════════════╪═════════╪════╪════╣
+║   │mysource-0.0.1    │         │    │    ║
+║   │> mysource-0.0.2 <│         │    │    ║
+║   │mysource-0.0.3    │         │    │    ║
+╚═══╧══════════════════╧═════════╧════╧════╝
 ----
 
 The `app list --id <type:name>` command lists all versions for a given stream application.
@@ -1077,12 +1077,12 @@ The `app unregister` command has an optional `--version` parameter to specify th
 ----
 dataflow:>app unregister --name mysource --type source --version 0.0.1
 dataflow:>app list --id source:mysource
-╔══════════════════╤═════════╤════╤════╗
-║     source       │processor│sink│task║
-╠══════════════════╪═════════╪════╪════╣
-║> mysource-0.0.2 <│         │    │    ║
-║mysource-0.0.3    │         │    │    ║
-╚══════════════════╧═════════╧════╧════╝
+╔═══╤══════════════════╤═════════╤════╤════╗
+║app│      source      │processor│sink│task║
+╠═══╪══════════════════╪═════════╪════╪════╣
+║   │> mysource-0.0.2 <│         │    │    ║
+║   │mysource-0.0.3    │         │    │    ║
+╚═══╧══════════════════╧═════════╧════╧════╝
 ----
 If a `--version` is not specified, the default version is unregistered.
 
@@ -1097,12 +1097,12 @@ Use the `app default` to set the defaults.
 ----
 app default --id source:mysource --version 0.0.3
 dataflow:>app list --id source:mysource
-╔══════════════════╤═════════╤════╤════╗
-║     source       │processor│sink│task║
-╠══════════════════╪═════════╪════╪════╣
-║mysource-0.0.2    │         │    │    ║
-║> mysource-0.0.3 <│         │    │    ║
-╚══════════════════╧═════════╧════╧════╝
+╔═══╤══════════════════╤═════════╤════╤════╗
+║app│      source      │processor│sink│task║
+╠═══╪══════════════════╪═════════╪════╪════╣
+║   │mysource-0.0.2    │         │    │    ║
+║   │> mysource-0.0.3 <│         │    │    ║
+╚═══╧══════════════════╧═════════╧════╧════╝
 ----
 
 The `stream deploy` necessitates default app versions to be set.
@@ -1398,7 +1398,7 @@ It is also possible to connect two different destinations (`source` and `sink` p
 
 `dataflow:>stream create --definition ":destination1 > :destination2" --name bridge_destinations --deploy`
 
-In the precding stream, both the destinations (`destination1` and `destination2`) are located in the broker. The messages flow from the source destination to the sink destination over a `bridge` app that connects them.
+In the preceding stream, both the destinations (`destination1` and `destination2`) are located in the broker. The messages flow from the source destination to the sink destination over a `bridge` app that connects them.
 
 
 [[spring-cloud-dataflow-stream-dsl-fanin-fanout]]
@@ -1453,7 +1453,7 @@ Consider the following example, using the `definition` style.
 URI dataFlowUri = URI.create("http://localhost:9393");
 DataFlowOperations dataFlowOperations = new DataFlowTemplate(dataFlowUri);
 dataFlowOperations.appRegistryOperations().importFromResource(
-                     "http://bit.ly/Darwin-GA-stream-applications-rabbit-maven", true);
+                     "http://bit.ly/Darwin-SR2-stream-applications-rabbit-maven", true);
 StreamDefinition streamDefinition = Stream.builder(dataFlowOperations)
                                       .name("ticktock")
                                       .definition("time | log")
@@ -1499,7 +1499,6 @@ The following example demonstrates the definition approach:
 ----
 public void definitionStyle() throws Exception{
 
-  DataFlowOperations dataFlowOperations = createDataFlowOperations();
   Map<String, String> deploymentProperties = createDeploymentProperties();
 
   Stream woodchuck = Stream.builder(dataFlowOperations)
@@ -1516,27 +1515,19 @@ The following example demonstrates the fluent approach:
 
 [source,java,options="nowrap"]
 ----
-public void fluentStyle() throws Exception {
+private void fluentStyle(DataFlowOperations dataFlowOperations) throws InterruptedException {
 
-  DataFlowOperations dataFlowOperations = createDataFlowOperations();
+  logger.info("Deploying stream.");
 
-  StreamApplication source = new StreamApplication("http").addProperty("server.port", 9900);
+  Stream woodchuck = builder
+    .name("woodchuck")
+    .source(source)
+    .processor(processor)
+    .sink(sink)
+    .create()
+    .deploy();
 
-  StreamApplication processor = new StreamApplication("splitter")
-                                 .addProperty("producer.partitionKeyExpression", "payload");
-
-  StreamApplication sink = new StreamApplication("log")
-                            .addDeploymentProperty("count", 2);
-
-  Stream woodchuck = Stream.builder(dataFlowOperations).name("woodchuck")
-          .source(source)
-          .processor(processor)
-          .sink(sink)
-          .create()
-          .deploy(deploymentProperties);
-
-  waitAndDestroy(woodchuck)
-
+  waitAndDestroy(woodchuck);
 }
 ----
 The `waitAndDestroy` method uses the `getStatus` method to poll for the stream's status, as shown in the following example:
@@ -1563,11 +1554,11 @@ When using the definition style, the deployment properties are specified as a `j
 [source,java,options="nowrap"]
 ----
 private Map<String, String> createDeploymentProperties() {
-  Map<String, String> deploymentProperties = new HashMap<>();
-  deploymentProperties.put("app.splitter.producer.partitionKeyExpression", "payload");
-  deploymentProperties.put("deployer.log.memory","512");
-  deploymentProperties.put("deployer.log.count", "2");
-  return deploymentProperties;
+  DeploymentPropertiesBuilder propertiesBuilder = new DeploymentPropertiesBuilder();
+  propertiesBuilder.memory("log", 512);
+  propertiesBuilder.count("log",2);
+  propertiesBuilder.put("app.splitter.producer.partitionKeyExpression", "payload");
+  return propertiesBuilder.build();
 }
 ----
 
@@ -1589,7 +1580,7 @@ There are many ways to structure Spring applications, but one way is to have an 
 [source,java,options="nowrap"]
 ----
 @Configuration
-public StreamConfiguration {
+public class StreamConfiguration {
 
   @Bean
   public StreamBuilder builder() {
@@ -1613,7 +1604,7 @@ Then in another class you can `@Autowire` these classes and deploy a stream.
 [source,java,options="nowrap"]
 ----
 @Component
-public MyStreamApps {
+public class MyStreamApps {
 
   @Autowired
   private StreamBuilder streamBuilder;
@@ -1627,7 +1618,7 @@ public MyStreamApps {
 
   public void deploySimpleStream() {
     Stream simpleStream = streamBuilder.name("simpleStream")
-                            .source(httpSource);
+                            .source(httpSource)
                             .sink(logSink)
                             .create()
                             .deploy();
@@ -1654,7 +1645,7 @@ private Map<String, String> createDeploymentProperties() {
 
 This utility class is meant to help with the creation of a Map and adds a few methods to assist with defining pre-defined properties.
 
-== Deploying using Skipper
+=== Deploying using Skipper
 
 If you desire to deploy your streams using Skipper, you need to pass certain properties to the server specific to a Skipper based deployment, for example selecting the target platfrom.
 The `SkipperDeploymentPropertiesBuilder` provides you all the properties in `DeploymentPropertiesBuilder` and adds those needed for Skipper.
@@ -1725,11 +1716,15 @@ As an example of a simple processing step, we can transform the payload of the H
 `http | transform --expression=payload.toUpperCase() | log`
 
 To create this stream enter the following command in the shell
-`dataflow:> stream create --definition "http | transform --expression=payload.toUpperCase() | log" --name mystream --deploy`
+```
+dataflow:> stream create --definition "http --server.port=9000 | transform --expression=payload.toUpperCase() | log" --name mystream --deploy
+```
 
 The following example uses a shell command to post some data:
 
-`dataflow:> http post --target http://localhost:1234 --data "hello"`
+```
+dataflow:> http post --target http://localhost:9000 --data "hello"
+```
 
 The preceding example results in an upper-case 'HELLO' in the log, as follows:
 

@@ -113,13 +113,15 @@ If you would like to register multiple apps at one time, you can store them in a
 For example, the followinng listing would be a valid properties file:
 
 [source]
-task.foo=file:///tmp/foo.jar
-task.bar=file:///tmp/bar.jar
+task.foo=file:///tmp/foo-1.2.1.BUILD-SNAPSHOT.jar
+task.bar=file:///tmp/bar-1.2.1.BUILD-SNAPSHOT.jar
 
 
 Then you can use the `app import` command and provide the location of the properties file by using the  `--uri` option, as follows:
 
-`app import --uri file:///tmp/task-apps.properties`
+```
+app import --uri file:///tmp/task-apps.properties
+```
 
 For convenience, we have the static files with application-URIs (for both maven and docker) available for all the out-of-the-box Task app-starters.
 You can point to this file and import all the application-URIs in bulk.
@@ -137,7 +139,9 @@ The following table lists the available static property files:
 
 For example, if you would like to register all out-of-the-box task applications in bulk, you can do so with the following command:
 
-`dataflow:>app import --uri http://bit.ly/Clark-GA-task-applications-maven`
+```
+dataflow:>app import --uri http://bit.ly/Clark-GA-task-applications-maven
+```
 
 You can also pass the `--local` option (which is `TRUE` by default) to indicate whether the properties file location should be resolved within the shell process itself.
 If the location should be resolved from the Data Flow Server process, specify `--local false`.
@@ -311,15 +315,15 @@ If the task is enabled to generate task or batch events (with the additional dep
 By default, the destination names for those published events on the broker (Rabbit, Kafka, and others) are the event names themselves (for instance: `task-events`, `job-execution-events`, and so on).
 
 [source]
-dataflow:>task create myTask --definition “myBatchJob"
-dataflow:>task launch myTask
+dataflow:>task create myTask --definition "myBatchJob"
 dataflow:>stream create task-event-subscriber1 --definition ":task-events > log" --deploy
+dataflow:>task launch myTask
 
 You can control the destination name for those events by specifying explicit names when launching the task, as follows:
 
 [source]
-dataflow:>task launch myTask --properties "spring.cloud.stream.bindings.task-events.destination=myTaskEvents"
 dataflow:>stream create task-event-subscriber2 --definition ":myTaskEvents > log" --deploy
+dataflow:>task launch myTask --properties "app.myBatchJob.spring.cloud.stream.bindings.task-events.destination=myTaskEvents"
 
 The following table lists the default task and batch event and destination names on the broker:
 
@@ -666,7 +670,9 @@ A task transition is represented by the following symbol `-&gt;`.
 
 A basic transition would look like the following:
 
-`task create my-transition-composed-task --definition "foo 'FAILED' -> bar 'COMPLETED' -> baz"`
+```
+task create my-transition-composed-task --definition "foo 'FAILED' -> bar 'COMPLETED' -> baz"
+```
 
 In the preceding example, `foo` would launch, and, if it had an exit status of `FAILED`, the `bar` task would launch.
 If the exit status of `foo` was `COMPLETED`, `baz` would launch.
@@ -698,7 +704,9 @@ To create a transitional connector:
 
 Wildcards are supported for transitions by the DSL, as shown in the following:
 
-`task create my-transition-composed-task --definition "foo 'FAILED' -> bar '*' -> baz"`
+```
+task create my-transition-composed-task --definition "foo 'FAILED' -> bar '*' -> baz"
+```
 
 In the preceding example, `foo` would launch, and, if it had an exit status of `FAILED`, the `bar` task would launch.
 For any exit status of `foo` other than `FAILED`, `baz` would launch.
@@ -715,7 +723,9 @@ image::{dataflow-asciidoc}/images/dataflow-ctr-transition-basic-wildcard.png[Com
 A transition can be followed by a conditional execution so long as the wildcard
 is not used, as shown in the following example:
 
-`task create my-transition-conditional-execution-task --definition "foo 'FAILED' -> bar 'UNKNOWN' -> baz && qux && quux"`
+```
+task create my-transition-conditional-execution-task --definition "foo 'FAILED' -> bar 'UNKNOWN' -> baz && qux && quux"
+```
 
 In the preceding example, `foo` would launch, and, if it had an exit status of `FAILED`, the `bar` task would launch.
 If `foo` had an exit status of `UNKNOWN`, `baz` would launch.
@@ -819,7 +829,7 @@ The `triggertask` can be added to the available sources by running the app regis
 For example, to launch the timestamp task once every 60 seconds, the stream implementation would be as follows:
 
 [source]
-stream create foo --definition "triggertask --triggertask.uri=maven://org.springframework.cloud.task.app:timestamp-task:jar:1.2.0.RELEASE --trigger.fixed-delay=60 --triggertask.environment-properties=spring.datasource.url=jdbc:h2:tcp://localhost:19092/mem:dataflow,spring.datasource.username=sa | task-launcher-local --maven.remote-repositories.repo1.url=http://repo.spring.io/libs-release" --deploy
+stream create foo --definition "triggertask --triggertask.uri=maven://org.springframework.cloud.task.app:timestamp-task:jar:1.2.0.RELEASE --trigger.fixed-delay=60 --triggertask.environment-properties='spring.datasource.url=jdbc:h2:tcp://localhost:19092/mem:dataflow,spring.datasource.username=sa' | task-launcher-local --maven.remote-repositories.repo1.url=http://repo.spring.io/libs-release" --deploy
 
 If you run `runtime apps`, you can find the log file for the task launcher sink.
 By using the `tail` command on that file, you can find the log file for the launched tasks.
