@@ -86,10 +86,8 @@ import org.springframework.cloud.dataflow.server.registry.DataFlowAppRegistryPop
 import org.springframework.cloud.dataflow.server.repository.DeploymentIdRepository;
 import org.springframework.cloud.dataflow.server.repository.InMemoryDeploymentIdRepository;
 import org.springframework.cloud.dataflow.server.repository.InMemoryStreamDefinitionRepository;
-import org.springframework.cloud.dataflow.server.repository.InMemoryStreamDeploymentRepository;
 import org.springframework.cloud.dataflow.server.repository.InMemoryTaskDefinitionRepository;
 import org.springframework.cloud.dataflow.server.repository.StreamDefinitionRepository;
-import org.springframework.cloud.dataflow.server.repository.StreamDeploymentRepository;
 import org.springframework.cloud.dataflow.server.repository.TaskDefinitionRepository;
 import org.springframework.cloud.dataflow.server.service.SchedulerService;
 import org.springframework.cloud.dataflow.server.service.SchedulerServiceProperties;
@@ -341,7 +339,7 @@ public class TestDependencies extends WebMvcConfigurationSupport {
 	}
 
 	@Bean
-	@ConditionalOnBean({ StreamDefinitionRepository.class, StreamDeploymentRepository.class })
+	@ConditionalOnBean({ StreamDefinitionRepository.class })
 	public RuntimeAppInstanceController appInstanceController(StreamDeployer streamDeployer) {
 		return new RuntimeAppInstanceController(streamDeployer);
 	}
@@ -485,11 +483,6 @@ public class TestDependencies extends WebMvcConfigurationSupport {
 	@Bean
 	public TaskDefinitionRepository taskDefinitionRepository() {
 		return new InMemoryTaskDefinitionRepository();
-	}
-
-	@Bean
-	public StreamDeploymentRepository streamDeploymentRepository() {
-		return new InMemoryStreamDeploymentRepository();
 	}
 
 	@Bean

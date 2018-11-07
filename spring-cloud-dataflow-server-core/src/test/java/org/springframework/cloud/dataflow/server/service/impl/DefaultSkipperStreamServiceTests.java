@@ -44,7 +44,6 @@ import org.springframework.cloud.dataflow.server.audit.service.AuditRecordServic
 import org.springframework.cloud.dataflow.server.config.apps.CommonApplicationProperties;
 import org.springframework.cloud.dataflow.server.controller.support.InvalidStreamDefinitionException;
 import org.springframework.cloud.dataflow.server.repository.StreamDefinitionRepository;
-import org.springframework.cloud.dataflow.server.repository.StreamDeploymentRepository;
 import org.springframework.cloud.dataflow.server.service.impl.validation.DefaultStreamValidationService;
 import org.springframework.cloud.dataflow.server.stream.SkipperStreamDeployer;
 import org.springframework.cloud.dataflow.server.stream.StreamDeploymentRequest;
@@ -81,13 +80,8 @@ public class DefaultSkipperStreamServiceTests {
 	private StreamDefinition streamDefinition3 = new StreamDefinition("test3", "time | log");
 	private StreamDefinition streamDefinition4 = new StreamDefinition("test4", "time | log");
 
-	private StreamDeployment streamDeployment1 = new StreamDeployment(streamDefinition1.getName());
-	private StreamDeployment streamDeployment2 = new StreamDeployment(streamDefinition2.getName());
-	private StreamDeployment streamDeployment3 = new StreamDeployment(streamDefinition3.getName());
-
 	private List<StreamDefinition> streamDefinitionList = new ArrayList<>();
 	private List<StreamDefinition> skipperStreamDefinitions = new ArrayList<>();
-	private StreamDeploymentRepository streamDeploymentRepository;
 
 	private StreamDefinitionRepository streamDefinitionRepository;
 	private SkipperStreamDeployer skipperStreamDeployer;
@@ -101,7 +95,6 @@ public class DefaultSkipperStreamServiceTests {
 
 	@Before
 	public void setupMock() {
-		this.streamDeploymentRepository = mock(StreamDeploymentRepository.class);
 		this.streamDefinitionRepository = mock(StreamDefinitionRepository.class);
 		this.skipperStreamDeployer = mock(SkipperStreamDeployer.class);
 		this.appRegistryCommon = mock(AppRegistryCommon.class);
@@ -120,9 +113,6 @@ public class DefaultSkipperStreamServiceTests {
 		this.skipperStreamDefinitions.add(streamDefinition3);
 		this.skipperStreamDefinitions.add(streamDefinition4);
 		when(streamDefinitionRepository.findOne("test2")).thenReturn(streamDefinition2);
-		when(streamDeploymentRepository.findOne(streamDeployment1.getStreamName())).thenReturn(streamDeployment1);
-		when(streamDeploymentRepository.findOne(streamDeployment2.getStreamName())).thenReturn(streamDeployment2);
-		when(streamDeploymentRepository.findOne(streamDeployment3.getStreamName())).thenReturn(streamDeployment3);
 	}
 
 	@Test
@@ -159,23 +149,20 @@ public class DefaultSkipperStreamServiceTests {
 		this.defaultSkipperStreamService.createStream("testStream", "time | log", false);
 	}
 
-		@Test
-		public void createStreamInvalidDsl() {
-			when(this.appRegistryCommon.appExist("time", ApplicationType.source)).thenReturn(true);
-			when(this.appRegistryCommon.appExist("log", ApplicationType.sink)).thenReturn(true);
+	@Test
+	public void createStreamInvalidDsl() {
+		when(this.appRegistryCommon.appExist("time", ApplicationType.source)).thenReturn(true);
+		when(this.appRegistryCommon.appExist("log", ApplicationType.sink)).thenReturn(true);
 
-			thrown.expect(InvalidStreamDefinitionException.class);
-			thrown.expectMessage("Application name 'koza' with type 'app' does not exist in the app registry.");
+		thrown.expect(InvalidStreamDefinitionException.class);
+		thrown.expectMessage("Application name 'koza' with type 'app' does not exist in the app registry.");
 
-			this.defaultSkipperStreamService.createStream("testStream", "koza", false);
-		}
+		this.defaultSkipperStreamService.createStream("testStream", "koza", false);
+	}
 
 	@Test
 	public void verifyUndeployStream() {
 		StreamDefinition streamDefinition2 = new StreamDefinition("test2", "time | log");
-		StreamDeployment streamDeployment2 = new StreamDeployment(streamDefinition2.getName(), "");
-
-		when(this.streamDeploymentRepository.findOne(streamDeployment2.getStreamName())).thenReturn(streamDeployment2);
 
 		this.defaultSkipperStreamService.undeployStream(streamDefinition2.getName());
 		verify(this.skipperStreamDeployer, times(1)).undeployStream(streamDefinition2.getName());
@@ -188,8 +175,6 @@ public class DefaultSkipperStreamServiceTests {
 	@Test
 	public void verifyRollbackStream() {
 		StreamDefinition streamDefinition2 = new StreamDefinition("test2", "time | log");
-		StreamDeployment streamDeployment2 = new StreamDeployment(streamDefinition2.getName(), "");
-		when(this.streamDeploymentRepository.findOne(streamDeployment2.getStreamName())).thenReturn(streamDeployment2);
 
 		verifyNoMoreInteractions(this.skipperStreamDeployer);
 		this.defaultSkipperStreamService.rollbackStream(streamDefinition2.getName(), 0);

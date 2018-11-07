@@ -26,7 +26,6 @@ import org.springframework.cloud.dataflow.core.StreamDeployment;
 import org.springframework.cloud.dataflow.rest.UpdateStreamRequest;
 import org.springframework.cloud.dataflow.server.configuration.TestDependencies;
 import org.springframework.cloud.dataflow.server.repository.StreamDefinitionRepository;
-import org.springframework.cloud.dataflow.server.repository.StreamDeploymentRepository;
 import org.springframework.cloud.dataflow.server.service.SkipperStreamService;
 import org.springframework.cloud.dataflow.server.stream.SkipperStreamDeployer;
 import org.springframework.cloud.dataflow.server.support.PlatformUtils;
@@ -56,9 +55,6 @@ public class DefaultSkipperStreamServiceUpgradeStreamTests {
 	@MockBean
 	private SkipperStreamDeployer skipperStreamDeployer;
 
-	@MockBean
-	private StreamDeploymentRepository streamDeploymentRepository;
-
 	private StreamDefinition streamDefinition2 = new StreamDefinition("test2", "time | log");
 
 	private StreamDeployment streamDeployment2 = new StreamDeployment(streamDefinition2.getName(), "");
@@ -67,7 +63,6 @@ public class DefaultSkipperStreamServiceUpgradeStreamTests {
 	public void verifyUpgradeStream() {
 		if (!PlatformUtils.isWindows()) {
 			when(streamDefinitionRepository.findOne("test2")).thenReturn(streamDefinition2);
-			when(streamDeploymentRepository.findOne(streamDeployment2.getStreamName())).thenReturn(streamDeployment2);
 
 			final UpdateStreamRequest updateStreamRequest = new UpdateStreamRequest(streamDeployment2.getStreamName(), null, null);
 			streamService.updateStream(streamDeployment2.getStreamName(), updateStreamRequest);

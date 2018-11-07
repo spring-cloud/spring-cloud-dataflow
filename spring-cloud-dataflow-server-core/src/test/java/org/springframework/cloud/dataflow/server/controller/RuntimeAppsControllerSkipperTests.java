@@ -25,12 +25,10 @@ import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.cloud.dataflow.core.StreamDefinition;
-import org.springframework.cloud.dataflow.core.StreamDeployment;
 import org.springframework.cloud.dataflow.registry.domain.AppRegistration;
 import org.springframework.cloud.dataflow.registry.repository.AppRegistrationRepository;
 import org.springframework.cloud.dataflow.server.configuration.TestDependencies;
 import org.springframework.cloud.dataflow.server.repository.StreamDefinitionRepository;
-import org.springframework.cloud.dataflow.server.repository.StreamDeploymentRepository;
 import org.springframework.cloud.skipper.client.SkipperClient;
 import org.springframework.cloud.skipper.domain.Info;
 import org.springframework.cloud.skipper.domain.Status;
@@ -70,9 +68,6 @@ public class RuntimeAppsControllerSkipperTests {
 	private AppRegistrationRepository appRegistrationRepository;
 
 	@Autowired
-	private StreamDeploymentRepository streamDeploymentRepository;
-
-	@Autowired
 	private StreamDefinitionRepository streamDefinitionRepository;
 
 	@Autowired
@@ -90,11 +85,6 @@ public class RuntimeAppsControllerSkipperTests {
 		StreamDefinition streamDefinition4 = new StreamDefinition("ticktock4", "time|log");
 		streamDefinitionRepository.save(streamDefinition3);
 		streamDefinitionRepository.save(streamDefinition4);
-
-		StreamDeployment streamDeployment3 = new StreamDeployment(streamDefinition3.getName());
-		StreamDeployment streamDeployment4 = new StreamDeployment(streamDefinition4.getName());
-		this.streamDeploymentRepository.save(streamDeployment3);
-		this.streamDeploymentRepository.save(streamDeployment4);
 
 		Info ticktock3Info = new Info();
 		Status ticktock3Status = new Status();
