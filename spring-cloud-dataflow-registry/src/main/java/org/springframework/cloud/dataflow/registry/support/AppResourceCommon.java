@@ -225,7 +225,14 @@ public class AppResourceCommon {
 		}
 	}
 
-
+	/**
+	 * Resolves the metadata resource if provided or falls back to the apps resources otherwise. For Docker app
+	 * resource types returns null
+	 * @param appUri the App Resource URI to fall back to in case of missing metadata URI
+	 * @param metadataUri Metadata resource URI
+	 * @return If metadata URI is not empty returns the Metadata resource. For empty metadataUri returns the App Resource
+	 * or null in case of Docker
+	 */
 	public Resource getMetadataResource(URI appUri, URI metadataUri) {
 		if (metadataUri != null) {
 			return this.metadataResourceLoader.getResource(metadataUri.toString());

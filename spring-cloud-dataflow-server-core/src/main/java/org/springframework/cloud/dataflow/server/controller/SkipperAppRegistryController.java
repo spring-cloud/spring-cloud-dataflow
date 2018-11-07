@@ -167,9 +167,7 @@ public class SkipperAppRegistryController {
 		if (!this.appRegistryService.appExist(name, type)) {
 			throw new NoSuchAppRegistrationException(name, type);
 		}
-		if (this.appRegistryService.getDefaultApp(name, type) == null) {
-			throw new RuntimeException(String.format("No default version exists for the app [%s:%s]", name, type));
-		}
+
 		String defaultVersion = this.appRegistryService.getDefaultApp(name, type).getVersion();
 		return getInfo(type, name, defaultVersion, exhaustive);
 	}
@@ -264,6 +262,10 @@ public class SkipperAppRegistryController {
 				throw new UnregisterAppException(String.format("The app [%s:%s:%s] you're trying to unregister is " +
 						"currently used in stream '%s'.", name, type, version, streamWithApp));
 			}
+		}
+
+		if (!this.appRegistryService.appExist(name, type, version)) {
+			throw new NoSuchAppRegistrationException(name, type, version);
 		}
 
 		appRegistryService.delete(name, type, version);

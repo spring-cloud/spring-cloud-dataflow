@@ -113,7 +113,20 @@ public class SkipperAppRegistryControllerTests {
 	}
 
 	@Test
-	public void testRegisterApplication() throws Exception {
+	public void testRegisterVersionedApp() throws Exception {
+		mockMvc.perform(post("/apps/sink/log1/1.2.0.RELEASE").param("uri", "maven://org.springframework.cloud.stream.app:log-sink-rabbit:1.2.0.RELEASE").accept(MediaType.APPLICATION_JSON))
+				.andDo(print()).andExpect(status().isCreated());
+		assertThat(this.appRegistryService.find("log1", ApplicationType.sink).getUri().toString(), is("maven://org.springframework.cloud.stream.app:log-sink-rabbit:1.2.0.RELEASE"));
+	}
+
+	@Test
+	public void testRegisterInvalidAppUri() throws Exception {
+		mockMvc.perform(post("/apps/sink/log1/1.2.0.RELEASE").param("uri", "\\boza").accept(MediaType.APPLICATION_JSON))
+				.andDo(print()).andExpect(status().is5xxServerError());
+	}
+
+	@Test
+	public void testRegisterApp() throws Exception {
 		mockMvc.perform(post("/apps/sink/log1").param("uri", "maven://org.springframework.cloud.stream.app:log-sink-rabbit:1.2.0.RELEASE").accept(MediaType.APPLICATION_JSON))
 				.andDo(print()).andExpect(status().isCreated());
 		assertThat(this.appRegistryService.find("log1", ApplicationType.sink).getUri().toString(), is("maven://org.springframework.cloud.stream.app:log-sink-rabbit:1.2.0.RELEASE"));
@@ -122,6 +135,12 @@ public class SkipperAppRegistryControllerTests {
 	@Test
 	public void testAppInfoNonExistingApp() throws Exception {
 		MvcResult mvcResult = this.mockMvc.perform(get("/apps/sink/log1")).andDo(print()).andExpect(status().is4xxClientError()).andReturn();
+		Assert.isInstanceOf(NoSuchAppRegistrationException.class, mvcResult.getResolvedException());
+	}
+
+	@Test
+	public void testAppInfoNonExistingVersionedApp() throws Exception {
+		MvcResult mvcResult = this.mockMvc.perform(get("/apps/sink/log1/1.0.0")).andDo(print()).andExpect(status().is4xxClientError()).andReturn();
 		Assert.isInstanceOf(NoSuchAppRegistrationException.class, mvcResult.getResolvedException());
 	}
 
@@ -167,6 +186,13 @@ public class SkipperAppRegistryControllerTests {
 	@Test
 	public void testRegisterAll() throws Exception {
 		mockMvc.perform(post("/apps").param("apps", "sink.foo=maven://org.springframework.cloud.stream.app:log-sink-rabbit:1.2.0.RELEASE").accept(MediaType.APPLICATION_JSON))
+				.andDo(print()).andExpect(status().isCreated());
+		assertThat(this.appRegistryService.find("foo", ApplicationType.sink).getUri().toString(), is("maven://org.springframework.cloud.stream.app:log-sink-rabbit:1.2.0.RELEASE"));
+	}
+
+	@Test
+	public void testRegisterAllFromFile() throws Exception {
+		mockMvc.perform(post("/apps").param("uri", "classpath:/register-all.txt").accept(MediaType.APPLICATION_JSON))
 				.andDo(print()).andExpect(status().isCreated());
 		assertThat(this.appRegistryService.find("foo", ApplicationType.sink).getUri().toString(), is("maven://org.springframework.cloud.stream.app:log-sink-rabbit:1.2.0.RELEASE"));
 	}
@@ -432,8 +458,14 @@ public class SkipperAppRegistryControllerTests {
 	}
 
 	@Test
+	public void testUnregisterUnversionedApplicationNotFound() throws Exception {
+		mockMvc.perform(delete("/apps/processor/transformer").accept(MediaType.APPLICATION_JSON))
+				.andExpect(status().isNotFound());
+	}
+
+	@Test
 	public void testUnregisterApplicationNotFound() throws Exception {
-		mockMvc.perform(delete("/apps/processor/blubba").accept(MediaType.APPLICATION_JSON))
+		mockMvc.perform(delete("/apps/processor/transformer/blubba").accept(MediaType.APPLICATION_JSON))
 				.andExpect(status().isNotFound());
 	}
 

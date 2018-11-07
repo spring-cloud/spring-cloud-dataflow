@@ -1,4 +1,9 @@
 spring:
+  jmx:
+    enabled: false
+  flyway:
+    locations: /db/migration/{vendor}
+    check-location: false
   cloud:
     dataflow:
       features:
