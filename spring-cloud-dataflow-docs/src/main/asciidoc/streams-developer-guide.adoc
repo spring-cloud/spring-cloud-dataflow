@@ -106,7 +106,7 @@ To do so:
 +
 [source,java]
 ----
-package io.spring.stream.sample.transformer;
+package io.spring.stream.sample;
 
 import org.springframework.cloud.stream.annotation.EnableBinding;
 import org.springframework.cloud.stream.annotation.Output;
@@ -154,7 +154,7 @@ import static org.assertj.core.api.Assertions.entry;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-public class TransformApplicationTests {
+public class TransformerApplicationTests {
 
     @Autowired
     private Transformer transformer;
@@ -234,7 +234,7 @@ java -Dserver.port=8123 \
      -Dhttp.path-pattern=/data \
      -Dspring.cloud.stream.bindings.output.destination=sensorData \
      -Dspring.cloud.stream.bindings.output.producer.requiredGroups=sensorDataGroup \
-     -jar http-source-rabbit-1.2.0.BUILD-SNAPSHOT.jar
+     -jar http-source-rabbit-1.3.1.RELEASE.jar
 
 java -Dserver.port=8090 \
      -Dspring.cloud.stream.bindings.input.destination=sensorData \
@@ -246,7 +246,7 @@ java -Dserver.port=8090 \
 java -Dlog.level=WARN \
      -Dspring.cloud.stream.bindings.input.destination=normalizedSensorData \
      -Dspring.cloud.stream.bindings.input.group=normalizedSensorDataGroup \
-     -jar log-sink-rabbit-1.1.1.RELEASE.jar
+     -jar log-sink-rabbit-1.3.1.RELEASE.jar
 ----
 
 As before, posting data to the `http` source results in the same log message in the sink.
