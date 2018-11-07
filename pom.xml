@@ -40,7 +40,7 @@
         <spring-cloud-services.version>2.0.1.RELEASE</spring-cloud-services.version>
         <spring-cloud-sso.version>2.0.0.RELEASE</spring-cloud-sso.version>
         <spring-cloud-deployer.version>1.3.4.RELEASE</spring-cloud-deployer.version>
-        <spring-cloud-deployer-local.version>1.3.9.RELEASE</spring-cloud-deployer-local.version>
+        <spring-cloud-deployer-local.version>1.3.10.BUILD-SNAPSHOT</spring-cloud-deployer-local.version>
 	<!-- note - check version of reactor at deployer-cf/cf-java-client uses -->
         <spring-cloud-deployer-cloudfoundry.version>1.4.3.RELEASE</spring-cloud-deployer-cloudfoundry.version>
         <reactor.version>3.1.8.RELEASE</reactor.version>
