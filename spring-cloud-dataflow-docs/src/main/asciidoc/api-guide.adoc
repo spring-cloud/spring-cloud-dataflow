@@ -1740,7 +1740,10 @@ include::{snippets}/task-executions-documentation/launch-task-display-detail/htt
 [[api-guide-resources-task-executions-delete]]
 ==== Delete Task Execution
 
-The task executions endpoint lets you delete a task execution.
+The task executions endpoint lets you clean up resources used to deploy the task.
+
+NOTE: The cleanup implementation is platform specific.
+
 The following topics provide more detail:
 
 * <<api-guide-resources-task-executions-delete-request-structure>>

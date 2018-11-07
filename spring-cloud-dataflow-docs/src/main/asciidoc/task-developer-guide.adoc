@@ -267,7 +267,7 @@ To do so:
 export spring_datasource_url=jdbc:mysql://localhost:3306/practice
 export spring_datasource_username=root
 export spring_datasource_password=password
-export spring_datasource_driverClassName=org.mysql.jdbc.Driver
+export spring_datasource_driverClassName=org.mariadb.jdbc.Driver
 ----
 . From the command line, run `./mvnw clean spring-boot:run`.
 +
