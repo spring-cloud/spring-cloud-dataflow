@@ -53,12 +53,9 @@ import org.springframework.cloud.dataflow.server.repository.DeploymentKey;
 import org.springframework.cloud.dataflow.server.repository.StreamDefinitionRepository;
 import org.springframework.cloud.dataflow.server.stream.StreamDeployerUtil;
 import org.springframework.cloud.dataflow.server.support.SkipperPackageUtils;
-import org.springframework.cloud.deployer.resource.maven.MavenResource;
 import org.springframework.cloud.deployer.spi.app.AppDeployer;
-import org.springframework.cloud.deployer.spi.app.AppInstanceStatus;
 import org.springframework.cloud.deployer.spi.app.AppStatus;
 import org.springframework.cloud.deployer.spi.app.DeploymentState;
-import org.springframework.cloud.deployer.spi.core.AppDeploymentRequest;
 import org.springframework.cloud.skipper.client.SkipperClient;
 import org.springframework.cloud.skipper.domain.Deployer;
 import org.springframework.cloud.skipper.domain.Info;
@@ -81,7 +78,6 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 
 import static org.hamcrest.Matchers.empty;
-import static org.hamcrest.Matchers.instanceOf;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.startsWith;
 import static org.junit.Assert.assertEquals;
@@ -89,7 +85,6 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -109,6 +104,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  * @author Gunnar Hillert
  * @author Glenn Renfro
  * @author Andy Clement
+ * @author Christian Tzolov
  */
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = TestDependencies.class)
@@ -130,9 +126,6 @@ public class StreamControllerTests {
 	private WebApplicationContext wac;
 
 	@Autowired
-	private AppDeployer appDeployer;
-
-	@Autowired
 	private CommonApplicationProperties appsProperties;
 
 	@Autowired
@@ -143,7 +136,6 @@ public class StreamControllerTests {
 		this.mockMvc = MockMvcBuilders.webAppContextSetup(wac)
 				.defaultRequest(get("/").accept(MediaType.APPLICATION_JSON)).build();
 
-		when(appDeployer.deploy(any(AppDeploymentRequest.class))).thenReturn("testID");
 		Info info = new Info();
 		info.setStatus(new Status());
 		info.getStatus().setStatusCode(StatusCode.DEPLOYED);
@@ -561,14 +553,14 @@ public class StreamControllerTests {
 		assertEquals("foo", filterDefinition.getProperties().get(BindingPropertyKeys.OUTPUT_DESTINATION));
 	}
 
-	@Ignore("TODO Tzolov")
 	@Test
 	public void testDestinationsOnBothSides() throws Exception {
+
+		prepareSkipperClientFixture();
+
 		assertEquals(0, repository.count());
 		String definition = ":bar > filter > :foo";
-		AppStatus status = mock(AppStatus.class);
-		when(status.getState()).thenReturn(DeploymentState.unknown);
-		when(appDeployer.status("testID")).thenReturn(status);
+
 		mockMvc.perform(post("/streams/definitions/").param("name", "myStream").param("definition", definition)
 				.param("deploy", "true").accept(MediaType.APPLICATION_JSON)).andDo(print())
 				.andExpect(status().isCreated());
@@ -583,12 +575,20 @@ public class StreamControllerTests {
 		assertEquals("myStream", filterDefinition.getProperties().get(BindingPropertyKeys.INPUT_GROUP));
 		assertEquals("foo", filterDefinition.getProperties().get(BindingPropertyKeys.OUTPUT_DESTINATION));
 
-		ArgumentCaptor<AppDeploymentRequest> captor = ArgumentCaptor.forClass(AppDeploymentRequest.class);
-		verify(appDeployer).deploy(captor.capture());
-		AppDeploymentRequest request = captor.getValue();
-		assertThat(request.getDefinition().getName(), is("filter"));
-		assertThat(request.getResource(), instanceOf(MavenResource.class));
-		assertThat(((MavenResource) request.getResource()).getArtifactId(), is("filter-processor-rabbit"));
+		ArgumentCaptor<UploadRequest> uploadRequestCaptor = ArgumentCaptor.forClass(UploadRequest.class);
+		verify(skipperClient, times(1)).upload(uploadRequestCaptor.capture());
+		ArgumentCaptor<InstallRequest> installRequestCaptor = ArgumentCaptor.forClass(InstallRequest.class);
+		verify(skipperClient, times(1)).install(installRequestCaptor.capture());
+
+		List<UploadRequest> updateRequests = uploadRequestCaptor.getAllValues();
+		assertEquals(1, updateRequests.size());
+
+		Package pkg = SkipperPackageUtils.loadPackageFromBytes(uploadRequestCaptor);
+
+		Package filterPackage = findChildPackageByName(pkg, "filter");
+		SpringCloudDeployerApplicationSpec filterSpec = parseSpec(filterPackage.getConfigValues().getRaw());
+
+		assertThat(filterSpec.getResource(), is("maven://org.springframework.cloud.stream.app:filter-processor-rabbit"));
 	}
 
 	@Test
@@ -600,10 +600,7 @@ public class StreamControllerTests {
 					streamDefinition1.getName() + "." + appDefinition.getName());
 		}
 		assertEquals(1, repository.count());
-		AppStatus status = mock(AppStatus.class);
-		when(status.getState()).thenReturn(DeploymentState.unknown);
-		when(appDeployer.status("myStream.time")).thenReturn(status);
-		when(appDeployer.status("myStream.log")).thenReturn(status);
+
 		mockMvc.perform(delete("/streams/definitions/myStream").accept(MediaType.APPLICATION_JSON)).andDo(print())
 				.andExpect(status().isOk());
 		assertEquals(0, repository.count());
@@ -620,10 +617,7 @@ public class StreamControllerTests {
 					streamDefinition1.getName() + "." + appDefinition.getName());
 		}
 		assertEquals(1, repository.count());
-		AppStatus status = mock(AppStatus.class);
-		when(status.getState()).thenReturn(DeploymentState.unknown);
-		when(appDeployer.status("myStream1234.time")).thenReturn(status);
-		when(appDeployer.status("myStream1234.log")).thenReturn(status);
+
 		mockMvc.perform(delete("/streams/definitions/myStream1234").accept(MediaType.APPLICATION_JSON)).andDo(print())
 				.andExpect(status().isOk());
 		assertEquals(0, repository.count());
@@ -669,10 +663,7 @@ public class StreamControllerTests {
 					streamDefinition1.getName() + "." + appDefinition.getName());
 		}
 		assertEquals(2, repository.count());
-		AppStatus status = mock(AppStatus.class);
-		when(status.getState()).thenReturn(DeploymentState.unknown);
-		when(appDeployer.status("myStream.time")).thenReturn(status);
-		when(appDeployer.status("myStream.log")).thenReturn(status);
+
 		mockMvc.perform(delete("/streams/definitions/myStream").accept(MediaType.APPLICATION_JSON)).andDo(print())
 				.andExpect(status().isOk());
 		assertEquals(1, repository.count());
@@ -687,10 +678,7 @@ public class StreamControllerTests {
 		}
 		repository.save(streamDefinition1);
 		assertEquals(1, repository.count());
-		AppStatus status = mock(AppStatus.class);
-		when(status.getState()).thenReturn(DeploymentState.unknown);
-		when(appDeployer.status("myStream.time")).thenReturn(status);
-		when(appDeployer.status("myStream.log")).thenReturn(status);
+
 		mockMvc.perform(get("/streams/definitions/myStream").accept(MediaType.APPLICATION_JSON))
 				.andExpect(status().isOk()).andExpect(content().json("{name: \"myStream\"}"))
 				.andExpect(content().json("{dslText: \"time | log\"}"));
@@ -705,10 +693,7 @@ public class StreamControllerTests {
 		}
 		repository.save(streamDefinition1);
 		assertEquals(1, repository.count());
-		AppStatus status = mock(AppStatus.class);
-		when(status.getState()).thenReturn(DeploymentState.unknown);
-		when(appDeployer.status("myStream.time")).thenReturn(status);
-		when(appDeployer.status("myStream.log")).thenReturn(status);
+
 		mockMvc.perform(get("/streams/definitions/myStream").accept(MediaType.APPLICATION_JSON))
 				.andExpect(status().isOk()).andExpect(content().json("{name: \"myStream\"}"))
 				.andExpect(content().json("{dslText: \"time --secret='******' | log\"}"));
@@ -872,30 +857,28 @@ public class StreamControllerTests {
 		assertEquals("4", timeSpec.getApplicationProperties().get("trigger.fixed-delay"));
 	}
 
-	@Ignore("TODO Tzolov")
 	@Test
 	public void testDuplicateDeploy() throws Exception {
+
+		Info info = prepareSkipperClientFixture();
+
 		repository.save(new StreamDefinition("myStream", "time | log"));
+
 		mockMvc.perform(post("/streams/deployments/myStream").accept(MediaType.APPLICATION_JSON)).andDo(print())
 				.andExpect(status().isCreated());
-		ArgumentCaptor<AppDeploymentRequest> captor = ArgumentCaptor.forClass(AppDeploymentRequest.class);
-		verify(appDeployer, times(2)).deploy(captor.capture());
-		when(appDeployer.status("testID")).thenReturn(AppStatus.of("testID").with(new AppInstanceStatus() {
-			@Override
-			public String getId() {
-				return "testID";
-			}
 
-			@Override
-			public DeploymentState getState() {
-				return DeploymentState.valueOf("deployed");
-			}
+		ArgumentCaptor<UploadRequest> uploadRequestCaptor = ArgumentCaptor.forClass(UploadRequest.class);
+		verify(skipperClient, times(1)).upload(uploadRequestCaptor.capture());
 
-			@Override
-			public Map<String, String> getAttributes() {
-				return null;
-			}
-		}).build());
+		Package pkg = SkipperPackageUtils.loadPackageFromBytes(uploadRequestCaptor);
+		assertNotNull(findChildPackageByName(pkg, "log"));
+		assertNotNull(findChildPackageByName(pkg, "time"));
+
+		info.getStatus().setPlatformStatusAsAppStatusList(Arrays.asList(
+				AppStatus.of("myStream.time-v1").generalState(DeploymentState.deploying).build(),
+				AppStatus.of("myStream.log-v1").generalState(DeploymentState.deployed).build()));
+
+		// Attempt to deploy already deployed stream
 		mockMvc.perform(post("/streams/deployments/myStream").accept(MediaType.APPLICATION_JSON)).andDo(print())
 				.andExpect(status().isConflict());
 	}
@@ -907,7 +890,7 @@ public class StreamControllerTests {
 		info.getStatus().setStatusCode(StatusCode.DEPLOYED);
 		when(skipperClient.status(ArgumentMatchers.eq("myStream"))).thenReturn(info);
 
-		Deployer deployer = new Deployer("testDeployer", "testType", appDeployer);
+		Deployer deployer = new Deployer("testDeployer", "testType", mock(AppDeployer.class));
 		when(skipperClient.listDeployers()).thenReturn(new Resources<>(Arrays.asList(deployer), new Link[0]));
 
 		repository.save(new StreamDefinition("myStream", "time | log"));
@@ -918,21 +901,47 @@ public class StreamControllerTests {
 
 	@Test
 	public void testUndeployNonDeployedStream() throws Exception {
+
+		when(skipperClient.search(ArgumentMatchers.eq("myStream"), ArgumentMatchers.eq(false))).thenReturn(
+				new Resources(Arrays.asList(new PackageMetadata()), new Link[0]));
+
 		repository.save(new StreamDefinition("myStream", "time | log"));
 		mockMvc.perform(delete("/streams/deployments/myStream").accept(MediaType.APPLICATION_JSON)).andDo(print())
 				.andExpect(status().isOk());
-		ArgumentCaptor<String> captor = ArgumentCaptor.forClass(String.class);
-		verify(appDeployer, times(0)).undeploy(captor.capture());
+
+		verify(skipperClient, times(0)).upload(ArgumentMatchers.any());
+		verify(skipperClient, times(0)).install(ArgumentMatchers.any());
+		verify(skipperClient, times(1)).delete(ArgumentMatchers.eq("myStream"), ArgumentMatchers.anyBoolean());
+
+		final List<AuditRecord> auditRecords = auditRecordRepository.findAll();
+		assertThat(auditRecords.size(), is(1));
+		assertThat(auditRecords.get(0).getAuditOperation(), is(AuditOperationType.STREAM));
+		assertThat(auditRecords.get(0).getAuditAction(), is(AuditActionType.UNDEPLOY));
 	}
 
 	@Test
 	public void testUndeployAllNonDeployedStream() throws Exception {
+		when(skipperClient.search(ArgumentMatchers.eq("myStream1"), ArgumentMatchers.eq(false))).thenReturn(
+				new Resources(Arrays.asList(new PackageMetadata()), new Link[0]));
+		when(skipperClient.search(ArgumentMatchers.eq("myStream2"), ArgumentMatchers.eq(false))).thenReturn(
+				new Resources(Arrays.asList(new PackageMetadata()), new Link[0]));
+
 		repository.save(new StreamDefinition("myStream1", "time | log"));
 		repository.save(new StreamDefinition("myStream2", "time | log"));
 		mockMvc.perform(delete("/streams/deployments").accept(MediaType.APPLICATION_JSON)).andDo(print())
 				.andExpect(status().isOk());
-		ArgumentCaptor<String> captor = ArgumentCaptor.forClass(String.class);
-		verify(appDeployer, times(0)).undeploy(captor.capture());
+
+		verify(skipperClient, times(0)).upload(ArgumentMatchers.any());
+		verify(skipperClient, times(0)).install(ArgumentMatchers.any());
+		verify(skipperClient, times(1)).delete(ArgumentMatchers.eq("myStream1"), ArgumentMatchers.anyBoolean());
+		verify(skipperClient, times(1)).delete(ArgumentMatchers.eq("myStream2"), ArgumentMatchers.anyBoolean());
+
+		final List<AuditRecord> auditRecords = auditRecordRepository.findAll();
+		assertThat(auditRecords.size(), is(2));
+		assertThat(auditRecords.get(0).getAuditOperation(), is(AuditOperationType.STREAM));
+		assertThat(auditRecords.get(0).getAuditAction(), is(AuditActionType.UNDEPLOY));
+		assertThat(auditRecords.get(1).getAuditOperation(), is(AuditOperationType.STREAM));
+		assertThat(auditRecords.get(1).getAuditAction(), is(AuditActionType.UNDEPLOY));
 	}
 
 	@Test
@@ -1114,6 +1123,7 @@ public class StreamControllerTests {
 		assertThat(StreamDeployerUtil.aggregateState(EnumSet.of(DeploymentState.deployed, DeploymentState.unknown)), is(DeploymentState.partial));
 		assertThat(StreamDeployerUtil.aggregateState(EnumSet.of(DeploymentState.undeployed, DeploymentState.unknown)), is(DeploymentState.partial));
 		assertThat(StreamDeployerUtil.aggregateState(EnumSet.of(DeploymentState.unknown)), is(DeploymentState.undeployed));
+		assertThat(StreamDeployerUtil.aggregateState(EnumSet.of(DeploymentState.deployed)), is(DeploymentState.deployed));
 	}
 
 	// TODO Not sure what are we trying to test here?
@@ -1124,10 +1134,11 @@ public class StreamControllerTests {
 		info.setStatus(new Status());
 		info.getStatus().setStatusCode(StatusCode.UNKNOWN);
 		when(skipperClient.status(ArgumentMatchers.eq("myStream"))).thenReturn(info);
-		Deployer deployer = new Deployer("testDeployer", "testType", appDeployer);
+		//Deployer deployer = new Deployer("testDeployer", "testType", appDeployer);
+		Deployer deployer = new Deployer("testDeployer", "testType", mock(AppDeployer.class));
 		when(skipperClient.listDeployers()).thenReturn(new Resources<>(Arrays.asList(deployer), new Link[0]));
 
-		when(skipperClient.upload(any())).thenThrow(new RuntimeException());
+		when(skipperClient.upload(ArgumentMatchers.any())).thenThrow(new RuntimeException());
 		// when(appDeployer.deploy(any(AppDeploymentRequest.class))).thenThrow(new RuntimeException());
 		repository.save(new StreamDefinition("myStream", "time | log"));
 		mockMvc.perform(post("/streams/deployments/myStream").accept(MediaType.APPLICATION_JSON))
@@ -1146,14 +1157,16 @@ public class StreamControllerTests {
 				.json("{\"appName\":\"myStream1\",\"appStatuses\":{\"source:time\":\"valid\",\"sink:log\":\"valid\"},\"dsl\":\"time | log\",\"links\":[]}"));
 	}
 
-	private void prepareSkipperClientFixture() {
+	private Info prepareSkipperClientFixture() {
 		Info info = new Info();
 		info.setStatus(new Status());
 		info.getStatus().setStatusCode(StatusCode.UNKNOWN);
 		when(skipperClient.status(ArgumentMatchers.eq("myStream"))).thenReturn(info);
 
-		Deployer deployer = new Deployer("testDeployer", "testType", appDeployer);
+		Deployer deployer = new Deployer("testDeployer", "testType", mock(AppDeployer.class));
 		when(skipperClient.listDeployers()).thenReturn(new Resources<>(Arrays.asList(deployer), new Link[0]));
+
+		return info;
 	}
 
 	private SpringCloudDeployerApplicationSpec parseSpec(String yamlString) throws IOException {
@@ -1165,8 +1178,6 @@ public class StreamControllerTests {
 
 	private Package findChildPackageByName(Package pkg, String childPackageName) {
 		return pkg.getDependencies().stream()
-				.filter(p -> p.getMetadata().getName().equalsIgnoreCase(childPackageName))
-				.findFirst()
-				.get();
+				.filter(p -> p.getMetadata().getName().equalsIgnoreCase(childPackageName)).findFirst().get();
 	}
 }
