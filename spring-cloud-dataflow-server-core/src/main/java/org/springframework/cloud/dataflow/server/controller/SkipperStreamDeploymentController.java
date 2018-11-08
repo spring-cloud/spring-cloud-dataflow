@@ -89,7 +89,7 @@ public class SkipperStreamDeploymentController extends StreamDeploymentControlle
 
 	@RequestMapping(value = "/manifest/{name}/{version}", method = RequestMethod.GET)
 	public ResponseEntity<String> manifest(@PathVariable("name") String name, @PathVariable("version") Integer version) {
-		return new ResponseEntity<String>(this.skipperStreamService.manifest(name, version), HttpStatus.OK);
+		return new ResponseEntity<>(this.skipperStreamService.manifest(name, version), HttpStatus.OK);
 	}
 
 	@RequestMapping(path = "/history/{name}", method = RequestMethod.GET)

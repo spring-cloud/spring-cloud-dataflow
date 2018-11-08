@@ -18,6 +18,7 @@ package org.springframework.cloud.dataflow.server.rest.documentation;
 
 import org.junit.Before;
 import org.junit.ClassRule;
+import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.RuleChain;
@@ -77,6 +78,7 @@ public class MetricsForStreamAppsDocumentation {
 		this.prepareDocumentationTests(localDataflowResource.getWebApplicationContext());
 	}
 
+	@Ignore("Deprecate Classic Mode (Tzolov)")
 	@Test
 	public void getMetricsWithCollectorRunning() throws Exception {
 		this.mockMvc.perform(get("/metrics/streams")

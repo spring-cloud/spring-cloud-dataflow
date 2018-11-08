@@ -16,14 +16,11 @@
 package org.springframework.cloud.dataflow.server.local;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
 
 import javax.servlet.Filter;
 
 import org.junit.rules.ExternalResource;
-import org.mockito.ArgumentMatchers;
 
 import org.springframework.analytics.metrics.AggregateCounterRepository;
 import org.springframework.analytics.metrics.FieldValueCounterRepository;
@@ -33,20 +30,14 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.cloud.dataflow.server.EnableDataFlowServer;
 import org.springframework.cloud.dataflow.server.config.features.FeaturesProperties;
-import org.springframework.cloud.deployer.spi.app.AppDeployer;
 import org.springframework.cloud.skipper.client.SkipperClient;
 import org.springframework.cloud.skipper.domain.AboutResource;
 import org.springframework.cloud.skipper.domain.Dependency;
-import org.springframework.cloud.skipper.domain.Deployer;
-import org.springframework.cloud.skipper.domain.Info;
-import org.springframework.cloud.skipper.domain.Status;
-import org.springframework.cloud.skipper.domain.StatusCode;
 import org.springframework.cloud.skipper.domain.VersionInfo;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
-import org.springframework.hateoas.Link;
 import org.springframework.hateoas.Resources;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
@@ -187,35 +178,25 @@ public class LocalDataflowResource extends ExternalResource {
 		return configurableApplicationContext;
 	}
 
+	public void mockSkipperAboutInfo() {
+		AboutResource about = new AboutResource();
+		about.setVersionInfo(new VersionInfo());
+		about.getVersionInfo().setServer(new Dependency());
+		about.getVersionInfo().getServer().setName("Test Server");
+		about.getVersionInfo().getServer().setVersion("Test Version");
+		when(this.skipperClient.info()).thenReturn(about);
+		when(this.skipperClient.listDeployers()).thenReturn(new Resources<>(new ArrayList<>(), new ArrayList<>()));
+	}
+
 	@EnableAutoConfiguration(excludeName = "org.springframework.cloud.dataflow.rest.client.config.DataFlowClientAutoConfiguration")
 	@EnableDataFlowServer
 	@Configuration
 	public static class TestConfig {
 
-		// CLASSIC MODE REMOVAL
-		// - Override skipperClient with mock
-		// - Add mock About response
 		@Bean
 		@Primary
 		public SkipperClient skipperClientMock() {
 			SkipperClient skipperClient = mock(SkipperClient.class);
-			AboutResource about = new AboutResource();
-			about.setVersionInfo(new VersionInfo());
-			about.getVersionInfo().setServer(new Dependency());
-			about.getVersionInfo().getServer().setName("Test Server");
-			about.getVersionInfo().getServer().setVersion("Test Version");
-			when(skipperClient.info()).thenReturn(about);
-			when(skipperClient.listDeployers()).thenReturn(new Resources<>(new ArrayList<>(), new ArrayList<>()));
-
-			Info info = new Info();
-			info.setStatus(new Status());
-			info.getStatus().setStatusCode(StatusCode.UNKNOWN);
-			when(skipperClient.status(ArgumentMatchers.anyString())).thenReturn(info);
-
-			Deployer deployer = new Deployer("testDeployer", "testType", mock(AppDeployer.class));
-			when(skipperClient.listDeployers()).thenReturn(new Resources<>(Arrays.asList(deployer), new Link[0]));
-
-			when(skipperClient.search(ArgumentMatchers.anyString(), ArgumentMatchers.anyBoolean())).thenReturn(new Resources(Collections.EMPTY_LIST));
 			return skipperClient;
 		}
 

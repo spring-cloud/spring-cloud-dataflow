@@ -19,6 +19,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Map;
 
+import org.junit.Before;
 import org.junit.ClassRule;
 import org.junit.Test;
 import org.junit.rules.RuleChain;
@@ -83,6 +84,11 @@ public class LocalServerSecurityWithSingleUserTests {
 
 	@Parameter(4)
 	public Map<String, String> urlParameters;
+
+	@Before
+	public void before() {
+		localDataflowResource.mockSkipperAboutInfo();
+	}
 
 	@Parameters(name = "Authentication Test {index} - {0} {2} - Returns: {1}")
 	public static Collection<Object[]> data() {

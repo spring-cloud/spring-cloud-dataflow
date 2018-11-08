@@ -17,6 +17,8 @@
 package org.springframework.cloud.dataflow.server.rest.documentation;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -27,25 +29,37 @@ import javax.sql.DataSource;
 import org.junit.Before;
 import org.junit.ClassRule;
 import org.junit.Rule;
+import org.mockito.ArgumentMatchers;
 
 import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.GenericBeanDefinition;
 import org.springframework.cloud.dataflow.core.ApplicationType;
 import org.springframework.cloud.dataflow.server.local.LocalDataflowResource;
+import org.springframework.cloud.deployer.spi.app.AppDeployer;
 import org.springframework.cloud.scheduler.spi.core.ScheduleInfo;
 import org.springframework.cloud.scheduler.spi.core.ScheduleRequest;
 import org.springframework.cloud.scheduler.spi.core.Scheduler;
-import org.springframework.cloud.skipper.server.local.security.LocalSkipperResource;
+import org.springframework.cloud.skipper.domain.AboutResource;
+import org.springframework.cloud.skipper.domain.Dependency;
+import org.springframework.cloud.skipper.domain.Deployer;
+import org.springframework.cloud.skipper.domain.Info;
+import org.springframework.cloud.skipper.domain.Status;
+import org.springframework.cloud.skipper.domain.StatusCode;
+import org.springframework.cloud.skipper.domain.VersionInfo;
+import org.springframework.hateoas.Link;
+import org.springframework.hateoas.Resources;
 import org.springframework.restdocs.JUnitRestDocumentation;
 import org.springframework.restdocs.mockmvc.RestDocumentationResultHandler;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.ResultHandler;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
-import org.springframework.util.SocketUtils;
 import org.springframework.web.context.WebApplicationContext;
 
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.reset;
+import static org.mockito.Mockito.when;
 import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.document;
 import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.documentationConfiguration;
 import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.delete;
@@ -62,22 +76,32 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 public abstract class BaseDocumentation {
 
 	private static String skipperServerPort;
-	private static LocalSkipperResource skipperServer;
-
-	@ClassRule
-	public static LocalSkipperResource setupSkipperServer() {
-		skipperServerPort = String.valueOf(SocketUtils.findAvailableTcpPort());
-		skipperServer = new LocalSkipperResource(
-				new String[] {"classpath:rest-docs-config-skipper.yml"}, null,
-				new String[] {"--server.port="+ skipperServerPort});
-		return skipperServer;
-	}
 
 	@ClassRule
 	public final static LocalDataflowResource springDataflowServer = new LocalDataflowResource(
 				"classpath:rest-docs-config.yml", true, true, true, true, skipperServerPort);
 	@Before
 	public void setupMocks() {
+		reset(springDataflowServer.getSkipperClient());
+
+		AboutResource about = new AboutResource();
+		about.setVersionInfo(new VersionInfo());
+		about.getVersionInfo().setServer(new Dependency());
+		about.getVersionInfo().getServer().setName("Test Server");
+		about.getVersionInfo().getServer().setVersion("Test Version");
+		when(springDataflowServer.getSkipperClient().info()).thenReturn(about);
+		when(springDataflowServer.getSkipperClient().listDeployers()).thenReturn(new Resources<>(new ArrayList<>(), new ArrayList<>()));
+
+		Info info = new Info();
+		info.setStatus(new Status());
+		info.getStatus().setStatusCode(StatusCode.UNKNOWN);
+		when(springDataflowServer.getSkipperClient().status(ArgumentMatchers.anyString())).thenReturn(info);
+
+		Deployer deployer = new Deployer("default", "local", mock(AppDeployer.class));
+		when(springDataflowServer.getSkipperClient().listDeployers()).thenReturn(new Resources<>(Arrays.asList(deployer), new Link[0]));
+
+		when(springDataflowServer.getSkipperClient().search(ArgumentMatchers.anyString(), ArgumentMatchers.anyBoolean())).thenReturn(new Resources(Collections.EMPTY_LIST));
+
 		this.prepareDocumentationTests(springDataflowServer.getWebApplicationContext());
 	}
 

@@ -116,8 +116,17 @@ public class ApiDocumentation extends BaseDocumentation {
 				linkWithRel("streams/definitions/definition").description("Handle a specific Stream " + "definition"),
 				linkWithRel("streams/validation").description("Provides the validation for a stream definition"),
 				linkWithRel("streams/deployments").description("Provides Stream deployment operations"),
+				linkWithRel("streams/deployments/{name}").description("Request un-deployment of an existing stream"),
 				linkWithRel("streams/deployments/deployment")
 						.description("Request (un-)deployment of" + " an existing stream definition"),
+				linkWithRel("streams/deployments/manifest/{name}/{version}")
+						.description("Return a manifest info of a release version"),
+				linkWithRel("streams/deployments/history/{name}")
+						.description("Get stream's deployment history as list or Releases for this release"),
+				linkWithRel("streams/deployments/rollback/{name}/{version}")
+						.description("Rollback the stream to the previous or a specific version of the stream"),
+				linkWithRel("streams/deployments/update/{name}").description("Update the stream."),
+				linkWithRel("streams/deployments/platform/list").description("List of supported deployment platforms"),
 				linkWithRel("counters").description("Exposes the resource for dealing with Counters"),
 				linkWithRel("counters/counter").description("Handle a specific counter"),
 				linkWithRel("aggregate-counters")
@@ -148,9 +157,25 @@ public class ApiDocumentation extends BaseDocumentation {
 							.description("Link runtime/apps/instances is templated"),
 						fieldWithPath("_links.metrics/streams.href").description("Link to the metrics/streams"),
 						fieldWithPath("_links.streams/deployments.href").description("Link to the streams/deployments"),
+						fieldWithPath("_links.streams/deployments/{name}.href").description("Link to the streams/deployments/{name}"),
+						fieldWithPath("_links.streams/deployments/{name}.templated").type(JsonFieldType.BOOLEAN).optional()
+								.description("Link streams/deployments/{name} is templated"),
 						fieldWithPath("_links.streams/deployments/deployment.href").description("Link to the streams/deployments/deployment"),
 						fieldWithPath("_links.streams/deployments/deployment.templated").type(JsonFieldType.BOOLEAN).optional()
 							.description("Link streams/deployments/deployment is templated"),
+						fieldWithPath("_links.streams/deployments/manifest/{name}/{version}.href").description("Link to the streams/deployments/manifest/{name}/{version}"),
+						fieldWithPath("_links.streams/deployments/manifest/{name}/{version}.templated").type(JsonFieldType.BOOLEAN).optional()
+								.description("Link streams/deployments/manifest/{name}/{version} is templated"),
+						fieldWithPath("_links.streams/deployments/history/{name}.href").description("Link to the streams/deployments/history/{name}"),
+						fieldWithPath("_links.streams/deployments/history/{name}.templated").type(JsonFieldType.BOOLEAN).optional()
+								.description("Link streams/deployments/history is templated"),
+						fieldWithPath("_links.streams/deployments/rollback/{name}/{version}.href").description("Link to the streams/deployments/rollback/{name}/{version}"),
+						fieldWithPath("_links.streams/deployments/rollback/{name}/{version}.templated").type(JsonFieldType.BOOLEAN).optional()
+								.description("Link streams/deployments/rollback/{name}/{version} is templated"),
+						fieldWithPath("_links.streams/deployments/update/{name}.href").description("Link to the streams/deployments/update/{name}"),
+						fieldWithPath("_links.streams/deployments/update/{name}.templated").type(JsonFieldType.BOOLEAN).optional()
+								.description("Link streams/deployments/update/{name} is templated"),
+						fieldWithPath("_links.streams/deployments/platform/list.href").description("Link to the streams/deployments/platform/list"),
 						fieldWithPath("_links.streams/validation.href").description("Link to the streams/validation"),
 						fieldWithPath("_links.streams/validation.templated").type(JsonFieldType.BOOLEAN).optional()
 							.description("Link streams/validation is templated"),
