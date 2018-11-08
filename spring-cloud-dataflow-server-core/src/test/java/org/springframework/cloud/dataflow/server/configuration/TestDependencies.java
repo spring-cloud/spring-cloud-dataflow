@@ -25,7 +25,6 @@ import java.util.Optional;
 import java.util.concurrent.ForkJoinPool;
 import java.util.stream.Collectors;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 
 import org.springframework.batch.core.StepExecution;
@@ -62,8 +61,13 @@ import org.springframework.cloud.dataflow.server.config.features.FeaturesPropert
 import org.springframework.cloud.dataflow.server.controller.AboutController;
 import org.springframework.cloud.dataflow.server.controller.AuditRecordController;
 import org.springframework.cloud.dataflow.server.controller.CompletionController;
+import org.springframework.cloud.dataflow.server.controller.JobExecutionController;
+import org.springframework.cloud.dataflow.server.controller.JobInstanceController;
+import org.springframework.cloud.dataflow.server.controller.JobStepExecutionController;
+import org.springframework.cloud.dataflow.server.controller.JobStepExecutionProgressController;
 import org.springframework.cloud.dataflow.server.controller.MetricsController;
 import org.springframework.cloud.dataflow.server.controller.RestControllerAdvice;
+import org.springframework.cloud.dataflow.server.controller.RootController;
 import org.springframework.cloud.dataflow.server.controller.RuntimeAppInstanceController;
 import org.springframework.cloud.dataflow.server.controller.RuntimeAppsController;
 import org.springframework.cloud.dataflow.server.controller.SkipperAppRegistryController;
@@ -129,6 +133,7 @@ import org.springframework.core.io.ResourceLoader;
 import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.data.web.config.EnableSpringDataWebSupport;
+import org.springframework.hateoas.EntityLinks;
 import org.springframework.hateoas.config.EnableHypermediaSupport;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 import org.springframework.validation.beanvalidation.MethodValidationPostProcessor;
@@ -187,8 +192,7 @@ public class TestDependencies extends WebMvcConfigurationSupport {
 	}
 
 	@Bean
-	public AuditRecordService auditRecordService(AuditRecordRepository auditRecordRepository,
-			ObjectMapper objectMapper) {
+	public AuditRecordService auditRecordService(AuditRecordRepository auditRecordRepository) {
 		return new DefaultAuditRecordService(auditRecordRepository);
 	}
 
@@ -575,5 +579,30 @@ public class TestDependencies extends WebMvcConfigurationSupport {
 		public List<ScheduleInfo> getSchedules() {
 			return schedules;
 		}
+	}
+
+	@Bean
+	public RootController rootController(EntityLinks entityLinks) {
+		return new RootController(entityLinks);
+	}
+
+	@Bean
+	public JobExecutionController jobExecutionController() {
+		return mock(JobExecutionController.class);
+	}
+
+	@Bean
+	public JobStepExecutionController jobStepExecutionController() {
+		return mock(JobStepExecutionController.class);
+	}
+
+	@Bean
+	public JobStepExecutionProgressController jobStepExecutionProgressController() {
+		return mock(JobStepExecutionProgressController.class);
+	}
+
+	@Bean
+	public JobInstanceController jobInstanceController() {
+		return mock(JobInstanceController.class);
 	}
 }

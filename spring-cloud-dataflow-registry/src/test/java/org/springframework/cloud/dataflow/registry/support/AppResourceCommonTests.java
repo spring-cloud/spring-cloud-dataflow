@@ -19,7 +19,6 @@ import java.net.MalformedURLException;
 import java.net.URI;
 
 import org.junit.Test;
-import org.mockito.ArgumentMatchers;
 
 import org.springframework.cloud.deployer.resource.docker.DockerResource;
 import org.springframework.cloud.deployer.resource.maven.MavenProperties;
@@ -32,6 +31,7 @@ import org.springframework.core.io.UrlResource;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.fail;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
@@ -90,7 +90,7 @@ public class AppResourceCommonTests {
 		String appUri = "docker:springcloudstream/log-sink-rabbit:1.2.0.RELEASE";
 		String metadataUri = "http://repo.spring.io/libs-release/org/springframework/cloud/stream/app/file-sink-rabbit/1.2.0.RELEASE/file-sink-rabbit-1.2.0.RELEASE.jar";
 		Resource metadataResource = appResourceCommon.getMetadataResource(new URI(appUri), new URI(metadataUri));
-		verify(resourceLoader).getResource(ArgumentMatchers.eq(metadataUri));
+		verify(resourceLoader).getResource(eq(metadataUri));
 	}
 
 	@Test

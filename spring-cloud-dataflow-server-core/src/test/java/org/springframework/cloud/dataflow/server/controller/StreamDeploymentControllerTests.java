@@ -28,16 +28,20 @@ import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
+import org.mockito.ArgumentMatchers;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 
 import org.springframework.cloud.dataflow.core.StreamDefinition;
 import org.springframework.cloud.dataflow.core.StreamDeployment;
+import org.springframework.cloud.dataflow.rest.SkipperStream;
+import org.springframework.cloud.dataflow.rest.UpdateStreamRequest;
 import org.springframework.cloud.dataflow.rest.resource.StreamDeploymentResource;
 import org.springframework.cloud.dataflow.server.repository.StreamDefinitionRepository;
 import org.springframework.cloud.dataflow.server.service.SkipperStreamService;
 import org.springframework.cloud.deployer.spi.app.DeploymentState;
 import org.springframework.cloud.skipper.domain.Deployer;
+import org.springframework.cloud.skipper.domain.PackageIdentifier;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
@@ -52,6 +56,7 @@ import static org.mockito.Mockito.when;
  *
  * @author Eric Bottard
  * @author Ilayaperumal Gopinathan
+ * @author Christian Tzolov
  */
 @RunWith(MockitoJUnitRunner.class)
 public class StreamDeploymentControllerTests {
@@ -85,6 +90,32 @@ public class StreamDeploymentControllerTests {
 		ArgumentCaptor<Map> argumentCaptor2 = ArgumentCaptor.forClass(Map.class);
 		verify(skipperStreamService).deployStream(argumentCaptor1.capture(), argumentCaptor2.capture());
 		Assert.assertEquals(argumentCaptor1.getValue(), "test");
+	}
+
+	@Test
+	public void testUpdateStream() {
+		Map<String, String> deploymentProperties = new HashMap<>();
+		deploymentProperties.put(SkipperStream.SKIPPER_PACKAGE_NAME, "ticktock");
+		deploymentProperties.put(SkipperStream.SKIPPER_PACKAGE_VERSION, "1.0.0");
+		deploymentProperties.put("version.log", "1.2.0.RELEASE");
+
+		UpdateStreamRequest updateStreamRequest = new UpdateStreamRequest("ticktock", new PackageIdentifier(), deploymentProperties);
+		this.controller.update("ticktock", updateStreamRequest);
+		ArgumentCaptor<UpdateStreamRequest> argumentCaptor1 = ArgumentCaptor.forClass(UpdateStreamRequest.class);
+		verify(skipperStreamService).updateStream(ArgumentMatchers.eq("ticktock"), argumentCaptor1.capture());
+		Assert.assertEquals(updateStreamRequest, argumentCaptor1.getValue());
+	}
+
+	@Test
+	public void testStreamManifest() {
+		this.controller.manifest("ticktock", 666);
+		verify(skipperStreamService, times(1)).manifest(ArgumentMatchers.eq("ticktock"), ArgumentMatchers.eq(666));
+	}
+
+	@Test
+	public void testStreamHistory() {
+		this.controller.history("releaseName");
+		verify(skipperStreamService, times(1)).history(ArgumentMatchers.eq("releaseName"));
 	}
 
 	@Test
