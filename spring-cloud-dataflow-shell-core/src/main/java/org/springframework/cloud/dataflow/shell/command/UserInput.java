@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.cloud.dataflow.shell.command.common;
+package org.springframework.cloud.dataflow.shell.command;
 
 /**
  * Abstraction for a mechanism used to get user interactive user input.

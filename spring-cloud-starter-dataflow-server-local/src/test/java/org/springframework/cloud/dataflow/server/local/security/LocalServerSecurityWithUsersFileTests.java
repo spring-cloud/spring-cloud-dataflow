@@ -448,7 +448,7 @@ public class LocalServerSecurityWithUsersFileTests {
 				{ HttpMethod.DELETE, HttpStatus.OK, "/streams/definitions", createOnlyUser, null },
 				{ HttpMethod.DELETE, HttpStatus.UNAUTHORIZED, "/streams/definitions", null, null },
 
-				/* StreamDeploymentController */
+				/* SkipperStreamDeploymentController */
 
 				{ HttpMethod.DELETE, HttpStatus.FORBIDDEN, "/streams/deployments", manageOnlyUser, null },
 				{ HttpMethod.DELETE, HttpStatus.FORBIDDEN, "/streams/deployments", viewOnlyUser, null },

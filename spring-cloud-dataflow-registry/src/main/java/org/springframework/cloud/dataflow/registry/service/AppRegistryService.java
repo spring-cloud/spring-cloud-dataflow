@@ -16,18 +16,19 @@
 package org.springframework.cloud.dataflow.registry.service;
 
 import java.net.URI;
+import java.util.List;
 
 import org.springframework.cloud.dataflow.core.ApplicationType;
-import org.springframework.cloud.dataflow.registry.AppRegistryCommon;
 import org.springframework.cloud.dataflow.registry.domain.AppRegistration;
 import org.springframework.cloud.dataflow.registry.support.NoSuchAppRegistrationException;
+import org.springframework.core.io.Resource;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
 /**
  * @author Christian Tzolov
  */
-public interface AppRegistryService extends AppRegistryCommon {
+public interface AppRegistryService {
 
 	/**
 	 * @param name application name
@@ -91,4 +92,88 @@ public interface AppRegistryService extends AppRegistryCommon {
 	 * @return returns all {@link AppRegistration} versions for given name and type. Uses the pagination.
 	 */
 	Page<AppRegistration> findAllByTypeAndNameIsLike(ApplicationType type, String name, Pageable pageable);
+
+	/**
+	 * Checks if an application with such name and type exists and is set as default.
+	 * @param name applicaiton name
+	 * @param type applicaiton type
+	 * @return true if a default application with this name and type exists.
+	 */
+	boolean appExist(String name, ApplicationType type);
+
+	/**
+	 * @return returns all {@link AppRegistration}'s including multiple version for the same
+	 * application.
+	 */
+	List<AppRegistration> findAll();
+
+	/**
+	 * @param name application name
+	 * @param type application typ
+	 * @return the application with those name and type and default version
+	 */
+	AppRegistration find(String name, ApplicationType type);
+
+	/**
+	 * @param name application name
+	 * @param type application type
+	 * @param version application version
+	 * @return the application with those name and type and default version
+	 */
+	default AppRegistration find(String name, ApplicationType type, String version) {
+		throw new UnsupportedOperationException("version is not supported in Classic mode");
+	}
+
+	/**
+	 * Import bulk of applications from input load files
+	 * @param overwrite if set to true this command will override and existing application
+	 * with same name:type:version If set to false operation will throw an exception in the
+	 * application already exists.
+	 * @param resources list of input load files
+	 * @return list of application being imported
+	 */
+	List<AppRegistration> importAll(boolean overwrite, Resource... resources);
+
+	/**
+	 * Converts application's URI into Spring resource object. Supports File:, Http:, Maven:
+	 * and Docker: schemas
+	 * @param appRegistration the application registration
+	 * @return Returns {@link Resource} instance that corresponds to application's URI
+	 */
+	Resource getAppResource(AppRegistration appRegistration);
+
+	/**
+	 * Converts application's metadata URI into Spring resource object. Supports File:, Http:,
+	 * Maven: and Docker: schemas
+	 * @param appRegistration the application registration
+	 * @return Returns {@link Resource} instance that corresponds to application's metdata URI
+	 */
+	Resource getAppMetadataResource(AppRegistration appRegistration);
+
+	/**
+	 * Save an {@link AppRegistration} instance.
+	 * @param app appRegistration to save
+	 * @return the saved appRegistration
+	 */
+	AppRegistration save(AppRegistration app);
+
+	/**
+	 * @param resource to retrieve the version for
+	 * @return Returns the version for the provided resource
+	 */
+	String getResourceVersion(Resource resource);
+
+	/**
+	 * Returns a string representing the resource with version subtracted
+	 * @param resource to be represented as string.
+	 * @return String representation of the resource.
+	 */
+	String getResourceWithoutVersion(Resource resource);
+
+	/**
+	 * Returns the version for the given resource URI string.
+	 * @param uriString String representation of the resource URI
+	 * @return the resource version
+	 */
+	String getResourceVersion(String uriString);
 }

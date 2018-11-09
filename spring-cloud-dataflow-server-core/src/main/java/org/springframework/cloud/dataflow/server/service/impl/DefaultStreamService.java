@@ -15,11 +15,14 @@
  */
 package org.springframework.cloud.dataflow.server.service.impl;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.apache.commons.logging.Log;
@@ -27,21 +30,31 @@ import org.apache.commons.logging.LogFactory;
 import org.yaml.snakeyaml.DumperOptions;
 import org.yaml.snakeyaml.Yaml;
 
+import org.springframework.cloud.dataflow.core.ApplicationType;
 import org.springframework.cloud.dataflow.core.DataFlowPropertyKeys;
 import org.springframework.cloud.dataflow.core.StreamAppDefinition;
 import org.springframework.cloud.dataflow.core.StreamDefinition;
 import org.springframework.cloud.dataflow.core.StreamDefinitionToDslConverter;
 import org.springframework.cloud.dataflow.core.StreamDeployment;
+import org.springframework.cloud.dataflow.core.dsl.ParseException;
+import org.springframework.cloud.dataflow.core.dsl.StreamNode;
+import org.springframework.cloud.dataflow.core.dsl.StreamParser;
 import org.springframework.cloud.dataflow.rest.SkipperStream;
 import org.springframework.cloud.dataflow.rest.UpdateStreamRequest;
 import org.springframework.cloud.dataflow.rest.util.DeploymentPropertiesUtils;
 import org.springframework.cloud.dataflow.server.audit.domain.AuditActionType;
 import org.springframework.cloud.dataflow.server.audit.domain.AuditOperationType;
 import org.springframework.cloud.dataflow.server.audit.service.AuditRecordService;
+import org.springframework.cloud.dataflow.server.audit.service.AuditServiceUtils;
+import org.springframework.cloud.dataflow.server.controller.StreamAlreadyDeployedException;
+import org.springframework.cloud.dataflow.server.controller.StreamAlreadyDeployingException;
+import org.springframework.cloud.dataflow.server.controller.support.InvalidStreamDefinitionException;
 import org.springframework.cloud.dataflow.server.repository.NoSuchStreamDefinitionException;
 import org.springframework.cloud.dataflow.server.repository.StreamDefinitionRepository;
-import org.springframework.cloud.dataflow.server.service.SkipperStreamService;
+import org.springframework.cloud.dataflow.server.repository.support.SearchPageable;
+import org.springframework.cloud.dataflow.server.service.StreamService;
 import org.springframework.cloud.dataflow.server.service.StreamValidationService;
+import org.springframework.cloud.dataflow.server.service.ValidationStatus;
 import org.springframework.cloud.dataflow.server.stream.SkipperStreamDeployer;
 import org.springframework.cloud.dataflow.server.stream.StreamDeploymentRequest;
 import org.springframework.cloud.deployer.spi.app.DeploymentState;
@@ -52,12 +65,20 @@ import org.springframework.cloud.skipper.domain.Release;
 import org.springframework.cloud.skipper.domain.SpringCloudDeployerApplicationManifest;
 import org.springframework.cloud.skipper.domain.SpringCloudDeployerApplicationManifestReader;
 import org.springframework.cloud.skipper.domain.SpringCloudDeployerApplicationSpec;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
 /**
- * An implementation of {@link SkipperStreamService}.
+ * Performs manipulation on application and deployment properties, expanding shorthand
+ * application property values, resolving wildcard deployment properties, and creates a
+ * {@link StreamDeploymentRequest}.
+ * <p>
+ * The {@link StreamService} deployer is agnostic. For deploying streams on
+ * Skipper use the {@link DefaultStreamService}.
  *
  * @author Mark Pollack
  * @author Ilayaperumal Gopinathan
@@ -65,11 +86,19 @@ import org.springframework.util.StringUtils;
  * @author Gunnar Hillert
  */
 @Transactional
-public class DefaultSkipperStreamService extends AbstractStreamService implements SkipperStreamService {
+public class DefaultStreamService implements StreamService {
 
 	public static final String DEFAULT_SKIPPER_PACKAGE_VERSION = "1.0.0";
 
-	private static Log logger = LogFactory.getLog(DefaultSkipperStreamService.class);
+	private static Log logger = LogFactory.getLog(DefaultStreamService.class);
+
+	/**
+	 * The repository this controller will use for stream CRUD operations.
+	 */
+	protected final StreamDefinitionRepository streamDefinitionRepository;
+	protected final AuditRecordService auditRecordService;
+	protected final AuditServiceUtils auditServiceUtils;
+	protected final StreamValidationService streamValidationService;
 
 	/**
 	 * The repository this controller will use for stream CRUD operations.
@@ -78,16 +107,25 @@ public class DefaultSkipperStreamService extends AbstractStreamService implement
 
 	private final AppDeploymentRequestCreator appDeploymentRequestCreator;
 
-	public DefaultSkipperStreamService(StreamDefinitionRepository streamDefinitionRepository,
+	public DefaultStreamService(StreamDefinitionRepository streamDefinitionRepository,
 			SkipperStreamDeployer skipperStreamDeployer,
 			AppDeploymentRequestCreator appDeploymentRequestCreator,
 			StreamValidationService streamValidationService,
 			AuditRecordService auditRecordService) {
-		super(streamDefinitionRepository, streamValidationService, auditRecordService);
+
 		Assert.notNull(skipperStreamDeployer, "SkipperStreamDeployer must not be null");
 		Assert.notNull(appDeploymentRequestCreator, "AppDeploymentRequestCreator must not be null");
+		Assert.notNull(streamDefinitionRepository, "StreamDefinitionRepository must not be null");
+		Assert.notNull(streamValidationService, "StreamValidationService must not be null");
+		Assert.notNull(auditRecordService, "AuditRecordService must not be null");
+
 		this.skipperStreamDeployer = skipperStreamDeployer;
 		this.appDeploymentRequestCreator = appDeploymentRequestCreator;
+		this.streamDefinitionRepository = streamDefinitionRepository;
+		this.streamValidationService = streamValidationService;
+		this.auditRecordService = auditRecordService;
+		this.auditServiceUtils = new AuditServiceUtils();
+
 	}
 
 	/**
@@ -96,7 +134,6 @@ public class DefaultSkipperStreamService extends AbstractStreamService implement
 	 * @param streamDefinition the stream definition to deploy
 	 * @param deploymentProperties the deployment properties for the stream
 	 */
-	@Override
 	public void doDeployStream(StreamDefinition streamDefinition, Map<String, String> deploymentProperties) {
 		// Extract skipper properties
 		Map<String, String> skipperDeploymentProperties = getSkipperProperties(deploymentProperties);
@@ -132,7 +169,6 @@ public class DefaultSkipperStreamService extends AbstractStreamService implement
 		}
 	}
 
-	@Override
 	public DeploymentState doCalculateStreamState(String name) {
 		return this.skipperStreamDeployer.streamState(name);
 	}
@@ -309,5 +345,210 @@ public class DefaultSkipperStreamService extends AbstractStreamService implement
 	@Override
 	public StreamDeployment info(String streamName) {
 		return this.skipperStreamDeployer.getStreamInfo(streamName);
+	}
+
+	/**
+	 * Create a new stream.
+	 *
+	 * @param streamName stream name
+	 * @param dsl DSL definition for stream
+	 * @param deploy if {@code true}, the stream is deployed upon creation (default is
+	 * {@code false})
+	 * @return the created stream definition already exists
+	 * @throws InvalidStreamDefinitionException if there are errors in parsing the stream DSL,
+	 * resolving the name, or type of applications in the stream
+	 */
+	public StreamDefinition createStream(String streamName, String dsl, boolean deploy) {
+		StreamDefinition streamDefinition = createStreamDefinition(streamName, dsl);
+		List<String> errorMessages = new ArrayList<>();
+
+		for (StreamAppDefinition streamAppDefinition : streamDefinition.getAppDefinitions()) {
+			final String appName = streamAppDefinition.getRegisteredAppName();
+			ApplicationType applicationType = streamAppDefinition.getApplicationType();
+			if (!streamValidationService.isRegistered(appName, applicationType)) {
+				errorMessages.add(
+						String.format("Application name '%s' with type '%s' does not exist in the app registry.",
+								appName, applicationType));
+			}
+		}
+
+		if (!errorMessages.isEmpty()) {
+			throw new InvalidStreamDefinitionException(
+					StringUtils.collectionToDelimitedString(errorMessages, "\n"));
+		}
+
+		final StreamDefinition savedStreamDefintion = this.streamDefinitionRepository.save(streamDefinition);
+
+		if (deploy) {
+			this.deployStream(streamName, new HashMap<>());
+		}
+
+		auditRecordService.populateAndSaveAuditRecord(
+				AuditOperationType.STREAM, AuditActionType.CREATE, streamDefinition.getName(),
+				this.auditServiceUtils.convertStreamDefinitionToAuditData(savedStreamDefintion));
+
+		return streamDefinition;
+
+	}
+
+	public StreamDefinition createStreamDefinition(String streamName, String dsl) {
+
+		try {
+			return new StreamDefinition(streamName, dsl);
+		}
+		catch (ParseException ex) {
+			throw new InvalidStreamDefinitionException(ex.getMessage());
+		}
+	}
+
+	/**
+	 * Deploys the stream with the user provided deployment properties.
+	 * Implementations are responsible for expanding deployment wildcard expressions.
+	 * @param name the name of the stream
+	 * @param deploymentProperties deployment properties to use as passed in from the client.
+	 */
+	public void deployStream(String name, Map<String, String> deploymentProperties) {
+		if (deploymentProperties == null) {
+			deploymentProperties = new HashMap<>();
+		}
+		StreamDefinition streamDefinition = this.streamDefinitionRepository.findOne(name);
+		if (streamDefinition == null) {
+			throw new NoSuchStreamDefinitionException(name);
+		}
+
+		DeploymentState status = this.doCalculateStreamState(name);
+
+		if (DeploymentState.deployed == status) {
+			throw new StreamAlreadyDeployedException(name);
+		}
+		else if (DeploymentState.deploying == status) {
+			throw new StreamAlreadyDeployingException(name);
+		}
+		doDeployStream(streamDefinition, deploymentProperties);
+
+		auditRecordService.populateAndSaveAuditRecordUsingMapData(
+				AuditOperationType.STREAM, AuditActionType.DEPLOY,
+				streamDefinition.getName(),
+				this.auditServiceUtils.convertStreamDefinitionToAuditData(streamDefinition, deploymentProperties));
+	}
+
+	/**
+	 * Delete the stream, including undeloying.
+	 * @param name the name of the stream to delete
+	 */
+	public void deleteStream(String name) {
+		final StreamDefinition streamDefinition = this.streamDefinitionRepository.findOne(name);
+		if (streamDefinition == null) {
+			throw new NoSuchStreamDefinitionException(name);
+		}
+		this.undeployStream(name);
+		this.streamDefinitionRepository.delete(name);
+
+		auditRecordService.populateAndSaveAuditRecord(
+				AuditOperationType.STREAM, AuditActionType.DELETE,
+				streamDefinition.getName(), this.auditServiceUtils.convertStreamDefinitionToAuditData(streamDefinition));
+	}
+
+	/**
+	 * Delete all streams, including undeploying.
+	 */
+	public void deleteAll() {
+		final Iterable<StreamDefinition> streamDefinitions = this.streamDefinitionRepository.findAll();
+		for (StreamDefinition streamDefinition : streamDefinitions) {
+			this.undeployStream(streamDefinition.getName());
+		}
+		this.streamDefinitionRepository.deleteAll();
+
+		for (StreamDefinition streamDefinition : streamDefinitions) {
+			auditRecordService.populateAndSaveAuditRecord(
+					AuditOperationType.STREAM, AuditActionType.DELETE,
+					streamDefinition.getName(), this.auditServiceUtils.convertStreamDefinitionToAuditData(streamDefinition));
+		}
+	}
+
+	/**
+	 * Find streams related to the given stream name.
+	 * @param name name of the stream
+	 * @param nested if should recursively findByNameLike for related stream definitions
+	 * @return a list of related stream definitions
+	 */
+	public List<StreamDefinition> findRelatedStreams(String name, boolean nested) {
+		Set<StreamDefinition> relatedDefinitions = new LinkedHashSet<>();
+		StreamDefinition currentStreamDefinition = streamDefinitionRepository.findOne(name);
+		if (currentStreamDefinition == null) {
+			throw new NoSuchStreamDefinitionException(name);
+		}
+		Iterable<StreamDefinition> definitions = streamDefinitionRepository.findAll();
+		List<StreamDefinition> result = new ArrayList<>(findRelatedDefinitions(currentStreamDefinition, definitions,
+				relatedDefinitions, nested));
+		return result;
+	}
+
+	private Set<StreamDefinition> findRelatedDefinitions(StreamDefinition currentStreamDefinition,
+			Iterable<StreamDefinition> definitions,
+			Set<StreamDefinition> relatedDefinitions,
+			boolean nested) {
+		relatedDefinitions.add(currentStreamDefinition);
+		String currentStreamName = currentStreamDefinition.getName();
+		String indexedStreamName = currentStreamName + ".";
+		for (StreamDefinition definition : definitions) {
+			StreamNode sn = new StreamParser(definition.getName(), definition.getDslText()).parse();
+			if (sn.getSourceDestinationNode() != null) {
+				String nameComponent = sn.getSourceDestinationNode().getDestinationName();
+				if (nameComponent.equals(currentStreamName) || nameComponent.startsWith(indexedStreamName)) {
+					boolean isNewEntry = relatedDefinitions.add(definition);
+					if (nested && isNewEntry) {
+						findRelatedDefinitions(definition, definitions, relatedDefinitions, true);
+					}
+				}
+			}
+		}
+		return relatedDefinitions;
+	}
+
+	/**
+	 * Find stream definitions where the findByNameLike parameter
+	 * @param pageable Pagination information
+	 * @param search the findByNameLike parameter to use
+	 * @return Page of stream definitions
+	 */
+	public Page<StreamDefinition> findDefinitionByNameLike(Pageable pageable, String search) {
+		Page<StreamDefinition> streamDefinitions;
+		if (search != null) {
+			final SearchPageable searchPageable = new SearchPageable(pageable, search);
+			searchPageable.addColumns("DEFINITION_NAME", "DEFINITION");
+			streamDefinitions = streamDefinitionRepository.findByNameLike(searchPageable);
+			long count = streamDefinitions.getContent().size();
+			long to = Math.min(count, pageable.getOffset() + pageable.getPageSize());
+			streamDefinitions = new PageImpl<>(streamDefinitions.getContent(), pageable,
+					streamDefinitions.getTotalElements());
+		}
+		else {
+			streamDefinitions = streamDefinitionRepository.findAll(pageable);
+		}
+		return streamDefinitions;
+	}
+
+	/**
+	 * Find a stream definition by name.
+	 * @param streamDefinitionName the name of the stream definition
+	 * @return the stream definition
+	 * @throws NoSuchStreamDefinitionException if the definition can not be found.
+	 */
+	public StreamDefinition findOne(String streamDefinitionName) {
+		StreamDefinition definition = streamDefinitionRepository.findOne(streamDefinitionName);
+		if (definition == null) {
+			throw new NoSuchStreamDefinitionException(streamDefinitionName);
+		}
+		return definition;
+	}
+
+	/**
+	 * Verifies that all apps in the stream are valid.
+	 * @param name the name of the definition
+	 * @return  {@link ValidationStatus} for a stream.
+	 */
+	public ValidationStatus validateStream(String name) {
+		return this.streamValidationService.validateStream(name);
 	}
 }

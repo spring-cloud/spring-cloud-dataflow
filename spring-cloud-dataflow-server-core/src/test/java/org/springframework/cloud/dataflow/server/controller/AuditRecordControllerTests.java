@@ -29,7 +29,7 @@ import org.springframework.cloud.dataflow.server.audit.domain.AuditRecord;
 import org.springframework.cloud.dataflow.server.audit.repository.AuditRecordRepository;
 import org.springframework.cloud.dataflow.server.configuration.TestDependencies;
 import org.springframework.cloud.dataflow.server.repository.StreamDefinitionRepository;
-import org.springframework.cloud.dataflow.server.service.impl.AbstractStreamService;
+import org.springframework.cloud.dataflow.server.service.StreamService;
 import org.springframework.cloud.skipper.client.SkipperClient;
 import org.springframework.cloud.skipper.domain.Info;
 import org.springframework.cloud.skipper.domain.PackageMetadata;
@@ -114,9 +114,9 @@ public class AuditRecordControllerTests {
 	/**
 	 * Verify that the correct number of {@link AuditRecord}s are persisted to the database.
 	 *
-	 * Keep in mind that {@link AbstractStreamService#deleteStream(String)}
+	 * Keep in mind that {@link StreamService#deleteStream(String)}
 	 * does not only invokes {@link StreamDefinitionRepository#delete(String)} but also
-	 * {@link AbstractStreamService#undeployStream(String).
+	 * {@link StreamService#undeployStream(String).
 	 */
 	@Test
 	public void testVerifyNumberOfAuditRecords() throws Exception {

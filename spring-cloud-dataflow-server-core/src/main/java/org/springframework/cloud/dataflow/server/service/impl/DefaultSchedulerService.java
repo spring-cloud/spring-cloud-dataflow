@@ -28,8 +28,8 @@ import org.springframework.cloud.dataflow.core.ApplicationType;
 import org.springframework.cloud.dataflow.core.TaskDefinition;
 import org.springframework.cloud.dataflow.core.dsl.TaskNode;
 import org.springframework.cloud.dataflow.core.dsl.TaskParser;
-import org.springframework.cloud.dataflow.registry.AppRegistryCommon;
 import org.springframework.cloud.dataflow.registry.domain.AppRegistration;
+import org.springframework.cloud.dataflow.registry.service.AppRegistryService;
 import org.springframework.cloud.dataflow.rest.util.DeploymentPropertiesUtils;
 import org.springframework.cloud.dataflow.server.audit.domain.AuditActionType;
 import org.springframework.cloud.dataflow.server.audit.domain.AuditOperationType;
@@ -63,7 +63,7 @@ public class DefaultSchedulerService implements SchedulerService {
 	private CommonApplicationProperties commonApplicationProperties;
 	private Scheduler scheduler;
 	private TaskDefinitionRepository taskDefinitionRepository;
-	private AppRegistryCommon registry;
+	private AppRegistryService registry;
 	private final TaskConfigurationProperties taskConfigurationProperties;
 	private final DataSourceProperties dataSourceProperties;
 	private final String dataflowServerUri;
@@ -74,7 +74,7 @@ public class DefaultSchedulerService implements SchedulerService {
 
 	public DefaultSchedulerService(CommonApplicationProperties commonApplicationProperties,
 			Scheduler scheduler, TaskDefinitionRepository taskDefinitionRepository,
-			AppRegistryCommon registry, ResourceLoader resourceLoader,
+			AppRegistryService registry, ResourceLoader resourceLoader,
 			TaskConfigurationProperties taskConfigurationProperties,
 			DataSourceProperties dataSourceProperties, String dataflowServerUri,
 			ApplicationConfigurationMetadataResolver metaDataResolver,
@@ -82,7 +82,7 @@ public class DefaultSchedulerService implements SchedulerService {
 			AuditRecordService auditRecordService) {
 		Assert.notNull(commonApplicationProperties, "commonApplicationProperties must not be null");
 		Assert.notNull(scheduler, "scheduler must not be null");
-		Assert.notNull(registry, "UriRegistry must not be null");
+		Assert.notNull(registry, "AppRegistryService must not be null");
 		Assert.notNull(resourceLoader, "ResourceLoader must not be null");
 		Assert.notNull(taskDefinitionRepository, "TaskDefinitionRepository must not be null");
 		Assert.notNull(taskConfigurationProperties, "taskConfigurationProperties must not be null");

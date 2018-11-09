@@ -91,8 +91,7 @@ public class BaseShellAutoConfiguration {
 	}
 
 	@Configuration
-	@ComponentScan({ "org.springframework.shell.commands", "org.springframework.cloud.dataflow.shell.command.common",
-			"org.springframework.cloud.dataflow.shell.command.skipper",
+	@ComponentScan({ "org.springframework.shell.commands", "org.springframework.cloud.dataflow.shell.command",
 			"org.springframework.cloud.dataflow.shell.converter", "org.springframework.cloud.dataflow.shell.config" })
 	public static class SkipperRegisterInternalCommands {
 

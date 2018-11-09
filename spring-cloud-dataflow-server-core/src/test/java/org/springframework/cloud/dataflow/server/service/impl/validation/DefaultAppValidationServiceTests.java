@@ -29,8 +29,8 @@ import org.springframework.boot.autoconfigure.jdbc.EmbeddedDataSourceConfigurati
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.cloud.dataflow.core.ApplicationType;
-import org.springframework.cloud.dataflow.registry.AppRegistryCommon;
 import org.springframework.cloud.dataflow.registry.domain.AppRegistration;
+import org.springframework.cloud.dataflow.registry.service.AppRegistryService;
 import org.springframework.cloud.dataflow.server.DockerValidatorProperties;
 import org.springframework.cloud.dataflow.server.config.apps.CommonApplicationProperties;
 import org.springframework.cloud.dataflow.server.configuration.TaskServiceDependencies;
@@ -57,7 +57,7 @@ import static org.mockito.Mockito.when;
 public class DefaultAppValidationServiceTests {
 
 	@Autowired
-	private AppRegistryCommon appRegistry;
+	private AppRegistryService appRegistry;
 
 	@Autowired
 	DockerValidatorProperties dockerValidatorProperties;
@@ -104,21 +104,21 @@ public class DefaultAppValidationServiceTests {
 		assertFalse(appValidationService.validate("AAA", ApplicationType.task));
 	}
 
-	private void initializeSuccessfulRegistry(AppRegistryCommon appRegistry) {
+	private void initializeSuccessfulRegistry(AppRegistryService appRegistry) {
 		when(appRegistry.find(anyString(), any(ApplicationType.class))).thenReturn(
 				new AppRegistration("some-name", ApplicationType.task, URI.create("http://helloworld")));
 		when(appRegistry.getAppResource(any())).thenReturn(new FileSystemResource("src/test/resources/apps/foo-task"));
 		when(appRegistry.getAppMetadataResource(any())).thenReturn(null);
 	}
 
-	private void initializeDockerRegistry(AppRegistryCommon appRegistry, String imageUrl) {
+	private void initializeDockerRegistry(AppRegistryService appRegistry, String imageUrl) {
 		when(appRegistry.find(anyString(), any(ApplicationType.class))).thenReturn(
 				new AppRegistration("some-name", ApplicationType.task, URI.create(imageUrl)));
 		when(appRegistry.getAppResource(any())).thenReturn(new DockerResource(imageUrl));
 		when(appRegistry.getAppMetadataResource(any())).thenReturn(null);
 	}
 
-	private void initializeFailRegistry(AppRegistryCommon appRegistry) throws IllegalArgumentException {
+	private void initializeFailRegistry(AppRegistryService appRegistry) throws IllegalArgumentException {
 		when(appRegistry.find("BBB", ApplicationType.task)).thenThrow(new IllegalArgumentException(
 				String.format("Application name '%s' with type '%s' does not exist in the app registry.", "fake",
 						ApplicationType.task)));

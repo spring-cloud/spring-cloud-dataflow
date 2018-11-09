@@ -24,8 +24,8 @@ import org.springframework.cloud.dataflow.configuration.metadata.ApplicationConf
 import org.springframework.cloud.dataflow.core.ApplicationType;
 import org.springframework.cloud.dataflow.core.TaskDefinition;
 import org.springframework.cloud.dataflow.core.dsl.CheckPointedParseException;
-import org.springframework.cloud.dataflow.registry.AppRegistryCommon;
 import org.springframework.cloud.dataflow.registry.domain.AppRegistration;
+import org.springframework.cloud.dataflow.registry.service.AppRegistryService;
 
 /**
  * Provides completion proposals when the user has typed the two dashes that precede an
@@ -41,7 +41,7 @@ class ConfigurationPropertyNameAfterDashDashTaskRecoveryStrategy
 
 	private final ProposalsCollectorSupportUtils collectorSupport;
 
-	ConfigurationPropertyNameAfterDashDashTaskRecoveryStrategy(AppRegistryCommon appRegistry,
+	ConfigurationPropertyNameAfterDashDashTaskRecoveryStrategy(AppRegistryService appRegistry,
 			ApplicationConfigurationMetadataResolver metadataResolver) {
 		super(CheckPointedParseException.class, "file --");
 		this.collectorSupport = new ProposalsCollectorSupportUtils(appRegistry, metadataResolver);

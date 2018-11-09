@@ -36,9 +36,10 @@ import org.springframework.cloud.dataflow.configuration.metadata.ApplicationConf
 import org.springframework.cloud.dataflow.configuration.metadata.BootApplicationConfigurationMetadataResolver;
 import org.springframework.cloud.dataflow.core.ApplicationType;
 import org.springframework.cloud.dataflow.core.StreamDefinition;
-import org.springframework.cloud.dataflow.registry.AbstractAppRegistryCommon;
-import org.springframework.cloud.dataflow.registry.AppRegistryCommon;
 import org.springframework.cloud.dataflow.registry.domain.AppRegistration;
+import org.springframework.cloud.dataflow.registry.repository.AppRegistrationRepository;
+import org.springframework.cloud.dataflow.registry.service.AppRegistryService;
+import org.springframework.cloud.dataflow.registry.service.DefaultAppRegistryService;
 import org.springframework.cloud.dataflow.registry.support.AppResourceCommon;
 import org.springframework.cloud.dataflow.server.repository.InMemoryStreamDefinitionRepository;
 import org.springframework.cloud.dataflow.server.repository.StreamDefinitionRepository;
@@ -46,13 +47,13 @@ import org.springframework.cloud.deployer.resource.maven.MavenProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.io.FileSystemResourceLoader;
-import org.springframework.core.io.ResourceLoader;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.util.Assert;
 
 import static org.hamcrest.Matchers.hasItems;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
+import static org.mockito.Mockito.mock;
 
 /**
  * @author Ilayaperumal Gopinathan
@@ -115,17 +116,13 @@ public class TabOnTapCompletionProviderTests {
 
 		private static final File ROOT = new File("src/test/resources/apps");
 
-		private static final FileFilter FILTER = new FileFilter() {
-			@Override
-			public boolean accept(File pathname) {
-				return pathname.isDirectory() && pathname.getName().matches(".+-.+");
-			}
-		};
+		private static final FileFilter FILTER = pathname -> pathname.isDirectory() && pathname.getName().matches(".+-.+");
 
 		@Bean
-		public AppRegistryCommon appRegistry() {
-			final ResourceLoader resourceLoader = new FileSystemResourceLoader();
-			return new AbstractAppRegistryCommon(new AppResourceCommon(new MavenProperties(), resourceLoader)) {
+		public AppRegistryService appRegistry() {
+
+			return new DefaultAppRegistryService(mock(AppRegistrationRepository.class),
+					new AppResourceCommon(new MavenProperties(), new FileSystemResourceLoader())) {
 
 				@Override
 				public boolean appExist(String name, ApplicationType type) {
@@ -167,7 +164,6 @@ public class TabOnTapCompletionProviderTests {
 					return null;
 				}
 
-				@Override
 				protected boolean isOverwrite(AppRegistration app, boolean overwrite) {
 					return false;
 				}

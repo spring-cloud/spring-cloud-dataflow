@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.cloud.dataflow.shell.command;
+package org.springframework.cloud.dataflow.shell;
 
 import java.io.FileNotFoundException;
 import java.util.concurrent.ExecutorService;
@@ -36,12 +36,9 @@ import org.springframework.boot.autoconfigure.orm.jpa.HibernateJpaAutoConfigurat
 import org.springframework.boot.autoconfigure.session.SessionAutoConfiguration;
 import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.cloud.dataflow.core.ApplicationType;
-import org.springframework.cloud.dataflow.registry.AppRegistryCommon;
 import org.springframework.cloud.dataflow.registry.domain.AppRegistration;
 import org.springframework.cloud.dataflow.registry.service.AppRegistryService;
 import org.springframework.cloud.dataflow.rest.client.config.DataFlowClientAutoConfiguration;
-import org.springframework.cloud.dataflow.shell.AbstractShellIntegrationTest;
-import org.springframework.cloud.dataflow.shell.EnableDataFlowShell;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.util.ResourceUtils;
 
@@ -80,7 +77,7 @@ public class ShellCommandsTests extends AbstractShellIntegrationTest {
 				"commands/registerTask_timestamp.txt,commands/unregisterTask_timestamp.txt,commands/registerSink_log.txt,commands/unregisterSink_log.txt");
 		assertTrue(runShell(commandFiles));
 
-		assertThat("Registry should be empty", AbstractShellIntegrationTest.applicationContext.getBean(AppRegistryCommon.class).findAll(),
+		assertThat("Registry should be empty", AbstractShellIntegrationTest.applicationContext.getBean(AppRegistryService.class).findAll(),
 				Matchers.empty());
 	}
 
@@ -94,7 +91,7 @@ public class ShellCommandsTests extends AbstractShellIntegrationTest {
 	}
 
 	private void assertAppExists(String name, ApplicationType type) {
-		AppRegistryCommon registry = AbstractShellIntegrationTest.applicationContext.getBean(AppRegistryCommon.class);
+		AppRegistryService registry = AbstractShellIntegrationTest.applicationContext.getBean(AppRegistryService.class);
 		assertTrue(String.format("'%s' application should be registered", name), registry.appExist(name, type));
 	}
 

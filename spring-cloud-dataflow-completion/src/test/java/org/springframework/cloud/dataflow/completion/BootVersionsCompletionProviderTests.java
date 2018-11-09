@@ -28,20 +28,21 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.cloud.dataflow.configuration.metadata.ApplicationConfigurationMetadataResolver;
 import org.springframework.cloud.dataflow.configuration.metadata.BootApplicationConfigurationMetadataResolver;
 import org.springframework.cloud.dataflow.core.ApplicationType;
-import org.springframework.cloud.dataflow.registry.AbstractAppRegistryCommon;
-import org.springframework.cloud.dataflow.registry.AppRegistryCommon;
 import org.springframework.cloud.dataflow.registry.domain.AppRegistration;
+import org.springframework.cloud.dataflow.registry.repository.AppRegistrationRepository;
+import org.springframework.cloud.dataflow.registry.service.AppRegistryService;
+import org.springframework.cloud.dataflow.registry.service.DefaultAppRegistryService;
 import org.springframework.cloud.dataflow.registry.support.AppResourceCommon;
 import org.springframework.cloud.deployer.resource.maven.MavenProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.io.FileSystemResourceLoader;
-import org.springframework.core.io.ResourceLoader;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import static org.hamcrest.CoreMatchers.hasItems;
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
+import static org.mockito.Mockito.mock;
 
 /**
  * Tests that the completion mechanism knows how to cope with different versions of Spring
@@ -49,6 +50,7 @@ import static org.junit.Assert.assertThat;
  * (e.g. enum values completion).
  *
  * @author Eric Bottard
+ * @author Christian Tzolov
  */
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = { CompletionConfiguration.class, BootVersionsCompletionProviderTests.Mocks.class })
@@ -103,9 +105,10 @@ public class BootVersionsCompletionProviderTests {
 						+ "/boot_versions");
 
 		@Bean
-		public AppRegistryCommon appRegistry() {
-			final ResourceLoader resourceLoader = new FileSystemResourceLoader();
-			return new AbstractAppRegistryCommon(new AppResourceCommon(new MavenProperties(), resourceLoader)) {
+		public AppRegistryService appRegistry() {
+
+			return new DefaultAppRegistryService(mock(AppRegistrationRepository.class),
+					new AppResourceCommon(new MavenProperties(), new FileSystemResourceLoader())) {
 
 				@Override
 				public boolean appExist(String name, ApplicationType type) {

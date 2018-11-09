@@ -311,7 +311,7 @@ public class LocalServerSecurityWithSingleUserTests {
 				{ HttpMethod.DELETE, HttpStatus.OK, "/streams/definitions", singleUser, null },
 				{ HttpMethod.DELETE, HttpStatus.UNAUTHORIZED, "/streams/definitions", null, null },
 
-				/* StreamDeploymentController */
+				/* SkipperStreamDeploymentController */
 
 				{ HttpMethod.DELETE, HttpStatus.OK, "/streams/deployments", singleUser, null },
 				{ HttpMethod.DELETE, HttpStatus.UNAUTHORIZED, "/streams/deployments", null, null },

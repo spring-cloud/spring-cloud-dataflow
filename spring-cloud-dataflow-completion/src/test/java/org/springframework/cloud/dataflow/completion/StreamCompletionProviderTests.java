@@ -35,7 +35,7 @@ import static org.junit.Assert.assertThat;
  * Integration tests for StreamCompletionProvider.
  * <p>
  * <p>
- * These tests work hand in hand with a custom {@link org.springframework.cloud.dataflow.registry.AppRegistryCommon} and
+ * These tests work hand in hand with a custom {@link org.springframework.cloud.dataflow.registry.service.AppRegistryService} and
  * {@link ApplicationConfigurationMetadataResolver} to provide completions for a fictional
  * set of well known apps.
  * </p>

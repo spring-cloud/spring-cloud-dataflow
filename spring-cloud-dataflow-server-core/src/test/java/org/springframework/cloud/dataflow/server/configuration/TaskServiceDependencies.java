@@ -25,7 +25,6 @@ import javax.sql.DataSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceProperties;
 import org.springframework.cloud.dataflow.configuration.metadata.ApplicationConfigurationMetadataResolver;
-import org.springframework.cloud.dataflow.registry.AppRegistryCommon;
 import org.springframework.cloud.dataflow.registry.service.AppRegistryService;
 import org.springframework.cloud.dataflow.server.DockerValidatorProperties;
 import org.springframework.cloud.dataflow.server.audit.service.AuditRecordService;
@@ -97,11 +96,10 @@ public class TaskServiceDependencies {
 	}
 
 	@Bean
-	public TaskValidationService taskValidationService(AppRegistryCommon appRegistryCommon,
-													   DockerValidatorProperties dockerValidatorProperties,
-													   TaskDefinitionRepository taskDefinitionRepository,
-													   TaskConfigurationProperties taskConfigurationProperties) {
-		return new DefaultTaskValidationService(appRegistryCommon,
+	public TaskValidationService taskValidationService(AppRegistryService appRegistry,
+		DockerValidatorProperties dockerValidatorProperties, TaskDefinitionRepository taskDefinitionRepository,
+			TaskConfigurationProperties taskConfigurationProperties) {
+		return new DefaultTaskValidationService(appRegistry,
 				dockerValidatorProperties,
 				taskDefinitionRepository,
 				taskConfigurationProperties.getComposedTaskRunnerName());
@@ -175,7 +173,7 @@ public class TaskServiceDependencies {
 
 	@Bean
 	public DefaultTaskService defaultTaskService(TaskDefinitionRepository taskDefinitionRepository,
-			TaskExplorer taskExplorer, TaskRepository taskExecutionRepository, AppRegistryCommon appRegistry,
+			TaskExplorer taskExplorer, TaskRepository taskExecutionRepository, AppRegistryService appRegistry,
 			TaskLauncher taskLauncher, ApplicationConfigurationMetadataResolver metadataResolver,
 			TaskConfigurationProperties taskConfigurationProperties, AuditRecordService auditRecordService,
 			CommonApplicationProperties commonApplicationProperties, TaskValidationService taskValidationService) {
@@ -188,7 +186,7 @@ public class TaskServiceDependencies {
 	@Bean
 	public SchedulerService schedulerService(CommonApplicationProperties commonApplicationProperties,
 			Scheduler scheduler, TaskDefinitionRepository taskDefinitionRepository,
-			AppRegistryCommon registry, ResourceLoader resourceLoader,
+			AppRegistryService registry, ResourceLoader resourceLoader,
 			DataSourceProperties dataSourceProperties,
 			ApplicationConfigurationMetadataResolver metaDataResolver,
 			SchedulerServiceProperties schedulerServiceProperties,

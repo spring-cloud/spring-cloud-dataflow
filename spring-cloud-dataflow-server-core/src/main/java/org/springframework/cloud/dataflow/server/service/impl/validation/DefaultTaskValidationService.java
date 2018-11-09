@@ -19,7 +19,7 @@ import org.springframework.cloud.dataflow.core.ApplicationType;
 import org.springframework.cloud.dataflow.core.TaskDefinition;
 import org.springframework.cloud.dataflow.core.dsl.TaskNode;
 import org.springframework.cloud.dataflow.core.dsl.TaskParser;
-import org.springframework.cloud.dataflow.registry.AppRegistryCommon;
+import org.springframework.cloud.dataflow.registry.service.AppRegistryService;
 import org.springframework.cloud.dataflow.server.DockerValidatorProperties;
 import org.springframework.cloud.dataflow.server.repository.TaskDefinitionRepository;
 import org.springframework.cloud.dataflow.server.service.TaskValidationService;
@@ -42,16 +42,16 @@ public class DefaultTaskValidationService extends DefaultValidationService imple
 
 	private final String composedTaskRunnerName;
 
-	public DefaultTaskValidationService(AppRegistryCommon appRegistry,
-										DockerValidatorProperties dockerValidatorProperties,
-										TaskDefinitionRepository taskDefinitionRepository,
-										String composedTaskRunnerName) {
+	public DefaultTaskValidationService(AppRegistryService appRegistry,
+			DockerValidatorProperties dockerValidatorProperties, TaskDefinitionRepository taskDefinitionRepository,
+			String composedTaskRunnerName) {
 		super(appRegistry, dockerValidatorProperties);
 		Assert.notNull(taskDefinitionRepository, "TaskDefinitionRepository must not be null");
 		Assert.isTrue(StringUtils.hasText(composedTaskRunnerName), "ComposedTaskRunnerName must have a value");
 		this.taskDefinitionRepository = taskDefinitionRepository;
 		this.composedTaskRunnerName = composedTaskRunnerName;
 	}
+
 	@Override
 	public ValidationStatus validateTask(String name) {
 		TaskDefinition definition = this.taskDefinitionRepository.findByNameRequired(name);

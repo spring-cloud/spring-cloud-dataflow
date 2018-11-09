@@ -25,8 +25,8 @@ import org.springframework.cloud.dataflow.core.StreamDefinition;
 import org.springframework.cloud.dataflow.core.dsl.CheckPointedParseException;
 import org.springframework.cloud.dataflow.core.dsl.Token;
 import org.springframework.cloud.dataflow.core.dsl.TokenKind;
-import org.springframework.cloud.dataflow.registry.AppRegistryCommon;
 import org.springframework.cloud.dataflow.registry.domain.AppRegistration;
+import org.springframework.cloud.dataflow.registry.service.AppRegistryService;
 
 /**
  * Attempts to fill in possible values after a {@literal --foo=} dangling construct in the
@@ -44,7 +44,7 @@ public class ConfigurationPropertyValueHintRecoveryStrategy
 	@Autowired
 	private ValueHintProvider[] valueHintProviders = new ValueHintProvider[0];
 
-	ConfigurationPropertyValueHintRecoveryStrategy(AppRegistryCommon appRegistry,
+	ConfigurationPropertyValueHintRecoveryStrategy(AppRegistryService appRegistry,
 			ApplicationConfigurationMetadataResolver metadataResolver) {
 		super(CheckPointedParseException.class, "foo --bar=", "foo | wizz --bar=");
 		this.collectorSupport = new ProposalsCollectorSupportUtils(appRegistry, metadataResolver);

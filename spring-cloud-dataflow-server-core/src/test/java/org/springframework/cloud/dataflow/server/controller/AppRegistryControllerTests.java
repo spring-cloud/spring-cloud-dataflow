@@ -35,8 +35,8 @@ import org.springframework.cloud.dataflow.registry.support.NoSuchAppRegistration
 import org.springframework.cloud.dataflow.server.configuration.TestDependencies;
 import org.springframework.cloud.dataflow.server.registry.DataFlowAppRegistryPopulator;
 import org.springframework.cloud.dataflow.server.repository.StreamDefinitionRepository;
-import org.springframework.cloud.dataflow.server.service.SkipperStreamService;
-import org.springframework.cloud.dataflow.server.service.impl.DefaultSkipperStreamServiceIntegrationTests;
+import org.springframework.cloud.dataflow.server.service.StreamService;
+import org.springframework.cloud.dataflow.server.service.impl.DefaultStreamServiceIntegrationTests;
 import org.springframework.cloud.dataflow.server.support.MockUtils;
 import org.springframework.cloud.dataflow.server.support.TestResourceUtils;
 import org.springframework.cloud.skipper.ReleaseNotFoundException;
@@ -79,7 +79,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 		"spring.datasource.url=jdbc:h2:tcp://localhost:19092/mem:dataflow" })
 @DirtiesContext(classMode = ClassMode.AFTER_EACH_TEST_METHOD)
 @Transactional
-public class SkipperAppRegistryControllerTests {
+public class AppRegistryControllerTests {
 
 	private MockMvc mockMvc;
 
@@ -90,7 +90,7 @@ public class SkipperAppRegistryControllerTests {
 	private AppRegistryService appRegistryService;
 
 	@Autowired
-	private SkipperStreamService streamService;
+	private StreamService streamService;
 
 	@MockBean
 	private SkipperClient skipperClient;
@@ -343,7 +343,7 @@ public class SkipperAppRegistryControllerTests {
 
 		// configure mock SkipperClient
 		String expectedReleaseManifest = StreamUtils.copyToString(
-				TestResourceUtils.qualifiedResource(DefaultSkipperStreamServiceIntegrationTests.class,
+				TestResourceUtils.qualifiedResource(DefaultStreamServiceIntegrationTests.class,
 						"deployManifest.yml").getInputStream(),
 				Charset.defaultCharset());
 		Release release = new Release();

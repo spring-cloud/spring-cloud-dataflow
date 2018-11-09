@@ -109,13 +109,13 @@ public class RootController {
 							.withRel("runtime/apps/instances")));
 			root.add(ControllerLinkBuilder.linkTo(MetricsController.class).withRel("metrics/streams"));
 
-			root.add(ControllerLinkBuilder.linkTo(SkipperStreamDeploymentController.class).withRel("streams/deployments"));
-			root.add(ControllerLinkBuilder.linkTo(ControllerLinkBuilder.methodOn(SkipperStreamDeploymentController.class).deploy(null, null)).withRel("streams/deployments/{name}"));
-			root.add(ControllerLinkBuilder.linkTo(ControllerLinkBuilder.methodOn(SkipperStreamDeploymentController.class).history(null)).withRel("streams/deployments/history/{name}"));
-			root.add(ControllerLinkBuilder.linkTo(ControllerLinkBuilder.methodOn(SkipperStreamDeploymentController.class).manifest(null, null)).withRel("streams/deployments/manifest/{name}/{version}"));
-			root.add(ControllerLinkBuilder.linkTo(ControllerLinkBuilder.methodOn(SkipperStreamDeploymentController.class).platformList()).withRel("streams/deployments/platform/list"));
-			root.add(ControllerLinkBuilder.linkTo(ControllerLinkBuilder.methodOn(SkipperStreamDeploymentController.class).rollback(null, null)).withRel("streams/deployments/rollback/{name}/{version}"));
-			root.add(ControllerLinkBuilder.linkTo(ControllerLinkBuilder.methodOn(SkipperStreamDeploymentController.class).update(null, null)).withRel("streams/deployments/update/{name}"));
+			root.add(ControllerLinkBuilder.linkTo(StreamDeploymentController.class).withRel("streams/deployments"));
+			root.add(ControllerLinkBuilder.linkTo(ControllerLinkBuilder.methodOn(StreamDeploymentController.class).deploy(null, null)).withRel("streams/deployments/{name}"));
+			root.add(ControllerLinkBuilder.linkTo(ControllerLinkBuilder.methodOn(StreamDeploymentController.class).history(null)).withRel("streams/deployments/history/{name}"));
+			root.add(ControllerLinkBuilder.linkTo(ControllerLinkBuilder.methodOn(StreamDeploymentController.class).manifest(null, null)).withRel("streams/deployments/manifest/{name}/{version}"));
+			root.add(ControllerLinkBuilder.linkTo(ControllerLinkBuilder.methodOn(StreamDeploymentController.class).platformList()).withRel("streams/deployments/platform/list"));
+			root.add(ControllerLinkBuilder.linkTo(ControllerLinkBuilder.methodOn(StreamDeploymentController.class).rollback(null, null)).withRel("streams/deployments/rollback/{name}/{version}"));
+			root.add(ControllerLinkBuilder.linkTo(ControllerLinkBuilder.methodOn(StreamDeploymentController.class).update(null, null)).withRel("streams/deployments/update/{name}"));
 
 			root.add(
 					unescapeTemplateVariables(entityLinks.linkToSingleResource(StreamDeploymentResource.class, "{name}")

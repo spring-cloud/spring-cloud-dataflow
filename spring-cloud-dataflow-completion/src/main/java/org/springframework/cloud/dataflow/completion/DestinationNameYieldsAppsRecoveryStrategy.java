@@ -20,8 +20,8 @@ import java.util.List;
 
 import org.springframework.cloud.dataflow.core.ApplicationType;
 import org.springframework.cloud.dataflow.core.dsl.CheckPointedParseException;
-import org.springframework.cloud.dataflow.registry.AppRegistryCommon;
 import org.springframework.cloud.dataflow.registry.domain.AppRegistration;
+import org.springframework.cloud.dataflow.registry.service.AppRegistryService;
 
 /**
  * Proposes app names when the user has typed a destination redirection.
@@ -32,9 +32,9 @@ import org.springframework.cloud.dataflow.registry.domain.AppRegistration;
 class DestinationNameYieldsAppsRecoveryStrategy
 		extends StacktraceFingerprintingRecoveryStrategy<CheckPointedParseException> {
 
-	private final AppRegistryCommon appRegistry;
+	private final AppRegistryService appRegistry;
 
-	public DestinationNameYieldsAppsRecoveryStrategy(AppRegistryCommon appRegistry) {
+	public DestinationNameYieldsAppsRecoveryStrategy(AppRegistryService appRegistry) {
 		super(CheckPointedParseException.class, ":foo >", ":foo > ");
 		this.appRegistry = appRegistry;
 	}

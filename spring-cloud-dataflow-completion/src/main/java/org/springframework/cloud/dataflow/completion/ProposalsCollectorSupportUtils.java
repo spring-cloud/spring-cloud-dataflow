@@ -27,8 +27,8 @@ import org.springframework.cloud.dataflow.core.ApplicationType;
 import org.springframework.cloud.dataflow.core.dsl.CheckPointedParseException;
 import org.springframework.cloud.dataflow.core.dsl.Token;
 import org.springframework.cloud.dataflow.core.dsl.TokenKind;
-import org.springframework.cloud.dataflow.registry.AppRegistryCommon;
 import org.springframework.cloud.dataflow.registry.domain.AppRegistration;
+import org.springframework.cloud.dataflow.registry.service.AppRegistryService;
 import org.springframework.core.io.Resource;
 
 /**
@@ -41,11 +41,11 @@ import org.springframework.core.io.Resource;
  */
 class ProposalsCollectorSupportUtils {
 
-	private final AppRegistryCommon appRegistry;
+	private final AppRegistryService appRegistry;
 
 	private final ApplicationConfigurationMetadataResolver metadataResolver;
 
-	ProposalsCollectorSupportUtils(AppRegistryCommon appRegistry, ApplicationConfigurationMetadataResolver metadataResolver) {
+	ProposalsCollectorSupportUtils(AppRegistryService appRegistry, ApplicationConfigurationMetadataResolver metadataResolver) {
 		this.appRegistry = appRegistry;
 		this.metadataResolver = metadataResolver;
 	}

@@ -26,7 +26,7 @@ import org.springframework.cloud.dataflow.core.StreamDeployment;
 import org.springframework.cloud.dataflow.rest.UpdateStreamRequest;
 import org.springframework.cloud.dataflow.server.configuration.TestDependencies;
 import org.springframework.cloud.dataflow.server.repository.StreamDefinitionRepository;
-import org.springframework.cloud.dataflow.server.service.SkipperStreamService;
+import org.springframework.cloud.dataflow.server.service.StreamService;
 import org.springframework.cloud.dataflow.server.stream.SkipperStreamDeployer;
 import org.springframework.cloud.dataflow.server.support.PlatformUtils;
 import org.springframework.test.annotation.DirtiesContext;
@@ -44,13 +44,13 @@ import static org.mockito.Mockito.when;
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = TestDependencies.class)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
-public class DefaultSkipperStreamServiceUpgradeStreamTests {
+public class DefaultStreamServiceUpgradeStreamTests {
 
 	@MockBean
 	private StreamDefinitionRepository streamDefinitionRepository;
 
 	@Autowired
-	private SkipperStreamService streamService;
+	private StreamService streamService;
 
 	@MockBean
 	private SkipperStreamDeployer skipperStreamDeployer;

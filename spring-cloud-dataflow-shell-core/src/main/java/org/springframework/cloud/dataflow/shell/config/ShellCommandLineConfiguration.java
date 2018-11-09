@@ -38,7 +38,7 @@ public class ShellCommandLineConfiguration {
 	 * @return the interactive shell
 	 */
 	@Bean
-	@ConditionalOnMissingBean(type = "org.springframework.cloud.dataflow.registry.AppRegistryCommon")
+	@ConditionalOnMissingBean(type = "org.springframework.cloud.dataflow.registry.service.AppRegistryService")
 	public ShellCommandLineRunner commandLineRunner() {
 		return new ShellCommandLineRunner();
 	}

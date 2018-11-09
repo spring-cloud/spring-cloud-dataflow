@@ -84,9 +84,9 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/apps")
 @ExposesResourceFor(AppRegistrationResource.class)
-public class SkipperAppRegistryController {
+public class AppRegistryController {
 
-	private static final Logger logger = LoggerFactory.getLogger(SkipperAppRegistryController.class);
+	private static final Logger logger = LoggerFactory.getLogger(AppRegistryController.class);
 
 	private final Assembler assembler = new Assembler();
 
@@ -104,7 +104,7 @@ public class SkipperAppRegistryController {
 
 	private ResourceLoader resourceLoader = new DefaultResourceLoader();
 
-	public SkipperAppRegistryController(Optional<StreamDefinitionRepository> streamDefinitionRepository,
+	public AppRegistryController(Optional<StreamDefinitionRepository> streamDefinitionRepository,
 			Optional<StreamService> streamService,
 			AppRegistryService appRegistryService,
 			ApplicationConfigurationMetadataResolver metadataResolver,
@@ -396,7 +396,7 @@ public class SkipperAppRegistryController {
 	class Assembler extends ResourceAssemblerSupport<AppRegistration, AppRegistrationResource> {
 
 		public Assembler() {
-			super(SkipperAppRegistryController.class, AppRegistrationResource.class);
+			super(AppRegistryController.class, AppRegistrationResource.class);
 		}
 
 		@Override
