@@ -19,6 +19,7 @@ package org.springframework.cloud.dataflow.shell.command;
 import java.util.Arrays;
 import java.util.List;
 
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentMatchers;
@@ -58,6 +59,11 @@ public class StreamCommandTests extends AbstractShellIntegrationTest {
 	public void registerApps() {
 		AppRegistryCommon registry = applicationContext.getBean(AppRegistryCommon.class);
 		registry.importAll(true, new ClassPathResource(APPS_URI));
+	}
+
+	@After
+	public void destroyStreams() {
+		stream().destroyCreatedStreams();
 	}
 
 	@Test
@@ -106,7 +112,6 @@ public class StreamCommandTests extends AbstractShellIntegrationTest {
 		assertEquals("Second Row Second Value should be: valid", "valid", table.getModel().getValue(1, 1));
 		assertEquals("Third Row First Value should be: sink:log", "sink:log" , table.getModel().getValue(2, 0));
 		assertEquals("Third Row Second Value should be: valid", "valid", table.getModel().getValue(2, 1));
-
 	}
 
 }

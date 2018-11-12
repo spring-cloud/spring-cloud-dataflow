@@ -77,7 +77,7 @@ public class ShellCommandsTests extends AbstractShellIntegrationTest {
 	@Test
 	public void testMultiFileCommandOrderPreserved() {
 		String commandFiles = toAbsolutePaths(
-				"commands/registerTask_timestamp.txt,commands/unregisterTask_timestamp.txt,commands/registerSink_log.txt,commands/unregisterSink_log.txt");
+				"commands/stream_all_delete.txt,commands/registerTask_timestamp.txt,commands/unregisterTask_timestamp.txt,commands/registerSink_log.txt,commands/unregisterSink_log.txt");
 		assertTrue(runShell(commandFiles));
 
 		assertThat("Registry should be empty", AbstractShellIntegrationTest.applicationContext.getBean(AppRegistryCommon.class).findAll(),
