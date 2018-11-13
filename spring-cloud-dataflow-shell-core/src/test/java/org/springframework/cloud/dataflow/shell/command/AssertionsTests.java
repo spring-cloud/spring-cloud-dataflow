@@ -18,8 +18,6 @@ package org.springframework.cloud.dataflow.shell.command;
 
 import org.junit.Test;
 
-import org.springframework.cloud.dataflow.shell.command.common.Assertions;
-
 import static org.junit.Assert.assertEquals;
 
 /**

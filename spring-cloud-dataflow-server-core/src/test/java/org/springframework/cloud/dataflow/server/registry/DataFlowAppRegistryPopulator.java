@@ -17,8 +17,7 @@
 package org.springframework.cloud.dataflow.server.registry;
 
 import org.springframework.beans.factory.InitializingBean;
-import org.springframework.cloud.dataflow.registry.AppRegistryCommon;
-import org.springframework.cloud.deployer.resource.registry.UriRegistry;
+import org.springframework.cloud.dataflow.registry.service.AppRegistryService;
 import org.springframework.context.ResourceLoaderAware;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
@@ -32,21 +31,21 @@ import org.springframework.util.ObjectUtils;
  */
 public class DataFlowAppRegistryPopulator implements InitializingBean, ResourceLoaderAware {
 
-	private final AppRegistryCommon registry;
+	private final AppRegistryService registry;
 
 	private final String[] locations;
 
 	private ResourceLoader resourceLoader;
 
 	/**
-	 * Populates a {@link org.springframework.cloud.dataflow.registry.AppRegistryCommon} on
+	 * Populates a {@link org.springframework.cloud.dataflow.registry.service.AppRegistryService} on
 	 * startup.
 	 *
-	 * @param registry the {@link UriRegistry} to populate
+	 * @param registry the {@link AppRegistryService} to populate
 	 * @param locations the properties file(s) listing apps to import into the registry
 	 */
-	public DataFlowAppRegistryPopulator(AppRegistryCommon registry, String... locations) {
-		Assert.notNull(registry, "UriRegistry must not be null");
+	public DataFlowAppRegistryPopulator(AppRegistryService registry, String... locations) {
+		Assert.notNull(registry, "AppRegistryService must not be null");
 		this.registry = registry;
 		this.locations = locations;
 	}

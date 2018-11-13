@@ -55,7 +55,7 @@ import static org.assertj.core.api.Assertions.fail;
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = TestDependencies.class)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
-public class DefaultSkipperStreamServiceUpdateTests {
+public class DefaultStreamServiceUpdateTests {
 
 	@Autowired
 	private SkipperStreamDeployer skipperStreamDeployer;
@@ -96,7 +96,7 @@ public class DefaultSkipperStreamServiceUpdateTests {
 
 	public void testCreateUpdateRequests() throws IOException {
 
-		DefaultSkipperStreamService streamService = new DefaultSkipperStreamService(streamDefinitionRepository,
+		DefaultStreamService streamService = new DefaultStreamService(streamDefinitionRepository,
 				skipperStreamDeployer,
 				appDeploymentRequestCreator, streamValidationService, auditRecordService);
 		StreamDefinition streamDefinition = new StreamDefinition("test", "time | log");

@@ -51,7 +51,6 @@ import org.springframework.cloud.dataflow.completion.CompletionConfiguration;
 import org.springframework.cloud.dataflow.completion.StreamCompletionProvider;
 import org.springframework.cloud.dataflow.completion.TaskCompletionProvider;
 import org.springframework.cloud.dataflow.configuration.metadata.ApplicationConfigurationMetadataResolver;
-import org.springframework.cloud.dataflow.registry.AppRegistryCommon;
 import org.springframework.cloud.dataflow.registry.repository.AppRegistrationRepository;
 import org.springframework.cloud.dataflow.registry.service.AppRegistryService;
 import org.springframework.cloud.dataflow.registry.service.DefaultAppRegistryService;
@@ -66,6 +65,7 @@ import org.springframework.cloud.dataflow.server.batch.JobService;
 import org.springframework.cloud.dataflow.server.config.apps.CommonApplicationProperties;
 import org.springframework.cloud.dataflow.server.config.features.FeaturesProperties;
 import org.springframework.cloud.dataflow.server.controller.AboutController;
+import org.springframework.cloud.dataflow.server.controller.AppRegistryController;
 import org.springframework.cloud.dataflow.server.controller.AuditRecordController;
 import org.springframework.cloud.dataflow.server.controller.CompletionController;
 import org.springframework.cloud.dataflow.server.controller.JobExecutionController;
@@ -77,9 +77,8 @@ import org.springframework.cloud.dataflow.server.controller.RestControllerAdvice
 import org.springframework.cloud.dataflow.server.controller.RootController;
 import org.springframework.cloud.dataflow.server.controller.RuntimeAppInstanceController;
 import org.springframework.cloud.dataflow.server.controller.RuntimeAppsController;
-import org.springframework.cloud.dataflow.server.controller.SkipperAppRegistryController;
-import org.springframework.cloud.dataflow.server.controller.SkipperStreamDeploymentController;
 import org.springframework.cloud.dataflow.server.controller.StreamDefinitionController;
+import org.springframework.cloud.dataflow.server.controller.StreamDeploymentController;
 import org.springframework.cloud.dataflow.server.controller.StreamValidationController;
 import org.springframework.cloud.dataflow.server.controller.TaskDefinitionController;
 import org.springframework.cloud.dataflow.server.controller.TaskExecutionController;
@@ -92,14 +91,13 @@ import org.springframework.cloud.dataflow.server.controller.support.MetricStore;
 import org.springframework.cloud.dataflow.server.repository.StreamDefinitionRepository;
 import org.springframework.cloud.dataflow.server.repository.TaskDefinitionRepository;
 import org.springframework.cloud.dataflow.server.service.SchedulerService;
-import org.springframework.cloud.dataflow.server.service.SkipperStreamService;
 import org.springframework.cloud.dataflow.server.service.StreamService;
 import org.springframework.cloud.dataflow.server.service.StreamValidationService;
 import org.springframework.cloud.dataflow.server.service.TaskJobService;
 import org.springframework.cloud.dataflow.server.service.TaskService;
 import org.springframework.cloud.dataflow.server.service.TaskValidationService;
 import org.springframework.cloud.dataflow.server.service.impl.AppDeploymentRequestCreator;
-import org.springframework.cloud.dataflow.server.service.impl.DefaultSkipperStreamService;
+import org.springframework.cloud.dataflow.server.service.impl.DefaultStreamService;
 import org.springframework.cloud.dataflow.server.service.impl.TaskConfigurationProperties;
 import org.springframework.cloud.dataflow.server.service.impl.validation.DefaultStreamValidationService;
 import org.springframework.cloud.dataflow.server.service.impl.validation.DefaultTaskValidationService;
@@ -188,10 +186,10 @@ public class DataFlowControllerAutoConfiguration {
 
 	@Bean
 	@ConditionalOnBean({ StreamDefinitionRepository.class })
-	public StreamValidationService streamValidationService(AppRegistryCommon appRegistryCommon,
+	public StreamValidationService streamValidationService(AppRegistryService appRegistry,
 			DockerValidatorProperties dockerValidatorProperties,
 			StreamDefinitionRepository streamDefinitionRepository) {
-		return new DefaultStreamValidationService(appRegistryCommon,
+		return new DefaultStreamValidationService(appRegistry,
 				dockerValidatorProperties,
 				streamDefinitionRepository);
 	}
@@ -222,11 +220,11 @@ public class DataFlowControllerAutoConfiguration {
 
 	@Bean
 	@ConditionalOnBean(TaskDefinitionRepository.class)
-	public TaskValidationService taskValidationService(AppRegistryCommon appRegistryCommon,
+	public TaskValidationService taskValidationService(AppRegistryService appRegistry,
 			DockerValidatorProperties dockerValidatorProperties,
 			TaskDefinitionRepository taskDefinitionRepository,
 			TaskConfigurationProperties taskConfigurationProperties) {
-		return new DefaultTaskValidationService(appRegistryCommon,
+		return new DefaultTaskValidationService(appRegistry,
 				dockerValidatorProperties,
 				taskDefinitionRepository,
 				taskConfigurationProperties.getComposedTaskRunnerName());
@@ -247,7 +245,7 @@ public class DataFlowControllerAutoConfiguration {
 	}
 
 	@Bean
-	public AppDeploymentRequestCreator streamDeploymentPropertiesUtils(AppRegistryCommon appRegistry,
+	public AppDeploymentRequestCreator streamDeploymentPropertiesUtils(AppRegistryService appRegistry,
 			CommonApplicationProperties commonApplicationProperties,
 			ApplicationConfigurationMetadataResolver applicationConfigurationMetadataResolver) {
 		return new AppDeploymentRequestCreator(appRegistry,
@@ -433,9 +431,9 @@ public class DataFlowControllerAutoConfiguration {
 
 		@Bean
 		@ConditionalOnBean({ StreamDefinitionRepository.class })
-		public SkipperStreamDeploymentController updatableStreamDeploymentController(
-				StreamDefinitionRepository repository, SkipperStreamService streamService) {
-			return new SkipperStreamDeploymentController(repository, streamService);
+		public StreamDeploymentController updatableStreamDeploymentController(
+				StreamDefinitionRepository repository, StreamService streamService) {
+			return new StreamDeploymentController(repository, streamService);
 		}
 
 		@Bean
@@ -474,12 +472,12 @@ public class DataFlowControllerAutoConfiguration {
 
 		@Bean
 		@ConditionalOnBean(StreamDefinitionRepository.class)
-		public SkipperStreamService skipperStreamDeploymentService(
+		public StreamService streamService(
 				StreamDefinitionRepository streamDefinitionRepository,
 				SkipperStreamDeployer skipperStreamDeployer, AppDeploymentRequestCreator appDeploymentRequestCreator,
 				StreamValidationService streamValidationService,
 				AuditRecordService auditRecordService) {
-			return new DefaultSkipperStreamService(streamDefinitionRepository, skipperStreamDeployer,
+			return new DefaultStreamService(streamDefinitionRepository, skipperStreamDeployer,
 					appDeploymentRequestCreator, streamValidationService, auditRecordService);
 		}
 
@@ -490,12 +488,12 @@ public class DataFlowControllerAutoConfiguration {
 		}
 
 		@Bean
-		public SkipperAppRegistryController skipperAppRegistryController(
+		public AppRegistryController appRegistryController(
 				Optional<StreamDefinitionRepository> streamDefinitionRepository,
 				Optional<StreamService> streamService,
 				AppRegistryService appRegistry, ApplicationConfigurationMetadataResolver metadataResolver,
 				ForkJoinPool appRegistryFJPFB, MavenProperties mavenProperties) {
-			return new SkipperAppRegistryController(streamDefinitionRepository,
+			return new AppRegistryController(streamDefinitionRepository,
 					streamService,
 					appRegistry,
 					metadataResolver, appRegistryFJPFB, mavenProperties);

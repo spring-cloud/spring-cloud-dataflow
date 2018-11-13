@@ -36,7 +36,6 @@ import org.springframework.cloud.dataflow.rest.resource.about.AboutResource;
 import org.springframework.cloud.dataflow.rest.resource.security.SecurityInfoResource;
 import org.springframework.cloud.dataflow.shell.Target;
 import org.springframework.cloud.dataflow.shell.TargetHolder;
-import org.springframework.cloud.dataflow.shell.command.common.ConfigCommands;
 import org.springframework.cloud.dataflow.shell.config.DataFlowShell;
 import org.springframework.hateoas.Link;
 import org.springframework.http.converter.HttpMessageConverter;

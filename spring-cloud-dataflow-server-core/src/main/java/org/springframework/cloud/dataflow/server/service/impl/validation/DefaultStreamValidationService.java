@@ -18,7 +18,7 @@ package org.springframework.cloud.dataflow.server.service.impl.validation;
 import org.springframework.cloud.dataflow.core.ApplicationType;
 import org.springframework.cloud.dataflow.core.StreamAppDefinition;
 import org.springframework.cloud.dataflow.core.StreamDefinition;
-import org.springframework.cloud.dataflow.registry.AppRegistryCommon;
+import org.springframework.cloud.dataflow.registry.service.AppRegistryService;
 import org.springframework.cloud.dataflow.server.DockerValidatorProperties;
 import org.springframework.cloud.dataflow.server.repository.NoSuchStreamDefinitionException;
 import org.springframework.cloud.dataflow.server.repository.StreamDefinitionRepository;
@@ -35,9 +35,8 @@ public class DefaultStreamValidationService extends DefaultValidationService imp
 
 	private final StreamDefinitionRepository streamDefinitionRepository;
 
-	public DefaultStreamValidationService(AppRegistryCommon appRegistry,
-									DockerValidatorProperties dockerValidatorProperties,
-									StreamDefinitionRepository streamDefinitionRepository) {
+	public DefaultStreamValidationService(AppRegistryService appRegistry,
+			DockerValidatorProperties dockerValidatorProperties, StreamDefinitionRepository streamDefinitionRepository) {
 		super(appRegistry, dockerValidatorProperties);
 		Assert.notNull(streamDefinitionRepository, "StreamDefinitionRepository must not be null");
 		this.streamDefinitionRepository = streamDefinitionRepository;

@@ -30,8 +30,8 @@ import org.springframework.cloud.dataflow.core.DefinitionUtils;
 import org.springframework.cloud.dataflow.core.TaskDefinition;
 import org.springframework.cloud.dataflow.core.dsl.TaskNode;
 import org.springframework.cloud.dataflow.core.dsl.TaskParser;
-import org.springframework.cloud.dataflow.registry.AppRegistryCommon;
 import org.springframework.cloud.dataflow.registry.domain.AppRegistration;
+import org.springframework.cloud.dataflow.registry.service.AppRegistryService;
 import org.springframework.cloud.dataflow.rest.util.DeploymentPropertiesUtils;
 import org.springframework.cloud.dataflow.server.audit.domain.AuditActionType;
 import org.springframework.cloud.dataflow.server.audit.domain.AuditOperationType;
@@ -93,9 +93,9 @@ public class DefaultTaskService implements TaskService {
 	private final TaskLauncher taskLauncher;
 
 	/**
-	 * The {@link AppRegistryCommon} this service will use to look up task app URIs.
+	 * The {@link AppRegistryService} this service will use to look up task app URIs.
 	 */
-	private final AppRegistryCommon registry;
+	private final AppRegistryService registry;
 
 	private final TaskDefinitionRepository taskDefinitionRepository;
 
@@ -137,7 +137,7 @@ public class DefaultTaskService implements TaskService {
 	 */
 	public DefaultTaskService(DataSourceProperties dataSourceProperties,
 			TaskDefinitionRepository taskDefinitionRepository, TaskExplorer taskExplorer,
-			TaskRepository taskExecutionRepository, AppRegistryCommon registry,
+			TaskRepository taskExecutionRepository, AppRegistryService registry,
 			TaskLauncher taskLauncher, ApplicationConfigurationMetadataResolver metaDataResolver,
 			TaskConfigurationProperties taskConfigurationProperties, DeploymentIdRepository deploymentIdRepository,
 			AuditRecordService auditRecordService,
@@ -147,7 +147,7 @@ public class DefaultTaskService implements TaskService {
 		Assert.notNull(taskDefinitionRepository, "TaskDefinitionRepository must not be null");
 		Assert.notNull(taskExecutionRepository, "TaskExecutionRepository must not be null");
 		Assert.notNull(taskExplorer, "TaskExplorer must not be null");
-		Assert.notNull(registry, "UriRegistry must not be null");
+		Assert.notNull(registry, "AppRegistryService must not be null");
 		Assert.notNull(taskLauncher, "TaskLauncher must not be null");
 		Assert.notNull(metaDataResolver, "metaDataResolver must not be null");
 		Assert.notNull(taskConfigurationProperties, "taskConfigurationProperties must not be null");

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.cloud.dataflow.shell.command.common;
+package org.springframework.cloud.dataflow.shell.command;
 
 import java.io.IOException;
 import java.io.InputStreamReader;

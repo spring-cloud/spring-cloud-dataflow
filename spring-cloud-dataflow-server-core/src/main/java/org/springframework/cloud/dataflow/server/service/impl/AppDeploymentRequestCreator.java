@@ -32,8 +32,8 @@ import org.springframework.cloud.dataflow.core.DataFlowPropertyKeys;
 import org.springframework.cloud.dataflow.core.StreamAppDefinition;
 import org.springframework.cloud.dataflow.core.StreamDefinition;
 import org.springframework.cloud.dataflow.core.StreamPropertyKeys;
-import org.springframework.cloud.dataflow.registry.AppRegistryCommon;
 import org.springframework.cloud.dataflow.registry.domain.AppRegistration;
+import org.springframework.cloud.dataflow.registry.service.AppRegistryService;
 import org.springframework.cloud.dataflow.rest.util.DeploymentPropertiesUtils;
 import org.springframework.cloud.dataflow.server.config.apps.CommonApplicationProperties;
 import org.springframework.cloud.dataflow.server.controller.WhitelistProperties;
@@ -59,16 +59,16 @@ public class AppDeploymentRequestCreator {
 
 	private static Log logger = LogFactory.getLog(AppDeploymentRequestCreator.class);
 
-	private final AppRegistryCommon appRegistry;
+	private final AppRegistryService appRegistry;
 
 	private final CommonApplicationProperties commonApplicationProperties;
 
 	private final WhitelistProperties whitelistProperties;
 
-	public AppDeploymentRequestCreator(AppRegistryCommon appRegistry,
+	public AppDeploymentRequestCreator(AppRegistryService appRegistry,
 			CommonApplicationProperties commonApplicationProperties,
 			ApplicationConfigurationMetadataResolver metadataResolver) {
-		Assert.notNull(appRegistry, "AppRegistryCommon must not be null");
+		Assert.notNull(appRegistry, "AppRegistryService must not be null");
 		Assert.notNull(commonApplicationProperties, "CommonApplicationProperties must not be null");
 		Assert.notNull(metadataResolver, "MetadataResolver must not be null");
 		this.appRegistry = appRegistry;

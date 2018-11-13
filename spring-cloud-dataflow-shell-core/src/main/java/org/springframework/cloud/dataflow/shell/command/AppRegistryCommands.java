@@ -14,25 +14,31 @@
  * limitations under the License.
  */
 
-package org.springframework.cloud.dataflow.shell.command.skipper;
+package org.springframework.cloud.dataflow.shell.command;
 
+import java.io.IOException;
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Optional;
+import java.util.Properties;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.configurationmetadata.ConfigurationMetadataProperty;
 import org.springframework.cloud.dataflow.core.ApplicationType;
+import org.springframework.cloud.dataflow.rest.client.AppRegistryOperations;
 import org.springframework.cloud.dataflow.rest.resource.AppRegistrationResource;
 import org.springframework.cloud.dataflow.rest.resource.DetailedAppRegistrationResource;
-import org.springframework.cloud.dataflow.shell.command.common.AbstractAppRegistryCommands;
-import org.springframework.cloud.dataflow.shell.command.common.DataFlowTables;
 import org.springframework.cloud.dataflow.shell.command.support.OpsType;
 import org.springframework.cloud.dataflow.shell.command.support.RoleType;
 import org.springframework.cloud.dataflow.shell.config.DataFlowShell;
 import org.springframework.context.ResourceLoaderAware;
+import org.springframework.core.io.DefaultResourceLoader;
+import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
+import org.springframework.core.io.support.PropertiesLoaderUtils;
+import org.springframework.hateoas.PagedResources;
 import org.springframework.shell.core.CommandMarker;
 import org.springframework.shell.core.annotation.CliAvailabilityIndicator;
 import org.springframework.shell.core.annotation.CliCommand;
@@ -40,6 +46,7 @@ import org.springframework.shell.core.annotation.CliOption;
 import org.springframework.shell.table.AbsoluteWidthSizeConstraints;
 import org.springframework.shell.table.CellMatchers;
 import org.springframework.shell.table.TableBuilder;
+import org.springframework.shell.table.TableModel;
 import org.springframework.shell.table.TableModelBuilder;
 import org.springframework.stereotype.Component;
 import org.springframework.util.Assert;
@@ -62,20 +69,24 @@ import org.springframework.util.StringUtils;
  * @author Christian Tzolov
  */
 @Component
-public class SkipperAppRegistryCommands extends AbstractAppRegistryCommands implements CommandMarker, ResourceLoaderAware {
+public class AppRegistryCommands implements CommandMarker, ResourceLoaderAware {
 
 	private final static String APPLICATION_INFO = "app info";
 
 	private final static String UNREGISTER_APPLICATION = "app unregister";
 
 	private static final String DEFAULT_APPLICATION = "app default";
+	private final static String LIST_APPLICATIONS = "app list";
+	private static final String REGISTER_APPLICATION = "app register";
+	private static final String IMPORT_APPLICATIONS = "app import";
+	protected DataFlowShell dataFlowShell;
+	protected ResourceLoader resourceLoader = new DefaultResourceLoader();
 
 	@Autowired
 	public void setDataFlowShell(DataFlowShell dataFlowShell) {
 		this.dataFlowShell = dataFlowShell;
 	}
 
-	@Override
 	public void setResourceLoader(ResourceLoader resourceLoader) {
 		Assert.notNull(resourceLoader, "resourceLoader must not be null");
 		this.resourceLoader = resourceLoader;
@@ -188,5 +199,159 @@ public class SkipperAppRegistryCommands extends AbstractAppRegistryCommands impl
 		appRegistryOperations().makeDefault(application.name, application.type, version);
 
 		return String.format("New default Application %s:%s:%s", application.type, application.name, version);
+	}
+
+	@CliCommand(value = REGISTER_APPLICATION, help = "Register a new application")
+	public String register(
+			@CliOption(mandatory = true, key = { "",
+					"name" }, help = "the name for the registered application") String name,
+			@CliOption(mandatory = true, key = {
+					"type" }, help = "the type for the registered application") ApplicationType type,
+			@CliOption(mandatory = true, key = { "uri" }, help = "URI for the application artifact") String uri,
+			@CliOption(key = { "metadata-uri" }, help = "Metadata URI for the application artifact") String metadataUri,
+			@CliOption(key = "force", help = "force update if application is already registered (only if not in use)", specifiedDefaultValue = "true", unspecifiedDefaultValue = "false") boolean force) {
+
+		appRegistryOperations().register(name, type, uri, metadataUri, force);
+
+		return String.format(("Successfully registered application '%s:%s'"), type, name);
+	}
+
+	@CliCommand(value = LIST_APPLICATIONS, help = "List all registered applications")
+	public Object list(@CliOption(
+			key = { "", "id" },
+			help = "id of the application to query in the form of 'type:name'") QualifiedApplicationName application) {
+		PagedResources<AppRegistrationResource> appRegistrations = appRegistryOperations().list();
+
+		// TODO This can go outside the method
+		final LinkedHashMap<String, List<String>> mappings = new LinkedHashMap<>();
+		for (ApplicationType type : ApplicationType.values()) {
+			mappings.put(type.name(), new ArrayList<>());
+		}
+		//
+
+		int max = 0;
+		for (AppRegistrationResource appRegistration : appRegistrations) {
+
+			if (application != null &&
+					(!application.name.equals(appRegistration.getName())
+							|| !application.type.toString().equals(appRegistration.getType()))) {
+				continue;
+			}
+
+			List<String> column = mappings.get(appRegistration.getType());
+			String value = appRegistration.getName();
+			if (application != null) {
+				String version = StringUtils.isEmpty(appRegistration.getVersion()) ? "" : "-"+appRegistration.getVersion();
+				value = value + version;
+				if (appRegistration.getDefaultVersion()) {
+					value = String.format("> %s <", value);
+				}
+			}
+			if (!column.contains(value)) {
+				column.add(value);
+			}
+			max = Math.max(max, column.size());
+		}
+		if (max == 0) {
+			return String.format("No registered apps.%n" + "You can register new apps with the '%s' and '%s' commands.",
+					REGISTER_APPLICATION, IMPORT_APPLICATIONS);
+		}
+
+		final List<String> keys = new ArrayList<>(mappings.keySet());
+		final int rows = max + 1;
+		final TableModel model = new TableModel() {
+
+			@Override
+			public int getRowCount() {
+				return rows;
+			}
+
+			@Override
+			public int getColumnCount() {
+				return keys.size();
+			}
+
+			@Override
+			public Object getValue(int row, int column) {
+				String key = keys.get(column);
+				if (row == 0) {
+					return key;
+				}
+				int currentRow = row - 1;
+				if (mappings.get(key).size() > currentRow) {
+					return mappings.get(key).get(currentRow);
+				}
+				else {
+					return null;
+				}
+			}
+		};
+		return DataFlowTables.applyStyle(new TableBuilder(model)).build();
+	}
+
+	@CliCommand(value = IMPORT_APPLICATIONS, help = "Register all applications listed in a properties file")
+	public String importFromResource(
+			@CliOption(mandatory = true, key = { "", "uri" }, help = "URI for the properties file") String uri,
+			@CliOption(key = "local", help = "whether to resolve the URI locally (as opposed to on the server)", specifiedDefaultValue = "true", unspecifiedDefaultValue = "true") boolean local,
+			@CliOption(key = "force", help = "force update if any module already exists (only if not in use)", specifiedDefaultValue = "true", unspecifiedDefaultValue = "false") boolean force) {
+		if (local) {
+			try {
+				Resource resource = this.resourceLoader.getResource(uri);
+				Properties applications = PropertiesLoaderUtils.loadProperties(resource);
+				PagedResources<AppRegistrationResource> registered = null;
+				try {
+					registered = appRegistryOperations().registerAll(applications, force);
+				}
+				catch (Exception e) {
+					return "Error when registering applications from " + uri + ": " + e.getMessage();
+				}
+				long numRegistered = registered.getMetadata().getTotalElements();
+				return (applications.keySet().size() == numRegistered)
+						? String.format("Successfully registered applications: %s", applications.keySet())
+						: String.format("Successfully registered %d applications from %s", numRegistered,
+						applications.keySet());
+			}
+			catch (IOException e) {
+				throw new IllegalArgumentException(e);
+			}
+		}
+		else {
+			PagedResources<AppRegistrationResource> registered = appRegistryOperations().importFromResource(uri, force);
+			return String.format("Successfully registered %d applications from '%s'",
+					registered.getMetadata().getTotalElements(), uri);
+		}
+	}
+
+	protected AppRegistryOperations appRegistryOperations() {
+		return dataFlowShell.getDataFlowOperations().appRegistryOperations();
+	}
+
+	/**
+	 * Escapes some special values so that they don't disturb console rendering and are easier
+	 * to read.
+	 *
+	 * @param o the configurationMetadataProperty to pretty print
+	 * @return the pretty printed value
+	 */
+	protected String prettyPrintDefaultValue(ConfigurationMetadataProperty o) {
+		if (o.getDefaultValue() == null) {
+			return "<none>";
+		}
+		return o.getDefaultValue().toString().replace("\n", "\\n").replace("\t", "\\t").replace("\f", "\\f");
+	}
+
+	/**
+	 * Unique identifier for an application, including the name and type.
+	 */
+	public static class QualifiedApplicationName {
+
+		public ApplicationType type;
+
+		public String name;
+
+		public QualifiedApplicationName(String name, ApplicationType type) {
+			this.name = name;
+			this.type = type;
+		}
 	}
 }

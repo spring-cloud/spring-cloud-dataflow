@@ -26,8 +26,8 @@ import org.springframework.boot.loader.archive.ExplodedArchive;
 import org.springframework.boot.loader.archive.JarFileArchive;
 import org.springframework.cloud.dataflow.configuration.metadata.BootClassLoaderFactory;
 import org.springframework.cloud.dataflow.core.ApplicationType;
-import org.springframework.cloud.dataflow.registry.AppRegistryCommon;
 import org.springframework.cloud.dataflow.registry.domain.AppRegistration;
+import org.springframework.cloud.dataflow.registry.service.AppRegistryService;
 import org.springframework.cloud.dataflow.server.DockerValidatorProperties;
 import org.springframework.cloud.dataflow.server.service.ValidationService;
 import org.springframework.cloud.deployer.resource.docker.DockerResource;
@@ -49,12 +49,12 @@ public class DefaultValidationService implements ValidationService {
 	 */
 	private final DockerValidatorProperties dockerValidatorProperties;
 
-	private final AppRegistryCommon appRegistry;
+	private final AppRegistryService appRegistry;
 
-	public DefaultValidationService(AppRegistryCommon appRegistry,
-									DockerValidatorProperties dockerValidatorProperties) {
+	public DefaultValidationService(AppRegistryService appRegistry,
+			DockerValidatorProperties dockerValidatorProperties) {
 		Assert.notNull(dockerValidatorProperties, "DockerValidatorProperties must not be null");
-		Assert.notNull(appRegistry, "AppRegistryCommon must not be null");
+		Assert.notNull(appRegistry, "AppRegistryService must not be null");
 		this.dockerValidatorProperties = dockerValidatorProperties;
 		this.appRegistry = appRegistry;
 	}
@@ -100,6 +100,5 @@ public class DefaultValidationService implements ValidationService {
 		File moduleFile = app.getFile();
 		return moduleFile.isDirectory() ? new ExplodedArchive(moduleFile) : new JarFileArchive(moduleFile);
 	}
-
 
 }

@@ -22,7 +22,7 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.dataflow.configuration.metadata.ApplicationConfigurationMetadataResolver;
 import org.springframework.cloud.dataflow.configuration.metadata.ApplicationConfigurationMetadataResolverAutoConfiguration;
-import org.springframework.cloud.dataflow.registry.AppRegistryCommon;
+import org.springframework.cloud.dataflow.registry.service.AppRegistryService;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
@@ -40,14 +40,14 @@ import org.springframework.context.annotation.Import;
 public class CompletionConfiguration {
 
 	@Autowired
-	private AppRegistryCommon appRegistry;
+	private AppRegistryService appRegistry;
 
 	@Autowired
 	private ApplicationConfigurationMetadataResolver metadataResolver;
 
 	@Bean
 	public StreamCompletionProvider streamCompletionProvider() {
-		List<RecoveryStrategy<?>> recoveryStrategies = Arrays.<RecoveryStrategy<?>>asList(
+		List<RecoveryStrategy<?>> recoveryStrategies = Arrays.asList(
 				emptyStartYieldsAppsRecoveryStrategy(), expandOneDashToTwoDashesRecoveryStrategy(),
 				configurationPropertyNameAfterDashDashRecoveryStrategy(),
 				unfinishedConfigurationPropertyNameRecoveryStrategy(), destinationNameYieldsAppsRecoveryStrategy(),

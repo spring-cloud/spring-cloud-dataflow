@@ -21,8 +21,8 @@ import java.util.List;
 import org.springframework.cloud.dataflow.core.ApplicationType;
 import org.springframework.cloud.dataflow.core.StreamAppDefinition;
 import org.springframework.cloud.dataflow.core.StreamDefinition;
-import org.springframework.cloud.dataflow.registry.AppRegistryCommon;
 import org.springframework.cloud.dataflow.registry.domain.AppRegistration;
+import org.springframework.cloud.dataflow.registry.service.AppRegistryService;
 
 /**
  * Continues a well-formed stream definition by adding a pipe symbol and another app,
@@ -33,9 +33,9 @@ import org.springframework.cloud.dataflow.registry.domain.AppRegistration;
  */
 public class PipeIntoOtherAppsExpansionStrategy implements ExpansionStrategy {
 
-	private final AppRegistryCommon appRegistry;
+	private final AppRegistryService appRegistry;
 
-	public PipeIntoOtherAppsExpansionStrategy(AppRegistryCommon appRegistry) {
+	public PipeIntoOtherAppsExpansionStrategy(AppRegistryService appRegistry) {
 		this.appRegistry = appRegistry;
 	}
 

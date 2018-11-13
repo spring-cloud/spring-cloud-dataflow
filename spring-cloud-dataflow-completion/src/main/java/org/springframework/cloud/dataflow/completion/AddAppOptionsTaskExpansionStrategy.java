@@ -23,8 +23,8 @@ import java.util.Set;
 import org.springframework.cloud.dataflow.configuration.metadata.ApplicationConfigurationMetadataResolver;
 import org.springframework.cloud.dataflow.core.ApplicationType;
 import org.springframework.cloud.dataflow.core.TaskDefinition;
-import org.springframework.cloud.dataflow.registry.AppRegistryCommon;
 import org.springframework.cloud.dataflow.registry.domain.AppRegistration;
+import org.springframework.cloud.dataflow.registry.service.AppRegistryService;
 
 /**
  * Adds missing application configuration properties at the end of a well formed task
@@ -39,7 +39,7 @@ class AddAppOptionsTaskExpansionStrategy implements TaskExpansionStrategy {
 
 	private final ProposalsCollectorSupportUtils collectorSupport;
 
-	public AddAppOptionsTaskExpansionStrategy(AppRegistryCommon appRegistry,
+	public AddAppOptionsTaskExpansionStrategy(AppRegistryService appRegistry,
 			ApplicationConfigurationMetadataResolver metadataResolver) {
 		this.collectorSupport = new ProposalsCollectorSupportUtils(appRegistry, metadataResolver);
 	}

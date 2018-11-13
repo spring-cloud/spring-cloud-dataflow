@@ -40,7 +40,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.cloud.dataflow.configuration.metadata.ApplicationConfigurationMetadataResolver;
 import org.springframework.cloud.dataflow.core.ApplicationType;
 import org.springframework.cloud.dataflow.core.TaskDefinition;
-import org.springframework.cloud.dataflow.registry.AppRegistryCommon;
 import org.springframework.cloud.dataflow.registry.domain.AppRegistration;
 import org.springframework.cloud.dataflow.registry.service.AppRegistryService;
 import org.springframework.cloud.dataflow.server.DockerValidatorProperties;
@@ -290,10 +289,10 @@ public class DefaultSchedulerServiceTests {
 	private List<String> getCommandLineArguments(List<String> commandLineArguments) {
 		Scheduler mockScheduler = mock(TaskServiceDependencies.SimpleTestScheduler.class);
 		TaskDefinitionRepository mockTaskDefinitionRepository = mock(TaskDefinitionRepository.class);
-		AppRegistryCommon mockAppRegistryCommon = mock(AppRegistryCommon.class);
+		AppRegistryService mockAppRegistryService = mock(AppRegistryService.class);
 
 		SchedulerService mockSchedulerService = new DefaultSchedulerService(mock(CommonApplicationProperties.class),
-				mockScheduler, mockTaskDefinitionRepository, mockAppRegistryCommon, mock(ResourceLoader.class),
+				mockScheduler, mockTaskDefinitionRepository, mockAppRegistryService, mock(ResourceLoader.class),
 				mock(TaskConfigurationProperties.class), mock(DataSourceProperties.class), "uri",
 				mock(ApplicationConfigurationMetadataResolver.class), mock(SchedulerServiceProperties.class),
 				mock(AuditRecordService.class));
@@ -301,7 +300,7 @@ public class DefaultSchedulerServiceTests {
 		TaskDefinition taskDefinition = new TaskDefinition(BASE_DEFINITION_NAME, "timestamp");
 
 		when(mockTaskDefinitionRepository.findById(BASE_DEFINITION_NAME)).thenReturn(Optional.of(taskDefinition));
-		when(mockAppRegistryCommon.find(taskDefinition.getRegisteredAppName(), ApplicationType.task))
+		when(mockAppRegistryService.find(taskDefinition.getRegisteredAppName(), ApplicationType.task))
 				.thenReturn(new AppRegistration());
 		when(((DefaultSchedulerService)mockSchedulerService).getTaskResource(BASE_DEFINITION_NAME))
 				.thenReturn(new DockerResource("springcloudtask/timestamp-task:latest"));

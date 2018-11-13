@@ -33,7 +33,6 @@ import org.springframework.boot.autoconfigure.orm.jpa.HibernateJpaAutoConfigurat
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.cloud.dataflow.configuration.metadata.ApplicationConfigurationMetadataResolver;
 import org.springframework.cloud.dataflow.configuration.metadata.BootApplicationConfigurationMetadataResolver;
-import org.springframework.cloud.dataflow.registry.AppRegistryCommon;
 import org.springframework.cloud.dataflow.registry.repository.AppRegistrationRepository;
 import org.springframework.cloud.dataflow.registry.service.AppRegistryService;
 import org.springframework.cloud.dataflow.registry.service.DefaultAppRegistryService;
@@ -115,10 +114,10 @@ public class JobDependencies {
 	}
 
 	@Bean
-	public TaskValidationService taskValidationService(AppRegistryCommon appRegistryCommon,
+	public TaskValidationService taskValidationService(AppRegistryService appRegistry,
 			DockerValidatorProperties dockerValidatorProperties, TaskDefinitionRepository taskDefinitionRepository,
 			TaskConfigurationProperties taskConfigurationProperties) {
-		return new DefaultTaskValidationService(appRegistryCommon, dockerValidatorProperties, taskDefinitionRepository,
+		return new DefaultTaskValidationService(appRegistry, dockerValidatorProperties, taskDefinitionRepository,
 				taskConfigurationProperties.getComposedTaskRunnerName());
 	}
 
@@ -172,7 +171,7 @@ public class JobDependencies {
 	}
 
 	@Bean
-	public TaskService taskService(TaskDefinitionRepository repository, TaskExplorer explorer, AppRegistryCommon registry,
+	public TaskService taskService(TaskDefinitionRepository repository, TaskExplorer explorer, AppRegistryService registry,
 			TaskLauncher taskLauncher, ApplicationConfigurationMetadataResolver metadataResolver,
 			DeploymentIdRepository deploymentIdRepository, AuditRecordService auditRecordService,
 			CommonApplicationProperties commonApplicationProperties, TaskValidationService taskValidationService) {

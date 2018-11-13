@@ -17,6 +17,7 @@
 package org.springframework.cloud.dataflow.server.controller;
 
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Map;
 
 import org.slf4j.Logger;
@@ -24,6 +25,7 @@ import org.slf4j.LoggerFactory;
 
 import org.springframework.cloud.dataflow.core.StreamDefinition;
 import org.springframework.cloud.dataflow.core.StreamDeployment;
+import org.springframework.cloud.dataflow.rest.UpdateStreamRequest;
 import org.springframework.cloud.dataflow.rest.resource.DeploymentStateResource;
 import org.springframework.cloud.dataflow.rest.resource.StreamDeploymentResource;
 import org.springframework.cloud.dataflow.server.controller.support.ArgumentSanitizer;
@@ -31,8 +33,9 @@ import org.springframework.cloud.dataflow.server.controller.support.ControllerUt
 import org.springframework.cloud.dataflow.server.repository.NoSuchStreamDefinitionException;
 import org.springframework.cloud.dataflow.server.repository.StreamDefinitionRepository;
 import org.springframework.cloud.dataflow.server.service.StreamService;
-import org.springframework.cloud.deployer.spi.app.AppDeployer;
 import org.springframework.cloud.deployer.spi.app.DeploymentState;
+import org.springframework.cloud.skipper.domain.Deployer;
+import org.springframework.cloud.skipper.domain.Release;
 import org.springframework.hateoas.ExposesResourceFor;
 import org.springframework.hateoas.mvc.ResourceAssemblerSupport;
 import org.springframework.http.HttpStatus;
@@ -47,7 +50,8 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
- * Controller for deployment operations on {@link StreamDefinition}.
+ * Controller for deployment operations on {@link StreamDefinition}s. Support for stream update, rollback, and
+ * update history by delegating to {@link StreamService}.
  *
  * @author Eric Bottard
  * @author Mark Fisher
@@ -57,6 +61,7 @@ import org.springframework.web.bind.annotation.RestController;
  * @author Janne Valkealahti
  * @author Christian Tzolov
  * @author Gunnar Hillert
+ * @author Christian Tzolov
  */
 @RestController
 @RequestMapping("/streams/deployments")
@@ -66,28 +71,55 @@ public class StreamDeploymentController {
 	private static final Logger logger = LoggerFactory.getLogger(StreamDeploymentController.class);
 
 	private final StreamService streamService;
-
 	/**
 	 * The repository this controller will use for stream CRUD operations.
 	 */
 	private final StreamDefinitionRepository repository;
 
 	/**
-	 * Create a {@code StreamDeploymentController} that delegates
-	 * <ul>
-	 * <li>CRUD operations to the provided {@link StreamDefinitionRepository}</li>
-	 * <li>deployment operations to the provided {@link AppDeployer} via
-	 * {@link StreamService}</li>
-	 * </ul>
+	 * Construct a new UpdatableStreamDeploymentController, given a
+	 * {@link StreamDeploymentController} and {@link StreamService}
 	 *
 	 * @param repository the repository this controller will use for stream CRUD operations
-	 * @param streamService the underlying StreamService to deploy the stream
+	 * @param streamService the underlying UpdatableStreamService to deploy the stream
 	 */
-	public StreamDeploymentController(StreamDefinitionRepository repository, StreamService streamService) {
+	public StreamDeploymentController(StreamDefinitionRepository repository,
+			StreamService streamService) {
+
 		Assert.notNull(repository, "StreamDefinitionRepository must not be null");
 		Assert.notNull(streamService, "StreamService must not be null");
+
 		this.repository = repository;
 		this.streamService = streamService;
+	}
+
+	@RequestMapping(value = "/update/{name}", method = RequestMethod.POST)
+	public ResponseEntity<Void> update(@PathVariable("name") String name, @RequestBody UpdateStreamRequest updateStreamRequest) {
+		this.streamService.updateStream(name, updateStreamRequest);
+		return new ResponseEntity<>(HttpStatus.CREATED);
+	}
+
+	@RequestMapping(value = "/rollback/{name}/{version}", method = RequestMethod.POST)
+	public ResponseEntity<Void> rollback(@PathVariable("name") String name, @PathVariable("version") Integer version) {
+		this.streamService.rollbackStream(name, version);
+		return new ResponseEntity<>(HttpStatus.CREATED);
+	}
+
+	@RequestMapping(value = "/manifest/{name}/{version}", method = RequestMethod.GET)
+	public ResponseEntity<String> manifest(@PathVariable("name") String name, @PathVariable("version") Integer version) {
+		return new ResponseEntity<>(this.streamService.manifest(name, version), HttpStatus.OK);
+	}
+
+	@RequestMapping(path = "/history/{name}", method = RequestMethod.GET)
+	@ResponseStatus(HttpStatus.OK)
+	public Collection<Release> history(@PathVariable("name") String releaseName) {
+		return this.streamService.history(releaseName);
+	}
+
+	@RequestMapping(path = "/platform/list", method = RequestMethod.GET)
+	@ResponseStatus(HttpStatus.OK)
+	public Collection<Deployer> platformList() {
+		return this.streamService.platformList();
 	}
 
 	/**
@@ -185,7 +217,9 @@ public class StreamDeploymentController {
 				deploymentProperties = streamDeployment.getDeploymentProperties();
 			}
 			return new StreamDeploymentResource(streamDeployment.getStreamName(),
-					new ArgumentSanitizer().sanitizeStream(new StreamDefinition(streamDeployment.getStreamName(), this.dslText)), deploymentProperties, this.status);
+					new ArgumentSanitizer().sanitizeStream(
+							new StreamDefinition(streamDeployment.getStreamName(), this.dslText)),
+					deploymentProperties, this.status);
 		}
 
 		private boolean canDisplayDeploymentProperties() {

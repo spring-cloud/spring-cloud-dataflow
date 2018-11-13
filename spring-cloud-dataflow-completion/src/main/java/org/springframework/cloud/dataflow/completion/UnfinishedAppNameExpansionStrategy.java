@@ -24,8 +24,8 @@ import java.util.Set;
 import org.springframework.cloud.dataflow.core.ApplicationType;
 import org.springframework.cloud.dataflow.core.StreamAppDefinition;
 import org.springframework.cloud.dataflow.core.StreamDefinition;
-import org.springframework.cloud.dataflow.registry.AppRegistryCommon;
 import org.springframework.cloud.dataflow.registry.domain.AppRegistration;
+import org.springframework.cloud.dataflow.registry.service.AppRegistryService;
 
 /**
  * Provides completions by finding apps whose name starts with a prefix (which was assumed
@@ -36,9 +36,9 @@ import org.springframework.cloud.dataflow.registry.domain.AppRegistration;
  */
 public class UnfinishedAppNameExpansionStrategy implements ExpansionStrategy {
 
-	private final AppRegistryCommon appRegistry;
+	private final AppRegistryService appRegistry;
 
-	UnfinishedAppNameExpansionStrategy(AppRegistryCommon appRegistry) {
+	UnfinishedAppNameExpansionStrategy(AppRegistryService appRegistry) {
 		this.appRegistry = appRegistry;
 	}
 
