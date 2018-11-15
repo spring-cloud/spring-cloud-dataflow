@@ -43,7 +43,6 @@ import org.springframework.cloud.dataflow.server.audit.service.AuditRecordServic
 import org.springframework.cloud.dataflow.server.config.apps.CommonApplicationProperties;
 import org.springframework.cloud.dataflow.server.configuration.TaskServiceDependencies;
 import org.springframework.cloud.dataflow.server.repository.DuplicateTaskException;
-import org.springframework.cloud.dataflow.server.repository.InMemoryDeploymentIdRepository;
 import org.springframework.cloud.dataflow.server.repository.NoSuchTaskDefinitionException;
 import org.springframework.cloud.dataflow.server.repository.TaskDefinitionRepository;
 import org.springframework.cloud.dataflow.server.service.TaskService;
@@ -200,7 +199,7 @@ public abstract class DefaultTaskServiceTests {
 			TaskService taskService = new DefaultTaskService(this.dataSourceProperties,
 					mock(TaskDefinitionRepository.class), this.taskExplorer, this.taskExecutionRepository,
 					this.appRegistry, this.taskLauncher, this.metadataResolver, new TaskConfigurationProperties(),
-					new InMemoryDeploymentIdRepository(), auditRecordService, null, this.commonApplicationProperties,
+					auditRecordService, null, this.commonApplicationProperties,
 					this.taskValidationService);
 			try {
 				taskService.executeTask(TASK_NAME_ORIG, new HashMap<>(), new LinkedList<>());

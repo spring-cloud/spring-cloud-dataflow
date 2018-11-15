@@ -40,7 +40,6 @@ import org.springframework.cloud.dataflow.server.batch.JobService;
 import org.springframework.cloud.dataflow.server.batch.SimpleJobServiceFactoryBean;
 import org.springframework.cloud.dataflow.server.config.apps.CommonApplicationProperties;
 import org.springframework.cloud.dataflow.server.job.TaskExplorerFactoryBean;
-import org.springframework.cloud.dataflow.server.repository.DeploymentIdRepository;
 import org.springframework.cloud.dataflow.server.repository.RdbmsTaskDefinitionRepository;
 import org.springframework.cloud.dataflow.server.repository.TaskDefinitionRepository;
 import org.springframework.cloud.dataflow.server.service.TaskJobService;
@@ -97,11 +96,11 @@ public class TaskConfiguration {
 	public TaskService taskService(TaskDefinitionRepository repository, TaskExplorer taskExplorer,
 			TaskRepository taskExecutionRepository, AppRegistryService registry, TaskLauncher taskLauncher,
 			ApplicationConfigurationMetadataResolver metadataResolver,
-			TaskConfigurationProperties taskConfigurationProperties, DeploymentIdRepository deploymentIdRepository,
+			TaskConfigurationProperties taskConfigurationProperties,
 			AuditRecordService auditRecordService, CommonApplicationProperties commonApplicationProperties,
 			TaskValidationService taskValidationService) {
 		return new DefaultTaskService(dataSourceProperties, repository, taskExplorer, taskExecutionRepository, registry,
-				taskLauncher, metadataResolver, taskConfigurationProperties, deploymentIdRepository, auditRecordService,
+				taskLauncher, metadataResolver, taskConfigurationProperties, auditRecordService,
 				dataflowServerUri, commonApplicationProperties, taskValidationService);
 	}
 

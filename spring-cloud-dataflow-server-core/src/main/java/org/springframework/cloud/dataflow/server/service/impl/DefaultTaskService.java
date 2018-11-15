@@ -38,8 +38,6 @@ import org.springframework.cloud.dataflow.server.audit.domain.AuditOperationType
 import org.springframework.cloud.dataflow.server.audit.service.AuditRecordService;
 import org.springframework.cloud.dataflow.server.config.apps.CommonApplicationProperties;
 import org.springframework.cloud.dataflow.server.controller.WhitelistProperties;
-import org.springframework.cloud.dataflow.server.repository.DeploymentIdRepository;
-import org.springframework.cloud.dataflow.server.repository.DeploymentKey;
 import org.springframework.cloud.dataflow.server.repository.NoSuchTaskDefinitionException;
 import org.springframework.cloud.dataflow.server.repository.TaskDefinitionRepository;
 import org.springframework.cloud.dataflow.server.service.TaskService;
@@ -103,8 +101,6 @@ public class DefaultTaskService implements TaskService {
 
 	private final TaskConfigurationProperties taskConfigurationProperties;
 
-	private final DeploymentIdRepository deploymentIdRepository;
-
 	private final String dataflowServerUri;
 
 	private final CommonApplicationProperties commonApplicationProperties;
@@ -119,17 +115,15 @@ public class DefaultTaskService implements TaskService {
 
 	/**
 	 * Initializes the {@link DefaultTaskService}.
-	 *
-	 * @param dataSourceProperties the data source properties.
+	 *  @param dataSourceProperties the data source properties.
 	 * @param taskDefinitionRepository the {@link TaskDefinitionRepository} this service will
 	 * use for task CRUD operations.
-	 * @param taskExecutionRepository the repository this service will use for deployment IDs.
 	 * @param taskExplorer the explorer this service will use to lookup task executions
+	 * @param taskExecutionRepository the repository this service will use for deployment IDs.
 	 * @param registry URI registry this service will use to look up app URIs.
 	 * @param taskLauncher the launcher this service will use to launch task apps.
 	 * @param metaDataResolver the metadata resolver
 	 * @param taskConfigurationProperties the properties used to define the behavior of tasks
-	 * @param deploymentIdRepository the repository that maps deployment keys to IDs
 	 * @param auditRecordService the audit record service
 	 * @param dataflowServerUri the data flow server URI
 	 * @param commonApplicationProperties the common application properties
@@ -139,7 +133,7 @@ public class DefaultTaskService implements TaskService {
 			TaskDefinitionRepository taskDefinitionRepository, TaskExplorer taskExplorer,
 			TaskRepository taskExecutionRepository, AppRegistryService registry,
 			TaskLauncher taskLauncher, ApplicationConfigurationMetadataResolver metaDataResolver,
-			TaskConfigurationProperties taskConfigurationProperties, DeploymentIdRepository deploymentIdRepository,
+			TaskConfigurationProperties taskConfigurationProperties,
 			AuditRecordService auditRecordService,
 			String dataflowServerUri, CommonApplicationProperties commonApplicationProperties,
 			TaskValidationService taskValidationService) {
@@ -151,7 +145,6 @@ public class DefaultTaskService implements TaskService {
 		Assert.notNull(taskLauncher, "TaskLauncher must not be null");
 		Assert.notNull(metaDataResolver, "metaDataResolver must not be null");
 		Assert.notNull(taskConfigurationProperties, "taskConfigurationProperties must not be null");
-		Assert.notNull(deploymentIdRepository, "deploymentIdRepository must not be null");
 		Assert.notNull(commonApplicationProperties, "commonApplicationProperties must not be null");
 		Assert.notNull(auditRecordService, "auditRecordService must not be null");
 		Assert.notNull(taskValidationService, "TaskValidationService must not be null");
@@ -163,7 +156,6 @@ public class DefaultTaskService implements TaskService {
 		this.taskLauncher = taskLauncher;
 		this.whitelistProperties = new WhitelistProperties(metaDataResolver);
 		this.taskConfigurationProperties = taskConfigurationProperties;
-		this.deploymentIdRepository = deploymentIdRepository;
 		this.dataflowServerUri = dataflowServerUri;
 		this.commonApplicationProperties = commonApplicationProperties;
 		this.auditRecordService = auditRecordService;
@@ -363,7 +355,6 @@ public class DefaultTaskService implements TaskService {
 
 	private void destroyTask(TaskDefinition taskDefinition) {
 		taskLauncher.destroy(taskDefinition.getName());
-		deploymentIdRepository.delete(DeploymentKey.forTaskDefinition(taskDefinition));
 		taskDefinitionRepository.deleteById(taskDefinition.getName());
 	}
 

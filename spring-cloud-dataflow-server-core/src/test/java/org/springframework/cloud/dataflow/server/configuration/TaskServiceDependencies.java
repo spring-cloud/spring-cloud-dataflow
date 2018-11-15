@@ -31,7 +31,6 @@ import org.springframework.cloud.dataflow.server.audit.service.AuditRecordServic
 import org.springframework.cloud.dataflow.server.audit.service.DefaultAuditRecordService;
 import org.springframework.cloud.dataflow.server.config.apps.CommonApplicationProperties;
 import org.springframework.cloud.dataflow.server.config.features.FeaturesProperties;
-import org.springframework.cloud.dataflow.server.repository.InMemoryDeploymentIdRepository;
 import org.springframework.cloud.dataflow.server.repository.RdbmsTaskDefinitionRepository;
 import org.springframework.cloud.dataflow.server.repository.TaskDefinitionRepository;
 import org.springframework.cloud.dataflow.server.repository.support.DataflowRdbmsInitializer;
@@ -179,7 +178,7 @@ public class TaskServiceDependencies {
 			CommonApplicationProperties commonApplicationProperties, TaskValidationService taskValidationService) {
 		return new DefaultTaskService(this.dataSourceProperties, taskDefinitionRepository, taskExplorer,
 				taskExecutionRepository, appRegistry, taskLauncher, metadataResolver, taskConfigurationProperties,
-				new InMemoryDeploymentIdRepository(), auditRecordService, null, commonApplicationProperties,
+				auditRecordService, null, commonApplicationProperties,
 				taskValidationService);
 	}
 

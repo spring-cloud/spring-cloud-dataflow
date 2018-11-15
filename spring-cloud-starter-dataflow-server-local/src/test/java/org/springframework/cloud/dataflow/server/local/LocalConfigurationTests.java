@@ -28,7 +28,6 @@ import org.springframework.cloud.dataflow.registry.service.AppRegistryService;
 import org.springframework.cloud.dataflow.server.config.features.FeaturesProperties;
 import org.springframework.cloud.dataflow.server.local.dataflowapp.LocalTestDataFlowServer;
 import org.springframework.cloud.dataflow.server.local.nodataflowapp.LocalTestNoDataFlowServer;
-import org.springframework.cloud.dataflow.server.repository.DeploymentIdRepository;
 import org.springframework.cloud.dataflow.server.repository.StreamDefinitionRepository;
 import org.springframework.cloud.dataflow.server.repository.TaskDefinitionRepository;
 import org.springframework.cloud.deployer.resource.support.DelegatingResourceLoader;
@@ -101,7 +100,6 @@ public class LocalConfigurationTests {
 		context = app.run(new String[] { "--server.port=0",
 				"--" + FeaturesProperties.FEATURES_PREFIX + "." + FeaturesProperties.STREAMS_ENABLED + "=false"});
 		assertNotNull(context.getBean(TaskDefinitionRepository.class));
-		assertNotNull(context.getBean(DeploymentIdRepository.class));
 		assertNotNull(context.getBean(FieldValueCounterRepository.class));
 		try {
 			context.getBean(StreamDefinitionRepository.class);
@@ -117,7 +115,6 @@ public class LocalConfigurationTests {
 		context = app.run(new String[] { "--server.port=0",
 				"--" + FeaturesProperties.FEATURES_PREFIX + "." + FeaturesProperties.TASKS_ENABLED + "=false" });
 		assertNotNull(context.getBean(StreamDefinitionRepository.class));
-		assertNotNull(context.getBean(DeploymentIdRepository.class));
 		assertNotNull(context.getBean(FieldValueCounterRepository.class));
 		try {
 			context.getBean(TaskDefinitionRepository.class);
@@ -134,7 +131,6 @@ public class LocalConfigurationTests {
 				"--" + FeaturesProperties.FEATURES_PREFIX + "." + FeaturesProperties.ANALYTICS_ENABLED + "=false" });
 		assertNotNull(context.getBean(StreamDefinitionRepository.class));
 		assertNotNull(context.getBean(TaskDefinitionRepository.class));
-		assertNotNull(context.getBean(DeploymentIdRepository.class));
 		try {
 			context.getBean(FieldValueCounterRepository.class);
 			fail("Task features should have been disabled.");

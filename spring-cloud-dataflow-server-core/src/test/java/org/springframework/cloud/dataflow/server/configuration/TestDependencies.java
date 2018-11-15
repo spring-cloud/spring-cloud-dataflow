@@ -30,7 +30,6 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.springframework.batch.core.StepExecution;
 import org.springframework.batch.item.ExecutionContext;
 import org.springframework.boot.autoconfigure.ImportAutoConfiguration;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.domain.EntityScan;
 import org.springframework.boot.autoconfigure.jackson.Jackson2ObjectMapperBuilderCustomizer;
 import org.springframework.boot.autoconfigure.jackson.JacksonAutoConfiguration;
@@ -85,8 +84,6 @@ import org.springframework.cloud.dataflow.server.controller.support.MetricStore;
 import org.springframework.cloud.dataflow.server.job.support.ExecutionContextJacksonMixIn;
 import org.springframework.cloud.dataflow.server.job.support.StepExecutionJacksonMixIn;
 import org.springframework.cloud.dataflow.server.registry.DataFlowAppRegistryPopulator;
-import org.springframework.cloud.dataflow.server.repository.DeploymentIdRepository;
-import org.springframework.cloud.dataflow.server.repository.InMemoryDeploymentIdRepository;
 import org.springframework.cloud.dataflow.server.repository.InMemoryStreamDefinitionRepository;
 import org.springframework.cloud.dataflow.server.repository.InMemoryTaskDefinitionRepository;
 import org.springframework.cloud.dataflow.server.repository.StreamDefinitionRepository;
@@ -381,22 +378,22 @@ public class TestDependencies extends WebMvcConfigurationSupport {
 
 	@Bean
 	public TaskDefinitionController taskDefinitionController(TaskExplorer explorer, TaskDefinitionRepository repository,
-			DeploymentIdRepository deploymentIdRepository, ApplicationConfigurationMetadataResolver metadataResolver,
-			AppRegistryService appRegistry, AuditRecordService auditRecordService,
-			CommonApplicationProperties commonApplicationProperties, TaskValidationService taskValidationService) {
+			ApplicationConfigurationMetadataResolver metadataResolver, AppRegistryService appRegistry,
+			AuditRecordService auditRecordService, CommonApplicationProperties commonApplicationProperties,
+			TaskValidationService taskValidationService) {
 		return new TaskDefinitionController(explorer, repository,
-				taskService(metadataResolver, taskRepository(), deploymentIdRepository, appRegistry,
+				taskService(metadataResolver, taskRepository(), appRegistry,
 						/* delegatingResourceLoader, */auditRecordService, commonApplicationProperties,
 						taskValidationService));
 	}
 
 	@Bean
 	public TaskExecutionController taskExecutionController(TaskExplorer explorer,
-			ApplicationConfigurationMetadataResolver metadataResolver, DeploymentIdRepository deploymentIdRepository,
+			ApplicationConfigurationMetadataResolver metadataResolver,
 			AppRegistryService appRegistry, AuditRecordService auditRecordService,
 			CommonApplicationProperties commonApplicationProperties, TaskValidationService taskValidationService) {
 		return new TaskExecutionController(
-				explorer, taskService(metadataResolver, taskRepository(), deploymentIdRepository, appRegistry,
+				explorer, taskService(metadataResolver, taskRepository(), appRegistry,
 				auditRecordService, commonApplicationProperties, taskValidationService),
 				taskDefinitionRepository());
 	}
@@ -439,12 +436,11 @@ public class TestDependencies extends WebMvcConfigurationSupport {
 
 	@Bean
 	public TaskService taskService(ApplicationConfigurationMetadataResolver metadataResolver,
-			TaskRepository taskExecutionRepository, DeploymentIdRepository deploymentIdRepository,
-			AppRegistryService appRegistry, AuditRecordService auditRecordService,
+			TaskRepository taskExecutionRepository, AppRegistryService appRegistry, AuditRecordService auditRecordService,
 			CommonApplicationProperties commonApplicationProperties, TaskValidationService taskValidationService) {
 		return new DefaultTaskService(new DataSourceProperties(), taskDefinitionRepository(), taskExplorer(),
 				taskExecutionRepository, appRegistry, taskLauncher(), metadataResolver,
-				new TaskConfigurationProperties(), deploymentIdRepository, auditRecordService, null,
+				new TaskConfigurationProperties(), auditRecordService, null,
 				commonApplicationProperties, taskValidationService);
 	}
 
@@ -475,12 +471,6 @@ public class TestDependencies extends WebMvcConfigurationSupport {
 	@Bean
 	public TaskDefinitionRepository taskDefinitionRepository() {
 		return new InMemoryTaskDefinitionRepository();
-	}
-
-	@Bean
-	@ConditionalOnMissingBean
-	public DeploymentIdRepository deploymentIdRepository() {
-		return new InMemoryDeploymentIdRepository();
 	}
 
 

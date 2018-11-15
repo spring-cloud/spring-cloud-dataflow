@@ -50,8 +50,6 @@ import org.springframework.cloud.dataflow.server.controller.JobStepExecutionCont
 import org.springframework.cloud.dataflow.server.controller.JobStepExecutionProgressController;
 import org.springframework.cloud.dataflow.server.controller.RestControllerAdvice;
 import org.springframework.cloud.dataflow.server.controller.TaskExecutionController;
-import org.springframework.cloud.dataflow.server.repository.DeploymentIdRepository;
-import org.springframework.cloud.dataflow.server.repository.InMemoryDeploymentIdRepository;
 import org.springframework.cloud.dataflow.server.repository.InMemoryTaskDefinitionRepository;
 import org.springframework.cloud.dataflow.server.repository.TaskDefinitionRepository;
 import org.springframework.cloud.dataflow.server.service.TaskJobService;
@@ -173,10 +171,10 @@ public class JobDependencies {
 	@Bean
 	public TaskService taskService(TaskDefinitionRepository repository, TaskExplorer explorer, AppRegistryService registry,
 			TaskLauncher taskLauncher, ApplicationConfigurationMetadataResolver metadataResolver,
-			DeploymentIdRepository deploymentIdRepository, AuditRecordService auditRecordService,
-			CommonApplicationProperties commonApplicationProperties, TaskValidationService taskValidationService) {
+			AuditRecordService auditRecordService, CommonApplicationProperties commonApplicationProperties,
+			TaskValidationService taskValidationService) {
 		return new DefaultTaskService(new DataSourceProperties(), repository, explorer, taskRepository(), registry,
-				taskLauncher, metadataResolver, new TaskConfigurationProperties(), deploymentIdRepository,
+				taskLauncher, metadataResolver, new TaskConfigurationProperties(),
 				auditRecordService, null, commonApplicationProperties, taskValidationService);
 	}
 
@@ -249,11 +247,6 @@ public class JobDependencies {
 	@Bean
 	public RestControllerAdvice restControllerAdvice() {
 		return new RestControllerAdvice();
-	}
-
-	@Bean
-	public DeploymentIdRepository deploymentIdRepository() {
-		return new InMemoryDeploymentIdRepository();
 	}
 
 	@Bean
