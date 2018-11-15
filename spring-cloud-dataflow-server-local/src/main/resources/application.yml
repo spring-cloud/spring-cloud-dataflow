@@ -8,6 +8,8 @@ spring:
     deployer:
       local:
         free-disk-space-percentage: 0
+logging:
+  config: classpath:logback-scdf-local.xml
 #server:
 #  port: 8443
 #  ssl:
