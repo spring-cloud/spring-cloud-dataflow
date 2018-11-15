@@ -18,6 +18,8 @@ out
 spring-shell.log
 target/
 test-output
+logs/
+scdf-logs/
 
 # Eclipse artifacts, including WTP generated manifests
 .classpath

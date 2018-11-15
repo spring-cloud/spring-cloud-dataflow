@@ -232,6 +232,54 @@ $ SPRING_APPLICATION_JSON='{ "maven": { "local-repository": null,
 "proxy": { "host": "proxyhost", "port": 9018, "auth": { "username": "proxyuser", "password": "proxypass" } } } }' java -jar spring-cloud-dataflow-server-local-{project-version}.jar
 ----
 
+[[configuration-logging]]
+== Local Data Flow Server Logging configuration
+
+Spring Cloud Data Flow `local` server is configured to use `RollingFileAppender` for logging.
+
+----
+logging:
+  config: classpath:logback-scdf-local.xml
+----
+
+By default, the log file is configured to use:
+
+```
+<property name="LOG_FILE" value="${LOG_FILE:-${LOG_PATH:-${LOG_TEMP:-${java.io.tmpdir:-/tmp}}}/spring-cloud-dataflow-server-local}"/>
+
+```
+
+with the logback configuration for the `RollingPolicy`:
+
+----
+
+<appender name="FILE"
+			  class="ch.qos.logback.core.rolling.RollingFileAppender">
+		<file>${LOG_FILE}.log</file>
+		<rollingPolicy
+				class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
+			<!-- daily rolling -->
+			<fileNamePattern>${LOG_FILE}.${LOG_FILE_ROLLING_FILE_NAME_PATTERN:-%d{yyyy-MM-dd}}.%i.gz</fileNamePattern>
+			<maxFileSize>${LOG_FILE_MAX_SIZE:-100MB}</maxFileSize>
+			<maxHistory>${LOG_FILE_MAX_HISTORY:-30}</maxHistory>
+			<totalSizeCap>${LOG_FILE_TOTAL_SIZE_CAP:-500MB}</totalSizeCap>
+		</rollingPolicy>
+		<encoder>
+			<pattern>${FILE_LOG_PATTERN}</pattern>
+		</encoder>
+	</appender>
+
+----
+
+To check the `java.io.tmpdir` for the current Spring Cloud Data Flow Server `local` server,
+
+```
+jinfo <pid> | grep "java.io.tmpdir"
+
+```
+
+If you want to change or override any of the properties `LOG_FILE`, `LOG_PATH`, `LOG_TEMP`, `LOG_FILE_MAX_SIZE`, `LOG_FILE_MAX_HISTORY` and `LOG_FILE_TOTAL_SIZE_CAP`, please set them as system properties.
+
 [[configuration-skipper]]
 == Skipper
 To use features such as Stream update and rollback, the Data Flow Server delegates to the Skipper server to manage the Stream's lifecycle.  Set the configuration property `spring.cloud.skipper.client.serverUri` to the location of Skipper, e.g.
