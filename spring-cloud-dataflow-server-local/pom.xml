@@ -85,6 +85,8 @@
 				<filtering>true</filtering>
 				<includes>
 					<include>application.yml</include>
+					<include>application.properties</include>
+					<include>logback-scdf-local.xml</include>
 				</includes>
 			</resource>
 		</resources>

@@ -232,6 +232,32 @@ $ SPRING_APPLICATION_JSON='{ "maven": { "local-repository": null,
 "proxy": { "host": "proxyhost", "port": 9018, "auth": { "username": "proxyuser", "password": "proxypass" } } } }' java -jar spring-cloud-dataflow-server-local-{project-version}.jar
 ----
 
+[[configuration-logging]]
+== Local Data Flow Server Logging configuration
+
+Spring Cloud Data Flow `local` server is configured to use `RollingFileAppender` for logging.
+By default, the logging configuration uses the following settings for `LOG_CONFIG`, `LOG_FILE` and `LOG_PATH`.
+
+----
+logging:
+  config: classpath:logback-scdf-local.xml
+  path: scdf-logs
+  file: spring-cloud-dataflow-server-local
+----
+
+The logback configuration `logback-scdf-local.xml` uses the following `RollingPolicy` configuration:
+
+----
+
+<fileNamePattern>${LOG_PATH}/${LOG_FILE}.${LOG_FILE_ROLLING_FILE_NAME_PATTERN:-%d{yyyy-MM-dd}}.%i.gz</fileNamePattern>
+<maxFileSize>${LOG_FILE_MAX_SIZE:-100MB}</maxFileSize>
+<maxHistory>${LOG_FILE_MAX_HISTORY:-30}</maxHistory>
+<totalSizeCap>${LOG_FILE_TOTAL_SIZE_CAP:-500MB}</totalSizeCap>
+
+----
+
+If you want to override any of the properties `LOG_FILE_MAX_SIZE`, `LOG_FILE_MAX_HISTORY` and `LOG_FILE_TOTAL_SIZE_CAP`, please set them as system properties.
+
 [[configuration-skipper]]
 == Skipper
 To use features such as Stream update and rollback, the Data Flow Server delegates to the Skipper server to manage the Stream's lifecycle.  Set the configuration property `spring.cloud.skipper.client.serverUri` to the location of Skipper, e.g.
