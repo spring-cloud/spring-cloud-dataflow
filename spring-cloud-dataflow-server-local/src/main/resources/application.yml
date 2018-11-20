@@ -10,8 +10,6 @@ spring:
         free-disk-space-percentage: 0
 logging:
   config: classpath:logback-scdf-local.xml
-  path: scdf-logs
-  file: spring-cloud-dataflow-server-local
 #server:
 #  port: 8443
 #  ssl:
