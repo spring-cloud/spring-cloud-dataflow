@@ -180,7 +180,7 @@ To make that happen, retrieve an OAuth2 Access Token from your OAuth2 provider a
 `$ curl -H "Authorization: Bearer <ACCESS_TOKEN>" http://localhost:7577/`
 
 [[configuration-security-oauth2-authorization]]
-==== OAuth REST Endpoint Authorization
+=== OAuth REST Endpoint Authorization
 
 Spring Cloud Skipper supports the following roles:
 
@@ -290,7 +290,7 @@ where
 Be mindful that the above is indeed a YAML list, not a map (thus the use of '-' dashes at the start of each line) that lives under the `spring.cloud.skipper.security.authorization.rules` key.
 
 [[configuration-security-oauth2-authorization-user-roles]]
-===== Users and Roles
+==== Users and Roles
 
 Spring Cloud Skipper does not make any assumptions of how roles are assigned to users.
 Due to the fact that the determination of security roles is very environment-specific, Spring Cloud Data Skipper, by default, assigns _all roles_ to authenticated OAuth2 users by using the `DefaultAuthoritiesExtractor` class.
@@ -299,7 +299,7 @@ You can customize that behavior by providing your own Spring bean definition tha
 In that case, the custom bean definition takes precedence over the default one provided by Spring Cloud Skipper.
 
 [[configuration-security-oauth2-shell]]
-==== OAuth Authentication Using the Spring Cloud Skipper Shell
+=== OAuth Authentication Using the Spring Cloud Skipper Shell
 
 If your OAuth2 provider supports the Password Grant Type, you can start the
 Skipper shell with the following command:

@@ -1,6 +1,15 @@
 [[appendix]]
 = Appendices
 
+[partintro]
+--
+Having trouble with Spring Cloud Skipper, We'd like to help!
+
+* Ask a question - we monitor http://stackoverflow.com[stackoverflow.com] for questions
+  tagged with http://stackoverflow.com/tags/spring-cloud-skipper[`spring-cloud-skipper`].
+* Report bugs with Spring Cloud Skipper at https://github.com/spring-cloud/spring-cloud-skipper/issues.
+--
+
 include::appendix-building.adoc[]
 include::appendix-contributing.adoc[]
 
