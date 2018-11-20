@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 the original author or authors.
+ * Copyright 2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,45 +13,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.springframework.cloud.skipper.server.deployer;
+package org.springframework.cloud.skipper.deployer.cloudfoundry;
 
 import org.junit.Test;
 
-import org.springframework.cloud.deployer.resource.support.DelegatingResourceLoader;
-import org.springframework.cloud.skipper.SkipperException;
-import org.springframework.cloud.skipper.domain.SpringCloudDeployerApplicationManifest;
 import org.springframework.cloud.skipper.domain.SpringCloudDeployerApplicationSpec;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Fail.fail;
-import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-/**
- * @author Ilayaperumal Gopinathan
- */
-public class AppDeploymentRequestFactoryTests {
-
-	@Test
-	public void testGetResourceExceptionHandler() {
-		DelegatingResourceLoader resourceLoader = mock(DelegatingResourceLoader.class);
-		AppDeploymentRequestFactory appDeploymentRequestFactory = new AppDeploymentRequestFactory(resourceLoader);
-		when(resourceLoader.getResource(anyString())).thenThrow(RuntimeException.class);
-		SpringCloudDeployerApplicationManifest applicationSpec = mock(SpringCloudDeployerApplicationManifest.class);
-		SpringCloudDeployerApplicationSpec springCloudDeployerApplicationSpec = mock(SpringCloudDeployerApplicationSpec.class);
-		when(applicationSpec.getSpec()).thenReturn(springCloudDeployerApplicationSpec);
-		String specResource = "http://test";
-		when(springCloudDeployerApplicationSpec.getResource()).thenReturn(specResource);
-		when(springCloudDeployerApplicationSpec.getApplicationProperties()).thenReturn(null);
-		try {
-			appDeploymentRequestFactory.createAppDeploymentRequest(applicationSpec, "release1", "1.0.0");
-			fail("SkipperException is expected to be thrown.");
-		}
-		catch (SkipperException e) {
-			assertThat(e.getMessage()).contains("Could not load Resource " + specResource + ".");
-		}
-	}
+public class CloudFoundryManifestApplicationDeployerTests {
 
 	@Test
 	public void testGetResourceLocation() {
@@ -70,24 +42,24 @@ public class AppDeploymentRequestFactoryTests {
 				+ "log-sink-rabbit/1.2.0.RELEASE/log-sink-rabbit";
 		when(springBootAppSpec3.getResource()).thenReturn(httpSpecResource);
 		when(springBootAppSpec3.getVersion()).thenReturn("1.2.0.RELEASE");
-		assertThat(AppDeploymentRequestFactory.getResourceLocation(springBootAppSpec1.getResource(), springBootAppSpec1.getVersion()))
+		assertThat(CloudFoundryManifestApplicationDeployer.getResourceLocation(springBootAppSpec1.getResource(), springBootAppSpec1.getVersion()))
 				.isEqualTo(String.format("%s:%s", mavenSpecResource, mavenSpecVersion));
-		assertThat(AppDeploymentRequestFactory.getResourceLocation(springBootAppSpec2.getResource(), springBootAppSpec2.getVersion()))
+		assertThat(CloudFoundryManifestApplicationDeployer.getResourceLocation(springBootAppSpec2.getResource(), springBootAppSpec2.getVersion()))
 				.isEqualTo(String.format("%s:%s", dockerSpecResource, dockerSpecVersion));
-		assertThat(AppDeploymentRequestFactory.getResourceLocation(springBootAppSpec3.getResource(), springBootAppSpec3.getVersion()))
-				.isEqualTo(httpSpecResource + "-1.2.0.RELEASE.jar");
+		assertThat(CloudFoundryManifestApplicationDeployer.getResourceLocation(springBootAppSpec3.getResource(), springBootAppSpec3.getVersion()))
+				.isEqualTo(httpSpecResource);
 		SpringCloudDeployerApplicationSpec springBootAppSpec4 = mock(SpringCloudDeployerApplicationSpec.class);
 		String mavenSpecResource2 = "maven://org.springframework.cloud.stream.app:log-sink-rabbit:1.2.0.RELEASE";
 		String mavenSpecVersion2 = "1.2.0.RELEASE";
 		when(springBootAppSpec4.getResource()).thenReturn(mavenSpecResource2);
 		when(springBootAppSpec4.getVersion()).thenReturn(mavenSpecVersion2);
-		assertThat(AppDeploymentRequestFactory.getResourceLocation(springBootAppSpec4.getResource(), springBootAppSpec4.getVersion()))
+		assertThat(CloudFoundryManifestApplicationDeployer.getResourceLocation(springBootAppSpec4.getResource(), springBootAppSpec4.getVersion()))
 				.isEqualTo(mavenSpecResource2);
 		String mavenSpecResource3 = "maven://org.springframework.cloud.stream.app:log-sink-rabbit:1.2.0.RELEASE";
 		SpringCloudDeployerApplicationSpec springBootAppSpec5 = mock(SpringCloudDeployerApplicationSpec.class);
 		when(springBootAppSpec5.getResource()).thenReturn(mavenSpecResource3);
 		when(springBootAppSpec5.getVersion()).thenReturn(null);
-		assertThat(AppDeploymentRequestFactory.getResourceLocation(springBootAppSpec4.getResource(), springBootAppSpec4.getVersion()))
+		assertThat(CloudFoundryManifestApplicationDeployer.getResourceLocation(springBootAppSpec4.getResource(), springBootAppSpec4.getVersion()))
 				.isEqualTo(mavenSpecResource3);
 	}
 

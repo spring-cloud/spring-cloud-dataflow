@@ -41,9 +41,9 @@ import org.springframework.cloud.skipper.domain.CloudFoundryApplicationSpec.Mani
 import org.springframework.cloud.skipper.domain.Release;
 import org.springframework.cloud.skipper.domain.Status;
 import org.springframework.cloud.skipper.domain.StatusCode;
-import org.springframework.cloud.skipper.server.deployer.AppDeploymentRequestFactory;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpStatus;
+import org.springframework.util.Assert;
 
 /**
  * The helper class that handles the deployment related operation for CF manifest based application deployment.
@@ -115,13 +115,33 @@ public class CloudFoundryManifestApplicationDeployer {
 					.build();
 
 
-			Resource application = this.delegatingResourceLoader.getResource(
-					AppDeploymentRequestFactory.getResourceLocation(resource, version));
+			Resource application = this.delegatingResourceLoader.getResource(getResourceLocation(resource, version));
 			cfApplicationManifest = CloudFoundryApplicationManifestUtils.updateApplicationPath(cfApplicationManifest, application);
 
 		}
 
 		return cfApplicationManifest;
+	}
+
+	public static String getResourceLocation(String specResource, String specVersion) {
+		Assert.hasText(specResource, "Spec resource must not be empty");
+		if (specVersion != null) {
+			if ((specResource.startsWith("maven") || specResource.startsWith("docker"))) {
+				if (specResource.endsWith(":" + specVersion)) {
+					return specResource;
+				}
+				else {
+					return String.format("%s:%s", specResource, specVersion);
+				}
+			}
+			// When it is neither maven nor docker, the version is expected to have been embedded into resource value.
+			else {
+				return specResource;
+			}
+		}
+		else {
+			return specResource;
+		}
 	}
 
 	public Mono<AppStatus> getStatus(String applicationName, String platformName) {

@@ -65,9 +65,9 @@ public class AppDeploymentRequestFactory {
 					return String.format("%s:%s", specResource, specVersion);
 				}
 			}
-			// When it is neither maven nor docker, the version is expected to have been embedded into resource value.
+			// Assume the resource extension is JAR when it is neither maven nor docker.
 			else {
-				return specResource;
+				return String.format("%s-%s.jar", specResource, specVersion);
 			}
 		}
 		else {
