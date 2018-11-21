@@ -1,5 +1,5 @@
 /*
- * Copyright 2015-2016 the original author or authors.
+ * Copyright 2015-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,6 +33,7 @@ import org.springframework.cloud.dataflow.registry.domain.AppRegistration;
  *
  * @author Eric Bottard
  * @author Mark Fisher
+ * @author Andy Clement
  */
 public class UnfinishedAppNameExpansionStrategy implements ExpansionStrategy {
 
@@ -59,7 +60,7 @@ public class UnfinishedAppNameExpansionStrategy implements ExpansionStrategy {
 		CompletionProposal.Factory proposals = CompletionProposal.expanding(text);
 
 		List<ApplicationType> validTypesAtThisPosition = Arrays
-				.asList(CompletionUtils.determinePotentialTypes(lastApp));
+				.asList(CompletionUtils.determinePotentialTypes(lastApp, streamDefinition.getAppDefinitions().size() > 1));
 
 		for (AppRegistration appRegistration : appRegistry.findAll()) {
 			String candidateName = appRegistration.getName();

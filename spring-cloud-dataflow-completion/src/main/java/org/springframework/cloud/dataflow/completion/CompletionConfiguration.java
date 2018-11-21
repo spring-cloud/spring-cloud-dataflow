@@ -1,5 +1,5 @@
 /*
- * Copyright 2015-2016 the original author or authors.
+ * Copyright 2015-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,6 +34,7 @@ import org.springframework.context.annotation.Import;
  * @author Eric Bottard
  * @author Ilayaperumal Gopinathan
  * @author Mark Fisher
+ * @author Andy Clement
  */
 @Configuration
 @Import({ ApplicationConfigurationMetadataResolverAutoConfiguration.class })
@@ -51,7 +52,8 @@ public class CompletionConfiguration {
 				emptyStartYieldsAppsRecoveryStrategy(), expandOneDashToTwoDashesRecoveryStrategy(),
 				configurationPropertyNameAfterDashDashRecoveryStrategy(),
 				unfinishedConfigurationPropertyNameRecoveryStrategy(), destinationNameYieldsAppsRecoveryStrategy(),
-				appsAfterPipeRecoveryStrategy(), configurationPropertyValueHintRecoveryStrategy());
+				appsAfterPipeRecoveryStrategy(), appsAfterCommaRecoveryStrategy(),
+				configurationPropertyValueHintRecoveryStrategy());
 		List<ExpansionStrategy> expansionStrategies = Arrays.asList(addAppOptionsExpansionStrategy(),
 				pipeIntoOtherAppsExpansionStrategy(), unfinishedAppNameExpansionStrategy(),
 				// Make sure this one runs last, as it may clear already computed
@@ -64,7 +66,7 @@ public class CompletionConfiguration {
 
 	@Bean
 	public RecoveryStrategy<?> emptyStartYieldsAppsRecoveryStrategy() {
-		return new EmptyStartYieldsSourceAppsRecoveryStrategy(appRegistry);
+		return new EmptyStartYieldsSourceOrUnboundAppsRecoveryStrategy(appRegistry);
 	}
 
 	@Bean
@@ -85,6 +87,11 @@ public class CompletionConfiguration {
 	@Bean
 	public RecoveryStrategy<?> appsAfterPipeRecoveryStrategy() {
 		return new AppsAfterPipeRecoveryStrategy(appRegistry);
+	}
+
+	@Bean
+	public RecoveryStrategy<?> appsAfterCommaRecoveryStrategy() {
+		return new AppsAfterCommaRecoveryStrategy(appRegistry);
 	}
 
 	@Bean

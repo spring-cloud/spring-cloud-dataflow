@@ -1,5 +1,5 @@
 /*
- * Copyright 2015-2016 the original author or authors.
+ * Copyright 2015-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,6 +32,7 @@ import org.springframework.cloud.dataflow.core.TaskPropertyKeys;
  *
  * @author Eric Bottard
  * @author Mark Fisher
+ * @author Andy Clement
  */
 public class CompletionUtils {
 
@@ -55,7 +56,7 @@ public class CompletionUtils {
 	 * Return the type(s) a given stream app definition <em>could</em> have, in the
 	 * context of code completion.
 	 */
-	static ApplicationType[] determinePotentialTypes(StreamAppDefinition appDefinition) {
+	static ApplicationType[] determinePotentialTypes(StreamAppDefinition appDefinition, boolean multipleAppsInStreamDefinition) {
 		Set<String> properties = appDefinition.getProperties().keySet();
 		if (properties.contains(BindingPropertyKeys.INPUT_DESTINATION)) {
 			// Can't be source. For the purpose of completion, being the last app
@@ -69,9 +70,15 @@ public class CompletionUtils {
 			else {
 				return new ApplicationType[] { ApplicationType.processor, ApplicationType.sink };
 			}
-		} // MUST be source
+		}
 		else {
-			return new ApplicationType[] { ApplicationType.source };
+			// Multiple apps and no binding properties indicates unbound app sequence (a,b,c)
+			if (multipleAppsInStreamDefinition) {
+				return new ApplicationType[] { ApplicationType.app };
+			}
+			else {
+				return new ApplicationType[] { ApplicationType.source, ApplicationType.app };
+			}
 		}
 	}
 

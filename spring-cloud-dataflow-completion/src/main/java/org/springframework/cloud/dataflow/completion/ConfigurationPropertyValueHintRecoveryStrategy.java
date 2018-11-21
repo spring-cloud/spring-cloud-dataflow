@@ -1,5 +1,5 @@
 /*
- * Copyright 2015-2017 the original author or authors.
+ * Copyright 2015-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,6 +35,7 @@ import org.springframework.cloud.dataflow.registry.domain.AppRegistration;
  * @author Eric Bottard
  * @author Mark Fisher
  * @author Oleg Zhurakousky
+ * @author Andy Clement
  */
 public class ConfigurationPropertyValueHintRecoveryStrategy
 		extends StacktraceFingerprintingRecoveryStrategy<CheckPointedParseException> {
@@ -67,7 +68,8 @@ public class ConfigurationPropertyValueHintRecoveryStrategy
 		String safe = exception.getExpressionStringUntilCheckpoint();
 		StreamDefinition streamDefinition = new StreamDefinition("__dummy", safe);
 		StreamAppDefinition lastApp = streamDefinition.getDeploymentOrderIterator().next();
-		return this.collectorSupport.findAppRegistration(lastApp.getName(), CompletionUtils.determinePotentialTypes(lastApp));
+		return this.collectorSupport.findAppRegistration(lastApp.getName(),
+				CompletionUtils.determinePotentialTypes(lastApp, streamDefinition.getAppDefinitions().size() > 1));
 	}
 
 	private String recoverPropertyName(CheckPointedParseException exception) {
