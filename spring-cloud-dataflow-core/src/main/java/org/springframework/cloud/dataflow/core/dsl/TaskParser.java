@@ -235,12 +235,12 @@ public class TaskParser extends AppParser {
 			}
 			// Process argument value:
 			Token t = tokens.peek();
-			String argValue = eatArgValue();
+			String[] argValue = eatArgValue();
 			tokens.checkpoint();
 			if (args == null) {
 				args = new ArrayList<ArgumentNode>();
 			}
-			args.add(new ArgumentNode(toData(argNameComponents), argValue, dashDash.startPos, t.endPos));
+			args.add(new ArgumentNode(toData(argNameComponents), argValue[0], argValue[1], dashDash.startPos, t.endPos));
 		}
 		return args == null ? NO_ARGUMENTS : args.toArray(new ArgumentNode[args.size()]);
 	}

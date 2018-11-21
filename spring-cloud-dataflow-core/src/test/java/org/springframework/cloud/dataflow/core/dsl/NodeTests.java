@@ -35,8 +35,8 @@ public class NodeTests {
 
 	@Test
 	public void testDestinationNodeToString(){
-		ArgumentNode an1 = new ArgumentNode("foo", "bar", 0, 4);
-		ArgumentNode an2 = new ArgumentNode("abc", "'xyz'", 0, 4);
+		ArgumentNode an1 = new ArgumentNode("foo", "bar", null, 0, 4);
+		ArgumentNode an2 = new ArgumentNode("abc", "'xyz'", "'", 0, 4);
 		DestinationNode node = new DestinationNode(0, 4, "foo.bar.bazz", new ArgumentNode[]{an1, an2});
 		System.out.println(node.stringify());
 		assertEquals(":foo.bar.bazz", node.toString());
@@ -44,8 +44,8 @@ public class NodeTests {
 
 	@Test // see https://github.com/spring-cloud/spring-cloud-dataflow/issues/1568
 	public void testStreamNodesToString(){
-		ArgumentNode an1 = new ArgumentNode("foo", "bar", 0, 4);
-		ArgumentNode an2 = new ArgumentNode("abc", "'xyz'", 0, 4);
+		ArgumentNode an1 = new ArgumentNode("foo", "bar", null, 0, 4);
+		ArgumentNode an2 = new ArgumentNode("abc", "xyz", "'", 0, 4);
 		AppNode appNode = new AppNode(null, "bar", 0, 2, new ArgumentNode[]{an1, an2});
 
 		DestinationNode sourceDNode = new DestinationNode(0, 0, "source.bar.bazz", null);

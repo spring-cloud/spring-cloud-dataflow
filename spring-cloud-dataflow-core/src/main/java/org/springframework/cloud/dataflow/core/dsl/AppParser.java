@@ -121,12 +121,12 @@ public class AppParser {
 			}
 			// Process argument value:
 			Token t = tokens.peek();
-			String argValue = eatArgValue();
+			String[] argValue = eatArgValue();
 			tokens.checkpoint();
 			if (args == null) {
 				args = new ArrayList<ArgumentNode>();
 			}
-			args.add(new ArgumentNode(toData(argNameComponents), argValue, dashDash.startPos, t.endPos));
+			args.add(new ArgumentNode(toData(argNameComponents), argValue[0], argValue[1], dashDash.startPos, t.endPos));
 		}
 		return args == null ? null : args.toArray(new ArgumentNode[args.size()]);
 	}
@@ -136,22 +136,23 @@ public class AppParser {
 	 * <p>
 	 * Expected format: {@code argValue: identifier | literal_string}
 	 *
-	 * @return argument value
+	 * @return string array of length 2, first is arg value, second (if set) is quotes that were used
 	 */
-	protected String eatArgValue() {
+	protected String[] eatArgValue() {
 		Token t = tokens.next();
 		String argValue = null;
+		String quotesUsed = null;
 		if (t.getKind() == TokenKind.IDENTIFIER) {
 			argValue = t.data;
 		}
 		else if (t.getKind() == TokenKind.LITERAL_STRING) {
-			String quotesUsed = t.data.substring(0, 1);
+			quotesUsed = t.data.substring(0, 1);
 			argValue = t.data.substring(1, t.data.length() - 1).replace(quotesUsed + quotesUsed, quotesUsed);
 		}
 		else {
 			tokens.raiseException(t.startPos, DSLMessage.EXPECTED_ARGUMENT_VALUE, t.data);
 		}
-		return argValue;
+		return new String[] {argValue, quotesUsed};
 	}
 
 	/**

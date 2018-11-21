@@ -26,11 +26,14 @@ public class ArgumentNode extends AstNode {
 	private final String name;
 
 	private final String value;
+	
+	private final String quoteUsed;
 
-	public ArgumentNode(String name, String value, int startPos, int endPos) {
+	public ArgumentNode(String name, String value, String quoteUsed, int startPos, int endPos) {
 		super(startPos, endPos);
 		this.name = name;
 		this.value = value;
+		this.quoteUsed = quoteUsed;
 	}
 
 	public String getName() {
@@ -48,7 +51,11 @@ public class ArgumentNode extends AstNode {
 
 	@Override
 	public String toString() {
-		return "--" + name + "=" + value;
+		String valueString = value;
+		if (quoteUsed != null) {
+			valueString = quoteUsed + (quoteUsed.equals("\'")?value.replace("'", "''"):value) + quoteUsed;
+		}
+		return "--" + name + "=" + valueString;
 	}
 
 }
