@@ -12,9 +12,12 @@ buildscript {
 		springCloudSkipper104VersionTag = '1.0.4'
 		springCloudSkipper104Version = "${springCloudSkipper104VersionTag}.RELEASE"
 		springCloudSkipper105VersionTag = '1.0.5'
-		springCloudSkipper105Version = "${springCloudSkipper105VersionTag}.BUILD-SNAPSHOT"		
+		springCloudSkipper105Version = "${springCloudSkipper105VersionTag}.RELEASE"
 		springCloudSkipper110VersionTag = '1.1.0'
-		springCloudSkipper110Version = "${springCloudSkipper110VersionTag}.BUILD-SNAPSHOT"
+		springCloudSkipper110Version = "${springCloudSkipper110VersionTag}.RELEASE"
+		// keep 11x as a latest snapshot version from 1.1.x branch
+		springCloudSkipper11xVersionTag = '1.1.3'
+		springCloudSkipper11xVersion = "${springCloudSkipper11xVersionTag}.BUILD-SNAPSHOT"
 		junitPlatformVersion = '1.1.0'
 		junitJupiterVersion = '5.1.0'
 		dockerComposeRuleJunit4Version = '0.33.0'
@@ -142,6 +145,7 @@ project('spring-cloud-skipper-acceptance-tests') {
 	build.dependsOn ':spring-cloud-skipper-acceptance-image-legacy104:docker'
 	build.dependsOn ':spring-cloud-skipper-acceptance-image-legacy105:docker'
 	build.dependsOn ':spring-cloud-skipper-acceptance-image-legacy110:docker'
+	build.dependsOn ':spring-cloud-skipper-acceptance-image-legacy11x:docker'
 	build.dependsOn ':spring-cloud-skipper-acceptance-image-drivers100:docker'
 	build.dependsOn ':spring-cloud-skipper-acceptance-image-drivers101:docker'
 	build.dependsOn ':spring-cloud-skipper-acceptance-image-drivers102:docker'
@@ -149,5 +153,6 @@ project('spring-cloud-skipper-acceptance-tests') {
 	build.dependsOn ':spring-cloud-skipper-acceptance-image-drivers104:docker'
 	build.dependsOn ':spring-cloud-skipper-acceptance-image-drivers105:docker'
 	build.dependsOn ':spring-cloud-skipper-acceptance-image-drivers110:docker'
+	build.dependsOn ':spring-cloud-skipper-acceptance-image-drivers11x:docker'
 }
 

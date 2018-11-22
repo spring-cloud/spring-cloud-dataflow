@@ -1,0 +1,19 @@
+apply plugin: 'com.palantir.docker'
+
+configurations {
+	legacy11x
+}
+
+dependencies {
+	legacy11x("org.springframework.cloud:spring-cloud-skipper-server:${springCloudSkipper11xVersion}")
+}
+
+docker {
+	name "spring-cloud-skipper-acceptance-image-legacy11x"
+	tags "${springCloudSkipper11xVersionTag}"
+	dockerfile file('src/main/resources/Dockerfile')
+	files getResolvedVersionOf(configurations.legacy11x, "spring-cloud-skipper-server").file.absolutePath[0], 'src/main/resources/entrypoint.sh'
+	buildArgs(['JAR_FILE': getResolvedVersionOf(configurations.legacy11x, "spring-cloud-skipper-server").file.name[0], 'ENTRYPOINT_FILE': 'entrypoint.sh'])
+}
+
+build.dependsOn = ['docker', 'dockerTag']

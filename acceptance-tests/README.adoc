@@ -56,6 +56,32 @@ BUILD SUCCESSFUL in 9m 37s
 38 actionable tasks: 34 executed, 4 up-to-date
 ```
 
+All tests contains various _junit5_ tags which can be used to include and exclude tests.
+
+Databases have tags `oracle`, `mysql` and `postgres`. As we have initial bootstrap and
+migration tests, there are tags `migration` and `bootstrap` respectively. Different skipper
+versions have tags like `skipper100`, `skipper101`, etc. Version tag `skipper11x` always
+maps to latest snapshot from a branch `1.1.x`. Special version tag `skipperall` matches
+all versions.
+
+All these run postgresql related tests but skips migration tests.
+```
+./gradlew clean build -PskipperIncludeTags='postgres & !migration'
+./gradlew clean build -PskipperIncludeTags=postgres -PskipperExcludeTags=migration
+./gradlew clean build -PskipperIncludeTags='postgres&!migration'
+```
+
+This would run unly migration tests with postgresql.
+```
+./gradlew clean build -PskipperIncludeTags='postgres&migration'
+```
+
+
+This would run postgresql tests with latest version from `1.1.x` branch and skips migration tests.
+```
+./gradlew clean build -PskipperIncludeTags='postgres&skipper11x&!migration'
+```
+
 === Deploy Pipeline
 This pipeline depends on credentials to be available via `credhub`
 associated with `ci.spring.io`.

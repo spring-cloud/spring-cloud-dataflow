@@ -31,6 +31,7 @@ import org.springframework.cloud.skipper.acceptance.tests.support.Skipper103;
 import org.springframework.cloud.skipper.acceptance.tests.support.Skipper104;
 import org.springframework.cloud.skipper.acceptance.tests.support.Skipper105;
 import org.springframework.cloud.skipper.acceptance.tests.support.Skipper110;
+import org.springframework.cloud.skipper.acceptance.tests.support.Skipper11x;
 
 /**
  * Tests going through start of skipper servers with databases and verifying
@@ -108,6 +109,15 @@ public class SkipperServerInitialBootstrapTests extends AbstractSkipperServerTes
 		assertServerRunning(dockerComposeInfo, "skipper", "skipper");
 	}
 
+	@Test
+	@Postgres
+	@Skipper11x
+	@DockerCompose(id = "db", order = 0, locations = { "src/test/resources/postgres.yml" }, services = { "postgres" })
+	@DockerCompose(id = "skipper", order = 1, locations = { "src/test/resources/skipper11xpostgres.yml" }, services = { "skipper" })
+	public void testSkipper11xWithPostgres(DockerComposeInfo dockerComposeInfo) throws Exception {
+		assertServerRunning(dockerComposeInfo, "skipper", "skipper");
+	}
+
 	// mysql
 
 	@Test
@@ -173,6 +183,15 @@ public class SkipperServerInitialBootstrapTests extends AbstractSkipperServerTes
 		assertServerRunning(dockerComposeInfo, "skipper", "skipper");
 	}
 
+	@Test
+	@Mysql
+	@Skipper11x
+	@DockerCompose(id = "db", order = 0, locations = { "src/test/resources/mysql.yml" }, services = { "mysql" })
+	@DockerCompose(id = "skipper", order = 1, locations = { "src/test/resources/skipper11xmysql.yml" }, services = { "skipper" })
+	public void testSkipper11xWithMysql(DockerComposeInfo dockerComposeInfo) throws Exception {
+		assertServerRunning(dockerComposeInfo, "skipper", "skipper");
+	}
+
 	// oracle
 
 	@Test
@@ -235,6 +254,15 @@ public class SkipperServerInitialBootstrapTests extends AbstractSkipperServerTes
 	@DockerCompose(id = "db", order = 0, locations = { "src/test/resources/oracle.yml" }, services = { "oracle" })
 	@DockerCompose(id = "skipper", order = 1, locations = { "src/test/resources/skipper110oracle.yml" }, services = { "skipper" })
 	public void testSkipper110WithOracle(DockerComposeInfo dockerComposeInfo) throws Exception {
+		assertServerRunning(dockerComposeInfo, "skipper", "skipper");
+	}
+
+	@Test
+	@Oracle
+	@Skipper11x
+	@DockerCompose(id = "db", order = 0, locations = { "src/test/resources/oracle.yml" }, services = { "oracle" })
+	@DockerCompose(id = "skipper", order = 1, locations = { "src/test/resources/skipper11xoracle.yml" }, services = { "skipper" })
+	public void testSkipper11xWithOracle(DockerComposeInfo dockerComposeInfo) throws Exception {
 		assertServerRunning(dockerComposeInfo, "skipper", "skipper");
 	}
 }

@@ -3,7 +3,7 @@ buildscript {
 		springBootVersion = '1.5.9.RELEASE'
 		oracleJdbcDriverVersion = '12.2.0.1'
 		springCloudVersion = 'Dalston.SR5'
-		springCloudSkipperVersion = '1.0.2.BUILD-SNAPSHOT'
+		springCloudSkipperVersion = '1.0.2.RELEASE'
 		reactorVersion = 'Aluminium-SR3'
 		reactorNettyVersion = '0.6.6.RELEASE'
 		objenesisVersion = '2.1'
@@ -22,7 +22,7 @@ apply plugin: 'maven'
 apply plugin: 'org.springframework.boot'
 
 group = 'org.springframework.cloud.skipper.acceptance.app'
-version = '1.0.2.BUILD-SNAPSHOT'
+version = '1.0.2.RELEASE'
 sourceCompatibility = 1.8
 
 repositories {

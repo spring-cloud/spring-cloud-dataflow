@@ -24,7 +24,6 @@ import org.junit.jupiter.api.Tag;
 
 @Target({ ElementType.TYPE, ElementType.METHOD })
 @Retention(RetentionPolicy.RUNTIME)
-@SkipperAll
 @Tag("skipper100")
 public @interface Skipper100 {
 }

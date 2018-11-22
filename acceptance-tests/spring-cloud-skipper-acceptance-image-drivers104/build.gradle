@@ -2,7 +2,7 @@ apply plugin: 'com.palantir.docker'
 
 dependencies {
 	// version need to match one from custom-apps/skipper-server-with-drivers104
-	compile('org.springframework.cloud.skipper.acceptance.app:skipper-server-with-drivers104:1.0.4.BUILD-SNAPSHOT')
+	compile("org.springframework.cloud.skipper.acceptance.app:skipper-server-with-drivers104:${springCloudSkipper104Version}")
 }
 
 docker {

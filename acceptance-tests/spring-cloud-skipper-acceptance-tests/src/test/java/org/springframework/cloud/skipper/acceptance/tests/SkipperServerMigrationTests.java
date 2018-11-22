@@ -20,14 +20,11 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.cloud.skipper.acceptance.core.DockerCompose;
 import org.springframework.cloud.skipper.acceptance.core.DockerComposeExtension;
 import org.springframework.cloud.skipper.acceptance.core.DockerComposeInfo;
-import org.springframework.cloud.skipper.acceptance.tests.support.AssertUtils;
 import org.springframework.cloud.skipper.acceptance.tests.support.Migration;
 import org.springframework.cloud.skipper.acceptance.tests.support.Mysql;
 import org.springframework.cloud.skipper.acceptance.tests.support.Oracle;
 import org.springframework.cloud.skipper.acceptance.tests.support.Postgres;
 import org.springframework.cloud.skipper.acceptance.tests.support.SkipperAll;
-
-import com.palantir.docker.compose.connection.DockerPort;
 
 /**
  * Tests going through start of skipper servers with databases and verifying
