@@ -239,8 +239,8 @@ The following topics provide more detail:
 * <<resources-app-registry-list>>
 * <<resources-app-registry-get>>
 * <<resources-app-registry-post>>
-* <<resources-app-registry-post-skipper>> (In Skipper mode)
-* <<resources-app-registry-default>> (In Skipper mode)
+* <<resources-app-registry-post-skipper>>
+* <<resources-app-registry-default>>
 * <<resources-app-registry-delete>>
 * <<resources-app-registry-bulk>>
 
@@ -383,9 +383,7 @@ include::{snippets}/app-registry-documentation/registering-an-application/http-r
 [[resources-app-registry-post-skipper]]
 ==== Registering a New Application with version
 
-IMPORTANT: In order to use this feature, the Data Flow server must be in <<spring-cloud-dataflow-stream-lifecycle-skipper, Skipper Mode>>
-
-A `POST` request on `/apps/<type>/<name>/<version>` allows registration of a new application in Skipper mode.
+A `POST` request on `/apps/<type>/<name>/<version>` allows registration of a new application
 The following topics provide more detail:
 
 * <<api-guide-resources-app-registry-post-skipper-request-structure>>
@@ -395,47 +393,44 @@ The following topics provide more detail:
 * <<api-guide-resources-app-registry-post-skipper-response-structure>>
 
 
-
 [[api-guide-resources-app-registry-post-skipper-request-structure]]
 ===== Request Structure
 
-include::{skipper-snippets}/skipper-documentation/registering-an-application-version/http-request.adoc[]
+include::{snippets}/app-registry-documentation/registering-an-application-version/http-request.adoc[]
 
 
 
 [[api-guide-resources-app-registry-post-skipper-request-parameters]]
 ===== Request Parameters
 
-include::{skipper-snippets}/skipper-documentation/registering-an-application-version/request-parameters.adoc[]
+include::{snippets}/app-registry-documentation/registering-an-application-version/request-parameters.adoc[]
 
 
 
 [[api-guide-resources-app-registry-post-skipper-path-parameters]]
 ===== Path Parameters
 
-include::{skipper-snippets}/skipper-documentation/registering-an-application-version/path-parameters.adoc[]
+include::{snippets}/app-registry-documentation/registering-an-application-version/path-parameters.adoc[]
 
 
 
 [[api-guide-resources-app-registry-post-skipper-example-request]]
 ===== Example Request
 
-include::{skipper-snippets}/skipper-documentation/registering-an-application-version/curl-request.adoc[]
+include::{snippets}/app-registry-documentation/registering-an-application-version/curl-request.adoc[]
 
 
 
 [[api-guide-resources-app-registry-post-skipper-response-structure]]
 ===== Response Structure
 
-include::{skipper-snippets}/skipper-documentation/registering-an-application-version/http-response.adoc[]
+include::{snippets}/app-registry-documentation/registering-an-application-version/http-response.adoc[]
 
 
 [[resources-app-registry-default]]
 ==== Set the default application version
 
-IMPORTANT: In order to use this feature, the Data Flow server must be in <<spring-cloud-dataflow-stream-lifecycle-skipper, Skipper Mode>>
-
-For an application with the `name` and `type`, multiple versions can be registered in Skipper mode.
+For an application with the `name` and `type`, multiple versions can be registered.
 In this case, one of the versions can be chosen as the default application.
 
 The following topics provide more detail:
@@ -450,28 +445,28 @@ The following topics provide more detail:
 [[api-guide-resources-app-registry-default-request-structure]]
 ===== Request Structure
 
-include::{skipper-snippets}/skipper-documentation/app-default/http-request.adoc[]
+include::{snippets}/app-registry-documentation/app-default/http-request.adoc[]
 
 
 
 [[api-guide-resources-app-registry-default-path-parameters]]
 ===== Path Parameters
 
-include::{skipper-snippets}/skipper-documentation/app-default/path-parameters.adoc[]
+include::{snippets}/app-registry-documentation/app-default/path-parameters.adoc[]
 
 
 
 [[api-guide-resources-app-registry-default-example-request]]
 ===== Example Request
 
-include::{skipper-snippets}/skipper-documentation/app-default/curl-request.adoc[]
+include::{snippets}/app-registry-documentation/app-default/curl-request.adoc[]
 
 
 
 [[api-guide-resources-app-registry-default-response-structure]]
 ===== Response Structure
 
-include::{skipper-snippets}/skipper-documentation/app-default/http-response.adoc[]
+include::{snippets}/app-registry-documentation/app-default/http-response.adoc[]
 
 
 [[resources-app-registry-delete]]
@@ -860,11 +855,11 @@ The following topics provide more detail:
 * <<api-guide-resources-stream-deployment-deploy>>
 * <<api-guide-resources-stream-deployment-undeploy>>
 * <<api-guide-resources-stream-deployment-undeploy-all>>
-* <<api-guide-resources-stream-deployment-update>> (In Skipper mode)
-* <<api-guide-resources-stream-deployment-rollback>> (In Skipper mode)
-* <<api-guide-resources-stream-deployment-manifest>> (In Skipper mode)
-* <<api-guide-resources-stream-deployment-history>> (In Skipper mode)
-* <<api-guide-resources-stream-deployment-platform-list>> (In Skipper mode)
+* <<api-guide-resources-stream-deployment-update>>
+* <<api-guide-resources-stream-deployment-rollback>>
+* <<api-guide-resources-stream-deployment-manifest>>
+* <<api-guide-resources-stream-deployment-history>>
+* <<api-guide-resources-stream-deployment-platform-list>>
 
 [[api-guide-resources-stream-deployment-deploy]]
 ==== Deploying Stream Definition
@@ -990,10 +985,7 @@ include::{snippets}/stream-deployments-documentation/un-deploy-all/http-response
 [[api-guide-resources-stream-deployment-update]]
 ==== Update Deployed Stream
 
-When using _Spring Cloud Data Flow_ in Skipper mode, you can update deployed
-streams, and provide additional deployment properties.
-
-IMPORTANT: In order to use this feature, the Data Flow server must be in <<spring-cloud-dataflow-stream-lifecycle-skipper, Skipper Mode>>
+Thanks to Skipper, you can update deployed streams, and provide additional deployment properties.
 
 * <<api-guide-resources-stream-definitions-deployment-update-request-structure>>
 * <<api-guide-resources-stream-definitions-deployment-update-request-parameters>>
@@ -1005,9 +997,9 @@ IMPORTANT: In order to use this feature, the Data Flow server must be in <<sprin
 [[api-guide-resources-stream-definitions-deployment-update-request-structure]]
 ===== Request Structure
 
-include::{skipper-snippets}/skipper-documentation/a_stream-update/http-request.adoc[]
+include::{snippets}/stream-deployments-documentation/stream-update/http-request.adoc[]
 
-include::{skipper-snippets}/skipper-documentation/a_stream-update/path-parameters.adoc[]
+include::{snippets}/stream-deployments-documentation/stream-update/path-parameters.adoc[]
 
 
 [[api-guide-resources-stream-definitions-deployment-update-request-parameters]]
@@ -1020,21 +1012,19 @@ There are no request parameters for this endpoint.
 [[api-guide-resources-stream-definitions-deployment-update-example-request]]
 ===== Example Request
 
-include::{skipper-snippets}/skipper-documentation/a_stream-update/curl-request.adoc[]
+include::{snippets}/stream-deployments-documentation/stream-update/curl-request.adoc[]
 
 
 
 [[api-guide-resources-stream-definitions-deployment-update-response-structure]]
 ===== Response Structure
 
-include::{skipper-snippets}/skipper-documentation/a_stream-update/http-response.adoc[]
+include::{snippets}/stream-deployments-documentation/stream-update/http-response.adoc[]
 
 [[api-guide-resources-stream-deployment-rollback]]
 ==== Rollback Stream Definition
 
 Rollback the stream to the previous or a specific version of the stream.
-
-IMPORTANT: In order to use this feature, the Data Flow server must be in <<spring-cloud-dataflow-stream-lifecycle-skipper, Skipper Mode>>
 
 * <<api-guide-resources-stream-definitions-deployment-rollback-request-structure>>
 * <<api-guide-resources-stream-definitions-deployment-rollback-request-parameters>>
@@ -1046,9 +1036,9 @@ IMPORTANT: In order to use this feature, the Data Flow server must be in <<sprin
 [[api-guide-resources-stream-definitions-deployment-rollback-request-structure]]
 ===== Request Structure
 
-include::{skipper-snippets}/skipper-documentation/b_rollback/http-request.adoc[]
+include::{snippets}/stream-deployments-documentation/rollback/http-request.adoc[]
 
-include::{skipper-snippets}/skipper-documentation/b_rollback/path-parameters.adoc[]
+include::{snippets}/stream-deployments-documentation/rollback/path-parameters.adoc[]
 
 
 [[api-guide-resources-stream-definitions-deployment-rollback-request-parameters]]
@@ -1061,22 +1051,20 @@ There are no request parameters for this endpoint.
 [[api-guide-resources-stream-definitions-deployment-rollback-example-request]]
 ===== Example Request
 
-include::{skipper-snippets}/skipper-documentation/b_rollback/curl-request.adoc[]
+include::{snippets}/stream-deployments-documentation/rollback/curl-request.adoc[]
 
 
 
 [[api-guide-resources-stream-definitions-deployment-rollback-response-structure]]
 ===== Response Structure
 
-include::{skipper-snippets}/skipper-documentation/b_rollback/http-response.adoc[]
+include::{snippets}/stream-deployments-documentation/rollback/http-response.adoc[]
 
 
 [[api-guide-resources-stream-deployment-manifest]]
 ==== Get Manifest
 
 Return a manifest of a released version. For packages with dependencies, the manifest includes the contents of those dependencies.
-
-IMPORTANT: In order to use this feature, the Data Flow server must be in <<spring-cloud-dataflow-stream-lifecycle-skipper, Skipper Mode>>
 
 * <<api-guide-resources-stream-definitions-deployment-manifest-request-structure>>
 * <<api-guide-resources-stream-definitions-deployment-manifest-request-parameters>>
@@ -1088,9 +1076,9 @@ IMPORTANT: In order to use this feature, the Data Flow server must be in <<sprin
 [[api-guide-resources-stream-definitions-deployment-manifest-request-structure]]
 ===== Request Structure
 
-include::{skipper-snippets}/skipper-documentation/manifest/http-request.adoc[]
+include::{snippets}/stream-deployments-documentation/manifest/http-request.adoc[]
 
-include::{skipper-snippets}/skipper-documentation/manifest/path-parameters.adoc[]
+include::{snippets}/stream-deployments-documentation/manifest/path-parameters.adoc[]
 
 
 [[api-guide-resources-stream-definitions-deployment-manifest-request-parameters]]
@@ -1103,22 +1091,20 @@ There are no request parameters for this endpoint.
 [[api-guide-resources-stream-definitions-deployment-manifest-example-request]]
 ===== Example Request
 
-include::{skipper-snippets}/skipper-documentation/manifest/curl-request.adoc[]
+include::{snippets}/stream-deployments-documentation/manifest/curl-request.adoc[]
 
 
 
 [[api-guide-resources-stream-definitions-deployment-manifest-response-structure]]
 ===== Response Structure
 
-include::{skipper-snippets}/skipper-documentation/manifest/http-response.adoc[]
+include::{snippets}/stream-deployments-documentation/manifest/http-response.adoc[]
 
 
 [[api-guide-resources-stream-deployment-history]]
 ==== Get Deployment History
 
 Get the stream's deployment history.
-
-IMPORTANT: In order to use this feature, the Data Flow server must be in <<spring-cloud-dataflow-stream-lifecycle-skipper, Skipper Mode>>
 
 * <<api-guide-resources-stream-definitions-deployment-history-request-structure>>
 * <<api-guide-resources-stream-definitions-deployment-history-example-request>>
@@ -1129,26 +1115,24 @@ IMPORTANT: In order to use this feature, the Data Flow server must be in <<sprin
 [[api-guide-resources-stream-definitions-deployment-history-request-structure]]
 ===== Request Structure
 
-include::{skipper-snippets}/skipper-documentation/history/http-request.adoc[]
+include::{snippets}/stream-deployments-documentation/history/http-request.adoc[]
 
 
 [[api-guide-resources-stream-definitions-deployment-history-example-request]]
 ===== Example Request
 
-include::{skipper-snippets}/skipper-documentation/history/curl-request.adoc[]
+include::{snippets}/stream-deployments-documentation/history/curl-request.adoc[]
 
 
 [[api-guide-resources-stream-definitions-deployment-history-response-structure]]
 ===== Response Structure
 
-include::{skipper-snippets}/skipper-documentation/history/http-response.adoc[]
+include::{snippets}/stream-deployments-documentation/history/http-response.adoc[]
 
 [[api-guide-resources-stream-deployment-platform-list]]
 ==== Get Deployment Platforms
 
 Retrieve a list of supported deployment platforms.
-
-IMPORTANT: In order to use this feature, the Data Flow server must be in <<spring-cloud-dataflow-stream-lifecycle-skipper, Skipper Mode>>
 
 * <<api-guide-resources-stream-definitions-deployment-platform-list-request-structure>>
 * <<api-guide-resources-stream-definitions-deployment-history-example-request>>
@@ -1158,19 +1142,19 @@ IMPORTANT: In order to use this feature, the Data Flow server must be in <<sprin
 [[api-guide-resources-stream-definitions-deployment-platform-list-request-structure]]
 ===== Request Structure
 
-include::{skipper-snippets}/skipper-documentation/platform-list/http-request.adoc[]
+include::{snippets}/stream-deployments-documentation/platform-list/http-request.adoc[]
 
 
 [[api-guide-resources-stream-definitions-deployment-platform-list-example-request]]
 ===== Example Request
 
-include::{skipper-snippets}/skipper-documentation/platform-list/curl-request.adoc[]
+include::{snippets}/stream-deployments-documentation/platform-list/curl-request.adoc[]
 
 
 [[api-guide-resources-stream-definitions-deployment-platform-list-response-structure]]
 ===== Response Structure
 
-include::{skipper-snippets}/skipper-documentation/platform-list/http-response.adoc[]
+include::{snippets}/stream-deployments-documentation/platform-list/http-response.adoc[]
 
 [[api-guide-resources-task-definitions]]
 === Task Definitions

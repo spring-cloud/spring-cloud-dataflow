@@ -1,5 +1,5 @@
 /*
- * Copyright 2016-2017 the original author or authors.
+ * Copyright 2016-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,6 +22,7 @@ import org.junit.Test;
 
 import org.springframework.cloud.dataflow.core.ApplicationType;
 import org.springframework.http.MediaType;
+import org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders;
 
 import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.delete;
 import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.get;
@@ -36,17 +37,63 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  *
  * @author Eric Bottard
  * @author Gunnar Hillert
+ * @author Christian Tzolov
  */
 public class AppRegistryDocumentation extends BaseDocumentation {
 
 	@Test
+	public void appDefault() throws Exception {
+		registerApp(ApplicationType.source, "http", "1.2.0.RELEASE");
+		registerApp(ApplicationType.source, "http", "1.3.0.RELEASE");
+
+		this.mockMvc.perform(RestDocumentationRequestBuilders
+				.put("/apps/{type}/{name}/{version:.+}", ApplicationType.source, "http", "1.2.0.RELEASE").accept(MediaType.APPLICATION_JSON))
+				.andExpect(status().isAccepted())
+				.andDo(
+						this.documentationHandler.document(
+								pathParameters(
+										parameterWithName("type").description("The type of application. One of " + Arrays.asList(ApplicationType.values())),
+										parameterWithName("name").description("The name of the application"),
+										parameterWithName("version").description("The version of the application")
+								)
+						)
+				);
+		unregisterApp(ApplicationType.source, "http", "1.2.0.RELEASE");
+		unregisterApp(ApplicationType.source, "http", "1.3.0.RELEASE");
+	}
+
+	@Test
+	public void registeringAnApplicationVersion() throws Exception {
+		this.mockMvc.perform(
+				post("/apps/{type}/{name}/{version:.+}", ApplicationType.source, "http", "1.1.0.RELEASE")
+						.param("uri", "maven://org.springframework.cloud.stream.app:http-source-rabbit:1.1.0.RELEASE"))
+				.andExpect(status().isCreated())
+				.andDo(
+						this.documentationHandler.document(
+								pathParameters(
+										parameterWithName("type").description("The type of application to register. One of " + Arrays.asList(ApplicationType.values())),
+										parameterWithName("name").description("The name of the application to register"),
+										parameterWithName("version").description("The version of the application to register")
+								),
+								requestParameters(
+										parameterWithName("uri").description("URI where the application bits reside"),
+										parameterWithName("metadata-uri").optional().description("URI where the application metadata jar can be found"),
+										parameterWithName("force").optional().description("Must be true if a registration with the same name and type already exists, otherwise an error will occur")
+								)
+						)
+				);
+
+		unregisterApp(ApplicationType.source, "http", "1.1.0.RELEASE");
+	}
+
+	@Test
 	public void getApplicationsFiltered() throws Exception {
-		registerApp(ApplicationType.source, "http");
-		registerApp(ApplicationType.source, "time");
+		registerApp(ApplicationType.source, "http", "1.2.0.RELEASE");
+		registerApp(ApplicationType.source, "time", "1.2.0.RELEASE");
 
 		this.mockMvc.perform(get("/apps").param("type", "source").accept(MediaType.APPLICATION_JSON))
 				.andExpect(status().isOk()).andDo(this.documentationHandler.document(requestParameters(
-						parameterWithName("type").description("Restrict the returned apps to the type of the app. One of " + Arrays.asList(ApplicationType.values())))));
+				parameterWithName("type").description("Restrict the returned apps to the type of the app. One of " + Arrays.asList(ApplicationType.values())))));
 
 		unregisterApp(ApplicationType.source, "http");
 		unregisterApp(ApplicationType.source, "time");
@@ -54,83 +101,83 @@ public class AppRegistryDocumentation extends BaseDocumentation {
 
 	@Test
 	public void getSingleApplication() throws Exception {
-		registerApp(ApplicationType.source, "http");
+		registerApp(ApplicationType.source, "http", "1.2.0.RELEASE");
 
 		this.mockMvc.perform(
-			get("/apps/{type}/{name}", ApplicationType.source, "http").accept(MediaType.APPLICATION_JSON)
-				.param("exhaustive", "false"))
-			.andExpect(status().isOk())
-			.andDo(
-				this.documentationHandler.document(
-					pathParameters(
-						parameterWithName("type").description("The type of application to query. One of " + Arrays.asList(ApplicationType.values())),
-						parameterWithName("name").description("The name of the application to query")
-					),
-					requestParameters(
-						parameterWithName("exhaustive").optional().description("Return all application properties, including common Spring Boot properties")
-					)
-				)
-			);
+				get("/apps/{type}/{name}", ApplicationType.source, "http").accept(MediaType.APPLICATION_JSON)
+						.param("exhaustive", "false"))
+				.andExpect(status().isOk())
+				.andDo(
+						this.documentationHandler.document(
+								pathParameters(
+										parameterWithName("type").description("The type of application to query. One of " + Arrays.asList(ApplicationType.values())),
+										parameterWithName("name").description("The name of the application to query")
+								),
+								requestParameters(
+										parameterWithName("exhaustive").optional().description("Return all application properties, including common Spring Boot properties")
+								)
+						)
+				);
 		unregisterApp(ApplicationType.source, "http");
 	}
 
 	@Test
 	public void registeringAnApplication() throws Exception {
 		this.mockMvc.perform(
-			post("/apps/{type}/{name}", ApplicationType.source, "http")
-				.param("uri", "maven://org.springframework.cloud.stream.app:http-source-rabbit:1.1.0.RELEASE"))
-			.andExpect(status().isCreated())
-			.andDo(
-				this.documentationHandler.document(
-					pathParameters(
-						parameterWithName("type").description("The type of application to register. One of " + Arrays.asList(ApplicationType.values())),
-						parameterWithName("name").description("The name of the application to register")
-					),
-					requestParameters(
-						parameterWithName("uri").description("URI where the application bits reside"),
-						parameterWithName("metadata-uri").optional().description("URI where the application metadata jar can be found"),
-						parameterWithName("force").optional().description("Must be true if a registration with the same name and type already exists, otherwise an error will occur")
-					)
-				)
-			);
+				post("/apps/{type}/{name}", ApplicationType.source, "http")
+						.param("uri", "maven://org.springframework.cloud.stream.app:http-source-rabbit:1.1.0.RELEASE"))
+				.andExpect(status().isCreated())
+				.andDo(
+						this.documentationHandler.document(
+								pathParameters(
+										parameterWithName("type").description("The type of application to register. One of " + Arrays.asList(ApplicationType.values())),
+										parameterWithName("name").description("The name of the application to register")
+								),
+								requestParameters(
+										parameterWithName("uri").description("URI where the application bits reside"),
+										parameterWithName("metadata-uri").optional().description("URI where the application metadata jar can be found"),
+										parameterWithName("force").optional().description("Must be true if a registration with the same name and type already exists, otherwise an error will occur")
+								)
+						)
+				);
 
 		unregisterApp(ApplicationType.source, "http");
 	}
 
 	@Test
 	public void unregisteringAnApplication() throws Exception {
-		registerApp(ApplicationType.source, "http");
+		registerApp(ApplicationType.source, "http", "1.2.0.RELEASE");
 
 		this.mockMvc.perform(
-			delete("/apps/{type}/{name}", ApplicationType.source, "http"))
-			.andExpect(status().isOk())
-			.andDo(
-				this.documentationHandler.document(
-					pathParameters(
-						parameterWithName("type").description("The type of application to unregister. One of " + Arrays.asList(ApplicationType.values())),
-						parameterWithName("name").description("The name of the application to unregister")
-					)
-				)
-			);
+				delete("/apps/{type}/{name}", ApplicationType.source, "http"))
+				.andExpect(status().isOk())
+				.andDo(
+						this.documentationHandler.document(
+								pathParameters(
+										parameterWithName("type").description("The type of application to unregister. One of " + Arrays.asList(ApplicationType.values())),
+										parameterWithName("name").description("The name of the application to unregister")
+								)
+						)
+				);
 	}
 
 	@Test
 	public void bulkRegisteringApps() throws Exception {
 		this.mockMvc.perform(
-			post("/apps")
-				.param("apps", "source.http=maven://org.springframework.cloud.stream.app:http-source-rabbit:1.1.0.RELEASE")
-				.param("force", "false")
-			)
-			.andExpect(status().isCreated())
-			.andDo(
-				this.documentationHandler.document(
-					requestParameters(
-						parameterWithName("uri").optional().description("URI where a properties file containing registrations can be fetched. Exclusive with `apps`."),
-						parameterWithName("apps").optional().description("Inline set of registrations. Exclusive with `uri`."),
-						parameterWithName("force").optional().description("Must be true if a registration with the same name and type already exists, otherwise an error will occur")
-					)
-				)
-			);
+				post("/apps")
+						.param("apps", "source.http=maven://org.springframework.cloud.stream.app:http-source-rabbit:1.1.0.RELEASE")
+						.param("force", "false")
+		)
+				.andExpect(status().isCreated())
+				.andDo(
+						this.documentationHandler.document(
+								requestParameters(
+										parameterWithName("uri").optional().description("URI where a properties file containing registrations can be fetched. Exclusive with `apps`."),
+										parameterWithName("apps").optional().description("Inline set of registrations. Exclusive with `uri`."),
+										parameterWithName("force").optional().description("Must be true if a registration with the same name and type already exists, otherwise an error will occur")
+								)
+						)
+				);
 
 		unregisterApp(ApplicationType.source, "http");
 

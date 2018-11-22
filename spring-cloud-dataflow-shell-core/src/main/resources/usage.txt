@@ -9,7 +9,6 @@ Data Flow Options:
   --dataflow.proxy.uri=<PROXY-URI>                  Address of an optional proxy server to use [no default].
   --dataflow.proxy.username=<PROXY-USERNAME>        Username of the proxy server (if required by proxy server) [no default].
   --dataflow.proxy.password=<PROXY-PASSWORD>        Password of the proxy server (if required by proxy server) [no default].
-  --dataflow.mode=<MODE>                            Server DataFlow mode: 'classic' or 'skipper' modes. [default: classic].
   --spring.shell.historySize=<SIZE>                 Default size of the shell log file [default: 3000].
   --spring.shell.commandFile=<FILE>                 Data Flow Shell executes commands read from the file(s) and then exits.
   --help                                            This message.

@@ -69,7 +69,6 @@
 		<module>spring-cloud-dataflow-shell</module>
 		<module>spring-cloud-dataflow-shell-core</module>
 		<module>spring-cloud-dataflow-classic-docs</module>
-		<module>spring-cloud-dataflow-skipper-docs</module>
 		<module>spring-cloud-dataflow-docs</module>
 
 		<module>spring-cloud-dataflow-completion</module>

@@ -12,10 +12,9 @@ It also covers how to configure Spring Cloud Data Flow's shell features.
 
 Sprig Cloud Data Flow Server offers specific set of features that can be enabled/disabled when launching. These features include all the lifecycle operations and REST endpoints (server and client implementations, including the shell and the UI) for:
 
-* Streams
+* Streams (requires Skipper)
 * Tasks
 * Analytics
-* Skipper
 * Task Scheduler
 
 One can enable and disable these features by setting the following boolean properties when launching the Data Flow server:
@@ -23,10 +22,9 @@ One can enable and disable these features by setting the following boolean prope
 * `spring.cloud.dataflow.features.streams-enabled`
 * `spring.cloud.dataflow.features.tasks-enabled`
 * `spring.cloud.dataflow.features.analytics-enabled`
-* `spring.cloud.dataflow.features.skipper-enabled`
 * `spring.cloud.dataflow.features.schedules-enabled`
 
-By default, stream, tasks, and analytics are enabled and Skipper along with Task Scheduler are disabled by default.
+By default, stream (requires Skipper), tasks, and analytics are enabled and Task Scheduler is disabled by default.
 
 NOTE: Since the analytics feature is enabled by default, the Data Flow Server expects to have a valid Redis store available to server as the analytic repository, because Spring Cloud Data Flow provides a default implementation of analytics based on Redis.
 This also means that the Data Flow Server's `health` depends on the redis store availability as well.
@@ -282,11 +280,11 @@ If you want to change or override any of the properties `LOG_FILE`, `LOG_PATH`, 
 
 [[configuration-skipper]]
 == Skipper
-To use features such as Stream update and rollback, the Data Flow Server delegates to the Skipper server to manage the Stream's lifecycle.  Set the configuration property `spring.cloud.skipper.client.serverUri` to the location of Skipper, e.g.
+Data Flow Server delegates to the Skipper server the management of the Stream's lifecycle.  Set the configuration property `spring.cloud.skipper.client.serverUri` to the location of Skipper, e.g.
 +
 [source,bash,subs=attributes]
 ----
-$ java -jar spring-cloud-dataflow-server-local-{project-version}.jar --spring.cloud.skipper.client.serverUri=http://192.51.100.1:7577/api --spring.cloud.dataflow.features.skipper-enabled=true
+$ java -jar spring-cloud-dataflow-server-local-{project-version}.jar --spring.cloud.skipper.client.serverUri=http://192.51.100.1:7577/api
 ----
 
 [[configuration-security]]

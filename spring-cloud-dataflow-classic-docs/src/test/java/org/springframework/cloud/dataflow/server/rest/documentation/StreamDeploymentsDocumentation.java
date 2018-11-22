@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 the original author or authors.
+ * Copyright 2017-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,14 +16,29 @@
 
 package org.springframework.cloud.dataflow.server.rest.documentation;
 
+import java.io.IOException;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
+
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Before;
 import org.junit.FixMethodOrder;
 import org.junit.Test;
 import org.junit.runners.MethodSorters;
 
+import org.springframework.cloud.dataflow.rest.UpdateStreamRequest;
+import org.springframework.cloud.skipper.domain.PackageIdentifier;
+import org.springframework.cloud.skipper.domain.Release;
+import org.springframework.cloud.skipper.domain.RollbackRequest;
+import org.springframework.hateoas.Resources;
 import org.springframework.http.MediaType;
 
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.when;
 import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.delete;
+import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.get;
 import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.post;
 import static org.springframework.restdocs.request.RequestDocumentation.parameterWithName;
 import static org.springframework.restdocs.request.RequestDocumentation.pathParameters;
@@ -32,6 +47,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 /**
  * @author Glenn Renfro
+ * @author Ilayaperumal Gopinathan
+ * @author Christian Tzolov
  */
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 public class StreamDeploymentsDocumentation extends BaseDocumentation {
@@ -55,6 +72,12 @@ public class StreamDeploymentsDocumentation extends BaseDocumentation {
 		this.mockMvc.perform(
 				post("/streams/definitions")
 						.param("name", "timelog")
+						.param("definition", "time --format='YYYY MM DD' | log")
+						.param("deploy", "false"))
+				.andExpect(status().isCreated());
+		this.mockMvc.perform(
+				post("/streams/definitions")
+						.param("name", "timelog1")
 						.param("definition", "time --format='YYYY MM DD' | log")
 						.param("deploy", "false"))
 				.andExpect(status().isCreated());
@@ -94,4 +117,104 @@ public class StreamDeploymentsDocumentation extends BaseDocumentation {
 								.description("The name of an existing stream definition (required)"))
 				));
 	}
+
+	@Test
+	public void streamUpdate() throws Exception {
+		String json = "{\"app.time.timestamp.format\":\"YYYY\"}";
+		this.mockMvc.perform(
+				post("/streams/deployments/{timelog1}", "timelog1")
+						.contentType(MediaType.APPLICATION_JSON)
+						.content(json))
+				.andDo(print())
+				.andExpect(status().isCreated())
+				.andDo(this.documentationHandler.document(
+						pathParameters(parameterWithName("timelog1")
+								.description("The name of an existing stream definition (required)"))
+				));
+		Thread.sleep(30000);
+		UpdateStreamRequest updateStreamRequest = new UpdateStreamRequest();
+		updateStreamRequest.setReleaseName("timelog1");
+		Map<String, String> updateProperties = new HashMap<>();
+		updateProperties.put("app.time.timestamp.format", "YYYYMMDD");
+		updateStreamRequest.setUpdateProperties(updateProperties);
+		final String releaseName = "myLogRelease";
+		final PackageIdentifier packageIdentifier = new PackageIdentifier();
+		packageIdentifier.setPackageName("timelog1");
+		packageIdentifier.setPackageVersion("1.0.0");
+		packageIdentifier.setRepositoryName("test");
+		updateStreamRequest.setPackageIdentifier(packageIdentifier);
+
+		this.mockMvc.perform(
+				post("/streams/deployments/update/{timelog1}", "timelog1")
+						.contentType(MediaType.APPLICATION_JSON)
+						.content(convertObjectToJson(updateStreamRequest)))
+				.andDo(print())
+				.andExpect(status().isCreated())
+				.andDo(this.documentationHandler.document(
+						pathParameters(parameterWithName("timelog1")
+								.description("The name of an existing stream definition (required)"))
+				));
+		Thread.sleep(30000);
+	}
+
+	@Test
+	public void rollback() throws Exception {
+		RollbackRequest rollbackRequest = new RollbackRequest();
+		rollbackRequest.setReleaseName("timelog1");
+		this.mockMvc.perform(
+				post("/streams/deployments//rollback/{name}/{version}", "timelog1", 1)
+						.contentType(MediaType.APPLICATION_JSON))
+				.andDo(print())
+				.andExpect(status().isCreated())
+				.andDo(this.documentationHandler.document(
+						pathParameters(parameterWithName("name")
+										.description("The name of an existing stream definition (required)"),
+								parameterWithName("version").description("The version to rollback to"))));
+		Thread.sleep(30000);
+	}
+
+	@Test
+	public void history() throws Exception {
+		when(this.springDataflowServer.getSkipperClient().history(anyString()))
+				.thenReturn(new Resources<>(Arrays.asList(new Release())));
+
+		this.mockMvc.perform(
+				get("/streams/deployments/history/{name}", "timelog1")
+						.contentType(MediaType.APPLICATION_JSON))
+				.andDo(print())
+				.andExpect(status().isOk())
+				.andDo(this.documentationHandler.document(
+						pathParameters(parameterWithName("name")
+								.description("The name of an existing stream definition (required)"))));
+	}
+
+	@Test
+	public void manifest() throws Exception {
+		this.mockMvc.perform(
+				get("/streams/deployments/manifest/{name}/{version}", "timelog1", 1)
+						.contentType(MediaType.APPLICATION_JSON))
+				.andDo(print())
+				.andExpect(status().isOk())
+				.andDo(this.documentationHandler.document(
+						pathParameters(parameterWithName("name")
+										.description("The name of an existing stream definition (required)"),
+								parameterWithName("version").description("The version of the stream"))));
+	}
+
+	@Test
+	public void platformList() throws Exception {
+		this.mockMvc.perform(
+				get("/streams/deployments/platform/list")
+						.contentType(MediaType.APPLICATION_JSON))
+				.andDo(print())
+				.andExpect(status().isOk());
+	}
+
+	public static String convertObjectToJson(Object object) throws IOException {
+		ObjectMapper mapper = new ObjectMapper();
+		mapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
+		String json = mapper.writeValueAsString(object);
+		return json;
+	}
+
 }

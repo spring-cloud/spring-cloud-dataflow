@@ -62,7 +62,7 @@ public class JobStepExecutionsDocumentation extends BaseDocumentation {
 	@Before
 	public void setup() throws Exception {
 		if (!initialized) {
-			registerApp(ApplicationType.task, "timestamp");
+			registerApp(ApplicationType.task, "timestamp", "1.2.0.RELEASE");
 			initialize();
 			createJobExecution(JOB_NAME, BatchStatus.STARTED);
 

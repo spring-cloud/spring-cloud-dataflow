@@ -25,20 +25,10 @@ The general lifecycle of a Stream is:
 . Undeploy or Destroy the Stream.
 . Upgrade or Rollack applications in the Stream.
 
-If you use Skipper, you can upgrade or rollback applications in the Stream.
+For deploying streams, the Data Flow Server has to be configured to delegate the deployment to a new server in the Spring Cloud ecosystem named http://cloud.spring.io/spring-cloud-skipper/[Skipper].
 
-There are two options for deploying streams:
-
-* Use a Data Flow Server implementation that deploys to a single platform.
-* Configure the Data Flow Server to delegate the deployment to a new server in the Spring Cloud ecosystem named http://cloud.spring.io/spring-cloud-skipper/[Skipper].
-
-
-When using the first option, you can use the Local Data Flow Server to deploy streams to your local machine, the Data Flow Server for Cloud Foundry to deploy streams to a single org and space on Cloud Foundry.
-Similarly, you can use Data Flow Server for Kuberenetes to deploy a stream to a single namespace on a Kubernetes cluster.
-See http://cloud.spring.io/spring-cloud-dataflow/#platform-implementations[the Spring Cloud Data Flow project page] for a list of Data Flow server implementations.
-
-When using the second option, you can configure Skipper to deploy applications to one or more Cloud Foundry orgs and spaces, one or more namespaces on a Kubernetes cluster, or to the local machine.
-When deploying a stream in Data Flow using Skipper, you can specify which platform to use at deployment time.
+Furthermore you can configure Skipper to deploy applications to one or more Cloud Foundry orgs and spaces, one or more namespaces on a Kubernetes cluster, or to the local machine.
+When deploying a stream in Data Flow, you can specify which platform to use at deployment time.
 Skipper also provides Data Flow with the ability to perform updates to deployed streams.
 There are many ways the applications in a stream can be updated, but one of the most common examples is to upgrade a processor application with new custom business logic while leaving the existing source and sink applications alone.
 
@@ -171,42 +161,84 @@ NOTE: Supported Stream `<appType>` possibilities are: source, processor, and sin
 [[spring-cloud-dataflow-stream-lifecycle]]
 == Stream Lifecycle
 
-The lifecycle of a stream, in "classic" mode, goes through the following stages:
+The lifecycle of a stream, goes through the following stages:
 
 . <<spring-cloud-dataflow-register-stream-apps>>
 . <<spring-cloud-dataflow-create-stream>>
 . <<spring-cloud-dataflow-deploy-stream>>
 . <<spring-cloud-dataflow-destroy-stream>> or <<spring-cloud-dataflow-undeploy-stream>>
+. <<spring-cloud-dataflow-streams-skipper-upgrading,Upgrade>> or <<spring-cloud-dataflow-streams-skipper-rollback,Rollback>> applications in the Stream.
+
+https://cloud.spring.io/spring-cloud-skipper/[Skipper] is a server that you discover Spring Boot applications and manage their lifecycle on multiple Cloud Platforms.
+
+Applications in Skipper are bundled as packages that contain the application's resource location, application properties and deployment properties.
+You can think Skipper packages as analogous to packages found in tools such as `apt-get` or `brew`.
+
+When Data Flow deploys a Stream, it will generate and upload a package to Skipper that represents the applications in the Stream.
+Subsequent commands to upgrade or rollback the applications within the Stream are passed through to Skipper.
+In addition, the Stream definition is reverse engineered from the package and the status of the Stream is also delegated to Skipper.
 
 [[spring-cloud-dataflow-register-stream-apps]]
 === Register a Stream App
 
-You can register a Stream App with the App Registry by using the Spring Cloud Data Flow Shell
-`app register` command. You must provide a unique name, an application type, and a URI that can be
-resolved to the app artifact. For the type, specify `source`, `processor`, `sink`, or `app`.
-Here are a few examples for `source`, `processor` and `sink`:
+Register a versioned stream application using the `app register` command. You must provide a unique name, application type, and a URI that can be resolved to the app artifact.
+For the type, specify "source", "processor", or "sink". The version is resolved from the URI. Here are a few examples:
+[source,bash]
+----
+dataflow:>app register --name mysource --type source --uri maven://com.example:mysource:0.0.1
+dataflow:>app register --name mysource --type source --uri maven://com.example:mysource:0.0.2
+dataflow:>app register --name mysource --type source --uri maven://com.example:mysource:0.0.3
 
-```
-dataflow:>app register --name mysource --type source --uri maven://com.example:mysource:0.0.1-SNAPSHOT
+dataflow:>app list --id source:mysource
+╔═══╤══════════════════╤═════════╤════╤════╗
+║app│      source      │processor│sink│task║
+╠═══╪══════════════════╪═════════╪════╪════╣
+║   │> mysource-0.0.1 <│         │    │    ║
+║   │mysource-0.0.2    │         │    │    ║
+║   │mysource-0.0.3    │         │    │    ║
+╚═══╧══════════════════╧═════════╧════╧════╝
 
 dataflow:>app register --name myprocessor --type processor --uri file:///Users/example/myprocessor-1.2.3.jar
 
 dataflow:>app register --name mysink --type sink --uri http://example.com/mysink-2.0.1.jar
-```
 
-When providing a URI with the `maven` scheme, the format should conform to the following:
+----
 
-```
+The application URI should conform to one the following schema formats:
+
+* maven schema
+[source,bash]
+----
 maven://<groupId>:<artifactId>[:<extension>[:<classifier>]]:<version>
-```
+----
+* http schema
+[source,bash]
+----
+http://<web-path>/<artifactName>-<version>.jar
+----
+* file schema
+[source,bash]
+----
+file:///<local-path>/<artifactName>-<version>.jar
+----
+* docker schema
+[source,bash]
+----
+docker:<docker-image-path>/<imageName>:<version>
+----
 
-For example, if you would like to register the snapshot versions of the `http` and `log`
+[NOTE]
+The URI `<version>` part is compulsory for the versioned stream applications.
+Skipper leverages the multi-versioned stream applications to allow upgrade or rollback of those applications at runtime using the deployment properties.
+
+If you would like to register the snapshot versions of the `http` and `log`
 applications built with the RabbitMQ binder, you could do the following:
 
-```
+[source,bash]
+----
 dataflow:>app register --name http --type source --uri maven://org.springframework.cloud.stream.app:http-source-rabbit:1.2.1.BUILD-SNAPSHOT
 dataflow:>app register --name log --type sink --uri maven://org.springframework.cloud.stream.app:log-sink-rabbit:1.2.1.BUILD-SNAPSHOT
-```
+----
 
 If you would like to register multiple apps at one time, you can store them in a properties file
 where the keys are formatted as `<type>.<name>` and the values are the URIs.
@@ -214,22 +246,95 @@ where the keys are formatted as `<type>.<name>` and the values are the URIs.
 For example, if you would like to register the snapshot versions of the `http` and `log`
 applications built with the RabbitMQ binder, you could have the following in a properties file (for example, `stream-apps.properties`):
 
-```
+[source,bash]
+----
 source.http=maven://org.springframework.cloud.stream.app:http-source-rabbit:1.2.1.BUILD-SNAPSHOT
 sink.log=maven://org.springframework.cloud.stream.app:log-sink-rabbit:1.2.1.BUILD-SNAPSHOT
-```
+----
 
 Then to import the apps in bulk, use the `app import` command and provide the location of the properties file with the `--uri` switch, as follows:
 
-```
+[source,bash]
+----
 dataflow:>app import --uri file:///<YOUR_FILE_LOCATION>/stream-apps.properties
-```
+----
 
 Registering an application using `--type app` is the same as registering a `source`, `processor` or `sink`.
 Applications of the type `app` are only allowed to be used in the Stream Application DSL, which uses a comma instead of the pipe symbol in the DSL, and instructs Data Flow not to configure the Spring Cloud Stream binding properties of the application.
 The application that is registered using `--type app` does not have to be a Spring Cloud Stream app, it can be any Spring Boot application.
 See the <<spring-cloud-dataflow-stream-app-dsl,Stream Application DSL introduction>> for more information on using this application type.
 
+Multiple versions can be registered for the same applications (e.g. same name and type) but only one can be set as default.
+The default version is used for deploying Streams.
+
+The first time an application is registered it will be marked as default. The default application version can be altered with the `app default` command:
+[source,bash]
+----
+dataflow:>app default --id source:mysource --version 0.0.2
+dataflow:>app list --id source:mysource
+╔═══╤══════════════════╤═════════╤════╤════╗
+║app│      source      │processor│sink│task║
+╠═══╪══════════════════╪═════════╪════╪════╣
+║   │mysource-0.0.1    │         │    │    ║
+║   │> mysource-0.0.2 <│         │    │    ║
+║   │mysource-0.0.3    │         │    │    ║
+╚═══╧══════════════════╧═════════╧════╧════╝
+----
+
+The `app list --id <type:name>` command lists all versions for a given stream application.
+
+The `app unregister` command has an optional `--version` parameter to specify the app version to unregister.
+[source,bash]
+----
+dataflow:>app unregister --name mysource --type source --version 0.0.1
+dataflow:>app list --id source:mysource
+╔═══╤══════════════════╤═════════╤════╤════╗
+║app│      source      │processor│sink│task║
+╠═══╪══════════════════╪═════════╪════╪════╣
+║   │> mysource-0.0.2 <│         │    │    ║
+║   │mysource-0.0.3    │         │    │    ║
+╚═══╧══════════════════╧═════════╧════╧════╝
+----
+If a `--version` is not specified, the default version is unregistered.
+
+[NOTE]
+====
+All applications in a stream should have a default version set for the stream to be deployed.
+Otherwise they will be treated as unregistered application during the deployment.
+Use the `app default` to set the defaults.
+====
+
+[source,bash]
+----
+app default --id source:mysource --version 0.0.3
+dataflow:>app list --id source:mysource
+╔═══╤══════════════════╤═════════╤════╤════╗
+║app│      source      │processor│sink│task║
+╠═══╪══════════════════╪═════════╪════╪════╣
+║   │mysource-0.0.2    │         │    │    ║
+║   │> mysource-0.0.3 <│         │    │    ║
+╚═══╧══════════════════╧═════════╧════╧════╝
+----
+
+The `stream deploy` necessitates default app versions to be set.
+The `stream update` and `stream rollback` commands though can use all (default and non-default) registered app versions.
+
+[source,bash]
+----
+dataflow:>stream create foo --definition "mysource | log"
+----
+This will create stream using the default mysource version (0.0.3). Then we can update the version to 0.0.2 like this:
+[source,bash]
+----
+dataflow:>stream update foo --properties version.mysource=0.0.2
+----
+
+[IMPORTANT]
+====
+Only pre-registered applications can be used to `deploy`, `update` or `rollback` a Stream.
+====
+
+An attempt to update the `mysource` to version `0.0.1` (not registered) will fail!
 
 [[supported-apps-and-tasks]]
 ==== Register Supported Applications and Tasks
@@ -502,12 +607,24 @@ The Spring Cloud Data Flow Server exposes a full RESTful API for managing the li
 
 New streams are created with the help of stream definitions. The definitions are built from a simple DSL. For example, consider what happens if we execute the following shell command:
 
-```
+[source,bash]
+----
 dataflow:> stream create --definition "time | log" --name ticktock
-```
+----
 
 This defines a stream named `ticktock` that is based off the DSL expression `time | log`. The DSL uses the "pipe" symbol (`|`), to connect a source to a sink.
 
+The `stream info` command shows useful information about the stream, as shown (with its output) in the following example:
+
+[source,bash]
+----
+dataflow:>stream info ticktock
+╔═══════════╤═════════════════╤══════════╗
+║Stream Name│Stream Definition│  Status  ║
+╠═══════════╪═════════════════╪══════════╣
+║ticktock   │time | log       │undeployed║
+╚═══════════╧═════════════════╧══════════╝
+----
 
 ==== Application Properties
 
@@ -603,7 +720,7 @@ They are overridden if a property with the same key is specified at stream deplo
 [[spring-cloud-dataflow-deploy-stream]]
 === Deploying a Stream
 
-This section describes how to deploy a Stream when the Spring Cloud Data Flow server is responsible for deploying the stream.  The following section, <<spring-cloud-dataflow-stream-lifecycle-skipper>>, covers the new deployment and upgrade features when the Spring Cloud Data Flow server delegates to Skipper for stream deployment.  The description of how deployment properties applies to both approaches of Stream deployment.
+This section describes how to deploy a Stream when the Spring Cloud Data Flow server is responsible for deploying the stream. It covers the deployment and upgrade of Streams leveraging the Skipper service.  The description of how deployment properties applies to both approaches of Stream deployment.
 
 Give the `ticktock` stream definition:
 
@@ -614,13 +731,38 @@ To deploy the stream, use the following shell command:
 
 `dataflow:> stream deploy --name ticktock`
 
-The Data Flow Server resolves `time` and `log` to maven coordinates and uses those to launch the `time` and `log` applications of the stream, as shown in the following listing:
+The Data Flow Server delegates to Skipper the resolution and deployment of the `time` and `log` applications.
 
-[source]
-2016-06-01 09:41:21.728  INFO 79016 --- [nio-9393-exec-6] o.s.c.d.spi.local.LocalAppDeployer       : deploying app ticktock.log instance 0
-   Logs will be in /var/folders/wn/8jxm_tbd1vj28c8vj37n900m0000gn/T/spring-cloud-dataflow-912434582726479179/ticktock-1464788481708/ticktock.log
-2016-06-01 09:41:21.914  INFO 79016 --- [nio-9393-exec-6] o.s.c.d.spi.local.LocalAppDeployer       : deploying app ticktock.time instance 0
-   Logs will be in /var/folders/wn/8jxm_tbd1vj28c8vj37n900m0000gn/T/spring-cloud-dataflow-912434582726479179/ticktock-1464788481910/ticktock.time
+The `stream info` command shows useful information about the stream, including the deployment properties:
+[source,bash,options="nowrap"]
+----
+dataflow:>stream info --name ticktock
+╔═══════════╤═════════════════╤═════════╗
+║Stream Name│Stream Definition│  Status ║
+╠═══════════╪═════════════════╪═════════╣
+║ticktock   │time | log       │deploying║
+╚═══════════╧═════════════════╧═════════╝
+
+Stream Deployment properties: {
+  "log" : {
+    "resource" : "maven://org.springframework.cloud.stream.app:log-sink-rabbit",
+    "spring.cloud.deployer.group" : "ticktock",
+    "version" : "2.0.1.RELEASE"
+  },
+  "time" : {
+    "resource" : "maven://org.springframework.cloud.stream.app:time-source-rabbit",
+    "spring.cloud.deployer.group" : "ticktock",
+    "version" : "2.0.1.RELEASE"
+  }
+}
+----
+
+There is an important optional command argument (called `--platformName`) to the `stream deploy` command.
+Skipper can be configured to deploy to multiple platforms.
+Skipper is pre-configured with a platform named `default`, which deploys applications to the local machine where Skipper is running.
+The default value of the command line argument `--platformName` is `default`.
+If you commonly deploy to one platform, when installing Skipper, you can override the configuration of the `default` platform.
+Otherwise, specify the `platformName` to one of the values returned by the `stream platform-list` command.
 
 In the preceding example, the time source sends the current time as a message each second, and the log sink outputs it by using the logging framework.
 You can tail the `stdout` log (which has an `<instance>` suffix). The log files are located within the directory displayed in the Data Flow Server's log output, as shown in the following listing:
@@ -634,9 +776,10 @@ $ tail -f /var/folders/wn/8jxm_tbd1vj28c8vj37n900m0000gn/T/spring-cloud-dataflow
 
 You can also create and deploy the stream in one step by passing the `--deploy` flag when creating the stream, as follows:
 
-```
+[source,bash]
+----
 dataflow:> stream create --definition "time | log" --name ticktock --deploy
-```
+----
 
 However, it is not very common in real-world use cases to create and deploy the stream in one step.
 The reason is that when you use the `stream deploy` command, you can pass in properties that define how to map the applications onto the platform (for example, what is the memory size of the container to use, the number of each application to run, and whether to enable data partitioning features).
@@ -988,162 +1131,16 @@ bad-ticktock is an invalid stream.
 ----
 In this case Spring Cloud Data Flow states that the stream is invalid because source:bad-time has an invalid URI.
 
-[[spring-cloud-dataflow-stream-lifecycle-skipper]]
-== Stream Lifecycle with Skipper
-
-An additional lifecycle stage of Stream is available if you run in "skipper" mode.
-
-. <<spring-cloud-dataflow-streams-skipper-upgrading,Upgrade>> or <<spring-cloud-dataflow-streams-skipper-rollback,Rollback>> applications in the Stream. (Skipper mode)
-
-https://cloud.spring.io/spring-cloud-skipper/[Skipper] is a server that you discover Spring Boot applications and manage their lifecycle on multiple Cloud Platforms.
-
-Applications in Skipper are bundled as packages that contain the application's resource location, application properties and deployment properites.
-You can think Skipper packages as analogous to packages found in tools such as `apt-get` or `brew`.
-
-When Data Flow deploys a Stream, it will generate and upload a package to Skipper that represents the applications in the Stream.
-Subsequent commands to upgrade or rollback the applications within the Stream are passed through to Skipper.
-In addition, the Stream definition is reverse engineered from the package and the status of the Stream is also delegated to Skipper.
-
-=== Register a Versioned Stream App
-Skipper extends the _<<streams.adoc#spring-cloud-dataflow-register-stream-apps, Register a Stream App>>_
- lifecycle with support of multi-versioned stream applications.
-This allows to upgrade or rollback those applications at runtime using the deployment properties.
-
-Register a versioned stream application using the `app register` command. You must provide a unique name, application type, and a URI that can be resolved to the app artifact.
-For the type, specify "source", "processor", or "sink". The version is resolved from the URI. Here are a few examples:
-[source,bash]
-----
-dataflow:>app register --name mysource --type source --uri maven://com.example:mysource:0.0.1
-dataflow:>app register --name mysource --type source --uri maven://com.example:mysource:0.0.2
-dataflow:>app register --name mysource --type source --uri maven://com.example:mysource:0.0.3
-
-dataflow:>app list --id source:mysource
-╔═══╤══════════════════╤═════════╤════╤════╗
-║app│      source      │processor│sink│task║
-╠═══╪══════════════════╪═════════╪════╪════╣
-║   │> mysource-0.0.1 <│         │    │    ║
-║   │mysource-0.0.2    │         │    │    ║
-║   │mysource-0.0.3    │         │    │    ║
-╚═══╧══════════════════╧═════════╧════╧════╝
-----
-
-The application URI should conform to one the following schema formats:
-
-* maven schema
-[source,bash]
-----
-maven://<groupId>:<artifactId>[:<extension>[:<classifier>]]:<version>
-----
-* http schema
-[source,bash]
-----
-http://<web-path>/<artifactName>-<version>.jar
-----
-* file schema
-[source,bash]
-----
-file:///<local-path>/<artifactName>-<version>.jar
-----
-* docker schema
-[source,bash]
-----
-docker:<docker-image-path>/<imageName>:<version>
-----
-
-[NOTE]
-The URI `<version>` part is compulsory for the versioned stream applications
-
-Multiple versions can be registered for the same applications (e.g. same name and type) but only one can be set as default.
-The default version is used for deploying Streams.
-
-The first time an application is registered it will be marked as default. The default application version can be altered with the `app default` command:
-[source,bash]
-----
-dataflow:>app default --id source:mysource --version 0.0.2
-dataflow:>app list --id source:mysource
-╔═══╤══════════════════╤═════════╤════╤════╗
-║app│      source      │processor│sink│task║
-╠═══╪══════════════════╪═════════╪════╪════╣
-║   │mysource-0.0.1    │         │    │    ║
-║   │> mysource-0.0.2 <│         │    │    ║
-║   │mysource-0.0.3    │         │    │    ║
-╚═══╧══════════════════╧═════════╧════╧════╝
-----
-
-The `app list --id <type:name>` command lists all versions for a given stream application.
-
-The `app unregister` command has an optional `--version` parameter to specify the app version to unregister.
-[source,bash]
-----
-dataflow:>app unregister --name mysource --type source --version 0.0.1
-dataflow:>app list --id source:mysource
-╔═══╤══════════════════╤═════════╤════╤════╗
-║app│      source      │processor│sink│task║
-╠═══╪══════════════════╪═════════╪════╪════╣
-║   │> mysource-0.0.2 <│         │    │    ║
-║   │mysource-0.0.3    │         │    │    ║
-╚═══╧══════════════════╧═════════╧════╧════╝
-----
-If a `--version` is not specified, the default version is unregistered.
-
-[NOTE]
-====
-All applications in a stream should have a default version set for the stream to be deployed.
-Otherwise they will be treated as unregistered application during the deployment.
-Use the `app default` to set the defaults.
-====
-
-[source,bash]
-----
-app default --id source:mysource --version 0.0.3
-dataflow:>app list --id source:mysource
-╔═══╤══════════════════╤═════════╤════╤════╗
-║app│      source      │processor│sink│task║
-╠═══╪══════════════════╪═════════╪════╪════╣
-║   │mysource-0.0.2    │         │    │    ║
-║   │> mysource-0.0.3 <│         │    │    ║
-╚═══╧══════════════════╧═════════╧════╧════╝
-----
-
-The `stream deploy` necessitates default app versions to be set.
-The `stream update` and `stream rollback` commands though can use all (default and non-default) registered app versions.
-
-[source,bash]
-----
-dataflow:>stream create foo --definition "mysource | log"
-----
-This will create stream using the default mysource version (0.0.3). Then we can update the version to 0.0.2 like this:
-[source,bash]
-----
-dataflow:>stream update foo --properties version.mysource=0.0.2
-----
-
-[IMPORTANT]
-====
-Only pre-registered applications can be used to `deploy`, `update` or `rollback` a Stream.
-====
-
-An attempt to update the `mysource` to version `0.0.1` (not registered) will fail!
-
-[[spring-cloud-dataflow-stream-lifecycle-skipper-create]]
-=== Creating and Deploying a Stream
-You create and deploy a stream by using Skipper in two steps:
-
-. Creating the stream definition.
-. Deploying the stream.
-
-The following example shows the two steps in action:
+[[spring-cloud-dataflow-stream-lifecycle-skipper-update]]
+=== Updating a Stream
+To update the stream, use the command `stream update` which takes as a command argument either `--properties` or `--propertiesFile`.
+There is an important new top level prefix available when using Skipper, which is `version`.
+If the Stream `http | log` was deployed, and the version of `log` which registered at the time of deployment was `1.1.0.RELEASE`:
 
 [source,bash]
 ----
 dataflow:> stream create --name httptest --definition "http --server.port=9000 | log"
 dataflow:> stream deploy --name httptest
-----
-
-The `stream info` command shows useful information about the stream, including the deployment properties, as shown (with its output) in the following example:
-
-[source,bash]
-----
 dataflow:>stream info httptest
 ╔══════════════════════════════╤══════════════════════════════╤════════════════════════════╗
 ║             Name             │             DSL              │          Status            ║
@@ -1162,23 +1159,9 @@ Stream Deployment properties: {
     "maven://org.springframework.cloud.stream.app:http-source-rabbit" : "1.1.0.RELEASE"
   }
 }
-
 ----
 
-
-There is an important optional command argument (called `--platformName`) to the `stream deploy` command.
-Skipper can be configured to deploy to multiple platforms.
-Skipper is pre-configured with a platform named `default`, which deploys applications to the local machine where Skipper is running.
-The default value of the command line argument `--platformName` is `default`.
-If you commonly deploy to one platform, when installing Skipper, you can override the configuration of the `default` platform.
-Otherwise, specify the `platformName` to one of the values returned by the `stream platform-list` command.
-
-[[spring-cloud-dataflow-stream-lifecycle-skipper-update]]
-=== Updating a Stream
-To update the stream, use the command `stream update` which takes as a command argument either `--properties` or `--propertiesFile`.
-You can pass in values to these command arguments in the same format as when deploy the stream with or without Skipper.
-There is an important new top level prefix available when using Skipper, which is `version`.
-If the Stream `http | log` was deployed, and the version of `log` which registered at the time of deployment was `1.1.0.RELEASE`, the following command will update the Stream to use the `1.2.0.RELEASE` of the log application.
+Then the following command will update the Stream to use the `1.2.0.RELEASE` of the log application.
 Before updating the stream with the specific version of the app, we need to make sure that the app is registered with that version.
 [source,bash]
 ----
@@ -1222,7 +1205,7 @@ Stream Deployment properties: {
 ----
 [[spring-cloud-dataflow-stream-lifecycle-skipper-force-update]]
 === Force update of a Stream
-When upgrading a stream, the `--force` option can be used to deploy new instances of currently deployed applications even if no applicaton or deployment properties have changed.
+When upgrading a stream, the `--force` option can be used to deploy new instances of currently deployed applications even if no application or deployment properties have changed.
 This behavior is needed in the case when configuration information is obtained by the application itself at startup time, for example from Spring Cloud Config Server.
 You can specify which applications to force upgrade by using the option `--app-names`.
 If you do not specify any application names, all the applications will be force upgraded.
@@ -1645,9 +1628,9 @@ private Map<String, String> createDeploymentProperties() {
 
 This utility class is meant to help with the creation of a Map and adds a few methods to assist with defining pre-defined properties.
 
-=== Deploying using Skipper
+=== Skipper Deployment Properties
 
-If you desire to deploy your streams using Skipper, you need to pass certain properties to the server specific to a Skipper based deployment, for example selecting the target platfrom.
+In addition to Spring Cloud Data Flow, you need to pass certain Skipper specific deployment properties, for example selecting the target platform.
 The `SkipperDeploymentPropertiesBuilder` provides you all the properties in `DeploymentPropertiesBuilder` and adds those needed for Skipper.
 
 [source,java,options="nowrap"]
@@ -1745,18 +1728,54 @@ Deployed stream 'words'
 dataflow:>http post --target http://localhost:9900 --data "How much wood would a woodchuck chuck if a woodchuck could chuck wood"
 > POST (text/plain;Charset=UTF-8) http://localhost:9900 How much wood would a woodchuck chuck if a woodchuck could chuck wood
 > 202 ACCEPTED
+
+
+dataflow:>runtime apps
+╔════════════════════╤═══════════╤═══════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════╗
+║App Id / Instance Id│Unit Status│                                                               No. of Instances / Attributes                                                               ║
+╠════════════════════╪═══════════╪═══════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════╣
+║words.log-v1        │ deployed  │                                                                             2                                                                             ║
+╟┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┼┈┈┈┈┈┈┈┈┈┈┈┼┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈╢
+║                    │           │       guid = 24166                                                                                                                                        ║
+║                    │           │        pid = 33097                                                                                                                                        ║
+║                    │           │       port = 24166                                                                                                                                        ║
+║words.log-v1-0      │ deployed  │     stderr = /var/folders/js/7b_pn0t575l790x7j61slyxc0000gn/T/spring-cloud-deployer-6467595568759190742/words-1542803461063/words.log-v1/stderr_0.log     ║
+║                    │           │     stdout = /var/folders/js/7b_pn0t575l790x7j61slyxc0000gn/T/spring-cloud-deployer-6467595568759190742/words-1542803461063/words.log-v1/stdout_0.log     ║
+║                    │           │        url = http://192.168.0.102:24166                                                                                                                   ║
+║                    │           │working.dir = /var/folders/js/7b_pn0t575l790x7j61slyxc0000gn/T/spring-cloud-deployer-6467595568759190742/words-1542803461063/words.log-v1                  ║
+╟┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┼┈┈┈┈┈┈┈┈┈┈┈┼┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈╢
+║                    │           │       guid = 41269                                                                                                                                        ║
+║                    │           │        pid = 33098                                                                                                                                        ║
+║                    │           │       port = 41269                                                                                                                                        ║
+║words.log-v1-1      │ deployed  │     stderr = /var/folders/js/7b_pn0t575l790x7j61slyxc0000gn/T/spring-cloud-deployer-6467595568759190742/words-1542803461063/words.log-v1/stderr_1.log     ║
+║                    │           │     stdout = /var/folders/js/7b_pn0t575l790x7j61slyxc0000gn/T/spring-cloud-deployer-6467595568759190742/words-1542803461063/words.log-v1/stdout_1.log     ║
+║                    │           │        url = http://192.168.0.102:41269                                                                                                                   ║
+║                    │           │working.dir = /var/folders/js/7b_pn0t575l790x7j61slyxc0000gn/T/spring-cloud-deployer-6467595568759190742/words-1542803461063/words.log-v1                  ║
+╟────────────────────┼───────────┼───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╢
+║words.http-v1       │ deployed  │                                                                             1                                                                             ║
+╟┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┼┈┈┈┈┈┈┈┈┈┈┈┼┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈╢
+║                    │           │       guid = 9900                                                                                                                                         ║
+║                    │           │        pid = 33094                                                                                                                                        ║
+║                    │           │       port = 9900                                                                                                                                         ║
+║words.http-v1-0     │ deployed  │     stderr = /var/folders/js/7b_pn0t575l790x7j61slyxc0000gn/T/spring-cloud-deployer-6467595568759190742/words-1542803461054/words.http-v1/stderr_0.log    ║
+║                    │           │     stdout = /var/folders/js/7b_pn0t575l790x7j61slyxc0000gn/T/spring-cloud-deployer-6467595568759190742/words-1542803461054/words.http-v1/stdout_0.log    ║
+║                    │           │        url = http://192.168.0.102:9900                                                                                                                    ║
+║                    │           │working.dir = /var/folders/js/7b_pn0t575l790x7j61slyxc0000gn/T/spring-cloud-deployer-6467595568759190742/words-1542803461054/words.http-v1                 ║
+╟────────────────────┼───────────┼───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╢
+║words.splitter-v1   │ deployed  │                                                                             1                                                                             ║
+╟┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┼┈┈┈┈┈┈┈┈┈┈┈┼┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈╢
+║                    │           │       guid = 33963                                                                                                                                        ║
+║                    │           │        pid = 33093                                                                                                                                        ║
+║                    │           │       port = 33963                                                                                                                                        ║
+║words.splitter-v1-0 │ deployed  │     stderr = /var/folders/js/7b_pn0t575l790x7j61slyxc0000gn/T/spring-cloud-deployer-6467595568759190742/words-1542803437542/words.splitter-v1/stderr_0.log║
+║                    │           │     stdout = /var/folders/js/7b_pn0t575l790x7j61slyxc0000gn/T/spring-cloud-deployer-6467595568759190742/words-1542803437542/words.splitter-v1/stdout_0.log║
+║                    │           │        url = http://192.168.0.102:33963                                                                                                                   ║
+║                    │           │working.dir = /var/folders/js/7b_pn0t575l790x7j61slyxc0000gn/T/spring-cloud-deployer-6467595568759190742/words-1542803437542/words.splitter-v1             ║
+╚════════════════════╧═══════════╧═══════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════╝
+
 ```
 
-You should then see the following in the server logs:
-
-```
-2016-06-05 18:33:24.982  INFO 58039 --- [nio-9393-exec-9] o.s.c.d.spi.local.LocalAppDeployer       : deploying app words.log instance 0
-   Logs will be in /var/folders/c3/ctx7_rns6x30tq7rb76wzqwr0000gp/T/spring-cloud-dataflow-694182453710731989/words-1465176804970/words.log
-2016-06-05 18:33:24.988  INFO 58039 --- [nio-9393-exec-9] o.s.c.d.spi.local.LocalAppDeployer       : deploying app words.log instance 1
-   Logs will be in /var/folders/c3/ctx7_rns6x30tq7rb76wzqwr0000gp/T/spring-cloud-dataflow-694182453710731989/words-1465176804970/words.log
-```
-
-When you review the `words.log instance 0` logs, you should see the following:
+When you review the `words.log-v1-0` logs, you should see the following:
 
 ```
 2016-06-05 18:35:47.047  INFO 58638 --- [  kafka-binder-] log.sink                                 : How
@@ -1764,7 +1783,7 @@ When you review the `words.log instance 0` logs, you should see the following:
 2016-06-05 18:35:47.066  INFO 58638 --- [  kafka-binder-] log.sink                                 : chuck
 ```
 
-When you review the `words.log instance 1` logs, you shoul see the following:
+When you review the `words.log-v1-1` logs, you should see the following:
 
 ```
 2016-06-05 18:35:47.047  INFO 58639 --- [  kafka-binder-] log.sink                                 : much
@@ -1788,19 +1807,41 @@ This example shows something a bit more complicated: swapping out the `time` sou
 
 To create a stream using an `http` source but still using the same `log` sink, we would change the original command in the <<spring-cloud-dataflow-simple-stream>> example to the following:
 
-`dataflow:> stream create --definition "http | log" --name myhttpstream --deploy
-
-The preceding command produces the following output from the server:
-
-[source]
-2016-06-01 09:47:58.920  INFO 79016 --- [io-9393-exec-10] o.s.c.d.spi.local.LocalAppDeployer       : deploying app myhttpstream.log instance 0
-   Logs will be in /var/folders/wn/8jxm_tbd1vj28c8vj37n900m0000gn/T/spring-cloud-dataflow-912434582726479179/myhttpstream-1464788878747/myhttpstream.log
-2016-06-01 09:48:06.396  INFO 79016 --- [io-9393-exec-10] o.s.c.d.spi.local.LocalAppDeployer       : deploying app myhttpstream.http instance 0
-   Logs will be in /var/folders/wn/8jxm_tbd1vj28c8vj37n900m0000gn/T/spring-cloud-dataflow-912434582726479179/myhttpstream-1464788886383/myhttpstream.http
+[source,bash,options="nowrap"]
+----
+dataflow:> stream create --definition "http | log" --name myhttpstream --deploy
+----
 
 Note that we do not see any other output this time until we actually post some data (by using a shell command). In order to see the randomly assigned port on which the http source is listening, run the following command:
 
-`dataflow:> runtime apps`
+[source,bash,options="nowrap"]
+----
+dataflow:>runtime apps
+
+╔══════════════════════╤═══════════╤═════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════╗
+║ App Id / Instance Id │Unit Status│                                                                    No. of Instances / Attributes                                                                    ║
+╠══════════════════════╪═══════════╪═════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════╣
+║myhttpstream.log-v1   │ deploying │                                                                                  1                                                                                  ║
+╟┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┼┈┈┈┈┈┈┈┈┈┈┈┼┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈╢
+║                      │           │       guid = 39628                                                                                                                                                  ║
+║                      │           │        pid = 34403                                                                                                                                                  ║
+║                      │           │       port = 39628                                                                                                                                                  ║
+║myhttpstream.log-v1-0 │ deploying │     stderr = /var/folders/js/7b_pn0t575l790x7j61slyxc0000gn/T/spring-cloud-deployer-6467595568759190742/myhttpstream-1542803867070/myhttpstream.log-v1/stderr_0.log ║
+║                      │           │     stdout = /var/folders/js/7b_pn0t575l790x7j61slyxc0000gn/T/spring-cloud-deployer-6467595568759190742/myhttpstream-1542803867070/myhttpstream.log-v1/stdout_0.log ║
+║                      │           │        url = http://192.168.0.102:39628                                                                                                                             ║
+║                      │           │working.dir = /var/folders/js/7b_pn0t575l790x7j61slyxc0000gn/T/spring-cloud-deployer-6467595568759190742/myhttpstream-1542803867070/myhttpstream.log-v1              ║
+╟──────────────────────┼───────────┼─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╢
+║myhttpstream.http-v1  │ deploying │                                                                                  1                                                                                  ║
+╟┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┼┈┈┈┈┈┈┈┈┈┈┈┼┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈╢
+║                      │           │       guid = 52143                                                                                                                                                  ║
+║                      │           │        pid = 34401                                                                                                                                                  ║
+║                      │           │       port = 52143                                                                                                                                                  ║
+║myhttpstream.http-v1-0│ deploying │     stderr = /var/folders/js/7b_pn0t575l790x7j61slyxc0000gn/T/spring-cloud-deployer-6467595568759190742/myhttpstream-1542803866800/myhttpstream.http-v1/stderr_0.log║
+║                      │           │     stdout = /var/folders/js/7b_pn0t575l790x7j61slyxc0000gn/T/spring-cloud-deployer-6467595568759190742/myhttpstream-1542803866800/myhttpstream.http-v1/stdout_0.log║
+║                      │           │        url = http://192.168.0.102:52143                                                                                                                             ║
+║                      │           │working.dir = /var/folders/js/7b_pn0t575l790x7j61slyxc0000gn/T/spring-cloud-deployer-6467595568759190742/myhttpstream-1542803866800/myhttpstream.http-v1             ║
+╚══════════════════════╧═══════════╧═════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════╝
+----
 
 You should see that the corresponding `http` source has a `url` property containing the host and port information on which it is listening. You are now ready to post to that url, as shown in the following example:
 

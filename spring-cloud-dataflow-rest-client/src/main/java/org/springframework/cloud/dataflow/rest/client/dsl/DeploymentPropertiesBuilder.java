@@ -22,7 +22,7 @@ import org.springframework.util.Assert;
 /**
  * @author Vinicius Carvalho
  *
- * Utility class to help building a Map of classic mode based deployment properties
+ * Utility class to help building a Map of deployment properties
  */
 public class DeploymentPropertiesBuilder extends AbstractPropertiesBuilder{
 

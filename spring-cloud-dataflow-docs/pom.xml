@@ -105,7 +105,6 @@
 								<project-artifactId>${project.artifactId}</project-artifactId>
 								<version-type-lowercase>${version-type-lowercase}</version-type-lowercase>
 								<snippets>${basedir}/../spring-cloud-dataflow-classic-docs/target/generated-snippets</snippets>
-								<skipper-snippets>${basedir}/../spring-cloud-dataflow-skipper-docs/target/generated-snippets</skipper-snippets>
 								<skipper-version>${spring-cloud-skipper.version}</skipper-version>
 								<skipper-version-type-lowercase>${skipper-version-type-lowercase}</skipper-version-type-lowercase>
 								<skipper-branch-or-tag>${skipper-branch-or-tag}</skipper-branch-or-tag>

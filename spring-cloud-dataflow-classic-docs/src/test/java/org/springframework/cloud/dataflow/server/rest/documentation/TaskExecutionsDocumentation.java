@@ -46,7 +46,7 @@ public class TaskExecutionsDocumentation extends BaseDocumentation {
 
 	@Before
 	public void setup() throws Exception {
-		registerApp(ApplicationType.task, "timestamp");
+		registerApp(ApplicationType.task, "timestamp", "1.2.0.RELEASE");
 		createTaskDefinition("taskA");
 		createTaskDefinition("taskB");
 

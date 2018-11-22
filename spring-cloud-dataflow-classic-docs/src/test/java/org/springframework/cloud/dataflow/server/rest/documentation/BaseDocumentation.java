@@ -136,16 +136,17 @@ public abstract class BaseDocumentation {
 	 * Can be used by subclasses to easily register dummy apps, as most endpoints require apps to be effective
 	 * @param type the type of app to register
 	 * @param name the name of the app to register
+	 * @param version the version to register
 	 */
-	void registerApp(ApplicationType type, String name) throws Exception {
+	void registerApp(ApplicationType type, String name, String version) throws Exception {
 		String group = type == ApplicationType.task ? "org.springframework.cloud.task.app" : "org.springframework.cloud.stream.app";
 		String binder = type == ApplicationType.task ? "" : "-rabbit";
 
 		documentation.dontDocument(
-			() -> this.mockMvc.perform(
-				post(String.format("/apps/%s/%s", type, name))
-					.param("uri", String.format("maven://%s:%s-%s%s:1.2.0.RELEASE", group, name, type, binder)))
-				.andExpect(status().isCreated())
+				() -> this.mockMvc.perform(
+						post(String.format("/apps/%s/%s/%s", type, name, version))
+								.param("uri", String.format("maven://%s:%s-%s%s:%s", group, name, type, binder, version)))
+						.andExpect(status().isCreated())
 		);
 	}
 
@@ -153,6 +154,15 @@ public abstract class BaseDocumentation {
 		documentation.dontDocument(
 			() -> this.mockMvc.perform(
 					delete(String.format("/apps/%s/%s", type, name))
+				)
+				.andExpect(status().isOk())
+		);
+	}
+
+	void unregisterApp(ApplicationType type, String name, String version) throws Exception {
+		documentation.dontDocument(
+			() -> this.mockMvc.perform(
+					delete(String.format("/apps/%s/%s/%s", type, name, version))
 				)
 				.andExpect(status().isOk())
 		);

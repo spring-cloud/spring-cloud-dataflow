@@ -97,7 +97,6 @@ public class BaseShellAutoConfiguration {
 
 		@PostConstruct
 		public void log() {
-			logger.debug("Skipper Mode");
 			logger.debug("(o.s.shell.commands) Spring Shell" + " packages are being scanned");
 			logger.debug("(o.s.c.dataflow.shell.command) Spring Cloud Data Flow Shell" + " packages are being scanned");
 		}

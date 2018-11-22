@@ -15,21 +15,21 @@ We then build an introductory Spring Cloud Data Flow application, discussing som
 
 You need Java 8 to run and to build you need to have Maven.
 
-You need to have an RDBMS for storing stream definition and deployment properites and task/batch job states.
+You need to have an RDBMS for storing stream definition and deployment properties and task/batch job states.
 By default, the Data Flow server uses embedded H2 database for this purpose but you can easily configure the server to use another external database.
 
 You also need to have link:https://redis.io[Redis] running if you are running any streams that involve analytics applications. Redis may also be required to run the unit/integration tests.
 
 For the deployed streams applications communicate, either link:http://www.rabbitmq.com[RabbitMQ] or link:http://kafka.apache.org[Kafka] needs to be installed.
 
-If you would like to have the feature of upgrading and rolling back applications in Streams at runtime, you should install the Spring Cloud Skipper server.
+For deploying, upgrading and rolling back applications in Streams at runtime, you should install the Spring Cloud Skipper server as well.
 
 
 [[getting-started-deploying-spring-cloud-dataflow-docker]]
 == Getting Started with Docker Compose
 
 As of Spring Cloud Data Flow 1.4, a Docker Compose file is provided to quickly bring up Spring Cloud Data Flow and its dependencies without having to obtain them manually.
-When running, a composed system includes the latest GA release of Spring Cloud Data Flow Local Server using the Kafka binder for communication.
+When running, a composed system includes the latest GA release of Spring Cloud Data Flow Server using the Kafka binder for communication and Skipper for stream deployment.
 Docker Compose is required and it's recommended to use the link:https://docs.docker.com/compose/install/[latest version].
 
 . Download the Spring Cloud Data Flow Local Server Docker Compose file:
@@ -48,16 +48,17 @@ In the directory where you downloaded `docker-compose.yml`, start the system, as
 [source,bash,subs=attributes]
 ----
 $ export DATAFLOW_VERSION={local-server-image-tag}
+$ export SKIPPER_VERSION=1.1.2.RELEASE
 $ docker-compose up
 ----
 +
-The `docker-compose.yml` file defines a variable `DATAFLOW_VERSION` so that it can be changed easily. The above commands first set the `DATAFLOW_VERSION` to use in the environment and then `docker-compose` is started.
+The `docker-compose.yml` file defines `DATAFLOW_VERSION` and `SKIPPER_VERSION` variables  so that those can be changed easily. The above commands first set the `DATAFLOW_VERSION` and `SKIPPER_VERSION` to use in the environment and then `docker-compose` is started.
 +
-A shorthand version which only exposes the `DATAFLOW_VERSION` variable to the `docker-compose` process rather than setting it in the environment would be as follows:
+A shorthand version which only exposes the `DATAFLOW_VERSION` and `SKIPPER_VERSION` variables to the `docker-compose` process rather than setting it in the environment would be as follows:
 +
 [source,bash,subs=attributes]
 ----
-$ DATAFLOW_VERSION={local-server-image-tag} docker-compose up
+$ DATAFLOW_VERSION={local-server-image-tag} SKIPPER_VERSION=1.1.2.RELEASE docker-compose up
 ----
 +
 When using Windows, environment variables are defined by using the `set` command. To start the system on Windows, enter the following commands:
@@ -65,6 +66,7 @@ When using Windows, environment variables are defined by using the `set` command
 [source,bash,subs=attributes]
 ----
 C:\ set DATAFLOW_VERSION={local-server-image-tag}
+C:\ set SKIPPER_VERSION=1.1.2.RELEASE
 C:\ docker-compose up
 ----
 +
@@ -273,7 +275,7 @@ One can also pre-register the apps directly in the docker-compose. For every pre
 Check the https://docs.spring.io/spring-cloud-dataflow/docs/current/reference/htmlsingle/#resources-registered-applications[SCDF REST API] for further details.
 +
 
-. To enable Spring Cloud Skipper along with Metrics support, the following modifications need to be made. In this example, its assumed the stock `docker-compose.yml` file is being used as a starting point. Customizations can still be applied, for example swapping Kafka with Rabbit by using the examples above.
+. To run Spring Cloud Skipper along with Metrics support, the following modifications need to be made. In this example, its assumed the stock `docker-compose.yml` file is being used as a starting point. Customizations can still be applied, for example swapping Kafka with Rabbit by using the examples above.
 +
 First, after the `zookeeper` service definition:
 +
@@ -331,11 +333,10 @@ And lastly append the following environment variables to the `dataflow-server` `
 +
 [source,yaml,subs=attributes]
 ----
-      - spring.cloud.dataflow.features.skipper-enabled=true
       - spring.cloud.skipper.client.serverUri=http://skipper-server:7577/api
 ----
 +
-NOTE: When using Skipper, launched applications and their logs reside on the `skipper` container rather than the `dataflow-server` container. For example, when viewing stream logs as described earlier, the `skipper` container would be referenced instead:
+NOTE: With Skipper, launched applications and their logs reside on the `skipper` container rather than the `dataflow-server` container. For example, when viewing stream logs as described earlier, the `skipper` container would be referenced instead:
 +
 [source,yaml,subs=attributes]
 ----
@@ -354,12 +355,10 @@ wget https://repo.spring.io/{version-type-lowercase}/org/springframework/cloud/s
 wget https://repo.spring.io/{version-type-lowercase}/org/springframework/cloud/spring-cloud-dataflow-shell/{project-version}/spring-cloud-dataflow-shell-{project-version}.jar
 ----
 +
-Starting 1.3.x, the Data Flow Server can run in either the  `skipper` or `classic` mode.
-The `classic` mode is how the Data Flow Server worked in the 1.2.x releases.
-The mode is specified when starting the Data Flow server using the property `spring.cloud.dataflow.features.skipper-enabled`.
-By default, the `classic` mode is enabled.
+Starting 2.0.x, the Data Flow Server run in `skipper` mode only when the Stream feature is enabled.
+
 +
-. Download http://cloud.spring.io/spring-cloud-skipper/[Skipper] if you would like the added features of upgrading and rolling back applications inside Streams, since Data Flow delegates to Skipper for those features.
+. Download http://cloud.spring.io/spring-cloud-skipper/[Skipper] when Stream features are enabled, since Data Flow delegates to Skipper for those features.
 +
 [source,yaml,options=nowrap,subs=attributes]
 ----
@@ -368,7 +367,7 @@ wget https://repo.spring.io/{skipper-version-type-lowercase}/org/springframework
 wget https://repo.spring.io/{skipper-version-type-lowercase}/org/springframework/cloud/spring-cloud-skipper-shell/{skipper-version}/spring-cloud-skipper-shell-{skipper-version}.jar
 ----
 +
-. Launch Skipper (Required only if you want to run Spring Cloud Data Flow server in `skipper` mode)
+. Launch Skipper (Required unless the Stream features are disabled and the Spring Cloud Data Flow runs in Task mode only)
 +
 In the directory where you downloaded Skipper, run the server using `java -jar`, as follows:
 +
@@ -381,18 +380,9 @@ $ java -jar spring-cloud-skipper-server-{skipper-version}.jar
 +
 In the directory where you downloaded Data Flow, run the server using `java -jar`, as follows:
 +
-To run the Data Flow server in `classic` mode:
-+
 [source,bash,subs=attributes]
 ----
 $ java -jar spring-cloud-dataflow-server-local-{project-version}.jar
-----
-+
-To run the Data Flow server in `skipper` mode:
-+
-[source,bash,subs=attributes]
-----
-$ java -jar spring-cloud-dataflow-server-local-{project-version}.jar --spring.cloud.dataflow.features.skipper-enabled=true
 ----
 +
 If Skipper and the Data Flow server are not running on the same host, set the configuration property `spring.cloud.skipper.client.serverUri` to the location of Skipper, e.g.
@@ -404,22 +394,10 @@ $ java -jar spring-cloud-dataflow-server-local-{project-version}.jar --spring.cl
 +
 . Launch the Data Flow Shell, as follows:
 +
-Launching the Data Flow shell requires the appropriate data flow server mode to be specified.
-To start the Data Flow Shell for the Data Flow server running in `classic` mode:
-+
 [source,bash,subs=attributes]
 ----
 $ java -jar spring-cloud-dataflow-shell-{project-version}.jar
 ----
-+
-To start the Data Flow Shell for the Data Flow server running in `skipper` mode:
-+
-[source,bash,subs=attributes]
-----
-$ java -jar spring-cloud-dataflow-shell-{project-version}.jar --dataflow.mode=skipper
-----
-+
-NOTE: Both the Data Flow Server and the Shell must be on the same mode.
 +
 If the Data Flow Server and shell are not running on the same host, you can also point the shell to the Data Flow server URL using the `dataflow config server` command when in the shell's interactive mode.
 +
@@ -454,8 +432,6 @@ For more details, such as how to register applications that are based on docker 
 NOTE: Depending on your environment, you may need to configure the Data Flow Server to point to a custom
 Maven repository location or configure proxy settings.  See <<configuration-maven>> for more information.
 +
-In this getting started section, we only show deploying a stream, so the commands are the same in `skipper` as well as `classic` mode of the server.
-+
 . Create a stream
 +
 Use the `stream create` command to create a stream with a `http` source and a `log` sink and deploy it:
@@ -478,13 +454,485 @@ dataflow:> http post --target http://localhost:9000 --data "hello world"
 Check to see if `hello world` ended up in log files for the `log` application.
 The location of the log file for the `log` application will be shown in the Data Flow server's log.
 
-You can read more about the general features of using Skipper to deploy streams in the section <<spring-cloud-dataflow-stream-lifecycle-skipper>> and how to upgrade and rollback streams in <<spring-cloud-dataflow-streams-skipper>>.
-
 [NOTE]
 ====
 When deploying locally, each app (and each app instance, in case of `count > 1`) gets a dynamically assigned `server.port`, unless you explicitly assign one with `--server.port=x`.
 In both cases, this setting is propagated as a configuration property that overrides any lower-level setting that you may have used (for example, in `application.yml` files).
 ====
+
+Following sections show Streams can be updated and rolled back by using the Local Data Flow server and Skipper.
+If you execute the Unix `jps` command you can see the two java processes running, as shown in the following listing:
+
+[source,bash]
+----
+$ jps | grep rabbit
+12643 log-sink-rabbit-1.1.0.RELEASE.jar
+12645 http-source-rabbit-1.2.0.RELEASE.jar
+----
+
+[[spring-cloud-dataflow-streams-skipper-upgrading]]
+=== Upgrading
+
+Before we start upgrading the log-sink version to 1.2.0.RELEASE, we will have to register that version in the app registry.
+
+[source,bash]
+----
+dataflow:>app register --name log --type sink --uri maven://org.springframework.cloud.stream.app:log-sink-rabbit:1.2.0.RELEASE
+Successfully registered application 'sink:log'
+----
+
+Since we are using the local server, we need to set the port to a different value (9002) than the currently running log sink's value of 9000 to avoid a conflict.
+While we are at it, we update log level to be `ERROR`.
+To do so, we create a YAML file, named `local-log-update.yml`, with the following contents:
+
+[source,yml]
+----
+version:
+  log: 1.2.0.RELEASE
+app:
+  log:
+    server.port: 9002
+    log.level: ERROR
+----
+
+Now we update the Stream, as follows:
+
+[source,bash]
+----
+dataflow:> stream update --name httptest --propertiesFile /home/mpollack/local-log-update.yml
+Update request has been sent for the stream 'httptest'
+----
+
+By executing the Unix `jps` command, you can see the two java processes running, but now the log application is version 1.2.0.RELEASE, as shown in the following listing:
+
+[source,bash]
+----
+$ jps | grep rabbit
+22034 http-source-rabbit-1.2.0.RELEASE.jar
+22031 log-sink-rabbit-1.1.0.RELEASE.jar
+----
+
+Now you can look in the log file of the Skipper server.
+To do so, use the following command:
+
+`cd` to the directory `/tmp/spring-cloud-dataflow-5262910238261867964/httptest-1511749222274/httptest.log-v2` and `tail -f stdout_0.log`
+
+You should see log entries similar to the following:
+
+[source,bash,options=nowrap]
+----
+INFO 12591 --- [  StateUpdate-1] o.s.c.d.spi.local.LocalAppDeployer       : Deploying app with deploymentId httptest.log-v2 instance 0.
+   Logs will be in /tmp/spring-cloud-dataflow-5262910238261867964/httptest-1511749222274/httptest.log-v2
+INFO 12591 --- [  StateUpdate-1] o.s.c.s.s.d.strategies.HealthCheckStep   : Waiting for apps in release httptest-v2 to be healthy.
+INFO 12591 --- [  StateUpdate-1] o.s.c.s.s.d.s.HandleHealthCheckStep      : Release httptest-v2 has been DEPLOYED
+INFO 12591 --- [  StateUpdate-1] o.s.c.s.s.d.s.HandleHealthCheckStep      : Apps in release httptest-v2 are healthy.
+----
+
+Now you can post a message to the http source at port `9000`, as follows:
+
+[source,bash]
+----
+dataflow:> http post --target http://localhost:9000 --data "hello world upgraded"
+----
+
+The log message is now at the error level, as shown in the following example:
+
+[source,bash]
+----
+ERROR 22311 --- [http.httptest-1] log-sink  : hello world upgraded
+----
+
+If you query the `/info` endpoint of the application, you can also see that it is at version `1.2.0.RELEASE`, as shown in the following example:
+
+[source,bash]
+----
+$ curl http://localhost:9002/info
+{"app":{"description":"Spring Cloud Stream Log Sink Rabbit Binder Application","name":"log-sink-rabbit","version":"1.2.0.RELEASE"}}
+----
+
+==== Force upgrade of a Stream
+
+When upgrading a stream, the --force option can be used to deploy new instances of currently deployed applications even if no applicaton or deployment properties have changed.
+This behavior is needed in the case when configuration information is obtained by the application itself at startup time, for example from Spring Cloud Config Server.
+You can specify which applications to force upgrade by using the option --app-names.
+If you do not specify any application names, all the applications will be force upgraded.
+You can specify --force and --app-names options together with --properties or --propertiesFile options.
+
+==== Overriding properties during Stream update
+
+The properties that are passed during stream update are added on top of the existing properties for the same stream.
+
+For instance, the stream `ticktock` is deployed without any explicit properties as follows:
+
+[source,bash]
+----
+dataflow:>stream create --name ticktock --definition "time | log --name=mylogger"
+Created new stream 'ticktock'
+
+dataflow:>stream deploy --name ticktock
+Deployment request has been sent for stream 'ticktock'
+----
+
+[source,bash]
+----
+dataflow:>stream manifest --name ticktock
+"apiVersion": "skipper.spring.io/v1"
+"kind": "SpringCloudDeployerApplication"
+"metadata":
+  "name": "time"
+"spec":
+  "resource": "maven://org.springframework.cloud.stream.app:time-source-rabbit"
+  "resourceMetadata": "maven://org.springframework.cloud.stream.app:time-source-rabbit:jar:metadata:1.3.1.RELEASE"
+  "version": "1.3.1.RELEASE"
+  "applicationProperties":
+    "spring.metrics.export.triggers.application.includes": "integration**"
+    "spring.cloud.dataflow.stream.app.label": "time"
+    "spring.cloud.stream.metrics.key": "ticktock.time.${spring.cloud.application.guid}"
+    "spring.cloud.stream.bindings.output.producer.requiredGroups": "ticktock"
+    "spring.cloud.stream.metrics.properties": "spring.application.name,spring.application.index,spring.cloud.application.*,spring.cloud.dataflow.*"
+    "spring.cloud.stream.bindings.output.destination": "ticktock.time"
+    "spring.cloud.dataflow.stream.name": "ticktock"
+    "spring.cloud.dataflow.stream.app.type": "source"
+  "deploymentProperties":
+    "spring.cloud.deployer.group": "ticktock"
+---
+"apiVersion": "skipper.spring.io/v1"
+"kind": "SpringCloudDeployerApplication"
+"metadata":
+  "name": "log"
+"spec":
+  "resource": "maven://org.springframework.cloud.stream.app:log-sink-rabbit"
+  "resourceMetadata": "maven://org.springframework.cloud.stream.app:log-sink-rabbit:jar:metadata:1.3.1.RELEASE"
+  "version": "1.3.1.RELEASE"
+  "applicationProperties":
+    "spring.metrics.export.triggers.application.includes": "integration**"
+    "spring.cloud.dataflow.stream.app.label": "log"
+    "spring.cloud.stream.metrics.key": "ticktock.log.${spring.cloud.application.guid}"
+    "spring.cloud.stream.bindings.input.group": "ticktock"
+    "log.name": "mylogger"
+    "spring.cloud.stream.metrics.properties": "spring.application.name,spring.application.index,spring.cloud.application.*,spring.cloud.dataflow.*"
+    "spring.cloud.dataflow.stream.name": "ticktock"
+    "spring.cloud.dataflow.stream.app.type": "sink"
+    "spring.cloud.stream.bindings.input.destination": "ticktock.time"
+  "deploymentProperties":
+    "spring.cloud.deployer.group": "ticktock"
+----
+
+In the second update, we try to add a new property for `log` application `foo2=bar2`.
+
+[source,bash]
+----
+dataflow:>stream update --name ticktock --properties app.log.foo2=bar2
+Update request has been sent for the stream 'ticktock'
+
+dataflow:>stream manifest --name ticktock
+"apiVersion": "skipper.spring.io/v1"
+"kind": "SpringCloudDeployerApplication"
+"metadata":
+  "name": "time"
+"spec":
+  "resource": "maven://org.springframework.cloud.stream.app:time-source-rabbit"
+  "resourceMetadata": "maven://org.springframework.cloud.stream.app:time-source-rabbit:jar:metadata:1.3.1.RELEASE"
+  "version": "1.3.1.RELEASE"
+  "applicationProperties":
+    "spring.metrics.export.triggers.application.includes": "integration**"
+    "spring.cloud.dataflow.stream.app.label": "time"
+    "spring.cloud.stream.metrics.key": "ticktock.time.${spring.cloud.application.guid}"
+    "spring.cloud.stream.bindings.output.producer.requiredGroups": "ticktock"
+    "spring.cloud.stream.metrics.properties": "spring.application.name,spring.application.index,spring.cloud.application.*,spring.cloud.dataflow.*"
+    "spring.cloud.stream.bindings.output.destination": "ticktock.time"
+    "spring.cloud.dataflow.stream.name": "ticktock"
+    "spring.cloud.dataflow.stream.app.type": "source"
+  "deploymentProperties":
+    "spring.cloud.deployer.group": "ticktock"
+---
+"apiVersion": "skipper.spring.io/v1"
+"kind": "SpringCloudDeployerApplication"
+"metadata":
+  "name": "log"
+"spec":
+  "resource": "maven://org.springframework.cloud.stream.app:log-sink-rabbit"
+  "resourceMetadata": "maven://org.springframework.cloud.stream.app:log-sink-rabbit:jar:metadata:1.3.1.RELEASE"
+  "version": "1.3.1.RELEASE"
+  "applicationProperties":
+    "spring.metrics.export.triggers.application.includes": "integration**"
+    "spring.cloud.dataflow.stream.app.label": "log"
+    "spring.cloud.stream.metrics.key": "ticktock.log.${spring.cloud.application.guid}"
+    "spring.cloud.stream.bindings.input.group": "ticktock"
+    "log.name": "mylogger"
+    "spring.cloud.stream.metrics.properties": "spring.application.name,spring.application.index,spring.cloud.application.*,spring.cloud.dataflow.*"
+    "spring.cloud.dataflow.stream.name": "ticktock"
+    "spring.cloud.dataflow.stream.app.type": "sink"
+    "foo2": "bar2" // <1>
+    "spring.cloud.stream.bindings.input.destination": "ticktock.time"
+  "deploymentProperties":
+    "spring.cloud.deployer.count": "1"
+    "spring.cloud.deployer.group": "ticktock"
+
+dataflow:>stream list
+╔═══════════╤══════════════════════════════════════════╤═════════════════════════════════════════╗
+║Stream Name│            Stream Definition             │                 Status                  ║
+╠═══════════╪══════════════════════════════════════════╪═════════════════════════════════════════╣
+║ticktock   │time | log --log.name=mylogger --foo2=bar2│The stream has been successfully deployed║
+╚═══════════╧══════════════════════════════════════════╧═════════════════════════════════════════╝
+
+----
+
+<1> Property `foo2=bar2` is applied for the `log` application.
+
+Now, when we add another property `foo3=bar3` to `log` application, this new property is added on top of the existing properties for the stream `ticktock`.
+
+[source,bash]
+----
+dataflow:>stream update --name ticktock --properties app.log.foo3=bar3
+Update request has been sent for the stream 'ticktock'
+
+dataflow:>stream manifest --name ticktock
+"apiVersion": "skipper.spring.io/v1"
+"kind": "SpringCloudDeployerApplication"
+"metadata":
+  "name": "time"
+"spec":
+  "resource": "maven://org.springframework.cloud.stream.app:time-source-rabbit"
+  "resourceMetadata": "maven://org.springframework.cloud.stream.app:time-source-rabbit:jar:metadata:1.3.1.RELEASE"
+  "version": "1.3.1.RELEASE"
+  "applicationProperties":
+    "spring.metrics.export.triggers.application.includes": "integration**"
+    "spring.cloud.dataflow.stream.app.label": "time"
+    "spring.cloud.stream.metrics.key": "ticktock.time.${spring.cloud.application.guid}"
+    "spring.cloud.stream.bindings.output.producer.requiredGroups": "ticktock"
+    "spring.cloud.stream.metrics.properties": "spring.application.name,spring.application.index,spring.cloud.application.*,spring.cloud.dataflow.*"
+    "spring.cloud.stream.bindings.output.destination": "ticktock.time"
+    "spring.cloud.dataflow.stream.name": "ticktock"
+    "spring.cloud.dataflow.stream.app.type": "source"
+  "deploymentProperties":
+    "spring.cloud.deployer.group": "ticktock"
+---
+"apiVersion": "skipper.spring.io/v1"
+"kind": "SpringCloudDeployerApplication"
+"metadata":
+  "name": "log"
+"spec":
+  "resource": "maven://org.springframework.cloud.stream.app:log-sink-rabbit"
+  "resourceMetadata": "maven://org.springframework.cloud.stream.app:log-sink-rabbit:jar:metadata:1.3.1.RELEASE"
+  "version": "1.3.1.RELEASE"
+  "applicationProperties":
+    "spring.metrics.export.triggers.application.includes": "integration**"
+    "spring.cloud.dataflow.stream.app.label": "log"
+    "spring.cloud.stream.metrics.key": "ticktock.log.${spring.cloud.application.guid}"
+    "spring.cloud.stream.bindings.input.group": "ticktock"
+    "log.name": "mylogger"
+    "spring.cloud.stream.metrics.properties": "spring.application.name,spring.application.index,spring.cloud.application.*,spring.cloud.dataflow.*"
+    "spring.cloud.dataflow.stream.name": "ticktock"
+    "spring.cloud.dataflow.stream.app.type": "sink"
+    "foo2": "bar2" <1>
+    "spring.cloud.stream.bindings.input.destination": "ticktock.time"
+    "foo3": "bar3" <1>
+  "deploymentProperties":
+    "spring.cloud.deployer.count": "1"
+    "spring.cloud.deployer.group": "ticktock"
+----
+
+<1> The property `foo3=bar3` is added along with the existing `foo2=bar2` for the `log` application.
+
+We can still override the existing properties as follows:
+
+[source,bash]
+----
+dataflow:>stream update --name ticktock --properties app.log.foo3=bar4
+Update request has been sent for the stream 'ticktock'
+
+dataflow:>stream manifest ticktock
+"apiVersion": "skipper.spring.io/v1"
+"kind": "SpringCloudDeployerApplication"
+"metadata":
+  "name": "time"
+"spec":
+  "resource": "maven://org.springframework.cloud.stream.app:time-source-rabbit"
+  "resourceMetadata": "maven://org.springframework.cloud.stream.app:time-source-rabbit:jar:metadata:1.3.1.RELEASE"
+  "version": "1.3.1.RELEASE"
+  "applicationProperties":
+    "spring.metrics.export.triggers.application.includes": "integration**"
+    "spring.cloud.dataflow.stream.app.label": "time"
+    "spring.cloud.stream.metrics.key": "ticktock.time.${spring.cloud.application.guid}"
+    "spring.cloud.stream.bindings.output.producer.requiredGroups": "ticktock"
+    "spring.cloud.stream.metrics.properties": "spring.application.name,spring.application.index,spring.cloud.application.*,spring.cloud.dataflow.*"
+    "spring.cloud.stream.bindings.output.destination": "ticktock.time"
+    "spring.cloud.dataflow.stream.name": "ticktock"
+    "spring.cloud.dataflow.stream.app.type": "source"
+  "deploymentProperties":
+    "spring.cloud.deployer.group": "ticktock"
+---
+"apiVersion": "skipper.spring.io/v1"
+"kind": "SpringCloudDeployerApplication"
+"metadata":
+  "name": "log"
+"spec":
+  "resource": "maven://org.springframework.cloud.stream.app:log-sink-rabbit"
+  "resourceMetadata": "maven://org.springframework.cloud.stream.app:log-sink-rabbit:jar:metadata:1.3.1.RELEASE"
+  "version": "1.3.1.RELEASE"
+  "applicationProperties":
+    "spring.metrics.export.triggers.application.includes": "integration**"
+    "spring.cloud.dataflow.stream.app.label": "log"
+    "spring.cloud.stream.metrics.key": "ticktock.log.${spring.cloud.application.guid}"
+    "spring.cloud.stream.bindings.input.group": "ticktock"
+    "log.name": "mylogger"
+    "spring.cloud.stream.metrics.properties": "spring.application.name,spring.application.index,spring.cloud.application.*,spring.cloud.dataflow.*"
+    "spring.cloud.dataflow.stream.name": "ticktock"
+    "spring.cloud.dataflow.stream.app.type": "sink"
+    "foo2": "bar2" <1>
+    "spring.cloud.stream.bindings.input.destination": "ticktock.time"
+    "foo3": "bar4" <1>
+  "deploymentProperties":
+    "spring.cloud.deployer.count": "1"
+    "spring.cloud.deployer.group": "ticktock"
+----
+
+<1> The property `foo3` is replaced with the new value` bar4` and the existing property `foo2=bar2` remains.
+
+==== Stream History
+
+The history of the stream can be viewed by running the `stream history` command, as shown (with its output), in the following example:
+
+[source,bash]
+----
+dataflow:>stream history --name httptest
+╔═══════╤════════════════════════════╤════════╤════════════╤═══════════════╤════════════════╗
+║Version│        Last updated        │ Status │Package Name│Package Version│  Description   ║
+╠═══════╪════════════════════════════╪════════╪════════════╪═══════════════╪════════════════╣
+║2      │Mon Nov 27 22:41:16 EST 2017│DEPLOYED│httptest    │1.0.0          │Upgrade complete║
+║1      │Mon Nov 27 22:40:41 EST 2017│DELETED │httptest    │1.0.0          │Delete complete ║
+╚═══════╧════════════════════════════╧════════╧════════════╧═══════════════╧════════════════╝
+----
+
+==== Stream Manifest
+
+The manifest is a YAML document that represents the final state of what was deployed to the platform.
+You can view the manifest for any stream version by using the `stream manifest --name <name-of-stream> --releaseVersion <optional-version>` command.
+If the `--releaseVersion` is not specified, the manifest for the last version is returned.
+The following listing shows a typical `stream manifest` command and its output:
+
+[source,bash]
+----
+dataflow:>stream manifest --name httptest
+
+---
+# Source: log.yml
+apiVersion: skipper.spring.io/v1
+kind: SpringCloudDeployerApplication
+metadata:
+  name: log
+spec:
+  resource: maven://org.springframework.cloud.stream.app:log-sink-rabbit
+  version: 1.2.0.RELEASE
+  applicationProperties:
+    spring.metrics.export.triggers.application.includes: integration**
+    spring.cloud.dataflow.stream.app.label: log
+    spring.cloud.stream.metrics.key: httptest.log.${spring.cloud.application.guid}
+    spring.cloud.stream.bindings.input.group: httptest
+    spring.cloud.stream.metrics.properties: spring.application.name,spring.application.index,spring.cloud.application.*,spring.cloud.dataflow.*
+    spring.cloud.dataflow.stream.name: httptest
+    spring.cloud.dataflow.stream.app.type: sink
+    spring.cloud.stream.bindings.input.destination: httptest.http
+  deploymentProperties:
+    spring.cloud.deployer.indexed: true
+    spring.cloud.deployer.group: httptest
+    spring.cloud.deployer.count: 1
+
+---
+# Source: http.yml
+apiVersion: skipper.spring.io/v1
+kind: SpringCloudDeployerApplication
+metadata:
+  name: http
+spec:
+  resource: maven://org.springframework.cloud.stream.app:http-source-rabbit
+  version: 1.2.0.RELEASE
+  applicationProperties:
+    spring.metrics.export.triggers.application.includes: integration**
+    spring.cloud.dataflow.stream.app.label: http
+    spring.cloud.stream.metrics.key: httptest.http.${spring.cloud.application.guid}
+    spring.cloud.stream.bindings.output.producer.requiredGroups: httptest
+    spring.cloud.stream.metrics.properties: spring.application.name,spring.application.index,spring.cloud.application.*,spring.cloud.dataflow.*
+    server.port: 9000
+    spring.cloud.stream.bindings.output.destination: httptest.http
+    spring.cloud.dataflow.stream.name: httptest
+    spring.cloud.dataflow.stream.app.type: source
+  deploymentProperties:
+    spring.cloud.deployer.group: httptest
+----
+
+The majority of the deployment and application properties were set by Data Flow in order to enable the applications to talk to each other and send application metrics with identifying labels.
+
+If you compare this YAML document to the one for `--releaseVersion=1` you will see the difference in the log application version.
+
+[[spring-cloud-dataflow-streams-skipper-rollback]]
+=== Rolling back
+
+To go back to the previous version of the stream, use the `stream rollback` command, as shown (with its output) in the following example:
+
+[source,bash]
+----
+dataflow:>stream rollback --name httptest
+Rollback request has been sent for the stream 'httptest'
+----
+
+By executing the Unix `jps` command, you can see the two java processes running, but now the log application is back to 1.1.0.RELEASE.
+The http source process remains unchanged.
+The following listing shows the `jps` command and typical output:
+
+[source,bash]
+----
+$ jps | grep rabbit
+22034 http-source-rabbit-1.2.0.RELEASE.jar
+23939 log-sink-rabbit-1.1.0.RELEASE.jar
+----
+
+Now look in the log file for the skipper server, by using the following command:
+
+`cd` to the directory `/tmp/spring-cloud-dataflow-3784227772192239992/httptest-1511755751505/httptest.log-v3` and `tail -f stdout_0.log`
+
+You should see log entries similar to the following:
+
+[source,bash,options=nowrap]
+----
+INFO 21487 --- [  StateUpdate-2] o.s.c.d.spi.local.LocalAppDeployer       : Deploying app with deploymentId httptest.log-v3 instance 0.
+   Logs will be in /tmp/spring-cloud-dataflow-3784227772192239992/httptest-1511755751505/httptest.log-v3
+INFO 21487 --- [  StateUpdate-2] o.s.c.s.s.d.strategies.HealthCheckStep   : Waiting for apps in release httptest-v3 to be healthy.
+INFO 21487 --- [  StateUpdate-2] o.s.c.s.s.d.s.HandleHealthCheckStep      : Release httptest-v3 has been DEPLOYED
+INFO 21487 --- [  StateUpdate-2] o.s.c.s.s.d.s.HandleHealthCheckStep      : Apps in release httptest-v3 are healthy.
+----
+
+Now post a message to the http source at port `9000`, as follows:
+
+[source,bash]
+----
+dataflow:> http post --target http://localhost:9000 --data "hello world upgraded"
+----
+
+The log message in the log sink is now back at the info error level, as shown in the following example:
+[source,bash]
+----
+INFO 23939 --- [http.httptest-1] log-sink  : hello world rollback
+----
+
+The `history` command now shows that the third version of the stream has been deployed, as shown (with its output) in the following listing:
+
+[source,bash]
+----
+dataflow:>stream history --name httptest
+╔═══════╤════════════════════════════╤════════╤════════════╤═══════════════╤════════════════╗
+║Version│        Last updated        │ Status │Package Name│Package Version│  Description   ║
+╠═══════╪════════════════════════════╪════════╪════════════╪═══════════════╪════════════════╣
+║3      │Mon Nov 27 23:01:13 EST 2017│DEPLOYED│httptest    │1.0.0          │Upgrade complete║
+║2      │Mon Nov 27 22:41:16 EST 2017│DELETED │httptest    │1.0.0          │Delete complete ║
+║1      │Mon Nov 27 22:40:41 EST 2017│DELETED │httptest    │1.0.0          │Delete complete ║
+╚═══════╧════════════════════════════╧════════╧════════════╧═══════════════╧════════════════╝
+----
+
+If you look at the manifest for version 3, you can see that it shows version 1.1.0.RELEASE for the log sink.
+
+
 
 == Deploying Tasks
 In this getting started section, we show how to register a task, create a task definition and then launch it.
