@@ -21,6 +21,7 @@ import org.springframework.cloud.skipper.acceptance.core.DockerCompose;
 import org.springframework.cloud.skipper.acceptance.core.DockerComposeExtension;
 import org.springframework.cloud.skipper.acceptance.core.DockerComposeInfo;
 import org.springframework.cloud.skipper.acceptance.tests.support.Bootstrap;
+import org.springframework.cloud.skipper.acceptance.tests.support.MsSql;
 import org.springframework.cloud.skipper.acceptance.tests.support.Mysql;
 import org.springframework.cloud.skipper.acceptance.tests.support.Oracle;
 import org.springframework.cloud.skipper.acceptance.tests.support.Postgres;
@@ -263,6 +264,17 @@ public class SkipperServerInitialBootstrapTests extends AbstractSkipperServerTes
 	@DockerCompose(id = "db", order = 0, locations = { "src/test/resources/oracle.yml" }, services = { "oracle" })
 	@DockerCompose(id = "skipper", order = 1, locations = { "src/test/resources/skipper11xoracle.yml" }, services = { "skipper" })
 	public void testSkipper11xWithOracle(DockerComposeInfo dockerComposeInfo) throws Exception {
+		assertServerRunning(dockerComposeInfo, "skipper", "skipper");
+	}
+
+	// mssql
+
+	@Test
+	@MsSql
+	@Skipper11x
+	@DockerCompose(id = "db", order = 0, locations = { "src/test/resources/mssql.yml" }, services = { "mssql" })
+	@DockerCompose(id = "skipper", order = 1, locations = { "src/test/resources/skipper11xmssql.yml" }, services = { "skipper" })
+	public void testSkipper11xWithMsSql(DockerComposeInfo dockerComposeInfo) throws Exception {
 		assertServerRunning(dockerComposeInfo, "skipper", "skipper");
 	}
 }
