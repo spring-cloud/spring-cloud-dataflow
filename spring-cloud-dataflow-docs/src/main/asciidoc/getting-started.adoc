@@ -355,9 +355,7 @@ wget https://repo.spring.io/{version-type-lowercase}/org/springframework/cloud/s
 wget https://repo.spring.io/{version-type-lowercase}/org/springframework/cloud/spring-cloud-dataflow-shell/{project-version}/spring-cloud-dataflow-shell-{project-version}.jar
 ----
 +
-Starting 2.0.x, the Data Flow Server run in `skipper` mode only when the Stream feature is enabled.
 
-+
 . Download http://cloud.spring.io/spring-cloud-skipper/[Skipper] when Stream features are enabled, since Data Flow delegates to Skipper for those features.
 +
 [source,yaml,options=nowrap,subs=attributes]
@@ -470,7 +468,7 @@ $ jps | grep rabbit
 12645 http-source-rabbit-1.2.0.RELEASE.jar
 ----
 
-[[spring-cloud-dataflow-streams-skipper-upgrading]]
+[[spring-cloud-dataflow-streams-upgrading]]
 === Upgrading
 
 Before we start upgrading the log-sink version to 1.2.0.RELEASE, we will have to register that version in the app registry.
@@ -866,7 +864,7 @@ The majority of the deployment and application properties were set by Data Flow 
 
 If you compare this YAML document to the one for `--releaseVersion=1` you will see the difference in the log application version.
 
-[[spring-cloud-dataflow-streams-skipper-rollback]]
+[[spring-cloud-dataflow-streams-rollback]]
 === Rolling back
 
 To go back to the previous version of the stream, use the `stream rollback` command, as shown (with its output) in the following example:

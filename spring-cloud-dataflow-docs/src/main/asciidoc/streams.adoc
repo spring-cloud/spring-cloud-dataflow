@@ -167,7 +167,7 @@ The lifecycle of a stream, goes through the following stages:
 . <<spring-cloud-dataflow-create-stream>>
 . <<spring-cloud-dataflow-deploy-stream>>
 . <<spring-cloud-dataflow-destroy-stream>> or <<spring-cloud-dataflow-undeploy-stream>>
-. <<spring-cloud-dataflow-streams-skipper-upgrading,Upgrade>> or <<spring-cloud-dataflow-streams-skipper-rollback,Rollback>> applications in the Stream.
+. <<spring-cloud-dataflow-streams-upgrading,Upgrade>> or <<spring-cloud-dataflow-streams-rollback,Rollback>> applications in the Stream.
 
 https://cloud.spring.io/spring-cloud-skipper/[Skipper] is a server that you discover Spring Boot applications and manage their lifecycle on multiple Cloud Platforms.
 
@@ -1131,7 +1131,7 @@ bad-ticktock is an invalid stream.
 ----
 In this case Spring Cloud Data Flow states that the stream is invalid because source:bad-time has an invalid URI.
 
-[[spring-cloud-dataflow-stream-lifecycle-skipper-update]]
+[[spring-cloud-dataflow-stream-lifecycle-update]]
 === Updating a Stream
 To update the stream, use the command `stream update` which takes as a command argument either `--properties` or `--propertiesFile`.
 There is an important new top level prefix available when using Skipper, which is `version`.
@@ -1203,7 +1203,7 @@ Stream Deployment properties: {
 }
 
 ----
-[[spring-cloud-dataflow-stream-lifecycle-skipper-force-update]]
+[[spring-cloud-dataflow-stream-lifecycle-force-update]]
 === Force update of a Stream
 When upgrading a stream, the `--force` option can be used to deploy new instances of currently deployed applications even if no application or deployment properties have changed.
 This behavior is needed in the case when configuration information is obtained by the application itself at startup time, for example from Spring Cloud Config Server.
@@ -1296,7 +1296,7 @@ The majority of the deployment and application properties were set by Data Flow 
 
 
 
-[[spring-cloud-dataflow-stream-lifecycle-skipper-rollback]]
+[[spring-cloud-dataflow-stream-lifecycle-rollback]]
 === Rollback a Stream
 
 You can rollback to a previous version of the stream using the command `stream rollback`.

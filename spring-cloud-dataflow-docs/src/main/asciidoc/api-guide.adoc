@@ -239,7 +239,7 @@ The following topics provide more detail:
 * <<resources-app-registry-list>>
 * <<resources-app-registry-get>>
 * <<resources-app-registry-post>>
-* <<resources-app-registry-post-skipper>>
+* <<resources-app-registry-post-versioned>>
 * <<resources-app-registry-default>>
 * <<resources-app-registry-delete>>
 * <<resources-app-registry-bulk>>
@@ -380,48 +380,48 @@ include::{snippets}/app-registry-documentation/registering-an-application/curl-r
 
 include::{snippets}/app-registry-documentation/registering-an-application/http-response.adoc[]
 
-[[resources-app-registry-post-skipper]]
+[[resources-app-registry-post-versioned]]
 ==== Registering a New Application with version
 
 A `POST` request on `/apps/<type>/<name>/<version>` allows registration of a new application
 The following topics provide more detail:
 
-* <<api-guide-resources-app-registry-post-skipper-request-structure>>
-* <<api-guide-resources-app-registry-post-skipper-request-parameters>>
-* <<api-guide-resources-app-registry-post-skipper-path-parameters>>
-* <<api-guide-resources-app-registry-post-skipper-example-request>>
-* <<api-guide-resources-app-registry-post-skipper-response-structure>>
+* <<api-guide-resources-app-registry-post-versioned-request-structure>>
+* <<api-guide-resources-app-registry-post-versioned-request-parameters>>
+* <<api-guide-resources-app-registry-post-versioned-path-parameters>>
+* <<api-guide-resources-app-registry-post-versioned-example-request>>
+* <<api-guide-resources-app-registry-post-versioned-response-structure>>
 
 
-[[api-guide-resources-app-registry-post-skipper-request-structure]]
+[[api-guide-resources-app-registry-post-versioned-request-structure]]
 ===== Request Structure
 
 include::{snippets}/app-registry-documentation/registering-an-application-version/http-request.adoc[]
 
 
 
-[[api-guide-resources-app-registry-post-skipper-request-parameters]]
+[[api-guide-resources-app-registry-post-versioned-request-parameters]]
 ===== Request Parameters
 
 include::{snippets}/app-registry-documentation/registering-an-application-version/request-parameters.adoc[]
 
 
 
-[[api-guide-resources-app-registry-post-skipper-path-parameters]]
+[[api-guide-resources-app-registry-post-versioned-path-parameters]]
 ===== Path Parameters
 
 include::{snippets}/app-registry-documentation/registering-an-application-version/path-parameters.adoc[]
 
 
 
-[[api-guide-resources-app-registry-post-skipper-example-request]]
+[[api-guide-resources-app-registry-post-versioned-example-request]]
 ===== Example Request
 
 include::{snippets}/app-registry-documentation/registering-an-application-version/curl-request.adoc[]
 
 
 
-[[api-guide-resources-app-registry-post-skipper-response-structure]]
+[[api-guide-resources-app-registry-post-versioned-response-structure]]
 ===== Response Structure
 
 include::{snippets}/app-registry-documentation/registering-an-application-version/http-response.adoc[]

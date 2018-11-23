@@ -281,7 +281,7 @@ If you want to change or override any of the properties `LOG_FILE`, `LOG_PATH`, 
 [[configuration-skipper]]
 == Skipper
 Data Flow Server delegates to the Skipper server the management of the Stream's lifecycle.  Set the configuration property `spring.cloud.skipper.client.serverUri` to the location of Skipper, e.g.
-+
+
 [source,bash,subs=attributes]
 ----
 $ java -jar spring-cloud-dataflow-server-local-{project-version}.jar --spring.cloud.skipper.client.serverUri=http://192.51.100.1:7577/api
