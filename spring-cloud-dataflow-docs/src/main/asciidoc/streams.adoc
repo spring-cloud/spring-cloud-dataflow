@@ -1033,7 +1033,10 @@ The `transform` application processes the Tuple data and sends the processed dat
 
 Consider the following example of sending some data to the `http` application:
 
-`dataflow:>http post --data {"hello":"world","something":"somethingelse"} --contentType application/json --target http://localhost:<http-port>`
+[Source]
+----
+dataflow:>http post --data {"hello":"world","something":"somethingelse"} --contentType application/json --target http://localhost:<http-port>
+----
 
 At the log application, you see the content as follows:
 
@@ -1651,14 +1654,19 @@ private Map<String, String> createDeploymentProperties() {
 
 In some cases, a stream can have its applications bound to multiple spring cloud stream binders when they are required to connect to different messaging
 middleware configurations. In those cases, it is important to make sure the applications are configured appropriately with their binder
-configurations. For example, consider the following stream:
+configurations. For example, a multi-binder transformer that supports both Kafka and Rabbit binders is the processor in the following stream:
 
-`http | transform --expression=payload.toUpperCase() | log`
+[source]
+----
+http | multibindertransform --expression=payload.toUpperCase() | log
+----
+
+NOTE: In the example above you would write your own multibindertransform application.
 
 In this stream, each application connects to messaging middleware in the following way:
 
 . The HTTP source sends events to RabbitMQ (`rabbit1`).
-. The Transform processor receives events from RabbitMQ (`rabbit1`) and sends the processed events into Kafka (`kafka1`).
+. The Multi-Binder Transform processor receives events from RabbitMQ (`rabbit1`) and sends the processed events into Kafka (`kafka1`).
 . The log sink receives events from Kafka (`kafka1`).
 
 Here, `rabbit1` and `kafka1` are the binder names given in the spring cloud stream application properties.
@@ -1673,10 +1681,10 @@ If not, they can be passed through `deployment` properties when the stream is de
 
 [source,bash]
 ----
-dataflow:>stream create --definition "http | transform --expression=payload.toUpperCase() | log" --name mystream
+dataflow:>stream create --definition "http | multibindertransform --expression=payload.toUpperCase() | log" --name mystream
 
-dataflow:>stream deploy mystream --properties "app.http.spring.cloud.stream.bindings.output.binder=rabbit1,app.transform.spring.cloud.stream.bindings.input.binder=rabbit1,
-app.transform.spring.cloud.stream.bindings.output.binder=kafka1,app.log.spring.cloud.stream.bindings.input.binder=kafka1"
+dataflow:>stream deploy mystream --properties "app.http.spring.cloud.stream.bindings.output.binder=rabbit1,app.multibindertransform.spring.cloud.stream.bindings.input.binder=rabbit1,
+app.multibindertransform.spring.cloud.stream.bindings.output.binder=kafka1,app.log.spring.cloud.stream.bindings.input.binder=kafka1"
 ----
 
 One can override any of the binder configuration properties by specifying them through deployment properties.
