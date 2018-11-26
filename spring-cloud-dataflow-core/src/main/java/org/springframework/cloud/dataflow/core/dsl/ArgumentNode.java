@@ -49,6 +49,14 @@ public class ArgumentNode extends AstNode {
 		return toString();
 	}
 
+	public String getValueQuoted() {
+		String valueString = value;
+		if (quoteUsed != null) {
+			valueString = quoteUsed + (quoteUsed.equals("\'")?value.replace("'", "''"):value) + quoteUsed;
+		}
+		return valueString;
+	}
+
 	@Override
 	public String toString() {
 		String valueString = value;
