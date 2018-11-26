@@ -118,6 +118,8 @@ jobs:
       file: ci-git-repo/((base-path))/ci/tasks/build-skipper-server-with-drivers.yml
       input_mapping:
         git-repo: ci-apps-git-repo
+      output_mapping:
+        distribution-repository: distribution-repository-100
       params:
         BASE_PATH: ((base-path))
         APP_VERSION: 100
@@ -128,6 +130,8 @@ jobs:
       file: ci-git-repo/((base-path))/ci/tasks/build-skipper-server-with-drivers.yml
       input_mapping:
         git-repo: ci-apps-git-repo
+      output_mapping:
+        distribution-repository: distribution-repository-101
       params:
         BASE_PATH: ((base-path))
         APP_VERSION: 101
@@ -138,6 +142,8 @@ jobs:
       file: ci-git-repo/((base-path))/ci/tasks/build-skipper-server-with-drivers.yml
       input_mapping:
         git-repo: ci-apps-git-repo
+      output_mapping:
+        distribution-repository: distribution-repository-102
       params:
         BASE_PATH: ((base-path))
         APP_VERSION: 102
@@ -148,6 +154,8 @@ jobs:
       file: ci-git-repo/((base-path))/ci/tasks/build-skipper-server-with-drivers.yml
       input_mapping:
         git-repo: ci-apps-git-repo
+      output_mapping:
+        distribution-repository: distribution-repository-103
       params:
         BASE_PATH: ((base-path))
         APP_VERSION: 103
@@ -158,6 +166,8 @@ jobs:
       file: ci-git-repo/((base-path))/ci/tasks/build-skipper-server-with-drivers.yml
       input_mapping:
         git-repo: ci-apps-git-repo
+      output_mapping:
+        distribution-repository: distribution-repository-104
       params:
         BASE_PATH: ((base-path))
         APP_VERSION: 104
@@ -168,6 +178,8 @@ jobs:
       file: ci-git-repo/((base-path))/ci/tasks/build-skipper-server-with-drivers.yml
       input_mapping:
         git-repo: ci-apps-git-repo
+      output_mapping:
+        distribution-repository: distribution-repository-105
       params:
         BASE_PATH: ((base-path))
         APP_VERSION: 105
@@ -178,6 +190,8 @@ jobs:
       file: ci-git-repo/((base-path))/ci/tasks/build-skipper-server-with-drivers.yml
       input_mapping:
         git-repo: ci-apps-git-repo
+      output_mapping:
+        distribution-repository: distribution-repository-110
       params:
         BASE_PATH: ((base-path))
         APP_VERSION: 110
@@ -188,12 +202,35 @@ jobs:
       file: ci-git-repo/((base-path))/ci/tasks/build-skipper-server-with-drivers.yml
       input_mapping:
         git-repo: ci-apps-git-repo
+      output_mapping:
+        distribution-repository: distribution-repository-11x
       params:
         BASE_PATH: ((base-path))
         APP_VERSION: 11x
+  - task: aggregate-build-skipper-server-with-drivers
+    config:
+      platform: linux
+      image_resource:
+        type: docker-image
+        source:
+          repository: busybox
+      inputs:
+      - name: ci-git-repo
+      - name: distribution-repository-100
+      - name: distribution-repository-101
+      - name: distribution-repository-102
+      - name: distribution-repository-103
+      - name: distribution-repository-104
+      - name: distribution-repository-105
+      - name: distribution-repository-110
+      - name: distribution-repository-11x
+      outputs:
+      - name: distribution-repository
+      run:
+        path: ci-git-repo/((base-path))/ci/scripts/aggregate-build-skipper-server-with-drivers.sh
   - put: artifactory-repo
     params:
-      repo: libs-snapshot-local
+      repo: ext-private-local
       folder: distribution-repository
       strip_snapshot_timestamps: false
       build_uri: "https://ci.spring.io/teams/${BUILD_TEAM_NAME}/pipelines/${BUILD_PIPELINE_NAME}/jobs/${BUILD_JOB_NAME}/builds/${BUILD_NAME}"
