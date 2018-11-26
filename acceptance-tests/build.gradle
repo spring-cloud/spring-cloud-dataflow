@@ -102,11 +102,14 @@ configure(subprojects) { subproject ->
 	}
 	
 	test {
+		testLogging {
+			events 'STARTED', 'PASSED', 'FAILED', 'SKIPPED'
+		}
 		useJUnitPlatform {
-			if (project.hasProperty('skipperIncludeTags')) {
+			if (project.hasProperty('skipperIncludeTags') && skipperIncludeTags.size() > 0) {
 				includeTags = skipperIncludeTags.split(',')
 			}
-			if (project.hasProperty('skipperExcludeTags')) {
+			if (project.hasProperty('skipperExcludeTags') && skipperExcludeTags.size() > 0) {
 				excludeTags = skipperExcludeTags.split(',')
 			}
 		}

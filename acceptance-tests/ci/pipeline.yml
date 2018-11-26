@@ -71,7 +71,7 @@ jobs:
         GITHUB_REPO_RAW: ((github-repo-raw))
         BASE_PATH: ((base-path))
 
-- name: acceptance-tests
+- name: acceptance-tests-postgres
   serial: true
   public: false
   plan:
@@ -93,6 +93,123 @@ jobs:
       file: git-repo/((base-path))/ci/tasks/build-project.yml
       params:
         BASE_PATH: ((base-path))
+        SKIPPER_INCLUDE_TAGS: postgres
+      on_failure:
+        aggregate:
+        - put: acceptance-tests-reports
+          params:
+            file: distribution-repository/spring-cloud-skipper-acceptance-tests-*.tar.gz
+
+- name: acceptance-tests-mysql
+  serial: true
+  public: false
+  plan:
+  - get: spring-cloud-skipper-ci-image
+    trigger: true
+    passed:
+      - "spring-cloud-skipper-ci-images"
+  - get: git-repo
+    trigger: true
+  - get: artifactory-repo
+    trigger: true
+    passed:
+      - "build-skipper-servers-with-drivers"
+  - do:
+    - task: build-project
+      privileged: true
+      timeout: 90m
+      image: spring-cloud-skipper-ci-image
+      file: git-repo/((base-path))/ci/tasks/build-project.yml
+      params:
+        BASE_PATH: ((base-path))
+        SKIPPER_INCLUDE_TAGS: mysql
+      on_failure:
+        aggregate:
+        - put: acceptance-tests-reports
+          params:
+            file: distribution-repository/spring-cloud-skipper-acceptance-tests-*.tar.gz
+
+- name: acceptance-tests-mssql
+  serial: true
+  public: false
+  plan:
+  - get: spring-cloud-skipper-ci-image
+    trigger: true
+    passed:
+      - "spring-cloud-skipper-ci-images"
+  - get: git-repo
+    trigger: true
+  - get: artifactory-repo
+    trigger: true
+    passed:
+      - "build-skipper-servers-with-drivers"
+  - do:
+    - task: build-project
+      privileged: true
+      timeout: 90m
+      image: spring-cloud-skipper-ci-image
+      file: git-repo/((base-path))/ci/tasks/build-project.yml
+      params:
+        BASE_PATH: ((base-path))
+        SKIPPER_INCLUDE_TAGS: mssql
+      on_failure:
+        aggregate:
+        - put: acceptance-tests-reports
+          params:
+            file: distribution-repository/spring-cloud-skipper-acceptance-tests-*.tar.gz
+
+- name: acceptance-tests-oracle
+  serial: true
+  public: false
+  plan:
+  - get: spring-cloud-skipper-ci-image
+    trigger: true
+    passed:
+      - "spring-cloud-skipper-ci-images"
+  - get: git-repo
+    trigger: true
+  - get: artifactory-repo
+    trigger: true
+    passed:
+      - "build-skipper-servers-with-drivers"
+  - do:
+    - task: build-project
+      privileged: true
+      timeout: 90m
+      image: spring-cloud-skipper-ci-image
+      file: git-repo/((base-path))/ci/tasks/build-project.yml
+      params:
+        BASE_PATH: ((base-path))
+        SKIPPER_INCLUDE_TAGS: oracle
+      on_failure:
+        aggregate:
+        - put: acceptance-tests-reports
+          params:
+            file: distribution-repository/spring-cloud-skipper-acceptance-tests-*.tar.gz
+
+- name: acceptance-tests-db2
+  serial: true
+  public: false
+  plan:
+  - get: spring-cloud-skipper-ci-image
+    trigger: true
+    passed:
+      - "spring-cloud-skipper-ci-images"
+  - get: git-repo
+    trigger: true
+  - get: artifactory-repo
+    trigger: true
+    passed:
+      - "build-skipper-servers-with-drivers"
+  - do:
+    - task: build-project
+      privileged: true
+      timeout: 90m
+      image: spring-cloud-skipper-ci-image
+      file: git-repo/((base-path))/ci/tasks/build-project.yml
+      params:
+        BASE_PATH: ((base-path))
+        SKIPPER_INCLUDE_TAGS: db2
       on_failure:
         aggregate:
         - put: acceptance-tests-reports
