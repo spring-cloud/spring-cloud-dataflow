@@ -3,6 +3,7 @@ buildscript {
 		springBootVersion = '1.5.9.RELEASE'
 		oracleJdbcDriverVersion = '12.2.0.1'
 		mssqlJdbcDriverVersion = '7.0.0.jre8'
+		db2JdbcDriverVersion = '4.19.26'
 		springCloudVersion = 'Dalston.SR5'
 		springCloudSkipperVersion = '1.1.3.BUILD-SNAPSHOT'
 		reactorVersion = 'Aluminium-SR3'
@@ -45,6 +46,7 @@ dependencies {
 	compile('org.springframework.cloud:spring-cloud-starter-skipper-server')
 	runtime("com.oracle.jdbc:ojdbc8:${oracleJdbcDriverVersion}")
 	runtime("com.microsoft.sqlserver:mssql-jdbc:${mssqlJdbcDriverVersion}")
+	runtime("com.ibm.db2:db2jcc4:${db2JdbcDriverVersion}")
 	testCompile('org.springframework.boot:spring-boot-starter-test')
 }
 
