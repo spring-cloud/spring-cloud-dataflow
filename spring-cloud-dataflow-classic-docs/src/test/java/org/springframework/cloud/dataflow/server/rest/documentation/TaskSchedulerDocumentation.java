@@ -46,12 +46,12 @@ public class TaskSchedulerDocumentation extends BaseDocumentation {
 	@Before
 	public void setup() throws Exception {
 		registerApp(ApplicationType.task, "timestamp");
-		createTaskDefinition("taskC");
+		createTaskDefinition("mytaskname");
 	}
 
 	@After
 	public void tearDown() throws Exception {
-		destroyTaskDefinition("taskC");
+		destroyTaskDefinition("mytaskname");
 		unregisterApp(ApplicationType.task, "timestamp");
 	}
 
@@ -59,9 +59,9 @@ public class TaskSchedulerDocumentation extends BaseDocumentation {
 	public void createSchedule() throws Exception {
 		this.mockMvc.perform(
 				post("/tasks/schedules")
-						.param("scheduleName", "mySchedule")
-						.param("taskDefinitionName", "taskC")
-						.param("properties", "scheduler.AAA.spring.cloud.scheduler.cron.expression=00%2041%2017%20?%20*%20*")
+						.param("scheduleName", "myschedule")
+						.param("taskDefinitionName", "mytaskname")
+						.param("properties", "scheduler.cron.expression=00 22 17 ? *")
 						.param("arguments", "--foo=bar"))
 				.andExpect(status().isCreated())
 				.andDo(this.documentationHandler.document(
