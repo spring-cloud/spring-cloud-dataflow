@@ -84,7 +84,7 @@ class StreamApplicationDefinitionBuilder {
 						builder.setProperty(BindingPropertyKeys.OUTPUT_CONTENT_TYPE, argument.getValue());
 					}
 					else {
-						builder.setProperty(argument.getName(), argument.getValueQuoted());
+						builder.setProperty(argument.getName(), argument.getValue());
 					}
 				}
 			}
