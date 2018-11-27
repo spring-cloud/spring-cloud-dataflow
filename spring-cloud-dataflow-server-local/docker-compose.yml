@@ -24,6 +24,7 @@ services:
     environment:
       - spring.cloud.dataflow.applicationProperties.stream.spring.cloud.stream.kafka.binder.brokers=kafka:9092
       - spring.cloud.dataflow.applicationProperties.stream.spring.cloud.stream.kafka.binder.zkNodes=zookeeper:2181
+      - spring.cloud.skipper.client.serverUri=http://skipper-server:7577/api
     depends_on:
       - kafka
   app-import:
