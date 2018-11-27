@@ -69,6 +69,7 @@ import org.springframework.cloud.skipper.domain.Package;
 import org.springframework.cloud.skipper.domain.PackageIdentifier;
 import org.springframework.cloud.skipper.domain.PackageMetadata;
 import org.springframework.cloud.skipper.domain.Release;
+import org.springframework.cloud.skipper.domain.RollbackRequest;
 import org.springframework.cloud.skipper.domain.SpringCloudDeployerApplicationManifest;
 import org.springframework.cloud.skipper.domain.SpringCloudDeployerApplicationManifestReader;
 import org.springframework.cloud.skipper.domain.SpringCloudDeployerApplicationSpec;
@@ -302,7 +303,7 @@ public class SkipperStreamDeployer implements StreamDeployer {
 	}
 
 	private String getRegisteredName(StreamDefinition streamDefinition, String adrAppName) {
-		for (StreamAppDefinition appDefinition: streamDefinition.getAppDefinitions()) {
+		for (StreamAppDefinition appDefinition : streamDefinition.getAppDefinitions()) {
 			if (appDefinition.getName().equals(adrAppName)) {
 				return appDefinition.getRegisteredAppName();
 			}
@@ -557,7 +558,7 @@ public class SkipperStreamDeployer implements StreamDeployer {
 	 * @param releaseVersion the version of the stream to rollback to
 	 */
 	public void rollbackStream(String streamName, int releaseVersion) {
-		this.skipperClient.rollback(streamName, releaseVersion);
+		this.skipperClient.rollback(new RollbackRequest(streamName, releaseVersion));
 	}
 
 	public String manifest(String name, int version) {

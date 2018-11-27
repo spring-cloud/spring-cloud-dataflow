@@ -51,6 +51,7 @@ import org.springframework.cloud.skipper.domain.InstallRequest;
 import org.springframework.cloud.skipper.domain.Package;
 import org.springframework.cloud.skipper.domain.PackageMetadata;
 import org.springframework.cloud.skipper.domain.Release;
+import org.springframework.cloud.skipper.domain.RollbackRequest;
 import org.springframework.cloud.skipper.domain.Status;
 import org.springframework.cloud.skipper.domain.StatusCode;
 import org.springframework.cloud.skipper.domain.UploadRequest;
@@ -494,7 +495,10 @@ public class SkipperStreamDeployerTests {
 		SkipperStreamDeployer skipperStreamDeployer = new SkipperStreamDeployer(skipperClient,
 				mock(StreamDefinitionRepository.class), mock(AppRegistryService.class), mock(ForkJoinPool.class));
 		skipperStreamDeployer.rollbackStream("release666", 666);
-		verify(skipperClient).rollback(eq("release666"), eq(666));
+		ArgumentCaptor<RollbackRequest> rollbackRequestCaptor = ArgumentCaptor.forClass(RollbackRequest.class);
+		verify(skipperClient).rollback(rollbackRequestCaptor.capture());
+		assertThat(rollbackRequestCaptor.getValue().getReleaseName()).isEqualTo("release666");
+		assertThat(rollbackRequestCaptor.getValue().getVersion()).isEqualTo(666);
 	}
 
 	@Test
