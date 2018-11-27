@@ -68,7 +68,7 @@ public class StreamParserTests {
 		checkForParseError("aaa | bbb, ccc", DSLMessage.DONT_MIX_PIPE_AND_COMMA, 9);
 		checkForParseError("aaa , bbb| ccc", DSLMessage.DONT_MIX_PIPE_AND_COMMA, 9);
 		sn = parse("aaa | filter --expression='#jsonPath(payload,''$.lang'')==''en'''");
-		assertEquals("--expression=#jsonPath(payload,'$.lang')=='en'",sn.getAppNodes().get(1).getArguments()[0].toString());
+		assertEquals("--expression='#jsonPath(payload,''$.lang'')==''en'''",sn.getAppNodes().get(1).getArguments()[0].toString());
 	}
 
 	@Test
@@ -274,6 +274,27 @@ public class StreamParserTests {
 	@Test
 	public void testUnbalancedDoubleQuotes() {
 		checkForParseError("foo | bar --expression=\"select foo", DSLMessage.NON_TERMINATING_DOUBLE_QUOTED_STRING, 23);
+	}
+
+	@Test
+	public void keepingQuotes_issue2587() {
+		// the argument value contains a comma, which is now a special character due to
+		// unbound apps support so quotes must remain if parsing, converting to string then
+		// reparsing
+		StreamNode ast = parse(":timer.time > transform --expression='payload.substring(2,4)' | log");
+		assertEquals("payload.substring(2,4)", ast.getApp("transform").getArguments()[0].getValue());
+		assertEquals(":timer.time > transform --expression='payload.substring(2,4)' | log", ast.toString());
+		ast = parse(ast.toString());
+
+		ast = parse(":timer.time > transform --expression='payload.indexOf(''abcdef'')!=-1' | log");
+		assertEquals("payload.indexOf('abcdef')!=-1", ast.getApp("transform").getArguments()[0].getValue());
+		assertEquals(":timer.time > transform --expression='payload.indexOf(''abcdef'')!=-1' | log", ast.toString());
+		ast = parse(ast.toString());
+
+		ast = parse(":timer.time > transform --expression=\"payload.indexOf('abcdef')!=-1\" | log");
+		assertEquals("payload.indexOf('abcdef')!=-1", ast.getApp("transform").getArguments()[0].getValue());
+		assertEquals(":timer.time > transform --expression=\"payload.indexOf('abcdef')!=-1\" | log", ast.toString());
+		ast = parse(ast.toString());
 	}
 
 	@Test
@@ -614,13 +635,13 @@ public class StreamParserTests {
 		sn = parse("foo --aaa=\"bbb\", bar");
 		appNodes = sn.getAppNodes();
 		assertEquals(2,appNodes.size());
-		assertEquals("foo --aaa=bbb",appNodes.get(0).toString());
+		assertEquals("foo --aaa=\"bbb\"",appNodes.get(0).toString());
 		assertEquals("bar",appNodes.get(1).toString());
 
 		sn = parse("foo --aaa=\"bbb\" , bar");
 		appNodes = sn.getAppNodes();
 		assertEquals(2,appNodes.size());
-		assertEquals("foo --aaa=bbb",appNodes.get(0).toString());
+		assertEquals("foo --aaa=\"bbb\"",appNodes.get(0).toString());
 		assertEquals("bar",appNodes.get(1).toString());
 
 

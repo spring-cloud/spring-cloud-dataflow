@@ -93,7 +93,7 @@ public class ArgumentSanitizerTest {
 		Assert.assertEquals("twitterstream --twitter.credentials.access-token-secret='******' "
 						+ "--twitter.credentials.access-token='******' --twitter.credentials.consumer-secret='******' "
 						+ "--twitter.credentials.consumer-key='******' | "
-						+ "filter --expression=#jsonPath(payload,'$.lang')=='en' | "
+						+ "filter --expression=\\\"#jsonPath(payload,'$.lang')=='en'\\\" | "
 						+ "twitter-sentiment --vocabulary=http://dl.bintray.com/test --model-fetch=output/test "
 						+ "--model=http://dl.bintray.com/test | field-value-counter --field-name=sentiment --name=sentiment",
 				sanitizer.sanitizeStream(new StreamDefinition("stream", "twitterstream "

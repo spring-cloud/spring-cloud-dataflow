@@ -42,7 +42,7 @@ public class StreamDefinitionToDslConverterTests {
 
 	@Test
 	public void quotesInParams2() {
-		reverseDslTest("http --port=9700 | filter --expression=\"payload.matches('hello world')\" | file", 3);
+		reverseDslTest("http --port=9700 | filter --expression=\\\"payload.matches('hello world')\\\" | file", 3);
 	}
 
 	@Test
@@ -184,7 +184,7 @@ public class StreamDefinitionToDslConverterTests {
 				.setProperty("p3", "ef")
 				.build("stream2");
 
-		assertEquals("foo --p1='a b' --p2=\"'c d'\" --p3=ef --p4=\"'i' 'j'\" --p5=\"k l\" | bar --p1='a b' --p2=\"'c d'\" --p3=ef",
+		assertEquals("foo --p1='a b' --p2=\\\"'c d'\\\" --p3=ef --p4=\\\"'i' 'j'\\\" --p5=\"k l\" | bar --p1='a b' --p2=\\\"'c d'\\\" --p3=ef",
 				new StreamDefinitionToDslConverter().toDsl(Arrays.asList(foo2, bar2)));
 	}
 

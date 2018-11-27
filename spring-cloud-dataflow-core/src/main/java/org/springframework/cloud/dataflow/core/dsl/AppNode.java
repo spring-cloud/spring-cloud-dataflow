@@ -59,7 +59,7 @@ public class AppNode extends AstNode {
 		s.append(appName);
 		if (arguments != null) {
 			for (ArgumentNode argumentNode : arguments) {
-				s.append(" --").append(argumentNode.getName()).append("=").append(argumentNode.getValue());
+				s.append(" ").append(argumentNode.toString());
 			}
 		}
 		return s.toString();

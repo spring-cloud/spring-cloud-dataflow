@@ -33,6 +33,10 @@ public class DefinitionUtils {
 			return propertyValue;
 		}
 
+		if (propertyValue.startsWith("\\\"") && propertyValue.endsWith("\\\"")) {
+			return propertyValue;
+		}
+
 		if (!propertyValue.contains("'")) {
 			if (propertyValue.contains(" ") || propertyValue.contains(";") || propertyValue.contains("*") ||
 					propertyValue.contains(",")) {
@@ -42,7 +46,7 @@ public class DefinitionUtils {
 		else {
 			if (propertyValue.contains(" ") || propertyValue.contains(";") || propertyValue.contains("*") ||
 					propertyValue.contains(",")) {
-				return "\"" + propertyValue + "\"";
+				return "\\\"" + propertyValue + "\\\"";
 			}
 		}
 

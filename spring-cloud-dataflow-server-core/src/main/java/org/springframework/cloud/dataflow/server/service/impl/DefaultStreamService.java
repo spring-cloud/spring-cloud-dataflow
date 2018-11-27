@@ -34,7 +34,6 @@ import org.springframework.cloud.dataflow.core.ApplicationType;
 import org.springframework.cloud.dataflow.core.DataFlowPropertyKeys;
 import org.springframework.cloud.dataflow.core.StreamAppDefinition;
 import org.springframework.cloud.dataflow.core.StreamDefinition;
-import org.springframework.cloud.dataflow.core.StreamDefinitionToDslConverter;
 import org.springframework.cloud.dataflow.core.StreamDeployment;
 import org.springframework.cloud.dataflow.core.dsl.ParseException;
 import org.springframework.cloud.dataflow.core.dsl.StreamNode;
@@ -209,7 +208,8 @@ public class DefaultStreamService implements StreamService {
 			updatedStreamAppDefinitions.addLast(appDefinitionBuilder.build(streamDefinition.getName()));
 		}
 
-		String dslText = new StreamDefinitionToDslConverter().toDsl(updatedStreamAppDefinitions);
+		//String dslText = new StreamDefinitionToDslConverter().toDsl(updatedStreamAppDefinitions);
+		String dslText = streamDefinition.getDslText();
 
 		StreamDefinition updatedStreamDefinition = new StreamDefinition(streamName, dslText);
 		logger.debug("Updated StreamDefinition: " + updatedStreamDefinition);
