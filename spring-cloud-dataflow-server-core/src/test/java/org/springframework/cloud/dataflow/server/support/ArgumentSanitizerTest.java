@@ -90,17 +90,18 @@ public class ArgumentSanitizerTest {
 
 	@Test
 	public void testStreamMatcherWithHyphenDotChar() {
+		StreamDefinition streamDefinition = new StreamDefinition("stream", "twitterstream "
+				+ "--twitter.credentials.consumer-key=dadadfaf --twitter.credentials.consumer-secret=dadfdasfdads "
+				+ "--twitter.credentials.access-token=58849055-dfdae "
+				+ "--twitter.credentials.access-token-secret=deteegdssa4466 | filter --expression='#jsonPath(payload,'$.lang')=='en\'\' | "
+				+ "twitter-sentiment --vocabulary=http://dl.bintray.com/test --model-fetch=output/test --model=http://dl.bintray.com/test | "
+				+ "field-value-counter --field-name=sentiment --name=sentiment");
 		Assert.assertEquals("twitterstream --twitter.credentials.access-token-secret='******' "
 						+ "--twitter.credentials.access-token='******' --twitter.credentials.consumer-secret='******' "
 						+ "--twitter.credentials.consumer-key='******' | "
-						+ "filter --expression=#jsonPath(payload,'$.lang')=='en' | "
+						+ "filter --expression='#jsonPath(payload,'$.lang')=='en\'\' | "
 						+ "twitter-sentiment --vocabulary=http://dl.bintray.com/test --model-fetch=output/test "
 						+ "--model=http://dl.bintray.com/test | field-value-counter --field-name=sentiment --name=sentiment",
-				sanitizer.sanitizeStream(new StreamDefinition("stream", "twitterstream "
-						+ "--twitter.credentials.consumer-key=dadadfaf --twitter.credentials.consumer-secret=dadfdasfdads "
-						+ "--twitter.credentials.access-token=58849055-dfdae "
-						+ "--twitter.credentials.access-token-secret=deteegdssa4466 | filter --expression='#jsonPath(payload,''$.lang'')==''en''' | "
-						+ "twitter-sentiment --vocabulary=http://dl.bintray.com/test --model-fetch=output/test --model=http://dl.bintray.com/test | "
-						+ "field-value-counter --field-name=sentiment --name=sentiment")));
+				sanitizer.sanitizeStream(streamDefinition));
 	}
 }
