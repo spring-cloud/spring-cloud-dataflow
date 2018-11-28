@@ -30,6 +30,7 @@ import org.springframework.batch.support.PropertiesConverter;
 import org.springframework.cloud.dataflow.rest.job.TaskJobExecution;
 import org.springframework.cloud.dataflow.rest.job.support.JobUtils;
 import org.springframework.cloud.dataflow.rest.job.support.TimeUtils;
+import org.springframework.cloud.dataflow.rest.support.ArgumentSanitizer;
 import org.springframework.hateoas.PagedResources;
 import org.springframework.hateoas.ResourceSupport;
 import org.springframework.util.Assert;
@@ -39,6 +40,7 @@ import org.springframework.util.Assert;
  *
  * @author Glenn Renfro
  * @author Gunnar Hillert
+ * @author Ilayaperumal Gopinathan
  */
 public class JobExecutionResource extends ResourceSupport {
 
@@ -84,6 +86,8 @@ public class JobExecutionResource extends ResourceSupport {
 
 	private TimeZone timeZone;
 
+	private final ArgumentSanitizer argumentSanitizer = new ArgumentSanitizer();
+
 	/**
 	 * Default constructor to be used by Jackson.
 	 */
@@ -100,8 +104,9 @@ public class JobExecutionResource extends ResourceSupport {
 		this.executionId = jobExecution.getId();
 		this.jobId = jobExecution.getJobId();
 		this.stepExecutionCount = jobExecution.getStepExecutions().size();
-		this.jobParameters = converter.getProperties(jobExecution.getJobParameters());
-		this.jobParametersString = fromJobParameters(jobExecution.getJobParameters());
+		this.jobParameters =converter.getProperties(jobExecution.getJobParameters());
+		this.jobParametersString = fromJobParameters(
+				this.argumentSanitizer.sanitizeJobParameters(jobExecution.getJobParameters()));
 		this.defined = taskJobExecution.isTaskDefined();
 		JobInstance jobInstance = jobExecution.getJobInstance();
 		if (jobInstance != null) {

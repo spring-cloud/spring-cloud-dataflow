@@ -19,7 +19,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.springframework.cloud.dataflow.core.StreamDefinition;
-import org.springframework.cloud.dataflow.server.controller.support.ArgumentSanitizer;
+import org.springframework.cloud.dataflow.rest.support.ArgumentSanitizer;
 import org.springframework.cloud.scheduler.spi.core.ScheduleRequest;
 import org.springframework.util.Assert;
 
@@ -39,10 +39,9 @@ public class AuditServiceUtils {
 	public static final String DEPLOYMENT_PROPERTIES = "deploymentProperties";
 	public static final String COMMANDLINE_ARGUMENTS = "commandlineArguments";
 
-	private final ArgumentSanitizer argumentSanitizer;
+	private final ArgumentSanitizer argumentSanitizer = new ArgumentSanitizer();
 
 	public AuditServiceUtils() {
-		this.argumentSanitizer = new ArgumentSanitizer();
 	}
 
 	public String convertStreamDefinitionToAuditData(StreamDefinition streamDefinition) {
