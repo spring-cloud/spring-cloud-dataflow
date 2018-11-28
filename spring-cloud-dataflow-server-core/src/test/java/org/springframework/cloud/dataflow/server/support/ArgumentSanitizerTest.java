@@ -24,7 +24,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import org.springframework.cloud.dataflow.core.StreamDefinition;
-import org.springframework.cloud.dataflow.server.controller.support.ArgumentSanitizer;
+import org.springframework.cloud.dataflow.rest.support.ArgumentSanitizer;
 
 /**
  * @author Christian Tzolov
