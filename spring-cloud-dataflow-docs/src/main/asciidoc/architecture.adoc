@@ -36,12 +36,10 @@ The supported platforms are:
 There is a deployer Service Provider Interface (SPI) that lets you extend Data Flow to deploy onto other runtimes.
 There are community implementations of Hashicorp's Nomad and RedHat Openshift. We look forward to working with the community for further contributions!
 
-There are two mutually exclusive options that determine how applications are deployed to the platform.
+The Spring Cloud Data Flow Server delegates the deployment and runtime status of stream applications to the Spring Cloud Skipper Server.
+Later has the capabilities to update and rollback applications in a Stream at runtime as well as the ability to deploy applications to multiple platforms.
 
-. Select a Spring Cloud Data Flow Server executable jar that targets a single platform.
-. Enable the Spring Cloud Data Flow Server to delegate the deployment and runtime status of applications to the Spring Cloud Skipper Server, which has the capability to deploy to multiple platforms.
-
-Selecting the Spring Cloud Skipper option also enables the ability to update and rollback applications in a Stream at runtime.
+NOTE: For managing task applications you need to select a Spring Cloud Data Flow Server executable jar that targets a single platform.
 
 The Data Flow server is also responsible for:
 
