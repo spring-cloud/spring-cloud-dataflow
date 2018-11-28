@@ -280,9 +280,9 @@ public class LocalServerSecurityWithSingleUserTests {
 						TestUtils.toImmutableMap("page", "0", "size", "10") },
 
 				{ HttpMethod.GET, HttpStatus.OK, "/streams/definitions", singleUser,
-						TestUtils.toImmutableMap("findByNameLike", "mysearch") },
+						TestUtils.toImmutableMap("findByTaskNameLike", "mysearch") },
 				{ HttpMethod.GET, HttpStatus.UNAUTHORIZED, "/streams/definitions", null,
-						TestUtils.toImmutableMap("findByNameLike", "mysearch") },
+						TestUtils.toImmutableMap("findByTaskNameLike", "mysearch") },
 
 				{ HttpMethod.POST, HttpStatus.BAD_REQUEST, "/streams/definitions", singleUser,
 						TestUtils.toImmutableMap("name", "myname", "definition", "fooo | baaar") },

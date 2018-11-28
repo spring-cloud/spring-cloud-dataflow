@@ -19,8 +19,6 @@ package org.springframework.cloud.dataflow.server.configuration;
 import javax.sql.DataSource;
 
 import org.springframework.cloud.dataflow.server.config.features.FeaturesProperties;
-import org.springframework.cloud.dataflow.server.repository.RdbmsTaskDefinitionRepository;
-import org.springframework.cloud.dataflow.server.repository.TaskDefinitionRepository;
 import org.springframework.cloud.dataflow.server.repository.support.DataflowRdbmsInitializer;
 import org.springframework.cloud.task.repository.TaskExplorer;
 import org.springframework.cloud.task.repository.support.SimpleTaskExplorer;
@@ -54,11 +52,6 @@ public class TaskDependencies {
 	@Bean
 	public TaskExplorer taskExplorer(DataSource dataSource) {
 		return new SimpleTaskExplorer(new TaskExecutionDaoFactoryBean(dataSource));
-	}
-
-	@Bean
-	public TaskDefinitionRepository taskDefinitionRepository(DataSource dataSource) throws Exception {
-		return new RdbmsTaskDefinitionRepository(dataSource);
 	}
 
 	@Bean

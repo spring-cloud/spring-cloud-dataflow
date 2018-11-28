@@ -26,23 +26,19 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.batch.BatchDataSourceInitializer;
 import org.springframework.boot.autoconfigure.batch.BatchProperties;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.cloud.dataflow.configuration.metadata.ApplicationConfigurationMetadataResolver;
 import org.springframework.cloud.dataflow.registry.service.AppRegistryService;
 import org.springframework.cloud.dataflow.server.DockerValidatorProperties;
-import org.springframework.cloud.dataflow.server.audit.service.AuditRecordService;
 import org.springframework.cloud.dataflow.server.batch.JobService;
 import org.springframework.cloud.dataflow.server.batch.SimpleJobServiceFactoryBean;
 import org.springframework.cloud.dataflow.server.config.apps.CommonApplicationProperties;
 import org.springframework.cloud.dataflow.server.job.TaskExplorerFactoryBean;
-import org.springframework.cloud.dataflow.server.repository.DeploymentIdRepository;
-import org.springframework.cloud.dataflow.server.repository.RdbmsTaskDefinitionRepository;
 import org.springframework.cloud.dataflow.server.repository.TaskDefinitionRepository;
+import org.springframework.cloud.dataflow.server.service.AuditRecordService;
 import org.springframework.cloud.dataflow.server.service.TaskJobService;
 import org.springframework.cloud.dataflow.server.service.TaskService;
 import org.springframework.cloud.dataflow.server.service.TaskValidationService;
@@ -71,7 +67,7 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
  * @author Christian Tzolov
  */
 @Configuration
-@ConditionalOnProperty(prefix = FeaturesProperties.FEATURES_PREFIX, name = FeaturesProperties.TASKS_ENABLED, matchIfMissing = true)
+@ConditionalOnTasksEnabled
 @EnableConfigurationProperties({ TaskConfigurationProperties.class, CommonApplicationProperties.class, DockerValidatorProperties.class})
 @EnableTransactionManagement
 public class TaskConfiguration {
@@ -93,20 +89,18 @@ public class TaskConfiguration {
 	}
 
 	@Bean
-	@ConditionalOnBean(TaskDefinitionRepository.class)
 	public TaskService taskService(TaskDefinitionRepository repository, TaskExplorer taskExplorer,
 			TaskRepository taskExecutionRepository, AppRegistryService registry, TaskLauncher taskLauncher,
 			ApplicationConfigurationMetadataResolver metadataResolver,
-			TaskConfigurationProperties taskConfigurationProperties, DeploymentIdRepository deploymentIdRepository,
+			TaskConfigurationProperties taskConfigurationProperties,
 			AuditRecordService auditRecordService, CommonApplicationProperties commonApplicationProperties,
 			TaskValidationService taskValidationService) {
 		return new DefaultTaskService(dataSourceProperties, repository, taskExplorer, taskExecutionRepository, registry,
-				taskLauncher, metadataResolver, taskConfigurationProperties, deploymentIdRepository, auditRecordService,
+				taskLauncher, metadataResolver, taskConfigurationProperties, auditRecordService,
 				dataflowServerUri, commonApplicationProperties, taskValidationService);
 	}
 
 	@Bean
-	@ConditionalOnBean(TaskDefinitionRepository.class)
 	public TaskJobService taskJobExecutionRepository(JobService service, TaskExplorer taskExplorer,
 			TaskDefinitionRepository taskDefinitionRepository, TaskService taskService) {
 		return new DefaultTaskJobService(service, taskExplorer, taskDefinitionRepository, taskService);
@@ -160,12 +154,6 @@ public class TaskConfiguration {
 			taskRepositoryInitializer.setDataSource(dataSource);
 			return taskRepositoryInitializer;
 		}
-
-		@Bean
-		@ConditionalOnMissingBean
-		public TaskDefinitionRepository taskDefinitionRepository(DataSource dataSource) {
-			return new RdbmsTaskDefinitionRepository(dataSource);
-		}
 	}
 
 	@Configuration
@@ -202,12 +190,6 @@ public class TaskConfiguration {
 		//		ResourceLoader resourceLoader) {
 		//	return new BatchTaskIndexesDatabaseInitializer(dataSource, resourceLoader);
 		//}
-
-		@Bean
-		@ConditionalOnMissingBean
-		public TaskDefinitionRepository taskDefinitionRepository(DataSource dataSource) throws Exception {
-			return new RdbmsTaskDefinitionRepository(dataSource);
-		}
 	}
 
 }

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.cloud.dataflow.server.audit.domain;
+package org.springframework.cloud.dataflow.core;
 
 import java.time.Instant;
 

@@ -118,13 +118,13 @@ public class AppRegistryController {
 	}
 
 	/**
-	 * List app registrations. Optional type and findByNameLike parameters can be passed to do
+	 * List app registrations. Optional type and findByTaskNameLike parameters can be passed to do
 	 * filtering. Search parameter only filters by {@code AppRegistration} name field.
 	 *
 	 * @param pageable Pagination information
 	 * @param pagedResourcesAssembler the resource assembler for app registrations
 	 * @param type the application type: source, sink, processor, task
-	 * @param search optional findByNameLike parameter
+	 * @param search optional findByTaskNameLike parameter
 	 * @return the list of registered applications
 	 */
 	@RequestMapping(method = RequestMethod.GET)

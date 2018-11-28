@@ -25,9 +25,9 @@ import org.mockito.ArgumentMatchers;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.cloud.dataflow.server.audit.domain.AuditRecord;
-import org.springframework.cloud.dataflow.server.audit.repository.AuditRecordRepository;
+import org.springframework.cloud.dataflow.core.AuditRecord;
 import org.springframework.cloud.dataflow.server.configuration.TestDependencies;
+import org.springframework.cloud.dataflow.server.repository.AuditRecordRepository;
 import org.springframework.cloud.dataflow.server.repository.StreamDefinitionRepository;
 import org.springframework.cloud.dataflow.server.service.StreamService;
 import org.springframework.cloud.skipper.client.SkipperClient;

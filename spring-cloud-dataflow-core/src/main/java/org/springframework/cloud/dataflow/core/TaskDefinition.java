@@ -19,6 +19,13 @@ package org.springframework.cloud.dataflow.core;
 import java.util.HashMap;
 import java.util.Map;
 
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.Id;
+import javax.persistence.Lob;
+import javax.persistence.PostLoad;
+import javax.persistence.Table;
+
 import org.springframework.cloud.dataflow.core.dsl.ArgumentNode;
 import org.springframework.cloud.dataflow.core.dsl.TaskAppNode;
 import org.springframework.cloud.dataflow.core.dsl.TaskNode;
@@ -33,21 +40,37 @@ import org.springframework.util.Assert;
  * @author Glenn Renfro
  * @author Andy Clement
  */
+@Entity
+@Table(name = "TASK_DEFINITIONS")
 public class TaskDefinition extends DataFlowAppDefinition {
 
 	public static final String SPRING_CLOUD_TASK_NAME = "spring.cloud.task.name";
 
 	/**
-	 * DSL text for the module.
+	 * Name of task.
 	 */
-	private final String dslText;
+	@Id
+	@Column(name = "DEFINITION_NAME")
+	private String taskName;
+
+	/**
+	 * DSL definition for stream.
+	 */
+	@Column(name = "DEFINITION")
+	@Lob
+	private String dslText;
+
+	public TaskDefinition() {
+	}
 
 	TaskDefinition(String registeredAppName, String label, Map<String, String> properties) {
 		super(registeredAppName, label, ApplicationType.task, properties);
+		this.taskName = registeredAppName;
 		this.dslText = "";
 	}
 
 	public TaskDefinition(String name, String dsl) {
+		this.taskName = name;
 		this.dslText = dsl;
 		Map<String, String> properties = new HashMap<>();
 		TaskNode taskNode = new TaskParser(name, dsl, true, true).parse();
@@ -67,8 +90,32 @@ public class TaskDefinition extends DataFlowAppDefinition {
 		this.appDefinition = new AppDefinition(name, properties);
 	}
 
+	public String getTaskName() {
+		return this.taskName;
+	}
+
 	public String getDslText() {
 		return dslText;
+	}
+
+	@PostLoad
+	public void initialize() {
+		Map<String, String> properties = new HashMap<>();
+		TaskNode taskNode = new TaskParser(this.taskName, this.dslText, true, true).parse();
+		if (taskNode.isComposed()) {
+			setRegisteredAppName(this.taskName);
+		}
+		else {
+			TaskAppNode singleTaskApp = taskNode.getTaskApp();
+			setRegisteredAppName(singleTaskApp.getName());
+			if (singleTaskApp.hasArguments()) {
+				for (ArgumentNode argumentNode : singleTaskApp.getArguments()) {
+					properties.put(argumentNode.getName(), argumentNode.getValue());
+				}
+			}
+		}
+		properties.put(SPRING_CLOUD_TASK_NAME, this.taskName);
+		this.appDefinition = new AppDefinition(this.taskName, properties);
 	}
 
 	@Override

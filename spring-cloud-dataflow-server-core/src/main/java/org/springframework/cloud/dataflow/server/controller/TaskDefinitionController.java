@@ -27,7 +27,6 @@ import org.springframework.cloud.dataflow.rest.resource.TaskExecutionResource;
 import org.springframework.cloud.dataflow.server.controller.support.TaskExecutionAwareTaskDefinition;
 import org.springframework.cloud.dataflow.server.repository.NoSuchTaskDefinitionException;
 import org.springframework.cloud.dataflow.server.repository.TaskDefinitionRepository;
-import org.springframework.cloud.dataflow.server.repository.support.SearchPageable;
 import org.springframework.cloud.dataflow.server.service.TaskService;
 import org.springframework.cloud.deployer.spi.task.TaskLauncher;
 import org.springframework.cloud.task.repository.TaskExecution;
@@ -119,7 +118,7 @@ public class TaskDefinitionController {
 	 *
 	 * @param pageable page-able collection of {@code TaskDefinitionResource}.
 	 * @param assembler assembler for the {@link TaskDefinition}
-	 * @param search optional findByNameLike parameter
+	 * @param search optional findByTaskNameLike parameter
 	 * @return a list of task definitions
 	 */
 	@RequestMapping(value = "", method = RequestMethod.GET)
@@ -129,9 +128,7 @@ public class TaskDefinitionController {
 
 		final Page<TaskDefinition> taskDefinitions;
 		if (search != null) {
-			final SearchPageable searchPageable = new SearchPageable(pageable, search);
-			searchPageable.addColumns("DEFINITION_NAME", "DEFINITION");
-			taskDefinitions = repository.findByNameLike(searchPageable);
+			taskDefinitions = repository.findByTaskNameLike(search, pageable);
 		}
 		else {
 			taskDefinitions = repository.findAll(pageable);

@@ -29,7 +29,6 @@ import org.junit.runner.RunWith;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.cloud.dataflow.completion.CompletionConfiguration;
 import org.springframework.cloud.dataflow.completion.CompletionProposal;
 import org.springframework.cloud.dataflow.completion.StreamCompletionProvider;
 import org.springframework.cloud.dataflow.configuration.metadata.ApplicationConfigurationMetadataResolver;
@@ -41,7 +40,7 @@ import org.springframework.cloud.dataflow.registry.repository.AppRegistrationRep
 import org.springframework.cloud.dataflow.registry.service.AppRegistryService;
 import org.springframework.cloud.dataflow.registry.service.DefaultAppRegistryService;
 import org.springframework.cloud.dataflow.registry.support.AppResourceCommon;
-import org.springframework.cloud.dataflow.server.repository.InMemoryStreamDefinitionRepository;
+import org.springframework.cloud.dataflow.server.configuration.TestDependencies;
 import org.springframework.cloud.dataflow.server.repository.StreamDefinitionRepository;
 import org.springframework.cloud.deployer.resource.maven.MavenProperties;
 import org.springframework.context.annotation.Bean;
@@ -59,12 +58,15 @@ import static org.mockito.Mockito.mock;
  * @author Ilayaperumal Gopinathan
  */
 @RunWith(SpringRunner.class)
-@SpringBootTest(classes = { CompletionConfiguration.class, TabOnTapCompletionProviderTests.Mocks.class })
+@SpringBootTest(classes = TestDependencies.class)
 @SuppressWarnings("unchecked")
 public class TabOnTapCompletionProviderTests {
 
 	@Autowired
 	private StreamCompletionProvider completionProvider;
+
+	@Autowired
+	private StreamDefinitionRepository streamDefinitionRepository;
 
 	private static org.hamcrest.Matcher<CompletionProposal> proposalThat(org.hamcrest.Matcher<String> matcher) {
 		return new FeatureMatcher<CompletionProposal, String>(matcher, "a proposal whose text", "text") {
@@ -77,10 +79,9 @@ public class TabOnTapCompletionProviderTests {
 
 	@Before
 	public void setup() {
-		StreamDefinitionRepository streamDefinitionRepository = new InMemoryStreamDefinitionRepository();
-		streamDefinitionRepository.save(new StreamDefinition("foo", "time | transform | log"));
-		streamDefinitionRepository.save(new StreamDefinition("bar", "time | log"));
-		completionProvider
+		this.streamDefinitionRepository.save(new StreamDefinition("foo", "time | transform | log"));
+		this.streamDefinitionRepository.save(new StreamDefinition("bar", "time | log"));
+		this.completionProvider
 				.addCompletionRecoveryStrategy(new TapOnDestinationRecoveryStrategy(streamDefinitionRepository));
 	}
 

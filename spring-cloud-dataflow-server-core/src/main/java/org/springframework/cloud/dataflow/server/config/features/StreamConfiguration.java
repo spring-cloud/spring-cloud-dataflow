@@ -15,14 +15,10 @@
  */
 package org.springframework.cloud.dataflow.server.config.features;
 
-import javax.sql.DataSource;
-
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.cloud.dataflow.completion.RecoveryStrategy;
 import org.springframework.cloud.dataflow.completion.StreamCompletionProvider;
 import org.springframework.cloud.dataflow.server.completion.TapOnDestinationRecoveryStrategy;
-import org.springframework.cloud.dataflow.server.repository.RdbmsStreamDefinitionRepository;
 import org.springframework.cloud.dataflow.server.repository.StreamDefinitionRepository;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -31,14 +27,8 @@ import org.springframework.context.annotation.Configuration;
  * @author Ilayaperumal Gopinathan
  */
 @Configuration
-@ConditionalOnProperty(prefix = FeaturesProperties.FEATURES_PREFIX, name = FeaturesProperties.STREAMS_ENABLED, matchIfMissing = true)
+@ConditionalOnStreamsEnabled
 public class StreamConfiguration {
-
-	@Bean
-	@ConditionalOnMissingBean
-	public StreamDefinitionRepository streamDefinitionRepository(DataSource dataSource) {
-		return new RdbmsStreamDefinitionRepository(dataSource);
-	}
 
 	@Bean
 	@ConditionalOnMissingBean(TapOnDestinationRecoveryStrategy.class)

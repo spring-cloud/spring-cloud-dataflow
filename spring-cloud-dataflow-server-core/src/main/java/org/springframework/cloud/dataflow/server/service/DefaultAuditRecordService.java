@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.springframework.cloud.dataflow.server.audit.service;
+package org.springframework.cloud.dataflow.server.service;
 
 import java.util.Map;
 import java.util.Optional;
@@ -24,10 +24,10 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import org.springframework.cloud.dataflow.server.audit.domain.AuditActionType;
-import org.springframework.cloud.dataflow.server.audit.domain.AuditOperationType;
-import org.springframework.cloud.dataflow.server.audit.domain.AuditRecord;
-import org.springframework.cloud.dataflow.server.audit.repository.AuditRecordRepository;
+import org.springframework.cloud.dataflow.core.AuditActionType;
+import org.springframework.cloud.dataflow.core.AuditOperationType;
+import org.springframework.cloud.dataflow.core.AuditRecord;
+import org.springframework.cloud.dataflow.server.repository.AuditRecordRepository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.util.Assert;
@@ -53,7 +53,7 @@ public class DefaultAuditRecordService implements AuditRecordService {
 		this.objectMapper.configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false);
 	}
 
-	DefaultAuditRecordService(AuditRecordRepository auditRecordRepository, ObjectMapper objectMapper) {
+	public DefaultAuditRecordService(AuditRecordRepository auditRecordRepository, ObjectMapper objectMapper) {
 		Assert.notNull(auditRecordRepository, "auditRecordRepository must not be null.");
 		Assert.notNull(objectMapper, "objectMapper must not be null.");
 		this.auditRecordRepository = auditRecordRepository;

@@ -13,16 +13,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.springframework.cloud.dataflow.server.audit.repository;
+package org.springframework.cloud.dataflow.server.repository;
 
 import java.util.List;
 
-import org.springframework.cloud.dataflow.server.audit.domain.AuditActionType;
-import org.springframework.cloud.dataflow.server.audit.domain.AuditOperationType;
-import org.springframework.cloud.dataflow.server.audit.domain.AuditRecord;
+import org.springframework.cloud.dataflow.core.AuditActionType;
+import org.springframework.cloud.dataflow.core.AuditOperationType;
+import org.springframework.cloud.dataflow.core.AuditRecord;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.repository.PagingAndSortingRepository;
+import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
@@ -31,6 +32,7 @@ import org.springframework.transaction.annotation.Transactional;
  * @author Gunnar Hillert
  */
 @Transactional
+@Repository
 public interface AuditRecordRepository
 		extends PagingAndSortingRepository<AuditRecord, Long> {
 
