@@ -110,10 +110,12 @@ interface KStreamKTableBinding {
 
 In these cases with multiple input and output bindings, Data Flow cannot make any assumptions about the flow of data from one application to another.
 Therefore the developer needs to set the binding properties to 'wire up' the application.
-The *Stream Application DSL* uses a `comma`, instead of the `pipe symbol`, to indicate that Data Flow should not configure the binding properties of the application.
+The *Stream Application DSL* uses a `double pipe`, instead of the `pipe symbol`, to indicate that Data Flow should not configure the binding properties of the application.  Think of `||` as meaning 'in parallel'.
 For example:
 
-`dataflow:> stream create --definition "orderGeneratorApp, baristaApp, hotDrinkDeliveryApp, coldDrinkDeliveryApp" --name myCafeStream`
+`dataflow:> stream create --definition "orderGeneratorApp || baristaApp || hotDrinkDeliveryApp || coldDrinkDeliveryApp" --name myCafeStream`
+
+NOTE: Breaking Change!  Versions of SCDF Local, Cloud Foundry 1.7.0 to 1.7.2 and SCDF Kubernetes 1.7.0 to 1.7.1 used the `comma` character as the separator between applications.  This caused breaking changes in the traditional Stream DSL.  While not ideal, changing the separator character was felt to be the best solution with the least impact on existing users.
 
 There are four applications in this stream.
  The baristaApp has two output destinations, `hotDrinks` and `coldDrinks` intended to be consumed by the `hotDrinkDeliveryApp` and `coldDrinkDeliveryApp` respectively.
