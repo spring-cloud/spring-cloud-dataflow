@@ -1,5 +1,5 @@
 /*
- * Copyright 2015-2016 the original author or authors.
+ * Copyright 2015-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -53,8 +53,9 @@ public class StreamCompletionProviderTests {
 
 	@Test
 	// <TAB> => file,http,etc
-	public void testEmptyStartShouldProposeSourceApps() {
-		assertThat(completionProvider.complete("", 1), hasItems(Proposals.proposalThat(is("http")), Proposals.proposalThat(is("hdfs"))));
+	public void testEmptyStartShouldProposeSourceOrUnboundApps() {
+		assertThat(completionProvider.complete("", 1), hasItems(Proposals.proposalThat(is("orange")),
+			Proposals.proposalThat(is("http")), Proposals.proposalThat(is("hdfs"))));
 		assertThat(completionProvider.complete("", 1), not(hasItems(Proposals.proposalThat(is("log")))));
 	}
 
@@ -64,6 +65,21 @@ public class StreamCompletionProviderTests {
 		assertThat(completionProvider.complete("h", 1), hasItems(Proposals.proposalThat(is("http")), Proposals.proposalThat(is("hdfs"))));
 		assertThat(completionProvider.complete("ht", 1), hasItems(Proposals.proposalThat(is("http"))));
 		assertThat(completionProvider.complete("ht", 1), not(hasItems(Proposals.proposalThat(is("hdfs")))));
+	}
+
+	@Test
+	public void testUnfinishedUnboundAppNameShouldReturnCompletions2() {
+		assertThat(completionProvider.complete("", 1), hasItems(Proposals.proposalThat(is("orange"))));
+		assertThat(completionProvider.complete("o", 1), hasItems(Proposals.proposalThat(is("orange"))));
+		assertThat(completionProvider.complete("oran", 1), hasItems(Proposals.proposalThat(is("orange"))));
+		assertThat(completionProvider.complete("orange", 1), hasItems(Proposals.proposalThat(is("orange --expression=")),
+				Proposals.proposalThat(is("orange --fooble=")),Proposals.proposalThat(is("orange --expresso="))));
+		assertThat(completionProvider.complete("o1: orange||", 1), hasItems(Proposals.proposalThat(is("o1: orange|| orange"))));
+		assertThat(completionProvider.complete("o1: orange|| ", 1), hasItems(Proposals.proposalThat(is("o1: orange|| orange"))));
+		assertThat(completionProvider.complete("o1: orange ||", 1), hasItems(Proposals.proposalThat(is("o1: orange || orange"))));
+		assertThat(completionProvider.complete("o1: orange|| or", 1), hasItems(Proposals.proposalThat(is("o1: orange|| orange"))));
+		assertThat(completionProvider.complete("http | o", 1), empty());
+		assertThat(completionProvider.complete("http|| o", 1), hasItems(Proposals.proposalThat(is("http|| orange"))));
 	}
 
 	@Test

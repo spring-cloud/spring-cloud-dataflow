@@ -1,5 +1,5 @@
 /*
- * Copyright 2015-2017 the original author or authors.
+ * Copyright 2015-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -65,7 +65,8 @@ public class ConfigurationPropertyValueHintExpansionStrategy implements Expansio
 		StreamAppDefinition lastApp = parseResult.getDeploymentOrderIterator().next();
 		String alreadyTyped = lastApp.getProperties().get(propertyName);
 
-		AppRegistration lastAppRegistration = this.collectorSupport.findAppRegistration(lastApp.getName(), CompletionUtils.determinePotentialTypes(lastApp));
+		AppRegistration lastAppRegistration = this.collectorSupport.findAppRegistration(lastApp.getName(),
+				CompletionUtils.determinePotentialTypes(lastApp, parseResult.getAppDefinitions().size() > 1));
 		if (lastAppRegistration != null) {
 			return this.collectorSupport.addAlreadyTypedValueHintsProposals(text, lastAppRegistration, collector, propertyName, valueHintProviders, alreadyTyped);
 		}

@@ -113,8 +113,8 @@ public enum DSLMessage {
 	TASK_VALIDATION_SPLIT_WITH_ONE_FLOW(Kind.ERROR, 167,
 			"unnecessary use of split construct when only one flow to execute" + " in parallel"), //
 	TASK_ARGUMENTS_NOT_ALLOWED_UNLESS_IN_APP_MODE(Kind.ERROR, 168, "arguments not allowed unless parser is in app mode"), //
-	DONT_MIX_PIPE_AND_COMMA(Kind.ERROR, 169, "do not mix '|' and ',' when specifying a set of applications"), //
-	DONT_USE_COMMA_WITH_CHANNELS(Kind.ERROR, 170, "do not use comma delimiter between apps in a stream, use '|'"), //
+	DONT_MIX_PIPE_AND_DOUBLEPIPE(Kind.ERROR, 169, "do not mix '|' and '||' when specifying a list of applications"), //
+	DONT_USE_DOUBLEPIPE_WITH_CHANNELS(Kind.ERROR, 170, "do not use '||' between source/processor/sink apps in a stream, use '|'"), //
 	UNEXPECTED_DATA_IN_DESTINATION_NAME(Kind.ERROR, 171, "unexpected data in destination name ''{0}''"), //
 	;
 

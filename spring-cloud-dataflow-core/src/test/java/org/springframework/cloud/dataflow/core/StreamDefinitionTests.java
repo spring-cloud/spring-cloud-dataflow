@@ -63,10 +63,10 @@ public class StreamDefinitionTests {
 	public void testLongRunningNonStreamApps() {
 		StreamDefinition sd = new StreamDefinition("something","aaa");
 		assertEquals(ApplicationType.app, sd.getAppDefinitions().get(0).getApplicationType());
-		sd = new StreamDefinition("something","aaa, bbb");
+		sd = new StreamDefinition("something","aaa|| bbb");
 		assertEquals(ApplicationType.app, sd.getAppDefinitions().get(0).getApplicationType());
 		assertEquals(ApplicationType.app, sd.getAppDefinitions().get(1).getApplicationType());
-		sd = new StreamDefinition("something","aaa --aaa=bbb , bbb");
+		sd = new StreamDefinition("something","aaa --aaa=bbb || bbb");
 		assertEquals(ApplicationType.app, sd.getAppDefinitions().get(0).getApplicationType());
 		assertEquals(ApplicationType.app, sd.getAppDefinitions().get(1).getApplicationType());
 	}
