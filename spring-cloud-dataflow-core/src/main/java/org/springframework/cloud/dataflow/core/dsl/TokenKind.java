@@ -30,7 +30,7 @@ public enum TokenKind {
 	EQUALS("="),
 	AND("&"),
 	ANDAND("&&"),
-	OROR("||"),
+	DOUBLEPIPE("||"),
 	ARROW("->"),
 	PIPE("|"),
 	OPEN_PAREN("("),
@@ -45,8 +45,7 @@ public enum TokenKind {
 	DOT("."),
 	LITERAL_STRING,
 	SLASH("/"),
-	HASH("#"),
-	COMMA(",");
+	HASH("#");
 
 	char[] tokenChars;
 

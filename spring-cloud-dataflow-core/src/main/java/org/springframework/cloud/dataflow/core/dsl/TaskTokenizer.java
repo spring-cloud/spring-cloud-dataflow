@@ -71,8 +71,8 @@ class TaskTokenizer extends AbstractTokenizer {
 					}
 					break;
 				case '|':
-					if (isTwoCharToken(TokenKind.OROR)) {
-						pushPairToken(TokenKind.OROR);
+					if (isTwoCharToken(TokenKind.DOUBLEPIPE)) {
+						pushPairToken(TokenKind.DOUBLEPIPE);
 					}
 					else {
 						raiseException(DSLMessage.TASK_DOUBLE_OR_REQUIRED);

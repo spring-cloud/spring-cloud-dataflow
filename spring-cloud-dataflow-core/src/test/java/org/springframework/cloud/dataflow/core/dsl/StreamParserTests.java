@@ -63,20 +63,22 @@ public class StreamParserTests {
 
 	@Test
 	public void listApps() {
-		checkForParseError(":aaa > fff,bbb", DSLMessage.DONT_USE_COMMA_WITH_CHANNELS, 10);
-		checkForParseError("fff,bbb > :zzz", DSLMessage.DONT_USE_COMMA_WITH_CHANNELS, 3);
-		checkForParseError("aaa | bbb, ccc", DSLMessage.DONT_MIX_PIPE_AND_COMMA, 9);
-		checkForParseError("aaa , bbb| ccc", DSLMessage.DONT_MIX_PIPE_AND_COMMA, 9);
-		sn = parse("aaa | filter --expression='#jsonPath(payload,''$.lang'')==''en'''");
+		checkForParseError(":aaa > fff||bbb", DSLMessage.DONT_USE_DOUBLEPIPE_WITH_CHANNELS, 10);
+		checkForParseError("fff||bbb > :zzz", DSLMessage.DONT_USE_DOUBLEPIPE_WITH_CHANNELS, 3);
+		checkForParseError("aaa | bbb|| ccc", DSLMessage.DONT_MIX_PIPE_AND_DOUBLEPIPE, 9);
+		checkForParseError("aaa || bbb| ccc", DSLMessage.DONT_MIX_PIPE_AND_DOUBLEPIPE, 10);
+		sn = parse("aaa | filter --expression=#jsonPath(payload,'$.lang')=='en'");
 		assertEquals("--expression=#jsonPath(payload,'$.lang')=='en'",sn.getAppNodes().get(1).getArguments()[0].toString());
 	}
 
 	@Test
-	public void commaEndingArgs() {
-		checkForParseError("aaa --bbb=ccc,", DSLMessage.OOD, 14);
-		checkForParseError("aaa --bbb='ccc',", DSLMessage.OOD, 16);
-		sn = parse("aaa --bbb='ccc', bbb");
-		assertEquals("[(AppNode:aaa --bbb=ccc:0>15)(AppNode:bbb:17>20)]", sn.stringify(true));
+	public void doublePipeEndingArgs() {
+		checkForParseError("aaa --bbb=ccc||", DSLMessage.OOD, 15);
+		sn = parse("aaa --bbb=ccc,");
+		assertEquals("[(AppNode:aaa --bbb=ccc,)]",sn.stringify(false));
+		checkForParseError("aaa --bbb='ccc'||", DSLMessage.OOD, 17);
+		sn = parse("aaa --bbb='ccc'|| bbb");
+		assertEquals("[(AppNode:aaa --bbb=ccc:0>15)(AppNode:bbb:18>21)]", sn.stringify(true));
 		ArgumentNode argumentNode = sn.getAppNodes().get(0).getArguments()[0];
 		assertEquals("ccc", argumentNode.getValue());
 	}
@@ -568,7 +570,7 @@ public class StreamParserTests {
 	
 	@Test
 	public void testParseUnboundStreamApps() {
-		sn = parse("foo, bar, baz");
+		sn = parse("foo|| bar|| baz");
 		List<AppNode> appNodes = sn.getAppNodes();
 		assertEquals(3,appNodes.size());
 		assertEquals("foo", appNodes.get(0).getName());
@@ -582,54 +584,45 @@ public class StreamParserTests {
 		assertEquals("bar", appNodes.get(1).getName());
 		assertFalse(appNodes.get(0).isUnboundStreamApp());
 		
-		checkForParseError("foo,",DSLMessage.OOD, 4);
+		checkForParseError("foo||",DSLMessage.OOD, 5);
 
-		// TODO should have special message for this occurrence... ? need the space before the comma
-		// value of the aaa option is a comma.
-		sn = parse("foo --aaa=,, bar");
+		sn = parse("foo --aaa=,|| bar");
 		appNodes = sn.getAppNodes();
 		assertEquals(2,appNodes.size());
 		assertEquals("foo --aaa=,",appNodes.get(0).toString());
 		assertEquals("bar",appNodes.get(1).toString());
-
 	}
 
 	@Test
 	public void testParseUnboundStreamAppsWithParams() {
-
-
-		sn = parse("foo --aaa=bbb , bar");
+		sn = parse("foo --aaa=bbb || bar");
 		List<AppNode> appNodes = sn.getAppNodes();
 		assertEquals(2,appNodes.size());
 		assertEquals("foo --aaa=bbb",appNodes.get(0).toString());
 		assertEquals("bar",appNodes.get(1).toString());
 
 		// No space after bbb argument
-		sn = parse("foo --aaa=bbb, bar");
+		sn = parse("foo --aaa=bbb|| bar");
 		appNodes = sn.getAppNodes();
 		assertEquals(2,appNodes.size());
 		assertEquals("foo --aaa=bbb",appNodes.get(0).toString());
 		assertEquals("bar",appNodes.get(1).toString());
 
-		sn = parse("foo --aaa=\"bbb\", bar");
+		sn = parse("foo --aaa=\"bbb\"|| bar");
 		appNodes = sn.getAppNodes();
 		assertEquals(2,appNodes.size());
 		assertEquals("foo --aaa=bbb",appNodes.get(0).toString());
 		assertEquals("bar",appNodes.get(1).toString());
 
-		sn = parse("foo --aaa=\"bbb\" , bar");
+		sn = parse("foo --aaa=\"bbb\" || bar");
 		appNodes = sn.getAppNodes();
 		assertEquals(2,appNodes.size());
 		assertEquals("foo --aaa=bbb",appNodes.get(0).toString());
 		assertEquals("bar",appNodes.get(1).toString());
 
-
-		checkForParseError("foo --aaa=\"bbb\",",DSLMessage.OOD, 16);
-
-		checkForParseError("foo --aaa=\"bbb\" ,",DSLMessage.OOD, 17);
-
+		checkForParseError("foo --aaa=\"bbb\"||",DSLMessage.OOD, 17);
+		checkForParseError("foo --aaa=\"bbb\" ||",DSLMessage.OOD, 18);
 	}
-
 	
 	// --- 
 

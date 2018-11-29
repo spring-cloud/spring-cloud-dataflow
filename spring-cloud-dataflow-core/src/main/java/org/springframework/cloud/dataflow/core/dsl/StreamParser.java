@@ -379,18 +379,18 @@ public class StreamParser extends AppParser {
 			Token t = tokens.peek();
 			if (t.kind == TokenKind.PIPE) {
 				if (usedListDelimiter >= 0) {
-					tokens.raiseException(t.startPos, DSLMessage.DONT_MIX_PIPE_AND_COMMA);
+					tokens.raiseException(t.startPos, DSLMessage.DONT_MIX_PIPE_AND_DOUBLEPIPE);
 				}
 				usedStreamDelimiter = t.startPos;
 				tokens.next();
 				appNodes.add(eatApp());
 			}
-			else if (t.kind == TokenKind.COMMA) {
+			else if (t.kind == TokenKind.DOUBLEPIPE) {
 				if (preceedingSourceChannelSpecified) {
-					tokens.raiseException(t.startPos, DSLMessage.DONT_USE_COMMA_WITH_CHANNELS);
+					tokens.raiseException(t.startPos, DSLMessage.DONT_USE_DOUBLEPIPE_WITH_CHANNELS);
 				}
 				if (usedStreamDelimiter >= 0) {
-					tokens.raiseException(t.startPos, DSLMessage.DONT_MIX_PIPE_AND_COMMA);
+					tokens.raiseException(t.startPos, DSLMessage.DONT_MIX_PIPE_AND_DOUBLEPIPE);
 				}
 				usedListDelimiter = t.startPos;
 				tokens.next();
@@ -403,7 +403,7 @@ public class StreamParser extends AppParser {
 		}
 		boolean isFollowedBySinkChannel = tokens.peek(TokenKind.GT);
 		if (isFollowedBySinkChannel && usedListDelimiter >= 0) {
-			tokens.raiseException(usedListDelimiter, DSLMessage.DONT_USE_COMMA_WITH_CHANNELS);
+			tokens.raiseException(usedListDelimiter, DSLMessage.DONT_USE_DOUBLEPIPE_WITH_CHANNELS);
 		}
 		for (AppNode appNode: appNodes) {
 			appNode.setUnboundStreamApp(!preceedingSourceChannelSpecified && !isFollowedBySinkChannel && (usedStreamDelimiter < 0));

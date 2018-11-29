@@ -175,7 +175,7 @@ public class TaskParser extends AppParser {
 		List<LabelledTaskNode> flows = new ArrayList<>();
 		Token startSplit = eat(TokenKind.LT);
 		flows.add(parseTaskNode());
-		while (maybeEat(TokenKind.OROR)) {
+		while (maybeEat(TokenKind.DOUBLEPIPE)) {
 			flows.add(parseTaskNode());
 		}
 		Token endSplit = eat(TokenKind.GT);
