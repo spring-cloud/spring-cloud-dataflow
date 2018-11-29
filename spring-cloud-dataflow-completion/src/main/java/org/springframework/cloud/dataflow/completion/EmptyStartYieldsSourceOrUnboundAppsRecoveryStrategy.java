@@ -1,5 +1,5 @@
 /*
- * Copyright 2015-2016 the original author or authors.
+ * Copyright 2015-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,12 +28,12 @@ import org.springframework.cloud.dataflow.registry.domain.AppRegistration;
  * @author Eric Bottard
  * @author Mark Fisher
  */
-class EmptyStartYieldsSourceAppsRecoveryStrategy
+class EmptyStartYieldsSourceOrUnboundAppsRecoveryStrategy
 		extends StacktraceFingerprintingRecoveryStrategy<IllegalArgumentException> {
 
 	private final AppRegistryCommon registry;
 
-	public EmptyStartYieldsSourceAppsRecoveryStrategy(AppRegistryCommon registry) {
+	public EmptyStartYieldsSourceOrUnboundAppsRecoveryStrategy(AppRegistryCommon registry) {
 		super(IllegalArgumentException.class, "");
 		this.registry = registry;
 	}
@@ -43,8 +43,8 @@ class EmptyStartYieldsSourceAppsRecoveryStrategy
 			List<CompletionProposal> proposals) {
 		CompletionProposal.Factory completionFactory = CompletionProposal.expanding(dsl);
 		for (AppRegistration app : this.registry.findAll()) {
-			if (app.getType() == ApplicationType.source) {
-				proposals.add(completionFactory.withSeparateTokens(app.getName(), "Start with a source app"));
+			if (app.getType() == ApplicationType.source || app.getType() == ApplicationType.app) {
+				proposals.add(completionFactory.withSeparateTokens(app.getName(), "Start with a source app or an unbounded streaming app"));
 			}
 		}
 	}

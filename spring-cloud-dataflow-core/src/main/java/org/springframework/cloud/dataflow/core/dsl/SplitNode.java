@@ -52,7 +52,7 @@ public class SplitNode extends LabelledTaskNode {
 			for (int i = 0; i < parallelTaskApps.size(); i++) {
 				LabelledTaskNode jn = parallelTaskApps.get(i);
 				if (i > 0) {
-					s.append(" ").append(TokenKind.OROR.tokenChars).append(" ");
+					s.append(" ").append(TokenKind.DOUBLEPIPE.tokenChars).append(" ");
 				}
 				s.append(jn.stringify(includePositionInfo));
 			}

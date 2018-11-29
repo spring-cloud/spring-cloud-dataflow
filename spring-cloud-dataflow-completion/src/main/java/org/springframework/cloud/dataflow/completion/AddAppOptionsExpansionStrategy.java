@@ -1,5 +1,5 @@
 /*
- * Copyright 2015-2017 the original author or authors.
+ * Copyright 2015-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -47,7 +47,8 @@ class AddAppOptionsExpansionStrategy implements ExpansionStrategy {
 	public boolean addProposals(String text, StreamDefinition streamDefinition, int detailLevel,
 			List<CompletionProposal> collector) {
 		StreamAppDefinition lastApp = streamDefinition.getDeploymentOrderIterator().next();
-		AppRegistration appRegistration = this.collectorSupport.findAppRegistration(lastApp.getName(), CompletionUtils.determinePotentialTypes(lastApp));
+		AppRegistration appRegistration = this.collectorSupport.findAppRegistration(lastApp.getName(),
+				CompletionUtils.determinePotentialTypes(lastApp,streamDefinition.getAppDefinitions().size() > 1));
 
 		if (appRegistration != null) {
 			Set<String> alreadyPresentOptions = new HashSet<>(lastApp.getProperties().keySet());

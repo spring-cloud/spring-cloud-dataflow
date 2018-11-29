@@ -63,7 +63,12 @@ class Tokenizer extends AbstractTokenizer {
 					pushCharToken(TokenKind.AND);
 					break;
 				case '|':
-					pushCharToken(TokenKind.PIPE);
+					if (isTwoCharToken(TokenKind.DOUBLEPIPE)) {
+						pushPairToken(TokenKind.DOUBLEPIPE);
+					}
+					else {
+						pushCharToken(TokenKind.PIPE);
+					}
 					break;
 				case ' ':
 				case '\t':
@@ -79,9 +84,6 @@ class Tokenizer extends AbstractTokenizer {
 					break;
 				case '>':
 					pushCharToken(TokenKind.GT);
-					break;
-				case ',':
-					pushCharToken(TokenKind.COMMA);
 					break;
 				case ':':
 					pushCharToken(TokenKind.COLON);

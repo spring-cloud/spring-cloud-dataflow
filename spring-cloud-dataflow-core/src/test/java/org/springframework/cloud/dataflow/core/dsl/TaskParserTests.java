@@ -193,9 +193,7 @@ public class TaskParserTests {
 		// checkForParseError("foo | transform --expression=''Hello, world!'' | bar",
 		// DSLMessage.UNEXPECTED_DATA, 37);
 		// but now it points to the !
-		// But with the changes to have comma as a character that can terminate a non
-		// quoted literal (for supporting app lists), it now points to 30 again.
-		checkForParseError("transform --expression=''Hello, world!''", DSLMessage.TASK_UNEXPECTED_DATA, 30);
+		checkForParseError("transform --expression=''Hello, world!''", DSLMessage.TASK_UNEXPECTED_DATA, 37);
 	}
 
 	@Test

@@ -103,7 +103,7 @@ public class StreamDefinitionToDslConverter {
 				if (appDefinition.getApplicationType() != ApplicationType.app) {
 					dslBuilder.append(" | ");
 				} else {
-					dslBuilder.append(" , ");
+					dslBuilder.append(" || ");
 				}
 			}
 
