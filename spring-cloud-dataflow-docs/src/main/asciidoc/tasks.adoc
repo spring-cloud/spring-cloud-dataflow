@@ -773,6 +773,9 @@ image::{dataflow-asciidoc}/images/dataflow-ctr-multiple-splits.png[Composed Task
 Notice that there is a `SYNC` control node that is inserted by the designer when
 connecting two consecutive splits.
 
+NOTE: Tasks that are used in a split should not set the their `ExitMessage`.   Setting the `ExitMessage` is only to be used
+with  <<spring-cloud-data-flow-transitional-execution, transitions>>.
+
 ==== Split Containing Conditional Execution
 
 A split can also have a conditional execution within the angle brackets, as shown in the following example:
