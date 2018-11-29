@@ -18,6 +18,7 @@ package org.springframework.cloud.dataflow.server.repository;
 import org.springframework.cloud.dataflow.core.TaskDefinition;
 import org.springframework.cloud.dataflow.server.repository.support.SearchPageable;
 import org.springframework.data.domain.Page;
+import org.springframework.data.repository.NoRepositoryBean;
 import org.springframework.data.repository.PagingAndSortingRepository;
 
 /**
@@ -26,6 +27,7 @@ import org.springframework.data.repository.PagingAndSortingRepository;
  * @author Michael Minella
  * @author Gunnar Hillert
  */
+@NoRepositoryBean
 public interface TaskDefinitionRepository extends PagingAndSortingRepository<TaskDefinition, String> {
 
 	Page<TaskDefinition> findByNameLike(SearchPageable searchPageable);

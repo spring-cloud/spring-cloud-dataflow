@@ -32,6 +32,7 @@ import org.springframework.cloud.dataflow.rest.resource.about.SecurityInfo;
 import org.springframework.cloud.dataflow.rest.resource.about.VersionInfo;
 import org.springframework.cloud.dataflow.server.config.VersionInfoProperties;
 import org.springframework.cloud.dataflow.server.config.features.FeaturesProperties;
+import org.springframework.cloud.dataflow.server.repository.LauncherRepository;
 import org.springframework.cloud.dataflow.server.stream.StreamDeployer;
 import org.springframework.cloud.deployer.spi.core.RuntimeEnvironmentInfo;
 import org.springframework.cloud.deployer.spi.task.TaskLauncher;
@@ -84,12 +85,12 @@ public class AboutController {
 	@Value("${info.app.version:#{null}}")
 	private String implementationVersion;
 
-	private TaskLauncher taskLauncher;
+	private LauncherRepository launcherRepository;
 
-	public AboutController(StreamDeployer streamDeployer, TaskLauncher taskLauncher, FeaturesProperties featuresProperties,
-			VersionInfoProperties versionInfoProperties, SecurityStateBean securityStateBean) {
+	public AboutController(StreamDeployer streamDeployer, LauncherRepository launcherRepository, FeaturesProperties featuresProperties,
+						VersionInfoProperties versionInfoProperties, SecurityStateBean securityStateBean) {
 		this.streamDeployer = streamDeployer;
-		this.taskLauncher = taskLauncher;
+		this.launcherRepository = launcherRepository;
 		this.featuresProperties = featuresProperties;
 		this.versionInfoProperties = versionInfoProperties;
 		this.securityStateBean = securityStateBean;
@@ -169,8 +170,10 @@ public class AboutController {
 				runtimeEnvironment.setAppDeployer(deployerInfo);
 			}
 
-			if (this.taskLauncher != null) {
-				final RuntimeEnvironmentInfo taskLauncherEnvironmentInfo = this.taskLauncher.environmentInfo();
+			if (this.launcherRepository != null) {
+				// TODO GH-2616 cleanup
+				TaskLauncher taskLauncher = this.launcherRepository.findByName("default").getTaskLauncher();
+				final RuntimeEnvironmentInfo taskLauncherEnvironmentInfo = taskLauncher.environmentInfo();
 				final RuntimeEnvironmentDetails taskLauncherInfo = new RuntimeEnvironmentDetails();
 
 				taskLauncherInfo.setDeployerImplementationVersion(taskLauncherEnvironmentInfo.getImplementationVersion());

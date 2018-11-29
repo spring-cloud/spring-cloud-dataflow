@@ -35,6 +35,7 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.cloud.dataflow.configuration.metadata.ApplicationConfigurationMetadataResolver;
 import org.springframework.cloud.dataflow.core.ApplicationType;
+import org.springframework.cloud.dataflow.core.Launcher;
 import org.springframework.cloud.dataflow.core.TaskDefinition;
 import org.springframework.cloud.dataflow.registry.domain.AppRegistration;
 import org.springframework.cloud.dataflow.registry.service.AppRegistryService;
@@ -44,6 +45,7 @@ import org.springframework.cloud.dataflow.server.config.apps.CommonApplicationPr
 import org.springframework.cloud.dataflow.server.configuration.TaskServiceDependencies;
 import org.springframework.cloud.dataflow.server.repository.DuplicateTaskException;
 import org.springframework.cloud.dataflow.server.repository.InMemoryDeploymentIdRepository;
+import org.springframework.cloud.dataflow.server.repository.LauncherRepository;
 import org.springframework.cloud.dataflow.server.repository.NoSuchTaskDefinitionException;
 import org.springframework.cloud.dataflow.server.repository.TaskDefinitionRepository;
 import org.springframework.cloud.dataflow.server.service.TaskService;
@@ -114,6 +116,9 @@ public abstract class DefaultTaskServiceTests {
 		private TaskLauncher taskLauncher;
 
 		@Autowired
+		private LauncherRepository launcherRepository;
+
+		@Autowired
 		private ApplicationConfigurationMetadataResolver metadataResolver;
 
 		@Autowired
@@ -129,7 +134,10 @@ public abstract class DefaultTaskServiceTests {
 		private AuditRecordService auditRecordService;
 
 		@Before
-		public void setupMockMVC() {
+		public void setupMocks() {
+			Launcher launcher = mock(Launcher.class);
+			when(launcher.getTaskLauncher()).thenReturn(taskLauncher);
+			when(launcherRepository.findByName("default")).thenReturn(launcher);
 			taskDefinitionRepository.save(new TaskDefinition(TASK_NAME_ORIG, "demo"));
 		}
 
@@ -199,7 +207,7 @@ public abstract class DefaultTaskServiceTests {
 			when(this.taskLauncher.launch(anyObject())).thenReturn("0");
 			TaskService taskService = new DefaultTaskService(this.dataSourceProperties,
 					mock(TaskDefinitionRepository.class), this.taskExplorer, this.taskExecutionRepository,
-					this.appRegistry, this.taskLauncher, this.metadataResolver, new TaskConfigurationProperties(),
+					this.appRegistry, mock(LauncherRepository.class), this.metadataResolver, new TaskConfigurationProperties(),
 					new InMemoryDeploymentIdRepository(), auditRecordService, null, this.commonApplicationProperties,
 					this.taskValidationService);
 			try {
@@ -252,7 +260,17 @@ public abstract class DefaultTaskServiceTests {
 		private TaskLauncher taskLauncher;
 
 		@Autowired
+		private LauncherRepository launcherRepository;
+
+		@Autowired
 		private TaskService taskService;
+
+		@Before
+		public void setupMocks() {
+			Launcher launcher = mock(Launcher.class);
+			when(launcher.getTaskLauncher()).thenReturn(taskLauncher);
+			when(launcherRepository.findByName("default")).thenReturn(launcher);
+		}
 
 		@Test
 		@DirtiesContext

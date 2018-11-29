@@ -43,6 +43,7 @@ import org.springframework.cloud.dataflow.completion.CompletionConfiguration;
 import org.springframework.cloud.dataflow.completion.StreamCompletionProvider;
 import org.springframework.cloud.dataflow.completion.TaskCompletionProvider;
 import org.springframework.cloud.dataflow.configuration.metadata.ApplicationConfigurationMetadataResolver;
+import org.springframework.cloud.dataflow.core.Launcher;
 import org.springframework.cloud.dataflow.registry.repository.AppRegistrationRepository;
 import org.springframework.cloud.dataflow.registry.service.AppRegistryService;
 import org.springframework.cloud.dataflow.registry.service.DefaultAppRegistryService;
@@ -89,6 +90,7 @@ import org.springframework.cloud.dataflow.server.repository.DeploymentIdReposito
 import org.springframework.cloud.dataflow.server.repository.InMemoryDeploymentIdRepository;
 import org.springframework.cloud.dataflow.server.repository.InMemoryStreamDefinitionRepository;
 import org.springframework.cloud.dataflow.server.repository.InMemoryTaskDefinitionRepository;
+import org.springframework.cloud.dataflow.server.repository.LauncherRepository;
 import org.springframework.cloud.dataflow.server.repository.StreamDefinitionRepository;
 import org.springframework.cloud.dataflow.server.repository.TaskDefinitionRepository;
 import org.springframework.cloud.dataflow.server.service.SchedulerService;
@@ -433,8 +435,18 @@ public class TestDependencies extends WebMvcConfigurationSupport {
 	}
 
 	@Bean
+	public Launcher launcher() {
+		return mock(Launcher.class);
+	}
+
+	@Bean
 	public TaskExplorer taskExplorer() {
 		return mock(TaskExplorer.class);
+	}
+
+	@Bean
+	public LauncherRepository launcherRepository() {
+		return mock(LauncherRepository.class);
 	}
 
 	@Bean
@@ -443,7 +455,7 @@ public class TestDependencies extends WebMvcConfigurationSupport {
 			AppRegistryService appRegistry, AuditRecordService auditRecordService,
 			CommonApplicationProperties commonApplicationProperties, TaskValidationService taskValidationService) {
 		return new DefaultTaskService(new DataSourceProperties(), taskDefinitionRepository(), taskExplorer(),
-				taskExecutionRepository, appRegistry, taskLauncher(), metadataResolver,
+				taskExecutionRepository, appRegistry, launcherRepository(), metadataResolver,
 				new TaskConfigurationProperties(), deploymentIdRepository, auditRecordService, null,
 				commonApplicationProperties, taskValidationService);
 	}
@@ -501,7 +513,9 @@ public class TestDependencies extends WebMvcConfigurationSupport {
 
 		when(streamDeployer.environmentInfo()).thenReturn(appDeployerEnvInfoSkipper);
 
+		Launcher launcher = mock(Launcher.class);
 		TaskLauncher taskLauncher = mock(TaskLauncher.class);
+		LauncherRepository launcherRepository = mock(LauncherRepository.class);
 
 		RuntimeEnvironmentInfo taskDeployerEnvInfo = new RuntimeEnvironmentInfo.Builder()
 				.implementationName("testTaskDepImplementationName")
@@ -513,8 +527,11 @@ public class TestDependencies extends WebMvcConfigurationSupport {
 				.platformHostVersion("testTaskDepPlatformHostVersion").build();
 
 		when(taskLauncher.environmentInfo()).thenReturn(taskDeployerEnvInfo);
+		when(launcher.getTaskLauncher()).thenReturn(taskLauncher);
+		when(launcherRepository.findByName("default")).thenReturn(launcher);
 
-		return new AboutController(streamDeployer, taskLauncher,
+
+		return new AboutController(streamDeployer, launcherRepository,
 				featuresProperties, versionInfoProperties,
 				mock(SecurityStateBean.class));
 	}

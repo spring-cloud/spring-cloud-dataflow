@@ -88,6 +88,7 @@ import org.springframework.cloud.dataflow.server.controller.UiController;
 import org.springframework.cloud.dataflow.server.controller.security.LoginController;
 import org.springframework.cloud.dataflow.server.controller.security.SecurityController;
 import org.springframework.cloud.dataflow.server.controller.support.MetricStore;
+import org.springframework.cloud.dataflow.server.repository.LauncherRepository;
 import org.springframework.cloud.dataflow.server.repository.StreamDefinitionRepository;
 import org.springframework.cloud.dataflow.server.repository.TaskDefinitionRepository;
 import org.springframework.cloud.dataflow.server.service.SchedulerService;
@@ -106,7 +107,6 @@ import org.springframework.cloud.dataflow.server.stream.StreamDeployer;
 import org.springframework.cloud.deployer.resource.maven.MavenProperties;
 import org.springframework.cloud.deployer.resource.maven.MavenResourceLoader;
 import org.springframework.cloud.deployer.resource.support.DelegatingResourceLoader;
-import org.springframework.cloud.deployer.spi.task.TaskLauncher;
 import org.springframework.cloud.skipper.client.DefaultSkipperClient;
 import org.springframework.cloud.skipper.client.SkipperClient;
 import org.springframework.cloud.skipper.client.SkipperClientProperties;
@@ -142,7 +142,7 @@ import org.springframework.web.client.RestTemplate;
 @SuppressWarnings("all")
 @Configuration
 @Import(CompletionConfiguration.class)
-@ConditionalOnBean({ EnableDataFlowServerConfiguration.Marker.class, TaskLauncher.class })
+@ConditionalOnBean({ EnableDataFlowServerConfiguration.Marker.class })
 @EnableConfigurationProperties({ FeaturesProperties.class, VersionInfoProperties.class, MetricsProperties.class,
 		DockerValidatorProperties.class })
 @ConditionalOnProperty(prefix = "dataflow.server", name = "enabled", havingValue = "true", matchIfMissing = true)
@@ -377,10 +377,13 @@ public class DataFlowControllerAutoConfiguration {
 	}
 
 	@Bean
-	public AboutController aboutController(ObjectProvider<StreamDeployer> streamDeployer, TaskLauncher taskLauncher,
-			FeaturesProperties featuresProperties, VersionInfoProperties versionInfoProperties,
-			SecurityStateBean securityStateBean) {
-		return new AboutController(streamDeployer.getIfAvailable(), taskLauncher, featuresProperties,
+	public AboutController aboutController(ObjectProvider<StreamDeployer> streamDeployer,
+										ObjectProvider<LauncherRepository> launcherRepository,
+										FeaturesProperties featuresProperties,
+										VersionInfoProperties versionInfoProperties,
+										SecurityStateBean securityStateBean) {
+		return new AboutController(streamDeployer.getIfAvailable(), launcherRepository.getIfAvailable(),
+				featuresProperties,
 				versionInfoProperties,
 				securityStateBean);
 	}

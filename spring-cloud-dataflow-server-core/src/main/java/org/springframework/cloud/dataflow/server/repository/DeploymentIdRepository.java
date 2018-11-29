@@ -18,6 +18,7 @@ package org.springframework.cloud.dataflow.server.repository;
 
 import java.util.Optional;
 
+import org.springframework.data.repository.NoRepositoryBean;
 import org.springframework.stereotype.Repository;
 
 /**
@@ -28,6 +29,7 @@ import org.springframework.stereotype.Repository;
  * @author Ilayaperumal Gopinathan
  */
 @Repository
+@NoRepositoryBean
 public interface DeploymentIdRepository extends org.springframework.data.repository.Repository<String, String> {
 
 	/**
