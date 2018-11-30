@@ -158,7 +158,7 @@ public class ArgumentSanitizer {
 	 * @param taskDefinition the task definition to sanitize
 	 * @return Task definition text that has sensitive data redacted.
 	 */
-	public String sanitizeTask(TaskDefinition taskDefinition) {
+	public String sanitizeTaskDsl(TaskDefinition taskDefinition) {
 		TaskDefinition sanitizedTaskDefinition = TaskDefinition.TaskDefinitionBuilder.from(taskDefinition)
 			.setProperties(this.sanitizeProperties(taskDefinition.getProperties()))
 			.build();

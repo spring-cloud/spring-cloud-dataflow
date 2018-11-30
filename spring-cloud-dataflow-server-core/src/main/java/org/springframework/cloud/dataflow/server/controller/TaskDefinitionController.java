@@ -203,7 +203,7 @@ public class TaskDefinitionController {
 		public TaskDefinitionResource instantiateResource(TaskExecutionAwareTaskDefinition taskExecutionAwareTaskDefinition) {
 			boolean composed = taskService.isComposedDefinition(taskExecutionAwareTaskDefinition.getTaskDefinition().getDslText());
 			TaskDefinitionResource taskDefinitionResource = new TaskDefinitionResource(taskExecutionAwareTaskDefinition.getTaskDefinition().getName(),
-					argumentSanitizer.sanitizeTask(taskExecutionAwareTaskDefinition.getTaskDefinition()));
+					argumentSanitizer.sanitizeTaskDsl(taskExecutionAwareTaskDefinition.getTaskDefinition()));
 			if(taskExecutionAwareTaskDefinition.getLatestTaskExecution() != null) {
 				taskDefinitionResource.setLastTaskExecution(new TaskExecutionResource(taskExecutionAwareTaskDefinition.getLatestTaskExecution()));
 			}

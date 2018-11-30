@@ -17,6 +17,7 @@
 package org.springframework.cloud.dataflow.core;
 
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 import org.springframework.cloud.dataflow.core.dsl.ArgumentNode;
@@ -49,7 +50,7 @@ public class TaskDefinition extends DataFlowAppDefinition {
 
 	public TaskDefinition(String name, String dsl) {
 		this.dslText = dsl;
-		Map<String, String> properties = new HashMap<>();
+		Map<String, String> properties = new LinkedHashMap<>();
 		TaskNode taskNode = new TaskParser(name, dsl, true, true).parse();
 		if (taskNode.isComposed()) {
 			setRegisteredAppName(name);

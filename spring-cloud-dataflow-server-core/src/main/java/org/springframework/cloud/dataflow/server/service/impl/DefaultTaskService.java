@@ -242,7 +242,7 @@ public class DefaultTaskService implements TaskService {
 	private Map<String, Object> getAuditata(TaskDefinition taskDefinition, Map<String, String> taskDeploymentProperties,
 			List<String> commandLineArgs) {
 		final Map<String, Object> auditedData = new HashMap<>(3);
-		auditedData.put(TASK_DEFINITION_DSL_TEXT, this.argumentSanitizer.sanitizeTask(taskDefinition));
+		auditedData.put(TASK_DEFINITION_DSL_TEXT, this.argumentSanitizer.sanitizeTaskDsl(taskDefinition));
 		auditedData.put(TASK_DEPLOYMENT_PROPERTIES, this.argumentSanitizer.sanitizeProperties(taskDeploymentProperties));
 		auditedData.put(COMMAND_LINE_ARGS, this.argumentSanitizer.sanitizeArguments(commandLineArgs));
 		return auditedData;
@@ -309,7 +309,7 @@ public class DefaultTaskService implements TaskService {
 		}
 		this.auditRecordService.populateAndSaveAuditRecord(
 				AuditOperationType.TASK, AuditActionType.CREATE,
-				name, this.argumentSanitizer.sanitizeTask(taskDefinition));
+				name, this.argumentSanitizer.sanitizeTaskDsl(taskDefinition));
 	}
 
 	private void saveStandardTaskDefinition(TaskDefinition taskDefinition) {
@@ -348,7 +348,7 @@ public class DefaultTaskService implements TaskService {
 
 		auditRecordService.populateAndSaveAuditRecord(
 				AuditOperationType.TASK, AuditActionType.DELETE,
-				name, this.argumentSanitizer.sanitizeTask(taskDefinition));
+				name, this.argumentSanitizer.sanitizeTaskDsl(taskDefinition));
 	}
 
 	private void destroyPrimaryTask(String name) {
