@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.springframework.cloud.dataflow.server.audit.domain;
+package org.springframework.cloud.dataflow.core;
 
 import javax.persistence.AttributeConverter;
 import javax.persistence.Converter;

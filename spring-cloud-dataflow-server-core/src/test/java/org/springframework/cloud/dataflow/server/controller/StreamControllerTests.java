@@ -36,18 +36,16 @@ import org.mockito.ArgumentCaptor;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.cloud.dataflow.core.AuditActionType;
+import org.springframework.cloud.dataflow.core.AuditOperationType;
+import org.springframework.cloud.dataflow.core.AuditRecord;
 import org.springframework.cloud.dataflow.core.BindingPropertyKeys;
 import org.springframework.cloud.dataflow.core.StreamAppDefinition;
 import org.springframework.cloud.dataflow.core.StreamDefinition;
 import org.springframework.cloud.dataflow.core.StreamPropertyKeys;
-import org.springframework.cloud.dataflow.server.audit.domain.AuditActionType;
-import org.springframework.cloud.dataflow.server.audit.domain.AuditOperationType;
-import org.springframework.cloud.dataflow.server.audit.domain.AuditRecord;
-import org.springframework.cloud.dataflow.server.audit.repository.AuditRecordRepository;
 import org.springframework.cloud.dataflow.server.config.apps.CommonApplicationProperties;
 import org.springframework.cloud.dataflow.server.configuration.TestDependencies;
-import org.springframework.cloud.dataflow.server.repository.DeploymentIdRepository;
-import org.springframework.cloud.dataflow.server.repository.DeploymentKey;
+import org.springframework.cloud.dataflow.server.repository.AuditRecordRepository;
 import org.springframework.cloud.dataflow.server.repository.StreamDefinitionRepository;
 import org.springframework.cloud.dataflow.server.stream.StreamDeployerUtil;
 import org.springframework.cloud.dataflow.server.support.SkipperPackageUtils;
@@ -119,9 +117,6 @@ public class StreamControllerTests {
 
 	@Autowired
 	private AuditRecordRepository auditRecordRepository;
-
-	@Autowired
-	private DeploymentIdRepository deploymentIdRepository;
 
 	private MockMvc mockMvc;
 
@@ -631,10 +626,6 @@ public class StreamControllerTests {
 	public void testDestroyStream() throws Exception {
 		StreamDefinition streamDefinition1 = new StreamDefinition("myStream", "time | log");
 		repository.save(streamDefinition1);
-		for (StreamAppDefinition appDefinition : streamDefinition1.getAppDefinitions()) {
-			deploymentIdRepository.save(DeploymentKey.forStreamAppDefinition(appDefinition),
-					streamDefinition1.getName() + "." + appDefinition.getName());
-		}
 		assertEquals(1, repository.count());
 
 		mockMvc.perform(delete("/streams/definitions/myStream")
@@ -649,10 +640,6 @@ public class StreamControllerTests {
 
 		StreamDefinition streamDefinition1 = new StreamDefinition("myStream1234", "time --some.password=foobar --another-secret=kenny | log");
 		repository.save(streamDefinition1);
-		for (StreamAppDefinition appDefinition : streamDefinition1.getAppDefinitions()) {
-			deploymentIdRepository.save(DeploymentKey.forStreamAppDefinition(appDefinition),
-					streamDefinition1.getName() + "." + appDefinition.getName());
-		}
 		assertEquals(1, repository.count());
 
 		mockMvc.perform(delete("/streams/definitions/myStream1234").accept(MediaType.APPLICATION_JSON)).andDo(print())
@@ -695,10 +682,6 @@ public class StreamControllerTests {
 		StreamDefinition streamDefinition2 = new StreamDefinition("myStream1", "time | log");
 		repository.save(streamDefinition1);
 		repository.save(streamDefinition2);
-		for (StreamAppDefinition appDefinition : streamDefinition1.getAppDefinitions()) {
-			deploymentIdRepository.save(DeploymentKey.forStreamAppDefinition(appDefinition),
-					streamDefinition1.getName() + "." + appDefinition.getName());
-		}
 		assertEquals(2, repository.count());
 
 		mockMvc.perform(delete("/streams/definitions/myStream")
@@ -710,10 +693,6 @@ public class StreamControllerTests {
 	@Test
 	public void testDisplaySingleStream() throws Exception {
 		StreamDefinition streamDefinition1 = new StreamDefinition("myStream", "time | log");
-		for (StreamAppDefinition appDefinition : streamDefinition1.getAppDefinitions()) {
-			deploymentIdRepository.save(DeploymentKey.forStreamAppDefinition(appDefinition),
-					streamDefinition1.getName() + "." + appDefinition.getName());
-		}
 		repository.save(streamDefinition1);
 		assertEquals(1, repository.count());
 
@@ -725,10 +704,6 @@ public class StreamControllerTests {
 	@Test
 	public void testDisplaySingleStreamWithRedaction() throws Exception {
 		StreamDefinition streamDefinition1 = new StreamDefinition("myStream", "time --secret=foo | log");
-		for (StreamAppDefinition appDefinition : streamDefinition1.getAppDefinitions()) {
-			deploymentIdRepository.save(DeploymentKey.forStreamAppDefinition(appDefinition),
-					streamDefinition1.getName() + "." + appDefinition.getName());
-		}
 		repository.save(streamDefinition1);
 		assertEquals(1, repository.count());
 

@@ -30,22 +30,18 @@ import org.mockito.ArgumentCaptor;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceProperties;
-import org.springframework.boot.autoconfigure.jdbc.EmbeddedDataSourceConfiguration;
-import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.cloud.dataflow.configuration.metadata.ApplicationConfigurationMetadataResolver;
 import org.springframework.cloud.dataflow.core.ApplicationType;
 import org.springframework.cloud.dataflow.core.TaskDefinition;
 import org.springframework.cloud.dataflow.registry.domain.AppRegistration;
 import org.springframework.cloud.dataflow.registry.service.AppRegistryService;
-import org.springframework.cloud.dataflow.server.DockerValidatorProperties;
-import org.springframework.cloud.dataflow.server.audit.service.AuditRecordService;
 import org.springframework.cloud.dataflow.server.config.apps.CommonApplicationProperties;
 import org.springframework.cloud.dataflow.server.configuration.TaskServiceDependencies;
 import org.springframework.cloud.dataflow.server.repository.DuplicateTaskException;
-import org.springframework.cloud.dataflow.server.repository.InMemoryDeploymentIdRepository;
 import org.springframework.cloud.dataflow.server.repository.NoSuchTaskDefinitionException;
 import org.springframework.cloud.dataflow.server.repository.TaskDefinitionRepository;
+import org.springframework.cloud.dataflow.server.service.AuditRecordService;
 import org.springframework.cloud.dataflow.server.service.TaskService;
 import org.springframework.cloud.dataflow.server.service.TaskValidationService;
 import org.springframework.cloud.dataflow.server.service.ValidationStatus;
@@ -81,8 +77,7 @@ import static org.mockito.Mockito.when;
  * @author Gunnar Hillert
  */
 @RunWith(SpringRunner.class)
-@SpringBootTest(classes = { EmbeddedDataSourceConfiguration.class, TaskServiceDependencies.class })
-@EnableConfigurationProperties({ CommonApplicationProperties.class, TaskConfigurationProperties.class, DockerValidatorProperties.class})
+@SpringBootTest(classes = { TaskServiceDependencies.class })
 public abstract class DefaultTaskServiceTests {
 
 	@Rule
@@ -92,45 +87,47 @@ public abstract class DefaultTaskServiceTests {
 
 	private final static String TASK_NAME_ORIG = BASE_TASK_NAME + "_ORIG";
 
+	@Autowired
+	TaskRepository taskExecutionRepository;
+
+	@Autowired
+	DataSourceProperties dataSourceProperties;
+
+	@Autowired
+	TaskDefinitionRepository taskDefinitionRepository;
+
+	@Autowired
+	AppRegistryService appRegistry;
+
+	@Autowired
+	TaskLauncher taskLauncher;
+
+	@Autowired
+	TaskService taskService;
+
+	@Autowired
+	TaskExplorer taskExplorer;
+
+	@Autowired
+	ApplicationConfigurationMetadataResolver metadataResolver;
+
+	@Autowired
+	CommonApplicationProperties commonApplicationProperties;
+
+	@Autowired
+	TaskValidationService taskValidationService;
+
+	@Autowired
+	AuditRecordService auditRecordService;
+
+
 	@TestPropertySource(properties = { "spring.cloud.dataflow.task.maximum-concurrent-tasks=10" })
 	public static class SimpleTaskTests extends DefaultTaskServiceTests {
-
-		@Autowired
-		TaskRepository taskExecutionRepository;
-
-		@Autowired
-		DataSourceProperties dataSourceProperties;
-
-		@Autowired
-		private TaskDefinitionRepository taskDefinitionRepository;
-
-		@Autowired
-		private TaskExplorer taskExplorer;
-
-		@Autowired
-		private AppRegistryService appRegistry;
-
-		@Autowired
-		private TaskLauncher taskLauncher;
-
-		@Autowired
-		private ApplicationConfigurationMetadataResolver metadataResolver;
-
-		@Autowired
-		private TaskService taskService;
-
-		@Autowired
-		private CommonApplicationProperties commonApplicationProperties;
-
-		@Autowired
-		private TaskValidationService taskValidationService;
-
-		@Autowired
-		private AuditRecordService auditRecordService;
 
 		@Before
 		public void setupMockMVC() {
 			taskDefinitionRepository.save(new TaskDefinition(TASK_NAME_ORIG, "demo"));
+			taskDefinitionRepository.findAll();
 		}
 
 		@Test
@@ -200,7 +197,7 @@ public abstract class DefaultTaskServiceTests {
 			TaskService taskService = new DefaultTaskService(this.dataSourceProperties,
 					mock(TaskDefinitionRepository.class), this.taskExplorer, this.taskExecutionRepository,
 					this.appRegistry, this.taskLauncher, this.metadataResolver, new TaskConfigurationProperties(),
-					new InMemoryDeploymentIdRepository(), auditRecordService, null, this.commonApplicationProperties,
+					auditRecordService, null, this.commonApplicationProperties,
 					this.taskValidationService);
 			try {
 				taskService.executeTask(TASK_NAME_ORIG, new HashMap<>(), new LinkedList<>());
@@ -236,23 +233,6 @@ public abstract class DefaultTaskServiceTests {
 	@TestPropertySource(properties = { "spring.cloud.dataflow.applicationProperties.task.globalkey=globalvalue",
 		"spring.cloud.dataflow.applicationProperties.stream.globalstreamkey=nothere" })
 	public static class ComposedTaskTests extends DefaultTaskServiceTests {
-		@Autowired
-		TaskRepository taskExecutionRepository;
-
-		@Autowired
-		DataSourceProperties dataSourceProperties;
-
-		@Autowired
-		private TaskDefinitionRepository taskDefinitionRepository;
-
-		@Autowired
-		private AppRegistryService appRegistry;
-
-		@Autowired
-		private TaskLauncher taskLauncher;
-
-		@Autowired
-		private TaskService taskService;
 
 		@Test
 		@DirtiesContext

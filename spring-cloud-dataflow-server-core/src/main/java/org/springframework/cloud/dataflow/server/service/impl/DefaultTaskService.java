@@ -26,6 +26,8 @@ import java.util.stream.Stream;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceProperties;
 import org.springframework.cloud.dataflow.configuration.metadata.ApplicationConfigurationMetadataResolver;
 import org.springframework.cloud.dataflow.core.ApplicationType;
+import org.springframework.cloud.dataflow.core.AuditActionType;
+import org.springframework.cloud.dataflow.core.AuditOperationType;
 import org.springframework.cloud.dataflow.core.DefinitionUtils;
 import org.springframework.cloud.dataflow.core.TaskDefinition;
 import org.springframework.cloud.dataflow.core.dsl.TaskNode;
@@ -33,15 +35,12 @@ import org.springframework.cloud.dataflow.core.dsl.TaskParser;
 import org.springframework.cloud.dataflow.registry.domain.AppRegistration;
 import org.springframework.cloud.dataflow.registry.service.AppRegistryService;
 import org.springframework.cloud.dataflow.rest.util.DeploymentPropertiesUtils;
-import org.springframework.cloud.dataflow.server.audit.domain.AuditActionType;
-import org.springframework.cloud.dataflow.server.audit.domain.AuditOperationType;
-import org.springframework.cloud.dataflow.server.audit.service.AuditRecordService;
 import org.springframework.cloud.dataflow.server.config.apps.CommonApplicationProperties;
 import org.springframework.cloud.dataflow.server.controller.WhitelistProperties;
-import org.springframework.cloud.dataflow.server.repository.DeploymentIdRepository;
-import org.springframework.cloud.dataflow.server.repository.DeploymentKey;
+import org.springframework.cloud.dataflow.server.repository.DuplicateTaskException;
 import org.springframework.cloud.dataflow.server.repository.NoSuchTaskDefinitionException;
 import org.springframework.cloud.dataflow.server.repository.TaskDefinitionRepository;
+import org.springframework.cloud.dataflow.server.service.AuditRecordService;
 import org.springframework.cloud.dataflow.server.service.TaskService;
 import org.springframework.cloud.dataflow.server.service.TaskValidationService;
 import org.springframework.cloud.dataflow.server.service.ValidationStatus;
@@ -103,8 +102,6 @@ public class DefaultTaskService implements TaskService {
 
 	private final TaskConfigurationProperties taskConfigurationProperties;
 
-	private final DeploymentIdRepository deploymentIdRepository;
-
 	private final String dataflowServerUri;
 
 	private final CommonApplicationProperties commonApplicationProperties;
@@ -129,7 +126,6 @@ public class DefaultTaskService implements TaskService {
 	 * @param taskLauncher the launcher this service will use to launch task apps.
 	 * @param metaDataResolver the metadata resolver
 	 * @param taskConfigurationProperties the properties used to define the behavior of tasks
-	 * @param deploymentIdRepository the repository that maps deployment keys to IDs
 	 * @param auditRecordService the audit record service
 	 * @param dataflowServerUri the data flow server URI
 	 * @param commonApplicationProperties the common application properties
@@ -139,7 +135,7 @@ public class DefaultTaskService implements TaskService {
 			TaskDefinitionRepository taskDefinitionRepository, TaskExplorer taskExplorer,
 			TaskRepository taskExecutionRepository, AppRegistryService registry,
 			TaskLauncher taskLauncher, ApplicationConfigurationMetadataResolver metaDataResolver,
-			TaskConfigurationProperties taskConfigurationProperties, DeploymentIdRepository deploymentIdRepository,
+			TaskConfigurationProperties taskConfigurationProperties,
 			AuditRecordService auditRecordService,
 			String dataflowServerUri, CommonApplicationProperties commonApplicationProperties,
 			TaskValidationService taskValidationService) {
@@ -151,7 +147,6 @@ public class DefaultTaskService implements TaskService {
 		Assert.notNull(taskLauncher, "TaskLauncher must not be null");
 		Assert.notNull(metaDataResolver, "metaDataResolver must not be null");
 		Assert.notNull(taskConfigurationProperties, "taskConfigurationProperties must not be null");
-		Assert.notNull(deploymentIdRepository, "deploymentIdRepository must not be null");
 		Assert.notNull(commonApplicationProperties, "commonApplicationProperties must not be null");
 		Assert.notNull(auditRecordService, "auditRecordService must not be null");
 		Assert.notNull(taskValidationService, "TaskValidationService must not be null");
@@ -163,7 +158,6 @@ public class DefaultTaskService implements TaskService {
 		this.taskLauncher = taskLauncher;
 		this.whitelistProperties = new WhitelistProperties(metaDataResolver);
 		this.taskConfigurationProperties = taskConfigurationProperties;
-		this.deploymentIdRepository = deploymentIdRepository;
 		this.dataflowServerUri = dataflowServerUri;
 		this.commonApplicationProperties = commonApplicationProperties;
 		this.auditRecordService = auditRecordService;
@@ -285,6 +279,11 @@ public class DefaultTaskService implements TaskService {
 		TaskParser taskParser = new TaskParser(name, dsl, true, true);
 		TaskNode taskNode = taskParser.parse();
 		TaskDefinition taskDefinition = new TaskDefinition(name, dsl);
+		if (this.taskDefinitionRepository.existsById(name)) {
+			throw new DuplicateTaskException(String.format(
+					"Cannot register task %s because another one has already " + "been registered with the same name",
+					name));
+		}
 		if (taskNode.isComposed()) {
 			// Create the child task definitions needed for the composed task
 			taskNode.getTaskApps().stream().forEach(task -> {
@@ -316,6 +315,11 @@ public class DefaultTaskService implements TaskService {
 			throw new ApplicationDoesNotExistException(
 					String.format("Application name '%s' with type '%s' does not exist in the app registry.", appName,
 							ApplicationType.task));
+		}
+		if (this.taskDefinitionRepository.existsById(taskDefinition.getTaskName())) {
+			throw new DuplicateTaskException(String.format(
+					"Cannot register task %s because another one has already " + "been registered with the same name",
+					taskDefinition.getTaskName()));
 		}
 		taskDefinitionRepository.save(taskDefinition);
 	}
@@ -363,7 +367,6 @@ public class DefaultTaskService implements TaskService {
 
 	private void destroyTask(TaskDefinition taskDefinition) {
 		taskLauncher.destroy(taskDefinition.getName());
-		deploymentIdRepository.delete(DeploymentKey.forTaskDefinition(taskDefinition));
 		taskDefinitionRepository.deleteById(taskDefinition.getName());
 	}
 

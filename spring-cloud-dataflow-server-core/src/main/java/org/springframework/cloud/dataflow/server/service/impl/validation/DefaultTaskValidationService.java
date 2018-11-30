@@ -54,7 +54,7 @@ public class DefaultTaskValidationService extends DefaultValidationService imple
 
 	@Override
 	public ValidationStatus validateTask(String name) {
-		TaskDefinition definition = this.taskDefinitionRepository.findByNameRequired(name);
+		TaskDefinition definition = this.taskDefinitionRepository.findByTaskName(name);
 		ValidationStatus validationStatus = new ValidationStatus(
 				definition.getName(),
 				definition.getDslText());
@@ -67,7 +67,7 @@ public class DefaultTaskValidationService extends DefaultValidationService imple
 				TaskNode taskNode = taskParser.parse();
 				String childTaskPrefix = TaskNode.getTaskPrefix(name);
 				taskNode.getTaskApps().stream().forEach(task -> {
-					TaskDefinition childDefinition = this.taskDefinitionRepository.findByNameRequired(childTaskPrefix + task.getName());
+					TaskDefinition childDefinition = this.taskDefinitionRepository.findByTaskName(childTaskPrefix + task.getName());
 					boolean status = this.validate(childDefinition.getRegisteredAppName(), ApplicationType.task);
 					validationStatus.getAppsStatuses().put(
 							String.format("%s:%s", appType.name(), childDefinition.getName()),

@@ -16,15 +16,23 @@
 
 package org.springframework.cloud.dataflow.core;
 
-import java.util.Collections;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.Id;
+import javax.persistence.Lob;
+import javax.persistence.PostLoad;
+import javax.persistence.Table;
+import javax.persistence.Transient;
 
 import org.springframework.cloud.dataflow.core.dsl.StreamNode;
 import org.springframework.cloud.dataflow.core.dsl.StreamParser;
 import org.springframework.core.style.ToStringCreator;
 import org.springframework.util.Assert;
+import org.springframework.util.CollectionUtils;
 
 /**
  * Representation of a defined stream. A stream consists of an ordered list of apps used
@@ -38,23 +46,33 @@ import org.springframework.util.Assert;
  * @author Mark Fisher
  * @see StreamAppDefinition
  */
+@Entity
+@Table(name = "STREAM_DEFINITIONS")
 public class StreamDefinition {
 
 	/**
 	 * Name of stream.
 	 */
-	private final String name;
+	@Id
+	@Column(name = "DEFINITION_NAME")
+	private String name;
 
 	/**
 	 * DSL definition for stream.
 	 */
-	private final String dslText;
+	@Column(name = "DEFINITION")
+	@Lob
+	private String dslText;
 
 	/**
 	 * Ordered list of {@link StreamAppDefinition}s comprising this stream. The source is
 	 * the first entry and the sink is the last entry.
 	 */
-	private final LinkedList<StreamAppDefinition> applicationDefinitions;
+	@Transient
+	private LinkedList<StreamAppDefinition> applicationDefinitions;
+
+	public StreamDefinition() {
+	}
 
 	/**
 	 * Construct a {@code StreamDefinition}.
@@ -67,11 +85,7 @@ public class StreamDefinition {
 		Assert.hasText(dslText, "dslText is required");
 		this.name = name;
 		this.dslText = dslText;
-		this.applicationDefinitions = new LinkedList<>();
-		StreamNode streamNode = new StreamParser(name, dslText).parse();
-		for (StreamAppDefinition appDefinition : new StreamApplicationDefinitionBuilder(name, streamNode).build()) {
-			this.applicationDefinitions.addFirst(appDefinition);
-		}
+		this.applicationDefinitions = getAppDefinitions(name, dslText);
 	}
 
 	/**
@@ -92,6 +106,14 @@ public class StreamDefinition {
 		return dslText;
 	}
 
+	private LinkedList<StreamAppDefinition> getAppDefinitions(String name, String dslText) {
+		LinkedList<StreamAppDefinition> appDefinitions = new LinkedList<>();
+		StreamNode streamNode = new StreamParser(name, dslText).parse();
+		for (StreamAppDefinition appDefinition : new StreamApplicationDefinitionBuilder(name, streamNode).build()) {
+			appDefinitions.addFirst(appDefinition);
+		}
+		return appDefinitions;
+	}
 	/**
 	 * Return the ordered list of application definitions for this stream as a
 	 * {@link List}. This allows for retrieval of application definitions in the stream by
@@ -100,8 +122,11 @@ public class StreamDefinition {
 	 *
 	 * @return list of application definitions for this stream definition
 	 */
-	public List<StreamAppDefinition> getAppDefinitions() {
-		return Collections.unmodifiableList(this.applicationDefinitions);
+	public LinkedList<StreamAppDefinition> getAppDefinitions() {
+		if (CollectionUtils.isEmpty(this.applicationDefinitions)) {
+			return getAppDefinitions(this.name, this.dslText);
+		}
+		return this.applicationDefinitions;
 	}
 
 	/**
@@ -112,7 +137,14 @@ public class StreamDefinition {
 	 * @return iterator that iterates over the application definitions in deployment order
 	 */
 	public Iterator<StreamAppDefinition> getDeploymentOrderIterator() {
-		return new ReadOnlyIterator<>(this.applicationDefinitions.descendingIterator());
+		return new ReadOnlyIterator<>(getAppDefinitions().descendingIterator());
+	}
+
+	@PostLoad
+	public void initialize() {
+		if (CollectionUtils.isEmpty(this.applicationDefinitions)) {
+			this.applicationDefinitions = getAppDefinitions(this.name, this.dslText);
+		}
 	}
 
 	@Override

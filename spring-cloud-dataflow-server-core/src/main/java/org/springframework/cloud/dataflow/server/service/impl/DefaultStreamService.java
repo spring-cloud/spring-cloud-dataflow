@@ -31,6 +31,8 @@ import org.yaml.snakeyaml.DumperOptions;
 import org.yaml.snakeyaml.Yaml;
 
 import org.springframework.cloud.dataflow.core.ApplicationType;
+import org.springframework.cloud.dataflow.core.AuditActionType;
+import org.springframework.cloud.dataflow.core.AuditOperationType;
 import org.springframework.cloud.dataflow.core.DataFlowPropertyKeys;
 import org.springframework.cloud.dataflow.core.StreamAppDefinition;
 import org.springframework.cloud.dataflow.core.StreamDefinition;
@@ -42,16 +44,14 @@ import org.springframework.cloud.dataflow.core.dsl.StreamParser;
 import org.springframework.cloud.dataflow.rest.SkipperStream;
 import org.springframework.cloud.dataflow.rest.UpdateStreamRequest;
 import org.springframework.cloud.dataflow.rest.util.DeploymentPropertiesUtils;
-import org.springframework.cloud.dataflow.server.audit.domain.AuditActionType;
-import org.springframework.cloud.dataflow.server.audit.domain.AuditOperationType;
-import org.springframework.cloud.dataflow.server.audit.service.AuditRecordService;
-import org.springframework.cloud.dataflow.server.audit.service.AuditServiceUtils;
 import org.springframework.cloud.dataflow.server.controller.StreamAlreadyDeployedException;
 import org.springframework.cloud.dataflow.server.controller.StreamAlreadyDeployingException;
 import org.springframework.cloud.dataflow.server.controller.support.InvalidStreamDefinitionException;
+import org.springframework.cloud.dataflow.server.repository.DuplicateStreamDefinitionException;
 import org.springframework.cloud.dataflow.server.repository.NoSuchStreamDefinitionException;
 import org.springframework.cloud.dataflow.server.repository.StreamDefinitionRepository;
-import org.springframework.cloud.dataflow.server.repository.support.SearchPageable;
+import org.springframework.cloud.dataflow.server.service.AuditRecordService;
+import org.springframework.cloud.dataflow.server.service.AuditServiceUtils;
 import org.springframework.cloud.dataflow.server.service.StreamService;
 import org.springframework.cloud.dataflow.server.service.StreamValidationService;
 import org.springframework.cloud.dataflow.server.service.ValidationStatus;
@@ -377,6 +377,11 @@ public class DefaultStreamService implements StreamService {
 					StringUtils.collectionToDelimitedString(errorMessages, "\n"));
 		}
 
+		if (this.streamDefinitionRepository.existsById(streamName)) {
+			throw new DuplicateStreamDefinitionException(String.format(
+					"Cannot create stream %s because another one has already " + "been created with the same name",
+					streamName));
+		}
 		final StreamDefinition savedStreamDefintion = this.streamDefinitionRepository.save(streamDefinition);
 
 		if (deploy) {
@@ -465,7 +470,7 @@ public class DefaultStreamService implements StreamService {
 	/**
 	 * Find streams related to the given stream name.
 	 * @param streamName name of the stream
-	 * @param nested if should recursively findByNameLike for related stream definitions
+	 * @param nested if should recursively findByTaskNameLike for related stream definitions
 	 * @return a list of related stream definitions
 	 */
 	public List<StreamDefinition> findRelatedStreams(String streamName, boolean nested) {
@@ -501,17 +506,15 @@ public class DefaultStreamService implements StreamService {
 	}
 
 	/**
-	 * Find stream definitions where the findByNameLike parameter
+	 * Find stream definitions where the findByTaskNameLike parameter
 	 * @param pageable Pagination information
-	 * @param search the findByNameLike parameter to use
+	 * @param search the findByTaskNameLike parameter to use
 	 * @return Page of stream definitions
 	 */
 	public Page<StreamDefinition> findDefinitionByNameLike(Pageable pageable, String search) {
 		Page<StreamDefinition> streamDefinitions;
 		if (search != null) {
-			final SearchPageable searchPageable = new SearchPageable(pageable, search);
-			searchPageable.addColumns("DEFINITION_NAME", "DEFINITION");
-			streamDefinitions = streamDefinitionRepository.findByNameLike(searchPageable);
+			streamDefinitions = streamDefinitionRepository.findByNameLike(search, pageable);
 			long count = streamDefinitions.getContent().size();
 			long to = Math.min(count, pageable.getOffset() + pageable.getPageSize());
 			streamDefinitions = new PageImpl<>(streamDefinitions.getContent(), pageable,

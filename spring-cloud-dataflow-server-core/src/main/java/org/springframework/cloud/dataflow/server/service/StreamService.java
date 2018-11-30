@@ -136,15 +136,15 @@ public interface StreamService {
 	/**
 	 * Find streams related to the given stream name.
 	 * @param name name of the stream
-	 * @param nested if should recursively findByNameLike for related stream definitions
+	 * @param nested if should recursively findByTaskNameLike for related stream definitions
 	 * @return a list of related stream definitions
 	 */
 	List<StreamDefinition> findRelatedStreams(String name, boolean nested);
 
 	/**
-	 * Find stream definitions where the findByNameLike parameter
+	 * Find stream definitions where the findByTaskNameLike parameter
 	 * @param pageable Pagination information
-	 * @param search the findByNameLike parameter to use
+	 * @param search the findByTaskNameLike parameter to use
 	 * @return Page of stream definitions
 	 */
 	Page<StreamDefinition> findDefinitionByNameLike(Pageable pageable, String search);

@@ -16,6 +16,7 @@
 
 package org.springframework.cloud.dataflow.server.configuration;
 
+import javax.persistence.EntityManagerFactory;
 import javax.sql.DataSource;
 
 import org.springframework.batch.core.configuration.support.MapJobRegistry;
@@ -38,9 +39,6 @@ import org.springframework.cloud.dataflow.registry.service.AppRegistryService;
 import org.springframework.cloud.dataflow.registry.service.DefaultAppRegistryService;
 import org.springframework.cloud.dataflow.registry.support.AppResourceCommon;
 import org.springframework.cloud.dataflow.server.DockerValidatorProperties;
-import org.springframework.cloud.dataflow.server.audit.repository.AuditRecordRepository;
-import org.springframework.cloud.dataflow.server.audit.service.AuditRecordService;
-import org.springframework.cloud.dataflow.server.audit.service.DefaultAuditRecordService;
 import org.springframework.cloud.dataflow.server.batch.JobService;
 import org.springframework.cloud.dataflow.server.batch.SimpleJobServiceFactoryBean;
 import org.springframework.cloud.dataflow.server.config.apps.CommonApplicationProperties;
@@ -50,10 +48,10 @@ import org.springframework.cloud.dataflow.server.controller.JobStepExecutionCont
 import org.springframework.cloud.dataflow.server.controller.JobStepExecutionProgressController;
 import org.springframework.cloud.dataflow.server.controller.RestControllerAdvice;
 import org.springframework.cloud.dataflow.server.controller.TaskExecutionController;
-import org.springframework.cloud.dataflow.server.repository.DeploymentIdRepository;
-import org.springframework.cloud.dataflow.server.repository.InMemoryDeploymentIdRepository;
-import org.springframework.cloud.dataflow.server.repository.InMemoryTaskDefinitionRepository;
+import org.springframework.cloud.dataflow.server.repository.AuditRecordRepository;
 import org.springframework.cloud.dataflow.server.repository.TaskDefinitionRepository;
+import org.springframework.cloud.dataflow.server.service.AuditRecordService;
+import org.springframework.cloud.dataflow.server.service.DefaultAuditRecordService;
 import org.springframework.cloud.dataflow.server.service.TaskJobService;
 import org.springframework.cloud.dataflow.server.service.TaskService;
 import org.springframework.cloud.dataflow.server.service.TaskValidationService;
@@ -77,9 +75,10 @@ import org.springframework.core.io.DefaultResourceLoader;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
+import org.springframework.data.map.repository.config.EnableMapRepositories;
 import org.springframework.data.web.config.EnableSpringDataWebSupport;
 import org.springframework.hateoas.config.EnableHypermediaSupport;
-import org.springframework.jdbc.datasource.DataSourceTransactionManager;
+import org.springframework.orm.jpa.JpaTransactionManager;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
@@ -96,15 +95,20 @@ import static org.mockito.Mockito.mock;
 @ImportAutoConfiguration({ HibernateJpaAutoConfiguration.class, EmbeddedDataSourceConfiguration.class })
 @EnableWebMvc
 @EnableTransactionManagement
-@EnableJpaRepositories(basePackages = {
-		"org.springframework.cloud.dataflow.registry.repository",
-		"org.springframework.cloud.dataflow.server.audit.repository"
-})
-@EnableJpaAuditing
 @EntityScan({
 		"org.springframework.cloud.dataflow.registry.domain",
-		"org.springframework.cloud.dataflow.server.audit.domain"
+		"org.springframework.cloud.dataflow.server.audit.domain",
+		"org.springframework.cloud.dataflow.core"
 })
+@EnableMapRepositories(basePackages = {
+		"org.springframework.cloud.dataflow.registry.repository",
+		"org.springframework.cloud.dataflow.server.repository"
+})
+@EnableJpaRepositories(basePackages = {
+		"org.springframework.cloud.dataflow.registry.repository",
+		"org.springframework.cloud.dataflow.server.repository"
+})
+@EnableJpaAuditing
 @EnableConfigurationProperties({ DockerValidatorProperties.class, TaskConfigurationProperties.class })
 public class JobDependencies {
 
@@ -166,18 +170,13 @@ public class JobDependencies {
 	}
 
 	@Bean
-	public TaskDefinitionRepository taskDefinitionRepository() {
-		return new InMemoryTaskDefinitionRepository();
-	}
-
-	@Bean
 	public TaskService taskService(TaskDefinitionRepository repository, TaskExplorer explorer, AppRegistryService registry,
 			TaskLauncher taskLauncher, ApplicationConfigurationMetadataResolver metadataResolver,
-			DeploymentIdRepository deploymentIdRepository, AuditRecordService auditRecordService,
-			CommonApplicationProperties commonApplicationProperties, TaskValidationService taskValidationService) {
+			AuditRecordService auditRecordService, CommonApplicationProperties commonApplicationProperties,
+			TaskValidationService taskValidationService) {
 		return new DefaultTaskService(new DataSourceProperties(), repository, explorer, taskRepository(), registry,
-				taskLauncher, metadataResolver, new TaskConfigurationProperties(), deploymentIdRepository,
-				auditRecordService, null, commonApplicationProperties, taskValidationService);
+				taskLauncher, metadataResolver, new TaskConfigurationProperties(), auditRecordService,
+				null, commonApplicationProperties, taskValidationService);
 	}
 
 	@Bean
@@ -211,16 +210,16 @@ public class JobDependencies {
 
 	@Bean
 	public JobRepositoryFactoryBean jobRepositoryFactoryBeanForServer(DataSource dataSource,
-			DataSourceTransactionManager dataSourceTransactionManager) {
+			PlatformTransactionManager platformTransactionManager) {
 		JobRepositoryFactoryBean repositoryFactoryBean = new JobRepositoryFactoryBean();
 		repositoryFactoryBean.setDataSource(dataSource);
-		repositoryFactoryBean.setTransactionManager(dataSourceTransactionManager);
+		repositoryFactoryBean.setTransactionManager(platformTransactionManager);
 		return repositoryFactoryBean;
 	}
 
 	@Bean
-	public DataSourceTransactionManager transactionManagerForServer(DataSource dataSource) {
-		return new DataSourceTransactionManager(dataSource);
+	public PlatformTransactionManager transactionManager(EntityManagerFactory entityManagerFactory) {
+		return new JpaTransactionManager(entityManagerFactory);
 	}
 
 	@Bean
@@ -249,11 +248,6 @@ public class JobDependencies {
 	@Bean
 	public RestControllerAdvice restControllerAdvice() {
 		return new RestControllerAdvice();
-	}
-
-	@Bean
-	public DeploymentIdRepository deploymentIdRepository() {
-		return new InMemoryDeploymentIdRepository();
 	}
 
 	@Bean

@@ -22,6 +22,7 @@ import java.util.Map;
 import org.junit.Test;
 
 import org.springframework.cloud.dataflow.core.dsl.ParseException;
+import org.springframework.cloud.dataflow.core.dsl.StreamParser;
 
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.is;
@@ -172,7 +173,7 @@ public class StreamDefinitionTests {
 	public void appWithBadDestination() throws Exception {
 		boolean isException = false;
 		try {
-			new StreamDefinition("test", "app > foo");
+			new StreamParser("test", "app > foo").parse();
 		}
 		catch (Exception e) {
 			isException = true;
