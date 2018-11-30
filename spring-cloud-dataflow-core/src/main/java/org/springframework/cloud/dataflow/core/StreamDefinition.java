@@ -32,6 +32,7 @@ import org.springframework.cloud.dataflow.core.dsl.StreamNode;
 import org.springframework.cloud.dataflow.core.dsl.StreamParser;
 import org.springframework.core.style.ToStringCreator;
 import org.springframework.util.Assert;
+import org.springframework.util.CollectionUtils;
 
 /**
  * Representation of a defined stream. A stream consists of an ordered list of apps used
@@ -122,7 +123,7 @@ public class StreamDefinition {
 	 * @return list of application definitions for this stream definition
 	 */
 	public LinkedList<StreamAppDefinition> getAppDefinitions() {
-		if (this.applicationDefinitions == null || this.applicationDefinitions.isEmpty()) {
+		if (CollectionUtils.isEmpty(this.applicationDefinitions)) {
 			return getAppDefinitions(this.name, this.dslText);
 		}
 		return this.applicationDefinitions;
@@ -141,7 +142,7 @@ public class StreamDefinition {
 
 	@PostLoad
 	public void initialize() {
-		if (this.applicationDefinitions == null || this.applicationDefinitions.isEmpty()) {
+		if (CollectionUtils.isEmpty(this.applicationDefinitions)) {
 			this.applicationDefinitions = getAppDefinitions(this.name, this.dslText);
 		}
 	}

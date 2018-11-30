@@ -54,7 +54,7 @@ import static org.assertj.core.api.Assertions.fail;
  */
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = TestDependencies.class)
-@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
+@DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
 public class DefaultStreamServiceUpdateTests {
 
 	@Autowired
