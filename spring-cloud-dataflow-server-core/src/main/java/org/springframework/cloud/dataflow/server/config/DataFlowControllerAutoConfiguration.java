@@ -146,8 +146,7 @@ import org.springframework.web.client.RestTemplate;
 @Configuration
 @Import(CompletionConfiguration.class)
 @ConditionalOnBean({ EnableDataFlowServerConfiguration.Marker.class })
-@EnableConfigurationProperties({ FeaturesProperties.class, VersionInfoProperties.class, MetricsProperties.class,
-		DockerValidatorProperties.class })
+@EnableConfigurationProperties({ FeaturesProperties.class, VersionInfoProperties.class, DockerValidatorProperties.class })
 @ConditionalOnProperty(prefix = "dataflow.server", name = "enabled", havingValue = "true", matchIfMissing = true)
 @EnableCircuitBreaker
 @EntityScan({
@@ -171,194 +170,6 @@ public class DataFlowControllerAutoConfiguration {
 	}
 
 	@Bean
-	public AuditRecordService auditRecordService(AuditRecordRepository auditRecordRepository,
-			ObjectMapper objectMapper) {
-		return new DefaultAuditRecordService(auditRecordRepository);
-	}
-
-	@Bean
-	public SpringSecurityAuditorAware springSecurityAuditorAware(SecurityStateBean securityStateBean) {
-		return new SpringSecurityAuditorAware(securityStateBean);
-	}
-
-	@Bean
-	@ConditionalOnBean(AuditRecordService.class)
-	public AuditRecordController auditController(
-			AuditRecordService auditRecordService) {
-		return new AuditRecordController(auditRecordService);
-	}
-
-	@Bean
-	@ConditionalOnStreamsEnabled
-	public StreamValidationService streamValidationService(AppRegistryService appRegistry,
-			DockerValidatorProperties dockerValidatorProperties,
-			StreamDefinitionRepository streamDefinitionRepository) {
-		return new DefaultStreamValidationService(appRegistry,
-				dockerValidatorProperties,
-				streamDefinitionRepository);
-	}
-
-	@Bean
-	@ConditionalOnStreamsEnabled
-	public RuntimeAppInstanceController appInstanceController(StreamDeployer streamDeployer) {
-		return new RuntimeAppInstanceController(streamDeployer);
-	}
-
-	@Bean
-	public MetricStore metricStore(MetricsProperties metricsProperties) {
-		return new MetricStore(metricsProperties);
-	}
-
-	@Bean
-	@ConditionalOnStreamsEnabled
-	public StreamDefinitionController streamDefinitionController(StreamDefinitionRepository repository,
-			StreamService streamService) {
-		return new StreamDefinitionController(streamService);
-	}
-
-	@Bean
-	@ConditionalOnStreamsEnabled
-	public StreamValidationController streamValidationController(StreamService streamService) {
-		return new StreamValidationController(streamService);
-	}
-
-	@Bean
-	@ConditionalOnTasksEnabled
-	public TaskValidationService taskValidationService(AppRegistryService appRegistry,
-			DockerValidatorProperties dockerValidatorProperties,
-			TaskDefinitionRepository taskDefinitionRepository,
-			TaskConfigurationProperties taskConfigurationProperties) {
-		return new DefaultTaskValidationService(appRegistry,
-				dockerValidatorProperties,
-				taskDefinitionRepository,
-				taskConfigurationProperties.getComposedTaskRunnerName());
-	}
-
-	@Bean
-	@ConditionalOnTasksEnabled
-	public TaskValidationController taskValidationController(TaskService taskService) {
-		return new TaskValidationController(taskService);
-	}
-
-	@Bean
-	@ConditionalOnMissingBean(name = "appRegistryFJPFB")
-	public ForkJoinPoolFactoryBean appRegistryFJPFB() {
-		ForkJoinPoolFactoryBean forkJoinPoolFactoryBean = new ForkJoinPoolFactoryBean();
-		forkJoinPoolFactoryBean.setParallelism(4);
-		return forkJoinPoolFactoryBean;
-	}
-
-	@Bean
-	public AppDeploymentRequestCreator streamDeploymentPropertiesUtils(AppRegistryService appRegistry,
-			CommonApplicationProperties commonApplicationProperties,
-			ApplicationConfigurationMetadataResolver applicationConfigurationMetadataResolver) {
-		return new AppDeploymentRequestCreator(appRegistry,
-				commonApplicationProperties,
-				applicationConfigurationMetadataResolver);
-	}
-
-	@Bean
-	@ConditionalOnStreamsEnabled
-	public RuntimeAppsController runtimeAppsController(StreamDeployer streamDeployer) {
-		return new RuntimeAppsController(streamDeployer);
-	}
-
-	@Bean
-	public MetricsController metricsController(MetricStore metricStore) {
-		return new MetricsController(metricStore);
-	}
-
-	@Bean
-	@ConditionalOnStreamsEnabled
-	@ConditionalOnMissingBean(name = "runtimeAppsStatusFJPFB")
-	public ForkJoinPoolFactoryBean runtimeAppsStatusFJPFB() {
-		ForkJoinPoolFactoryBean forkJoinPoolFactoryBean = new ForkJoinPoolFactoryBean();
-		forkJoinPoolFactoryBean.setParallelism(8);
-		return forkJoinPoolFactoryBean;
-	}
-
-	@Bean
-	public MavenResourceLoader mavenResourceLoader(MavenProperties properties) {
-		return new MavenResourceLoader(properties);
-	}
-
-	@Bean
-	@ConditionalOnMissingBean(DelegatingResourceLoader.class)
-	public DelegatingResourceLoader delegatingResourceLoader(MavenResourceLoader mavenResourceLoader) {
-		Map<String, ResourceLoader> loaders = new HashMap<>();
-		loaders.put("maven", mavenResourceLoader);
-		return new DelegatingResourceLoader(loaders);
-	}
-
-	@Bean
-	public AppResourceCommon appResourceCommon(MavenProperties mavenProperties, DelegatingResourceLoader delegatingResourceLoader) {
-		return new AppResourceCommon(mavenProperties, delegatingResourceLoader);
-	}
-
-	@Bean
-	@ConditionalOnTasksEnabled
-	public TaskDefinitionController taskDefinitionController(TaskExplorer taskExplorer,
-			TaskDefinitionRepository repository,
-			TaskService taskService) {
-		return new TaskDefinitionController(taskExplorer, repository, taskService);
-	}
-
-	@Bean
-	@ConditionalOnTasksEnabled
-	public TaskExecutionController taskExecutionController(TaskExplorer explorer, TaskService taskService,
-			TaskDefinitionRepository taskDefinitionRepository) {
-		return new TaskExecutionController(explorer, taskService, taskDefinitionRepository);
-	}
-
-	@Bean
-	@ConditionalOnBean(SchedulerService.class)
-	public TaskSchedulerController taskSchedulerController(SchedulerService schedulerService) {
-		return new TaskSchedulerController(schedulerService);
-	}
-
-	@Bean
-	@ConditionalOnTasksEnabled
-	public JobExecutionController jobExecutionController(TaskJobService repository) {
-		return new JobExecutionController(repository);
-	}
-
-	@Bean
-	@ConditionalOnTasksEnabled
-	public JobStepExecutionController jobStepExecutionController(JobService service) {
-		return new JobStepExecutionController(service);
-	}
-
-	@Bean
-	@ConditionalOnTasksEnabled
-	public JobStepExecutionProgressController jobStepExecutionProgressController(JobService service) {
-		return new JobStepExecutionProgressController(service);
-	}
-
-	@Bean
-	@ConditionalOnTasksEnabled
-	public JobInstanceController jobInstanceController(TaskJobService repository) {
-		return new JobInstanceController(repository);
-	}
-
-	@Bean
-	@ConditionalOnBean(RedisMetricRepository.class)
-	public CounterController counterController(RedisMetricRepository metricRepository) {
-		return new CounterController(metricRepository);
-	}
-
-	@Bean
-	@ConditionalOnBean(FieldValueCounterRepository.class)
-	public FieldValueCounterController fieldValueCounterController(FieldValueCounterRepository repository) {
-		return new FieldValueCounterController(repository);
-	}
-
-	@Bean
-	@ConditionalOnBean(AggregateCounterRepository.class)
-	public AggregateCounterController aggregateCounterController(AggregateCounterRepository repository) {
-		return new AggregateCounterController(repository);
-	}
-
-	@Bean
 	public CompletionController completionController(StreamCompletionProvider completionProvider,
 			TaskCompletionProvider taskCompletionProvider) {
 		return new CompletionController(completionProvider, taskCompletionProvider);
@@ -370,22 +181,11 @@ public class DataFlowControllerAutoConfiguration {
 	}
 
 	@Bean
-	public SecurityController securityController(SecurityStateBean securityStateBean) {
-		return new SecurityController(securityStateBean);
-	}
-
-	@Bean
-	@Conditional(OnSecurityEnabledAndOAuth2Disabled.class)
-	public LoginController loginController() {
-		return new LoginController();
-	}
-
-	@Bean
 	public AboutController aboutController(ObjectProvider<StreamDeployer> streamDeployer,
-										ObjectProvider<LauncherRepository> launcherRepository,
-										FeaturesProperties featuresProperties,
-										VersionInfoProperties versionInfoProperties,
-										SecurityStateBean securityStateBean) {
+			ObjectProvider<LauncherRepository> launcherRepository,
+			FeaturesProperties featuresProperties,
+			VersionInfoProperties versionInfoProperties,
+			SecurityStateBean securityStateBean) {
 		return new AboutController(streamDeployer.getIfAvailable(), launcherRepository.getIfAvailable(),
 				featuresProperties,
 				versionInfoProperties,
@@ -402,90 +202,42 @@ public class DataFlowControllerAutoConfiguration {
 		return new RestControllerAdvice();
 	}
 
-	@Bean
-	public MavenProperties mavenProperties() {
-		return new MavenConfigurationProperties();
-	}
-
-	@Bean
-	@ConfigurationProperties(prefix = "spring.cloud.dataflow.security.authorization")
-	public AuthorizationProperties authorizationProperties() {
-		return new AuthorizationProperties();
-	}
-
-	@Bean
-	@ConditionalOnProperty(name = "spring.cloud.dataflow.security.authentication.file.enabled", havingValue = "true")
-	@ConfigurationProperties(prefix = "spring.cloud.dataflow.security.authentication.file")
-	public FileSecurityProperties fileSecurityProperties() {
-		return new FileSecurityProperties();
-	}
-
-	@Bean
-	@ConditionalOnProperty(name = "spring.cloud.dataflow.security.authentication.ldap.enabled", havingValue = "true")
-	@ConfigurationProperties(prefix = "spring.cloud.dataflow.security.authentication.ldap")
-	public LdapSecurityProperties ldapSecurityProperties() {
-		return new LdapSecurityProperties();
-	}
-
-	@Bean
-	public SecurityStateBean securityStateBean() {
-		return new SecurityStateBean();
-	}
-
 	@Configuration
-	@EnableConfigurationProperties(SkipperClientProperties.class)
-	public static class SkipperDeploymentConfiguration {
+	public static class AppRegistryConfiguration {
 
-		@Bean
-		@ConditionalOnStreamsEnabled
-		public StreamDeploymentController updatableStreamDeploymentController(
-				StreamDefinitionRepository repository, StreamService streamService) {
-			return new StreamDeploymentController(repository, streamService);
+		@ConfigurationProperties(prefix = "maven")
+		static class MavenConfigurationProperties extends MavenProperties {
 		}
 
 		@Bean
-		@ConditionalOnStreamsEnabled
-		public SkipperClient skipperClient(SkipperClientProperties properties,
-				RestTemplateBuilder restTemplateBuilder, ObjectMapper objectMapper) {
-
-			// TODO (Tzolov) review the manual Hal convertion configuration
-			objectMapper.registerModule(new Jackson2HalModule());
-			objectMapper.setHandlerInstantiator(new Jackson2HalModule.HalHandlerInstantiator(
-					new AnnotationRelProvider(), null, null, new HalConfiguration()));
-			objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-
-			RestTemplate restTemplate = restTemplateBuilder
-					.errorHandler(new SkipperClientResponseErrorHandler(objectMapper))
-					.interceptors(new OAuth2AccessTokenProvidingClientHttpRequestInterceptor())
-					.messageConverters(Arrays.asList(new StringHttpMessageConverter(),
-							new MappingJackson2HttpMessageConverter(objectMapper)))
-					.build();
-
-			return new DefaultSkipperClient(properties.getServerUri(), restTemplate);
+		@ConditionalOnMissingBean(name = "appRegistryFJPFB")
+		public ForkJoinPoolFactoryBean appRegistryFJPFB() {
+			ForkJoinPoolFactoryBean forkJoinPoolFactoryBean = new ForkJoinPoolFactoryBean();
+			forkJoinPoolFactoryBean.setParallelism(4);
+			return forkJoinPoolFactoryBean;
 		}
 
 		@Bean
-		@ConditionalOnStreamsEnabled
-		public SkipperStreamDeployer skipperStreamDeployer(SkipperClient skipperClient,
-				StreamDefinitionRepository streamDefinitionRepository,
-				SkipperClientProperties skipperClientProperties,
-				AppRegistryService appRegistryService,
-				ForkJoinPool runtimeAppsStatusFJPFB) {
-			logger.info("Skipper URI [" + skipperClientProperties.getServerUri() + "]");
-			return new SkipperStreamDeployer(skipperClient, streamDefinitionRepository, appRegistryService,
-					runtimeAppsStatusFJPFB);
+		public MavenResourceLoader mavenResourceLoader(MavenProperties properties) {
+			return new MavenResourceLoader(properties);
 		}
 
+		@Bean
+		@ConditionalOnMissingBean(DelegatingResourceLoader.class)
+		public DelegatingResourceLoader delegatingResourceLoader(MavenResourceLoader mavenResourceLoader) {
+			Map<String, ResourceLoader> loaders = new HashMap<>();
+			loaders.put("maven", mavenResourceLoader);
+			return new DelegatingResourceLoader(loaders);
+		}
 
 		@Bean
-		@ConditionalOnStreamsEnabled
-		public StreamService streamService(
-				StreamDefinitionRepository streamDefinitionRepository,
-				SkipperStreamDeployer skipperStreamDeployer, AppDeploymentRequestCreator appDeploymentRequestCreator,
-				StreamValidationService streamValidationService,
-				AuditRecordService auditRecordService) {
-			return new DefaultStreamService(streamDefinitionRepository, skipperStreamDeployer,
-					appDeploymentRequestCreator, streamValidationService, auditRecordService);
+		public MavenProperties mavenProperties() {
+			return new MavenConfigurationProperties();
+		}
+
+		@Bean
+		public AppResourceCommon appResourceCommon(MavenProperties mavenProperties, DelegatingResourceLoader delegatingResourceLoader) {
+			return new AppResourceCommon(mavenProperties, delegatingResourceLoader);
 		}
 
 		@Bean
@@ -507,7 +259,256 @@ public class DataFlowControllerAutoConfiguration {
 		}
 	}
 
-	@ConfigurationProperties(prefix = "maven")
-	static class MavenConfigurationProperties extends MavenProperties {
+	@Configuration
+	@ConditionalOnTasksEnabled
+	public static class TaskEnabledConfiguration {
+
+		@Bean
+		public TaskExecutionController taskExecutionController(TaskExplorer explorer, TaskService taskService,
+				TaskDefinitionRepository taskDefinitionRepository) {
+			return new TaskExecutionController(explorer, taskService, taskDefinitionRepository);
+		}
+
+		@Bean
+		public TaskDefinitionController taskDefinitionController(TaskExplorer taskExplorer,
+				TaskDefinitionRepository repository,
+				TaskService taskService) {
+			return new TaskDefinitionController(taskExplorer, repository, taskService);
+		}
+
+		@Bean
+		public JobExecutionController jobExecutionController(TaskJobService repository) {
+			return new JobExecutionController(repository);
+		}
+
+		@Bean
+		public JobStepExecutionController jobStepExecutionController(JobService service) {
+			return new JobStepExecutionController(service);
+		}
+
+		@Bean
+		public JobStepExecutionProgressController jobStepExecutionProgressController(JobService service) {
+			return new JobStepExecutionProgressController(service);
+		}
+
+		@Bean
+		public JobInstanceController jobInstanceController(TaskJobService repository) {
+			return new JobInstanceController(repository);
+		}
+
+		@Bean
+		public TaskValidationService taskValidationService(AppRegistryService appRegistry,
+				DockerValidatorProperties dockerValidatorProperties,
+				TaskDefinitionRepository taskDefinitionRepository,
+				TaskConfigurationProperties taskConfigurationProperties) {
+			return new DefaultTaskValidationService(appRegistry,
+					dockerValidatorProperties,
+					taskDefinitionRepository,
+					taskConfigurationProperties.getComposedTaskRunnerName());
+		}
+
+		@Bean
+		public TaskValidationController taskValidationController(TaskService taskService) {
+			return new TaskValidationController(taskService);
+		}
 	}
+
+	@Configuration
+	@ConditionalOnStreamsEnabled
+	@EnableConfigurationProperties(SkipperClientProperties.class)
+	public static class StreamEnabledConfiguration {
+
+		@Bean
+		public StreamValidationService streamValidationService(AppRegistryService appRegistry,
+				DockerValidatorProperties dockerValidatorProperties,
+				StreamDefinitionRepository streamDefinitionRepository) {
+			return new DefaultStreamValidationService(appRegistry,
+					dockerValidatorProperties,
+					streamDefinitionRepository);
+		}
+
+		@Bean
+		public RuntimeAppInstanceController appInstanceController(StreamDeployer streamDeployer) {
+			return new RuntimeAppInstanceController(streamDeployer);
+		}
+
+		@Bean
+		public StreamDefinitionController streamDefinitionController(StreamDefinitionRepository repository,
+				StreamService streamService) {
+			return new StreamDefinitionController(streamService);
+		}
+
+		@Bean
+		public StreamValidationController streamValidationController(StreamService streamService) {
+			return new StreamValidationController(streamService);
+		}
+
+		@Bean
+		public RuntimeAppsController runtimeAppsController(StreamDeployer streamDeployer) {
+			return new RuntimeAppsController(streamDeployer);
+		}
+
+		@Bean
+		@ConditionalOnMissingBean(name = "runtimeAppsStatusFJPFB")
+		public ForkJoinPoolFactoryBean runtimeAppsStatusFJPFB() {
+			ForkJoinPoolFactoryBean forkJoinPoolFactoryBean = new ForkJoinPoolFactoryBean();
+			forkJoinPoolFactoryBean.setParallelism(8);
+			return forkJoinPoolFactoryBean;
+		}
+
+		@Bean
+		public StreamDeploymentController updatableStreamDeploymentController(
+				StreamDefinitionRepository repository, StreamService streamService) {
+			return new StreamDeploymentController(repository, streamService);
+		}
+
+		@Bean
+		public SkipperClient skipperClient(SkipperClientProperties properties,
+				RestTemplateBuilder restTemplateBuilder, ObjectMapper objectMapper) {
+
+			// TODO (Tzolov) review the manual Hal convertion configuration
+			objectMapper.registerModule(new Jackson2HalModule());
+			objectMapper.setHandlerInstantiator(new Jackson2HalModule.HalHandlerInstantiator(
+					new AnnotationRelProvider(), null, null, new HalConfiguration()));
+			objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+
+			RestTemplate restTemplate = restTemplateBuilder
+					.errorHandler(new SkipperClientResponseErrorHandler(objectMapper))
+					.interceptors(new OAuth2AccessTokenProvidingClientHttpRequestInterceptor())
+					.messageConverters(Arrays.asList(new StringHttpMessageConverter(),
+							new MappingJackson2HttpMessageConverter(objectMapper)))
+					.build();
+
+			return new DefaultSkipperClient(properties.getServerUri(), restTemplate);
+		}
+
+		@Bean
+		public SkipperStreamDeployer skipperStreamDeployer(SkipperClient skipperClient,
+				StreamDefinitionRepository streamDefinitionRepository,
+				SkipperClientProperties skipperClientProperties,
+				AppRegistryService appRegistryService,
+				ForkJoinPool runtimeAppsStatusFJPFB) {
+			logger.info("Skipper URI [" + skipperClientProperties.getServerUri() + "]");
+			return new SkipperStreamDeployer(skipperClient, streamDefinitionRepository, appRegistryService,
+					runtimeAppsStatusFJPFB);
+		}
+
+		@Bean
+		public AppDeploymentRequestCreator streamDeploymentPropertiesUtils(AppRegistryService appRegistry,
+				CommonApplicationProperties commonApplicationProperties,
+				ApplicationConfigurationMetadataResolver applicationConfigurationMetadataResolver) {
+			return new AppDeploymentRequestCreator(appRegistry, commonApplicationProperties,
+					applicationConfigurationMetadataResolver);
+		}
+
+		@Bean
+		public StreamService streamService(
+				StreamDefinitionRepository streamDefinitionRepository,
+				SkipperStreamDeployer skipperStreamDeployer, AppDeploymentRequestCreator appDeploymentRequestCreator,
+				StreamValidationService streamValidationService,
+				AuditRecordService auditRecordService) {
+			return new DefaultStreamService(streamDefinitionRepository, skipperStreamDeployer,
+					appDeploymentRequestCreator, streamValidationService, auditRecordService);
+		}
+	}
+
+	@Bean
+	@ConditionalOnBean(SchedulerService.class)
+	public TaskSchedulerController taskSchedulerController(SchedulerService schedulerService) {
+		return new TaskSchedulerController(schedulerService);
+	}
+
+	@Configuration
+	public static class AuditingConfiguration {
+		@Bean
+		public AuditRecordService auditRecordService(AuditRecordRepository auditRecordRepository,
+				ObjectMapper objectMapper) {
+			return new DefaultAuditRecordService(auditRecordRepository);
+		}
+
+		@Bean
+		@ConditionalOnBean(AuditRecordService.class) // TODO Redundant ??
+		public AuditRecordController auditController(AuditRecordService auditRecordService) {
+			return new AuditRecordController(auditRecordService);
+		}
+	}
+
+	@Configuration
+	public static class SecurityConfiguration {
+
+		@Bean
+		public SpringSecurityAuditorAware springSecurityAuditorAware(SecurityStateBean securityStateBean) {
+			return new SpringSecurityAuditorAware(securityStateBean);
+		}
+
+		@Bean
+		public SecurityStateBean securityStateBean() {
+			return new SecurityStateBean();
+		}
+
+		@Bean
+		public SecurityController securityController(SecurityStateBean securityStateBean) {
+			return new SecurityController(securityStateBean);
+		}
+
+		@Bean
+		@ConfigurationProperties(prefix = "spring.cloud.dataflow.security.authorization")
+		public AuthorizationProperties authorizationProperties() {
+			return new AuthorizationProperties();
+		}
+
+		@Bean
+		@ConditionalOnProperty(name = "spring.cloud.dataflow.security.authentication.file.enabled", havingValue = "true")
+		@ConfigurationProperties(prefix = "spring.cloud.dataflow.security.authentication.file")
+		public FileSecurityProperties fileSecurityProperties() {
+			return new FileSecurityProperties();
+		}
+
+		@Bean
+		@ConditionalOnProperty(name = "spring.cloud.dataflow.security.authentication.ldap.enabled", havingValue = "true")
+		@ConfigurationProperties(prefix = "spring.cloud.dataflow.security.authentication.ldap")
+		public LdapSecurityProperties ldapSecurityProperties() {
+			return new LdapSecurityProperties();
+		}
+
+		@Bean
+		@Conditional(OnSecurityEnabledAndOAuth2Disabled.class)
+		public LoginController loginController() {
+			return new LoginController();
+		}
+	}
+
+	@Configuration
+	@EnableConfigurationProperties(MetricsProperties.class)
+	public static class MetricsConfiguration {
+
+		@Bean
+		public MetricStore metricStore(MetricsProperties metricsProperties) {
+			return new MetricStore(metricsProperties);
+		}
+
+		@Bean
+		@ConditionalOnBean(RedisMetricRepository.class)
+		public CounterController counterController(RedisMetricRepository metricRepository) {
+			return new CounterController(metricRepository);
+		}
+
+		@Bean
+		@ConditionalOnBean(FieldValueCounterRepository.class)
+		public FieldValueCounterController fieldValueCounterController(FieldValueCounterRepository repository) {
+			return new FieldValueCounterController(repository);
+		}
+
+		@Bean
+		@ConditionalOnBean(AggregateCounterRepository.class)
+		public AggregateCounterController aggregateCounterController(AggregateCounterRepository repository) {
+			return new AggregateCounterController(repository);
+		}
+
+		@Bean
+		public MetricsController metricsController(MetricStore metricStore) {
+			return new MetricsController(metricStore);
+		}
+	}
+
 }
