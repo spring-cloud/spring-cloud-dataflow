@@ -48,6 +48,7 @@ import org.springframework.cloud.dataflow.server.controller.JobStepExecutionCont
 import org.springframework.cloud.dataflow.server.controller.JobStepExecutionProgressController;
 import org.springframework.cloud.dataflow.server.controller.RestControllerAdvice;
 import org.springframework.cloud.dataflow.server.controller.TaskExecutionController;
+import org.springframework.cloud.dataflow.server.job.LauncherRepository;
 import org.springframework.cloud.dataflow.server.repository.AuditRecordRepository;
 import org.springframework.cloud.dataflow.server.repository.TaskDefinitionRepository;
 import org.springframework.cloud.dataflow.server.service.AuditRecordService;
@@ -100,16 +101,13 @@ import static org.mockito.Mockito.mock;
 		"org.springframework.cloud.dataflow.server.audit.domain",
 		"org.springframework.cloud.dataflow.core"
 })
-@EnableMapRepositories(basePackages = {
-		"org.springframework.cloud.dataflow.registry.repository",
-		"org.springframework.cloud.dataflow.server.repository"
-})
 @EnableJpaRepositories(basePackages = {
 		"org.springframework.cloud.dataflow.registry.repository",
 		"org.springframework.cloud.dataflow.server.repository"
 })
 @EnableJpaAuditing
 @EnableConfigurationProperties({ DockerValidatorProperties.class, TaskConfigurationProperties.class })
+@EnableMapRepositories(basePackages = "org.springframework.cloud.dataflow.server.job")
 public class JobDependencies {
 
 	@Bean
@@ -171,11 +169,11 @@ public class JobDependencies {
 
 	@Bean
 	public TaskService taskService(TaskDefinitionRepository repository, TaskExplorer explorer, AppRegistryService registry,
-			TaskLauncher taskLauncher, ApplicationConfigurationMetadataResolver metadataResolver,
-			AuditRecordService auditRecordService, CommonApplicationProperties commonApplicationProperties,
-			TaskValidationService taskValidationService) {
+								   LauncherRepository launcherRepository, ApplicationConfigurationMetadataResolver metadataResolver,
+								   AuditRecordService auditRecordService, CommonApplicationProperties commonApplicationProperties,
+								   TaskValidationService taskValidationService) {
 		return new DefaultTaskService(new DataSourceProperties(), repository, explorer, taskRepository(), registry,
-				taskLauncher, metadataResolver, new TaskConfigurationProperties(), auditRecordService,
+				launcherRepository, metadataResolver, new TaskConfigurationProperties(), auditRecordService,
 				null, commonApplicationProperties, taskValidationService);
 	}
 
@@ -259,4 +257,5 @@ public class JobDependencies {
 	public TaskLauncher taskLauncher() {
 		return mock(TaskLauncher.class);
 	}
+
 }

@@ -42,6 +42,7 @@ import org.springframework.cloud.dataflow.completion.CompletionConfiguration;
 import org.springframework.cloud.dataflow.completion.StreamCompletionProvider;
 import org.springframework.cloud.dataflow.completion.TaskCompletionProvider;
 import org.springframework.cloud.dataflow.configuration.metadata.ApplicationConfigurationMetadataResolver;
+import org.springframework.cloud.dataflow.core.Launcher;
 import org.springframework.cloud.dataflow.registry.repository.AppRegistrationRepository;
 import org.springframework.cloud.dataflow.registry.service.AppRegistryService;
 import org.springframework.cloud.dataflow.registry.service.DefaultAppRegistryService;
@@ -78,6 +79,7 @@ import org.springframework.cloud.dataflow.server.controller.support.Applications
 import org.springframework.cloud.dataflow.server.controller.support.ApplicationsMetrics.Instance;
 import org.springframework.cloud.dataflow.server.controller.support.ApplicationsMetrics.Metric;
 import org.springframework.cloud.dataflow.server.controller.support.MetricStore;
+import org.springframework.cloud.dataflow.server.job.LauncherRepository;
 import org.springframework.cloud.dataflow.server.job.support.ExecutionContextJacksonMixIn;
 import org.springframework.cloud.dataflow.server.job.support.StepExecutionJacksonMixIn;
 import org.springframework.cloud.dataflow.server.registry.DataFlowAppRegistryPopulator;
@@ -160,15 +162,12 @@ import static org.mockito.Mockito.when;
 		"org.springframework.cloud.dataflow.registry.domain",
 		"org.springframework.cloud.dataflow.core"
 })
-@EnableMapRepositories(basePackages = {
-		"org.springframework.cloud.dataflow.registry.repository",
-		"org.springframework.cloud.dataflow.server.repository"
-})
 @EnableJpaRepositories(basePackages = {
 		"org.springframework.cloud.dataflow.registry.repository",
 		"org.springframework.cloud.dataflow.server.repository"
 })
 @EnableJpaAuditing
+@EnableMapRepositories("org.springframework.cloud.dataflow.server.job")
 @EnableTransactionManagement
 public class TestDependencies extends WebMvcConfigurationSupport {
 
@@ -382,22 +381,22 @@ public class TestDependencies extends WebMvcConfigurationSupport {
 	@Bean
 	public TaskDefinitionController taskDefinitionController(TaskExplorer explorer, TaskDefinitionRepository repository,
 			ApplicationConfigurationMetadataResolver metadataResolver,
-			AppRegistryService appRegistry, AuditRecordService auditRecordService,
+			AppRegistryService appRegistry, LauncherRepository launcherRepository, AuditRecordService auditRecordService,
 			CommonApplicationProperties commonApplicationProperties, TaskValidationService taskValidationService) {
 		return new TaskDefinitionController(explorer, repository,
-				taskService(metadataResolver, taskRepository(), appRegistry,
-						/* delegatingResourceLoader, */auditRecordService, commonApplicationProperties,
+				taskService(metadataResolver, taskRepository(), appRegistry, launcherRepository,
+						auditRecordService, commonApplicationProperties,
 						taskValidationService, repository));
 	}
 
 	@Bean
 	public TaskExecutionController taskExecutionController(TaskExplorer explorer,
 			ApplicationConfigurationMetadataResolver metadataResolver,
-			AppRegistryService appRegistry, AuditRecordService auditRecordService,
+			AppRegistryService appRegistry, LauncherRepository launcherRepository, AuditRecordService auditRecordService,
 			CommonApplicationProperties commonApplicationProperties, TaskValidationService taskValidationService,
 			TaskDefinitionRepository taskDefinitionRepository) {
 		return new TaskExecutionController(
-				explorer, taskService(metadataResolver, taskRepository(), appRegistry,
+				explorer, taskService(metadataResolver, taskRepository(), appRegistry, launcherRepository,
 				auditRecordService, commonApplicationProperties, taskValidationService, taskDefinitionRepository),
 				taskDefinitionRepository);
 	}
@@ -434,17 +433,23 @@ public class TestDependencies extends WebMvcConfigurationSupport {
 	}
 
 	@Bean
+	public Launcher launcher() {
+		return mock(Launcher.class);
+	}
+
+	@Bean
 	public TaskExplorer taskExplorer() {
 		return mock(TaskExplorer.class);
 	}
 
 	@Bean
 	public TaskService taskService(ApplicationConfigurationMetadataResolver metadataResolver,
-			TaskRepository taskExecutionRepository, AppRegistryService appRegistry, AuditRecordService auditRecordService,
+			TaskRepository taskExecutionRepository, AppRegistryService appRegistry,
+								   LauncherRepository launcherRepository, AuditRecordService auditRecordService,
 			CommonApplicationProperties commonApplicationProperties, TaskValidationService taskValidationService,
 			TaskDefinitionRepository taskDefinitionRepository) {
 		return new DefaultTaskService(new DataSourceProperties(), taskDefinitionRepository, taskExplorer(),
-				taskExecutionRepository, appRegistry, taskLauncher(), metadataResolver,
+				taskExecutionRepository, appRegistry,  launcherRepository, metadataResolver,
 				new TaskConfigurationProperties(), auditRecordService, null,
 				commonApplicationProperties, taskValidationService);
 	}
@@ -486,7 +491,9 @@ public class TestDependencies extends WebMvcConfigurationSupport {
 
 		when(streamDeployer.environmentInfo()).thenReturn(appDeployerEnvInfoSkipper);
 
+		Launcher launcher = mock(Launcher.class);
 		TaskLauncher taskLauncher = mock(TaskLauncher.class);
+		LauncherRepository launcherRepository = mock(LauncherRepository.class);
 
 		RuntimeEnvironmentInfo taskDeployerEnvInfo = new RuntimeEnvironmentInfo.Builder()
 				.implementationName("testTaskDepImplementationName")
@@ -498,8 +505,11 @@ public class TestDependencies extends WebMvcConfigurationSupport {
 				.platformHostVersion("testTaskDepPlatformHostVersion").build();
 
 		when(taskLauncher.environmentInfo()).thenReturn(taskDeployerEnvInfo);
+		when(launcher.getTaskLauncher()).thenReturn(taskLauncher);
+		when(launcherRepository.findByName("default")).thenReturn(launcher);
 
-		return new AboutController(streamDeployer, taskLauncher,
+
+		return new AboutController(streamDeployer, launcherRepository,
 				featuresProperties, versionInfoProperties,
 				mock(SecurityStateBean.class));
 	}

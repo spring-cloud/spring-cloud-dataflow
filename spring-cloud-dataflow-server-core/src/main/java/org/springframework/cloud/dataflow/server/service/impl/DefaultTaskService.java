@@ -37,6 +37,7 @@ import org.springframework.cloud.dataflow.registry.service.AppRegistryService;
 import org.springframework.cloud.dataflow.rest.util.DeploymentPropertiesUtils;
 import org.springframework.cloud.dataflow.server.config.apps.CommonApplicationProperties;
 import org.springframework.cloud.dataflow.server.controller.WhitelistProperties;
+import org.springframework.cloud.dataflow.server.job.LauncherRepository;
 import org.springframework.cloud.dataflow.server.repository.DuplicateTaskException;
 import org.springframework.cloud.dataflow.server.repository.NoSuchTaskDefinitionException;
 import org.springframework.cloud.dataflow.server.repository.TaskDefinitionRepository;
@@ -89,7 +90,7 @@ public class DefaultTaskService implements TaskService {
 	/**
 	 * Used to launch apps as tasks.
 	 */
-	private final TaskLauncher taskLauncher;
+	private final LauncherRepository launcherRepository;
 
 	/**
 	 * The {@link AppRegistryService} this service will use to look up task app URIs.
@@ -123,7 +124,7 @@ public class DefaultTaskService implements TaskService {
 	 * @param taskExecutionRepository the repository this service will use for deployment IDs.
 	 * @param taskExplorer the explorer this service will use to lookup task executions
 	 * @param registry URI registry this service will use to look up app URIs.
-	 * @param taskLauncher the launcher this service will use to launch task apps.
+	 * @param launcherRepository the repository of task launcher used to launch task apps.
 	 * @param metaDataResolver the metadata resolver
 	 * @param taskConfigurationProperties the properties used to define the behavior of tasks
 	 * @param auditRecordService the audit record service
@@ -132,19 +133,19 @@ public class DefaultTaskService implements TaskService {
 	 * @param taskValidationService the task validation service
 	 */
 	public DefaultTaskService(DataSourceProperties dataSourceProperties,
-			TaskDefinitionRepository taskDefinitionRepository, TaskExplorer taskExplorer,
-			TaskRepository taskExecutionRepository, AppRegistryService registry,
-			TaskLauncher taskLauncher, ApplicationConfigurationMetadataResolver metaDataResolver,
-			TaskConfigurationProperties taskConfigurationProperties,
-			AuditRecordService auditRecordService,
-			String dataflowServerUri, CommonApplicationProperties commonApplicationProperties,
-			TaskValidationService taskValidationService) {
+							TaskDefinitionRepository taskDefinitionRepository, TaskExplorer taskExplorer,
+							TaskRepository taskExecutionRepository, AppRegistryService registry,
+							LauncherRepository launcherRepository, ApplicationConfigurationMetadataResolver metaDataResolver,
+							TaskConfigurationProperties taskConfigurationProperties,
+							AuditRecordService auditRecordService,
+							String dataflowServerUri, CommonApplicationProperties commonApplicationProperties,
+							TaskValidationService taskValidationService) {
 		Assert.notNull(dataSourceProperties, "DataSourceProperties must not be null");
 		Assert.notNull(taskDefinitionRepository, "TaskDefinitionRepository must not be null");
 		Assert.notNull(taskExecutionRepository, "TaskExecutionRepository must not be null");
 		Assert.notNull(taskExplorer, "TaskExplorer must not be null");
 		Assert.notNull(registry, "AppRegistryService must not be null");
-		Assert.notNull(taskLauncher, "TaskLauncher must not be null");
+		Assert.notNull(launcherRepository, "LauncherRepository must not be null");
 		Assert.notNull(metaDataResolver, "metaDataResolver must not be null");
 		Assert.notNull(taskConfigurationProperties, "taskConfigurationProperties must not be null");
 		Assert.notNull(commonApplicationProperties, "commonApplicationProperties must not be null");
@@ -155,7 +156,7 @@ public class DefaultTaskService implements TaskService {
 		this.taskExecutionRepository = taskExecutionRepository;
 		this.taskExplorer = taskExplorer;
 		this.registry = registry;
-		this.taskLauncher = taskLauncher;
+		this.launcherRepository = launcherRepository;
 		this.whitelistProperties = new WhitelistProperties(metaDataResolver);
 		this.taskConfigurationProperties = taskConfigurationProperties;
 		this.dataflowServerUri = dataflowServerUri;
@@ -215,7 +216,9 @@ public class DefaultTaskService implements TaskService {
 		List<String> updatedCmdLineArgs = this.updateCommandLineArgs(commandLineArgs, taskExecution);
 		AppDeploymentRequest request = new AppDeploymentRequest(revisedDefinition, appResource,
 				deployerDeploymentProperties, updatedCmdLineArgs);
-		String id = this.taskLauncher.launch(request);
+		// TODO 2616 cleanup
+		TaskLauncher taskLauncher = this.launcherRepository.findByName("default").getTaskLauncher();
+		String id = taskLauncher.launch(request);
 		if (!StringUtils.hasText(id)) {
 			throw new IllegalStateException("Deployment ID is null for the task:" + taskName);
 		}
@@ -270,6 +273,8 @@ public class DefaultTaskService implements TaskService {
 		Assert.notNull(taskExecution, "There was no task execution with id " + id);
 		String launchId = taskExecution.getExternalExecutionId();
 		Assert.hasLength(launchId, "The TaskExecution for id " + id + " did not have an externalExecutionId");
+		// TODO 2616 cleanup
+		TaskLauncher taskLauncher = this.launcherRepository.findByName("default").getTaskLauncher();
 		taskLauncher.cleanup(launchId);
 	}
 
@@ -366,6 +371,8 @@ public class DefaultTaskService implements TaskService {
 	}
 
 	private void destroyTask(TaskDefinition taskDefinition) {
+		// TODO GH-2616 cleanup
+		TaskLauncher taskLauncher = this.launcherRepository.findByName("default").getTaskLauncher();
 		taskLauncher.destroy(taskDefinition.getName());
 		taskDefinitionRepository.deleteById(taskDefinition.getName());
 	}

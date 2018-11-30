@@ -28,8 +28,12 @@ import org.springframework.analytics.metrics.memory.InMemoryAggregateCounterRepo
 import org.springframework.analytics.metrics.memory.InMemoryFieldValueCounterRepository;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
+import org.springframework.cloud.dataflow.core.Launcher;
 import org.springframework.cloud.dataflow.server.EnableDataFlowServer;
 import org.springframework.cloud.dataflow.server.config.features.FeaturesProperties;
+import org.springframework.cloud.dataflow.server.job.LauncherRepository;
+import org.springframework.cloud.deployer.spi.local.LocalDeployerProperties;
+import org.springframework.cloud.deployer.spi.local.LocalTaskLauncher;
 import org.springframework.cloud.skipper.client.SkipperClient;
 import org.springframework.cloud.skipper.domain.AboutResource;
 import org.springframework.cloud.skipper.domain.Dependency;
@@ -145,6 +149,8 @@ public class LocalDataflowResource extends ExternalResource {
 				"--spring.cloud.skipper.client.serverUri=http://localhost:" + this.skipperServerPort + "/api"
 		});
 		skipperClient = configurableApplicationContext.getBean(SkipperClient.class);
+		LauncherRepository launcherRepository = configurableApplicationContext.getBean(LauncherRepository.class);
+		launcherRepository.save(new Launcher("default", "local", new LocalTaskLauncher(new LocalDeployerProperties())));
 		Collection<Filter> filters = configurableApplicationContext.getBeansOfType(Filter.class).values();
 		mockMvc = MockMvcBuilders.webAppContextSetup(configurableApplicationContext)
 				.addFilters(filters.toArray(new Filter[filters.size()])).build();
@@ -197,6 +203,13 @@ public class LocalDataflowResource extends ExternalResource {
 		@Primary
 		public SkipperClient skipperClientMock() {
 			SkipperClient skipperClient = mock(SkipperClient.class);
+			AboutResource about = new AboutResource();
+			about.setVersionInfo(new VersionInfo());
+			about.getVersionInfo().setServer(new Dependency());
+			about.getVersionInfo().getServer().setName("Test Server");
+			about.getVersionInfo().getServer().setVersion("Test Version");
+			when(skipperClient.info()).thenReturn(about);
+			when(skipperClient.listDeployers()).thenReturn(new Resources<>(new ArrayList<>(), new ArrayList<>()));
 			return skipperClient;
 		}
 

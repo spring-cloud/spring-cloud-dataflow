@@ -53,7 +53,8 @@ public class LocalServerSecurityRootWithUsersFileTestsWithoutTasksAndStreamsAndM
 		localDataflowResource.getMockMvc()
 				.perform(get("/").header("Authorization", basicAuthorizationHeader(fullUser.getUsername(), fullUser.getPassword()))).andDo(print())
 				.andExpect(status().isOk())
-				.andExpect(jsonPath("$._links.*", hasSize(5)))
+				.andExpect(jsonPath("$._links.*", hasSize(6)))
+				//TODO more links to assert
 				.andExpect(jsonPath("$._links.dashboard.href", is("http://localhost/dashboard")))
 				.andExpect(jsonPath("$._links.streams").doesNotExist())
 				.andExpect(jsonPath("$._links.runtime").doesNotExist())
@@ -76,7 +77,8 @@ public class LocalServerSecurityRootWithUsersFileTestsWithoutTasksAndStreamsAndM
 		localDataflowResource.getMockMvc()
 				.perform(get("/").header("Authorization", basicAuthorizationHeader(viewOnlyUser.getUsername(), viewOnlyUser.getPassword()))).andDo(print())
 				.andExpect(status().isOk())
-				.andExpect(jsonPath("$._links.*", hasSize(5)))
+				.andExpect(jsonPath("$._links.*", hasSize(6)))
+				//TODO more links to assert
 				.andExpect(jsonPath("$._links.dashboard.href", is("http://localhost/dashboard")))
 				.andExpect(jsonPath("$._links.streams").doesNotExist())
 				.andExpect(jsonPath("$._links.runtime").doesNotExist())

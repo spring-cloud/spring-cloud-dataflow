@@ -33,11 +33,13 @@ import org.springframework.boot.autoconfigure.jdbc.DataSourceProperties;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.cloud.dataflow.configuration.metadata.ApplicationConfigurationMetadataResolver;
 import org.springframework.cloud.dataflow.core.ApplicationType;
+import org.springframework.cloud.dataflow.core.Launcher;
 import org.springframework.cloud.dataflow.core.TaskDefinition;
 import org.springframework.cloud.dataflow.registry.domain.AppRegistration;
 import org.springframework.cloud.dataflow.registry.service.AppRegistryService;
 import org.springframework.cloud.dataflow.server.config.apps.CommonApplicationProperties;
 import org.springframework.cloud.dataflow.server.configuration.TaskServiceDependencies;
+import org.springframework.cloud.dataflow.server.job.LauncherRepository;
 import org.springframework.cloud.dataflow.server.repository.DuplicateTaskException;
 import org.springframework.cloud.dataflow.server.repository.NoSuchTaskDefinitionException;
 import org.springframework.cloud.dataflow.server.repository.TaskDefinitionRepository;
@@ -115,6 +117,9 @@ public abstract class DefaultTaskServiceTests {
 	CommonApplicationProperties commonApplicationProperties;
 
 	@Autowired
+	LauncherRepository launcherRepository;
+
+	@Autowired
 	TaskValidationService taskValidationService;
 
 	@Autowired
@@ -125,7 +130,8 @@ public abstract class DefaultTaskServiceTests {
 	public static class SimpleTaskTests extends DefaultTaskServiceTests {
 
 		@Before
-		public void setupMockMVC() {
+		public void setupMocks() {
+			this.launcherRepository.save(new Launcher("default", "local", taskLauncher));
 			taskDefinitionRepository.save(new TaskDefinition(TASK_NAME_ORIG, "demo"));
 			taskDefinitionRepository.findAll();
 		}
@@ -143,6 +149,7 @@ public abstract class DefaultTaskServiceTests {
 		public void executeSingleTaskTest() {
 			initializeSuccessfulRegistry(appRegistry);
 			when(taskLauncher.launch(anyObject())).thenReturn("0");
+			this.launcherRepository.save(new Launcher("local", "default", taskLauncher));
 			assertEquals(1L, this.taskService.executeTask(TASK_NAME_ORIG, new HashMap<>(), new LinkedList<>()));
 		}
 
@@ -151,6 +158,7 @@ public abstract class DefaultTaskServiceTests {
 		public void executeMultipleTasksTest() {
 			initializeSuccessfulRegistry(appRegistry);
 			when(taskLauncher.launch(anyObject())).thenReturn("0");
+			this.launcherRepository.save(new Launcher("local", "default", taskLauncher));
 			assertEquals(1L, this.taskService.executeTask(TASK_NAME_ORIG, new HashMap<>(), new LinkedList<>()));
 			assertEquals(2L, this.taskService.executeTask(TASK_NAME_ORIG, new HashMap<>(), new LinkedList<>()));
 		}
@@ -160,6 +168,7 @@ public abstract class DefaultTaskServiceTests {
 		public void failOnLimitReached() {
 			initializeSuccessfulRegistry(this.appRegistry);
 			when(taskLauncher.launch(anyObject())).thenReturn("0");
+			this.launcherRepository.save(new Launcher("local", "default", taskLauncher));
 			assertEquals(10, taskService.getMaximumConcurrentTasks());
 			for (long i = 1; i <= taskService.getMaximumConcurrentTasks(); i++) {
 				assertEquals(i, taskService.executeTask(TASK_NAME_ORIG, new HashMap<>(), new LinkedList<>()));
@@ -177,6 +186,7 @@ public abstract class DefaultTaskServiceTests {
 			initializeSuccessfulRegistry(appRegistry);
 			boolean errorCaught = false;
 			when(this.taskLauncher.launch(anyObject())).thenReturn(null);
+			this.launcherRepository.save(new Launcher("local", "default", taskLauncher));
 			try {
 				taskService.executeTask(TASK_NAME_ORIG, new HashMap<>(), new LinkedList<>());
 			}
@@ -194,9 +204,10 @@ public abstract class DefaultTaskServiceTests {
 		public void executeTaskWithNullDefinitionTest() {
 			boolean errorCaught = false;
 			when(this.taskLauncher.launch(anyObject())).thenReturn("0");
+			this.launcherRepository.save(new Launcher("local", "default", taskLauncher));
 			TaskService taskService = new DefaultTaskService(this.dataSourceProperties,
 					mock(TaskDefinitionRepository.class), this.taskExplorer, this.taskExecutionRepository,
-					this.appRegistry, this.taskLauncher, this.metadataResolver, new TaskConfigurationProperties(),
+					this.appRegistry, mock(LauncherRepository.class), this.metadataResolver, new TaskConfigurationProperties(),
 					auditRecordService, null, this.commonApplicationProperties,
 					this.taskValidationService);
 			try {
@@ -233,6 +244,32 @@ public abstract class DefaultTaskServiceTests {
 	@TestPropertySource(properties = { "spring.cloud.dataflow.applicationProperties.task.globalkey=globalvalue",
 		"spring.cloud.dataflow.applicationProperties.stream.globalstreamkey=nothere" })
 	public static class ComposedTaskTests extends DefaultTaskServiceTests {
+
+		@Autowired
+		TaskRepository taskExecutionRepository;
+
+		@Autowired
+		DataSourceProperties dataSourceProperties;
+
+		@Autowired
+		private TaskDefinitionRepository taskDefinitionRepository;
+
+		@Autowired
+		private AppRegistryService appRegistry;
+
+		@Autowired
+		private TaskLauncher taskLauncher;
+
+		@Autowired
+		private LauncherRepository launcherRepository;
+
+		@Autowired
+		private TaskService taskService;
+
+		@Before
+		public void setupMocks() {
+			this.launcherRepository.save(new Launcher("default", "local", taskLauncher));
+		}
 
 		@Test
 		@DirtiesContext

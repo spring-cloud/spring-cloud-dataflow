@@ -32,10 +32,12 @@ import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.cloud.dataflow.core.ApplicationType;
+import org.springframework.cloud.dataflow.core.Launcher;
 import org.springframework.cloud.dataflow.core.TaskDefinition;
 import org.springframework.cloud.dataflow.registry.service.AppRegistryService;
 import org.springframework.cloud.dataflow.server.TaskValidationController;
 import org.springframework.cloud.dataflow.server.configuration.TestDependencies;
+import org.springframework.cloud.dataflow.server.job.LauncherRepository;
 import org.springframework.cloud.dataflow.server.repository.TaskDefinitionRepository;
 import org.springframework.cloud.dataflow.server.service.TaskService;
 import org.springframework.cloud.deployer.spi.core.AppDeploymentRequest;
@@ -100,6 +102,12 @@ public class TaskControllerTests {
 	private TaskLauncher taskLauncher;
 
 	@Autowired
+	private Launcher launcher;
+
+	@Autowired
+	private LauncherRepository launcherRepository;
+
+	@Autowired
 	private TaskExplorer taskExplorer;
 
 	@Autowired
@@ -109,6 +117,8 @@ public class TaskControllerTests {
 	public void setupMockMVC() {
 		this.mockMvc = MockMvcBuilders.webAppContextSetup(wac)
 				.defaultRequest(get("/").accept(MediaType.APPLICATION_JSON)).build();
+
+		launcherRepository.save(new Launcher("default","local", taskLauncher));
 		when(taskLauncher.launch(any(AppDeploymentRequest.class))).thenReturn("testID");
 
 		final TaskExecution taskExecutionRunning = new TaskExecution();

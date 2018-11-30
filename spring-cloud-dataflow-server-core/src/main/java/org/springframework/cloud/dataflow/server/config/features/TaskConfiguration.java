@@ -15,6 +15,10 @@
  */
 package org.springframework.cloud.dataflow.server.config.features;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+
 import javax.sql.DataSource;
 
 import org.springframework.batch.core.configuration.support.MapJobRegistry;
@@ -31,21 +35,26 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.cloud.dataflow.configuration.metadata.ApplicationConfigurationMetadataResolver;
+import org.springframework.cloud.dataflow.core.Launcher;
+import org.springframework.cloud.dataflow.core.TaskPlatform;
 import org.springframework.cloud.dataflow.registry.service.AppRegistryService;
 import org.springframework.cloud.dataflow.server.DockerValidatorProperties;
 import org.springframework.cloud.dataflow.server.batch.JobService;
 import org.springframework.cloud.dataflow.server.batch.SimpleJobServiceFactoryBean;
 import org.springframework.cloud.dataflow.server.config.apps.CommonApplicationProperties;
+import org.springframework.cloud.dataflow.server.job.LauncherRepository;
 import org.springframework.cloud.dataflow.server.job.TaskExplorerFactoryBean;
 import org.springframework.cloud.dataflow.server.repository.TaskDefinitionRepository;
 import org.springframework.cloud.dataflow.server.service.AuditRecordService;
+import org.springframework.cloud.dataflow.server.service.LauncherInitializationService;
 import org.springframework.cloud.dataflow.server.service.TaskJobService;
 import org.springframework.cloud.dataflow.server.service.TaskService;
 import org.springframework.cloud.dataflow.server.service.TaskValidationService;
 import org.springframework.cloud.dataflow.server.service.impl.DefaultTaskJobService;
 import org.springframework.cloud.dataflow.server.service.impl.DefaultTaskService;
 import org.springframework.cloud.dataflow.server.service.impl.TaskConfigurationProperties;
-import org.springframework.cloud.deployer.spi.task.TaskLauncher;
+import org.springframework.cloud.deployer.spi.local.LocalDeployerProperties;
+import org.springframework.cloud.deployer.spi.local.LocalTaskLauncher;
 import org.springframework.cloud.task.repository.TaskExplorer;
 import org.springframework.cloud.task.repository.TaskRepository;
 import org.springframework.cloud.task.repository.support.SimpleTaskRepository;
@@ -54,8 +63,10 @@ import org.springframework.cloud.task.repository.support.TaskRepositoryInitializ
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.io.ResourceLoader;
+import org.springframework.data.map.repository.config.EnableMapRepositories;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
+import org.springframework.util.StringUtils;
 
 /**
  * @author Thomas Risberg
@@ -68,7 +79,9 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
  */
 @Configuration
 @ConditionalOnTasksEnabled
-@EnableConfigurationProperties({ TaskConfigurationProperties.class, CommonApplicationProperties.class, DockerValidatorProperties.class})
+@EnableConfigurationProperties({ TaskConfigurationProperties.class, CommonApplicationProperties.class,
+		DockerValidatorProperties.class, LocalPlatformProperties.class})
+@EnableMapRepositories(basePackages = "org.springframework.cloud.dataflow.server.job")
 @EnableTransactionManagement
 public class TaskConfiguration {
 
@@ -89,14 +102,56 @@ public class TaskConfiguration {
 	}
 
 	@Bean
+	@ConditionalOnProperty(value = "spring.cloud.dataflow.task.enableLocalPlatform", matchIfMissing = true)
+	public TaskPlatform localTaskPlatform(LocalPlatformProperties localPlatformProperties) {
+		List<Launcher> launchers = new ArrayList<>();
+		Map<String, LocalDeployerProperties> localDeployerPropertiesMap = localPlatformProperties.getAccounts();
+		if (localDeployerPropertiesMap.isEmpty()) {
+			localDeployerPropertiesMap.put("default", new LocalDeployerProperties());
+		}
+		for (Map.Entry<String, LocalDeployerProperties> entry : localDeployerPropertiesMap
+				.entrySet()) {
+			LocalTaskLauncher localTaskLauncher = new LocalTaskLauncher(entry.getValue());
+			Launcher launcher = new Launcher(entry.getKey(), "local", localTaskLauncher);
+			launcher.setDescription(prettyPrintLocalDeployerProperties(entry.getValue()));
+			launchers.add(launcher);
+		}
+
+		return new TaskPlatform("Local", launchers);
+	}
+
+	@Bean
+	public LauncherInitializationService launcherInitializationService(
+			LauncherRepository launcherRepository,
+			List<TaskPlatform> platforms) {
+		return new LauncherInitializationService(launcherRepository, platforms);
+	}
+
+
+
+	private String prettyPrintLocalDeployerProperties(LocalDeployerProperties localDeployerProperties) {
+		StringBuilder builder = new StringBuilder();
+		if (localDeployerProperties.getJavaOpts() != null) {
+			builder.append("JavaOpts = [" + localDeployerProperties.getJavaOpts() + "], ");
+		}
+		builder.append("ShutdownTimeout = [" + localDeployerProperties.getShutdownTimeout() + "], ");
+		builder.append("EnvVarsToInherit = ["
+				+ StringUtils.arrayToCommaDelimitedString(localDeployerProperties.getEnvVarsToInherit()) + "], ");
+		builder.append("JavaCmd = [" + localDeployerProperties.getJavaCmd() + "], ");
+		builder.append("WorkingDirectoriesRoot = [" + localDeployerProperties.getWorkingDirectoriesRoot() + "], ");
+		builder.append("DeleteFilesOnExit = [" + localDeployerProperties.isDeleteFilesOnExit() + "]");
+		return builder.toString();
+	}
+
+	@Bean
 	public TaskService taskService(TaskDefinitionRepository repository, TaskExplorer taskExplorer,
-			TaskRepository taskExecutionRepository, AppRegistryService registry, TaskLauncher taskLauncher,
+			TaskRepository taskExecutionRepository, AppRegistryService registry, LauncherRepository launcherRepository,
 			ApplicationConfigurationMetadataResolver metadataResolver,
 			TaskConfigurationProperties taskConfigurationProperties,
 			AuditRecordService auditRecordService, CommonApplicationProperties commonApplicationProperties,
 			TaskValidationService taskValidationService) {
 		return new DefaultTaskService(dataSourceProperties, repository, taskExplorer, taskExecutionRepository, registry,
-				taskLauncher, metadataResolver, taskConfigurationProperties, auditRecordService,
+				launcherRepository, metadataResolver, taskConfigurationProperties, auditRecordService,
 				dataflowServerUri, commonApplicationProperties, taskValidationService);
 	}
 

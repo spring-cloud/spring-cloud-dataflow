@@ -18,6 +18,10 @@ logging:
     # The following INFO is to log the embedded tomcat port
     org.springframework.boot.context.embedded.tomcat: 'INFO'
 spring:
+  data:
+    redis:
+      repositories:
+        enabled: false
   jpa:
     properties:
       hibernate.id.new_generator_mappings: true

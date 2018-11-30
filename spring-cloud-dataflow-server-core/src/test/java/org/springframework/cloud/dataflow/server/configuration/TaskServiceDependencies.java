@@ -38,6 +38,7 @@ import org.springframework.cloud.dataflow.server.config.MetricsProperties;
 import org.springframework.cloud.dataflow.server.config.VersionInfoProperties;
 import org.springframework.cloud.dataflow.server.config.apps.CommonApplicationProperties;
 import org.springframework.cloud.dataflow.server.config.features.FeaturesProperties;
+import org.springframework.cloud.dataflow.server.job.LauncherRepository;
 import org.springframework.cloud.dataflow.server.repository.TaskDefinitionRepository;
 import org.springframework.cloud.dataflow.server.repository.support.DataflowRdbmsInitializer;
 import org.springframework.cloud.dataflow.server.service.AuditRecordService;
@@ -100,10 +101,7 @@ import static org.mockito.Mockito.when;
 		"org.springframework.cloud.dataflow.registry.domain",
 		"org.springframework.cloud.dataflow.core"
 })
-@EnableMapRepositories(basePackages = {
-		"org.springframework.cloud.dataflow.registry.repository",
-		"org.springframework.cloud.dataflow.server.repository"
-})
+@EnableMapRepositories("org.springframework.cloud.dataflow.server.job")
 @EnableJpaRepositories(basePackages = {
 		"org.springframework.cloud.dataflow.registry.repository",
 		"org.springframework.cloud.dataflow.server.repository"
@@ -120,7 +118,6 @@ public class TaskServiceDependencies extends WebMvcConfigurationSupport {
 
 	@Autowired
 	DockerValidatorProperties dockerValidatorProperties;
-
 
 	@Bean
 	public TaskRepositoryInitializer taskExecutionRepository(DataSource dataSource) {
@@ -174,9 +171,9 @@ public class TaskServiceDependencies extends WebMvcConfigurationSupport {
 
 	@Bean
 	TaskLauncher taskLauncher() {
-		return 	mock(TaskLauncher.class);
-
+		return mock(TaskLauncher.class);
 	}
+
 
 	@Bean
 	ApplicationConfigurationMetadataResolver metadataResolver() {
@@ -202,12 +199,12 @@ public class TaskServiceDependencies extends WebMvcConfigurationSupport {
 
 	@Bean
 	public DefaultTaskService defaultTaskService(TaskDefinitionRepository taskDefinitionRepository,
-			TaskExplorer taskExplorer, TaskRepository taskExecutionRepository, AppRegistryService appRegistry,
-			TaskLauncher taskLauncher, ApplicationConfigurationMetadataResolver metadataResolver,
-			TaskConfigurationProperties taskConfigurationProperties, AuditRecordService auditRecordService,
-			CommonApplicationProperties commonApplicationProperties, TaskValidationService taskValidationService) {
+												 TaskExplorer taskExplorer, TaskRepository taskExecutionRepository, AppRegistryService appRegistry,
+												 LauncherRepository launcherRepository, ApplicationConfigurationMetadataResolver metadataResolver,
+												 TaskConfigurationProperties taskConfigurationProperties, AuditRecordService auditRecordService,
+												 CommonApplicationProperties commonApplicationProperties, TaskValidationService taskValidationService) {
 		return new DefaultTaskService(this.dataSourceProperties, taskDefinitionRepository, taskExplorer,
-				taskExecutionRepository, appRegistry, taskLauncher, metadataResolver, taskConfigurationProperties,
+				taskExecutionRepository, appRegistry, launcherRepository, metadataResolver, taskConfigurationProperties,
 				auditRecordService, null, commonApplicationProperties,
 				taskValidationService);
 	}
