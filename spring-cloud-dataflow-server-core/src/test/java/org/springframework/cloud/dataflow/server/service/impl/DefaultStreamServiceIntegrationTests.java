@@ -54,6 +54,7 @@ import org.springframework.cloud.skipper.domain.Package;
 import org.springframework.cloud.skipper.domain.PackageIdentifier;
 import org.springframework.cloud.skipper.domain.PackageMetadata;
 import org.springframework.cloud.skipper.domain.Release;
+import org.springframework.cloud.skipper.domain.RollbackRequest;
 import org.springframework.cloud.skipper.domain.UpgradeRequest;
 import org.springframework.cloud.skipper.domain.UploadRequest;
 import org.springframework.hateoas.Resources;
@@ -233,6 +234,58 @@ public class DefaultStreamServiceIntegrationTests {
 		StreamDefinition streamDefinitionAfterDeploy = this.streamDefinitionRepository.findById("ticktock").get();
 		assertThat(streamDefinitionAfterDeploy.getDslText())
 				.isEqualTo("time --trigger.fixed-delay=200 | log --log.level=INFO");
+	}
+
+	@Test
+	public void testUpdateStreamDslOnRollback() throws IOException {
+
+		// Create stream
+		StreamDefinition streamDefinition = new StreamDefinition("ticktock",
+				"time --fixed-delay=100 | log --level=DEBUG");
+		this.streamDefinitionRepository.deleteById(streamDefinition.getName());
+		this.streamDefinitionRepository.save(streamDefinition);
+
+		when(skipperClient.status(eq("ticktock"))).thenThrow(new ReleaseNotFoundException(""));
+
+		streamService.deployStream("ticktock", createSkipperDeploymentProperties());
+
+		// Update Stream
+		StreamDefinition streamDefinitionBeforeDeploy = this.streamDefinitionRepository.findById("ticktock").get();
+		assertThat(streamDefinitionBeforeDeploy.getDslText())
+				.isEqualTo("time --fixed-delay=100 | log --level=DEBUG");
+
+		String expectedReleaseManifest = StreamUtils.copyToString(
+				TestResourceUtils.qualifiedResource(getClass(), "upgradeManifest.yml").getInputStream(),
+				Charset.defaultCharset());
+		Release release = new Release();
+		Manifest manifest = new Manifest();
+		manifest.setData(expectedReleaseManifest);
+		release.setManifest(manifest);
+		when(skipperClient.upgrade(isA(UpgradeRequest.class))).thenReturn(release);
+
+		Map<String, String> deploymentProperties = createSkipperDeploymentProperties();
+		deploymentProperties.put("version.log", "1.2.0.RELEASE");
+		streamService.updateStream("ticktock",
+				new UpdateStreamRequest("ticktock", new PackageIdentifier(), deploymentProperties));
+
+		StreamDefinition streamDefinitionAfterDeploy = this.streamDefinitionRepository.findById("ticktock").get();
+		assertThat(streamDefinitionAfterDeploy.getDslText())
+				.isEqualTo("time --trigger.fixed-delay=200 | log --log.level=INFO");
+
+		// Rollback Stream
+		String rollbackReleaseManifest = StreamUtils.copyToString(
+				TestResourceUtils.qualifiedResource(getClass(), "rollbackManifest.yml").getInputStream(),
+				Charset.defaultCharset());
+		Release rollbackRelease = new Release();
+		Manifest rollbackManifest = new Manifest();
+		rollbackManifest.setData(rollbackReleaseManifest);
+		rollbackRelease.setManifest(rollbackManifest);
+		when(skipperClient.rollback(isA(RollbackRequest.class))).thenReturn(rollbackRelease);
+
+		streamService.rollbackStream("ticktock", 0);
+		StreamDefinition streamDefinitionAfterRollback = this.streamDefinitionRepository.findById("ticktock").get();
+		assertThat(streamDefinitionAfterRollback.getDslText())
+				.isEqualTo("time --trigger.fixed-delay=100 | log --log.level=DEBUG");
 	}
 
 	@Test
