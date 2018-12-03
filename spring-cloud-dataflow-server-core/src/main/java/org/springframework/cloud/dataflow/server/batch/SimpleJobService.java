@@ -64,6 +64,7 @@ import org.springframework.util.CollectionUtils;
  *
  * @author Dave Syer
  * @author Michael Minella
+ * @author Glenn Renfro
  *
  */
 public class SimpleJobService implements JobService, DisposableBean {
@@ -314,6 +315,11 @@ public class SimpleJobService implements JobService, DisposableBean {
 	}
 
 	@Override
+	public Collection<JobExecutionWithStepCount> listJobExecutionsWithStepCount(int start, int count) {
+		return jobExecutionDao.getJobExecutionsWithStepCount(start, count);
+	}
+
+	@Override
 	public int countJobExecutions() {
 		return jobExecutionDao.countJobExecutions();
 	}
@@ -501,6 +507,14 @@ public class SimpleJobService implements JobService, DisposableBean {
 	}
 
 	@Override
+	public Collection<JobExecutionWithStepCount> listJobExecutionsForJobWithStepCount(String jobName, int start, int count)
+			throws NoSuchJobException {
+		checkJobExists(jobName);
+		List<JobExecutionWithStepCount> jobExecutions = jobExecutionDao.getJobExecutionsWithStepCount(jobName, start, count);
+		return jobExecutions;
+	}
+
+	@Override
 	public Collection<StepExecution> listStepExecutionsForStep(String jobName, String stepName, int start, int count)
 			throws NoSuchStepException {
 		if (stepExecutionDao.countStepExecutions(jobName, stepName) == 0) {
@@ -512,6 +526,11 @@ public class SimpleJobService implements JobService, DisposableBean {
 	@Override
 	public int countStepExecutionsForStep(String jobName, String stepName) throws NoSuchStepException {
 		return stepExecutionDao.countStepExecutions(jobName, stepName);
+	}
+
+	@Override
+	public int countStepExecutionsForJobExecution(long jobExecutionId) {
+		return stepExecutionDao.countStepExecutionsForJobExecution(jobExecutionId);
 	}
 
 	@Override

@@ -62,6 +62,7 @@ import org.springframework.cloud.dataflow.server.controller.AppRegistryControlle
 import org.springframework.cloud.dataflow.server.controller.AuditRecordController;
 import org.springframework.cloud.dataflow.server.controller.CompletionController;
 import org.springframework.cloud.dataflow.server.controller.JobExecutionController;
+import org.springframework.cloud.dataflow.server.controller.JobExecutionThinController;
 import org.springframework.cloud.dataflow.server.controller.JobInstanceController;
 import org.springframework.cloud.dataflow.server.controller.JobStepExecutionController;
 import org.springframework.cloud.dataflow.server.controller.JobStepExecutionProgressController;
@@ -246,6 +247,11 @@ public class DataFlowControllerAutoConfiguration {
 		@Bean
 		public JobExecutionController jobExecutionController(TaskJobService repository) {
 			return new JobExecutionController(repository);
+		}
+
+		@Bean
+		public JobExecutionThinController jobExecutionThinController(TaskJobService repository) {
+			return new JobExecutionThinController(repository);
 		}
 
 		@Bean

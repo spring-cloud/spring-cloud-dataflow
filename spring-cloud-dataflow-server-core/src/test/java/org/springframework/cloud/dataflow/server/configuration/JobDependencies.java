@@ -43,6 +43,7 @@ import org.springframework.cloud.dataflow.server.batch.JobService;
 import org.springframework.cloud.dataflow.server.batch.SimpleJobServiceFactoryBean;
 import org.springframework.cloud.dataflow.server.config.apps.CommonApplicationProperties;
 import org.springframework.cloud.dataflow.server.controller.JobExecutionController;
+import org.springframework.cloud.dataflow.server.controller.JobExecutionThinController;
 import org.springframework.cloud.dataflow.server.controller.JobInstanceController;
 import org.springframework.cloud.dataflow.server.controller.JobStepExecutionController;
 import org.springframework.cloud.dataflow.server.controller.JobStepExecutionProgressController;
@@ -131,6 +132,11 @@ public class JobDependencies {
 	@Bean
 	public JobExecutionController jobExecutionController(TaskJobService repository) {
 		return new JobExecutionController(repository);
+	}
+
+	@Bean
+	public JobExecutionThinController jobExecutionThinController(TaskJobService repository) {
+		return new JobExecutionThinController(repository);
 	}
 
 	@Bean

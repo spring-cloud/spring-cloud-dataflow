@@ -67,4 +67,13 @@ public interface SearchableStepExecutionDao extends StepExecutionDao {
 	 * @return the total number of step executions in the repository matching the pattern
 	 */
 	int countStepExecutions(String jobName, String stepName);
+
+	/**
+	 * Count all the step executions for a given job execution.
+	 * @param jobExecutionId the job execution to retrieve count from.
+	 *
+	 * @return the total number of step executions in the repository for the job execution
+	 */
+
+	int countStepExecutionsForJobExecution(long jobExecutionId);
 }

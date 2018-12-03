@@ -80,6 +80,7 @@ public class ApiDocumentation extends BaseDocumentation {
 				linkWithRel("completions/task").description("Exposes the DSL completion features for " + "Task"),
 				linkWithRel("metrics/streams").description("Exposes metrics for the stream " + "applications"),
 				linkWithRel("jobs/executions").description("Provides the JobExecution resource"),
+				linkWithRel("jobs/thinexecutions").description("Provides the JobExecution thin resource with no step executions included"),
 				linkWithRel("jobs/executions/execution")
 						.description("Provides details for a specific" + " JobExecution"),
 				linkWithRel("jobs/executions/execution/steps")
@@ -89,6 +90,7 @@ public class ApiDocumentation extends BaseDocumentation {
 				linkWithRel("jobs/executions/execution/steps/step/progress")
 						.description("Provides " + "progress information for a specific step"),
 				linkWithRel("jobs/executions/name").description("Retrieve Job Executions by Job name"),
+				linkWithRel("jobs/thinexecutions/name").description("Retrieve Job Executions by Job name with no step executions included"),
 				linkWithRel("jobs/instances/instance")
 						.description("Provides the job instance " + "resource for a specific job instance"),
 				linkWithRel("jobs/instances/name")
@@ -199,9 +201,13 @@ public class ApiDocumentation extends BaseDocumentation {
 						fieldWithPath("_links.tasks/validation.templated").type(JsonFieldType.BOOLEAN).optional()
 							.description("Link tasks/validation is templated"),
 						fieldWithPath("_links.jobs/executions.href").description("Link to the jobs/executions"),
+						fieldWithPath("_links.jobs/thinexecutions.href").description("Link to the jobs/thinexecutions"),
 						fieldWithPath("_links.jobs/executions/name.href").description("Link to the jobs/executions/name"),
 						fieldWithPath("_links.jobs/executions/name.templated").type(JsonFieldType.BOOLEAN).optional()
 							.description("Link jobs/executions/name is templated"),
+						fieldWithPath("_links.jobs/thinexecutions/name.href").description("Link to the jobs/thinexecutions/name"),
+						fieldWithPath("_links.jobs/thinexecutions/name.templated").type(JsonFieldType.BOOLEAN).optional()
+								.description("Link jobs/executions/name is templated"),
 						fieldWithPath("_links.jobs/executions/execution.href").description("Link to the jobs/executions/execution"),
 						fieldWithPath("_links.jobs/executions/execution.templated").type(JsonFieldType.BOOLEAN).optional()
 							.description("Link jobs/executions/execution is templated"),

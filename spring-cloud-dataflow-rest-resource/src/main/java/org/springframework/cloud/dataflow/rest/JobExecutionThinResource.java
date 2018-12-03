@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 the original author or authors.
+ * Copyright 2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,13 +14,14 @@
  * limitations under the License.
  */
 
-package org.springframework.cloud.dataflow.rest.resource;
+package org.springframework.cloud.dataflow.rest;
 
 import java.text.DateFormat;
 import java.util.Date;
 import java.util.Properties;
 import java.util.TimeZone;
 
+import org.springframework.batch.core.BatchStatus;
 import org.springframework.batch.core.JobExecution;
 import org.springframework.batch.core.JobInstance;
 import org.springframework.batch.core.JobParameters;
@@ -36,13 +37,13 @@ import org.springframework.hateoas.ResourceSupport;
 import org.springframework.util.Assert;
 
 /**
- * A HATEOAS representation of a JobExecution.
+ * A HATEOAS representation of a JobExecution without the StepExecutions.
  *
  * @author Glenn Renfro
- * @author Gunnar Hillert
- * @author Ilayaperumal Gopinathan
+ *
+ * @since 2.0
  */
-public class JobExecutionResource extends ResourceSupport {
+public class JobExecutionThinResource extends ResourceSupport {
 
 	private static final String LINE_SEPARATOR = System.getProperty("line.separator");
 
@@ -60,15 +61,17 @@ public class JobExecutionResource extends ResourceSupport {
 
 	private Long taskExecutionId;
 
+	private Long instanceId;
+
 	private String name;
 
 	private String startDate = "";
 
 	private String startTime = "";
 
-	private String duration = "";
+	private Date startDateTime = null;
 
-	private JobExecution jobExecution;
+	private String duration = "";
 
 	private Properties jobParameters;
 
@@ -88,18 +91,20 @@ public class JobExecutionResource extends ResourceSupport {
 
 	private final ArgumentSanitizer argumentSanitizer = new ArgumentSanitizer();
 
+	private BatchStatus status;
+
 	/**
 	 * Default constructor to be used by Jackson.
 	 */
 	@SuppressWarnings("unused")
-	private JobExecutionResource() {
+	private JobExecutionThinResource() {
 
 	}
 
-	public JobExecutionResource(TaskJobExecution taskJobExecution, TimeZone timeZone) {
+	public JobExecutionThinResource(TaskJobExecution taskJobExecution, TimeZone timeZone) {
 		Assert.notNull(taskJobExecution, "taskJobExecution must not be null");
 		this.taskExecutionId = taskJobExecution.getTaskId();
-		this.jobExecution = taskJobExecution.getJobExecution();
+		JobExecution jobExecution = taskJobExecution.getJobExecution();
 		this.timeZone = timeZone;
 		this.executionId = jobExecution.getId();
 		this.jobId = jobExecution.getJobId();
@@ -109,11 +114,13 @@ public class JobExecutionResource extends ResourceSupport {
 				this.argumentSanitizer.sanitizeJobParameters(jobExecution.getJobParameters()));
 		this.defined = taskJobExecution.isTaskDefined();
 		JobInstance jobInstance = jobExecution.getJobInstance();
+		this.status = taskJobExecution.getJobExecution().getStatus();
 		if (jobInstance != null) {
 			this.name = jobInstance.getJobName();
 			this.restartable = JobUtils.isJobExecutionRestartable(jobExecution);
 			this.abandonable = JobUtils.isJobExecutionAbandonable(jobExecution);
 			this.stoppable = JobUtils.isJobExecutionStoppable(jobExecution);
+			this.instanceId = jobExecution.getJobInstance().getInstanceId();
 		}
 		else {
 			this.name = "?";
@@ -129,6 +136,7 @@ public class JobExecutionResource extends ResourceSupport {
 			this.startTime = timeFormat.format(jobExecution.getStartTime());
 			Date endTime = jobExecution.getEndTime() != null ? jobExecution.getEndTime() : new Date();
 			this.duration = durationFormat.format(new Date(endTime.getTime() - jobExecution.getStartTime().getTime()));
+			this.startDateTime = jobExecution.getStartTime();
 		}
 
 	}
@@ -165,8 +173,8 @@ public class JobExecutionResource extends ResourceSupport {
 		return duration;
 	}
 
-	public JobExecution getJobExecution() {
-		return jobExecution;
+	public Long getInstanceId() {
+		return instanceId;
 	}
 
 	public boolean isRestartable() {
@@ -187,6 +195,14 @@ public class JobExecutionResource extends ResourceSupport {
 
 	public Properties getJobParameters() {
 		return jobParameters;
+	}
+
+	public BatchStatus getStatus() {
+		return status;
+	}
+
+	public Date getStartDateTime() {
+		return startDateTime;
 	}
 
 	public long getTaskExecutionId() {
@@ -213,6 +229,6 @@ public class JobExecutionResource extends ResourceSupport {
 
 	}
 
-	public static class Page extends PagedResources<JobExecutionResource> {
+	public static class Page extends PagedResources<JobExecutionThinResource> {
 	}
 }

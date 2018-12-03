@@ -43,6 +43,7 @@ import org.springframework.batch.core.step.tasklet.Tasklet;
  * special-purpose optimisations via a relation database, for instance).
  * 
  * @author Dave Syer
+ * @author Glenn Renfro
  * 
  */
 public interface JobService {
@@ -214,6 +215,18 @@ public interface JobService {
 	Collection<JobExecution> listJobExecutionsForJob(String jobName, int start, int count) throws NoSuchJobException;
 
 	/**
+	 * List the {@link JobExecutionWithStepCount job executions} for a job in descending
+	 * order of creation (usually close to execution order).
+	 *
+	 * @param jobName the job name
+	 * @param start the start index of the first job execution
+	 * @param count the maximum number of executions to return
+	 * @return a collection of {@link JobExecutionWithStepCount}
+	 * @throws NoSuchJobException
+	 */
+	Collection<JobExecutionWithStepCount> listJobExecutionsForJobWithStepCount(String jobName, int start, int count) throws NoSuchJobException;
+
+	/**
 	 * Count the job executions in the repository for a job.
 	 * 
 	 * @param jobName the job name
@@ -244,6 +257,16 @@ public interface JobService {
 	 * @return a collection of {@link JobExecution}
 	 */
 	Collection<JobExecution> listJobExecutions(int start, int count);
+
+	/**
+	 * List the {@link JobExecutionWithStepCount JobExecutions} in descending order of
+	 * creation (usually close to execution order) without step execution data.
+	 *
+	 * @param start the index of the first execution to return
+	 * @param count the maximum number of executions
+	 * @return a collection of {@link JobExecutionWithStepCount}
+	 */
+	Collection<JobExecutionWithStepCount> listJobExecutionsWithStepCount(int start, int count);
 
 	/**
 	 * Count the maximum number of executions that could be returned by
@@ -299,6 +322,14 @@ public interface JobService {
 	 * @throws NoSuchStepException
 	 */
 	int countStepExecutionsForStep(String jobName, String stepName) throws NoSuchStepException;
+
+	/**
+	 * Count the step executions in the repository for a given job execution.
+	 * @param jobExecutionId the id of the job execution.
+	 *
+	 * @return the number of executions.
+	 */
+	int countStepExecutionsForJobExecution(long jobExecutionId);
 
 	/**
 	 * Locate a {@link StepExecution} from its id and that of its parent

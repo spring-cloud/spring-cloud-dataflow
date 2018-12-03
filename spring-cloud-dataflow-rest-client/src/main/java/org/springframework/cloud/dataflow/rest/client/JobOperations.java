@@ -16,6 +16,7 @@
 
 package org.springframework.cloud.dataflow.rest.client;
 
+import org.springframework.cloud.dataflow.rest.JobExecutionThinResource;
 import org.springframework.cloud.dataflow.rest.resource.JobExecutionResource;
 import org.springframework.cloud.dataflow.rest.resource.JobInstanceResource;
 import org.springframework.cloud.dataflow.rest.resource.StepExecutionProgressInfoResource;
@@ -35,10 +36,23 @@ public interface JobOperations {
 	PagedResources<JobExecutionResource> executionList();
 
 	/**
+	 * @return the list job executions without step executions known to the system.
+	 */
+	PagedResources<JobExecutionThinResource> executionThinList();
+
+	/**
 	 * @param jobName the name of the job
 	 * @return the list job instances for the specified jobName.
 	 */
 	PagedResources<JobInstanceResource> instanceList(String jobName);
+
+	/**
+	 * List job executions without step executions known to the system filtered by job name.
+	 *
+	 * @param jobName of the executions.
+	 * @return the list of job executions
+	 */
+	PagedResources<JobExecutionThinResource> executionThinListByJobName(String jobName);
 
 	/**
 	 * List job executions known to the system filtered by job name.
@@ -47,6 +61,7 @@ public interface JobOperations {
 	 * @return the list of job executions
 	 */
 	PagedResources<JobExecutionResource> executionListByJobName(String jobName);
+
 
 	/**
 	 * Return the {@link JobExecutionResource} for the id specified.
