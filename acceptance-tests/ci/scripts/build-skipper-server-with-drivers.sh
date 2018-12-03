@@ -6,8 +6,8 @@ repository=$(pwd)/distribution-repository
 
 pushd git-repo > /dev/null
 pushd $BASE_PATH > /dev/null
-pushd custom-apps/skipper-server-with-drivers$APP_VERSION > /dev/null
-./gradlew clean build install -Dmaven.repo.local=${repository}
+pushd custom-apps/$APP_TEMPLATE > /dev/null
+./gradlew clean build install -Dmaven.repo.local=${repository} -PprojectBuildVersion=$SKIPPER_VERSION -PspringCloudSkipperVersion=$SKIPPER_VERSION -PjarPostfix=$APP_VERSION
 popd > /dev/null
 popd > /dev/null
 popd > /dev/null

@@ -1,12 +1,16 @@
 buildscript {
 	ext {
-		springBootVersion = '1.5.9.RELEASE'
-		oracleJdbcDriverVersion = '12.2.0.1'
-		springCloudVersion = 'Dalston.SR5'
-		springCloudSkipperVersion = '1.1.0.RELEASE'
-		reactorVersion = 'Aluminium-SR3'
-		reactorNettyVersion = '0.6.6.RELEASE'
-		objenesisVersion = '2.1'
+		jarPostfix = project.properties['jarPostfix'] ?: '11x'
+		projectBuildVersion = project.properties['projectBuildVersion'] ?: '1.1.3.BUILD-SNAPSHOT'
+		springBootVersion = project.properties['springBootVersion'] ?: '1.5.9.RELEASE'
+		oracleJdbcDriverVersion = project.properties['oracleJdbcDriverVersion'] ?: '12.2.0.1'
+		mssqlJdbcDriverVersion = project.properties['mssqlJdbcDriverVersion'] ?: '7.0.0.jre8'
+		db2JdbcDriverVersion = project.properties['db2JdbcDriverVersion'] ?: '4.19.26'
+		springCloudVersion = project.properties['springCloudVersion'] ?: 'Dalston.SR5'
+		springCloudSkipperVersion = project.properties['springCloudSkipperVersion'] ?: '1.1.3.BUILD-SNAPSHOT'
+		reactorVersion = project.properties['reactorVersion'] ?: 'Aluminium-SR3'
+		reactorNettyVersion = project.properties['reactorNettyVersion'] ?: '0.6.6.RELEASE'
+		objenesisVersion = project.properties['objenesisVersion'] ?: '2.1'
 	}
 	repositories {
 		mavenCentral()
@@ -22,8 +26,12 @@ apply plugin: 'maven'
 apply plugin: 'org.springframework.boot'
 
 group = 'org.springframework.cloud.skipper.acceptance.app'
-version = '1.1.0.RELEASE'
+version = "${projectBuildVersion}"
 sourceCompatibility = 1.8
+
+jar {
+	baseName = "skipper-server-with-drivers${jarPostfix}"
+}
 
 repositories {
 	mavenCentral()
@@ -43,6 +51,8 @@ repositories {
 dependencies {
 	compile('org.springframework.cloud:spring-cloud-starter-skipper-server')
 	runtime("com.oracle.jdbc:ojdbc8:${oracleJdbcDriverVersion}")
+	runtime("com.microsoft.sqlserver:mssql-jdbc:${mssqlJdbcDriverVersion}")
+	runtime("com.ibm.db2:db2jcc4:${db2JdbcDriverVersion}")
 	testCompile('org.springframework.boot:spring-boot-starter-test')
 }
 

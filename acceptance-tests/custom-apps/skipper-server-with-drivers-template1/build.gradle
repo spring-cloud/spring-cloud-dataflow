@@ -1,9 +1,11 @@
 buildscript {
 	ext {
-		springBootVersion = '1.5.9.RELEASE'
-		springCloudSkipperVersion = '1.0.1.RELEASE'
-		oracleJdbcDriverVersion = '12.2.0.1'
-		flywayVersion = '5.0.5'
+		jarPostfix = project.properties['jarPostfix'] ?: '100'
+		projectBuildVersion = project.properties['projectBuildVersion'] ?: '1.0.0.BUILD-SNAPSHOT'
+		springBootVersion = project.properties['springBootVersion'] ?: '1.5.9.RELEASE'
+		springCloudSkipperVersion = project.properties['springCloudSkipperVersion'] ?: '1.0.0.BUILD-SNAPSHOT'
+		oracleJdbcDriverVersion = project.properties['oracleJdbcDriverVersion'] ?: '12.2.0.1'
+		flywayVersion = project.properties['flywayVersion'] ?: '5.0.5'
 	}
 	repositories {
 		mavenCentral()
@@ -19,8 +21,12 @@ apply plugin: 'eclipse'
 apply plugin: 'org.springframework.boot'
 
 group = 'org.springframework.cloud.skipper.acceptance.app'
-version = '1.0.1.RELEASE'
+version = "${projectBuildVersion}"
 sourceCompatibility = 1.8
+
+jar {
+	baseName = "skipper-server-with-drivers${jarPostfix}"
+}
 
 repositories {
 	mavenCentral()
@@ -44,4 +50,3 @@ dependencies {
     runtime("org.flywaydb:flyway-core:${flywayVersion}")
 	testCompile('org.springframework.boot:spring-boot-starter-test')
 }
-
