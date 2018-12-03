@@ -46,6 +46,7 @@ import org.springframework.cloud.deployer.resource.maven.MavenProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.io.FileSystemResourceLoader;
+import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.util.Assert;
 
@@ -59,6 +60,7 @@ import static org.mockito.Mockito.mock;
  */
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = TestDependencies.class)
+@DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
 @SuppressWarnings("unchecked")
 public class TabOnTapCompletionProviderTests {
 
