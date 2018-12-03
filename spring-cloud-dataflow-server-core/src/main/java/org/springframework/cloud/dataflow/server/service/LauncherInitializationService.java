@@ -36,10 +36,10 @@ public class LauncherInitializationService {
 	private final Logger logger = LoggerFactory
 			.getLogger(LauncherInitializationService.class);
 	private final List<TaskPlatform> platforms;
-	private LauncherRepository deployerRepository;
+	private LauncherRepository launcherRepository;
 
-	public LauncherInitializationService(LauncherRepository deployerRepository, List<TaskPlatform> platforms) {
-		this.deployerRepository = deployerRepository;
+	public LauncherInitializationService(LauncherRepository launcherRepository, List<TaskPlatform> platforms) {
+		this.launcherRepository = launcherRepository;
 		this.platforms = platforms;
 	}
 
@@ -65,12 +65,12 @@ public class LauncherInitializationService {
 			}
 		}
 		this.platforms.forEach(platform -> {
-			platform.getLaunchers().forEach(deployer -> {
-				this.deployerRepository.save(deployer);
+			platform.getLaunchers().forEach(launcher -> {
+				this.launcherRepository.save(launcher);
 				logger.info(String.format(
 						"Added '%s' platform account '%s' into Task Launcher repository.",
 						platform.getName(),
-						deployer.getName()));
+						launcher.getName()));
 			});
 		});
 	}
