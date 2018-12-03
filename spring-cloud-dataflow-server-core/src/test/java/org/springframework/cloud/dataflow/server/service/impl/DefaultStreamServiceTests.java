@@ -16,6 +16,7 @@
 
 package org.springframework.cloud.dataflow.server.service.impl;
 
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -48,11 +49,14 @@ import org.springframework.cloud.dataflow.server.service.AuditRecordService;
 import org.springframework.cloud.dataflow.server.service.impl.validation.DefaultStreamValidationService;
 import org.springframework.cloud.dataflow.server.stream.SkipperStreamDeployer;
 import org.springframework.cloud.dataflow.server.stream.StreamDeploymentRequest;
+import org.springframework.cloud.dataflow.server.support.TestResourceUtils;
 import org.springframework.cloud.deployer.spi.app.DeploymentState;
 import org.springframework.cloud.deployer.spi.core.AppDeploymentRequest;
 import org.springframework.cloud.skipper.domain.Deployer;
+import org.springframework.cloud.skipper.domain.Manifest;
 import org.springframework.cloud.skipper.domain.Release;
 import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.util.StreamUtils;
 
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyInt;
@@ -174,10 +178,17 @@ public class DefaultStreamServiceTests {
 	}
 
 	@Test
-	public void verifyRollbackStream() {
+	public void verifyRollbackStream() throws Exception {
 		StreamDefinition streamDefinition2 = new StreamDefinition("test2", "time | log");
-
 		verifyNoMoreInteractions(this.skipperStreamDeployer);
+		Release release = new Release();
+		Manifest manifest = new Manifest();
+		String rollbackReleaseManifestData = StreamUtils.copyToString(
+				TestResourceUtils.qualifiedResource(getClass(), "rollbackManifest.yml").getInputStream(),
+				Charset.defaultCharset());
+		manifest.setData(rollbackReleaseManifestData);
+		release.setManifest(manifest);
+		when(this.skipperStreamDeployer.rollbackStream(streamDefinition2.getName(), 0)).thenReturn(release);
 		this.defaultStreamService.rollbackStream(streamDefinition2.getName(), 0);
 		verify(this.skipperStreamDeployer, times(1)).rollbackStream(streamDefinition2.getName(), 0);
 	}
