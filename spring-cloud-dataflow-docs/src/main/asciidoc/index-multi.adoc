@@ -1,0 +1,12 @@
+= Spring Cloud Data Flow Reference Guides
+
+Spring Cloud Data Flow can run locally, on Cloud Foundry, or on Kubernetes. The following
+guides describe how to use Spring Cloud Data Flow in each case:
+
+
+[horizontal]
+<<local.adoc,Local>> :: How to use Spring Cloud Data Flow from a local server.
+<<kubernetes.adoc,Kubernetes>> :: How to use Spring Cloud Data Flow from a Kubernetes
+server.
+<<cloud-foundry.adoc,Cloud Foundry>> :: How to use Spring Cloud Data Flow from a Cloud
+Foundry server.
