@@ -47,7 +47,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  */
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = TestDependencies.class)
-@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
+@DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
 @TestPropertySource(properties = {
 		"spring.cloud.dataflow.version-info.dependencies.spring-cloud-dataflow-implementation.version=1.2.3.IMPLEMENTATION.TEST",
 		"spring.cloud.dataflow.version-info.dependencies.spring-cloud-dataflow-core.version=1.2.3.CORE.TEST",
@@ -103,7 +103,7 @@ public class AboutControllerTests {
 
 	@RunWith(SpringRunner.class)
 	@SpringBootTest(classes = TestDependencies.class)
-	@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
+	@DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
 	@TestPropertySource(properties = {
 			"spring.cloud.dataflow.version-info.dependencies.spring-cloud-dataflow-shell.version=1.2.3.SHELL.TEST",
 			"spring.cloud.dataflow.version-info.dependency-fetch.enabled=false",
@@ -140,7 +140,7 @@ public class AboutControllerTests {
 
 	@RunWith(SpringRunner.class)
 	@SpringBootTest(classes = TestDependencies.class)
-	@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
+	@DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
 	@TestPropertySource(properties = {
 			"spring.cloud.dataflow.version-info.dependencies.spring-cloud-dataflow-shell.version=1.2.3.M1",
 			"spring.cloud.dataflow.version-info.dependency-fetch.enabled=false",
@@ -177,7 +177,7 @@ public class AboutControllerTests {
 
 	@RunWith(SpringRunner.class)
 	@SpringBootTest(classes = TestDependencies.class)
-	@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
+	@DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
 	@TestPropertySource(properties = {
 			"spring.cloud.dataflow.version-info.dependencies.spring-cloud-dataflow-shell.version=1.2.3.RC1",
 			"spring.cloud.dataflow.version-info.dependency-fetch.enabled=false",
@@ -213,7 +213,7 @@ public class AboutControllerTests {
 
 	@RunWith(SpringRunner.class)
 	@SpringBootTest(classes = TestDependencies.class)
-	@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
+	@DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
 	@TestPropertySource(properties = {
 			"spring.cloud.dataflow.version-info.dependencies.spring-cloud-dataflow-shell.version=1.2.3.GA",
 			"spring.cloud.dataflow.version-info.dependency-fetch.enabled=false",
@@ -246,7 +246,7 @@ public class AboutControllerTests {
 
 	@RunWith(SpringRunner.class)
 	@SpringBootTest(classes = TestDependencies.class)
-	@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
+	@DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
 	@TestPropertySource(properties = {
 			"spring.cloud.dataflow.version-info.dependencies.spring-cloud-dataflow-shell.version=1.2.3.RELEASE",
 			"spring.cloud.dataflow.version-info.dependency-fetch.enabled=false",
@@ -282,7 +282,7 @@ public class AboutControllerTests {
 
 	@RunWith(SpringRunner.class)
 	@SpringBootTest(classes = TestDependencies.class)
-	@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
+	@DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
 	@TestPropertySource(properties = {
 			"spring.cloud.dataflow.version-info.dependencies.spring-cloud-dataflow-shell.version=1.2.3.RELEASE",
 			"spring.cloud.dataflow.version-info.dependency-fetch.enabled=true",
@@ -319,7 +319,7 @@ public class AboutControllerTests {
 
 	@RunWith(SpringRunner.class)
 	@SpringBootTest(classes = TestDependencies.class)
-	@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
+	@DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
 	@TestPropertySource(properties = {
 			"spring.cloud.dataflow.version-info.dependencies.spring-cloud-dataflow-implementation.version=1.2.3.IMPLEMENTATION.TEST",
 			"spring.cloud.dataflow.version-info.dependencies.spring-cloud-dataflow-core.version=1.2.3.CORE.TEST",

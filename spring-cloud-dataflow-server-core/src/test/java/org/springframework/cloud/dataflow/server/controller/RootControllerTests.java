@@ -52,7 +52,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 		properties = { "spring.datasource.url=jdbc:h2:tcp://localhost:19092/mem:dataflow",
 		"spring.cloud.dataflow.features.analytics-enabled=false"})
 @EnableConfigurationProperties({ CommonApplicationProperties.class })
-@DirtiesContext(classMode = ClassMode.AFTER_EACH_TEST_METHOD)
+@DirtiesContext(classMode = ClassMode.BEFORE_EACH_TEST_METHOD)
 @Transactional
 public class RootControllerTests {
 
