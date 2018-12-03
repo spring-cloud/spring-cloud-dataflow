@@ -263,7 +263,9 @@ public class DefaultStreamService implements StreamService {
 	public void rollbackStream(String streamName, int releaseVersion) {
 		Assert.isTrue(StringUtils.hasText(streamName), "Stream name must not be null");
 		Release release = this.skipperStreamDeployer.rollbackStream(streamName, releaseVersion);
-		updateStreamDefinitionFromReleaseManifest(streamName, release.getManifest().getData());
+		if (release != null && release.getManifest() != null) {
+			updateStreamDefinitionFromReleaseManifest(streamName, release.getManifest().getData());
+		}
 		this.auditRecordService.populateAndSaveAuditRecord(AuditOperationType.STREAM, AuditActionType.ROLLBACK,
 				streamName, "Rollback to version: " + releaseVersion);
 	}
