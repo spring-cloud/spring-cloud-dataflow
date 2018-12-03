@@ -1,12 +1,11 @@
 = Spring Cloud Data Flow Reference Guides
-
+:scdf-core-git: master
+:dataflow-asciidoc: https://raw.githubusercontent.com/spring-cloud/spring-cloud-dataflow-server-cloudfoundry/edit/master/spring-cloud-dataflow-docs/src/main/asciidoc
+https://raw.githubusercontent.com/spring-cloud/spring-cloud-dataflow-server-cloudfoundry/edit/master/spring-cloud-dataflow-server-cloudfoundry-docs/src/main/asciidoc/index.adoc
 Spring Cloud Data Flow can run locally, on Cloud Foundry, or on Kubernetes. The following
 guides describe how to use Spring Cloud Data Flow in each case:
 
-
 [horizontal]
-<<local.adoc,Local>> :: How to use Spring Cloud Data Flow from a local server.
-<<kubernetes.adoc,Kubernetes>> :: How to use Spring Cloud Data Flow from a Kubernetes
-server.
-<<cloud-foundry.adoc,Cloud Foundry>> :: How to use Spring Cloud Data Flow from a Cloud
-Foundry server.
+https://raw.githubusercontent.com/spring-cloud/spring-cloud-dataflow/master/spring-cloud-dataflow-docs/src/main/asciidoc/index.adoc[Local] :: How to use Spring Cloud Data Flow from a local server.
+https://raw.githubusercontent.com/spring-cloud/spring-cloud-dataflow-server-kubernetes/master/spring-cloud-dataflow-server-kubernetes-docs/src/main/asciidoc/index.adoc[Kubernetes] :: How to use Spring Cloud Data Flow from a Kubernetes server.
+https://raw.githubusercontent.com/spring-cloud/spring-cloud-dataflow-server-cloudfoundry/master/spring-cloud-dataflow-server-cloudfoundry-docs/src/main/asciidoc/index.adoc[Cloud Foundry] :: How to use Spring Cloud Data Flow from a Cloud Foundry server.
