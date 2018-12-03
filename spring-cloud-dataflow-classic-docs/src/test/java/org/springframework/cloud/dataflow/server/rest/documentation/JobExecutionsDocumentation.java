@@ -109,6 +109,27 @@ public class JobExecutionsDocumentation extends BaseDocumentation {
 	}
 
 	@Test
+	public void listJobExecutionsJobExecutionInfoOnly() throws Exception {
+		this.mockMvc.perform(
+				get("/jobs/executions/jobexecutioninfoonly")
+						.param("page", "0")
+						.param("size", "10"))
+				.andDo(print())
+				.andExpect(status().isOk()).andDo(this.documentationHandler.document(
+				requestParameters(
+						parameterWithName("page")
+								.description("The zero-based page number (optional)"),
+						parameterWithName("size")
+								.description("The requested page size (optional)")),
+				responseFields(
+						subsectionWithPath("_embedded.jobExecutionResourceList")
+								.description("Contains a collection of Job Executions without step executions included/"),
+						subsectionWithPath("_links.self").description("Link to the job execution resource"),
+						subsectionWithPath("page").description("Pagination properties")
+				)));
+	}
+
+	@Test
 	public void listJobExecutionsByName() throws Exception {
 		this.mockMvc.perform(
 				get("/jobs/executions")

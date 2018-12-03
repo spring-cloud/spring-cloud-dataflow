@@ -80,6 +80,7 @@ public class ApiDocumentation extends BaseDocumentation {
 				linkWithRel("completions/task").description("Exposes the DSL completion features for " + "Task"),
 				linkWithRel("metrics/streams").description("Exposes metrics for the stream " + "applications"),
 				linkWithRel("jobs/executions").description("Provides the JobExecution resource"),
+				linkWithRel("jobs/executions/jobexecutioninfoonly").description("Provides the JobExecution resource with no step executions included"),
 				linkWithRel("jobs/executions/execution")
 						.description("Provides details for a specific" + " JobExecution"),
 				linkWithRel("jobs/executions/execution/steps")
@@ -199,6 +200,7 @@ public class ApiDocumentation extends BaseDocumentation {
 						fieldWithPath("_links.tasks/validation.templated").type(JsonFieldType.BOOLEAN).optional()
 							.description("Link tasks/validation is templated"),
 						fieldWithPath("_links.jobs/executions.href").description("Link to the jobs/executions"),
+						fieldWithPath("_links.jobs/executions/jobexecutioninfoonly.href").description("Link to the jobs/executions/jobexecutioninfoonly"),
 						fieldWithPath("_links.jobs/executions/name.href").description("Link to the jobs/executions/name"),
 						fieldWithPath("_links.jobs/executions/name.templated").type(JsonFieldType.BOOLEAN).optional()
 							.description("Link jobs/executions/name is templated"),

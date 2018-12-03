@@ -103,7 +103,7 @@ public class JobExecutionResource extends ResourceSupport {
 		this.timeZone = timeZone;
 		this.executionId = jobExecution.getId();
 		this.jobId = jobExecution.getJobId();
-		this.stepExecutionCount = jobExecution.getStepExecutions().size();
+		this.stepExecutionCount = taskJobExecution.getStepExecutionCount();
 		this.jobParameters =converter.getProperties(jobExecution.getJobParameters());
 		this.jobParametersString = fromJobParameters(
 				this.argumentSanitizer.sanitizeJobParameters(jobExecution.getJobParameters()));

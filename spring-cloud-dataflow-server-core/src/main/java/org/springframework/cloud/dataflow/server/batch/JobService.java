@@ -43,6 +43,7 @@ import org.springframework.batch.core.step.tasklet.Tasklet;
  * special-purpose optimisations via a relation database, for instance).
  * 
  * @author Dave Syer
+ * @author Glenn Renfro
  * 
  */
 public interface JobService {
@@ -299,6 +300,14 @@ public interface JobService {
 	 * @throws NoSuchStepException
 	 */
 	int countStepExecutionsForStep(String jobName, String stepName) throws NoSuchStepException;
+
+	/**
+	 * Count the step executions in the repository for a given job execution.
+	 * @param jobExecutionId the id of the job execution.
+	 *
+	 * @return the number of executions.
+	 */
+	int countStepExecutionsForJobExecution(long jobExecutionId);
 
 	/**
 	 * Locate a {@link StepExecution} from its id and that of its parent

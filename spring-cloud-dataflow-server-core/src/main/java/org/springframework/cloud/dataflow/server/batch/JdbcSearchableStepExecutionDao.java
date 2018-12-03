@@ -46,7 +46,7 @@ import org.springframework.util.Assert;
 /**
  * @author Dave Syer
  * @author Michael Minella
- * 
+ * @author Glenn Renfro
  */
 public class JdbcSearchableStepExecutionDao extends JdbcStepExecutionDao implements SearchableStepExecutionDao {
 
@@ -55,6 +55,9 @@ public class JdbcSearchableStepExecutionDao extends JdbcStepExecutionDao impleme
 
 	private static final String COUNT_STEP_EXECUTIONS_FOR_STEP = "SELECT COUNT(STEP_EXECUTION_ID) from %PREFIX%STEP_EXECUTION S, %PREFIX%JOB_EXECUTION E, %PREFIX%JOB_INSTANCE I "
 			+ "where S.JOB_EXECUTION_ID = E.JOB_EXECUTION_ID AND E.JOB_INSTANCE_ID = I.JOB_INSTANCE_ID AND I.JOB_NAME = ? AND S.STEP_NAME = ?";
+
+	private static final String COUNT_STEP_EXECUTIONS_FOR_JOB_EXECUTION = "SELECT COUNT(STEP_EXECUTION_ID) from %PREFIX%STEP_EXECUTION S, %PREFIX%JOB_EXECUTION E "
+			+ "where S.JOB_EXECUTION_ID = E.JOB_EXECUTION_ID and E.JOB_EXECUTION_ID = ?";
 
 	private static final String COUNT_STEP_EXECUTIONS_FOR_STEP_PATTERN = "SELECT COUNT(STEP_EXECUTION_ID) from %PREFIX%STEP_EXECUTION S, %PREFIX%JOB_EXECUTION E, %PREFIX%JOB_INSTANCE I"
 			+ " where S.JOB_EXECUTION_ID = E.JOB_EXECUTION_ID AND E.JOB_INSTANCE_ID = I.JOB_INSTANCE_ID AND I.JOB_NAME = ? AND S.STEP_NAME like ?";
@@ -163,6 +166,11 @@ public class JdbcSearchableStepExecutionDao extends JdbcStepExecutionDao impleme
 					stepName.replace("*", "%"));
 		}
 		return getJdbcTemplate().queryForObject(getQuery(COUNT_STEP_EXECUTIONS_FOR_STEP), Integer.class, jobName, stepName);
+	}
+
+	@Override
+	public int countStepExecutionsForJobExecution(long jobExecutionId) {
+		return getJdbcTemplate().queryForObject(getQuery(COUNT_STEP_EXECUTIONS_FOR_JOB_EXECUTION), Integer.class, jobExecutionId);
 	}
 
 	/**

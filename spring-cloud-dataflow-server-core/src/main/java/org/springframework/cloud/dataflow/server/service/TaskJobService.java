@@ -145,4 +145,13 @@ public interface TaskJobService {
 	 * @see org.springframework.cloud.dataflow.server.batch.JobService#stop(Long)
 	 */
 	void stopJobExecution(long jobExecutionId) throws NoSuchJobExecutionException, JobExecutionNotRunningException;
+
+	/**
+	 * Retrieves Pageable list of {@link JobExecution}s from the JobRepository and matches the
+	 * data with a task id but excludes the step executions.
+	 *
+	 * @param pageable enumerates the data to be returned.
+	 * @return List containing {@link TaskJobExecution}s.
+	 */
+	public List<TaskJobExecution> listJobExecutionsJobExecutionInfoOnly(Pageable pageable) throws NoSuchJobExecutionException;
 }

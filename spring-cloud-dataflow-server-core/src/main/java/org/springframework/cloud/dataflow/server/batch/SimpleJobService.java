@@ -64,6 +64,7 @@ import org.springframework.util.CollectionUtils;
  *
  * @author Dave Syer
  * @author Michael Minella
+ * @author Glenn Renfro
  *
  */
 public class SimpleJobService implements JobService, DisposableBean {
@@ -512,6 +513,11 @@ public class SimpleJobService implements JobService, DisposableBean {
 	@Override
 	public int countStepExecutionsForStep(String jobName, String stepName) throws NoSuchStepException {
 		return stepExecutionDao.countStepExecutions(jobName, stepName);
+	}
+
+	@Override
+	public int countStepExecutionsForJobExecution(long jobExecutionId) {
+		return stepExecutionDao.countStepExecutionsForJobExecution(jobExecutionId);
 	}
 
 	@Override

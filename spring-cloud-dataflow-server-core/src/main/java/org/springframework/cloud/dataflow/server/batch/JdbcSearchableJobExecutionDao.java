@@ -43,7 +43,7 @@ import org.springframework.util.Assert;
 /**
  * @author Dave Syer
  * @author Michael Minella
- * 
+ *
  */
 public class JdbcSearchableJobExecutionDao extends JdbcJobExecutionDao implements SearchableJobExecutionDao {
 

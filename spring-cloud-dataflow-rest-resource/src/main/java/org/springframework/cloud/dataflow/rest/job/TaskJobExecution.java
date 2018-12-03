@@ -31,11 +31,18 @@ public class TaskJobExecution {
 
 	private final JobExecution jobExecution;
 
+	private final int stepExecutionCount;
+
 	public TaskJobExecution(long taskId, JobExecution jobExecution, boolean isTaskDefined) {
+		this(taskId, jobExecution, isTaskDefined, 0);
+	}
+
+	public TaskJobExecution(long taskId, JobExecution jobExecution, boolean isTaskDefined, int stepExecutionCount) {
 		Assert.notNull(jobExecution, "jobExecution must not be null");
 		this.taskId = taskId;
 		this.jobExecution = jobExecution;
 		this.isTaskDefined = isTaskDefined;
+		this.stepExecutionCount = stepExecutionCount;
 	}
 
 	/**
@@ -58,5 +65,13 @@ public class TaskJobExecution {
 	 */
 	public boolean isTaskDefined() {
 		return isTaskDefined;
+	}
+
+	/**
+	 * The number of steps executions contained in the job execution.
+	 * @return int containing the number of step executions.
+	 */
+	public int getStepExecutionCount() {
+		return stepExecutionCount;
 	}
 }

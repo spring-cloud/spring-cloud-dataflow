@@ -143,6 +143,8 @@ public class RootController {
 				root.add(new Link(scheduleTemplated).withRel("tasks/schedules/instances"));
 			}
 			root.add(entityLinks.linkToCollectionResource(JobExecutionResource.class).withRel("jobs/executions"));
+			taskTemplated = entityLinks.linkToCollectionResource(JobExecutionResource.class).getHref() + "/jobexecutioninfoonly";
+			root.add(new Link(taskTemplated).withRel("jobs/executions/jobexecutioninfoonly"));
 			taskTemplated = entityLinks.linkToCollectionResource(JobExecutionResource.class).getHref() + "{?name}";
 			root.add(new Link(taskTemplated).withRel("jobs/executions/name"));
 			root.add(unescapeTemplateVariables(entityLinks.linkToSingleResource(JobExecutionResource.class, "{id}")

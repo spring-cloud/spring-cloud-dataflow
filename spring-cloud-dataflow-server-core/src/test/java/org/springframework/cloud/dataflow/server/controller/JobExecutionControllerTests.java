@@ -28,24 +28,32 @@ import org.springframework.batch.core.BatchStatus;
 import org.springframework.batch.core.JobExecution;
 import org.springframework.batch.core.JobInstance;
 import org.springframework.batch.core.JobParameters;
+import org.springframework.batch.core.StepExecution;
 import org.springframework.batch.core.repository.JobRepository;
+import org.springframework.batch.item.ExecutionContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.batch.BatchProperties;
 import org.springframework.boot.autoconfigure.context.PropertyPlaceholderAutoConfiguration;
 import org.springframework.boot.autoconfigure.jdbc.EmbeddedDataSourceConfiguration;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.cloud.dataflow.rest.job.support.ISO8601DateFormatWithMilliSeconds;
 import org.springframework.cloud.dataflow.server.config.apps.CommonApplicationProperties;
 import org.springframework.cloud.dataflow.server.configuration.JobDependencies;
+import org.springframework.cloud.dataflow.server.job.support.ExecutionContextJacksonMixIn;
+import org.springframework.cloud.dataflow.server.job.support.StepExecutionJacksonMixIn;
 import org.springframework.cloud.task.batch.listener.TaskBatchDao;
 import org.springframework.cloud.task.repository.TaskExecution;
 import org.springframework.cloud.task.repository.dao.TaskExecutionDao;
 import org.springframework.http.MediaType;
+import org.springframework.http.converter.HttpMessageConverter;
+import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
+import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter;
 
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.hasSize;
@@ -97,6 +105,9 @@ public class JobExecutionControllerTests {
 	@Autowired
 	private WebApplicationContext wac;
 
+	@Autowired
+	private RequestMappingHandlerAdapter adapter;
+
 	@Before
 	public void setupMockMVC() {
 		this.mockMvc = MockMvcBuilders.webAppContextSetup(wac)
@@ -107,6 +118,14 @@ public class JobExecutionControllerTests {
 		createSampleJob(JOB_NAME_COMPLETED, 1, BatchStatus.COMPLETED);
 		createSampleJob(JOB_NAME_STARTED, 1, BatchStatus.STARTED);
 		createSampleJob(JOB_NAME_STOPPED, 1, BatchStatus.STOPPED);
+		for (HttpMessageConverter<?> converter : adapter.getMessageConverters()) {
+			if (converter instanceof MappingJackson2HttpMessageConverter) {
+				final MappingJackson2HttpMessageConverter jacksonConverter = (MappingJackson2HttpMessageConverter) converter;
+				jacksonConverter.getObjectMapper().addMixIn(StepExecution.class, StepExecutionJacksonMixIn.class);
+				jacksonConverter.getObjectMapper().addMixIn(ExecutionContext.class, ExecutionContextJacksonMixIn.class);
+				jacksonConverter.getObjectMapper().setDateFormat(new ISO8601DateFormatWithMilliSeconds());
+			}
+		}
 	}
 
 	@Test(expected = IllegalArgumentException.class)
@@ -193,6 +212,14 @@ public class JobExecutionControllerTests {
 	}
 
 	@Test
+	public void testGetAllExecutionsJobExecutionOnly() throws Exception {
+		mockMvc.perform(get("/jobs/executions/jobexecutioninfoonly").accept(MediaType.APPLICATION_JSON)).andExpect(status().isOk())
+				.andExpect(jsonPath("$.content[*].taskExecutionId", containsInAnyOrder(6, 5, 4, 3, 3, 2, 1)))
+				.andExpect(jsonPath("$.content[0].stepExecutionCount", is(1)))
+				.andExpect(jsonPath("$.content", hasSize(7)));
+	}
+
+	@Test
 	public void testGetExecutionsByName() throws Exception {
 		mockMvc.perform(get("/jobs/executions/").param("name", JOB_NAME_ORIG).accept(MediaType.APPLICATION_JSON))
 				.andExpect(status().isOk())
@@ -222,6 +249,9 @@ public class JobExecutionControllerTests {
 
 		for (int i = 0; i < jobExecutionCount; i++) {
 			jobExecution = jobRepository.createJobExecution(instance, new JobParameters(), null);
+			StepExecution stepExecution = new StepExecution("foo", jobExecution, 1L);
+			stepExecution.setId(null);
+			jobRepository.add(stepExecution);
 			taskBatchDao.saveRelationship(taskExecution, jobExecution);
 			jobExecution.setStatus(status);
 			jobExecution.setStartTime(new Date());
