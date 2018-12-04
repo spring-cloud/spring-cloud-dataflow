@@ -24,6 +24,7 @@ import java.util.function.Function;
 import org.springframework.cloud.dataflow.core.TaskDefinition;
 import org.springframework.cloud.dataflow.rest.resource.TaskDefinitionResource;
 import org.springframework.cloud.dataflow.rest.resource.TaskExecutionResource;
+import org.springframework.cloud.dataflow.rest.support.ArgumentSanitizer;
 import org.springframework.cloud.dataflow.server.controller.support.TaskExecutionAwareTaskDefinition;
 import org.springframework.cloud.dataflow.server.repository.NoSuchTaskDefinitionException;
 import org.springframework.cloud.dataflow.server.repository.TaskDefinitionRepository;
@@ -67,6 +68,8 @@ public class TaskDefinitionController {
 	private TaskService taskService;
 
 	private final TaskExplorer explorer;
+
+	private final ArgumentSanitizer argumentSanitizer = new ArgumentSanitizer();
 
 	/**
 	 * Creates a {@code TaskDefinitionController} that delegates
@@ -195,7 +198,7 @@ public class TaskDefinitionController {
 		public TaskDefinitionResource instantiateResource(TaskExecutionAwareTaskDefinition taskExecutionAwareTaskDefinition) {
 			boolean composed = taskService.isComposedDefinition(taskExecutionAwareTaskDefinition.getTaskDefinition().getDslText());
 			TaskDefinitionResource taskDefinitionResource = new TaskDefinitionResource(taskExecutionAwareTaskDefinition.getTaskDefinition().getName(),
-					taskExecutionAwareTaskDefinition.getTaskDefinition().getDslText());
+					argumentSanitizer.sanitizeTaskDsl(taskExecutionAwareTaskDefinition.getTaskDefinition()));
 			if(taskExecutionAwareTaskDefinition.getLatestTaskExecution() != null) {
 				taskDefinitionResource.setLastTaskExecution(new TaskExecutionResource(taskExecutionAwareTaskDefinition.getLatestTaskExecution()));
 			}

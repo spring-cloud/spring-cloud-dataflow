@@ -25,6 +25,7 @@ import org.springframework.cloud.dataflow.rest.resource.JobExecutionResource;
 import org.springframework.cloud.dataflow.rest.resource.JobInstanceResource;
 import org.springframework.cloud.dataflow.rest.resource.StepExecutionProgressInfoResource;
 import org.springframework.cloud.dataflow.rest.resource.StepExecutionResource;
+import org.springframework.cloud.dataflow.rest.support.ArgumentSanitizer;
 import org.springframework.cloud.dataflow.shell.command.support.OpsType;
 import org.springframework.cloud.dataflow.shell.command.support.RoleType;
 import org.springframework.cloud.dataflow.shell.config.DataFlowShell;
@@ -135,8 +136,8 @@ public class JobCommands implements CommandMarker {
 			if (!jobParameterEntry.getValue().isIdentifying()) {
 				key = "-" + key;
 			}
-			key = String.format("%s(%s) ", key, jobParameterEntry.getValue().getType().name());
-			modelBuilder.addRow().addValue(key).addValue(String.valueOf(jobParameterEntry.getValue()));
+			String updatedKey = String.format("%s(%s) ", key, jobParameterEntry.getValue().getType().name());
+			modelBuilder.addRow().addValue(updatedKey).addValue(new ArgumentSanitizer().sanitize(key, String.valueOf(jobParameterEntry.getValue())));
 		}
 
 		TableBuilder builder = new TableBuilder(modelBuilder.build());

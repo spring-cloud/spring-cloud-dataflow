@@ -142,7 +142,7 @@ public class TaskExecutionControllerTests {
 			SAMPLE_CLEANSED_ARGUMENT_LIST.add("foo.bar=foo");
 			SAMPLE_CLEANSED_ARGUMENT_LIST.add("bar.baz = boo");
 			SAMPLE_CLEANSED_ARGUMENT_LIST.add("foo.credentials.boo=******");
-			SAMPLE_CLEANSED_ARGUMENT_LIST.add("spring.datasource.username=dbuser");
+			SAMPLE_CLEANSED_ARGUMENT_LIST.add("spring.datasource.username=******");
 			SAMPLE_CLEANSED_ARGUMENT_LIST.add("spring.datasource.password=******");
 
 			taskDefinitionRepository.save(new TaskDefinition(TASK_NAME_ORIG, "demo"));

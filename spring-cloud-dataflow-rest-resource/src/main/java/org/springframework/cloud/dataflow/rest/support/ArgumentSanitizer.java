@@ -14,19 +14,23 @@
  * limitations under the License.
  */
 
-package org.springframework.cloud.dataflow.server.controller.support;
+package org.springframework.cloud.dataflow.rest.support;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
+import org.springframework.batch.core.JobParameter;
+import org.springframework.batch.core.JobParameters;
 import org.springframework.cloud.dataflow.core.StreamAppDefinition;
 import org.springframework.cloud.dataflow.core.StreamDefinition;
 import org.springframework.cloud.dataflow.core.StreamDefinitionToDslConverter;
 import org.springframework.cloud.dataflow.core.TaskDefinition;
+import org.springframework.cloud.dataflow.core.TaskDefinitionToDslConverter;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
@@ -35,25 +39,27 @@ import org.springframework.util.StringUtils;
  *
  * @author Glenn Renfro
  * @author Gunnar Hillert
+ * @author Ilayaperumal Gopinathan
  */
 public class ArgumentSanitizer {
 	private static final String[] REGEX_PARTS = { "*", "$", "^", "+" };
 
 	private static final String REDACTION_STRING = "******";
 
-	private static final String[] KEYS_TO_SANITIZE = { "password", "secret", "key", "token", ".*credentials.*",
+	private static final String[] KEYS_TO_SANITIZE = { "username", "password", "secret", "key", "token", ".*credentials.*",
 			"vcap_services" };
 
 	private Pattern[] keysToSanitize;
 
-	private StreamDefinitionToDslConverter dslConverter;
+	private final StreamDefinitionToDslConverter streamDslConverter = new StreamDefinitionToDslConverter();
+
+	private final TaskDefinitionToDslConverter taskDslConverter = new TaskDefinitionToDslConverter();
 
 	public ArgumentSanitizer() {
 		this.keysToSanitize = new Pattern[KEYS_TO_SANITIZE.length];
 		for (int i = 0; i < keysToSanitize.length; i++) {
 			this.keysToSanitize[i] = getPattern(KEYS_TO_SANITIZE[i]);
 		}
-		this.dslConverter = new StreamDefinitionToDslConverter();
 	}
 
 	private Pattern getPattern(String value) {
@@ -111,6 +117,25 @@ public class ArgumentSanitizer {
 	}
 
 	/**
+	 * Replaces the sensitive String values in the JobParameter value.
+	 *
+	 * @param jobParameters the original job parameters
+	 * @return the sanitized job parameters
+	 */
+	public JobParameters sanitizeJobParameters(JobParameters jobParameters) {
+		Map<String,JobParameter> newJobParameters = new HashMap<>();
+		jobParameters.getParameters().forEach( (key, jobParameter) -> {
+			String updatedKey = !jobParameter.isIdentifying() ? "-" + key : key;
+			if (jobParameter.getType().equals(JobParameter.ParameterType.STRING)) {
+				newJobParameters.put(updatedKey, new JobParameter(this.sanitize(key, jobParameter.toString())));
+			}
+			else {
+				newJobParameters.put(updatedKey, jobParameter);
+			}
+		});
+		return new JobParameters(newJobParameters);
+	}
+	/**
 	 * Redacts sensitive property values in a stream.
 	 *
 	 * @param streamDefinition the stream definition to sanitize
@@ -124,7 +149,7 @@ public class ArgumentSanitizer {
 						.build(streamDefinition.getName())
 				).collect(Collectors.toList());
 
-		return this.dslConverter.toDsl(sanitizedAppDefinitions);
+		return this.streamDslConverter.toDsl(sanitizedAppDefinitions);
 	}
 
 	/**
@@ -133,11 +158,11 @@ public class ArgumentSanitizer {
 	 * @param taskDefinition the task definition to sanitize
 	 * @return Task definition text that has sensitive data redacted.
 	 */
-	public String sanitizeTask(TaskDefinition taskDefinition) {
-		final TaskDefinition sanitizedTaskDefinition = TaskDefinition.TaskDefinitionBuilder.from(taskDefinition)
+	public String sanitizeTaskDsl(TaskDefinition taskDefinition) {
+		TaskDefinition sanitizedTaskDefinition = TaskDefinition.TaskDefinitionBuilder.from(taskDefinition)
 			.setProperties(this.sanitizeProperties(taskDefinition.getProperties()))
 			.build();
-		return sanitizedTaskDefinition.getDslText(); //TODO gh-2469
+		return this.taskDslConverter.toDsl(sanitizedTaskDefinition);
 	}
 
 	/**

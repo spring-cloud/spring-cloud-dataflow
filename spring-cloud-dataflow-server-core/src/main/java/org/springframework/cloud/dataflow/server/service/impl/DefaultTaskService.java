@@ -34,6 +34,7 @@ import org.springframework.cloud.dataflow.core.dsl.TaskNode;
 import org.springframework.cloud.dataflow.core.dsl.TaskParser;
 import org.springframework.cloud.dataflow.registry.domain.AppRegistration;
 import org.springframework.cloud.dataflow.registry.service.AppRegistryService;
+import org.springframework.cloud.dataflow.rest.support.ArgumentSanitizer;
 import org.springframework.cloud.dataflow.rest.util.DeploymentPropertiesUtils;
 import org.springframework.cloud.dataflow.server.config.apps.CommonApplicationProperties;
 import org.springframework.cloud.dataflow.server.controller.WhitelistProperties;
@@ -110,6 +111,8 @@ public class DefaultTaskService implements TaskService {
 	private final TaskValidationService taskValidationService;
 
 	protected final AuditRecordService auditRecordService;
+
+	private final ArgumentSanitizer argumentSanitizer = new ArgumentSanitizer();
 
 	public static final String TASK_DEFINITION_DSL_TEXT = "taskDefinitionDslText";
 	public static final String TASK_DEPLOYMENT_PROPERTIES = "taskDeploymentProperties";
@@ -222,22 +225,22 @@ public class DefaultTaskService implements TaskService {
 		if (!StringUtils.hasText(id)) {
 			throw new IllegalStateException("Deployment ID is null for the task:" + taskName);
 		}
-		taskExecutionRepository.updateExternalExecutionId(taskExecution.getExecutionId(), id);
+		this.taskExecutionRepository.updateExternalExecutionId(taskExecution.getExecutionId(), id);
 
-		final Map<String, Object> auditedData = new HashMap<>(3);
-		auditedData.put(TASK_DEFINITION_DSL_TEXT, taskDefinition.getDslText());
-		auditedData.put(TASK_DEPLOYMENT_PROPERTIES, taskDeploymentProperties);
-		auditedData.put(COMMAND_LINE_ARGS, commandLineArgs);
-
-		// auditedData.put(TASK_DEFINITION_DSL_TEXT, this.argumentSanitizer.sanitizeTask(taskDefinition));
-		// auditedData.put(TASK_DEPLOYMENT_PROPERTIES, this.argumentSanitizer.sanitizeProperties(taskDeploymentProperties));
-		// auditedData.put(COMMAND_LINE_ARGS, commandLineArgs); //TODO see gh-2469
-
-		auditRecordService.populateAndSaveAuditRecordUsingMapData(
+		this.auditRecordService.populateAndSaveAuditRecordUsingMapData(
 				AuditOperationType.TASK, AuditActionType.DEPLOY,
-				taskDefinition.getName(), auditedData);
+				taskDefinition.getName(), getAuditata(taskDefinition, taskDeploymentProperties, updatedCmdLineArgs));
 
 		return taskExecution.getExecutionId();
+	}
+
+	private Map<String, Object> getAuditata(TaskDefinition taskDefinition, Map<String, String> taskDeploymentProperties,
+			List<String> commandLineArgs) {
+		final Map<String, Object> auditedData = new HashMap<>(3);
+		auditedData.put(TASK_DEFINITION_DSL_TEXT, this.argumentSanitizer.sanitizeTaskDsl(taskDefinition));
+		auditedData.put(TASK_DEPLOYMENT_PROPERTIES, this.argumentSanitizer.sanitizeProperties(taskDeploymentProperties));
+		auditedData.put(COMMAND_LINE_ARGS, this.argumentSanitizer.sanitizeArguments(commandLineArgs));
+		return auditedData;
 	}
 
 	private synchronized boolean maxConcurrentExecutionsReached() {
@@ -301,17 +304,14 @@ public class DefaultTaskService implements TaskService {
 						generatedTaskDSL);
 				saveStandardTaskDefinition(composedTaskDefinition);
 			});
-			taskDefinitionRepository.save(taskDefinition);
+			this.taskDefinitionRepository.save(taskDefinition);
 		}
 		else {
 			saveStandardTaskDefinition(taskDefinition);
 		}
-
-		auditRecordService.populateAndSaveAuditRecord(
+		this.auditRecordService.populateAndSaveAuditRecord(
 				AuditOperationType.TASK, AuditActionType.CREATE,
-				name, dsl);
-		// name, this.argumentSanitizer.sanitizeTask(taskDefinition)); //FIXME depends on gh-2469
-
+				name, this.argumentSanitizer.sanitizeTaskDsl(taskDefinition));
 	}
 
 	private void saveStandardTaskDefinition(TaskDefinition taskDefinition) {
@@ -326,7 +326,7 @@ public class DefaultTaskService implements TaskService {
 					"Cannot register task %s because another one has already " + "been registered with the same name",
 					taskDefinition.getTaskName()));
 		}
-		taskDefinitionRepository.save(taskDefinition);
+		this.taskDefinitionRepository.save(taskDefinition);
 	}
 
 	@Override
@@ -353,8 +353,7 @@ public class DefaultTaskService implements TaskService {
 
 		auditRecordService.populateAndSaveAuditRecord(
 				AuditOperationType.TASK, AuditActionType.DELETE,
-				name, taskDefinition.getDslText());
-		// name, this.argumentSanitizer.sanitizeTask(taskDefinition)); // FIXME depends on gh-2469
+				name, this.argumentSanitizer.sanitizeTaskDsl(taskDefinition));
 	}
 
 	private void destroyPrimaryTask(String name) {
