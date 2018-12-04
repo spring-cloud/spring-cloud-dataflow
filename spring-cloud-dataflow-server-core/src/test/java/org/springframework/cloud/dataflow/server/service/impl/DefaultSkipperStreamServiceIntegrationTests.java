@@ -238,6 +238,58 @@ public class DefaultSkipperStreamServiceIntegrationTests {
 	}
 
 	@Test
+	public void testUpdateStreamDslOnRollback() throws IOException {
+
+		// Create stream
+		StreamDefinition streamDefinition = new StreamDefinition("ticktock",
+				"time --fixed-delay=100 | log --level=DEBUG");
+		this.streamDefinitionRepository.delete(streamDefinition.getName());
+		this.streamDefinitionRepository.save(streamDefinition);
+
+		when(skipperClient.status(eq("ticktock"))).thenThrow(new ReleaseNotFoundException(""));
+
+		streamService.deployStream("ticktock", createSkipperDeploymentProperties());
+
+		// Update Stream
+		StreamDefinition streamDefinitionBeforeDeploy = this.streamDefinitionRepository.findOne("ticktock");
+		assertThat(streamDefinitionBeforeDeploy.getDslText())
+				.isEqualTo("time --fixed-delay=100 | log --level=DEBUG");
+
+		String expectedReleaseManifest = StreamUtils.copyToString(
+				TestResourceUtils.qualifiedResource(getClass(), "upgradeManifest.yml").getInputStream(),
+				Charset.defaultCharset());
+		Release release = new Release();
+		Manifest manifest = new Manifest();
+		manifest.setData(expectedReleaseManifest);
+		release.setManifest(manifest);
+		when(skipperClient.upgrade(isA(UpgradeRequest.class))).thenReturn(release);
+
+		Map<String, String> deploymentProperties = createSkipperDeploymentProperties();
+		deploymentProperties.put("version.log", "1.2.0.RELEASE");
+		streamService.updateStream("ticktock",
+				new UpdateStreamRequest("ticktock", new PackageIdentifier(), deploymentProperties));
+
+		StreamDefinition streamDefinitionAfterDeploy = this.streamDefinitionRepository.findOne("ticktock");
+		assertThat(streamDefinitionAfterDeploy.getDslText())
+				.isEqualTo("time --trigger.fixed-delay=200 | log --log.level=INFO");
+
+		// Rollback Stream
+		String rollbackReleaseManifest = StreamUtils.copyToString(
+				TestResourceUtils.qualifiedResource(getClass(), "rollbackManifest.yml").getInputStream(),
+				Charset.defaultCharset());
+		Release rollbackRelease = new Release();
+		Manifest rollbackManifest = new Manifest();
+		rollbackManifest.setData(rollbackReleaseManifest);
+		rollbackRelease.setManifest(rollbackManifest);
+		when(skipperClient.rollback("ticktock", 0)).thenReturn(rollbackRelease);
+
+		streamService.rollbackStream("ticktock", 0);
+		StreamDefinition streamDefinitionAfterRollback = this.streamDefinitionRepository.findOne("ticktock");
+		assertThat(streamDefinitionAfterRollback.getDslText())
+				.isEqualTo("time --trigger.fixed-delay=100 | log --log.level=DEBUG");
+	}
+
+	@Test
 	public void testStreamInfo() throws IOException {
 
 		// Create stream

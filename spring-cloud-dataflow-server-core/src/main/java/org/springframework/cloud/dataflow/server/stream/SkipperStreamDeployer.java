@@ -545,8 +545,8 @@ public class SkipperStreamDeployer implements StreamDeployer {
 	 * @param streamName the name of the stream to rollback
 	 * @param releaseVersion the version of the stream to rollback to
 	 */
-	public void rollbackStream(String streamName, int releaseVersion) {
-		this.skipperClient.rollback(streamName, releaseVersion);
+	public Release rollbackStream(String streamName, int releaseVersion) {
+		return this.skipperClient.rollback(streamName, releaseVersion);
 	}
 
 	public String manifest(String name, int version) {
