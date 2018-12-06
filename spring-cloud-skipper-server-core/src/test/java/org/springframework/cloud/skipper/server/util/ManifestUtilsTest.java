@@ -67,7 +67,6 @@ public class ManifestUtilsTest {
 		assertThat(manifest).contains("\"bool\": \"true\"").describedAs("Handle Boolean");
 		assertThat(manifest).contains("\"adate\": " + dateAsStringWithQuotes).describedAs("Handle Date");
 		assertThat(manifest).contains("\"array\":\n  - \"a\"\n  - \"b\"\n  - \"c\"").describedAs("Handle Array");
-		// TODO: Tzolov
-		// assertThat(manifest).contains("\"applicationProperties\": !!null \"null\"").describedAs("Handle Null");
+		assertThat(manifest).contains("\"deploymentProperties\": !!null \"null\"").describedAs("Handle Null");
 	}
 }
