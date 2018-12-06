@@ -17,11 +17,11 @@ package org.springframework.cloud.common.security;
 
 import org.junit.Test;
 
-import org.springframework.boot.test.util.EnvironmentTestUtils;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Conditional;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.boot.test.util.TestPropertyValues;
 import org.springframework.cloud.common.security.support.OnSecurityEnabledAndOAuth2Disabled;
 
 import static org.hamcrest.Matchers.equalTo;
@@ -63,7 +63,7 @@ public class OnSecurityEnabledAndOAuth2DisabledTests {
 
 	private AnnotationConfigApplicationContext load(Class<?> config, String... env) {
 		AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext();
-		EnvironmentTestUtils.addEnvironment(context, env);
+		TestPropertyValues.of(env).applyTo(context);
 		context.register(config);
 		context.refresh();
 		return context;

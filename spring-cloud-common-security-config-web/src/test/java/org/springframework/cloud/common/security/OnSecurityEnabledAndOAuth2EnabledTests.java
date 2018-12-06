@@ -16,8 +16,7 @@
 package org.springframework.cloud.common.security;
 
 import org.junit.Test;
-
-import org.springframework.boot.test.util.EnvironmentTestUtils;
+import org.springframework.boot.test.util.TestPropertyValues;
 import org.springframework.cloud.common.security.support.OnSecurityEnabledAndOAuth2Enabled;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.annotation.Bean;
@@ -109,7 +108,7 @@ public class OnSecurityEnabledAndOAuth2EnabledTests {
 
 	private AnnotationConfigApplicationContext load(Class<?> config, String... env) {
 		AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext();
-		EnvironmentTestUtils.addEnvironment(context, env);
+		TestPropertyValues.of(env).applyTo(context);
 		context.register(config);
 		context.refresh();
 		return context;
