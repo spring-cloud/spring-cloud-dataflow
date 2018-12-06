@@ -24,7 +24,7 @@ import org.springframework.cloud.skipper.domain.Info;
 import org.springframework.cloud.skipper.domain.Release;
 import org.springframework.cloud.skipper.server.deployer.ReleaseManager;
 import org.springframework.cloud.skipper.server.deployer.ReleaseManagerFactory;
-import org.springframework.cloud.skipper.server.repository.ReleaseRepository;
+import org.springframework.cloud.skipper.server.repository.jpa.ReleaseRepository;
 import org.springframework.cloud.skipper.server.util.ManifestUtils;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.transaction.annotation.Transactional;

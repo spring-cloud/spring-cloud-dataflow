@@ -18,8 +18,8 @@ package org.springframework.cloud.skipper.deployer.cloudfoundry;
 import org.springframework.cloud.deployer.resource.support.DelegatingResourceLoader;
 import org.springframework.cloud.skipper.domain.CloudFoundryApplicationManifestReader;
 import org.springframework.cloud.skipper.server.deployer.ReleaseManagerFactory;
-import org.springframework.cloud.skipper.server.repository.AppDeployerDataRepository;
-import org.springframework.cloud.skipper.server.repository.ReleaseRepository;
+import org.springframework.cloud.skipper.server.repository.jpa.AppDeployerDataRepository;
+import org.springframework.cloud.skipper.server.repository.jpa.ReleaseRepository;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 

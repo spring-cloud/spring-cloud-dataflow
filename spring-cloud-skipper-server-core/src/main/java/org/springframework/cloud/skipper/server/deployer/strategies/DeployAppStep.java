@@ -30,9 +30,9 @@ import org.springframework.cloud.skipper.domain.StatusCode;
 import org.springframework.cloud.skipper.server.deployer.AppDeploymentRequestFactory;
 import org.springframework.cloud.skipper.server.deployer.ReleaseAnalysisReport;
 import org.springframework.cloud.skipper.server.domain.AppDeployerData;
-import org.springframework.cloud.skipper.server.repository.AppDeployerDataRepository;
-import org.springframework.cloud.skipper.server.repository.DeployerRepository;
-import org.springframework.cloud.skipper.server.repository.ReleaseRepository;
+import org.springframework.cloud.skipper.server.repository.jpa.AppDeployerDataRepository;
+import org.springframework.cloud.skipper.server.repository.jpa.ReleaseRepository;
+import org.springframework.cloud.skipper.server.repository.map.DeployerRepository;
 import org.springframework.dao.DataAccessException;
 import org.springframework.transaction.annotation.Transactional;
 

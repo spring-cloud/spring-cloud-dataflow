@@ -15,11 +15,11 @@
  */
 package org.springframework.cloud.skipper.server.controller.docs;
 
-import org.springframework.cloud.skipper.server.repository.AppDeployerDataRepository;
-import org.springframework.cloud.skipper.server.repository.DeployerRepository;
-import org.springframework.cloud.skipper.server.repository.PackageMetadataRepository;
-import org.springframework.cloud.skipper.server.repository.ReleaseRepository;
-import org.springframework.cloud.skipper.server.repository.RepositoryRepository;
+import org.springframework.cloud.skipper.server.repository.jpa.AppDeployerDataRepository;
+import org.springframework.cloud.skipper.server.repository.jpa.PackageMetadataRepository;
+import org.springframework.cloud.skipper.server.repository.jpa.ReleaseRepository;
+import org.springframework.cloud.skipper.server.repository.jpa.RepositoryRepository;
+import org.springframework.cloud.skipper.server.repository.map.DeployerRepository;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
@@ -66,8 +66,8 @@ public class RepositoryConfiguration {
 	}
 
 	@Configuration
-	@EnableMapRepositories(basePackages = "org.springframework.cloud.skipper.server.repository")
-	@EnableJpaRepositories(basePackages = "org.springframework.cloud.skipper.server.repository")
+	@EnableMapRepositories(basePackages = "org.springframework.cloud.skipper.server.repository.map")
+	@EnableJpaRepositories(basePackages = "org.springframework.cloud.skipper.server.repository.jpa")
 	@Profile("repository")
 	public class JPARepositoryConfiguration {
 	}

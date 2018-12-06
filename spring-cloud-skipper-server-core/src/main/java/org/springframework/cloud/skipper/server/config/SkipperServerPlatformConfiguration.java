@@ -24,7 +24,7 @@ import org.springframework.cloud.deployer.spi.local.LocalAppDeployer;
 import org.springframework.cloud.deployer.spi.local.LocalDeployerProperties;
 import org.springframework.cloud.skipper.domain.Deployer;
 import org.springframework.cloud.skipper.domain.Platform;
-import org.springframework.cloud.skipper.server.repository.DeployerRepository;
+import org.springframework.cloud.skipper.server.repository.map.DeployerRepository;
 import org.springframework.cloud.skipper.server.service.DeployerInitializationService;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

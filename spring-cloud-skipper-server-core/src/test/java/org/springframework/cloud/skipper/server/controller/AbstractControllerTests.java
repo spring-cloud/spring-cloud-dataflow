@@ -33,8 +33,8 @@ import org.springframework.cloud.skipper.domain.UpgradeProperties;
 import org.springframework.cloud.skipper.domain.UpgradeRequest;
 import org.springframework.cloud.skipper.server.AbstractMockMvcTests;
 import org.springframework.cloud.skipper.server.config.SkipperServerProperties;
-import org.springframework.cloud.skipper.server.repository.PackageMetadataRepository;
-import org.springframework.cloud.skipper.server.repository.ReleaseRepository;
+import org.springframework.cloud.skipper.server.repository.jpa.PackageMetadataRepository;
+import org.springframework.cloud.skipper.server.repository.jpa.ReleaseRepository;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.web.servlet.MvcResult;
 

@@ -27,7 +27,7 @@ import org.springframework.cloud.skipper.domain.RollbackRequest;
 import org.springframework.cloud.skipper.domain.StatusCode;
 import org.springframework.cloud.skipper.domain.UpgradeProperties;
 import org.springframework.cloud.skipper.domain.UpgradeRequest;
-import org.springframework.cloud.skipper.server.repository.ReleaseRepository;
+import org.springframework.cloud.skipper.server.repository.jpa.ReleaseRepository;
 import org.springframework.cloud.skipper.server.statemachine.SkipperStateMachineService.SkipperEventHeaders;
 import org.springframework.cloud.skipper.server.statemachine.SkipperStateMachineService.SkipperEvents;
 import org.springframework.cloud.skipper.server.statemachine.SkipperStateMachineService.SkipperStates;

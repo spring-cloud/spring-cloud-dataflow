@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2018 the original author or authors.
+ * Copyright 2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,23 +13,38 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.springframework.cloud.skipper.server.repository;
+package org.springframework.cloud.skipper.server.repository.map;
 
-import org.springframework.cloud.skipper.server.domain.AppDeployerData;
+import org.springframework.cloud.skipper.domain.Deployer;
 import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.data.rest.core.annotation.RepositoryRestResource;
+import org.springframework.data.rest.core.annotation.RestResource;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
- * Stores data related to the app deployment.
+ * Repository for Deployers
  * @author Mark Pollack
  */
-@RepositoryRestResource(exported = false)
+@RepositoryRestResource
 @Transactional
-public interface AppDeployerDataRepository
-		extends PagingAndSortingRepository<AppDeployerData, Long>, AppDeployerDataRepositoryCustom {
+@SuppressWarnings("unchecked")
+public interface DeployerRepository extends PagingAndSortingRepository<Deployer, String>, DeployerRepositoryCustom {
 
-	@Transactional(readOnly = true)
-	AppDeployerData findByReleaseNameAndReleaseVersion(String releaseName, Integer releaseVersion);
+	Deployer findByName(String name);
 
+	@Override
+	@RestResource(exported = false)
+	Deployer save(Deployer deployer);
+
+	@Override
+	@RestResource(exported = false)
+	void deleteById(String s);
+
+	@Override
+	@RestResource(exported = false)
+	void delete(Deployer deployer);
+
+	@Override
+	@RestResource(exported = false)
+	void deleteAll();
 }

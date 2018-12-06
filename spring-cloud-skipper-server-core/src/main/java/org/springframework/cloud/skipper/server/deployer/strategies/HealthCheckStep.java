@@ -26,8 +26,8 @@ import org.springframework.cloud.deployer.spi.app.DeploymentState;
 import org.springframework.cloud.skipper.domain.Release;
 import org.springframework.cloud.skipper.domain.SpringCloudDeployerApplicationManifestReader;
 import org.springframework.cloud.skipper.server.domain.AppDeployerData;
-import org.springframework.cloud.skipper.server.repository.AppDeployerDataRepository;
-import org.springframework.cloud.skipper.server.repository.DeployerRepository;
+import org.springframework.cloud.skipper.server.repository.jpa.AppDeployerDataRepository;
+import org.springframework.cloud.skipper.server.repository.map.DeployerRepository;
 
 /**
  * Checks if the apps in the Replacing release are healthy. Health polling values are set

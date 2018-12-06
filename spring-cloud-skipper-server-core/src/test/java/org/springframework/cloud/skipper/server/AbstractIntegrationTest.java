@@ -42,7 +42,7 @@ import org.springframework.cloud.skipper.domain.UpgradeRequest;
 import org.springframework.cloud.skipper.server.config.SkipperServerConfiguration;
 import org.springframework.cloud.skipper.server.config.SkipperServerPlatformConfiguration;
 import org.springframework.cloud.skipper.server.deployer.ReleaseManager;
-import org.springframework.cloud.skipper.server.repository.ReleaseRepository;
+import org.springframework.cloud.skipper.server.repository.jpa.ReleaseRepository;
 import org.springframework.cloud.skipper.server.service.ReleaseService;
 import org.springframework.cloud.skipper.server.statemachine.SkipperStateMachineService;
 import org.springframework.context.annotation.Configuration;

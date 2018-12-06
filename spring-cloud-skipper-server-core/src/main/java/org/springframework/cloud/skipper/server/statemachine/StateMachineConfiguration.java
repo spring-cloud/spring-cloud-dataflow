@@ -21,7 +21,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.skipper.server.deployer.strategies.HealthCheckProperties;
 import org.springframework.cloud.skipper.server.deployer.strategies.UpgradeStrategyFactory;
-import org.springframework.cloud.skipper.server.repository.ReleaseRepository;
+import org.springframework.cloud.skipper.server.repository.jpa.ReleaseRepository;
 import org.springframework.cloud.skipper.server.service.ReleaseReportService;
 import org.springframework.cloud.skipper.server.service.ReleaseService;
 import org.springframework.cloud.skipper.server.statemachine.SkipperStateMachineService.SkipperEventHeaders;

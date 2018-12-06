@@ -22,6 +22,7 @@ import org.springframework.cloud.deployer.spi.local.LocalAppDeployer;
 import org.springframework.cloud.deployer.spi.local.LocalDeployerProperties;
 import org.springframework.cloud.skipper.domain.Deployer;
 import org.springframework.cloud.skipper.server.AbstractIntegrationTest;
+import org.springframework.cloud.skipper.server.repository.map.DeployerRepository;
 
 import static org.assertj.core.api.Assertions.assertThat;
 

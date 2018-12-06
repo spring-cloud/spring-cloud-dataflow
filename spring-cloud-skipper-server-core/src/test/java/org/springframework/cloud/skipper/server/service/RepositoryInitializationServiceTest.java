@@ -19,8 +19,8 @@ import org.junit.Test;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.skipper.server.AbstractIntegrationTest;
-import org.springframework.cloud.skipper.server.repository.PackageMetadataRepository;
-import org.springframework.cloud.skipper.server.repository.RepositoryRepository;
+import org.springframework.cloud.skipper.server.repository.jpa.PackageMetadataRepository;
+import org.springframework.cloud.skipper.server.repository.jpa.RepositoryRepository;
 import org.springframework.test.context.ActiveProfiles;
 
 import static org.assertj.core.api.Assertions.assertThat;

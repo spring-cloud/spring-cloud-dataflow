@@ -27,7 +27,7 @@ import org.springframework.cloud.skipper.domain.PackageIdentifier;
 import org.springframework.cloud.skipper.domain.Release;
 import org.springframework.cloud.skipper.domain.Repository;
 import org.springframework.cloud.skipper.domain.StatusCode;
-import org.springframework.cloud.skipper.server.repository.RepositoryRepository;
+import org.springframework.cloud.skipper.server.repository.jpa.RepositoryRepository;
 import org.springframework.http.HttpStatus;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.test.annotation.DirtiesContext;

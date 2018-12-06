@@ -46,7 +46,7 @@ import org.springframework.cloud.skipper.server.deployer.strategies.HealthCheckP
 import org.springframework.cloud.skipper.server.deployer.strategies.HealthCheckStep;
 import org.springframework.cloud.skipper.server.deployer.strategies.UpgradeStrategy;
 import org.springframework.cloud.skipper.server.deployer.strategies.UpgradeStrategyFactory;
-import org.springframework.cloud.skipper.server.repository.ReleaseRepository;
+import org.springframework.cloud.skipper.server.repository.jpa.ReleaseRepository;
 import org.springframework.cloud.skipper.server.service.PackageService;
 import org.springframework.cloud.skipper.server.service.ReleaseReportService;
 import org.springframework.cloud.skipper.server.service.ReleaseService;

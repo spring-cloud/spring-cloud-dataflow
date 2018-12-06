@@ -28,8 +28,8 @@ import org.springframework.cloud.skipper.domain.Release;
 import org.springframework.cloud.skipper.domain.Status;
 import org.springframework.cloud.skipper.domain.StatusCode;
 import org.springframework.cloud.skipper.server.domain.AppDeployerData;
-import org.springframework.cloud.skipper.server.repository.DeployerRepository;
-import org.springframework.cloud.skipper.server.repository.ReleaseRepository;
+import org.springframework.cloud.skipper.server.repository.jpa.ReleaseRepository;
+import org.springframework.cloud.skipper.server.repository.map.DeployerRepository;
 
 /**
  * Responsible for deleting the provided list of applications and updating the status of

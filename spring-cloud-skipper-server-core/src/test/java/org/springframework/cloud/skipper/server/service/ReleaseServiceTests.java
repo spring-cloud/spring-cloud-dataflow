@@ -39,9 +39,9 @@ import org.springframework.cloud.skipper.domain.StatusCode;
 import org.springframework.cloud.skipper.domain.UpgradeProperties;
 import org.springframework.cloud.skipper.domain.UpgradeRequest;
 import org.springframework.cloud.skipper.server.AbstractIntegrationTest;
-import org.springframework.cloud.skipper.server.repository.AppDeployerDataRepository;
-import org.springframework.cloud.skipper.server.repository.PackageMetadataRepository;
-import org.springframework.cloud.skipper.server.repository.RepositoryRepository;
+import org.springframework.cloud.skipper.server.repository.jpa.AppDeployerDataRepository;
+import org.springframework.cloud.skipper.server.repository.jpa.PackageMetadataRepository;
+import org.springframework.cloud.skipper.server.repository.jpa.RepositoryRepository;
 import org.springframework.test.context.ActiveProfiles;
 
 import static junit.framework.TestCase.fail;

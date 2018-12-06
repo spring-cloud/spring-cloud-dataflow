@@ -22,6 +22,7 @@ import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.skipper.domain.Repository;
 import org.springframework.cloud.skipper.server.AbstractIntegrationTest;
+import org.springframework.cloud.skipper.server.repository.jpa.RepositoryRepository;
 
 import static org.assertj.core.api.Assertions.assertThat;
 

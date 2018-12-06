@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 the original author or authors.
+ * Copyright 2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,26 +13,21 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.springframework.cloud.skipper.server.repository;
+package org.springframework.cloud.skipper.server.repository.map;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.skipper.SkipperException;
 import org.springframework.cloud.skipper.domain.Deployer;
 
 /**
  * @author Mark Pollack
  */
-public class DeployerRepositoryImpl implements DeployerRepositoryCustom {
+public interface DeployerRepositoryCustom {
 
-	@Autowired
-	private DeployerRepository deployerRepository;
+	/**
+	 * Performs a findByName query and throws an exception if the name is not found.
+	 * @param name the name of the deployer
+	 * @return The deployer instance or {@link SkipperException} if not found.
+	 */
+	Deployer findByNameRequired(String name);
 
-	@Override
-	public Deployer findByNameRequired(String name) {
-		Deployer deployer = deployerRepository.findByName(name);
-		if (deployer == null) {
-			throw new SkipperException(String.format("No deployer named '%s'", name));
-		}
-		return deployer;
-	}
 }

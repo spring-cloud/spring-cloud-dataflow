@@ -41,9 +41,9 @@ import org.springframework.cloud.skipper.domain.SpringCloudDeployerApplicationSp
 import org.springframework.cloud.skipper.domain.Status;
 import org.springframework.cloud.skipper.domain.StatusCode;
 import org.springframework.cloud.skipper.server.domain.AppDeployerData;
-import org.springframework.cloud.skipper.server.repository.AppDeployerDataRepository;
-import org.springframework.cloud.skipper.server.repository.DeployerRepository;
-import org.springframework.cloud.skipper.server.repository.ReleaseRepository;
+import org.springframework.cloud.skipper.server.repository.jpa.AppDeployerDataRepository;
+import org.springframework.cloud.skipper.server.repository.jpa.ReleaseRepository;
+import org.springframework.cloud.skipper.server.repository.map.DeployerRepository;
 import org.springframework.cloud.skipper.server.util.ArgumentSanitizer;
 import org.springframework.cloud.skipper.server.util.ConfigValueUtils;
 import org.springframework.cloud.skipper.server.util.ManifestUtils;

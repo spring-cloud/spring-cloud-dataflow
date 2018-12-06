@@ -16,6 +16,7 @@
 package org.springframework.cloud.skipper.server.repository;
 
 import org.springframework.cloud.skipper.domain.Repository;
+import org.springframework.cloud.skipper.server.repository.jpa.RepositoryRepository;
 
 /**
  * @author Mark Pollack
