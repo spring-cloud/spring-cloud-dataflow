@@ -65,6 +65,6 @@ public class HealthCheckStep {
 				return true;
 			}
 		}
-	return false;
+		return false;
 	}
 }

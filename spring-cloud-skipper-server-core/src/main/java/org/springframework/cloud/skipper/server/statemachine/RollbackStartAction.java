@@ -17,6 +17,7 @@ package org.springframework.cloud.skipper.server.statemachine;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
 import org.springframework.cloud.skipper.SkipperException;
 import org.springframework.cloud.skipper.domain.InstallProperties;
 import org.springframework.cloud.skipper.domain.InstallRequest;
@@ -40,7 +41,7 @@ import org.springframework.util.Assert;
  * @author Janne Valkealahti
  *
  */
-public class RollbackStartAction  extends AbstractAction {
+public class RollbackStartAction extends AbstractAction {
 
 	private static final Logger log = LoggerFactory.getLogger(RollbackStartAction.class);
 	private final ReleaseRepository releaseRepository;

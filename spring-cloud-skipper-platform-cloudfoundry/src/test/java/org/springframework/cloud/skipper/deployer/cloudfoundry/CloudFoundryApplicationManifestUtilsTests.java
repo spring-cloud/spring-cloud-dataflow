@@ -15,13 +15,13 @@
  */
 package org.springframework.cloud.skipper.deployer.cloudfoundry;
 
-import static org.assertj.core.api.Assertions.assertThat;
-
 import java.util.Map;
 
 import org.cloudfoundry.operations.applications.ApplicationHealthCheck;
 import org.cloudfoundry.operations.applications.ApplicationManifest;
 import org.junit.Test;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class CloudFoundryApplicationManifestUtilsTests {
 

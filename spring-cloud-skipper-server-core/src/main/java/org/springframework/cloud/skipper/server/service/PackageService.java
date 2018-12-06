@@ -30,15 +30,15 @@ import com.github.zafarkhaja.semver.ParseException;
 import com.github.zafarkhaja.semver.Version;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.cloud.skipper.domain.PackageFile;
 import org.zeroturnaround.zip.ZipUtil;
 
 import org.springframework.cloud.skipper.SkipperException;
-import org.springframework.cloud.skipper.io.PackageFileUtils;
 import org.springframework.cloud.skipper.domain.Package;
+import org.springframework.cloud.skipper.domain.PackageFile;
 import org.springframework.cloud.skipper.domain.PackageMetadata;
 import org.springframework.cloud.skipper.domain.Repository;
 import org.springframework.cloud.skipper.domain.UploadRequest;
+import org.springframework.cloud.skipper.io.PackageFileUtils;
 import org.springframework.cloud.skipper.io.PackageReader;
 import org.springframework.cloud.skipper.io.TempFileUtils;
 import org.springframework.cloud.skipper.server.repository.PackageMetadataRepository;
@@ -287,9 +287,10 @@ public class PackageService implements ResourceLoaderAware {
 				uploadRequest.getRepoName().trim(), uploadRequest.getName().trim(), uploadRequest.getVersion().trim());
 		if (existingPackageMetadata != null) {
 			throw new SkipperException(String.format("Failed to upload the package. " + "" +
-					"Package [%s:%s] in Repository [%s] already exists.",
+							"Package [%s:%s] in Repository [%s] already exists.",
 					uploadRequest.getName(), uploadRequest.getVersion(), uploadRequest.getRepoName().trim()));
-		} }
+		}
+	}
 
 	@Override
 	public void setResourceLoader(ResourceLoader resourceLoader) {

@@ -64,7 +64,7 @@ public class ReleaseReportService {
 		this.packageService = packageService;
 		this.releaseManagerFactory = releaseManagerFactory;
 	}
-	
+
 	/**
 	 * Merges the configuration values for the replacing release, creates the manfiest, and
 	 * creates the Report for the next stage of upgrading a Release.
@@ -111,7 +111,7 @@ public class ReleaseReportService {
 		Manifest manifest = new Manifest();
 		manifest.setData(manifestData);
 		replacingRelease.setManifest(manifest);
-		
+
 		// TODO: should check both releases
 		String kind = ManifestUtils.resolveKind(existingRelease.getManifest().getData());
 		ReleaseManager releaseManager = this.releaseManagerFactory.getReleaseManager(kind);

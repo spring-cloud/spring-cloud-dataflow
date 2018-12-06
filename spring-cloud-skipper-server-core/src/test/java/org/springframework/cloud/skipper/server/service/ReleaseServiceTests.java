@@ -292,7 +292,8 @@ public class ReleaseServiceTests extends AbstractIntegrationTest {
 		try {
 			delete(releaseName, true);
 			fail("Packages from non-local repositories can't be deleted");
-		} catch (SkipperException se) {
+		}
+		catch (SkipperException se) {
 		}
 		assertReleaseStatus(releaseName, StatusCode.DEPLOYED);
 		assertThat(this.packageMetadataRepository.findByName(packageIdentifier.getPackageName()).size()).isEqualTo(3);

@@ -29,7 +29,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 /**
  * @author Gunnar Hillert
  */
-@ActiveProfiles({"repository"})
+@ActiveProfiles({ "repository" })
 public class RepositoriesDocumentation extends BaseDocumentation {
 
 	@Test
@@ -74,6 +74,6 @@ public class RepositoriesDocumentation extends BaseDocumentation {
 								fieldWithPath("local").description("Is the repo local?"),
 								fieldWithPath("repoOrder").description("Order of the Repository"),
 								fieldWithPath("sourceUrl").description("Source URL of the repository"))
-										.and(super.defaultLinkProperties)));
+								.and(super.defaultLinkProperties)));
 	}
 }

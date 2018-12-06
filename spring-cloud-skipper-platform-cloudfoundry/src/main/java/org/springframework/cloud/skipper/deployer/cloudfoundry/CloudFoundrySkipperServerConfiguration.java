@@ -25,7 +25,7 @@ import org.springframework.context.annotation.Configuration;
 
 /**
  * Configuration for CF related server features for CF manifest support.
- * 
+ *
  * @author Janne Valkealahti
  *
  */

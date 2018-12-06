@@ -229,15 +229,11 @@ public class ReleaseService {
 			}
 
 			this.packageMetadataService.deleteIfAllReleasesDeleted(packageName,
-					r -> {
-						// Exclude the release being deleted from the is active check
-						if (r.getName().equals(releaseToDelete.getName())
-								&& r.getVersion() == releaseToDelete.getVersion()) {
-							return false;
-						}
-						// If not the deleted release follow the default package delete policies
-						return PackageMetadataService.DEFAULT_RELEASE_ACTIVITY_CHECK.test(r);
-					});
+					// Exclude the release being deleted from the is active check
+					// If not the deleted release follow the default package delete policies
+					r -> (r.getName().equals(releaseToDelete.getName())
+							&& r.getVersion() == releaseToDelete.getVersion()) ?
+							false : PackageMetadataService.DEFAULT_RELEASE_ACTIVITY_CHECK.test(r));
 		}
 		String kind = ManifestUtils.resolveKind(releaseToDelete.getManifest().getData());
 		ReleaseManager releaseManager = this.releaseManagerFactory.getReleaseManager(kind);

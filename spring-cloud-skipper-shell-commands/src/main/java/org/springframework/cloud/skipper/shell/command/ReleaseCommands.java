@@ -15,7 +15,6 @@
  */
 package org.springframework.cloud.skipper.shell.command;
 
-import javax.validation.constraints.NotNull;
 import java.io.File;
 import java.io.IOException;
 import java.time.Duration;
@@ -23,6 +22,8 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.List;
+
+import javax.validation.constraints.NotNull;
 
 import org.apache.commons.io.FilenameUtils;
 import org.slf4j.Logger;
@@ -136,7 +137,8 @@ public class ReleaseCommands extends AbstractSkipperCommand {
 			@ShellOption(help = "the expression for upgrade timeout", defaultValue = NULL) String timeoutExpression,
 			@ShellOption(help = "the comma separated set of properties to override during upgrade", defaultValue = NULL) String properties,
 			@ShellOption(help = "force upgrade") boolean force,
-			@ShellOption(help = "application names to force upgrade. If no specific list is provided, all the apps in the packages are force upgraded", defaultValue = NULL) String appNames)
+			@ShellOption(help = "application names to force upgrade. If no specific list is provided, all the apps in the packages are force upgraded",
+					defaultValue = NULL) String appNames)
 			throws IOException {
 		// Commented out until https://github.com/spring-cloud/spring-cloud-skipper/issues/263 is
 		// addressed
@@ -231,7 +233,7 @@ public class ReleaseCommands extends AbstractSkipperCommand {
 			@ShellOption(help = "the name of the release to cancel") String releaseName) {
 		CancelResponse cancelResponse = this.skipperClient.cancel(new CancelRequest(releaseName));
 		if (cancelResponse != null && cancelResponse.getAccepted() != null && cancelResponse.getAccepted()) {
-			return "Cancel request for release " + releaseName + " sent";			
+			return "Cancel request for release " + releaseName + " sent";
 		}
 		throw new SkipperException("Cancel request for release " + releaseName + " not accepted");
 	}

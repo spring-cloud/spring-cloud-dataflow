@@ -57,23 +57,23 @@ public class PlatformCloudFoundryOperations {
 
 	private CloudFoundryOperations buildCloudFoundryOperations(String platformName) {
 		CloudFoundryPlatformProperties.CloudFoundryProperties cloudFoundryProperties = this.cloudFoundryPlatformProperties
-																							.getAccounts()
-																							.get(platformName);
+				.getAccounts()
+				.get(platformName);
 		CloudFoundryConnectionProperties connectionProperties = cloudFoundryProperties.getConnection();
 		ConnectionContext connectionContext = DefaultConnectionContext.builder()
-													.apiHost(connectionProperties.getUrl().getHost())
-													.skipSslValidation(connectionProperties.isSkipSslValidation())
-													.build();
+				.apiHost(connectionProperties.getUrl().getHost())
+				.skipSslValidation(connectionProperties.isSkipSslValidation())
+				.build();
 		TokenProvider tokenProvider = PasswordGrantTokenProvider.builder()
-											.username(connectionProperties.getUsername())
-											.password(connectionProperties.getPassword()).build();
+				.username(connectionProperties.getUsername())
+				.password(connectionProperties.getPassword()).build();
 		CloudFoundryClient cloudFoundryClient = ReactorCloudFoundryClient.builder()
-														.connectionContext(connectionContext)
-														.tokenProvider(tokenProvider)
-														.build();
+				.connectionContext(connectionContext)
+				.tokenProvider(tokenProvider)
+				.build();
 		return DefaultCloudFoundryOperations
-					.builder().cloudFoundryClient(cloudFoundryClient)
-					.organization(connectionProperties.getOrg())
-					.space(connectionProperties.getSpace()).build();
+				.builder().cloudFoundryClient(cloudFoundryClient)
+				.organization(connectionProperties.getOrg())
+				.space(connectionProperties.getSpace()).build();
 	}
 }

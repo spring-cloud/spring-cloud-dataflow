@@ -36,7 +36,7 @@ public class PackageSummaryResourceProcessor implements ResourceProcessor<Resour
 		Link link = linkTo(
 				methodOn(PackageController.class).install(Long.valueOf(packageSummaryResource.getContent().getId()),
 						null))
-								.withRel("install");
+				.withRel("install");
 		packageSummaryResource.add(link);
 		return packageSummaryResource;
 	}

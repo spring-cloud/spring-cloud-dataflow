@@ -52,7 +52,7 @@ public class ManifestUtils {
 
 	/**
 	 * Resolve a kind from a raw manifest yaml.
-	 * 
+	 *
 	 * @param manifest the raw yaml
 	 * @return the kind or {@code null} if not found
 	 */
@@ -64,15 +64,15 @@ public class ManifestUtils {
 		Iterable<Object> object = yaml.loadAll(manifest);
 		for (Object o : object) {
 			if (o != null && o instanceof Map) {
-				Object kind = ((Map<?, ?>)o).get("kind");
+				Object kind = ((Map<?, ?>) o).get("kind");
 				if (kind instanceof String) {
-					return (String)kind;
+					return (String) kind;
 				}
 			}
 		}
 		return null;
 	}
-	
+
 	/**
 	 * Iterate overall the template files, replacing placeholders with model values. One
 	 * string is returned that contain all the YAML of multiple files using YAML file

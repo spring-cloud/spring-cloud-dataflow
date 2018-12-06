@@ -22,6 +22,7 @@ import java.util.Map.Entry;
 
 import org.cloudfoundry.operations.applications.ApplicationManifest;
 import org.cloudfoundry.operations.applications.Docker;
+
 import org.springframework.cloud.deployer.resource.docker.DockerResource;
 import org.springframework.cloud.skipper.SkipperException;
 import org.springframework.cloud.skipper.domain.Release;
@@ -127,7 +128,7 @@ public class CloudFoundryApplicationManifestUtils {
 			}
 		}
 		if (applicationManifest.getEnvironmentVariables() != null) {
-			for (Entry<String,Object> entry : applicationManifest.getEnvironmentVariables().entrySet()) {
+			for (Entry<String, Object> entry : applicationManifest.getEnvironmentVariables().entrySet()) {
 				applicationManifestMap.put("spec.manifest.env." + entry.getKey(), entry.getValue().toString());
 			}
 		}
@@ -139,16 +140,20 @@ public class CloudFoundryApplicationManifestUtils {
 		Integer value = null;
 		try {
 			value = Integer.parseInt(text);
-		} catch (Exception e) {
+		}
+		catch (Exception e) {
 		}
 		if (StringUtils.hasText(text)) {
 			if (text.endsWith("G")) {
 				value = Integer.parseInt(text.substring(0, text.length() - 1)) * GIBI;
-			} else if (text.endsWith("GB")) {
+			}
+			else if (text.endsWith("GB")) {
 				value = Integer.parseInt(text.substring(0, text.length() - 2)) * GIBI;
-			} else if (text.endsWith("M")) {
+			}
+			else if (text.endsWith("M")) {
 				value = Integer.parseInt(text.substring(0, text.length() - 1));
-			} else if (text.endsWith("MB")) {
+			}
+			else if (text.endsWith("MB")) {
 				value = Integer.parseInt(text.substring(0, text.length() - 2));
 			}
 		}

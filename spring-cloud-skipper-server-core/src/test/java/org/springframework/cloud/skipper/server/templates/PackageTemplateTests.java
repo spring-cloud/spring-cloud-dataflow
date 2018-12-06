@@ -50,7 +50,7 @@ import static org.assertj.core.api.Assertions.entry;
  * @author Mark Pollack
  */
 @RunWith(SpringRunner.class)
-@SpringBootTest(classes = TestConfig.class)
+@SpringBootTest(classes = TestConfig.class, properties = "spring.main.allow-bean-definition-overriding=true")
 public class PackageTemplateTests {
 
 	private final Logger logger = LoggerFactory.getLogger(PackageTemplateTests.class);

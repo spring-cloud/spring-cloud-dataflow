@@ -40,8 +40,12 @@ public class DeleteProperties {
 
 	@Override
 	public boolean equals(Object o) {
-		if (this == o) return true;
-		if (!(o instanceof DeleteProperties)) return false;
+		if (this == o) {
+			return true;
+		}
+		if (!(o instanceof DeleteProperties)) {
+			return false;
+		}
 
 		DeleteProperties that = (DeleteProperties) o;
 

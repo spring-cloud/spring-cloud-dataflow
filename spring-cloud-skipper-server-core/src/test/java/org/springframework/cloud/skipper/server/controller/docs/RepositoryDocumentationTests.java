@@ -25,8 +25,8 @@ import org.junit.runners.Suite;
  */
 
 @RunWith(Suite.class)
-@Suite.SuiteClasses({ApiDocumentation.class, DeployersDocumentation.class,
-		PackageMetadataDocumentation.class, RepositoriesDocumentation.class, ReleasesDocumentation.class})
+@Suite.SuiteClasses({ ApiDocumentation.class, DeployersDocumentation.class,
+		PackageMetadataDocumentation.class, RepositoriesDocumentation.class, ReleasesDocumentation.class })
 public class RepositoryDocumentationTests {
 
 }

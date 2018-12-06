@@ -298,12 +298,12 @@ public class DefaultReleaseManager implements ReleaseManager {
 		List<String> deploymentIds = appDeployerData.getDeploymentIds();
 		if (!deploymentIds.isEmpty()) {
 			for (String deploymentId : deploymentIds) {
-				try  {
+				try {
 					appDeployer.undeploy(deploymentId);
 				}
 				catch (Exception e) {
 					this.logger.error(String.format("Exception undeploying the application with the deploymentId %s. "
-							+ "Exception message: %s",  deploymentId, e.getMessage()));
+							+ "Exception message: %s", deploymentId, e.getMessage()));
 				}
 			}
 			Status deletedStatus = new Status();

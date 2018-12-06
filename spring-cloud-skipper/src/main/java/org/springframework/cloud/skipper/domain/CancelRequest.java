@@ -27,7 +27,7 @@ public class CancelRequest {
 
 	public CancelRequest() {
 	}
-	
+
 	public CancelRequest(String releaseName) {
 		this.releaseName = releaseName;
 	}
@@ -39,9 +39,9 @@ public class CancelRequest {
 	public void setReleaseName(String releaseName) {
 		this.releaseName = releaseName;
 	}
-	
+
 	@Override
 	public String toString() {
 		return "CancelRequest [releaseName=" + releaseName + "]";
-	}	
+	}
 }

@@ -24,8 +24,9 @@ import org.junit.runners.Suite;
  * @author Ilayaperumal Gopinathan
  */
 @RunWith(Suite.class)
-@Suite.SuiteClasses({AboutDocumentation.class, InstallDocumentation.class, ListDocumentation.class, CancelDocumentation.class, DeleteDocumentation.class, HistoryDocumentation.class, ManifestDocumentation.class,
-		RollbackDocumentation.class, StatusDocumentation.class, UpgradeDocumentation.class, UploadDocumentation.class})
+@Suite.SuiteClasses({ AboutDocumentation.class, InstallDocumentation.class, ListDocumentation.class,
+		CancelDocumentation.class, DeleteDocumentation.class, HistoryDocumentation.class, ManifestDocumentation.class,
+		RollbackDocumentation.class, StatusDocumentation.class, UpgradeDocumentation.class, UploadDocumentation.class })
 public class DocumentationTests {
 
 }

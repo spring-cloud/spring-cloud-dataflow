@@ -60,9 +60,11 @@ public class LocalSkipperResource extends ExternalResource {
 	}
 
 	@Override
-	protected void before() throws Throwable {
+	protected void before() {
 
 		final SpringApplicationBuilder builder = new SpringApplicationBuilder(LocalTestSkipperServer.class);
+
+		builder.properties("spring.main.allow-bean-definition-overriding:true");
 
 		if (this.configLocations  != null && this.configLocations.length > 0) {
 			builder.properties(

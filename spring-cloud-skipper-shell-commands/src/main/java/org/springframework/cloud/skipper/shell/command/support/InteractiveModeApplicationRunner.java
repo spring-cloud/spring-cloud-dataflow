@@ -94,7 +94,7 @@ public class InteractiveModeApplicationRunner implements ApplicationRunner {
 
 		private boolean done;
 
-		public StringInputProvider(List<String> words) {
+		StringInputProvider(List<String> words) {
 			this.commands = words;
 		}
 

@@ -120,7 +120,7 @@ public class ReleaseControllerTests extends AbstractControllerTests {
 		assertThat(this.packageMetadataRepository.findByName("log").size()).isEqualTo(3);
 
 		// Delete the 'release2' only not the package.
-		mockMvc.perform(delete("/api/release/" + releaseNameTwo ))
+		mockMvc.perform(delete("/api/release/" + releaseNameTwo))
 				.andDo(print()).andExpect(status().isOk()).andReturn();
 		assertThat(this.packageMetadataRepository.findByName("log").size()).isEqualTo(3);
 

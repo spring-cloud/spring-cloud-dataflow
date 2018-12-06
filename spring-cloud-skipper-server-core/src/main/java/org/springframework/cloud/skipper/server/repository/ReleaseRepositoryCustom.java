@@ -116,5 +116,4 @@ public interface ReleaseRepositoryCustom {
 	@RestResource(exported = false)
 	Release findLatestReleaseIfDeleted(String releaseName);
 
-
 }

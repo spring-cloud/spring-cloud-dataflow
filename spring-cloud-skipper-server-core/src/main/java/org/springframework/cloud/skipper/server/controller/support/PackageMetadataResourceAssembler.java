@@ -19,7 +19,6 @@ import org.springframework.cloud.skipper.domain.PackageMetadata;
 import org.springframework.cloud.skipper.server.controller.PackageController;
 import org.springframework.hateoas.Resource;
 
-
 import static org.springframework.hateoas.mvc.ControllerLinkBuilder.linkTo;
 import static org.springframework.hateoas.mvc.ControllerLinkBuilder.methodOn;
 

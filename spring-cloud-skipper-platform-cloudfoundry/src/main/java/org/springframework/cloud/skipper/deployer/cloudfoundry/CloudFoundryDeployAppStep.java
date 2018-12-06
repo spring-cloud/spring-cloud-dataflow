@@ -15,8 +15,6 @@
  */
 package org.springframework.cloud.skipper.deployer.cloudfoundry;
 
-import static org.springframework.cloud.skipper.deployer.cloudfoundry.CloudFoundryManifestApplicationDeployer.isNotFoundError;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -37,6 +35,8 @@ import org.springframework.cloud.skipper.server.repository.ReleaseRepository;
 import org.springframework.cloud.skipper.server.util.ArgumentSanitizer;
 import org.springframework.dao.DataAccessException;
 import org.springframework.transaction.annotation.Transactional;
+
+import static org.springframework.cloud.skipper.deployer.cloudfoundry.CloudFoundryManifestApplicationDeployer.isNotFoundError;
 
 /**
  * Responsible for taking the ReleaseAnalysisReport and deploying the apps in the
@@ -120,7 +120,7 @@ public class CloudFoundryDeployAppStep {
 						logger.warn("Unable to deploy application. It may have been destroyed before start completed: " + error.getMessage());
 					}
 					else {
-						logger.error(String.format("Failed to deploy %s", applicationName + ". " +  error.getMessage()));
+						logger.error(String.format("Failed to deploy %s", applicationName + ". " + error.getMessage()));
 					}
 				})
 				.block();

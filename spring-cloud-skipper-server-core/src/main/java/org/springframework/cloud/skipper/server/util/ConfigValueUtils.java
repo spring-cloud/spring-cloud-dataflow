@@ -19,12 +19,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
-import org.springframework.util.Assert;
 import org.yaml.snakeyaml.Yaml;
 
 import org.springframework.cloud.skipper.SkipperException;
 import org.springframework.cloud.skipper.domain.ConfigValues;
 import org.springframework.cloud.skipper.domain.Package;
+import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
 /**

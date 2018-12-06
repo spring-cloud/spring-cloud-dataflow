@@ -24,14 +24,14 @@ import org.springframework.cloud.skipper.SkipperException;
 /**
  * Default implementation of a {@link UpgradeStrategyFactory} returning
  * instances from a context.
- * 
+ *
  * @author Janne Valkealahti
  *
  */
 public class DefaultUpgradeStrategyFactory implements UpgradeStrategyFactory {
 
 	private final Map<String, UpgradeStrategy> strategies = new HashMap<>();
-	
+
 	public DefaultUpgradeStrategyFactory(List<UpgradeStrategy> strategies) {
 		if (strategies != null) {
 			for (UpgradeStrategy strategy : strategies) {

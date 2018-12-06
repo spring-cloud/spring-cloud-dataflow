@@ -52,14 +52,14 @@ public class UpgradeDeleteSourceAppsAction extends AbstractUpgradeStartAction {
 	protected void executeInternal(StateContext<SkipperStates, SkipperEvents> context) {
 		super.executeInternal(context);
 		ReleaseAnalysisReport releaseAnalysisReport = getReleaseAnalysisReport(context);
-		
+
 		// check if we're doing rollback and pass flag to strategy
 		RollbackRequest rollbackRequest = context.getExtendedState().get(SkipperEventHeaders.ROLLBACK_REQUEST,
 				RollbackRequest.class);
-		
+
 		// TODO: should check both releases
 		String kind = ManifestUtils.resolveKind(releaseAnalysisReport.getExistingRelease().getManifest().getData());
-		UpgradeStrategy upgradeStrategy = this.upgradeStrategyFactory.getUpgradeStrategy(kind);		
+		UpgradeStrategy upgradeStrategy = this.upgradeStrategyFactory.getUpgradeStrategy(kind);
 		upgradeStrategy.accept(releaseAnalysisReport.getExistingRelease(), releaseAnalysisReport.getReplacingRelease(),
 				releaseAnalysisReport, rollbackRequest != null);
 	}

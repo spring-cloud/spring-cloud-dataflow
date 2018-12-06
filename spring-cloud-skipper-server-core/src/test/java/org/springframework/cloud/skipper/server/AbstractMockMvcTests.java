@@ -62,7 +62,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
  * @author Mark Pollack
  */
 @RunWith(SpringRunner.class)
-@SpringBootTest(classes = TestConfig.class)
+@SpringBootTest(classes = TestConfig.class, properties = "spring.main.allow-bean-definition-overriding=true")
 @AutoConfigureMockMvc
 public abstract class AbstractMockMvcTests extends AbstractAssertReleaseDeployedTest {
 

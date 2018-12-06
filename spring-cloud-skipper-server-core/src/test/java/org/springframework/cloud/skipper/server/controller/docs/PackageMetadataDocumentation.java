@@ -277,7 +277,7 @@ public class PackageMetadataDocumentation extends BaseDocumentation {
 								fieldWithPath("_embedded.packageMetadata[]._links.packageMetadata.templated").ignored(),
 								fieldWithPath("_embedded.packageMetadata[]._links.install.href")
 										.description("link to install the package")
-								)
+						)
 								.and(super.defaultLinkProperties)
 				));
 	}

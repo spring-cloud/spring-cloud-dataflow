@@ -44,7 +44,7 @@ public class SimpleRedBlackUpgradeStrategy implements UpgradeStrategy {
 		this.handleHealthCheckStep = handleHealthCheckStep;
 		this.deployAppStep = deployAppStep;
 	}
-	
+
 	@Override
 	public Collection<String> getSupportedKinds() {
 		return Arrays.asList(SkipperManifestKind.SpringBootApp.name(),

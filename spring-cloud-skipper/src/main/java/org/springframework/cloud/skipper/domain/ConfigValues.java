@@ -48,18 +48,22 @@ public class ConfigValues {
 
 	@Override
 	public boolean equals(Object obj) {
-		if (this == obj)
+		if (this == obj) {
 			return true;
-		if (obj == null)
+		}
+		if (obj == null) {
 			return false;
-		if (getClass() != obj.getClass())
+		}
+		if (getClass() != obj.getClass()) {
 			return false;
+		}
 		ConfigValues other = (ConfigValues) obj;
-		if (raw == null) {
-			if (other.raw != null)
-				return false;
-		} else if (!raw.equals(other.raw))
+		if (raw == null && other.raw != null) {
 			return false;
+		}
+		else if (!raw.equals(other.raw)) {
+			return false;
+		}
 		return true;
 	}
 }

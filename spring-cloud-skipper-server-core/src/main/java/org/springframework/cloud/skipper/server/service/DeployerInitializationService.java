@@ -26,6 +26,7 @@ import org.springframework.cloud.skipper.domain.Deployer;
 import org.springframework.cloud.skipper.domain.Platform;
 import org.springframework.cloud.skipper.server.repository.DeployerRepository;
 import org.springframework.context.event.EventListener;
+import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
@@ -36,6 +37,7 @@ import org.springframework.transaction.annotation.Transactional;
  * @author Glenn Renfro
  * @author Donovan Muller
  */
+@Component
 public class DeployerInitializationService {
 
 	private final Logger logger = LoggerFactory
@@ -54,13 +56,13 @@ public class DeployerInitializationService {
 	@Transactional
 	public void initialize(ApplicationReadyEvent event) {
 		if (singleDeployerExists()) {
-			for (Platform platform: this.platforms) {
+			for (Platform platform : this.platforms) {
 				if (platform.getDeployers().size() == 1) {
 					List<Deployer> updatedDeployers = new ArrayList<>();
 					List<Deployer> deployers = platform.getDeployers();
 
 					Deployer existingDeployer = deployers.get(0);
-					if (existingDeployer.getName() != "default") {
+					if (!"default".equalsIgnoreCase(existingDeployer.getName())) {
 						Deployer defaultDeployer = new Deployer("default",
 								existingDeployer.getType(), existingDeployer.getAppDeployer());
 						defaultDeployer.setDescription(existingDeployer.getDescription());
@@ -84,7 +86,7 @@ public class DeployerInitializationService {
 
 	private boolean singleDeployerExists() {
 		int deployersCount = 0;
-		for (Platform platform: this.platforms) {
+		for (Platform platform : this.platforms) {
 			deployersCount = deployersCount + platform.getDeployers().size();
 		}
 		return (deployersCount > 1) ? false : true;

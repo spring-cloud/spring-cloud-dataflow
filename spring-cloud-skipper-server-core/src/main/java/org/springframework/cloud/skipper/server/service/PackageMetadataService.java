@@ -86,7 +86,7 @@ public class PackageMetadataService implements ResourceLoaderAware {
 	@Transactional
 	public void deleteIfAllReleasesDeleted(String packageName, Predicate<Release> releaseCheckPredicate) {
 		List<PackageMetadata> packageMetadataList = this.packageMetadataRepository.findByNameRequired(packageName);
-		List<String> errorMessages = new ArrayList<String>();
+		List<String> errorMessages = new ArrayList<>();
 		for (PackageMetadata packageMetadata : packageMetadataList) {
 			List<Release> releases = this.releaseRepository.findByRepositoryIdAndPackageMetadataIdOrderByNameAscVersionDesc(
 					packageMetadata.getRepositoryId(),
@@ -144,7 +144,8 @@ public class PackageMetadataService implements ResourceLoaderAware {
 						repository.getName()));
 				return true;
 			}
-		} else {
+		}
+		else {
 			errorMessages.add(String.format("Can not delete package {}, repositoryId {} does not exist.",
 					packageMetadata.getName(),
 					packageMetadata.getRepositoryId()));

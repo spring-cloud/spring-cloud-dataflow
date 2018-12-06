@@ -57,7 +57,6 @@ public class Dependency {
 
 	/**
 	 * Retrieve the current name for the {@link Dependency}
-
 	 * @return the name for the {@link Dependency}
 	 */
 	public String getName() {
@@ -105,8 +104,7 @@ public class Dependency {
 	 *
 	 * @param checksumSha1 {@link String} representing the checksumSha1.
 	 */
-	public void setChecksumSha1(String checksumSha1)
-	{
+	public void setChecksumSha1(String checksumSha1) {
 		this.checksumSha1 = checksumSha1;
 	}
 

@@ -42,7 +42,8 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author Donovan Muller
  */
 @RunWith(SpringRunner.class)
-@SpringBootTest(classes = PlatformPropertiesTests.TestConfig.class)
+@SpringBootTest(classes = PlatformPropertiesTests.TestConfig.class,
+		properties = "spring.main.allow-bean-definition-overriding=true")
 @ActiveProfiles("platform-properties")
 public class PlatformPropertiesTests {
 

@@ -579,7 +579,8 @@ public class StateMachineTests {
 			modifierField.setAccessible(true);
 			modifierField.setInt(field, modifiers);
 			ReflectionUtils.setField(field, instance, value);
-		} catch (ReflectiveOperationException e) {
+		}
+		catch (ReflectiveOperationException e) {
 			throw new IllegalArgumentException(e);
 		}
 	}

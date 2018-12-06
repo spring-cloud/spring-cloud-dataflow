@@ -1,4 +1,3 @@
-
 /*
  * Copyright 2017 the original author or authors.
  *
@@ -54,28 +53,28 @@ public class HistoryDocumentation extends BaseDocumentation {
 										String.format("StatusCode of the release's status (%s)",
 												StringUtils.arrayToCommaDelimitedString(StatusCode.values()))),
 								fieldWithPath("_embedded.releases[].info.status.platformStatus")
-								.description("Status from the underlying platform"),
+										.description("Status from the underlying platform"),
 								fieldWithPath("_embedded.releases[].info.firstDeployed").description("Date/Time of first deployment"),
 								fieldWithPath("_embedded.releases[].info.lastDeployed").description("Date/Time of last deployment"),
 								fieldWithPath("_embedded.releases[].info.deleted")
-								.description("Date/Time of when the release was deleted"),
+										.description("Date/Time of when the release was deleted"),
 								fieldWithPath("_embedded.releases[].info.description")
-								.description("Human-friendly 'log entry' about this release"),
+										.description("Human-friendly 'log entry' about this release"),
 								fieldWithPath("_embedded.releases[].pkg.metadata.apiVersion")
-								.description("The Package Index spec version this file is based on"),
+										.description("The Package Index spec version this file is based on"),
 								fieldWithPath("_embedded.releases[].pkg.metadata.origin")
-								.description("Indicates the origin of the repository (free form text)"),
+										.description("Indicates the origin of the repository (free form text)"),
 								fieldWithPath("_embedded.releases[].pkg.metadata.repositoryId")
 										.description("The repository ID this Package belongs to"),
 								fieldWithPath("_embedded.releases[].pkg.metadata.repositoryName")
 										.description("The repository name this Package belongs to."),
 								fieldWithPath("_embedded.releases[].pkg.metadata.kind")
-								.description("What type of package system is being used"),
+										.description("What type of package system is being used"),
 								fieldWithPath("_embedded.releases[].pkg.metadata.name").description("The name of the package"),
 								fieldWithPath("_embedded.releases[].pkg.metadata.displayName").description("Display name of the release"),
 								fieldWithPath("_embedded.releases[].pkg.metadata.version").description("The version of the package"),
 								fieldWithPath("_embedded.releases[].pkg.metadata.packageSourceUrl")
-								.description("Location to source code for this package"),
+										.description("Location to source code for this package"),
 								fieldWithPath("_embedded.releases[].pkg.metadata.packageHomeUrl")
 										.description("The home page of the package"),
 								fieldWithPath("_embedded.releases[].pkg.metadata.tags")

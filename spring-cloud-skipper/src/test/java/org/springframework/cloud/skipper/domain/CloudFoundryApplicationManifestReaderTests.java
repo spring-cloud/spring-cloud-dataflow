@@ -15,16 +15,17 @@
  */
 package org.springframework.cloud.skipper.domain;
 
-import static org.assertj.core.api.Assertions.assertThat;
-
 import java.io.IOException;
 import java.nio.charset.Charset;
 import java.util.List;
 
 import org.junit.Test;
+
 import org.springframework.cloud.skipper.TestResourceUtils;
 import org.springframework.cloud.skipper.domain.CloudFoundryApplicationSpec.HealthCheckType;
 import org.springframework.util.StreamUtils;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class CloudFoundryApplicationManifestReaderTests {
 

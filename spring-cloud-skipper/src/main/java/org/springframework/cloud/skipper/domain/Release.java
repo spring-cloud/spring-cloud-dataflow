@@ -44,7 +44,7 @@ import org.springframework.util.StringUtils;
  * @author Gunnar Hillert
  */
 @Entity
-@Table(name = "SkipperRelease", indexes = @Index(name="idx_rel_name", columnList = "name"))
+@Table(name = "SkipperRelease", indexes = @Index(name = "idx_rel_name", columnList = "name"))
 public class Release extends AbstractEntity {
 
 	/**

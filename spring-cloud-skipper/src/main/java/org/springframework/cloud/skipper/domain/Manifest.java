@@ -44,8 +44,12 @@ public class Manifest extends AbstractEntity {
 
 	@Override
 	public boolean equals(Object o) {
-		if (this == o) return true;
-		if (!(o instanceof Manifest)) return false;
+		if (this == o) {
+			return true;
+		}
+		if (!(o instanceof Manifest)) {
+			return false;
+		}
 
 		Manifest manifest = (Manifest) o;
 

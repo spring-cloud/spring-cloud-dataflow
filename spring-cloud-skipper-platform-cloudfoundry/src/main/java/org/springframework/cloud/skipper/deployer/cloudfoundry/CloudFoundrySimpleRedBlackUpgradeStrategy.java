@@ -30,7 +30,7 @@ import org.springframework.cloud.skipper.server.deployer.strategies.UpgradeStrat
  * lived operation. Delegates to {@link CloudFoundryDeployAppStep},
  * {@link CloudFoundryHealthCheckStep} and
  * {@link CloudFoundryHandleHealthCheckStep}
- * 
+ *
  * @author Mark Pollack
  * @author Janne Valkealahti
  */
@@ -54,7 +54,7 @@ public class CloudFoundrySimpleRedBlackUpgradeStrategy implements UpgradeStrateg
 	public Collection<String> getSupportedKinds() {
 		return Arrays.asList(SkipperManifestKind.CloudFoundryApplication.name());
 	}
-	
+
 	@Override
 	public void deployApps(Release existingRelease, Release replacingRelease, ReleaseAnalysisReport releaseAnalysisReport) {
 		this.deployAppStep.deployApps(existingRelease, replacingRelease, releaseAnalysisReport);

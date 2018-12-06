@@ -72,7 +72,7 @@ public class CloudFoundryReleaseManager implements ReleaseManager {
 			CloudFoundryReleaseAnalyzer cloudFoundryReleaseAnalyzer,
 			PlatformCloudFoundryOperations platformCloudFoundryOperations,
 			CloudFoundryManifestApplicationDeployer cfManifestApplicationDeployer
-			) {
+	) {
 		this.releaseRepository = releaseRepository;
 		this.appDeployerDataRepository = appDeployerDataRepository;
 		this.cloudFoundryReleaseAnalyzer = cloudFoundryReleaseAnalyzer;
@@ -84,7 +84,7 @@ public class CloudFoundryReleaseManager implements ReleaseManager {
 	public Collection<String> getSupportedKinds() {
 		return Arrays.asList(SkipperManifestKind.CloudFoundryApplication.name());
 	}
-	
+
 	public Release install(Release newRelease) {
 		Release release = this.releaseRepository.save(newRelease);
 		ApplicationManifest applicationManifest = this.cfManifestApplicationDeployer.getCFApplicationManifest(release);
@@ -153,8 +153,8 @@ public class CloudFoundryReleaseManager implements ReleaseManager {
 	}
 
 	public Release status(Release release) {
-			release.getInfo().getStatus().setPlatformStatusAsAppStatusList(
-					Collections.singletonList(this.cfManifestApplicationDeployer.status(release)));
+		release.getInfo().getStatus().setPlatformStatusAsAppStatusList(
+				Collections.singletonList(this.cfManifestApplicationDeployer.status(release)));
 		return release;
 	}
 

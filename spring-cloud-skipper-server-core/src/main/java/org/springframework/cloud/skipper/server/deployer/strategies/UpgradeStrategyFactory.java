@@ -17,7 +17,7 @@ package org.springframework.cloud.skipper.server.deployer.strategies;
 
 /**
  * Interface resolving {@link UpgradeStrategy} for an {@code application kind}.
- * 
+ *
  * @author Janne Valkealahti
  *
  */
@@ -25,7 +25,7 @@ public interface UpgradeStrategyFactory {
 
 	/**
 	 * Resolve {@link UpgradeStrategy} for an {@code application kind}.
-	 * 
+	 *
 	 * @param kind the application kind
 	 * @return the resolved upgrade strategy
 	 */

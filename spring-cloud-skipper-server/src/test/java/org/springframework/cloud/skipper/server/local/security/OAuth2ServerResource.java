@@ -57,7 +57,9 @@ public class OAuth2ServerResource extends ExternalResource {
 
 		System.setProperty(OAUTH2_PORT_PROPERTY, String.valueOf(this.oauth2ServerPort));
 
-		this.application = new SpringApplicationBuilder(OAuth2TestServer.class).build()
+		this.application = new SpringApplicationBuilder(OAuth2TestServer.class)
+				.properties("spring.main.allow-bean-definition-overriding:true")
+				.build()
 				.run("--spring.config.location=classpath:/org/springframework/cloud/skipper/server/local/security"
 						+ "/support/oauth2TestServerConfig.yml");
 	}

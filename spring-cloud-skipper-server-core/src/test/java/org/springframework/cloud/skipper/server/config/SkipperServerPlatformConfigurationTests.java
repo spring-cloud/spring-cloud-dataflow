@@ -36,6 +36,7 @@ import org.springframework.cloud.skipper.domain.Platform;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
+import org.springframework.context.annotation.Primary;
 import org.springframework.statemachine.boot.autoconfigure.StateMachineJpaRepositoriesAutoConfiguration;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
@@ -55,7 +56,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 public class SkipperServerPlatformConfigurationTests {
 
 	@RunWith(SpringRunner.class)
-	@SpringBootTest(classes = TestConfig.class)
+	@SpringBootTest(classes = TestConfig.class, properties = "spring.main.allow-bean-definition-overriding=true")
 	@ActiveProfiles("platform-configuration")
 	public static class AllPlatformsConfigurationTest {
 
@@ -69,7 +70,9 @@ public class SkipperServerPlatformConfigurationTests {
 	}
 
 	@RunWith(SpringRunner.class)
-	@SpringBootTest(classes = TestConfig.class, properties = "spring.cloud.skipper.server.enableLocalPlatform=false")
+	@SpringBootTest(classes = TestConfig.class,
+			properties = { "spring.cloud.skipper.server.enableLocalPlatform=false",
+					"spring.main.allow-bean-definition-overriding=true" })
 	public static class SinglePlatformConfigurationTest {
 
 		@Autowired
@@ -82,7 +85,9 @@ public class SkipperServerPlatformConfigurationTests {
 	}
 
 	@RunWith(SpringRunner.class)
-	@SpringBootTest(classes = TestConfig.class, properties = "spring.cloud.skipper.server.enableLocalPlatform=false")
+	@SpringBootTest(classes = TestConfig.class,
+			properties = { "spring.cloud.skipper.server.enableLocalPlatform=false",
+					"spring.main.allow-bean-definition-overriding=true" })
 	@ActiveProfiles("platform-configuration")
 	public static class ExternalPlatformsOnlyConfigurationTest {
 
@@ -107,6 +112,7 @@ public class SkipperServerPlatformConfigurationTests {
 	static class TestPlatformAutoConfiguration {
 
 		@Bean
+		@Primary
 		public Platform testPlatform() {
 			return new Platform("Test", Collections.singletonList(
 					new Deployer("test", "test", new AppDeployer() {

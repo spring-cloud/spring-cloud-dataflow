@@ -22,7 +22,7 @@ package org.springframework.cloud.skipper.domain;
  *
  */
 public class CancelResponse {
-	
+
 	private Boolean accepted;
 
 	public CancelResponse() {
@@ -39,9 +39,9 @@ public class CancelResponse {
 	public void setAccepted(Boolean accepted) {
 		this.accepted = accepted;
 	}
-		
+
 	@Override
 	public String toString() {
 		return "CancelResponse [accepted=" + accepted + "]";
-	}	
+	}
 }

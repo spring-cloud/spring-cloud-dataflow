@@ -65,7 +65,7 @@ import static org.springframework.cloud.skipper.server.AbstractIntegrationTest.T
  * @author Glenn Renfro
  */
 @RunWith(SpringRunner.class)
-@SpringBootTest(classes = TestConfig.class)
+@SpringBootTest(classes = TestConfig.class, properties = "spring.main.allow-bean-definition-overriding=true")
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_CLASS)
 public abstract class AbstractIntegrationTest extends AbstractAssertReleaseDeployedTest {
 

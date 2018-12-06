@@ -131,5 +131,4 @@ public class ReleaseRepositoryImpl implements ReleaseRepositoryCustom {
 				latestRelease.getInfo().getStatus().getStatusCode().equals(StatusCode.DELETED)) ? latestRelease : null;
 	}
 
-
 }

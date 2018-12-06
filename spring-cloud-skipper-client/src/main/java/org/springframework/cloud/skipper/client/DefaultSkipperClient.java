@@ -26,6 +26,7 @@ import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
 import org.springframework.cloud.skipper.domain.AboutResource;
 import org.springframework.cloud.skipper.domain.CancelRequest;
 import org.springframework.cloud.skipper.domain.CancelResponse;
@@ -127,7 +128,7 @@ public class DefaultSkipperClient implements SkipperClient {
 	@Override
 	public Info status(String releaseName) {
 		ParameterizedTypeReference<Resource<Info>> typeReference =
-				new ParameterizedTypeReference<Resource<Info>>() {	};
+				new ParameterizedTypeReference<Resource<Info>>() { };
 		Map<String, String> uriVariables = new HashMap<String, String>();
 		uriVariables.put("releaseName", releaseName);
 
@@ -143,7 +144,7 @@ public class DefaultSkipperClient implements SkipperClient {
 	@Override
 	public Info status(String releaseName, int releaseVersion) {
 		ParameterizedTypeReference<Resource<Info>> typeReference =
-				new ParameterizedTypeReference<Resource<Info>>() {	};
+				new ParameterizedTypeReference<Resource<Info>>() { };
 		Map<String, String> uriVariables = new HashMap<String, String>();
 		uriVariables.put("releaseName", releaseName);
 		uriVariables.put("releaseVersion", Integer.toString(releaseVersion));
@@ -159,7 +160,7 @@ public class DefaultSkipperClient implements SkipperClient {
 	@Override
 	public String manifest(String releaseName) {
 		ParameterizedTypeReference<Resource<Manifest>> typeReference =
-				new ParameterizedTypeReference<Resource<Manifest>>() {	};
+				new ParameterizedTypeReference<Resource<Manifest>>() { };
 		Map<String, String> uriVariables = new HashMap<String, String>();
 		uriVariables.put("releaseName", releaseName);
 		ResponseEntity<Resource<Manifest>> resourceResponseEntity =
@@ -174,7 +175,7 @@ public class DefaultSkipperClient implements SkipperClient {
 	@Override
 	public String manifest(String releaseName, int releaseVersion) {
 		ParameterizedTypeReference<Resource<Manifest>> typeReference =
-				new ParameterizedTypeReference<Resource<Manifest>>() {	};
+				new ParameterizedTypeReference<Resource<Manifest>>() { };
 		Map<String, String> uriVariables = new HashMap<String, String>();
 		uriVariables.put("releaseName", releaseName);
 		uriVariables.put("releaseVersion", Integer.toString(releaseVersion));
@@ -190,7 +191,7 @@ public class DefaultSkipperClient implements SkipperClient {
 	@Override
 	public Resources<PackageMetadata> search(String name, boolean details) {
 		ParameterizedTypeReference<Resources<PackageMetadata>> typeReference =
-				new ParameterizedTypeReference<Resources<PackageMetadata>>() {	};
+				new ParameterizedTypeReference<Resources<PackageMetadata>>() { };
 		Traverson.TraversalBuilder traversalBuilder = this.traverson.follow("packageMetadata");
 		Map<String, Object> parameters = new HashMap<>();
 		parameters.put("size", 2000);
@@ -212,7 +213,7 @@ public class DefaultSkipperClient implements SkipperClient {
 
 		HttpEntity<InstallRequest> httpEntity = new HttpEntity<>(installRequest);
 		ResponseEntity<Resource<Release>> resourceResponseEntity =
-				restTemplate.exchange(url, HttpMethod.POST, httpEntity,	typeReference);
+				restTemplate.exchange(url, HttpMethod.POST, httpEntity, typeReference);
 		return resourceResponseEntity.getBody().getContent();
 	}
 
@@ -241,8 +242,8 @@ public class DefaultSkipperClient implements SkipperClient {
 		String url = String.format("%s/%s/%s", baseUri, "release", "cancel");
 		log.debug("Posting CancelRequest to " + url + ". CancelRequest = " + cancelRequest);
 		return this.restTemplate.postForObject(url, cancelRequest, CancelResponse.class);
-	}	
-	
+	}
+
 	@Override
 	public Release rollback(RollbackRequest rollbackRequest) {
 		ParameterizedTypeReference<Resource<Release>> typeReference =
@@ -251,7 +252,7 @@ public class DefaultSkipperClient implements SkipperClient {
 
 		HttpEntity<RollbackRequest> httpEntity = new HttpEntity<>(rollbackRequest);
 		ResponseEntity<Resource<Release>> resourceResponseEntity =
-				restTemplate.exchange(url, HttpMethod.POST, httpEntity,	typeReference);
+				restTemplate.exchange(url, HttpMethod.POST, httpEntity, typeReference);
 		return resourceResponseEntity.getBody().getContent();
 	}
 
@@ -278,7 +279,7 @@ public class DefaultSkipperClient implements SkipperClient {
 	@Override
 	public Resources<Release> history(String releaseName) {
 		ParameterizedTypeReference<Resources<Release>> typeReference =
-				new ParameterizedTypeReference<Resources<Release>>() {	};
+				new ParameterizedTypeReference<Resources<Release>>() { };
 		Map<String, Object> parameters = new HashMap<>();
 		parameters.put("name", releaseName);
 		Traverson.TraversalBuilder traversalBuilder = this.traverson.follow("releases", "search",
@@ -343,7 +344,7 @@ public class DefaultSkipperClient implements SkipperClient {
 				uploadRequest.getRepoName());
 		HttpEntity<UploadRequest> httpEntity = new HttpEntity<>(uploadRequest);
 		ResponseEntity<Resource<PackageMetadata>> resourceResponseEntity =
-				restTemplate.exchange(url, HttpMethod.POST, httpEntity,	typeReference);
+				restTemplate.exchange(url, HttpMethod.POST, httpEntity, typeReference);
 		PackageMetadata packageMetadata = resourceResponseEntity.getBody().getContent();
 		return packageMetadata;
 	}

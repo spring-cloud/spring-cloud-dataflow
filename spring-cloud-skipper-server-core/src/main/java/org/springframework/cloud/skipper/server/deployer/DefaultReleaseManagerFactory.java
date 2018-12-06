@@ -24,14 +24,14 @@ import org.springframework.cloud.skipper.SkipperException;
 /**
  * Default implementation of a {@link ReleaseManagerFactory} returning
  * instances from a context.
- * 
+ *
  * @author Janne Valkealahti
  *
  */
 public class DefaultReleaseManagerFactory implements ReleaseManagerFactory {
 
 	private final Map<String, ReleaseManager> managers = new HashMap<>();
-	
+
 	public DefaultReleaseManagerFactory(List<ReleaseManager> managers) {
 		if (managers != null) {
 			for (ReleaseManager manager : managers) {

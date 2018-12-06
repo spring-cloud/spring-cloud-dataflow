@@ -22,7 +22,6 @@ import java.util.TreeMap;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.springframework.cloud.skipper.server.util.ConfigValueUtils;
 import org.yaml.snakeyaml.DumperOptions;
 import org.yaml.snakeyaml.Yaml;
 
@@ -37,6 +36,7 @@ import org.springframework.cloud.skipper.domain.Package;
 import org.springframework.cloud.skipper.io.PackageReader;
 import org.springframework.cloud.skipper.server.TestResourceUtils;
 import org.springframework.cloud.skipper.server.config.SkipperServerConfiguration;
+import org.springframework.cloud.skipper.server.util.ConfigValueUtils;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.core.io.ClassPathResource;
@@ -53,7 +53,7 @@ import static org.springframework.cloud.skipper.server.service.ConfigValueUtilsT
  * @author Mark Pollack
  */
 @RunWith(SpringRunner.class)
-@SpringBootTest(classes = TestConfig.class)
+@SpringBootTest(classes = TestConfig.class, properties = "spring.main.allow-bean-definition-overriding=true")
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_CLASS)
 public class ConfigValueUtilsTests {
 

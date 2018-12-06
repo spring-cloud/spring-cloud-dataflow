@@ -34,10 +34,10 @@ public class ArgumentSanitizer {
 
 	private static final String REDACTION_STRING = "******";
 
-	private static final String[] REGEX_PARTS = {"*", "$", "^", "+"};
+	private static final String[] REGEX_PARTS = { "*", "$", "^", "+" };
 
-	private static final String[] KEYS_TO_SANITIZE = {"password", "secret", "key", "token", ".*credentials.*",
-			"vcap_services"};
+	private static final String[] KEYS_TO_SANITIZE = { "password", "secret", "key", "token", ".*credentials.*",
+			"vcap_services" };
 
 	private static Pattern[] keysToSanitize;
 

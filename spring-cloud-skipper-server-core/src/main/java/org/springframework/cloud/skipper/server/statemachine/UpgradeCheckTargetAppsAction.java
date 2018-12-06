@@ -17,6 +17,7 @@ package org.springframework.cloud.skipper.server.statemachine;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
 import org.springframework.cloud.skipper.server.deployer.ReleaseAnalysisReport;
 import org.springframework.cloud.skipper.server.deployer.strategies.UpgradeStrategy;
 import org.springframework.cloud.skipper.server.deployer.strategies.UpgradeStrategyFactory;
@@ -58,7 +59,7 @@ public class UpgradeCheckTargetAppsAction extends AbstractUpgradeStartAction {
 		int upgradeStatus = 0;
 		// TODO: should check both releases
 		String kind = ManifestUtils.resolveKind(releaseAnalysisReport.getReplacingRelease().getManifest().getData());
-		UpgradeStrategy upgradeStrategy = this.upgradeStrategyFactory.getUpgradeStrategy(kind);		
+		UpgradeStrategy upgradeStrategy = this.upgradeStrategyFactory.getUpgradeStrategy(kind);
 		boolean ok = upgradeStrategy.checkStatus(releaseAnalysisReport.getReplacingRelease());
 		log.debug("upgradeStrategy checkStatus {}", ok);
 		if (ok) {

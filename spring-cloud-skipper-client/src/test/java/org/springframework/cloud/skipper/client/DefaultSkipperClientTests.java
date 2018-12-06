@@ -130,7 +130,7 @@ public class DefaultSkipperClientTests {
 				MediaType.APPLICATION_JSON.getSubtype(), Charset.forName("utf8"));
 
 		MockRestServiceServer mockServer = MockRestServiceServer.bindTo(restTemplate).build();
-		mockServer.expect(requestTo("/release/release1" + (deletePackage?"/package":"")))
+		mockServer.expect(requestTo("/release/release1" + (deletePackage ? "/package" : "")))
 				.andRespond(withStatus(HttpStatus.OK).contentType(MediaType.APPLICATION_JSON));
 
 		skipperClient.delete("release1", deletePackage);

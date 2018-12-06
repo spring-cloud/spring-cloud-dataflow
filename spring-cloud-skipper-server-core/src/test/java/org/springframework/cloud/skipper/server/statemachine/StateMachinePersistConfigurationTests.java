@@ -15,8 +15,6 @@
  */
 package org.springframework.cloud.skipper.server.statemachine;
 
-import static org.assertj.core.api.Assertions.assertThat;
-
 import java.util.Map;
 
 import org.junit.Test;
@@ -28,6 +26,8 @@ import org.springframework.cloud.skipper.server.statemachine.SkipperStateMachine
 import org.springframework.cloud.skipper.server.statemachine.StateMachinePersistConfiguration.SkipUnwantedVariablesFunction;
 import org.springframework.statemachine.StateMachine;
 import org.springframework.statemachine.support.DefaultExtendedState;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Tests for persist skip function.

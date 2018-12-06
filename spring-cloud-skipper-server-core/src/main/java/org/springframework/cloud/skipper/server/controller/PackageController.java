@@ -23,11 +23,11 @@ import org.springframework.cloud.skipper.domain.InstallRequest;
 import org.springframework.cloud.skipper.domain.PackageMetadata;
 import org.springframework.cloud.skipper.domain.Release;
 import org.springframework.cloud.skipper.domain.UploadRequest;
+import org.springframework.cloud.skipper.server.controller.support.PackageMetadataResourceAssembler;
+import org.springframework.cloud.skipper.server.controller.support.ReleaseResourceAssembler;
 import org.springframework.cloud.skipper.server.service.PackageMetadataService;
 import org.springframework.cloud.skipper.server.service.PackageService;
 import org.springframework.cloud.skipper.server.statemachine.SkipperStateMachineService;
-import org.springframework.cloud.skipper.server.controller.support.PackageMetadataResourceAssembler;
-import org.springframework.cloud.skipper.server.controller.support.ReleaseResourceAssembler;
 import org.springframework.hateoas.Resource;
 import org.springframework.hateoas.ResourceSupport;
 import org.springframework.hateoas.mvc.ControllerLinkBuilder;
@@ -129,6 +129,5 @@ public class PackageController {
 		public PackageControllerLinksResource() {
 		}
 	}
-
 
 }

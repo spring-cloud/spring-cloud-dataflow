@@ -92,8 +92,10 @@ import static org.springframework.restdocs.request.RequestDocumentation.requestP
 @ActiveProfiles("repo-test")
 @AutoConfigureMockMvc
 @AutoConfigureRestDocs("target/generated-snippets")
-@SpringBootTest(properties = {"spring.cloud.skipper.server.synchonizeIndexOnContextRefresh=false",
-		"spring.cloud.skipper.server.enableReleaseStateUpdateService=false" } , classes = ServerDependencies.class)
+@SpringBootTest(properties = { "spring.cloud.skipper.server.synchonizeIndexOnContextRefresh=false",
+		"spring.cloud.skipper.server.enableReleaseStateUpdateService=false",
+		"spring.main.allow-bean-definition-overriding=true"
+}, classes = ServerDependencies.class)
 @RunWith(SpringRunner.class)
 public abstract class BaseDocumentation {
 
@@ -222,7 +224,7 @@ public abstract class BaseDocumentation {
 		return upgradeProperties;
 	}
 
-	protected  Release createTestRelease() {
+	protected Release createTestRelease() {
 		return createTestRelease("test", StatusCode.DEPLOYED);
 	}
 

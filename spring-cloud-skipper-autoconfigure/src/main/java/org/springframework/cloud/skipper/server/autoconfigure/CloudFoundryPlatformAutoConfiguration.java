@@ -20,7 +20,6 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import com.github.zafarkhaja.semver.Version;
-
 import org.cloudfoundry.client.CloudFoundryClient;
 import org.cloudfoundry.client.v2.info.GetInfoRequest;
 import org.cloudfoundry.operations.CloudFoundryOperations;
@@ -30,9 +29,9 @@ import org.cloudfoundry.reactor.DefaultConnectionContext;
 import org.cloudfoundry.reactor.TokenProvider;
 import org.cloudfoundry.reactor.client.ReactorCloudFoundryClient;
 import org.cloudfoundry.reactor.tokenprovider.PasswordGrantTokenProvider;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.cloud.deployer.spi.app.AppDeployer;

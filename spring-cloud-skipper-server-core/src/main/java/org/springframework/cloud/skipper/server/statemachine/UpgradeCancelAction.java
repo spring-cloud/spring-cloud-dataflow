@@ -35,7 +35,7 @@ import org.springframework.statemachine.action.Action;
  *
  */
 public class UpgradeCancelAction extends AbstractUpgradeStartAction {
-	
+
 	private final UpgradeStrategyFactory upgradeStrategyFactory;
 
 	/**
@@ -52,7 +52,7 @@ public class UpgradeCancelAction extends AbstractUpgradeStartAction {
 	@Override
 	protected void executeInternal(StateContext<SkipperStates, SkipperEvents> context) {
 		super.executeInternal(context);
-		
+
 		Long upgradeTimeout = context.getExtendedState().get(SkipperEventHeaders.UPGRADE_TIMEOUT, Long.class);
 		Long cutOffTime = context.getExtendedState().get(SkipperVariables.UPGRADE_CUTOFF_TIME, Long.class);
 		SkipperEvents event = context.getEvent();
@@ -66,15 +66,15 @@ public class UpgradeCancelAction extends AbstractUpgradeStartAction {
 			// else assume timeout upgrade is using
 			upgradeTimeout = context.getExtendedState().get(SkipperEventHeaders.UPGRADE_TIMEOUT, Long.class);
 		}
-		
+
 		ReleaseAnalysisReport releaseAnalysisReport = getReleaseAnalysisReport(context);
-		
+
 		// check if we're doing rollback and pass flag to strategy
 		RollbackRequest rollbackRequest = context.getExtendedState().get(SkipperEventHeaders.ROLLBACK_REQUEST,
 				RollbackRequest.class);
 		// TODO: should check both releases
 		String kind = ManifestUtils.resolveKind(releaseAnalysisReport.getExistingRelease().getManifest().getData());
-		UpgradeStrategy upgradeStrategy = this.upgradeStrategyFactory.getUpgradeStrategy(kind);		
+		UpgradeStrategy upgradeStrategy = this.upgradeStrategyFactory.getUpgradeStrategy(kind);
 		upgradeStrategy.cancel(releaseAnalysisReport.getExistingRelease(), releaseAnalysisReport.getReplacingRelease(),
 				releaseAnalysisReport, upgradeTimeout, event == SkipperEvents.UPGRADE_CANCEL, rollbackRequest != null);
 	}

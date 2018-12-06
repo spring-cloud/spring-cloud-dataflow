@@ -28,6 +28,7 @@ import org.springframework.cloud.skipper.server.config.SkipperServerProperties;
 import org.springframework.cloud.skipper.server.repository.PackageMetadataRepository;
 import org.springframework.cloud.skipper.server.repository.RepositoryRepository;
 import org.springframework.context.event.EventListener;
+import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
@@ -38,6 +39,7 @@ import org.springframework.transaction.annotation.Transactional;
  * @author Mark Pollack
  * @author Glenn Renfro
  */
+@Component
 public class RepositoryInitializationService {
 
 	private final Logger logger = LoggerFactory.getLogger(RepositoryInitializationService.class);

@@ -67,11 +67,11 @@ public class SkipperOAuthSecurityConfiguration extends OAuthSecurityConfiguratio
 		this.authorizationProperties.getAuthenticatedPaths().add(dashboard(""));
 
 		ExpressionUrlAuthorizationConfigurer<HttpSecurity>.ExpressionInterceptUrlRegistry security =
-			http.authorizeRequests()
-					.antMatchers(this.authorizationProperties.getPermitAllPaths().toArray(new String[0]))
-					.permitAll()
-					.antMatchers(this.authorizationProperties.getAuthenticatedPaths().toArray(new String[0]))
-					.authenticated();
+				http.authorizeRequests()
+						.antMatchers(this.authorizationProperties.getPermitAllPaths().toArray(new String[0]))
+						.permitAll()
+						.antMatchers(this.authorizationProperties.getAuthenticatedPaths().toArray(new String[0]))
+						.authenticated();
 
 		security = SecurityConfigUtils.configureSimpleSecurity(security, this.authorizationProperties);
 		security.anyRequest().denyAll();

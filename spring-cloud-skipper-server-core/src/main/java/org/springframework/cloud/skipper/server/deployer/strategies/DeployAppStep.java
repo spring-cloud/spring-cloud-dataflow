@@ -72,7 +72,7 @@ public class DeployAppStep {
 		try {
 			applicationNamesToUpgrade = releaseAnalysisReport.getApplicationNamesToUpgrade();
 			AppDeployer appDeployer = this.deployerRepository.findByNameRequired(replacingRelease.getPlatformName())
-											.getAppDeployer();
+					.getAppDeployer();
 
 			// Deploy the application
 			Map<String, String> appNameDeploymentIdMap = deploy(replacingRelease, applicationNamesToUpgrade,

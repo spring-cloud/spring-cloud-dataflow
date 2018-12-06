@@ -15,13 +15,13 @@
  */
 package org.springframework.cloud.skipper.server.controller.support;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.springframework.hateoas.Resource;
 import org.springframework.hateoas.ResourceAssembler;
 import org.springframework.hateoas.Resources;
 import org.springframework.util.Assert;
-
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * A {@link ResourceAssembler}/{@link ResourcesAssembler} that focuses purely on the domain type,

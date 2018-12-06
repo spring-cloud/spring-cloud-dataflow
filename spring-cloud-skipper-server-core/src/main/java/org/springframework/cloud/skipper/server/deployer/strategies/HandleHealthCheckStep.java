@@ -92,7 +92,7 @@ public class HandleHealthCheckStep {
 		try {
 			if (!cancel) {
 				logger.error("New release " + replacingRelease.getName() + " was not detected as healthy after " + timeout
-						+ " milliseconds.  " + "Keeping existing release, and Deleting apps of replacing release");				
+						+ " milliseconds.  " + "Keeping existing release, and Deleting apps of replacing release");
 			}
 			String kind = ManifestUtils.resolveKind(replacingRelease.getManifest().getData());
 			ReleaseManager releaseManager = this.releaseManagerFactory.getReleaseManager(kind);

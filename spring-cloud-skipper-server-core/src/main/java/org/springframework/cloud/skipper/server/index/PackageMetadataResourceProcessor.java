@@ -36,7 +36,7 @@ public class PackageMetadataResourceProcessor implements ResourceProcessor<Resou
 	public Resource<PackageMetadata> process(Resource<PackageMetadata> packageMetadataResource) {
 		Link installLink = linkTo(
 				methodOn(PackageController.class).install(packageMetadataResource.getContent().getId(), null))
-						.withRel("install");
+				.withRel("install");
 		packageMetadataResource.add(installLink);
 		return packageMetadataResource;
 	}

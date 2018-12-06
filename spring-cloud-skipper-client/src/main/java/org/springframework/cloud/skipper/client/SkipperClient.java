@@ -121,7 +121,7 @@ public interface SkipperClient {
 
 	/**
 	 * Sends a cancel request for current release operation
-	 * 
+	 *
 	 * @param cancelRequest the cancel request
 	 * @return the cancel response
 	 */

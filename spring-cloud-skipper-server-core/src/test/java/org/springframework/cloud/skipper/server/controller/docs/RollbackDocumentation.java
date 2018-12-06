@@ -112,13 +112,13 @@ public class RollbackDocumentation extends BaseDocumentation {
 		Release release = createTestRelease();
 		when(this.skipperStateMachineService.rollbackRelease(any(RollbackRequest.class))).thenReturn(release);
 
-		final RollbackRequest rollbackRequest = new RollbackRequest(release.getName(), 1, 60000l);
+		final RollbackRequest rollbackRequest = new RollbackRequest(release.getName(), 1, 60000L);
 		final MediaType contentType = new MediaType(MediaType.APPLICATION_JSON.getType(),
 				MediaType.APPLICATION_JSON.getSubtype(), Charset.forName("utf8"));
 
 		MvcResult result = this.mockMvc.perform(
 				post("/api/release/rollback").accept(MediaType.APPLICATION_JSON).contentType(contentType)
-				.content(convertObjectToJson(rollbackRequest)))
+						.content(convertObjectToJson(rollbackRequest)))
 				.andDo(print())
 				.andExpect(status().isCreated())
 				.andDo(this.documentationHandler.document(

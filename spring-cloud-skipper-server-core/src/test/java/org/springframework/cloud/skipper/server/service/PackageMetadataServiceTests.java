@@ -34,14 +34,13 @@ import org.springframework.statemachine.boot.autoconfigure.StateMachineJpaReposi
 import org.springframework.test.context.junit4.SpringRunner;
 
 import static org.assertj.core.api.Assertions.assertThat;
-
 import static org.springframework.cloud.skipper.server.service.PackageMetadataServiceTests.TestConfig;
 
 /**
  * @author Mark Pollack
  */
 @RunWith(SpringRunner.class)
-@SpringBootTest(classes = TestConfig.class)
+@SpringBootTest(classes = TestConfig.class, properties = "spring.main.allow-bean-definition-overriding=true")
 public class PackageMetadataServiceTests {
 
 	@Autowired

@@ -35,7 +35,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
  * @author Gunnar Hillert
  */
 @Entity
-@Table(name = "SkipperPackageMetadata", indexes = @Index(name="idx_pkg_name", columnList = "name"))
+@Table(name = "SkipperPackageMetadata", indexes = @Index(name = "idx_pkg_name", columnList = "name"))
 public class PackageMetadata extends AbstractEntity {
 
 	/**
@@ -103,7 +103,7 @@ public class PackageMetadata extends AbstractEntity {
 	@JsonIgnore
 	@OneToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
 	// need to keep fk key max 30 char thus not using fk_package_metadata_package_file
-	@JoinColumn(name = "packagefile_id", foreignKey = @ForeignKey(name="fk_package_metadata_pfile"))
+	@JoinColumn(name = "packagefile_id", foreignKey = @ForeignKey(name = "fk_package_metadata_pfile"))
 	private PackageFile packageFile;
 
 	/**
@@ -269,13 +269,21 @@ public class PackageMetadata extends AbstractEntity {
 
 	@Override
 	public boolean equals(Object o) {
-		if (this == o) return true;
-		if (!(o instanceof PackageMetadata)) return false;
+		if (this == o) {
+			return true;
+		}
+		if (!(o instanceof PackageMetadata)) {
+			return false;
+		}
 
 		PackageMetadata that = (PackageMetadata) o;
 
-		if (repositoryId != null ? !repositoryId.equals(that.repositoryId) : that.repositoryId != null) return false;
-		if (name != null ? !name.equals(that.name) : that.name != null) return false;
+		if (repositoryId != null ? !repositoryId.equals(that.repositoryId) : that.repositoryId != null) {
+			return false;
+		}
+		if (name != null ? !name.equals(that.name) : that.name != null) {
+			return false;
+		}
 		return version != null ? version.equals(that.version) : that.version == null;
 	}
 

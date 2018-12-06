@@ -17,7 +17,7 @@ package org.springframework.cloud.skipper.server.deployer;
 
 /**
  * Interface resolving {@link ReleaseManager} for an {@code application kind}.
- * 
+ *
  * @author Janne Valkealahti
  *
  */
@@ -25,7 +25,7 @@ public interface ReleaseManagerFactory {
 
 	/**
 	 * Resolve {@link ReleaseManager} for an {@code application kind}.
-	 * 
+	 *
 	 * @param kind the application kind
 	 * @return the resolved released manager
 	 */

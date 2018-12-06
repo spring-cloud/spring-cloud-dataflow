@@ -98,7 +98,7 @@ public class StateMachineConfiguration {
 		private StateMachineRuntimePersister<SkipperStates, SkipperEvents, String> stateMachineRuntimePersister;
 
 		@Override
-		public void configure(StateMachineConfigurationConfigurer<SkipperStates, SkipperEvents> config)	throws Exception {
+		public void configure(StateMachineConfigurationConfigurer<SkipperStates, SkipperEvents> config) throws Exception {
 			config
 				.withConfiguration()
 					.taskExecutor(skipperStateMachineTaskExecutor)

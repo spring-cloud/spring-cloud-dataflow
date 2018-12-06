@@ -29,11 +29,11 @@ import org.springframework.cloud.skipper.domain.Manifest;
 import org.springframework.cloud.skipper.domain.Release;
 import org.springframework.cloud.skipper.domain.RollbackRequest;
 import org.springframework.cloud.skipper.domain.UpgradeRequest;
-import org.springframework.cloud.skipper.server.service.ReleaseService;
-import org.springframework.cloud.skipper.server.statemachine.SkipperStateMachineService;
 import org.springframework.cloud.skipper.server.controller.support.InfoResourceAssembler;
 import org.springframework.cloud.skipper.server.controller.support.ManifestResourceAssembler;
 import org.springframework.cloud.skipper.server.controller.support.ReleaseResourceAssembler;
+import org.springframework.cloud.skipper.server.service.ReleaseService;
+import org.springframework.cloud.skipper.server.statemachine.SkipperStateMachineService;
 import org.springframework.hateoas.Resource;
 import org.springframework.hateoas.ResourceSupport;
 import org.springframework.hateoas.Resources;
@@ -177,7 +177,7 @@ public class ReleaseController {
 		boolean accepted = this.skipperStateMachineService.cancelRelease(cancelRequest.getReleaseName());
 		return new CancelResponse(accepted);
 	}
-	
+
 	@RequestMapping(path = "/list", method = RequestMethod.GET)
 	@ResponseStatus(HttpStatus.OK)
 	public Resources<Resource<Release>> list() {

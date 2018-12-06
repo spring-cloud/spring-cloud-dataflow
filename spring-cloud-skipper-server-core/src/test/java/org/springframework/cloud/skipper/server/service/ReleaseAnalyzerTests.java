@@ -91,7 +91,7 @@ public class ReleaseAnalyzerTests extends AbstractIntegrationTest {
 		ReleaseAnalysisReport releaseAnalysisReport = this.releaseAnalyzer.analyze(installedRelease,
 				upgradedRelease, false, null);
 		String releaseDifferenceSummary = releaseAnalysisReport.getReleaseDifferenceSummary();
-		String manifest =  upgradedRelease.getManifest().getData();
+		String manifest = upgradedRelease.getManifest().getData();
 
 
 		assertThat(upgradedRelease.getName()).isEqualTo(releaseName);
@@ -115,7 +115,7 @@ public class ReleaseAnalyzerTests extends AbstractIntegrationTest {
 		Release upgradedReleaseV3 = upgrade(upgradeRequest);
 		releaseAnalysisReport = this.releaseAnalyzer.analyze(upgradedRelease, upgradedReleaseV3, false, null);
 		releaseDifferenceSummary = releaseAnalysisReport.getReleaseDifferenceSummary();
-		manifest =  upgradedReleaseV3.getManifest().getData();
+		manifest = upgradedReleaseV3.getManifest().getData();
 
 		logger.info("Release Manifest v3: \n" + manifest);
 
@@ -128,7 +128,7 @@ public class ReleaseAnalyzerTests extends AbstractIntegrationTest {
 		upgradeRequest.setForce(true);
 		Release upgradedReleaseV4 = upgrade(upgradeRequest);
 		releaseAnalysisReport = this.releaseAnalyzer.analyze(upgradedReleaseV3, upgradedReleaseV4, true, null);
-		manifest =  upgradedReleaseV4.getManifest().getData();
+		manifest = upgradedReleaseV4.getManifest().getData();
 
 		logger.info("Release Manifest v4: \n" + manifest);
 

@@ -27,7 +27,7 @@ import org.springframework.cloud.skipper.server.deployer.ReleaseAnalysisReport;
  * @author Mark Pollack
  */
 public interface UpgradeStrategy {
-	
+
 	Collection<String> getSupportedKinds();
 
 	void deployApps(Release existingRelease, Release replacingRelease, ReleaseAnalysisReport releaseAnalysisReport);

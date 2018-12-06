@@ -23,9 +23,9 @@ import org.springframework.cloud.skipper.domain.PackageMetadata;
 public class PackageMetadataCreator {
 
 	public static Long TEST_REPO_ID = 1L;
-	
+
 	public static String TEST_REPO_NAME = "testRepo";
-	
+
 	public static void createTwoPackages(PackageMetadataRepository repository) {
 		PackageMetadata packageMetadata = new PackageMetadata();
 		packageMetadata.setApiVersion("1");
@@ -124,6 +124,5 @@ public class PackageMetadataCreator {
 		packageMetadata.setDescription("Another very cool project");
 		repository.save(packageMetadata);
 	}
-
 
 }

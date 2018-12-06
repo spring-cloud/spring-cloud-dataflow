@@ -35,5 +35,4 @@ public interface ResourcesAssembler<T, D extends ResourceSupport> {
 	 * @return {@link Resources} containing {@link Resource} of {@code T}.
 	 */
 	Resources<D> toResources(Iterable<? extends T> entities);
-
 }

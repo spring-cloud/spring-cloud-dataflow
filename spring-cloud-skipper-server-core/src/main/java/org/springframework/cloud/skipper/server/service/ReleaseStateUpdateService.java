@@ -79,8 +79,7 @@ public class ReleaseStateUpdateService {
 		for (Release release : releases) {
 			String kind = ManifestUtils.resolveKind(release.getManifest().getData());
 			ReleaseManager releaseManager = this.releaseManagerFactory.getReleaseManager(kind);
-			
-			
+
 			Info info = release.getInfo();
 			if (checkInfo(info)) {
 				// poll new apps every time or we do full poll anyway

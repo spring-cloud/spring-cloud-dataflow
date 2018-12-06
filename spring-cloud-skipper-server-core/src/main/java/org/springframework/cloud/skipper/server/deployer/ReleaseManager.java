@@ -33,11 +33,11 @@ public interface ReleaseManager {
 
 	/**
 	 * Return a supported application kinds.
-	 * 
+	 *
 	 * @return supported application kinds
 	 */
 	Collection<String> getSupportedKinds();
-	
+
 	/**
 	 * Install the requested release.
 	 * @param release the requested release
