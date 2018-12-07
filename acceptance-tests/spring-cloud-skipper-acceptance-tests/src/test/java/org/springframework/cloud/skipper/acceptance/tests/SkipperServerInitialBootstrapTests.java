@@ -34,6 +34,7 @@ import org.springframework.cloud.skipper.acceptance.tests.support.Skipper104;
 import org.springframework.cloud.skipper.acceptance.tests.support.Skipper105;
 import org.springframework.cloud.skipper.acceptance.tests.support.Skipper110;
 import org.springframework.cloud.skipper.acceptance.tests.support.Skipper11x;
+import org.springframework.cloud.skipper.acceptance.tests.support.Skipper20x;
 
 /**
  * Tests going through start of skipper servers with databases and verifying
@@ -120,6 +121,15 @@ public class SkipperServerInitialBootstrapTests extends AbstractSkipperServerTes
 		assertServerRunning(dockerComposeInfo, "skipper", "skipper");
 	}
 
+	@Test
+	@Postgres
+	@Skipper20x
+	@DockerCompose(id = "db", order = 0, locations = { "src/test/resources/postgres.yml" }, services = { "postgres" })
+	@DockerCompose(id = "skipper", order = 1, locations = { "src/test/resources/skipper20xpostgres.yml" }, services = { "skipper" })
+	public void testSkipper20xWithPostgres(DockerComposeInfo dockerComposeInfo) throws Exception {
+		assertServerRunning(dockerComposeInfo, "skipper", "skipper");
+	}
+
 	// mysql
 
 	@Test
@@ -191,6 +201,15 @@ public class SkipperServerInitialBootstrapTests extends AbstractSkipperServerTes
 	@DockerCompose(id = "db", order = 0, locations = { "src/test/resources/mysql.yml" }, services = { "mysql" })
 	@DockerCompose(id = "skipper", order = 1, locations = { "src/test/resources/skipper11xmysql.yml" }, services = { "skipper" })
 	public void testSkipper11xWithMysql(DockerComposeInfo dockerComposeInfo) throws Exception {
+		assertServerRunning(dockerComposeInfo, "skipper", "skipper");
+	}
+
+	@Test
+	@Mysql
+	@Skipper20x
+	@DockerCompose(id = "db", order = 0, locations = { "src/test/resources/mysql.yml" }, services = { "mysql" })
+	@DockerCompose(id = "skipper", order = 1, locations = { "src/test/resources/skipper20xmysql.yml" }, services = { "skipper" })
+	public void testSkipper20xWithMysql(DockerComposeInfo dockerComposeInfo) throws Exception {
 		assertServerRunning(dockerComposeInfo, "skipper", "skipper");
 	}
 
@@ -268,6 +287,15 @@ public class SkipperServerInitialBootstrapTests extends AbstractSkipperServerTes
 		assertServerRunning(dockerComposeInfo, "skipper", "skipper");
 	}
 
+	@Test
+	@Oracle
+	@Skipper20x
+	@DockerCompose(id = "db", order = 0, locations = { "src/test/resources/oracle.yml" }, services = { "oracle" })
+	@DockerCompose(id = "skipper", order = 1, locations = { "src/test/resources/skipper20xoracle.yml" }, services = { "skipper" })
+	public void testSkipper20xWithOracle(DockerComposeInfo dockerComposeInfo) throws Exception {
+		assertServerRunning(dockerComposeInfo, "skipper", "skipper");
+	}
+
 	// mssql
 
 	@Test
@@ -279,6 +307,15 @@ public class SkipperServerInitialBootstrapTests extends AbstractSkipperServerTes
 		assertServerRunning(dockerComposeInfo, "skipper", "skipper");
 	}
 
+	@Test
+	@MsSql
+	@Skipper20x
+	@DockerCompose(id = "db", order = 0, locations = { "src/test/resources/mssql.yml" }, services = { "mssql" })
+	@DockerCompose(id = "skipper", order = 1, locations = { "src/test/resources/skipper20xmssql.yml" }, services = { "skipper" })
+	public void testSkipper20xWithMsSql(DockerComposeInfo dockerComposeInfo) throws Exception {
+		assertServerRunning(dockerComposeInfo, "skipper", "skipper");
+	}
+
 	// db2
 
 	@Test
@@ -287,6 +324,15 @@ public class SkipperServerInitialBootstrapTests extends AbstractSkipperServerTes
 	@DockerCompose(id = "db", order = 0, locations = { "src/test/resources/db2.yml" }, services = { "db2" })
 	@DockerCompose(id = "skipper", order = 1, locations = { "src/test/resources/skipper11xdb2.yml" }, services = { "skipper" })
 	public void testSkipper11xWithDb2(DockerComposeInfo dockerComposeInfo) throws Exception {
+		assertServerRunning(dockerComposeInfo, "skipper", "skipper");
+	}
+
+	@Test
+	@Db2
+	@Skipper20x
+	@DockerCompose(id = "db", order = 0, locations = { "src/test/resources/db2.yml" }, services = { "db2" })
+	@DockerCompose(id = "skipper", order = 1, locations = { "src/test/resources/skipper20xdb2.yml" }, services = { "skipper" })
+	public void testSkipper20xWithDb2(DockerComposeInfo dockerComposeInfo) throws Exception {
 		assertServerRunning(dockerComposeInfo, "skipper", "skipper");
 	}
 }

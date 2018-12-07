@@ -340,6 +340,20 @@ jobs:
         APP_VERSION: 11x
         APP_TEMPLATE: skipper-server-with-drivers-template2
         SKIPPER_VERSION: 1.1.3.BUILD-SNAPSHOT
+    - task: build-skipper-server-with-drivers20x
+      privileged: true
+      timeout: 30m
+      image: spring-cloud-skipper-ci-image
+      file: ci-git-repo/((base-path))/ci/tasks/build-skipper-server-with-drivers.yml
+      input_mapping:
+        git-repo: ci-apps-git-repo
+      output_mapping:
+        distribution-repository: distribution-repository-20x
+      params:
+        BASE_PATH: ((base-path))
+        APP_VERSION: 20x
+        APP_TEMPLATE: skipper-server-with-drivers-template3
+        SKIPPER_VERSION: 2.0.0.BUILD-SNAPSHOT
   - task: aggregate-build-skipper-server-with-drivers
     config:
       platform: linux
@@ -357,6 +371,7 @@ jobs:
       - name: distribution-repository-105
       - name: distribution-repository-110
       - name: distribution-repository-11x
+      - name: distribution-repository-20x
       outputs:
       - name: distribution-repository
       run:
