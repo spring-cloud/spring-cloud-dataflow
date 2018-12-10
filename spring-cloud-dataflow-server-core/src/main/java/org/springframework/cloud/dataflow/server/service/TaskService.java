@@ -37,9 +37,11 @@ public interface TaskService {
 	 * @param taskName Name of the task. Must not be null or empty.
 	 * @param taskDeploymentProperties Optional deployment properties. Must not be null.
 	 * @param commandLineArgs Optional runtime commandline arguments
+	 * @param platformName Name of the platform to deploy to.
 	 * @return the taskExecutionId for the executed task.
 	 */
-	long executeTask(String taskName, Map<String, String> taskDeploymentProperties, List<String> commandLineArgs);
+	long executeTask(String taskName, Map<String, String> taskDeploymentProperties,
+					 List<String> commandLineArgs, String platformName);
 
 	/**
 	 * Cleanup the resources that resulted from running the task with the given execution id.

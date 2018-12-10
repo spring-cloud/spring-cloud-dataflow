@@ -1,0 +1,38 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: metrics
+  labels:
+    app: metrics
+spec:
+  selector:
+    matchLabels:
+      app: metrics
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: metrics
+    spec:
+      containers:
+      - name: metrics
+        image: springcloud/metrics-collector-kafka:2.0.0.RELEASE
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 80
+        resources:
+          limits:
+            cpu: 1.0
+            memory: 2048Mi
+          requests:
+            cpu: 0.5
+            memory: 1024Mi
+        env:
+        - name: SERVER_PORT
+          value: '80'
+        - name: SPRING_CLOUD_STREAM_KAFKA_BINDER_BROKERS
+          value: '${KAFKA_SERVICE_HOST}:${KAFKA_SERVICE_PORT}'
+        - name: SPRING_CLOUD_STREAM_KAFKA_BINDER_ZK_NODES
+          value: '${KAFKA_ZK_SERVICE_HOST}:${KAFKA_ZK_SERVICE_PORT}'
+        - name: SPRING_AUTOCONFIGURE_EXCLUDE
+          value: 'org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration'

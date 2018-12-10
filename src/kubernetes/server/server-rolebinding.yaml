@@ -1,0 +1,11 @@
+kind: RoleBinding
+apiVersion: rbac.authorization.k8s.io/v1beta1
+metadata:
+  name: scdf-rb
+subjects:
+- kind: ServiceAccount
+  name: scdf-sa
+roleRef:
+  kind: Role
+  name: scdf-role
+  apiGroup: rbac.authorization.k8s.io

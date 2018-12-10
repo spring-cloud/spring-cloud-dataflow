@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: skipper
+  labels:
+    app: skipper
+spec:
+  # If you are running k8s on a local dev box or using minikube, you can use type NodePort instead
+  type: LoadBalancer
+  ports:
+  - port: 80
+    targetPort: 7577
+  selector:
+    app: skipper

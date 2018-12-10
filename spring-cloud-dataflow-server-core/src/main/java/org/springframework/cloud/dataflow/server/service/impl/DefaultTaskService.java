@@ -170,7 +170,7 @@ public class DefaultTaskService implements TaskService {
 
 	@Override
 	public long executeTask(String taskName, Map<String, String> taskDeploymentProperties,
-			List<String> commandLineArgs) {
+			List<String> commandLineArgs, String platformName) {
 		Assert.hasText(taskName, "The provided taskName must not be null or empty.");
 		Assert.notNull(taskDeploymentProperties, "The provided runtimeProperties must not be null.");
 
@@ -219,8 +219,11 @@ public class DefaultTaskService implements TaskService {
 		List<String> updatedCmdLineArgs = this.updateCommandLineArgs(commandLineArgs, taskExecution);
 		AppDeploymentRequest request = new AppDeploymentRequest(revisedDefinition, appResource,
 				deployerDeploymentProperties, updatedCmdLineArgs);
-		// TODO 2616 cleanup
-		TaskLauncher taskLauncher = this.launcherRepository.findByName("default").getTaskLauncher();
+		TaskLauncher taskLauncher = this.launcherRepository.findByName(platformName).getTaskLauncher();
+		if (taskLauncher == null) {
+			throw new IllegalStateException(String.format("No TaskLauncher found for the platform named '%s'",
+					platformName));
+		}
 		String id = taskLauncher.launch(request);
 		if (!StringUtils.hasText(id)) {
 			throw new IllegalStateException("Deployment ID is null for the task:" + taskName);
@@ -276,7 +279,7 @@ public class DefaultTaskService implements TaskService {
 		Assert.notNull(taskExecution, "There was no task execution with id " + id);
 		String launchId = taskExecution.getExternalExecutionId();
 		Assert.hasLength(launchId, "The TaskExecution for id " + id + " did not have an externalExecutionId");
-		// TODO 2616 cleanup
+		// TODO GH-2674
 		TaskLauncher taskLauncher = this.launcherRepository.findByName("default").getTaskLauncher();
 		taskLauncher.cleanup(launchId);
 	}
@@ -370,7 +373,7 @@ public class DefaultTaskService implements TaskService {
 	}
 
 	private void destroyTask(TaskDefinition taskDefinition) {
-		// TODO GH-2616 cleanup
+		// TODO GH-2678
 		TaskLauncher taskLauncher = this.launcherRepository.findByName("default").getTaskLauncher();
 		taskLauncher.destroy(taskDefinition.getName());
 		taskDefinitionRepository.deleteById(taskDefinition.getName());

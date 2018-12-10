@@ -35,7 +35,7 @@ import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.GenericBeanDefinition;
 import org.springframework.cloud.dataflow.core.ApplicationType;
-import org.springframework.cloud.dataflow.server.local.LocalDataflowResource;
+import org.springframework.cloud.dataflow.server.single.LocalDataflowResource;
 import org.springframework.cloud.deployer.spi.app.AppDeployer;
 import org.springframework.cloud.scheduler.spi.core.ScheduleInfo;
 import org.springframework.cloud.scheduler.spi.core.ScheduleRequest;
@@ -194,7 +194,9 @@ public abstract class BaseDocumentation {
 	private void createMockScheduler() {
 		AutowireCapableBeanFactory factory = springDataflowServer.getWebApplicationContext().getAutowireCapableBeanFactory();
 		BeanDefinitionRegistry registry = (BeanDefinitionRegistry) factory;
-		registry.removeBeanDefinition("localScheduler");
+		if (registry.containsBeanDefinition("localScheduler")) {
+			registry.removeBeanDefinition("localScheduler");
+		}
 		GenericBeanDefinition schedulerBeanDefinition = new GenericBeanDefinition();
 		schedulerBeanDefinition.setBeanClass(MockScheduler.class);
 		schedulerBeanDefinition.setScope(org.springframework.beans.factory.config.BeanDefinition.SCOPE_SINGLETON);
