@@ -20,32 +20,25 @@ import static org.junit.Assert.assertThat;
 
 import org.junit.Test;
 import org.springframework.boot.test.util.TestPropertyValues;
-import org.springframework.cloud.common.security.support.OnSecurityDisabled;
+import org.springframework.cloud.common.security.support.OnOAuth2SecurityDisabled;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Conditional;
 import org.springframework.context.annotation.Configuration;
 
-public class OnSecurityDisabledTests {
+public class OnOAuth2SecurityDisabledTests {
 
 	@Test
-	public void propertySecurityEnabled() throws Exception {
-		AnnotationConfigApplicationContext context = load(Config.class, "security.basic.enabled:true");
-		assertThat(context.containsBean("myBean"), equalTo(false));
-		context.close();
-	}
-
-	@Test
-	public void propertySecurityDisabled() throws Exception {
-		AnnotationConfigApplicationContext context = load(Config.class, "security.basic.enabled:false");
-		assertThat(context.containsBean("myBean"), equalTo(true));
-		context.close();
-	}
-
-	@Test
-	public void propertySecurityMissing() throws Exception {
+	public void noPropertySet() throws Exception {
 		AnnotationConfigApplicationContext context = load(Config.class);
 		assertThat(context.containsBean("myBean"), equalTo(true));
+		context.close();
+	}
+
+	@Test
+	public void propertyClientIdSet() throws Exception {
+		AnnotationConfigApplicationContext context = load(Config.class, "security.oauth2.client.client-id:12345");
+		assertThat(context.containsBean("myBean"), equalTo(false));
 		context.close();
 	}
 
@@ -58,7 +51,7 @@ public class OnSecurityDisabledTests {
 	}
 
 	@Configuration
-	@Conditional(OnSecurityDisabled.class)
+	@Conditional(OnOAuth2SecurityDisabled.class)
 	public static class Config {
 		@Bean
 		public String myBean() {

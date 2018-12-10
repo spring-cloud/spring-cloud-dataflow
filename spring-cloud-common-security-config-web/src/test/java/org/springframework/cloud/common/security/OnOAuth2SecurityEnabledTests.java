@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 the original author or authors.
+ * Copyright 2016-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,22 +15,21 @@
  */
 package org.springframework.cloud.common.security;
 
-import org.junit.Test;
+import static org.hamcrest.Matchers.equalTo;
+import static org.junit.Assert.assertThat;
 
+import org.junit.Test;
+import org.springframework.boot.test.util.TestPropertyValues;
+import org.springframework.cloud.common.security.support.OnOAuth2SecurityEnabled;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Conditional;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.boot.test.util.TestPropertyValues;
-import org.springframework.cloud.common.security.support.OnSecurityEnabledAndOAuth2Disabled;
-
-import static org.hamcrest.Matchers.equalTo;
-import static org.junit.Assert.assertThat;
 
 /**
  * @author Gunnar Hillert
  */
-public class OnSecurityEnabledAndOAuth2DisabledTests {
+public class OnOAuth2SecurityEnabledTests {
 
 	@Test
 	public void noPropertySet() throws Exception {
@@ -39,25 +38,22 @@ public class OnSecurityEnabledAndOAuth2DisabledTests {
 		context.close();
 	}
 
+	@Test(expected=IllegalStateException.class)
+	public void propertySecurityOauth() throws Exception {
+		load(Config.class, "security.oauth2");
+	}
+
 	@Test
-	public void basicSecurityEnabled() throws Exception {
-		AnnotationConfigApplicationContext context = load(Config.class, "security.basic.enabled:true");
+	public void propertyClientId() throws Exception {
+		AnnotationConfigApplicationContext context = load(Config.class, "security.oauth2.client.client-id:12345");
 		assertThat(context.containsBean("myBean"), equalTo(true));
 		context.close();
 	}
 
 	@Test
-	public void basicSecurityDefaultAndOauth2Enabled() throws Exception {
-		AnnotationConfigApplicationContext context = load(Config.class, "security.oauth2.client.client-id:12345");
-		assertThat(context.containsBean("myBean"), equalTo(false));
-		context.close();
-	}
-
-	@Test
-	public void basicSecurityEnabledAndOauth2Enabled() throws Exception {
-		AnnotationConfigApplicationContext context = load(Config.class, "security.basic.enabled:true",
-				"security" + ".oauth2.client.client-id:12345");
-		assertThat(context.containsBean("myBean"), equalTo(false));
+	public void clientIdOnlyWithNoValue() throws Exception {
+		AnnotationConfigApplicationContext context = load(Config.class, "security.oauth2.client.client-id");
+		assertThat(context.containsBean("myBean"), equalTo(true));
 		context.close();
 	}
 
@@ -70,7 +66,7 @@ public class OnSecurityEnabledAndOAuth2DisabledTests {
 	}
 
 	@Configuration
-	@Conditional(OnSecurityEnabledAndOAuth2Disabled.class)
+	@Conditional(OnOAuth2SecurityEnabled.class)
 	public static class Config {
 		@Bean
 		public String myBean() {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 the original author or authors.
+ * Copyright 2017-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,8 +24,6 @@ public class SecurityStateBean {
 
 	private boolean authenticationEnabled;
 
-	private boolean authorizationEnabled;
-
 	public SecurityStateBean() {
 		super();
 	}
@@ -36,14 +34,6 @@ public class SecurityStateBean {
 
 	public void setAuthenticationEnabled(boolean authenticationEnabled) {
 		this.authenticationEnabled = authenticationEnabled;
-	}
-
-	public boolean isAuthorizationEnabled() {
-		return authorizationEnabled;
-	}
-
-	public void setAuthorizationEnabled(boolean authorizationEnabled) {
-		this.authorizationEnabled = authorizationEnabled;
 	}
 
 }

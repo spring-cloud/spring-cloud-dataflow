@@ -1,5 +1,5 @@
 /*
- * Copyright 2016-2017 the original author or authors.
+ * Copyright 2016-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,24 +15,24 @@
  */
 package org.springframework.cloud.common.security.support;
 
-import org.springframework.boot.autoconfigure.condition.AllNestedConditions;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.boot.autoconfigure.condition.NoneNestedConditions;
 import org.springframework.context.annotation.Condition;
+import org.springframework.context.annotation.Conditional;
 
 /**
- * {@link Condition} that is only valid if the property
- * {@code security.oauth2.client.client-id} exists.
+ * {@link Condition} that is only valid if {@code security.basic.enabled} is {@code true}
+ * and the property {@code security.oauth2} exists.
  *
  * @author Gunnar Hillert
  * @since 1.1.0
  */
-public class OnSecurityEnabledAndOAuth2Enabled extends AllNestedConditions {
+public class OnOAuth2SecurityDisabled extends NoneNestedConditions {
 
-	public OnSecurityEnabledAndOAuth2Enabled() {
+	public OnOAuth2SecurityDisabled() {
 		super(ConfigurationPhase.REGISTER_BEAN);
 	}
 
-	@ConditionalOnProperty(name = "security.oauth2.client.client-id")
-	static class OAuth2Enabled {
+	@Conditional(OnOAuth2SecurityEnabled.class)
+	static class OAuthEnabled {
 	}
 }
