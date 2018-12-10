@@ -20,7 +20,7 @@ import javax.servlet.Filter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.common.security.AuthorizationProperties;
 import org.springframework.cloud.common.security.OAuthSecurityConfiguration;
-import org.springframework.cloud.common.security.support.OnSecurityEnabledAndOAuth2Enabled;
+import org.springframework.cloud.common.security.support.OnOAuth2SecurityEnabled;
 import org.springframework.cloud.common.security.support.SecurityConfigUtils;
 import org.springframework.cloud.common.security.support.SecurityStateBean;
 import org.springframework.context.annotation.Conditional;
@@ -42,7 +42,7 @@ import org.springframework.security.web.util.matcher.AnyRequestMatcher;
  */
 @EnableOAuth2Client
 @Configuration
-@Conditional(OnSecurityEnabledAndOAuth2Enabled.class)
+@Conditional(OnOAuth2SecurityEnabled.class)
 public class SkipperOAuthSecurityConfiguration extends OAuthSecurityConfiguration {
 
 	@Autowired
@@ -75,7 +75,6 @@ public class SkipperOAuthSecurityConfiguration extends OAuthSecurityConfiguratio
 
 		security = SecurityConfigUtils.configureSimpleSecurity(security, this.authorizationProperties);
 		security.anyRequest().denyAll();
-		this.securityStateBean.setAuthorizationEnabled(true);
 
 		http.httpBasic().and()
 				.logout()
