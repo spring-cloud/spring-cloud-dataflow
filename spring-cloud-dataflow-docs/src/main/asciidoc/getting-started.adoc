@@ -99,7 +99,7 @@ Copy the path in the "stdout" text box on the dashboard and in another console t
 +
 [source,bash,subs=attributes]
 ----
-$ docker exec -it dataflow-server tail -f /path/from/stdout/textbox/in/dashboard
+$ docker exec -it skipper tail -f /path/from/stdout/textbox/in/dashboard
 ----
 +
 You should now see the output of the log sink, printing a timestamp once per second.
@@ -211,6 +211,25 @@ Then add the following entries to the `environment` block of the `dataflow-serve
 ----
 +
 
+. To enable Metrics support, the following modifications need to be made.
++
+First, after the `zookeeper` service definition add Redis as described in <<getting-started-customizing-spring-cloud-dataflow-docker-redis,Enable analytics using Redis>>.
++
+Then add the metrics collector after the `skipper-server` service definition:
++
+[source,yaml,options=nowrap,subs=attributes]
+----
+  metrics-collector:
+    image: springcloud/metrics-collector-kafka:2.0.0.RELEASE
+    environment:
+      - spring.cloud.stream.kafka.binder.brokers=kafka:9092
+      - spring.cloud.stream.kafka.binder.zkNodes=zookeeper:2181
+      - spring.autoconfigure.exclude=org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration
+    expose:
+      - "8080"
+----
++
+
 . To enable `app starters` registration directly from the host machine you have to mount the source host folders to the `dataflow-server` container. For example, if the `my-app.jar` is in the `/foo/bar/apps` folder on your host machine, then add the following `volumes` block to the `dataflow-server` service definition:
 +
 [source,yaml,subs=attributes]
@@ -275,73 +294,6 @@ One can also pre-register the apps directly in the docker-compose. For every pre
 Check the https://docs.spring.io/spring-cloud-dataflow/docs/current/reference/htmlsingle/#resources-registered-applications[SCDF REST API] for further details.
 +
 
-. To run Spring Cloud Skipper along with Metrics support, the following modifications need to be made. In this example, its assumed the stock `docker-compose.yml` file is being used as a starting point. Customizations can still be applied, for example swapping Kafka with Rabbit by using the examples above.
-+
-First, after the `zookeeper` service definition:
-+
-* Add MySQL as described in <<getting-started-customizing-spring-cloud-dataflow-docker-mysql,Using MySQL>>
-* Add Redis as described in <<getting-started-customizing-spring-cloud-dataflow-docker-redis,Enable analytics using Redis>>
-+
-Then add Skipper and Metrics under the `dataflow-server` service definition:
-+
-[source,yaml,subs=attributes]
-----
-  skipper-server:
-    image: springcloud/spring-cloud-skipper-server:{skipper-version}
-    container_name: skipper
-    ports:
-      - "7577:7577"
-      - "9000-9010:9000-9010"
-    environment:
-      - spring.datasource.url=jdbc:mysql://mysql:3306/dataflow
-      - spring.datasource.username=root
-      - spring.datasource.password=rootpw
-      - spring.datasource.driver-class-name=org.mariadb.jdbc.Driver
-
-  metrics-collector:
-    image: springcloud/metrics-collector-kafka:2.0.0.RELEASE
-    environment:
-      - spring.cloud.stream.kafka.binder.brokers=kafka:9092
-      - spring.cloud.stream.kafka.binder.zkNodes=zookeeper:2181
-      - spring.autoconfigure.exclude=org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration
-    expose:
-      - "8080"
-----
-+
-Remove application port mapping from `dataflow-server` as they are now assigned to the `skipper-server` container:
-+
-[source,yaml,subs=attributes]
-----
-  dataflow-server:
-    ...
-    ports:
-      - "9393:9393"
-      - "9000-9010:9000-9010"
-----
-+
-Becomes:
-+
-[source,yaml,subs=attributes]
-----
-  dataflow-server:
-    ...
-    ports:
-      - "9393:9393"
-----
-+
-And lastly append the following environment variables to the `dataflow-server` `environment` block:
-+
-[source,yaml,subs=attributes]
-----
-      - spring.cloud.skipper.client.serverUri=http://skipper-server:7577/api
-----
-+
-NOTE: With Skipper, launched applications and their logs reside on the `skipper` container rather than the `dataflow-server` container. For example, when viewing stream logs as described earlier, the `skipper` container would be referenced instead:
-+
-[source,yaml,subs=attributes]
-----
-$ docker exec -it skipper tail -f /path/from/stdout/textbox/in/dashboard
-----
 
 [[getting-started-deploying-spring-cloud-dataflow]]
 == Getting Started with Manual Installation

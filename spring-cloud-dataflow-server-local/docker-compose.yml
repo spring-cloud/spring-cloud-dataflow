@@ -20,7 +20,6 @@ services:
     container_name: dataflow-server
     ports:
       - "9393:9393"
-      - "9000-9010:9000-9010"
     environment:
       - spring.cloud.dataflow.applicationProperties.stream.spring.cloud.stream.kafka.binder.brokers=kafka:9092
       - spring.cloud.dataflow.applicationProperties.stream.spring.cloud.stream.kafka.binder.zkNodes=zookeeper:2181
@@ -46,5 +45,5 @@ services:
     container_name: skipper
     ports:
     - "7577:7577"
-    - "9011-9020:9011-9020"
+    - "9000-9010:9000-9010"
 
