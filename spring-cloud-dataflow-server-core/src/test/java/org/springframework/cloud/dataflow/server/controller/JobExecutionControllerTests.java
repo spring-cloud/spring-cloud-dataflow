@@ -224,6 +224,7 @@ public class JobExecutionControllerTests {
 			jobExecution = jobRepository.createJobExecution(instance, new JobParameters(), null);
 			taskBatchDao.saveRelationship(taskExecution, jobExecution);
 			jobExecution.setStatus(status);
+			jobExecution.setStartTime(new Date());
 			if (BatchStatus.STOPPED.equals(status)) {
 				jobExecution.setEndTime(new Date());
 			}

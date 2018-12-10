@@ -16,6 +16,7 @@
 package org.springframework.cloud.dataflow.server.local.security;
 
 import org.junit.ClassRule;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.rules.RuleChain;
 import org.junit.rules.TestRule;
@@ -37,6 +38,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  * @author Gunnar Hillert
  * @author David Turanski
  */
+@Ignore
 public class LocalServerSecurityRootWithUsersFileTests {
 
 	private final static LocalDataflowResource localDataflowResource = new LocalDataflowResource(

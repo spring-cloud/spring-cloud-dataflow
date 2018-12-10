@@ -30,6 +30,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import org.springframework.boot.Banner;
+import org.springframework.boot.WebApplicationType;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
 import org.springframework.boot.autoconfigure.orm.jpa.HibernateJpaAutoConfiguration;
@@ -122,7 +123,7 @@ public class ShellCommandsTests extends AbstractShellIntegrationTest {
 		ExecutorService executorService = Executors.newFixedThreadPool(1);
 		Future<?> completed = executorService.submit(() -> {
 			new SpringApplicationBuilder(ShellApp.class)
-					.web(false)
+					.web(WebApplicationType.NONE)
 					.bannerMode(Banner.Mode.OFF)
 					.run(
 							"--spring.shell.command-file=" + commandFiles,

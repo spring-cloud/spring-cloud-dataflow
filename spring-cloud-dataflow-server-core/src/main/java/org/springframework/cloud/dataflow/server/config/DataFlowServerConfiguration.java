@@ -16,7 +16,6 @@
 
 package org.springframework.cloud.dataflow.server.config;
 
-import javax.persistence.EntityManagerFactory;
 import javax.sql.DataSource;
 
 import org.springframework.boot.autoconfigure.batch.BatchProperties;
@@ -32,8 +31,6 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.data.web.config.EnableSpringDataWebSupport;
 import org.springframework.hateoas.config.EnableHypermediaSupport;
-import org.springframework.orm.jpa.JpaTransactionManager;
-import org.springframework.transaction.PlatformTransactionManager;
 
 /**
  * Configuration for the Data Flow Server application context. This includes support for
@@ -56,11 +53,6 @@ import org.springframework.transaction.PlatformTransactionManager;
 		SecurityConfiguration.class })
 @EnableConfigurationProperties({ BatchProperties.class, CommonApplicationProperties.class })
 public class DataFlowServerConfiguration {
-
-	@Bean
-	public PlatformTransactionManager transactionManager(EntityManagerFactory entityManagerFactory) {
-		return new JpaTransactionManager(entityManagerFactory);
-	}
 
 	@Bean
 	public DataflowRdbmsInitializer dataflowRdbmsInitializer(DataSource dataSource,

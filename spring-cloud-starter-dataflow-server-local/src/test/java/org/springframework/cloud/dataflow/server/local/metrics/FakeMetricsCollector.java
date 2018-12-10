@@ -22,6 +22,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.actuate.autoconfigure.security.servlet.ManagementWebSecurityAutoConfiguration;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.data.redis.RedisAutoConfiguration;
 import org.springframework.boot.autoconfigure.data.redis.RedisRepositoriesAutoConfiguration;
@@ -60,7 +61,9 @@ import org.springframework.web.bind.annotation.RestController;
 				RedisAutoConfiguration.class,
 				RedisRepositoriesAutoConfiguration.class,
 				SecurityAutoConfiguration.class,
-				HibernateJpaAutoConfiguration.class
+				HibernateJpaAutoConfiguration.class,
+				SecurityAutoConfiguration.class,
+				ManagementWebSecurityAutoConfiguration.class
 		})
 public class FakeMetricsCollector {
 
