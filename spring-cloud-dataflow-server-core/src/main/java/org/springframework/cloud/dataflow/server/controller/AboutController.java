@@ -169,7 +169,6 @@ public class AboutController {
 			}
 
 			if (this.launcherRepository != null) {
-				// TODO GH-2616 cleanup
 				TaskLauncher taskLauncher = this.launcherRepository.findByName("default").getTaskLauncher();
 				final RuntimeEnvironmentInfo taskLauncherEnvironmentInfo = taskLauncher.environmentInfo();
 				final RuntimeEnvironmentDetails taskLauncherInfo = new RuntimeEnvironmentDetails();

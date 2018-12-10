@@ -60,6 +60,7 @@ import org.springframework.cloud.task.repository.support.TaskRepositoryInitializ
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.io.ResourceLoader;
+import org.springframework.data.map.repository.config.EnableMapRepositories;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 import org.springframework.util.StringUtils;
@@ -76,7 +77,9 @@ import org.springframework.util.StringUtils;
 @Configuration
 @ConditionalOnTasksEnabled
 @EnableConfigurationProperties({ TaskConfigurationProperties.class, CommonApplicationProperties.class,
-		DockerValidatorProperties.class, LocalPlatformProperties.class})
+		DockerValidatorProperties.class, LocalPlatformProperties.class
+})
+@EnableMapRepositories(basePackages = "org.springframework.cloud.dataflow.server.job")
 @EnableTransactionManagement
 public class TaskConfiguration {
 
@@ -87,13 +90,17 @@ public class TaskConfiguration {
 	private String dataflowServerUri;
 
 	@Bean
+	public LauncherInitializationService launcherInitializationService(
+			LauncherRepository launcherRepository,
+			List<TaskPlatform> platforms) {
+		return new LauncherInitializationService(launcherRepository, platforms);
+	}
+
+	@Bean
 	@ConditionalOnProperty(value = "spring.cloud.dataflow.task.enableLocalPlatform", matchIfMissing = true)
 	public TaskPlatform localTaskPlatform(LocalPlatformProperties localPlatformProperties) {
 		List<Launcher> launchers = new ArrayList<>();
 		Map<String, LocalDeployerProperties> localDeployerPropertiesMap = localPlatformProperties.getAccounts();
-		if (localDeployerPropertiesMap.isEmpty()) {
-			localDeployerPropertiesMap.put("default", new LocalDeployerProperties());
-		}
 		for (Map.Entry<String, LocalDeployerProperties> entry : localDeployerPropertiesMap
 				.entrySet()) {
 			LocalTaskLauncher localTaskLauncher = new LocalTaskLauncher(entry.getValue());
@@ -101,18 +108,8 @@ public class TaskConfiguration {
 			launcher.setDescription(prettyPrintLocalDeployerProperties(entry.getValue()));
 			launchers.add(launcher);
 		}
-
 		return new TaskPlatform("Local", launchers);
 	}
-
-	@Bean
-	public LauncherInitializationService launcherInitializationService(
-			LauncherRepository launcherRepository,
-			List<TaskPlatform> platforms) {
-		return new LauncherInitializationService(launcherRepository, platforms);
-	}
-
-
 
 	private String prettyPrintLocalDeployerProperties(LocalDeployerProperties localDeployerProperties) {
 		StringBuilder builder = new StringBuilder();

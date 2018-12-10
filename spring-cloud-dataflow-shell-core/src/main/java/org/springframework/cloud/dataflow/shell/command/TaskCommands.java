@@ -84,6 +84,8 @@ public class TaskCommands implements CommandMarker {
 
 	private static final String EXECUTION_LIST = "task execution list";
 
+	private static final String PLATFORM_OPTION = "platformName";
+
 	@Autowired
 	private DataFlowShell dataFlowShell;
 
@@ -155,11 +157,14 @@ public class TaskCommands implements CommandMarker {
 			@CliOption(key = { "", "name" }, help = "the name of the task to launch", mandatory = true,
 				optionContext = "existing-task disable-string-converter") String name,
 			@CliOption(key = {
-					PROPERTIES_OPTION }, help = "the properties for this launch", mandatory = false) String properties,
+					PROPERTIES_OPTION }, help = "the properties for this launch") String properties,
 			@CliOption(key = {
-					PROPERTIES_FILE_OPTION }, help = "the properties for this launch (as a File)", mandatory = false) File propertiesFile,
+					PROPERTIES_FILE_OPTION }, help = "the properties for this launch (as a File)") File propertiesFile,
 			@CliOption(key = {
-					ARGUMENTS_OPTION }, help = "the commandline arguments for this launch", mandatory = false) String arguments)
+					ARGUMENTS_OPTION }, help = "the commandline arguments for this launch") String arguments,
+			@CliOption(key = {
+					PLATFORM_OPTION }, help = "the platform name to use for this launch",
+					unspecifiedDefaultValue = "default") String platformName)
 			throws IOException {
 		int which = Assertions.atMostOneOf(PROPERTIES_OPTION, properties, PROPERTIES_FILE_OPTION, propertiesFile);
 		Map<String, String> propertiesToUse = DeploymentPropertiesUtils.parseDeploymentProperties(properties,

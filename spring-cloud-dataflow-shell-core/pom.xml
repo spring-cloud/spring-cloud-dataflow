@@ -57,7 +57,7 @@
 		</dependency>
 		<dependency>
 			<groupId>org.springframework.cloud</groupId>
-			<artifactId>spring-cloud-dataflow-server-local</artifactId>
+			<artifactId>spring-cloud-dataflow-server</artifactId>
 			<scope>test</scope>
 		</dependency>
 		<dependency>

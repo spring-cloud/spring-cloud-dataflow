@@ -151,7 +151,8 @@ public abstract class DefaultTaskServiceTests {
 			initializeSuccessfulRegistry(appRegistry);
 			when(taskLauncher.launch(anyObject())).thenReturn("0");
 			this.launcherRepository.save(new Launcher("local", "default", taskLauncher));
-			assertEquals(1L, this.taskService.executeTask(TASK_NAME_ORIG, new HashMap<>(), new LinkedList<>()));
+			assertEquals(1L, this.taskService.executeTask(TASK_NAME_ORIG, new HashMap<>(), new LinkedList<>(),
+					"default"));
 		}
 
 		@Test
@@ -160,8 +161,10 @@ public abstract class DefaultTaskServiceTests {
 			initializeSuccessfulRegistry(appRegistry);
 			when(taskLauncher.launch(anyObject())).thenReturn("0");
 			this.launcherRepository.save(new Launcher("local", "default", taskLauncher));
-			assertEquals(1L, this.taskService.executeTask(TASK_NAME_ORIG, new HashMap<>(), new LinkedList<>()));
-			assertEquals(2L, this.taskService.executeTask(TASK_NAME_ORIG, new HashMap<>(), new LinkedList<>()));
+			assertEquals(1L, this.taskService.executeTask(TASK_NAME_ORIG, new HashMap<>(), new LinkedList<>(),
+					"default"));
+			assertEquals(2L, this.taskService.executeTask(TASK_NAME_ORIG, new HashMap<>(), new LinkedList<>(),
+					"default"));
 		}
 
 		@Test
@@ -172,13 +175,13 @@ public abstract class DefaultTaskServiceTests {
 			this.launcherRepository.save(new Launcher("local", "default", taskLauncher));
 			assertEquals(10, taskService.getMaximumConcurrentTasks());
 			for (long i = 1; i <= taskService.getMaximumConcurrentTasks(); i++) {
-				assertEquals(i, taskService.executeTask(TASK_NAME_ORIG, new HashMap<>(), new LinkedList<>()));
+				assertEquals(i, taskService.executeTask(TASK_NAME_ORIG, new HashMap<>(), new LinkedList<>(), "default"));
 			}
 
 			thrown.expect(IllegalStateException.class);
 			thrown.expectMessage("The maximum concurrent task executions [10] is at its limit.");
 
-			taskService.executeTask(TASK_NAME_ORIG, new HashMap<>(), new LinkedList<>());
+			taskService.executeTask(TASK_NAME_ORIG, new HashMap<>(), new LinkedList<>(), "default");
 		}
 
 		@Test
@@ -189,7 +192,7 @@ public abstract class DefaultTaskServiceTests {
 			when(this.taskLauncher.launch(anyObject())).thenReturn(null);
 			this.launcherRepository.save(new Launcher("local", "default", taskLauncher));
 			try {
-				taskService.executeTask(TASK_NAME_ORIG, new HashMap<>(), new LinkedList<>());
+				taskService.executeTask(TASK_NAME_ORIG, new HashMap<>(), new LinkedList<>(), "default");
 			}
 			catch (IllegalStateException ise) {
 				errorCaught = true;
@@ -212,7 +215,7 @@ public abstract class DefaultTaskServiceTests {
 					auditRecordService, null, this.commonApplicationProperties,
 					this.taskValidationService);
 			try {
-				taskService.executeTask(TASK_NAME_ORIG, new HashMap<>(), new LinkedList<>());
+				taskService.executeTask(TASK_NAME_ORIG, new HashMap<>(), new LinkedList<>(), "default");
 			}
 			catch (NoSuchTaskDefinitionException ise) {
 				errorCaught = true;
@@ -284,7 +287,8 @@ public abstract class DefaultTaskServiceTests {
 			properties.put("app.seqTask.AAA.timestamp.format", "YYYY");
 			properties.put("deployer.seqTask.AAA.memory", "1240m");
 			properties.put("app.composed-task-runner.interval-time-between-checks", "1000");
-			assertEquals(1L, this.taskService.executeTask("seqTask", properties, new LinkedList<>()));
+			assertEquals(1L, this.taskService.executeTask("seqTask", properties, new LinkedList<>(),
+					"default"));
 			ArgumentCaptor<AppDeploymentRequest> argumentCaptor = ArgumentCaptor.forClass(AppDeploymentRequest.class);
 			verify(this.taskLauncher, atLeast(1)).launch(argumentCaptor.capture());
 
@@ -311,7 +315,8 @@ public abstract class DefaultTaskServiceTests {
 			Map<String, String> properties = new HashMap<>();
 			properties.put("app.seqTask.t1.timestamp.format", "YYYY");
 			properties.put("app.composed-task-runner.interval-time-between-checks", "1000");
-			assertEquals(1L, this.taskService.executeTask("seqTask", properties, new LinkedList<>()));
+			assertEquals(1L, this.taskService.executeTask("seqTask", properties, new LinkedList<>(),
+					"default"));
 			ArgumentCaptor<AppDeploymentRequest> argumentCaptor = ArgumentCaptor.forClass(AppDeploymentRequest.class);
 			verify(this.taskLauncher, atLeast(1)).launch(argumentCaptor.capture());
 

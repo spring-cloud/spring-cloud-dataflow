@@ -25,9 +25,12 @@ import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.cloud.dataflow.core.Launcher;
 import org.springframework.cloud.dataflow.core.TaskPlatform;
 import org.springframework.cloud.dataflow.server.job.LauncherRepository;
+import org.springframework.cloud.deployer.spi.local.LocalDeployerProperties;
+import org.springframework.cloud.deployer.spi.local.LocalTaskLauncher;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StringUtils;
 
 /**
  * @author Mark Pollack
@@ -37,36 +40,33 @@ public class LauncherInitializationService {
 
 	private final Logger logger = LoggerFactory
 			.getLogger(LauncherInitializationService.class);
-	private final List<TaskPlatform> platforms;
+	private final List<TaskPlatform> taskPlatforms;
 	private LauncherRepository launcherRepository;
 
-	public LauncherInitializationService(LauncherRepository launcherRepository, List<TaskPlatform> platforms) {
+	public LauncherInitializationService(LauncherRepository launcherRepository, List<TaskPlatform> taskPlatforms) {
 		this.launcherRepository = launcherRepository;
-		this.platforms = platforms;
+		this.taskPlatforms = taskPlatforms;
 	}
 
 	@EventListener
 	@Transactional
 	public void initialize(ApplicationReadyEvent event) {
-		if (singleDeployerExists()) {
-			for (TaskPlatform platform : this.platforms) {
-				if (platform.getLaunchers().size() == 1) {
-					List<Launcher> updatedLaunchers = new ArrayList<>();
-					List<Launcher> launchers = platform.getLaunchers();
-
-					Launcher existingLauncher = launchers.get(0);
-					if (existingLauncher.getName() != "default") {
-						Launcher defaultLauncher = new Launcher("default",
-								existingLauncher.getType(), existingLauncher.getTaskLauncher());
-						defaultLauncher.setDescription(existingLauncher.getDescription());
-						updatedLaunchers.add(defaultLauncher);
-					}
-					updatedLaunchers.addAll(launchers);
-					platform.setLaunchers(updatedLaunchers);
+		if (noTaskLauncherExists()) {
+			LocalDeployerProperties localDeployerProperties = new LocalDeployerProperties();
+			LocalTaskLauncher localTaskLauncher = new LocalTaskLauncher(localDeployerProperties);
+			Launcher launcher = new Launcher("default", "local", localTaskLauncher);
+			launcher.setDescription(prettyPrintLocalDeployerProperties(localDeployerProperties));
+			List<Launcher> localLaunchers = new ArrayList<>();
+			localLaunchers.add(launcher);
+			for (TaskPlatform taskPlatform : taskPlatforms) {
+				if (taskPlatform.getName().equalsIgnoreCase("Local")) {
+					logger.info("Creating Local Task Launcher named 'default' since no Task Launchers configured.");
+					taskPlatform.setLaunchers(localLaunchers);
 				}
 			}
 		}
-		this.platforms.forEach(platform -> {
+
+		this.taskPlatforms.forEach(platform -> {
 			platform.getLaunchers().forEach(launcher -> {
 				this.launcherRepository.save(launcher);
 				logger.info(String.format(
@@ -77,11 +77,25 @@ public class LauncherInitializationService {
 		});
 	}
 
-	private boolean singleDeployerExists() {
-		int deployersCount = 0;
-		for (TaskPlatform platform : this.platforms) {
-			deployersCount = deployersCount + platform.getLaunchers().size();
+	private String prettyPrintLocalDeployerProperties(LocalDeployerProperties localDeployerProperties) {
+		StringBuilder builder = new StringBuilder();
+		if (localDeployerProperties.getJavaOpts() != null) {
+			builder.append("JavaOpts = [" + localDeployerProperties.getJavaOpts() + "], ");
 		}
-		return (deployersCount > 1) ? false : true;
+		builder.append("ShutdownTimeout = [" + localDeployerProperties.getShutdownTimeout() + "], ");
+		builder.append("EnvVarsToInherit = ["
+				+ StringUtils.arrayToCommaDelimitedString(localDeployerProperties.getEnvVarsToInherit()) + "], ");
+		builder.append("JavaCmd = [" + localDeployerProperties.getJavaCmd() + "], ");
+		builder.append("WorkingDirectoriesRoot = [" + localDeployerProperties.getWorkingDirectoriesRoot() + "], ");
+		builder.append("DeleteFilesOnExit = [" + localDeployerProperties.isDeleteFilesOnExit() + "]");
+		return builder.toString();
+	}
+
+	private boolean noTaskLauncherExists() {
+		int taskLauncherCount = 0;
+		for (TaskPlatform platform : this.taskPlatforms) {
+			taskLauncherCount = taskLauncherCount + platform.getLaunchers().size();
+		}
+		return (taskLauncherCount == 0) ? true : false;
 	}
 }

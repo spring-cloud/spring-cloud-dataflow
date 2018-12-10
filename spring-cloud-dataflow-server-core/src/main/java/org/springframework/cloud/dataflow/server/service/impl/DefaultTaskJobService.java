@@ -218,7 +218,8 @@ public class DefaultTaskJobService implements TaskJobService {
 		TaskExecution taskExecution = this.taskExplorer.getTaskExecution(taskJobExecution.getTaskId());
 		TaskDefinition taskDefinition = this.taskDefinitionRepository.findById(taskExecution.getTaskName())
 				.orElseThrow(() -> new NoSuchTaskDefinitionException(taskExecution.getTaskName()));
-		taskService.executeTask(taskDefinition.getName(), taskDefinition.getProperties(), taskExecution.getArguments());
+		taskService.executeTask(taskDefinition.getName(), taskDefinition.getProperties(), taskExecution.getArguments(),
+				"default");
 	}
 
 	@Override

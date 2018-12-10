@@ -14,12 +14,14 @@
  * limitations under the License.
  */
 
-package org.springframework.cloud.dataflow.server.local;
+package org.springframework.cloud.dataflow.server.single;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.session.SessionAutoConfiguration;
 import org.springframework.cloud.dataflow.server.EnableDataFlowServer;
+import org.springframework.cloud.deployer.spi.cloudfoundry.CloudFoundryDeployerAutoConfiguration;
+import org.springframework.cloud.deployer.spi.kubernetes.KubernetesAutoConfiguration;
 import org.springframework.cloud.deployer.spi.local.LocalDeployerAutoConfiguration;
 
 /**
@@ -31,7 +33,9 @@ import org.springframework.cloud.deployer.spi.local.LocalDeployerAutoConfigurati
  */
 @SpringBootApplication(exclude = {
 		SessionAutoConfiguration.class,
-		LocalDeployerAutoConfiguration.class
+		LocalDeployerAutoConfiguration.class,
+		CloudFoundryDeployerAutoConfiguration.class,
+		KubernetesAutoConfiguration.class
 })
 @EnableDataFlowServer
 public class LocalDataFlowServer {
