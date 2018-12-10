@@ -52,6 +52,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.client.HttpClientErrorException;
+import org.springframework.web.client.ResourceAccessException;
 import org.springframework.web.client.RestTemplate;
 
 /**
@@ -151,23 +152,28 @@ public class AboutController {
 
 		if (!authenticationEnabled || (authenticationEnabled && SecurityContextHolder.getContext().getAuthentication() != null)) {
 			if (this.streamDeployer != null) {
-				final RuntimeEnvironmentInfo deployerEnvironmentInfo = this.streamDeployer.environmentInfo();
-				final RuntimeEnvironmentDetails deployerInfo = new RuntimeEnvironmentDetails();
+				try {
+					final RuntimeEnvironmentInfo deployerEnvironmentInfo = this.streamDeployer.environmentInfo();
+					final RuntimeEnvironmentDetails deployerInfo = new RuntimeEnvironmentDetails();
 
-				deployerInfo.setDeployerImplementationVersion(deployerEnvironmentInfo.getImplementationVersion());
-				deployerInfo.setDeployerName(deployerEnvironmentInfo.getImplementationName());
-				deployerInfo.setDeployerSpiVersion(deployerEnvironmentInfo.getSpiVersion());
-				deployerInfo.setJavaVersion(deployerEnvironmentInfo.getJavaVersion());
-				deployerInfo.setPlatformApiVersion(deployerEnvironmentInfo.getPlatformApiVersion());
-				deployerInfo.setPlatformClientVersion(deployerEnvironmentInfo.getPlatformClientVersion());
-				deployerInfo.setPlatformHostVersion(deployerEnvironmentInfo.getPlatformHostVersion());
-				deployerInfo.setPlatformSpecificInfo(deployerEnvironmentInfo.getPlatformSpecificInfo());
-				deployerInfo.setPlatformHostVersion(deployerEnvironmentInfo.getPlatformHostVersion());
-				deployerInfo.setPlatformType(deployerEnvironmentInfo.getPlatformType());
-				deployerInfo.setSpringBootVersion(deployerEnvironmentInfo.getSpringBootVersion());
-				deployerInfo.setSpringVersion(deployerEnvironmentInfo.getSpringVersion());
+					deployerInfo.setDeployerImplementationVersion(deployerEnvironmentInfo.getImplementationVersion());
+					deployerInfo.setDeployerName(deployerEnvironmentInfo.getImplementationName());
+					deployerInfo.setDeployerSpiVersion(deployerEnvironmentInfo.getSpiVersion());
+					deployerInfo.setJavaVersion(deployerEnvironmentInfo.getJavaVersion());
+					deployerInfo.setPlatformApiVersion(deployerEnvironmentInfo.getPlatformApiVersion());
+					deployerInfo.setPlatformClientVersion(deployerEnvironmentInfo.getPlatformClientVersion());
+					deployerInfo.setPlatformHostVersion(deployerEnvironmentInfo.getPlatformHostVersion());
+					deployerInfo.setPlatformSpecificInfo(deployerEnvironmentInfo.getPlatformSpecificInfo());
+					deployerInfo.setPlatformHostVersion(deployerEnvironmentInfo.getPlatformHostVersion());
+					deployerInfo.setPlatformType(deployerEnvironmentInfo.getPlatformType());
+					deployerInfo.setSpringBootVersion(deployerEnvironmentInfo.getSpringBootVersion());
+					deployerInfo.setSpringVersion(deployerEnvironmentInfo.getSpringVersion());
 
-				runtimeEnvironment.setAppDeployer(deployerInfo);
+					runtimeEnvironment.setAppDeployer(deployerInfo);
+				}
+				catch (ResourceAccessException rae) {
+					logger.warn("Skipper Server is not accessible", rae);
+				}
 			}
 
 			if (this.launcherRepository != null) {

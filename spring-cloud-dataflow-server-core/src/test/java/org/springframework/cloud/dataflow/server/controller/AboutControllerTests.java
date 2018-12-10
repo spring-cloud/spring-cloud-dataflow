@@ -20,11 +20,13 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Mockito;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.cloud.dataflow.server.configuration.TestDependencies;
 import org.springframework.cloud.dataflow.server.support.LogTestNameRule;
+import org.springframework.cloud.skipper.client.SkipperClient;
 import org.springframework.http.MediaType;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.TestPropertySource;
@@ -32,11 +34,13 @@ import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+import org.springframework.web.client.ResourceAccessException;
 import org.springframework.web.context.WebApplicationContext;
 
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.isEmptyOrNullString;
 import static org.hamcrest.Matchers.not;
+import static org.mockito.Mockito.reset;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -78,7 +82,7 @@ public class AboutControllerTests {
 	@Test
 	public void testListApplications() throws Exception {
 		ResultActions result = mockMvc.perform(get("/about").accept(MediaType.APPLICATION_JSON)).andDo(print()).andExpect(status().isOk());
-				result.andDo(print()).andExpect(jsonPath("$.featureInfo.analyticsEnabled", is(true)))
+		result.andDo(print()).andExpect(jsonPath("$.featureInfo.analyticsEnabled", is(true)))
 				.andExpect(jsonPath("$.versionInfo.implementation.name", is("${info.app.name}")))
 				.andExpect(jsonPath("$.versionInfo.implementation.version", is("1.2.3.IMPLEMENTATION.TEST")))
 				.andExpect(jsonPath("$.versionInfo.core.name", is("Spring Cloud Data Flow Core")))
@@ -331,7 +335,7 @@ public class AboutControllerTests {
 			"spring.cloud.dataflow.version-info.dependencies.spring-cloud-dataflow-shell.checksum-sha1=ABCDEFG",
 			"spring.cloud.dataflow.version-info.dependencies.spring-cloud-dataflow-shell.checksum-sha1-url={repository}/org/springframework/cloud/spring-cloud-dataflow-shell/{version}/spring-cloud-dataflow-shell-{version}.jar.sha1"
 	})
-	public static class SkipperModeTests {
+	public static class AboutTests {
 
 		private MockMvc mockMvc;
 
@@ -341,6 +345,9 @@ public class AboutControllerTests {
 		@Autowired
 		private WebApplicationContext wac;
 
+		@Autowired
+		private SkipperClient skipperClient;
+
 		@Before
 		public void setupMocks() {
 			this.mockMvc = MockMvcBuilders.webAppContextSetup(wac)
@@ -348,7 +355,7 @@ public class AboutControllerTests {
 		}
 
 		@Test
-		public void testAboutInSkipperMode() throws Exception {
+		public void testAbout() throws Exception {
 			ResultActions result = mockMvc.perform(get("/about").accept(MediaType.APPLICATION_JSON)).andDo(print()).andExpect(status().isOk());
 			result.andExpect(jsonPath("$.featureInfo.analyticsEnabled", is(true)))
 					.andExpect(jsonPath("$.versionInfo.implementation.name", is("${info.app.name}")))
@@ -369,5 +376,35 @@ public class AboutControllerTests {
 					.andExpect(jsonPath("$.securityInfo.username", isEmptyOrNullString()))
 					.andExpect(jsonPath("$.runtimeEnvironment.appDeployer.deployerName", is("skipper server")));
 		}
+
+
+		@Test
+		public void testAboutWithMissingSkipper() throws Exception {
+
+			reset(this.skipperClient);
+
+			Mockito.when(this.skipperClient.info()).thenThrow(new ResourceAccessException("Skipper Not There"));
+
+			ResultActions result = mockMvc.perform(get("/about").accept(MediaType.APPLICATION_JSON)).andDo(print()).andExpect(status().isOk());
+			result.andExpect(jsonPath("$.featureInfo.analyticsEnabled", is(true)))
+					.andExpect(jsonPath("$.versionInfo.implementation.name", is("${info.app.name}")))
+					.andExpect(jsonPath("$.versionInfo.implementation.version", is("1.2.3.IMPLEMENTATION.TEST")))
+					.andExpect(jsonPath("$.versionInfo.core.name", is("Spring Cloud Data Flow Core")))
+					.andExpect(jsonPath("$.versionInfo.core.version", is("1.2.3.CORE.TEST")))
+					.andExpect(jsonPath("$.versionInfo.dashboard.name", is("Spring Cloud Dataflow UI")))
+					.andExpect(jsonPath("$.versionInfo.dashboard.version", is("1.2.3.UI.TEST")))
+					.andExpect(jsonPath("$.versionInfo.shell.name", is("Spring Cloud Data Flow Shell Test")))
+					.andExpect(jsonPath("$.versionInfo.shell.url", is("https://repo.spring.io/libs-milestone/org/springframework/cloud/spring-cloud-dataflow-shell/1.3.0.BUILD-SNAPSHOT/spring-cloud-dataflow-shell-1.3.0.BUILD-SNAPSHOT.jsdfasdf")))
+					.andExpect(jsonPath("$.versionInfo.shell.version", is("1.2.3.SHELL.TEST")))
+					.andExpect(jsonPath("$.versionInfo.shell.checksumSha1", is("ABCDEFG")))
+					.andExpect(jsonPath("$.versionInfo.shell.checksumSha256").doesNotExist())
+					.andExpect(jsonPath("$.securityInfo.authenticationEnabled", is(false)))
+					.andExpect(jsonPath("$.securityInfo.authorizationEnabled", is(false)))
+					.andExpect(jsonPath("$.securityInfo.formLogin", is(false)))
+					.andExpect(jsonPath("$.securityInfo.authenticated", is(false)))
+					.andExpect(jsonPath("$.securityInfo.username", isEmptyOrNullString()))
+					.andExpect(jsonPath("$.runtimeEnvironment.appDeployer.deployerName", isEmptyOrNullString())); // Connection to Skipper is lost!
+		}
+
 	}
 }

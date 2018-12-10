@@ -114,6 +114,9 @@ import org.springframework.cloud.scheduler.spi.core.ScheduleInfo;
 import org.springframework.cloud.scheduler.spi.core.ScheduleRequest;
 import org.springframework.cloud.scheduler.spi.core.Scheduler;
 import org.springframework.cloud.skipper.client.SkipperClient;
+import org.springframework.cloud.skipper.domain.AboutResource;
+import org.springframework.cloud.skipper.domain.Dependency;
+import org.springframework.cloud.skipper.domain.Deployer;
 import org.springframework.cloud.task.repository.TaskExplorer;
 import org.springframework.cloud.task.repository.TaskRepository;
 import org.springframework.cloud.task.repository.support.SimpleTaskRepository;
@@ -128,6 +131,7 @@ import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.data.map.repository.config.EnableMapRepositories;
 import org.springframework.data.web.config.EnableSpringDataWebSupport;
 import org.springframework.hateoas.EntityLinks;
+import org.springframework.hateoas.Resources;
 import org.springframework.hateoas.config.EnableHypermediaSupport;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 import org.springframework.validation.beanvalidation.MethodValidationPostProcessor;
@@ -275,7 +279,21 @@ public class TestDependencies extends WebMvcConfigurationSupport {
 
 	@Bean
 	public SkipperClient skipperClient() {
-		return mock(SkipperClient.class);
+		SkipperClient skipperClient = mock(SkipperClient.class);
+
+		// Handle Skipper Info
+		AboutResource aboutResource = new AboutResource();
+		aboutResource.getVersionInfo().setServer(new Dependency());
+		aboutResource.getVersionInfo().getServer().setName("skipper server");
+		aboutResource.getVersionInfo().getServer().setVersion("1.0");
+		when(skipperClient.info()).thenReturn(aboutResource);
+
+		// Handle Skipper List Deployers
+		List<Deployer> deployers = new ArrayList<>();
+		//deployers.add(new Deployer("", "", null));
+		when(skipperClient.listDeployers()).thenReturn(new Resources<>(deployers, new ArrayList<>()));
+
+		return skipperClient;
 	}
 
 	@Bean
@@ -445,11 +463,11 @@ public class TestDependencies extends WebMvcConfigurationSupport {
 	@Bean
 	public TaskService taskService(ApplicationConfigurationMetadataResolver metadataResolver,
 			TaskRepository taskExecutionRepository, AppRegistryService appRegistry,
-								   LauncherRepository launcherRepository, AuditRecordService auditRecordService,
+			LauncherRepository launcherRepository, AuditRecordService auditRecordService,
 			CommonApplicationProperties commonApplicationProperties, TaskValidationService taskValidationService,
 			TaskDefinitionRepository taskDefinitionRepository) {
 		return new DefaultTaskService(new DataSourceProperties(), taskDefinitionRepository, taskExplorer(),
-				taskExecutionRepository, appRegistry,  launcherRepository, metadataResolver,
+				taskExecutionRepository, appRegistry, launcherRepository, metadataResolver,
 				new TaskConfigurationProperties(), auditRecordService, null,
 				commonApplicationProperties, taskValidationService);
 	}
@@ -475,21 +493,8 @@ public class TestDependencies extends WebMvcConfigurationSupport {
 
 
 	@Bean
-	public AboutController aboutController(VersionInfoProperties versionInfoProperties, FeaturesProperties featuresProperties) {
-		StreamDeployer streamDeployer = mock(StreamDeployer.class);
-
-		RuntimeEnvironmentInfo.Builder builder = new RuntimeEnvironmentInfo.Builder();
-
-		RuntimeEnvironmentInfo appDeployerEnvInfoSkipper = builder
-				.implementationName("skipper server")
-				.implementationVersion("1.0")
-				.platformApiVersion("")
-				.platformClientVersion("")
-				.platformHostVersion("")
-				.platformType("Skipper Managed")
-				.spiClass(SkipperClient.class).build();
-
-		when(streamDeployer.environmentInfo()).thenReturn(appDeployerEnvInfoSkipper);
+	public AboutController aboutController(VersionInfoProperties versionInfoProperties,
+			FeaturesProperties featuresProperties, StreamDeployer streamDeployer) {
 
 		Launcher launcher = mock(Launcher.class);
 		TaskLauncher taskLauncher = mock(TaskLauncher.class);
