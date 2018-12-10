@@ -112,7 +112,6 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
-import org.springframework.data.map.repository.config.EnableMapRepositories;
 import org.springframework.hateoas.EntityLinks;
 import org.springframework.hateoas.core.AnnotationRelProvider;
 import org.springframework.hateoas.hal.HalConfiguration;
@@ -144,7 +143,6 @@ import org.springframework.web.client.RestTemplate;
 		"org.springframework.cloud.dataflow.registry.domain",
 		"org.springframework.cloud.dataflow.core"
 })
-@EnableMapRepositories("org.springframework.cloud.dataflow.server.job")
 @EnableJpaRepositories(basePackages = {
 		"org.springframework.cloud.dataflow.registry.repository",
 		"org.springframework.cloud.dataflow.server.repository"

@@ -1,0 +1,12 @@
+spring:
+  cloud:
+    dataflow:
+      task:
+        platform:
+          local:
+            accounts:
+              localDev:
+                shutdownTimeout: 60
+                javaOpts: "-Dtest=foo"
+              localDevDebug:
+                javaOpts: "-Xdebug"

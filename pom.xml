@@ -34,6 +34,13 @@
 		<spring-cloud-deployer.version>2.0.0.M2</spring-cloud-deployer.version>
 		<spring-cloud-deployer-local.version>2.0.0.M2</spring-cloud-deployer-local.version>
 
+		<!-- note - check version of reactor at deployer-cf/cf-java-client uses -->
+		<spring-cloud-deployer-cloudfoundry.version>2.0.0.BUILD-SNAPSHOT</spring-cloud-deployer-cloudfoundry.version>
+		<reactor.version>3.1.8.RELEASE</reactor.version>
+		<spring-cloud-deployer-kubernetes.version>2.0.0.BUILD-SNAPSHOT</spring-cloud-deployer-kubernetes.version>
+		<kubernetes-client.version>4.0.4</kubernetes-client.version>
+		<spring-cloud-kubernetes.version>0.3.0.RELEASE</spring-cloud-kubernetes.version>
+
 		<spring-cloud-skipper.version>2.0.0.BUILD-SNAPSHOT</spring-cloud-skipper.version>
 
 		<spring-cloud-task.version>2.1.0.BUILD-SNAPSHOT</spring-cloud-task.version>
@@ -44,6 +51,8 @@
 		<spring-cloud.version>Greenwich.RC1</spring-cloud.version>
 
 		<spring-cloud-scheduler-spi.version>1.0.1.RELEASE</spring-cloud-scheduler-spi.version>
+		<spring-cloud-scheduler-kubernetes.version>1.1.0.BUILD-SNAPSHOT</spring-cloud-scheduler-kubernetes.version>
+		<spring-cloud-scheduler-cloudfoundry>1.0.1.RELEASE</spring-cloud-scheduler-cloudfoundry>
 
 		<spring-cloud-common-security-config.version>1.1.0.M1</spring-cloud-common-security-config.version>
 
@@ -63,7 +72,7 @@
 		<module>spring-cloud-dataflow-rest-resource</module>
 		<module>spring-cloud-dataflow-server-core</module>
 		<module>spring-cloud-dataflow-server-local-autoconfig</module>
-		<module>spring-cloud-dataflow-server-local</module>
+		<module>spring-cloud-dataflow-server</module>
 		<module>spring-cloud-dataflow-rest-client</module>
 		<module>spring-cloud-dataflow-shell</module>
 		<module>spring-cloud-dataflow-shell-core</module>
@@ -72,6 +81,8 @@
 
 		<module>spring-cloud-dataflow-completion</module>
 		<module>spring-cloud-dataflow-dependencies</module>
+		<module>spring-cloud-dataflow-platform-kubernetes</module>
+		<module>spring-cloud-dataflow-platform-cloudfoundry</module>
 		<module>spring-cloud-starter-dataflow-server-local</module>
 	</modules>
 	<dependencyManagement>
@@ -128,6 +139,16 @@
 				<version>${spring-cloud-deployer-local.version}</version>
 			</dependency>
 			<dependency>
+				<groupId>org.springframework.cloud</groupId>
+				<artifactId>spring-cloud-deployer-cloudfoundry</artifactId>
+				<version>${spring-cloud-deployer-cloudfoundry.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.springframework.cloud</groupId>
+				<artifactId>spring-cloud-deployer-kubernetes</artifactId>
+				<version>${spring-cloud-deployer-kubernetes.version}</version>
+			</dependency>
+			<dependency>
 				<groupId>org.springframework.analytics</groupId>
 				<artifactId>spring-analytics</artifactId>
 				<version>${spring-analytics.version}</version>
@@ -163,6 +184,16 @@
 				<groupId>org.springframework.security.oauth.boot</groupId>
 				<artifactId>spring-security-oauth2-autoconfigure</artifactId>
 				<version>${spring-boot.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>io.fabric8</groupId>
+				<artifactId>kubernetes-client</artifactId>
+				<version>${kubernetes-client.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.springframework.cloud</groupId>
+				<artifactId>spring-cloud-starter-kubernetes-config</artifactId>
+				<version>${spring-cloud-kubernetes.version}</version>
 			</dependency>
 		</dependencies>
 	</dependencyManagement>

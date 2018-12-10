@@ -1,0 +1,38 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: scdf-server
+  labels:
+    app: scdf-server
+data:
+  application.yaml: |-
+    security:
+      basic:
+        enabled: true
+        realm: Spring Cloud Data Flow
+    spring:
+      cloud:
+        dataflow:
+          security:
+            authentication:
+              file:
+                enabled: true
+                users:
+                  admin: "{noop}admin, ROLE_MANAGE, ROLE_VIEW"
+                  user: "{noop}password, ROLE_VIEW, ROLE_CREATE"
+          task:
+            platform:
+              kubernetes:
+                accounts:
+                  default:
+                    environmentVariables: 'SPRING_CLOUD_STREAM_KAFKA_BINDER_BROKERS=${KAFKA_SERVICE_HOST}:${KAFKA_SERVICE_PORT},SPRING_CLOUD_STREAM_KAFKA_BINDER_ZK_NODES=${KAFKA_ZK_SERVICE_HOST}:${KAFKA_ZK_SERVICE_PORT},SPRING_REDIS_HOST=${REDIS_SERVICE_HOST},SPRING_REDIS_PORT=${REDIS_SERVICE_PORT}'
+      datasource:
+        url: jdbc:mysql://${MYSQL_SERVICE_HOST}:${MYSQL_SERVICE_PORT}/mysql
+        username: root
+        password: ${mysql-root-password}
+        driverClassName: org.mariadb.jdbc.Driver
+        testOnBorrow: true
+        validationQuery: "SELECT 1"
+      redis:
+        host: ${REDIS_SERVICE_HOST}
+        port: ${REDIS_SERVICE_PORT}

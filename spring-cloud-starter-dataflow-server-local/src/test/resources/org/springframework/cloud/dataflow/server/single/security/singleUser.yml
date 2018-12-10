@@ -1,0 +1,8 @@
+security:
+  basic:
+    enabled: true
+    realm: Spring Cloud Data Flow
+spring:
+  security:
+    user:
+      password: "{noop}password"

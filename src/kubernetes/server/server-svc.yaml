@@ -1,0 +1,14 @@
+kind: Service
+apiVersion: v1
+metadata:
+  name: scdf-server
+  labels:
+    app: scdf-server
+spec:
+  # If you are running k8s on a local dev box or using minikube, you can use type NodePort instead
+  type: LoadBalancer
+  ports:
+    - port: 80
+      name: scdf-server
+  selector:
+    app: scdf-server
