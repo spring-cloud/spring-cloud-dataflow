@@ -67,7 +67,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @SpringBootTest(classes = { EmbeddedDataSourceConfiguration.class, JobDependencies.class,
 		PropertyPlaceholderAutoConfiguration.class, BatchProperties.class })
 @EnableConfigurationProperties({ CommonApplicationProperties.class })
-@DirtiesContext
+@DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
 public class JobStepExecutionControllerTests {
 
 	private final static String BASE_JOB_NAME = "myJob";
@@ -86,7 +86,7 @@ public class JobStepExecutionControllerTests {
 
 	private final static String STEP_NAME_FOOBAR = BASE_STEP_NAME + "_FOOBAR";
 
-	private static boolean initialized = false;
+	private boolean initialized = false;
 
 	@Autowired
 	private TaskExecutionDao dao;
