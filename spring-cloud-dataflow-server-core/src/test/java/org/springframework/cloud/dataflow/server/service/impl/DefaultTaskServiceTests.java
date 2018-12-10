@@ -79,7 +79,8 @@ import static org.mockito.Mockito.when;
  * @author Gunnar Hillert
  */
 @RunWith(SpringRunner.class)
-@SpringBootTest(classes = { TaskServiceDependencies.class })
+@SpringBootTest(classes = { TaskServiceDependencies.class }, properties = {
+		"spring.main.allow-bean-definition-overriding=true" })
 public abstract class DefaultTaskServiceTests {
 
 	@Rule

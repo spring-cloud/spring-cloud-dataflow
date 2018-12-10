@@ -49,7 +49,8 @@ public class DefaultEnvironmentPostProcessorTests {
 
 	@Test
 	public void testDefaultsBeingContributedByServerModule() throws Exception {
-		try (ConfigurableApplicationContext ctx = SpringApplication.run(EmptyDefaultApp.class, "--server.port=0")) {
+		try (ConfigurableApplicationContext ctx = SpringApplication.run(EmptyDefaultApp.class, "--server.port=0",
+				"--spring.main.allow-bean-definition-overriding=true")) {
 			String cp = ctx.getEnvironment().getProperty(MANAGEMENT_CONTEXT_PATH);
 			assertEquals(CONTRIBUTED_PATH, cp);
 		}
@@ -58,7 +59,8 @@ public class DefaultEnvironmentPostProcessorTests {
 	@Test
 	public void testOverridingDefaultsWithAConfigFile() {
 		try (ConfigurableApplicationContext ctx = SpringApplication.run(EmptyDefaultApp.class,
-				"--spring.config.name=test", "--server.port=0")) {
+				"--spring.config.name=test", "--server.port=0",
+				"--spring.main.allow-bean-definition-overriding=true")) {
 			String cp = ctx.getEnvironment().getProperty(MANAGEMENT_CONTEXT_PATH);
 			assertEquals(cp, "/foo");
 		}

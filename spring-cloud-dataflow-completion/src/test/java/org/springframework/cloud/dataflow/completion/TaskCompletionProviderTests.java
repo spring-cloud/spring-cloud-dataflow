@@ -46,7 +46,8 @@ import static org.junit.Assert.assertThat;
  */
 @SuppressWarnings("unchecked")
 @RunWith(SpringRunner.class)
-@SpringBootTest(classes = { CompletionConfiguration.class, CompletionTestsMocks.class })
+@SpringBootTest(classes = { CompletionConfiguration.class, CompletionTestsMocks.class }, properties = {
+		"spring.main.allow-bean-definition-overriding=true" })
 public class TaskCompletionProviderTests {
 
 	@Autowired

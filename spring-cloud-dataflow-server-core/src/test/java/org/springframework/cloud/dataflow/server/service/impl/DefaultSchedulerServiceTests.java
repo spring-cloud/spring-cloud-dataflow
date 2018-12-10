@@ -73,7 +73,8 @@ import static org.mockito.Mockito.when;
 @SpringBootTest(classes = { EmbeddedDataSourceConfiguration.class, TaskServiceDependencies.class,
 		PropertyPlaceholderAutoConfiguration.class }, properties = {
 		"spring.cloud.dataflow.applicationProperties.task.globalkey=globalvalue",
-		"spring.cloud.dataflow.applicationProperties.stream.globalstreamkey=nothere"})
+		"spring.cloud.dataflow.applicationProperties.stream.globalstreamkey=nothere",
+		"spring.main.allow-bean-definition-overriding=true"})
 @EnableConfigurationProperties({ CommonApplicationProperties.class, TaskConfigurationProperties.class, DockerValidatorProperties.class})
 public class DefaultSchedulerServiceTests {
 

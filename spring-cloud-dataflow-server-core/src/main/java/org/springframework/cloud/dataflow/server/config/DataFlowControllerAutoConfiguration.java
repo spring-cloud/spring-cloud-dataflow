@@ -17,8 +17,6 @@
 package org.springframework.cloud.dataflow.server.config;
 
 import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ForkJoinPool;
 
@@ -107,7 +105,6 @@ import org.springframework.cloud.dataflow.server.service.impl.validation.Default
 import org.springframework.cloud.dataflow.server.stream.SkipperStreamDeployer;
 import org.springframework.cloud.dataflow.server.stream.StreamDeployer;
 import org.springframework.cloud.deployer.resource.maven.MavenProperties;
-import org.springframework.cloud.deployer.resource.maven.MavenResourceLoader;
 import org.springframework.cloud.deployer.resource.support.DelegatingResourceLoader;
 import org.springframework.cloud.skipper.client.DefaultSkipperClient;
 import org.springframework.cloud.skipper.client.SkipperClient;
@@ -118,7 +115,6 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Conditional;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
-import org.springframework.core.io.ResourceLoader;
 import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.data.map.repository.config.EnableMapRepositories;
@@ -205,34 +201,12 @@ public class DataFlowControllerAutoConfiguration {
 	@Configuration
 	public static class AppRegistryConfiguration {
 
-		@ConfigurationProperties(prefix = "maven")
-		static class MavenConfigurationProperties extends MavenProperties {
-		}
-
 		@Bean
 		@ConditionalOnMissingBean(name = "appRegistryFJPFB")
 		public ForkJoinPoolFactoryBean appRegistryFJPFB() {
 			ForkJoinPoolFactoryBean forkJoinPoolFactoryBean = new ForkJoinPoolFactoryBean();
 			forkJoinPoolFactoryBean.setParallelism(4);
 			return forkJoinPoolFactoryBean;
-		}
-
-		@Bean
-		public MavenResourceLoader mavenResourceLoader(MavenProperties properties) {
-			return new MavenResourceLoader(properties);
-		}
-
-		@Bean
-		@ConditionalOnMissingBean(DelegatingResourceLoader.class)
-		public DelegatingResourceLoader delegatingResourceLoader(MavenResourceLoader mavenResourceLoader) {
-			Map<String, ResourceLoader> loaders = new HashMap<>();
-			loaders.put("maven", mavenResourceLoader);
-			return new DelegatingResourceLoader(loaders);
-		}
-
-		@Bean
-		public MavenProperties mavenProperties() {
-			return new MavenConfigurationProperties();
 		}
 
 		@Bean

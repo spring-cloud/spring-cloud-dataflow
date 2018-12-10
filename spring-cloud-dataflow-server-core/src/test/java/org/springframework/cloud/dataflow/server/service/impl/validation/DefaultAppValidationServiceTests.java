@@ -52,7 +52,8 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 @RunWith(SpringRunner.class)
-@SpringBootTest(classes = {EmbeddedDataSourceConfiguration.class, TaskServiceDependencies.class})
+@SpringBootTest(classes = { EmbeddedDataSourceConfiguration.class, TaskServiceDependencies.class }, properties = {
+		"spring.main.allow-bean-definition-overriding=true" })
 @EnableConfigurationProperties({CommonApplicationProperties.class, TaskConfigurationProperties.class, DockerValidatorProperties.class})
 public class DefaultAppValidationServiceTests {
 

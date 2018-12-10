@@ -46,7 +46,6 @@ import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
-import org.springframework.validation.beanvalidation.MethodValidationPostProcessor;
 import org.springframework.web.servlet.config.annotation.PathMatchConfigurer;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
@@ -64,8 +63,6 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 public class WebConfiguration implements ServletContextInitializer, ApplicationListener<ContextClosedEvent> {
 
 	private static final org.slf4j.Logger logger = LoggerFactory.getLogger(WebConfiguration.class);
-
-	private static final String SPRING_HATEOAS_OBJECT_MAPPER = "_halObjectMapper";
 
 	private static final String REL_PROVIDER_BEAN_NAME = "defaultRelProvider";
 
@@ -158,11 +155,6 @@ public class WebConfiguration implements ServletContextInitializer, ApplicationL
 				return bean;
 			}
 		};
-	}
-
-	@Bean
-	public MethodValidationPostProcessor methodValidationPostProcessor() {
-		return new MethodValidationPostProcessor();
 	}
 
 	@Override

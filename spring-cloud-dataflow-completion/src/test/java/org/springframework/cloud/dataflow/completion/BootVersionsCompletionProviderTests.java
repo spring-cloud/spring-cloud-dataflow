@@ -53,7 +53,9 @@ import static org.mockito.Mockito.mock;
  * @author Christian Tzolov
  */
 @RunWith(SpringRunner.class)
-@SpringBootTest(classes = { CompletionConfiguration.class, BootVersionsCompletionProviderTests.Mocks.class })
+@SpringBootTest(classes = { CompletionConfiguration.class,
+		BootVersionsCompletionProviderTests.Mocks.class }, properties = {
+				"spring.main.allow-bean-definition-overriding=true" })
 @SuppressWarnings("unchecked")
 public class BootVersionsCompletionProviderTests {
 

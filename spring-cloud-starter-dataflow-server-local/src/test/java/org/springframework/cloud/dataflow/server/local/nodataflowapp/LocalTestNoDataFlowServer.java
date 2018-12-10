@@ -18,6 +18,7 @@ package org.springframework.cloud.dataflow.server.local.nodataflowapp;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 
 /**
  * Bootstrap class for dummy spring boot app having no enabled dataflow server configs.
@@ -28,6 +29,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
  * @author Janne Valkealahti
  */
 @SpringBootApplication
+@AutoConfigureTestDatabase
 public class LocalTestNoDataFlowServer {
 
 	public static void main(String[] args) {

@@ -44,7 +44,8 @@ import static org.junit.Assert.assertThat;
  * @author Mark Fisher
  */
 @RunWith(SpringRunner.class)
-@SpringBootTest(classes = { CompletionConfiguration.class, CompletionTestsMocks.class })
+@SpringBootTest(classes = { CompletionConfiguration.class, CompletionTestsMocks.class }, properties = {
+		"spring.main.allow-bean-definition-overriding=true" })
 @SuppressWarnings("unchecked")
 public class StreamCompletionProviderTests {
 

@@ -43,7 +43,6 @@ import org.springframework.cloud.dataflow.server.batch.JobService;
 import org.springframework.cloud.dataflow.server.batch.SimpleJobServiceFactoryBean;
 import org.springframework.cloud.dataflow.server.config.apps.CommonApplicationProperties;
 import org.springframework.cloud.dataflow.server.job.LauncherRepository;
-import org.springframework.cloud.dataflow.server.job.TaskExplorerFactoryBean;
 import org.springframework.cloud.dataflow.server.repository.TaskDefinitionRepository;
 import org.springframework.cloud.dataflow.server.service.AuditRecordService;
 import org.springframework.cloud.dataflow.server.service.LauncherInitializationService;
@@ -57,13 +56,10 @@ import org.springframework.cloud.deployer.spi.local.LocalDeployerProperties;
 import org.springframework.cloud.deployer.spi.local.LocalTaskLauncher;
 import org.springframework.cloud.task.repository.TaskExplorer;
 import org.springframework.cloud.task.repository.TaskRepository;
-import org.springframework.cloud.task.repository.support.SimpleTaskRepository;
-import org.springframework.cloud.task.repository.support.TaskExecutionDaoFactoryBean;
 import org.springframework.cloud.task.repository.support.TaskRepositoryInitializer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.io.ResourceLoader;
-import org.springframework.data.map.repository.config.EnableMapRepositories;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 import org.springframework.util.StringUtils;
@@ -81,7 +77,6 @@ import org.springframework.util.StringUtils;
 @ConditionalOnTasksEnabled
 @EnableConfigurationProperties({ TaskConfigurationProperties.class, CommonApplicationProperties.class,
 		DockerValidatorProperties.class, LocalPlatformProperties.class})
-@EnableMapRepositories(basePackages = "org.springframework.cloud.dataflow.server.job")
 @EnableTransactionManagement
 public class TaskConfiguration {
 
@@ -90,16 +85,6 @@ public class TaskConfiguration {
 
 	@Value("${spring.cloud.dataflow.server.uri:}")
 	private String dataflowServerUri;
-
-	@Bean
-	public TaskExplorerFactoryBean taskExplorerFactoryBean(DataSource dataSource) {
-		return new TaskExplorerFactoryBean(dataSource);
-	}
-
-	@Bean
-	public TaskRepository taskRepository(DataSource dataSource) {
-		return new SimpleTaskRepository(new TaskExecutionDaoFactoryBean(dataSource));
-	}
 
 	@Bean
 	@ConditionalOnProperty(value = "spring.cloud.dataflow.task.enableLocalPlatform", matchIfMissing = true)

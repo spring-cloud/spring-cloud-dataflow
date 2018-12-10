@@ -33,7 +33,7 @@ import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
 import org.springframework.boot.autoconfigure.orm.jpa.HibernateJpaAutoConfiguration;
 import org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration;
 import org.springframework.boot.autoconfigure.web.client.RestTemplateAutoConfiguration;
-import org.springframework.boot.test.util.EnvironmentTestUtils;
+import org.springframework.boot.test.util.TestPropertyValues;
 import org.springframework.cloud.dataflow.server.EnableDataFlowServer;
 import org.springframework.cloud.dataflow.server.config.features.SchedulerConfiguration;
 import org.springframework.cloud.dataflow.server.config.web.WebConfiguration;
@@ -41,10 +41,12 @@ import org.springframework.cloud.dataflow.server.service.StreamValidationService
 import org.springframework.cloud.dataflow.server.service.TaskService;
 import org.springframework.cloud.dataflow.server.service.impl.DefaultTaskService;
 import org.springframework.cloud.dataflow.server.support.TestUtils;
+import org.springframework.cloud.deployer.autoconfigure.ResourceLoadingAutoConfiguration;
 import org.springframework.cloud.deployer.spi.app.AppDeployer;
 import org.springframework.cloud.deployer.spi.task.TaskLauncher;
 import org.springframework.cloud.scheduler.spi.core.Scheduler;
 import org.springframework.cloud.skipper.client.SkipperClient;
+import org.springframework.cloud.task.configuration.SimpleTaskAutoConfiguration;
 import org.springframework.cloud.task.repository.TaskRepository;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.annotation.Bean;
@@ -81,7 +83,8 @@ public class DataFlowServerConfigurationTests {
 				DataFlowControllerAutoConfiguration.class, DataSourceAutoConfiguration.class,
 				DataFlowServerConfiguration.class, PropertyPlaceholderAutoConfiguration.class,
 				RestTemplateAutoConfiguration.class, HibernateJpaAutoConfiguration.class, WebConfiguration.class,
-				SchedulerConfiguration.class, JacksonAutoConfiguration.class);
+				SchedulerConfiguration.class, JacksonAutoConfiguration.class, SimpleTaskAutoConfiguration.class,
+				ResourceLoadingAutoConfiguration.class);
 		environment = new StandardEnvironment();
 		propertySources = environment.getPropertySources();
 	}
@@ -116,6 +119,7 @@ public class DataFlowServerConfigurationTests {
 	 * @throws Throwable if any error occurs and should be handled by the caller.
 	 */
 	@Test(expected = ConnectException.class)
+	//@Ignore
 	public void testDoNotStartEmbeddedH2Server() throws Throwable {
 		Throwable exceptionResult = null;
 		Map myMap = new HashMap();
@@ -146,7 +150,7 @@ public class DataFlowServerConfigurationTests {
 
 	@Test
 	public void testSkipperConfig() throws Exception {
-		EnvironmentTestUtils.addEnvironment(context, "spring.cloud.skipper.client.serverUri:http://fakehost:1234/api");
+		TestPropertyValues.of("spring.cloud.skipper.client.serverUri=http://fakehost:1234/api").applyTo(context);
 		this.context.refresh();
 		SkipperClient skipperClient = context.getBean(SkipperClient.class);
 		Object baseUri = TestUtils.readField("baseUri", skipperClient);

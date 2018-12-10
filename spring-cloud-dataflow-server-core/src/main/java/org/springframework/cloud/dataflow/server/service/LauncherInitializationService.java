@@ -26,11 +26,13 @@ import org.springframework.cloud.dataflow.core.Launcher;
 import org.springframework.cloud.dataflow.core.TaskPlatform;
 import org.springframework.cloud.dataflow.server.job.LauncherRepository;
 import org.springframework.context.event.EventListener;
+import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
  * @author Mark Pollack
  */
+@Component
 public class LauncherInitializationService {
 
 	private final Logger logger = LoggerFactory

@@ -15,14 +15,8 @@
  */
 package org.springframework.cloud.dataflow.server.config.features;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.actuate.health.Health;
-import org.springframework.boot.actuate.redis.RedisHealthIndicator;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
-import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
-import org.springframework.data.redis.connection.RedisConnectionFactory;
 
 /**
  * Configuration class that imports analytics, stream, scheduler and task
@@ -34,26 +28,4 @@ import org.springframework.data.redis.connection.RedisConnectionFactory;
 @Configuration
 @Import({ AnalyticsConfiguration.class, StreamConfiguration.class, TaskConfiguration.class, SchedulerConfiguration.class })
 public class FeaturesConfiguration {
-
-	@Autowired
-	private RedisConnectionFactory redisConnectionFactory;
-
-	@Bean
-	@ConditionalOnExpression("#{'${" + FeaturesProperties.FEATURES_PREFIX + "." + FeaturesProperties.ANALYTICS_ENABLED
-			+ ":true}'.equalsIgnoreCase('false')}")
-	public RedisHealthIndicator redisHealthIndicator() {
-		return new CustomRedisHealthIndicator(redisConnectionFactory);
-	}
-
-	private class CustomRedisHealthIndicator extends RedisHealthIndicator {
-
-		public CustomRedisHealthIndicator(RedisConnectionFactory redisConnectionFactory) {
-			super(redisConnectionFactory);
-		}
-
-		@Override
-		protected void doHealthCheck(Health.Builder builder) throws Exception {
-			// do nothing - status UNKNOWN
-		}
-	}
 }
