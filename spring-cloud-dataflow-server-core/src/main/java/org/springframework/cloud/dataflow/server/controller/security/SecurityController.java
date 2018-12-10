@@ -24,7 +24,6 @@ import org.springframework.hateoas.mvc.ControllerLinkBuilder;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -66,11 +65,9 @@ public class SecurityController {
 	public SecurityInfoResource getSecurityInfo() {
 
 		final boolean authenticationEnabled = securityStateBean.isAuthenticationEnabled();
-		final boolean authorizationEnabled = securityStateBean.isAuthorizationEnabled();
 
 		final SecurityInfoResource securityInfo = new SecurityInfoResource();
 		securityInfo.setAuthenticationEnabled(authenticationEnabled);
-		securityInfo.setAuthorizationEnabled(authorizationEnabled);
 		securityInfo.add(ControllerLinkBuilder.linkTo(SecurityController.class).withSelfRel());
 
 		if (authenticationEnabled && SecurityContextHolder.getContext() != null) {
@@ -79,11 +76,6 @@ public class SecurityController {
 				securityInfo.setAuthenticated(authentication.isAuthenticated());
 				securityInfo.setUsername(authentication.getName());
 
-				if (authorizationEnabled) {
-					for (GrantedAuthority authority : authentication.getAuthorities()) {
-						securityInfo.addRole(authority.getAuthority());
-					}
-				}
 				if (this.oauthClientId == null) {
 					securityInfo.setFormLogin(true);
 				}

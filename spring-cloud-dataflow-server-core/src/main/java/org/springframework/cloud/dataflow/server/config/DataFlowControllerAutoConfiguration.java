@@ -41,9 +41,7 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.cloud.client.circuitbreaker.EnableCircuitBreaker;
 import org.springframework.cloud.common.security.AuthorizationProperties;
-import org.springframework.cloud.common.security.support.FileSecurityProperties;
-import org.springframework.cloud.common.security.support.LdapSecurityProperties;
-import org.springframework.cloud.common.security.support.OnSecurityEnabledAndOAuth2Disabled;
+import org.springframework.cloud.common.security.support.OnOAuth2SecurityEnabled;
 import org.springframework.cloud.common.security.support.SecurityStateBean;
 import org.springframework.cloud.dataflow.completion.CompletionConfiguration;
 import org.springframework.cloud.dataflow.completion.StreamCompletionProvider;
@@ -432,21 +430,7 @@ public class DataFlowControllerAutoConfiguration {
 		}
 
 		@Bean
-		@ConditionalOnProperty(name = "spring.cloud.dataflow.security.authentication.file.enabled", havingValue = "true")
-		@ConfigurationProperties(prefix = "spring.cloud.dataflow.security.authentication.file")
-		public FileSecurityProperties fileSecurityProperties() {
-			return new FileSecurityProperties();
-		}
-
-		@Bean
-		@ConditionalOnProperty(name = "spring.cloud.dataflow.security.authentication.ldap.enabled", havingValue = "true")
-		@ConfigurationProperties(prefix = "spring.cloud.dataflow.security.authentication.ldap")
-		public LdapSecurityProperties ldapSecurityProperties() {
-			return new LdapSecurityProperties();
-		}
-
-		@Bean
-		@Conditional(OnSecurityEnabledAndOAuth2Disabled.class)
+		@Conditional(OnOAuth2SecurityEnabled.class)
 		public LoginController loginController() {
 			return new LoginController();
 		}

@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 the original author or authors.
+ * Copyright 2017-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,12 +16,7 @@
 
 package org.springframework.cloud.dataflow.server.config;
 
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
-import org.springframework.cloud.common.security.BasicAuthSecurityConfiguration;
-import org.springframework.cloud.common.security.DefaultBootUserAuthenticationConfiguration;
-import org.springframework.cloud.common.security.FileAuthenticationConfiguration;
 import org.springframework.cloud.common.security.IgnoreAllSecurityConfiguration;
-import org.springframework.cloud.common.security.LdapAuthenticationConfiguration;
 import org.springframework.cloud.common.security.OAuthSecurityConfiguration;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
@@ -30,17 +25,6 @@ import org.springframework.context.annotation.Import;
  * @author Ilayaperumal Gopinathan
  */
 @Configuration
-@Import({ BasicAuthSecurityConfiguration.class, DefaultBootUserAuthenticationConfiguration.class,
-		OAuthSecurityConfiguration.class, IgnoreAllSecurityConfiguration.class })
+@Import({ OAuthSecurityConfiguration.class, IgnoreAllSecurityConfiguration.class })
 public class SecurityConfiguration {
-
-	@Configuration
-	@ConditionalOnProperty(name = "spring.cloud.dataflow.security.authentication.file.enabled", havingValue = "true")
-	public class FileBasedAuthenticationConfiguration extends FileAuthenticationConfiguration {
-	}
-
-	@Configuration
-	@ConditionalOnProperty(name = "spring.cloud.dataflow.security.authentication.ldap.enabled", havingValue = "true")
-	public class LdapBasedAuthenticationConfiguration extends LdapAuthenticationConfiguration {
-	}
 }

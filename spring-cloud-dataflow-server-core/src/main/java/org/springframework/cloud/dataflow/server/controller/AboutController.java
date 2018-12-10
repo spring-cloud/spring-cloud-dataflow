@@ -44,7 +44,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -120,11 +119,9 @@ public class AboutController {
 		aboutResource.setVersionInfo(versionInfo);
 
 		final boolean authenticationEnabled = securityStateBean.isAuthenticationEnabled();
-		final boolean authorizationEnabled = securityStateBean.isAuthorizationEnabled();
 
 		final SecurityInfo securityInfo = new SecurityInfo();
 		securityInfo.setAuthenticationEnabled(authenticationEnabled);
-		securityInfo.setAuthorizationEnabled(authorizationEnabled);
 
 		if (authenticationEnabled && SecurityContextHolder.getContext() != null) {
 			final Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
@@ -132,11 +129,6 @@ public class AboutController {
 				securityInfo.setAuthenticated(authentication.isAuthenticated());
 				securityInfo.setUsername(authentication.getName());
 
-				if (authorizationEnabled) {
-					for (GrantedAuthority authority : authentication.getAuthorities()) {
-						securityInfo.addRole(authority.getAuthority());
-					}
-				}
 				if (this.oauthClientId == null) {
 					securityInfo.setFormLogin(true);
 				}
