@@ -31,8 +31,8 @@
 
 		<spring-cloud-dataflow-ui.version>2.0.0.BUILD-SNAPSHOT</spring-cloud-dataflow-ui.version>
 
-		<spring-cloud-deployer.version>2.0.0.BUILD-SNAPSHOT</spring-cloud-deployer.version>
-		<spring-cloud-deployer-local.version>2.0.0.BUILD-SNAPSHOT</spring-cloud-deployer-local.version>
+		<spring-cloud-deployer.version>2.0.0.M2</spring-cloud-deployer.version>
+		<spring-cloud-deployer-local.version>2.0.0.M2</spring-cloud-deployer-local.version>
 
 		<spring-cloud-skipper.version>2.0.0.BUILD-SNAPSHOT</spring-cloud-skipper.version>
 
