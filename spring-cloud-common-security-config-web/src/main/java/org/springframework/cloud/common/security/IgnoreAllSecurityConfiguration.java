@@ -15,6 +15,7 @@
  */
 package org.springframework.cloud.common.security;
 
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.cloud.common.security.support.OnOAuth2SecurityDisabled;
 import org.springframework.context.annotation.Conditional;
 import org.springframework.context.annotation.Configuration;
@@ -22,23 +23,28 @@ import org.springframework.security.config.annotation.web.WebSecurityConfigurer;
 import org.springframework.security.config.annotation.web.builders.WebSecurity;
 
 /**
- * Spring Security {@link WebSecurityConfigurer} simply ingoring all paths
- * conditionally if security is not enabled.
+ * Spring Security {@link WebSecurityConfigurer} simply ignoring all paths conditionally if security is not enabled.
+ *
+ * The org.springframework.cloud.common.security.enabled=true property disables this configuration and
+ * fall back to the Spring Boot default security configuration.
  *
  * @author Janne Valkealahti
  * @author Gunnar Hillert
+ * @author Christian Tzolov
  *
  */
 @Configuration
 @Conditional(OnOAuth2SecurityDisabled.class)
+@ConditionalOnProperty(value = "org.springframework.cloud.common.security.enabled",
+		havingValue = "false", matchIfMissing = true)
 public class IgnoreAllSecurityConfiguration implements WebSecurityConfigurer<WebSecurity> {
 
 	@Override
-	public void init(WebSecurity builder) throws Exception {
+	public void init(WebSecurity builder) {
 	}
 
 	@Override
-	public void configure(WebSecurity builder) throws Exception {
+	public void configure(WebSecurity builder) {
 		builder.ignoring().antMatchers("/**");
 	}
 }
