@@ -777,15 +777,15 @@ For example, you can start with the https://github.com/spring-cloud-stream-app-s
 </dependency>
 ----
 
-TIP: https://start-scs.cfapps.io/[Spring Cloud Stream Initializr] provides a great starting point for this.
+TIP: https://start-scs.cfapps.io/[Spring Cloud Stream Initializr] provides a great starting point for creating stream applications.
 
-Next, register the `tasklauncher-dataflow` sink, and create a task (we will use the provided timestamp task).
+Next, <<applications.adoc#applications, register>> the `tasklauncher-dataflow` sink, and create a task (we will use the provided timestamp task).
 
 ```
 stream create --name task-every-minute --definition "time-tlr --trigger.fixed-delay=60 --spring.cloud.stream.function.definition=taskLaunchRequest --task.launch.request.task-name=timestamp-task | tasklauncher-dataflow" --deploy
 ```
 
-will produce a task launch request every minute. The request provides the name of the task to launch : `{"name":"timestamp-task"}`.
+The preceding stream will produce a task launch request every minute. The request provides the name of the task to launch : `{"name":"timestamp-task"}`.
 
 
 The following stream definition illustrates the use of command line arguments. It will produce messages like `{"args":["foo=bar","time=12/03/18 17:44:12"],"deploymentProps":{},"name":"timestamp-task"}` to provide command line arguments to the task:
@@ -901,10 +901,9 @@ and https://github.com/spring-cloud-stream-app-starters/triggertask/blob/master/
 
 Currently the platforms supported by the standalone `tasklauncher` sinks are:
 
-* https://github.com/spring-cloud-stream-app-starters/tasklauncher-local[local],
+* https://github.com/spring-cloud-stream-app-starters/tasklauncher-local[local]
 * https://github.com/spring-cloud-stream-app-starters/tasklauncher-cloudfoundry[Cloud Foundry]
 * https://github.com/spring-cloud-stream-app-starters/tasklauncher-kubernetes[Kubernetes]
-* https://github.com/spring-cloud-stream-app-starters/tasklauncher-yarn[Yarn]
 
 CAUTION: `tasklauncher-local` is meant for development purposes only.
 
