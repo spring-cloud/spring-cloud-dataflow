@@ -32,6 +32,7 @@ import org.springframework.batch.core.repository.ExecutionContextSerializer;
 import org.springframework.batch.core.repository.JobRepository;
 import org.springframework.batch.core.repository.dao.AbstractJdbcBatchMetadataDao;
 import org.springframework.batch.core.repository.dao.ExecutionContextDao;
+import org.springframework.batch.core.repository.dao.Jackson2ExecutionContextStringSerializer;
 import org.springframework.batch.core.repository.dao.JdbcExecutionContextDao;
 import org.springframework.batch.core.repository.dao.JdbcJobExecutionDao;
 import org.springframework.batch.core.repository.dao.JdbcStepExecutionDao;
@@ -215,13 +216,9 @@ public class SimpleJobServiceFactoryBean implements FactoryBean<JobService>, Ini
 			lobHandler = new DefaultLobHandler();
 		}
 
-		// TODO: BOOT2 this may cause issues as it just removed for now
-		//if (serializer == null) {
-		//	XStreamExecutionContextStringSerializer defaultSerializer = new XStreamExecutionContextStringSerializer();
-		//	defaultSerializer.afterPropertiesSet();
-		//
-		//	serializer = defaultSerializer;
-		//}
+		if (serializer == null) {
+			this.serializer = new Jackson2ExecutionContextStringSerializer();
+		}
 
 		Assert.isTrue(incrementerFactory.isSupportedIncrementerType(databaseType), "'" + databaseType
 				+ "' is an unsupported database type.  The supported database types are "

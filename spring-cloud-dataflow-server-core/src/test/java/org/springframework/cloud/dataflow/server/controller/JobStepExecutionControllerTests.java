@@ -19,6 +19,7 @@ package org.springframework.cloud.dataflow.server.controller;
 import java.util.ArrayList;
 import java.util.Date;
 
+import org.hamcrest.Matchers;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -138,8 +139,18 @@ public class JobStepExecutionControllerTests {
 
 	@Test
 	public void testSingleGetStepExecution() throws Exception {
-		mockMvc.perform(get("/jobs/executions/1/steps/1").accept(MediaType.APPLICATION_JSON)).andExpect(status().isOk())
-				.andExpect(content().json("{jobExecutionId: " + 1 + "}"));
+		validateStepDetail(1, 1, STEP_NAME_ORIG);
+		validateStepDetail(2, 2 ,STEP_NAME_ORIG);
+		validateStepDetail(2, 3 ,STEP_NAME_FOO);
+		validateStepDetail(3, 4 ,STEP_NAME_ORIG);
+		validateStepDetail(3, 5 ,STEP_NAME_FOO);
+		validateStepDetail(3, 6 ,STEP_NAME_FOOBAR);
+	}
+
+	private void validateStepDetail(int jobId, int stepId, String contextValue) throws Exception{
+		mockMvc.perform(get(String.format("/jobs/executions/%d/steps/%d", jobId, stepId)).accept(MediaType.APPLICATION_JSON)).andExpect(status().isOk())
+				.andExpect(content().json(String.format("{jobExecutionId: %d}", jobId)))
+				.andExpect(content().string(Matchers.containsString(String.format("{\"stepval\":\"%s\"}", contextValue))));
 	}
 
 	@Test
@@ -166,6 +177,9 @@ public class JobStepExecutionControllerTests {
 		for (String stepName : stepNames) {
 			StepExecution stepExecution = new StepExecution(stepName, jobExecution, 1L);
 			stepExecution.setId(null);
+			ExecutionContext context = new ExecutionContext();
+			context.put("stepval", stepName);
+			stepExecution.setExecutionContext(context);
 			jobRepository.add(stepExecution);
 		}
 		TaskExecution taskExecution = dao.createTaskExecution(jobName, new Date(), new ArrayList<String>(), null);
