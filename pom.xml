@@ -39,8 +39,8 @@
         <spring-cloud.version>Greenwich.BUILD-SNAPSHOT</spring-cloud.version>
         <spring-cloud-services.version>2.0.2.RELEASE</spring-cloud-services.version> <!--TODO Tzolov: https://github.com/spring-cloud/spring-cloud-skipper/issues/750-->
         <spring-cloud-sso.version>2.0.0.RELEASE</spring-cloud-sso.version>
-        <spring-cloud-deployer.version>2.0.0.BUILD-SNAPSHOT</spring-cloud-deployer.version>
-        <spring-cloud-deployer-local.version>2.0.0.BUILD-SNAPSHOT</spring-cloud-deployer-local.version>
+        <spring-cloud-deployer.version>2.0.0.M2</spring-cloud-deployer.version>
+        <spring-cloud-deployer-local.version>2.0.0.M2</spring-cloud-deployer-local.version>
 	<!-- note - check version of reactor at deployer-cf/cf-java-client uses -->
         <spring-cloud-deployer-cloudfoundry.version>2.0.0.BUILD-SNAPSHOT</spring-cloud-deployer-cloudfoundry.version>
         <reactor.version>3.1.8.RELEASE</reactor.version>
