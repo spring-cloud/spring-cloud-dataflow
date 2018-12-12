@@ -22,6 +22,8 @@ spring:
     redis:
       repositories:
         enabled: false
+  batch:
+    initialize-schema: always
   jpa:
     properties:
       hibernate.id.new_generator_mappings: true
