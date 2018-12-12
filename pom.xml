@@ -157,6 +157,13 @@
 				<artifactId>spring-cloud-scheduler-spi</artifactId>
 				<version>${spring-cloud-scheduler-spi.version}</version>
 			</dependency>
+			<!-- Required to override the spring-cloud-sso-connector versions. Related to
+			https://github.com/spring-cloud/spring-cloud-skipper/issues/750 -->
+			<dependency>
+				<groupId>org.springframework.security.oauth.boot</groupId>
+				<artifactId>spring-security-oauth2-autoconfigure</artifactId>
+				<version>${spring-boot.version}</version>
+			</dependency>
 		</dependencies>
 	</dependencyManagement>
 	<build>
