@@ -54,6 +54,16 @@ public interface SearchableJobExecutionDao extends JobExecutionDao {
 	List<JobExecution> getJobExecutions(int start, int count);
 
 	/**
+	 * Get the {@link JobExecutionStepCount JobExecutions} in reverse order of creation
+	 * (so normally of execution) without StepExecution.
+	 *
+	 * @param start the start index of the instances
+	 * @param count the maximum number of instances to return
+	 * @return the {@link JobExecutionStepCount} instances requested
+	 */
+	List<JobExecutionStepCount> getJobExecutionsWithStepCount(int start, int count);
+
+	/**
 	 * @param jobName the name of a job
 	 * @return the number of {@link JobExecution JobExecutions} belonging to
 	 * this job

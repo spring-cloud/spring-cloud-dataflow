@@ -1848,49 +1848,49 @@ include::{snippets}/job-executions-documentation/list-job-executions/curl-reques
 
 
 
-[[api-guide-resources-job-executions-job-execution-info-only-list-response-structure]]
+[[api-guide-resources-job-executions-thin-job-execution-list-response-structure]]
 ===== Response Structure
 
 include::{snippets}/job-executions-documentation/list-job-executions/http-response.adoc[]
 
-[[api-guide-resources-job-executions-job-execution-info-only-list]]
+[[api-guide-resources-job-executions-thin-job-execution-list]]
 ==== List All Job Executions Without Step Executions Included
 
 The job executions endpoint lets you list all job executions without step executions included.
 The following topics provide more detail:
 
-* <<api-guide-resources-job-executions-job-execution-info-only-list-request-structure>>
-* <<api-guide-resources-job-executions-job-execution-info-only-list-request-parameters>>
-* <<api-guide-resources-job-executions-job-execution-info-only-list-example-request>>
-* <<api-guide-resources-job-executions-job-execution-info-only-list-response-structure>>
+* <<api-guide-resources-job-executions-thin-job-execution-list-request-structure>>
+* <<api-guide-resources-job-executions-thin-job-execution-list-request-parameters>>
+* <<api-guide-resources-job-executions-thin-job-execution-list-example-request>>
+* <<api-guide-resources-job-executions-thin-job-execution-list-response-structure>>
 
 
 
-[[api-guide-resources-job-executions-job-execution-info-only-list-request-structure]]
+[[api-guide-resources-job-executions-thin-job-execution-list-request-structure]]
 ===== Request Structure
 
-include::{snippets}/job-executions-documentation/list-job-executions-job-execution-info-only/http-request.adoc[]
+include::{snippets}/job-executions-documentation/list-thin-job-executions/http-request.adoc[]
 
 
 
-[[api-guide-resources-job-executions-job-execution-info-only-list-request-parameters]]
+[[api-guide-resources-job-executions-thin-job-execution-list-request-parameters]]
 ===== Request Parameters
 
-include::{snippets}/job-executions-documentation/list-job-executions-job-execution-info-only/request-parameters.adoc[]
+include::{snippets}/job-executions-documentation/list-thin-job-executions/request-parameters.adoc[]
 
 
 
-[[api-guide-resources-job-executions-job-execution-info-only-list-example-request]]
+[[api-guide-resources-job-executions-thin-job-execution-list-example-request]]
 ===== Example Request
 
-include::{snippets}/job-executions-documentation/list-job-executions-job-execution-info-only/curl-request.adoc[]
+include::{snippets}/job-executions-documentation/list-thin-job-executions/curl-request.adoc[]
 
 
 
-[[api-guide-resources-job-executions-job-execution-info-only-list-response-structure]]
+[[api-guide-resources-job-executions-thin-job-execution-list-response-structure]]
 ===== Response Structure
 
-include::{snippets}/job-executions-documentation/list-job-executions-job-execution-info-only/http-response.adoc[]
+include::{snippets}/job-executions-documentation/list-thin-job-executions/http-response.adoc[]
 
 [[api-guide-resources-job-executions-job-execution-info-only-list-by-name]]
 ==== List All Job Executions With a Specified Job Name

@@ -315,6 +315,11 @@ public class SimpleJobService implements JobService, DisposableBean {
 	}
 
 	@Override
+	public Collection<JobExecutionStepCount> listJobExecutionsWithStepCount(int start, int count) {
+		return jobExecutionDao.getJobExecutionsWithStepCount(start, count);
+	}
+
+	@Override
 	public int countJobExecutions() {
 		return jobExecutionDao.countJobExecutions();
 	}

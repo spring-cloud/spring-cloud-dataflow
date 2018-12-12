@@ -94,25 +94,6 @@ public class JobExecutionController {
 	}
 
 	/**
-	 * Return a page-able list of {@link JobExecutionResource} defined jobs that
-	 * do not contain step execution detail.
-	 *
-	 * @param pageable page-able collection of {@code TaskJobExecution}s.
-	 * @param assembler for the {@link TaskJobExecution}s
-	 * @return a list of Task/Job executions(job executions do not contain step executions.
-	 * @throws NoSuchJobExecutionException in the event that a job execution id specified
-	 * is not present when looking up stepExecutions for the result.
-	 */
-	@RequestMapping(value = "/jobexecutioninfoonly", method = RequestMethod.GET, produces = "application/json")
-	@ResponseStatus(HttpStatus.OK)
-	public PagedResources<JobExecutionResource> listJobsOnly(Pageable pageable,
-			PagedResourcesAssembler<TaskJobExecution> assembler) throws NoSuchJobExecutionException {
-		List<TaskJobExecution> jobExecutions = taskJobService.listJobExecutionsJobExecutionInfoOnly(pageable);
-		Page<TaskJobExecution> page = new PageImpl<>(jobExecutions, pageable, taskJobService.countJobExecutions());
-		return assembler.toResource(page, jobAssembler);
-	}
-
-	/**
 	 * Retrieve all task job executions with the task name specified
 	 *
 	 * @param jobName name of the job

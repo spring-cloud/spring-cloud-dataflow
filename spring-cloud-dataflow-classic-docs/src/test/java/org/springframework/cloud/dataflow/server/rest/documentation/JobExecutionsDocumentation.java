@@ -109,9 +109,9 @@ public class JobExecutionsDocumentation extends BaseDocumentation {
 	}
 
 	@Test
-	public void listJobExecutionsJobExecutionInfoOnly() throws Exception {
+	public void listThinJobExecutions() throws Exception {
 		this.mockMvc.perform(
-				get("/jobs/executions/jobexecutioninfoonly")
+				get("/jobs/thinexecutions")
 						.param("page", "0")
 						.param("size", "10"))
 				.andDo(print())
@@ -122,7 +122,7 @@ public class JobExecutionsDocumentation extends BaseDocumentation {
 						parameterWithName("size")
 								.description("The requested page size (optional)")),
 				responseFields(
-						subsectionWithPath("_embedded.jobExecutionResourceList")
+						subsectionWithPath("_embedded.jobExecutionThinResourceList")
 								.description("Contains a collection of Job Executions without step executions included/"),
 						subsectionWithPath("_links.self").description("Link to the job execution resource"),
 						subsectionWithPath("page").description("Pagination properties")

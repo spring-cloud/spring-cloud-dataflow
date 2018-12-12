@@ -34,6 +34,7 @@ import org.springframework.cloud.dataflow.core.TaskDefinition;
 import org.springframework.cloud.dataflow.rest.job.JobInstanceExecutions;
 import org.springframework.cloud.dataflow.rest.job.TaskJobExecution;
 import org.springframework.cloud.dataflow.rest.job.support.JobUtils;
+import org.springframework.cloud.dataflow.server.batch.JobExecutionStepCount;
 import org.springframework.cloud.dataflow.server.batch.JobService;
 import org.springframework.cloud.dataflow.server.job.support.JobNotRestartableException;
 import org.springframework.cloud.dataflow.server.repository.NoSuchTaskBatchException;
@@ -102,10 +103,10 @@ public class DefaultTaskJobService implements TaskJobService {
 
 
 	@Override
-	public List<TaskJobExecution> listJobExecutionsJobExecutionInfoOnly(Pageable pageable) throws NoSuchJobExecutionException {
+	public List<TaskJobExecution> listJobExecutionsWithStepCount(Pageable pageable) throws NoSuchJobExecutionException {
 		Assert.notNull(pageable, "pageable must not be null");
-		List<JobExecution> jobExecutions = new ArrayList<>(
-				jobService.listJobExecutions((int)pageable.getOffset(), pageable.getPageSize()));
+		List<JobExecutionStepCount> jobExecutions = new ArrayList<>(
+				jobService.listJobExecutionsWithStepCount((int)pageable.getOffset(), pageable.getPageSize()));
 		return getTaskJobExecutionsWithStepCountForList(jobExecutions);
 	}
 
@@ -200,18 +201,18 @@ public class DefaultTaskJobService implements TaskJobService {
 				isTaskDefined(jobExecution), jobExecution.getStepExecutions().size());
 	}
 
-	private List<TaskJobExecution> getTaskJobExecutionsWithStepCountForList(Collection<JobExecution> jobExecutions) {
+	private List<TaskJobExecution> getTaskJobExecutionsWithStepCountForList(Collection<JobExecutionStepCount> jobExecutions) {
 		Assert.notNull(jobExecutions, "jobExecutions must not be null");
 		List<TaskJobExecution> taskJobExecutions = new ArrayList<>();
-		for (JobExecution jobExecution : jobExecutions) {
+		for (JobExecutionStepCount jobExecution : jobExecutions) {
 			taskJobExecutions.add(getTaskJobExecutionWithStepCount(jobExecution));
 		}
 		return taskJobExecutions;
 	}
 
-	private TaskJobExecution getTaskJobExecutionWithStepCount(JobExecution jobExecution) {
-		return new TaskJobExecution(getTaskExecutionId(jobExecution), jobExecution,
-				isTaskDefined(jobExecution), this.jobService.countStepExecutionsForJobExecution(jobExecution.getId()));
+	private TaskJobExecution getTaskJobExecutionWithStepCount(JobExecutionStepCount jobExecutionStepCount) {
+		return new TaskJobExecution(getTaskExecutionId(jobExecutionStepCount), jobExecutionStepCount,
+				isTaskDefined(jobExecutionStepCount), jobExecutionStepCount.getStepCount());
 	}
 
 	private Long getTaskExecutionId(JobExecution jobExecution) {

@@ -21,6 +21,7 @@ import org.springframework.analytics.rest.domain.CounterResource;
 import org.springframework.analytics.rest.domain.FieldValueCounterResource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.cloud.dataflow.rest.JobExecutionThinResource;
 import org.springframework.cloud.dataflow.rest.Version;
 import org.springframework.cloud.dataflow.rest.resource.AppInstanceStatusResource;
 import org.springframework.cloud.dataflow.rest.resource.AppRegistrationResource;
@@ -143,8 +144,6 @@ public class RootController {
 				root.add(new Link(scheduleTemplated).withRel("tasks/schedules/instances"));
 			}
 			root.add(entityLinks.linkToCollectionResource(JobExecutionResource.class).withRel("jobs/executions"));
-			taskTemplated = entityLinks.linkToCollectionResource(JobExecutionResource.class).getHref() + "/jobexecutioninfoonly";
-			root.add(new Link(taskTemplated).withRel("jobs/executions/jobexecutioninfoonly"));
 			taskTemplated = entityLinks.linkToCollectionResource(JobExecutionResource.class).getHref() + "{?name}";
 			root.add(new Link(taskTemplated).withRel("jobs/executions/name"));
 			root.add(unescapeTemplateVariables(entityLinks.linkToSingleResource(JobExecutionResource.class, "{id}")
@@ -162,6 +161,7 @@ public class RootController {
 					.withRel("jobs/instances/instance")));
 			root.add(entityLinks.linkFor(TaskToolsResource.class).withRel("tools/parseTaskTextToGraph"));
 			root.add(entityLinks.linkFor(TaskToolsResource.class).withRel("tools/convertTaskGraphToText"));
+			root.add(entityLinks.linkToCollectionResource(JobExecutionThinResource.class).withRel("jobs/thinexecutions"));
 		}
 		if (featuresProperties.isAnalyticsEnabled()) {
 			root.add(entityLinks.linkToCollectionResource(CounterResource.class).withRel("counters"));

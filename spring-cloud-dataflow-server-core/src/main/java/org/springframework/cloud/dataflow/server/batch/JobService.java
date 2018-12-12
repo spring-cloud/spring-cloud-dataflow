@@ -247,6 +247,16 @@ public interface JobService {
 	Collection<JobExecution> listJobExecutions(int start, int count);
 
 	/**
+	 * List the {@link JobExecutionStepCount JobExecutions} in descending order of
+	 * creation (usually close to execution order) without step execution data.
+	 *
+	 * @param start the index of the first execution to return
+	 * @param count the maximum number of executions
+	 * @return a collection of {@link JobExecutionStepCount}
+	 */
+	Collection<JobExecutionStepCount> listJobExecutionsWithStepCount(int start, int count);
+
+	/**
 	 * Count the maximum number of executions that could be returned by
 	 * {@link #listJobExecutions(int, int)}.
 	 * 

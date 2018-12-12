@@ -43,6 +43,7 @@ import org.springframework.util.Assert;
 /**
  * @author Dave Syer
  * @author Michael Minella
+ * @author Glenn Renfro
  *
  */
 public class JdbcSearchableJobExecutionDao extends JdbcJobExecutionDao implements SearchableJobExecutionDao {
@@ -55,6 +56,10 @@ public class JdbcSearchableJobExecutionDao extends JdbcJobExecutionDao implement
 	private static final String FIELDS = "E.JOB_EXECUTION_ID, E.START_TIME, E.END_TIME, E.STATUS, E.EXIT_CODE, E.EXIT_MESSAGE, "
 			+ "E.CREATE_TIME, E.LAST_UPDATED, E.VERSION, I.JOB_INSTANCE_ID, I.JOB_NAME";
 
+	private static final String FIELDS_WITH_STEP_COUNT = FIELDS +
+			", (SELECT COUNT(*) FROM %PREFIX%STEP_EXECUTION AS S WHERE S.JOB_EXECUTION_ID = E.JOB_EXECUTION_ID) as STEP_COUNT";
+
+
 	private static final String GET_RUNNING_EXECUTIONS = "SELECT " + FIELDS
 			+ " from %PREFIX%JOB_EXECUTION E, %PREFIX%JOB_INSTANCE I "
 			+ "where E.JOB_INSTANCE_ID=I.JOB_INSTANCE_ID and E.END_TIME is NULL";
@@ -62,6 +67,8 @@ public class JdbcSearchableJobExecutionDao extends JdbcJobExecutionDao implement
 	private PagingQueryProvider allExecutionsPagingQueryProvider;
 
 	private PagingQueryProvider byJobNamePagingQueryProvider;
+
+	private PagingQueryProvider executionsWithStepCountPagingQueryProvider;
 
 	private DataSource dataSource;
 
@@ -91,6 +98,7 @@ public class JdbcSearchableJobExecutionDao extends JdbcJobExecutionDao implement
 		});
 
 		allExecutionsPagingQueryProvider = getPagingQueryProvider();
+		executionsWithStepCountPagingQueryProvider = getPagingQueryProvider(FIELDS_WITH_STEP_COUNT, null, null);
 		byJobNamePagingQueryProvider = getPagingQueryProvider("I.JOB_NAME=?");
 
 		super.afterPropertiesSet();
@@ -99,7 +107,7 @@ public class JdbcSearchableJobExecutionDao extends JdbcJobExecutionDao implement
 
 	/**
 	 * @return a {@link PagingQueryProvider} for all job executions
-	 * @throws Exception
+	 * @throws Exception if page provider is not created.
 	 */
 	private PagingQueryProvider getPagingQueryProvider() throws Exception {
 		return getPagingQueryProvider(null);
@@ -108,7 +116,7 @@ public class JdbcSearchableJobExecutionDao extends JdbcJobExecutionDao implement
 	/**
 	 * @return a {@link PagingQueryProvider} for all job executions with the
 	 * provided where clause
-	 * @throws Exception
+	 * @throws Exception if page provider is not created.
 	 */
 	private PagingQueryProvider getPagingQueryProvider(String whereClause) throws Exception {
 		return getPagingQueryProvider(null, whereClause);
@@ -117,21 +125,33 @@ public class JdbcSearchableJobExecutionDao extends JdbcJobExecutionDao implement
 	/**
 	 * @return a {@link PagingQueryProvider} with a where clause to narrow the
 	 * query
-	 * @throws Exception
+	 * @throws Exception if page provider is not created.
 	 */
 	private PagingQueryProvider getPagingQueryProvider(String fromClause, String whereClause) throws Exception {
+		return getPagingQueryProvider(null, fromClause, whereClause);
+	}
+
+	/**
+	 * @return a {@link PagingQueryProvider} with a where clause to narrow the
+	 * query
+	 * @throws Exception if page provider is not created.
+	 */
+	private PagingQueryProvider getPagingQueryProvider(String fields, String fromClause, String whereClause) throws Exception {
 		SqlPagingQueryProviderFactoryBean factory = new SqlPagingQueryProviderFactoryBean();
 		factory.setDataSource(dataSource);
 		fromClause = "%PREFIX%JOB_EXECUTION E, %PREFIX%JOB_INSTANCE I" + (fromClause == null ? "" : ", " + fromClause);
 		factory.setFromClause(getQuery(fromClause));
-		factory.setSelectClause(FIELDS);
+		if(fields == null) {
+			fields = FIELDS;
+		}
+		factory.setSelectClause(getQuery(fields));
 		Map<String, Order> sortKeys = new HashMap<String, Order>();
 		sortKeys.put("JOB_EXECUTION_ID", Order.DESCENDING);
 		factory.setSortKeys(sortKeys);
 		whereClause = "E.JOB_INSTANCE_ID=I.JOB_INSTANCE_ID" + (whereClause == null ? "" : " and " + whereClause);
 		factory.setWhereClause(whereClause);
 
-		return (PagingQueryProvider) factory.getObject();
+		return factory.getObject();
 	}
 
 	/**
@@ -199,6 +219,23 @@ public class JdbcSearchableJobExecutionDao extends JdbcJobExecutionDao implement
 	}
 
 	@Override
+	public List<JobExecutionStepCount> getJobExecutionsWithStepCount(int start, int count) {
+		if (start <= 0) {
+			return getJdbcTemplate().query(executionsWithStepCountPagingQueryProvider.generateFirstPageQuery(count),
+					new JobExecutionStepCountRowMapper());
+		}
+		try {
+			Long startAfterValue = getJdbcTemplate().queryForObject(
+					allExecutionsPagingQueryProvider.generateJumpToItemQuery(start, count), Long.class);
+			return getJdbcTemplate().query(executionsWithStepCountPagingQueryProvider.generateRemainingPagesQuery(count),
+					new JobExecutionStepCountRowMapper(), startAfterValue);
+		}
+		catch (IncorrectResultSizeDataAccessException e) {
+			return Collections.emptyList();
+		}
+	}
+
+	@Override
 	public void saveJobExecution(JobExecution jobExecution) {
 		throw new UnsupportedOperationException("SearchableJobExecutionDao is read only");
 	}
@@ -217,33 +254,57 @@ public class JdbcSearchableJobExecutionDao extends JdbcJobExecutionDao implement
 	 * Re-usable mapper for {@link JobExecution} instances.
 	 * 
 	 * @author Dave Syer
+	 * @author Glenn Renfro
 	 * 
 	 */
 	protected class JobExecutionRowMapper implements RowMapper<JobExecution> {
 
-		public JobExecutionRowMapper() {
+		JobExecutionRowMapper() {
 		}
 
 		@Override
 		public JobExecution mapRow(ResultSet rs, int rowNum) throws SQLException {
-			Long id = rs.getLong(1);
-			JobExecution jobExecution;
-			
-			JobParameters jobParameters = getJobParameters(id);
-
-			JobInstance jobInstance = new JobInstance(rs.getLong(10), rs.getString(11));
-			jobExecution = new JobExecution(jobInstance, jobParameters);
-			jobExecution.setId(id);
-
-			jobExecution.setStartTime(rs.getTimestamp(2));
-			jobExecution.setEndTime(rs.getTimestamp(3));
-			jobExecution.setStatus(BatchStatus.valueOf(rs.getString(4)));
-			jobExecution.setExitStatus(new ExitStatus(rs.getString(5), rs.getString(6)));
-			jobExecution.setCreateTime(rs.getTimestamp(7));
-			jobExecution.setLastUpdated(rs.getTimestamp(8));
-			jobExecution.setVersion(rs.getInt(9));
-			return jobExecution;
+			return createJobExecutionFromResultSet(rs, rowNum);
 		}
 
+	}
+	/**
+	 * Re-usable mapper for {@link JobExecutionStepCount} instances.
+	 *
+	 * @author Glenn Renfro
+	 *
+	 */
+	protected class JobExecutionStepCountRowMapper implements RowMapper<JobExecutionStepCount> {
+
+		JobExecutionStepCountRowMapper() {
+		}
+
+		@Override
+		public JobExecutionStepCount mapRow(ResultSet rs, int rowNum) throws SQLException {
+
+			return new JobExecutionStepCount(createJobExecutionFromResultSet(rs, rowNum), rs.getInt(12));
+		}
+
+	}
+
+
+	JobExecution createJobExecutionFromResultSet(ResultSet rs, int rowNum)  throws SQLException{
+		Long id = rs.getLong(1);
+		JobExecution jobExecution;
+
+		JobParameters jobParameters = getJobParameters(id);
+
+		JobInstance jobInstance = new JobInstance(rs.getLong(10), rs.getString(11));
+		jobExecution = new JobExecution(jobInstance, jobParameters);
+		jobExecution.setId(id);
+
+		jobExecution.setStartTime(rs.getTimestamp(2));
+		jobExecution.setEndTime(rs.getTimestamp(3));
+		jobExecution.setStatus(BatchStatus.valueOf(rs.getString(4)));
+		jobExecution.setExitStatus(new ExitStatus(rs.getString(5), rs.getString(6)));
+		jobExecution.setCreateTime(rs.getTimestamp(7));
+		jobExecution.setLastUpdated(rs.getTimestamp(8));
+		jobExecution.setVersion(rs.getInt(9));
+		return jobExecution;
 	}
 }
