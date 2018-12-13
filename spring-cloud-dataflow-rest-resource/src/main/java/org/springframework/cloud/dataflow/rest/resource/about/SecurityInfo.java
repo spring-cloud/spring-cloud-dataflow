@@ -29,8 +29,6 @@ public class SecurityInfo {
 
 	private boolean authenticationEnabled;
 
-	private boolean authorizationEnabled;
-
 	private boolean formLogin;
 
 	private boolean authenticated;
@@ -57,17 +55,6 @@ public class SecurityInfo {
 	}
 
 	/**
-	 * @return true if the authorization feature is enabled, false otherwise.
-	 */
-	public boolean isAuthorizationEnabled() {
-		return authorizationEnabled;
-	}
-
-	public void setAuthorizationEnabled(boolean authorizationEnabled) {
-		this.authorizationEnabled = authorizationEnabled;
-	}
-
-	/**
 	 * @return True if the user is authenticated
 	 */
 	public boolean isAuthenticated() {
@@ -90,8 +77,6 @@ public class SecurityInfo {
 	}
 
 	/**
-	 * Will only contain values if {@link #isAuthorizationEnabled()} is {@code true}.
-	 *
 	 * @return List of Roles, if no roles are associated, an empty collection is returned.
 	 */
 	public List<String> getRoles() {

@@ -44,6 +44,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -128,6 +129,11 @@ public class AboutController {
 			if (!(authentication instanceof AnonymousAuthenticationToken)) {
 				securityInfo.setAuthenticated(authentication.isAuthenticated());
 				securityInfo.setUsername(authentication.getName());
+
+				for (Object authority : authentication.getAuthorities()) {
+					final GrantedAuthority grantedAuthority = (GrantedAuthority) authority;
+					securityInfo.addRole(grantedAuthority.getAuthority());
+				}
 
 				if (this.oauthClientId == null) {
 					securityInfo.setFormLogin(true);

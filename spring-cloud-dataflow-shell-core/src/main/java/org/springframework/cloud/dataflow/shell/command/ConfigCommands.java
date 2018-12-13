@@ -239,8 +239,6 @@ public class ConfigCommands implements CommandMarker, InitializingBean, Applicat
 
 			this.targetHolder.getTarget().setAuthenticated(securityInfoResource.isAuthenticated());
 			this.targetHolder.getTarget().setAuthenticationEnabled(securityInfoResource.isAuthenticationEnabled());
-			this.targetHolder.getTarget().setAuthorizationEnabled(securityInfoResource.isAuthorizationEnabled());
-
 			this.targetHolder.getTarget().setTargetResultMessage(String.format("Successfully targeted %s", targetUriString));
 
 		}
@@ -294,7 +292,7 @@ public class ConfigCommands implements CommandMarker, InitializingBean, Applicat
 		modelBuilder.addRow().addValue("Security").addValue(securityInfo);
 		rowIndex++;
 
-		if (securityInfo.isAuthorizationEnabled()) {
+		if (securityInfo.isAuthenticated()) {
 			modelBuilder.addRow().addValue("Roles").addValue(securityInfo.getRoles());
 			rowsWithThinSeparators.add(rowIndex++);
 		}

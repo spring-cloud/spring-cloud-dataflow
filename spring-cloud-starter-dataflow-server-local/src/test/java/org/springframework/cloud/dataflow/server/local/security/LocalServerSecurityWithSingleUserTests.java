@@ -412,6 +412,7 @@ public class LocalServerSecurityWithSingleUserTests {
 	}
 
 	@Test
+	@Ignore("Revisit once Outh2/OpenID Connect security is implemented")
 	public void testEndpointAuthentication() throws Exception {
 
 		logger.info(String.format(

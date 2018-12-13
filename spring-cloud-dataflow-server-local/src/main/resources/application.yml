@@ -1,3 +1,4 @@
+debug: true
 info:
   app:
     name: "@project.artifactId@"
@@ -8,8 +9,14 @@ spring:
     deployer:
       local:
         free-disk-space-percentage: 0
+#    dataflow:
+#      security:
+#        authorization:
+#          map-oauth-scopes: true
+
 logging:
   config: classpath:logback-scdf-local.xml
+
 #server:
 #  port: 8443
 #  ssl:
@@ -19,17 +26,6 @@ logging:
 #    key-store-type: jks
 #    key-store-password: dataflow
 #    key-password: dataflow
-
-# Basic Authentication:
-
-#security:
-#  basic:
-#    enabled: true
-#    realm: Spring Cloud Data Flow
-#  user:
-#    name: your-username
-#    password: your-password
-#    role: VIEW, CREATE, MANAGE
 
 # Oauth 2 support:
 
@@ -42,6 +38,18 @@ logging:
 #      user-authorization-uri: http://127.0.0.1:9999/oauth/authorize
 #    resource:
 #      user-info-uri: http://127.0.0.1:9999/me
+
+# UAA Security
+
+#security:
+#  oauth2:
+#    client:
+#      client-id: app
+#      client-secret: dataflow
+#      access-token-uri: http://dataflow.local:8080/uaa/oauth/token
+#      user-authorization-uri: http://dataflow.local:8080/uaa/oauth/authorize
+#    resource:
+#      user-info-uri: http://dataflow.local:8080/uaa/userinfo
 
 # If you prefer to use Eureka to locate the Config Server, you can do that by setting
 # spring.cloud.config.discovery.enabled=true (default "false"). The net result of that is

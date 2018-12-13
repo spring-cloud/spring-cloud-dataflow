@@ -1,5 +1,5 @@
 /*
- * Copyright 2016-2017 the original author or authors.
+ * Copyright 2016-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,6 +24,7 @@ import org.springframework.hateoas.mvc.ControllerLinkBuilder;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -76,12 +77,11 @@ public class SecurityController {
 				securityInfo.setAuthenticated(authentication.isAuthenticated());
 				securityInfo.setUsername(authentication.getName());
 
-				if (this.oauthClientId == null) {
-					securityInfo.setFormLogin(true);
+				for (Object authority : authentication.getAuthorities()) {
+					final GrantedAuthority grantedAuthority = (GrantedAuthority) authority;
+					securityInfo.addRole(grantedAuthority.getAuthority());
 				}
-				else {
-					securityInfo.setFormLogin(false);
-				}
+
 			}
 		}
 

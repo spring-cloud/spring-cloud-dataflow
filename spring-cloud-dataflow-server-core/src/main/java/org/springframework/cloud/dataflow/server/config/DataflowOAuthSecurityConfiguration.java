@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2018 the original author or authors.
+ * Copyright 2016-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,18 +13,28 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.springframework.cloud.dataflow.server.config;
 
-import org.springframework.cloud.common.security.IgnoreAllSecurityConfiguration;
+import org.springframework.cloud.common.security.OAuthSecurityConfiguration;
+import org.springframework.cloud.common.security.support.OnOAuth2SecurityEnabled;
+import org.springframework.context.annotation.Conditional;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Import;
+import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 
 /**
- * @author Ilayaperumal Gopinathan
+ * Setup Spring Security OAuth for the Rest Endpoints of Spring Cloud Data Flow.
+ *
  * @author Gunnar Hillert
+ * @author Ilayaperumal Gopinathan
+ * @author Janne Valkealahti
  */
 @Configuration
-@Import({ DataflowOAuthSecurityConfiguration.class, IgnoreAllSecurityConfiguration.class })
-public class SecurityConfiguration {
+@Conditional(OnOAuth2SecurityEnabled.class)
+public class DataflowOAuthSecurityConfiguration extends OAuthSecurityConfiguration {
+
+	@Override
+	protected void configure(HttpSecurity http) throws Exception {
+		super.configure(http);
+	}
+
 }

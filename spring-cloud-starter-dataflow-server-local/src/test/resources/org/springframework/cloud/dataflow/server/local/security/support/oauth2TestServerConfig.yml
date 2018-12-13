@@ -6,14 +6,15 @@ spring:
   security:
     user:
       password: "{noop}secret10"
-server:
   port: ${oauth2.port}
 security:
   oauth2:
     client:
-      clientId: myclient
-      clientSecret: mysecret
+      client-id: myclient
+      client-secret: mysecret
       scope: access
       auto-approve-scopes: '.*'
+      registered-redirect-uri: "http://localhost:9393/login"
     authorization:
       checkTokenAccess: permitAll()
+ 

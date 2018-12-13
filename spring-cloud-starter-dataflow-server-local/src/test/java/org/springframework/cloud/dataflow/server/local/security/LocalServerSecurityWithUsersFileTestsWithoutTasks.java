@@ -20,6 +20,7 @@ import java.util.Collection;
 import java.util.Map;
 
 import org.junit.ClassRule;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.rules.RuleChain;
 import org.junit.rules.TestRule;
@@ -537,6 +538,7 @@ public class LocalServerSecurityWithUsersFileTestsWithoutTasks {
 	}
 
 	@Test
+	@Ignore("Revisit once Outh2/OpenID Connect security is implemented")
 	public void testEndpointAuthentication() throws Exception {
 
 		logger.info(String.format(

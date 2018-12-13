@@ -41,7 +41,6 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.cloud.client.circuitbreaker.EnableCircuitBreaker;
 import org.springframework.cloud.common.security.AuthorizationProperties;
-import org.springframework.cloud.common.security.support.OnOAuth2SecurityEnabled;
 import org.springframework.cloud.common.security.support.SecurityStateBean;
 import org.springframework.cloud.dataflow.completion.CompletionConfiguration;
 import org.springframework.cloud.dataflow.completion.StreamCompletionProvider;
@@ -79,7 +78,6 @@ import org.springframework.cloud.dataflow.server.controller.TaskExecutionControl
 import org.springframework.cloud.dataflow.server.controller.TaskSchedulerController;
 import org.springframework.cloud.dataflow.server.controller.ToolsController;
 import org.springframework.cloud.dataflow.server.controller.UiController;
-import org.springframework.cloud.dataflow.server.controller.security.LoginController;
 import org.springframework.cloud.dataflow.server.controller.security.SecurityController;
 import org.springframework.cloud.dataflow.server.controller.support.MetricStore;
 import org.springframework.cloud.dataflow.server.job.LauncherRepository;
@@ -110,7 +108,6 @@ import org.springframework.cloud.skipper.client.SkipperClientProperties;
 import org.springframework.cloud.skipper.client.SkipperClientResponseErrorHandler;
 import org.springframework.cloud.task.repository.TaskExplorer;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Conditional;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
@@ -429,11 +426,6 @@ public class DataFlowControllerAutoConfiguration {
 			return new AuthorizationProperties();
 		}
 
-		@Bean
-		@Conditional(OnOAuth2SecurityEnabled.class)
-		public LoginController loginController() {
-			return new LoginController();
-		}
 	}
 
 	@Configuration
