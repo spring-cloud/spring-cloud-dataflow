@@ -51,6 +51,7 @@ public class LocalServerSecurityRootWithUsersFileTests {
 	private static UserCredentials fullUser = new UserCredentials("fulluser", "fullpassword");
 
 	@Test
+	@Ignore("Revisit once Outh2/OpenID Connect security is implemented")
 	public void testAccessRootUrlAndCheckAllLinksWithFullUser() throws Exception {
 		localDataflowResource.getMockMvc()
 				.perform(get("/").header("Authorization", basicAuthorizationHeader(fullUser.getUsername(), fullUser.getPassword()))).andDo(print())
@@ -97,6 +98,7 @@ public class LocalServerSecurityRootWithUsersFileTests {
 	}
 
 	@Test
+	@Ignore("Revisit once Outh2/OpenID Connect security is implemented")
 	public void testAccessRootUrlAndCheckAllLinksWithViewOnlyUser() throws Exception {
 		localDataflowResource.getMockMvc()
 				.perform(get("/").header("Authorization", basicAuthorizationHeader(viewOnlyUser.getUsername(), viewOnlyUser.getPassword()))).andDo(print())

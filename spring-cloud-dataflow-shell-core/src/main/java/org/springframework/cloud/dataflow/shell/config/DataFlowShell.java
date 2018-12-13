@@ -64,10 +64,8 @@ public class DataFlowShell {
 	 * settings:
 	 * <ul>
 	 * <li>{@link Target#isAuthenticationEnabled()} Is authentication enabled?
-	 * <li>{@link Target#isAuthorizationEnabled()} If authentication is enabled, is
-	 * authorization enabled?
 	 * <li>{@link Target#isAuthenticated()} Is the user authenticated?
-	 * <li>Only if {@link Target#isAuthorizationEnabled()} and
+	 * <li>Only if
 	 * {@link Target#isAuthenticated()} is {@code true} will the {@link RoleType} checked
 	 * against {@link TargetCredentials#getRoles()}.
 	 * </ul>
@@ -117,7 +115,7 @@ public class DataFlowShell {
 
 			if (target.isAuthenticationEnabled()) {
 				if (target.isAuthenticated()) {
-					if (target.isAuthorizationEnabled() && role != null) {
+					if (role != null) {
 						passesSecurityChecks = target.getTargetCredentials().getRoles().contains(role);
 					}
 					else {

@@ -11,10 +11,10 @@
 	<logger name="org.springframework.context" level="WARN"/>
 	<logger name="org.springframework.jmx" level="WARN"/>
 	<logger name="org.springframework.web" level="WARN"/>
-	<logger name="org.springframework.security" level="WARN"/>
+	<logger name="org.springframework.security" level="DEBUG"/>
 	<logger name="org.springframework.integration" level="WARN"/>
 	<logger name="org.springframework.boot" level="WARN"/>
-	<logger name="org.springframework.boot.autoconfigure.security" level="INFO"/>
+	<logger name="org.springframework.boot.autoconfigure.security" level="DEBUG"/>
 	<logger name="org.springframework.boot.context.embedded.tomcat" level="INFO"/>
 	<appender name="FILE"
 			  class="ch.qos.logback.core.rolling.RollingFileAppender">
@@ -36,7 +36,7 @@
 			<pattern>${CONSOLE_LOG_PATTERN}</pattern>
 		</encoder>
 	</appender>
-	<root level="INFO">
+	<root level="DEBUG">
 		<appender-ref ref="STDOUT" />
 		<appender-ref ref="FILE" />
 	</root>

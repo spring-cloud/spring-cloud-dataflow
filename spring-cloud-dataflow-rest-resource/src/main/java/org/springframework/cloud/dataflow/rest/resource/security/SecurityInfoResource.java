@@ -1,5 +1,5 @@
 /*
- * Copyright 2016-2017 the original author or authors.
+ * Copyright 2016-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,9 +31,7 @@ public class SecurityInfoResource extends ResourceSupport {
 
 	private boolean authenticationEnabled;
 
-	private boolean authorizationEnabled;
-
-	private boolean formLogin;
+	private boolean formLogin = false;
 
 	private boolean authenticated;
 
@@ -59,17 +57,6 @@ public class SecurityInfoResource extends ResourceSupport {
 	}
 
 	/**
-	 * @return true if the authorization feature is enabled, false otherwise.
-	 */
-	public boolean isAuthorizationEnabled() {
-		return authorizationEnabled;
-	}
-
-	public void setAuthorizationEnabled(boolean authorizationEnabled) {
-		this.authorizationEnabled = authorizationEnabled;
-	}
-
-	/**
 	 * @return True if the user is authenticated
 	 */
 	public boolean isAuthenticated() {
@@ -92,8 +79,6 @@ public class SecurityInfoResource extends ResourceSupport {
 	}
 
 	/**
-	 * Will only contain values if {@link #isAuthorizationEnabled()} is {@code true}.
-	 *
 	 * @return List of Roles, if no roles are associated, an empty collection is returned.
 	 */
 	public List<String> getRoles() {

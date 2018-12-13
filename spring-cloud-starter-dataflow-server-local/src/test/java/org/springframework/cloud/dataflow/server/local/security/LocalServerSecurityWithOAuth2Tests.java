@@ -167,7 +167,7 @@ public class LocalServerSecurityWithOAuth2Tests {
 
 		localDataflowResource.getMockMvc()
 				.perform(get("/security/info").header("Authorization", "bearer " + accessTokenAsString)).andDo(print())
-				.andExpect(status().isOk()).andExpect(jsonPath("$.authorizationEnabled", is(Boolean.TRUE)))
+				.andExpect(status().isOk())
 				.andExpect(jsonPath("$.authenticated", is(Boolean.TRUE)))
 				.andExpect(jsonPath("$.authenticationEnabled", is(Boolean.TRUE)))
 				.andExpect(jsonPath("$.roles", hasSize(3)));

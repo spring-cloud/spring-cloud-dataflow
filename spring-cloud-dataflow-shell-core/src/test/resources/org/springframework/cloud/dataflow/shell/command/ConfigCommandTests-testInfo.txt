@@ -10,7 +10,6 @@
 ╟─────────────────┼─────────────────────────────────────╢
 ║                 │         Authenticated: false        ║
 ║    Security     │Authentication Enabled: true         ║
-║                 │ Authorization Enabled: false        ║
 ║                 │            Form Login: false        ║
 ╟─────────────────┼─────────────────────────────────────╢
 ║                 │Deployer Implementation Version: null║

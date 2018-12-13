@@ -292,34 +292,22 @@ $ java -jar spring-cloud-dataflow-server-local-{project-version}.jar --spring.cl
 
 By default, the Data Flow server is unsecured and runs on an unencrypted HTTP connection.
 You can secure your REST endpoints as well as the Data Flow Dashboard by enabling HTTPS
-and requiring clients to authenticate using either:
-
-* https://oauth.net/2/[OAuth 2.0]
-* Traditional Authentication (including Basic Authentication)
-
-The following image shows the authentication options for Spring Cloud Data Flow Server:
-
-.Authentication Options
-image::{dataflow-asciidoc}/images/dataflow-authentication-options.png[Authentication Options, scaledwidth="80%"]
-
-When choosing traditional authentication, the Spring Cloud Data Flow server
-is the main authentication point, using Spring Security under the covers. When
-selecting this option, users then need to further define their preferred authentication
-mechanism by selecting the desired authentication backing store, which can be one of the
-following options:
-
-* <<configuration-security-single-user-authentication,Single User Authentication>>
-* <<configuration-security-ldap-authentication,LDAP Authentication>>
-* <<configuration-security-file-based-authentication,File-based authentication>>
-
-When choosing between traditional authentication or OAuth2, keep in mind that
-both options are mutually exclusive. Please refer to the sections below for
-a more detailed discussion.
+and requiring clients to authenticate using https://oauth.net/2/[OAuth 2.0].
 
 [NOTE]
 ====
 By default, the REST endpoints (administration, management, and health) as well as the Dashboard UI do not require authenticated access.
 ====
+
+While you can theoretically choose any OAuth provider in conjunction with
+Spring Cloud Data Flow, we recommend using the
+https://github.com/cloudfoundry/uaa[CloudFoundry User Account and Authentication (UAA) Server].
+
+Not only is the UAA OpenID certified and is used by Cloud Foundry but it can
+also be used in local stand-alone deployment scenarios.
+
+Furthermore, the UAA not only provides its own user store, but also provides
+comprehensive LDAP integration.
 
 [[configuration-security-enabling-https]]
 === Enabling HTTPS
@@ -453,258 +441,482 @@ If possible, you should avoid using this option. Disabling the trust manager
 defeats the purpose of SSL and makes you vulnerable to man-in-the-middle attacks.
 ====
 
-[[configuration-security-basic-authentication]]
-=== Traditional Authentication
+[[configuration-security-oauth2]]
+=== Authentication using OAuth 2.0
 
-When using traditional authentication, Spring Cloud Data Flow is the sole
-authentication provider. In that case, Data Flow REST API users would use
-https://en.wikipedia.org/wiki/Basic_access_authentication[Basic Authentication]
-to access the endpoints.
+In order to support authentication and authorization, Spring Cloud Data
+Flow is using https://oauth.net/2/[OAuth 2.0] and https://openid.net/connect/[OpenID Connect].
+It lets you integrate Spring Cloud Data Flow into Single Sign On (SSO)
+environments.
 
-When using that option, users have a choice of three backing stores for authentication
-details:
+NOTE: As of Spring Cloud Data Flow 2.0, OAuth2 is the only mechanism
+for providing authentication and authorization.
 
-* *Single User Authentication* by setting Spring Boot properties
-* *File-based Authentication* for multiple users by using a Yaml file
-* *Ldap Authentication*
+The following OAuth2 Grant Types are used:
 
-[[configuration-security-single-user-authentication]]
-==== Single User Authentication
+* *Authorization Code*: Used for the GUI (browser) integration. Visitors are redirected to your OAuth Service for authentication
+* *Password*: Used by the shell (and the REST integration), so visitors can log in with username and password
+* *Client Credentials*: Retrieve an access token directly from your OAuth provider and pass it to the Data Flow server by using the Authorization HTTP header
 
-This is the simplest option and mimics the behavior of the default Spring Boot user
-experience. It can be enabled by setting environment variables or by adding the following to `application.yml`:
+NOTE: Currently, Spring Cloud Data Flow uses opaque tokens and not transparent
+tokens (JWT).
+
+The REST endpoints can be accessed in two ways:
+
+* *Basic authentication*, which uses the Password Grant Type under the covers to authenticate with your OAuth2 service
+* *Access token*, which uses the Client Credentials Grant Type under the covers
+
+NOTE: When authentication is set up, it is strongly recommended to enable HTTPS
+as well, especially in production environments.
+
+You can turn on OAuth2 authentication by adding the following to `application.yml` or by setting
+environment variables:
 
 [source,yaml]
 ----
 security:
-  basic:
-    enabled: true                                                     # <1>
-    realm: Spring Cloud Data Flow                                     # <2>
+  oauth2:
+    client:
+      client-id: myclient                                             # <1>
+      client-secret: mysecret
+      access-token-uri: http://127.0.0.1:9999/oauth/token
+      user-authorization-uri: http://127.0.0.1:9999/oauth/authorize
+    resource:
+      user-info-uri: http://127.0.0.1:9999/me
 ----
 
-<1> Enables basic authentication. Must be set to true for security to be enabled.
-<2> (Optional) The realm for Basic authentication. Defaults to `Spring` if not explicitly set.
+<1> Providing the Client ID in the OAuth Configuration Section activates OAuth2 security
 
-NOTE: Current versions of Chrome do not display the realm. Please see the following
-https://bugs.chromium.org/p/chromium/issues/detail?id=544244[Chromium issue ticket] for more information.
+You can verify that basic authentication is working properly by using curl, as follows:
 
-In this use case, the underlying Spring Boot auto-creates a user called `user`
-with an auto-generated password which is printed out to the console upon startup.
+[source,bash]
+----
+$ curl -u myusername:mypassword http://localhost:9393/ -H 'Accept: application/json'
+----
 
-With this setup, the generated user has all main roles assigned, as follows:
+As a result, you should see a list of available REST endpoints.
 
-* VIEW
-* CREATE
-* MANAGE
+IMPORTANT: Please be aware that when accessing the Root URL with a web browser and
+enabled security, you are redirected to the Dashboard UI. In order to see the
+list of REST endpoints, specify the `application/json`. Also be sure to add the
+Accept header using tools such as Postman (Chrome) or RESTClient (Firefox).
 
-The following image shows the default Spring Boot user credentials as they appear in the console.
-
-.Default Spring Boot user credentials
-image::{dataflow-asciidoc}/images/dataflow-security-default-user.png[Default Spring Boot user credentials , scaledwidth="100%"]
-
-You can customize the user by setting the following properties:
+Besides Basic Authentication, you can also provide an Access Token in order to
+access the REST Api. In order to make that happen, you would retrieve an
+OAuth2 Access Token from your OAuth2 provider first and then pass that Access Token to
+the REST Api using the *Authorization* Http header:
 
 ```
-security.user.name=user # Default user name.
-security.user.password= # Password for the default user name. A random password is logged on startup by default.
-security.user.role=VIEW,CREATE,MANAGE # Granted roles for the default user name.
+$ curl -H "Authorization: Bearer <ACCESS_TOKEN>" http://localhost:9393/ -H 'Accept: application/json'
 ```
 
-NOTE: Please be aware of inherent issues of Basic Authentication and logging out: The credentials are cached by the browser and simply browsing back to application pages logs you back in.
+[[configuration-security-oauth2-authorization]]
+==== OAuth REST Endpoint Authorization
 
-Of course, you can also pass in credentials by setting system properties, environment
-variables, or command-line arguments, as this is standard Spring Boot behavior. For
-instance, in the following example, command-line arguments are used to specify the
-user credentials:
+The OAuth2 authentication option uses the same authorization rules as used by the
+<<configuration-security-basic-authentication, Traditional Authentication>> option.
+
+[TIP]
+====
+The authorization rules are defined in `dataflow-server-defaults.yml` (part of
+the Spring Cloud Data Flow Core module). Please see the chapter on
+<<customizing-authorization, customizing authorization>> for more details.
+====
+
+Because the determination of security roles is environment-specific,
+Spring Cloud Data Flow, by default, assigns all roles to authenticated OAuth2
+users by using the `DefaultDataflowAuthoritiesExtractor` class.
+
+You can customize that behavior by providing your own Spring bean definition that
+extends Spring Security OAuth's `AuthoritiesExtractor` interface. In that case,
+the custom bean definition takes precedence over the default one provided by
+Spring Cloud Data Flow.
+
+[[configuration-security-oauth2-shell]]
+==== OAuth Authentication using the Spring Cloud Data Flow Shell
+
+When using the Shell, the credentials can either be provided via username and password
+or by specifying a _credentials-provider_ command.
+
+If your OAuth2 provider supports the _Password_ Grant Type you can start the
+_Data Flow Shell_ with:
 
 [source,bash,subs=attributes]
 ----
-$ java -jar spring-cloud-dataflow-server-local-{project-version}.jar\
-    --security.basic.enabled=true \
-    --security.user.name=test \
-    --security.user.password=pass \
-    --security.user.role=VIEW
+$ java -jar spring-cloud-dataflow-shell-{project-version}.jar \
+  --dataflow.uri=http://localhost:9393 \
+  --dataflow.username=my_username --dataflow.password=my_password
 ----
 
-If you need to define more than one file-based user account, please take a look
-at <<configuration-security-file-based-authentication,File-based authentication>>.
+NOTE: Keep in mind that when authentication for Spring Cloud Data Flow is enabled,
+the underlying OAuth2 provider *must* support the _Password_ OAuth2 Grant Type
+if you want to use the Shell via username/password authentication.
 
-[[configuration-security-file-based-authentication]]
-==== File-based Authentication
+From within the Data Flow Shell you can also provide credentials by using the following command:
 
-By default, Spring Boot lets you specify only one single user. Spring Cloud
-Data Flow also supports the listing of more than one user in a configuration file. Each user must be assigned a password and one or more roles.
-The following example shows the creation of additional users:
+[source,bash]
+----
+dataflow config server --uri http://localhost:9393 --username my_username --password my_password
+----
+
+Once successfully targeted, you should see the following output:
+
+[source,bash]
+----
+dataflow:>dataflow config info
+dataflow config info
+
+╔═══════════╤═══════════════════════════════════════╗
+║Credentials│[username='my_username, password=****']║
+╠═══════════╪═══════════════════════════════════════╣
+║Result     │                                       ║
+║Target     │http://localhost:9393                  ║
+╚═══════════╧═══════════════════════════════════════╝
+----
+
+Alternatively, you can specify the _credentials-provider_ command in order to
+pass-in a bearer token directly, instead of providing a username and password.
+This works from within the shell or by providing the
+`--dataflow.credentials-provider-command` command-line argument when starting the Shell.
+
+[IMPORTANT]
+====
+When using the _credentials-provider_ command, please be aware that your
+specified command *must* return a _Bearer token_ (Access Token prefixed with _Bearer_).
+For instance, in Unix environments the following simplistic command can be used:
+
+[source,bash,subs=attributes]
+----
+$ java -jar spring-cloud-dataflow-shell-{project-version}.jar \
+  --dataflow.uri=http://localhost:9393 \
+  --dataflow.credentials-provider-command="echo Bearer 123456789"
+----
+
+====
+
+==== OAuth2 Authentication Examples
+
+This section documents following authentication scenarios:
+
+* <<oauth2-examples-local>>
+* <<oauth2-examples-github>>
+
+[[oauth2-examples-local]]
+===== Local OAuth2 Server
+
+For local deployment scenarios, we recommend using the https://github.com/cloudfoundry/uaa[CloudFoundry User
+Account and Authentication (UAA) Server], which is https://openid.net/certification/[OpenID certified].
+
+While the UAA is also used by https://www.cloudfoundry.org/[Cloud Foundry],
+it is also a fully featured stand alone OAuth2 server with enterprise features such as
+https://github.com/cloudfoundry/uaa/blob/develop/docs/UAA-LDAP.md[LDAP integration].
+
+For local testing and development, you can also use the support provided by
+http://projects.spring.io/spring-security-oauth/[Spring Security OAuth]. It
+allows you to easily create your own OAuth2 Server with the following simple annotations:
+
+* `@EnableResourceServer`
+* `@EnableAuthorizationServer`
+
+A working example application can be found at:
+
+https://github.com/ghillert/oauth-test-server/[https://github.com/ghillert/oauth-test-server/]
+
+Clone the project and configure Spring Cloud
+Data Flow with the respective Client ID and Client Secret. Then build and start the project.
+
+[[oauth2-examples-github]]
+===== Authentication with GitHub
+
+If you like to use an existing OAuth2 provider, here is an example for GitHub.
+First, you need to register a new application under your GitHub account at:
+
+https://github.com/settings/developers[https://github.com/settings/developers]
+
+When running a default version of Spring Cloud Data Flow locally, your GitHub configuration
+should look like the following image:
+
+.Register an OAuth Application for GitHub
+image::{dataflow-asciidoc}/images/dataflow-security-github.png[Register an OAuth Application for GitHub , scaledwidth="100%"]
+
+NOTE: For the authorization callback URL, enter Spring Cloud Data Flow's Login URL - for example, `http://localhost:9393/login`.
+
+Configure Spring Cloud Data Flow with the GitHub relevant Client ID and Secret, as follows:
 
 [source,yaml]
 ----
 security:
-  basic:
-    enabled: true
-    realm: Spring Cloud Data Flow
-spring:
-  cloud:
-    dataflow:
-      security:
-        authentication:
-          file:
-            enabled: true                                                 # <1>
-            users:                                                        # <2>
-              bob: bobspassword, ROLE_MANAGE                              # <3>
-              alice: alicepwd, ROLE_VIEW, ROLE_CREATE
+  oauth2:
+    client:
+      client-id: your-github-client-id
+      client-secret: your-github-client-secret
+      access-token-uri: https://github.com/login/oauth/access_token
+      user-authorization-uri: https://github.com/login/oauth/authorize
+    resource:
+      user-info-uri: https://api.github.com/user
 ----
 
-<1> Enables file based authentication.
-<2> This is a yaml map of username to password.
-<3> Each map `value` is made of a corresponding password and role(s), comma separated.
+IMPORTANT: GitHub does not support the OAuth2 password grant type. As a result, you cannot use the Spring Cloud Data Flow Shell in conjunction with GitHub.
+
+=== Securing the Spring Boot Management Endpoints
+
+When enabling security, please also make sure that the {spring-boot-docs-reference}/html/production-ready-monitoring.html[Spring Boot HTTP Management Endpoints]
+are secured as well. You can enable security for the management endpoints by adding the following to `application.yml`:
+
+[source,yaml]
+----
+management:
+  contextPath: /management
+  security:
+    enabled: true
+----
+
+IMPORTANT: If you do not explicitly enable security for the management endpoints,
+you may end up having unsecured REST endpoints, despite `security.basic.enabled`
+being set to `true`.
+
+==== Setting up a CloudFoundry User Account and Authentication (UAA) Server
+
+
+Checkout, Build and Run UAA:
+
+[source,bash]
+----
+$ git clone https://github.com/cloudfoundry/uaa.git
+$ cd uaa/
+$ ./gradlew  run
+----
+
+In a separate window, check if the UAA server is running:
+
+The configuration of the UAA is driven by a
+https://github.com/cloudfoundry/uaa/blob/develop/uaa/src/main/resources/uaa.yml[uaa.yml]
+file. You can provide custom configuration but in this case we will use the
+embedded default configuration that provides also a default user:
+
+[source,bash]
+----
+curl -v -d"username=marissa&password=koala&client_id=app&grant_type=password" -u "app:appclientsecret" http://localhost:8080/uaa/oauth/token -d 'token_format=opaque'
+----
+
+This should produce output similar to the following:
+
+[source,bash]
+----
+*   Trying ::1...
+* TCP_NODELAY set
+* Connected to localhost (::1) port 8080 (#0)
+* Server auth using Basic with user 'app'
+> POST /uaa/oauth/token HTTP/1.1
+> Host: localhost:8080
+> Authorization: Basic YXBwOmFwcGNsaWVudHNlY3JldA==
+> User-Agent: curl/7.54.0
+> Accept: */*
+> Content-Length: 85
+> Content-Type: application/x-www-form-urlencoded
+>
+* upload completely sent off: 85 out of 85 bytes
+< HTTP/1.1 200
+< Cache-Control: no-store
+< Pragma: no-cache
+< X-XSS-Protection: 1; mode=block
+< X-Frame-Options: DENY
+< X-Content-Type-Options: nosniff
+< Content-Type: application/json;charset=UTF-8
+< Transfer-Encoding: chunked
+< Date: Mon, 03 Dec 2018 23:58:41 GMT
+<
+* Connection #0 to host localhost left intact
+{"access_token":"0f935cea42fd4516bb36e4088f6d7c44","token_type":"bearer","id_token":"eyJhbGciOiJIUzI1NiIsImprdSI6Imh0dHBzOi8vbG9jYWxob3N0OjgwODAvdWFhL3Rva2VuX2tleXMiLCJraWQiOiJsZWdhY3ktdG9rZW4ta2V5IiwidHlwIjoiSldUIn0.eyJzdWIiOiI1ODExMWNlNC02NGRlLTQ3ZDYtYjZiZi0wZDRhNDFhNGFlMDAiLCJhdWQiOlsiYXBwIl0sImlzcyI6Imh0dHA6Ly9sb2NhbGhvc3Q6ODA4MC91YWEvb2F1dGgvdG9rZW4iLCJleHAiOjE1NDM5MjQ3MjEsImlhdCI6MTU0Mzg4MTUyMSwiYW1yIjpbInB3ZCJdLCJhenAiOiJhcHAiLCJzY29wZSI6WyJvcGVuaWQiXSwiZW1haWwiOiJtYXJpc3NhQHRlc3Qub3JnIiwiemlkIjoidWFhIiwib3JpZ2luIjoidWFhIiwianRpIjoiMGY5MzVjZWE0MmZkNDUxNmJiMzZlNDA4OGY2ZDdjNDQiLCJwcmV2aW91c19sb2dvbl90aW1lIjoxNTQzODgxMTk1NzU2LCJlbWFpbF92ZXJpZmllZCI6dHJ1ZSwiY2xpZW50X2lkIjoiYXBwIiwiY2lkIjoiYXBwIiwiZ3JhbnRfdHlwZSI6InBhc3N3b3JkIiwidXNlcl9uYW1lIjoibWFyaXNzYSIsInJldl9zaWciOiI1ZmI4N2M1NiIsInVzZXJfaWQiOiI1ODExMWNlNC02NGRlLTQ3ZDYtYjZiZi0wZDRhNDFhNGFlMDAiLCJhdXRoX3RpbWUiOjE1NDM4ODE1MjF9.qSxoygd7LUUJSEN0wGI3-U0x2tYZzHnTDuzk6AJUfBk","refresh_token":"d106513b98804a508c35d3f7b656a7fe-r","expires_in":43199,"scope":"scim.userids openid cloud_controller.read password.write cloud_controller.write","jti":"0f935cea42fd4516bb36e4088f6d7c44"}
+----
+
+Using `token_format` parameter you can requested token to be either:
+
+- opaque
+- jwt
+
+In order to configure the UAA, it is recommended to use the `uaac` command\
+line tool and target the UAA server:
+
+[source,bash]
+----
+$ gem install cf-uaac
+$ uaac target http://localhost:8080/uaa
+----
+
+Check out user detail of user `marissa`:
+
+[source,bash]
+----
+$ uaac token owner get cf marissa -s "" -p koala
+$ uaac contexts
+----
+
+This should also provide the relevant token details. Next, switch to the
+admin user (password is `adminsecret`):
+
+[source,bash]
+----
+$ uaac token client get admin -s adminsecret
+----
+
+Get a list of all configured clients:
+
+[source,bash]
+----
+$ uaac clients
+----
+
+This returns the interesting client app among others:
+
+[source,bash]
+----
+…
+  app
+    scope: cloud_controller.read cloud_controller.write openid password.write scim.userids organizations.acme
+    resource_ids: none
+    authorized_grant_types: password implicit authorization_code client_credentials refresh_token
+    redirect_uri: http://localhost:8080/** http://localhost:8080/app/
+    autoapprove: openid
+    authorities: uaa.resource
+    name: The Ultimate Oauth App
+    signup_redirect_url: http://localhost:8080/app/
+    change_email_redirect_url: http://localhost:8080/app/
+    lastmodified: 1543879731285
+…
+----
+
+We are going to use that `app` for Spring Cloud Data Flow but need to update
+the `redirect_uri`. We will also update the client secret:
+
+[source,bash]
+----
+$ uaac client update app --redirect_uri http://localhost:9393/login
+$ uaac secret set app --secret dataflow
+----
+
+Now we can update the relavant OAuth configuration in Spring Cloud Data Flow:
+
+[source,yaml]
+----
+security:
+  oauth2:
+    client:
+      client-id: app
+      client-secret: dataflow
+      scope: openid, dataflow.view, dataflow.create, dataflow.manage    # <1>
+      access-token-uri: http://localhost:8080/uaa/oauth/token
+      user-authorization-uri: http://localhost:8080/uaa/oauth/authorize
+    resource:
+      user-info-uri: http://localhost:8080/uaa/userinfo
+----
+
+<1> If you use scopes to identify roles, please make sure to also request
+the relevant roles
+
+[[configuration-security-role-mapping]]
+===== Role Mappings
+
+By default all roles are assigned to users that login to Spring Cloud Data Flow.
+However, you can set the property:
+
+`spring.cloud.dataflow.security.authorization.map-oauth-scopes: true`
+
+This will instruct the the underlying `DefaultAuthoritiesExtractor` to map
+OAuth scopes to the respective authorities. The following scopes are supported:
+
+* Scope `dataflow.view` maps to the `VIEW` role
+* Scope `dataflow.create` maps to the `CREATE` role
+* Scope `dataflow.manage` maps to the `MANAGE` role
+
+Additionally you can also map arbitrary scopes to each of the Data Flow roles:
+
+[source,yaml]
+----
+spring:
+  cloud:
+    deployer:
+      local:
+        free-disk-space-percentage: 0
+    dataflow:
+      security:
+        authorization:
+          map-oauth-scopes: true                                    # <1>
+          role-mappings:
+            ROLE_VIEW: dataflow.view                                # <2>
+            ROLE_CREATE: dataflow.create
+            ROLE_MANAGE: dataflow.manage
+----
+
+<1> Enables explicit mapping support from OAuth scopes to Data Flow roles
+<2> When role mapping support is enabled, you must provide a mapping for
+all 3 Spring Cloud Data Flow roles *ROLE_MANAGE*, *ROLE_VIEW*, *ROLE_CREATE*.
 
 [[configuration-security-ldap-authentication]]
 ==== LDAP Authentication
 
-Spring Cloud Data Flow also supports authentication against an LDAP (Lightweight Directory Access Protocol) server, providing support for the following modes:
+LDAP Authentication (Lightweight Directory Access Protocol) is indirectly
+provided by Spring Cloud Data Flow using the UAA. The UAA itself provides
+https://github.com/cloudfoundry/uaa/blob/develop/docs/UAA-LDAP.md[comprehensive LDAP support].
 
-* Direct bind
-* Search and bind
+[IMPORTANT]
+====
+While you may use your own OAuth2 authentication server, the LDAP support
+documented here requires using the UAA as authentication server. For any
+other provider, please consult the documentation for that particular provider.
+====
 
-When the LDAP authentication option is activated, the default single user mode is
-turned off.
+The UAA supports authentication against an LDAP (Lightweight Directory Access Protocol)
+server using the following modes:
 
-In direct bind mode, a pattern is defined for the user’s distinguished name (DN),
-using a placeholder for the username. The authentication process derives the
-distinguished name of the user by replacing the placeholder and using it to authenticate
-a user against the LDAP server, along with the supplied password. You can set up
-LDAP direct bind as follows:
+* https://github.com/cloudfoundry/uaa/blob/develop/docs/UAA-LDAP.md#ldap-search-and-bind[Direct bind]
+* https://github.com/cloudfoundry/uaa/blob/develop/docs/UAA-LDAP.md#ldap-bind[Search and bind]
+* https://github.com/cloudfoundry/uaa/blob/develop/docs/UAA-LDAP.md#ldap-search-and-compare[Search and Compare]
 
-[source,yaml]
-----
-security:
-  basic:
-    enabled: true
-    realm: Spring Cloud Data Flow
-spring:
-  cloud:
-    dataflow:
-      security:
-        authentication:
-          ldap:
-            enabled: true                                                 # <1>
-            url: ldap://ldap.example.com:3309                             # <2>
-            userDnPattern: uid={0},ou=people,dc=example,dc=com            # <3>
-----
-
-<1> Enables LDAP authentication
-<2> The URL for the LDAP server
-<3> The distinguished name (DN) pattern for authenticating against the server
-
-The search and bind mode involves connecting to an LDAP server, either anonymously
-or with a fixed account, searching for the distinguished name of the authenticating
-user based on its username, and then using the resulting value and the supplied password
-for binding to the LDAP server. This option is configured as follows:
-
-[source,yaml]
-----
-security:
-  basic:
-    enabled: true
-    realm: Spring Cloud Data Flow
-spring:
-  cloud:
-    dataflow:
-      security:
-        authentication:
-          ldap:
-            enabled: true                                                 # <1>
-            url: ldap://localhost:10389                                   # <2>
-            managerDn: uid=admin,ou=system                                # <3>
-            managerPassword: secret                                       # <4>
-            userSearchBase: ou=otherpeople,dc=example,dc=com              # <5>
-            userSearchFilter: uid={0}                                     # <6>
-----
-
-<1> Enables LDAP integration
-<2> The URL of the LDAP server
-<3> A DN to authenticate to the LDAP server, if anonymous searches are not supported (optional, required together with next option)
-<4> A password to authenticate to the LDAP server, if anonymous searches are not supported (optional, required together with previous option)
-<5> The base for searching the DN of the authenticating user (serves to restrict the scope of the search)
-<6> The search filter for the DN of the authenticating user
-
-TIP: For more information, please also see the
-http://docs.spring.io/spring-security/site/docs/current/reference/html/ldap.html[LDAP Authentication]
-chapter of the Spring Security reference guide.
+[NOTE]
+====
+When integrating with an external identity provider such as LDAP, authentication
+within the UAA becomes *chained*. UAA first attempts to authenticate with
+a user's credentials against the UAA user store before the external provider,
+LDAP. For more information, see
+https://github.com/cloudfoundry/uaa/blob/develop/docs/UAA-LDAP.md#chained-authentication[Chained Authentication]
+in the _User Account and Authentication LDAP Integration_ GitHub documentation.
+====
 
 ===== LDAP Role Mapping
 
-By default, the role name retrieved from Ldap needs to match the name of the
-role in Spring Cloud Data Flow. However, it is also possible to explicitly
-provide a mapping between LDAP roles and Spring Cloud Data Flow roles.
-[source,yaml]
+The OAuth2 authentication server (UAA), provides comprehensive support
+for https://github.com/cloudfoundry/uaa/blob/develop/docs/UAA-LDAP.md#scopes[mapping LDAP groups to OAuth scopes].
+
+The following options exist:
+
+* `ldap/ldap-groups-null.xml` No groups will be mapped
+* `ldap/ldap-groups-as-scopes.xml` Group names will be retrieved from an LDAP attribute. E.g. `CN`
+* `ldap/ldap-groups-map-to-scopes.xml` Groups will be mapped to UAA groups using the external_group_mapping table
+
+These values are specified via the configuration property `ldap.groups.file controls`. Under the covers
+these values reference a Spring XML configuration file.
+
+[TIP]
+====
+During test and development it might be necessary to make frequent changes
+to LDAP groups and users and see those reflected in the UAA. However, user
+information is cached for the duration of the login. The following script
+helps to retrieve the updated information quickly:
+
+[source,bash]
 ----
-security:
-  basic:
-    enabled: true
-    realm: Spring Cloud Data Flow
-spring:
-  cloud:
-    dataflow:
-      security:
-        authentication:
-          ldap:
-            enabled: true
-            url: ldap://localhost:10389
-            managerDn: uid=admin,ou=system
-            managerPassword: secret
-            userSearchBase: ou=otherpeople,dc=example,dc=com
-            userSearchFilter: uid={0}
-            roleMappings:                                                 # <1>
-              ROLE_MANAGE: foo-manage                                     # <2>
-              ROLE_VIEW: bar-view
-              ROLE_CREATE: foo-manage
-----
-
-<1> Enables explicit role mapping support
-<2> When role mapping support is enabled, you must provide a mapping for
-all 3 Spring Cloud Data Flow roles *ROLE_MANAGE*, *ROLE_VIEW*, *ROLE_CREATE*.
-
-===== LDAP Transport Security
-
-When connecting to an LDAP server, you typically (in the LDAP world) have two options
-to establish a connection to an LDAP server securely:
-
-* LDAP over SSL (LDAPs)
-* Start Transport Layer Security (Start TLS is defined in https://www.ietf.org/rfc/rfc2830.txt[RFC2830])
-
-As of Spring Cloud Data Flow 1.1.0, only LDAPs is supported out-of-the-box. When using
-official certificates, no special configuration is necessary to connect
-to an LDAP Server over LDAPs. You need only change the url format to **ldaps** - for example: `ldaps://localhost:636`.
-
-In the case of self-signed certificates, the setup for your Spring Cloud Data Flow
-server becomes slightly more complex. The setup is very similar to
-<<configuration-security-self-signed-certificates>> (please read first), and
-Spring Cloud Data Flow needs to reference a trustStore in order to work with
-your self-signed certificates.
-
-IMPORTANT: While useful during development and testing, never use
-self-signed certificates in production!
-
-Ultimately, you have to provide a set of system properties to reference
-the trustStore and its credentials when starting the server, as follows:
-
-[source,bash,subs=attributes]
-----
-$ java -Djavax.net.ssl.trustStorePassword=dataflow \
-       -Djavax.net.ssl.trustStore=/path/to/dataflow.truststore \
-       -Djavax.net.ssl.trustStoreType=jks \
-       -jar spring-cloud-starter-dataflow-server-local-{project-version}.jar
+#!/bin/bash
+uaac token delete --all
+uaac target http://localhost:8080/uaa
+uaac token owner get cf <username> -s "" -p  <password>
+uaac token client get admin -s adminsecret
+uaac user get <username>
 ----
 
-As mentioned earlier, another option to connect to an LDAP server securely is over Start TLS.
-In the LDAP world, LDAPs is technically even considered deprecated in favor of Start TLS. However,
-this option is currently not supported out-of-the-box by Spring Cloud Data Flow.
-
-Please follow the following https://github.com/spring-cloud/spring-cloud-dataflow/issues/963[issue
-tracker ticket] to track its implementation. You may also want to look at the
-Spring LDAP reference documentation chapter on
-http://docs.spring.io/spring-ldap/docs/current/reference/#custom-dircontext-authentication-processing[Custom DirContext Authentication Processing] for further details.
+For more information and sample application, please see the following
+https://github.com/ghillert/ldap-uaa-example[GitHub repository].
+====
 
 [[configuration-security-authentication-via-shell]]
 ==== Shell Authentication
@@ -747,7 +959,7 @@ image::{dataflow-asciidoc}/images/dataflow-security-shell-target.png[Target and 
 [[customizing-authorization]]
 ==== Customizing Authorization
 
-The preceding content deals with authentication - that is, how to assess the identity of the user. Irrespective of the option chosen, you can also customize *authorization* - that is,
+The preceding content deals with mostly with authentication - that is, how to assess the identity of the user. Irrespective of the option chosen, you can also customize *authorization* - that is,
 who can do what.
 
 The default scheme uses three roles to protect the xref:api-guide[REST endpoints]
@@ -886,29 +1098,10 @@ where
 
 Be mindful that the above is indeed a YAML list, not a map (thus the use of '-' dashes at the start of each line) that lives under the `spring.cloud.dataflow.security.authorization.rules` key.
 
-[TIP]
-====
-In case you are solely interested in authentication but not authorization
-(for instance every user shall have have access to all endpoints), then you can also
-set `spring.cloud.dataflow.security.authorization.enabled=false`.
-====
-
-If you use basic security configuration by setting security properties, then it is important to set the roles for the users,
-as shown in the following example:
-
-[source,bash,subs=attributes]
-----
-java -jar spring-cloud-dataflow-server-local/target/spring-cloud-dataflow-server-local-{project-version}.jar \
-    --security.basic.enabled=true \
-    --security.user.name=test \
-    --security.user.password=pass \
-    --security.user.role=VIEW
-----
-
 [[authorization-shell-and-dashboard]]
 ==== Authorization - Shell and Dashboard Behavior
 
-When authorization is enabled, the dashboard and the shell are role-aware,
+When security is enabled, the dashboard and the shell are role-aware,
 meaning that, depending on the assigned roles, not all functionality may be visible.
 
 For instance, shell commands for which the user does not have the necessary roles
@@ -920,235 +1113,8 @@ Currently, the shell's `help` command lists commands that are unavailable.
 Please track the following issue: https://github.com/spring-projects/spring-shell/issues/115
 ====
 
-Similarly, for the dashboard, the UI does not show pages or page elements for
+Similarly, for the Dashboard, the UI does not show pages or page elements for
 which the user is not authorized.
-
-[[ldap-authorization-and-roles]]
-==== Authorization with LDAP
-
-When configuring LDAP for authentication, you can also specify the `group-role-attribute`
-in conjunction with `group-search-base` and `group-search-filter`.
-
-The group role attribute contains the name of the role. If not specified, the
-`ROLE_MANAGE` role is populated by default.
-
-For further information, please refer to http://docs.spring.io/spring-security/site/docs/current/reference/htmlsingle/#loading-authorities[Configuring an LDAP Server] in the Spring Security reference guide.
-
-[[configuration-security-oauth2]]
-=== OAuth 2.0
-
-https://oauth.net/2/[OAuth 2.0] lets you integrate Spring Cloud
-Data Flow into Single Sign On (SSO) environments. The following OAuth2 Grant Types are used:
-
-* *Authorization Code*: Used for the GUI (browser) integration. Visitors are redirected to your OAuth Service for authentication
-* *Password*: Used by the shell (and the REST integration), so visitors can log in with username and password
-* *Client Credentials*: Retrieve an access token directly from your OAuth provider and pass it to the Data Flow server by using the Authorization HTTP header
-
-The REST endpoints can be accessed in two ways:
-
-* *Basic authentication*, which uses the Password Grant Type under the covers to authenticate with your OAuth2 service
-* *Access token*, which uses the Client Credentials Grant Type under the covers
-
-NOTE: When authentication is set up, it is strongly recommended to enable HTTPS
-as well, especially in production environments.
-
-You can turn on OAuth2 authentication by adding the following to `application.yml` or by setting
-environment variables:
-
-[source,yaml]
-----
-security:
-  oauth2:
-    client:
-      client-id: myclient                                             # <1>
-      client-secret: mysecret
-      access-token-uri: http://127.0.0.1:9999/oauth/token
-      user-authorization-uri: http://127.0.0.1:9999/oauth/authorize
-    resource:
-      user-info-uri: http://127.0.0.1:9999/me
-----
-
-<1> Providing the Client ID in the OAuth Configuration Section activates OAuth2 security
-
-You can verify that basic authentication is working properly by using curl, as follows:
-
-[source,bash]
-----
-$ curl -u myusername:mypassword http://localhost:9393/ -H 'Accept: application/json'
-----
-
-As a result, you should see a list of available REST endpoints.
-
-IMPORTANT: Please be aware that when accessing the Root URL with a web browser and
-enabled security, you are redirected to the Dashboard UI. In order to see the
-list of REST endpoints, specify the `application/json`. Also be sure to add the
-Accept header using tools such as Postman (Chrome) or RESTClient (Firefox).
-
-Besides Basic Authentication, you can also provide an Access Token in order to
-access the REST Api. In order to make that happen, you would retrieve an
-OAuth2 Access Token from your OAuth2 provider first and then pass that Access Token to
-the REST Api using the *Authorization* Http header:
-
-```
-$ curl -H "Authorization: Bearer <ACCESS_TOKEN>" http://localhost:9393/ -H 'Accept: application/json'
-```
-
-[[configuration-security-oauth2-authorization]]
-==== OAuth REST Endpoint Authorization
-
-The OAuth2 authentication option uses the same authorization rules as used by the
-<<configuration-security-basic-authentication, Traditional Authentication>> option.
-
-[TIP]
-====
-The authorization rules are defined in `dataflow-server-defaults.yml` (part of
-the Spring Cloud Data Flow Core module). Please see the chapter on
-<<customizing-authorization, customizing authorization>> for more details.
-====
-
-Because the determination of security roles is environment-specific,
-Spring Cloud Data Flow, by default, assigns all roles to authenticated OAuth2
-users by using the `DefaultDataflowAuthoritiesExtractor` class.
-
-You can customize that behavior by providing your own Spring bean definition that
-extends Spring Security OAuth's `AuthoritiesExtractor` interface. In that case,
-the custom bean definition takes precedence over the default one provided by
-Spring Cloud Data Flow.
-
-[[configuration-security-oauth2-shell]]
-==== OAuth Authentication using the Spring Cloud Data Flow Shell
-
-When using the Shell, the credentials can either be provided via username and password
-or by specifying a _credentials-provider_ command.
-
-If your OAuth2 provider supports the _Password_ Grant Type you can start the
-_Data Flow Shell_ with:
-
-[source,bash,subs=attributes]
-----
-$ java -jar spring-cloud-dataflow-shell-{project-version}.jar \
-  --dataflow.uri=http://localhost:9393 \
-  --dataflow.username=my_username --dataflow.password=my_password
-----
-
-NOTE: Keep in mind that when authentication for Spring Cloud Data Flow is enabled,
-the underlying OAuth2 provider *must* support the _Password_ OAuth2 Grant Type
-if you want to use the Shell via username/password authentication.
-
-From within the Data Flow Shell you can also provide credentials by using the following command:
-
-[source,bash]
-----
-dataflow config server --uri http://localhost:9393 --username my_username --password my_password
-----
-
-Once successfully targeted, you should see the following output:
-
-[source,bash]
-----
-dataflow:>dataflow config info
-dataflow config info
-
-╔═══════════╤═══════════════════════════════════════╗
-║Credentials│[username='my_username, password=****']║
-╠═══════════╪═══════════════════════════════════════╣
-║Result     │                                       ║
-║Target     │http://localhost:9393                  ║
-╚═══════════╧═══════════════════════════════════════╝
-----
-
-Alternatively, you can specify the _credentials-provider_ command in order to
-pass-in a bearer token directly, instead of providing a username and password.
-This works from within the shell or by providing the
-`--dataflow.credentials-provider-command` command-line argument when starting the Shell.
-
-[IMPORTANT]
-====
-When using the _credentials-provider_ command, please be aware that your
-specified command *must* return a _Bearer token_ (Access Token prefixed with _Bearer_).
-For instance, in Unix environments the following simplistic command can be used:
-
-[source,bash,subs=attributes]
-----
-$ java -jar spring-cloud-dataflow-shell-{project-version}.jar \
-  --dataflow.uri=http://localhost:9393 \
-  --dataflow.credentials-provider-command="echo Bearer 123456789"
-----
-
-====
-
-==== OAuth2 Authentication Examples
-
-This section offers the following authentication examples:
-
-* <<oauth2-examples-local>>
-* <<oauth2-examples-github>>
-
-[[oauth2-examples-local]]
-===== Local OAuth2 Server
-
-With http://projects.spring.io/spring-security-oauth/[Spring Security OAuth], you
-can easily create your own OAuth2 Server with the following simple annotations:
-
-* `@EnableResourceServer`
-* `@EnableAuthorizationServer`
-
-A working example application can be found at:
-
-https://github.com/ghillert/oauth-test-server/[https://github.com/ghillert/oauth-test-server/]
-
-Clone the project and configure Spring Cloud
-Data Flow with the respective Client ID and Client Secret. Then build and start the project.
-
-[[oauth2-examples-github]]
-===== Authentication with GitHub
-
-If you like to use an existing OAuth2 provider, here is an example for GitHub.
-First, you need to register a new application under your GitHub account at:
-
-https://github.com/settings/developers[https://github.com/settings/developers]
-
-When running a default version of Spring Cloud Data Flow locally, your GitHub configuration
-should look like the following image:
-
-.Register an OAuth Application for GitHub
-image::{dataflow-asciidoc}/images/dataflow-security-github.png[Register an OAuth Application for GitHub , scaledwidth="100%"]
-
-NOTE: For the authorization callback URL, enter Spring Cloud Data Flow's Login URL - for example, `http://localhost:9393/login`.
-
-Configure Spring Cloud Data Flow with the GitHub relevant Client ID and Secret, as follows:
-
-[source,yaml]
-----
-security:
-  oauth2:
-    client:
-      client-id: your-github-client-id
-      client-secret: your-github-client-secret
-      access-token-uri: https://github.com/login/oauth/access_token
-      user-authorization-uri: https://github.com/login/oauth/authorize
-    resource:
-      user-info-uri: https://api.github.com/user
-----
-
-IMPORTANT: GitHub does not support the OAuth2 password grant type. As a result, you cannot use the Spring Cloud Data Flow Shell in conjunction with GitHub.
-
-=== Securing the Spring Boot Management Endpoints
-
-When enabling security, please also make sure that the {spring-boot-docs-reference}/html/production-ready-monitoring.html[Spring Boot HTTP Management Endpoints]
-are secured as well. You can enable security for the management endpoints by adding the following to `application.yml`:
-
-[source,yaml]
-----
-management:
-  contextPath: /management
-  security:
-    enabled: true
-----
-
-IMPORTANT: If you do not explicitly enable security for the management endpoints,
-you may end up having unsecured REST endpoints, despite `security.basic.enabled`
-being set to `true`.
 
 [[configuration-monitoring-management]]
 == Monitoring and Management

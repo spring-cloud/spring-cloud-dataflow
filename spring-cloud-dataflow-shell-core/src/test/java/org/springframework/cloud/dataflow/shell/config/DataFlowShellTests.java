@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 the original author or authors.
+ * Copyright 2017-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -80,6 +80,16 @@ public class DataFlowShellTests {
 	}
 
 	@Test
+	public void testHasNotAccessWithOperationsAndAuthenticationEnabledAndAuthenticated() {
+		final Target target = new Target("http://myUri", "username", "password", true);
+		target.getTargetCredentials().getRoles().add(RoleType.CREATE);
+		target.setAuthenticationEnabled(true);
+		target.setAuthenticated(true);
+		final DataFlowShell dataFlowShell = prepareDataFlowShellWithAggregateCounterOperations(target);
+		Assert.assertFalse(dataFlowShell.hasAccess(RoleType.VIEW, OpsType.AGGREGATE_COUNTER));
+	}
+
+	@Test
 	public void testHasWrongRoleWithOperationsAndAuthenticationEnabledAndAuthenticated() {
 
 		final Target target = new Target("http://myUri", "username", "password", true);
@@ -101,18 +111,6 @@ public class DataFlowShellTests {
 
 		final DataFlowShell dataFlowShell = prepareDataFlowShellWithAggregateCounterOperations(target);
 		Assert.assertTrue(dataFlowShell.hasAccess(null, OpsType.AGGREGATE_COUNTER));
-	}
-
-	@Test
-	public void testHasAccessWithOperationsAndAuthenticationEnabledAndAuthenticatedAndAuthorizationDisabled() {
-		final Target target = new Target("http://myUri", "username", "password", true);
-		target.getTargetCredentials().getRoles().add(RoleType.CREATE);
-		target.setAuthenticationEnabled(true);
-		target.setAuthenticated(true);
-		target.setAuthorizationEnabled(false);
-
-		final DataFlowShell dataFlowShell = prepareDataFlowShellWithAggregateCounterOperations(target);
-		Assert.assertTrue(dataFlowShell.hasAccess(RoleType.VIEW, OpsType.AGGREGATE_COUNTER));
 	}
 
 	private DataFlowShell prepareDataFlowShellWithAggregateCounterOperations(Target target) {

@@ -119,7 +119,6 @@ public class DataFlowServerConfigurationTests {
 	 * @throws Throwable if any error occurs and should be handled by the caller.
 	 */
 	@Test(expected = ConnectException.class)
-	//@Ignore
 	public void testDoNotStartEmbeddedH2Server() throws Throwable {
 		Throwable exceptionResult = null;
 		Map myMap = new HashMap();

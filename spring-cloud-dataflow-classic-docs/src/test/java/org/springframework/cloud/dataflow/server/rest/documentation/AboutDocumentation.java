@@ -84,8 +84,6 @@ public class AboutDocumentation extends BaseDocumentation {
 								.description("Provides security configuration information."),
 						fieldWithPath("securityInfo.authenticationEnabled").type(JsonFieldType.BOOLEAN)
 								.description("Describes if security authentication is enabled."),
-						fieldWithPath("securityInfo.authorizationEnabled").type(JsonFieldType.BOOLEAN)
-								.description("Describes if security authorization is enabled."),
 						fieldWithPath("securityInfo.formLogin").type(JsonFieldType.BOOLEAN)
 								.description("Describes if security form login is enabled."),
 						fieldWithPath("securityInfo.authenticated").type(JsonFieldType.BOOLEAN)

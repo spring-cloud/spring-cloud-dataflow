@@ -16,6 +16,7 @@
 package org.springframework.cloud.dataflow.server.local.security;
 
 import org.junit.ClassRule;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.rules.RuleChain;
 import org.junit.rules.TestRule;
@@ -49,6 +50,7 @@ public class LocalServerSecurityRootWithUsersFileTestsWithoutTasks {
 	private static UserCredentials fullUser = new UserCredentials("fulluser", "fullpassword");
 
 	@Test
+	@Ignore("Revisit once Outh2/OpenID Connect security is implemented")
 	public void testAccessRootUrlAndCheckAllLinksWithFullUser() throws Exception {
 		localDataflowResource.getMockMvc()
 				.perform(get("/").header("Authorization", basicAuthorizationHeader(fullUser.getUsername(), fullUser.getPassword()))).andDo(print())
@@ -82,6 +84,7 @@ public class LocalServerSecurityRootWithUsersFileTestsWithoutTasks {
 	}
 
 	@Test
+	@Ignore("Revisit once Outh2/OpenID Connect security is implemented")
 	public void testAccessRootUrlAndCheckAllLinksWithViewOnlyUser() throws Exception {
 		localDataflowResource.getMockMvc()
 				.perform(get("/").header("Authorization", basicAuthorizationHeader(viewOnlyUser.getUsername(), viewOnlyUser.getPassword()))).andDo(print())

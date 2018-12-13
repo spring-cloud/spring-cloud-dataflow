@@ -72,8 +72,6 @@ public class Target {
 
 	private boolean authenticationEnabled;
 
-	private boolean authorizationEnabled = true;
-
 	private boolean authenticated;
 
 	/**
@@ -215,20 +213,6 @@ public class Target {
 	 */
 	public void setAuthenticationEnabled(boolean authenticationEnabled) {
 		this.authenticationEnabled = authenticationEnabled;
-	}
-
-	/**
-	 * @return True if authorization is enabled, false otherwise
-	 */
-	public boolean isAuthorizationEnabled() {
-		return authorizationEnabled;
-	}
-
-	/**
-	 * @param authorizationEnabled If not set, it defaults to true
-	 */
-	public void setAuthorizationEnabled(boolean authorizationEnabled) {
-		this.authorizationEnabled = authorizationEnabled;
 	}
 
 	/**
