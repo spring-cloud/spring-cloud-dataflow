@@ -7,9 +7,7 @@
 This section goes into more detail about how you can work with Spring Cloud Stream. It covers topics
 such as creating and running stream applications.
 
-If you're just starting out with Spring Cloud Data Flow, you should probably read the
-_<<getting-started.adoc#getting-started, Getting Started>>_ guide before diving into
-this section.
+If you're just starting out with Spring Cloud Data Flow, you should probably read the Getting Started guide for  "`<<getting-started-local.adoc#getting-started-local, Local>>`" , "`<<getting-started-cloudfoundry.adoc#getting-started-cloudfoundry, Cloud Foundry>>`", "`<<getting-started-kubernetes.adoc#getting-started-kubernetes, Kubernetes>>`" before diving into this section.
 --
 
 == Introducing Spring Cloud Stream
