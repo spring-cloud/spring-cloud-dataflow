@@ -3,8 +3,7 @@
 
 [partintro]
 --
-This section goes into more detail about how you can work with http://cloud.spring.io/spring-cloud-task/[Spring Cloud Task].
-It covers topics such as creating and running task applications.
+This section goes into more detail about how you can orchestrate https://cloud.spring.io/spring-cloud-task/[Spring Cloud Task] applications on Spring Cloud Data Flow.
 
 If you are just starting out with Spring Cloud Data Flow, you should probably read the "`<<getting-started.adoc#getting-started, Getting Started>>`" guide before diving into this section.
 --
@@ -12,31 +11,20 @@ If you are just starting out with Spring Cloud Data Flow, you should probably re
 [[spring-cloud-dataflow-task-intro]]
 == Introduction
 
-A task executes a process on demand.
-In the case of Spring Cloud Task, a task is a http://projects.spring.io/spring-boot/[Spring Boot] application that is annotated with `@EnableTask`.
-A user launches a task that performs a certain process, and, once complete, the task ends.  Unlike a stream where a stream definition can have at most one deployment a single task definition can be launched multiple times simultaneously.
-An example of a task would be a Spring Boot application that exports data from a JDBC repository to an HDFS instance.
-Tasks record the start time and the end time as well as the boot exit code in a relational database.
-The task implementation is based on the http://cloud.spring.io/spring-cloud-task/[Spring Cloud Task] project.
+A task application is short lived, meaning it stops running on purpose, and can be executed on demand or scheduled for execution.
+A use case might be to scrape a web page and write to the database.
+The http://cloud.spring.io/spring-cloud-task/[Spring Cloud Task] framework is based on Spring Boot and adds the capability for Boot applications to record the lifecycle events of a short lived application such as when it starts, when it ends and the exit status.
+The https://docs.spring.io/spring-cloud-task/docs/{spring-cloud-task-version}/reference/htmlsingle/#features-task-execution-details[TaskExecution] documentation shows which information is stored in the database.
+The entry point for code execution in a Spring Cloud Task application is most often an implementation of Boot's CommandLineRunner interface as shown in this https://docs.spring.io/spring-cloud-task/docs/{spring-cloud-task-version}/reference/htmlsingle/#getting-started-writing-the-code[example].
 
-=== Application properties
+The Spring Batch project is probably what comes to mind for Spring developers writing short lived applications.
+Spring Batch provides a much richer set of functionality than Spring Cloud Task and is recommended when processing large volumes of data.
+A use case might be to read many CSV files, transform each row of data, and write each transformed row to a database.
+Spring Batch provides its own database schema with a much more rich https://docs.spring.io/spring-batch/{spring-batch-version}/reference/html/schema-appendix.html#metaDataSchema[set of information] about the execution of a Spring Batch job.
+Spring Cloud Task is integrated with Spring Batch so that if a Spring Cloud Task application defined a Spring Batch `Job`, a link between the Spring Cloud Task and Spring Cloud Batch execution tables is created.
 
-Each application takes properties to customize its behavior.  As an example, the `timestamp` task `format` setting establishes a output format that is different from the default value.
-
-`dataflow:> task create --definition "timestamp --format=\"yyyy\"" --name printTimeStamp`
-
-This `timestamp` property is actually the same as the `timestamp.format` property specified by the timestamp application.
-Data Flow adds the ability to use the shorthand form `format` instead of `timestamp.format`.
-One may also specify the longhand version as well, as shown in the following example:
-
-`dataflow:> task create --definition "timestamp --timestamp.format=\"yyyy\"" --name printTimeStamp`
-
-This shorthand behavior is discussed more in the section on <<spring-cloud-dataflow-stream-app-whitelisting>>.
-If you have <<spring-cloud-dataflow-stream-app-metadata-artifact, registered application property metadata>> you can use tab completion in the shell after typing `--` to get a list of candidate property names.
-
-The shell provides tab completion for application properties. The shell command `app info --name <appName> --type <appType>` provides additional documentation for all the supported properties.
-
-NOTE: The supported Task `<appType>` is task.
+When running Data Flow on your local machine, Tasks are launched in a separate JVM.
+When running on Cloud Foundry, tasks are launched using https://docs.cloudfoundry.org/devguide/using-tasks.html[Cloud Foundry's Task] functional and when running on Kubernetes, task are launched using the `Job` kind type.
 
 
 == The Lifecycle of a Task
@@ -195,6 +183,26 @@ It is up to an implementation to choose how those are passed into an actual task
 If the property is prefixed with `deployer` instead of `app`, it is passed to `TaskLauncher` as a deployment property and its meaning may be `TaskLauncher` implementation specific.
 
 `dataflow:>task launch mytask --properties "deployer.timestamp.custom1=value1,app.timestamp.custom2=value2"`
+
+==== Application properties
+
+Each application takes properties to customize its behavior.  As an example, the `timestamp` task `format` setting establishes a output format that is different from the default value.
+
+`dataflow:> task create --definition "timestamp --format=\"yyyy\"" --name printTimeStamp`
+
+This `timestamp` property is actually the same as the `timestamp.format` property specified by the timestamp application.
+Data Flow adds the ability to use the shorthand form `format` instead of `timestamp.format`.
+One may also specify the longhand version as well, as shown in the following example:
+
+`dataflow:> task create --definition "timestamp --timestamp.format=\"yyyy\"" --name printTimeStamp`
+
+This shorthand behavior is discussed more in the section on <<spring-cloud-dataflow-stream-app-whitelisting>>.
+If you have <<spring-cloud-dataflow-stream-app-metadata-artifact, registered application property metadata>> you can use tab completion in the shell after typing `--` to get a list of candidate property names.
+
+The shell provides tab completion for application properties. The shell command `app info --name <appName> --type <appType>` provides additional documentation for all the supported properties.
+
+NOTE: The supported Task `<appType>` is task.
+
 
 ==== Common application properties
 
