@@ -86,7 +86,6 @@ import org.springframework.web.context.request.NativeWebRequest;
 @ConditionalOnClass(WebSecurityConfigurerAdapter.class)
 @ConditionalOnMissingBean(WebSecurityConfigurerAdapter.class)
 @ConditionalOnWebApplication(type = ConditionalOnWebApplication.Type.ANY)
-@AutoConfigureBefore({ ManagementWebSecurityAutoConfiguration.class, SecurityAutoConfiguration.class })
 @EnableWebSecurity
 @Conditional(OnOAuth2SecurityEnabled.class)
 public class OAuthSecurityConfiguration extends WebSecurityConfigurerAdapter {

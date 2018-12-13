@@ -15,7 +15,6 @@
  */
 package org.springframework.cloud.common.security;
 
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.cloud.common.security.support.OnOAuth2SecurityDisabled;
 import org.springframework.context.annotation.Conditional;
 import org.springframework.context.annotation.Configuration;
@@ -35,8 +34,6 @@ import org.springframework.security.config.annotation.web.builders.WebSecurity;
  */
 @Configuration
 @Conditional(OnOAuth2SecurityDisabled.class)
-@ConditionalOnProperty(value = "org.springframework.cloud.common.security.enabled",
-		havingValue = "false", matchIfMissing = true)
 public class IgnoreAllSecurityConfiguration implements WebSecurityConfigurer<WebSecurity> {
 
 	@Override
