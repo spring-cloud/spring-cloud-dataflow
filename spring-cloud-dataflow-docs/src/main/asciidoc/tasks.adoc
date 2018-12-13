@@ -5,7 +5,7 @@
 --
 This section goes into more detail about how you can orchestrate https://cloud.spring.io/spring-cloud-task/[Spring Cloud Task] applications on Spring Cloud Data Flow.
 
-If you are just starting out with Spring Cloud Data Flow, you should probably read the "`<<getting-started.adoc#getting-started, Getting Started>>`" guide before diving into this section.
+If you are just starting out with Spring Cloud Data Flow, you should probably read the Getting Started guide for  "`<<getting-started-local.adoc#getting-started-local, Local>>`" , "`<<getting-started-cloudfoundry.adoc#getting-started-cloudfoundry, Cloud Foundry>>`", "`<<getting-started-kubernetes.adoc#getting-started-kubernetes, Kubernetes>>`" before diving into this section.
 --
 
 [[spring-cloud-dataflow-task-intro]]
@@ -267,6 +267,12 @@ dataflow:>task destroy mytask
 The task execution information for previously launched tasks for the definition remains in the task repository.
 
 NOTE: This does not stop any currently executing tasks for this definition. Instead, it removes the task definition from the database.
+
+NOTE: The `task destroy <task-name>` deletes only the definition and not the task deployed on Cloud Foundry.
+The only way to do this now is through the CLI in two steps. First, obtain a list of the apps by using the `cf apps` command.
+. Identify the task application to be deleted and run the `cf delete <task-name>` command.
+
+
 
 [[spring-cloud-dataflow-validate-task]]
 === Validating a Task

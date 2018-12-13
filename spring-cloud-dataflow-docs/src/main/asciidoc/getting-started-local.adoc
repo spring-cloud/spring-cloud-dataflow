@@ -1,5 +1,5 @@
-[[getting-started]]
-= Getting started
+[[getting-started-local]]
+= Getting Started - Local
 
 [partintro]
 --
@@ -10,7 +10,7 @@ We then build an introductory Spring Cloud Data Flow application, discussing som
 --
 
 
-[[getting-started-system-requirements]]
+[[getting-started-local-system-requirements]]
 == System Requirements
 
 You need Java 8 to run and to build you need to have Maven.
@@ -25,7 +25,7 @@ For the deployed streams applications communicate, either link:http://www.rabbit
 For deploying, upgrading and rolling back applications in Streams at runtime, you should install the Spring Cloud Skipper server as well.
 
 
-[[getting-started-deploying-spring-cloud-dataflow-docker]]
+[[getting-started-local-deploying-spring-cloud-dataflow-docker]]
 == Getting Started with Docker Compose
 
 As of Spring Cloud Data Flow 1.4, a Docker Compose file is provided to quickly bring up Spring Cloud Data Flow and its dependencies without having to obtain them manually.
@@ -123,13 +123,13 @@ NOTE: Some stream applications may open a port, for example `http --server.port=
 +
 
 
-[[getting-started-customizing-spring-cloud-dataflow-docker]]
+[[getting-started-local-customizing-spring-cloud-dataflow-docker]]
 === Docker Compose Customization
 
 Out of the box Spring Cloud Data Flow will use the H2 embedded database for storing state, Kafka for communication and no analytics.
 Customizations can be made to these components by editing the `docker-compose.yml` file as described below.
 
-. [[getting-started-customizing-spring-cloud-dataflow-docker-mysql]]To use MySQL rather than the H2 embedded database, add the following configuration under the `services` section:
+. [[getting-started-local-customizing-spring-cloud-dataflow-docker-mysql]]To use MySQL rather than the H2 embedded database, add the following configuration under the `services` section:
 +
 [source,yaml,subs=attributes]
 ----
@@ -192,7 +192,7 @@ In the `dataflow-server` services configuration block, add the following `enviro
 And finally, modify the `app-import` service definition `command` attribute to replace `http://bit.ly/Celsius-SR3-stream-applications-kafka-10-maven` with `http://bit.ly/Celsius-SR3-stream-applications-rabbit-maven`.
 +
 
-. [[getting-started-customizing-spring-cloud-dataflow-docker-redis]]To enable analytics using redis as a backend, add the following configuration under the `services` section:
+. [[getting-started-local-customizing-spring-cloud-dataflow-docker-redis]]To enable analytics using redis as a backend, add the following configuration under the `services` section:
 +
 [source,yaml,subs=attributes]
 ----
@@ -295,7 +295,7 @@ Check the https://docs.spring.io/spring-cloud-dataflow/docs/current/reference/ht
 +
 
 
-[[getting-started-deploying-spring-cloud-dataflow]]
+[[getting-started-local-deploying-spring-cloud-dataflow]]
 == Getting Started with Manual Installation
 
 . Download the Spring Cloud Data Flow Server and Shell apps:
@@ -362,7 +362,7 @@ dataflow:>
 +
 Alternatively, pass in the command line option `--dataflow.uri`.  The shell's command line option `--help` shows what is available.
 
-[[getting-started-deploying-streams-spring-cloud-dataflow]]
+[[getting-started-local-deploying-streams-spring-cloud-dataflow]]
 == Deploying Streams
 . Register Stream Apps
 +
@@ -420,7 +420,7 @@ $ jps | grep rabbit
 12645 http-source-rabbit-1.2.0.RELEASE.jar
 ----
 
-[[spring-cloud-dataflow-streams-upgrading]]
+[[getting-started-local-spring-cloud-dataflow-streams-upgrading]]
 === Upgrading
 
 Before we start upgrading the log-sink version to 1.2.0.RELEASE, we will have to register that version in the app registry.
@@ -816,7 +816,7 @@ The majority of the deployment and application properties were set by Data Flow 
 
 If you compare this YAML document to the one for `--releaseVersion=1` you will see the difference in the log application version.
 
-[[spring-cloud-dataflow-streams-rollback]]
+[[getting-started-local-streams-rollback]]
 === Rolling back
 
 To go back to the previous version of the stream, use the `stream rollback` command, as shown (with its output) in the following example:

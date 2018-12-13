@@ -1,5 +1,5 @@
-[[configuration]]
-= Configuration
+[[configuration-local]]
+= Configuration - Local
 
 [partintro]
 --
@@ -7,7 +7,7 @@ This section covers how to configure Spring Cloud Data Flow Server's features, s
 It also covers how to configure Spring Cloud Data Flow's shell features.
 --
 
-[[enable-disable-specific-features]]
+[[configuration-local-enable-disable-specific-features]]
 == Feature Toggles
 
 Sprig Cloud Data Flow Server offers specific set of features that can be enabled/disabled when launching. These features include all the lifecycle operations and REST endpoints (server and client implementations, including the shell and the UI) for:
@@ -32,7 +32,7 @@ If you do not want Data Flow's endpoints to read analytics data written to Redis
 
 The REST `/about` endpoint provides information on the features that have been enabled and disabled.
 
-[[configuration-rdbms]]
+[[configuration-local-rdbms]]
 == Database
 
 A relational database is used to store stream and task definitions as well as the state of executed tasks.
@@ -143,7 +143,7 @@ spring:
     driver-class-name:org.postgresql.Driver
 ----
 
-[[configuration-deployer]]
+[[configuration-local-deployer]]
 == Local Deployer
 You can use the following configuration properties of the Data Flow Local server's deployer to customize how applications are deployed:
 
@@ -187,28 +187,48 @@ dataflow:> stream deploy --name ticktock --properties "deployer.time.memory=2048
 
 At deployment time, if you specify an `-Xmx` option in the `deployer.<app>.local.javaOpts` property in addition to a value of the `deployer.<app>.local.memory` option, the value in the `javaOpts` property has precedence.  Also, the `javaOpts` property set when deploying the application has precedence over the Data Flow Server's `spring.cloud.deployer.local.javaOpts` property.
 
-[[configuration-maven]]
+[[configuration-local-maven]]
 == Maven
 If you want to override specific maven configuration properties (remote repositories, proxies, and others) or run the Data Flow Server behind a proxy,
 you need to specify those properties as command line arguments when starting the Data Flow Server, as shown in the following example:
 
 [source,bash,subs=attributes]
 ----
-$ java -jar spring-cloud-dataflow-server-local-{project-version}.jar --maven.localRepository=mylocal
---maven.remote-repositories.repo1.url=https://repo1
---maven.remote-repositories.repo1.auth.username=user1
---maven.remote-repositories.repo1.auth.password=pass1
---maven.remote-repositories.repo1.snapshot-policy.update-policy=daily
---maven.remote-repositories.repo1.snapshot-policy.checksum-policy=warn
---maven.remote-repositories.repo1.release-policy.update-policy=never
---maven.remote-repositories.repo1.release-policy.checksum-policy=fail
---maven.remote-repositories.repo2.url=https://repo2
---maven.remote-repositories.repo2.policy.update-policy=always
---maven.remote-repositories.repo2.policy.checksum-policy=fail
---maven.proxy.host=proxy1
---maven.proxy.port=9010 --maven.proxy.auth.username=proxyuser1
---maven.proxy.auth.password=proxypass1
+$ java -jar spring-cloud-dataflow-server-local-{project-version}.jar --spring.config.additional-location=/home/joe/maven.yml
 ----
+
+where `maven.yaml` is
+
+[source,yml]
+----
+maven
+  localRepository: mylocal
+  remote-repositories:
+    repo1:
+      url: https://repo1
+      auth:
+        username: user1
+        password: pass1
+      snapshot-policy:
+        update-policy: daily
+        checksum-policy: warn
+      release-policy:
+        update-policy: never
+        checksum-policy: fail
+    repo2:
+      url: https://repo2
+      policy:
+        update-policy: always
+        checksum-policy: fail
+  proxy:
+    host: proxy1
+    port: "9010"
+    auth:
+      username: proxyuser1
+      password: proxypass1
+----
+
+
 
 By default, the protocol is set to `http`. You can omit the auth properties if the proxy does not need a username and password. Also, the maven `localRepository` is set to `${user.home}/.m2/repository/` by default.
 As shown in the preceding example, the remote repositories can be specified along with their authentication (if needed). If the remote repositories are behind a proxy, then the proxy properties can be specified as shown in the preceding example.
@@ -230,10 +250,12 @@ $ SPRING_APPLICATION_JSON='{ "maven": { "local-repository": null,
 "proxy": { "host": "proxyhost", "port": 9018, "auth": { "username": "proxyuser", "password": "proxypass" } } } }' java -jar spring-cloud-dataflow-server-local-{project-version}.jar
 ----
 
-[[configuration-logging]]
+[[configuration-local-logging]]
 == Local Data Flow Server Logging configuration
 
-Spring Cloud Data Flow `local` server is configured to use `RollingFileAppender` for logging.
+Spring Cloud Data Flow `local` server is configured to use `RollingFileAppender` for logging and you should enable the spring profile named 'local'.
+For example, pass the property `--spring.profiles.active=local` when starting the uber jar.
+The profile is needed since writing to a log file is not the recommended way to gather logs when running on Cloud Platforms such as Cloud Foundry and Kubernetes.
 
 ----
 logging:
@@ -278,7 +300,7 @@ jinfo <pid> | grep "java.io.tmpdir"
 
 If you want to change or override any of the properties `LOG_FILE`, `LOG_PATH`, `LOG_TEMP`, `LOG_FILE_MAX_SIZE`, `LOG_FILE_MAX_HISTORY` and `LOG_FILE_TOTAL_SIZE_CAP`, please set them as system properties.
 
-[[configuration-skipper]]
+[[configuration-local-skipper]]
 == Skipper
 Data Flow Server delegates to the Skipper server the management of the Stream's lifecycle.  Set the configuration property `spring.cloud.skipper.client.serverUri` to the location of Skipper, e.g.
 
@@ -287,7 +309,7 @@ Data Flow Server delegates to the Skipper server the management of the Stream's 
 $ java -jar spring-cloud-dataflow-server-local-{project-version}.jar --spring.cloud.skipper.client.serverUri=http://192.51.100.1:7577/api
 ----
 
-[[configuration-security]]
+[[configuration-local-security]]
 == Security
 
 By default, the Data Flow server is unsecured and runs on an unencrypted HTTP connection.
@@ -309,7 +331,7 @@ also be used in local stand-alone deployment scenarios.
 Furthermore, the UAA not only provides its own user store, but also provides
 comprehensive LDAP integration.
 
-[[configuration-security-enabling-https]]
+[[configuration-local-security-enabling-https]]
 === Enabling HTTPS
 
 By default, the dashboard, management, and health endpoints use HTTP as a transport.
@@ -514,13 +536,13 @@ $ curl -H "Authorization: Bearer <ACCESS_TOKEN>" http://localhost:9393/ -H 'Acce
 ==== OAuth REST Endpoint Authorization
 
 The OAuth2 authentication option uses the same authorization rules as used by the
-<<configuration-security-basic-authentication, Traditional Authentication>> option.
+<<configuration-local-security-basic-authentication, Traditional Authentication>> option.
 
 [TIP]
 ====
 The authorization rules are defined in `dataflow-server-defaults.yml` (part of
 the Spring Cloud Data Flow Core module). Please see the chapter on
-<<customizing-authorization, customizing authorization>> for more details.
+<<customizing-local-authorization, customizing authorization>> for more details.
 ====
 
 Because the determination of security roles is environment-specific,
@@ -814,7 +836,7 @@ security:
 <1> If you use scopes to identify roles, please make sure to also request
 the relevant roles
 
-[[configuration-security-role-mapping]]
+[[configuration-local-security-role-mapping]]
 ===== Role Mappings
 
 By default all roles are assigned to users that login to Spring Cloud Data Flow.
@@ -852,7 +874,7 @@ spring:
 <2> When role mapping support is enabled, you must provide a mapping for
 all 3 Spring Cloud Data Flow roles *ROLE_MANAGE*, *ROLE_VIEW*, *ROLE_CREATE*.
 
-[[configuration-security-ldap-authentication]]
+[[configuration-local-security-ldap-authentication]]
 ==== LDAP Authentication
 
 LDAP Authentication (Lightweight Directory Access Protocol) is indirectly
@@ -918,7 +940,7 @@ For more information and sample application, please see the following
 https://github.com/ghillert/ldap-uaa-example[GitHub repository].
 ====
 
-[[configuration-security-authentication-via-shell]]
+[[configuration-local-security-authentication-via-shell]]
 ==== Shell Authentication
 
 When using traditional authentication with the Data Flow Shell, you typically provide
@@ -956,7 +978,7 @@ Flow Server:
 .Target and Authenticate with the Data Flow Server from within the Shell
 image::{dataflow-asciidoc}/images/dataflow-security-shell-target.png[Target and Authenticate with the Data Flow Server from within the Shell, scaledwidth="100%"]
 
-[[customizing-authorization]]
+[[customizing-local-authorization]]
 ==== Customizing Authorization
 
 The preceding content deals with mostly with authentication - that is, how to assess the identity of the user. Irrespective of the option chosen, you can also customize *authorization* - that is,
@@ -1098,7 +1120,7 @@ where
 
 Be mindful that the above is indeed a YAML list, not a map (thus the use of '-' dashes at the start of each line) that lives under the `spring.cloud.dataflow.security.authorization.rules` key.
 
-[[authorization-shell-and-dashboard]]
+[[authorization-local-shell-and-dashboard]]
 ==== Authorization - Shell and Dashboard Behavior
 
 When security is enabled, the dashboard and the shell are role-aware,
@@ -1116,7 +1138,7 @@ Please track the following issue: https://github.com/spring-projects/spring-shel
 Similarly, for the Dashboard, the UI does not show pages or page elements for
 which the user is not authorized.
 
-[[configuration-monitoring-management]]
+[[configuration-local-monitoring-management]]
 == Monitoring and Management
 The Spring Cloud Data Flow server is a Spring Boot 1.5 application that includes the  {spring-boot-docs-reference}/htmlsingle/#production-ready[Actuator
 library], which adds several production ready features to help you monitor and manage your application.
@@ -1125,7 +1147,7 @@ The Actuator library adds HTTP endpoints under the context path `/management` wh
 For example, there is a `health` endpoint that shows application health information and an `env` that lists properties from Spring's `ConfigurableEnvironment`.
 By default, only the health and application info endpoints are accessible.  The other endpoints are considered to be sensitive
 and need to be  {spring-boot-docs-reference}/htmlsingle/#production-ready-customizing-endpoints[enabled explicitly via configuration].
-If you enable sensitive endpoints, you should also <<configuration-security,secure the Data Flow server's endpoints>> so that information is not inadvertently exposed to unauthenticated users.
+If you enable sensitive endpoints, you should also <<configuration-local-security,secure the Data Flow server's endpoints>> so that information is not inadvertently exposed to unauthenticated users.
 The local Data Flow server has security disabled by default, so all actuator endpoints are available.
 
 The Data Flow server requires a relational database, and, if the feature toggle for analytics is enabled, a Redis server is also required.
@@ -1133,7 +1155,7 @@ The Data Flow server autoconfigures the https://github.com/spring-projects/sprin
 The health of these two services is incorporated to the overall health status of the server through the `health` endpoint.
 
 
-[[configuration-monitoring-deployed-applications]]
+[[configuration-local-monitoring-deployed-applications]]
 === Monitoring Deployed Stream Applications
 
 The stream applications deployed by Spring Cloud Data Flow can be based on Spring Boot 1.5 or Spring Boot 2.0.
