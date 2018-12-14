@@ -108,7 +108,7 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 @EnableTransactionManagement
 @EnableAsync
 @Import({ StateMachinePersistConfiguration.class, StateMachineExecutorConfiguration.class,
-		StateMachineConfiguration.class, SecurityConfiguration.class })
+		StateMachineConfiguration.class})
 public class SkipperServerConfiguration implements AsyncConfigurer {
 
 	public static final String SKIPPER_EXECUTOR = "skipperThreadPoolTaskExecutor";
