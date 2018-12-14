@@ -18,7 +18,11 @@ package org.springframework.cloud.dataflow.server.single.nodataflowapp;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.autoconfigure.session.SessionAutoConfiguration;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
+import org.springframework.cloud.deployer.spi.cloudfoundry.CloudFoundryDeployerAutoConfiguration;
+import org.springframework.cloud.deployer.spi.kubernetes.KubernetesAutoConfiguration;
+import org.springframework.cloud.deployer.spi.local.LocalDeployerAutoConfiguration;
 
 /**
  * Bootstrap class for dummy spring boot app having no enabled dataflow server configs.
@@ -28,7 +32,12 @@ import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabas
  *
  * @author Janne Valkealahti
  */
-@SpringBootApplication
+@SpringBootApplication(exclude = {
+		SessionAutoConfiguration.class,
+		LocalDeployerAutoConfiguration.class,
+		CloudFoundryDeployerAutoConfiguration.class,
+		KubernetesAutoConfiguration.class
+})
 @AutoConfigureTestDatabase
 public class LocalTestNoDataFlowServer {
 

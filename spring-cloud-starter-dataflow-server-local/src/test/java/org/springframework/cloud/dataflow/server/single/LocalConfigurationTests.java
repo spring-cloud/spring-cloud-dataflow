@@ -17,6 +17,7 @@
 package org.springframework.cloud.dataflow.server.single;
 
 import java.util.Map;
+import java.util.Properties;
 
 import org.junit.After;
 import org.junit.Test;
@@ -28,13 +29,12 @@ import org.springframework.cloud.dataflow.registry.service.AppRegistryService;
 import org.springframework.cloud.dataflow.server.config.features.FeaturesProperties;
 import org.springframework.cloud.dataflow.server.repository.StreamDefinitionRepository;
 import org.springframework.cloud.dataflow.server.repository.TaskDefinitionRepository;
+import org.springframework.cloud.dataflow.server.service.LauncherInitializationService;
 import org.springframework.cloud.dataflow.server.service.StreamService;
 import org.springframework.cloud.dataflow.server.service.TaskService;
 import org.springframework.cloud.dataflow.server.single.dataflowapp.LocalTestDataFlowServer;
 import org.springframework.cloud.dataflow.server.single.nodataflowapp.LocalTestNoDataFlowServer;
 import org.springframework.cloud.deployer.resource.support.DelegatingResourceLoader;
-import org.springframework.cloud.deployer.spi.local.LocalAppDeployer;
-import org.springframework.cloud.deployer.spi.local.LocalTaskLauncher;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.util.SocketUtils;
@@ -56,10 +56,6 @@ import static org.junit.Assert.fail;
  */
 public class LocalConfigurationTests {
 
-	private static final String APP_DEPLOYER_BEAN_NAME = "appDeployer";
-
-	private static final String TASK_LAUNCHER_BEAN_NAME = "taskLauncher";
-
 	private ConfigurableApplicationContext context;
 
 	@After
@@ -75,10 +71,6 @@ public class LocalConfigurationTests {
 		int randomPort = SocketUtils.findAvailableTcpPort();
 		String dataSourceUrl = String.format("jdbc:h2:tcp://localhost:%s/mem:dataflow", randomPort);
 		context = app.run(new String[] { "--server.port=0", "--spring.datasource.url=" + dataSourceUrl });
-		assertThat(context.containsBean(APP_DEPLOYER_BEAN_NAME), is(true));
-		assertThat(context.getBean(APP_DEPLOYER_BEAN_NAME), instanceOf(LocalAppDeployer.class));
-		assertThat(context.containsBean(TASK_LAUNCHER_BEAN_NAME), is(true));
-		assertThat(context.getBean(TASK_LAUNCHER_BEAN_NAME), instanceOf(LocalTaskLauncher.class));
 		assertNotNull(context.getBean(AppRegistryService.class));
 	}
 
@@ -149,9 +141,6 @@ public class LocalConfigurationTests {
 	public void testNoDataflowConfig() {
 		SpringApplication app = new SpringApplication(LocalTestNoDataFlowServer.class);
 		context = app.run(new String[] { "--server.port=0", "--spring.jpa.database=H2" });
-		// we still have deployer beans
-		assertThat(context.containsBean(APP_DEPLOYER_BEAN_NAME), is(true));
-		assertThat(context.containsBean(TASK_LAUNCHER_BEAN_NAME), is(true));
 		assertThat(context.containsBean("appRegistry"), is(false));
 	}
 }
