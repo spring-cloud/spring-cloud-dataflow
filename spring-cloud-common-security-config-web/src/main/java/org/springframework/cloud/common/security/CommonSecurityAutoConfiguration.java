@@ -17,14 +17,12 @@ package org.springframework.cloud.common.security;
 
 import org.springframework.boot.actuate.autoconfigure.security.servlet.ManagementWebSecurityAutoConfiguration;
 import org.springframework.boot.autoconfigure.AutoConfigureBefore;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.autoconfigure.security.oauth2.OAuth2AutoConfiguration;
 import org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 
 @Configuration
-@ConditionalOnProperty(value = "spring.cloud.common.security.enabled", havingValue = "true", matchIfMissing = true)
 @AutoConfigureBefore({ SecurityAutoConfiguration.class, ManagementWebSecurityAutoConfiguration.class,
 		OAuth2AutoConfiguration.class })
 @Import({IgnoreAllSecurityConfiguration.class, OAuthSecurityConfiguration.class})
