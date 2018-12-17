@@ -16,8 +16,6 @@
 
 package org.springframework.cloud.dataflow.shell;
 
-import java.util.ArrayList;
-
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Rule;
@@ -25,38 +23,20 @@ import org.junit.rules.TestName;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import org.springframework.analytics.metrics.AggregateCounterRepository;
-import org.springframework.analytics.metrics.FieldValueCounterRepository;
-import org.springframework.analytics.metrics.memory.InMemoryAggregateCounterRepository;
-import org.springframework.analytics.metrics.memory.InMemoryFieldValueCounterRepository;
 import org.springframework.boot.SpringApplication;
-import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.builder.SpringApplicationBuilder;
-import org.springframework.cloud.dataflow.rest.client.config.DataFlowClientAutoConfiguration;
-import org.springframework.cloud.dataflow.server.EnableDataFlowServer;
 import org.springframework.cloud.dataflow.shell.command.JobCommandTemplate;
 import org.springframework.cloud.dataflow.shell.command.MetricsCommandTemplate;
 import org.springframework.cloud.dataflow.shell.command.StreamCommandTemplate;
 import org.springframework.cloud.dataflow.shell.command.TaskCommandTemplate;
 import org.springframework.cloud.skipper.client.SkipperClient;
-import org.springframework.cloud.skipper.domain.AboutResource;
-import org.springframework.cloud.skipper.domain.Dependency;
-import org.springframework.cloud.skipper.domain.VersionInfo;
 import org.springframework.context.ApplicationContext;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Primary;
-import org.springframework.data.redis.connection.RedisConnectionFactory;
-import org.springframework.hateoas.Resources;
 import org.springframework.shell.core.CommandResult;
 import org.springframework.shell.core.JLineShellComponent;
 import org.springframework.util.AlternativeJdkIdGenerator;
 import org.springframework.util.Assert;
 import org.springframework.util.IdGenerator;
 import org.springframework.util.SocketUtils;
-
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 
 /**
  * Base class for shell integration tests. This class sets up and tears down the
@@ -243,34 +223,4 @@ public abstract class AbstractShellIntegrationTest {
 		}
 	}
 
-	@EnableAutoConfiguration(exclude = DataFlowClientAutoConfiguration.class)
-	@EnableDataFlowServer
-	@Configuration
-	public static class TestConfig {
-
-		@Bean
-		@Primary
-		public SkipperClient skipperClientMock() {
-			SkipperClient skipperClient = mock(SkipperClient.class);
-			AboutResource about = new AboutResource();
-			about.setVersionInfo(new VersionInfo());
-			about.getVersionInfo().setServer(new Dependency());
-			about.getVersionInfo().getServer().setName("Test Server");
-			about.getVersionInfo().getServer().setVersion("Test Version");
-			when(skipperClient.info()).thenReturn(about);
-			when(skipperClient.listDeployers()).thenReturn(new Resources<>(new ArrayList<>(), new ArrayList<>()));
-			return skipperClient;
-		}
-
-		@Bean
-		public FieldValueCounterRepository fieldValueCounterReader() {
-			return new InMemoryFieldValueCounterRepository();
-		}
-
-		@Bean
-		public AggregateCounterRepository aggregateCounterReader(RedisConnectionFactory redisConnectionFactory) {
-			return new InMemoryAggregateCounterRepository();
-		}
-
-	}
 }
