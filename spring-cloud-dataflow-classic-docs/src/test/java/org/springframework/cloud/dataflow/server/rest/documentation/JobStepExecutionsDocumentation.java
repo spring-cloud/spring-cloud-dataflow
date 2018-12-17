@@ -21,6 +21,7 @@ import java.util.Date;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 
 import org.springframework.batch.core.BatchStatus;
 import org.springframework.batch.core.JobExecution;
@@ -28,6 +29,8 @@ import org.springframework.batch.core.JobParameters;
 import org.springframework.batch.core.StepExecution;
 import org.springframework.batch.core.repository.JobRepository;
 import org.springframework.batch.core.repository.support.JobRepositoryFactoryBean;
+import org.springframework.boot.autoconfigure.jdbc.EmbeddedDataSourceConfiguration;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.cloud.dataflow.core.ApplicationType;
 import org.springframework.cloud.task.batch.listener.TaskBatchDao;
 import org.springframework.cloud.task.batch.listener.support.JdbcTaskBatchDao;
@@ -35,6 +38,8 @@ import org.springframework.cloud.task.repository.TaskExecution;
 import org.springframework.cloud.task.repository.dao.TaskExecutionDao;
 import org.springframework.cloud.task.repository.support.TaskExecutionDaoFactoryBean;
 import org.springframework.jdbc.datasource.DataSourceTransactionManager;
+import org.springframework.test.annotation.DirtiesContext;
+import org.springframework.test.context.junit4.SpringRunner;
 
 import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.get;
 import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.post;
@@ -50,6 +55,9 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  *
  * @author Glenn Renfro
  */
+@RunWith(SpringRunner.class)
+@SpringBootTest(classes = { EmbeddedDataSourceConfiguration.class })
+@DirtiesContext
 public class JobStepExecutionsDocumentation extends BaseDocumentation {
 
 	private final static String JOB_NAME = "DOCJOB";

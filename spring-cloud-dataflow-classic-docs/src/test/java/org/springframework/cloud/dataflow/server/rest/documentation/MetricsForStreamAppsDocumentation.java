@@ -18,6 +18,7 @@ package org.springframework.cloud.dataflow.server.rest.documentation;
 
 import org.junit.Before;
 import org.junit.ClassRule;
+import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.RuleChain;
@@ -46,6 +47,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 /**
  * @author Gunnar Hillert
  */
+@Ignore
 public class MetricsForStreamAppsDocumentation {
 
 	private final static FakeMetricsCollectorResource fakeMetricsCollectorResource = new FakeMetricsCollectorResource();
