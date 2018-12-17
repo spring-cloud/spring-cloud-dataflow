@@ -16,9 +16,6 @@
 
 package org.springframework.cloud.dataflow.server.config.cloudfoundry;
 
-import javax.validation.constraints.Max;
-import javax.validation.constraints.Min;
-
 import org.springframework.boot.autoconfigure.condition.ConditionalOnCloudPlatform;
 import org.springframework.boot.cloud.CloudPlatform;
 import org.springframework.boot.context.properties.ConfigurationProperties;
@@ -41,24 +38,10 @@ public class CloudFoundryServerConfigurationProperties {
 	 * Whether to turn on reactor style stacktraces.
 	 */
 	public boolean debugReactor = false;
+
 	int maxWaitTime = 30000;
-	/**
-	 * The target percentag of free disk space to always aim for when cleaning downloaded
-	 * resources (typically via the local maven repository). Specify as an integer greater
-	 * than zero and less than 100. Default is 25.
-	 */
-	private int freeDiskSpacePercentage = 25;
+
 	private int maxPoolSize = 10;
-
-	@Min(0)
-	@Max(100)
-	public int getFreeDiskSpacePercentage() {
-		return freeDiskSpacePercentage;
-	}
-
-	public void setFreeDiskSpacePercentage(int freeDiskSpacePercentage) {
-		this.freeDiskSpacePercentage = freeDiskSpacePercentage;
-	}
 
 	public boolean isDebugReactor() {
 		return debugReactor;

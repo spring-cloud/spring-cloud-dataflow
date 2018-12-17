@@ -22,16 +22,21 @@ import org.slf4j.LoggerFactory;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnCloudPlatform;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.autoconfigure.security.oauth2.resource.PrincipalExtractor;
 import org.springframework.boot.autoconfigure.security.oauth2.resource.UserInfoTokenServices;
+import org.springframework.boot.cloud.CloudPlatform;
 import org.springframework.cloud.common.security.OAuthSecurityConfiguration;
 import org.springframework.cloud.common.security.support.DefaultAuthoritiesExtractor;
+import org.springframework.cloud.common.security.support.OnOAuth2SecurityEnabled;
 import org.springframework.cloud.dataflow.server.config.cloudfoundry.security.support.CloudFoundryDataflowAuthoritiesExtractor;
 import org.springframework.cloud.dataflow.server.config.cloudfoundry.security.support.CloudFoundryPrincipalExtractor;
 import org.springframework.cloud.dataflow.server.config.cloudfoundry.security.support.CloudFoundrySecurityService;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Conditional;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Import;
 import org.springframework.security.oauth2.client.OAuth2RestTemplate;
 
 /**
@@ -54,9 +59,10 @@ import org.springframework.security.oauth2.client.OAuth2RestTemplate;
  * @author Gunnar Hillert
  * @author Ilayaperumal Gopinathan
  */
-//@Configuration
-//@ConditionalOnCloudPlatform(CloudPlatform.CLOUD_FOUNDRY)
-//@Import(CloudFoundryOAuthSecurityConfiguration.CloudFoundryUAAConfiguration.class)
+@Configuration
+@ConditionalOnCloudPlatform(CloudPlatform.CLOUD_FOUNDRY)
+@Conditional(OnOAuth2SecurityEnabled.class)
+@Import(CloudFoundryOAuthSecurityConfiguration.CloudFoundryUAAConfiguration.class)
 public class CloudFoundryOAuthSecurityConfiguration {
 
 	private static final Logger logger = LoggerFactory.getLogger(CloudFoundryOAuthSecurityConfiguration.class);
