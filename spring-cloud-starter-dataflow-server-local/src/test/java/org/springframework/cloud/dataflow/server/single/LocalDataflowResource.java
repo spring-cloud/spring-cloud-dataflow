@@ -17,6 +17,7 @@ package org.springframework.cloud.dataflow.server.single;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 
 import javax.servlet.Filter;
 
@@ -28,12 +29,16 @@ import org.springframework.analytics.metrics.memory.InMemoryAggregateCounterRepo
 import org.springframework.analytics.metrics.memory.InMemoryFieldValueCounterRepository;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.cloud.dataflow.core.Launcher;
 import org.springframework.cloud.dataflow.server.EnableDataFlowServer;
 import org.springframework.cloud.dataflow.server.config.features.FeaturesProperties;
 import org.springframework.cloud.dataflow.server.job.LauncherRepository;
 import org.springframework.cloud.deployer.spi.local.LocalDeployerProperties;
 import org.springframework.cloud.deployer.spi.local.LocalTaskLauncher;
+import org.springframework.cloud.scheduler.spi.core.ScheduleInfo;
+import org.springframework.cloud.scheduler.spi.core.ScheduleRequest;
+import org.springframework.cloud.scheduler.spi.core.Scheduler;
 import org.springframework.cloud.skipper.client.SkipperClient;
 import org.springframework.cloud.skipper.domain.AboutResource;
 import org.springframework.cloud.skipper.domain.Dependency;
@@ -221,6 +226,32 @@ public class LocalDataflowResource extends ExternalResource {
 		@Bean
 		public AggregateCounterRepository aggregateCounterReader(RedisConnectionFactory redisConnectionFactory) {
 			return new InMemoryAggregateCounterRepository();
+		}
+
+		@Bean
+		@ConditionalOnMissingBean
+		public Scheduler localScheduler() {
+			return new Scheduler() {
+				@Override
+				public void schedule(ScheduleRequest scheduleRequest) {
+					throw new UnsupportedOperationException("Interface is not implemented for schedule method.");
+				}
+
+				@Override
+				public void unschedule(String scheduleName) {
+					throw new UnsupportedOperationException("Interface is not implemented for unschedule method.");
+				}
+
+				@Override
+				public List<ScheduleInfo> list(String taskDefinitionName) {
+					throw new UnsupportedOperationException("Interface is not implemented for list method.");
+				}
+
+				@Override
+				public List<ScheduleInfo> list() {
+					throw new UnsupportedOperationException("Interface is not implemented for list method.");
+				}
+			};
 		}
 
 	}

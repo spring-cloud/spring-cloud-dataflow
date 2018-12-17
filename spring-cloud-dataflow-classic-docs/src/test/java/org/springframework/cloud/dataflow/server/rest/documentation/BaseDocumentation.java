@@ -194,7 +194,9 @@ public abstract class BaseDocumentation {
 	private void createMockScheduler() {
 		AutowireCapableBeanFactory factory = springDataflowServer.getWebApplicationContext().getAutowireCapableBeanFactory();
 		BeanDefinitionRegistry registry = (BeanDefinitionRegistry) factory;
-		registry.removeBeanDefinition("localScheduler");
+		if (registry.containsBeanDefinition("localScheduler")) {
+			registry.removeBeanDefinition("localScheduler");
+		}
 		GenericBeanDefinition schedulerBeanDefinition = new GenericBeanDefinition();
 		schedulerBeanDefinition.setBeanClass(MockScheduler.class);
 		schedulerBeanDefinition.setScope(org.springframework.beans.factory.config.BeanDefinition.SCOPE_SINGLETON);
