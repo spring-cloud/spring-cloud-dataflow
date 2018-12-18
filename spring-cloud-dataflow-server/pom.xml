@@ -72,6 +72,11 @@
 			<artifactId>spring-cloud-starter-dataflow-server-local</artifactId>
 		</dependency>
 		<dependency>
+			<groupId>io.fabric8</groupId>
+			<artifactId>kubernetes-client</artifactId>
+			<version>${kubernetes-client.version}</version>
+		</dependency>
+		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-test</artifactId>
 			<scope>test</scope>

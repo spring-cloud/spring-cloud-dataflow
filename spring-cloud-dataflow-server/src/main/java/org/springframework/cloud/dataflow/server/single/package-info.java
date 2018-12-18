@@ -14,6 +14,6 @@
  * limitations under the License.
  */
 /**
- * Root package for the local version of Spring Cloud Data Flow Server.
+ * Root package for the Spring Cloud Data Flow Server.
  */
 package org.springframework.cloud.dataflow.server.single;

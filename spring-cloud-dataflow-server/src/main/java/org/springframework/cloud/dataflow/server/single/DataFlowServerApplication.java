@@ -28,7 +28,7 @@ import org.springframework.cloud.deployer.spi.kubernetes.KubernetesAutoConfigura
 import org.springframework.cloud.deployer.spi.local.LocalDeployerAutoConfiguration;
 
 /**
- * Bootstrap class for the local Spring Cloud Data Flow Server.
+ * Bootstrap class for the Spring Cloud Data Flow Server.
  *
  * @author Mark Fisher
  * @author Ilayaperumal Gopinathan
