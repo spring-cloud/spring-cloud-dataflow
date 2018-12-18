@@ -704,12 +704,6 @@ applications:
   path: spring-cloud-dataflow-server-cloudfoundry-VERSION.jar
   env:
     SPRING_APPLICATION_NAME: test-server
-    SPRING_CLOUD_DEPLOYER_CLOUDFOUNDRY_URL: <URL>
-    SPRING_CLOUD_DEPLOYER_CLOUDFOUNDRY_ORG: <ORG>
-    SPRING_CLOUD_DEPLOYER_CLOUDFOUNDRY_SPACE: <SPACE>
-    SPRING_CLOUD_DEPLOYER_CLOUDFOUNDRY_DOMAIN: <DOMAIN>
-    SPRING_CLOUD_DEPLOYER_CLOUDFOUNDRY_USERNAME: <USER>
-    SPRING_CLOUD_DEPLOYER_CLOUDFOUNDRY_PASSWORD: <PASSWORD>
     SPRING_CLOUD_SKIPPER_CLIENT_SERVER_URI: https://<skipper-host-name>/api
     SPRING_APPLICATION_JSON: '{ "maven": { "remote-repositories": { "repo1": { "url": "https://repo.spring.io/libs-snapshot" } } }, "spring": { "cloud": { "dataflow": { "task": { "platform": { "cloudfoundry": { "accounts": { "default": { "connection": { "url": "<URL>", "org": "<ORG>", "space": "<SPACE>", "domain": "<DOMAIN>", "username": "<USER>", "password": "<PASSWORD>"}, "deployment": { "services": "mysql,config-server" } } } } } } } } } }'
 
