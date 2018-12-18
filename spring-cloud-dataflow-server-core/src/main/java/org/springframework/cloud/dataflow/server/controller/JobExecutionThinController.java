@@ -20,6 +20,7 @@ import java.util.List;
 import java.util.TimeZone;
 
 import org.springframework.batch.core.JobExecution;
+import org.springframework.batch.core.launch.NoSuchJobException;
 import org.springframework.batch.core.launch.NoSuchJobExecutionException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -39,6 +40,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -90,6 +92,26 @@ public class JobExecutionThinController {
 		Page<TaskJobExecution> page = new PageImpl<>(jobExecutions, pageable, taskJobService.countJobExecutions());
 		return assembler.toResource(page, jobAssembler);
 	}
+	/**
+	 * Retrieve all task job executions with the task name specified
+	 *
+	 * @param jobName name of the job
+	 * @param pageable page-able collection of {@code TaskJobExecution}s.
+	 * @param assembler for the {@link TaskJobExecution}s
+	 * @return list task/job executions with the specified jobName.
+	 * @throws NoSuchJobException if the job with the given name does not exist.
+	 */
+	@RequestMapping(value = "", method = RequestMethod.GET, params = "name", produces = "application/json")
+	@ResponseStatus(HttpStatus.OK)
+	public PagedResources<JobExecutionThinResource> retrieveJobsByName(@RequestParam("name") String jobName,
+			Pageable pageable, PagedResourcesAssembler<TaskJobExecution> assembler) throws NoSuchJobException {
+		List<TaskJobExecution> jobExecutions = taskJobService.listJobExecutionsForJobWithStepCount(pageable, jobName);
+		Page<TaskJobExecution> page = new PageImpl<>(jobExecutions, pageable,
+				taskJobService.countJobExecutionsForJob(jobName));
+		return assembler.toResource(page, jobAssembler);
+	}
+
+
 
 	/**
 	 * {@link org.springframework.hateoas.ResourceAssembler} implementation that converts

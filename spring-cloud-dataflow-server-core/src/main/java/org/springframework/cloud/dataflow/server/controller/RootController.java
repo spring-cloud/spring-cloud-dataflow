@@ -162,6 +162,9 @@ public class RootController {
 			root.add(entityLinks.linkFor(TaskToolsResource.class).withRel("tools/parseTaskTextToGraph"));
 			root.add(entityLinks.linkFor(TaskToolsResource.class).withRel("tools/convertTaskGraphToText"));
 			root.add(entityLinks.linkToCollectionResource(JobExecutionThinResource.class).withRel("jobs/thinexecutions"));
+			taskTemplated = entityLinks.linkToCollectionResource(JobExecutionThinResource.class).getHref() + "{?name}";
+			root.add(new Link(taskTemplated).withRel("jobs/thinexecutions/name"));
+
 		}
 		if (featuresProperties.isAnalyticsEnabled()) {
 			root.add(entityLinks.linkToCollectionResource(CounterResource.class).withRel("counters"));

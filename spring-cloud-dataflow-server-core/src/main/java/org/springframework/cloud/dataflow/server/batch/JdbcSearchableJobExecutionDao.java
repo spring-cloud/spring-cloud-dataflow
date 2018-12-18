@@ -64,9 +64,13 @@ public class JdbcSearchableJobExecutionDao extends JdbcJobExecutionDao implement
 			+ " from %PREFIX%JOB_EXECUTION E, %PREFIX%JOB_INSTANCE I "
 			+ "where E.JOB_INSTANCE_ID=I.JOB_INSTANCE_ID and E.END_TIME is NULL";
 
+	private static final String NAME_FILTER = "I.JOB_NAME=?";
+
 	private PagingQueryProvider allExecutionsPagingQueryProvider;
 
 	private PagingQueryProvider byJobNamePagingQueryProvider;
+
+	private PagingQueryProvider byJobNameWithStepCountPagingQueryProvider;
 
 	private PagingQueryProvider executionsWithStepCountPagingQueryProvider;
 
@@ -99,7 +103,8 @@ public class JdbcSearchableJobExecutionDao extends JdbcJobExecutionDao implement
 
 		allExecutionsPagingQueryProvider = getPagingQueryProvider();
 		executionsWithStepCountPagingQueryProvider = getPagingQueryProvider(FIELDS_WITH_STEP_COUNT, null, null);
-		byJobNamePagingQueryProvider = getPagingQueryProvider("I.JOB_NAME=?");
+		byJobNamePagingQueryProvider = getPagingQueryProvider(NAME_FILTER);
+		byJobNameWithStepCountPagingQueryProvider = getPagingQueryProvider(FIELDS_WITH_STEP_COUNT, null, NAME_FILTER);
 
 		super.afterPropertiesSet();
 
@@ -199,6 +204,26 @@ public class JdbcSearchableJobExecutionDao extends JdbcJobExecutionDao implement
 	}
 
 	/**
+	 * @see SearchableJobExecutionDao#getJobExecutionsWithStepCount(String, int, int)
+	 */
+	@Override
+	public List<JobExecutionWithStepCount> getJobExecutionsWithStepCount(String jobName, int start, int count) {
+		if (start <= 0) {
+			return getJdbcTemplate().query(byJobNameWithStepCountPagingQueryProvider.generateFirstPageQuery(count),
+					new JobExecutionStepCountRowMapper(), jobName);
+		}
+		try {
+			Long startAfterValue = getJdbcTemplate().queryForObject(
+					byJobNameWithStepCountPagingQueryProvider.generateJumpToItemQuery(start, count), Long.class, jobName);
+			return getJdbcTemplate().query(byJobNameWithStepCountPagingQueryProvider.generateRemainingPagesQuery(count),
+					new JobExecutionStepCountRowMapper(), jobName, startAfterValue);
+		}
+		catch (IncorrectResultSizeDataAccessException e) {
+			return Collections.emptyList();
+		}
+	}
+
+	/**
 	 * @see SearchableJobExecutionDao#getJobExecutions(int, int)
 	 */
 	@Override
@@ -219,14 +244,14 @@ public class JdbcSearchableJobExecutionDao extends JdbcJobExecutionDao implement
 	}
 
 	@Override
-	public List<JobExecutionStepCount> getJobExecutionsWithStepCount(int start, int count) {
+	public List<JobExecutionWithStepCount> getJobExecutionsWithStepCount(int start, int count) {
 		if (start <= 0) {
 			return getJdbcTemplate().query(executionsWithStepCountPagingQueryProvider.generateFirstPageQuery(count),
 					new JobExecutionStepCountRowMapper());
 		}
 		try {
 			Long startAfterValue = getJdbcTemplate().queryForObject(
-					allExecutionsPagingQueryProvider.generateJumpToItemQuery(start, count), Long.class);
+					executionsWithStepCountPagingQueryProvider.generateJumpToItemQuery(start, count), Long.class);
 			return getJdbcTemplate().query(executionsWithStepCountPagingQueryProvider.generateRemainingPagesQuery(count),
 					new JobExecutionStepCountRowMapper(), startAfterValue);
 		}
@@ -269,20 +294,20 @@ public class JdbcSearchableJobExecutionDao extends JdbcJobExecutionDao implement
 
 	}
 	/**
-	 * Re-usable mapper for {@link JobExecutionStepCount} instances.
+	 * Re-usable mapper for {@link JobExecutionWithStepCount} instances.
 	 *
 	 * @author Glenn Renfro
 	 *
 	 */
-	protected class JobExecutionStepCountRowMapper implements RowMapper<JobExecutionStepCount> {
+	protected class JobExecutionStepCountRowMapper implements RowMapper<JobExecutionWithStepCount> {
 
 		JobExecutionStepCountRowMapper() {
 		}
 
 		@Override
-		public JobExecutionStepCount mapRow(ResultSet rs, int rowNum) throws SQLException {
+		public JobExecutionWithStepCount mapRow(ResultSet rs, int rowNum) throws SQLException {
 
-			return new JobExecutionStepCount(createJobExecutionFromResultSet(rs, rowNum), rs.getInt(12));
+			return new JobExecutionWithStepCount(createJobExecutionFromResultSet(rs, rowNum), rs.getInt(12));
 		}
 
 	}

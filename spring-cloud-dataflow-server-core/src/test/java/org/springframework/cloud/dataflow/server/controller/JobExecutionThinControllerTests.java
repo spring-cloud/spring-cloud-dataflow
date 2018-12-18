@@ -42,6 +42,7 @@ import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -89,6 +90,15 @@ public class JobExecutionThinControllerTests {
 				.andExpect(jsonPath("$.content[*].taskExecutionId", containsInAnyOrder(6, 5, 4, 3, 3, 2, 1)))
 				.andExpect(jsonPath("$.content[0].stepExecutionCount", is(1)))
 				.andExpect(jsonPath("$.content", hasSize(7)));
+	}
+
+	@Test
+	public void testGetExecutionsByName() throws Exception {
+		mockMvc.perform(get("/jobs/thinexecutions/").param("name", JobExecutionUtils.JOB_NAME_ORIG).accept(MediaType.APPLICATION_JSON))
+				.andDo(print())
+				.andExpect(status().isOk())
+				.andExpect(jsonPath("$.content[0].name", is(JobExecutionUtils.JOB_NAME_ORIG)))
+				.andExpect(jsonPath("$.content", hasSize(1)));
 	}
 
 

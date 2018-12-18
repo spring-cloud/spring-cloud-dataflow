@@ -16,6 +16,7 @@
 
 package org.springframework.cloud.dataflow.rest.client;
 
+import org.springframework.cloud.dataflow.rest.JobExecutionThinResource;
 import org.springframework.cloud.dataflow.rest.resource.JobExecutionResource;
 import org.springframework.cloud.dataflow.rest.resource.JobInstanceResource;
 import org.springframework.cloud.dataflow.rest.resource.StepExecutionProgressInfoResource;
@@ -33,11 +34,11 @@ import org.springframework.web.client.RestTemplate;
  */
 public class JobTemplate implements JobOperations {
 
-	private static final String EXECUTIONS_RELATION = "jobs/executions";
+	private static final String EXECUTIONS_RELATION = "jobs/thinexecutions";
 
 	private static final String EXECUTION_RELATION = "jobs/executions/execution";
 
-	private static final String EXECUTION_RELATION_BY_NAME = "jobs/executions/name";
+	private static final String EXECUTION_RELATION_BY_NAME = "jobs/thinexecutions/name";
 
 	private static final String INSTANCE_RELATION = "jobs/instances/instance";
 
@@ -100,8 +101,22 @@ public class JobTemplate implements JobOperations {
 	}
 
 	@Override
+	public PagedResources<JobExecutionThinResource> executionThinList() {
+		String uriTemplate = executionsLink.getHref().toString();
+		uriTemplate = uriTemplate + "?size=2000";
+
+		return restTemplate.getForObject(uriTemplate, JobExecutionThinResource.Page.class);
+	}
+
+	@Override
 	public PagedResources<JobInstanceResource> instanceList(String jobName) {
 		return restTemplate.getForObject(instanceByNameLink.expand(jobName).getHref(), JobInstanceResource.Page.class);
+	}
+
+	@Override
+	public PagedResources<JobExecutionThinResource> executionThinListByJobName(String jobName) {
+		return restTemplate.getForObject(executionByNameLink.expand(jobName).getHref(),
+				JobExecutionThinResource.Page.class);
 	}
 
 	@Override

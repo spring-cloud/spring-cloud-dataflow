@@ -90,6 +90,7 @@ public class ApiDocumentation extends BaseDocumentation {
 				linkWithRel("jobs/executions/execution/steps/step/progress")
 						.description("Provides " + "progress information for a specific step"),
 				linkWithRel("jobs/executions/name").description("Retrieve Job Executions by Job name"),
+				linkWithRel("jobs/thinexecutions/name").description("Retrieve Job Executions by Job name with no step executions included"),
 				linkWithRel("jobs/instances/instance")
 						.description("Provides the job instance " + "resource for a specific job instance"),
 				linkWithRel("jobs/instances/name")
@@ -204,6 +205,9 @@ public class ApiDocumentation extends BaseDocumentation {
 						fieldWithPath("_links.jobs/executions/name.href").description("Link to the jobs/executions/name"),
 						fieldWithPath("_links.jobs/executions/name.templated").type(JsonFieldType.BOOLEAN).optional()
 							.description("Link jobs/executions/name is templated"),
+						fieldWithPath("_links.jobs/thinexecutions/name.href").description("Link to the jobs/thinexecutions/name"),
+						fieldWithPath("_links.jobs/thinexecutions/name.templated").type(JsonFieldType.BOOLEAN).optional()
+								.description("Link jobs/executions/name is templated"),
 						fieldWithPath("_links.jobs/executions/execution.href").description("Link to the jobs/executions/execution"),
 						fieldWithPath("_links.jobs/executions/execution.templated").type(JsonFieldType.BOOLEAN).optional()
 							.description("Link jobs/executions/execution is templated"),

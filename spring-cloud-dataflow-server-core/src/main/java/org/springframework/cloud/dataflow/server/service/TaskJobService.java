@@ -27,6 +27,7 @@ import org.springframework.batch.core.launch.NoSuchJobExecutionException;
 import org.springframework.batch.core.launch.NoSuchJobInstanceException;
 import org.springframework.cloud.dataflow.rest.job.JobInstanceExecutions;
 import org.springframework.cloud.dataflow.rest.job.TaskJobExecution;
+import org.springframework.cloud.dataflow.server.batch.JobExecutionWithStepCount;
 import org.springframework.cloud.dataflow.server.job.support.JobNotRestartableException;
 import org.springframework.cloud.task.repository.TaskExecution;
 import org.springframework.data.domain.Pageable;
@@ -61,6 +62,17 @@ public interface TaskJobService {
 	 * @throws NoSuchJobException if the job with the given name does not exist.
 	 */
 	List<TaskJobExecution> listJobExecutionsForJob(Pageable pageable, String jobName) throws NoSuchJobException;
+
+	/**
+	 * Retrieves Pageable list of {@link JobExecutionWithStepCount} from the JobRepository with a specific
+	 * jobName and matches the data with a task id.
+	 *
+	 * @param pageable enumerates the data to be returned.
+	 * @param jobName the name of the job for which to findByTaskNameLike.
+	 * @return List containing {@link JobExecutionWithStepCount}s.
+	 * @throws NoSuchJobException if the job with the given name does not exist.
+	 */
+	public List<TaskJobExecution> listJobExecutionsForJobWithStepCount(Pageable pageable, String jobName) throws NoSuchJobException;
 
 	/**
 	 * Retrieves a JobExecution from the JobRepository and matches it with a task id.
@@ -147,7 +159,7 @@ public interface TaskJobService {
 	void stopJobExecution(long jobExecutionId) throws NoSuchJobExecutionException, JobExecutionNotRunningException;
 
 	/**
-	 * Retrieves Pageable list of {@link org.springframework.cloud.dataflow.server.batch.JobExecutionStepCount}s from the JobRepository and matches the
+	 * Retrieves Pageable list of {@link JobExecutionWithStepCount}s from the JobRepository and matches the
 	 * data with a task id but excludes the step executions.
 	 *
 	 * @param pageable enumerates the data to be returned.

@@ -34,7 +34,7 @@ import org.springframework.cloud.dataflow.core.TaskDefinition;
 import org.springframework.cloud.dataflow.rest.job.JobInstanceExecutions;
 import org.springframework.cloud.dataflow.rest.job.TaskJobExecution;
 import org.springframework.cloud.dataflow.rest.job.support.JobUtils;
-import org.springframework.cloud.dataflow.server.batch.JobExecutionStepCount;
+import org.springframework.cloud.dataflow.server.batch.JobExecutionWithStepCount;
 import org.springframework.cloud.dataflow.server.batch.JobService;
 import org.springframework.cloud.dataflow.server.job.support.JobNotRestartableException;
 import org.springframework.cloud.dataflow.server.repository.NoSuchTaskBatchException;
@@ -105,7 +105,7 @@ public class DefaultTaskJobService implements TaskJobService {
 	@Override
 	public List<TaskJobExecution> listJobExecutionsWithStepCount(Pageable pageable) throws NoSuchJobExecutionException {
 		Assert.notNull(pageable, "pageable must not be null");
-		List<JobExecutionStepCount> jobExecutions = new ArrayList<>(
+		List<JobExecutionWithStepCount> jobExecutions = new ArrayList<>(
 				jobService.listJobExecutionsWithStepCount((int)pageable.getOffset(), pageable.getPageSize()));
 		return getTaskJobExecutionsWithStepCountForList(jobExecutions);
 	}
@@ -117,6 +117,14 @@ public class DefaultTaskJobService implements TaskJobService {
 		// TODO: BOOT2 check what to do with long to int cast for offset
 		return getTaskJobExecutionsForList(
 				jobService.listJobExecutionsForJob(jobName, (int) pageable.getOffset(), pageable.getPageSize()));
+	}
+
+	@Override
+	public List<TaskJobExecution> listJobExecutionsForJobWithStepCount(Pageable pageable, String jobName) throws NoSuchJobException {
+		Assert.notNull(pageable, "pageable must not be null");
+		Assert.notNull(jobName, "jobName must not be null");
+		return getTaskJobExecutionsWithStepCountForList(
+				jobService.listJobExecutionsForJobWithStepCount(jobName, (int) pageable.getOffset(), pageable.getPageSize()));
 	}
 
 	@Override
@@ -201,18 +209,18 @@ public class DefaultTaskJobService implements TaskJobService {
 				isTaskDefined(jobExecution), jobExecution.getStepExecutions().size());
 	}
 
-	private List<TaskJobExecution> getTaskJobExecutionsWithStepCountForList(Collection<JobExecutionStepCount> jobExecutions) {
+	private List<TaskJobExecution> getTaskJobExecutionsWithStepCountForList(Collection<JobExecutionWithStepCount> jobExecutions) {
 		Assert.notNull(jobExecutions, "jobExecutions must not be null");
 		List<TaskJobExecution> taskJobExecutions = new ArrayList<>();
-		for (JobExecutionStepCount jobExecution : jobExecutions) {
+		for (JobExecutionWithStepCount jobExecution : jobExecutions) {
 			taskJobExecutions.add(getTaskJobExecutionWithStepCount(jobExecution));
 		}
 		return taskJobExecutions;
 	}
 
-	private TaskJobExecution getTaskJobExecutionWithStepCount(JobExecutionStepCount jobExecutionStepCount) {
-		return new TaskJobExecution(getTaskExecutionId(jobExecutionStepCount), jobExecutionStepCount,
-				isTaskDefined(jobExecutionStepCount), jobExecutionStepCount.getStepCount());
+	private TaskJobExecution getTaskJobExecutionWithStepCount(JobExecutionWithStepCount jobExecutionWithStepCount) {
+		return new TaskJobExecution(getTaskExecutionId(jobExecutionWithStepCount), jobExecutionWithStepCount,
+				isTaskDefined(jobExecutionWithStepCount), jobExecutionWithStepCount.getStepCount());
 	}
 
 	private Long getTaskExecutionId(JobExecution jobExecution) {

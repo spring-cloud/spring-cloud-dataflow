@@ -68,6 +68,8 @@ public class JobExecutionThinResource extends ResourceSupport {
 
 	private String startTime = "";
 
+	private Date startDateTime = null;
+
 	private String duration = "";
 
 	private Properties jobParameters;
@@ -130,6 +132,7 @@ public class JobExecutionThinResource extends ResourceSupport {
 			this.startTime = timeFormat.format(jobExecution.getStartTime());
 			Date endTime = jobExecution.getEndTime() != null ? jobExecution.getEndTime() : new Date();
 			this.duration = durationFormat.format(new Date(endTime.getTime() - jobExecution.getStartTime().getTime()));
+			this.startDateTime = jobExecution.getStartTime();
 		}
 
 	}
@@ -188,6 +191,10 @@ public class JobExecutionThinResource extends ResourceSupport {
 
 	public Properties getJobParameters() {
 		return jobParameters;
+	}
+
+	public Date getStartDateTime() {
+		return startDateTime;
 	}
 
 	public long getTaskExecutionId() {

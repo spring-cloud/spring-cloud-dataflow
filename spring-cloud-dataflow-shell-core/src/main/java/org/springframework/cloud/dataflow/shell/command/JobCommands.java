@@ -20,6 +20,7 @@ import java.util.Map;
 
 import org.springframework.batch.core.JobParameter;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cloud.dataflow.rest.JobExecutionThinResource;
 import org.springframework.cloud.dataflow.rest.client.JobOperations;
 import org.springframework.cloud.dataflow.rest.resource.JobExecutionResource;
 import org.springframework.cloud.dataflow.rest.resource.JobInstanceResource;
@@ -74,23 +75,23 @@ public class JobCommands implements CommandMarker {
 	public Table executionList(
 			@CliOption(key = { "name" }, help = "the job name to be used as a filter", mandatory = false) String name) {
 
-		final PagedResources<JobExecutionResource> jobs;
+		final PagedResources<JobExecutionThinResource> jobs;
 		if (name == null) {
-			jobs = jobOperations().executionList();
+			jobs = jobOperations().executionThinList();
 		}
 		else {
-			jobs = jobOperations().executionListByJobName(name);
+			jobs = jobOperations().executionThinListByJobName(name);
 		}
 
 		TableModelBuilder<Object> modelBuilder = new TableModelBuilder<>();
 
 		modelBuilder.addRow().addValue("ID ").addValue("Task ID").addValue("Job Name ").addValue("Start Time ")
 				.addValue("Step Execution Count ").addValue("Definition Status ");
-		for (JobExecutionResource job : jobs) {
+		for (JobExecutionThinResource job : jobs) {
 			modelBuilder.addRow().addValue(job.getExecutionId()).addValue(job.getTaskExecutionId())
-					.addValue(job.getJobExecution().getJobInstance().getJobName())
-					.addValue(job.getJobExecution().getStartTime())
-					.addValue(job.getJobExecution().getStepExecutions().size())
+					.addValue(job.getName())
+					.addValue(job.getStartDateTime())
+					.addValue(job.getStepExecutionCount())
 					.addValue(job.isDefined() ? "Created" : "Destroyed");
 		}
 		TableBuilder builder = new TableBuilder(modelBuilder.build());

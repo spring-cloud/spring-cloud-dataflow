@@ -24,11 +24,11 @@ import org.springframework.batch.core.JobExecution;
  *
  * @since 2.0
  */
-public class JobExecutionStepCount extends JobExecution {
+public class JobExecutionWithStepCount extends JobExecution {
 
 	private int stepCount;
 
-	public JobExecutionStepCount(JobExecution original, int stepCount) {
+	public JobExecutionWithStepCount(JobExecution original, int stepCount) {
 		super(original);
 		this.stepCount = stepCount;
 	}

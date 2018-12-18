@@ -315,7 +315,7 @@ public class SimpleJobService implements JobService, DisposableBean {
 	}
 
 	@Override
-	public Collection<JobExecutionStepCount> listJobExecutionsWithStepCount(int start, int count) {
+	public Collection<JobExecutionWithStepCount> listJobExecutionsWithStepCount(int start, int count) {
 		return jobExecutionDao.getJobExecutionsWithStepCount(start, count);
 	}
 
@@ -503,6 +503,14 @@ public class SimpleJobService implements JobService, DisposableBean {
 		for (JobExecution jobExecution : jobExecutions) {
 			stepExecutionDao.addStepExecutions(jobExecution);
 		}
+		return jobExecutions;
+	}
+
+	@Override
+	public Collection<JobExecutionWithStepCount> listJobExecutionsForJobWithStepCount(String jobName, int start, int count)
+			throws NoSuchJobException {
+		checkJobExists(jobName);
+		List<JobExecutionWithStepCount> jobExecutions = jobExecutionDao.getJobExecutionsWithStepCount(jobName, start, count);
 		return jobExecutions;
 	}
 

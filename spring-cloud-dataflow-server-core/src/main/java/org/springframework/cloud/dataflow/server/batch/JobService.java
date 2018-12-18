@@ -215,6 +215,18 @@ public interface JobService {
 	Collection<JobExecution> listJobExecutionsForJob(String jobName, int start, int count) throws NoSuchJobException;
 
 	/**
+	 * List the {@link JobExecutionWithStepCount job executions} for a job in descending
+	 * order of creation (usually close to execution order).
+	 *
+	 * @param jobName the job name
+	 * @param start the start index of the first job execution
+	 * @param count the maximum number of executions to return
+	 * @return a collection of {@link JobExecutionWithStepCount}
+	 * @throws NoSuchJobException
+	 */
+	Collection<JobExecutionWithStepCount> listJobExecutionsForJobWithStepCount(String jobName, int start, int count) throws NoSuchJobException;
+
+	/**
 	 * Count the job executions in the repository for a job.
 	 * 
 	 * @param jobName the job name
@@ -247,14 +259,14 @@ public interface JobService {
 	Collection<JobExecution> listJobExecutions(int start, int count);
 
 	/**
-	 * List the {@link JobExecutionStepCount JobExecutions} in descending order of
+	 * List the {@link JobExecutionWithStepCount JobExecutions} in descending order of
 	 * creation (usually close to execution order) without step execution data.
 	 *
 	 * @param start the index of the first execution to return
 	 * @param count the maximum number of executions
-	 * @return a collection of {@link JobExecutionStepCount}
+	 * @return a collection of {@link JobExecutionWithStepCount}
 	 */
-	Collection<JobExecutionStepCount> listJobExecutionsWithStepCount(int start, int count);
+	Collection<JobExecutionWithStepCount> listJobExecutionsWithStepCount(int start, int count);
 
 	/**
 	 * Count the maximum number of executions that could be returned by
