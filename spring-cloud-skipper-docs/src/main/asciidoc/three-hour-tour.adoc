@@ -531,7 +531,7 @@ maven:
 ----
 
 You can specify other entries and also specify proxy properties.
-This is currently best documented https://docs.spring.io/spring-cloud-dataflow/docs/1.3.0.M2/reference/htmlsingle/#getting-started-maven-configuration[here].
+This is currently best documented https://docs.spring.io/spring-cloud-dataflow/docs/current/reference/htmlsingle/#configuration-maven[here].
 Essentially, this needs to be set as a property in your launch properties or `manifest.yml` (when pushing to PCF), as follows:
 
 [source,yaml]
@@ -539,7 +539,7 @@ Essentially, this needs to be set as a property in your launch properties or `ma
 # manifest.yml
 ...
 env:
-    MAVEN_REMOTE_REPOSITORIES_{{REPOSITORY_NAME}}_URL: https://repo.spring.io
+    SPRING_APPLICATION_JSON: '{"maven": { "remote-repositories": { "springRepo": { "url": "https://repo.spring.io/libs-snapshot"} } } }'
 ...
 ----
 
