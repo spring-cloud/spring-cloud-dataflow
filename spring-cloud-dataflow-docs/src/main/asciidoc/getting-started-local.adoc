@@ -28,18 +28,18 @@ For deploying, upgrading and rolling back applications in Streams at runtime, yo
 [[getting-started-local-deploying-spring-cloud-dataflow-docker]]
 === Getting Started with Docker Compose
 
-As of Spring Cloud Data Flow 1.4, a Docker Compose file is provided to quickly bring up Spring Cloud Data Flow and its dependencies without having to obtain them manually.
+A Docker Compose file is provided to quickly bring up Spring Cloud Data Flow and its dependencies without having to obtain them manually.
 When running, a composed system includes the latest GA release of Spring Cloud Data Flow Server using the Kafka binder for communication and Skipper for stream deployment.
 Docker Compose is required and it's recommended to use the link:https://docs.docker.com/compose/install/[latest version].
 
-. Download the Spring Cloud Data Flow Local Server Docker Compose file:
+. Download the Spring Cloud Data Flow Server Docker Compose file:
 +
 [source,bash,subs=attributes]
 ----
-$ wget https://raw.githubusercontent.com/spring-cloud/spring-cloud-dataflow/{github-tag}/spring-cloud-dataflow-server-local/docker-compose.yml
+$ wget https://raw.githubusercontent.com/spring-cloud/spring-cloud-dataflow/{github-tag}/spring-cloud-dataflow-server/docker-compose.yml
 ----
 
-NOTE: If the `wget` command is unavailable, `curl` or another platform specific utility may be used. Alternatively navigate to https://raw.githubusercontent.com/spring-cloud/spring-cloud-dataflow/{github-tag}/spring-cloud-dataflow-server-local/docker-compose.yml[https://raw.githubusercontent.com/spring-cloud/spring-cloud-dataflow/{github-tag}/spring-cloud-dataflow-server-local/docker-compose.yml] in a web browser and save the contents. Ensure the downloaded filename is `docker-compose.yml`.
+NOTE: If the `wget` command is unavailable, `curl` or another platform specific utility may be used. Alternatively navigate to https://raw.githubusercontent.com/spring-cloud/spring-cloud-dataflow/{github-tag}/spring-cloud-dataflow-server/docker-compose.yml[https://raw.githubusercontent.com/spring-cloud/spring-cloud-dataflow/{github-tag}/spring-cloud-dataflow-server/docker-compose.yml] in a web browser and save the contents. Ensure the downloaded filename is `docker-compose.yml`.
 
 . Start Docker Compose
 +
