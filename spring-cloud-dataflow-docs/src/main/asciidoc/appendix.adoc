@@ -12,7 +12,6 @@ Having trouble with Spring Cloud Data Flow, We'd like to help!
 
 include::appendix-dataflow-template.adoc[]
 include::appendix-howto.adoc[]
-include::appendix-migration-guide.adoc[]
 include::appendix-building.adoc[]
 include::appendix-contributing.adoc[]
 

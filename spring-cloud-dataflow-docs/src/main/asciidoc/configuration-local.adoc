@@ -61,7 +61,7 @@ The following example shows how to define a MySQL database connection with comma
 
 [source,bash,subs=attributes]
 ----
-java -jar spring-cloud-dataflow-server-local/target/spring-cloud-dataflow-server-local-{project-version}.jar \
+java -jar spring-cloud-dataflow-server/target/spring-cloud-dataflow-server-{project-version}.jar \
     --spring.datasource.url=jdbc:mysql://localhost:3306/mydb \
     --spring.datasource.username=<user> \
     --spring.datasource.password=<password> \
@@ -72,7 +72,7 @@ The following example shows how to define a PostgreSQL database connection with 
 
 [source,bash,subs=attributes]
 ----
-java -jar spring-cloud-dataflow-server-local/target/spring-cloud-dataflow-server-local-{project-version}.jar \
+java -jar spring-cloud-dataflow-server/target/spring-cloud-dataflow-server-{project-version}.jar \
     --spring.datasource.url=jdbc:postgresql://localhost:5432/mydb \
     --spring.datasource.username=<user> \
     --spring.datasource.password=<password> \
@@ -83,7 +83,7 @@ The following example shows how to define a HSQLDB database connection with comm
 
 [source,bash,subs=attributes]
 ----
-java -jar spring-cloud-dataflow-server-local/target/spring-cloud-dataflow-server-local-{project-version}.jar \
+java -jar spring-cloud-dataflow-server/target/spring-cloud-dataflow-server-{project-version}.jar \
     --spring.datasource.url=jdbc:hsqldb://localhost:9001/mydb \
     --spring.datasource.username=SA \
     --spring.datasource.driver-class-name=org.hsqldb.jdbc.JDBCDriver &
@@ -112,7 +112,7 @@ Since there is a Spring Cloud Data Flow Server for each target platform, you nee
 To add a custom JDBC driver dependency for the local server implementation:
 
 . Select the tag that corresponds to the version of the server you want to rebuild and clone the github repository.
-. Edit the spring-cloud-dataflow-server-local/pom.xml and, in the `dependencies` section, add the dependency for the database driver required.  In the following example , an Oracle driver has been chosen:
+. Edit the spring-cloud-dataflow-server/pom.xml and, in the `dependencies` section, add the dependency for the database driver required.  In the following example , an Oracle driver has been chosen:
 
 [source, xml]
 ----
@@ -194,7 +194,7 @@ you need to specify those properties as command line arguments when starting the
 
 [source,bash,subs=attributes]
 ----
-$ java -jar spring-cloud-dataflow-server-local-{project-version}.jar --spring.config.additional-location=/home/joe/maven.yml
+$ java -jar spring-cloud-dataflow-server-{project-version}.jar --spring.config.additional-location=/home/joe/maven.yml
 ----
 
 where `maven.yaml` is
@@ -239,22 +239,20 @@ The key `policy` is applicable to both `snapshot` and the `release` repository p
 You can refer to https://github.com/eclipse/aether-core/blob/4cf5f7a406b516a45d8bf15e7dfe3fb3849cb87b/aether-api/src/main/java/org/eclipse/aether/repository/RepositoryPolicy.java#L16[Repository Policies] for the list of
 supported repository policies.
 
-As these are Spring Boot `@ConfigurationProperties`, you can also specify them as environment variables, such as `MAVEN_REMOTE_REPOSITORIES_REPO1_URL`.
-Another common option is to set the properties by setting the `SPRING_APPLICATION_JSON` environment variable.
-The following example shows how the JSON is structured:
+As these are Spring Boot `@ConfigurationProperties`, that you need to specify by adding them to the `SPRING_APPLICATION_JSON` environment variable. The following example shows how the JSON is structured:
 
 [source,bash,subs=attributes]
 ----
 $ SPRING_APPLICATION_JSON='{ "maven": { "local-repository": null,
 "remote-repositories": { "repo1": { "url": "https://repo1", "auth": { "username": "repo1user", "password": "repo1pass" } }, "repo2": { "url": "https://repo2" } },
-"proxy": { "host": "proxyhost", "port": 9018, "auth": { "username": "proxyuser", "password": "proxypass" } } } }' java -jar spring-cloud-dataflow-server-local-{project-version}.jar
+"proxy": { "host": "proxyhost", "port": 9018, "auth": { "username": "proxyuser", "password": "proxypass" } } } }' java -jar spring-cloud-dataflow-server-{project-version}.jar
 ----
 
 [[configuration-local-logging]]
 === Local Data Flow Server Logging configuration
 
 Spring Cloud Data Flow `local` server is configured to use `RollingFileAppender` for logging and you should enable the spring profile named 'local'.
-For example, pass the property `--spring.profiles.active=local` when starting the uber jar.
+You need to pass the property `--spring.profiles.active=local` when starting the uber jar to trigger the configuration of logging in local mode.
 The profile is needed since writing to a log file is not the recommended way to gather logs when running on Cloud Platforms such as Cloud Foundry and Kubernetes.
 
 ----
@@ -265,7 +263,7 @@ logging:
 By default, the log file is configured to use:
 
 ```
-<property name="LOG_FILE" value="${LOG_FILE:-${LOG_PATH:-${LOG_TEMP:-${java.io.tmpdir:-/tmp}}}/spring-cloud-dataflow-server-local}"/>
+<property name="LOG_FILE" value="${LOG_FILE:-${LOG_PATH:-${LOG_TEMP:-${java.io.tmpdir:-/tmp}}}/spring-cloud-dataflow-server}"/>
 
 ```
 
@@ -306,7 +304,7 @@ Data Flow Server delegates to the Skipper server the management of the Stream's 
 
 [source,bash,subs=attributes]
 ----
-$ java -jar spring-cloud-dataflow-server-local-{project-version}.jar --spring.cloud.skipper.client.serverUri=http://192.51.100.1:7577/api
+$ java -jar spring-cloud-dataflow-server-{project-version}.jar --spring.cloud.skipper.client.serverUri=http://192.51.100.1:7577/api
 ----
 
 [[configuration-local-security]]
@@ -1186,7 +1184,7 @@ For example, if you run the Metrics Collector locally on port `8080`, this is ho
 
 [source,bash,subs=attributes]
 ----
-$ java -jar spring-cloud-dataflow-server-local-{project-version}.jar --spring.cloud.dataflow.metrics.collector.uri=http://localhost:8080
+$ java -jar spring-cloud-dataflow-server-{project-version}.jar --spring.cloud.dataflow.metrics.collector.uri=http://localhost:8080
 ----
 
 The Metrics Collector can be secured with 'basic' authentication that requires a username and password.

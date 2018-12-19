@@ -235,7 +235,7 @@ Then add the metrics collector after the `skipper-server` service definition:
 [source,yaml,subs=attributes]
 ----
   dataflow-server:
-    image: springcloud/spring-cloud-dataflow-server-local:${DATAFLOW_VERSION}
+    image: springcloud/spring-cloud-dataflow-server:${DATAFLOW_VERSION}
     container_name: dataflow-server
     ports:
       - "9393:9393"
@@ -302,7 +302,7 @@ Check the https://docs.spring.io/spring-cloud-dataflow/docs/current/reference/ht
 +
 [source,bash,subs=attributes]
 ----
-wget https://repo.spring.io/{version-type-lowercase}/org/springframework/cloud/spring-cloud-dataflow-server-local/{project-version}/spring-cloud-dataflow-server-local-{project-version}.jar
+wget https://repo.spring.io/{version-type-lowercase}/org/springframework/cloud/spring-cloud-dataflow-server/{project-version}/spring-cloud-dataflow-server-{project-version}.jar
 
 wget https://repo.spring.io/{version-type-lowercase}/org/springframework/cloud/spring-cloud-dataflow-shell/{project-version}/spring-cloud-dataflow-shell-{project-version}.jar
 ----
@@ -332,14 +332,14 @@ In the directory where you downloaded Data Flow, run the server using `java -jar
 +
 [source,bash,subs=attributes]
 ----
-$ java -jar spring-cloud-dataflow-server-local-{project-version}.jar
+$ java -jar spring-cloud-dataflow-server-{project-version}.jar
 ----
 +
 If Skipper and the Data Flow server are not running on the same host, set the configuration property `spring.cloud.skipper.client.serverUri` to the location of Skipper, e.g.
 +
 [source,bash,subs=attributes]
 ----
-$ java -jar spring-cloud-dataflow-server-local-{project-version}.jar --spring.cloud.skipper.client.serverUri=http://192.51.100.1:7577/api
+$ java -jar spring-cloud-dataflow-server-{project-version}.jar --spring.cloud.skipper.client.serverUri=http://192.51.100.1:7577/api
 ----
 +
 . Launch the Data Flow Shell, as follows:

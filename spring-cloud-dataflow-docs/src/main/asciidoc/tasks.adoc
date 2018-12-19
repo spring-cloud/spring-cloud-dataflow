@@ -938,7 +938,7 @@ Cloud Data Flow to share the task execution information.
 
 [a-common-datastore-dependency]
 === A Common DataStore Dependency
-Spring Cloud Data Flow supports many database <<appendix-migration-guide.adoc#rdbms, types>> out-of-the-box,
+Spring Cloud Data Flow supports many databases out-of-the-box,
 so all the user typically has to do is declare the `spring_datasource_*` environment variables
 to establish what data store Spring Cloud Data Flow will need.
 So whatever database you decide to use for Spring Cloud Data Flow make sure that the your task also

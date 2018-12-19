@@ -25,15 +25,14 @@ maintains the set of available apps, and their mappings to URIs.
 For example, if relying on Maven coordinates, an app's URI would be of the format:
 `maven://<groupId>:<artifactId>:<version>`
 
-The Data Flow Server is a Spring Boot application that provides a common REST API and UI. For each
-runtime environment there is a different version of the Data Flow Server that depends upon a
-deployer SPI implementation for that environment. The github locations for these Data Flow Servers are:
+The Data Flow Server is a Spring Boot application that provides a common REST API and UI.
+As of version 2.0 a single Data Flow Server supports deploying tasks to Local, Cloud Foundry, and Kubernetes.
+Also as of version 2.0, the Skipper Server is required for deploying streams to Local, Cloud Foundry and Kubernetes.
+The github locations for the Data Flow Server is:
 
-* https://github.com/spring-cloud/spring-cloud-dataflow/tree/master/spring-cloud-dataflow-server-local[Local]
-* https://github.com/spring-cloud/spring-cloud-dataflow-server-cloudfoundry[Cloud Foundry]
-* https://github.com/spring-cloud/spring-cloud-dataflow-server-kubernetes[Kubernetes]
+* https://github.com/spring-cloud/spring-cloud-dataflow/tree/master/spring-cloud-dataflow-server
 
-There are also community maintained Spring Cloud Data Flow implementations.
+There are also community maintained Spring Cloud Data Flow implementations that are currently based on the 1.7.x series of Data Flow but will eventually get updated to the 2.0 baseline.
 
  * https://github.com/donovanmuller/spring-cloud-dataflow-server-nomad[HashiCorp Nomad]
  * https://github.com/donovanmuller/spring-cloud-dataflow-server-openshift[OpenShift]

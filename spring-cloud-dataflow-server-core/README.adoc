@@ -12,10 +12,4 @@ stream and task definitions by delegating to the `StreamDefinitionRepository` an
 underlying `spring-cloud-deployer` SPI implementation. Other controllers provide endpoints for
 managing the `AppRegistry`, viewing counters, etc.
 
-For a simple getting-started experience, see the `spring-cloud-dataflow-server-local` (sibling)
-project. The build for that project produces a boot-executable `LocalDataFlowServer` that relies on
-an implementation of the Spring Cloud Deployer SPI that launches each stream app as a new JVM
-process on the same host as the `LocalDataFlowServer` itself. By default the local server is
-auto-populated with apps generated from the
-link:https://github.com/spring-cloud/spring-cloud-stream-app-starters[`spring-cloud-stream-app-starters`]
-project.
+The `spring-cloud-dataflow-server` project uses this dependency and pulls in task platform deployers for CloudFoundry and Kubernetes.
