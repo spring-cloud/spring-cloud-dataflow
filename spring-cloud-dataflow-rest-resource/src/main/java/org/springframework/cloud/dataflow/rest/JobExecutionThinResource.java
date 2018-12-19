@@ -21,6 +21,7 @@ import java.util.Date;
 import java.util.Properties;
 import java.util.TimeZone;
 
+import org.springframework.batch.core.BatchStatus;
 import org.springframework.batch.core.JobExecution;
 import org.springframework.batch.core.JobInstance;
 import org.springframework.batch.core.JobParameters;
@@ -90,6 +91,8 @@ public class JobExecutionThinResource extends ResourceSupport {
 
 	private final ArgumentSanitizer argumentSanitizer = new ArgumentSanitizer();
 
+	private BatchStatus status;
+
 	/**
 	 * Default constructor to be used by Jackson.
 	 */
@@ -111,6 +114,7 @@ public class JobExecutionThinResource extends ResourceSupport {
 				this.argumentSanitizer.sanitizeJobParameters(jobExecution.getJobParameters()));
 		this.defined = taskJobExecution.isTaskDefined();
 		JobInstance jobInstance = jobExecution.getJobInstance();
+		this.status = taskJobExecution.getJobExecution().getStatus();
 		if (jobInstance != null) {
 			this.name = jobInstance.getJobName();
 			this.restartable = JobUtils.isJobExecutionRestartable(jobExecution);
@@ -191,6 +195,10 @@ public class JobExecutionThinResource extends ResourceSupport {
 
 	public Properties getJobParameters() {
 		return jobParameters;
+	}
+
+	public BatchStatus getStatus() {
+		return status;
 	}
 
 	public Date getStartDateTime() {
