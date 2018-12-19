@@ -235,6 +235,12 @@
                 <artifactId>reactor-core</artifactId>
                 <version>${reactor.version}</version>
             </dependency>
+            <!-- Until we get this https://github.com/spring-projects/spring-boot/issues/15402 in a Spring Boot 2.1.x release-->
+            <dependency>
+                <groupId>org.flywaydb</groupId>
+                <artifactId>flyway-core</artifactId>
+                <version>5.2.4</version>
+            </dependency>
         </dependencies>
     </dependencyManagement>
     <build>
