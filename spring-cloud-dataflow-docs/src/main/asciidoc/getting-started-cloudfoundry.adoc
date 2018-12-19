@@ -120,6 +120,8 @@ Once you have the desired config values in `manifest.yml`, you can run the `cf p
 WARNING: Only set 'Skip SSL Validation' to `true` if you run on a Cloud Foundry instance by using self-signed
 certificates (for example, in development). Do not use self-signed certificates for production.
 +
+NOTE: When specifying the `buildpack`, our examples typically specify `java_buildpack` or `java_buildpack_offline`. Use the CF command `cf buildpacks` to get a listing of available relevant buildpacks for your environment.
++
 . Configure and run the Data Flow Server
 +
 One of the most important configuration details is providing credentials to the Cloud Foundry instance so that the server can itself spawn applications.
