@@ -44,7 +44,6 @@ public class CloudFoundryDataFlowServerConfiguration {
 	}
 
 	@Bean
-	@ConfigurationProperties(prefix = CloudFoundryServerConfigurationProperties.PREFIX)
 	public CloudFoundryServerConfigurationProperties cloudFoundryServerConfigurationProperties() {
 		return new CloudFoundryServerConfigurationProperties();
 	}
