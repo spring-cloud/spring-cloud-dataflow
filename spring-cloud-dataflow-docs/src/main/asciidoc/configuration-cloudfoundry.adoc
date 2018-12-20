@@ -26,7 +26,7 @@ The REST endpoint (`/features`) provides information on the enabled and disabled
 
 [[configuration-cloudfoundry-app-defaults]]
 === Deployer Properties
-You can also set other optional properties that alter the way Spring Cloud Data Flow deploys stream and task apps to Cloud Foundry:
+You can also set other optional properties that alter the way Spring Cloud Data Flow deploys task apps to Cloud Foundry:
 
 * You can configure the default memory and disk sizes for a deployed application. By default, they are 1024 MB memory
 and 1024 MB disk. To change these to (for example) 512 and 2048 respectively, use the following commands:
@@ -34,17 +34,7 @@ and 1024 MB disk. To change these to (for example) 512 and 2048 respectively, us
 ====
 [source]\
 ----
-cf set-env dataflow-server SPRING_CLOUD_DEPLOYER_CLOUDFOUNDRY_STREAM_MEMORY 512
-cf set-env dataflow-server SPRING_CLOUD_DEPLOYER_CLOUDFOUNDRY_STREAM_DISK 2048
-----
-====
-
-* The default number of instances to deploy is set to 1, but you can override it by using the following command:
-+
-====
-[source]
-----
-cf set-env dataflow-server SPRING_CLOUD_DEPLOYER_CLOUDFOUNDRY_STREAM_INSTANCES 1
+e.g.
 ----
 ====
 
@@ -54,14 +44,14 @@ set the following environment variable:
 ====
 [source]
 ----
-cf set-env dataflow-server SPRING_CLOUD_DEPLOYER_CLOUDFOUNDRY_STREAM_BUILDPACK java_buildpack_offline
+cf set-env dataflow-server SPRING_CLOUD_DATAFLOW_TASK_PLATFORM_CLOUDFOUNDRY_ACCOUNTS[default]_DEPLOYMENT_BUILDPACK java_buildpack_offline
 ----
 ====
 
-* You can customize the health check mechanism used by Cloud Foundry to assert whether apps are running by using the `SPRING_CLOUD_DEPLOYER_CLOUDFOUNDRY_STREAM_HEALTH_CHECK` environment variable. The current supported options
+* You can customize the health check mechanism used by Cloud Foundry to assert whether apps are running by using the `SPRING_CLOUD_DATAFLOW_TASK_PLATFORM_CLOUDFOUNDRY_ACCOUNTS[default]_DEPLOYMENT_HEALTH_CHECK` environment variable. The current supported options
 are `http` (the default), `port`, and `none`.
 +
-You can also set environment variables that specify the the HTTP-based health check endpoint and timeout: `SPRING_CLOUD_DEPLOYER_CLOUDFOUNDRY_STREAM_HEALTH_CHECK_ENDPOINT` and `SPRING_CLOUD_DEPLOYER_CLOUDFOUNDRY_STREAM_HEALTH_CHECK_TIMEOUT`, respectively. These default to `/health` (the Spring Boot default location) and `120` seconds.
+You can also set environment variables that specify the the HTTP-based health check endpoint and timeout: `SPRING_CLOUD_DATAFLOW_TASK_PLATFORM_CLOUDFOUNDRY_ACCOUNTS[default]_DEPLOYMENT_HEALTH_CHECK_ENDPOINT` and `SPRING_CLOUD_DATAFLOW_TASK_PLATFORM_CLOUDFOUNDRY_ACCOUNTS[default]_DEPLOYMENT_HEALTH_CHECK_TIMEOUT`, respectively. These default to `/health` (the Spring Boot default location) and `120` seconds.
 
 * You can also specify deployment properties by using the DSL. For instance, if you want to set the allocated memory for the `http` application to 512m and also bind a mysql service to the `jdbc` application, you can run the following commands:
 +
@@ -81,7 +71,7 @@ substitute `TASK` for `STREAM` in the property name, as the following example sh
 ====
 [source]
 ----
-cf set-env dataflow-server SPRING_CLOUD_DEPLOYER_CLOUDFOUNDRY_TASK_MEMORY 512
+cf set-env dataflow-server SPRING_CLOUD_DATAFLOW_TASK_PLATFORM_CLOUDFOUNDRY_ACCOUNTS[default]_DEPLOYMENT_TASK_MEMORY 512
 ----
 ====
 =====
@@ -101,7 +91,7 @@ For instance, if you want to disable the randomization, you can override it by u
 ====
 [source]
 ----
-cf set-env dataflow-server SPRING_CLOUD_DEPLOYER_CLOUDFOUNDRY_STREAM_ENABLE_RANDOM_APP_NAME_PREFIX false
+cf set-env dataflow-server SPRING_CLOUD_DATAFLOW_TASK_PLATFORM_CLOUDFOUNDRY_ACCOUNTS[default]_DEPLOYMENT_ENABLE_RANDOM_APP_NAME_PREFIX false
 ----
 ====
 
@@ -165,8 +155,7 @@ following variables for streams and tasks, respectively:
 ====
 [source, properties]
 ----
-SPRING_CLOUD_DEPLOYER_CLOUDFOUNDRY_STREAM_USE_SPRING_APPLICATION_JSON=false
-SPRING_CLOUD_DEPLOYER_CLOUDFOUNDRY_TASK_USE_SPRING_APPLICATION_JSON=false
+SPRING_CLOUD_DATAFLOW_TASK_PLATFORM_CLOUDFOUNDRY_ACCOUNTS[default]_DEPLOYMENT_USE_SPRING_APPLICATION_JSON=false
 ----
 ====
 =====
@@ -533,9 +522,6 @@ stream deploy --name ticktock --properties "deployer.time.cloudfoundry.javaOpts=
 ----
 ====
 
-You can also set this property at the global level for all the streams as applicable to any deployment property by setting
-`SPRING_CLOUD_DEPLOYER_CLOUDFOUNDRY_STREAM_JAVA_OPTS` as the server level property.
-
 === Debugging
 If you want to get better insights into what is happening when your streams and tasks are being deployed, you may want
 to turn on the following features:
@@ -594,8 +580,6 @@ NOTE: You may see a `WARN` logging message if the application that uses this lib
 server when the application starts and whenever the `/health` endpoint is accessed.
 If you know that you are not using config server functionality, you can disable the client library by setting the
 `SPRING_CLOUD_CONFIG_ENABLED` environment variable to `false`.
-Another, more drastic, option is to disable the platform health check by setting the
-`SPRING_CLOUD_DEPLOYER_CLOUDFOUNDRY_STREAM_HEALTH_CHECK` environment variable to `none`.
 
 ==== Sample Manifest Template
 
@@ -669,7 +653,7 @@ However, the configuration server for Pivotal Cloud Foundry uses HTTPS for all c
 
 By using the same `manifest.yml` templates listed in the previous section for the server, we can provide the self-signed SSL certificate by setting `TRUST_CERTS: <API_ENDPOINT>`.
 
-However, the deployed applications also require `TRUST_CERTS` as a flat environment variable (as opposed to being wrapped inside `SPRING_APPLICATION_JSON`), so we must instruct the server with yet another set of tokens (`SPRING_CLOUD_DEPLOYER_CLOUDFOUNDRY_STREAM_USE_SPRING_APPLICATION_JSON: false` and `SPRING_CLOUD_DEPLOYER_CLOUDFOUNDRY_TASK_USE_SPRING_APPLICATION_JSON: false`) for stream and task applications, respectively.
+However, the deployed applications also require `TRUST_CERTS` as a flat environment variable (as opposed to being wrapped inside `SPRING_APPLICATION_JSON`), so we must instruct the server with yet another set of tokens (`SPRING_CLOUD_DATAFLOW_TASK_PLATFORM_CLOUDFOUNDRY_ACCOUNTS[default]_DEPLOYMENT_USE_SPRING_APPLICATION_JSON: false`) for tasks.
 With this setup, the applications receive their application properties as regular environment variables.
 
 The following listing shows the updated `manifest.yml` with the required changes. Both the Data Flow server and deployed applications
@@ -753,7 +737,7 @@ Name of a service is later used to bound running application in _PCF_.
 For scheduling, you must add (or update) the following environment variables in your environment:
 
 * Enable scheduling for Spring Cloud Data Flow by setting `spring.cloud.dataflow.features.schedules-enabled` to `true`.
-* Bind the task deployer to your instance of PCF-Scheduler by adding the PCF-Scheduler service name to the `SPRING_CLOUD_DEPLOYER_CLOUDFOUNDRY_TASK_SERVICES` environment variable.
+* Bind the task deployer to your instance of PCF-Scheduler by adding the PCF-Scheduler service name to the `SPRING_CLOUD_DATAFLOW_TASK_PLATFORM_CLOUDFOUNDRY_ACCOUNTS[default]_DEPLOYMENT_SERVICES` environment variable.
 * Establish the URL to the PCF-Scheduler by setting the `SPRING_CLOUD_SCHEDULER_CLOUDFOUNDRY_SCHEDULER_URL` environment variable.
 
 [NOTE]
@@ -776,18 +760,17 @@ applications:
   path: {PATH TO SERVER UBER-JAR}
   env:
     SPRING_APPLICATION_NAME: data-flow-server
-    SPRING_CLOUD_DEPLOYER_CLOUDFOUNDRY_URL: https://api.local.pcfdev.io
-    SPRING_CLOUD_DEPLOYER_CLOUDFOUNDRY_ORG: pcfdev-org
-    SPRING_CLOUD_DEPLOYER_CLOUDFOUNDRY_SPACE: pcfdev-space
-    SPRING_CLOUD_DEPLOYER_CLOUDFOUNDRY_DOMAIN: local.pcfdev.io
-    SPRING_CLOUD_DEPLOYER_CLOUDFOUNDRY_USERNAME: admin
-    SPRING_CLOUD_DEPLOYER_CLOUDFOUNDRY_PASSWORD: admin
-    SPRING_CLOUD_DEPLOYER_CLOUDFOUNDRY_TASK_SERVICES: mysql,myscheduler
-    SPRING_CLOUD_DEPLOYER_CLOUDFOUNDRY_SKIP_SSL_VALIDATION: true
+    SPRING_CLOUD_SKIPPER_SERVER_ENABLE_LOCAL_PLATFORM: false
+    SPRING_CLOUD_SKIPPER_SERVER_PLATFORM_CLOUDFOUNDRY_ACCOUNTS[default]_CONNECTION_URL: <URL>
+    SPRING_CLOUD_SKIPPER_SERVER_PLATFORM_CLOUDFOUNDRY_ACCOUNTS[default]_CONNECTION_ORG: <ORG>
+    SPRING_CLOUD_SKIPPER_SERVER_PLATFORM_CLOUDFOUNDRY_ACCOUNTS[default]_CONNECTION_SPACE: <SPACE>
+    SPRING_CLOUD_SKIPPER_SERVER_PLATFORM_CLOUDFOUNDRY_ACCOUNTS[default]_DEPLOYMENT_DOMAIN: <DOMAIN>
+    SPRING_CLOUD_SKIPPER_SERVER_PLATFORM_CLOUDFOUNDRY_ACCOUNTS[default]_CONNECTION_USERNAME: <USER>
+    SPRING_CLOUD_SKIPPER_SERVER_PLATFORM_CLOUDFOUNDRY_ACCOUNTS[default]_CONNECTION_PASSWORD: <PASSWORD>
+    SPRING_CLOUD_SKIPPER_SERVER_PLATFORM_CLOUDFOUNDRY_ACCOUNTS[default]_DEPLOYMENT_SERVICES: rabbit, myscheduler
     SPRING_CLOUD_DATAFLOW_FEATURES_SCHEDULES_ENABLED: true
     SPRING_CLOUD_SKIPPER_CLIENT_SERVER_URI: https://<skipper-host-name>/api
     SPRING_CLOUD_SCHEDULER_CLOUDFOUNDRY_SCHEDULER_URL: https://scheduler.local.pcfdev.io
-    SPRING_APPLICATION_JSON: '{"maven": { "remote-repositories": { "repo1": { "url": "https://repo.spring.io/libs-release"} } } }'
 services:
 - mysql
 ----
