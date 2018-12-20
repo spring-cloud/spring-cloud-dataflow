@@ -467,7 +467,8 @@ image::cf-getting-started-security-no-roles.png[Dashboard without roles, scaledw
 
 You must provide several pieces of configuration. These are Spring Boot `@ConfigurationProperties`, so you can set
 them as environment variables or by any other means that Spring Boot supports. The following listing is in environment
-variable format, as that is an easy way to get started configuring Boot applications in Cloud Foundry:
+variable format, as that is an easy way to get started configuring Boot applications in Cloud Foundry.
+Note that in the future, you will be able to deploy tasks to multiple platforms, but for 2.0.0.M1 you can deploy only to a single platform and the name must be `default`.
 
 ====
 [source,bash]
@@ -476,52 +477,35 @@ variable format, as that is an easy way to get started configuring Boot applicat
 # Example values, typical for Pivotal Web Services, are included as comments.
 
 # URL of the CF API (used when using cf login -a for example) - for example, https://api.run.pivotal.io
-# (to set the environment variable, use SPRING_CLOUD_DEPLOYER_CLOUDFOUNDRY_URL).
-spring.cloud.deployer.cloudfoundry.url=
+SPRING_CLOUD_DATAFLOW_TASK_PLATFORM_CLOUDFOUNDRY_ACCOUNTS[default]_CONNECTION_URL=
 
 # The name of the organization that owns the space above - for example, youruser-org
-# (To set the environment variable, use SPRING_CLOUD_DEPLOYER_CLOUDFOUNDRY_ORG).
-spring.cloud.deployer.cloudfoundry.org=
+SPRING_CLOUD_DATAFLOW_TASK_PLATFORM_CLOUDFOUNDRY_ACCOUNTS[default]_CONNECTION_ORG=
 
 # The name of the space into which modules will be deployed - for example, development
-# (to set the environment variable, use SPRING_CLOUD_DEPLOYER_CLOUDFOUNDRY_SPACE).
-spring.cloud.deployer.cloudfoundry.space=
+SPRING_CLOUD_DATAFLOW_TASK_PLATFORM_CLOUDFOUNDRY_ACCOUNTS[default]_CONNECTION_SPACE=
 
 # The root domain to use when mapping routes - for example, cfapps.io
-# (to set the environment variable, use SPRING_CLOUD_DEPLOYER_CLOUDFOUNDRY_DOMAIN).
-spring.cloud.deployer.cloudfoundry.domain=
+SPRING_CLOUD_DATAFLOW_TASK_PLATFORM_CLOUDFOUNDRY_ACCOUNTS[default]_CONNECTION_DOMAIN=
 
 # The user name and password of the user to use to create applications
-# (to set the environment variables, use SPRING_CLOUD_DEPLOYER_CLOUDFOUNDRY_USERNAME
-# and SPRING_CLOUD_DEPLOYER_CLOUDFOUNDRY_PASSWORD).
-spring.cloud.deployer.cloudfoundry.username=
-spring.cloud.deployer.cloudfoundry.password=
+SPRING_CLOUD_DATAFLOW_TASK_PLATFORM_CLOUDFOUNDRY_ACCOUNTS[default]_CONNECTION_USERNAME=
+SPRING_CLOUD_DATAFLOW_TASK_PLATFORM_CLOUDFOUNDRY_ACCOUNTS[default]_CONNECTION_PASSWORD
 
 # Whether to allow self-signed certificates during SSL validation (you should NOT do so in production)
-# (to set the environment variable, use SPRING_CLOUD_DEPLOYER_CLOUDFOUNDRY_SKIP_SSL_VALIDATION).
-spring.cloud.deployer.cloudfoundry.skipSslValidation=false
-
-# The health check type to use for stream apps. Accepts 'none' and 'port'.
-spring.cloud.deployer.cloudfoundry.stream.health-check=
-
+SPRING_CLOUD_DATAFLOW_TASK_PLATFORM_CLOUDFOUNDRY_ACCOUNTS[default]_CONNECTION_SKIP_SSL_VALIDATION
 
 # A comma-separated set of service instance names to bind to every deployed task application.
 # Among other things, this should include an RDBMS service that is used
 # for Spring Cloud Task execution reporting, such as my_mysql
-# (to set the environment variable, use SPRING_CLOUD_DEPLOYER_CLOUDFOUNDRY_TASK_SERVICES).
+SPRING_CLOUD_DATAFLOW_TASK_PLATFORM_CLOUDFOUNDRY_ACCOUNTS[default]_DEPLOYMENT_SERVICES
 spring.cloud.deployer.cloudfoundry.task.services=
 
 # Timeout, in seconds, to use when doing blocking API calls to Cloud Foundry
-# (to set the  environment variable, use SPRING_CLOUD_DEPLOYER_CLOUDFOUNDRY_TASK_API_TIMEOUT
-# and SPRING_CLOUD_DEPLOYER_CLOUDFOUNDRY_STREAM_API_TIMEOUT).
-spring.cloud.deployer.cloudfoundry.stream.apiTimeout=360
-spring.cloud.deployer.cloudfoundry.task.apiTimeout=360
+SPRING_CLOUD_DATAFLOW_TASK_PLATFORM_CLOUDFOUNDRY_ACCOUNTS[default]_DEPLOYMENT_API_TIMEOUT=
 
 # Timeout, in milliseconds, to use when querying the Cloud Foundry API to compute app status
-# (to set the environment variable, use SPRING_CLOUD_DEPLOYER_CLOUDFOUNDRY_TASK_STATUS_TIMEOUT
-# and SPRING_CLOUD_DEPLOYER_CLOUDFOUNDRY_STREAM_STATUS_TIMEOUT).
-spring.cloud.deployer.cloudfoundry.stream.statusTimeout=5000
-spring.cloud.deployer.cloudfoundry.task.statusTimeout=5000
+SPRING_CLOUD_DATAFLOW_TASK_PLATFORM_CLOUDFOUNDRY_ACCOUNTS[default]_DEPLOYMENT_STATUS_TIMEOUT
 ----
 ====
 
@@ -630,16 +614,16 @@ applications:
   path: {PATH TO SERVER UBER-JAR}
   env:
     SPRING_APPLICATION_NAME: data-flow-server
-    SPRING_CLOUD_DEPLOYER_CLOUDFOUNDRY_URL: https://api.local.pcfdev.io
-    SPRING_CLOUD_DEPLOYER_CLOUDFOUNDRY_ORG: pcfdev-org
-    SPRING_CLOUD_DEPLOYER_CLOUDFOUNDRY_SPACE: pcfdev-space
-    SPRING_CLOUD_DEPLOYER_CLOUDFOUNDRY_DOMAIN: local.pcfdev.io
-    SPRING_CLOUD_DEPLOYER_CLOUDFOUNDRY_USERNAME: admin
-    SPRING_CLOUD_DEPLOYER_CLOUDFOUNDRY_PASSWORD: admin
-    SPRING_CLOUD_DEPLOYER_CLOUDFOUNDRY_TASK_SERVICES: mysql,my-config-server
-    SPRING_CLOUD_DEPLOYER_CLOUDFOUNDRY_SKIP_SSL_VALIDATION: true
+    MAVEN_REMOTE_REPOSITORIES_REPO1_URL: https://repo.spring.io/libs-snapshot
+    SPRING_CLOUD_DATAFLOW_TASK_PLATFORM_CLOUDFOUNDRY_ACCOUNTS[default]_CONNECTION_URL: https://api.sys.huron.cf-app.com
+    SPRING_CLOUD_DATAFLOW_TASK_PLATFORM_CLOUDFOUNDRY_ACCOUNTS[default]_CONNECTION_ORG: sabby20
+    SPRING_CLOUD_DATAFLOW_TASK_PLATFORM_CLOUDFOUNDRY_ACCOUNTS[default]_CONNECTION_SPACE: sabby20
+    SPRING_CLOUD_DATAFLOW_TASK_PLATFORM_CLOUDFOUNDRY_ACCOUNTS[default]_CONNECTION_DOMAIN: apps.huron.cf-app.com
+    SPRING_CLOUD_DATAFLOW_TASK_PLATFORM_CLOUDFOUNDRY_ACCOUNTS[default]_CONNECTION_USERNAME: admin
+    SPRING_CLOUD_DATAFLOW_TASK_PLATFORM_CLOUDFOUNDRY_ACCOUNTS[default]_CONNECTION_PASSWORD: ***
+    SPRING_CLOUD_DATAFLOW_TASK_PLATFORM_CLOUDFOUNDRY_ACCOUNTS[default]_CONNECTION_SKIP_SSL_VALIDATION: true
+    SPRING_CLOUD_DATAFLOW_TASK_PLATFORM_CLOUDFOUNDRY_ACCOUNTS[default]_DEPLOYMENT_SERVICES: mysql
     SPRING_CLOUD_SKIPPER_CLIENT_SERVER_URI: https://<skipper-host-name>/api
-    SPRING_APPLICATION_JSON: '{"maven": { "remote-repositories": { "repo1": { "url": "https://repo.spring.io/libs-release"} } } }'
 services:
 - mysql
 - my-config-server
@@ -658,15 +642,15 @@ applications:
     SPRING_APPLICATION_NAME: skipper-server
     SPRING_CLOUD_SKIPPER_SERVER_ENABLE_LOCAL_PLATFORM: false
     SPRING_CLOUD_SKIPPER_SERVER_STRATEGIES_HEALTHCHECK_TIMEOUTINMILLIS: 300000
-    SPRING_CLOUD_SKIPPER_SERVER_PLATFORM_CLOUDFOUNDRY_ACCOUNTS[pws]_CONNECTION_URL: https://api.local.pcfdev.io
-    SPRING_CLOUD_SKIPPER_SERVER_PLATFORM_CLOUDFOUNDRY_ACCOUNTS[pws]_CONNECTION_ORG: pcfdev-org
-    SPRING_CLOUD_SKIPPER_SERVER_PLATFORM_CLOUDFOUNDRY_ACCOUNTS[pws]_CONNECTION_SPACE: pcfdev-space
-    SPRING_CLOUD_SKIPPER_SERVER_PLATFORM_CLOUDFOUNDRY_ACCOUNTS[pws]_DEPLOYMENT_DOMAIN: cfapps.io
-    SPRING_CLOUD_SKIPPER_SERVER_PLATFORM_CLOUDFOUNDRY_ACCOUNTS[pws]_CONNECTION_USERNAME: admin
-    SPRING_CLOUD_SKIPPER_SERVER_PLATFORM_CLOUDFOUNDRY_ACCOUNTS[pws]_CONNECTION_PASSWORD: admin
-    SPRING_CLOUD_SKIPPER_SERVER_PLATFORM_CLOUDFOUNDRY_ACCOUNTS[pws]_CONNECTION_SKIP_SSL_VALIDATION: false
-    SPRING_CLOUD_SKIPPER_SERVER_PLATFORM_CLOUDFOUNDRY_ACCOUNTS[pws]_DEPLOYMENT_DELETE_ROUTES: false
-    SPRING_CLOUD_SKIPPER_SERVER_PLATFORM_CLOUDFOUNDRY_ACCOUNTS[pws]_DEPLOYMENT_SERVICES: rabbit, my-config-server
+    SPRING_CLOUD_SKIPPER_SERVER_PLATFORM_CLOUDFOUNDRY_ACCOUNTS[default]_CONNECTION_URL: https://api.local.pcfdev.io
+    SPRING_CLOUD_SKIPPER_SERVER_PLATFORM_CLOUDFOUNDRY_ACCOUNTS[default]_CONNECTION_ORG: pcfdev-org
+    SPRING_CLOUD_SKIPPER_SERVER_PLATFORM_CLOUDFOUNDRY_ACCOUNTS[default]_CONNECTION_SPACE: pcfdev-space
+    SPRING_CLOUD_SKIPPER_SERVER_PLATFORM_CLOUDFOUNDRY_ACCOUNTS[default]_DEPLOYMENT_DOMAIN: cfapps.io
+    SPRING_CLOUD_SKIPPER_SERVER_PLATFORM_CLOUDFOUNDRY_ACCOUNTS[default]_CONNECTION_USERNAME: admin
+    SPRING_CLOUD_SKIPPER_SERVER_PLATFORM_CLOUDFOUNDRY_ACCOUNTS[default]_CONNECTION_PASSWORD: admin
+    SPRING_CLOUD_SKIPPER_SERVER_PLATFORM_CLOUDFOUNDRY_ACCOUNTS[default]_CONNECTION_SKIP_SSL_VALIDATION: false
+    SPRING_CLOUD_SKIPPER_SERVER_PLATFORM_CLOUDFOUNDRY_ACCOUNTS[default]_DEPLOYMENT_DELETE_ROUTES: false
+    SPRING_CLOUD_SKIPPER_SERVER_PLATFORM_CLOUDFOUNDRY_ACCOUNTS[default]_DEPLOYMENT_SERVICES: rabbit, my-config-server
 services:
 - mysql
   my-config-server
@@ -701,15 +685,21 @@ applications:
   memory: 1G
   disk_quota: 1G
   instances: 1
-  path: spring-cloud-dataflow-server-cloudfoundry-VERSION.jar
+  path: spring-cloud-dataflow-server-VERSION.jar
   env:
     SPRING_APPLICATION_NAME: test-server
+    MAVEN_REMOTE_REPOSITORIES_REPO1_URL: https://repo.spring.io/libs-snapshot
+    SPRING_CLOUD_DATAFLOW_TASK_PLATFORM_CLOUDFOUNDRY_ACCOUNTS[default]_CONNECTION_URL: https://api.sys.huron.cf-app.com
+    SPRING_CLOUD_DATAFLOW_TASK_PLATFORM_CLOUDFOUNDRY_ACCOUNTS[default]_CONNECTION_ORG: sabby20
+    SPRING_CLOUD_DATAFLOW_TASK_PLATFORM_CLOUDFOUNDRY_ACCOUNTS[default]_CONNECTION_SPACE: sabby20
+    SPRING_CLOUD_DATAFLOW_TASK_PLATFORM_CLOUDFOUNDRY_ACCOUNTS[default]_CONNECTION_DOMAIN: apps.huron.cf-app.com
+    SPRING_CLOUD_DATAFLOW_TASK_PLATFORM_CLOUDFOUNDRY_ACCOUNTS[default]_CONNECTION_USERNAME: admin
+    SPRING_CLOUD_DATAFLOW_TASK_PLATFORM_CLOUDFOUNDRY_ACCOUNTS[default]_CONNECTION_PASSWORD: ***
+    SPRING_CLOUD_DATAFLOW_TASK_PLATFORM_CLOUDFOUNDRY_ACCOUNTS[default]_CONNECTION_SKIP_SSL_VALIDATION: true
+    SPRING_CLOUD_DATAFLOW_TASK_PLATFORM_CLOUDFOUNDRY_ACCOUNTS[default]_DEPLOYMENT_SERVICES: mysql, config-server
     SPRING_CLOUD_SKIPPER_CLIENT_SERVER_URI: https://<skipper-host-name>/api
-    SPRING_APPLICATION_JSON: '{ "maven": { "remote-repositories": { "repo1": { "url": "https://repo.spring.io/libs-snapshot" } } }, "spring": { "cloud": { "dataflow": { "task": { "platform": { "cloudfoundry": { "accounts": { "default": { "connection": { "url": "<URL>", "org": "<ORG>", "space": "<SPACE>", "domain": "<DOMAIN>", "username": "<USER>", "password": "<PASSWORD>"}, "deployment": { "services": "mysql,config-server" } } } } } } } } } }'
-
     TRUST_CERTS: <API_ENDPOINT> #this is for the server
-    spring.cloud.dataflow.applicationProperties.stream.TRUST_CERTS: <API_ENDPOINT> #this propagates to all streams
-    spring.cloud.dataflow.applicationProperties.task.TRUST_CERTS: <API_ENDPOINT>   #this propagates to all tasks
+    SPRING_CLOUD_DATAFLOW_APPLICATION_PROPERTIES_TASK_TRUST_CERTS: <API_ENDPOINT>   #this propagates to all tasks
 services:
 - mysql
 - my-config-server #this is for the server
@@ -735,13 +725,13 @@ applications:
     SPRING_APPLICATION_NAME: skipper-server
     SPRING_CLOUD_SKIPPER_SERVER_ENABLE_LOCAL_PLATFORM: false
     SPRING_CLOUD_SKIPPER_SERVER_STRATEGIES_HEALTHCHECK_TIMEOUTINMILLIS: 300000
-    SPRING_CLOUD_SKIPPER_SERVER_PLATFORM_CLOUDFOUNDRY_ACCOUNTS[pws]_CONNECTION_URL: <URL>
-    SPRING_CLOUD_SKIPPER_SERVER_PLATFORM_CLOUDFOUNDRY_ACCOUNTS[pws]_CONNECTION_ORG: <ORG>
-    SPRING_CLOUD_SKIPPER_SERVER_PLATFORM_CLOUDFOUNDRY_ACCOUNTS[pws]_CONNECTION_SPACE: <SPACE>
-    SPRING_CLOUD_SKIPPER_SERVER_PLATFORM_CLOUDFOUNDRY_ACCOUNTS[pws]_DEPLOYMENT_DOMAIN: <DOMAIN>
-    SPRING_CLOUD_SKIPPER_SERVER_PLATFORM_CLOUDFOUNDRY_ACCOUNTS[pws]_CONNECTION_USERNAME: <USER>
-    SPRING_CLOUD_SKIPPER_SERVER_PLATFORM_CLOUDFOUNDRY_ACCOUNTS[pws]_CONNECTION_PASSWORD: <PASSWORD>
-    SPRING_CLOUD_SKIPPER_SERVER_PLATFORM_CLOUDFOUNDRY_ACCOUNTS[pws]_DEPLOYMENT_SERVICES: rabbit, my-config-server #this is so all stream applications bind to my-config-server
+    SPRING_CLOUD_SKIPPER_SERVER_PLATFORM_CLOUDFOUNDRY_ACCOUNTS[default]_CONNECTION_URL: <URL>
+    SPRING_CLOUD_SKIPPER_SERVER_PLATFORM_CLOUDFOUNDRY_ACCOUNTS[default]_CONNECTION_ORG: <ORG>
+    SPRING_CLOUD_SKIPPER_SERVER_PLATFORM_CLOUDFOUNDRY_ACCOUNTS[default]_CONNECTION_SPACE: <SPACE>
+    SPRING_CLOUD_SKIPPER_SERVER_PLATFORM_CLOUDFOUNDRY_ACCOUNTS[default]_DEPLOYMENT_DOMAIN: <DOMAIN>
+    SPRING_CLOUD_SKIPPER_SERVER_PLATFORM_CLOUDFOUNDRY_ACCOUNTS[default]_CONNECTION_USERNAME: <USER>
+    SPRING_CLOUD_SKIPPER_SERVER_PLATFORM_CLOUDFOUNDRY_ACCOUNTS[default]_CONNECTION_PASSWORD: <PASSWORD>
+    SPRING_CLOUD_SKIPPER_SERVER_PLATFORM_CLOUDFOUNDRY_ACCOUNTS[default]_DEPLOYMENT_SERVICES: rabbit, my-config-server #this is so all stream applications bind to my-config-server
 services:
 - mysql
   my-config-server
