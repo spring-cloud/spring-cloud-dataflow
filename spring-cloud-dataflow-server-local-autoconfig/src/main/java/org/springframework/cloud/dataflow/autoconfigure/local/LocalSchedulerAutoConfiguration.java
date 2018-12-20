@@ -19,6 +19,7 @@ import java.util.List;
 
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.boot.autoconfigure.condition.NoneNestedConditions;
 import org.springframework.cloud.dataflow.server.config.features.SchedulerConfiguration;
 import org.springframework.cloud.scheduler.spi.core.ScheduleInfo;
 import org.springframework.cloud.scheduler.spi.core.ScheduleRequest;
@@ -32,10 +33,21 @@ import org.springframework.context.annotation.Profile;
  * @author Mark Pollack
  */
 @Configuration
-@Conditional({ SchedulerConfiguration.SchedulerConfigurationPropertyChecker.class })
+@Conditional({ SchedulerConfiguration.SchedulerConfigurationPropertyChecker.class,
+		LocalSchedulerAutoConfiguration.OnNotKubernetesPlatform.class })
 @Profile("!cloud") // Server not deployed on CF
-@ConditionalOnProperty(name = "kubernetes.service.host", matchIfMissing = true) // Server not deployed on K8s
 public class LocalSchedulerAutoConfiguration {
+
+	static class OnNotKubernetesPlatform extends NoneNestedConditions {
+
+		public OnNotKubernetesPlatform(ConfigurationPhase configurationPhase) {
+			super(configurationPhase);
+		}
+
+		@ConditionalOnProperty(name = "kubernetes.service.host")
+		static class OnKubernetesPlatform {
+		}
+	}
 
 	@Bean
 	@ConditionalOnMissingBean
