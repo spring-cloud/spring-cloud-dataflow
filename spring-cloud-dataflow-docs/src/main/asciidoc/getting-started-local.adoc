@@ -48,7 +48,7 @@ In the directory where you downloaded `docker-compose.yml`, start the system, as
 [source,bash,subs=attributes]
 ----
 $ export DATAFLOW_VERSION={local-server-image-tag}
-$ export SKIPPER_VERSION=1.1.2.RELEASE
+$ export SKIPPER_VERSION={skipper-version}
 $ docker-compose up
 ----
 +
@@ -58,7 +58,7 @@ A shorthand version which only exposes the `DATAFLOW_VERSION` and `SKIPPER_VERSI
 +
 [source,bash,subs=attributes]
 ----
-$ DATAFLOW_VERSION={local-server-image-tag} SKIPPER_VERSION=1.1.2.RELEASE docker-compose up
+$ DATAFLOW_VERSION={local-server-image-tag} SKIPPER_VERSION={skipper-version} docker-compose up
 ----
 +
 When using Windows, environment variables are defined by using the `set` command. To start the system on Windows, enter the following commands:
@@ -66,7 +66,7 @@ When using Windows, environment variables are defined by using the `set` command
 [source,bash,subs=attributes]
 ----
 C:\ set DATAFLOW_VERSION={local-server-image-tag}
-C:\ set SKIPPER_VERSION=1.1.2.RELEASE
+C:\ set SKIPPER_VERSION={skipper-version}
 C:\ docker-compose up
 ----
 +

@@ -369,9 +369,7 @@ The following table lists the bit.ly links to the available Stream Application S
 
 The following table lists the bit.ly links to the available Stream Application Starters based on Spring Boot 2.0.x:
 
-NOTE: App Starter actuator endpoints are secured by default.  You can disable security by deploying streams with the property `app.*.spring.autoconfigure.exclude=org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration`.  On Kubernetes refer to the section https://docs.spring.io/spring-cloud-dataflow-server-kubernetes/docs/current/reference/htmlsingle/#_liveness_and_readiness_probes[Liveness and readiness probes] to configure security for actuator endpoints.
-
-
+NOTE: App Starter actuator endpoints are secured by default.  You can disable security by deploying streams with the property `app.*.spring.autoconfigure.exclude=org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration`.  On Kubernetes refer to the section <<getting-started-kubernetes-probes, Liveness and readiness probes>> to configure security for actuator endpoints.
 
 [width="100%",frame="topbot",options="header"]
 |======================

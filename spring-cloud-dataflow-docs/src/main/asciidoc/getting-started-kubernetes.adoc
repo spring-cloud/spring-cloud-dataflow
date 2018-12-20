@@ -81,7 +81,7 @@ To check out the code, enter the following commands:
 [source,console,subs=attributes]
 ----
 $ git clone https://github.com/{github-repo}
-$ cd spring-cloud-dataflow-server-kubernetes
+$ cd spring-cloud-dataflow-server
 $ git checkout {github-tag}
 ----
 ====
@@ -233,12 +233,12 @@ The deployment is defined in the `src/kubernetes/skipper/skipper-deployment.yaml
 To control what version of Skipper gets deployed, modify the tag used for the Docker image in the container specification, as the following example shows:
 +
 ====
-[source,yaml]
+[source,yaml,subs=attributes]
 ----
     spec:
       containers:
       - name: skipper
-        image: springcloud/spring-cloud-skipper-server:1.2.0.RELEASE   # <1>
+        image: springcloud/spring-cloud-skipper-server:{skipper-version}   # <1>
         imagePullPolicy: Always
 ----
 
@@ -288,12 +288,12 @@ The deployment is defined in the `src/kubernetes/server/server-deployment.yaml` 
 To control which version of Spring Cloud Data Flow server gets deployed, modify the tag used for the Docker image in the container specification, as follows:
 +
 ====
-[source,yaml]
+[source,yaml,subs=attributes]
 ----
     spec:
       containers:
       - name: scdf-server
-        image: springcloud/spring-cloud-dataflow-server-kubernetes:2.0.0.RELEASE   # <1>
+        image: springcloud/spring-cloud-dataflow-server:{project-version}      # <1>
         imagePullPolicy: Always
 ----
 
@@ -1385,6 +1385,7 @@ anotherhost:9093'`
 
 This overrides the JVM memory setting for the desired `<app>` (replace `<app>` with the name of your application).
 
+[[getting-started-kubernetes-probes]]
 ==== Liveness and Readiness Probes
 
 The `liveness` and `readiness` probes use paths called `/health` and `/info` respectively. They use a `delay` of `10` for both and a `period` of `60` and `10` respectively. You can change these defaults when you deploy the stream by using deployer properties.

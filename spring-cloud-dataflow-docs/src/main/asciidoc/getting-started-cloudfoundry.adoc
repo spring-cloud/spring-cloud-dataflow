@@ -65,9 +65,9 @@ Starting with 2.0.x, the Data Flow Server requires a `Skipper` server for managi
 ====
 [source,yaml,subs=attributes]
 ----
-wget http://repo.spring.io/{version-type-lowercase}/org/springframework/cloud/spring-cloud-dataflow-server-cloudfoundry/{project-version}/spring-cloud-dataflow-server-cloudfoundry-{project-version}.jar
+wget https://repo.spring.io/{version-type-lowercase}/org/springframework/cloud/spring-cloud-dataflow-server/{project-version}/spring-cloud-dataflow-server-{project-version}.jar
 
-wget http://repo.spring.io/{dataflow-version-type-lowercase}/org/springframework/cloud/spring-cloud-dataflow-shell/{dataflow-project-version}/spring-cloud-dataflow-shell-{dataflow-project-version}.jar
+wget https://repo.spring.io/{version-type-lowercase}/org/springframework/cloud/spring-cloud-dataflow-shell/{project-version}/spring-cloud-dataflow-shell-{project-version}.jar
 ----
 ====
 . Download http://cloud.spring.io/spring-cloud-skipper/[Skipper] to which Data Flow delegate Streams lifecycle operations such as deployment, upgrading and rolling back.
