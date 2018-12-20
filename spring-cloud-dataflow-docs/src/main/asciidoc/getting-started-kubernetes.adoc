@@ -1287,7 +1287,7 @@ The deployer uses `ReplicationController` by default. To use deployments instead
 [source,yaml]
 ----
 env:
-- name: SPRING_CLOUD_DEPLOYER_KUBERNETES_CREATE_DEPLOYMENT
+- name: SPRING_CLOUD_DATAFLOW_TASK_PLATFORM_KUBERNETES_ACCOUNTS[default]_CREATE_DEPLOYMENT
   value: 'true'
 ----
 ====
@@ -1355,9 +1355,9 @@ You can also control the default values to which to set the `cpu` and `memory` r
 [source,yaml]
 ----
 env:
-- name: SPRING_CLOUD_DEPLOYER_KUBERNETES_CPU
+- name: SPRING_CLOUD_DATAFLOW_TASK_PLATFORM_KUBERNETES_ACCOUNTS[default]_CPU
   value: 500m
-- name: SPRING_CLOUD_DEPLOYER_KUBERNETES_MEMORY
+- name: SPRING_CLOUD_DATAFLOW_TASK_PLATFORM_KUBERNETES_ACCOUNTS[default]_MEMORY
   value: 640Mi
 ----
 ====
@@ -1407,11 +1407,11 @@ The same can be declared as part of the container env section in a deployment YA
 [source]
 ----
 env:
-- name: SPRING_CLOUD_DEPLOYER_KUBERNETES_LIVENESS_PROBE_PATH
+- name: SPRING_CLOUD_DATAFLOW_TASK_PLATFORM_KUBERNETES_ACCOUNTS[default]_LIVENESS_PROBE_PATH
   value: '/health'
-- name: SPRING_CLOUD_DEPLOYER_KUBERNETES_LIVENESS_PROBE_DELAY
+- name: SPRING_CLOUD_DATAFLOW_TASK_PLATFORM_KUBERNETES_ACCOUNTS[default]_LIVENESS_PROBE_DELAY
   value: '120'
-- name: SPRING_CLOUD_DEPLOYER_KUBERNETES_LIVENESS_PROBE_PERIOD
+- name: SPRING_CLOUD_DATAFLOW_TASK_PLATFORM_KUBERNETES_ACCOUNTS[default]_LIVENESS_PROBE_PERIOD
   value: '20'
 ----
 ====
@@ -1434,9 +1434,9 @@ You can also set the port values in the container `env` section of a deployment 
 [source]
 ----
 env:
-- name: SPRING_CLOUD_DEPLOYER_KUBERNETES_READINESS_PROBE_PORT
+- name: SPRING_CLOUD_DATAFLOW_TASK_PLATFORM_KUBERNETES_ACCOUNTS[default]_READINESS_PROBE_PORT
   value: '7000'
-- name: SPRING_CLOUD_DEPLOYER_KUBERNETES_LIVENESS_PROBE_PORT
+- name: SPRING_CLOUD_DATAFLOW_TASK_PLATFORM_KUBERNETES_ACCOUNTS[default]_LIVENESS_PROBE_PORT
   value: '7000'
 ----
 ====
@@ -1557,7 +1557,7 @@ You can also configure the image pull secret at the server level in the containe
 [source]
 ----
 env:
-- name: SPRING_CLOUD_DEPLOYER_KUBERNETES_IMAGE_PULL_SECRET
+- name: SPRING_CLOUD_DATAFLOW_TASK_PLATFORM_KUBERNETES_ACCOUNTS[default]_IMAGE_PULL_SECRET
   value: mysecret
 ----
 ====
@@ -1608,7 +1608,7 @@ You can also configure the Entry Point Style at the server level in the containe
 [source]
 ----
 env:
-- name: SPRING_CLOUD_DEPLOYER_KUBERNETES_ENTRY_POINT_STYLE
+- name: SPRING_CLOUD_DATAFLOW_TASK_PLATFORM_KUBERNETES_ACCOUNTS[default]_ENTRY_POINT_STYLE
   value: entryPointStyle
 ----
 ====
@@ -1650,7 +1650,7 @@ You can also configure the service account name at the server level in the conta
 [source]
 ----
 env:
-- name: SPRING_CLOUD_DEPLOYER_KUBERNETES_DEPLOYMENT_SERVICE_ACCOUNT_NAME
+- name: SPRING_CLOUD_DATAFLOW_TASK_PLATFORM_KUBERNETES_ACCOUNTS[default]_DEPLOYMENT_SERVICE_ACCOUNT_NAME
   value: myserviceaccountname
 ----
 ====
@@ -1682,7 +1682,7 @@ You can configure an image pull policy at the server level in the container `env
 [source]
 ----
         env:
-        - name: SPRING_CLOUD_DEPLOYER_KUBERNETES_IMAGE_PULL_POLICY
+        - name: SPRING_CLOUD_DATAFLOW_TASK_PLATFORM_KUBERNETES_ACCOUNTS[default]_IMAGE_PULL_POLICY
           value: Always
 ----
 ====
