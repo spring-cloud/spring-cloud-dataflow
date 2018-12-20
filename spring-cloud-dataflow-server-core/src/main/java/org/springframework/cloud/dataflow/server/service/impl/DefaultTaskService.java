@@ -23,12 +23,16 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import org.springframework.boot.autoconfigure.jdbc.DataSourceProperties;
 import org.springframework.cloud.dataflow.configuration.metadata.ApplicationConfigurationMetadataResolver;
 import org.springframework.cloud.dataflow.core.ApplicationType;
 import org.springframework.cloud.dataflow.core.AuditActionType;
 import org.springframework.cloud.dataflow.core.AuditOperationType;
 import org.springframework.cloud.dataflow.core.DefinitionUtils;
+import org.springframework.cloud.dataflow.core.Launcher;
 import org.springframework.cloud.dataflow.core.TaskDefinition;
 import org.springframework.cloud.dataflow.core.dsl.TaskNode;
 import org.springframework.cloud.dataflow.core.dsl.TaskParser;
@@ -75,6 +79,8 @@ import org.springframework.util.StringUtils;
  */
 @Transactional
 public class DefaultTaskService implements TaskService {
+
+	private static final Logger logger = LoggerFactory.getLogger(DefaultTaskService.class);
 
 	private final DataSourceProperties dataSourceProperties;
 
@@ -219,7 +225,12 @@ public class DefaultTaskService implements TaskService {
 		List<String> updatedCmdLineArgs = this.updateCommandLineArgs(commandLineArgs, taskExecution);
 		AppDeploymentRequest request = new AppDeploymentRequest(revisedDefinition, appResource,
 				deployerDeploymentProperties, updatedCmdLineArgs);
-		TaskLauncher taskLauncher = this.launcherRepository.findByName(platformName).getTaskLauncher();
+		Launcher launcher = this.launcherRepository.findByName(platformName);
+		if (launcher == null) {
+			throw new IllegalStateException(String.format("No Launcher found for the platform named '%s'",
+					platformName));
+		}
+		TaskLauncher taskLauncher = launcher.getTaskLauncher();
 		if (taskLauncher == null) {
 			throw new IllegalStateException(String.format("No TaskLauncher found for the platform named '%s'",
 					platformName));
@@ -280,8 +291,13 @@ public class DefaultTaskService implements TaskService {
 		String launchId = taskExecution.getExternalExecutionId();
 		Assert.hasLength(launchId, "The TaskExecution for id " + id + " did not have an externalExecutionId");
 		// TODO GH-2674
-		TaskLauncher taskLauncher = this.launcherRepository.findByName("default").getTaskLauncher();
-		taskLauncher.cleanup(launchId);
+		Launcher launcher = this.launcherRepository.findByName("default");
+		if (launcher != null) {
+			TaskLauncher taskLauncher = launcher.getTaskLauncher();
+			taskLauncher.cleanup(launchId);
+		} else {
+			logger.info("Could clean up execution for task id " + id + ". Did not find a task launcher named 'default'");
+		}
 	}
 
 	@Override
@@ -374,9 +390,15 @@ public class DefaultTaskService implements TaskService {
 
 	private void destroyTask(TaskDefinition taskDefinition) {
 		// TODO GH-2678
-		TaskLauncher taskLauncher = this.launcherRepository.findByName("default").getTaskLauncher();
-		taskLauncher.destroy(taskDefinition.getName());
-		taskDefinitionRepository.deleteById(taskDefinition.getName());
+		Launcher launcher = this.launcherRepository.findByName("default");
+		if (launcher != null) {
+			TaskLauncher taskLauncher = launcher.getTaskLauncher();
+			taskLauncher.destroy(taskDefinition.getName());
+			taskDefinitionRepository.deleteById(taskDefinition.getName());
+		} else {
+			logger.info("Could destory task definition " +
+					taskDefinition.getTaskName() + ". Did not find a task launcher named 'default'");
+		}
 	}
 
 }
