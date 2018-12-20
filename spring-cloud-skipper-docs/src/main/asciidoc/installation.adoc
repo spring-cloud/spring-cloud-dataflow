@@ -100,7 +100,6 @@ applications:
 env:
     SPRING_APPLICATION_NAME: mlp-skipper
     SPRING_CLOUD_SKIPPER_SERVER_ENABLE_LOCAL_PLATFORM: false
-    SPRING_CLOUD_SKIPPER_SERVER_STRATEGIES_HEALTHCHECK.TIMEOUTINMILLIS: 300000
     SPRING_CLOUD_SKIPPER_SERVER_PLATFORM_CLOUDFOUNDRY_ACCOUNTS[pws]_CONNECTION_URL: https://api.run.pivotal.io
     SPRING_CLOUD_SKIPPER_SERVER_PLATFORM_CLOUDFOUNDRY_ACCOUNTS[pws]_CONNECTION_ORG: myOrgQA
     SPRING_CLOUD_SKIPPER_SERVER_PLATFORM_CLOUDFOUNDRY_ACCOUNTS[pws]_CONNECTION_SPACE: mySpaceQA
@@ -139,6 +138,47 @@ skipper:>
 The Skipper server uses the Spring Cloud Connector library to create the DataSource with a default connection pool size of 4.
 To change the connection pool size and maximum wait time, set the following two properties `spring.cloud.skipper.server.cloudfoundry.maxPoolSize` and `spring.cloud.skipper.server.cloudfoundry.maxWaitTime`.
 The wait time is specified in milliseconds.
+
+[[skipper-installation-cloudfoundry-maximum-disk-quota-configuration]]
+=== Maximum Disk Quota
+By default, every application in Cloud Foundry starts with 1G disk quota and this can be adjusted to a default maximum of
+2G. The default maximum can also be overridden up to 10G by using Pivotal Cloud Foundry's (PCF) Ops Manager GUI.
+
+This configuration is relevant for Spring Cloud Skipper because every deployment is composed of applications
+(typically Spring Boot uber-jar's), and those applications are resolved from a remote maven repository. After resolution,
+the application artifacts are downloaded to the local Maven Repository for caching and reuse. With this happening in the background,
+the default disk quota (1G) can fill up rapidly, especially when we experiment with streams that
+are made up of unique applications. In order to overcome this disk limitation and depending
+on your scaling requirements, you may want to change the default maximum from 2G to 10G. Let's review the
+steps to change the default maximum disk quota allocation.
+
+From PCF's Ops Manager, select the "`Pivotal Elastic Runtime`" tile and navigate to the "`Application Developer Controls`" tab.
+Change the "`Maximum Disk Quota per App (MB)`" setting from 2048 (2G) to 10240 (10G). Save the disk quota update and click
+"`Apply Changes`" to complete the configuration override.
+
+[[configuration-cloudfoundry-managing-disk-utilization]]
+=== Managing Disk Use
+
+Even when configuring Skipper to use 10G of space, there is the possibility of exhausting
+the available space on the local disk.
+If you deploy the Skipper by using the default `port` health check type, you must explicitly monitor the disk space on the server in order to avoid running out space.
+If you deploy the server by using the `http` health check type (see the next example), the server is restarted if there is low disk space.
+This is due to Spring Boot's link:https://github.com/spring-projects/spring-boot/blob/v1.5.14.RELEASE/spring-boot-actuator/src/main/java/org/springframework/boot/actuate/health/DiskSpaceHealthIndicator.java[Disk Space Health Indicator].
+You can link:https://docs.spring.io/spring-boot/docs/1.5.14.RELEASE/reference/htmlsingle/#common-application-properties[configure] the settings of the Disk Space Health Indicator by using the properties that have the `management.health.diskspace` prefix.
+
+For version 1.7, we are investigating the use of link:https://docs.cloudfoundry.org/devguide/services/using-vol-services.html[Volume Services] for the server to store `.jar` artifacts before pushing them to Cloud Foundry.
+
+The following example shows how to deploy the `http` health check type to an endpoint called `/management/health`:
+
+====
+[source]
+----
+---
+  ...
+  health-check-type: http
+  health-check-http-endpoint: /management/health
+----
+====
 
 [[skipper-installation-kubernetes]]
 == Installing on Kubernetes
