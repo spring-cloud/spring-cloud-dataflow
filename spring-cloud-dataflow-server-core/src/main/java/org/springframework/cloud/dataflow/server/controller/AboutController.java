@@ -23,6 +23,7 @@ import org.slf4j.LoggerFactory;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cloud.common.security.support.SecurityStateBean;
+import org.springframework.cloud.dataflow.core.Launcher;
 import org.springframework.cloud.dataflow.rest.resource.about.AboutResource;
 import org.springframework.cloud.dataflow.rest.resource.about.Dependency;
 import org.springframework.cloud.dataflow.rest.resource.about.FeatureInfo;
@@ -175,23 +176,27 @@ public class AboutController {
 			}
 
 			if (this.launcherRepository != null) {
-				TaskLauncher taskLauncher = this.launcherRepository.findByName("default").getTaskLauncher();
-				final RuntimeEnvironmentInfo taskLauncherEnvironmentInfo = taskLauncher.environmentInfo();
 				final RuntimeEnvironmentDetails taskLauncherInfo = new RuntimeEnvironmentDetails();
 
-				taskLauncherInfo.setDeployerImplementationVersion(taskLauncherEnvironmentInfo.getImplementationVersion());
-				taskLauncherInfo.setDeployerName(taskLauncherEnvironmentInfo.getImplementationName());
-				taskLauncherInfo.setDeployerSpiVersion(taskLauncherEnvironmentInfo.getSpiVersion());
-				taskLauncherInfo.setJavaVersion(taskLauncherEnvironmentInfo.getJavaVersion());
-				taskLauncherInfo.setPlatformApiVersion(taskLauncherEnvironmentInfo.getPlatformApiVersion());
-				taskLauncherInfo.setPlatformClientVersion(taskLauncherEnvironmentInfo.getPlatformClientVersion());
-				taskLauncherInfo.setPlatformHostVersion(taskLauncherEnvironmentInfo.getPlatformHostVersion());
-				taskLauncherInfo.setPlatformSpecificInfo(taskLauncherEnvironmentInfo.getPlatformSpecificInfo());
-				taskLauncherInfo.setPlatformHostVersion(taskLauncherEnvironmentInfo.getPlatformHostVersion());
-				taskLauncherInfo.setPlatformType(taskLauncherEnvironmentInfo.getPlatformType());
-				taskLauncherInfo.setSpringBootVersion(taskLauncherEnvironmentInfo.getSpringBootVersion());
-				taskLauncherInfo.setSpringVersion(taskLauncherEnvironmentInfo.getSpringVersion());
-
+				Launcher launcher = this.launcherRepository.findByName("default");
+				if (launcher == null) {
+					logger.info("Could not find a task launcher named 'default'");
+				} else {
+					TaskLauncher taskLauncher = launcher.getTaskLauncher();
+					final RuntimeEnvironmentInfo taskLauncherEnvironmentInfo = taskLauncher.environmentInfo();
+					taskLauncherInfo.setDeployerImplementationVersion(taskLauncherEnvironmentInfo.getImplementationVersion());
+					taskLauncherInfo.setDeployerName(taskLauncherEnvironmentInfo.getImplementationName());
+					taskLauncherInfo.setDeployerSpiVersion(taskLauncherEnvironmentInfo.getSpiVersion());
+					taskLauncherInfo.setJavaVersion(taskLauncherEnvironmentInfo.getJavaVersion());
+					taskLauncherInfo.setPlatformApiVersion(taskLauncherEnvironmentInfo.getPlatformApiVersion());
+					taskLauncherInfo.setPlatformClientVersion(taskLauncherEnvironmentInfo.getPlatformClientVersion());
+					taskLauncherInfo.setPlatformHostVersion(taskLauncherEnvironmentInfo.getPlatformHostVersion());
+					taskLauncherInfo.setPlatformSpecificInfo(taskLauncherEnvironmentInfo.getPlatformSpecificInfo());
+					taskLauncherInfo.setPlatformHostVersion(taskLauncherEnvironmentInfo.getPlatformHostVersion());
+					taskLauncherInfo.setPlatformType(taskLauncherEnvironmentInfo.getPlatformType());
+					taskLauncherInfo.setSpringBootVersion(taskLauncherEnvironmentInfo.getSpringBootVersion());
+					taskLauncherInfo.setSpringVersion(taskLauncherEnvironmentInfo.getSpringVersion());
+				}
 				runtimeEnvironment.setTaskLauncher(taskLauncherInfo);
 			}
 		}
