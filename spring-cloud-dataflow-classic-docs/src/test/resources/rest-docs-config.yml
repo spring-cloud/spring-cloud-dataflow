@@ -10,3 +10,7 @@ spring:
           uri: http://localhost:${fakeMetricsCollector.port}
   autoconfigure:
     exclude: org.springframework.cloud.deployer.spi.cloudfoundry.CloudFoundryDeployerAutoConfiguration,org.springframework.cloud.deployer.spi.kubernetes.KubernetesAutoConfiguration,org.springframework.cloud.dataflow.rest.client.config.DataFlowClientAutoConfiguration,org.springframework.boot.autoconfigure.session.SessionAutoConfiguration,org.springframework.cloud.dataflow.shell.autoconfigure.BaseShellAutoConfiguration
+maven:
+  remoteRepositories:
+    springRepo:
+      url: https://repo.spring.io/libs-snapshot
