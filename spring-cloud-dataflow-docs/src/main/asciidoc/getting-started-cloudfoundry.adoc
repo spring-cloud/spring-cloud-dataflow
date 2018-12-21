@@ -285,7 +285,7 @@ Now we are ready to start the server application, as follows:
 ====
 [source, subs=attributes]
 ----
-java -jar spring-cloud-dataflow-server-cloudfoundry-{project-version}.jar
+java -jar spring-cloud-dataflow-server-{project-version}.jar
 ----
 ====
 
