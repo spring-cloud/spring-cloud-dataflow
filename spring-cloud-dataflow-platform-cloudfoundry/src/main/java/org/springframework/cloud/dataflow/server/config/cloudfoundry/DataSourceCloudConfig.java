@@ -50,7 +50,7 @@ public class DataSourceCloudConfig extends AbstractCloudConfig {
 
 	@Bean
 	@ConditionalOnProperty(prefix = FeaturesProperties.FEATURES_PREFIX, name = FeaturesProperties.ANALYTICS_ENABLED, matchIfMissing = true)
-	public RedisConnectionFactory redisFactory() {
+	public RedisConnectionFactory scdfRedisConnectionFactory() {
 		return connectionFactory().redisConnectionFactory();
 	}
 
@@ -59,6 +59,11 @@ public class DataSourceCloudConfig extends AbstractCloudConfig {
 	@Bean
 	public DataSourceBeanFactoryPostProcessor dataSourceBeanFactoryPostProcessor() {
 		return new DataSourceBeanFactoryPostProcessor();
+	}
+
+	@Bean
+	public RedisConnectionFactoryBeanPostProcessor redisConnectionFactoryBeanPostProcessor() {
+		return new RedisConnectionFactoryBeanPostProcessor();
 	}
 
 }
