@@ -49,7 +49,7 @@ public class SearchPageableTests {
 
 	@Test
 	public void initializeSearchPageableWithNullSearchQuery() throws Exception {
-		final PageRequest pageable = new PageRequest(1, 5);
+		final PageRequest pageable = PageRequest.of(1, 5);
 		try {
 			new SearchPageable(pageable, null);
 		}
@@ -63,7 +63,7 @@ public class SearchPageableTests {
 
 	@Test
 	public void initializeSearchPageableWithEmptySearchQuery() throws Exception {
-		final PageRequest pageable = new PageRequest(1, 5);
+		final PageRequest pageable = PageRequest.of(1, 5);
 		try {
 			new SearchPageable(pageable, "  ");
 		}
@@ -76,8 +76,8 @@ public class SearchPageableTests {
 	}
 
 	@Test
-	public void addNullCollumn() throws Exception {
-		final PageRequest pageable = new PageRequest(1, 5);
+	public void addNullColumn() throws Exception {
+		final PageRequest pageable = PageRequest.of(1, 5);
 		final SearchPageable searchPageable = new SearchPageable(pageable, "findByTaskNameLike query");
 
 		try {
@@ -92,8 +92,8 @@ public class SearchPageableTests {
 	}
 
 	@Test
-	public void addNullCollumn2() throws Exception {
-		final PageRequest pageable = new PageRequest(1, 5);
+	public void addNullColumn2() throws Exception {
+		final PageRequest pageable = PageRequest.of(1, 5);
 		final SearchPageable searchPageable = new SearchPageable(pageable, "findByTaskNameLike query");
 
 		try {
@@ -108,8 +108,8 @@ public class SearchPageableTests {
 	}
 
 	@Test
-	public void addWhitespaceCollumn() throws Exception {
-		final PageRequest pageable = new PageRequest(1, 5);
+	public void addWhitespaceColumn() throws Exception {
+		final PageRequest pageable = PageRequest.of(1, 5);
 		final SearchPageable searchPageable = new SearchPageable(pageable, "findByTaskNameLike query");
 
 		try {
@@ -125,7 +125,7 @@ public class SearchPageableTests {
 
 	@Test
 	public void testSearchPageableGetters() throws Exception {
-		final PageRequest pageable = new PageRequest(1, 5);
+		final PageRequest pageable = PageRequest.of(1, 5);
 		final SearchPageable searchPageable = new SearchPageable(pageable, "findByTaskNameLike query");
 
 		assertThat(searchPageable.getColumns(), is(empty()));

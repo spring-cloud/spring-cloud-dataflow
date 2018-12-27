@@ -80,7 +80,7 @@ public class TaskExecutionExplorerTests {
 		insertTestExecutionDataIntoRepo(template, 1L, "foo");
 		insertTestExecutionDataIntoRepo(template, 0L, "foo");
 
-		List<TaskExecution> resultList = explorer.findAll(new PageRequest(0, 10)).getContent();
+		List<TaskExecution> resultList = explorer.findAll(PageRequest.of(0, 10)).getContent();
 		assertEquals(String.format("expected %s entries returned from task_execution", ENTRY_COUNT), ENTRY_COUNT,
 				resultList.size());
 		Map<Long, TaskExecution> actual = new HashMap<>();
@@ -103,7 +103,7 @@ public class TaskExecutionExplorerTests {
 		insertTestExecutionDataIntoRepo(template, 1L, "baz");
 		insertTestExecutionDataIntoRepo(template, 0L, "fee");
 
-		List<TaskExecution> resultList = explorer.findTaskExecutionsByName("fee", new PageRequest(0, 10)).getContent();
+		List<TaskExecution> resultList = explorer.findTaskExecutionsByName("fee", PageRequest.of(0, 10)).getContent();
 		assertEquals("expected 1 entries returned from task_execution", 1, resultList.size());
 		TaskExecution taskExecution = resultList.get(0);
 		assertEquals("expected execution id does not match actual", 0, taskExecution.getExecutionId());

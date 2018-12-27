@@ -16,8 +16,8 @@
 package org.springframework.cloud.dataflow.server.single.security;
 
 import java.nio.charset.StandardCharsets;
+import java.util.Base64;
 
-import org.springframework.security.crypto.codec.Base64;
 import org.springframework.util.Assert;
 
 /**
@@ -37,6 +37,6 @@ public class SecurityTestUtils {
 		Assert.notNull(username, "The username must not be null.");
 		Assert.notNull(password, "The password must not be null.");
 
-		return "Basic " + new String(Base64.encode((username + ":" + password).getBytes(StandardCharsets.ISO_8859_1)));
+		return "Basic " + new String(Base64.getEncoder().encode((username + ":" + password).getBytes(StandardCharsets.ISO_8859_1)));
 	}
 }

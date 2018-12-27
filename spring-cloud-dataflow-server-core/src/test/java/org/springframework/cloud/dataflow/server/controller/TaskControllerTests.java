@@ -57,8 +57,7 @@ import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyVararg;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.atLeast;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -133,7 +132,7 @@ public class TaskControllerTests {
 		taskExecutionComplete.setExitCode(0);
 		when(taskExplorer.getLatestTaskExecutionForTaskName("myTask2")).thenReturn(taskExecutionComplete);
 
-		when(taskExplorer.getLatestTaskExecutionsByTaskNames(anyVararg())).thenReturn(Arrays.asList(taskExecutionRunning, taskExecutionComplete));
+		when(taskExplorer.getLatestTaskExecutionsByTaskNames(any())).thenReturn(Arrays.asList(taskExecutionRunning, taskExecutionComplete));
 	}
 
 	@Test(expected = IllegalArgumentException.class)

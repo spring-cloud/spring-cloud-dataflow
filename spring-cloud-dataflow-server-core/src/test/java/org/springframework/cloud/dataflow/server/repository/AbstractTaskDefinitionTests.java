@@ -54,7 +54,7 @@ public abstract class AbstractTaskDefinitionTests {
 
 	@Test
 	public void testFindAllNone() {
-		Pageable pageable = new PageRequest(1, 10);
+		Pageable pageable = PageRequest.of(1, 10);
 
 		Page<TaskDefinition> page = repository.findAll(pageable);
 
@@ -68,7 +68,7 @@ public abstract class AbstractTaskDefinitionTests {
 	@Test
 	public void testFindAllPageable() {
 		initializeRepository();
-		Pageable pageable = new PageRequest(0, 10);
+		Pageable pageable = PageRequest.of(0, 10);
 
 		Page<TaskDefinition> page = repository.findAll(pageable);
 
