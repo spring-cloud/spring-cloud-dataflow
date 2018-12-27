@@ -17,6 +17,8 @@ package org.springframework.cloud.dataflow.server.config.web;
 
 import java.sql.SQLException;
 import java.util.Arrays;
+import java.util.Locale;
+import java.util.TimeZone;
 
 import javax.servlet.ServletContext;
 
@@ -124,7 +126,7 @@ public class WebConfiguration implements ServletContextInitializer, ApplicationL
 	@Bean
 	public Jackson2ObjectMapperBuilderCustomizer dataflowObjectMapperBuilderCustomizer() {
 		return (builder) -> {
-			builder.dateFormat(new ISO8601DateFormatWithMilliSeconds());
+			builder.dateFormat(new ISO8601DateFormatWithMilliSeconds(TimeZone.getDefault(), Locale.getDefault(), true));
 			// apply SCDF Batch Mixins to
 			// ignore the JobExecution in StepExecution to prevent infinite loop.
 			// https://github.com/spring-projects/spring-hateoas/issues/333

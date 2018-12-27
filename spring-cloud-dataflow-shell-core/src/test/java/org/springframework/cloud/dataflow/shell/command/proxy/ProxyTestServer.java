@@ -46,7 +46,7 @@ public class ProxyTestServer {
 			.withFiltersSource(
 				new HttpFiltersSourceAdapter() {
 					public HttpFilters filterRequest(HttpRequest originalRequest, ChannelHandlerContext ctx) {
-						System.out.println("Request comining in " + originalRequest.getUri());
+						System.out.println("Request comining in " + originalRequest.uri());
 						return new HttpFiltersAdapter(originalRequest) {
 							@Override
 							public HttpResponse clientToProxyRequest(HttpObject httpObject) {

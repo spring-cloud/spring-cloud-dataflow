@@ -64,8 +64,8 @@ import org.springframework.test.context.junit4.SpringRunner;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyString;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -226,12 +226,12 @@ public class DefaultSchedulerServiceTests {
 
 	@Test(expected = UnsupportedOperationException.class)
 	public void testListPaginated() {
-		schedulerService.list(new PageRequest(0, 1));
+		schedulerService.list(PageRequest.of(0, 1));
 	}
 
 	@Test(expected = UnsupportedOperationException.class)
 	public void testListWithParamsPaginated() {
-		schedulerService.list(new PageRequest(0, 1), BASE_DEFINITION_NAME);
+		schedulerService.list(PageRequest.of(0, 1), BASE_DEFINITION_NAME);
 	}
 
 	@Test

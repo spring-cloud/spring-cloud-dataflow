@@ -15,7 +15,6 @@
  */
 package org.springframework.cloud.dataflow.server.audit.service;
 
-
 import java.util.HashMap;
 import java.util.Map;
 
@@ -35,8 +34,8 @@ import org.springframework.data.domain.PageRequest;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -70,7 +69,8 @@ public class DefaultAuditRecordServiceTests {
 	@Test
 	public void testPopulateAndSaveAuditRecord() {
 		final AuditRecordService auditRecordService = new DefaultAuditRecordService(this.auditRecordRepository);
-		auditRecordService.populateAndSaveAuditRecord(AuditOperationType.SCHEDULE, AuditActionType.CREATE, "1234", "my data");
+		auditRecordService.populateAndSaveAuditRecord(AuditOperationType.SCHEDULE, AuditActionType.CREATE, "1234",
+				"my data");
 
 		final ArgumentCaptor<AuditRecord> argument = ArgumentCaptor.forClass(AuditRecord.class);
 		verify(this.auditRecordRepository, times(1)).save(argument.capture());
@@ -83,7 +83,6 @@ public class DefaultAuditRecordServiceTests {
 		assertEquals("1234", auditRecord.getCorrelationId());
 		assertEquals("my data", auditRecord.getAuditData());
 	}
-
 
 	@Test
 	public void testPopulateAndSaveAuditRecordWithNullAuditActionType() {
@@ -121,7 +120,8 @@ public class DefaultAuditRecordServiceTests {
 		mapAuditData.put("foo1", "bar1");
 		mapAuditData.put("foofoo", "barbar");
 
-		auditRecordService.populateAndSaveAuditRecordUsingMapData(AuditOperationType.SCHEDULE, AuditActionType.CREATE, "1234", mapAuditData);
+		auditRecordService.populateAndSaveAuditRecordUsingMapData(AuditOperationType.SCHEDULE, AuditActionType.CREATE,
+				"1234", mapAuditData);
 
 		final ArgumentCaptor<AuditRecord> argument = ArgumentCaptor.forClass(AuditRecord.class);
 		verify(this.auditRecordRepository, times(1)).save(argument.capture());
@@ -143,7 +143,8 @@ public class DefaultAuditRecordServiceTests {
 		mapAuditData.put("foo", "bar");
 
 		try {
-			auditRecordService.populateAndSaveAuditRecordUsingMapData(AuditOperationType.SCHEDULE, null, "1234", mapAuditData);
+			auditRecordService.populateAndSaveAuditRecordUsingMapData(AuditOperationType.SCHEDULE, null, "1234",
+					mapAuditData);
 		}
 		catch (IllegalArgumentException e) {
 			assertEquals("auditActionType must not be null.", e.getMessage());
@@ -160,7 +161,8 @@ public class DefaultAuditRecordServiceTests {
 		mapAuditData.put("foo", "bar");
 
 		try {
-			auditRecordService.populateAndSaveAuditRecordUsingMapData(null, AuditActionType.CREATE, "1234", mapAuditData);
+			auditRecordService.populateAndSaveAuditRecordUsingMapData(null, AuditActionType.CREATE, "1234",
+					mapAuditData);
 		}
 		catch (IllegalArgumentException e) {
 			assertEquals("auditOperationType must not be null.", e.getMessage());
@@ -170,18 +172,21 @@ public class DefaultAuditRecordServiceTests {
 	}
 
 	@Test
-	public void testPopulateAndSaveAuditRecordUsingMapDataThrowingJsonProcessingException() throws JsonProcessingException {
+	public void testPopulateAndSaveAuditRecordUsingMapDataThrowingJsonProcessingException()
+			throws JsonProcessingException {
 		final ObjectMapper objectMapper = mock(ObjectMapper.class);
-		when(objectMapper.writeValueAsString(any(Object.class))).thenThrow(new JsonProcessingException("Error"){
+		when(objectMapper.writeValueAsString(any(Object.class))).thenThrow(new JsonProcessingException("Error") {
 			private static final long serialVersionUID = 1L;
 		});
 
-		final AuditRecordService auditRecordService = new DefaultAuditRecordService(this.auditRecordRepository, objectMapper);
+		final AuditRecordService auditRecordService = new DefaultAuditRecordService(this.auditRecordRepository,
+				objectMapper);
 
 		final Map<String, Object> mapAuditData = new HashMap<>(2);
 		mapAuditData.put("foo", "bar");
 
-		auditRecordService.populateAndSaveAuditRecordUsingMapData(AuditOperationType.SCHEDULE, AuditActionType.CREATE, "1234", mapAuditData);
+		auditRecordService.populateAndSaveAuditRecordUsingMapData(AuditOperationType.SCHEDULE, AuditActionType.CREATE,
+				"1234", mapAuditData);
 
 		final ArgumentCaptor<AuditRecord> argument = ArgumentCaptor.forClass(AuditRecord.class);
 		verify(this.auditRecordRepository, times(1)).save(argument.capture());
@@ -199,12 +204,14 @@ public class DefaultAuditRecordServiceTests {
 	public void testFindAuditRecordByAuditOperationTypeAndAuditActionType() {
 		AuditRecordService auditRecordService = new DefaultAuditRecordService(auditRecordRepository);
 
-		AuditActionType[] auditActionTypes = {AuditActionType.CREATE};
-		AuditOperationType[] auditOperationTypes = {AuditOperationType.STREAM};
+		AuditActionType[] auditActionTypes = { AuditActionType.CREATE };
+		AuditOperationType[] auditOperationTypes = { AuditOperationType.STREAM };
 		PageRequest pageRequest = PageRequest.of(0, 1);
-		auditRecordService.findAuditRecordByAuditOperationTypeAndAuditActionType(pageRequest, auditActionTypes, auditOperationTypes);
+		auditRecordService.findAuditRecordByAuditOperationTypeAndAuditActionType(pageRequest, auditActionTypes,
+				auditOperationTypes);
 
-		verify(this.auditRecordRepository, times(1)).findByAuditOperationInAndAuditActionIn(eq(auditOperationTypes),eq(auditActionTypes),eq(pageRequest));
+		verify(this.auditRecordRepository, times(1)).findByAuditOperationInAndAuditActionIn(eq(auditOperationTypes),
+				eq(auditActionTypes), eq(pageRequest));
 		verifyNoMoreInteractions(this.auditRecordRepository);
 	}
 
@@ -212,9 +219,10 @@ public class DefaultAuditRecordServiceTests {
 	public void testFindAuditRecordByAuditOperationTypeAndAuditActionTypeWithNullAuditActionType() {
 		AuditRecordService auditRecordService = new DefaultAuditRecordService(auditRecordRepository);
 
-		AuditOperationType[] auditOperationTypes = {AuditOperationType.STREAM};
+		AuditOperationType[] auditOperationTypes = { AuditOperationType.STREAM };
 		PageRequest pageRequest = PageRequest.of(0, 1);
-		auditRecordService.findAuditRecordByAuditOperationTypeAndAuditActionType(pageRequest, null, auditOperationTypes);
+		auditRecordService.findAuditRecordByAuditOperationTypeAndAuditActionType(pageRequest, null,
+				auditOperationTypes);
 
 		verify(this.auditRecordRepository, times(1)).findByAuditOperationIn(eq(auditOperationTypes), eq(pageRequest));
 		verifyNoMoreInteractions(this.auditRecordRepository);
@@ -224,7 +232,7 @@ public class DefaultAuditRecordServiceTests {
 	public void testFindAuditRecordByAuditOperationTypeAndAuditActionTypeWithNullOperationType() {
 		AuditRecordService auditRecordService = new DefaultAuditRecordService(auditRecordRepository);
 
-		AuditActionType[] auditActionTypes = {AuditActionType.CREATE};
+		AuditActionType[] auditActionTypes = { AuditActionType.CREATE };
 		PageRequest pageRequest = PageRequest.of(0, 1);
 		auditRecordService.findAuditRecordByAuditOperationTypeAndAuditActionType(pageRequest, auditActionTypes, null);
 

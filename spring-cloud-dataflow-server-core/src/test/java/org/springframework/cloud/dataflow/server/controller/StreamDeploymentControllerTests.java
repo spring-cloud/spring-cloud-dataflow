@@ -47,7 +47,7 @@ import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
-import static org.mockito.Matchers.anyListOf;
+import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -156,7 +156,7 @@ public class StreamDeploymentControllerTests {
 
 		when(this.streamDefinitionRepository.findById(streamDefinition.getName())).thenReturn(Optional.of(streamDefinition));
 		when(this.streamService.info(streamDefinition.getName())).thenReturn(streamDeployment);
-		when(this.streamService.state(anyListOf(StreamDefinition.class))).thenReturn(streamDeploymentStates);
+		when(this.streamService.state(anyList())).thenReturn(streamDeploymentStates);
 
 		StreamDeploymentResource streamDeploymentResource = this.controller.info(streamDefinition.getName());
 		Assert.assertTrue(streamDeploymentResource.getStreamName().equals(streamDefinition.getName()));

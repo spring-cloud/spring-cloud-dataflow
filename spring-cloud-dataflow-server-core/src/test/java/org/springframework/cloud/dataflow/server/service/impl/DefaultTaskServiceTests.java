@@ -66,9 +66,8 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyObject;
-import static org.mockito.Matchers.anyString;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.atLeast;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -152,7 +151,7 @@ public abstract class DefaultTaskServiceTests {
 		@DirtiesContext
 		public void executeSingleTaskTest() {
 			initializeSuccessfulRegistry(appRegistry);
-			when(taskLauncher.launch(anyObject())).thenReturn("0");
+			when(taskLauncher.launch(any())).thenReturn("0");
 			this.launcherRepository.save(new Launcher("local", "default", taskLauncher));
 			assertEquals(1L, this.taskService.executeTask(TASK_NAME_ORIG, new HashMap<>(), new LinkedList<>(),
 					"default"));
@@ -162,7 +161,7 @@ public abstract class DefaultTaskServiceTests {
 		@DirtiesContext
 		public void executeMultipleTasksTest() {
 			initializeSuccessfulRegistry(appRegistry);
-			when(taskLauncher.launch(anyObject())).thenReturn("0");
+			when(taskLauncher.launch(any())).thenReturn("0");
 			this.launcherRepository.save(new Launcher("local", "default", taskLauncher));
 			assertEquals(1L, this.taskService.executeTask(TASK_NAME_ORIG, new HashMap<>(), new LinkedList<>(),
 					"default"));
@@ -174,7 +173,7 @@ public abstract class DefaultTaskServiceTests {
 		@DirtiesContext
 		public void failOnLimitReached() {
 			initializeSuccessfulRegistry(this.appRegistry);
-			when(taskLauncher.launch(anyObject())).thenReturn("0");
+			when(taskLauncher.launch(any())).thenReturn("0");
 			this.launcherRepository.save(new Launcher("local", "default", taskLauncher));
 			assertEquals(10, taskService.getMaximumConcurrentTasks());
 			for (long i = 1; i <= taskService.getMaximumConcurrentTasks(); i++) {
@@ -192,7 +191,7 @@ public abstract class DefaultTaskServiceTests {
 		public void executeTaskWithNullIDReturnedTest() {
 			initializeSuccessfulRegistry(appRegistry);
 			boolean errorCaught = false;
-			when(this.taskLauncher.launch(anyObject())).thenReturn(null);
+			when(this.taskLauncher.launch(any())).thenReturn(null);
 			this.launcherRepository.save(new Launcher("local", "default", taskLauncher));
 			try {
 				taskService.executeTask(TASK_NAME_ORIG, new HashMap<>(), new LinkedList<>(), "default");
@@ -210,7 +209,7 @@ public abstract class DefaultTaskServiceTests {
 		@DirtiesContext
 		public void executeTaskWithNullDefinitionTest() {
 			boolean errorCaught = false;
-			when(this.taskLauncher.launch(anyObject())).thenReturn("0");
+			when(this.taskLauncher.launch(any())).thenReturn("0");
 			this.launcherRepository.save(new Launcher("local", "default", taskLauncher));
 			TaskService taskService = new DefaultTaskService(this.dataSourceProperties,
 					mock(TaskDefinitionRepository.class), this.taskExplorer, this.taskExecutionRepository,
@@ -285,7 +284,7 @@ public abstract class DefaultTaskServiceTests {
 			String dsl = "AAA && BBB";
 			initializeSuccessfulRegistry(appRegistry);
 			taskService.saveTaskDefinition("seqTask", dsl);
-			when(taskLauncher.launch(anyObject())).thenReturn("0");
+			when(taskLauncher.launch(any())).thenReturn("0");
 			Map<String, String> properties = new HashMap<>();
 			properties.put("app.foo", "bar");
 			properties.put("app.seqTask.AAA.timestamp.format", "YYYY");
@@ -315,7 +314,7 @@ public abstract class DefaultTaskServiceTests {
 			String dsl = "t1: AAA && t2: BBB";
 			initializeSuccessfulRegistry(appRegistry);
 			taskService.saveTaskDefinition("seqTask", dsl);
-			when(taskLauncher.launch(anyObject())).thenReturn("0");
+			when(taskLauncher.launch(any())).thenReturn("0");
 			Map<String, String> properties = new HashMap<>();
 			properties.put("app.seqTask.t1.timestamp.format", "YYYY");
 			properties.put("app.composed-task-runner.interval-time-between-checks", "1000");
