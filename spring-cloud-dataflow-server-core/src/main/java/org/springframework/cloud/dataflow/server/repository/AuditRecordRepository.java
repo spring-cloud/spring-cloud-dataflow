@@ -15,6 +15,7 @@
  */
 package org.springframework.cloud.dataflow.server.repository;
 
+import java.time.Instant;
 import java.util.List;
 
 import org.springframework.cloud.dataflow.core.AuditActionType;
@@ -30,6 +31,7 @@ import org.springframework.transaction.annotation.Transactional;
  * Repository interface for managing the {@link AuditRecord} class.
  *
  * @author Gunnar Hillert
+ * @author Daniel Serleg
  */
 @Transactional
 @Repository
@@ -46,5 +48,12 @@ public interface AuditRecordRepository
 
 	Page<AuditRecord> findByAuditOperationIn(AuditOperationType[] operations, Pageable pageable);
 
-	Page<AuditRecord> findByAuditOperationInAndAuditActionIn(AuditOperationType[] operations, AuditActionType[] actions, Pageable pageable);
+	Page<AuditRecord> findByAuditOperationInAndAuditActionIn(AuditOperationType[] operations, AuditActionType[] actions,
+			Pageable pageable);
+
+	Page<AuditRecord> findByCreatedOnBetween(Instant fromDate, Instant toDate, Pageable page);
+
+	Page<AuditRecord> findByCreatedOnLessThanEqual(Instant toDate, Pageable page);
+
+	Page<AuditRecord> findByCreatedOnGreaterThanEqual(Instant fromDate, Pageable page);
 }

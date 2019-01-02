@@ -15,6 +15,8 @@
  */
 package org.springframework.cloud.dataflow.server.service;
 
+import java.time.Instant;
+import java.time.format.DateTimeFormatter;
 import java.util.Map;
 import java.util.Optional;
 
@@ -36,7 +38,7 @@ import org.springframework.util.Assert;
  * Default implementation of the {@link AuditRecordService}.
  *
  * @author Gunnar Hillert
- *
+ * @author Daniel Serleg
  */
 public class DefaultAuditRecordService implements AuditRecordService {
 
@@ -114,4 +116,28 @@ public class DefaultAuditRecordService implements AuditRecordService {
 	public Optional<AuditRecord> findById(Long id) {
 		return this.auditRecordRepository.findById(id);
 	}
+
+	@Override
+	public Page<AuditRecord> findAuditRecordsByGivenDate(String fromDate, String toDate, Pageable pageable) {
+		if (fromDate != null && toDate == null) {
+			return this.auditRecordRepository.findByCreatedOnGreaterThanEqual(convertStringToInstant(fromDate),
+					pageable);
+		}
+		else if (fromDate == null && toDate != null) {
+			return this.auditRecordRepository.findByCreatedOnLessThanEqual(convertStringToInstant(toDate), pageable);
+		}
+		else if (fromDate != null && toDate != null) {
+			return this.auditRecordRepository.findByCreatedOnBetween(convertStringToInstant(fromDate),
+					convertStringToInstant(toDate), pageable);
+		}
+		else {
+			return this.auditRecordRepository.findAll(pageable);
+		}
+	}
+
+	private Instant convertStringToInstant(String date) {
+		final DateTimeFormatter formatter = DateTimeFormatter.ISO_DATE_TIME;
+		return Instant.from(formatter.parse(date));
+	}
+
 }

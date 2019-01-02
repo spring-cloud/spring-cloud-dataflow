@@ -47,6 +47,7 @@ import org.springframework.web.bind.annotation.RestController;
  * Controller for retrieving {@link AuditRecord}s.
  *
  * @author Gunnar Hillert
+ * @author Daniel Serleg
  */
 @RestController
 @RequestMapping("/audit-records")
@@ -75,8 +76,10 @@ public class AuditRecordController {
 	 *
 	 * @param pageable Pagination information
 	 * @param assembler assembler for {@link AuditRecord}
-	 * @param actions Optional. For which {@link AuditActionType}s do you want to retrieve {@link AuditRecord}s
-	 * @param operations Optional. For which {@link AuditOperationType}s do you want to retrieve {@link AuditRecord}s
+	 * @param actions Optional. For which {@link AuditActionType}s do you want to retrieve
+	 *     {@link AuditRecord}s
+	 * @param operations Optional. For which {@link AuditOperationType}s do you want to
+	 *     retrieve {@link AuditRecord}s
 	 * @return list of audit records
 	 */
 	@RequestMapping(value = "", method = RequestMethod.GET)
@@ -86,7 +89,38 @@ public class AuditRecordController {
 			@RequestParam(required = false) AuditOperationType[] operations,
 			PagedResourcesAssembler<AuditRecord> assembler) {
 		Page<AuditRecord> auditRecords = this.auditRecordService
-			.findAuditRecordByAuditOperationTypeAndAuditActionType(pageable, actions, operations);
+				.findAuditRecordByAuditOperationTypeAndAuditActionType(pageable, actions, operations);
+		return assembler.toResource(auditRecords, new Assembler(auditRecords));
+	}
+
+	/**
+	 * Return a page-able list of {@link AuditRecordResource}s depending on the date
+	 * parameters. The parser uses {@code DateTimeFormatter.ISO_DATE_TIME} to parse the String
+	 * parameters.
+	 *
+	 * If fomDate is null, the endpoint will return the {@link AuditRecord}s from the first
+	 * record until the given date. If toDate is null, the endpoint will return the
+	 * {@link AuditRecord}s from the given date to the last record. If both of the parameters
+	 * are not null the endpoint will return the {@link AuditRecord}s between the given range.
+	 * If both of the parameters are null it will return all of the inserted
+	 * {@link AuditRecord}s.
+	 *
+	 * @param pageable Pagination information
+	 * @param assembler assembler for {@link AuditRecord}
+	 * @param fromDate Optional. The from date in ISO_DATE_TIME format. eg.:
+	 *     2019-01-01T19:30:00.000-1:00
+	 * @param toDate Optional. The to date in ISO_DATE_TIME format. eg.:
+	 *     2019-01-04T19:30:00.000-1:00
+	 * @return list of audit records
+	 */
+	@RequestMapping(value = "query", method = RequestMethod.GET)
+	@ResponseStatus(HttpStatus.OK)
+	public PagedResources<AuditRecordResource> listByDate(Pageable pageable,
+			@RequestParam(required = false) String fromDate,
+			@RequestParam(required = false) String toDate,
+			PagedResourcesAssembler<AuditRecord> assembler) {
+		Page<AuditRecord> auditRecords = this.auditRecordService
+				.findAuditRecordsByGivenDate(fromDate, toDate, pageable);
 		return assembler.toResource(auditRecords, new Assembler(auditRecords));
 	}
 
@@ -153,7 +187,8 @@ public class AuditRecordController {
 			resource.setAuditRecordId(auditRecord.getId());
 			resource.setAuditAction(auditRecord.getAuditAction() != null ? auditRecord.getAuditAction().name() : null);
 			resource.setAuditData(auditRecord.getAuditData());
-			resource.setAuditOperation(auditRecord.getAuditOperation() != null ? auditRecord.getAuditOperation().name() : null);
+			resource.setAuditOperation(
+					auditRecord.getAuditOperation() != null ? auditRecord.getAuditOperation().name() : null);
 			resource.setCorrelationId(auditRecord.getCorrelationId());
 			resource.setCreatedBy(auditRecord.getCreatedBy());
 			resource.setCreatedOn(auditRecord.getCreatedOn());

@@ -35,7 +35,7 @@ import org.springframework.data.domain.Pageable;
  * to JSON using Jackson.
  *
  * @author Gunnar Hillert
- *
+ * @author Daniel Serleg
  */
 public interface AuditRecordService {
 
@@ -97,4 +97,15 @@ public interface AuditRecordService {
 	 */
 	Optional<AuditRecord> findById(Long id);
 
+	/**
+	 * Find and return the {@link AuditRecord}s between the given range. If both of them are
+	 * null all {@link AuditRecord}s will be returned.
+	 *
+	 * @param fromDate the start date of the query
+	 * @param toDate the end date of the query
+	 * @param pageable Contains pagination information. If null, all {@link AuditRecord}s will
+	 *     be returned
+	 * @return a {@link Page} of {@link AuditRecord}s
+	 */
+	Page<AuditRecord> findAuditRecordsByGivenDate(String fromDate, String toDate, Pageable pageable);
 }
