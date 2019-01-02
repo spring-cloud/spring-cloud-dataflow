@@ -108,9 +108,9 @@ public class AuditRecordController {
 	 * @param pageable Pagination information
 	 * @param assembler assembler for {@link AuditRecord}
 	 * @param fromDate Optional. The from date in ISO_DATE_TIME format. eg.:
-	 *     2019-01-01T19:30:00.000-1:00
+	 *     2019-01-01T19:30:00.000-01:00
 	 * @param toDate Optional. The to date in ISO_DATE_TIME format. eg.:
-	 *     2019-01-04T19:30:00.000-1:00
+	 *     2019-01-04T19:30:00.000-01:00
 	 * @return list of audit records
 	 */
 	@RequestMapping(value = "query", method = RequestMethod.GET)

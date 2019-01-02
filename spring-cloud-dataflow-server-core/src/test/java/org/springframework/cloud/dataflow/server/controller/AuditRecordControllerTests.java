@@ -15,6 +15,8 @@
  */
 package org.springframework.cloud.dataflow.server.controller;
 
+import java.time.ZoneOffset;
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
 
 import org.junit.After;
@@ -80,6 +82,12 @@ public class AuditRecordControllerTests {
 	@Autowired
 	private SkipperClient skipperClient;
 
+	private ZonedDateTime startDate;
+
+	private ZonedDateTime betweenDate;
+
+	private ZonedDateTime endDate;
+
 	@Before
 	public void setupMocks() throws Exception {
 		this.mockMvc = MockMvcBuilders.webAppContextSetup(wac)
@@ -90,17 +98,25 @@ public class AuditRecordControllerTests {
 		info.getStatus().setStatusCode(StatusCode.DEPLOYED);
 		when(skipperClient.status(ArgumentMatchers.anyString())).thenReturn(info);
 
-		when(skipperClient.search(ArgumentMatchers.anyString(), ArgumentMatchers.eq(false))).thenReturn(new Resources(new ArrayList<PackageMetadata>(), new Link[0]));
+		when(skipperClient.search(ArgumentMatchers.anyString(), ArgumentMatchers.eq(false)))
+				.thenReturn(new Resources(new ArrayList<PackageMetadata>(), new Link[0]));
+
+		startDate = ZonedDateTime.now();
 
 		mockMvc.perform(post("/streams/definitions/").param("name", "myStream").param("definition", "time | log")
 				.accept(MediaType.APPLICATION_JSON)).andExpect(status().isCreated());
 		mockMvc.perform(post("/streams/definitions/").param("name", "myStream1").param("definition", "time | log")
 				.accept(MediaType.APPLICATION_JSON)).andExpect(status().isCreated());
+
+		betweenDate = ZonedDateTime.now();
+
 		mockMvc.perform(post("/streams/definitions/").param("name", "myStream2").param("definition", "time | log")
 				.accept(MediaType.APPLICATION_JSON)).andExpect(status().isCreated());
-		mockMvc.perform(delete("/streams/definitions/myStream").accept(MediaType.APPLICATION_JSON))
-		.andExpect(status().isOk());
 
+		endDate = ZonedDateTime.now();
+
+		mockMvc.perform(delete("/streams/definitions/myStream").accept(MediaType.APPLICATION_JSON))
+				.andExpect(status().isOk());
 	}
 
 	@After
@@ -114,9 +130,9 @@ public class AuditRecordControllerTests {
 	/**
 	 * Verify that the correct number of {@link AuditRecord}s are persisted to the database.
 	 *
-	 * Keep in mind that {@link StreamService#deleteStream(String)}
-	 * does not only invokes {@link StreamDefinitionRepository#delete(String)} but also
-	 * {@link StreamService#undeployStream(String).
+	 * Keep in mind that {@link StreamService#deleteStream(String)} calls
+	 * {@link StreamService#deleteStream(String)} and
+	 * {@link StreamService#undeployStream(String)} too.
 	 */
 	@Test
 	public void testVerifyNumberOfAuditRecords() throws Exception {
@@ -127,111 +143,189 @@ public class AuditRecordControllerTests {
 	@Test
 	public void testRetrieveAllAuditRecords() throws Exception {
 		mockMvc.perform(get("/audit-records").accept(MediaType.APPLICATION_JSON))
-		.andDo(print())
-		.andExpect(status().isOk())
-		.andExpect(jsonPath("$.content.*", hasSize(5)));
+				.andDo(print())
+				.andExpect(status().isOk())
+				.andExpect(jsonPath("$.content.*", hasSize(5)));
 	}
 
 	@Test
 	public void testRetrieveAllAuditRecordsWithActionUndeploy() throws Exception {
 		mockMvc.perform(get("/audit-records?actions=UNDEPLOY").accept(MediaType.APPLICATION_JSON))
-		.andDo(print())
-		.andExpect(status().isOk())
-		.andExpect(jsonPath("$.content.*", hasSize(1)));
+				.andDo(print())
+				.andExpect(status().isOk())
+				.andExpect(jsonPath("$.content.*", hasSize(1)));
 	}
 
 	@Test
 	public void testRetrieveAllAuditRecordsWithOperationStream() throws Exception {
 		mockMvc.perform(get("/audit-records?operations=STREAM").accept(MediaType.APPLICATION_JSON))
-		.andDo(print())
-		.andExpect(status().isOk())
-		.andExpect(jsonPath("$.content.*", hasSize(5)));
+				.andDo(print())
+				.andExpect(status().isOk())
+				.andExpect(jsonPath("$.content.*", hasSize(5)));
 	}
 
 	@Test
 	public void testRetrieveAllAuditRecordsWithOperationTask() throws Exception {
 		mockMvc.perform(get("/audit-records?operations=TASK").accept(MediaType.APPLICATION_JSON))
-		.andDo(print())
-		.andExpect(status().isOk())
-		.andExpect(jsonPath("$.content.*", hasSize(0)));
+				.andDo(print())
+				.andExpect(status().isOk())
+				.andExpect(jsonPath("$.content.*", hasSize(0)));
 	}
 
 	@Test
 	public void testRetrieveAllAuditRecordsWithOperationTaskAndStream() throws Exception {
 		mockMvc.perform(get("/audit-records?operations=TASK,STREAM").accept(MediaType.APPLICATION_JSON))
-		.andDo(print())
-		.andExpect(status().isOk())
-		.andExpect(jsonPath("$.content.*", hasSize(5)));
+				.andDo(print())
+				.andExpect(status().isOk())
+				.andExpect(jsonPath("$.content.*", hasSize(5)));
 	}
 
 	@Test
 	public void testRetrieveAllAuditRecordsWithActionDeleteAndUndeploy() throws Exception {
 		mockMvc.perform(get("/audit-records?actions=DELETE,UNDEPLOY").accept(MediaType.APPLICATION_JSON))
-		.andDo(print())
-		.andExpect(status().isOk())
-		.andExpect(jsonPath("$.content.*", hasSize(2)));
+				.andDo(print())
+				.andExpect(status().isOk())
+				.andExpect(jsonPath("$.content.*", hasSize(2)));
 	}
 
 	@Test
 	public void testRetrieveAuditActionTypes() throws Exception {
 		mockMvc.perform(get("/audit-records/audit-action-types").accept(MediaType.APPLICATION_JSON))
-		.andDo(print())
-		.andExpect(status().isOk())
-		.andExpect(jsonPath("$.*", hasSize(6)))
-		.andExpect(jsonPath("$[0].id", is(100)))
-		.andExpect(jsonPath("$[0].name", is("Create")))
-		.andExpect(jsonPath("$[0].description", is("Create an Entity")))
-		.andExpect(jsonPath("$[0].key", is("CREATE")))
+				.andDo(print())
+				.andExpect(status().isOk())
+				.andExpect(jsonPath("$.*", hasSize(6)))
+				.andExpect(jsonPath("$[0].id", is(100)))
+				.andExpect(jsonPath("$[0].name", is("Create")))
+				.andExpect(jsonPath("$[0].description", is("Create an Entity")))
+				.andExpect(jsonPath("$[0].key", is("CREATE")))
 
-		.andExpect(jsonPath("$[1].id", is(200)))
-		.andExpect(jsonPath("$[1].name", is("Delete")))
-		.andExpect(jsonPath("$[1].description", is("Delete an Entity")))
-		.andExpect(jsonPath("$[1].key", is("DELETE")))
+				.andExpect(jsonPath("$[1].id", is(200)))
+				.andExpect(jsonPath("$[1].name", is("Delete")))
+				.andExpect(jsonPath("$[1].description", is("Delete an Entity")))
+				.andExpect(jsonPath("$[1].key", is("DELETE")))
 
-		.andExpect(jsonPath("$[2].id", is(300)))
-		.andExpect(jsonPath("$[2].name", is("Deploy")))
-		.andExpect(jsonPath("$[2].description", is("Deploy an Entity")))
-		.andExpect(jsonPath("$[2].key", is("DEPLOY")))
+				.andExpect(jsonPath("$[2].id", is(300)))
+				.andExpect(jsonPath("$[2].name", is("Deploy")))
+				.andExpect(jsonPath("$[2].description", is("Deploy an Entity")))
+				.andExpect(jsonPath("$[2].key", is("DEPLOY")))
 
-		.andExpect(jsonPath("$[3].id", is(400)))
-		.andExpect(jsonPath("$[3].name", is("Rollback")))
-		.andExpect(jsonPath("$[3].description", is("Rollback an Entity")))
-		.andExpect(jsonPath("$[3].key", is("ROLLBACK")))
+				.andExpect(jsonPath("$[3].id", is(400)))
+				.andExpect(jsonPath("$[3].name", is("Rollback")))
+				.andExpect(jsonPath("$[3].description", is("Rollback an Entity")))
+				.andExpect(jsonPath("$[3].key", is("ROLLBACK")))
 
-		.andExpect(jsonPath("$[4].id", is(500)))
-		.andExpect(jsonPath("$[4].name", is("Undeploy")))
-		.andExpect(jsonPath("$[4].description", is("Undeploy an Entity")))
-		.andExpect(jsonPath("$[4].key", is("UNDEPLOY")))
+				.andExpect(jsonPath("$[4].id", is(500)))
+				.andExpect(jsonPath("$[4].name", is("Undeploy")))
+				.andExpect(jsonPath("$[4].description", is("Undeploy an Entity")))
+				.andExpect(jsonPath("$[4].key", is("UNDEPLOY")))
 
-		.andExpect(jsonPath("$[5].id", is(600)))
-		.andExpect(jsonPath("$[5].name", is("Update")))
-		.andExpect(jsonPath("$[5].description", is("Update an Entity")))
-		.andExpect(jsonPath("$[5].key", is("UPDATE")));
+				.andExpect(jsonPath("$[5].id", is(600)))
+				.andExpect(jsonPath("$[5].name", is("Update")))
+				.andExpect(jsonPath("$[5].description", is("Update an Entity")))
+				.andExpect(jsonPath("$[5].key", is("UPDATE")));
 	}
 
 	@Test
 	public void testRetrieveAuditOperationTypes() throws Exception {
 		mockMvc.perform(get("/audit-records/audit-operation-types").accept(MediaType.APPLICATION_JSON))
-		.andDo(print())
-		.andExpect(status().isOk())
-		.andExpect(jsonPath("$.*", hasSize(3)))
+				.andDo(print())
+				.andExpect(status().isOk())
+				.andExpect(jsonPath("$.*", hasSize(3)))
 
-		/* Commented out until the implementation of gh-2486
-		.andExpect(jsonPath("$[0].id", is(100)))
-		.andExpect(jsonPath("$[0].name", is("App Registration")))
-		.andExpect(jsonPath("$[0].key", is("APP_REGISTRATION")))
-		*/
+				/*
+				 * Commented out until the implementation of gh-2486 .andExpect(jsonPath("$[0].id",
+				 * is(100))) .andExpect(jsonPath("$[0].name", is("App Registration")))
+				 * .andExpect(jsonPath("$[0].key", is("APP_REGISTRATION")))
+				 */
 
-		.andExpect(jsonPath("$[0].id", is(200)))
-		.andExpect(jsonPath("$[0].name", is("Schedule")))
-		.andExpect(jsonPath("$[0].key", is("SCHEDULE")))
+				.andExpect(jsonPath("$[0].id", is(200)))
+				.andExpect(jsonPath("$[0].name", is("Schedule")))
+				.andExpect(jsonPath("$[0].key", is("SCHEDULE")))
 
-		.andExpect(jsonPath("$[1].id", is(300)))
-		.andExpect(jsonPath("$[1].name", is("Stream")))
-		.andExpect(jsonPath("$[1].key", is("STREAM")))
+				.andExpect(jsonPath("$[1].id", is(300)))
+				.andExpect(jsonPath("$[1].name", is("Stream")))
+				.andExpect(jsonPath("$[1].key", is("STREAM")))
 
-		.andExpect(jsonPath("$[2].id", is(400)))
-		.andExpect(jsonPath("$[2].name", is("Task")))
-		.andExpect(jsonPath("$[2].key", is("TASK")));
+				.andExpect(jsonPath("$[2].id", is(400)))
+				.andExpect(jsonPath("$[2].name", is("Task")))
+				.andExpect(jsonPath("$[2].key", is("TASK")));
+	}
+
+	@Test
+	public void testRetrieveAuditRecordsFromNullToGivenDate() throws Exception {
+		ZonedDateTime time = betweenDate.withZoneSameInstant(ZoneOffset.of("+01:00"));
+		String toDate = time.toString();
+
+		mockMvc.perform(get("/audit-records/query?toDate=" + toDate).accept(MediaType.APPLICATION_JSON))
+				.andDo(print())
+				.andExpect(status().isOk())
+				.andExpect(jsonPath("$.content.*", hasSize(2)))
+
+				.andExpect(jsonPath("$.content[0].auditRecordId", is(5)))
+				.andExpect(jsonPath("$.content[0].correlationId", is("myStream")))
+				.andExpect(jsonPath("$.content[0].auditAction", is("CREATE")))
+
+				.andExpect(jsonPath("$.content[1].auditRecordId", is(6)))
+				.andExpect(jsonPath("$.content[1].correlationId", is("myStream1")))
+				.andExpect(jsonPath("$.content[1].auditAction", is("CREATE")));
+	}
+
+	@Test
+	public void testRetrieveAuditRecordsFromGivenDateToNull() throws Exception {
+		ZonedDateTime betweenTime = endDate.withZoneSameInstant(ZoneOffset.of("+01:00"));
+		String fromDate = betweenTime.toString();
+
+		mockMvc.perform(get("/audit-records/query?fromDate=" + fromDate).accept(MediaType.APPLICATION_JSON))
+				.andDo(print())
+				.andExpect(status().isOk())
+				.andExpect(jsonPath("$.content.*", hasSize(2)))
+
+				.andExpect(jsonPath("$.content[0].auditRecordId", is(8)))
+				.andExpect(jsonPath("$.content[0].correlationId", is("myStream")))
+				.andExpect(jsonPath("$.content[0].auditAction", is("UNDEPLOY")))
+
+				.andExpect(jsonPath("$.content[1].auditRecordId", is(9)))
+				.andExpect(jsonPath("$.content[1].correlationId", is("myStream")))
+				.andExpect(jsonPath("$.content[1].auditAction", is("DELETE")));
+	}
+
+	@Test
+	public void testRetrieveAuditRecordsBetweenTwoGivenDate() throws Exception {
+		ZonedDateTime betweenTime = betweenDate.withZoneSameInstant(ZoneOffset.of("+01:00"));
+		String fromDate = betweenTime.toString();
+
+		ZonedDateTime endTime = endDate.withZoneSameInstant(ZoneOffset.of("+01:00"));
+		String toDate = endTime.toString();
+
+		mockMvc.perform(get("/audit-records/query?fromDate=" + fromDate + "&toDate=" + toDate)
+				.accept(MediaType.APPLICATION_JSON))
+				.andDo(print())
+				.andExpect(status().isOk())
+				.andExpect(jsonPath("$.content.*", hasSize(1)))
+
+				.andExpect(jsonPath("$.content[0].auditRecordId", is(7)))
+				.andExpect(jsonPath("$.content[0].correlationId", is("myStream2")))
+				.andExpect(jsonPath("$.content[0].auditAction", is("CREATE")));
+	}
+
+	@Test
+	public void testRetrieveAuditRecordsBetweenTwoNullDate() throws Exception {
+		mockMvc.perform(get("/audit-records/query").accept(MediaType.APPLICATION_JSON))
+				.andDo(print())
+				.andExpect(status().isOk())
+				.andExpect(jsonPath("$.content.*", hasSize(5)))
+				.andExpect(jsonPath("$.content[0].auditRecordId", is(5)))
+				.andExpect(jsonPath("$.content[0].correlationId", is("myStream")))
+				.andExpect(jsonPath("$.content[0].auditAction", is("CREATE")));
+	}
+
+	@Test
+	public void testRetrieveAuditRecordById() throws Exception {
+		mockMvc.perform(get("/audit-records/9").accept(MediaType.APPLICATION_JSON))
+				.andDo(print())
+				.andExpect(status().isOk())
+				.andExpect(jsonPath("$.auditRecordId", is(9)))
+				.andExpect(jsonPath("$.correlationId", is("myStream")))
+				.andExpect(jsonPath("$.auditAction", is("DELETE")));
 	}
 }
