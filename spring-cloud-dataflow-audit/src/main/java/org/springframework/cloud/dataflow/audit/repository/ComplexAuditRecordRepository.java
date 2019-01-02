@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2019 the original author or authors.
+ * Copyright 2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,28 +15,18 @@
  */
 package org.springframework.cloud.dataflow.audit.repository;
 
-import java.util.List;
-
+import org.springframework.cloud.dataflow.core.AuditActionType;
+import org.springframework.cloud.dataflow.core.AuditOperationType;
 import org.springframework.cloud.dataflow.core.AuditRecord;
-import org.springframework.data.repository.PagingAndSortingRepository;
-import org.springframework.stereotype.Repository;
-import org.springframework.transaction.annotation.Transactional;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 /**
- * Repository interface for managing the {@link AuditRecord} class.
+ * Repository interface for complex {@link AuditRecord} queries.
  *
- * @author Gunnar Hillert
  * @author Daniel Serleg
  */
-@Transactional
-@Repository
-public interface AuditRecordRepository
-		extends PagingAndSortingRepository<AuditRecord, Long>, ComplexAuditRecordRepository {
-
-	@Override
-	<S extends AuditRecord> S save(S s);
-
-	@Override
-	List<AuditRecord> findAll();
-
+public interface ComplexAuditRecordRepository {
+	Page<AuditRecord> findByActionTypeAndOperationTypeAndDate(AuditOperationType[] operations,
+			AuditActionType[] actions, String fromDate, String toDate, Pageable pageable);
 }

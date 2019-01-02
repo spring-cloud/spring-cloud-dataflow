@@ -43,6 +43,7 @@ import org.springframework.cloud.dataflow.server.service.SchedulerService;
 import org.springframework.cloud.scheduler.spi.core.ScheduleInfo;
 import org.springframework.cloud.scheduler.spi.core.SchedulerPropertyKeys;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.http.MediaType;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.junit4.SpringRunner;
@@ -60,7 +61,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-
 
 /**
  * Tests for the {@link TaskSchedulerController}.
@@ -113,9 +113,9 @@ public class TaskSchedulerControllerTests {
 		repository.save(new TaskDefinition("testDefinition", "testApp"));
 		createSampleSchedule("schedule1");
 		createSampleSchedule("schedule2");
-		mockMvc.perform(get("/tasks/schedules").accept(MediaType.APPLICATION_JSON)).
-				andDo(print()).andExpect(status().isOk()).
-				andExpect(jsonPath("$.content[*].scheduleName", containsInAnyOrder("schedule1", "schedule2")))
+		mockMvc.perform(get("/tasks/schedules").accept(MediaType.APPLICATION_JSON)).andDo(print())
+				.andExpect(status().isOk())
+				.andExpect(jsonPath("$.content[*].scheduleName", containsInAnyOrder("schedule1", "schedule2")))
 				.andExpect(jsonPath("$.content", hasSize(2)));
 	}
 
@@ -152,9 +152,9 @@ public class TaskSchedulerControllerTests {
 
 		createSampleSchedule("foo", "schedule1");
 		createSampleSchedule("bar", "schedule2");
-		mockMvc.perform(get("/tasks/schedules/instances/bar").accept(MediaType.APPLICATION_JSON)).
-				andDo(print()).andExpect(status().isOk()).
-				andExpect(jsonPath("$.content[*].scheduleName", containsInAnyOrder("schedule2")))
+		mockMvc.perform(get("/tasks/schedules/instances/bar").accept(MediaType.APPLICATION_JSON)).andDo(print())
+				.andExpect(status().isOk())
+				.andExpect(jsonPath("$.content[*].scheduleName", containsInAnyOrder("schedule2")))
 				.andExpect(jsonPath("$.content", hasSize(1)));
 	}
 
@@ -164,9 +164,8 @@ public class TaskSchedulerControllerTests {
 				"1.0.0", new URI("file:src/test/resources/apps/foo-task"), null);
 
 		repository.save(new TaskDefinition("testDefinition", "testApp"));
-		mockMvc.perform(post("/tasks/schedules/").param("taskDefinitionName", "testDefinition").
-				param("scheduleName", "mySchedule").
-				param("properties", "scheduler.cron.expression=* * * * *")
+		mockMvc.perform(post("/tasks/schedules/").param("taskDefinitionName", "testDefinition")
+				.param("scheduleName", "mySchedule").param("properties", "scheduler.cron.expression=* * * * *")
 				.accept(MediaType.APPLICATION_JSON)).andDo(print()).andExpect(status().isCreated());
 		assertEquals(1, simpleTestScheduler.list().size());
 		ScheduleInfo scheduleInfo = simpleTestScheduler.list().get(0);
@@ -195,10 +194,11 @@ public class TaskSchedulerControllerTests {
 				"1.0.0", new URI("file:src/test/resources/apps/foo-task"), null);
 
 		repository.save(new TaskDefinition("testDefinition", "testApp"));
-		mockMvc.perform(post("/tasks/schedules/").param("taskDefinitionName", "testDefinition").
-				param("scheduleName", "mySchedule").
-				param("properties", "scheduler.cron.expression=* * * * *,app.testApp.prop1=foo,app.testApp.prop2.secret=kenny,deployer.*.prop1.secret=cartman,deployer.*.prop2.password=kyle").
-				param("arguments", "argument1=foo,password=secret")
+		mockMvc.perform(post("/tasks/schedules/").param("taskDefinitionName", "testDefinition")
+				.param("scheduleName", "mySchedule")
+				.param("properties",
+						"scheduler.cron.expression=* * * * *,app.testApp.prop1=foo,app.testApp.prop2.secret=kenny,deployer.*.prop1.secret=cartman,deployer.*.prop2.password=kyle")
+				.param("arguments", "argument1=foo,password=secret")
 				.accept(MediaType.APPLICATION_JSON)).andDo(print()).andExpect(status().isCreated());
 		assertEquals(1, simpleTestScheduler.list().size());
 		ScheduleInfo scheduleInfo = simpleTestScheduler.list().get(0);
@@ -215,9 +215,11 @@ public class TaskSchedulerControllerTests {
 		assertEquals(AuditActionType.CREATE, auditRecord.getAuditAction());
 		assertEquals("mySchedule", auditRecord.getCorrelationId());
 
-		assertEquals("{\"commandlineArguments\":[\"argument1=foo\",\"password=******\"],\"taskDefinitionName\":\"testDefinition\","
-				+ "\"taskDefinitionProperties\":{\"prop1\":\"foo\",\"spring.datasource.username\":null,\"prop2.secret\":\"******\",\"spring.datasource.url\":null,\"spring.datasource.driverClassName\":null,\"spring.cloud.task.name\":\"testDefinition\"},"
-				+ "\"deploymentProperties\":{\"spring.cloud.deployer.prop1.secret\":\"******\",\"spring.cloud.deployer.prop2.password\":\"******\"}}", auditRecord.getAuditData());
+		assertEquals(
+				"{\"commandlineArguments\":[\"argument1=foo\",\"password=******\"],\"taskDefinitionName\":\"testDefinition\","
+						+ "\"taskDefinitionProperties\":{\"prop1\":\"foo\",\"spring.datasource.username\":null,\"prop2.secret\":\"******\",\"spring.datasource.url\":null,\"spring.datasource.driverClassName\":null,\"spring.cloud.task.name\":\"testDefinition\"},"
+						+ "\"deploymentProperties\":{\"spring.cloud.deployer.prop1.secret\":\"******\",\"spring.cloud.deployer.prop2.password\":\"******\"}}",
+				auditRecord.getAuditData());
 
 	}
 
@@ -227,9 +229,10 @@ public class TaskSchedulerControllerTests {
 				"1.0.0", new URI("file:src/test/resources/apps/foo-task"), null);
 
 		repository.save(new TaskDefinition("testDefinition", "testApp"));
-		mockMvc.perform(post("/tasks/schedules/").param("taskDefinitionName", "testDefinition").
-				param("scheduleName", "myScheduleBadCron").
-				param("properties", "scheduler.cron.expression=" + TestDependencies.SimpleTestScheduler.INVALID_CRON_EXPRESSION)
+		mockMvc.perform(post("/tasks/schedules/").param("taskDefinitionName", "testDefinition")
+				.param("scheduleName", "myScheduleBadCron")
+				.param("properties",
+						"scheduler.cron.expression=" + TestDependencies.SimpleTestScheduler.INVALID_CRON_EXPRESSION)
 				.accept(MediaType.APPLICATION_JSON)).andExpect(status().isBadRequest());
 	}
 
@@ -246,10 +249,13 @@ public class TaskSchedulerControllerTests {
 		assertEquals(0, simpleTestScheduler.list().size());
 
 		AuditActionType[] auditActionTypesCreate = { AuditActionType.CREATE };
-		final Page<AuditRecord> auditRecordsCreate = auditRecordRepository.findByAuditActionIn(auditActionTypesCreate, null);
+		final Page<AuditRecord> auditRecordsCreate = auditRecordRepository.findByActionTypeAndOperationTypeAndDate(null,
+				auditActionTypesCreate, null, null, PageRequest.of(0,6));
 
 		AuditActionType[] auditActionTypesDelete = { AuditActionType.DELETE };
-		final Page<AuditRecord> auditRecordsDelete = auditRecordRepository.findByAuditActionIn(auditActionTypesDelete, null);
+		final Page<AuditRecord> auditRecordsDelete = auditRecordRepository.findByActionTypeAndOperationTypeAndDate(null,
+				auditActionTypesDelete,
+				null, null, PageRequest.of(0,6));
 
 		assertEquals(6, auditRecordsCreate.getContent().size());
 		assertEquals(1, auditRecordsDelete.getContent().size());

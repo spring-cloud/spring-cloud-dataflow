@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 the original author or authors.
+ * Copyright 2018-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,7 +36,7 @@ import org.springframework.util.Assert;
  * Default implementation of the {@link AuditRecordService}.
  *
  * @author Gunnar Hillert
- *
+ * @author Daniel Serleg
  */
 public class DefaultAuditRecordService implements AuditRecordService {
 
@@ -91,27 +91,19 @@ public class DefaultAuditRecordService implements AuditRecordService {
 	}
 
 	@Override
-	public Page<AuditRecord> findAuditRecordByAuditOperationTypeAndAuditActionType(
+	public Page<AuditRecord> findAuditRecordByAuditOperationTypeAndAuditActionTypeAndDate(
 			Pageable pageable,
 			AuditActionType[] actions,
-			AuditOperationType[] operations) {
-
-		if (actions != null && operations == null) {
-			return this.auditRecordRepository.findByAuditActionIn(actions, pageable);
-		}
-		else if (actions == null && operations != null) {
-			return this.auditRecordRepository.findByAuditOperationIn(operations, pageable);
-		}
-		else if (actions != null && operations != null) {
-			return this.auditRecordRepository.findByAuditOperationInAndAuditActionIn(operations, actions, pageable);
-		}
-		else {
-			return this.auditRecordRepository.findAll(pageable);
-		}
+			AuditOperationType[] operations,
+			String fromDate,
+			String toDate) {
+		return this.auditRecordRepository.findByActionTypeAndOperationTypeAndDate(operations, actions, fromDate, toDate,
+				pageable);
 	}
 
 	@Override
 	public Optional<AuditRecord> findById(Long id) {
 		return this.auditRecordRepository.findById(id);
 	}
+
 }

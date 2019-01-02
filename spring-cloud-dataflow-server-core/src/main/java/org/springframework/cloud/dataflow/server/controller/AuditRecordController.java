@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 the original author or authors.
+ * Copyright 2018-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -47,6 +47,7 @@ import org.springframework.web.bind.annotation.RestController;
  * Controller for retrieving {@link AuditRecord}s.
  *
  * @author Gunnar Hillert
+ * @author Daniel Serleg
  */
 @RestController
 @RequestMapping("/audit-records")
@@ -75,8 +76,14 @@ public class AuditRecordController {
 	 *
 	 * @param pageable Pagination information
 	 * @param assembler assembler for {@link AuditRecord}
-	 * @param actions Optional. For which {@link AuditActionType}s do you want to retrieve {@link AuditRecord}s
-	 * @param operations Optional. For which {@link AuditOperationType}s do you want to retrieve {@link AuditRecord}s
+	 * @param actions Optional. For which {@link AuditActionType}s do you want to retrieve
+	 *     {@link AuditRecord}s
+	 * @param fromDate Optional. The from date in ISO_DATE_TIME format. eg.:
+	 *     2019-01-01T19:30:00.000-01:00
+	 * @param toDate Optional. The to date in ISO_DATE_TIME format. eg.:
+	 *     2019-01-04T19:30:00.000-01:00
+	 * @param operations Optional. For which {@link AuditOperationType}s do you want to
+	 *     retrieve {@link AuditRecord}s
 	 * @return list of audit records
 	 */
 	@RequestMapping(value = "", method = RequestMethod.GET)
@@ -84,9 +91,12 @@ public class AuditRecordController {
 	public PagedResources<AuditRecordResource> list(Pageable pageable,
 			@RequestParam(required = false) AuditActionType[] actions,
 			@RequestParam(required = false) AuditOperationType[] operations,
+			@RequestParam(required = false) String fromDate,
+			@RequestParam(required = false) String toDate,
 			PagedResourcesAssembler<AuditRecord> assembler) {
 		Page<AuditRecord> auditRecords = this.auditRecordService
-			.findAuditRecordByAuditOperationTypeAndAuditActionType(pageable, actions, operations);
+				.findAuditRecordByAuditOperationTypeAndAuditActionTypeAndDate(pageable, actions, operations, fromDate,
+						toDate);
 		return assembler.toResource(auditRecords, new Assembler(auditRecords));
 	}
 
@@ -153,7 +163,8 @@ public class AuditRecordController {
 			resource.setAuditRecordId(auditRecord.getId());
 			resource.setAuditAction(auditRecord.getAuditAction() != null ? auditRecord.getAuditAction().name() : null);
 			resource.setAuditData(auditRecord.getAuditData());
-			resource.setAuditOperation(auditRecord.getAuditOperation() != null ? auditRecord.getAuditOperation().name() : null);
+			resource.setAuditOperation(
+					auditRecord.getAuditOperation() != null ? auditRecord.getAuditOperation().name() : null);
 			resource.setCorrelationId(auditRecord.getCorrelationId());
 			resource.setCreatedBy(auditRecord.getCreatedBy());
 			resource.setCreatedOn(auditRecord.getCreatedOn());
