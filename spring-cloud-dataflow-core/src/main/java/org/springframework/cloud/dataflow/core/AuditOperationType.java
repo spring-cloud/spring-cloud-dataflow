@@ -28,7 +28,7 @@ import org.springframework.util.Assert;
 @JsonFormat(shape = JsonFormat.Shape.OBJECT)
 public enum AuditOperationType {
 
-	// APP_REGISTRATION(100L, "App Registration"), // Commented out until the implementation of gh-2486
+	APP_REGISTRATION(100L, "App Registration"),
 	SCHEDULE(200L, "Schedule"),
 	STREAM(300L, "Stream"),
 	TASK(400L, "Task");

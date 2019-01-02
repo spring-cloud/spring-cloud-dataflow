@@ -18,7 +18,9 @@ package org.springframework.cloud.dataflow.server.service;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.springframework.cloud.dataflow.core.ApplicationType;
 import org.springframework.cloud.dataflow.core.StreamDefinition;
+import org.springframework.cloud.dataflow.registry.domain.AppRegistration;
 import org.springframework.cloud.dataflow.rest.support.ArgumentSanitizer;
 import org.springframework.cloud.scheduler.spi.core.ScheduleRequest;
 import org.springframework.util.Assert;
@@ -29,19 +31,42 @@ import org.springframework.util.Assert;
  *
  */
 public class AuditServiceUtils {
+	public static final String APP_NAME = "APP_NAME";
+
+	public static final String APP_TYPE = "APP_TYPE";
+
+	public static final String APP_VERSION = "APP_VERSION";
+
+	public static final String APP_IS_DEFAULT = "APP_IS_DEFAULT";
 
 	public static final String STREAM_DEFINITION_DSL_TEXT = "streamDefinitionDslText";
 
-	public static final String TASK_DEFINITION_DSL_TEXT = "taskDefinitionDslText";
 	public static final String TASK_DEFINITION_NAME = "taskDefinitionName";
+
 	public static final String TASK_DEFINITION_PROPERTIES = "taskDefinitionProperties";
 
 	public static final String DEPLOYMENT_PROPERTIES = "deploymentProperties";
+
 	public static final String COMMANDLINE_ARGUMENTS = "commandlineArguments";
 
 	private final ArgumentSanitizer argumentSanitizer = new ArgumentSanitizer();
 
 	public AuditServiceUtils() {
+	}
+
+	public Map<String, Object> convertAppRegistrationToAuditData(String name, ApplicationType type, String version) {
+		return this.convertAppRegistrationToAuditData(new AppRegistration(name, type, version, null, null));
+	}
+
+	public Map<String, Object> convertAppRegistrationToAuditData(AppRegistration appRegistration) {
+		final Map<String, Object> auditData = new HashMap<>(4);
+
+		auditData.put(APP_NAME, appRegistration.getName());
+		auditData.put(APP_TYPE, appRegistration.getType());
+		auditData.put(APP_VERSION, appRegistration.getVersion());
+		auditData.put(APP_IS_DEFAULT, appRegistration.isDefaultVersion());
+
+		return auditData;
 	}
 
 	public String convertStreamDefinitionToAuditData(StreamDefinition streamDefinition) {
@@ -64,22 +89,26 @@ public class AuditServiceUtils {
 
 	public Map<String, Object> convertScheduleRequestToAuditData(ScheduleRequest scheduleRequest) {
 		Assert.notNull(scheduleRequest, "scheduleRequest must not be null");
-		Assert.hasText(scheduleRequest.getScheduleName(), "The scheduleName of the scheduleRequest must not be null or empty");
+		Assert.hasText(scheduleRequest.getScheduleName(),
+				"The scheduleName of the scheduleRequest must not be null or empty");
 		Assert.notNull(scheduleRequest.getDefinition(), "The task definition of the scheduleRequest must not be null");
 
 		final Map<String, Object> auditedData = new HashMap<>(3);
 		auditedData.put(TASK_DEFINITION_NAME, scheduleRequest.getDefinition().getName());
 
 		if (scheduleRequest.getDefinition().getProperties() != null) {
-			auditedData.put(TASK_DEFINITION_PROPERTIES, argumentSanitizer.sanitizeProperties(scheduleRequest.getDefinition().getProperties()));
+			auditedData.put(TASK_DEFINITION_PROPERTIES,
+					argumentSanitizer.sanitizeProperties(scheduleRequest.getDefinition().getProperties()));
 		}
 
 		if (scheduleRequest.getDeploymentProperties() != null) {
-			auditedData.put(DEPLOYMENT_PROPERTIES, argumentSanitizer.sanitizeProperties(scheduleRequest.getDeploymentProperties()));
+			auditedData.put(DEPLOYMENT_PROPERTIES,
+					argumentSanitizer.sanitizeProperties(scheduleRequest.getDeploymentProperties()));
 		}
 
 		if (scheduleRequest.getCommandlineArguments() != null) {
-			auditedData.put(COMMANDLINE_ARGUMENTS, argumentSanitizer.sanitizeArguments(scheduleRequest.getCommandlineArguments()));
+			auditedData.put(COMMANDLINE_ARGUMENTS,
+					argumentSanitizer.sanitizeArguments(scheduleRequest.getCommandlineArguments()));
 		}
 		return auditedData;
 	}

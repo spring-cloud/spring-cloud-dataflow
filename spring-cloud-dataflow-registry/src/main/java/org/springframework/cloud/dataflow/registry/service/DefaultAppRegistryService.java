@@ -31,10 +31,14 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import org.springframework.cloud.dataflow.core.ApplicationType;
+import org.springframework.cloud.dataflow.core.AuditActionType;
+import org.springframework.cloud.dataflow.core.AuditOperationType;
 import org.springframework.cloud.dataflow.registry.domain.AppRegistration;
 import org.springframework.cloud.dataflow.registry.repository.AppRegistrationRepository;
 import org.springframework.cloud.dataflow.registry.support.AppResourceCommon;
 import org.springframework.cloud.dataflow.registry.support.NoSuchAppRegistrationException;
+import org.springframework.cloud.dataflow.server.service.AuditRecordService;
+import org.springframework.cloud.dataflow.server.service.AuditServiceUtils;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.PropertiesLoaderUtils;
 import org.springframework.data.domain.Page;
@@ -74,12 +78,19 @@ public class DefaultAppRegistryService implements AppRegistryService {
 
 	private AppResourceCommon appResourceCommon;
 
+	protected final AuditRecordService auditRecordService;
+
+	protected final AuditServiceUtils auditServiceUtils;
+
 	public DefaultAppRegistryService(AppRegistrationRepository appRegistrationRepository,
-			AppResourceCommon appResourceCommon) {
+			AppResourceCommon appResourceCommon, AuditRecordService auditRecordService) {
 		Assert.notNull(appResourceCommon, "'appResourceCommon' must not be null");
 		Assert.notNull(appRegistrationRepository, "'appRegistrationRepository' must not be null");
+		Assert.notNull(auditRecordService, "'auditRecordService' must not be null");
 		this.appResourceCommon = appResourceCommon;
 		this.appRegistrationRepository = appRegistrationRepository;
+		this.auditRecordService = auditRecordService;
+		this.auditServiceUtils = new AuditServiceUtils();
 	}
 
 	@Override
@@ -116,6 +127,10 @@ public class DefaultAppRegistryService implements AppRegistryService {
 		newDefault.setDefaultVersion(true);
 
 		this.appRegistrationRepository.save(newDefault);
+
+		this.auditRecordService.populateAndSaveAuditRecordUsingMapData(AuditOperationType.APP_REGISTRATION,
+				AuditActionType.UPDATE, newDefault.getName(),
+				this.auditServiceUtils.convertAppRegistrationToAuditData(newDefault));
 	}
 
 	@Override
@@ -151,19 +166,27 @@ public class DefaultAppRegistryService implements AppRegistryService {
 
 	@Override
 	public AppRegistration save(AppRegistration app) {
+		AppRegistration createdApp;
+
 		AppRegistration appRegistration = this.appRegistrationRepository.findAppRegistrationByNameAndTypeAndVersion(
 				app.getName(), app.getType(), app.getVersion());
 		if (appRegistration != null) {
 			appRegistration.setUri(app.getUri());
 			appRegistration.setMetadataUri(app.getMetadataUri());
-			return this.appRegistrationRepository.save(appRegistration);
+			createdApp = this.appRegistrationRepository.save(appRegistration);
 		}
 		else {
 			if (getDefaultApp(app.getName(), app.getType()) == null) {
 				app.setDefaultVersion(true);
 			}
-			return this.appRegistrationRepository.save(app);
+			createdApp = this.appRegistrationRepository.save(app);
 		}
+
+		this.auditRecordService.populateAndSaveAuditRecordUsingMapData(AuditOperationType.APP_REGISTRATION,
+				AuditActionType.UPDATE, createdApp.getName(),
+				this.auditServiceUtils.convertAppRegistrationToAuditData(createdApp));
+
+		return createdApp;
 	}
 
 	/**
@@ -176,6 +199,10 @@ public class DefaultAppRegistryService implements AppRegistryService {
 	 */
 	public void delete(String name, ApplicationType type, String version) {
 		this.appRegistrationRepository.deleteAppRegistrationByNameAndTypeAndVersion(name, type, version);
+
+		this.auditRecordService.populateAndSaveAuditRecordUsingMapData(AuditOperationType.APP_REGISTRATION,
+				AuditActionType.DELETE, name,
+				this.auditServiceUtils.convertAppRegistrationToAuditData(name, type, version));
 	}
 
 	protected boolean isOverwrite(AppRegistration app, boolean overwrite) {

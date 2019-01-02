@@ -137,7 +137,8 @@ import org.springframework.web.client.RestTemplate;
 @Configuration
 @Import(CompletionConfiguration.class)
 @ConditionalOnBean({ EnableDataFlowServerConfiguration.Marker.class })
-@EnableConfigurationProperties({ FeaturesProperties.class, VersionInfoProperties.class, DockerValidatorProperties.class })
+@EnableConfigurationProperties({ FeaturesProperties.class, VersionInfoProperties.class,
+		DockerValidatorProperties.class })
 @ConditionalOnProperty(prefix = "dataflow.server", name = "enabled", havingValue = "true", matchIfMissing = true)
 @EnableCircuitBreaker
 @EntityScan({
@@ -204,14 +205,15 @@ public class DataFlowControllerAutoConfiguration {
 		}
 
 		@Bean
-		public AppResourceCommon appResourceCommon(MavenProperties mavenProperties, DelegatingResourceLoader delegatingResourceLoader) {
+		public AppResourceCommon appResourceCommon(MavenProperties mavenProperties,
+				DelegatingResourceLoader delegatingResourceLoader) {
 			return new AppResourceCommon(mavenProperties, delegatingResourceLoader);
 		}
 
 		@Bean
 		public AppRegistryService appRegistryService(AppRegistrationRepository appRegistrationRepository,
-				AppResourceCommon appResourceCommon) {
-			return new DefaultAppRegistryService(appRegistrationRepository, appResourceCommon);
+				AppResourceCommon appResourceCommon, AuditRecordService auditRecordService) {
+			return new DefaultAppRegistryService(appRegistrationRepository, appResourceCommon, auditRecordService);
 		}
 
 		@Bean
