@@ -1443,26 +1443,25 @@ env:
 
 [NOTE]
 =====
-If you intend to use Spring Boot 2.x+, all Actuator endpoints in Spring Boot 2.x have been moved under `/actuator` by default. You must adjust the `liveness` and `readiness` probe paths to the new defaults. The following example configures Spring Boot 2.x+ `liveness` and `readiness` endpoint paths (replace `<app>` with the name of your application):
+By default `liveness` and `readiness` probe paths use Spring Boot 2.x+ actuator endpoints. To use Spring Boot 1.x actuator endpoint paths, you must adjust the `liveness` and `readiness` values, for example (replace `<app>` with the name of your application):
 
 ====
 [source]
 ----
-deployer.<app>.kubernetes.livenessProbePath=/actuator/health
-deployer.<app>.kubernetes.readinessProbePath=/actuator/info
+deployer.<app>.kubernetes.livenessProbePath=/health
+deployer.<app>.kubernetes.readinessProbePath=/info
 ----
 ====
 
-To automatically set both `liveness` and `readiness` endpoints on a per-application basis to the default Spring Boot 2.x paths, you can set the following property:
+To automatically set both `liveness` and `readiness` endpoints on a per-application basis to the default Spring Boot 1.x paths, you can set the following property:
 
 ====
 [source]
 ----
-deployer.<app>.kubernetes.bootMajorVersion=2
+deployer.<app>.kubernetes.bootMajorVersion=1
 ----
 ====
 
-See the https://github.com/spring-projects/spring-boot/wiki/Spring-Boot-2.0-Migration-Guide#base-path[Spring Boot 2.0 Migration Guide] for more information and how to restore the Spring Boot 1.x base path behavior.
 =====
 
 You can access secured probe endpoints by using credentials stored in a https://kubernetes.io/docs/concepts/configuration/secret/[Kubernetes secret]. You can use an existing secret, provided the credentials are contained under the `credentials` key name of the secret's `data` block. You can configure probe authentication on a per-application basis. When enabled, it is applied to both the `liveness` and `readiness` probe endpoints by using the same credentials and authentication type. Currently, only `Basic` authentication is supported.
