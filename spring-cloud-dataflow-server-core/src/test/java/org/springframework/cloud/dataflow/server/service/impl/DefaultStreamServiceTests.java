@@ -34,6 +34,7 @@ import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 
+import org.springframework.cloud.dataflow.audit.service.AuditRecordService;
 import org.springframework.cloud.dataflow.configuration.metadata.BootApplicationConfigurationMetadataResolver;
 import org.springframework.cloud.dataflow.core.ApplicationType;
 import org.springframework.cloud.dataflow.core.AuditActionType;
@@ -45,7 +46,6 @@ import org.springframework.cloud.dataflow.rest.SkipperStream;
 import org.springframework.cloud.dataflow.server.config.apps.CommonApplicationProperties;
 import org.springframework.cloud.dataflow.server.controller.support.InvalidStreamDefinitionException;
 import org.springframework.cloud.dataflow.server.repository.StreamDefinitionRepository;
-import org.springframework.cloud.dataflow.server.service.AuditRecordService;
 import org.springframework.cloud.dataflow.server.service.impl.validation.DefaultStreamValidationService;
 import org.springframework.cloud.dataflow.server.stream.SkipperStreamDeployer;
 import org.springframework.cloud.dataflow.server.stream.StreamDeploymentRequest;

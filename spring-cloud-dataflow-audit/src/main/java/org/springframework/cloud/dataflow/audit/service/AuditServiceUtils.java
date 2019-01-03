@@ -13,14 +13,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.springframework.cloud.dataflow.server.service;
+package org.springframework.cloud.dataflow.audit.service;
 
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.springframework.cloud.dataflow.core.AppRegistration;
 import org.springframework.cloud.dataflow.core.ApplicationType;
 import org.springframework.cloud.dataflow.core.StreamDefinition;
-import org.springframework.cloud.dataflow.registry.domain.AppRegistration;
 import org.springframework.cloud.dataflow.rest.support.ArgumentSanitizer;
 import org.springframework.cloud.scheduler.spi.core.ScheduleRequest;
 import org.springframework.util.Assert;
@@ -55,7 +57,14 @@ public class AuditServiceUtils {
 	}
 
 	public Map<String, Object> convertAppRegistrationToAuditData(String name, ApplicationType type, String version) {
-		return this.convertAppRegistrationToAuditData(new AppRegistration(name, type, version, null, null));
+		try {
+			return this.convertAppRegistrationToAuditData(new AppRegistration(name, type, version, new URI(""), null));
+		}
+		catch (URISyntaxException e) {
+			e.printStackTrace();
+		}
+
+		return null;
 	}
 
 	public Map<String, Object> convertAppRegistrationToAuditData(AppRegistration appRegistration) {

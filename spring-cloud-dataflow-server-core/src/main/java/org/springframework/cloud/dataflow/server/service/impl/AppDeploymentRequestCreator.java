@@ -26,13 +26,13 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import org.springframework.cloud.dataflow.configuration.metadata.ApplicationConfigurationMetadataResolver;
+import org.springframework.cloud.dataflow.core.AppRegistration;
 import org.springframework.cloud.dataflow.core.ApplicationType;
 import org.springframework.cloud.dataflow.core.BindingPropertyKeys;
 import org.springframework.cloud.dataflow.core.DataFlowPropertyKeys;
 import org.springframework.cloud.dataflow.core.StreamAppDefinition;
 import org.springframework.cloud.dataflow.core.StreamDefinition;
 import org.springframework.cloud.dataflow.core.StreamPropertyKeys;
-import org.springframework.cloud.dataflow.registry.domain.AppRegistration;
 import org.springframework.cloud.dataflow.registry.service.AppRegistryService;
 import org.springframework.cloud.dataflow.rest.util.DeploymentPropertiesUtils;
 import org.springframework.cloud.dataflow.server.config.apps.CommonApplicationProperties;

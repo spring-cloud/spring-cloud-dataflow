@@ -23,10 +23,11 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.springframework.cloud.dataflow.audit.service.DefaultAuditRecordService;
 import org.springframework.cloud.dataflow.configuration.metadata.ApplicationConfigurationMetadataResolver;
 import org.springframework.cloud.dataflow.configuration.metadata.BootApplicationConfigurationMetadataResolver;
+import org.springframework.cloud.dataflow.core.AppRegistration;
 import org.springframework.cloud.dataflow.core.ApplicationType;
-import org.springframework.cloud.dataflow.registry.domain.AppRegistration;
 import org.springframework.cloud.dataflow.registry.repository.AppRegistrationRepository;
 import org.springframework.cloud.dataflow.registry.service.AppRegistryService;
 import org.springframework.cloud.dataflow.registry.service.DefaultAppRegistryService;
@@ -59,7 +60,8 @@ public class CompletionTestsMocks {
 	public AppRegistryService appRegistry() {
 
 		return new DefaultAppRegistryService(mock(AppRegistrationRepository.class),
-				new AppResourceCommon(new MavenProperties(), new FileSystemResourceLoader())) {
+				new AppResourceCommon(new MavenProperties(), new FileSystemResourceLoader()),
+				mock(DefaultAuditRecordService.class)) {
 
 			@Override
 			public boolean appExist(String name, ApplicationType type) {

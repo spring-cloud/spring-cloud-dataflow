@@ -25,10 +25,11 @@ import org.junit.runner.RunWith;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.cloud.dataflow.audit.service.DefaultAuditRecordService;
 import org.springframework.cloud.dataflow.configuration.metadata.ApplicationConfigurationMetadataResolver;
 import org.springframework.cloud.dataflow.configuration.metadata.BootApplicationConfigurationMetadataResolver;
+import org.springframework.cloud.dataflow.core.AppRegistration;
 import org.springframework.cloud.dataflow.core.ApplicationType;
-import org.springframework.cloud.dataflow.registry.domain.AppRegistration;
 import org.springframework.cloud.dataflow.registry.repository.AppRegistrationRepository;
 import org.springframework.cloud.dataflow.registry.service.AppRegistryService;
 import org.springframework.cloud.dataflow.registry.service.DefaultAppRegistryService;
@@ -110,7 +111,8 @@ public class BootVersionsCompletionProviderTests {
 		public AppRegistryService appRegistry() {
 
 			return new DefaultAppRegistryService(mock(AppRegistrationRepository.class),
-					new AppResourceCommon(new MavenProperties(), new FileSystemResourceLoader())) {
+					new AppResourceCommon(new MavenProperties(), new FileSystemResourceLoader()),
+					mock(DefaultAuditRecordService.class)) {
 
 				@Override
 				public boolean appExist(String name, ApplicationType type) {

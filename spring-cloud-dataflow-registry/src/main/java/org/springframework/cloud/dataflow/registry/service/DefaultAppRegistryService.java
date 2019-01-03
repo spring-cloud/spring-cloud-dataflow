@@ -30,15 +30,15 @@ import java.util.stream.Stream;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import org.springframework.cloud.dataflow.audit.service.AuditRecordService;
+import org.springframework.cloud.dataflow.audit.service.AuditServiceUtils;
+import org.springframework.cloud.dataflow.core.AppRegistration;
 import org.springframework.cloud.dataflow.core.ApplicationType;
 import org.springframework.cloud.dataflow.core.AuditActionType;
 import org.springframework.cloud.dataflow.core.AuditOperationType;
-import org.springframework.cloud.dataflow.registry.domain.AppRegistration;
 import org.springframework.cloud.dataflow.registry.repository.AppRegistrationRepository;
 import org.springframework.cloud.dataflow.registry.support.AppResourceCommon;
 import org.springframework.cloud.dataflow.registry.support.NoSuchAppRegistrationException;
-import org.springframework.cloud.dataflow.server.service.AuditRecordService;
-import org.springframework.cloud.dataflow.server.service.AuditServiceUtils;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.PropertiesLoaderUtils;
 import org.springframework.data.domain.Page;
@@ -182,9 +182,14 @@ public class DefaultAppRegistryService implements AppRegistryService {
 			createdApp = this.appRegistrationRepository.save(app);
 		}
 
-		this.auditRecordService.populateAndSaveAuditRecordUsingMapData(AuditOperationType.APP_REGISTRATION,
-				AuditActionType.UPDATE, createdApp.getName(),
-				this.auditServiceUtils.convertAppRegistrationToAuditData(createdApp));
+		if (createdApp == null) {
+			logger.error("App registration failed, app not saved into database!");
+		}
+		else {
+			this.auditRecordService.populateAndSaveAuditRecordUsingMapData(AuditOperationType.APP_REGISTRATION,
+					AuditActionType.UPDATE, createdApp.getName(),
+					this.auditServiceUtils.convertAppRegistrationToAuditData(createdApp));
+		}
 
 		return createdApp;
 	}

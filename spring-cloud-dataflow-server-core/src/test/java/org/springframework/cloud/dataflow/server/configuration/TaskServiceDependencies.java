@@ -30,6 +30,8 @@ import org.springframework.boot.autoconfigure.jdbc.DataSourceProperties;
 import org.springframework.boot.autoconfigure.jdbc.EmbeddedDataSourceConfiguration;
 import org.springframework.boot.autoconfigure.orm.jpa.HibernateJpaAutoConfiguration;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.cloud.dataflow.audit.service.AuditRecordService;
+import org.springframework.cloud.dataflow.audit.service.DefaultAuditRecordService;
 import org.springframework.cloud.dataflow.completion.CompletionConfiguration;
 import org.springframework.cloud.dataflow.configuration.metadata.ApplicationConfigurationMetadataResolver;
 import org.springframework.cloud.dataflow.registry.service.AppRegistryService;
@@ -41,8 +43,6 @@ import org.springframework.cloud.dataflow.server.config.features.FeaturesPropert
 import org.springframework.cloud.dataflow.server.job.LauncherRepository;
 import org.springframework.cloud.dataflow.server.repository.TaskDefinitionRepository;
 import org.springframework.cloud.dataflow.server.repository.support.DataflowRdbmsInitializer;
-import org.springframework.cloud.dataflow.server.service.AuditRecordService;
-import org.springframework.cloud.dataflow.server.service.DefaultAuditRecordService;
 import org.springframework.cloud.dataflow.server.service.SchedulerService;
 import org.springframework.cloud.dataflow.server.service.SchedulerServiceProperties;
 import org.springframework.cloud.dataflow.server.service.TaskValidationService;

@@ -54,12 +54,13 @@ import org.springframework.test.context.junit4.SpringRunner;
 		HibernateJpaAutoConfiguration.class
 })
 @EntityScan({
-	"org.springframework.cloud.dataflow.registry.domain",
+		"org.springframework.cloud.dataflow.core",
 	"org.springframework.cloud.dataflow.server.audit.domain"
 })
 @EnableJpaRepositories(basePackages = {
 	"org.springframework.cloud.dataflow.registry.repository",
-	"org.springframework.cloud.dataflow.server.audit.repository"
+		"org.springframework.cloud.dataflow.server.audit.repository",
+		"org.springframework.cloud.dataflow.audit.repository"
 })
 public class SchemaGenerationTests {
 

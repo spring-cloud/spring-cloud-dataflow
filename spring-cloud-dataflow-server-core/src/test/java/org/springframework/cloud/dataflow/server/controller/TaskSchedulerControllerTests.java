@@ -27,15 +27,15 @@ import org.junit.runner.RunWith;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.cloud.dataflow.audit.repository.AuditRecordRepository;
+import org.springframework.cloud.dataflow.core.AppRegistration;
 import org.springframework.cloud.dataflow.core.ApplicationType;
 import org.springframework.cloud.dataflow.core.AuditActionType;
 import org.springframework.cloud.dataflow.core.AuditOperationType;
 import org.springframework.cloud.dataflow.core.AuditRecord;
 import org.springframework.cloud.dataflow.core.TaskDefinition;
-import org.springframework.cloud.dataflow.registry.domain.AppRegistration;
 import org.springframework.cloud.dataflow.registry.service.AppRegistryService;
 import org.springframework.cloud.dataflow.server.configuration.TestDependencies;
-import org.springframework.cloud.dataflow.server.repository.AuditRecordRepository;
 import org.springframework.cloud.dataflow.server.repository.TaskDefinitionRepository;
 import org.springframework.cloud.dataflow.server.service.SchedulerService;
 import org.springframework.cloud.scheduler.spi.core.ScheduleInfo;
@@ -173,8 +173,8 @@ public class TaskSchedulerControllerTests {
 
 		final List<AuditRecord> auditRecords = auditRecordRepository.findAll();
 
-		assertEquals(1, auditRecords.size());
-		final AuditRecord auditRecord = auditRecords.get(0);
+		assertEquals(6, auditRecords.size());
+		final AuditRecord auditRecord = auditRecords.get(5);
 
 		assertEquals(AuditOperationType.SCHEDULE, auditRecord.getAuditOperation());
 		assertEquals(AuditActionType.CREATE, auditRecord.getAuditAction());
@@ -205,8 +205,8 @@ public class TaskSchedulerControllerTests {
 
 		final List<AuditRecord> auditRecords = auditRecordRepository.findAll();
 
-		assertEquals(1, auditRecords.size());
-		final AuditRecord auditRecord = auditRecords.get(0);
+		assertEquals(6, auditRecords.size());
+		final AuditRecord auditRecord = auditRecords.get(5);
 
 		assertEquals(AuditOperationType.SCHEDULE, auditRecord.getAuditOperation());
 		assertEquals(AuditActionType.CREATE, auditRecord.getAuditAction());

@@ -25,12 +25,12 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 
+import org.springframework.cloud.dataflow.audit.repository.AuditRecordRepository;
+import org.springframework.cloud.dataflow.audit.service.AuditRecordService;
+import org.springframework.cloud.dataflow.audit.service.DefaultAuditRecordService;
 import org.springframework.cloud.dataflow.core.AuditActionType;
 import org.springframework.cloud.dataflow.core.AuditOperationType;
 import org.springframework.cloud.dataflow.core.AuditRecord;
-import org.springframework.cloud.dataflow.server.repository.AuditRecordRepository;
-import org.springframework.cloud.dataflow.server.service.AuditRecordService;
-import org.springframework.cloud.dataflow.server.service.DefaultAuditRecordService;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
