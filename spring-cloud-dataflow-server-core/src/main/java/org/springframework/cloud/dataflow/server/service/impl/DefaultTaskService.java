@@ -39,6 +39,7 @@ import org.springframework.cloud.dataflow.core.TaskDefinition;
 import org.springframework.cloud.dataflow.core.dsl.TaskNode;
 import org.springframework.cloud.dataflow.core.dsl.TaskParser;
 import org.springframework.cloud.dataflow.registry.service.AppRegistryService;
+import org.springframework.cloud.dataflow.registry.support.NoSuchAppRegistrationException;
 import org.springframework.cloud.dataflow.rest.support.ArgumentSanitizer;
 import org.springframework.cloud.dataflow.rest.util.DeploymentPropertiesUtils;
 import org.springframework.cloud.dataflow.server.config.apps.CommonApplicationProperties;
@@ -50,7 +51,6 @@ import org.springframework.cloud.dataflow.server.repository.TaskDefinitionReposi
 import org.springframework.cloud.dataflow.server.service.TaskService;
 import org.springframework.cloud.dataflow.server.service.TaskValidationService;
 import org.springframework.cloud.dataflow.server.service.ValidationStatus;
-import org.springframework.cloud.dataflow.server.support.ApplicationDoesNotExistException;
 import org.springframework.cloud.deployer.spi.core.AppDefinition;
 import org.springframework.cloud.deployer.spi.core.AppDeploymentRequest;
 import org.springframework.cloud.deployer.spi.task.TaskLauncher;
@@ -336,9 +336,7 @@ public class DefaultTaskService implements TaskService {
 	private void saveStandardTaskDefinition(TaskDefinition taskDefinition) {
 		String appName = taskDefinition.getRegisteredAppName();
 		if (registry.find(appName, ApplicationType.task) == null) {
-			throw new ApplicationDoesNotExistException(
-					String.format("Application name '%s' with type '%s' does not exist in the app registry.", appName,
-							ApplicationType.task));
+			throw new NoSuchAppRegistrationException(appName, ApplicationType.task);
 		}
 		if (this.taskDefinitionRepository.existsById(taskDefinition.getTaskName())) {
 			throw new DuplicateTaskException(String.format(
