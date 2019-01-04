@@ -41,13 +41,13 @@ The following outlines the compatibility between Spring Cloud Data Flow for Kube
 
 [source,console]
 ----
-| Versions: SCDF K8S Server - K8S Deployer \ Kubernetes | 1.8.x | 1.9.x | 1.10.x |
-|-------------------------------------------------------|-------|-------|--------|
-| Server: 1.4.x - Deployer: 1.3.2                       | ✓     | ✓     | ✓     |
-| Server: 1.5.x - Deployer: 1.3.6                       | ✓     | ✓     | ✓     |
-| Server: 1.6.x - Deployer: 1.3.7                       | ✓     | ✓     | ✓     |
-| Server: 1.7.x - Deployer: 1.3.9                       | ✓     | ✓     | ✓     |
-|--------------------------------------------------------------------------------|
+| Versions: SCDF K8S Server - K8S Deployer \ Kubernetes | 1.9.x | 1.10.x | 1.11.x |
+|-------------------------------------------------------|-------|--------|--------|
+| Server: 1.4.x - Deployer: 1.3.2                       | ✓     | ✓      | ✓     |
+| Server: 1.5.x - Deployer: 1.3.6                       | ✓     | ✓      | ✓     |
+| Server: 1.6.x - Deployer: 1.3.7                       | ✓     | ✓      | ✓     |
+| Server: 1.7.x - Deployer: 1.3.9                       | ✓     | ✓      | ✓     |
+|---------------------------------------------------------------------------------|
 ----
 
 ==== Create a Kubernetes Cluster
