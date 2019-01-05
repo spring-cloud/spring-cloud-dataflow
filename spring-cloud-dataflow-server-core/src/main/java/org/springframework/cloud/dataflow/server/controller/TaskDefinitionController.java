@@ -55,6 +55,7 @@ import org.springframework.web.bind.annotation.RestController;
  * @author Glenn Renfro
  * @author Mark Fisher
  * @author Gunnar Hillert
+ * @author Daniel Serleg
  */
 @RestController
 @RequestMapping("/tasks/definitions")
@@ -114,6 +115,16 @@ public class TaskDefinitionController {
 	@ResponseStatus(HttpStatus.OK)
 	public void destroyTask(@PathVariable("name") String name) {
 		taskService.deleteTaskDefinition(name);
+	}
+
+	/**
+	 * Delete all task from the repository.
+	 *
+	 */
+	@RequestMapping(value = "", method = RequestMethod.DELETE)
+	@ResponseStatus(HttpStatus.OK)
+	public void destroyAll() {
+		taskService.deleteAll();
 	}
 
 	/**

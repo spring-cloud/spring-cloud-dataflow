@@ -28,6 +28,7 @@ import java.util.Map;
  * @author Janne Valkealahti
  * @author Gunnar Hillert
  * @author David Turanski
+ * @author Daniel Serleg
  */
 public interface TaskService {
 
@@ -88,4 +89,9 @@ public interface TaskService {
 	 */
 	ValidationStatus validateTask(String name);
 
+	/**
+	 * Destroy all task definition. If it is a Composed Task then the task definitions
+	 * required for a ComposedTaskRunner tasks are also destroyed.
+	 */
+	void deleteAll();
 }
