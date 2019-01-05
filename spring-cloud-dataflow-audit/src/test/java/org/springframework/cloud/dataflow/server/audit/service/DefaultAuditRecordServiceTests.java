@@ -31,9 +31,11 @@ import org.springframework.cloud.dataflow.audit.service.DefaultAuditRecordServic
 import org.springframework.cloud.dataflow.core.AuditActionType;
 import org.springframework.cloud.dataflow.core.AuditOperationType;
 import org.springframework.cloud.dataflow.core.AuditRecord;
+import org.springframework.data.domain.PageRequest;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
@@ -191,5 +193,53 @@ public class DefaultAuditRecordServiceTests {
 		assertEquals(AuditOperationType.SCHEDULE, auditRecord.getAuditOperation());
 		assertEquals("1234", auditRecord.getCorrelationId());
 		assertEquals("Error serializing audit record data.  Data = {foo=bar}", auditRecord.getAuditData());
+	}
+
+	@Test
+	public void testFindAuditRecordByAuditOperationTypeAndAuditActionType() {
+		AuditRecordService auditRecordService = new DefaultAuditRecordService(auditRecordRepository);
+
+		AuditActionType[] auditActionTypes = {AuditActionType.CREATE};
+		AuditOperationType[] auditOperationTypes = {AuditOperationType.STREAM};
+		PageRequest pageRequest = PageRequest.of(0, 1);
+		auditRecordService.findAuditRecordByAuditOperationTypeAndAuditActionType(pageRequest, auditActionTypes, auditOperationTypes);
+
+		verify(this.auditRecordRepository, times(1)).findByAuditOperationInAndAuditActionIn(eq(auditOperationTypes),eq(auditActionTypes),eq(pageRequest));
+		verifyNoMoreInteractions(this.auditRecordRepository);
+	}
+
+	@Test
+	public void testFindAuditRecordByAuditOperationTypeAndAuditActionTypeWithNullAuditActionType() {
+		AuditRecordService auditRecordService = new DefaultAuditRecordService(auditRecordRepository);
+
+		AuditOperationType[] auditOperationTypes = {AuditOperationType.STREAM};
+		PageRequest pageRequest = PageRequest.of(0, 1);
+		auditRecordService.findAuditRecordByAuditOperationTypeAndAuditActionType(pageRequest, null, auditOperationTypes);
+
+		verify(this.auditRecordRepository, times(1)).findByAuditOperationIn(eq(auditOperationTypes), eq(pageRequest));
+		verifyNoMoreInteractions(this.auditRecordRepository);
+	}
+
+	@Test
+	public void testFindAuditRecordByAuditOperationTypeAndAuditActionTypeWithNullOperationType() {
+		AuditRecordService auditRecordService = new DefaultAuditRecordService(auditRecordRepository);
+
+		AuditActionType[] auditActionTypes = {AuditActionType.CREATE};
+		PageRequest pageRequest = PageRequest.of(0, 1);
+		auditRecordService.findAuditRecordByAuditOperationTypeAndAuditActionType(pageRequest, auditActionTypes, null);
+
+		verify(this.auditRecordRepository, times(1)).findByAuditActionIn(eq(auditActionTypes), eq(pageRequest));
+		verifyNoMoreInteractions(this.auditRecordRepository);
+	}
+
+	@Test
+	public void testFindAuditRecordByAuditOperationTypeAndAuditActionTypeWithNullActionAndOperationType() {
+		AuditRecordService auditRecordService = new DefaultAuditRecordService(auditRecordRepository);
+
+		PageRequest pageRequest = PageRequest.of(0, 1);
+		auditRecordService.findAuditRecordByAuditOperationTypeAndAuditActionType(pageRequest, null, null);
+
+		verify(this.auditRecordRepository, times(1)).findAll(eq(pageRequest));
+		verifyNoMoreInteractions(this.auditRecordRepository);
 	}
 }
