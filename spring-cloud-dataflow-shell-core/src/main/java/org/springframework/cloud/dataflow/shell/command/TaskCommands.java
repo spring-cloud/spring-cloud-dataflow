@@ -68,6 +68,8 @@ public class TaskCommands implements CommandMarker {
 
 	private static final String DESTROY = "task destroy";
 
+	private static final String DESTROY_TASK_ALL = "task all destroy";
+
 	private static final String VALIDATE = "task validate";
 
 	private static final String TASK_EXECUTION_STATUS = "task execution status";
@@ -87,6 +89,9 @@ public class TaskCommands implements CommandMarker {
 	private static final String PLATFORM_OPTION = "platformName";
 
 	@Autowired
+	protected UserInput userInput;
+
+	@Autowired
 	private DataFlowShell dataFlowShell;
 
 	@CliAvailabilityIndicator({ LIST, TASK_EXECUTION_STATUS, EXECUTION_LIST })
@@ -94,7 +99,7 @@ public class TaskCommands implements CommandMarker {
 		return dataFlowShell.hasAccess(RoleType.VIEW, OpsType.TASK);
 	}
 
-	@CliAvailabilityIndicator({ CREATE, LAUNCH, TASK_EXECUTION_CLEANUP, DESTROY, VALIDATE })
+	@CliAvailabilityIndicator({ CREATE, LAUNCH, TASK_EXECUTION_CLEANUP, DESTROY, DESTROY_TASK_ALL, VALIDATE })
 	public boolean availableWithCreateRole() {
 		return dataFlowShell.hasAccess(RoleType.CREATE, OpsType.TASK);
 	}
@@ -185,6 +190,17 @@ public class TaskCommands implements CommandMarker {
 				optionContext = "existing-task disable-string-converter") String name) {
 		taskOperations().destroy(name);
 		return String.format("Destroyed task '%s'", name);
+	}
+
+	@CliCommand(value = DESTROY_TASK_ALL, help = "Destroy all existing tasks")
+	public String destroyAll(
+			@CliOption(key = "force", help = "bypass confirmation prompt", unspecifiedDefaultValue = "false", specifiedDefaultValue = "true") boolean force) {
+		if (force || "y".equalsIgnoreCase(userInput.promptWithOptions("Really destroy all tasks?", "n", "y", "n"))) {
+			taskOperations().destroyAll();
+			return String.format("All tasks destroyed");
+		} else {
+			return "";
+		}
 	}
 
 	@CliCommand(value = EXECUTION_LIST, help = "List created task executions filtered by taskName")

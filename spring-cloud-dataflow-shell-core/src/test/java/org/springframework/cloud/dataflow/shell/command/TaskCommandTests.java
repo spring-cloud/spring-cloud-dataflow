@@ -111,6 +111,25 @@ public class TaskCommandTests extends AbstractShellIntegrationTest {
 	}
 
 	@Test
+	public void destroySpecificTask() {
+		logger.info("Create Task Test");
+		String taskName = generateUniqueName();
+		task().create(taskName, "timestamp");
+		logger.info("Destroy created task");
+		task().destroyTask(taskName);
+	}
+
+	@Test
+	public void destroyAllTasks() {
+		logger.info("Create Task Test");
+		String taskName1 = generateUniqueName();
+		task().create(taskName1, "timestamp");
+		String taskName2 = generateUniqueName();
+		task().create(taskName2, "timestamp");
+		task().destroyAllTasks();
+	}
+
+	@Test
 	public void testTaskExecutionList() {
 		logger.info("Retrieve Task Execution List Test");
 		CommandResult cr = task().taskExecutionList();

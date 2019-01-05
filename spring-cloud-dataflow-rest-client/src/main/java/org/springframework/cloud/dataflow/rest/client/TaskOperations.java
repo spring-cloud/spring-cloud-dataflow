@@ -110,4 +110,10 @@ public interface TaskOperations {
 	 * @throws OperationNotSupportedException if the server does not support task validation
 	 */
 	TaskAppStatusResource validateTaskDefinition(String taskDefinitionName) throws OperationNotSupportedException;
+
+	/**
+	 * Destroy all existing tasks.
+	 *
+	 */
+    void destroyAll();
 }

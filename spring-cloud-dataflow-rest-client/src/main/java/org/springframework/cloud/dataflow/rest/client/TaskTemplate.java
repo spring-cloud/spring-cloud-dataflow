@@ -149,6 +149,11 @@ public class TaskTemplate implements TaskOperations {
 	}
 
 	@Override
+	public void destroyAll() {
+		restTemplate.delete(definitionsLink.getHref());
+	}
+
+	@Override
 	public TaskExecutionResource.Page executionList() {
 		return restTemplate.getForObject(executionsLink.getHref(), TaskExecutionResource.Page.class);
 	}

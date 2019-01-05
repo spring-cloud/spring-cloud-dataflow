@@ -148,6 +148,17 @@ public class TaskCommandTemplate {
 	}
 
 	/**
+	 * Destroy all tasks.
+	 *
+	 */
+	public void destroyAllTasks() {
+		CommandResult cr = shell.executeCommand("task all destroy --force");
+		// stateVerifier.waitForDestroy(task);
+		assertTrue("Failure to destroy all tasks. CommandResult = " + cr.toString(), cr.isSuccess());
+		tasks.clear();
+	}
+
+	/**
 	 * Verify the task is listed in task list.
 	 *
 	 * @param taskName the name of the task
