@@ -264,6 +264,18 @@ To destroy a task through the shell, use the `task destroy` command, as shown in
 dataflow:>task destroy mytask
  Destroyed task 'mytask'
 
+To destroy all tasks through the shell, use the `task all destroy` command as shown in the following example:
+
+[source]
+dataflow:>task all destroy
+ Really destroy all tasks? [y, n]: y
+ All tasks destroyed
+
+Or use the force command:
+[source]
+dataflow:>task all destroy --force
+ All tasks destroyed
+
 The task execution information for previously launched tasks for the definition remains in the task repository.
 
 NOTE: This does not stop any currently executing tasks for this definition. Instead, it removes the task definition from the database.
