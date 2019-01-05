@@ -1,5 +1,5 @@
 /*
- * Copyright 2015-2018 the original author or authors.
+ * Copyright 2015-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -251,6 +251,26 @@ public class TaskControllerTests {
 		mockMvc.perform(delete("/tasks/definitions/myTask").accept(MediaType.APPLICATION_JSON)).andDo(print())
 				.andExpect(status().isNotFound());
 		assertEquals(0, repository.count());
+	}
+
+	@Test
+	public void testDestroyAllTask() throws Exception {
+		repository.save(new TaskDefinition("myTask1", "task"));
+		repository.save(new TaskDefinition("myTask2", "task && task2"));
+		repository.save(new TaskDefinition("myTask3", "task"));
+
+		assertEquals(3, repository.count());
+
+		mockMvc.perform(get("/tasks/definitions/").accept(MediaType.APPLICATION_JSON)).andExpect(status().isOk())
+				.andExpect(jsonPath("$.content", hasSize(3)));
+
+		mockMvc.perform(delete("/tasks/definitions").accept(MediaType.APPLICATION_JSON)).andDo(print())
+				.andExpect(status().isOk());
+
+		assertEquals(0, repository.count());
+		Mockito.verify(taskLauncher).destroy("myTask1");
+		Mockito.verify(taskLauncher).destroy("myTask2");
+		Mockito.verify(taskLauncher).destroy("myTask3");
 	}
 
 	@Test

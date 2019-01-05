@@ -1,5 +1,5 @@
 /*
- * Copyright 2015-2018 the original author or authors.
+ * Copyright 2015-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -76,6 +76,7 @@ import org.springframework.util.StringUtils;
  * @author Ilayaperumal Gopinathan
  * @author Michael Wirth
  * @author David Turanski
+ * @author Daniel Serleg
  */
 @Transactional
 public class DefaultTaskService implements TaskService {
@@ -346,16 +347,39 @@ public class DefaultTaskService implements TaskService {
 		this.taskDefinitionRepository.save(taskDefinition);
 	}
 
+
+	@Override
+	public void deleteAll() {
+		Iterable<TaskDefinition> allTaskDefinition = this.taskDefinitionRepository.findAll();
+
+		for(TaskDefinition taskDefinition : allTaskDefinition) {
+			deleteTaskDefinition(taskDefinition);
+
+			auditRecordService.populateAndSaveAuditRecord(
+					AuditOperationType.TASK, AuditActionType.DELETE,
+					taskDefinition.getTaskName(), this.argumentSanitizer.sanitizeTaskDsl(taskDefinition));
+		}
+	}
+
 	@Override
 	public void deleteTaskDefinition(String name) {
 		TaskDefinition taskDefinition = this.taskDefinitionRepository.findById(name)
 				.orElseThrow(() -> new NoSuchTaskDefinitionException(name));
+
+		deleteTaskDefinition(taskDefinition);
+
+		auditRecordService.populateAndSaveAuditRecord(
+				AuditOperationType.TASK, AuditActionType.DELETE,
+				taskDefinition.getTaskName(), this.argumentSanitizer.sanitizeTaskDsl(taskDefinition));
+	}
+
+	private void deleteTaskDefinition(TaskDefinition taskDefinition) {
 		TaskParser taskParser = new TaskParser(taskDefinition.getName(), taskDefinition.getDslText(), true, true);
 		TaskNode taskNode = taskParser.parse();
 		// if composed-task-runner definition then destroy all child tasks associated with
 		// it.
 		if (taskNode.isComposed()) {
-			String childTaskPrefix = TaskNode.getTaskPrefix(name);
+			String childTaskPrefix = TaskNode.getTaskPrefix(taskDefinition.getTaskName());
 			// destroy composed child tasks
 			taskNode.getTaskApps().stream().forEach(task -> {
 				String childName = task.getName();
@@ -366,11 +390,7 @@ public class DefaultTaskService implements TaskService {
 			});
 		}
 		// destroy normal task or composed parent task
-		destroyPrimaryTask(name);
-
-		auditRecordService.populateAndSaveAuditRecord(
-				AuditOperationType.TASK, AuditActionType.DELETE,
-				name, this.argumentSanitizer.sanitizeTaskDsl(taskDefinition));
+		destroyPrimaryTask(taskDefinition.getTaskName());
 	}
 
 	private void destroyPrimaryTask(String name) {

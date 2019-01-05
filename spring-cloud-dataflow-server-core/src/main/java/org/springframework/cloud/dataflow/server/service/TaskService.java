@@ -1,5 +1,5 @@
 /*
- * Copyright 2016-2018 the original author or authors.
+ * Copyright 2016-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,6 +28,7 @@ import java.util.Map;
  * @author Janne Valkealahti
  * @author Gunnar Hillert
  * @author David Turanski
+ * @author Daniel Serleg
  */
 public interface TaskService {
 
@@ -88,4 +89,9 @@ public interface TaskService {
 	 */
 	ValidationStatus validateTask(String name);
 
+	/**
+	 * Destroy all task definitions. If it is a Composed Task then the task definitions
+	 * required for a ComposedTaskRunner tasks are also destroyed.
+	 */
+	void deleteAll();
 }

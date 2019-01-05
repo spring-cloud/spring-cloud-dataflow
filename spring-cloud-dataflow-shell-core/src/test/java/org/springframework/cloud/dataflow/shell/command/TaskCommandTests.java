@@ -1,5 +1,5 @@
 /*
- * Copyright 2015-2018 the original author or authors.
+ * Copyright 2015-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -108,6 +108,25 @@ public class TaskCommandTests extends AbstractShellIntegrationTest {
 		logger.info("Create Task Test");
 		String taskName = generateUniqueName();
 		task().create(taskName, "timestamp");
+	}
+
+	@Test
+	public void destroySpecificTask() {
+		logger.info("Create Task Test");
+		String taskName = generateUniqueName();
+		task().create(taskName, "timestamp");
+		logger.info("Destroy created task");
+		task().destroyTask(taskName);
+	}
+
+	@Test
+	public void destroyAllTasks() {
+		logger.info("Create Task Test");
+		String taskName1 = generateUniqueName();
+		task().create(taskName1, "timestamp");
+		String taskName2 = generateUniqueName();
+		task().create(taskName2, "timestamp");
+		task().destroyAllTasks();
 	}
 
 	@Test
