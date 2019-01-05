@@ -382,6 +382,25 @@ public abstract class DefaultTaskServiceTests {
 
 		@Test
 		@DirtiesContext
+		public void deleteAllComposedTask() {
+			initializeSuccessfulRegistry(appRegistry);
+			String taskDsl1 = "AAA && BBB && CCC";
+			String taskDsl2 = "DDD";
+			taskService.saveTaskDefinition("deleteTask1", taskDsl1);
+			taskService.saveTaskDefinition("deleteTask2", taskDsl2);
+			verifyTaskExistsInRepo("deleteTask1-AAA", "AAA", taskDefinitionRepository);
+			verifyTaskExistsInRepo("deleteTask1-BBB", "BBB", taskDefinitionRepository);
+			verifyTaskExistsInRepo("deleteTask1-CCC", "CCC", taskDefinitionRepository);
+			verifyTaskExistsInRepo("deleteTask1", taskDsl1, taskDefinitionRepository);
+			verifyTaskExistsInRepo("deleteTask2", taskDsl2, taskDefinitionRepository);
+
+			long preDeleteSize = taskDefinitionRepository.count();
+			taskService.deleteAll();
+			assertThat(preDeleteSize - 5, is(equalTo(taskDefinitionRepository.count())));
+		}
+
+		@Test
+		@DirtiesContext
 		public void deleteComposedTask() {
 			initializeSuccessfulRegistry(appRegistry);
 			String dsl = "AAA && BBB && CCC";

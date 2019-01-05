@@ -254,6 +254,26 @@ public class TaskControllerTests {
 	}
 
 	@Test
+	public void testDestroyAllTask() throws Exception {
+		repository.save(new TaskDefinition("myTask1", "task"));
+		repository.save(new TaskDefinition("myTask2", "task && task2"));
+		repository.save(new TaskDefinition("myTask3", "task"));
+
+		assertEquals(3, repository.count());
+
+		mockMvc.perform(get("/tasks/definitions/").accept(MediaType.APPLICATION_JSON)).andExpect(status().isOk())
+				.andExpect(jsonPath("$.content", hasSize(3)));
+
+		mockMvc.perform(delete("/tasks/definitions").accept(MediaType.APPLICATION_JSON)).andDo(print())
+				.andExpect(status().isOk());
+
+		assertEquals(0, repository.count());
+		Mockito.verify(taskLauncher).destroy("myTask1");
+		Mockito.verify(taskLauncher).destroy("myTask2");
+		Mockito.verify(taskLauncher).destroy("myTask3");
+	}
+
+	@Test
 	public void testMissingApplication() throws Exception {
 		repository.save(new TaskDefinition("myTask", "no-such-task-app"));
 
