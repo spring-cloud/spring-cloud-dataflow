@@ -115,5 +115,5 @@ public interface TaskOperations {
 	 * Destroy all existing tasks.
 	 *
 	 */
-    void destroyAll();
+	void destroyAll();
 }
