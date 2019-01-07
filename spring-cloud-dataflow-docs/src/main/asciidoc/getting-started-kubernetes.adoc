@@ -81,7 +81,7 @@ To check out the code, enter the following commands:
 [source,console,subs=attributes]
 ----
 $ git clone https://github.com/{github-repo}
-$ cd spring-cloud-dataflow-server
+$ cd spring-cloud-dataflow
 $ git checkout {github-tag}
 ----
 ====
