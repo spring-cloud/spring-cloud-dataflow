@@ -70,6 +70,7 @@ import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.data.map.repository.config.EnableMapRepositories;
 import org.springframework.data.web.config.EnableSpringDataWebSupport;
 import org.springframework.hateoas.config.EnableHypermediaSupport;
+import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurationSupport;
@@ -191,14 +192,15 @@ public class TaskServiceDependencies extends WebMvcConfigurationSupport {
 
 	@Bean
 	public DefaultTaskService defaultTaskService(TaskDefinitionRepository taskDefinitionRepository,
-												 TaskExplorer taskExplorer, TaskRepository taskExecutionRepository, AppRegistryService appRegistry,
-												 LauncherRepository launcherRepository, ApplicationConfigurationMetadataResolver metadataResolver,
-												 TaskConfigurationProperties taskConfigurationProperties, AuditRecordService auditRecordService,
-												 CommonApplicationProperties commonApplicationProperties, TaskValidationService taskValidationService) {
+			TaskExplorer taskExplorer, TaskRepository taskExecutionRepository, AppRegistryService appRegistry,
+			LauncherRepository launcherRepository, ApplicationConfigurationMetadataResolver metadataResolver,
+			TaskConfigurationProperties taskConfigurationProperties, AuditRecordService auditRecordService,
+			CommonApplicationProperties commonApplicationProperties, TaskValidationService taskValidationService,
+			PlatformTransactionManager transactionManager) {
 		return new DefaultTaskService(this.dataSourceProperties, taskDefinitionRepository, taskExplorer,
 				taskExecutionRepository, appRegistry, launcherRepository, metadataResolver, taskConfigurationProperties,
 				auditRecordService, null, commonApplicationProperties,
-				taskValidationService);
+				taskValidationService, transactionManager);
 	}
 
 	@Bean

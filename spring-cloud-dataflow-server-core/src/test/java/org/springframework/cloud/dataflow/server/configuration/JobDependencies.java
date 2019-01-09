@@ -181,12 +181,13 @@ public class JobDependencies {
 
 	@Bean
 	public TaskService taskService(TaskDefinitionRepository repository, TaskExplorer explorer, AppRegistryService registry,
-								   LauncherRepository launcherRepository, ApplicationConfigurationMetadataResolver metadataResolver,
-								   AuditRecordService auditRecordService, CommonApplicationProperties commonApplicationProperties,
-								   TaskValidationService taskValidationService) {
+			LauncherRepository launcherRepository, ApplicationConfigurationMetadataResolver metadataResolver,
+			AuditRecordService auditRecordService, CommonApplicationProperties commonApplicationProperties,
+			TaskValidationService taskValidationService,
+			PlatformTransactionManager transactionManager) {
 		return new DefaultTaskService(new DataSourceProperties(), repository, explorer, taskRepository(), registry,
 				launcherRepository, metadataResolver, new TaskConfigurationProperties(), auditRecordService,
-				null, commonApplicationProperties, taskValidationService);
+				null, commonApplicationProperties, taskValidationService, transactionManager);
 	}
 
 	@Bean

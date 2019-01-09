@@ -134,6 +134,7 @@ import org.springframework.data.web.config.EnableSpringDataWebSupport;
 import org.springframework.hateoas.EntityLinks;
 import org.springframework.hateoas.Resources;
 import org.springframework.hateoas.config.EnableHypermediaSupport;
+import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 import org.springframework.validation.beanvalidation.MethodValidationPostProcessor;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
@@ -401,11 +402,12 @@ public class TestDependencies extends WebMvcConfigurationSupport {
 	public TaskDefinitionController taskDefinitionController(TaskExplorer explorer, TaskDefinitionRepository repository,
 			ApplicationConfigurationMetadataResolver metadataResolver,
 			AppRegistryService appRegistry, LauncherRepository launcherRepository, AuditRecordService auditRecordService,
-			CommonApplicationProperties commonApplicationProperties, TaskValidationService taskValidationService) {
+			CommonApplicationProperties commonApplicationProperties, TaskValidationService taskValidationService,
+			PlatformTransactionManager transactionManager) {
 		return new TaskDefinitionController(explorer, repository,
 				taskService(metadataResolver, taskRepository(), appRegistry, launcherRepository,
 						auditRecordService, commonApplicationProperties,
-						taskValidationService, repository));
+						taskValidationService, repository, transactionManager));
 	}
 
 	@Bean
@@ -413,10 +415,12 @@ public class TestDependencies extends WebMvcConfigurationSupport {
 			ApplicationConfigurationMetadataResolver metadataResolver,
 			AppRegistryService appRegistry, LauncherRepository launcherRepository, AuditRecordService auditRecordService,
 			CommonApplicationProperties commonApplicationProperties, TaskValidationService taskValidationService,
-			TaskDefinitionRepository taskDefinitionRepository) {
+			TaskDefinitionRepository taskDefinitionRepository,
+			PlatformTransactionManager transactionManager) {
 		return new TaskExecutionController(
 				explorer, taskService(metadataResolver, taskRepository(), appRegistry, launcherRepository,
-				auditRecordService, commonApplicationProperties, taskValidationService, taskDefinitionRepository),
+				auditRecordService, commonApplicationProperties, taskValidationService,
+				taskDefinitionRepository, transactionManager),
 				taskDefinitionRepository);
 	}
 
@@ -471,11 +475,12 @@ public class TestDependencies extends WebMvcConfigurationSupport {
 			TaskRepository taskExecutionRepository, AppRegistryService appRegistry,
 			LauncherRepository launcherRepository, AuditRecordService auditRecordService,
 			CommonApplicationProperties commonApplicationProperties, TaskValidationService taskValidationService,
-			TaskDefinitionRepository taskDefinitionRepository) {
+			TaskDefinitionRepository taskDefinitionRepository,
+			PlatformTransactionManager transactionManager) {
 		return new DefaultTaskService(new DataSourceProperties(), taskDefinitionRepository, taskExplorer(),
 				taskExecutionRepository, appRegistry, launcherRepository, metadataResolver,
 				new TaskConfigurationProperties(), auditRecordService, null,
-				commonApplicationProperties, taskValidationService);
+				commonApplicationProperties, taskValidationService, transactionManager);
 	}
 
 	@Bean

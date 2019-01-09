@@ -133,10 +133,12 @@ public class TaskConfiguration {
 			ApplicationConfigurationMetadataResolver metadataResolver,
 			TaskConfigurationProperties taskConfigurationProperties,
 			AuditRecordService auditRecordService, CommonApplicationProperties commonApplicationProperties,
-			TaskValidationService taskValidationService) {
+			TaskValidationService taskValidationService,
+			PlatformTransactionManager transactionManager) {
 		return new DefaultTaskService(dataSourceProperties, repository, taskExplorer, taskExecutionRepository, registry,
 				launcherRepository, metadataResolver, taskConfigurationProperties, auditRecordService,
-				dataflowServerUri, commonApplicationProperties, taskValidationService);
+				dataflowServerUri, commonApplicationProperties, taskValidationService,
+				transactionManager);
 	}
 
 	@Bean

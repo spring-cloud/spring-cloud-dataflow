@@ -20,6 +20,9 @@ import java.net.URI;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Map;
+import java.util.Optional;
+
+import javax.sql.DataSource;
 
 import org.junit.Before;
 import org.junit.Rule;
@@ -37,6 +40,9 @@ import org.springframework.cloud.dataflow.audit.service.AuditRecordService;
 import org.springframework.cloud.dataflow.configuration.metadata.ApplicationConfigurationMetadataResolver;
 import org.springframework.cloud.dataflow.core.AppRegistration;
 import org.springframework.cloud.dataflow.core.ApplicationType;
+import org.springframework.cloud.dataflow.core.AuditActionType;
+import org.springframework.cloud.dataflow.core.AuditOperationType;
+import org.springframework.cloud.dataflow.core.AuditRecord;
 import org.springframework.cloud.dataflow.core.Launcher;
 import org.springframework.cloud.dataflow.core.TaskDefinition;
 import org.springframework.cloud.dataflow.registry.service.AppRegistryService;
@@ -50,13 +56,19 @@ import org.springframework.cloud.dataflow.server.service.TaskService;
 import org.springframework.cloud.dataflow.server.service.TaskValidationService;
 import org.springframework.cloud.dataflow.server.service.ValidationStatus;
 import org.springframework.cloud.deployer.spi.core.AppDeploymentRequest;
+import org.springframework.cloud.deployer.spi.core.RuntimeEnvironmentInfo;
 import org.springframework.cloud.deployer.spi.task.TaskLauncher;
+import org.springframework.cloud.deployer.spi.task.TaskStatus;
 import org.springframework.cloud.task.repository.TaskExplorer;
 import org.springframework.cloud.task.repository.TaskRepository;
 import org.springframework.core.io.FileSystemResource;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.transaction.PlatformTransactionManager;
 
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.core.Is.is;
@@ -205,8 +217,7 @@ public abstract class DefaultTaskServiceTests {
 			}
 		}
 
-		@Test
-		@DirtiesContext
+
 		public void executeTaskWithNullDefinitionTest() {
 			boolean errorCaught = false;
 			when(this.taskLauncher.launch(any())).thenReturn("0");
@@ -215,7 +226,7 @@ public abstract class DefaultTaskServiceTests {
 					mock(TaskDefinitionRepository.class), this.taskExplorer, this.taskExecutionRepository,
 					this.appRegistry, mock(LauncherRepository.class), this.metadataResolver, new TaskConfigurationProperties(),
 					auditRecordService, null, this.commonApplicationProperties,
-					this.taskValidationService);
+					this.taskValidationService, mock(PlatformTransactionManager.class));
 			try {
 				taskService.executeTask(TASK_NAME_ORIG, new HashMap<>(), new LinkedList<>(), "default");
 			}
@@ -522,6 +533,122 @@ public abstract class DefaultTaskServiceTests {
 			assertFalse(wasTaskDefinitionCreated("splitTask-AAA", taskDefinitionRepository));
 			assertTrue(wasTaskDefinitionCreated("splitTask-BBB", taskDefinitionRepository));
 		}
+	}
+
+	@AutoConfigureTestDatabase(replace = Replace.ANY)
+	public static class SimpleTaskTransactionTests extends DefaultTaskServiceTests {
+
+		private TaskService transactionTaskService;
+
+		@Autowired
+		PlatformTransactionManager platformTransactionManager;
+
+		@Autowired
+		TaskConfigurationProperties taskConfigurationProperties;
+
+		@Autowired
+		DataSource dataSource;
+
+		@Before
+		public void setupMocks() {
+			this.launcherRepository.save(new Launcher("default", "local", new TaskLauncherStub(this.dataSource)));
+			this.taskDefinitionRepository.save(new TaskDefinition(TASK_NAME_ORIG, "demo"));
+			this.taskDefinitionRepository.findAll();
+			this.transactionTaskService = new DefaultTaskService(
+					this.dataSourceProperties, this.taskDefinitionRepository,
+					this.taskExplorer, this.taskExecutionRepository, this.appRegistry,
+					this.launcherRepository, this.metadataResolver,
+					this.taskConfigurationProperties,
+					new AuditRecordServiceStub(), null,
+					this.commonApplicationProperties,
+					this.taskValidationService, this.platformTransactionManager);
+		}
+
+		@Test
+		@DirtiesContext
+		public void executeSingleTaskTransactionTest() {
+			initializeSuccessfulRegistry(this.appRegistry);
+			this.launcherRepository.save(new Launcher("local", "default", new TaskLauncherStub(this.dataSource)));
+			assertEquals(1L, this.transactionTaskService.executeTask(TASK_NAME_ORIG, new HashMap<>(), new LinkedList<>(),
+					"default"));
+		}
+
+
+	}
+	private static class TaskLauncherStub implements TaskLauncher {
+		private String result = "0";
+
+		private DataSource dataSource;
+
+		private TaskLauncherStub(DataSource dataSource) {
+			this.dataSource = dataSource;
+		}
+
+		@Override
+		public String launch(AppDeploymentRequest request) {
+			JdbcTemplate template = new JdbcTemplate(this.dataSource);
+			result = String.valueOf(template.queryForObject("select count(*) from task_execution", Integer.class));
+			return result;
+		}
+
+		@Override
+		public void cancel(String id) {
+
+		}
+
+		@Override
+		public TaskStatus status(String id) {
+			return null;
+		}
+
+		@Override
+		public void cleanup(String id) {
+
+		}
+
+		@Override
+		public void destroy(String appName) {
+
+		}
+
+		@Override
+		public RuntimeEnvironmentInfo environmentInfo() {
+			return null;
+		}
+
+		public String getResult() {
+			return result;
+		}
+	}
+
+	private static class AuditRecordServiceStub implements AuditRecordService {
+
+		@Override
+		public AuditRecord populateAndSaveAuditRecord(AuditOperationType auditOperationType, AuditActionType auditActionType, String correlationId, String data) {
+			return null;
+		}
+
+		@Override
+		public AuditRecord populateAndSaveAuditRecordUsingMapData(AuditOperationType auditOperationType, AuditActionType auditActionType, String correlationId, Map<String, Object> data) {
+			try {
+				Thread.sleep(1000);
+			}
+			catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+			return null;
+		}
+
+		@Override
+		public Page<AuditRecord> findAuditRecordByAuditOperationTypeAndAuditActionType(Pageable pageable, AuditActionType[] actions, AuditOperationType[] operations) {
+			return null;
+		}
+
+		@Override
+		public Optional<AuditRecord> findById(Long id) {
+			return Optional.empty();
+		}
+
 	}
 
 	private static void initializeSuccessfulRegistry(AppRegistryService appRegistry) {
