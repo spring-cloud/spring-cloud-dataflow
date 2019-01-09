@@ -100,10 +100,10 @@ public class TaskConfiguration {
 			ApplicationConfigurationMetadataResolver metadataResolver,
 			TaskConfigurationProperties taskConfigurationProperties, DeploymentIdRepository deploymentIdRepository,
 			AuditRecordService auditRecordService, CommonApplicationProperties commonApplicationProperties,
-			TaskValidationService taskValidationService) {
+			TaskValidationService taskValidationService, PlatformTransactionManager transactionManager) {
 		return new DefaultTaskService(dataSourceProperties, repository, taskExplorer, taskExecutionRepository, registry,
 				taskLauncher, metadataResolver, taskConfigurationProperties, deploymentIdRepository, auditRecordService,
-				dataflowServerUri, commonApplicationProperties, taskValidationService);
+				dataflowServerUri, commonApplicationProperties, taskValidationService, transactionManager);
 	}
 
 	@Bean

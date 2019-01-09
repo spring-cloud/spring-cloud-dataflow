@@ -57,6 +57,7 @@ import org.springframework.core.io.FileSystemResource;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.transaction.PlatformTransactionManager;
 
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.core.Is.is;
@@ -201,7 +202,7 @@ public abstract class DefaultTaskServiceTests {
 					mock(TaskDefinitionRepository.class), this.taskExplorer, this.taskExecutionRepository,
 					this.appRegistry, this.taskLauncher, this.metadataResolver, new TaskConfigurationProperties(),
 					new InMemoryDeploymentIdRepository(), auditRecordService, null, this.commonApplicationProperties,
-					this.taskValidationService);
+					this.taskValidationService, mock(PlatformTransactionManager.class));
 			try {
 				taskService.executeTask(TASK_NAME_ORIG, new HashMap<>(), new LinkedList<>());
 			}

@@ -59,6 +59,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.jdbc.datasource.DataSourceTransactionManager;
+import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 
 import static org.mockito.Matchers.anyString;
@@ -178,11 +179,12 @@ public class TaskServiceDependencies {
 			TaskExplorer taskExplorer, TaskRepository taskExecutionRepository, AppRegistry appRegistry,
 			TaskLauncher taskLauncher, ApplicationConfigurationMetadataResolver metadataResolver,
 			TaskConfigurationProperties taskConfigurationProperties, AuditRecordService auditRecordService,
-			CommonApplicationProperties commonApplicationProperties, TaskValidationService taskValidationService) {
+			CommonApplicationProperties commonApplicationProperties, TaskValidationService taskValidationService,
+			PlatformTransactionManager transactionManager) {
 		return new DefaultTaskService(this.dataSourceProperties, taskDefinitionRepository, taskExplorer,
 				taskExecutionRepository, appRegistry, taskLauncher, metadataResolver, taskConfigurationProperties,
 				new InMemoryDeploymentIdRepository(), auditRecordService, null, commonApplicationProperties,
-				taskValidationService);
+				taskValidationService, transactionManager);
 	}
 
 	@Bean

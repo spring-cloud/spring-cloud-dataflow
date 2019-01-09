@@ -54,7 +54,11 @@ import org.springframework.cloud.task.repository.TaskExecution;
 import org.springframework.cloud.task.repository.TaskExplorer;
 import org.springframework.cloud.task.repository.TaskRepository;
 import org.springframework.core.io.Resource;
+import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionCallbackWithoutResult;
+import org.springframework.transaction.support.TransactionTemplate;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
@@ -73,10 +77,11 @@ import org.springframework.util.StringUtils;
  * @author Michael Wirth
  * @author David Turanski
  */
-@Transactional
 public class DefaultTaskService implements TaskService {
 
 	private final DataSourceProperties dataSourceProperties;
+
+	private PlatformTransactionManager transactionManager;
 
 	/**
 	 * Used to create TaskExecutions.
@@ -137,6 +142,7 @@ public class DefaultTaskService implements TaskService {
 	 * @param dataflowServerUri the data flow server URI
 	 * @param commonApplicationProperties the common application properties
 	 * @param taskValidationService the task validation service
+	 * @param transactionManager the {@link PlatformTransactionManager} to be used.
 	 */
 	public DefaultTaskService(DataSourceProperties dataSourceProperties,
 			TaskDefinitionRepository taskDefinitionRepository, TaskExplorer taskExplorer,
@@ -145,7 +151,8 @@ public class DefaultTaskService implements TaskService {
 			TaskConfigurationProperties taskConfigurationProperties, DeploymentIdRepository deploymentIdRepository,
 			AuditRecordService auditRecordService,
 			String dataflowServerUri, CommonApplicationProperties commonApplicationProperties,
-			TaskValidationService taskValidationService) {
+			TaskValidationService taskValidationService,
+			PlatformTransactionManager transactionManager) {
 		Assert.notNull(dataSourceProperties, "DataSourceProperties must not be null");
 		Assert.notNull(taskDefinitionRepository, "TaskDefinitionRepository must not be null");
 		Assert.notNull(taskExecutionRepository, "TaskExecutionRepository must not be null");
@@ -158,6 +165,7 @@ public class DefaultTaskService implements TaskService {
 		Assert.notNull(commonApplicationProperties, "commonApplicationProperties must not be null");
 		Assert.notNull(auditRecordService, "auditRecordService must not be null");
 		Assert.notNull(taskValidationService, "TaskValidationService must not be null");
+		Assert.notNull(transactionManager, "transactionManager must not be null");
 		this.dataSourceProperties = dataSourceProperties;
 		this.taskDefinitionRepository = taskDefinitionRepository;
 		this.taskExecutionRepository = taskExecutionRepository;
@@ -171,75 +179,110 @@ public class DefaultTaskService implements TaskService {
 		this.commonApplicationProperties = commonApplicationProperties;
 		this.auditRecordService = auditRecordService;
 		this.taskValidationService = taskValidationService;
+		this.transactionManager = transactionManager;
 	}
 
 	@Override
 	public long executeTask(String taskName, Map<String, String> taskDeploymentProperties,
 			List<String> commandLineArgs) {
-		Assert.hasText(taskName, "The provided taskName must not be null or empty.");
-		Assert.notNull(taskDeploymentProperties, "The provided runtimeProperties must not be null.");
+		RequestCriteria requestCriteria = createLaunchRequest(taskName, taskDeploymentProperties,commandLineArgs);
 
-		if (maxConcurrentExecutionsReached()) {
-			throw new IllegalStateException(String.format(
-					"The maximum concurrent task executions [%d] is at its limit.",
-					taskConfigurationProperties.getMaximumConcurrentTasks()));
-		}
-
-		TaskDefinition taskDefinition = this.taskDefinitionRepository.findOne(taskName);
-		if (taskDefinition == null) {
-			throw new NoSuchTaskDefinitionException(taskName);
-		}
-		TaskParser taskParser = new TaskParser(taskDefinition.getName(), taskDefinition.getDslText(), true, true);
-		TaskNode taskNode = taskParser.parse();
-		// if composed task definition replace definition with one composed task
-		// runner and executable graph.
-		if (taskNode.isComposed()) {
-			taskDefinition = new TaskDefinition(taskDefinition.getName(),
-					TaskServiceUtils.createComposedTaskDefinition(
-							taskNode.toExecutableDSL(), taskConfigurationProperties));
-			taskDeploymentProperties = TaskServiceUtils.establishComposedTaskProperties(taskDeploymentProperties,
-					taskNode);
-		}
-
-		AppRegistration appRegistration = this.registry.find(taskDefinition.getRegisteredAppName(),
-				ApplicationType.task);
-		Assert.notNull(appRegistration, "Unknown task app: " + taskDefinition.getRegisteredAppName());
-		Resource appResource = this.registry.getAppResource(appRegistration);
-		Resource metadataResource = this.registry.getAppMetadataResource(appRegistration);
-
-		TaskExecution taskExecution = taskExecutionRepository.createTaskExecution(taskName);
-		taskDefinition = TaskServiceUtils.updateTaskProperties(taskDefinition,
-				dataSourceProperties);
-
-		Map<String, String> appDeploymentProperties = new HashMap<>(commonApplicationProperties.getTask());
-		appDeploymentProperties.putAll(
-				TaskServiceUtils.extractAppProperties(taskDefinition.getRegisteredAppName(), taskDeploymentProperties));
-
-		Map<String, String> deployerDeploymentProperties = DeploymentPropertiesUtils
-				.extractAndQualifyDeployerProperties(taskDeploymentProperties, taskDefinition.getRegisteredAppName());
-		if (StringUtils.hasText(this.dataflowServerUri) && taskNode.isComposed()) {
-			TaskServiceUtils.updateDataFlowUriIfNeeded(this.dataflowServerUri, appDeploymentProperties,
-					commandLineArgs);
-		}
-		AppDefinition revisedDefinition = TaskServiceUtils.mergeAndExpandAppProperties(taskDefinition, metadataResource,
-				appDeploymentProperties, this.whitelistProperties);
-		List<String> updatedCmdLineArgs = this.updateCommandLineArgs(commandLineArgs, taskExecution);
-		AppDeploymentRequest request = new AppDeploymentRequest(revisedDefinition, appResource,
-				deployerDeploymentProperties, updatedCmdLineArgs);
-		String id = this.taskLauncher.launch(request);
+		String id = this.taskLauncher.launch(requestCriteria.getAppDeploymentRequest());
 		if (!StringUtils.hasText(id)) {
 			throw new IllegalStateException("Deployment ID is null for the task:" + taskName);
 		}
-		this.taskExecutionRepository.updateExternalExecutionId(taskExecution.getExecutionId(), id);
-
-		this.auditRecordService.populateAndSaveAuditRecordUsingMapData(
-				AuditOperationType.TASK, AuditActionType.DEPLOY,
-				taskDefinition.getName(), getAuditata(taskDefinition, taskDeploymentProperties, updatedCmdLineArgs));
-
-		return taskExecution.getExecutionId();
+		postLaunchProcessing(requestCriteria, id);
+		return requestCriteria.getTaskExecution().getExecutionId();
 	}
 
-	private Map<String, Object> getAuditata(TaskDefinition taskDefinition, Map<String, String> taskDeploymentProperties,
+	private RequestCriteria createLaunchRequest (final String taskName, final Map<String, String> taskDeploymentProperties,
+			final List<String> commandLineArgs) {
+		TransactionTemplate template = new TransactionTemplate(transactionManager);
+
+		return template.execute(status -> {
+			Assert.hasText(taskName, "The provided taskName must not be null or empty.");
+			Assert.notNull(taskDeploymentProperties, "The provided runtimeProperties must not be null.");
+
+			Map<String, String> launchTaskDeploymentProperties = new HashMap<>(taskDeploymentProperties);
+			if (maxConcurrentExecutionsReached()) {
+				throw new IllegalStateException(String.format(
+						"The maximum concurrent task executions [%d] is at its limit.",
+						taskConfigurationProperties.getMaximumConcurrentTasks()));
+			}
+
+			TaskDefinition taskDefinition = this.taskDefinitionRepository.findOne(taskName);
+			if (taskDefinition == null) {
+				throw new NoSuchTaskDefinitionException(taskName);
+			}
+			TaskParser taskParser = new TaskParser(taskDefinition.getName(), taskDefinition.getDslText(), true, true);
+			TaskNode taskNode = taskParser.parse();
+			// if composed task definition replace definition with one composed task
+			// runner and executable graph.
+			if (taskNode.isComposed()) {
+				taskDefinition = new TaskDefinition(taskDefinition.getName(),
+						TaskServiceUtils.createComposedTaskDefinition(
+								taskNode.toExecutableDSL(), taskConfigurationProperties));
+				launchTaskDeploymentProperties = TaskServiceUtils.establishComposedTaskProperties(launchTaskDeploymentProperties,
+						taskNode);
+			}
+
+			AppRegistration appRegistration = this.registry.find(taskDefinition.getRegisteredAppName(),
+					ApplicationType.task);
+			Assert.notNull(appRegistration, "Unknown task app: " + taskDefinition.getRegisteredAppName());
+			Resource appResource = this.registry.getAppResource(appRegistration);
+			Resource metadataResource = this.registry.getAppMetadataResource(appRegistration);
+
+			TaskExecution taskExecution = taskExecutionRepository.createTaskExecution(taskName);
+			taskDefinition = TaskServiceUtils.updateTaskProperties(taskDefinition,
+					dataSourceProperties);
+
+			Map<String, String> appDeploymentProperties = new HashMap<>(commonApplicationProperties.getTask());
+			appDeploymentProperties.putAll(
+					TaskServiceUtils.extractAppProperties(taskDefinition.getRegisteredAppName(), launchTaskDeploymentProperties));
+
+			Map<String, String> deployerDeploymentProperties = DeploymentPropertiesUtils
+					.extractAndQualifyDeployerProperties(launchTaskDeploymentProperties, taskDefinition.getRegisteredAppName());
+			if (StringUtils.hasText(this.dataflowServerUri) && taskNode.isComposed()) {
+				TaskServiceUtils.updateDataFlowUriIfNeeded(this.dataflowServerUri, appDeploymentProperties,
+						commandLineArgs);
+			}
+			AppDefinition revisedDefinition = TaskServiceUtils.mergeAndExpandAppProperties(taskDefinition, metadataResource,
+					appDeploymentProperties, this.whitelistProperties);
+			List<String> updatedCmdLineArgs = this.updateCommandLineArgs(commandLineArgs, taskExecution);
+			AppDeploymentRequest request = new AppDeploymentRequest(revisedDefinition, appResource,
+					deployerDeploymentProperties, updatedCmdLineArgs);
+
+			RequestCriteria requestCriteria = new RequestCriteria(request, taskDefinition, taskExecution, launchTaskDeploymentProperties);
+			return requestCriteria;
+		});
+	}
+
+	private void postLaunchProcessing(RequestCriteria requestCriteria,
+			String externalExecutionId) {
+		TransactionTemplate template = new TransactionTemplate(transactionManager);
+
+		template.execute(new TransactionCallbackWithoutResult() {
+
+			@Override
+			protected void doInTransactionWithoutResult(TransactionStatus transactionStatus) {
+				TaskDefinition taskDefinition = requestCriteria.getTaskDefinition();
+
+				taskExecutionRepository.updateExternalExecutionId(
+						requestCriteria.getTaskExecution().getExecutionId(),
+						externalExecutionId);
+
+				auditRecordService.populateAndSaveAuditRecordUsingMapData(
+						AuditOperationType.TASK, AuditActionType.DEPLOY,
+						taskDefinition.getName(), getAuditData(taskDefinition,
+								requestCriteria.getLaunchTaskDeploymentProperties(),
+								requestCriteria.getAppDeploymentRequest().getCommandlineArguments()));
+
+			}
+		});
+	}
+
+
+	private Map<String, Object> getAuditData(TaskDefinition taskDefinition, Map<String, String> taskDeploymentProperties,
 			List<String> commandLineArgs) {
 		final Map<String, Object> auditedData = new HashMap<>(3);
 		auditedData.put(TASK_DEFINITION_DSL_TEXT, this.argumentSanitizer.sanitizeTaskDsl(taskDefinition));
@@ -271,11 +314,13 @@ public class DefaultTaskService implements TaskService {
 	}
 
 	@Override
+	@Transactional
 	public ValidationStatus validateTask(String name) {
 		return this.taskValidationService.validateTask(name);
 	}
 
 	@Override
+	@Transactional
 	public void cleanupExecution(long id) {
 		TaskExecution taskExecution = taskExplorer.getTaskExecution(id);
 		Assert.notNull(taskExecution, "There was no task execution with id " + id);
@@ -323,6 +368,7 @@ public class DefaultTaskService implements TaskService {
 	}
 
 	@Override
+	@Transactional
 	public void deleteTaskDefinition(String name) {
 		TaskDefinition taskDefinition = taskDefinitionRepository.findOne(name);
 		if (taskDefinition == null) {
@@ -351,6 +397,7 @@ public class DefaultTaskService implements TaskService {
 				name, this.argumentSanitizer.sanitizeTaskDsl(taskDefinition));
 	}
 
+
 	private void destroyPrimaryTask(String name) {
 		TaskDefinition taskDefinition = taskDefinitionRepository.findOne(name);
 		if (taskDefinition == null) {
@@ -359,6 +406,7 @@ public class DefaultTaskService implements TaskService {
 		destroyTask(taskDefinition);
 	}
 
+
 	private void destroyChildTask(String name) {
 		TaskDefinition taskDefinition = taskDefinitionRepository.findOne(name);
 		if (taskDefinition != null) {
@@ -366,10 +414,49 @@ public class DefaultTaskService implements TaskService {
 		}
 	}
 
+
 	private void destroyTask(TaskDefinition taskDefinition) {
 		taskLauncher.destroy(taskDefinition.getName());
 		deploymentIdRepository.delete(DeploymentKey.forTaskDefinition(taskDefinition));
 		taskDefinitionRepository.delete(taskDefinition.getName());
 	}
+
+	private static class RequestCriteria {
+
+		private AppDeploymentRequest appDeploymentRequest;
+
+		private TaskDefinition taskDefinition;
+
+		private TaskExecution taskExecution;
+
+		Map<String, String> launchTaskDeploymentProperties;
+
+
+		public RequestCriteria(AppDeploymentRequest appDeploymentRequest,
+				TaskDefinition taskDefinition, TaskExecution taskExecution,
+				Map<String, String> launchTaskDeploymentProperties) {
+			this.appDeploymentRequest = appDeploymentRequest;
+			this.taskDefinition = taskDefinition;
+			this.taskExecution = taskExecution;
+			this.launchTaskDeploymentProperties = launchTaskDeploymentProperties;
+		}
+
+		public AppDeploymentRequest getAppDeploymentRequest() {
+			return appDeploymentRequest;
+		}
+
+		public TaskDefinition getTaskDefinition() {
+			return taskDefinition;
+		}
+
+		public TaskExecution getTaskExecution() {
+			return taskExecution;
+		}
+
+		public Map<String, String> getLaunchTaskDeploymentProperties() {
+			return launchTaskDeploymentProperties;
+		}
+	}
+
 
 }
