@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 the original author or authors.
+ * Copyright 2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -174,24 +174,30 @@ public class DefaultAppRegistryService implements AppRegistryService {
 			appRegistration.setUri(app.getUri());
 			appRegistration.setMetadataUri(app.getMetadataUri());
 			createdApp = this.appRegistrationRepository.save(appRegistration);
+
+			populateAuditData(AuditActionType.UPDATE, createdApp);
 		}
 		else {
 			if (getDefaultApp(app.getName(), app.getType()) == null) {
 				app.setDefaultVersion(true);
 			}
 			createdApp = this.appRegistrationRepository.save(app);
+
+			populateAuditData(AuditActionType.CREATE, createdApp);
 		}
 
-		if (createdApp == null) {
+		return createdApp;
+	}
+
+	private void populateAuditData(AuditActionType auditActionType, AppRegistration appRegistration) {
+		if (appRegistration == null) {
 			logger.error("App registration failed, app not saved into database!");
 		}
 		else {
 			this.auditRecordService.populateAndSaveAuditRecordUsingMapData(AuditOperationType.APP_REGISTRATION,
-					AuditActionType.UPDATE, createdApp.getName(),
-					this.auditServiceUtils.convertAppRegistrationToAuditData(createdApp));
+					auditActionType, appRegistration.getName(),
+					this.auditServiceUtils.convertAppRegistrationToAuditData(appRegistration));
 		}
-
-		return createdApp;
 	}
 
 	/**
@@ -205,9 +211,7 @@ public class DefaultAppRegistryService implements AppRegistryService {
 	public void delete(String name, ApplicationType type, String version) {
 		this.appRegistrationRepository.deleteAppRegistrationByNameAndTypeAndVersion(name, type, version);
 
-		this.auditRecordService.populateAndSaveAuditRecordUsingMapData(AuditOperationType.APP_REGISTRATION,
-				AuditActionType.DELETE, name,
-				this.auditServiceUtils.convertAppRegistrationToAuditData(name, type, version));
+		populateAuditData(AuditActionType.DELETE, new AppRegistration(name, type, version, URI.create(""), URI.create("")));
 	}
 
 	protected boolean isOverwrite(AppRegistration app, boolean overwrite) {

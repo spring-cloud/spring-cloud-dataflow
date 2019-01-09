@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 the original author or authors.
+ * Copyright 2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,13 +15,10 @@
  */
 package org.springframework.cloud.dataflow.audit.service;
 
-import java.net.URI;
-import java.net.URISyntaxException;
 import java.util.HashMap;
 import java.util.Map;
 
 import org.springframework.cloud.dataflow.core.AppRegistration;
-import org.springframework.cloud.dataflow.core.ApplicationType;
 import org.springframework.cloud.dataflow.core.StreamDefinition;
 import org.springframework.cloud.dataflow.rest.support.ArgumentSanitizer;
 import org.springframework.cloud.scheduler.spi.core.ScheduleRequest;
@@ -41,6 +38,10 @@ public class AuditServiceUtils {
 
 	public static final String APP_IS_DEFAULT = "APP_IS_DEFAULT";
 
+	public static final String APP_URI = "uri";
+
+	public static final String APP_META_DATA_URI = "metaDataUri";
+
 	public static final String STREAM_DEFINITION_DSL_TEXT = "streamDefinitionDslText";
 
 	public static final String TASK_DEFINITION_NAME = "taskDefinitionName";
@@ -56,17 +57,6 @@ public class AuditServiceUtils {
 	public AuditServiceUtils() {
 	}
 
-	public Map<String, Object> convertAppRegistrationToAuditData(String name, ApplicationType type, String version) {
-		try {
-			return this.convertAppRegistrationToAuditData(new AppRegistration(name, type, version, new URI(""), null));
-		}
-		catch (URISyntaxException e) {
-			e.printStackTrace();
-		}
-
-		return null;
-	}
-
 	public Map<String, Object> convertAppRegistrationToAuditData(AppRegistration appRegistration) {
 		final Map<String, Object> auditData = new HashMap<>(4);
 
@@ -74,6 +64,8 @@ public class AuditServiceUtils {
 		auditData.put(APP_TYPE, appRegistration.getType());
 		auditData.put(APP_VERSION, appRegistration.getVersion());
 		auditData.put(APP_IS_DEFAULT, appRegistration.isDefaultVersion());
+		auditData.put(APP_URI, appRegistration.getUri());
+		auditData.put(APP_META_DATA_URI, appRegistration.getMetadataUri());
 
 		return auditData;
 	}

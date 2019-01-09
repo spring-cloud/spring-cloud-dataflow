@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 the original author or authors.
+ * Copyright 2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -89,7 +89,8 @@ public interface AppRegistryService {
 	 * @param type appliation type
 	 * @param name application name
 	 * @param pageable Pagination information
-	 * @return returns all {@link AppRegistration} versions for given name and type. Uses the pagination.
+	 * @return returns all {@link AppRegistration} versions for given name and type. Uses the
+	 * pagination.
 	 */
 	Page<AppRegistration> findAllByTypeAndNameIsLike(ApplicationType type, String name, Pageable pageable);
 
@@ -127,8 +128,8 @@ public interface AppRegistryService {
 	/**
 	 * Import bulk of applications from input load files
 	 * @param overwrite if set to true this command will override and existing application
-	 * with same name:type:version If set to false operation will throw an exception in the
-	 * application already exists.
+	 *     with same name:type:version If set to false operation will throw an exception in
+	 *     the application already exists.
 	 * @param resources list of input load files
 	 * @return list of application being imported
 	 */

@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 the original author or authors.
+ * Copyright 2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@
 package org.springframework.cloud.dataflow.registry.service;
 
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.Arrays;
 import java.util.List;
 
@@ -135,7 +136,6 @@ public class DefaultAppRegistryServiceTests {
 						hasProperty("type", is(ApplicationType.sink)))));
 	}
 
-
 	@Test
 	public void testFindAllPageable() {
 		AppRegistration fooSource = appRegistration("foo", ApplicationType.source, true);
@@ -143,7 +143,8 @@ public class DefaultAppRegistryServiceTests {
 		AppRegistration barSource = appRegistration("bar", ApplicationType.source, true);
 
 		PageRequest pageRequest1 = PageRequest.of(0, 2);
-		when(appRegistrationRepository.findAll(eq(pageRequest1))).thenReturn(new PageImpl(Arrays.asList(fooSink, barSource), pageRequest1, 3));
+		when(appRegistrationRepository.findAll(eq(pageRequest1)))
+				.thenReturn(new PageImpl(Arrays.asList(fooSink, barSource), pageRequest1, 3));
 		Page<AppRegistration> registrations1 = appRegistryService.findAll(pageRequest1);
 
 		assertEquals(3, registrations1.getTotalElements());
@@ -152,7 +153,8 @@ public class DefaultAppRegistryServiceTests {
 		assertEquals("bar", registrations1.getContent().get(1).getName());
 
 		PageRequest pageRequest2 = PageRequest.of(1, 2);
-		when(appRegistrationRepository.findAll(eq(pageRequest2))).thenReturn(new PageImpl(Arrays.asList(fooSource), pageRequest2, 3));
+		when(appRegistrationRepository.findAll(eq(pageRequest2)))
+				.thenReturn(new PageImpl(Arrays.asList(fooSource), pageRequest2, 3));
 		Page<AppRegistration> registrations2 = appRegistryService.findAll(pageRequest2);
 
 		assertEquals(3, registrations2.getTotalElements());
@@ -197,7 +199,8 @@ public class DefaultAppRegistryServiceTests {
 		fooSource2.setMetadataUri(null);
 
 		when(appRegistrationRepository.findAppRegistrationByNameAndTypeAndVersion(
-				eq(fooSource2.getName()), eq(fooSource2.getType()), eq(fooSource2.getVersion()))).thenReturn(fooSource2);
+				eq(fooSource2.getName()), eq(fooSource2.getType()), eq(fooSource2.getVersion())))
+						.thenReturn(fooSource2);
 
 		appRegistryService.save(fooSource);
 
@@ -218,7 +221,8 @@ public class DefaultAppRegistryServiceTests {
 		when(appRegistrationRepository.findAppRegistrationByNameAndTypeAndVersion(
 				eq("foo"), eq(ApplicationType.source), eq("1.0"))).thenReturn(appRegistration());
 
-		appRegistryService.importAll(!overwrite, new ClassPathResource("AppRegistryTests-importAll.properties", getClass()));
+		appRegistryService.importAll(!overwrite,
+				new ClassPathResource("AppRegistryTests-importAll.properties", getClass()));
 
 		ArgumentCaptor<AppRegistration> appRegistrationCaptor = ArgumentCaptor.forClass(AppRegistration.class);
 		verify(appRegistrationRepository, times(2)).save(appRegistrationCaptor.capture());
@@ -242,7 +246,8 @@ public class DefaultAppRegistryServiceTests {
 		//
 		reset(appRegistrationRepository);
 
-		appRegistryService.importAll(overwrite, new ClassPathResource("AppRegistryTests-importAll.properties", getClass()));
+		appRegistryService.importAll(overwrite,
+				new ClassPathResource("AppRegistryTests-importAll.properties", getClass()));
 
 		appRegistrationCaptor = ArgumentCaptor.forClass(AppRegistration.class);
 		verify(appRegistrationRepository, times(3)).save(appRegistrationCaptor.capture());
@@ -269,7 +274,7 @@ public class DefaultAppRegistryServiceTests {
 	}
 
 	@Test
-	public void testDelete() {
+	public void testDelete() throws URISyntaxException {
 		AppRegistration fooSource = appRegistration("foo", ApplicationType.source, true);
 		appRegistryService.delete(fooSource.getName(), fooSource.getType(), fooSource.getVersion());
 		verify(appRegistrationRepository, times(1))
