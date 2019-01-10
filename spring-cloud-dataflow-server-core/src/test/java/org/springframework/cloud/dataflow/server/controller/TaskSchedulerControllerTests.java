@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 the original author or authors.
+ * Copyright 2018-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -248,7 +248,7 @@ public class TaskSchedulerControllerTests {
 		AuditActionType[] auditActionTypesDelete = { AuditActionType.DELETE };
 		final Page<AuditRecord> auditRecordsDelete = auditRecordRepository.findByAuditActionIn(auditActionTypesDelete, null);
 
-		assertEquals(1, auditRecordsCreate.getContent().size());
+		assertEquals(6, auditRecordsCreate.getContent().size());
 		assertEquals(1, auditRecordsDelete.getContent().size());
 		final AuditRecord auditRecord = auditRecordsDelete.getContent().get(0);
 
