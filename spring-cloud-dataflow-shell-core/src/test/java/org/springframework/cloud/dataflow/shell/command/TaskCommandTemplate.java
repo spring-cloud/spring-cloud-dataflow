@@ -16,10 +16,6 @@
 
 package org.springframework.cloud.dataflow.shell.command;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -27,6 +23,10 @@ import org.springframework.shell.core.CommandResult;
 import org.springframework.shell.core.JLineShellComponent;
 import org.springframework.shell.table.Table;
 import org.springframework.shell.table.TableModel;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 /**
  * Helper methods for task commands to execute in the shell.
@@ -55,13 +55,13 @@ public class TaskCommandTemplate {
 	/**
 	 * Create a task.
 	 * <p>
-	 * Note the name of the task will be stored so that when the method
-	 * destroyCreatedTasks is called, the task will be destroyed.
+	 * Note the name of the task will be stored so that when the method destroyCreatedTasks is
+	 * called, the task will be destroyed.
 	 *
 	 * @param taskName the name of the task
 	 * @param taskDefinition the task definition DSL
 	 * @param values will be injected into taskdefinition according to
-	 * {@link String#format(String, Object...)} syntax
+	 *     {@link String#format(String, Object...)} syntax
 	 */
 	public void create(String taskName, String taskDefinition, Object... values) {
 		doCreate(taskName, taskDefinition, true, values);
