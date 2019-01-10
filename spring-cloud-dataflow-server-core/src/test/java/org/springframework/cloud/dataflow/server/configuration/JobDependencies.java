@@ -52,6 +52,7 @@ import org.springframework.cloud.dataflow.server.controller.JobStepExecutionCont
 import org.springframework.cloud.dataflow.server.controller.JobStepExecutionProgressController;
 import org.springframework.cloud.dataflow.server.controller.RestControllerAdvice;
 import org.springframework.cloud.dataflow.server.controller.TaskExecutionController;
+import org.springframework.cloud.dataflow.server.controller.TaskPlatformController;
 import org.springframework.cloud.dataflow.server.job.LauncherRepository;
 import org.springframework.cloud.dataflow.server.repository.TaskDefinitionRepository;
 import org.springframework.cloud.dataflow.server.service.TaskJobService;
@@ -158,6 +159,11 @@ public class JobDependencies {
 	public TaskExecutionController taskExecutionController(TaskExplorer explorer, TaskService taskService,
 			TaskDefinitionRepository taskDefinitionRepository) {
 		return new TaskExecutionController(explorer, taskService, taskDefinitionRepository);
+	}
+
+	@Bean
+	public TaskPlatformController taskPlatformController(LauncherRepository launcherRepository) {
+		return new TaskPlatformController(launcherRepository);
 	}
 
 	@Bean

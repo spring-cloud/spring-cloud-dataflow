@@ -28,6 +28,7 @@ import javax.naming.OperationNotSupportedException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.dataflow.rest.client.TaskOperations;
 import org.springframework.cloud.dataflow.rest.resource.CurrentTaskExecutionsResource;
+import org.springframework.cloud.dataflow.rest.resource.LauncherResource;
 import org.springframework.cloud.dataflow.rest.resource.TaskAppStatusResource;
 import org.springframework.cloud.dataflow.rest.resource.TaskDefinitionResource;
 import org.springframework.cloud.dataflow.rest.resource.TaskExecutionResource;
@@ -62,6 +63,8 @@ public class TaskCommands implements CommandMarker {
 
 	private static final String LIST = "task list";
 
+	private static final String PLATFORM_LIST = "task platform-list";
+
 	private static final String CREATE = "task create";
 
 	private static final String LAUNCH = "task launch";
@@ -94,7 +97,7 @@ public class TaskCommands implements CommandMarker {
 	@Autowired
 	private DataFlowShell dataFlowShell;
 
-	@CliAvailabilityIndicator({ LIST, TASK_EXECUTION_STATUS, EXECUTION_LIST })
+	@CliAvailabilityIndicator({ LIST, PLATFORM_LIST, TASK_EXECUTION_STATUS, EXECUTION_LIST })
 	public boolean availableWithViewRole() {
 		return dataFlowShell.hasAccess(RoleType.VIEW, OpsType.TASK);
 	}
@@ -112,6 +115,17 @@ public class TaskCommands implements CommandMarker {
 		headers.put("dslText", "Task Definition");
 		headers.put("status", "Task Status");
 		final TableBuilder builder = new TableBuilder(new BeanListTableModel<>(tasks, headers));
+		return DataFlowTables.applyStyle(builder).build();
+	}
+
+	@CliCommand(value = PLATFORM_LIST, help = "List platform accounts for tasks")
+	public Table listPlatforms() {
+		final PagedResources<LauncherResource> platforms = taskOperations().listPlatforms();
+		LinkedHashMap<String, Object> headers = new LinkedHashMap<>();
+		headers.put("name", "Platform Name");
+		headers.put("type", "Platform Type");
+		headers.put("description", "Description");
+		final TableBuilder builder = new TableBuilder(new BeanListTableModel<>(platforms, headers));
 		return DataFlowTables.applyStyle(builder).build();
 	}
 

@@ -79,6 +79,7 @@ import org.springframework.cloud.dataflow.server.controller.StreamDeploymentCont
 import org.springframework.cloud.dataflow.server.controller.StreamValidationController;
 import org.springframework.cloud.dataflow.server.controller.TaskDefinitionController;
 import org.springframework.cloud.dataflow.server.controller.TaskExecutionController;
+import org.springframework.cloud.dataflow.server.controller.TaskPlatformController;
 import org.springframework.cloud.dataflow.server.controller.TaskSchedulerController;
 import org.springframework.cloud.dataflow.server.controller.ToolsController;
 import org.springframework.cloud.dataflow.server.controller.UiController;
@@ -237,6 +238,11 @@ public class DataFlowControllerAutoConfiguration {
 		public TaskExecutionController taskExecutionController(TaskExplorer explorer, TaskService taskService,
 				TaskDefinitionRepository taskDefinitionRepository) {
 			return new TaskExecutionController(explorer, taskService, taskDefinitionRepository);
+		}
+
+		@Bean
+		public TaskPlatformController taskLauncherController(LauncherRepository launcherRepository) {
+			return new TaskPlatformController(launcherRepository);
 		}
 
 		@Bean

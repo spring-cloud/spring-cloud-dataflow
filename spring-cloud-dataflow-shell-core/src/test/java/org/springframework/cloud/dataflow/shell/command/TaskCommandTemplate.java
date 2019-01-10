@@ -76,6 +76,13 @@ public class TaskCommandTemplate {
 	}
 
 	/**
+	 * Lists the platform accounts for tasks.
+	 */
+	public CommandResult taskPlatformList() {
+		return shell.executeCommand("task platform-list");
+	}
+
+	/**
 	 * Lists task executions by predefined name 'foo'.
 	 */
 	public CommandResult taskExecutionListByName() {

@@ -22,6 +22,7 @@ import java.util.Map;
 import javax.naming.OperationNotSupportedException;
 
 import org.springframework.cloud.dataflow.rest.resource.CurrentTaskExecutionsResource;
+import org.springframework.cloud.dataflow.rest.resource.LauncherResource;
 import org.springframework.cloud.dataflow.rest.resource.TaskAppStatusResource;
 import org.springframework.cloud.dataflow.rest.resource.TaskDefinitionResource;
 import org.springframework.cloud.dataflow.rest.resource.TaskExecutionResource;
@@ -41,6 +42,12 @@ public interface TaskOperations {
 	 * @return the list tasks known to the system.
 	 */
 	PagedResources<TaskDefinitionResource> list();
+
+
+	/**
+	 * @return the list of platform accounts for tasks.
+	 */
+	PagedResources<LauncherResource> listPlatforms();
 
 	/**
 	 * Create a new task definition
