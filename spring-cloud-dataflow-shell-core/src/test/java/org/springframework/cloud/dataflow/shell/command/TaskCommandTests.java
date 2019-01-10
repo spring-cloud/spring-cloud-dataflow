@@ -44,6 +44,7 @@ import static org.junit.Assert.assertTrue;
 /**
  * @author Glenn Renfro
  * @author David Turanski
+ * @author Ilayaperumal Gopinathan
  */
 public class TaskCommandTests extends AbstractShellIntegrationTest {
 
@@ -241,6 +242,18 @@ public class TaskCommandTests extends AbstractShellIntegrationTest {
 	public void testTaskExecutionCleanup() {
 		CommandResult cr = task().taskExecutionCleanup(10000);
 		assertThat(cr.getResult(), is("Request to clean up resources for task execution 10000 has been submitted"));
+	}
+
+	@Test
+	public void testPlatformList() {
+		CommandResult cr = task().taskPlatformList();
+		Table table = (Table) cr.getResult();
+		assertEquals("Number of columns returned was not expected", 3, table.getModel().getColumnCount());
+		assertEquals("First Row First Value should be: Platform Name", "Platform Name", table.getModel().getValue(0, 0));
+		assertEquals("First Row Second Value should be: Platform Type", "Platform Type", table.getModel().getValue(0, 1));
+		assertEquals("First Row Second Value should be: Description", "Description", table.getModel().getValue(0, 2));
+		assertEquals("Second Row First Value should be: default", "default", table.getModel().getValue(1, 0));
+		assertEquals("Second Row Second Value should be: local", "local", table.getModel().getValue(1, 1));
 	}
 
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2015-2018 the original author or authors.
+ * Copyright 2015-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -73,6 +73,7 @@ import org.springframework.cloud.dataflow.server.controller.StreamDeploymentCont
 import org.springframework.cloud.dataflow.server.controller.StreamValidationController;
 import org.springframework.cloud.dataflow.server.controller.TaskDefinitionController;
 import org.springframework.cloud.dataflow.server.controller.TaskExecutionController;
+import org.springframework.cloud.dataflow.server.controller.TaskPlatformController;
 import org.springframework.cloud.dataflow.server.controller.TaskSchedulerController;
 import org.springframework.cloud.dataflow.server.controller.ToolsController;
 import org.springframework.cloud.dataflow.server.controller.support.ApplicationsMetrics;
@@ -418,6 +419,11 @@ public class TestDependencies extends WebMvcConfigurationSupport {
 				explorer, taskService(metadataResolver, taskRepository(), appRegistry, launcherRepository,
 				auditRecordService, commonApplicationProperties, taskValidationService, taskDefinitionRepository),
 				taskDefinitionRepository);
+	}
+
+	@Bean
+	public TaskPlatformController taskPlatformController(LauncherRepository launcherRepository) {
+		return new TaskPlatformController(launcherRepository);
 	}
 
 	@Bean

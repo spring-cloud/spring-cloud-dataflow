@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2018 the original author or authors.
+ * Copyright 2017-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,6 +14,9 @@
  * limitations under the License.
  */
 package org.springframework.cloud.dataflow.server.controller;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import org.apache.http.conn.ssl.NoopHostnameVerifier;
 import org.apache.http.impl.client.CloseableHttpClient;
@@ -62,6 +65,7 @@ import org.springframework.web.client.RestTemplate;
  *
  * @author Gunnar Hillert
  * @author Glenn Renfro
+ * @author Ilayaperumal Gopinathan
  */
 @RestController
 @RequestMapping("/about")
@@ -174,15 +178,11 @@ public class AboutController {
 					logger.warn("Skipper Server is not accessible", rae);
 				}
 			}
-
 			if (this.launcherRepository != null) {
-				final RuntimeEnvironmentDetails taskLauncherInfo = new RuntimeEnvironmentDetails();
-
-				Launcher launcher = this.launcherRepository.findByName("default");
-				if (launcher == null) {
-					logger.info("Could not find a task launcher named 'default'");
-				} else {
+				final List<RuntimeEnvironmentDetails> taskLauncherInfoList = new ArrayList<RuntimeEnvironmentDetails>();
+				for (Launcher launcher: this.launcherRepository.findAll()) {
 					TaskLauncher taskLauncher = launcher.getTaskLauncher();
+					RuntimeEnvironmentDetails taskLauncherInfo = new RuntimeEnvironmentDetails();
 					final RuntimeEnvironmentInfo taskLauncherEnvironmentInfo = taskLauncher.environmentInfo();
 					taskLauncherInfo.setDeployerImplementationVersion(taskLauncherEnvironmentInfo.getImplementationVersion());
 					taskLauncherInfo.setDeployerName(taskLauncherEnvironmentInfo.getImplementationName());
@@ -196,8 +196,9 @@ public class AboutController {
 					taskLauncherInfo.setPlatformType(taskLauncherEnvironmentInfo.getPlatformType());
 					taskLauncherInfo.setSpringBootVersion(taskLauncherEnvironmentInfo.getSpringBootVersion());
 					taskLauncherInfo.setSpringVersion(taskLauncherEnvironmentInfo.getSpringVersion());
+					taskLauncherInfoList.add(taskLauncherInfo);
 				}
-				runtimeEnvironment.setTaskLauncher(taskLauncherInfo);
+				runtimeEnvironment.setTaskLaunchers(taskLauncherInfoList);
 			}
 		}
 		aboutResource.setRuntimeEnvironment(runtimeEnvironment);
