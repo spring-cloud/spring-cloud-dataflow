@@ -30,7 +30,7 @@ import java.util.Map;
  * @author David Turanski
  * @author Daniel Serleg
  */
-public interface TaskService {
+public interface TaskExecutionService {
 
 	/**
 	 * Execute a task with the provided task name and optional runtime properties.
@@ -43,55 +43,4 @@ public interface TaskService {
 	 */
 	long executeTask(String taskName, Map<String, String> taskDeploymentProperties,
 					 List<String> commandLineArgs, String platformName);
-
-	/**
-	 * Cleanup the resources that resulted from running the task with the given execution id.
-	 *
-	 * @param id the execution id
-	 */
-	void cleanupExecution(long id);
-
-	/**
-	 * Saves the task definition. If it is a Composed Task then the task definitions required
-	 * for a ComposedTaskRunner task are also created.
-	 *
-	 * @param name The name of the task.
-	 * @param dsl The dsl that comprises the task.
-	 */
-	void saveTaskDefinition(String name, String dsl);
-
-	/**
-	 * Destroy the task definition. If it is a Composed Task then the task definitions
-	 * required for a ComposedTaskRunner task are also destroyed.
-	 *
-	 * @param name The name of the task.
-	 */
-	void deleteTaskDefinition(String name);
-
-	/**
-	 * Determines if the DSL is a composed DSL definition.
-	 *
-	 * @param dsl the Task DSL to evaluate
-	 * @return true if it is composed task definition else false.
-	 */
-	boolean isComposedDefinition(String dsl);
-
-	/**
-	 * Provide the maximum number of concurrent tasks.
-	 * @return the maximum number of concurrent tasks.
-	 */
-	long getMaximumConcurrentTasks();
-
-	/**
-	 * Verifies that all apps in the task are valid.
-	 * @param name the name of the definition
-	 * @return  {@link ValidationStatus} for a task.
-	 */
-	ValidationStatus validateTask(String name);
-
-	/**
-	 * Destroy all task definitions. If it is a Composed Task then the task definitions
-	 * required for a ComposedTaskRunner tasks are also destroyed.
-	 */
-	void deleteAll();
 }

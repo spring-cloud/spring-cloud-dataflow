@@ -20,7 +20,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import org.springframework.cloud.dataflow.rest.resource.TaskAppStatusResource;
-import org.springframework.cloud.dataflow.server.service.TaskService;
+import org.springframework.cloud.dataflow.server.service.TaskValidationService;
 import org.springframework.cloud.dataflow.server.service.ValidationStatus;
 import org.springframework.hateoas.ExposesResourceFor;
 import org.springframework.hateoas.mvc.ResourceAssemblerSupport;
@@ -36,7 +36,7 @@ import org.springframework.web.bind.annotation.RestController;
  * Controller for operations on {@link ValidationStatus}.
  *
  * @author Glenn Renfro
-
+ * 
  */
 @RestController
 @RequestMapping("/tasks/validation")
@@ -48,16 +48,17 @@ public class TaskValidationController {
 	/**
 	 * The service that is responsible for validating tasks.
 	 */
-	private final TaskService taskService;
+	private final TaskValidationService taskValidationService;
 
 	/**
-	 * Create a {@code TaskValidationController} that delegates to {@link TaskService}.
+	 * Create a {@code TaskValidationController} that delegates to
+	 * {@link TaskValidationService}.
 	 *
-	 * @param taskService the task service to use
+	 * @param taskValidationService the task service to use
 	 */
-	public TaskValidationController(TaskService taskService) {
-		Assert.notNull(taskService, "TaskService must not be null");
-		this.taskService = taskService;
+	public TaskValidationController(TaskValidationService taskValidationService) {
+		Assert.notNull(taskValidationService, "TaskValidationService must not be null");
+		this.taskValidationService = taskValidationService;
 	}
 
 	/**
@@ -70,7 +71,7 @@ public class TaskValidationController {
 	@ResponseStatus(HttpStatus.OK)
 	public TaskAppStatusResource validate(
 			@PathVariable("name") String name) {
-		ValidationStatus result = this.taskService.validateTask(name);
+		ValidationStatus result = this.taskValidationService.validateTask(name);
 		return new Assembler().toResource(result);
 	}
 

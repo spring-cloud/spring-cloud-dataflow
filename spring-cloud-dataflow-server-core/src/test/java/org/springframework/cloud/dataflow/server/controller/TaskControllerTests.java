@@ -39,7 +39,9 @@ import org.springframework.cloud.dataflow.server.TaskValidationController;
 import org.springframework.cloud.dataflow.server.configuration.TestDependencies;
 import org.springframework.cloud.dataflow.server.job.LauncherRepository;
 import org.springframework.cloud.dataflow.server.repository.TaskDefinitionRepository;
-import org.springframework.cloud.dataflow.server.service.TaskService;
+import org.springframework.cloud.dataflow.server.service.TaskDeleteService;
+import org.springframework.cloud.dataflow.server.service.TaskExecutionService;
+import org.springframework.cloud.dataflow.server.service.TaskSaveService;
 import org.springframework.cloud.deployer.spi.core.AppDeploymentRequest;
 import org.springframework.cloud.deployer.spi.task.TaskLauncher;
 import org.springframework.cloud.task.repository.TaskExecution;
@@ -85,7 +87,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 public class TaskControllerTests {
 
 	@Autowired
-	TaskService taskService;
+	TaskExecutionService taskExecutionService;
 
 	@Autowired
 	private TaskDefinitionRepository repository;
@@ -113,12 +115,18 @@ public class TaskControllerTests {
 	@Autowired
 	private TaskValidationController taskValidationController;
 
+	@Autowired
+	private TaskSaveService taskSaveService;
+
+	@Autowired
+	private TaskDeleteService taskDeleteService;
+
 	@Before
 	public void setupMockMVC() {
 		this.mockMvc = MockMvcBuilders.webAppContextSetup(wac)
 				.defaultRequest(get("/").accept(MediaType.APPLICATION_JSON)).build();
 
-		launcherRepository.save(new Launcher("default","local", taskLauncher));
+		launcherRepository.save(new Launcher("default", "local", taskLauncher));
 		when(taskLauncher.launch(any(AppDeploymentRequest.class))).thenReturn("testID");
 
 		final TaskExecution taskExecutionRunning = new TaskExecution();
@@ -133,17 +141,18 @@ public class TaskControllerTests {
 		taskExecutionComplete.setExitCode(0);
 		when(taskExplorer.getLatestTaskExecutionForTaskName("myTask2")).thenReturn(taskExecutionComplete);
 
-		when(taskExplorer.getLatestTaskExecutionsByTaskNames(anyVararg())).thenReturn(Arrays.asList(taskExecutionRunning, taskExecutionComplete));
+		when(taskExplorer.getLatestTaskExecutionsByTaskNames(anyVararg()))
+				.thenReturn(Arrays.asList(taskExecutionRunning, taskExecutionComplete));
 	}
 
 	@Test(expected = IllegalArgumentException.class)
 	public void testTaskDefinitionControllerConstructorMissingRepository() {
-		new TaskDefinitionController(taskExplorer, null, taskService);
+		new TaskDefinitionController(mock(TaskExplorer.class), null, taskSaveService, taskDeleteService);
 	}
 
 	@Test(expected = IllegalArgumentException.class)
 	public void testTaskDefinitionControllerConstructorMissingTaskExplorer() {
-		new TaskDefinitionController(null, mock(TaskDefinitionRepository.class), taskService);
+		new TaskDefinitionController(null, mock(TaskDefinitionRepository.class), taskSaveService, taskDeleteService);
 	}
 
 	@Test
@@ -217,7 +226,8 @@ public class TaskControllerTests {
 
 		registry.save("task", ApplicationType.task, "1.0.0", new URI("http://fake.example.com/"), null);
 		mockMvc.perform(post("/tasks/definitions/").param("name", "myTask")
-				.param("definition", "t1: task --foo='bar rab' && t2: task --foo='one two'").accept(MediaType.APPLICATION_JSON)).andDo(print())
+				.param("definition", "t1: task --foo='bar rab' && t2: task --foo='one two'")
+				.accept(MediaType.APPLICATION_JSON)).andDo(print())
 				.andExpect(status().isOk());
 
 		assertEquals(3, repository.count());
@@ -332,11 +342,12 @@ public class TaskControllerTests {
 				"1.0.0", new URI("file:src/test/resources/apps/foo-task"), null);
 
 		mockMvc.perform(post("/tasks/executions")
-				//.param("name", "myTask3")
+				// .param("name", "myTask3")
 				.contentType(MediaType.APPLICATION_FORM_URLENCODED)
 				.content(EntityUtils.toString(new UrlEncodedFormEntity(Arrays.asList(
 						new BasicNameValuePair("name", "myTask3"),
-						new BasicNameValuePair("arguments", "--foobar=jee --foobar2=jee2,foo=bar --foobar3='jee3 jee3'")))))
+						new BasicNameValuePair("arguments",
+								"--foobar=jee --foobar2=jee2,foo=bar --foobar3='jee3 jee3'")))))
 				.accept(MediaType.APPLICATION_JSON))
 				.andDo(print())
 				.andExpect(status().isCreated());
@@ -360,7 +371,7 @@ public class TaskControllerTests {
 		TaskDefinition taskDefinition2 = new TaskDefinition("myTask2", "timestamp");
 		repository.save(taskDefinition2);
 
-		TaskDefinition taskDefinition3= new TaskDefinition("myTask3", "timestamp");
+		TaskDefinition taskDefinition3 = new TaskDefinition("myTask3", "timestamp");
 		repository.save(taskDefinition3);
 
 		assertEquals(3, repository.count());
@@ -395,7 +406,7 @@ public class TaskControllerTests {
 		TaskDefinition taskDefinition2 = new TaskDefinition("myTask2", "timestamp");
 		repository.save(taskDefinition2);
 
-		TaskDefinition taskDefinition3= new TaskDefinition("myTask3", "timestamp");
+		TaskDefinition taskDefinition3 = new TaskDefinition("myTask3", "timestamp");
 		repository.save(taskDefinition3);
 
 		assertEquals(3, repository.count());
@@ -413,9 +424,9 @@ public class TaskControllerTests {
 		this.registry.save("foo", ApplicationType.task,
 				"1.0.0", new URI("file:src/test/resources/apps/foo-task"), null);
 
-
 		mockMvc.perform(get("/tasks/validation/myTask")).andExpect(status().isOk())
-				.andDo(print()).andExpect(content().json("{\"appName\":\"myTask\",\"appStatuses\":{\"task:myTask\":\"valid\"},\"dsl\":\"foo\",\"links\":[]}"));
+				.andDo(print()).andExpect(content().json(
+						"{\"appName\":\"myTask\",\"appStatuses\":{\"task:myTask\":\"valid\"},\"dsl\":\"foo\",\"links\":[]}"));
 
 	}
 }

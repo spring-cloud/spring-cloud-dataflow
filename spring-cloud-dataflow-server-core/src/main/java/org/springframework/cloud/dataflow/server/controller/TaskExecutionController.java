@@ -29,7 +29,9 @@ import org.springframework.cloud.dataflow.rest.util.DeploymentPropertiesUtils;
 import org.springframework.cloud.dataflow.server.repository.NoSuchTaskDefinitionException;
 import org.springframework.cloud.dataflow.server.repository.NoSuchTaskExecutionException;
 import org.springframework.cloud.dataflow.server.repository.TaskDefinitionRepository;
-import org.springframework.cloud.dataflow.server.service.TaskService;
+import org.springframework.cloud.dataflow.server.service.TaskDefinitionRetriever;
+import org.springframework.cloud.dataflow.server.service.TaskDeleteService;
+import org.springframework.cloud.dataflow.server.service.TaskExecutionService;
 import org.springframework.cloud.task.repository.TaskExecution;
 import org.springframework.cloud.task.repository.TaskExplorer;
 import org.springframework.data.domain.Page;
@@ -66,7 +68,11 @@ public class TaskExecutionController {
 
 	private final Assembler taskAssembler = new Assembler();
 
-	private final TaskService taskService;
+	private final TaskExecutionService taskExecutionService;
+
+	private final TaskDefinitionRetriever taskDefinitionRetriever;
+
+	private final TaskDeleteService taskDeleteService;
 
 	private final TaskExplorer explorer;
 
@@ -79,18 +85,25 @@ public class TaskExecutionController {
 	 * from a the {@link TaskExplorer}
 	 *
 	 * @param explorer the explorer this controller will use for retrieving task execution
-	 * information.
-	 * @param taskService used to launch tasks
+	 *     information.
+	 * @param taskExecutionService used to launch tasks
 	 * @param taskDefinitionRepository the task definition repository
+	 * @param taskDefinitionRetriever the task execution information service
+	 * @param taskDeleteService the task deletion service
 	 */
-	public TaskExecutionController(TaskExplorer explorer, TaskService taskService,
-			TaskDefinitionRepository taskDefinitionRepository) {
+	public TaskExecutionController(TaskExplorer explorer, TaskExecutionService taskExecutionService,
+			TaskDefinitionRepository taskDefinitionRepository, TaskDefinitionRetriever taskDefinitionRetriever,
+			TaskDeleteService taskDeleteService) {
 		Assert.notNull(explorer, "explorer must not be null");
-		Assert.notNull(taskService, "taskService must not be null");
+		Assert.notNull(taskExecutionService, "taskExecutionService must not be null");
 		Assert.notNull(taskDefinitionRepository, "taskDefinitionRepository must not be null");
-		this.taskService = taskService;
+		Assert.notNull(taskDefinitionRetriever, "taskDefinitionRetriever must not be null");
+		Assert.notNull(taskDeleteService, "taskDeleteService must not be null");
+		this.taskExecutionService = taskExecutionService;
 		this.explorer = explorer;
 		this.taskDefinitionRepository = taskDefinitionRepository;
+		this.taskDefinitionRetriever = taskDefinitionRetriever;
+		this.taskDeleteService = taskDeleteService;
 	}
 
 	/**
@@ -129,12 +142,12 @@ public class TaskExecutionController {
 	}
 
 	/**
-	 * Request the launching of an existing task definition. The name must be included in
-	 * the path.
+	 * Request the launching of an existing task definition. The name must be included in the
+	 * path.
 	 *
 	 * @param taskName the name of the existing task to be executed (required)
 	 * @param properties the runtime properties for the task, as a comma-delimited list of
-	 * key=value pairs
+	 *     key=value pairs
 	 * @param arguments the runtime commandline arguments
 	 * @return the taskExecutionId for the executed task
 	 */
@@ -147,7 +160,7 @@ public class TaskExecutionController {
 		Map<String, String> propertiesToUse = DeploymentPropertiesUtils.parse(properties);
 		DeploymentPropertiesUtils.validateDeploymentProperties(propertiesToUse);
 		List<String> argumentsToUse = DeploymentPropertiesUtils.parseParamList(arguments, " ");
-		return this.taskService.executeTask(taskName, propertiesToUse, argumentsToUse, platformName);
+		return this.taskExecutionService.executeTask(taskName, propertiesToUse, argumentsToUse, platformName);
 	}
 
 	/**
@@ -174,7 +187,7 @@ public class TaskExecutionController {
 	public CurrentTaskExecutionsResource getCurrentTaskExecutionsInfo() {
 		CurrentTaskExecutionsResource currentTaskExecutionsResource = new CurrentTaskExecutionsResource();
 		currentTaskExecutionsResource.setRunningExecutionCount(explorer.getRunningTaskExecutionCount());
-		currentTaskExecutionsResource.setMaximumTaskExecutions(taskService.getMaximumConcurrentTasks());
+		currentTaskExecutionsResource.setMaximumTaskExecutions(taskDefinitionRetriever.getMaximumConcurrentTasks());
 		return currentTaskExecutionsResource;
 	}
 
@@ -190,7 +203,7 @@ public class TaskExecutionController {
 		if (taskExecution == null) {
 			throw new NoSuchTaskExecutionException(id);
 		}
-		this.taskService.cleanupExecution(id);
+		this.taskDeleteService.cleanupExecution(id);
 	}
 
 	private Page<TaskJobExecutionRel> getPageableRelationships(Page<TaskExecution> taskExecutions, Pageable pageable) {

@@ -91,8 +91,11 @@ import org.springframework.cloud.dataflow.server.service.SchedulerService;
 import org.springframework.cloud.dataflow.server.service.SpringSecurityAuditorAware;
 import org.springframework.cloud.dataflow.server.service.StreamService;
 import org.springframework.cloud.dataflow.server.service.StreamValidationService;
+import org.springframework.cloud.dataflow.server.service.TaskDefinitionRetriever;
+import org.springframework.cloud.dataflow.server.service.TaskDeleteService;
+import org.springframework.cloud.dataflow.server.service.TaskExecutionService;
 import org.springframework.cloud.dataflow.server.service.TaskJobService;
-import org.springframework.cloud.dataflow.server.service.TaskService;
+import org.springframework.cloud.dataflow.server.service.TaskSaveService;
 import org.springframework.cloud.dataflow.server.service.TaskValidationService;
 import org.springframework.cloud.dataflow.server.service.impl.AppDeploymentRequestCreator;
 import org.springframework.cloud.dataflow.server.service.impl.DefaultStreamService;
@@ -137,7 +140,8 @@ import org.springframework.web.client.RestTemplate;
 @Configuration
 @Import(CompletionConfiguration.class)
 @ConditionalOnBean({ EnableDataFlowServerConfiguration.Marker.class })
-@EnableConfigurationProperties({ FeaturesProperties.class, VersionInfoProperties.class, DockerValidatorProperties.class })
+@EnableConfigurationProperties({ FeaturesProperties.class, VersionInfoProperties.class,
+		DockerValidatorProperties.class })
 @ConditionalOnProperty(prefix = "dataflow.server", name = "enabled", havingValue = "true", matchIfMissing = true)
 @EnableCircuitBreaker
 @EntityScan({
@@ -204,7 +208,8 @@ public class DataFlowControllerAutoConfiguration {
 		}
 
 		@Bean
-		public AppResourceCommon appResourceCommon(MavenProperties mavenProperties, DelegatingResourceLoader delegatingResourceLoader) {
+		public AppResourceCommon appResourceCommon(MavenProperties mavenProperties,
+				DelegatingResourceLoader delegatingResourceLoader) {
 			return new AppResourceCommon(mavenProperties, delegatingResourceLoader);
 		}
 
@@ -232,16 +237,20 @@ public class DataFlowControllerAutoConfiguration {
 	public static class TaskEnabledConfiguration {
 
 		@Bean
-		public TaskExecutionController taskExecutionController(TaskExplorer explorer, TaskService taskService,
-				TaskDefinitionRepository taskDefinitionRepository) {
-			return new TaskExecutionController(explorer, taskService, taskDefinitionRepository);
+		public TaskExecutionController taskExecutionController(TaskExplorer explorer,
+				TaskExecutionService taskExecutionService,
+				TaskDefinitionRepository taskDefinitionRepository, TaskDefinitionRetriever taskDefinitionRetriever,
+				TaskDeleteService taskDeleteService) {
+			return new TaskExecutionController(explorer, taskExecutionService, taskDefinitionRepository,
+					taskDefinitionRetriever,
+					taskDeleteService);
 		}
 
 		@Bean
 		public TaskDefinitionController taskDefinitionController(TaskExplorer taskExplorer,
-				TaskDefinitionRepository repository,
-				TaskService taskService) {
-			return new TaskDefinitionController(taskExplorer, repository, taskService);
+				TaskDefinitionRepository repository, TaskSaveService taskSaveService,
+				TaskDeleteService taskDeleteService) {
+			return new TaskDefinitionController(taskExplorer, repository, taskSaveService, taskDeleteService);
 		}
 
 		@Bean
@@ -281,8 +290,8 @@ public class DataFlowControllerAutoConfiguration {
 		}
 
 		@Bean
-		public TaskValidationController taskValidationController(TaskService taskService) {
-			return new TaskValidationController(taskService);
+		public TaskValidationController taskValidationController(TaskValidationService taskValidationService) {
+			return new TaskValidationController(taskValidationService);
 		}
 	}
 

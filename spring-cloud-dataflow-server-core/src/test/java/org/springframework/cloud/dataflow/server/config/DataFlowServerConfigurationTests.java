@@ -38,8 +38,8 @@ import org.springframework.cloud.dataflow.server.EnableDataFlowServer;
 import org.springframework.cloud.dataflow.server.config.features.SchedulerConfiguration;
 import org.springframework.cloud.dataflow.server.config.web.WebConfiguration;
 import org.springframework.cloud.dataflow.server.service.StreamValidationService;
-import org.springframework.cloud.dataflow.server.service.TaskService;
-import org.springframework.cloud.dataflow.server.service.impl.DefaultTaskService;
+import org.springframework.cloud.dataflow.server.service.TaskExecutionService;
+import org.springframework.cloud.dataflow.server.service.impl.DefaultTaskExecutionService;
 import org.springframework.cloud.dataflow.server.support.TestUtils;
 import org.springframework.cloud.deployer.autoconfigure.ResourceLoadingAutoConfiguration;
 import org.springframework.cloud.deployer.spi.app.AppDeployer;
@@ -176,8 +176,8 @@ public class DataFlowServerConfigurationTests {
 		}
 
 		@Bean
-		public TaskService taskService() {
-			return mock(DefaultTaskService.class);
+		public TaskExecutionService taskService() {
+			return mock(DefaultTaskExecutionService.class);
 		}
 
 		@Bean
