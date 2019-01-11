@@ -85,9 +85,8 @@ public class DefaultTaskJobService implements TaskJobService {
 	@Override
 	public List<TaskJobExecution> listJobExecutions(Pageable pageable) throws NoSuchJobExecutionException {
 		Assert.notNull(pageable, "pageable must not be null");
-		// TODO: BOOT2 check what to do with long to int cast for offset
 		List<JobExecution> jobExecutions = new ArrayList<>(
-				jobService.listJobExecutions((int) pageable.getOffset(), pageable.getPageSize()));
+				jobService.listJobExecutions(getPageOffset(pageable), pageable.getPageSize()));
 		for (JobExecution jobExecution : jobExecutions) {
 			Collection<StepExecution> stepExecutions = jobService.getStepExecutions(jobExecution.getId());
 			List<StepExecution> validStepExecutions = new ArrayList<>();
@@ -101,12 +100,11 @@ public class DefaultTaskJobService implements TaskJobService {
 		return getTaskJobExecutionsForList(jobExecutions);
 	}
 
-
 	@Override
 	public List<TaskJobExecution> listJobExecutionsWithStepCount(Pageable pageable) throws NoSuchJobExecutionException {
 		Assert.notNull(pageable, "pageable must not be null");
 		List<JobExecutionWithStepCount> jobExecutions = new ArrayList<>(
-				jobService.listJobExecutionsWithStepCount((int)pageable.getOffset(), pageable.getPageSize()));
+				jobService.listJobExecutionsWithStepCount(getPageOffset(pageable), pageable.getPageSize()));
 		return getTaskJobExecutionsWithStepCountForList(jobExecutions);
 	}
 
@@ -114,9 +112,8 @@ public class DefaultTaskJobService implements TaskJobService {
 	public List<TaskJobExecution> listJobExecutionsForJob(Pageable pageable, String jobName) throws NoSuchJobException {
 		Assert.notNull(pageable, "pageable must not be null");
 		Assert.notNull(jobName, "jobName must not be null");
-		// TODO: BOOT2 check what to do with long to int cast for offset
 		return getTaskJobExecutionsForList(
-				jobService.listJobExecutionsForJob(jobName, (int) pageable.getOffset(), pageable.getPageSize()));
+				jobService.listJobExecutionsForJob(jobName, getPageOffset(pageable), pageable.getPageSize()));
 	}
 
 	@Override
@@ -124,7 +121,7 @@ public class DefaultTaskJobService implements TaskJobService {
 		Assert.notNull(pageable, "pageable must not be null");
 		Assert.notNull(jobName, "jobName must not be null");
 		return getTaskJobExecutionsWithStepCountForList(
-				jobService.listJobExecutionsForJobWithStepCount(jobName, (int) pageable.getOffset(), pageable.getPageSize()));
+				jobService.listJobExecutionsForJobWithStepCount(jobName, getPageOffset(pageable), pageable.getPageSize()));
 	}
 
 	@Override
@@ -139,8 +136,7 @@ public class DefaultTaskJobService implements TaskJobService {
 		Assert.notNull(pageable, "pageable must not be null");
 		Assert.notNull(jobName, "jobName must not be null");
 		List<JobInstanceExecutions> taskJobInstances = new ArrayList<>();
-		// TODO: BOOT2 check what to do with long to int cast for offset
-		for (JobInstance jobInstance : jobService.listJobInstances(jobName, (int) pageable.getOffset(),
+		for (JobInstance jobInstance : jobService.listJobInstances(jobName, getPageOffset(pageable),
 				pageable.getPageSize())) {
 			taskJobInstances.add(getJobInstanceExecution(jobInstance));
 		}
@@ -238,6 +234,13 @@ public class DefaultTaskJobService implements TaskJobService {
 		return taskExecutionId;
 	}
 
+
+	private int getPageOffset(Pageable pageable) {
+		if(pageable.getOffset() > (long)Integer.MAX_VALUE) {
+			throw new OffsetOutOfBoundsException("The pageable offset requested for this query is greater than MAX_INT.") ;
+		}
+		return (int)pageable.getOffset();
+	}
 
 	private JobInstanceExecutions getJobInstanceExecution(JobInstance jobInstance) throws NoSuchJobException {
 		Assert.notNull(jobInstance, "jobInstance must not be null");
