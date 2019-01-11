@@ -141,7 +141,6 @@ public class DataFlowServerConfigurationTests {
 	 * Verify that the embedded server is not started if h2 string is not specified.
 	 */
 	@Test
-	@Ignore
 	public void testNoServer() {
 		context.refresh();
 		assertFalse(context.containsBean("initH2TCPServer"));

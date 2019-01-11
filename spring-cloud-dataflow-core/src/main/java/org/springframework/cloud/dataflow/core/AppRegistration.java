@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.cloud.dataflow.registry.domain;
+package org.springframework.cloud.dataflow.core;
 
 import java.net.URI;
 
@@ -22,7 +22,6 @@ import javax.persistence.Entity;
 import javax.persistence.Lob;
 import javax.persistence.Table;
 
-import org.springframework.cloud.dataflow.core.ApplicationType;
 import org.springframework.util.Assert;
 
 /**

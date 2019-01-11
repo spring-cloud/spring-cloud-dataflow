@@ -1,5 +1,5 @@
 /*
- * Copyright 2016-2018 the original author or authors.
+ * Copyright 2016-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,6 +32,9 @@ import org.springframework.boot.autoconfigure.jdbc.DataSourceProperties;
 import org.springframework.boot.autoconfigure.jdbc.EmbeddedDataSourceConfiguration;
 import org.springframework.boot.autoconfigure.orm.jpa.HibernateJpaAutoConfiguration;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.cloud.dataflow.audit.repository.AuditRecordRepository;
+import org.springframework.cloud.dataflow.audit.service.AuditRecordService;
+import org.springframework.cloud.dataflow.audit.service.DefaultAuditRecordService;
 import org.springframework.cloud.dataflow.configuration.metadata.ApplicationConfigurationMetadataResolver;
 import org.springframework.cloud.dataflow.configuration.metadata.BootApplicationConfigurationMetadataResolver;
 import org.springframework.cloud.dataflow.registry.repository.AppRegistrationRepository;
@@ -50,10 +53,7 @@ import org.springframework.cloud.dataflow.server.controller.JobStepExecutionProg
 import org.springframework.cloud.dataflow.server.controller.RestControllerAdvice;
 import org.springframework.cloud.dataflow.server.controller.TaskExecutionController;
 import org.springframework.cloud.dataflow.server.job.LauncherRepository;
-import org.springframework.cloud.dataflow.server.repository.AuditRecordRepository;
 import org.springframework.cloud.dataflow.server.repository.TaskDefinitionRepository;
-import org.springframework.cloud.dataflow.server.service.AuditRecordService;
-import org.springframework.cloud.dataflow.server.service.DefaultAuditRecordService;
 import org.springframework.cloud.dataflow.server.service.TaskJobService;
 import org.springframework.cloud.dataflow.server.service.TaskService;
 import org.springframework.cloud.dataflow.server.service.TaskValidationService;
@@ -98,13 +98,13 @@ import static org.mockito.Mockito.mock;
 @EnableWebMvc
 @EnableTransactionManagement
 @EntityScan({
-		"org.springframework.cloud.dataflow.registry.domain",
 		"org.springframework.cloud.dataflow.server.audit.domain",
 		"org.springframework.cloud.dataflow.core"
 })
 @EnableJpaRepositories(basePackages = {
 		"org.springframework.cloud.dataflow.registry.repository",
-		"org.springframework.cloud.dataflow.server.repository"
+		"org.springframework.cloud.dataflow.server.repository",
+		"org.springframework.cloud.dataflow.audit.repository"
 })
 @EnableJpaAuditing
 @EnableConfigurationProperties({ DockerValidatorProperties.class, TaskConfigurationProperties.class })
@@ -255,8 +255,10 @@ public class JobDependencies {
 	}
 
 	@Bean
-	public AppRegistryService appRegistryService(AppRegistrationRepository appRegistrationRepository) {
-		return new DefaultAppRegistryService(appRegistrationRepository, new AppResourceCommon(new MavenProperties(), new DefaultResourceLoader()));
+	public AppRegistryService appRegistryService(AppRegistrationRepository appRegistrationRepository,
+			AuditRecordService auditRecordService) {
+		return new DefaultAppRegistryService(appRegistrationRepository,
+				new AppResourceCommon(new MavenProperties(), new DefaultResourceLoader()), auditRecordService);
 	}
 
 	@Bean

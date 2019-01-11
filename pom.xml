@@ -84,6 +84,7 @@
 		<module>spring-cloud-dataflow-platform-kubernetes</module>
 		<module>spring-cloud-dataflow-platform-cloudfoundry</module>
 		<module>spring-cloud-starter-dataflow-server-local</module>
+		<module>spring-cloud-dataflow-audit</module>
 	</modules>
 	<dependencyManagement>
 		<dependencies>

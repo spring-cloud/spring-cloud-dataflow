@@ -1,5 +1,5 @@
 /*
- * Copyright 2016-2018 the original author or authors.
+ * Copyright 2016-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -42,6 +42,9 @@ import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.cloud.client.circuitbreaker.EnableCircuitBreaker;
 import org.springframework.cloud.common.security.AuthorizationProperties;
 import org.springframework.cloud.common.security.support.SecurityStateBean;
+import org.springframework.cloud.dataflow.audit.repository.AuditRecordRepository;
+import org.springframework.cloud.dataflow.audit.service.AuditRecordService;
+import org.springframework.cloud.dataflow.audit.service.DefaultAuditRecordService;
 import org.springframework.cloud.dataflow.completion.CompletionConfiguration;
 import org.springframework.cloud.dataflow.completion.StreamCompletionProvider;
 import org.springframework.cloud.dataflow.completion.TaskCompletionProvider;
@@ -82,11 +85,8 @@ import org.springframework.cloud.dataflow.server.controller.UiController;
 import org.springframework.cloud.dataflow.server.controller.security.SecurityController;
 import org.springframework.cloud.dataflow.server.controller.support.MetricStore;
 import org.springframework.cloud.dataflow.server.job.LauncherRepository;
-import org.springframework.cloud.dataflow.server.repository.AuditRecordRepository;
 import org.springframework.cloud.dataflow.server.repository.StreamDefinitionRepository;
 import org.springframework.cloud.dataflow.server.repository.TaskDefinitionRepository;
-import org.springframework.cloud.dataflow.server.service.AuditRecordService;
-import org.springframework.cloud.dataflow.server.service.DefaultAuditRecordService;
 import org.springframework.cloud.dataflow.server.service.SchedulerService;
 import org.springframework.cloud.dataflow.server.service.SpringSecurityAuditorAware;
 import org.springframework.cloud.dataflow.server.service.StreamService;
@@ -137,16 +137,17 @@ import org.springframework.web.client.RestTemplate;
 @Configuration
 @Import(CompletionConfiguration.class)
 @ConditionalOnBean({ EnableDataFlowServerConfiguration.Marker.class })
-@EnableConfigurationProperties({ FeaturesProperties.class, VersionInfoProperties.class, DockerValidatorProperties.class })
+@EnableConfigurationProperties({ FeaturesProperties.class, VersionInfoProperties.class,
+		DockerValidatorProperties.class })
 @ConditionalOnProperty(prefix = "dataflow.server", name = "enabled", havingValue = "true", matchIfMissing = true)
 @EnableCircuitBreaker
 @EntityScan({
-		"org.springframework.cloud.dataflow.registry.domain",
 		"org.springframework.cloud.dataflow.core"
 })
 @EnableJpaRepositories(basePackages = {
 		"org.springframework.cloud.dataflow.registry.repository",
-		"org.springframework.cloud.dataflow.server.repository"
+		"org.springframework.cloud.dataflow.server.repository",
+		"org.springframework.cloud.dataflow.audit.repository"
 })
 @EnableJpaAuditing
 @EnableTransactionManagement
@@ -204,14 +205,15 @@ public class DataFlowControllerAutoConfiguration {
 		}
 
 		@Bean
-		public AppResourceCommon appResourceCommon(MavenProperties mavenProperties, DelegatingResourceLoader delegatingResourceLoader) {
+		public AppResourceCommon appResourceCommon(MavenProperties mavenProperties,
+				DelegatingResourceLoader delegatingResourceLoader) {
 			return new AppResourceCommon(mavenProperties, delegatingResourceLoader);
 		}
 
 		@Bean
 		public AppRegistryService appRegistryService(AppRegistrationRepository appRegistrationRepository,
-				AppResourceCommon appResourceCommon) {
-			return new DefaultAppRegistryService(appRegistrationRepository, appResourceCommon);
+				AppResourceCommon appResourceCommon, AuditRecordService auditRecordService) {
+			return new DefaultAppRegistryService(appRegistrationRepository, appResourceCommon, auditRecordService);
 		}
 
 		@Bean

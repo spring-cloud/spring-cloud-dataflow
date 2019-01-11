@@ -86,6 +86,11 @@
 				<artifactId>spring-cloud-starter-dataflow-server-local</artifactId>
 				<version>2.0.0.BUILD-SNAPSHOT</version>
 			</dependency>
+			<dependency>
+				<groupId>org.springframework.cloud</groupId>
+				<artifactId>spring-cloud-dataflow-audit</artifactId>
+				<version>2.0.0.BUILD-SNAPSHOT</version>
+			</dependency>
 		</dependencies>
 	</dependencyManagement>
 	<distributionManagement>

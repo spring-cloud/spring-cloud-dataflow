@@ -14,13 +14,11 @@
  * limitations under the License.
  */
 
-package org.springframework.cloud.dataflow.registry.domain;
+package org.springframework.cloud.dataflow.core;
 
 import java.net.URI;
 
 import org.junit.Test;
-
-import org.springframework.cloud.dataflow.core.ApplicationType;
 
 import static org.assertj.core.api.Assertions.assertThat;
 

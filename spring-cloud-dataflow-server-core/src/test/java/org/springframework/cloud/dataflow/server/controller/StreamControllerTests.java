@@ -1,5 +1,5 @@
 /*
- * Copyright 2015-2018 the original author or authors.
+ * Copyright 2015-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,6 +36,7 @@ import org.mockito.ArgumentCaptor;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.cloud.dataflow.audit.repository.AuditRecordRepository;
 import org.springframework.cloud.dataflow.core.AuditActionType;
 import org.springframework.cloud.dataflow.core.AuditOperationType;
 import org.springframework.cloud.dataflow.core.AuditRecord;
@@ -45,7 +46,6 @@ import org.springframework.cloud.dataflow.core.StreamDefinition;
 import org.springframework.cloud.dataflow.core.StreamPropertyKeys;
 import org.springframework.cloud.dataflow.server.config.apps.CommonApplicationProperties;
 import org.springframework.cloud.dataflow.server.configuration.TestDependencies;
-import org.springframework.cloud.dataflow.server.repository.AuditRecordRepository;
 import org.springframework.cloud.dataflow.server.repository.StreamDefinitionRepository;
 import org.springframework.cloud.dataflow.server.stream.StreamDeployerUtil;
 import org.springframework.cloud.dataflow.server.support.SkipperPackageUtils;
@@ -189,9 +189,9 @@ public class StreamControllerTests {
 		StreamDefinition myStream = repository.findById("myStream2").get();
 		final List<AuditRecord> auditRecords = auditRecordRepository.findAll();
 
-		assertEquals(1, auditRecords.size());
+		assertEquals(5, auditRecords.size());
 
-		final AuditRecord auditRecord = auditRecords.get(0);
+		final AuditRecord auditRecord = auditRecords.get(4);
 
 		assertEquals("time --some.password=foobar --another-secret=kenny | log", myStream.getDslText());
 		assertEquals("time --some.password='******' --another-secret='******' | log", auditRecord.getAuditData());
@@ -649,9 +649,9 @@ public class StreamControllerTests {
 
 		final List<AuditRecord> auditRecords = auditRecordRepository.findAll();
 
-		assertEquals(2, auditRecords.size());
-		final AuditRecord auditRecord1 = auditRecords.get(0);
-		final AuditRecord auditRecord2 = auditRecords.get(1);
+		assertEquals(6, auditRecords.size());
+		final AuditRecord auditRecord1 = auditRecords.get(4);
+		final AuditRecord auditRecord2 = auditRecords.get(5);
 
 		assertEquals("time --some.password='******' --another-secret='******' | log", auditRecord1.getAuditData());
 		assertEquals("time --some.password='******' --another-secret='******' | log", auditRecord2.getAuditData());
@@ -759,8 +759,8 @@ public class StreamControllerTests {
 
 		final List<AuditRecord> auditRecords = auditRecordRepository.findAll();
 
-		assertEquals(2, auditRecords.size()); // TODO (Tzolov) This looks wrong! only one Audit record should exist
-		final AuditRecord auditRecord = auditRecords.get(0);
+		assertEquals(6, auditRecords.size()); // TODO (Tzolov) This looks wrong! only one Audit record should exist
+		final AuditRecord auditRecord = auditRecords.get(5);
 
 		assertEquals("{\"streamDefinitionDslText\":\"time --some.password='******' --another-secret='******' | log\",\"deploymentProperties\":{}}", auditRecord.getAuditData());
 
@@ -919,9 +919,9 @@ public class StreamControllerTests {
 		verify(skipperClient, times(1)).delete(eq("myStream"), anyBoolean());
 
 		final List<AuditRecord> auditRecords = auditRecordRepository.findAll();
-		assertThat(auditRecords.size(), is(1));
-		assertThat(auditRecords.get(0).getAuditOperation(), is(AuditOperationType.STREAM));
-		assertThat(auditRecords.get(0).getAuditAction(), is(AuditActionType.UNDEPLOY));
+		assertThat(auditRecords.size(), is(5));
+		assertThat(auditRecords.get(4).getAuditOperation(), is(AuditOperationType.STREAM));
+		assertThat(auditRecords.get(4).getAuditAction(), is(AuditActionType.UNDEPLOY));
 	}
 
 	@Test
@@ -942,11 +942,11 @@ public class StreamControllerTests {
 		verify(skipperClient, times(1)).delete(eq("myStream2"), anyBoolean());
 
 		final List<AuditRecord> auditRecords = auditRecordRepository.findAll();
-		assertThat(auditRecords.size(), is(2));
-		assertThat(auditRecords.get(0).getAuditOperation(), is(AuditOperationType.STREAM));
-		assertThat(auditRecords.get(0).getAuditAction(), is(AuditActionType.UNDEPLOY));
-		assertThat(auditRecords.get(1).getAuditOperation(), is(AuditOperationType.STREAM));
-		assertThat(auditRecords.get(1).getAuditAction(), is(AuditActionType.UNDEPLOY));
+		assertThat(auditRecords.size(), is(6));
+		assertThat(auditRecords.get(4).getAuditOperation(), is(AuditOperationType.STREAM));
+		assertThat(auditRecords.get(4).getAuditAction(), is(AuditActionType.UNDEPLOY));
+		assertThat(auditRecords.get(5).getAuditOperation(), is(AuditOperationType.STREAM));
+		assertThat(auditRecords.get(5).getAuditAction(), is(AuditActionType.UNDEPLOY));
 	}
 
 	@Test

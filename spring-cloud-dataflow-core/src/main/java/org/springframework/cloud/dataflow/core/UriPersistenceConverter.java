@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.springframework.cloud.dataflow.registry.domain;
+package org.springframework.cloud.dataflow.core;
 
 import java.net.URI;
 
