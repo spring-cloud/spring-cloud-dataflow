@@ -37,7 +37,7 @@ server:
 <6> The path to the truststore file. Classpath resources may also be specified, by using the classpath prefix: `classpath:path/to/trust-store`
 <7> The password of the trust store.
 
-TIP: You can reference the YAML file using the following parameter: `--spring.config.location=skipper.yml`
+TIP: You can reference the YAML file using the following parameter: `--spring.config.additional-location=skipper.yml`
 
 NOTE: If HTTPS is enabled, it completely replaces HTTP as the protocol over which the REST endpoints interact.
 Plain HTTP requests then fail. Therefore, you must make sure that you configure the Skipper shell accordingly.

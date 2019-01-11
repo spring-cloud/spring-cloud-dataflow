@@ -81,7 +81,7 @@ NOTE: The `deleteRoutes` deployment setting is `false` so that "`v2`" of an appl
 Otherwise, undeploying "`v1`" removes the route.
 
 You can also run the Skipper server locally and deploy to Cloud Foundry.
-In this case, it is more convenient to specify the configuration in a `skipper.yml` file and start the server with the `--spring.config.location=skipper.yml` option.
+In this case, it is more convenient to specify the configuration in a `skipper.yml` file and start the server with the `--spring.config.additional-location=skipper.yml` option.
 
 If you use `cf push` to deploy Skipper, a Cloud Foundry manifest is more appropriate to use.
 You can modify the following sample manifest.yml to fit your needs:

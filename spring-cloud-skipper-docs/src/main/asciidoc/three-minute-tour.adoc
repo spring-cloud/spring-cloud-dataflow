@@ -215,6 +215,9 @@ skipper:>repo list
 ╚════════════╧═══════════════════════════════════════════════════════════╧═════╧═════╝
 ----
 
+NOTE: Above example assumes that `experimental` repository has been added to the server configuration. More about
+working with repositories can be found from <<using-repositories>>.
+
 The following example shows the `package search` command and the output of our example:
 
 [source,bash,options="nowrap"]
@@ -526,7 +529,7 @@ NOTE: The upgrade approach in 1.02 does not correctly handle the routing of HTTP
 The Spring Cloud Deployer for Kubernetes creates a service, a replication controller, and a pod for the app (or, optionally, a deployment).
 This is not an issue for apps that communicate over Messaging middleware and will be addressed in a future release.
 
-Start the Skipper server with the `--spring.config.location=skipper.yml` option. The YAML content follows:
+Start the Skipper server with the `--spring.config.additional-location=skipper.yml` option. The YAML content follows:
 
 ----
 spring:

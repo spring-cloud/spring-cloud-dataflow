@@ -55,7 +55,7 @@ There is also a docker image hosted on https://hub.docker.com/r/springcloud/spri
 == A Three-second Tour
 
 The default configuration of Skipper deploys apps to the local machine.
-The default configuration also has one local repository, named `local`, where you can upload packages, and one remote repository, named `experimental`, where some sample test packages are located.
+The default configuration also has one local repository, named `local`, where you can upload packages.
 You can get a list of the package repositories by using the command `repo list`, as shown (with its output) in the following example:
 
 [source,bash,options="nowrap"]
@@ -64,7 +64,6 @@ skipper:>repo list
 ╔════════════╤═══════════════════════════════════════════════════════════╤═════╤═════╗
 ║    Name    │                            URL                            │Local│Order║
 ╠════════════╪═══════════════════════════════════════════════════════════╪═════╪═════╣
-║experimental│http://skipper-repository.cfapps.io/repository/experimental│false│0    ║
 ║local       │http://10.55.13.45:7577                                    │true │1    ║
 ╚════════════╧═══════════════════════════════════════════════════════════╧═════╧═════╝
 ----

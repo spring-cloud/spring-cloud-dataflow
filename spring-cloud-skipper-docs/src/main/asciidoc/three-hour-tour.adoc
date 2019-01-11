@@ -781,19 +781,20 @@ Released demo. Now at version v1.
 
 Congratulations! You have now created, packaged, uploaded, and installed your own Skipper package!
 
+[[using-repositories]]
 == Repositories
 
 Repositories store package metadata and host package .zip files.
 Repositores can be local or remote, were local means backed by Skipper's relational database and remote means a filesystem exposed over HTTP.
 
-When registering a remote registry (for example, the `experimental` one that is currently defined by default in addition to one named local`), use the following format:
+When registering a remote registry (for example, the `experimental` one that is currently not defined by default in addition to one named local`), use the following format:
 
 ----
 spring
   cloud:
     skipper:
       server:
-        packageRepositories:
+        package-repositories:
           -
             name: experimental
             url: http://skipper-repository.cfapps.io/repository/experimental
@@ -807,6 +808,8 @@ spring
             repoOrder: 1
 
 ----
+
+IMPORTANT: When modifying default configuration you need to re-define everything under `spring.cloud.skipper.server.package-repositories`.
 
 The `repoOrder` determines which repository serves up a package if one with the same name is registered in two or more repositories.
 
