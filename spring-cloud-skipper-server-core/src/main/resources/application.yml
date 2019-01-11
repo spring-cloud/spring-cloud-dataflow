@@ -152,3 +152,5 @@ logging:
     org.springframework.boot.autoconfigure.security: 'INFO'
     org.springframework.cloud.skipper: 'INFO'
     org.springframework.statemachine: 'INFO'
+    # The following can be removed after https://github.com/spring-cloud/spring-cloud-kubernetes/pull/303 is merged
+    org.springframework.cloud.kubernetes.config: 'ERROR'
