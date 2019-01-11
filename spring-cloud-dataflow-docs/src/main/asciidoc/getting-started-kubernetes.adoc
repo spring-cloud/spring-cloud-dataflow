@@ -227,8 +227,6 @@ $ kubectl delete serviceaccount scdf-sa
 Data Flow delegates to Skipper the streams lifecycle management. Deploy link:http://cloud.spring.io/spring-cloud-skipper/[Skipper] to enable the stream management features.
 For more details, see link:https://docs.spring.io/spring-cloud-skipper/docs/{skipper-core-version}/reference/htmlsingle/#overview[Spring Cloud Skipper Reference Guide] for a complete overview.
 +
-IMPORTANT: Specify the version of Skipper that you want to deploy.
-+
 The deployment is defined in the `src/kubernetes/skipper/skipper-deployment.yaml` file.
 To control what version of Skipper gets deployed, modify the tag used for the Docker image in the container specification, as the following example shows:
 +
@@ -239,32 +237,38 @@ To control what version of Skipper gets deployed, modify the tag used for the Do
       containers:
       - name: skipper
         image: springcloud/spring-cloud-skipper-server:{skipper-version}   # <1>
-        imagePullPolicy: Always
 ----
 
 <1> You may change the version as you like.
 ====
 +
 NOTE: Skipper includes the concept of link:https://docs.spring.io/spring-cloud-skipper/docs/current/reference/htmlsingle/#using-platforms[platforms], so it is important to define the "`accounts`" based on the project preferences.
-In the preceding YAML file, the accounts map to `minikube` as the platform. You can modify this, and you can have any number of platform definitions.
 More details are in the link:https://docs.spring.io/spring-cloud-skipper/docs/{skipper-core-version}/reference/htmlsingle/#overview[Spring Cloud Skipper Reference Guide].
 +
-If you want to orchestrate stream processing pipelines with Apache Kafka as the messaging middleware by using Skipper, you must change
-the `SPRING_APPLICATION_JSON` environment variable value in the `src/kubernetes/skipper/skipper-deployment.yaml` file as follows:
+If you would like to use RabbitMQ as the messaging middleware, apply the following:
++
+====
+[source,bash]
+----
+kubectl create -f src/kubernetes/skipper/skipper-config-rabbit.yaml
+----
+====
++
+If you would like to use Apache Kafka as the messaging middleware, apply the following:
++
+====
+[source,bash]
+----
+kubectl create -f src/kubernetes/skipper/skipper-config-kafka.yaml
+----
+====
++
+Additionally, if you want to use the link:https://docs.spring.io/spring-cloud-stream/docs/current/reference/htmlsingle/#_apache_kafka_streams_binder[Apache Kafka Streams Binder], update the `environmentVariables` attribute to include the Kafka Streams Binder configuraton in `src/kubernetes/skipper/skipper-config-kafka.yaml` as follows:
 +
 ====
 [source,yaml]
 ----
-"{\"spring.cloud.skipper.server.enableLocalPlatform\" : false, \"spring.cloud.skipper.server.platform.kubernetes.accounts.minikube.environmentVariables\": \"SPRING_CLOUD_STREAM_KAFKA_BINDER_BROKERS=${KAFKA_SERVICE_HOST}:${KAFKA_SERVICE_PORT}, SPRING_CLOUD_STREAM_KAFKA_BINDER_ZK_NODES=${KAFKA_ZK_SERVICE_HOST}:${KAFKA_ZK_SERVICE_PORT}\",\"spring.cloud.skipper.server.platform.kubernetes.accounts.minikube.memory\" : \"1024Mi\"}"
-----
-====
-+
-Additionally, if you want to use the link:https://docs.spring.io/spring-cloud-stream/docs/current/reference/htmlsingle/#_apache_kafka_streams_binder[Apache Kafka Streams Binder], configure the `SPRING_APPLICATION_JSON` environment variable in `src/kubernetes/skipper/skipper-deployment.yaml` as follows:
-+
-====
-[source,yaml]
-----
-"{\"spring.cloud.skipper.server.enableLocalPlatform\" : false, \"spring.cloud.skipper.server.platform.kubernetes.accounts.minikube.environmentVariables\": \"SPRING_CLOUD_STREAM_KAFKA_BINDER_BROKERS=${KAFKA_SERVICE_HOST}:${KAFKA_SERVICE_PORT}, SPRING_CLOUD_STREAM_KAFKA_BINDER_ZK_NODES=${KAFKA_ZK_SERVICE_HOST}:${KAFKA_ZK_SERVICE_PORT}, SPRING_CLOUD_STREAM_KAFKA_STREAMS_BINDER_BROKERS=${KAFKA_SERVICE_HOST}:${KAFKA_SERVICE_PORT}, SPRING_CLOUD_STREAM_KAFKA_STREAMS_BINDER_ZK_NODES=${KAFKA_ZK_SERVICE_HOST}:${KAFKA_ZK_SERVICE_PORT}\",\"spring.cloud.skipper.server.platform.kubernetes.accounts.minikube.memory\" : \"1024Mi\"}"
+environmentVariables: 'SPRING_CLOUD_STREAM_KAFKA_BINDER_BROKERS=${KAFKA_SERVICE_HOST}:${KAFKA_SERVICE_PORT},SPRING_CLOUD_STREAM_KAFKA_BINDER_ZK_NODES=${KAFKA_ZK_SERVICE_HOST}:${KAFKA_ZK_SERVICE_PORT}, SPRING_CLOUD_STREAM_KAFKA_STREAMS_BINDER_BROKERS=${KAFKA_SERVICE_HOST}:${KAFKA_SERVICE_PORT},SPRING_CLOUD_STREAM_KAFKA_STREAMS_BINDER_ZK_NODES=${KAFKA_ZK_SERVICE_HOST}:${KAFKA_ZK_SERVICE_PORT},SPRING_REDIS_HOST=${REDIS_SERVICE_HOST},SPRING_REDIS_PORT=${REDIS_SERVICE_PORT}'
 ----
 ====
 +
@@ -278,7 +282,7 @@ kubectl create -f src/kubernetes/skipper/skipper-svc.yaml
 ----
 ====
 +
-You can use the command `kubectl get all -l app=skipper` to verify that the deployment, pod, and service resources are running. You can use `kubectl delete all -l app=skipper` to clean up afterwards.
+You can use the command `kubectl get all -l app=skipper` to verify that the deployment, pod, and service resources are running. You can use `kubectl delete all,cm -l app=skipper` to clean up afterwards.
 +
 . Deploy the Data Flow Server.
 +
@@ -294,7 +298,6 @@ To control which version of Spring Cloud Data Flow server gets deployed, modify 
       containers:
       - name: scdf-server
         image: springcloud/spring-cloud-dataflow-server:{project-version}      # <1>
-        imagePullPolicy: Always
 ----
 
 <1> Change the version as you like. This document is based on the `{project-version}` release. The docker tag `latest` can be used for `BUILD-SNAPSHOT` releases.
@@ -304,7 +307,7 @@ IMPORTANT: The Skipper service should be running and the `SPRING_CLOUD_SKIPPER_C
 +
 The Data Flow Server uses the https://github.com/fabric8io/kubernetes-client[Fabric8 Java client library] to connect to the Kubernetes cluster.
 We use environment variables to set the values needed when deploying the Data Flow server to Kubernetes.
-We also use the https://github.com/spring-cloud/spring-cloud-kubernetes[Fabric8 Spring Cloud integration with Kubernetes library] to access the Kubernetes http://kubernetes.io/docs/user-guide/configmap/[ConfigMap] and http://kubernetes.io/docs/user-guide/secrets/[Secrets] settings.
+We also use the https://github.com/spring-cloud/spring-cloud-kubernetes[Spring Cloud Kubernetes library] to access the Kubernetes http://kubernetes.io/docs/user-guide/configmap/[ConfigMap] and http://kubernetes.io/docs/user-guide/secrets/[Secrets] settings.
 The ConfigMap settings for RabbitMQ are specified in the `src/kubernetes/server/server-config-rabbit.yaml` file and for Kafka in the `src/kubernetes/server/server-config-kafka.yaml` file.
 MySQL secrets are located in the `src/kubernetes/mysql/mysql-secrets.yaml` file.
 If you modified the password for MySQL, you should change it in the `src/kubernetes/mysql/mysql-secrets.yaml` file.
@@ -313,13 +316,25 @@ Any secrets have to be provided in base64 encoding.
 NOTE: We now configure the Data Flow server with file-based security, and the default user is 'user' with a password of 'password'.
 You should change these values in `src/kubernetes/server/server-config-rabbit.yaml` for RabbitMQ or `src/kubernetes/server/server-config-kafka.yaml` for Kafka.
 +
-NOTE: The default memory for the pods is 1024Mi.
-If you expect most of your applications to require more memory, update the value in the `src/kubernetes/server/server-deployment.yaml` file .
+To create the configuration map when using RabbitMQ:
 +
-* RabbitMQ: `kubectl create -f src/kubernetes/server/server-config-rabbit.yaml`
-* Kafka: `kubectl create -f src/kubernetes/server/server-config-kafka.yaml`
+====
+[source,bash]
+----
+kubectl create -f src/kubernetes/server/server-config-rabbit.yaml
+----
+====
 +
-To create a server deployment:
+To create the configuration map when using Kafka:
++
+====
+[source,bash]
+----
+kubectl create -f src/kubernetes/server/server-config-kafka.yaml
+----
+====
++
+Create the server deployment:
 +
 ====
 [source,bash]
@@ -674,7 +689,7 @@ dataflow:>stream platform-list
 ╔════════╤══════════╤════════════════════════════════════════════════════════════════════════════════════════════════╗
 ║  Name  │   Type   │                                      Description                                               ║
 ╠════════╪══════════╪════════════════════════════════════════════════════════════════════════════════════════════════╣
-║minikube│kubernetes│master url == [https://kubernetes.default.svc/], namespace == [default], api version == [v1]       ║
+║default │kubernetes│master url == [https://kubernetes.default.svc/], namespace == [default], api version == [v1]    ║
 ╚════════╧══════════╧════════════════════════════════════════════════════════════════════════════════════════════════╝
 ----
 ====
@@ -772,12 +787,12 @@ The following example shows how to deploy the stream:
 ====
 [source]
 ----
-dataflow:>stream deploy mystream --platformName minikube
+dataflow:>stream deploy mystream --platformName default
 Deployment request has been sent for stream 'mystream'
 ----
 ====
 +
-NOTE: While deploying the stream, we supply `--platformName`, which indicates the platform repository (in this case, `minikube`) to use when deploying the stream applications with Skipper.
+NOTE: While deploying the stream, we supply `--platformName`, which indicates the platform repository (in this case, `default`) to use when deploying the stream applications with Skipper.
 
 . List the pods.
 +
@@ -1273,55 +1288,15 @@ dataflow:>task destroy --name task1
 
 === Application and Server Properties
 
-This section covers how you can customize the deployment of your applications. You can use a number of properties to influence settings for the applications that are deployed. Properties can be applied on a per-application basis or in the server configuration for all deployed applications.
+This section covers how you can customize the deployment of your applications. You can use a number of properties to influence settings for the applications that are deployed. Properties can be applied on a per-application basis or in the appropriate server configuration for all deployed applications.
 
 NOTE: Properties set on a per-application basis always take precedence over properties set as the server configuration. This arrangement allows for the ability to override global server level properties on a per-application basis.
 
-See https://github.com/spring-cloud/spring-cloud-deployer-kubernetes/blob/master/src/main/java/org/springframework/cloud/deployer/spi/kubernetes/KubernetesDeployerProperties.java[`KubernetesDeployerProperties`] for more on the supported options.
-
-==== Using Deployments
-
-The deployer uses `ReplicationController` by default. To use deployments instead, you can set the following option as part of the container `env` section in a deployment YAML file:
-
-====
-[source,yaml]
-----
-env:
-- name: SPRING_CLOUD_DATAFLOW_TASK_PLATFORM_KUBERNETES_ACCOUNTS[default]_CREATE_DEPLOYMENT
-  value: 'true'
-----
-====
-
-This is now the preferred setting and will be the default in future releases of the deployer.
+Properties to be applied for all deployed Tasks are defined in the `src/kubernetes/server/server-config-(binder).yaml` file and for Streams in `src/kubernetes/skipper/skipper-config-(binder).yaml`. Replace `(binder)` with the messaging middleware you are using, for example `rabbit` or `kafka`.
 
 ==== Memory and CPU Settings
 
-The apps are deployed by default with the following `Limits` and `Requests` settings:
-
-====
-[source,yaml]
-----
-Limits:
-  cpu:	500m
-  memory:	512Mi
-Requests:
-  cpu:	500m
-  memory:	512Mi
-----
-====
-
-You might find that the 512Mi memory limit is too low. To increase it, you can provide a common `spring.cloud.deployer.memory` deployer property, as the following example shows (replace `<app>` with the name of the app for which you want to set the memory):
-
-====
-[source]
-----
-deployer.<app>.memory=640m
-----
-====
-
-This property affects both the `Requests` and `Limits` memory value set for the container.
-
-If you want to set the `Requests` and `Limits` values separately, you can use the deployer properties that are specific to the Kubernetes deployer. The following example shows how to set `Limits` to `1000m` for `CPU` and `1024Mi` for memory and `Requests` to `800m` for CPU and `640Mi` for memory:
+Applications are deployed with default memory/cpu settings. If needed, these values can be adjusted. The following example shows how to set `Limits` to `1000m` for `CPU` and `1024Mi` for memory and `Requests` to `800m` for CPU and `640Mi` for memory:
 
 ====
 [source]
@@ -1347,18 +1322,47 @@ Requests:
 ----
 ====
 
-NOTE: When using the common memory property, you should use an `m` suffix for the value. When using the Kubernetes-specific properties, you should use the Kubernetes `Mi` style suffix.
+You can also control the default values to which to set the `cpu` and `memory` globally, for example:
 
-You can also control the default values to which to set the `cpu` and `memory` requirements for the pods that are created as part of application deployments. You can declare the following as part of the container `env` section in a deployment YAML file:
+For Streams:
 
 ====
 [source,yaml]
 ----
-env:
-- name: SPRING_CLOUD_DATAFLOW_TASK_PLATFORM_KUBERNETES_ACCOUNTS[default]_CPU
-  value: 500m
-- name: SPRING_CLOUD_DATAFLOW_TASK_PLATFORM_KUBERNETES_ACCOUNTS[default]_MEMORY
-  value: 640Mi
+data:
+  application.yaml: |-
+    spring:
+      cloud:
+        skipper:
+          server:
+            platform:
+              kubernetes:
+                accounts:
+                  default:
+                    limits:
+                      memory: 640mi
+                      cpu: 500m
+----
+====
+
+For Tasks:
+
+====
+[source,yaml]
+----
+data:
+  application.yaml: |-
+    spring:
+      cloud:
+        dataflow:
+          task:
+            platform:
+              kubernetes:
+                accounts:
+                  default:
+                    limits:
+                      memory: 640mi
+                      cpu: 500m
 ----
 ====
 
@@ -1388,7 +1392,7 @@ This overrides the JVM memory setting for the desired `<app>` (replace `<app>` w
 [[getting-started-kubernetes-probes]]
 ==== Liveness and Readiness Probes
 
-The `liveness` and `readiness` probes use paths called `/health` and `/info` respectively. They use a `delay` of `10` for both and a `period` of `60` and `10` respectively. You can change these defaults when you deploy the stream by using deployer properties.
+The `liveness` and `readiness` probes use paths called `/health` and `/info` respectively. They use a `delay` of `10` for both and a `period` of `60` and `10` respectively. You can change these defaults when you deploy the stream by using deployer properties. Liveness and Readiness Probes are only applied to Streams.
 
 The following example changes the `liveness` probe (replace `<app>` with the name of your application) by setting deployer properties:
 
@@ -1401,18 +1405,24 @@ deployer.<app>.kubernetes.livenessProbePeriod=20
 ----
 ====
 
-The same can be declared as part of the container env section in a deployment YAML file:
+The same can be declared as part of the server global configuration for Streams:
 
 ====
-[source]
+[source,yaml]
 ----
-env:
-- name: SPRING_CLOUD_DATAFLOW_TASK_PLATFORM_KUBERNETES_ACCOUNTS[default]_LIVENESS_PROBE_PATH
-  value: '/health'
-- name: SPRING_CLOUD_DATAFLOW_TASK_PLATFORM_KUBERNETES_ACCOUNTS[default]_LIVENESS_PROBE_DELAY
-  value: '120'
-- name: SPRING_CLOUD_DATAFLOW_TASK_PLATFORM_KUBERNETES_ACCOUNTS[default]_LIVENESS_PROBE_PERIOD
-  value: '20'
+data:
+  application.yaml: |-
+    spring:
+      cloud:
+        skipper:
+          server:
+            platform:
+              kubernetes:
+                accounts:
+                  default:
+                    livenessProbePath: /health
+                    livenessProbeDelay: 120
+                    livenessProbePeriod: 20
 ----
 ====
 
@@ -1428,16 +1438,23 @@ deployer.<app>.kubernetes.livenessProbePort=7000
 ----
 ====
 
-You can also set the port values in the container `env` section of a deployment YAML file:
+The same can be declared as part of the global configuration for Streams:
 
 ====
-[source]
+[source,yaml]
 ----
-env:
-- name: SPRING_CLOUD_DATAFLOW_TASK_PLATFORM_KUBERNETES_ACCOUNTS[default]_READINESS_PROBE_PORT
-  value: '7000'
-- name: SPRING_CLOUD_DATAFLOW_TASK_PLATFORM_KUBERNETES_ACCOUNTS[default]_LIVENESS_PROBE_PORT
-  value: '7000'
+data:
+  application.yaml: |-
+    spring:
+      cloud:
+        skipper:
+          server:
+            platform:
+              kubernetes:
+                accounts:
+                  default:
+                    readinessProbePort: 7000
+                    livenessProbePort: 7000
 ----
 ====
 
@@ -1479,7 +1496,6 @@ The following example (which includes output and in which you should replace `us
 ----
 $ echo -n "user:pass" | base64
 dXNlcjpwYXNz
-$
 ----
 ====
 
@@ -1507,7 +1523,6 @@ data:
 ----
 $ kubectl create -f ./myprobesecret.yml
 secret "myprobesecret" created
-$
 ----
 ====
 
@@ -1550,14 +1565,43 @@ deployer.<app>.kubernetes.imagePullSecret=mysecret
 
 Replace `<app>` with the name of your application and `mysecret` with the name of the secret you created earlier.
 
-You can also configure the image pull secret at the server level in the container `env` section of a deployment YAML, as the following example shows:
+You can also configure the image pull secret at the global server level, as the following example shows:
+
+For Streams:
 
 ====
-[source]
+[source,yaml]
 ----
-env:
-- name: SPRING_CLOUD_DATAFLOW_TASK_PLATFORM_KUBERNETES_ACCOUNTS[default]_IMAGE_PULL_SECRET
-  value: mysecret
+data:
+  application.yaml: |-
+    spring:
+      cloud:
+        skipper:
+          server:
+            platform:
+              kubernetes:
+                accounts:
+                  default:
+                    imagePullSecret: mysecret
+----
+====
+
+For Tasks:
+
+====
+[source,yaml]
+----
+data:
+  application.yaml: |-
+    spring:
+      cloud:
+        dataflow:
+          task:
+            platform:
+              kubernetes:
+                accounts:
+                  default:
+                    imagePullSecret: mysecret
 ----
 ====
 
@@ -1601,14 +1645,43 @@ deployer.<app>.kubernetes.entryPointStyle=<Entry Point Style>
 
 Replace `<app>` with the name of your application and `<Entry Point Style>` with your desired Entry Point Style.
 
-You can also configure the Entry Point Style at the server level in the container `env` section of a deployment YAML, as the following example shows:
+You can also configure the Entry Point Style at the global server level, as the following example shows:
+
+For Streams:
 
 ====
-[source]
+[source,yaml]
 ----
-env:
-- name: SPRING_CLOUD_DATAFLOW_TASK_PLATFORM_KUBERNETES_ACCOUNTS[default]_ENTRY_POINT_STYLE
-  value: entryPointStyle
+data:
+  application.yaml: |-
+    spring:
+      cloud:
+        skipper:
+          server:
+            platform:
+              kubernetes:
+                accounts:
+                  default:
+                    entryPointStyle: entryPointStyle
+----
+====
+
+For Tasks:
+
+====
+[source,yaml]
+----
+data:
+  application.yaml: |-
+    spring:
+      cloud:
+        dataflow:
+          task:
+            platform:
+              kubernetes:
+                accounts:
+                  default:
+                    entryPointStyle: entryPointStyle
 ----
 ====
 
@@ -1643,14 +1716,43 @@ deployer.<app>.kubernetes.deploymentServiceAccountName=myserviceaccountname
 
 Replace `<app>` with the name of your application and `myserviceaccountname` with your service account name.
 
-You can also configure the service account name at the server level in the container `env` section of a deployment YAML, as the following example shows:
+You can also configure the service account name at the global server level, as the following example shows:
+
+For Streams:
 
 ====
-[source]
+[source,yaml]
 ----
-env:
-- name: SPRING_CLOUD_DATAFLOW_TASK_PLATFORM_KUBERNETES_ACCOUNTS[default]_DEPLOYMENT_SERVICE_ACCOUNT_NAME
-  value: myserviceaccountname
+data:
+  application.yaml: |-
+    spring:
+      cloud:
+        skipper:
+          server:
+            platform:
+              kubernetes:
+                accounts:
+                  default:
+                    deploymentServiceAccountName: myserviceaccountname
+----
+====
+
+For Tasks:
+
+====
+[source,yaml]
+----
+data:
+  application.yaml: |-
+    spring:
+      cloud:
+        dataflow:
+          task:
+            platform:
+              kubernetes:
+                accounts:
+                  default:
+                    deploymentServiceAccountName: myserviceaccountname
 ----
 ====
 
@@ -1675,14 +1777,43 @@ deployer.<app>.kubernetes.imagePullPolicy=Always
 
 Replace `<app>` with the name of your application and `Always` with your desired image pull policy.
 
-You can configure an image pull policy at the server level in the container `env` section of a deployment YAML, as the following example shows:
+You can configure an image pull policy at the global server level, as the following example shows:
+
+For Streams:
 
 ====
-[source]
+[source,yaml]
 ----
-        env:
-        - name: SPRING_CLOUD_DATAFLOW_TASK_PLATFORM_KUBERNETES_ACCOUNTS[default]_IMAGE_PULL_POLICY
-          value: Always
+data:
+  application.yaml: |-
+    spring:
+      cloud:
+        skipper:
+          server:
+            platform:
+              kubernetes:
+                accounts:
+                  default:
+                    imagePullPolicy: Always
+----
+====
+
+For Tasks:
+
+====
+[source,yaml]
+----
+data:
+  application.yaml: |-
+    spring:
+      cloud:
+        dataflow:
+          task:
+            platform:
+              kubernetes:
+                accounts:
+                  default:
+                    imagePullPolicy: Always
 ----
 ====
 
