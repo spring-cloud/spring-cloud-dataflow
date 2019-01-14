@@ -54,7 +54,6 @@ import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.DefaultResourceLoader;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PagedResourcesAssembler;
 import org.springframework.hateoas.ExposesResourceFor;
@@ -358,20 +357,18 @@ public class AppRegistryController {
 		List<AppRegistration> registrations = new ArrayList<>();
 
 		if (StringUtils.hasText(uri)) {
-			registrations.addAll(appRegistryService.importAll(force, this.resourceLoader.getResource(uri)));
+			registrations.addAll(this.appRegistryService.importAll(force, this.resourceLoader.getResource(uri)));
 		}
 		else if (!CollectionUtils.isEmpty(apps)) {
 			ByteArrayOutputStream baos = new ByteArrayOutputStream();
 			apps.store(baos, "");
 			ByteArrayResource bar = new ByteArrayResource(baos.toByteArray(), "Inline properties");
-			registrations.addAll(appRegistryService.importAll(force, bar));
+			registrations.addAll(this.appRegistryService.importAll(force, bar));
 		}
 
 		Collections.sort(registrations);
 		prefetchMetadata(registrations);
-		return pagedResourcesAssembler.toResource(
-				new PageImpl<>(registrations, pageable, appRegistryService.findAll().size()),
-				assembler);
+		return pagedResourcesAssembler.toResource(this.appRegistryService.findAll(pageable), this.assembler);
 	}
 
 	/**
@@ -384,7 +381,7 @@ public class AppRegistryController {
 			appRegistrations.stream().filter(r -> r.getMetadataUri() != null).parallel().forEach(r -> {
 				logger.info("Eagerly fetching {}", r.getMetadataUri());
 				try {
-					appRegistryService.getAppMetadataResource(r);
+					this.appRegistryService.getAppMetadataResource(r);
 				}
 				catch (Exception e) {
 					logger.warn("Could not fetch " + r.getMetadataUri(), e);

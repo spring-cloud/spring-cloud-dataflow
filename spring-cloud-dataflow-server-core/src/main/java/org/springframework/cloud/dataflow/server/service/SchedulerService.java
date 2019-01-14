@@ -21,6 +21,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.springframework.cloud.scheduler.spi.core.ScheduleInfo;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
 /**
@@ -70,9 +71,9 @@ public interface SchedulerService {
 	 * List all of the schedules registered with the system.
 	 *
 	 * @param pageable Establish the pagination setup for the result set.
-	 * @return A List of Schedules for the given system.
+	 * @return Paged items of schedules.
 	 */
-	List<ScheduleInfo> list(Pageable pageable);
+	Page<ScheduleInfo> list(Pageable pageable);
 
 	/**
 	 * List all of the Schedules associated with the provided TaskDefinition up to the

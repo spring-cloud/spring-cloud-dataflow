@@ -29,8 +29,6 @@ import org.springframework.cloud.dataflow.server.stream.StreamDeployer;
 import org.springframework.cloud.deployer.spi.app.AppInstanceStatus;
 import org.springframework.cloud.deployer.spi.app.AppStatus;
 import org.springframework.cloud.deployer.spi.app.DeploymentState;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PagedResourcesAssembler;
 import org.springframework.hateoas.ExposesResourceFor;
@@ -82,13 +80,7 @@ public class RuntimeAppsController {
 	@RequestMapping
 	public PagedResources<AppStatusResource> list(Pageable pageable, PagedResourcesAssembler<AppStatus> assembler)
 			throws ExecutionException, InterruptedException {
-
-		Page<AppStatus> statuses = streamDeployer.getAppStatuses(pageable);
-
-		// finally, pass in pageable and tell how many items we have in all pages
-		return assembler.toResource(new PageImpl<>(statuses.getContent(), pageable, statuses.getTotalElements()),
-				statusAssembler);
-
+		return assembler.toResource(streamDeployer.getAppStatuses(pageable), statusAssembler);
 	}
 
 	@RequestMapping("/{id}")
