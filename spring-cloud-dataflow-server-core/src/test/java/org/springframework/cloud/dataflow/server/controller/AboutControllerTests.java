@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 the original author or authors.
+ * Copyright 2017-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,6 +23,8 @@ import org.junit.runner.RunWith;
 import org.mockito.Mockito;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
+import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase.Replace;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.cloud.dataflow.server.configuration.TestDependencies;
 import org.springframework.cloud.dataflow.server.support.LogTestNameRule;
@@ -63,6 +65,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 		"spring.cloud.dataflow.version-info.dependencies.spring-cloud-dataflow-shell.checksum-sha1=ABCDEFG",
 		"spring.cloud.dataflow.version-info.dependencies.spring-cloud-dataflow-shell.checksum-sha1-url={repository}/org/springframework/cloud/spring-cloud-dataflow-shell/{version}/spring-cloud-dataflow-shell-{version}.jar.sha1"
 })
+@AutoConfigureTestDatabase(replace = Replace.ANY)
 public class AboutControllerTests {
 
 	private MockMvc mockMvc;
@@ -113,6 +116,7 @@ public class AboutControllerTests {
 			"spring.cloud.dataflow.version-info.dependencies.spring-cloud-dataflow-shell.url=https://repo.spring.io/libs-milestone/org/springframework/cloud/spring-cloud-dataflow-shell/1.3.0.BUILD-SNAPSHOT/spring-cloud-dataflow-shell-1.3.0.BUILD-SNAPSHOT.jsdfasdf",
 			"spring.cloud.dataflow.version-info.dependencies.spring-cloud-dataflow-shell.checksum-sha1=ABCDEFG"
 	})
+	@AutoConfigureTestDatabase(replace = Replace.ANY)
 	public static class ChecksumDisabledTests {
 
 		private MockMvc mockMvc;
@@ -149,6 +153,7 @@ public class AboutControllerTests {
 			"spring.cloud.dataflow.version-info.dependency-fetch.enabled=false",
 			"spring.cloud.dataflow.version-info.dependencies.spring-cloud-dataflow-shell.checksum-sha1=ABCDEFG"
 	})
+	@AutoConfigureTestDatabase(replace = Replace.ANY)
 	public static class MilestoneUrlTests {
 
 		private MockMvc mockMvc;
@@ -186,6 +191,7 @@ public class AboutControllerTests {
 			"spring.cloud.dataflow.version-info.dependency-fetch.enabled=false",
 			"spring.cloud.dataflow.version-info.dependencies.spring-cloud-dataflow-shell.checksum-sha1=ABCDEFG"
 	})
+	@AutoConfigureTestDatabase(replace = Replace.ANY)
 	public static class RCUrlTests {
 
 		private MockMvc mockMvc;
@@ -222,6 +228,7 @@ public class AboutControllerTests {
 			"spring.cloud.dataflow.version-info.dependency-fetch.enabled=false",
 			"spring.cloud.dataflow.version-info.dependencies.spring-cloud-dataflow-shell.checksum-sha1=ABCDEFG"
 	})
+	@AutoConfigureTestDatabase(replace = Replace.ANY)
 	public static class GAUrlTests {
 
 		private MockMvc mockMvc;
@@ -255,6 +262,7 @@ public class AboutControllerTests {
 			"spring.cloud.dataflow.version-info.dependency-fetch.enabled=false",
 			"spring.cloud.dataflow.version-info.dependencies.spring-cloud-dataflow-shell.checksum-sha1=ABCDEFG"
 	})
+	@AutoConfigureTestDatabase(replace = Replace.ANY)
 	public static class ReleaseUrlTests {
 
 		private MockMvc mockMvc;
@@ -293,6 +301,7 @@ public class AboutControllerTests {
 			"spring.cloud.dataflow.version-info.dependencies.spring-cloud-dataflow-shell.checksum-sha1-url=",
 			"spring.cloud.dataflow.version-info.dependencies.spring-cloud-dataflow-shell.checksum-sha256-url="
 	})
+	@AutoConfigureTestDatabase(replace = Replace.ANY)
 	public static class ChecksumNoDefaultTests {
 
 		private MockMvc mockMvc;
@@ -334,6 +343,7 @@ public class AboutControllerTests {
 			"spring.cloud.dataflow.version-info.dependencies.spring-cloud-dataflow-shell.checksum-sha1=ABCDEFG",
 			"spring.cloud.dataflow.version-info.dependencies.spring-cloud-dataflow-shell.checksum-sha1-url={repository}/org/springframework/cloud/spring-cloud-dataflow-shell/{version}/spring-cloud-dataflow-shell-{version}.jar.sha1"
 	})
+	@AutoConfigureTestDatabase(replace = Replace.ANY)
 	public static class AboutTests {
 
 		private MockMvc mockMvc;

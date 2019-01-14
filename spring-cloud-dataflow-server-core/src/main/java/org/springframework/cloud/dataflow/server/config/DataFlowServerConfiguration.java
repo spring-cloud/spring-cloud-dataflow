@@ -1,5 +1,5 @@
 /*
- * Copyright 2015-2018 the original author or authors.
+ * Copyright 2015-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,17 +16,12 @@
 
 package org.springframework.cloud.dataflow.server.config;
 
-import javax.sql.DataSource;
-
 import org.springframework.boot.autoconfigure.batch.BatchProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.cloud.dataflow.completion.CompletionConfiguration;
 import org.springframework.cloud.dataflow.server.config.apps.CommonApplicationProperties;
 import org.springframework.cloud.dataflow.server.config.features.FeaturesConfiguration;
-import org.springframework.cloud.dataflow.server.config.features.FeaturesProperties;
 import org.springframework.cloud.dataflow.server.config.web.WebConfiguration;
-import org.springframework.cloud.dataflow.server.repository.support.DataflowRdbmsInitializer;
-import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.data.web.config.EnableSpringDataWebSupport;
@@ -52,12 +47,4 @@ import org.springframework.hateoas.config.EnableHypermediaSupport;
 @Import({ CompletionConfiguration.class, FeaturesConfiguration.class, WebConfiguration.class })
 @EnableConfigurationProperties({ BatchProperties.class, CommonApplicationProperties.class })
 public class DataFlowServerConfiguration {
-
-	@Bean
-	public DataflowRdbmsInitializer dataflowRdbmsInitializer(DataSource dataSource,
-			FeaturesProperties featuresProperties) {
-		DataflowRdbmsInitializer dataflowRdbmsInitializer = new DataflowRdbmsInitializer(featuresProperties);
-		dataflowRdbmsInitializer.setDataSource(dataSource);
-		return dataflowRdbmsInitializer;
-	}
 }
