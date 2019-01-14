@@ -1296,18 +1296,7 @@ Properties to be applied for all deployed Tasks are defined in the `src/kubernet
 
 ==== Memory and CPU Settings
 
-Applications are deployed with default memory/cpu settings. You might find these settings may need to be adjusted which can be done as the following example shows (replace `<app>` with the name of the app for which you want to set the memory):
-
-====
-[source]
-----
-deployer.<app>.memory=640m
-----
-====
-
-This property affects both the `Requests` and `Limits` memory value set for the container.
-
-If you want to set the `Requests` and `Limits` values separately, you can use the deployer properties that are specific to the Kubernetes deployer. The following example shows how to set `Limits` to `1000m` for `CPU` and `1024Mi` for memory and `Requests` to `800m` for CPU and `640Mi` for memory:
+Applications are deployed with default memory/cpu settings. If needed, these values can be adjusted. The following example shows how to set `Limits` to `1000m` for `CPU` and `1024Mi` for memory and `Requests` to `800m` for CPU and `640Mi` for memory:
 
 ====
 [source]
@@ -1333,9 +1322,7 @@ Requests:
 ----
 ====
 
-NOTE: When using the common memory property, you should use an `m` suffix for the value. When using the Kubernetes-specific properties, you should use the Kubernetes `Mi` style suffix.
-
-You can also control the default values to which to set the `cpu` and `memory` requirements for the pods that are created as part of application deployments, for example:
+You can also control the default values to which to set the `cpu` and `memory` globally, for example:
 
 For Streams:
 
@@ -1352,8 +1339,9 @@ data:
               kubernetes:
                 accounts:
                   default:
-                    memory: 640mi
-                    cpu: 500m
+                    limits:
+                      memory: 640mi
+                      cpu: 500m
 ----
 ====
 
@@ -1372,8 +1360,9 @@ data:
               kubernetes:
                 accounts:
                   default:
-                    memory: 640mi
-                    cpu: 500m
+                    limits:
+                      memory: 640mi
+                      cpu: 500m
 ----
 ====
 

@@ -16,7 +16,8 @@ data:
                 accounts:
                   default:
                     environmentVariables: 'SPRING_RABBITMQ_HOST=${RABBITMQ_SERVICE_HOST},SPRING_RABBITMQ_PORT=${RABBITMQ_SERVICE_PORT},SPRING_REDIS_HOST=${REDIS_SERVICE_HOST},SPRING_REDIS_PORT=${REDIS_SERVICE_PORT}'
-                    memory: 1024Mi
-                    cpu: 500m
+                    limits:
+                      memory: 1024Mi
+                      cpu: 500m
                     readinessProbeDelay: 120
                     livenessProbeDelay: 90
