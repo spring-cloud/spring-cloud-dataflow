@@ -1,0 +1,11 @@
+datasources:
+  - name: 'influx_auto_DataFlowMetricsCollector'
+    type: 'influxdb'
+    access: 'proxy'
+    org_id: 1
+    url: 'http://influxdb:8086'
+    database: 'myinfluxdb'
+    is_default: true
+    version: 5
+    editable: true
+    read_only: false

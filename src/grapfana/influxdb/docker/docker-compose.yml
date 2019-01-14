@@ -1,0 +1,24 @@
+version: '3.3'
+services:
+
+  # Prometheus uses the image resulting form the build
+  # of `./influxdb` which simply packs some configuration
+  # into the form of an image.
+  #
+  # It could instead, use volume-mounts.
+  influxdb:
+    build: './influxdb'
+    container_name: 'influxdb'
+    ports:
+      - '8086:8086'
+
+  # The grafana container uses the image resulting from the build
+  # of `./grafana` which simply packs some configuration into the
+  # form of an image.
+  #
+  # This could instead be a volume-mounted container.
+  grafana:
+    build: './grafana'
+    container_name: 'grafana'
+    ports:
+      - '3000:3000'
