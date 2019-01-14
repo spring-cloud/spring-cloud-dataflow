@@ -1,5 +1,5 @@
 /*
- * Copyright 2015-2016 the original author or authors.
+ * Copyright 2015-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -140,7 +140,7 @@ public class LocalConfigurationTests {
 	@Test
 	public void testNoDataflowConfig() {
 		SpringApplication app = new SpringApplication(LocalTestNoDataFlowServer.class);
-		context = app.run(new String[] { "--server.port=0", "--spring.jpa.database=H2" });
+		context = app.run(new String[] { "--server.port=0", "--spring.jpa.database=H2", "--spring.flyway.enabled=false" });
 		assertThat(context.containsBean("appRegistry"), is(false));
 	}
 }

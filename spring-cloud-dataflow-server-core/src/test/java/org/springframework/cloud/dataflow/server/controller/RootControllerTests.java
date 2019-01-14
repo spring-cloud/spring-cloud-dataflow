@@ -23,6 +23,8 @@ import org.junit.runner.RunWith;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
+import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase.Replace;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.cloud.dataflow.core.AppRegistration;
@@ -48,12 +50,12 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  * @author Christian Tzolov
  */
 @RunWith(SpringRunner.class)
-@SpringBootTest(classes = {TestDependencies.class},
-		properties = { "spring.datasource.url=jdbc:h2:tcp://localhost:19092/mem:dataflow",
-		"spring.cloud.dataflow.features.analytics-enabled=false"})
+@SpringBootTest(classes = { TestDependencies.class }, properties = {
+		"spring.cloud.dataflow.features.analytics-enabled=false" })
 @EnableConfigurationProperties({ CommonApplicationProperties.class })
 @DirtiesContext(classMode = ClassMode.BEFORE_EACH_TEST_METHOD)
 @Transactional
+@AutoConfigureTestDatabase(replace = Replace.ANY)
 public class RootControllerTests {
 
 	private MockMvc mockMvc;

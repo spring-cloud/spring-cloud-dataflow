@@ -23,17 +23,32 @@ spring:
       repositories:
         enabled: false
   batch:
-    initialize-schema: always
+    initialize-schema: never
   jpa:
     properties:
       hibernate.id.new_generator_mappings: true
     hibernate:
         naming:
-          physical-strategy: org.springframework.cloud.dataflow.server.repository.support.UpperCaseSpringPhysicalNamingStrategy
+          physical-strategy: org.springframework.boot.orm.jpa.hibernate.SpringPhysicalNamingStrategy
+          implicit-strategy: org.springframework.boot.orm.jpa.hibernate.SpringImplicitNamingStrategy
+  flyway:
+    enabled: true
+    baselineVersion: 0
+    baselineOnMigrate: true
+    table: flyway_schema_history_dataflow
+    locations:
+      - classpath:org/springframework/cloud/dataflow/server/db/migration/{vendor}
+    check-location: true
   autoconfigure:
     exclude: org.springframework.boot.autoconfigure.session.SessionAutoConfiguration
   cloud:
+    task:
+      initialize:
+        enable: false
     dataflow:
+      rdbms:
+        initialize:
+          enable: false
       version-info:
         dependency-fetch:
           enabled: false

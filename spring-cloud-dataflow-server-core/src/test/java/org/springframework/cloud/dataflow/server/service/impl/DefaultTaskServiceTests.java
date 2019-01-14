@@ -30,6 +30,8 @@ import org.mockito.ArgumentCaptor;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceProperties;
+import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
+import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase.Replace;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.cloud.dataflow.audit.service.AuditRecordService;
 import org.springframework.cloud.dataflow.configuration.metadata.ApplicationConfigurationMetadataResolver;
@@ -128,6 +130,7 @@ public abstract class DefaultTaskServiceTests {
 
 
 	@TestPropertySource(properties = { "spring.cloud.dataflow.task.maximum-concurrent-tasks=10" })
+	@AutoConfigureTestDatabase(replace = Replace.ANY)
 	public static class SimpleTaskTests extends DefaultTaskServiceTests {
 
 		@Before
@@ -247,6 +250,7 @@ public abstract class DefaultTaskServiceTests {
 
 	@TestPropertySource(properties = { "spring.cloud.dataflow.applicationProperties.task.globalkey=globalvalue",
 		"spring.cloud.dataflow.applicationProperties.stream.globalstreamkey=nothere" })
+	@AutoConfigureTestDatabase(replace = Replace.ANY)
 	public static class ComposedTaskTests extends DefaultTaskServiceTests {
 
 		@Autowired
