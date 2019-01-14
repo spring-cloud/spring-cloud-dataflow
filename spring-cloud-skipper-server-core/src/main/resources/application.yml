@@ -146,7 +146,7 @@ logging:
     org.springframework.security: 'WARN'
     org.springframework.integration: 'WARN'
     org.springframework.boot: 'WARN'
-    org.springframework.boot.context.embedded.tomcat: 'INFO'
+    org.springframework.boot.web.embedded.tomcat: 'INFO'
     org.hibernate: 'WARN'
     # The following INFO is to log the generated password when using basic security
     org.springframework.boot.autoconfigure.security: 'INFO'
