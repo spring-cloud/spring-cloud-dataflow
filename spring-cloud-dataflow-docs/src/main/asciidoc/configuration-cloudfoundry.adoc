@@ -216,7 +216,7 @@ stream deploy fooz --properties "app.time.spring.cloud.stream.kafka.binder.broke
 
 [[configuration-cloudfoundry-db-connection-pool]]
 === Database Connection Pool
-The Data Flow server uses the Spring Cloud Connector library to create the DataSource with a default connection pool size of 4. 
+The Data Flow server uses the Spring Cloud Connector library to create the DataSource with a default connection pool size of 4.
 To change the connection pool size and maximum wait time, set the following two properties `spring.cloud.dataflow.server.cloudfoundry.maxPoolSize` and `"spring.cloud.dataflow.server.cloudfoundry.maxWaitTime`. The wait time is specified in milliseconds.
 
 [[configuration-cloudfoundry-maximum-disk-quota-configuration]]
@@ -450,7 +450,7 @@ Otherwise, no roles whatsoever are assigned. In that case, you may see the follo
 Dashboard screen:
 
 .Accessing the Data Flow Dashboard without Roles
-image::cf-getting-started-security-no-roles.png[Dashboard without roles, scaledwidth="100%"]
+image::images/cf-getting-started-security-no-roles.png[Dashboard without roles, scaledwidth="100%"]
 
 === Configuration Reference
 
@@ -778,4 +778,3 @@ services:
 Where the `SPRING_CLOUD_SCHEDULER_CLOUDFOUNDRY_SCHEDULER_URL` has the following format: `scheduler.<Domain-Name>` (for
 example, `https://scheduler.local.pcfdev.io`). Check the actual address from your _PCF_ environment.
 ====
-
