@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 the original author or authors.
+ * Copyright 2017-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,6 +26,7 @@ import org.springframework.boot.autoconfigure.jackson.JacksonAutoConfiguration;
 import org.springframework.boot.autoconfigure.jdbc.EmbeddedDataSourceConfiguration;
 import org.springframework.boot.autoconfigure.orm.jpa.HibernateJpaAutoConfiguration;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.cloud.deployer.autoconfigure.ResourceLoadingAutoConfiguration;
 import org.springframework.cloud.skipper.server.config.SkipperServerConfiguration;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
@@ -67,7 +68,8 @@ public class PackageMetadataServiceTests {
 
 	@Configuration
 	@ImportAutoConfiguration(classes = { JacksonAutoConfiguration.class, EmbeddedDataSourceConfiguration.class,
-			HibernateJpaAutoConfiguration.class, StateMachineJpaRepositoriesAutoConfiguration.class })
+			HibernateJpaAutoConfiguration.class, StateMachineJpaRepositoriesAutoConfiguration.class,
+			ResourceLoadingAutoConfiguration.class })
 	@Import(SkipperServerConfiguration.class)
 	static class TestConfig {
 	}

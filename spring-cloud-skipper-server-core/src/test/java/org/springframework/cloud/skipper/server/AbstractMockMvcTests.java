@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 the original author or authors.
+ * Copyright 2017-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,6 +37,7 @@ import org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfi
 import org.springframework.boot.autoconfigure.web.servlet.error.ErrorMvcAutoConfiguration;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.cloud.deployer.autoconfigure.ResourceLoadingAutoConfiguration;
 import org.springframework.cloud.skipper.domain.CancelResponse;
 import org.springframework.cloud.skipper.domain.Info;
 import org.springframework.cloud.skipper.domain.Release;
@@ -153,7 +154,7 @@ public abstract class AbstractMockMvcTests extends AbstractAssertReleaseDeployed
 	@ImportAutoConfiguration(classes = { SecurityAutoConfiguration.class, JacksonAutoConfiguration.class, EmbeddedDataSourceConfiguration.class,
 			HibernateJpaAutoConfiguration.class, RepositoryRestMvcAutoConfiguration.class,
 			ErrorMvcAutoConfiguration.class, StateMachineJpaRepositoriesAutoConfiguration.class,
-			SkipperServerPlatformConfiguration.class })
+			SkipperServerPlatformConfiguration.class, ResourceLoadingAutoConfiguration.class })
 	@Import(SkipperServerConfiguration.class)
 	@EnableWebMvc
 	static class TestConfig {

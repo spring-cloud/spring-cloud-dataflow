@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 the original author or authors.
+ * Copyright 2018-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,7 +37,9 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.boot.web.servlet.error.ErrorAttributes;
 import org.springframework.cloud.common.security.AuthorizationProperties;
 import org.springframework.cloud.common.security.support.SecurityStateBean;
+import org.springframework.cloud.deployer.autoconfigure.ResourceLoadingAutoConfiguration;
 import org.springframework.cloud.deployer.resource.docker.DockerResourceLoader;
+import org.springframework.cloud.deployer.resource.maven.MavenProperties;
 import org.springframework.cloud.deployer.resource.maven.MavenResourceLoader;
 import org.springframework.cloud.deployer.resource.support.DelegatingResourceLoader;
 import org.springframework.cloud.skipper.domain.SpringCloudDeployerApplicationManifestReader;
@@ -46,7 +48,6 @@ import org.springframework.cloud.skipper.io.DefaultPackageWriter;
 import org.springframework.cloud.skipper.io.PackageReader;
 import org.springframework.cloud.skipper.io.PackageWriter;
 import org.springframework.cloud.skipper.server.config.LocalPlatformProperties;
-import org.springframework.cloud.skipper.server.config.MavenConfigurationProperties;
 import org.springframework.cloud.skipper.server.config.SkipperServerConfiguration;
 import org.springframework.cloud.skipper.server.config.SkipperServerPlatformConfiguration;
 import org.springframework.cloud.skipper.server.config.SkipperServerProperties;
@@ -104,15 +105,14 @@ import static org.springframework.cloud.skipper.server.config.SkipperServerConfi
  */
 @Configuration
 @EnableConfigurationProperties({ SkipperServerProperties.class, VersionInfoProperties.class,
-		LocalPlatformProperties.class, /* CloudFoundryPlatformProperties.class, */ MavenConfigurationProperties.class,
-		HealthCheckProperties.class })
+		LocalPlatformProperties.class, HealthCheckProperties.class })
 @EntityScan({ "org.springframework.cloud.skipper.domain",
 		"org.springframework.cloud.skipper.server.domain" })
 @EnableAsync
 @ImportAutoConfiguration(classes = { JacksonAutoConfiguration.class, EmbeddedDataSourceConfiguration.class,
 		HibernateJpaAutoConfiguration.class, RepositoryRestMvcAutoConfiguration.class,
 		ErrorMvcAutoConfiguration.class, StateMachineJpaRepositoriesAutoConfiguration.class,
-		SkipperServerPlatformConfiguration.class })
+		SkipperServerPlatformConfiguration.class, ResourceLoadingAutoConfiguration.class })
 @Import(RepositoryConfiguration.class)
 @WebAppConfiguration
 public class ServerDependencies implements AsyncConfigurer {
@@ -184,7 +184,7 @@ public class ServerDependencies implements AsyncConfigurer {
 	}
 
 	@Bean
-	public DelegatingResourceLoader delegatingResourceLoader(MavenConfigurationProperties mavenProperties) {
+	public DelegatingResourceLoader delegatingResourceLoader(MavenProperties mavenProperties) {
 		DockerResourceLoader dockerLoader = new DockerResourceLoader();
 		MavenResourceLoader mavenResourceLoader = new MavenResourceLoader(mavenProperties);
 		Map<String, ResourceLoader> loaders = new HashMap<>();

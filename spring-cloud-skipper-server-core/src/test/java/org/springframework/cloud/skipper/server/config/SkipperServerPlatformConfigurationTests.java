@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2018 the original author or authors.
+ * Copyright 2017-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,6 +27,7 @@ import org.springframework.boot.autoconfigure.ImportAutoConfiguration;
 import org.springframework.boot.autoconfigure.jdbc.EmbeddedDataSourceConfiguration;
 import org.springframework.boot.autoconfigure.orm.jpa.HibernateJpaAutoConfiguration;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.cloud.deployer.autoconfigure.ResourceLoadingAutoConfiguration;
 import org.springframework.cloud.deployer.spi.app.AppDeployer;
 import org.springframework.cloud.deployer.spi.app.AppStatus;
 import org.springframework.cloud.deployer.spi.core.AppDeploymentRequest;
@@ -103,7 +104,7 @@ public class SkipperServerPlatformConfigurationTests {
 	@Configuration
 	@ImportAutoConfiguration(classes = { EmbeddedDataSourceConfiguration.class, HibernateJpaAutoConfiguration.class,
 			StateMachineJpaRepositoriesAutoConfiguration.class, SkipperServerPlatformConfiguration.class,
-			TestPlatformAutoConfiguration.class })
+			TestPlatformAutoConfiguration.class, ResourceLoadingAutoConfiguration.class })
 	@Import(SkipperServerConfiguration.class)
 	static class TestConfig {
 	}

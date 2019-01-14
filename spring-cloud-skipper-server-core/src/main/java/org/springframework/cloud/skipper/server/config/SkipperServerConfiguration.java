@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2018 the original author or authors.
+ * Copyright 2017-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,6 +32,7 @@ import org.springframework.boot.web.servlet.error.ErrorAttributes;
 import org.springframework.cloud.common.security.AuthorizationProperties;
 import org.springframework.cloud.common.security.support.SecurityStateBean;
 import org.springframework.cloud.deployer.resource.docker.DockerResourceLoader;
+import org.springframework.cloud.deployer.resource.maven.MavenProperties;
 import org.springframework.cloud.deployer.resource.maven.MavenResourceLoader;
 import org.springframework.cloud.deployer.resource.support.DelegatingResourceLoader;
 import org.springframework.cloud.skipper.domain.SpringCloudDeployerApplicationManifestReader;
@@ -100,8 +101,7 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
  */
 @Configuration
 @EnableConfigurationProperties({ SkipperServerProperties.class, VersionInfoProperties.class,
-		LocalPlatformProperties.class, MavenConfigurationProperties.class,
-		HealthCheckProperties.class })
+		LocalPlatformProperties.class, HealthCheckProperties.class })
 @EntityScan({ "org.springframework.cloud.skipper.domain", "org.springframework.cloud.skipper.server.domain" })
 @EnableMapRepositories(basePackages = "org.springframework.cloud.skipper.server.repository.map")
 @EnableJpaRepositories(basePackages = "org.springframework.cloud.skipper.server.repository.jpa")
@@ -177,7 +177,7 @@ public class SkipperServerConfiguration implements AsyncConfigurer {
 	}
 
 	@Bean
-	public DelegatingResourceLoader delegatingResourceLoader(MavenConfigurationProperties mavenProperties) {
+	public DelegatingResourceLoader delegatingResourceLoader(MavenProperties mavenProperties) {
 		DockerResourceLoader dockerLoader = new DockerResourceLoader();
 		MavenResourceLoader mavenResourceLoader = new MavenResourceLoader(mavenProperties);
 		Map<String, ResourceLoader> loaders = new HashMap<>();

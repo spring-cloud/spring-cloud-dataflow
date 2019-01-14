@@ -49,7 +49,6 @@
         <dependency>
             <groupId>org.springframework.cloud</groupId>
             <artifactId>spring-cloud-deployer-spi</artifactId>
-            <version>${spring-cloud-deployer.version}</version>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
