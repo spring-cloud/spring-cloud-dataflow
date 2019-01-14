@@ -47,6 +47,7 @@ import org.springframework.cloud.scheduler.spi.core.ScheduleRequest;
 import org.springframework.cloud.scheduler.spi.core.Scheduler;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
@@ -167,7 +168,7 @@ public class DefaultSchedulerService implements SchedulerService {
 	}
 
 	@Override
-	public List<ScheduleInfo> list(Pageable pageable) {
+	public Page<ScheduleInfo> list(Pageable pageable) {
 		throw new UnsupportedOperationException("method not supported");
 	}
 

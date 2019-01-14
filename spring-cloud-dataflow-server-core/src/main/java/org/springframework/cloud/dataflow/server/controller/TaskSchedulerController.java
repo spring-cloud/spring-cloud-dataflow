@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 the original author or authors.
+ * Copyright 2018-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -46,6 +46,7 @@ import org.springframework.web.bind.annotation.RestController;
  *
  * @author Glenn Renfro
  * @author Christian Tzolov
+ * @author Ilayaperumal Gopinathan
  */
 @RestController
 @RequestMapping("/tasks/schedules")
@@ -77,16 +78,10 @@ public class TaskSchedulerController {
 	 */
 	@RequestMapping(value = "", method = RequestMethod.GET)
 	@ResponseStatus(HttpStatus.OK)
-	public PagedResources<ScheduleInfoResource> list(
+	public PagedResources<ScheduleInfoResource> list(Pageable pageable,
 			PagedResourcesAssembler<ScheduleInfo> assembler) {
 		List<ScheduleInfo> result = this.schedulerService.list();
-		int resultSize = result.size();
-		Pageable pageable = PageRequest.of(0,
-				(resultSize == 0) ? resultSize = 1 : resultSize); //handle empty result set
-
-		Page<ScheduleInfo> page = new PageImpl<>(result, pageable,
-				result.size());
-		return assembler.toResource(page, taskAssembler);
+		return assembler.toResource(new PageImpl<>(result, pageable, result.size()), taskAssembler);
 	}
 
 	/**
