@@ -72,8 +72,8 @@ public class FieldValueCounterCommands extends AbstractMetricsCommands implement
 	}
 
 	@CliAvailabilityIndicator({ RESET_COUNTER })
-	public boolean availableWithCreateRole() {
-		return dataFlowShell.hasAccess(RoleType.CREATE, OpsType.FIELD_VALUE_COUNTER);
+	public boolean availableWithDestroyRole() {
+		return dataFlowShell.hasAccess(RoleType.DESTROY, OpsType.FIELD_VALUE_COUNTER);
 	}
 
 	@CliCommand(value = DISPLAY_COUNTER, help = "Display the value of a field value counter")

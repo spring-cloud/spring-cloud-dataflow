@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 the original author or authors.
+ * Copyright 2018-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -71,16 +71,26 @@ import org.springframework.util.StringUtils;
 @Component
 public class AppRegistryCommands implements CommandMarker, ResourceLoaderAware {
 
-	private final static String APPLICATION_INFO = "app info";
+	protected DataFlowShell dataFlowShell;
+	protected ResourceLoader resourceLoader = new DefaultResourceLoader();
+
+	// Create Role
+
+	private static final String REGISTER_APPLICATION = "app register";
+	private static final String IMPORT_APPLICATIONS = "app import";
+
+	// Destroy Role
 
 	private final static String UNREGISTER_APPLICATION = "app unregister";
 
+	// Modify Role
+
 	private static final String DEFAULT_APPLICATION = "app default";
+
+	// View Role
+
+	private final static String APPLICATION_INFO = "app info";
 	private final static String LIST_APPLICATIONS = "app list";
-	private static final String REGISTER_APPLICATION = "app register";
-	private static final String IMPORT_APPLICATIONS = "app import";
-	protected DataFlowShell dataFlowShell;
-	protected ResourceLoader resourceLoader = new DefaultResourceLoader();
 
 	@Autowired
 	public void setDataFlowShell(DataFlowShell dataFlowShell) {
@@ -92,14 +102,24 @@ public class AppRegistryCommands implements CommandMarker, ResourceLoaderAware {
 		this.resourceLoader = resourceLoader;
 	}
 
-	@CliAvailabilityIndicator({ APPLICATION_INFO })
-	public boolean availableWithViewRole() {
-		return dataFlowShell.hasAccess(RoleType.VIEW, OpsType.APP_REGISTRY);
-	}
-
-	@CliAvailabilityIndicator({ UNREGISTER_APPLICATION, DEFAULT_APPLICATION })
+	@CliAvailabilityIndicator({ REGISTER_APPLICATION, IMPORT_APPLICATIONS })
 	public boolean availableWithCreateRole() {
 		return dataFlowShell.hasAccess(RoleType.CREATE, OpsType.APP_REGISTRY);
+	}
+
+	@CliAvailabilityIndicator({ UNREGISTER_APPLICATION })
+	public boolean availableWithDestroyRole() {
+		return dataFlowShell.hasAccess(RoleType.DESTROY, OpsType.APP_REGISTRY);
+	}
+
+	@CliAvailabilityIndicator({ DEFAULT_APPLICATION })
+	public boolean availableWithModifyRole() {
+		return dataFlowShell.hasAccess(RoleType.MODIFY, OpsType.APP_REGISTRY);
+	}
+
+	@CliAvailabilityIndicator({ APPLICATION_INFO, LIST_APPLICATIONS })
+	public boolean availableWithViewRole() {
+		return dataFlowShell.hasAccess(RoleType.VIEW, OpsType.APP_REGISTRY);
 	}
 
 	@CliCommand(value = APPLICATION_INFO, help = "Get information about an application")

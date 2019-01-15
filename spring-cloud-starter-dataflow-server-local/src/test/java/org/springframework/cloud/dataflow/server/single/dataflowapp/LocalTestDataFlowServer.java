@@ -46,8 +46,13 @@ import org.springframework.cloud.deployer.spi.local.LocalDeployerAutoConfigurati
 })
 @EnableDataFlowServer
 public class LocalTestDataFlowServer {
-
 	public static void main(String[] args) {
-		SpringApplication.run(LocalTestDataFlowServer.class, args);
+		SpringApplication.run(LocalTestDataFlowServer.class, new String[] {
+				"--spring.cloud.kubernetes.enabled=false",
+				"--security.oauth2.client.client-id=myclient",
+				"--security.oauth2.client.client-secret=mysecret",
+				"--security.oauth2.client.access-token-uri=http://127.0.0.1:9999/oauth/token",
+				"--security.oauth2.client.user-authorization-uri=http://127.0.0.1:9999/oauth/authorize",
+				"--security.oauth2.resource.user-info-uri=http://127.0.0.1:9999/me"});
 	}
 }

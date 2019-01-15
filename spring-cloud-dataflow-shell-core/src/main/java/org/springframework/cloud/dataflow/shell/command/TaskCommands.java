@@ -61,35 +61,33 @@ import org.springframework.util.StringUtils;
 @Component
 public class TaskCommands implements CommandMarker {
 
-	private static final String LIST = "task list";
+	private static final String PROPERTIES_OPTION = "properties";
+	private static final String PROPERTIES_FILE_OPTION = "propertiesFile";
+	private static final String ARGUMENTS_OPTION = "arguments";
+	private static final String PLATFORM_OPTION = "platformName";
 
-	private static final String PLATFORM_LIST = "task platform-list";
+	// Create Role
 
 	private static final String CREATE = "task create";
 
+	// Deploy Role
+
 	private static final String LAUNCH = "task launch";
 
+	// Destroy Role
+
 	private static final String DESTROY = "task destroy";
-
 	private static final String DESTROY_TASK_ALL = "task all destroy";
-
-	private static final String VALIDATE = "task validate";
-
-	private static final String TASK_EXECUTION_STATUS = "task execution status";
-
-	private static final String TASK_EXECUTION_CURRENT = "task execution current";
-
 	private static final String TASK_EXECUTION_CLEANUP = "task execution cleanup";
 
-	private static final String PROPERTIES_OPTION = "properties";
-
-	private static final String PROPERTIES_FILE_OPTION = "propertiesFile";
-
-	private static final String ARGUMENTS_OPTION = "arguments";
+	// View Role
 
 	private static final String EXECUTION_LIST = "task execution list";
-
-	private static final String PLATFORM_OPTION = "platformName";
+	private static final String LIST = "task list";
+	private static final String PLATFORM_LIST = "task platform-list";
+	private static final String TASK_EXECUTION_CURRENT = "task execution current";
+	private static final String TASK_EXECUTION_STATUS = "task execution status";
+	private static final String VALIDATE = "task validate";
 
 	@Autowired
 	protected UserInput userInput;
@@ -97,14 +95,24 @@ public class TaskCommands implements CommandMarker {
 	@Autowired
 	private DataFlowShell dataFlowShell;
 
-	@CliAvailabilityIndicator({ LIST, PLATFORM_LIST, TASK_EXECUTION_STATUS, EXECUTION_LIST })
-	public boolean availableWithViewRole() {
-		return dataFlowShell.hasAccess(RoleType.VIEW, OpsType.TASK);
-	}
-
-	@CliAvailabilityIndicator({ CREATE, LAUNCH, TASK_EXECUTION_CLEANUP, DESTROY, DESTROY_TASK_ALL, VALIDATE })
+	@CliAvailabilityIndicator({ CREATE })
 	public boolean availableWithCreateRole() {
 		return dataFlowShell.hasAccess(RoleType.CREATE, OpsType.TASK);
+	}
+
+	@CliAvailabilityIndicator({ LAUNCH })
+	public boolean availableWithDeployRole() {
+		return dataFlowShell.hasAccess(RoleType.DEPLOY, OpsType.TASK);
+	}
+
+	@CliAvailabilityIndicator({ DESTROY, DESTROY_TASK_ALL, TASK_EXECUTION_CLEANUP })
+	public boolean availableWithDestroyRole() {
+		return dataFlowShell.hasAccess(RoleType.DESTROY, OpsType.TASK);
+	}
+
+	@CliAvailabilityIndicator({ EXECUTION_LIST, LIST, PLATFORM_LIST, TASK_EXECUTION_CURRENT, TASK_EXECUTION_STATUS, VALIDATE })
+	public boolean availableWithViewRole() {
+		return dataFlowShell.hasAccess(RoleType.VIEW, OpsType.TASK);
 	}
 
 	@CliCommand(value = LIST, help = "List created tasks")
