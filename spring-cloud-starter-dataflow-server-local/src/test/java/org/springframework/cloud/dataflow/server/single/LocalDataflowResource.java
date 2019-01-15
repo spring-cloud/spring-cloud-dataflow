@@ -1,5 +1,5 @@
 /*
- * Copyright 2016-2018 the original author or authors.
+ * Copyright 2016-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,12 +28,18 @@ import org.springframework.analytics.metrics.FieldValueCounterRepository;
 import org.springframework.analytics.metrics.memory.InMemoryAggregateCounterRepository;
 import org.springframework.analytics.metrics.memory.InMemoryFieldValueCounterRepository;
 import org.springframework.boot.SpringApplication;
+import org.springframework.boot.actuate.autoconfigure.security.servlet.ManagementWebSecurityAutoConfiguration;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
+import org.springframework.boot.autoconfigure.security.servlet.UserDetailsServiceAutoConfiguration;
+import org.springframework.boot.autoconfigure.session.SessionAutoConfiguration;
 import org.springframework.cloud.dataflow.core.Launcher;
 import org.springframework.cloud.dataflow.server.EnableDataFlowServer;
 import org.springframework.cloud.dataflow.server.config.features.FeaturesProperties;
 import org.springframework.cloud.dataflow.server.job.LauncherRepository;
+import org.springframework.cloud.deployer.spi.cloudfoundry.CloudFoundryDeployerAutoConfiguration;
+import org.springframework.cloud.deployer.spi.kubernetes.KubernetesAutoConfiguration;
+import org.springframework.cloud.deployer.spi.local.LocalDeployerAutoConfiguration;
 import org.springframework.cloud.deployer.spi.local.LocalDeployerProperties;
 import org.springframework.cloud.deployer.spi.local.LocalTaskLauncher;
 import org.springframework.cloud.scheduler.spi.core.ScheduleInfo;
@@ -46,6 +52,8 @@ import org.springframework.cloud.skipper.domain.VersionInfo;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.hateoas.Resources;
 import org.springframework.test.web.servlet.MockMvc;
@@ -134,15 +142,21 @@ public class LocalDataflowResource extends ExternalResource {
 
 	@Override
 	protected void before() {
-		originalConfigLocation = System.getProperty("spring.config.location");
+		originalConfigLocation = System.getProperty("spring.config.additional-locationn");
 
 		if (!StringUtils.isEmpty(configurationLocation)) {
-			System.setProperty("spring.config.location", configurationLocation);
+			final Resource resource = new PathMatchingResourcePatternResolver().getResource(configurationLocation);
+			if (!resource.exists()) {
+			  throw new IllegalArgumentException(String.format("Resource 'configurationLocation' ('%s') does not exist.", configurationLocation));
+			}
+			System.setProperty("spring.config.additional-location", configurationLocation);
 		}
 
 		app = new SpringApplication(TestConfig.class);
 
-		configurableApplicationContext = (WebApplicationContext) app.run(new String[] { "--server.port=0",
+		configurableApplicationContext = (WebApplicationContext) app.run(new String[] {
+				"--spring.cloud.kubernetes.enabled=false",
+				"--server.port=0",
 				"--" + FeaturesProperties.FEATURES_PREFIX + "." + FeaturesProperties.STREAMS_ENABLED + "="
 						+ this.streamsEnabled,
 				"--" + FeaturesProperties.FEATURES_PREFIX + "." + FeaturesProperties.TASKS_ENABLED + "="
@@ -170,10 +184,10 @@ public class LocalDataflowResource extends ExternalResource {
 
 	private void resetConfigLocation() {
 		if (originalConfigLocation != null) {
-			System.setProperty("spring.config.location", originalConfigLocation);
+			System.setProperty("spring.config.additional-location", originalConfigLocation);
 		}
 		else {
-			System.clearProperty("spring.config.location");
+			System.clearProperty("spring.config.additional-location");
 		}
 	}
 
@@ -199,7 +213,17 @@ public class LocalDataflowResource extends ExternalResource {
 		when(this.skipperClient.listDeployers()).thenReturn(new Resources<>(new ArrayList<>(), new ArrayList<>()));
 	}
 
-	@EnableAutoConfiguration(excludeName = "org.springframework.cloud.dataflow.rest.client.config.DataFlowClientAutoConfiguration")
+	@EnableAutoConfiguration(
+		exclude = {
+				SessionAutoConfiguration.class,
+				ManagementWebSecurityAutoConfiguration.class,
+				//SecurityAutoConfiguration.class,
+				UserDetailsServiceAutoConfiguration.class,
+				LocalDeployerAutoConfiguration.class,
+				CloudFoundryDeployerAutoConfiguration.class,
+				KubernetesAutoConfiguration.class
+		},
+		excludeName = "org.springframework.cloud.dataflow.rest.client.config.DataFlowClientAutoConfiguration")
 	@EnableDataFlowServer
 	@Configuration
 	public static class TestConfig {

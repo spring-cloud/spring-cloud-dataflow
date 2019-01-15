@@ -4,6 +4,20 @@ management:
       base-path: /management
       exposure:
         include: "*"
+spring:
+  cloud:
+    dataflow:
+      security:
+        authorization:
+          map-oauth-scopes: true
+          role-mappings:
+            ROLE_VIEW: dataflow.view
+            ROLE_CREATE: dataflow.create
+            ROLE_MANAGE: dataflow.manage
+            ROLE_DEPLOY: dataflow.create
+            ROLE_DESTROY: dataflow.create
+            ROLE_MODIFY: dataflow.create
+            ROLE_SCHEDULE: dataflow.create
 security:
   oauth2:
     client:

@@ -24,7 +24,11 @@ public enum RoleType {
 
 	VIEW("ROLE_VIEW", "view role"),
 	CREATE("ROLE_CREATE", "role for create operations"),
-	MANAGE("ROLE_MANAGE", "role for the boot management endpoints");
+	MANAGE("ROLE_MANAGE", "role for the boot management endpoints"),
+	MODIFY("ROLE_MODIFY", "role for modify operations"),
+	DEPLOY("DEPLOY", "role for deploy operations"),
+	DESTROY("DESTROY", "role for destroy operations"),
+	SCHEDULE("SCHEDULE", "role for scheduling operations");
 
 	private String key;
 

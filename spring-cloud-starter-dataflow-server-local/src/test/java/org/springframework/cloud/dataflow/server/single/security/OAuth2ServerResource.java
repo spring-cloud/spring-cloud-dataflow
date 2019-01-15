@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 the original author or authors.
+ * Copyright 2017-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,6 +23,8 @@ import org.junit.rules.ExternalResource;
 import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.cloud.dataflow.server.single.security.support.OAuth2TestServer;
 import org.springframework.context.ConfigurableApplicationContext;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import org.springframework.util.SocketUtils;
 
 /**
@@ -57,9 +59,18 @@ public class OAuth2ServerResource extends ExternalResource {
 
 		System.setProperty(OAUTH2_PORT_PROPERTY, String.valueOf(this.oauth2ServerPort));
 
+		final String configurationLocation =
+			"classpath:/org/springframework/cloud/dataflow/server/single/security/support/oauth2TestServerConfig.yml";
+
+		final Resource resource = new PathMatchingResourcePatternResolver().getResource(configurationLocation);
+		if (!resource.exists()) {
+		  throw new IllegalArgumentException(String.format("Resource 'configurationLocation' ('%s') does not exist.", configurationLocation));
+		}
+
 		this.application = new SpringApplicationBuilder(OAuth2TestServer.class).build()
-				.run("--spring.config.location=classpath:/org/springframework/cloud/dataflow/server/local/security"
-						+ "/support/oauth2TestServerConfig.yml");
+				.run("--spring.cloud.common.security.enabled=false",
+					"--spring.cloud.kubernetes.enabled=false",
+					"--spring.config.additional-location=" + configurationLocation);
 	}
 
 	@Override

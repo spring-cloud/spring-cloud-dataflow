@@ -1,3 +1,5 @@
+server:
+  port: ${oauth2.port}
 spring:
   application:
     name: my-app-name
@@ -6,15 +8,27 @@ spring:
   security:
     user:
       password: "{noop}secret10"
-  port: ${oauth2.port}
 security:
   oauth2:
     client:
+      id: local
       client-id: myclient
       client-secret: mysecret
-      scope: access
+      scope: dataflow.view,dataflow.manage,dataflow.create
+      registered-redirect-uri:
+      - http://localhost:9393/login
       auto-approve-scopes: '.*'
-      registered-redirect-uri: "http://localhost:9393/login"
+      authorized-grant-types:
+      - authorization_code
+      - client_credentials
+      - password
     authorization:
       checkTokenAccess: permitAll()
- 
+  authentication:
+    file:
+      enabled: true
+      users:
+        user: "{noop}secret10, ROLE_DATAFLOW.VIEW, ROLE_DATAFLOW.MANAGE, ROLE_DATAFLOW.CREATE"
+        bob: "{noop}bobspassword, ROLE_DATAFLOW.VIEW"
+        alice: "{noop}alicepwd, ROLE_DATAFLOW.MANAGE"
+        cartman: "{noop}cartmanpwd, ROLE_DATAFLOW.CREATE"

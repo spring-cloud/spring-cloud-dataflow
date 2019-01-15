@@ -1,5 +1,5 @@
 /*
- * Copyright 2016-2018 the original author or authors.
+ * Copyright 2016-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,7 +21,6 @@ import java.util.Map;
 
 import org.junit.Before;
 import org.junit.ClassRule;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.rules.RuleChain;
 import org.junit.rules.TestRule;
@@ -34,7 +33,6 @@ import org.slf4j.LoggerFactory;
 
 import org.springframework.cloud.dataflow.server.single.LocalDataflowResource;
 import org.springframework.cloud.dataflow.server.single.TestUtils;
-import org.springframework.data.authentication.UserCredentials;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.test.web.servlet.ResultMatcher;
@@ -57,16 +55,18 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  * @author Ilayaperumal Gopinathan
  */
 @RunWith(Parameterized.class)
-@Ignore
 public class LocalServerSecurityWithUsersFileTests {
 
 	private final static Logger logger = LoggerFactory.getLogger(LocalServerSecurityWithUsersFileTests.class);
 
+	private final static OAuth2ServerResource oAuth2ServerResource = new OAuth2ServerResource();
+
 	private final static LocalDataflowResource localDataflowResource = new LocalDataflowResource(
-			"classpath:org/springframework/cloud/dataflow/server/local/security/fileBasedUsers.yml");
+			"classpath:org/springframework/cloud/dataflow/server/single/security/oauthConfig.yml");
 
 	@ClassRule
-	public static TestRule springDataflowAndLdapServer = RuleChain.outerRule(localDataflowResource);
+	public static TestRule springDataflowAndOAuth2Server = RuleChain.outerRule(oAuth2ServerResource)
+			.around(localDataflowResource);
 
 	private static UserCredentials viewOnlyUser = new UserCredentials("bob", "bobspassword");
 
@@ -177,35 +177,35 @@ public class LocalServerSecurityWithUsersFileTests {
 				/* CompletionController */
 
 				{ HttpMethod.GET, HttpStatus.FORBIDDEN, "/completions/stream", manageOnlyUser, null },
-				{ HttpMethod.GET, HttpStatus.FORBIDDEN, "/completions/stream", viewOnlyUser, null },
-				{ HttpMethod.GET, HttpStatus.BAD_REQUEST, "/completions/stream", createOnlyUser, null },
-				{ HttpMethod.GET, HttpStatus.OK, "/completions/stream", createOnlyUser, TestUtils.toImmutableMap("start", "2") },
+				{ HttpMethod.GET, HttpStatus.FORBIDDEN, "/completions/stream", createOnlyUser, null },
+				{ HttpMethod.GET, HttpStatus.BAD_REQUEST, "/completions/stream", viewOnlyUser, null },
+				{ HttpMethod.GET, HttpStatus.OK, "/completions/stream", viewOnlyUser, TestUtils.toImmutableMap("start", "2") },
 				{ HttpMethod.GET, HttpStatus.UNAUTHORIZED, "/completions/stream", null, null },
 
 				{ HttpMethod.GET, HttpStatus.FORBIDDEN, "/completions/task", manageOnlyUser, null },
-				{ HttpMethod.GET, HttpStatus.FORBIDDEN, "/completions/task", viewOnlyUser, null },
-				{ HttpMethod.GET, HttpStatus.BAD_REQUEST, "/completions/task", createOnlyUser, null },
-				{ HttpMethod.GET, HttpStatus.OK, "/completions/task", createOnlyUser, TestUtils.toImmutableMap("start", "2") },
+				{ HttpMethod.GET, HttpStatus.FORBIDDEN, "/completions/task", createOnlyUser, null },
+				{ HttpMethod.GET, HttpStatus.BAD_REQUEST, "/completions/task", viewOnlyUser, null },
+				{ HttpMethod.GET, HttpStatus.OK, "/completions/task", viewOnlyUser, TestUtils.toImmutableMap("start", "2") },
 				{ HttpMethod.GET, HttpStatus.UNAUTHORIZED, "/completions/task", null, null },
 
 				{ HttpMethod.GET, HttpStatus.FORBIDDEN, "/completions/stream", manageOnlyUser,
-						TestUtils.toImmutableMap("detailLevel", "2") },
-				{ HttpMethod.GET, HttpStatus.FORBIDDEN, "/completions/stream", viewOnlyUser,
-						TestUtils.toImmutableMap("detailLevel", "2") },
-				{ HttpMethod.GET, HttpStatus.OK, "/completions/stream", createOnlyUser,
+						TestUtils.toImmutableMap("detailLevel", "2","start", "0") },
+				{ HttpMethod.GET, HttpStatus.FORBIDDEN, "/completions/stream", createOnlyUser,
+						TestUtils.toImmutableMap("detailLevel", "2","start", "0") },
+				{ HttpMethod.GET, HttpStatus.OK, "/completions/stream", viewOnlyUser,
 						TestUtils.toImmutableMap("start", "2", "detailLevel", "2") },
-				{ HttpMethod.GET, HttpStatus.BAD_REQUEST, "/completions/stream", createOnlyUser,
+				{ HttpMethod.GET, HttpStatus.BAD_REQUEST, "/completions/stream", viewOnlyUser,
 						TestUtils.toImmutableMap("start", "2", "detailLevel", "-123") },
 				{ HttpMethod.GET, HttpStatus.UNAUTHORIZED, "/completions/stream", null,
 						TestUtils.toImmutableMap("detailLevel", "2") },
 
 				{ HttpMethod.GET, HttpStatus.FORBIDDEN, "/completions/task", manageOnlyUser,
 						TestUtils.toImmutableMap("detailLevel", "2") },
-				{ HttpMethod.GET, HttpStatus.FORBIDDEN, "/completions/task", viewOnlyUser,
+				{ HttpMethod.GET, HttpStatus.FORBIDDEN, "/completions/task", createOnlyUser,
 						TestUtils.toImmutableMap("detailLevel", "2") },
-				{ HttpMethod.GET, HttpStatus.OK, "/completions/task", createOnlyUser,
+				{ HttpMethod.GET, HttpStatus.OK, "/completions/task", viewOnlyUser,
 						TestUtils.toImmutableMap("start", "2", "detailLevel", "2") },
-				{ HttpMethod.GET, HttpStatus.BAD_REQUEST, "/completions/task", createOnlyUser,
+				{ HttpMethod.GET, HttpStatus.BAD_REQUEST, "/completions/task", viewOnlyUser,
 						TestUtils.toImmutableMap("start", "2", "detailLevel", "-123") },
 				{ HttpMethod.GET, HttpStatus.UNAUTHORIZED, "/completions/task", null,
 						TestUtils.toImmutableMap("detailLevel", "2") },
@@ -213,23 +213,23 @@ public class LocalServerSecurityWithUsersFileTests {
 				/* ToolsController */
 
 				{ HttpMethod.GET, HttpStatus.FORBIDDEN, "/tools/parseTaskTextToGraph", manageOnlyUser, null },
-				{ HttpMethod.GET, HttpStatus.FORBIDDEN, "/tools/parseTaskTextToGraph", viewOnlyUser, null },
+				{ HttpMethod.GET, HttpStatus.FORBIDDEN, "/tools/parseTaskTextToGraph", createOnlyUser, null },
 				{ HttpMethod.GET, HttpStatus.UNAUTHORIZED, "/tools/parseTaskTextToGraph", null, null },
 
 				{ HttpMethod.GET, HttpStatus.FORBIDDEN, "/tools/convertTaskGraphToText", manageOnlyUser, null },
-				{ HttpMethod.GET, HttpStatus.FORBIDDEN, "/tools/convertTaskGraphToText", viewOnlyUser, null },
+				{ HttpMethod.GET, HttpStatus.FORBIDDEN, "/tools/convertTaskGraphToText", createOnlyUser, null },
 				{ HttpMethod.GET, HttpStatus.UNAUTHORIZED, "/tools/convertTaskGraphToText", null, null },
 
 				{ HttpMethod.GET, HttpStatus.FORBIDDEN, "/tools/parseTaskTextToGraph", manageOnlyUser,
 						TestUtils.toImmutableMap("definition", "fooApp") },
-				{ HttpMethod.GET, HttpStatus.FORBIDDEN, "/tools/parseTaskTextToGraph", viewOnlyUser,
+				{ HttpMethod.GET, HttpStatus.FORBIDDEN, "/tools/parseTaskTextToGraph", createOnlyUser,
 						TestUtils.toImmutableMap("definition", "fooApp") },
 				{ HttpMethod.GET, HttpStatus.UNAUTHORIZED, "/tools/parseTaskTextToGraph", null,
 						TestUtils.toImmutableMap("definition", "fooApp") },
 
 				{ HttpMethod.GET, HttpStatus.FORBIDDEN, "/tools/convertTaskGraphToText", manageOnlyUser,
 						TestUtils.toImmutableMap("detailLevel", "2") },
-				{ HttpMethod.GET, HttpStatus.FORBIDDEN, "/tools/convertTaskGraphToText", viewOnlyUser,
+				{ HttpMethod.GET, HttpStatus.FORBIDDEN, "/tools/convertTaskGraphToText", createOnlyUser,
 						TestUtils.toImmutableMap("detailLevel", "2") },
 				{ HttpMethod.GET, HttpStatus.UNAUTHORIZED, "/tools/convertTaskGraphToText", null,
 						TestUtils.toImmutableMap("detailLevel", "2") },
@@ -547,7 +547,9 @@ public class LocalServerSecurityWithUsersFileTests {
 				{ HttpMethod.GET, HttpStatus.FOUND, "/dashboard", manageOnlyUser, null },
 				{ HttpMethod.GET, HttpStatus.FOUND, "/dashboard", viewOnlyUser, null },
 				{ HttpMethod.GET, HttpStatus.FOUND, "/dashboard", createOnlyUser, null },
-				{ HttpMethod.GET, HttpStatus.FOUND, "/dashboard", null, null },
+
+				// FIXME
+				// { HttpMethod.GET, HttpStatus.FOUND, "/dashboard", null, null },
 
 				{ HttpMethod.GET, HttpStatus.FORBIDDEN, "/about", manageOnlyUser, null },
 
@@ -580,19 +582,14 @@ public class LocalServerSecurityWithUsersFileTests {
 				// { HttpMethod.GET, HttpStatus.UNAUTHORIZED, "/metrics/counters", null,
 				// null },
 
-				/* LoginController */
-
-				{ HttpMethod.POST, HttpStatus.BAD_REQUEST, "/authenticate", manageOnlyUser, null },
-				{ HttpMethod.POST, HttpStatus.BAD_REQUEST, "/authenticate", viewOnlyUser, null },
-				{ HttpMethod.POST, HttpStatus.BAD_REQUEST, "/authenticate", createOnlyUser, null },
-				{ HttpMethod.POST, HttpStatus.BAD_REQUEST, "/authenticate", null, null },
 
 				/* SecurityController */
 
 				{ HttpMethod.GET, HttpStatus.OK, "/security/info", manageOnlyUser, null },
 				{ HttpMethod.GET, HttpStatus.OK, "/security/info", viewOnlyUser, null },
 				{ HttpMethod.GET, HttpStatus.OK, "/security/info", createOnlyUser, null },
-				{ HttpMethod.GET, HttpStatus.OK, "/security/info", null, null } });
+				{ HttpMethod.GET, HttpStatus.OK, "/security/info", null, null }
+		});
 	}
 
 	@Test
@@ -671,6 +668,25 @@ public class LocalServerSecurityWithUsersFileTests {
 					"Assertion failed for parameters - httpMethod: %s, "
 							+ "URL: %s, URL parameters: %s, user credentials: %s",
 					this.httpMethod, this.url, this.urlParameters, this.userCredentials), e);
+		}
+	}
+
+	private static class UserCredentials {
+		final String username;
+		final String password;
+
+		public UserCredentials(String username, String password) {
+			super();
+			this.username = username;
+			this.password = password;
+		}
+
+		public String getUsername() {
+			return username;
+		}
+
+		public String getPassword() {
+			return password;
 		}
 	}
 }

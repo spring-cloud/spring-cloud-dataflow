@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 the original author or authors.
+ * Copyright 2018-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -70,27 +70,38 @@ public class StreamCommands implements CommandMarker {
 
 	protected static final String PROPERTIES_OPTION = "properties";
 	protected static final String PROPERTIES_FILE_OPTION = "propertiesFile";
-	protected static final String VALIDATE_STREAM = "stream validate";
-	private static final String STREAM_SKIPPER_DEPLOY = "stream deploy";
 
-	private static final String STREAM_SKIPPER_UPDATE = "stream update";
-
-	private static final String STREAM_SKIPPER_ROLLBACK = "stream rollback";
-
-	private static final String STREAM_SKIPPER_MANIFEST_GET = "stream manifest";
-
-	private static final String STREAM_SKIPPER_HISTORY = "stream history";
-
-	private static final String STREAM_SKIPPER_PLATFORM_LIST = "stream platform-list";
-	private static final String CREATE_STREAM = "stream create";
-	private static final String INFO_STREAM = "stream info";
-	private static final String LIST_STREAM = "stream list";
-	private static final String UNDEPLOY_STREAM = "stream undeploy";
-	private static final String UNDEPLOY_STREAM_ALL = "stream all undeploy";
-	private static final String DESTROY_STREAM = "stream destroy";
-	private static final String DESTROY_STREAM_ALL = "stream all destroy";
 	protected DataFlowShell dataFlowShell;
 	protected UserInput userInput;
+
+	// Create Role
+
+	private static final String CREATE_STREAM = "stream create";
+
+	// Deploy Role
+
+	private static final String STREAM_DEPLOY = "stream deploy";
+	private static final String UNDEPLOY_STREAM = "stream undeploy";
+	private static final String UNDEPLOY_STREAM_ALL = "stream all undeploy";
+
+	// Destroy Role
+
+	private static final String DESTROY_STREAM = "stream destroy";
+	private static final String DESTROY_STREAM_ALL = "stream all destroy";
+
+	// Modify Role
+
+	private static final String STREAM_ROLLBACK = "stream rollback";
+	private static final String STREAM_UPDATE = "stream update";
+
+	// View Role
+
+	private static final String INFO_STREAM = "stream info";
+	private static final String LIST_STREAM = "stream list";
+	private static final String STREAM_HISTORY = "stream history";
+	private static final String STREAM_MANIFEST_GET = "stream manifest";
+	private static final String STREAM_PLATFORM_LIST = "stream platform-list";
+	private static final String VALIDATE_STREAM = "stream validate";
 
 	@Autowired
 	public void setDataFlowShell(DataFlowShell dataFlowShell) {
@@ -102,12 +113,32 @@ public class StreamCommands implements CommandMarker {
 		this.userInput = userInput;
 	}
 
-	@CliAvailabilityIndicator({ STREAM_SKIPPER_DEPLOY, STREAM_SKIPPER_UPDATE })
+	@CliAvailabilityIndicator({ CREATE_STREAM })
 	public boolean availableWithCreateRole() {
 		return dataFlowShell.hasAccess(RoleType.CREATE, OpsType.STREAM);
 	}
 
-	@CliCommand(value = STREAM_SKIPPER_DEPLOY, help = "Deploy a previously created stream using Skipper")
+	@CliAvailabilityIndicator({ STREAM_DEPLOY, UNDEPLOY_STREAM, UNDEPLOY_STREAM_ALL })
+	public boolean availableWithDeployRole() {
+		return dataFlowShell.hasAccess(RoleType.DEPLOY, OpsType.STREAM);
+	}
+
+	@CliAvailabilityIndicator({ DESTROY_STREAM, DESTROY_STREAM_ALL })
+	public boolean availableWithDestroyRole() {
+		return dataFlowShell.hasAccess(RoleType.DESTROY, OpsType.STREAM);
+	}
+
+	@CliAvailabilityIndicator({ STREAM_ROLLBACK, STREAM_UPDATE })
+	public boolean availableWithModifyRole() {
+		return dataFlowShell.hasAccess(RoleType.MODIFY, OpsType.STREAM);
+	}
+
+	@CliAvailabilityIndicator({ INFO_STREAM, LIST_STREAM, STREAM_HISTORY, STREAM_MANIFEST_GET, STREAM_PLATFORM_LIST, VALIDATE_STREAM })
+	public boolean availableWithViewRole() {
+		return dataFlowShell.hasAccess(RoleType.VIEW, OpsType.STREAM);
+	}
+
+	@CliCommand(value = STREAM_DEPLOY, help = "Deploy a previously created stream using Skipper")
 	public String deployStream(
 			@CliOption(key = { "",
 					"name" }, help = "the name of the stream to deploy", mandatory = true, optionContext = "existing-stream disable-string-converter") String name,
@@ -115,18 +146,16 @@ public class StreamCommands implements CommandMarker {
 					PROPERTIES_OPTION }, help = "the properties for this deployment") String deploymentProperties,
 			@CliOption(key = {
 					PROPERTIES_FILE_OPTION }, help = "the properties for this deployment (as a File)") File propertiesFile,
-			@CliOption(key = "packageVersion", help = "the package version of the package to deploy.  Default is 1.0.0"
-					+ "when using Skipper", unspecifiedDefaultValue = "1.0.0") String packageVersion,
-			@CliOption(key = "platformName", help = "the name of the target platform to deploy when using Skipper") String platformName,
-			@CliOption(key = "repoName", help = "the name of the local repository to upload the package when using "
-					+ "Skipper") String repoName)
+			@CliOption(key = "packageVersion", help = "the package version of the package to deploy.  Default is 1.0.0", unspecifiedDefaultValue = "1.0.0") String packageVersion,
+			@CliOption(key = "platformName", help = "the name of the target platform to deploy to") String platformName,
+			@CliOption(key = "repoName", help = "the name of the local repository to upload the package to") String repoName)
 			throws IOException {
 		int which = Assertions.atMostOneOf(PROPERTIES_OPTION, deploymentProperties, PROPERTIES_FILE_OPTION,
 				propertiesFile);
 		Map<String, String> propertiesToUse = DeploymentPropertiesUtils.parseDeploymentProperties(deploymentProperties,
 				propertiesFile, which);
 		propertiesToUse.put(SkipperStream.SKIPPER_PACKAGE_NAME, name);
-		Assert.isTrue(StringUtils.hasText(packageVersion), "Package version must be set when using Skipper.");
+		Assert.isTrue(StringUtils.hasText(packageVersion), "Package version must be set.");
 		propertiesToUse.put(SkipperStream.SKIPPER_PACKAGE_VERSION, packageVersion);
 		if (StringUtils.hasText(platformName)) {
 			propertiesToUse.put(SkipperStream.SKIPPER_PLATFORM_NAME, platformName);
@@ -138,7 +167,7 @@ public class StreamCommands implements CommandMarker {
 		return String.format("Deployment request has been sent for stream '%s'", name);
 	}
 
-	@CliCommand(value = STREAM_SKIPPER_MANIFEST_GET, help = "Get manifest for the stream deployed using Skipper")
+	@CliCommand(value = STREAM_MANIFEST_GET, help = "Get manifest for the stream deployed using Skipper")
 	public String getManifest(
 			@CliOption(key = { "",
 					"name" }, help = "the name of the stream", mandatory = true, optionContext = "existing-stream "
@@ -148,7 +177,7 @@ public class StreamCommands implements CommandMarker {
 		return streamOperations().getManifest(name, releaseVersion);
 	}
 
-	@CliCommand(value = STREAM_SKIPPER_HISTORY, help = "Get history for the stream deployed using Skipper")
+	@CliCommand(value = STREAM_HISTORY, help = "Get history for the stream deployed using Skipper")
 	public Table history(
 			@CliOption(key = { "",
 					"name" }, help = "the name of the stream", mandatory = true, optionContext = "existing-stream "
@@ -167,7 +196,7 @@ public class StreamCommands implements CommandMarker {
 		return tableBuilder.build();
 	}
 
-	@CliCommand(value = STREAM_SKIPPER_PLATFORM_LIST, help = "List Skipper platforms")
+	@CliCommand(value = STREAM_PLATFORM_LIST, help = "List Skipper platforms")
 	public Table listPlatforms() {
 		Collection<Deployer> platforms = streamOperations().listPlatforms();
 		LinkedHashMap<String, Object> headers = new LinkedHashMap<>();
@@ -178,7 +207,7 @@ public class StreamCommands implements CommandMarker {
 		return DataFlowTables.applyStyle(new TableBuilder(model)).build();
 	}
 
-	@CliCommand(value = STREAM_SKIPPER_UPDATE, help = "Update a previously created stream using Skipper")
+	@CliCommand(value = STREAM_UPDATE, help = "Update a previously created stream using Skipper")
 	public String updateStream(
 			@CliOption(key = { "",
 					"name" }, help = "the name of the stream to update", mandatory = true, optionContext = "existing-stream disable-string-converter") String name,
@@ -214,7 +243,7 @@ public class StreamCommands implements CommandMarker {
 		return String.format("Update request has been sent for the stream '%s'", name);
 	}
 
-	@CliCommand(value = STREAM_SKIPPER_ROLLBACK, help = "Rollback a stream using Skipper")
+	@CliCommand(value = STREAM_ROLLBACK, help = "Rollback a stream using Skipper")
 	public String rollbackStreamUsingSkipper(
 			@CliOption(key = { "", "name" }, help = "the name of the stream to rollback", mandatory = true,
 					optionContext = "existing-stream disable-string-converter") String name,
@@ -222,11 +251,6 @@ public class StreamCommands implements CommandMarker {
 					unspecifiedDefaultValue = "0") int releaseVersion) {
 		this.streamOperations().rollbackStream(name, releaseVersion);
 		return String.format("Rollback request has been sent for the stream '%s'", name);
-	}
-
-	@CliAvailabilityIndicator({ LIST_STREAM, INFO_STREAM })
-	public boolean availableWithViewRole() {
-		return dataFlowShell.hasAccess(RoleType.VIEW, OpsType.STREAM);
 	}
 
 	@CliCommand(value = CREATE_STREAM, help = "Create a new stream definition")

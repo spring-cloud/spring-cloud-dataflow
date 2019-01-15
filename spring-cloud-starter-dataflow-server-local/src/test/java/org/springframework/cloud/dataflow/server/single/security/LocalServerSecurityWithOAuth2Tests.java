@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2018 the original author or authors.
+ * Copyright 2017-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,6 @@
 package org.springframework.cloud.dataflow.server.single.security;
 
 import org.junit.ClassRule;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.rules.RuleChain;
 import org.junit.rules.TestRule;
@@ -27,7 +26,6 @@ import org.springframework.security.oauth2.client.OAuth2RestTemplate;
 import org.springframework.security.oauth2.client.token.grant.client.ClientCredentialsResourceDetails;
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
 
-import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.springframework.cloud.dataflow.server.single.security.SecurityTestUtils.basicAuthorizationHeader;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -38,16 +36,15 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 /**
  * @author Gunnar Hillert
  */
-@Ignore
 public class LocalServerSecurityWithOAuth2Tests {
 
 	private final static OAuth2ServerResource oAuth2ServerResource = new OAuth2ServerResource();
 
 	private final static LocalDataflowResource localDataflowResource = new LocalDataflowResource(
-			"classpath:org/springframework/cloud/dataflow/server/local/security/oauthConfig" + ".yml");
+			"classpath:org/springframework/cloud/dataflow/server/single/security/oauthConfig.yml");
 
 	@ClassRule
-	public static TestRule springDataflowAndLdapServer = RuleChain.outerRule(oAuth2ServerResource)
+	public static TestRule springDataflowAndOAuth2Server = RuleChain.outerRule(oAuth2ServerResource)
 			.around(localDataflowResource);
 
 	@Test
@@ -73,9 +70,9 @@ public class LocalServerSecurityWithOAuth2Tests {
 				.andExpect(jsonPath("$._links.streams/deployments.href", is("http://localhost/streams/deployments")))
 				.andExpect(jsonPath("$._links.streams/deployments/deployment.href", is("http://localhost/streams/deployments/{name}")))
 				.andExpect(jsonPath("$._links.runtime/apps.href", is("http://localhost/runtime/apps")))
-				.andExpect(jsonPath("$._links.runtime/apps/app.href", is("http://localhost/runtime/apps/{appId}")))
+				.andExpect(jsonPath("$._links.runtime/apps/app/{id}.href", is("http://localhost/runtime/apps/{id}")))
 				.andExpect(jsonPath("$._links.runtime/apps/instances.href", is("http://localhost/runtime/apps/{appId}/instances")))
-				.andExpect(jsonPath("$._links.runtime/streams.href", is("http://localhost/runtime/streams")))
+				.andExpect(jsonPath("$._links.runtime/streams.href", is("http://localhost/runtime/streams?names={names}")))
 				.andExpect(jsonPath("$._links.tasks/definitions.href", is("http://localhost/tasks/definitions")))
 				.andExpect(jsonPath("$._links.tasks/definitions/definition.href", is("http://localhost/tasks/definitions/{name}")))
 				.andExpect(jsonPath("$._links.tasks/executions.href", is("http://localhost/tasks/executions")))
@@ -150,28 +147,29 @@ public class LocalServerSecurityWithOAuth2Tests {
 				.andDo(print()).andExpect(status().isOk());
 	}
 
-	@Test
-	public void testAccessSecurityInfoUrlWithOAuth2AccessToken() throws Exception {
-
-		final ClientCredentialsResourceDetails resourceDetails = new ClientCredentialsResourceDetails();
-		resourceDetails.setClientId("myclient");
-		resourceDetails.setClientSecret("mysecret");
-		resourceDetails.setGrantType("client_credentials");
-		resourceDetails
-				.setAccessTokenUri("http://localhost:" + oAuth2ServerResource.getOauth2ServerPort() + "/oauth/token");
-
-		final OAuth2RestTemplate oAuth2RestTemplate = new OAuth2RestTemplate(resourceDetails);
-		final OAuth2AccessToken accessToken = oAuth2RestTemplate.getAccessToken();
-
-		final String accessTokenAsString = accessToken.getValue();
-
-		localDataflowResource.getMockMvc()
-				.perform(get("/security/info").header("Authorization", "bearer " + accessTokenAsString)).andDo(print())
-				.andExpect(status().isOk())
-				.andExpect(jsonPath("$.authenticated", is(Boolean.TRUE)))
-				.andExpect(jsonPath("$.authenticationEnabled", is(Boolean.TRUE)))
-				.andExpect(jsonPath("$.roles", hasSize(3)));
-	}
+	// FIXME - https://github.com/spring-cloud/spring-cloud-common-security-config/issues/33
+	//	@Test
+	//	public void testAccessSecurityInfoUrlWithOAuth2AccessToken() throws Exception {
+	//
+	//		final ClientCredentialsResourceDetails resourceDetails = new ClientCredentialsResourceDetails();
+	//		resourceDetails.setClientId("myclient");
+	//		resourceDetails.setClientSecret("mysecret");
+	//		resourceDetails.setGrantType("client_credentials");
+	//		resourceDetails
+	//				.setAccessTokenUri("http://localhost:" + oAuth2ServerResource.getOauth2ServerPort() + "/oauth/token");
+	//
+	//		final OAuth2RestTemplate oAuth2RestTemplate = new OAuth2RestTemplate(resourceDetails);
+	//		final OAuth2AccessToken accessToken = oAuth2RestTemplate.getAccessToken();
+	//
+	//		final String accessTokenAsString = accessToken.getValue();
+	//
+	//		localDataflowResource.getMockMvc()
+	//				.perform(get("/security/info").header("Authorization", "bearer " + accessTokenAsString)).andDo(print())
+	//				.andExpect(status().isOk())
+	//				.andExpect(jsonPath("$.authenticated", is(Boolean.TRUE)))
+	//				.andExpect(jsonPath("$.authenticationEnabled", is(Boolean.TRUE)))
+	//				.andExpect(jsonPath("$.roles", hasSize(7)));
+	//	}
 
 	@Test
 	public void testAccessRootUrlWithWrongOAuth2AccessToken() throws Exception {

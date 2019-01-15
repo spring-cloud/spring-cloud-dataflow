@@ -73,8 +73,8 @@ public class AggregateCounterCommands extends AbstractMetricsCommands implements
 	}
 
 	@CliAvailabilityIndicator({ DELETE_AGGR_COUNTER })
-	public boolean availableWithCreateRole() {
-		return dataFlowShell.hasAccess(RoleType.CREATE, OpsType.AGGREGATE_COUNTER);
+	public boolean availableWithDestoyRole() {
+		return dataFlowShell.hasAccess(RoleType.DESTROY, OpsType.AGGREGATE_COUNTER);
 	}
 
 	@CliCommand(value = DISPLAY_AGGR_COUNTER, help = "Display aggregate counter values by chosen interval and "

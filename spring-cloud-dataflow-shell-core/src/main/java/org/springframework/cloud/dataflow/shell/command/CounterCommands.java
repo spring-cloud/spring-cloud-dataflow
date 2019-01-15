@@ -63,8 +63,8 @@ public class CounterCommands extends AbstractMetricsCommands implements CommandM
 	}
 
 	@CliAvailabilityIndicator({ DELETE_COUNTER })
-	public boolean availableWithCreateRole() {
-		return dataFlowShell.hasAccess(RoleType.CREATE, OpsType.COUNTER);
+	public boolean availableWithDestroyRole() {
+		return dataFlowShell.hasAccess(RoleType.DESTROY, OpsType.COUNTER);
 	}
 
 	@CliCommand(value = DISPLAY_COUNTER, help = "Display the value of a counter")
