@@ -27,7 +27,6 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnCloudPlatfo
 import org.springframework.boot.cloud.CloudPlatform;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.cloud.dataflow.server.config.cloudfoundry.DataSourceCloudConfig;
 import org.springframework.cloud.deployer.spi.cloudfoundry.CloudFoundry2630AndLaterTaskLauncher;
 import org.springframework.cloud.deployer.spi.cloudfoundry.CloudFoundryConnectionProperties;
 import org.springframework.cloud.deployer.spi.cloudfoundry.CloudFoundryDeployerAutoConfiguration;
@@ -53,7 +52,7 @@ public abstract class AbstractSchedulerPerPlatformTest {
 
 	@Configuration
 	@EnableAutoConfiguration(exclude = { LocalDataFlowServerAutoConfiguration.class,
-			CloudFoundryDeployerAutoConfiguration.class, DataSourceCloudConfig.class })
+			CloudFoundryDeployerAutoConfiguration.class })
 	public static class AutoConfigurationApplication {
 
 
