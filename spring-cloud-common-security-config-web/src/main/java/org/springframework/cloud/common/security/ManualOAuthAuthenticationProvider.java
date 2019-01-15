@@ -27,6 +27,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.oauth2.client.DefaultOAuth2ClientContext;
+import org.springframework.security.oauth2.client.OAuth2ClientContext;
 import org.springframework.security.oauth2.client.OAuth2RestTemplate;
 import org.springframework.security.oauth2.client.resource.OAuth2AccessDeniedException;
 import org.springframework.security.oauth2.client.token.AccessTokenProvider;
@@ -56,6 +57,12 @@ public class ManualOAuthAuthenticationProvider implements AuthenticationProvider
 
 	@Autowired
 	private UserInfoTokenServices userInfoTokenServices;
+	private final OAuth2ClientContext oauth2ClientContext;
+
+	public ManualOAuthAuthenticationProvider(OAuth2ClientContext oauth2ClientContext) {
+		super();
+		this.oauth2ClientContext = oauth2ClientContext;
+	}
 
 	public AccessTokenProvider userAccessTokenProvider() {
 		ResourceOwnerPasswordAccessTokenProvider accessTokenProvider = new ResourceOwnerPasswordAccessTokenProvider();
@@ -77,8 +84,7 @@ public class ManualOAuthAuthenticationProvider implements AuthenticationProvider
 		resource.setClientSecret(oAuth2ClientProperties.getClientSecret());
 		resource.setGrantType("password");
 
-		final OAuth2RestTemplate template = new OAuth2RestTemplate(resource,
-				new DefaultOAuth2ClientContext(new DefaultAccessTokenRequest()));
+		final OAuth2RestTemplate template = new OAuth2RestTemplate(resource, this.oauth2ClientContext);
 		template.setAccessTokenProvider(userAccessTokenProvider());
 
 		final OAuth2AccessToken accessToken;

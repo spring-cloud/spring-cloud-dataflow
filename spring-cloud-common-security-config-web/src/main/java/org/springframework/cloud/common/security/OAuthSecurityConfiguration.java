@@ -190,7 +190,7 @@ public class OAuthSecurityConfiguration extends WebSecurityConfigurerAdapter {
 
 	@Bean
 	protected AuthenticationProvider authenticationProvider() {
-		return new ManualOAuthAuthenticationProvider();
+		return new ManualOAuthAuthenticationProvider(oauth2ClientContext);
 	}
 
 	@Bean

@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2018 the original author or authors.
+ * Copyright 2017-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -55,14 +55,14 @@ public class DefaultAuthoritiesExtractorTests {
 	}
 
 	@Test
-	public void testThat3AuthoritiesAreReturned() throws Exception {
+	public void testThat7AuthoritiesAreReturned() throws Exception {
 		final DefaultAuthoritiesExtractor authoritiesExtractor = new DefaultAuthoritiesExtractor();
 
 		final List<GrantedAuthority> authorities = authoritiesExtractor.extractAuthorities(new HashMap<>());
-		assertThat(authorities, hasSize(3));
+		assertThat(authorities, hasSize(7));
 
 		assertThat(authorities.stream().map(authority -> authority.getAuthority()).collect(Collectors.toList()),
-			containsInAnyOrder("ROLE_MANAGE", "ROLE_CREATE", "ROLE_VIEW"));
+			containsInAnyOrder("ROLE_MANAGE", "ROLE_CREATE", "ROLE_VIEW", "ROLE_DEPLOY", "ROLE_MODIFY", "ROLE_SCHEDULE", "ROLE_DESTROY"));
 	}
 
 	@Test
@@ -90,20 +90,25 @@ public class DefaultAuthoritiesExtractorTests {
 			new DefaultAuthoritiesExtractor(true, Collections.singletonMap("ROLE_MANAGE", "foo-scope-in-oauth"), mock(OAuth2RestTemplate.class));
 		}
 		catch (IllegalArgumentException e) {
-			Assert.assertEquals("The following 2 roles are not mapped: VIEW,CREATE.", e.getMessage());
+			Assert.assertEquals("The following 6 roles are not mapped: CREATE, DEPLOY, DESTROY, MODIFY, SCHEDULE, VIEW.", e.getMessage());
 			return;
 		}
 		Assert.fail("Expected an IllegalStateException to be thrown.");
 	}
 
 	@Test
-	public void testThat3MappedAuthoritiesAreReturned() throws Exception {
+	public void testThat7MappedAuthoritiesAreReturned() throws Exception {
 
 		final Map<String, String> roleMappings = new HashMap<>();
 
 		roleMappings.put("ROLE_MANAGE", "foo-manage");
 		roleMappings.put("ROLE_VIEW", "bar-view");
 		roleMappings.put("ROLE_CREATE", "blubba-create");
+
+		roleMappings.put("ROLE_MODIFY", "foo-modify");
+		roleMappings.put("ROLE_DEPLOY", "foo-deploy");
+		roleMappings.put("ROLE_DESTROY", "foo-destroy");
+		roleMappings.put("ROLE_SCHEDULE", "foo-schedule");
 
 		final OAuth2RestTemplate template = mock(OAuth2RestTemplate.class);
 		final OAuth2AccessToken accessToken = mock(OAuth2AccessToken.class);
@@ -112,6 +117,10 @@ public class DefaultAuthoritiesExtractorTests {
 		scopes.add("foo-manage");
 		scopes.add("bar-view");
 		scopes.add("blubba-create");
+		scopes.add("foo-modify");
+		scopes.add("foo-deploy");
+		scopes.add("foo-destroy");
+		scopes.add("foo-schedule");
 
 		when(template.getAccessToken()).thenReturn(accessToken);
 		when(accessToken.getScope()).thenReturn(scopes);
@@ -120,10 +129,10 @@ public class DefaultAuthoritiesExtractorTests {
 
 		final Collection<? extends GrantedAuthority> authorities = defaultAuthoritiesExtractor.extractAuthorities(new HashMap<>());
 
-		assertThat(authorities, hasSize(3));
+		assertThat(authorities, hasSize(7));
 
 		assertThat(authorities.stream().map(authority -> authority.getAuthority()).collect(Collectors.toList()),
-			containsInAnyOrder("ROLE_MANAGE", "ROLE_CREATE", "ROLE_VIEW"));
+			containsInAnyOrder("ROLE_CREATE", "ROLE_DEPLOY", "ROLE_DESTROY", "ROLE_MANAGE", "ROLE_MODIFY", "ROLE_SCHEDULE", "ROLE_VIEW"));
 	}
 
 	@Test
@@ -151,7 +160,7 @@ public class DefaultAuthoritiesExtractorTests {
 	}
 
 	@Test
-	public void testThat3MappedAuthoritiesAreReturnedForDefaultMappingWithoutMappingScopes() throws Exception {
+	public void testThat7MappedAuthoritiesAreReturnedForDefaultMappingWithoutMappingScopes() throws Exception {
 
 		final OAuth2RestTemplate template = mock(OAuth2RestTemplate.class);
 		final OAuth2AccessToken accessToken = mock(OAuth2AccessToken.class);
@@ -168,10 +177,10 @@ public class DefaultAuthoritiesExtractorTests {
 
 		final Collection<? extends GrantedAuthority> authorities = defaultAuthoritiesExtractor.extractAuthorities(new HashMap<>());
 
-		assertThat(authorities, hasSize(3));
+		assertThat(authorities, hasSize(7));
 
 		assertThat(authorities.stream().map(authority -> authority.getAuthority()).collect(Collectors.toList()),
-			containsInAnyOrder("ROLE_MANAGE", "ROLE_CREATE", "ROLE_VIEW"));
+			containsInAnyOrder("ROLE_CREATE", "ROLE_DEPLOY", "ROLE_DESTROY", "ROLE_MANAGE", "ROLE_MODIFY", "ROLE_SCHEDULE", "ROLE_VIEW"));
 	}
 
 	@Test
@@ -198,11 +207,15 @@ public class DefaultAuthoritiesExtractorTests {
 	}
 
 	@Test
-	public void testThat3AuthoritiesAreReturnedAndOneOAuthScopeCoversMultipleServerRoles() throws Exception {
+	public void testThat7AuthoritiesAreReturnedAndOneOAuthScopeCoversMultipleServerRoles() throws Exception {
 		final Map<String, String> roleMappings = new HashMap<>();
 
 		roleMappings.put("ROLE_MANAGE", "foo-manage");
 		roleMappings.put("ROLE_VIEW", "foo-manage");
+		roleMappings.put("ROLE_DEPLOY", "foo-manage");
+		roleMappings.put("ROLE_DESTROY", "foo-manage");
+		roleMappings.put("ROLE_MODIFY", "foo-manage");
+		roleMappings.put("ROLE_SCHEDULE", "foo-manage");
 		roleMappings.put("ROLE_CREATE", "blubba-create");
 
 		final OAuth2RestTemplate template = mock(OAuth2RestTemplate.class);
@@ -219,9 +232,9 @@ public class DefaultAuthoritiesExtractorTests {
 
 		final Collection<? extends GrantedAuthority> authorities = defaultAuthoritiesExtractor.extractAuthorities(new HashMap<>());
 
-		assertThat(authorities, hasSize(3));
+		assertThat(authorities, hasSize(7));
 
 		assertThat(authorities.stream().map(authority -> authority.getAuthority()).collect(Collectors.toList()),
-			containsInAnyOrder("ROLE_MANAGE", "ROLE_CREATE", "ROLE_VIEW"));
+			containsInAnyOrder("ROLE_CREATE", "ROLE_DEPLOY", "ROLE_DESTROY", "ROLE_MANAGE", "ROLE_MODIFY", "ROLE_SCHEDULE", "ROLE_VIEW"));
 	}
 }

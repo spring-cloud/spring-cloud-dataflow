@@ -158,7 +158,7 @@ public class DefaultAuthoritiesExtractor implements AuthoritiesExtractor {
 				String.format("The following %s %s not mapped: %s.",
 					unmappedRoles.size(),
 					unmappedRoles.size() > 1 ? "roles are" : "role is",
-					StringUtils.collectionToCommaDelimitedString(unmappedRoles)));
+					StringUtils.collectionToDelimitedString(unmappedRoles, ", ")));
 		}
 
 		return roleMappings;
