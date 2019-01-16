@@ -141,7 +141,6 @@ public class LocalConfigurationTests {
 	public void testNoDataflowConfig() {
 		SpringApplication app = new SpringApplication(LocalTestNoDataFlowServer.class);
 		context = app.run(new String[] { "--server.port=0", "--spring.jpa.database=H2", "--spring.flyway.enabled=false" });
-		// we still have deployer beans
 		assertThat(context.containsBean("appRegistry"), is(false));
 	}
 }
