@@ -2374,7 +2374,7 @@
     ]
   },
   "timezone": "",
-  "title": "scdf-influxdb-dashboard",
-  "uid": "QvcTSLGik",
+  "title": "SCDF Streams",
+  "uid": "scdf-streams",
   "version": 67
 }

@@ -5025,7 +5025,7 @@
     ]
   },
   "timezone": "",
-  "title": "scdf-influxdb-applicattion-members-dashboard",
-  "uid": "QvcTSLGik666",
+  "title": "SCDF Applications",
+  "uid": "scdf-applications",
   "version": 33
 }
