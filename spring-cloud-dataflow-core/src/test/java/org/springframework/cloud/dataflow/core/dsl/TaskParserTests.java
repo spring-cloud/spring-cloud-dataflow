@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2018 the original author or authors.
+ * Copyright 2017-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -222,6 +222,23 @@ public class TaskParserTests {
 	public void errorCases04() {
 		checkForParseError("foo bar=yyy", DSLMessage.TASK_MORE_INPUT, 4, "bar");
 		checkForParseError("foo bar", DSLMessage.TASK_MORE_INPUT, 4, "bar");
+	}
+
+	@Test
+	public void shortArgValues_2499() {
+		// This is the expected result when an argument value is missing:
+		checkForParseError("aaa --bbb= --ccc=ddd", DSLMessage.EXPECTED_ARGUMENT_VALUE, 11);
+		// From AbstractTokenizer.isArgValueIdentifierTerminator these are the 'special chars' that should
+		// terminate an argument value if not quoted:
+		// "|"   ";"   "\0"   " "   "\t"   ">"   "\r"   "\n"
+		// (\0 is the sentinel, wouldn't expect that in user data)
+		checkForParseError("aaa --bbb=| --ccc=ddd", DSLMessage.EXPECTED_ARGUMENT_VALUE, 10);
+		checkForParseError("aaa --bbb=; --ccc=ddd", DSLMessage.EXPECTED_ARGUMENT_VALUE, 10);
+		checkForParseError("aaa --bbb=> --ccc=ddd", DSLMessage.EXPECTED_ARGUMENT_VALUE, 10);
+		// Not sure the tabs/etc here and handled quite right during tokenization but it does error as expected
+		checkForParseError("aaa --bbb=	 --ccc=ddd", DSLMessage.EXPECTED_ARGUMENT_VALUE, 12);
+		checkForParseError("aaa --bbb=\t --ccc=ddd", DSLMessage.EXPECTED_ARGUMENT_VALUE, 12);
+		checkForParseError("aaa --bbb=\n --ccc=ddd", DSLMessage.EXPECTED_ARGUMENT_VALUE, 12);
 	}
 
 	@Test
