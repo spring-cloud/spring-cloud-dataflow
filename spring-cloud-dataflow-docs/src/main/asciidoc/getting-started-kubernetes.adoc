@@ -1292,7 +1292,7 @@ This section covers how you can customize the deployment of your applications. Y
 
 NOTE: Properties set on a per-application basis always take precedence over properties set as the server configuration. This arrangement allows for the ability to override global server level properties on a per-application basis.
 
-Properties to be applied for all deployed Tasks are defined in the `src/kubernetes/server/server-config-(binder).yaml` file and for Streams in `src/kubernetes/skipper/skipper-config-(binder).yaml`. Replace `(binder)` with the messaging middleware you are using, for example `rabbit` or `kafka`. By default properties are defined in the `application.yaml` configuration block under the namespace `spring.cloud.dataflow.task.platform.kubernetes.accounts.default` for Tasks and `spring.cloud.skipper.server.platform.kubernetes.accounts.default` for Streams.
+Properties to be applied for all deployed Tasks are defined in the `src/kubernetes/server/server-config-(binder).yaml` file and for Streams in `src/kubernetes/skipper/skipper-config-(binder).yaml`. Replace `(binder)` with the messaging middleware you are using, for example `rabbit` or `kafka`.
 
 ==== Memory and CPU Settings
 
@@ -1438,7 +1438,7 @@ deployer.<app>.kubernetes.livenessProbePort=7000
 ----
 ====
 
-The same can declared as part of the global configuration for Streams:
+The same can be declared as part of the global configuration for Streams:
 
 ====
 [source,yaml]
