@@ -429,7 +429,7 @@ public class DefaultTaskService implements TaskService {
 
 		private TaskExecution taskExecution;
 
-		Map<String, String> launchTaskDeploymentProperties;
+		private Map<String, String> launchTaskDeploymentProperties;
 
 
 		public RequestCriteria(AppDeploymentRequest appDeploymentRequest,
