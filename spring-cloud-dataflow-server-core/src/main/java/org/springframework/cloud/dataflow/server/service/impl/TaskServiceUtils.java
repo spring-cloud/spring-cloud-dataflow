@@ -57,7 +57,7 @@ public class TaskServiceUtils {
 	 * of the CTR app to be launched.
 	 * @return String containing the CTR task definition.
 	 */
-	public static  String createComposedTaskDefinition(String graph,
+	public static String createComposedTaskDefinition(String graph,
 			TaskConfigurationProperties taskConfigurationProperties) {
 		Assert.hasText(graph, "graph must not be empty or null");
 		Assert.notNull(taskConfigurationProperties,

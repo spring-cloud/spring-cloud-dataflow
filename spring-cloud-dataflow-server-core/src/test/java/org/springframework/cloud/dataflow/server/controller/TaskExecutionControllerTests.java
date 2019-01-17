@@ -41,7 +41,9 @@ import org.springframework.cloud.dataflow.server.config.apps.CommonApplicationPr
 import org.springframework.cloud.dataflow.server.configuration.JobDependencies;
 import org.springframework.cloud.dataflow.server.job.LauncherRepository;
 import org.springframework.cloud.dataflow.server.repository.TaskDefinitionRepository;
-import org.springframework.cloud.dataflow.server.service.TaskService;
+import org.springframework.cloud.dataflow.server.service.TaskDeleteService;
+import org.springframework.cloud.dataflow.server.service.TaskExecutionInfoService;
+import org.springframework.cloud.dataflow.server.service.TaskExecutionService;
 import org.springframework.cloud.deployer.spi.task.TaskLauncher;
 import org.springframework.cloud.task.batch.listener.TaskBatchDao;
 import org.springframework.cloud.task.repository.TaskExecution;
@@ -111,13 +113,19 @@ public class TaskExecutionControllerTests {
 	private TaskExplorer taskExplorer;
 
 	@Autowired
-	private TaskService taskService;
+	private TaskExecutionService taskExecutionService;
 
 	@Autowired
 	private TaskLauncher taskLauncher;
 
 	@Autowired
 	private LauncherRepository launcherRepository;
+
+	@Autowired
+	private TaskExecutionInfoService taskExecutionInfoService;
+
+	@Autowired
+	private TaskDeleteService taskDeleteService;
 
 	@Before
 	public void setupMockMVC() {
@@ -161,17 +169,32 @@ public class TaskExecutionControllerTests {
 
 	@Test(expected = IllegalArgumentException.class)
 	public void testTaskExecutionControllerConstructorMissingExplorer() {
-		new TaskExecutionController(null, taskService, taskDefinitionRepository);
+		new TaskExecutionController(null, taskExecutionService, taskDefinitionRepository, taskExecutionInfoService,
+				taskDeleteService);
 	}
 
 	@Test(expected = IllegalArgumentException.class)
 	public void testTaskExecutionControllerConstructorMissingTaskService() {
-		new TaskExecutionController(taskExplorer, null, taskDefinitionRepository);
+		new TaskExecutionController(taskExplorer, null, taskDefinitionRepository, taskExecutionInfoService,
+				taskDeleteService);
 	}
 
 	@Test(expected = IllegalArgumentException.class)
 	public void testTaskExecutionControllerConstructorMissingTaskDefinitionRepository() {
-		new TaskExecutionController(taskExplorer, taskService, null);
+		new TaskExecutionController(taskExplorer, taskExecutionService, null, taskExecutionInfoService,
+				taskDeleteService);
+	}
+
+	@Test(expected = IllegalArgumentException.class)
+	public void testTaskExecutionControllerConstructorMissingTaskDefinitionRetriever() {
+		new TaskExecutionController(taskExplorer, taskExecutionService, taskDefinitionRepository, null,
+				taskDeleteService);
+	}
+
+	@Test(expected = IllegalArgumentException.class)
+	public void testTaskExecutionControllerConstructorMissingDeleteTaskService() {
+		new TaskExecutionController(taskExplorer, taskExecutionService, taskDefinitionRepository,
+				taskExecutionInfoService, null);
 	}
 
 	@Test

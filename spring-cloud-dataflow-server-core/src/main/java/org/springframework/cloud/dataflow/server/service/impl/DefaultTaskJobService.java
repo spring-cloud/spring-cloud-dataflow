@@ -40,8 +40,8 @@ import org.springframework.cloud.dataflow.server.job.support.JobNotRestartableEx
 import org.springframework.cloud.dataflow.server.repository.NoSuchTaskBatchException;
 import org.springframework.cloud.dataflow.server.repository.NoSuchTaskDefinitionException;
 import org.springframework.cloud.dataflow.server.repository.TaskDefinitionRepository;
+import org.springframework.cloud.dataflow.server.service.TaskExecutionService;
 import org.springframework.cloud.dataflow.server.service.TaskJobService;
-import org.springframework.cloud.dataflow.server.service.TaskService;
 import org.springframework.cloud.task.repository.TaskExecution;
 import org.springframework.cloud.task.repository.TaskExplorer;
 import org.springframework.data.domain.Pageable;
@@ -62,7 +62,7 @@ public class DefaultTaskJobService implements TaskJobService {
 
 	private static final Logger logger = LoggerFactory.getLogger(DefaultTaskJobService.class);
 
-	private final TaskService taskService;
+	private final TaskExecutionService taskExecutionService;
 
 	private TaskExplorer taskExplorer;
 
@@ -71,15 +71,15 @@ public class DefaultTaskJobService implements TaskJobService {
 	private TaskDefinitionRepository taskDefinitionRepository;
 
 	public DefaultTaskJobService(JobService jobService, TaskExplorer taskExplorer,
-			TaskDefinitionRepository taskDefinitionRepository, TaskService taskService) {
+			TaskDefinitionRepository taskDefinitionRepository, TaskExecutionService taskExecutionService) {
 		Assert.notNull(jobService, "jobService must not be null");
 		Assert.notNull(taskExplorer, "taskExplorer must not be null");
 		Assert.notNull(taskDefinitionRepository, "taskDefinitionRepository must not be null");
-		Assert.notNull(taskService, "taskService must not be null");
+		Assert.notNull(taskExecutionService, "taskExecutionService must not be null");
 		this.jobService = jobService;
 		this.taskExplorer = taskExplorer;
 		this.taskDefinitionRepository = taskDefinitionRepository;
-		this.taskService = taskService;
+		this.taskExecutionService = taskExecutionService;
 	}
 
 	@Override
@@ -181,7 +181,8 @@ public class DefaultTaskJobService implements TaskJobService {
 		TaskExecution taskExecution = this.taskExplorer.getTaskExecution(taskJobExecution.getTaskId());
 		TaskDefinition taskDefinition = this.taskDefinitionRepository.findById(taskExecution.getTaskName())
 				.orElseThrow(() -> new NoSuchTaskDefinitionException(taskExecution.getTaskName()));
-		taskService.executeTask(taskDefinition.getName(), taskDefinition.getProperties(), taskExecution.getArguments(),
+		taskExecutionService.executeTask(taskDefinition.getName(), taskDefinition.getProperties(),
+				taskExecution.getArguments(),
 				"default");
 	}
 

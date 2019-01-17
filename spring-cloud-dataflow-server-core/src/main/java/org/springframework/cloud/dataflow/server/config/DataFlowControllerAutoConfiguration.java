@@ -92,8 +92,11 @@ import org.springframework.cloud.dataflow.server.service.SchedulerService;
 import org.springframework.cloud.dataflow.server.service.SpringSecurityAuditorAware;
 import org.springframework.cloud.dataflow.server.service.StreamService;
 import org.springframework.cloud.dataflow.server.service.StreamValidationService;
+import org.springframework.cloud.dataflow.server.service.TaskDeleteService;
+import org.springframework.cloud.dataflow.server.service.TaskExecutionInfoService;
+import org.springframework.cloud.dataflow.server.service.TaskExecutionService;
 import org.springframework.cloud.dataflow.server.service.TaskJobService;
-import org.springframework.cloud.dataflow.server.service.TaskService;
+import org.springframework.cloud.dataflow.server.service.TaskSaveService;
 import org.springframework.cloud.dataflow.server.service.TaskValidationService;
 import org.springframework.cloud.dataflow.server.service.impl.AppDeploymentRequestCreator;
 import org.springframework.cloud.dataflow.server.service.impl.DefaultStreamService;
@@ -235,9 +238,13 @@ public class DataFlowControllerAutoConfiguration {
 	public static class TaskEnabledConfiguration {
 
 		@Bean
-		public TaskExecutionController taskExecutionController(TaskExplorer explorer, TaskService taskService,
-				TaskDefinitionRepository taskDefinitionRepository) {
-			return new TaskExecutionController(explorer, taskService, taskDefinitionRepository);
+		public TaskExecutionController taskExecutionController(TaskExplorer explorer,
+				TaskExecutionService taskExecutionService,
+				TaskDefinitionRepository taskDefinitionRepository, TaskExecutionInfoService taskExecutionInfoService,
+				TaskDeleteService taskDeleteService) {
+			return new TaskExecutionController(explorer, taskExecutionService, taskDefinitionRepository,
+					taskExecutionInfoService,
+					taskDeleteService);
 		}
 
 		@Bean
@@ -247,9 +254,9 @@ public class DataFlowControllerAutoConfiguration {
 
 		@Bean
 		public TaskDefinitionController taskDefinitionController(TaskExplorer taskExplorer,
-				TaskDefinitionRepository repository,
-				TaskService taskService) {
-			return new TaskDefinitionController(taskExplorer, repository, taskService);
+				TaskDefinitionRepository repository, TaskSaveService taskSaveService,
+				TaskDeleteService taskDeleteService) {
+			return new TaskDefinitionController(taskExplorer, repository, taskSaveService, taskDeleteService);
 		}
 
 		@Bean
@@ -289,8 +296,8 @@ public class DataFlowControllerAutoConfiguration {
 		}
 
 		@Bean
-		public TaskValidationController taskValidationController(TaskService taskService) {
-			return new TaskValidationController(taskService);
+		public TaskValidationController taskValidationController(TaskValidationService taskValidationService) {
+			return new TaskValidationController(taskValidationService);
 		}
 	}
 

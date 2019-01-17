@@ -212,25 +212,28 @@ public class TaskCommandTests extends AbstractShellIntegrationTest {
 		CommandResult cr = task().taskValidate(taskName);
 		assertTrue("task validate status command must be successful", cr.isSuccess());
 		List results = (List) cr.getResult();
-		Table table = (Table)results.get(0);
+		Table table = (Table) results.get(0);
 		assertEquals("Number of columns returned was not expected", 2, table.getModel().getColumnCount());
 		assertEquals("First Row First Value should be: Task Name", "Task Name", table.getModel().getValue(0, 0));
-		assertEquals("First Row Second Value should be: Task Definition", "Task Definition", table.getModel().getValue(0, 1));
+		assertEquals("First Row Second Value should be: Task Definition", "Task Definition",
+				table.getModel().getValue(0, 1));
 		assertEquals("Second Row First Value should be: " + taskName, taskName, table.getModel().getValue(1, 0));
 		assertEquals("Second Row Second Value should be: timestamp", "timestamp", table.getModel().getValue(1, 1));
 
 		String message = String.format("\n%s is a valid task.", taskName);
-		assertEquals(String.format("Notification should be: %s",message ), message, results.get(1));
+		assertEquals(String.format("Notification should be: %s", message), message, results.get(1));
 
-		table = (Table)results.get(2);
+		table = (Table) results.get(2);
 		assertEquals("Number of columns returned was not expected", 2, table.getModel().getColumnCount());
 		assertEquals("First Row First Value should be: App Name", "App Name", table.getModel().getValue(0, 0));
-		assertEquals("First Row Second Value should be: Validation Status", "Validation Status", table.getModel().getValue(0, 1));
-		assertEquals("Second Row First Value should be: task:" + taskName, "task:" + taskName, table.getModel().getValue(1, 0));
+		assertEquals("First Row Second Value should be: Validation Status", "Validation Status",
+				table.getModel().getValue(0, 1));
+		assertEquals("Second Row First Value should be: task:" + taskName, "task:" + taskName,
+				table.getModel().getValue(1, 0));
 		assertEquals("Second Row Second Value should be: valid", "valid", table.getModel().getValue(1, 1));
 	}
 
-		@Test
+	@Test
 	public void testCurrentExecutions() {
 		CommandResult idResult = task().taskExecutionCurrent();
 		Table result = (Table) idResult.getResult();
