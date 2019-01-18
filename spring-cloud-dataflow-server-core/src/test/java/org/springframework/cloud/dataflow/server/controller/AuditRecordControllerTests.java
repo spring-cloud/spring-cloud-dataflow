@@ -260,15 +260,15 @@ public class AuditRecordControllerTests {
 		mockMvc.perform(get("/audit-records?toDate=" + toDate).accept(MediaType.APPLICATION_JSON))
 				.andDo(print())
 				.andExpect(status().isOk())
-				.andExpect(jsonPath("$.content.*", hasSize(2)))
+				.andExpect(jsonPath("$.content.*", hasSize(6)))
 
-				.andExpect(jsonPath("$.content[0].auditRecordId", is(5)))
-				.andExpect(jsonPath("$.content[0].correlationId", is("myStream")))
-				.andExpect(jsonPath("$.content[0].auditAction", is("CREATE")))
+				.andExpect(jsonPath("$.content[4].auditRecordId", is(9)))
+				.andExpect(jsonPath("$.content[4].correlationId", is("myStream")))
+				.andExpect(jsonPath("$.content[4].auditAction", is("CREATE")))
 
-				.andExpect(jsonPath("$.content[1].auditRecordId", is(6)))
-				.andExpect(jsonPath("$.content[1].correlationId", is("myStream1")))
-				.andExpect(jsonPath("$.content[1].auditAction", is("CREATE")));
+				.andExpect(jsonPath("$.content[5].auditRecordId", is(10)))
+				.andExpect(jsonPath("$.content[5].correlationId", is("myStream1")))
+				.andExpect(jsonPath("$.content[5].auditAction", is("CREATE")));
 	}
 
 	@Test
@@ -281,11 +281,11 @@ public class AuditRecordControllerTests {
 				.andExpect(status().isOk())
 				.andExpect(jsonPath("$.content.*", hasSize(2)))
 
-				.andExpect(jsonPath("$.content[0].auditRecordId", is(8)))
+				.andExpect(jsonPath("$.content[0].auditRecordId", is(12)))
 				.andExpect(jsonPath("$.content[0].correlationId", is("myStream")))
 				.andExpect(jsonPath("$.content[0].auditAction", is("UNDEPLOY")))
 
-				.andExpect(jsonPath("$.content[1].auditRecordId", is(9)))
+				.andExpect(jsonPath("$.content[1].auditRecordId", is(13)))
 				.andExpect(jsonPath("$.content[1].correlationId", is("myStream")))
 				.andExpect(jsonPath("$.content[1].auditAction", is("DELETE")));
 	}
@@ -304,7 +304,7 @@ public class AuditRecordControllerTests {
 				.andExpect(status().isOk())
 				.andExpect(jsonPath("$.content.*", hasSize(1)))
 
-				.andExpect(jsonPath("$.content[0].auditRecordId", is(7)))
+				.andExpect(jsonPath("$.content[0].auditRecordId", is(11)))
 				.andExpect(jsonPath("$.content[0].correlationId", is("myStream2")))
 				.andExpect(jsonPath("$.content[0].auditAction", is("CREATE")));
 	}
@@ -314,18 +314,18 @@ public class AuditRecordControllerTests {
 		mockMvc.perform(get("/audit-records").accept(MediaType.APPLICATION_JSON))
 				.andDo(print())
 				.andExpect(status().isOk())
-				.andExpect(jsonPath("$.content.*", hasSize(5)))
-				.andExpect(jsonPath("$.content[0].auditRecordId", is(5)))
-				.andExpect(jsonPath("$.content[0].correlationId", is("myStream")))
-				.andExpect(jsonPath("$.content[0].auditAction", is("CREATE")));
+				.andExpect(jsonPath("$.content.*", hasSize(9)))
+				.andExpect(jsonPath("$.content[4].auditRecordId", is(9)))
+				.andExpect(jsonPath("$.content[4].correlationId", is("myStream")))
+				.andExpect(jsonPath("$.content[4].auditAction", is("CREATE")));
 	}
 
 	@Test
 	public void testRetrieveAuditRecordById() throws Exception {
-		mockMvc.perform(get("/audit-records/9").accept(MediaType.APPLICATION_JSON))
+		mockMvc.perform(get("/audit-records/13").accept(MediaType.APPLICATION_JSON))
 				.andDo(print())
 				.andExpect(status().isOk())
-				.andExpect(jsonPath("$.auditRecordId", is(9)))
+				.andExpect(jsonPath("$.auditRecordId", is(13)))
 				.andExpect(jsonPath("$.correlationId", is("myStream")))
 				.andExpect(jsonPath("$.auditAction", is("DELETE")));
 	}

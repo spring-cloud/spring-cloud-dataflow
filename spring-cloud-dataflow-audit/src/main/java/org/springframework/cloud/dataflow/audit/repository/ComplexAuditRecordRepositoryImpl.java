@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.springframework.cloud.dataflow.server.repository;
+package org.springframework.cloud.dataflow.audit.repository;
 
 import java.time.Instant;
 import java.time.format.DateTimeFormatter;
@@ -71,25 +71,29 @@ public class ComplexAuditRecordRepositoryImpl implements ComplexAuditRecordRepos
 			datePredicate = cb.and();
 		}
 
-		List<Predicate> auditPredicates = new ArrayList<>();
+		List<Predicate> auditActionPredicates = new ArrayList<>();
 		if (actions != null) {
 			for (AuditActionType action : actions) {
-				auditPredicates.add(cb.equal(auditAction, action));
+				auditActionPredicates.add(cb.equal(auditAction, action));
 			}
+		} else {
+			auditActionPredicates.add(cb.and());
 		}
+
+		List<Predicate> auditOperationsPredicates = new ArrayList<>();
 		if (operations != null) {
 			for (AuditOperationType operation : operations) {
-				auditPredicates.add(cb.equal(auditOperation, operation));
+				auditOperationsPredicates.add(cb.equal(auditOperation, operation));
 			}
-		}
-		if (actions == null && operations == null) {
-			auditPredicates.add(cb.and());
+		}else {
+			auditOperationsPredicates.add(cb.and());
 		}
 
-		Predicate[] auditPredicateArray = auditPredicates.toArray(new Predicate[0]);
+		Predicate[] auditActionsArray = auditActionPredicates.toArray(new Predicate[0]);
+		Predicate[] auditOperationsArray = auditOperationsPredicates.toArray(new Predicate[0]);
 
 		query.select(auditRecordRoot)
-				.where(cb.and(datePredicate, cb.or(auditPredicateArray)));
+				.where(cb.and(datePredicate, cb.or(auditActionsArray), cb.or(auditOperationsArray)));
 
 		List<AuditRecord> resultList = entityManager.createQuery(query)
 				.getResultList();

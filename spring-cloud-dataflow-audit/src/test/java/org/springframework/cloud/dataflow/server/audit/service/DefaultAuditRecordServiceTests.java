@@ -36,6 +36,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -207,11 +208,11 @@ public class DefaultAuditRecordServiceTests {
 		AuditActionType[] auditActionTypes = { AuditActionType.CREATE };
 		AuditOperationType[] auditOperationTypes = { AuditOperationType.STREAM };
 		PageRequest pageRequest = PageRequest.of(0, 1);
-		auditRecordService.findAuditRecordByAuditOperationTypeAndAuditActionType(pageRequest, auditActionTypes,
-				auditOperationTypes);
+		auditRecordService.findAuditRecordByAuditOperationTypeAndAuditActionTypeAndDate(pageRequest, auditActionTypes,
+				auditOperationTypes, null, null);
 
-		verify(this.auditRecordRepository, times(1)).findByAuditOperationInAndAuditActionIn(eq(auditOperationTypes),
-				eq(auditActionTypes), eq(pageRequest));
+		verify(this.auditRecordRepository, times(1)).findByActionTypeAndOperationTypeAndDate(eq(auditOperationTypes),
+				eq(auditActionTypes), isNull(), isNull(), eq(pageRequest));
 		verifyNoMoreInteractions(this.auditRecordRepository);
 	}
 
@@ -221,10 +222,11 @@ public class DefaultAuditRecordServiceTests {
 
 		AuditOperationType[] auditOperationTypes = { AuditOperationType.STREAM };
 		PageRequest pageRequest = PageRequest.of(0, 1);
-		auditRecordService.findAuditRecordByAuditOperationTypeAndAuditActionType(pageRequest, null,
-				auditOperationTypes);
+		auditRecordService.findAuditRecordByAuditOperationTypeAndAuditActionTypeAndDate(pageRequest, null,
+				auditOperationTypes, null, null);
 
-		verify(this.auditRecordRepository, times(1)).findByAuditOperationIn(eq(auditOperationTypes), eq(pageRequest));
+		verify(this.auditRecordRepository, times(1)).findByActionTypeAndOperationTypeAndDate(eq(auditOperationTypes),
+				isNull(), isNull(), isNull(), eq(pageRequest));
 		verifyNoMoreInteractions(this.auditRecordRepository);
 	}
 
@@ -234,9 +236,11 @@ public class DefaultAuditRecordServiceTests {
 
 		AuditActionType[] auditActionTypes = { AuditActionType.CREATE };
 		PageRequest pageRequest = PageRequest.of(0, 1);
-		auditRecordService.findAuditRecordByAuditOperationTypeAndAuditActionType(pageRequest, auditActionTypes, null);
+		auditRecordService.findAuditRecordByAuditOperationTypeAndAuditActionTypeAndDate(pageRequest, auditActionTypes,
+				null, null, null);
 
-		verify(this.auditRecordRepository, times(1)).findByAuditActionIn(eq(auditActionTypes), eq(pageRequest));
+		verify(this.auditRecordRepository, times(1)).findByActionTypeAndOperationTypeAndDate(isNull(),
+				eq(auditActionTypes), isNull(), isNull(), eq(pageRequest));
 		verifyNoMoreInteractions(this.auditRecordRepository);
 	}
 
@@ -245,9 +249,11 @@ public class DefaultAuditRecordServiceTests {
 		AuditRecordService auditRecordService = new DefaultAuditRecordService(auditRecordRepository);
 
 		PageRequest pageRequest = PageRequest.of(0, 1);
-		auditRecordService.findAuditRecordByAuditOperationTypeAndAuditActionType(pageRequest, null, null);
+		auditRecordService.findAuditRecordByAuditOperationTypeAndAuditActionTypeAndDate(pageRequest, null, null, null,
+				null);
 
-		verify(this.auditRecordRepository, times(1)).findAll(eq(pageRequest));
+		verify(this.auditRecordRepository, times(1)).findByActionTypeAndOperationTypeAndDate(isNull(), isNull(),
+				isNull(), isNull(), eq(pageRequest));
 		verifyNoMoreInteractions(this.auditRecordRepository);
 	}
 }
