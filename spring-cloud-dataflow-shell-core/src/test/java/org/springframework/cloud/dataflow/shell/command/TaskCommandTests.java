@@ -87,6 +87,12 @@ public class TaskCommandTests extends AbstractShellIntegrationTest {
 						+ "EXTERNAL_EXECUTION_ID)" + "values (?, ?, ?, ?, ?, ?, ?, ?, ?)",
 				TASK_EXECUTION_ID - 1, startTime, null, TASK_NAME, null, EXIT_MESSAGE, null, ERROR_MESSAGE,
 				EXTERNAL_EXECUTION_ID);
+
+		template.update(
+				"INSERT into task_deployment(id, object_version, task_deployment_id, task_definition_name, platform_name, created_on) " +
+						"values (?,?,?,?,?,?)",
+						1, 1, TASK_EXECUTION_ID, TASK_NAME, "default", startTime);
+
 	}
 
 	@AfterClass

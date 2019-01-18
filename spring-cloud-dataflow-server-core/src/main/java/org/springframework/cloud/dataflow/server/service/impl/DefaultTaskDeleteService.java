@@ -26,12 +26,14 @@ import org.springframework.cloud.dataflow.core.AuditActionType;
 import org.springframework.cloud.dataflow.core.AuditOperationType;
 import org.springframework.cloud.dataflow.core.Launcher;
 import org.springframework.cloud.dataflow.core.TaskDefinition;
+import org.springframework.cloud.dataflow.core.TaskDeployment;
 import org.springframework.cloud.dataflow.core.dsl.TaskNode;
 import org.springframework.cloud.dataflow.core.dsl.TaskParser;
 import org.springframework.cloud.dataflow.rest.util.ArgumentSanitizer;
 import org.springframework.cloud.dataflow.server.job.LauncherRepository;
 import org.springframework.cloud.dataflow.server.repository.NoSuchTaskDefinitionException;
 import org.springframework.cloud.dataflow.server.repository.TaskDefinitionRepository;
+import org.springframework.cloud.dataflow.server.repository.TaskDeploymentRepository;
 import org.springframework.cloud.dataflow.server.service.TaskDeleteService;
 import org.springframework.cloud.deployer.spi.task.TaskLauncher;
 import org.springframework.cloud.task.repository.TaskExecution;
@@ -67,20 +69,26 @@ public class DefaultTaskDeleteService implements TaskDeleteService {
 
 	private final TaskDefinitionRepository taskDefinitionRepository;
 
+	private final TaskDeploymentRepository taskDeploymentRepository;
+
 	protected final AuditRecordService auditRecordService;
 
 	private final ArgumentSanitizer argumentSanitizer = new ArgumentSanitizer();
 
 	public DefaultTaskDeleteService(TaskExplorer taskExplorer, LauncherRepository launcherRepository,
-			TaskDefinitionRepository taskDefinitionRepository, AuditRecordService auditRecordService) {
+			TaskDefinitionRepository taskDefinitionRepository,
+			TaskDeploymentRepository taskDeploymentRepository,
+			AuditRecordService auditRecordService) {
 		Assert.notNull(taskExplorer, "TaskExplorer must not be null");
 		Assert.notNull(launcherRepository, "LauncherRepository must not be null");
 		Assert.notNull(taskDefinitionRepository, "TaskDefinitionRepository must not be null");
+		Assert.notNull(taskDeploymentRepository, "TaskDeploymentRepository must not be null");
 		Assert.notNull(auditRecordService, "AuditRecordService must not be null");
 
 		this.taskExplorer = taskExplorer;
 		this.launcherRepository = launcherRepository;
 		this.taskDefinitionRepository = taskDefinitionRepository;
+		this.taskDeploymentRepository = taskDeploymentRepository;
 		this.auditRecordService = auditRecordService;
 	}
 
@@ -90,15 +98,21 @@ public class DefaultTaskDeleteService implements TaskDeleteService {
 		Assert.notNull(taskExecution, "There was no task execution with id " + id);
 		String launchId = taskExecution.getExternalExecutionId();
 		Assert.hasLength(launchId, "The TaskExecution for id " + id + " did not have an externalExecutionId");
-		// TODO GH-2674
-		Launcher launcher = launcherRepository.findByName("default");
+		TaskDeployment taskDeployment = this.taskDeploymentRepository.findByTaskDeploymentId(String.valueOf(id));
+		if (taskDeployment == null) {
+			logger.warn(String.format("Did not find TaskDeployment for taskName = [%s], taskId = [%s].  Nothing to clean up.",
+					taskExecution.getTaskName(), id));
+			return;
+		}
+		Launcher launcher = launcherRepository.findByName(taskDeployment.getPlatformName());
 		if (launcher != null) {
 			TaskLauncher taskLauncher = launcher.getTaskLauncher();
 			taskLauncher.cleanup(launchId);
 		}
 		else {
 			logger.info(
-					"Could clean up execution for task id " + id + ". Did not find a task launcher named 'default'");
+					"Could clean up execution for task id " + id + ". Did not find a task platform named " +
+							taskDeployment.getPlatformName());
 		}
 	}
 
@@ -158,16 +172,19 @@ public class DefaultTaskDeleteService implements TaskDeleteService {
 	}
 
 	private void destroyTask(TaskDefinition taskDefinition) {
-		// TODO GH-2678
-		Launcher launcher = launcherRepository.findByName("default");
-		if (launcher != null) {
-			TaskLauncher taskLauncher = launcher.getTaskLauncher();
-			taskLauncher.destroy(taskDefinition.getName());
-			taskDefinitionRepository.deleteById(taskDefinition.getName());
+		taskDefinitionRepository.deleteById(taskDefinition.getName());
+		TaskDeployment taskDeployment =
+				this.taskDeploymentRepository.findTopByTaskDefinitionNameOrderByCreatedOnAsc(taskDefinition.getTaskName());
+		if (taskDeployment != null) {
+			Launcher launcher = launcherRepository.findByName(taskDeployment.getPlatformName());
+			if (launcher != null) {
+				TaskLauncher taskLauncher = launcher.getTaskLauncher();
+				taskLauncher.destroy(taskDefinition.getName());
+			}
 		}
 		else {
-			logger.info("Could destory task definition " +
-					taskDefinition.getTaskName() + ". Did not find a task launcher named 'default'");
+			logger.info("TaskLauncher.destroy not invoked for task " +
+					taskDefinition.getTaskName() + ". Did not find a previously launched task to destroy.");
 		}
 	}
 }

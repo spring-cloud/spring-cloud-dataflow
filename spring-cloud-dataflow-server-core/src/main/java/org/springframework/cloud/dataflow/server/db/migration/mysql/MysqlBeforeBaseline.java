@@ -179,4 +179,9 @@ public class MysqlBeforeBaseline extends AbstractBaselineCallback {
 		return Arrays.asList(
 				SqlCommand.from(V1__Initial_Setup.CREATE_TASK_LOCK_TABLE));
 	}
+
+	@Override
+	public List<SqlCommand> createTaskDeploymentTable() {
+		return Arrays.asList(SqlCommand.from(V1__Initial_Setup.CREATE_TASK_DEPLOYMENT_TABLE));
+	}
 }

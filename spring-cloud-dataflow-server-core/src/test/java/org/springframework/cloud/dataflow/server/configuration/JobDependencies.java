@@ -55,6 +55,7 @@ import org.springframework.cloud.dataflow.server.controller.TaskExecutionControl
 import org.springframework.cloud.dataflow.server.controller.TaskPlatformController;
 import org.springframework.cloud.dataflow.server.job.LauncherRepository;
 import org.springframework.cloud.dataflow.server.repository.TaskDefinitionRepository;
+import org.springframework.cloud.dataflow.server.repository.TaskDeploymentRepository;
 import org.springframework.cloud.dataflow.server.service.TaskDeleteService;
 import org.springframework.cloud.dataflow.server.service.TaskExecutionInfoService;
 import org.springframework.cloud.dataflow.server.service.TaskExecutionService;
@@ -185,14 +186,19 @@ public class JobDependencies {
 
 	@Bean
 	public TaskJobService taskJobExecutionRepository(JobService jobService, TaskExplorer taskExplorer,
-			TaskDefinitionRepository taskDefinitionRepository, TaskExecutionService taskExecutionService) {
-		return new DefaultTaskJobService(jobService, taskExplorer, taskDefinitionRepository, taskExecutionService);
+			TaskDefinitionRepository taskDefinitionRepository, TaskExecutionService taskExecutionService,
+													 TaskDeploymentRepository taskDeploymentRepository) {
+		return new DefaultTaskJobService(jobService, taskExplorer, taskDefinitionRepository, taskExecutionService,
+				taskDeploymentRepository);
 	}
 
 	@Bean
 	public TaskDeleteService deleteTaskService(TaskExplorer taskExplorer, LauncherRepository launcherRepository,
-			TaskDefinitionRepository taskDefinitionRepository, AuditRecordService auditRecordService) {
+			TaskDefinitionRepository taskDefinitionRepository,
+			TaskDeploymentRepository taskDeploymentRepository,
+			AuditRecordService auditRecordService) {
 		return new DefaultTaskDeleteService(taskExplorer, launcherRepository, taskDefinitionRepository,
+				taskDeploymentRepository,
 				auditRecordService);
 	}
 
@@ -207,12 +213,12 @@ public class JobDependencies {
 			ApplicationConfigurationMetadataResolver metadataResolver,
 			AuditRecordService auditRecordService, CommonApplicationProperties commonApplicationProperties,
 			TaskRepository taskRepository,
-			TaskExecutionInfoService taskExecutionInfoService) {
+			TaskExecutionInfoService taskExecutionInfoService, TaskDeploymentRepository taskDeploymentRepository) {
 		return new DefaultTaskExecutionService(
 				launcherRepository, metadataResolver, auditRecordService,
 				null, commonApplicationProperties,
 				taskRepository,
-				taskExecutionInfoService);
+				taskExecutionInfoService, taskDeploymentRepository);
 	}
 
 	@Bean

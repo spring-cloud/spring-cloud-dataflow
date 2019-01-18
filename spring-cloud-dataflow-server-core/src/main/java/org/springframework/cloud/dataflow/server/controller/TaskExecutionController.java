@@ -155,12 +155,10 @@ public class TaskExecutionController {
 	@ResponseStatus(HttpStatus.CREATED)
 	public long launch(@RequestParam("name") String taskName,
 			@RequestParam(required = false) String properties,
-			@RequestParam(required = false) String arguments,
-			@RequestParam(required = false, defaultValue = "default") String platformName) {
+			@RequestParam(required = false) String arguments) {
 		Map<String, String> propertiesToUse = DeploymentPropertiesUtils.parse(properties);
-		DeploymentPropertiesUtils.validateDeploymentProperties(propertiesToUse);
 		List<String> argumentsToUse = DeploymentPropertiesUtils.parseParamList(arguments, " ");
-		return this.taskExecutionService.executeTask(taskName, propertiesToUse, argumentsToUse, platformName);
+		return this.taskExecutionService.executeTask(taskName, propertiesToUse, argumentsToUse);
 	}
 
 	/**

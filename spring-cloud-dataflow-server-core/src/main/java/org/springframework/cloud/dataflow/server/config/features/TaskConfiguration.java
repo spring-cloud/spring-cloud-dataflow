@@ -46,6 +46,7 @@ import org.springframework.cloud.dataflow.server.config.OnLocalPlatform;
 import org.springframework.cloud.dataflow.server.config.apps.CommonApplicationProperties;
 import org.springframework.cloud.dataflow.server.job.LauncherRepository;
 import org.springframework.cloud.dataflow.server.repository.TaskDefinitionRepository;
+import org.springframework.cloud.dataflow.server.repository.TaskDeploymentRepository;
 import org.springframework.cloud.dataflow.server.service.LauncherInitializationService;
 import org.springframework.cloud.dataflow.server.service.TaskDeleteService;
 import org.springframework.cloud.dataflow.server.service.TaskExecutionInfoService;
@@ -144,8 +145,10 @@ public class TaskConfiguration {
 
 	@Bean
 	public TaskDeleteService deleteTaskService(TaskExplorer taskExplorer, LauncherRepository launcherRepository,
-			TaskDefinitionRepository taskDefinitionRepository, AuditRecordService auditRecordService) {
+			TaskDefinitionRepository taskDefinitionRepository, TaskDeploymentRepository taskDeploymentRepository,
+			AuditRecordService auditRecordService) {
 		return new DefaultTaskDeleteService(taskExplorer, launcherRepository, taskDefinitionRepository,
+				taskDeploymentRepository,
 				auditRecordService);
 	}
 
@@ -160,18 +163,20 @@ public class TaskConfiguration {
 			ApplicationConfigurationMetadataResolver metadataResolver,
 			AuditRecordService auditRecordService, CommonApplicationProperties commonApplicationProperties,
 			TaskRepository taskRepository,
-			TaskExecutionInfoService taskExecutionInfoService) {
+			TaskExecutionInfoService taskExecutionInfoService, TaskDeploymentRepository taskDeploymentRepository) {
 		return new DefaultTaskExecutionService(
 				launcherRepository, metadataResolver, auditRecordService,
 				dataflowServerUri, commonApplicationProperties,
 				taskRepository,
-				taskExecutionInfoService);
+				taskExecutionInfoService, taskDeploymentRepository);
 	}
 
 	@Bean
 	public TaskJobService taskJobExecutionRepository(JobService service, TaskExplorer taskExplorer,
-			TaskDefinitionRepository taskDefinitionRepository, TaskExecutionService taskExecutionService) {
-		return new DefaultTaskJobService(service, taskExplorer, taskDefinitionRepository, taskExecutionService);
+			TaskDefinitionRepository taskDefinitionRepository, TaskExecutionService taskExecutionService,
+			TaskDeploymentRepository taskDeploymentRepository) {
+		return new DefaultTaskJobService(service, taskExplorer, taskDefinitionRepository, taskExecutionService,
+				taskDeploymentRepository);
 	}
 
 	@Bean

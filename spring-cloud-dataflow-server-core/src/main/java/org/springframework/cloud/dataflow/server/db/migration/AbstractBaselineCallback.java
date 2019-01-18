@@ -75,6 +75,7 @@ public abstract class AbstractBaselineCallback extends AbstractCallback {
 			commands.addAll(changeTaskDefinitionsTable());
 			commands.addAll(changeAuditRecordsTable());
 			commands.addAll(createTaskLockTable());
+			commands.addAll(createTaskDeploymentTable());
 			commands.addAll(createIndexes());
 		}
 
@@ -129,4 +130,11 @@ public abstract class AbstractBaselineCallback extends AbstractCallback {
 	 * @return the list of sql commands
 	 */
 	public abstract List<SqlCommand> createTaskLockTable();
+
+	/**
+	 * Create the task deployment table.
+	 *
+	 * @return the list of sql commands
+	 */
+	public abstract List<SqlCommand> createTaskDeploymentTable();
 }

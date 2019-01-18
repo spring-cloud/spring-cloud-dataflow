@@ -21,6 +21,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
 
 import org.springframework.cloud.dataflow.audit.service.AuditRecordService;
 import org.springframework.cloud.dataflow.configuration.metadata.ApplicationConfigurationMetadataResolver;
@@ -28,11 +29,13 @@ import org.springframework.cloud.dataflow.core.AuditActionType;
 import org.springframework.cloud.dataflow.core.AuditOperationType;
 import org.springframework.cloud.dataflow.core.Launcher;
 import org.springframework.cloud.dataflow.core.TaskDefinition;
+import org.springframework.cloud.dataflow.core.TaskDeployment;
 import org.springframework.cloud.dataflow.rest.util.ArgumentSanitizer;
 import org.springframework.cloud.dataflow.rest.util.DeploymentPropertiesUtils;
 import org.springframework.cloud.dataflow.server.config.apps.CommonApplicationProperties;
 import org.springframework.cloud.dataflow.server.controller.WhitelistProperties;
 import org.springframework.cloud.dataflow.server.job.LauncherRepository;
+import org.springframework.cloud.dataflow.server.repository.TaskDeploymentRepository;
 import org.springframework.cloud.dataflow.server.service.TaskExecutionInfoService;
 import org.springframework.cloud.dataflow.server.service.TaskExecutionService;
 import org.springframework.cloud.deployer.spi.core.AppDefinition;
@@ -83,6 +86,8 @@ public class DefaultTaskExecutionService implements TaskExecutionService {
 
 	private final TaskExecutionInfoService taskExecutionInfoService;
 
+	private final TaskDeploymentRepository taskDeploymentRepository;
+
 	private final ArgumentSanitizer argumentSanitizer = new ArgumentSanitizer();
 
 	public static final String TASK_DEFINITION_DSL_TEXT = "taskDefinitionDslText";
@@ -90,6 +95,8 @@ public class DefaultTaskExecutionService implements TaskExecutionService {
 	public static final String TASK_DEPLOYMENT_PROPERTIES = "taskDeploymentProperties";
 
 	public static final String COMMAND_LINE_ARGS = "commandLineArgs";
+
+	public static final String TASK_PLATFORM_NAME = "spring.cloud.dataflow.task.platformName";
 
 	/**
 	 * Initializes the {@link DefaultTaskExecutionService}.
@@ -104,7 +111,8 @@ public class DefaultTaskExecutionService implements TaskExecutionService {
 			AuditRecordService auditRecordService,
 			String dataflowServerUri, CommonApplicationProperties commonApplicationProperties,
 			TaskRepository taskRepository,
-			TaskExecutionInfoService taskExecutionInfoService) {
+			TaskExecutionInfoService taskExecutionInfoService,
+			TaskDeploymentRepository taskDeploymentRepository) {
 		Assert.notNull(launcherRepository, "LauncherRepository must not be null");
 		Assert.notNull(metaDataResolver, "metaDataResolver must not be null");
 		Assert.notNull(auditRecordService, "auditRecordService must not be null");
@@ -112,6 +120,7 @@ public class DefaultTaskExecutionService implements TaskExecutionService {
 		Assert.notNull(taskExecutionInfoService, "TaskDefinitionRetriever must not be null");
 		Assert.notNull(taskRepository, "TaskRepository must not be null");
 		Assert.notNull(taskExecutionInfoService, "TaskExecutionInfoService must not be null");
+		Assert.notNull(taskDeploymentRepository, "TaskDeploymentRepository must not be null");
 
 		this.launcherRepository = launcherRepository;
 		this.whitelistProperties = new WhitelistProperties(metaDataResolver);
@@ -120,16 +129,40 @@ public class DefaultTaskExecutionService implements TaskExecutionService {
 		this.commonApplicationProperties = commonApplicationProperties;
 		this.taskRepository = taskRepository;
 		this.taskExecutionInfoService = taskExecutionInfoService;
+		this.taskDeploymentRepository = taskDeploymentRepository;
 	}
 
 	@Override
-	public long executeTask(String taskName, Map<String, String> taskDeploymentProperties,
-			List<String> commandLineArgs, String platformName) {
+	public long executeTask(String taskName, Map<String, String> taskDeploymentProperties, List<String> commandLineArgs) {
 
 		if (taskExecutionInfoService.maxConcurrentExecutionsReached()) {
 			throw new IllegalStateException(String.format(
 					"The maximum concurrent task executions [%d] is at its limit.",
 					taskExecutionInfoService.getMaximumConcurrentTasks()));
+		}
+
+		String platformName = taskDeploymentProperties.get(TASK_PLATFORM_NAME);
+		if (!StringUtils.hasText(platformName)) {
+			platformName = "default";
+		}
+		// Remove since the key for task platform name will not pass validation for app, deployer, or scheduler prefix
+		if (taskDeploymentProperties.containsKey(TASK_PLATFORM_NAME)) {
+			taskDeploymentProperties.remove(TASK_PLATFORM_NAME);
+		}
+
+		DeploymentPropertiesUtils.validateDeploymentProperties(taskDeploymentProperties);
+
+		TaskLauncher taskLauncher = findTaskLaucher(platformName);
+
+		TaskDeployment existingTaskDeployment =
+				taskDeploymentRepository.findTopByTaskDefinitionNameOrderByCreatedOnAsc(taskName);
+		if (existingTaskDeployment != null) {
+			if (!existingTaskDeployment.getPlatformName().equals(platformName)) {
+				throw new IllegalStateException(String.format(
+						"Task definition [%s] has already been deployed on platfrom [%s].  " +
+						"Requested to deploy on platform [%s].",
+						taskName, existingTaskDeployment.getPlatformName(), platformName));
+			}
 		}
 
 		TaskExecutionInformation taskExecutionInformation = taskExecutionInfoService
@@ -157,21 +190,18 @@ public class DefaultTaskExecutionService implements TaskExecutionService {
 		AppDeploymentRequest request = new AppDeploymentRequest(revisedDefinition,
 				taskExecutionInformation.getAppResource(),
 				deployerDeploymentProperties, updatedCmdLineArgs);
-		Launcher launcher = this.launcherRepository.findByName(platformName);
-		if (launcher == null) {
-			throw new IllegalStateException(String.format("No Launcher found for the platform named '%s'",
-					platformName));
-		}
-		TaskLauncher taskLauncher = launcher.getTaskLauncher();
-		if (taskLauncher == null) {
-			throw new IllegalStateException(String.format("No TaskLauncher found for the platform named '%s'",
-					platformName));
-		}
+
 		String id = taskLauncher.launch(request);
 		if (!StringUtils.hasText(id)) {
 			throw new IllegalStateException("Deployment ID is null for the task:" + taskName);
 		}
 		this.updateExternalExecutionId(taskExecution.getExecutionId(), id);
+
+		TaskDeployment taskDeployment = new TaskDeployment();
+		taskDeployment.setTaskDeploymentId(id);
+		taskDeployment.setPlatformName(platformName);
+		taskDeployment.setTaskDefinitionName(taskName);
+		this.taskDeploymentRepository.save(taskDeployment);
 
 		this.auditRecordService.populateAndSaveAuditRecordUsingMapData(
 				AuditOperationType.TASK, AuditActionType.DEPLOY,
@@ -179,6 +209,25 @@ public class DefaultTaskExecutionService implements TaskExecutionService {
 				getAudited(taskDefinition, taskExecutionInformation.getTaskDeploymentProperties(), updatedCmdLineArgs));
 
 		return taskExecution.getExecutionId();
+	}
+
+	private TaskLauncher findTaskLaucher(String platformName) {
+		Launcher launcher = this.launcherRepository.findByName(platformName);
+		if (launcher == null) {
+			List<String> launcherNames =
+					StreamSupport.stream(launcherRepository.findAll().spliterator(), false)
+							.map(Launcher::getName)
+							.collect(Collectors.toList());
+			throw new IllegalStateException(String.format("No Launcher found for the platform named '%s'.  " +
+							"Available platform names are %s",
+					platformName, launcherNames));
+		}
+		TaskLauncher taskLauncher = launcher.getTaskLauncher();
+		if (taskLauncher == null) {
+			throw new IllegalStateException(String.format("No TaskLauncher found for the platform named '%s'",
+					platformName));
+		}
+		return taskLauncher;
 	}
 
 	protected void updateExternalExecutionId(long executionId, String taskLaunchId) {
