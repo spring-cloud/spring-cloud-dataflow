@@ -98,6 +98,22 @@ public class ArgumentSanitizerTest {
 		Assert.assertEquals("task1 --some.password='******' --another-secret='******'", this.sanitizer.sanitizeTaskDsl(taskDefinition));
 	}
 
+
+	@Test
+	public void testSanitizeComposedTaskDefinition() {
+		TaskDefinition taskDefinition = new TaskDefinition("mytask", "task1 --some.password=foobar && task2 --some.password=woof");
+		Assert.assertEquals("task1 --some.password='******' && task2 --some.password='******'", this.sanitizer.sanitizeTaskDsl(taskDefinition));
+	}
+
+	@Test
+	public void testSanitizeComposedTaskSplitDefinition() {
+		TaskDefinition taskDefinition = new TaskDefinition(
+				"mytask", "<task1 --some.password=foobar || task2 --some.password=woof> && task3  --some.password=foobar");
+		Assert.assertEquals(
+				"<task1 --some.password='******' || task2 --some.password='******'> && task3 --some.password='******'",
+				this.sanitizer.sanitizeTaskDsl(taskDefinition));
+	}
+
 	@Test
 	public void testSanitizeArguments() {
 		final List<String> arguments = new ArrayList<>();
