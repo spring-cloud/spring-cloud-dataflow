@@ -33,12 +33,12 @@ spring:
           implicit-strategy: org.springframework.boot.orm.jpa.hibernate.SpringImplicitNamingStrategy
   flyway:
     enabled: true
-    baselineVersion: 0
+    baselineVersion: 1
     baselineOnMigrate: true
     table: flyway_schema_history_dataflow
     locations:
       - classpath:org/springframework/cloud/dataflow/server/db/migration/{vendor}
-    check-location: true
+    check-location: false
   autoconfigure:
     exclude: org.springframework.boot.autoconfigure.session.SessionAutoConfiguration
   cloud:

@@ -23,6 +23,7 @@ import org.slf4j.LoggerFactory;
 
 import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.support.SQLErrorCodeSQLExceptionTranslator;
+import org.springframework.util.Assert;
 
 /**
  * {@link SQLErrorCodeSQLExceptionTranslator} suppressing errors based on
@@ -34,15 +35,25 @@ import org.springframework.jdbc.support.SQLErrorCodeSQLExceptionTranslator;
 public class SuppressSQLErrorCodesTranslator extends SQLErrorCodeSQLExceptionTranslator {
 
 	private static final org.slf4j.Logger logger = LoggerFactory.getLogger(SuppressSQLErrorCodesTranslator.class);
-
 	private final List<Integer> errorCodes;
 
+	/**
+	 * Instantiates a new suppress SQL error codes translator.
+	 *
+	 * @param errorCode the error code
+	 */
 	public SuppressSQLErrorCodesTranslator(int errorCode) {
 		this(Arrays.asList(errorCode));
 	}
 
+	/**
+	 * Instantiates a new suppress SQL error codes translator.
+	 *
+	 * @param errorCodes the error codes
+	 */
 	public SuppressSQLErrorCodesTranslator(List<Integer> errorCodes) {
 		super();
+		Assert.notNull(errorCodes, "errorCodes must be set");
 		this.errorCodes = errorCodes;
 	}
 

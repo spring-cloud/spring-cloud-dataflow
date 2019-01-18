@@ -15,10 +15,11 @@
  */
 package org.springframework.cloud.dataflow.server.db.migration.oracle;
 
+import java.util.Arrays;
+import java.util.List;
+
 import org.springframework.cloud.dataflow.server.db.migration.AbstractMigration;
-import org.springframework.cloud.dataflow.server.db.migration.SuppressSQLErrorCodesTranslator;
-import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.support.SQLErrorCodeSQLExceptionTranslator;
+import org.springframework.cloud.dataflow.server.db.migration.SqlCommand;
 
 /**
  * Repeatable migration ensuring that {@code hibernate_sequence} table exists.
@@ -34,16 +35,10 @@ public class R__Hibernate_Sequence extends AbstractMigration {
 	// StatementCallback; bad SQL grammar [create sequence hibernate_sequence start with 1 increment by 1];
 	// nested exception is java.sql.SQLSyntaxErrorException:
 	// ORA-00955: name is already used by an existing object
+	private final static List<SqlCommand> commands = Arrays.asList(
+			SqlCommand.from("create sequence hibernate_sequence start with 1 increment by 1", 955));
 
-	private final static SuppressSQLErrorCodesTranslator errorCodesTranslator = new SuppressSQLErrorCodesTranslator(955);
-
-	@Override
-	protected void executeInternal(JdbcTemplate jdbcTemplate) {
-		jdbcTemplate.execute("create sequence hibernate_sequence start with 1 increment by 1");
-	}
-
-	@Override
-	protected SQLErrorCodeSQLExceptionTranslator getExceptionTranslator() {
-		return errorCodesTranslator;
+	public R__Hibernate_Sequence() {
+		super(commands);
 	}
 }
