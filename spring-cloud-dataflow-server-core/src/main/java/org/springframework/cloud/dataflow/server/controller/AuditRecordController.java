@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 the original author or authors.
+ * Copyright 2018-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -78,6 +78,10 @@ public class AuditRecordController {
 	 * @param assembler assembler for {@link AuditRecord}
 	 * @param actions Optional. For which {@link AuditActionType}s do you want to retrieve
 	 *     {@link AuditRecord}s
+	 * @param fromDate Optional. The from date in ISO_DATE_TIME format. eg.:
+	 *     2019-01-01T19:30:00.000-01:00
+	 * @param toDate Optional. The to date in ISO_DATE_TIME format. eg.:
+	 *     2019-01-04T19:30:00.000-01:00
 	 * @param operations Optional. For which {@link AuditOperationType}s do you want to
 	 *     retrieve {@link AuditRecord}s
 	 * @return list of audit records
@@ -87,40 +91,12 @@ public class AuditRecordController {
 	public PagedResources<AuditRecordResource> list(Pageable pageable,
 			@RequestParam(required = false) AuditActionType[] actions,
 			@RequestParam(required = false) AuditOperationType[] operations,
-			PagedResourcesAssembler<AuditRecord> assembler) {
-		Page<AuditRecord> auditRecords = this.auditRecordService
-				.findAuditRecordByAuditOperationTypeAndAuditActionType(pageable, actions, operations);
-		return assembler.toResource(auditRecords, new Assembler(auditRecords));
-	}
-
-	/**
-	 * Return a page-able list of {@link AuditRecordResource}s depending on the date
-	 * parameters. The parser uses {@code DateTimeFormatter.ISO_DATE_TIME} to parse the String
-	 * parameters.
-	 *
-	 * If fomDate is null, the endpoint will return the {@link AuditRecord}s from the first
-	 * record until the given date. If toDate is null, the endpoint will return the
-	 * {@link AuditRecord}s from the given date to the last record. If both of the parameters
-	 * are not null the endpoint will return the {@link AuditRecord}s between the given range.
-	 * If both of the parameters are null it will return all of the inserted
-	 * {@link AuditRecord}s.
-	 *
-	 * @param pageable Pagination information
-	 * @param assembler assembler for {@link AuditRecord}
-	 * @param fromDate Optional. The from date in ISO_DATE_TIME format. eg.:
-	 *     2019-01-01T19:30:00.000-01:00
-	 * @param toDate Optional. The to date in ISO_DATE_TIME format. eg.:
-	 *     2019-01-04T19:30:00.000-01:00
-	 * @return list of audit records
-	 */
-	@RequestMapping(value = "query", method = RequestMethod.GET)
-	@ResponseStatus(HttpStatus.OK)
-	public PagedResources<AuditRecordResource> listByDate(Pageable pageable,
 			@RequestParam(required = false) String fromDate,
 			@RequestParam(required = false) String toDate,
 			PagedResourcesAssembler<AuditRecord> assembler) {
 		Page<AuditRecord> auditRecords = this.auditRecordService
-				.findAuditRecordsByGivenDate(fromDate, toDate, pageable);
+				.findAuditRecordByAuditOperationTypeAndAuditActionTypeAndDate(pageable, actions, operations, fromDate,
+						toDate);
 		return assembler.toResource(auditRecords, new Assembler(auditRecords));
 	}
 

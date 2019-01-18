@@ -256,7 +256,7 @@ public class AuditRecordControllerTests {
 		ZonedDateTime time = betweenDate.withZoneSameInstant(ZoneOffset.of("+01:00"));
 		String toDate = time.toString();
 
-		mockMvc.perform(get("/audit-records/query?toDate=" + toDate).accept(MediaType.APPLICATION_JSON))
+		mockMvc.perform(get("/audit-records?toDate=" + toDate).accept(MediaType.APPLICATION_JSON))
 				.andDo(print())
 				.andExpect(status().isOk())
 				.andExpect(jsonPath("$.content.*", hasSize(2)))
@@ -275,7 +275,7 @@ public class AuditRecordControllerTests {
 		ZonedDateTime betweenTime = endDate.withZoneSameInstant(ZoneOffset.of("+01:00"));
 		String fromDate = betweenTime.toString();
 
-		mockMvc.perform(get("/audit-records/query?fromDate=" + fromDate).accept(MediaType.APPLICATION_JSON))
+		mockMvc.perform(get("/audit-records?fromDate=" + fromDate).accept(MediaType.APPLICATION_JSON))
 				.andDo(print())
 				.andExpect(status().isOk())
 				.andExpect(jsonPath("$.content.*", hasSize(2)))
@@ -297,7 +297,7 @@ public class AuditRecordControllerTests {
 		ZonedDateTime endTime = endDate.withZoneSameInstant(ZoneOffset.of("+01:00"));
 		String toDate = endTime.toString();
 
-		mockMvc.perform(get("/audit-records/query?fromDate=" + fromDate + "&toDate=" + toDate)
+		mockMvc.perform(get("/audit-records?fromDate=" + fromDate + "&toDate=" + toDate)
 				.accept(MediaType.APPLICATION_JSON))
 				.andDo(print())
 				.andExpect(status().isOk())
@@ -310,7 +310,7 @@ public class AuditRecordControllerTests {
 
 	@Test
 	public void testRetrieveAuditRecordsBetweenTwoNullDate() throws Exception {
-		mockMvc.perform(get("/audit-records/query").accept(MediaType.APPLICATION_JSON))
+		mockMvc.perform(get("/audit-records").accept(MediaType.APPLICATION_JSON))
 				.andDo(print())
 				.andExpect(status().isOk())
 				.andExpect(jsonPath("$.content.*", hasSize(5)))

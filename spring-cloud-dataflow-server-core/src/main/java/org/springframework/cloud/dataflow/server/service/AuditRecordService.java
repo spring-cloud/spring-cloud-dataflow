@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 the original author or authors.
+ * Copyright 2018-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -79,15 +79,22 @@ public interface AuditRecordService {
 	/**
 	 * Allows for querying of {@link AuditRecord}s.
 	 *
-	 * @param pageable Contains pagination information. If null, all {@link AuditRecord}s will be returned
-	 * @param actions Can be null. For which {@link AuditActionType}s shall {@link AuditRecord}s be returned
-	 * @param operations Can be null. For which {@link AuditOperationType}s shall {@link AuditRecord}s be returned
+	 * @param pageable Contains pagination information. If null, all {@link AuditRecord}s will
+	 *     be returned
+	 * @param actions Can be null. For which {@link AuditActionType}s shall
+	 *     {@link AuditRecord}s be returned
+	 * @param operations Can be null. For which {@link AuditOperationType}s shall
+	 *     {@link AuditRecord}s be returned
+	 * @param fromDate Can be null. The start date of the query records
+	 * @param toDate Can be null. The end date of the query records
 	 * @return a {@link Page} of {@link AuditRecord}s
 	 */
-	Page<AuditRecord> findAuditRecordByAuditOperationTypeAndAuditActionType(
+	Page<AuditRecord> findAuditRecordByAuditOperationTypeAndAuditActionTypeAndDate(
 			Pageable pageable,
 			AuditActionType[] actions,
-			AuditOperationType[] operations);
+			AuditOperationType[] operations,
+			String fromDate,
+			String toDate);
 
 	/**
 	 * Find a single {@link AuditRecord} by providing a mandatory id.
@@ -97,15 +104,4 @@ public interface AuditRecordService {
 	 */
 	Optional<AuditRecord> findById(Long id);
 
-	/**
-	 * Find and return the {@link AuditRecord}s between the given range. If both of them are
-	 * null all {@link AuditRecord}s will be returned.
-	 *
-	 * @param fromDate the start date of the query
-	 * @param toDate the end date of the query
-	 * @param pageable Contains pagination information. If null, all {@link AuditRecord}s will
-	 *     be returned
-	 * @return a {@link Page} of {@link AuditRecord}s
-	 */
-	Page<AuditRecord> findAuditRecordsByGivenDate(String fromDate, String toDate, Pageable pageable);
 }
