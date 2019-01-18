@@ -15,8 +15,8 @@
   "editable": true,
   "gnetId": null,
   "graphTooltip": 0,
-  "id": 4,
-  "iteration": 1547738898678,
+  "id": 5,
+  "iteration": 1547806580541,
   "links": [
     {
       "icon": "external link",
@@ -47,7 +47,7 @@
       },
       "gridPos": {
         "h": 4,
-        "w": 3,
+        "w": 2,
         "x": 0,
         "y": 0
       },
@@ -116,87 +116,6 @@
         "rgba(237, 129, 40, 0.89)",
         "#d44a3a"
       ],
-      "decimals": null,
-      "description": "Number of active Application Instances",
-      "format": "short",
-      "gauge": {
-        "maxValue": 200,
-        "minValue": 0,
-        "show": true,
-        "thresholdLabels": false,
-        "thresholdMarkers": true
-      },
-      "gridPos": {
-        "h": 4,
-        "w": 3,
-        "x": 3,
-        "y": 0
-      },
-      "id": 29,
-      "interval": null,
-      "links": [],
-      "mappingType": 1,
-      "mappingTypes": [
-        {
-          "name": "value to text",
-          "value": 1
-        },
-        {
-          "name": "range to text",
-          "value": 2
-        }
-      ],
-      "maxDataPoints": 100,
-      "nullPointMode": "connected",
-      "nullText": null,
-      "postfix": "",
-      "postfixFontSize": "50%",
-      "prefix": "",
-      "prefixFontSize": "50%",
-      "rangeMaps": [
-        {
-          "from": "null",
-          "text": "N/A",
-          "to": "null"
-        }
-      ],
-      "sparkline": {
-        "fillColor": "rgba(31, 118, 189, 0.18)",
-        "full": true,
-        "lineColor": "rgb(31, 120, 193)",
-        "show": true
-      },
-      "tableColumn": "",
-      "targets": [
-        {
-          "expr": "count(count by (application_guid) (spring_integration_send_seconds_count))",
-          "format": "time_series",
-          "intervalFactor": 1,
-          "refId": "A"
-        }
-      ],
-      "thresholds": "100, 150",
-      "title": "Total App Count",
-      "type": "singlestat",
-      "valueFontSize": "80%",
-      "valueMaps": [
-        {
-          "op": "=",
-          "text": "N/A",
-          "value": "null"
-        }
-      ],
-      "valueName": "current"
-    },
-    {
-      "cacheTimeout": null,
-      "colorBackground": false,
-      "colorValue": false,
-      "colors": [
-        "#299c46",
-        "rgba(237, 129, 40, 0.89)",
-        "#d44a3a"
-      ],
       "format": "decbytes",
       "gauge": {
         "maxValue": 100,
@@ -207,8 +126,8 @@
       },
       "gridPos": {
         "h": 4,
-        "w": 3,
-        "x": 6,
+        "w": 2,
+        "x": 2,
         "y": 0
       },
       "id": 43,
@@ -276,164 +195,6 @@
         "rgba(237, 129, 40, 0.89)",
         "#d44a3a"
       ],
-      "format": "percentunit",
-      "gauge": {
-        "maxValue": 100,
-        "minValue": 0,
-        "show": false,
-        "thresholdLabels": false,
-        "thresholdMarkers": true
-      },
-      "gridPos": {
-        "h": 4,
-        "w": 3,
-        "x": 9,
-        "y": 0
-      },
-      "id": 44,
-      "interval": null,
-      "links": [],
-      "mappingType": 1,
-      "mappingTypes": [
-        {
-          "name": "value to text",
-          "value": 1
-        },
-        {
-          "name": "range to text",
-          "value": 2
-        }
-      ],
-      "maxDataPoints": 100,
-      "nullPointMode": "connected",
-      "nullText": null,
-      "postfix": "",
-      "postfixFontSize": "50%",
-      "prefix": "",
-      "prefixFontSize": "50%",
-      "rangeMaps": [
-        {
-          "from": "null",
-          "text": "N/A",
-          "to": "null"
-        }
-      ],
-      "sparkline": {
-        "fillColor": "rgba(31, 118, 189, 0.18)",
-        "full": true,
-        "lineColor": "rgb(31, 120, 193)",
-        "show": true
-      },
-      "tableColumn": "",
-      "targets": [
-        {
-          "expr": "sum(process_cpu_usage{stream_name=~\"$stream_name\"})",
-          "format": "time_series",
-          "intervalFactor": 1,
-          "refId": "A"
-        }
-      ],
-      "thresholds": "",
-      "title": "CPU",
-      "type": "singlestat",
-      "valueFontSize": "80%",
-      "valueMaps": [
-        {
-          "op": "=",
-          "text": "N/A",
-          "value": "null"
-        }
-      ],
-      "valueName": "current"
-    },
-    {
-      "cacheTimeout": null,
-      "colorBackground": false,
-      "colorValue": false,
-      "colors": [
-        "#299c46",
-        "rgba(237, 129, 40, 0.89)",
-        "#d44a3a"
-      ],
-      "format": "s",
-      "gauge": {
-        "maxValue": 100,
-        "minValue": 0,
-        "show": false,
-        "thresholdLabels": false,
-        "thresholdMarkers": true
-      },
-      "gridPos": {
-        "h": 4,
-        "w": 3,
-        "x": 12,
-        "y": 0
-      },
-      "id": 45,
-      "interval": null,
-      "links": [],
-      "mappingType": 1,
-      "mappingTypes": [
-        {
-          "name": "value to text",
-          "value": 1
-        },
-        {
-          "name": "range to text",
-          "value": 2
-        }
-      ],
-      "maxDataPoints": 100,
-      "nullPointMode": "connected",
-      "nullText": null,
-      "postfix": "",
-      "postfixFontSize": "50%",
-      "prefix": "",
-      "prefixFontSize": "50%",
-      "rangeMaps": [
-        {
-          "from": "null",
-          "text": "N/A",
-          "to": "null"
-        }
-      ],
-      "sparkline": {
-        "fillColor": "rgba(31, 118, 189, 0.18)",
-        "full": true,
-        "lineColor": "rgb(31, 120, 193)",
-        "show": true
-      },
-      "tableColumn": "",
-      "targets": [
-        {
-          "expr": "avg(rate(jvm_gc_pause_seconds_count{stream_name=~\"$stream_name\"}[60s]))",
-          "format": "time_series",
-          "intervalFactor": 1,
-          "refId": "A"
-        }
-      ],
-      "thresholds": "",
-      "title": "GC Rate",
-      "type": "singlestat",
-      "valueFontSize": "80%",
-      "valueMaps": [
-        {
-          "op": "=",
-          "text": "N/A",
-          "value": "null"
-        }
-      ],
-      "valueName": "current"
-    },
-    {
-      "cacheTimeout": null,
-      "colorBackground": false,
-      "colorValue": false,
-      "colors": [
-        "#299c46",
-        "rgba(237, 129, 40, 0.89)",
-        "#d44a3a"
-      ],
       "format": "short",
       "gauge": {
         "maxValue": 100,
@@ -444,166 +205,8 @@
       },
       "gridPos": {
         "h": 4,
-        "w": 3,
-        "x": 15,
-        "y": 0
-      },
-      "id": 47,
-      "interval": null,
-      "links": [],
-      "mappingType": 1,
-      "mappingTypes": [
-        {
-          "name": "value to text",
-          "value": 1
-        },
-        {
-          "name": "range to text",
-          "value": 2
-        }
-      ],
-      "maxDataPoints": 100,
-      "nullPointMode": "connected",
-      "nullText": null,
-      "postfix": "",
-      "postfixFontSize": "50%",
-      "prefix": "",
-      "prefixFontSize": "50%",
-      "rangeMaps": [
-        {
-          "from": "null",
-          "text": "N/A",
-          "to": "null"
-        }
-      ],
-      "sparkline": {
-        "fillColor": "rgba(31, 118, 189, 0.18)",
-        "full": true,
-        "lineColor": "rgb(31, 120, 193)",
-        "show": true
-      },
-      "tableColumn": "",
-      "targets": [
-        {
-          "expr": "sum(jvm_threads_live_threads{stream_name=~\"$stream_name\"})",
-          "format": "time_series",
-          "intervalFactor": 1,
-          "refId": "A"
-        }
-      ],
-      "thresholds": "",
-      "title": "Threads",
-      "type": "singlestat",
-      "valueFontSize": "80%",
-      "valueMaps": [
-        {
-          "op": "=",
-          "text": "N/A",
-          "value": "null"
-        }
-      ],
-      "valueName": "current"
-    },
-    {
-      "cacheTimeout": null,
-      "colorBackground": false,
-      "colorValue": false,
-      "colors": [
-        "#299c46",
-        "rgba(237, 129, 40, 0.89)",
-        "#d44a3a"
-      ],
-      "format": "short",
-      "gauge": {
-        "maxValue": 100,
-        "minValue": 0,
-        "show": false,
-        "thresholdLabels": false,
-        "thresholdMarkers": true
-      },
-      "gridPos": {
-        "h": 4,
-        "w": 3,
-        "x": 18,
-        "y": 0
-      },
-      "id": 46,
-      "interval": null,
-      "links": [],
-      "mappingType": 1,
-      "mappingTypes": [
-        {
-          "name": "value to text",
-          "value": 1
-        },
-        {
-          "name": "range to text",
-          "value": 2
-        }
-      ],
-      "maxDataPoints": 100,
-      "nullPointMode": "connected",
-      "nullText": null,
-      "postfix": "",
-      "postfixFontSize": "50%",
-      "prefix": "",
-      "prefixFontSize": "50%",
-      "rangeMaps": [
-        {
-          "from": "null",
-          "text": "N/A",
-          "to": "null"
-        }
-      ],
-      "sparkline": {
-        "fillColor": "rgba(31, 118, 189, 0.18)",
-        "full": true,
-        "lineColor": "rgb(31, 120, 193)",
-        "show": true
-      },
-      "tableColumn": "",
-      "targets": [
-        {
-          "expr": "sum(tomcat_global_error_total{stream_name=~\"$stream_name\"})",
-          "format": "time_series",
-          "intervalFactor": 1,
-          "refId": "A"
-        }
-      ],
-      "thresholds": "",
-      "title": "Tomcat Errors",
-      "type": "singlestat",
-      "valueFontSize": "80%",
-      "valueMaps": [
-        {
-          "op": "=",
-          "text": "N/A",
-          "value": "null"
-        }
-      ],
-      "valueName": "current"
-    },
-    {
-      "cacheTimeout": null,
-      "colorBackground": false,
-      "colorValue": false,
-      "colors": [
-        "#299c46",
-        "rgba(237, 129, 40, 0.89)",
-        "#d44a3a"
-      ],
-      "format": "short",
-      "gauge": {
-        "maxValue": 100,
-        "minValue": 0,
-        "show": false,
-        "thresholdLabels": false,
-        "thresholdMarkers": true
-      },
-      "gridPos": {
-        "h": 4,
-        "w": 3,
-        "x": 21,
+        "w": 2,
+        "x": 4,
         "y": 0
       },
       "id": 48,
@@ -670,10 +273,10 @@
       "description": "Average throughput of the apps in the stream",
       "fill": 1,
       "gridPos": {
-        "h": 7,
+        "h": 8,
         "w": 3,
-        "x": 0,
-        "y": 4
+        "x": 6,
+        "y": 0
       },
       "id": 34,
       "legend": {
@@ -710,7 +313,7 @@
       "timeFrom": null,
       "timeRegions": [],
       "timeShift": null,
-      "title": "Number of Stream Apps",
+      "title": "Number of Apps",
       "tooltip": {
         "shared": true,
         "sort": 0,
@@ -755,10 +358,10 @@
       "description": "Average throughput of the apps in the stream",
       "fill": 1,
       "gridPos": {
-        "h": 7,
-        "w": 7,
-        "x": 3,
-        "y": 4
+        "h": 8,
+        "w": 5,
+        "x": 9,
+        "y": 0
       },
       "id": 31,
       "legend": {
@@ -784,12 +387,20 @@
       "steppedLine": false,
       "targets": [
         {
-          "expr": "avg(rate(spring_integration_send_seconds_count{result=\"success\", stream_name=~\"$stream_name\"}[60s])) by (stream_name,result)",
+          "expr": "avg(rate(spring_integration_send_seconds_count{result=\"success\", application_type=\"source\", stream_name=~\"$stream_name\"}[60s])) by (stream_name,result)",
           "format": "time_series",
           "hide": false,
           "intervalFactor": 1,
-          "legendFormat": "{{stream_name}} ",
+          "legendFormat": "{{stream_name}} -input",
           "refId": "A"
+        },
+        {
+          "expr": "avg(rate(spring_integration_send_seconds_count{result=\"success\", application_type=\"sink\", stream_name=~\"$stream_name\"}[60s])) by (stream_name,result)",
+          "format": "time_series",
+          "hide": false,
+          "intervalFactor": 1,
+          "legendFormat": "{{stream_name}} -output",
+          "refId": "C"
         },
         {
           "expr": "avg(rate(spring_integration_send_seconds_count{result=\"failure\", stream_name=~\"$stream_name\"}[60s])) by (stream_name,result)",
@@ -849,10 +460,10 @@
       "description": "Average latency of all apps in a stream",
       "fill": 1,
       "gridPos": {
-        "h": 7,
-        "w": 7,
-        "x": 10,
-        "y": 4
+        "h": 8,
+        "w": 5,
+        "x": 14,
+        "y": 0
       },
       "id": 32,
       "legend": {
@@ -878,14 +489,14 @@
       "steppedLine": false,
       "targets": [
         {
-          "expr": "avg(rate(spring_integration_send_seconds_sum{result=\"success\",stream_name=~\"$stream_name\"}[60s])/rate(spring_integration_send_seconds_count{result=\"success\",stream_name=~\"$stream_name\"}[60s])) by (stream_name,result)",
+          "expr": "sum(spring_integration_send_seconds_sum{result=\"success\",stream_name=~\"$stream_name\"}/spring_integration_send_seconds_count{result=\"success\",stream_name=~\"$stream_name\"}) by (stream_name,result)",
           "format": "time_series",
           "intervalFactor": 1,
           "legendFormat": "{{stream_name}}",
           "refId": "A"
         },
         {
-          "expr": "avg(rate(spring_integration_send_seconds_sum{result=\"failure\",stream_name=~\"$stream_name\"}[60s])/rate(spring_integration_send_seconds_count{result=\"success\",stream_name=~\"$stream_name\"}[60s])) by (stream_name,result)",
+          "expr": "sum(spring_integration_send_seconds_sum{result=\"failure\",stream_name=~\"$stream_name\"}/spring_integration_send_seconds_count{result=\"success\",stream_name=~\"$stream_name\"}) by (stream_name,result)",
           "format": "time_series",
           "intervalFactor": 1,
           "legendFormat": "{{stream_name}}  ({{result}})",
@@ -941,10 +552,10 @@
       "description": "",
       "fill": 1,
       "gridPos": {
-        "h": 7,
-        "w": 7,
-        "x": 17,
-        "y": 4
+        "h": 8,
+        "w": 5,
+        "x": 19,
+        "y": 0
       },
       "id": 49,
       "legend": {
@@ -1027,6 +638,245 @@
       }
     },
     {
+      "cacheTimeout": null,
+      "colorBackground": false,
+      "colorValue": false,
+      "colors": [
+        "#299c46",
+        "rgba(237, 129, 40, 0.89)",
+        "#d44a3a"
+      ],
+      "decimals": null,
+      "description": "Number of active Application Instances",
+      "format": "short",
+      "gauge": {
+        "maxValue": 200,
+        "minValue": 0,
+        "show": true,
+        "thresholdLabels": false,
+        "thresholdMarkers": true
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 2,
+        "x": 0,
+        "y": 4
+      },
+      "id": 29,
+      "interval": null,
+      "links": [],
+      "mappingType": 1,
+      "mappingTypes": [
+        {
+          "name": "value to text",
+          "value": 1
+        },
+        {
+          "name": "range to text",
+          "value": 2
+        }
+      ],
+      "maxDataPoints": 100,
+      "nullPointMode": "connected",
+      "nullText": null,
+      "postfix": "",
+      "postfixFontSize": "50%",
+      "prefix": "",
+      "prefixFontSize": "50%",
+      "rangeMaps": [
+        {
+          "from": "null",
+          "text": "N/A",
+          "to": "null"
+        }
+      ],
+      "sparkline": {
+        "fillColor": "rgba(31, 118, 189, 0.18)",
+        "full": true,
+        "lineColor": "rgb(31, 120, 193)",
+        "show": true
+      },
+      "tableColumn": "",
+      "targets": [
+        {
+          "expr": "count(count by (application_guid) (spring_integration_send_seconds_count))",
+          "format": "time_series",
+          "intervalFactor": 1,
+          "refId": "A"
+        }
+      ],
+      "thresholds": "100, 150",
+      "title": "Total App Count",
+      "type": "singlestat",
+      "valueFontSize": "80%",
+      "valueMaps": [
+        {
+          "op": "=",
+          "text": "N/A",
+          "value": "null"
+        }
+      ],
+      "valueName": "current"
+    },
+    {
+      "cacheTimeout": null,
+      "colorBackground": false,
+      "colorValue": false,
+      "colors": [
+        "#299c46",
+        "rgba(237, 129, 40, 0.89)",
+        "#d44a3a"
+      ],
+      "format": "percentunit",
+      "gauge": {
+        "maxValue": 100,
+        "minValue": 0,
+        "show": false,
+        "thresholdLabels": false,
+        "thresholdMarkers": true
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 2,
+        "x": 2,
+        "y": 4
+      },
+      "id": 44,
+      "interval": null,
+      "links": [],
+      "mappingType": 1,
+      "mappingTypes": [
+        {
+          "name": "value to text",
+          "value": 1
+        },
+        {
+          "name": "range to text",
+          "value": 2
+        }
+      ],
+      "maxDataPoints": 100,
+      "nullPointMode": "connected",
+      "nullText": null,
+      "postfix": "",
+      "postfixFontSize": "50%",
+      "prefix": "",
+      "prefixFontSize": "50%",
+      "rangeMaps": [
+        {
+          "from": "null",
+          "text": "N/A",
+          "to": "null"
+        }
+      ],
+      "sparkline": {
+        "fillColor": "rgba(31, 118, 189, 0.18)",
+        "full": true,
+        "lineColor": "rgb(31, 120, 193)",
+        "show": true
+      },
+      "tableColumn": "",
+      "targets": [
+        {
+          "expr": "sum(process_cpu_usage{stream_name=~\"$stream_name\"})",
+          "format": "time_series",
+          "intervalFactor": 1,
+          "refId": "A"
+        }
+      ],
+      "thresholds": "",
+      "title": "CPU",
+      "type": "singlestat",
+      "valueFontSize": "80%",
+      "valueMaps": [
+        {
+          "op": "=",
+          "text": "N/A",
+          "value": "null"
+        }
+      ],
+      "valueName": "current"
+    },
+    {
+      "cacheTimeout": null,
+      "colorBackground": false,
+      "colorValue": false,
+      "colors": [
+        "#299c46",
+        "rgba(237, 129, 40, 0.89)",
+        "#d44a3a"
+      ],
+      "format": "short",
+      "gauge": {
+        "maxValue": 100,
+        "minValue": 0,
+        "show": false,
+        "thresholdLabels": false,
+        "thresholdMarkers": true
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 2,
+        "x": 4,
+        "y": 4
+      },
+      "id": 46,
+      "interval": null,
+      "links": [],
+      "mappingType": 1,
+      "mappingTypes": [
+        {
+          "name": "value to text",
+          "value": 1
+        },
+        {
+          "name": "range to text",
+          "value": 2
+        }
+      ],
+      "maxDataPoints": 100,
+      "nullPointMode": "connected",
+      "nullText": null,
+      "postfix": "",
+      "postfixFontSize": "50%",
+      "prefix": "",
+      "prefixFontSize": "50%",
+      "rangeMaps": [
+        {
+          "from": "null",
+          "text": "N/A",
+          "to": "null"
+        }
+      ],
+      "sparkline": {
+        "fillColor": "rgba(31, 118, 189, 0.18)",
+        "full": true,
+        "lineColor": "rgb(31, 120, 193)",
+        "show": true
+      },
+      "tableColumn": "",
+      "targets": [
+        {
+          "expr": "sum(tomcat_global_error_total{stream_name=~\"$stream_name\"})",
+          "format": "time_series",
+          "intervalFactor": 1,
+          "refId": "A"
+        }
+      ],
+      "thresholds": "",
+      "title": "Tomcat Errors",
+      "type": "singlestat",
+      "valueFontSize": "80%",
+      "valueMaps": [
+        {
+          "op": "=",
+          "text": "N/A",
+          "value": "null"
+        }
+      ],
+      "valueName": "current"
+    },
+    {
       "aliasColors": {},
       "bars": false,
       "dashLength": 10,
@@ -1034,10 +884,10 @@
       "datasource": "ScdfPrometheus",
       "fill": 1,
       "gridPos": {
-        "h": 8,
-        "w": 8,
+        "h": 6,
+        "w": 5,
         "x": 0,
-        "y": 11
+        "y": 8
       },
       "id": 35,
       "legend": {
@@ -1074,7 +924,7 @@
       "timeFrom": null,
       "timeRegions": [],
       "timeShift": null,
-      "title": "Avg Stream CPU",
+      "title": "Stream CPU",
       "tooltip": {
         "shared": true,
         "sort": 0,
@@ -1119,10 +969,10 @@
       "datasource": "ScdfPrometheus",
       "fill": 1,
       "gridPos": {
-        "h": 8,
-        "w": 8,
-        "x": 8,
-        "y": 11
+        "h": 6,
+        "w": 5,
+        "x": 5,
+        "y": 8
       },
       "id": 22,
       "legend": {
@@ -1159,7 +1009,7 @@
       "timeFrom": null,
       "timeRegions": [],
       "timeShift": null,
-      "title": "Avg. Stream Memory",
+      "title": "Stream Memory",
       "tooltip": {
         "shared": true,
         "sort": 0,
@@ -1204,10 +1054,10 @@
       "datasource": "ScdfPrometheus",
       "fill": 1,
       "gridPos": {
-        "h": 8,
-        "w": 8,
-        "x": 16,
-        "y": 11
+        "h": 6,
+        "w": 5,
+        "x": 10,
+        "y": 8
       },
       "id": 24,
       "legend": {
@@ -1289,10 +1139,10 @@
       "datasource": "ScdfPrometheus",
       "fill": 1,
       "gridPos": {
-        "h": 8,
-        "w": 8,
-        "x": 0,
-        "y": 19
+        "h": 6,
+        "w": 5,
+        "x": 15,
+        "y": 8
       },
       "id": 23,
       "legend": {
@@ -1374,95 +1224,10 @@
       "datasource": "ScdfPrometheus",
       "fill": 1,
       "gridPos": {
-        "h": 8,
-        "w": 8,
-        "x": 8,
-        "y": 19
-      },
-      "id": 18,
-      "legend": {
-        "avg": false,
-        "current": false,
-        "max": false,
-        "min": false,
-        "show": true,
-        "total": false,
-        "values": false
-      },
-      "lines": true,
-      "linewidth": 1,
-      "links": [],
-      "nullPointMode": "null",
-      "percentage": false,
-      "pointradius": 5,
-      "points": false,
-      "renderer": "flot",
-      "seriesOverrides": [],
-      "spaceLength": 10,
-      "stack": false,
-      "steppedLine": false,
-      "targets": [
-        {
-          "expr": "sum(rate(tomcat_global_error_total{stream_name=~\"$stream_name\"}[60s])) by (stream_name)",
-          "format": "time_series",
-          "intervalFactor": 1,
-          "legendFormat": "{{stream_name}}",
-          "refId": "A"
-        }
-      ],
-      "thresholds": [],
-      "timeFrom": null,
-      "timeRegions": [],
-      "timeShift": null,
-      "title": "Tomcat Error Rate",
-      "tooltip": {
-        "shared": true,
-        "sort": 0,
-        "value_type": "individual"
-      },
-      "type": "graph",
-      "xaxis": {
-        "buckets": null,
-        "mode": "time",
-        "name": null,
-        "show": true,
-        "values": []
-      },
-      "yaxes": [
-        {
-          "format": "short",
-          "label": null,
-          "logBase": 1,
-          "max": null,
-          "min": "0",
-          "show": true
-        },
-        {
-          "format": "short",
-          "label": null,
-          "logBase": 1,
-          "max": null,
-          "min": null,
-          "show": false
-        }
-      ],
-      "yaxis": {
-        "align": false,
-        "alignLevel": null
-      }
-    },
-    {
-      "aliasColors": {},
-      "bars": false,
-      "dashLength": 10,
-      "dashes": false,
-      "datasource": "ScdfPrometheus",
-      "fill": 1,
-      "gridPos": {
-        "h": 8,
-        "w": 8,
-        "x": 16,
-        "y": 19
+        "h": 6,
+        "w": 4,
+        "x": 20,
+        "y": 8
       },
       "id": 33,
       "legend": {
@@ -1546,9 +1311,9 @@
       {
         "allValue": null,
         "current": {
-          "text": "All",
+          "text": "s3",
           "value": [
-            "$__all"
+            "s3"
           ]
         },
         "datasource": "ScdfPrometheus",
@@ -1573,7 +1338,7 @@
     ]
   },
   "time": {
-    "from": "now-3h",
+    "from": "now-5m",
     "to": "now"
   },
   "timepicker": {
@@ -1604,5 +1369,5 @@
   "timezone": "",
   "title": "Streams",
   "uid": "scdf-streams",
-  "version": 56
+  "version": 5
 }
