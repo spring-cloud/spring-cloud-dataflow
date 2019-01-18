@@ -156,7 +156,7 @@ public class TaskExecutionController {
 	public long launch(@RequestParam("name") String taskName,
 			@RequestParam(required = false) String properties,
 			@RequestParam(required = false) String arguments,
-			@RequestParam(required = false, defaultValue = "default") String platformName) {
+			@RequestParam(required = false, defaultValue = "default", name="platform-name") String platformName) {
 		Map<String, String> propertiesToUse = DeploymentPropertiesUtils.parse(properties);
 		DeploymentPropertiesUtils.validateDeploymentProperties(propertiesToUse);
 		List<String> argumentsToUse = DeploymentPropertiesUtils.parseParamList(arguments, " ");

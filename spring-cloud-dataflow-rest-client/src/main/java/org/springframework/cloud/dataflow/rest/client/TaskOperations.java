@@ -64,9 +64,10 @@ public interface TaskOperations {
 	 * @param name the name of the task
 	 * @param properties the deployment properties
 	 * @param arguments the command line arguments
+	 * @param platformName the name of the platform to use
 	 * @return long containing the TaskExecutionId
 	 */
-	long launch(String name, Map<String, String> properties, List<String> arguments);
+	long launch(String name, Map<String, String> properties, List<String> arguments, String platformName);
 
 	/**
 	 * Destroy an existing task.

@@ -194,7 +194,7 @@ public class TaskCommands implements CommandMarker {
 			argumentsToUse.add(arguments);
 		}
 		DeploymentPropertiesUtils.validateDeploymentProperties(propertiesToUse);
-		taskOperations().launch(name, propertiesToUse, argumentsToUse);
+		taskOperations().launch(name, propertiesToUse, argumentsToUse, platformName);
 		return String.format("Launched task '%s'", name);
 	}
 
