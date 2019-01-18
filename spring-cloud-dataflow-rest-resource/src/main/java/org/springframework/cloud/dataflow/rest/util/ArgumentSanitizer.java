@@ -26,11 +26,14 @@ import java.util.stream.Collectors;
 
 import org.springframework.batch.core.JobParameter;
 import org.springframework.batch.core.JobParameters;
+import org.springframework.cloud.dataflow.core.DefinitionUtils;
 import org.springframework.cloud.dataflow.core.StreamAppDefinition;
 import org.springframework.cloud.dataflow.core.StreamDefinition;
 import org.springframework.cloud.dataflow.core.StreamDefinitionToDslConverter;
 import org.springframework.cloud.dataflow.core.TaskDefinition;
 import org.springframework.cloud.dataflow.core.TaskDefinitionToDslConverter;
+import org.springframework.cloud.dataflow.core.dsl.TaskParser;
+import org.springframework.cloud.dataflow.core.dsl.graph.Graph;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
@@ -159,10 +162,20 @@ public class ArgumentSanitizer {
 	 * @return Task definition text that has sensitive data redacted.
 	 */
 	public String sanitizeTaskDsl(TaskDefinition taskDefinition) {
-		TaskDefinition sanitizedTaskDefinition = TaskDefinition.TaskDefinitionBuilder.from(taskDefinition)
-			.setProperties(this.sanitizeProperties(taskDefinition.getProperties()))
-			.build();
-		return this.taskDslConverter.toDsl(sanitizedTaskDefinition);
+		if(StringUtils.isEmpty(taskDefinition.getDslText())) {
+			return taskDefinition.getDslText();
+		}
+		TaskParser taskParser = new TaskParser(taskDefinition.getTaskName(), taskDefinition.getDslText(), true, true);
+		Graph graph = taskParser.parse().toGraph();
+		graph.getNodes().stream().forEach(node -> {
+			if (node.properties != null) {
+				node.properties.keySet().stream().forEach(key -> {
+					node.properties.put(key,
+							DefinitionUtils.autoQuotes(sanitize(key, node.properties.get(key))));
+				});
+			}
+		});
+		return graph.toDSLText();
 	}
 
 	/**
