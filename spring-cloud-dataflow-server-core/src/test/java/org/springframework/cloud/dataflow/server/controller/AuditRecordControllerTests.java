@@ -329,4 +329,57 @@ public class AuditRecordControllerTests {
 				.andExpect(jsonPath("$.correlationId", is("myStream")))
 				.andExpect(jsonPath("$.auditAction", is("DELETE")));
 	}
+
+	@Test
+	public void testRetrieveStreamAndTaskRecords() throws Exception {
+		mockMvc.perform(get("/audit-records?operations=STREAM,TASK").accept(MediaType.APPLICATION_JSON))
+				.andDo(print())
+				.andExpect(status().isOk())
+				.andExpect(jsonPath("$.content.*", hasSize(5)));
+	}
+
+	@Test
+	public void testRetrieveDeletedAndUndeployedStreamsAndTasks() throws Exception {
+		mockMvc.perform(get("/audit-records?operations=STREAM,TASK&actions=DELETE,UNDEPLOY").accept(MediaType.APPLICATION_JSON))
+				.andDo(print())
+				.andExpect(status().isOk())
+				.andExpect(jsonPath("$.content.*", hasSize(2)))
+
+				.andExpect(jsonPath("$.content[0].auditRecordId", is(12)))
+				.andExpect(jsonPath("$.content[0].correlationId", is("myStream")))
+				.andExpect(jsonPath("$.content[0].auditAction", is("UNDEPLOY")))
+				.andExpect(jsonPath("$.content[0].auditOperation", is("STREAM")))
+
+				.andExpect(jsonPath("$.content[1].auditRecordId", is(13)))
+				.andExpect(jsonPath("$.content[1].correlationId", is("myStream")))
+				.andExpect(jsonPath("$.content[1].auditAction", is("DELETE")))
+				.andExpect(jsonPath("$.content[1].auditOperation", is("STREAM")));
+
+	}
+
+	@Test
+	public void testRetrieveDataByOperationsAndActionsAndDate() throws Exception {
+		ZonedDateTime startTime = startDate.withZoneSameInstant(ZoneOffset.of("+01:00"));
+		String fromDate = startTime.toString();
+
+		ZonedDateTime betweenTime = betweenDate.withZoneSameInstant(ZoneOffset.of("+01:00"));
+		String toDate = betweenTime.toString();
+
+		mockMvc.perform(get("/audit-records?fromDate=" + fromDate + "&toDate=" + toDate+"&actions=CREATE&operations=STREAM")
+				.accept(MediaType.APPLICATION_JSON))
+				.andDo(print())
+				.andExpect(status().isOk())
+				.andExpect(jsonPath("$.content.*", hasSize(2)))
+
+				.andExpect(jsonPath("$.content[0].auditRecordId", is(9)))
+				.andExpect(jsonPath("$.content[0].correlationId", is("myStream")))
+				.andExpect(jsonPath("$.content[0].auditAction", is("CREATE")))
+				.andExpect(jsonPath("$.content[0].auditOperation", is("STREAM")))
+
+				.andExpect(jsonPath("$.content[1].auditRecordId", is(10)))
+				.andExpect(jsonPath("$.content[1].correlationId", is("myStream1")))
+				.andExpect(jsonPath("$.content[1].auditAction", is("CREATE")))
+				.andExpect(jsonPath("$.content[1].auditOperation", is("STREAM")));
+	}
+
 }
