@@ -27,6 +27,12 @@ import org.springframework.dao.DataAccessException;
 @SuppressWarnings("serial")
 public class SuppressDataAccessException extends DataAccessException {
 
+	/**
+	 * Instantiates a new suppress data access exception.
+	 *
+	 * @param msg the msg
+	 * @param cause the cause
+	 */
 	public SuppressDataAccessException(String msg, Throwable cause) {
 		super(msg, cause);
 	}

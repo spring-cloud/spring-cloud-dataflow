@@ -15,10 +15,11 @@
  */
 package org.springframework.cloud.dataflow.server.db.migration.db2;
 
+import java.util.Arrays;
+import java.util.List;
+
 import org.springframework.cloud.dataflow.server.db.migration.AbstractMigration;
-import org.springframework.cloud.dataflow.server.db.migration.SuppressSQLErrorCodesTranslator;
-import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.support.SQLErrorCodeSQLExceptionTranslator;
+import org.springframework.cloud.dataflow.server.db.migration.SqlCommand;
 
 /**
  * Repeatable migration ensuring that {@code hibernate_sequence} table exists.
@@ -34,16 +35,10 @@ public class R__Hibernate_Sequence extends AbstractMigration {
 	// StatementCallback; bad SQL grammar [create sequence hibernate_sequence start with 1 increment by 1];
 	// nested exception is com.ibm.db2.jcc.am.SqlSyntaxErrorException:
 	// DB2 SQL Error: SQLCODE=-601, SQLSTATE=42710, SQLERRMC=HIBERNATE_SEQUENCE;SEQUENCE, DRIVER=4.19.26
+	private final static List<SqlCommand> commands = Arrays.asList(
+			SqlCommand.from("create sequence hibernate_sequence start with 1 increment by 1", -601));
 
-	private final static SuppressSQLErrorCodesTranslator errorCodesTranslator = new SuppressSQLErrorCodesTranslator(-601);
-
-	@Override
-	protected void executeInternal(JdbcTemplate jdbcTemplate) {
-		jdbcTemplate.execute("create sequence hibernate_sequence start with 1 increment by 1");
-	}
-
-	@Override
-	protected SQLErrorCodeSQLExceptionTranslator getExceptionTranslator() {
-		return errorCodesTranslator;
+	public R__Hibernate_Sequence() {
+		super(commands);
 	}
 }

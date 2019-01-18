@@ -22,6 +22,8 @@ import org.springframework.cloud.dataflow.completion.CompletionConfiguration;
 import org.springframework.cloud.dataflow.server.config.apps.CommonApplicationProperties;
 import org.springframework.cloud.dataflow.server.config.features.FeaturesConfiguration;
 import org.springframework.cloud.dataflow.server.config.web.WebConfiguration;
+import org.springframework.cloud.dataflow.server.db.migration.DataFlowFlywayConfigurationCustomizer;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.data.web.config.EnableSpringDataWebSupport;
@@ -47,4 +49,9 @@ import org.springframework.hateoas.config.EnableHypermediaSupport;
 @Import({ CompletionConfiguration.class, FeaturesConfiguration.class, WebConfiguration.class })
 @EnableConfigurationProperties({ BatchProperties.class, CommonApplicationProperties.class })
 public class DataFlowServerConfiguration {
+
+	@Bean
+	public DataFlowFlywayConfigurationCustomizer dataFlowFlywayConfigurationCustomizer() {
+		return new DataFlowFlywayConfigurationCustomizer();
+	}
 }

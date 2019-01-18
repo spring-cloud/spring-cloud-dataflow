@@ -15,13 +15,10 @@
  */
 package org.springframework.cloud.dataflow.server.db.migration;
 
+import java.util.List;
+
 import org.flywaydb.core.api.migration.BaseJavaMigration;
 import org.flywaydb.core.api.migration.Context;
-import org.slf4j.LoggerFactory;
-
-import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.datasource.SingleConnectionDataSource;
-import org.springframework.jdbc.support.SQLErrorCodeSQLExceptionTranslator;
 
 /**
  * Base implementation providing some shared features for java based migrations.
@@ -31,23 +28,30 @@ import org.springframework.jdbc.support.SQLErrorCodeSQLExceptionTranslator;
  */
 public abstract class AbstractMigration extends BaseJavaMigration {
 
-	private static final org.slf4j.Logger logger = LoggerFactory.getLogger(AbstractMigration.class);
+	private final List<SqlCommand> commands;
+	private final SqlCommandsRunner runner = new SqlCommandsRunner();
+
+	/**
+	 * Instantiates a new abstract migration.
+	 *
+	 * @param commands the commands
+	 */
+	public AbstractMigration(List<SqlCommand> commands) {
+		super();
+		this.commands = commands;
+	}
 
 	@Override
 	public void migrate(Context context) throws Exception {
-		JdbcTemplate jdbcTemplate = new JdbcTemplate(new SingleConnectionDataSource(context.getConnection(), true));
-		jdbcTemplate.setExceptionTranslator(getExceptionTranslator());
-		try {
-			executeInternal(jdbcTemplate);
-		} catch (SuppressDataAccessException e) {
-			logger.debug("Suppressing error {}", e);
-		}
+		runner.execute(context.getConnection(), getCommands());
 	}
 
-	protected void executeInternal(JdbcTemplate jdbcTemplate) {
-	}
-
-	protected SQLErrorCodeSQLExceptionTranslator getExceptionTranslator() {
-		return null;
+	/**
+	 * Gets the commands.
+	 *
+	 * @return the commands
+	 */
+	public List<SqlCommand> getCommands() {
+		return commands;
 	}
 }
