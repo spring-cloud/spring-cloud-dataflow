@@ -87,4 +87,15 @@ public class Launcher {
 	public void setDescription(String description) {
 		this.description = description;
 	}
+
+	@Override
+	public String toString() {
+		final StringBuffer sb = new StringBuffer("Launcher{");
+		sb.append("id='").append(id).append('\'');
+		sb.append(", name='").append(name).append('\'');
+		sb.append(", type='").append(type).append('\'');
+		sb.append(", description='").append(description).append('\'');
+		sb.append('}');
+		return sb.toString();
+	}
 }

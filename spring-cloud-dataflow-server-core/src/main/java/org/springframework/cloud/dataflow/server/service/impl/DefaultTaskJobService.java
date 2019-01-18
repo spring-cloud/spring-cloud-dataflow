@@ -18,7 +18,9 @@ package org.springframework.cloud.dataflow.server.service.impl;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -31,6 +33,7 @@ import org.springframework.batch.core.launch.NoSuchJobException;
 import org.springframework.batch.core.launch.NoSuchJobExecutionException;
 import org.springframework.batch.core.launch.NoSuchJobInstanceException;
 import org.springframework.cloud.dataflow.core.TaskDefinition;
+import org.springframework.cloud.dataflow.core.TaskDeployment;
 import org.springframework.cloud.dataflow.rest.job.JobInstanceExecutions;
 import org.springframework.cloud.dataflow.rest.job.TaskJobExecution;
 import org.springframework.cloud.dataflow.rest.job.support.JobUtils;
@@ -40,6 +43,7 @@ import org.springframework.cloud.dataflow.server.job.support.JobNotRestartableEx
 import org.springframework.cloud.dataflow.server.repository.NoSuchTaskBatchException;
 import org.springframework.cloud.dataflow.server.repository.NoSuchTaskDefinitionException;
 import org.springframework.cloud.dataflow.server.repository.TaskDefinitionRepository;
+import org.springframework.cloud.dataflow.server.repository.TaskDeploymentRepository;
 import org.springframework.cloud.dataflow.server.service.TaskExecutionService;
 import org.springframework.cloud.dataflow.server.service.TaskJobService;
 import org.springframework.cloud.task.repository.TaskExecution;
@@ -70,16 +74,21 @@ public class DefaultTaskJobService implements TaskJobService {
 
 	private TaskDefinitionRepository taskDefinitionRepository;
 
+	private TaskDeploymentRepository taskDeploymentRepository;
+
 	public DefaultTaskJobService(JobService jobService, TaskExplorer taskExplorer,
-			TaskDefinitionRepository taskDefinitionRepository, TaskExecutionService taskExecutionService) {
+			TaskDefinitionRepository taskDefinitionRepository, TaskExecutionService taskExecutionService,
+			TaskDeploymentRepository taskDeploymentRepository) {
 		Assert.notNull(jobService, "jobService must not be null");
 		Assert.notNull(taskExplorer, "taskExplorer must not be null");
 		Assert.notNull(taskDefinitionRepository, "taskDefinitionRepository must not be null");
 		Assert.notNull(taskExecutionService, "taskExecutionService must not be null");
+		Assert.notNull(taskDeploymentRepository, "taskDeploymentRepository must not be null");
 		this.jobService = jobService;
 		this.taskExplorer = taskExplorer;
 		this.taskDefinitionRepository = taskDefinitionRepository;
 		this.taskExecutionService = taskExecutionService;
+		this.taskDeploymentRepository = taskDeploymentRepository;
 	}
 
 	@Override
@@ -181,9 +190,19 @@ public class DefaultTaskJobService implements TaskJobService {
 		TaskExecution taskExecution = this.taskExplorer.getTaskExecution(taskJobExecution.getTaskId());
 		TaskDefinition taskDefinition = this.taskDefinitionRepository.findById(taskExecution.getTaskName())
 				.orElseThrow(() -> new NoSuchTaskDefinitionException(taskExecution.getTaskName()));
-		taskExecutionService.executeTask(taskDefinition.getName(), taskDefinition.getProperties(),
-				taskExecution.getArguments(),
-				"default");
+
+		TaskDeployment taskDeployment =
+				this.taskDeploymentRepository.findByTaskDeploymentId(String.valueOf(taskJobExecution.getTaskId()));
+		if (taskDeployment != null) {
+			Map<String, String> deploymentProperties = new HashMap<>();
+			deploymentProperties.put(DefaultTaskExecutionService.TASK_PLATFORM_NAME, taskDeployment.getPlatformName());
+			taskExecutionService.executeTask(taskDefinition.getName(), deploymentProperties,
+					taskExecution.getArguments());
+		} else {
+			throw new IllegalStateException(String.format("Did not find platform for taskName=[%s] , taskId=[%s]",
+					taskExecution.getTaskName(),taskJobExecution.getTaskId()));
+		}
+
 	}
 
 	@Override

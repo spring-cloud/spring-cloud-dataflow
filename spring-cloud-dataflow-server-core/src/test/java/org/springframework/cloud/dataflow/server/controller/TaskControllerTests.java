@@ -254,7 +254,6 @@ public class TaskControllerTests {
 				.andExpect(status().isOk());
 
 		assertEquals(0, repository.count());
-		Mockito.verify(taskLauncher).destroy("myTask");
 	}
 
 	@Test
@@ -279,9 +278,6 @@ public class TaskControllerTests {
 				.andExpect(status().isOk());
 
 		assertEquals(0, repository.count());
-		Mockito.verify(taskLauncher).destroy("myTask1");
-		Mockito.verify(taskLauncher).destroy("myTask2");
-		Mockito.verify(taskLauncher).destroy("myTask3");
 	}
 
 	@Test
@@ -315,6 +311,12 @@ public class TaskControllerTests {
 
 		AppDeploymentRequest request = argumentCaptor.getValue();
 		assertEquals("myTask", request.getDefinition().getProperties().get("spring.cloud.task.name"));
+
+		mockMvc.perform(delete("/tasks/definitions").accept(MediaType.APPLICATION_JSON)).andDo(print())
+				.andExpect(status().isOk());
+
+		// Destroy should be called only if there was a launch task
+		Mockito.verify(taskLauncher).destroy("myTask");
 	}
 
 	@Test

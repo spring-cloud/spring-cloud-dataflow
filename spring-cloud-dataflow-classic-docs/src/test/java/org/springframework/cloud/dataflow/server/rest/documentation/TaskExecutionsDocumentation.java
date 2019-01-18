@@ -148,11 +148,19 @@ public class TaskExecutionsDocumentation extends BaseDocumentation {
 
 	@Test
 	public void removeTaskExecution() throws Exception {
+
+		documentation.dontDocument( () -> this.mockMvc.perform(
+				post("/tasks/executions")
+						.param("name", "taskB")
+						.param("properties", "app.my-task.foo=bar,deployer.my-task.something-else=3")
+						.param("arguments", "--server.port=8080 --foo=bar"))
+				.andExpect(status().isCreated()));
+
 		// TODO: spring-cloud-task with lifecycle starting from 2.1.x creates
 		//       a default taskexecution and because of that we expect to start
 		//       from id 2
 		this.mockMvc.perform(
-				delete("/tasks/executions/{id}", "2"))
+				delete("/tasks/executions/{id}", "1"))
 				.andDo(print())
 				.andExpect(status().isOk())
 				.andDo(this.documentationHandler.document(

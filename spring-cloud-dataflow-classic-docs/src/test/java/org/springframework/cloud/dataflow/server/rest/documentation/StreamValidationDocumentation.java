@@ -45,11 +45,13 @@ public class StreamValidationDocumentation extends BaseDocumentation {
 
 		this.mockMvc.perform(
 				post("/apps/{type}/time", "source")
-						.param("uri", "maven://org.springframework.cloud.stream.app:time-source-rabbit:1.2.0.RELEASE"))
+						.param("uri", "maven://org.springframework.cloud.stream.app:time-source-rabbit:1.2.0.RELEASE")
+						.param("force", "true"))
 				.andExpect(status().isCreated());
 		this.mockMvc.perform(
 				post("/apps/{type}/log", "sink")
-						.param("uri", "maven://org.springframework.cloud.stream.app:log-sink-rabbit:1.2.0.RELEASE"))
+						.param("uri", "maven://org.springframework.cloud.stream.app:log-sink-rabbit:1.2.0.RELEASE")
+						.param("force", "true"))
 				.andExpect(status().isCreated());
 		setUpIsDone = true;
 	}

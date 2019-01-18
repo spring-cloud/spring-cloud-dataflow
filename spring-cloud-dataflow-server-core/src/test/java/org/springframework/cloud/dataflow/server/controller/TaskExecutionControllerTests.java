@@ -16,6 +16,7 @@
 
 package org.springframework.cloud.dataflow.server.controller;
 
+import java.time.Instant;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
@@ -37,10 +38,12 @@ import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabas
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.cloud.dataflow.core.Launcher;
 import org.springframework.cloud.dataflow.core.TaskDefinition;
+import org.springframework.cloud.dataflow.core.TaskDeployment;
 import org.springframework.cloud.dataflow.server.config.apps.CommonApplicationProperties;
 import org.springframework.cloud.dataflow.server.configuration.JobDependencies;
 import org.springframework.cloud.dataflow.server.job.LauncherRepository;
 import org.springframework.cloud.dataflow.server.repository.TaskDefinitionRepository;
+import org.springframework.cloud.dataflow.server.repository.TaskDeploymentRepository;
 import org.springframework.cloud.dataflow.server.service.TaskDeleteService;
 import org.springframework.cloud.dataflow.server.service.TaskExecutionInfoService;
 import org.springframework.cloud.dataflow.server.service.TaskExecutionService;
@@ -127,6 +130,9 @@ public class TaskExecutionControllerTests {
 	@Autowired
 	private TaskDeleteService taskDeleteService;
 
+	@Autowired
+	private TaskDeploymentRepository taskDeploymentRepository;
+
 	@Before
 	public void setupMockMVC() {
 		Launcher launcher = new Launcher("default", "local", taskLauncher);
@@ -163,6 +169,12 @@ public class TaskExecutionControllerTests {
 			JobInstance instance = jobRepository.createJobInstance(TASK_NAME_FOOBAR, new JobParameters());
 			JobExecution jobExecution = jobRepository.createJobExecution(instance, new JobParameters(), null);
 			taskBatchDao.saveRelationship(taskExecution, jobExecution);
+			TaskDeployment taskDeployment = new TaskDeployment();
+			taskDeployment.setTaskDefinitionName(TASK_NAME_ORIG);
+			taskDeployment.setTaskDeploymentId("1");
+			taskDeployment.setPlatformName("default");
+			taskDeployment.setCreatedOn(Instant.now());
+			taskDeploymentRepository.save(taskDeployment);
 			initialized = true;
 		}
 	}

@@ -37,6 +37,7 @@ import org.springframework.cloud.task.repository.TaskExecution;
 import org.springframework.cloud.task.repository.dao.TaskExecutionDao;
 import org.springframework.cloud.task.repository.support.TaskExecutionDaoFactoryBean;
 import org.springframework.http.MediaType;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.datasource.DataSourceTransactionManager;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.junit4.SpringRunner;
@@ -68,6 +69,8 @@ public class JobExecutionsDocumentation extends BaseDocumentation {
 	private JobRepository jobRepository;
 	private TaskExecutionDao dao;
 	private TaskBatchDao taskBatchDao;
+	private JdbcTemplate jdbcTemplate;
+
 
 	@Before
 	public void setup() throws Exception {
@@ -76,6 +79,14 @@ public class JobExecutionsDocumentation extends BaseDocumentation {
 			initialize();
 			createJobExecution(JOB_NAME, BatchStatus.STARTED);
 			createJobExecution(JOB_NAME + "_1", BatchStatus.STOPPED);
+
+
+			jdbcTemplate = new JdbcTemplate(this.dataSource);
+			jdbcTemplate.afterPropertiesSet();
+			jdbcTemplate.update(
+					"INSERT into task_deployment(id, object_version, task_deployment_id, task_definition_name, platform_name, created_on) " +
+							"values (?,?,?,?,?,?)",
+					1, 1, "2", JOB_NAME + "_1", "default", new Date());
 
 			documentation.dontDocument(() -> this.mockMvc.perform(
 					post("/tasks/definitions")

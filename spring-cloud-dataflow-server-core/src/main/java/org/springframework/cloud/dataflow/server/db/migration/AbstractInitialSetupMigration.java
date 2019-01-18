@@ -44,6 +44,7 @@ public abstract class AbstractInitialSetupMigration extends AbstractMigration {
 		}
 		commands.addAll(createHibernateSequence());
 		commands.addAll(createAppRegistrationTable());
+		commands.addAll(createTaskDeploymentTable());
 		commands.addAll(createAuditRecordsTable());
 		commands.addAll(createStreamDefinitionsTable());
 		commands.addAll(createTaskDefinitionsTable());
@@ -65,6 +66,13 @@ public abstract class AbstractInitialSetupMigration extends AbstractMigration {
 	 * @return the list of sql commands
 	 */
 	public abstract List<SqlCommand> createAppRegistrationTable();
+
+	/**
+	 * Creates the task deployment table.
+	 *
+	 * @return the list of sql commands
+	 */
+	public abstract List<SqlCommand> createTaskDeploymentTable();
 
 	/**
 	 * Creates the audit records table.
