@@ -21,6 +21,8 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Map;
 
+import javax.sql.DataSource;
+
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -129,6 +131,9 @@ public abstract class DefaultTaskServiceTests {
 		@Autowired
 		private AuditRecordService auditRecordService;
 
+		@Autowired
+		private DataSource dataSource;
+
 		@Before
 		public void setupMockMVC() {
 			taskDefinitionRepository.save(new TaskDefinition(TASK_NAME_ORIG, "demo"));
@@ -202,7 +207,8 @@ public abstract class DefaultTaskServiceTests {
 					mock(TaskDefinitionRepository.class), this.taskExplorer, this.taskExecutionRepository,
 					this.appRegistry, this.taskLauncher, this.metadataResolver, new TaskConfigurationProperties(),
 					new InMemoryDeploymentIdRepository(), auditRecordService, null, this.commonApplicationProperties,
-					this.taskValidationService, mock(PlatformTransactionManager.class));
+					this.taskValidationService, mock(PlatformTransactionManager.class),
+					this.dataSource);
 			try {
 				taskService.executeTask(TASK_NAME_ORIG, new HashMap<>(), new LinkedList<>());
 			}

@@ -52,6 +52,7 @@ import org.springframework.cloud.deployer.spi.core.AppDeploymentRequest;
 import org.springframework.cloud.deployer.spi.core.RuntimeEnvironmentInfo;
 import org.springframework.cloud.deployer.spi.task.TaskLauncher;
 import org.springframework.cloud.deployer.spi.task.TaskStatus;
+import org.springframework.cloud.task.repository.TaskExecution;
 import org.springframework.cloud.task.repository.TaskExplorer;
 import org.springframework.cloud.task.repository.TaskRepository;
 import org.springframework.core.io.FileSystemResource;
@@ -65,6 +66,7 @@ import org.springframework.transaction.PlatformTransactionManager;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertThat;
+import static org.junit.Assert.fail;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.when;
@@ -123,19 +125,40 @@ public class DefaultTaskServiceTransactionTests {
 	public void setupMockMVC() {
 		taskDefinitionRepository.save(new TaskDefinition(TASK_NAME_ORIG, "demo"));
 		this.taskLauncher = new TaskLauncherStub(this.dataSource);
-		this.transactionTaskService = new DefaultTaskService(this.dataSourceProperties, taskDefinitionRepository, taskExplorer,
-				taskExecutionRepository, appRegistry, taskLauncher, metadataResolver, taskConfigurationProperties,
-				new InMemoryDeploymentIdRepository(), new AuditRecordServiceStub(), null, commonApplicationProperties,
-				taskValidationService, transactionManager);
+
 	}
 
 	@Test
 	@DirtiesContext
 	public void executeSingleTaskTest() {
+		this.transactionTaskService = new DefaultTaskService(this.dataSourceProperties, taskDefinitionRepository, taskExplorer,
+				taskExecutionRepository, appRegistry, taskLauncher, metadataResolver, taskConfigurationProperties,
+				new InMemoryDeploymentIdRepository(), new AuditRecordServiceStub(), null, commonApplicationProperties,
+				taskValidationService, transactionManager, this.dataSource);
 		initializeSuccessfulRegistry(appRegistry);
 		this.transactionTaskService.executeTask(TASK_NAME_ORIG, new HashMap<>(), new LinkedList<>());
 		assertThat(taskLauncher.getResult(), is(equalTo("1")));
 	}
+
+	@Test
+	@DirtiesContext
+	public void launchFailTest() {
+		this.transactionTaskService = new DefaultTaskService(this.dataSourceProperties, taskDefinitionRepository, taskExplorer,
+				taskExecutionRepository, appRegistry, new TaskLauncherFailStub(), metadataResolver, taskConfigurationProperties,
+				new InMemoryDeploymentIdRepository(), new AuditRecordServiceStub(), null, commonApplicationProperties,
+				taskValidationService, transactionManager, this.dataSource);
+		initializeSuccessfulRegistry(appRegistry);
+		try {
+			this.transactionTaskService.executeTask(TASK_NAME_ORIG, new HashMap<>(), new LinkedList<>());
+		} catch (IllegalStateException e) {
+			assertThat(taskExplorer.getTaskExecutionCount(), is(equalTo(1L)));
+			TaskExecution taskExecution = taskExplorer.getTaskExecution(1);
+			assertThat(taskExecution.getErrorMessage(), is(equalTo("An error occurred while attempting to launch task: myTask_ORIG")));
+			return;
+		}
+		fail("An IllegalStateException should have occurred.");
+	}
+
 
 	private static void initializeSuccessfulRegistry(AppRegistry appRegistry) {
 		when(appRegistry.find(anyString(), any(ApplicationType.class))).thenReturn(
@@ -188,6 +211,40 @@ public class DefaultTaskServiceTransactionTests {
 		public String getResult() {
 			return result;
 		}
+	}
+
+	private static class TaskLauncherFailStub implements TaskLauncher {
+
+		@Override
+		public String launch(AppDeploymentRequest request) {
+			throw new IllegalStateException("expected exception");
+		}
+
+		@Override
+		public void cancel(String id) {
+
+		}
+
+		@Override
+		public TaskStatus status(String id) {
+			return null;
+		}
+
+		@Override
+		public void cleanup(String id) {
+
+		}
+
+		@Override
+		public void destroy(String appName) {
+
+		}
+
+		@Override
+		public RuntimeEnvironmentInfo environmentInfo() {
+			return null;
+		}
+
 	}
 
 	private static class AuditRecordServiceStub implements AuditRecordService {

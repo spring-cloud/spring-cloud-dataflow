@@ -180,11 +180,11 @@ public class TaskServiceDependencies {
 			TaskLauncher taskLauncher, ApplicationConfigurationMetadataResolver metadataResolver,
 			TaskConfigurationProperties taskConfigurationProperties, AuditRecordService auditRecordService,
 			CommonApplicationProperties commonApplicationProperties, TaskValidationService taskValidationService,
-			PlatformTransactionManager transactionManager) {
+			PlatformTransactionManager transactionManager, DataSource dataSource) {
 		return new DefaultTaskService(this.dataSourceProperties, taskDefinitionRepository, taskExplorer,
 				taskExecutionRepository, appRegistry, taskLauncher, metadataResolver, taskConfigurationProperties,
 				new InMemoryDeploymentIdRepository(), auditRecordService, null, commonApplicationProperties,
-				taskValidationService, transactionManager);
+				taskValidationService, transactionManager, dataSource);
 	}
 
 	@Bean

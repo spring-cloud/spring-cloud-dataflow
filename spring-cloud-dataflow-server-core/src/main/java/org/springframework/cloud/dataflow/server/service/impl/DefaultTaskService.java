@@ -16,11 +16,17 @@
 
 package org.springframework.cloud.dataflow.server.service.impl;
 
+import java.sql.Types;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+
+import javax.sql.DataSource;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import org.springframework.boot.autoconfigure.jdbc.DataSourceProperties;
 import org.springframework.cloud.dataflow.configuration.metadata.ApplicationConfigurationMetadataResolver;
@@ -54,6 +60,7 @@ import org.springframework.cloud.task.repository.TaskExecution;
 import org.springframework.cloud.task.repository.TaskExplorer;
 import org.springframework.cloud.task.repository.TaskRepository;
 import org.springframework.core.io.Resource;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.annotation.Transactional;
@@ -78,6 +85,10 @@ import org.springframework.util.StringUtils;
  * @author David Turanski
  */
 public class DefaultTaskService implements TaskService {
+
+	private final Logger logger = LoggerFactory.getLogger(DefaultTaskService.class);
+
+	private DataSource dataSource;
 
 	private final DataSourceProperties dataSourceProperties;
 
@@ -121,9 +132,9 @@ public class DefaultTaskService implements TaskService {
 
 	private final ArgumentSanitizer argumentSanitizer = new ArgumentSanitizer();
 
-	public static final String TASK_DEFINITION_DSL_TEXT = "taskDefinitionDslText";
-	public static final String TASK_DEPLOYMENT_PROPERTIES = "taskDeploymentProperties";
-	public static final String COMMAND_LINE_ARGS = "commandLineArgs";
+	private static final String TASK_DEFINITION_DSL_TEXT = "taskDefinitionDslText";
+	private static final String TASK_DEPLOYMENT_PROPERTIES = "taskDeploymentProperties";
+	private static final String COMMAND_LINE_ARGS = "commandLineArgs";
 
 	/**
 	 * Initializes the {@link DefaultTaskService}.
@@ -152,7 +163,8 @@ public class DefaultTaskService implements TaskService {
 			AuditRecordService auditRecordService,
 			String dataflowServerUri, CommonApplicationProperties commonApplicationProperties,
 			TaskValidationService taskValidationService,
-			PlatformTransactionManager transactionManager) {
+			PlatformTransactionManager transactionManager,
+			DataSource dataSource) {
 		Assert.notNull(dataSourceProperties, "DataSourceProperties must not be null");
 		Assert.notNull(taskDefinitionRepository, "TaskDefinitionRepository must not be null");
 		Assert.notNull(taskExecutionRepository, "TaskExecutionRepository must not be null");
@@ -166,6 +178,8 @@ public class DefaultTaskService implements TaskService {
 		Assert.notNull(auditRecordService, "auditRecordService must not be null");
 		Assert.notNull(taskValidationService, "TaskValidationService must not be null");
 		Assert.notNull(transactionManager, "transactionManager must not be null");
+		Assert.notNull(dataSource, "dataSource must not be null");
+
 		this.dataSourceProperties = dataSourceProperties;
 		this.taskDefinitionRepository = taskDefinitionRepository;
 		this.taskExecutionRepository = taskExecutionRepository;
@@ -180,6 +194,7 @@ public class DefaultTaskService implements TaskService {
 		this.auditRecordService = auditRecordService;
 		this.taskValidationService = taskValidationService;
 		this.transactionManager = transactionManager;
+		this.dataSource = dataSource;
 	}
 
 	@Override
@@ -187,10 +202,26 @@ public class DefaultTaskService implements TaskService {
 			List<String> commandLineArgs) {
 		RequestCriteria requestCriteria = createLaunchRequest(taskName, taskDeploymentProperties,commandLineArgs);
 
-		String id = this.taskLauncher.launch(requestCriteria.getAppDeploymentRequest());
+		String id;
+		try {
+			id = this.taskLauncher.launch(requestCriteria.getAppDeploymentRequest());
+		} catch (Throwable throwable) {
+			recordFailedTaskLaunch(requestCriteria.taskExecution.getExecutionId(), "An error occurred while attempting to launch task: " + taskName);
+			throw throwable;
+		}
 		if (!StringUtils.hasText(id)) {
+			recordFailedTaskLaunch(requestCriteria.taskExecution.getExecutionId(), "Deployment ID is null for the task:" + taskName);
 			throw new IllegalStateException("Deployment ID is null for the task:" + taskName);
 		}
+
+		try {
+			taskExecutionRepository.updateExternalExecutionId(
+					requestCriteria.getTaskExecution().getExecutionId(),
+					id);
+		} catch (Throwable throwable) {
+			logger.warn("Unable to update taskExecution's externalExecutionId", throwable);
+		}
+
 		postLaunchProcessing(requestCriteria, id);
 		return requestCriteria.getTaskExecution().getExecutionId();
 	}
@@ -267,14 +298,10 @@ public class DefaultTaskService implements TaskService {
 			protected void doInTransactionWithoutResult(TransactionStatus transactionStatus) {
 				TaskDefinition taskDefinition = requestCriteria.getTaskDefinition();
 
-				taskExecutionRepository.updateExternalExecutionId(
-						requestCriteria.getTaskExecution().getExecutionId(),
-						externalExecutionId);
-
 				auditRecordService.populateAndSaveAuditRecordUsingMapData(
 						AuditOperationType.TASK, AuditActionType.DEPLOY,
 						taskDefinition.getName(), getAuditData(taskDefinition,
-								requestCriteria.getLaunchTaskDeploymentProperties(),
+								requestCriteria.getAppDeploymentRequest().getDeploymentProperties(),
 								requestCriteria.getAppDeploymentRequest().getCommandlineArguments()));
 
 			}
@@ -421,6 +448,17 @@ public class DefaultTaskService implements TaskService {
 		taskDefinitionRepository.delete(taskDefinition.getName());
 	}
 
+	@Transactional
+	protected void recordFailedTaskLaunch(long executionId, String message) {
+		//TODO: Remove this code when https://github.com/spring-cloud/spring-cloud-task/issues/507
+		//is merged and TaskRepository.updateErrorMessage is available.
+		JdbcTemplate jdbcTemplate = new JdbcTemplate(this.dataSource);
+		int[] types = {Types.VARCHAR, Types.BIGINT};
+		Object[] params = {message, executionId};
+		jdbcTemplate.update("UPDATE TASK_EXECUTION SET ERROR_MESSAGE = ? WHERE TASK_EXECUTION_ID = ?", params, types);
+	}
+
+
 	private static class RequestCriteria {
 
 		private AppDeploymentRequest appDeploymentRequest;
@@ -429,16 +467,12 @@ public class DefaultTaskService implements TaskService {
 
 		private TaskExecution taskExecution;
 
-		private Map<String, String> launchTaskDeploymentProperties;
-
-
 		public RequestCriteria(AppDeploymentRequest appDeploymentRequest,
 				TaskDefinition taskDefinition, TaskExecution taskExecution,
 				Map<String, String> launchTaskDeploymentProperties) {
 			this.appDeploymentRequest = appDeploymentRequest;
 			this.taskDefinition = taskDefinition;
 			this.taskExecution = taskExecution;
-			this.launchTaskDeploymentProperties = launchTaskDeploymentProperties;
 		}
 
 		public AppDeploymentRequest getAppDeploymentRequest() {
@@ -453,9 +487,6 @@ public class DefaultTaskService implements TaskService {
 			return taskExecution;
 		}
 
-		public Map<String, String> getLaunchTaskDeploymentProperties() {
-			return launchTaskDeploymentProperties;
-		}
 	}
 
 

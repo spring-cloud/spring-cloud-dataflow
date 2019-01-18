@@ -24,6 +24,8 @@ import java.util.Map;
 import java.util.concurrent.ForkJoinPool;
 import java.util.stream.Collectors;
 
+import javax.sql.DataSource;
+
 import org.springframework.boot.autoconfigure.ImportAutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
@@ -421,11 +423,11 @@ public class TestDependencies extends WebMvcConfigurationSupport {
 			DeploymentIdRepository deploymentIdRepository, ApplicationConfigurationMetadataResolver metadataResolver,
 			AppRegistryCommon appRegistry, AuditRecordService auditRecordService,
 			CommonApplicationProperties commonApplicationProperties, TaskValidationService taskValidationService,
-			PlatformTransactionManager transactionManager) {
+			PlatformTransactionManager transactionManager, DataSource dataSource) {
 		return new TaskDefinitionController(explorer, repository,
 				taskService(metadataResolver, taskRepository(), deploymentIdRepository, appRegistry,
 						/* delegatingResourceLoader, */auditRecordService, commonApplicationProperties,
-						taskValidationService, transactionManager));
+						taskValidationService, transactionManager, dataSource));
 	}
 
 	@Bean
@@ -433,10 +435,11 @@ public class TestDependencies extends WebMvcConfigurationSupport {
 			ApplicationConfigurationMetadataResolver metadataResolver, DeploymentIdRepository deploymentIdRepository,
 			AppRegistryCommon appRegistry, AuditRecordService auditRecordService,
 			CommonApplicationProperties commonApplicationProperties, TaskValidationService taskValidationService,
-			PlatformTransactionManager transactionManager) {
+			PlatformTransactionManager transactionManager, DataSource dataSource) {
 		return new TaskExecutionController(
-				explorer, taskService(metadataResolver, taskRepository(), deploymentIdRepository, appRegistry,
-						auditRecordService, commonApplicationProperties, taskValidationService, transactionManager),
+				explorer, taskService(metadataResolver, taskRepository(), deploymentIdRepository,
+				appRegistry, auditRecordService, commonApplicationProperties,
+				taskValidationService, transactionManager, dataSource),
 				taskDefinitionRepository());
 	}
 
@@ -493,11 +496,12 @@ public class TestDependencies extends WebMvcConfigurationSupport {
 			TaskRepository taskExecutionRepository, DeploymentIdRepository deploymentIdRepository,
 			AppRegistryCommon appRegistry, AuditRecordService auditRecordService,
 			CommonApplicationProperties commonApplicationProperties, TaskValidationService taskValidationService,
-			PlatformTransactionManager transactionManager) {
+			PlatformTransactionManager transactionManager, DataSource dataSource) {
 		return new DefaultTaskService(new DataSourceProperties(), taskDefinitionRepository(), taskExplorer(),
 				taskExecutionRepository, appRegistry, taskLauncher(), metadataResolver,
 				new TaskConfigurationProperties(), deploymentIdRepository, auditRecordService, null,
-				commonApplicationProperties, taskValidationService, transactionManager);
+				commonApplicationProperties, taskValidationService, transactionManager,
+				dataSource);
 	}
 
 	@Bean
