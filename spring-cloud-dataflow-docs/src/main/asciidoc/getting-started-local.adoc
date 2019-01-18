@@ -188,6 +188,18 @@ In the `dataflow-server` services configuration block, add the following `enviro
 ----
       - spring.cloud.dataflow.applicationProperties.stream.spring.rabbitmq.host=rabbitmq
 ----
+And replace:
+[source,yaml,subs=attributes]
+----
+    depends_on:
+      - kafka
+----
+with:
+[source,yaml,subs=attributes]
+----
+    depends_on:
+      - rabbitmq
+----
 +
 And finally, modify the `app-import` service definition `command` attribute to replace `http://bit.ly/Celsius-SR3-stream-applications-kafka-10-maven` with `http://bit.ly/Celsius-SR3-stream-applications-rabbit-maven`.
 +
