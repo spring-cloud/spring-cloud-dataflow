@@ -21,12 +21,12 @@ import java.util.Collections;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import org.springframework.cloud.dataflow.audit.service.AuditRecordService;
 import org.springframework.cloud.dataflow.core.AuditActionType;
 import org.springframework.cloud.dataflow.core.AuditOperationType;
 import org.springframework.cloud.dataflow.core.AuditRecord;
 import org.springframework.cloud.dataflow.rest.resource.AuditRecordResource;
 import org.springframework.cloud.dataflow.server.repository.NoSuchAuditRecordException;
-import org.springframework.cloud.dataflow.server.service.AuditRecordService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;

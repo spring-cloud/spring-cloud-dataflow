@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 the original author or authors.
+ * Copyright 2018-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,6 +28,7 @@ import javax.naming.OperationNotSupportedException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.dataflow.rest.client.TaskOperations;
 import org.springframework.cloud.dataflow.rest.resource.CurrentTaskExecutionsResource;
+import org.springframework.cloud.dataflow.rest.resource.LauncherResource;
 import org.springframework.cloud.dataflow.rest.resource.TaskAppStatusResource;
 import org.springframework.cloud.dataflow.rest.resource.TaskDefinitionResource;
 import org.springframework.cloud.dataflow.rest.resource.TaskExecutionResource;
@@ -62,11 +63,15 @@ public class TaskCommands implements CommandMarker {
 
 	private static final String LIST = "task list";
 
+	private static final String PLATFORM_LIST = "task platform-list";
+
 	private static final String CREATE = "task create";
 
 	private static final String LAUNCH = "task launch";
 
 	private static final String DESTROY = "task destroy";
+
+	private static final String DESTROY_TASK_ALL = "task all destroy";
 
 	private static final String VALIDATE = "task validate";
 
@@ -87,14 +92,17 @@ public class TaskCommands implements CommandMarker {
 	private static final String PLATFORM_OPTION = "platformName";
 
 	@Autowired
+	protected UserInput userInput;
+
+	@Autowired
 	private DataFlowShell dataFlowShell;
 
-	@CliAvailabilityIndicator({ LIST, TASK_EXECUTION_STATUS, EXECUTION_LIST })
+	@CliAvailabilityIndicator({ LIST, PLATFORM_LIST, TASK_EXECUTION_STATUS, EXECUTION_LIST })
 	public boolean availableWithViewRole() {
 		return dataFlowShell.hasAccess(RoleType.VIEW, OpsType.TASK);
 	}
 
-	@CliAvailabilityIndicator({ CREATE, LAUNCH, TASK_EXECUTION_CLEANUP, DESTROY, VALIDATE })
+	@CliAvailabilityIndicator({ CREATE, LAUNCH, TASK_EXECUTION_CLEANUP, DESTROY, DESTROY_TASK_ALL, VALIDATE })
 	public boolean availableWithCreateRole() {
 		return dataFlowShell.hasAccess(RoleType.CREATE, OpsType.TASK);
 	}
@@ -107,6 +115,17 @@ public class TaskCommands implements CommandMarker {
 		headers.put("dslText", "Task Definition");
 		headers.put("status", "Task Status");
 		final TableBuilder builder = new TableBuilder(new BeanListTableModel<>(tasks, headers));
+		return DataFlowTables.applyStyle(builder).build();
+	}
+
+	@CliCommand(value = PLATFORM_LIST, help = "List platform accounts for tasks")
+	public Table listPlatforms() {
+		final PagedResources<LauncherResource> platforms = taskOperations().listPlatforms();
+		LinkedHashMap<String, Object> headers = new LinkedHashMap<>();
+		headers.put("name", "Platform Name");
+		headers.put("type", "Platform Type");
+		headers.put("description", "Description");
+		final TableBuilder builder = new TableBuilder(new BeanListTableModel<>(platforms, headers));
 		return DataFlowTables.applyStyle(builder).build();
 	}
 
@@ -185,6 +204,17 @@ public class TaskCommands implements CommandMarker {
 				optionContext = "existing-task disable-string-converter") String name) {
 		taskOperations().destroy(name);
 		return String.format("Destroyed task '%s'", name);
+	}
+
+	@CliCommand(value = DESTROY_TASK_ALL, help = "Destroy all existing tasks")
+	public String destroyAll(
+			@CliOption(key = "force", help = "bypass confirmation prompt", unspecifiedDefaultValue = "false", specifiedDefaultValue = "true") boolean force) {
+		if (force || "y".equalsIgnoreCase(userInput.promptWithOptions("Really destroy all tasks?", "n", "y", "n"))) {
+			taskOperations().destroyAll();
+			return String.format("All tasks destroyed");
+		} else {
+			return "";
+		}
 	}
 
 	@CliCommand(value = EXECUTION_LIST, help = "List created task executions filtered by taskName")

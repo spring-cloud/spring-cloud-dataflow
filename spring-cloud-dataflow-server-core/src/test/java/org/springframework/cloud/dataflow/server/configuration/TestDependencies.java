@@ -1,5 +1,5 @@
 /*
- * Copyright 2015-2018 the original author or authors.
+ * Copyright 2015-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,10 +34,12 @@ import org.springframework.boot.autoconfigure.domain.EntityScan;
 import org.springframework.boot.autoconfigure.jackson.Jackson2ObjectMapperBuilderCustomizer;
 import org.springframework.boot.autoconfigure.jackson.JacksonAutoConfiguration;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceProperties;
-import org.springframework.boot.autoconfigure.jdbc.EmbeddedDataSourceConfiguration;
 import org.springframework.boot.autoconfigure.orm.jpa.HibernateJpaAutoConfiguration;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.cloud.common.security.support.SecurityStateBean;
+import org.springframework.cloud.dataflow.audit.repository.AuditRecordRepository;
+import org.springframework.cloud.dataflow.audit.service.AuditRecordService;
+import org.springframework.cloud.dataflow.audit.service.DefaultAuditRecordService;
 import org.springframework.cloud.dataflow.completion.CompletionConfiguration;
 import org.springframework.cloud.dataflow.completion.StreamCompletionProvider;
 import org.springframework.cloud.dataflow.completion.TaskCompletionProvider;
@@ -73,6 +75,7 @@ import org.springframework.cloud.dataflow.server.controller.StreamDeploymentCont
 import org.springframework.cloud.dataflow.server.controller.StreamValidationController;
 import org.springframework.cloud.dataflow.server.controller.TaskDefinitionController;
 import org.springframework.cloud.dataflow.server.controller.TaskExecutionController;
+import org.springframework.cloud.dataflow.server.controller.TaskPlatformController;
 import org.springframework.cloud.dataflow.server.controller.TaskSchedulerController;
 import org.springframework.cloud.dataflow.server.controller.ToolsController;
 import org.springframework.cloud.dataflow.server.controller.support.ApplicationsMetrics;
@@ -84,21 +87,24 @@ import org.springframework.cloud.dataflow.server.job.LauncherRepository;
 import org.springframework.cloud.dataflow.server.job.support.ExecutionContextJacksonMixIn;
 import org.springframework.cloud.dataflow.server.job.support.StepExecutionJacksonMixIn;
 import org.springframework.cloud.dataflow.server.registry.DataFlowAppRegistryPopulator;
-import org.springframework.cloud.dataflow.server.repository.AuditRecordRepository;
 import org.springframework.cloud.dataflow.server.repository.StreamDefinitionRepository;
 import org.springframework.cloud.dataflow.server.repository.TaskDefinitionRepository;
-import org.springframework.cloud.dataflow.server.service.AuditRecordService;
-import org.springframework.cloud.dataflow.server.service.DefaultAuditRecordService;
 import org.springframework.cloud.dataflow.server.service.SchedulerService;
 import org.springframework.cloud.dataflow.server.service.SchedulerServiceProperties;
 import org.springframework.cloud.dataflow.server.service.StreamService;
 import org.springframework.cloud.dataflow.server.service.StreamValidationService;
-import org.springframework.cloud.dataflow.server.service.TaskService;
+import org.springframework.cloud.dataflow.server.service.TaskDeleteService;
+import org.springframework.cloud.dataflow.server.service.TaskExecutionInfoService;
+import org.springframework.cloud.dataflow.server.service.TaskExecutionService;
+import org.springframework.cloud.dataflow.server.service.TaskSaveService;
 import org.springframework.cloud.dataflow.server.service.TaskValidationService;
 import org.springframework.cloud.dataflow.server.service.impl.AppDeploymentRequestCreator;
 import org.springframework.cloud.dataflow.server.service.impl.DefaultSchedulerService;
 import org.springframework.cloud.dataflow.server.service.impl.DefaultStreamService;
-import org.springframework.cloud.dataflow.server.service.impl.DefaultTaskService;
+import org.springframework.cloud.dataflow.server.service.impl.DefaultTaskDeleteService;
+import org.springframework.cloud.dataflow.server.service.impl.DefaultTaskExecutionInfoService;
+import org.springframework.cloud.dataflow.server.service.impl.DefaultTaskExecutionService;
+import org.springframework.cloud.dataflow.server.service.impl.DefaultTaskSaveService;
 import org.springframework.cloud.dataflow.server.service.impl.TaskConfigurationProperties;
 import org.springframework.cloud.dataflow.server.service.impl.validation.DefaultStreamValidationService;
 import org.springframework.cloud.dataflow.server.service.impl.validation.DefaultTaskValidationService;
@@ -154,8 +160,7 @@ import static org.mockito.Mockito.when;
 @EnableSpringDataWebSupport
 @EnableHypermediaSupport(type = EnableHypermediaSupport.HypermediaType.HAL)
 @Import(CompletionConfiguration.class)
-@ImportAutoConfiguration({ HibernateJpaAutoConfiguration.class, EmbeddedDataSourceConfiguration.class,
-		JacksonAutoConfiguration.class })
+@ImportAutoConfiguration({ HibernateJpaAutoConfiguration.class, JacksonAutoConfiguration.class })
 @EnableWebMvc
 @EnableConfigurationProperties({ CommonApplicationProperties.class,
 		MetricsProperties.class,
@@ -169,6 +174,7 @@ import static org.mockito.Mockito.when;
 })
 @EnableJpaRepositories(basePackages = {
 		"org.springframework.cloud.dataflow.registry.repository",
+		"org.springframework.cloud.dataflow.audit.repository",
 		"org.springframework.cloud.dataflow.server.repository"
 })
 @EnableJpaAuditing
@@ -215,7 +221,8 @@ public class TestDependencies extends WebMvcConfigurationSupport {
 	}
 
 	@Bean
-	public AppResourceCommon appResourceService(MavenProperties mavenProperties, DelegatingResourceLoader delegatingResourceLoader) {
+	public AppResourceCommon appResourceService(MavenProperties mavenProperties,
+			DelegatingResourceLoader delegatingResourceLoader) {
 		return new AppResourceCommon(mavenProperties, delegatingResourceLoader);
 	}
 
@@ -229,7 +236,6 @@ public class TestDependencies extends WebMvcConfigurationSupport {
 	public FeaturesProperties featuresProperties() {
 		return new FeaturesProperties();
 	}
-
 
 	@Bean
 	public StreamValidationService streamValidationService(AppRegistryService appRegistry,
@@ -291,7 +297,7 @@ public class TestDependencies extends WebMvcConfigurationSupport {
 
 		// Handle Skipper List Deployers
 		List<Deployer> deployers = new ArrayList<>();
-		//deployers.add(new Deployer("", "", null));
+		// deployers.add(new Deployer("", "", null));
 		when(skipperClient.listDeployers()).thenReturn(new Resources<>(deployers, new ArrayList<>()));
 
 		return skipperClient;
@@ -330,8 +336,8 @@ public class TestDependencies extends WebMvcConfigurationSupport {
 
 	@Bean
 	public AppRegistryService appRegistryService(AppRegistrationRepository appRegistrationRepository,
-			AppResourceCommon appResourceService) {
-		return new DefaultAppRegistryService(appRegistrationRepository, appResourceService);
+			AppResourceCommon appResourceService, AuditRecordService auditRecordService) {
+		return new DefaultAppRegistryService(appRegistrationRepository, appResourceService, auditRecordService);
 	}
 
 	@Bean
@@ -399,25 +405,26 @@ public class TestDependencies extends WebMvcConfigurationSupport {
 
 	@Bean
 	public TaskDefinitionController taskDefinitionController(TaskExplorer explorer, TaskDefinitionRepository repository,
-			ApplicationConfigurationMetadataResolver metadataResolver,
-			AppRegistryService appRegistry, LauncherRepository launcherRepository, AuditRecordService auditRecordService,
-			CommonApplicationProperties commonApplicationProperties, TaskValidationService taskValidationService) {
-		return new TaskDefinitionController(explorer, repository,
-				taskService(metadataResolver, taskRepository(), appRegistry, launcherRepository,
-						auditRecordService, commonApplicationProperties,
-						taskValidationService, repository));
+			TaskSaveService taskSaveService, TaskDeleteService taskDeleteService) {
+		return new TaskDefinitionController(explorer, repository, taskSaveService, taskDeleteService);
 	}
 
 	@Bean
 	public TaskExecutionController taskExecutionController(TaskExplorer explorer,
 			ApplicationConfigurationMetadataResolver metadataResolver,
-			AppRegistryService appRegistry, LauncherRepository launcherRepository, AuditRecordService auditRecordService,
+			AppRegistryService appRegistry, LauncherRepository launcherRepository,
+			AuditRecordService auditRecordService,
 			CommonApplicationProperties commonApplicationProperties, TaskValidationService taskValidationService,
-			TaskDefinitionRepository taskDefinitionRepository) {
+			TaskDefinitionRepository taskDefinitionRepository, TaskExecutionService taskExecutionService,
+			TaskExecutionInfoService taskExecutionInfoService, TaskDeleteService taskDeleteService) {
 		return new TaskExecutionController(
-				explorer, taskService(metadataResolver, taskRepository(), appRegistry, launcherRepository,
-				auditRecordService, commonApplicationProperties, taskValidationService, taskDefinitionRepository),
-				taskDefinitionRepository);
+				explorer, taskExecutionService,
+				taskDefinitionRepository, taskExecutionInfoService, taskDeleteService);
+	}
+
+	@Bean
+	public TaskPlatformController taskPlatformController(LauncherRepository launcherRepository) {
+		return new TaskPlatformController(launcherRepository);
 	}
 
 	@Bean
@@ -427,8 +434,8 @@ public class TestDependencies extends WebMvcConfigurationSupport {
 	}
 
 	@Bean
-	public TaskValidationController taskValidationController(TaskService taskService) {
-		return new TaskValidationController(taskService);
+	public TaskValidationController taskValidationController(TaskValidationService taskValidationService) {
+		return new TaskValidationController(taskValidationService);
 	}
 
 	@Bean
@@ -462,15 +469,39 @@ public class TestDependencies extends WebMvcConfigurationSupport {
 	}
 
 	@Bean
-	public TaskService taskService(ApplicationConfigurationMetadataResolver metadataResolver,
-			TaskRepository taskExecutionRepository, AppRegistryService appRegistry,
-			LauncherRepository launcherRepository, AuditRecordService auditRecordService,
-			CommonApplicationProperties commonApplicationProperties, TaskValidationService taskValidationService,
-			TaskDefinitionRepository taskDefinitionRepository) {
-		return new DefaultTaskService(new DataSourceProperties(), taskDefinitionRepository, taskExplorer(),
-				taskExecutionRepository, appRegistry, launcherRepository, metadataResolver,
-				new TaskConfigurationProperties(), auditRecordService, null,
-				commonApplicationProperties, taskValidationService);
+	public TaskDeleteService deleteTaskService(TaskExplorer taskExplorer, LauncherRepository launcherRepository,
+			TaskDefinitionRepository taskDefinitionRepository, AuditRecordService auditRecordService) {
+		return new DefaultTaskDeleteService(taskExplorer, launcherRepository, taskDefinitionRepository,
+				auditRecordService);
+	}
+
+	@Bean
+	public TaskSaveService saveTaskService(TaskDefinitionRepository taskDefinitionRepository,
+			AuditRecordService auditRecordService, AppRegistryService registry) {
+		return new DefaultTaskSaveService(taskDefinitionRepository, auditRecordService, registry);
+	}
+
+	@Bean
+	public TaskExecutionService taskService(LauncherRepository launcherRepository,
+			ApplicationConfigurationMetadataResolver metadataResolver,
+			AuditRecordService auditRecordService, CommonApplicationProperties commonApplicationProperties,
+			TaskRepository taskRepository,
+			TaskExecutionInfoService taskExecutionInfoService) {
+		return new DefaultTaskExecutionService(
+				launcherRepository, metadataResolver, auditRecordService,
+				null, commonApplicationProperties,
+				taskRepository,
+				taskExecutionInfoService);
+	}
+
+	@Bean
+	public TaskExecutionInfoService taskDefinitionRetriever(AppRegistryService registry,
+			TaskRepository taskExecutionRepository, TaskExplorer taskExplorer,
+			TaskDefinitionRepository taskDefinitionRepository,
+			TaskConfigurationProperties taskConfigurationProperties) {
+		return new DefaultTaskExecutionInfoService(new DataSourceProperties(), registry, taskExecutionRepository,
+				taskExplorer,
+				taskDefinitionRepository, taskConfigurationProperties);
 	}
 
 	@Bean
@@ -491,7 +522,6 @@ public class TestDependencies extends WebMvcConfigurationSupport {
 				dataSourceProperties, null,
 				metaDataResolver, new SchedulerServiceProperties(), auditRecordService);
 	}
-
 
 	@Bean
 	public AboutController aboutController(VersionInfoProperties versionInfoProperties,
@@ -514,12 +544,10 @@ public class TestDependencies extends WebMvcConfigurationSupport {
 		when(launcher.getTaskLauncher()).thenReturn(taskLauncher);
 		when(launcherRepository.findByName("default")).thenReturn(launcher);
 
-
 		return new AboutController(streamDeployer, launcherRepository,
 				featuresProperties, versionInfoProperties,
 				mock(SecurityStateBean.class));
 	}
-
 
 	public static class SimpleTestScheduler implements Scheduler {
 		public static final String INVALID_CRON_EXPRESSION = "BAD";
@@ -533,16 +561,18 @@ public class TestDependencies extends WebMvcConfigurationSupport {
 			schedule.setScheduleProperties(scheduleRequest.getSchedulerProperties());
 			schedule.setTaskDefinitionName(scheduleRequest.getDefinition().getName());
 			if (schedule.getScheduleProperties().containsKey("spring.cloud.scheduler.cron.expression") &&
-					schedule.getScheduleProperties().get("spring.cloud.scheduler.cron.expression").equals(INVALID_CRON_EXPRESSION)) {
+					schedule.getScheduleProperties().get("spring.cloud.scheduler.cron.expression")
+							.equals(INVALID_CRON_EXPRESSION)) {
 				throw new CreateScheduleException("Invalid Cron Expression", new IllegalArgumentException());
 			}
-			List<ScheduleInfo> scheduleInfos = schedules.stream().filter(s -> s.getScheduleName().
-					equals(scheduleRequest.getScheduleName())).
-					collect(Collectors.toList());
+			List<ScheduleInfo> scheduleInfos = schedules.stream()
+					.filter(s -> s.getScheduleName().equals(scheduleRequest.getScheduleName()))
+					.collect(Collectors.toList());
 			if (scheduleInfos.size() > 0) {
 				throw new CreateScheduleException(
 						String.format("Schedule %s already exists",
-								scheduleRequest.getScheduleName()), null);
+								scheduleRequest.getScheduleName()),
+						null);
 			}
 			schedules.add(schedule);
 
@@ -551,15 +581,13 @@ public class TestDependencies extends WebMvcConfigurationSupport {
 		@Override
 		public void unschedule(String scheduleName) {
 			schedules = schedules.stream().filter(
-					s -> !s.getScheduleName().equals(scheduleName)).
-					collect(Collectors.toList());
+					s -> !s.getScheduleName().equals(scheduleName)).collect(Collectors.toList());
 		}
 
 		@Override
 		public List<ScheduleInfo> list(String taskDefinitionName) {
 			return schedules.stream().filter(
-					s -> s.getTaskDefinitionName().equals(taskDefinitionName)).
-					collect(Collectors.toList());
+					s -> s.getTaskDefinitionName().equals(taskDefinitionName)).collect(Collectors.toList());
 		}
 
 		@Override

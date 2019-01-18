@@ -11,6 +11,7 @@
 	<description>Spring Cloud Data Flow Docs</description>
 	<properties>
 		<main.basedir>${basedir}/..</main.basedir>
+		<docs.resources.version>0.1.0.RELEASE</docs.resources.version>
 	</properties>
 	<dependencies>
 		<dependency>
@@ -49,6 +50,13 @@
 			<groupId>org.springframework.cloud</groupId>
 			<artifactId>spring-cloud-dataflow-completion</artifactId>
 		</dependency>
+		<dependency>
+			<groupId>io.spring.docresources</groupId>
+			<artifactId>spring-doc-resources</artifactId>
+			<version>${docs.resources.version}</version>
+			<type>zip</type>
+			<optional>true</optional>
+		</dependency>
 	</dependencies>
 	<profiles>
 		<profile>
@@ -85,6 +93,48 @@
 						</executions>
 					</plugin>
 					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-dependency-plugin</artifactId>
+						<executions>
+							<execution>
+								<id>unpack-doc-resources</id>
+								<goals>
+									<goal>unpack-dependencies</goal>
+								</goals>
+								<phase>generate-resources</phase>
+								<configuration>
+									<includeGroupIds>io.spring.docresources</includeGroupIds>
+									<includeArtifactIds>spring-doc-resources</includeArtifactIds>
+									<includeTypes>zip</includeTypes>
+									<excludeTransitive>true</excludeTransitive>
+									<outputDirectory>${project.build.directory}/refdocs/</outputDirectory>
+								</configuration>
+							</execution>
+						</executions>
+					</plugin>
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-resources-plugin</artifactId>
+						<executions>
+							<execution>
+								<id>copy-asciidoc-resources</id>
+								<phase>generate-resources</phase>
+								<goals>
+									<goal>copy-resources</goal>
+								</goals>
+								<configuration>
+									<outputDirectory>${project.build.directory}/refdocs/</outputDirectory>
+									<resources>
+										<resource>
+											<directory>src/main/asciidoc</directory>
+											<filtering>false</filtering>
+										</resource>
+									</resources>
+								</configuration>
+							</execution>
+						</executions>
+					</plugin>
+					<plugin>
 						<groupId>org.asciidoctor</groupId>
 						<artifactId>asciidoctor-maven-plugin</artifactId>
 						<version>1.5.3</version>
@@ -96,9 +146,13 @@
 							</dependency>
 						</dependencies>
 						<configuration>
+							<sourceDirectory>${project.build.directory}/refdocs/</sourceDirectory>
+							<outputDirectory>${project.build.directory}/generated-docs</outputDirectory>
 							<sourceDocumentName>index.adoc</sourceDocumentName>
+							<imagesDir>.</imagesDir>
 							<doctype>book</doctype>
 							<attributes>
+								<icons>font</icons>
 								<allow-uri-read>true</allow-uri-read>
 								<attribute-missing>warn</attribute-missing>
 								<project-version>${project.version}</project-version>
@@ -122,79 +176,26 @@
 								<configuration>
 									<backend>html5</backend>
 									<attributes>
-										<toc2 />
+										// these attributes are required to use the doc resources
+										<docinfo>shared</docinfo>
+										<stylesdir>css/</stylesdir>
+										<stylesheet>spring.css</stylesheet>
+										<linkcss>true</linkcss>
+										<icons>font</icons>
+										<highlightjsdir>js/highlight</highlightjsdir>
+										<highlightjs-theme>atom-one-dark-reasonable</highlightjs-theme>
 									</attributes>
 								</configuration>
 							</execution>
-						</executions>
-					</plugin>
-					<plugin>
-						<groupId>com.agilejava.docbkx</groupId>
-						<artifactId>docbkx-maven-plugin</artifactId>
-						<version>2.0.15</version>
-						<configuration>
-							<sourceDirectory>${basedir}/target/generated-docs</sourceDirectory>
-							<imgSrcPath />
-							<graphicsize.extension>0</graphicsize.extension>
-							<includes>index.xml</includes>
-							<xincludeSupported>true</xincludeSupported>
-							<chunkedOutput>false</chunkedOutput>
-							<foCustomization>${basedir}/src/main/docbook/xsl/pdf.xsl</foCustomization>
-							<useExtensions>1</useExtensions>
-							<admonGraphics>1</admonGraphics>
-
-							<highlightSource>1</highlightSource>
-							<highlightXslthlConfig>${basedir}/src/main/docbook/xsl/xslthl-config.xml
-							</highlightXslthlConfig>
-							<preProcess>
-								<copy todir="${basedir}/target/generated-docs/images">
-									<fileset dir="${basedir}/src/main/docbook/images" />
-								</copy>
-							</preProcess>
-						</configuration>
-						<dependencies>
-							<dependency>
-								<groupId>net.sf.xslthl</groupId>
-								<artifactId>xslthl</artifactId>
-								<version>2.1.0</version>
-							</dependency>
-							<dependency>
-								<groupId>net.sf.docbook</groupId>
-								<artifactId>docbook-xml</artifactId>
-								<version>5.0-all</version>
-								<classifier>resources</classifier>
-								<type>zip</type>
-								<scope>runtime</scope>
-							</dependency>
-						</dependencies>
-						<executions>
 							<execution>
-								<id>html</id>
-								<goals>
-									<goal>generate-html</goal>
-								</goals>
+								<id>generate-pdf</id>
 								<phase>prepare-package</phase>
+								<goals>
+									<goal>process-asciidoc</goal>
+								</goals>
 								<configuration>
-									<htmlCustomization>${basedir}/src/main/docbook/xsl/html-multipage.xsl
-									</htmlCustomization>
-									<targetDirectory>${basedir}/target/docbook/html</targetDirectory>
-									<chunkedOutput>true</chunkedOutput>
-									<postProcess>
-										<copy todir="${basedir}/target/contents/reference/html">
-											<fileset dir="${basedir}/target/docbook/html">
-												<include name="**/*.html" />
-											</fileset>
-										</copy>
-										<copy todir="${basedir}/target/contents/reference/html/images">
-											<fileset dir="${basedir}/target/generated-docs/images" />
-										</copy>
-										<copy todir="${basedir}/target/contents/reference/html/css">
-											<fileset dir="${basedir}/src/main/docbook/css" />
-										</copy>
-										<copy todir="${basedir}/target/generated-docs/tocbot-3.0.2">
-											<fileset dir="${basedir}/src/main/asciidoc/tocbot-3.0.2" />
-										</copy>
-									</postProcess>
+									<backend>pdf</backend>
+									<sourceHighlighter>coderay</sourceHighlighter>
 								</configuration>
 							</execution>
 						</executions>
@@ -237,11 +238,14 @@
 									<target>
 										<zip destfile="${project.build.directory}/${project.artifactId}-${project.version}.zip">
 											<zipfileset src="${project.build.directory}/${project.artifactId}-${project.version}-javadoc.jar" prefix="api" />
-											<fileset dir="${project.build.directory}/contents" />
 											<zipfileset dir="${project.build.directory}/generated-docs" prefix="reference/htmlsingle">
 												<include name="index.html" />
 												<include name="images/**" />
-												<include name="tocbot-3.0.2/**" />
+												<include name="css/**" />
+												<include name="js/**" />
+											</zipfileset>
+											<zipfileset dir="${project.build.directory}/generated-docs" prefix="reference/pdf">
+												<include name="index.pdf" />
 											</zipfileset>
 										</zip>
 									</target>

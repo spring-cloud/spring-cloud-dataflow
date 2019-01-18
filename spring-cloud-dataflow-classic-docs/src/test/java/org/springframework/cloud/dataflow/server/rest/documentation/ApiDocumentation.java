@@ -1,5 +1,5 @@
 /*
- * Copyright 2016-2018 the original author or authors.
+ * Copyright 2016-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -114,6 +114,8 @@ public class ApiDocumentation extends BaseDocumentation {
 						.description("Returns all task executions for a " + "given Task name"),
 				linkWithRel("tasks/executions/execution")
 						.description("Provides details for a " + "specific task execution"),
+				linkWithRel("tasks/platforms")
+						.description("Provides platform accounts for launching tasks"),
 				linkWithRel("streams/definitions").description("Exposes the Streams resource"),
 				linkWithRel("streams/definitions/definition").description("Handle a specific Stream " + "definition"),
 				linkWithRel("streams/validation").description("Provides the validation for a stream definition"),
@@ -181,6 +183,7 @@ public class ApiDocumentation extends BaseDocumentation {
 						fieldWithPath("_links.streams/validation.href").description("Link to the streams/validation"),
 						fieldWithPath("_links.streams/validation.templated").type(JsonFieldType.BOOLEAN).optional()
 							.description("Link streams/validation is templated"),
+						fieldWithPath("_links.tasks/platforms.href").description("Link to the tasks/platforms"),
 						fieldWithPath("_links.tasks/definitions.href").description("Link to the tasks/definitions"),
 						fieldWithPath("_links.tasks/definitions/definition.href").description("Link to the tasks/definitions/definition"),
 						fieldWithPath("_links.tasks/definitions/definition.templated").type(JsonFieldType.BOOLEAN).optional()

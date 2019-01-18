@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 the original author or authors.
+ * Copyright 2018-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -298,7 +298,7 @@ public class ConfigCommands implements CommandMarker, InitializingBean, Applicat
 		}
 
 		RuntimeEnvironmentDetails appDeployer = about.getRuntimeEnvironment().getAppDeployer();
-		RuntimeEnvironmentDetails taskLauncher = about.getRuntimeEnvironment().getTaskLauncher();
+		List<RuntimeEnvironmentDetails> taskLaunchers = about.getRuntimeEnvironment().getTaskLaunchers();
 		String deployerColumnName = "Skipper Deployer";
 		modelBuilder.addRow().addValue(deployerColumnName).addValue(appDeployer);
 		rowIndex++;
@@ -306,11 +306,13 @@ public class ConfigCommands implements CommandMarker, InitializingBean, Applicat
 			modelBuilder.addRow().addValue("Platform Specific").addValue(appDeployer.getPlatformSpecificInfo());
 			rowsWithThinSeparators.add(rowIndex++);
 		}
-		modelBuilder.addRow().addValue("Task Launcher").addValue(taskLauncher);
-		rowIndex++;
-		if (!taskLauncher.getPlatformSpecificInfo().isEmpty()) {
-			modelBuilder.addRow().addValue("Platform Specific").addValue(taskLauncher.getPlatformSpecificInfo());
-			rowsWithThinSeparators.add(rowIndex++);
+		for (RuntimeEnvironmentDetails taskLauncher : taskLaunchers) {
+			modelBuilder.addRow().addValue("Task Launcher").addValue(taskLauncher);
+			rowIndex++;
+			if (!taskLauncher.getPlatformSpecificInfo().isEmpty()) {
+				modelBuilder.addRow().addValue("Platform Specific").addValue(taskLauncher.getPlatformSpecificInfo());
+				rowsWithThinSeparators.add(rowIndex++);
+			}
 		}
 
 		TableBuilder builder = new TableBuilder(modelBuilder.build());

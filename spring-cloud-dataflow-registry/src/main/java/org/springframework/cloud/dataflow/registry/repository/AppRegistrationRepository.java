@@ -17,8 +17,8 @@ package org.springframework.cloud.dataflow.registry.repository;
 
 import java.util.List;
 
+import org.springframework.cloud.dataflow.core.AppRegistration;
 import org.springframework.cloud.dataflow.core.ApplicationType;
-import org.springframework.cloud.dataflow.registry.domain.AppRegistration;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.repository.PagingAndSortingRepository;

@@ -11,10 +11,6 @@
 	</parent>
 	<dependencies>
 		<dependency>
-			<groupId>org.springframework.hateoas</groupId>
-			<artifactId>spring-hateoas</artifactId>
-		</dependency>
-		<dependency>
 			<groupId>com.fasterxml.jackson.core</groupId>
 			<artifactId>jackson-annotations</artifactId>
 		</dependency>
@@ -61,6 +57,12 @@
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-test</artifactId>
 			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.cloud</groupId>
+			<artifactId>spring-cloud-dataflow-audit</artifactId>
+			<version>2.0.0.BUILD-SNAPSHOT</version>
+			<scope>compile</scope>
 		</dependency>
 	</dependencies>
 </project>

@@ -17,8 +17,7 @@
 package org.springframework.cloud.dataflow.server.service.impl;
 
 import javax.validation.constraints.Min;
-
-import org.hibernate.validator.constraints.NotBlank;
+import javax.validation.constraints.NotBlank;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.cloud.dataflow.core.DataFlowPropertyKeys;

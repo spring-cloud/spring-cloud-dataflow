@@ -16,25 +16,25 @@
 
 package org.springframework.cloud.dataflow.rest.job.support;
 
-import java.text.FieldPosition;
-import java.util.Date;
+import java.util.Locale;
+import java.util.TimeZone;
 
-import com.fasterxml.jackson.databind.util.ISO8601DateFormat;
-import com.fasterxml.jackson.databind.util.ISO8601Utils;
+import com.fasterxml.jackson.databind.util.StdDateFormat;
 
 /**
- * Improved version of the {@link ISO8601DateFormat} that also serializes milliseconds.
+ * Wrapper for the {@link StdDateFormat} to use {@link TimeZone} and {@link Locale} based constructor.
  *
  * @author Gunnar Hillert
+ * @author Daniel Serleg
  */
 @SuppressWarnings("serial")
-public class ISO8601DateFormatWithMilliSeconds extends ISO8601DateFormat {
+public class ISO8601DateFormatWithMilliSeconds extends StdDateFormat {
 
-	@Override
-	public StringBuffer format(Date date, StringBuffer toAppendTo, FieldPosition fieldPosition) {
-		final String value = ISO8601Utils.format(date, true);
-		toAppendTo.append(value);
-		return toAppendTo;
+	public ISO8601DateFormatWithMilliSeconds(TimeZone tz, Locale loc, Boolean lenient) {
+		super(tz, loc, lenient);
 	}
 
+	public ISO8601DateFormatWithMilliSeconds() {
+		super();
+	}
 }

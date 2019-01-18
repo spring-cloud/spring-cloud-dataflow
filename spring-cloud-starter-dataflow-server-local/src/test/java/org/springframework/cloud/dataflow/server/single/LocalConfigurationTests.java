@@ -1,5 +1,5 @@
 /*
- * Copyright 2015-2016 the original author or authors.
+ * Copyright 2015-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,7 +31,7 @@ import org.springframework.cloud.dataflow.server.controller.TaskExecutionControl
 import org.springframework.cloud.dataflow.server.repository.StreamDefinitionRepository;
 import org.springframework.cloud.dataflow.server.repository.TaskDefinitionRepository;
 import org.springframework.cloud.dataflow.server.service.StreamService;
-import org.springframework.cloud.dataflow.server.service.TaskService;
+import org.springframework.cloud.dataflow.server.service.TaskExecutionService;
 import org.springframework.cloud.dataflow.server.single.dataflowapp.LocalTestDataFlowServer;
 import org.springframework.cloud.dataflow.server.single.nodataflowapp.LocalTestNoDataFlowServer;
 import org.springframework.cloud.deployer.resource.support.DelegatingResourceLoader;
@@ -115,7 +115,7 @@ public class LocalConfigurationTests {
 		// The TaskDefinition repository is expected to exist.
 		assertNotNull(context.getBean(TaskDefinitionRepository.class));
 		try {
-			context.getBean(TaskService.class);
+			context.getBean(TaskExecutionService.class);
 			fail("Task features should have been disabled.");
 		}
 		catch (NoSuchBeanDefinitionException e) {
@@ -140,7 +140,7 @@ public class LocalConfigurationTests {
 	@Test
 	public void testNoDataflowConfig() {
 		SpringApplication app = new SpringApplication(LocalTestNoDataFlowServer.class);
-		context = app.run(new String[] { "--server.port=0", "--spring.jpa.database=H2" });
+		context = app.run(new String[] { "--server.port=0", "--spring.jpa.database=H2", "--spring.flyway.enabled=false" });
 		assertThat(context.containsBean("appRegistry"), is(false));
 	}
 }

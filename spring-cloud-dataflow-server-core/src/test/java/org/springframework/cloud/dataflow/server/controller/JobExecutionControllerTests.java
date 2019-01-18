@@ -1,5 +1,5 @@
 /*
- * Copyright 2016-2018 the original author or authors.
+ * Copyright 2016-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,8 +31,9 @@ import org.springframework.batch.core.repository.JobRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.batch.BatchProperties;
 import org.springframework.boot.autoconfigure.context.PropertyPlaceholderAutoConfiguration;
-import org.springframework.boot.autoconfigure.jdbc.EmbeddedDataSourceConfiguration;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
+import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase.Replace;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.cloud.dataflow.server.config.apps.CommonApplicationProperties;
 import org.springframework.cloud.dataflow.server.configuration.JobDependencies;
@@ -42,6 +43,7 @@ import org.springframework.http.MediaType;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter;
 
@@ -59,10 +61,11 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  * @author Gunnar Hillert
  */
 @RunWith(SpringRunner.class)
-@SpringBootTest(classes = { EmbeddedDataSourceConfiguration.class, JobDependencies.class,
+@SpringBootTest(classes = { JobDependencies.class,
 		PropertyPlaceholderAutoConfiguration.class, BatchProperties.class })
 @EnableConfigurationProperties({ CommonApplicationProperties.class })
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
+@AutoConfigureTestDatabase(replace = Replace.ANY)
 public class JobExecutionControllerTests {
 
 	@Autowired
@@ -172,11 +175,23 @@ public class JobExecutionControllerTests {
 	}
 
 	@Test
+	public void testGetAllExecutionsPageOffsetLargerThanIntMaxValue() throws Exception {
+		verify5XXErrorIsThrownForPageOffsetError(get("/jobs/executions/"));
+		verifyBorderCaseForMaxInt(get("/jobs/executions/"));
+	}
+
+	@Test
 	public void testGetExecutionsByName() throws Exception {
 		mockMvc.perform(get("/jobs/executions/").param("name", JobExecutionUtils.JOB_NAME_ORIG).accept(MediaType.APPLICATION_JSON))
 				.andExpect(status().isOk())
 				.andExpect(jsonPath("$.content[0].jobExecution.jobInstance.jobName", is(JobExecutionUtils.JOB_NAME_ORIG)))
 				.andExpect(jsonPath("$.content", hasSize(1)));
+	}
+
+	@Test
+	public void testGetExecutionsByNamePageOffsetLargerThanIntMaxValue() throws Exception {
+		verify5XXErrorIsThrownForPageOffsetError(get("/jobs/executions/").param("name", JobExecutionUtils.JOB_NAME_ORIG));
+		verifyBorderCaseForMaxInt(get("/jobs/executions/").param("name", JobExecutionUtils.JOB_NAME_ORIG));
 	}
 
 	@Test
@@ -187,6 +202,7 @@ public class JobExecutionControllerTests {
 				.andExpect(jsonPath("$.content[1].jobExecution.jobInstance.jobName", is(JobExecutionUtils.JOB_NAME_FOOBAR)))
 				.andExpect(jsonPath("$.content", hasSize(2)));
 	}
+
 
 	@Test
 	public void testGetExecutionsByNameNotFound() throws Exception {
@@ -201,5 +217,18 @@ public class JobExecutionControllerTests {
 		jobExecution.setStatus(BatchStatus.STOPPED);
 		jobExecution.setEndTime(new Date());
 		jobRepository.update(jobExecution);
+	}
+
+	private void verify5XXErrorIsThrownForPageOffsetError(MockHttpServletRequestBuilder builder) throws Exception{
+		mockMvc.perform(builder.param("page", String.valueOf(Integer.MAX_VALUE))
+				.accept(MediaType.APPLICATION_JSON))
+				.andExpect(status().is4xxClientError())
+				.andReturn().getResponse().getContentAsString()
+				.contains("OffsetOutOfBoundsException");
+	}
+	private void verifyBorderCaseForMaxInt(MockHttpServletRequestBuilder builder) throws Exception {
+		mockMvc.perform(builder.param("page", String.valueOf(Integer.MAX_VALUE - 1 ))
+				.param("size", "1")
+				.accept(MediaType.APPLICATION_JSON)).andExpect(status().isOk());
 	}
 }

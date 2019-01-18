@@ -191,6 +191,16 @@
 			<artifactId>spring-cloud-skipper</artifactId>
 			<version>${spring-cloud-skipper.version}</version>
 		</dependency>
+		<dependency>
+			<groupId>org.springframework.cloud</groupId>
+			<artifactId>spring-cloud-dataflow-audit</artifactId>
+			<version>2.0.0.BUILD-SNAPSHOT</version>
+			<scope>compile</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.flywaydb</groupId>
+			<artifactId>flyway-core</artifactId>
+		</dependency>
 	</dependencies>
 	<build>
 		<resources>
@@ -202,6 +212,7 @@
 					<include>banner.txt</include>
 					<include>META-INF/dataflow-server-defaults.yml</include>
 					<include>schemas/**</include>
+					<include>org/**</include>
 				</includes>
 			</resource>
 		</resources>

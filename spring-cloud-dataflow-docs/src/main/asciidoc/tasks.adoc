@@ -26,7 +26,6 @@ Spring Cloud Task is integrated with Spring Batch so that if a Spring Cloud Task
 When running Data Flow on your local machine, Tasks are launched in a separate JVM.
 When running on Cloud Foundry, tasks are launched using https://docs.cloudfoundry.org/devguide/using-tasks.html[Cloud Foundry's Task] functional and when running on Kubernetes, task are launched using the `Job` kind type.
 
-
 == The Lifecycle of a Task
 
 Before we dive deeper into the details of creating Tasks, we need to understand the typical lifecycle for tasks in the context of Spring Cloud Data Flow:
@@ -65,8 +64,6 @@ public class MyTask {
 . Packaging your application with Spring Boot into an über jar is done through the standard {spring-boot-docs-reference}/html/getting-started-first-application.html#getting-started-first-application-executable-jar[Spring Boot conventions].
 The packaged application can be registered and deployed as noted below.
 
-
-
 ==== Task Database Configuration
 
 CAUTION: When launching a task application, be sure that the database driver that is being used by Spring Cloud Data Flow is also a dependency on the task application.
@@ -74,8 +71,6 @@ For example, if your Spring Cloud Data Flow is set to use Postgresql, be sure th
 
 TIP: When you run tasks externally (that is, from the command line) and you want Spring Cloud Data Flow to show the TaskExecutions in its UI, be sure that common datasource settings are shared among the both.
 By default, Spring Cloud Task uses a local H2 instance, and the execution is recorded to the database used by Spring Cloud Data Flow.
-
-
 
 [[spring-cloud-dataflow-register-task-apps]]
 === Registering a Task Application
@@ -103,7 +98,6 @@ For example, the followinng listing would be a valid properties file:
 [source]
 task.foo=file:///tmp/foo-1.2.1.BUILD-SNAPSHOT.jar
 task.bar=file:///tmp/bar-1.2.1.BUILD-SNAPSHOT.jar
-
 
 Then you can use the `app import` command and provide the location of the properties file by using the  `--uri` option, as follows:
 
@@ -142,8 +136,6 @@ pre-existing task app, then include the `--force` option.
 In some cases, the Resource is resolved on the server side.
 In other cases, the URI is passed to a runtime container instance where it is resolved.
 Consult the specific documentation of each Data Flow Server for more detail.
-
-
 
 [[spring-cloud-dataflow-create-task-definition]]
 === Creating a Task Definition
@@ -252,8 +244,6 @@ the task definition name, for example `task execution list --name foo`.  To retr
 details for a task execution use the `task execution status` command with the id of the task execution,
 for example `task execution status --id 549`.
 
-
-
 [[spring-cloud-dataflow-task-definition-destroying]]
 === Destroying a Task Definition
 Destroying a Task Definition removes the definition from the definition repository.
@@ -263,6 +253,18 @@ To destroy a task through the shell, use the `task destroy` command, as shown in
 [source]
 dataflow:>task destroy mytask
  Destroyed task 'mytask'
+
+To destroy all tasks through the shell, use the `task all destroy` command as shown in the following example:
+
+[source]
+dataflow:>task all destroy
+ Really destroy all tasks? [y, n]: y
+ All tasks destroyed
+
+Or use the force command:
+[source]
+dataflow:>task all destroy --force
+ All tasks destroyed
 
 The task execution information for previously launched tasks for the definition remains in the task repository.
 
@@ -319,8 +321,6 @@ bad-timestamp is an invalid task.
 ----
 In this case Spring Cloud Data Flow states that the task is invalid because task:badtimestamp has an invalid URI.
 
-
-
 [[spring-cloud-dataflow-task-events]]
 == Subscribing to Task/Batch Events
 
@@ -369,8 +369,6 @@ A composed task can be created through the RESTful API, the Spring Cloud Data Fl
 
 Composed tasks are executed through a task application called the https://github.com/spring-cloud-task-app-starters/composed-task-runner[Composed Task Runner].
 
-
-
 ==== Registering the Composed Task Runner
 
 By default, the Composed Task Runner application is not registered with Spring Cloud Data Flow.
@@ -382,8 +380,6 @@ Task Runner as an application with Spring Cloud Data Flow, as follows:
 You can also configure Spring Cloud Data Flow to use a different task definition name for the composed task runner.
 This can be done by setting the `spring.cloud.dataflow.task.composedTaskRunnerName` property to the name of your choice.
 You can then register the composed task runner application with the name you set by using that property.
-
-
 
 ==== Configuring the Composed Task Runner
 
@@ -445,7 +441,6 @@ Whether to wait for scheduled tasks to complete on shutdown, not interrupting ru
 Note
 when using the options above as environment variables, convert to uppercase, remove the dash character and replace with the underscore character. For example: increment-instance-enabled would be INCREMENT_INSTANCE_ENABLED.
 
-
 === The Lifecycle of a Composed Task
 
 The lifecycle of a composed task has three parts:
@@ -453,8 +448,6 @@ The lifecycle of a composed task has three parts:
 * <<spring-cloud-data-flow-composed-task-creating>>
 * <<spring-cloud-data-flow-composed-task-stopping>>
 * <<spring-cloud-data-flow-composed-task-restarting>>
-
-
 
 [[spring-cloud-data-flow-composed-task-creating]]
 ==== Creating a Composed Task
@@ -490,15 +483,11 @@ dataflow:>task list
 In the example, Spring Cloud Data Flow created three task definitions, one for each of the applications that makes up our composed task (`my-composed-task-mytaskapp` and `my-composed-task-timestamp`) as well as the composed task (`my-composed-task`) definition.
 We also see that each of the generated names for the child tasks is made up of the name of the composed task and the name of the application, separated by a dash `-` (as in _my-composed-task_ `-` _mytaskapp_).
 
-
-
 ===== Task Application Parameters
 
 The task applications that make up the composed task definition can also contain parameters, as shown in the following example:
 
 `dataflow:> task create my-composed-task --definition "mytaskapp --displayMessage=hello && timestamp --format=YYYY"`
-
-
 
 ==== Launching a Composed Task
 Launching a composed task is done the same way as launching a stand-alone task, as follows:
@@ -569,8 +558,6 @@ The following list shows how the Exit Status is set for each step (task) contain
 * If no `ExitMessage` is present and the `ExitCode` is set to zero, then the `ExitStatus` for the step is `COMPLETED`.
 * If no `ExitMessage` is present and the `ExitCode` is set to any non-zero number, the `ExitStatus` for the step is `FAILED`.
 
-
-
 ==== Destroying a Composed Task
 
 The command used to destroy a stand-alone task is the same as the command used to destroy a composed task.
@@ -595,8 +582,6 @@ dataflow:>task list
 ╚═════════╧═══════════════╧═══════════╝
 ----
 
-
-
 [[spring-cloud-data-flow-composed-task-stopping]]
 ==== Stopping a Composed Task
 In cases where a composed task execution needs to be stopped, you can do so through the:
@@ -609,8 +594,6 @@ To stop a composed task through the dashboard, select the Jobs tab and click the
 The composed task run is stopped when the currently running child task completes.
 The step associated with the child task that was running at the time that the composed task was stopped is marked as `STOPPED` as well as the composed task job execution.
 
-
-
 [[spring-cloud-data-flow-composed-task-restarting]]
 ==== Restarting a Composed Task
 In cases where a composed task fails during execution and the status of the composed task is `FAILED`, the task can be restarted.
@@ -620,13 +603,10 @@ You can do so through the:
 * The shell
 * Spring Cloud Data Flow Dashboard
 
-
 To restart a composed task through the shell, launch the task with the same parameters.
 To restart a composed task through the dashboard, select the Jobs tab and click the Restart button next to the job execution that you want to restart.
 
 NOTE: Restarting a Composed Task job that has been stopped (through the Spring Cloud Data Flow Dashboard or RESTful API) relaunches the `STOPPED` child task and then launches the remaining (unlaunched) child tasks in the specified order.
-
-
 
 == Composed Tasks DSL
 
@@ -635,8 +615,6 @@ Composed tasks can be run in three ways:
 * <<spring-cloud-data-flow-conditional-execution>>
 * <<spring-cloud-data-flow-transitional-execution>>
 * <<spring-cloud-data-flow-split-execution>>
-
-
 
 [[spring-cloud-data-flow-conditional-execution]]
 === Conditional Execution
@@ -670,15 +648,12 @@ There is only one.
 
 TIP: You can view a diagram of your directed graph by clicking the Detail button next to the composed task definition on the Definitions tab.
 
-
-
 [[spring-cloud-data-flow-transitional-execution]]
 === Transitional Execution
 
 The DSL supports fine- grained control over the transitions taken during the execution of the directed graph.
 Transitions are specified by providing a condition for equality based on the exit status of the previous task.
 A task transition is represented by the following symbol `-&gt;`.
-
 
 ==== Basic Transition
 
@@ -712,8 +687,6 @@ To create a transitional connector:
 . Enter the exit status required for that connector.
 . The solid line for that connector turns to a dashed line.
 
-
-
 ==== Transition With a Wildcard
 
 Wildcards are supported for transitions by the DSL, as shown in the following:
@@ -729,8 +702,6 @@ Using the Spring Cloud Data Flow Dashboard to create the same "`transition with 
 
 .Basic Transition With Wildcard
 image::{dataflow-asciidoc}/images/dataflow-ctr-transition-basic-wildcard.png[Composed Task Basic Transition with Wildcard, scaledwidth="50%"]
-
-
 
 ==== Transition With a Following Conditional Execution
 
@@ -814,45 +785,44 @@ Then `DDD` and `EEE` would run in parallel.
 [[spring-cloud-dataflow-launch-tasks-from-stream]]
 == Launching Tasks from a Stream
 
-You can launch a task from a stream by using one of the available `task-launcher` sinks. Currently the platforms supported by the `task-launcher` sinks are:
+You can launch a task from a stream by using the https://github.com/spring-cloud-stream-app-starters/tasklauncher-dataflow/blob/master/spring-cloud-starter-stream-sink-task-launcher-dataflow/README.adoc[tasklauncher-dataflow] sink.
+The sink connects to a Data Flow server and uses its REST API to launch any defined task.
+The sink accepts a https://github.com/spring-cloud-stream-app-starters/tasklauncher-dataflow/blob/master/spring-cloud-starter-stream-sink-task-launcher-dataflow/README.adoc#payload[JSON payload] representing a `task launch request` which provides the name of the task to launch, and may include command line arguments and deployment properties.
 
-* https://github.com/spring-cloud-stream-app-starters/tasklauncher-local[local],
-* https://github.com/spring-cloud-stream-app-starters/tasklauncher-cloudfoundry[Cloud Foundry]
-* https://github.com/spring-cloud-stream-app-starters/tasklauncher-kubernetes[Kubernetes]
-* https://github.com/spring-cloud-stream-app-starters/tasklauncher-yarn[Yarn]
+The https://github.com/spring-cloud-stream-app-starters/core/blob/master/common/app-starters-task-launch-request-common/README.adoc[app-starters-task-launch-request-common] component , in conjunction with Spring Cloud Stream https://docs.spring.io/spring-cloud-stream/docs/current-snapshot/reference/htmlsingle/#_functional_composition[functional composition], can transform the output of any source or processor to a task launch request.
 
-CAUTION: `task-launcher-local` is meant for development purposes only.
+Adding a dependency to `app-starters-task-launch-request-common`, auto-configures a `java.util.function.Function` implementation, registered via https://cloud.spring.io/spring-cloud-function/[Spring Cloud Function] as `taskLaunchRequest`.
 
-A `task-launcher` sink expects a message containing a https://github.com/spring-cloud/spring-cloud-task/blob/master/spring-cloud-task-stream/src/main/java/org/springframework/cloud/task/launcher/TaskLaunchRequest.java[TaskLaunchRequest] object in its payload.
-From the `TaskLaunchRequest` object, the `task-launcher` obtains the URI of the artifact to be launched, as well as the environment properties, command line arguments, deployment properties, and application name to be used by the task.
+For example, you can start with the https://github.com/spring-cloud-stream-app-starters/time/tree/master/spring-cloud-starter-stream-source-time[time] source, add the following dependency, build it, and register it as a custom source. We'll call it `time-tlr` in this example.
 
-The https://github.com/spring-cloud-stream-app-starters/tasklauncher-local/blob/v1.2.0.RELEASE/spring-cloud-starter-stream-sink-task-launcher-local/README.adoc[task-launcher-local] can be added to the available sinks by executing the app register command, as follows (for the Rabbit Binder, in this case):
+[source,xml]
+----
+<dependency>
+    <groupId>org.springframework.cloud.stream.app</groupId>
+    <artifactId>app-starters-task-launch-request-common</artifactId>
+</dependency>
+----
 
-`app register --name task-launcher-local --type sink --uri maven://org.springframework.cloud.stream.app:task-launcher-local-sink-rabbit:jar:1.2.0.RELEASE`
+TIP: https://start-scs.cfapps.io/[Spring Cloud Stream Initializr] provides a great starting point for creating stream applications.
 
-In the case of a Maven-based task that is to be launched, the `task-launcher` application is responsible for downloading the artifact.
-You *must* configure the `task-launcher` with the appropriate configuration of https://github.com/spring-cloud/spring-cloud-deployer/blob/master/spring-cloud-deployer-resource-maven/src/main/java/org/springframework/cloud/deployer/resource/maven/MavenProperties.java[Maven Properties], such as `--maven.remote-repositories.repo1.url=http://repo.spring.io/libs-milestone"` to resolve artifacts (in this case against a milestone repo).  Note that this repostory can be different than the one used to register the `task-launcher` application itself.
+Next, <<applications.adoc#applications, register>> the `tasklauncher-dataflow` sink, and create a task (we will use the provided timestamp task).
+
+```
+stream create --name task-every-minute --definition "time-tlr --trigger.fixed-delay=60 --spring.cloud.stream.function.definition=taskLaunchRequest --task.launch.request.task-name=timestamp-task | tasklauncher-dataflow" --deploy
+```
+
+The preceding stream will produce a task launch request every minute. The request provides the name of the task to launch : `{"name":"timestamp-task"}`.
 
 
+The following stream definition illustrates the use of command line arguments. It will produce messages like `{"args":["foo=bar","time=12/03/18 17:44:12"],"deploymentProps":{},"name":"timestamp-task"}` to provide command line arguments to the task:
 
-=== TriggerTask
+```
+stream create --name task-every-second --definition "time-tlr --spring.cloud.stream.function.definition=taskLaunchRequest --task.launch.request.task-name=timestamp-task --task.launch.request.args=foo=bar --task.launch.request.arg-expressions=time=payload | tasklauncher-dataflow" --deploy
+```
 
-One way to launch a task with the `task-launcher` is to use the https://github.com/spring-cloud-stream-app-starters/triggertask/blob/v1.2.0.RELEASE/spring-cloud-starter-stream-source-triggertask/README.adoc[triggertask] source.
-The `triggertask` source emits a message with a `TaskLaunchRequest` object that contains the required launch information.
-The `triggertask` can be added to the available sources by running the app register command, as follows (for the Rabbit Binder, in this case):
+Note the use of SpEL expressions to map each message payload to the `time` command line argument, along with a static argument `foo=bar`.
 
-`app register --type source --name triggertask --uri maven://org.springframework.cloud.stream.app:triggertask-source-rabbit:1.2.0.RELEASE`
-
-For example, to launch the timestamp task once every 60 seconds, the stream implementation would be as follows:
-
-[source]
-stream create foo --definition "triggertask --triggertask.uri=maven://org.springframework.cloud.task.app:timestamp-task:jar:1.2.0.RELEASE --trigger.fixed-delay=60 --triggertask.environment-properties='spring.datasource.url=jdbc:h2:tcp://localhost:19092/mem:dataflow,spring.datasource.username=sa' | task-launcher-local --maven.remote-repositories.repo1.url=http://repo.spring.io/libs-release" --deploy
-
-If you run `runtime apps`, you can find the log file for the task launcher sink.
-By using the `tail` command on that file, you can find the log file for the launched tasks.
-Setting of `triggertask.environment-properties` establishes the Data Flow Server's H2 Database as the database where the task executions will be recorded.
 You can then see the list of task executions by using the shell command `task execution list`, as shown (with its output) in the following example:
-
 [source,bash,options="nowrap"]
 ----
 dataflow:>task execution list
@@ -866,52 +836,38 @@ dataflow:>task execution list
 ╚════════════════════╧══╧════════════════════════════╧════════════════════════════╧═════════╝
 ----
 
-
-
-=== TaskLaunchRequest-transform
-
-Another way to start a task with the `task-launcher` would be to create a stream by using the
-https://github.com/spring-cloud-stream-app-starters/tasklaunchrequest-transform[Tasklaunchrequest-transform] processor to translate a message payload to a `TaskLaunchRequest`.
-
-The `tasklaunchrequest-transform` can be added to the available processors by executing the app register command, as follows (for the Rabbit Binder, in this case):
-
-`app register --type processor --name tasklaunchrequest-transform --uri maven://org.springframework.cloud.stream.app:tasklaunchrequest-transform-processor-rabbit:1.2.0.RELEASE`
-
-The following example shows the creation of a task that includes the `tasklaunchrequest-transform`:
-
-`stream create task-stream --definition "http --port=9000 | tasklaunchrequest-transform --uri=maven://org.springframework.cloud.task.app:timestamp-task:jar:1.2.0.RELEASE | task-launcher-local --maven.remote-repositories.repo1.url=http://repo.spring.io/libs-release"`
-
-
+In this example, we have shown how to use the `time` source to launch a task at a fixed rate.
+This pattern may be applied to any source to launch a task in response to any event.
 
 === Launching a Composed Task From a Stream
 
-A composed task can be launched with one of the `task-launcher` sinks as discussed <<spring-cloud-dataflow-launch-tasks-from-stream, here>>.
-Since we use the `ComposedTaskRunner` directly, we need to set up the task definitions it uses prior to the creation of the composed task launching stream.
+A composed task can be launched with the `tasklauncher-dataflow` sink, as discussed <<spring-cloud-dataflow-launch-tasks-from-stream, here>>.
+Since we use the `ComposedTaskRunner` directly, we need to set up the task definitions for the composed task runner itself, along with the composed tasks, prior to the creation of the composed task launching stream.
 Suppose we wanted to create the following composed task definition: `AAA && BBB`.
 The first step would be to create the task definitions, as shown in the following example:
 
 [source]
 ----
+task create composed-task-runner --definition "composed-task-runner"
 task create AAA --definition "timestamp"
 task create BBB --definition "timestamp"
 ----
+
+NOTE: Releases of `ComposedTaskRunner` can be found
+https://github.com/spring-cloud-task-app-starters/composed-task-runner/releases[here].
+
 Now that the task definitions we need for composed task definition are ready, we need to create a stream that launches `ComposedTaskRunner`.
 So, in this case, we create a stream with
 
-* A trigger that emits a message once every 30 seconds
-* A transformer that creates a `TaskLaunchRequest` for each message received
-* A `task-launcher-local` sink that launches a the `ComposedTaskRunner` on our local machine
+* The `time` source customized to emit task launch requests, as shown <<spring-cloud-dataflow-launch-tasks-from-stream, above>>.
+* The `tasklauncher-dataflow` sink that launches the `ComposedTaskRunner`
 
 The stream should resemble the following:
 
 [source]
 ----
-stream create ctr-stream --definition "time --fixed-delay=30 | tasklaunchrequest-transform --uri=maven://org.springframework.cloud.task.app:composedtaskrunner-task:<current release> --command-line-arguments='--graph=AAA&&BBB --increment-instance-enabled=true --spring.datasource.url=...' | task-launcher-local"
+stream create ctr-stream --definition "time --fixed-delay=30 --task.launch.request.task-name=composed-task-launcher --task.launch.request.args=--graph=AAA&&BBB,--increment-instance-enabled=true | tasklauncher-dataflow"
 ----
-In the preceding example, we see that the `tasklaunchrequest-transform` is establishing two primary components:
-
-* *uri*: The URI of the `ComposedTaskRunner` that is used
-* *command-line-arguments*: To configure the `ComposedTaskRunner`
 
 For now, we focus on the configuration that is required to launch the `ComposedTaskRunner`:
 
@@ -921,13 +877,6 @@ In this case it is `AAA&&BBB`.
 `ComposedTaskRunner` is built by using http://projects.spring.io/spring-batch/[Spring Batch].
 Thus, we want a new Job Instance for each launch of the `ComposedTaskRunner`.
 To do this, we set `increment-instance-enabled` to be `true`.
-* *spring.datasource.**: The datasource that is used by Spring Cloud
-Data Flow, which lets the user track the tasks launched by the
-`ComposedTaskRunner` and the state of the job execution.
-Also, this is so that the `ComposedTaskRunner` can track the state of the tasks it launched and update its state.
-
-NOTE: Releases of `ComposedTaskRunner` can be found
-https://github.com/spring-cloud-task-app-starters/composed-task-runner/releases[here].
 
 [[sharing-spring-cloud-dataflows-datastore-with-tasks]]
 == Sharing Spring Cloud Data Flow's Datastore with Tasks
@@ -963,14 +912,26 @@ will record its task execution information to the Spring Cloud Data Flow reposit
 
 [datasource-task-launcher-sink]
 ==== Task Launcher Sink
-The https://github.com/spring-cloud-stream-app-starters/tasklauncher-local[Task Launcher Sink] allows tasks to be launched via a stream as discussed <<spring-cloud-dataflow-launch-tasks-from-stream, here>>.
-Since tasks launched by the Task Launcher Sink may not want their task executions
-recorded to the same datastore as Spring Cloud Data Flow,
-each https://docs.spring.io/spring-cloud-task/docs/current/apidocs/org/springframework/cloud/task/launcher/TaskLaunchRequest.html[TaskLaunchRequest]
-received by the Task Launcher Sink must have the required datasource information established as app properties or command line arguments.
+The https://github.com/spring-cloud-stream-app-starters/tasklauncher-dataflow[Data Flow Task Launcher Sink] always uses the Data Flow Server's configured task database when launching tasks.
+
+Standalone Task Launcher Sink implementations are also available which allow you to store task executions in a separate database.
+Since these task launchers do not use the Data Flow Server, they are platform-specific and require additional configuration parameters, including data source configuration, and the resource location of the executable jar for the task application.
+Additionally, they do not provide a way to limit the number of concurrently running tasks, as the Data Flow Task Launcher does.
+
+The additional configuration requires a more complex form of the
+https://docs.spring.io/spring-cloud-task/docs/current/apidocs/org/springframework/cloud/task/launcher/TaskLaunchRequest.html[TaskLaunchRequest].
+Requests processed by a standalone Task Launcher Sink must include the required datasource information as app properties or command line arguments.
 Both https://github.com/spring-cloud-stream-app-starters/tasklaunchrequest-transform/blob/master/spring-cloud-starter-stream-processor-tasklaunchrequest-transform/README.adoc[TaskLaunchRequest-Transform]
-and https://github.com/spring-cloud-stream-app-starters/triggertask/blob/master/spring-cloud-starter-stream-source-triggertask/README.adoc[TriggerTask Source] are examples
-of how a source and a processor allow a user to set the datasource properties via the app properties or command line arguments.
+and https://github.com/spring-cloud-stream-app-starters/triggertask/blob/master/spring-cloud-starter-stream-source-triggertask/README.adoc[TriggerTask Source] provide examples of using a standalone Task Launcher Sink.
+
+
+Currently the platforms supported by the standalone `tasklauncher` sinks are:
+
+* https://github.com/spring-cloud-stream-app-starters/tasklauncher-local[local]
+* https://github.com/spring-cloud-stream-app-starters/tasklauncher-cloudfoundry[Cloud Foundry]
+* https://github.com/spring-cloud-stream-app-starters/tasklauncher-kubernetes[Kubernetes]
+
+CAUTION: `tasklauncher-local` is meant for development purposes only.
 
 ==== Composed Task Runner
 Spring Cloud Data Flow allows a user to create a directed graph where each node

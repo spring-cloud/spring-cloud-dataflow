@@ -1,5 +1,5 @@
 /*
- * Copyright 2016-2018 the original author or authors.
+ * Copyright 2016-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,7 +28,9 @@ import org.springframework.cloud.dataflow.rest.support.ArgumentSanitizer;
 import org.springframework.cloud.dataflow.server.controller.support.TaskExecutionAwareTaskDefinition;
 import org.springframework.cloud.dataflow.server.repository.NoSuchTaskDefinitionException;
 import org.springframework.cloud.dataflow.server.repository.TaskDefinitionRepository;
-import org.springframework.cloud.dataflow.server.service.TaskService;
+import org.springframework.cloud.dataflow.server.service.TaskDeleteService;
+import org.springframework.cloud.dataflow.server.service.TaskSaveService;
+import org.springframework.cloud.dataflow.server.service.impl.TaskServiceUtils;
 import org.springframework.cloud.deployer.spi.task.TaskLauncher;
 import org.springframework.cloud.task.repository.TaskExecution;
 import org.springframework.cloud.task.repository.TaskExplorer;
@@ -55,6 +57,7 @@ import org.springframework.web.bind.annotation.RestController;
  * @author Glenn Renfro
  * @author Mark Fisher
  * @author Gunnar Hillert
+ * @author Daniel Serleg
  */
 @RestController
 @RequestMapping("/tasks/definitions")
@@ -63,9 +66,11 @@ public class TaskDefinitionController {
 
 	private final Assembler taskAssembler = new Assembler();
 
-	private TaskDefinitionRepository repository;
+	private final TaskDefinitionRepository repository;
 
-	private TaskService taskService;
+	private final TaskSaveService taskSaveService;
+
+	private final TaskDeleteService taskDeleteService;
 
 	private final TaskExplorer explorer;
 
@@ -78,17 +83,21 @@ public class TaskDefinitionController {
 	 * <li>task status checks to the provided {@link TaskLauncher}</li>
 	 * </ul>
 	 *
-	 * @param taskExplorer used to look up TaskExecutions
+	 * @param taskExplorer used to look up TaskExecutions.
 	 * @param repository the repository this controller will use for task CRUD operations.
-	 * @param taskService handles specialized behavior needed for tasks.
+	 * @param taskSaveService handles Task saving related operations.
+	 * @param taskDeleteService handles Task deletion related operations.
 	 */
-	public TaskDefinitionController(TaskExplorer taskExplorer, TaskDefinitionRepository repository, TaskService taskService) {
+	public TaskDefinitionController(TaskExplorer taskExplorer, TaskDefinitionRepository repository,
+			TaskSaveService taskSaveService, TaskDeleteService taskDeleteService) {
 		Assert.notNull(taskExplorer, "taskExplorer must not be null");
 		Assert.notNull(repository, "repository must not be null");
-		Assert.notNull(taskService, "taskService must not be null");
+		Assert.notNull(taskSaveService, "taskSaveService must not be null");
+		Assert.notNull(taskDeleteService, "taskDeleteService must not be null");
 		this.explorer = taskExplorer;
 		this.repository = repository;
-		this.taskService = taskService;
+		this.taskSaveService = taskSaveService;
+		this.taskDeleteService = taskDeleteService;
 	}
 
 	/**
@@ -101,7 +110,7 @@ public class TaskDefinitionController {
 	@RequestMapping(value = "", method = RequestMethod.POST)
 	public TaskDefinitionResource save(@RequestParam("name") String name, @RequestParam("definition") String dsl) {
 		TaskDefinition taskDefinition = new TaskDefinition(name, dsl);
-		taskService.saveTaskDefinition(name, dsl);
+		taskSaveService.saveTaskDefinition(name, dsl);
 		return taskAssembler.toResource(new TaskExecutionAwareTaskDefinition(taskDefinition));
 	}
 
@@ -113,7 +122,17 @@ public class TaskDefinitionController {
 	@RequestMapping(value = "/{name}", method = RequestMethod.DELETE)
 	@ResponseStatus(HttpStatus.OK)
 	public void destroyTask(@PathVariable("name") String name) {
-		taskService.deleteTaskDefinition(name);
+		taskDeleteService.deleteTaskDefinition(name);
+	}
+
+	/**
+	 * Delete all task from the repository.
+	 *
+	 */
+	@RequestMapping(value = "", method = RequestMethod.DELETE)
+	@ResponseStatus(HttpStatus.OK)
+	public void destroyAll() {
+		taskDeleteService.deleteAll();
 	}
 
 	/**
@@ -146,14 +165,15 @@ public class TaskDefinitionController {
 		final List<TaskExecution> taskExecutions;
 
 		if (!taskDefinitionMap.isEmpty()) {
-			taskExecutions =
-					this.explorer.getLatestTaskExecutionsByTaskNames(taskDefinitionMap.keySet().toArray(new String[taskDefinitionMap.size()]));
+			taskExecutions = this.explorer.getLatestTaskExecutionsByTaskNames(
+					taskDefinitionMap.keySet().toArray(new String[taskDefinitionMap.size()]));
 		}
 		else {
 			taskExecutions = null;
 		}
 
-		final Page<TaskExecutionAwareTaskDefinition> taskExecutionAwareTaskDefinitions = taskDefinitions.map(new TaskDefinitionConverter(taskExecutions));
+		final Page<TaskExecutionAwareTaskDefinition> taskExecutionAwareTaskDefinitions = taskDefinitions
+				.map(new TaskDefinitionConverter(taskExecutions));
 
 		return assembler.toResource(taskExecutionAwareTaskDefinitions, taskAssembler);
 	}
@@ -191,16 +211,21 @@ public class TaskDefinitionController {
 
 		@Override
 		public TaskDefinitionResource toResource(TaskExecutionAwareTaskDefinition taskExecutionAwareTaskDefinition) {
-			return createResourceWithId(taskExecutionAwareTaskDefinition.getTaskDefinition().getName(), taskExecutionAwareTaskDefinition);
+			return createResourceWithId(taskExecutionAwareTaskDefinition.getTaskDefinition().getName(),
+					taskExecutionAwareTaskDefinition);
 		}
 
 		@Override
-		public TaskDefinitionResource instantiateResource(TaskExecutionAwareTaskDefinition taskExecutionAwareTaskDefinition) {
-			boolean composed = taskService.isComposedDefinition(taskExecutionAwareTaskDefinition.getTaskDefinition().getDslText());
-			TaskDefinitionResource taskDefinitionResource = new TaskDefinitionResource(taskExecutionAwareTaskDefinition.getTaskDefinition().getName(),
+		public TaskDefinitionResource instantiateResource(
+				TaskExecutionAwareTaskDefinition taskExecutionAwareTaskDefinition) {
+			boolean composed = TaskServiceUtils
+					.isComposedTaskDefinition(taskExecutionAwareTaskDefinition.getTaskDefinition().getDslText());
+			TaskDefinitionResource taskDefinitionResource = new TaskDefinitionResource(
+					taskExecutionAwareTaskDefinition.getTaskDefinition().getName(),
 					argumentSanitizer.sanitizeTaskDsl(taskExecutionAwareTaskDefinition.getTaskDefinition()));
-			if(taskExecutionAwareTaskDefinition.getLatestTaskExecution() != null) {
-				taskDefinitionResource.setLastTaskExecution(new TaskExecutionResource(taskExecutionAwareTaskDefinition.getLatestTaskExecution()));
+			if (taskExecutionAwareTaskDefinition.getLatestTaskExecution() != null) {
+				taskDefinitionResource.setLastTaskExecution(
+						new TaskExecutionResource(taskExecutionAwareTaskDefinition.getLatestTaskExecution()));
 			}
 			taskDefinitionResource.setComposed(composed);
 			return taskDefinitionResource;

@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 the original author or authors.
+ * Copyright 2017-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,6 +28,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 /**
  * @author Gunnar Hillert
+ * @author Ilayaperumal Gopinathan
  */
 public class AboutDocumentation extends BaseDocumentation {
 
@@ -122,29 +123,29 @@ public class AboutDocumentation extends BaseDocumentation {
 						fieldWithPath("runtimeEnvironment.appDeployer.springVersion").type(JsonFieldType.STRING)
 								.description("Provides details of the appDeployer spring version."),
 
-						fieldWithPath("runtimeEnvironment.taskLauncher").type(JsonFieldType.OBJECT)
+						fieldWithPath("runtimeEnvironment.taskLaunchers").type(JsonFieldType.ARRAY)
 								.description("Provides details of the taskLauncher environment."),
-						fieldWithPath("runtimeEnvironment.taskLauncher.deployerImplementationVersion").type(JsonFieldType.STRING)
+						fieldWithPath("runtimeEnvironment.taskLaunchers[0].deployerImplementationVersion").type(JsonFieldType.STRING)
 								.description("Provides details of the taskLauncher implementation version."),
-						fieldWithPath("runtimeEnvironment.taskLauncher.deployerName").type(JsonFieldType.STRING)
+						fieldWithPath("runtimeEnvironment.taskLaunchers[0].deployerName").type(JsonFieldType.STRING)
 								.description("Provides details of the taskLauncher deployer name."),
-						fieldWithPath("runtimeEnvironment.taskLauncher.deployerSpiVersion").type(JsonFieldType.STRING)
+						fieldWithPath("runtimeEnvironment.taskLaunchers[0].deployerSpiVersion").type(JsonFieldType.STRING)
 								.description("Provides details of the taskLauncher deployer SPI version."),
-						fieldWithPath("runtimeEnvironment.taskLauncher.javaVersion").type(JsonFieldType.STRING)
+						fieldWithPath("runtimeEnvironment.taskLaunchers[0].javaVersion").type(JsonFieldType.STRING)
 								.description("Provides details of the taskLauncher java version."),
-						fieldWithPath("runtimeEnvironment.taskLauncher.platformApiVersion").type(JsonFieldType.STRING)
+						fieldWithPath("runtimeEnvironment.taskLaunchers[0].platformApiVersion").type(JsonFieldType.STRING)
 								.description("Provides details of the taskLauncher platform api version."),
-						fieldWithPath("runtimeEnvironment.taskLauncher.platformClientVersion").type(JsonFieldType.STRING)
+						fieldWithPath("runtimeEnvironment.taskLaunchers[0].platformClientVersion").type(JsonFieldType.STRING)
 								.description("Provides details of the taskLauncher platform client version."),
-						fieldWithPath("runtimeEnvironment.taskLauncher.platformHostVersion").type(JsonFieldType.STRING)
+						fieldWithPath("runtimeEnvironment.taskLaunchers[0].platformHostVersion").type(JsonFieldType.STRING)
 								.description("Provides details of the taskLauncher platform host version."),
-						fieldWithPath("runtimeEnvironment.taskLauncher.platformSpecificInfo").type(JsonFieldType.OBJECT)
+						fieldWithPath("runtimeEnvironment.taskLaunchers[0].platformSpecificInfo").type(JsonFieldType.OBJECT)
 								.description("Provides details of the taskLauncher specific info."),
-						fieldWithPath("runtimeEnvironment.taskLauncher.platformType").type(JsonFieldType.STRING)
+						fieldWithPath("runtimeEnvironment.taskLaunchers[0].platformType").type(JsonFieldType.STRING)
 								.description("Provides details of the taskLauncher platform type."),
-						fieldWithPath("runtimeEnvironment.taskLauncher.springBootVersion").type(JsonFieldType.STRING)
+						fieldWithPath("runtimeEnvironment.taskLaunchers[0].springBootVersion").type(JsonFieldType.STRING)
 								.description("Provides details of the taskLauncher boot version."),
-						fieldWithPath("runtimeEnvironment.taskLauncher.springVersion").type(JsonFieldType.STRING)
+						fieldWithPath("runtimeEnvironment.taskLaunchers[0].springVersion").type(JsonFieldType.STRING)
 								.description("Provides details of the taskLauncher spring version.")
 						)));
 	}

@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 the original author or authors.
+ * Copyright 2018-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,7 +28,7 @@ import org.springframework.util.Assert;
 @JsonFormat(shape = JsonFormat.Shape.OBJECT)
 public enum AuditOperationType {
 
-	// APP_REGISTRATION(100L, "App Registration"), // Commented out until the implementation of gh-2486
+	APP_REGISTRATION(100L, "App Registration"),
 	SCHEDULE(200L, "Schedule"),
 	STREAM(300L, "Stream"),
 	TASK(400L, "Task");

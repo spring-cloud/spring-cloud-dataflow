@@ -1,5 +1,5 @@
 /*
- * Copyright 2015-2018 the original author or authors.
+ * Copyright 2015-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,6 +29,7 @@ import org.springframework.cloud.dataflow.rest.resource.AppStatusResource;
 import org.springframework.cloud.dataflow.rest.resource.CompletionProposalsResource;
 import org.springframework.cloud.dataflow.rest.resource.JobExecutionResource;
 import org.springframework.cloud.dataflow.rest.resource.JobInstanceResource;
+import org.springframework.cloud.dataflow.rest.resource.LauncherResource;
 import org.springframework.cloud.dataflow.rest.resource.RootResource;
 import org.springframework.cloud.dataflow.rest.resource.ScheduleInfoResource;
 import org.springframework.cloud.dataflow.rest.resource.StepExecutionProgressInfoResource;
@@ -123,6 +124,7 @@ public class RootController {
 							.withRel("streams/deployments/deployment")));
 		}
 		if (featuresProperties.isTasksEnabled()) {
+			root.add(entityLinks.linkToCollectionResource(LauncherResource.class).withRel("tasks/platforms"));
 			root.add(entityLinks.linkToCollectionResource(TaskDefinitionResource.class).withRel("tasks/definitions"));
 			root.add(unescapeTemplateVariables(entityLinks.linkToSingleResource(TaskDefinitionResource.class, "{name}")
 					.withRel("tasks/definitions/definition")));

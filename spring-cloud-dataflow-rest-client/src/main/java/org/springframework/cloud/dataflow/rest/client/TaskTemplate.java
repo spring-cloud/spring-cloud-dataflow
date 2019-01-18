@@ -1,5 +1,5 @@
 /*
- * Copyright 2015-2018 the original author or authors.
+ * Copyright 2015-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,6 +24,7 @@ import javax.naming.OperationNotSupportedException;
 
 import org.springframework.cloud.dataflow.rest.client.support.VersionUtils;
 import org.springframework.cloud.dataflow.rest.resource.CurrentTaskExecutionsResource;
+import org.springframework.cloud.dataflow.rest.resource.LauncherResource;
 import org.springframework.cloud.dataflow.rest.resource.TaskAppStatusResource;
 import org.springframework.cloud.dataflow.rest.resource.TaskDefinitionResource;
 import org.springframework.cloud.dataflow.rest.resource.TaskExecutionResource;
@@ -65,6 +66,8 @@ public class TaskTemplate implements TaskOperations {
 
 	private static final String VALIDATION_REL = "tasks/validation";
 
+	private static final String PLATFORM_LIST_RELATION = "tasks/platforms";
+
 	private final RestTemplate restTemplate;
 
 	private final Link definitionsLink;
@@ -80,6 +83,8 @@ public class TaskTemplate implements TaskOperations {
 	private final Link executionsCurrentLink;
 
 	private final Link validationLink;
+
+	private final Link platformListLink;
 
 	private final String dataFlowServerVersion;
 
@@ -116,13 +121,21 @@ public class TaskTemplate implements TaskOperations {
 		this.executionByNameLink = resources.getLink(EXECUTION_RELATION_BY_NAME);
 		this.executionsCurrentLink = resources.getLink(EXECUTIONS_CURRENT_RELATION);
 		this.validationLink = resources.getLink(VALIDATION_REL);
+		this.platformListLink = resources.getLink(PLATFORM_LIST_RELATION);
 	}
 
 	@Override
 	public TaskDefinitionResource.Page list() {
-		String uriTemplate = definitionsLink.getHref().toString();
+		String uriTemplate = definitionsLink.getHref();
 		uriTemplate = uriTemplate + "?size=2000";
 		return restTemplate.getForObject(uriTemplate, TaskDefinitionResource.Page.class);
+	}
+
+	@Override
+	public LauncherResource.Page listPlatforms() {
+		String uriTemplate = this.platformListLink.getHref();
+		uriTemplate = uriTemplate + "?size=2000";
+		return restTemplate.getForObject(uriTemplate, LauncherResource.Page.class);
 	}
 
 	@Override
@@ -146,6 +159,11 @@ public class TaskTemplate implements TaskOperations {
 	@Override
 	public void destroy(String name) {
 		restTemplate.delete(definitionLink.expand(name).getHref(), Collections.singletonMap("name", name));
+	}
+
+	@Override
+	public void destroyAll() {
+		restTemplate.delete(definitionsLink.getHref());
 	}
 
 	@Override

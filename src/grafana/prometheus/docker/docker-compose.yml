@@ -1,0 +1,48 @@
+version: '3.3'
+services:
+
+  # Prometheus uses the image resulting form the build
+  # of `./prometheus` which simply packs some configuration
+  # into the form of an image.
+  #
+  # It could instead, use volume-mounts.
+  prometheus:
+    build: './prometheus'
+    container_name: 'prometheus'
+    volumes:
+      - 'scdf-targets:/etc/prometheus/'
+    ports:
+      - '9090:9090'
+
+  # The grafana container uses the image resulting from the build
+  # of `./grafana` which simply packs some configuration into the
+  # form of an image.
+  #
+  # This could instead be a volume-mounted container.
+  grafana:
+    build: './grafana'
+    container_name: 'grafana'
+    ports:
+      - '3000:3000'
+
+  # The service-discovery container uses the image resulting from the build
+  # of `./discovery` which simply packs some configuration into the
+  # form of an image.
+  #
+  # This could instead be a volume-mounted container.
+  service-discovery:
+    build: './discovery'
+    container_name: 'discovery'
+    volumes:
+      - 'scdf-targets:/tmp/scdf-targets/'
+    expose:
+      - '8181'
+    ports:
+      - '8181:8181'
+    #    network_mode: 'host'
+    environment:
+      - 'SCDF_HOST_IP=${SCDF_HOST_IP}'
+
+volumes:
+  scdf-targets:
+

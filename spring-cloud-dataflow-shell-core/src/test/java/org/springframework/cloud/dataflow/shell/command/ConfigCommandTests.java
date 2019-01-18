@@ -1,5 +1,5 @@
 /*
- * Copyright 2016-2018 the original author or authors.
+ * Copyright 2016-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,6 +33,7 @@ import org.springframework.cloud.dataflow.rest.client.AboutOperations;
 import org.springframework.cloud.dataflow.rest.client.DataFlowOperations;
 import org.springframework.cloud.dataflow.rest.resource.RootResource;
 import org.springframework.cloud.dataflow.rest.resource.about.AboutResource;
+import org.springframework.cloud.dataflow.rest.resource.about.RuntimeEnvironmentDetails;
 import org.springframework.cloud.dataflow.rest.resource.security.SecurityInfoResource;
 import org.springframework.cloud.dataflow.shell.Target;
 import org.springframework.cloud.dataflow.shell.TargetHolder;
@@ -110,7 +111,10 @@ public class ConfigCommandTests {
 			aboutResource.getSecurityInfo().setAuthenticationEnabled(true);
 			aboutResource.getRuntimeEnvironment().getAppDeployer().setJavaVersion("1.8");
 			aboutResource.getRuntimeEnvironment().getAppDeployer().getPlatformSpecificInfo().put("Some", "Stuff");
-			aboutResource.getRuntimeEnvironment().getTaskLauncher().setDeployerSpiVersion("6.4");
+			List<RuntimeEnvironmentDetails> taskLaunchers = new ArrayList<>();
+			taskLaunchers.add(new RuntimeEnvironmentDetails());
+			aboutResource.getRuntimeEnvironment().setTaskLaunchers(taskLaunchers);
+			aboutResource.getRuntimeEnvironment().getTaskLaunchers().get(0).setDeployerSpiVersion("6.4");
 			final Table infoResult = (Table) configCommands.info().get(0);
 			String expectedOutput = FileCopyUtils.copyToString(new InputStreamReader(
 					getClass().getResourceAsStream(ConfigCommandTests.class.getSimpleName() + "-testInfo.txt"), "UTF-8"));

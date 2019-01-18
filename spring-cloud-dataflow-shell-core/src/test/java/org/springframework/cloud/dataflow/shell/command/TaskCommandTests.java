@@ -1,5 +1,5 @@
 /*
- * Copyright 2015-2018 the original author or authors.
+ * Copyright 2015-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -44,6 +44,7 @@ import static org.junit.Assert.assertTrue;
 /**
  * @author Glenn Renfro
  * @author David Turanski
+ * @author Ilayaperumal Gopinathan
  */
 public class TaskCommandTests extends AbstractShellIntegrationTest {
 
@@ -108,6 +109,25 @@ public class TaskCommandTests extends AbstractShellIntegrationTest {
 		logger.info("Create Task Test");
 		String taskName = generateUniqueName();
 		task().create(taskName, "timestamp");
+	}
+
+	@Test
+	public void destroySpecificTask() {
+		logger.info("Create Task Test");
+		String taskName = generateUniqueName();
+		task().create(taskName, "timestamp");
+		logger.info("Destroy created task");
+		task().destroyTask(taskName);
+	}
+
+	@Test
+	public void destroyAllTasks() {
+		logger.info("Create Task Test");
+		String taskName1 = generateUniqueName();
+		task().create(taskName1, "timestamp");
+		String taskName2 = generateUniqueName();
+		task().create(taskName2, "timestamp");
+		task().destroyAllTasks();
 	}
 
 	@Test
@@ -192,25 +212,28 @@ public class TaskCommandTests extends AbstractShellIntegrationTest {
 		CommandResult cr = task().taskValidate(taskName);
 		assertTrue("task validate status command must be successful", cr.isSuccess());
 		List results = (List) cr.getResult();
-		Table table = (Table)results.get(0);
+		Table table = (Table) results.get(0);
 		assertEquals("Number of columns returned was not expected", 2, table.getModel().getColumnCount());
 		assertEquals("First Row First Value should be: Task Name", "Task Name", table.getModel().getValue(0, 0));
-		assertEquals("First Row Second Value should be: Task Definition", "Task Definition", table.getModel().getValue(0, 1));
+		assertEquals("First Row Second Value should be: Task Definition", "Task Definition",
+				table.getModel().getValue(0, 1));
 		assertEquals("Second Row First Value should be: " + taskName, taskName, table.getModel().getValue(1, 0));
 		assertEquals("Second Row Second Value should be: timestamp", "timestamp", table.getModel().getValue(1, 1));
 
 		String message = String.format("\n%s is a valid task.", taskName);
-		assertEquals(String.format("Notification should be: %s",message ), message, results.get(1));
+		assertEquals(String.format("Notification should be: %s", message), message, results.get(1));
 
-		table = (Table)results.get(2);
+		table = (Table) results.get(2);
 		assertEquals("Number of columns returned was not expected", 2, table.getModel().getColumnCount());
 		assertEquals("First Row First Value should be: App Name", "App Name", table.getModel().getValue(0, 0));
-		assertEquals("First Row Second Value should be: Validation Status", "Validation Status", table.getModel().getValue(0, 1));
-		assertEquals("Second Row First Value should be: task:" + taskName, "task:" + taskName, table.getModel().getValue(1, 0));
+		assertEquals("First Row Second Value should be: Validation Status", "Validation Status",
+				table.getModel().getValue(0, 1));
+		assertEquals("Second Row First Value should be: task:" + taskName, "task:" + taskName,
+				table.getModel().getValue(1, 0));
 		assertEquals("Second Row Second Value should be: valid", "valid", table.getModel().getValue(1, 1));
 	}
 
-		@Test
+	@Test
 	public void testCurrentExecutions() {
 		CommandResult idResult = task().taskExecutionCurrent();
 		Table result = (Table) idResult.getResult();
@@ -222,6 +245,18 @@ public class TaskCommandTests extends AbstractShellIntegrationTest {
 	public void testTaskExecutionCleanup() {
 		CommandResult cr = task().taskExecutionCleanup(10000);
 		assertThat(cr.getResult(), is("Request to clean up resources for task execution 10000 has been submitted"));
+	}
+
+	@Test
+	public void testPlatformList() {
+		CommandResult cr = task().taskPlatformList();
+		Table table = (Table) cr.getResult();
+		assertEquals("Number of columns returned was not expected", 3, table.getModel().getColumnCount());
+		assertEquals("First Row First Value should be: Platform Name", "Platform Name", table.getModel().getValue(0, 0));
+		assertEquals("First Row Second Value should be: Platform Type", "Platform Type", table.getModel().getValue(0, 1));
+		assertEquals("First Row Second Value should be: Description", "Description", table.getModel().getValue(0, 2));
+		assertEquals("Second Row First Value should be: default", "default", table.getModel().getValue(1, 0));
+		assertEquals("Second Row Second Value should be: local", "local", table.getModel().getValue(1, 1));
 	}
 
 }

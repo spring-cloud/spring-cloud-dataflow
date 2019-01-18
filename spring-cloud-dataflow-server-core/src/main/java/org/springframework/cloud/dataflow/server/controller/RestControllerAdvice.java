@@ -39,7 +39,7 @@ import org.springframework.cloud.dataflow.server.repository.NoSuchStreamDefiniti
 import org.springframework.cloud.dataflow.server.repository.NoSuchTaskBatchException;
 import org.springframework.cloud.dataflow.server.repository.NoSuchTaskDefinitionException;
 import org.springframework.cloud.dataflow.server.repository.NoSuchTaskExecutionException;
-import org.springframework.cloud.dataflow.server.support.ApplicationDoesNotExistException;
+import org.springframework.cloud.dataflow.server.service.impl.OffsetOutOfBoundsException;
 import org.springframework.cloud.scheduler.spi.core.CreateScheduleException;
 import org.springframework.hateoas.VndErrors;
 import org.springframework.http.HttpStatus;
@@ -139,7 +139,7 @@ public class RestControllerAdvice {
 	 * {@link NoSuchTaskExecutionException}, {@link NoSuchJobExecutionException},
 	 * {@link NoSuchJobInstanceException}, {@link NoSuchJobException},
 	 * {@link NoSuchStepExecutionException},
-	 * {@link MetricsMvcEndpoint.NoSuchMetricException}, {@link NoSuchAppException}, or
+	 * {@link NoSuchAppException}, or
 	 * {@link NoSuchAppInstanceException}
 	 * @return the error response in JSON format with media type
 	 * application/vnd.error+json
@@ -149,7 +149,7 @@ public class RestControllerAdvice {
 			NoSuchTaskDefinitionException.class, NoSuchTaskExecutionException.class, NoSuchJobExecutionException.class,
 			NoSuchJobInstanceException.class, NoSuchJobException.class, NoSuchStepExecutionException.class,
 			NoSuchTaskBatchException.class, NoSuchMetricException.class, NoSuchAppException.class,
-			NoSuchAppInstanceException.class, ApplicationDoesNotExistException.class, NoSuchScheduleException.class })
+			NoSuchAppInstanceException.class, NoSuchScheduleException.class })
 	@ResponseStatus(HttpStatus.NOT_FOUND)
 	@ResponseBody
 	public VndErrors onNotFoundException(Exception e) {
@@ -175,7 +175,7 @@ public class RestControllerAdvice {
 	 */
 	@ExceptionHandler({ MissingServletRequestParameterException.class, HttpMessageNotReadableException.class,
 			UnsatisfiedServletRequestParameterException.class, MethodArgumentTypeMismatchException.class,
-			InvalidStreamDefinitionException.class, CreateScheduleException.class })
+			InvalidStreamDefinitionException.class, CreateScheduleException.class, OffsetOutOfBoundsException.class })
 	@ResponseStatus(HttpStatus.BAD_REQUEST)
 	@ResponseBody
 	public VndErrors onClientGenericBadRequest(Exception e) {

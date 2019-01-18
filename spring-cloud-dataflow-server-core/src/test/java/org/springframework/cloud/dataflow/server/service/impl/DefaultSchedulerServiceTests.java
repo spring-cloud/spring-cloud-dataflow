@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 the original author or authors.
+ * Copyright 2018-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,19 +34,20 @@ import org.mockito.ArgumentCaptor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.context.PropertyPlaceholderAutoConfiguration;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceProperties;
-import org.springframework.boot.autoconfigure.jdbc.EmbeddedDataSourceConfiguration;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
+import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase.Replace;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.cloud.dataflow.audit.service.AuditRecordService;
 import org.springframework.cloud.dataflow.configuration.metadata.ApplicationConfigurationMetadataResolver;
+import org.springframework.cloud.dataflow.core.AppRegistration;
 import org.springframework.cloud.dataflow.core.ApplicationType;
 import org.springframework.cloud.dataflow.core.TaskDefinition;
-import org.springframework.cloud.dataflow.registry.domain.AppRegistration;
 import org.springframework.cloud.dataflow.registry.service.AppRegistryService;
 import org.springframework.cloud.dataflow.server.DockerValidatorProperties;
 import org.springframework.cloud.dataflow.server.config.apps.CommonApplicationProperties;
 import org.springframework.cloud.dataflow.server.configuration.TaskServiceDependencies;
 import org.springframework.cloud.dataflow.server.repository.TaskDefinitionRepository;
-import org.springframework.cloud.dataflow.server.service.AuditRecordService;
 import org.springframework.cloud.dataflow.server.service.SchedulerService;
 import org.springframework.cloud.dataflow.server.service.SchedulerServiceProperties;
 import org.springframework.cloud.deployer.resource.docker.DockerResource;
@@ -63,19 +64,21 @@ import org.springframework.test.context.junit4.SpringRunner;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyString;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @RunWith(SpringRunner.class)
-@SpringBootTest(classes = { EmbeddedDataSourceConfiguration.class, TaskServiceDependencies.class,
+@SpringBootTest(classes = { TaskServiceDependencies.class,
 		PropertyPlaceholderAutoConfiguration.class }, properties = {
 		"spring.cloud.dataflow.applicationProperties.task.globalkey=globalvalue",
 		"spring.cloud.dataflow.applicationProperties.stream.globalstreamkey=nothere",
 		"spring.main.allow-bean-definition-overriding=true"})
 @EnableConfigurationProperties({ CommonApplicationProperties.class, TaskConfigurationProperties.class, DockerValidatorProperties.class})
+@DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
+@AutoConfigureTestDatabase(replace = Replace.ANY)
 public class DefaultSchedulerServiceTests {
 
 	private static final String DATA_FLOW_SCHEDULER_PREFIX = "scheduler.";
@@ -133,21 +136,18 @@ public class DefaultSchedulerServiceTests {
 	}
 
 	@Test
-	@DirtiesContext
 	public void testSchedule(){
 		schedulerService.schedule(BASE_SCHEDULE_NAME, BASE_DEFINITION_NAME, this.testProperties, this.commandLineArgs);
 		verifyScheduleExistsInScheduler(createScheduleInfo(BASE_SCHEDULE_NAME));
 	}
 
 	@Test
-	@DirtiesContext
 	public void testScheduleCTR(){
 		schedulerService.schedule(BASE_SCHEDULE_NAME, CTR_DEFINITION_NAME, this.testProperties, this.commandLineArgs);
 		verifyScheduleExistsInScheduler(createScheduleInfo(BASE_SCHEDULE_NAME, CTR_DEFINITION_NAME));
 	}
 
 	@Test(expected = CreateScheduleException.class)
-	@DirtiesContext
 	public void testDuplicate(){
 		schedulerService.schedule(BASE_SCHEDULE_NAME + 1, BASE_DEFINITION_NAME,
 				this.testProperties, this.commandLineArgs);
@@ -156,7 +156,6 @@ public class DefaultSchedulerServiceTests {
 	}
 
 	@Test
-	@DirtiesContext
 	public void testMultipleSchedules(){
 		schedulerService.schedule(BASE_SCHEDULE_NAME + 1,
 				BASE_DEFINITION_NAME, this.testProperties, this.commandLineArgs);
@@ -171,7 +170,6 @@ public class DefaultSchedulerServiceTests {
 	}
 
 	@Test
-	@DirtiesContext
 	public void testUnschedule(){
 		schedulerService.schedule(BASE_SCHEDULE_NAME + 1,
 				BASE_DEFINITION_NAME, this.testProperties, this.commandLineArgs);
@@ -192,7 +190,6 @@ public class DefaultSchedulerServiceTests {
 	}
 
 	@Test
-	@DirtiesContext
 	public void testEmptyUnschedule(){
 		validateSchedulesCount(0);
 		schedulerService.unschedule(BASE_SCHEDULE_NAME + 2);
@@ -200,7 +197,6 @@ public class DefaultSchedulerServiceTests {
 	}
 
 	@Test
-	@DirtiesContext
 	public void testList(){
 		schedulerService.schedule(BASE_SCHEDULE_NAME + 1,
 				BASE_DEFINITION_NAME, this.testProperties, this.commandLineArgs);
@@ -217,7 +213,6 @@ public class DefaultSchedulerServiceTests {
 	}
 
 	@Test
-	@DirtiesContext
 	public void testListMaxEntry() {
 		final int MAX_COUNT = 500;
 		schedulerServiceProperties.setMaxSchedulesReturned(MAX_COUNT);
@@ -230,19 +225,16 @@ public class DefaultSchedulerServiceTests {
 	}
 
 	@Test(expected = UnsupportedOperationException.class)
-	@DirtiesContext
 	public void testListPaginated() {
-		schedulerService.list(new PageRequest(0, 1));
+		schedulerService.list(PageRequest.of(0, 1));
 	}
 
 	@Test(expected = UnsupportedOperationException.class)
-	@DirtiesContext
 	public void testListWithParamsPaginated() {
-		schedulerService.list(new PageRequest(0, 1), BASE_DEFINITION_NAME);
+		schedulerService.list(PageRequest.of(0, 1), BASE_DEFINITION_NAME);
 	}
 
 	@Test
-	@DirtiesContext
 	public void testListWithParams() {
 		taskDefinitionRepository.save(new TaskDefinition(BASE_DEFINITION_NAME + 1, "demo"));
 		schedulerService.schedule(BASE_SCHEDULE_NAME + 1,
@@ -258,7 +250,6 @@ public class DefaultSchedulerServiceTests {
 	}
 
 	@Test
-	@DirtiesContext
 	public void testEmptyList() {
 		taskDefinitionRepository.save(new TaskDefinition(BASE_DEFINITION_NAME + 1, "demo"));
 		List<ScheduleInfo> schedules = schedulerService.list(BASE_DEFINITION_NAME + 1);
@@ -268,7 +259,6 @@ public class DefaultSchedulerServiceTests {
 	}
 
 	@Test
-	@DirtiesContext
 	public void testScheduleWithCommandLineArguments() {
 		List<String> commandLineArguments = getCommandLineArguments(Arrays.asList("--myArg1", "--myArg2"));
 
@@ -279,7 +269,6 @@ public class DefaultSchedulerServiceTests {
 	}
 
 	@Test
-	@DirtiesContext
 	public void testScheduleWithoutCommandLineArguments() {
 		List<String> commandLineArguments = getCommandLineArguments(null);
 

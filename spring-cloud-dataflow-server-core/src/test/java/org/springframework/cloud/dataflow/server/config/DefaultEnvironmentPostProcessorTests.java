@@ -1,5 +1,5 @@
 /*
- * Copyright 2015-2017 the original author or authors.
+ * Copyright 2015-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,11 +20,12 @@ import org.junit.Test;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
+import org.springframework.boot.autoconfigure.flyway.FlywayAutoConfiguration;
 import org.springframework.boot.autoconfigure.session.SessionAutoConfiguration;
 import org.springframework.cloud.dataflow.server.EnableDataFlowServer;
 import org.springframework.cloud.dataflow.server.service.SchedulerService;
-import org.springframework.cloud.dataflow.server.service.TaskService;
-import org.springframework.cloud.dataflow.server.service.impl.DefaultTaskService;
+import org.springframework.cloud.dataflow.server.service.TaskExecutionService;
+import org.springframework.cloud.dataflow.server.service.impl.DefaultTaskExecutionService;
 import org.springframework.cloud.deployer.spi.app.AppDeployer;
 import org.springframework.cloud.deployer.spi.task.TaskLauncher;
 import org.springframework.cloud.scheduler.spi.core.Scheduler;
@@ -68,7 +69,7 @@ public class DefaultEnvironmentPostProcessorTests {
 
 	@Configuration
 	@Import(TestConfiguration.class)
-	@EnableAutoConfiguration(exclude = SessionAutoConfiguration.class)
+	@EnableAutoConfiguration(exclude = { SessionAutoConfiguration.class, FlywayAutoConfiguration.class })
 	@EnableDataFlowServer
 	public static class EmptyDefaultApp {
 	}
@@ -91,8 +92,8 @@ public class DefaultEnvironmentPostProcessorTests {
 		}
 
 		@Bean
-		public TaskService taskService() {
-			return mock(DefaultTaskService.class);
+		public TaskExecutionService taskService() {
+			return mock(DefaultTaskExecutionService.class);
 		}
 
 		@Bean

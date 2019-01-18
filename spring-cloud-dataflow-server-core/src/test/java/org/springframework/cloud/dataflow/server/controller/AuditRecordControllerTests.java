@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 the original author or authors.
+ * Copyright 2018-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,10 +26,12 @@ import org.junit.runner.RunWith;
 import org.mockito.ArgumentMatchers;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
+import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase.Replace;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.cloud.dataflow.audit.repository.AuditRecordRepository;
 import org.springframework.cloud.dataflow.core.AuditRecord;
 import org.springframework.cloud.dataflow.server.configuration.TestDependencies;
-import org.springframework.cloud.dataflow.server.repository.AuditRecordRepository;
 import org.springframework.cloud.dataflow.server.repository.StreamDefinitionRepository;
 import org.springframework.cloud.dataflow.server.service.StreamService;
 import org.springframework.cloud.skipper.client.SkipperClient;
@@ -66,6 +68,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = TestDependencies.class)
 @DirtiesContext(classMode = ClassMode.BEFORE_EACH_TEST_METHOD)
+@AutoConfigureTestDatabase(replace = Replace.ANY)
 public class AuditRecordControllerTests {
 
 	@Autowired
@@ -137,15 +140,15 @@ public class AuditRecordControllerTests {
 	@Test
 	public void testVerifyNumberOfAuditRecords() throws Exception {
 		assertEquals(2, streamDefinitionRepository.count());
-		assertEquals(5, auditRecordRepository.count());
+		assertEquals(9, auditRecordRepository.count());
 	}
 
 	@Test
 	public void testRetrieveAllAuditRecords() throws Exception {
 		mockMvc.perform(get("/audit-records").accept(MediaType.APPLICATION_JSON))
-				.andDo(print())
-				.andExpect(status().isOk())
-				.andExpect(jsonPath("$.content.*", hasSize(5)));
+		.andDo(print())
+		.andExpect(status().isOk())
+				.andExpect(jsonPath("$.content.*", hasSize(9)));
 	}
 
 	@Test
@@ -228,27 +231,25 @@ public class AuditRecordControllerTests {
 	@Test
 	public void testRetrieveAuditOperationTypes() throws Exception {
 		mockMvc.perform(get("/audit-records/audit-operation-types").accept(MediaType.APPLICATION_JSON))
-				.andDo(print())
-				.andExpect(status().isOk())
-				.andExpect(jsonPath("$.*", hasSize(3)))
+		.andDo(print())
+		.andExpect(status().isOk())
+		.andExpect(jsonPath("$.*", hasSize(4)))
 
-				/*
-				 * Commented out until the implementation of gh-2486 .andExpect(jsonPath("$[0].id",
-				 * is(100))) .andExpect(jsonPath("$[0].name", is("App Registration")))
-				 * .andExpect(jsonPath("$[0].key", is("APP_REGISTRATION")))
-				 */
+		.andExpect(jsonPath("$[0].id", is(100)))
+		.andExpect(jsonPath("$[0].name", is("App Registration")))
+		.andExpect(jsonPath("$[0].key", is("APP_REGISTRATION")))
 
-				.andExpect(jsonPath("$[0].id", is(200)))
-				.andExpect(jsonPath("$[0].name", is("Schedule")))
-				.andExpect(jsonPath("$[0].key", is("SCHEDULE")))
+		.andExpect(jsonPath("$[1].id", is(200)))
+		.andExpect(jsonPath("$[1].name", is("Schedule")))
+		.andExpect(jsonPath("$[1].key", is("SCHEDULE")))
 
-				.andExpect(jsonPath("$[1].id", is(300)))
-				.andExpect(jsonPath("$[1].name", is("Stream")))
-				.andExpect(jsonPath("$[1].key", is("STREAM")))
+		.andExpect(jsonPath("$[2].id", is(300)))
+		.andExpect(jsonPath("$[2].name", is("Stream")))
+		.andExpect(jsonPath("$[2].key", is("STREAM")))
 
-				.andExpect(jsonPath("$[2].id", is(400)))
-				.andExpect(jsonPath("$[2].name", is("Task")))
-				.andExpect(jsonPath("$[2].key", is("TASK")));
+		.andExpect(jsonPath("$[3].id", is(400)))
+		.andExpect(jsonPath("$[3].name", is("Task")))
+		.andExpect(jsonPath("$[3].key", is("TASK")));
 	}
 
 	@Test

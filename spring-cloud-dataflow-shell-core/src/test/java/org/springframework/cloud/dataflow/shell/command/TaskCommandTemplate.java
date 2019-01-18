@@ -1,5 +1,5 @@
 /*
- * Copyright 2015-2018 the original author or authors.
+ * Copyright 2015-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -55,13 +55,13 @@ public class TaskCommandTemplate {
 	/**
 	 * Create a task.
 	 * <p>
-	 * Note the name of the task will be stored so that when the method
-	 * destroyCreatedTasks is called, the task will be destroyed.
+	 * Note the name of the task will be stored so that when the method destroyCreatedTasks is
+	 * called, the task will be destroyed.
 	 *
 	 * @param taskName the name of the task
 	 * @param taskDefinition the task definition DSL
 	 * @param values will be injected into taskdefinition according to
-	 * {@link String#format(String, Object...)} syntax
+	 *     {@link String#format(String, Object...)} syntax
 	 */
 	public void create(String taskName, String taskDefinition, Object... values) {
 		doCreate(taskName, taskDefinition, true, values);
@@ -73,6 +73,13 @@ public class TaskCommandTemplate {
 	public CommandResult taskExecutionList() {
 		return shell.executeCommand("task execution list");
 
+	}
+
+	/**
+	 * Lists the platform accounts for tasks.
+	 */
+	public CommandResult taskPlatformList() {
+		return shell.executeCommand("task platform-list");
 	}
 
 	/**
@@ -145,6 +152,17 @@ public class TaskCommandTemplate {
 		// stateVerifier.waitForDestroy(task);
 		assertTrue("Failure to destroy task " + task + ".  CommandResult = " + cr.toString(), cr.isSuccess());
 		tasks.remove(task);
+	}
+
+	/**
+	 * Destroy all tasks.
+	 *
+	 */
+	public void destroyAllTasks() {
+		CommandResult cr = shell.executeCommand("task all destroy --force");
+		// stateVerifier.waitForDestroy(task);
+		assertTrue("Failure to destroy all tasks. CommandResult = " + cr.toString(), cr.isSuccess());
+		tasks.clear();
 	}
 
 	/**

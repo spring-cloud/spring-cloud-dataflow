@@ -40,8 +40,8 @@ import org.springframework.cloud.dataflow.server.job.support.JobNotRestartableEx
 import org.springframework.cloud.dataflow.server.repository.NoSuchTaskBatchException;
 import org.springframework.cloud.dataflow.server.repository.NoSuchTaskDefinitionException;
 import org.springframework.cloud.dataflow.server.repository.TaskDefinitionRepository;
+import org.springframework.cloud.dataflow.server.service.TaskExecutionService;
 import org.springframework.cloud.dataflow.server.service.TaskJobService;
-import org.springframework.cloud.dataflow.server.service.TaskService;
 import org.springframework.cloud.task.repository.TaskExecution;
 import org.springframework.cloud.task.repository.TaskExplorer;
 import org.springframework.data.domain.Pageable;
@@ -62,7 +62,7 @@ public class DefaultTaskJobService implements TaskJobService {
 
 	private static final Logger logger = LoggerFactory.getLogger(DefaultTaskJobService.class);
 
-	private final TaskService taskService;
+	private final TaskExecutionService taskExecutionService;
 
 	private TaskExplorer taskExplorer;
 
@@ -71,23 +71,22 @@ public class DefaultTaskJobService implements TaskJobService {
 	private TaskDefinitionRepository taskDefinitionRepository;
 
 	public DefaultTaskJobService(JobService jobService, TaskExplorer taskExplorer,
-			TaskDefinitionRepository taskDefinitionRepository, TaskService taskService) {
+			TaskDefinitionRepository taskDefinitionRepository, TaskExecutionService taskExecutionService) {
 		Assert.notNull(jobService, "jobService must not be null");
 		Assert.notNull(taskExplorer, "taskExplorer must not be null");
 		Assert.notNull(taskDefinitionRepository, "taskDefinitionRepository must not be null");
-		Assert.notNull(taskService, "taskService must not be null");
+		Assert.notNull(taskExecutionService, "taskExecutionService must not be null");
 		this.jobService = jobService;
 		this.taskExplorer = taskExplorer;
 		this.taskDefinitionRepository = taskDefinitionRepository;
-		this.taskService = taskService;
+		this.taskExecutionService = taskExecutionService;
 	}
 
 	@Override
 	public List<TaskJobExecution> listJobExecutions(Pageable pageable) throws NoSuchJobExecutionException {
 		Assert.notNull(pageable, "pageable must not be null");
-		// TODO: BOOT2 check what to do with long to int cast for offset
 		List<JobExecution> jobExecutions = new ArrayList<>(
-				jobService.listJobExecutions((int) pageable.getOffset(), pageable.getPageSize()));
+				jobService.listJobExecutions(getPageOffset(pageable), pageable.getPageSize()));
 		for (JobExecution jobExecution : jobExecutions) {
 			Collection<StepExecution> stepExecutions = jobService.getStepExecutions(jobExecution.getId());
 			List<StepExecution> validStepExecutions = new ArrayList<>();
@@ -101,12 +100,11 @@ public class DefaultTaskJobService implements TaskJobService {
 		return getTaskJobExecutionsForList(jobExecutions);
 	}
 
-
 	@Override
 	public List<TaskJobExecution> listJobExecutionsWithStepCount(Pageable pageable) throws NoSuchJobExecutionException {
 		Assert.notNull(pageable, "pageable must not be null");
 		List<JobExecutionWithStepCount> jobExecutions = new ArrayList<>(
-				jobService.listJobExecutionsWithStepCount((int)pageable.getOffset(), pageable.getPageSize()));
+				jobService.listJobExecutionsWithStepCount(getPageOffset(pageable), pageable.getPageSize()));
 		return getTaskJobExecutionsWithStepCountForList(jobExecutions);
 	}
 
@@ -114,9 +112,8 @@ public class DefaultTaskJobService implements TaskJobService {
 	public List<TaskJobExecution> listJobExecutionsForJob(Pageable pageable, String jobName) throws NoSuchJobException {
 		Assert.notNull(pageable, "pageable must not be null");
 		Assert.notNull(jobName, "jobName must not be null");
-		// TODO: BOOT2 check what to do with long to int cast for offset
 		return getTaskJobExecutionsForList(
-				jobService.listJobExecutionsForJob(jobName, (int) pageable.getOffset(), pageable.getPageSize()));
+				jobService.listJobExecutionsForJob(jobName, getPageOffset(pageable), pageable.getPageSize()));
 	}
 
 	@Override
@@ -124,7 +121,7 @@ public class DefaultTaskJobService implements TaskJobService {
 		Assert.notNull(pageable, "pageable must not be null");
 		Assert.notNull(jobName, "jobName must not be null");
 		return getTaskJobExecutionsWithStepCountForList(
-				jobService.listJobExecutionsForJobWithStepCount(jobName, (int) pageable.getOffset(), pageable.getPageSize()));
+				jobService.listJobExecutionsForJobWithStepCount(jobName, getPageOffset(pageable), pageable.getPageSize()));
 	}
 
 	@Override
@@ -139,8 +136,7 @@ public class DefaultTaskJobService implements TaskJobService {
 		Assert.notNull(pageable, "pageable must not be null");
 		Assert.notNull(jobName, "jobName must not be null");
 		List<JobInstanceExecutions> taskJobInstances = new ArrayList<>();
-		// TODO: BOOT2 check what to do with long to int cast for offset
-		for (JobInstance jobInstance : jobService.listJobInstances(jobName, (int) pageable.getOffset(),
+		for (JobInstance jobInstance : jobService.listJobInstances(jobName, getPageOffset(pageable),
 				pageable.getPageSize())) {
 			taskJobInstances.add(getJobInstanceExecution(jobInstance));
 		}
@@ -185,7 +181,8 @@ public class DefaultTaskJobService implements TaskJobService {
 		TaskExecution taskExecution = this.taskExplorer.getTaskExecution(taskJobExecution.getTaskId());
 		TaskDefinition taskDefinition = this.taskDefinitionRepository.findById(taskExecution.getTaskName())
 				.orElseThrow(() -> new NoSuchTaskDefinitionException(taskExecution.getTaskName()));
-		taskService.executeTask(taskDefinition.getName(), taskDefinition.getProperties(), taskExecution.getArguments(),
+		taskExecutionService.executeTask(taskDefinition.getName(), taskDefinition.getProperties(),
+				taskExecution.getArguments(),
 				"default");
 	}
 
@@ -238,6 +235,13 @@ public class DefaultTaskJobService implements TaskJobService {
 		return taskExecutionId;
 	}
 
+
+	private int getPageOffset(Pageable pageable) {
+		if(pageable.getOffset() > (long)Integer.MAX_VALUE) {
+			throw new OffsetOutOfBoundsException("The pageable offset requested for this query is greater than MAX_INT.") ;
+		}
+		return (int)pageable.getOffset();
+	}
 
 	private JobInstanceExecutions getJobInstanceExecution(JobInstance jobInstance) throws NoSuchJobException {
 		Assert.notNull(jobInstance, "jobInstance must not be null");

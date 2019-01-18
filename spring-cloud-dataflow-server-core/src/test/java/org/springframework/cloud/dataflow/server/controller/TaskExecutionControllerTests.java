@@ -1,5 +1,5 @@
 /*
- * Copyright 2016-2018 the original author or authors.
+ * Copyright 2016-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,8 +31,9 @@ import org.springframework.batch.core.repository.JobRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.batch.BatchProperties;
 import org.springframework.boot.autoconfigure.context.PropertyPlaceholderAutoConfiguration;
-import org.springframework.boot.autoconfigure.jdbc.EmbeddedDataSourceConfiguration;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
+import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase.Replace;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.cloud.dataflow.core.Launcher;
 import org.springframework.cloud.dataflow.core.TaskDefinition;
@@ -40,7 +41,9 @@ import org.springframework.cloud.dataflow.server.config.apps.CommonApplicationPr
 import org.springframework.cloud.dataflow.server.configuration.JobDependencies;
 import org.springframework.cloud.dataflow.server.job.LauncherRepository;
 import org.springframework.cloud.dataflow.server.repository.TaskDefinitionRepository;
-import org.springframework.cloud.dataflow.server.service.TaskService;
+import org.springframework.cloud.dataflow.server.service.TaskDeleteService;
+import org.springframework.cloud.dataflow.server.service.TaskExecutionInfoService;
+import org.springframework.cloud.dataflow.server.service.TaskExecutionService;
 import org.springframework.cloud.deployer.spi.task.TaskLauncher;
 import org.springframework.cloud.task.batch.listener.TaskBatchDao;
 import org.springframework.cloud.task.repository.TaskExecution;
@@ -69,10 +72,10 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  * @author Ilayaperumal Gopinathan
  */
 @RunWith(SpringRunner.class)
-@SpringBootTest(classes = { EmbeddedDataSourceConfiguration.class, JobDependencies.class,
-		PropertyPlaceholderAutoConfiguration.class, BatchProperties.class })
+@SpringBootTest(classes = { JobDependencies.class, PropertyPlaceholderAutoConfiguration.class, BatchProperties.class })
 @EnableConfigurationProperties({ CommonApplicationProperties.class })
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
+@AutoConfigureTestDatabase(replace = Replace.ANY)
 public class TaskExecutionControllerTests {
 
 	private final static String BASE_TASK_NAME = "myTask";
@@ -110,13 +113,19 @@ public class TaskExecutionControllerTests {
 	private TaskExplorer taskExplorer;
 
 	@Autowired
-	private TaskService taskService;
+	private TaskExecutionService taskExecutionService;
 
 	@Autowired
 	private TaskLauncher taskLauncher;
 
 	@Autowired
 	private LauncherRepository launcherRepository;
+
+	@Autowired
+	private TaskExecutionInfoService taskExecutionInfoService;
+
+	@Autowired
+	private TaskDeleteService taskDeleteService;
 
 	@Before
 	public void setupMockMVC() {
@@ -160,17 +169,32 @@ public class TaskExecutionControllerTests {
 
 	@Test(expected = IllegalArgumentException.class)
 	public void testTaskExecutionControllerConstructorMissingExplorer() {
-		new TaskExecutionController(null, taskService, taskDefinitionRepository);
+		new TaskExecutionController(null, taskExecutionService, taskDefinitionRepository, taskExecutionInfoService,
+				taskDeleteService);
 	}
 
 	@Test(expected = IllegalArgumentException.class)
 	public void testTaskExecutionControllerConstructorMissingTaskService() {
-		new TaskExecutionController(taskExplorer, null, taskDefinitionRepository);
+		new TaskExecutionController(taskExplorer, null, taskDefinitionRepository, taskExecutionInfoService,
+				taskDeleteService);
 	}
 
 	@Test(expected = IllegalArgumentException.class)
 	public void testTaskExecutionControllerConstructorMissingTaskDefinitionRepository() {
-		new TaskExecutionController(taskExplorer, taskService, null);
+		new TaskExecutionController(taskExplorer, taskExecutionService, null, taskExecutionInfoService,
+				taskDeleteService);
+	}
+
+	@Test(expected = IllegalArgumentException.class)
+	public void testTaskExecutionControllerConstructorMissingTaskDefinitionRetriever() {
+		new TaskExecutionController(taskExplorer, taskExecutionService, taskDefinitionRepository, null,
+				taskDeleteService);
+	}
+
+	@Test(expected = IllegalArgumentException.class)
+	public void testTaskExecutionControllerConstructorMissingDeleteTaskService() {
+		new TaskExecutionController(taskExplorer, taskExecutionService, taskDefinitionRepository,
+				taskExecutionInfoService, null);
 	}
 
 	@Test

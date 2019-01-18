@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 the original author or authors.
+ * Copyright 2018-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -42,7 +42,7 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
  * @author Christian Tzolov
  */
 @Entity
-@Table(name = "AUDIT_RECORDS")
+@Table(name = "AuditRecords")
 @EntityListeners(AuditingEntityListener.class)
 public class AuditRecord {
 
@@ -63,14 +63,17 @@ public class AuditRecord {
 	private String auditData;
 
 	@CreatedDate
+	@Column(name = "created_on")
 	private Instant createdOn;
 
 	@NotNull
 	@Convert(converter = AuditActionTypeConverter.class)
+	@Column(name = "audit_action")
 	private AuditActionType auditAction;
 
 	@NotNull
 	@Convert(converter = AuditOperationTypeConverter.class)
+	@Column(name = "audit_operation")
 	private AuditOperationType auditOperation;
 
 	public Long getId() {

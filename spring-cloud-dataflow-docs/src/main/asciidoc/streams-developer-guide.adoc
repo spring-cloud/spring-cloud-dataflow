@@ -98,15 +98,16 @@ To do so:
 
 . Visit the link:https://start.spring.io/[Spring Initialzr] site.
 .. Create a new Maven project with a *Group* name of `io.spring.stream.sample` and an *Artifact* name of `transformer`.
-.. In the Dependencies text box, type `stream` to select the Spring Cloud Stream dependency.
-.. In the Dependencies text box, type either `kafka` or `rabbit` and select which middleware you want to use.
+.. In the Dependencies text box, type `stream` to select the `Cloud Stream` dependency.
+.. In the Dependencies text box, type `web` to select the `Web` dependency.
+.. In the Dependencies text box, select the middleware required by typing either: `kafka` and select the `Kafka` dependency or `rabbit` and select the `RabbitMQ` dependency.
 .. Click the *Generate Project* button
 . Unzip the project and bring the project into your favorite IDE.
-. Create a class called Transformer in the `io.spring.stream.sample` package with the following contents:
+. Create a class called Transformer in the `io.spring.stream.sample.transformer` package with the following contents:
 +
 [source,java]
 ----
-package io.spring.stream.sample;
+package io.spring.stream.sample.transformer;
 
 import org.springframework.cloud.stream.annotation.EnableBinding;
 import org.springframework.cloud.stream.annotation.Output;
@@ -137,7 +138,7 @@ All that this processor is doing is changing the names of the keys in the map an
 +
 [source,java]
 ----
-package io.spring.stream.sample;
+package io.spring.stream.sample.transformer;
 
 
 import org.junit.Test;
