@@ -52,7 +52,6 @@ import org.springframework.cloud.dataflow.registry.support.AppResourceCommon;
 import org.springframework.cloud.dataflow.rest.job.support.ISO8601DateFormatWithMilliSeconds;
 import org.springframework.cloud.dataflow.server.DockerValidatorProperties;
 import org.springframework.cloud.dataflow.server.TaskValidationController;
-import org.springframework.cloud.dataflow.server.config.MetricsProperties;
 import org.springframework.cloud.dataflow.server.config.VersionInfoProperties;
 import org.springframework.cloud.dataflow.server.config.apps.CommonApplicationProperties;
 import org.springframework.cloud.dataflow.server.config.features.FeaturesProperties;
@@ -65,7 +64,6 @@ import org.springframework.cloud.dataflow.server.controller.JobExecutionThinCont
 import org.springframework.cloud.dataflow.server.controller.JobInstanceController;
 import org.springframework.cloud.dataflow.server.controller.JobStepExecutionController;
 import org.springframework.cloud.dataflow.server.controller.JobStepExecutionProgressController;
-import org.springframework.cloud.dataflow.server.controller.MetricsController;
 import org.springframework.cloud.dataflow.server.controller.RestControllerAdvice;
 import org.springframework.cloud.dataflow.server.controller.RootController;
 import org.springframework.cloud.dataflow.server.controller.RuntimeAppInstanceController;
@@ -78,11 +76,6 @@ import org.springframework.cloud.dataflow.server.controller.TaskExecutionControl
 import org.springframework.cloud.dataflow.server.controller.TaskPlatformController;
 import org.springframework.cloud.dataflow.server.controller.TaskSchedulerController;
 import org.springframework.cloud.dataflow.server.controller.ToolsController;
-import org.springframework.cloud.dataflow.server.controller.support.ApplicationsMetrics;
-import org.springframework.cloud.dataflow.server.controller.support.ApplicationsMetrics.Application;
-import org.springframework.cloud.dataflow.server.controller.support.ApplicationsMetrics.Instance;
-import org.springframework.cloud.dataflow.server.controller.support.ApplicationsMetrics.Metric;
-import org.springframework.cloud.dataflow.server.controller.support.MetricStore;
 import org.springframework.cloud.dataflow.server.job.LauncherRepository;
 import org.springframework.cloud.dataflow.server.job.support.ExecutionContextJacksonMixIn;
 import org.springframework.cloud.dataflow.server.job.support.StepExecutionJacksonMixIn;
@@ -163,7 +156,6 @@ import static org.mockito.Mockito.when;
 @ImportAutoConfiguration({ HibernateJpaAutoConfiguration.class, JacksonAutoConfiguration.class })
 @EnableWebMvc
 @EnableConfigurationProperties({ CommonApplicationProperties.class,
-		MetricsProperties.class,
 		VersionInfoProperties.class,
 		DockerValidatorProperties.class,
 		TaskConfigurationProperties.class,
@@ -351,56 +343,13 @@ public class TestDependencies extends WebMvcConfigurationSupport {
 	}
 
 	@Bean
-	public MetricsController metricsController(MetricStore metricStore) {
-		return new MetricsController(metricStore);
-	}
-
-	@Bean
-	public RuntimeAppsController runtimeAppsController(MetricStore metricStore, StreamDeployer streamDeployer) {
+	public RuntimeAppsController runtimeAppsController(StreamDeployer streamDeployer) {
 		return new RuntimeAppsController(streamDeployer);
 	}
 
 	@Bean
 	public RuntimeAppInstanceController appInstanceController(StreamDeployer streamDeployer) {
 		return new RuntimeAppInstanceController(streamDeployer);
-	}
-
-	@Bean
-	public MetricStore metricStore(MetricsProperties metricsProperties) {
-		return new MetricStore(metricsProperties) {
-			@Override
-			public List<ApplicationsMetrics> getMetrics() {
-				List<ApplicationsMetrics> metrics = new ArrayList<>();
-				ApplicationsMetrics am = new ApplicationsMetrics();
-				am.setName("ticktock1");
-				List<Application> applications = new ArrayList<>();
-				Application application = new Application();
-				application.setName("time");
-				List<Instance> instances = new ArrayList<>();
-				Instance i = new Instance();
-				List<ApplicationsMetrics.Metric> imetrics = new ArrayList<>();
-				Metric imetric = new ApplicationsMetrics.Metric();
-				imetric.setName("fake1");
-				imetric.setValue(111);
-				imetrics.add(imetric);
-				i.setMetrics(imetrics);
-				i.setGuid("34215");
-				instances.add(i);
-				application.setInstances(instances);
-
-				List<Metric> aggregateMetrics = new ArrayList<>();
-				Metric aggregateMetric = new ApplicationsMetrics.Metric();
-				aggregateMetric.setName("rate");
-				aggregateMetric.setValue("1000");
-				aggregateMetrics.add(aggregateMetric);
-				application.setAggregateMetrics(aggregateMetrics);
-
-				applications.add(application);
-				am.setApplications(applications);
-				metrics.add(am);
-				return metrics;
-			}
-		};
 	}
 
 	@Bean

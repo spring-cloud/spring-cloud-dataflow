@@ -1008,18 +1008,9 @@ spring:
         authorization:
           enabled: true
           rules:
-            # Metrics
-
-            - GET    /metrics/streams                => hasRole('ROLE_VIEW')
-
             # About
 
             - GET    /about                          => hasRole('ROLE_VIEW')
-
-            # Metrics
-
-            - GET    /metrics/**                     => hasRole('ROLE_VIEW')
-            - DELETE /metrics/**                     => hasRole('ROLE_CREATE')
 
             # Boot Endpoints
 
@@ -1050,6 +1041,7 @@ spring:
 
             # Running Applications
 
+            - GET    /runtime/streams                 => hasRole('ROLE_VIEW')
             - GET    /runtime/apps                   => hasRole('ROLE_VIEW')
             - GET    /runtime/apps/**                => hasRole('ROLE_VIEW')
 
@@ -1219,7 +1211,7 @@ stream deploy --name foostream --properties "app.*.spring.cloud.stream.bindings.
 
 The Metrics Collector exposes aggregated metrics under the HTTP endpoint `/collector/metrics` in JSON format.
 The Data Flow server accesses this endpoint in two distinct ways.
-The first is by exposing a `/metrics/streams` HTTP endpoint that acts as a proxy to the Metrics Collector endpoint.
+The first is by exposing a `/runtime/streams` HTTP endpoint that acts as a proxy to the Metrics Collector endpoint.
 This is accessed by the UI when overlaying message rates on SCDF's Flo and it's visual representation of streaming pipelines.
 It is also accessed to enrich the Data Flow `/runtime/apps` endpoint that is exposed in the UI in the `Runtime` tab and in the shell through the `runtime apps` command with message rates.
 

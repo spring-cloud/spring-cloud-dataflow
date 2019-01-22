@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 the original author or authors.
+ * Copyright 2017-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,13 +20,16 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Support domain class to map metrics response from a collector.
+ * Domain class that represents the runtime stream status
  *
  * @author Janne Valkealahti
+ * @author Christian Tzolov
  */
-public class ApplicationsMetrics {
+public class StreamStatus {
 
 	private String name;
+
+	private String version;
 
 	private List<Application> applications;
 
@@ -46,13 +49,19 @@ public class ApplicationsMetrics {
 		this.applications = applications;
 	}
 
+	public String getVersion() {
+		return version;
+	}
+
+	public void setVersion(String version) {
+		this.version = version;
+	}
+
 	public static class Application {
 
 		private String name;
 
 		private List<Instance> instances;
-
-		private List<Metric> aggregateMetrics;
 
 		public String getName() {
 			return name;
@@ -69,14 +78,6 @@ public class ApplicationsMetrics {
 		public void setInstances(List<Instance> instances) {
 			this.instances = instances;
 		}
-
-		public List<Metric> getAggregateMetrics() {
-			return aggregateMetrics;
-		}
-
-		public void setAggregateMetrics(List<Metric> aggregateMetrics) {
-			this.aggregateMetrics = aggregateMetrics;
-		}
 	}
 
 	public static class Instance {
@@ -87,7 +88,7 @@ public class ApplicationsMetrics {
 
 		private Map<String, Object> properties;
 
-		private List<Metric> metrics;
+		private String state;
 
 		public String getGuid() {
 			return guid;
@@ -113,35 +114,12 @@ public class ApplicationsMetrics {
 			this.properties = properties;
 		}
 
-		public List<Metric> getMetrics() {
-			return metrics;
+		public String getState() {
+			return state;
 		}
 
-		public void setMetrics(List<Metric> metrics) {
-			this.metrics = metrics;
-		}
-	}
-
-	public static class Metric {
-
-		private String name;
-
-		private Object value;
-
-		public String getName() {
-			return name;
-		}
-
-		public void setName(String name) {
-			this.name = name;
-		}
-
-		public Object getValue() {
-			return value;
-		}
-
-		public void setValue(Object value) {
-			this.value = value;
+		public void setState(String state) {
+			this.state = state;
 		}
 	}
 }

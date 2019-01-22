@@ -69,7 +69,6 @@ import org.springframework.cloud.dataflow.server.controller.JobExecutionThinCont
 import org.springframework.cloud.dataflow.server.controller.JobInstanceController;
 import org.springframework.cloud.dataflow.server.controller.JobStepExecutionController;
 import org.springframework.cloud.dataflow.server.controller.JobStepExecutionProgressController;
-import org.springframework.cloud.dataflow.server.controller.MetricsController;
 import org.springframework.cloud.dataflow.server.controller.RestControllerAdvice;
 import org.springframework.cloud.dataflow.server.controller.RootController;
 import org.springframework.cloud.dataflow.server.controller.RuntimeAppInstanceController;
@@ -84,7 +83,6 @@ import org.springframework.cloud.dataflow.server.controller.TaskSchedulerControl
 import org.springframework.cloud.dataflow.server.controller.ToolsController;
 import org.springframework.cloud.dataflow.server.controller.UiController;
 import org.springframework.cloud.dataflow.server.controller.security.SecurityController;
-import org.springframework.cloud.dataflow.server.controller.support.MetricStore;
 import org.springframework.cloud.dataflow.server.job.LauncherRepository;
 import org.springframework.cloud.dataflow.server.repository.StreamDefinitionRepository;
 import org.springframework.cloud.dataflow.server.repository.TaskDefinitionRepository;
@@ -448,13 +446,7 @@ public class DataFlowControllerAutoConfiguration {
 	}
 
 	@Configuration
-	@EnableConfigurationProperties(MetricsProperties.class)
-	public static class MetricsConfiguration {
-
-		@Bean
-		public MetricStore metricStore(MetricsProperties metricsProperties) {
-			return new MetricStore(metricsProperties);
-		}
+	public static class AnalyticsConfiguration {
 
 		@Bean
 		@ConditionalOnBean(RedisMetricRepository.class)
@@ -472,11 +464,6 @@ public class DataFlowControllerAutoConfiguration {
 		@ConditionalOnBean(AggregateCounterRepository.class)
 		public AggregateCounterController aggregateCounterController(AggregateCounterRepository repository) {
 			return new AggregateCounterController(repository);
-		}
-
-		@Bean
-		public MetricsController metricsController(MetricStore metricStore) {
-			return new MetricsController(metricStore);
 		}
 	}
 
