@@ -24,7 +24,7 @@ import org.springframework.boot.jdbc.DatabaseDriver;
 import org.springframework.cloud.dataflow.server.db.migration.db2.Db2BeforeBaseline;
 import org.springframework.cloud.dataflow.server.db.migration.mysql.MysqlBeforeBaseline;
 import org.springframework.cloud.dataflow.server.db.migration.oracle.OracleBeforeBaseline;
-import org.springframework.cloud.dataflow.server.db.migration.postgres.PostgresBeforeBaseline;
+import org.springframework.cloud.dataflow.server.db.migration.postgresql.PostgresBeforeBaseline;
 import org.springframework.cloud.dataflow.server.db.migration.sqlserver.MsSqlBeforeBaseline;
 import org.springframework.jdbc.support.JdbcUtils;
 import org.springframework.jdbc.support.MetaDataAccessException;
