@@ -15,8 +15,8 @@
   "editable": true,
   "gnetId": null,
   "graphTooltip": 0,
-  "id": 3,
-  "iteration": 1547807849462,
+  "id": 1,
+  "iteration": 1548166668661,
   "links": [
     {
       "icon": "external link",
@@ -566,7 +566,7 @@
       "content": "<p style=\"text-align: center;font-size: 200%;color:#299c46;\" > $application_name </p>",
       "gridPos": {
         "h": 2,
-        "w": 8,
+        "w": 24,
         "x": 0,
         "y": 7
       },
@@ -578,63 +578,9 @@
       "repeatDirection": "h",
       "scopedVars": {
         "application_name": {
-          "selected": false,
+          "selected": true,
           "text": "time",
           "value": "time"
-        }
-      },
-      "title": "",
-      "transparent": true,
-      "type": "text"
-    },
-    {
-      "content": "<p style=\"text-align: center;font-size: 200%;color:#299c46;\" > $application_name </p>",
-      "gridPos": {
-        "h": 2,
-        "w": 8,
-        "x": 8,
-        "y": 7
-      },
-      "id": 158,
-      "links": [],
-      "minSpan": 2,
-      "mode": "html",
-      "repeat": null,
-      "repeatDirection": "h",
-      "repeatIteration": 1547807849462,
-      "repeatPanelId": 100,
-      "scopedVars": {
-        "application_name": {
-          "selected": false,
-          "text": "transform",
-          "value": "transform"
-        }
-      },
-      "title": "",
-      "transparent": true,
-      "type": "text"
-    },
-    {
-      "content": "<p style=\"text-align: center;font-size: 200%;color:#299c46;\" > $application_name </p>",
-      "gridPos": {
-        "h": 2,
-        "w": 8,
-        "x": 16,
-        "y": 7
-      },
-      "id": 159,
-      "links": [],
-      "minSpan": 2,
-      "mode": "html",
-      "repeat": null,
-      "repeatDirection": "h",
-      "repeatIteration": 1547807849462,
-      "repeatPanelId": 100,
-      "scopedVars": {
-        "application_name": {
-          "selected": false,
-          "text": "log",
-          "value": "log"
         }
       },
       "title": "",
@@ -650,7 +596,7 @@
       "fill": 1,
       "gridPos": {
         "h": 6,
-        "w": 8,
+        "w": 24,
         "x": 0,
         "y": 9
       },
@@ -677,205 +623,9 @@
       "repeatDirection": "h",
       "scopedVars": {
         "application_name": {
-          "selected": false,
+          "selected": true,
           "text": "time",
           "value": "time"
-        }
-      },
-      "seriesOverrides": [],
-      "spaceLength": 10,
-      "stack": false,
-      "steppedLine": false,
-      "targets": [
-        {
-          "expr": "rate(spring_integration_send_seconds_count{type=\"channel\",name!=\"errorChannel\",name!=\"nullChannel\",result=\"success\",stream_name=~\"$stream_name\",application_name=~\"$application_name\"}[60s])",
-          "format": "time_series",
-          "intervalFactor": 1,
-          "legendFormat": "{{name}}",
-          "refId": "A"
-        }
-      ],
-      "thresholds": [],
-      "timeFrom": null,
-      "timeRegions": [],
-      "timeShift": null,
-      "title": "Channel Throughput",
-      "tooltip": {
-        "shared": true,
-        "sort": 0,
-        "value_type": "individual"
-      },
-      "transparent": true,
-      "type": "graph",
-      "xaxis": {
-        "buckets": null,
-        "mode": "time",
-        "name": null,
-        "show": true,
-        "values": []
-      },
-      "yaxes": [
-        {
-          "format": "short",
-          "label": null,
-          "logBase": 10,
-          "max": null,
-          "min": null,
-          "show": true
-        },
-        {
-          "format": "short",
-          "label": null,
-          "logBase": 1,
-          "max": null,
-          "min": null,
-          "show": true
-        }
-      ],
-      "yaxis": {
-        "align": false,
-        "alignLevel": null
-      }
-    },
-    {
-      "aliasColors": {},
-      "bars": false,
-      "dashLength": 10,
-      "dashes": false,
-      "datasource": "ScdfPrometheus",
-      "fill": 1,
-      "gridPos": {
-        "h": 6,
-        "w": 8,
-        "x": 8,
-        "y": 9
-      },
-      "id": 160,
-      "legend": {
-        "avg": false,
-        "current": false,
-        "max": false,
-        "min": false,
-        "show": true,
-        "total": false,
-        "values": false
-      },
-      "lines": true,
-      "linewidth": 1,
-      "links": [],
-      "minSpan": 2,
-      "nullPointMode": "null",
-      "percentage": false,
-      "pointradius": 5,
-      "points": false,
-      "renderer": "flot",
-      "repeat": null,
-      "repeatDirection": "h",
-      "repeatIteration": 1547807849462,
-      "repeatPanelId": 2,
-      "scopedVars": {
-        "application_name": {
-          "selected": false,
-          "text": "transform",
-          "value": "transform"
-        }
-      },
-      "seriesOverrides": [],
-      "spaceLength": 10,
-      "stack": false,
-      "steppedLine": false,
-      "targets": [
-        {
-          "expr": "rate(spring_integration_send_seconds_count{type=\"channel\",name!=\"errorChannel\",name!=\"nullChannel\",result=\"success\",stream_name=~\"$stream_name\",application_name=~\"$application_name\"}[60s])",
-          "format": "time_series",
-          "intervalFactor": 1,
-          "legendFormat": "{{name}}",
-          "refId": "A"
-        }
-      ],
-      "thresholds": [],
-      "timeFrom": null,
-      "timeRegions": [],
-      "timeShift": null,
-      "title": "Channel Throughput",
-      "tooltip": {
-        "shared": true,
-        "sort": 0,
-        "value_type": "individual"
-      },
-      "transparent": true,
-      "type": "graph",
-      "xaxis": {
-        "buckets": null,
-        "mode": "time",
-        "name": null,
-        "show": true,
-        "values": []
-      },
-      "yaxes": [
-        {
-          "format": "short",
-          "label": null,
-          "logBase": 10,
-          "max": null,
-          "min": null,
-          "show": true
-        },
-        {
-          "format": "short",
-          "label": null,
-          "logBase": 1,
-          "max": null,
-          "min": null,
-          "show": true
-        }
-      ],
-      "yaxis": {
-        "align": false,
-        "alignLevel": null
-      }
-    },
-    {
-      "aliasColors": {},
-      "bars": false,
-      "dashLength": 10,
-      "dashes": false,
-      "datasource": "ScdfPrometheus",
-      "fill": 1,
-      "gridPos": {
-        "h": 6,
-        "w": 8,
-        "x": 16,
-        "y": 9
-      },
-      "id": 161,
-      "legend": {
-        "avg": false,
-        "current": false,
-        "max": false,
-        "min": false,
-        "show": true,
-        "total": false,
-        "values": false
-      },
-      "lines": true,
-      "linewidth": 1,
-      "links": [],
-      "minSpan": 2,
-      "nullPointMode": "null",
-      "percentage": false,
-      "pointradius": 5,
-      "points": false,
-      "renderer": "flot",
-      "repeat": null,
-      "repeatDirection": "h",
-      "repeatIteration": 1547807849462,
-      "repeatPanelId": 2,
-      "scopedVars": {
-        "application_name": {
-          "selected": false,
-          "text": "log",
-          "value": "log"
         }
       },
       "seriesOverrides": [],
@@ -943,7 +693,7 @@
       "fill": 1,
       "gridPos": {
         "h": 6,
-        "w": 8,
+        "w": 24,
         "x": 0,
         "y": 15
       },
@@ -970,7 +720,7 @@
       "repeatDirection": "h",
       "scopedVars": {
         "application_name": {
-          "selected": false,
+          "selected": true,
           "text": "time",
           "value": "time"
         }
@@ -1036,208 +786,10 @@
       "dashLength": 10,
       "dashes": false,
       "datasource": "ScdfPrometheus",
-      "description": "($application_name)",
       "fill": 1,
       "gridPos": {
         "h": 6,
-        "w": 8,
-        "x": 8,
-        "y": 15
-      },
-      "id": 162,
-      "legend": {
-        "avg": false,
-        "current": false,
-        "max": false,
-        "min": false,
-        "show": true,
-        "total": false,
-        "values": false
-      },
-      "lines": true,
-      "linewidth": 1,
-      "links": [],
-      "minSpan": 2,
-      "nullPointMode": "null",
-      "percentage": false,
-      "pointradius": 5,
-      "points": false,
-      "renderer": "flot",
-      "repeat": null,
-      "repeatDirection": "h",
-      "repeatIteration": 1547807849462,
-      "repeatPanelId": 6,
-      "scopedVars": {
-        "application_name": {
-          "selected": false,
-          "text": "transform",
-          "value": "transform"
-        }
-      },
-      "seriesOverrides": [],
-      "spaceLength": 10,
-      "stack": false,
-      "steppedLine": false,
-      "targets": [
-        {
-          "expr": "spring_integration_send_seconds_sum{type=\"channel\", stream_name=~\"$stream_name\",application_name=~\"$application_name\"}/spring_integration_send_seconds_count{type=\"channel\", stream_name=~\"$stream_name\",application_name=~\"$application_name\"}",
-          "format": "time_series",
-          "intervalFactor": 1,
-          "legendFormat": "{{name}}",
-          "refId": "A"
-        }
-      ],
-      "thresholds": [],
-      "timeFrom": null,
-      "timeRegions": [],
-      "timeShift": null,
-      "title": "Channel Latency",
-      "tooltip": {
-        "shared": true,
-        "sort": 0,
-        "value_type": "individual"
-      },
-      "transparent": true,
-      "type": "graph",
-      "xaxis": {
-        "buckets": null,
-        "mode": "time",
-        "name": null,
-        "show": true,
-        "values": []
-      },
-      "yaxes": [
-        {
-          "format": "s",
-          "label": null,
-          "logBase": 1,
-          "max": null,
-          "min": null,
-          "show": true
-        },
-        {
-          "format": "short",
-          "label": null,
-          "logBase": 1,
-          "max": null,
-          "min": null,
-          "show": true
-        }
-      ],
-      "yaxis": {
-        "align": false,
-        "alignLevel": null
-      }
-    },
-    {
-      "aliasColors": {},
-      "bars": false,
-      "dashLength": 10,
-      "dashes": false,
-      "datasource": "ScdfPrometheus",
-      "description": "($application_name)",
-      "fill": 1,
-      "gridPos": {
-        "h": 6,
-        "w": 8,
-        "x": 16,
-        "y": 15
-      },
-      "id": 163,
-      "legend": {
-        "avg": false,
-        "current": false,
-        "max": false,
-        "min": false,
-        "show": true,
-        "total": false,
-        "values": false
-      },
-      "lines": true,
-      "linewidth": 1,
-      "links": [],
-      "minSpan": 2,
-      "nullPointMode": "null",
-      "percentage": false,
-      "pointradius": 5,
-      "points": false,
-      "renderer": "flot",
-      "repeat": null,
-      "repeatDirection": "h",
-      "repeatIteration": 1547807849462,
-      "repeatPanelId": 6,
-      "scopedVars": {
-        "application_name": {
-          "selected": false,
-          "text": "log",
-          "value": "log"
-        }
-      },
-      "seriesOverrides": [],
-      "spaceLength": 10,
-      "stack": false,
-      "steppedLine": false,
-      "targets": [
-        {
-          "expr": "spring_integration_send_seconds_sum{type=\"channel\", stream_name=~\"$stream_name\",application_name=~\"$application_name\"}/spring_integration_send_seconds_count{type=\"channel\", stream_name=~\"$stream_name\",application_name=~\"$application_name\"}",
-          "format": "time_series",
-          "intervalFactor": 1,
-          "legendFormat": "{{name}}",
-          "refId": "A"
-        }
-      ],
-      "thresholds": [],
-      "timeFrom": null,
-      "timeRegions": [],
-      "timeShift": null,
-      "title": "Channel Latency",
-      "tooltip": {
-        "shared": true,
-        "sort": 0,
-        "value_type": "individual"
-      },
-      "transparent": true,
-      "type": "graph",
-      "xaxis": {
-        "buckets": null,
-        "mode": "time",
-        "name": null,
-        "show": true,
-        "values": []
-      },
-      "yaxes": [
-        {
-          "format": "s",
-          "label": null,
-          "logBase": 1,
-          "max": null,
-          "min": null,
-          "show": true
-        },
-        {
-          "format": "short",
-          "label": null,
-          "logBase": 1,
-          "max": null,
-          "min": null,
-          "show": true
-        }
-      ],
-      "yaxis": {
-        "align": false,
-        "alignLevel": null
-      }
-    },
-    {
-      "aliasColors": {},
-      "bars": false,
-      "dashLength": 10,
-      "dashes": false,
-      "datasource": "ScdfPrometheus",
-      "fill": 1,
-      "gridPos": {
-        "h": 6,
-        "w": 8,
+        "w": 24,
         "x": 0,
         "y": 21
       },
@@ -1264,205 +816,9 @@
       "repeatDirection": "h",
       "scopedVars": {
         "application_name": {
-          "selected": false,
+          "selected": true,
           "text": "time",
           "value": "time"
-        }
-      },
-      "seriesOverrides": [],
-      "spaceLength": 10,
-      "stack": false,
-      "steppedLine": false,
-      "targets": [
-        {
-          "expr": "rate(spring_integration_send_seconds_count{type=\"handler\",result=\"success\",stream_name=~\"$stream_name\",application_name=~\"$application_name\"}[60s])",
-          "format": "time_series",
-          "intervalFactor": 1,
-          "legendFormat": "{{name}}",
-          "refId": "A"
-        }
-      ],
-      "thresholds": [],
-      "timeFrom": null,
-      "timeRegions": [],
-      "timeShift": null,
-      "title": "Handler Throughput",
-      "tooltip": {
-        "shared": true,
-        "sort": 0,
-        "value_type": "individual"
-      },
-      "transparent": true,
-      "type": "graph",
-      "xaxis": {
-        "buckets": null,
-        "mode": "time",
-        "name": null,
-        "show": true,
-        "values": []
-      },
-      "yaxes": [
-        {
-          "format": "short",
-          "label": null,
-          "logBase": 10,
-          "max": null,
-          "min": "0",
-          "show": true
-        },
-        {
-          "format": "short",
-          "label": null,
-          "logBase": 1,
-          "max": null,
-          "min": null,
-          "show": true
-        }
-      ],
-      "yaxis": {
-        "align": false,
-        "alignLevel": null
-      }
-    },
-    {
-      "aliasColors": {},
-      "bars": false,
-      "dashLength": 10,
-      "dashes": false,
-      "datasource": "ScdfPrometheus",
-      "fill": 1,
-      "gridPos": {
-        "h": 6,
-        "w": 8,
-        "x": 8,
-        "y": 21
-      },
-      "id": 164,
-      "legend": {
-        "avg": false,
-        "current": false,
-        "max": false,
-        "min": false,
-        "show": true,
-        "total": false,
-        "values": false
-      },
-      "lines": true,
-      "linewidth": 1,
-      "links": [],
-      "minSpan": 2,
-      "nullPointMode": "null",
-      "percentage": false,
-      "pointradius": 5,
-      "points": false,
-      "renderer": "flot",
-      "repeat": null,
-      "repeatDirection": "h",
-      "repeatIteration": 1547807849462,
-      "repeatPanelId": 22,
-      "scopedVars": {
-        "application_name": {
-          "selected": false,
-          "text": "transform",
-          "value": "transform"
-        }
-      },
-      "seriesOverrides": [],
-      "spaceLength": 10,
-      "stack": false,
-      "steppedLine": false,
-      "targets": [
-        {
-          "expr": "rate(spring_integration_send_seconds_count{type=\"handler\",result=\"success\",stream_name=~\"$stream_name\",application_name=~\"$application_name\"}[60s])",
-          "format": "time_series",
-          "intervalFactor": 1,
-          "legendFormat": "{{name}}",
-          "refId": "A"
-        }
-      ],
-      "thresholds": [],
-      "timeFrom": null,
-      "timeRegions": [],
-      "timeShift": null,
-      "title": "Handler Throughput",
-      "tooltip": {
-        "shared": true,
-        "sort": 0,
-        "value_type": "individual"
-      },
-      "transparent": true,
-      "type": "graph",
-      "xaxis": {
-        "buckets": null,
-        "mode": "time",
-        "name": null,
-        "show": true,
-        "values": []
-      },
-      "yaxes": [
-        {
-          "format": "short",
-          "label": null,
-          "logBase": 10,
-          "max": null,
-          "min": "0",
-          "show": true
-        },
-        {
-          "format": "short",
-          "label": null,
-          "logBase": 1,
-          "max": null,
-          "min": null,
-          "show": true
-        }
-      ],
-      "yaxis": {
-        "align": false,
-        "alignLevel": null
-      }
-    },
-    {
-      "aliasColors": {},
-      "bars": false,
-      "dashLength": 10,
-      "dashes": false,
-      "datasource": "ScdfPrometheus",
-      "fill": 1,
-      "gridPos": {
-        "h": 6,
-        "w": 8,
-        "x": 16,
-        "y": 21
-      },
-      "id": 165,
-      "legend": {
-        "avg": false,
-        "current": false,
-        "max": false,
-        "min": false,
-        "show": true,
-        "total": false,
-        "values": false
-      },
-      "lines": true,
-      "linewidth": 1,
-      "links": [],
-      "minSpan": 2,
-      "nullPointMode": "null",
-      "percentage": false,
-      "pointradius": 5,
-      "points": false,
-      "renderer": "flot",
-      "repeat": null,
-      "repeatDirection": "h",
-      "repeatIteration": 1547807849462,
-      "repeatPanelId": 22,
-      "scopedVars": {
-        "application_name": {
-          "selected": false,
-          "text": "log",
-          "value": "log"
         }
       },
       "seriesOverrides": [],
@@ -1530,7 +886,7 @@
       "fill": 1,
       "gridPos": {
         "h": 6,
-        "w": 8,
+        "w": 24,
         "x": 0,
         "y": 27
       },
@@ -1557,7 +913,7 @@
       "repeatDirection": "h",
       "scopedVars": {
         "application_name": {
-          "selected": false,
+          "selected": true,
           "text": "time",
           "value": "time"
         }
@@ -1627,205 +983,7 @@
       "fill": 1,
       "gridPos": {
         "h": 6,
-        "w": 8,
-        "x": 8,
-        "y": 27
-      },
-      "id": 166,
-      "legend": {
-        "avg": false,
-        "current": false,
-        "max": false,
-        "min": false,
-        "show": true,
-        "total": false,
-        "values": false
-      },
-      "lines": true,
-      "linewidth": 1,
-      "links": [],
-      "minSpan": 2,
-      "nullPointMode": "null",
-      "percentage": false,
-      "pointradius": 5,
-      "points": false,
-      "renderer": "flot",
-      "repeat": null,
-      "repeatDirection": "h",
-      "repeatIteration": 1547807849462,
-      "repeatPanelId": 21,
-      "scopedVars": {
-        "application_name": {
-          "selected": false,
-          "text": "transform",
-          "value": "transform"
-        }
-      },
-      "seriesOverrides": [],
-      "spaceLength": 10,
-      "stack": false,
-      "steppedLine": false,
-      "targets": [
-        {
-          "expr": "rate(spring_integration_receive_total{type=\"source\",result=\"success\",stream_name=~\"$stream_name\",application_name=~\"$application_name\"}[60s])",
-          "format": "time_series",
-          "intervalFactor": 1,
-          "legendFormat": "{{name}}",
-          "refId": "A"
-        }
-      ],
-      "thresholds": [],
-      "timeFrom": null,
-      "timeRegions": [],
-      "timeShift": null,
-      "title": "Message Source Rate",
-      "tooltip": {
-        "shared": true,
-        "sort": 0,
-        "value_type": "individual"
-      },
-      "transparent": true,
-      "type": "graph",
-      "xaxis": {
-        "buckets": null,
-        "mode": "time",
-        "name": null,
-        "show": true,
-        "values": []
-      },
-      "yaxes": [
-        {
-          "format": "short",
-          "label": null,
-          "logBase": 10,
-          "max": null,
-          "min": null,
-          "show": true
-        },
-        {
-          "format": "short",
-          "label": null,
-          "logBase": 1,
-          "max": null,
-          "min": null,
-          "show": true
-        }
-      ],
-      "yaxis": {
-        "align": false,
-        "alignLevel": null
-      }
-    },
-    {
-      "aliasColors": {},
-      "bars": false,
-      "dashLength": 10,
-      "dashes": false,
-      "datasource": "ScdfPrometheus",
-      "description": "($application_name)",
-      "fill": 1,
-      "gridPos": {
-        "h": 6,
-        "w": 8,
-        "x": 16,
-        "y": 27
-      },
-      "id": 167,
-      "legend": {
-        "avg": false,
-        "current": false,
-        "max": false,
-        "min": false,
-        "show": true,
-        "total": false,
-        "values": false
-      },
-      "lines": true,
-      "linewidth": 1,
-      "links": [],
-      "minSpan": 2,
-      "nullPointMode": "null",
-      "percentage": false,
-      "pointradius": 5,
-      "points": false,
-      "renderer": "flot",
-      "repeat": null,
-      "repeatDirection": "h",
-      "repeatIteration": 1547807849462,
-      "repeatPanelId": 21,
-      "scopedVars": {
-        "application_name": {
-          "selected": false,
-          "text": "log",
-          "value": "log"
-        }
-      },
-      "seriesOverrides": [],
-      "spaceLength": 10,
-      "stack": false,
-      "steppedLine": false,
-      "targets": [
-        {
-          "expr": "rate(spring_integration_receive_total{type=\"source\",result=\"success\",stream_name=~\"$stream_name\",application_name=~\"$application_name\"}[60s])",
-          "format": "time_series",
-          "intervalFactor": 1,
-          "legendFormat": "{{name}}",
-          "refId": "A"
-        }
-      ],
-      "thresholds": [],
-      "timeFrom": null,
-      "timeRegions": [],
-      "timeShift": null,
-      "title": "Message Source Rate",
-      "tooltip": {
-        "shared": true,
-        "sort": 0,
-        "value_type": "individual"
-      },
-      "transparent": true,
-      "type": "graph",
-      "xaxis": {
-        "buckets": null,
-        "mode": "time",
-        "name": null,
-        "show": true,
-        "values": []
-      },
-      "yaxes": [
-        {
-          "format": "short",
-          "label": null,
-          "logBase": 10,
-          "max": null,
-          "min": null,
-          "show": true
-        },
-        {
-          "format": "short",
-          "label": null,
-          "logBase": 1,
-          "max": null,
-          "min": null,
-          "show": true
-        }
-      ],
-      "yaxis": {
-        "align": false,
-        "alignLevel": null
-      }
-    },
-    {
-      "aliasColors": {},
-      "bars": false,
-      "dashLength": 10,
-      "dashes": false,
-      "datasource": "ScdfPrometheus",
-      "description": "($application_name)",
-      "fill": 1,
-      "gridPos": {
-        "h": 6,
-        "w": 8,
+        "w": 24,
         "x": 0,
         "y": 33
       },
@@ -1852,7 +1010,7 @@
       "repeatDirection": "h",
       "scopedVars": {
         "application_name": {
-          "selected": false,
+          "selected": true,
           "text": "time",
           "value": "time"
         }
@@ -1922,205 +1080,7 @@
       "fill": 1,
       "gridPos": {
         "h": 6,
-        "w": 8,
-        "x": 8,
-        "y": 33
-      },
-      "id": 168,
-      "legend": {
-        "avg": false,
-        "current": false,
-        "max": false,
-        "min": false,
-        "show": true,
-        "total": false,
-        "values": false
-      },
-      "lines": true,
-      "linewidth": 1,
-      "links": [],
-      "minSpan": 2,
-      "nullPointMode": "null",
-      "percentage": false,
-      "pointradius": 5,
-      "points": false,
-      "renderer": "flot",
-      "repeat": null,
-      "repeatDirection": "h",
-      "repeatIteration": 1547807849462,
-      "repeatPanelId": 16,
-      "scopedVars": {
-        "application_name": {
-          "selected": false,
-          "text": "transform",
-          "value": "transform"
-        }
-      },
-      "seriesOverrides": [],
-      "spaceLength": 10,
-      "stack": false,
-      "steppedLine": false,
-      "targets": [
-        {
-          "expr": "rate(spring_integration_send_seconds_count{type=\"channel\",result=\"failure\",stream_name=~\"$stream_name\",application_name=~\"$application_name\"}[60s])",
-          "format": "time_series",
-          "intervalFactor": 1,
-          "legendFormat": "{{name}}",
-          "refId": "A"
-        }
-      ],
-      "thresholds": [],
-      "timeFrom": null,
-      "timeRegions": [],
-      "timeShift": null,
-      "title": "Channel  Failures",
-      "tooltip": {
-        "shared": true,
-        "sort": 0,
-        "value_type": "individual"
-      },
-      "transparent": true,
-      "type": "graph",
-      "xaxis": {
-        "buckets": null,
-        "mode": "time",
-        "name": null,
-        "show": true,
-        "values": []
-      },
-      "yaxes": [
-        {
-          "format": "short",
-          "label": null,
-          "logBase": 1,
-          "max": null,
-          "min": null,
-          "show": true
-        },
-        {
-          "format": "short",
-          "label": null,
-          "logBase": 1,
-          "max": null,
-          "min": null,
-          "show": true
-        }
-      ],
-      "yaxis": {
-        "align": false,
-        "alignLevel": null
-      }
-    },
-    {
-      "aliasColors": {},
-      "bars": false,
-      "dashLength": 10,
-      "dashes": false,
-      "datasource": "ScdfPrometheus",
-      "description": "($application_name)",
-      "fill": 1,
-      "gridPos": {
-        "h": 6,
-        "w": 8,
-        "x": 16,
-        "y": 33
-      },
-      "id": 169,
-      "legend": {
-        "avg": false,
-        "current": false,
-        "max": false,
-        "min": false,
-        "show": true,
-        "total": false,
-        "values": false
-      },
-      "lines": true,
-      "linewidth": 1,
-      "links": [],
-      "minSpan": 2,
-      "nullPointMode": "null",
-      "percentage": false,
-      "pointradius": 5,
-      "points": false,
-      "renderer": "flot",
-      "repeat": null,
-      "repeatDirection": "h",
-      "repeatIteration": 1547807849462,
-      "repeatPanelId": 16,
-      "scopedVars": {
-        "application_name": {
-          "selected": false,
-          "text": "log",
-          "value": "log"
-        }
-      },
-      "seriesOverrides": [],
-      "spaceLength": 10,
-      "stack": false,
-      "steppedLine": false,
-      "targets": [
-        {
-          "expr": "rate(spring_integration_send_seconds_count{type=\"channel\",result=\"failure\",stream_name=~\"$stream_name\",application_name=~\"$application_name\"}[60s])",
-          "format": "time_series",
-          "intervalFactor": 1,
-          "legendFormat": "{{name}}",
-          "refId": "A"
-        }
-      ],
-      "thresholds": [],
-      "timeFrom": null,
-      "timeRegions": [],
-      "timeShift": null,
-      "title": "Channel  Failures",
-      "tooltip": {
-        "shared": true,
-        "sort": 0,
-        "value_type": "individual"
-      },
-      "transparent": true,
-      "type": "graph",
-      "xaxis": {
-        "buckets": null,
-        "mode": "time",
-        "name": null,
-        "show": true,
-        "values": []
-      },
-      "yaxes": [
-        {
-          "format": "short",
-          "label": null,
-          "logBase": 1,
-          "max": null,
-          "min": null,
-          "show": true
-        },
-        {
-          "format": "short",
-          "label": null,
-          "logBase": 1,
-          "max": null,
-          "min": null,
-          "show": true
-        }
-      ],
-      "yaxis": {
-        "align": false,
-        "alignLevel": null
-      }
-    },
-    {
-      "aliasColors": {},
-      "bars": false,
-      "dashLength": 10,
-      "dashes": false,
-      "datasource": "ScdfPrometheus",
-      "description": "($application_name)",
-      "fill": 1,
-      "gridPos": {
-        "h": 6,
-        "w": 8,
+        "w": 24,
         "x": 0,
         "y": 39
       },
@@ -2147,235 +1107,9 @@
       "repeatDirection": "h",
       "scopedVars": {
         "application_name": {
-          "selected": false,
+          "selected": true,
           "text": "time",
           "value": "time"
-        }
-      },
-      "seriesOverrides": [],
-      "spaceLength": 10,
-      "stack": false,
-      "steppedLine": false,
-      "targets": [
-        {
-          "expr": "spring_integration_channels{stream_name=~\"$stream_name\", application_name=~\"$application_name\"}",
-          "format": "time_series",
-          "intervalFactor": 1,
-          "legendFormat": "channels",
-          "refId": "A"
-        },
-        {
-          "expr": "spring_integration_handlers{stream_name=~\"$stream_name\", application_name=~\"$application_name\"}",
-          "format": "time_series",
-          "intervalFactor": 1,
-          "legendFormat": "handlers",
-          "refId": "B"
-        },
-        {
-          "expr": "spring_integration_sources{stream_name=~\"$stream_name\", application_name=~\"$application_name\"}",
-          "format": "time_series",
-          "intervalFactor": 1,
-          "legendFormat": "sources",
-          "refId": "C"
-        }
-      ],
-      "thresholds": [],
-      "timeFrom": null,
-      "timeRegions": [],
-      "timeShift": null,
-      "title": "Channels, Handlers, Sources Counts",
-      "tooltip": {
-        "shared": true,
-        "sort": 0,
-        "value_type": "individual"
-      },
-      "transparent": true,
-      "type": "graph",
-      "xaxis": {
-        "buckets": null,
-        "mode": "time",
-        "name": null,
-        "show": true,
-        "values": []
-      },
-      "yaxes": [
-        {
-          "format": "short",
-          "label": null,
-          "logBase": 1,
-          "max": null,
-          "min": null,
-          "show": true
-        },
-        {
-          "format": "short",
-          "label": null,
-          "logBase": 1,
-          "max": null,
-          "min": null,
-          "show": true
-        }
-      ],
-      "yaxis": {
-        "align": false,
-        "alignLevel": null
-      }
-    },
-    {
-      "aliasColors": {},
-      "bars": false,
-      "dashLength": 10,
-      "dashes": false,
-      "datasource": "ScdfPrometheus",
-      "description": "($application_name)",
-      "fill": 1,
-      "gridPos": {
-        "h": 6,
-        "w": 8,
-        "x": 8,
-        "y": 39
-      },
-      "id": 170,
-      "legend": {
-        "avg": false,
-        "current": false,
-        "max": false,
-        "min": false,
-        "show": true,
-        "total": false,
-        "values": false
-      },
-      "lines": true,
-      "linewidth": 1,
-      "links": [],
-      "minSpan": 2,
-      "nullPointMode": "null",
-      "percentage": false,
-      "pointradius": 5,
-      "points": false,
-      "renderer": "flot",
-      "repeat": null,
-      "repeatDirection": "h",
-      "repeatIteration": 1547807849462,
-      "repeatPanelId": 135,
-      "scopedVars": {
-        "application_name": {
-          "selected": false,
-          "text": "transform",
-          "value": "transform"
-        }
-      },
-      "seriesOverrides": [],
-      "spaceLength": 10,
-      "stack": false,
-      "steppedLine": false,
-      "targets": [
-        {
-          "expr": "spring_integration_channels{stream_name=~\"$stream_name\", application_name=~\"$application_name\"}",
-          "format": "time_series",
-          "intervalFactor": 1,
-          "legendFormat": "channels",
-          "refId": "A"
-        },
-        {
-          "expr": "spring_integration_handlers{stream_name=~\"$stream_name\", application_name=~\"$application_name\"}",
-          "format": "time_series",
-          "intervalFactor": 1,
-          "legendFormat": "handlers",
-          "refId": "B"
-        },
-        {
-          "expr": "spring_integration_sources{stream_name=~\"$stream_name\", application_name=~\"$application_name\"}",
-          "format": "time_series",
-          "intervalFactor": 1,
-          "legendFormat": "sources",
-          "refId": "C"
-        }
-      ],
-      "thresholds": [],
-      "timeFrom": null,
-      "timeRegions": [],
-      "timeShift": null,
-      "title": "Channels, Handlers, Sources Counts",
-      "tooltip": {
-        "shared": true,
-        "sort": 0,
-        "value_type": "individual"
-      },
-      "transparent": true,
-      "type": "graph",
-      "xaxis": {
-        "buckets": null,
-        "mode": "time",
-        "name": null,
-        "show": true,
-        "values": []
-      },
-      "yaxes": [
-        {
-          "format": "short",
-          "label": null,
-          "logBase": 1,
-          "max": null,
-          "min": null,
-          "show": true
-        },
-        {
-          "format": "short",
-          "label": null,
-          "logBase": 1,
-          "max": null,
-          "min": null,
-          "show": true
-        }
-      ],
-      "yaxis": {
-        "align": false,
-        "alignLevel": null
-      }
-    },
-    {
-      "aliasColors": {},
-      "bars": false,
-      "dashLength": 10,
-      "dashes": false,
-      "datasource": "ScdfPrometheus",
-      "description": "($application_name)",
-      "fill": 1,
-      "gridPos": {
-        "h": 6,
-        "w": 8,
-        "x": 16,
-        "y": 39
-      },
-      "id": 171,
-      "legend": {
-        "avg": false,
-        "current": false,
-        "max": false,
-        "min": false,
-        "show": true,
-        "total": false,
-        "values": false
-      },
-      "lines": true,
-      "linewidth": 1,
-      "links": [],
-      "minSpan": 2,
-      "nullPointMode": "null",
-      "percentage": false,
-      "pointradius": 5,
-      "points": false,
-      "renderer": "flot",
-      "repeat": null,
-      "repeatDirection": "h",
-      "repeatIteration": 1547807849462,
-      "repeatPanelId": 135,
-      "scopedVars": {
-        "application_name": {
-          "selected": false,
-          "text": "log",
-          "value": "log"
         }
       },
       "seriesOverrides": [],
@@ -2457,8 +1191,8 @@
       {
         "allValue": null,
         "current": {
-          "text": "s2",
-          "value": "s2"
+          "text": "stream1",
+          "value": "stream1"
         },
         "datasource": "ScdfPrometheus",
         "definition": "label_values(stream_name)",
@@ -2483,9 +1217,7 @@
         "allValue": null,
         "current": {
           "text": "All",
-          "value": [
-            "$__all"
-          ]
+          "value": "$__all"
         },
         "datasource": "ScdfPrometheus",
         "definition": "label_values({stream_name=\"$stream_name\"},application_name)",
@@ -2494,30 +1226,9 @@
         "label": "application",
         "multi": true,
         "name": "application_name",
-        "options": [
-          {
-            "selected": true,
-            "text": "All",
-            "value": "$__all"
-          },
-          {
-            "selected": false,
-            "text": "time",
-            "value": "time"
-          },
-          {
-            "selected": false,
-            "text": "transform",
-            "value": "transform"
-          },
-          {
-            "selected": false,
-            "text": "log",
-            "value": "log"
-          }
-        ],
+        "options": [],
         "query": "label_values({stream_name=\"$stream_name\"},application_name)",
-        "refresh": 0,
+        "refresh": 1,
         "regex": "",
         "skipUrlSync": false,
         "sort": 0,
@@ -2547,66 +1258,6 @@
             "selected": true,
             "text": "All",
             "value": "$__all"
-          },
-          {
-            "selected": false,
-            "text": "org.springframework.cloud.stream.app.time.source.TimeSourceConfiguration.publishTime.inboundChannelAdapter.source",
-            "value": "org.springframework.cloud.stream.app.time.source.TimeSourceConfiguration.publishTime.inboundChannelAdapter.source"
-          },
-          {
-            "selected": false,
-            "text": "output",
-            "value": "output"
-          },
-          {
-            "selected": false,
-            "text": "input",
-            "value": "input"
-          },
-          {
-            "selected": false,
-            "text": "org.springframework.cloud.stream.app.transform.processor.TransformProcessorConfiguration.transform.serviceActivator.handler",
-            "value": "org.springframework.cloud.stream.app.transform.processor.TransformProcessorConfiguration.transform.serviceActivator.handler"
-          },
-          {
-            "selected": false,
-            "text": "logSinkHandler",
-            "value": "logSinkHandler"
-          },
-          {
-            "selected": false,
-            "text": "org.springframework.cloud.stream.app.log.sink.LogSinkConfiguration.logSinkHandler.serviceActivator.handler",
-            "value": "org.springframework.cloud.stream.app.log.sink.LogSinkConfiguration.logSinkHandler.serviceActivator.handler"
-          },
-          {
-            "selected": false,
-            "text": "http-nio-24568",
-            "value": "http-nio-24568"
-          },
-          {
-            "selected": false,
-            "text": "http-nio-25066",
-            "value": "http-nio-25066"
-          },
-          {
-            "selected": false,
-            "text": "http-nio-29579",
-            "value": "http-nio-29579"
-          },
-          {
-            "selected": false,
-            "text": "default",
-            "value": "default"
-          },
-          {
-            "selected": false,
-            "text": "dispatcherServlet",
-            "value": "dispatcherServlet"
-          },
-          {
-            "selected": false,
-            "text": "messageDispatcherServlet",
-            "value": "messageDispatcherServlet"
           }
         ],
         "query": "label_values({stream_name=\"$stream_name\",application_name=~\"$application_name\"},name)",
@@ -2654,5 +1305,5 @@
   "timezone": "",
   "title": "Applications",
   "uid": "scdf-applications",
-  "version": 2
+  "version": 1
 }
