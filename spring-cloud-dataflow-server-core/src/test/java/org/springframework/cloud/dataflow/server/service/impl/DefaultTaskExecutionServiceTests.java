@@ -21,6 +21,8 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Map;
 
+import javax.sql.DataSource;
+
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -60,6 +62,7 @@ import org.springframework.core.io.FileSystemResource;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.transaction.PlatformTransactionManager;
 
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.core.Is.is;
@@ -139,6 +142,9 @@ public abstract class DefaultTaskExecutionServiceTests {
 
 	@Autowired
 	AuditRecordService auditRecordService;
+
+	@Autowired
+	DataSource dataSource;
 
 	@TestPropertySource(properties = { "spring.cloud.dataflow.task.maximum-concurrent-tasks=10" })
 	@AutoConfigureTestDatabase(replace = Replace.ANY)
@@ -231,7 +237,8 @@ public abstract class DefaultTaskExecutionServiceTests {
 					mock(LauncherRepository.class), this.metadataResolver,
 					auditRecordService, null, this.commonApplicationProperties,
 					taskRepository,
-					taskExecutionInfoService);
+					taskExecutionInfoService, this.dataSource,
+					mock(PlatformTransactionManager.class));
 			try {
 				taskExecutionService.executeTask(TASK_NAME_ORIG, new HashMap<>(), new LinkedList<>(), "default");
 			}
@@ -266,7 +273,6 @@ public abstract class DefaultTaskExecutionServiceTests {
 	@TestPropertySource(properties = { "spring.cloud.dataflow.applicationProperties.task.globalkey=globalvalue",
 			"spring.cloud.dataflow.applicationProperties.stream.globalstreamkey=nothere" })
 	@AutoConfigureTestDatabase(replace = Replace.ANY)
-
 	public static class ComposedTaskTests extends DefaultTaskExecutionServiceTests {
 
 		@Autowired

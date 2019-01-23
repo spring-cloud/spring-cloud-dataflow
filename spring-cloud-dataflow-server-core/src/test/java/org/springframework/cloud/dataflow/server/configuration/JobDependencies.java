@@ -205,14 +205,16 @@ public class JobDependencies {
 	@Bean
 	public TaskExecutionService taskService(LauncherRepository launcherRepository,
 			ApplicationConfigurationMetadataResolver metadataResolver,
-			AuditRecordService auditRecordService, CommonApplicationProperties commonApplicationProperties,
+			AuditRecordService auditRecordService,
+			CommonApplicationProperties commonApplicationProperties,
 			TaskRepository taskRepository,
-			TaskExecutionInfoService taskExecutionInfoService) {
+			TaskExecutionInfoService taskExecutionInfoService,
+			PlatformTransactionManager transactionManager, DataSource dataSource) {
 		return new DefaultTaskExecutionService(
 				launcherRepository, metadataResolver, auditRecordService,
 				null, commonApplicationProperties,
 				taskRepository,
-				taskExecutionInfoService);
+				taskExecutionInfoService, dataSource, transactionManager);
 	}
 
 	@Bean

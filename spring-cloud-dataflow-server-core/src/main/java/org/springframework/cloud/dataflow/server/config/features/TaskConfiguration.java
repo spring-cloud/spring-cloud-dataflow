@@ -160,12 +160,13 @@ public class TaskConfiguration {
 			ApplicationConfigurationMetadataResolver metadataResolver,
 			AuditRecordService auditRecordService, CommonApplicationProperties commonApplicationProperties,
 			TaskRepository taskRepository,
-			TaskExecutionInfoService taskExecutionInfoService) {
+			TaskExecutionInfoService taskExecutionInfoService,
+			PlatformTransactionManager transactionManager, DataSource dataSource) {
 		return new DefaultTaskExecutionService(
 				launcherRepository, metadataResolver, auditRecordService,
 				dataflowServerUri, commonApplicationProperties,
 				taskRepository,
-				taskExecutionInfoService);
+				taskExecutionInfoService, dataSource, transactionManager);
 	}
 
 	@Bean

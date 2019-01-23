@@ -25,6 +25,8 @@ import java.util.Optional;
 import java.util.concurrent.ForkJoinPool;
 import java.util.stream.Collectors;
 
+import javax.sql.DataSource;
+
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 
 import org.springframework.batch.core.StepExecution;
@@ -140,6 +142,7 @@ import org.springframework.data.web.config.EnableSpringDataWebSupport;
 import org.springframework.hateoas.EntityLinks;
 import org.springframework.hateoas.Resources;
 import org.springframework.hateoas.config.EnableHypermediaSupport;
+import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 import org.springframework.validation.beanvalidation.MethodValidationPostProcessor;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
@@ -486,12 +489,13 @@ public class TestDependencies extends WebMvcConfigurationSupport {
 			ApplicationConfigurationMetadataResolver metadataResolver,
 			AuditRecordService auditRecordService, CommonApplicationProperties commonApplicationProperties,
 			TaskRepository taskRepository,
-			TaskExecutionInfoService taskExecutionInfoService) {
+			TaskExecutionInfoService taskExecutionInfoService,
+			PlatformTransactionManager transactionManager, DataSource dataSource) {
 		return new DefaultTaskExecutionService(
 				launcherRepository, metadataResolver, auditRecordService,
 				null, commonApplicationProperties,
 				taskRepository,
-				taskExecutionInfoService);
+				taskExecutionInfoService, dataSource, transactionManager);
 	}
 
 	@Bean

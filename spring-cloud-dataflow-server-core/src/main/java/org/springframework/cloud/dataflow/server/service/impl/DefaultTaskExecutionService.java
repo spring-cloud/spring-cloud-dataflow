@@ -16,11 +16,17 @@
 
 package org.springframework.cloud.dataflow.server.service.impl;
 
+import java.sql.Types;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+
+import javax.sql.DataSource;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import org.springframework.cloud.dataflow.audit.service.AuditRecordService;
 import org.springframework.cloud.dataflow.configuration.metadata.ApplicationConfigurationMetadataResolver;
@@ -40,7 +46,11 @@ import org.springframework.cloud.deployer.spi.core.AppDeploymentRequest;
 import org.springframework.cloud.deployer.spi.task.TaskLauncher;
 import org.springframework.cloud.task.repository.TaskExecution;
 import org.springframework.cloud.task.repository.TaskRepository;
-import org.springframework.transaction.annotation.Transactional;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.TransactionStatus;
+import org.springframework.transaction.support.TransactionCallbackWithoutResult;
+import org.springframework.transaction.support.TransactionTemplate;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
@@ -60,8 +70,9 @@ import org.springframework.util.StringUtils;
  * @author David Turanski
  * @author Daniel Serleg
  */
-@Transactional
 public class DefaultTaskExecutionService implements TaskExecutionService {
+
+	private final Logger logger = LoggerFactory.getLogger(DefaultTaskExecutionService.class);
 
 	/**
 	 * Used to launch apps as tasks.
@@ -85,11 +96,17 @@ public class DefaultTaskExecutionService implements TaskExecutionService {
 
 	private final ArgumentSanitizer argumentSanitizer = new ArgumentSanitizer();
 
-	public static final String TASK_DEFINITION_DSL_TEXT = "taskDefinitionDslText";
+	private DataSource dataSource;
 
-	public static final String TASK_DEPLOYMENT_PROPERTIES = "taskDeploymentProperties";
+	private PlatformTransactionManager transactionManager;
 
-	public static final String COMMAND_LINE_ARGS = "commandLineArgs";
+
+	private static final String TASK_DEFINITION_DSL_TEXT = "taskDefinitionDslText";
+
+	private static final String TASK_DEPLOYMENT_PROPERTIES = "taskDeploymentProperties";
+
+	private static final String COMMAND_LINE_ARGS = "commandLineArgs";
+
 
 	/**
 	 * Initializes the {@link DefaultTaskExecutionService}.
@@ -104,7 +121,8 @@ public class DefaultTaskExecutionService implements TaskExecutionService {
 			AuditRecordService auditRecordService,
 			String dataflowServerUri, CommonApplicationProperties commonApplicationProperties,
 			TaskRepository taskRepository,
-			TaskExecutionInfoService taskExecutionInfoService) {
+			TaskExecutionInfoService taskExecutionInfoService,
+			DataSource dataSource, PlatformTransactionManager transactionManager) {
 		Assert.notNull(launcherRepository, "LauncherRepository must not be null");
 		Assert.notNull(metaDataResolver, "metaDataResolver must not be null");
 		Assert.notNull(auditRecordService, "auditRecordService must not be null");
@@ -112,6 +130,9 @@ public class DefaultTaskExecutionService implements TaskExecutionService {
 		Assert.notNull(taskExecutionInfoService, "TaskDefinitionRetriever must not be null");
 		Assert.notNull(taskRepository, "TaskRepository must not be null");
 		Assert.notNull(taskExecutionInfoService, "TaskExecutionInfoService must not be null");
+		Assert.notNull(dataSource, "dataSource must not be null");
+		Assert.notNull(transactionManager, "transactionManager must not be null");
+
 
 		this.launcherRepository = launcherRepository;
 		this.whitelistProperties = new WhitelistProperties(metaDataResolver);
@@ -120,43 +141,14 @@ public class DefaultTaskExecutionService implements TaskExecutionService {
 		this.commonApplicationProperties = commonApplicationProperties;
 		this.taskRepository = taskRepository;
 		this.taskExecutionInfoService = taskExecutionInfoService;
+		this.transactionManager = transactionManager;
+		this.dataSource = dataSource;
 	}
 
 	@Override
 	public long executeTask(String taskName, Map<String, String> taskDeploymentProperties,
 			List<String> commandLineArgs, String platformName) {
-
-		if (taskExecutionInfoService.maxConcurrentExecutionsReached()) {
-			throw new IllegalStateException(String.format(
-					"The maximum concurrent task executions [%d] is at its limit.",
-					taskExecutionInfoService.getMaximumConcurrentTasks()));
-		}
-
-		TaskExecutionInformation taskExecutionInformation = taskExecutionInfoService
-				.findTaskExecutionInformation(taskName, taskDeploymentProperties);
-		TaskDefinition taskDefinition = taskExecutionInformation.getTaskDefinition();
-		String registeredAppName = taskDefinition.getRegisteredAppName();
-		TaskExecution taskExecution = taskExecutionInformation.getTaskExecution();
-
-		Map<String, String> appDeploymentProperties = new HashMap<>(commonApplicationProperties.getTask());
-		appDeploymentProperties.putAll(
-				TaskServiceUtils.extractAppProperties(registeredAppName,
-						taskExecutionInformation.getTaskDeploymentProperties()));
-
-		Map<String, String> deployerDeploymentProperties = DeploymentPropertiesUtils
-				.extractAndQualifyDeployerProperties(taskExecutionInformation.getTaskDeploymentProperties(),
-						registeredAppName);
-		if (StringUtils.hasText(this.dataflowServerUri) && taskExecutionInformation.isComposed()) {
-			TaskServiceUtils.updateDataFlowUriIfNeeded(this.dataflowServerUri, appDeploymentProperties,
-					commandLineArgs);
-		}
-		AppDefinition revisedDefinition = TaskServiceUtils.mergeAndExpandAppProperties(taskDefinition,
-				taskExecutionInformation.getMetadataResource(),
-				appDeploymentProperties, this.whitelistProperties);
-		List<String> updatedCmdLineArgs = this.updateCommandLineArgs(commandLineArgs, taskExecution);
-		AppDeploymentRequest request = new AppDeploymentRequest(revisedDefinition,
-				taskExecutionInformation.getAppResource(),
-				deployerDeploymentProperties, updatedCmdLineArgs);
+		RequestCriteria requestCriteria = createLaunchRequest(taskName, taskDeploymentProperties, commandLineArgs);
 		Launcher launcher = this.launcherRepository.findByName(platformName);
 		if (launcher == null) {
 			throw new IllegalStateException(String.format("No Launcher found for the platform named '%s'",
@@ -167,18 +159,70 @@ public class DefaultTaskExecutionService implements TaskExecutionService {
 			throw new IllegalStateException(String.format("No TaskLauncher found for the platform named '%s'",
 					platformName));
 		}
-		String id = taskLauncher.launch(request);
+		String id;
+
+		try {
+			id = taskLauncher.launch(requestCriteria.getAppDeploymentRequest());
+		} catch (Throwable throwable) {
+			recordFailedTaskLaunch(requestCriteria.taskExecution.getExecutionId(), "An error occurred while attempting to launch task: " + taskName);
+			throw throwable;
+		}
+
 		if (!StringUtils.hasText(id)) {
+			recordFailedTaskLaunch(requestCriteria.taskExecution.getExecutionId(), "Deployment ID is null for the task:" + taskName);
 			throw new IllegalStateException("Deployment ID is null for the task:" + taskName);
 		}
-		this.updateExternalExecutionId(taskExecution.getExecutionId(), id);
 
-		this.auditRecordService.populateAndSaveAuditRecordUsingMapData(
-				AuditOperationType.TASK, AuditActionType.DEPLOY,
-				taskDefinition.getName(),
-				getAudited(taskDefinition, taskExecutionInformation.getTaskDeploymentProperties(), updatedCmdLineArgs));
+		try {
+			this.updateExternalExecutionId(requestCriteria.getTaskExecution().getExecutionId(), id);
+		} catch (Throwable throwable) {
+			logger.warn("Unable to update taskExecution's externalExecutionId", throwable);
+		}
 
-		return taskExecution.getExecutionId();
+		postLaunchProcessing(requestCriteria);
+
+		return requestCriteria.getTaskExecution().getExecutionId();
+	}
+
+	private RequestCriteria createLaunchRequest (final String taskName, final Map<String, String> taskDeploymentProperties,
+			final List<String> commandLineArgs) {
+		TransactionTemplate template = new TransactionTemplate(transactionManager);
+
+		return template.execute(status -> {
+			if (taskExecutionInfoService.maxConcurrentExecutionsReached()) {
+				throw new IllegalStateException(String.format(
+						"The maximum concurrent task executions [%d] is at its limit.",
+						taskExecutionInfoService.getMaximumConcurrentTasks()));
+			}
+
+			TaskExecutionInformation taskExecutionInformation = taskExecutionInfoService
+					.findTaskExecutionInformation(taskName, taskDeploymentProperties);
+			TaskDefinition taskDefinition = taskExecutionInformation.getTaskDefinition();
+			String registeredAppName = taskDefinition.getRegisteredAppName();
+			TaskExecution taskExecution = taskExecutionInformation.getTaskExecution();
+
+			Map<String, String> appDeploymentProperties = new HashMap<>(commonApplicationProperties.getTask());
+			appDeploymentProperties.putAll(
+					TaskServiceUtils.extractAppProperties(registeredAppName,
+							taskExecutionInformation.getTaskDeploymentProperties()));
+
+			Map<String, String> deployerDeploymentProperties = DeploymentPropertiesUtils
+					.extractAndQualifyDeployerProperties(taskExecutionInformation.getTaskDeploymentProperties(),
+							registeredAppName);
+			if (StringUtils.hasText(this.dataflowServerUri) && taskExecutionInformation.isComposed()) {
+				TaskServiceUtils.updateDataFlowUriIfNeeded(this.dataflowServerUri, appDeploymentProperties,
+						commandLineArgs);
+			}
+			AppDefinition revisedDefinition = TaskServiceUtils.mergeAndExpandAppProperties(taskDefinition,
+					taskExecutionInformation.getMetadataResource(),
+					appDeploymentProperties, this.whitelistProperties);
+			List<String> updatedCmdLineArgs = this.updateCommandLineArgs(commandLineArgs, taskExecution);
+			AppDeploymentRequest request = new AppDeploymentRequest(revisedDefinition,
+					taskExecutionInformation.getAppResource(),
+					deployerDeploymentProperties, updatedCmdLineArgs);
+
+			return new RequestCriteria(request, taskDefinition, taskExecution);
+		});
 	}
 
 	protected void updateExternalExecutionId(long executionId, String taskLaunchId) {
@@ -202,4 +246,65 @@ public class DefaultTaskExecutionService implements TaskExecutionService {
 				.collect(Collectors.toList());
 	}
 
+	private void postLaunchProcessing(RequestCriteria requestCriteria) {
+		TransactionTemplate template = new TransactionTemplate(transactionManager);
+
+		template.execute(new TransactionCallbackWithoutResult() {
+			@Override
+			protected void doInTransactionWithoutResult(TransactionStatus transactionStatus) {
+				auditRecordService.populateAndSaveAuditRecordUsingMapData(
+						AuditOperationType.TASK, AuditActionType.DEPLOY,
+						requestCriteria.getTaskDefinition().getName(),
+						getAudited(requestCriteria.getTaskDefinition(),
+								requestCriteria.getAppDeploymentRequest().getDeploymentProperties(),
+								requestCriteria.getAppDeploymentRequest().getCommandlineArguments()));
+			}
+		});
+	}
+
+	protected void recordFailedTaskLaunch(long executionId, String message) {
+		//TODO: Remove this code when https://github.com/spring-cloud/spring-cloud-task/issues/507
+		//is merged and TaskRepository.updateErrorMessage is available.
+		TransactionTemplate template = new TransactionTemplate(transactionManager);
+
+		template.execute(new TransactionCallbackWithoutResult() {
+			@Override
+			protected void doInTransactionWithoutResult(TransactionStatus transactionStatus) {
+
+				JdbcTemplate jdbcTemplate = new JdbcTemplate(dataSource);
+				int[] types = {Types.VARCHAR, Types.BIGINT};
+				Object[] params = {message, executionId};
+				jdbcTemplate.update("UPDATE TASK_EXECUTION SET ERROR_MESSAGE = ? WHERE TASK_EXECUTION_ID = ?", params, types);
+			}
+		});
+	}
+
+	private static class RequestCriteria {
+
+		private AppDeploymentRequest appDeploymentRequest;
+
+		private TaskDefinition taskDefinition;
+
+		private TaskExecution taskExecution;
+
+		public RequestCriteria(AppDeploymentRequest appDeploymentRequest,
+				TaskDefinition taskDefinition, TaskExecution taskExecution) {
+			this.appDeploymentRequest = appDeploymentRequest;
+			this.taskDefinition = taskDefinition;
+			this.taskExecution = taskExecution;
+		}
+
+		public AppDeploymentRequest getAppDeploymentRequest() {
+			return appDeploymentRequest;
+		}
+
+		public TaskDefinition getTaskDefinition() {
+			return taskDefinition;
+		}
+
+		public TaskExecution getTaskExecution() {
+			return taskExecution;
+		}
+
+	}
 }
