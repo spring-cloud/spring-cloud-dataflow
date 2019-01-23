@@ -95,6 +95,10 @@ public class AppDeployerData extends AbstractEntity {
 		}
 	}
 
+	/**
+	 * Convenience method to save the Deployment Data Map.
+	 * @param appNameDeploymentIdMap Map that has the application name as a key and the deployment as a value.
+	 */
 	public void setDeploymentDataUsingMap(Map<String, String> appNameDeploymentIdMap) {
 		ObjectMapper objectMapper = new ObjectMapper();
 		try {

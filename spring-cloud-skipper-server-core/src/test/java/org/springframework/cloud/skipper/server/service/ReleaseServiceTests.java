@@ -15,6 +15,7 @@
  */
 package org.springframework.cloud.skipper.server.service;
 
+import java.io.IOException;
 import java.util.List;
 
 import org.junit.After;
@@ -24,6 +25,9 @@ import org.slf4j.LoggerFactory;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.deployer.resource.support.DelegatingResourceLoader;
+import org.springframework.cloud.deployer.spi.app.AppInstanceStatus;
+import org.springframework.cloud.deployer.spi.app.AppStatus;
+import org.springframework.cloud.deployer.spi.app.DeploymentState;
 import org.springframework.cloud.skipper.PackageDeleteException;
 import org.springframework.cloud.skipper.ReleaseNotFoundException;
 import org.springframework.cloud.skipper.SkipperException;
@@ -39,6 +43,7 @@ import org.springframework.cloud.skipper.domain.StatusCode;
 import org.springframework.cloud.skipper.domain.UpgradeProperties;
 import org.springframework.cloud.skipper.domain.UpgradeRequest;
 import org.springframework.cloud.skipper.server.AbstractIntegrationTest;
+import org.springframework.cloud.skipper.server.deployer.DefaultReleaseManager;
 import org.springframework.cloud.skipper.server.repository.jpa.AppDeployerDataRepository;
 import org.springframework.cloud.skipper.server.repository.jpa.PackageMetadataRepository;
 import org.springframework.cloud.skipper.server.repository.jpa.RepositoryRepository;
@@ -133,6 +138,38 @@ public class ReleaseServiceTests extends AbstractIntegrationTest {
 		}
 
 		delete(release.getName());
+	}
+
+	@Test
+	public void testStatus() throws InterruptedException, IOException {
+		String releaseName = "logrelease";
+		InstallRequest installRequest = new InstallRequest();
+		installRequest.setInstallProperties(createInstallProperties(releaseName));
+		PackageIdentifier packageIdentifier = new PackageIdentifier();
+		packageIdentifier.setPackageName("log");
+		packageIdentifier.setPackageVersion("1.0.0");
+		installRequest.setPackageIdentifier(packageIdentifier);
+		Release release = install(installRequest);
+		installRequest.setPackageIdentifier(packageIdentifier);
+		assertThat(release).isNotNull();
+		assertThat(release.getPkg().getMetadata().getVersion()).isEqualTo("1.0.0");
+
+		Info info = this.releaseService.status(releaseName);
+		assertThat(info).isNotNull();
+
+		List<AppStatus> appStatuses = info.getStatus().getAppStatusList();
+		assertThat(appStatuses).isNotNull();
+		assertThat(appStatuses.size()).isEqualTo(1);
+
+		AppStatus appStatus = appStatuses.iterator().next();
+		assertThat(appStatus.getDeploymentId()).isEqualTo("logrelease.log-v1");
+		assertThat(appStatus.getState()).isEqualTo(DeploymentState.deployed);
+		assertThat(appStatus.getInstances().size()).isEqualTo(1);
+
+		AppInstanceStatus appInstanceState = appStatus.getInstances().values().iterator().next();
+		assertThat(appInstanceState.getAttributes().get(DefaultReleaseManager.SKIPPER_RELEASE_NAME_ATTRIBUTE)).isEqualTo("logrelease");
+		assertThat(appInstanceState.getAttributes().get(DefaultReleaseManager.SKIPPER_RELEASE_VERSION_ATTRIBUTE)).isEqualTo("1");
+		assertThat(appInstanceState.getAttributes().get(DefaultReleaseManager.SKIPPER_APPLICATION_NAME_ATTRIBUTE)).isEqualTo("log");
 	}
 
 	@Test

@@ -27,6 +27,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import org.springframework.cloud.deployer.spi.app.AppDeployer;
+import org.springframework.cloud.deployer.spi.app.AppInstanceStatus;
 import org.springframework.cloud.deployer.spi.app.AppStatus;
 import org.springframework.cloud.deployer.spi.app.DeploymentState;
 import org.springframework.cloud.deployer.spi.app.MultiStateAppDeployer;
@@ -61,6 +62,9 @@ public class DefaultReleaseManager implements ReleaseManager {
 	public static final String SPRING_CLOUD_DEPLOYER_COUNT = "spring.cloud.deployer.count";
 
 	private static final Logger logger = LoggerFactory.getLogger(DefaultReleaseManager.class);
+	public static final String SKIPPER_APPLICATION_NAME_ATTRIBUTE = "skipper.application.name";
+	public static final String SKIPPER_RELEASE_NAME_ATTRIBUTE = "skipper.release.name";
+	public static final String SKIPPER_RELEASE_VERSION_ATTRIBUTE = "skipper.release.version";
 
 	private final ReleaseRepository releaseRepository;
 
@@ -255,9 +259,18 @@ public class DefaultReleaseManager implements ReleaseManager {
 				deploymentStateMap = multiStateAppDeployer.states(StringUtils.toStringArray(deploymentIds));
 			}
 			List<AppStatus> appStatusList = new ArrayList<>();
-			for (String deploymentId : deploymentIds) {
+			// Key = app name, value = deploymentId
+			Map<String, String> appNameDeploymentIdMap = appDeployerData.getDeploymentDataAsMap();
+			for (Map.Entry<String, String> nameDeploymentId : appNameDeploymentIdMap.entrySet()) {
+				String appName = nameDeploymentId.getKey();
+				String deploymentId = nameDeploymentId.getValue();
 				AppStatus appStatus = appDeployer.status(deploymentId);
-
+				Collection<AppInstanceStatus> instanceStatuses = appStatus.getInstances().values();
+				for (AppInstanceStatus instanceStatus : instanceStatuses) {
+					instanceStatus.getAttributes().put(SKIPPER_APPLICATION_NAME_ATTRIBUTE, appName);
+					instanceStatus.getAttributes().put(SKIPPER_RELEASE_NAME_ATTRIBUTE, release.getName());
+					instanceStatus.getAttributes().put(SKIPPER_RELEASE_VERSION_ATTRIBUTE, "" + release.getVersion());
+				}
 				if (appStatus.getState().equals(DeploymentState.failed) ||
 						appStatus.getState().equals(DeploymentState.error)) {
 					// check if we have 'early' status computed via multiStateAppDeployer
