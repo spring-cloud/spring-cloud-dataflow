@@ -46,6 +46,8 @@ import org.springframework.cloud.skipper.server.controller.ReleaseController;
 import org.springframework.cloud.skipper.server.controller.RootController;
 import org.springframework.cloud.skipper.server.controller.SkipperErrorAttributes;
 import org.springframework.cloud.skipper.server.controller.VersionInfoProperties;
+import org.springframework.cloud.skipper.server.db.migration.SkipperFlywayConfigurationCustomizer;
+import org.springframework.cloud.skipper.server.db.migration.SkipperFlywayMigrationStrategy;
 import org.springframework.cloud.skipper.server.deployer.AppDeploymentRequestFactory;
 import org.springframework.cloud.skipper.server.deployer.DefaultReleaseManager;
 import org.springframework.cloud.skipper.server.deployer.DefaultReleaseManagerFactory;
@@ -114,6 +116,16 @@ public class SkipperServerConfiguration implements AsyncConfigurer {
 	public static final String SKIPPER_EXECUTOR = "skipperThreadPoolTaskExecutor";
 
 	private final Logger logger = LoggerFactory.getLogger(SkipperServerConfiguration.class);
+
+	@Bean
+	public SkipperFlywayConfigurationCustomizer skipperFlywayConfigurationCustomizer() {
+		return new SkipperFlywayConfigurationCustomizer();
+	}
+
+	@Bean
+	public SkipperFlywayMigrationStrategy skipperFlywayMigrationStrategy() {
+		return new SkipperFlywayMigrationStrategy();
+	}
 
 	@Bean
 	public ErrorAttributes errorAttributes() {

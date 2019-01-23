@@ -233,7 +233,7 @@
                 <filtering>true</filtering>
                 <includes>
                     <include>application.yml</include>
-                    <include>db/**</include>
+                    <include>org/**</include>
                 </includes>
             </resource>
         </resources>

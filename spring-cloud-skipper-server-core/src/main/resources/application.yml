@@ -125,7 +125,10 @@ spring:
             - GET  /actuator/**                     => hasRole('ROLE_MANAGE')
 
   flyway:
-    locations: /db/migration/{vendor}
+    baselineVersion: 1
+    baselineOnMigrate: true
+    locations:
+      - classpath:org/springframework/cloud/skipper/server/db/migration/{vendor}
     check-location: false
   mustache:
     check-template-location: false
