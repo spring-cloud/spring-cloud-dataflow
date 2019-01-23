@@ -17,9 +17,12 @@
 package org.springframework.cloud.dataflow.server.controller;
 
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
+import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -31,14 +34,13 @@ import org.springframework.cloud.dataflow.server.repository.StreamDefinitionRepo
 import org.springframework.cloud.dataflow.server.stream.SkipperStreamDeployer;
 import org.springframework.cloud.deployer.spi.app.AppInstanceStatus;
 import org.springframework.cloud.deployer.spi.app.AppStatus;
-import org.springframework.cloud.deployer.spi.app.DeploymentState;
 import org.springframework.cloud.skipper.client.SkipperClient;
 import org.springframework.cloud.skipper.domain.Info;
+import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.client.ResourceAccessException;
 
 /**
  *
@@ -53,8 +55,6 @@ public class RuntimeAppsMetricsController {
 	private final StreamDefinitionRepository streamDefinitionRepository;
 	private final SkipperClient skipperClient;
 
-	private final static List<ApplicationsMetrics> EMPTY_RESPONSE = new ArrayList<>();
-
 	/**
 	 * Instantiates a new metrics controller.*
 	 */
@@ -67,48 +67,32 @@ public class RuntimeAppsMetricsController {
 	@RequestMapping(method = RequestMethod.GET)
 	public List<ApplicationsMetrics> list() {
 		try {
-			List<ApplicationsMetrics> metrics = new ArrayList<>();
+
 			Iterable<StreamDefinition> streamDefinitions = this.streamDefinitionRepository.findAll();
 
-			for (StreamDefinition streamDefinition : streamDefinitions) {
-				List<AppStatus> appStatuses = skipperStatus(streamDefinition.getName());
-				ApplicationsMetrics appMetrics = toStreamMetrics(streamDefinition, appStatuses);
-				if (appMetrics != null) {
-					metrics.add(appMetrics);
-				}
-			}
-			return metrics;
-		}
-		catch (ResourceAccessException e) {
-			logger.warn(e);
+			// For every stream definition retrieve its runtime apps
+			return StreamSupport.stream(streamDefinitions.spliterator(), false)
+					.map(this::toStreamMetrics)
+					.filter(Objects::nonNull)
+					.collect(Collectors.toList());
 		}
 		catch (Exception e) {
 			logger.error(e);
 		}
-		return EMPTY_RESPONSE;
+		return Collections.emptyList();
 	}
 
-	private List<AppStatus> skipperStatus(String streamName) {
-		List<AppStatus> appStatuses = new ArrayList<>();
-		try {
-			Info info = this.skipperClient.status(streamName);
-			appStatuses.addAll(SkipperStreamDeployer.deserializeAppStatus(info.getStatus().getPlatformStatus()));
-		}
-		catch (Exception e) {
-			// ignore as we query status for all the streams.
-		}
-		return appStatuses;
-	}
+	private ApplicationsMetrics toStreamMetrics(StreamDefinition streamDefinition) {
 
-	private ApplicationsMetrics toStreamMetrics(StreamDefinition streamDefinition, List<AppStatus> streamAppStatuses) {
+		String streamName = streamDefinition.getName();
+
+		List<AppStatus> streamAppStatuses = runtimeStatus(streamName);
 
 		if (CollectionUtils.isEmpty(streamAppStatuses)) {
 			return null;
 		}
 
 		try {
-
-			String streamName = streamDefinition.getName();
 
 			ApplicationsMetrics streamMetrics = new ApplicationsMetrics();
 			streamMetrics.setName(streamName);
@@ -117,7 +101,7 @@ public class RuntimeAppsMetricsController {
 			for (AppStatus appStatus : streamAppStatuses) {
 
 				StreamAppDefinition streamAppDefinition =
-						this.findApplicationDefinitionFromAppStatus(streamDefinition, appStatus);
+						this.resolveApplicationDefinitionFromAppStatus(streamDefinition, appStatus);
 
 				String applicationName = streamAppDefinition.getName();
 
@@ -129,17 +113,19 @@ public class RuntimeAppsMetricsController {
 
 				for (Map.Entry<String, AppInstanceStatus> instance : appStatus.getInstances().entrySet()) {
 
-					int instanceIndex = resolveInstanceIndexFromInstanceId(instance.getValue());
-					String appInstanceGuid = instance.getValue().getAttributes().get("guid");
-					String appType = streamAppDefinition.getApplicationType().name();
-
 					ApplicationsMetrics.Instance instanceMetrics = new ApplicationsMetrics.Instance();
 					appMetrics.getInstances().add(instanceMetrics);
 
+					//TODO (WARNING): The Guid attribute is not universal across all deployers.
+					String appInstanceGuid = instance.getValue().getAttributes().get("guid");
 					instanceMetrics.setGuid(appInstanceGuid);
-					instanceMetrics.setIndex(instanceIndex);
-					instanceMetrics.setProperties(createInstanceProperties(instanceIndex, appInstanceGuid, streamName,
-							applicationName, appType, instance.getValue().getState()));
+
+					//int instanceIndex = resolveInstanceIndexFromInstanceId(instance.getValue());
+					//instanceMetrics.setIndex(instanceIndex); // TODO: Looks like the index is not required
+
+					instanceMetrics.setProperties(Collections.emptyMap());
+
+					instanceMetrics.setState(instance.getValue().getState().name());
 				}
 			}
 			return streamMetrics;
@@ -149,6 +135,17 @@ public class RuntimeAppsMetricsController {
 		}
 
 		return null;
+	}
+
+	private List<AppStatus> runtimeStatus(String streamName) {
+		try {
+			Info info = this.skipperClient.status(streamName);
+			return SkipperStreamDeployer.deserializeAppStatus(info.getStatus().getPlatformStatus());
+		}
+		catch (Exception e) {
+			// ignore as we query status for all the streams.
+		}
+		return Collections.emptyList();
 	}
 
 	/**
@@ -161,46 +158,42 @@ public class RuntimeAppsMetricsController {
 	 * @param appStatus status for one of the applications in the streamDefinition.
 	 * @return
 	 */
-	private StreamAppDefinition findApplicationDefinitionFromAppStatus(StreamDefinition streamDefinition,
+	private StreamAppDefinition resolveApplicationDefinitionFromAppStatus(StreamDefinition streamDefinition,
 			AppStatus appStatus) {
 
 		String deploymentId = appStatus.getDeploymentId();
 
+		Assert.hasText(deploymentId, "Valid deployer ID can not be empty!");
+
 		for (StreamAppDefinition sd : streamDefinition.getAppDefinitions()) {
-			if (deploymentId.startsWith(sd.getStreamName() + "." + sd.getName())) {
+
+			if (deploymentId.startsWith(sd.getStreamName() + "." + sd.getName())) { // Local Deployer: <stream name>.<app name/label>-vXX
 				return sd;
+			}
+			else if (deploymentId.startsWith(sd.getStreamName() + "-" + sd.getName())) { // K8s Deployer: <stream name>-<app name/label>-vXX
+				return sd;
+			}
+			else {
+				String boza = deploymentId.substring(deploymentId.indexOf("-"));
+				if (boza.startsWith("-" + sd.getStreamName() + "-" + sd.getName())) { // CF Deployer: <random string>-<stream name>-<app name/label>-vXX
+					return sd;
+				}
 			}
 		}
 		return null;
 	}
 
-	/**
-	 *
-	 * WARNING: Makes assumption about the Instance ID's naming convention, which may not be consistent across the
-	 * deployment platforms.
-	 *
-	 * @param instanceStatus
-	 * @return Returns the Instance's index
-	 */
-	private int resolveInstanceIndexFromInstanceId(AppInstanceStatus instanceStatus) {
-		String instanceId = instanceStatus.getId();
-		String indexId = instanceId.substring(instanceId.lastIndexOf("-") + 1);
-		return Integer.valueOf(indexId);
-	}
-
-	private Map<String, Object> createInstanceProperties(int instanceIndex, String applicationGuid, String stream,
-			String applicationName, String applicationType, DeploymentState state) {
-
-		Map<String, Object> properties = new HashMap<>();
-		properties.put("spring.application.index", instanceIndex);
-		properties.put("spring.cloud.application.guid", applicationGuid);
-		properties.put("spring.cloud.dataflow.stream.app.type", applicationType);
-		properties.put("spring.cloud.dataflow.stream.name", stream);
-		properties.put("spring.cloud.application.group", stream);
-		properties.put("spring.cloud.dataflow.stream.app.label", applicationName);
-
-		properties.put("spring.cloud.dataflow.stream.app.state", state.name()); // new
-
-		return properties;
-	}
+	///**
+	// *
+	// * WARNING: Makes assumption about the Instance ID's naming convention, which may not be consistent across the
+	// * deployment platforms.
+	// *
+	// * @param instanceStatus
+	// * @return Returns the Instance's index
+	// */
+	//private int resolveInstanceIndexFromInstanceId(AppInstanceStatus instanceStatus) {
+	//	String instanceId = instanceStatus.getId();
+	//	String indexId = instanceId.substring(instanceId.lastIndexOf("-") + 1);
+	//	return Integer.valueOf(indexId);
+	//}
 }

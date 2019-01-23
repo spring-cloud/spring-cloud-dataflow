@@ -52,8 +52,6 @@ public class ApplicationsMetrics {
 
 		private List<Instance> instances;
 
-		private List<Metric> aggregateMetrics;
-
 		public String getName() {
 			return name;
 		}
@@ -69,14 +67,6 @@ public class ApplicationsMetrics {
 		public void setInstances(List<Instance> instances) {
 			this.instances = instances;
 		}
-
-		public List<Metric> getAggregateMetrics() {
-			return aggregateMetrics;
-		}
-
-		public void setAggregateMetrics(List<Metric> aggregateMetrics) {
-			this.aggregateMetrics = aggregateMetrics;
-		}
 	}
 
 	public static class Instance {
@@ -87,7 +77,7 @@ public class ApplicationsMetrics {
 
 		private Map<String, Object> properties;
 
-		private List<Metric> metrics;
+		private String state;
 
 		public String getGuid() {
 			return guid;
@@ -113,35 +103,12 @@ public class ApplicationsMetrics {
 			this.properties = properties;
 		}
 
-		public List<Metric> getMetrics() {
-			return metrics;
+		public String getState() {
+			return state;
 		}
 
-		public void setMetrics(List<Metric> metrics) {
-			this.metrics = metrics;
-		}
-	}
-
-	public static class Metric {
-
-		private String name;
-
-		private Object value;
-
-		public String getName() {
-			return name;
-		}
-
-		public void setName(String name) {
-			this.name = name;
-		}
-
-		public Object getValue() {
-			return value;
-		}
-
-		public void setValue(Object value) {
-			this.value = value;
+		public void setState(String state) {
+			this.state = state;
 		}
 	}
 }
