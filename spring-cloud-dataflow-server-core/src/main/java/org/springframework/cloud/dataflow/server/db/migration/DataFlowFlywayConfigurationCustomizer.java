@@ -50,7 +50,7 @@ public class DataFlowFlywayConfigurationCustomizer implements FlywayConfiguratio
 		if (databaseDriver == DatabaseDriver.POSTGRESQL) {
 			configuration.callbacks(new PostgresBeforeBaseline());
 		}
-		else if (databaseDriver == DatabaseDriver.MYSQL) {
+		else if (databaseDriver == DatabaseDriver.MYSQL || databaseDriver == DatabaseDriver.MARIADB) {
 			configuration.callbacks(new MysqlBeforeBaseline());
 		}
 		else if (databaseDriver == DatabaseDriver.SQLSERVER) {
