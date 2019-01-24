@@ -95,7 +95,7 @@
 				<filtering>true</filtering>
 				<includes>
 					<include>application.yml</include>
-					<include>logback-scdf-local.xml</include>
+					<include>logback-spring.xml</include>
 				</includes>
 			</resource>
 		</resources>
