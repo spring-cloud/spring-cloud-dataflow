@@ -30,16 +30,16 @@ import org.springframework.cloud.dataflow.server.db.migration.SqlCommand;
 public class MysqlBeforeBaseline extends AbstractBaselineCallback {
 
 	public final static String DROP_AUDIT_RECORDS_AUDIT_ACTION_IDX_INDEX =
-			"drop index if exists AUDIT_RECORDS_AUDIT_ACTION_IDX";
+			"drop index AUDIT_RECORDS_AUDIT_ACTION_IDX on AUDIT_RECORDS";
 
 	public final static String DROP_AUDIT_RECORDS_AUDIT_OPERATION_IDX_INDEX =
-			"drop index if exists AUDIT_RECORDS_AUDIT_OPERATION_IDX";
+			"drop index AUDIT_RECORDS_AUDIT_OPERATION_IDX on AUDIT_RECORDS";
 
 	public final static String DROP_AUDIT_RECORDS_CORRELATION_ID_IDX_INDEX =
-			"drop index if exists AUDIT_RECORDS_CORRELATION_ID_IDX";
+			"drop index AUDIT_RECORDS_CORRELATION_ID_IDX on AUDIT_RECORDS";
 
 	public final static String DROP_AUDIT_RECORDS_CREATED_ON_IDX_INDEX =
-			"drop index if exists AUDIT_RECORDS_CREATED_ON_IDX";
+			"drop index AUDIT_RECORDS_CREATED_ON_IDX on AUDIT_RECORDS";
 
 	public final static String CREATE_APP_REGISTRATION_TMP_TABLE =
 			V1__Initial_Setup.CREATE_APP_REGISTRATION_TABLE.replaceFirst("app_registration", "app_registration_tmp");
@@ -72,16 +72,16 @@ public class MysqlBeforeBaseline extends AbstractBaselineCallback {
 			"alter table audit_records_tmp rename to audit_records";
 
 	public final static String CREATE_AUDIT_RECORDS_AUDIT_ACTION_IDX_INDEX =
-			"create index if not exists audit_records_audit_action_idx on audit_records (audit_action)";
+			"create index audit_records_audit_action_idx on audit_records (audit_action)";
 
 	public final static String CREATE_AUDIT_RECORDS_AUDIT_OPERATION_IDX_INDEX =
-			"create index if not exists audit_records_audit_operation_idx on audit_records (audit_operation)";
+			"create index audit_records_audit_operation_idx on audit_records (audit_operation)";
 
 	public final static String CREATE_AUDIT_RECORDS_CORRELATION_ID_IDX_INDEX =
-			"create index if not exists audit_records_correlation_id_idx on audit_records (correlation_id)";
+			"create index audit_records_correlation_id_idx on audit_records (correlation_id)";
 
 	public final static String CREATE_AUDIT_RECORDS_CREATED_ON_IDX_INDEX =
-			"create index if not exists audit_records_created_on_idx on audit_records (created_on)";
+			"create index audit_records_created_on_idx on audit_records (created_on)";
 
 	/**
 	 * Instantiates a new postgres before baseline.
