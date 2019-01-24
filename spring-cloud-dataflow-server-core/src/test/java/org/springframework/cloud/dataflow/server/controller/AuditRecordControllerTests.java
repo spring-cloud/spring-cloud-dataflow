@@ -28,7 +28,11 @@ import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabas
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase.Replace;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.cloud.dataflow.audit.repository.AuditRecordRepository;
+import org.springframework.cloud.dataflow.core.AppRegistration;
+import org.springframework.cloud.dataflow.core.ApplicationType;
 import org.springframework.cloud.dataflow.core.AuditRecord;
+import org.springframework.cloud.dataflow.registry.repository.AppRegistrationRepository;
+import org.springframework.cloud.dataflow.registry.service.AppRegistryService;
 import org.springframework.cloud.dataflow.server.configuration.TestDependencies;
 import org.springframework.cloud.dataflow.server.repository.StreamDefinitionRepository;
 import org.springframework.cloud.dataflow.server.service.StreamService;
@@ -62,6 +66,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  * Verifies the functionality of the {@link AuditRecordController}.
  *
  * @author Gunnar Hillert
+ * @author Daniel Serleg
  */
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = TestDependencies.class)
@@ -74,6 +79,12 @@ public class AuditRecordControllerTests {
 
 	@Autowired
 	private AuditRecordRepository auditRecordRepository;
+
+	@Autowired
+	private AppRegistrationRepository appRegistrationRepository;
+
+	@Autowired
+	private AppRegistryService appRegistryService;
 
 	private MockMvc mockMvc;
 
@@ -93,7 +104,8 @@ public class AuditRecordControllerTests {
 		info.getStatus().setStatusCode(StatusCode.DEPLOYED);
 		when(skipperClient.status(ArgumentMatchers.anyString())).thenReturn(info);
 
-		when(skipperClient.search(ArgumentMatchers.anyString(), ArgumentMatchers.eq(false))).thenReturn(new Resources(new ArrayList<PackageMetadata>(), new Link[0]));
+		when(skipperClient.search(ArgumentMatchers.anyString(), ArgumentMatchers.eq(false)))
+				.thenReturn(new Resources(new ArrayList<PackageMetadata>(), new Link[0]));
 
 		mockMvc.perform(post("/streams/definitions/").param("name", "myStream").param("definition", "time | log")
 				.accept(MediaType.APPLICATION_JSON)).andExpect(status().isCreated());
@@ -102,14 +114,16 @@ public class AuditRecordControllerTests {
 		mockMvc.perform(post("/streams/definitions/").param("name", "myStream2").param("definition", "time | log")
 				.accept(MediaType.APPLICATION_JSON)).andExpect(status().isCreated());
 		mockMvc.perform(delete("/streams/definitions/myStream").accept(MediaType.APPLICATION_JSON))
-		.andExpect(status().isOk());
+				.andExpect(status().isOk());
 
 	}
 
 	@After
 	public void tearDown() {
+		appRegistrationRepository.deleteAll();
 		streamDefinitionRepository.deleteAll();
 		auditRecordRepository.deleteAll();
+		assertEquals(0, appRegistrationRepository.count());
 		assertEquals(0, streamDefinitionRepository.count());
 		assertEquals(0, auditRecordRepository.count());
 	}
@@ -117,12 +131,13 @@ public class AuditRecordControllerTests {
 	/**
 	 * Verify that the correct number of {@link AuditRecord}s are persisted to the database.
 	 *
-	 * Keep in mind that {@link StreamService#deleteStream(String)}
-	 * does not only invokes {@link StreamDefinitionRepository#delete(String)} but also
+	 * Keep in mind that {@link StreamService#deleteStream(String)} does not only invokes
+	 * {@link StreamDefinitionRepository#delete(String)} but also
 	 * {@link StreamService#undeployStream(String).
 	 */
 	@Test
 	public void testVerifyNumberOfAuditRecords() throws Exception {
+		assertEquals(4, appRegistrationRepository.count());
 		assertEquals(2, streamDefinitionRepository.count());
 		assertEquals(9, auditRecordRepository.count());
 	}
@@ -130,109 +145,186 @@ public class AuditRecordControllerTests {
 	@Test
 	public void testRetrieveAllAuditRecords() throws Exception {
 		mockMvc.perform(get("/audit-records").accept(MediaType.APPLICATION_JSON))
-		.andDo(print())
-		.andExpect(status().isOk())
+				.andDo(print())
+				.andExpect(status().isOk())
 				.andExpect(jsonPath("$.content.*", hasSize(9)));
 	}
 
 	@Test
 	public void testRetrieveAllAuditRecordsWithActionUndeploy() throws Exception {
 		mockMvc.perform(get("/audit-records?actions=UNDEPLOY").accept(MediaType.APPLICATION_JSON))
-		.andDo(print())
-		.andExpect(status().isOk())
-		.andExpect(jsonPath("$.content.*", hasSize(1)));
+				.andDo(print())
+				.andExpect(status().isOk())
+				.andExpect(jsonPath("$.content.*", hasSize(1)));
 	}
 
 	@Test
 	public void testRetrieveAllAuditRecordsWithOperationStream() throws Exception {
 		mockMvc.perform(get("/audit-records?operations=STREAM").accept(MediaType.APPLICATION_JSON))
-		.andDo(print())
-		.andExpect(status().isOk())
-		.andExpect(jsonPath("$.content.*", hasSize(5)));
+				.andDo(print())
+				.andExpect(status().isOk())
+				.andExpect(jsonPath("$.content.*", hasSize(5)));
 	}
 
 	@Test
 	public void testRetrieveAllAuditRecordsWithOperationTask() throws Exception {
 		mockMvc.perform(get("/audit-records?operations=TASK").accept(MediaType.APPLICATION_JSON))
-		.andDo(print())
-		.andExpect(status().isOk())
-		.andExpect(jsonPath("$.content.*", hasSize(0)));
+				.andDo(print())
+				.andExpect(status().isOk())
+				.andExpect(jsonPath("$.content.*", hasSize(0)));
 	}
 
 	@Test
 	public void testRetrieveAllAuditRecordsWithOperationTaskAndStream() throws Exception {
 		mockMvc.perform(get("/audit-records?operations=TASK,STREAM").accept(MediaType.APPLICATION_JSON))
-		.andDo(print())
-		.andExpect(status().isOk())
-		.andExpect(jsonPath("$.content.*", hasSize(5)));
+				.andDo(print())
+				.andExpect(status().isOk())
+				.andExpect(jsonPath("$.content.*", hasSize(5)));
 	}
 
 	@Test
 	public void testRetrieveAllAuditRecordsWithActionDeleteAndUndeploy() throws Exception {
 		mockMvc.perform(get("/audit-records?actions=DELETE,UNDEPLOY").accept(MediaType.APPLICATION_JSON))
-		.andDo(print())
-		.andExpect(status().isOk())
-		.andExpect(jsonPath("$.content.*", hasSize(2)));
+				.andDo(print())
+				.andExpect(status().isOk())
+				.andExpect(jsonPath("$.content.*", hasSize(2)));
+	}
+
+	@Test
+	public void testRetrieveAppRelatedAuditRecords() throws Exception {
+		mockMvc.perform(get("/audit-records?operations=APP_REGISTRATION").accept(MediaType.APPLICATION_JSON))
+				.andDo(print())
+				.andExpect(status().isOk())
+				.andExpect(jsonPath("$.content.*", hasSize(4)));
+	}
+
+	@Test
+	public void testRetrieveAuditRecordsWithActionCreate() throws Exception {
+		mockMvc.perform(get("/audit-records?actions=CREATE").accept(MediaType.APPLICATION_JSON))
+				.andDo(print())
+				.andExpect(status().isOk())
+				.andExpect(jsonPath("$.content.*", hasSize(7)));
 	}
 
 	@Test
 	public void testRetrieveAuditActionTypes() throws Exception {
 		mockMvc.perform(get("/audit-records/audit-action-types").accept(MediaType.APPLICATION_JSON))
-		.andDo(print())
-		.andExpect(status().isOk())
-		.andExpect(jsonPath("$.*", hasSize(6)))
-		.andExpect(jsonPath("$[0].id", is(100)))
-		.andExpect(jsonPath("$[0].name", is("Create")))
-		.andExpect(jsonPath("$[0].description", is("Create an Entity")))
-		.andExpect(jsonPath("$[0].key", is("CREATE")))
+				.andDo(print())
+				.andExpect(status().isOk())
+				.andExpect(jsonPath("$.*", hasSize(6)))
+				.andExpect(jsonPath("$[0].id", is(100)))
+				.andExpect(jsonPath("$[0].name", is("Create")))
+				.andExpect(jsonPath("$[0].description", is("Create an Entity")))
+				.andExpect(jsonPath("$[0].key", is("CREATE")))
 
-		.andExpect(jsonPath("$[1].id", is(200)))
-		.andExpect(jsonPath("$[1].name", is("Delete")))
-		.andExpect(jsonPath("$[1].description", is("Delete an Entity")))
-		.andExpect(jsonPath("$[1].key", is("DELETE")))
+				.andExpect(jsonPath("$[1].id", is(200)))
+				.andExpect(jsonPath("$[1].name", is("Delete")))
+				.andExpect(jsonPath("$[1].description", is("Delete an Entity")))
+				.andExpect(jsonPath("$[1].key", is("DELETE")))
 
-		.andExpect(jsonPath("$[2].id", is(300)))
-		.andExpect(jsonPath("$[2].name", is("Deploy")))
-		.andExpect(jsonPath("$[2].description", is("Deploy an Entity")))
-		.andExpect(jsonPath("$[2].key", is("DEPLOY")))
+				.andExpect(jsonPath("$[2].id", is(300)))
+				.andExpect(jsonPath("$[2].name", is("Deploy")))
+				.andExpect(jsonPath("$[2].description", is("Deploy an Entity")))
+				.andExpect(jsonPath("$[2].key", is("DEPLOY")))
 
-		.andExpect(jsonPath("$[3].id", is(400)))
-		.andExpect(jsonPath("$[3].name", is("Rollback")))
-		.andExpect(jsonPath("$[3].description", is("Rollback an Entity")))
-		.andExpect(jsonPath("$[3].key", is("ROLLBACK")))
+				.andExpect(jsonPath("$[3].id", is(400)))
+				.andExpect(jsonPath("$[3].name", is("Rollback")))
+				.andExpect(jsonPath("$[3].description", is("Rollback an Entity")))
+				.andExpect(jsonPath("$[3].key", is("ROLLBACK")))
 
-		.andExpect(jsonPath("$[4].id", is(500)))
-		.andExpect(jsonPath("$[4].name", is("Undeploy")))
-		.andExpect(jsonPath("$[4].description", is("Undeploy an Entity")))
-		.andExpect(jsonPath("$[4].key", is("UNDEPLOY")))
+				.andExpect(jsonPath("$[4].id", is(500)))
+				.andExpect(jsonPath("$[4].name", is("Undeploy")))
+				.andExpect(jsonPath("$[4].description", is("Undeploy an Entity")))
+				.andExpect(jsonPath("$[4].key", is("UNDEPLOY")))
 
-		.andExpect(jsonPath("$[5].id", is(600)))
-		.andExpect(jsonPath("$[5].name", is("Update")))
-		.andExpect(jsonPath("$[5].description", is("Update an Entity")))
-		.andExpect(jsonPath("$[5].key", is("UPDATE")));
+				.andExpect(jsonPath("$[5].id", is(600)))
+				.andExpect(jsonPath("$[5].name", is("Update")))
+				.andExpect(jsonPath("$[5].description", is("Update an Entity")))
+				.andExpect(jsonPath("$[5].key", is("UPDATE")));
 	}
 
 	@Test
 	public void testRetrieveAuditOperationTypes() throws Exception {
 		mockMvc.perform(get("/audit-records/audit-operation-types").accept(MediaType.APPLICATION_JSON))
-		.andDo(print())
-		.andExpect(status().isOk())
-		.andExpect(jsonPath("$.*", hasSize(4)))
+				.andDo(print())
+				.andExpect(status().isOk())
+				.andExpect(jsonPath("$.*", hasSize(4)))
 
-		.andExpect(jsonPath("$[0].id", is(100)))
-		.andExpect(jsonPath("$[0].name", is("App Registration")))
-		.andExpect(jsonPath("$[0].key", is("APP_REGISTRATION")))
+				.andExpect(jsonPath("$[0].id", is(100)))
+				.andExpect(jsonPath("$[0].name", is("App Registration")))
+				.andExpect(jsonPath("$[0].key", is("APP_REGISTRATION")))
 
-		.andExpect(jsonPath("$[1].id", is(200)))
-		.andExpect(jsonPath("$[1].name", is("Schedule")))
-		.andExpect(jsonPath("$[1].key", is("SCHEDULE")))
+				.andExpect(jsonPath("$[1].id", is(200)))
+				.andExpect(jsonPath("$[1].name", is("Schedule")))
+				.andExpect(jsonPath("$[1].key", is("SCHEDULE")))
 
-		.andExpect(jsonPath("$[2].id", is(300)))
-		.andExpect(jsonPath("$[2].name", is("Stream")))
-		.andExpect(jsonPath("$[2].key", is("STREAM")))
+				.andExpect(jsonPath("$[2].id", is(300)))
+				.andExpect(jsonPath("$[2].name", is("Stream")))
+				.andExpect(jsonPath("$[2].key", is("STREAM")))
 
-		.andExpect(jsonPath("$[3].id", is(400)))
-		.andExpect(jsonPath("$[3].name", is("Task")))
-		.andExpect(jsonPath("$[3].key", is("TASK")));
+				.andExpect(jsonPath("$[3].id", is(400)))
+				.andExpect(jsonPath("$[3].name", is("Task")))
+				.andExpect(jsonPath("$[3].key", is("TASK")));
 	}
+
+	@Test
+	public void testRetrieveRegisteredAppsAuditData() throws Exception {
+		mockMvc.perform(
+				get("/audit-records?operations=APP_REGISTRATION&actions=CREATE").accept(MediaType.APPLICATION_JSON))
+				.andDo(print())
+				.andExpect(status().isOk())
+				.andExpect(jsonPath("$.content.*", hasSize(4)))
+
+				.andExpect(jsonPath("$.content[0].auditRecordId", is(2)))
+				.andExpect(jsonPath("$.content[0].correlationId", is("time")))
+
+				.andExpect(jsonPath("$.content[1].auditRecordId", is(4)))
+				.andExpect(jsonPath("$.content[1].correlationId", is("filter")))
+
+				.andExpect(jsonPath("$.content[2].auditRecordId", is(6)))
+				.andExpect(jsonPath("$.content[2].correlationId", is("log")))
+
+				.andExpect(jsonPath("$.content[3].auditRecordId", is(8)))
+				.andExpect(jsonPath("$.content[3].correlationId", is("timestamp")));
+	}
+
+	@Test
+	public void testRetrieveDeletedAppsAuditData() throws Exception {
+		mockMvc.perform(get("/audit-records").accept(MediaType.APPLICATION_JSON))
+				.andDo(print())
+				.andExpect(status().isOk())
+				.andExpect(jsonPath("$.content.*", hasSize(9)));
+
+		appRegistryService.delete("filter", ApplicationType.processor, "1.0.0.BUILD-SNAPSHOT");
+
+		mockMvc.perform(
+				get("/audit-records?operations=APP_REGISTRATION&actions=DELETE").accept(MediaType.APPLICATION_JSON))
+				.andDo(print())
+				.andExpect(status().isOk())
+				.andExpect(jsonPath("$.content.*", hasSize(1)))
+
+				.andExpect(jsonPath("$.content[0].auditRecordId", is(14)))
+				.andExpect(jsonPath("$.content[0].correlationId", is("filter")));
+	}
+
+	@Test
+	public void testRetrieveUpdatedAppsAuditData() throws Exception {
+		mockMvc.perform(get("/audit-records?operations=APP_REGISTRATION").accept(MediaType.APPLICATION_JSON))
+				.andDo(print())
+				.andExpect(status().isOk())
+				.andExpect(jsonPath("$.content.*", hasSize(4)));
+
+		AppRegistration filter = appRegistryService.find("filter", ApplicationType.processor, "1.0.0.BUILD-SNAPSHOT");
+		appRegistryService.save(filter);
+
+		mockMvc.perform(
+				get("/audit-records?operations=APP_REGISTRATION&actions=UPDATE").accept(MediaType.APPLICATION_JSON))
+				.andDo(print())
+				.andExpect(status().isOk())
+				.andExpect(jsonPath("$.content.*", hasSize(1)))
+
+				.andExpect(jsonPath("$.content[0].auditRecordId", is(14)))
+				.andExpect(jsonPath("$.content[0].correlationId", is("filter")));
+	}
+
 }
