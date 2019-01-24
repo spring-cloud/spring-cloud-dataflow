@@ -68,7 +68,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @SpringBootTest(classes = TestDependencies.class)
 @DirtiesContext(classMode = ClassMode.BEFORE_EACH_TEST_METHOD)
 @AutoConfigureTestDatabase(replace = Replace.ANY)
-public class RuntimeAppsMetricsControllerTests {
+public class RuntimeAppsControllerStreamStatusTests {
 
 	private MockMvc mockMvc;
 
@@ -136,7 +136,7 @@ public class RuntimeAppsMetricsControllerTests {
 	public void testGetResponse() throws Exception {
 		MockHttpServletResponse responseString = mockMvc
 				.perform(
-						get("/metrics/streams")
+						get("/runtime/stream")
 								.param("names", "ticktock1,ticktock2,ticktock3")
 								.accept(MediaType.APPLICATION_JSON))
 				.andDo(print())
@@ -177,9 +177,9 @@ public class RuntimeAppsMetricsControllerTests {
 			@Override
 			public Map<String, String> getAttributes() {
 				Map<String, String> attributes = new HashMap<>();
-				attributes.put(RuntimeAppsMetricsController.ATTRIBUTE_SKIPPER_APPLICATION_NAME, appName);
+				attributes.put(RuntimeAppsController.ATTRIBUTE_SKIPPER_APPLICATION_NAME, appName);
 				if (guid != null) {
-					attributes.put(RuntimeAppsMetricsController.ATTRIBUTE_GUID, guid);
+					attributes.put(RuntimeAppsController.ATTRIBUTE_GUID, guid);
 				}
 				return attributes;
 			}

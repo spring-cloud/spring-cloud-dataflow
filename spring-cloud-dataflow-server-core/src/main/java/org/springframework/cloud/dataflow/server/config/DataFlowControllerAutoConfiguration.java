@@ -73,7 +73,6 @@ import org.springframework.cloud.dataflow.server.controller.RestControllerAdvice
 import org.springframework.cloud.dataflow.server.controller.RootController;
 import org.springframework.cloud.dataflow.server.controller.RuntimeAppInstanceController;
 import org.springframework.cloud.dataflow.server.controller.RuntimeAppsController;
-import org.springframework.cloud.dataflow.server.controller.RuntimeAppsMetricsController;
 import org.springframework.cloud.dataflow.server.controller.StreamDefinitionController;
 import org.springframework.cloud.dataflow.server.controller.StreamDeploymentController;
 import org.springframework.cloud.dataflow.server.controller.StreamValidationController;
@@ -396,11 +395,6 @@ public class DataFlowControllerAutoConfiguration {
 				AuditRecordService auditRecordService) {
 			return new DefaultStreamService(streamDefinitionRepository, skipperStreamDeployer,
 					appDeploymentRequestCreator, streamValidationService, auditRecordService);
-		}
-
-		@Bean
-		public RuntimeAppsMetricsController metricsController(StreamDeployer streamDeployer) {
-			return new RuntimeAppsMetricsController(streamDeployer);
 		}
 	}
 

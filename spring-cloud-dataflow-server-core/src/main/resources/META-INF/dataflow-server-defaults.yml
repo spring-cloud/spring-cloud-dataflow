@@ -74,10 +74,6 @@ spring:
           loginUrl: "/"
           permit-all-paths: "/authenticate,/security/info,/assets/**,/dashboard/logout-success-oauth.html"
           rules:
-            # Metrics
-
-            - GET    /metrics/streams                => hasRole('ROLE_VIEW')
-
             # About
 
             - GET    /about                          => hasRole('ROLE_VIEW')
@@ -86,11 +82,6 @@ spring:
 
             - GET /audit-records                     => hasRole('ROLE_VIEW')
             - GET /audit-records/**                  => hasRole('ROLE_VIEW')
-
-            # Metrics
-
-            - GET    /metrics/**                     => hasRole('ROLE_VIEW')
-            - DELETE /metrics/**                     => hasRole('ROLE_CREATE')
 
             # Boot Endpoints
 
@@ -122,6 +113,7 @@ spring:
 
             # Running Applications
 
+            - GET    /runtime/stream                 => hasRole('ROLE_VIEW')
             - GET    /runtime/apps                   => hasRole('ROLE_VIEW')
             - GET    /runtime/apps/**                => hasRole('ROLE_VIEW')
 

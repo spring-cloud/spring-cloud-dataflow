@@ -68,7 +68,6 @@ import org.springframework.cloud.dataflow.server.controller.RestControllerAdvice
 import org.springframework.cloud.dataflow.server.controller.RootController;
 import org.springframework.cloud.dataflow.server.controller.RuntimeAppInstanceController;
 import org.springframework.cloud.dataflow.server.controller.RuntimeAppsController;
-import org.springframework.cloud.dataflow.server.controller.RuntimeAppsMetricsController;
 import org.springframework.cloud.dataflow.server.controller.StreamDefinitionController;
 import org.springframework.cloud.dataflow.server.controller.StreamDeploymentController;
 import org.springframework.cloud.dataflow.server.controller.StreamValidationController;
@@ -341,11 +340,6 @@ public class TestDependencies extends WebMvcConfigurationSupport {
 			ApplicationConfigurationMetadataResolver metadataResolver, MavenProperties mavenProperties) {
 		return new AppRegistryController(streamDefinitionRepository, streamService, appRegistry, metadataResolver,
 				new ForkJoinPool(2), mavenProperties);
-	}
-
-	@Bean
-	public RuntimeAppsMetricsController metricsController(StreamDeployer streamDeployer) {
-		return new RuntimeAppsMetricsController(streamDeployer);
 	}
 
 	@Bean

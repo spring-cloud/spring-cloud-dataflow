@@ -109,7 +109,7 @@ public class RootController {
 			root.add(unescapeTemplateVariables(
 					entityLinks.linkFor(AppInstanceStatusResource.class, "{appId}")
 							.withRel("runtime/apps/instances")));
-			root.add(ControllerLinkBuilder.linkTo(RuntimeAppsMetricsController.class).withRel("metrics/streams"));
+			root.add(ControllerLinkBuilder.linkTo(RuntimeAppsController.class).withRel("runtime/stream"));
 
 			root.add(ControllerLinkBuilder.linkTo(StreamDeploymentController.class).withRel("streams/deployments"));
 			root.add(ControllerLinkBuilder.linkTo(ControllerLinkBuilder.methodOn(StreamDeploymentController.class).deploy(null, null)).withRel("streams/deployments/{name}"));

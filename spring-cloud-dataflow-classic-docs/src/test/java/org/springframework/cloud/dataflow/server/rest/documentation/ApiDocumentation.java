@@ -78,7 +78,7 @@ public class ApiDocumentation extends BaseDocumentation {
 				linkWithRel("apps").description("Handle registered applications"),
 				linkWithRel("completions/stream").description("Exposes the DSL completion features " + "for Stream"),
 				linkWithRel("completions/task").description("Exposes the DSL completion features for " + "Task"),
-				linkWithRel("metrics/streams").description("Exposes metrics for the stream " + "applications"),
+				linkWithRel("runtime/stream").description("Exposes stream runtime status"),
 				linkWithRel("jobs/executions").description("Provides the JobExecution resource"),
 				linkWithRel("jobs/thinexecutions").description("Provides the JobExecution thin resource with no step executions included"),
 				linkWithRel("jobs/executions/execution")
@@ -159,7 +159,7 @@ public class ApiDocumentation extends BaseDocumentation {
 						fieldWithPath("_links.runtime/apps/instances.href").description("Link to the runtime/apps/instances"),
 						fieldWithPath("_links.runtime/apps/instances.templated").type(JsonFieldType.BOOLEAN).optional()
 							.description("Link runtime/apps/instances is templated"),
-						fieldWithPath("_links.metrics/streams.href").description("Link to the metrics/streams"),
+						fieldWithPath("_links.runtime/stream.href").description("Link to the runtime/stream"),
 						fieldWithPath("_links.streams/deployments.href").description("Link to the streams/deployments"),
 						fieldWithPath("_links.streams/deployments/{name}.href").description("Link to the streams/deployments/{name}"),
 						fieldWithPath("_links.streams/deployments/{name}.templated").type(JsonFieldType.BOOLEAN).optional()

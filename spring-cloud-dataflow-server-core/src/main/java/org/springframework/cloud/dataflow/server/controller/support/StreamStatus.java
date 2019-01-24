@@ -20,12 +20,12 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Support domain class to map metrics response from a collector.
+ * Domain class that represents the runtime stream status
  *
  * @author Janne Valkealahti
  * @author Christian Tzolov
  */
-public class ApplicationsMetrics {
+public class StreamStatus {
 
 	private String name;
 
