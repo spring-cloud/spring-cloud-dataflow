@@ -251,14 +251,8 @@ $ SPRING_APPLICATION_JSON='{ "maven": { "local-repository": null,
 [[configuration-local-logging]]
 === Local Data Flow Server Logging configuration
 
-Spring Cloud Data Flow `local` server is configured to use `RollingFileAppender` for logging and you should enable the spring profile named 'local'.
-You need to pass the property `--spring.profiles.active=local` when starting the uber jar to trigger the configuration of logging in local mode.
-The profile is needed since writing to a log file is not the recommended way to gather logs when running on Cloud Platforms such as Cloud Foundry and Kubernetes.
-
-----
-logging:
-  config: classpath:logback-scdf-local.xml
-----
+Spring Cloud Data Flow `local` server is automatically configured to use `RollingFileAppender` for logging.
+The logging configuration is located on the classpath contained in a file named `logback-spring.xml`.
 
 By default, the log file is configured to use:
 
