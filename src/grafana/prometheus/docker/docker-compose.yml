@@ -6,6 +6,7 @@ services:
   # into the form of an image.
   #
   # It could instead, use volume-mounts.
+  # Use `docker exec -it prometheus /bin/sh` to logging in the container
   prometheus:
     build: './prometheus'
     container_name: 'prometheus'
@@ -19,6 +20,7 @@ services:
   # form of an image.
   #
   # This could instead be a volume-mounted container.
+  # Use `docker exec -it grafana /bin/bash` to logging in the container
   grafana:
     build: './grafana'
     container_name: 'grafana'
@@ -30,9 +32,11 @@ services:
   # form of an image.
   #
   # This could instead be a volume-mounted container.
+  # Use `docker exec -it service-discovery /bin/sh` to logging the container
+  # Project https://github.com/tzolov/spring-cloud-dataflow-prometheus-service-discovery
   service-discovery:
-    build: './discovery'
-    container_name: 'discovery'
+    image: tzolov/spring-cloud-dataflow-prometheus-service-discovery:0.0.1
+    container_name: 'service-discovery'
     volumes:
       - 'scdf-targets:/tmp/scdf-targets/'
     expose:

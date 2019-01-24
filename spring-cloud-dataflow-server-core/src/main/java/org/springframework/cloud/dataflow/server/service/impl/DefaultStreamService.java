@@ -66,7 +66,6 @@ import org.springframework.cloud.skipper.domain.SpringCloudDeployerApplicationMa
 import org.springframework.cloud.skipper.domain.SpringCloudDeployerApplicationManifestReader;
 import org.springframework.cloud.skipper.domain.SpringCloudDeployerApplicationSpec;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Assert;
@@ -518,10 +517,6 @@ public class DefaultStreamService implements StreamService {
 		Page<StreamDefinition> streamDefinitions;
 		if (search != null) {
 			streamDefinitions = streamDefinitionRepository.findByNameLike(search, pageable);
-			long count = streamDefinitions.getContent().size();
-			long to = Math.min(count, pageable.getOffset() + pageable.getPageSize());
-			streamDefinitions = new PageImpl<>(streamDefinitions.getContent(), pageable,
-					streamDefinitions.getTotalElements());
 		}
 		else {
 			streamDefinitions = streamDefinitionRepository.findAll(pageable);
