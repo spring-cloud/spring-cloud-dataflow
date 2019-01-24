@@ -17,7 +17,7 @@
 package org.springframework.cloud.dataflow.server.controller;
 
 import java.util.Arrays;
-import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -102,21 +102,21 @@ public class RuntimeAppsMetricsControllerTests {
 
 		List<AppStatus> appStatues1 = Arrays.asList( // CF deployer id
 				AppStatus.of("boza-ticktock1-log1-v1")
-						.with(instance("ticktock1-log1-v1-0", "46188")).build(),
+						.with(instance("ticktock1-log1-v1-0", "guid1", "log1")).build(),
 				AppStatus.of("boza-ticktock1-time1-v1")
-						.with(instance("ticktock1-time1-v1-0", "46188")).build());
+						.with(instance("ticktock1-time1-v1-0", "guid2", "time1")).build());
 
 		List<AppStatus> appStatues2 = Arrays.asList( // K8s deployer Id
 				AppStatus.of("ticktock2-log2-v1")
-						.with(instance("ticktock2-log2-v1-0", "46188")).build(),
+						.with(instance("ticktock2-log2-v1-0", "guid3", "log2")).build(),
 				AppStatus.of("ticktock2-time2-v1")
-						.with(instance("ticktock2-time2-v1-0", "46188")).build());
+						.with(instance("ticktock2-time2-v1-0", "guid4", "time2")).build());
 
 		List<AppStatus> appStatues3 = Arrays.asList( // Local deployer id
 				AppStatus.of("ticktock3.log3-v1")
-						.with(instance("ticktock3.log3-v1-0", "46188")).build(),
+						.with(instance("ticktock3.log3-v1-0", null, "log3")).build(),
 				AppStatus.of("ticktock3.time3-v1")
-						.with(instance("ticktock3.time3-v1-0", "46188")).build());
+						.with(instance("ticktock3.time3-v1-0", null, "time3")).build());
 
 		when(this.skipperClient.status("ticktock1")).thenReturn(toInfo(appStatues1));
 		when(this.skipperClient.status("ticktock2")).thenReturn(toInfo(appStatues2));
@@ -135,20 +135,34 @@ public class RuntimeAppsMetricsControllerTests {
 	@Test
 	public void testGetResponse() throws Exception {
 		MockHttpServletResponse responseString = mockMvc
-				.perform(get("/metrics/streams").accept(MediaType.APPLICATION_JSON)).andDo(print())
+				.perform(
+						get("/metrics/streams")
+								.param("names", "ticktock1,ticktock2,ticktock3")
+								.accept(MediaType.APPLICATION_JSON))
+				.andDo(print())
 				.andExpect(status().isOk()).andReturn().getResponse();
-		// for now we just get dummy mocked response
+
 		assertThat(responseString.getContentAsString(), containsString("ticktock1"));
-		assertThat(responseString.getContentAsString(), containsString("ticktock2"));
-		assertThat(responseString.getContentAsString(), containsString("ticktock3"));
 		assertThat(responseString.getContentAsString(), containsString("time1"));
 		assertThat(responseString.getContentAsString(), containsString("log1"));
+		assertThat(responseString.getContentAsString(), containsString("guid1"));
+		assertThat(responseString.getContentAsString(), containsString("guid2"));
+
+		assertThat(responseString.getContentAsString(), containsString("ticktock2"));
 		assertThat(responseString.getContentAsString(), containsString("time2"));
+		assertThat(responseString.getContentAsString(), containsString("log2"));
+		assertThat(responseString.getContentAsString(), containsString("guid3"));
+		assertThat(responseString.getContentAsString(), containsString("guid4"));
+
+		assertThat(responseString.getContentAsString(), containsString("ticktock3"));
 		assertThat(responseString.getContentAsString(), containsString("log3"));
 		assertThat(responseString.getContentAsString(), containsString("log3"));
+		assertThat(responseString.getContentAsString(), containsString("ticktock3.log3-v1-0"));
+		assertThat(responseString.getContentAsString(), containsString("ticktock3.time3-v1"));
+
 	}
 
-	private AppInstanceStatus instance(String id, String guid) {
+	private AppInstanceStatus instance(String id, String guid, String appName) {
 		return new AppInstanceStatus() {
 			@Override
 			public String getId() {
@@ -162,7 +176,12 @@ public class RuntimeAppsMetricsControllerTests {
 
 			@Override
 			public Map<String, String> getAttributes() {
-				return Collections.singletonMap("guid", guid);
+				Map<String, String> attributes = new HashMap<>();
+				attributes.put(RuntimeAppsMetricsController.ATTRIBUTE_SKIPPER_APPLICATION_NAME, appName);
+				if (guid != null) {
+					attributes.put(RuntimeAppsMetricsController.ATTRIBUTE_GUID, guid);
+				}
+				return attributes;
 			}
 		};
 	}

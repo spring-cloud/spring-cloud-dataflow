@@ -20,26 +20,20 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.stream.Collectors;
-import java.util.stream.StreamSupport;
+import java.util.stream.Stream;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import org.springframework.cloud.dataflow.core.StreamAppDefinition;
-import org.springframework.cloud.dataflow.core.StreamDefinition;
 import org.springframework.cloud.dataflow.server.controller.support.ApplicationsMetrics;
-import org.springframework.cloud.dataflow.server.repository.StreamDefinitionRepository;
-import org.springframework.cloud.dataflow.server.stream.SkipperStreamDeployer;
+import org.springframework.cloud.dataflow.server.stream.StreamDeployer;
 import org.springframework.cloud.deployer.spi.app.AppInstanceStatus;
 import org.springframework.cloud.deployer.spi.app.AppStatus;
-import org.springframework.cloud.skipper.client.SkipperClient;
-import org.springframework.cloud.skipper.domain.Info;
-import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
@@ -50,150 +44,66 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/metrics/streams")
 public class RuntimeAppsMetricsController {
 
+	public static final String ATTRIBUTE_SKIPPER_APPLICATION_NAME = "skipper.application.name";
+	public static final String ATTRIBUTE_SKIPPER_RELEASE_VERSION = "skipper.release.version";
+	public static final String ATTRIBUTE_GUID = "guid";
+
 	private static Log logger = LogFactory.getLog(RuntimeAppsMetricsController.class);
 
-	private final StreamDefinitionRepository streamDefinitionRepository;
-	private final SkipperClient skipperClient;
+	private final StreamDeployer streamDeployer;
 
-	/**
-	 * Instantiates a new metrics controller.*
-	 */
-	public RuntimeAppsMetricsController(StreamDefinitionRepository streamDefinitionRepository,
-			SkipperClient skipperClient) {
-		this.streamDefinitionRepository = streamDefinitionRepository;
-		this.skipperClient = skipperClient;
+	public RuntimeAppsMetricsController(StreamDeployer streamDeployer) {
+		this.streamDeployer = streamDeployer;
 	}
 
 	@RequestMapping(method = RequestMethod.GET)
-	public List<ApplicationsMetrics> list() {
+	public List<ApplicationsMetrics> list(@RequestParam("names") String[] names) {
 		try {
-
-			Iterable<StreamDefinition> streamDefinitions = this.streamDefinitionRepository.findAll();
-
-			// For every stream definition retrieve its runtime apps
-			return StreamSupport.stream(streamDefinitions.spliterator(), false)
-					.map(this::toStreamMetrics)
-					.filter(Objects::nonNull)
-					.collect(Collectors.toList());
+			return Stream.of(names).map(this::toStreamMetrics).collect(Collectors.toList());
 		}
 		catch (Exception e) {
-			logger.error(e);
+			logger.error("Failed to retrieve any metrics", e);
 		}
 		return Collections.emptyList();
 	}
 
-	private ApplicationsMetrics toStreamMetrics(StreamDefinition streamDefinition) {
+	private ApplicationsMetrics toStreamMetrics(String streamName) {
+		ApplicationsMetrics streamMetrics = new ApplicationsMetrics();
+		streamMetrics.setName(streamName);
+		streamMetrics.setApplications(new ArrayList<>());
 
-		String streamName = streamDefinition.getName();
+		List<AppStatus> streamAppStatuses = this.streamDeployer.getStreamStatuses(streamName);
 
-		List<AppStatus> streamAppStatuses = runtimeStatus(streamName);
-
-		if (CollectionUtils.isEmpty(streamAppStatuses)) {
-			return null;
-		}
-
-		try {
-
-			ApplicationsMetrics streamMetrics = new ApplicationsMetrics();
-			streamMetrics.setName(streamName);
-			streamMetrics.setApplications(new ArrayList<>());
-
+		if (!CollectionUtils.isEmpty(streamAppStatuses)) {
 			for (AppStatus appStatus : streamAppStatuses) {
+				try {
+					ApplicationsMetrics.Application appMetrics = new ApplicationsMetrics.Application();
+					streamMetrics.getApplications().add(appMetrics);
+					appMetrics.setInstances(new ArrayList<>());
 
-				StreamAppDefinition streamAppDefinition =
-						this.resolveApplicationDefinitionFromAppStatus(streamDefinition, appStatus);
+					for (Map.Entry<String, AppInstanceStatus> instanceEntry : appStatus.getInstances().entrySet()) {
+						AppInstanceStatus appInstanceStatus = instanceEntry.getValue();
+						ApplicationsMetrics.Instance instanceMetrics = new ApplicationsMetrics.Instance();
+						appMetrics.getInstances().add(instanceMetrics);
 
-				String applicationName = streamAppDefinition.getName();
+						instanceMetrics.setGuid(getAppInstanceGuid(appInstanceStatus));
+						instanceMetrics.setState(appInstanceStatus.getState().name());
+						instanceMetrics.setProperties(Collections.emptyMap());
 
-				ApplicationsMetrics.Application appMetrics = new ApplicationsMetrics.Application();
-				streamMetrics.getApplications().add(appMetrics);
-
-				appMetrics.setName(applicationName);
-				appMetrics.setInstances(new ArrayList<>());
-
-				for (Map.Entry<String, AppInstanceStatus> instance : appStatus.getInstances().entrySet()) {
-
-					ApplicationsMetrics.Instance instanceMetrics = new ApplicationsMetrics.Instance();
-					appMetrics.getInstances().add(instanceMetrics);
-
-					//TODO (WARNING): The Guid attribute is not universal across all deployers.
-					String appInstanceGuid = instance.getValue().getAttributes().get("guid");
-					instanceMetrics.setGuid(appInstanceGuid);
-
-					//int instanceIndex = resolveInstanceIndexFromInstanceId(instance.getValue());
-					//instanceMetrics.setIndex(instanceIndex); // TODO: Looks like the index is not required
-
-					instanceMetrics.setProperties(Collections.emptyMap());
-
-					instanceMetrics.setState(instance.getValue().getState().name());
+						appMetrics.setName(appInstanceStatus.getAttributes().get(ATTRIBUTE_SKIPPER_APPLICATION_NAME));
+						streamMetrics.setVersion(appInstanceStatus.getAttributes().get(ATTRIBUTE_SKIPPER_RELEASE_VERSION));
+					}
 				}
-			}
-			return streamMetrics;
-		}
-		catch (Throwable throwable) {
-			logger.warn(throwable);
-		}
-
-		return null;
-	}
-
-	private List<AppStatus> runtimeStatus(String streamName) {
-		try {
-			Info info = this.skipperClient.status(streamName);
-			return SkipperStreamDeployer.deserializeAppStatus(info.getStatus().getPlatformStatus());
-		}
-		catch (Exception e) {
-			// ignore as we query status for all the streams.
-		}
-		return Collections.emptyList();
-	}
-
-	/**
-	 * Reverse engineer to find the AppDefinition from the reported AppStatus.
-	 *
-	 * WARNING: This approach assumes certain name convention for the appState deployment id, which not be the same
-	 * across the various deployment platforms !!!!
-	 *
-	 * @param streamDefinition stream with all application definitions.
-	 * @param appStatus status for one of the applications in the streamDefinition.
-	 * @return
-	 */
-	private StreamAppDefinition resolveApplicationDefinitionFromAppStatus(StreamDefinition streamDefinition,
-			AppStatus appStatus) {
-
-		String deploymentId = appStatus.getDeploymentId();
-
-		Assert.hasText(deploymentId, "Valid deployer ID can not be empty!");
-
-		for (StreamAppDefinition sd : streamDefinition.getAppDefinitions()) {
-
-			if (deploymentId.startsWith(sd.getStreamName() + "." + sd.getName())) { // Local Deployer: <stream name>.<app name/label>-vXX
-				return sd;
-			}
-			else if (deploymentId.startsWith(sd.getStreamName() + "-" + sd.getName())) { // K8s Deployer: <stream name>-<app name/label>-vXX
-				return sd;
-			}
-			else {
-				String boza = deploymentId.substring(deploymentId.indexOf("-"));
-				if (boza.startsWith("-" + sd.getStreamName() + "-" + sd.getName())) { // CF Deployer: <random string>-<stream name>-<app name/label>-vXX
-					return sd;
+				catch (Throwable throwable) {
+					logger.warn("Failed to retrieve runtime status for " + appStatus.getDeploymentId(), throwable);
 				}
 			}
 		}
-		return null;
+		return streamMetrics;
 	}
 
-	///**
-	// *
-	// * WARNING: Makes assumption about the Instance ID's naming convention, which may not be consistent across the
-	// * deployment platforms.
-	// *
-	// * @param instanceStatus
-	// * @return Returns the Instance's index
-	// */
-	//private int resolveInstanceIndexFromInstanceId(AppInstanceStatus instanceStatus) {
-	//	String instanceId = instanceStatus.getId();
-	//	String indexId = instanceId.substring(instanceId.lastIndexOf("-") + 1);
-	//	return Integer.valueOf(indexId);
-	//}
+	private String getAppInstanceGuid(AppInstanceStatus instance) {
+		return instance.getAttributes().containsKey(ATTRIBUTE_GUID) ?
+				instance.getAttributes().get(ATTRIBUTE_GUID) : instance.getId();
+	}
 }

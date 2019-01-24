@@ -344,9 +344,8 @@ public class TestDependencies extends WebMvcConfigurationSupport {
 	}
 
 	@Bean
-	public RuntimeAppsMetricsController metricsController2(StreamDefinitionRepository streamDefinitionRepository,
-			SkipperClient skipperClient) {
-		return new RuntimeAppsMetricsController(streamDefinitionRepository, skipperClient);
+	public RuntimeAppsMetricsController metricsController(StreamDeployer streamDeployer) {
+		return new RuntimeAppsMetricsController(streamDeployer);
 	}
 
 	@Bean

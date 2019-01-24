@@ -67,6 +67,13 @@ public interface StreamDeployer {
 	AppStatus getAppStatus(String appDeploymentId);
 
 	/**
+	 * Returns the deployed application statuses part for the streamName stream.
+	 * @param streamName Stream name to retrieve the runtime application statues for
+	 * @return List of runtime application statues, part of the requested streamName.
+	 */
+	List<AppStatus> getStreamStatuses(String streamName);
+
+	/**
 	 * @return the runtime environment info for deploying streams.
 	 */
 	RuntimeEnvironmentInfo environmentInfo();

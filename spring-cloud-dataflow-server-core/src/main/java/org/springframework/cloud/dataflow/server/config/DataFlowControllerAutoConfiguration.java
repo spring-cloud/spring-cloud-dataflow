@@ -399,9 +399,8 @@ public class DataFlowControllerAutoConfiguration {
 		}
 
 		@Bean
-		public RuntimeAppsMetricsController metricsController(StreamDefinitionRepository streamDefinitionRepository,
-				SkipperClient skipperClient) {
-			return new RuntimeAppsMetricsController(streamDefinitionRepository, skipperClient);
+		public RuntimeAppsMetricsController metricsController(StreamDeployer streamDeployer) {
+			return new RuntimeAppsMetricsController(streamDeployer);
 		}
 	}
 

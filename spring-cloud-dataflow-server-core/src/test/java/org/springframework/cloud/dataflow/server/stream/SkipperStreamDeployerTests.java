@@ -16,6 +16,7 @@
 package org.springframework.cloud.dataflow.server.stream;
 
 import java.io.IOException;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -56,7 +57,9 @@ import org.springframework.cloud.skipper.domain.Status;
 import org.springframework.cloud.skipper.domain.StatusCode;
 import org.springframework.cloud.skipper.domain.UploadRequest;
 import org.springframework.cloud.skipper.domain.VersionInfo;
+import org.springframework.core.io.DefaultResourceLoader;
 import org.springframework.hateoas.Resources;
+import org.springframework.util.StreamUtils;
 
 import static junit.framework.TestCase.fail;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -379,6 +382,35 @@ public class SkipperStreamDeployerTests {
 		status.setPlatformStatus(null);
 		info.setStatus(status);
 		return info;
+	}
+
+	@Test
+	public void testGetStreamStatuses() throws IOException {
+
+		AppRegistryService appRegistryService = mock(AppRegistryService.class);
+		SkipperClient skipperClient = mock(SkipperClient.class);
+		StreamDefinitionRepository streamDefinitionRepository = mock(StreamDefinitionRepository.class);
+
+		SkipperStreamDeployer skipperStreamDeployer = new SkipperStreamDeployer(skipperClient,
+				streamDefinitionRepository, appRegistryService, mock(ForkJoinPool.class));
+
+
+		String platformStatus = StreamUtils.copyToString(
+				new DefaultResourceLoader().getResource("classpath:/app-instance-state.json").getInputStream(),
+				Charset.forName("UTF-8"));
+		new DefaultResourceLoader().getResource("classpath:/app-instance-state.json");
+
+		Info info = new Info();
+		Status status = new Status();
+		status.setStatusCode(StatusCode.DEPLOYED);
+		status.setPlatformStatus(platformStatus);
+		info.setStatus(status);
+
+		when(skipperClient.status(eq("stream1"))).thenReturn(info);
+
+		List<AppStatus> appStatues = skipperStreamDeployer.getStreamStatuses("stream1");
+		assertThat(appStatues).isNotNull();
+		assertThat(appStatues.size()).isEqualTo(4);
 	}
 
 	@Test

@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2018 the original author or authors.
+ * Copyright 2017-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -447,7 +447,7 @@ public class SkipperStreamDeployer implements StreamDeployer {
 			skipperStreams.add(streamDefinition.getName());
 		}
 
-		List<AppStatus> allStatuses = getStreamStatuses(pageable, skipperStreams);
+		List<AppStatus> allStatuses = getStreamsStatuses(skipperStreams);
 
 		List<AppStatus> pagedStatuses = allStatuses.stream().skip(pageable.getPageNumber() * pageable.getPageSize())
 				.limit(pageable.getPageSize()).parallel().collect(Collectors.toList());
@@ -467,6 +467,17 @@ public class SkipperStreamDeployer implements StreamDeployer {
 			}
 		}
 		throw new NoSuchAppException(appDeploymentId);
+	}
+
+	@Override
+	public List<AppStatus> getStreamStatuses(String streamName) {
+		return skipperStatus(streamName);
+	}
+
+	private List<AppStatus> getStreamsStatuses(List<String> streamNames)
+			throws ExecutionException, InterruptedException {
+		return this.forkJoinPool.submit(() -> streamNames.stream().parallel()
+				.map(this::skipperStatus).flatMap(List::stream).collect(Collectors.toList())).get();
 	}
 
 	@Override
@@ -508,12 +519,6 @@ public class SkipperStreamDeployer implements StreamDeployer {
 		catch (ReleaseNotFoundException e) {
 			return new StreamDeployment(streamName);
 		}
-	}
-
-	private List<AppStatus> getStreamStatuses(Pageable pageable, List<String> skipperStreamNames)
-			throws ExecutionException, InterruptedException {
-		return this.forkJoinPool.submit(() -> skipperStreamNames.stream().parallel()
-				.map(this::skipperStatus).flatMap(List::stream).collect(Collectors.toList())).get();
 	}
 
 	private List<AppStatus> skipperStatus(String streamName) {

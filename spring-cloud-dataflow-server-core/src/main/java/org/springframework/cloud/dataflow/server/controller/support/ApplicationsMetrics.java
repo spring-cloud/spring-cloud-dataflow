@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 the original author or authors.
+ * Copyright 2017-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,10 +23,13 @@ import java.util.Map;
  * Support domain class to map metrics response from a collector.
  *
  * @author Janne Valkealahti
+ * @author Christian Tzolov
  */
 public class ApplicationsMetrics {
 
 	private String name;
+
+	private String version;
 
 	private List<Application> applications;
 
@@ -44,6 +47,14 @@ public class ApplicationsMetrics {
 
 	public void setApplications(List<Application> applications) {
 		this.applications = applications;
+	}
+
+	public String getVersion() {
+		return version;
+	}
+
+	public void setVersion(String version) {
+		this.version = version;
 	}
 
 	public static class Application {
