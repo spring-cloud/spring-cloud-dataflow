@@ -15,6 +15,17 @@
  */
 package org.springframework.cloud.dataflow.server.controller;
 
+import static org.hamcrest.Matchers.hasSize;
+import static org.hamcrest.Matchers.is;
+import static org.junit.Assert.assertEquals;
+import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
 import java.util.ArrayList;
 
 import org.junit.After;
@@ -22,14 +33,16 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentMatchers;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase.Replace;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.cloud.dataflow.audit.repository.AuditRecordRepository;
+import org.springframework.cloud.dataflow.core.AppRegistration;
+import org.springframework.cloud.dataflow.core.ApplicationType;
 import org.springframework.cloud.dataflow.core.AuditRecord;
 import org.springframework.cloud.dataflow.registry.repository.AppRegistrationRepository;
+import org.springframework.cloud.dataflow.registry.service.AppRegistryService;
 import org.springframework.cloud.dataflow.server.configuration.TestDependencies;
 import org.springframework.cloud.dataflow.server.repository.StreamDefinitionRepository;
 import org.springframework.cloud.dataflow.server.service.StreamService;
@@ -47,17 +60,6 @@ import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
-
-import static org.hamcrest.Matchers.hasSize;
-import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertEquals;
-import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 /**
  * Verifies the functionality of the {@link AuditRecordController}.
@@ -79,6 +81,9 @@ public class AuditRecordControllerTests {
 
 	@Autowired
 	private AppRegistrationRepository appRegistrationRepository;
+
+	@Autowired
+	private AppRegistryService appRegistryService;
 
 	private MockMvc mockMvc;
 
@@ -186,17 +191,17 @@ public class AuditRecordControllerTests {
 	@Test
 	public void testRetrieveAppRelatedAuditRecords() throws Exception {
 		mockMvc.perform(get("/audit-records?operations=APP_REGISTRATION").accept(MediaType.APPLICATION_JSON))
-				.andDo(print())
-				.andExpect(status().isOk())
-				.andExpect(jsonPath("$.content.*", hasSize(4)));
+		.andDo(print())
+		.andExpect(status().isOk())
+		.andExpect(jsonPath("$.content.*", hasSize(4)));
 	}
 
 	@Test
 	public void testRetrieveAuditRecordsWithActionCreate() throws Exception {
 		mockMvc.perform(get("/audit-records?actions=CREATE").accept(MediaType.APPLICATION_JSON))
-				.andDo(print())
-				.andExpect(status().isOk())
-				.andExpect(jsonPath("$.content.*", hasSize(7)));
+		.andDo(print())
+		.andExpect(status().isOk())
+		.andExpect(jsonPath("$.content.*", hasSize(7)));
 	}
 
 	@Test
@@ -283,31 +288,38 @@ public class AuditRecordControllerTests {
 	@Test
 	public void testRetrieveDeletedAppsAuditData() throws Exception {
 		mockMvc.perform(get("/audit-records").accept(MediaType.APPLICATION_JSON))
-				.andDo(print())
-				.andExpect(status().isOk())
-				.andExpect(jsonPath("$.content.*", hasSize(9)));
+		.andDo(print())
+		.andExpect(status().isOk())
+		.andExpect(jsonPath("$.content.*", hasSize(9)));
 
-		deleteAppByName("processor","filter", "1.0.0.BUILD-SNAPSHOT");
+		appRegistryService.delete("filter", ApplicationType.processor,"1.0.0.BUILD-SNAPSHOT");
 
-		mockMvc.perform(get("/audit-records?operations=APP_REGISTRATIO&actions=DELETE").accept(MediaType.APPLICATION_JSON))
-				.andDo(print())
-				.andExpect(status().isOk())
-				.andExpect(jsonPath("$.content.*", hasSize(1)))
+		mockMvc.perform(get("/audit-records?operations=APP_REGISTRATION&actions=DELETE").accept(MediaType.APPLICATION_JSON))
+		.andDo(print())
+		.andExpect(status().isOk())
+		.andExpect(jsonPath("$.content.*", hasSize(1)))
 
-				.andExpect(jsonPath("$.content[0].auditRecordId", is(6)))
-				.andExpect(jsonPath("$.content[0].correlationId", is("log")));
+		.andExpect(jsonPath("$.content[0].auditRecordId", is(14)))
+		.andExpect(jsonPath("$.content[0].correlationId", is("filter")));
 	}
 
 	@Test
 	public void testRetrieveUpdatedAppsAuditData() throws Exception {
 		mockMvc.perform(get("/audit-records?operations=APP_REGISTRATION").accept(MediaType.APPLICATION_JSON))
-				.andDo(print())
-				.andExpect(status().isOk())
-				.andExpect(jsonPath("$.content.*", hasSize(4)));
+		.andDo(print())
+		.andExpect(status().isOk())
+		.andExpect(jsonPath("$.content.*", hasSize(4)));
+
+		AppRegistration filter = appRegistryService.find("filter", ApplicationType.processor, "1.0.0.BUILD-SNAPSHOT");
+		appRegistryService.save(filter);
+
+		mockMvc.perform(get("/audit-records?operations=APP_REGISTRATION&actions=UPDATE").accept(MediaType.APPLICATION_JSON))
+		.andDo(print())
+		.andExpect(status().isOk())
+		.andExpect(jsonPath("$.content.*", hasSize(1)))
+
+		.andExpect(jsonPath("$.content[0].auditRecordId", is(14)))
+		.andExpect(jsonPath("$.content[0].correlationId", is("filter")));
 	}
 
-	private void deleteAppByName(String type, String name, String version) throws Exception {
-		mockMvc.perform(delete("/apps/"+type+"/"+name+"/"+version)
-				.accept(MediaType.APPLICATION_JSON)).andExpect(status().isOk());
-	}
 }
