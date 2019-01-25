@@ -56,6 +56,16 @@ public class RuntimeAppsDocumentation extends BaseDocumentation {
 	}
 
 	@Test
+	public void listRuntimeStreamStatus() throws Exception {
+		this.mockMvc.perform(
+				get("/runtime/streams")
+						.accept(MediaType.APPLICATION_JSON)
+						.param("names", "mystream"))
+				.andExpect(status().isOk())
+				.andDo(this.documentationHandler.document());
+	}
+
+	@Test
 	public void listAllApps() throws Exception {
 		this.mockMvc.perform(
 				get("/runtime/apps")

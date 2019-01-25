@@ -25,7 +25,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ForkJoinPool;
 import java.util.stream.Collectors;
 
@@ -440,7 +439,7 @@ public class SkipperStreamDeployer implements StreamDeployer {
 	}
 
 	@Override
-	public Page<AppStatus> getAppStatuses(Pageable pageable) throws ExecutionException, InterruptedException {
+	public Page<AppStatus> getAppStatuses(Pageable pageable) {
 		List<String> skipperStreams = new ArrayList<>();
 		Iterable<StreamDefinition> streamDefinitions = this.streamDefinitionRepository.findAll();
 		for (StreamDefinition streamDefinition : streamDefinitions) {
@@ -474,10 +473,15 @@ public class SkipperStreamDeployer implements StreamDeployer {
 		return skipperStatus(streamName);
 	}
 
-	private List<AppStatus> getStreamsStatuses(List<String> streamNames)
-			throws ExecutionException, InterruptedException {
-		return this.forkJoinPool.submit(() -> streamNames.stream().parallel()
-				.map(this::skipperStatus).flatMap(List::stream).collect(Collectors.toList())).get();
+	private List<AppStatus> getStreamsStatuses(List<String> streamNames) {
+		try {
+			return this.forkJoinPool.submit(() -> streamNames.stream().parallel()
+					.map(this::skipperStatus).flatMap(List::stream).collect(Collectors.toList())).get();
+		}
+		catch (Exception e) {
+			logger.error("Failed to retrieve the Runtime Stream Statues", e);
+			throw new RuntimeException("Failed to retrieve the Runtime Stream Statues for " + streamNames);
+		}
 	}
 
 	@Override

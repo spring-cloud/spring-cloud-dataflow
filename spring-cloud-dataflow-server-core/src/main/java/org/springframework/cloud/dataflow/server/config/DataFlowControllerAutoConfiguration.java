@@ -140,7 +140,7 @@ import org.springframework.web.client.RestTemplate;
 @Import(CompletionConfiguration.class)
 @ConditionalOnBean({ EnableDataFlowServerConfiguration.Marker.class })
 @EnableConfigurationProperties({ FeaturesProperties.class, VersionInfoProperties.class,
-		DockerValidatorProperties.class })
+		DockerValidatorProperties.class, GrafanaInfoProperties.class })
 @ConditionalOnProperty(prefix = "dataflow.server", name = "enabled", havingValue = "true", matchIfMissing = true)
 @EnableCircuitBreaker
 @EntityScan({
@@ -178,11 +178,10 @@ public class DataFlowControllerAutoConfiguration {
 			ObjectProvider<LauncherRepository> launcherRepository,
 			FeaturesProperties featuresProperties,
 			VersionInfoProperties versionInfoProperties,
-			SecurityStateBean securityStateBean) {
+			SecurityStateBean securityStateBean,
+			GrafanaInfoProperties grafanaInfoProperties) {
 		return new AboutController(streamDeployer.getIfAvailable(), launcherRepository.getIfAvailable(),
-				featuresProperties,
-				versionInfoProperties,
-				securityStateBean);
+				featuresProperties, versionInfoProperties, securityStateBean, grafanaInfoProperties);
 	}
 
 	@Bean

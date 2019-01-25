@@ -33,6 +33,8 @@ public class AboutResource extends ResourceSupport {
 
 	private RuntimeEnvironment runtimeEnvironment = new RuntimeEnvironment();
 
+	private GrafanaInfo grafanaInfo = new GrafanaInfo();
+
 	/**
 	 * Default constructor for serialization frameworks.
 	 */
@@ -71,4 +73,11 @@ public class AboutResource extends ResourceSupport {
 		this.runtimeEnvironment = runtimeEnvironment;
 	}
 
+	public GrafanaInfo getGrafanaInfo() {
+		return grafanaInfo;
+	}
+
+	public void setGrafanaInfo(GrafanaInfo grafanaInfo) {
+		this.grafanaInfo = grafanaInfo;
+	}
 }

@@ -341,7 +341,10 @@ public class AboutControllerTests {
 			"spring.cloud.dataflow.version-info.dependencies.spring-cloud-dataflow-shell.url=https://repo.spring.io/libs-milestone/org/springframework/cloud/spring-cloud-dataflow-shell/1.3.0.BUILD-SNAPSHOT/spring-cloud-dataflow-shell-1.3.0.BUILD-SNAPSHOT.jsdfasdf",
 			"spring.cloud.dataflow.version-info.dependencies.spring-cloud-dataflow-shell.name=Spring Cloud Data Flow Shell Test",
 			"spring.cloud.dataflow.version-info.dependencies.spring-cloud-dataflow-shell.checksum-sha1=ABCDEFG",
-			"spring.cloud.dataflow.version-info.dependencies.spring-cloud-dataflow-shell.checksum-sha1-url={repository}/org/springframework/cloud/spring-cloud-dataflow-shell/{version}/spring-cloud-dataflow-shell-{version}.jar.sha1"
+			"spring.cloud.dataflow.version-info.dependencies.spring-cloud-dataflow-shell.checksum-sha1-url={repository}/org/springframework/cloud/spring-cloud-dataflow-shell/{version}/spring-cloud-dataflow-shell-{version}.jar.sha1",
+			"spring.cloud.dataflow.grafana-info.url=http://localhost:3001",
+			"spring.cloud.dataflow.grafana-info.token=boza",
+			"spring.cloud.dataflow.grafana-info.refresh-interval=30"
 	})
 	@AutoConfigureTestDatabase(replace = Replace.ANY)
 	public static class AboutTests {
@@ -382,9 +385,11 @@ public class AboutControllerTests {
 					.andExpect(jsonPath("$.securityInfo.formLogin", is(false)))
 					.andExpect(jsonPath("$.securityInfo.authenticated", is(false)))
 					.andExpect(jsonPath("$.securityInfo.username", isEmptyOrNullString()))
-					.andExpect(jsonPath("$.runtimeEnvironment.appDeployer.deployerName", is("skipper server")));
+					.andExpect(jsonPath("$.runtimeEnvironment.appDeployer.deployerName", is("skipper server")))
+					.andExpect(jsonPath("$.featureInfo.grafanaEnabled", is(true)))
+					.andExpect(jsonPath("$.grafanaInfo.url", is("http://localhost:3001")))
+					.andExpect(jsonPath("$.grafanaInfo.refreshInterval", is(30)));
 		}
-
 
 		@Test
 		public void testAboutWithMissingSkipper() throws Exception {

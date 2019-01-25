@@ -32,6 +32,8 @@ public class FeatureInfo {
 
 	private boolean schedulerEnabled = false;
 
+	private boolean grafanaEnabled = false;
+
 	/**
 	 * Default constructor for serialization frameworks.
 	 */
@@ -68,5 +70,13 @@ public class FeatureInfo {
 
 	public void setSchedulerEnabled(boolean schedulerEnabled) {
 		this.schedulerEnabled = schedulerEnabled;
+	}
+
+	public boolean isGrafanaEnabled() {
+		return grafanaEnabled;
+	}
+
+	public void setGrafanaEnabled(boolean grafanaEnabled) {
+		this.grafanaEnabled = grafanaEnabled;
 	}
 }
