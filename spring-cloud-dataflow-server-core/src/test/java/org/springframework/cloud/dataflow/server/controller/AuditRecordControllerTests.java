@@ -474,5 +474,35 @@ public class AuditRecordControllerTests {
                 .andExpect(jsonPath("$.content[0].correlationId", is("filter")));
     }
 
+    @Test
+	public void testRetrievePagedAuditDataNegative() throws Exception {
+		mockMvc.perform(get("/audit-records?page=-5&size=2").accept(MediaType.APPLICATION_JSON))
+				.andDo(print())
+				.andExpect(status().isOk())
+				.andExpect(jsonPath("$.content.*", hasSize(2)));
+	}
 
+	@Test
+	public void testRetrievePagedAuditDataInRange() throws Exception {
+		mockMvc.perform(get("/audit-records?page=0&size=5").accept(MediaType.APPLICATION_JSON))
+				.andDo(print())
+				.andExpect(status().isOk())
+				.andExpect(jsonPath("$.content.*", hasSize(5)));
+	}
+
+	@Test
+	public void testRetrievePagedAuditDataOverlappingRightBound() throws Exception {
+		mockMvc.perform(get("/audit-records?page=0&size=20").accept(MediaType.APPLICATION_JSON))
+				.andDo(print())
+				.andExpect(status().isOk())
+				.andExpect(jsonPath("$.content.*", hasSize(9)));
+	}
+
+	@Test
+	public void testRetrievePagedAuditDataOutOfRange() throws Exception {
+		mockMvc.perform(get("/audit-records?page=55&size=2").accept(MediaType.APPLICATION_JSON))
+				.andDo(print())
+				.andExpect(status().isOk())
+				.andExpect(jsonPath("$.content.*", hasSize(0)));
+	}
 }

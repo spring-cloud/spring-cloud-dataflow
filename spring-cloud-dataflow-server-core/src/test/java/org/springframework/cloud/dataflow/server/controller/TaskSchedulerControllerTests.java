@@ -43,7 +43,7 @@ import org.springframework.cloud.dataflow.server.service.SchedulerService;
 import org.springframework.cloud.scheduler.spi.core.ScheduleInfo;
 import org.springframework.cloud.scheduler.spi.core.SchedulerPropertyKeys;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.http.MediaType;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.junit4.SpringRunner;
@@ -250,12 +250,12 @@ public class TaskSchedulerControllerTests {
 
 		AuditActionType[] auditActionTypesCreate = { AuditActionType.CREATE };
 		final Page<AuditRecord> auditRecordsCreate = auditRecordRepository.findByActionTypeAndOperationTypeAndDate(null,
-				auditActionTypesCreate, null, null, Pageable.unpaged());
+				auditActionTypesCreate, null, null, PageRequest.of(0,6));
 
 		AuditActionType[] auditActionTypesDelete = { AuditActionType.DELETE };
 		final Page<AuditRecord> auditRecordsDelete = auditRecordRepository.findByActionTypeAndOperationTypeAndDate(null,
 				auditActionTypesDelete,
-				null, null, Pageable.unpaged());
+				null, null, PageRequest.of(0,6));
 
 		assertEquals(6, auditRecordsCreate.getContent().size());
 		assertEquals(1, auditRecordsDelete.getContent().size());
