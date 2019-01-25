@@ -1,5 +1,5 @@
 /*
- * Copyright 2016-2018 the original author or authors.
+ * Copyright 2016-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,8 +25,6 @@ import javax.servlet.Filter;
 import org.slf4j.LoggerFactory;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.actuate.autoconfigure.security.servlet.ManagementWebSecurityAutoConfiguration;
-import org.springframework.boot.autoconfigure.AutoConfigureBefore;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
@@ -34,8 +32,7 @@ import org.springframework.boot.autoconfigure.security.SecurityProperties;
 import org.springframework.boot.autoconfigure.security.oauth2.resource.AuthoritiesExtractor;
 import org.springframework.boot.autoconfigure.security.oauth2.resource.PrincipalExtractor;
 import org.springframework.boot.autoconfigure.security.oauth2.resource.ResourceServerProperties;
-import org.springframework.boot.autoconfigure.security.oauth2.resource.UserInfoTokenServices;
-import org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration;
+import org.springframework.cloud.common.security.support.TokenValidatingUserInfoTokenServices;
 import org.springframework.cloud.common.security.support.DataflowPrincipalExtractor;
 import org.springframework.cloud.common.security.support.DefaultAuthoritiesExtractor;
 import org.springframework.cloud.common.security.support.ExternalOauth2ResourceAuthoritiesExtractor;
@@ -60,10 +57,17 @@ import org.springframework.security.oauth2.client.OAuth2ClientContext;
 import org.springframework.security.oauth2.client.OAuth2RestTemplate;
 import org.springframework.security.oauth2.client.filter.OAuth2AuthenticationFailureEvent;
 import org.springframework.security.oauth2.client.filter.OAuth2ClientAuthenticationProcessingFilter;
+import org.springframework.security.oauth2.client.resource.BaseOAuth2ProtectedResourceDetails;
+import org.springframework.security.oauth2.client.token.AccessTokenProvider;
 import org.springframework.security.oauth2.client.token.grant.code.AuthorizationCodeResourceDetails;
+import org.springframework.security.oauth2.client.token.grant.password.ResourceOwnerPasswordAccessTokenProvider;
 import org.springframework.security.oauth2.config.annotation.web.configuration.EnableOAuth2Client;
+import org.springframework.security.oauth2.config.annotation.web.configuration.ResourceServerConfigurerAdapter;
+import org.springframework.security.oauth2.config.annotation.web.configurers.ResourceServerSecurityConfigurer;
 import org.springframework.security.oauth2.provider.authentication.OAuth2AuthenticationManager;
 import org.springframework.security.oauth2.provider.authentication.OAuth2AuthenticationProcessingFilter;
+import org.springframework.security.oauth2.provider.token.ResourceServerTokenServices;
+import org.springframework.security.oauth2.provider.token.store.InMemoryTokenStore;
 import org.springframework.security.web.authentication.LoginUrlAuthenticationEntryPoint;
 import org.springframework.security.web.authentication.www.BasicAuthenticationEntryPoint;
 import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
@@ -113,6 +117,10 @@ public class OAuthSecurityConfiguration extends WebSecurityConfigurerAdapter {
 	@Autowired
 	protected AuthorizationProperties authorizationProperties;
 
+	@Autowired
+	protected BaseOAuth2ProtectedResourceDetails clientCredentialsResourceDetails;
+
+
 	@Autowired(required = false)
 	private PrincipalExtractor principalExtractor;
 
@@ -158,9 +166,17 @@ public class OAuthSecurityConfiguration extends WebSecurityConfigurerAdapter {
 	}
 
 	@Bean
-	protected UserInfoTokenServices tokenServices() {
-		final UserInfoTokenServices tokenServices = new UserInfoTokenServices(resourceServerProperties.getUserInfoUri(),
-				authorizationCodeResourceDetails.getClientId());
+	protected TokenValidatingUserInfoTokenServices resourceServerTokenServices() {
+
+		final TokenValidatingUserInfoTokenServices tokenServices = new TokenValidatingUserInfoTokenServices(
+				resourceServerProperties.getUserInfoUri(),
+				resourceServerProperties.getTokenInfoUri(),
+				authorizationCodeResourceDetails.getClientId(),
+				authorizationCodeResourceDetails.getClientSecret());
+
+		tokenServices.setTokenStore(new InMemoryTokenStore());
+		tokenServices.setSupportRefreshToken(true);
+
 		tokenServices.setRestTemplate(oAuth2RestTemplate());
 		final AuthoritiesExtractor authoritiesExtractor;
 		if (StringUtils.isEmpty(authorizationProperties.getExternalAuthoritiesUrl())) {
@@ -188,9 +204,14 @@ public class OAuthSecurityConfiguration extends WebSecurityConfigurerAdapter {
 		return oAuth2RestTemplate;
 	}
 
+	public AccessTokenProvider userAccessTokenProvider() {
+		ResourceOwnerPasswordAccessTokenProvider accessTokenProvider = new ResourceOwnerPasswordAccessTokenProvider();
+		return accessTokenProvider;
+	}
+
 	@Bean
 	protected AuthenticationProvider authenticationProvider() {
-		return new ManualOAuthAuthenticationProvider(oauth2ClientContext);
+		return new ManualOAuthAuthenticationProvider(this.resourceServerTokenServices(), oauth2ClientContext);
 	}
 
 	@Bean
@@ -205,7 +226,7 @@ public class OAuthSecurityConfiguration extends WebSecurityConfigurerAdapter {
 		final OAuth2ClientAuthenticationProcessingFilter oauthFilter = new OAuth2ClientAuthenticationProcessingFilter(
 				"/login");
 		oauthFilter.setRestTemplate(oAuth2RestTemplate());
-		oauthFilter.setTokenServices(tokenServices());
+		oauthFilter.setTokenServices(resourceServerTokenServices());
 		oauthFilter.setApplicationEventPublisher(this.applicationEventPublisher);
 		return oauthFilter;
 	}
@@ -220,7 +241,7 @@ public class OAuthSecurityConfiguration extends WebSecurityConfigurerAdapter {
 	@Bean
 	public AuthenticationManager oauthAuthenticationManager() {
 		final OAuth2AuthenticationManager oauthAuthenticationManager = new OAuth2AuthenticationManager();
-		oauthAuthenticationManager.setTokenServices(tokenServices());
+		oauthAuthenticationManager.setTokenServices(resourceServerTokenServices());
 		return oauthAuthenticationManager;
 	}
 
@@ -251,4 +272,19 @@ public class OAuthSecurityConfiguration extends WebSecurityConfigurerAdapter {
 			return Collections.singletonList(MediaType.APPLICATION_JSON);
 		}
 	}
+
+	@Configuration
+	protected static class ResourceServerConfiguration
+			extends ResourceServerConfigurerAdapter {
+
+		@Autowired ResourceServerTokenServices resourceServerTokenServices;
+
+		@Override
+		public void configure(ResourceServerSecurityConfigurer resources) throws Exception {
+			super.configure(resources);
+			resources.tokenServices(resourceServerTokenServices);
+		}
+
+	}
+
 }

@@ -37,6 +37,7 @@ import org.springframework.security.oauth2.client.token.grant.password.ResourceO
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
 import org.springframework.security.oauth2.common.exceptions.OAuth2Exception;
 import org.springframework.security.oauth2.provider.OAuth2Authentication;
+import org.springframework.security.oauth2.provider.token.ResourceServerTokenServices;
 import org.springframework.web.client.ResourceAccessException;
 
 /**
@@ -55,12 +56,14 @@ public class ManualOAuthAuthenticationProvider implements AuthenticationProvider
 	@Value("${security.oauth2.client.access-token-uri}")
 	private String accessTokenUri;
 
-	@Autowired
-	private UserInfoTokenServices userInfoTokenServices;
+	private final ResourceServerTokenServices resourceServerTokenServices;
 	private final OAuth2ClientContext oauth2ClientContext;
 
-	public ManualOAuthAuthenticationProvider(OAuth2ClientContext oauth2ClientContext) {
-		super();
+	public ManualOAuthAuthenticationProvider(
+		ResourceServerTokenServices resourceServerTokenServices,
+		OAuth2ClientContext oauth2ClientContext) {
+
+		this.resourceServerTokenServices = resourceServerTokenServices;
 		this.oauth2ClientContext = oauth2ClientContext;
 	}
 
@@ -108,7 +111,7 @@ public class ManualOAuthAuthenticationProvider implements AuthenticationProvider
 		}
 
 		final ManualOAuthAuthenticationDetails details = new ManualOAuthAuthenticationDetails(accessToken);
-		final OAuth2Authentication auth2Authentication = userInfoTokenServices.loadAuthentication(accessToken.getValue());
+		final OAuth2Authentication auth2Authentication = resourceServerTokenServices.loadAuthentication(accessToken.getValue());
 		auth2Authentication.setDetails(details);
 		return auth2Authentication;
 	}
