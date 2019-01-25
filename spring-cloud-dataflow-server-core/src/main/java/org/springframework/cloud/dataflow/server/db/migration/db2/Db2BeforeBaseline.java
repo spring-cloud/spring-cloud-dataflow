@@ -59,6 +59,36 @@ public class Db2BeforeBaseline extends AbstractBaselineCallback {
 	public final static String RENAME_APP_REGISTRATION_TMP_TABLE =
 			"rename table app_registration_tmp to app_registration";
 
+	public final static String CREATE_STREAM_DEFINITIONS_TMP_TABLE =
+			V1__Initial_Setup.CREATE_STREAM_DEFINITIONS_TABLE.replaceFirst("stream_definitions", "stream_definitions_tmp");
+
+	public final static String INSERT_STREAM_DEFINITIONS_DATA =
+			"insert into\n" +
+			"  stream_definitions_tmp (definition_name, definition) \n" +
+			"  select DEFINITION_NAME, DEFINITION\n" +
+			"  from STREAM_DEFINITIONS";
+
+	public final static String DROP_STREAM_DEFINITIONS_TABLE =
+			"drop table STREAM_DEFINITIONS";
+
+	public final static String RENAME_STREAM_DEFINITIONS_TMP_TABLE =
+			"rename table stream_definitions_tmp to stream_definitions";
+
+	public final static String CREATE_TASK_DEFINITIONS_TMP_TABLE =
+			V1__Initial_Setup.CREATE_TASK_DEFINITIONS_TABLE.replaceFirst("task_definitions", "task_definitions_tmp");
+
+	public final static String INSERT_TASK_DEFINITIONS_DATA =
+			"insert into\n" +
+			"  task_definitions_tmp (definition_name, definition) \n" +
+			"  select DEFINITION_NAME, DEFINITION\n" +
+			"  from TASK_DEFINITIONS";
+
+	public final static String DROP_TASK_DEFINITIONS_TABLE =
+			"drop table TASK_DEFINITIONS";
+
+	public final static String RENAME_TASK_DEFINITIONS_TMP_TABLE =
+			"rename table task_definitions_tmp to task_definitions";
+
 	public final static String CREATE_AUDIT_RECORDS_TMP_TABLE =
 			V1__Initial_Setup.CREATE_AUDIT_RECORDS_TABLE.replaceFirst("audit_records", "audit_records_tmp");
 
@@ -109,6 +139,24 @@ public class Db2BeforeBaseline extends AbstractBaselineCallback {
 				SqlCommand.from(INSERT_APP_REGISTRATION_DATA),
 				SqlCommand.from(DROP_APP_REGISTRATION_TABLE),
 				SqlCommand.from(RENAME_APP_REGISTRATION_TMP_TABLE));
+	}
+
+	@Override
+	public List<SqlCommand> changeStreamDefinitionsTable() {
+		return Arrays.asList(
+				SqlCommand.from(CREATE_STREAM_DEFINITIONS_TMP_TABLE),
+				SqlCommand.from(INSERT_STREAM_DEFINITIONS_DATA),
+				SqlCommand.from(DROP_STREAM_DEFINITIONS_TABLE),
+				SqlCommand.from(RENAME_STREAM_DEFINITIONS_TMP_TABLE));
+	}
+
+	@Override
+	public List<SqlCommand> changeTaskDefinitionsTable() {
+		return Arrays.asList(
+				SqlCommand.from(CREATE_TASK_DEFINITIONS_TMP_TABLE),
+				SqlCommand.from(INSERT_TASK_DEFINITIONS_DATA),
+				SqlCommand.from(DROP_TASK_DEFINITIONS_TABLE),
+				SqlCommand.from(RENAME_TASK_DEFINITIONS_TMP_TABLE));
 	}
 
 	@Override
