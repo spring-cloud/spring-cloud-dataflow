@@ -225,11 +225,11 @@ public class DataFlowControllerAutoConfiguration {
 				Optional<StreamDefinitionRepository> streamDefinitionRepository,
 				Optional<StreamService> streamService,
 				AppRegistryService appRegistry, ApplicationConfigurationMetadataResolver metadataResolver,
-				ForkJoinPool appRegistryFJPFB, MavenProperties mavenProperties) {
+				ForkJoinPool appRegistryFJPFB) {
 			return new AppRegistryController(streamDefinitionRepository,
 					streamService,
 					appRegistry,
-					metadataResolver, appRegistryFJPFB, mavenProperties);
+					metadataResolver, appRegistryFJPFB);
 		}
 	}
 
