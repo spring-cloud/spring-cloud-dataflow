@@ -49,7 +49,6 @@ import org.springframework.cloud.dataflow.rest.resource.AppRegistrationResource;
 import org.springframework.cloud.dataflow.rest.resource.DetailedAppRegistrationResource;
 import org.springframework.cloud.dataflow.server.repository.StreamDefinitionRepository;
 import org.springframework.cloud.dataflow.server.service.StreamService;
-import org.springframework.cloud.deployer.resource.maven.MavenProperties;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.DefaultResourceLoader;
 import org.springframework.core.io.ResourceLoader;
@@ -93,8 +92,6 @@ public class AppRegistryController {
 
 	private final AppRegistryService appRegistryService;
 
-	private final MavenProperties mavenProperties;
-
 	private final StreamService streamService;
 
 	private ApplicationConfigurationMetadataResolver metadataResolver;
@@ -107,13 +104,12 @@ public class AppRegistryController {
 			Optional<StreamService> streamService,
 			AppRegistryService appRegistryService,
 			ApplicationConfigurationMetadataResolver metadataResolver,
-			ForkJoinPool forkJoinPool, MavenProperties mavenProperties) {
+			ForkJoinPool forkJoinPool) {
 		this.streamDefinitionRepository = streamDefinitionRepository.isPresent() ? streamDefinitionRepository.get() : null;
 		this.streamService = streamService.isPresent() ? streamService.get() : null;
 		this.appRegistryService = appRegistryService;
 		this.metadataResolver = metadataResolver;
 		this.forkJoinPool = forkJoinPool;
-		this.mavenProperties = mavenProperties;
 	}
 
 	/**

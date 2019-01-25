@@ -337,9 +337,9 @@ public class TestDependencies extends WebMvcConfigurationSupport {
 			Optional<StreamDefinitionRepository> streamDefinitionRepository,
 			Optional<StreamService> streamService,
 			AppRegistryService appRegistry,
-			ApplicationConfigurationMetadataResolver metadataResolver, MavenProperties mavenProperties) {
+			ApplicationConfigurationMetadataResolver metadataResolver) {
 		return new AppRegistryController(streamDefinitionRepository, streamService, appRegistry, metadataResolver,
-				new ForkJoinPool(2), mavenProperties);
+				new ForkJoinPool(2));
 	}
 
 	@Bean
