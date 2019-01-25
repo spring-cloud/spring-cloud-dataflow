@@ -34,6 +34,11 @@ public class GrafanaInfo {
 	 */
 	private String token = "";
 
+	/**
+	 * Dashboard refresh interval in Seconds
+	 */
+	private int refreshInterval = 15;
+
 	public String getUrl() {
 		return url;
 	}
@@ -48,5 +53,13 @@ public class GrafanaInfo {
 
 	public void setToken(String token) {
 		this.token = token;
+	}
+
+	public int getRefreshInterval() {
+		return refreshInterval;
+	}
+
+	public void setRefreshInterval(int refreshInterval) {
+		this.refreshInterval = refreshInterval;
 	}
 }

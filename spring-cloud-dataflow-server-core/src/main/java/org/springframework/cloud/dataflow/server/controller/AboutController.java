@@ -100,6 +100,9 @@ public class AboutController {
 	@Value("${spring.cloud.dataflow.grafana-info.token:#{null}}")
 	private String grafanaToken;
 
+	@Value("${spring.cloud.dataflow.grafana-info.refreshInterval:15}")
+	private int grafanaRefreshInterval;
+
 	public AboutController(StreamDeployer streamDeployer, LauncherRepository launcherRepository, FeaturesProperties featuresProperties,
 			VersionInfoProperties versionInfoProperties, SecurityStateBean securityStateBean) {
 		this.streamDeployer = streamDeployer;
@@ -214,6 +217,7 @@ public class AboutController {
 			final GrafanaInfo grafanaInfo = new GrafanaInfo();
 			grafanaInfo.setUrl(this.grafanaUrl);
 			grafanaInfo.setToken(this.grafanaToken);
+			grafanaInfo.setRefreshInterval(this.grafanaRefreshInterval);
 			aboutResource.setGrafanaInfo(grafanaInfo);
 		}
 
