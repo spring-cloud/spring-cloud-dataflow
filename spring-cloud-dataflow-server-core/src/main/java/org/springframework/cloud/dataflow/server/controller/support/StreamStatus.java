@@ -61,6 +61,8 @@ public class StreamStatus {
 
 		private String name;
 
+		private String id;
+
 		private List<Instance> instances;
 
 		public String getName() {
@@ -69,6 +71,14 @@ public class StreamStatus {
 
 		public void setName(String name) {
 			this.name = name;
+		}
+
+		public String getId() {
+			return id;
+		}
+
+		public void setId(String id) {
+			this.id = id;
 		}
 
 		public List<Instance> getInstances() {
@@ -82,6 +92,8 @@ public class StreamStatus {
 
 	public static class Instance {
 
+		private String id;
+
 		private String guid;
 
 		private int index;
@@ -89,6 +101,14 @@ public class StreamStatus {
 		private Map<String, Object> properties;
 
 		private String state;
+
+		public String getId() {
+			return id;
+		}
+
+		public void setId(String id) {
+			this.id = id;
+		}
 
 		public String getGuid() {
 			return guid;

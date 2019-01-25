@@ -17,7 +17,6 @@ package org.springframework.cloud.dataflow.server.stream;
 
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ExecutionException;
 
 import org.springframework.cloud.dataflow.core.StreamDefinition;
 import org.springframework.cloud.dataflow.core.StreamDeployment;
@@ -54,10 +53,8 @@ public interface StreamDeployer {
 	 * Returns application statuses of all deployed applications
 	 * @param pageable Pagination information
 	 * @return pagable list of all app statuses
-	 * @throws ExecutionException if the computation threw an exception
-	 * @throws InterruptedException if the current thread was interrupted while waiting
 	 */
-	Page<AppStatus> getAppStatuses(Pageable pageable) throws ExecutionException, InterruptedException;
+	Page<AppStatus> getAppStatuses(Pageable pageable);
 
 	/**
 	 * Gets runtime application status

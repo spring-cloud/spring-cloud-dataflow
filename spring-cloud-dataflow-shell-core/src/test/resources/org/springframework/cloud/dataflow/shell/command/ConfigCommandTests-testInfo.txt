@@ -2,6 +2,7 @@
 ║     Target      │        http://localhost:9393        ║
 ╟─────────────────┼─────────────────────────────────────╢
 ║                 │Analytics Enabled: true              ║
+║                 │  Grafana Enabled: false             ║
 ║    Features     │Scheduler Enabled: false             ║
 ║                 │  Streams Enabled: true              ║
 ║                 │    Tasks Enabled: false             ║

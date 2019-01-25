@@ -21,7 +21,6 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -112,12 +111,14 @@ public class RuntimeAppsController {
 					StreamStatus.Application application = new StreamStatus.Application();
 					streamStatus.getApplications().add(application);
 					application.setInstances(new ArrayList<>());
+					application.setId(appStatus.getDeploymentId());
 
 					for (Map.Entry<String, AppInstanceStatus> instanceEntry : appStatus.getInstances().entrySet()) {
 						AppInstanceStatus appInstanceStatus = instanceEntry.getValue();
 						StreamStatus.Instance instance = new StreamStatus.Instance();
 						application.getInstances().add(instance);
 
+						instance.setId(appInstanceStatus.getId());
 						instance.setGuid(getAppInstanceGuid(appInstanceStatus));
 						instance.setState(appInstanceStatus.getState().name());
 						instance.setProperties(Collections.emptyMap());
@@ -140,8 +141,7 @@ public class RuntimeAppsController {
 	}
 
 	@RequestMapping("/apps")
-	public PagedResources<AppStatusResource> list(Pageable pageable, PagedResourcesAssembler<AppStatus> assembler)
-			throws ExecutionException, InterruptedException {
+	public PagedResources<AppStatusResource> list(Pageable pageable, PagedResourcesAssembler<AppStatus> assembler) {
 		return assembler.toResource(streamDeployer.getAppStatuses(pageable), statusAssembler);
 	}
 

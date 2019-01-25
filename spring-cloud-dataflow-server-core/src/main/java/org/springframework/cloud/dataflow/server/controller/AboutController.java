@@ -30,6 +30,7 @@ import org.springframework.cloud.dataflow.core.Launcher;
 import org.springframework.cloud.dataflow.rest.resource.about.AboutResource;
 import org.springframework.cloud.dataflow.rest.resource.about.Dependency;
 import org.springframework.cloud.dataflow.rest.resource.about.FeatureInfo;
+import org.springframework.cloud.dataflow.rest.resource.about.GrafanaInfo;
 import org.springframework.cloud.dataflow.rest.resource.about.RuntimeEnvironment;
 import org.springframework.cloud.dataflow.rest.resource.about.RuntimeEnvironmentDetails;
 import org.springframework.cloud.dataflow.rest.resource.about.SecurityInfo;
@@ -93,8 +94,14 @@ public class AboutController {
 
 	private LauncherRepository launcherRepository;
 
+	@Value("${spring.cloud.dataflow.grafana-info.url:#{null}}")
+	private String grafanaUrl;
+
+	@Value("${spring.cloud.dataflow.grafana-info.token:#{null}}")
+	private String grafanaToken;
+
 	public AboutController(StreamDeployer streamDeployer, LauncherRepository launcherRepository, FeaturesProperties featuresProperties,
-						VersionInfoProperties versionInfoProperties, SecurityStateBean securityStateBean) {
+			VersionInfoProperties versionInfoProperties, SecurityStateBean securityStateBean) {
 		this.streamDeployer = streamDeployer;
 		this.launcherRepository = launcherRepository;
 		this.featuresProperties = featuresProperties;
@@ -117,7 +124,7 @@ public class AboutController {
 		featureInfo.setStreamsEnabled(featuresProperties.isStreamsEnabled());
 		featureInfo.setTasksEnabled(featuresProperties.isTasksEnabled());
 		featureInfo.setSchedulerEnabled(featuresProperties.isSchedulesEnabled());
-
+		featureInfo.setGrafanaEnabled(this.grafanaUrl != null);
 
 		final VersionInfo versionInfo = getVersionInfo();
 
@@ -180,7 +187,7 @@ public class AboutController {
 			}
 			if (this.launcherRepository != null) {
 				final List<RuntimeEnvironmentDetails> taskLauncherInfoList = new ArrayList<RuntimeEnvironmentDetails>();
-				for (Launcher launcher: this.launcherRepository.findAll()) {
+				for (Launcher launcher : this.launcherRepository.findAll()) {
 					TaskLauncher taskLauncher = launcher.getTaskLauncher();
 					RuntimeEnvironmentDetails taskLauncherInfo = new RuntimeEnvironmentDetails();
 					final RuntimeEnvironmentInfo taskLauncherEnvironmentInfo = taskLauncher.environmentInfo();
@@ -202,6 +209,14 @@ public class AboutController {
 			}
 		}
 		aboutResource.setRuntimeEnvironment(runtimeEnvironment);
+
+		if (this.grafanaUrl != null) {
+			final GrafanaInfo grafanaInfo = new GrafanaInfo();
+			grafanaInfo.setUrl(this.grafanaUrl);
+			grafanaInfo.setToken(this.grafanaToken);
+			aboutResource.setGrafanaInfo(grafanaInfo);
+		}
+
 		aboutResource.add(ControllerLinkBuilder.linkTo(AboutController.class).withSelfRel());
 
 		return aboutResource;

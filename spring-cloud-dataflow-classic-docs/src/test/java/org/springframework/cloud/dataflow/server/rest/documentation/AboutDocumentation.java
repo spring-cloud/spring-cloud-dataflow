@@ -48,6 +48,8 @@ public class AboutDocumentation extends BaseDocumentation {
 								.description("Describes if streams feature is enabled."),
 						fieldWithPath("featureInfo.tasksEnabled").type(JsonFieldType.BOOLEAN)
 								.description("Describes if tasks feature is enabled."),
+						fieldWithPath("featureInfo.grafanaEnabled").type(JsonFieldType.BOOLEAN)
+								.description("Describes if an URL to an external Grafana dashboards is provided."),
 
 						fieldWithPath("versionInfo").type(JsonFieldType.OBJECT).description(
 								"Provides details of the Spring Cloud Data Flow Server " + "dependencies."),
@@ -146,7 +148,14 @@ public class AboutDocumentation extends BaseDocumentation {
 						fieldWithPath("runtimeEnvironment.taskLaunchers[0].springBootVersion").type(JsonFieldType.STRING)
 								.description("Provides details of the taskLauncher boot version."),
 						fieldWithPath("runtimeEnvironment.taskLaunchers[0].springVersion").type(JsonFieldType.STRING)
-								.description("Provides details of the taskLauncher spring version.")
+								.description("Provides details of the taskLauncher spring version."),
+
+						fieldWithPath("grafanaInfo").type(JsonFieldType.OBJECT).description(
+								"Provides details of how to access the Grafana Dashboards if provided."),
+						fieldWithPath("grafanaInfo.url").type(JsonFieldType.STRING).description(
+								"Provides URL of the external Grafana dashboard."),
+						fieldWithPath("grafanaInfo.token").type(JsonFieldType.STRING).description(
+								"Provides Security token to access the Grafana dashboard.")
 						)));
 	}
 }
