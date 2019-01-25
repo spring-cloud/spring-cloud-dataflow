@@ -76,7 +76,8 @@ public class ComplexAuditRecordRepositoryImpl implements ComplexAuditRecordRepos
 			for (AuditActionType action : actions) {
 				auditActionPredicates.add(cb.equal(auditAction, action));
 			}
-		} else {
+		}
+		else {
 			auditActionPredicates.add(cb.and());
 		}
 
@@ -85,7 +86,8 @@ public class ComplexAuditRecordRepositoryImpl implements ComplexAuditRecordRepos
 			for (AuditOperationType operation : operations) {
 				auditOperationsPredicates.add(cb.equal(auditOperation, operation));
 			}
-		}else {
+		}
+		else {
 			auditOperationsPredicates.add(cb.and());
 		}
 
@@ -98,7 +100,19 @@ public class ComplexAuditRecordRepositoryImpl implements ComplexAuditRecordRepos
 		List<AuditRecord> resultList = entityManager.createQuery(query)
 				.getResultList();
 
-		return new PageImpl(resultList, pageable, resultList.size());
+		int pageNumber = pageable.getPageNumber();
+		int pageSize = pageable.getPageSize();
+		List<AuditRecord> records = createPage(pageNumber, pageSize, resultList);
+
+		return new PageImpl<>(records, pageable, records.size());
+	}
+
+	private List<AuditRecord> createPage(int pageNumber, int pageSize, List<AuditRecord> collection) {
+		int listSize = collection.size();
+		int start = pageNumber * pageSize > listSize ? listSize : pageNumber * pageSize;
+		int end = (start + pageSize) > listSize ? listSize : (start + pageSize);
+
+		return collection.subList(start, end);
 	}
 
 	private Instant convertStringToInstant(String date) {
