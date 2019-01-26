@@ -127,7 +127,7 @@ public class AboutController {
 		featureInfo.setStreamsEnabled(featuresProperties.isStreamsEnabled());
 		featureInfo.setTasksEnabled(featuresProperties.isTasksEnabled());
 		featureInfo.setSchedulerEnabled(featuresProperties.isSchedulesEnabled());
-		featureInfo.setGrafanaEnabled(this.grafanaUrl != null);
+		featureInfo.setGrafanaEnabled(StringUtils.hasText(this.grafanaUrl));
 
 		final VersionInfo versionInfo = getVersionInfo();
 
@@ -213,7 +213,7 @@ public class AboutController {
 		}
 		aboutResource.setRuntimeEnvironment(runtimeEnvironment);
 
-		if (this.grafanaUrl != null) {
+		if (StringUtils.hasText(this.grafanaUrl)) {
 			final GrafanaInfo grafanaInfo = new GrafanaInfo();
 			grafanaInfo.setUrl(this.grafanaUrl);
 			grafanaInfo.setToken(this.grafanaToken);
