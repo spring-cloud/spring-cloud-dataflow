@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 the original author or authors.
+ * Copyright 2018-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -67,18 +67,19 @@ import org.springframework.util.StringUtils;
  * @author Thomas Risberg
  * @author Gunnar Hillert
  * @author Christian Tzolov
+ * @author Chris Schaefer
  */
 @Component
 public class AppRegistryCommands implements CommandMarker, ResourceLoaderAware {
 
 	private final static String APPLICATION_INFO = "app info";
-
 	private final static String UNREGISTER_APPLICATION = "app unregister";
-
+	private final static String UNREGISTER_ALL = "app all unregister";
 	private static final String DEFAULT_APPLICATION = "app default";
 	private final static String LIST_APPLICATIONS = "app list";
 	private static final String REGISTER_APPLICATION = "app register";
 	private static final String IMPORT_APPLICATIONS = "app import";
+
 	protected DataFlowShell dataFlowShell;
 	protected ResourceLoader resourceLoader = new DefaultResourceLoader();
 
@@ -187,6 +188,13 @@ public class AppRegistryCommands implements CommandMarker, ResourceLoaderAware {
 				.filter(a -> a.getName().equals(appName))
 				.filter(a -> a.getType().equals(appType.toString()))
 				.collect(Collectors.toList());
+	}
+
+	@CliCommand(value = UNREGISTER_ALL, help = "Unregister all applications")
+	public String unregisterAll() {
+		appRegistryOperations().unregisterAll();
+
+		return "Successfully unregistered all applications";
 	}
 
 	@CliCommand(value = DEFAULT_APPLICATION, help = "Change the default application version")

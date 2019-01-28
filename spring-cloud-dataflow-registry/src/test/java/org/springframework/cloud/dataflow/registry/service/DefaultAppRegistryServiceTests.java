@@ -56,7 +56,10 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 /**
+ * Tests for {@link DefaultAppRegistryService}.
+ *
  * @author Christian Tzolov
+ * @author Chris Schaefer
  */
 public class DefaultAppRegistryServiceTests {
 
@@ -280,6 +283,12 @@ public class DefaultAppRegistryServiceTests {
 		verify(appRegistrationRepository, times(1))
 				.deleteAppRegistrationByNameAndTypeAndVersion(
 						eq(fooSource.getName()), eq(fooSource.getType()), eq(fooSource.getVersion()));
+	}
+
+	@Test
+	public void testDeleteAll() throws URISyntaxException {
+		appRegistryService.deleteAll();
+		verify(appRegistrationRepository, times(1)).deleteAll();
 	}
 
 	private AppRegistration appRegistration() {

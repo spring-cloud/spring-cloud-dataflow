@@ -1,5 +1,5 @@
 /*
- * Copyright 2015-2017 the original author or authors.
+ * Copyright 2015-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -78,6 +78,7 @@ import org.springframework.web.bind.annotation.RestController;
  * @author Gary Russell
  * @author Patrick Peralta
  * @author Thomas Risberg
+ * @author Chris Schaefer
  */
 @RestController
 @RequestMapping("/apps")
@@ -329,6 +330,30 @@ public class AppRegistryController {
 			throw new RuntimeException(String.format("No default version exists for the app [%s:%s]", name, type));
 		}
 		this.unregister(type, name, appRegistration.getVersion());
+	}
+
+	@RequestMapping(method = RequestMethod.DELETE)
+	@ResponseStatus(HttpStatus.OK)
+	public void unregisterAll() {
+		List<AppRegistration> appRegistrations = appRegistryService.findAll();
+
+		for (AppRegistration appRegistration : appRegistrations) {
+			String applicationName = appRegistration.getName();
+			String applicationVersion = appRegistration.getVersion();
+			ApplicationType applicationType = appRegistration.getType();
+
+			if (applicationType != ApplicationType.task) {
+				String streamWithApp = findStreamContainingAppOf(applicationType, applicationName, applicationVersion);
+
+				if (streamWithApp != null) {
+					throw new UnregisterAppException(String.format("The app [%s:%s:%s] you're trying to unregister is " +
+							"currently used in stream '%s'.", applicationName, applicationType, applicationVersion,
+							streamWithApp));
+				}
+			}
+		}
+
+		appRegistryService.deleteAll();
 	}
 
 	/**

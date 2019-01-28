@@ -1,5 +1,5 @@
 /*
- * Copyright 2015-2016 the original author or authors.
+ * Copyright 2015-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,9 +21,10 @@ import java.util.Properties;
 import org.springframework.cloud.dataflow.core.ApplicationType;
 import org.springframework.cloud.dataflow.rest.resource.AppRegistrationResource;
 import org.springframework.cloud.dataflow.rest.resource.DetailedAppRegistrationResource;
+import org.springframework.hateoas.Link;
 import org.springframework.hateoas.PagedResources;
 import org.springframework.hateoas.ResourceSupport;
-import org.springframework.hateoas.UriTemplate;
+import org.springframework.util.Assert;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
@@ -38,13 +39,18 @@ import org.springframework.web.client.RestTemplate;
  * @author Gunnar Hillert
  * @author Patrick Peralta
  * @author Christian Tzolov
+ * @author Chris Schaefer
  */
 public class AppRegistryTemplate implements AppRegistryOperations {
+	/**
+	 * Apps relation path
+	 */
+	private static final String APPS_REL = "apps";
 
 	/**
-	 * Template for URI creation.
+	 * {@link Link} to apps
 	 */
-	protected final UriTemplate uriTemplate;
+	private Link appsLink;
 
 	/**
 	 * Template used for http interaction.
@@ -58,8 +64,11 @@ public class AppRegistryTemplate implements AppRegistryOperations {
 	 * @param resourceSupport HATEOAS link support
 	 */
 	public AppRegistryTemplate(RestTemplate restTemplate, ResourceSupport resourceSupport) {
+		Assert.notNull(resourceSupport, "URI Resources can't be null");
+		Assert.notNull(resourceSupport.getLink(APPS_REL), "Apps relation is required");
+
 		this.restTemplate = restTemplate;
-		this.uriTemplate = new UriTemplate(resourceSupport.getLink("apps").getHref());
+		this.appsLink = resourceSupport.getLink(APPS_REL);
 	}
 
 	@Override
@@ -69,31 +78,36 @@ public class AppRegistryTemplate implements AppRegistryOperations {
 
 	@Override
 	public PagedResources<AppRegistrationResource> list(ApplicationType type) {
-		String uri = uriTemplate + "?size=2000" + ((type == null) ? "" : "&type=" + type.name());
+		String uri = appsLink.getHref() + "?size=2000" + ((type == null) ? "" : "&type=" + type.name());
 		return restTemplate.getForObject(uri, AppRegistrationResource.Page.class);
 	}
 
 	@Override
 	public void unregister(String name, ApplicationType applicationType) {
-		String uri = uriTemplate.toString() + "/{type}/{name}";
+		String uri = appsLink.getHref() + "/{type}/{name}";
 		restTemplate.delete(uri, applicationType.name(), name);
 	}
 
 	@Override
 	public void unregister(String name, ApplicationType applicationType, String version) {
-		String uri = uriTemplate.toString() + "/{type}/{name}/{version}";
+		String uri = appsLink.getHref() + "/{type}/{name}/{version}";
 		restTemplate.delete(uri, applicationType.name(), name, version);
 	}
 
 	@Override
+	public void unregisterAll() {
+		restTemplate.delete(appsLink.getHref());
+	}
+
+	@Override
 	public DetailedAppRegistrationResource info(String name, ApplicationType type, boolean exhaustive) {
-		String uri = uriTemplate.toString() + "/{type}/{name}?exhaustive={exhaustive}";
+		String uri = appsLink.getHref() + "/{type}/{name}?exhaustive={exhaustive}";
 		return restTemplate.getForObject(uri, DetailedAppRegistrationResource.class, type, name, exhaustive);
 	}
 
 	@Override
 	public DetailedAppRegistrationResource info(String name, ApplicationType type, String version, boolean exhaustive) {
-		String uri = uriTemplate.toString() + "/{type}/{name}/{version}?exhaustive={exhaustive}";
+		String uri = appsLink.getHref() + "/{type}/{name}/{version}?exhaustive={exhaustive}";
 		return restTemplate.getForObject(uri, DetailedAppRegistrationResource.class, type, name, version, exhaustive);
 	}
 
@@ -107,7 +121,7 @@ public class AppRegistryTemplate implements AppRegistryOperations {
 		}
 		values.add("force", Boolean.toString(force));
 
-		return restTemplate.postForObject(uriTemplate.toString() + "/{type}/{name}", values,
+		return restTemplate.postForObject(appsLink.getHref() + "/{type}/{name}", values,
 				AppRegistrationResource.class, type, name);
 	}
 
@@ -121,7 +135,7 @@ public class AppRegistryTemplate implements AppRegistryOperations {
 		}
 		values.add("force", Boolean.toString(force));
 
-		return restTemplate.postForObject(uriTemplate.toString() + "/{type}/{name}/{version}", values,
+		return restTemplate.postForObject(appsLink.getHref() + "/{type}/{name}/{version}", values,
 				AppRegistrationResource.class, type, name, version);
 	}
 
@@ -130,7 +144,7 @@ public class AppRegistryTemplate implements AppRegistryOperations {
 		MultiValueMap<String, Object> values = new LinkedMultiValueMap<>();
 		values.add("uri", uri);
 		values.add("force", Boolean.toString(force));
-		return restTemplate.postForObject(uriTemplate.toString(), values, AppRegistrationResource.Page.class);
+		return restTemplate.postForObject(appsLink.getHref(), values, AppRegistrationResource.Page.class);
 	}
 
 	@Override
@@ -142,11 +156,11 @@ public class AppRegistryTemplate implements AppRegistryOperations {
 		}
 		values.add("apps", buffer.toString());
 		values.add("force", Boolean.toString(force));
-		return restTemplate.postForObject(uriTemplate.toString(), values, AppRegistrationResource.Page.class);
+		return restTemplate.postForObject(appsLink.getHref(), values, AppRegistrationResource.Page.class);
 	}
 
 	@Override
 	public void makeDefault(String name, ApplicationType type, String version) {
-		restTemplate.put(uriTemplate.toString() + "/{type}/{name}/{version}", null, type, name, version);
+		restTemplate.put(appsLink.getHref() + "/{type}/{name}/{version}", null, type, name, version);
 	}
 }
