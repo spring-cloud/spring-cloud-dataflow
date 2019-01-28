@@ -66,6 +66,7 @@ import org.springframework.util.StringUtils;
  * @author Ilayaperumal Gopinathan
  * @author Oleg Zhurakousky
  * @author Christian Tzolov
+ * @author Chris Schaefer
  */
 @Transactional
 public class DefaultAppRegistryService implements AppRegistryService {
@@ -212,6 +213,11 @@ public class DefaultAppRegistryService implements AppRegistryService {
 		this.appRegistrationRepository.deleteAppRegistrationByNameAndTypeAndVersion(name, type, version);
 
 		populateAuditData(AuditActionType.DELETE, new AppRegistration(name, type, version, URI.create(""), URI.create("")));
+	}
+
+	@Override
+	public void deleteAll(Iterable<AppRegistration> appRegistrations) {
+		this.appRegistrationRepository.deleteAll(appRegistrations);
 	}
 
 	protected boolean isOverwrite(AppRegistration app, boolean overwrite) {

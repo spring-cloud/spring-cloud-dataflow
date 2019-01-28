@@ -27,6 +27,7 @@ import org.springframework.data.domain.Pageable;
 
 /**
  * @author Christian Tzolov
+ * @author Chris Schaefer
  */
 public interface AppRegistryService {
 
@@ -68,6 +69,11 @@ public interface AppRegistryService {
 	 * @param version Version of the AppRegistration to delete
 	 */
 	void delete(String name, ApplicationType type, String version);
+
+	/**
+	 * Deletes all provided {@link AppRegistration}'s.
+	 */
+	void deleteAll(Iterable<AppRegistration> appRegistrations);
 
 	/**
 	 * Checks if an {@link AppRegistration} with this name, type and version exists.

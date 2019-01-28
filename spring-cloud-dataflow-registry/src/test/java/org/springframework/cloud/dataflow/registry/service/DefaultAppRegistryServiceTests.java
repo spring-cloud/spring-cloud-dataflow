@@ -19,6 +19,7 @@ package org.springframework.cloud.dataflow.registry.service;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 import org.hamcrest.Matchers;
@@ -56,7 +57,10 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 /**
+ * Tests for {@link DefaultAppRegistryService}.
+ *
  * @author Christian Tzolov
+ * @author Chris Schaefer
  */
 public class DefaultAppRegistryServiceTests {
 
@@ -280,6 +284,13 @@ public class DefaultAppRegistryServiceTests {
 		verify(appRegistrationRepository, times(1))
 				.deleteAppRegistrationByNameAndTypeAndVersion(
 						eq(fooSource.getName()), eq(fooSource.getType()), eq(fooSource.getVersion()));
+	}
+
+	@Test
+	public void testDeleteAll() throws URISyntaxException {
+		List<AppRegistration> appsToDelete = Collections.emptyList();
+		appRegistryService.deleteAll(appsToDelete);
+		verify(appRegistrationRepository, times(1)).deleteAll(appsToDelete);
 	}
 
 	private AppRegistration appRegistration() {

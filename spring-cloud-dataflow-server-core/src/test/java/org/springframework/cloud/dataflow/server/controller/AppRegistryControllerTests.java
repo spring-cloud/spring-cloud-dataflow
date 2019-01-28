@@ -74,7 +74,10 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 /**
+ * Tests for {@link AppRegistryController}
+ *
  * @author Ilayaperumal Gopinathan
+ * @author Chris Schaefer
  */
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = TestDependencies.class)
@@ -305,7 +308,77 @@ public class AppRegistryControllerTests {
 
 	@Test
 	@Transactional
+	public void testUnregisterAllApplications() throws Exception {
+		mockMvc.perform(delete("/apps").accept(MediaType.APPLICATION_JSON))
+				.andExpect(status().isOk());
+
+		mockMvc.perform(post("/apps/sink/log").param("uri", "maven://org.springframework.cloud.stream.app:log-sink-rabbit:1.2.0.RELEASE").accept(MediaType.APPLICATION_JSON))
+				.andExpect(status().isCreated());
+
+		mockMvc.perform(post("/apps/source/time").param("uri", "maven://org.springframework.cloud.stream.app:time-source-rabbit:1.2.0.RELEASE").accept(MediaType.APPLICATION_JSON))
+				.andExpect(status().isCreated());
+
+		mockMvc.perform(get("/apps/source/time").accept(MediaType.APPLICATION_JSON)).andDo(print())
+				.andExpect(status().isOk()).andExpect(jsonPath("name", is("time")))
+				.andExpect(jsonPath("type", is("source")));
+
+		mockMvc.perform(get("/apps/sink/log").accept(MediaType.APPLICATION_JSON))
+				.andExpect(status().isOk()).andExpect(jsonPath("name", is("log")))
+				.andExpect(jsonPath("type", is("sink")));
+
+		mockMvc.perform(delete("/apps").accept(MediaType.APPLICATION_JSON))
+				.andExpect(status().isOk());
+
+		mockMvc.perform(get("/apps").accept(MediaType.APPLICATION_JSON)).andExpect(status().isOk())
+				.andExpect(jsonPath("content", hasSize(0)));
+	}
+
+	@Test
+	@Transactional
 	public void testUnregisterApplicationUsedInStream() throws Exception {
+		setupUnregistrationTestStreams();
+
+		// This log sink v1.2 is part of a deployed stream, so it can not be unregistered
+		mockMvc.perform(delete("/apps/sink/log/1.2.0.RELEASE").accept(MediaType.APPLICATION_JSON))
+				.andExpect(status().isConflict());
+
+		// This log sink v1.0.BS is part of a deployed stream, so it can be unregistered
+		mockMvc.perform(delete("/apps/sink/log/1.0.0.BUILD-SNAPSHOT").accept(MediaType.APPLICATION_JSON))
+				.andExpect(status().isOk());
+
+		// This time source v1.0 BS is not part of a deployed stream, so it can be unregistered
+		mockMvc.perform(delete("/apps/source/time/1.0.0.BUILD-SNAPSHOT").accept(MediaType.APPLICATION_JSON))
+				.andExpect(status().isOk());
+
+		// This time source is part of a deployed stream, so it can not be unregistered.
+		mockMvc.perform(delete("/apps/source/time/1.2.0.RELEASE").accept(MediaType.APPLICATION_JSON))
+				.andExpect(status().isConflict());
+
+		// This is unrelated to a stream, so should work
+		mockMvc.perform(delete("/apps/task/timestamp/1.3.0.RELEASE").accept(MediaType.APPLICATION_JSON))
+				.andExpect(status().isOk());
+
+		// Transformer processor is not deployed, so should work
+		mockMvc.perform(delete("/apps/processor/transformer").accept(MediaType.APPLICATION_JSON))
+				.andExpect(status().isOk());
+	}
+
+	@Test
+	@Transactional
+	public void testUnregisterAllApplicationsWhenApplicationUsedInStream() throws Exception {
+		setupUnregistrationTestStreams();
+
+		streamDefinitionRepository.deleteById("ticktock");
+		skipperClient.delete("ticktock", true);
+
+		mockMvc.perform(delete("/apps").accept(MediaType.APPLICATION_JSON))
+				.andExpect(status().isOk());
+
+		mockMvc.perform(get("/apps").accept(MediaType.APPLICATION_JSON)).andExpect(status().isOk())
+				.andExpect(jsonPath("content", hasSize(0)));
+	}
+
+	private void setupUnregistrationTestStreams() throws Exception {
 		// Note, by default there are apps registered from classpath:META-INF/test-apps.properties.
 
 		// Register time source v1.2
@@ -361,32 +434,6 @@ public class AppRegistryControllerTests {
 		deploymentProperties.put("version.time", "1.2.0.RELEASE");
 		deploymentProperties.put("version.log", "1.2.0.RELEASE");
 		streamService.deployStream("ticktock", deploymentProperties);
-
-
-		// This log sink v1.2 is part of a deployed stream, so it can be unregistered
-		mockMvc.perform(delete("/apps/sink/log/1.2.0.RELEASE").accept(MediaType.APPLICATION_JSON))
-				.andExpect(status().isConflict());
-
-		// This log sink v1.0.BS is part of a deployed stream, so it can be unregistered
-		mockMvc.perform(delete("/apps/sink/log/1.0.0.BUILD-SNAPSHOT").accept(MediaType.APPLICATION_JSON))
-				.andExpect(status().isOk());
-
-		// This time source v1.0 BS is not part of a deployed stream, so it can be unregistered
-		mockMvc.perform(delete("/apps/source/time/1.0.0.BUILD-SNAPSHOT").accept(MediaType.APPLICATION_JSON))
-				.andExpect(status().isOk());
-
-		// This time source is part of a deployed stream, so it can not be unregistered.
-		mockMvc.perform(delete("/apps/source/time/1.2.0.RELEASE").accept(MediaType.APPLICATION_JSON))
-				.andExpect(status().isConflict());
-
-
-		// This is unrelated to a stream, so should work
-		mockMvc.perform(delete("/apps/task/timestamp/1.3.0.RELEASE").accept(MediaType.APPLICATION_JSON))
-				.andExpect(status().isOk());
-
-		// Transformer processor is not deployed, so should work
-		mockMvc.perform(delete("/apps/processor/transformer").accept(MediaType.APPLICATION_JSON))
-				.andExpect(status().isOk());
 	}
 
 	@Test

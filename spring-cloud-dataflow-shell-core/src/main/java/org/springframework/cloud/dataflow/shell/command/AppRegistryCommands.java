@@ -67,6 +67,7 @@ import org.springframework.util.StringUtils;
  * @author Thomas Risberg
  * @author Gunnar Hillert
  * @author Christian Tzolov
+ * @author Chris Schaefer
  */
 @Component
 public class AppRegistryCommands implements CommandMarker, ResourceLoaderAware {
@@ -82,9 +83,9 @@ public class AppRegistryCommands implements CommandMarker, ResourceLoaderAware {
 	// Destroy Role
 
 	private final static String UNREGISTER_APPLICATION = "app unregister";
+	private final static String UNREGISTER_ALL = "app all unregister";
 
 	// Modify Role
-
 	private static final String DEFAULT_APPLICATION = "app default";
 
 	// View Role
@@ -207,6 +208,27 @@ public class AppRegistryCommands implements CommandMarker, ResourceLoaderAware {
 				.filter(a -> a.getName().equals(appName))
 				.filter(a -> a.getType().equals(appType.toString()))
 				.collect(Collectors.toList());
+	}
+
+	@CliCommand(value = UNREGISTER_ALL, help = "Unregister all applications")
+	public String unregisterAll() {
+		appRegistryOperations().unregisterAll();
+
+		StringBuilder msg = new StringBuilder()
+				.append("Successfully unregistered applications.");
+
+		PagedResources<AppRegistrationResource> appRegistrationResources = appRegistryOperations().list();
+
+		if (!appRegistrationResources.getContent().isEmpty()) {
+			msg.append(" The following were not unregistered as they are associated with an existing stream:");
+
+			for(AppRegistrationResource appRegistrationResource : appRegistrationResources) {
+				msg.append(String.format(" [%s:%s:%s]", appRegistrationResource.getName(),
+						appRegistrationResource.getType(), appRegistrationResource.getVersion()));
+			}
+		}
+
+		return msg.toString();
 	}
 
 	@CliCommand(value = DEFAULT_APPLICATION, help = "Change the default application version")
