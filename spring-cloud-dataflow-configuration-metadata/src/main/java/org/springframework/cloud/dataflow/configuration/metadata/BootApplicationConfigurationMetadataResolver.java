@@ -1,5 +1,5 @@
 /*
- * Copyright 2016-2018 the original author or authors.
+ * Copyright 2016-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,6 +39,7 @@ import org.springframework.boot.loader.jar.JarFile;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import org.springframework.core.io.support.ResourcePatternResolver;
+import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 
 /**
@@ -54,7 +55,10 @@ public class BootApplicationConfigurationMetadataResolver extends ApplicationCon
 
 	private static final String CONFIGURATION_METADATA_PATTERN = "classpath*:/META-INF/spring-configuration-metadata.json";
 
-	private static final String WHITELIST_PROPERTIES = "classpath*:/META-INF/spring-configuration-metadata-whitelist.properties";
+	// this is superseded with name prefixed with dataflow and will get removed in future
+	private static final String WHITELIST_LEGACY_PROPERTIES = "classpath*:/META-INF/spring-configuration-metadata-whitelist.properties";
+
+	private static final String WHITELIST_PROPERTIES = "classpath*:/META-INF/dataflow-configuration-metadata-whitelist.properties";
 
 	private static final String CONFIGURATION_PROPERTIES_CLASSES = "configuration-properties.classes";
 
@@ -76,6 +80,13 @@ public class BootApplicationConfigurationMetadataResolver extends ApplicationCon
 		try {
 			Resource[] globalResources = new PathMatchingResourcePatternResolver(
 					ApplicationConfigurationMetadataResolver.class.getClassLoader()).getResources(WHITELIST_PROPERTIES);
+			if (ObjectUtils.isEmpty(globalResources)) {
+				// if we found at least one resource with new naming use that, otherwise fall back
+				// to legacy naming as long as we support it.
+				globalResources = new PathMatchingResourcePatternResolver(
+						ApplicationConfigurationMetadataResolver.class.getClassLoader())
+								.getResources(WHITELIST_LEGACY_PROPERTIES);
+			}
 			loadWhiteLists(globalResources, globalWhiteListedClasses, globalWhiteListedProperties);
 		}
 		catch (IOException e) {
@@ -91,6 +102,7 @@ public class BootApplicationConfigurationMetadataResolver extends ApplicationCon
 	 * @param app a Spring Cloud Stream app; typically a Boot uberjar, but directories are
 	 * supported as well
 	 */
+	@Override
 	public List<ConfigurationMetadataProperty> listProperties(Resource app, boolean exhaustive) {
 		try {
 			if (app != null) {
@@ -112,6 +124,11 @@ public class BootApplicationConfigurationMetadataResolver extends ApplicationCon
 			Collection<String> whiteListedClasses = new HashSet<>(globalWhiteListedClasses);
 			Collection<String> whiteListedProperties = new HashSet<>(globalWhiteListedProperties);
 			Resource[] whitelistDescriptors = moduleResourceLoader.getResources(WHITELIST_PROPERTIES);
+			if (ObjectUtils.isEmpty(whitelistDescriptors)) {
+				// if we found at least one resource with new naming use that, otherwise fall back
+				// to legacy naming as long as we support it.
+				whitelistDescriptors = moduleResourceLoader.getResources(WHITELIST_LEGACY_PROPERTIES);
+			}
 			loadWhiteLists(whitelistDescriptors, whiteListedClasses, whiteListedProperties);
 			ConfigurationMetadataRepositoryJsonBuilder builder = ConfigurationMetadataRepositoryJsonBuilder.create();
 			for (Resource r : moduleResourceLoader.getResources(CONFIGURATION_METADATA_PATTERN)) {
