@@ -301,7 +301,7 @@ The following example shows how to start the Data Flow Shell:
 ====
 [source,bash,subs=attributes]
 ----
-$ java -jar spring-cloud-dataflow-shell-{dataflow-project-version}.jar
+$ java -jar spring-cloud-dataflow-shell-{scdf-core-version}.jar
 ----
 ====
 
@@ -381,7 +381,7 @@ The following example shows how to start the Data Flow shell for the Data Flow s
 ====
 [source,bash,subs=attributes]
 ----
-$ java -jar spring-cloud-dataflow-shell-{dataflow-project-version}.jar
+$ java -jar spring-cloud-dataflow-shell-{scdf-core-version}.jar
 ----
 ====
 

@@ -21,7 +21,16 @@ Sabby Anandan; Marius Bogoevici; Eric Bottard; Mark Fisher; Ilayaperumal Gopinat
 :github-repo: spring-cloud/spring-cloud-dataflow
 :github-code: https://github.com/{github-repo}
 
+
 :dataflow-asciidoc: https://raw.githubusercontent.com/spring-cloud/spring-cloud-dataflow/master/spring-cloud-dataflow-docs/src/main/asciidoc
+
+:docker-http-source-rabbit-version: 1.3.1.RELEASE
+:docker-time-source-rabbit-version: 1.3.1.RELEASE
+:docker-log-sink-rabbit-version: 1.3.1.RELEASE
+:docker-log-sink-kafka-version: 1.3.1.RELEASE
+:docker-http-source-kafka-version: 1.3.1.RELEASE
+:docker-time-source-kafka-version: 1.3.1.RELEASE
+:docker-timestamp-task-version: 1.3.1.RELEASE
 
 ifdef::backend-html5[]
 

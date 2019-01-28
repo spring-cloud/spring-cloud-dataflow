@@ -164,6 +164,9 @@
 								<skipper-branch-or-tag>${skipper-branch-or-tag}</skipper-branch-or-tag>
 								<github-tag>${github-tag}</github-tag>
 								<local-server-image-tag>${local-server-image-tag}</local-server-image-tag>
+
+								<scdf-core-version>${org.springframework.cloud:spring-cloud-dataflow-core:jar.version}</scdf-core-version>
+								<cf-deployer-branch-or-tag>${cf-deployer-branch-or-tag}</cf-deployer-branch-or-tag>
 							</attributes>
 						</configuration>
 						<executions>
@@ -286,6 +289,8 @@
 
 										<var name="local-server-image-tag" value="${project.version}" />
 										<propertyregex property="local-server-image-tag" override="true" input="${local-server-image-tag}" regexp=".*SNAPSHOT" replace="latest" />
+
+										<propertyregex property="cf-deployer-branch-or-tag" override="true" input="${spring-cloud-deployer-cloudfoundry.version}" regexp=".*\.(?:M\d+|RC\d+|RELEASE)" select="v\0" defaultValue="master" />
 									</target>
 								</configuration>
 							</execution>
