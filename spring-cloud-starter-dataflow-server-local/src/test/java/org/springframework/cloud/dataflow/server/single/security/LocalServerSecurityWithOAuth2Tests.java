@@ -24,9 +24,13 @@ import org.junit.rules.TestRule;
 import org.springframework.cloud.dataflow.server.single.LocalDataflowResource;
 import org.springframework.security.oauth2.client.OAuth2RestTemplate;
 import org.springframework.security.oauth2.client.token.grant.client.ClientCredentialsResourceDetails;
+import org.springframework.security.oauth2.client.token.grant.password.ResourceOwnerPasswordResourceDetails;
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
 
+
+import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
+import static org.junit.Assert.assertTrue;
 import static org.springframework.cloud.dataflow.server.single.security.SecurityTestUtils.basicAuthorizationHeader;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
@@ -54,6 +58,16 @@ public class LocalServerSecurityWithOAuth2Tests {
 
 	@Test
 	public void testAccessRootUrlWithBasicAuthCredentials() throws Exception {
+		localDataflowResource.getMockMvc()
+				.perform(get("/").header("Authorization", basicAuthorizationHeader("user", "secret10"))).andDo(print())
+				.andExpect(status().isOk());
+	}
+
+	@Test
+	public void testAccessRootUrlWithBasicAuthCredentialsTwice() throws Exception {
+		localDataflowResource.getMockMvc()
+				.perform(get("/").header("Authorization", basicAuthorizationHeader("user", "secret10"))).andDo(print())
+				.andExpect(status().isOk());
 		localDataflowResource.getMockMvc()
 				.perform(get("/").header("Authorization", basicAuthorizationHeader("user", "secret10"))).andDo(print())
 				.andExpect(status().isOk());
@@ -148,29 +162,130 @@ public class LocalServerSecurityWithOAuth2Tests {
 				.andDo(print()).andExpect(status().isOk());
 	}
 
-	// FIXME - https://github.com/spring-cloud/spring-cloud-common-security-config/issues/33
-	//	@Test
-	//	public void testAccessSecurityInfoUrlWithOAuth2AccessToken() throws Exception {
-	//
-	//		final ClientCredentialsResourceDetails resourceDetails = new ClientCredentialsResourceDetails();
-	//		resourceDetails.setClientId("myclient");
-	//		resourceDetails.setClientSecret("mysecret");
-	//		resourceDetails.setGrantType("client_credentials");
-	//		resourceDetails
-	//				.setAccessTokenUri("http://localhost:" + oAuth2ServerResource.getOauth2ServerPort() + "/oauth/token");
-	//
-	//		final OAuth2RestTemplate oAuth2RestTemplate = new OAuth2RestTemplate(resourceDetails);
-	//		final OAuth2AccessToken accessToken = oAuth2RestTemplate.getAccessToken();
-	//
-	//		final String accessTokenAsString = accessToken.getValue();
-	//
-	//		localDataflowResource.getMockMvc()
-	//				.perform(get("/security/info").header("Authorization", "bearer " + accessTokenAsString)).andDo(print())
-	//				.andExpect(status().isOk())
-	//				.andExpect(jsonPath("$.authenticated", is(Boolean.TRUE)))
-	//				.andExpect(jsonPath("$.authenticationEnabled", is(Boolean.TRUE)))
-	//				.andExpect(jsonPath("$.roles", hasSize(7)));
-	//	}
+	@Test
+	public void testAccessSecurityInfoUrlWithOAuth2AccessToken() throws Exception {
+
+		final ClientCredentialsResourceDetails resourceDetails = new ClientCredentialsResourceDetails();
+		resourceDetails.setClientId("myclient");
+		resourceDetails.setClientSecret("mysecret");
+		resourceDetails.setGrantType("client_credentials");
+		resourceDetails
+				.setAccessTokenUri("http://localhost:" + oAuth2ServerResource.getOauth2ServerPort() + "/oauth/token");
+
+		final OAuth2RestTemplate oAuth2RestTemplate = new OAuth2RestTemplate(resourceDetails);
+		final OAuth2AccessToken accessToken = oAuth2RestTemplate.getAccessToken();
+
+		final String accessTokenAsString = accessToken.getValue();
+
+		localDataflowResource.getMockMvc()
+				.perform(get("/security/info").header("Authorization", "bearer " + accessTokenAsString)).andDo(print())
+				.andExpect(status().isOk())
+				.andExpect(jsonPath("$.authenticated", is(Boolean.TRUE)))
+				.andExpect(jsonPath("$.authenticationEnabled", is(Boolean.TRUE)))
+				.andExpect(jsonPath("$.roles", hasSize(7)));
+	}
+
+	@Test
+	public void testAccessSecurityInfoUrlWithOAuth2AccessToken2Times() throws Exception {
+
+		final ClientCredentialsResourceDetails resourceDetails = new ClientCredentialsResourceDetails();
+		resourceDetails.setClientId("myclient");
+		resourceDetails.setClientSecret("mysecret");
+		resourceDetails
+				.setAccessTokenUri("http://localhost:" + oAuth2ServerResource.getOauth2ServerPort() + "/oauth/token");
+
+		final OAuth2RestTemplate oAuth2RestTemplate = new OAuth2RestTemplate(resourceDetails);
+		final OAuth2AccessToken accessToken = oAuth2RestTemplate.getAccessToken();
+
+		final String accessTokenAsString = accessToken.getValue();
+
+		localDataflowResource.getMockMvc()
+				.perform(get("/security/info").header("Authorization", "bearer " + accessTokenAsString)).andDo(print())
+				.andExpect(status().isOk())
+				.andExpect(jsonPath("$.authenticated", is(Boolean.TRUE)))
+				.andExpect(jsonPath("$.authenticationEnabled", is(Boolean.TRUE)))
+				.andExpect(jsonPath("$.roles", hasSize(7)));
+
+		localDataflowResource.getMockMvc()
+				.perform(get("/security/info").header("Authorization", "bearer " + accessTokenAsString)).andDo(print())
+				.andExpect(status().isOk())
+				.andExpect(jsonPath("$.authenticated", is(Boolean.TRUE)))
+				.andExpect(jsonPath("$.authenticationEnabled", is(Boolean.TRUE)))
+				.andExpect(jsonPath("$.roles", hasSize(7)));
+	}
+
+	@Test
+	public void testAccessSecurityInfoUrlWithOAuth2AccessTokenPasswordGrant2Times() throws Exception {
+
+		final ResourceOwnerPasswordResourceDetails resourceDetails = new ResourceOwnerPasswordResourceDetails();
+		resourceDetails.setClientId("myclient");
+		resourceDetails.setClientSecret("mysecret");
+		resourceDetails.setUsername("user");
+		resourceDetails.setPassword("secret10");
+		resourceDetails
+				.setAccessTokenUri("http://localhost:" + oAuth2ServerResource.getOauth2ServerPort() + "/oauth/token");
+
+		final OAuth2RestTemplate oAuth2RestTemplate = new OAuth2RestTemplate(resourceDetails);
+		final OAuth2AccessToken accessToken = oAuth2RestTemplate.getAccessToken();
+
+		final String accessTokenAsString = accessToken.getValue();
+
+		localDataflowResource.getMockMvc()
+				.perform(get("/security/info").header("Authorization", "bearer " + accessTokenAsString)).andDo(print())
+				.andExpect(status().isOk())
+				.andExpect(jsonPath("$.authenticated", is(Boolean.TRUE)))
+				.andExpect(jsonPath("$.authenticationEnabled", is(Boolean.TRUE)))
+				.andExpect(jsonPath("$.roles", hasSize(7)));
+
+		localDataflowResource.getMockMvc()
+				.perform(get("/security/info").header("Authorization", "bearer " + accessTokenAsString)).andDo(print())
+				.andExpect(status().isOk())
+				.andExpect(jsonPath("$.authenticated", is(Boolean.TRUE)))
+				.andExpect(jsonPath("$.authenticationEnabled", is(Boolean.TRUE)))
+				.andExpect(jsonPath("$.roles", hasSize(7)));
+	}
+
+	@Test
+	public void testAccessSecurityInfoUrlWithOAuth2AccessToken2TimesAndLogout() throws Exception {
+
+		final ClientCredentialsResourceDetails resourceDetails = new ClientCredentialsResourceDetails();
+		resourceDetails.setClientId("myclient");
+		resourceDetails.setClientSecret("mysecret");
+		resourceDetails.setGrantType("client_credentials");
+		resourceDetails
+				.setAccessTokenUri("http://localhost:" + oAuth2ServerResource.getOauth2ServerPort() + "/oauth/token");
+
+		final OAuth2RestTemplate oAuth2RestTemplate = new OAuth2RestTemplate(resourceDetails);
+		final OAuth2AccessToken accessToken = oAuth2RestTemplate.getAccessToken();
+
+		final String accessTokenAsString = accessToken.getValue();
+
+		localDataflowResource.getMockMvc()
+				.perform(get("/security/info").header("Authorization", "bearer " + accessTokenAsString)).andDo(print())
+				.andExpect(status().isOk())
+				.andExpect(jsonPath("$.authenticated", is(Boolean.TRUE)))
+				.andExpect(jsonPath("$.authenticationEnabled", is(Boolean.TRUE)))
+				.andExpect(jsonPath("$.roles", hasSize(7)));
+
+		boolean oAuthServerResponse = oAuth2RestTemplate.getForObject("http://localhost:" + oAuth2ServerResource.getOauth2ServerPort() + "/revoke_token", Boolean.class);
+
+		assertTrue(Boolean.valueOf(oAuthServerResponse));
+
+		// At this point the Token is still cached by the Data Flow Server, and therefore a positive response is expected
+
+		localDataflowResource.getMockMvc()
+			.perform(get("/security/info").header("Authorization", "bearer " + accessTokenAsString)).andDo(print())
+			.andExpect(status().isOk());
+
+		localDataflowResource.getMockMvc()
+			.perform(get("/logout").header("Authorization", "bearer " + accessTokenAsString)).andDo(print())
+			.andExpect(status().isNoContent());
+
+		localDataflowResource.getMockMvc()
+			.perform(get("/security/info").header("Authorization", "bearer " + accessTokenAsString)).andDo(print())
+			.andExpect(status().isOk()); //FIXME
+
+	}
 
 	@Test
 	public void testAccessRootUrlWithWrongOAuth2AccessToken() throws Exception {

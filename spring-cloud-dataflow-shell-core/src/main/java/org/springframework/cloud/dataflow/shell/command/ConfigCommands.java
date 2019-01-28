@@ -233,7 +233,8 @@ public class ConfigCommands implements CommandMarker, InitializingBean, Applicat
 			if (securityInfoResource.isAuthenticated()
 					&& this.targetHolder.getTarget().getTargetCredentials() != null) {
 				for (String roleAsString : securityInfoResource.getRoles()) {
-					this.targetHolder.getTarget().getTargetCredentials().getRoles().add(RoleType.fromKey(roleAsString));
+					final RoleType shellRoleType = RoleType.fromKey(roleAsString);
+					this.targetHolder.getTarget().getTargetCredentials().getRoles().add(shellRoleType);
 				}
 			}
 

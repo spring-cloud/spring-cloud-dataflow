@@ -23,7 +23,7 @@ security:
       - client_credentials
       - password
     authorization:
-      checkTokenAccess: permitAll()
+      checkTokenAccess: isAuthenticated()
   authentication:
     file:
       enabled: true
@@ -32,3 +32,7 @@ security:
         bob: "{noop}bobspassword, ROLE_DATAFLOW.VIEW"
         alice: "{noop}alicepwd, ROLE_DATAFLOW.MANAGE"
         cartman: "{noop}cartmanpwd, ROLE_DATAFLOW.CREATE"
+logging:
+  level:
+    org.springframework.security: DEBUG
+    org.springframework.web: INFO

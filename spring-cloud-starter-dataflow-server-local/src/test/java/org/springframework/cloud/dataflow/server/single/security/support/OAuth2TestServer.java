@@ -46,9 +46,9 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.core.annotation.Order;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
-import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.oauth2.common.DefaultOAuth2AccessToken;
@@ -61,8 +61,10 @@ import org.springframework.security.oauth2.config.annotation.web.configurers.Aut
 import org.springframework.security.oauth2.provider.OAuth2Authentication;
 import org.springframework.security.oauth2.provider.client.BaseClientDetails;
 import org.springframework.security.oauth2.provider.token.AccessTokenConverter;
+import org.springframework.security.oauth2.provider.token.ConsumerTokenServices;
 import org.springframework.security.oauth2.provider.token.TokenEnhancer;
 import org.springframework.security.oauth2.provider.token.TokenStore;
+import org.springframework.security.oauth2.provider.token.store.InMemoryTokenStore;
 import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -106,9 +108,25 @@ public class OAuth2TestServer {
 		// + "/security/support/oauth2TestServerConfig.yml");
 	}
 
+	@Autowired
+	ConsumerTokenServices tokenServices;
+
+	@Bean
+	public TokenStore tokenStore() {
+	    return new InMemoryTokenStore();
+	}
+
 	@RequestMapping({ "/user", "/me" })
 	public Map<String, String> user(Principal principal) {
 		return Collections.singletonMap("name", principal.getName());
+	}
+
+	@RequestMapping("/revoke_token")
+	public boolean revokeToken() {
+		final OAuth2Authentication auth = (OAuth2Authentication) SecurityContextHolder
+                .getContext().getAuthentication();
+        final String token = tokenStore().getAccessToken(auth).getValue();
+        return tokenServices.revokeToken(token);
 	}
 
 	@Configuration
@@ -126,7 +144,7 @@ public class OAuth2TestServer {
 		@Override
 		public void configure(AuthorizationServerSecurityConfigurer security) throws Exception {
 			super.configure(security);
-			security.allowFormAuthenticationForClients();
+			security.allowFormAuthenticationForClients();;
 		}
 
 		@Override
@@ -159,7 +177,6 @@ public class OAuth2TestServer {
 		}
 	}
 
-
 	@Configuration
 	@Import(FileSecurityProperties.class)
 	@Order(SecurityProperties.BASIC_AUTH_ORDER)
@@ -180,10 +197,6 @@ public class OAuth2TestServer {
 	@EnableResourceServer
 	protected static class ResourceServerConfiguration
 			extends ResourceServerConfigurerAdapter {
-		@Override
-		public void configure(HttpSecurity http) throws Exception {
-			http.antMatcher("/me").authorizeRequests().anyRequest().authenticated();
-		}
 	}
 
 }
