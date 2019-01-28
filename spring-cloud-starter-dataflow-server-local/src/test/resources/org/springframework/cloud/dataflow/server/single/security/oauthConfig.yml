@@ -27,5 +27,6 @@ security:
       user-authorization-uri: http://127.0.0.1:${oauth2.port}/oauth/authorize
     resource:
       user-info-uri: http://127.0.0.1:${oauth2.port}/me
+      token-info-uri: http://127.0.0.1:${oauth2.port}/oauth/check_token
     authorization:
       check-token-access: isAuthenticated()
