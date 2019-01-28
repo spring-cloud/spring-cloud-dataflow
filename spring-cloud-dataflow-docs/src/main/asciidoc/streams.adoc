@@ -1033,7 +1033,7 @@ The `transform` application processes the Tuple data and sends the processed dat
 
 Consider the following example of sending some data to the `http` application:
 
-[Source]
+[source,bash]
 ----
 dataflow:>http post --data {"hello":"world","something":"somethingelse"} --contentType application/json --target http://localhost:<http-port>
 ----

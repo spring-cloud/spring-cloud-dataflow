@@ -225,7 +225,7 @@ $ kubectl delete serviceaccount scdf-sa
 . Deploy Skipper
 +
 Data Flow delegates to Skipper the streams lifecycle management. Deploy link:http://cloud.spring.io/spring-cloud-skipper/[Skipper] to enable the stream management features.
-For more details, see link:https://docs.spring.io/spring-cloud-skipper/docs/{skipper-core-version}/reference/htmlsingle/#overview[Spring Cloud Skipper Reference Guide] for a complete overview.
+For more details, see link:https://docs.spring.io/spring-cloud-skipper/docs/{skipper-version}/reference/htmlsingle/#overview[Spring Cloud Skipper Reference Guide] for a complete overview.
 +
 The deployment is defined in the `src/kubernetes/skipper/skipper-deployment.yaml` file.
 To control what version of Skipper gets deployed, modify the tag used for the Docker image in the container specification, as the following example shows:
@@ -243,7 +243,7 @@ To control what version of Skipper gets deployed, modify the tag used for the Do
 ====
 +
 NOTE: Skipper includes the concept of link:https://docs.spring.io/spring-cloud-skipper/docs/current/reference/htmlsingle/#using-platforms[platforms], so it is important to define the "`accounts`" based on the project preferences.
-More details are in the link:https://docs.spring.io/spring-cloud-skipper/docs/{skipper-core-version}/reference/htmlsingle/#overview[Spring Cloud Skipper Reference Guide].
+More details are in the link:https://docs.spring.io/spring-cloud-skipper/docs/{skipper-version}/reference/htmlsingle/#overview[Spring Cloud Skipper Reference Guide].
 +
 If you would like to use RabbitMQ as the messaging middleware, apply the following:
 +
@@ -611,9 +611,9 @@ This section describes how to create streams (using Skipper). To do so:
 ====
 [source,bash,subs=attributes]
 ----
-wget http://repo.spring.io/{dataflow-version-type-lowercase}/org/springframework/cloud/spring-cloud-dataflow-shell/{dataflow-project-version}/spring-cloud-dataflow-shell-{dataflow-project-version}.jar
+wget http://repo.spring.io/{version-type-lowercase}/org/springframework/cloud/spring-cloud-dataflow-shell/{scdf-core-version}/spring-cloud-dataflow-shell-{scdf-core-version}.jar
 
-java -jar spring-cloud-dataflow-shell-{dataflow-project-version}.jar
+java -jar spring-cloud-dataflow-shell-{scdf-core-version}.jar
 ----
 ====
 +
@@ -633,7 +633,7 @@ You should see the following startup message from the shell:
  | |_| | (_| | || (_| | |  _| | | (_) \ V  V /    / / / / / /
  |____/ \__,_|\__\__,_| |_|   |_|\___/ \_/\_/    /_/_/_/_/_/
 
-{dataflow-project-version}
+{scdf-core-version}
 
 Welcome to the Spring Cloud Data Flow shell. For assistance hit TAB or type "help".
 server-unknown:>

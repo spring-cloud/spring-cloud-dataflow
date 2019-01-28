@@ -137,14 +137,14 @@
 					<plugin>
 						<groupId>org.asciidoctor</groupId>
 						<artifactId>asciidoctor-maven-plugin</artifactId>
-						<version>1.5.3</version>
-						<dependencies>
-							<dependency>
-								<groupId>org.asciidoctor</groupId>
-								<artifactId>asciidoctorj-pdf</artifactId>
-								<version>1.5.0-alpha.11</version>
-							</dependency>
-						</dependencies>
+						<version>1.5.6</version>
+						<!--<dependencies>-->
+							<!--<dependency>-->
+								<!--<groupId>org.asciidoctor</groupId>-->
+								<!--<artifactId>asciidoctorj-pdf</artifactId>-->
+								<!--<version>1.5.0-alpha.11</version>-->
+							<!--</dependency>-->
+						<!--</dependencies>-->
 						<configuration>
 							<sourceDirectory>${project.build.directory}/refdocs/</sourceDirectory>
 							<outputDirectory>${project.build.directory}/generated-docs</outputDirectory>
@@ -164,6 +164,9 @@
 								<skipper-branch-or-tag>${skipper-branch-or-tag}</skipper-branch-or-tag>
 								<github-tag>${github-tag}</github-tag>
 								<local-server-image-tag>${local-server-image-tag}</local-server-image-tag>
+
+								<scdf-core-version>${org.springframework.cloud:spring-cloud-dataflow-core:jar.version}</scdf-core-version>
+								<cf-deployer-branch-or-tag>${cf-deployer-branch-or-tag}</cf-deployer-branch-or-tag>
 							</attributes>
 						</configuration>
 						<executions>
@@ -185,17 +188,6 @@
 										<highlightjsdir>js/highlight</highlightjsdir>
 										<highlightjs-theme>atom-one-dark-reasonable</highlightjs-theme>
 									</attributes>
-								</configuration>
-							</execution>
-							<execution>
-								<id>generate-pdf</id>
-								<phase>prepare-package</phase>
-								<goals>
-									<goal>process-asciidoc</goal>
-								</goals>
-								<configuration>
-									<backend>pdf</backend>
-									<sourceHighlighter>coderay</sourceHighlighter>
 								</configuration>
 							</execution>
 						</executions>
@@ -286,6 +278,8 @@
 
 										<var name="local-server-image-tag" value="${project.version}" />
 										<propertyregex property="local-server-image-tag" override="true" input="${local-server-image-tag}" regexp=".*SNAPSHOT" replace="latest" />
+
+										<propertyregex property="cf-deployer-branch-or-tag" override="true" input="${spring-cloud-deployer-cloudfoundry.version}" regexp=".*\.(?:M\d+|RC\d+|RELEASE)" select="v\0" defaultValue="master" />
 									</target>
 								</configuration>
 							</execution>

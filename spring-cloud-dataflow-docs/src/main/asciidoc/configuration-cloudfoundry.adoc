@@ -77,7 +77,7 @@ cf set-env dataflow-server SPRING_CLOUD_DATAFLOW_TASK_PLATFORM_CLOUDFOUNDRY_ACCO
 =====
 
 TIP: All the properties mentioned above are `@ConfigurationProperties` of the
-Cloud Foundry deployer. See link:https://github.com/spring-cloud/spring-cloud-deployer-cloudfoundry/blob/{deployer-branch-or-tag}/src/main/java/org/springframework/cloud/deployer/spi/cloudfoundry/CloudFoundryDeploymentProperties.java[CloudFoundryDeploymentProperties.java] for more information.
+Cloud Foundry deployer. See link:https://github.com/spring-cloud/spring-cloud-deployer-cloudfoundry/blob/{cf-deployer-branch-or-tag}/src/main/java/org/springframework/cloud/deployer/spi/cloudfoundry/CloudFoundryDeploymentProperties.java[CloudFoundryDeploymentProperties.java] for more information.
 
 [[configuration-app-names-cloud-foundry]]
 === Application Names and Prefixes
@@ -337,8 +337,8 @@ For more details about securing the
 REST endpoints and configuring to authenticate against an OAUTH backend (UAA and SSO running on Cloud Foundry),
 see the security section from the core http://docs.spring.io/spring-cloud-dataflow/docs/{scdf-core-version}/reference/htmlsingle/#configuration-security[reference guide]. You can configure the security details in `dataflow-server.yml` or pass them as environment variables through `cf set-env` commands.
 
-[[configuration-cloudfoundry-security]]
-==== Authentication and Cloud Foundry
+[[configuration-cloudfoundry-authentication]]
+==== Authentication
 
 Spring Cloud Data Flow can either integrate with Pivotal Single Sign-On Service
 (for example, on PWS) or Cloud Foundry User Account and Authentication (UAA) Server.

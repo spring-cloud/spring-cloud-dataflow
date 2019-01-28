@@ -100,22 +100,22 @@ applications:
     SPRING_APPLICATION_JSON: '{ "spring": { "cloud": { "skipper": { "server": { "enableLocalPlatform": "false"} } } } }'
     SPRING_CLOUD_SKIPPER_SERVER_STRATEGIES_HEALTHCHECK_TIMEOUTINMILLIS: 300000
     SPRING_CLOUD_SKIPPER_SERVER_PLATFORM_CLOUDFOUNDRY_ACCOUNTS[default]_CONNECTION_URL: https://api.run.pivotal.io
-    SPRING_CLOUD_SKIPPER_SERVER_PLATFORM_CLOUDFOUNDRY_ACCOUNTS[default]_CONNECTION_ORG: {org}
-    SPRING_CLOUD_SKIPPER_SERVER_PLATFORM_CLOUDFOUNDRY_ACCOUNTS[default]_CONNECTION_SPACE: {space}
+    SPRING_CLOUD_SKIPPER_SERVER_PLATFORM_CLOUDFOUNDRY_ACCOUNTS[default]_CONNECTION_ORG: <org>
+    SPRING_CLOUD_SKIPPER_SERVER_PLATFORM_CLOUDFOUNDRY_ACCOUNTS[default]_CONNECTION_SPACE: <space>
     SPRING_CLOUD_SKIPPER_SERVER_PLATFORM_CLOUDFOUNDRY_ACCOUNTS[default]_DEPLOYMENT_DOMAIN: cfapps.io
-    SPRING_CLOUD_SKIPPER_SERVER_PLATFORM_CLOUDFOUNDRY_ACCOUNTS[default]_CONNECTION_USERNAME: {email}
-    SPRING_CLOUD_SKIPPER_SERVER_PLATFORM_CLOUDFOUNDRY_ACCOUNTS[default]_CONNECTION_PASSWORD: {password}
+    SPRING_CLOUD_SKIPPER_SERVER_PLATFORM_CLOUDFOUNDRY_ACCOUNTS[default]_CONNECTION_USERNAME: <email>
+    SPRING_CLOUD_SKIPPER_SERVER_PLATFORM_CLOUDFOUNDRY_ACCOUNTS[default]_CONNECTION_PASSWORD: <password>
     SPRING_CLOUD_SKIPPER_SERVER_PLATFORM_CLOUDFOUNDRY_ACCOUNTS[default]_CONNECTION_SKIP_SSL_VALIDATION: false
     SPRING_CLOUD_SKIPPER_SERVER_PLATFORM_CLOUDFOUNDRY_ACCOUNTS[default]_DEPLOYMENT_DELETE_ROUTES: false
-    SPRING_CLOUD_SKIPPER_SERVER_PLATFORM_CLOUDFOUNDRY_ACCOUNTS[default]_DEPLOYMENT_SERVICES: {middlewareServiceName}
+    SPRING_CLOUD_SKIPPER_SERVER_PLATFORM_CLOUDFOUNDRY_ACCOUNTS[default]_DEPLOYMENT_SERVICES: <serviceName>
     SPRING_CLOUD_SKIPPER_SERVER_PLATFORM_CLOUDFOUNDRY_ACCOUNTS[default]_DEPLOYMENT_STREAM_ENABLE_RANDOM_APP_NAME_PREFIX: false
     SPRING_CLOUD_SKIPPER_SERVER_PLATFORM_CLOUDFOUNDRY_ACCOUNTS[default]_DEPLOYMENT_MEMORY: 2048m
 services:
-- {services}
+- <services>
 ----
 ====
 +
-You need to fill in `\{org}`, `\{space}`, `\{email}`,  `\{password}`, `{middlewareServiceName}` (e.g. rabbit or kafka) and {services} (such as mysql) before running these commands.
+You need to fill in `<org>`, `<space>`, `<email>`,  `<password>`, `<middlewareServiceName>` (e.g. rabbit or kafka) and `<services>` (such as mysql) before running these commands.
 Once you have the desired config values in `manifest.yml`, you can run the `cf push` command to provision the skipper-server.
 +
 WARNING: Only set 'Skip SSL Validation' to `true` if you run on a Cloud Foundry instance by using self-signed
@@ -301,7 +301,7 @@ The following example shows how to start the Data Flow Shell:
 ====
 [source,bash,subs=attributes]
 ----
-$ java -jar spring-cloud-dataflow-shell-{dataflow-project-version}.jar
+$ java -jar spring-cloud-dataflow-shell-{scdf-core-version}.jar
 ----
 ====
 
@@ -381,7 +381,7 @@ The following example shows how to start the Data Flow shell for the Data Flow s
 ====
 [source,bash,subs=attributes]
 ----
-$ java -jar spring-cloud-dataflow-shell-{dataflow-project-version}.jar
+$ java -jar spring-cloud-dataflow-shell-{scdf-core-version}.jar
 ----
 ====
 
