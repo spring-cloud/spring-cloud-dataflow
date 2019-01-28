@@ -17,6 +17,8 @@ logging:
     org.springframework.boot.autoconfigure.security: 'INFO'
     # The following INFO is to log the embedded tomcat port
     org.springframework.boot.web.embedded.tomcat: 'INFO'
+    # Silence annoying exception trace logged on info level - gh-2750
+    org.hibernate.engine.jdbc.env.internal.LobCreatorBuilderImpl: 'WARN'
 spring:
   data:
     redis:
