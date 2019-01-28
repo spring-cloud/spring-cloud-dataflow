@@ -154,10 +154,8 @@ public class AboutDocumentation extends BaseDocumentation {
 								"Provides details of how to access the Grafana Dashboards if provided."),
 						fieldWithPath("grafanaInfo.url").type(JsonFieldType.STRING).description(
 								"Provides URL of the external Grafana dashboard."),
-						fieldWithPath("grafanaInfo.token").type(JsonFieldType.STRING).description(
-								"Provides Security token to access the Grafana dashboard."),
 						fieldWithPath("grafanaInfo.refreshInterval").type(JsonFieldType.NUMBER).description(
 								"Provides the time interval (in seconds) for updating the Grafana dashboards.")
-						)));
+				)));
 	}
 }

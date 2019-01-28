@@ -52,6 +52,7 @@ import org.springframework.cloud.dataflow.registry.support.AppResourceCommon;
 import org.springframework.cloud.dataflow.rest.job.support.ISO8601DateFormatWithMilliSeconds;
 import org.springframework.cloud.dataflow.server.DockerValidatorProperties;
 import org.springframework.cloud.dataflow.server.TaskValidationController;
+import org.springframework.cloud.dataflow.server.config.GrafanaInfoProperties;
 import org.springframework.cloud.dataflow.server.config.VersionInfoProperties;
 import org.springframework.cloud.dataflow.server.config.apps.CommonApplicationProperties;
 import org.springframework.cloud.dataflow.server.config.features.FeaturesProperties;
@@ -159,7 +160,8 @@ import static org.mockito.Mockito.when;
 		VersionInfoProperties.class,
 		DockerValidatorProperties.class,
 		TaskConfigurationProperties.class,
-		DockerValidatorProperties.class })
+		DockerValidatorProperties.class,
+		GrafanaInfoProperties.class })
 @EntityScan({
 		"org.springframework.cloud.dataflow.registry.domain",
 		"org.springframework.cloud.dataflow.core"
@@ -474,7 +476,7 @@ public class TestDependencies extends WebMvcConfigurationSupport {
 
 	@Bean
 	public AboutController aboutController(VersionInfoProperties versionInfoProperties,
-			FeaturesProperties featuresProperties, StreamDeployer streamDeployer) {
+			FeaturesProperties featuresProperties, StreamDeployer streamDeployer, GrafanaInfoProperties grafanaInfoProperties) {
 
 		Launcher launcher = mock(Launcher.class);
 		TaskLauncher taskLauncher = mock(TaskLauncher.class);
@@ -495,7 +497,7 @@ public class TestDependencies extends WebMvcConfigurationSupport {
 
 		return new AboutController(streamDeployer, launcherRepository,
 				featuresProperties, versionInfoProperties,
-				mock(SecurityStateBean.class));
+				mock(SecurityStateBean.class), grafanaInfoProperties);
 	}
 
 	public static class SimpleTestScheduler implements Scheduler {

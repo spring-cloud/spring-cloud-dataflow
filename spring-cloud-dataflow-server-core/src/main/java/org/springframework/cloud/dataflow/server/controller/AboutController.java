@@ -25,6 +25,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.cloud.common.security.support.SecurityStateBean;
 import org.springframework.cloud.dataflow.core.Launcher;
 import org.springframework.cloud.dataflow.rest.resource.about.AboutResource;
@@ -35,6 +36,7 @@ import org.springframework.cloud.dataflow.rest.resource.about.RuntimeEnvironment
 import org.springframework.cloud.dataflow.rest.resource.about.RuntimeEnvironmentDetails;
 import org.springframework.cloud.dataflow.rest.resource.about.SecurityInfo;
 import org.springframework.cloud.dataflow.rest.resource.about.VersionInfo;
+import org.springframework.cloud.dataflow.server.config.GrafanaInfoProperties;
 import org.springframework.cloud.dataflow.server.config.VersionInfoProperties;
 import org.springframework.cloud.dataflow.server.config.features.FeaturesProperties;
 import org.springframework.cloud.dataflow.server.job.LauncherRepository;
@@ -71,6 +73,7 @@ import org.springframework.web.client.RestTemplate;
 @RestController
 @RequestMapping("/about")
 @ExposesResourceFor(AboutResource.class)
+@EnableConfigurationProperties(GrafanaInfoProperties.class)
 public class AboutController {
 
 	private static final Logger logger = LoggerFactory.getLogger(AboutController.class);
@@ -94,22 +97,16 @@ public class AboutController {
 
 	private LauncherRepository launcherRepository;
 
-	@Value("${spring.cloud.dataflow.grafana-info.url:#{null}}")
-	private String grafanaUrl;
-
-	@Value("${spring.cloud.dataflow.grafana-info.token:#{null}}")
-	private String grafanaToken;
-
-	@Value("${spring.cloud.dataflow.grafana-info.refreshInterval:15}")
-	private int grafanaRefreshInterval;
+	private GrafanaInfoProperties grafanaProperties;
 
 	public AboutController(StreamDeployer streamDeployer, LauncherRepository launcherRepository, FeaturesProperties featuresProperties,
-			VersionInfoProperties versionInfoProperties, SecurityStateBean securityStateBean) {
+			VersionInfoProperties versionInfoProperties, SecurityStateBean securityStateBean, GrafanaInfoProperties grafanaInfoProperties) {
 		this.streamDeployer = streamDeployer;
 		this.launcherRepository = launcherRepository;
 		this.featuresProperties = featuresProperties;
 		this.versionInfoProperties = versionInfoProperties;
 		this.securityStateBean = securityStateBean;
+		this.grafanaProperties = grafanaInfoProperties;
 	}
 
 	/**
@@ -127,7 +124,7 @@ public class AboutController {
 		featureInfo.setStreamsEnabled(featuresProperties.isStreamsEnabled());
 		featureInfo.setTasksEnabled(featuresProperties.isTasksEnabled());
 		featureInfo.setSchedulerEnabled(featuresProperties.isSchedulesEnabled());
-		featureInfo.setGrafanaEnabled(StringUtils.hasText(this.grafanaUrl));
+		featureInfo.setGrafanaEnabled(this.grafanaProperties.isGrafanaEnabled());
 
 		final VersionInfo versionInfo = getVersionInfo();
 
@@ -213,11 +210,10 @@ public class AboutController {
 		}
 		aboutResource.setRuntimeEnvironment(runtimeEnvironment);
 
-		if (StringUtils.hasText(this.grafanaUrl)) {
+		if (this.grafanaProperties.isGrafanaEnabled()) {
 			final GrafanaInfo grafanaInfo = new GrafanaInfo();
-			grafanaInfo.setUrl(this.grafanaUrl);
-			grafanaInfo.setToken(this.grafanaToken);
-			grafanaInfo.setRefreshInterval(this.grafanaRefreshInterval);
+			grafanaInfo.setUrl(this.grafanaProperties.getUrl());
+			grafanaInfo.setRefreshInterval(this.grafanaProperties.getRefreshInterval());
 			aboutResource.setGrafanaInfo(grafanaInfo);
 		}
 

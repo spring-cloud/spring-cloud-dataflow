@@ -14,17 +14,32 @@
  * limitations under the License.
  */
 
-package org.springframework.cloud.dataflow.rest.resource.about;
+package org.springframework.cloud.dataflow.server.config;
+
+import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.cloud.dataflow.core.DataFlowPropertyKeys;
+import org.springframework.util.StringUtils;
 
 /**
  * @author Christian Tzolov
  */
-public class GrafanaInfo {
+@ConfigurationProperties(prefix = GrafanaInfoProperties.VERSION_INFO_PREFIX)
+public class GrafanaInfoProperties {
+
+	public static final String VERSION_INFO_PREFIX = DataFlowPropertyKeys.PREFIX + "grafana-info";
 
 	/**
 	 * Root URL to access the grafana dashboards
 	 */
 	private String url = "";
+
+	/**
+	 * If provided, can be used to authenticate with Grafana.
+	 * http://docs.grafana.org/http_api/auth/#create-api-token
+	 *
+	 * The 'Authorization' header value should be: 'Bearer (your api key)'.
+	 */
+	private String token = "";
 
 	/**
 	 * Dashboard refresh interval in Seconds
@@ -39,11 +54,23 @@ public class GrafanaInfo {
 		this.url = url;
 	}
 
+	public String getToken() {
+		return token;
+	}
+
+	public void setToken(String token) {
+		this.token = token;
+	}
+
 	public int getRefreshInterval() {
 		return refreshInterval;
 	}
 
 	public void setRefreshInterval(int refreshInterval) {
 		this.refreshInterval = refreshInterval;
+	}
+
+	public boolean isGrafanaEnabled() {
+		return StringUtils.hasText(this.url);
 	}
 }
