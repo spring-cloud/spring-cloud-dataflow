@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 the original author or authors.
+ * Copyright 2016-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -44,6 +44,26 @@ public class BootApplicationConfigurationMetadataResolverTests {
 		List<ConfigurationMetadataProperty> properties = resolver
 				.listProperties(new ClassPathResource("apps/filter-processor", getClass()));
 		assertThat(properties, hasItem(configPropertyIdentifiedAs("filter.expression")));
+		assertThat(properties, hasItem(configPropertyIdentifiedAs("some.other.property.whitelisted.prefix.expresso2")));
+	}
+
+	@Test
+	public void appSpecificWhitelistedLegacyPropsShouldBeVisible() {
+		List<ConfigurationMetadataProperty> properties = resolver
+				.listProperties(new ClassPathResource("apps/filter-processor-legacy", getClass()));
+		assertThat(properties, hasItem(configPropertyIdentifiedAs("filter.expression")));
+		assertThat(properties, hasItem(configPropertyIdentifiedAs("some.other.property.whitelisted.prefix.expresso2")));
+	}
+
+	@Test
+	public void appSpecificWhitelistedLegacyPropsShouldBeVisibleIfBothInPlace() {
+		// test resource files has both expresso2 and expresso3 in spring-configuration-metadata
+		// and as we prefer new format(expresso3 whitelisted) and it exists
+		// expresso2 from old format doesn't get read.
+		List<ConfigurationMetadataProperty> properties = resolver
+				.listProperties(new ClassPathResource("apps/filter-processor-both", getClass()));
+		assertThat(properties, hasItem(configPropertyIdentifiedAs("filter.expression")));
+		assertThat(properties, hasItem(configPropertyIdentifiedAs("some.other.property.whitelisted.prefix.expresso3")));
 		assertThat(properties, hasItem(configPropertyIdentifiedAs("some.other.property.whitelisted.prefix.expresso2")));
 	}
 

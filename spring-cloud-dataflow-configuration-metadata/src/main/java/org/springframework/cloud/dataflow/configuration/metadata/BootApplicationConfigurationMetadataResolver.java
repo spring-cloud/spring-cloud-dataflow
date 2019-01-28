@@ -1,5 +1,5 @@
 /*
- * Copyright 2016-2018 the original author or authors.
+ * Copyright 2016-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -54,7 +54,10 @@ public class BootApplicationConfigurationMetadataResolver extends ApplicationCon
 
 	private static final String CONFIGURATION_METADATA_PATTERN = "classpath*:/META-INF/spring-configuration-metadata.json";
 
-	private static final String WHITELIST_PROPERTIES = "classpath*:/META-INF/spring-configuration-metadata-whitelist.properties";
+	// this is superseded with name prefixed with dataflow and will get removed in future
+	private static final String WHITELIST_LEGACY_PROPERTIES = "classpath*:/META-INF/spring-configuration-metadata-whitelist.properties";
+
+	private static final String WHITELIST_PROPERTIES = "classpath*:/META-INF/dataflow-configuration-metadata-whitelist.properties";
 
 	private static final String CONFIGURATION_PROPERTIES_CLASSES = "configuration-properties.classes";
 
@@ -74,13 +77,23 @@ public class BootApplicationConfigurationMetadataResolver extends ApplicationCon
 		this.parent = parent;
 		JarFile.registerUrlProtocolHandler();
 		try {
+			// read both formats and concat
+			Resource[] globalLegacyResources = new PathMatchingResourcePatternResolver(
+					ApplicationConfigurationMetadataResolver.class.getClassLoader())
+							.getResources(WHITELIST_LEGACY_PROPERTIES);
 			Resource[] globalResources = new PathMatchingResourcePatternResolver(
-					ApplicationConfigurationMetadataResolver.class.getClassLoader()).getResources(WHITELIST_PROPERTIES);
-			loadWhiteLists(globalResources, globalWhiteListedClasses, globalWhiteListedProperties);
+					ApplicationConfigurationMetadataResolver.class.getClassLoader())
+							.getResources(WHITELIST_PROPERTIES);
+			loadWhiteLists(concatArrays(globalLegacyResources, globalResources), globalWhiteListedClasses,
+					globalWhiteListedProperties);
 		}
 		catch (IOException e) {
 			throw new RuntimeException("Error reading global white list of configuration properties", e);
 		}
+	}
+
+	private static Resource[] concatArrays(final Resource[]... arrays) {
+		return Arrays.stream(arrays).flatMap(Arrays::stream).toArray(Resource[]::new);
 	}
 
 	/**
@@ -91,6 +104,7 @@ public class BootApplicationConfigurationMetadataResolver extends ApplicationCon
 	 * @param app a Spring Cloud Stream app; typically a Boot uberjar, but directories are
 	 * supported as well
 	 */
+	@Override
 	public List<ConfigurationMetadataProperty> listProperties(Resource app, boolean exhaustive) {
 		try {
 			if (app != null) {
@@ -111,8 +125,13 @@ public class BootApplicationConfigurationMetadataResolver extends ApplicationCon
 			ResourcePatternResolver moduleResourceLoader = new PathMatchingResourcePatternResolver(moduleClassLoader);
 			Collection<String> whiteListedClasses = new HashSet<>(globalWhiteListedClasses);
 			Collection<String> whiteListedProperties = new HashSet<>(globalWhiteListedProperties);
+
+			// read both formats and concat
+			Resource[] whitelistLegacyDescriptors = moduleResourceLoader.getResources(WHITELIST_LEGACY_PROPERTIES);
 			Resource[] whitelistDescriptors = moduleResourceLoader.getResources(WHITELIST_PROPERTIES);
-			loadWhiteLists(whitelistDescriptors, whiteListedClasses, whiteListedProperties);
+			loadWhiteLists(concatArrays(whitelistLegacyDescriptors, whitelistDescriptors), whiteListedClasses,
+					whiteListedProperties);
+
 			ConfigurationMetadataRepositoryJsonBuilder builder = ConfigurationMetadataRepositoryJsonBuilder.create();
 			for (Resource r : moduleResourceLoader.getResources(CONFIGURATION_METADATA_PATTERN)) {
 				builder.withJsonResource(r.getInputStream());
