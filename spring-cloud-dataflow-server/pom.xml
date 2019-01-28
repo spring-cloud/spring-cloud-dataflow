@@ -168,6 +168,9 @@
 						<volumes>
 						  <volume>/tmp</volume>
 						</volumes>
+            <runCmds>
+              <run>wget -q https://repo.spring.io/snapshot/org/springframework/cloud/spring-cloud-dataflow-shell/${project.version}/spring-cloud-dataflow-shell-${project.version}.jar -O /shell.jar</run>
+            </runCmds>
 						<entryPoint>
 						  <exec>
 							<arg>java</arg>
