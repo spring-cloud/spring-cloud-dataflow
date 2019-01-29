@@ -31,7 +31,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase.Replace;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.cloud.dataflow.core.AppRegistration;
 import org.springframework.cloud.dataflow.core.StreamDefinition;
 import org.springframework.cloud.dataflow.registry.repository.AppRegistrationRepository;
 import org.springframework.cloud.dataflow.server.configuration.TestDependencies;
@@ -68,7 +67,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @SpringBootTest(classes = TestDependencies.class)
 @DirtiesContext(classMode = ClassMode.BEFORE_EACH_TEST_METHOD)
 @AutoConfigureTestDatabase(replace = Replace.ANY)
-public class RuntimeAppsControllerStreamStatusTests {
+public class RuntimeStreamsControllerTests {
 
 	private MockMvc mockMvc;
 
@@ -88,9 +87,8 @@ public class RuntimeAppsControllerStreamStatusTests {
 	public void setupMocks() throws Exception {
 		this.mockMvc = MockMvcBuilders.webAppContextSetup(wac)
 				.defaultRequest(get("/").accept(MediaType.APPLICATION_JSON)).build();
-		for (AppRegistration appRegistration : this.appRegistrationRepository.findAll()) {
-			this.appRegistrationRepository.deleteAll();
-		}
+		this.appRegistrationRepository.deleteAll();
+
 
 		StreamDefinition streamDefinition1 = new StreamDefinition("ticktock1", "time1|log1");
 		StreamDefinition streamDefinition2 = new StreamDefinition("ticktock2", "time2|log2");
@@ -177,9 +175,9 @@ public class RuntimeAppsControllerStreamStatusTests {
 			@Override
 			public Map<String, String> getAttributes() {
 				Map<String, String> attributes = new HashMap<>();
-				attributes.put(RuntimeAppsController.ATTRIBUTE_SKIPPER_APPLICATION_NAME, appName);
+				attributes.put(RuntimeStreamsController.ATTRIBUTE_SKIPPER_APPLICATION_NAME, appName);
 				if (guid != null) {
-					attributes.put(RuntimeAppsController.ATTRIBUTE_GUID, guid);
+					attributes.put(RuntimeStreamsController.ATTRIBUTE_GUID, guid);
 				}
 				return attributes;
 			}

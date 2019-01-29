@@ -529,7 +529,7 @@ public class SkipperStreamDeployer implements StreamDeployer {
 		List<AppStatus> appStatuses = new ArrayList<>();
 		try {
 			Info info = this.skipperClient.status(streamName);
-			appStatuses.addAll(SkipperStreamDeployer.deserializeAppStatus(info.getStatus().getPlatformStatus()));
+			appStatuses.addAll(info.getStatus().getAppStatusList());
 		}
 		catch (Exception e) {
 			// ignore as we query status for all the streams.

@@ -23,7 +23,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.cloud.dataflow.rest.JobExecutionThinResource;
 import org.springframework.cloud.dataflow.rest.Version;
-import org.springframework.cloud.dataflow.rest.resource.AppInstanceStatusResource;
 import org.springframework.cloud.dataflow.rest.resource.AppRegistrationResource;
 import org.springframework.cloud.dataflow.rest.resource.CompletionProposalsResource;
 import org.springframework.cloud.dataflow.rest.resource.JobExecutionResource;
@@ -102,12 +101,14 @@ public class RootController {
 							.withRel("streams/definitions/definition")));
 			root.add(unescapeTemplateVariables(entityLinks.linkToSingleResource(StreamAppStatusResource.class, "{name}")
 					.withRel("streams/validation")));
-			root.add(ControllerLinkBuilder.linkTo(ControllerLinkBuilder.methodOn(RuntimeAppsController.class).list(null,null)).withRel("runtime/apps"));
-			root.add(ControllerLinkBuilder.linkTo(ControllerLinkBuilder.methodOn(RuntimeAppsController.class).display(null)).withRel("runtime/apps/app/{id}"));
-			root.add(unescapeTemplateVariables(
-					entityLinks.linkFor(AppInstanceStatusResource.class, "{appId}")
-							.withRel("runtime/apps/instances")));
-			root.add(ControllerLinkBuilder.linkTo(ControllerLinkBuilder.methodOn(RuntimeAppsController.class).streamStatus(null)).withRel("runtime/streams"));
+
+			root.add(ControllerLinkBuilder.linkTo(ControllerLinkBuilder.methodOn(RuntimeStreamsController.class).streamStatus(null)).withRel("runtime/streams"));
+
+			root.add(ControllerLinkBuilder.linkTo(ControllerLinkBuilder.methodOn(RuntimeAppsController.class).list(null, null)).withRel("runtime/apps"));
+			root.add(ControllerLinkBuilder.linkTo(ControllerLinkBuilder.methodOn(RuntimeAppsController.class).display(null)).withRel("runtime/apps/{appId}"));
+
+			root.add(ControllerLinkBuilder.linkTo(ControllerLinkBuilder.methodOn(RuntimeAppInstanceController.class).list(null, null, null)).withRel("runtime/apps/{appId}/instances"));
+			root.add(ControllerLinkBuilder.linkTo(ControllerLinkBuilder.methodOn(RuntimeAppInstanceController.class).display(null, null)).withRel("runtime/apps/{appId}/instances/{instanceId}"));
 
 			root.add(ControllerLinkBuilder.linkTo(StreamDeploymentController.class).withRel("streams/deployments"));
 			root.add(ControllerLinkBuilder.linkTo(ControllerLinkBuilder.methodOn(StreamDeploymentController.class).deploy(null, null)).withRel("streams/deployments/{name}"));
