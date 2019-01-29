@@ -39,7 +39,6 @@ import org.springframework.boot.loader.jar.JarFile;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import org.springframework.core.io.support.ResourcePatternResolver;
-import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 
 /**
@@ -78,20 +77,23 @@ public class BootApplicationConfigurationMetadataResolver extends ApplicationCon
 		this.parent = parent;
 		JarFile.registerUrlProtocolHandler();
 		try {
+			// read both formats and concat
+			Resource[] globalLegacyResources = new PathMatchingResourcePatternResolver(
+					ApplicationConfigurationMetadataResolver.class.getClassLoader())
+							.getResources(WHITELIST_LEGACY_PROPERTIES);
 			Resource[] globalResources = new PathMatchingResourcePatternResolver(
-					ApplicationConfigurationMetadataResolver.class.getClassLoader()).getResources(WHITELIST_PROPERTIES);
-			if (ObjectUtils.isEmpty(globalResources)) {
-				// if we found at least one resource with new naming use that, otherwise fall back
-				// to legacy naming as long as we support it.
-				globalResources = new PathMatchingResourcePatternResolver(
-						ApplicationConfigurationMetadataResolver.class.getClassLoader())
-								.getResources(WHITELIST_LEGACY_PROPERTIES);
-			}
-			loadWhiteLists(globalResources, globalWhiteListedClasses, globalWhiteListedProperties);
+					ApplicationConfigurationMetadataResolver.class.getClassLoader())
+							.getResources(WHITELIST_PROPERTIES);
+			loadWhiteLists(concatArrays(globalLegacyResources, globalResources), globalWhiteListedClasses,
+					globalWhiteListedProperties);
 		}
 		catch (IOException e) {
 			throw new RuntimeException("Error reading global white list of configuration properties", e);
 		}
+	}
+
+	private static Resource[] concatArrays(final Resource[]... arrays) {
+		return Arrays.stream(arrays).flatMap(Arrays::stream).toArray(Resource[]::new);
 	}
 
 	/**
@@ -123,13 +125,13 @@ public class BootApplicationConfigurationMetadataResolver extends ApplicationCon
 			ResourcePatternResolver moduleResourceLoader = new PathMatchingResourcePatternResolver(moduleClassLoader);
 			Collection<String> whiteListedClasses = new HashSet<>(globalWhiteListedClasses);
 			Collection<String> whiteListedProperties = new HashSet<>(globalWhiteListedProperties);
+
+			// read both formats and concat
+			Resource[] whitelistLegacyDescriptors = moduleResourceLoader.getResources(WHITELIST_LEGACY_PROPERTIES);
 			Resource[] whitelistDescriptors = moduleResourceLoader.getResources(WHITELIST_PROPERTIES);
-			if (ObjectUtils.isEmpty(whitelistDescriptors)) {
-				// if we found at least one resource with new naming use that, otherwise fall back
-				// to legacy naming as long as we support it.
-				whitelistDescriptors = moduleResourceLoader.getResources(WHITELIST_LEGACY_PROPERTIES);
-			}
-			loadWhiteLists(whitelistDescriptors, whiteListedClasses, whiteListedProperties);
+			loadWhiteLists(concatArrays(whitelistLegacyDescriptors, whitelistDescriptors), whiteListedClasses,
+					whiteListedProperties);
+
 			ConfigurationMetadataRepositoryJsonBuilder builder = ConfigurationMetadataRepositoryJsonBuilder.create();
 			for (Resource r : moduleResourceLoader.getResources(CONFIGURATION_METADATA_PATTERN)) {
 				builder.withJsonResource(r.getInputStream());

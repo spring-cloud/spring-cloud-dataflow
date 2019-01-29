@@ -56,7 +56,7 @@ public class BootApplicationConfigurationMetadataResolverTests {
 	}
 
 	@Test
-	public void appSpecificWhitelistedLegacyPropsShouldNotBeVisible() {
+	public void appSpecificWhitelistedLegacyPropsShouldBeVisibleIfBothInPlace() {
 		// test resource files has both expresso2 and expresso3 in spring-configuration-metadata
 		// and as we prefer new format(expresso3 whitelisted) and it exists
 		// expresso2 from old format doesn't get read.
@@ -64,7 +64,7 @@ public class BootApplicationConfigurationMetadataResolverTests {
 				.listProperties(new ClassPathResource("apps/filter-processor-both", getClass()));
 		assertThat(properties, hasItem(configPropertyIdentifiedAs("filter.expression")));
 		assertThat(properties, hasItem(configPropertyIdentifiedAs("some.other.property.whitelisted.prefix.expresso3")));
-		assertThat(properties, not(hasItem(configPropertyIdentifiedAs("some.other.property.whitelisted.prefix.expresso2"))));
+		assertThat(properties, hasItem(configPropertyIdentifiedAs("some.other.property.whitelisted.prefix.expresso2")));
 	}
 
 	@Test
