@@ -15,8 +15,8 @@
   "editable": true,
   "gnetId": null,
   "graphTooltip": 0,
-  "id": 1,
-  "iteration": 1548166668661,
+  "id": 3,
+  "iteration": 1548785950463,
   "links": [
     {
       "icon": "external link",
@@ -156,10 +156,10 @@
       "steppedLine": false,
       "targets": [
         {
-          "expr": "avg(process_cpu_usage{stream_name=~\"$stream_name\",application_name=~\"$application_name\"}) by (application_name)",
+          "expr": "avg(process_cpu_usage{stream_name=~\"$stream_name\",application_name=~\"$application_name\"}) by (application_name,application_guid)",
           "format": "time_series",
           "intervalFactor": 1,
-          "legendFormat": "{{application_name}}",
+          "legendFormat": "{{application_name}} [{{application_guid}}]",
           "refId": "A"
         }
       ],
@@ -242,10 +242,10 @@
       "steppedLine": false,
       "targets": [
         {
-          "expr": "avg(jvm_memory_used_bytes{stream_name=~\"$stream_name\",application_name=~\"$application_name\"}) by (application_name)",
+          "expr": "avg(jvm_memory_used_bytes{stream_name=~\"$stream_name\",application_name=~\"$application_name\"}) by (application_name,application_guid)",
           "format": "time_series",
           "intervalFactor": 1,
-          "legendFormat": "{{application_name}}",
+          "legendFormat": "{{application_name}} [{{application_guid}}]",
           "refId": "A"
         }
       ],
@@ -328,10 +328,10 @@
       "steppedLine": false,
       "targets": [
         {
-          "expr": "avg(jvm_threads_live_threads{stream_name=~\"$stream_name\",application_name=~\"$application_name\"}) by (application_name)",
+          "expr": "avg(jvm_threads_live_threads{stream_name=~\"$stream_name\",application_name=~\"$application_name\"}) by (application_name,application_guid)",
           "format": "time_series",
           "intervalFactor": 1,
-          "legendFormat": "{{application_name}}",
+          "legendFormat": "{{application_name}} [{{application_guid}}]",
           "refId": "A"
         }
       ],
@@ -414,10 +414,10 @@
       "steppedLine": false,
       "targets": [
         {
-          "expr": "avg(process_files_open_files{stream_name=~\"$stream_name\",application_name=~\"$application_name\"}) by (application_name)",
+          "expr": "avg(process_files_open_files{stream_name=~\"$stream_name\",application_name=~\"$application_name\"}) by (application_name,application_guid)",
           "format": "time_series",
           "intervalFactor": 1,
-          "legendFormat": "{{application_name}}",
+          "legendFormat": "{{application_name}} [{{application_guid}}]",
           "refId": "A"
         }
       ],
@@ -500,10 +500,10 @@
       "steppedLine": false,
       "targets": [
         {
-          "expr": "avg(jvm_classes_loaded_classes{stream_name=~\"$stream_name\",application_name=~\"$application_name\"}) by (application_name)",
+          "expr": "avg(jvm_classes_loaded_classes{stream_name=~\"$stream_name\",application_name=~\"$application_name\"}) by (application_name,application_guid)",
           "format": "time_series",
           "intervalFactor": 1,
-          "legendFormat": "{{application_name}}",
+          "legendFormat": "{{application_name}} [{{application_guid}}]",
           "refId": "A"
         }
       ],
@@ -598,7 +598,7 @@
         "h": 6,
         "w": 24,
         "x": 0,
-        "y": 9
+        "y": 11
       },
       "id": 2,
       "legend": {
@@ -634,10 +634,10 @@
       "steppedLine": false,
       "targets": [
         {
-          "expr": "rate(spring_integration_send_seconds_count{type=\"channel\",name!=\"errorChannel\",name!=\"nullChannel\",result=\"success\",stream_name=~\"$stream_name\",application_name=~\"$application_name\"}[60s])",
+          "expr": "rate(spring_integration_send_seconds_count{type=\"channel\",name!=\"errorChannel\",name!=\"nullChannel\",result=\"success\",stream_name=~\"$stream_name\",application_name=~\"$application_name\",application_guid=~\"$application_guid\"}[60s])",
           "format": "time_series",
           "intervalFactor": 1,
-          "legendFormat": "{{name}}",
+          "legendFormat": "{{name}} [{{application_guid}}]",
           "refId": "A"
         }
       ],
@@ -695,7 +695,7 @@
         "h": 6,
         "w": 24,
         "x": 0,
-        "y": 15
+        "y": 23
       },
       "id": 6,
       "legend": {
@@ -731,10 +731,10 @@
       "steppedLine": false,
       "targets": [
         {
-          "expr": "spring_integration_send_seconds_sum{type=\"channel\", stream_name=~\"$stream_name\",application_name=~\"$application_name\"}/spring_integration_send_seconds_count{type=\"channel\", stream_name=~\"$stream_name\",application_name=~\"$application_name\"}",
+          "expr": "spring_integration_send_seconds_sum{type=\"channel\", stream_name=~\"$stream_name\",application_name=~\"$application_name\"}/spring_integration_send_seconds_count{type=\"channel\", stream_name=~\"$stream_name\",application_name=~\"$application_name\",application_guid=~\"$application_guid\"}",
           "format": "time_series",
           "intervalFactor": 1,
-          "legendFormat": "{{name}}",
+          "legendFormat": "{{name}} [{{application_guid}}]",
           "refId": "A"
         }
       ],
@@ -791,7 +791,7 @@
         "h": 6,
         "w": 24,
         "x": 0,
-        "y": 21
+        "y": 35
       },
       "id": 22,
       "legend": {
@@ -827,10 +827,10 @@
       "steppedLine": false,
       "targets": [
         {
-          "expr": "rate(spring_integration_send_seconds_count{type=\"handler\",result=\"success\",stream_name=~\"$stream_name\",application_name=~\"$application_name\"}[60s])",
+          "expr": "rate(spring_integration_send_seconds_count{type=\"handler\",result=\"success\",stream_name=~\"$stream_name\",application_name=~\"$application_name\",application_guid=~\"$application_guid\"}[60s])",
           "format": "time_series",
           "intervalFactor": 1,
-          "legendFormat": "{{name}}",
+          "legendFormat": "{{name}} [{{application_guid}}]",
           "refId": "A"
         }
       ],
@@ -888,7 +888,7 @@
         "h": 6,
         "w": 24,
         "x": 0,
-        "y": 27
+        "y": 47
       },
       "id": 21,
       "legend": {
@@ -924,10 +924,10 @@
       "steppedLine": false,
       "targets": [
         {
-          "expr": "rate(spring_integration_receive_total{type=\"source\",result=\"success\",stream_name=~\"$stream_name\",application_name=~\"$application_name\"}[60s])",
+          "expr": "rate(spring_integration_receive_total{type=\"source\",result=\"success\",stream_name=~\"$stream_name\",application_name=~\"$application_name\",application_guid=~\"$application_guid\"}[60s])",
           "format": "time_series",
           "intervalFactor": 1,
-          "legendFormat": "{{name}}",
+          "legendFormat": "{{name}} [{{application_guid}}]",
           "refId": "A"
         }
       ],
@@ -985,7 +985,7 @@
         "h": 6,
         "w": 24,
         "x": 0,
-        "y": 33
+        "y": 59
       },
       "id": 16,
       "legend": {
@@ -1021,10 +1021,10 @@
       "steppedLine": false,
       "targets": [
         {
-          "expr": "rate(spring_integration_send_seconds_count{type=\"channel\",result=\"failure\",stream_name=~\"$stream_name\",application_name=~\"$application_name\"}[60s])",
+          "expr": "rate(spring_integration_send_seconds_count{type=\"channel\",result=\"failure\",stream_name=~\"$stream_name\",application_name=~\"$application_name\",application_guid=~\"$application_guid\"}[60s])",
           "format": "time_series",
           "intervalFactor": 1,
-          "legendFormat": "{{name}}",
+          "legendFormat": "{{name}} [{{application_guid}}]",
           "refId": "A"
         }
       ],
@@ -1082,7 +1082,7 @@
         "h": 6,
         "w": 24,
         "x": 0,
-        "y": 39
+        "y": 71
       },
       "id": 135,
       "legend": {
@@ -1118,24 +1118,24 @@
       "steppedLine": false,
       "targets": [
         {
-          "expr": "spring_integration_channels{stream_name=~\"$stream_name\", application_name=~\"$application_name\"}",
+          "expr": "spring_integration_channels{stream_name=~\"$stream_name\", application_name=~\"$application_name\", application_guid=~\"$application_guid\"}",
           "format": "time_series",
           "intervalFactor": 1,
-          "legendFormat": "channels",
+          "legendFormat": "#channels [{{application_guid}}]",
           "refId": "A"
         },
         {
-          "expr": "spring_integration_handlers{stream_name=~\"$stream_name\", application_name=~\"$application_name\"}",
+          "expr": "spring_integration_handlers{stream_name=~\"$stream_name\", application_name=~\"$application_name\", application_guid=~\"$application_guid\"}",
           "format": "time_series",
           "intervalFactor": 1,
-          "legendFormat": "handlers",
+          "legendFormat": "#handlers [{{application_guid}}]",
           "refId": "B"
         },
         {
-          "expr": "spring_integration_sources{stream_name=~\"$stream_name\", application_name=~\"$application_name\"}",
+          "expr": "spring_integration_sources{stream_name=~\"$stream_name\", application_name=~\"$application_name\", application_guid=~\"$application_guid\"}",
           "format": "time_series",
           "intervalFactor": 1,
-          "legendFormat": "sources",
+          "legendFormat": "#sources [{{application_guid}}]",
           "refId": "C"
         }
       ],
@@ -1191,8 +1191,8 @@
       {
         "allValue": null,
         "current": {
-          "text": "stream1",
-          "value": "stream1"
+          "text": "stream2",
+          "value": "stream2"
         },
         "datasource": "ScdfPrometheus",
         "definition": "label_values(stream_name)",
@@ -1216,8 +1216,11 @@
       {
         "allValue": null,
         "current": {
-          "text": "All",
-          "value": "$__all"
+          "tags": [],
+          "text": "time",
+          "value": [
+            "time"
+          ]
         },
         "datasource": "ScdfPrometheus",
         "definition": "label_values({stream_name=\"$stream_name\"},application_name)",
@@ -1258,10 +1261,72 @@
             "selected": true,
             "text": "All",
             "value": "$__all"
+          },
+          {
+            "selected": false,
+            "text": "org.springframework.cloud.stream.app.time.source.TimeSourceConfiguration.publishTime.inboundChannelAdapter.source",
+            "value": "org.springframework.cloud.stream.app.time.source.TimeSourceConfiguration.publishTime.inboundChannelAdapter.source"
+          },
+          {
+            "selected": false,
+            "text": "output",
+            "value": "output"
+          },
+          {
+            "selected": false,
+            "text": "http-nio-31740",
+            "value": "http-nio-31740"
+          },
+          {
+            "selected": false,
+            "text": "http-nio-36051",
+            "value": "http-nio-36051"
+          },
+          {
+            "selected": false,
+            "text": "default",
+            "value": "default"
+          },
+          {
+            "selected": false,
+            "text": "dispatcherServlet",
+            "value": "dispatcherServlet"
+          },
+          {
+            "selected": false,
+            "text": "messageDispatcherServlet",
+            "value": "messageDispatcherServlet"
           }
         ],
         "query": "label_values({stream_name=\"$stream_name\",application_name=~\"$application_name\"},name)",
         "refresh": 0,
+        "regex": "",
+        "skipUrlSync": false,
+        "sort": 0,
+        "tagValuesQuery": "",
+        "tags": [],
+        "tagsQuery": "",
+        "type": "query",
+        "useTags": false
+      },
+      {
+        "allValue": null,
+        "current": {
+          "text": "All",
+          "value": [
+            "$__all"
+          ]
+        },
+        "datasource": "ScdfPrometheus",
+        "definition": "label_values({application_name=~\"$application_name\",stream_name=~\"$stream_name\"},application_guid)",
+        "hide": 0,
+        "includeAll": true,
+        "label": "guid",
+        "multi": true,
+        "name": "application_guid",
+        "options": [],
+        "query": "label_values({application_name=~\"$application_name\",stream_name=~\"$stream_name\"},application_guid)",
+        "refresh": 1,
         "regex": "",
         "skipUrlSync": false,
         "sort": 0,
@@ -1305,5 +1370,5 @@
   "timezone": "",
   "title": "Applications",
   "uid": "scdf-applications",
-  "version": 1
+  "version": 17
 }
