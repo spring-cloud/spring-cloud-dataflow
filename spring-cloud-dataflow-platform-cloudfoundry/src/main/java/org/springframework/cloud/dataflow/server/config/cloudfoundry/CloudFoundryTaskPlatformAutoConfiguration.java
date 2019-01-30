@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 the original author or authors.
+ * Copyright 2018-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -42,7 +42,6 @@ import org.springframework.cloud.deployer.spi.cloudfoundry.CloudFoundryConnectio
 import org.springframework.cloud.deployer.spi.cloudfoundry.CloudFoundryDeploymentProperties;
 import org.springframework.cloud.deployer.spi.core.RuntimeEnvironmentInfo;
 import org.springframework.cloud.deployer.spi.util.RuntimeVersionUtils;
-import org.springframework.cloud.skipper.SkipperException;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -125,7 +124,7 @@ public class CloudFoundryTaskPlatformAutoConfiguration {
 		catch (Exception e) {
 			logger.error("Cloud Foundry platform account [{}] could not be registered: {}",
 					account, e.getMessage());
-			throw new SkipperException(e.getMessage());
+			throw new IllegalStateException(e.getMessage());
 		}
 	}
 
