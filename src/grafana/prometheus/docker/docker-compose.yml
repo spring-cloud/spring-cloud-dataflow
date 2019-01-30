@@ -35,7 +35,7 @@ services:
   # Use `docker exec -it service-discovery /bin/sh` to logging the container
   # Project https://github.com/tzolov/spring-cloud-dataflow-prometheus-service-discovery
   service-discovery:
-    image: tzolov/spring-cloud-dataflow-prometheus-service-discovery:0.0.1
+    image: tzolov/spring-cloud-dataflow-prometheus-service-discovery:0.0.2
     container_name: 'service-discovery'
     volumes:
       - 'scdf-targets:/tmp/scdf-targets/'
@@ -45,7 +45,8 @@ services:
       - '8181:8181'
     #    network_mode: 'host'
     environment:
-      - 'SCDF_HOST_IP=${SCDF_HOST_IP}'
+      - 'SCDF_HOST_IP=${SCDF_HOST_IP:?SCDF_HOST_IP is not set!
+      Use "export SCDF_HOST_IP=<SCDF Server IP>". Note: 127.0.0.1 is not a valid option!}'
 
 volumes:
   scdf-targets:
