@@ -30,7 +30,7 @@ import org.springframework.batch.core.JobParameter;
 import org.springframework.batch.core.JobParameters;
 import org.springframework.cloud.dataflow.core.StreamDefinition;
 import org.springframework.cloud.dataflow.core.TaskDefinition;
-import org.springframework.cloud.dataflow.rest.support.ArgumentSanitizer;
+import org.springframework.cloud.dataflow.rest.util.ArgumentSanitizer;
 
 /**
  * @author Christian Tzolov

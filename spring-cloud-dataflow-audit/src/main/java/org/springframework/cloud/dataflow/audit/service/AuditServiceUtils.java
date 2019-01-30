@@ -20,7 +20,7 @@ import java.util.Map;
 
 import org.springframework.cloud.dataflow.core.AppRegistration;
 import org.springframework.cloud.dataflow.core.StreamDefinition;
-import org.springframework.cloud.dataflow.rest.support.ArgumentSanitizer;
+import org.springframework.cloud.dataflow.rest.util.ArgumentSanitizer;
 import org.springframework.cloud.scheduler.spi.core.ScheduleRequest;
 import org.springframework.util.Assert;
 
