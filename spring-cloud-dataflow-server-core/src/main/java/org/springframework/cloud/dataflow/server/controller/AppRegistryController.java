@@ -336,6 +336,7 @@ public class AppRegistryController {
 	@ResponseStatus(HttpStatus.OK)
 	public void unregisterAll() {
 		List<AppRegistration> appRegistrations = appRegistryService.findAll();
+		List<AppRegistration> appRegistrationsToUnregister = new ArrayList<>();
 
 		for (AppRegistration appRegistration : appRegistrations) {
 			String applicationName = appRegistration.getName();
@@ -345,15 +346,17 @@ public class AppRegistryController {
 			if (applicationType != ApplicationType.task) {
 				String streamWithApp = findStreamContainingAppOf(applicationType, applicationName, applicationVersion);
 
-				if (streamWithApp != null) {
-					throw new UnregisterAppException(String.format("The app [%s:%s:%s] you're trying to unregister is " +
-							"currently used in stream '%s'.", applicationName, applicationType, applicationVersion,
-							streamWithApp));
+				if (streamWithApp == null) {
+					appRegistrationsToUnregister.add(appRegistration);
 				}
+			} else {
+				appRegistrationsToUnregister.add(appRegistration);
 			}
 		}
 
-		appRegistryService.deleteAll();
+		if (!appRegistrationsToUnregister.isEmpty()) {
+			appRegistryService.deleteAll(appRegistrationsToUnregister);
+		}
 	}
 
 	/**

@@ -216,8 +216,8 @@ public class DefaultAppRegistryService implements AppRegistryService {
 	}
 
 	@Override
-	public void deleteAll() {
-		this.appRegistrationRepository.deleteAll();
+	public void deleteAll(Iterable<AppRegistration> appRegistrations) {
+		this.appRegistrationRepository.deleteAll(appRegistrations);
 	}
 
 	protected boolean isOverwrite(AppRegistration app, boolean overwrite) {

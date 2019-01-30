@@ -326,13 +326,10 @@ public class AppRegistryControllerTests {
 				.andExpect(status().isOk()).andExpect(jsonPath("name", is("log")))
 				.andExpect(jsonPath("type", is("sink")));
 
-		mockMvc.perform(get("/apps").accept(MediaType.APPLICATION_JSON)).andDo(print()).andExpect(status().isOk())
-				.andExpect(jsonPath("content", hasSize(2)));
-
 		mockMvc.perform(delete("/apps").accept(MediaType.APPLICATION_JSON))
 				.andExpect(status().isOk());
 
-		mockMvc.perform(get("/apps").accept(MediaType.APPLICATION_JSON)).andDo(print()).andExpect(status().isOk())
+		mockMvc.perform(get("/apps").accept(MediaType.APPLICATION_JSON)).andExpect(status().isOk())
 				.andExpect(jsonPath("content", hasSize(0)));
 	}
 
@@ -371,14 +368,14 @@ public class AppRegistryControllerTests {
 	public void testUnregisterAllApplicationsWhenApplicationUsedInStream() throws Exception {
 		setupUnregistrationTestStreams();
 
-		mockMvc.perform(delete("/apps").accept(MediaType.APPLICATION_JSON))
-				.andExpect(status().isConflict());
-
 		streamDefinitionRepository.deleteById("ticktock");
 		skipperClient.delete("ticktock", true);
 
 		mockMvc.perform(delete("/apps").accept(MediaType.APPLICATION_JSON))
 				.andExpect(status().isOk());
+
+		mockMvc.perform(get("/apps").accept(MediaType.APPLICATION_JSON)).andExpect(status().isOk())
+				.andExpect(jsonPath("content", hasSize(0)));
 	}
 
 	private void setupUnregistrationTestStreams() throws Exception {

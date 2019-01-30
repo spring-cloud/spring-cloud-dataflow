@@ -71,9 +71,9 @@ public interface AppRegistryService {
 	void delete(String name, ApplicationType type, String version);
 
 	/**
-	 * Deletes all {@link AppRegistration}'s.
+	 * Deletes all provided {@link AppRegistration}'s.
 	 */
-	void deleteAll();
+	void deleteAll(Iterable<AppRegistration> appRegistrations);
 
 	/**
 	 * Checks if an {@link AppRegistration} with this name, type and version exists.

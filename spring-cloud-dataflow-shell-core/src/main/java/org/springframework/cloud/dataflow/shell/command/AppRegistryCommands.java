@@ -194,7 +194,21 @@ public class AppRegistryCommands implements CommandMarker, ResourceLoaderAware {
 	public String unregisterAll() {
 		appRegistryOperations().unregisterAll();
 
-		return "Successfully unregistered all applications";
+		StringBuilder msg = new StringBuilder()
+				.append("Successfully unregistered applications.");
+
+		PagedResources<AppRegistrationResource> appRegistrationResources = appRegistryOperations().list();
+
+		if (!appRegistrationResources.getContent().isEmpty()) {
+			msg.append(" The following were not unregistered as they are associated with an existing stream:");
+
+			for(AppRegistrationResource appRegistrationResource : appRegistrationResources) {
+				msg.append(String.format(" [%s:%s:%s]", appRegistrationResource.getName(),
+						appRegistrationResource.getType(), appRegistrationResource.getVersion()));
+			}
+		}
+
+		return msg.toString();
 	}
 
 	@CliCommand(value = DEFAULT_APPLICATION, help = "Change the default application version")
