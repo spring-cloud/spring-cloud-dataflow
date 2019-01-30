@@ -27,9 +27,10 @@ import org.springframework.core.env.ConfigurableEnvironment;
 
 /**
  * Sets an active Spring profile of "local" when determined the current DataFlow instance
- * is a local server.
+ * is not running on a cloud platform.
  *
  * @author Chris Schaefer
+ * @author Mark Pollack
  */
 public class LocalProfileApplicationListener
 		implements ApplicationListener<ApplicationEnvironmentPreparedEvent>, Ordered {
@@ -43,13 +44,11 @@ public class LocalProfileApplicationListener
 		Iterable<CloudProfileProvider> cloudProfileProviders = ServiceLoader.load(CloudProfileProvider.class);
 		boolean addedCloudProfile = false;
 		for (CloudProfileProvider cloudProfileProvider : cloudProfileProviders) {
-			if (cloudProfileProvider != null) {
-				if (cloudProfileProvider.isCloudPlatform(environment)) {
-					String profileToAdd = cloudProfileProvider.getCloudProfile();
-					if (!Arrays.asList(environment.getActiveProfiles()).contains(profileToAdd)) {
-						environment.addActiveProfile(profileToAdd);
-						addedCloudProfile = true;
-					}
+			if (cloudProfileProvider.isCloudPlatform(environment)) {
+				String profileToAdd = cloudProfileProvider.getCloudProfile();
+				if (!Arrays.asList(environment.getActiveProfiles()).contains(profileToAdd)) {
+					environment.addActiveProfile(profileToAdd);
+					addedCloudProfile = true;
 				}
 			}
 		}
@@ -58,7 +57,6 @@ public class LocalProfileApplicationListener
 		}
 
 	}
-
 
 	@Override
 	public int getOrder() {
