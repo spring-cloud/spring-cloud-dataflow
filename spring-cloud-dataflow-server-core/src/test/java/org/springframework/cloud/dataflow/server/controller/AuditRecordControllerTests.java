@@ -162,7 +162,85 @@ public class AuditRecordControllerTests {
 		mockMvc.perform(get("/audit-records").accept(MediaType.APPLICATION_JSON))
 				.andDo(print())
 				.andExpect(status().isOk())
-				.andExpect(jsonPath("$.content.*", hasSize(5)));
+				.andExpect(jsonPath("$.content.*", hasSize(9)));
+	}
+
+
+	@Test
+	public void testRetrieveAllAuditRecordsOrderByCorrelationIdAsc() throws Exception {
+		mockMvc.perform(get("/audit-records")
+				.param("sort", "correlationId,asc")
+				.param("sort", "id,asc")
+				.accept(MediaType.APPLICATION_JSON))
+				.andDo(print())
+				.andExpect(status().isOk())
+				.andExpect(jsonPath("$.content.*", hasSize(9)))
+
+				.andExpect(jsonPath("$.content[0].auditRecordId", is(4)))
+				.andExpect(jsonPath("$.content[0].correlationId", is("filter")))
+
+				.andExpect(jsonPath("$.content[1].auditRecordId", is(6)))
+				.andExpect(jsonPath("$.content[1].correlationId", is("log")))
+
+				.andExpect(jsonPath("$.content[2].auditRecordId", is(9)))
+				.andExpect(jsonPath("$.content[2].correlationId", is("myStream")))
+
+				.andExpect(jsonPath("$.content[3].auditRecordId", is(12)))
+				.andExpect(jsonPath("$.content[3].correlationId", is("myStream")))
+
+				.andExpect(jsonPath("$.content[4].auditRecordId", is(13)))
+				.andExpect(jsonPath("$.content[4].correlationId", is("myStream")))
+
+				.andExpect(jsonPath("$.content[5].auditRecordId", is(10)))
+				.andExpect(jsonPath("$.content[5].correlationId", is("myStream1")))
+
+				.andExpect(jsonPath("$.content[6].auditRecordId", is(11)))
+				.andExpect(jsonPath("$.content[6].correlationId", is("myStream2")))
+
+				.andExpect(jsonPath("$.content[7].auditRecordId", is(2)))
+				.andExpect(jsonPath("$.content[7].correlationId", is("time")))
+
+				.andExpect(jsonPath("$.content[8].auditRecordId", is(8)))
+				.andExpect(jsonPath("$.content[8].correlationId", is("timestamp")));
+	}
+
+	@Test
+	public void testRetrieveAllAuditRecordsOrderByCorrelationIdDesc() throws Exception {
+		mockMvc.perform(get("/audit-records")
+				.param("sort", "correlationId,desc")
+				.param("sort", "id,desc")
+				.accept(MediaType.APPLICATION_JSON))
+				.andDo(print())
+				.andExpect(status().isOk())
+				.andExpect(jsonPath("$.content.*", hasSize(9)))
+
+				.andExpect(jsonPath("$.content[0].auditRecordId", is(8)))
+				.andExpect(jsonPath("$.content[0].correlationId", is("timestamp")))
+
+				.andExpect(jsonPath("$.content[1].auditRecordId", is(2)))
+				.andExpect(jsonPath("$.content[1].correlationId", is("time")))
+
+				.andExpect(jsonPath("$.content[2].auditRecordId", is(11)))
+				.andExpect(jsonPath("$.content[2].correlationId", is("myStream2")))
+
+				.andExpect(jsonPath("$.content[3].auditRecordId", is(10)))
+				.andExpect(jsonPath("$.content[3].correlationId", is("myStream1")))
+
+				.andExpect(jsonPath("$.content[4].auditRecordId", is(13)))
+				.andExpect(jsonPath("$.content[4].correlationId", is("myStream")))
+
+				.andExpect(jsonPath("$.content[5].auditRecordId", is(12)))
+				.andExpect(jsonPath("$.content[5].correlationId", is("myStream")))
+
+				.andExpect(jsonPath("$.content[6].auditRecordId", is(9)))
+				.andExpect(jsonPath("$.content[6].correlationId", is("myStream")))
+
+				.andExpect(jsonPath("$.content[7].auditRecordId", is(6)))
+				.andExpect(jsonPath("$.content[7].correlationId", is("log")))
+
+				.andExpect(jsonPath("$.content[8].auditRecordId", is(4)))
+				.andExpect(jsonPath("$.content[8].correlationId", is("filter")));
+
 	}
 
 	@Test
@@ -361,7 +439,7 @@ public class AuditRecordControllerTests {
 	}
 
 	@Test
-	public void testRetrieveAuditRecordsBetweenTwoGivenDate() throws Exception {
+	public void testRetrieveAuditRecordsBetweenTwoGivenDates() throws Exception {
 		ZonedDateTime betweenTime = betweenDate.withZoneSameInstant(ZoneOffset.of("+01:00"));
 		String fromDate = betweenTime.toString();
 
@@ -380,7 +458,20 @@ public class AuditRecordControllerTests {
 	}
 
 	@Test
-	public void testRetrieveAuditRecordsBetweenTwoNullDate() throws Exception {
+	public void testRetrieveAuditRecordsBetweenTwoGivenDatesWithFromDateAfterToDate() throws Exception {
+		final String toDate = betweenDate.withZoneSameInstant(ZoneOffset.of("+01:00")).toString();
+		final String fromDate = endDate.withZoneSameInstant(ZoneOffset.of("+01:00")).toString();
+
+		mockMvc.perform(get("/audit-records")
+				.param("fromDate", fromDate)
+				.param("toDate", toDate)
+				.accept(MediaType.APPLICATION_JSON))
+				.andDo(print())
+				.andExpect(status().isBadRequest());
+	}
+
+	@Test
+	public void testRetrieveAuditRecordsBetweenTwoNullDates() throws Exception {
 		mockMvc.perform(get("/audit-records").accept(MediaType.APPLICATION_JSON))
 				.andDo(print())
 				.andExpect(status().isOk())
@@ -420,10 +511,13 @@ public class AuditRecordControllerTests {
 				.andExpect(jsonPath("$.content[0].correlationId", is("filter")));
 	}
 
-//	@Test
-//	public void testRetrieveStreamAndTaskRecords() throws Exception {
-//		mockMvc.perform(get("/audit-records?operations=STREAM,TASK").accept(MediaType.APPLICATION_JSON))
-//	}
+	@Test
+	public void testRetrieveStreamAndTaskRecords() throws Exception {
+		mockMvc.perform(get("/audit-records?operations=STREAM,TASK").accept(MediaType.APPLICATION_JSON))
+				.andDo(print())
+				.andExpect(status().isOk())
+				.andExpect(jsonPath("$.content.*", hasSize(5)));
+	}
 
     @Test
 	public void testRetrievePagedAuditDataNegative() throws Exception {
@@ -439,6 +533,15 @@ public class AuditRecordControllerTests {
 				.andDo(print())
 				.andExpect(status().isOk())
 				.andExpect(jsonPath("$.content.*", hasSize(5)));
+	}
+
+
+	@Test
+	public void testRetrievePagedAuditDataFromPage3() throws Exception {
+		mockMvc.perform(get("/audit-records?page=2&size=4").accept(MediaType.APPLICATION_JSON))
+				.andDo(print())
+				.andExpect(status().isOk())
+				.andExpect(jsonPath("$.content.*", hasSize(1)));
 	}
 
 	@Test

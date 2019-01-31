@@ -135,4 +135,11 @@ public class AuditRecord {
 	public void setCreatedOn(Instant createdOn) {
 		this.createdOn = createdOn;
 	}
+
+	@Override
+	public String toString() {
+		return "AuditRecord [id=" + id + ", createdOn=" + createdOn + ", auditAction=" + auditAction
+				+ ", auditOperation=" + auditOperation + "]";
+	}
+
 }

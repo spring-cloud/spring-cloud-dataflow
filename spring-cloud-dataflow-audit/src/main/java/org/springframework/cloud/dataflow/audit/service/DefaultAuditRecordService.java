@@ -15,6 +15,7 @@
  */
 package org.springframework.cloud.dataflow.audit.service;
 
+import java.time.Instant;
 import java.util.Map;
 import java.util.Optional;
 
@@ -95,8 +96,8 @@ public class DefaultAuditRecordService implements AuditRecordService {
 			Pageable pageable,
 			AuditActionType[] actions,
 			AuditOperationType[] operations,
-			String fromDate,
-			String toDate) {
+			Instant fromDate,
+			Instant toDate) {
 		return this.auditRecordRepository.findByActionTypeAndOperationTypeAndDate(operations, actions, fromDate, toDate,
 				pageable);
 	}
