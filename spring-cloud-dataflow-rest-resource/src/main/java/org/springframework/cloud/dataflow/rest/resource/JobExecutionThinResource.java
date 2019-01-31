@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.cloud.dataflow.rest;
+package org.springframework.cloud.dataflow.rest.resource;
 
 import java.text.DateFormat;
 import java.util.Date;
