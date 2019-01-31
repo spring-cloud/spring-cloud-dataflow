@@ -15,6 +15,7 @@
  */
 package org.springframework.cloud.dataflow.audit.service;
 
+import java.time.Instant;
 import java.util.Map;
 import java.util.Optional;
 
@@ -87,19 +88,20 @@ public interface AuditRecordService {
 	 *     {@link AuditRecord}s be returned
 	 * @param fromDate Can be null. The start date of the query records
 	 * @param toDate Can be null. The end date of the query records
+	 *
 	 * @return a {@link Page} of {@link AuditRecord}s
 	 */
 	Page<AuditRecord> findAuditRecordByAuditOperationTypeAndAuditActionTypeAndDate(
 			Pageable pageable,
 			AuditActionType[] actions,
 			AuditOperationType[] operations,
-			String fromDate,
-			String toDate);
+			Instant fromDate,
+			Instant toDate);
 
 	/**
 	 * Find a single {@link AuditRecord} by providing a mandatory id.
 	 *
-	 * @param id Must not be null/
+	 * @param id Must not be null
 	 * @return Audit Record
 	 */
 	Optional<AuditRecord> findById(Long id);

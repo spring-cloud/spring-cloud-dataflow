@@ -31,7 +31,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional
 @Repository
 public interface AuditRecordRepository
-		extends PagingAndSortingRepository<AuditRecord, Long>, ComplexAuditRecordRepository {
+		extends PagingAndSortingRepository<AuditRecord, Long>, AuditRecordRepositoryCustom {
 
 	@Override
 	<S extends AuditRecord> S save(S s);

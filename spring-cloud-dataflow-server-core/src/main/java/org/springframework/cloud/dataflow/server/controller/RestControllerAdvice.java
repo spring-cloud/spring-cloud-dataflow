@@ -29,6 +29,7 @@ import org.springframework.batch.core.launch.NoSuchJobExecutionException;
 import org.springframework.batch.core.launch.NoSuchJobInstanceException;
 import org.springframework.cloud.dataflow.registry.support.NoSuchAppRegistrationException;
 import org.springframework.cloud.dataflow.server.batch.NoSuchStepExecutionException;
+import org.springframework.cloud.dataflow.server.controller.support.InvalidDateRangeException;
 import org.springframework.cloud.dataflow.server.controller.support.InvalidStreamDefinitionException;
 import org.springframework.cloud.dataflow.server.job.support.JobNotRestartableException;
 import org.springframework.cloud.dataflow.server.repository.DuplicateStreamDefinitionException;
@@ -175,6 +176,7 @@ public class RestControllerAdvice {
 	 */
 	@ExceptionHandler({ MissingServletRequestParameterException.class, HttpMessageNotReadableException.class,
 			UnsatisfiedServletRequestParameterException.class, MethodArgumentTypeMismatchException.class,
+			InvalidDateRangeException.class,
 			InvalidStreamDefinitionException.class, CreateScheduleException.class, OffsetOutOfBoundsException.class })
 	@ResponseStatus(HttpStatus.BAD_REQUEST)
 	@ResponseBody

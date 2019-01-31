@@ -16,6 +16,8 @@
 
 package org.springframework.cloud.dataflow.server.controller;
 
+import java.time.Instant;
+import java.time.ZonedDateTime;
 import java.util.Collections;
 
 import org.slf4j.Logger;
@@ -26,11 +28,14 @@ import org.springframework.cloud.dataflow.core.AuditActionType;
 import org.springframework.cloud.dataflow.core.AuditOperationType;
 import org.springframework.cloud.dataflow.core.AuditRecord;
 import org.springframework.cloud.dataflow.rest.resource.AuditRecordResource;
+import org.springframework.cloud.dataflow.server.controller.support.InvalidDateRangeException;
 import org.springframework.cloud.dataflow.server.repository.NoSuchAuditRecordException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PagedResourcesAssembler;
+import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.format.annotation.DateTimeFormat.ISO;
 import org.springframework.hateoas.ExposesResourceFor;
 import org.springframework.hateoas.PagedResources;
 import org.springframework.hateoas.mvc.ResourceAssemblerSupport;
@@ -91,12 +96,20 @@ public class AuditRecordController {
 	public PagedResources<AuditRecordResource> list(Pageable pageable,
 			@RequestParam(required = false) AuditActionType[] actions,
 			@RequestParam(required = false) AuditOperationType[] operations,
-			@RequestParam(required = false) String fromDate,
-			@RequestParam(required = false) String toDate,
+			@RequestParam(required = false) @DateTimeFormat(iso = ISO.DATE_TIME) ZonedDateTime fromDate,
+			@RequestParam(required = false) @DateTimeFormat(iso = ISO.DATE_TIME) ZonedDateTime toDate,
 			PagedResourcesAssembler<AuditRecord> assembler) {
-		Page<AuditRecord> auditRecords = this.auditRecordService
-				.findAuditRecordByAuditOperationTypeAndAuditActionTypeAndDate(pageable, actions, operations, fromDate,
-						toDate);
+
+		final Instant fromDateAsInstant = fromDate != null ? fromDate.toInstant() : null;
+		final Instant toDateAsInstant = toDate != null ? toDate.toInstant() : null;
+
+		if (fromDate != null && toDate != null && fromDate.compareTo(toDate) > 0) {
+			throw new InvalidDateRangeException("The fromDate cannot be after the toDate.");
+		}
+
+		final Page<AuditRecord> auditRecords = this.auditRecordService
+				.findAuditRecordByAuditOperationTypeAndAuditActionTypeAndDate(pageable, actions, operations, fromDateAsInstant,
+						toDateAsInstant);
 		return assembler.toResource(auditRecords, new Assembler(auditRecords));
 	}
 
