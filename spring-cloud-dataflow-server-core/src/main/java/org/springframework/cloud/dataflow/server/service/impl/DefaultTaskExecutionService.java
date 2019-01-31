@@ -171,14 +171,29 @@ public class DefaultTaskExecutionService implements TaskExecutionService {
 		String registeredAppName = taskDefinition.getRegisteredAppName();
 		TaskExecution taskExecution = taskExecutionInformation.getTaskExecution();
 
+		DeploymentPropertiesUtils.validateDeploymentProperties(taskDeploymentProperties);
 		Map<String, String> appDeploymentProperties = new HashMap<>(commonApplicationProperties.getTask());
 		appDeploymentProperties.putAll(
 				TaskServiceUtils.extractAppProperties(registeredAppName,
 						taskExecutionInformation.getTaskDeploymentProperties()));
 
-		Map<String, String> deployerDeploymentProperties = DeploymentPropertiesUtils
-				.extractAndQualifyDeployerProperties(taskExecutionInformation.getTaskDeploymentProperties(),
-						registeredAppName);
+		String platformName = appDeploymentProperties.get(TASK_PLATFORM_NAME);
+		if (!StringUtils.hasText(platformName)) {
+			platformName = "default";
+		}
+
+		TaskLauncher taskLauncher = findTaskLaucher(platformName);
+
+		TaskDeployment existingTaskDeployment =
+				taskDeploymentRepository.findTopByTaskDefinitionNameOrderByCreatedOnAsc(taskName);
+		if (existingTaskDeployment != null) {
+			if (!existingTaskDeployment.getPlatformName().equals(platformName)) {
+				throw new IllegalStateException(String.format(
+						"Task definition [%s] has already been deployed on platfrom [%s].  " +
+						"Requested to deploy on platform [%s].",
+						taskName, existingTaskDeployment.getPlatformName(), platformName));
+			}
+		}
 		if (StringUtils.hasText(this.dataflowServerUri) && taskExecutionInformation.isComposed()) {
 			TaskServiceUtils.updateDataFlowUriIfNeeded(this.dataflowServerUri, appDeploymentProperties,
 					commandLineArgs);
@@ -187,6 +202,9 @@ public class DefaultTaskExecutionService implements TaskExecutionService {
 				taskExecutionInformation.getMetadataResource(),
 				appDeploymentProperties, this.whitelistProperties);
 		List<String> updatedCmdLineArgs = this.updateCommandLineArgs(commandLineArgs, taskExecution);
+		Map<String, String> deployerDeploymentProperties = DeploymentPropertiesUtils
+				.extractAndQualifyDeployerProperties(taskExecutionInformation.getTaskDeploymentProperties(),
+						registeredAppName);
 		AppDeploymentRequest request = new AppDeploymentRequest(revisedDefinition,
 				taskExecutionInformation.getAppResource(),
 				deployerDeploymentProperties, updatedCmdLineArgs);

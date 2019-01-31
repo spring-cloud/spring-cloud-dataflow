@@ -197,7 +197,7 @@ public abstract class DefaultTaskExecutionServiceTests {
 			this.launcherRepository.save(new Launcher("anotherPlatform", "local", taskLauncher));
 			assertEquals(1L, this.taskExecutionService.executeTask(TASK_NAME_ORIG, new HashMap<>(), new LinkedList<>()));
 			Map<String, String> deploymentProperties = new HashMap<>();
-			deploymentProperties.put(DefaultTaskExecutionService.TASK_PLATFORM_NAME, "anotherPlatform");
+			deploymentProperties.put("app.demo."+ DefaultTaskExecutionService.TASK_PLATFORM_NAME, "anotherPlatform");
 			boolean errorCaught = false;
 			try {
 				this.taskExecutionService.executeTask(TASK_NAME_ORIG, deploymentProperties, new LinkedList<>());
