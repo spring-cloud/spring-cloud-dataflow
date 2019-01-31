@@ -1848,7 +1848,7 @@ include::{snippets}/job-executions-documentation/list-job-executions/curl-reques
 
 
 
-[[api-guide-resources-job-executions-thin-job-execution-list-response-structure]]
+[[api-guide-resources-job-executions-thin-job-execution-list-structure]]
 ===== Response Structure
 
 include::{snippets}/job-executions-documentation/list-job-executions/http-response.adoc[]
