@@ -166,11 +166,11 @@
 						  </tags>
 						<from>springcloud/openjdk:latest</from>
 						<volumes>
-						  <volume>/tmp</volume>
+							<volume>/tmp</volume>
 						</volumes>
-            <runCmds>
-              <run>wget -q https://repo.spring.io/snapshot/org/springframework/cloud/spring-cloud-dataflow-shell/${project.version}/spring-cloud-dataflow-shell-${project.version}.jar -O /shell.jar</run>
-            </runCmds>
+						<env>
+							<LANG>C.UTF-8</LANG>
+						</env>
 						<entryPoint>
 						  <exec>
 							<arg>java</arg>
@@ -179,7 +179,9 @@
 						  </exec>
 						</entryPoint>
 						<assembly>
-						  <descriptor>assembly.xml</descriptor>
+							<name>maven</name>
+							<descriptor>assembly.xml</descriptor>
+							<targetDir>/</targetDir>
 						</assembly>
 					  </build>
 					</image>
