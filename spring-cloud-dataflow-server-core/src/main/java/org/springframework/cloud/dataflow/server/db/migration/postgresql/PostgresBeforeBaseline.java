@@ -194,6 +194,7 @@ public class PostgresBeforeBaseline extends AbstractBaselineCallback {
 
 	@Override
 	public List<SqlCommand> createTaskDeploymentTable() {
-		return null;
+		return Arrays.asList(SqlCommand.from(
+				V1__Initial_Setup.CREATE_TASK_DEPLOYMENT_TABLE));
 	}
 }

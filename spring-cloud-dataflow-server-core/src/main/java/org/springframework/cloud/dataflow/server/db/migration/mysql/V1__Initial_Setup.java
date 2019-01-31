@@ -50,18 +50,6 @@ public class V1__Initial_Setup extends AbstractInitialSetupMigration {
 			"  primary key (id)\n" +
 			")";
 
-	public final static String CREATE_TASK_DEPLOYMENT_TABLE =
-			"create table task_deployment (\n" +
-					"  id bigint not null,\n" +
-					"  object_version bigint,\n" +
-					"  task_deployment_id varchar(255) not null,\n" +
-					"  task_definition_name varchar(255) not null,\n" +
-					"  platform_name varchar(255) not null,\n" +
-					"  created_on datetime,\n" +
-					"  primary key (id)\n" +
-					");";
-
-
 	public final static String CREATE_AUDIT_RECORDS_TABLE =
 			"create table audit_records (\n" +
 			"  id bigint not null,\n" +
@@ -86,6 +74,17 @@ public class V1__Initial_Setup extends AbstractInitialSetupMigration {
 			"  definition_name varchar(255) not null,\n" +
 			"  definition longtext,\n" +
 			"  primary key (definition_name)\n" +
+			")";
+
+	public final static String CREATE_TASK_DEPLOYMENT_TABLE =
+			"create table task_deployment (\n" +
+			"  id bigint not null,\n" +
+			"  object_version bigint,\n" +
+			"  task_deployment_id varchar(255) not null,\n" +
+			"  task_definition_name varchar(255) not null,\n" +
+			"  platform_name varchar(255) not null,\n" +
+			"  created_on datetime,\n" +
+			"  primary key (id)\n" +
 			")";
 
 	public final static String CREATE_TASK_EXECUTION_TABLE =
