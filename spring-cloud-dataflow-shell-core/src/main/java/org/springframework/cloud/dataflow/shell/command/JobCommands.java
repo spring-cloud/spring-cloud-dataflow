@@ -20,9 +20,9 @@ import java.util.Map;
 
 import org.springframework.batch.core.JobParameter;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cloud.dataflow.rest.JobExecutionThinResource;
 import org.springframework.cloud.dataflow.rest.client.JobOperations;
 import org.springframework.cloud.dataflow.rest.resource.JobExecutionResource;
+import org.springframework.cloud.dataflow.rest.resource.JobExecutionThinResource;
 import org.springframework.cloud.dataflow.rest.resource.JobInstanceResource;
 import org.springframework.cloud.dataflow.rest.resource.StepExecutionProgressInfoResource;
 import org.springframework.cloud.dataflow.rest.resource.StepExecutionResource;

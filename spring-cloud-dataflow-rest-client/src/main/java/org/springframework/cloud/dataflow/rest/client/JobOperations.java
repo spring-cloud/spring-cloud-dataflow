@@ -16,8 +16,8 @@
 
 package org.springframework.cloud.dataflow.rest.client;
 
-import org.springframework.cloud.dataflow.rest.JobExecutionThinResource;
 import org.springframework.cloud.dataflow.rest.resource.JobExecutionResource;
+import org.springframework.cloud.dataflow.rest.resource.JobExecutionThinResource;
 import org.springframework.cloud.dataflow.rest.resource.JobInstanceResource;
 import org.springframework.cloud.dataflow.rest.resource.StepExecutionProgressInfoResource;
 import org.springframework.cloud.dataflow.rest.resource.StepExecutionResource;
