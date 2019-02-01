@@ -191,10 +191,7 @@ public class DataflowTemplateTests {
 		DataFlowTemplate template = getMockedDataFlowTemplate(true);
 
 		assertNotNull(template.taskOperations());
-		assertNotNull(template.aggregateCounterOperations());
-		assertNotNull(template.counterOperations());
 		assertNotNull(template.streamOperations());
-		assertNotNull(template.fieldValueCounterOperations());
 		assertNotNull(template.runtimeOperations());
 		assertNotNull(template.jobOperations());
 		assertNotNull(template.schedulerOperations());
@@ -207,10 +204,7 @@ public class DataflowTemplateTests {
 		DataFlowTemplate template = getMockedDataFlowTemplate(false);
 
 		assertNull(template.taskOperations());
-		assertNull(template.aggregateCounterOperations());
-		assertNull(template.counterOperations());
 		assertNull(template.streamOperations());
-		assertNull(template.fieldValueCounterOperations());
 		assertNull(template.runtimeOperations());
 		assertNull(template.jobOperations());
 		assertNull(template.schedulerOperations());

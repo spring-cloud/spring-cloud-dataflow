@@ -78,21 +78,6 @@ public class DataFlowTemplate implements DataFlowOperations {
 	private final StreamOperations streamOperations;
 
 	/**
-	 * REST client for counter operations.
-	 */
-	private final CounterOperations counterOperations;
-
-	/**
-	 * REST client for field value counter operations.
-	 */
-	private final FieldValueCounterOperations fieldValueCounterOperations;
-
-	/**
-	 * REST client for aggregate counter operations.
-	 */
-	private final AggregateCounterOperations aggregateCounterOperations;
-
-	/**
 	 * REST client for task operations.
 	 */
 	private final TaskOperations taskOperations;
@@ -195,16 +180,6 @@ public class DataFlowTemplate implements DataFlowOperations {
 				this.streamOperations = null;
 				this.runtimeOperations = null;
 			}
-			if (resourceSupport.hasLink(CounterTemplate.COUNTER_RELATION)) {
-				this.counterOperations = new CounterTemplate(restTemplate, resourceSupport);
-				this.fieldValueCounterOperations = new FieldValueCounterTemplate(restTemplate, resourceSupport);
-				this.aggregateCounterOperations = new AggregateCounterTemplate(restTemplate, resourceSupport);
-			}
-			else {
-				this.counterOperations = null;
-				this.fieldValueCounterOperations = null;
-				this.aggregateCounterOperations = null;
-			}
 			if (resourceSupport.hasLink(TaskTemplate.DEFINITIONS_RELATION)) {
 				this.taskOperations = new TaskTemplate(restTemplate, resourceSupport, getVersion());
 				this.jobOperations = new JobTemplate(restTemplate, resourceSupport);
@@ -228,9 +203,6 @@ public class DataFlowTemplate implements DataFlowOperations {
 			this.aboutOperations = null;
 			this.streamOperations = null;
 			this.runtimeOperations = null;
-			this.counterOperations = null;
-			this.fieldValueCounterOperations = null;
-			this.aggregateCounterOperations = null;
 			this.taskOperations = null;
 			this.jobOperations = null;
 			this.appRegistryOperations = null;
@@ -321,21 +293,6 @@ public class DataFlowTemplate implements DataFlowOperations {
 	@Override
 	public StreamOperations streamOperations() {
 		return streamOperations;
-	}
-
-	@Override
-	public CounterOperations counterOperations() {
-		return counterOperations;
-	}
-
-	@Override
-	public FieldValueCounterOperations fieldValueCounterOperations() {
-		return fieldValueCounterOperations;
-	}
-
-	@Override
-	public AggregateCounterOperations aggregateCounterOperations() {
-		return aggregateCounterOperations;
 	}
 
 	@Override

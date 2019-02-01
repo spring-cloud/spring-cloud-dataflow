@@ -79,20 +79,11 @@ public class DataFlowShell {
 		if (this.dataFlowOperations != null) {
 			boolean operationsAvailable = false;
 			switch (opsType) {
-			case AGGREGATE_COUNTER:
-				operationsAvailable = this.dataFlowOperations.aggregateCounterOperations() != null;
-				break;
 			case APP_REGISTRY:
 				operationsAvailable = this.dataFlowOperations.appRegistryOperations() != null;
 				break;
 			case COMPLETION:
 				operationsAvailable = this.dataFlowOperations.completionOperations() != null;
-				break;
-			case COUNTER:
-				operationsAvailable = this.dataFlowOperations.counterOperations() != null;
-				break;
-			case FIELD_VALUE_COUNTER:
-				operationsAvailable = this.dataFlowOperations.fieldValueCounterOperations() != null;
 				break;
 			case JOB:
 				operationsAvailable = this.dataFlowOperations.jobOperations() != null;

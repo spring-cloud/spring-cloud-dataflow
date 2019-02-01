@@ -19,8 +19,8 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.mockito.Mockito;
 
-import org.springframework.cloud.dataflow.rest.client.AggregateCounterOperations;
 import org.springframework.cloud.dataflow.rest.client.DataFlowOperations;
+import org.springframework.cloud.dataflow.rest.client.StreamOperations;
 import org.springframework.cloud.dataflow.shell.Target;
 import org.springframework.cloud.dataflow.shell.TargetHolder;
 import org.springframework.cloud.dataflow.shell.command.support.OpsType;
@@ -36,7 +36,7 @@ public class DataFlowShellTests {
 		final DataFlowShell dataFlowShell = new DataFlowShell();
 		dataFlowShell.setDataFlowOperations(null);
 
-		Assert.assertFalse(dataFlowShell.hasAccess(RoleType.VIEW, OpsType.AGGREGATE_COUNTER));
+		Assert.assertFalse(dataFlowShell.hasAccess(RoleType.VIEW, OpsType.STREAM));
 
 	}
 
@@ -44,8 +44,8 @@ public class DataFlowShellTests {
 	public void testHasAccessWithOperations() {
 		final Target target = new Target("http://myUri");
 
-		final DataFlowShell dataFlowShell = prepareDataFlowShellWithAggregateCounterOperations(target);
-		Assert.assertTrue(dataFlowShell.hasAccess(RoleType.VIEW, OpsType.AGGREGATE_COUNTER));
+		final DataFlowShell dataFlowShell = prepareDataFlowShellWithStreamOperations(target);
+		Assert.assertTrue(dataFlowShell.hasAccess(RoleType.VIEW, OpsType.STREAM));
 
 	}
 
@@ -53,8 +53,8 @@ public class DataFlowShellTests {
 	public void testHasAccessWithOperationsAndNullRole() {
 		final Target target = new Target("http://myUri");
 
-		final DataFlowShell dataFlowShell = prepareDataFlowShellWithAggregateCounterOperations(target);
-		Assert.assertTrue(dataFlowShell.hasAccess(null, OpsType.AGGREGATE_COUNTER));
+		final DataFlowShell dataFlowShell = prepareDataFlowShellWithStreamOperations(target);
+		Assert.assertTrue(dataFlowShell.hasAccess(null, OpsType.STREAM));
 
 	}
 
@@ -63,8 +63,8 @@ public class DataFlowShellTests {
 		final Target target = new Target("http://myUri");
 		target.setAuthenticationEnabled(true);
 
-		final DataFlowShell dataFlowShell = prepareDataFlowShellWithAggregateCounterOperations(target);
-		Assert.assertFalse(dataFlowShell.hasAccess(RoleType.VIEW, OpsType.AGGREGATE_COUNTER));
+		final DataFlowShell dataFlowShell = prepareDataFlowShellWithStreamOperations(target);
+		Assert.assertFalse(dataFlowShell.hasAccess(RoleType.VIEW, OpsType.STREAM));
 
 	}
 
@@ -75,8 +75,8 @@ public class DataFlowShellTests {
 		target.setAuthenticationEnabled(true);
 		target.setAuthenticated(true);
 
-		final DataFlowShell dataFlowShell = prepareDataFlowShellWithAggregateCounterOperations(target);
-		Assert.assertTrue(dataFlowShell.hasAccess(RoleType.VIEW, OpsType.AGGREGATE_COUNTER));
+		final DataFlowShell dataFlowShell = prepareDataFlowShellWithStreamOperations(target);
+		Assert.assertTrue(dataFlowShell.hasAccess(RoleType.VIEW, OpsType.STREAM));
 	}
 
 	@Test
@@ -85,8 +85,8 @@ public class DataFlowShellTests {
 		target.getTargetCredentials().getRoles().add(RoleType.CREATE);
 		target.setAuthenticationEnabled(true);
 		target.setAuthenticated(true);
-		final DataFlowShell dataFlowShell = prepareDataFlowShellWithAggregateCounterOperations(target);
-		Assert.assertFalse(dataFlowShell.hasAccess(RoleType.VIEW, OpsType.AGGREGATE_COUNTER));
+		final DataFlowShell dataFlowShell = prepareDataFlowShellWithStreamOperations(target);
+		Assert.assertFalse(dataFlowShell.hasAccess(RoleType.VIEW, OpsType.STREAM));
 	}
 
 	@Test
@@ -97,8 +97,8 @@ public class DataFlowShellTests {
 		target.setAuthenticationEnabled(true);
 		target.setAuthenticated(true);
 
-		final DataFlowShell dataFlowShell = prepareDataFlowShellWithAggregateCounterOperations(target);
-		Assert.assertFalse(dataFlowShell.hasAccess(RoleType.VIEW, OpsType.AGGREGATE_COUNTER));
+		final DataFlowShell dataFlowShell = prepareDataFlowShellWithStreamOperations(target);
+		Assert.assertFalse(dataFlowShell.hasAccess(RoleType.VIEW, OpsType.STREAM));
 	}
 
 	@Test
@@ -109,16 +109,16 @@ public class DataFlowShellTests {
 		target.setAuthenticationEnabled(true);
 		target.setAuthenticated(true);
 
-		final DataFlowShell dataFlowShell = prepareDataFlowShellWithAggregateCounterOperations(target);
-		Assert.assertTrue(dataFlowShell.hasAccess(null, OpsType.AGGREGATE_COUNTER));
+		final DataFlowShell dataFlowShell = prepareDataFlowShellWithStreamOperations(target);
+		Assert.assertTrue(dataFlowShell.hasAccess(null, OpsType.STREAM));
 	}
 
-	private DataFlowShell prepareDataFlowShellWithAggregateCounterOperations(Target target) {
+	private DataFlowShell prepareDataFlowShellWithStreamOperations(Target target) {
 		final DataFlowShell dataFlowShell = new DataFlowShell();
 
 		final DataFlowOperations dataFlowOperations = Mockito.mock(DataFlowOperations.class);
-		final AggregateCounterOperations aggregateCounterOperations = Mockito.mock(AggregateCounterOperations.class);
-		Mockito.when(dataFlowOperations.aggregateCounterOperations()).thenReturn(aggregateCounterOperations);
+		final StreamOperations streamOperations = Mockito.mock(StreamOperations.class);
+		Mockito.when(dataFlowOperations.streamOperations()).thenReturn(streamOperations);
 		dataFlowShell.setDataFlowOperations(dataFlowOperations);
 
 		final TargetHolder targetHolder = new TargetHolder();

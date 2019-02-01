@@ -57,7 +57,6 @@
 
 		<spring-cloud-common-security-config.version>1.1.0.RC1</spring-cloud-common-security-config.version>
 
-		<spring-analytics.version>2.0.1.BUILD-SNAPSHOT</spring-analytics.version>
 		<spring-shell.version>1.2.0.RELEASE</spring-shell.version>
 		<commons-io.version>2.4</commons-io.version>
 		<commons-lang.version>2.4</commons-lang.version>
@@ -139,11 +138,6 @@
 				<groupId>org.springframework.cloud</groupId>
 				<artifactId>spring-cloud-deployer-local</artifactId>
 				<version>${spring-cloud-deployer-local.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.springframework.analytics</groupId>
-				<artifactId>spring-analytics</artifactId>
-				<version>${spring-analytics.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.springframework.shell</groupId>

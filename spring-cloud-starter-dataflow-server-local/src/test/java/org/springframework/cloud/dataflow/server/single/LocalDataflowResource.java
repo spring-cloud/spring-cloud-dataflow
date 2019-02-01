@@ -23,10 +23,6 @@ import javax.servlet.Filter;
 
 import org.junit.rules.ExternalResource;
 
-import org.springframework.analytics.metrics.AggregateCounterRepository;
-import org.springframework.analytics.metrics.FieldValueCounterRepository;
-import org.springframework.analytics.metrics.memory.InMemoryAggregateCounterRepository;
-import org.springframework.analytics.metrics.memory.InMemoryFieldValueCounterRepository;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.actuate.autoconfigure.security.servlet.ManagementWebSecurityAutoConfiguration;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
@@ -54,7 +50,6 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
-import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.hateoas.Resources;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
@@ -73,8 +68,6 @@ public class LocalDataflowResource extends ExternalResource {
 	final boolean streamsEnabled;
 
 	final boolean tasksEnabled;
-
-	final boolean metricsEnabled;
 
 	final boolean schedulerEnabled;
 
@@ -102,7 +95,6 @@ public class LocalDataflowResource extends ExternalResource {
 		this.configurationLocation = configurationLocation;
 		this.streamsEnabled = true;
 		this.tasksEnabled = true;
-		this.metricsEnabled = true;
 		this.schedulerEnabled = false;
 	}
 
@@ -110,7 +102,6 @@ public class LocalDataflowResource extends ExternalResource {
 		this.configurationLocation = configurationLocation;
 		this.streamsEnabled = streamsEnabled;
 		this.tasksEnabled = tasksEnabled;
-		this.metricsEnabled = true;
 		this.schedulerEnabled = false;
 	}
 
@@ -118,7 +109,6 @@ public class LocalDataflowResource extends ExternalResource {
 		this.configurationLocation = configurationLocation;
 		this.streamsEnabled = streamsEnabled;
 		this.tasksEnabled = tasksEnabled;
-		this.metricsEnabled = metricsEnabled;
 		this.schedulerEnabled = false;
 	}
 
@@ -126,7 +116,6 @@ public class LocalDataflowResource extends ExternalResource {
 		this.configurationLocation = configurationLocation;
 		this.streamsEnabled = streamsEnabled;
 		this.tasksEnabled = tasksEnabled;
-		this.metricsEnabled = metricsEnabled;
 		this.schedulerEnabled = schedulerEnabled;
 	}
 
@@ -135,7 +124,6 @@ public class LocalDataflowResource extends ExternalResource {
 		this.configurationLocation = configurationLocation;
 		this.streamsEnabled = streamsEnabled;
 		this.tasksEnabled = tasksEnabled;
-		this.metricsEnabled = metricsEnabled;
 		this.schedulerEnabled = schedulerEnabled;
 		this.skipperServerPort = skipperServerPort;
 	}
@@ -161,8 +149,6 @@ public class LocalDataflowResource extends ExternalResource {
 						+ this.streamsEnabled,
 				"--" + FeaturesProperties.FEATURES_PREFIX + "." + FeaturesProperties.TASKS_ENABLED + "="
 						+ this.tasksEnabled,
-				"--" + FeaturesProperties.FEATURES_PREFIX + "." + FeaturesProperties.ANALYTICS_ENABLED + "="
-						+ this.metricsEnabled,
 				"--" + FeaturesProperties.FEATURES_PREFIX + "." + FeaturesProperties.SCHEDULES_ENABLED + "="
 						+ this.schedulerEnabled,
 				"--spring.cloud.skipper.client.serverUri=http://localhost:" + this.skipperServerPort + "/api"
@@ -240,16 +226,6 @@ public class LocalDataflowResource extends ExternalResource {
 			when(skipperClient.info()).thenReturn(about);
 			when(skipperClient.listDeployers()).thenReturn(new Resources<>(new ArrayList<>(), new ArrayList<>()));
 			return skipperClient;
-		}
-
-		@Bean
-		public FieldValueCounterRepository fieldValueCounterReader() {
-			return new InMemoryFieldValueCounterRepository();
-		}
-
-		@Bean
-		public AggregateCounterRepository aggregateCounterReader(RedisConnectionFactory redisConnectionFactory) {
-			return new InMemoryAggregateCounterRepository();
 		}
 
 		@Bean

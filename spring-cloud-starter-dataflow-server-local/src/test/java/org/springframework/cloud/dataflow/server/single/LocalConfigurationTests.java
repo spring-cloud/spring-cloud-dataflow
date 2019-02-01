@@ -22,7 +22,6 @@ import org.junit.After;
 import org.junit.Ignore;
 import org.junit.Test;
 
-import org.springframework.analytics.metrics.FieldValueCounterRepository;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.boot.SpringApplication;
 import org.springframework.cloud.dataflow.registry.service.AppRegistryService;
@@ -96,7 +95,6 @@ public class LocalConfigurationTests {
 		context = app.run(new String[] { "--spring.cloud.kubernetes.enabled=false", "--server.port=0",
 				"--" + FeaturesProperties.FEATURES_PREFIX + "." + FeaturesProperties.STREAMS_ENABLED + "=false" });
 		assertNotNull(context.getBean(TaskDefinitionRepository.class));
-		assertNotNull(context.getBean(FieldValueCounterRepository.class));
 		// The StreamDefinition repository is expected to exist.
 		assertNotNull(context.getBean(StreamDefinitionRepository.class));
 		try {
@@ -113,26 +111,10 @@ public class LocalConfigurationTests {
 		context = app.run(new String[] { "--spring.cloud.kubernetes.enabled=false", "--server.port=0",
 				"--" + FeaturesProperties.FEATURES_PREFIX + "." + FeaturesProperties.TASKS_ENABLED + "=false" });
 		assertNotNull(context.getBean(StreamDefinitionRepository.class));
-		assertNotNull(context.getBean(FieldValueCounterRepository.class));
 		// The TaskDefinition repository is expected to exist.
 		assertNotNull(context.getBean(TaskDefinitionRepository.class));
 		try {
 			context.getBean(TaskExecutionService.class);
-			fail("Task features should have been disabled.");
-		}
-		catch (NoSuchBeanDefinitionException e) {
-		}
-	}
-
-	@Test
-	public void testConfigWithAnalyticsDisabled() {
-		SpringApplication app = new SpringApplication(LocalTestDataFlowServer.class);
-		context = app.run(new String[] { "--spring.cloud.kubernetes.enabled=false", "--server.port=0",
-				"--" + FeaturesProperties.FEATURES_PREFIX + "." + FeaturesProperties.ANALYTICS_ENABLED + "=false" });
-		assertNotNull(context.getBean(StreamDefinitionRepository.class));
-		assertNotNull(context.getBean(TaskDefinitionRepository.class));
-		try {
-			context.getBean(FieldValueCounterRepository.class);
 			fail("Task features should have been disabled.");
 		}
 		catch (NoSuchBeanDefinitionException e) {

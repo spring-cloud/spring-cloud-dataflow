@@ -27,7 +27,6 @@ import org.springframework.security.oauth2.client.token.grant.client.ClientCrede
 import org.springframework.security.oauth2.client.token.grant.password.ResourceOwnerPasswordResourceDetails;
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
 
-
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertTrue;
@@ -103,12 +102,6 @@ public class LocalServerSecurityWithOAuth2Tests {
 				.andExpect(jsonPath("$._links.jobs/instances/instance.href", is("http://localhost/jobs/instances/{id}")))
 				.andExpect(jsonPath("$._links.tools/parseTaskTextToGraph.href", is("http://localhost/tools")))
 				.andExpect(jsonPath("$._links.tools/convertTaskGraphToText.href", is("http://localhost/tools")))
-				.andExpect(jsonPath("$._links.counters.href", is("http://localhost/metrics/counters")))
-				.andExpect(jsonPath("$._links.counters/counter.href", is("http://localhost/metrics/counters/{name}")))
-				.andExpect(jsonPath("$._links.field-value-counters.href", is("http://localhost/metrics/field-value-counters")))
-				.andExpect(jsonPath("$._links.field-value-counters/counter.href", is("http://localhost/metrics/field-value-counters/{name}")))
-				.andExpect(jsonPath("$._links.aggregate-counters.href", is("http://localhost/metrics/aggregate-counters")))
-				.andExpect(jsonPath("$._links.aggregate-counters/counter.href", is("http://localhost/metrics/aggregate-counters/{name}")))
 				.andExpect(jsonPath("$._links.apps.href", is("http://localhost/apps")))
 				.andExpect(jsonPath("$._links.about.href", is("http://localhost/about")))
 				.andExpect(jsonPath("$._links.completions/stream.href", is("http://localhost/completions/stream{?start,detailLevel}")))

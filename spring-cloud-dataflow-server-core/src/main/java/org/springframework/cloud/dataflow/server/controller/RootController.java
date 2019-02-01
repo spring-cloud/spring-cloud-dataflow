@@ -16,9 +16,6 @@
 
 package org.springframework.cloud.dataflow.server.controller;
 
-import org.springframework.analytics.rest.domain.AggregateCounterResource;
-import org.springframework.analytics.rest.domain.CounterResource;
-import org.springframework.analytics.rest.domain.FieldValueCounterResource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.cloud.dataflow.rest.Version;
@@ -166,21 +163,6 @@ public class RootController {
 			taskTemplated = entityLinks.linkToCollectionResource(JobExecutionThinResource.class).getHref() + "{?name}";
 			root.add(new Link(taskTemplated).withRel("jobs/thinexecutions/name"));
 
-		}
-		if (featuresProperties.isAnalyticsEnabled()) {
-			root.add(entityLinks.linkToCollectionResource(CounterResource.class).withRel("counters"));
-			root.add(unescapeTemplateVariables(
-					entityLinks.linkToSingleResource(CounterResource.class, "{name}").withRel("counters/counter")));
-			root.add(entityLinks.linkToCollectionResource(FieldValueCounterResource.class)
-					.withRel("field-value-counters"));
-			root.add(unescapeTemplateVariables(
-					entityLinks.linkToSingleResource(FieldValueCounterResource.class, "{name}")
-							.withRel("field-value-counters/counter")));
-			root.add(
-					entityLinks.linkToCollectionResource(AggregateCounterResource.class).withRel("aggregate-counters"));
-			root.add(
-					unescapeTemplateVariables(entityLinks.linkToSingleResource(AggregateCounterResource.class, "{name}")
-							.withRel("aggregate-counters/counter")));
 		}
 		root.add(entityLinks.linkToCollectionResource(AppRegistrationResource.class).withRel("apps"));
 		root.add(entityLinks.linkToCollectionResource(AboutResource.class).withRel("about"));

@@ -17,10 +17,6 @@ package org.springframework.cloud.dataflow.shell;
 
 import java.util.ArrayList;
 
-import org.springframework.analytics.metrics.AggregateCounterRepository;
-import org.springframework.analytics.metrics.FieldValueCounterRepository;
-import org.springframework.analytics.metrics.memory.InMemoryAggregateCounterRepository;
-import org.springframework.analytics.metrics.memory.InMemoryFieldValueCounterRepository;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.cloud.dataflow.rest.client.config.DataFlowClientAutoConfiguration;
 import org.springframework.cloud.dataflow.server.EnableDataFlowServer;
@@ -31,7 +27,6 @@ import org.springframework.cloud.skipper.domain.VersionInfo;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
-import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.hateoas.Resources;
 
 import static org.mockito.Mockito.mock;
@@ -58,16 +53,6 @@ public class TestConfig {
 		when(skipperClient.info()).thenReturn(about);
 		when(skipperClient.listDeployers()).thenReturn(new Resources<>(new ArrayList<>(), new ArrayList<>()));
 		return skipperClient;
-	}
-
-	@Bean
-	public FieldValueCounterRepository fieldValueCounterReader() {
-		return new InMemoryFieldValueCounterRepository();
-	}
-
-	@Bean
-	public AggregateCounterRepository aggregateCounterReader(RedisConnectionFactory redisConnectionFactory) {
-		return new InMemoryAggregateCounterRepository();
 	}
 
 }

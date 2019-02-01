@@ -32,21 +32,6 @@ public interface DataFlowOperations {
 	StreamOperations streamOperations();
 
 	/**
-	 * @return Counter related operations.
-	 */
-	CounterOperations counterOperations();
-
-	/**
-	 * @return Field Value Counter related operations.
-	 */
-	FieldValueCounterOperations fieldValueCounterOperations();
-
-	/**
-	 * @return Aggregate Counter related operations.
-	 */
-	AggregateCounterOperations aggregateCounterOperations();
-
-	/**
 	 * @return Task related operations.
 	 */
 	TaskOperations taskOperations();

@@ -35,23 +35,11 @@ public class FeaturesProperties {
 
 	public static final String TASKS_ENABLED = "tasks-enabled";
 
-	public static final String ANALYTICS_ENABLED = "analytics-enabled";
-
-	private boolean analyticsEnabled = true;
-
 	private boolean streamsEnabled = true;
 
 	private boolean tasksEnabled = true;
 
 	private boolean schedulesEnabled = false;
-
-	public boolean isAnalyticsEnabled() {
-		return this.analyticsEnabled;
-	}
-
-	public void setAnalyticsEnabled(boolean analyticsEnabled) {
-		this.analyticsEnabled = analyticsEnabled;
-	}
 
 	public boolean isStreamsEnabled() {
 		return this.streamsEnabled;
