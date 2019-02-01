@@ -29,7 +29,6 @@ import org.springframework.cloud.dataflow.server.repository.NoSuchTaskDefinition
 import org.springframework.cloud.dataflow.server.repository.TaskDefinitionRepository;
 import org.springframework.cloud.dataflow.server.service.TaskExecutionInfoService;
 import org.springframework.cloud.task.repository.TaskExplorer;
-import org.springframework.cloud.task.repository.TaskRepository;
 import org.springframework.util.Assert;
 
 /**
@@ -63,8 +62,6 @@ public class DefaultTaskExecutionInfoService implements TaskExecutionInfoService
 	 */
 	private final TaskExplorer taskExplorer;
 
-	private final TaskRepository taskRepository;
-
 	private final TaskDefinitionRepository taskDefinitionRepository;
 
 	private final TaskConfigurationProperties taskConfigurationProperties;
@@ -74,7 +71,6 @@ public class DefaultTaskExecutionInfoService implements TaskExecutionInfoService
 	 *
 	 * @param dataSourceProperties the data source properties.
 	 * @param appRegistryService URI registry this service will use to look up app URIs.
-	 * @param taskRepository the repository this service will use for deployment IDs.
 	 * @param taskExplorer the explorer this service will use to lookup task executions
 	 * @param taskDefinitionRepository the {@link TaskDefinitionRepository} this service will
 	 *     use for task CRUD operations.
@@ -82,20 +78,17 @@ public class DefaultTaskExecutionInfoService implements TaskExecutionInfoService
 	 */
 	public DefaultTaskExecutionInfoService(DataSourceProperties dataSourceProperties,
 			AppRegistryService appRegistryService,
-			TaskRepository taskRepository,
 			TaskExplorer taskExplorer,
 			TaskDefinitionRepository taskDefinitionRepository,
 			TaskConfigurationProperties taskConfigurationProperties) {
 		Assert.notNull(dataSourceProperties, "DataSourceProperties must not be null");
 		Assert.notNull(appRegistryService, "AppRegistryService must not be null");
 		Assert.notNull(taskDefinitionRepository, "TaskDefinitionRepository must not be null");
-		Assert.notNull(taskRepository, "TaskRepository must not be null");
 		Assert.notNull(taskExplorer, "TaskExplorer must not be null");
 		Assert.notNull(taskConfigurationProperties, "taskConfigurationProperties must not be null");
 
 		this.dataSourceProperties = dataSourceProperties;
 		this.appRegistryService = appRegistryService;
-		this.taskRepository = taskRepository;
 		this.taskExplorer = taskExplorer;
 		this.taskDefinitionRepository = taskDefinitionRepository;
 		this.taskConfigurationProperties = taskConfigurationProperties;
@@ -146,7 +139,6 @@ public class DefaultTaskExecutionInfoService implements TaskExecutionInfoService
 		retData.setComposed(taskNode.isComposed());
 		retData.setAppResource(appRegistryService.getAppResource(appRegistration));
 		retData.setMetadataResource(appRegistryService.getAppMetadataResource(appRegistration));
-		retData.setTaskExecution(taskRepository.createTaskExecution(taskName));
 		return retData;
 	}
 

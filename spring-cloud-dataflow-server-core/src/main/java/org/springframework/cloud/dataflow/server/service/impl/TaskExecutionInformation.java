@@ -19,7 +19,6 @@ package org.springframework.cloud.dataflow.server.service.impl;
 import java.util.Map;
 
 import org.springframework.cloud.dataflow.core.TaskDefinition;
-import org.springframework.cloud.task.repository.TaskExecution;
 import org.springframework.core.io.Resource;
 
 /**
@@ -37,8 +36,6 @@ public class TaskExecutionInformation {
 	private Resource appResource;
 
 	private Resource metadataResource;
-
-	private TaskExecution taskExecution;
 
 	public TaskExecutionInformation() {
 	}
@@ -83,11 +80,4 @@ public class TaskExecutionInformation {
 		this.metadataResource = metadataResource;
 	}
 
-	public TaskExecution getTaskExecution() {
-		return taskExecution;
-	}
-
-	public void setTaskExecution(TaskExecution taskExecution) {
-		this.taskExecution = taskExecution;
-	}
 }
