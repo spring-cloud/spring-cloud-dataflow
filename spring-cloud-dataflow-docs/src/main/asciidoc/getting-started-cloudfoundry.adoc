@@ -314,7 +314,7 @@ If you would like to register all out-of-the-box stream applications built with 
 ====
 [source]
 ----
-dataflow:>app import --uri http://bit.ly/Darwin-SR1-stream-applications-rabbit-maven
+dataflow:>app import --uri http://bit.ly/Darwin-SR3-stream-applications-rabbit-maven
 ----
 ====
 
