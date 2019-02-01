@@ -3,7 +3,6 @@ Sabby Anandan; Marius Bogoevici; Eric Bottard; Mark Fisher; Ilayaperumal Gopinat
 :doctype: book
 :toc: left
 :toclevels: 4
-:source-highlighter: prettify
 :numbered:
 :icons: font
 :hide-uri-scheme:
