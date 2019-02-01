@@ -60,7 +60,7 @@ public class OAuth2ServerResource extends ExternalResource {
 		this.application = new SpringApplicationBuilder(OAuth2TestServer.class)
 				.properties("spring.main.allow-bean-definition-overriding:true")
 				.build()
-				.run("--spring.config.location=classpath:/org/springframework/cloud/skipper/server/local/security"
+				.run("--spring.config.additional-location=classpath:/org/springframework/cloud/skipper/server/local/security"
 						+ "/support/oauth2TestServerConfig.yml");
 	}
 

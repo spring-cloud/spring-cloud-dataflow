@@ -64,7 +64,7 @@ Where you replace `/home/mpollack/projects/` to the path where you cloned `sprin
 Then start the Skipper server
 
 ----
-$ java -jar spring-cloud-skipper-server/target/spring-cloud-skipper-server-1.0.0.BUILD-SNAPSHOT.jar --spring.config.location=/home/mpollack/skipper.yml
+$ java -jar spring-cloud-skipper-server/target/spring-cloud-skipper-server-1.0.0.BUILD-SNAPSHOT.jar --spring.config.additional-location=/home/mpollack/skipper.yml
 ----
 
 Where you replace `/home/mpollack/` with your own home directory.

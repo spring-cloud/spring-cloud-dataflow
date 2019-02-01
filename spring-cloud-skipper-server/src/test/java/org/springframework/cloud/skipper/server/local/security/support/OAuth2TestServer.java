@@ -62,7 +62,7 @@ public class OAuth2TestServer {
 	public static void main(String[] args) {
 		new SpringApplicationBuilder(OAuth2TestServer.class)
 				.properties("server.port:" + SocketUtils.findAvailableTcpPort()).build()
-				.run("--debug --spring.config.location=classpath:/org/springframework/cloud/skipper/server/local"
+				.run("--debug --spring.config.additional-location=classpath:/org/springframework/cloud/skipper/server/local"
 						+ "/security/support/oauth2TestServerConfig.yml");
 	}
 
