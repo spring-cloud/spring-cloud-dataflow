@@ -24,9 +24,6 @@ The samples are part of a separate https://github.com/spring-cloud/spring-cloud-
 * https://docs.spring.io/spring-cloud-dataflow-samples/docs/current/reference/htmlsingle/#_batch_job_on_cloud_foundry[Batch Job on Cloud Foundry]
 * https://docs.spring.io/spring-cloud-dataflow-samples/docs/current/reference/htmlsingle/#_batch_file_ingest[Batch File Ingest]
 
-.Analytics
-* https://docs.spring.io/spring-cloud-dataflow-samples/docs/current/reference/htmlsingle/#spring-cloud-data-flow-samples-twitter-analytics-overview[Twitter Analytics]
-
 .Data Science
 * https://docs.spring.io/spring-cloud-dataflow-samples/docs/current/reference/htmlsingle/#_species_prediction[Species Prediction]
 

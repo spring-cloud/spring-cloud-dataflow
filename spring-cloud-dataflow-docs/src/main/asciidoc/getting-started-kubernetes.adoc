@@ -14,7 +14,6 @@ This section covers how to install the Spring Cloud Data Flow Server on a Kubern
 Spring Cloud Data Flow depends on a few services and their availability.
 For example, we need an RDBMS service for the application registry, stream and task repositories, and task management.
 For streaming pipelines, we also need link:http://cloud.spring.io/spring-cloud-skipper/[Skipper] server for lifecycle management and a messaging middleware option, such as Apache Kafka or RabbitMQ.
-In addition, if the analytics features are in use, we need a Redis service.
 
 IMPORTANT: This guide describes setting up an environment for testing Spring Cloud Data Flow on Google Kubernetes Engine and is not meant to be a definitive guide for setting up a production environment. Feel free to adjust the suggestions to fit your test setup. Remember that a production environment requires much more consideration for persistent storage of message queues, high availability, security, and other concerns.
 
@@ -144,32 +143,9 @@ Run the following command to start the MySQL service:
 kubectl create -f src/kubernetes/mysql/
 ----
 ====
++
 You can use `kubectl get all -l app=mysql` to verify that the deployment, pod, and service resources are running.
 You can use `kubectl delete all,pvc,secrets -l app=mysql` to clean up afterwards.
-+
-. Deploy Redis.
-+
-The Redis service is used for the analytics functionality.
-Run the following command to start the Redis service:
-+
-====
-[source,bash]
-----
-kubectl create -f src/kubernetes/redis/
-----
-====
-+
-[NOTE]
-====
-If you do not need the analytics functionality, you can turn this feature off by setting `SPRING_CLOUD_DATAFLOW_FEATURES_ANALYTICS_ENABLED` to `false` in the `src/kubernetes/server/server-deployment.yaml` file.
-If you do not install the Redis service, you should also remove the Redis configuration settings from the following files depending on your message broker:
-
-* RabbitMQ: `src/kubernetes/server/server-config-rabbit.yaml`
-* Kafka: `src/kubernetes/server/server-config-kafka.yaml`
-====
-+
-You can use `kubectl get all -l app=redis` to verify that the deployment, pod, and service resources are running.
-You can use `kubectl delete all -l app=redis` to clean up afterwards.
 +
 . Deploy the Metrics Collector.
 +
