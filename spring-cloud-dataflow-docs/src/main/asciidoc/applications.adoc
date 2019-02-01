@@ -29,7 +29,7 @@ A selection of pre-built link:http://cloud.spring.io/spring-cloud-stream-app-sta
 |link:{scs-app-starters-docs-htmlsingle}/#spring-cloud-stream-modules-time-source[time]
 |link:{scs-app-starters-docs-htmlsingle}/#spring-cloud-stream-modules-header-enricher-processor[header-enricher]
 |link:{scs-app-starters-docs-htmlsingle}/#spring-cloud-stream-modules-throughput-sink[throughput]
-|link:https://docs.spring.io/spring-cloud-task-app-starters/docs/Clark.RELEASE/reference/htmlsingle/#_timestamp_task[timestamp]
+|link:https://docs.spring.io/spring-cloud-task-app-starters/docs/current/reference/htmlsingle/#_timestamp_task[timestamp]
 
 |link:{scs-app-starters-docs-htmlsingle}/#spring-cloud-stream-modules-load-generator-source[load-generator]
 |link:{scs-app-starters-docs-htmlsingle}/#spring-cloud-stream-modules-python-http-processor[python-http]
@@ -39,14 +39,14 @@ A selection of pre-built link:http://cloud.spring.io/spring-cloud-stream-app-sta
 |link:{scs-app-starters-docs-htmlsingle}/#spring-cloud-stream-modules-syslog-source[syslog]
 |link:{scs-app-starters-docs-htmlsingle}/#spring-cloud-stream-modules-twitter-sentiment-processor[twitter-sentiment]
 |link:{scs-app-starters-docs-htmlsingle}/#spring-cloud-stream-modules-mongodb-sink[mongodb]
-|link:https://docs.spring.io/spring-cloud-task-app-starters/docs/Clark.RELEASE/reference/htmlsingle/#_composed_task_runner[composed-task-runner]
+|link:https://docs.spring.io/spring-cloud-task-app-starters/docs/current/reference/htmlsingle/#_composed_task_runner[composed-task-runner]
 
 |link:{scs-app-starters-docs-htmlsingle}/#spring-cloud-stream-modules-aws-s3-source[s3]
 |link:{scs-app-starters-docs-htmlsingle}/#spring-cloud-stream-modules-splitter[splitter]
 |link:{scs-app-starters-docs-htmlsingle}/#spring-cloud-stream-modules-hdfs-dataset-sink[hdfs-dataset]
-|link:https://docs.spring.io/spring-cloud-task-app-starters/docs/Clark.RELEASE/reference/htmlsingle/#_timestamp_batch_task[timestamp-batch]
+|link:https://docs.spring.io/spring-cloud-task-app-starters/docs/current/reference/htmlsingle/#_timestamp_batch_task[timestamp-batch]
 
-|link:https://github.com/spring-cloud-stream-app-starters/loggregator[loggregator]
+|link:{scs-app-starters-docs-htmlsingle}/#spring-cloud-stream-modules-loggregator-source[loggregator]
 |link:{scs-app-starters-docs-htmlsingle}/#spring-cloud-stream-modules-image-recognition-processor[image-recognition]
 |link:{scs-app-starters-docs-htmlsingle}/#spring-cloud-stream-modules-ftp-sink[ftp]
 |
@@ -112,7 +112,7 @@ A selection of pre-built link:http://cloud.spring.io/spring-cloud-stream-app-sta
 |
 
 |link:{scs-app-starters-docs-htmlsingle}/#spring-cloud-stream-modules-gemfire-source[gemfire]
-|link:https://github.com/spring-cloud-stream-app-starters/tasklaunchrequest-transform[tasklaunchrequest-transform]
+|link:{scs-app-starters-docs-htmlsingle}/#spring-cloud-stream-modules-tasklaunchrequest-transform[tasklaunchrequest-transform]
 |link:{scs-app-starters-docs-htmlsingle}/#spring-cloud-stream-modules-sftp-sink[sftp]
 |
 
