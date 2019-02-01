@@ -98,7 +98,7 @@ endif::omit-tasks-docs[]
 [[arch-comparison]]
 === Comparison to Other Platform Architectures
 
-Spring Cloud Data Flow’s architectural style is different than other Stream and Batch processing platforms.  For example in Apache Spark, Apache Flink, and Google Cloud Dataflow, applications run on a dedicated compute engine cluster.  The nature of the compute engine gives these platforms a richer environment for performing complex calculations on the data as compared to Spring Cloud Data Flow, but it introduces the complexity of another execution environment that is often not needed when creating data-centric applications.  That does not mean you cannot do real-time data computations when using Spring Cloud Data Flow.  Refer to the section <<arch-analytics, Analytics>>, which describes the integration of Redis to handle common counting-based use cases.  Spring Cloud Stream also supports using Reactive APIs such as https://docs.spring.io/spring-cloud-stream/docs/current/reference/htmlsingle/#_reactive_programming_support[Project Reactor and RxJava] which can be useful for creating functional style applications that contain time-sliding-window and moving-average functionality.  Similarly, Spring Cloud Stream also supports the development of applications in that use the https://docs.spring.io/spring-cloud-stream/docs/current/reference/htmlsingle/#_kafka_streams_binding_capabilities_of_spring_cloud_stream[Kafka Streams] API.
+Spring Cloud Data Flow’s architectural style is different than other Stream and Batch processing platforms.  For example in Apache Spark, Apache Flink, and Google Cloud Dataflow, applications run on a dedicated compute engine cluster.  The nature of the compute engine gives these platforms a richer environment for performing complex calculations on the data as compared to Spring Cloud Data Flow, but it introduces the complexity of another execution environment that is often not needed when creating data-centric applications.  That does not mean you cannot do real-time data computations when using Spring Cloud Data Flow. Spring Cloud Stream also supports using Reactive APIs such as https://docs.spring.io/spring-cloud-stream/docs/current/reference/htmlsingle/#_reactive_programming_support[Project Reactor and RxJava] which can be useful for creating functional style applications that contain time-sliding-window and moving-average functionality.  Similarly, Spring Cloud Stream also supports the development of applications in that use the https://docs.spring.io/spring-cloud-stream/docs/current/reference/htmlsingle/#_kafka_streams_binding_capabilities_of_spring_cloud_stream[Kafka Streams] API.
 
 Apache Storm, Hortonworks DataFlow, and Spring Cloud Data Flow’s predecessor, Spring XD, use a dedicated application execution cluster, unique to each product, that determines where your code should run on the cluster and performs health checks to ensure that long-lived applications are restarted if they fail.  Often, framework-specific interfaces are required in order to correctly “plug in” to the cluster’s execution framework.
 
@@ -116,7 +116,7 @@ The Data Flow Server provides the following functionality:
 [[arch-data-flow-server-endpoints]]
 === Endpoints
 
-The Data Flow Server uses an embedded servlet container and exposes REST endpoints for creating, deploying, undeploying, and destroying streams and tasks, querying runtime state, analytics, and the like. The Data Flow Server is implemented by using Spring’s MVC framework and the link:https://github.com/spring-projects/spring-hateoas[Spring HATEOAS] library to create REST representations that follow the HATEOAS principle, as shown in the following image:
+The Data Flow Server uses an embedded servlet container and exposes REST endpoints for creating, deploying, undeploying, and destroying streams and tasks, querying runtime state and the like. The Data Flow Server is implemented by using Spring’s MVC framework and the link:https://github.com/spring-projects/spring-hateoas[Spring HATEOAS] library to create REST representations that follow the HATEOAS principle, as shown in the following image:
 
 .The Spring Cloud Data Flow Server
 image::{dataflow-asciidoc}/images/dataflow-server-arch.png[The Spring Cloud Data Flow Server Architecture, scaledwidth="100%"]
@@ -248,16 +248,6 @@ The Spring Cloud Task programming model provides:
 See the <<spring-cloud-dataflow-task,Tasks>> section for more information.
 
 endif::omit-tasks-docs[]
-
-[[arch-analytics]]
-== Analytics
-Spring Cloud Data Flow is aware of certain Sink applications that write counter data to Redis and provides a REST endpoint to read counter data.  The types of counters supported are as follows:
-
-* link:https://github.com/spring-cloud-stream-app-starters/counter/tree/master/spring-cloud-starter-stream-sink-counter[Counter]: Counts the number of messages it receives, optionally storing counts in a separate store such as Redis.
-* link:https://github.com/spring-cloud-stream-app-starters/field-value-counter/tree/master/spring-cloud-starter-stream-sink-field-value-counter[Field Value Counter]: Counts occurrences of unique values for a named field in a message payload.
-* link:https://github.com/spring-cloud-stream-app-starters/aggregate-counter/tree/master/spring-cloud-starter-stream-sink-aggregate-counter[Aggregate Counter]: Stores total counts but also retains the total count values for each minute, hour, day, and month.
-
-Note that the timestamp used in the aggregate counter can come from a field in the message itself so that out-of-order messages are properly accounted.
 
 [[arch-runtime]]
 == Runtime

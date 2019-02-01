@@ -11,16 +11,13 @@ Data Flow server offers a specific set of features that you can enable or disabl
 
 * Streams
 * Tasks
-* Analytics
 
 You can enable or disable these features by setting the following boolean properties when you launch the Data Flow server:
 
 * `spring.cloud.dataflow.features.streams-enabled`
 * `spring.cloud.dataflow.features.tasks-enabled`
-* `spring.cloud.dataflow.features.analytics-enabled`
 
 By default, all features are enabled.
-Note: Since the analytics feature is enabled by default, the Data Flow server is expected to have a valid Redis store available as its analytic repository (we provide a default implementation of analytics based on Redis). This also means that the Data Flow server's `health` depends on the redis store availability as well. If you do not want to enable HTTP endpoints to read analytics data written to Redis, you can disable the analytics feature by using the `spring.cloud.dataflow.features.analytics-enabled` property to `false`.
 
 The REST endpoint (`/features`) provides information on the enabled and disabled features.
 

@@ -10,19 +10,15 @@ Data Flow server offers specific set of features that can be enabled or disabled
 
 * Streams
 * Tasks
-* Analytics
 * Schedules
 
 You can enable or disable these features by setting the following boolean environment variables when launching the Data Flow server:
 
 * `SPRING_CLOUD_DATAFLOW_FEATURES_STREAMS_ENABLED`
 * `SPRING_CLOUD_DATAFLOW_FEATURES_TASKS_ENABLED`
-* `SPRING_CLOUD_DATAFLOW_FEATURES_ANALYTICS_ENABLED`
 * `SPRING_CLOUD_DATAFLOW_FEATURES_SCHEDULES_ENABLED`
 
 By default, all the features are enabled.
-
-NOTE: Since the analytics feature is enabled by default, the Data Flow server is expected to have a valid Redis store available as an analytics repository. Consequently, we provide a default implementation of analytics based on Redis. This also means that the Data Flow server's `health` depends on the redis store availability as well. If you do not want to enable HTTP endpoints to read analytics data written to Redis, you can disable the analytics feature by setting the property mentioned earlier to `false`.
 
 The `/features` REST endpoint provides information on the features that have been enabled and disabled.
 

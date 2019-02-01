@@ -18,8 +18,6 @@ You need Java 8 to run and to build you need to have Maven.
 You need to have an RDBMS for storing stream definition and deployment properties and task/batch job states.
 By default, the Data Flow server uses embedded H2 database for this purpose but you can easily configure the server to use another external database.
 
-You also need to have link:https://redis.io[Redis] running if you are running any streams that involve analytics applications. Redis may also be required to run the unit/integration tests.
-
 For the deployed streams applications communicate, either link:http://www.rabbitmq.com[RabbitMQ] or link:http://kafka.apache.org[Kafka] needs to be installed.
 
 For deploying, upgrading and rolling back applications in Streams at runtime, you should install the Spring Cloud Skipper server as well.
@@ -126,7 +124,7 @@ NOTE: Some stream applications may open a port, for example `http --server.port=
 [[getting-started-local-customizing-spring-cloud-dataflow-docker]]
 ==== Docker Compose Customization
 
-Out of the box Spring Cloud Data Flow will use the H2 embedded database for storing state, Kafka for communication and no analytics.
+Out of the box Spring Cloud Data Flow will use the H2 embedded database for storing state, Kafka for communication.
 Customizations can be made to these components by editing the `docker-compose.yml` file as described below.
 
 . [[getting-started-local-customizing-spring-cloud-dataflow-docker-mysql]]To use MySQL rather than the H2 embedded database, add the following configuration under the `services` section:
@@ -204,30 +202,9 @@ with:
 And finally, modify the `app-import` service definition `command` attribute to replace `http://bit.ly/Celsius-SR3-stream-applications-kafka-10-maven` with `http://bit.ly/Celsius-SR3-stream-applications-rabbit-maven`.
 +
 
-. [[getting-started-local-customizing-spring-cloud-dataflow-docker-redis]]To enable analytics using redis as a backend, add the following configuration under the `services` section:
-+
-[source,yaml,subs=attributes]
-----
-  redis:
-    image: redis:2.8
-    expose:
-      - "6379"
-----
-+
-Then add the following entries to the `environment` block of the `dataflow-server` service definition:
-+
-[source,yaml,subs=attributes]
-----
-      - spring.cloud.dataflow.applicationProperties.stream.spring.redis.host=redis
-      - spring.redis.host=redis
-----
-+
-
 . To enable Metrics support, the following modifications need to be made.
 +
-First, after the `zookeeper` service definition add Redis as described in <<getting-started-customizing-spring-cloud-dataflow-docker-redis,Enable analytics using Redis>>.
-+
-Then add the metrics collector after the `skipper-server` service definition:
+Add the metrics collector after the `skipper-server` service definition:
 +
 [source,yaml,options=nowrap,subs=attributes]
 ----

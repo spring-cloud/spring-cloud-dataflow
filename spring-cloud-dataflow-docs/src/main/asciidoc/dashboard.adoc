@@ -18,7 +18,6 @@ ifndef::omit-tasks-docs[]
 * *Tasks*: The Tasks tab lets you list, create, launch, schedule and, destroy Task Definitions.
 endif::omit-tasks-docs[]
 * *Jobs*: The Jobs tab lets you perform batch job related functions.
-* *Analytics*: The Analytics tab lets you create data visualizations for the various analytics applications.
 
 Upon starting Spring Cloud Data Flow, the dashboard is available at:
 
@@ -421,24 +420,6 @@ On this screen you can perform the following actions:
 
 * Delete a schedule
 * Get details for a schedule
-
-[[dashboard-analytics]]
-== Analytics
-
-The Analytics page of the Dashboard provides the following data visualization capabilities for the various analytics applications available in Spring Cloud Data Flow:
-
-* Counters
-* Field-Value Counters
-* Aggregate Counters
-
-For example, if you create a stream with a link:https://github.com/spring-cloud-stream-app-starters/counter/tree/master/spring-cloud-starter-stream-sink-counter[Counter] application, you can create the corresponding graph from within the Dashboard tab.
-To do so:
-
-. Under `Metric Type`, select `Counters` from the select box.
-. Under `Stream`, select `tweetcount`.
-. Under `Visualization`, select the desired chart option, `Bar Chart`.
-
-Using the icons to the right, you can add additional charts to the Dashboard, re-arange the order of created dashboards, or remove data visualizations.
 
 [[dashboard-auditing]]
 == Auditing

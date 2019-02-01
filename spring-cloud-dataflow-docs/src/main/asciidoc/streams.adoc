@@ -342,36 +342,14 @@ An attempt to update the `mysource` to version `0.0.1` (not registered) will fai
 ==== Register Supported Applications and Tasks
 For convenience, we have the static files with application-URIs (for both maven and docker) available
 for all the out-of-the-box stream and task/batch app-starters. You can point to this file and import
-all the application-URIs in bulk. Otherwise, as explained previously, you can register them individually or have your own custom property file with only the required application-URIs in it. It is recommended, however, to have a "`focused`" list of desired application-URIs in a custom property file.
+all the application-URIs in bulk. Otherwise, as explained previously, you can register them individually or have your own
+custom property file with only the required application-URIs in it. It is recommended, however, to have a "`focused`"
+list of desired application-URIs in a custom property file.
 
-The following table include the bit.ly links to the available Stream Application Starters based on Spring Cloud Stream 1.3.x
-and Spring Boot 1.5.x:
+===== Sprfing Cloud Stream App Starters
 
-[width="100%",frame="topbot",options="header"]
-|======================
-|Artifact Type |Stable Release |SNAPSHOT Release
-
-|RabbitMQ + Maven
-|http://bit.ly/Celsius-SR3-stream-applications-rabbit-maven
-|http://bit.ly/Celsius-BUILD-SNAPSHOT-stream-applications-rabbit-maven
-
-|RabbitMQ + Docker
-|http://bit.ly/Celsius-SR3-stream-applications-rabbit-docker
-|http://bit.ly/Celsius-BUILD-SNAPSHOT-stream-applications-rabbit-docker
-
-|Kafka 0.10 + Maven
-|http://bit.ly/Celsius-SR3-stream-applications-kafka-10-maven
-|http://bit.ly/Celsius-BUILD-SNAPSHOT-stream-applications-kafka-10-maven
-
-|Kafka 0.10 + Docker
-|http://bit.ly/Celsius-SR3-stream-applications-kafka-10-docker
-|http://bit.ly/Celsius-BUILD-SNAPSHOT-stream-applications-kafka-10-docker
-|======================
-
-The following table include the bit.ly links to the available Stream Application Starters based on Spring Cloud Stream 2.0.x
+The following table includes the bit.ly links to the available Stream Application Starters based on Spring Cloud Stream 2.0.x
 and Spring Boot 2.0.x:
-
-NOTE: App Starter actuator endpoints are secured by default.  You can disable security by deploying streams with the property `app.*.spring.autoconfigure.exclude=org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration`.  On Kubernetes refer to the section <<getting-started-kubernetes-probes, Liveness and readiness probes>> to configure security for actuator endpoints.
 
 [width="100%",frame="topbot",options="header"]
 |======================
@@ -394,49 +372,45 @@ NOTE: App Starter actuator endpoints are secured by default.  You can disable se
 |http://bit.ly/Darwin-BUILD-SNAPSHOT-stream-applications-kafka-docker
 |======================
 
-The following table include the bit.ly links to the available Stream Application Starters based on Spring Cloud Stream 2.1.x
+The following table includes the bit.ly links to the available Stream Application Starters based on Spring Cloud Stream 2.1.x
 and Spring Boot 2.1.x:
-
-NOTE: App Starter actuator endpoints are secured by default.  You can disable security by deploying streams with the property `app.*.spring.autoconfigure.exclude=org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration`.  On Kubernetes refer to the section <<getting-started-kubernetes-probes, Liveness and readiness probes>> to configure security for actuator endpoints.
 
 [width="100%",frame="topbot",options="header"]
 |======================
 |Artifact Type |Stable Release |SNAPSHOT Release
 
 |RabbitMQ + Maven
-|http://bit.ly/Einstein-M2-stream-applications-rabbit-maven
+|http://bit.ly/Einstein-RC1-stream-applications-rabbit-maven
 |http://bit.ly/Einstein-BUILD-SNAPSHOT-stream-applications-rabbit-maven
 
 |RabbitMQ + Docker
-|http://bit.ly/Einstein-M2-stream-applications-rabbit-docker
+|http://bit.ly/Einstein-RC1-stream-applications-rabbit-docker
 |http://bit.ly/Einstein-BUILD-SNAPSHOT-stream-applications-rabbit-docker
 
 |Apache Kafka + Maven
-|http://bit.ly/Einstein-M2-stream-applications-kafka-maven
+|http://bit.ly/Einstein-RC1-stream-applications-kafka-maven
 |http://bit.ly/Einstein-BUILD-SNAPSHOT-stream-applications-kafka-maven
 
 |Apache Kafka + Docker
-|http://bit.ly/Einstein-M2-stream-applications-kafka-docker
+|http://bit.ly/Einstein-RC1-stream-applications-kafka-docker
 |http://bit.ly/Einstein-BUILD-SNAPSHOT-stream-applications-kafka-docker
 |======================
 
-The following table include the available Task Application Starters based on Spring Cloud Task 1.2.x and Spring Boot 1.5.x:
 
-[width="100%",frame="topbot",options="header"]
-|======================
-|Artifact Type |Stable Release |SNAPSHOT Release
+NOTE: App Starter actuator endpoints are secured by default. You can disable security by deploying streams with the
+property `app.*.spring.autoconfigure.exclude=org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration`.
+On Kubernetes refer to the section <<getting-started-kubernetes-probes, Liveness and readiness probes>> to configure
+security for actuator endpoints.
 
-|Maven
-|http://bit.ly/Clark-SR1-task-applications-maven
-|http://bit.ly/Clark-BUILD-SNAPSHOT-task-applications-maven
+NOTE: Starting with Spring Cloud Stream 2.1 GA release, we now have robust interoperability with Spring Cloud Function
+programming model. Building on that, with Einstein release-train, it is now possible to pick a few Stream App
+Starters, and compose them into a single application using the functional-style programming model. Check out the
+https://spring.io/blog/2019/01/09/composed-function-support-in-spring-cloud-data-flow["Composed Function Support in
+Spring Cloud Data Flow"] blog to learn more about the developer and orchestration-experience with an example.
 
-|Docker
-|http://bit.ly/Clark-SR1-task-applications-docker
-|http://bit.ly/Clark-BUILD-SNAPSHOT-task-applications-docker
-|======================
+===== Spring Cloud Task App Starters
 
-
-The following table include the available Task Application Starters based on Spring Cloud Task 2.0.x and Spring Boot 2.0.x:
+The following table includes the available Task Application Starters based on Spring Cloud Task 2.0.x and Spring Boot 2.0.x:
 
 [width="100%",frame="topbot",options="header"]
 |======================
@@ -451,18 +425,18 @@ The following table include the available Task Application Starters based on Spr
 |http://bit.ly/Dearborn-BUILD-SNAPSHOT-task-applications-docker
 |======================
 
-The following table include the available Task Application Starters based on Spring Cloud Task 2.1.x and Spring Boot 2.1.x:
+The following table includes the available Task Application Starters based on Spring Cloud Task 2.1.x and Spring Boot 2.1.x:
 
 [width="100%",frame="topbot",options="header"]
 |======================
 |Artifact Type |Milestone Release |SNAPSHOT Release
 
 |Maven
-|http://bit.ly/Elston-M1-task-applications-maven
+|http://bit.ly/Elston-RC1-task-applications-maven
 |http://bit.ly/Elston-BUILD-SNAPSHOT-task-applications-maven
 
 |Docker
-|http://bit.ly/Elston-M1-task-applications-docker
+|http://bit.ly/Elston-RC1-task-applications-docker
 |http://bit.ly/Elston-BUILD-SNAPSHOT-task-applications-docker
 |======================
 

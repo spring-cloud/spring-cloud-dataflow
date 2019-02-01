@@ -14,21 +14,15 @@ Sprig Cloud Data Flow Server offers specific set of features that can be enabled
 
 * Streams (requires Skipper)
 * Tasks
-* Analytics
 * Task Scheduler
 
 One can enable and disable these features by setting the following boolean properties when launching the Data Flow server:
 
 * `spring.cloud.dataflow.features.streams-enabled`
 * `spring.cloud.dataflow.features.tasks-enabled`
-* `spring.cloud.dataflow.features.analytics-enabled`
 * `spring.cloud.dataflow.features.schedules-enabled`
 
-By default, stream (requires Skipper), tasks, and analytics are enabled and Task Scheduler is disabled by default.
-
-NOTE: Since the analytics feature is enabled by default, the Data Flow Server expects to have a valid Redis store available to server as the analytic repository, because Spring Cloud Data Flow provides a default implementation of analytics based on Redis.
-This also means that the Data Flow Server's `health` depends on the redis store availability as well.
-If you do not want Data Flow's endpoints to read analytics data written to Redis, then disable the analytics feature by setting the property mentioned above.
+By default, stream (requires Skipper), and tasks are enabled and Task Scheduler is disabled by default.
 
 The REST `/about` endpoint provides information on the features that have been enabled and disabled.
 
@@ -1134,7 +1128,7 @@ and need to be  {spring-boot-docs-reference}/htmlsingle/#production-ready-custom
 If you enable sensitive endpoints, you should also <<configuration-local-security,secure the Data Flow server's endpoints>> so that information is not inadvertently exposed to unauthenticated users.
 The local Data Flow server has security disabled by default, so all actuator endpoints are available.
 
-The Data Flow server requires a relational database, and, if the feature toggle for analytics is enabled, a Redis server is also required.
+The Data Flow server requires a relational database.
 The Data Flow server autoconfigures the https://github.com/spring-projects/spring-boot/blob/v{spring-boot-version}/spring-boot-actuator/src/main/java/org/springframework/boot/actuate/health/DataSourceHealthIndicator.java[DataSourceHealthIndicator] and https://github.com/spring-projects/spring-boot/blob/v{spring-boot-version}/spring-boot-actuator/src/main/java/org/springframework/boot/actuate/health/RedisHealthIndicator.java[RedisHealthIndicator] if needed.
 The health of these two services is incorporated to the overall health status of the server through the `health` endpoint.
 

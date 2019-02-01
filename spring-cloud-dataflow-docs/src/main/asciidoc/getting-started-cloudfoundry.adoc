@@ -7,26 +7,13 @@
 The Spring Cloud Data Flow server deploys task tasks (short-lived applications) and via Skipper deploys streams (long-lived applications) to Cloud Foundry.
 The server is a lightweight Spring Boot application. It can run on Cloud Foundry or your laptop, but it is more common to run the server in Cloud Foundry.
 
-Spring Cloud Data Flow requires a few data services to perform streaming, task/batch processing, and analytics.
+Spring Cloud Data Flow requires a few data services to perform streaming and task/batch processing.
 You have two options when you provision Spring Cloud Data Flow and related services on Cloud Foundry:
 
 * The simplest (and automated) method is to use the link:https://network.pivotal.io/products/p-dataflow[Spring Cloud Data Flow for PCF] tile.
 This is an opinionated tile for Pivotal Cloud Foundry.
 It automatically provisions the server and the required data services, thus simplifying the overall getting-started experience. You can read more about the installation link:http://docs.pivotal.io/scdf/[here].
 * Alternatively, you can provision all the components manually. The following section goes into the specifics of how to do so.
-
-==== Provision a Redis Service Instance on Cloud Foundry
-A Redis instance is required for analytics apps and is typically bound to such apps when you create an analytics stream by using setting deployment properties set on a per-application basis
-
-You can use `cf marketplace` to discover which plans are available to you, depending on the details of your Cloud Foundry setup.
-For example, you can use link:https://run.pivotal.io/[Pivotal Web Services], as the following example shows:
-
-====
-[source]
-----
-cf create-service rediscloud 30mb redis
-----
-====
 
 ==== Provision a Rabbit Service Instance on Cloud Foundry
 RabbitMQ is used as a messaging middleware between streaming apps and is bound to each deployed streaming app.
