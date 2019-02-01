@@ -68,7 +68,7 @@ public class LocalSkipperResource extends ExternalResource {
 
 		if (this.configLocations  != null && this.configLocations.length > 0) {
 			builder.properties(
-				String.format("spring.config.location:%s", StringUtils.arrayToCommaDelimitedString(this.configLocations))
+				String.format("spring.config.additional-location:%s", StringUtils.arrayToCommaDelimitedString(this.configLocations))
 			);
 		}
 
