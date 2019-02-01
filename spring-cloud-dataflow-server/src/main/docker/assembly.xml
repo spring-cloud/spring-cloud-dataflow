@@ -8,8 +8,15 @@
 			<includes>
 				<include>org.springframework.cloud:spring-cloud-dataflow-server</include>
 			</includes>
-			<outputDirectory>.</outputDirectory>
+			<outputDirectory>maven</outputDirectory>
 			<outputFileNameMapping>spring-cloud-dataflow-server.jar</outputFileNameMapping>
 		</dependencySet>
 	</dependencySets>
+	<files>
+		<file>
+			<source>../spring-cloud-dataflow-shell/target/spring-cloud-dataflow-shell-${project.version}.jar</source>
+			<outputDirectory>.</outputDirectory>
+			<destName>shell.jar</destName>
+		</file>
+	</files>
 </assembly>

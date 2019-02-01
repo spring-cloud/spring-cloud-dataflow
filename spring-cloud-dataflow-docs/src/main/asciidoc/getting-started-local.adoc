@@ -124,6 +124,19 @@ NOTE: Some stream applications may open a port, for example `http --server.port=
 
 
 [[getting-started-local-customizing-spring-cloud-dataflow-docker]]
+
+==== Spring Cloud Data Flow Shell
+
+For convenience and as an alternative to use of the Spring Cloud Data Flow Dashboard, Spring Cloud Data Flow Shell is also included on the springcloud/spring-cloud-dataflow-server Docker image.
+To use it, open another console window and type as follows:
+
+[source,bash]
+----
+$ docker exec -it dataflow-server java -jar shell.jar
+----
+
+Use of Spring Cloud Data Flow Shell is further described in <<shell,Shell>>.
+
 ==== Docker Compose Customization
 
 Out of the box Spring Cloud Data Flow will use the H2 embedded database for storing state, Kafka for communication and no analytics.

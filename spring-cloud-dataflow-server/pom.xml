@@ -166,8 +166,11 @@
 						  </tags>
 						<from>springcloud/openjdk:latest</from>
 						<volumes>
-						  <volume>/tmp</volume>
+							<volume>/tmp</volume>
 						</volumes>
+						<env>
+							<LANG>C.UTF-8</LANG>
+						</env>
 						<entryPoint>
 						  <exec>
 							<arg>java</arg>
@@ -176,7 +179,9 @@
 						  </exec>
 						</entryPoint>
 						<assembly>
-						  <descriptor>assembly.xml</descriptor>
+							<name>maven</name>
+							<descriptor>assembly.xml</descriptor>
+							<targetDir>/</targetDir>
 						</assembly>
 					  </build>
 					</image>
