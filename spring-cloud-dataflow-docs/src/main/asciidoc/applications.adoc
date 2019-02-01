@@ -1,146 +1,146 @@
-\[[applications]]
- = Applications
+[[applications]]
+= Applications
 
- [partintro]
- --
- A selection of pre-built link:http://cloud.spring.io/spring-cloud-stream-app-starters/[stream] and link:http://cloud.spring.io/spring-cloud-task-app-starters/[task/batch] starter apps for various data integration and processing scenarios to facilitate learning and experimentation. The table below includes the pre-built applications at a glance. For more details, review how to <<index.adoc#supported-apps-and-tasks, register supported applications>>.
- --
+[partintro]
+--
+A selection of pre-built link:http://cloud.spring.io/spring-cloud-stream-app-starters/[stream] and link:http://cloud.spring.io/spring-cloud-task-app-starters/[task/batch] starter apps for various data integration and processing scenarios to facilitate learning and experimentation. The table below includes the pre-built applications at a glance. For more details, review how to <<index.adoc#supported-apps-and-tasks, register supported applications>>.
+--
 
- == Available Applications
- [width="100%",frame="topbot",options="header",subs=attributes]
- |======================
- |Source |Processor |Sink |Task
+== Available Applications
+[width="100%",frame="topbot",options="header",subs=attributes]
+|======================
+|Source |Processor |Sink |Task
 
- |link:{scs-app-starters-docs-htmlsingle}/#spring-cloud-stream-modules-sftp-source[sftp] ~(1.3.x,2.0.x,2.1.x)~
- |link:{scs-app-starters-docs-htmlsingle}/#spring-cloud-stream-modules-tcp-client-processor[tcp-client] ~(1.3.x,2.0.x,2.1.x)~
- |link:{scs-app-starters-docs-htmlsingle}/#spring-cloud-stream-modules-mqtt-sink[mqtt] ~(1.3.x,2.0.x,2.1.x)~
- |spark-yarn ~(deprecated)~
+|link:{scs-app-starters-docs-htmlsingle}/#spring-cloud-stream-modules-sftp-source[sftp] ~(1.3.x,2.0.x,2.1.x)~
+|link:{scs-app-starters-docs-htmlsingle}/#spring-cloud-stream-modules-tcp-client-processor[tcp-client] ~(1.3.x,2.0.x,2.1.x)~
+|link:{scs-app-starters-docs-htmlsingle}/#spring-cloud-stream-modules-mqtt-sink[mqtt] ~(1.3.x,2.0.x,2.1.x)~
+|spark-yarn ~(deprecated)~
 
- |link:{scs-app-starters-docs-htmlsingle}/#spring-cloud-stream-modules-jms-source[jms] ~(1.3.x,2.0.x,2.1.x)~
- |link:{scs-app-starters-docs-htmlsingle}/#spring-cloud-stream-modules-scriptable-transform[scriptable-transform] ~(1.3.x,2.0.x,2.1.x)~
- |link:{scs-app-starters-docs-htmlsingle}/#spring-cloud-stream-modules-log-sink[log] ~(1.3.x,2.0.x,2.1.x)~
- |spark-cluster ~(deprecated)~
+|link:{scs-app-starters-docs-htmlsingle}/#spring-cloud-stream-modules-jms-source[jms] ~(1.3.x,2.0.x,2.1.x)~
+|link:{scs-app-starters-docs-htmlsingle}/#spring-cloud-stream-modules-scriptable-transform[scriptable-transform] ~(1.3.x,2.0.x,2.1.x)~
+|link:{scs-app-starters-docs-htmlsingle}/#spring-cloud-stream-modules-log-sink[log] ~(1.3.x,2.0.x,2.1.x)~
+|spark-cluster ~(deprecated)~
 
- |link:{scs-app-starters-docs-htmlsingle}/#spring-cloud-stream-modules-ftp-source[ftp] ~(1.3.x,2.0.x,2.1.x)~
- |link:{scs-app-starters-docs-htmlsingle}/#spring-clound-stream-modules-transform-processor[transform] ~(1.3.x,2.0.x,2.1.x)~
- |task-launcher-yarn ~(deprecated)~
- |spark-client ~(deprecated)~
+|link:{scs-app-starters-docs-htmlsingle}/#spring-cloud-stream-modules-ftp-source[ftp] ~(1.3.x,2.0.x,2.1.x)~
+|link:{scs-app-starters-docs-htmlsingle}/#spring-clound-stream-modules-transform-processor[transform] ~(1.3.x,2.0.x,2.1.x)~
+|task-launcher-yarn ~(deprecated)~
+|spark-client ~(deprecated)~
 
- |link:{scs-app-starters-docs-htmlsingle}/#spring-cloud-stream-modules-time-source[time] ~(1.3.x,2.0.x,2.1.x)~
- |link:{scs-app-starters-docs-htmlsingle}/#spring-cloud-stream-modules-header-enricher-processor[header-enricher] ~(1.3.x,2.0.x,2.1.x)~
- |link:{scs-app-starters-docs-htmlsingle}/#spring-cloud-stream-modules-throughput-sink[throughput] ~(1.3.x,2.0.x,2.1.x)~
- |link:https://docs.spring.io/spring-cloud-task-app-starters/docs/Clark.RELEASE/reference/htmlsingle/#_timestamp_task[timestamp] ~(1.3.x,2.0.x,2.1.x)~
+|link:{scs-app-starters-docs-htmlsingle}/#spring-cloud-stream-modules-time-source[time] ~(1.3.x,2.0.x,2.1.x)~
+|link:{scs-app-starters-docs-htmlsingle}/#spring-cloud-stream-modules-header-enricher-processor[header-enricher] ~(1.3.x,2.0.x,2.1.x)~
+|link:{scs-app-starters-docs-htmlsingle}/#spring-cloud-stream-modules-throughput-sink[throughput] ~(1.3.x,2.0.x,2.1.x)~
+|link:https://docs.spring.io/spring-cloud-task-app-starters/docs/Clark.RELEASE/reference/htmlsingle/#_timestamp_task[timestamp] ~(1.3.x,2.0.x,2.1.x)~
 
- |link:{scs-app-starters-docs-htmlsingle}/#spring-cloud-stream-modules-load-generator-source[load-generator] ~(1.3.x,2.0.x,2.1.x)~
- |link:{scs-app-starters-docs-htmlsingle}/#spring-cloud-stream-modules-python-http-processor[python-http] ~(1.3.x,2.0.x,2.1.x)~
- |task-launcher-local ~(deprecated)~
- |jdbchdfs-local ~(deprecated)~
+|link:{scs-app-starters-docs-htmlsingle}/#spring-cloud-stream-modules-load-generator-source[load-generator] ~(1.3.x,2.0.x,2.1.x)~
+|link:{scs-app-starters-docs-htmlsingle}/#spring-cloud-stream-modules-python-http-processor[python-http] ~(1.3.x,2.0.x,2.1.x)~
+|task-launcher-local ~(deprecated)~
+|jdbchdfs-local ~(deprecated)~
 
- |link:{scs-app-starters-docs-htmlsingle}/#spring-cloud-stream-modules-syslog-source[syslog] ~(1.3.x,2.0.x,2.1.x)~
- |link:{scs-app-starters-docs-htmlsingle}/#spring-cloud-stream-modules-twitter-sentiment-processor[twitter-sentiment] ~(1.3.x,2.0.x,2.1.x)~
- |link:{scs-app-starters-docs-htmlsingle}/#spring-cloud-stream-modules-mongodb-sink[mongodb] ~(1.3.x,2.0.x,2.1.x)~
- |link:https://docs.spring.io/spring-cloud-task-app-starters/docs/Clark.RELEASE/reference/htmlsingle/#_composed_task_runner[composed-task-runner] ~(1.3.x,2.0.x,2.1.x)~
+|link:{scs-app-starters-docs-htmlsingle}/#spring-cloud-stream-modules-syslog-source[syslog] ~(1.3.x,2.0.x,2.1.x)~
+|link:{scs-app-starters-docs-htmlsingle}/#spring-cloud-stream-modules-twitter-sentiment-processor[twitter-sentiment] ~(1.3.x,2.0.x,2.1.x)~
+|link:{scs-app-starters-docs-htmlsingle}/#spring-cloud-stream-modules-mongodb-sink[mongodb] ~(1.3.x,2.0.x,2.1.x)~
+|link:https://docs.spring.io/spring-cloud-task-app-starters/docs/Clark.RELEASE/reference/htmlsingle/#_composed_task_runner[composed-task-runner] ~(1.3.x,2.0.x,2.1.x)~
 
- |link:{scs-app-starters-docs-htmlsingle}/#spring-cloud-stream-modules-aws-s3-source[s3] ~(1.3.x,2.0.x,2.1.x)~
- |link:{scs-app-starters-docs-htmlsingle}/#spring-cloud-stream-modules-splitter[splitter] ~(1.3.x,2.0.x,2.1.x)~
- |link:{scs-app-starters-docs-htmlsingle}/#spring-cloud-stream-modules-hdfs-dataset-sink[hdfs-dataset] ~(1.3.x,2.0.x,2.1.x)~
- |link:https://docs.spring.io/spring-cloud-task-app-starters/docs/Clark.RELEASE/reference/htmlsingle/#_timestamp_batch_task[timestamp-batch] ~(1.3.x,2.0.x,2.1.x)~
+|link:{scs-app-starters-docs-htmlsingle}/#spring-cloud-stream-modules-aws-s3-source[s3] ~(1.3.x,2.0.x,2.1.x)~
+|link:{scs-app-starters-docs-htmlsingle}/#spring-cloud-stream-modules-splitter[splitter] ~(1.3.x,2.0.x,2.1.x)~
+|link:{scs-app-starters-docs-htmlsingle}/#spring-cloud-stream-modules-hdfs-dataset-sink[hdfs-dataset] ~(1.3.x,2.0.x,2.1.x)~
+|link:https://docs.spring.io/spring-cloud-task-app-starters/docs/Clark.RELEASE/reference/htmlsingle/#_timestamp_batch_task[timestamp-batch] ~(1.3.x,2.0.x,2.1.x)~
 
- |loggregator ~(1.3.x,2.0.x,2.1.x)~
- |link:{scs-app-starters-docs-htmlsingle}/#spring-cloud-stream-modules-image-recognition-processor[image-recognition] ~(1.3.x,2.0.x,2.1.x)~
- |link:{scs-app-starters-docs-htmlsingle}/#spring-cloud-stream-modules-ftp-sink[ftp] ~(1.3.x,2.0.x,2.1.x)~
- |
+|loggregator ~(1.3.x,2.0.x,2.1.x)~
+|link:{scs-app-starters-docs-htmlsingle}/#spring-cloud-stream-modules-image-recognition-processor[image-recognition] ~(1.3.x,2.0.x,2.1.x)~
+|link:{scs-app-starters-docs-htmlsingle}/#spring-cloud-stream-modules-ftp-sink[ftp] ~(1.3.x,2.0.x,2.1.x)~
+|
 
- |link:{scs-app-starters-docs-htmlsingle}/#spring-cloud-stream-modules-trigger-source[triggertask] ~(1.3.x,2.0.x,2.1.x)~
- |link:{scs-app-starters-docs-htmlsingle}/#spring-cloud-stream-modules-bridge-processor[bridge] ~(1.3.x,2.0.x,2.1.x)~
- |link:{scs-app-starters-docs-htmlsingle}/#spring-cloud-stream-modules-jdbc-sink[jdbc] ~(1.3.x,2.0.x,2.1.x)~
- |
+|link:{scs-app-starters-docs-htmlsingle}/#spring-cloud-stream-modules-trigger-source[triggertask] ~(1.3.x,2.0.x,2.1.x)~
+|link:{scs-app-starters-docs-htmlsingle}/#spring-cloud-stream-modules-bridge-processor[bridge] ~(1.3.x,2.0.x,2.1.x)~
+|link:{scs-app-starters-docs-htmlsingle}/#spring-cloud-stream-modules-jdbc-sink[jdbc] ~(1.3.x,2.0.x,2.1.x)~
+|
 
- |link:{scs-app-starters-docs-htmlsingle}/#spring-cloud-stream-modules-twitterstream-source[twitterstream] ~(1.3.x,2.0.x,2.1.x)~
- |link:{scs-app-starters-docs-htmlsingle}/#spring-cloud-stream-modules-bridge-processor[bridge] ~(1.3.x,2.0.x,2.1.x)~
- |link:{scs-app-starters-docs-htmlsingle}/#spring-cloud-stream-modules-aggregate-counter-sink[aggregate-counter] ~(1.3.x,2.0.x,2.1.x)~
- |
+|link:{scs-app-starters-docs-htmlsingle}/#spring-cloud-stream-modules-twitterstream-source[twitterstream] ~(1.3.x,2.0.x,2.1.x)~
+|link:{scs-app-starters-docs-htmlsingle}/#spring-cloud-stream-modules-bridge-processor[bridge] ~(1.3.x,2.0.x,2.1.x)~
+|link:{scs-app-starters-docs-htmlsingle}/#spring-cloud-stream-modules-aggregate-counter-sink[aggregate-counter] ~(1.3.x,2.0.x,2.1.x)~
+|
 
- |link:{scs-app-starters-docs-htmlsingle}/#spring-cloud-stream-modules-mongodb-source[mongodb] ~(1.3.x,2.0.x,2.1.x)~
- |link:{scs-app-starters-docs-htmlsingle}/#spring-cloud-stream-modules-python-jython-processor[python-jython] ~(1.3.x,2.0.x,2.1.x)~
- |link:{scs-app-starters-docs-htmlsingle}/#spring-cloud-stream-modules-cassandra-sink[cassandra] ~(1.3.x,2.1.x)~
- |
+|link:{scs-app-starters-docs-htmlsingle}/#spring-cloud-stream-modules-mongodb-source[mongodb] ~(1.3.x,2.0.x,2.1.x)~
+|link:{scs-app-starters-docs-htmlsingle}/#spring-cloud-stream-modules-python-jython-processor[python-jython] ~(1.3.x,2.0.x,2.1.x)~
+|link:{scs-app-starters-docs-htmlsingle}/#spring-cloud-stream-modules-cassandra-sink[cassandra] ~(1.3.x,2.1.x)~
+|
 
- |link:{scs-app-starters-docs-htmlsingle}/#spring-cloud-stream-modules-gemfire-cq-source[gemfire-cq] ~(1.3.x,2.0.x,2.1.x)~
- |link:{scs-app-starters-docs-htmlsingle}/#spring-cloud-stream-modules-groovy-transform-processor[groovy-transform] ~(1.3.x,2.0.x,2.1.x)~
- |link:{scs-app-starters-docs-htmlsingle}/#spring-cloud-stream-modules-router-sink[router] ~(1.3.x,2.0.x,2.1.x)~
- |
+|link:{scs-app-starters-docs-htmlsingle}/#spring-cloud-stream-modules-gemfire-cq-source[gemfire-cq] ~(1.3.x,2.0.x,2.1.x)~
+|link:{scs-app-starters-docs-htmlsingle}/#spring-cloud-stream-modules-groovy-transform-processor[groovy-transform] ~(1.3.x,2.0.x,2.1.x)~
+|link:{scs-app-starters-docs-htmlsingle}/#spring-cloud-stream-modules-router-sink[router] ~(1.3.x,2.0.x,2.1.x)~
+|
 
- |link:{scs-app-starters-docs-htmlsingle}/#spring-cloud-stream-modules-http-source[http] ~(1.3.x,2.0.x,2.1.x)~
- |link:{scs-app-starters-docs-htmlsingle}/#spring-cloud-stream-modules-httpclient-processor[httpclient] ~(1.3.x,2.0.x,2.1.x)~
- |link:{scs-app-starters-docs-htmlsingle}/#spring-cloud-stream-modules-redis-sink[redis-pubsub] ~(1.3.x,2.0.x,2.1.x)~
- |
+|link:{scs-app-starters-docs-htmlsingle}/#spring-cloud-stream-modules-http-source[http] ~(1.3.x,2.0.x,2.1.x)~
+|link:{scs-app-starters-docs-htmlsingle}/#spring-cloud-stream-modules-httpclient-processor[httpclient] ~(1.3.x,2.0.x,2.1.x)~
+|link:{scs-app-starters-docs-htmlsingle}/#spring-cloud-stream-modules-redis-sink[redis-pubsub] ~(1.3.x,2.0.x,2.1.x)~
+|
 
- |link:{scs-app-starters-docs-htmlsingle}/#spring-cloud-stream-modules-rabbit-source[rabbit] ~(1.3.x,2.0.x,2.1.x)~
- |link:{scs-app-starters-docs-htmlsingle}/#spring-cloud-stream-modules-filter-processor[filter] ~(1.3.x,2.0.x,2.1.x)~
- |link:{scs-app-starters-docs-htmlsingle}/#spring-cloud-stream-modules-file-sink[file] ~(1.3.x,2.0.x,2.1.x)~
- |
+|link:{scs-app-starters-docs-htmlsingle}/#spring-cloud-stream-modules-rabbit-source[rabbit] ~(1.3.x,2.0.x,2.1.x)~
+|link:{scs-app-starters-docs-htmlsingle}/#spring-cloud-stream-modules-filter-processor[filter] ~(1.3.x,2.0.x,2.1.x)~
+|link:{scs-app-starters-docs-htmlsingle}/#spring-cloud-stream-modules-file-sink[file] ~(1.3.x,2.0.x,2.1.x)~
+|
 
- |link:{scs-app-starters-docs-htmlsingle}/#spring-cloud-stream-modules-tcp-source[tcp] ~(1.3.x,2.0.x,2.1.x)~
- |link:{scs-app-starters-docs-htmlsingle}/#spring-cloud-stream-modules-pose-estimation-processor[pose-estimation] ~(1.3.x,2.0.x,2.1.x)~
- |link:{scs-app-starters-docs-htmlsingle}/#spring-cloud-stream-modules-websocket-sink[websocket] ~(1.3.x,2.0.x,2.1.x)~
- |
+|link:{scs-app-starters-docs-htmlsingle}/#spring-cloud-stream-modules-tcp-source[tcp] ~(1.3.x,2.0.x,2.1.x)~
+|link:{scs-app-starters-docs-htmlsingle}/#spring-cloud-stream-modules-pose-estimation-processor[pose-estimation] ~(1.3.x,2.0.x,2.1.x)~
+|link:{scs-app-starters-docs-htmlsingle}/#spring-cloud-stream-modules-websocket-sink[websocket] ~(1.3.x,2.0.x,2.1.x)~
+|
 
- |link:{scs-app-starters-docs-htmlsingle}/#spring-cloud-stream-modules-trigger-source[trigger] ~(1.3.x,2.0.x,2.1.x)~
- |link:{scs-app-starters-docs-htmlsingle}/#spring-cloud-stream-modules-grpc-processor[grpc] ~(1.3.x,2.0.x,2.1.x)~
- |link:{scs-app-starters-docs-htmlsingle}/#spring-cloud-stream-modules-aws-s3-sink[s3] ~(1.3.x,2.0.x,2.1.x)~
- |
+|link:{scs-app-starters-docs-htmlsingle}/#spring-cloud-stream-modules-trigger-source[trigger] ~(1.3.x,2.0.x,2.1.x)~
+|link:{scs-app-starters-docs-htmlsingle}/#spring-cloud-stream-modules-grpc-processor[grpc] ~(1.3.x,2.0.x,2.1.x)~
+|link:{scs-app-starters-docs-htmlsingle}/#spring-cloud-stream-modules-aws-s3-sink[s3] ~(1.3.x,2.0.x,2.1.x)~
+|
 
- |link:{scs-app-starters-docs-htmlsingle}/#spring-cloud-stream-modules-mqtt-source[mqtt] ~(1.3.x,2.0.x,2.1.x)~
- |link:{scs-app-starters-docs-htmlsingle}/#spring-cloud-stream-modules-groovy-filter-processor[groovy-filter] ~(1.3.x,2.0.x,2.1.x)~
- |link:{scs-app-starters-docs-htmlsingle}/#spring-cloud-stream-modules-rabbit-sink[rabbit] ~(1.3.x,2.0.x,2.1.x)~
- |
+|link:{scs-app-starters-docs-htmlsingle}/#spring-cloud-stream-modules-mqtt-source[mqtt] ~(1.3.x,2.0.x,2.1.x)~
+|link:{scs-app-starters-docs-htmlsingle}/#spring-cloud-stream-modules-groovy-filter-processor[groovy-filter] ~(1.3.x,2.0.x,2.1.x)~
+|link:{scs-app-starters-docs-htmlsingle}/#spring-cloud-stream-modules-rabbit-sink[rabbit] ~(1.3.x,2.0.x,2.1.x)~
+|
 
- |link:{scs-app-starters-docs-htmlsingle}/#spring-cloud-stream-modules-tcp-client-source[tcp-client] ~(1.3.x,2.0.x,2.1.x)~
- |link:{scs-app-starters-docs-htmlsingle}/#spring-cloud-stream-modules-tensorflow-processor[tensorflow] ~(1.3.x,2.0.x,2.1.x)~
- |link:{scs-app-starters-docs-htmlsingle}/#spring-cloud-stream-modules-counter-sink[counter] ~(1.3.x,2.0.x,2.1.x)~
- |
+|link:{scs-app-starters-docs-htmlsingle}/#spring-cloud-stream-modules-tcp-client-source[tcp-client] ~(1.3.x,2.0.x,2.1.x)~
+|link:{scs-app-starters-docs-htmlsingle}/#spring-cloud-stream-modules-tensorflow-processor[tensorflow] ~(1.3.x,2.0.x,2.1.x)~
+|link:{scs-app-starters-docs-htmlsingle}/#spring-cloud-stream-modules-counter-sink[counter] ~(1.3.x,2.0.x,2.1.x)~
+|
 
- |link:{scs-app-starters-docs-htmlsingle}/#spring-cloud-stream-modules-mail-source[mail] ~(1.3.x,2.0.x,2.1.x)~
- |link:{scs-app-starters-docs-htmlsingle}/#spring-cloud-stream-modules-aggregator-processor[aggregator] ~(1.3.x,2.0.x,2.1.x)~
- |link:{scs-app-starters-docs-htmlsingle}/#spring-cloud-stream-modules-pgcopy-sink[pgcopy] ~(1.3.x,2.0.x,2.1.x)~
- |
+|link:{scs-app-starters-docs-htmlsingle}/#spring-cloud-stream-modules-mail-source[mail] ~(1.3.x,2.0.x,2.1.x)~
+|link:{scs-app-starters-docs-htmlsingle}/#spring-cloud-stream-modules-aggregator-processor[aggregator] ~(1.3.x,2.0.x,2.1.x)~
+|link:{scs-app-starters-docs-htmlsingle}/#spring-cloud-stream-modules-pgcopy-sink[pgcopy] ~(1.3.x,2.0.x,2.1.x)~
+|
 
- |link:{scs-app-starters-docs-htmlsingle}/#spring-cloud-stream-modules-jdbc-source[jdbc] ~(1.3.x,2.0.x,2.1.x)~
- |link:{scs-app-starters-docs-htmlsingle}/#spring-cloud-stream-modules-aggregator-processor[aggregator] ~(1.3.x,2.0.x,2.1.x)~
- |link:https://github.com/spring-cloud-stream-app-starters/gpfdist[gpfdist] ~(1.3.x)~
- |
+|link:{scs-app-starters-docs-htmlsingle}/#spring-cloud-stream-modules-jdbc-source[jdbc] ~(1.3.x,2.0.x,2.1.x)~
+|link:{scs-app-starters-docs-htmlsingle}/#spring-cloud-stream-modules-aggregator-processor[aggregator] ~(1.3.x,2.0.x,2.1.x)~
+|link:https://github.com/spring-cloud-stream-app-starters/gpfdist[gpfdist] ~(1.3.x)~
+|
 
- |link:{scs-app-starters-docs-htmlsingle}/#spring-cloud-stream-modules-gemfire-source[gemfire] ~(1.3.x,2.0.x,2.1.x)~
- |tasklaunchrequest-transform ~(1.3.x,2.0.x,2.1.x)~
- |link:{scs-app-starters-docs-htmlsingle}/#spring-cloud-stream-modules-sftp-sink[sftp] ~(1.3.x,2.0.x,2.1.x)~
- |
+|link:{scs-app-starters-docs-htmlsingle}/#spring-cloud-stream-modules-gemfire-source[gemfire] ~(1.3.x,2.0.x,2.1.x)~
+|tasklaunchrequest-transform ~(1.3.x,2.0.x,2.1.x)~
+|link:{scs-app-starters-docs-htmlsingle}/#spring-cloud-stream-modules-sftp-sink[sftp] ~(1.3.x,2.0.x,2.1.x)~
+|
 
- |link:{scs-app-starters-docs-htmlsingle}/#spring-cloud-stream-modules-file-source[file] ~(1.3.x,2.0.x,2.1.x)~
- |link:{scs-app-starters-docs-htmlsingle}/#spring-cloud-stream-modules-object-detection-processor[object-detection] ~(1.3.x,2.0.x,2.1.x)~
- |link:{scs-app-starters-docs-htmlsingle}/#spring-cloud-stream-modules-field-value-counter-sink[field-value-counter] ~(1.3.x,2.0.x,2.1.x)~
- |
+|link:{scs-app-starters-docs-htmlsingle}/#spring-cloud-stream-modules-file-source[file] ~(1.3.x,2.0.x,2.1.x)~
+|link:{scs-app-starters-docs-htmlsingle}/#spring-cloud-stream-modules-object-detection-processor[object-detection] ~(1.3.x,2.0.x,2.1.x)~
+|link:{scs-app-starters-docs-htmlsingle}/#spring-cloud-stream-modules-field-value-counter-sink[field-value-counter] ~(1.3.x,2.0.x,2.1.x)~
+|
 
- |
- |
- |link:{scs-app-starters-docs-htmlsingle}/#spring-cloud-stream-modules-hdfs-sink[hdfs] ~(1.3.x,2.0.x,2.1.x)~
- |
+|
+|
+|link:{scs-app-starters-docs-htmlsingle}/#spring-cloud-stream-modules-hdfs-sink[hdfs] ~(1.3.x,2.0.x,2.1.x)~
+|
 
- |
- |
- |link:{scs-app-starters-docs-htmlsingle}/#spring-cloud-stream-modules-tcp-sink[tcp] ~(1.3.x,2.0.x,2.1.x)~
- |
+|
+|
+|link:{scs-app-starters-docs-htmlsingle}/#spring-cloud-stream-modules-tcp-sink[tcp] ~(1.3.x,2.0.x,2.1.x)~
+|
 
- |
- |
- |link:{scs-app-starters-docs-htmlsingle}/#spring-cloud-stream-modules-gemfire-sink[gemfire] ~(1.3.x,2.0.x,2.1.x)~
- |
+|
+|
+|link:{scs-app-starters-docs-htmlsingle}/#spring-cloud-stream-modules-gemfire-sink[gemfire] ~(1.3.x,2.0.x,2.1.x)~
+|
 
- |
- |
- |task-launcher-cloudfoundry ~(deprecated)~
- |
- |======================
+|
+|
+|task-launcher-cloudfoundry ~(deprecated)~
+|
+|======================
 
- NOTE: Each of the applications listed in the table above include the supported version(s) in parenthesis. For example, the
- `sftp-sink` is available for the versions 1.3.x, 2.0.x, and 2.1.x.
+NOTE: Each of the applications listed in the table above include the supported version(s) in parenthesis. For example, the
+`sftp-sink` is available for the versions 1.3.x, 2.0.x, and 2.1.x.
