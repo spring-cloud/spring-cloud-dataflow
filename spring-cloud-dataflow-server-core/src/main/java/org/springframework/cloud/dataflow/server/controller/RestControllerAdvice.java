@@ -22,7 +22,6 @@ import javax.validation.ConstraintViolationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import org.springframework.analytics.rest.controller.NoSuchMetricException;
 import org.springframework.batch.core.launch.JobExecutionNotRunningException;
 import org.springframework.batch.core.launch.NoSuchJobException;
 import org.springframework.batch.core.launch.NoSuchJobExecutionException;
@@ -148,8 +147,8 @@ public class RestControllerAdvice {
 			NoSuchStreamDefinitionException.class, NoSuchAppRegistrationException.class,
 			NoSuchTaskDefinitionException.class, NoSuchTaskExecutionException.class, NoSuchJobExecutionException.class,
 			NoSuchJobInstanceException.class, NoSuchJobException.class, NoSuchStepExecutionException.class,
-			NoSuchTaskBatchException.class, NoSuchMetricException.class, NoSuchAppException.class,
-			NoSuchAppInstanceException.class, NoSuchScheduleException.class })
+			NoSuchTaskBatchException.class, NoSuchAppException.class, NoSuchAppInstanceException.class,
+			NoSuchScheduleException.class })
 	@ResponseStatus(HttpStatus.NOT_FOUND)
 	@ResponseBody
 	public VndErrors onNotFoundException(Exception e) {

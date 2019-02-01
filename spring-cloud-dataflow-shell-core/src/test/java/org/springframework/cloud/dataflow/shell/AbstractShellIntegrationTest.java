@@ -26,7 +26,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.cloud.dataflow.shell.command.JobCommandTemplate;
-import org.springframework.cloud.dataflow.shell.command.MetricsCommandTemplate;
 import org.springframework.cloud.dataflow.shell.command.StreamCommandTemplate;
 import org.springframework.cloud.dataflow.shell.command.TaskCommandTemplate;
 import org.springframework.cloud.skipper.client.SkipperClient;
@@ -177,11 +176,6 @@ public abstract class AbstractShellIntegrationTest {
 	protected JobCommandTemplate job() {
 		return new JobCommandTemplate(dataFlowShell);
 	}
-
-	/**
-	 * Return a {@link MetricsCommandTemplate} for issuing metrics related commands.
-	 */
-	protected MetricsCommandTemplate metrics() {return new MetricsCommandTemplate(dataFlowShell); }
 
 	// Util methods
 

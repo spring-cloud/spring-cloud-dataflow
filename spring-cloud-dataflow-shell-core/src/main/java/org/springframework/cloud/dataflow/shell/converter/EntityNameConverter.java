@@ -21,9 +21,6 @@ import java.util.List;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cloud.dataflow.rest.client.AggregateCounterOperations;
-import org.springframework.cloud.dataflow.rest.client.CounterOperations;
-import org.springframework.cloud.dataflow.rest.client.FieldValueCounterOperations;
 import org.springframework.cloud.dataflow.rest.client.JobOperations;
 import org.springframework.cloud.dataflow.rest.client.StreamOperations;
 import org.springframework.cloud.dataflow.rest.client.TaskOperations;
@@ -66,15 +63,6 @@ public class EntityNameConverter implements Converter<String> {
 				case "task":
 					taskOperations().list().forEach(tdf -> completions.add(new Completion(tdf.getName())));
 					break;
-				case "counter":
-					counterOperations().list().forEach(mr -> completions.add(new Completion(mr.getName())));
-					break;
-				case "field-value-counter":
-					fieldValueCounterOperations().list().forEach(mr -> completions.add(new Completion(mr.getName())));
-					break;
-				case "aggregate-counter":
-					aggregateCounterOperations().list().forEach(mr -> completions.add(new Completion(mr.getName())));
-					break;
 				case "job":
 					jobOperations().executionList().forEach(jer -> {if (!"?".equals(jer.getName())) {
 						completions.add(new Completion(jer.getName()));
@@ -91,18 +79,6 @@ public class EntityNameConverter implements Converter<String> {
 
 	private JobOperations jobOperations() {
 		return dataFlowShell.getDataFlowOperations().jobOperations();
-	}
-
-	private AggregateCounterOperations aggregateCounterOperations() {
-		return dataFlowShell.getDataFlowOperations().aggregateCounterOperations();
-	}
-
-	private FieldValueCounterOperations fieldValueCounterOperations() {
-		return dataFlowShell.getDataFlowOperations().fieldValueCounterOperations();
-	}
-
-	private CounterOperations counterOperations() {
-		return dataFlowShell.getDataFlowOperations().counterOperations();
 	}
 
 	private TaskOperations taskOperations() {

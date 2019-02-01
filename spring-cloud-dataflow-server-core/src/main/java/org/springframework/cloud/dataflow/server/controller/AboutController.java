@@ -120,7 +120,6 @@ public class AboutController {
 	public AboutResource getAboutResource() {
 		final AboutResource aboutResource = new AboutResource();
 		final FeatureInfo featureInfo = new FeatureInfo();
-		featureInfo.setAnalyticsEnabled(featuresProperties.isAnalyticsEnabled());
 		featureInfo.setStreamsEnabled(featuresProperties.isStreamsEnabled());
 		featureInfo.setTasksEnabled(featuresProperties.isTasksEnabled());
 		featureInfo.setSchedulerEnabled(featuresProperties.isSchedulesEnabled());

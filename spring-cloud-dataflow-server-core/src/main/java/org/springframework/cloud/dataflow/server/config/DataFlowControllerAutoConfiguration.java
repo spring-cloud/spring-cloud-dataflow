@@ -25,12 +25,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import org.springframework.analytics.metrics.AggregateCounterRepository;
-import org.springframework.analytics.metrics.FieldValueCounterRepository;
-import org.springframework.analytics.metrics.redis.RedisMetricRepository;
-import org.springframework.analytics.rest.controller.AggregateCounterController;
-import org.springframework.analytics.rest.controller.CounterController;
-import org.springframework.analytics.rest.controller.FieldValueCounterController;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
@@ -448,28 +442,6 @@ public class DataFlowControllerAutoConfiguration {
 			return new AuthorizationProperties();
 		}
 
-	}
-
-	@Configuration
-	public static class AnalyticsConfiguration {
-
-		@Bean
-		@ConditionalOnBean(RedisMetricRepository.class)
-		public CounterController counterController(RedisMetricRepository metricRepository) {
-			return new CounterController(metricRepository);
-		}
-
-		@Bean
-		@ConditionalOnBean(FieldValueCounterRepository.class)
-		public FieldValueCounterController fieldValueCounterController(FieldValueCounterRepository repository) {
-			return new FieldValueCounterController(repository);
-		}
-
-		@Bean
-		@ConditionalOnBean(AggregateCounterRepository.class)
-		public AggregateCounterController aggregateCounterController(AggregateCounterRepository repository) {
-			return new AggregateCounterController(repository);
-		}
 	}
 
 }

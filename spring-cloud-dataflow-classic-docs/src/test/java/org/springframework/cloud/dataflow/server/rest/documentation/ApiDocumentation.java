@@ -119,15 +119,6 @@ public class ApiDocumentation extends BaseDocumentation {
 				linkWithRel("streams/deployments/update/{name}").description("Update the stream."),
 				linkWithRel("streams/deployments/platform/list").description("List of supported deployment platforms"),
 
-				linkWithRel("counters").description("Exposes the resource for dealing with Counters"),
-				linkWithRel("counters/counter").description("Handle a specific counter"),
-
-				linkWithRel("aggregate-counters").description("Provides the resource for dealing with aggregate counters"),
-				linkWithRel("aggregate-counters/counter").description("Handle a specific aggregate  counter"),
-
-				linkWithRel("field-value-counters").description("Provides the resource for dealing with field-value-counters"),
-				linkWithRel("field-value-counters/counter").description("Handle a specific field-value-counter"),
-
 				linkWithRel("tools/parseTaskTextToGraph").description("Parse a task definition into a graph structure"),
 				linkWithRel("tools/convertTaskGraphToText").description("Convert a graph format into " + "DSL text format")),
 
@@ -215,19 +206,7 @@ public class ApiDocumentation extends BaseDocumentation {
 
 						fieldWithPath("_links.tools/parseTaskTextToGraph.href").description("Link to the tools/parseTaskTextToGraph"),
 						fieldWithPath("_links.tools/convertTaskGraphToText.href").description("Link to the tools/convertTaskGraphToText"),
-
-						fieldWithPath("_links.counters.href").description("Link to the counters"),
-						fieldWithPath("_links.counters/counter.href").description("Link to the counters/counter"),
-						fieldWithPath("_links.counters/counter.templated").type(JsonFieldType.BOOLEAN).optional().description("Link counters/counter is templated"),
-
-						fieldWithPath("_links.field-value-counters.href").description("Link to the field-value-counters"),
-						fieldWithPath("_links.field-value-counters/counter.href").description("Link to the field-value-counters/counter"),
-						fieldWithPath("_links.field-value-counters/counter.templated").type(JsonFieldType.BOOLEAN).optional().description("Link field-value-counters/counter is templated"),
-
-						fieldWithPath("_links.aggregate-counters.href").description("Link to the aggregate-counters"),
-						fieldWithPath("_links.aggregate-counters/counter.href").description("Link to the aggregate-counters/counter"),
-						fieldWithPath("_links.aggregate-counters/counter.templated").type(JsonFieldType.BOOLEAN).optional().description("Link aggregate-counters/counter is templated"),
-
+						
 						fieldWithPath("_links.apps.href").description("Link to the apps"),
 
 						fieldWithPath("_links.about.href").description("Link to the about"),
