@@ -49,6 +49,7 @@ import org.springframework.cloud.dataflow.server.repository.NoSuchTaskDefinition
 import org.springframework.cloud.dataflow.server.repository.TaskDefinitionRepository;
 import org.springframework.cloud.dataflow.server.repository.TaskDeploymentRepository;
 import org.springframework.cloud.dataflow.server.service.TaskDeleteService;
+import org.springframework.cloud.dataflow.server.service.TaskExecutionCreationService;
 import org.springframework.cloud.dataflow.server.service.TaskExecutionInfoService;
 import org.springframework.cloud.dataflow.server.service.TaskExecutionService;
 import org.springframework.cloud.dataflow.server.service.TaskSaveService;
@@ -145,6 +146,9 @@ public abstract class DefaultTaskExecutionServiceTests {
 
 	@Autowired
 	TaskDeploymentRepository taskDeploymentRepository;
+
+	@Autowired
+	TaskExecutionCreationService taskExecutionRepositoryService;
 
 	@TestPropertySource(properties = { "spring.cloud.dataflow.task.maximum-concurrent-tasks=10" })
 	@AutoConfigureTestDatabase(replace = Replace.ANY)
@@ -251,13 +255,14 @@ public abstract class DefaultTaskExecutionServiceTests {
 			boolean errorCaught = false;
 			when(this.taskLauncher.launch(any())).thenReturn("0");
 			TaskExecutionInfoService taskExecutionInfoService = new DefaultTaskExecutionInfoService(
-					this.dataSourceProperties, this.appRegistry, this.taskRepository, this.taskExplorer,
+					this.dataSourceProperties, this.appRegistry, this.taskExplorer,
 					mock(TaskDefinitionRepository.class), new TaskConfigurationProperties());
 			TaskExecutionService taskExecutionService = new DefaultTaskExecutionService(
 					launcherRepository, this.metadataResolver,
 					auditRecordService, null, this.commonApplicationProperties,
 					taskRepository,
-					taskExecutionInfoService, mock(TaskDeploymentRepository.class));
+					taskExecutionInfoService, mock(TaskDeploymentRepository.class),
+					taskExecutionRepositoryService);
 			try {
 				taskExecutionService.executeTask(TASK_NAME_ORIG, new HashMap<>(), new LinkedList<>());
 			}

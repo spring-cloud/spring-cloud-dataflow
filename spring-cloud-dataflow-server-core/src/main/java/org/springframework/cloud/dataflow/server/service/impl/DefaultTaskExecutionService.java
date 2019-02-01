@@ -36,6 +36,7 @@ import org.springframework.cloud.dataflow.server.config.apps.CommonApplicationPr
 import org.springframework.cloud.dataflow.server.controller.WhitelistProperties;
 import org.springframework.cloud.dataflow.server.job.LauncherRepository;
 import org.springframework.cloud.dataflow.server.repository.TaskDeploymentRepository;
+import org.springframework.cloud.dataflow.server.service.TaskExecutionCreationService;
 import org.springframework.cloud.dataflow.server.service.TaskExecutionInfoService;
 import org.springframework.cloud.dataflow.server.service.TaskExecutionService;
 import org.springframework.cloud.deployer.spi.core.AppDefinition;
@@ -75,6 +76,8 @@ public class DefaultTaskExecutionService implements TaskExecutionService {
 
 	private final String dataflowServerUri;
 
+	private final TaskExecutionCreationService taskExecutionRepositoryService;
+
 	private final CommonApplicationProperties commonApplicationProperties;
 
 	protected final AuditRecordService auditRecordService;
@@ -112,15 +115,18 @@ public class DefaultTaskExecutionService implements TaskExecutionService {
 			String dataflowServerUri, CommonApplicationProperties commonApplicationProperties,
 			TaskRepository taskRepository,
 			TaskExecutionInfoService taskExecutionInfoService,
-			TaskDeploymentRepository taskDeploymentRepository) {
-		Assert.notNull(launcherRepository, "LauncherRepository must not be null");
+			TaskDeploymentRepository taskDeploymentRepository,
+			TaskExecutionCreationService taskExecutionRepositoryService) {
+		Assert.notNull(launcherRepository, "launcherRepository must not be null");
 		Assert.notNull(metaDataResolver, "metaDataResolver must not be null");
 		Assert.notNull(auditRecordService, "auditRecordService must not be null");
 		Assert.notNull(commonApplicationProperties, "commonApplicationProperties must not be null");
-		Assert.notNull(taskExecutionInfoService, "TaskDefinitionRetriever must not be null");
-		Assert.notNull(taskRepository, "TaskRepository must not be null");
-		Assert.notNull(taskExecutionInfoService, "TaskExecutionInfoService must not be null");
-		Assert.notNull(taskDeploymentRepository, "TaskDeploymentRepository must not be null");
+		Assert.notNull(taskExecutionInfoService, "taskDefinitionRetriever must not be null");
+		Assert.notNull(taskRepository, "taskRepository must not be null");
+		Assert.notNull(taskExecutionInfoService, "taskExecutionInfoService must not be null");
+		Assert.notNull(taskDeploymentRepository, "taskDeploymentRepository must not be null");
+		Assert.notNull(taskExecutionRepositoryService, "taskExecutionRepositoryService must not be null");
+
 
 		this.launcherRepository = launcherRepository;
 		this.whitelistProperties = new WhitelistProperties(metaDataResolver);
@@ -130,6 +136,7 @@ public class DefaultTaskExecutionService implements TaskExecutionService {
 		this.taskRepository = taskRepository;
 		this.taskExecutionInfoService = taskExecutionInfoService;
 		this.taskDeploymentRepository = taskDeploymentRepository;
+		this.taskExecutionRepositoryService = taskExecutionRepositoryService;
 	}
 
 	@Override
@@ -164,12 +171,11 @@ public class DefaultTaskExecutionService implements TaskExecutionService {
 						taskName, existingTaskDeployment.getPlatformName(), platformName));
 			}
 		}
-
 		TaskExecutionInformation taskExecutionInformation = taskExecutionInfoService
 				.findTaskExecutionInformation(taskName, taskDeploymentProperties);
 		TaskDefinition taskDefinition = taskExecutionInformation.getTaskDefinition();
 		String registeredAppName = taskDefinition.getRegisteredAppName();
-		TaskExecution taskExecution = taskExecutionInformation.getTaskExecution();
+		TaskExecution taskExecution = taskExecutionRepositoryService.createTaskExecution(taskName);
 
 		Map<String, String> appDeploymentProperties = new HashMap<>(commonApplicationProperties.getTask());
 		appDeploymentProperties.putAll(
