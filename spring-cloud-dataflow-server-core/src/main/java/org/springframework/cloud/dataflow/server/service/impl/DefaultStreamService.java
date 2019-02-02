@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2018 the original author or authors.
+ * Copyright 2017-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -513,10 +513,10 @@ public class DefaultStreamService implements StreamService {
 	 * @param search the findByTaskNameLike parameter to use
 	 * @return Page of stream definitions
 	 */
-	public Page<StreamDefinition> findDefinitionByNameLike(Pageable pageable, String search) {
+	public Page<StreamDefinition> findDefinitionByNameContains(Pageable pageable, String search) {
 		Page<StreamDefinition> streamDefinitions;
 		if (search != null) {
-			streamDefinitions = streamDefinitionRepository.findByNameLike(search, pageable);
+			streamDefinitions = streamDefinitionRepository.findByNameContains(search, pageable);
 		}
 		else {
 			streamDefinitions = streamDefinitionRepository.findAll(pageable);
