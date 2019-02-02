@@ -77,6 +77,7 @@ import org.springframework.web.client.RestClientException;
 import org.springframework.web.context.WebApplicationContext;
 
 import static org.hamcrest.Matchers.empty;
+import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.startsWith;
 import static org.junit.Assert.assertEquals;
@@ -108,6 +109,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  * @author Glenn Renfro
  * @author Andy Clement
  * @author Christian Tzolov
+ * @author Daniel Serleg
  */
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = TestDependencies.class)
@@ -229,6 +231,44 @@ public class StreamControllerTests {
 		assertTrue(response.contains(":myStream1.time > log"));
 		assertTrue(response.contains("time | log"));
 		assertTrue(response.contains("\"totalElements\":3"));
+	}
+
+	@Test
+	public void testStreamSearchNameContainsSubstring() throws Exception {
+		mockMvc.perform(post("/streams/definitions/").param("name", "foo")
+				.param("definition", "time | log")
+				.accept(MediaType.APPLICATION_JSON)).andDo(print()).andExpect(status().isCreated());
+
+		mockMvc.perform(post("/streams/definitions/").param("name", "foaz")
+				.param("definition", "time | log")
+				.accept(MediaType.APPLICATION_JSON)).andDo(print()).andExpect(status().isCreated());
+
+		mockMvc.perform(post("/streams/definitions/").param("name", "ooz")
+				.param("definition", "time | log")
+				.accept(MediaType.APPLICATION_JSON)).andDo(print()).andExpect(status().isCreated());
+		assertEquals(3, repository.count());
+
+		mockMvc.perform(get("/streams/definitions").param("search", "f")
+				.accept(MediaType.APPLICATION_JSON)).andDo(print()).andExpect(status().isOk())
+				.andExpect(jsonPath("$.content.*", hasSize(2)))
+
+				.andExpect(jsonPath("$.content[0].name", is("foo")))
+				.andExpect(jsonPath("$.content[1].name", is("foaz")));
+
+		mockMvc.perform(get("/streams/definitions").param("search", "o")
+				.accept(MediaType.APPLICATION_JSON)).andDo(print()).andExpect(status().isOk())
+				.andExpect(jsonPath("$.content.*", hasSize(3)))
+
+				.andExpect(jsonPath("$.content[0].name", is("foo")))
+				.andExpect(jsonPath("$.content[1].name", is("foaz")))
+				.andExpect(jsonPath("$.content[2].name", is("ooz")));
+
+		mockMvc.perform(get("/streams/definitions").param("search", "z")
+				.accept(MediaType.APPLICATION_JSON)).andDo(print()).andExpect(status().isOk())
+				.andExpect(jsonPath("$.content.*", hasSize(2)))
+
+				.andExpect(jsonPath("$.content[0].name", is("foaz")))
+				.andExpect(jsonPath("$.content[1].name", is("ooz")));
 	}
 
 	@Test
@@ -438,7 +478,7 @@ public class StreamControllerTests {
 				.param("definition", "foo --.spring.cloud.stream.metrics.properties=spring* | bar")
 				.accept(MediaType.APPLICATION_JSON)).andDo(print()).andExpect(status().isBadRequest())
 				.andExpect(jsonPath("$[0].logref", is("InvalidStreamDefinitionException"))).andExpect(
-				jsonPath("$[0].message", startsWith("111E:(pos 6): Unexpected token.  Expected '.' but was")));
+						jsonPath("$[0].message", startsWith("111E:(pos 6): Unexpected token.  Expected '.' but was")));
 	}
 
 	@Test
@@ -622,7 +662,8 @@ public class StreamControllerTests {
 		Package filterPackage = findChildPackageByName(pkg, "filter");
 		SpringCloudDeployerApplicationSpec filterSpec = parseSpec(filterPackage.getConfigValues().getRaw());
 
-		assertThat(filterSpec.getResource(), is("maven://org.springframework.cloud.stream.app:filter-processor-rabbit"));
+		assertThat(filterSpec.getResource(),
+				is("maven://org.springframework.cloud.stream.app:filter-processor-rabbit"));
 	}
 
 	@Test
@@ -641,7 +682,8 @@ public class StreamControllerTests {
 	public void testDestroyWithSensitiveProperties() throws Exception {
 		assertEquals(0, repository.count());
 
-		StreamDefinition streamDefinition1 = new StreamDefinition("myStream1234", "time --some.password=foobar --another-secret=kenny | log");
+		StreamDefinition streamDefinition1 = new StreamDefinition("myStream1234",
+				"time --some.password=foobar --another-secret=kenny | log");
 		repository.save(streamDefinition1);
 		assertEquals(1, repository.count());
 
@@ -765,7 +807,9 @@ public class StreamControllerTests {
 		assertEquals(6, auditRecords.size()); // TODO (Tzolov) This looks wrong! only one Audit record should exist
 		final AuditRecord auditRecord = auditRecords.get(5);
 
-		assertEquals("{\"streamDefinitionDslText\":\"time --some.password='******' --another-secret='******' | log\",\"deploymentProperties\":{}}", auditRecord.getAuditData());
+		assertEquals(
+				"{\"streamDefinitionDslText\":\"time --some.password='******' --another-secret='******' | log\",\"deploymentProperties\":{}}",
+				auditRecord.getAuditData());
 
 		assertEquals("myStream", auditRecord.getCorrelationId());
 
@@ -991,16 +1035,20 @@ public class StreamControllerTests {
 
 		SpringCloudDeployerApplicationSpec logSpec = parseSpec(logPackage.getConfigValues().getRaw());
 		assertEquals("2", logSpec.getApplicationProperties().get(StreamPropertyKeys.INSTANCE_COUNT));
-		assertEquals("true", logSpec.getApplicationProperties().get("spring.cloud.stream.bindings.input.consumer.partitioned"));
-		assertEquals("3", logSpec.getApplicationProperties().get("spring.cloud.stream.bindings.input.consumer.concurrency"));
+		assertEquals("true",
+				logSpec.getApplicationProperties().get("spring.cloud.stream.bindings.input.consumer.partitioned"));
+		assertEquals("3",
+				logSpec.getApplicationProperties().get("spring.cloud.stream.bindings.input.consumer.concurrency"));
 
 		assertEquals("2", logSpec.getDeploymentProperties().get(AppDeployer.COUNT_PROPERTY_KEY));
 		assertEquals("myStream", logSpec.getDeploymentProperties().get(AppDeployer.GROUP_PROPERTY_KEY));
 		assertEquals("true", logSpec.getDeploymentProperties().get(AppDeployer.INDEXED_PROPERTY_KEY));
 
 		SpringCloudDeployerApplicationSpec timeSpec = parseSpec(timePackage.getConfigValues().getRaw());
-		assertEquals("2", timeSpec.getApplicationProperties().get("spring.cloud.stream.bindings.output.producer.partitionCount"));
-		assertEquals("payload", timeSpec.getApplicationProperties().get("spring.cloud.stream.bindings.output.producer.partitionKeyExpression"));
+		assertEquals("2",
+				timeSpec.getApplicationProperties().get("spring.cloud.stream.bindings.output.producer.partitionCount"));
+		assertEquals("payload", timeSpec.getApplicationProperties()
+				.get("spring.cloud.stream.bindings.output.producer.partitionKeyExpression"));
 		assertEquals("myStream", timeSpec.getDeploymentProperties().get(AppDeployer.GROUP_PROPERTY_KEY));
 		assertNull(timeSpec.getDeploymentProperties().get(AppDeployer.INDEXED_PROPERTY_KEY));
 	}
@@ -1044,8 +1092,10 @@ public class StreamControllerTests {
 
 		SpringCloudDeployerApplicationSpec logSpec = parseSpec(logPackage.getConfigValues().getRaw());
 		assertEquals("2", logSpec.getApplicationProperties().get(StreamPropertyKeys.INSTANCE_COUNT));
-		assertEquals("true", logSpec.getApplicationProperties().get("spring.cloud.stream.bindings.input.consumer.partitioned"));
-		assertEquals("3", logSpec.getApplicationProperties().get("spring.cloud.stream.bindings.input.consumer.concurrency"));
+		assertEquals("true",
+				logSpec.getApplicationProperties().get("spring.cloud.stream.bindings.input.consumer.partitioned"));
+		assertEquals("3",
+				logSpec.getApplicationProperties().get("spring.cloud.stream.bindings.input.consumer.concurrency"));
 
 		assertEquals("2", logSpec.getDeploymentProperties().get(AppDeployer.COUNT_PROPERTY_KEY));
 		assertEquals("myStream", logSpec.getDeploymentProperties().get(AppDeployer.GROUP_PROPERTY_KEY));
@@ -1053,8 +1103,10 @@ public class StreamControllerTests {
 
 		SpringCloudDeployerApplicationSpec timeSpec = parseSpec(timePackage.getConfigValues().getRaw());
 		assertEquals("2", timeSpec.getApplicationProperties().get(StreamPropertyKeys.INSTANCE_COUNT));
-		assertEquals("2", timeSpec.getApplicationProperties().get("spring.cloud.stream.bindings.output.producer.partitionCount"));
-		assertEquals("payload", timeSpec.getApplicationProperties().get("spring.cloud.stream.bindings.output.producer.partitionKeyExpression"));
+		assertEquals("2",
+				timeSpec.getApplicationProperties().get("spring.cloud.stream.bindings.output.producer.partitionCount"));
+		assertEquals("payload", timeSpec.getApplicationProperties()
+				.get("spring.cloud.stream.bindings.output.producer.partitionKeyExpression"));
 		assertEquals("2", timeSpec.getDeploymentProperties().get(AppDeployer.COUNT_PROPERTY_KEY));
 		assertEquals("myStream", timeSpec.getDeploymentProperties().get(AppDeployer.GROUP_PROPERTY_KEY));
 		assertNull(timeSpec.getDeploymentProperties().get(AppDeployer.INDEXED_PROPERTY_KEY));
@@ -1102,8 +1154,10 @@ public class StreamControllerTests {
 		assertEquals("2", logSpec.getApplicationProperties().get(StreamPropertyKeys.INSTANCE_COUNT));
 		assertEquals("fakeHost", logSpec.getApplicationProperties().get("spring.cloud.stream.fake.binder.host"));
 		assertEquals("fakePort", logSpec.getApplicationProperties().get("spring.cloud.stream.fake.binder.port"));
-		assertEquals("true", logSpec.getApplicationProperties().get("spring.cloud.stream.bindings.input.consumer.partitioned"));
-		assertEquals("3", logSpec.getApplicationProperties().get("spring.cloud.stream.bindings.input.consumer.concurrency"));
+		assertEquals("true",
+				logSpec.getApplicationProperties().get("spring.cloud.stream.bindings.input.consumer.partitioned"));
+		assertEquals("3",
+				logSpec.getApplicationProperties().get("spring.cloud.stream.bindings.input.consumer.concurrency"));
 		assertEquals("2", logSpec.getDeploymentProperties().get(AppDeployer.COUNT_PROPERTY_KEY));
 		assertEquals("myStream", logSpec.getDeploymentProperties().get(AppDeployer.GROUP_PROPERTY_KEY));
 		assertEquals("true", logSpec.getDeploymentProperties().get(AppDeployer.INDEXED_PROPERTY_KEY));
@@ -1113,8 +1167,10 @@ public class StreamControllerTests {
 
 		SpringCloudDeployerApplicationSpec timeSpec = parseSpec(timePackage.getConfigValues().getRaw());
 		assertEquals("2", timeSpec.getApplicationProperties().get(StreamPropertyKeys.INSTANCE_COUNT));
-		assertEquals("2", timeSpec.getApplicationProperties().get("spring.cloud.stream.bindings.output.producer.partitionCount"));
-		assertEquals("payload", timeSpec.getApplicationProperties().get("spring.cloud.stream.bindings.output.producer.partitionKeyExpression"));
+		assertEquals("2",
+				timeSpec.getApplicationProperties().get("spring.cloud.stream.bindings.output.producer.partitionCount"));
+		assertEquals("payload", timeSpec.getApplicationProperties()
+				.get("spring.cloud.stream.bindings.output.producer.partitionKeyExpression"));
 		assertEquals("2", timeSpec.getDeploymentProperties().get(AppDeployer.COUNT_PROPERTY_KEY));
 		assertEquals("myStream", timeSpec.getDeploymentProperties().get(AppDeployer.GROUP_PROPERTY_KEY));
 		assertNull(timeSpec.getDeploymentProperties().get(AppDeployer.INDEXED_PROPERTY_KEY));
@@ -1124,14 +1180,24 @@ public class StreamControllerTests {
 
 	@Test
 	public void testAggregateState() {
-		assertThat(StreamDeployerUtil.aggregateState(EnumSet.of(DeploymentState.deployed, DeploymentState.failed)), is(DeploymentState.partial));
-		assertThat(StreamDeployerUtil.aggregateState(EnumSet.of(DeploymentState.unknown, DeploymentState.failed)), is(DeploymentState.failed));
-		assertThat(StreamDeployerUtil.aggregateState(EnumSet.of(DeploymentState.deployed, DeploymentState.failed, DeploymentState.error)), is(DeploymentState.error));
-		assertThat(StreamDeployerUtil.aggregateState(EnumSet.of(DeploymentState.deployed, DeploymentState.undeployed)), is(DeploymentState.partial));
-		assertThat(StreamDeployerUtil.aggregateState(EnumSet.of(DeploymentState.deployed, DeploymentState.unknown)), is(DeploymentState.partial));
-		assertThat(StreamDeployerUtil.aggregateState(EnumSet.of(DeploymentState.undeployed, DeploymentState.unknown)), is(DeploymentState.partial));
-		assertThat(StreamDeployerUtil.aggregateState(EnumSet.of(DeploymentState.unknown)), is(DeploymentState.undeployed));
-		assertThat(StreamDeployerUtil.aggregateState(EnumSet.of(DeploymentState.deployed)), is(DeploymentState.deployed));
+		assertThat(StreamDeployerUtil.aggregateState(EnumSet.of(DeploymentState.deployed, DeploymentState.failed)),
+				is(DeploymentState.partial));
+		assertThat(StreamDeployerUtil.aggregateState(EnumSet.of(DeploymentState.unknown, DeploymentState.failed)),
+				is(DeploymentState.failed));
+		assertThat(
+				StreamDeployerUtil.aggregateState(
+						EnumSet.of(DeploymentState.deployed, DeploymentState.failed, DeploymentState.error)),
+				is(DeploymentState.error));
+		assertThat(StreamDeployerUtil.aggregateState(EnumSet.of(DeploymentState.deployed, DeploymentState.undeployed)),
+				is(DeploymentState.partial));
+		assertThat(StreamDeployerUtil.aggregateState(EnumSet.of(DeploymentState.deployed, DeploymentState.unknown)),
+				is(DeploymentState.partial));
+		assertThat(StreamDeployerUtil.aggregateState(EnumSet.of(DeploymentState.undeployed, DeploymentState.unknown)),
+				is(DeploymentState.partial));
+		assertThat(StreamDeployerUtil.aggregateState(EnumSet.of(DeploymentState.unknown)),
+				is(DeploymentState.undeployed));
+		assertThat(StreamDeployerUtil.aggregateState(EnumSet.of(DeploymentState.deployed)),
+				is(DeploymentState.deployed));
 	}
 
 	@Test
@@ -1151,14 +1217,14 @@ public class StreamControllerTests {
 				.accept(MediaType.APPLICATION_JSON)).andDo(print()).andExpect(status().isCreated());
 		mockMvc.perform(get("/streams/validation/myStream1").accept(MediaType.APPLICATION_JSON))
 				.andExpect(status().isOk()).andDo(print()).andExpect(content()
-				.json("{\"appName\":\"myStream1\",\"appStatuses\":{\"source:time\":\"valid\",\"sink:log\":\"valid\"},\"dsl\":\"time | log\",\"links\":[]}"));
+						.json("{\"appName\":\"myStream1\",\"appStatuses\":{\"source:time\":\"valid\",\"sink:log\":\"valid\"},\"dsl\":\"time | log\",\"links\":[]}"));
 	}
 
 	private SpringCloudDeployerApplicationSpec parseSpec(String yamlString) throws IOException {
 		YAMLMapper mapper = new YAMLMapper();
 		mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-		MappingIterator<SpringCloudDeployerApplicationManifest> it =
-				mapper.readerFor(SpringCloudDeployerApplicationManifest.class).readValues(yamlString);
+		MappingIterator<SpringCloudDeployerApplicationManifest> it = mapper
+				.readerFor(SpringCloudDeployerApplicationManifest.class).readValues(yamlString);
 		return it.next().getSpec();
 	}
 
