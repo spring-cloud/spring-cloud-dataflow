@@ -258,6 +258,7 @@ To do so:
 <dependency>
   <groupId>org.mariadb.jdbc</groupId>
   <artifactId>mariadb-java-client</artifactId>
+  <version>2.4.0</version>
 </dependency>
 ----
 . From your command line set up the database connection properties for MySql for example
