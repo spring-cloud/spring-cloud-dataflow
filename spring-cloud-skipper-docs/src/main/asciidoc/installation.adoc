@@ -99,6 +99,8 @@ applications:
   path: spring-cloud-skipper-server.jar
 env:
     SPRING_APPLICATION_NAME: mlp-skipper
+    SPRING_PROFILES_ACTIVE: cloud
+    JBP_CONFIG_SPRING_AUTO_RECONFIGURATION: '{enabled: false}'
     SPRING_CLOUD_SKIPPER_SERVER_ENABLELOCALPLATFORM: false
     SPRING_CLOUD_SKIPPER_SERVER_PLATFORM_CLOUDFOUNDRY_ACCOUNTS[pws]_CONNECTION_URL: https://api.run.pivotal.io
     SPRING_CLOUD_SKIPPER_SERVER_PLATFORM_CLOUDFOUNDRY_ACCOUNTS[pws]_CONNECTION_ORG: myOrgQA
@@ -115,6 +117,8 @@ services:
 
 NOTE: In the preceding manifest, we bound the application to the `mysqlboost` service.
 If you do not specify a service, the server uses an embedded database.
+
+NOTE: As of Skipper 2.0, you must disable Spring Auto-reconfiguration and set the profile to `cloud`.
 
 NOTE: You must set `SPRING_CLOUD_SKIPPER_SERVER_ENABLELOCALPLATFORM` to `false` so that the local platform deployer is never used.
 
@@ -135,9 +139,8 @@ skipper:>
 ----
 
 === Database Connection Pool
-The Skipper server uses the Spring Cloud Connector library to create the DataSource with a default connection pool size of 4.
-To change the connection pool size and maximum wait time, set the following two properties `spring.cloud.skipper.server.cloudfoundry.maxPoolSize` and `spring.cloud.skipper.server.cloudfoundry.maxWaitTime`.
-The wait time is specified in milliseconds.
+As of Skipper 2.0, the Spring Cloud Connector library is no longer used to create the DataSource.
+The library  https://github.com/pivotal-cf/java-cfenv[java-cfenv] is now used which allows you to set https://docs.spring.io/spring-boot/docs/current/reference/htmlsingle/#boot-features-connect-to-production-database[Spring Boot properties] to configure the connection pool.
 
 [[skipper-installation-cloudfoundry-maximum-disk-quota-configuration]]
 === Maximum Disk Quota
