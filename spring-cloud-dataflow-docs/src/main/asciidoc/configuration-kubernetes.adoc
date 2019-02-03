@@ -22,6 +22,196 @@ By default, all the features are enabled.
 
 The `/features` REST endpoint provides information on the features that have been enabled and disabled.
 
+[[configuration-kubernetes-deployer]]
+=== Deployer Properties
+You can use the following configuration properties the https://github.com/spring-cloud/spring-cloud-deployer-kubernetes[Kubernetes deployer] to customize how Streams and Tasks are deployed.
+When deploying with the Data Flow shell, you can use the syntax `deployer.<appName>.kubernetes.<deployerPropertyName>`.
+These properties are also used when configuring the <<configuration-kubernetes-tasks,Kubernetes task platforms>> in the Data Flow server and Kubernetes platforms in Skipper for deploying Streams.
+
+
+[width="100%",frame="topbot",options="header"]
+|===
+|Deployer Property Name | Description | Default Value
+
+|namespace
+|Namespace to use
+|environment variable `KUBERNETES_NAMESPACE`, otherwise `default`
+
+
+|imagePullSecret
+|Secrets for a access a private registry to pull images.
+|<none>
+
+|livenessProbeDelay
+|Delay in seconds when the Kubernetes liveness check of the app container should start checking its health status.
+|10
+
+|livenessProbePeriod
+|Period in seconds for performing the Kubernetes liveness check of the app container.
+|60
+
+|livenessProbeTimeout
+|Timeout in seconds for the Kubernetes liveness check of the app container.  If the health check takes longer than this value to return it is assumed as 'unavailable'.
+|2
+
+|livenessProbePath
+|Path that app container has to respond to for liveness check.
+|<none>
+
+|livenessProbePort
+|Port that app container has to respond on for liveness check.
+|<none>
+
+|readinessProbeDelay
+|Delay in seconds when the readiness check of the app container should start checking if the module is fully up and running.
+|10
+
+|readinessProbePeriod
+|Period in seconds to perform the readiness check of the app container.
+|10
+
+|readinessProbeTimeout
+|Timeout in seconds that the app container has to respond to its health status during the readiness check.
+|2
+
+|readinessProbePath
+|Path that app container has to respond to for readiness check.
+|<none>
+
+|readinessProbePort
+|Port that app container has to respond on for readiness check.
+|<none>
+
+|probeCredentialsSecret
+|The secret name containing the credentials to use when accessing secured probe endpoints.
+|<none>
+
+|limits.memory
+|The memory limit, maximum needed value to allocate a pod, Default unit is mebibytes, 'M' and 'G" suffixes supported
+|<none>
+
+|limits.cpu
+|The CPU limit, maximum needed value to allocate a pod
+|<none>
+
+|requests.memory
+|The memory request, guaranteed needed value to allocate a pod.
+|<none>
+
+|requests.cpu
+|The CPU request, guaranteed needed value to allocate a pod.
+|<none>
+
+
+|statefulSet.volumeClaimTemplate.storageClassName
+|Name of the storage class for a stateful set
+|<none>
+
+|statefulSet.volumeClaimTemplate.storage
+|The storage amount. Default unit is mebibytes, 'M' and 'G" suffixes supported
+|<none>
+
+|environmentVariables
+|List of environment variables to set for any deployed app container
+|<none>
+
+|entryPointStyle
+|Entry point style used for the Docker image. Used to determine how to pass in properties. Can be `exec`, `shell`, and `boot`
+|`exec`
+
+|createLoadBalancer
+|Create a "LoadBalancer" for the service created for each app. This facilitates assignment of external IP to app.
+|false
+
+|serviceAnnotations
+|Service annotations to set for the service created for each application. String of the format `annotation1:value1,annotation2:value2`
+|<none>
+
+|podAnnotations
+|Pod annotations to set for the pod created for each deployment.  String of the format `annotation1:value1,annotation2:value2`
+|<none>
+
+|jobAnnotations
+|Job annotations to set for the pod or job created for a job. String of the format `annotation1:value1,annotation2:value2`
+|<none>
+
+|minutesToWaitForLoadBalancer
+|Time to wait for load balancer to be available before attempting delete of service (in minutes).
+|5
+
+|maxTerminatedErrorRestarts
+|Maximum allowed restarts for app that fails due to an error or excessive resource use.
+|2
+
+|maxCrashLoopBackOffRestarts
+|Maximum allowed restarts for app that is in a CrashLoopBackOff.  Values are `Always`, `IfNotPresent`, `Never`
+|`IfNotPresent`
+
+|volumeMounts
+|volume mounts expressed in YAML format.  e.g. ```[{name: 'testhostpath', mountPath: '/test/hostPath'}, {name: 'testpvc', mountPath: '/test/pvc'}, {name: 'testnfs', mountPath: '/test/nfs'}]```
+|<none>
+
+|volumes
+|The volumes that a Kubernetes instance supports specifed in YAML format.  e.g. ```[{name: testhostpath, hostPath: { path: '/test/override/hostPath' }},{name: 'testpvc', persistentVolumeClaim: { claimName: 'testClaim', readOnly: 'true' }}, {name: 'testnfs', nfs: { server: '10.0.0.1:111', path: '/test/nfs' }}]```
+|<none>
+
+|hostNetwork
+|The hostNetwork setting for the deployments, see  https://kubernetes.io/docs/api-reference/v1/definitions/#_v1_podspec
+|false
+
+|createDeployment
+|Create a "Deployment" with a "Replica Set" instead of a "Replication Controller".
+|true
+
+|createJob
+|Create a "Job" instead of just a "Pod" when launching tasks.
+|false
+
+|deploymentServiceAccountName
+|Service account name to use for app deployments
+|<none>
+
+|===
+
+[[configuration-kubernetes-tasks]]
+=== Tasks
+The Data Flow server is responsible for deploying Tasks.
+Tasks that are launched by Data Flow write their state to the same database that is used by the Data Flow server.
+For Tasks which are Spring Batch Jobs, the job and step execution data is also stored in this database.
+As with Skipper, Tasks can be launched to multiple platforms.
+When Data Flow is running on Kubernetes, a Task platfom must be defined.
+To configure new platform accounts that target Kubernetes, provide an entry under the `spring.cloud.dataflow.task.platform.kubernetes` section in your `application.yaml` file for via another Spring Boot supported mechanism.
+In the following example, two Kubernetes platform accounts named `dev` and  `qa` are created.
+The keys such as `memory` and `disk` are <<configuration-cloudfoundry-deployer, Cloud Foundry Deployer Properties>>.
+
+[source,yaml]
+----
+spring:
+  cloud:
+    dataflow:
+      task:
+        platform:
+          kubernetes:
+            accounts:
+              dev:
+                namespace: devNamespace
+                imagePullPolicy: Always
+                entryPointStyle: exec
+                limits:
+                  cpu: 4
+              qa:
+                namespace: qaNamespace
+                imagePullPolicy: IfNotPresent
+                entryPointStyle: boot
+                limits:
+                  memory: 2048m
+----
+When launching a task, pass the value of the platform account name using the task launch option `--platformName`  If you do not pass a value for `platformName`, the value `default` will be used.
+
+NOTE: When deploying a task to multiple platforms, the configuration of the task needs to connect to the same database as the Data Flow Server.
+
+You can configure the Data Flow server that is on Kubernetes to deploy tasks to Cloud Foundry and Kubernetes.  See the section on <<configuration-cloudfoundry-tasks,Cloud Foundry Task Platform Configuration>> for more information.
+
 [[configuration-kubernetes-general]]
 === General Configuration
 

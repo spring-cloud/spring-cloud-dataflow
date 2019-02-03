@@ -138,34 +138,50 @@ spring:
 ----
 
 [[configuration-local-deployer]]
-=== Local Deployer
-You can use the following configuration properties of the Data Flow Local server's deployer to customize how applications are deployed:
+=== Deployer Properties
+You can use the following configuration properties of the https://github.com/spring-cloud/spring-cloud-deployer-local[Local deployer] to customize how Streams and Tasks are deployed.
+When deploying using the Data Flow shell, you can use the syntax `deployer.<appName>.local.<deployerPropertyName>`. See below for an example shell usage.
+These properties are also used when configuring <<configuration-local-tasks,Local Task Platforms>> in the Data Flow server and local platforms in Skipper for deploying Streams.
 
-[source,properties,indent=0,subs="verbatim,attributes,macros"]
-----
-spring.cloud.deployer.local.workingDirectoriesRoot=java.io.tmpdir # Directory in which all created processes will run and create log files.
+[width="100%",frame="topbot",options="header"]
+|===
+|Deployer Property Name | Description | Default Value
 
-spring.cloud.deployer.local.deleteFilesOnExit=true # Whether to delete created files and directories on JVM exit.
+|workingDirectoriesRoot
+|Directory in which all created processes will run and create log files.
+|java.io.tmpdir
 
-spring.cloud.deployer.local.envVarsToInherit=TMP,LANG,LANGUAGE,"LC_.*. # Array of regular expression patterns for environment variables that are passed to launched applications.
+|envVarsToInherit
+|Array of regular expression patterns for environment variables that are passed to launched applications.
+| <"TMP", "LANG", "LANGUAGE", "LC_.\*", "PATH", "SPRING_APPLICATION_JSON"> on windows and <"TMP", "LANG", "LANGUAGE", "LC_.*", "PATH"> on Unix
 
-spring.cloud.deployer.local.javaCmd=java # Command to run java.
+|deleteFilesOnExit
+|Whether to delete created files and directories on JVM exit.
+|true
 
-spring.cloud.deployer.local.shutdownTimeout=30 # Max number of seconds to wait for app shutdown.
+|javaCmd
+|Command to run java
+|java
 
-spring.cloud.deployer.local.javaOpts== # The Java options to pass to the JVM
+|shutdownTimeout
+|Max number of seconds to wait for app shutdown.
+|30
 
-spring.cloud.deployer.local.freeDiskSpacePercentage=5 # The target percentage of free disk space to always aim for when cleaning downloaded resources (typically via the local maven repository). Specify as an integer greater than zero and less than 100. Default is 5.
-----
+|javaOpts
+|The Java Options to pass to the JVM, e.g -Dtest=foo
+|<none>
 
-[NOTE]
-====
-Data Flow Local server itself overrides
-`spring.cloud.deployer.local.freeDiskSpacePercentage` to `0` from its
-default value.
-====
+|inheritLogging
+|allow logging to be redirected to the output stream of the process that triggered child process.
+|false
 
-When deploying the application, you can also set deployer properties prefixed with `deployer.<name of application>`. For example, to set Java options for the time application in the `ticktock` stream, use the following stream deployment properties.
+|debugPort
+|Port for remote debugging
+|<none>
+
+|===
+
+As an example, to set Java options for the time application in the `ticktock` stream, use the following stream deployment properties.
 [source,bash]
 ----
 dataflow:> stream create --name ticktock --definition "time --server.port=9000 | log"
@@ -181,69 +197,8 @@ dataflow:> stream deploy --name ticktock --properties "deployer.time.memory=2048
 
 At deployment time, if you specify an `-Xmx` option in the `deployer.<app>.local.javaOpts` property in addition to a value of the `deployer.<app>.local.memory` option, the value in the `javaOpts` property has precedence.  Also, the `javaOpts` property set when deploying the application has precedence over the Data Flow Server's `spring.cloud.deployer.local.javaOpts` property.
 
-[[configuration-local-maven]]
-=== Maven
-If you want to override specific maven configuration properties (remote repositories, proxies, and others) or run the Data Flow Server behind a proxy,
-you need to specify those properties as command line arguments when starting the Data Flow Server, as shown in the following example:
-
-[source,bash,subs=attributes]
-----
-$ java -jar spring-cloud-dataflow-server-{project-version}.jar --spring.config.additional-location=/home/joe/maven.yml
-----
-
-where `maven.yaml` is
-
-[source,yml]
-----
-maven
-  localRepository: mylocal
-  remote-repositories:
-    repo1:
-      url: https://repo1
-      auth:
-        username: user1
-        password: pass1
-      snapshot-policy:
-        update-policy: daily
-        checksum-policy: warn
-      release-policy:
-        update-policy: never
-        checksum-policy: fail
-    repo2:
-      url: https://repo2
-      policy:
-        update-policy: always
-        checksum-policy: fail
-  proxy:
-    host: proxy1
-    port: "9010"
-    auth:
-      username: proxyuser1
-      password: proxypass1
-----
-
-
-
-By default, the protocol is set to `http`. You can omit the auth properties if the proxy does not need a username and password. Also, the maven `localRepository` is set to `${user.home}/.m2/repository/` by default.
-As shown in the preceding example, the remote repositories can be specified along with their authentication (if needed). If the remote repositories are behind a proxy, then the proxy properties can be specified as shown in the preceding example.
-
-The repository policies can be specified for each remote repository configuration as shown in the preceding example.
-The key `policy` is applicable to both `snapshot` and the `release` repository policies.
-
-You can refer to https://github.com/eclipse/aether-core/blob/4cf5f7a406b516a45d8bf15e7dfe3fb3849cb87b/aether-api/src/main/java/org/eclipse/aether/repository/RepositoryPolicy.java#L16[Repository Policies] for the list of
-supported repository policies.
-
-As these are Spring Boot `@ConfigurationProperties`, that you need to specify by adding them to the `SPRING_APPLICATION_JSON` environment variable. The following example shows how the JSON is structured:
-
-[source,bash,subs=attributes]
-----
-$ SPRING_APPLICATION_JSON='{ "maven": { "local-repository": null,
-"remote-repositories": { "repo1": { "url": "https://repo1", "auth": { "username": "repo1user", "password": "repo1pass" } }, "repo2": { "url": "https://repo2" } },
-"proxy": { "host": "proxyhost", "port": 9018, "auth": { "username": "proxyuser", "password": "proxypass" } } } }' java -jar spring-cloud-dataflow-server-{project-version}.jar
-----
-
 [[configuration-local-logging]]
-=== Local Data Flow Server Logging configuration
+=== Logging
 
 Spring Cloud Data Flow `local` server is automatically configured to use `RollingFileAppender` for logging.
 The logging configuration is located on the classpath contained in a file named `logback-spring.xml`.
@@ -286,14 +241,54 @@ jinfo <pid> | grep "java.io.tmpdir"
 
 If you want to change or override any of the properties `LOG_FILE`, `LOG_PATH`, `LOG_TEMP`, `LOG_FILE_MAX_SIZE`, `LOG_FILE_MAX_HISTORY` and `LOG_FILE_TOTAL_SIZE_CAP`, please set them as system properties.
 
-[[configuration-local-skipper]]
-=== Skipper
+[[configuration-local-streams]]
+=== Streams
 Data Flow Server delegates to the Skipper server the management of the Stream's lifecycle.  Set the configuration property `spring.cloud.skipper.client.serverUri` to the location of Skipper, e.g.
 
 [source,bash,subs=attributes]
 ----
 $ java -jar spring-cloud-dataflow-server-{project-version}.jar --spring.cloud.skipper.client.serverUri=http://192.51.100.1:7577/api
 ----
+
+The configuration of show streams are deployed and to which platforms, is done by configuration of `platform accounts` on the Skipper server.
+See the documentation on https://docs.spring.io/spring-cloud-skipper/docs/current/reference/htmlsingle/#platforms[platforms] for more information.
+
+
+[[configuration-local-tasks]]
+=== Tasks
+The Data Flow server is responsible for deploying Tasks.
+Tasks that are launched by Data Flow write their state to the same database that is used by the Data Flow server.
+For Tasks which are Spring Batch Jobs, the job and step execution data is also stored in this database.
+As with streams launched by Skipper, Tasks can be launched to multiple platforms.
+If no platform is defined, a platform named `default` is created using the default values of the class https://github.com/spring-cloud/spring-cloud-deployer-local/blob/master/spring-cloud-deployer-local/src/main/java/org/springframework/cloud/deployer/spi/local/LocalDeployerProperties.java[LocalDeployerProperties], which is summarized in the table <<configuration-local-deployer,Local Deployer Properties>>
+
+To configure new platform accounts for the local platform, provide an entry under the `spring.cloud.dataflow.task.platform.local` section in your `application.yaml` file for via another Spring Boot supported mechanism.
+In the following example, two local platform accounts named `localDev` and  `localDevDebug` are created.
+The keys such as `shutdownTimeout` and `javaOpts` are local deployer properties.
+
+[source,yaml]
+----
+spring:
+  cloud:
+    dataflow:
+      task:
+        platform:
+          local:
+            accounts:
+              localDev:
+                shutdownTimeout: 60
+                javaOpts: "-Dtest=foo -Xmx1024m"
+              localDevDebug:
+                javaOpts: "-Xdebug -Xmx2048m"
+
+----
+
+When launching a task, pass the value of the platform account name using the task launch option `--platformName`  If you do not pass a value for `platformName`, the value `default` will be used.
+
+NOTE: When deploying a task to multiple platforms, the configuration of the task needs to connect to the same database as the Data Flow Server.
+
+You can configure the Data Flow server that is running locally to deploy tasks to Cloud Foundry or Kubernetes.  See the sections on <<configuration-cloudfoundry-tasks,Cloud Foundry Task Platform Configuration>> and <<configuration-kubernetes-tasks,Kubernetes Task Platform Configuration>> for more information.
+
 
 [[configuration-local-security]]
 === Security

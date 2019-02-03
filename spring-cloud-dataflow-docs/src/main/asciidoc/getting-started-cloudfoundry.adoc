@@ -121,6 +121,8 @@ However, there are some general configuration details you should be aware of in 
 [[getting-started-cloudfoundry-general-configuration]]
 ==== General Configuration
 
+Some things to be aware of when installing into a Cloud Foundry.
+
 NOTE: You must use a unique name for your app. An application with the same name in the same organization causes your deployment to fail.
 
 NOTE: The recommended minimum memory setting for the server is 2G. Also, to push apps to PCF and obtain application property metadata, the server downloads applications to a Maven repository hosted on the local disk.
@@ -131,67 +133,9 @@ Also, the Data Flow server itself implements a Last-Recently-Used algorithm to f
 NOTE: If you are pushing to a space with multiple users (for example, on PWS), the route you chose for your application name may already be taken.
 You can use the `--random-route` option to avoid this when you push the server application.
 
-NOTE: By default, the https://github.com/spring-cloud/spring-cloud-dataflow/tree/master/spring-cloud-dataflow-registry[application registry] in Spring Cloud Data Flow's Cloud Foundry server is empty.
-It is intentionally designed to let you have the flexibility of http://docs.spring.io/spring-cloud-dataflow/docs/{scdf-core-version}/reference/htmlsingle/#spring-cloud-dataflow-register-stream-apps[choosing and registering] applications as you find appropriate for the given use-case requirement. Depending on the message-binder you choose, you can register between http://repo.spring.io/libs-snapshot/org/springframework/cloud/stream/app/[RabbitMQ- or Apache Kafka-based] Maven artifacts.
 
 NOTE: If you need to configure multiple Maven repositories, a proxy, or authorization for a private repository, see link:http://docs.spring.io/spring-cloud-dataflow/docs/{scdf-core-version}/reference/htmlsingle/#getting-started-maven-configuration[Maven Configuration].
 
-[[getting-started-cloudfoundry-deploying-using-env-vars]]
-==== Deploying by Using Environment Variables
-
-The following configuration is for Pivotal Web Services. You need to fill in `\{org}`, `\{space}`, `\{email}` and `\{password}` before running these commands.
-Tasks are deployed directly from the Data Flow Server.
-In the future, you will be able to deploy tasks to multiple platforms, but for 2.0.0.M1 you can deploy only to a single platform and the name must be `default`.
-
-====
-[source]
-----
-cf set-env dataflow-server SPRING_CLOUD_DATAFLOW_TASK_PLATFORM_CLOUDFOUNDRY_ACCOUNTS[default]_CONNECTION_URL: https://api.run.pivotal.io
-cf set-env dataflow-server SPRING_CLOUD_DATAFLOW_TASK_PLATFORM_CLOUDFOUNDRY_ACCOUNTS[default]_CONNECTION_ORG: {org}
-cf set-env dataflow-server SPRING_CLOUD_DATAFLOW_TASK_PLATFORM_CLOUDFOUNDRY_ACCOUNTS[default]_CONNECTION_SPACE: {space}
-cf set-env dataflow-server SPRING_CLOUD_DATAFLOW_TASK_PLATFORM_CLOUDFOUNDRY_ACCOUNTS[default]_CONNECTION_DOMAIN: cfapps.io
-cf set-env dataflow-server SPRING_CLOUD_DATAFLOW_TASK_PLATFORM_CLOUDFOUNDRY_ACCOUNTS[default]_CONNECTION_USERNAME: {email}
-cf set-env dataflow-server SPRING_CLOUD_DATAFLOW_TASK_PLATFORM_CLOUDFOUNDRY_ACCOUNTS[default]_CONNECTION_PASSWORD: {password}
-cf set-env dataflow-server SPRING_CLOUD_DATAFLOW_TASK_PLATFORM_CLOUDFOUNDRY_ACCOUNTS[default]_CONNECTION_SKIP_SSL_VALIDATION: true
-cf set-env dataflow-server SPRING_CLOUD_DATAFLOW_TASK_PLATFORM_CLOUDFOUNDRY_ACCOUNTS[default]_DEPLOYMENT_SERVICES: mysql
-cf set-env dataflow-server SPRING_CLOUD_DATAFLOW_TASK_PLATFORM_CLOUDFOUNDRY_ACCOUNTS[default]_DEPLOYMENT_MEMORY: 2048m
-----
-====
-
-[NOTE]
-=====
-Deploy Skipper first and then configure the URI location where the Skipper server runs.
-=====
-
-The Spring Cloud Data Flow server does not have any default remote maven repository configured.
-This is intentionally designed to provide the flexibility, so you can override and point to a remote repository of your choice.
-The out-of-the-box applications that are supported by Spring Cloud Data Flow are available in Spring's repository. If you want to use them, set it as the remote repository, as the following example shows:
-
-====
-[source]
-----
-cf set-env dataflow-server SPRING_APPLICATION_JSON '{"maven": { "remote-repositories": { "repo1": { "url": "https://repo.spring.io/libs-release" } } } }'
-----
-where `repo1` is the alias name for the remote repository
-
-or using the environment variable `MAVEN_REMOTEREPOSITORIES[REPO1]_URL:`.
-====
-
-WARNING: Only set 'Skip SSL Validation' to true if you run on a Cloud Foundry instance using self-signed certificates (for example, in development).
-Do not use self-signed certificates for production.
-
-NOTE: If you are deploying in an environment that requires you to sign on using the Pivotal Single Sign-On Service, see <<getting-started-security-cloud-foundry>> for information on how to configure the server.
-
-You can now issue a `cf push` command and reference the Data Flow server .jar file, as the following example shows:
-
-====
-[source, subs=attributes]
-----
-cf push dataflow-server -b java_buildpack -m 2G -k 2G --no-start -p spring-cloud-dataflow-server-{project-version}.jar
-cf bind-service dataflow-server redis
-cf bind-service dataflow-server my_mysql
-----
-====
 
 [[getting-started-cloudfoundry-deploying-using-manifest]]
 ==== Deploying by Using a Manifest
@@ -234,6 +178,64 @@ Deploy Skipper first and then configure the URI location where the Skipper serve
 =====
 
 Once you are ready with the relevant properties in this file, you can issue a `cf push` command from the directory where this file is stored.
+
+[[getting-started-cloudfoundry-deploying-using-env-vars]]
+==== Deploying by Using Environment Variables
+
+The following configuration is for Pivotal Web Services. You need to fill in `\<org>`, `\<space>`, `\<email>` and `\<password>` before running these commands.
+Tasks are deployed directly from the Data Flow Server.
+In the future, you will be able to deploy tasks to multiple platforms, but for 2.0.0.M1 you can deploy only to a single platform and the name must be `default`.
+
+====
+[source]
+----
+cf set-env dataflow-server SPRING_CLOUD_DATAFLOW_TASK_PLATFORM_CLOUDFOUNDRY_ACCOUNTS[default]_CONNECTION_URL: https://api.run.pivotal.io
+cf set-env dataflow-server SPRING_CLOUD_DATAFLOW_TASK_PLATFORM_CLOUDFOUNDRY_ACCOUNTS[default]_CONNECTION_ORG: <org>
+cf set-env dataflow-server SPRING_CLOUD_DATAFLOW_TASK_PLATFORM_CLOUDFOUNDRY_ACCOUNTS[default]_CONNECTION_SPACE: <space>
+cf set-env dataflow-server SPRING_CLOUD_DATAFLOW_TASK_PLATFORM_CLOUDFOUNDRY_ACCOUNTS[default]_CONNECTION_DOMAIN: cfapps.io
+cf set-env dataflow-server SPRING_CLOUD_DATAFLOW_TASK_PLATFORM_CLOUDFOUNDRY_ACCOUNTS[default]_CONNECTION_USERNAME: <email>
+cf set-env dataflow-server SPRING_CLOUD_DATAFLOW_TASK_PLATFORM_CLOUDFOUNDRY_ACCOUNTS[default]_CONNECTION_PASSWORD: <password>
+cf set-env dataflow-server SPRING_CLOUD_DATAFLOW_TASK_PLATFORM_CLOUDFOUNDRY_ACCOUNTS[default]_CONNECTION_SKIP_SSL_VALIDATION: true
+cf set-env dataflow-server SPRING_CLOUD_DATAFLOW_TASK_PLATFORM_CLOUDFOUNDRY_ACCOUNTS[default]_DEPLOYMENT_SERVICES: mysql
+cf set-env dataflow-server SPRING_CLOUD_DATAFLOW_TASK_PLATFORM_CLOUDFOUNDRY_ACCOUNTS[default]_DEPLOYMENT_MEMORY: 2048m
+----
+====
+
+[NOTE]
+=====
+Deploy Skipper first and then configure the URI location where the Skipper server runs.
+=====
+
+The Spring Cloud Data Flow server does not have any default remote maven repository configured.
+This is intentionally designed to provide the flexibility, so you can override and point to a remote repository of your choice.
+The out-of-the-box applications that are supported by Spring Cloud Data Flow are available in Spring's repository. If you want to use them, set it as the remote repository, as the following example shows:
+
+====
+[source]
+----
+cf set-env dataflow-server SPRING_APPLICATION_JSON '{"maven": { "remote-repositories": { "repo1": { "url": "https://repo.spring.io/libs-release" } } } }'
+----
+where `repo1` is the alias name for the remote repository
+
+or using the environment variable `MAVEN_REMOTEREPOSITORIES[REPO1]_URL:`.
+====
+
+WARNING: Only set 'Skip SSL Validation' to true if you run on a Cloud Foundry instance using self-signed certificates (for example, in development).
+Do not use self-signed certificates for production.
+
+NOTE: If you are deploying in an environment that requires you to sign on using the Pivotal Single Sign-On Service, see <<getting-started-security-cloud-foundry>> for information on how to configure the server.
+
+You can now issue a `cf push` command and reference the Data Flow server .jar file, as the following example shows:
+
+====
+[source, subs=attributes]
+----
+cf push dataflow-server -b java_buildpack -m 2G -k 2G --no-start -p spring-cloud-dataflow-server-{project-version}.jar
+cf bind-service dataflow-server redis
+cf bind-service dataflow-server my_mysql
+----
+====
+
 
 [[getting-started-cloudfoundry-on-local]]
 === Local Installation
@@ -295,7 +297,11 @@ $ java -jar spring-cloud-dataflow-shell-{scdf-core-version}.jar
 [[getting-started-cloudfoundry-deploying-streams]]
 === Deploying Streams
 
-By default, the application registry is empty.
+
+By default, the https://github.com/spring-cloud/spring-cloud-dataflow/tree/master/spring-cloud-dataflow-registry[application registry] in Spring Cloud Data Flow's Cloud Foundry server is empty.
+It is intentionally designed to let you have the flexibility of http://docs.spring.io/spring-cloud-dataflow/docs/{scdf-core-version}/reference/htmlsingle/#spring-cloud-dataflow-register-stream-apps[choosing and registering] applications as you find appropriate for the given use-case requirement.
+Depending on the message-binder you choose, you can register between http://repo.spring.io/libs-snapshot/org/springframework/cloud/stream/app/[RabbitMQ- or Apache Kafka-based] Maven artifacts.
+
 If you would like to register all out-of-the-box stream applications built with the RabbitMQ binder in bulk, run the following command:
 
 ====
@@ -304,8 +310,6 @@ If you would like to register all out-of-the-box stream applications built with 
 dataflow:>app import --uri http://bit.ly/Darwin-SR3-stream-applications-rabbit-maven
 ----
 ====
-
-For more details, review how to xref:spring-cloud-dataflow-register-apps[register applications].
 
 Data Flow delegates the Streams deployment to Skipper which provide support for features such as Streams update and rollback.
 
@@ -323,6 +327,10 @@ dataflow:> stream deploy --name httptest --platformName pws
 ----
 ====
 
+Skipper supports deploying to multiple https://docs.spring.io/spring-cloud-skipper/docs/current/reference/htmlsingle/#platforms[platforms], so it is important to define "`platform accounts`" with the credentials for the platform.
+Each platform account can be for a different org/space on Cloud Foundry or a namespace in Kubernetes.
+In the previous configuration file for Skipper, the platform account was named `pwd`, which is why the command line option above for `--platformName` references `pws`.
+
 NOTE: You need to wait a little while until the applications are actually deployed before posting data. Tail the log file for each application to verify that the application has started.
 
 Now you can post some data. The URL is unique to your deployment. The following example shows how to post data:
@@ -336,10 +344,6 @@ dataflow:> http post --target http://dataflow-AxwwAhK-httptest-http.cfapps.io --
 
 Now you can see whether `hello world` is in the log files for the `log` application.
 
-NOTE: Skipper includes the concept of link:https://docs.spring.io/spring-cloud-skipper/docs/current/reference/htmlsingle/#platforms[platforms],
-so it is important to define the "`accounts`" based on the project preferences.
-In the preceding YAML file, the accounts map to `pws` as the platform. You can modify this, and you can have any number of platform definitions.
-The https://docs.spring.io/spring-cloud-skipper/docs/current/reference/htmlsingle/[Spring Cloud Skipper reference guide] has more details.
 
 
 You can read more about the general features of using Skipper to deploy streams in the <<spring-cloud-dataflow-stream-lifecycle>> section and how to upgrade a streams in the <<spring-cloud-dataflow-stream-lifecycle-update>> section.

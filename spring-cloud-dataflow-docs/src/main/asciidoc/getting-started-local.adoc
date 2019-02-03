@@ -15,19 +15,17 @@ We then build an introductory Spring Cloud Data Flow application, discussing som
 
 You need Java 8 to run and to build you need to have Maven.
 
-You need to have an RDBMS for storing stream definition and deployment properties and task/batch job states.
+Both the Data Flow Server and Skipper Server need to have an RDBMS installed.  The Data Flow Server stores stream and task definitions.  It also stores the execution state of deployed tasks.  The Skipper server stores the execution state of deployed streams.
+
 By default, the Data Flow server uses embedded H2 database for this purpose but you can easily configure the server to use another external database.
 
-For the deployed streams applications communicate, either link:http://www.rabbitmq.com[RabbitMQ] or link:http://kafka.apache.org[Kafka] needs to be installed.
-
-For deploying, upgrading and rolling back applications in Streams at runtime, you should install the Spring Cloud Skipper server as well.
-
+For the deployed streams applications communicate a messaging middleware product needs to be installed.
+We provide prebuilt stream applications that use link:http://www.rabbitmq.com[RabbitMQ] or link:http://kafka.apache.org[Kafka], however other https://cloud.spring.io/spring-cloud-stream/#binder-implementations[messaging middleware products] are supported.
 
 [[getting-started-local-deploying-spring-cloud-dataflow-docker]]
 === Getting Started with Docker Compose
 
-A Docker Compose file is provided to quickly bring up Spring Cloud Data Flow and its dependencies without having to obtain them manually.
-When running, a composed system includes the latest GA release of Spring Cloud Data Flow Server using the Kafka binder for communication and Skipper for stream deployment.
+A Docker Compose file is provided to quickly bring up Spring Cloud Data Flow, Skipper and the Apache Kafka broker instead of having to install them manually.
 Docker Compose is required and it's recommended to use the link:https://docs.docker.com/compose/install/[latest version].
 
 . Download the Spring Cloud Data Flow Server Docker Compose file:

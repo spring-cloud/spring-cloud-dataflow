@@ -1,6 +1,67 @@
 [[configuration]]
 = Configuration
 
+[[configuration-maven]]
+== Maven
+If you want to override specific maven configuration properties (remote repositories, proxies, and others) or run the Data Flow Server behind a proxy,
+you need to specify those properties as command line arguments when starting the Data Flow Server, as shown in the following example:
+
+[source,bash,subs=attributes]
+----
+$ java -jar spring-cloud-dataflow-server-{project-version}.jar --spring.config.additional-location=/home/joe/maven.yml
+----
+
+where `maven.yaml` is
+
+[source,yml]
+----
+maven
+  localRepository: mylocal
+  remote-repositories:
+    repo1:
+      url: https://repo1
+      auth:
+        username: user1
+        password: pass1
+      snapshot-policy:
+        update-policy: daily
+        checksum-policy: warn
+      release-policy:
+        update-policy: never
+        checksum-policy: fail
+    repo2:
+      url: https://repo2
+      policy:
+        update-policy: always
+        checksum-policy: fail
+  proxy:
+    host: proxy1
+    port: "9010"
+    auth:
+      username: proxyuser1
+      password: proxypass1
+----
+
+
+
+By default, the protocol is set to `http`. You can omit the auth properties if the proxy does not need a username and password. Also, the maven `localRepository` is set to `${user.home}/.m2/repository/` by default.
+As shown in the preceding example, the remote repositories can be specified along with their authentication (if needed). If the remote repositories are behind a proxy, then the proxy properties can be specified as shown in the preceding example.
+
+The repository policies can be specified for each remote repository configuration as shown in the preceding example.
+The key `policy` is applicable to both `snapshot` and the `release` repository policies.
+
+You can refer to https://github.com/eclipse/aether-core/blob/4cf5f7a406b516a45d8bf15e7dfe3fb3849cb87b/aether-api/src/main/java/org/eclipse/aether/repository/RepositoryPolicy.java#L16[Repository Policies] for the list of
+supported repository policies.
+
+As these are Spring Boot `@ConfigurationProperties`, that you need to specify by adding them to the `SPRING_APPLICATION_JSON` environment variable. The following example shows how the JSON is structured:
+
+[source,bash,subs=attributes]
+----
+$ SPRING_APPLICATION_JSON='{ "maven": { "local-repository": null,
+"remote-repositories": { "repo1": { "url": "https://repo1", "auth": { "username": "repo1user", "password": "repo1pass" } }, "repo2": { "url": "https://repo2" } },
+"proxy": { "host": "proxyhost", "port": 9018, "auth": { "username": "proxyuser", "password": "proxypass" } } } }' java -jar spring-cloud-dataflow-server-{project-version}.jar
+----
+
 include::configuration-local.adoc[]
 include::configuration-cloudfoundry.adoc[]
 include::configuration-kubernetes.adoc[]
