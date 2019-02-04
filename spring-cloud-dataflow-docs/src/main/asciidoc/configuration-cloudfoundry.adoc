@@ -353,7 +353,6 @@ stream deploy fooz --properties "app.time.spring.cloud.stream.kafka.binder.broke
 As of Data Flow 2.0, the Spring Cloud Connector library is no longer used to create the DataSource.
 The library  https://github.com/pivotal-cf/java-cfenv[java-cfenv] is now used which allows you to set https://docs.spring.io/spring-boot/docs/current/reference/htmlsingle/#boot-features-connect-to-production-database[Spring Boot properties] to configure the connection pool.
 
-
 [[configuration-cloudfoundry-maximum-disk-quota-configuration]]
 === Maximum Disk Quota
 By default, every application in Cloud Foundry starts with 1G disk quota and this can be adjusted to a default maximum of
@@ -478,7 +477,7 @@ Spring Cloud Data Flow can either integrate with Pivotal Single Sign-On Service
 When deploying Spring Cloud Data Flow to Cloud Foundry, you can bind the
 application to the Pivotal Single Sign-On Service. By doing so, Spring Cloud
 Data Flow takes advantage of the
-https://github.com/pivotal-cf/spring-cloud-sso-connector[Spring Cloud Single Sign-On Connector],
+https://github.com/pivotal-cf/java-cfenv[Java CFEnv],
 which provides Cloud Foundry-specific auto-configuration support for OAuth 2.0.
 
 To do so, bind the Pivotal Single Sign-On Service to your Data Flow Server application and

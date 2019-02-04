@@ -85,6 +85,8 @@ applications:
   env:
     SPRING_APPLICATION_NAME: skipper-server
     SPRING_APPLICATION_JSON: '{ "spring": { "cloud": { "skipper": { "server": { "enableLocalPlatform": "false"} } } } }'
+    SPRING_PROFILES_ACTIVE: cloud
+    JBP_CONFIG_SPRING_AUTO_RECONFIGURATION: '{enabled: false}'
     SPRING_CLOUD_SKIPPER_SERVER_STRATEGIES_HEALTHCHECK_TIMEOUTINMILLIS: 300000
     SPRING_CLOUD_SKIPPER_SERVER_PLATFORM_CLOUDFOUNDRY_ACCOUNTS[default]_CONNECTION_URL: https://api.run.pivotal.io
     SPRING_CLOUD_SKIPPER_SERVER_PLATFORM_CLOUDFOUNDRY_ACCOUNTS[default]_CONNECTION_ORG: <org>
@@ -189,9 +191,11 @@ In the future, you will be able to deploy tasks to multiple platforms, but for 2
 ====
 [source]
 ----
+cf set-env dataflow-server SPRING_PROFILES_ACTIVE: cloud
+cf set-env dataflow-server JBP_CONFIG_SPRING_AUTO_RECONFIGURATION: '{enabled: false}'
 cf set-env dataflow-server SPRING_CLOUD_DATAFLOW_TASK_PLATFORM_CLOUDFOUNDRY_ACCOUNTS[default]_CONNECTION_URL: https://api.run.pivotal.io
-cf set-env dataflow-server SPRING_CLOUD_DATAFLOW_TASK_PLATFORM_CLOUDFOUNDRY_ACCOUNTS[default]_CONNECTION_ORG: <org>
-cf set-env dataflow-server SPRING_CLOUD_DATAFLOW_TASK_PLATFORM_CLOUDFOUNDRY_ACCOUNTS[default]_CONNECTION_SPACE: <space>
+cf set-env dataflow-server SPRING_CLOUD_DATAFLOW_TASK_PLATFORM_CLOUDFOUNDRY_ACCOUNTS[default]_CONNECTION_ORG: {org}
+cf set-env dataflow-server SPRING_CLOUD_DATAFLOW_TASK_PLATFORM_CLOUDFOUNDRY_ACCOUNTS[default]_CONNECTION_SPACE: {space}
 cf set-env dataflow-server SPRING_CLOUD_DATAFLOW_TASK_PLATFORM_CLOUDFOUNDRY_ACCOUNTS[default]_CONNECTION_DOMAIN: cfapps.io
 cf set-env dataflow-server SPRING_CLOUD_DATAFLOW_TASK_PLATFORM_CLOUDFOUNDRY_ACCOUNTS[default]_CONNECTION_USERNAME: <email>
 cf set-env dataflow-server SPRING_CLOUD_DATAFLOW_TASK_PLATFORM_CLOUDFOUNDRY_ACCOUNTS[default]_CONNECTION_PASSWORD: <password>
@@ -237,6 +241,50 @@ cf bind-service dataflow-server my_mysql
 ====
 
 
+[[getting-started-cloudfoundry-deploying-using-manifest]]
+==== Deploying by Using a Manifest
+
+As an alternative to setting environment variables with the `cf set-env` command, you can curate all the relevant env-var's in a `manifest.yml` file and use the `cf push` command to provision the server.
+
+The following example template provisions the server on PCFDev:
+
+====
+[source,yml]
+----
+---
+applications:
+- name: data-flow-server
+  host: data-flow-server
+  memory: 2G
+  disk_quota: 2G
+  instances: 1
+  path: {PATH TO SERVER UBER-JAR}
+  env:
+    SPRING_APPLICATION_NAME: data-flow-server
+    SPRING_PROFILES_ACTIVE: cloud
+    JBP_CONFIG_SPRING_AUTO_RECONFIGURATION: '{enabled: false}'
+    MAVEN_REMOTEREPOSITORIES[REPO1]_URL: https://repo.spring.io/libs-snapshot
+    SPRING_CLOUD_DATAFLOW_TASK_PLATFORM_CLOUDFOUNDRY_ACCOUNTS[default]_CONNECTION_URL: https://api.sys.huron.cf-app.com
+    SPRING_CLOUD_DATAFLOW_TASK_PLATFORM_CLOUDFOUNDRY_ACCOUNTS[default]_CONNECTION_ORG: sabby20
+    SPRING_CLOUD_DATAFLOW_TASK_PLATFORM_CLOUDFOUNDRY_ACCOUNTS[default]_CONNECTION_SPACE: sabby20
+    SPRING_CLOUD_DATAFLOW_TASK_PLATFORM_CLOUDFOUNDRY_ACCOUNTS[default]_CONNECTION_DOMAIN: apps.huron.cf-app.com
+    SPRING_CLOUD_DATAFLOW_TASK_PLATFORM_CLOUDFOUNDRY_ACCOUNTS[default]_CONNECTION_USERNAME: admin
+    SPRING_CLOUD_DATAFLOW_TASK_PLATFORM_CLOUDFOUNDRY_ACCOUNTS[default]_CONNECTION_PASSWORD: ***
+    SPRING_CLOUD_DATAFLOW_TASK_PLATFORM_CLOUDFOUNDRY_ACCOUNTS[default]_CONNECTION_SKIP_SSL_VALIDATION: true
+    SPRING_CLOUD_DATAFLOW_TASK_PLATFORM_CLOUDFOUNDRY_ACCOUNTS[default]_DEPLOYMENT_SERVICES: mysql
+    SPRING_CLOUD_SKIPPER_CLIENT_SERVER_URI: https://<skipper-host-name>/api
+services:
+- mysql
+----
+====
+
+[NOTE]
+=====
+Deploy Skipper first and then configure the URI location where the Skipper server runs.
+=====
+
+Once you are ready with the relevant properties in this file, you can issue a `cf push` command from the directory where this file is stored.
+
 [[getting-started-cloudfoundry-on-local]]
 === Local Installation
 
@@ -245,6 +293,8 @@ To run the server application locally (on your laptop or desktop) and target you
 ====
 [source]
 ----
+export SPRING_PROFILES_ACTIVE=cloud
+export JBP_CONFIG_SPRING_AUTO_RECONFIGURATION='{enabled: false}'
 export SPRING_CLOUD_DATAFLOW_TASK_PLATFORM_CLOUDFOUNDRY_ACCOUNTS[default]_CONNECTION_URL=https://api.run.pivotal.io
 export SPRING_CLOUD_DATAFLOW_TASK_PLATFORM_CLOUDFOUNDRY_ACCOUNTS[default]_CONNECTION_ORG={org}
 export SPRING_CLOUD_DATAFLOW_TASK_PLATFORM_CLOUDFOUNDRY_ACCOUNTS[default]_CONNECTION_SPACE={space}
@@ -293,60 +343,6 @@ The following example shows how to start the Data Flow Shell:
 $ java -jar spring-cloud-dataflow-shell-{scdf-core-version}.jar
 ----
 ====
-
-[[getting-started-cloudfoundry-deploying-streams]]
-=== Deploying Streams
-
-
-By default, the https://github.com/spring-cloud/spring-cloud-dataflow/tree/master/spring-cloud-dataflow-registry[application registry] in Spring Cloud Data Flow's Cloud Foundry server is empty.
-It is intentionally designed to let you have the flexibility of http://docs.spring.io/spring-cloud-dataflow/docs/{scdf-core-version}/reference/htmlsingle/#spring-cloud-dataflow-register-stream-apps[choosing and registering] applications as you find appropriate for the given use-case requirement.
-Depending on the message-binder you choose, you can register between http://repo.spring.io/libs-snapshot/org/springframework/cloud/stream/app/[RabbitMQ- or Apache Kafka-based] Maven artifacts.
-
-If you would like to register all out-of-the-box stream applications built with the RabbitMQ binder in bulk, run the following command:
-
-====
-[source]
-----
-dataflow:>app import --uri http://bit.ly/Darwin-SR3-stream-applications-rabbit-maven
-----
-====
-
-Data Flow delegates the Streams deployment to Skipper which provide support for features such as Streams update and rollback.
-
-==== Creating Streams
-
-NOTE: Make sure the Skipper server is deployed and have configured the Data Flow server's `SPRING_CLOUD_SKIPPER_CLIENT_SERVER_URI` property to reference the Skipper server.
-
-The following example shows how to create and deploy a stream:
-
-====
-[source]
-----
-dataflow:> stream create --name httptest --definition "http | log"
-dataflow:> stream deploy --name httptest --platformName pws
-----
-====
-
-Skipper supports deploying to multiple https://docs.spring.io/spring-cloud-skipper/docs/current/reference/htmlsingle/#platforms[platforms], so it is important to define "`platform accounts`" with the credentials for the platform.
-Each platform account can be for a different org/space on Cloud Foundry or a namespace in Kubernetes.
-In the previous configuration file for Skipper, the platform account was named `pwd`, which is why the command line option above for `--platformName` references `pws`.
-
-NOTE: You need to wait a little while until the applications are actually deployed before posting data. Tail the log file for each application to verify that the application has started.
-
-Now you can post some data. The URL is unique to your deployment. The following example shows how to post data:
-
-====
-[source]
-----
-dataflow:> http post --target http://dataflow-AxwwAhK-httptest-http.cfapps.io --data "hello world"
-----
-====
-
-Now you can see whether `hello world` is in the log files for the `log` application.
-
-
-
-You can read more about the general features of using Skipper to deploy streams in the <<spring-cloud-dataflow-stream-lifecycle>> section and how to upgrade a streams in the <<spring-cloud-dataflow-stream-lifecycle-update>> section.
 
 [[getting-started-cloudfoundry-streams-using-skipper]]
 === Deploying Streams
@@ -739,6 +735,3 @@ dataflow:>task launch mytask
 ====
 
 You will see the year (`2018` at the time of this writing) printed in the logs. The execution status of the task is stored in the database, and you can retrieve information about the task execution by using the `task execution list` and `task execution status --id <ID_OF_TASK>` shell commands or though the Data Flow UI.
-
-NOTE: The current underlying PCF task capabilities are considered experimental for PCF version versions less than 1.9.
-See http://docs.spring.io/spring-cloud-dataflow/docs/{scdf-core-version}/reference/htmlsingle/#enable-disable-specific-features[Feature Togglers] for how to disable task support in Data Flow.
