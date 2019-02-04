@@ -213,7 +213,7 @@ stream deploy fooz --properties "app.time.spring.cloud.stream.kafka.binder.broke
 
 [[configuration-cloudfoundry-db-connection-pool]]
 === Database Connection Pool
-The Data Flow server uses the Spring Cloud Connector library to create the DataSource with a default connection pool size of 4.
+The Data Flow server uses the link:https://github.com/pivotal-cf/java-cfenv[Java CFEnv] library to create the DataSource with a default connection pool size of 4.
 To change the connection pool size and maximum wait time, set the following two properties `spring.cloud.dataflow.server.cloudfoundry.maxPoolSize` and `"spring.cloud.dataflow.server.cloudfoundry.maxWaitTime`. The wait time is specified in milliseconds.
 
 [[configuration-cloudfoundry-maximum-disk-quota-configuration]]
@@ -321,7 +321,7 @@ example, register the application with the name `http-source.jar` by using `--ur
 
 [[configuration-cloudfoundry-connection-pool]]
 === Database Connection Pool
-The Data Flow server uses the Spring Cloud Connector library to create the DataSource with a default connection pool size of `4`.
+The Data Flow server uses the https://github.com/pivotal-cf/java-cfenv[Java CFEnv] library to create the DataSource with a default connection pool size of `4`.
 To change the connection pool size and maximum wait time, set the following two properties `spring.cloud.dataflow.server.cloudfoundry.maxPoolSize` and `spring.cloud.dataflow.server.cloudfoundry.maxWaitTime`.
 The wait time is specified in milliseconds.
 
@@ -346,7 +346,7 @@ Spring Cloud Data Flow can either integrate with Pivotal Single Sign-On Service
 When deploying Spring Cloud Data Flow to Cloud Foundry, you can bind the
 application to the Pivotal Single Sign-On Service. By doing so, Spring Cloud
 Data Flow takes advantage of the
-https://github.com/pivotal-cf/spring-cloud-sso-connector[Spring Cloud Single Sign-On Connector],
+https://github.com/pivotal-cf/java-cfenv[Java CFEnv],
 which provides Cloud Foundry-specific auto-configuration support for OAuth 2.0.
 
 To do so, bind the Pivotal Single Sign-On Service to your Data Flow Server application and
