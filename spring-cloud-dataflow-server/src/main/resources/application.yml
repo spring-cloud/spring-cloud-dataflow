@@ -35,6 +35,7 @@ info:
 #      user-authorization-uri: http://127.0.0.1:9999/oauth/authorize
 #    resource:
 #      user-info-uri: http://127.0.0.1:9999/me
+#      token-info-uri: http://127.0.0.1:9999/oauth/check_token
 
 # If you prefer to use Eureka to locate the Config Server, you can do that by setting
 # spring.cloud.config.discovery.enabled=true (default "false"). The net result of that is
