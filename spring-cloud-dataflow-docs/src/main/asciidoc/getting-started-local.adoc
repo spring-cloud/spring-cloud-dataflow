@@ -186,13 +186,17 @@ In the `dataflow-server` services configuration block, add the following `enviro
 ----
       - spring.cloud.dataflow.applicationProperties.stream.spring.rabbitmq.host=rabbitmq
 ----
++
 And replace:
++
 [source,yaml,subs=attributes]
 ----
     depends_on:
       - kafka
 ----
-with:
++
+With:
++
 [source,yaml,subs=attributes]
 ----
     depends_on:
@@ -201,24 +205,6 @@ with:
 +
 And finally, modify the `app-import` service definition `command` attribute to replace `http://bit.ly/Celsius-SR3-stream-applications-kafka-10-maven` with `http://bit.ly/Celsius-SR3-stream-applications-rabbit-maven`.
 +
-
-. To enable Metrics support, the following modifications need to be made.
-+
-Add the metrics collector after the `skipper-server` service definition:
-+
-[source,yaml,options=nowrap,subs=attributes]
-----
-  metrics-collector:
-    image: springcloud/metrics-collector-kafka:2.0.0.RELEASE
-    environment:
-      - spring.cloud.stream.kafka.binder.brokers=kafka:9092
-      - spring.cloud.stream.kafka.binder.zkNodes=zookeeper:2181
-      - spring.autoconfigure.exclude=org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration
-    expose:
-      - "8080"
-----
-+
-
 . To enable `app starters` registration directly from the host machine you have to mount the source host folders to the `dataflow-server` container. For example, if the `my-app.jar` is in the `/foo/bar/apps` folder on your host machine, then add the following `volumes` block to the `dataflow-server` service definition:
 +
 [source,yaml,subs=attributes]
