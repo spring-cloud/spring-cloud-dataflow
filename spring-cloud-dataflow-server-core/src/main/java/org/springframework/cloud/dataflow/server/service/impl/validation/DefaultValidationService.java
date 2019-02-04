@@ -78,7 +78,7 @@ public class DefaultValidationService implements ValidationService {
 					result = validateDockerResource(dockerValidatorProperties, (DockerResource) resource);
 				}
 				else {
-					new BootClassLoaderFactory(resolveAsArchive(appRegistry.getAppResource(registration)), null)
+					new BootClassLoaderFactory(resolveAsArchive(resource), null)
 							.createClassLoader();
 					result = true;
 				}

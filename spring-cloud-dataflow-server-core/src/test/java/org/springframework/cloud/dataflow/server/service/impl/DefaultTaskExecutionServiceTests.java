@@ -580,7 +580,8 @@ public abstract class DefaultTaskExecutionServiceTests {
 		when(appRegistry.find("BBB", ApplicationType.task)).thenThrow(new IllegalArgumentException(
 				String.format("Application name '%s' with type '%s' does not exist in the app registry.", "fake",
 						ApplicationType.task)));
-		when(appRegistry.find("AAA", ApplicationType.task)).thenReturn(mock(AppRegistration.class));
+		when(appRegistry.find("AAA", ApplicationType.task)).thenReturn(new AppRegistration("some-name", ApplicationType.task, URI.create("http://helloworld")));
+		when(appRegistry.getAppResource(any())).thenReturn(new FileSystemResource("src/test/resources/apps/foo-task/bad.jar"));
 	}
 
 	private static void verifyTaskExistsInRepo(String taskName, String dsl,
