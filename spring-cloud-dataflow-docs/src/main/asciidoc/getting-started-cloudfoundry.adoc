@@ -300,60 +300,8 @@ $ java -jar spring-cloud-dataflow-shell-{scdf-core-version}.jar
 ----
 ====
 
-[[getting-started-cloudfoundry-deploying-streams]]
-=== Deploying Streams
-
-By default, the application registry is empty.
-If you would like to register all out-of-the-box stream applications built with the RabbitMQ binder in bulk, run the following command:
-
-====
-[source]
-----
-dataflow:>app import --uri http://bit.ly/Darwin-SR3-stream-applications-rabbit-maven
-----
-====
-
-For more details, review how to xref:spring-cloud-dataflow-register-apps[register applications].
-
-Data Flow delegates the Streams deployment to Skipper which provide support for features such as Streams update and rollback.
-
-==== Creating Stream
-
-NOTE: Make sure the Skipper server is deployed and have configured the Data Flow server's `SPRING_CLOUD_SKIPPER_CLIENT_SERVER_URI` property to reference the Skipper server.
-
-The following example shows how to create and deploy a stream:
-
-====
-[source]
-----
-dataflow:> stream create --name httptest --definition "http | log"
-dataflow:> stream deploy --name httptest --platformName pws
-----
-====
-
-NOTE: You need to wait a little while until the applications are actually deployed before posting data. Tail the log file for each application to verify that the application has started.
-
-Now you can post some data. The URL is unique to your deployment. The following example shows how to post data:
-
-====
-[source]
-----
-dataflow:> http post --target http://dataflow-AxwwAhK-httptest-http.cfapps.io --data "hello world"
-----
-====
-
-Now you can see whether `hello world` is in the log files for the `log` application.
-
-NOTE: Skipper includes the concept of link:https://docs.spring.io/spring-cloud-skipper/docs/current/reference/htmlsingle/#platforms[platforms],
-so it is important to define the "`accounts`" based on the project preferences.
-In the preceding YAML file, the accounts map to `pws` as the platform. You can modify this, and you can have any number of platform definitions.
-The https://docs.spring.io/spring-cloud-skipper/docs/current/reference/htmlsingle/[Spring Cloud Skipper reference guide] has more details.
-
-
-You can read more about the general features of using Skipper to deploy streams in the <<spring-cloud-dataflow-stream-lifecycle>> section and how to upgrade a streams in the <<spring-cloud-dataflow-stream-lifecycle-update>> section.
-
 [[getting-started-cloudfoundry-streams-using-skipper]]
-=== Rolling-upgrade Streams
+=== Deploying Streams
 
 This section proceeds with the assumption that Spring Cloud Data Flow, Spring Cloud Skipper, RDBMS, and your desired messaging middleware are all running in PWS.
 The following listing shows the apps running in a sample org and space:
