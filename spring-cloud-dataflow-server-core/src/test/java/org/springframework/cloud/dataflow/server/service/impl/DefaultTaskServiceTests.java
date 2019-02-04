@@ -46,6 +46,7 @@ import org.springframework.cloud.dataflow.server.repository.DuplicateTaskExcepti
 import org.springframework.cloud.dataflow.server.repository.InMemoryDeploymentIdRepository;
 import org.springframework.cloud.dataflow.server.repository.NoSuchTaskDefinitionException;
 import org.springframework.cloud.dataflow.server.repository.TaskDefinitionRepository;
+import org.springframework.cloud.dataflow.server.service.TaskExecutionCreationService;
 import org.springframework.cloud.dataflow.server.service.TaskService;
 import org.springframework.cloud.dataflow.server.service.TaskValidationService;
 import org.springframework.cloud.dataflow.server.service.ValidationStatus;
@@ -97,6 +98,9 @@ public abstract class DefaultTaskServiceTests {
 
 		@Autowired
 		TaskRepository taskExecutionRepository;
+
+		@Autowired
+		TaskExecutionCreationService taskExecutionCreationService;
 
 		@Autowired
 		DataSourceProperties dataSourceProperties;
@@ -201,7 +205,7 @@ public abstract class DefaultTaskServiceTests {
 					mock(TaskDefinitionRepository.class), this.taskExplorer, this.taskExecutionRepository,
 					this.appRegistry, this.taskLauncher, this.metadataResolver, new TaskConfigurationProperties(),
 					new InMemoryDeploymentIdRepository(), auditRecordService, null, this.commonApplicationProperties,
-					this.taskValidationService);
+					this.taskValidationService, this.taskExecutionCreationService);
 			try {
 				taskService.executeTask(TASK_NAME_ORIG, new HashMap<>(), new LinkedList<>());
 			}

@@ -43,6 +43,7 @@ import org.springframework.cloud.dataflow.server.repository.DeploymentIdReposito
 import org.springframework.cloud.dataflow.server.repository.DeploymentKey;
 import org.springframework.cloud.dataflow.server.repository.NoSuchTaskDefinitionException;
 import org.springframework.cloud.dataflow.server.repository.TaskDefinitionRepository;
+import org.springframework.cloud.dataflow.server.service.TaskExecutionCreationService;
 import org.springframework.cloud.dataflow.server.service.TaskService;
 import org.springframework.cloud.dataflow.server.service.TaskValidationService;
 import org.springframework.cloud.dataflow.server.service.ValidationStatus;
@@ -112,6 +113,8 @@ public class DefaultTaskService implements TaskService {
 
 	private final TaskValidationService taskValidationService;
 
+	private final TaskExecutionCreationService taskExecutionCreationService;
+
 	protected final AuditRecordService auditRecordService;
 
 	private final ArgumentSanitizer argumentSanitizer = new ArgumentSanitizer();
@@ -145,19 +148,21 @@ public class DefaultTaskService implements TaskService {
 			TaskConfigurationProperties taskConfigurationProperties, DeploymentIdRepository deploymentIdRepository,
 			AuditRecordService auditRecordService,
 			String dataflowServerUri, CommonApplicationProperties commonApplicationProperties,
-			TaskValidationService taskValidationService) {
-		Assert.notNull(dataSourceProperties, "DataSourceProperties must not be null");
-		Assert.notNull(taskDefinitionRepository, "TaskDefinitionRepository must not be null");
-		Assert.notNull(taskExecutionRepository, "TaskExecutionRepository must not be null");
-		Assert.notNull(taskExplorer, "TaskExplorer must not be null");
-		Assert.notNull(registry, "UriRegistry must not be null");
-		Assert.notNull(taskLauncher, "TaskLauncher must not be null");
+			TaskValidationService taskValidationService,
+			TaskExecutionCreationService taskExecutionCreationService) {
+		Assert.notNull(dataSourceProperties, "dataSourceProperties must not be null");
+		Assert.notNull(taskDefinitionRepository, "taskDefinitionRepository must not be null");
+		Assert.notNull(taskExecutionRepository, "taskExecutionRepository must not be null");
+		Assert.notNull(taskExplorer, "taskExplorer must not be null");
+		Assert.notNull(registry, "uriRegistry must not be null");
+		Assert.notNull(taskLauncher, "taskLauncher must not be null");
 		Assert.notNull(metaDataResolver, "metaDataResolver must not be null");
 		Assert.notNull(taskConfigurationProperties, "taskConfigurationProperties must not be null");
 		Assert.notNull(deploymentIdRepository, "deploymentIdRepository must not be null");
 		Assert.notNull(commonApplicationProperties, "commonApplicationProperties must not be null");
 		Assert.notNull(auditRecordService, "auditRecordService must not be null");
-		Assert.notNull(taskValidationService, "TaskValidationService must not be null");
+		Assert.notNull(taskValidationService, "taskValidationService must not be null");
+		Assert.notNull(taskExecutionCreationService, "taskExecutionRepositoryService must not be null");
 		this.dataSourceProperties = dataSourceProperties;
 		this.taskDefinitionRepository = taskDefinitionRepository;
 		this.taskExecutionRepository = taskExecutionRepository;
@@ -171,6 +176,7 @@ public class DefaultTaskService implements TaskService {
 		this.commonApplicationProperties = commonApplicationProperties;
 		this.auditRecordService = auditRecordService;
 		this.taskValidationService = taskValidationService;
+		this.taskExecutionCreationService = taskExecutionCreationService;
 	}
 
 	@Override
@@ -207,7 +213,7 @@ public class DefaultTaskService implements TaskService {
 		Resource appResource = this.registry.getAppResource(appRegistration);
 		Resource metadataResource = this.registry.getAppMetadataResource(appRegistration);
 
-		TaskExecution taskExecution = taskExecutionRepository.createTaskExecution(taskName);
+		TaskExecution taskExecution = this.taskExecutionCreationService.createTaskExecution(taskName);
 		taskDefinition = TaskServiceUtils.updateTaskProperties(taskDefinition,
 				dataSourceProperties);
 

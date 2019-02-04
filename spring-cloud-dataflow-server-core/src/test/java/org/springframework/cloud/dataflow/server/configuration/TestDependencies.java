@@ -90,12 +90,14 @@ import org.springframework.cloud.dataflow.server.service.SchedulerServicePropert
 import org.springframework.cloud.dataflow.server.service.SkipperStreamService;
 import org.springframework.cloud.dataflow.server.service.StreamService;
 import org.springframework.cloud.dataflow.server.service.StreamValidationService;
+import org.springframework.cloud.dataflow.server.service.TaskExecutionCreationService;
 import org.springframework.cloud.dataflow.server.service.TaskService;
 import org.springframework.cloud.dataflow.server.service.TaskValidationService;
 import org.springframework.cloud.dataflow.server.service.impl.AppDeployerStreamService;
 import org.springframework.cloud.dataflow.server.service.impl.AppDeploymentRequestCreator;
 import org.springframework.cloud.dataflow.server.service.impl.DefaultSchedulerService;
 import org.springframework.cloud.dataflow.server.service.impl.DefaultSkipperStreamService;
+import org.springframework.cloud.dataflow.server.service.impl.DefaultTaskExecutionCreationService;
 import org.springframework.cloud.dataflow.server.service.impl.DefaultTaskService;
 import org.springframework.cloud.dataflow.server.service.impl.TaskConfigurationProperties;
 import org.springframework.cloud.dataflow.server.service.impl.validation.DefaultStreamValidationService;
@@ -419,21 +421,24 @@ public class TestDependencies extends WebMvcConfigurationSupport {
 	public TaskDefinitionController taskDefinitionController(TaskExplorer explorer, TaskDefinitionRepository repository,
 			DeploymentIdRepository deploymentIdRepository, ApplicationConfigurationMetadataResolver metadataResolver,
 			AppRegistryCommon appRegistry, AuditRecordService auditRecordService,
-			CommonApplicationProperties commonApplicationProperties, TaskValidationService taskValidationService) {
+			CommonApplicationProperties commonApplicationProperties, TaskValidationService taskValidationService,
+			TaskExecutionCreationService taskExecutionCreationService) {
 		return new TaskDefinitionController(explorer, repository,
 				taskService(metadataResolver, taskRepository(), deploymentIdRepository, appRegistry,
 						/* delegatingResourceLoader, */auditRecordService, commonApplicationProperties,
-						taskValidationService));
+						taskValidationService, taskExecutionCreationService));
 	}
 
 	@Bean
 	public TaskExecutionController taskExecutionController(TaskExplorer explorer,
 			ApplicationConfigurationMetadataResolver metadataResolver, DeploymentIdRepository deploymentIdRepository,
 			AppRegistryCommon appRegistry, AuditRecordService auditRecordService,
-			CommonApplicationProperties commonApplicationProperties, TaskValidationService taskValidationService) {
+			CommonApplicationProperties commonApplicationProperties, TaskValidationService taskValidationService,
+			TaskExecutionCreationService taskExecutionCreationService) {
 		return new TaskExecutionController(
 				explorer, taskService(metadataResolver, taskRepository(), deploymentIdRepository, appRegistry,
-						auditRecordService, commonApplicationProperties, taskValidationService),
+				auditRecordService, commonApplicationProperties,
+				taskValidationService, taskExecutionCreationService),
 				taskDefinitionRepository());
 	}
 
@@ -486,14 +491,20 @@ public class TestDependencies extends WebMvcConfigurationSupport {
 	}
 
 	@Bean
+	public TaskExecutionCreationService taskExecutionRepositoryService(TaskRepository taskRepository) {
+		return new DefaultTaskExecutionCreationService(taskRepository);
+	}
+
+	@Bean
 	public TaskService taskService(ApplicationConfigurationMetadataResolver metadataResolver,
 			TaskRepository taskExecutionRepository, DeploymentIdRepository deploymentIdRepository,
 			AppRegistryCommon appRegistry, AuditRecordService auditRecordService,
-			CommonApplicationProperties commonApplicationProperties, TaskValidationService taskValidationService) {
+			CommonApplicationProperties commonApplicationProperties, TaskValidationService taskValidationService,
+			TaskExecutionCreationService taskExecutionCreationService) {
 		return new DefaultTaskService(new DataSourceProperties(), taskDefinitionRepository(), taskExplorer(),
 				taskExecutionRepository, appRegistry, taskLauncher(), metadataResolver,
 				new TaskConfigurationProperties(), deploymentIdRepository, auditRecordService, null,
-				commonApplicationProperties, taskValidationService);
+				commonApplicationProperties, taskValidationService, taskExecutionCreationService);
 	}
 
 	@Bean

@@ -38,8 +38,10 @@ import org.springframework.cloud.dataflow.server.repository.TaskDefinitionReposi
 import org.springframework.cloud.dataflow.server.repository.support.DataflowRdbmsInitializer;
 import org.springframework.cloud.dataflow.server.service.SchedulerService;
 import org.springframework.cloud.dataflow.server.service.SchedulerServiceProperties;
+import org.springframework.cloud.dataflow.server.service.TaskExecutionCreationService;
 import org.springframework.cloud.dataflow.server.service.TaskValidationService;
 import org.springframework.cloud.dataflow.server.service.impl.DefaultSchedulerService;
+import org.springframework.cloud.dataflow.server.service.impl.DefaultTaskExecutionCreationService;
 import org.springframework.cloud.dataflow.server.service.impl.DefaultTaskService;
 import org.springframework.cloud.dataflow.server.service.impl.TaskConfigurationProperties;
 import org.springframework.cloud.dataflow.server.service.impl.validation.DefaultTaskValidationService;
@@ -174,15 +176,21 @@ public class TaskServiceDependencies {
 	}
 
 	@Bean
+	public TaskExecutionCreationService taskExecutionRepositoryService(TaskRepository taskRepository) {
+		return new DefaultTaskExecutionCreationService(taskRepository);
+	}
+
+	@Bean
 	public DefaultTaskService defaultTaskService(TaskDefinitionRepository taskDefinitionRepository,
 			TaskExplorer taskExplorer, TaskRepository taskExecutionRepository, AppRegistry appRegistry,
 			TaskLauncher taskLauncher, ApplicationConfigurationMetadataResolver metadataResolver,
 			TaskConfigurationProperties taskConfigurationProperties, AuditRecordService auditRecordService,
-			CommonApplicationProperties commonApplicationProperties, TaskValidationService taskValidationService) {
+			CommonApplicationProperties commonApplicationProperties, TaskValidationService taskValidationService,
+			TaskExecutionCreationService taskExecutionCreationService) {
 		return new DefaultTaskService(this.dataSourceProperties, taskDefinitionRepository, taskExplorer,
 				taskExecutionRepository, appRegistry, taskLauncher, metadataResolver, taskConfigurationProperties,
 				new InMemoryDeploymentIdRepository(), auditRecordService, null, commonApplicationProperties,
-				taskValidationService);
+				taskValidationService, taskExecutionCreationService);
 	}
 
 	@Bean

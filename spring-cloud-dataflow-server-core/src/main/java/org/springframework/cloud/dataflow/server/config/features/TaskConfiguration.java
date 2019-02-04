@@ -43,9 +43,11 @@ import org.springframework.cloud.dataflow.server.job.TaskExplorerFactoryBean;
 import org.springframework.cloud.dataflow.server.repository.DeploymentIdRepository;
 import org.springframework.cloud.dataflow.server.repository.RdbmsTaskDefinitionRepository;
 import org.springframework.cloud.dataflow.server.repository.TaskDefinitionRepository;
+import org.springframework.cloud.dataflow.server.service.TaskExecutionCreationService;
 import org.springframework.cloud.dataflow.server.service.TaskJobService;
 import org.springframework.cloud.dataflow.server.service.TaskService;
 import org.springframework.cloud.dataflow.server.service.TaskValidationService;
+import org.springframework.cloud.dataflow.server.service.impl.DefaultTaskExecutionCreationService;
 import org.springframework.cloud.dataflow.server.service.impl.DefaultTaskJobService;
 import org.springframework.cloud.dataflow.server.service.impl.DefaultTaskService;
 import org.springframework.cloud.dataflow.server.service.impl.TaskConfigurationProperties;
@@ -94,16 +96,21 @@ public class TaskConfiguration {
 	}
 
 	@Bean
+	public TaskExecutionCreationService taskExecutionRepositoryService(TaskRepository taskRepository) {
+		return new DefaultTaskExecutionCreationService(taskRepository);
+	}
+
+	@Bean
 	@ConditionalOnBean(TaskDefinitionRepository.class)
 	public TaskService taskService(TaskDefinitionRepository repository, TaskExplorer taskExplorer,
 			TaskRepository taskExecutionRepository, AppRegistryCommon registry, TaskLauncher taskLauncher,
 			ApplicationConfigurationMetadataResolver metadataResolver,
 			TaskConfigurationProperties taskConfigurationProperties, DeploymentIdRepository deploymentIdRepository,
 			AuditRecordService auditRecordService, CommonApplicationProperties commonApplicationProperties,
-			TaskValidationService taskValidationService) {
+			TaskValidationService taskValidationService, TaskExecutionCreationService taskExecutionCreationService) {
 		return new DefaultTaskService(dataSourceProperties, repository, taskExplorer, taskExecutionRepository, registry,
 				taskLauncher, metadataResolver, taskConfigurationProperties, deploymentIdRepository, auditRecordService,
-				dataflowServerUri, commonApplicationProperties, taskValidationService);
+				dataflowServerUri, commonApplicationProperties, taskValidationService, taskExecutionCreationService);
 	}
 
 	@Bean
