@@ -147,27 +147,6 @@ kubectl create -f src/kubernetes/mysql/
 You can use `kubectl get all -l app=mysql` to verify that the deployment, pod, and service resources are running.
 You can use `kubectl delete all,pvc,secrets -l app=mysql` to clean up afterwards.
 +
-. Deploy the Metrics Collector.
-+
-The Metrics Collector provides message rates for all deployed stream applications.
-These message rates are visible in the Dashboard UI.
-Run one of the following commands (depending on your message broker) to start the Metrics Collector:
-+
-* RabbitMQ: `kubectl create -f src/kubernetes/metrics/metrics-deployment-rabbit.yaml`
-* Kafka: `kubectl create -f src/kubernetes/metrics/metrics-deployment-kafka.yaml`
-+
-Create the metrics service:
-+
-====
-[source,bash]
-----
-$ kubectl create -f src/kubernetes/metrics/metrics-svc.yaml
-----
-====
-+
-You can use `kubectl get all -l app=metrics` to verify that the deployment, pod, and service resources are running.
-You can use `kubectl delete all -l app=metrics` to clean up afterwards.
-+
 . Create Role Bindings and Service account
 +
 IMPORTANT: Since version 1.9, the latest releases of Kubernetes have enabled https://kubernetes.io/docs/admin/authorization/rbac/[RBAC] on the api-server.
@@ -244,7 +223,7 @@ Additionally, if you want to use the link:https://docs.spring.io/spring-cloud-st
 ====
 [source,yaml]
 ----
-environmentVariables: 'SPRING_CLOUD_STREAM_KAFKA_BINDER_BROKERS=${KAFKA_SERVICE_HOST}:${KAFKA_SERVICE_PORT},SPRING_CLOUD_STREAM_KAFKA_BINDER_ZK_NODES=${KAFKA_ZK_SERVICE_HOST}:${KAFKA_ZK_SERVICE_PORT}, SPRING_CLOUD_STREAM_KAFKA_STREAMS_BINDER_BROKERS=${KAFKA_SERVICE_HOST}:${KAFKA_SERVICE_PORT},SPRING_CLOUD_STREAM_KAFKA_STREAMS_BINDER_ZK_NODES=${KAFKA_ZK_SERVICE_HOST}:${KAFKA_ZK_SERVICE_PORT},SPRING_REDIS_HOST=${REDIS_SERVICE_HOST},SPRING_REDIS_PORT=${REDIS_SERVICE_PORT}'
+environmentVariables: 'SPRING_CLOUD_STREAM_KAFKA_BINDER_BROKERS=${KAFKA_SERVICE_HOST}:${KAFKA_SERVICE_PORT},SPRING_CLOUD_STREAM_KAFKA_BINDER_ZK_NODES=${KAFKA_ZK_SERVICE_HOST}:${KAFKA_ZK_SERVICE_PORT}, SPRING_CLOUD_STREAM_KAFKA_STREAMS_BINDER_BROKERS=${KAFKA_SERVICE_HOST}:${KAFKA_SERVICE_PORT},SPRING_CLOUD_STREAM_KAFKA_STREAMS_BINDER_ZK_NODES=${KAFKA_ZK_SERVICE_HOST}:${KAFKA_ZK_SERVICE_PORT}'
 ----
 ====
 +
@@ -465,7 +444,6 @@ RESOURCES:
 NAME                  TYPE    DATA  AGE
 my-release-mysql      Opaque  2     1s
 my-release-data-flow  Opaque  2     1s
-my-release-redis      Opaque  1     1s
 my-release-rabbitmq   Opaque  2     1s
 
 ==> v1/ConfigMap
@@ -477,7 +455,6 @@ my-release-data-flow-skipper  1     1s
 NAME                 STATUS   VOLUME                                    CAPACITY  ACCESSMODES  STORAGECLASS  AGE
 my-release-rabbitmq  Bound    pvc-e9ed7f55-2499-11e8-886f-08002799df04  8Gi       RWO          standard      1s
 my-release-mysql     Pending  standard                                  1s
-my-release-redis     Pending  standard                                  1s
 
 ==> v1/ServiceAccount
 NAME                  SECRETS  AGE
@@ -487,8 +464,6 @@ my-release-data-flow  1        1s
 NAME                          CLUSTER-IP      EXTERNAL-IP  PORT(S)                                AGE
 my-release-mysql              10.110.98.253   <none>       3306/TCP                               1s
 my-release-data-flow-server   10.105.216.155  <pending>    80:32626/TCP                           1s
-my-release-redis              10.111.63.33    <none>       6379/TCP                               1s
-my-release-data-flow-metrics  10.107.157.1    <none>       80/TCP                                 1s
 my-release-rabbitmq           10.106.76.215   <none>       4369/TCP,5672/TCP,25672/TCP,15672/TCP  1s
 my-release-data-flow-skipper  10.100.28.64    <none>       80/TCP                                 1s
 
@@ -496,9 +471,7 @@ my-release-data-flow-skipper  10.100.28.64    <none>       80/TCP               
 NAME                          DESIRED  CURRENT  UP-TO-DATE  AVAILABLE  AGE
 my-release-mysql              1        1        1           0          1s
 my-release-rabbitmq           1        1        1           0          1s
-my-release-data-flow-metrics  1        1        1           0          1s
 my-release-data-flow-skipper  1        1        1           0          1s
-my-release-redis              1        1        1           0          1s
 my-release-data-flow-server   1        1        1           0          1s
 
 
@@ -545,8 +518,7 @@ To avoid this issue, set the password for these services when installing the cha
 ----
 helm install --name my-release \
     --set rabbitmq.rabbitmqPassword=rabbitpwd \
-    --set mysql.mysqlRootPassword=mysqlpwd \
-    --set redis.redisPassword=redispwd incubator/spring-cloud-data-flow
+    --set mysql.mysqlRootPassword=mysqlpwd incubator/spring-cloud-data-flow
 ----
 ====
 =====
@@ -568,7 +540,6 @@ $ kubectl get all
 NAME                              READY     STATUS    RESTARTS   AGE
 po/mysql-777890292-z0dsw          1/1       Running   0          38m
 po/rabbitmq-317767540-2qzrr       1/1       Running   0          38m
-po/redis-4054078334-37m0l         1/1       Running   0          38m
 po/scdf-server-2734071167-bjd3g   1/1       Running   0          48s
 po/skipper-2408247821-50z31       1/1       Running   0          3m
 
@@ -784,7 +755,6 @@ mystream-log-v1-0-2k4r8             1/1       Running   0          2m
 mystream-time-v1-qhdqq              1/1       Running   0          2m
 mysql-777890292-z0dsw          1/1       Running   0          49m
 rabbitmq-317767540-2qzrr       1/1       Running   0          49m
-redis-4054078334-37m0l         1/1       Running   0          49m
 scdf-server-2734071167-bjd3g   1/1       Running   0          12m
 skipper-2408247821-50z31       1/1       Running   0          15m
 
@@ -913,7 +883,6 @@ mystream-log-v2-0-fjnlt        0/1       Running       0          9s
 mystream-time-v1-qhdqq         1/1       Running       0          3m
 mysql-777890292-z0dsw          1/1       Running       0          51m
 rabbitmq-317767540-2qzrr       1/1       Running       0          51m
-redis-4054078334-37m0l         1/1       Running       0          51m
 scdf-server-2734071167-bjd3g   1/1       Running       0          14m
 skipper-2408247821-50z31       1/1       Running       0          16m
 

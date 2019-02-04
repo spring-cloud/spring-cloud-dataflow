@@ -46,7 +46,7 @@ env:
 
 You can pass configuration properties to the Data Flow Server by using Kubernetes https://kubernetes.io/docs/tasks/configure-pod-container/configmap/[ConfigMap] and https://kubernetes.io/docs/concepts/configuration/secret/[secrets].
 
-The following example shows one possible configuration, which enables RabbitMQ, MySQL and Redis as well as basic security settings for the server:
+The following example shows one possible configuration, which enables RabbitMQ, and MySQL as well as basic security settings for the server:
 
 ====
 [source,yaml]
@@ -75,7 +75,7 @@ data:
                   user: password, ROLE_VIEW, ROLE_CREATE
         deployer:
           kubernetes:
-            environmentVariables: 'SPRING_RABBITMQ_HOST=${RABBITMQ_SERVICE_HOST},SPRING_RABBITMQ_PORT=${RABBITMQ_SERVICE_PORT},SPRING_REDIS_HOST=${REDIS_SERVICE_HOST},SPRING_REDIS_PORT=${REDIS_SERVICE_PORT}'
+            environmentVariables: 'SPRING_RABBITMQ_HOST=${RABBITMQ_SERVICE_HOST},SPRING_RABBITMQ_PORT=${RABBITMQ_SERVICE_PORT}'
       datasource:
         url: jdbc:mysql://${MYSQL_SERVICE_HOST}:${MYSQL_SERVICE_PORT}/mysql
         username: root
@@ -83,13 +83,10 @@ data:
         driverClassName: org.mariadb.jdbc.Driver
         testOnBorrow: true
         validationQuery: "SELECT 1"
-      redis:
-        host: ${REDIS_SERVICE_HOST}
-        port: ${REDIS_SERVICE_PORT}
 ----
 ====
 
-The preceding example assumes that RabbitMQ is deployed with `rabbitmq` as the service name. For MySQL, it assumes that the service name is `mysql`. For Redis, it assumes that the service name is `redis`. Kubernetes publishes the host and port values of these services as environment variables that we can use when configuring the apps we deploy.
+The preceding example assumes that RabbitMQ is deployed with `rabbitmq` as the service name. For MySQL, it assumes that the service name is `mysql`. Kubernetes publishes the host and port values of these services as environment variables that we can use when configuring the apps we deploy.
 
 We prefer to provide the MySQL connection password in a Secrets file, as the following example shows:
 
