@@ -15,8 +15,8 @@
   "editable": true,
   "gnetId": null,
   "graphTooltip": 0,
-  "id": 2,
-  "iteration": 1547457367029,
+  "id": 4,
+  "iteration": 1549383387167,
   "links": [
     {
       "icon": "external link",
@@ -277,7 +277,7 @@
           ],
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "SELECT distinct(\"application_name\")  as \"apps\" FROM (SELECT * FROM \"autogen\".\"spring_integration_send\" WHERE  (\"stream_name\" =~ /^$stream$/ )  group by application_name)\n",
+          "query": "SELECT distinct(\"application_name\")  as \"apps\" FROM (SELECT * FROM \"autogen\".\"spring_integration_send\" WHERE  (\"stream_name\" =~ /^$stream_name$/ )  group by application_name)\n",
           "rawQuery": true,
           "refId": "A",
           "resultFormat": "table",
@@ -556,13 +556,13 @@
             {
               "key": "stream_name",
               "operator": "=~",
-              "value": "/^$stream$/"
+              "value": "/^$stream_name$/"
             },
             {
               "condition": "AND",
               "key": "application_name",
               "operator": "=~",
-              "value": "/^$application$/"
+              "value": "/^$application_name$/"
             }
           ]
         }
@@ -691,13 +691,13 @@
             {
               "key": "stream_name",
               "operator": "=~",
-              "value": "/^$stream$/"
+              "value": "/^$stream_name$/"
             },
             {
               "condition": "AND",
               "key": "application_name",
               "operator": "=~",
-              "value": "/^$application$/"
+              "value": "/^$application_name$/"
             }
           ]
         },
@@ -747,13 +747,13 @@
             {
               "key": "stream_name",
               "operator": "=~",
-              "value": "/^$stream$/"
+              "value": "/^$stream_name$/"
             },
             {
               "condition": "AND",
               "key": "application_name",
               "operator": "=~",
-              "value": "/^$application$/"
+              "value": "/^$application_name$/"
             }
           ]
         }
@@ -881,13 +881,13 @@
             {
               "key": "stream_name",
               "operator": "=~",
-              "value": "/^$stream$/"
+              "value": "/^$stream_name$/"
             },
             {
               "condition": "AND",
               "key": "application_name",
               "operator": "=~",
-              "value": "/^$application$/"
+              "value": "/^$application_name$/"
             }
           ]
         }
@@ -999,7 +999,7 @@
           "measurement": "spring_integration_send",
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "SELECT count(distinct(application_name)) FROM (SELECT * FROM \"autogen\".\"spring_integration_send\" WHERE  (\"stream_name\" =~ /^$stream$/ )  group by application_name)",
+          "query": "SELECT count(distinct(application_name)) FROM (SELECT * FROM \"autogen\".\"spring_integration_send\" WHERE  (\"stream_name\" =~ /^$stream_name$/ )  group by application_name)",
           "rawQuery": true,
           "refId": "A",
           "resultFormat": "time_series",
@@ -1118,13 +1118,13 @@
             {
               "key": "stream_name",
               "operator": "=~",
-              "value": "/^$stream$/"
+              "value": "/^$stream_name$/"
             },
             {
               "condition": "AND",
               "key": "application_name",
               "operator": "=~",
-              "value": "/^$application$/"
+              "value": "/^$application_name$/"
             },
             {
               "condition": "AND",
@@ -1224,7 +1224,7 @@
           ],
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "SELECT \"count\"  / 60 FROM \"spring_integration_send\" WHERE (\"stream_name\" =~ /^$stream$/ AND \"application_name\" =~ /^$application$/ AND \"type\" = 'channel' AND \"name\" = 'errorChannel') AND $timeFilter GROUP BY \"stream_name\", \"application_name\", \"result\"",
+          "query": "SELECT \"count\"  / 60 FROM \"spring_integration_send\" WHERE (\"stream_name\" =~ /^$stream_name$/ AND \"application_name\" =~ /^$application_name$/ AND \"type\" = 'channel' AND \"name\" = 'errorChannel') AND $timeFilter GROUP BY \"stream_name\", \"application_name\", \"result\"",
           "rawQuery": true,
           "refId": "A",
           "resultFormat": "time_series",
@@ -1340,7 +1340,7 @@
           "measurement": "spring_integration_send",
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "SELECT \"count\"  / 60 FROM \"spring_integration_send\" WHERE (\"stream_name\" =~ /^$stream$/ AND \"type\" = 'channel' AND \"application_name\" =~ /^$application$/ AND \"result\" = 'success' AND ( \"name\" = 'output' OR \"name\" = 'input')) AND $timeFilter GROUP BY \"application_name\", \"result\", \"application_name\", \"name\"",
+          "query": "SELECT \"count\"  / 60 FROM \"spring_integration_send\" WHERE (\"stream_name\" =~ /^$stream_name$/ AND \"type\" = 'channel' AND \"application_name\" =~ /^$application_name$/ AND \"result\" = 'success' AND ( \"name\" = 'output' OR \"name\" = 'input')) AND $timeFilter GROUP BY \"application_name\", \"result\", \"application_name\", \"name\"",
           "rawQuery": true,
           "refId": "A",
           "resultFormat": "time_series",
@@ -1507,7 +1507,7 @@
           "measurement": "spring_integration_send",
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "SELECT \"mean\" FROM \"spring_integration_send\" WHERE (\"stream_name\" =~ /^$stream$/ AND \"application_name\" =~ /^$application$/ AND \"type\" = 'channel' AND \"result\" = 'success' AND ( \"name\" = 'output' OR \"name\" = 'input')) AND $timeFilter GROUP BY \"stream_name\", \"application_name\", \"result\", \"name\"",
+          "query": "SELECT \"mean\" FROM \"spring_integration_send\" WHERE (\"stream_name\" =~ /^$stream_name$/ AND \"application_name\" =~ /^$application_name$/ AND \"type\" = 'channel' AND \"result\" = 'success' AND ( \"name\" = 'output' OR \"name\" = 'input')) AND $timeFilter GROUP BY \"stream_name\", \"application_name\", \"result\", \"name\"",
           "rawQuery": true,
           "refId": "A",
           "resultFormat": "time_series",
@@ -1658,7 +1658,7 @@
           "measurement": "spring_integration_send",
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "SELECT \"count\"  / 60 FROM \"spring_integration_send\" WHERE (\"stream_name\" =~ /^$stream$/ AND \"application_name\" =~ /^$application$/ AND \"type\" = 'channel' AND \"name\" = 'errorChannel') AND $timeFilter GROUP BY \"stream_name\", \"application_name\", \"result\"",
+          "query": "SELECT \"count\"  / 60 FROM \"spring_integration_send\" WHERE (\"stream_name\" =~ /^$stream_name$/ AND \"application_name\" =~ /^$application_name$/ AND \"type\" = 'channel' AND \"name\" = 'errorChannel') AND $timeFilter GROUP BY \"stream_name\", \"application_name\", \"result\"",
           "rawQuery": true,
           "refId": "A",
           "resultFormat": "time_series",
@@ -1823,13 +1823,13 @@
             {
               "key": "stream_name",
               "operator": "=~",
-              "value": "/^$stream$/"
+              "value": "/^$stream_name$/"
             },
             {
               "condition": "AND",
               "key": "application_name",
               "operator": "=~",
-              "value": "/^$application$/"
+              "value": "/^$application_name$/"
             },
             {
               "condition": "AND",
@@ -1992,13 +1992,13 @@
             {
               "key": "stream_name",
               "operator": "=~",
-              "value": "/^$stream$/"
+              "value": "/^$stream_name$/"
             },
             {
               "condition": "AND",
               "key": "application_name",
               "operator": "=~",
-              "value": "/^$application$/"
+              "value": "/^$application_name$/"
             },
             {
               "condition": "AND",
@@ -2139,13 +2139,13 @@
             {
               "key": "stream_name",
               "operator": "=~",
-              "value": "/^$stream$/"
+              "value": "/^$stream_name$/"
             },
             {
               "condition": "AND",
               "key": "application_name",
               "operator": "=~",
-              "value": "/^$application$/"
+              "value": "/^$application_name$/"
             },
             {
               "condition": "AND",
@@ -2213,8 +2213,8 @@
       {
         "allValue": null,
         "current": {
-          "text": "t3",
-          "value": "t3"
+          "text": "",
+          "value": ""
         },
         "datasource": "influx_auto_DataFlowMetricsCollector",
         "definition": "select distinct(\"stream_name\") from (select  * from \"spring_integration_send\" WHERE time > now() - 60s)",
@@ -2222,7 +2222,7 @@
         "includeAll": false,
         "label": "Stream",
         "multi": false,
-        "name": "stream",
+        "name": "stream_name",
         "options": [],
         "query": "select distinct(\"stream_name\") from (select  * from \"spring_integration_send\" WHERE time > now() - 60s)",
         "refresh": 2,
@@ -2244,14 +2244,14 @@
           ]
         },
         "datasource": "influx_auto_DataFlowMetricsCollector",
-        "definition": "show tag values with key=\"application_name\" WHERE stream_name='$stream'",
+        "definition": "show tag values with key=\"application_name\" WHERE stream_name='$stream_name'",
         "hide": 0,
         "includeAll": true,
         "label": "application",
         "multi": true,
-        "name": "application",
+        "name": "application_name",
         "options": [],
-        "query": "show tag values with key=\"application_name\" WHERE stream_name='$stream'",
+        "query": "show tag values with key=\"application_name\" WHERE stream_name='$stream_name'",
         "refresh": 1,
         "regex": "",
         "skipUrlSync": false,
@@ -2265,13 +2265,13 @@
       {
         "allValue": null,
         "current": {
-          "selected": true,
-          "text": "27833",
-          "value": "27833"
+          "isNone": true,
+          "text": "None",
+          "value": ""
         },
         "datasource": "influx_auto_DataFlowMetricsCollector",
         "definition": "",
-        "hide": 0,
+        "hide": 2,
         "includeAll": false,
         "label": "ApplicationId",
         "multi": false,
@@ -2283,11 +2283,7 @@
         "skipUrlSync": false,
         "sort": 0,
         "tagValuesQuery": "show tag values with key = \"application_guid\" WHERE stream_name = '$stream' and application_name = '$tag'",
-        "tags": [
-          "atime",
-          "log",
-          "transform"
-        ],
+        "tags": [],
         "tagsQuery": "show tag values with key=\"application_name\" WHERE stream_name='$stream'",
         "type": "query",
         "useTags": true
@@ -2295,8 +2291,8 @@
       {
         "allValue": null,
         "current": {
-          "text": "3",
-          "value": "3"
+          "text": "2",
+          "value": "2"
         },
         "datasource": "influx_auto_DataFlowMetricsCollector",
         "definition": "SHOW TAG VALUES CARDINALITY FROM \"spring_integration_send\" WITH KEY = \"application_name\"",
@@ -2320,8 +2316,8 @@
       {
         "allValue": null,
         "current": {
-          "text": "t3",
-          "value": "t3"
+          "text": "stream1",
+          "value": "stream1"
         },
         "datasource": "influx_auto_DataFlowMetricsCollector",
         "definition": "show tag values with key=\"stream_name\"",
@@ -2376,5 +2372,5 @@
   "timezone": "",
   "title": "Streams",
   "uid": "scdf-streams",
-  "version": 67
+  "version": 11
 }
