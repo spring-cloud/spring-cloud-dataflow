@@ -15,18 +15,25 @@
  */
 package org.springframework.cloud.skipper.server.controller;
 
+import java.util.Collections;
+import java.util.Map;
+
 import javax.servlet.DispatcherType;
 import javax.servlet.ServletContext;
 
 import org.junit.Test;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cloud.deployer.spi.app.AppInstanceStatus;
+import org.springframework.cloud.deployer.spi.app.AppStatus;
+import org.springframework.cloud.deployer.spi.app.DeploymentState;
 import org.springframework.cloud.skipper.domain.InstallProperties;
 import org.springframework.cloud.skipper.domain.InstallRequest;
 import org.springframework.cloud.skipper.domain.PackageIdentifier;
 import org.springframework.cloud.skipper.domain.Release;
 import org.springframework.cloud.skipper.domain.Repository;
 import org.springframework.cloud.skipper.domain.StatusCode;
+import org.springframework.cloud.skipper.server.deployer.DefaultReleaseManager;
 import org.springframework.cloud.skipper.server.repository.jpa.RepositoryRepository;
 import org.springframework.http.HttpStatus;
 import org.springframework.mock.web.MockHttpServletRequest;
@@ -216,6 +223,46 @@ public class ReleaseControllerTests extends AbstractControllerTests {
 		MvcResult response = this.mockMvc.perform(new ErrorDispatcher(result, "/error"))
 				.andReturn();
 		assertThat(response.getResponse().getContentAsString()).contains("ReleaseNotFoundException");
+	}
+
+	@Test
+	public void testMutableAttributesAppInstanceStatus() {
+		// Test AppStatus with general State set
+		AppStatus appStatusWithGeneralState = AppStatus.of("id666").generalState(DeploymentState.deployed).build();
+		AppStatus appStatusCopy = DefaultReleaseManager.copyStatus(appStatusWithGeneralState);
+
+		assertThat(appStatusCopy.getState()).isNotNull();
+		assertThat(appStatusCopy.getState()).isEqualTo(appStatusWithGeneralState.getState());
+
+		assertThat(appStatusWithGeneralState.getInstances().size()).isEqualTo(0);
+		assertThat(appStatusCopy.getInstances().size()).isEqualTo(0);
+
+		// Test AppStatus with instances
+		AppStatus appStatusWithInstances = AppStatus.of("id666").generalState(null)
+				.with(new AppInstanceStatus() {
+					@Override
+					public String getId() {
+						return "instance666";
+					}
+
+					@Override
+					public DeploymentState getState() {
+						return DeploymentState.deployed;
+					}
+
+					@Override
+					public Map<String, String> getAttributes() {
+						return Collections.singletonMap("key1", "value1");
+					}
+				}).build();
+
+		appStatusCopy = DefaultReleaseManager.copyStatus(appStatusWithInstances);
+		appStatusCopy.getInstances().get("instance666").getAttributes().put("key2", "value2");
+
+		assertThat(appStatusWithInstances.getInstances().get("instance666").getAttributes().size()).isEqualTo(1);
+		assertThat(appStatusCopy.getInstances().get("instance666").getAttributes().size()).isEqualTo(2);
+		assertThat(appStatusCopy.getInstances().get("instance666").getAttributes().get("key2")).isEqualTo("value2");
+
 	}
 
 	private class ErrorDispatcher implements RequestBuilder {

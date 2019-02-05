@@ -48,6 +48,7 @@ import org.springframework.cloud.skipper.server.repository.map.DeployerRepositor
 import org.springframework.cloud.skipper.server.util.ArgumentSanitizer;
 import org.springframework.cloud.skipper.server.util.ConfigValueUtils;
 import org.springframework.cloud.skipper.server.util.ManifestUtils;
+import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
 /**
@@ -264,7 +265,8 @@ public class DefaultReleaseManager implements ReleaseManager {
 			for (Map.Entry<String, String> nameDeploymentId : appNameDeploymentIdMap.entrySet()) {
 				String appName = nameDeploymentId.getKey();
 				String deploymentId = nameDeploymentId.getValue();
-				AppStatus appStatus = appDeployer.status(deploymentId);
+				// Copy the status to allow instance attribute mutation.
+				AppStatus appStatus = copyStatus(appDeployer.status(deploymentId));
 				Collection<AppInstanceStatus> instanceStatuses = appStatus.getInstances().values();
 				for (AppInstanceStatus instanceStatus : instanceStatuses) {
 					instanceStatus.getAttributes().put(SKIPPER_APPLICATION_NAME_ATTRIBUTE, appName);
@@ -328,4 +330,45 @@ public class DefaultReleaseManager implements ReleaseManager {
 		return release;
 	}
 
+	public static AppStatus copyStatus(AppStatus appStatus) {
+		AppStatus.Builder builder = AppStatus.of(appStatus.getDeploymentId());
+		if (CollectionUtils.isEmpty(appStatus.getInstances())) {
+			builder.generalState(appStatus.getState());
+		}
+		else {
+			appStatus.getInstances().entrySet().stream().map(Map.Entry::getValue).forEach(e -> builder.with(
+					new MutableAttributesAppInstanceStatus(e.getId(), e.getState(), e.getAttributes())));
+		}
+		return builder.build();
+	}
+
+	private static final class MutableAttributesAppInstanceStatus implements AppInstanceStatus {
+
+		private final String id;
+
+		private final DeploymentState state;
+
+		private final Map<String, String> attributes = new TreeMap<>();
+
+		private MutableAttributesAppInstanceStatus(String id, DeploymentState state, Map<String, String> attributes) {
+			this.id = id;
+			this.state = state;
+			this.attributes.putAll(attributes);
+		}
+
+		@Override
+		public String getId() {
+			return this.id;
+		}
+
+		@Override
+		public DeploymentState getState() {
+			return this.state;
+		}
+
+		@Override
+		public Map<String, String> getAttributes() {
+			return this.attributes;
+		}
+	}
 }
