@@ -104,3 +104,7 @@ You should see dashboards similar to these.
 image::{dataflow-asciidoc}/images/grafana-prometheus-scdf-applications-dashboard.png[Grafana Prometheus Dashboard, scaledwidth="80%"]
 
 === InfluxDB
+
+You should see dashboards similar to these.
+
+image::{dataflow-asciidoc}/images/grafana-influxdb-scdf-streams-dashboard.png[Grafana InfluxDB Dashboard, scaledwidth="80%"]
