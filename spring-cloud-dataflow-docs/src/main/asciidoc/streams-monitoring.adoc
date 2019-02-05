@@ -9,6 +9,7 @@ It provides a simple facade over the instrumentation clients for the most popula
 See the https://micrometer.io/docs[Micrometer documentation] for the list of supported monitoring systems.
 Starting with Spring Boot 2.0, Micrometer is the instrumentation library https://docs.spring.io/spring-integration/docs/current/reference/html/system-management-chapter.html#micrometer-integration[powering the delivery of application metrics from Spring Boot].
 Spring Integration provides https://docs.spring.io/spring-integration/docs/current/reference/html/system-management-chapter.html#micrometer-integration[additional integration] to expose metrics around message rates and errors which is critical to the monitoring of deployed Streams.
+
 All Spring Cloud Stream App Starters are configured to support two of the most popular monitoring systems, Prometheus and InfluxDB.
 You can declaratively select which monitoring system to use.
 If you are not using Prometheus or InfluxDB, you can customise the App starters to use a different monitoring system as well as include your preferred micrometer monitoring system library in your own custom applications.
@@ -23,7 +24,7 @@ image::{dataflow-asciidoc}/images/micrometer-arch.png[Micrometer Monitoring Arch
 .Connect Grafana to the selected monitoring system and install the provided Grafana dashboards that visualize different aspects of the running stream applications..
 .The Data Flow UI provides buttons to open the Grafana dashboard for each stream.
 
-To allow aggregating metrics per application type, instance or per stream the SCSt app starters are enriched with the following Micrometer tags:
+To allow aggregating metrics per application type, per instance or per stream the Spring <<applications,Cloud Stream Application Starters>> are configured to use the following Micrometer tags:
 
 [width="100%",frame="topbot",options="header"]
 |===
@@ -46,11 +47,11 @@ To allow aggregating metrics per application type, instance or per stream the SC
 
 |===
 
-If the Data Flow server is started with the `spring.cloud.dataflow.grafana-info.url` property pointing to your Grafana URL, then the Grafana feature is enabled and SCDF UI will provide you with handy Grafana-buttons that can open particular dashboard for given stream, application or application instance. Following screenshot illustrate those buttons:
+If the Data Flow server is started with the `spring.cloud.dataflow.grafana-info.url` property pointing to your Grafana URL, then the Grafana feature is enabled and Data Flow UI will provide you with Grafana-buttons that can open particular dashboard for given stream, application or application instance. Following screenshot illustrates these buttons:
 
-image::{dataflow-asciidoc}/images/grafana-scdf-ui-buttons-streams.png[SCDF UI Grafana Buttions - Streams, scaledwidth="70%"]
+image::{dataflow-asciidoc}/images/grafana-scdf-ui-buttons-streams.png[Data Flow UI Grafana Buttons - Streams, scaledwidth="70%"]
 
-image::{dataflow-asciidoc}/images/grafana-scdf-ui-buttons-apps.png[SCDF UI Grafana Buttions - Appliations, scaledwidth="70%"]
+image::{dataflow-asciidoc}/images/grafana-scdf-ui-buttons-apps.png[Data Flow UI Grafana Buttons - Applications, scaledwidth="70%"]
 
 As setting up Prometheus and InfluxDB is different depending on the platform you are running on, we provide instructions for each platform.
 In Spring Cloud Data Flow 2.0 M2, only the local server instructions have been provided, which will give you a good indication of what is to come on the other platforms.
