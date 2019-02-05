@@ -4,11 +4,11 @@
 === Prometheus
 
 https://prometheus.io/[Prometheus] is a popular pull based time series database that pulls the metrics from the target applications from preconfigured endpoints.
-Prometheus needs to be provides with the current runtime list of target URLs to monitor.
+Prometheus needs to be regularly provided with the URLs of the target applications to monitor.
  This task is delegated to a component called Service Discovery, which usually a platform specific implementation.
 The Data Flow server provides a standalone Service Discovery service that uses the Data Flow `/runtime/apps` REST endpoint to compute the URL locations of the deployed application's Prometheus endpoints.
 
-To enable Micrometer's Prometheus meter registry for Spring Cloud Stream app starters, set the following property.
+To enable Micrometer's Prometheus meter registry for Spring Cloud Stream app starters, set the following properties.
 
 [source,bash]
 ----
@@ -32,8 +32,8 @@ Clone the Data Flow github repository for tagged release and change to the prome
 cd ./scdf/src/grafana/prometheus/docker
 ----
 
-Set the SCDF_HOST_IP environment variable to the the IP address of your local host.  Use the your real IP address and not the localhost/127.0.0.1.
-You can use ifconfig to find out your IP address.
+Set the SCDF_HOST_IP environment variable to the IP address of your local host.  Use the real IP address and not the localhost/127.0.0.1.
+You can use `ifconfig` to find out your IP address.
 [source,bash]
 ----
 export SCDF_HOST_IP=<YOUR locahost IP address>
@@ -50,7 +50,7 @@ Start Prometheus, Grafana + Service-Discovery using docker-compose
 docker-compose up -d --build
 ----
 
-Check the containers have started started:
+Check the containers have started:
 [source,bash]
 ----
 docker ps

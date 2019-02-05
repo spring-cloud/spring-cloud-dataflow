@@ -2,7 +2,7 @@
 = Stream Monitoring
 
 This section describes how to monitor the applications that were deployed as part of a Stream.
-The setup for each platform is differnet but the general architecture is the same across the platforms.
+The setup for each platform is different but the general architecture is the same across the platforms.
 
 The Data Flow 2.x metrics architecture is designed around the https://micrometer.io/[Micrometer library] which is a Vendor-neutral application metrics facade.
 It provides a simple facade over the instrumentation clients for the most popular monitoring systems.
@@ -16,7 +16,7 @@ To help you get started monitoring Streams, Data Flow provides https://grafana.c
 
 The general architecture of how applications are monitored is shown below.
 
-.The Spring Cloud Data Flow Monitorng Architecure
+.The Spring Cloud Data Flow Monitoring Architecture
 image::{dataflow-asciidoc}/images/micrometer-arch.png[Micrometer Monitoring Architecture, scaledwidth="80%"]
 
 .Each Spring Cloud Stream application sends send metrics to a monitoring system, often a Time Series Database (TSDB).
