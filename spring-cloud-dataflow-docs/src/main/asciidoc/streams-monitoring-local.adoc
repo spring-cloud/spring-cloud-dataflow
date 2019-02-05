@@ -101,5 +101,6 @@ dataflow:>stream create stream2 --definition "time --fixed-delay=10 --time-unit=
 
 You should see dashboards similar to these.
 
+image::{dataflow-asciidoc}/images/grafana-prometheus-scdf-applications-dashboard.png[Grafana Prometheus Dashboard, scaledwidth="80%"]
 
 === InfluxDB
