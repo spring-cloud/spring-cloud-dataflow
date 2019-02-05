@@ -1,0 +1,105 @@
+[[streams-monitoring-local]]
+== Stream Monitoring - Local
+
+=== Prometheus
+
+https://prometheus.io/[Prometheus] is a popular pull based time series database that pulls the metrics from the target applications from preconfigured endpoints.
+Prometheus needs to be provides with the current runtime list of target URLs to monitor.
+ This task is delegated to a component called Service Discovery, which usually a platform specific implementation.
+The Data Flow server provides a standalone Service Discovery service that uses the Data Flow `/runtime/apps` REST endpoint to compute the URL locations of the deployed application's Prometheus endpoints.
+
+To enable Micrometer's Prometheus meter registry for Spring Cloud Stream app starters, set the following property.
+
+[source,bash]
+----
+management.metrics.export.prometheus.enabled=true
+management.endpoints.web.exposure.include=prometheus
+----
+
+Disable the application's security which allows for a simple Prometheus configuration to scrape monitoring information by setting the following property.
+
+[source,bash]
+----
+spring.cloud.streamapp.security.enabled=false
+----
+
+The following steps will start up Prometheus, Grafana, and the local service discovery application.
+You will need to install the latest versions of `docker` and `docker-compose`.
+
+Clone the Data Flow github repository for tagged release and change to the prometheus docker folder:
+[source,bash]
+----
+cd ./scdf/src/grafana/prometheus/docker
+----
+
+Set the SCDF_HOST_IP environment variable to the the IP address of your local host.  Use the your real IP address and not the localhost/127.0.0.1.
+You can use ifconfig to find out your IP address.
+[source,bash]
+----
+export SCDF_HOST_IP=<YOUR locahost IP address>
+----
+In many cases the provided `find_host_ip.sh` script will give you the IP address.
+[source,bash]
+----
+source ./find_host_ip.sh
+----
+
+Start Prometheus, Grafana + Service-Discovery using docker-compose
+[source,bash]
+----
+docker-compose up -d --build
+----
+
+Check the containers have started started:
+[source,bash]
+----
+docker ps
+CONTAINER ID IMAGE              ...  PORTS                    NAMES
+2b8b6a442365 tzolov/spring-...  ...  0.0.0.0:8181->8181/tcp   service-discovery
+bff63c4902d5 docker_prometheus  ...  0.0.0.0:9090->9090/tcp   prometheus
+40190da6aa4b docker_grafana     .... 0.0.0.0:3000->3000/tcp   grafana
+----
+
+To validate the seutp, you can login into those containers using the following commands.
+[source,bash]
+----
+docker exec -it service-discovery /bin/sh
+docker exec -it prometheus /bin/sh
+docker exec -it grafana /bin/bash
+----
+Then on the prometheus and service-discovery containers you can check the content of the targets.json file like this: cat /tmp/scdf-targets/targets.json
+
+You can reach the Prometheus UI on `http://localhost:9090/graph` and `http://localhost:9090/targets`
+
+The Grafana dashboard can be reached at `http://localhost:3000` with credentials user: admin, password: admin.
+It comes with two provisioned dashboards
+
+. Streams: `http://localhost:3000/d/scdf-streams/streams?refresh=10s`
+. Applications: `http://localhost:3000/d/scdf-applications/applications?refresh=10s`
+
+You can destroy all containers with
+[source,bash]
+----
+docker-compose down
+----
+
+Start Data Flow server with the following properties:
+[source,bash]
+----
+--spring.cloud.dataflow.applicationProperties.stream.management.metrics.export.prometheus.enabled=true
+--spring.cloud.dataflow.applicationProperties.stream.spring.cloud.streamapp.security.enabled=false
+--spring.cloud.dataflow.applicationProperties.stream.management.endpoints.web.exposure.include=prometheus,info,health
+--spring.cloud.dataflow.grafana-info.url=http://localhost:3000
+----
+
+Now if you deploy a simple stream that uses Kafka, such as
+[source,bash]
+----
+dataflow:>app import --uri http://bit.ly/Einstein-BUILD-RC1-stream-applications-kafka-maven --force
+dataflow:>stream create stream2 --definition "time --fixed-delay=10 --time-unit=MILLISECONDS | filter --expression=payload.contains('3') | log" --deploy
+----
+
+You should see dashboards similar to these.
+
+
+=== InfluxDB
