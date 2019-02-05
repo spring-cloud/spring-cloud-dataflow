@@ -1,5 +1,5 @@
 /*
- * Copyright 2016-2018 the original author or authors.
+ * Copyright 2016-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,8 +30,6 @@ import org.springframework.hateoas.ResourceSupport;
 public class SecurityInfoResource extends ResourceSupport {
 
 	private boolean authenticationEnabled;
-
-	private boolean formLogin = false;
 
 	private boolean authenticated;
 
@@ -97,19 +95,4 @@ public class SecurityInfoResource extends ResourceSupport {
 		this.roles.add(role);
 		return this;
 	}
-
-	/**
-	 * Returns {@code true} if form-login is used. In case of OAuth2 authentication,
-	 * {@code false} is returned.
-	 *
-	 * @return True if form-login is, false if OAuth2 authentication is used
-	 */
-	public boolean isFormLogin() {
-		return formLogin;
-	}
-
-	public void setFormLogin(boolean formLogin) {
-		this.formLogin = formLogin;
-	}
-
 }

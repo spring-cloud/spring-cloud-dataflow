@@ -98,7 +98,6 @@ public class AboutControllerTests {
 				.andExpect(jsonPath("$.versionInfo.shell.checksumSha1", is("ABCDEFG")))
 				.andExpect(jsonPath("$.versionInfo.shell.checksumSha256").doesNotExist())
 				.andExpect(jsonPath("$.securityInfo.authenticationEnabled", is(false)))
-				.andExpect(jsonPath("$.securityInfo.formLogin", is(false)))
 				.andExpect(jsonPath("$.securityInfo.authenticated", is(false)))
 				.andExpect(jsonPath("$.securityInfo.username", isEmptyOrNullString()))
 				.andExpect(jsonPath("$.featureInfo.streamsEnabled", is(true)))
@@ -382,7 +381,6 @@ public class AboutControllerTests {
 					.andExpect(jsonPath("$.versionInfo.shell.checksumSha1", is("ABCDEFG")))
 					.andExpect(jsonPath("$.versionInfo.shell.checksumSha256").doesNotExist())
 					.andExpect(jsonPath("$.securityInfo.authenticationEnabled", is(false)))
-					.andExpect(jsonPath("$.securityInfo.formLogin", is(false)))
 					.andExpect(jsonPath("$.securityInfo.authenticated", is(false)))
 					.andExpect(jsonPath("$.securityInfo.username", isEmptyOrNullString()))
 					.andExpect(jsonPath("$.runtimeEnvironment.appDeployer.deployerName", is("skipper server")))
@@ -412,11 +410,9 @@ public class AboutControllerTests {
 					.andExpect(jsonPath("$.versionInfo.shell.checksumSha1", is("ABCDEFG")))
 					.andExpect(jsonPath("$.versionInfo.shell.checksumSha256").doesNotExist())
 					.andExpect(jsonPath("$.securityInfo.authenticationEnabled", is(false)))
-					.andExpect(jsonPath("$.securityInfo.formLogin", is(false)))
 					.andExpect(jsonPath("$.securityInfo.authenticated", is(false)))
 					.andExpect(jsonPath("$.securityInfo.username", isEmptyOrNullString()))
 					.andExpect(jsonPath("$.runtimeEnvironment.appDeployer.deployerName", isEmptyOrNullString())); // Connection to Skipper is lost!
 		}
-
 	}
 }

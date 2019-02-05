@@ -145,13 +145,6 @@ public class AboutController {
 					final GrantedAuthority grantedAuthority = (GrantedAuthority) authority;
 					securityInfo.addRole(grantedAuthority.getAuthority());
 				}
-
-				if (this.oauthClientId == null) {
-					securityInfo.setFormLogin(true);
-				}
-				else {
-					securityInfo.setFormLogin(false);
-				}
 			}
 		}
 

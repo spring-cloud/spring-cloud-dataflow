@@ -9,9 +9,8 @@
 ╟─────────────────┼─────────────────────────────────────╢
 ║    Versions     │Foo Core: 1.2.3.BUILD-SNAPSHOT       ║
 ╟─────────────────┼─────────────────────────────────────╢
-║                 │         Authenticated: false        ║
-║    Security     │Authentication Enabled: true         ║
-║                 │            Form Login: false        ║
+║    Security     │         Authenticated: false        ║
+║                 │Authentication Enabled: true         ║
 ╟─────────────────┼─────────────────────────────────────╢
 ║                 │Deployer Implementation Version: null║
 ║                 │                  Deployer Name: null║

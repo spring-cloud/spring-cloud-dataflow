@@ -1,5 +1,5 @@
 /*
- * Copyright 2016-2017 the original author or authors.
+ * Copyright 2016-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,8 +28,6 @@ import java.util.List;
 public class SecurityInfo {
 
 	private boolean authenticationEnabled;
-
-	private boolean formLogin;
 
 	private boolean authenticated;
 
@@ -94,20 +92,6 @@ public class SecurityInfo {
 	public SecurityInfo addRole(String role) {
 		this.roles.add(role);
 		return this;
-	}
-
-	/**
-	 * Returns {@code true} if form-login is used. In case of OAuth2 authentication,
-	 * {@code false} is returned.
-	 *
-	 * @return True if form-login is, false if OAuth2 authentication is used
-	 */
-	public boolean isFormLogin() {
-		return formLogin;
-	}
-
-	public void setFormLogin(boolean formLogin) {
-		this.formLogin = formLogin;
 	}
 
 }
