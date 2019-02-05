@@ -145,6 +145,7 @@ public class Tokens {
 	 * Return the token at a specified distance beyond current position. If that is off
 	 * the end of the list of known tokens, return {@code null}.
 	 *
+	 * @param howFarAhead how many character positions to peek ahead.
 	 * @return token at specified distance beyond current position or {@code null} if
 	 * there are no more tokens
 	 */

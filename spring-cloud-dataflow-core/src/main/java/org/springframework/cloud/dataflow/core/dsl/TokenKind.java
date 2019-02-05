@@ -74,7 +74,7 @@ public enum TokenKind {
 	}
 
 	/**
-	 * @return the chars representing simple fixed token (eg. : > --)
+	 * @return the chars representing simple fixed token (eg. : {@code > --})
 	 */
 	public char[] getTokenChars() {
 		return tokenChars;

@@ -198,13 +198,14 @@ public class SimpleJobService implements JobService, DisposableBean {
 	 * Delegates launching to {@link org.springframework.cloud.dataflow.server.batch.SimpleJobService#restart(Long, org.springframework.batch.core.JobParameters)}
 	 *
 	 * @param jobExecutionId the job execution to restart
-	 * @return
-	 * @throws NoSuchJobExecutionException
-	 * @throws JobExecutionAlreadyRunningException
-	 * @throws JobRestartException
-	 * @throws JobInstanceAlreadyCompleteException
-	 * @throws NoSuchJobException
-	 * @throws JobParametersInvalidException
+	 * @return Instance of {@link JobExecution} associated with the restart.
+
+	 * @throws NoSuchJobExecutionException thrown if job execution specified does not exist
+	 * @throws JobExecutionAlreadyRunningException thrown if job is already running
+	 * @throws JobRestartException thrown if job can not be restarted
+	 * @throws JobInstanceAlreadyCompleteException thrown if job is already complete
+	 * @throws NoSuchJobException thrown if job does not exist
+	 * @throws JobParametersInvalidException the parameters specified are invalid
 	 */
 	@Override
 	public JobExecution restart(Long jobExecutionId) throws NoSuchJobExecutionException, JobExecutionAlreadyRunningException, JobRestartException, JobInstanceAlreadyCompleteException, NoSuchJobException, JobParametersInvalidException {

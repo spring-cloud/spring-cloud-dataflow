@@ -43,9 +43,6 @@ public class StreamNode extends AstNode {
 		this.sinkDestinationNode = sinkDestinationNode;
 	}
 
-	/**
-	 * @inheritDoc
-	 */
 	@Override
 	public String stringify(boolean includePositionalInfo) {
 		StringBuilder s = new StringBuilder();
@@ -115,6 +112,7 @@ public class StreamNode extends AstNode {
 	 * referred to multiple times the secondary references cannot be accessed via this
 	 * method.
 	 *
+	 * @param  appName the name of the app
 	 * @return the first occurrence of the named app in the stream
 	 */
 	public AppNode getApp(String appName) {

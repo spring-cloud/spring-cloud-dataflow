@@ -46,6 +46,7 @@ public class CurrentTaskExecutionsResource extends ResourceSupport {
 	/**
 	 *
 	 * Set the maximum number of concurrently running task executions allowed.
+	 * @param maximumTaskExecutions that should be allowed to be executed.
 	 */
 	public void setMaximumTaskExecutions(long maximumTaskExecutions) {
 		this.maximumTaskExecutions = maximumTaskExecutions;
@@ -62,6 +63,7 @@ public class CurrentTaskExecutionsResource extends ResourceSupport {
 	/**
 	 *
 	 * Set the current number of running task executions.
+	 * @param runningExecutionCount the current count of running executions.
 	 */
 	public void setRunningExecutionCount(long runningExecutionCount) {
 		this.runningExecutionCount = runningExecutionCount;

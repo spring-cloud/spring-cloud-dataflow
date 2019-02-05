@@ -31,10 +31,8 @@ import org.springframework.util.Assert;
  * Multiple fingerprints are supported, as the control flow in the parser code may be
  * different depending on the form of the expression. For example, for the rule
  * {@code stream = module (| module)* }, the pseudo code for the parser may look like
- * <p>
- *
  * <pre>
- * <code>
+ * {@code
  * stream() {
  *   module();  (1)
  *   while(moreInput()) {
@@ -42,9 +40,8 @@ import org.springframework.util.Assert;
  *     module();  (2)
  *   }
  * }
- * </code>
+ * }
  * </pre>
- * <p>
  * In that setup, whether we're dealing with the first module, or a subsequent module,
  * stack frames would be different (see (1) and (2)).
  *

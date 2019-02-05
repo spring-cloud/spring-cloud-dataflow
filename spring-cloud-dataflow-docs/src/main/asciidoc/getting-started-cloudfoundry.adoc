@@ -139,48 +139,6 @@ You can use the `--random-route` option to avoid this when you push the server a
 NOTE: If you need to configure multiple Maven repositories, a proxy, or authorization for a private repository, see link:http://docs.spring.io/spring-cloud-dataflow/docs/{scdf-core-version}/reference/htmlsingle/#getting-started-maven-configuration[Maven Configuration].
 
 
-[[getting-started-cloudfoundry-deploying-using-manifest]]
-==== Deploying by Using a Manifest
-
-As an alternative to setting environment variables with the `cf set-env` command, you can curate all the relevant env-var's in a `manifest.yml` file and use the `cf push` command to provision the server.
-
-The following example template provisions the server on PCFDev:
-
-====
-[source,yml]
-----
----
-applications:
-- name: data-flow-server
-  host: data-flow-server
-  memory: 2G
-  disk_quota: 2G
-  instances: 1
-  path: {PATH TO SERVER UBER-JAR}
-  env:
-    SPRING_APPLICATION_NAME: data-flow-server
-    MAVEN_REMOTEREPOSITORIES[REPO1]_URL: https://repo.spring.io/libs-snapshot
-    SPRING_CLOUD_DATAFLOW_TASK_PLATFORM_CLOUDFOUNDRY_ACCOUNTS[default]_CONNECTION_URL: https://api.sys.huron.cf-app.com
-    SPRING_CLOUD_DATAFLOW_TASK_PLATFORM_CLOUDFOUNDRY_ACCOUNTS[default]_CONNECTION_ORG: sabby20
-    SPRING_CLOUD_DATAFLOW_TASK_PLATFORM_CLOUDFOUNDRY_ACCOUNTS[default]_CONNECTION_SPACE: sabby20
-    SPRING_CLOUD_DATAFLOW_TASK_PLATFORM_CLOUDFOUNDRY_ACCOUNTS[default]_CONNECTION_DOMAIN: apps.huron.cf-app.com
-    SPRING_CLOUD_DATAFLOW_TASK_PLATFORM_CLOUDFOUNDRY_ACCOUNTS[default]_CONNECTION_USERNAME: admin
-    SPRING_CLOUD_DATAFLOW_TASK_PLATFORM_CLOUDFOUNDRY_ACCOUNTS[default]_CONNECTION_PASSWORD: ***
-    SPRING_CLOUD_DATAFLOW_TASK_PLATFORM_CLOUDFOUNDRY_ACCOUNTS[default]_CONNECTION_SKIP_SSL_VALIDATION: true
-    SPRING_CLOUD_DATAFLOW_TASK_PLATFORM_CLOUDFOUNDRY_ACCOUNTS[default]_DEPLOYMENT_SERVICES: mysql
-    SPRING_CLOUD_SKIPPER_CLIENT_SERVER_URI: https://<skipper-host-name>/api
-services:
-- mysql
-----
-====
-
-[NOTE]
-=====
-Deploy Skipper first and then configure the URI location where the Skipper server runs.
-=====
-
-Once you are ready with the relevant properties in this file, you can issue a `cf push` command from the directory where this file is stored.
-
 [[getting-started-cloudfoundry-deploying-using-env-vars]]
 ==== Deploying by Using Environment Variables
 

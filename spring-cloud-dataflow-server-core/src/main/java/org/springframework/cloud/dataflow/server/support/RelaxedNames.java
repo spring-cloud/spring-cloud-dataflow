@@ -30,8 +30,6 @@ import org.springframework.util.StringUtils;
  *
  * @author Phillip Webb
  * @author Dave Syer
- * @see RelaxedDataBinder
- * @see RelaxedPropertyResolver
  */
 public final class RelaxedNames implements Iterable<String> {
 

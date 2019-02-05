@@ -565,6 +565,7 @@ public class SkipperStreamDeployer implements StreamDeployer {
 	 * Rollback the stream to a specific version
 	 * @param streamName the name of the stream to rollback
 	 * @param releaseVersion the version of the stream to rollback to
+	 * @return instance of {@link Release}
 	 */
 	public Release rollbackStream(String streamName, int releaseVersion) {
 		RollbackRequest rollbackRequest = new RollbackRequest();

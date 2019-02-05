@@ -74,6 +74,7 @@ public class TaskSchedulerController {
 	 * Return a page-able list of {@link ScheduleInfo}s.
 	 *
 	 * @param assembler assembler for the {@link ScheduleInfo}
+	 * @param pageable {@link Pageable} to be used
 	 * @return a list of Schedules
 	 */
 	@RequestMapping(value = "", method = RequestMethod.GET)

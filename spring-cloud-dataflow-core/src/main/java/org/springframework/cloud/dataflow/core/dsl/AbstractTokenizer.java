@@ -102,6 +102,8 @@ public abstract class AbstractTokenizer {
 
 	/**
 	 * Check if this might be a two character token.
+	 * @param kind the {@link TokenKind} to be evaluated
+	 * @return true if the token has length of 2
 	 */
 	protected boolean isTwoCharToken(TokenKind kind) {
 		Assert.isTrue(kind.tokenChars.length == 2, "The token kind being looked for should be of length 2");
@@ -112,6 +114,7 @@ public abstract class AbstractTokenizer {
 
 	/**
 	 * Push a token of just one character in length.
+	 * @param kind the {@link TokenKind} to be pushed
 	 */
 	protected void pushCharToken(TokenKind kind) {
 		tokens.add(new Token(kind, pos, pos + 1));
@@ -120,6 +123,7 @@ public abstract class AbstractTokenizer {
 
 	/**
 	 * Push a token of two characters in length.
+	 * @param kind the {@link TokenKind} to be pushed
 	 */
 	protected void pushPairToken(TokenKind kind) {
 		tokens.add(new Token(kind, pos, pos + 2));
@@ -212,6 +216,9 @@ public abstract class AbstractTokenizer {
 	 * only terminate that identifier if encountering a small set of characters. If the
 	 * argument has included a ' to put something in quotes, we remember that and don't
 	 * allow ' ' (space) and '\t' (tab) to terminate the value.
+	 * @param ch char to be evaluated
+	 * @param quoteOpen true if parsing an open quote
+	 * @return true if char is a type of terminator and quote is not open.
 	 */
 	protected boolean isArgValueIdentifierTerminator(char ch, boolean quoteOpen) {
 		return (ch == '|' && !quoteOpen) || (ch == ';' && !quoteOpen) || ch == '\0' || (ch == ' ' && !quoteOpen)

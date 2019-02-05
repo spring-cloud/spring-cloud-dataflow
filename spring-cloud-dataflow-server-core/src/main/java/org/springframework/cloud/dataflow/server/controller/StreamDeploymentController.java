@@ -138,6 +138,7 @@ public class StreamDeploymentController {
 
 	/**
 	 * Request un-deployment of all streams.
+	 * @return instance of {@link ResponseEntity}
 	 */
 	@RequestMapping(value = "", method = RequestMethod.DELETE)
 	public ResponseEntity<Void> undeployAll() {

@@ -1522,22 +1522,22 @@ The following topics provide more detail:
 
 
 [[api-guide-resources-task-validation-request-structure]]
-===== Request Structure
+==== Request Structure
 
 include::{snippets}/task-validation-documentation/validate-task/http-request.adoc[]
 
 [[api-guide-resources-task-validation-request-parameters]]
-===== Request Parameters
+==== Request Parameters
 
 There are no request parameters for this endpoint.
 
 [[api-guide-resources-task-validation-example-request]]
-===== Example Request
+==== Example Request
 
 include::{snippets}/task-validation-documentation/validate-task/curl-request.adoc[]
 
 [[api-guide-resources-task-validation-response-structure]]
-===== Response Structure
+==== Response Structure
 
 include::{snippets}/task-validation-documentation/validate-task/http-response.adoc[]
 

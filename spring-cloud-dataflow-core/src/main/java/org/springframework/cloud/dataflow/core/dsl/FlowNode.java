@@ -25,10 +25,10 @@ import java.util.List;
  * flow is expressed like this:
  *
  * <pre>
- * <tt>aa && bb</tt>
+ * {@code
+ * aa && bb
+ * }
  * </pre>
- *
- * .
  *
  * @author Andy Clement
  */

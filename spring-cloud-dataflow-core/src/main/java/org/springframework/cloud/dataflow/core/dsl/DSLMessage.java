@@ -27,15 +27,14 @@ import java.text.MessageFormat;
  * locales.
  * <p>
  * When a message is formatted, it will have this kind of form
- * <p>
- *
- * <pre class="code">
+ * </p>
+ * {@code
  * 105E: (pos 34): Expected an argument value but was ' '
- * </pre>
+ * }
  * <p>
- * </code> The prefix captures the code and the error kind, whilst the position is
+ * The prefix captures the code and the error kind, whilst the position is
  * included if it is known.
- *
+ * </p>
  * @author Andy Clement
  * @author Ilayaperumal Gopinathan
  * @author Mark Fisher

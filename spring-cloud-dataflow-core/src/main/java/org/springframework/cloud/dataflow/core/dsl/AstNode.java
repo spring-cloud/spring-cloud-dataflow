@@ -41,6 +41,7 @@ public abstract class AstNode {
 	}
 
 	/**
+	 * @param includePositionInfo position information is returned as a part of the result if set to true.
 	 * @return a string representation of the AST. Useful for debugging/testing.
 	 */
 	public abstract String stringify(boolean includePositionInfo);

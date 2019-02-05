@@ -195,7 +195,7 @@ public class AppParser {
 
 	/**
 	 * Return the concatenation of the data of multiple tokens.
-	 *
+	 * @param iterable the tokens to concatenate into the result.
 	 * @return string containing the data of multiple tokens
 	 */
 	protected String toData(Iterable<Token> iterable) {

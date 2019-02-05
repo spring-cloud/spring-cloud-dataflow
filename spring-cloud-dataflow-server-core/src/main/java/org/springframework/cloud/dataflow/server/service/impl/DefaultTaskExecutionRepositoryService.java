@@ -24,8 +24,8 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Assert;
 
 /**
- * Default implementation of TaskExecutionCreationService that creates a {@see TaskExecution}
- * with a transaction propagation setting of {@see  Propagation.REQUIRES_NEW}
+ * Default implementation of TaskExecutionCreationService that creates a {@link TaskExecution}
+ * with a transaction propagation setting of {@link Propagation#REQUIRES_NEW}
  */
 @Transactional
 public class DefaultTaskExecutionRepositoryService implements TaskExecutionCreationService {

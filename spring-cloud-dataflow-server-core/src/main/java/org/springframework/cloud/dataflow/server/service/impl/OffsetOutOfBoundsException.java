@@ -18,7 +18,7 @@ package org.springframework.cloud.dataflow.server.service.impl;
 
 
 /**
- * Exception thrown when a user requests a page & size combination that creates
+ * Exception thrown when a user requests a page and size combination that creates
  * an offset  that is greater than  {@link Integer#MAX_VALUE}.
  *
  * @author Glenn Renfro

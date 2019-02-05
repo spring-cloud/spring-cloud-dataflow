@@ -72,6 +72,7 @@ public interface AppRegistryService {
 
 	/**
 	 * Deletes all provided {@link AppRegistration}'s.
+	 * @param appRegistrations the {@link AppRegistration}s that will be deleted
 	 */
 	void deleteAll(Iterable<AppRegistration> appRegistrations);
 

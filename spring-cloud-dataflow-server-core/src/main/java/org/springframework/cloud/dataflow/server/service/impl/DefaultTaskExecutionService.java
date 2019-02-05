@@ -107,7 +107,12 @@ public class DefaultTaskExecutionService implements TaskExecutionService {
 	 * @param launcherRepository the repository of task launcher used to launch task apps.
 	 * @param metaDataResolver the metadata resolver
 	 * @param auditRecordService the audit record service
-	 *
+	 * @param dataflowServerUri the URI of the data flow server
+	 * @param commonApplicationProperties the common application properties for all tasks
+	 * @param taskRepository the repository to use for accessing and updating task executions
+	 * @param taskDeploymentRepository the repository to track task deployment
+	 * @param taskExecutionInfoService the service used to setup a task execution
+	 * @param taskExecutionRepositoryService the service used to create the task execution
 	 */
 	public DefaultTaskExecutionService(LauncherRepository launcherRepository,
 			ApplicationConfigurationMetadataResolver metaDataResolver,

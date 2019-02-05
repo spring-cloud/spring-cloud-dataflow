@@ -68,7 +68,7 @@ public class StreamParser extends AppParser {
 	 * Parse a stream definition.
 	 *
 	 * @return the AST for the parsed stream
-	 * @throws ParseException
+	 * @throws ParseException thrown if expression fails parsing.
 	 */
 	public StreamNode parse() {
 		StreamNode ast = eatStream();
