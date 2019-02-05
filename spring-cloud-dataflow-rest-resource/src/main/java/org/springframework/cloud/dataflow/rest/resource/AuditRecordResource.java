@@ -22,7 +22,7 @@ import org.springframework.hateoas.PagedResources;
 import org.springframework.hateoas.ResourceSupport;
 
 /**
- * A HATEOAS representation of an {@link AuditRecord}.
+ * A HATEOAS representation of an {@link org.springframework.cloud.dataflow.core.AuditRecord}.
  * <p>
  * Note: this implementation is not thread safe.
  *

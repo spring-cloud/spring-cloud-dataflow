@@ -20,7 +20,7 @@ import org.springframework.cloud.task.repository.TaskExecution;
 
 /**
  * Offers features to allow users to create {@link TaskExecution}s.
- * Created in order to have the {@see TaskExecution} created in a new transaction.
+ * Created in order to have the {@link TaskExecution} created in a new transaction.
  */
 public interface TaskExecutionCreationService {
 

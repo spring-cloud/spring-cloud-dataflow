@@ -143,6 +143,7 @@ public class AppRegistryController {
 	 * @param type application type
 	 * @param name application name
 	 * @param version application version
+	 * @param exhaustive if set to true all properties are returned
 	 * @return detailed application information
 	 */
 	@RequestMapping(value = "/{type}/{name}/{version:.+}", method = RequestMethod.GET)

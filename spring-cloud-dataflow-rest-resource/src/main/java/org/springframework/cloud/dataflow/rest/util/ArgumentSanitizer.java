@@ -181,6 +181,8 @@ public class ArgumentSanitizer {
 	/**
 	 * For all sensitive properties (e.g. key names containing words like password, secret,
 	 * key, token) replace the value with '*****' string
+	 * @param properties to be sanitized
+	 * @return sanitized properties
 	 */
 	public Map<String, String> sanitizeProperties(Map<String, String> properties) {
 		if (!CollectionUtils.isEmpty(properties)) {
@@ -196,6 +198,8 @@ public class ArgumentSanitizer {
 	/**
 	 * For all sensitive arguments (e.g. key names containing words like password, secret,
 	 * key, token) replace the value with '*****' string
+	 * @param arguments to be sanitized
+	 * @return sanitized arguments
 	 */
 	public List<String> sanitizeArguments(List<String> arguments) {
 		if (!CollectionUtils.isEmpty(arguments)) {

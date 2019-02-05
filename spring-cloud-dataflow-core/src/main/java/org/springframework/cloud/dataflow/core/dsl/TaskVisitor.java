@@ -19,15 +19,15 @@ package org.springframework.cloud.dataflow.core.dsl;
 /**
  * Basic visitor pattern for a parsed task. Provide a concrete implementation to
  * participate in the visit and pass it to a parsed TaskNode. A simple task only has one
- * sequence, for example: <tt>appA && appB && appC</tt>. In this situation
+ * sequence, for example: {@code appA && appB && appC}. In this situation
  * <tt> preVisit(int)</tt> and <tt>postVisit(int)</tt> will only be called with 0. A more
  * complex situation would be:
  *
  * <pre>
- * </code>
+ * {@code
  * appA && appB 0->:foo *->appC
  * foo: appD && appE
- * </code>
+ * }
  * </pre>
  *
  * This includes two sequences - as in two separate definitions. The primary definition
@@ -95,8 +95,8 @@ public abstract class TaskVisitor {
 
 	/**
 	 * <b>This preVisit/visit/postVisit sequence for taskApp is not invoked for inlined
-	 * references to apps in transitions, for example: <tt>appA 0->:foo 1->appB</tt>. The
-	 * reference to <tt>appB</tt> would be seen in the transition visit below.
+	 * references to apps in transitions, for example: {@code appA 0->:foo 1->appB}. The
+	 * reference to {@code appB} would be seen in the transition visit below.</b>
 	 *
 	 * @param taskApp the use of a task app in a task dsl
 	 * @return false to skip visiting this taskApp

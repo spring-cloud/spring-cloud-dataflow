@@ -50,7 +50,7 @@ import org.springframework.web.bind.annotation.RestController;
  *
  * @author Glenn Renfro
  *
- * @Since 2.0
+ * @since 2.0
  */
 @RestController
 @RequestMapping("/jobs/thinexecutions")

@@ -105,6 +105,7 @@ public class AppNode extends AstNode {
 	 * <li>an explicit label if provided</li>
 	 * <li>the app name if no label was provided</li>
 	 * </ul>
+	 * @return String containing the label
 	 */
 	public String getLabelName() {
 		return (label != null) ? label.getLabelName() : appName;

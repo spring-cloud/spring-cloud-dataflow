@@ -48,7 +48,7 @@ import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
 /**
- * Convenience wrapper for the {@link } that operates on higher level
+ * Convenience wrapper for the {@link AppRegistryService} that operates on higher level
  * {@link DefaultAppRegistryService} objects and supports on-demand loading of
  * {@link Resource}s.
  * <p>

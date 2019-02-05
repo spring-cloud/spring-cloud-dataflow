@@ -186,7 +186,7 @@ The deployment is defined in the `src/kubernetes/skipper/skipper-deployment.yaml
 To control what version of Skipper gets deployed, modify the tag used for the Docker image in the container specification, as the following example shows:
 +
 ====
-[source,yaml,subs=attributes]
+[source,yaml,subs=attributes+]
 ----
     spec:
       containers:
@@ -247,7 +247,7 @@ The deployment is defined in the `src/kubernetes/server/server-deployment.yaml` 
 To control which version of Spring Cloud Data Flow server gets deployed, modify the tag used for the Docker image in the container specification, as follows:
 +
 ====
-[source,yaml,subs=attributes]
+[source,yaml,subs=attributes+]
 ----
     spec:
       containers:

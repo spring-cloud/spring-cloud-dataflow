@@ -20,6 +20,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.springframework.jdbc.core.namedparam.NamedParameterUtils;
+
 /**
  * Helper methods for SQL statement parameter parsing.
  * <p>
@@ -38,7 +40,7 @@ public class JdbcParameterUtils {
 	 * parameters indicated with a leading ':' or '&amp;'.
 	 * <p>
 	 * The code for this method is taken from an early version of the
-	 * {@link org.springframework.jdbc.core.namedparam.NamedParameterUtils} class.
+	 * {@link NamedParameterUtils} class.
 	 *
 	 * @param sql String to findByTaskNameLike in. Returns 0 if the given String is <code>null</code>.
 	 * @param namedParameterHolder the list of parameter placehholder names

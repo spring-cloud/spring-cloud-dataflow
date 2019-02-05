@@ -18,7 +18,7 @@ package org.springframework.cloud.dataflow.core.dsl;
 
 /**
  * An AST node representing a transition found in a parsed task specification. A
- * transition is expressed in the form "<tt>STATE->TARGET</tt>". If <tt>STATE</tt> is
+ * transition is expressed in the form "{@code STATE->TARGET}". If <tt>STATE</tt> is
  * unquoted it is considered a reference to the exit code of the preceding app (where
  * <tt>*</tt> means 'any exit code'). If <tt>STATE</tt> is quoted it is considered a
  * reference to the exit status of the preceding app (where <tt>'*'</tt> means 'any exit

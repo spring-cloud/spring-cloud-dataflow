@@ -25,7 +25,9 @@ import java.util.List;
  * form a split is expressed like this:
  *
  * <pre>
- * <tt><aa || bb></tt>
+ * {@code
+ * <aa || bb>
+ * }
  * </pre>
  *
  * .

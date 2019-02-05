@@ -112,6 +112,7 @@ public class CheckPointedParseException extends ParseException {
 	/**
 	 * Return the parsed expression until the last known, well formed position. Attempting
 	 * to re-parse that expression is guaranteed to not fail.
+	 * @return a String containing the expression until the last known well formed position.
 	 */
 	public String getExpressionStringUntilCheckpoint() {
 		return expressionString.substring(0, getCheckpointPosition());

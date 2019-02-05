@@ -28,9 +28,6 @@ public class SourceDestinationNode extends AstNode {
 		this.destinationNode = destinationNode;
 	}
 
-	/**
-	 * @inheritDoc
-	 */
 	@Override
 	public String stringify(boolean includePositionalInfo) {
 		return destinationNode.stringify(includePositionalInfo) + ">";
