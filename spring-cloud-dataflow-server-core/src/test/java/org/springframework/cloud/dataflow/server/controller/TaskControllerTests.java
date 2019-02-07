@@ -247,6 +247,35 @@ public class TaskControllerTests {
 	}
 
 	@Test
+	public void testFindTaskNameContainsSubstring() throws Exception {
+		repository.save(new TaskDefinition("foo", "task"));
+		repository.save(new TaskDefinition("foz", "task"));
+		repository.save(new TaskDefinition("ooz", "task"));
+
+		mockMvc.perform(get("/tasks/definitions").param("search", "f")
+				.accept(MediaType.APPLICATION_JSON)).andDo(print()).andExpect(status().isOk())
+				.andExpect(jsonPath("$.content.*", hasSize(2)))
+
+				.andExpect(jsonPath("$.content[0].name", is("foo")))
+				.andExpect(jsonPath("$.content[1].name", is("foz")));
+
+		mockMvc.perform(get("/tasks/definitions").param("search", "oz")
+				.accept(MediaType.APPLICATION_JSON)).andDo(print()).andExpect(status().isOk())
+				.andExpect(jsonPath("$.content.*", hasSize(2)))
+
+				.andExpect(jsonPath("$.content[0].name", is("foz")))
+				.andExpect(jsonPath("$.content[1].name", is("ooz")));
+
+		mockMvc.perform(get("/tasks/definitions").param("search", "o")
+				.accept(MediaType.APPLICATION_JSON)).andDo(print()).andExpect(status().isOk())
+				.andExpect(jsonPath("$.content.*", hasSize(3)))
+
+				.andExpect(jsonPath("$.content[0].name", is("foo")))
+				.andExpect(jsonPath("$.content[1].name", is("foz")))
+				.andExpect(jsonPath("$.content[2].name", is("ooz")));
+	}
+
+	@Test
 	public void testDestroyTask() throws Exception {
 		repository.save(new TaskDefinition("myTask", "task"));
 

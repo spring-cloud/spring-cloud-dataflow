@@ -1,5 +1,5 @@
 /*
- * Copyright 2015-2016 the original author or authors.
+ * Copyright 2015-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,7 +28,7 @@ import org.springframework.data.repository.PagingAndSortingRepository;
  */
 public interface TaskDefinitionRepository extends PagingAndSortingRepository<TaskDefinition, String> {
 
-	Page<TaskDefinition> findByTaskNameLike(String taskName, Pageable pageable);
+	Page<TaskDefinition> findByTaskNameContains(String taskName, Pageable pageable);
 
 	/**
 	 * Performs a findByName query and throws an exception if the name is not found.

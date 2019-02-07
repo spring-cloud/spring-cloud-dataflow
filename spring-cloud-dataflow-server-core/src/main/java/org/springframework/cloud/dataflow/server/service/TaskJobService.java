@@ -57,7 +57,7 @@ public interface TaskJobService {
 	 * jobName and matches the data with a task id.
 	 *
 	 * @param pageable enumerates the data to be returned.
-	 * @param jobName the name of the job for which to findByTaskNameLike.
+	 * @param jobName the name of the job for which to findByTaskNameContains.
 	 * @return List containing {@link TaskJobExecution}s.
 	 * @throws NoSuchJobException if the job with the given name does not exist.
 	 */
@@ -68,7 +68,7 @@ public interface TaskJobService {
 	 * jobName and matches the data with a task id.
 	 *
 	 * @param pageable enumerates the data to be returned.
-	 * @param jobName the name of the job for which to findByTaskNameLike.
+	 * @param jobName the name of the job for which to findByTaskNameContains.
 	 * @return List containing {@link JobExecutionWithStepCount}s.
 	 * @throws NoSuchJobException if the job with the given name does not exist.
 	 */
@@ -89,7 +89,7 @@ public interface TaskJobService {
 	 * specific jobName and matches the data with the associated JobExecutions.
 	 *
 	 * @param pageable enumerates the data to be returned.
-	 * @param jobName the name of the job for which to findByTaskNameLike.
+	 * @param jobName the name of the job for which to findByTaskNameContains.
 	 * @return List containing {@link JobInstanceExecutions}.
 	 * @throws NoSuchJobException if the job for the jobName specified does not exist.
 	 */
@@ -126,7 +126,7 @@ public interface TaskJobService {
 	/**
 	 * Retrieves the total number {@link JobExecution} that match a specific job name.
 	 *
-	 * @param jobName the job name to findByTaskNameLike.
+	 * @param jobName the job name to findByTaskNameContains.
 	 * @return the number of {@link JobExecution}s that match the job name.
 	 * @throws NoSuchJobException if the job for the jobName does not exist.
 	 */

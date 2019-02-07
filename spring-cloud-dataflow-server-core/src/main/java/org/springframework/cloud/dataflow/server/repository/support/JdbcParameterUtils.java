@@ -42,7 +42,7 @@ public class JdbcParameterUtils {
 	 * The code for this method is taken from an early version of the
 	 * {@link NamedParameterUtils} class.
 	 *
-	 * @param sql String to findByTaskNameLike in. Returns 0 if the given String is <code>null</code>.
+	 * @param sql String to findByTaskNameContains in. Returns 0 if the given String is <code>null</code>.
 	 * @param namedParameterHolder the list of parameter placehholder names
 	 * @return the number of parameter placeholder and adds to the namedParameterHolder
 	 * list any parsed namedParameters from the sql
