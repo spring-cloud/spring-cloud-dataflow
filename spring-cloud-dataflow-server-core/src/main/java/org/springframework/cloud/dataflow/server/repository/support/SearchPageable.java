@@ -23,7 +23,7 @@ import org.springframework.util.Assert;
 
 /**
  * Simple class that is composed of a {@link Pageable} and several properties to
- * encapsulate findByTaskNameLike queries.
+ * encapsulate findByTaskNameContains queries.
  *
  * @author Gunnar Hillert
  */
@@ -37,7 +37,7 @@ public class SearchPageable {
 
 	/**
 	 * Initialize a {@link SearchPageable}. Must provide a {@link Pageable} and a
-	 * searchQuery. Don't forget to also provide the column names for the findByTaskNameLike using
+	 * searchQuery. Don't forget to also provide the column names for the findByTaskNameContains using
 	 * {@link #addColumns(String...)}.
 	 *
 	 * @param pageable Must not be null

@@ -89,7 +89,7 @@ public class StreamDefinitionController {
 	 *
 	 * @param pageable Pagination information
 	 * @param assembler assembler for {@link StreamDefinition}
-	 * @param search optional findByTaskNameLike parameter
+	 * @param search optional findByTaskNameContains parameter
 	 * @return list of stream definitions
 	 */
 	@RequestMapping(value = "", method = RequestMethod.GET)
@@ -139,7 +139,7 @@ public class StreamDefinitionController {
 	 *
 	 * @param pageable Pagination information
 	 * @param name the name of an existing stream definition (required)
-	 * @param nested if should recursively findByTaskNameLike for related stream definitions
+	 * @param nested if should recursively findByTaskNameContains for related stream definitions
 	 * @param assembler resource assembler for stream definition
 	 * @return a list of related stream definitions
 	 */

@@ -136,7 +136,7 @@ public interface StreamService {
 	/**
 	 * Find streams related to the given stream name.
 	 * @param name name of the stream
-	 * @param nested if should recursively findByTaskNameLike for related stream definitions
+	 * @param nested if should recursively findByTaskNameContains for related stream definitions
 	 * @return a list of related stream definitions
 	 */
 	List<StreamDefinition> findRelatedStreams(String name, boolean nested);

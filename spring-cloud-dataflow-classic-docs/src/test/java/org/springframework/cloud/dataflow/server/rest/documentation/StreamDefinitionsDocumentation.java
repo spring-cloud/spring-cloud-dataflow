@@ -107,7 +107,7 @@ public class StreamDefinitionsDocumentation extends BaseDocumentation {
 			.andDo(this.documentationHandler.document(
 					requestParameters(
 							parameterWithName("nested")
-								.description("Should we recursively findByTaskNameLike for related stream definitions (optional)")),
+								.description("Should we recursively findByTaskNameContains for related stream definitions (optional)")),
 					pathParameters(parameterWithName("name")
 						.description("The name of an existing stream definition (required)"))
 				));

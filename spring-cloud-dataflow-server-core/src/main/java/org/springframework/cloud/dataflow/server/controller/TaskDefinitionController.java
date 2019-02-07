@@ -142,7 +142,7 @@ public class TaskDefinitionController {
 	 *
 	 * @param pageable page-able collection of {@code TaskDefinitionResource}.
 	 * @param assembler assembler for the {@link TaskDefinition}
-	 * @param search optional findByTaskNameLike parameter
+	 * @param search optional findByTaskNameContains parameter
 	 * @return a list of task definitions
 	 */
 	@RequestMapping(value = "", method = RequestMethod.GET)
@@ -152,7 +152,7 @@ public class TaskDefinitionController {
 
 		final Page<TaskDefinition> taskDefinitions;
 		if (search != null) {
-			taskDefinitions = repository.findByTaskNameLike(search, pageable);
+			taskDefinitions = repository.findByTaskNameContains(search, pageable);
 		}
 		else {
 			taskDefinitions = repository.findAll(pageable);

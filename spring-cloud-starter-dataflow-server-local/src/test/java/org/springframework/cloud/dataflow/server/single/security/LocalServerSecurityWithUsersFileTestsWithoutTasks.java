@@ -342,13 +342,13 @@ public class LocalServerSecurityWithUsersFileTestsWithoutTasks {
 						TestUtils.toImmutableMap("page", "0", "size", "10") },
 
 				{ HttpMethod.GET, HttpStatus.FORBIDDEN, "/streams/definitions", adminOnlyUser,
-						TestUtils.toImmutableMap("findByTaskNameLike", "mysearch") },
+						TestUtils.toImmutableMap("findByTaskNameContains", "mysearch") },
 				{ HttpMethod.GET, HttpStatus.OK, "/streams/definitions", viewOnlyUser,
-						TestUtils.toImmutableMap("findByTaskNameLike", "mysearch") },
+						TestUtils.toImmutableMap("findByTaskNameContains", "mysearch") },
 				{ HttpMethod.GET, HttpStatus.FORBIDDEN, "/streams/definitions", createOnlyUser,
-						TestUtils.toImmutableMap("findByTaskNameLike", "mysearch") },
+						TestUtils.toImmutableMap("findByTaskNameContains", "mysearch") },
 				{ HttpMethod.GET, HttpStatus.UNAUTHORIZED, "/streams/definitions", null,
-						TestUtils.toImmutableMap("findByTaskNameLike", "mysearch") },
+						TestUtils.toImmutableMap("findByTaskNameContains", "mysearch") },
 
 				{ HttpMethod.POST, HttpStatus.FORBIDDEN, "/streams/definitions", adminOnlyUser,
 						TestUtils.toImmutableMap("name", "myname", "definition", "fooo | baaar") },

@@ -472,7 +472,7 @@ public class DefaultStreamService implements StreamService {
 	/**
 	 * Find streams related to the given stream name.
 	 * @param streamName name of the stream
-	 * @param nested if should recursively findByTaskNameLike for related stream definitions
+	 * @param nested if should recursively findByTaskNameContains for related stream definitions
 	 * @return a list of related stream definitions
 	 */
 	public List<StreamDefinition> findRelatedStreams(String streamName, boolean nested) {
@@ -508,9 +508,9 @@ public class DefaultStreamService implements StreamService {
 	}
 
 	/**
-	 * Find stream definitions where the findByTaskNameLike parameter
+	 * Find stream definitions where the findByTaskNameContains parameter
 	 * @param pageable Pagination information
-	 * @param search the findByTaskNameLike parameter to use
+	 * @param search the findByTaskNameContains parameter to use
 	 * @return Page of stream definitions
 	 */
 	public Page<StreamDefinition> findDefinitionByNameContains(Pageable pageable, String search) {
