@@ -178,6 +178,8 @@
 								</goals>
 								<configuration>
 									<backend>html5</backend>
+									<sourceHighlighter>highlight.js</sourceHighlighter>
+									<doctype>book</doctype>
 									<attributes>
 										// these attributes are required to use the doc resources
 										<docinfo>shared</docinfo>
