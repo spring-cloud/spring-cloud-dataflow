@@ -4,7 +4,7 @@
 	<parent>
 		<groupId>org.springframework.cloud</groupId>
 		<artifactId>spring-cloud-dataflow-parent</artifactId>
-		<version>1.7.4.BUILD-SNAPSHOT</version>
+		<version>1.7.4.RELEASE</version>
 	</parent>
 	<artifactId>spring-cloud-dataflow-skipper-docs</artifactId>
 	<name>Spring Cloud Data Flow Skipper Docs</name>
@@ -13,7 +13,7 @@
 		<dependency>
 			<groupId>org.springframework.cloud</groupId>
 			<artifactId>spring-cloud-starter-dataflow-server-local</artifactId>
-			<version>1.7.4.BUILD-SNAPSHOT</version>
+			<version>1.7.4.RELEASE</version>
 			<type>test-jar</type>
 			<scope>test</scope>
 		</dependency>
