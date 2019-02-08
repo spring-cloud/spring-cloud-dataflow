@@ -82,7 +82,7 @@ An easy way to get started on Spring Cloud Data Flow would be to follow the plat
 
 | __Server Type__      | __Stable Release__                                                                                                                                                                                                                                                                                                  | __Milestone/Snapshot Release__                                                                                                                                                                                                                                                                       |
 |:---------------------|:--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|:-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| Local Server         | [1.7.3.RELEASE](https://repo.spring.io/release/org/springframework/cloud/spring-cloud-dataflow-server-local/1.7.3.RELEASE/spring-cloud-dataflow-server-local-1.7.3.RELEASE.jar)[[docs](http://docs.spring.io/spring-cloud-dataflow/docs/1.7.3.RELEASE/reference/htmlsingle/#getting-started)]                                   | 2.0.0.M1[[docs](http://docs.spring.io/spring-cloud-dataflow/docs/1.7.4.BUILD-SNAPSHOT/reference/htmlsingle/#getting-started)]                                   |
+| Local Server         | [1.7.4.RELEASE](https://repo.spring.io/release/org/springframework/cloud/spring-cloud-dataflow-server-local/1.7.4.RELEASE/spring-cloud-dataflow-server-local-1.7.4.RELEASE.jar)[[docs](http://docs.spring.io/spring-cloud-dataflow/docs/1.7.4.RELEASE/reference/htmlsingle/#getting-started)]                                   | 2.0.0.M2[[docs](http://docs.spring.io/spring-cloud-dataflow/docs/2.0.0.M2/reference/htmlsingle/#getting-started)]                                   |
 | [Cloud Foundry Server](http://cloud.spring.io/spring-cloud-dataflow-server-cloudfoundry/) | [1.7.3.RELEASE](http://repo.spring.io/release/org/springframework/cloud/spring-cloud-dataflow-server-cloudfoundry/1.7.3.RELEASE/spring-cloud-dataflow-server-cloudfoundry-1.7.3.RELEASE.jar)[[docs](https://docs.spring.io/spring-cloud-dataflow-server-cloudfoundry/docs/1.7.3.RELEASE/reference/htmlsingle/#getting-started)] | 2.0.0.M1[[docs](http://docs.spring.io/spring-cloud-dataflow/docs/2.0.0.BUILD-SNAPSHOT/reference/htmlsingle/#getting-started-cloudfoundry)] |
 | [Kubernetes Server](http://cloud.spring.io/spring-cloud-dataflow-server-kubernetes/)    | [1.7.2.RELEASE](https://repo.spring.io/libs-release/org/springframework/cloud/spring-cloud-dataflow-server-kubernetes/1.7.2.RELEASE/spring-cloud-dataflow-server-kubernetes-1.7.2.RELEASE.jar)[[docs](https://docs.spring.io/spring-cloud-dataflow-server-kubernetes/docs/1.7.2.RELEASE/reference/htmlsingle/#kubernetes-getting-started)]       | 2.0.0.M1[[docs](http://docs.spring.io/spring-cloud-dataflow/docs/2.0.0.BUILD-SNAPSHOT/reference/htmlsingle/#getting-started-kubernetes)]       |
 
@@ -100,14 +100,14 @@ An easy way to get started on Spring Cloud Data Flow would be to follow the plat
 <u><b>Step 1</b></u> - There are two ways to [get started](https://docs.spring.io/spring-cloud-dataflow/docs/current/reference/htmlsingle/#getting-started). The quickest is to download the Spring Cloud Data Flow Local-Server's Docker Compose artifact. (_Mac users can use 'curl -O' instead of 'wget'_) <br>
 
 ```
-wget https://raw.githubusercontent.com/spring-cloud/spring-cloud-dataflow/v1.7.3.RELEASE/spring-cloud-dataflow-server-local/docker-compose.yml
+wget https://raw.githubusercontent.com/spring-cloud/spring-cloud-dataflow/v1.7.4.RELEASE/spring-cloud-dataflow-server-local/docker-compose.yml
 ```
 
 <u><b>Step 2</b></u> - From the directory where you downloaded `docker-compose.yml`, start the SCDF system.
 <br>
 
 ```
-DATAFLOW_VERSION=1.7.3.RELEASE docker-compose up
+DATAFLOW_VERSION=1.7.4.RELEASE docker-compose up
 ```
 
 <u><b>Step 3</b></u> - Open the dashboard at [http://localhost:9393/dashboard](http://localhost:9393/dashboard).
