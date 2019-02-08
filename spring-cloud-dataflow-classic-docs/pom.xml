@@ -4,7 +4,7 @@
 	<parent>
 		<groupId>org.springframework.cloud</groupId>
 		<artifactId>spring-cloud-dataflow-parent</artifactId>
-		<version>1.7.4.RELEASE</version>
+		<version>1.7.5.BUILD-SNAPSHOT</version>
 	</parent>
 	<artifactId>spring-cloud-dataflow-classic-docs</artifactId>
 	<name>Spring Cloud Data Flow Docs for Classic mode</name>
@@ -53,7 +53,7 @@
 		<dependency>
 			<groupId>org.springframework.cloud</groupId>
 			<artifactId>spring-cloud-starter-dataflow-server-local</artifactId>
-			<version>1.7.4.RELEASE</version>
+			<version>1.7.5.BUILD-SNAPSHOT</version>
 			<type>test-jar</type>
 			<scope>test</scope>
 		</dependency>

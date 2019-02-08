@@ -3,7 +3,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>org.springframework.cloud</groupId>
 	<artifactId>spring-cloud-dataflow-server-local</artifactId>
-	<version>1.7.4.RELEASE</version>
+	<version>1.7.5.BUILD-SNAPSHOT</version>
 	<packaging>jar</packaging>
 	<name>Spring Cloud Data Flow Local Server</name>
 	<description>Spring Cloud Data Flow Local Server</description>
@@ -11,7 +11,7 @@
 	<parent>
 		<groupId>org.springframework.cloud</groupId>
 		<artifactId>spring-cloud-dataflow-parent</artifactId>
-		<version>1.7.4.RELEASE</version>
+		<version>1.7.5.BUILD-SNAPSHOT</version>
 	</parent>
 
 	<properties>
