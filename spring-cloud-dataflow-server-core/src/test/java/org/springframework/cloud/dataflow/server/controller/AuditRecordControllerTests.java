@@ -402,7 +402,7 @@ public class AuditRecordControllerTests {
 
 	@Test
 	public void testRetrieveAuditRecordsFromNullToGivenDate() throws Exception {
-		ZonedDateTime time = betweenDate.withZoneSameInstant(ZoneOffset.of("+01:00"));
+		ZonedDateTime time = betweenDate.withZoneSameInstant(ZoneOffset.UTC);
 		String toDate = time.toString();
 
 		mockMvc.perform(get("/audit-records?toDate=" + toDate).accept(MediaType.APPLICATION_JSON))
@@ -421,7 +421,7 @@ public class AuditRecordControllerTests {
 
 	@Test
 	public void testRetrieveAuditRecordsFromGivenDateToNull() throws Exception {
-		ZonedDateTime betweenTime = endDate.withZoneSameInstant(ZoneOffset.of("+01:00"));
+		ZonedDateTime betweenTime = endDate.withZoneSameInstant(ZoneOffset.UTC);
 		String fromDate = betweenTime.toString();
 
 		mockMvc.perform(get("/audit-records?fromDate=" + fromDate).accept(MediaType.APPLICATION_JSON))
@@ -440,10 +440,10 @@ public class AuditRecordControllerTests {
 
 	@Test
 	public void testRetrieveAuditRecordsBetweenTwoGivenDates() throws Exception {
-		ZonedDateTime betweenTime = betweenDate.withZoneSameInstant(ZoneOffset.of("+01:00"));
+		ZonedDateTime betweenTime = betweenDate.withZoneSameInstant(ZoneOffset.UTC);
 		String fromDate = betweenTime.toString();
 
-		ZonedDateTime endTime = endDate.withZoneSameInstant(ZoneOffset.of("+01:00"));
+		ZonedDateTime endTime = endDate.withZoneSameInstant(ZoneOffset.UTC);
 		String toDate = endTime.toString();
 
 		mockMvc.perform(get("/audit-records?fromDate=" + fromDate + "&toDate=" + toDate)
@@ -459,8 +459,8 @@ public class AuditRecordControllerTests {
 
 	@Test
 	public void testRetrieveAuditRecordsBetweenTwoGivenDatesWithFromDateAfterToDate() throws Exception {
-		final String toDate = betweenDate.withZoneSameInstant(ZoneOffset.of("+01:00")).toString();
-		final String fromDate = endDate.withZoneSameInstant(ZoneOffset.of("+01:00")).toString();
+		final String toDate = betweenDate.withZoneSameInstant(ZoneOffset.UTC).toString();
+		final String fromDate = endDate.withZoneSameInstant(ZoneOffset.UTC).toString();
 
 		mockMvc.perform(get("/audit-records")
 				.param("fromDate", fromDate)
@@ -565,10 +565,10 @@ public class AuditRecordControllerTests {
 
 	@Test
 	public void testRetrieveDataByOperationsAndActionsAndDate() throws Exception {
-		ZonedDateTime startTime = startDate.withZoneSameInstant(ZoneOffset.of("+01:00"));
+		ZonedDateTime startTime = startDate.withZoneSameInstant(ZoneOffset.UTC);
 		String fromDate = startTime.toString();
 
-		ZonedDateTime betweenTime = betweenDate.withZoneSameInstant(ZoneOffset.of("+01:00"));
+		ZonedDateTime betweenTime = betweenDate.withZoneSameInstant(ZoneOffset.UTC);
 		String toDate = betweenTime.toString();
 
 		mockMvc.perform(get("/audit-records?fromDate=" + fromDate + "&toDate=" + toDate+"&actions=CREATE&operations=STREAM")

@@ -17,7 +17,9 @@
 package org.springframework.cloud.dataflow.server.controller;
 
 import java.time.Instant;
-import java.time.ZonedDateTime;
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
+import java.time.format.DateTimeFormatter;
 import java.util.Collections;
 
 import org.slf4j.Logger;
@@ -34,8 +36,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PagedResourcesAssembler;
-import org.springframework.format.annotation.DateTimeFormat;
-import org.springframework.format.annotation.DateTimeFormat.ISO;
 import org.springframework.hateoas.ExposesResourceFor;
 import org.springframework.hateoas.PagedResources;
 import org.springframework.hateoas.mvc.ResourceAssemblerSupport;
@@ -83,10 +83,10 @@ public class AuditRecordController {
 	 * @param assembler assembler for {@link AuditRecord}
 	 * @param actions Optional. For which {@link AuditActionType}s do you want to retrieve
 	 *     {@link AuditRecord}s
-	 * @param fromDate Optional. The from date in ISO_DATE_TIME format. eg.:
-	 *     2019-01-01T19:30:00.000-01:00
-	 * @param toDate Optional. The to date in ISO_DATE_TIME format. eg.:
-	 *     2019-01-04T19:30:00.000-01:00
+	 * @param fromDate Optional. The fromDate must be {@link DateTimeFormatter}.ISO_DATE_TIME
+	 *     formatted. eg.: 2019-02-03T00:00:30
+	 * @param toDate Optional. The toDate must be {@link DateTimeFormatter}.ISO_DATE_TIME
+	 *     formatted. eg.: 2019-02-05T23:59:30
 	 * @param operations Optional. For which {@link AuditOperationType}s do you want to
 	 *     retrieve {@link AuditRecord}s
 	 * @return list of audit records
@@ -96,19 +96,20 @@ public class AuditRecordController {
 	public PagedResources<AuditRecordResource> list(Pageable pageable,
 			@RequestParam(required = false) AuditActionType[] actions,
 			@RequestParam(required = false) AuditOperationType[] operations,
-			@RequestParam(required = false) @DateTimeFormat(iso = ISO.DATE_TIME) ZonedDateTime fromDate,
-			@RequestParam(required = false) @DateTimeFormat(iso = ISO.DATE_TIME) ZonedDateTime toDate,
+			@RequestParam(required = false) String fromDate,
+			@RequestParam(required = false) String toDate,
 			PagedResourcesAssembler<AuditRecord> assembler) {
 
-		final Instant fromDateAsInstant = fromDate != null ? fromDate.toInstant() : null;
-		final Instant toDateAsInstant = toDate != null ? toDate.toInstant() : null;
+		final Instant fromDateAsInstant = paresStringToInstant(fromDate);
+		final Instant toDateAsInstant = paresStringToInstant(toDate);
 
 		if (fromDate != null && toDate != null && fromDate.compareTo(toDate) > 0) {
 			throw new InvalidDateRangeException("The fromDate cannot be after the toDate.");
 		}
 
 		final Page<AuditRecord> auditRecords = this.auditRecordService
-				.findAuditRecordByAuditOperationTypeAndAuditActionTypeAndDate(pageable, actions, operations, fromDateAsInstant,
+				.findAuditRecordByAuditOperationTypeAndAuditActionTypeAndDate(pageable, actions, operations,
+						fromDateAsInstant,
 						toDateAsInstant);
 		return assembler.toResource(auditRecords, new Assembler(auditRecords));
 	}
@@ -147,6 +148,15 @@ public class AuditRecordController {
 	@ResponseStatus(HttpStatus.OK)
 	public AuditActionType[] getAuditActionTypes() {
 		return AuditActionType.values();
+	}
+
+	private Instant paresStringToInstant(String textDate) {
+		if (textDate == null) {
+			return null;
+		}
+
+		LocalDateTime localDateTime = LocalDateTime.parse(textDate, DateTimeFormatter.ISO_DATE_TIME);
+		return localDateTime.toInstant(ZoneOffset.UTC);
 	}
 
 	/**
