@@ -125,6 +125,8 @@ NOTE: You must set `SPRING_CLOUD_SKIPPER_SERVER_ENABLELOCALPLATFORM` to `false` 
 NOTE: You must set `SPRING_CLOUD_SKIPPER_SERVER_PLATFORM_CLOUDFOUNDRY_ACCOUNTS[pws]_DEPLOYMENT_DELETE_ROUTES: false` so that "`v2`" of an application has the same route as "`v1`".
 Otherwise, undeploying "`v1`" removes the route.
 
+NOTE: You must set `SPRING_CLOUD_SKIPPER_SERVER_PLATFORM_CLOUDFOUNDRY_ACCOUNTS[pws]_DEPLOYMENT_SERVICES` property that binds the specified services to each of the deployed applications.
+
 You can find information on the deployment properties that you can configure in https://github.com/spring-cloud/spring-cloud-deployer-cloudfoundry/blob/master/src/main/java/org/springframework/cloud/deployer/spi/cloudfoundry/CloudFoundryDeploymentProperties.java[CloudFoundryDeploymentProperties].
 
 When starting the Skipper shell on your local machine, it tries to connect to the Server at the default location of `http://localhost:7577/api`.
