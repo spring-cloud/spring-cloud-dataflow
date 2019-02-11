@@ -71,6 +71,7 @@ public abstract class AbstractBaselineCallback extends AbstractCallback {
 			logger.info("Detected old Data Flow schema, doing baseline.");
 			commands.addAll(dropIndexes());
 			commands.addAll(changeAppRegistrationTable());
+			commands.addAll(changeUriRegistryTable());
 			commands.addAll(changeStreamDefinitionsTable());
 			commands.addAll(changeTaskDefinitionsTable());
 			commands.addAll(changeAuditRecordsTable());
@@ -95,6 +96,13 @@ public abstract class AbstractBaselineCallback extends AbstractCallback {
 	 * @return the list of sql commands
 	 */
 	public abstract List<SqlCommand> changeAppRegistrationTable();
+
+	/**
+	 * Change uri registry table.
+	 *
+	 * @return the list of sql commands
+	 */
+	public abstract List<SqlCommand> changeUriRegistryTable();
 
 	/**
 	 * Change stream definitions table.
