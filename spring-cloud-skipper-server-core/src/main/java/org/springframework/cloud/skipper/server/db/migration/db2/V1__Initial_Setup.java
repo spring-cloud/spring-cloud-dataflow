@@ -182,7 +182,7 @@ public class V1__Initial_Setup extends AbstractInitialSetupMigration {
 			"create table state_machine (\n" +
 			"    machine_id varchar(255) not null,\n" +
 			"    state varchar(255),\n" +
-			"    state_machine_context blob(255),\n" +
+			"    state_machine_context blob(1048576),\n" +
 			"    primary key (machine_id)\n" +
 			")";
 
