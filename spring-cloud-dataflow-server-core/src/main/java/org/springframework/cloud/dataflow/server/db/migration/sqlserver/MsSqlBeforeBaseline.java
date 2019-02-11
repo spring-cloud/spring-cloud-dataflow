@@ -139,6 +139,12 @@ public class MsSqlBeforeBaseline extends AbstractBaselineCallback {
 	}
 
 	@Override
+	public List<SqlCommand> changeUriRegistryTable() {
+		return Arrays.asList(
+				new MsSqlMigrateUriRegistrySqlCommand());
+	}
+
+	@Override
 	public List<SqlCommand> changeStreamDefinitionsTable() {
 		return Arrays.asList(
 				SqlCommand.from(CREATE_STREAM_DEFINITIONS_TMP_TABLE),

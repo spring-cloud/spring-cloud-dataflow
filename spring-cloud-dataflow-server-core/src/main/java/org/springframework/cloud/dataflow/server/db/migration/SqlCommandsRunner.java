@@ -49,18 +49,23 @@ public class SqlCommandsRunner {
 		SQLExceptionTranslator origExceptionTranslator = jdbcTemplate.getExceptionTranslator();
 
 		for (SqlCommand command : commands) {
-			if(!ObjectUtils.isEmpty(command.getSuppressedErrorCodes())) {
-				jdbcTemplate.setExceptionTranslator(new SuppressSQLErrorCodesTranslator(command.getSuppressedErrorCodes()));
+			if (command.canHandleInJdbcTemplate()) {
+				command.handle(jdbcTemplate, connection);
 			}
-			try {
-				logger.debug("Executing command {}", command.getCommand());
-				jdbcTemplate.execute(command.getCommand());
-			} catch (SuppressDataAccessException e) {
-				logger.debug("Suppressing error {}", e);
+			else {
+				if(!ObjectUtils.isEmpty(command.getSuppressedErrorCodes())) {
+					jdbcTemplate.setExceptionTranslator(new SuppressSQLErrorCodesTranslator(command.getSuppressedErrorCodes()));
+				}
+				try {
+					logger.debug("Executing command {}", command.getCommand());
+					jdbcTemplate.execute(command.getCommand());
+				} catch (SuppressDataAccessException e) {
+					logger.debug("Suppressing error {}", e);
+				}
+				// restore original translator in case next command
+				// doesn't define suppressing codes.
+				jdbcTemplate.setExceptionTranslator(origExceptionTranslator);
 			}
-			// restore original translator in case next command
-			// doesn't define suppressing codes.
-			jdbcTemplate.setExceptionTranslator(origExceptionTranslator);
 		}
 	}
 }

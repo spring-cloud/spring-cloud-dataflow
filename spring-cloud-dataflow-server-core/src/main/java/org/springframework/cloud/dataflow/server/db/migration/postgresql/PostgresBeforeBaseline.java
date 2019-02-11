@@ -62,12 +62,6 @@ public class PostgresBeforeBaseline extends AbstractBaselineCallback {
 	public final static String CREATE_STREAM_DEFINITIONS_TMP_TABLE =
 			V1__Initial_Setup.CREATE_STREAM_DEFINITIONS_TABLE.replaceFirst("stream_definitions", "stream_definitions_tmp");
 
-	public final static String INSERT_STREAM_DEFINITIONS_DATA =
-			"insert into\n" +
-			"  stream_definitions_tmp (definition_name, definition) \n" +
-			"  select DEFINITION_NAME, DEFINITION\n" +
-			"  from STREAM_DEFINITIONS";
-
 	public final static String DROP_STREAM_DEFINITIONS_TABLE =
 			"drop table STREAM_DEFINITIONS";
 
@@ -76,12 +70,6 @@ public class PostgresBeforeBaseline extends AbstractBaselineCallback {
 
 	public final static String CREATE_TASK_DEFINITIONS_TMP_TABLE =
 			V1__Initial_Setup.CREATE_TASK_DEFINITIONS_TABLE.replaceFirst("task_definitions", "task_definitions_tmp");
-
-	public final static String INSERT_TASK_DEFINITIONS_DATA =
-			"insert into\n" +
-			"  task_definitions_tmp (definition_name, definition) \n" +
-			"  select DEFINITION_NAME, DEFINITION\n" +
-			"  from TASK_DEFINITIONS";
 
 	public final static String DROP_TASK_DEFINITIONS_TABLE =
 			"drop table TASK_DEFINITIONS";
@@ -151,10 +139,17 @@ public class PostgresBeforeBaseline extends AbstractBaselineCallback {
 	}
 
 	@Override
+	public List<SqlCommand> changeUriRegistryTable() {
+		return Arrays.asList(
+				new PostgresMigrateUriRegistrySqlCommand());
+	}
+
+	@Override
 	public List<SqlCommand> changeStreamDefinitionsTable() {
 		return Arrays.asList(
 				SqlCommand.from(CREATE_STREAM_DEFINITIONS_TMP_TABLE),
-				SqlCommand.from(INSERT_STREAM_DEFINITIONS_DATA),
+				// need to run copy command programmatically
+				new PostgresMigrateStreamDefinitionsSqlCommand(),
 				SqlCommand.from(DROP_STREAM_DEFINITIONS_TABLE),
 				SqlCommand.from(RENAME_STREAM_DEFINITIONS_TMP_TABLE));
 	}
@@ -163,7 +158,8 @@ public class PostgresBeforeBaseline extends AbstractBaselineCallback {
 	public List<SqlCommand> changeTaskDefinitionsTable() {
 		return Arrays.asList(
 				SqlCommand.from(CREATE_TASK_DEFINITIONS_TMP_TABLE),
-				SqlCommand.from(INSERT_TASK_DEFINITIONS_DATA),
+				// need to run copy command programmatically
+				new PostgresMigrateTaskDefinitionsSqlCommand(),
 				SqlCommand.from(DROP_TASK_DEFINITIONS_TABLE),
 				SqlCommand.from(RENAME_TASK_DEFINITIONS_TMP_TABLE));
 	}

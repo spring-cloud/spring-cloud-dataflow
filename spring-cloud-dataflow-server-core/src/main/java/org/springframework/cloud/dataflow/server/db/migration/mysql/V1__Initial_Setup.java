@@ -31,11 +31,13 @@ public class V1__Initial_Setup extends AbstractInitialSetupMigration {
 
 	public final static String CREATE_HIBERNATE_SEQUENCE_TABLE =
 			"create table if not exists hibernate_sequence (\n" +
-			"  next_val bigint\n" +
+			"    next_val bigint\n" +
 			")";
 
 	public final static String INSERT_HIBERNATE_SEQUENCE_TABLE =
-			"insert into hibernate_sequence values ( 1 )";
+			"insert into hibernate_sequence (next_val)\n" +
+			"    select * from (select 1 as next_val) as temp\n" +
+			"    where not exists(select * from hibernate_sequence)";
 
 	public final static String CREATE_APP_REGISTRATION_TABLE =
 			"create table app_registration (\n" +

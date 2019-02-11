@@ -142,6 +142,12 @@ public class OracleBeforeBaseline extends AbstractBaselineCallback {
 	}
 
 	@Override
+	public List<SqlCommand> changeUriRegistryTable() {
+		return Arrays.asList(
+				new OracleMigrateUriRegistrySqlCommand());
+	}
+
+	@Override
 	public List<SqlCommand> changeStreamDefinitionsTable() {
 		return Arrays.asList(
 				SqlCommand.from(CREATE_STREAM_DEFINITIONS_TMP_TABLE),

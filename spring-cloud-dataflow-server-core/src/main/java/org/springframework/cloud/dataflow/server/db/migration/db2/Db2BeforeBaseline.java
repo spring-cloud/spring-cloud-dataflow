@@ -142,6 +142,12 @@ public class Db2BeforeBaseline extends AbstractBaselineCallback {
 	}
 
 	@Override
+	public List<SqlCommand> changeUriRegistryTable() {
+		return Arrays.asList(
+				new Db2MigrateUriRegistrySqlCommand());
+	}
+
+	@Override
 	public List<SqlCommand> changeStreamDefinitionsTable() {
 		return Arrays.asList(
 				SqlCommand.from(CREATE_STREAM_DEFINITIONS_TMP_TABLE),
