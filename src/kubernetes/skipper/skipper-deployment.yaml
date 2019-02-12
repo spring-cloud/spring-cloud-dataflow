@@ -14,12 +14,15 @@ spec:
       labels:
         app: skipper
     spec:
+      securityContext:
+        runAsUser: 65534
+        fsGroup: 65534
       containers:
       - name: skipper
         image: springcloud/spring-cloud-skipper-server:2.0.0.BUILD-SNAPSHOT
         imagePullPolicy: Always
         ports:
-        - containerPort: 80
+        - containerPort: 8080
         resources:
           limits:
             cpu: 1.0

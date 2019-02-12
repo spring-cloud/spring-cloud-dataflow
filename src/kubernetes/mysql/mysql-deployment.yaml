@@ -11,6 +11,9 @@ spec:
       labels:
         app: mysql
     spec:
+      securityContext:
+        runAsUser: 999
+        fsGroup: 999
       containers:
       - image: mysql:5.6
         name: mysql

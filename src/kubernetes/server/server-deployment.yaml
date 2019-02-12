@@ -14,12 +14,15 @@ spec:
       labels:
         app: scdf-server
     spec:
+      securityContext:
+        runAsUser: 65534
+        fsGroup: 65534
       containers:
       - name: scdf-server
         image: springcloud/spring-cloud-dataflow-server:2.0.0.BUILD-SNAPSHOT
         imagePullPolicy: Always
         ports:
-        - containerPort: 80
+        - containerPort: 8080
         resources:
           limits:
             cpu: 1.0
@@ -33,7 +36,7 @@ spec:
             fieldRef:
               fieldPath: "metadata.namespace"
         - name: SERVER_PORT
-          value: '80'
+          value: '8080'
         - name: SPRING_CLOUD_CONFIG_ENABLED
           value: 'false'
         - name: SPRING_CLOUD_DATAFLOW_FEATURES_ANALYTICS_ENABLED
@@ -54,4 +57,8 @@ spec:
           # Add Maven repo for metadata artifact resolution for all stream apps
         - name: SPRING_APPLICATION_JSON
           value: "{ \"maven\": { \"local-repository\": null, \"remote-repositories\": { \"repo1\": { \"url\": \"https://repo.spring.io/libs-snapshot\"} } } }"
+        - name: JAVA_TOOL_OPTIONS
+          value: "-Duser.home=/tmp"
+        - name: MAVEN_CONFIG
+          value: "/tmp"
       serviceAccountName: scdf-sa

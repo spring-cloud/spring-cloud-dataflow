@@ -11,6 +11,9 @@ spec:
       labels:
         app: rabbitmq
     spec:
+      securityContext:
+        runAsUser: 999
+        fsGroup: 999
       containers:
       - image: rabbitmq:3.6.10
         name: rabbitmq
