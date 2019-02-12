@@ -87,21 +87,6 @@ public class Graph {
 		return s.toString();
 	}
 
-	// TODO reactivate when we need to transmit this to the front end
-	// public String toJSON() {
-	// Graph g = new Graph(nodes, links, properties);
-	// ObjectMapper mapper = new ObjectMapper();
-	// mapper.setSerializationInclusion(Include.NON_NULL);
-	// try {
-	// return mapper.writeValueAsString(g);
-	// }
-	// catch (IOException e) {
-	// throw new IllegalStateException("Unexpected problem creating JSON from Graph", e);
-	// }
-	// }
-
-	// TODO this does not correctly handle use of secondary sequences yet
-
 	/**
 	 * Produce the DSL representation of the graph. To make this process easier we can
 	 * assume there is a START and an END node.

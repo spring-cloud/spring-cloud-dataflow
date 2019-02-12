@@ -29,7 +29,6 @@ import java.util.Set;
  * <li>All target labels used on transitions must exist.
  * <li>Two references to the same app must be labeled to differentiate them
  * <li>Do not use split construct with only one flow inside
- * <li>TODO much more!
  * </ul>
  *
  * @author Andy Clement
@@ -159,7 +158,6 @@ public class TaskValidatorVisitor extends TaskVisitor {
 						DSLMessage.TASK_VALIDATION_TRANSITION_TARGET_LABEL_UNDEFINED);
 			}
 		}
-		// TODO Verify all secondary sequences are visited
 	}
 
 	private void pushProblem(int pos, DSLMessage message) {

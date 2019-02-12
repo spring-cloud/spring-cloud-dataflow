@@ -57,7 +57,6 @@ public class TaskNode extends AstNode {
 		this.name = name;
 		this.taskDSL = taskDSL;
 		this.sequences = sequences;
-		// TODO use inAppMode to police what can be called on this node?
 	}
 
 	/**

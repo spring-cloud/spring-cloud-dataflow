@@ -142,7 +142,6 @@ public class GraphGeneratorVisitor extends TaskVisitor {
 				}
 				tooMany++;
 			}
-			// TODO if still stuff to do we were probably in infinite loop
 		}
 	}
 
