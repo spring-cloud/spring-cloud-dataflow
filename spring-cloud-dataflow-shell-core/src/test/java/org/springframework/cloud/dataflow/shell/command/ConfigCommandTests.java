@@ -128,8 +128,6 @@ public class ConfigCommandTests {
 		value.add(new Link("http://localhost:9393/dashboard", "dashboard"));
 		when(restTemplate.getForObject(Mockito.any(URI.class), Mockito.eq(RootResource.class))).thenReturn(value);
 
-		configCommands.onApplicationEvent(null);
-
 		final String targetResult = configCommands.target("http://localhost:9393", null, null, null, false, null, null, null);
 		assertThat(targetResult, containsString("Incompatible version of Data Flow server detected"));
 	}

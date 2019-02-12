@@ -55,6 +55,7 @@ import org.springframework.context.ApplicationListener;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.env.Environment;
+import org.springframework.shell.CommandLine;
 import org.springframework.shell.core.CommandMarker;
 import org.springframework.shell.core.annotation.CliCommand;
 import org.springframework.shell.core.annotation.CliOption;
@@ -75,7 +76,6 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 
-
 /**
  * Configuration commands for the Shell. The default Data Flow Server location is
  * <code>http://localhost:9393</code>
@@ -91,7 +91,7 @@ import org.springframework.web.client.RestTemplate;
 @Component
 @Configuration
 public class ConfigCommands implements CommandMarker, InitializingBean, ApplicationListener<ApplicationReadyEvent>,
-		ApplicationContextAware {
+				ApplicationContextAware {
 
 	public static final String HORIZONTAL_LINE = "-------------------------------------------------------------------------------\n";
 
@@ -136,6 +136,9 @@ public class ConfigCommands implements CommandMarker, InitializingBean, Applicat
 	private volatile boolean initialized;
 
 	@Autowired
+	private CommandLine commandLine;
+
+	@Autowired
 	public void setUserInput(UserInput userInput) {
 		this.userInput = userInput;
 	}
@@ -144,8 +147,6 @@ public class ConfigCommands implements CommandMarker, InitializingBean, Applicat
 	public void setTargetHolder(TargetHolder targetHolder) {
 		this.targetHolder = targetHolder;
 	}
-
-	// These should be ctor injection
 
 	@Autowired
 	public void setDataFlowShell(DataFlowShell shell) {
@@ -194,25 +195,12 @@ public class ConfigCommands implements CommandMarker, InitializingBean, Applicat
 			return "A password may be specified only together with a username";
 		}
 
-		if (StringUtils.isEmpty(credentialsProviderCommand) &&
-				StringUtils.isEmpty(targetPassword) && !StringUtils.isEmpty(targetUsername)) {
-			// read password from the command line
-			targetPassword = userInput.prompt("Password", "", false);
-		}
-
 		try {
 			this.targetHolder.setTarget(new Target(targetUriString, targetUsername, targetPassword, skipSslValidation));
 
 			final HttpClientConfigurer httpClientConfigurer = HttpClientConfigurer.create(this.targetHolder.getTarget().getTargetUri())
 					.skipTlsCertificateVerification(skipSslValidation);
-			if (StringUtils.hasText(targetUsername) && StringUtils.hasText(targetPassword)) {
-				httpClientConfigurer.basicAuthCredentials(targetUsername, targetPassword);
-			}
-			if (StringUtils.hasText(credentialsProviderCommand)) {
-				this.targetHolder.getTarget().setTargetCredentials(new TargetCredentials(true));
-				final CheckableResource credentialsResource = new ProcessOutputResource(credentialsProviderCommand.split("\\s+"));
-				httpClientConfigurer.addInterceptor(new ResourceBasedAuthorizationInterceptor(credentialsResource));
-			}
+
 			if (StringUtils.hasText(proxyUri)) {
 				if (StringUtils.isEmpty(proxyPassword) && !StringUtils.isEmpty(proxyUsername)) {
 					// read password from the command line
@@ -220,6 +208,37 @@ public class ConfigCommands implements CommandMarker, InitializingBean, Applicat
 				}
 				httpClientConfigurer.withProxyCredentials(URI.create(proxyUri), proxyUsername, proxyPassword);
 			}
+
+			this.restTemplate.setRequestFactory(httpClientConfigurer.buildClientHttpRequestFactory());
+
+			final SecurityInfoResource securityInfoResourceBeforeLogin = restTemplate
+					.getForObject(targetUriString + "/security/info", SecurityInfoResource.class);
+
+			boolean authenticationEnabled = false;
+			if (securityInfoResourceBeforeLogin != null) {
+				authenticationEnabled = securityInfoResourceBeforeLogin.isAuthenticationEnabled();
+			}
+
+			if (StringUtils.isEmpty(credentialsProviderCommand) &&
+					StringUtils.isEmpty(targetUsername) && authenticationEnabled) {
+				targetUsername = userInput.prompt("Username", "", true);
+			}
+
+			if (StringUtils.isEmpty(credentialsProviderCommand) && authenticationEnabled &&
+					StringUtils.isEmpty(targetPassword) && !StringUtils.isEmpty(targetUsername)) {
+				targetPassword = userInput.prompt("Password", "", false);
+			}
+
+			if (StringUtils.hasText(credentialsProviderCommand) && authenticationEnabled) {
+				this.targetHolder.getTarget().setTargetCredentials(new TargetCredentials(true));
+				final CheckableResource credentialsResource = new ProcessOutputResource(credentialsProviderCommand.split("\\s+"));
+				httpClientConfigurer.addInterceptor(new ResourceBasedAuthorizationInterceptor(credentialsResource));
+			}
+
+			if (authenticationEnabled && StringUtils.hasText(targetUsername) && StringUtils.hasText(targetPassword)) {
+				httpClientConfigurer.basicAuthCredentials(targetUsername, targetPassword);
+			}
+
 			this.restTemplate.setRequestFactory(httpClientConfigurer.buildClientHttpRequestFactory());
 
 			this.shell.setDataFlowOperations(
@@ -385,38 +404,49 @@ public class ConfigCommands implements CommandMarker, InitializingBean, Applicat
 		}
 	}
 
+	public String triggerTarget() {
+		return target(
+				this.serverUri,
+				this.userName,
+				this.password,
+				this.credentialsProviderCommand,
+				this.skipSslValidation,
+				this.proxyUri,
+				this.proxyUsername,
+				this.proxyPassword
+		);
+	}
+
+	/**
+	 * Will execute the targeting of the Data Flow server ONLY if the shell
+	 * is executing shell command passed directly from the console using
+	 * {@code --spring.shell.commandFile}.
+	 *
+	 * see also: https://github.com/spring-projects/spring-shell/issues/252
+	 */
 	@Override
 	public void onApplicationEvent(ApplicationReadyEvent event) {
 		// Only invoke if the shell is executing in the same application context as the data flow server.
-		if (!initialized) {
-			target(
-					this.serverUri,
-					this.userName,
-					this.password,
-					this.credentialsProviderCommand,
-					this.skipSslValidation,
-					this.proxyUri,
-					this.proxyUsername,
-					this.proxyPassword
-			);
+		if (!initialized && this.commandLine.getShellCommandsToExecute() != null) {
+			triggerTarget();
 		}
 	}
 
+	/**
+	 * Will execute the targeting of the Data Flow server ONLY if the shell
+	 * is executing shell command passed directly from the console using
+	 * {@code --spring.shell.commandFile}.
+	 *
+	 * see also: https://github.com/spring-projects/spring-shell/issues/252
+	 */
 	@Override
 	public void afterPropertiesSet() throws Exception {
-		// Only invoke this lifecycle method if the shell is executing in stand-alone mode.
-		if (applicationContext != null && !applicationContext.containsBean("streamDefinitionRepository")) {
-			initialized = true;
-			target(
-					this.serverUri,
-					this.userName,
-					this.password,
-					this.credentialsProviderCommand,
-					this.skipSslValidation,
-					this.proxyUri,
-					this.proxyUsername,
-					this.proxyPassword
-			);
+		if (this.commandLine.getShellCommandsToExecute() != null) {
+			// Only invoke this lifecycle method if the shell is executing in stand-alone mode.
+			if (applicationContext != null && !applicationContext.containsBean("streamDefinitionRepository")) {
+				initialized = true;
+				System.out.println(triggerTarget());
+			}
 		}
 	}
 
@@ -424,5 +454,4 @@ public class ConfigCommands implements CommandMarker, InitializingBean, Applicat
 	public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
 		this.applicationContext = applicationContext;
 	}
-
 }

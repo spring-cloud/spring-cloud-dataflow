@@ -1,5 +1,5 @@
 /*
- * Copyright 2016-2017 the original author or authors.
+ * Copyright 2016-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,12 +21,13 @@ import javax.annotation.PostConstruct;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
+import org.springframework.cloud.dataflow.shell.DataflowJLineShellComponent;
 import org.springframework.cloud.dataflow.shell.ShellCommandLineParser;
 import org.springframework.cloud.dataflow.shell.ShellProperties;
 import org.springframework.cloud.dataflow.shell.TargetHolder;
+import org.springframework.cloud.dataflow.shell.command.ConfigCommands;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
@@ -41,15 +42,13 @@ import org.springframework.shell.core.JLineShellComponent;
  * @author Josh Long
  * @author Mark Pollack
  * @author Eric Bottard
+ * @author Gunnar Hillert
  */
 @Configuration
 @ImportResource("classpath*:/META-INF/spring/spring-shell-plugin.xml")
 public class BaseShellAutoConfiguration {
 
 	private static final Logger logger = LoggerFactory.getLogger(BaseShellAutoConfiguration.class);
-
-	@Autowired
-	private CommandLine commandLine;
 
 	@Bean
 	public TargetHolder targetHolder() {
@@ -75,8 +74,8 @@ public class BaseShellAutoConfiguration {
 
 	@Bean
 	@ConditionalOnMissingBean(JLineShell.class)
-	public JLineShellComponent shell() {
-		return new JLineShellComponent();
+	public JLineShellComponent shell(ConfigCommands configCommands, TargetHolder targetHolder) {
+		return new DataflowJLineShellComponent(configCommands, targetHolder);
 	}
 
 	@Configuration
