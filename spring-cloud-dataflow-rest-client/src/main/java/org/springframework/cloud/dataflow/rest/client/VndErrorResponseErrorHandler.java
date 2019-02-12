@@ -24,6 +24,7 @@ import org.springframework.hateoas.VndErrors.VndError;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.client.ClientHttpResponse;
 import org.springframework.http.converter.HttpMessageConverter;
+import org.springframework.util.StringUtils;
 import org.springframework.web.client.DefaultResponseErrorHandler;
 import org.springframework.web.client.HttpMessageConverterExtractor;
 import org.springframework.web.client.ResponseExtractor;
@@ -60,6 +61,18 @@ public class VndErrorResponseErrorHandler extends DefaultResponseErrorHandler {
 		catch (Exception e) {
 			super.handleError(response);
 		}
-		throw new DataFlowClientException(vndErrors);
+		if (vndErrors != null) {
+			throw new DataFlowClientException(vndErrors);
+		}
+		else {
+			//FIXME Basic Authentication Exceptions do not return a VndError
+			final String message = StringUtils.hasText(response.getStatusText())
+					? response.getStatusText()
+					: String.valueOf(response.getStatusCode());
+
+			throw new DataFlowClientException(
+				new VndErrors(String.valueOf(response.getStatusCode()), message));
+		}
+
 	}
 }
