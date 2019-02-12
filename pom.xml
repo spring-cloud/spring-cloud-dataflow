@@ -72,7 +72,7 @@
 		<module>spring-cloud-dataflow-registry</module>
 		<module>spring-cloud-dataflow-rest-resource</module>
 		<module>spring-cloud-dataflow-server-core</module>
-		<module>spring-cloud-dataflow-server-local-autoconfig</module>
+		<module>spring-cloud-dataflow-autoconfigure</module>
 		<module>spring-cloud-dataflow-server</module>
 		<module>spring-cloud-dataflow-rest-client</module>
 		<module>spring-cloud-dataflow-shell</module>
@@ -84,7 +84,7 @@
 		<module>spring-cloud-dataflow-dependencies</module>
 		<module>spring-cloud-dataflow-platform-kubernetes</module>
 		<module>spring-cloud-dataflow-platform-cloudfoundry</module>
-		<module>spring-cloud-starter-dataflow-server-local</module>
+		<module>spring-cloud-starter-dataflow-server</module>
 		<module>spring-cloud-dataflow-audit</module>
 	</modules>
 	<dependencyManagement>
