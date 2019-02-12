@@ -678,7 +678,7 @@ public class TaskParserTests {
 	@Test
 	public void transitionToSplit() {
 		String spec = "aa 'foo'->:split && bb && split: <cc || dd> && ee";
-		// TODO lets consider this a limitation for now.
+		// lets consider this a limitation for now.
 		assertGraph("[0:START][1:aa][2:bb][3:cc][4:dd][5:ee][6:END]" + "[0-1][1-2]['foo':1-3][2-3][2-4][3-5][4-5][5-6]",
 				spec);
 	}
@@ -751,9 +751,6 @@ public class TaskParserTests {
 		assertApps(ctn.getTaskApps(), "appA", "appB", "appC", "foo:appD", "appE");
 		tv.reset();
 		ctn.accept(tv);
-		// TODO slight nuance here. foo: above is considered the label for the second flow
-		// and for the app appD, is
-		// that a problem? Is the distinction necessary?
 		assertEquals(">SN[0] >F =F >TA =TA[appA] <TA >TA =TA[appB] >T =T[0->:foo] <T >T =T[*->appC] <T <TA <F <SN[0] "
 				+ ">SN[foo: 1] >F =F[foo:] >TA =TA[foo: appD] <TA >TA =TA[appE] <TA <F <SN[1]", tv.getString());
 	}

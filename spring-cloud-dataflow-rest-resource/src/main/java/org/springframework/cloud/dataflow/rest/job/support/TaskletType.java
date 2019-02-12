@@ -54,8 +54,6 @@ public enum TaskletType {
 	 */
 	UNKNOWN("", "");
 
-	// TODO: Add Hadoop Types
-
 	private final String className;
 
 	private final String displayName;
