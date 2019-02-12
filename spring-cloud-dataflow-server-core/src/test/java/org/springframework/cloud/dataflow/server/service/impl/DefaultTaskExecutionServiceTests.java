@@ -34,14 +34,12 @@ import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabas
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase.Replace;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.cloud.dataflow.audit.service.AuditRecordService;
-import org.springframework.cloud.dataflow.configuration.metadata.ApplicationConfigurationMetadataResolver;
 import org.springframework.cloud.dataflow.core.AppRegistration;
 import org.springframework.cloud.dataflow.core.ApplicationType;
 import org.springframework.cloud.dataflow.core.Launcher;
 import org.springframework.cloud.dataflow.core.TaskDefinition;
 import org.springframework.cloud.dataflow.core.TaskDeployment;
 import org.springframework.cloud.dataflow.registry.service.AppRegistryService;
-import org.springframework.cloud.dataflow.server.config.apps.CommonApplicationProperties;
 import org.springframework.cloud.dataflow.server.configuration.TaskServiceDependencies;
 import org.springframework.cloud.dataflow.server.job.LauncherRepository;
 import org.springframework.cloud.dataflow.server.repository.DuplicateTaskException;
@@ -130,12 +128,6 @@ public abstract class DefaultTaskExecutionServiceTests {
 	TaskExplorer taskExplorer;
 
 	@Autowired
-	ApplicationConfigurationMetadataResolver metadataResolver;
-
-	@Autowired
-	CommonApplicationProperties commonApplicationProperties;
-
-	@Autowired
 	LauncherRepository launcherRepository;
 
 	@Autowired
@@ -149,6 +141,9 @@ public abstract class DefaultTaskExecutionServiceTests {
 
 	@Autowired
 	TaskExecutionCreationService taskExecutionRepositoryService;
+
+	@Autowired
+	TaskAppDeploymentRequestCreator taskAppDeploymentRequestCreator;
 
 	@TestPropertySource(properties = { "spring.cloud.dataflow.task.maximum-concurrent-tasks=10" })
 	@AutoConfigureTestDatabase(replace = Replace.ANY)
@@ -258,11 +253,9 @@ public abstract class DefaultTaskExecutionServiceTests {
 					this.dataSourceProperties, this.appRegistry, this.taskExplorer,
 					mock(TaskDefinitionRepository.class), new TaskConfigurationProperties());
 			TaskExecutionService taskExecutionService = new DefaultTaskExecutionService(
-					launcherRepository, this.metadataResolver,
-					auditRecordService, null, this.commonApplicationProperties,
-					taskRepository,
+					launcherRepository, auditRecordService, taskRepository,
 					taskExecutionInfoService, mock(TaskDeploymentRepository.class),
-					taskExecutionRepositoryService);
+					taskExecutionRepositoryService, taskAppDeploymentRequestCreator);
 			try {
 				taskExecutionService.executeTask(TASK_NAME_ORIG, new HashMap<>(), new LinkedList<>());
 			}

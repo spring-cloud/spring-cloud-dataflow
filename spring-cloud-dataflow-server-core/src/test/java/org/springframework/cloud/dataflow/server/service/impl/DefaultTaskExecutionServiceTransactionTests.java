@@ -36,7 +36,6 @@ import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabas
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase.Replace;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.cloud.dataflow.audit.service.AuditRecordService;
-import org.springframework.cloud.dataflow.configuration.metadata.ApplicationConfigurationMetadataResolver;
 import org.springframework.cloud.dataflow.core.AppRegistration;
 import org.springframework.cloud.dataflow.core.ApplicationType;
 import org.springframework.cloud.dataflow.core.AuditActionType;
@@ -45,7 +44,6 @@ import org.springframework.cloud.dataflow.core.AuditRecord;
 import org.springframework.cloud.dataflow.core.Launcher;
 import org.springframework.cloud.dataflow.core.TaskDefinition;
 import org.springframework.cloud.dataflow.registry.service.AppRegistryService;
-import org.springframework.cloud.dataflow.server.config.apps.CommonApplicationProperties;
 import org.springframework.cloud.dataflow.server.configuration.TaskServiceDependencies;
 import org.springframework.cloud.dataflow.server.job.LauncherRepository;
 import org.springframework.cloud.dataflow.server.repository.TaskDefinitionRepository;
@@ -101,12 +99,6 @@ public class DefaultTaskExecutionServiceTransactionTests {
 	TaskExecutionInfoService taskExecutionInfoService;
 
 	@Autowired
-	ApplicationConfigurationMetadataResolver metadataResolver;
-
-	@Autowired
-	CommonApplicationProperties commonApplicationProperties;
-
-	@Autowired
 	LauncherRepository launcherRepository;
 
 	@Autowired
@@ -118,6 +110,9 @@ public class DefaultTaskExecutionServiceTransactionTests {
 	@Autowired
 	TaskExecutionCreationService taskExecutionRepositoryService;
 
+	@Autowired
+	TaskAppDeploymentRequestCreator taskAppDeploymentRequestCreator;
+
 	private TaskExecutionService transactionTaskService;
 
 	@Before
@@ -126,11 +121,9 @@ public class DefaultTaskExecutionServiceTransactionTests {
 		this.taskDefinitionRepository.save(new TaskDefinition(TASK_NAME_ORIG, "demo"));
 		this.taskDefinitionRepository.findAll();
 		this.transactionTaskService = new DefaultTaskExecutionService(
-				launcherRepository, this.metadataResolver,
-				auditRecordService, null, this.commonApplicationProperties,
-				taskRepository,
+				launcherRepository, auditRecordService, taskRepository,
 				taskExecutionInfoService, mock(TaskDeploymentRepository.class),
-				taskExecutionRepositoryService);
+				taskExecutionRepositoryService, taskAppDeploymentRequestCreator);
 
 	}
 

@@ -69,6 +69,7 @@ import org.springframework.cloud.dataflow.server.service.impl.DefaultTaskExecuti
 import org.springframework.cloud.dataflow.server.service.impl.DefaultTaskExecutionService;
 import org.springframework.cloud.dataflow.server.service.impl.DefaultTaskJobService;
 import org.springframework.cloud.dataflow.server.service.impl.DefaultTaskSaveService;
+import org.springframework.cloud.dataflow.server.service.impl.TaskAppDeploymentRequestCreator;
 import org.springframework.cloud.dataflow.server.service.impl.TaskConfigurationProperties;
 import org.springframework.cloud.dataflow.server.service.impl.validation.DefaultTaskValidationService;
 import org.springframework.cloud.deployer.resource.maven.MavenProperties;
@@ -216,18 +217,25 @@ public class JobDependencies {
 	}
 
 	@Bean
+	TaskAppDeploymentRequestCreator taskAppDeploymentRequestCreator(
+			CommonApplicationProperties commonApplicationProperties,
+			ApplicationConfigurationMetadataResolver metadataResolver) {
+		return new TaskAppDeploymentRequestCreator(commonApplicationProperties,
+				metadataResolver, null);
+	}
+
+	@Bean
 	public TaskExecutionService taskService(LauncherRepository launcherRepository,
-			ApplicationConfigurationMetadataResolver metadataResolver,
-			AuditRecordService auditRecordService, CommonApplicationProperties commonApplicationProperties,
-			TaskRepository taskRepository,
+			AuditRecordService auditRecordService, TaskRepository taskRepository,
 			TaskExecutionInfoService taskExecutionInfoService,
 			TaskDeploymentRepository taskDeploymentRepository,
-			TaskExecutionCreationService taskExecutionRepositoryService) {
+			TaskExecutionCreationService taskExecutionRepositoryService,
+			TaskAppDeploymentRequestCreator taskAppDeploymentRequestCreator) {
 		return new DefaultTaskExecutionService(
-				launcherRepository, metadataResolver, auditRecordService,
-				null, commonApplicationProperties,
+				launcherRepository, auditRecordService,
 				taskRepository,
-				taskExecutionInfoService, taskDeploymentRepository, taskExecutionRepositoryService);
+				taskExecutionInfoService, taskDeploymentRepository,
+				taskExecutionRepositoryService, taskAppDeploymentRequestCreator);
 	}
 
 	@Bean

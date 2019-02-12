@@ -103,6 +103,7 @@ import org.springframework.cloud.dataflow.server.service.impl.DefaultTaskExecuti
 import org.springframework.cloud.dataflow.server.service.impl.DefaultTaskExecutionRepositoryService;
 import org.springframework.cloud.dataflow.server.service.impl.DefaultTaskExecutionService;
 import org.springframework.cloud.dataflow.server.service.impl.DefaultTaskSaveService;
+import org.springframework.cloud.dataflow.server.service.impl.TaskAppDeploymentRequestCreator;
 import org.springframework.cloud.dataflow.server.service.impl.TaskConfigurationProperties;
 import org.springframework.cloud.dataflow.server.service.impl.validation.DefaultStreamValidationService;
 import org.springframework.cloud.dataflow.server.service.impl.validation.DefaultTaskValidationService;
@@ -450,18 +451,25 @@ public class TestDependencies extends WebMvcConfigurationSupport {
 	}
 
 	@Bean
+	TaskAppDeploymentRequestCreator taskAppDeploymentRequestCreator(
+			CommonApplicationProperties commonApplicationProperties,
+			ApplicationConfigurationMetadataResolver metadataResolver) {
+		return new TaskAppDeploymentRequestCreator(commonApplicationProperties,
+				metadataResolver, null);
+	}
+
+	@Bean
 	public TaskExecutionService taskService(LauncherRepository launcherRepository,
-			ApplicationConfigurationMetadataResolver metadataResolver,
-			AuditRecordService auditRecordService, CommonApplicationProperties commonApplicationProperties,
+			AuditRecordService auditRecordService,
 			TaskRepository taskRepository,
 			TaskExecutionInfoService taskExecutionInfoService,
 			TaskDeploymentRepository taskDeploymentRepository,
-			TaskExecutionCreationService taskExecutionRepositoryService) {
+			TaskExecutionCreationService taskExecutionRepositoryService,
+			TaskAppDeploymentRequestCreator taskAppDeploymentRequestCreator) {
 		return new DefaultTaskExecutionService(
-				launcherRepository, metadataResolver, auditRecordService,
-				null, commonApplicationProperties,
-				taskRepository,
-				taskExecutionInfoService, taskDeploymentRepository, taskExecutionRepositoryService);
+				launcherRepository, auditRecordService, taskRepository,
+				taskExecutionInfoService, taskDeploymentRepository,
+				taskExecutionRepositoryService, taskAppDeploymentRequestCreator);
 	}
 
 	@Bean
