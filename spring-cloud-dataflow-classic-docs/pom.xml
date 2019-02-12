@@ -44,7 +44,7 @@
 		</dependency>
 		<dependency>
 			<groupId>org.springframework.cloud</groupId>
-			<artifactId>spring-cloud-starter-dataflow-server-local</artifactId>
+			<artifactId>spring-cloud-starter-dataflow-server</artifactId>
 			<version>2.0.0.BUILD-SNAPSHOT</version>
 			<type>test-jar</type>
 			<scope>test</scope>
