@@ -36,7 +36,7 @@ spring:
               checksum-sha1-url: "{repository}/org/springframework/cloud/spring-cloud-skipper-shell/{version}/spring-cloud-skipper-shell-{version}.jar.sha1"
               checksum-sha256-url: "{repository}/org/springframework/cloud/spring-cloud-skipper-shell/{version}/spring-cloud-skipper-shell-{version}.jar.sha256"
         package-repositories:
-          -
+          local:
             name: local
             url: http://${spring.cloud.client.hostname}:7577
             local: true

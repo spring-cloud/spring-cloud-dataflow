@@ -2,13 +2,11 @@ spring:
   cloud:
     skipper:
       server:
-        packageRepositories:
-          -
-            name: test
+        package-repositories:
+          test:
             url: "classpath:/repositories/binaries/test"
             description: test repository with a few packages
-          -
-            name: local
+          local:
             url: "http://localhost:7577"
             local: true
             description: Default local database backed repository

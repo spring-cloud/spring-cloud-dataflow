@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 the original author or authors.
+ * Copyright 2017-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 package org.springframework.cloud.skipper.server.service;
 
 import java.util.List;
+import java.util.Map.Entry;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,6 +26,7 @@ import org.springframework.cloud.skipper.SkipperException;
 import org.springframework.cloud.skipper.domain.PackageMetadata;
 import org.springframework.cloud.skipper.domain.Repository;
 import org.springframework.cloud.skipper.server.config.SkipperServerProperties;
+import org.springframework.cloud.skipper.server.config.SkipperServerProperties.PackageRepository;
 import org.springframework.cloud.skipper.server.repository.jpa.PackageMetadataRepository;
 import org.springframework.cloud.skipper.server.repository.jpa.RepositoryRepository;
 import org.springframework.context.event.EventListener;
@@ -93,15 +95,22 @@ public class RepositoryInitializationService {
 	}
 
 	private void synchronizeRepositories() {
-		List<Repository> configurationRepositories = skipperServerProperties.getPackageRepositories();
-		for (Repository configurationRepository : configurationRepositories) {
-			if (repositoryRepository.findByName(configurationRepository.getName()) == null) {
-				logger.info("Initializing repository database with " + configurationRepository);
-				repositoryRepository.save(configurationRepository);
+		for (Entry<String, PackageRepository> entry : skipperServerProperties.getPackageRepositories().entrySet()) {
+			String name = entry.getKey();
+			if (repositoryRepository.findByName(name) == null) {
+				logger.info("Initializing repository database for name {}", name);
+				Repository repository = new Repository();
+				repository.setName(name);
+				repository.setUrl(entry.getValue().getUrl());
+				repository.setSourceUrl(entry.getValue().getSourceUrl());
+				repository.setDescription(entry.getValue().getDescription());
+				repository.setLocal(entry.getValue().getLocal());
+				repository.setRepoOrder(entry.getValue().getRepoOrder());
+				repositoryRepository.save(repository);
 			}
 			else {
-				logger.warn("Ignoring application configuration for " + configurationRepository +
-						".  Repository name already in database.");
+				logger.warn("Ignoring application repository configuration for {} because name {} already exists.",
+						name, entry.getValue());
 			}
 		}
 	}

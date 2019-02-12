@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 the original author or authors.
+ * Copyright 2017-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,11 +15,10 @@
  */
 package org.springframework.cloud.skipper.server.config;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.cloud.skipper.domain.Repository;
 
 /**
  * Configurable properties of the server.
@@ -33,9 +32,9 @@ public class SkipperServerProperties {
 	private CloudFoundry cloudFoundry = new CloudFoundry();
 
 	/**
-	 * List of locations for package Repositories
+	 * Map of Package Repositories configurations.
 	 */
-	private List<Repository> packageRepositories = new ArrayList<>();
+	private Map<String, PackageRepository> packageRepositories = new HashMap<>();
 
 	/**
 	 * Flag indicating to sync the local contents of the index directory with the database on
@@ -54,11 +53,11 @@ public class SkipperServerProperties {
 	 */
 	private boolean enableReleaseStateUpdateService;
 
-	public List<Repository> getPackageRepositories() {
+	public Map<String, PackageRepository> getPackageRepositories() {
 		return packageRepositories;
 	}
 
-	public void setPackageRepositories(List<Repository> packageRepositories) {
+	public void setPackageRepositories(Map<String, PackageRepository> packageRepositories) {
 		this.packageRepositories = packageRepositories;
 	}
 
@@ -114,6 +113,55 @@ public class SkipperServerProperties {
 
 		public void setMaxWaitTime(int maxWaitTime) {
 			this.maxWaitTime = maxWaitTime;
+		}
+	}
+
+	public static class PackageRepository {
+
+		private String url;
+		private String sourceUrl;
+		private Boolean local = false;
+		private String description;
+		private Integer repoOrder;
+
+		public String getUrl() {
+			return url;
+		}
+
+		public void setUrl(String url) {
+			this.url = url;
+		}
+
+		public String getSourceUrl() {
+			return sourceUrl;
+		}
+
+		public void setSourceUrl(String sourceUrl) {
+			this.sourceUrl = sourceUrl;
+		}
+
+		public Boolean getLocal() {
+			return local;
+		}
+
+		public void setLocal(Boolean local) {
+			this.local = local;
+		}
+
+		public String getDescription() {
+			return description;
+		}
+
+		public void setDescription(String description) {
+			this.description = description;
+		}
+
+		public Integer getRepoOrder() {
+			return repoOrder;
+		}
+
+		public void setRepoOrder(Integer repoOrder) {
+			this.repoOrder = repoOrder;
 		}
 	}
 }

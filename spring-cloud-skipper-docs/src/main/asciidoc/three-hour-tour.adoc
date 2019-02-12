@@ -795,13 +795,11 @@ spring
     skipper:
       server:
         package-repositories:
-          -
-            name: experimental
+          experimental:
             url: http://skipper-repository.cfapps.io/repository/experimental
             description: Experimental Skipper Repository
             repoOrder: 0
-          -
-            name: local
+          local:
             url: http://${spring.cloud.client.hostname}:7577
             local: true
             description: Default local database backed repository
@@ -809,7 +807,7 @@ spring
 
 ----
 
-IMPORTANT: When modifying default configuration you need to re-define everything under `spring.cloud.skipper.server.package-repositories`.
+IMPORTANT: For Skipper 2.x, `spring.cloud.skipper.server.package-repositories` structure has been changed from a list to a map where key is the repository name. Having a map format makes it easier to define and override configuration values.
 
 The `repoOrder` determines which repository serves up a package if one with the same name is registered in two or more repositories.
 
