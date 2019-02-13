@@ -20,6 +20,24 @@ data:
                 users:
                   admin: "{noop}admin, ROLE_MANAGE, ROLE_VIEW"
                   user: "{noop}password, ROLE_VIEW, ROLE_CREATE"
+          applicationProperties:
+            stream:
+              management:
+                metrics:
+                  export:
+                    prometheus:
+                      enabled: true
+                endpoints:
+                  web:
+                    exposure:
+                      include: 'prometheus,info,health'
+              spring:
+                cloud:
+                  streamapp:
+                    security:
+                      enabled: false
+          grafana-info:
+            url: 'http://${GRAFANA_SERVICE_HOST}:${GRAFANA_SERVICE_PORT}'
           task:
             platform:
               kubernetes:

@@ -54,8 +54,9 @@ image::{dataflow-asciidoc}/images/grafana-scdf-ui-buttons-streams.png[Data Flow 
 image::{dataflow-asciidoc}/images/grafana-scdf-ui-buttons-apps.png[Data Flow UI Grafana Buttons - Applications, scaledwidth="70%"]
 
 As setting up Prometheus and InfluxDB is different depending on the platform you are running on, we provide instructions for each platform.
-In Spring Cloud Data Flow 2.0 M2, only the local server instructions have been provided, which will give you a good indication of what is to come on the other platforms.
+In Spring Cloud Data Flow 2.0 RC1, local server and Kubernetes instructions have been provided.
 
 include::streams-monitoring-local.adoc[]
+include::streams-monitoring-kubernetes.adoc[]
 
 

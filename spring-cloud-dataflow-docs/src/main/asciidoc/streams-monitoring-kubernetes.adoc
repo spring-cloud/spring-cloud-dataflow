@@ -1,2 +1,94 @@
-[[streams-monitoring-local]]
+[[streams-monitoring-kubernetes]]
 == Stream Monitoring - Kubernetes
+
+[[streams-monitoring-kubernetes-prometheus]]
+=== Prometheus
+
+https://prometheus.io/[Prometheus] is a popular pull based time series database that pulls metrics from the target applications from a preconfigured endpoint.
+When running in Kubernetes, Prometheus will "scrape" metrics from target applications that have specific pod level annotation. The endpoint to scrape is provided by Spring Boot, under the default path of `/actuator/prometheus`.
+
+Out of the box, each binder middleware configuration file defines attributes to enable metrics and supporting properties. Settings for RabbitMQ can be found in: `src/kubernetes/server/server-config-rabbit.yaml` and `src/kubernetes/server/server-config-kafka.yaml` for Kafka. The main point of interest is the following configuration section:
+
+[source,yaml]
+----
+          applicationProperties:
+            stream:
+              management:
+                metrics:
+                  export:
+                    prometheus:
+                      enabled: true
+                endpoints:
+                  web:
+                    exposure:
+                      include: 'prometheus,info,health'
+              spring:
+                cloud:
+                  streamapp:
+                    security:
+                      enabled: false
+          grafana-info:
+            url: 'http://${GRAFANA_SERVICE_HOST}:${GRAFANA_SERVICE_PORT}'
+----
+
+In this configuration, Prometheus metrics are enabled along with the appropriate endpoints and security settings.
+
+With Prometheus, Grafana, Spring Cloud Data Flow and any other services as defined in the <<getting-started-kubernetes.adoc#getting-started-kubernetes, Getting Started - Kubernetes>> section up and running, metrics are ready to be collected.
+
+IMPORTANT: The address used to accesss the Grafana UI will be dependent on the Kubernetes platform the system is deployed to. If you are using for example GKE, the `LoadBalancer` address would be used. If using Minikube which does not provide a `LoadBalancer` implementation, the IP of Minikube along with an assigned port is used. In the following examples, for simplicity we will use Minikube.
+
+To obtain the URL of the Grafana UI when deployed to Minikube, run the following command:
+
+[source,bash]
+----
+$ minikube service --url grafana
+http://192.168.99.100:31595
+----
+
+In the above example, the Grafana dashboard can be reached at http://192.168.99.100:31595. The default credentials are username: `admin` and password: `password`. The Grafana instance is pre-provisioned with two dashboards:
+
+. Streams: http://192.168.99.100:31595/d/scdf-streams/streams?refresh=10s
+
+. Applications: http://192.168.99.100:31595/d/scdf-applications/applications?refresh=10s
+
+Metrics can be collected on a per application / stream basis, or applied to all deployed applications globally.
+
+* To deploy a single stream with metrics enabled, the following can be entered into the Spring Cloud Data Flow shell:
+
+[source,bash]
+----
+dataflow:>stream create metricstest --definition "time --fixed-delay=10 --time-unit=MILLISECONDS | filter --expression=payload.contains('3') | log"
+dataflow:>stream deploy --name metricstest --properties "deployer.*.kubernetes.podAnnotations=prometheus.io/path:/actuator/prometheus,prometheus.io/port:8080,prometheus.io/scrape:true"
+----
+
+The above example creates a stream definition along with setting the `podAnnotations` property on to each application in the stream.
+The annotations applied to the pod indicate to Prometheus that it should be scraped for metrics and related information such as endpoint path and port.
+
+* To deploy all streams with metrics enabled, the following `podAnnotations` entry would be appended to the configuration in either `src/kubernetes/skipper/skipper-config-rabbit.yaml` when using RabbitMQ or `src/kubernetes/skipper/skipper-config-kafka.yaml` when using Kafka:
+
+[source,yaml]
+----
+data:
+  application.yaml: |-
+    spring:
+      cloud:
+        skipper:
+          server:
+            platform:
+              kubernetes:
+                accounts:
+                  myaccountname:
+                    podAnnotations: 'prometheus.io/path:/actuator/prometheus,prometheus.io/port:8080,prometheus.io/scrape:true'
+----
+
+All streams and containing applicatons would then have the appropriate pod annotations applied instructing Prometheus to scrape metrics.
+The shell command to deploy a stream, for example becomes:
+
+[source,bash]
+----
+dataflow:>stream create metricstest --definition "time --fixed-delay=10 --time-unit=MILLISECONDS | filter --expression=payload.contains('3') | log" --deploy
+----
+
+Either way metrics are enabled, after deploying a stream visit the Grafana UI and you should see dashboard graphs similar to the image below:
+
+image::{dataflow-asciidoc}/images/grafana-prometheus-scdf-applications-dashboard.png[Grafana Prometheus Dashboard, scaledwidth="80%"]
