@@ -147,7 +147,91 @@ kubectl create -f src/kubernetes/mysql/
 You can use `kubectl get all -l app=mysql` to verify that the deployment, pod, and service resources are running.
 You can use `kubectl delete all,pvc,secrets -l app=mysql` to clean up afterwards.
 +
-. Create Role Bindings and Service account
+. Deploy Prometheus and Grafana
++
+Metrics are "scraped" from deployed pods by Prometheus when configured with the appropriate annotations.
+The scraped metrics are viewable via Grafana dashboards. Out of the box, Grafana comes pre-configured with a Prometheus data source connection along with SCDF-specific Grafana dashboards to monitor the streaming applications composed in a data pipeline.
++
+Run the following commands to create the cluster role, binding and service account:
++
+IMPORTANT: Since version 1.9, the latest releases of Kubernetes have enabled https://kubernetes.io/docs/admin/authorization/rbac/[RBAC] on the api-server.
+If your target platform has RBAC enabled, you must ask a `cluster-admin` to create these for you before deploying Prometheus.
++
+====
+[source,bash]
+----
+$ kubectl create -f src/kubernetes/prometheus/prometheus-clusterroles.yaml
+$ kubectl create -f src/kubernetes/prometheus/prometheus-clusterrolebinding.yaml
+$ kubectl create -f src/kubernetes/prometheus/prometheus-serviceaccount.yaml
+----
+====
++
+Run the following commands to deploy Prometheus:
++
+====
+[source,bash]
+----
+$ kubectl create -f src/kubernetes/prometheus/prometheus-configmap.yaml
+$ kubectl create -f src/kubernetes/prometheus/prometheus-deployment.yaml
+$ kubectl create -f src/kubernetes/prometheus/prometheus-service.yaml
+----
+====
++
+You can use `kubectl get all -l app=prometheus` to verify that the deployment, pod, and service resources are running.
+You can use `kubectl delete all,cm,svc -l app=prometheus` to clean up afterwards.
+To cleanup roles, bindings and the service account for Prometheus, use the following command: `kubectl delete clusterrole,clusterrolebinding,sa -l app=prometheus`
++
+Run the following command to deploy Grafana:
++
+====
+[source,bash]
+----
+$ kubectl create -f src/kubernetes/grafana/
+----
+====
++
+You can use `kubectl get all -l app=grafana` to verify that the deployment, pod, and service resources are running.
+You can use `kubectl delete all,cm,svc,secrets -l app=grafana` to clean up afterwards.
++
+IMPORTANT: The `url` attribute value shown below should be replaced in `src/kubernetes/server/server-config-rabbit.yaml` or `src/kubernetes/server/server-config-kafka.yaml` to reflect the address and port Grafana is running on. Depending on your setup, the value can obtained by running the command `minikube service --url grafana` if running on Minikube, your load balancer external IP, or DNS name. This configuration is needed for Grafana links to be accessible when accessing the dashboard from a web browser.
++
+====
+[source,yaml]
+----
+          grafana-info:
+            url: 'http://grafana:3000'
+----
+====
++
+The default Grafana dashboard credentials are username: `admin` and password: `password`. These defaults can be changed by modifying the `src/kubernetes/grafana/grafana-secret.yaml` file with the desired values.
++
+In the event you would not like to deploy metrics collection using Prometheus and Grafana, the following section of `src/kubernetes/server/server-config-rabbit.yaml` or `src/kubernetes/server/server-config-kafka.yaml` should be removed. Edit the appropriate file based on the messaging middleware deployed earlier:
++
+====
+[source,yaml]
+----
+          applicationProperties:
+            stream:
+              management:
+                metrics:
+                  export:
+                    prometheus:
+                      enabled: true
+                endpoints:
+                  web:
+                    exposure:
+                      include: 'prometheus,info,health'
+              spring:
+                cloud:
+                  streamapp:
+                    security:
+                      enabled: false
+          grafana-info:
+            url: 'http://grafana:3000'
+----
+====
++
+. Create Data Flow Role Bindings and Service account
 +
 IMPORTANT: Since version 1.9, the latest releases of Kubernetes have enabled https://kubernetes.io/docs/admin/authorization/rbac/[RBAC] on the api-server.
 If your target platform has RBAC enabled, you must ask a `cluster-admin` to create the `roles` and `role-bindings` for you before deploying the Data Flow server.

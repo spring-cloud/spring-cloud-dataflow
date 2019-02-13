@@ -1,0 +1,19 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: grafana
+  labels:
+    app: grafana
+data:
+  datasources.yaml: |
+    apiVersion: 1
+    datasources:
+    - name: ScdfPrometheus
+      type: prometheus
+      access: proxy
+      org_id: 1
+      url: http://prometheus:9090
+      is_default: true
+      version: 5
+      editable: true
+      read_only: false
