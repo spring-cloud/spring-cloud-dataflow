@@ -128,8 +128,12 @@ Both streaming and batch use cases are intended to be used in production when de
 [[arch-data-flow-server-security]]
 === Security
 
-The Data Flow Server executable jars support basic HTTP, LDAP(S), File-based, and OAuth 2.0 authentication to access its endpoints. Refer to the <<configuration-security,security section>> for more information.
-
+The Data Flow Server executable jars use https://oauth.net/2/[OAuth 2.0] authentication
+to secure the relevant REST endpoints. These can be accessed using either
+_Basic Authentication_ or using _OAuth2 Access Tokens_. As OAuth provider we recommend the
+https://github.com/cloudfoundry/uaa[CloudFoundry User Account and Authentication (UAA) Server]
+which also provides comprehensive LDAP support. Please refer to the
+<<configuration-local-security,security section>> for more information.
 
 [[arch-streams]]
 == Streams
