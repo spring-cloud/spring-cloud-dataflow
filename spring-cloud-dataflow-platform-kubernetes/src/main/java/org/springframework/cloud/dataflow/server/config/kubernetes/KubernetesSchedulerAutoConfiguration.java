@@ -20,7 +20,6 @@ import io.fabric8.kubernetes.client.DefaultKubernetesClient;
 import io.fabric8.kubernetes.client.KubernetesClient;
 
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.cloud.dataflow.server.config.features.SchedulerConfiguration;
 import org.springframework.cloud.scheduler.spi.core.Scheduler;
 import org.springframework.cloud.scheduler.spi.kubernetes.KubernetesScheduler;
@@ -28,6 +27,7 @@ import org.springframework.cloud.scheduler.spi.kubernetes.KubernetesSchedulerPro
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Conditional;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Profile;
 
 /**
  * Configures the Spring Cloud Kubernetes Scheduler based on feature toggle settings and if running on
@@ -37,7 +37,7 @@ import org.springframework.context.annotation.Configuration;
  */
 @Configuration
 @Conditional({ SchedulerConfiguration.SchedulerConfigurationPropertyChecker.class })
-@ConditionalOnProperty(name = "kubernetes.service.host")
+@Profile("kubernetes")
 public class KubernetesSchedulerAutoConfiguration {
 
 	@Bean

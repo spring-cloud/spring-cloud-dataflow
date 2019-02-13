@@ -40,7 +40,7 @@ public class SchedulerPerPlatformTest {
 
 		@Test(expected = NoSuchBeanDefinitionException.class)
 		public void testLocalSchedulerEnabled() {
-			assertFalse(context.getEnvironment().containsProperty("kubernetes.service.host"));
+			assertFalse(context.getEnvironment().containsProperty("kubernetes_service_host"));
 			assertFalse(CloudPlatform.CLOUD_FOUNDRY.isActive(context.getEnvironment()));
 			context.getBean(Scheduler.class);
 		}
@@ -51,7 +51,7 @@ public class SchedulerPerPlatformTest {
 
 		@Test
 		public void testLocalSchedulerEnabled() {
-			assertFalse("K8s should be disabled", context.getEnvironment().containsProperty("kubernetes.service.host"));
+			assertFalse("K8s should be disabled", context.getEnvironment().containsProperty("kubernetes_service_host"));
 			assertFalse("CF should be disabled", CloudPlatform.CLOUD_FOUNDRY.isActive(context.getEnvironment()));
 
 			Scheduler scheduler = context.getBean(Scheduler.class);
@@ -62,12 +62,12 @@ public class SchedulerPerPlatformTest {
 	}
 
 	@TestPropertySource(properties = { "spring.cloud.dataflow.features.schedules-enabled=true",
-			"kubernetes.service.host=dummy" })
+			"kubernetes_service_host=dummy" })
 	public static class KubernetesSchedulerActivatedTests extends AbstractSchedulerPerPlatformTest {
 
 		@Test
 		public void testLocalSchedulerEnabled() {
-			assertTrue("K8s should be enabled", context.getEnvironment().containsProperty("kubernetes.service.host"));
+			assertTrue("K8s should be enabled", context.getEnvironment().containsProperty("kubernetes_service_host"));
 			assertFalse("CF should be disabled", CloudPlatform.CLOUD_FOUNDRY.isActive(context.getEnvironment()));
 
 			Scheduler scheduler = context.getBean(Scheduler.class);
@@ -84,7 +84,7 @@ public class SchedulerPerPlatformTest {
 
 		@Test
 		public void testLocalSchedulerEnabled() {
-			assertFalse("K8s should be disabled", context.getEnvironment().containsProperty("kubernetes.service.host"));
+			assertFalse("K8s should be disabled", context.getEnvironment().containsProperty("kubernetes_service_host"));
 			assertTrue("CF should be enabled", CloudPlatform.CLOUD_FOUNDRY.isActive(context.getEnvironment()));
 
 			Scheduler scheduler = context.getBean(Scheduler.class);
