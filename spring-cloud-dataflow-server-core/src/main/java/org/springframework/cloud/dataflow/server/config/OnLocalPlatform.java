@@ -16,28 +16,35 @@
 
 package org.springframework.cloud.dataflow.server.config;
 
-import org.springframework.boot.autoconfigure.condition.ConditionalOnCloudPlatform;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
-import org.springframework.boot.autoconfigure.condition.NoneNestedConditions;
-import org.springframework.boot.cloud.CloudPlatform;
-import org.springframework.context.annotation.ConfigurationCondition;
+import java.util.ServiceLoader;
+
+import org.springframework.boot.autoconfigure.condition.ConditionOutcome;
+import org.springframework.boot.autoconfigure.condition.SpringBootCondition;
+import org.springframework.context.annotation.ConditionContext;
+import org.springframework.core.type.AnnotatedTypeMetadata;
 
 /**
- * When Server in not deployed neither on CF nor on K8s it is considered to be on a Local platform.
+ * When Server in not deployed on a cloud platform, it is considered to be on a Local platform.
  *
  * @author Christian Tzolov
  */
-public class OnLocalPlatform extends NoneNestedConditions {
+public class OnLocalPlatform extends SpringBootCondition {
 
-	public OnLocalPlatform() {
-		super(ConfigurationCondition.ConfigurationPhase.PARSE_CONFIGURATION);
-	}
 
-	@ConditionalOnProperty(name = "kubernetes.service.host")
-	static class OnKubernetesPlatform {
-	}
+	@Override
+	public ConditionOutcome getMatchOutcome(ConditionContext context, AnnotatedTypeMetadata metadata) {
 
-	@ConditionalOnCloudPlatform(CloudPlatform.CLOUD_FOUNDRY)
-	static class OnCloudFoundryPlatform {
+		Iterable<CloudProfileProvider> cloudProfileProviders = ServiceLoader.load(CloudProfileProvider.class);
+		boolean onLocalPlatform = true;
+		for (CloudProfileProvider cloudProfileProvider : cloudProfileProviders) {
+			if (cloudProfileProvider.isCloudPlatform(context.getEnvironment())) {
+				onLocalPlatform = false;
+			}
+		}
+		if (onLocalPlatform) {
+			return new ConditionOutcome(onLocalPlatform, "On local platform.");
+		} else {
+			return new ConditionOutcome(onLocalPlatform, "On cloud platform.");
+		}
 	}
 }
