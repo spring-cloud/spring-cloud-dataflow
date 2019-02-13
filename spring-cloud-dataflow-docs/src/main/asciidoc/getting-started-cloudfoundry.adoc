@@ -185,7 +185,7 @@ or using the environment variable `MAVEN_REMOTEREPOSITORIES[REPO1]_URL:`.
 WARNING: Only set 'Skip SSL Validation' to true if you run on a Cloud Foundry instance using self-signed certificates (for example, in development).
 Do not use self-signed certificates for production.
 
-NOTE: If you are deploying in an environment that requires you to sign on using the Pivotal Single Sign-On Service, see <<getting-started-security-cloud-foundry>> for information on how to configure the server.
+NOTE: If you are deploying in an environment that requires you to sign on using the Pivotal Single Sign-On Service, see <<configuration-cloudfoundry-security-sso>> for information on how to configure the server.
 
 You can now issue a `cf push` command and reference the Data Flow server .jar file, as the following example shows:
 
