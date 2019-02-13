@@ -97,6 +97,7 @@ public class DefaultValidationService implements ValidationService {
 	}
 
 	private static Archive resolveAsArchive(Resource app) throws IOException {
+		Assert.notNull(app, "The resource specified for the app must not be null");
 		File moduleFile = app.getFile();
 		return moduleFile.isDirectory() ? new ExplodedArchive(moduleFile) : new JarFileArchive(moduleFile);
 	}

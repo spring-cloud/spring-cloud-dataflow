@@ -285,6 +285,15 @@ public abstract class DefaultTaskExecutionServiceTests {
 			ValidationStatus validationStatus = taskValidationService.validateTask("simpleTask");
 			assertEquals("invalid", validationStatus.getAppsStatuses().get("task:simpleTask"));
 		}
+
+		@Test
+		@DirtiesContext
+		public void validateNullResourceTaskTest() {
+			initializeNullRegistry(appRegistry);
+			taskSaveService.saveTaskDefinition("simpleTask", "AAA --foo=bar");
+			ValidationStatus validationStatus = taskValidationService.validateTask("simpleTask");
+			assertEquals("invalid", validationStatus.getAppsStatuses().get("task:simpleTask"));
+		}
 	}
 
 	@TestPropertySource(properties = { "spring.cloud.dataflow.applicationProperties.task.globalkey=globalvalue",
@@ -582,6 +591,13 @@ public abstract class DefaultTaskExecutionServiceTests {
 						ApplicationType.task)));
 		when(appRegistry.find("AAA", ApplicationType.task)).thenReturn(new AppRegistration("some-name", ApplicationType.task, URI.create("http://helloworld")));
 		when(appRegistry.getAppResource(any())).thenReturn(new FileSystemResource("src/test/resources/apps/foo-task/bad.jar"));
+	}
+
+	private static void initializeNullRegistry(AppRegistryService appRegistry) throws IllegalArgumentException {
+		when(appRegistry.find("BBB", ApplicationType.task)).thenThrow(new IllegalArgumentException(
+				String.format("Application name '%s' with type '%s' does not exist in the app registry.", "fake",
+						ApplicationType.task)));
+		when(appRegistry.find("AAA", ApplicationType.task)).thenReturn(mock(AppRegistration.class));
 	}
 
 	private static void verifyTaskExistsInRepo(String taskName, String dsl,
