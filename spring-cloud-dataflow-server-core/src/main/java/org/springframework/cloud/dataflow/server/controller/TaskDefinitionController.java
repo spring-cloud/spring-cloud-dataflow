@@ -122,7 +122,6 @@ public class TaskDefinitionController {
 	@RequestMapping(value = "/{name}", method = RequestMethod.DELETE)
 	@ResponseStatus(HttpStatus.OK)
 	public void destroyTask(@PathVariable("name") String name) {
-		//TODO GH-2674  will need to pass in optional platform name here
 		taskDeleteService.deleteTaskDefinition(name);
 	}
 
@@ -133,7 +132,6 @@ public class TaskDefinitionController {
 	@RequestMapping(value = "", method = RequestMethod.DELETE)
 	@ResponseStatus(HttpStatus.OK)
 	public void destroyAll() {
-		//TODO GH-2674  will need to pass in optional platform name here
 		taskDeleteService.deleteAll();
 	}
 
