@@ -37,9 +37,9 @@ import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
 /**
- * Create the list of {@link AppDeploymentRequest}s
- * from a {@link org.springframework.cloud.dataflow.core.TaskDefinition} and
- * deployment properties map.
+ * Create a {@link AppDeploymentRequest} from a
+ * {@link org.springframework.cloud.dataflow.core.TaskDefinition} and deployment
+ * properties map.
  *
  * @author Glenn Renfro
  */
@@ -56,9 +56,9 @@ public class TaskAppDeploymentRequestCreator {
 	/**
 	 * Initializes the {@link TaskAppDeploymentRequestCreator}.
 	 *
+	 * @param commonApplicationProperties the common application properties for all tasks
 	 * @param metaDataResolver the metadata resolver
 	 * @param dataflowServerUri the URI of the data flow server
-	 * @param commonApplicationProperties the common application properties for all tasks
 	 */
 	public TaskAppDeploymentRequestCreator(CommonApplicationProperties commonApplicationProperties,
 			ApplicationConfigurationMetadataResolver metaDataResolver,

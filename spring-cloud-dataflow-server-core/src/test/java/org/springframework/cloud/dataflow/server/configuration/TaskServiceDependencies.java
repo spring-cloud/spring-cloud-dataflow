@@ -218,7 +218,7 @@ public class TaskServiceDependencies extends WebMvcConfigurationSupport {
 	}
 
 	@Bean
-	TaskAppDeploymentRequestCreator taskAppDeploymentRequestCreator(
+	public TaskAppDeploymentRequestCreator taskAppDeploymentRequestCreator(
 			CommonApplicationProperties commonApplicationProperties,
 			ApplicationConfigurationMetadataResolver metadataResolver) {
 		return new TaskAppDeploymentRequestCreator(commonApplicationProperties,
