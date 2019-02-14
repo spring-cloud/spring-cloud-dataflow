@@ -13,7 +13,6 @@ spring:
                 fabric8:
                   masterUrl: http://192.168.0.1:8443
                   namespace: dev1
-                namespace: devNamespace
                 imagePullPolicy: Always
                 entryPointStyle: exec
                 limits:
