@@ -16,10 +16,12 @@
 
 package org.springframework.cloud.dataflow.server.service;
 
+import java.util.List;
 import java.util.Map;
 
 import org.springframework.cloud.dataflow.core.AllPlatformsTaskExecutionInformation;
 import org.springframework.cloud.dataflow.server.service.impl.TaskExecutionInformation;
+import org.springframework.cloud.deployer.spi.core.AppDeploymentRequest;
 
 /**
  * Return the TaskExecutionInformation object given the task name and deployment
@@ -43,4 +45,5 @@ public interface TaskExecutionInfoService {
 			Map<String, String> taskDeploymentProperties, String composedTaskRunnerName);
 
 	AllPlatformsTaskExecutionInformation findAllPlatformTaskExecutionInformation();
+	List<AppDeploymentRequest> createRequests(String taskName, String dslText);
 }

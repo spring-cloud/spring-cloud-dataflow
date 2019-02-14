@@ -36,6 +36,7 @@ public class TaskExecutionInformation {
 	private Resource appResource;
 
 	private Resource metadataResource;
+	private TaskDefinition originalTaskDefinition;
 
 	public TaskExecutionInformation() {
 	}
@@ -80,4 +81,11 @@ public class TaskExecutionInformation {
 		this.metadataResource = metadataResource;
 	}
 
+	public void setOriginalTaskDefinition(TaskDefinition originalTaskDefinition) {
+		this.originalTaskDefinition = originalTaskDefinition;
+	}
+
+	public TaskDefinition getOriginalTaskDefinition() {
+		return originalTaskDefinition;
+	}
 }

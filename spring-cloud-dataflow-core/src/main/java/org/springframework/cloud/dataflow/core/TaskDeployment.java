@@ -27,6 +27,8 @@ import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 /**
+ * Records the association of taskDeploymentId to the platfornName the task was launched
+ * on.
  * @author Mark Pollack
  */
 @Entity
@@ -49,6 +51,10 @@ public class TaskDeployment extends AbstractEntity {
 	@CreatedDate
 	@Column(name = "created_on")
 	private Instant createdOn;
+
+	// @NotNull
+	// @Lob
+	// private String taskManifestString;
 
 	public TaskDeployment() {
 	}
@@ -84,6 +90,14 @@ public class TaskDeployment extends AbstractEntity {
 	public void setCreatedOn(Instant createdOn) {
 		this.createdOn = createdOn;
 	}
+
+	// public String getTaskManifestString() {
+	// return taskManifestString;
+	// }
+	//
+	// public void setTaskManifestString(String taskManifestString) {
+	// this.taskManifestString = taskManifestString;
+	// }
 
 	@Override
 	public String toString() {
