@@ -663,7 +663,7 @@ public class StreamControllerTests {
 		SpringCloudDeployerApplicationSpec filterSpec = parseSpec(filterPackage.getConfigValues().getRaw());
 
 		assertThat(filterSpec.getResource(),
-				is("maven://org.springframework.cloud.stream.app:filter-processor-rabbit"));
+				is("maven://org.springframework.cloud.stream.app:filter-processor-rabbit:jar"));
 	}
 
 	@Test
