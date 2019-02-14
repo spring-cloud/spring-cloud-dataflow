@@ -1,24 +1,18 @@
 version: '3.3'
 services:
 
-  # Prometheus uses the image resulting form the build
-  # of `./influxdb` which simply packs some configuration
-  # into the form of an image.
-  #
-  # It could instead, use volume-mounts.
+  # Prometheus uses the InfluxDB datasource
   influxdb:
-    build: './influxdb'
+    image: influxdb:1.7.3
     container_name: 'influxdb'
     ports:
       - '8086:8086'
 
-  # The grafana container uses the image resulting from the build
-  # of `./grafana` which simply packs some configuration into the
-  # form of an image.
-  #
-  # This could instead be a volume-mounted container.
+  # Grafana SCDF InfluxdDB pre-build image
   grafana:
-    build: './grafana'
+    # To use a locally build grafana image, comment out the 'image:' and uncomment 'build:' section. Then run 'docker-compose up -d --build`
+    # build: './grafana'
+    image: springcloud/spring-cloud-dataflow-grafana-influxdb:${DATAFLOW_VERSION:?DATAFLOW_VERSION is not set! Use 'export DATAFLOW_VERSION=local-server-image-tag'}
     container_name: 'grafana'
     ports:
       - '3000:3000'

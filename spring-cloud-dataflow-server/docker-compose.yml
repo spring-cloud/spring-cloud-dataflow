@@ -24,6 +24,10 @@ services:
       - spring.cloud.dataflow.applicationProperties.stream.spring.cloud.stream.kafka.binder.brokers=kafka:9092
       - spring.cloud.dataflow.applicationProperties.stream.spring.cloud.stream.kafka.binder.zkNodes=zookeeper:2181
       - spring.cloud.skipper.client.serverUri=http://skipper-server:7577/api
+      - spring.cloud.dataflow.applicationProperties.stream.management.metrics.export.influx.enabled=true
+      - spring.cloud.dataflow.applicationProperties.stream.management.metrics.export.influx.db=myinfluxdb
+      - spring.cloud.dataflow.applicationProperties.stream.management.metrics.export.influx.uri=http://influxdb:8086
+      - spring.cloud.dataflow.grafana-info.url=http://localhost:3000
     depends_on:
       - kafka
   app-import:
@@ -36,7 +40,7 @@ services:
         do
           sleep 1;
         done;
-        wget -qO- 'http://dataflow-server:9393/apps' --post-data='uri=http://bit.ly/Darwin-SR2-stream-applications-kafka-maven&force=true';
+        wget -qO- 'http://dataflow-server:9393/apps' --post-data='uri=http://bit.ly/Einstein-BUILD-SNAPSHOT-stream-applications-kafka-maven&force=true';
         echo 'Stream apps imported'
         wget -qO- 'http://dataflow-server:9393/apps' --post-data='uri=http://bit.ly/Clark-GA-task-applications-maven&force=true';
         echo 'Task apps imported'"
@@ -47,3 +51,18 @@ services:
     - "7577:7577"
     - "9000-9010:9000-9010"
 
+  # Prometheus uses the InfluxDB datasource
+  influxdb:
+    image: influxdb:1.7.3
+    container_name: 'influxdb'
+    ports:
+      - '8086:8086'
+
+  # Grafana SCDF InfluxdDB pre-build image
+  grafana:
+    image: springcloud/spring-cloud-dataflow-grafana-influxdb:${DATAFLOW_VERSION}
+    container_name: 'grafana'
+    ports:
+      - '3000:3000'
+volumes:
+  scdf-targets:
