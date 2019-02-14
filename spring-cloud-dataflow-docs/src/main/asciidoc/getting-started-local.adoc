@@ -135,7 +135,7 @@ Use of Spring Cloud Data Flow Shell is further described in <<shell,Shell>>.
 
 ==== Spring Cloud Data Monitoring
 
-By default the Data Flow docker-compose configures Stream monitoring with InfluxDB and pre-build dash boards for Grafana.
+By default the Data Flow docker-compose configures Stream monitoring with InfluxDB and pre-build dashboards for Grafana.
 
 For further instructions about the Data Flow monitoring follow the <<streams-monitoring-local-influx,Streams Monitoring InfluxDB >> section.
 

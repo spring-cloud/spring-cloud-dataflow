@@ -51,14 +51,12 @@ services:
     - "7577:7577"
     - "9000-9010:9000-9010"
 
-  # Prometheus uses the InfluxDB datasource
   influxdb:
     image: influxdb:1.7.3
     container_name: 'influxdb'
     ports:
       - '8086:8086'
 
-  # Grafana SCDF InfluxdDB pre-build image
   grafana:
     image: springcloud/spring-cloud-dataflow-grafana-influxdb:${DATAFLOW_VERSION}
     container_name: 'grafana'
