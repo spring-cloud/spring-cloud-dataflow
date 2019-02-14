@@ -591,6 +591,7 @@ The following topics provide more detail:
 * <<api-guide-resources-stream-definitions-create>>
 * <<api-guide-resources-stream-definitions-list>>
 * <<api-guide-resources-stream-definitions-list-related>>
+* <<api-guide-resources-stream-definition-get>>
 * <<api-guide-resources-stream-definitions-delete-one>>
 * <<api-guide-resources-stream-definitions-delete-all>>
 * <<api-guide-resources-stream-deployment-deploy>>
@@ -728,6 +729,45 @@ include::{snippets}/stream-definitions-documentation/list-related-stream-definit
 
 include::{snippets}/stream-definitions-documentation/list-related-stream-definitions/http-response.adoc[]
 
+
+
+[[api-guide-resources-stream-definition-get]]
+==== Retrieve Stream Definition Detail
+
+The stream definition endpoint lets you get a single stream definition.
+The following topics provide more detail:
+
+* <<api-guide-resources-stream-definition-get-request-structure>>
+* <<api-guide-resources-stream-definition-get-path-parameters>>
+* <<api-guide-resources-stream-definition-get-example-request>>
+* <<api-guide-resources-stream-definition-get-response-structure>>
+
+
+[[api-guide-resources-stream-definition-get-request-structure]]
+===== Request Structure
+
+include::{snippets}/stream-definitions-documentation/get-stream-definition/http-request.adoc[]
+
+
+
+[[api-guide-resources-stream-definition-get-path-parameters]]
+===== Path Parameters
+
+include::{snippets}/stream-definitions-documentation/get-stream-definition/path-parameters.adoc[]
+
+
+
+[[api-guide-resources-stream-definition-get-example-request]]
+===== Example Request
+
+include::{snippets}/stream-definitions-documentation/get-stream-definition/curl-request.adoc[]
+
+
+
+[[api-guide-resources-stream-definition-get-response-structure]]
+===== Response Structure
+
+include::{snippets}/stream-definitions-documentation/get-stream-definition/http-response.adoc[]
 
 
 

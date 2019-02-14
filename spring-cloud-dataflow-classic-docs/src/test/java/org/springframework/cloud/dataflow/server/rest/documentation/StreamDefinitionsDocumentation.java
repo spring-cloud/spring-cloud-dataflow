@@ -24,6 +24,7 @@ import org.junit.runners.MethodSorters;
 import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.delete;
 import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.get;
 import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.post;
+import static org.springframework.restdocs.payload.PayloadDocumentation.fieldWithPath;
 import static org.springframework.restdocs.payload.PayloadDocumentation.responseFields;
 import static org.springframework.restdocs.payload.PayloadDocumentation.subsectionWithPath;
 import static org.springframework.restdocs.request.RequestDocumentation.parameterWithName;
@@ -48,6 +49,7 @@ public class StreamDefinitionsDocumentation extends BaseDocumentation {
 			return;
 		}
 
+
 		this.mockMvc.perform(
 			post("/apps/{type}/time", "source")
 					.param("uri", "maven://org.springframework.cloud.stream.app:time-source-rabbit:1.2.0.RELEASE"))
@@ -68,13 +70,20 @@ public class StreamDefinitionsDocumentation extends BaseDocumentation {
 					.param("deploy", "false"))
 			.andExpect(status().isCreated())
 			.andDo(this.documentationHandler.document(
-					requestParameters(
-						parameterWithName("name")
-							.description("The name for the created task definitions"),
-						parameterWithName("definition")
-							.description("The definition for the stream, using Data Flow DSL"),
-						parameterWithName("deploy")
-							.description("If true, the stream is deployed upon creation (default is false"))));
+				requestParameters(
+					parameterWithName("name").description("The name for the created task definitions"),
+					parameterWithName("definition").description("The definition for the stream, using Data Flow DSL"),
+					parameterWithName("deploy")
+						.description("If true, the stream is deployed upon creation (default is false)")),
+				responseFields(
+						fieldWithPath("name").description("The name of the created stream definition"),
+						fieldWithPath("dslText").description("The DSL of the created stream definition"),
+						fieldWithPath("status").description("The status of the created stream definition"),
+						fieldWithPath("statusDescription")
+								.description("The status description of the created stream definition"),
+						subsectionWithPath("_links.self").description("Link to the created stream definition resource")
+				)
+			));
 	}
 
 	@Test
@@ -82,35 +91,71 @@ public class StreamDefinitionsDocumentation extends BaseDocumentation {
 		this.mockMvc.perform(
 			get("/streams/definitions")
 				.param("page", "0")
+				.param("sort", "name,ASC")
+				.param("search", "")
 				.param("size", "10"))
 			.andDo(print())
 			.andExpect(status().isOk())
 			.andDo(this.documentationHandler.document(
 				requestParameters(
-					parameterWithName("page")
-						.description("The zero-based page number (optional)"),
-					parameterWithName("size")
-						.description("The requested page size (optional)")),
+					parameterWithName("page").description("The zero-based page number (optional)"),
+					parameterWithName("search").description("The search string performed on the name (optional)"),
+					parameterWithName("sort").description("The sort on the list (optional)"),
+					parameterWithName("size").description("The requested page size (optional)")),
 				responseFields(
 					subsectionWithPath("_embedded.streamDefinitionResourceList")
-						.description("Contains a collection of Stream Definitions/"),
+						.description("Contains a collection of Stream Definitions"),
 					subsectionWithPath("_links.self").description("Link to the stream definitions resource"),
 					subsectionWithPath("page").description("Pagination properties"))));
 	}
 
 	@Test
-	public void listRelatedStreamDefinitions() throws Exception {
+	public void getStreamDefinition() throws Exception {
 		this.mockMvc.perform(
-			get("/streams/definitions/{name}/related", "timelog").param("nested", "true"))
+			get("/streams/definitions/{name}", "timelog"))
 			.andDo(print())
 			.andExpect(status().isOk())
 			.andDo(this.documentationHandler.document(
-					requestParameters(
-							parameterWithName("nested")
-								.description("Should we recursively findByTaskNameContains for related stream definitions (optional)")),
-					pathParameters(parameterWithName("name")
-						.description("The name of an existing stream definition (required)"))
-				));
+				pathParameters(
+					parameterWithName("name").description("The name of the stream definition to query (required)")
+				),
+				responseFields(
+					fieldWithPath("name").description("The name of the stream definition"),
+					fieldWithPath("dslText").description("The DSL of the stream definition"),
+					fieldWithPath("status").description("The status of the stream definition"),
+					fieldWithPath("statusDescription")
+							.description("The status description of the stream definition"),
+					subsectionWithPath("_links.self").description("Link to the stream definition resource")
+				)));
+	}
+
+	@Test
+	public void listRelatedStreamDefinitions() throws Exception {
+		this.mockMvc.perform(
+			get("/streams/definitions/{name}/related", "timelog")
+                    .param("page", "0")
+                    .param("sort", "name,ASC")
+                    .param("search", "")
+                    .param("size", "10")
+					.param("nested", "true"))
+			.andDo(print())
+			.andExpect(status().isOk())
+			.andDo(this.documentationHandler.document(
+                requestParameters(
+                    parameterWithName("nested")
+                        .description("Should we recursively findByTaskNameContains for related stream definitions (optional)"),
+                    parameterWithName("page").description("The zero-based page number (optional)"),
+                    parameterWithName("search").description("The search string performed on the name (optional)"),
+                    parameterWithName("sort").description("The sort on the list (optional)"),
+                    parameterWithName("size").description("The requested page size (optional)")),
+                pathParameters(parameterWithName("name")
+                    .description("The name of an existing stream definition (required)")),
+                responseFields(
+                    subsectionWithPath("_embedded.streamDefinitionResourceList")
+                        .description("Contains a collection of Stream Definitions"),
+                    subsectionWithPath("_links.self").description("Link to the stream definitions resource"),
+                    subsectionWithPath("page").description("Pagination properties"))
+            ));
 	}
 
 	@Test

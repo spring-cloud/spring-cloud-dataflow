@@ -108,7 +108,7 @@ public class ApiDocumentation extends BaseDocumentation {
 				linkWithRel("tasks/platforms").description("Provides platform accounts for launching tasks"),
 
 				linkWithRel("streams/definitions").description("Exposes the Streams resource"),
-				linkWithRel("streams/definitions/definition").description("Handle a specific Stream " + "definition"),
+				linkWithRel("streams/definitions/definition").description("Handle a specific Stream definition"),
 				linkWithRel("streams/validation").description("Provides the validation for a stream definition"),
 				linkWithRel("streams/deployments").description("Provides Stream deployment operations"),
 				linkWithRel("streams/deployments/{name}").description("Request un-deployment of an existing stream"),
