@@ -2,3 +2,6 @@ org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
   org.springframework.cloud.skipper.server.autoconfigure.SkipperServerAutoConfiguration,\
   org.springframework.cloud.skipper.server.autoconfigure.CloudFoundryPlatformAutoConfiguration,\
   org.springframework.cloud.skipper.server.autoconfigure.KubernetesPlatformAutoConfiguration
+
+org.springframework.context.ApplicationListener=\
+  org.springframework.cloud.skipper.server.autoconfigure.ProfileApplicationListener

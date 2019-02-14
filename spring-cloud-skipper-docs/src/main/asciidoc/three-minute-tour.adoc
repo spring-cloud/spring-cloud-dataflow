@@ -245,7 +245,6 @@ The command `platform list` shows the platforms with which the server has been c
 ----
 
 In the preceding example, there is only one Cloud Foundry platform.
-Disabling the local platform during the installation process (by setting the `enableLocalPlatform` property to `false`) caused the default `local` platform to not appear.
 
 Now we can install the Hello World app (specifically, the maven based artifact).
 The following example shows the `package install` command (with its output) that we use to install the `Hello World` application:
@@ -536,7 +535,6 @@ spring:
   cloud:
     skipper:
       server:
-        enableLocalPlatform: false
         platform:
           kubernetes:
             accounts:
@@ -571,7 +569,6 @@ skipper:>package search
 ----
 
 The `platform list` command shows which platforms the server has been configured with -- in this case, one Kubernetes namespace.
-Disabling the local platform by setting the `enableLocalPlatform` property to `false` causes the default `local` platform to not appear.
 
 [source,bash,options="nowrap"]
 ----

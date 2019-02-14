@@ -41,7 +41,6 @@ spring:
   cloud:
     skipper:
       server:
-        enableLocalPlatform: false
         platform:
           cloudfoundry:
             accounts:
@@ -75,8 +74,6 @@ spring:
                   deleteRoutes: false
 ----
 
-NOTE: You must set `enableLocalPlatform` to `false` so that the local platform deployer is never used.
-
 NOTE: The `deleteRoutes` deployment setting is `false` so that "`v2`" of an application has the same route as "`v1`".
 Otherwise, undeploying "`v1`" removes the route.
 
@@ -99,9 +96,7 @@ applications:
   path: spring-cloud-skipper-server.jar
 env:
     SPRING_APPLICATION_NAME: mlp-skipper
-    SPRING_PROFILES_ACTIVE: cloud
     JBP_CONFIG_SPRING_AUTO_RECONFIGURATION: '{enabled: false}'
-    SPRING_CLOUD_SKIPPER_SERVER_ENABLELOCALPLATFORM: false
     SPRING_CLOUD_SKIPPER_SERVER_PLATFORM_CLOUDFOUNDRY_ACCOUNTS[pws]_CONNECTION_URL: https://api.run.pivotal.io
     SPRING_CLOUD_SKIPPER_SERVER_PLATFORM_CLOUDFOUNDRY_ACCOUNTS[pws]_CONNECTION_ORG: myOrgQA
     SPRING_CLOUD_SKIPPER_SERVER_PLATFORM_CLOUDFOUNDRY_ACCOUNTS[pws]_CONNECTION_SPACE: mySpaceQA
@@ -119,8 +114,6 @@ NOTE: In the preceding manifest, we bound the application to the `mysqlboost` se
 If you do not specify a service, the server uses an embedded database.
 
 NOTE: As of Skipper 2.0, you must disable Spring Auto-reconfiguration and set the profile to `cloud`.
-
-NOTE: You must set `SPRING_CLOUD_SKIPPER_SERVER_ENABLELOCALPLATFORM` to `false` so that the local platform deployer is never used.
 
 NOTE: You must set `SPRING_CLOUD_SKIPPER_SERVER_PLATFORM_CLOUDFOUNDRY_ACCOUNTS[pws]_DEPLOYMENT_DELETE_ROUTES: false` so that "`v2`" of an application has the same route as "`v1`".
 Otherwise, undeploying "`v1`" removes the route.

@@ -39,5 +39,9 @@
             <artifactId>spring-boot-starter-test</artifactId>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>org.springframework.cloud</groupId>
+            <artifactId>spring-cloud-skipper-server-core</artifactId>
+        </dependency>
     </dependencies>
 </project>
