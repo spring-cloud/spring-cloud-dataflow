@@ -65,7 +65,7 @@ public class VndErrorResponseErrorHandler extends DefaultResponseErrorHandler {
 			throw new DataFlowClientException(vndErrors);
 		}
 		else {
-			//FIXME Basic Authentication Exceptions do not return a VndError
+			//see https://github.com/spring-cloud/spring-cloud-dataflow/issues/2898
 			final String message = StringUtils.hasText(response.getStatusText())
 					? response.getStatusText()
 					: String.valueOf(response.getStatusCode());

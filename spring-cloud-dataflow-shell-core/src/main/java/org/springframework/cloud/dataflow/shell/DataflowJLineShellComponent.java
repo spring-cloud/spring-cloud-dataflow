@@ -46,12 +46,13 @@ public class DataflowJLineShellComponent extends JLineShellComponent {
 		final StringBuilder sb = new StringBuilder();
 		if (targetHolder.getTarget().getTargetException() != null &&
 			StringUtils.hasText(targetHolder.getTarget().getTargetResultMessage())) {
-			sb.append("WARNING - During targeting we encountered a problem:"
+			sb.append("WARNING - Problem connecting to the Spring Cloud Data Flow Server:"
 				+ System.lineSeparator())
 			.append("\"" + targetHolder.getTarget().getTargetResultMessage() + "\""
 				+ System.lineSeparator())
 			.append("Please double check your startup parameters and either restart the "
-				+ "Data Flow Shell or target the Data Flow Server using the "
+				+ "Data Flow Shell (with any missing configuration including security etc.) "
+				+ "or target the Data Flow Server using the "
 				+ "'dataflow config server' command."
 				+ System.lineSeparator()
 				+ System.lineSeparator());
