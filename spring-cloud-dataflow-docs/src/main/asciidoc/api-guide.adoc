@@ -240,9 +240,10 @@ The following topics provide more detail:
 * <<resources-app-registry-get>>
 * <<resources-app-registry-post>>
 * <<resources-app-registry-post-versioned>>
+* <<resources-app-registry-bulk>>
 * <<resources-app-registry-default>>
 * <<resources-app-registry-delete>>
-* <<resources-app-registry-bulk>>
+* <<resources-app-registry-delete-all>>
 
 
 
@@ -427,6 +428,47 @@ include::{snippets}/app-registry-documentation/registering-an-application-versio
 include::{snippets}/app-registry-documentation/registering-an-application-version/http-response.adoc[]
 
 
+
+[[resources-app-registry-bulk]]
+==== Registering Applications in Bulk
+A `POST` request on `/apps` allows registering multiple applications at once.
+The following topics provide more detail:
+
+* <<api-guide-resources-app-registry-bulk-request-structure>>
+* <<api-guide-resources-app-registry-bulk-request-parameters>>
+* <<api-guide-resources-app-registry-bulk-example-request>>
+* <<api-guide-resources-app-registry-bulk-response-structure>>
+
+
+
+[[api-guide-resources-app-registry-bulk-request-structure]]
+===== Request Structure
+
+include::{snippets}/app-registry-documentation/bulk-registering-apps/http-request.adoc[]
+
+
+
+[[api-guide-resources-app-registry-bulk-request-parameters]]
+===== Request Parameters
+
+include::{snippets}/app-registry-documentation/bulk-registering-apps/request-parameters.adoc[]
+
+
+
+[[api-guide-resources-app-registry-bulk-example-request]]
+===== Example Request
+
+include::{snippets}/app-registry-documentation/bulk-registering-apps/curl-request.adoc[]
+
+
+
+[[api-guide-resources-app-registry-bulk-response-structure]]
+===== Response Structure
+
+include::{snippets}/app-registry-documentation/bulk-registering-apps/http-response.adoc[]
+
+
+
 [[resources-app-registry-default]]
 ==== Set the default application version
 
@@ -509,46 +551,46 @@ include::{snippets}/app-registry-documentation/unregistering-an-application/http
 
 
 
-[[resources-app-registry-bulk]]
-==== Registering Applications in Bulk
-A `POST` request on `/apps` allows registering multiple applications at once.
+[[resources-app-registry-delete-all]]
+==== Unregistering all Applications
+A `DELETE` request on `/apps` unregisters all the applications.
 The following topics provide more detail:
 
-* <<api-guide-resources-app-registry-bulk-request-structure>>
-* <<api-guide-resources-app-registry-bulk-request-parameters>>
-* <<api-guide-resources-app-registry-bulk-example-request>>
-* <<api-guide-resources-app-registry-bulk-response-structure>>
+* <<api-guide-resources-app-registry-delete-all-request-structure>>
+* <<api-guide-resources-app-registry-delete-all-example-request>>
+* <<api-guide-resources-app-registry-delete-all-response-structure>>
 
 
 
-[[api-guide-resources-app-registry-bulk-request-structure]]
+[[api-guide-resources-app-registry-delete-all-request-structure]]
 ===== Request Structure
 
-include::{snippets}/app-registry-documentation/bulk-registering-apps/http-request.adoc[]
+include::{snippets}/app-registry-documentation/unregistering-all-applications/http-request.adoc[]
 
 
 
-[[api-guide-resources-app-registry-bulk-request-parameters]]
-===== Request Parameters
-
-include::{snippets}/app-registry-documentation/bulk-registering-apps/request-parameters.adoc[]
-
-
-
-[[api-guide-resources-app-registry-bulk-example-request]]
+[[api-guide-resources-app-registry-delete-all-example-request]]
 ===== Example Request
 
-include::{snippets}/app-registry-documentation/bulk-registering-apps/curl-request.adoc[]
+include::{snippets}/app-registry-documentation/unregistering-all-applications/curl-request.adoc[]
 
 
 
-[[api-guide-resources-app-registry-bulk-response-structure]]
+[[api-guide-resources-app-registry-delete-all-response-structure]]
 ===== Response Structure
 
-include::{snippets}/app-registry-documentation/bulk-registering-apps/http-response.adoc[]
+include::{snippets}/app-registry-documentation/unregistering-all-applications/http-response.adoc[]
+
 
 [[api-guide-resources-audit-records]]
 === Audit Records
+
+The audit records endpoint provides information about the audit records. The following topics provide more detail:
+
+* <<api-guide-resources-audit-records-list>>
+* <<api-guide-resources-audit-record-get>>
+* <<api-guide-resources-audit-action-types>>
+* <<api-guide-resources-audit-operation-types>>
 
 [[api-guide-resources-audit-records-list]]
 ==== List All Audit Records
@@ -582,6 +624,88 @@ include::{snippets}/audit-records-documentation/list-all-audit-records/curl-requ
 
 include::{snippets}/audit-records-documentation/list-all-audit-records/http-response.adoc[]
 
+
+[[api-guide-resources-audit-record-get]]
+==== Retrieve Audit Record Detail
+
+The audit record endpoint lets you get a single audit record. The following topics provide more detail:
+
+* <<api-guide-resources-audit-record-get-request-structure>>
+* <<api-guide-resources-audit-record-get-path-parameters>>
+* <<api-guide-resources-audit-record-get-example-request>>
+* <<api-guide-resources-audit-record-get-response-structure>>
+
+[[api-guide-resources-audit-record-get-request-structure]]
+===== Request Structure
+
+include::{snippets}/audit-records-documentation/get-audit-record/http-request.adoc[]
+
+[[api-guide-resources-audit-record-get-path-parameters]]
+===== Path Parameters
+
+include::{snippets}/audit-records-documentation/get-audit-record/path-parameters.adoc[]
+
+[[api-guide-resources-audit-record-get-example-request]]
+===== Example Request
+
+include::{snippets}/audit-records-documentation/get-audit-record/curl-request.adoc[]
+
+[[api-guide-resources-audit-record-get-response-structure]]
+===== Response Structure
+
+include::{snippets}/audit-records-documentation/get-audit-record/http-response.adoc[]
+
+
+[[api-guide-resources-audit-action-types]]
+==== List all the Audit Action Types
+
+The audit record endpoint lets you get the action types. The following topics provide more detail:
+
+* <<api-guide-resources-audit-action-types-request-structure>>
+* <<api-guide-resources-audit-action-types-example-request>>
+* <<api-guide-resources-audit-action-types-response-structure>>
+
+[[api-guide-resources-audit-action-types-request-structure]]
+===== Request Structure
+
+include::{snippets}/audit-records-documentation/get-audit-action-types/http-request.adoc[]
+
+[[api-guide-resources-audit-action-types-example-request]]
+===== Example Request
+
+include::{snippets}/audit-records-documentation/get-audit-action-types/curl-request.adoc[]
+
+[[api-guide-resources-audit-action-types-response-structure]]
+===== Response Structure
+
+include::{snippets}/audit-records-documentation/get-audit-action-types/http-response.adoc[]
+
+
+[[api-guide-resources-audit-operation-types]]
+==== List all the Audit Operation Types
+
+The audit record endpoint lets you get the operation types. The following topics provide more detail:
+
+* <<api-guide-resources-audit-operation-types-request-structure>>
+* <<api-guide-resources-audit-operation-types-example-request>>
+* <<api-guide-resources-audit-operation-types-response-structure>>
+
+[[api-guide-resources-audit-operation-types-request-structure]]
+===== Request Structure
+
+include::{snippets}/audit-records-documentation/get-audit-operation-types/http-request.adoc[]
+
+[[api-guide-resources-audit-operation-types-example-request]]
+===== Example Request
+
+include::{snippets}/audit-records-documentation/get-audit-operation-types/curl-request.adoc[]
+
+[[api-guide-resources-audit-operation-types-response-structure]]
+===== Response Structure
+
+include::{snippets}/audit-records-documentation/get-audit-operation-types/http-response.adoc[]
+
+
 [[api-guide-resources-stream-definitions]]
 === Stream Definitions
 
@@ -591,6 +715,7 @@ The following topics provide more detail:
 * <<api-guide-resources-stream-definitions-create>>
 * <<api-guide-resources-stream-definitions-list>>
 * <<api-guide-resources-stream-definitions-list-related>>
+* <<api-guide-resources-stream-definition-get>>
 * <<api-guide-resources-stream-definitions-delete-one>>
 * <<api-guide-resources-stream-definitions-delete-all>>
 * <<api-guide-resources-stream-deployment-deploy>>
@@ -730,6 +855,45 @@ include::{snippets}/stream-definitions-documentation/list-related-stream-definit
 
 
 
+[[api-guide-resources-stream-definition-get]]
+==== Retrieve Stream Definition Detail
+
+The stream definition endpoint lets you get a single stream definition.
+The following topics provide more detail:
+
+* <<api-guide-resources-stream-definition-get-request-structure>>
+* <<api-guide-resources-stream-definition-get-path-parameters>>
+* <<api-guide-resources-stream-definition-get-example-request>>
+* <<api-guide-resources-stream-definition-get-response-structure>>
+
+
+[[api-guide-resources-stream-definition-get-request-structure]]
+===== Request Structure
+
+include::{snippets}/stream-definitions-documentation/get-stream-definition/http-request.adoc[]
+
+
+
+[[api-guide-resources-stream-definition-get-path-parameters]]
+===== Path Parameters
+
+include::{snippets}/stream-definitions-documentation/get-stream-definition/path-parameters.adoc[]
+
+
+
+[[api-guide-resources-stream-definition-get-example-request]]
+===== Example Request
+
+include::{snippets}/stream-definitions-documentation/get-stream-definition/curl-request.adoc[]
+
+
+
+[[api-guide-resources-stream-definition-get-response-structure]]
+===== Response Structure
+
+include::{snippets}/stream-definitions-documentation/get-stream-definition/http-response.adoc[]
+
+
 
 [[api-guide-resources-stream-definitions-delete-one]]
 ==== Delete a Single Stream Definition
@@ -821,7 +985,7 @@ The stream validation endpoint lets you validate the apps in a stream definition
 The following topics provide more detail:
 
 * <<api-guide-resources-stream-validation-request-structure>>
-* <<api-guide-resources-stream-validation-request-parameters>>
+* <<api-guide-resources-stream-validation-path-parameters>>
 * <<api-guide-resources-stream-validation-example-request>>
 * <<api-guide-resources-stream-validation-response-structure>>
 
@@ -831,10 +995,10 @@ The following topics provide more detail:
 
 include::{snippets}/stream-validation-documentation/validate-stream/http-request.adoc[]
 
-[[api-guide-resources-stream-validation-request-parameters]]
-==== Request Parameters
+[[api-guide-resources-stream-validation-path-parameters]]
+==== Path Parameters
 
-There are no request parameters for this endpoint.
+include::{snippets}/stream-validation-documentation/validate-stream/path-parameters.adoc[]
 
 [[api-guide-resources-stream-validation-example-request]]
 ==== Example Request
@@ -1516,7 +1680,7 @@ The task validation endpoint lets you validate the apps in a task definition.
 The following topics provide more detail:
 
 * <<api-guide-resources-task-validation-request-structure>>
-* <<api-guide-resources-task-validation-request-parameters>>
+* <<api-guide-resources-task-validation-path-parameters>>
 * <<api-guide-resources-task-validation-example-request>>
 * <<api-guide-resources-task-validation-response-structure>>
 
@@ -1526,10 +1690,11 @@ The following topics provide more detail:
 
 include::{snippets}/task-validation-documentation/validate-task/http-request.adoc[]
 
-[[api-guide-resources-task-validation-request-parameters]]
-==== Request Parameters
+[[api-guide-resources-task-validation-path-parameters]]
+==== Path Parameters
 
-There are no request parameters for this endpoint.
+include::{snippets}/task-validation-documentation/validate-task/path-parameters.adoc[]
+
 
 [[api-guide-resources-task-validation-example-request]]
 ==== Example Request
@@ -1553,6 +1718,7 @@ The following topics provide more detail:
 * <<api-guide-resources-task-executions-list-by-name>>
 * <<api-guide-resources-task-executions-detail>>
 * <<api-guide-resources-task-executions-delete>>
+* <<api-guide-resources-task-executions-current-count>>
 
 
 
@@ -1806,8 +1972,9 @@ The job executions endpoint provides information about the job executions that a
 The following topics provide more detail:
 
 * <<api-guide-resources-job-executions-list>>
-* <<api-guide-resources-job-executions-job-execution-info-only-list>>
-* <<api-guide-resources-job-executions-list-by-name>>
+* <<api-guide-resources-job-executions-thin-job-execution-list>>
+* <<api-guide-resources-job-executions-job-execution-info-only-list-by-name>>
+* <<api-guide-resources-job-executions-thin-job-execution-info-only-list-by-name>>
 * <<api-guide-resources-job-executions-detail>>
 * <<api-guide-resources-job-executions-stop>>
 * <<api-guide-resources-job-executions-restart>>
@@ -1848,7 +2015,7 @@ include::{snippets}/job-executions-documentation/list-job-executions/curl-reques
 
 
 
-[[api-guide-resources-job-executions-thin-job-execution-list-structure]]
+[[api-guide-resources-job-executions-list-response-structure]]
 ===== Response Structure
 
 include::{snippets}/job-executions-documentation/list-job-executions/http-response.adoc[]

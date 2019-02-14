@@ -41,6 +41,7 @@ import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.get;
+import static org.springframework.restdocs.payload.PayloadDocumentation.fieldWithPath;
 import static org.springframework.restdocs.payload.PayloadDocumentation.responseFields;
 import static org.springframework.restdocs.payload.PayloadDocumentation.subsectionWithPath;
 import static org.springframework.restdocs.request.RequestDocumentation.parameterWithName;
@@ -106,8 +107,16 @@ public class JobInstancesDocumentation extends BaseDocumentation {
 				.andDo(print())
 				.andExpect(status().isOk())
 				.andDo(this.documentationHandler.document(
-						pathParameters(parameterWithName("id")
-								.description("The id of an existing job instance (required)"))));
+					pathParameters(
+						parameterWithName("id").description("The id of an existing job instance (required)")
+					),
+					responseFields(
+						fieldWithPath("jobName").description("The name of the job instance"),
+						fieldWithPath("jobInstanceId").description("The ID of the job instance"),
+						subsectionWithPath("jobExecutions").description("The executions of the job instance"),
+						subsectionWithPath("_links.self").description("Link to the job instance resource")
+					)
+				));
 	}
 
 

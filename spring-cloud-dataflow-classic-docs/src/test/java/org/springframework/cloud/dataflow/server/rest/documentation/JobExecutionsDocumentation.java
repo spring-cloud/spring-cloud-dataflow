@@ -45,6 +45,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.get;
 import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.post;
 import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.put;
+import static org.springframework.restdocs.payload.PayloadDocumentation.fieldWithPath;
 import static org.springframework.restdocs.payload.PayloadDocumentation.responseFields;
 import static org.springframework.restdocs.payload.PayloadDocumentation.subsectionWithPath;
 import static org.springframework.restdocs.request.RequestDocumentation.parameterWithName;
@@ -191,12 +192,33 @@ public class JobExecutionsDocumentation extends BaseDocumentation {
 	@Test
 	public void jobDisplayDetail() throws Exception {
 		this.mockMvc.perform(
-				get("/jobs/executions/{id}", "2"))
-				.andDo(print())
-				.andExpect(status().isOk())
-				.andDo(this.documentationHandler.document(
-						pathParameters(parameterWithName("id")
-								.description("The id of an existing job execution (required)"))));
+			get("/jobs/executions/{id}", "2"))
+			.andDo(print())
+			.andExpect(status().isOk())
+			.andDo(this.documentationHandler.document(
+				pathParameters(
+					parameterWithName("id").description("The id of an existing job execution (required)")
+				),
+				responseFields(
+					fieldWithPath("executionId").description("The execution ID of the job execution"),
+					fieldWithPath("stepExecutionCount").description("the number of step of the job execution"),
+					fieldWithPath("jobId").description("The job ID of the job execution"),
+					fieldWithPath("taskExecutionId").description("The task execution ID of the job execution"),
+					fieldWithPath("name").description("The name of the job execution"),
+					fieldWithPath("startDate").description("The start date of the job execution"),
+					fieldWithPath("startTime").description("The start time of the job execution"),
+					fieldWithPath("duration").description("The duration of the job execution"),
+					fieldWithPath("jobParameters").description("The parameters of the job execution"),
+					fieldWithPath("jobParametersString").description("The parameters string of the job execution"),
+					fieldWithPath("restartable").description("The status restartable of the job execution"),
+					fieldWithPath("abandonable").description("The status abandonable of the job execution"),
+					fieldWithPath("stoppable").description("The status stoppable of the job execution"),
+					fieldWithPath("defined").description("The status defined of the job execution"),
+					fieldWithPath("timeZone").description("The time zone of the job execution"),
+					subsectionWithPath("jobExecution").description("The details of the job execution"),
+					subsectionWithPath("_links.self").description("Link to the stream definition resource")
+				)
+			));
 	}
 
 	@Test

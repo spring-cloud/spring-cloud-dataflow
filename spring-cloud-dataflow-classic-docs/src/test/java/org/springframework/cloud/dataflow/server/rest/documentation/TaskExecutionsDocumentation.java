@@ -27,6 +27,7 @@ import org.springframework.cloud.dataflow.core.ApplicationType;
 import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.delete;
 import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.get;
 import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.post;
+import static org.springframework.restdocs.payload.PayloadDocumentation.fieldWithPath;
 import static org.springframework.restdocs.payload.PayloadDocumentation.responseFields;
 import static org.springframework.restdocs.payload.PayloadDocumentation.subsectionWithPath;
 import static org.springframework.restdocs.request.RequestDocumentation.parameterWithName;
@@ -129,12 +130,28 @@ public class TaskExecutionsDocumentation extends BaseDocumentation {
 	@Test
 	public void launchTaskDisplayDetail() throws Exception {
 		this.mockMvc.perform(
-				get("/tasks/executions/{id}","1"))
-				.andDo(print())
-				.andExpect(status().isOk())
-				.andDo(this.documentationHandler.document(
-						pathParameters(parameterWithName("id")
-								.description("The id of an existing task execution (required)"))));
+            get("/tasks/executions/{id}","1"))
+            .andDo(print())
+            .andExpect(status().isOk())
+            .andDo(this.documentationHandler.document(
+                pathParameters(
+                    parameterWithName("id").description("The id of an existing task execution (required)")
+                ),
+                responseFields(
+                    fieldWithPath("executionId").description("The id of the task execution"),
+                    fieldWithPath("exitCode").description("The exit code of the task execution"),
+                    fieldWithPath("taskName").description("The task name related to the task execution"),
+                    fieldWithPath("startTime").description("The start time of the task execution"),
+                    fieldWithPath("endTime").description("The end time of the task execution"),
+                    fieldWithPath("exitMessage").description("The exit message of the task execution"),
+                    fieldWithPath("arguments").description("The arguments of the task execution"),
+                    fieldWithPath("jobExecutionIds").description("The job executions ids of the task execution"),
+                    fieldWithPath("errorMessage").description("The error message of the task execution"),
+                    fieldWithPath("externalExecutionId").description("The external id of the task execution"),
+                    fieldWithPath("taskExecutionStatus").description("The status of the task execution"),
+                    subsectionWithPath("_links.self").description("Link to the task execution resource")
+                )
+            ));
 	}
 
 	@Test
@@ -143,7 +160,12 @@ public class TaskExecutionsDocumentation extends BaseDocumentation {
 				get("/tasks/executions/current"))
 				.andDo(print())
 				.andExpect(status().isOk())
-				.andDo(this.documentationHandler.document());
+				.andDo(this.documentationHandler.document(
+                    responseFields(
+                        fieldWithPath("maximumTaskExecutions").description("The number of maximum task execution"),
+                        fieldWithPath("runningExecutionCount").description("The number of number execution")
+                    )
+                ));
 	}
 
 	@Test

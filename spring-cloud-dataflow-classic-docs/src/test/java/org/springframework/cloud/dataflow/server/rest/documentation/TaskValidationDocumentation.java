@@ -27,6 +27,9 @@ import org.springframework.cloud.dataflow.core.ApplicationType;
 import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.delete;
 import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.get;
 import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.post;
+import static org.springframework.restdocs.payload.PayloadDocumentation.fieldWithPath;
+import static org.springframework.restdocs.payload.PayloadDocumentation.responseFields;
+import static org.springframework.restdocs.payload.PayloadDocumentation.subsectionWithPath;
 import static org.springframework.restdocs.request.RequestDocumentation.parameterWithName;
 import static org.springframework.restdocs.request.RequestDocumentation.pathParameters;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -39,38 +42,46 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 public class TaskValidationDocumentation extends BaseDocumentation {
 
-	@Before
-	public void setup() throws Exception {
-		registerApp(ApplicationType.task, "timestamp", "1.2.0.RELEASE");
-		createTaskDefinition("taskC");
-	}
+    @Before
+    public void setup() throws Exception {
+        registerApp(ApplicationType.task, "timestamp", "1.2.0.RELEASE");
+        createTaskDefinition("taskC");
+    }
 
-	@After
-	public void tearDown() throws Exception {
-		destroyTaskDefinition("taskC");
-		unregisterApp(ApplicationType.task, "timestamp");
-	}
+    @After
+    public void tearDown() throws Exception {
+        destroyTaskDefinition("taskC");
+        unregisterApp(ApplicationType.task, "timestamp");
+    }
 
-	@Test
-	public void validateTask() throws Exception {
-		this.mockMvc.perform(
-				get("/tasks/validation/{name}", "taskC"))
-				.andExpect(status().isOk())
-				.andDo(this.documentationHandler.document(pathParameters(parameterWithName("name")
-						.description("The name of a task definition to be validated (required)"))));
-	}
+    @Test
+    public void validateTask() throws Exception {
+        this.mockMvc.perform(
+            get("/tasks/validation/{name}", "taskC"))
+            .andExpect(status().isOk())
+            .andDo(this.documentationHandler.document(
+                pathParameters(
+                    parameterWithName("name").description("The name of a task definition to be validated (required)")
+                ),
+                responseFields(
+                    fieldWithPath("appName").description("The name of a task definition"),
+                    fieldWithPath("dsl").description("The dsl of a task definition"),
+                    subsectionWithPath("appStatuses").description("The status of the application instances")
+                )
+            ));
+    }
 
-	private void createTaskDefinition(String taskName) throws Exception{
-		documentation.dontDocument( () -> this.mockMvc.perform(
-				post("/tasks/definitions")
-						.param("name", taskName)
-						.param("definition", "timestamp --format='yyyy MM dd'"))
-				.andExpect(status().isOk()));
-	}
+    private void createTaskDefinition(String taskName) throws Exception {
+        documentation.dontDocument(() -> this.mockMvc.perform(
+                post("/tasks/definitions")
+                        .param("name", taskName)
+                        .param("definition", "timestamp --format='yyyy MM dd'"))
+                .andExpect(status().isOk()));
+    }
 
-	private void destroyTaskDefinition(String taskName) throws Exception{
-		documentation.dontDocument( () -> this.mockMvc.perform(
-				delete("/tasks/definitions/{name}", taskName))
-				.andExpect(status().isOk()));
-	}
+    private void destroyTaskDefinition(String taskName) throws Exception {
+        documentation.dontDocument(() -> this.mockMvc.perform(
+                delete("/tasks/definitions/{name}", taskName))
+                .andExpect(status().isOk()));
+    }
 }
