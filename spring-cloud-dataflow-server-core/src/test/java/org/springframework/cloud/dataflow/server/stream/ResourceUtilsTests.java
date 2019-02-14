@@ -46,7 +46,7 @@ public class ResourceUtilsTests {
 				.version("1.0.0.RELEASE")
 				.build();
 		String resourceWithoutVersion = appResourceService.getResourceWithoutVersion(mavenResource);
-		assertThat(resourceWithoutVersion).isEqualTo("maven://org.springframework.cloud.task.app:timestamp-task");
+		assertThat(resourceWithoutVersion).isEqualTo("maven://org.springframework.cloud.task.app:timestamp-task:jar");
 		assertThat(appResourceService.getResourceVersion(mavenResource)).isEqualTo("1.0.0.RELEASE");
 	}
 

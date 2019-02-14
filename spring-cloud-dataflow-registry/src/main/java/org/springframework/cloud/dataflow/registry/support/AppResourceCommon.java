@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 the original author or authors.
+ * Copyright 2018-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,6 +36,7 @@ import org.springframework.util.StringUtils;
 
 /**
  * @author Christian Tzolov
+ * @author Ilayaperumal Gopinathan
  */
 public class AppResourceCommon {
 
@@ -181,9 +182,20 @@ public class AppResourceCommon {
 		Assert.notNull(resource, "resource must not be null");
 		if (resource instanceof MavenResource) {
 			MavenResource mavenResource = (MavenResource) resource;
-			return String.format("maven://%s:%s",
+			StringBuilder mavenResourceStringBuilder = new StringBuilder();
+			mavenResourceStringBuilder.append(String.format("maven://%s:%s",
 					mavenResource.getGroupId(),
-					mavenResource.getArtifactId());
+					mavenResource.getArtifactId()));
+			if (StringUtils.hasText(mavenResource.getExtension())) {
+				mavenResourceStringBuilder.append(":" + mavenResource.getExtension());
+			}
+			else {
+				mavenResourceStringBuilder.append(":jar");
+			}
+			if (StringUtils.hasText(mavenResource.getClassifier())) {
+				mavenResourceStringBuilder.append(":" + mavenResource.getClassifier());
+			}
+			return mavenResourceStringBuilder.toString();
 		}
 		else if (resource instanceof DockerResource) {
 			DockerResource dockerResource = (DockerResource) resource;

@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 the original author or authors.
+ * Copyright 2017-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -169,6 +169,19 @@ public class AppResourceCommonTests {
 		assertThat(version).isEqualTo("1.2.0-SNAPSHOT");
 		theRest = appResourceCommon.getResourceWithoutVersion(urlResource);
 		assertThat(theRest).isEqualTo("http://repo.spring.io/libs-release/org/springframework/cloud/stream/app/file-sink-rabbit/file-sink-rabbit");
+	}
+
+	@Test
+	public void testGetResourceWithoutVersion() {
+		assertThat(appResourceCommon.getResourceWithoutVersion(
+				MavenResource.parse("org.springframework.cloud.stream.app:aggregate-counter-sink-rabbit:war:exec:1.3.0.RELEASE")))
+				.isEqualTo("maven://org.springframework.cloud.stream.app:aggregate-counter-sink-rabbit:war:exec");
+		assertThat(appResourceCommon.getResourceWithoutVersion(
+				MavenResource.parse("org.springframework.cloud.stream.app:aggregate-counter-sink-rabbit::exec:1.3.0.RELEASE")))
+				.isEqualTo("maven://org.springframework.cloud.stream.app:aggregate-counter-sink-rabbit:jar:exec");
+		assertThat(appResourceCommon.getResourceWithoutVersion(
+				MavenResource.parse("org.springframework.cloud.stream.app:aggregate-counter-sink-rabbit:1.3.0.RELEASE")))
+				.isEqualTo("maven://org.springframework.cloud.stream.app:aggregate-counter-sink-rabbit:jar");
 	}
 
 	@Test
