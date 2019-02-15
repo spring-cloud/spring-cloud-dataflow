@@ -333,7 +333,7 @@ These properties can be supplied in a `.properties` file that is accessible to t
 
 [source,bash,subs=attributes]
 ----
-java -jar spring-cloud-dataflow-server/target/spring-cloud-dataflow-server-{project-version}.jar --spring.config.location=<PATH-TO-FILE>/foo.properties
+java -jar spring-cloud-dataflow-server/target/spring-cloud-dataflow-server-{project-version}.jar --spring.config.additional-location=<PATH-TO-FILE>/foo.properties
 ----
 
 Spring Cloud Data Flow internally uses `bridge-processor` to directly connect different named channel destinations.
