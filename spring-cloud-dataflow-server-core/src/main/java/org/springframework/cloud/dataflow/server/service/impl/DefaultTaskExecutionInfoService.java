@@ -187,7 +187,7 @@ public class DefaultTaskExecutionInfoService implements TaskExecutionInfoService
 
 				// TODO whitelist args
 				// TODO incoropate the label somehow, ea. 1:timestamp --format=YYYY
-				AppDefinition appDefinition = new AppDefinition(subTask.getName(), subTask.getArguments());
+				AppDefinition appDefinition = new AppDefinition(subTask.getName(), subTaskNode.getTaskApp().getArgumentsAsMap());
 
 				AppDeploymentRequest appDeploymentRequest = new AppDeploymentRequest(appDefinition,
 						appResource, null, null);
