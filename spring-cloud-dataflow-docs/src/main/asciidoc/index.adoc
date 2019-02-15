@@ -14,6 +14,7 @@ Sabby Anandan; Marius Bogoevici; Eric Bottard; Mark Fisher; Ilayaperumal Gopinat
 :spring-boot-version: 2.1.1.RELEASE
 :spring-cloud-task-version: 2.0.0.RELEASE
 :spring-batch-version: 4.1.0.RELEASE
+:composed-task-version: 2.1.0.RELEASE
 :spring-boot-docs-reference: https://docs.spring.io/spring-boot/docs/2.1.1.RELEASE/reference
 :scs-app-starters-docs: https://docs.spring.io/spring-cloud-stream-app-starters/docs/current/reference/html
 :scs-app-starters-docs-htmlsingle: https://docs.spring.io/spring-cloud-stream-app-starters/docs/current/reference/htmlsingle
