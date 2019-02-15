@@ -43,7 +43,6 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.when;
 
-
 /**
  * @author Ilayaperumal Gopinathan
  * @author Mark Fisher
@@ -67,15 +66,16 @@ public class StreamCommandTests extends AbstractShellIntegrationTest {
 	}
 
 	@Test
-	public void testStreamLifecycleForTickTock() {
+	public void testStreamLifecycleForTickTock() throws InterruptedException {
 		logger.info("Starting Stream Test for TickTock");
+		Thread.sleep(2000);
 		String streamName = generateUniqueName();
 		stream().create(streamName, "time | log");
 	}
 
 	@Test
-	public void testValidate() {
-
+	public void testValidate() throws InterruptedException {
+		Thread.sleep(2000);
 		String streamName = generateUniqueName();
 		Info info = new Info();
 		Status status = new Status();
