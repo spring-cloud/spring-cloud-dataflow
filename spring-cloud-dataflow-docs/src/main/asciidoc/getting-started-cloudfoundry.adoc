@@ -246,30 +246,31 @@ Once you are ready with the relevant properties in this file, you can issue a `c
 [[getting-started-cloudfoundry-on-local]]
 === Local Installation
 
-To run the server application locally (on your laptop or desktop) and target your Cloud Foundry installation, configure the Data Flow server by setting the following environment variables.
+To run the server application locally (on your laptop or desktop) and target your Cloud Foundry installation, configure the Data
+Flow server by setting the following environment variables in a property file (e.g., `foo.properties`).
 
 ====
-[source]
+[source,properties]
 ----
-export SPRING_PROFILES_ACTIVE=cloud
-export JBP_CONFIG_SPRING_AUTO_RECONFIGURATION='{enabled: false}'
-export SPRING_CLOUD_DATAFLOW_TASK_PLATFORM_CLOUDFOUNDRY_ACCOUNTS[default]_CONNECTION_URL=https://api.run.pivotal.io
-export SPRING_CLOUD_DATAFLOW_TASK_PLATFORM_CLOUDFOUNDRY_ACCOUNTS[default]_CONNECTION_ORG={org}
-export SPRING_CLOUD_DATAFLOW_TASK_PLATFORM_CLOUDFOUNDRY_ACCOUNTS[default]_CONNECTION_SPACE={space}
-export SPRING_CLOUD_DATAFLOW_TASK_PLATFORM_CLOUDFOUNDRY_ACCOUNTS[default]_CONNECTION_DOMAIN=cfapps.io
-export SPRING_CLOUD_DATAFLOW_TASK_PLATFORM_CLOUDFOUNDRY_ACCOUNTS[default]_CONNECTION_USERNAME={email}
-export SPRING_CLOUD_DATAFLOW_TASK_PLATFORM_CLOUDFOUNDRY_ACCOUNTS[default]_CONNECTION_PASSWORD={password}
-export SPRING_CLOUD_DATAFLOW_TASK_PLATFORM_CLOUDFOUNDRY_ACCOUNTS[default]_CONNECTION_SKIP_SSL_VALIDATION=false
+spring.profiles.active=cloud
+jbp.config.spring.auto.reconfiguration='{enabled: false}'
+spring.cloud.dataflow.task.platform.cloudfoundry.accounts[default].connection.url=https://api.run.pivotal.io
+spring.cloud.dataflow.task.platform.cloudfoundry.accounts[default].connection.org={org}
+spring.cloud.dataflow.task.platform.cloudfoundry.accounts[default].connection.space={space}
+spring.cloud.dataflow.task.platform.cloudfoundry.accounts[default].connection.domain=cfapps.io
+spring.cloud.dataflow.task.platform.cloudfoundry.accounts[default].connection.username={email}
+spring.cloud.dataflow.task.platform.cloudfoundry.accounts[default].connection.password={password}
+spring.cloud.dataflow.task.platform.cloudfoundry.accounts[default].connection.skipSslValidation=false
 
 # The following is for letting task apps write to their db.
 # Note however that when the *server* is running locally, it can't access that db
 # task related commands that show executions won't work then
-export SPRING_CLOUD_DATAFLOW_TASK_PLATFORM_CLOUDFOUNDRY_ACCOUNTS[default]_DEPLOYMENT_SERVICES=my_mysql
-export SKIPPER_CLIENT_HOST https://<skipper-host-name>/api
+spring.cloud.dataflow.task.platform.cloudfoundry.accounts[default].deployment.services=mysqlcups
+skipper.cliet.host=https://<skipper-host-name>/api
 ----
 ====
 
-You need to fill in `\{org}`, `\{space}`, `\{email}` and `\{password}` before running these commands.
+You need to fill in `\{org}`, `\{space}`, `\{email}` and `\{password}` before using the file in the following command.
 
 WARNING: Only set 'Skip SSL Validation' to true if you run on a Cloud Foundry instance using self-signed certificates (for example, in development).
 Do not use self-signed certificates for production.
@@ -284,7 +285,7 @@ Now we are ready to start the server application, as follows:
 ====
 [source, subs=attributes]
 ----
-java -jar spring-cloud-dataflow-server-{project-version}.jar
+java -jar spring-cloud-dataflow-server-{project-version}.jar --spring.config.additional-location=<PATH-TO-FILE>/foo.properties
 ----
 ====
 
