@@ -375,7 +375,7 @@ By default, the Composed Task Runner application is not registered with Spring C
 Consequently, to launch composed tasks, we must first register the Composed
 Task Runner as an application with Spring Cloud Data Flow, as follows:
 
-`app register --name composed-task-runner --type task --uri maven://org.springframework.cloud.task.app:composedtaskrunner-task:<DESIRED_VERSION>`
+`app register --name composed-task-runner --type task --uri maven://org.springframework.cloud.task.app:composedtaskrunner-task:{composed-task-version}`
 
 You can also configure Spring Cloud Data Flow to use a different task definition name for the composed task runner.
 This can be done by setting the `spring.cloud.dataflow.task.composedTaskRunnerName` property to the name of your choice.
