@@ -27,6 +27,7 @@ import org.springframework.cloud.dataflow.core.ApplicationType;
 import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.delete;
 import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.get;
 import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.post;
+import static org.springframework.restdocs.payload.PayloadDocumentation.fieldWithPath;
 import static org.springframework.restdocs.payload.PayloadDocumentation.responseFields;
 import static org.springframework.restdocs.payload.PayloadDocumentation.subsectionWithPath;
 import static org.springframework.restdocs.request.RequestDocumentation.parameterWithName;
@@ -57,59 +58,85 @@ public class TaskDefinitionsDocumentation extends BaseDocumentation {
 	@Test
 	public void createDefinition() throws Exception {
 		this.mockMvc.perform(
-				post("/tasks/definitions")
-						.param("name", "my-task")
-						.param("definition", "timestamp --format='YYYY MM DD'"))
-				.andExpect(status().isOk())
-				.andDo(this.documentationHandler.document(
-						requestParameters(
-								parameterWithName("name").description("The name for the created task definition"),
-								parameterWithName("definition")
-										.description("The definition for the task, using Data Flow DSL"))));
+			post("/tasks/definitions")
+				.param("name", "my-task")
+				.param("definition", "timestamp --format='YYYY MM DD'"))
+			.andExpect(status().isOk())
+			.andDo(this.documentationHandler.document(
+				requestParameters(
+					parameterWithName("name").description("The name for the created task definition"),
+					parameterWithName("definition").description("The definition for the task, using Data Flow DSL")
+				),
+				responseFields(
+					fieldWithPath("name").description("The name of the created task definition"),
+					fieldWithPath("dslText").description("The DSL of the created task definition"),
+					fieldWithPath("composed").description("The compose attribute of the created task definition"),
+					fieldWithPath("lastTaskExecution")
+							.description("The last task execution of the created task definition"),
+					fieldWithPath("status").description("The status of the created task definition"),
+					subsectionWithPath("_links.self").description("Link to the created task definition resource")
+				)
+			));
 	}
 
 	@Test
 	public void listAllTaskDefinitions() throws Exception {
 		this.mockMvc.perform(
-				get("/tasks/definitions")
-						.param("page", "0")
-						.param("size", "10"))
-				.andDo(print())
-				.andExpect(status().isOk())
-				.andDo(this.documentationHandler.document(
-						requestParameters(
-								parameterWithName("page")
-										.description("The zero-based page number (optional)"),
-								parameterWithName("size")
-										.description("The requested page size (optional)")),
-						responseFields(
-								subsectionWithPath("_embedded.taskDefinitionResourceList")
-										.description("Contains a collection of Task Definitions/"),
-								subsectionWithPath("_links.self").description("Link to the task definitions resource"),
-								subsectionWithPath("page").description("Pagination properties"))));
+			get("/tasks/definitions")
+				.param("page", "0")
+				.param("size", "10")
+				.param("sort", "taskName,ASC")
+				.param("search", "")
+			)
+			.andDo(print())
+			.andExpect(status().isOk())
+			.andDo(this.documentationHandler.document(
+				requestParameters(
+					parameterWithName("page").description("The zero-based page number (optional)"),
+					parameterWithName("size").description("The requested page size (optional)"),
+					parameterWithName("search").description("The search string performed on the name (optional)"),
+					parameterWithName("sort").description("The sort on the list (optional)")
+				),
+				responseFields(
+					subsectionWithPath("_embedded.taskDefinitionResourceList")
+						.description("Contains a collection of Task Definitions/"),
+					subsectionWithPath("_links.self").description("Link to the task definitions resource"),
+					subsectionWithPath("page").description("Pagination properties"))));
 	}
 
 	@Test
 	public void displayDetail() throws Exception {
 		this.mockMvc.perform(
-				get("/tasks/definitions/{my-task}","my-task"))
-				.andDo(print())
-				.andExpect(status().isOk())
-				.andDo(this.documentationHandler.document(
-						pathParameters(parameterWithName("my-task")
-								.description("The name of an existing task definition (required)"))));
+			get("/tasks/definitions/{my-task}","my-task"))
+			.andDo(print())
+			.andExpect(status().isOk())
+			.andDo(this.documentationHandler.document(
+				pathParameters(
+					parameterWithName("my-task").description("The name of an existing task definition (required)")
+				),
+				responseFields(
+					fieldWithPath("name").description("The name of the created task definition"),
+					fieldWithPath("dslText").description("The DSL of the created task definition"),
+					fieldWithPath("composed").description("The compose attribute of the created task definition"),
+					fieldWithPath("lastTaskExecution")
+						.description("The last task execution of the created task definition"),
+					fieldWithPath("status").description("The status of the created task definition"),
+					subsectionWithPath("_links.self").description("Link to the created task definition resource")
+				)
+			));
 	}
 
 	@Test
 	public void taskDefinitionDelete() throws Exception {
 		this.mockMvc.perform(
-				delete("/tasks/definitions/{my-task}", "my-task"))
-				.andDo(print())
-				.andExpect(status().isOk())
-				.andDo(this.documentationHandler.document(
-						pathParameters(parameterWithName("my-task")
-								.description("The name of an existing task definition (required)"))
-				));
+			delete("/tasks/definitions/{my-task}", "my-task"))
+			.andDo(print())
+			.andExpect(status().isOk())
+			.andDo(this.documentationHandler.document(
+				pathParameters(
+					parameterWithName("my-task").description("The name of an existing task definition (required)")
+				)
+			));
 	}
 
 }
