@@ -193,7 +193,6 @@ You can now issue a `cf push` command and reference the Data Flow server .jar fi
 [source, subs=attributes]
 ----
 cf push dataflow-server -b java_buildpack -m 2G -k 2G --no-start -p spring-cloud-dataflow-server-{project-version}.jar
-cf bind-service dataflow-server redis
 cf bind-service dataflow-server my_mysql
 ----
 ====
