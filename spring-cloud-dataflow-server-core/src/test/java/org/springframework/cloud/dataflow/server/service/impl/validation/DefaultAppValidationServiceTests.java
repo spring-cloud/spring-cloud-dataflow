@@ -97,7 +97,7 @@ public class DefaultAppValidationServiceTests {
 	@DirtiesContext
 	public void validateDockerTest() {
 		org.junit.Assume.assumeTrue(dockerCheck());
-		initializeDockerRegistry(appRegistry, "springcloudstream/log-sink-rabbit:1.3.1.RELEASE");
+		initializeDockerRegistry(appRegistry, "springcloudstream/log-sink-rabbit:latest");
 		assertTrue(appValidationService.validate("AAA", ApplicationType.task));
 	}
 
