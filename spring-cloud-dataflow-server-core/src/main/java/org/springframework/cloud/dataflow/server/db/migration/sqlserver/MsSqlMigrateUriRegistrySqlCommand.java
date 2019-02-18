@@ -33,6 +33,20 @@ public class MsSqlMigrateUriRegistrySqlCommand extends AbstractMigrateUriRegistr
 
 	@Override
 	protected void updateAppRegistration(JdbcTemplate jdbcTemplate, List<AppRegistrationMigrationData> data) {
+
+		// check and do same fix as in R__Hibernate_Sequence
+		// needed if we're coming from classic mode and skipper is not
+		// started first
+		boolean fixHibernateSequence = false;
+		try {
+			jdbcTemplate.execute("select 1 from hibernate_sequence");
+			fixHibernateSequence = true;
+		} catch (Exception e) {
+		}
+		if (fixHibernateSequence) {
+			jdbcTemplate.execute(R__Hibernate_Sequence.fixcommands.get(0).getCommand());
+		}
+
 		for (AppRegistrationMigrationData d : data) {
 			Long nextVal = jdbcTemplate.queryForObject("select next value for hibernate_sequence", Long.class);
 			jdbcTemplate.update(
