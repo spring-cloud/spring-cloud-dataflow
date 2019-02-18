@@ -23,9 +23,11 @@ import org.junit.runners.MethodSorters;
 
 import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.get;
 import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.post;
+import static org.springframework.restdocs.payload.PayloadDocumentation.fieldWithPath;
 import static org.springframework.restdocs.payload.PayloadDocumentation.responseFields;
 import static org.springframework.restdocs.payload.PayloadDocumentation.subsectionWithPath;
 import static org.springframework.restdocs.request.RequestDocumentation.parameterWithName;
+import static org.springframework.restdocs.request.RequestDocumentation.pathParameters;
 import static org.springframework.restdocs.request.RequestDocumentation.requestParameters;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -70,24 +72,69 @@ public class AuditRecordsDocumentation extends BaseDocumentation {
 				.param("page", "0")
 				.param("size", "10")
 				.param("operations", "STREAM")
-				.param("actions", "CREATE"))
+				.param("actions", "CREATE")
+				.param("fromDate", "2000-01-01T00:00:00")
+				.param("toDate", "2099-01-01T00:00:00")
+			)
 			.andDo(print())
 			.andExpect(status().isOk())
 			.andDo(this.documentationHandler.document(
 				requestParameters(
-					parameterWithName("page")
-						.description("The zero-based page number (optional)"),
-					parameterWithName("size")
-						.description("The requested page size (optional)"),
-					parameterWithName("operations")
-						.description("Comma-separated list of Audit Operations (optional)"),
-					parameterWithName("actions")
-						.description("Comma-separated list of Audit Actions (optional)")),
+					parameterWithName("page").description("The zero-based page number (optional)"),
+					parameterWithName("size").description("The requested page size (optional)"),
+					parameterWithName("operations").description("Comma-separated list of Audit Operations (optional)"),
+					parameterWithName("actions").description("Comma-separated list of Audit Actions (optional)"),
+					parameterWithName("fromDate")
+							.description("From date filter (ex.: 2019-02-03T00:00:30) (optional)"),
+					parameterWithName("toDate")
+							.description("To date filter (ex.: 2019-02-03T00:00:30) (optional)")
+				),
 				responseFields(
 					subsectionWithPath("_embedded.auditRecordResourceList")
 						.description("Contains a collection of Audit Records"),
 					subsectionWithPath("_links.self").description("Link to the audit record resource"),
 					subsectionWithPath("page").description("Pagination properties"))));
+	}
+
+	@Test
+	public void getAuditRecord() throws Exception {
+		this.mockMvc.perform(
+			get("/audit-records/{id}", "5"))
+			.andDo(print())
+			.andExpect(status().isOk())
+			.andDo(this.documentationHandler.document(
+				pathParameters(
+					parameterWithName("id").description("The id of the audit record to query (required)")
+				),
+				responseFields(
+					fieldWithPath("auditRecordId").description("The id of the audit record"),
+					fieldWithPath("createdBy").description("The author of the audit record (optional)"),
+					fieldWithPath("correlationId").description("The correlation ID of the audit record"),
+					fieldWithPath("auditData").description("The data of the audit record"),
+					fieldWithPath("createdOn").description("The creation date of the audit record"),
+					fieldWithPath("auditAction").description("The action of the audit record"),
+					fieldWithPath("auditOperation").description("The operation of the audit record"),
+					subsectionWithPath("_links.self").description("Link to the audit record resource")
+				)
+			));
+	}
+
+	@Test
+	public void getAuditActionTypes() throws Exception {
+		this.mockMvc.perform(
+			get("/audit-records/audit-action-types"))
+			.andDo(print())
+			.andExpect(status().isOk()
+		);
+	}
+
+	@Test
+	public void getAuditOperationTypes() throws Exception {
+		this.mockMvc.perform(
+			get("/audit-records/audit-operation-types"))
+			.andDo(print())
+			.andExpect(status().isOk()
+		);
 	}
 
 }

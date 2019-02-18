@@ -582,9 +582,15 @@ include::{snippets}/app-registry-documentation/unregistering-all-applications/cu
 include::{snippets}/app-registry-documentation/unregistering-all-applications/http-response.adoc[]
 
 
-
 [[api-guide-resources-audit-records]]
 === Audit Records
+
+The audit records endpoint provides information about the audit records. The following topics provide more detail:
+
+* <<api-guide-resources-audit-records-list>>
+* <<api-guide-resources-audit-record-get>>
+* <<api-guide-resources-audit-action-types>>
+* <<api-guide-resources-audit-operation-types>>
 
 [[api-guide-resources-audit-records-list]]
 ==== List All Audit Records
@@ -617,6 +623,88 @@ include::{snippets}/audit-records-documentation/list-all-audit-records/curl-requ
 ===== Response Structure
 
 include::{snippets}/audit-records-documentation/list-all-audit-records/http-response.adoc[]
+
+
+[[api-guide-resources-audit-record-get]]
+==== Retrieve Audit Record Detail
+
+The audit record endpoint lets you get a single audit record. The following topics provide more detail:
+
+* <<api-guide-resources-audit-record-get-request-structure>>
+* <<api-guide-resources-audit-record-get-path-parameters>>
+* <<api-guide-resources-audit-record-get-example-request>>
+* <<api-guide-resources-audit-record-get-response-structure>>
+
+[[api-guide-resources-audit-record-get-request-structure]]
+===== Request Structure
+
+include::{snippets}/audit-records-documentation/get-audit-record/http-request.adoc[]
+
+[[api-guide-resources-audit-record-get-path-parameters]]
+===== Path Parameters
+
+include::{snippets}/audit-records-documentation/get-audit-record/path-parameters.adoc[]
+
+[[api-guide-resources-audit-record-get-example-request]]
+===== Example Request
+
+include::{snippets}/audit-records-documentation/get-audit-record/curl-request.adoc[]
+
+[[api-guide-resources-audit-record-get-response-structure]]
+===== Response Structure
+
+include::{snippets}/audit-records-documentation/get-audit-record/http-response.adoc[]
+
+
+[[api-guide-resources-audit-action-types]]
+==== List all the Audit Action Types
+
+The audit record endpoint lets you get the action types. The following topics provide more detail:
+
+* <<api-guide-resources-audit-action-types-request-structure>>
+* <<api-guide-resources-audit-action-types-example-request>>
+* <<api-guide-resources-audit-action-types-response-structure>>
+
+[[api-guide-resources-audit-action-types-request-structure]]
+===== Request Structure
+
+include::{snippets}/audit-records-documentation/get-audit-action-types/http-request.adoc[]
+
+[[api-guide-resources-audit-action-types-example-request]]
+===== Example Request
+
+include::{snippets}/audit-records-documentation/get-audit-action-types/curl-request.adoc[]
+
+[[api-guide-resources-audit-action-types-response-structure]]
+===== Response Structure
+
+include::{snippets}/audit-records-documentation/get-audit-action-types/http-response.adoc[]
+
+
+[[api-guide-resources-audit-operation-types]]
+==== List all the Audit Operation Types
+
+The audit record endpoint lets you get the operation types. The following topics provide more detail:
+
+* <<api-guide-resources-audit-operation-types-request-structure>>
+* <<api-guide-resources-audit-operation-types-example-request>>
+* <<api-guide-resources-audit-operation-types-response-structure>>
+
+[[api-guide-resources-audit-operation-types-request-structure]]
+===== Request Structure
+
+include::{snippets}/audit-records-documentation/get-audit-operation-types/http-request.adoc[]
+
+[[api-guide-resources-audit-operation-types-example-request]]
+===== Example Request
+
+include::{snippets}/audit-records-documentation/get-audit-operation-types/curl-request.adoc[]
+
+[[api-guide-resources-audit-operation-types-response-structure]]
+===== Response Structure
+
+include::{snippets}/audit-records-documentation/get-audit-operation-types/http-response.adoc[]
+
 
 [[api-guide-resources-stream-definitions]]
 === Stream Definitions
