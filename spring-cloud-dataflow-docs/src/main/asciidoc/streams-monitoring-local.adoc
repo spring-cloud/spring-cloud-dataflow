@@ -90,7 +90,7 @@ Start the Skipper server.  Then start the Data Flow server with the following pr
 Now if you deploy a simple stream that uses Kafka, such as
 [source,bash]
 ----
-dataflow:>app import --uri http://bit.ly/Einstein-BUILD-RC1-stream-applications-kafka-maven --force
+dataflow:>app import --uri http://bit.ly/Einstein-GA-stream-applications-kafka-maven --force
 dataflow:>stream create stream2 --definition "time --fixed-delay=10 --time-unit=MILLISECONDS | filter --expression=payload.contains('3') | log" --deploy
 ----
 
@@ -178,7 +178,7 @@ Start the Skipper server.  Then start the Data Flow server with the following pr
 Now if you deploy a simple stream that uses Kafka, such as
 [source,bash]
 ----
-dataflow:>app import --uri http://bit.ly/Einstein-BUILD-SNAPSHOT-stream-applications-kafka-maven --force
+dataflow:>app import --uri http://bit.ly/Einstein-GA-stream-applications-kafka-maven --force
 
 dataflow:>stream create stream2 --definition "time --fixed-delay=10 --time-unit=MILLISECONDS | filter --expression=payload.contains('3') | log" --deploy
 ----

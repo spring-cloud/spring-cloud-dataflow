@@ -380,19 +380,19 @@ and Spring Boot 2.1.x:
 |Artifact Type |Stable Release |SNAPSHOT Release
 
 |RabbitMQ + Maven
-|http://bit.ly/Einstein-RC1-stream-applications-rabbit-maven
+|http://bit.ly/Einstein-GA-stream-applications-rabbit-maven
 |http://bit.ly/Einstein-BUILD-SNAPSHOT-stream-applications-rabbit-maven
 
 |RabbitMQ + Docker
-|http://bit.ly/Einstein-RC1-stream-applications-rabbit-docker
+|http://bit.ly/Einstein-GA-stream-applications-rabbit-docker
 |http://bit.ly/Einstein-BUILD-SNAPSHOT-stream-applications-rabbit-docker
 
 |Apache Kafka + Maven
-|http://bit.ly/Einstein-RC1-stream-applications-kafka-maven
+|http://bit.ly/Einstein-GA-stream-applications-kafka-maven
 |http://bit.ly/Einstein-BUILD-SNAPSHOT-stream-applications-kafka-maven
 
 |Apache Kafka + Docker
-|http://bit.ly/Einstein-RC1-stream-applications-kafka-docker
+|http://bit.ly/Einstein-GA-stream-applications-kafka-docker
 |http://bit.ly/Einstein-BUILD-SNAPSHOT-stream-applications-kafka-docker
 |======================
 
