@@ -50,7 +50,7 @@ public class R__Hibernate_Sequence extends AbstractMigration {
 
 	// sequence of tsql commands to change table to sequence
 	// this is needed if skipper migration hasn't yet fixed it
-	private final static List<SqlCommand> fixcommands = Arrays.asList(
+	public final static List<SqlCommand> fixcommands = Arrays.asList(
 			SqlCommand.from("exec sp_rename 'hibernate_sequence', 'hibernate_sequence_old';  \n" +
 					"declare @max int;\n" +
 					"select @max = max(next_val) from hibernate_sequence_old;\n" +
