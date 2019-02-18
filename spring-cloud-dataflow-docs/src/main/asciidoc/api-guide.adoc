@@ -240,9 +240,10 @@ The following topics provide more detail:
 * <<resources-app-registry-get>>
 * <<resources-app-registry-post>>
 * <<resources-app-registry-post-versioned>>
+* <<resources-app-registry-bulk>>
 * <<resources-app-registry-default>>
 * <<resources-app-registry-delete>>
-* <<resources-app-registry-bulk>>
+* <<resources-app-registry-delete-all>>
 
 
 
@@ -427,6 +428,47 @@ include::{snippets}/app-registry-documentation/registering-an-application-versio
 include::{snippets}/app-registry-documentation/registering-an-application-version/http-response.adoc[]
 
 
+
+[[resources-app-registry-bulk]]
+==== Registering Applications in Bulk
+A `POST` request on `/apps` allows registering multiple applications at once.
+The following topics provide more detail:
+
+* <<api-guide-resources-app-registry-bulk-request-structure>>
+* <<api-guide-resources-app-registry-bulk-request-parameters>>
+* <<api-guide-resources-app-registry-bulk-example-request>>
+* <<api-guide-resources-app-registry-bulk-response-structure>>
+
+
+
+[[api-guide-resources-app-registry-bulk-request-structure]]
+===== Request Structure
+
+include::{snippets}/app-registry-documentation/bulk-registering-apps/http-request.adoc[]
+
+
+
+[[api-guide-resources-app-registry-bulk-request-parameters]]
+===== Request Parameters
+
+include::{snippets}/app-registry-documentation/bulk-registering-apps/request-parameters.adoc[]
+
+
+
+[[api-guide-resources-app-registry-bulk-example-request]]
+===== Example Request
+
+include::{snippets}/app-registry-documentation/bulk-registering-apps/curl-request.adoc[]
+
+
+
+[[api-guide-resources-app-registry-bulk-response-structure]]
+===== Response Structure
+
+include::{snippets}/app-registry-documentation/bulk-registering-apps/http-response.adoc[]
+
+
+
 [[resources-app-registry-default]]
 ==== Set the default application version
 
@@ -509,43 +551,37 @@ include::{snippets}/app-registry-documentation/unregistering-an-application/http
 
 
 
-[[resources-app-registry-bulk]]
-==== Registering Applications in Bulk
-A `POST` request on `/apps` allows registering multiple applications at once.
+[[resources-app-registry-delete-all]]
+==== Unregistering all Applications
+A `DELETE` request on `/apps` unregisters all the applications.
 The following topics provide more detail:
 
-* <<api-guide-resources-app-registry-bulk-request-structure>>
-* <<api-guide-resources-app-registry-bulk-request-parameters>>
-* <<api-guide-resources-app-registry-bulk-example-request>>
-* <<api-guide-resources-app-registry-bulk-response-structure>>
+* <<api-guide-resources-app-registry-delete-all-request-structure>>
+* <<api-guide-resources-app-registry-delete-all-example-request>>
+* <<api-guide-resources-app-registry-delete-all-response-structure>>
 
 
 
-[[api-guide-resources-app-registry-bulk-request-structure]]
+[[api-guide-resources-app-registry-delete-all-request-structure]]
 ===== Request Structure
 
-include::{snippets}/app-registry-documentation/bulk-registering-apps/http-request.adoc[]
+include::{snippets}/app-registry-documentation/unregistering-all-applications/http-request.adoc[]
 
 
 
-[[api-guide-resources-app-registry-bulk-request-parameters]]
-===== Request Parameters
-
-include::{snippets}/app-registry-documentation/bulk-registering-apps/request-parameters.adoc[]
-
-
-
-[[api-guide-resources-app-registry-bulk-example-request]]
+[[api-guide-resources-app-registry-delete-all-example-request]]
 ===== Example Request
 
-include::{snippets}/app-registry-documentation/bulk-registering-apps/curl-request.adoc[]
+include::{snippets}/app-registry-documentation/unregistering-all-applications/curl-request.adoc[]
 
 
 
-[[api-guide-resources-app-registry-bulk-response-structure]]
+[[api-guide-resources-app-registry-delete-all-response-structure]]
 ===== Response Structure
 
-include::{snippets}/app-registry-documentation/bulk-registering-apps/http-response.adoc[]
+include::{snippets}/app-registry-documentation/unregistering-all-applications/http-response.adoc[]
+
+
 
 [[api-guide-resources-audit-records]]
 === Audit Records
