@@ -985,7 +985,7 @@ The stream validation endpoint lets you validate the apps in a stream definition
 The following topics provide more detail:
 
 * <<api-guide-resources-stream-validation-request-structure>>
-* <<api-guide-resources-stream-validation-request-parameters>>
+* <<api-guide-resources-stream-validation-path-parameters>>
 * <<api-guide-resources-stream-validation-example-request>>
 * <<api-guide-resources-stream-validation-response-structure>>
 
@@ -995,10 +995,10 @@ The following topics provide more detail:
 
 include::{snippets}/stream-validation-documentation/validate-stream/http-request.adoc[]
 
-[[api-guide-resources-stream-validation-request-parameters]]
-==== Request Parameters
+[[api-guide-resources-stream-validation-path-parameters]]
+==== Path Parameters
 
-There are no request parameters for this endpoint.
+include::{snippets}/stream-validation-documentation/validate-stream/path-parameters.adoc[]
 
 [[api-guide-resources-stream-validation-example-request]]
 ==== Example Request

@@ -23,6 +23,9 @@ import org.junit.runners.MethodSorters;
 
 import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.get;
 import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.post;
+import static org.springframework.restdocs.payload.PayloadDocumentation.fieldWithPath;
+import static org.springframework.restdocs.payload.PayloadDocumentation.responseFields;
+import static org.springframework.restdocs.payload.PayloadDocumentation.subsectionWithPath;
 import static org.springframework.restdocs.request.RequestDocumentation.parameterWithName;
 import static org.springframework.restdocs.request.RequestDocumentation.pathParameters;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -59,16 +62,25 @@ public class StreamValidationDocumentation extends BaseDocumentation {
 	@Test
 	public void validateStream() throws Exception {
 		this.mockMvc.perform(
-				post("/streams/definitions")
-						.param("name", "timelog")
-						.param("definition", "time --format='YYYY MM DD' | log")
-						.param("deploy", "false"))
-				.andExpect(status().isCreated());
+			post("/streams/definitions")
+					.param("name", "timelog")
+					.param("definition", "time --format='YYYY MM DD' | log")
+					.param("deploy", "false"))
+			.andExpect(status().isCreated());
+
 		this.mockMvc.perform(
-				get("/streams/validation/{name}", "timelog"))
-				.andExpect(status().isOk())
-				.andDo(this.documentationHandler.document(pathParameters(parameterWithName("name")
-						.description("The name of a stream definition to be validated (required)"))));
+			get("/streams/validation/{name}", "timelog"))
+			.andExpect(status().isOk())
+			.andDo(this.documentationHandler.document(
+				pathParameters(
+					parameterWithName("name").description("The name of a stream definition to be validated (required)")
+				),
+				responseFields(
+					fieldWithPath("appName").description("The name of a stream definition"),
+					fieldWithPath("dsl").description("The dsl of a stream definition"),
+					subsectionWithPath("appStatuses").description("The status of the application instances")
+				)
+			));
 	}
 
 }
