@@ -1680,7 +1680,7 @@ The task validation endpoint lets you validate the apps in a task definition.
 The following topics provide more detail:
 
 * <<api-guide-resources-task-validation-request-structure>>
-* <<api-guide-resources-task-validation-request-parameters>>
+* <<api-guide-resources-task-validation-path-parameters>>
 * <<api-guide-resources-task-validation-example-request>>
 * <<api-guide-resources-task-validation-response-structure>>
 
@@ -1690,10 +1690,11 @@ The following topics provide more detail:
 
 include::{snippets}/task-validation-documentation/validate-task/http-request.adoc[]
 
-[[api-guide-resources-task-validation-request-parameters]]
-==== Request Parameters
+[[api-guide-resources-task-validation-path-parameters]]
+==== Path Parameters
 
-There are no request parameters for this endpoint.
+include::{snippets}/task-validation-documentation/validate-task/path-parameters.adoc[]
+
 
 [[api-guide-resources-task-validation-example-request]]
 ==== Example Request
