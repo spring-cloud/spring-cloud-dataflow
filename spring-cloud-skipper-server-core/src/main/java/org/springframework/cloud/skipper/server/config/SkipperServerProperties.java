@@ -29,8 +29,6 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 @ConfigurationProperties("spring.cloud.skipper.server")
 public class SkipperServerProperties {
 
-	private CloudFoundry cloudFoundry = new CloudFoundry();
-
 	/**
 	 * Map of Package Repositories configurations.
 	 */
@@ -83,37 +81,6 @@ public class SkipperServerProperties {
 
 	public void setEnableLocalPlatform(boolean enableLocalPlatform) {
 		this.enableLocalPlatform = enableLocalPlatform;
-	}
-
-	public CloudFoundry getCloudFoundry() {
-		return cloudFoundry;
-	}
-
-	public void setCloudFoundry(CloudFoundry cloudFoundry) {
-		this.cloudFoundry = cloudFoundry;
-	}
-
-	public static class CloudFoundry {
-
-		private int maxPoolSize = 4;
-
-		private int maxWaitTime = 30000;
-
-		public int getMaxPoolSize() {
-			return maxPoolSize;
-		}
-
-		public void setMaxPoolSize(int maxPoolSize) {
-			this.maxPoolSize = maxPoolSize;
-		}
-
-		public int getMaxWaitTime() {
-			return maxWaitTime;
-		}
-
-		public void setMaxWaitTime(int maxWaitTime) {
-			this.maxWaitTime = maxWaitTime;
-		}
 	}
 
 	public static class PackageRepository {
