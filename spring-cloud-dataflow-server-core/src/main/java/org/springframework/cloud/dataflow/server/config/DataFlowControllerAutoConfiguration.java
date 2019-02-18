@@ -33,7 +33,6 @@ import org.springframework.boot.autoconfigure.domain.EntityScan;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.boot.web.client.RestTemplateBuilder;
-import org.springframework.cloud.client.circuitbreaker.EnableCircuitBreaker;
 import org.springframework.cloud.common.security.AuthorizationProperties;
 import org.springframework.cloud.common.security.support.SecurityStateBean;
 import org.springframework.cloud.dataflow.audit.repository.AuditRecordRepository;
@@ -137,7 +136,6 @@ import org.springframework.web.client.RestTemplate;
 @EnableConfigurationProperties({ FeaturesProperties.class, VersionInfoProperties.class,
 		DockerValidatorProperties.class, GrafanaInfoProperties.class })
 @ConditionalOnProperty(prefix = "dataflow.server", name = "enabled", havingValue = "true", matchIfMissing = true)
-@EnableCircuitBreaker
 @EntityScan({
 		"org.springframework.cloud.dataflow.core"
 })
