@@ -28,6 +28,8 @@ public class DockerResult {
 
 	private int count;
 
+	private String next;
+
 	private List<DockerTag> results = new ArrayList<>();
 
 	protected  DockerResult() {
@@ -49,4 +51,11 @@ public class DockerResult {
 		this.results = results;
 	}
 
+	public String getNext() {
+		return next;
+	}
+
+	public void setNext(String next) {
+		this.next = next;
+	}
 }

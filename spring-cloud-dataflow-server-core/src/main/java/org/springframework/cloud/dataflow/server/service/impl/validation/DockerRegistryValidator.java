@@ -79,16 +79,25 @@ public class DockerRegistryValidator {
 	public boolean isImagePresent() {
 		boolean result = false;
 		try {
-			DockerResult dockerResult = getDockerImageInfo();
 			String resourceTag = this.appResourceCommon.getResourceVersion(this.dockerResource);
-			if (dockerResult.getCount() > 0) {
-				for (DockerTag tag : dockerResult.getResults()) {
-					if (tag.getName().equals(resourceTag)) {
+			HttpHeaders headers = new HttpHeaders();
+			if (this.dockerAuth != null) {
+				headers.add(HttpHeaders.AUTHORIZATION, DOCKER_REGISTRY_AUTH_TYPE + " " + this.dockerAuth.getToken());
+			}
+			HttpEntity<String> httpEntity = new HttpEntity<>(headers);
+			String endpointUrl = getDockerTagsEndpointUrl();
+			do {
+				ResponseEntity tags = this.restTemplate.exchange(endpointUrl, HttpMethod.GET, httpEntity,
+						DockerResult.class);
+				DockerResult dockerResult = (DockerResult)tags.getBody();
+				for(DockerTag dockerTag : dockerResult.getResults()) {
+					if(dockerTag.getName().equals(resourceTag)) {
 						result = true;
 						break;
 					}
 				}
-			}
+				endpointUrl = dockerResult.getNext();
+			} while(result == false && endpointUrl != null);
 		}
 		catch (HttpClientErrorException hcee) {
 			//when attempting to access an invalid docker image or if you
@@ -137,18 +146,6 @@ public class DockerRegistryValidator {
 			result = (DockerAuth) dockerAuth.getBody();
 		}
 		return result;
-	}
-
-	private DockerResult getDockerImageInfo() {
-		HttpHeaders headers = new HttpHeaders();
-		if (this.dockerAuth != null) {
-			headers.add(HttpHeaders.AUTHORIZATION, DOCKER_REGISTRY_AUTH_TYPE + " " + this.dockerAuth.getToken());
-		}
-		HttpEntity<String> httpEntity = new HttpEntity<>(headers);
-		ResponseEntity tags = this.restTemplate.exchange(getDockerTagsEndpointUrl(), HttpMethod.GET, httpEntity,
-				DockerResult.class);
-
-		return (DockerResult) tags.getBody();
 	}
 
 	private String getDockerTagsEndpointUrl() {
