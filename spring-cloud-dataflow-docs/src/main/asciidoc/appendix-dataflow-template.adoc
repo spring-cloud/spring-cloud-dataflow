@@ -92,6 +92,9 @@ When declaring a `RestTemplate` as a bean, the following configuration suffices:
   }
 ----
 
+TIP: You can also get a pre-configured `RestTemplate` using
+`DataFlowTemplate.getDefaultDataflowRestTemplate();`
+
 Now you can instantiate the `DataFlowTemplate` with the following code:
 
 [source,java]
@@ -119,3 +122,53 @@ for (AppRegistrationResource app : apps.getContent()) {
     app.getUri()));
 }
 ----
+
+=== Data Flow Template and Security
+
+When using the `DataFlowTemplate`, you can also provide all the security-related
+options similar to as if you were using the _Data Flow Shell_. In fact the _Data Flow Shell_
+uses the `DataFlowTemplate` for all its operations.
+
+In order to get started, we provide a `HttpClientConfigurer` that uses the builder
+pattern to set the various security-related options:
+
+[source,java]
+----
+	HttpClientConfigurer
+		.create(targetUri)                                             # <1>
+		.basicAuthCredentials(username, password)                      # <2>
+		.skipTlsCertificateVerification()                              # <3>
+		.withProxyCredentials(proxyUri, proxyUsername, proxyPassword)  # <4>
+		.addInterceptor(interceptor)                                   # <5>
+		.buildClientHttpRequestFactory()                               # <6>
+----
+
+<1> Creates a HttpClientConfigurer with the provided target URI.
+<2> Sets the credentials for basic authentication (Using OAuth2 Password Grant)
+<3> Skip SSL certificate verification (*Use for DEVELOPMENT ONLY!*)
+<4> Configure any Proxy settings
+<5> Add a custom interceptor e.g. to set the OAuth2 Authorization header. This allows
+you to pass an OAuth2 Access Token instead of username/password credentials.
+<6> Builds the `ClientHttpRequestFactory` that can be set on the `RestTemplate`.
+
+Once the `HttpClientConfigurer` is configured, its `buildClientHttpRequestFactory`
+can be used to build the `ClientHttpRequestFactory` and you would set the corresponding
+property on the `RestTemplate`. You can then instantiate the actual `DataFlowTemplate`
+using that `RestTemplate`.
+
+In order to configure _Basic Authentication_, the following setup is required:
+
+[source,java]
+----
+	RestTemplate restTemplate = DataFlowTemplate.getDefaultDataflowRestTemplate();
+	HttpClientConfigurer httpClientConfigurer = HttpClientConfigurer.create("http://localhost:9393");
+
+	httpClientConfigurer.basicAuthCredentials("my_username", "my_password");
+	restTemplate.setRequestFactory(httpClientConfigurer.buildClientHttpRequestFactory());
+
+	DataFlowTemplate dataFlowTemplate = new DataFlowTemplate("http://localhost:9393", restTemplate);
+----
+
+You can find a sample application as part of the
+https://github.com/spring-cloud/spring-cloud-dataflow-samples/tree/master/dataflow-template-example[spring-cloud-dataflow-samples]
+on GitHub.
