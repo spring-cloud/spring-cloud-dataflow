@@ -214,7 +214,7 @@ With:
       - rabbitmq
 ----
 +
-And finally, modify the `app-import` service definition `command` attribute to replace `http://bit.ly/Celsius-SR3-stream-applications-kafka-10-maven` with `http://bit.ly/Celsius-SR3-stream-applications-rabbit-maven`.
+And finally, modify the `app-import` service definition `command` attribute to replace `http://bit.ly/Einstein-GA-stream-applications-kafka-maven` with `http://bit.ly/Einstein-GA-stream-applications-kafka-maven`.
 +
 . To enable `app starters` registration directly from the host machine you have to mount the source host folders to the `dataflow-server` container. For example, if the `my-app.jar` is in the `/foo/bar/apps` folder on your host machine, then add the following `volumes` block to the `dataflow-server` service definition:
 +
