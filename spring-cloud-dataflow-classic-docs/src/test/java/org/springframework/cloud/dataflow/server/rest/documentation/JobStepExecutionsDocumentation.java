@@ -43,6 +43,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 
 import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.get;
 import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.post;
+import static org.springframework.restdocs.payload.PayloadDocumentation.fieldWithPath;
 import static org.springframework.restdocs.payload.PayloadDocumentation.responseFields;
 import static org.springframework.restdocs.payload.PayloadDocumentation.subsectionWithPath;
 import static org.springframework.restdocs.request.RequestDocumentation.parameterWithName;
@@ -109,24 +110,42 @@ public class JobStepExecutionsDocumentation extends BaseDocumentation {
 	@Test
 	public void stepDetail() throws Exception {
 		this.mockMvc.perform(
-				get("/jobs/executions/{id}/steps/{stepid}", "1", "1"))
-				.andExpect(status().isOk()).andDo(this.documentationHandler.document(
-				pathParameters(parameterWithName("id")
-								.description("The id of an existing job execution (required)"),
-						parameterWithName("stepid")
-								.description("The id of an existing step execution for a specific job execution (required)"))
+			get("/jobs/executions/{id}/steps/{stepid}", "1", "1"))
+			.andExpect(status().isOk()).andDo(this.documentationHandler.document(
+			pathParameters(
+				parameterWithName("id").description("The id of an existing job execution (required)"),
+				parameterWithName("stepid")
+						.description("The id of an existing step execution for a specific job execution (required)")
+			),
+			responseFields(
+				fieldWithPath("jobExecutionId").description("The ID of the job step execution"),
+				fieldWithPath("stepType").description("The type of the job step execution"),
+				subsectionWithPath("stepExecution").description("The step details of the job step execution"),
+				subsectionWithPath("_links.self").description("Link to the job step execution resource")
+			)
 		));
 	}
 
 	@Test
 	public void stepProgress() throws Exception {
 		this.mockMvc.perform(
-				get("/jobs/executions/{id}/steps/{stepid}/progress", "1", "1"))
-				.andExpect(status().isOk()).andDo(this.documentationHandler.document(
-				pathParameters(parameterWithName("id")
-								.description("The id of an existing job execution (required)"),
-						parameterWithName("stepid")
-								.description("The id of an existing step execution for a specific job execution (required)"))));
+			get("/jobs/executions/{id}/steps/{stepid}/progress", "1", "1"))
+			.andExpect(status().isOk()).andDo(this.documentationHandler.document(
+			pathParameters(
+				parameterWithName("id").description("The id of an existing job execution (required)"),
+				parameterWithName("stepid")
+						.description("The id of an existing step execution for a specific job execution (required)")
+			),
+			responseFields(
+				subsectionWithPath("stepExecution").description("The detailed step details of the job step execution"),
+				subsectionWithPath("stepExecutionHistory")
+						.description("The history of the job step execution"),
+				fieldWithPath("percentageComplete").description("The percentage complete of the job step execution"),
+				fieldWithPath("finished").description("The status finished of the job step execution"),
+				fieldWithPath("duration").description("The duration of the job step execution"),
+				subsectionWithPath("_links.self").description("Link to the job step execution resource")
+			)
+		));
 	}
 
 
