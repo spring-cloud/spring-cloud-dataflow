@@ -103,6 +103,14 @@ public class DefaultAppValidationServiceTests {
 
 	@Test
 	@DirtiesContext
+	public void validateDockerMultiPageTest() {
+		org.junit.Assume.assumeTrue(dockerCheck());
+		initializeDockerRegistry(appRegistry, "springcloudstream/log-sink-rabbit:1.3.1.RELEASE");
+		assertTrue(appValidationService.validate("AAA", ApplicationType.task));
+	}
+
+	@Test
+	@DirtiesContext
 	public void validateMissingTagDockerTest() {
 		initializeDockerRegistry(appRegistry,"springcloudstream/log-sink-rabbit:1.3.1.NOTHERE");
 		assertFalse(appValidationService.validate("AAA", ApplicationType.task));
