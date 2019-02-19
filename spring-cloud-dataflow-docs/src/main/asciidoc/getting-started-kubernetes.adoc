@@ -702,15 +702,15 @@ For Kafka binder application registration may look like this:
 ====
 [subs=attributes]
 ----
-dataflow:>app register --type source --name time --uri docker://springcloudstream/time-source-kafka-10:{docker-time-source-kafka-version} --metadata-uri maven://org.springframework.cloud.stream.app:time-source-kafka-10:jar:metadata:{docker-time-source-kafka-version}
-dataflow:>app register --type sink --name log --uri docker://springcloudstream/log-sink-kafka-10:{docker-log-sink-kafka-version} --metadata-uri maven://org.springframework.cloud.stream.app:log-sink-kafka-10:jar:metadata:{docker-log-sink-kafka-version}
+dataflow:>app register --type source --name time --uri docker://springcloudstream/time-source-kafka:{docker-time-source-kafka-version} --metadata-uri maven://org.springframework.cloud.stream.app:time-source-kafka:jar:metadata:{docker-time-source-kafka-version}
+dataflow:>app register --type sink --name log --uri docker://springcloudstream/log-sink-kafka:{docker-log-sink-kafka-version} --metadata-uri maven://org.springframework.cloud.stream.app:log-sink-kafka:jar:metadata:{docker-log-sink-kafka-version}
 ----
 ====
 
 Alternatively, if you want register all out-of-the-box stream applications for a particular binder in bulk, you can use one of the following commands:
 
-* RabbitMQ: `dataflow:>app import --uri http://bit.ly/Celsius-SR3-stream-applications-rabbit-docker`
-* Kafka: `dataflow:>app import --uri http://bit.ly/Celsius-SR3-stream-applications-kafka-10-docker`
+* RabbitMQ: `dataflow:>app import --uri http://bit.ly/Einstein-GA-stream-applications-rabbit-docker`
+* Kafka: `dataflow:>app import --uri http://bit.ly/Einstein-GA-stream-applications-kafka-docker`
 
 For more details, review how to link:http://docs.spring.io/spring-cloud-dataflow/docs/{scdf-core-version}/reference/html/spring-cloud-dataflow-register-apps.html[register applications].
 =====

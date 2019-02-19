@@ -23,7 +23,7 @@ The general lifecycle of a Stream is:
 . Create a Stream Definition.
 . Deploy the Stream.
 . Undeploy or Destroy the Stream.
-. Upgrade or Rollack applications in the Stream.
+. Upgrade or Rollback applications in the Stream.
 
 For deploying streams, the Data Flow Server has to be configured to delegate the deployment to a new server in the Spring Cloud ecosystem named http://cloud.spring.io/spring-cloud-skipper/[Skipper].
 
@@ -448,14 +448,14 @@ As an example, if you would like to register all out-of-the-box stream applicati
 
 [source,bash,subs=attributes]
 ----
-$ dataflow:>app import --uri http://bit.ly/Darwin-SR3-stream-applications-kafka-maven
+$ dataflow:>app import --uri http://bit.ly/Einstein-GA-stream-applications-kafka-maven
 ----
 
 Alternatively you can register all the stream applications with the Rabbit binder, as follows:
 
 [source,bash,subs=attributes]
 ----
-$ dataflow:>app import --uri http://bit.ly/Darwin-SR3-stream-applications-rabbit-maven
+$ dataflow:>app import --uri http://bit.ly/Einstein-GA-stream-applications-rabbit-maven
 ----
 
 You can also pass the `--local` option (which is `true` by default) to indicate whether the
@@ -581,8 +581,8 @@ When registering a single app with `app register`, you can use the optional `--m
 [source]
 ----
 dataflow:>app register --name log --type sink
-    --uri maven://org.springframework.cloud.stream.app:log-sink-kafka-10:1.2.1.BUILD-SNAPSHOT
-    --metadata-uri maven://org.springframework.cloud.stream.app:log-sink-kafka-10:jar:metadata:1.2.1.BUILD-SNAPSHOT
+    --uri maven://org.springframework.cloud.stream.app:log-sink:2.1.0.RELEASE
+    --metadata-uri maven://org.springframework.cloud.stream.app:log-sink:jar:metadata:2.1.0.RELEASE
 ----
 
 When registering several files by using the `app import` command, the file should contain a `<type>.<name>.metadata` line
@@ -595,7 +595,7 @@ it through `http://` or `file://` would be equally possible).
 ----
 ...
 source.http=docker:springcloudstream/http-source-rabbit:latest
-source.http.metadata=maven://org.springframework.cloud.stream.app:http-source-rabbit:jar:metadata:1.2.1.BUILD-SNAPSHOT
+source.http.metadata=maven://org.springframework.cloud.stream.app:http-source-rabbit:jar:metadata:2.1.0.RELEASE
 ...
 ----
 

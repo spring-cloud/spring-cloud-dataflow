@@ -2,7 +2,7 @@ version: '3'
 
 services:
   kafka:
-    image: wurstmeister/kafka:1.1.0
+    image: wurstmeister/kafka:2.11-0.11.0.3
     expose:
       - "9092"
     environment:
@@ -36,9 +36,9 @@ services:
         do
           sleep 1;
         done;
-        wget -qO- 'http://dataflow-server:9393/apps' --post-data='uri=http://bit.ly/Darwin-SR2-stream-applications-kafka-maven&force=true';
+        wget -qO- 'http://dataflow-server:9393/apps' --post-data='uri=http://bit.ly/Einstein-GA-stream-applications-kafka-maven&force=true';
         echo 'Stream apps imported'
-        wget -qO- 'http://dataflow-server:9393/apps' --post-data='uri=http://bit.ly/Clark-GA-task-applications-maven&force=true';
+        wget -qO- 'http://dataflow-server:9393/apps' --post-data='uri=http://bit.ly/Dearborn-SR1-task-applications-maven&force=true';
         echo 'Task apps imported'"
   skipper-server:
     image: springcloud/spring-cloud-skipper-server:${SKIPPER_VERSION}
