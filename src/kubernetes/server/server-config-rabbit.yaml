@@ -37,7 +37,7 @@ data:
                     security:
                       enabled: false
           grafana-info:
-            url: 'http://35.231.157.217:3000'
+            url: 'http://grafana:3000'
           task:
             platform:
               kubernetes:
