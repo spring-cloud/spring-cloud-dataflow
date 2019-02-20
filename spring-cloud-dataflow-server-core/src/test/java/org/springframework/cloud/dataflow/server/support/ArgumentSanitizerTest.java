@@ -41,7 +41,7 @@ public class ArgumentSanitizerTest {
 	private ArgumentSanitizer sanitizer;
 
 	private static final String[] keys = { "password", "secret", "key", "token", ".*credentials.*",
-			"vcap_services" };
+			"vcap_services", "url" };
 
 	@Before
 	public void before() {

@@ -50,7 +50,7 @@ public class ArgumentSanitizer {
 	private static final String REDACTION_STRING = "******";
 
 	private static final String[] KEYS_TO_SANITIZE = { "username", "password", "secret", "key", "token", ".*credentials.*",
-			"vcap_services" };
+			"vcap_services", "url" };
 
 	private Pattern[] keysToSanitize;
 
