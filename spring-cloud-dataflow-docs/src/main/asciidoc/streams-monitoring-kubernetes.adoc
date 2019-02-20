@@ -28,7 +28,7 @@ Out of the box, each binder middleware configuration file defines attributes to 
                     security:
                       enabled: false
           grafana-info:
-            url: 'http://${GRAFANA_SERVICE_HOST}:${GRAFANA_SERVICE_PORT}'
+            url: 'http://grafana:3000'
 ----
 
 In this configuration, Prometheus metrics are enabled along with the appropriate endpoints and security settings.

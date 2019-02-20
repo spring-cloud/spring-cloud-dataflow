@@ -152,7 +152,7 @@ You can use `kubectl delete all,pvc,secrets -l app=mysql` to clean up afterwards
 Metrics are "scraped" from deployed pods by Prometheus when configured with the appropriate annotations.
 The collected metrics and monitoring data are then viewable via Grafana dashboards. Out of the box, Grafana comes pre-configured with a Prometheus data source connection along with dashboards for streams and applications.
 +
-Run the following commands to deploy create the cluster role, binding and service account:
+Run the following commands to create the cluster role, binding and service account:
 +
 IMPORTANT: Since version 1.9, the latest releases of Kubernetes have enabled https://kubernetes.io/docs/admin/authorization/rbac/[RBAC] on the api-server.
 If your target platform has RBAC enabled, you must ask a `cluster-admin` to create these for you before deploying Prometheus.
@@ -166,7 +166,7 @@ $ kubectl create -f src/kubernetes/prometheus/prometheus-serviceaccount.yaml
 ----
 ====
 +
-Run the following command to deploy Prometheus:
+Run the following commands to deploy Prometheus:
 +
 ====
 [source,bash]
@@ -193,7 +193,15 @@ $ kubectl create -f src/kubernetes/grafana/
 You can use `kubectl get all -l app=grafana` to verify that the deployment, pod, and service resources are running.
 You can use `kubectl delete all,cm,svc,secrets -l app=grafana` to clean up afterwards.
 +
-IMPORTANT: If you are deploying to Minikube that does not provide a load balancer, you can obtain the dashboard address by running: `minikube service --url grafana`.
+IMPORTANT: The `url` attribute value shown below should be replaced in `src/kubernetes/server/server-config-rabbit.yaml` or `src/kubernetes/server/server-config-kafka.yaml` to reflect the address and port Grafana is running on. Depending on your setup, the value can obtained by running the command `minikube service --url grafana` if running on Minikube, your load balancer external IP, or DNS name. This configuration is needed for Grafana links to be accessible when accessing the dashboard from a web browser.
++
+====
+[source,yaml]
+----
+          grafana-info:
+            url: 'http://grafana:3000'
+----
+====
 +
 The default Grafana dashboard credentials are username: `admin` and password: `password`. These defaults can be changed by modifying the `src/kubernetes/grafana/grafana-secret.yaml` file with the desired values.
 +
@@ -219,7 +227,7 @@ In the event you would not like to deploy metrics collection using Prometheus an
                     security:
                       enabled: false
           grafana-info:
-            url: 'http://${GRAFANA_SERVICE_HOST}:${GRAFANA_SERVICE_PORT}'
+            url: 'http://grafana:3000'
 ----
 ====
 +
