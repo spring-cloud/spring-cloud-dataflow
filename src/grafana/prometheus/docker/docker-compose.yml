@@ -1,11 +1,7 @@
 version: '3.3'
 services:
 
-  # Prometheus uses the image resulting form the build
-  # of `./prometheus` which simply packs some configuration
-  # into the form of an image.
-  #
-  # It could instead, use volume-mounts.
+  # Grafana is configured with the Prometheus datasource.
   # Use `docker exec -it prometheus /bin/sh` to logging in the container
   prometheus:
     image: prom/prometheus:v2.7.1
@@ -16,7 +12,7 @@ services:
     ports:
       - '9090:9090'
 
-  # Grafana SCDF Prometheus pre-build image:
+  # Grafana SCDF Prometheus pre-built image:
   grafana:
     # To use a locally build grafana image, comment out the 'image:' and uncomment 'build:' section. Then run 'docker-compose up -d --build`
     # build: './grafana'
@@ -25,13 +21,9 @@ services:
     ports:
       - '3000:3000'
 
-  # The service-discovery container uses the image resulting from the build
-  # of `./discovery` which simply packs some configuration into the
-  # form of an image.
-  #
-  # This could instead be a volume-mounted container.
+  # The service-discovery container uses the images built from the
+  # https://github.com/tzolov/spring-cloud-dataflow-prometheus-service-discovery project.
   # Use `docker exec -it service-discovery /bin/sh` to logging the container
-  # Project https://github.com/tzolov/spring-cloud-dataflow-prometheus-service-discovery
   service-discovery:
     image: springcloud/spring-cloud-dataflow-prometheus-service-discovery:0.0.2
     container_name: 'service-discovery'
@@ -41,7 +33,6 @@ services:
       - '8181'
     ports:
       - '8181:8181'
-    #    network_mode: 'host'
     environment:
       - 'SCDF_HOST_IP=${SCDF_HOST_IP:?SCDF_HOST_IP is not set!
       Use "export SCDF_HOST_IP=<SCDF Server IP>". Note: 127.0.0.1 is not a valid option!}'

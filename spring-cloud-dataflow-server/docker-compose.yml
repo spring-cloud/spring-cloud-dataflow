@@ -16,7 +16,7 @@ services:
     expose:
       - "2181"
   dataflow-server:
-    image: springcloud/spring-cloud-dataflow-server:${DATAFLOW_VERSION}
+    image: springcloud/spring-cloud-dataflow-server:${DATAFLOW_VERSION:?DATAFLOW_VERSION is not set!}
     container_name: dataflow-server
     ports:
       - "9393:9393"
@@ -40,25 +40,25 @@ services:
         do
           sleep 1;
         done;
-        wget -qO- 'http://dataflow-server:9393/apps' --post-data='uri=http://bit.ly/Einstein-BUILD-SNAPSHOT-stream-applications-kafka-maven&force=true';
+        wget -qO- 'http://dataflow-server:9393/apps' --post-data='uri=http://bit.ly/Einstein-GA-stream-applications-kafka-maven&force=true';
         echo 'Stream apps imported'
         wget -qO- 'http://dataflow-server:9393/apps' --post-data='uri=http://bit.ly/Clark-GA-task-applications-maven&force=true';
         echo 'Task apps imported'"
   skipper-server:
-    image: springcloud/spring-cloud-skipper-server:${SKIPPER_VERSION}
+    image: springcloud/spring-cloud-skipper-server:${SKIPPER_VERSION:?SKIPPER_VERSION is not set!}
     container_name: skipper
     ports:
     - "7577:7577"
     - "9000-9010:9000-9010"
 
   influxdb:
-    image: influxdb:1.7.3
+    image: influxdb:1.7.4
     container_name: 'influxdb'
     ports:
       - '8086:8086'
 
   grafana:
-    image: springcloud/spring-cloud-dataflow-grafana-influxdb:${DATAFLOW_VERSION}
+    image: springcloud/spring-cloud-dataflow-grafana-influxdb:${DATAFLOW_VERSION:?DATAFLOW_VERSION is not set!}
     container_name: 'grafana'
     ports:
       - '3000:3000'

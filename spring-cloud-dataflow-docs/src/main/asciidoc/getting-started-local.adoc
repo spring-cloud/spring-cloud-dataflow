@@ -133,11 +133,11 @@ $ docker exec -it dataflow-server java -jar shell.jar
 
 Use of Spring Cloud Data Flow Shell is further described in <<shell,Shell>>.
 
-==== Spring Cloud Data Monitoring
+==== Spring Cloud Data Flow Monitoring
 
-By default the Data Flow docker-compose configures Stream monitoring with InfluxDB and pre-build dashboards for Grafana.
+By default the Data Flow docker-compose configures Stream monitoring with InfluxDB and pre-built dashboards for Grafana.
 
-For further instructions about the Data Flow monitoring follow the <<streams-monitoring-local-influx,Streams Monitoring InfluxDB >> section.
+For further instructions about Data Flow monitoring, follow the <<streams-monitoring-local-influx,Streams Monitoring InfluxDB >> section.
 
 image::{dataflow-asciidoc}/images/grafana-influxdb-scdf-streams-dashboard.png[Grafana InfluxDB Dashboard, scaledwidth="50%"]
 

@@ -1,14 +1,14 @@
 version: '3.3'
 services:
 
-  # Prometheus uses the InfluxDB datasource
+  # Grafana uses the InfluxDB datasource
   influxdb:
-    image: influxdb:1.7.3
+    image: influxdb:1.7.4
     container_name: 'influxdb'
     ports:
       - '8086:8086'
 
-  # Grafana SCDF InfluxdDB pre-build image
+  # Grafana SCDF InfluxdDB pre-built image
   grafana:
     # To use a locally build grafana image, comment out the 'image:' and uncomment 'build:' section. Then run 'docker-compose up -d --build`
     # build: './grafana'
