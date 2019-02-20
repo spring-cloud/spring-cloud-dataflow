@@ -150,7 +150,7 @@ You can use `kubectl delete all,pvc,secrets -l app=mysql` to clean up afterwards
 . Deploy Prometheus and Grafana
 +
 Metrics are "scraped" from deployed pods by Prometheus when configured with the appropriate annotations.
-The collected metrics and monitoring data are then viewable via Grafana dashboards. Out of the box, Grafana comes pre-configured with a Prometheus data source connection along with dashboards for streams and applications.
+The scraped metrics are viewable via Grafana dashboards. Out of the box, Grafana comes pre-configured with a Prometheus data source connection along with SCDF-specific Grafana dashboards to monitor the streaming applications composed in a data pipeline.
 +
 Run the following commands to create the cluster role, binding and service account:
 +

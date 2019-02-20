@@ -18,7 +18,7 @@ data:
               file:
                 enabled: true
                 users:
-                  admin: "{noop}admin, ROLE_MANAGE, ROLE_VIEW"
+                  admin: "{noop}admin, ROLE_CREATE, ROLE_DEPLOY, ROLE_DESTROY, ROLE_MANAGE, ROLE_MODIFY, ROLE_SCHEDULE, ROLE_VIEW"
                   user: "{noop}password, ROLE_VIEW, ROLE_CREATE"
           applicationProperties:
             stream:
