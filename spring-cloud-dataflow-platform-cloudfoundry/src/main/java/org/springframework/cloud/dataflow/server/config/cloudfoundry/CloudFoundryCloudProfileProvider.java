@@ -23,6 +23,8 @@ import org.springframework.core.env.Environment;
  */
 public class CloudFoundryCloudProfileProvider implements CloudProfileProvider {
 
+	public final static String PROFILE = "cloud";
+
 	@Override
 	public boolean isCloudPlatform(Environment environment) {
 		return environment.containsProperty("VCAP_APPLICATION") || environment.containsProperty("VCAP_SERVICES");
@@ -30,6 +32,6 @@ public class CloudFoundryCloudProfileProvider implements CloudProfileProvider {
 
 	@Override
 	public String getCloudProfile() {
-		return "cloud";
+		return PROFILE;
 	}
 }
