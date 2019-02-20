@@ -26,7 +26,8 @@ We provide prebuilt stream applications that use link:http://www.rabbitmq.com[Ra
 === Getting Started with Docker Compose
 
 A Docker Compose file is provided to quickly bring up Spring Cloud Data Flow, Skipper and the Apache Kafka broker instead of having to install them manually.
-Docker Compose is required and it's recommended to use the link:https://docs.docker.com/compose/install/[latest version].
+
+NOTE: It is recommended that you upgrade to the link:https://docs.docker.com/compose/install/[latest version] of Docker before running the `docker-compose` command. We have tested it against Docker Engine version `18.09.2`
 
 . Download the Spring Cloud Data Flow Server Docker Compose file:
 +

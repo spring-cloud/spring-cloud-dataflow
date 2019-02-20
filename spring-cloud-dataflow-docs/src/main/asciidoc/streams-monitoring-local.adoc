@@ -25,7 +25,8 @@ spring.cloud.streamapp.security.enabled=false
 ----
 
 The following steps will start up Prometheus, Grafana, and the local service discovery application.
-You will need to install the latest versions of `docker` and `docker-compose`.
+
+NOTE: It is recommended that you upgrade to the link:https://docs.docker.com/compose/install/[latest version] of Docker before running the `docker-compose` command. We have tested it against Docker Engine version `18.09.2`
 
 Clone the Data Flow github repository for tagged release and change to the `prometheus/docker` folder:
 [source,bash]
