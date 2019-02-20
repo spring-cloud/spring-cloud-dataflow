@@ -357,6 +357,15 @@ dataflow:>
 +
 Alternatively, pass in the command line option `--dataflow.uri`.  The shell's command line option `--help` shows what is available.
 
+[IMPORTANT]
+====
+If you are running Spring Cloud Data Flow Server behind a proxy server, such as
+https://github.com/Netflix/zuul[Zuul], you may also need to specify the property
+`server.use-forward-headers` and set it to `true`. An example using Zuul is available in the
+https://github.com/spring-cloud/spring-cloud-dataflow-samples/tree/master/dataflow-zuul[Spring Cloud Data Flow Samples repository]
+on GitHub. Additional information is also available in the
+https://docs.spring.io/spring-boot/docs/current/reference/htmlsingle/#howto-use-tomcat-behind-a-proxy-server[Spring Boot reference guide].
+====
 [[getting-started-local-deploying-streams-spring-cloud-dataflow]]
 === Deploying Streams
 . Register Stream Apps
