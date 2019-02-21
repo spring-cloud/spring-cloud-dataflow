@@ -55,7 +55,7 @@
         <zeroturnaround.version>1.13</zeroturnaround.version>
         <spring-restdocs.version>1.2.2.RELEASE</spring-restdocs.version>
         <java-semver.version>0.9.0</java-semver.version>
-        <spring-cloud-common-security-config.version>1.1.0.RELEASE</spring-cloud-common-security-config.version>
+        <spring-cloud-common-security-config.version>1.1.1.RELEASE</spring-cloud-common-security-config.version>
 
         <hikaricp.version>3.1.0</hikaricp.version>
         <jsonpath.version>2.4.0</jsonpath.version>
