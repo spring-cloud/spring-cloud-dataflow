@@ -1,7 +1,7 @@
 [[configuration-kubernetes]]
 == Configuration - Kubernetes
 
-This section describes how to configure Spring Cloud Data Flow features, such as security and which relational database to use.
+This section describes how to configure Spring Cloud Data Flow features, such as deployer properties, tasks, and which relational database to use.
 
 [[configuration-kubernetes-enable-disable-specific-features]]
 === Feature Toggles
@@ -236,7 +236,7 @@ env:
 
 You can pass configuration properties to the Data Flow Server by using Kubernetes https://kubernetes.io/docs/tasks/configure-pod-container/configmap/[ConfigMap] and https://kubernetes.io/docs/concepts/configuration/secret/[secrets].
 
-The following example shows one possible configuration, which enables RabbitMQ, and MySQL as well as basic security settings for the server:
+The following example shows one possible configuration, which enables RabbitMQ and MySQL:
 
 ====
 [source,yaml]
@@ -249,23 +249,15 @@ metadata:
     app: scdf-server
 data:
   application.yaml: |-
-    security:
-      basic:
-        enabled: true
-        realm: Spring Cloud Data Flow
     spring:
       cloud:
         dataflow:
-          security:
-            authentication:
-              file:
-                enabled: true
-                users:
-                  admin: admin, ROLE_MANAGE, ROLE_VIEW
-                  user: password, ROLE_VIEW, ROLE_CREATE
-        deployer:
-          kubernetes:
-            environmentVariables: 'SPRING_RABBITMQ_HOST=${RABBITMQ_SERVICE_HOST},SPRING_RABBITMQ_PORT=${RABBITMQ_SERVICE_PORT}'
+          task:
+            platform:
+              kubernetes:
+                accounts:
+                  default:
+                    environmentVariables: 'SPRING_RABBITMQ_HOST=${RABBITMQ_SERVICE_HOST},SPRING_RABBITMQ_PORT=${RABBITMQ_SERVICE_PORT}'
       datasource:
         url: jdbc:mysql://${MYSQL_SERVICE_HOST}:${MYSQL_SERVICE_PORT}/mysql
         username: root
@@ -355,42 +347,6 @@ data:
 
 You can find migration scripts for specific database types in the https://github.com/spring-cloud/spring-cloud-task/tree/master/spring-cloud-task-core/src/main/resources/org/springframework/cloud/task/migration[spring-cloud-task] repo.
 
-
-[[configuration-kubernetes-security]]
-=== Security
-
-This section covers how to secure the server application in the sample configurations file used in <<getting-started-kubernetes>>.
-
-This section covers the basic configuration settings in the sample configuration. See the  link:http://docs.spring.io/spring-cloud-dataflow/docs/{scdf-core-version}/reference/htmlsingle/#configuration-security[core security documentation] for more detailed coverage of the security configuration options for the Spring Cloud Data Flow server and shell.
-
-When using RabbitMQ as the transport, the security settings are located in the `src/kubernetes/server/server-config-rabbit.yaml` file. For Kafka, the settings are located in the `src/kubernetes/server/server-config-kafka.yaml` file. The following example shows a security configuration in YAML:
-
-====
-[source,yaml]
-----
-security:
-  basic:
-    enabled: true                                         # <1>
-    realm: Spring Cloud Data Flow                         # <2>
-spring:
-  cloud:
-    dataflow:
-      security:
-        authentication:
-          file:
-            enabled: true
-            users:
-              admin: admin, ROLE_MANAGE, ROLE_VIEW        # <3>
-              user: password, ROLE_VIEW, ROLE_CREATE      # <4>
-----
-
-<1> Enable security
-<2> Optionally set the realm (defaults to `Spring`)
-<3> Create an 'admin' user with its password set to 'admin'. It can view applications, streams, and tasks and can also view management endpoints.
-<4> Create a 'user' user with its password set to 'password'. It can register applications, create streams and tasks, and view them.
-====
-
-Feel free to change user names and passwords to suit and move the definition of user passwords to a Kubernetes secret.
 
 [[configuration-kubernetes-monitoring-management]]
 === Monitoring and Management
