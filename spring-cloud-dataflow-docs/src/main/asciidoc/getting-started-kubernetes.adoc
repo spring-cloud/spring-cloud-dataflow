@@ -702,7 +702,7 @@ The following example (with output) shows how to configure the Data Flow server 
 ====
 [source,console,options=nowrap]
 ----
-server-unknown:>dataflow config server --username user --password password --uri http://130.211.203.246
+server-unknown:>dataflow config server --uri http://130.211.203.246
 Successfully targeted http://130.211.203.246
 dataflow:>
 ----
