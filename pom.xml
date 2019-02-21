@@ -4,7 +4,7 @@
 
     <groupId>org.springframework.cloud</groupId>
     <artifactId>spring-cloud-common-security-config</artifactId>
-    <version>1.1.1.RELEASE</version>
+    <version>1.1.2.BUILD-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <properties>
