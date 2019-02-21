@@ -44,7 +44,7 @@
 
 		<spring-cloud-scheduler-spi.version>1.0.1.RELEASE</spring-cloud-scheduler-spi.version>
 
-		<spring-cloud-common-security-config.version>1.0.3.RELEASE</spring-cloud-common-security-config.version>
+		<spring-cloud-common-security-config.version>1.0.4.RELEASE</spring-cloud-common-security-config.version>
 
 		<spring-analytics.version>1.1.3.RELEASE</spring-analytics.version>
 		<spring-batch-admin-manager.version>1.3.1.RELEASE</spring-batch-admin-manager.version>
