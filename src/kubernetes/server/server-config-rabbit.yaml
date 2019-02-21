@@ -6,20 +6,9 @@ metadata:
     app: scdf-server
 data:
   application.yaml: |-
-    security:
-      basic:
-        enabled: true
-        realm: Spring Cloud Data Flow
     spring:
       cloud:
         dataflow:
-          security:
-            authentication:
-              file:
-                enabled: true
-                users:
-                  admin: "{noop}admin, ROLE_MANAGE, ROLE_VIEW"
-                  user: "{noop}password, ROLE_VIEW, ROLE_CREATE"
           task:
             platform:
               kubernetes:
