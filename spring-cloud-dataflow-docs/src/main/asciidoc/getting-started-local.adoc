@@ -29,8 +29,8 @@ A Docker Compose file is provided to quickly bring up Spring Cloud Data Flow, Sk
 
 NOTE: It is recommended that you upgrade to the link:https://docs.docker.com/compose/install/[latest version] of Docker before running the `docker-compose` command. We have tested it against Docker Engine version `18.09.2`
 
-. Download the Spring Cloud Data Flow Server Docker Compose file:
-+
+1) Download the Spring Cloud Data Flow Server Docker Compose file:
+
 [source,bash,subs=attributes]
 ----
 $ wget https://raw.githubusercontent.com/spring-cloud/spring-cloud-dataflow/{github-tag}/spring-cloud-dataflow-server/docker-compose.yml
@@ -38,86 +38,86 @@ $ wget https://raw.githubusercontent.com/spring-cloud/spring-cloud-dataflow/{git
 
 NOTE: If the `wget` command is unavailable, `curl` or another platform specific utility may be used. Alternatively navigate to https://raw.githubusercontent.com/spring-cloud/spring-cloud-dataflow/{github-tag}/spring-cloud-dataflow-server/docker-compose.yml[https://raw.githubusercontent.com/spring-cloud/spring-cloud-dataflow/{github-tag}/spring-cloud-dataflow-server/docker-compose.yml] in a web browser and save the contents. Ensure the downloaded filename is `docker-compose.yml`.
 
-. Start Docker Compose
-+
+2) Start Docker Compose
+
 In the directory where you downloaded `docker-compose.yml`, start the system, as follows:
-+
+
 [source,bash,subs=attributes]
 ----
 $ export DATAFLOW_VERSION={local-server-image-tag}
 $ export SKIPPER_VERSION={skipper-version}
 $ docker-compose up
 ----
-+
+
 The `docker-compose.yml` file defines `DATAFLOW_VERSION` and `SKIPPER_VERSION` variables  so that those can be changed easily. The above commands first set the `DATAFLOW_VERSION` and `SKIPPER_VERSION` to use in the environment and then `docker-compose` is started.
-+
+
 A shorthand version which only exposes the `DATAFLOW_VERSION` and `SKIPPER_VERSION` variables to the `docker-compose` process rather than setting it in the environment would be as follows:
-+
+
 [source,bash,subs=attributes]
 ----
 $ DATAFLOW_VERSION={local-server-image-tag} SKIPPER_VERSION={skipper-version} docker-compose up
 ----
-+
+
 When using Windows, environment variables are defined by using the `set` command. To start the system on Windows, enter the following commands:
-+
+
 [source,bash,subs=attributes]
 ----
 C:\ set DATAFLOW_VERSION={local-server-image-tag}
 C:\ set SKIPPER_VERSION={skipper-version}
 C:\ docker-compose up
 ----
-+
+
 NOTE: By default Docker Compose will use locally available images.
 For example when using the `latest` tag, execute `docker-compose pull` prior to `docker-compose up` to ensure the latest image is downloaded.
-+
-. Launch the Spring Cloud Data Flow Dashboard
-+
+
+3) Launch the Spring Cloud Data Flow Dashboard
+
 Spring Cloud Data Flow will be ready for use once the `docker-compose` command stops emitting log messages.
 At this time, in your browser navigate to the link:http://localhost:9393/dashboard[Spring Cloud Data Flow Dashboard].
 By default the latest GA releases of Stream and Task applications will be imported automatically.
-+
-. Create a Stream
-+
+
+4) Create a Stream
+
 To create a stream, first navigate to the "Streams" menu link then click the "Create Stream" link.
 Enter `time | log` into the "Create Stream" textarea then click the "CREATE STREAM" button.
 Enter "ticktock" for the stream name and click the "Deploy Stream(s) checkbox as show in the following image:
-+
+
 .Creating a Stream
 image::{dataflow-asciidoc}/images/dataflow-stream-create.png[Creating a Stream, scaledwidth="60%"]
-+
+
 Then click "OK" which will return back to the Definitions page.
 The stream will be in "deploying" status and move to "deployed" when finished.
 You may need to refresh your browser to see the updated status.
-+
-. View Stream Logs
-+
+
+5) View Stream Logs
+
 To view the stream logs, navigate to the "Runtime" menu link and click the "ticktock.log" link.
 Copy the path in the "stdout" text box on the dashboard and in another console type:
-+
+
 [source,bash,subs=attributes]
 ----
 $ docker exec -it skipper tail -f /path/from/stdout/textbox/in/dashboard
 ----
-+
+
 You should now see the output of the log sink, printing a timestamp once per second.
-Press CTRL+c to end the `tail`.
-+
-. Delete a Stream
-+
+Press CTRLc to end the `tail`.
+
+6) Delete a Stream
+
 To delete the stream, first navigate to the "Streams" menu link in the dashboard then click the checkbox on the "ticktock" row.
 Click the "DESTROY ALL 1 SELECTED STREAMS" button and then "YES" to destroy the stream.
-+
-. Destroy the Quick Start environment
-+
+
+7) Destroy the Quick Start environment
+
 To destroy the Quick Start environment, in another console from where the `docker-compose.yml` is located, type as follows:
-+
+
 [source,bash,subs=attributes]
 ----
 $ docker-compose down
 ----
-+
+
 NOTE: Some stream applications may open a port, for example `http --server.port=`. By default, a port range of `9000-9010` is exposed from the container to the host. If you would like to change this range, modify the `ports` block of the `dataflow-server` service in the `docker-compose.yml` file.
-+
+
 
 
 [[getting-started-local-customizing-spring-cloud-dataflow-docker]]
@@ -147,8 +147,8 @@ image::{dataflow-asciidoc}/images/grafana-influxdb-scdf-streams-dashboard.png[Gr
 Out of the box Spring Cloud Data Flow will use the H2 embedded database for storing state, Kafka for communication.
 Customizations can be made to these components by editing the `docker-compose.yml` file as described below.
 
-. [[getting-started-local-customizing-spring-cloud-dataflow-docker-mysql]]To use MySQL rather than the H2 embedded database, add the following configuration under the `services` section:
-+
+1) [[getting-started-local-customizing-spring-cloud-dataflow-docker-mysql]]To use MySQL rather than the H2 embedded database, add the following configuration under the `services` section:
+
 [source,yaml,subs=attributes]
 ----
   mysql:
@@ -160,9 +160,9 @@ Customizations can be made to these components by editing the `docker-compose.ym
     expose:
       - 3306
 ----
-+
+
 The following entries need to be added to the `environment` block of the `dataflow-server` service definition:
-+
+
 [source,yaml,subs=attributes]
 ----
       - spring.datasource.url=jdbc:mysql://mysql:3306/dataflow
@@ -170,10 +170,10 @@ The following entries need to be added to the `environment` block of the `datafl
       - spring.datasource.password=rootpw
       - spring.datasource.driver-class-name=org.mariadb.jdbc.Driver
 ----
-+
 
-. To use RabbitMQ instead of Kafka for communication, replace the following configuration under the `services` section:
-+
+
+2) To use RabbitMQ instead of Kafka for communication, replace the following configuration under the `services` section:
+
 [source,yaml,subs=attributes]
 ----
   kafka:
@@ -189,9 +189,9 @@ The following entries need to be added to the `environment` block of the `datafl
     expose:
       - "2181"
 ----
-+
+
 With:
-+
+
 [source,yaml,subs=attributes]
 ----
   rabbitmq:
@@ -199,34 +199,34 @@ With:
     expose:
       - "5672"
 ----
-+
+
 In the `dataflow-server` services configuration block, add the following `environment` entry:
-+
+
 [source,yaml,subs=attributes]
 ----
       - spring.cloud.dataflow.applicationProperties.stream.spring.rabbitmq.host=rabbitmq
 ----
-+
+
 And replace:
-+
+
 [source,yaml,subs=attributes]
 ----
     depends_on:
       - kafka
 ----
-+
+
 With:
-+
+
 [source,yaml,subs=attributes]
 ----
     depends_on:
       - rabbitmq
 ----
-+
+
 And finally, modify the `app-import` service definition `command` attribute to replace `http://bit.ly/Einstein-GA-stream-applications-kafka-maven` with `http://bit.ly/Einstein-GA-stream-applications-kafka-maven`.
-+
-. To enable `app starters` registration directly from the host machine you have to mount the source host folders to the `dataflow-server` container. For example, if the `my-app.jar` is in the `/foo/bar/apps` folder on your host machine, then add the following `volumes` block to the `dataflow-server` service definition:
-+
+
+3) To enable `app starters` registration directly from the host machine you have to mount the source host folders to the `dataflow-server` container. For example, if the `my-app.jar` is in the `/foo/bar/apps` folder on your host machine, then add the following `volumes` block to the `dataflow-server` service definition:
+
 [source,yaml,subs=attributes]
 ----
   dataflow-server:
@@ -240,22 +240,22 @@ And finally, modify the `app-import` service definition `command` attribute to r
     volumes:
       - /foo/bar/apps:/root/apps
 ----
-+
+
 Later provides access to the `my-app.jar` (and the other files in the folder) from within container's `/root/apps/` folder. Check the https://docs.docker.com/compose/compose-file/compose-file-v2/[compose-file reference] for furthether configuration details.
-+
+
 NOTE: The explicit volume mounting couples the docker-compose to your host's file system, limiting the portability to other machines and OS-es. Unlike `docker`, the `docker-compose` doesn't allow volume mounting from the command line (e.g. no `-v` like parameter). Instead you can define a placeholder environment variable such as `HOST_APP_FOLDER` in place of the hardcoded path: `- ${HOST_APP_FOLDER}:/root/apps` and set this variable before starting the docker-compose.
-+
+
 Once the host folder is mounted, you can register the app starters (from `/root/apps`), with the SCDF  https://docs.spring.io/spring-cloud-dataflow/docs/current/reference/htmlsingle/#shell[Shell] or https://docs.spring.io/spring-cloud-dataflow/docs/current/reference/htmlsingle/#dashboard-apps[Dashboard], using the `file://` URI schema:
-+
+
 [source,bash,subs=attributes]
 ----
 dataflow:>app register --type source --name my-app --uri file://root/apps/my-app.jar
 ----
-+
+
 NOTE: Use also `--metadata-uri` if the metadata jar is available in the /root/apps.
-+
+
 To access host's local maven repository from within the `dataflow-server` container, you should mount host maven local repository (defaults to `~/.m2` for OSX and Linux and `C:\Documents and Settings\{your-username}\.m2` for Windows) to a `dataflow-server` volume called `/root/.m2/`. For MacOS or Linux host machines this looks like this:
-+
+
 [source,yaml,subs=attributes]
 ----
   dataflow-server:
@@ -263,18 +263,18 @@ To access host's local maven repository from within the `dataflow-server` contai
     volumes:
       - ~/.m2:/root/.m2
 ----
-+
+
 Now you can use the `maven://` URI schema and maven coordinates to resolve jars installed in the host's maven repository:
-+
+
 [source,bash,subs=attributes]
 ----
 dataflow:>app register --type processor --name pose-estimation --uri maven://org.springframework.cloud.stream.app:pose-estimation-processor-rabbit:2.0.2.BUILD-SNAPSHOT --metadata-uri maven://org.springframework.cloud.stream.app:pose-estimation-processor-rabbit:jar:metadata:2.0.2.BUILD-SNAPSHOT --force
 ----
-+
+
 This approach allow you to share jars build and installed on the host machine (e.g. `mvn clean install`) directly with the dataflow-server container.
-+
+
 One can also pre-register the apps directly in the docker-compose. For every pre-registered app starer, add an additional `wget` statement to the `app-import` block configuration:
-+
+
 [source,yaml,subs=attributes]
 ----
   app-import:
@@ -285,76 +285,76 @@ One can also pre-register the apps directly in the docker-compose. For every pre
         wget -qO- 'http://dataflow-server:9393/apps/source/my-app' --post-data='uri=file:/root/apps/my-app.jar&metadata-uri=file:/root/apps/my-app-metadata.jar';
         echo 'My custom apps imported'"
 ----
-+
+
 Check the https://docs.spring.io/spring-cloud-dataflow/docs/current/reference/htmlsingle/#resources-registered-applications[SCDF REST API] for further details.
-+
+
 
 
 [[getting-started-local-deploying-spring-cloud-dataflow]]
 === Getting Started with Manual Installation
 
-. Download the Spring Cloud Data Flow Server and Shell apps:
-+
+1) Download the Spring Cloud Data Flow Server and Shell apps:
+
 [source,bash,subs=attributes]
 ----
 wget https://repo.spring.io/{version-type-lowercase}/org/springframework/cloud/spring-cloud-dataflow-server/{project-version}/spring-cloud-dataflow-server-{project-version}.jar
 
 wget https://repo.spring.io/{version-type-lowercase}/org/springframework/cloud/spring-cloud-dataflow-shell/{project-version}/spring-cloud-dataflow-shell-{project-version}.jar
 ----
-+
 
-. Download http://cloud.spring.io/spring-cloud-skipper/[Skipper] when Stream features are enabled, since Data Flow delegates to Skipper for those features.
-+
+
+2) Download http://cloud.spring.io/spring-cloud-skipper/[Skipper] when Stream features are enabled, since Data Flow delegates to Skipper for those features.
+
 [source,yaml,options=nowrap,subs=attributes]
 ----
 wget https://repo.spring.io/{skipper-version-type-lowercase}/org/springframework/cloud/spring-cloud-skipper-server/{skipper-version}/spring-cloud-skipper-server-{skipper-version}.jar
 
 wget https://repo.spring.io/{skipper-version-type-lowercase}/org/springframework/cloud/spring-cloud-skipper-shell/{skipper-version}/spring-cloud-skipper-shell-{skipper-version}.jar
 ----
-+
-. Launch Skipper (Required unless the Stream features are disabled and the Spring Cloud Data Flow runs in Task mode only)
-+
+
+3) Launch Skipper (Required unless the Stream features are disabled and the Spring Cloud Data Flow runs in Task mode only)
+
 In the directory where you downloaded Skipper, run the server using `java -jar`, as follows:
-+
+
 [source,bash,subs=attributes]
 ----
 $ java -jar spring-cloud-skipper-server-{skipper-version}.jar
 ----
-+
-. Launch the Data Flow Server
-+
+
+4) Launch the Data Flow Server
+
 In the directory where you downloaded Data Flow, run the server using `java -jar`, as follows:
-+
+
 [source,bash,subs=attributes]
 ----
 $ java -jar spring-cloud-dataflow-server-{project-version}.jar
 ----
-+
+
 If Skipper and the Data Flow server are not running on the same host, set the configuration property `spring.cloud.skipper.client.serverUri` to the location of Skipper, e.g.
-+
+
 [source,bash,subs=attributes]
 ----
 $ java -jar spring-cloud-dataflow-server-{project-version}.jar --spring.cloud.skipper.client.serverUri=http://192.51.100.1:7577/api
 ----
-+
-. Launch the Data Flow Shell, as follows:
-+
+
+5) Launch the Data Flow Shell, as follows:
+
 [source,bash,subs=attributes]
 ----
 $ java -jar spring-cloud-dataflow-shell-{project-version}.jar
 ----
-+
+
 If the Data Flow Server and shell are not running on the same host, you can also point the shell to the Data Flow server URL using the `dataflow config server` command when in the shell's interactive mode.
-+
+
 If the Data Flow Server and shell are not running on the same host, point the shell to the Data Flow server URL, as follows:
-+
+
 [source,bash]
 ----
 server-unknown:>dataflow config server http://198.51.100.0
 Successfully targeted http://198.51.100.0
 dataflow:>
 ----
-+
+
 Alternatively, pass in the command line option `--dataflow.uri`.  The shell's command line option `--help` shows what is available.
 
 [IMPORTANT]
@@ -366,13 +366,15 @@ https://github.com/spring-cloud/spring-cloud-dataflow-samples/tree/master/datafl
 on GitHub. Additional information is also available in the
 https://docs.spring.io/spring-boot/docs/current/reference/htmlsingle/#howto-use-tomcat-behind-a-proxy-server[Spring Boot reference guide].
 ====
+
 [[getting-started-local-deploying-streams-spring-cloud-dataflow]]
 === Deploying Streams
-. Register Stream Apps
-+
+
+1) Register Stream Apps
+
 By default, the application registry is empty.
 As an example, register two applications, `http` and `log`, that communicate by using RabbitMQ.
-+
+
 ```
 dataflow:>app register --name http --type source --uri maven://org.springframework.cloud.stream.app:http-source-rabbit:1.2.0.RELEASE
 Successfully registered application 'source:http'
@@ -380,27 +382,27 @@ Successfully registered application 'source:http'
 dataflow:>app register --name log --type sink --uri maven://org.springframework.cloud.stream.app:log-sink-rabbit:1.1.0.RELEASE
 Successfully registered application 'sink:log'
 ```
-+
+
 For more details, such as how to register applications that are based on docker containers or use Kafka as the messaging middleware, review the section on how to <<streams.adoc#spring-cloud-dataflow-register-stream-apps, register applications>>.
-+
+
 NOTE: Depending on your environment, you may need to configure the Data Flow Server to point to a custom
 Maven repository location or configure proxy settings.  See <<configuration-maven>> for more information.
-+
-. Create a stream
-+
+
+2) Create a stream
+
 Use the `stream create` command to create a stream with a `http` source and a `log` sink and deploy it:
-+
+
 [source,bash]
 ----
 dataflow:> stream create --name httptest --definition "http --server.port=9000 | log" --deploy
 ----
-+
+
 NOTE: You need to wait a little while, until the apps are actually deployed successfully, before posting data.
 Look in the log file of the Data Flow server for the location of the log files for the `http` and `log` applications.
 Use the `tail` command on the log file for each application to verify that the application has started.
-+
+
 Now post some data, as shown in the following example:
-+
+
 [source,bash]
 ----
 dataflow:> http post --target http://localhost:9000 --data "hello world"
@@ -894,52 +896,52 @@ We will then also review information about the task executions.
 
 NOTE: Launching Spring Cloud Task applications are not delegated to Skipper since they are short lived applications.  Tasks are alwasy deployed directly via the Data Flow Server.
 
-. Register a Task App
-+
+1) Register a Task App
+
 By default, the application registry is empty.
 As an example, we will register one task application, `timestamp` which simply prints the current time to the log.
-+
+
 [source,bash]
 ----
 dataflow:>app register --name timestamp --type task --uri maven://org.springframework.cloud.task.app:timestamp-task:1.3.0.RELEASE
 Successfully registered application 'task:timestamp'
 ----
-+
+
 NOTE: Depending on your environment, you may need to configure the Data Flow Server to point to a custom
 Maven repository location or configure proxy settings.  See <<configuration-maven>> for more information.
-+
-. Create a Task Definition
-+
+
+2) Create a Task Definition
+
 Use the `task create` command to create a task definition using the previously registered `timestamp` application.
 In this example, no additional properties are used to configure the `timestamp` application.
-+
+
 [source,bash]
 ----
 dataflow:> task create --name printTimeStamp --definition "timestamp"
 ----
-+
-. Launch a Task
-+
+
+3) Launch a Task
+
 The launching of task definitions is done through the shell's `task launch` command.
-+
+
 [source,bash]
 ----
 dataflow:> task launch printTimeStamp
 ----
-+
+
 Check to see if the a timestamp ended up in log file for the timestamp task.
 The location of the log file for the task application will be shown in the Data Flow server’s log.
 You should see a log entry similar to
-+
+
 [source,bash]
 ----
 TimestampTaskConfiguration$TimestampTask : 2018-02-28 16:42:21.051
 ----
-+
-. Review task execution
-+
+
+4) Review task execution
+
 Information about the task execution can be obtained using the command `task execution list`.
-+
+
 [source,bash]
 ----
 dataflow:>task execution list
@@ -949,9 +951,9 @@ dataflow:>task execution list
 ║printTimeStamp│1 │Wed Feb 28 16:42:21 EST 2018│Wed Feb 28 16:42:21 EST 2018│0        ║
 ╚══════════════╧══╧════════════════════════════╧════════════════════════════╧═════════╝
 ----
-+
+
 Additional information can be obtained using the command `task execution status`.
-+
+
 [source,bash]
 ----
 dataflow:>task execution status --id 1
@@ -970,7 +972,7 @@ dataflow:>task execution status --id 1
 ║External Execution Id │printTimeStamp-ab86b2cc-0508-4c1e-b33d-b3896d17fed7║
 ╚══════════════════════╧═══════════════════════════════════════════════════╝
 ----
-+
+
 The <<spring-cloud-dataflow-task>> section has more information on the lifecycle of Tasks and also how to use
 <<spring-cloud-dataflow-composed-tasks>> which let you create a directed graph where each node of the graph is a task application.
 

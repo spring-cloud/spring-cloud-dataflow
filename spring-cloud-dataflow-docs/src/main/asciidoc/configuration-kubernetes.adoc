@@ -219,7 +219,7 @@ The Spring Cloud Data Flow server for Kubernetes uses the https://github.com/fab
 
 The following example shows a snippet from a deployment script that sets these environment variables:
 
-====
+
 [source,yaml]
 ----
 env:
@@ -230,7 +230,7 @@ env:
 - name: SPRING_CLOUD_KUBERNETES_CONFIG_NAME
   value: scdf-server
 ----
-====
+
 
 ==== Using ConfigMap and Secrets
 
@@ -238,7 +238,7 @@ You can pass configuration properties to the Data Flow Server by using Kubernete
 
 The following example shows one possible configuration, which enables RabbitMQ and MySQL:
 
-====
+
 [source,yaml]
 ----
 apiVersion: v1
@@ -266,13 +266,13 @@ data:
         testOnBorrow: true
         validationQuery: "SELECT 1"
 ----
-====
+
 
 The preceding example assumes that RabbitMQ is deployed with `rabbitmq` as the service name. For MySQL, it assumes that the service name is `mysql`. Kubernetes publishes the host and port values of these services as environment variables that we can use when configuring the apps we deploy.
 
 We prefer to provide the MySQL connection password in a Secrets file, as the following example shows:
 
-====
+
 [source,yaml]
 ----
 apiVersion: v1
@@ -284,7 +284,7 @@ metadata:
 data:
   mysql-root-password: eW91cnBhc3N3b3Jk
 ----
-====
+
 
 The password is a base64-encoded value.
 
@@ -298,7 +298,7 @@ If you use any other database, you need to put the corresponding JDBC driver jar
 
 For instance, if you use MySQL in addition to a password in the secrets file, you could provide the following properties in the ConfigMap:
 
-====
+
 [source,yaml]
 ----
 data:
@@ -312,11 +312,11 @@ data:
         url: jdbc:mysql://${MYSQL_SERVICE_HOST}:${MYSQL_SERVICE_PORT}/test
         driverClassName: org.mariadb.jdbc.Driver
 ----
-====
+
 
 For PostgreSQL, you could use the following configuration:
 
-====
+
 [source,yaml]
 ----
 data:
@@ -328,11 +328,11 @@ data:
         password: ${postgres-password}
         driverClassName: org.postgresql.Driver
 ----
-====
+
 
 For HSQLDB, you could use the following configuration:
 
-====
+
 [source,yaml]
 ----
 data:
@@ -343,7 +343,7 @@ data:
         username: sa
         driverClassName: org.hsqldb.jdbc.JDBCDriver
 ----
-====
+
 
 You can find migration scripts for specific database types in the https://github.com/spring-cloud/spring-cloud-task/tree/master/spring-cloud-task-core/src/main/resources/org/springframework/cloud/task/migration[spring-cloud-task] repo.
 
@@ -355,69 +355,69 @@ We recommend using the `kubectl` command for troubleshooting streams and tasks.
 
 You can list all artifacts and resources used by using the following command:
 
-====
+
 [source,shell]
 ----
 kubectl get all,cm,secrets,pvc
 ----
-====
+
 
 You can list all resources used by a specific application or service by using a label to select resources. The following command lists all resources used by the `mysql` service:
 
-====
+
 [source,shell]
 ----
 kubectl get all -l app=mysql
 ----
-====
+
 
 You can get the logs for a specific pod by issuing the following command:
 
-====
+
 [source,shell]
 ----
 kubectl logs pod <pod-name>
 ----
-====
+
 
 If the pod is continuously getting restarted, you can add `-p` as an option to see the previous log, as follows:
 
-====
+
 [source,shell]
 ----
 kubectl logs -p <pod-name>
 ----
-====
+
 
 You can also tail or follow a log by adding an `-f` option, as follows:
 
-====
+
 [source,shell]
 ----
 kubectl logs -f <pod-name>
 ----
-====
+
 
 A useful command to help in troubleshooting issues, such as a container that has a fatal error when starting up, is to use the `describe` command, as the following example shows:
 
-====
+
 [source,shell]
 ----
 kubectl describe pod ticktock-log-0-qnk72
 ----
-====
+
 
 ==== Inspecting Server Logs
 
 You can access the server logs by using the following command:
 
-====
+
 [source,shell]
 ----
 kubectl get pod -l app=scdf=server
 kubectl logs <scdf-server-pod-name>
 ----
-====
+
 
 ==== Streams
 
@@ -425,39 +425,39 @@ Stream applications are deployed with the stream name followed by the name of th
 
 To see all the pods that are deployed by the Spring Cloud Data Flow server, you can specify the `role=spring-app` label, as follows:
 
-====
+
 [source,shell]
 ----
 kubectl get pod -l role=spring-app
 ----
-====
+
 
 To see details for a specific application deployment you can use the following command:
 
-====
+
 [source,shell]
 ----
 kubectl describe pod <app-pod-name>
 ----
-====
+
 
 To view the application logs, you can use the following command:
 
-====
+
 [source,shell]
 ----
 kubectl logs <app-pod-name>
 ----
-====
+
 
 If you would like to tail a log you can use the following command:
 
-====
+
 [source,shell]
 ----
 kubectl logs -f <app-pod-name>
 ----
-====
+
 
 ==== Tasks
 
@@ -465,21 +465,21 @@ Tasks are launched as bare pods without a replication controller. The pods remai
 
 To see all pods for a specific task, use the following command:
 
-====
+
 [source,shell]
 ----
 kubectl get pod -l task-name=<task-name>
 ----
-====
+
 
 To review the task logs, use the following command:
 
-====
+
 [source,shell]
 ----
 kubectl logs <task-pod-name>
 ----
-====
+
 
 You have two options to delete completed pods. You can delete them manually once they are no longer needed or you can use the Data Flow shell `task execution cleanup` command to remove the completed pod for a task execution.
 
@@ -492,7 +492,7 @@ kubectl delete pod <task-pod-name>
 
 To use the `task execution cleanup` command, you must first determine the `ID` for the task execution. To do so, use the `task execution list` command, as the following example (with output) shows:
 
-====
+
 [source,shell]
 ----
 dataflow:>task execution list
@@ -502,17 +502,17 @@ dataflow:>task execution list
 ║task1    │1 │Fri May 05 18:12:05 EDT 2017│Fri May 05 18:12:05 EDT 2017│0        ║
 ╚═════════╧══╧════════════════════════════╧════════════════════════════╧═════════╝
 ----
-====
+
 
 Once you have the ID, you can issue the command to cleanup the execution artifacts (the completed pod), as the following example shows:
 
-====
+
 [source,shell]
 ----
 dataflow:>task execution cleanup --id 1
 Request to clean up resources for task execution 1 has been submitted
 ----
-====
+
 
 === Scheduling
 
@@ -532,25 +532,25 @@ An Entry Point Style affects how application properties are passed to the task c
 
 You can configure the entry point style as follows:
 
-====
+
 [source,options=nowrap]
 ----
 scheduler.kubernetes.entryPointStyle=<Entry Point Style>
 ----
-====
+
 
 Replace `<Entry Point Style>` with your desired Entry Point Style.
 
 You can also configure the Entry Point Style at the server level in the container `env` section of a deployment YAML, as the following example shows:
 
-====
+
 [source]
 ----
 env:
 - name: SPRING_CLOUD_SCHEDULER_KUBERNETES_ENTRY_POINT_STYLE
   value: entryPointStyle
 ----
-====
+
 
 Replace `entryPointStyle` with the desired Entry Point Style.
 
@@ -564,25 +564,25 @@ To influence the environment settings for a given application, you can take adva
 For example, a common requirement in production settings is to influence the JVM memory arguments.
 You can achieve this by using the `JAVA_TOOL_OPTIONS` environment variable, as the following example shows:
 
-====
+
 [source]
 ----
 scheduler.kubernetes.environmentVariables=JAVA_TOOL_OPTIONS=-Xmx1024m
 ----
-====
+
 
 Additionally you can configure environment variables at the server level in the container `env` section of a deployment YAML, as the following example shows:
 
 NOTE: When specifying environment variables in the server configuration and on a per-schedule basis, environment variables will be merged. This allows for the ability to set common environment variables in the server configuration and more specific at the specific schedule level.
 
-====
+
 [source]
 ----
 env:
 - name: SPRING_CLOUD_SCHEDULER_KUBERNETES_ENVIRONMENT_VARIABLES
   value: myVar=myVal
 ----
-====
+
 
 Replace `myVar=myVal` with your desired environment variables.
 
@@ -596,25 +596,25 @@ An image pull policy defines when a Docker image should be pulled to the local r
 
 The following example shows how you can individually configure containers:
 
-====
+
 [source,options=nowrap]
 ----
 scheduler.kubernetes.imagePullPolicy=Always
 ----
-====
+
 
 Replace `Always` with your desired image pull policy.
 
 You can configure an image pull policy at the server level in the container `env` section of a deployment YAML, as the following example shows:
 
-====
+
 [source]
 ----
 env:
 - name: SPRING_CLOUD_SCHEDULER_KUBERNETES_IMAGE_PULL_POLICY
   value: Always
 ----
-====
+
 
 Replace `Always` with your desired image pull policy.
 
@@ -624,25 +624,25 @@ Docker images that are private and require authentication can be pulled by confi
 
 Once you have created the secret, use the `imagePullSecret` property to set the secret to use, as the following example shows:
 
-====
+
 [source]
 ----
 scheduler.kubernetes.imagePullSecret=mysecret
 ----
-====
+
 
 Replace `mysecret` with the name of the secret you created earlier.
 
 You can also configure the image pull secret at the server level in the container `env` section of a deployment YAML, as the following example shows:
 
-====
+
 [source]
 ----
 env:
 - name: SPRING_CLOUD_SCHEDULER_KUBERNETES_IMAGE_PULL_SECRET
   value: mysecret
 ----
-====
+
 
 Replace `mysecret` with the name of the secret you created earlier.
 
@@ -650,48 +650,48 @@ Replace `mysecret` with the name of the secret you created earlier.
 
 By default the namespace used for scheduled tasks is `default`. This value can be set at the server level configuration in the container `env` section of a deployment YAML, as the following example shows:
 
-====
+
 [source]
 ----
 env:
 - name: SPRING_CLOUD_SCHEDULER_KUBERNETES_NAMESPACE
   value: mynamespace
 ----
-====
+
 
 ==== Service Account
 
 You can configure a custom service account for scheduled tasks through properties. An existing service account can be used or a new one created. One way to create a service account is by using `kubectl`, as the following example shows:
 
-====
+
 [source,shell]
 ----
 $ kubectl create serviceaccount myserviceaccountname
 serviceaccount "myserviceaccountname" created
 ----
-====
+
 
 Then you can configure the service account to use on a per-schedule basis as follows:
 
-====
+
 [source,options=nowrap]
 ----
 scheduler.kubernetes.taskServiceAccountName=myserviceaccountname
 ----
-====
+
 
 Replace `myserviceaccountname` with your service account name.
 
 You can also configure the service account name at the server level in the container `env` section of a deployment YAML, as the following example shows:
 
-====
+
 [source]
 ----
 env:
 - name: SPRING_CLOUD_SCHEDULER_KUBERNETES_TASK_SERVICE_ACCOUNT_NAME
   value: myserviceaccountname
 ----
-====
+
 
 Replace `myserviceaccountname` with the service account name to be applied to all deployments.
 
@@ -707,7 +707,7 @@ NOTE: JDWP itself does not use any authentication. This section assumes debuggin
 
 To manually enable JDWP, first edit `src/kubernetes/server/server-deployment.yaml` and add an additional `containerPort` entry under `spec.template.spec.containers.ports` with a value of `5005`. Additionally, add the https://docs.oracle.com/javase/8/docs/platform/jvmti/jvmti.html#tooloptions[`JAVA_TOOL_OPTIONS`] environment variable under `spec.template.spec.containers.env` as the following example shows:
 
-====
+
 [source]
 ----
 spec:
@@ -725,13 +725,13 @@ spec:
         - name: JAVA_TOOL_OPTIONS
           value: '-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=5005'
 ----
-====
+
 
 NOTE: The preceding example uses port 5005, but it can be any number that does not conflict with another port. The chosen port number must also be the same for the added `containerPort` value and the `address` parameter of the `JAVA_TOOL_OPTIONS` `-agentlib` flag, as shown in the preceding example.
 
 You can now start the Spring Cloud Data Flow Kubernetes Server. Once the server is up, you can verify the configuration changes on the `scdf-server` deployment, as the following example (with output) shows:
 
-====
+
 [source,shell]
 ----
 kubectl describe deployment/scdf-server
@@ -748,11 +748,11 @@ Pod Template:
       JAVA_TOOL_OPTIONS:  -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=5005
 	  ...
 ----
-====
+
 
 With the server started and JDWP enabled, you need to configure access to the port. In this example, we use the https://kubernetes.io/docs/tasks/access-application-cluster/port-forward-access-application-cluster/[`port-forward`] subcommand of `kubectl`. The following example (with output) shows how to expose a local port to your debug target by using `port-forward`:
 
-====
+
 [source,shell]
 ----
 $ kubectl get pod -l app=scdf-server
@@ -762,7 +762,7 @@ $ kubectl port-forward scdf-server-5b7cfd86f7-d8mj4 5005:5005
 Forwarding from 127.0.0.1:5005 -> 5005
 Forwarding from [::1]:5005 -> 5005
 ----
-====
+
 
 You can now attach a debugger by pointing it to `127.0.0.1` as the host and `5005` as the port. The `port-forward` subcommand runs until stopped (by pressing `CTRL+c`, for example).
 
@@ -772,16 +772,16 @@ You can remove debugging support by reverting the changes to `src/kubernetes/ser
 
 Rather than manually changing the `server-deployment.yaml`, Kubernetes objects can be "`patched`" in place. For convenience, patch files that provide the same configuration as the manual approach are included. To enable debugging by patching, use the following command:
 
-====
+
 [source,shell]
 ----
 kubectl patch deployment scdf-server -p "$(cat src/kubernetes/server/server-deployment-debug.yaml)"
 ----
-====
+
 
 Running the preceding command automatically adds the `containerPort` attribute and the `JAVA_TOOL_OPTIONS` environment variable. The following example (with output) shows how toverify changes to the `scdf-server` deployment:
 
-====
+
 [source,shell]
 ----
 $ kubectl describe deployment/scdf-server
@@ -798,11 +798,11 @@ Pod Template:
       JAVA_TOOL_OPTIONS:  -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=5005
 	  ...
 ----
-====
+
 
 To enable access to the debug port, rather than using the `port-forward` subcommand of `kubectl`, you can patch the `scdf-server` Kubernetes service object. You must first ensure that the `scdf-server` Kubernetes service object has the proper configuration. The following example (with output) shows how to do so:
 
-====
+
 [source,shell]
 ----
 kubectl describe service/scdf-server
@@ -810,31 +810,31 @@ Port:                     <unset>  80/TCP
 TargetPort:               80/TCP
 NodePort:                 <unset>  30784/TCP
 ----
-====
+
 
 If the output contains `<unset>`, you must patch the service to add a name for this port. The following example shows how to do so:
 
-====
+
 [source,shell]
 ----
 $ kubectl patch service scdf-server -p "$(cat src/kubernetes/server/server-svc.yaml)"
 ----
-====
+
 
 NOTE: A port name should only be missing if the target cluster had been created prior to debug functionality being added. Since multiple ports are being added to the `scdf-server` Kubernetes Service Object, each needs to have its own name.
 
 Now you can add the debug port, as the following example shows:
 
-====
+
 [source,shell]
 ----
 kubectl patch service scdf-server -p "$(cat src/kubernetes/server/server-svc-debug.yaml)"
 ----
-====
+
 
 The following example (with output) shows how to verify the mapping:
 
-====
+
 [source,shell]
 ----
 $ kubectl describe service scdf-server
@@ -852,29 +852,29 @@ NodePort:                 scdf-server  30883/TCP
 ...
 ...
 ----
-====
+
 
 The output shows that container port 5005 has been mapped to the NodePort of 31339. The following example (with output) shows how to get the IP address of the Minikube node:
 
-====
+
 [source,shell]
 ----
 $ minikube ip
 192.168.99.100
 ----
-====
+
 
 With this information, you can create a debug connection by using a host of 192.168.99.100 and a port of 31339.
 
 The following example shows how to disable JDWP:
 
-====
+
 [source,shell]
 ----
 $ kubectl rollout undo deployment/scdf-server
 $ kubectl patch service scdf-server --type json -p='[{"op": "remove", "path": "/spec/ports/0"}]'
 ----
-====
+
 
 The Kubernetes deployment object is rolled back to its state before being patched. The Kubernetes service object is then patched with a `remove` operation to remove port 5005 from the `containerPorts` list.
 
