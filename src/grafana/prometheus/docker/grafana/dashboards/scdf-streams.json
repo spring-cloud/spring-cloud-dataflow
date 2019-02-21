@@ -15,8 +15,8 @@
   "editable": true,
   "gnetId": null,
   "graphTooltip": 0,
-  "id": 5,
-  "iteration": 1547806580541,
+  "id": 3,
+  "iteration": 1550772190556,
   "links": [
     {
       "icon": "external link",
@@ -116,6 +116,7 @@
         "rgba(237, 129, 40, 0.89)",
         "#d44a3a"
       ],
+      "datasource": "ScdfPrometheus",
       "format": "decbytes",
       "gauge": {
         "maxValue": 100,
@@ -195,6 +196,7 @@
         "rgba(237, 129, 40, 0.89)",
         "#d44a3a"
       ],
+      "datasource": "ScdfPrometheus",
       "format": "short",
       "gauge": {
         "maxValue": 100,
@@ -270,6 +272,7 @@
       "bars": false,
       "dashLength": 10,
       "dashes": false,
+      "datasource": "ScdfPrometheus",
       "description": "Average throughput of the apps in the stream",
       "fill": 1,
       "gridPos": {
@@ -355,6 +358,7 @@
       "bars": false,
       "dashLength": 10,
       "dashes": false,
+      "datasource": "ScdfPrometheus",
       "description": "Average throughput of the apps in the stream",
       "fill": 1,
       "gridPos": {
@@ -457,6 +461,7 @@
       "bars": false,
       "dashLength": 10,
       "dashes": false,
+      "datasource": "ScdfPrometheus",
       "description": "Average latency of all apps in a stream",
       "fill": 1,
       "gridPos": {
@@ -549,6 +554,7 @@
       "bars": false,
       "dashLength": 10,
       "dashes": false,
+      "datasource": "ScdfPrometheus",
       "description": "",
       "fill": 1,
       "gridPos": {
@@ -646,6 +652,7 @@
         "rgba(237, 129, 40, 0.89)",
         "#d44a3a"
       ],
+      "datasource": "ScdfPrometheus",
       "decimals": null,
       "description": "Number of active Application Instances",
       "format": "short",
@@ -727,6 +734,7 @@
         "rgba(237, 129, 40, 0.89)",
         "#d44a3a"
       ],
+      "datasource": "ScdfPrometheus",
       "format": "percentunit",
       "gauge": {
         "maxValue": 100,
@@ -806,6 +814,7 @@
         "rgba(237, 129, 40, 0.89)",
         "#d44a3a"
       ],
+      "datasource": "ScdfPrometheus",
       "format": "short",
       "gauge": {
         "maxValue": 100,
@@ -1311,10 +1320,8 @@
       {
         "allValue": null,
         "current": {
-          "text": "s3",
-          "value": [
-            "s3"
-          ]
+          "text": "All",
+          "value": "$__all"
         },
         "datasource": "ScdfPrometheus",
         "definition": "label_values(stream_name)",
@@ -1369,5 +1376,5 @@
   "timezone": "",
   "title": "Streams",
   "uid": "scdf-streams",
-  "version": 5
+  "version": 3
 }
