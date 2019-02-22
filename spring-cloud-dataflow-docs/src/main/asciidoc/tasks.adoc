@@ -24,7 +24,7 @@ Spring Batch provides its own database schema with a much more rich https://docs
 Spring Cloud Task is integrated with Spring Batch so that if a Spring Cloud Task application defined a Spring Batch `Job`, a link between the Spring Cloud Task and Spring Cloud Batch execution tables is created.
 
 When running Data Flow on your local machine, Tasks are launched in a separate JVM.
-When running on Cloud Foundry, tasks are launched using https://docs.cloudfoundry.org/devguide/using-tasks.html[Cloud Foundry's Task] functional and when running on Kubernetes, task are launched using the `Job` kind type.
+When running on Cloud Foundry, tasks are launched using https://docs.cloudfoundry.org/devguide/using-tasks.html[Cloud Foundry's Task] functionality and when running on Kubernetes, task are launched using either a `Pod` or a `Job` resource.
 
 == The Lifecycle of a Task
 
