@@ -272,15 +272,6 @@ public class TaskConfiguration {
 			taskRepositoryInitializer.setDataSource(dataSource);
 			return taskRepositoryInitializer;
 		}
-		// TODO: BOOT2 handle this custom ddl stuff
-		// @Bean
-		// @DependsOn({ "batchRepositoryInitializerForDefaultDB", "taskRepositoryInitializerForDB"
-		// })
-		// public AbstractDatabaseInitializer batchTaskIndexesDatabaseInitializer(DataSource
-		// dataSource,
-		// ResourceLoader resourceLoader) {
-		// return new BatchTaskIndexesDatabaseInitializer(dataSource, resourceLoader);
-		// }
 	}
 
 }
