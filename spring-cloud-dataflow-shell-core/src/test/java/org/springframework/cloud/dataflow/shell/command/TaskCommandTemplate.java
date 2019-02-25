@@ -68,6 +68,18 @@ public class TaskCommandTemplate {
 	}
 
 	/**
+	 * Launch a task and validate the result from shell.
+	 *
+	 * @param taskName the name of the task
+	 */
+	public void  launch(String taskName) {
+		// add the task name to the tasks list before assertion
+		tasks.add(taskName);
+		CommandResult cr = shell.executeCommand("task launch " + taskName);
+		assertTrue(cr.toString().contains("with execution id 1"));
+	}
+
+	/**
 	 * Executes a task execution list.
 	 */
 	public CommandResult taskExecutionList() {
@@ -118,7 +130,6 @@ public class TaskCommandTemplate {
 		String wholeCommand = String.format("task create %s --definition \"%s\"", taskName,
 				actualDefinition.replaceAll("\"", "\\\\\""));
 		CommandResult cr = shell.executeCommand(wholeCommand);
-		// todo: Add launch and verifier
 
 		// add the task name to the tasks list before assertion
 		tasks.add(taskName);

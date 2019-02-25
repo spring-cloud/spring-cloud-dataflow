@@ -208,8 +208,8 @@ public class TaskCommands implements CommandMarker {
 		if (StringUtils.hasText(platformName)) {
 			propertiesToUse.put("spring.cloud.dataflow.task.platformName", platformName);
 		}
-		taskOperations().launch(name, propertiesToUse, argumentsToUse);
-		return String.format("Launched task '%s'", name);
+		long taskExecutionId = taskOperations().launch(name, propertiesToUse, argumentsToUse);
+		return String.format("Launched task '%s' with execution id %d", name, taskExecutionId);
 	}
 
 	@CliCommand(value = DESTROY, help = "Destroy an existing task")

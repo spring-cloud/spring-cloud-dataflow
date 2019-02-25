@@ -71,7 +71,8 @@ public class TaskCommandTests extends AbstractShellIntegrationTest {
 	private static JdbcTemplate template;
 
 	@BeforeClass
-	public static void setUp() {
+	public static void setUp() throws InterruptedException{
+		Thread.sleep(2000);
 		template = new JdbcTemplate(applicationContext.getBean(DataSource.class));
 		template.afterPropertiesSet();
 
@@ -108,6 +109,14 @@ public class TaskCommandTests extends AbstractShellIntegrationTest {
 	public void registerApps() {
 		AppRegistryService registry = applicationContext.getBean(AppRegistryService.class);
 		registry.importAll(true, new ClassPathResource(APPS_URI));
+	}
+
+	@Test
+	public void testTaskLaunch() {
+		logger.info("Launching instance of task");
+		String taskName = generateUniqueName();
+		task().create(taskName, "timestamp");
+		task().launch(taskName);
 	}
 
 	@Test
