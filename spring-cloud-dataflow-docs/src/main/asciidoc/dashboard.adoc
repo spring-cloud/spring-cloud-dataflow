@@ -151,7 +151,7 @@ The following screenshots show the stream deploy page for `foobar` (`time | log`
 You can define deployments properties using:
 
 * Form builder tab: a builder which help you to define deployment properties (deployer, application properties...)
-* Free text tab: a free textarea (key/value pairs)
+* Free text tab: a free text area (key/value pairs)
 
 You can switch between the both views, the form builder provides a more stronger validation of the inputs.
 
