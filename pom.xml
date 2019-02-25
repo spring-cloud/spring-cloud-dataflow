@@ -29,19 +29,19 @@
 		<java.version>1.8</java.version>
 		<javadoc.opts>-Xdoclint:none</javadoc.opts>
 
-		<spring-cloud-dataflow-ui.version>2.0.0.RC1</spring-cloud-dataflow-ui.version>
+		<spring-cloud-dataflow-ui.version>2.0.0.BUILD-SNAPSHOT</spring-cloud-dataflow-ui.version>
 
 		<spring-cloud-deployer.version>2.0.0.RELEASE</spring-cloud-deployer.version>
 		<spring-cloud-deployer-local.version>2.0.0.RELEASE</spring-cloud-deployer-local.version>
 
 		<!-- note - check version of reactor at deployer-cf/cf-java-client uses -->
-		<spring-cloud-deployer-cloudfoundry.version>2.0.0.M1</spring-cloud-deployer-cloudfoundry.version>
+		<spring-cloud-deployer-cloudfoundry.version>2.0.0.BUILD-SNAPSHOT</spring-cloud-deployer-cloudfoundry.version>
 		<reactor.version>3.1.8.RELEASE</reactor.version>
 		<spring-cloud-deployer-kubernetes.version>2.0.0.RELEASE</spring-cloud-deployer-kubernetes.version>
 		<kubernetes-client.version>4.0.4</kubernetes-client.version>
 		<spring-cloud-kubernetes.version>0.3.0.RELEASE</spring-cloud-kubernetes.version>
 
-		<spring-cloud-skipper.version>2.0.0.RC1</spring-cloud-skipper.version>
+		<spring-cloud-skipper.version>2.0.0.BUILD-SNAPSHOT</spring-cloud-skipper.version>
 
 		<spring-cloud-task.version>2.1.0.RELEASE</spring-cloud-task.version>
 
@@ -49,7 +49,7 @@
 		     are in sync with the https://github.com/spring-cloud/spring-cloud-release/blob/master/pom.xml updates for the respective
 		     release versions -->
 		<spring-cloud.version>Greenwich.RELEASE</spring-cloud.version>
-		<java-cfenv-boot.version>1.0.0.M1</java-cfenv-boot.version>
+		<java-cfenv-boot.version>1.0.0.BUILD-SNAPSHOT</java-cfenv-boot.version>
 
 		<spring-cloud-scheduler-spi.version>1.0.2.RELEASE</spring-cloud-scheduler-spi.version>
 		<spring-cloud-scheduler-kubernetes.version>1.0.0.RELEASE</spring-cloud-scheduler-kubernetes.version>
