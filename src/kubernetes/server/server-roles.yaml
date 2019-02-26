@@ -16,5 +16,5 @@ rules:
     resources: ["deployments", "replicasets", "jobs"]
     verbs: ["get", "list", "watch", "create", "delete", "update", "patch"]
   - apiGroups: ["batch"]
-    resources: ["cronjobs"]
-    verbs: ["create", "delete", "get", "list", "watch"]
+    resources: ["cronjobs", "jobs"]
+    verbs: ["create", "delete", "get", "list", "watch", "update", "patch"]
