@@ -20,7 +20,7 @@ The entry point for code execution in a Spring Cloud Task application is most of
 The Spring Batch project is probably what comes to mind for Spring developers writing short lived applications.
 Spring Batch provides a much richer set of functionality than Spring Cloud Task and is recommended when processing large volumes of data.
 A use case might be to read many CSV files, transform each row of data, and write each transformed row to a database.
-Spring Batch provides its own database schema with a much more rich https://docs.spring.io/spring-batch/{spring-batch-version}/reference/html/schema-appendix.html#metaDataSchema[set of information] about the execution of a Spring Batch job.
+Spring Batch provides its own database schema with a much more rich https://docs.spring.io/spring-batch/{spring-batch-doc-version}/reference/html/schema-appendix.html#metaDataSchema[set of information] about the execution of a Spring Batch job.
 Spring Cloud Task is integrated with Spring Batch so that if a Spring Cloud Task application defined a Spring Batch `Job`, a link between the Spring Cloud Task and Spring Cloud Batch execution tables is created.
 
 When running Data Flow on your local machine, Tasks are launched in a separate JVM.
@@ -46,6 +46,7 @@ While Spring Cloud Task does provide a number of out-of-the-box applications (at
 .  Use the http://start.spring.io[Spring Initializer] to create a new project, making sure to select the following starters:
 .. `Cloud Task`: This dependency is the `spring-cloud-starter-task`.
 .. `JDBC`: This dependency is the `spring-jdbc` starter.
+.. Select your database dependency: Enter the database dependency that Data Flow is currently using.  For example: `H2`.
 . Within your new project, create a new class to serve as your main class, as follows:
 +
 [source,java]
@@ -70,7 +71,6 @@ CAUTION: When launching a task application, be sure that the database driver tha
 For example, if your Spring Cloud Data Flow is set to use Postgresql, be sure that the task application also has Postgresql as a dependency.
 
 TIP: When you run tasks externally (that is, from the command line) and you want Spring Cloud Data Flow to show the TaskExecutions in its UI, be sure that common datasource settings are shared among the both.
-By default, Spring Cloud Task uses a local H2 instance, and the execution is recorded to the database used by Spring Cloud Data Flow.
 
 [[spring-cloud-dataflow-register-task-apps]]
 === Registering a Task Application
@@ -651,7 +651,7 @@ TIP: You can view a diagram of your directed graph by clicking the Detail button
 [[spring-cloud-data-flow-transitional-execution]]
 === Transitional Execution
 
-The DSL supports fine- grained control over the transitions taken during the execution of the directed graph.
+The DSL supports fine-grained control over the transitions taken during the execution of the directed graph.
 Transitions are specified by providing a condition for equality based on the exit status of the previous task.
 A task transition is represented by the following symbol `-&gt;`.
 
@@ -885,7 +885,7 @@ Cloud Data Flow allows a user to view Spring Cloud Task App executions. So in
 this section we will discuss what is required by a Task Application and Spring
 Cloud Data Flow to share the task execution information.
 
-[a-common-datastore-dependency]
+[[a-common-datastore-dependency]]
 === A Common DataStore Dependency
 Spring Cloud Data Flow supports many databases out-of-the-box,
 so all the user typically has to do is declare the `spring_datasource_*` environment variables
@@ -895,7 +895,7 @@ includes that database dependency in its `pom.xml` or `gradle.build` file.  If t
 that is used by Spring Cloud Data Flow is not present in the Task Application, the task will fail
 and the task execution will not be recorded.
 
-[a-common-datastore]
+[[a-common-datastore]]
 === A Common Data Store
 Spring Cloud Data Flow and your task application must access the same datastore instance.
 This is so that the task executions recorded by the task application can be read by Spring Cloud Data Flow to list them in the Shell and Dashboard views.
@@ -903,14 +903,14 @@ Also the task app must have read  & write privileges to the task data tables tha
 
 Given the understanding of Datasource dependency between Task apps and Spring Cloud Data Flow, let's review how to apply them in various Task orchestration scenarios.
 
-[datasource-simple-task-launch]
+[[datasource-simple-task-launch]]
 ==== Simple Task Launch
 When launching a task from Spring Cloud Data Flow, Data Flow adds its datasource
 properties (`spring.datasource.url`, `spring.datasource.driverClassName`, `spring.datasource.username`, `spring.datasource.password`)
 to the app properties of the task being launched.  Thus a task application
 will record its task execution information to the Spring Cloud Data Flow repository.
 
-[datasource-task-launcher-sink]
+[[datasource-task-launcher-sink]]
 ==== Task Launcher Sink
 The https://github.com/spring-cloud-stream-app-starters/tasklauncher-dataflow[Data Flow Task Launcher Sink] always uses the Data Flow Server's configured task database when launching tasks.
 

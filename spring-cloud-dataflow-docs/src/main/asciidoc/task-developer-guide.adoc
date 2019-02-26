@@ -7,7 +7,7 @@ It also shows how to map these applications into Spring Cloud Data Flow and depl
 [[task-dev-guide-prebuilt-apps]]
 == Prebuilt Applications
 
-The link:http://cloud.spring.io/spring-cloud-task-app-starters/[Spring Cloud Task App Starters] project provides many applications that you can start using right away.
+The link:https://github.com/spring-cloud/spring-cloud-task/tree/master/spring-cloud-task-samples[Spring Cloud Task Samples] project provides many applications that you can start using right away.
 For example, there is a timestamp application that prints the timestamp to the console.
 All the applications are based on link:https://projects.spring.io/spring-boot/[Spring Boot] and link:https://cloud.spring.io/spring-cloud-task/[Spring Cloud Task].
 
@@ -290,7 +290,7 @@ Once you have Spring Cloud Data Flow Server and Shell running, you can use the f
 
 . Register a basic suite of tasks by importing their registrations through the Spring Cloud Data Flow Shell with the following command:
 +
-`app register --name timestamp --type task --uri maven://org.springframework.cloud.task.app:timestamp-task:1.3.0.RELEASE`
+`app register --name timestamp --type task --uri maven://org.springframework.cloud.task.app:timestamp-task:2.1.0.RELEASE`
 +
 NOTE: This example shows how to register a task from a Maven repository.
 . Verify that the timestamp-task app registered by running the following command in the Spring Cloud Data Flow Shell:
@@ -309,7 +309,7 @@ You should see a message saying "Created new task 'myStamp'".
 +
 `task launch myStamp`
 +
-You should see a message saying "Launched task `myStamp`".
+You should see a message saying "Launched task myStamp".
 . Verify that your task was successfully run by running the following command in the Spring Cloud Data Flow Shell:
 `task execution list`
 +
@@ -329,7 +329,7 @@ To register your first Spring Batch Task:
 
 . In Spring Cloud Data Flow Shell, register a Spring Batch Task application by using the following command:
 +
-`app register --name batch-events --type task --uri maven://org.springframework.cloud.task.app:timestamp-batch-task:2.0.0.RELEASE`
+`app register --name batch-events --type task --uri maven://org.springframework.cloud.task.app:timestamp-batch-task:2.1.0.RELEASE`
 +
 . To verify that your application has been registered, run the following command in the Spring Cloud Data Flow Shell:
 +
@@ -343,12 +343,12 @@ image:images/dataflow-app-list-batch-event.png[]
 +
 `task create --name myBatchTask --definition "batch-events"`
 +
-You should see a message saying "Created new task 'myBatchTask'".
+You should see a message saying "Created new task myBatchTask".
 . Launch your batch-task by running the following command:
 +
 `task launch myBatchTask`
 +
-You should see a message saying "Launched task `myBatchTask`".
+You should see a message saying "Launched task myBatchTask".
 . Verify that the task ran, run the following command:
 +
 `task execution list`
@@ -377,7 +377,7 @@ image:images/dataflow-job-execution-list.png[]
 . Note the Job ID from the ID column (in this case, we want to look at `2`).
 . To get the details of the job execution, we can use the Job ID in the following command:
 +
-`job execution display --id 1`
+`job execution display --id 2`
 +
 You should see output similar to the following:
 +
