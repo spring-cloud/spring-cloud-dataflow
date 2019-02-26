@@ -16,7 +16,7 @@
   "gnetId": null,
   "graphTooltip": 0,
   "id": 4,
-  "iteration": 1549383387167,
+  "iteration": 1551181494480,
   "links": [
     {
       "icon": "external link",
@@ -522,6 +522,7 @@
       "steppedLine": false,
       "targets": [
         {
+          "alias": "$tag_stream_name [$tag_application_name]",
           "dsType": "influxdb",
           "groupBy": [
             {
@@ -647,6 +648,7 @@
       "steppedLine": false,
       "targets": [
         {
+          "alias": "$tag_stream_name [$tag_application_name]",
           "dsType": "influxdb",
           "groupBy": [
             {
@@ -702,6 +704,7 @@
           ]
         },
         {
+          "alias": "$tag_stream_name [$tag_application_name]",
           "dsType": "influxdb",
           "groupBy": [
             {
@@ -837,6 +840,7 @@
       "steppedLine": false,
       "targets": [
         {
+          "alias": "$tag_stream_name [$tag_application_name]",
           "dsType": "influxdb",
           "groupBy": [
             {
@@ -1309,6 +1313,7 @@
       "steppedLine": false,
       "targets": [
         {
+          "alias": "$tag_application_name [$tag_name]",
           "dsType": "influxdb",
           "groupBy": [
             {
@@ -1340,7 +1345,7 @@
           "measurement": "spring_integration_send",
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "SELECT \"count\"  / 60 FROM \"spring_integration_send\" WHERE (\"stream_name\" =~ /^$stream_name$/ AND \"type\" = 'channel' AND \"application_name\" =~ /^$application_name$/ AND \"result\" = 'success' AND ( \"name\" = 'output' OR \"name\" = 'input')) AND $timeFilter GROUP BY \"application_name\", \"result\", \"application_name\", \"name\"",
+          "query": "SELECT \"count\"  / 60 FROM \"spring_integration_send\" WHERE (\"stream_name\" =~ /^$stream_name$/ AND \"type\" = 'channel' AND \"application_name\" =~ /^$application_name$/ AND \"result\" = 'success' AND ( \"name\" = 'output' OR \"name\" = 'input')) AND $timeFilter GROUP BY \"application_name\", \"name\"",
           "rawQuery": true,
           "refId": "A",
           "resultFormat": "time_series",
@@ -1477,6 +1482,7 @@
       "steppedLine": false,
       "targets": [
         {
+          "alias": "$tag_application_name [$tag_name]",
           "dsType": "influxdb",
           "groupBy": [
             {
@@ -1507,7 +1513,7 @@
           "measurement": "spring_integration_send",
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "SELECT \"mean\" FROM \"spring_integration_send\" WHERE (\"stream_name\" =~ /^$stream_name$/ AND \"application_name\" =~ /^$application_name$/ AND \"type\" = 'channel' AND \"result\" = 'success' AND ( \"name\" = 'output' OR \"name\" = 'input')) AND $timeFilter GROUP BY \"stream_name\", \"application_name\", \"result\", \"name\"",
+          "query": "SELECT \"mean\" FROM \"spring_integration_send\" WHERE (\"stream_name\" =~ /^$stream_name$/ AND \"application_name\" =~ /^$application_name$/ AND \"type\" = 'channel' AND \"result\" = 'success' AND ( \"name\" = 'output' OR \"name\" = 'input')) AND $timeFilter GROUP BY \"stream_name\", \"application_name\",  \"name\"",
           "rawQuery": true,
           "refId": "A",
           "resultFormat": "time_series",
@@ -1634,6 +1640,7 @@
       "steppedLine": false,
       "targets": [
         {
+          "alias": "$tag_application_name [$tag_result]",
           "dsType": "influxdb",
           "groupBy": [
             {
@@ -1940,6 +1947,7 @@
       "steppedLine": false,
       "targets": [
         {
+          "alias": "$tag_application_name [$tag_name]",
           "dsType": "influxdb",
           "groupBy": [
             {
@@ -1951,12 +1959,6 @@
             {
               "params": [
                 "application_name"
-              ],
-              "type": "tag"
-            },
-            {
-              "params": [
-                "result"
               ],
               "type": "tag"
             },
@@ -2011,6 +2013,12 @@
               "key": "name",
               "operator": "!=",
               "value": "org_springframework_cloud_stream_app_log_sink_LogSinkConfiguration_logSinkHandler_serviceActivator_handler"
+            },
+            {
+              "condition": "AND",
+              "key": "result",
+              "operator": "=",
+              "value": "success"
             }
           ]
         }
@@ -2093,6 +2101,7 @@
       "steppedLine": false,
       "targets": [
         {
+          "alias": "$tag_application_name [$tag_name]",
           "dsType": "influxdb",
           "groupBy": [
             {
@@ -2104,12 +2113,6 @@
             {
               "params": [
                 "application_name"
-              ],
-              "type": "tag"
-            },
-            {
-              "params": [
-                "result"
               ],
               "type": "tag"
             },
@@ -2158,6 +2161,12 @@
               "key": "name",
               "operator": "!=",
               "value": "org_springframework_cloud_stream_app_log_sink_LogSinkConfiguration_logSinkHandler_serviceActivator_handler"
+            },
+            {
+              "condition": "AND",
+              "key": "result",
+              "operator": "=",
+              "value": "success"
             }
           ]
         }
@@ -2213,8 +2222,8 @@
       {
         "allValue": null,
         "current": {
-          "text": "",
-          "value": ""
+          "text": "s2",
+          "value": "s2"
         },
         "datasource": "influx_auto_DataFlowMetricsCollector",
         "definition": "select distinct(\"stream_name\") from (select  * from \"spring_integration_send\" WHERE time > now() - 60s)",
@@ -2291,8 +2300,8 @@
       {
         "allValue": null,
         "current": {
-          "text": "2",
-          "value": "2"
+          "text": "3",
+          "value": "3"
         },
         "datasource": "influx_auto_DataFlowMetricsCollector",
         "definition": "SHOW TAG VALUES CARDINALITY FROM \"spring_integration_send\" WITH KEY = \"application_name\"",
@@ -2316,8 +2325,8 @@
       {
         "allValue": null,
         "current": {
-          "text": "stream1",
-          "value": "stream1"
+          "text": "s2",
+          "value": "s2"
         },
         "datasource": "influx_auto_DataFlowMetricsCollector",
         "definition": "show tag values with key=\"stream_name\"",
@@ -2372,5 +2381,5 @@
   "timezone": "",
   "title": "Streams",
   "uid": "scdf-streams",
-  "version": 11
+  "version": 9
 }
