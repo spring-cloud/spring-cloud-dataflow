@@ -62,7 +62,7 @@ bff63c4902d5 docker_prometheus  ...  0.0.0.0:9090->9090/tcp   prometheus
 40190da6aa4b docker_grafana     .... 0.0.0.0:3000->3000/tcp   grafana
 ----
 
-To validate the seutp, you can login into those containers using the following commands.
+To validate the setup, you can login into those containers using the following commands.
 [source,bash]
 ----
 docker exec -it service-discovery /bin/sh
@@ -144,7 +144,7 @@ CONTAINER ID        IMAGE               PORTS                    NAMES
 2f42e88f0606        docker_grafana      0.0.0.0:3000->3000/tcp   grafana
 ----
 
-To validate the seutp, you can login into those containers using the following commands.
+To validate the setup, you can login into those containers using the following commands.
 [source,bash]
 ----
 docker exec -it influxdb /bin/sh

@@ -79,17 +79,28 @@ By default the latest GA releases of Stream and Task applications will be import
 4) Create a Stream
 
 To create a stream, first navigate to the "Streams" menu link then click the "Create Stream" link.
-Enter `time | log` into the "Create Stream" textarea then click the "CREATE STREAM" button.
-Enter "ticktock" for the stream name and click the "Deploy Stream(s) checkbox as show in the following image:
+Enter `time | log` into the "Create Stream" textual DSL area then click the "CREATE STREAM" button.
+Enter "ticktock" for the stream name as show in the following image:
 
 .Creating a Stream
 image::{dataflow-asciidoc}/images/dataflow-stream-create.png[Creating a Stream, scaledwidth="60%"]
 
-Then click "OK" which will return back to the Definitions page.
+Then click "Create the stream" button which will return back to the Definitions page.
+
+5) Deploy a stream
+
+Click the play (deploy) button next to the "ticktock" definition that was created in the previous step.
+
+.Initiate Deploy of a Stream
+image::{dataflow-asciidoc}/images/dataflow-stream-definition-deploy.png[Creating a Stream, scaledwidth="60%"]
+
+This will now display the available properties that can be applied to the apps in the "ticktock" stream.
+This example will use the defaults, so click the "Deploy stream" button and the UI will return back
+to the Definitions page.
 The stream will be in "deploying" status and move to "deployed" when finished.
 You may need to refresh your browser to see the updated status.
 
-5) View Stream Logs
+6) View Stream Logs
 
 To view the stream logs, navigate to the "Runtime" menu link and click the "ticktock.log" link.
 Copy the path in the "stdout" text box on the dashboard and in another console type:
@@ -100,14 +111,14 @@ $ docker exec -it skipper tail -f /path/from/stdout/textbox/in/dashboard
 ----
 
 You should now see the output of the log sink, printing a timestamp once per second.
-Press CTRLc to end the `tail`.
+Press CTRL-c to end the `tail`.
 
-6) Delete a Stream
+7) Delete a Stream
 
 To delete the stream, first navigate to the "Streams" menu link in the dashboard then click the checkbox on the "ticktock" row.
 Click the "DESTROY ALL 1 SELECTED STREAMS" button and then "YES" to destroy the stream.
 
-7) Destroy the Quick Start environment
+8) Destroy the Quick Start environment
 
 To destroy the Quick Start environment, in another console from where the `docker-compose.yml` is located, type as follows:
 
@@ -152,7 +163,7 @@ Customizations can be made to these components by editing the `docker-compose.ym
 [source,yaml,subs=attributes]
 ----
   mysql:
-    image: mariadb:10.2
+    image: mysql:5.7.25
     environment:
       MYSQL_DATABASE: dataflow
       MYSQL_USER: root
@@ -177,7 +188,7 @@ The following entries need to be added to the `environment` block of the `datafl
 [source,yaml,subs=attributes]
 ----
   kafka:
-    image: wurstmeister/kafka:1.1.0
+    image: wurstmeister/kafka:2.11-0.11.0.3
     expose:
       - "9092"
     environment:
@@ -223,7 +234,7 @@ With:
       - rabbitmq
 ----
 
-And finally, modify the `app-import` service definition `command` attribute to replace `http://bit.ly/Einstein-GA-stream-applications-kafka-maven` with `http://bit.ly/Einstein-GA-stream-applications-kafka-maven`.
+And finally, modify the `app-import` service definition `command` attribute to replace `http://bit.ly/Einstein-GA-stream-applications-kafka-maven` with `http://bit.ly/Einstein-GA-stream-applications-rabbit-maven`.
 
 3) To enable `app starters` registration directly from the host machine you have to mount the source host folders to the `dataflow-server` container. For example, if the `my-app.jar` is in the `/foo/bar/apps` folder on your host machine, then add the following `volumes` block to the `dataflow-server` service definition:
 
