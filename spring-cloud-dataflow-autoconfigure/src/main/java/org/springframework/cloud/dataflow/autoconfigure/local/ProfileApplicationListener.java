@@ -51,6 +51,9 @@ public class ProfileApplicationListener
 	 * CloudProfileProvider implementations discovered from the ServiceLoader.
 	 */
 	public static final String IGNORE_PROFILEAPPLICATIONLISTENER_PROPERTY_NAME = "spring.cloud.dataflow.server.profileapplicationlistener.ignore";
+
+	public static final String IGNORE_PROFILEAPPLICATIONLISTENER_ENVVAR_NAME = "SPRING_CLOUD_DATAFLOW_SERVER_PROFILEAPPLICATIONLISTENER_IGNORE";
+
 	private static final Logger logger = LoggerFactory.getLogger(ProfileApplicationListener.class);
 	private ConfigurableEnvironment environment;
 
@@ -59,7 +62,8 @@ public class ProfileApplicationListener
 		this.environment = event.getEnvironment();
 		Iterable<CloudProfileProvider> cloudProfileProviders = ServiceLoader.load(CloudProfileProvider.class);
 
-		if (Boolean.getBoolean(IGNORE_PROFILEAPPLICATIONLISTENER_PROPERTY_NAME)
+		if (ignoreFromSystemProperty()
+				|| ignoreFromEnvironmentVariable()
 				|| cloudProfilesAlreadySet(cloudProfileProviders)) {
 			return;
 		}
@@ -103,6 +107,20 @@ public class ProfileApplicationListener
 		}
 
 	}
+
+	private boolean ignoreFromSystemProperty() {
+		return Boolean.getBoolean(IGNORE_PROFILEAPPLICATIONLISTENER_PROPERTY_NAME);
+	}
+
+	private boolean ignoreFromEnvironmentVariable() {
+		boolean ignore = false;
+		String ignoreString = System.getenv(IGNORE_PROFILEAPPLICATIONLISTENER_ENVVAR_NAME);
+		if (ignoreString != null && ignoreString.length() > 0) {
+			ignore = Boolean.parseBoolean(ignoreString);
+		}
+		return ignore;
+	}
+
 
 	@Override
 	public int getOrder() {
