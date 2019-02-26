@@ -158,6 +158,16 @@
             <version>${java-cfenv-boot.version}</version>
         </dependency>
         <dependency>
+            <groupId>io.pivotal.cfenv</groupId>
+            <artifactId>java-cfenv-boot-pivotal-scs</artifactId>
+            <version>${java-cfenv-boot.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>io.pivotal.cfenv</groupId>
+            <artifactId>java-cfenv-boot-pivotal-sso</artifactId>
+            <version>${java-cfenv-boot.version}</version>
+        </dependency>
+        <dependency>
             <groupId>org.springframework.cloud</groupId>
             <artifactId>spring-cloud-starter-common-security-config-web</artifactId>
             <exclusions>

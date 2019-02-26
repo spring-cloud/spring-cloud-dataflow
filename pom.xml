@@ -204,6 +204,16 @@
                 <artifactId>java-cfenv-boot</artifactId>
                 <version>${java-cfenv-boot.version}</version>
             </dependency>
+            <dependency>
+                <groupId>io.pivotal.cfenv</groupId>
+                <artifactId>java-cfenv-boot-pivotal-scs</artifactId>
+                <version>${java-cfenv-boot.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.pivotal.cfenv</groupId>
+                <artifactId>java-cfenv-boot-pivotal-sso</artifactId>
+                <version>${java-cfenv-boot.version}</version>
+            </dependency>
             <!-- just having hikaricp.version didn't work, need to redefine dependency -->
             <dependency>
                 <groupId>com.zaxxer</groupId>
