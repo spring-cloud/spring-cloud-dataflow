@@ -72,6 +72,7 @@
 
         <commons-io.version>2.5</commons-io.version>
         <snakeyaml.version>1.18</snakeyaml.version>
+        <jmockit.version>1.24</jmockit.version>
 
         <maven-javadoc-plugin.version>2.10.1</maven-javadoc-plugin.version>
         <asciidoctor-maven-plugin.version>1.5.3</asciidoctor-maven-plugin.version>
