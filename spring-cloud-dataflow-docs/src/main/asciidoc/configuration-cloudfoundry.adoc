@@ -318,6 +318,45 @@ application does not get the binding by this method.
 If you have more than one service to bind, they can be passed as comma-separated items
 (for example: `deployer.jdbc.cloudfoundry.services=mysqlService,someService`).
 
+[[configure-service-binding-parameters]]
+=== Configuring Service binding parameters
+
+The CloudFoundry API supports providing configuration parameters when binding a service instance. Some service brokers require or
+recommend binding configuration.
+For example, binding the https://docs.pivotal.io/partners/gcp-sb/using.html[Google Cloud Platform service] using the CF CLI looks something like:
+
+[source]
+----
+cf bind-service my-app my-google-bigquery-example -c '{"role":"bigquery.user"}'
+----
+
+Likewise the https://docs.cloudfoundry.org/devguide/services/using-vol-services.html[NFS Volume Service] supports binding configuration such as:
+
+[source]
+----
+cf bind-service my-app nfs_service_instance -c '{"uid":"1000","gid":"1000","mount":"/var/volume1","readonly":true}'
+----
+
+Starting with version 2.0, Data Flow for Cloud Foundry allows you to provide binding configuration parameters may be provided in the app level or server level `cloudfoundry.services` deployment property. For example, to bind to the nfs service, as above :
+
+[source]
+----
+dataflow:> stream deploy --name mystream --properties "deployer.<app>.cloudfoundry.services='nfs_service_instance uid:1000,gid:1000,mount:/var/volume1,readonly:true'"
+----
+
+The format is intended to be compatible with the Data Flow DSL parser.
+Generally, the `cloudfoundry.services` deployment property accepts a comma delimited value.
+Since a comma is also used to separate configuration parameters, and to avoid white space issues, any item including configuration parameters must be enclosed in singe quotes. Valid values incude things like:
+
+[source]
+----
+rabbitmq,'nfs_service_instance uid:1000,gid:1000,mount:/var/volume1,readonly:true',mysql,'my-google-bigquery-example role:bigquery.user'
+----
+
+[TIP]
+Spaces are permitted within single quotes and  `=` may be used instead of `:` to delimit key-value pairs.
+
+
 [[configuration-cloudfoundry-ups]]
 === User-provided Services
 In addition to marketplace services, Cloud Foundry supports
