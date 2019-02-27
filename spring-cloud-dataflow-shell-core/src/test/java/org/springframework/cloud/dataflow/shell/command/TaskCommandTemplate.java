@@ -76,7 +76,11 @@ public class TaskCommandTemplate {
 		// add the task name to the tasks list before assertion
 		tasks.add(taskName);
 		CommandResult cr = shell.executeCommand("task launch " + taskName);
-		assertTrue(cr.toString().contains("with execution id 1"));
+		CommandResult idResult = shell.executeCommand("task execution list --name " + taskName);
+		Table result = (Table) idResult.getResult();
+
+		long value = (long) result.getModel().getValue(1, 1);
+		assertTrue(cr.toString().contains("with execution id " + value));
 	}
 
 	/**
