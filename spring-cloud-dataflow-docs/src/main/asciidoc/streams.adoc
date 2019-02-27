@@ -578,7 +578,7 @@ Once you have a companion artifact at hand, you need to make the system aware of
 
 When registering a single app with `app register`, you can use the optional `--metadata-uri` option in the shell, as follows:
 
-[source]
+[source,bash,subs=attributes]
 ----
 dataflow:>app register --name log --type sink
     --uri maven://org.springframework.cloud.stream.app:log-sink:2.1.0.RELEASE
@@ -1425,10 +1425,12 @@ In the preceding stream, both the destinations (`destination1` and `destination2
 
 By using named destinations, you can support fan-in and fan-out use cases.  Fan-in use cases are when multiple sources all send data to the same named destination, as shown in the following example:
 
-[source]
+[source,bash,subs=attributes]
+----
 s3 > :data
 ftp > :data
 http > :data
+----
 
 The preceding example directs the data payloads from the Amazon S3, FTP, and HTTP sources to the same named destination called `data`. Then an additional stream created with the following DSL expression would have all the data from those three sources sent to the file sink:
 
@@ -1689,7 +1691,7 @@ In some cases, a stream can have its applications bound to multiple spring cloud
 middleware configurations. In those cases, it is important to make sure the applications are configured appropriately with their binder
 configurations. For example, a multi-binder transformer that supports both Kafka and Rabbit binders is the processor in the following stream:
 
-[source]
+[source,bash,subs=attributes]
 ----
 http | multibindertransform --expression=payload.toUpperCase() | log
 ----
@@ -1886,9 +1888,11 @@ dataflow:>runtime apps
 
 You should see that the corresponding `http` source has a `url` property containing the host and port information on which it is listening. You are now ready to post to that url, as shown in the following example:
 
-[source]
+[source,bash,subs=attributes]
+----
 dataflow:> http post --target http://localhost:1234 --data "hello"
 dataflow:> http post --target http://localhost:1234 --data "goodbye"
+----
 
 The stream then funnels the data from the http source to the output log implemented by the log sink, yielding output similar to the following:
 

@@ -24,7 +24,7 @@ You can use `cf marketplace` to discover which plans are available to you, depen
 For example, you can use link:https://run.pivotal.io/[Pivotal Web Services]:
 
 
-[source]
+[source,bash,subs=attributes]
 ----
 cf create-service cloudamqp lemur rabbit
 ----
@@ -37,7 +37,7 @@ You can use `cf marketplace` to discover which plans are available to you, depen
 For example, you can use link:https://run.pivotal.io/[Pivotal Web Services]:
 
 
-[source]
+[source,bash,subs=attributes]
 ----
 cf create-service cleardb spark my_mysql
 ----
@@ -147,7 +147,7 @@ Tasks are deployed directly from the Data Flow Server.
 In the future, you will be able to deploy tasks to multiple platforms, but for 2.0.0.M1 you can deploy only to a single platform and the name must be `default`.
 
 
-[source]
+[source,bash,subs=attributes]
 ----
 cf set-env dataflow-server SPRING_PROFILES_ACTIVE: cloud
 cf set-env dataflow-server JBP_CONFIG_SPRING_AUTO_RECONFIGURATION: '{enabled: false}'
@@ -173,7 +173,7 @@ This is intentionally designed to provide the flexibility, so you can override a
 The out-of-the-box applications that are supported by Spring Cloud Data Flow are available in Spring's repository. If you want to use them, set it as the remote repository, as the following example shows:
 
 
-[source]
+[source,bash,subs=attributes]
 ----
 cf set-env dataflow-server SPRING_APPLICATION_JSON '{"maven": { "remote-repositories": { "repo1": { "url": "https://repo.spring.io/libs-release" } } } }'
 ----
@@ -333,7 +333,7 @@ $ java -jar spring-cloud-dataflow-shell-{scdf-core-version}.jar
 If the Data Flow Server and shell are not running on the same host, you can point the shell to the Data Flow server URL, as follows:
 
 
-[source]
+[source,bash,subs=attributes]
 ----
 server-unknown:>dataflow config server http://dataflow-server.cfapps.io
 Successfully targeted http://dataflow-server.cfapps.io
@@ -384,7 +384,7 @@ When you create a stream, use a unique name (one that might not be taken by anot
 The following example shows how to create a deploy a stream
 
 
-[source]
+[source,bash,subs=attributes]
 ----
 dataflow:>stream create ticker-314 --definition "time | log"
 Created new stream 'ticker-314'
@@ -668,7 +668,7 @@ dataflow:>stream history --name ticker-314
 To run a simple task application, you can register all the out-of-the-box task applications with the following command:
 
 
-[source]
+[source,bash,subs=attributes]
 ----
 dataflow:>app import --uri http://bit.ly/Dearborn-GA-task-applications-maven
 ----
@@ -677,7 +677,7 @@ dataflow:>app import --uri http://bit.ly/Dearborn-GA-task-applications-maven
 Now you can create a simple link:https://docs.spring.io/spring-cloud-task-app-starters/docs/Dearborn.RELEASE/reference/htmlsingle/#spring-cloud-task-modules-tasks[timestamp] task, as the following example shows:
 
 
-[source]
+[source,bash,subs=attributes]
 ----
 dataflow:>task create mytask --definition "timestamp --format='yyyy'"
 ----
@@ -686,7 +686,7 @@ dataflow:>task create mytask --definition "timestamp --format='yyyy'"
 Now you can examine the tail of the logs (for example, `cf logs mytask`) and then launch the task in the UI or in the Data Flow Shell, as the following example shows:
 
 
-[source]
+[source,bash,subs=attributes]
 ----
 dataflow:>task launch mytask
 ----

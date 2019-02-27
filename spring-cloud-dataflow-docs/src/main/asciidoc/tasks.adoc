@@ -96,8 +96,10 @@ If you would like to register multiple apps at one time, you can store them in a
 For example, the followinng listing would be a valid properties file:
 
 [source]
+----
 task.foo=file:///tmp/foo-1.2.1.BUILD-SNAPSHOT.jar
 task.bar=file:///tmp/bar-1.2.1.BUILD-SNAPSHOT.jar
+----
 
 Then you can use the `app import` command and provide the location of the properties file by using the  `--uri` option, as follows:
 
@@ -145,9 +147,11 @@ properties that apply to the task execution.  Creating a task definition can be 
 the RESTful API or the shell.  To create a task definition by using the shell, use the
 `task create` command to create the task definition, as shown in the following example:
 
-[source]
+[source,bash,subs=attributes]
+----
 dataflow:>task create mytask --definition "timestamp --format=\"yyyy\""
 Created new task 'mytask'
+----
 
 A listing of the current task definitions can be obtained through the RESTful API or the shell.
 To get the task definition list by using the shell, use the `task list` command.
@@ -157,13 +161,18 @@ To get the task definition list by using the shell, use the `task list` command.
 An adhoc task can be launched through the RESTful API or the shell.
 To launch an ad-hoc task through the shell, use the `task launch` command, as shown in the following example:
 
-[source]
+[source,bash,subs=attributes]
+----
 dataflow:>task launch mytask
- Launched task 'mytask'
+Launched task 'mytask'
+----
 
 When a task is launched, any properties that need to be passed as command line arguments to the task application can be set when launching the task, as follows:
-[source]
+
+[source,bash,subs=attributes]
+----
 dataflow:>task launch mytask --arguments "--server.port=8080 --custom=value"
+----
 
 [NOTE]
 The arguments need to be passed as `space` delimited values.
@@ -204,9 +213,11 @@ When doing so, the server passes all the properties, without the prefix, to the 
 
 For example, all the launched applications can be configured to use the properties `prop1` and `prop2` by launching the Data Flow server with the following options:
 
-[source]
+[source,bash,subs=attributes]
+----
 --spring.cloud.dataflow.applicationProperties.task.prop1=value1
 --spring.cloud.dataflow.applicationProperties.task.prop2=value2
+----
 
 This causes the properties, `prop1=value1` and `prop2=value2`, to be passed to all the launched applications.
 
@@ -250,21 +261,28 @@ Destroying a Task Definition removes the definition from the definition reposito
 This can be done through the RESTful API or the shell.
 To destroy a task through the shell, use the `task destroy` command, as shown in the following example:
 
-[source]
+[source,bash,subs=attributes]
+----
 dataflow:>task destroy mytask
- Destroyed task 'mytask'
+Destroyed task 'mytask'
+----
 
 To destroy all tasks through the shell, use the `task all destroy` command as shown in the following example:
 
-[source]
+[source,bash,subs=attributes]
+----
 dataflow:>task all destroy
- Really destroy all tasks? [y, n]: y
- All tasks destroyed
+Really destroy all tasks? [y, n]: y
+All tasks destroyed
+----
 
 Or use the force command:
-[source]
+
+[source,bash,subs=attributes]
+----
 dataflow:>task all destroy --force
- All tasks destroyed
+All tasks destroyed
+----
 
 The task execution information for previously launched tasks for the definition remains in the task repository.
 
@@ -300,8 +318,10 @@ time-stamp is a valid task.
 ║task:timestamp │valid            ║
 ╚═══════════════╧═════════════════╝
 ----
+
 In the example above the user validated their time-stamp task.   As we see `task:timestamp` app is valid.
 Now let's see what happens if we have a stream definition with a registered app with an invalid URI.
+
 [source,bash]
 ----
 dataflow:>task validate bad-timestamp
@@ -319,6 +339,7 @@ bad-timestamp is an invalid task.
 ║task:badtimestamp │invalid          ║
 ╚══════════════════╧═════════════════╝
 ----
+
 In this case Spring Cloud Data Flow states that the task is invalid because task:badtimestamp has an invalid URI.
 
 [[spring-cloud-dataflow-task-events]]
@@ -328,16 +349,20 @@ You can also tap into various task and batch events when the task is launched.
 If the task is enabled to generate task or batch events (with the additional dependencies `spring-cloud-task-stream` and, in the case of Kafka as the binder, `spring-cloud-stream-binder-kafka`), those events are published during the task lifecycle.
 By default, the destination names for those published events on the broker (Rabbit, Kafka, and others) are the event names themselves (for instance: `task-events`, `job-execution-events`, and so on).
 
-[source]
+[source,bash,subs=attributes]
+----
 dataflow:>task create myTask --definition "myBatchJob"
 dataflow:>stream create task-event-subscriber1 --definition ":task-events > log" --deploy
 dataflow:>task launch myTask
+----
 
 You can control the destination name for those events by specifying explicit names when launching the task, as follows:
 
-[source]
+[source,bash,subs=attributes]
+----
 dataflow:>stream create task-event-subscriber2 --definition ":myTaskEvents > log" --deploy
 dataflow:>task launch myTask --properties "app.myBatchJob.spring.cloud.stream.bindings.task-events.destination=myTaskEvents"
+----
 
 The following table lists the default task and batch event and destination names on the broker:
 
@@ -454,11 +479,13 @@ The lifecycle of a composed task has three parts:
 
 The DSL for the composed tasks is used when creating a task definition through the task create command, as shown in the following example:
 
-[source]
+[source,bash,subs=attributes]
+----
 dataflow:> app register --name timestamp --type task --uri maven://org.springframework.cloud.task.app:timestamp-task:<DESIRED_VERSION>
 dataflow:> app register --name mytaskapp --type task --uri file:///home/tasks/mytask.jar
 dataflow:> task create my-composed-task --definition "mytaskapp && timestamp"
 dataflow:> task launch my-composed-task
+----
 
 In the preceding example, we assume that the applications to be used by our composed task have not been registered yet.
 Consequently, in the first two steps, we register two task applications.
@@ -823,6 +850,7 @@ stream create --name task-every-second --definition "time-tlr --spring.cloud.str
 Note the use of SpEL expressions to map each message payload to the `time` command line argument, along with a static argument `foo=bar`.
 
 You can then see the list of task executions by using the shell command `task execution list`, as shown (with its output) in the following example:
+
 [source,bash,options="nowrap"]
 ----
 dataflow:>task execution list

@@ -676,7 +676,7 @@ Use the `kubectl get svc scdf-server` command to retrieve the `EXTERNAL-IP` assi
 The following example shows how to get the external IP address:
 
 
-[source]
+[source,bash,subs=attributes]
 ----
 kubectl get svc scdf-server
 NAME         CLUSTER-IP       EXTERNAL-IP       PORT(S)    AGE
@@ -690,7 +690,7 @@ If you use Minikube, you do not have an external load balancer and the EXTERNAL-
 You need to use the NodePort assigned for the `skipper` service. The following example (with output) shows how to look up the URL to use:
 
 
-[source]
+[source,bash,subs=attributes]
 ----
 $ minikube service --url scdf-server
 http://192.168.99.100:31991
@@ -804,7 +804,7 @@ For more details, review how to link:http://docs.spring.io/spring-cloud-dataflow
 The following example shows how to create a stream:
 
 
-[source]
+[source,bash,subs=attributes]
 ----
 dataflow:>stream create mystream --definition "time | log"
 Created new stream 'mystream'
@@ -816,7 +816,7 @@ Created new stream 'mystream'
 The following example shows how to deploy the stream:
 
 
-[source]
+[source,bash,subs=attributes]
 ----
 dataflow:>stream deploy mystream --platformName default
 Deployment request has been sent for stream 'mystream'
