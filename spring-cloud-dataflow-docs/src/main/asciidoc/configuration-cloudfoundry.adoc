@@ -120,7 +120,7 @@ Here are some examples using the Cloud Foundry deployment properties:
 set the following environment variable:
 
 
-[source]
+[source,bash,subs=attributes]
 ----
 cf set-env dataflow-server SPRING_CLOUD_DATAFLOW_TASK_PLATFORM_CLOUDFOUNDRY_ACCOUNTS[default]_DEPLOYMENT_BUILDPACK java_buildpack_offline
 ----
@@ -134,7 +134,7 @@ You can also set environment variables that specify the the HTTP-based health ch
 * You can also specify deployment properties by using the DSL. For instance, if you want to set the allocated memory for the `http` application to 512m and also bind a mysql service to the `jdbc` application, you can run the following commands:
 
 
-[source]
+[source,bash,subs=attributes]
 ----
 dataflow:> stream create --name mysqlstream --definition "http | jdbc --tableName=names --columns=name"
 dataflow:> stream deploy --name mysqlstream --properties "deployer.http.memory=512, deployer.jdbc.cloudfoundry.services=mysql"
@@ -147,7 +147,7 @@ You can configure these settings separately for stream and task apps. To alter s
 substitute `TASK` for `STREAM` in the property name, as the following example shows:
 
 
-[source]
+[source,bash,subs=attributes]
 ----
 cf set-env dataflow-server SPRING_CLOUD_DATAFLOW_TASK_PLATFORM_CLOUDFOUNDRY_ACCOUNTS[default]_DEPLOYMENT_TASK_MEMORY 512
 ----
@@ -223,7 +223,7 @@ and set the respective properties by using `cf set-env` commands.
 For instance, if you want to disable the randomization, you can override it by using the following command:
 
 
-[source]
+[source,bash,subs=attributes]
 ----
 cf set-env dataflow-server SPRING_CLOUD_DATAFLOW_TASK_PLATFORM_CLOUDFOUNDRY_ACCOUNTS[default]_DEPLOYMENT_ENABLE_RANDOM_APP_NAME_PREFIX false
 ----
@@ -236,7 +236,7 @@ As an alternative to a random name or to get even more control over the hostname
 custom deployment properties, as the following example shows:
 
 
-[source]
+[source,bash,subs=attributes]
 ----
 dataflow:>stream create foo --definition "http | log"
 
@@ -259,7 +259,7 @@ If you use Spring Boot and RabbitMQ-based Docker images, you can provide a commo
 to facilitate binding the apps to the RabbitMQ service. Assuming your RabbitMQ service is named `rabbit`, you can provide the following:
 
 
-[source]
+[source,bash,subs=attributes]
 ----
 cf set-env dataflow-server SPRING_APPLICATION_JSON '{"spring.cloud.dataflow.applicationProperties.stream.spring.rabbitmq.addresses": "${vcap.services.rabbit.credentials.protocols.amqp.uris}"}'
 ----
@@ -268,7 +268,7 @@ cf set-env dataflow-server SPRING_APPLICATION_JSON '{"spring.cloud.dataflow.appl
 For Spring Cloud Task apps, you can use something similar to the following, if you use a database service instance named `mysql`:
 
 
-[source]
+[source,bash,subs=attributes]
 ----
 cf set-env SPRING_DATASOURCE_URL '${vcap.services.mysql.credentials.jdbcUrl}'
 cf set-env SPRING_DATASOURCE_USERNAME '${vcap.services.mysql.credentials.username}'
@@ -304,7 +304,7 @@ For instance, if you want to provide a `mysql` service binding only for the `jdb
 definition, you can pass the service binding as a deployment property:
 
 
-[source]
+[source,bash,subs=attributes]
 ----
 dataflow:>stream create --name httptojdbc --definition "http | jdbc"
 dataflow:>stream deploy --name httptojdbc --properties "deployer.jdbc.cloudfoundry.services=mysqlService"
@@ -380,7 +380,7 @@ The UPS credentials are wrapped within `VCAP_SERVICES`, and they can be supplied
 the following example shows.
 
 
-[source]
+[source,bash,subs=attributes]
 ----
 stream create fooz --definition "time | log"
 stream deploy fooz --properties "app.time.spring.cloud.stream.kafka.binder.brokers=${vcap.services.kafkacups.credentials.brokers},app.time.spring.cloud.stream.kafka.binder.zkNodes=${vcap.services.kafkacups.credentials.zkNodes},app.log.spring.cloud.stream.kafka.binder.brokers=${vcap.services.kafkacups.credentials.brokers},app.log.spring.cloud.stream.kafka.binder.zkNodes=${vcap.services.kafkacups.credentials.zkNodes}"
@@ -613,11 +613,6 @@ https://apidocs.cloudfoundry.org/253/apps/retrieving_permissions_on_a_app.html[C
 Apps API] and ensure that users are in fact Space Developers.
 
 If the authenticated user is verified as a Space Developer, all roles are assigned.
-Otherwise, no roles whatsoever are assigned. In that case, you may see the following
-Dashboard screen:
-
-.Accessing the Data Flow Dashboard without Roles
-image::images/cf-getting-started-security-no-roles.png[Dashboard without roles, scaledwidth="100%"]
 
 === Configuration Reference
 
@@ -671,7 +666,7 @@ Note that you can set `spring.cloud.deployer.cloudfoundry.services`,
 as part of an individual deployment request by using the `deployer.<app-name>` shortcut, as the following example shows:
 
 
-[source]
+[source,bash,subs=attributes]
 ----
 stream create --name ticktock --definition "time | log"
 stream deploy --name ticktock --properties "deployer.time.memory=2g"

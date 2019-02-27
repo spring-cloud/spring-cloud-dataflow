@@ -59,9 +59,11 @@ For bulk import, the application definitions are expected to be expressed in a p
 
 The following examples show a typical application definitions:
 
-[source]
+[source,subs=properties]
+----
 task.timestamp=maven://org.springframework.cloud.task.app:timestamp-task:1.2.0.RELEASE
 processor.transform=maven://org.springframework.cloud.stream.app:transform-processor-rabbit:1.2.0.RELEASE
+----
 
 At the top of the bulk import page, a URI can be specified that points to a properties file stored elsewhere, it should contain properties formatted as shown in the previous example.
 Alternatively, by using the textbox labeled "`Apps as Properties`", you can directly list each property string. Finally, if the properties are stored in a local file, the "`Select Properties File`" option opens a local file browser to select the file.
