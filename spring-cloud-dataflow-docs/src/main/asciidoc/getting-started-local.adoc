@@ -319,8 +319,6 @@ wget https://repo.spring.io/{version-type-lowercase}/org/springframework/cloud/s
 [source,yaml,options=nowrap,subs=attributes]
 ----
 wget https://repo.spring.io/{skipper-version-type-lowercase}/org/springframework/cloud/spring-cloud-skipper-server/{skipper-version}/spring-cloud-skipper-server-{skipper-version}.jar
-
-wget https://repo.spring.io/{skipper-version-type-lowercase}/org/springframework/cloud/spring-cloud-skipper-shell/{skipper-version}/spring-cloud-skipper-shell-{skipper-version}.jar
 ----
 
 3) Launch Skipper (Required unless the Stream features are disabled and the Spring Cloud Data Flow runs in Task mode only)
@@ -387,10 +385,10 @@ By default, the application registry is empty.
 As an example, register two applications, `http` and `log`, that communicate by using RabbitMQ.
 
 ```
-dataflow:>app register --name http --type source --uri maven://org.springframework.cloud.stream.app:http-source-rabbit:1.2.0.RELEASE
+dataflow:>app register --name http --type source --uri maven://org.springframework.cloud.stream.app:http-source-rabbit:2.1.0.RELEASE
 Successfully registered application 'source:http'
 
-dataflow:>app register --name log --type sink --uri maven://org.springframework.cloud.stream.app:log-sink-rabbit:1.1.0.RELEASE
+dataflow:>app register --name log --type sink --uri maven://org.springframework.cloud.stream.app:log-sink-rabbit:2.0.0.RELEASE
 Successfully registered application 'sink:log'
 ```
 
@@ -409,7 +407,7 @@ dataflow:> stream create --name httptest --definition "http --server.port=9000 |
 ----
 
 NOTE: You need to wait a little while, until the apps are actually deployed successfully, before posting data.
-Look in the log file of the Data Flow server for the location of the log files for the `http` and `log` applications.
+Look in the log file of the Skipper server for the location of the log files for the `http` and `log` applications.
 Use the `tail` command on the log file for each application to verify that the application has started.
 
 Now post some data, as shown in the following example:
@@ -433,18 +431,18 @@ If you execute the Unix `jps` command you can see the two java processes running
 [source,bash]
 ----
 $ jps | grep rabbit
-12643 log-sink-rabbit-1.1.0.RELEASE.jar
-12645 http-source-rabbit-1.2.0.RELEASE.jar
+12643 log-sink-rabbit-2.0.0.RELEASE.jar
+12645 http-source-rabbit-2.1.0.RELEASE.jar
 ----
 
 [[getting-started-local-spring-cloud-dataflow-streams-upgrading]]
 ==== Upgrading
 
-Before we start upgrading the log-sink version to 1.2.0.RELEASE, we will have to register that version in the app registry.
+Before we start upgrading the log-sink version to 2.1.0.RELEASE, we will have to register that version in the app registry.
 
 [source,bash]
 ----
-dataflow:>app register --name log --type sink --uri maven://org.springframework.cloud.stream.app:log-sink-rabbit:1.2.0.RELEASE
+dataflow:>app register --name log --type sink --uri maven://org.springframework.cloud.stream.app:log-sink-rabbit:2.1.0.RELEASE
 Successfully registered application 'sink:log'
 ----
 
@@ -455,7 +453,7 @@ To do so, we create a YAML file, named `local-log-update.yml`, with the followin
 [source,yml]
 ----
 version:
-  log: 1.2.0.RELEASE
+  log: 2.1.0.RELEASE
 app:
   log:
     server.port: 9002
@@ -470,19 +468,19 @@ dataflow:> stream update --name httptest --propertiesFile /home/mpollack/local-l
 Update request has been sent for the stream 'httptest'
 ----
 
-By executing the Unix `jps` command, you can see the two java processes running, but now the log application is version 1.2.0.RELEASE, as shown in the following listing:
+By executing the Unix `jps` command, you can see the two java processes running, but now the log application is version 2.1.0.RELEASE, as shown in the following listing:
 
 [source,bash]
 ----
 $ jps | grep rabbit
-22034 http-source-rabbit-1.2.0.RELEASE.jar
-22031 log-sink-rabbit-1.1.0.RELEASE.jar
+22034 http-source-rabbit-2.1.0.RELEASE.jar
+22031 log-sink-rabbit-2.1.0.RELEASE.jar
 ----
 
-Now you can look in the log file of the Skipper server.
-To do so, use the following command:
+Now you can look in the log file of the Skipper server to find the location of the httptest-log app.
+To view the log, use the following commands:
 
-`cd` to the directory `/tmp/spring-cloud-dataflow-5262910238261867964/httptest-1511749222274/httptest.log-v2` and `tail -f stdout_0.log`
+`cd` to the directory `/<location of log>/httptest.log-v2` and `tail -f stdout_0.log`
 
 You should see log entries similar to the following:
 
@@ -509,17 +507,9 @@ The log message is now at the error level, as shown in the following example:
 ERROR 22311 --- [http.httptest-1] log-sink  : hello world upgraded
 ----
 
-If you query the `/info` endpoint of the application, you can also see that it is at version `1.2.0.RELEASE`, as shown in the following example:
-
-[source,bash]
-----
-$ curl http://localhost:9002/info
-{"app":{"description":"Spring Cloud Stream Log Sink Rabbit Binder Application","name":"log-sink-rabbit","version":"1.2.0.RELEASE"}}
-----
-
 ===== Force upgrade of a Stream
 
-When upgrading a stream, the --force option can be used to deploy new instances of currently deployed applications even if no applicaton or deployment properties have changed.
+When upgrading a stream, the --force option can be used to deploy new instances of currently deployed applications even if no application or deployment properties have changed.
 This behavior is needed in the case when configuration information is obtained by the application itself at startup time, for example from Spring Cloud Config Server.
 You can specify which applications to force upgrade by using the option --app-names.
 If you do not specify any application names, all the applications will be force upgraded.
@@ -549,8 +539,8 @@ dataflow:>stream manifest --name ticktock
   "name": "time"
 "spec":
   "resource": "maven://org.springframework.cloud.stream.app:time-source-rabbit"
-  "resourceMetadata": "maven://org.springframework.cloud.stream.app:time-source-rabbit:jar:metadata:1.3.1.RELEASE"
-  "version": "1.3.1.RELEASE"
+  "resourceMetadata": "maven://org.springframework.cloud.stream.app:time-source-rabbit:jar:metadata:2.1.0.RELEASE"
+  "version": "2.1.0.RELEASE"
   "applicationProperties":
     "spring.metrics.export.triggers.application.includes": "integration**"
     "spring.cloud.dataflow.stream.app.label": "time"
@@ -569,8 +559,8 @@ dataflow:>stream manifest --name ticktock
   "name": "log"
 "spec":
   "resource": "maven://org.springframework.cloud.stream.app:log-sink-rabbit"
-  "resourceMetadata": "maven://org.springframework.cloud.stream.app:log-sink-rabbit:jar:metadata:1.3.1.RELEASE"
-  "version": "1.3.1.RELEASE"
+  "resourceMetadata": "maven://org.springframework.cloud.stream.app:log-sink-rabbit:jar:metadata:2.1.0.RELEASE"
+  "version": "2.1.0.RELEASE"
   "applicationProperties":
     "spring.metrics.export.triggers.application.includes": "integration**"
     "spring.cloud.dataflow.stream.app.label": "log"
@@ -599,8 +589,8 @@ dataflow:>stream manifest --name ticktock
   "name": "time"
 "spec":
   "resource": "maven://org.springframework.cloud.stream.app:time-source-rabbit"
-  "resourceMetadata": "maven://org.springframework.cloud.stream.app:time-source-rabbit:jar:metadata:1.3.1.RELEASE"
-  "version": "1.3.1.RELEASE"
+  "resourceMetadata": "maven://org.springframework.cloud.stream.app:time-source-rabbit:jar:metadata:2.1.0.RELEASE"
+  "version": "2.1.0.RELEASE"
   "applicationProperties":
     "spring.metrics.export.triggers.application.includes": "integration**"
     "spring.cloud.dataflow.stream.app.label": "time"
@@ -619,8 +609,8 @@ dataflow:>stream manifest --name ticktock
   "name": "log"
 "spec":
   "resource": "maven://org.springframework.cloud.stream.app:log-sink-rabbit"
-  "resourceMetadata": "maven://org.springframework.cloud.stream.app:log-sink-rabbit:jar:metadata:1.3.1.RELEASE"
-  "version": "1.3.1.RELEASE"
+  "resourceMetadata": "maven://org.springframework.cloud.stream.app:log-sink-rabbit:jar:metadata:2.1.0.RELEASE"
+  "version": "2.1.0.RELEASE"
   "applicationProperties":
     "spring.metrics.export.triggers.application.includes": "integration**"
     "spring.cloud.dataflow.stream.app.label": "log"
@@ -661,8 +651,8 @@ dataflow:>stream manifest --name ticktock
   "name": "time"
 "spec":
   "resource": "maven://org.springframework.cloud.stream.app:time-source-rabbit"
-  "resourceMetadata": "maven://org.springframework.cloud.stream.app:time-source-rabbit:jar:metadata:1.3.1.RELEASE"
-  "version": "1.3.1.RELEASE"
+  "resourceMetadata": "maven://org.springframework.cloud.stream.app:time-source-rabbit:jar:metadata:2.1.0.RELEASE"
+  "version": "2.1.0.RELEASE"
   "applicationProperties":
     "spring.metrics.export.triggers.application.includes": "integration**"
     "spring.cloud.dataflow.stream.app.label": "time"
@@ -681,8 +671,8 @@ dataflow:>stream manifest --name ticktock
   "name": "log"
 "spec":
   "resource": "maven://org.springframework.cloud.stream.app:log-sink-rabbit"
-  "resourceMetadata": "maven://org.springframework.cloud.stream.app:log-sink-rabbit:jar:metadata:1.3.1.RELEASE"
-  "version": "1.3.1.RELEASE"
+  "resourceMetadata": "maven://org.springframework.cloud.stream.app:log-sink-rabbit:jar:metadata:2.1.0.RELEASE"
+  "version": "2.1.0.RELEASE"
   "applicationProperties":
     "spring.metrics.export.triggers.application.includes": "integration**"
     "spring.cloud.dataflow.stream.app.label": "log"
@@ -716,8 +706,8 @@ dataflow:>stream manifest ticktock
   "name": "time"
 "spec":
   "resource": "maven://org.springframework.cloud.stream.app:time-source-rabbit"
-  "resourceMetadata": "maven://org.springframework.cloud.stream.app:time-source-rabbit:jar:metadata:1.3.1.RELEASE"
-  "version": "1.3.1.RELEASE"
+  "resourceMetadata": "maven://org.springframework.cloud.stream.app:time-source-rabbit:jar:metadata:2.1.0.RELEASE"
+  "version": "2.1.0.RELEASE"
   "applicationProperties":
     "spring.metrics.export.triggers.application.includes": "integration**"
     "spring.cloud.dataflow.stream.app.label": "time"
@@ -736,8 +726,8 @@ dataflow:>stream manifest ticktock
   "name": "log"
 "spec":
   "resource": "maven://org.springframework.cloud.stream.app:log-sink-rabbit"
-  "resourceMetadata": "maven://org.springframework.cloud.stream.app:log-sink-rabbit:jar:metadata:1.3.1.RELEASE"
-  "version": "1.3.1.RELEASE"
+  "resourceMetadata": "maven://org.springframework.cloud.stream.app:log-sink-rabbit:jar:metadata:2.1.0.RELEASE"
+  "version": "2.1.0.RELEASE"
   "applicationProperties":
     "spring.metrics.export.triggers.application.includes": "integration**"
     "spring.cloud.dataflow.stream.app.label": "log"
@@ -791,7 +781,7 @@ metadata:
   name: log
 spec:
   resource: maven://org.springframework.cloud.stream.app:log-sink-rabbit
-  version: 1.2.0.RELEASE
+  version: 2.1.0.RELEASE
   applicationProperties:
     spring.metrics.export.triggers.application.includes: integration**
     spring.cloud.dataflow.stream.app.label: log
@@ -814,7 +804,7 @@ metadata:
   name: http
 spec:
   resource: maven://org.springframework.cloud.stream.app:http-source-rabbit
-  version: 1.2.0.RELEASE
+  version: 2.1.0.RELEASE
   applicationProperties:
     spring.metrics.export.triggers.application.includes: integration**
     spring.cloud.dataflow.stream.app.label: http
@@ -844,20 +834,21 @@ dataflow:>stream rollback --name httptest
 Rollback request has been sent for the stream 'httptest'
 ----
 
-By executing the Unix `jps` command, you can see the two java processes running, but now the log application is back to 1.1.0.RELEASE.
+By executing the Unix `jps` command, you can see the two java processes running, but now the log application is back to 2.0.0.RELEASE.
 The http source process remains unchanged.
 The following listing shows the `jps` command and typical output:
 
 [source,bash]
 ----
 $ jps | grep rabbit
-22034 http-source-rabbit-1.2.0.RELEASE.jar
-23939 log-sink-rabbit-1.1.0.RELEASE.jar
+22034 http-source-rabbit-2.1.0.RELEASE.jar
+23939 log-sink-rabbit-2.0.0.RELEASE.jar
 ----
 
-Now look in the log file for the skipper server, by using the following command:
+Now you can look in the log file of the Skipper server to find the location of the httptest-log app.
+To view the log, use the following commands:
 
-`cd` to the directory `/tmp/spring-cloud-dataflow-3784227772192239992/httptest-1511755751505/httptest.log-v3` and `tail -f stdout_0.log`
+`cd` to the directory `/<location of log>/httptest.log-v3` and `tail -f stdout_0.log`
 
 You should see log entries similar to the following:
 
@@ -905,7 +896,7 @@ If you look at the manifest for version 3, you can see that it shows version 1.1
 In this getting started section, we show how to register a task, create a task definition and then launch it.
 We will then also review information about the task executions.
 
-NOTE: Launching Spring Cloud Task applications are not delegated to Skipper since they are short lived applications.  Tasks are alwasy deployed directly via the Data Flow Server.
+NOTE: Launching Spring Cloud Task applications are not delegated to Skipper since they are short lived applications.  Tasks are always deployed directly via the Data Flow Server.
 
 1) Register a Task App
 
@@ -914,7 +905,7 @@ As an example, we will register one task application, `timestamp` which simply p
 
 [source,bash]
 ----
-dataflow:>app register --name timestamp --type task --uri maven://org.springframework.cloud.task.app:timestamp-task:1.3.0.RELEASE
+dataflow:>app register --name timestamp --type task --uri maven://org.springframework.cloud.task.app:timestamp-task:2.1.0.RELEASE
 Successfully registered application 'task:timestamp'
 ----
 
