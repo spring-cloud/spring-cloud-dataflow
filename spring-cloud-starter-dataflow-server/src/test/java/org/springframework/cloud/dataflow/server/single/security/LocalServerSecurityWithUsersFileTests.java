@@ -473,6 +473,13 @@ public class LocalServerSecurityWithUsersFileTests {
 
 				{ HttpMethod.GET, HttpStatus.UNAUTHORIZED, "/streams/deployments/platform/list", null, null },
 
+				/* TaskPlatformController */
+
+				{ HttpMethod.GET, HttpStatus.FORBIDDEN, "/tasks/platforms", manageOnlyUser, null },
+				{ HttpMethod.GET, HttpStatus.OK, "/tasks/platforms", viewOnlyUser, null },
+				{ HttpMethod.GET, HttpStatus.FORBIDDEN, "/tasks/platforms", createOnlyUser, null },
+				{ HttpMethod.GET, HttpStatus.UNAUTHORIZED, "/tasks/platforms", null, null },
+
 				/* TaskDefinitionController */
 
 				{ HttpMethod.POST, HttpStatus.FORBIDDEN, "/tasks/definitions", manageOnlyUser,
