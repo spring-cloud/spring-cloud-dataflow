@@ -30,7 +30,9 @@ import org.springframework.cloud.dataflow.core.AppRegistration;
 import org.springframework.cloud.dataflow.core.ApplicationType;
 import org.springframework.cloud.dataflow.core.AuditActionType;
 import org.springframework.cloud.dataflow.core.AuditOperationType;
+import org.springframework.cloud.dataflow.core.Launcher;
 import org.springframework.cloud.dataflow.core.TaskDefinition;
+import org.springframework.cloud.dataflow.core.TaskPlatform;
 import org.springframework.cloud.dataflow.core.dsl.TaskNode;
 import org.springframework.cloud.dataflow.core.dsl.TaskParser;
 import org.springframework.cloud.dataflow.registry.service.AppRegistryService;
@@ -44,7 +46,6 @@ import org.springframework.cloud.dataflow.server.service.SchedulerServicePropert
 import org.springframework.cloud.deployer.spi.core.AppDefinition;
 import org.springframework.cloud.scheduler.spi.core.ScheduleInfo;
 import org.springframework.cloud.scheduler.spi.core.ScheduleRequest;
-import org.springframework.cloud.scheduler.spi.core.Scheduler;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.data.domain.Page;
@@ -62,7 +63,7 @@ import org.springframework.util.StringUtils;
 public class DefaultSchedulerService implements SchedulerService {
 
 	private CommonApplicationProperties commonApplicationProperties;
-	private Scheduler scheduler;
+	private TaskPlatform taskPlatform;
 	private TaskDefinitionRepository taskDefinitionRepository;
 	private AppRegistryService registry;
 	private final TaskConfigurationProperties taskConfigurationProperties;
@@ -74,7 +75,7 @@ public class DefaultSchedulerService implements SchedulerService {
 	private final AuditServiceUtils auditServiceUtils;
 
 	public DefaultSchedulerService(CommonApplicationProperties commonApplicationProperties,
-			Scheduler scheduler, TaskDefinitionRepository taskDefinitionRepository,
+			TaskPlatform taskPlatform, TaskDefinitionRepository taskDefinitionRepository,
 			AppRegistryService registry, ResourceLoader resourceLoader,
 			TaskConfigurationProperties taskConfigurationProperties,
 			DataSourceProperties dataSourceProperties, String dataflowServerUri,
@@ -82,7 +83,7 @@ public class DefaultSchedulerService implements SchedulerService {
 			SchedulerServiceProperties schedulerServiceProperties,
 			AuditRecordService auditRecordService) {
 		Assert.notNull(commonApplicationProperties, "commonApplicationProperties must not be null");
-		Assert.notNull(scheduler, "scheduler must not be null");
+		Assert.notNull(taskPlatform, "taskPlatform must not be null");
 		Assert.notNull(registry, "AppRegistryService must not be null");
 		Assert.notNull(resourceLoader, "ResourceLoader must not be null");
 		Assert.notNull(taskDefinitionRepository, "TaskDefinitionRepository must not be null");
@@ -94,7 +95,7 @@ public class DefaultSchedulerService implements SchedulerService {
 
 		this.dataSourceProperties = dataSourceProperties;
 		this.commonApplicationProperties = commonApplicationProperties;
-		this.scheduler = scheduler;
+		this.taskPlatform = taskPlatform;
 		this.taskDefinitionRepository = taskDefinitionRepository;
 		this.registry = registry;
 		this.taskConfigurationProperties = taskConfigurationProperties;
@@ -145,7 +146,9 @@ public class DefaultSchedulerService implements SchedulerService {
 		taskDeploymentProperties = extractAndQualifySchedulerProperties(taskDeploymentProperties);
 		ScheduleRequest scheduleRequest = new ScheduleRequest(revisedDefinition, taskDeploymentProperties,
 				deployerDeploymentProperties, commandLineArgs, scheduleName, getTaskResource(taskDefinitionName));
-		this.scheduler.schedule(scheduleRequest);
+		Launcher launcher = this.taskPlatform.getLaunchers().get(0);
+
+		launcher.getScheduler().schedule(scheduleRequest);
 		this.auditRecordService.populateAndSaveAuditRecordUsingMapData(AuditOperationType.SCHEDULE, AuditActionType.CREATE,
 			scheduleRequest.getScheduleName(), this.auditServiceUtils.convertScheduleRequestToAuditData(scheduleRequest));
 	}
@@ -154,7 +157,8 @@ public class DefaultSchedulerService implements SchedulerService {
 	public void unschedule(String scheduleName) {
 		final ScheduleInfo scheduleInfo = getSchedule(scheduleName);
 		if (scheduleInfo != null) {
-			this.scheduler.unschedule(scheduleInfo.getScheduleName());
+			Launcher launcher = this.taskPlatform.getLaunchers().get(0);
+			launcher.getScheduler().unschedule(scheduleInfo.getScheduleName());
 			this.auditRecordService.populateAndSaveAuditRecord(
 					AuditOperationType.SCHEDULE,
 					AuditActionType.DELETE, scheduleInfo.getScheduleName(),
@@ -174,13 +178,15 @@ public class DefaultSchedulerService implements SchedulerService {
 
 	@Override
 	public List<ScheduleInfo> list(String taskDefinitionName) {
-		return limitScheduleInfoResultSize(scheduler.list(taskDefinitionName),
+		Launcher launcher = this.taskPlatform.getLaunchers().get(0);
+		return limitScheduleInfoResultSize(launcher.getScheduler().list(taskDefinitionName),
 				this.schedulerServiceProperties.getMaxSchedulesReturned());
 	}
 
 	@Override
 	public List<ScheduleInfo> list() {
-		return limitScheduleInfoResultSize(scheduler.list(),
+		Launcher launcher = this.taskPlatform.getLaunchers().get(0);
+		return limitScheduleInfoResultSize(launcher.getScheduler().list(),
 				this.schedulerServiceProperties.getMaxSchedulesReturned());
 	}
 

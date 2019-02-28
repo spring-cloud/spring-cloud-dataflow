@@ -17,9 +17,11 @@ package org.springframework.cloud.dataflow.server.config.cloudfoundry;
 
 import java.time.Duration;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import com.github.zafarkhaja.semver.Version;
+import io.pivotal.reactor.scheduler.ReactorSchedulerClient;
 import org.cloudfoundry.client.CloudFoundryClient;
 import org.cloudfoundry.client.v2.info.GetInfoRequest;
 import org.cloudfoundry.operations.CloudFoundryOperations;
@@ -30,6 +32,7 @@ import org.cloudfoundry.reactor.TokenProvider;
 import org.cloudfoundry.reactor.client.ReactorCloudFoundryClient;
 import org.cloudfoundry.reactor.tokenprovider.PasswordGrantTokenProvider;
 import org.slf4j.LoggerFactory;
+import reactor.core.publisher.Mono;
 
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.cloud.dataflow.core.Launcher;
@@ -42,6 +45,9 @@ import org.springframework.cloud.deployer.spi.cloudfoundry.CloudFoundryConnectio
 import org.springframework.cloud.deployer.spi.cloudfoundry.CloudFoundryDeploymentProperties;
 import org.springframework.cloud.deployer.spi.core.RuntimeEnvironmentInfo;
 import org.springframework.cloud.deployer.spi.util.RuntimeVersionUtils;
+import org.springframework.cloud.scheduler.spi.cloudfoundry.CloudFoundryAppScheduler;
+import org.springframework.cloud.scheduler.spi.cloudfoundry.CloudFoundrySchedulerProperties;
+import org.springframework.cloud.scheduler.spi.core.Scheduler;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -57,14 +63,16 @@ public class CloudFoundryTaskPlatformAutoConfiguration {
 
 	@Bean
 	public TaskPlatform cloudFoundryPlatform(
-			CloudFoundryPlatformProperties cloudFoundryPlatformProperties) {
+			CloudFoundryPlatformProperties cloudFoundryPlatformProperties,
+			Optional<CloudFoundrySchedulerProperties> cloudFoundrySchedulerProperties) {
 		List<Launcher> launchers = cloudFoundryPlatformProperties.getAccounts().entrySet().stream().map(
-				e -> createAndSaveCFTaskLauncher(e.getKey(), e.getValue())).collect(Collectors.toList());
+				e -> createAndSaveCFTaskLauncher(e.getKey(), e.getValue(), cloudFoundrySchedulerProperties)).collect(Collectors.toList());
 		return new TaskPlatform("Cloud Foundry", launchers);
 	}
 
 	private Launcher createAndSaveCFTaskLauncher(String account,
-			CloudFoundryPlatformProperties.CloudFoundryProperties cloudFoundryProperties) {
+												 CloudFoundryPlatformProperties.CloudFoundryProperties cloudFoundryProperties,
+												 Optional<CloudFoundrySchedulerProperties> cloudFoundrySchedulerProperties) {
 		CloudFoundryDeploymentProperties deploymentProperties = cloudFoundryProperties
 				.getDeployment();
 		if (deploymentProperties == null) {
@@ -115,7 +123,22 @@ public class CloudFoundryTaskPlatformAutoConfiguration {
 			CloudFoundry2630AndLaterTaskLauncher cfTaskLauncher = new CloudFoundry2630AndLaterTaskLauncher(
 					cloudFoundryClient, deploymentProperties, cloudFoundryOperations, runtimeEnvironmentInfo);
 
-			Launcher launcher = new Launcher(account, "cloudfoundry", cfTaskLauncher);
+
+			CloudFoundrySchedulerProperties propsToUse =
+					cloudFoundrySchedulerProperties.orElseGet(() -> new CloudFoundrySchedulerProperties());
+			ReactorSchedulerClient reactorSchedulerClient = ReactorSchedulerClient.builder()
+					.connectionContext(connectionContext)
+					.tokenProvider(tokenProvider)
+					.root(Mono.just(propsToUse.getSchedulerUrl()))
+					.build();
+
+			Scheduler scheduler = new CloudFoundryAppScheduler(reactorSchedulerClient,
+					cloudFoundryOperations,
+					connectionProperties,
+					cfTaskLauncher,
+					propsToUse);
+
+			Launcher launcher = new Launcher(account, "cloudfoundry", cfTaskLauncher, scheduler);
 			launcher.setDescription(String.format("org = [%s], space = [%s], url = [%s]",
 					connectionProperties.getOrg(), connectionProperties.getSpace(),
 					connectionProperties.getUrl()));

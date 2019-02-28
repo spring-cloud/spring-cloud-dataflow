@@ -43,6 +43,7 @@ import org.springframework.cloud.dataflow.configuration.metadata.ApplicationConf
 import org.springframework.cloud.dataflow.core.AppRegistration;
 import org.springframework.cloud.dataflow.core.ApplicationType;
 import org.springframework.cloud.dataflow.core.TaskDefinition;
+import org.springframework.cloud.dataflow.core.TaskPlatform;
 import org.springframework.cloud.dataflow.registry.service.AppRegistryService;
 import org.springframework.cloud.dataflow.server.DockerValidatorProperties;
 import org.springframework.cloud.dataflow.server.config.apps.CommonApplicationProperties;
@@ -282,7 +283,7 @@ public class DefaultSchedulerServiceTests {
 		AppRegistryService mockAppRegistryService = mock(AppRegistryService.class);
 
 		SchedulerService mockSchedulerService = new DefaultSchedulerService(mock(CommonApplicationProperties.class),
-				mockScheduler, mockTaskDefinitionRepository, mockAppRegistryService, mock(ResourceLoader.class),
+				mock(TaskPlatform.class), mockTaskDefinitionRepository, mockAppRegistryService, mock(ResourceLoader.class),
 				mock(TaskConfigurationProperties.class), mock(DataSourceProperties.class), "uri",
 				mock(ApplicationConfigurationMetadataResolver.class), mock(SchedulerServiceProperties.class),
 				mock(AuditRecordService.class));

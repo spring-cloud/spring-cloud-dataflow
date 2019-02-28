@@ -34,6 +34,7 @@ import org.springframework.cloud.dataflow.audit.service.AuditRecordService;
 import org.springframework.cloud.dataflow.audit.service.DefaultAuditRecordService;
 import org.springframework.cloud.dataflow.completion.CompletionConfiguration;
 import org.springframework.cloud.dataflow.configuration.metadata.ApplicationConfigurationMetadataResolver;
+import org.springframework.cloud.dataflow.core.TaskPlatform;
 import org.springframework.cloud.dataflow.registry.service.AppRegistryService;
 import org.springframework.cloud.dataflow.server.DockerValidatorProperties;
 import org.springframework.cloud.dataflow.server.config.VersionInfoProperties;
@@ -249,14 +250,14 @@ public class TaskServiceDependencies extends WebMvcConfigurationSupport {
 
 	@Bean
 	public SchedulerService schedulerService(CommonApplicationProperties commonApplicationProperties,
-			Scheduler scheduler, TaskDefinitionRepository taskDefinitionRepository,
-			AppRegistryService registry, ResourceLoader resourceLoader,
-			DataSourceProperties dataSourceProperties,
-			ApplicationConfigurationMetadataResolver metaDataResolver,
-			SchedulerServiceProperties schedulerServiceProperties,
-			AuditRecordService auditRecordService) {
+											 TaskPlatform taskPlatform, TaskDefinitionRepository taskDefinitionRepository,
+											 AppRegistryService registry, ResourceLoader resourceLoader,
+											 DataSourceProperties dataSourceProperties,
+											 ApplicationConfigurationMetadataResolver metaDataResolver,
+											 SchedulerServiceProperties schedulerServiceProperties,
+											 AuditRecordService auditRecordService) {
 		return new DefaultSchedulerService(commonApplicationProperties,
-				scheduler, taskDefinitionRepository,
+				taskPlatform, taskDefinitionRepository,
 				registry, resourceLoader,
 				new TaskConfigurationProperties(),
 				dataSourceProperties, null,

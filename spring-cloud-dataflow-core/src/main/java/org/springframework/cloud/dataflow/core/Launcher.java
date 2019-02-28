@@ -18,6 +18,7 @@ package org.springframework.cloud.dataflow.core;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import org.springframework.cloud.deployer.spi.task.TaskLauncher;
+import org.springframework.cloud.scheduler.spi.core.Scheduler;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.keyvalue.annotation.KeySpace;
 
@@ -39,13 +40,25 @@ public class Launcher {
 	@JsonIgnore
 	private TaskLauncher taskLauncher;
 
-	Launcher() {
-	}
+	@JsonIgnore
+    private Scheduler scheduler;
+
 
 	public Launcher(String name, String type, TaskLauncher taskLauncher) {
 		this.name = name;
 		this.type = type;
 		this.taskLauncher = taskLauncher;
+	}
+
+	public Launcher(String name, String type, TaskLauncher taskLauncher, Scheduler scheduler) {
+		this.name = name;
+		this.type = type;
+		this.taskLauncher = taskLauncher;
+		this.scheduler = scheduler;
+	}
+
+	public Scheduler getScheduler() {
+		return scheduler;
 	}
 
 	public String getId() {

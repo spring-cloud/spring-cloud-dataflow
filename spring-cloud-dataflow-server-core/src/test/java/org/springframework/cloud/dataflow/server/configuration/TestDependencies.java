@@ -45,6 +45,7 @@ import org.springframework.cloud.dataflow.completion.StreamCompletionProvider;
 import org.springframework.cloud.dataflow.completion.TaskCompletionProvider;
 import org.springframework.cloud.dataflow.configuration.metadata.ApplicationConfigurationMetadataResolver;
 import org.springframework.cloud.dataflow.core.Launcher;
+import org.springframework.cloud.dataflow.core.TaskPlatform;
 import org.springframework.cloud.dataflow.registry.repository.AppRegistrationRepository;
 import org.springframework.cloud.dataflow.registry.service.AppRegistryService;
 import org.springframework.cloud.dataflow.registry.service.DefaultAppRegistryService;
@@ -488,12 +489,12 @@ public class TestDependencies extends WebMvcConfigurationSupport {
 
 	@Bean
 	public SchedulerService schedulerService(CommonApplicationProperties commonApplicationProperties,
-			Scheduler scheduler, TaskDefinitionRepository taskDefinitionRepository,
-			AppRegistryService registry, ResourceLoader resourceLoader,
-			DataSourceProperties dataSourceProperties,
-			ApplicationConfigurationMetadataResolver metaDataResolver, AuditRecordService auditRecordService) {
+											 TaskPlatform taskPlatform, TaskDefinitionRepository taskDefinitionRepository,
+											 AppRegistryService registry, ResourceLoader resourceLoader,
+											 DataSourceProperties dataSourceProperties,
+											 ApplicationConfigurationMetadataResolver metaDataResolver, AuditRecordService auditRecordService) {
 		return new DefaultSchedulerService(commonApplicationProperties,
-				scheduler, taskDefinitionRepository,
+				taskPlatform, taskDefinitionRepository,
 				registry, resourceLoader,
 				new TaskConfigurationProperties(),
 				dataSourceProperties, null,
