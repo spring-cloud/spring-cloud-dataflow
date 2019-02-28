@@ -34,6 +34,8 @@ import org.cloudfoundry.reactor.tokenprovider.PasswordGrantTokenProvider;
 import org.slf4j.LoggerFactory;
 import reactor.core.publisher.Mono;
 
+import org.springframework.boot.autoconfigure.condition.ConditionalOnCloudPlatform;
+import org.springframework.boot.cloud.CloudPlatform;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.cloud.dataflow.core.Launcher;
 import org.springframework.cloud.dataflow.core.TaskPlatform;
@@ -56,6 +58,7 @@ import org.springframework.context.annotation.Configuration;
  * @author Mark Pollack
  */
 @Configuration
+@ConditionalOnCloudPlatform(CloudPlatform.CLOUD_FOUNDRY)
 @EnableConfigurationProperties(CloudFoundryPlatformProperties.class)
 public class CloudFoundryTaskPlatformAutoConfiguration {
 

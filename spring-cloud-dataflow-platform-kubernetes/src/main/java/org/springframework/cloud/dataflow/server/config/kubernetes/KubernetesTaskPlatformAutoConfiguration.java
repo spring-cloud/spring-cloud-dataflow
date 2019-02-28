@@ -31,12 +31,14 @@ import org.springframework.cloud.deployer.spi.kubernetes.KubernetesDeployerPrope
 import org.springframework.cloud.deployer.spi.kubernetes.KubernetesTaskLauncher;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Profile;
 
 /**
  * @author Mark Pollack
  */
 @Configuration
 @EnableConfigurationProperties(KubernetesPlatformProperties.class)
+@Profile("kubernetes")
 public class KubernetesTaskPlatformAutoConfiguration {
 
 	@Bean
