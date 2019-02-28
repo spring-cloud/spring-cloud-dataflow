@@ -229,6 +229,8 @@ public class ConfigCommands implements CommandMarker, InitializingBean, Applicat
 				targetPassword = userInput.prompt("Password", "", false);
 			}
 
+			this.targetHolder.setTarget(new Target(targetUriString, targetUsername, targetPassword, skipSslValidation));
+
 			if (StringUtils.hasText(credentialsProviderCommand) && authenticationEnabled) {
 				this.targetHolder.getTarget().setTargetCredentials(new TargetCredentials(true));
 				final CheckableResource credentialsResource = new ProcessOutputResource(credentialsProviderCommand.split("\\s+"));

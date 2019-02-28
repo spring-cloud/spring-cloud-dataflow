@@ -13,18 +13,7 @@ info:
 #    key-store-password: dataflow
 #    key-password: dataflow
 
-# Basic Authentication:
-
-#security:
-#  basic:
-#    enabled: true
-#    realm: Spring Cloud Data Flow
-#  user:
-#    name: your-username
-#    password: your-password
-#    role: VIEW, CREATE, MANAGE
-
-# Oauth 2 support:
+# Security (Oauth 2):
 
 #security:
 #  oauth2:
