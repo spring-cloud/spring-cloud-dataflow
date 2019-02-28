@@ -59,7 +59,7 @@ We have also successfully deployed with https://kubernetes.io/docs/getting-start
 We note where you need to adjust for deploying on Minikube.
 
 NOTE: When starting Minikube, you should allocate some extra resources, since we deploy several services.
-We start with `minikube start --cpus=4 --memory=4096`.
+We start with `minikube start --cpus=4 --memory=8192`.
 Please note that the allocated memory and cpu for the Minikube VM directly gets assigned to the number of applications deployed in a stream/task.
 The more you add, the more VM resources is required.
 
@@ -153,6 +153,10 @@ Metrics are "scraped" from deployed pods by Prometheus when configured with the 
 The scraped metrics are viewable via Grafana dashboards. Out of the box, Grafana comes pre-configured with a Prometheus data source connection along with SCDF-specific Grafana dashboards to monitor the streaming applications composed in a data pipeline.
 
 Run the following commands to create the cluster role, binding and service account:
+
+IMPORTANT: To run Prometheus and Grafana, you would require at least 2GB to 3GB of Memory. If you use Minikube and you want
+Prometheus and Grafana running in it, please make sure you allocate enough resources. The instructions above point to
+`minikube start --cpus=4 --memory=8192`, but to account for these two components, you'd need at least 10GB or more memory.
 
 IMPORTANT: Since version 1.9, the latest releases of Kubernetes have enabled https://kubernetes.io/docs/admin/authorization/rbac/[RBAC] on the api-server.
 If your target platform has RBAC enabled, you must ask a `cluster-admin` to create these for you before deploying Prometheus.
@@ -687,7 +691,7 @@ scdf-server  10.103.246.82    130.211.203.246   80/TCP     4m
 In the preceding example, the URL to use is http://130.211.203.246
 
 If you use Minikube, you do not have an external load balancer and the EXTERNAL-IP column shows `<pending>`.
-You need to use the NodePort assigned for the `skipper` service. The following example (with output) shows how to look up the URL to use:
+You need to use the NodePort assigned for the `scdf` service. The following example (with output) shows how to look up the URL to use:
 
 
 [source,bash,subs=attributes]
@@ -710,6 +714,7 @@ dataflow:>
 
 Alternatively, you can use the `--dataflow.uri` command line option.  The shell's `--help` command line option shows what is available.
 
+NOTE: If you use Minikube include the port for example: `dataflow config server --uri http://192.168.99.100:31991`
 
 2) Verify the registered platforms in Skipper, as the following example (with output) shows:
 
@@ -734,17 +739,17 @@ The following multi-step example (with output after each command) shows how to d
 
 [source,console,options=nowrap]
 ----
-dataflow:>app register --type source --name time --uri docker://springcloudstream/time-source-rabbit:1.3.0.RELEASE --metadata-uri maven://org.springframework.cloud.stream.app:time-source-rabbit:jar:metadata:1.3.0.RELEASE
+dataflow:>app register --type source --name time --uri docker://springcloudstream/time-source-rabbit:2.0.1.RELEASE --metadata-uri maven://org.springframework.cloud.stream.app:time-source-rabbit:jar:metadata:2.0.1.RELEASE
 Successfully registered application 'source:time'
 
-dataflow:>app register --type sink --name log --uri docker://springcloudstream/log-sink-rabbit:1.2.0.RELEASE --metadata-uri maven://org.springframework.cloud.stream.app:log-sink-rabbit:jar:metadata:1.2.0.RELEASE
+dataflow:>app register --type sink --name log --uri docker://springcloudstream/log-sink-rabbit:2.0.1.RELEASE --metadata-uri maven://org.springframework.cloud.stream.app:log-sink-rabbit:jar:metadata:2.0.1.RELEASE
 Successfully registered application 'sink:log'
 
 dataflow:>app info time --type source
 Information about source application 'time':
-Version: '1.3.0.RELEASE':
+Version: '2.0.1.RELEASE':
 Default application version: 'true':
-Resource URI: docker://springcloudstream/time-source-rabbit:1.3.0.RELEASE
+Resource URI: docker://springcloudstream/time-source-rabbit:2.0.1.RELEASE
 ╔══════════════════════════════╤══════════════════════════════╤══════════════════════════════╤══════════════════════════════╗
 ║         Option Name          │         Description          │           Default            │             Type             ║
 ╠══════════════════════════════╪══════════════════════════════╪══════════════════════════════╪══════════════════════════════╣
@@ -763,9 +768,9 @@ Resource URI: docker://springcloudstream/time-source-rabbit:1.3.0.RELEASE
 
 dataflow:>app info log --type sink
 Information about sink application 'log':
-Version: '1.2.0.RELEASE':
+Version: '2.0.1.RELEASE':
 Default application version: 'true':
-Resource URI: docker://springcloudstream/log-sink-rabbit:1.2.0.RELEASE
+Resource URI: docker://springcloudstream/log-sink-rabbit:2.0.1.RELEASE
 ╔══════════════════════════════╤══════════════════════════════╤══════════════════════════════╤══════════════════════════════╗
 ║         Option Name          │         Description          │           Default            │             Type             ║
 ╠══════════════════════════════╪══════════════════════════════╪══════════════════════════════╪══════════════════════════════╣
@@ -881,7 +886,7 @@ dataflow:>stream history --name mystream
 
 9) Verify the package manifest
 
-The `log-sink` should be at 1.2.0.RELEASE.
+The `log-sink` should be at 2.0.1.RELEASE.
 The following example (with output) shows how to display the package manifest so that you can ensure the version of the `log-sink` application:
 
 
@@ -897,8 +902,8 @@ metadata:
   "name": "log"
 spec:
   resource: "docker:springcloudstream/log-sink-rabbit"
-  resourceMetadata: "docker:springcloudstream/log-sink-rabbit:jar:metadata:1.2.0.RELEASE"
-  version: "1.2.0.RELEASE"
+  resourceMetadata: "docker:springcloudstream/log-sink-rabbit:jar:metadata:2.0.1.RELEASE"
+  version: "2.0.1.RELEASE"
   applicationProperties:
     "spring.metrics.export.triggers.application.includes": "integration**"
     "spring.cloud.dataflow.stream.app.label": "log"
@@ -920,8 +925,8 @@ metadata:
   "name": "time"
 spec:
   resource: "docker:springcloudstream/time-source-rabbit"
-  resourceMetadata: "docker:springcloudstream/time-source-rabbit:jar:metadata:1.3.0.RELEASE"
-  version: "1.3.0.RELEASE"
+  resourceMetadata: "docker:springcloudstream/time-source-rabbit:jar:metadata:2.0.1.RELEASE"
+  version: "2.0.1.RELEASE"
   applicationProperties:
     "spring.metrics.export.triggers.application.includes": "integration**"
     "spring.cloud.dataflow.stream.app.label": "time"
@@ -937,17 +942,17 @@ spec:
 ----
 
 
-10) Register the `log-sink` application version 1.3.0.RELEASE and update your stream to use it
+10) Register the `log-sink` application version 2.1.0.RELEASE and update your stream to use it
 
 The following example (with output after each command) shows how to register the `log-sink` application and update its version:
 
 
 [source,console,options=nowrap]
 ----
-dataflow:>app register --name log --type sink --uri docker:springcloudstream/log-sink-rabbit:1.3.0.RELEASE --force
+dataflow:>app register --name log --type sink --uri docker:springcloudstream/log-sink-rabbit:2.1.0.RELEASE --force
 Successfully registered application 'sink:log'
 
-dataflow:>stream update --name mystream --properties version.log=1.3.0.RELEASE
+dataflow:>stream update --name mystream --properties version.log=2.1.0.RELEASE
 Update request has been sent for stream 'mystream'
 ----
 
@@ -995,7 +1000,7 @@ $ kubectl logs -f mystream-log-v2-0-fjnlt
 ----
 
 
-13) View the updated package manifest persisted in Skipper. You should now see `log-sink` at 1.3.0.RELEASE.
+13) View the updated package manifest persisted in Skipper. You should now see `log-sink` at 2.1.0.RELEASE.
 
 The following example (with output) shows how to view the updated package manifest:
 
@@ -1012,8 +1017,8 @@ metadata:
   "name": "log"
 spec:
   resource: "docker:springcloudstream/log-sink-rabbit"
-  resourceMetadata: "docker:springcloudstream/log-sink-rabbit:jar:metadata:1.3.0.RELEASE"
-  version: "1.3.0.RELEASE"
+  resourceMetadata: "docker:springcloudstream/log-sink-rabbit:jar:metadata:2.1.0.RELEASE"
+  version: "2.1.0.RELEASE"
   applicationProperties:
     "spring.metrics.export.triggers.application.includes": "integration**"
     "spring.cloud.dataflow.stream.app.label": "log"
@@ -1036,8 +1041,8 @@ metadata:
   "name": "time"
 spec:
   resource: "docker:springcloudstream/time-source-rabbit"
-  resourceMetadata: "docker:springcloudstream/time-source-rabbit:jar:metadata:1.3.0.RELEASE"
-  version: "1.3.0.RELEASE"
+  resourceMetadata: "docker:springcloudstream/time-source-rabbit:jar:metadata:2.0.1.RELEASE"
+  version: "2.0.1.RELEASE"
   applicationProperties:
     "spring.metrics.export.triggers.application.includes": "integration**"
     "spring.cloud.dataflow.stream.app.label": "time"

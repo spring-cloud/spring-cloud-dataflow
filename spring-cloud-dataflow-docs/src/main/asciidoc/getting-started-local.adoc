@@ -409,7 +409,7 @@ dataflow:> stream create --name httptest --definition "http --server.port=9000 |
 ----
 
 NOTE: You need to wait a little while, until the apps are actually deployed successfully, before posting data.
-Look in the log file of the Data Flow server for the location of the log files for the `http` and `log` applications.
+Look in the log file of the Skipper server for the location of the log files for the `http` and `log` applications.
 Use the `tail` command on the log file for each application to verify that the application has started.
 
 Now post some data, as shown in the following example:
@@ -519,7 +519,7 @@ $ curl http://localhost:9002/info
 
 ===== Force upgrade of a Stream
 
-When upgrading a stream, the --force option can be used to deploy new instances of currently deployed applications even if no applicaton or deployment properties have changed.
+When upgrading a stream, the --force option can be used to deploy new instances of currently deployed applications even if no application or deployment properties have changed.
 This behavior is needed in the case when configuration information is obtained by the application itself at startup time, for example from Spring Cloud Config Server.
 You can specify which applications to force upgrade by using the option --app-names.
 If you do not specify any application names, all the applications will be force upgraded.
@@ -905,7 +905,7 @@ If you look at the manifest for version 3, you can see that it shows version 1.1
 In this getting started section, we show how to register a task, create a task definition and then launch it.
 We will then also review information about the task executions.
 
-NOTE: Launching Spring Cloud Task applications are not delegated to Skipper since they are short lived applications.  Tasks are alwasy deployed directly via the Data Flow Server.
+NOTE: Launching Spring Cloud Task applications are not delegated to Skipper since they are short lived applications.  Tasks are always deployed directly via the Data Flow Server.
 
 1) Register a Task App
 

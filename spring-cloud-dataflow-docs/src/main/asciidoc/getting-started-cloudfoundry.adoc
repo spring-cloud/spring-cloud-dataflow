@@ -265,7 +265,7 @@ spring.cloud.dataflow.task.platform.cloudfoundry.accounts[default].connection.sk
 # Note however that when the *server* is running locally, it can't access that db
 # task related commands that show executions won't work then
 spring.cloud.dataflow.task.platform.cloudfoundry.accounts[default].deployment.services=mysqlcups
-skipper.cliet.host=https://<skipper-host-name>/api
+skipper.client.serverUri=https://<skipper-host-name>/api
 ----
 
 
