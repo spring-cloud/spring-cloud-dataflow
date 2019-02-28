@@ -163,6 +163,10 @@ spring:
             - POST   /tasks/schedules                => hasRole('ROLE_SCHEDULE')
             - DELETE /tasks/schedules/*              => hasRole('ROLE_SCHEDULE')
 
+            # Task Platform Account List */
+
+            - GET    /tasks/platforms                => hasRole('ROLE_VIEW')
+
             # Task Validations
 
             - GET    /tasks/validation/               => hasRole('ROLE_VIEW')
