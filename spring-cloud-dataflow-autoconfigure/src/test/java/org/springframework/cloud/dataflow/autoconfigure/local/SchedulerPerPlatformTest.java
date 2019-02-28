@@ -22,7 +22,9 @@ import org.junit.runner.RunWith;
 
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.boot.cloud.CloudPlatform;
+import org.springframework.cloud.scheduler.spi.cloudfoundry.CloudFoundrySchedulerProperties;
 import org.springframework.cloud.scheduler.spi.core.Scheduler;
+import org.springframework.cloud.scheduler.spi.kubernetes.KubernetesSchedulerProperties;
 import org.springframework.test.context.TestPropertySource;
 
 import static org.junit.Assert.assertFalse;
@@ -66,31 +68,28 @@ public class SchedulerPerPlatformTest {
 	public static class KubernetesSchedulerActivatedTests extends AbstractSchedulerPerPlatformTest {
 
 		@Test
-		public void testLocalSchedulerEnabled() {
+		public void testKubernetesSchedulerEnabled() {
 			assertTrue("K8s should be enabled", context.getEnvironment().containsProperty("kubernetes_service_host"));
 			assertFalse("CF should be disabled", CloudPlatform.CLOUD_FOUNDRY.isActive(context.getEnvironment()));
 
-			Scheduler scheduler = context.getBean(Scheduler.class);
 
-			assertNotNull(scheduler);
-			assertTrue(scheduler.getClass().getName().contains("KubernetesScheduler"));
+			KubernetesSchedulerProperties props = context.getBean(KubernetesSchedulerProperties.class);
+			assertNotNull(props);
 		}
 
 	}
 
 	@TestPropertySource(properties = { "spring.cloud.dataflow.features.schedules-enabled=true",
-			"VCAP_APPLICATION=dummy" })
+			"VCAP_APPLICATION=\"{\"instance_id\":\"123\"}\"" })
 	public static class CloudFoundrySchedulerActivatedTests extends AbstractSchedulerPerPlatformTest {
 
 		@Test
-		public void testLocalSchedulerEnabled() {
+		public void testCloudFoundryScheudlerEnabled() {
 			assertFalse("K8s should be disabled", context.getEnvironment().containsProperty("kubernetes_service_host"));
 			assertTrue("CF should be enabled", CloudPlatform.CLOUD_FOUNDRY.isActive(context.getEnvironment()));
 
-			Scheduler scheduler = context.getBean(Scheduler.class);
-
-			assertNotNull(scheduler);
-			assertTrue(scheduler.getClass().getName().contains("CloudFoundryAppScheduler"));
+			CloudFoundrySchedulerProperties props = context.getBean(CloudFoundrySchedulerProperties.class);
+			assertNotNull(props);
 		}
 	}
 }

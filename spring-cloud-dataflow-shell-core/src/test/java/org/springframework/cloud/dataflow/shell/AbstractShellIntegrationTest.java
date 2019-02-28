@@ -119,8 +119,7 @@ public abstract class AbstractShellIntegrationTest {
 					"--spring.jmx.default-domain=" + System.currentTimeMillis(), "--spring.jmx.enabled=false",
 					"--security.basic.enabled=false", "--spring.main.show_banner=false",
 					"--spring.cloud.config.enabled=false",
-					"--spring.autoconfigure.exclude=org.springframework.boot.autoconfigure.session"
-							+ ".SessionAutoConfiguration",
+					"--spring.autoconfigure.exclude=org.springframework.boot.autoconfigure.session.SessionAutoConfiguration,org.springframework.cloud.deployer.spi.cloudfoundry.CloudFoundryDeployerAutoConfiguration,org.springframework.cloud.deployer.spi.kubernetes.KubernetesAutoConfiguration",
 					"--spring.datasource.url=" + dataSourceUrl);
 
 			JLineShellComponent shell = applicationContext.getBean(JLineShellComponent.class);

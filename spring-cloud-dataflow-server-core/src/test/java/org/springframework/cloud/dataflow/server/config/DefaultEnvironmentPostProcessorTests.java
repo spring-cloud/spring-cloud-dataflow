@@ -51,7 +51,8 @@ public class DefaultEnvironmentPostProcessorTests {
 	@Test
 	public void testDefaultsBeingContributedByServerModule() throws Exception {
 		try (ConfigurableApplicationContext ctx = SpringApplication.run(EmptyDefaultApp.class, "--server.port=0",
-				"--spring.main.allow-bean-definition-overriding=true")) {
+				"--spring.main.allow-bean-definition-overriding=true",
+				"--spring.autoconfigure.exclude=org.springframework.cloud.deployer.spi.cloudfoundry.CloudFoundryDeployerAutoConfiguration,org.springframework.cloud.deployer.spi.kubernetes.KubernetesAutoConfiguration")) {
 			String cp = ctx.getEnvironment().getProperty(MANAGEMENT_CONTEXT_PATH);
 			assertEquals(CONTRIBUTED_PATH, cp);
 		}
@@ -61,7 +62,9 @@ public class DefaultEnvironmentPostProcessorTests {
 	public void testOverridingDefaultsWithAConfigFile() {
 		try (ConfigurableApplicationContext ctx = SpringApplication.run(EmptyDefaultApp.class,
 				"--spring.config.name=test", "--server.port=0",
-				"--spring.main.allow-bean-definition-overriding=true")) {
+				"--spring.main.allow-bean-definition-overriding=true",
+				"--spring.cloud.dataflow.server.profileapplicationlistener.ignore=true",
+				"--spring.autoconfigure.exclude=org.springframework.cloud.deployer.spi.cloudfoundry.CloudFoundryDeployerAutoConfiguration,org.springframework.cloud.deployer.spi.kubernetes.KubernetesAutoConfiguration")) {
 			String cp = ctx.getEnvironment().getProperty(MANAGEMENT_CONTEXT_PATH);
 			assertEquals(cp, "/foo");
 		}

@@ -24,6 +24,7 @@ import org.springframework.boot.autoconfigure.jdbc.DataSourceProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.cloud.dataflow.audit.service.AuditRecordService;
 import org.springframework.cloud.dataflow.configuration.metadata.ApplicationConfigurationMetadataResolver;
+import org.springframework.cloud.dataflow.core.TaskPlatform;
 import org.springframework.cloud.dataflow.registry.service.AppRegistryService;
 import org.springframework.cloud.dataflow.server.config.apps.CommonApplicationProperties;
 import org.springframework.cloud.dataflow.server.repository.TaskDefinitionRepository;
@@ -31,7 +32,6 @@ import org.springframework.cloud.dataflow.server.service.SchedulerService;
 import org.springframework.cloud.dataflow.server.service.SchedulerServiceProperties;
 import org.springframework.cloud.dataflow.server.service.impl.DefaultSchedulerService;
 import org.springframework.cloud.dataflow.server.service.impl.TaskConfigurationProperties;
-import org.springframework.cloud.scheduler.spi.core.Scheduler;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Conditional;
 import org.springframework.context.annotation.Configuration;
@@ -55,15 +55,15 @@ public class SchedulerConfiguration {
 	@Bean
 	@ConditionalOnMissingBean
 	public SchedulerService schedulerService(CommonApplicationProperties commonApplicationProperties,
-			Scheduler scheduler, TaskDefinitionRepository taskDefinitionRepository,
-			AppRegistryService registry, ResourceLoader resourceLoader,
-			TaskConfigurationProperties taskConfigurationProperties,
-			DataSourceProperties dataSourceProperties,
-			ApplicationConfigurationMetadataResolver metaDataResolver,
-			SchedulerServiceProperties schedulerServiceProperties,
-			AuditRecordService auditRecordService) {
+											 TaskPlatform taskPlatform, TaskDefinitionRepository taskDefinitionRepository,
+											 AppRegistryService registry, ResourceLoader resourceLoader,
+											 TaskConfigurationProperties taskConfigurationProperties,
+											 DataSourceProperties dataSourceProperties,
+											 ApplicationConfigurationMetadataResolver metaDataResolver,
+											 SchedulerServiceProperties schedulerServiceProperties,
+											 AuditRecordService auditRecordService) {
 		return new DefaultSchedulerService(commonApplicationProperties,
-				scheduler, taskDefinitionRepository, registry, resourceLoader,
+				taskPlatform, taskDefinitionRepository, registry, resourceLoader,
 				taskConfigurationProperties, dataSourceProperties,
 				this.dataflowServerUri, metaDataResolver, schedulerServiceProperties, auditRecordService);
 	}

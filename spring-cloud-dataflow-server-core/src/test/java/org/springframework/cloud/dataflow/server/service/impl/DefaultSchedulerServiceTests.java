@@ -42,10 +42,13 @@ import org.springframework.cloud.dataflow.audit.service.AuditRecordService;
 import org.springframework.cloud.dataflow.configuration.metadata.ApplicationConfigurationMetadataResolver;
 import org.springframework.cloud.dataflow.core.AppRegistration;
 import org.springframework.cloud.dataflow.core.ApplicationType;
+import org.springframework.cloud.dataflow.core.Launcher;
 import org.springframework.cloud.dataflow.core.TaskDefinition;
+import org.springframework.cloud.dataflow.core.TaskPlatform;
 import org.springframework.cloud.dataflow.registry.service.AppRegistryService;
 import org.springframework.cloud.dataflow.server.DockerValidatorProperties;
 import org.springframework.cloud.dataflow.server.config.apps.CommonApplicationProperties;
+import org.springframework.cloud.dataflow.server.configuration.SimpleTestScheduler;
 import org.springframework.cloud.dataflow.server.configuration.TaskServiceDependencies;
 import org.springframework.cloud.dataflow.server.repository.TaskDefinitionRepository;
 import org.springframework.cloud.dataflow.server.service.SchedulerService;
@@ -132,7 +135,7 @@ public class DefaultSchedulerServiceTests {
 
 	@After
 	public void tearDown() {
-		((TaskServiceDependencies.SimpleTestScheduler)simpleTestScheduler).getSchedules().clear();
+		((SimpleTestScheduler)simpleTestScheduler).getSchedules().clear();
 	}
 
 	@Test
@@ -277,12 +280,16 @@ public class DefaultSchedulerServiceTests {
 	}
 
 	private List<String> getCommandLineArguments(List<String> commandLineArguments) {
-		Scheduler mockScheduler = mock(TaskServiceDependencies.SimpleTestScheduler.class);
+		Scheduler mockScheduler = mock(SimpleTestScheduler.class);
 		TaskDefinitionRepository mockTaskDefinitionRepository = mock(TaskDefinitionRepository.class);
 		AppRegistryService mockAppRegistryService = mock(AppRegistryService.class);
 
+		Launcher launcher = new Launcher("default", "defaultType", null, mockScheduler);
+		List<Launcher> launchers = new ArrayList<>();
+		launchers.add(launcher);
+		TaskPlatform taskPlatform = new TaskPlatform("testTaskPlatform", launchers);
 		SchedulerService mockSchedulerService = new DefaultSchedulerService(mock(CommonApplicationProperties.class),
-				mockScheduler, mockTaskDefinitionRepository, mockAppRegistryService, mock(ResourceLoader.class),
+				taskPlatform, mockTaskDefinitionRepository, mockAppRegistryService, mock(ResourceLoader.class),
 				mock(TaskConfigurationProperties.class), mock(DataSourceProperties.class), "uri",
 				mock(ApplicationConfigurationMetadataResolver.class), mock(SchedulerServiceProperties.class),
 				mock(AuditRecordService.class));
@@ -305,7 +312,7 @@ public class DefaultSchedulerServiceTests {
 	}
 
 	private void verifyScheduleExistsInScheduler(ScheduleInfo scheduleInfo) {
-		List<ScheduleInfo> scheduleInfos = ((TaskServiceDependencies.SimpleTestScheduler)simpleTestScheduler).getSchedules();
+		List<ScheduleInfo> scheduleInfos = ((SimpleTestScheduler)simpleTestScheduler).getSchedules();
 		scheduleInfos = scheduleInfos.stream().filter(s -> s.getScheduleName().
 				equals(scheduleInfo.getScheduleName())).
 				collect(Collectors.toList());
@@ -322,7 +329,7 @@ public class DefaultSchedulerServiceTests {
 	}
 
 	private void validateSchedulesCount(int expectedScheduleCount) {
-		assertThat(((TaskServiceDependencies.SimpleTestScheduler)simpleTestScheduler).
+		assertThat(((SimpleTestScheduler)simpleTestScheduler).
 				getSchedules().size()).isEqualTo(expectedScheduleCount);
 	}
 

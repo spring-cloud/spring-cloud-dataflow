@@ -23,7 +23,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ForkJoinPool;
-import java.util.stream.Collectors;
 
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 
@@ -45,6 +44,7 @@ import org.springframework.cloud.dataflow.completion.StreamCompletionProvider;
 import org.springframework.cloud.dataflow.completion.TaskCompletionProvider;
 import org.springframework.cloud.dataflow.configuration.metadata.ApplicationConfigurationMetadataResolver;
 import org.springframework.cloud.dataflow.core.Launcher;
+import org.springframework.cloud.dataflow.core.TaskPlatform;
 import org.springframework.cloud.dataflow.registry.repository.AppRegistrationRepository;
 import org.springframework.cloud.dataflow.registry.service.AppRegistryService;
 import org.springframework.cloud.dataflow.registry.service.DefaultAppRegistryService;
@@ -115,9 +115,6 @@ import org.springframework.cloud.deployer.resource.support.DelegatingResourceLoa
 import org.springframework.cloud.deployer.spi.app.AppDeployer;
 import org.springframework.cloud.deployer.spi.core.RuntimeEnvironmentInfo;
 import org.springframework.cloud.deployer.spi.task.TaskLauncher;
-import org.springframework.cloud.scheduler.spi.core.CreateScheduleException;
-import org.springframework.cloud.scheduler.spi.core.ScheduleInfo;
-import org.springframework.cloud.scheduler.spi.core.ScheduleRequest;
 import org.springframework.cloud.scheduler.spi.core.Scheduler;
 import org.springframework.cloud.skipper.client.SkipperClient;
 import org.springframework.cloud.skipper.domain.AboutResource;
@@ -488,16 +485,25 @@ public class TestDependencies extends WebMvcConfigurationSupport {
 
 	@Bean
 	public SchedulerService schedulerService(CommonApplicationProperties commonApplicationProperties,
-			Scheduler scheduler, TaskDefinitionRepository taskDefinitionRepository,
-			AppRegistryService registry, ResourceLoader resourceLoader,
-			DataSourceProperties dataSourceProperties,
-			ApplicationConfigurationMetadataResolver metaDataResolver, AuditRecordService auditRecordService) {
+											 TaskPlatform taskPlatform, TaskDefinitionRepository taskDefinitionRepository,
+											 AppRegistryService registry, ResourceLoader resourceLoader,
+											 DataSourceProperties dataSourceProperties,
+											 ApplicationConfigurationMetadataResolver metaDataResolver, AuditRecordService auditRecordService) {
 		return new DefaultSchedulerService(commonApplicationProperties,
-				scheduler, taskDefinitionRepository,
+				taskPlatform, taskDefinitionRepository,
 				registry, resourceLoader,
 				new TaskConfigurationProperties(),
 				dataSourceProperties, null,
 				metaDataResolver, new SchedulerServiceProperties(), auditRecordService);
+	}
+
+	@Bean
+	public TaskPlatform taskPlatform(Scheduler scheduler) {
+		Launcher launcher = new Launcher("default", "defaultType", null, scheduler);
+		List<Launcher> launchers = new ArrayList<>();
+		launchers.add(launcher);
+		TaskPlatform taskPlatform = new TaskPlatform("testTaskPlatform", launchers);
+		return taskPlatform;
 	}
 
 	@Bean
@@ -524,57 +530,6 @@ public class TestDependencies extends WebMvcConfigurationSupport {
 		return new AboutController(streamDeployer, launcherRepository,
 				featuresProperties, versionInfoProperties,
 				mock(SecurityStateBean.class), grafanaInfoProperties);
-	}
-
-	public static class SimpleTestScheduler implements Scheduler {
-		public static final String INVALID_CRON_EXPRESSION = "BAD";
-
-		List<ScheduleInfo> schedules = new ArrayList<>();
-
-		@Override
-		public void schedule(ScheduleRequest scheduleRequest) {
-			ScheduleInfo schedule = new ScheduleInfo();
-			schedule.setScheduleName(scheduleRequest.getScheduleName());
-			schedule.setScheduleProperties(scheduleRequest.getSchedulerProperties());
-			schedule.setTaskDefinitionName(scheduleRequest.getDefinition().getName());
-			if (schedule.getScheduleProperties().containsKey("spring.cloud.scheduler.cron.expression") &&
-					schedule.getScheduleProperties().get("spring.cloud.scheduler.cron.expression")
-							.equals(INVALID_CRON_EXPRESSION)) {
-				throw new CreateScheduleException("Invalid Cron Expression", new IllegalArgumentException());
-			}
-			List<ScheduleInfo> scheduleInfos = schedules.stream()
-					.filter(s -> s.getScheduleName().equals(scheduleRequest.getScheduleName()))
-					.collect(Collectors.toList());
-			if (scheduleInfos.size() > 0) {
-				throw new CreateScheduleException(
-						String.format("Schedule %s already exists",
-								scheduleRequest.getScheduleName()),
-						null);
-			}
-			schedules.add(schedule);
-
-		}
-
-		@Override
-		public void unschedule(String scheduleName) {
-			schedules = schedules.stream().filter(
-					s -> !s.getScheduleName().equals(scheduleName)).collect(Collectors.toList());
-		}
-
-		@Override
-		public List<ScheduleInfo> list(String taskDefinitionName) {
-			return schedules.stream().filter(
-					s -> s.getTaskDefinitionName().equals(taskDefinitionName)).collect(Collectors.toList());
-		}
-
-		@Override
-		public List<ScheduleInfo> list() {
-			return schedules;
-		}
-
-		public List<ScheduleInfo> getSchedules() {
-			return schedules;
-		}
 	}
 
 	@Bean
