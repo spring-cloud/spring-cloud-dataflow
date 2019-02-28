@@ -7,7 +7,7 @@ It also shows how to map these applications into Spring Cloud Data Flow and depl
 [[task-dev-guide-prebuilt-apps]]
 == Prebuilt Applications
 
-The link:http://cloud.spring.io/spring-cloud-task-app-starters/[Spring Cloud Task App Starters] project provides many applications that you can start using right away.
+The link:https://github.com/spring-cloud/spring-cloud-task/tree/master/spring-cloud-task-samples[Spring Cloud Task Samples]  project provides many applications that you can start using right away.
 For example, there is a timestamp application that prints the timestamp to the console.
 All the applications are based on link:https://projects.spring.io/spring-boot/[Spring Boot] and link:https://cloud.spring.io/spring-cloud-task/[Spring Cloud Task].
 
@@ -415,7 +415,7 @@ You should see output similar to the following:
 . Note the Job ID from the ID column (in this case, we want to look at `2`).
 . To get the details of the job execution, we can use the Job ID in the following command:
 +
-`job execution display --id 1`
+`job execution display --id 2`
 +
 You should see output similar to the following:
 +
