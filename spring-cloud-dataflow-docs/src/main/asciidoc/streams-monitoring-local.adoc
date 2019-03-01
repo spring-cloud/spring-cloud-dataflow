@@ -108,7 +108,13 @@ docker-compose down
 [[streams-monitoring-local-influx]]
 === InfluxDB
 
+NOTE: By default the <<getting-started-local-deploying-spring-cloud-dataflow-docker,Data Flow docker-compose >> configures Stream monitoring with InfluxDB and pre-built dashboards for Grafana.
+The follow instructions are provided to let you configure InfluxDB and Grafana in case you decide to install Data Flow manually, without the the help of the getting started `docker-compose`.
+
+
 https://github.com/influxdata/influxdb[InfluxDB] is a popular open-source push based time series database.
+It supports downsampling, automatically expiring and deleting unwanted data, as well as backup and restore. Analysis of data is done via a  https://docs.influxdata.com/influxdb/v1.5/query_language/[SQL-like query] language.
+
 To enable Micrometer's Influx meter registry for <<applications,Spring Cloud Stream application starters>>, set the following property.
 
 [source,bash]
