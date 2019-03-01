@@ -18,6 +18,7 @@ package org.springframework.cloud.dataflow.server.config.kubernetes;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import io.fabric8.kubernetes.client.KubernetesClient;
 
@@ -29,6 +30,9 @@ import org.springframework.cloud.deployer.spi.kubernetes.DefaultContainerFactory
 import org.springframework.cloud.deployer.spi.kubernetes.KubernetesClientFactory;
 import org.springframework.cloud.deployer.spi.kubernetes.KubernetesDeployerProperties;
 import org.springframework.cloud.deployer.spi.kubernetes.KubernetesTaskLauncher;
+import org.springframework.cloud.scheduler.spi.core.Scheduler;
+import org.springframework.cloud.scheduler.spi.kubernetes.KubernetesScheduler;
+import org.springframework.cloud.scheduler.spi.kubernetes.KubernetesSchedulerProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
@@ -42,12 +46,13 @@ import org.springframework.context.annotation.Profile;
 public class KubernetesTaskPlatformAutoConfiguration {
 
 	@Bean
-	public TaskPlatform kubernetesTaskPlatform(KubernetesPlatformProperties kubernetesPlatformProperties) {
+	public TaskPlatform kubernetesTaskPlatform(KubernetesPlatformProperties kubernetesPlatformProperties,
+							Optional<KubernetesSchedulerProperties> kubernetesSchedulerProperties) {
 		List<Launcher> launchers = new ArrayList<>();
 		Map<String, KubernetesDeployerProperties> k8sDeployerPropertiesMap = kubernetesPlatformProperties
 				.getAccounts();
 		k8sDeployerPropertiesMap.forEach((key, value) -> {
-			Launcher launcher = createAndSaveKubernetesTaskLaunchers(key, value);
+			Launcher launcher = createAndSaveKubernetesTaskLaunchers(key, value, kubernetesSchedulerProperties);
 			launchers.add(launcher);
 		});
 
@@ -55,13 +60,20 @@ public class KubernetesTaskPlatformAutoConfiguration {
 	}
 
 	protected Launcher createAndSaveKubernetesTaskLaunchers(String account,
-			KubernetesDeployerProperties kubernetesProperties) {
+							KubernetesDeployerProperties kubernetesProperties,
+							Optional<KubernetesSchedulerProperties> kubernetesSchedulerProperties) {
 		KubernetesClient kubernetesClient = KubernetesClientFactory.getKubernetesClient(kubernetesProperties);
 		ContainerFactory containerFactory = new DefaultContainerFactory(
 				kubernetesProperties);
 		KubernetesTaskLauncher kubernetesTaskLauncher = new KubernetesTaskLauncher(
 				kubernetesProperties, kubernetesClient, containerFactory);
-		Launcher launcher = new Launcher(account, "kubernetes", kubernetesTaskLauncher);
+
+		KubernetesSchedulerProperties schedulerProperties = kubernetesSchedulerProperties
+				.orElseGet(KubernetesSchedulerProperties::new);
+		Scheduler scheduler = new KubernetesScheduler(kubernetesClient, schedulerProperties);
+
+		Launcher launcher = new Launcher(account, "kubernetes", kubernetesTaskLauncher, scheduler);
+
 		launcher.setDescription(
 				String.format("master url = [%s], namespace = [%s], api version = [%s]",
 						kubernetesClient.getMasterUrl(), kubernetesClient.getNamespace(),

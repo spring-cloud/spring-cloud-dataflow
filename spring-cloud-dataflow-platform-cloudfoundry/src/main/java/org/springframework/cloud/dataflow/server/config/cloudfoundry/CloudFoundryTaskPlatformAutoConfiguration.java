@@ -128,7 +128,7 @@ public class CloudFoundryTaskPlatformAutoConfiguration {
 
 
 			CloudFoundrySchedulerProperties propsToUse =
-					cloudFoundrySchedulerProperties.orElseGet(() -> new CloudFoundrySchedulerProperties());
+					cloudFoundrySchedulerProperties.orElseGet(CloudFoundrySchedulerProperties::new);
 			ReactorSchedulerClient reactorSchedulerClient = ReactorSchedulerClient.builder()
 					.connectionContext(connectionContext)
 					.tokenProvider(tokenProvider)
