@@ -37,8 +37,14 @@ import org.springframework.core.env.MapPropertySource;
 import org.springframework.core.env.MutablePropertySources;
 
 /**
- * Sets an active Spring profile of "local" when determined the current DataFlow instance
- * is not running on a cloud platform.
+ * Programmatically sets the profile using implementations of {@link CloudProfileProvider} discovered from the
+ * {@link ServiceLoader}.
+ * If no cloud providers are found, the {@literal local} profile is set.
+ * You can disable this class by setting the environment variable
+ * {@literal SPRING_CLOUD_SKIPPER_SERVER_PROFILEAPPLICATIONLISTENER_IGNORE} to {@literal true}.
+ * If the kubernetes profile has not been detected, then the property {@literal spring.cloud.kubernetes.enabled}
+ * is set to false in order to disable functionality in the spring-cloud-kubernetes library that would result
+ * in the logging of warning message.
  *
  * @author Chris Schaefer
  * @author Mark Pollack
