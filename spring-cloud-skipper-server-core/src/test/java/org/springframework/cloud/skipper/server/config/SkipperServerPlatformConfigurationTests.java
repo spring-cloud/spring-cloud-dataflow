@@ -58,7 +58,7 @@ public class SkipperServerPlatformConfigurationTests {
 
 	@RunWith(SpringRunner.class)
 	@SpringBootTest(classes = TestConfig.class, properties = "spring.main.allow-bean-definition-overriding=true")
-	@ActiveProfiles("platform-configuration")
+	@ActiveProfiles({"platform-configuration", "local"})
 	public static class AllPlatformsConfigurationTest {
 
 		@Autowired
@@ -72,8 +72,7 @@ public class SkipperServerPlatformConfigurationTests {
 
 	@RunWith(SpringRunner.class)
 	@SpringBootTest(classes = TestConfig.class,
-			properties = { "spring.cloud.skipper.server.enableLocalPlatform=false",
-					"spring.main.allow-bean-definition-overriding=true" })
+			properties = {"spring.main.allow-bean-definition-overriding=true" })
 	public static class SinglePlatformConfigurationTest {
 
 		@Autowired
@@ -87,8 +86,7 @@ public class SkipperServerPlatformConfigurationTests {
 
 	@RunWith(SpringRunner.class)
 	@SpringBootTest(classes = TestConfig.class,
-			properties = { "spring.cloud.skipper.server.enableLocalPlatform=false",
-					"spring.main.allow-bean-definition-overriding=true" })
+			properties = {"spring.main.allow-bean-definition-overriding=true" })
 	@ActiveProfiles("platform-configuration")
 	public static class ExternalPlatformsOnlyConfigurationTest {
 

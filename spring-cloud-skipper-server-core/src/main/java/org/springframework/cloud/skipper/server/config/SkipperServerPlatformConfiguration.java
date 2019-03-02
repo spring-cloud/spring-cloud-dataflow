@@ -19,7 +19,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.cloud.deployer.spi.local.LocalAppDeployer;
 import org.springframework.cloud.deployer.spi.local.LocalDeployerProperties;
 import org.springframework.cloud.skipper.domain.Deployer;
@@ -28,6 +27,7 @@ import org.springframework.cloud.skipper.server.repository.map.DeployerRepositor
 import org.springframework.cloud.skipper.server.service.DeployerInitializationService;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Profile;
 import org.springframework.util.StringUtils;
 
 @Configuration
@@ -41,7 +41,7 @@ public class SkipperServerPlatformConfiguration {
 	}
 
 	@Bean
-	@ConditionalOnProperty(value = "spring.cloud.skipper.server.enable-local-platform", matchIfMissing = true)
+	@Profile("local")
 	public Platform localDeployers(LocalPlatformProperties localPlatformProperties) {
 		List<Deployer> deployers = new ArrayList<>();
 		Map<String, LocalDeployerProperties> localDeployerPropertiesMap = localPlatformProperties.getAccounts();

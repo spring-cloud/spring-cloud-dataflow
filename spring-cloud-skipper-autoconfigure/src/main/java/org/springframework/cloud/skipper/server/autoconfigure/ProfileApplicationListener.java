@@ -36,6 +36,15 @@ import org.springframework.core.env.MapPropertySource;
 import org.springframework.core.env.MutablePropertySources;
 
 /**
+ * Programmatically sets the profile using implementations of {@link CloudProfileProvider} discovered from the
+ * {@link ServiceLoader}.
+ * If no cloud providers are found, the {@literal local} profile is set.
+ * You can disable this class by setting the environment variable
+ * {@literal SPRING_CLOUD_SKIPPER_SERVER_PROFILEAPPLICATIONLISTENER_IGNORE} to {@literal true}.
+ * If the kubernetes profile has not been detected, then the property {@literal spring.cloud.kubernetes.enabled}
+ * is set to false in order to disable functionality in the spring-cloud-kubernetes library that would result
+ * in the logging of warning message.
+ *
  * @author Mark Pollack
  */
 public class ProfileApplicationListener implements ApplicationListener<ApplicationEnvironmentPreparedEvent>, Ordered {
@@ -48,6 +57,10 @@ public class ProfileApplicationListener implements ApplicationListener<Applicati
 	 */
 	public static final String IGNORE_PROFILEAPPLICATIONLISTENER_PROPERTY_NAME = "spring.cloud.skipper.server.profileapplicationlistener.ignore";
 
+	/**
+	 * Environmemnt variable that when set to {@code true} will not set the active profiles using
+	 * CloudProfileProvider implementations discovered from the ServiceLoader.
+	 */
 	public static final String IGNORE_PROFILEAPPLICATIONLISTENER_ENVVAR_NAME = "SPRING_CLOUD_SKIPPER_SERVER_PROFILEAPPLICATIONLISTENER_IGNORE";
 
 

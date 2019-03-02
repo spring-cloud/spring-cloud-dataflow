@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 the original author or authors.
+ * Copyright 2017-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,7 +38,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author Mark Pollack
  * @author Ilayaperumal Gopinathan
  */
-@ActiveProfiles("repo-test")
+@ActiveProfiles({"repo-test", "local"})
 @TestPropertySource(properties = { "maven.remote-repositories.repo1.url=http://repo.spring.io/libs-snapshot" })
 public class ReleaseAnalyzerTests extends AbstractIntegrationTest {
 
