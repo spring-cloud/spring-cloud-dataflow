@@ -10,7 +10,6 @@ data:
       cloud:
         skipper:
           server:
-            enableLocalPlatform: false
             platform:
               kubernetes:
                 accounts:

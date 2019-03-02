@@ -84,7 +84,6 @@ applications:
   path: <PATH TO THE DOWNLOADED SKIPPER SERVER UBER-JAR>
   env:
     SPRING_APPLICATION_NAME: skipper-server
-    SPRING_APPLICATION_JSON: '{ "spring": { "cloud": { "skipper": { "server": { "enableLocalPlatform": "false"} } } } }'
     SPRING_PROFILES_ACTIVE: cloud
     JBP_CONFIG_SPRING_AUTO_RECONFIGURATION: '{enabled: false}'
     SPRING_CLOUD_SKIPPER_SERVER_STRATEGIES_HEALTHCHECK_TIMEOUTINMILLIS: 300000
