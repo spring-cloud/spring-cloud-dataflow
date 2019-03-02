@@ -34,6 +34,7 @@ import org.cloudfoundry.reactor.tokenprovider.PasswordGrantTokenProvider;
 import org.slf4j.LoggerFactory;
 import reactor.core.publisher.Mono;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnCloudPlatform;
 import org.springframework.boot.cloud.CloudPlatform;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
@@ -61,6 +62,9 @@ import org.springframework.context.annotation.Configuration;
 @ConditionalOnCloudPlatform(CloudPlatform.CLOUD_FOUNDRY)
 @EnableConfigurationProperties(CloudFoundryPlatformProperties.class)
 public class CloudFoundryTaskPlatformAutoConfiguration {
+
+	@Value("${spring.cloud.dataflow.features.schedules-enabled:false}")
+	private boolean schedulesEnabled;
 
 	private static final org.slf4j.Logger logger = LoggerFactory.getLogger(CloudFoundryTaskPlatformAutoConfiguration.class);
 
@@ -126,20 +130,24 @@ public class CloudFoundryTaskPlatformAutoConfiguration {
 			CloudFoundry2630AndLaterTaskLauncher cfTaskLauncher = new CloudFoundry2630AndLaterTaskLauncher(
 					cloudFoundryClient, deploymentProperties, cloudFoundryOperations, runtimeEnvironmentInfo);
 
+			Scheduler scheduler;
+			if (schedulesEnabled) {
+				CloudFoundrySchedulerProperties propsToUse =
+						cloudFoundrySchedulerProperties.orElseGet(CloudFoundrySchedulerProperties::new);
+				ReactorSchedulerClient reactorSchedulerClient = ReactorSchedulerClient.builder()
+						.connectionContext(connectionContext)
+						.tokenProvider(tokenProvider)
+						.root(Mono.just(propsToUse.getSchedulerUrl()))
+						.build();
 
-			CloudFoundrySchedulerProperties propsToUse =
-					cloudFoundrySchedulerProperties.orElseGet(CloudFoundrySchedulerProperties::new);
-			ReactorSchedulerClient reactorSchedulerClient = ReactorSchedulerClient.builder()
-					.connectionContext(connectionContext)
-					.tokenProvider(tokenProvider)
-					.root(Mono.just(propsToUse.getSchedulerUrl()))
-					.build();
-
-			Scheduler scheduler = new CloudFoundryAppScheduler(reactorSchedulerClient,
-					cloudFoundryOperations,
-					connectionProperties,
-					cfTaskLauncher,
-					propsToUse);
+				scheduler = new CloudFoundryAppScheduler(reactorSchedulerClient,
+						cloudFoundryOperations,
+						connectionProperties,
+						cfTaskLauncher,
+						propsToUse);
+			} else {
+				scheduler = null;
+			}
 
 			Launcher launcher = new Launcher(account, "cloudfoundry", cfTaskLauncher, scheduler);
 			launcher.setDescription(String.format("org = [%s], space = [%s], url = [%s]",
@@ -150,7 +158,7 @@ public class CloudFoundryTaskPlatformAutoConfiguration {
 		catch (Exception e) {
 			logger.error("Cloud Foundry platform account [{}] could not be registered: {}",
 					account, e.getMessage());
-			throw new IllegalStateException(e.getMessage());
+			throw new IllegalStateException(e.getMessage(), e);
 		}
 	}
 
