@@ -670,7 +670,7 @@ To run a simple task application, you can register all the out-of-the-box task a
 
 [source,bash,subs=attributes]
 ----
-dataflow:>app import --uri http://bit.ly/Dearborn-GA-task-applications-maven
+dataflow:>app import --uri http://bit.ly/Dearborn-SR1-task-applications-maven
 ----
 
 
