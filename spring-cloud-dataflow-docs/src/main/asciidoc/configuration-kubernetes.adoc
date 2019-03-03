@@ -37,10 +37,17 @@ These properties are also used when configuring the <<configuration-kubernetes-t
 |Namespace to use
 |environment variable `KUBERNETES_NAMESPACE`, otherwise `default`
 
+|nodeSelector
+|The node selectors to apply to the deployment in `key:value` format. Multiple node selectors are comma separated.
+|<none>
 
 |imagePullSecret
 |Secrets for a access a private registry to pull images.
 |<none>
+
+|imagePullPolicy
+|The Image Pull Policy to apply when pulling images. Valid options are `Always`, `IfNotPresent`, and `Never`.
+|IfNotPresent
 
 |livenessProbeDelay
 |Delay in seconds when the Kubernetes liveness check of the app container should start checking its health status.
@@ -101,7 +108,6 @@ These properties are also used when configuring the <<configuration-kubernetes-t
 |requests.cpu
 |The CPU request, guaranteed needed value to allocate a pod.
 |<none>
-
 
 |statefulSet.volumeClaimTemplate.storageClassName
 |Name of the storage class for a stateful set
@@ -167,9 +173,29 @@ These properties are also used when configuring the <<configuration-kubernetes-t
 |Create a "Job" instead of just a "Pod" when launching tasks.
 |false
 
+|containerCommand
+|Overrides the default entry point command with the provided command and arguments.
+|<none>
+
+|containerPorts
+|Adds additional ports to expose on the container.
+|<none>
+
+|createNodePort
+|The explicit port to use when `NodePort` is the `Service` type.
+|<none>
+
 |deploymentServiceAccountName
 |Service account name to use for app deployments
 |<none>
+
+|deploymentLabels
+|Additional labels to add to the deployment in `key:value` format. Multiple labels are comma separated.
+|<none>
+
+|bootMajorVersion
+|The Spring Boot major version to use. Currently only used to configure Spring Boot version specific probe paths automatically. Valid options are `1` or `2`.
+|2
 
 |===
 
