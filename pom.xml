@@ -49,7 +49,7 @@
 		     are in sync with the https://github.com/spring-cloud/spring-cloud-release/blob/master/pom.xml updates for the respective
 		     release versions -->
 		<spring-cloud.version>Greenwich.RELEASE</spring-cloud.version>
-		<java-cfenv-boot.version>1.0.0.RELEASE</java-cfenv-boot.version>
+		<java-cfenv-boot.version>1.0.1.BUILD-SNAPSHOT</java-cfenv-boot.version>
 
 		<spring-cloud-scheduler-spi.version>1.0.2.RELEASE</spring-cloud-scheduler-spi.version>
 		<spring-cloud-scheduler-kubernetes.version>1.0.0.RELEASE</spring-cloud-scheduler-kubernetes.version>
