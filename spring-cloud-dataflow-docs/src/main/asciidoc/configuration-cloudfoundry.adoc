@@ -648,7 +648,7 @@ SPRING_CLOUD_DATAFLOW_TASK_PLATFORM_CLOUDFOUNDRY_ACCOUNTS[default]_CONNECTION_SK
 
 # A comma-separated set of service instance names to bind to every deployed task application.
 # Among other things, this should include an RDBMS service that is used
-# for Spring Cloud Task execution reporting, such as my_mysql
+# for Spring Cloud Task execution reporting, such as my_postgres
 SPRING_CLOUD_DATAFLOW_TASK_PLATFORM_CLOUDFOUNDRY_ACCOUNTS[default]_DEPLOYMENT_SERVICES
 spring.cloud.deployer.cloudfoundry.task.services=
 
