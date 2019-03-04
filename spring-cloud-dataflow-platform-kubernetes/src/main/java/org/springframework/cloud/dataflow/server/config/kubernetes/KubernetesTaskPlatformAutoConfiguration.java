@@ -22,6 +22,7 @@ import java.util.Optional;
 
 import io.fabric8.kubernetes.client.KubernetesClient;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.cloud.dataflow.core.Launcher;
 import org.springframework.cloud.dataflow.core.TaskPlatform;
@@ -44,6 +45,9 @@ import org.springframework.context.annotation.Profile;
 @EnableConfigurationProperties(KubernetesPlatformProperties.class)
 @Profile("kubernetes")
 public class KubernetesTaskPlatformAutoConfiguration {
+
+	@Value("${spring.cloud.dataflow.features.schedules-enabled:false}")
+	private boolean schedulesEnabled;
 
 	@Bean
 	public TaskPlatform kubernetesTaskPlatform(KubernetesPlatformProperties kubernetesPlatformProperties,
@@ -68,9 +72,7 @@ public class KubernetesTaskPlatformAutoConfiguration {
 		KubernetesTaskLauncher kubernetesTaskLauncher = new KubernetesTaskLauncher(
 				kubernetesProperties, kubernetesClient, containerFactory);
 
-		KubernetesSchedulerProperties schedulerProperties = kubernetesSchedulerProperties
-				.orElseGet(KubernetesSchedulerProperties::new);
-		Scheduler scheduler = new KubernetesScheduler(kubernetesClient, schedulerProperties);
+		Scheduler scheduler = getScheduler(kubernetesSchedulerProperties, kubernetesClient);
 
 		Launcher launcher = new Launcher(account, "kubernetes", kubernetesTaskLauncher, scheduler);
 
@@ -79,6 +81,18 @@ public class KubernetesTaskPlatformAutoConfiguration {
 						kubernetesClient.getMasterUrl(), kubernetesClient.getNamespace(),
 						kubernetesClient.getApiVersion()));
 		return launcher;
+	}
+
+	private Scheduler getScheduler(Optional<KubernetesSchedulerProperties> kubernetesSchedulerProperties, KubernetesClient kubernetesClient) {
+		Scheduler scheduler = null;
+
+		if (schedulesEnabled) {
+			KubernetesSchedulerProperties schedulerProperties = kubernetesSchedulerProperties
+					.orElseGet(KubernetesSchedulerProperties::new);
+			scheduler = new KubernetesScheduler(kubernetesClient, schedulerProperties);
+		}
+
+		return scheduler;
 	}
 
 }
