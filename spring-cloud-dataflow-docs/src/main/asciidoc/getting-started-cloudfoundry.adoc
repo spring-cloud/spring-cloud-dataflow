@@ -30,7 +30,7 @@ cf create-service cloudamqp lemur rabbit
 ----
 
 
-==== Provision a MySQL Service Instance on Cloud Foundry
+==== Provision a PostgreSQL Service Instance on Cloud Foundry
 An RDBMS is used to persist Data Flow state, such as stream and task definitions, deployments, and executions.
 
 You can use `cf marketplace` to discover which plans are available to you, depending on the details of your Cloud Foundry setup.
@@ -39,9 +39,12 @@ For example, you can use link:https://run.pivotal.io/[Pivotal Web Services]:
 
 [source,bash,subs=attributes]
 ----
-cf create-service cleardb spark my_mysql
+cf create-service elephantsql panda my_postgres
 ----
 
+NOTE: If you intend to create and run batch-jobs as Task pipelines in SCDF, please make sure the underlying database
+instance includes enough connections capacity so that the batch-jobs, Task, and SCDF can concurrently connect to the same
+database instance without running into connection limits.
 
 [[getting-started-cloudfoundry-installation]]
 === Cloud Foundry Installation
@@ -104,7 +107,7 @@ services:
 ----
 
 
-You need to fill in `<org>`, `<space>`, `<email>`,  `<password>`, `<middlewareServiceName>` (e.g. rabbit or kafka) and `<services>` (such as mysql) before running these commands.
+You need to fill in `<org>`, `<space>`, `<email>`,  `<password>`, `<middlewareServiceName>` (e.g. rabbit or kafka) and `<services>` (such as PostgresSQL) before running these commands.
 Once you have the desired config values in `manifest.yml`, you can run the `cf push` command to provision the skipper-server.
 
 WARNING: Only set 'Skip SSL Validation' to `true` if you run on a Cloud Foundry instance by using self-signed
@@ -158,7 +161,7 @@ cf set-env dataflow-server SPRING_CLOUD_DATAFLOW_TASK_PLATFORM_CLOUDFOUNDRY_ACCO
 cf set-env dataflow-server SPRING_CLOUD_DATAFLOW_TASK_PLATFORM_CLOUDFOUNDRY_ACCOUNTS[default]_CONNECTION_USERNAME: <email>
 cf set-env dataflow-server SPRING_CLOUD_DATAFLOW_TASK_PLATFORM_CLOUDFOUNDRY_ACCOUNTS[default]_CONNECTION_PASSWORD: <password>
 cf set-env dataflow-server SPRING_CLOUD_DATAFLOW_TASK_PLATFORM_CLOUDFOUNDRY_ACCOUNTS[default]_CONNECTION_SKIP_SSL_VALIDATION: true
-cf set-env dataflow-server SPRING_CLOUD_DATAFLOW_TASK_PLATFORM_CLOUDFOUNDRY_ACCOUNTS[default]_DEPLOYMENT_SERVICES: mysql
+cf set-env dataflow-server SPRING_CLOUD_DATAFLOW_TASK_PLATFORM_CLOUDFOUNDRY_ACCOUNTS[default]_DEPLOYMENT_SERVICES: postgreSQL
 cf set-env dataflow-server SPRING_CLOUD_DATAFLOW_TASK_PLATFORM_CLOUDFOUNDRY_ACCOUNTS[default]_DEPLOYMENT_MEMORY: 2048m
 ----
 
@@ -193,7 +196,7 @@ You can now issue a `cf push` command and reference the Data Flow server .jar fi
 [source, subs=attributes]
 ----
 cf push dataflow-server -b java_buildpack -m 2G -k 2G --no-start -p spring-cloud-dataflow-server-{project-version}.jar
-cf bind-service dataflow-server my_mysql
+cf bind-service dataflow-server my_postgres
 ----
 
 
@@ -203,8 +206,7 @@ cf bind-service dataflow-server my_mysql
 
 As an alternative to setting environment variables with the `cf set-env` command, you can curate all the relevant env-var's in a `manifest.yml` file and use the `cf push` command to provision the server.
 
-The following example template provisions the server on PCFDev:
-
+Example:
 
 [source,yml]
 ----
@@ -221,17 +223,17 @@ applications:
     SPRING_PROFILES_ACTIVE: cloud
     JBP_CONFIG_SPRING_AUTO_RECONFIGURATION: '{enabled: false}'
     MAVEN_REMOTEREPOSITORIES[REPO1]_URL: https://repo.spring.io/libs-snapshot
-    SPRING_CLOUD_DATAFLOW_TASK_PLATFORM_CLOUDFOUNDRY_ACCOUNTS[default]_CONNECTION_URL: https://api.sys.huron.cf-app.com
+    SPRING_CLOUD_DATAFLOW_TASK_PLATFORM_CLOUDFOUNDRY_ACCOUNTS[default]_CONNECTION_URL: https://api.huron.cf-app.com
     SPRING_CLOUD_DATAFLOW_TASK_PLATFORM_CLOUDFOUNDRY_ACCOUNTS[default]_CONNECTION_ORG: sabby20
     SPRING_CLOUD_DATAFLOW_TASK_PLATFORM_CLOUDFOUNDRY_ACCOUNTS[default]_CONNECTION_SPACE: sabby20
     SPRING_CLOUD_DATAFLOW_TASK_PLATFORM_CLOUDFOUNDRY_ACCOUNTS[default]_CONNECTION_DOMAIN: apps.huron.cf-app.com
     SPRING_CLOUD_DATAFLOW_TASK_PLATFORM_CLOUDFOUNDRY_ACCOUNTS[default]_CONNECTION_USERNAME: admin
     SPRING_CLOUD_DATAFLOW_TASK_PLATFORM_CLOUDFOUNDRY_ACCOUNTS[default]_CONNECTION_PASSWORD: ***
     SPRING_CLOUD_DATAFLOW_TASK_PLATFORM_CLOUDFOUNDRY_ACCOUNTS[default]_CONNECTION_SKIP_SSL_VALIDATION: true
-    SPRING_CLOUD_DATAFLOW_TASK_PLATFORM_CLOUDFOUNDRY_ACCOUNTS[default]_DEPLOYMENT_SERVICES: mysql
+    SPRING_CLOUD_DATAFLOW_TASK_PLATFORM_CLOUDFOUNDRY_ACCOUNTS[default]_DEPLOYMENT_SERVICES: postgreSQL
     SPRING_CLOUD_SKIPPER_CLIENT_SERVER_URI: https://<skipper-host-name>/api
 services:
-- mysql
+- postgreSQL
 ----
 
 
