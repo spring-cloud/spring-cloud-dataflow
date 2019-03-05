@@ -16,13 +16,9 @@
 
 package org.springframework.cloud.dataflow.server.config.kubernetes;
 
-import io.fabric8.kubernetes.client.DefaultKubernetesClient;
-import io.fabric8.kubernetes.client.KubernetesClient;
 
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.cloud.dataflow.server.config.features.SchedulerConfiguration;
-import org.springframework.cloud.scheduler.spi.core.Scheduler;
-import org.springframework.cloud.scheduler.spi.kubernetes.KubernetesScheduler;
 import org.springframework.cloud.scheduler.spi.kubernetes.KubernetesSchedulerProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Conditional;
@@ -39,15 +35,6 @@ import org.springframework.context.annotation.Profile;
 @Conditional({ SchedulerConfiguration.SchedulerConfigurationPropertyChecker.class })
 @Profile("kubernetes")
 public class KubernetesSchedulerAutoConfiguration {
-
-	@Bean
-	@ConditionalOnMissingBean
-	public Scheduler scheduler(KubernetesSchedulerProperties kubernetesSchedulerProperties) {
-		KubernetesClient kubernetesClient = new DefaultKubernetesClient()
-				.inNamespace(kubernetesSchedulerProperties.getNamespace());
-
-		return new KubernetesScheduler(kubernetesClient, kubernetesSchedulerProperties);
-	}
 
 	@Bean
 	@ConditionalOnMissingBean

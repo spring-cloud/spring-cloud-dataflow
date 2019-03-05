@@ -77,7 +77,7 @@ public class CloudFoundryTaskPlatformAutoConfiguration {
 		return new TaskPlatform("Cloud Foundry", launchers);
 	}
 
-	private Launcher createAndSaveCFTaskLauncher(String account,
+	private Launcher createAndSaveCFTaskLauncher(String launcherName,
 												 CloudFoundryPlatformProperties.CloudFoundryProperties cloudFoundryProperties,
 												 Optional<CloudFoundrySchedulerProperties> cloudFoundrySchedulerProperties) {
 		CloudFoundryDeploymentProperties deploymentProperties = cloudFoundryProperties
@@ -149,7 +149,7 @@ public class CloudFoundryTaskPlatformAutoConfiguration {
 				scheduler = null;
 			}
 
-			Launcher launcher = new Launcher(account, "cloudfoundry", cfTaskLauncher, scheduler);
+			Launcher launcher = new Launcher(launcherName, "cloudfoundry", cfTaskLauncher, scheduler);
 			launcher.setDescription(String.format("org = [%s], space = [%s], url = [%s]",
 					connectionProperties.getOrg(), connectionProperties.getSpace(),
 					connectionProperties.getUrl()));
@@ -157,7 +157,7 @@ public class CloudFoundryTaskPlatformAutoConfiguration {
 		}
 		catch (Exception e) {
 			logger.error("Cloud Foundry platform account [{}] could not be registered: {}",
-					account, e.getMessage());
+					launcherName, e.getMessage());
 			throw new IllegalStateException(e.getMessage(), e);
 		}
 	}

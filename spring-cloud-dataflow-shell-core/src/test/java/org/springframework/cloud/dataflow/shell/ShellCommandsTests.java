@@ -40,6 +40,7 @@ import org.springframework.cloud.dataflow.core.AppRegistration;
 import org.springframework.cloud.dataflow.core.ApplicationType;
 import org.springframework.cloud.dataflow.registry.service.AppRegistryService;
 import org.springframework.cloud.dataflow.rest.client.config.DataFlowClientAutoConfiguration;
+import org.springframework.cloud.deployer.spi.cloudfoundry.CloudFoundryDeployerAutoConfiguration;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.util.ResourceUtils;
 
@@ -130,6 +131,7 @@ public class ShellCommandsTests extends AbstractShellIntegrationTest {
 							"--spring.cloud.config.enabled=false",
 							"--spring.autoconfigure.exclude=" + Stream.of(SessionAutoConfiguration.class,
 									DataSourceAutoConfiguration.class,
+									CloudFoundryDeployerAutoConfiguration.class,
 									HibernateJpaAutoConfiguration.class)
 									.map(Class::getName)
 									.collect(Collectors.joining(",")),

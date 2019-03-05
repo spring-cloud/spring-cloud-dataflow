@@ -55,7 +55,6 @@ public abstract class AbstractSchedulerPerPlatformTest {
 			CloudFoundryDeployerAutoConfiguration.class })
 	public static class AutoConfigurationApplication {
 
-
 		@Configuration
 		@ConditionalOnCloudPlatform(CloudPlatform.CLOUD_FOUNDRY)
 		public static class CloudFoundryMockConfig {

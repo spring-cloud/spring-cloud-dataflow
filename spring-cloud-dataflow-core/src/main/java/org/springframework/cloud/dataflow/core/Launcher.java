@@ -61,6 +61,10 @@ public class Launcher {
 		return scheduler;
 	}
 
+	public void setScheduler(Scheduler scheduler) {
+		this.scheduler = scheduler;
+	}
+
 	public String getId() {
 		return id;
 	}

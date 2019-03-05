@@ -32,9 +32,9 @@ import org.junit.Rule;
 import org.mockito.ArgumentMatchers;
 
 import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
-import org.springframework.beans.factory.support.BeanDefinitionRegistry;
-import org.springframework.beans.factory.support.GenericBeanDefinition;
 import org.springframework.cloud.dataflow.core.ApplicationType;
+import org.springframework.cloud.dataflow.core.Launcher;
+import org.springframework.cloud.dataflow.core.TaskPlatform;
 import org.springframework.cloud.dataflow.server.single.LocalDataflowResource;
 import org.springframework.cloud.deployer.spi.app.AppDeployer;
 import org.springframework.cloud.scheduler.spi.core.ScheduleInfo;
@@ -192,15 +192,12 @@ public abstract class BaseDocumentation {
 	 * restful interfaces.  This can be removed when a Local Scheduler impl is created.
 	 */
 	private void createMockScheduler() {
-		AutowireCapableBeanFactory factory = springDataflowServer.getWebApplicationContext().getAutowireCapableBeanFactory();
-		BeanDefinitionRegistry registry = (BeanDefinitionRegistry) factory;
-		if (registry.containsBeanDefinition("localScheduler")) {
-			registry.removeBeanDefinition("localScheduler");
+		AutowireCapableBeanFactory factory = springDataflowServer.getWebApplicationContext().getAutowireCapableBeanFactory();	
+		TaskPlatform taskPlatform = springDataflowServer.getWebApplicationContext().getBean(TaskPlatform.class);
+		List<Launcher> launchers = taskPlatform.getLaunchers();
+		for (Launcher launcher : launchers) {
+			launcher.setScheduler(new DocStubScheduler());
 		}
-		GenericBeanDefinition schedulerBeanDefinition = new GenericBeanDefinition();
-		schedulerBeanDefinition.setBeanClass(MockScheduler.class);
-		schedulerBeanDefinition.setScope(org.springframework.beans.factory.config.BeanDefinition.SCOPE_SINGLETON);
-		registry.registerBeanDefinition("localScheduler", schedulerBeanDefinition);
 	}
 
 	/**
@@ -250,10 +247,10 @@ public abstract class BaseDocumentation {
 	}
 
 	/**
-	 * Mocks a Scheduler Impl so that we can generate docs. This can be removed
+	 * Stubs a Scheduler Impl so that we can generate docs. This can be removed
 	 * when a local impl is created.
 	 */
-	public static class MockScheduler implements Scheduler {
+	public static class DocStubScheduler implements Scheduler {
 
 		@Override
 		public void schedule(ScheduleRequest scheduleRequest) {

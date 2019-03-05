@@ -37,6 +37,7 @@ import org.springframework.cloud.dataflow.core.AuditOperationType;
 import org.springframework.cloud.dataflow.core.AuditRecord;
 import org.springframework.cloud.dataflow.core.TaskDefinition;
 import org.springframework.cloud.dataflow.registry.service.AppRegistryService;
+import org.springframework.cloud.dataflow.server.configuration.SimpleTestScheduler;
 import org.springframework.cloud.dataflow.server.configuration.TestDependencies;
 import org.springframework.cloud.dataflow.server.repository.TaskDefinitionRepository;
 import org.springframework.cloud.dataflow.server.service.SchedulerService;
@@ -87,7 +88,7 @@ public class TaskSchedulerControllerTests {
 	private AppRegistryService registry;
 
 	@Autowired
-	private TestDependencies.SimpleTestScheduler simpleTestScheduler;
+	private SimpleTestScheduler simpleTestScheduler;
 
 	@Autowired
 	private AuditRecordRepository auditRecordRepository;
@@ -232,7 +233,7 @@ public class TaskSchedulerControllerTests {
 		mockMvc.perform(post("/tasks/schedules/").param("taskDefinitionName", "testDefinition")
 				.param("scheduleName", "myScheduleBadCron")
 				.param("properties",
-						"scheduler.cron.expression=" + TestDependencies.SimpleTestScheduler.INVALID_CRON_EXPRESSION)
+						"scheduler.cron.expression=" + SimpleTestScheduler.INVALID_CRON_EXPRESSION)
 				.accept(MediaType.APPLICATION_JSON)).andExpect(status().isBadRequest());
 	}
 

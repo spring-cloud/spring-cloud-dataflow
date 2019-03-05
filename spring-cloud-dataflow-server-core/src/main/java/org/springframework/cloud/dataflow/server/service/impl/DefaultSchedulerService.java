@@ -46,6 +46,7 @@ import org.springframework.cloud.dataflow.server.service.SchedulerServicePropert
 import org.springframework.cloud.deployer.spi.core.AppDefinition;
 import org.springframework.cloud.scheduler.spi.core.ScheduleInfo;
 import org.springframework.cloud.scheduler.spi.core.ScheduleRequest;
+import org.springframework.cloud.scheduler.spi.core.Scheduler;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.data.domain.Page;
@@ -146,11 +147,27 @@ public class DefaultSchedulerService implements SchedulerService {
 		taskDeploymentProperties = extractAndQualifySchedulerProperties(taskDeploymentProperties);
 		ScheduleRequest scheduleRequest = new ScheduleRequest(revisedDefinition, taskDeploymentProperties,
 				deployerDeploymentProperties, commandLineArgs, scheduleName, getTaskResource(taskDefinitionName));
-		Launcher launcher = this.taskPlatform.getLaunchers().get(0);
+		Launcher launcher = getDefaultLauncher();
 
+		if (launcher == null) {
+			throw new IllegalStateException("Could not find a default launcher.");
+		}
+		Scheduler scheduler = launcher.getScheduler();
+		if (scheduler == null) {
+			throw new IllegalStateException("Could not find a default scheduler.");
+		}
 		launcher.getScheduler().schedule(scheduleRequest);
 		this.auditRecordService.populateAndSaveAuditRecordUsingMapData(AuditOperationType.SCHEDULE, AuditActionType.CREATE,
 			scheduleRequest.getScheduleName(), this.auditServiceUtils.convertScheduleRequestToAuditData(scheduleRequest));
+	}
+
+	private Launcher getDefaultLauncher() {
+		for (Launcher launcher : this.taskPlatform.getLaunchers()) {
+			if (launcher.getName().equalsIgnoreCase("default")) {
+				return launcher;
+			}
+		}
+		return this.taskPlatform.getLaunchers().get(0);
 	}
 
 	@Override
@@ -178,14 +195,14 @@ public class DefaultSchedulerService implements SchedulerService {
 
 	@Override
 	public List<ScheduleInfo> list(String taskDefinitionName) {
-		Launcher launcher = this.taskPlatform.getLaunchers().get(0);
+		Launcher launcher = getDefaultLauncher();
 		return limitScheduleInfoResultSize(launcher.getScheduler().list(taskDefinitionName),
 				this.schedulerServiceProperties.getMaxSchedulesReturned());
 	}
 
 	@Override
 	public List<ScheduleInfo> list() {
-		Launcher launcher = this.taskPlatform.getLaunchers().get(0);
+		Launcher launcher = getDefaultLauncher();
 		return limitScheduleInfoResultSize(launcher.getScheduler().list(),
 				this.schedulerServiceProperties.getMaxSchedulesReturned());
 	}
