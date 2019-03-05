@@ -13,8 +13,8 @@ endif::omit-tasks-docs[]
 ifndef::omit-tasks-docs[]
 Applications come in two flavors:
 
-* Long-lived Stream applications where an unbounded amount of data is consumed or produced through messaging middleware.
-* Short-lived Task applications that process a finite set of data and then terminate.
+* Long-lived applications.  These applications can be part of a `Stream` in which case an unbounded amount of data is consumed or produced through messaging middleware.  Alternatively, they can be arbitrary applications that are long lived and do not necessarily use messaging middleware.
+* Short-lived `Task` applications that process a finite set of data and then terminate.
 endif::omit-tasks-docs[]
 
 Depending on the runtime, applications can be packaged in two ways:
@@ -46,8 +46,6 @@ Let us know at https://gitter.im/spring-cloud/spring-cloud-dataflow[Gitter] if y
 The Spring Cloud Data Flow Server delegates the deployment and runtime status of stream applications to the Spring Cloud Skipper Server.
 Later has the capabilities to update and rollback applications in a Stream at runtime as well as the ability to deploy applications to multiple platforms.
 
-NOTE: For managing task applications you need to select a Spring Cloud Data Flow Server executable jar that targets a single platform.
-
 The Data Flow server is also responsible for:
 
 * Interpreting and executing a stream DSL that describes the logical flow of data through multiple long-lived applications.
@@ -56,19 +54,58 @@ The Data Flow server is also responsible for:
 * Applying a deployment manifest that describes the mapping of applications onto the runtime - for example, to set the initial number of instances, memory requirements, and data partitioning.
 * Providing the runtime status of deployed applications.
 
-As an example, the stream DSL to describe the flow of data from an HTTP source to an Apache Cassandra sink would be written using a Unix pipes and filter syntax " `http | cassandra` ".  Each name in the DSL is mapped to an application that can that Maven or Docker repositories.  You can also register an application to an `http` location.  Many source, processor, and sink applications for common use cases (such as JDBC, HDFS, HTTP, and router) are provided by the Spring Cloud Data Flow team.  The pipe symbol represents the communication between the two applications through messaging middleware. The two messaging middleware brokers that are supported are:
+As an example, the stream DSL to describe the flow of data from an HTTP source to an Apache Cassandra sink would be written using a Unix pipes and filter syntax " `http | cassandra` ".
+Each name in the DSL is mapped to an application that can that Maven or Docker repositories.
+You can also register an application to an `http` location.
+Many source, processor, and sink applications for common use cases (such as JDBC, HDFS, HTTP, and router) are provided by the Spring Cloud Data Flow team.
+The pipe symbol represents the communication between the two applications through messaging middleware.
+The messaging middleware that you can use is based on what the https://cloud.spring.io/spring-cloud-stream/#binder-implementations[Spring Cloud Stream project] supports, namely:
 
-* Apache Kafka
-* RabbitMQ
+* https://github.com/spring-cloud/spring-cloud-stream-binder-rabbit[RabbitMQ]
+* https://github.com/spring-cloud/spring-cloud-stream-binder-kafka[Apache Kafka / Kafka Streams]
+* https://github.com/spring-cloud/spring-cloud-stream-binder-aws-kinesis[Amazon Kinesis]
+* https://github.com/spring-cloud/spring-cloud-gcp/tree/master/spring-cloud-gcp-pubsub-stream-binder[Google PubSub (partner maintained)]
+* https://github.com/SolaceProducts/spring-cloud-stream-binder-solace[Solace PubSub+ (partner maintained)]
+* https://github.com/Microsoft/spring-cloud-azure/tree/master/spring-cloud-azure-eventhub-stream-binder[Azure Event Hubs (partner maintained)]
 
-In the case of Kafka, when deploying the stream, the Data Flow server is responsible for creating the topics that correspond to each pipe symbol and configure each application to produce or consume from the topics so the desired flow of data is achieved.  Similarly for RabbitMQ, exchanges and queues are created as needed to achieve the desired flow.
+<<applications,Pre-built Stream applications>> are available for RabbitMQ and Apache Kafka.
+You can easily modify these pre-built application using the https://start-scs.cfapps.io/[Spring Intializr for Stream applications].
+The Data Flow server is responsible for creating the destinations/topics that correspond to each pipe symbol and configure each application to produce or consume from the topics so the desired flow of data is achieved.
 
-The interaction of the main components is shown in the following image:
+The interaction of the main components for the three types of DSLs are shown in the following images.
 
-.The Spring Cloud Data High Level Architecure
-image::{dataflow-asciidoc}/images/dataflow-arch.png[The Spring Cloud Data Flow High Level Architecture, scaledwidth="60%"]
+.The Spring Cloud Data Flow Stream DSL Architecure
+image::{dataflow-asciidoc}/images/arch-stream-dsl.png[The Spring Cloud Data Flow Streaming Application Architecture, scaledwidth="60%"]
 
-In the preceding diagram, a DSL description of a stream is POSTed to the Data Flow Server.  Based on the mapping of DSL application names to Maven and Docker artifacts, the http-source and cassandra-sink applications are deployed on the target runtime.  Data that is posted to the HTTP application will then be stored in Cassandra.  The https://docs.spring.io/spring-cloud-dataflow-samples/docs/current/reference/html/_streaming.html#spring-cloud-data-flow-samples-http-cassandra-overview[Samples Repository] shows this use case in full detail.
+In this architecture, the Stream DSL is POSTed to the Data Flow Server.
+Based on the mapping of DSL application names to Maven and Docker artifacts, the http-source and cassandra-sink applications are deployed on the target runtime.
+Data that is posted to the HTTP application will then be stored in Cassandra.
+The https://docs.spring.io/spring-cloud-dataflow-samples/docs/current/reference/html/_streaming.html#spring-cloud-data-flow-samples-http-cassandra-overview[Samples Repository] shows this use case in full detail.
+
+The architecture for the Application DSL is similar.
+
+
+.The Spring Cloud Data Flow Application DSL Architecure
+image::{dataflow-asciidoc}/images/arch-app-dsl.png[The Spring Cloud Data Flow Application DSL Architecture, scaledwidth="60%"]
+
+In this architecture, the Application DSL describes a group of related applications is POSTed to the Data Flow Server.
+Instead of a pipe symbol separating the applications, a double pipe symbol is used.
+As compared to the case of a single pipe, when a double pipe symbol is used the Data Flow server does not configure the applications to connect to each other over a single messaging middleware destination.
+Instead, deployment properties (not shown) set by the user are used to configure applications to have multiple producing or consuming messaging middleware destinations.
+In this example, the `baristaApp` sends messages on either the `hotDrinks` destination or the `coldDrinks` destination.
+It is also possible to deploy applications using the Application DSL that do not involve the use of messaging middleware.
+
+
+The architecture for the Task DSL does not involve the Skipper server.
+
+.The Spring Cloud Data Flow Task DSL Architecure
+image::{dataflow-asciidoc}/images/arch-task-dsl.png[The Spring Cloud Data Flow Task DSL Architecture, scaledwidth="60%"]
+
+In this architecture, the Task DSL is POSTed to the Data Flow Server.
+It describes a sequence of steps to execute with the double ampersand symbol denoting the step separation.
+
+In all cases, the target platform can be either Cloud Foundry or Kubernetes.
+Similarly, the Data Flow Server and Skipper Server can run on either Cloud Foundry or Kubernetes.
 
 [[arch-microservice-style]]
 == Microservice Architectural Style
