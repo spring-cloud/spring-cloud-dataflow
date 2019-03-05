@@ -39,6 +39,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
 
 /**
+ * Creates TaskPlatform implementations to launch/schedule tasks on Kubernetes.
  * @author Mark Pollack
  */
 @Configuration

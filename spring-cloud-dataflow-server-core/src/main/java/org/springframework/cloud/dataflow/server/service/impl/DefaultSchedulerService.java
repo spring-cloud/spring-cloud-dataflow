@@ -148,33 +148,37 @@ public class DefaultSchedulerService implements SchedulerService {
 		ScheduleRequest scheduleRequest = new ScheduleRequest(revisedDefinition, taskDeploymentProperties,
 				deployerDeploymentProperties, commandLineArgs, scheduleName, getTaskResource(taskDefinitionName));
 		Launcher launcher = getDefaultLauncher();
-
-		if (launcher == null) {
-			throw new IllegalStateException("Could not find a default launcher.");
-		}
-		Scheduler scheduler = launcher.getScheduler();
-		if (scheduler == null) {
-			throw new IllegalStateException("Could not find a default scheduler.");
-		}
 		launcher.getScheduler().schedule(scheduleRequest);
 		this.auditRecordService.populateAndSaveAuditRecordUsingMapData(AuditOperationType.SCHEDULE, AuditActionType.CREATE,
 			scheduleRequest.getScheduleName(), this.auditServiceUtils.convertScheduleRequestToAuditData(scheduleRequest));
 	}
 
 	private Launcher getDefaultLauncher() {
+		Launcher launcherToUse = null;
 		for (Launcher launcher : this.taskPlatform.getLaunchers()) {
 			if (launcher.getName().equalsIgnoreCase("default")) {
-				return launcher;
+				launcherToUse = launcher;
+				break;
 			}
 		}
-		return this.taskPlatform.getLaunchers().get(0);
+		if (launcherToUse == null) {
+			launcherToUse = this.taskPlatform.getLaunchers().get(0);
+		}
+		if (launcherToUse == null) {
+			throw new IllegalStateException("Could not find a default launcher.");
+		}
+		Scheduler scheduler = launcherToUse.getScheduler();
+		if (scheduler == null) {
+			throw new IllegalStateException("Could not find a default scheduler.");
+		}
+		return launcherToUse;
 	}
 
 	@Override
 	public void unschedule(String scheduleName) {
 		final ScheduleInfo scheduleInfo = getSchedule(scheduleName);
 		if (scheduleInfo != null) {
-			Launcher launcher = this.taskPlatform.getLaunchers().get(0);
+			Launcher launcher = getDefaultLauncher();
 			launcher.getScheduler().unschedule(scheduleInfo.getScheduleName());
 			this.auditRecordService.populateAndSaveAuditRecord(
 					AuditOperationType.SCHEDULE,

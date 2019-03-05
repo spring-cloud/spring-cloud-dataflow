@@ -55,7 +55,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 /**
- * Creates TaskPlatform implementations to launch tasks on cloud foundry
+ * Creates TaskPlatform implementations to launch/schedule tasks on Cloud Foundry.
  * @author Mark Pollack
  */
 @Configuration
@@ -130,7 +130,7 @@ public class CloudFoundryTaskPlatformAutoConfiguration {
 			CloudFoundry2630AndLaterTaskLauncher cfTaskLauncher = new CloudFoundry2630AndLaterTaskLauncher(
 					cloudFoundryClient, deploymentProperties, cloudFoundryOperations, runtimeEnvironmentInfo);
 
-			Scheduler scheduler;
+			Scheduler scheduler = null;
 			if (schedulesEnabled) {
 				CloudFoundrySchedulerProperties propsToUse =
 						cloudFoundrySchedulerProperties.orElseGet(CloudFoundrySchedulerProperties::new);
@@ -145,10 +145,7 @@ public class CloudFoundryTaskPlatformAutoConfiguration {
 						connectionProperties,
 						cfTaskLauncher,
 						propsToUse);
-			} else {
-				scheduler = null;
 			}
-
 			Launcher launcher = new Launcher(launcherName, "cloudfoundry", cfTaskLauncher, scheduler);
 			launcher.setDescription(String.format("org = [%s], space = [%s], url = [%s]",
 					connectionProperties.getOrg(), connectionProperties.getSpace(),

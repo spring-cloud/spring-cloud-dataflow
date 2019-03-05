@@ -56,8 +56,8 @@
 		</dependency>
 		<dependency>
 			<groupId>org.springframework.cloud</groupId>
-			<artifactId>spring-cloud-scheduler-cloudfoundry</artifactId>
-			<version>${spring-cloud-scheduler-cloudfoundry}</version>
+			<artifactId>spring-cloud-scheduler-spi</artifactId>
+			<version>${spring-cloud-scheduler-spi.version}</version>
 		</dependency>
 	</dependencies>
 </project>

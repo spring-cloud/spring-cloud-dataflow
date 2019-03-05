@@ -41,7 +41,7 @@ public class Launcher {
 	private TaskLauncher taskLauncher;
 
 	@JsonIgnore
-    private Scheduler scheduler;
+	private Scheduler scheduler;
 
 
 	public Launcher(String name, String type, TaskLauncher taskLauncher) {
