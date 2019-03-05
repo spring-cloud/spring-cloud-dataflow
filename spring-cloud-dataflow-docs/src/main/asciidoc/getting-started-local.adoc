@@ -260,7 +260,7 @@ Once the host folder is mounted, you can register the app starters (from `/root/
 
 [source,bash,subs=attributes]
 ----
-dataflow:>app register --type source --name my-app --uri file://root/apps/my-app.jar
+dataflow:>app register --type source --name my-app --uri file://root/apps/my-app-1.0.0.RELEASE.jar
 ----
 
 NOTE: Use also `--metadata-uri` if the metadata jar is available in the /root/apps.
