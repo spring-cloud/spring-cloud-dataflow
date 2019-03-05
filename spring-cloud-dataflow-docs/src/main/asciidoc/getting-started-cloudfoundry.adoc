@@ -365,10 +365,10 @@ The goal is to perform a rolling upgrade of the `log-sink` application to `1.2.0
 
 [source,console,options=nowrap]
 ----
-dataflow:>app register --name time --type source --uri maven://org.springframework.cloud.stream.app:time-source-rabbit:1.2.0.RELEASE --force
+dataflow:>app register --name time --type source --uri maven://org.springframework.cloud.stream.app:time-source-rabbit:1.2.0.RELEASE
 Successfully registered application 'source:time'
 
-dataflow:>app register --name log --type sink --uri maven://org.springframework.cloud.stream.app:log-sink-rabbit:1.1.0.RELEASE --force
+dataflow:>app register --name log --type sink --uri maven://org.springframework.cloud.stream.app:log-sink-rabbit:1.1.0.RELEASE
 Successfully registered application 'sink:log'
 
 dataflow:>app info source:time
@@ -501,7 +501,7 @@ Now you can update `log-sink` from `1.1.0.RELEASE` to `1.2.0.RELEASE`.  First we
 
 [source,console,options=nowrap]
 ----
-dataflow:>app register --name log --type sink --uri maven://org.springframework.cloud.stream.app:log-sink-rabbit:1.1.0.RELEASE --force
+dataflow:>app register --name log --type sink --uri maven://org.springframework.cloud.stream.app:log-sink-rabbit:1.1.0.RELEASE
 Successfully registered application 'sink:log'
 ----
 

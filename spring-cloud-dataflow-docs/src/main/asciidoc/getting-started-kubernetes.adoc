@@ -949,7 +949,7 @@ The following example (with output after each command) shows how to register the
 
 [source,console,options=nowrap]
 ----
-dataflow:>app register --name log --type sink --uri docker:springcloudstream/log-sink-rabbit:2.1.0.RELEASE --force
+dataflow:>app register --name log --type sink --uri docker:springcloudstream/log-sink-rabbit:2.1.0.RELEASE
 Successfully registered application 'sink:log'
 
 dataflow:>stream update --name mystream --properties version.log=2.1.0.RELEASE
