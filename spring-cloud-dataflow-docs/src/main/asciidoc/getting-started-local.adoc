@@ -279,7 +279,7 @@ Now you can use the `maven://` URI schema and maven coordinates to resolve jars 
 
 [source,bash,subs=attributes]
 ----
-dataflow:>app register --type processor --name pose-estimation --uri maven://org.springframework.cloud.stream.app:pose-estimation-processor-rabbit:2.0.2.BUILD-SNAPSHOT --metadata-uri maven://org.springframework.cloud.stream.app:pose-estimation-processor-rabbit:jar:metadata:2.0.2.BUILD-SNAPSHOT --force
+dataflow:>app register --type processor --name pose-estimation --uri maven://org.springframework.cloud.stream.app:pose-estimation-processor-rabbit:2.0.2.BUILD-SNAPSHOT --metadata-uri maven://org.springframework.cloud.stream.app:pose-estimation-processor-rabbit:jar:metadata:2.0.2.BUILD-SNAPSHOT
 ----
 
 This approach allow you to share jars build and installed on the host machine (e.g. `mvn clean install`) directly with the dataflow-server container.

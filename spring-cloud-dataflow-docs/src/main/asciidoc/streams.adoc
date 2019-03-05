@@ -465,8 +465,8 @@ be resolved from the Data Flow Server process, specify `--local false`.
 [WARNING]
 ====
 When using either `app register` or `app import`, if an app is already registered with
-the provided name and type, it is not overridden by default. If you would like to override the
-pre-existing app coordinates, then include the `--force` option.
+the provided name and type and version, it is not overridden by default. If you would like to override the
+pre-existing app uri or metadata-uri coordinates, then include the `--force` option.
 
 Note, however, that, once downloaded, applications may be cached locally on the Data Flow server, based on the resource
 location. If the resource location does not change (even though the actual resource _bytes_ may be different), then it

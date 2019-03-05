@@ -132,8 +132,8 @@ You can also pass the `--local` option (which is `TRUE` by default) to indicate 
 If the location should be resolved from the Data Flow Server process, specify `--local false`.
 
 When using either `app register` or `app import`, if a task app is already registered with
-the provided name, it is not overridden by default. If you would like to override the
-pre-existing task app, then include the `--force` option.
+the provided name and version, it is not overridden by default. If you would like to override the
+pre-existing task app with a different uri or uri-metadata location, then include the `--force` option.
 
 [NOTE]
 In some cases, the Resource is resolved on the server side.
