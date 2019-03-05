@@ -49,7 +49,11 @@ public class ExternalOauth2ResourceAuthoritiesExtractor implements AuthoritiesEx
 	private static final Logger logger = LoggerFactory.getLogger(ExternalOauth2ResourceAuthoritiesExtractor.class);
 
 	public static final GrantedAuthority CREATE = new SimpleGrantedAuthority(SecurityConfigUtils.ROLE_PREFIX + CoreSecurityRoles.CREATE.getKey());
+	public static final GrantedAuthority DEPLOY = new SimpleGrantedAuthority(SecurityConfigUtils.ROLE_PREFIX + CoreSecurityRoles.DEPLOY.getKey());
+	public static final GrantedAuthority DESTROY = new SimpleGrantedAuthority(SecurityConfigUtils.ROLE_PREFIX + CoreSecurityRoles.DESTROY.getKey());
 	public static final GrantedAuthority MANAGE = new SimpleGrantedAuthority(SecurityConfigUtils.ROLE_PREFIX + CoreSecurityRoles.MANAGE.getKey());
+	public static final GrantedAuthority MODIFY = new SimpleGrantedAuthority(SecurityConfigUtils.ROLE_PREFIX + CoreSecurityRoles.MODIFY.getKey());
+	public static final GrantedAuthority SCHEDULE = new SimpleGrantedAuthority(SecurityConfigUtils.ROLE_PREFIX + CoreSecurityRoles.SCHEDULE.getKey());
 	public static final GrantedAuthority VIEW = new SimpleGrantedAuthority(SecurityConfigUtils.ROLE_PREFIX + CoreSecurityRoles.VIEW.getKey());
 
 	private final OAuth2RestTemplate restTemplate;
@@ -88,8 +92,20 @@ public class ExternalOauth2ResourceAuthoritiesExtractor implements AuthoritiesEx
 						case CREATE:
 							authorities.add(CREATE);
 							break;
+						case DEPLOY:
+							authorities.add(DEPLOY);
+							break;
+						case DESTROY:
+							authorities.add(DESTROY);
+							break;
 						case MANAGE:
 							authorities.add(MANAGE);
+							break;
+						case MODIFY:
+							authorities.add(MODIFY);
+							break;
+						case SCHEDULE:
+							authorities.add(SCHEDULE);
 							break;
 						case VIEW:
 							authorities.add(VIEW);

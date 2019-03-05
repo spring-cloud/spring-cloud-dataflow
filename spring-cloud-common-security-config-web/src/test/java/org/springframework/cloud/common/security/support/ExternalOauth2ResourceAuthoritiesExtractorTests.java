@@ -32,7 +32,6 @@ import org.springframework.security.oauth2.common.DefaultOAuth2AccessToken;
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
 
 import static org.hamcrest.Matchers.contains;
-import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasItem;
 import static org.junit.Assert.assertThat;
@@ -51,6 +50,7 @@ public class ExternalOauth2ResourceAuthoritiesExtractorTests {
 		assertAuthorities(URI.create("http://test/authorities"), "VIEW");
 		assertAuthorities(URI.create("http://the.authorities.server/authorities"), "VIEW", "CREATE", "MANAGE");
 		assertAuthorities(URI.create("http://server/"), "MANAGE");
+		assertAuthorities(URI.create("http://scdf2/"), "DEPLOY", "DESTROY", "MODIFY", "SCHEDULE");
 	}
 
 	private void assertAuthorities(URI uri, String... roles) {
