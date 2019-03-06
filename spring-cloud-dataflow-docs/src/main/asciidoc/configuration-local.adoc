@@ -741,7 +741,7 @@ $ cd uaa/
 $ ./gradlew  run
 ----
 
-In a separate window, check if the UAA server is running:
+IMPORTANT: The UAA requires *Java 8*.
 
 The configuration of the UAA is driven by a
 https://github.com/cloudfoundry/uaa/blob/develop/uaa/src/main/resources/uaa.yml[uaa.yml]
@@ -857,7 +857,7 @@ security:
     client:
       client-id: app
       client-secret: dataflow
-      scope: openid, dataflow.view, dataflow.create, dataflow.manage    # <1>
+      scope: openid                                                     # <1>
       access-token-uri: http://localhost:8080/uaa/oauth/token
       user-authorization-uri: http://localhost:8080/uaa/oauth/authorize
     resource:
@@ -866,7 +866,7 @@ security:
 ----
 
 <1> If you use scopes to identify roles, please make sure to also request
-the relevant roles
+the relevant scopes, e.g `dataflow.view`, `dataflow.create` etc.
 <2> Used to retrieve profile information, e.g. username for display purposes (mandatory)
 <3> Used for token introspection and validation (mandatory)
 
