@@ -19,6 +19,7 @@ package org.springframework.cloud.dataflow.shell.command;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -282,12 +283,15 @@ public class TaskCommands implements CommandMarker {
 	@CliCommand(value = TASK_EXECUTION_CURRENT,
 		help = "Display count of currently executin tasks and related information")
 	public Table currentExecutions() {
-		CurrentTaskExecutionsResource taskExecutionsResource = taskOperations().currentTaskExecutions();
-		TableModelBuilder<Object> modelBuilder = new TableModelBuilder<>();
-		modelBuilder.addRow().addValue("Current Running Tasks").addValue(taskExecutionsResource.getRunningExecutionCount());
-		modelBuilder.addRow().addValue("Maximum Concurrent Executions").addValue(taskExecutionsResource
-			.getMaximumTaskExecutions());
-		TableBuilder builder = new TableBuilder(modelBuilder.build());
+		Collection<CurrentTaskExecutionsResource> taskExecutionsResources = taskOperations().currentTaskExecutions();
+		LinkedHashMap<String, Object> headers = new LinkedHashMap<>();
+		headers.put("name", "Platform Name");
+		headers.put("type", "Platform Type");
+		headers.put("runningExecutionCount","Execution Count");
+		headers.put("maximumTaskExecutions","Maximum Executions");
+
+
+		TableBuilder builder = new TableBuilder(new BeanListTableModel<>(taskExecutionsResources, headers));
 		DataFlowTables.applyStyle(builder);
 		return builder.build();
 	}

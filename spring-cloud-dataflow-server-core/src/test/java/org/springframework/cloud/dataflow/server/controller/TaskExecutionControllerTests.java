@@ -17,6 +17,7 @@
 package org.springframework.cloud.dataflow.server.controller;
 
 import java.time.Instant;
+import java.util.Collections;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
@@ -39,6 +40,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.cloud.dataflow.core.Launcher;
 import org.springframework.cloud.dataflow.core.TaskDefinition;
 import org.springframework.cloud.dataflow.core.TaskDeployment;
+import org.springframework.cloud.dataflow.core.TaskPlatform;
 import org.springframework.cloud.dataflow.server.config.apps.CommonApplicationProperties;
 import org.springframework.cloud.dataflow.server.configuration.JobDependencies;
 import org.springframework.cloud.dataflow.server.job.LauncherRepository;
@@ -64,6 +66,7 @@ import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
@@ -73,6 +76,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 /**
  * @author Glenn Renfro
  * @author Ilayaperumal Gopinathan
+ * @author David Turanski
  */
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = { JobDependencies.class, PropertyPlaceholderAutoConfiguration.class, BatchProperties.class })
@@ -125,6 +129,9 @@ public class TaskExecutionControllerTests {
 	private LauncherRepository launcherRepository;
 
 	@Autowired
+	private TaskPlatform taskPlatform;
+
+	@Autowired
 	private TaskExecutionInfoService taskExecutionInfoService;
 
 	@Autowired
@@ -137,6 +144,7 @@ public class TaskExecutionControllerTests {
 	public void setupMockMVC() {
 		Launcher launcher = new Launcher("default", "local", taskLauncher);
 		launcherRepository.save(launcher);
+		taskPlatform.setLaunchers(Collections.singletonList(launcher));
 		this.mockMvc = MockMvcBuilders.webAppContextSetup(wac)
 				.defaultRequest(get("/").accept(MediaType.APPLICATION_JSON)).build();
 		if (!initialized) {
@@ -240,9 +248,10 @@ public class TaskExecutionControllerTests {
 
 	@Test
 	public void testGetCurrentExecutions() throws Exception {
+			when(taskLauncher.getRunningTaskExecutionCount()).thenReturn(4);
 			mockMvc.perform(get("/tasks/executions/current").accept(MediaType.APPLICATION_JSON))
 					.andExpect(status().isOk())
-					.andExpect(jsonPath("runningExecutionCount", is(4)));
+					.andExpect(jsonPath("$[0].runningExecutionCount", is(4)));
 
 	}
 

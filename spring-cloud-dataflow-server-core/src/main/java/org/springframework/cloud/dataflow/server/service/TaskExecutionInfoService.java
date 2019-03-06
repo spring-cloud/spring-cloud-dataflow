@@ -1,5 +1,5 @@
 /*
- * Copyright 2016-2018 the original author or authors.
+ * Copyright 2016-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,22 +18,21 @@ package org.springframework.cloud.dataflow.server.service;
 
 import java.util.Map;
 
+import org.springframework.cloud.dataflow.core.AllPlatformsTaskExecutionInformation;
 import org.springframework.cloud.dataflow.server.service.impl.TaskExecutionInformation;
 
 /**
- * Return the TaskExecutionInformation object givne the task name and deployment
+ * Return the TaskExecutionInformation object given the task name and deployment
  * properties.
  *
  * @author Daniel Serleg
  * @author Mark Pollack
+ * @author David Turanski
  */
 public interface TaskExecutionInfoService {
-
-	long getMaximumConcurrentTasks();
-
-	boolean maxConcurrentExecutionsReached();
 
 	TaskExecutionInformation findTaskExecutionInformation(String taskName,
 			Map<String, String> taskDeploymentProperties);
 
+	AllPlatformsTaskExecutionInformation findAllPlatformTaskExecutionInformation();
 }
