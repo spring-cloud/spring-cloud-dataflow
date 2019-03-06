@@ -115,6 +115,7 @@ import org.springframework.hateoas.hal.HalConfiguration;
 import org.springframework.hateoas.hal.Jackson2HalModule;
 import org.springframework.http.converter.StringHttpMessageConverter;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
+import org.springframework.lang.Nullable;
 import org.springframework.scheduling.concurrent.ForkJoinPoolFactoryBean;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 import org.springframework.web.client.RestTemplate;
@@ -199,7 +200,7 @@ public class DataFlowControllerAutoConfiguration {
 		}
 
 		@Bean
-		public AppResourceCommon appResourceCommon(MavenProperties mavenProperties,
+		public AppResourceCommon appResourceCommon(@Nullable MavenProperties mavenProperties,
 				DelegatingResourceLoader delegatingResourceLoader) {
 			return new AppResourceCommon(mavenProperties, delegatingResourceLoader);
 		}

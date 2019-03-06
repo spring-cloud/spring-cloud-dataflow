@@ -16,6 +16,7 @@
 
 package org.springframework.cloud.dataflow.rest.client;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
@@ -99,9 +100,9 @@ public interface TaskOperations {
 	/**
 	 * Return information including the count of currently executing tasks and task execution
 	 * limits.
-	 * @return {@link CurrentTaskExecutionsResource}
+	 * @return Collection of {@link CurrentTaskExecutionsResource}
 	 */
-	CurrentTaskExecutionsResource currentTaskExecutions();
+	Collection<CurrentTaskExecutionsResource> currentTaskExecutions();
 
 	/**
 	 * Cleanup any resources associated with the execution for the id specified.

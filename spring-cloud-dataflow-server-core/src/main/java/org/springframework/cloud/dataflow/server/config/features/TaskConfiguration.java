@@ -18,6 +18,7 @@ package org.springframework.cloud.dataflow.server.config.features;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import javax.sql.DataSource;
 
@@ -78,6 +79,7 @@ import org.springframework.util.StringUtils;
  * @author Ilayaperumal Gopinathan
  * @author Gunnar Hillert
  * @author Christian Tzolov
+ * @author David Turanski
  */
 @Configuration
 @ConditionalOnTasksEnabled
@@ -104,17 +106,38 @@ public class TaskConfiguration {
 	@Bean
 	@Conditional(OnLocalPlatform.class)
 	public TaskPlatform localTaskPlatform(LocalPlatformProperties localPlatformProperties) {
+
 		List<Launcher> launchers = new ArrayList<>();
 		Map<String, LocalDeployerProperties> localDeployerPropertiesMap = localPlatformProperties.getAccounts();
 		for (Map.Entry<String, LocalDeployerProperties> entry : localDeployerPropertiesMap
 				.entrySet()) {
-			LocalTaskLauncher localTaskLauncher = new LocalTaskLauncher(entry.getValue());
+			LocalDeployerProperties localDeployerProperties = entry.getValue();
+
+			validateLauncherMaximumConcurrentTasks(entry.getKey(),"Local",
+				localDeployerProperties.getMaximumConcurrentTasks(),
+				localPlatformProperties.getMaximumConcurrentTasks());
+
+			LocalTaskLauncher localTaskLauncher = new LocalTaskLauncher(localDeployerProperties);
 			Launcher launcher = new Launcher(entry.getKey(), "local", localTaskLauncher);
 			launcher.setDescription(prettyPrintLocalDeployerProperties(entry.getValue()));
 			launchers.add(launcher);
 		}
+
 		return new TaskPlatform("Local", launchers);
 	}
+
+	public void validateLauncherMaximumConcurrentTasks(String deployerName, String platformName,
+			int maxConcurrentTasks, Optional<Integer> platformMaxConcurrentTasks) {
+		if (platformMaxConcurrentTasks.isPresent())
+			if (maxConcurrentTasks > platformMaxConcurrentTasks.get()) {
+				throw new IllegalStateException(
+						String.format("'maximumConcurrentTasks' [%d] for launcher instance %s cannot be greater than "
+								+ "%s platform maximum [%d].", maxConcurrentTasks,
+								deployerName, platformName, platformMaxConcurrentTasks.get()));
+			}
+
+	}
+
 
 	private String prettyPrintLocalDeployerProperties(LocalDeployerProperties localDeployerProperties) {
 		StringBuilder builder = new StringBuilder();
@@ -133,10 +156,10 @@ public class TaskConfiguration {
 	@Bean
 	public TaskExecutionInfoService taskDefinitionRetriever(AppRegistryService registry,
 			TaskExplorer taskExplorer, TaskDefinitionRepository taskDefinitionRepository,
-			TaskConfigurationProperties taskConfigurationProperties) {
+			TaskConfigurationProperties taskConfigurationProperties,
+			LauncherRepository launcherRepository, List<TaskPlatform> taskPlatforms) {
 		return new DefaultTaskExecutionInfoService(dataSourceProperties, registry,
-				taskExplorer,
-				taskDefinitionRepository, taskConfigurationProperties);
+				taskExplorer, taskDefinitionRepository, taskConfigurationProperties, launcherRepository, taskPlatforms);
 	}
 
 	@Bean
