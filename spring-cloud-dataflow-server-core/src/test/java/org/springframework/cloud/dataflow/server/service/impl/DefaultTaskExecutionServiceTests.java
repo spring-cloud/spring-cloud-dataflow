@@ -17,6 +17,7 @@
 package org.springframework.cloud.dataflow.server.service.impl;
 
 import java.net.URI;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Map;
@@ -39,6 +40,7 @@ import org.springframework.cloud.dataflow.core.ApplicationType;
 import org.springframework.cloud.dataflow.core.Launcher;
 import org.springframework.cloud.dataflow.core.TaskDefinition;
 import org.springframework.cloud.dataflow.core.TaskDeployment;
+import org.springframework.cloud.dataflow.core.TaskPlatform;
 import org.springframework.cloud.dataflow.registry.service.AppRegistryService;
 import org.springframework.cloud.dataflow.server.configuration.TaskServiceDependencies;
 import org.springframework.cloud.dataflow.server.job.LauncherRepository;
@@ -84,6 +86,7 @@ import static org.mockito.Mockito.when;
  * @author David Turanski
  * @author Gunnar Hillert
  * @author Daniel Serleg
+ * @author David Turanski
  */
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = { TaskServiceDependencies.class }, properties = {
@@ -207,23 +210,6 @@ public abstract class DefaultTaskExecutionServiceTests {
 			if (!errorCaught) {
 				fail();
 			}
-
-		}
-
-		@Test
-		@DirtiesContext
-		public void failOnLimitReached() {
-			initializeSuccessfulRegistry(this.appRegistry);
-			when(taskLauncher.launch(any())).thenReturn("0");
-			assertEquals(10, taskExecutionInfoService.getMaximumConcurrentTasks());
-			for (long i = 1; i <= taskExecutionInfoService.getMaximumConcurrentTasks(); i++) {
-				assertEquals(i, taskExecutionService.executeTask(TASK_NAME_ORIG, new HashMap<>(), new LinkedList<>()));
-			}
-
-			thrown.expect(IllegalStateException.class);
-			thrown.expectMessage("The maximum concurrent task executions [10] is at its limit.");
-
-			taskExecutionService.executeTask(TASK_NAME_ORIG, new HashMap<>(), new LinkedList<>());
 		}
 
 		@Test
@@ -251,7 +237,8 @@ public abstract class DefaultTaskExecutionServiceTests {
 			when(this.taskLauncher.launch(any())).thenReturn("0");
 			TaskExecutionInfoService taskExecutionInfoService = new DefaultTaskExecutionInfoService(
 					this.dataSourceProperties, this.appRegistry, this.taskExplorer,
-					mock(TaskDefinitionRepository.class), new TaskConfigurationProperties());
+					mock(TaskDefinitionRepository.class), new TaskConfigurationProperties(),
+					mock(LauncherRepository.class), Collections.singletonList(mock(TaskPlatform.class)));
 			TaskExecutionService taskExecutionService = new DefaultTaskExecutionService(
 					launcherRepository, auditRecordService, taskRepository,
 					taskExecutionInfoService, mock(TaskDeploymentRepository.class),

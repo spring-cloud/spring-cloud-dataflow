@@ -111,10 +111,10 @@ public class TaskConfiguration {
 	@Bean
 	public TaskExecutionInfoService taskDefinitionRetriever(AppRegistryService registry,
 			TaskExplorer taskExplorer, TaskDefinitionRepository taskDefinitionRepository,
-			TaskConfigurationProperties taskConfigurationProperties) {
+			TaskConfigurationProperties taskConfigurationProperties,
+			LauncherRepository launcherRepository, List<TaskPlatform> taskPlatforms) {
 		return new DefaultTaskExecutionInfoService(dataSourceProperties, registry,
-				taskExplorer,
-				taskDefinitionRepository, taskConfigurationProperties);
+				taskExplorer, taskDefinitionRepository, taskConfigurationProperties, launcherRepository, taskPlatforms);
 	}
 
 	@Bean

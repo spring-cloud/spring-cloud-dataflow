@@ -175,6 +175,16 @@ public class DefaultTaskExecutionServiceTransactionTests {
 			return null;
 		}
 
+		@Override
+		public int getMaximumConcurrentTasks() {
+			throw new UnsupportedOperationException();
+		}
+
+		@Override
+		public int getRunningTaskExecutionCount() {
+			throw new UnsupportedOperationException();
+		}
+
 		public String getResult() {
 			return result;
 		}

@@ -472,10 +472,11 @@ public class TestDependencies extends WebMvcConfigurationSupport {
 	@Bean
 	public TaskExecutionInfoService taskDefinitionRetriever(AppRegistryService registry,
 			TaskExplorer taskExplorer, TaskDefinitionRepository taskDefinitionRepository,
-			TaskConfigurationProperties taskConfigurationProperties) {
+			TaskConfigurationProperties taskConfigurationProperties, LauncherRepository launcherRepository,
+			List<TaskPlatform> platforms) {
 		return new DefaultTaskExecutionInfoService(new DataSourceProperties(),
 				registry, taskExplorer, taskDefinitionRepository,
-				taskConfigurationProperties);
+				taskConfigurationProperties, launcherRepository, platforms);
 	}
 
 	@Bean

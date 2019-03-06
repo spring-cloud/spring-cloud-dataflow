@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 the original author or authors.
+ * Copyright 2018-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,6 @@
 
 package org.springframework.cloud.dataflow.server.service.impl;
 
-import javax.validation.constraints.Min;
 import javax.validation.constraints.NotBlank;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
@@ -42,22 +41,11 @@ public class TaskConfigurationProperties {
 	@NotBlank
 	private String composedTaskRunnerName = "composed-task-runner";
 
-	@Min(1)
-	private long maximumConcurrentTasks = 20;
-
 	public String getComposedTaskRunnerName() {
 		return composedTaskRunnerName;
 	}
 
 	public void setComposedTaskRunnerName(String taskName) {
 		this.composedTaskRunnerName = taskName;
-	}
-
-	public long getMaximumConcurrentTasks() {
-		return maximumConcurrentTasks;
-	}
-
-	public void setMaximumConcurrentTasks(long maximumConcurrentTasks) {
-		this.maximumConcurrentTasks = maximumConcurrentTasks;
 	}
 }

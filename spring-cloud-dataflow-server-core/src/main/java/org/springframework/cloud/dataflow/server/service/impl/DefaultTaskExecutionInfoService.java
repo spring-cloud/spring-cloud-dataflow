@@ -1,5 +1,5 @@
 /*
- * Copyright 2016-2018 the original author or authors.
+ * Copyright 2016-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,15 +16,19 @@
 
 package org.springframework.cloud.dataflow.server.service.impl;
 
+import java.util.List;
 import java.util.Map;
 
 import org.springframework.boot.autoconfigure.jdbc.DataSourceProperties;
+import org.springframework.cloud.dataflow.core.AllPlatformsTaskExecutionInformation;
 import org.springframework.cloud.dataflow.core.AppRegistration;
 import org.springframework.cloud.dataflow.core.ApplicationType;
 import org.springframework.cloud.dataflow.core.TaskDefinition;
+import org.springframework.cloud.dataflow.core.TaskPlatform;
 import org.springframework.cloud.dataflow.core.dsl.TaskNode;
 import org.springframework.cloud.dataflow.core.dsl.TaskParser;
 import org.springframework.cloud.dataflow.registry.service.AppRegistryService;
+import org.springframework.cloud.dataflow.server.job.LauncherRepository;
 import org.springframework.cloud.dataflow.server.repository.NoSuchTaskDefinitionException;
 import org.springframework.cloud.dataflow.server.repository.TaskDefinitionRepository;
 import org.springframework.cloud.dataflow.server.service.TaskExecutionInfoService;
@@ -66,6 +70,10 @@ public class DefaultTaskExecutionInfoService implements TaskExecutionInfoService
 
 	private final TaskConfigurationProperties taskConfigurationProperties;
 
+	private final LauncherRepository launcherRepository;
+
+	private final List<TaskPlatform> taskPlatforms;
+
 	/**
 	 * Initializes the {@link DefaultTaskExecutionInfoService}.
 	 *
@@ -80,29 +88,24 @@ public class DefaultTaskExecutionInfoService implements TaskExecutionInfoService
 			AppRegistryService appRegistryService,
 			TaskExplorer taskExplorer,
 			TaskDefinitionRepository taskDefinitionRepository,
-			TaskConfigurationProperties taskConfigurationProperties) {
+			TaskConfigurationProperties taskConfigurationProperties,
+			LauncherRepository launcherRepository,
+			List<TaskPlatform> taskPlatforms) {
 		Assert.notNull(dataSourceProperties, "DataSourceProperties must not be null");
 		Assert.notNull(appRegistryService, "AppRegistryService must not be null");
 		Assert.notNull(taskDefinitionRepository, "TaskDefinitionRepository must not be null");
 		Assert.notNull(taskExplorer, "TaskExplorer must not be null");
 		Assert.notNull(taskConfigurationProperties, "taskConfigurationProperties must not be null");
+		Assert.notNull(launcherRepository, "launcherRepository must not be null");
+		Assert.notEmpty(taskPlatforms, "taskPlatform must not be empty or null");
 
 		this.dataSourceProperties = dataSourceProperties;
 		this.appRegistryService = appRegistryService;
 		this.taskExplorer = taskExplorer;
 		this.taskDefinitionRepository = taskDefinitionRepository;
 		this.taskConfigurationProperties = taskConfigurationProperties;
-	}
-
-	@Override
-	public long getMaximumConcurrentTasks() {
-		return taskConfigurationProperties.getMaximumConcurrentTasks();
-	}
-
-	@Override
-	public synchronized boolean maxConcurrentExecutionsReached() {
-		return this.taskExplorer.getRunningTaskExecutionCount() >= taskConfigurationProperties
-				.getMaximumConcurrentTasks();
+		this.launcherRepository = launcherRepository;
+		this.taskPlatforms = taskPlatforms;
 	}
 
 	@Override
@@ -140,6 +143,10 @@ public class DefaultTaskExecutionInfoService implements TaskExecutionInfoService
 		retData.setAppResource(appRegistryService.getAppResource(appRegistration));
 		retData.setMetadataResource(appRegistryService.getAppMetadataResource(appRegistration));
 		return retData;
+	}
+	@Override
+	public AllPlatformsTaskExecutionInformation findAllPlatformTaskExecutionInformation() {
+		return new AllPlatformsTaskExecutionInformation(this.taskPlatforms);
 	}
 
 }

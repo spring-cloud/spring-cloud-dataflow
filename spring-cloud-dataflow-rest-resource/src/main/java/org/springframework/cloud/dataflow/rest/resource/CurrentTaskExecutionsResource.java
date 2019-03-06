@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 the original author or authors.
+ * Copyright 2018-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,8 @@
 
 package org.springframework.cloud.dataflow.rest.resource;
 
+import org.springframework.cloud.dataflow.core.PlatformTaskExecutionInformation;
+import org.springframework.hateoas.PagedResources;
 import org.springframework.hateoas.ResourceSupport;
 
 /**
@@ -26,48 +28,65 @@ import org.springframework.hateoas.ResourceSupport;
 public class CurrentTaskExecutionsResource extends ResourceSupport {
 
 	/**
+	 * The platform instance (account) name.
+	 */
+	private String name;
+
+	/**
+	 * The platform type name.
+	 */
+	private String type;
+
+	/**
 	 * The maximum concurrently running task executions allowed.
 	 */
-	private long maximumTaskExecutions = Long.MAX_VALUE;
+	private int maximumTaskExecutions;
 
 	/**
 	 * The current number of running task executions.
 	 */
-	private long runningExecutionCount;
+	private int runningExecutionCount;
 
-	/**
-	 *
-	 * @return the maximum number of concurrently running task executions allowed.
-	 */
-	public long getMaximumTaskExecutions() {
+
+	public String getName() {
+		return name;
+	}
+	public void setName(String name) {
+		this.name = name;
+	}
+	public String getType() {
+		return type;
+	}
+	public void setType(String type) {
+		this.type = type;
+	}
+	public int getMaximumTaskExecutions() {
 		return maximumTaskExecutions;
 	}
-
-	/**
-	 *
-	 * Set the maximum number of concurrently running task executions allowed.
-	 * @param maximumTaskExecutions that should be allowed to be executed.
-	 */
-	public void setMaximumTaskExecutions(long maximumTaskExecutions) {
+	public void setMaximumTaskExecutions(int maximumTaskExecutions) {
 		this.maximumTaskExecutions = maximumTaskExecutions;
 	}
-
-	/**
-	 *
-	 * @return the current number of running task executions.
-	 */
-	public long getRunningExecutionCount() {
+	public int getRunningExecutionCount() {
 		return runningExecutionCount;
 	}
-
-	/**
-	 *
-	 * Set the current number of running task executions.
-	 * @param runningExecutionCount the current count of running executions.
-	 */
-	public void setRunningExecutionCount(long runningExecutionCount) {
+	public void setRunningExecutionCount(int runningExecutionCount) {
 		this.runningExecutionCount = runningExecutionCount;
 	}
+	/**
+	 *
+	 * @param taskExecutionInformation
+	 */
+	public static CurrentTaskExecutionsResource fromTaskExecutionInformation(
+		PlatformTaskExecutionInformation taskExecutionInformation) {
+		CurrentTaskExecutionsResource resource = new CurrentTaskExecutionsResource();
+		resource.setName(taskExecutionInformation.getName());
+		resource.setType(taskExecutionInformation.getType());
+		resource.setMaximumTaskExecutions(taskExecutionInformation.getMaximumTaskExecutions());
+		resource.setRunningExecutionCount(taskExecutionInformation.getRunningExecutionCount());
+		return resource;
+	}
 
+	public static class Page extends PagedResources<CurrentTaskExecutionsResource> {
+	}
 
 }

@@ -239,10 +239,11 @@ public class TaskServiceDependencies extends WebMvcConfigurationSupport {
 	@Bean
 	public TaskExecutionInfoService taskDefinitionRetriever(AppRegistryService registry,
 			TaskExplorer taskExplorer, TaskDefinitionRepository taskDefinitionRepository,
-			TaskConfigurationProperties taskConfigurationProperties) {
+			TaskConfigurationProperties taskConfigurationProperties, LauncherRepository launcherRepository,
+		List<TaskPlatform> taskPlatforms) {
 		return new DefaultTaskExecutionInfoService(this.dataSourceProperties,
 				registry, taskExplorer, taskDefinitionRepository,
-				taskConfigurationProperties);
+				taskConfigurationProperties, launcherRepository, taskPlatforms);
 	}
 
 	@Bean

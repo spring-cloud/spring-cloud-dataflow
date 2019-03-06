@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 the original author or authors.
+ * Copyright 2015-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,6 +23,7 @@ import java.util.TimeZone;
 import javax.servlet.ServletContext;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.h2.tools.Server;
 import org.slf4j.LoggerFactory;
@@ -59,6 +60,7 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
  * @author Ilayaperumal Gopinathan
  * @author Mark Pollack
  * @author Christian Tzolov
+ * @author David Turanski
  */
 @Configuration
 @ConditionalOnWebApplication
@@ -128,7 +130,7 @@ public class WebConfiguration implements ServletContextInitializer, ApplicationL
 			// https://github.com/spring-projects/spring-hateoas/issues/333
 			builder.mixIn(StepExecution.class, StepExecutionJacksonMixIn.class);
 			builder.mixIn(ExecutionContext.class, ExecutionContextJacksonMixIn.class);
-			builder.modules(new JavaTimeModule());
+			builder.modules(new JavaTimeModule(), new Jdk8Module());
 		};
 	}
 

@@ -16,6 +16,9 @@
 
 package org.springframework.cloud.dataflow.server.configuration;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import javax.persistence.EntityManagerFactory;
 import javax.sql.DataSource;
 
@@ -37,6 +40,8 @@ import org.springframework.cloud.dataflow.audit.service.AuditRecordService;
 import org.springframework.cloud.dataflow.audit.service.DefaultAuditRecordService;
 import org.springframework.cloud.dataflow.configuration.metadata.ApplicationConfigurationMetadataResolver;
 import org.springframework.cloud.dataflow.configuration.metadata.BootApplicationConfigurationMetadataResolver;
+import org.springframework.cloud.dataflow.core.Launcher;
+import org.springframework.cloud.dataflow.core.TaskPlatform;
 import org.springframework.cloud.dataflow.registry.repository.AppRegistrationRepository;
 import org.springframework.cloud.dataflow.registry.service.AppRegistryService;
 import org.springframework.cloud.dataflow.registry.service.DefaultAppRegistryService;
@@ -101,6 +106,7 @@ import static org.mockito.Mockito.mock;
 /**
  * @author Glenn Renfro
  * @author Gunnar Hillert
+ * @author David Turanski
  */
 @Configuration
 @EnableSpringDataWebSupport
@@ -190,7 +196,7 @@ public class JobDependencies {
 	@Bean
 	public TaskJobService taskJobExecutionRepository(JobService jobService, TaskExplorer taskExplorer,
 			TaskDefinitionRepository taskDefinitionRepository, TaskExecutionService taskExecutionService,
-													 TaskDeploymentRepository taskDeploymentRepository) {
+			TaskDeploymentRepository taskDeploymentRepository) {
 		return new DefaultTaskJobService(jobService, taskExplorer, taskDefinitionRepository, taskExecutionService,
 				taskDeploymentRepository);
 	}
@@ -241,10 +247,11 @@ public class JobDependencies {
 	@Bean
 	public TaskExecutionInfoService taskDefinitionRetriever(AppRegistryService registry,
 			TaskExplorer taskExplorer, TaskDefinitionRepository taskDefinitionRepository,
-			TaskConfigurationProperties taskConfigurationProperties) {
+			TaskConfigurationProperties taskConfigurationProperties, LauncherRepository launcherRepository,
+			List<TaskPlatform> taskPlatforms) {
 		return new DefaultTaskExecutionInfoService(new DataSourceProperties(),
 				registry, taskExplorer, taskDefinitionRepository,
-				taskConfigurationProperties);
+				taskConfigurationProperties, launcherRepository, taskPlatforms);
 	}
 
 	@Bean
@@ -323,6 +330,15 @@ public class JobDependencies {
 			AuditRecordService auditRecordService) {
 		return new DefaultAppRegistryService(appRegistrationRepository,
 				new AppResourceCommon(new MavenProperties(), new DefaultResourceLoader()), auditRecordService);
+	}
+
+	@Bean
+	public TaskPlatform taskPlatform() {
+		Launcher launcher = new Launcher("default", "defaultType", null, null);
+		List<Launcher> launchers = new ArrayList<>();
+		launchers.add(launcher);
+		TaskPlatform taskPlatform = new TaskPlatform("testTaskPlatform", launchers);
+		return taskPlatform;
 	}
 
 	@Bean

@@ -211,7 +211,7 @@ public class StreamTemplate implements StreamOperations {
 		ParameterizedTypeReference<Collection<Deployer>> typeReference = new ParameterizedTypeReference<Collection<Deployer>>() {
 		};
 		Map<String, Object> parameters = new HashMap<>();
-		String url = url = deploymentsLink.getHref() + "/platform/list";
+		String url = deploymentsLink.getHref() + "/platform/list";
 		return this.restTemplate.exchange(url, HttpMethod.GET, null, typeReference, parameters).getBody();
 	}
 

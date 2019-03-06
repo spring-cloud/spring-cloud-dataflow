@@ -21,7 +21,6 @@ import org.springframework.cloud.deployer.spi.local.LocalDeployerProperties;
 
 /**
  * @author Mark Pollack
- * @author David Turanski
  */
 @ConfigurationProperties("spring.cloud.dataflow.task.platform.local")
 public class LocalPlatformProperties extends AbstractPlatformProperties<LocalDeployerProperties> {

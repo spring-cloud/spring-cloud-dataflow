@@ -16,6 +16,7 @@
 
 package org.springframework.cloud.dataflow.rest.client;
 
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -29,8 +30,10 @@ import org.springframework.cloud.dataflow.rest.resource.TaskAppStatusResource;
 import org.springframework.cloud.dataflow.rest.resource.TaskDefinitionResource;
 import org.springframework.cloud.dataflow.rest.resource.TaskExecutionResource;
 import org.springframework.cloud.dataflow.rest.util.DeploymentPropertiesUtils;
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.ResourceSupport;
+import org.springframework.http.HttpMethod;
 import org.springframework.util.Assert;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
@@ -183,8 +186,12 @@ public class TaskTemplate implements TaskOperations {
 	}
 
 	@Override
-	public CurrentTaskExecutionsResource currentTaskExecutions() {
-		return restTemplate.getForObject(executionsCurrentLink.getHref(), CurrentTaskExecutionsResource.class);
+	public Collection<CurrentTaskExecutionsResource> currentTaskExecutions() {
+		ParameterizedTypeReference<Collection<CurrentTaskExecutionsResource>> typeReference =
+			new ParameterizedTypeReference<Collection<CurrentTaskExecutionsResource>>() {
+		};
+		return restTemplate
+			.exchange(executionsCurrentLink.getHref(),HttpMethod.GET,null, typeReference).getBody();
 	}
 
 	@Override

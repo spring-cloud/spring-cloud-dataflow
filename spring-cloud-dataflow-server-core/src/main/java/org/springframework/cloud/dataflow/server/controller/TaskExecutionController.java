@@ -1,5 +1,5 @@
 /*
- * Copyright 2016-2018 the original author or authors.
+ * Copyright 2016-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,10 +17,12 @@
 package org.springframework.cloud.dataflow.server.controller;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import org.springframework.cloud.dataflow.core.PlatformTaskExecutionInformation;
 import org.springframework.cloud.dataflow.rest.job.TaskJobExecutionRel;
 import org.springframework.cloud.dataflow.rest.resource.CurrentTaskExecutionsResource;
 import org.springframework.cloud.dataflow.rest.resource.TaskExecutionResource;
@@ -182,11 +184,18 @@ public class TaskExecutionController {
 
 	@RequestMapping(value = "/current", method = RequestMethod.GET)
 	@ResponseStatus(HttpStatus.OK)
-	public CurrentTaskExecutionsResource getCurrentTaskExecutionsInfo() {
-		CurrentTaskExecutionsResource currentTaskExecutionsResource = new CurrentTaskExecutionsResource();
-		currentTaskExecutionsResource.setRunningExecutionCount(explorer.getRunningTaskExecutionCount());
-		currentTaskExecutionsResource.setMaximumTaskExecutions(taskExecutionInfoService.getMaximumConcurrentTasks());
-		return currentTaskExecutionsResource;
+	public Collection<CurrentTaskExecutionsResource> getCurrentTaskExecutionsInfo() {
+		List<PlatformTaskExecutionInformation> executionInformation = taskExecutionInfoService
+				.findAllPlatformTaskExecutionInformation().getTaskExecutionInformation();
+		List<CurrentTaskExecutionsResource> resources = new ArrayList<>();
+
+		executionInformation.forEach(platformTaskExecutionInformation -> {
+			CurrentTaskExecutionsResource currentTaskExecutionsResource =
+			CurrentTaskExecutionsResource.fromTaskExecutionInformation(platformTaskExecutionInformation);
+			resources.add(currentTaskExecutionsResource);
+		});
+
+		return resources;
 	}
 
 	/**
