@@ -29,7 +29,7 @@
 		<java.version>1.8</java.version>
 		<javadoc.opts>-Xdoclint:none</javadoc.opts>
 
-		<spring-cloud-dataflow-ui.version>2.0.0.BUILD-SNAPSHOT</spring-cloud-dataflow-ui.version>
+		<spring-cloud-dataflow-ui.version>2.0.0.RELEASE</spring-cloud-dataflow-ui.version>
 
 		<spring-cloud-deployer.version>2.0.0.RELEASE</spring-cloud-deployer.version>
 		<spring-cloud-deployer-local.version>2.0.0.RELEASE</spring-cloud-deployer-local.version>
@@ -43,7 +43,7 @@
 
 		<spring-cloud-skipper.version>2.0.0.BUILD-SNAPSHOT</spring-cloud-skipper.version>
 
-		<spring-cloud-task.version>2.1.0.RELEASE</spring-cloud-task.version>
+		<spring-cloud-task.version>2.1.1.RELEASE</spring-cloud-task.version>
 
 		<!-- Note: Make sure to update `spring-cloud-build` version and `spring-cloud-dependencies` version (spring-cloud.version)
 		     are in sync with the https://github.com/spring-cloud/spring-cloud-release/blob/master/pom.xml updates for the respective
