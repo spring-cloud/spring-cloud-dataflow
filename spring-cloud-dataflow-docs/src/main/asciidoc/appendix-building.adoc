@@ -4,8 +4,6 @@
 To build the source, you need to install JDK 1.8.
 
 The build uses the Maven wrapper so that you do not have to install a specific version of Maven.
-To enable the tests for Redis, run the server before building.
-More information on how to run Redis appears later in this appendix.
 
 The main build command is as follows:
 

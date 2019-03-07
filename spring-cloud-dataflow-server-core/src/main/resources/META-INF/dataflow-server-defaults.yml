@@ -20,10 +20,6 @@ logging:
     # Silence annoying exception trace logged on info level - gh-2750
     org.hibernate.engine.jdbc.env.internal.LobCreatorBuilderImpl: 'WARN'
 spring:
-  data:
-    redis:
-      repositories:
-        enabled: false
   batch:
     initialize-schema: never
   jpa:

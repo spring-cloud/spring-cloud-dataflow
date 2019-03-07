@@ -579,17 +579,6 @@ public class LocalServerSecurityWithUsersFileTests {
 				{ HttpMethod.GET, HttpStatus.FORBIDDEN, "/management/does-not-exist", createOnlyUser, null },
 				{ HttpMethod.GET, HttpStatus.UNAUTHORIZED, "/management/does-not-exist", null, null },
 
-				// Requires Redis
-				// { HttpMethod.GET, HttpStatus.FORBIDDEN, "/metrics/counters",
-				// manageOnlyUser, null },
-				// { HttpMethod.GET, HttpStatus.OK, "/metrics/counters", viewOnlyUser,
-				// null },
-				// { HttpMethod.GET, HttpStatus.FORBIDDEN, "/metrics/counters",
-				// createOnlyUser, null },
-				// { HttpMethod.GET, HttpStatus.UNAUTHORIZED, "/metrics/counters", null,
-				// null },
-
-
 				/* SecurityController */
 
 				{ HttpMethod.GET, HttpStatus.OK, "/security/info", manageOnlyUser, null },
