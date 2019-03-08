@@ -10,7 +10,7 @@ It also covers how to configure Spring Cloud Data Flow's shell features.
 [[enable-disable-specific-features]]
 == Feature Toggles
 
-Sprig Cloud Data Flow Server offers specific set of features that can be enabled/disabled when launching. These features include all the lifecycle operations and REST endpoints (server and client implementations, including the shell and the UI) for:
+Spring Cloud Data Flow Server offers specific set of features that can be enabled/disabled when launching. These features include all the lifecycle operations and REST endpoints (server and client implementations, including the shell and the UI) for:
 
 * Streams
 * Tasks
