@@ -188,7 +188,7 @@
 					<excludes>
 						<exclude>**/Abstract*.java</exclude>
 					</excludes>
-					<!-- see http://stackoverflow.com/questions/18107375/getting-skipping-jacoco-execution-due-to-missing-execution-data-file-upon-exec -->
+					<!-- see https://stackoverflow.com/questions/18107375/getting-skipping-jacoco-execution-due-to-missing-execution-data-file-upon-exec -->
 					<argLine>${argLine}</argLine>
 				</configuration>
 			</plugin>
