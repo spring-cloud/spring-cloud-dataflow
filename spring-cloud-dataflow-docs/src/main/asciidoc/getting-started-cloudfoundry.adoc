@@ -1,13 +1,15 @@
 [[getting-started-cloudfoundry]]
 == Getting Started - Cloud Foundry
 
+This section covers how to get started with Spring Cloud Data Flow on Cloud Foundry.
+
 [[getting-started-cloudfoundry-requirements]]
 === System Requirements
 
-The Spring Cloud Data Flow server deploys task tasks (short-lived applications) and via Skipper deploys streams (long-lived applications) to Cloud Foundry.
+The Spring Cloud Data Flow server deploys tasks (short-lived applications), and Skipper deploys streams (long-lived applications) to Cloud Foundry.
 The server is a lightweight Spring Boot application. It can run on Cloud Foundry or your laptop, but it is more common to run the server in Cloud Foundry.
 
-Spring Cloud Data Flow requires a few data services to perform streaming and task/batch processing.
+Spring Cloud Data Flow requires a few data services to perform streaming and task or batch processing.
 You have two options when you provision Spring Cloud Data Flow and related services on Cloud Foundry:
 
 * The simplest (and automated) method is to use the link:https://network.pivotal.io/products/p-dataflow[Spring Cloud Data Flow for PCF] tile.
@@ -15,64 +17,74 @@ This is an opinionated tile for Pivotal Cloud Foundry.
 It automatically provisions the server and the required data services, thus simplifying the overall getting-started experience. You can read more about the installation link:http://docs.pivotal.io/scdf/[here].
 * Alternatively, you can provision all the components manually. The following section goes into the specifics of how to do so.
 
-==== Provision a Rabbit Service Instance on Cloud Foundry
+==== Provisioning a Rabbit Service Instance on Cloud Foundry
+
 RabbitMQ is used as a messaging middleware between streaming apps and is bound to each deployed streaming app.
 Apache Kafka is the other option.
-We can use the `SPRING_CLOUD_SKIPPER_SERVER_PLATFORM_CLOUDFOUNDRY_ACCOUNTS[pws]_DEPLOYMENT_SERVICES` setting in `Skipper Server` configuration which automatically binds RabbitMQ to the deployed streaming applications.
+You can use the `SPRING_CLOUD_SKIPPER_SERVER_PLATFORM_CLOUDFOUNDRY_ACCOUNTS[pws]_DEPLOYMENT_SERVICES` setting in the `Skipper Server` configuration, which automatically binds RabbitMQ to the deployed streaming applications.
 
 You can use `cf marketplace` to discover which plans are available to you, depending on the details of your Cloud Foundry setup.
-For example, you can use link:https://run.pivotal.io/[Pivotal Web Services]:
+For example, you can use link:https://run.pivotal.io/[Pivotal Web Services], as the following example shows:
 
-
+====
 [source,bash,subs=attributes]
 ----
 cf create-service cloudamqp lemur rabbit
 ----
-
+====
 
 ==== Provision a PostgreSQL Service Instance on Cloud Foundry
+
 An RDBMS is used to persist Data Flow state, such as stream and task definitions, deployments, and executions.
 
 You can use `cf marketplace` to discover which plans are available to you, depending on the details of your Cloud Foundry setup.
-For example, you can use link:https://run.pivotal.io/[Pivotal Web Services]:
+For example, you can use link:https://run.pivotal.io/[Pivotal Web Services], as the following example shows:
 
-
+====
 [source,bash,subs=attributes]
 ----
 cf create-service elephantsql panda my_postgres
 ----
+====
 
-NOTE: If you intend to create and run batch-jobs as Task pipelines in SCDF, please make sure the underlying database
+IMPORTANT: If you intend to create and run batch-jobs as Task pipelines in SCDF, you must ensure that the underlying database
 instance includes enough connections capacity so that the batch-jobs, Task, and SCDF can concurrently connect to the same
 database instance without running into connection limits.
 
 [[getting-started-cloudfoundry-installation]]
 === Cloud Foundry Installation
-Starting with 2.0.x, the Data Flow Server requires a `Skipper` server for managing the Streams lifecycle.
 
-1) Download the Data Flow server and shell applications, as the following example shows:
+NOTE: Starting with 2.0.x, the Data Flow Server requires a `Skipper` server for managing the Streams lifecycle.
 
+To install Cloud Foundry:
 
+. Download the Data Flow server and shell applications, by running the following example commands:
++
+====
 [source,yaml,subs=attributes]
 ----
 wget https://repo.spring.io/{version-type-lowercase}/org/springframework/cloud/spring-cloud-dataflow-server/{project-version}/spring-cloud-dataflow-server-{project-version}.jar
 
 wget https://repo.spring.io/{version-type-lowercase}/org/springframework/cloud/spring-cloud-dataflow-shell/{project-version}/spring-cloud-dataflow-shell-{project-version}.jar
 ----
+====
 
-2) Download http://cloud.spring.io/spring-cloud-skipper/[Skipper] to which Data Flow delegate Streams lifecycle operations such as deployment, upgrading and rolling back.
-The following example shows how to do so:
-
-
+. Download http://cloud.spring.io/spring-cloud-skipper/[Skipper], to which Data Flow delegates stream lifecycle operations, such as deployment, upgrading and rolling back.
+To do so, use the following command:
++
+====
 [source,yaml,options=nowrap,subs=attributes]
 ----
 wget http://repo.spring.io/{skipper-version-type-lowercase}/org/springframework/cloud/spring-cloud-skipper-server/{skipper-version}/spring-cloud-skipper-server-{skipper-version}.jar
 ----
+====
 
-
-Push Skipper to Cloud Foundry.  The following example shows a manifest for Skipper.
-
-
+. Push Skipper to Cloud Foundry
++
+Once you have installed Cloud Foundry, you can push Skipper to Cloud Foundry. To do so, you need to create a manifest for Skipper.
+The following example shows a typical manifest for Skipper:
++
+====
 [source,yaml,options=nowrap]
 ----
 ---
@@ -104,17 +116,17 @@ applications:
 services:
 - <services>
 ----
-
-
-You need to fill in `<org>`, `<space>`, `<email>`,  `<password>`, `<middlewareServiceName>` (e.g. rabbit or kafka) and `<services>` (such as PostgresSQL) before running these commands.
+====
++
+You need to fill in `<org>`, `<space>`, `<email>`,  `<password>`, `<middlewareServiceName>` (Rabbit or Kafka) and `<services>` (such as PostgresSQL) before running these commands.
 Once you have the desired config values in `manifest.yml`, you can run the `cf push` command to provision the skipper-server.
-
-WARNING: Only set 'Skip SSL Validation' to `true` if you run on a Cloud Foundry instance by using self-signed
++
+WARNING: Set 'Skip SSL Validation' to `true` only if you run on a Cloud Foundry instance by using self-signed
 certificates (for example, in development). Do not use self-signed certificates for production.
-
++
 NOTE: When specifying the `buildpack`, our examples typically specify `java_buildpack` or `java_buildpack_offline`. Use the CF command `cf buildpacks` to get a listing of available relevant buildpacks for your environment.
 
-3) Configure and run the Data Flow Server
+. Configure and run the Data Flow Server.
 
 One of the most important configuration details is providing credentials to the Cloud Foundry instance so that the server can itself spawn applications.
 You can use any Spring Boot-compatible configuration mechanism (passing program arguments, editing configuration files before building the application, using link:https://github.com/spring-cloud/spring-cloud-config[Spring Cloud Config], using environment variables, and others), although some may prove more practicable than others, depending on how you typically deploy applications to Cloud Foundry.
@@ -125,18 +137,17 @@ However, there are some general configuration details you should be aware of in 
 [[getting-started-cloudfoundry-general-configuration]]
 ==== General Configuration
 
-Some things to be aware of when installing into a Cloud Foundry.
+This section covers some things to be aware of when you install into a Cloud Foundry instance.
 
-NOTE: You must use a unique name for your app. An application with the same name in the same organization causes your deployment to fail.
+NOTE: You must use a unique name for your application. An application with the same name in the same organization causes your deployment to fail.
 
 NOTE: The recommended minimum memory setting for the server is 2G. Also, to push apps to PCF and obtain application property metadata, the server downloads applications to a Maven repository hosted on the local disk.
 While you can specify up to 2G as a typical maximum value for disk space on a PCF installation, you can increase this to 10G.
 Read the xref:getting-started-maximum-disk-quota-configuration[maximum disk quota] section for information on how to configure this PCF property.
 Also, the Data Flow server itself implements a Last-Recently-Used algorithm to free disk space when it falls below a low-water-mark value.
 
-NOTE: If you are pushing to a space with multiple users (for example, on PWS), the route you chose for your application name may already be taken.
+NOTE: If you push to a space with multiple users (for example, on PWS), the route you chose for your application name may already be taken.
 You can use the `--random-route` option to avoid this when you push the server application.
-
 
 NOTE: If you need to configure multiple Maven repositories, a proxy, or authorization for a private repository, see link:http://docs.spring.io/spring-cloud-dataflow/docs/{scdf-core-version}/reference/htmlsingle/#getting-started-maven-configuration[Maven Configuration].
 
@@ -146,9 +157,9 @@ NOTE: If you need to configure multiple Maven repositories, a proxy, or authoriz
 
 The following configuration is for Pivotal Web Services. You need to fill in `\<org>`, `\<space>`, `\<email>` and `\<password>` before running these commands.
 Tasks are deployed directly from the Data Flow Server.
-In the future, you will be able to deploy tasks to multiple platforms, but for 2.0.0.M1 you can deploy only to a single platform and the name must be `default`.
+In the future, you will be able to deploy tasks to multiple platforms. However, for 2.0.0.M1, you can deploy to only a single platform and the name must be `default`.
 
-
+====
 [source,bash,subs=attributes]
 ----
 cf set-env dataflow-server SPRING_PROFILES_ACTIVE: cloud
@@ -163,50 +174,48 @@ cf set-env dataflow-server SPRING_CLOUD_DATAFLOW_TASK_PLATFORM_CLOUDFOUNDRY_ACCO
 cf set-env dataflow-server SPRING_CLOUD_DATAFLOW_TASK_PLATFORM_CLOUDFOUNDRY_ACCOUNTS[default]_DEPLOYMENT_SERVICES: postgreSQL
 cf set-env dataflow-server SPRING_CLOUD_DATAFLOW_TASK_PLATFORM_CLOUDFOUNDRY_ACCOUNTS[default]_DEPLOYMENT_MEMORY: 2048m
 ----
+====
 
+NOTE: You must deploy Skipper first and then configure the URI location where the Skipper server runs.
 
-[NOTE]
-=====
-Deploy Skipper first and then configure the URI location where the Skipper server runs.
-=====
-
-The Spring Cloud Data Flow server does not have any default remote maven repository configured.
-This is intentionally designed to provide the flexibility, so you can override and point to a remote repository of your choice.
+The Spring Cloud Data Flow server does not have a default remote Maven repository configured.
+This is an intentional bit of flexibility that lets you point to a remote repository of your choice.
 The out-of-the-box applications that are supported by Spring Cloud Data Flow are available in Spring's repository. If you want to use them, set it as the remote repository, as the following example shows:
 
-
+====
 [source,bash,subs=attributes]
 ----
 cf set-env dataflow-server SPRING_APPLICATION_JSON '{"maven": { "remote-repositories": { "repo1": { "url": "https://repo.spring.io/libs-release" } } } }'
 ----
-where `repo1` is the alias name for the remote repository
+where `repo1` is the alias name for the remote repository.
+====
 
-or using the environment variable `MAVEN_REMOTEREPOSITORIES[REPO1]_URL:`.
 
+Alternatively, you can use the `MAVEN_REMOTEREPOSITORIES[REPO1]_URL:` environment variable.
 
-WARNING: Only set 'Skip SSL Validation' to true if you run on a Cloud Foundry instance using self-signed certificates (for example, in development).
+WARNING: Set 'Skip SSL Validation' to true only if you run on a Cloud Foundry instance that uses self-signed certificates (for example, in development).
 Do not use self-signed certificates for production.
 
-NOTE: If you are deploying in an environment that requires you to sign on using the Pivotal Single Sign-On Service, see <<configuration-cloudfoundry-security-sso>> for information on how to configure the server.
+NOTE: If you deploy in an environment that requires you to sign on by using the Pivotal Single Sign-On Service, see <<configuration-cloudfoundry-security-sso>> for information on how to configure the server.
 
 You can now issue a `cf push` command and reference the Data Flow server .jar file, as the following example shows:
 
-
+====
 [source, subs=attributes]
 ----
 cf push dataflow-server -b java_buildpack -m 2G -k 2G --no-start -p spring-cloud-dataflow-server-{project-version}.jar
 cf bind-service dataflow-server my_postgres
 ----
+====
 
 
 
 [[getting-started-cloudfoundry-deploying-using-manifest]]
 ==== Deploying by Using a Manifest
 
-As an alternative to setting environment variables with the `cf set-env` command, you can curate all the relevant env-var's in a `manifest.yml` file and use the `cf push` command to provision the server.
+As an alternative to setting environment variables with the `cf set-env` command, you can curate all the relevant environment variables in a `manifest.yml` file and use the `cf push` command to provision the server. The following example shows such a manifest file:
 
-Example:
-
+====
 [source,yml]
 ----
 ---
@@ -234,22 +243,19 @@ applications:
 services:
 - postgreSQL
 ----
+====
 
+NOTE: You must deploy Skipper first and then configure the URI location where the Skipper server runs.
 
-[NOTE]
-=====
-Deploy Skipper first and then configure the URI location where the Skipper server runs.
-=====
-
-Once you are ready with the relevant properties in this file, you can issue a `cf push` command from the directory where this file is stored.
+Once you are ready with the relevant properties in your manifest file, you can issue a `cf push` command from the directory where this file is stored.
 
 [[getting-started-cloudfoundry-on-local]]
 === Local Installation
 
-To run the server application locally (on your laptop or desktop) and target your Cloud Foundry installation, configure the Data
-Flow server by setting the following environment variables in a property file (e.g., `foo.properties`).
+To run the server application locally (on your laptop or desktop) and target your Cloud Foundry installation, you can configure the Data
+Flow server by setting the following environment variables in a property file (for example, `myproject.properties`):
 
-
+====
 [source,properties]
 ----
 spring.profiles.active=cloud
@@ -262,46 +268,44 @@ spring.cloud.dataflow.task.platform.cloudfoundry.accounts[default].connection.us
 spring.cloud.dataflow.task.platform.cloudfoundry.accounts[default].connection.password={password}
 spring.cloud.dataflow.task.platform.cloudfoundry.accounts[default].connection.skipSslValidation=false
 
-# The following is for letting task apps write to their db.
-# Note however that when the *server* is running locally, it can't access that db
-# task related commands that show executions won't work then
+# The following command lets task applications write to their DB.
+# Note, however, that when the *server* runs locally, it cannot access that DB.
+# In that case, task-related commands that show executions do not work.
 spring.cloud.dataflow.task.platform.cloudfoundry.accounts[default].deployment.services=mysqlcups
 skipper.client.serverUri=https://<skipper-host-name>/api
 ----
+====
 
+You need to fill in `\{org}`, `\{space}`, `\{email}`, and `\{password}` before using the file in the following command.
 
-You need to fill in `\{org}`, `\{space}`, `\{email}` and `\{password}` before using the file in the following command.
-
-WARNING: Only set 'Skip SSL Validation' to true if you run on a Cloud Foundry instance using self-signed certificates (for example, in development).
+WARNING: Set 'Skip SSL Validation' to true only if you run on a Cloud Foundry instance by using self-signed certificates (for example, in development).
 Do not use self-signed certificates for production.
 
-[NOTE]
-=====
-Deploy Skipper first and then configure the URI location of where the Skipper server is running.
-=====
+NOTE: You must deploy Skipper first and then configure the URI location of where the Skipper server is running.
 
-Now we are ready to start the server application, as follows:
+Now you are ready to start the server application, as follows:
 
-
+====
 [source, subs=attributes]
 ----
 java -jar spring-cloud-dataflow-server-{project-version}.jar --spring.config.additional-location=<PATH-TO-FILE>/foo.properties
 ----
-
+====
 
 TIP: All other parameterization options that were available when running the server on Cloud Foundry are still available.
 This is particularly true for xref:configuring-defaults[configuring defaults] for applications. To use them, substitute `cf set-env` syntax with `export`.
 
 [[getting-started-cloudfoundry-data-flow-shell]]
 === Data Flow Shell
+
 The following example shows how to start the Data Flow Shell:
 
-
+====
 [source,bash,subs=attributes]
 ----
 $ java -jar spring-cloud-dataflow-shell-{scdf-core-version}.jar
 ----
-
+====
 
 [[getting-started-cloudfoundry-streams-using-skipper]]
 === Deploying Streams
@@ -309,7 +313,7 @@ $ java -jar spring-cloud-dataflow-shell-{scdf-core-version}.jar
 This section proceeds with the assumption that Spring Cloud Data Flow, Spring Cloud Skipper, RDBMS, and your desired messaging middleware are all running in PWS.
 The following listing shows the apps running in a sample org and space:
 
-
+====
 [source,console,options=nowrap]
 ----
 $ cf apps                                                                                                           ✭
@@ -320,33 +324,33 @@ name                         requested state   instances   memory   disk   urls
 skipper-server               started           1/1         1G       1G     skipper-server.cfapps.io
 dataflow-server              started           1/1         1G       1G     dataflow-server.cfapps.io
 ----
-
+====
 
 The following example shows how to start the Data Flow shell for the Data Flow server:
 
-
+====
 [source,bash,subs=attributes]
 ----
 $ java -jar spring-cloud-dataflow-shell-{scdf-core-version}.jar
 ----
-
+====
 
 If the Data Flow Server and shell are not running on the same host, you can point the shell to the Data Flow server URL, as follows:
 
-
+====
 [source,bash,subs=attributes]
 ----
 server-unknown:>dataflow config server http://dataflow-server.cfapps.io
 Successfully targeted http://dataflow-server.cfapps.io
 dataflow:>
 ----
+====
 
-
-Alternatively, you can pass in the `--dataflow.uri` command line option. The shell'sx `--help` command line option shows what options are available.
+Alternatively, you can pass in the `--dataflow.uri` command line option. The shell 'sx `--help` command line option shows what options are available.
 
 You can verify the available platforms in Skipper, as follows:
 
-
+====
 [source,console,options=nowrap]
 ----
 dataflow:>stream platform-list
@@ -356,12 +360,12 @@ dataflow:>stream platform-list
 ║pws    │cloudfoundry│org == [scdf-ci], space == [space-sabby], url == [https://api.run.pivotal.io]           ║
 ╚═══════╧════════════╧═════════════════════════════════════════════════════════════════════════════════════╝
 ----
-
+====
 
 We start by deploying a stream with the `time-source` pointing to `1.2.0.RELEASE` and `log-sink` pointing to `1.1.0.RELEASE`.
-The goal is to perform a rolling upgrade of the `log-sink` application to `1.2.0.RELEASE`.
+The goal is to perform a rolling upgrade of the `log-sink` application to `1.2.0.RELEASE`. The following example shows how to do so:
 
-
+====
 [source,console,options=nowrap]
 ----
 dataflow:>app register --name time --type source --uri maven://org.springframework.cloud.stream.app:time-source-rabbit:1.2.0.RELEASE
@@ -378,13 +382,13 @@ dataflow:>app info sink:log
 Information about sink application 'log':
 Resource URI: maven://org.springframework.cloud.stream.app:log-sink-rabbit:1.1.0.RELEASE
 ----
+====
 
+When you create a stream, you msut use a unique name (one that might not be taken by another application on PCF/PWS).
 
-When you create a stream, use a unique name (one that might not be taken by another application on PCF/PWS).
+The following example shows how to create and deploy a stream;
 
-The following example shows how to create a deploy a stream
-
-
+====
 [source,bash,subs=attributes]
 ----
 dataflow:>stream create ticker-314 --definition "time | log"
@@ -392,14 +396,14 @@ Created new stream 'ticker-314'
 dataflow:>stream deploy ticker-314 --platformName pws
 Deployment request has been sent for stream 'ticker-314'
 ----
-
+====
 
 NOTE: While deploying the stream, we supply `--platformName`, which indicates the platform repository (`pws`) to
 use when deploying the stream applications with Skipper.
 
 Now you can list the running applications again and see your applications in the list, as the following example shows:
 
-
+====
 [source,console,options=nowrap]
 ----
 $ cf apps                                                                                                                                                                                                                                         [1h] ✭
@@ -411,11 +415,11 @@ ticker-314-time-v1           started           1/1         1G       1G     ticke
 skipper-server               started           1/1         1G       1G     skipper-server.cfapps.io
 dataflow-server              started           1/1         1G       1G     dataflow-server.cfapps.io
 ----
+====
 
+Now you can verify the logs, as the following example shows:
 
-Now you an verify the logs, as the following example shows:
-
-
+====
 [source,console,options=nowrap]
 ----
 $ cf logs ticker-314-log-v1
@@ -425,11 +429,11 @@ $ cf logs ticker-314-log-v1
 2017-11-20T15:39:44.75-0800 [APP/PROC/WEB/0] OUT 2017-11-20 23:39:44.757  INFO 12 --- [ ticker-314.time.ticker-314-1] log-sink                                 : 11/20/17 23:39:44
 2017-11-20T15:39:45.75-0800 [APP/PROC/WEB/0] OUT 2017-11-20 23:39:45.757  INFO 12 --- [ ticker-314.time.ticker-314-1] log-sink                                 : 11/20/17 23:39:45
 ----
-
+====
 
 Now you can verify the stream history, as the following example shows:
 
-
+====
 [source,console,options=nowrap]
 ----
 dataflow:>stream history --name ticker-314
@@ -439,11 +443,11 @@ dataflow:>stream history --name ticker-314
 ║1      │Mon Nov 20 15:34:37 PST 2017│DEPLOYED│ticker-314  │1.0.0          │Install complete║
 ╚═══════╧════════════════════════════╧════════╧════════════╧═══════════════╧════════════════╝
 ----
-
+====
 
 Now you can verify the package manifest in Skipper. The `log-sink` should be at `1.1.0.RELEASE`. The following example shows both the command to use and its output:
 
-
+====
 [source,yml,options=nowrap]
 ----
 dataflow:>stream manifest --name ticker-314
@@ -493,21 +497,21 @@ spec:
   deploymentProperties:
     spring.cloud.deployer.group: ticker-314
 ----
+====
 
+Now you can update `log-sink` from `1.1.0.RELEASE` to `1.2.0.RELEASE`.  First, you need to register the version 1.2.0.RELEASE. The following example shows how to do so:
 
-Now you can update `log-sink` from `1.1.0.RELEASE` to `1.2.0.RELEASE`.  First we need to register the version 1.2.0.RELEASE. The following example shows how to do so:
-
-
+====
 [source,console,options=nowrap]
 ----
 dataflow:>app register --name log --type sink --uri maven://org.springframework.cloud.stream.app:log-sink-rabbit:1.1.0.RELEASE
 Successfully registered application 'sink:log'
 ----
-
+====
 
 If you run the `app list` command for the log sink, you can now see that two versions are registered, as the following example shows:
 
-
+====
 [source,console,options=nowrap]
 ----
 dataflow:>app list --id sink:log
@@ -518,22 +522,24 @@ dataflow:>app list --id sink:log
 ║      │         │log-1.2.0.RELEASE    │    ║
 ╚══════╧═════════╧═════════════════════╧════╝
 ----
-
+====
 
 The greater-than and less-than signs around `> log-1.1.0.RELEASE <` indicate that this is the default version that is used when matching `log` in the DSL for a stream definition.
 You can change the default version by using the `app default` command.
 
+Now you can use the `stream update` command to use the newer version, as the following example shows:
 
+====
 [source,console,options=nowrap]
 ----
 dataflow:>stream update --name ticker-314 --properties version.log=1.2.0.RELEASE
 Update request has been sent for stream 'ticker-314'
 ----
-
+====
 
 Now you can list the applications again to see the two versions of the `ticker-314-log` application, as the following example shows:
 
-
+====
 [source,console,options=nowrap]
 ----
 ± cf apps                                                                                                                                                                                                                                         [1h] ✭
@@ -549,14 +555,14 @@ ticker-314-time-v1           started           1/1         1G       1G     ticke
 skipper-server               started           1/1         1G       1G     skipper-server.cfapps.io
 dataflow-server              started           1/1         1G       1G     dataflow-server.cfapps.io
 ----
+====
 
-
-NOTE: There are two versions of the `log-sink` applications. The `ticker-314-log-v1` application instance is going down (route already removed) and the newly spawned `ticker-314-log-v2` application is bootstrapping.
+NOTE: There are two versions of the `log-sink` applications. The `ticker-314-log-v1` application instance is going down (its route has already been removed) and the newly spawned `ticker-314-log-v2` application is bootstrapping.
 The version number is incremented and the version-number (`v2`) is included in the new application name.
 
-1) Once the new application is up and running, you can verify the logs, as the following example shows:
+Once the new application is up and running, you can verify the logs, as the following example shows:
 
-
+====
 [source,console,options=nowrap]
 ----
 $ cf logs ticker-314-log-v2
@@ -566,13 +572,13 @@ $ cf logs ticker-314-log-v2
 2017-11-20T18:38:36.00-0800 [APP/PROC/WEB/0] OUT 2017-11-21 02:38:36.004  INFO 18 --- [ticker-314.time.ticker-314-1] ticker-314-log-v2                              : 11/21/17 02:38:35
 2017-11-20T18:38:37.00-0800 [APP/PROC/WEB/0] OUT 2017-11-21 02:38:37.005  INFO 18 --- [ticker-314.time.ticker-314-1] ticker-314-log-v2                              : 11/21/17 02:38:36
 ----
-
+====
 
 Now you can look at the updated package manifest persisted in Skipper.
 You should now be seeing `log-sink` at 1.2.0.RELEASE.
 The following example shows the command to use and its output:
 
-
+====
 [source,yml,options=nowrap]
 ----
 skipper:>stream manifest --name ticker-314
@@ -622,11 +628,11 @@ spec:
   deploymentProperties:
     spring.cloud.deployer.group: ticker-314
 ----
+====
 
+Now you can verify stream history for the latest updates. To do so, use the `stream history` command, as the following example shows:
 
-Now you can verify stream history for the latest updates.
-
-
+====
 [source,console,options=nowrap]
 ----
 dataflow:>stream history --name ticker-314
@@ -637,12 +643,12 @@ dataflow:>stream history --name ticker-314
 ║1      │Mon Nov 20 15:34:37 PST 2017│DELETED │ticker-314  │1.0.0          │Delete complete ║
 ╚═══════╧════════════════════════════╧════════╧════════════╧═══════════════╧════════════════╝
 ----
+====
 
+Rolling-back to the previous version is only a command away.
+The following example shows how to do so and shows the resulting output:
 
-Rolling-back to the previous version is just a command away.
-The following example shows how to do so and the resulting output:
-
-
+====
 [source,console,options=nowrap]
 ----
 dataflow:>stream rollback --name ticker-314
@@ -660,7 +666,7 @@ dataflow:>stream history --name ticker-314
 ║1      │Mon Nov 20 15:34:37 PST 2017│DELETED │ticker-314  │1.0.0          │Delete complete ║
 ╚═══════╧════════════════════════════╧════════╧════════════╧═══════════════╧════════════════╝
 ----
-
+====
 
 
 [[getting-started-cloudfoundry-deploying-tasks]]
@@ -668,29 +674,29 @@ dataflow:>stream history --name ticker-314
 
 To run a simple task application, you can register all the out-of-the-box task applications with the following command:
 
-
+====
 [source,bash,subs=attributes]
 ----
 dataflow:>app import --uri http://bit.ly/Dearborn-SR1-task-applications-maven
 ----
-
+====
 
 Now you can create a simple link:https://docs.spring.io/spring-cloud-task-app-starters/docs/Dearborn.RELEASE/reference/htmlsingle/#spring-cloud-task-modules-tasks[timestamp] task, as the following example shows:
 
-
+====
 [source,bash,subs=attributes]
 ----
 dataflow:>task create mytask --definition "timestamp --format='yyyy'"
 ----
-
+====
 
 Now you can examine the tail of the logs (for example, `cf logs mytask`) and then launch the task in the UI or in the Data Flow Shell, as the following example shows:
 
-
+====
 [source,bash,subs=attributes]
 ----
 dataflow:>task launch mytask
 ----
+====
 
-
-You will see the year (`2018` at the time of this writing) printed in the logs. The execution status of the task is stored in the database, and you can retrieve information about the task execution by using the `task execution list` and `task execution status --id <ID_OF_TASK>` shell commands or though the Data Flow UI.
+You can see the year (`2019` at the time of this writing) printed in the logs. The execution status of the task is stored in the database, and you can retrieve information about the task execution by using the `task execution list` and `task execution status --id <ID_OF_TASK>` shell commands or though the Data Flow UI.
