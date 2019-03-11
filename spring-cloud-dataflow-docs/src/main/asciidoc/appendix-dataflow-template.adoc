@@ -44,7 +44,7 @@ When the `DataFlowTemplate` is being initialized, the sub-templates can be disco
 
 IMPORTANT: If a resource cannot be resolved, the respective sub-template results
 in NULL. A common cause is that Spring Cloud Data Flow offers for specific
-sets of features to be enabled/disabled when launching. For more information, see "`<<enable-disable-specific-features>>`".
+sets of features to be enabled/disabled when launching. For more information, see `<<configuration-local-enable-disable-specific-features, local>>`, `<<configuration-cloudfoundry-enable-disable-specific-features, Cloud Foundry>>`, `<<configuration-kubernetes-enable-disable-specific-features, Kubernetes>>`.
 
 === Using the Data Flow Template
 
