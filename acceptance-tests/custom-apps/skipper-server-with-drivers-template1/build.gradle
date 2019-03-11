@@ -31,11 +31,11 @@ jar {
 repositories {
 	mavenCentral()
 	mavenLocal()
-	maven { url "http://repo.springsource.org/libs-snapshot" }
-	maven { url "http://repo.springsource.org/libs-release" }
-	maven { url "http://repo.springsource.org/libs-milestone" }
+	maven { url "https://repo.springsource.org/libs-snapshot" }
+	maven { url "https://repo.springsource.org/libs-release" }
+	maven { url "https://repo.springsource.org/libs-milestone" }
 	maven {
-		url "http://repo.springsource.org/ext-private-local"
+		url "https://repo.springsource.org/ext-private-local"
 		credentials {
             username = System.getenv('ARTIFACTORY_USERNAME') ?: artifactoryUsername
             password = System.getenv('ARTIFACTORY_PASSWORD') ?: artifactoryPassword

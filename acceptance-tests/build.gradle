@@ -71,7 +71,7 @@ configure(allprojects) {
 		maven { url "https://dl.bintray.com/palantir/releases" }
 		mavenLocal()
 		maven {
-			url "http://repo.springsource.org/ext-private-local"
+			url "https://repo.springsource.org/ext-private-local"
 			credentials {
 				username = System.getenv('ARTIFACTORY_USERNAME') ?: artifactoryUsername
 				password = System.getenv('ARTIFACTORY_PASSWORD') ?: artifactoryPassword
