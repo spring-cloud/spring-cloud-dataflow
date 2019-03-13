@@ -37,9 +37,6 @@
         are in sync with the https://github.com/spring-cloud/spring-cloud-release/blob/master/pom.xml updates for the respective
         release versions -->
         <spring-cloud.version>Greenwich.SR1</spring-cloud.version>
-        <!--TODO Tzolov: https://github.com/spring-cloud/spring-cloud-skipper/issues/750-->
-        <spring-cloud-services.version>2.0.2.RELEASE</spring-cloud-services.version>
-
 
         <java-cfenv-boot.version>1.0.1.RELEASE</java-cfenv-boot.version>
         <spring-cloud-deployer.version>2.0.0.RELEASE</spring-cloud-deployer.version>
@@ -57,12 +54,11 @@
         <java-semver.version>0.9.0</java-semver.version>
         <spring-cloud-common-security-config.version>1.1.2.RELEASE</spring-cloud-common-security-config.version>
 
-        <hikaricp.version>3.1.0</hikaricp.version>
         <jsonpath.version>2.4.0</jsonpath.version>
         <commons-lang.version>3.4</commons-lang.version>
         <equalverifier.version>2.4.1</equalverifier.version>
         <hibernate.jpa.version>1.0.0.Final</hibernate.jpa.version>
-        <mariadb-java-client.version>2.4.0</mariadb-java-client.version>
+        <mariadb.version>2.4.0</mariadb.version>
 
         <jacoco-maven-plugin.version>0.7.9</jacoco-maven-plugin.version>
         <surefire-maven-plugin.version>2.20</surefire-maven-plugin.version>
@@ -112,13 +108,6 @@
                 <scope>import</scope>
             </dependency>
             <dependency>
-                <groupId>io.pivotal.spring.cloud</groupId>
-                <artifactId>spring-cloud-services-dependencies</artifactId>
-                <version>${spring-cloud-services.version}</version>
-                <type>pom</type>
-                <scope>import</scope>
-            </dependency>
-            <dependency>
                 <groupId>org.springframework.cloud</groupId>
                 <artifactId>spring-cloud-deployer-dependencies</artifactId>
                 <version>${spring-cloud-deployer.version}</version>
@@ -130,26 +119,11 @@
                 <artifactId>spring-cloud-starter-common-security-config-web</artifactId>
                 <version>${spring-cloud-common-security-config.version}</version>
             </dependency>
-            <!--
-            oauth2 dep management is a mess, unless it's redefined here,
-            spring-cloud-services somehow switches scope to runtime
-            and compile fails.
-             -->
-            <dependency>
-                <groupId>org.springframework.security.oauth</groupId>
-                <artifactId>spring-security-oauth2</artifactId>
-                <version>2.3.4.RELEASE</version>
-            </dependency>
-            <!--
-            Required to override the spring-cloud-sso-connector versions. Related to
-            https://github.com/spring-cloud/spring-cloud-skipper/issues/750
-            -->
             <dependency>
                 <groupId>org.springframework.security.oauth.boot</groupId>
                 <artifactId>spring-security-oauth2-autoconfigure</artifactId>
                 <version>${spring-boot.version}</version>
             </dependency>
-
             <dependency>
                 <groupId>org.springframework.cloud</groupId>
                 <artifactId>spring-cloud-skipper-autoconfigure</artifactId>
@@ -215,16 +189,10 @@
                 <artifactId>java-cfenv-boot-pivotal-sso</artifactId>
                 <version>${java-cfenv-boot.version}</version>
             </dependency>
-            <!-- just having hikaricp.version didn't work, need to redefine dependency -->
-            <dependency>
-                <groupId>com.zaxxer</groupId>
-                <artifactId>HikariCP</artifactId>
-                <version>${hikaricp.version}</version>
-            </dependency>
             <dependency>
                 <groupId>org.mariadb.jdbc</groupId>
                 <artifactId>mariadb-java-client</artifactId>
-                <version>${mariadb-java-client.version}</version>
+                <version>${mariadb.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.springframework.cloud</groupId>
@@ -254,18 +222,12 @@
             <dependency>
                 <groupId>org.zeroturnaround</groupId>
                 <artifactId>zt-zip</artifactId>
-                <version>1.11</version>
+		<version>${zeroturnaround.version}</version>
             </dependency>
             <dependency>
                 <groupId>io.projectreactor</groupId>
                 <artifactId>reactor-core</artifactId>
                 <version>${reactor.version}</version>
-            </dependency>
-            <!-- Until we get this https://github.com/spring-projects/spring-boot/issues/15402 in a Spring Boot 2.1.x release-->
-            <dependency>
-                <groupId>org.flywaydb</groupId>
-                <artifactId>flyway-core</artifactId>
-                <version>5.2.4</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
