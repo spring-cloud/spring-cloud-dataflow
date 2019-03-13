@@ -30,4 +30,21 @@ spec:
         env:
         - name: SPRING_CLOUD_KUBERNETES_CONFIG_NAME
           value: skipper
+        - name: SPRING_CLOUD_KUBERNETES_SECRETS_ENABLE_API
+          value: 'true'
+        - name: SPRING_CLOUD_KUBERNETES_SECRETS_NAME
+          value: mysql
+      initContainers:
+      - name: init-mysql-wait
+        image: busybox
+        command: ['sh', '-c', 'until nc -w3 -z mysql 3306; do echo waiting for mysql; sleep 3; done;']
+      - name: init-mysql-database
+        image: mysql:5.6
+        env:
+        - name: MYSQL_PWD
+          valueFrom:
+            secretKeyRef:
+              name: mysql
+              key: mysql-root-password
+        command: ['sh', '-c', 'mysql -h mysql -u root -e "CREATE DATABASE IF NOT EXISTS skipper;"']
       serviceAccountName: scdf-sa
