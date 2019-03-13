@@ -155,7 +155,7 @@ public class DefaultTaskExecutionService implements TaskExecutionService {
 		if (existingTaskDeployment != null) {
 			if (!existingTaskDeployment.getPlatformName().equals(platformName)) {
 				throw new IllegalStateException(String.format(
-						"Task definition [%s] has already been deployed on platfrom [%s].  " +
+						"Task definition [%s] has already been deployed on platform [%s].  " +
 						"Requested to deploy on platform [%s].",
 						taskName, existingTaskDeployment.getPlatformName(), platformName));
 			}

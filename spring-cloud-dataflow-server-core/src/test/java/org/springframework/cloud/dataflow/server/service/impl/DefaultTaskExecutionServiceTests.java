@@ -202,7 +202,7 @@ public abstract class DefaultTaskExecutionServiceTests {
 				this.taskExecutionService.executeTask(TASK_NAME_ORIG, deploymentProperties, new LinkedList<>());
 			} catch (IllegalStateException ise) {
 				errorCaught = true;
-				assertEquals("Task definition [myTask_ORIG] has already been deployed on platfrom [default].  Requested to deploy on platform [anotherPlatform].", ise.getMessage());
+				assertEquals("Task definition [myTask_ORIG] has already been deployed on platform [default].  Requested to deploy on platform [anotherPlatform].", ise.getMessage());
 			}
 			if (!errorCaught) {
 				fail();
