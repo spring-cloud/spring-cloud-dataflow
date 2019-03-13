@@ -434,7 +434,7 @@ http://192.168.99.100:31991
 
 === Helm Installation
 
-Spring Cloud Data Flow offers a https://hub.kubeapps.com/charts/incubator/spring-cloud-data-flow[Helm Chart] for deploying the Spring Cloud Data Flow server and its required services to a Kubernetes Cluster.
+Spring Cloud Data Flow offers a https://hub.kubeapps.com/charts/stable/spring-cloud-data-flow[Helm Chart] for deploying the Spring Cloud Data Flow server and its required services to a Kubernetes Cluster.
 
 NOTE: The Helm chart is available since the 1.2 GA release of Spring Cloud Data Flow for Kubernetes.
 
@@ -530,6 +530,21 @@ helm install --name my-release --set server.service.type=NodePort --set rbac.cre
 ====
 =====
 
+[NOTE]
+=====
+If you prefer to use Kafka rather than RabbitMQ as the messaging middleware, you can override properties as shown below.
+RabbitMQ is enabled by default.
+
+====
+[source,console]
+----
+helm install --name my-release --set kafka.enabled=true,rabbitmq.enabled=false stable/spring-cloud-data-flow
+----
+====
+=====
+
+[NOTE]
+=====
 If you wish to specify a version of Spring Cloud Data Flow other than the current GA release, you can set the `server.version` (replacing `stable` with `incubator` if needed), as follows:
 
 ====
@@ -538,6 +553,7 @@ If you wish to specify a version of Spring Cloud Data Flow other than the curren
 helm install --name my-release stable/spring-cloud-data-flow --set server.version=<version-you-want>
 ----
 ====
+=====
 
 NOTE: To see all of the settings that you can configured on the Spring Cloud Data Flow chart, view the https://github.com/kubernetes/charts/tree/master/incubator/spring-cloud-data-flow/README.md[README].
 
@@ -548,15 +564,16 @@ The following listing shows Spring Cloud Data Flow's Kubernetes version compatib
 ====
 [source,console]
 ----
-| SCDF-K8S-Server Version \ Chart Version | 0.1.x | 0.2.x | 1.0.x |
-|-----------------------------------------|-------|---------------|
-|1.2.x                                    |✓      |✕     |✕       |
-|1.3.x                                    |✕      |✓     |✕       |
-|1.4.x                                    |✕      |✓     |✕       |
-|1.5.x                                    |✕      |✓     |✕       |
-|1.6.x                                    |✕      |✓     |✕       |
-|1.7.x                                    |✕      |✕     |✓       |
-|-----------------------------------------------------------------|
+| SCDF-K8S-Server Version \ Chart Version | 0.1.x | 0.2.x | 1.0.x | 2.0.x |
+|-----------------------------------------|-------|-------|-------|-------|
+|1.2.x                                    |✓      |✕     |✕       |✕      |
+|1.3.x                                    |✕      |✓     |✕       |✕      |
+|1.4.x                                    |✕      |✓     |✕       |✕      |
+|1.5.x                                    |✕      |✓     |✕       |✕      |
+|1.6.x                                    |✕      |✓     |✕       |✕      |
+|1.7.x                                    |✕      |✕     |✓       |✕      |
+|2.0.x                                    |✕      |✕     |✕       |✓      |
+|-------------------------------------------------------------------------|
 ----
 ====
 =====
