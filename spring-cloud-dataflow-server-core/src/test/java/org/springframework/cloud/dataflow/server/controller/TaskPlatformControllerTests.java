@@ -39,17 +39,20 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 
+import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.CoreMatchers.nullValue;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 /**
  * @author Ilayaperumal Gopinathan
  */
 @RunWith(SpringRunner.class)
-@SpringBootTest(classes = {  JobDependencies.class,
+@SpringBootTest(classes = { JobDependencies.class,
 		PropertyPlaceholderAutoConfiguration.class, BatchProperties.class })
 @EnableConfigurationProperties({ CommonApplicationProperties.class })
 @AutoConfigureTestDatabase(replace = Replace.ANY)
@@ -79,11 +82,17 @@ public class TaskPlatformControllerTests {
 
 	@Test
 	public void testGetPlatformList() throws Exception {
-		String responseString = mockMvc
-				.perform(get("/tasks/platforms").accept(MediaType.APPLICATION_JSON)).andDo(print())
-				.andExpect(status().isOk()).andReturn().getResponse().getContentAsString();
-		assertTrue(responseString.contains("{\"name\":\"default\",\"type\":\"local\",\"description\":null"));
-		assertTrue(responseString.contains("{\"name\":\"cf\",\"type\":\"Cloud Foundry\",\"description\":null"));
+		mockMvc.perform(get("/tasks/platforms").accept(MediaType.APPLICATION_JSON))
+				.andDo(print())
+				.andExpect(status().isOk())
+
+				.andExpect(jsonPath("$.content[1].name", is("cf")))
+				.andExpect(jsonPath("$.content[1].type", is("Cloud Foundry")))
+				.andExpect(jsonPath("$.content[1].description").value(nullValue()))
+
+				.andExpect(jsonPath("$.content[0].name", is("default")))
+				.andExpect(jsonPath("$.content[0].type", is("local")))
+				.andExpect(jsonPath("$.content[0].description").value(nullValue()));
 	}
 
 }

@@ -17,8 +17,6 @@
 package org.springframework.cloud.dataflow.server.controller;
 
 import java.util.Arrays;
-
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -48,10 +46,13 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 
 import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.CoreMatchers.nullValue;
+import static org.hamcrest.Matchers.hasSize;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 /**
@@ -119,10 +120,10 @@ public class RuntimeAppsControllerTests {
 
 	@Test
 	public void testFindNonExistentApp() throws Exception {
-		MockHttpServletResponse responseString = mockMvc
-				.perform(get("/runtime/apps/foo").accept(MediaType.APPLICATION_JSON)).andDo(print())
-				.andExpect(status().is4xxClientError()).andReturn().getResponse();
-		Assert.assertTrue(responseString.getContentAsString().contains("NoSuchAppException"));
+        mockMvc.perform(get("/runtime/apps/foo").accept(MediaType.APPLICATION_JSON))
+                .andDo(print())
+				.andExpect(status().is4xxClientError())
+                .andExpect(jsonPath("$[0].logref", is("NoSuchAppException")));
 	}
 
 	@Test
@@ -136,10 +137,9 @@ public class RuntimeAppsControllerTests {
 		when(this.skipperClient.status("ticktock5")).thenReturn(info);
 		streamDefinitionRepository.save(new StreamDefinition("ticktock5", "time2|log2"));
 
-		MockHttpServletResponse responseString = mockMvc
-				.perform(get("/runtime/apps/ticktock5.log2-v1.").accept(MediaType.APPLICATION_JSON)).andDo(print())
-				.andExpect(status().isNotFound()).andReturn().getResponse();
-		Assert.assertTrue(responseString.getContentAsString().contains("NoSuchAppException"));
+		mockMvc.perform(get("/runtime/apps/ticktock5.log2-v1.").accept(MediaType.APPLICATION_JSON)).andDo(print())
+				.andExpect(status().isNotFound())
+                .andExpect(jsonPath("$[0].logref", is("NoSuchAppException")));
 	}
 
 	@Test
@@ -153,30 +153,30 @@ public class RuntimeAppsControllerTests {
 		when(this.skipperClient.status("ticktock5")).thenReturn(info);
 		streamDefinitionRepository.save(new StreamDefinition("ticktock5", "time2|log2"));
 
-		MockHttpServletResponse responseString = mockMvc
-				.perform(get("/runtime/apps/ticktock5.log2-v1/instances/log2-0").accept(MediaType.APPLICATION_JSON)).andDo(print())
-				.andExpect(status().is4xxClientError()).andReturn().getResponse();
-		Assert.assertTrue(responseString.getContentAsString().contains("NoSuchAppException"));
-
+		 mockMvc.perform(get("/runtime/apps/ticktock5.log2-v1/instances/log2-0").accept(MediaType.APPLICATION_JSON))
+                .andDo(print())
+				.andExpect(status().is4xxClientError())
+                .andExpect(jsonPath("$[0].logref", is("NoSuchAppException")));
 
 		info.getStatus().setPlatformStatusAsAppStatusList(
 				Arrays.asList(AppStatus.of("ticktock5.log2-v1").generalState(DeploymentState.deployed).build()));
 
-		responseString = mockMvc
-				.perform(get("/runtime/apps/ticktock5.log2-v1/instances/log2-0").accept(MediaType.APPLICATION_JSON)).andDo(print())
-				.andExpect(status().is4xxClientError()).andReturn().getResponse();
-		Assert.assertTrue(responseString.getContentAsString().contains("NoSuchAppInstanceException"));
+		mockMvc.perform(get("/runtime/apps/ticktock5.log2-v1/instances/log2-0").accept(MediaType.APPLICATION_JSON)).andDo(print())
+				.andExpect(status().is4xxClientError())
+                .andExpect(jsonPath("$[0].logref", is("NoSuchAppInstanceException")));
 	}
 
 	@Test
 	public void testFindNonExistentAppInstance2() throws Exception {
-		MockHttpServletResponse response = mockMvc
-				.perform(get("/runtime/apps/ticktock4.log-v1/instances/ticktock4.log-v1-0.").accept(MediaType.APPLICATION_JSON)).andDo(print())
-				.andExpect(status().isOk()).andReturn().getResponse();
-		assertThat(response.getContentAsString(),
-				is("{\"instanceId\":\"ticktock4.log-v1-0\",\"state\":\"deployed\",\"attributes\":null,\"links\":[{\"rel\":\"self\",\"href\":" +
-						"\"http://localhost/runtime/apps/ticktock4.log-v1/instances/ticktock4.log-v1-0\",\"hreflang\":null,\"media\":null,\"title\":null," +
-						"\"type\":null,\"deprecation\":null}]}"));
+		mockMvc.perform(get("/runtime/apps/ticktock4.log-v1/instances/ticktock4.log-v1-0.").accept(MediaType.APPLICATION_JSON))
+                .andDo(print())
+				.andExpect(status().isOk())
+                .andExpect(jsonPath("$.instanceId",is("ticktock4.log-v1-0")))
+                .andExpect(jsonPath("$.state",is("deployed")))
+                .andExpect(jsonPath("$.attributes").value(nullValue()))
+                .andExpect(jsonPath("$.links.*", hasSize(1)))
+                .andExpect(jsonPath("$.links.[0].rel", is("self")))
+                .andExpect(jsonPath("$.links.[0].href", is("http://localhost/runtime/apps/ticktock4.log-v1/instances/ticktock4.log-v1-0")));
 	}
 
 	@Test
