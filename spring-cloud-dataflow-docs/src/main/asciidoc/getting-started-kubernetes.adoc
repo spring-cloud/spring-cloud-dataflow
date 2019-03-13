@@ -197,7 +197,7 @@ $ kubectl create -f src/kubernetes/grafana/
 You can use `kubectl get all -l app=grafana` to verify that the deployment, pod, and service resources are running.
 You can use `kubectl delete all,cm,svc,secrets -l app=grafana` to clean up afterwards.
 
-IMPORTANT: The `url` attribute value shown below should be replaced in `src/kubernetes/server/server-config-rabbit.yaml` or `src/kubernetes/server/server-config-kafka.yaml` to reflect the address and port Grafana is running on. Depending on your setup, the value can obtained by running the command `minikube service --url grafana` if running on Minikube, your load balancer external IP, or DNS name. This configuration is needed for Grafana links to be accessible when accessing the dashboard from a web browser.
+IMPORTANT: The `url` attribute value shown below should be replaced in `src/kubernetes/server/server-config.yaml` to reflect the address and port Grafana is running on. Depending on your setup, the value can obtained by running the command `minikube service --url grafana` if running on Minikube, your load balancer external IP, or DNS name. This configuration is needed for Grafana links to be accessible when accessing the dashboard from a web browser.
 
 
 [source,yaml]
@@ -209,7 +209,7 @@ IMPORTANT: The `url` attribute value shown below should be replaced in `src/kube
 
 The default Grafana dashboard credentials are username: `admin` and password: `password`. These defaults can be changed by modifying the `src/kubernetes/grafana/grafana-secret.yaml` file with the desired values.
 
-In the event you would not like to deploy metrics collection using Prometheus and Grafana, the following section of `src/kubernetes/server/server-config-rabbit.yaml` or `src/kubernetes/server/server-config-kafka.yaml` should be removed. Edit the appropriate file based on the messaging middleware deployed earlier:
+In the event you would not like to deploy metrics collection using Prometheus and Grafana, the following section of `src/kubernetes/server/server-config.yaml` should be removed. Edit the appropriate file based on the messaging middleware deployed earlier:
 
 
 [source,yaml]
@@ -351,29 +351,17 @@ IMPORTANT: The Skipper service should be running and the `SPRING_CLOUD_SKIPPER_C
 The Data Flow Server uses the https://github.com/fabric8io/kubernetes-client[Fabric8 Java client library] to connect to the Kubernetes cluster.
 We use environment variables to set the values needed when deploying the Data Flow server to Kubernetes.
 We also use the https://github.com/spring-cloud/spring-cloud-kubernetes[Spring Cloud Kubernetes library] to access the Kubernetes http://kubernetes.io/docs/user-guide/configmap/[ConfigMap] and http://kubernetes.io/docs/user-guide/secrets/[Secrets] settings.
-The ConfigMap settings for RabbitMQ are specified in the `src/kubernetes/server/server-config-rabbit.yaml` file and for Kafka in the `src/kubernetes/server/server-config-kafka.yaml` file.
+The ConfigMap settings are specified in the `src/kubernetes/server/server-config.yaml` file.
 MySQL secrets are located in the `src/kubernetes/mysql/mysql-secrets.yaml` file.
 If you modified the password for MySQL, you should change it in the `src/kubernetes/mysql/mysql-secrets.yaml` file.
 Any secrets have to be provided in base64 encoding.
 
-NOTE: We now configure the Data Flow server with file-based security, and the default user is 'user' with a password of 'password'.
-You should change these values in `src/kubernetes/server/server-config-rabbit.yaml` for RabbitMQ or `src/kubernetes/server/server-config-kafka.yaml` for Kafka.
-
-To create the configuration map when using RabbitMQ:
+To create the server configuration map:
 
 
 [source,bash]
 ----
-kubectl create -f src/kubernetes/server/server-config-rabbit.yaml
-----
-
-
-To create the configuration map when using Kafka:
-
-
-[source,bash]
-----
-kubectl create -f src/kubernetes/server/server-config-kafka.yaml
+kubectl create -f src/kubernetes/server/server-config.yaml
 ----
 
 
@@ -1326,7 +1314,7 @@ This section covers how you can customize the deployment of your applications. Y
 
 NOTE: Properties set on a per-application basis always take precedence over properties set as the server configuration. This arrangement allows for the ability to override global server level properties on a per-application basis.
 
-Properties to be applied for all deployed Tasks are defined in the `src/kubernetes/server/server-config-(binder).yaml` file and for Streams in `src/kubernetes/skipper/skipper-config-(binder).yaml`. Replace `(binder)` with the messaging middleware you are using, for example `rabbit` or `kafka`.
+Properties to be applied for all deployed Tasks are defined in the `src/kubernetes/server/server-config.yaml` file and for Streams in `src/kubernetes/skipper/skipper-config-(binder).yaml`. Replace `(binder)` with the messaging middleware you are using, for example `rabbit` or `kafka`.
 
 ==== Memory and CPU Settings
 
