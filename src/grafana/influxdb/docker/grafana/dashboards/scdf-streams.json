@@ -1,46 +1,4 @@
 {
-  "__inputs": [
-    {
-      "name": "DS_INFLUX_AUTO_DATAFLOWMETRICSCOLLECTOR",
-      "label": "influx_auto_DataFlowMetricsCollector",
-      "description": "",
-      "type": "datasource",
-      "pluginId": "influxdb",
-      "pluginName": "InfluxDB"
-    }
-  ],
-  "__requires": [
-    {
-      "type": "grafana",
-      "id": "grafana",
-      "name": "Grafana",
-      "version": "5.4.3"
-    },
-    {
-      "type": "panel",
-      "id": "graph",
-      "name": "Graph",
-      "version": "5.0.0"
-    },
-    {
-      "type": "datasource",
-      "id": "influxdb",
-      "name": "InfluxDB",
-      "version": "5.0.0"
-    },
-    {
-      "type": "panel",
-      "id": "singlestat",
-      "name": "Singlestat",
-      "version": "5.0.0"
-    },
-    {
-      "type": "panel",
-      "id": "table",
-      "name": "Table",
-      "version": "5.0.0"
-    }
-  ],
   "annotations": {
     "list": [
       {
@@ -57,8 +15,8 @@
   "editable": true,
   "gnetId": null,
   "graphTooltip": 0,
-  "id": null,
-  "iteration": 1552556642397,
+  "id": 2,
+  "iteration": 1552564086459,
   "links": [
     {
       "icon": "external link",
@@ -89,7 +47,7 @@
         "rgba(237, 129, 40, 0.89)",
         "#d44a3a"
       ],
-      "datasource": "${DS_INFLUX_AUTO_DATAFLOWMETRICSCOLLECTOR}",
+      "datasource": "influx_auto_DataFlowMetricsCollector",
       "description": "Number of deployed streams",
       "format": "none",
       "gauge": {
@@ -146,7 +104,7 @@
           "measurement": "spring_integration_send",
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "SELECT count(*)  FROM (SELECT  count(\"count\") FROM \"autogen\".\"spring_integration_send\" GROUP BY \"stream_name\") WHERE time > now() - 1m\n",
+          "query": "SELECT count(*)  FROM (SELECT  count(\"count\") FROM \"spring_integration_send\" GROUP BY \"stream_name\") WHERE time > now() - 1m\n",
           "rawQuery": true,
           "refId": "A",
           "resultFormat": "time_series",
@@ -178,7 +136,7 @@
     },
     {
       "columns": [],
-      "datasource": "${DS_INFLUX_AUTO_DATAFLOWMETRICSCOLLECTOR}",
+      "datasource": "influx_auto_DataFlowMetricsCollector",
       "fontSize": "100%",
       "gridPos": {
         "h": 8,
@@ -262,7 +220,7 @@
     },
     {
       "columns": [],
-      "datasource": "${DS_INFLUX_AUTO_DATAFLOWMETRICSCOLLECTOR}",
+      "datasource": "influx_auto_DataFlowMetricsCollector",
       "fontSize": "100%",
       "gridPos": {
         "h": 8,
@@ -319,7 +277,7 @@
           ],
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "SELECT distinct(\"application_name\")  as \"apps\" FROM (SELECT * FROM \"autogen\".\"spring_integration_send\" WHERE  (\"stream_name\" =~ /^$stream_name$/ )  group by application_name)\n",
+          "query": "SELECT distinct(\"application_name\")  as \"apps\" FROM (SELECT * FROM \"spring_integration_send\" WHERE  (\"stream_name\" =~ /^$stream_name$/ )  group by application_name)\n",
           "rawQuery": true,
           "refId": "A",
           "resultFormat": "table",
@@ -383,7 +341,7 @@
       "bars": false,
       "dashLength": 10,
       "dashes": false,
-      "datasource": "${DS_INFLUX_AUTO_DATAFLOWMETRICSCOLLECTOR}",
+      "datasource": "influx_auto_DataFlowMetricsCollector",
       "description": "Channel Errors across all Streams and Apps",
       "fill": 1,
       "gridPos": {
@@ -530,7 +488,7 @@
       "bars": false,
       "dashLength": 10,
       "dashes": false,
-      "datasource": "${DS_INFLUX_AUTO_DATAFLOWMETRICSCOLLECTOR}",
+      "datasource": "influx_auto_DataFlowMetricsCollector",
       "fill": 1,
       "gridPos": {
         "h": 8,
@@ -657,7 +615,7 @@
       "bars": false,
       "dashLength": 10,
       "dashes": false,
-      "datasource": "${DS_INFLUX_AUTO_DATAFLOWMETRICSCOLLECTOR}",
+      "datasource": "influx_auto_DataFlowMetricsCollector",
       "fill": 1,
       "gridPos": {
         "h": 8,
@@ -849,7 +807,7 @@
       "bars": false,
       "dashLength": 10,
       "dashes": false,
-      "datasource": "${DS_INFLUX_AUTO_DATAFLOWMETRICSCOLLECTOR}",
+      "datasource": "influx_auto_DataFlowMetricsCollector",
       "fill": 1,
       "gridPos": {
         "h": 8,
@@ -988,7 +946,7 @@
         "rgba(237, 129, 40, 0.89)",
         "#d44a3a"
       ],
-      "datasource": "${DS_INFLUX_AUTO_DATAFLOWMETRICSCOLLECTOR}",
+      "datasource": "influx_auto_DataFlowMetricsCollector",
       "description": "Number of running Applications for selected streams",
       "format": "none",
       "gauge": {
@@ -1045,7 +1003,7 @@
           "measurement": "spring_integration_send",
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "SELECT count(distinct(application_name)) FROM (SELECT * FROM \"autogen\".\"spring_integration_send\" WHERE  (\"stream_name\" =~ /^$stream_name$/ )  group by application_name)",
+          "query": "SELECT count(distinct(application_name)) FROM (SELECT * FROM \"spring_integration_send\" WHERE  (\"stream_name\" =~ /^$stream_name$/ )  group by application_name)",
           "rawQuery": true,
           "refId": "A",
           "resultFormat": "time_series",
@@ -1084,7 +1042,7 @@
         "rgba(237, 129, 40, 0.89)",
         "#d44a3a"
       ],
-      "datasource": "${DS_INFLUX_AUTO_DATAFLOWMETRICSCOLLECTOR}",
+      "datasource": "influx_auto_DataFlowMetricsCollector",
       "format": "none",
       "gauge": {
         "maxValue": 100,
@@ -1203,6 +1161,7 @@
         "rgba(237, 129, 40, 0.89)",
         "#d44a3a"
       ],
+      "datasource": "influx_auto_DataFlowMetricsCollector",
       "format": "none",
       "gauge": {
         "maxValue": 100,
@@ -1323,7 +1282,7 @@
       "bars": false,
       "dashLength": 10,
       "dashes": false,
-      "datasource": "${DS_INFLUX_AUTO_DATAFLOWMETRICSCOLLECTOR}",
+      "datasource": "influx_auto_DataFlowMetricsCollector",
       "fill": 1,
       "gridPos": {
         "h": 7,
@@ -1492,7 +1451,7 @@
       "bars": false,
       "dashLength": 10,
       "dashes": false,
-      "datasource": "${DS_INFLUX_AUTO_DATAFLOWMETRICSCOLLECTOR}",
+      "datasource": "influx_auto_DataFlowMetricsCollector",
       "fill": 1,
       "gridPos": {
         "h": 7,
@@ -1650,7 +1609,7 @@
       "bars": false,
       "dashLength": 10,
       "dashes": false,
-      "datasource": "${DS_INFLUX_AUTO_DATAFLOWMETRICSCOLLECTOR}",
+      "datasource": "influx_auto_DataFlowMetricsCollector",
       "fill": 1,
       "gridPos": {
         "h": 7,
@@ -1800,7 +1759,7 @@
       "bars": false,
       "dashLength": 10,
       "dashes": false,
-      "datasource": "${DS_INFLUX_AUTO_DATAFLOWMETRICSCOLLECTOR}",
+      "datasource": "influx_auto_DataFlowMetricsCollector",
       "fill": 1,
       "gridPos": {
         "h": 7,
@@ -1955,7 +1914,7 @@
       "bars": false,
       "dashLength": 10,
       "dashes": false,
-      "datasource": "${DS_INFLUX_AUTO_DATAFLOWMETRICSCOLLECTOR}",
+      "datasource": "influx_auto_DataFlowMetricsCollector",
       "fill": 1,
       "gridPos": {
         "h": 7,
@@ -2111,7 +2070,7 @@
       "bars": false,
       "dashLength": 10,
       "dashes": false,
-      "datasource": "${DS_INFLUX_AUTO_DATAFLOWMETRICSCOLLECTOR}",
+      "datasource": "influx_auto_DataFlowMetricsCollector",
       "fill": 1,
       "gridPos": {
         "h": 7,
@@ -2263,8 +2222,11 @@
     "list": [
       {
         "allValue": null,
-        "current": {},
-        "datasource": "${DS_INFLUX_AUTO_DATAFLOWMETRICSCOLLECTOR}",
+        "current": {
+          "text": "t1",
+          "value": "t1"
+        },
+        "datasource": "influx_auto_DataFlowMetricsCollector",
         "definition": "select distinct(\"stream_name\") from (select  * from \"spring_integration_send\" WHERE time > now() - 60s)",
         "hide": 0,
         "includeAll": false,
@@ -2285,8 +2247,13 @@
       },
       {
         "allValue": null,
-        "current": {},
-        "datasource": "${DS_INFLUX_AUTO_DATAFLOWMETRICSCOLLECTOR}",
+        "current": {
+          "text": "All",
+          "value": [
+            "$__all"
+          ]
+        },
+        "datasource": "influx_auto_DataFlowMetricsCollector",
         "definition": "show tag values with key=\"application_name\" WHERE stream_name='$stream_name'",
         "hide": 0,
         "includeAll": true,
@@ -2307,8 +2274,12 @@
       },
       {
         "allValue": null,
-        "current": {},
-        "datasource": "${DS_INFLUX_AUTO_DATAFLOWMETRICSCOLLECTOR}",
+        "current": {
+          "isNone": true,
+          "text": "None",
+          "value": ""
+        },
+        "datasource": "influx_auto_DataFlowMetricsCollector",
         "definition": "",
         "hide": 2,
         "includeAll": false,
@@ -2329,8 +2300,11 @@
       },
       {
         "allValue": null,
-        "current": {},
-        "datasource": "${DS_INFLUX_AUTO_DATAFLOWMETRICSCOLLECTOR}",
+        "current": {
+          "text": "2",
+          "value": "2"
+        },
+        "datasource": "influx_auto_DataFlowMetricsCollector",
         "definition": "SHOW TAG VALUES CARDINALITY FROM \"spring_integration_send\" WITH KEY = \"application_name\"",
         "hide": 2,
         "includeAll": false,
@@ -2351,8 +2325,11 @@
       },
       {
         "allValue": null,
-        "current": {},
-        "datasource": "${DS_INFLUX_AUTO_DATAFLOWMETRICSCOLLECTOR}",
+        "current": {
+          "text": "t1",
+          "value": "t1"
+        },
+        "datasource": "influx_auto_DataFlowMetricsCollector",
         "definition": "show tag values with key=\"stream_name\"",
         "hide": 2,
         "includeAll": false,
