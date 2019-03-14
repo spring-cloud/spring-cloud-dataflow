@@ -1,0 +1,24 @@
+{
+  "dirty": false,
+  "empty": false,
+  "values": [
+      {
+        "fooBoolean": true
+      },
+      {
+        "barNumber": 1234
+      },
+      {
+        "barNumberAsString": "1234"
+      },
+      {
+        "longNumber": 22222222222
+      },
+      {
+        "floatNumber": 3.5
+      },
+      {
+        "floatNumberArray": [1,2,3]
+      }
+  ]
+}

@@ -14,22 +14,27 @@
  * limitations under the License.
  */
 
-package org.springframework.cloud.dataflow.rest.client.support;
+package org.springframework.cloud.dataflow.rest.support.jackson;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.annotation.JsonProperty;
+import java.util.Locale;
+import java.util.TimeZone;
 
-import org.springframework.batch.item.ExecutionContext;
+import com.fasterxml.jackson.databind.util.StdDateFormat;
 
 /**
- * Jackson MixIn for {@link ExecutionContext} de-serialization.
+ * Wrapper for the {@link StdDateFormat} to use {@link TimeZone} and {@link Locale} based constructor.
  *
  * @author Gunnar Hillert
- * @since 1.0
+ * @author Daniel Serleg
  */
-@JsonIgnoreProperties({ "empty", "values" })
-public abstract class ExecutionContextJacksonMixIn {
+@SuppressWarnings("serial")
+public class ISO8601DateFormatWithMilliSeconds extends StdDateFormat {
 
-	@JsonProperty
-	abstract boolean isEmpty();
+	public ISO8601DateFormatWithMilliSeconds(TimeZone tz, Locale loc, Boolean lenient) {
+		super(tz, loc, lenient);
+	}
+
+	public ISO8601DateFormatWithMilliSeconds() {
+		super();
+	}
 }
