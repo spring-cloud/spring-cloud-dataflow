@@ -127,10 +127,13 @@ You can use `kubectl delete all -l app=kafka` to clean up afterwards.
 You must deploy a number of services and the Data Flow server. The following subsections describe how to do so:
 
 . <<getting-started-kubernetes-deploy-services-and-data-flow-deploy-mysql>>
-. <<getting-started-kubernetes-deploy-services-and-data-flow-deplot-prometheus-grafana>>
+. <<getting-started-kubernetes-deploy-services-and-data-flow-deploy-prometheus-grafana>>
 . <<getting-started-kubernetes-deploy-services-and-data-flow-create-df-role-bindings-service-account>>
 . <<getting-started-kubernetes-deploy-services-and-data-flow-deploy-skipper>>
 . <<getting-started-kubernetes-deploy-services-and-data-flow-deploy-data-flow-server>>
+
+IMPORTANT: You also need a messaging middleware application, either RabbitMQ or Apache Kafka.
+See their web sites for how to install and run them.
 
 [[getting-started-kubernetes-deploy-services-and-data-flow-deploy-mysql]]
 ====== Deploy MySQL
@@ -154,7 +157,7 @@ kubectl create -f src/kubernetes/mysql/
 You can use `kubectl get all -l app=mysql` to verify that the deployment, pod, and service resources are running.
 You can use `kubectl delete all,pvc,secrets -l app=mysql` to clean up afterwards.
 
-[[getting-started-kubernetes-deploy-services-and-data-flow-deplot-prometheus-grafana]]
+[[getting-started-kubernetes-deploy-services-and-data-flow-deploy-prometheus-grafana]]
 ====== Deploy Prometheus and Grafana
 
 Metrics are "`scraped`" from deployed pods by Prometheus when configured with the appropriate annotations.
@@ -255,10 +258,6 @@ In the event that you would not like to deploy metrics collection by using Prome
 
 [[getting-started-kubernetes-deploy-services-and-data-flow-create-df-role-bindings-service-account]]
 ====== Create Data Flow Role Bindings and Service Account
-
-IMPORTANT: Since version 1.9, the latest releases of Kubernetes have enabled https://kubernetes.io/docs/admin/authorization/rbac/[RBAC] on the API server.
-If your target platform has RBAC enabled, you must ask a cluster admin to create the `roles` and `role-bindings` for you before deploying the Data Flow server.
-They associate the Data Flow service account with the roles with which it needs to be run.
 
 To create Role Bindings and Service account, run the following commands:
 

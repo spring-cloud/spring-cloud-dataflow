@@ -384,7 +384,7 @@ Resource URI: maven://org.springframework.cloud.stream.app:log-sink-rabbit:1.1.0
 ----
 ====
 
-When you create a stream, you msut use a unique name (one that might not be taken by another application on PCF/PWS).
+When you create a stream, you must use a unique name (one that might not be taken by another application on PCF/PWS).
 
 The following example shows how to create and deploy a stream;
 
@@ -699,4 +699,4 @@ dataflow:>task launch mytask
 ----
 ====
 
-You can see the year (`2019` at the time of this writing) printed in the logs. The execution status of the task is stored in the database, and you can retrieve information about the task execution by using the `task execution list` and `task execution status --id <ID_OF_TASK>` shell commands or though the Data Flow UI.
+You can see the year (`2019` at the time of this writing) printed in the logs. The execution status of the task is stored in the database, and you can retrieve information about the task execution by using the `task execution list` and `task execution status --id <ID_OF_TASK>` shell commands or through the Data Flow UI.
