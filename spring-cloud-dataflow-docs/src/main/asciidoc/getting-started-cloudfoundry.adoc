@@ -118,7 +118,7 @@ services:
 ----
 ====
 +
-You need to fill in `<org>`, `<space>`, `<email>`,  `<password>`, `<middlewareServiceName>` (Rabbit or Kafka) and `<services>` (such as PostgresSQL) before running these commands.
+You need to fill in `<org>`, `<space>`, `<email>`,  `<password>`, `<middlewareServiceName>` (RabbitMQ or Apache Kafka) and `<services>` (such as PostgresSQL) before running these commands.
 Once you have the desired config values in `manifest.yml`, you can run the `cf push` command to provision the skipper-server.
 +
 WARNING: Set 'Skip SSL Validation' to `true` only if you run on a Cloud Foundry instance by using self-signed
@@ -137,7 +137,7 @@ However, there are some general configuration details you should be aware of in 
 [[getting-started-cloudfoundry-general-configuration]]
 ==== General Configuration
 
-This section covers some things to be aware of when you install into a Cloud Foundry instance.
+This section covers some things to be aware of when you install into Cloud Foundry.
 
 NOTE: You must use a unique name for your application. An application with the same name in the same organization causes your deployment to fail.
 
@@ -157,7 +157,7 @@ NOTE: If you need to configure multiple Maven repositories, a proxy, or authoriz
 
 The following configuration is for Pivotal Web Services. You need to fill in `\<org>`, `\<space>`, `\<email>` and `\<password>` before running these commands.
 Tasks are deployed directly from the Data Flow Server.
-In the future, you will be able to deploy tasks to multiple platforms. However, for 2.0.0.M1, you can deploy to only a single platform and the name must be `default`.
+In the future, you will be able to launch tasks to multiple platforms. However, in 2.0, you can launch tasks to only a single platform and the name must be `default`.
 
 ====
 [source,bash,subs=attributes]

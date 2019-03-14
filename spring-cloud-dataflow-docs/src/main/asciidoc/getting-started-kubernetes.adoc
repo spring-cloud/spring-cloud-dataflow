@@ -1038,7 +1038,7 @@ spec:
 [[getting-started-kubernetes-create-stream-register-logsink-app]]
 ===== Register the `log-sink` Application
 
-Now you need to register the log-sink application.
+Now you need to register the log-sink application and specify a version.
 The following example (with output) shows how to register the `log-sink` application and update its version:
 
 ====
@@ -1048,6 +1048,8 @@ dataflow:>app register --name log --type sink --uri docker:springcloudstream/log
 Successfully registered application 'sink:log'
 ----
 ====
+
+The log-sink is updated to the version you specified as part of the stream update workflow.
 
 [[getting-started-kubernetes-create-stream-update-stream]]
 ===== Update Stream to Use the `log-sink` Application
