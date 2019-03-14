@@ -1,17 +1,10 @@
 server:
   port: 9393
-management:
-  contextPath: /management
-  security:
-    enabled: false
 info:
   app:
     name: "@project.artifactId@"
     description: "@project.name@"
     version: "@project.version@"
-security:
-  basic:
-    enabled: false
 
 maven:
   remoteRepositories:
@@ -20,11 +13,7 @@ maven:
 
 spring:
   application:
-    name: spring-cloud-dataflow-server-local
-  jpa:
-    generate-ddl: false
-    hibernate:
-      ddl-auto: none
+    name: spring-cloud-dataflow-server
   cloud:
     config:
       uri: http://localhost:8888
@@ -35,10 +24,3 @@ spring:
     username: sa
     password:
     driverClassName: org.h2.Driver
-  task:
-    repo:
-      initialize: true
-  dataflow:
-    embedded:
-      database:
-        enabled: true
