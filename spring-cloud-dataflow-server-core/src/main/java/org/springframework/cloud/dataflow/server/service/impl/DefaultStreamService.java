@@ -155,11 +155,6 @@ public class DefaultStreamService implements StreamService {
 				streamDefinition.getDslText(), appDeploymentRequests, skipperDeploymentProperties);
 
 		Release release = this.skipperStreamDeployer.deployStream(streamDeploymentRequest);
-
-		this.auditRecordService.populateAndSaveAuditRecordUsingMapData(AuditOperationType.STREAM,
-				AuditActionType.DEPLOY,
-				streamDefinition.getName(), this.auditServiceUtils.convertStreamDefinitionToAuditData(streamDefinition, deploymentProperties));
-
 		if (release != null) {
 			updateStreamDefinitionFromReleaseManifest(streamDefinition.getName(), release.getManifest().getData());
 		}
@@ -384,7 +379,7 @@ public class DefaultStreamService implements StreamService {
 					"Cannot create stream %s because another one has already " + "been created with the same name",
 					streamName));
 		}
-		final StreamDefinition savedStreamDefintion = this.streamDefinitionRepository.save(streamDefinition);
+		final StreamDefinition savedStreamDefinition = this.streamDefinitionRepository.save(streamDefinition);
 
 		if (deploy) {
 			this.deployStream(streamName, new HashMap<>());
@@ -392,14 +387,13 @@ public class DefaultStreamService implements StreamService {
 
 		auditRecordService.populateAndSaveAuditRecord(
 				AuditOperationType.STREAM, AuditActionType.CREATE, streamDefinition.getName(),
-				this.auditServiceUtils.convertStreamDefinitionToAuditData(savedStreamDefintion));
+				this.auditServiceUtils.convertStreamDefinitionToAuditData(savedStreamDefinition));
 
 		return streamDefinition;
 
 	}
 
 	public StreamDefinition createStreamDefinition(String streamName, String dsl) {
-
 		try {
 			return new StreamDefinition(streamName, dsl);
 		}

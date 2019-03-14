@@ -84,7 +84,6 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -156,7 +155,9 @@ public class StreamControllerTests {
 	@After
 	public void tearDown() {
 		repository.deleteAll();
+		auditRecordRepository.deleteAll();
 		assertEquals(0, repository.count());
+		assertEquals(0, auditRecordRepository.count());
 	}
 
 	@Test(expected = IllegalArgumentException.class)
@@ -224,13 +225,20 @@ public class StreamControllerTests {
 				.param("definition", ":myAnotherStream1 > log").accept(MediaType.APPLICATION_JSON)).andDo(print())
 				.andExpect(status().isCreated());
 		assertEquals(5, repository.count());
-		String response = mockMvc
-				.perform(get("/streams/definitions/myStream1/related").accept(MediaType.APPLICATION_JSON)).andReturn()
-				.getResponse().getContentAsString();
-		assertTrue(response.contains(":myStream1 > log"));
-		assertTrue(response.contains(":myStream1.time > log"));
-		assertTrue(response.contains("time | log"));
-		assertTrue(response.contains("\"totalElements\":3"));
+
+		mockMvc.perform(get("/streams/definitions/myStream1/related").accept(MediaType.APPLICATION_JSON))
+				.andDo(print())
+				.andExpect(status().isOk())
+
+				.andExpect(jsonPath("$.content.*", hasSize(3)))
+				.andExpect(jsonPath("$.content[0].name", is("myStream1")))
+				.andExpect(jsonPath("$.content[0].dslText", is("time | log")))
+
+				.andExpect(jsonPath("$.content[1].name", is("myStream2")))
+				.andExpect(jsonPath("$.content[1].dslText", is(":myStream1 > log")))
+
+				.andExpect(jsonPath("$.content[2].name", is("myStream3")))
+				.andExpect(jsonPath("$.content[2].dslText", is(":myStream1.time > log")));
 	}
 
 	@Test
@@ -279,11 +287,15 @@ public class StreamControllerTests {
 				.param("definition", ":mapper.time > log")
 				.accept(MediaType.APPLICATION_JSON)).andDo(print()).andExpect(status().isCreated());
 		assertEquals(1, repository.count());
-		String response = mockMvc.perform(get("/streams/definitions/mapper/related")
+
+		mockMvc.perform(get("/streams/definitions/mapper/related")
 				.param("nested", "true")
-				.accept(MediaType.APPLICATION_JSON)).andReturn().getResponse().getContentAsString();
-		assertTrue(response.contains(":mapper.time > log"));
-		assertTrue(response.contains("\"totalElements\":1"));
+				.accept(MediaType.APPLICATION_JSON))
+				.andDo(print())
+				.andExpect(status().isOk())
+
+				.andExpect(jsonPath("$.content.*", hasSize(1)))
+				.andExpect(jsonPath("$.content[0].dslText", is(":mapper.time > log")));
 	}
 
 	@Test
@@ -296,12 +308,16 @@ public class StreamControllerTests {
 				.param("definition", ":foo.time > log")
 				.accept(MediaType.APPLICATION_JSON)).andDo(print()).andExpect(status().isCreated());
 		assertEquals(2, repository.count());
-		String response = mockMvc.perform(get("/streams/definitions/foo/related")
+
+		mockMvc.perform(get("/streams/definitions/foo/related")
 				.param("nested", "true")
-				.accept(MediaType.APPLICATION_JSON)).andReturn().getResponse().getContentAsString();
-		assertTrue(response.contains(":foo.time > log"));
-		assertTrue(response.contains(":bar.time > log"));
-		assertTrue(response.contains("\"totalElements\":2"));
+				.accept(MediaType.APPLICATION_JSON))
+				.andDo(print())
+				.andExpect(status().isOk())
+
+				.andExpect(jsonPath("$.content.*", hasSize(2)))
+				.andExpect(jsonPath("$.content[0].dslText", is(":bar.time > log")))
+				.andExpect(jsonPath("$.content[1].dslText", is(":foo.time > log")));
 	}
 
 	@Test
@@ -349,34 +365,42 @@ public class StreamControllerTests {
 				.andExpect(status().isCreated());
 
 		assertEquals(10, repository.count());
-		String response = mockMvc
-				.perform(get("/streams/definitions/myStream1/related?nested=true").accept(MediaType.APPLICATION_JSON))
-				.andReturn().getResponse().getContentAsString();
-		assertTrue(response.contains(":myStream1 > log"));
-		assertTrue(response.contains(":myStream1.time > log"));
-		assertTrue(response.contains("time | log"));
-		assertTrue(response.contains("\"totalElements\":6"));
+		mockMvc.perform(get("/streams/definitions/myStream1/related?nested=true").accept(MediaType.APPLICATION_JSON))
+				.andDo(print())
+				.andExpect(status().isOk())
 
-		response = mockMvc
-				.perform(get("/streams/definitions/myStream5/related?nested=true").accept(MediaType.APPLICATION_JSON))
-				.andReturn().getResponse().getContentAsString();
-		assertTrue(response.contains(":myStream5.time > log --password='******'"));
-		assertTrue(response.contains("time | log --secret='******'"));
-		assertTrue(response.contains("\"totalElements\":2"));
+				.andExpect(jsonPath("$.content.*", hasSize(6)))
+				.andExpect(jsonPath("$.content[0].dslText", is("time | log")))
+				.andExpect(jsonPath("$.content[1].dslText", is(":myStream1 > log")))
+				.andExpect(jsonPath("$.content[2].dslText", is(":myStream2 > log")))
+				.andExpect(jsonPath("$.content[3].dslText", is(":myStream1.time > log")))
+				.andExpect(jsonPath("$.content[4].dslText", is(":myStream3 > log")))
+				.andExpect(jsonPath("$.content[5].dslText", is(":TapOnMyStream3 > log")));
 
-		String response2 = mockMvc.perform(
+		mockMvc.perform(get("/streams/definitions/myStream5/related?nested=true").accept(MediaType.APPLICATION_JSON))
+				.andDo(print())
+				.andExpect(status().isOk())
+
+				.andExpect(jsonPath("$.content.*", hasSize(2)))
+				.andExpect(jsonPath("$.content[0].dslText", is("time | log --secret='******'")))
+				.andExpect(jsonPath("$.content[1].dslText", is(":myStream5.time > log --password='******'")));
+
+		mockMvc.perform(
 				get("/streams/definitions/myAnotherStream1/related?nested=true").accept(MediaType.APPLICATION_JSON))
-				.andReturn().getResponse().getContentAsString();
-		assertTrue(response2.contains(":myAnotherStream1 > log"));
-		assertTrue(response2.contains("time | log"));
-		assertTrue(response2.contains("\"totalElements\":2"));
+				.andDo(print())
+				.andExpect(status().isOk())
 
-		String response3 = mockMvc
-				.perform(get("/streams/definitions/myStream2/related?nested=true").accept(MediaType.APPLICATION_JSON))
-				.andReturn().getResponse().getContentAsString();
-		assertTrue(response3.contains(":myStream1 > log"));
-		assertTrue(response3.contains(":myStream2 > log"));
-		assertTrue(response3.contains("\"totalElements\":2"));
+				.andExpect(jsonPath("$.content.*", hasSize(2)))
+				.andExpect(jsonPath("$.content[0].dslText", is("time | log")))
+				.andExpect(jsonPath("$.content[1].dslText", is(":myAnotherStream1 > log")));
+
+		mockMvc.perform(get("/streams/definitions/myStream2/related?nested=true").accept(MediaType.APPLICATION_JSON))
+				.andDo(print())
+				.andExpect(status().isOk())
+
+				.andExpect(jsonPath("$.content.*", hasSize(2)))
+				.andExpect(jsonPath("$.content[0].dslText", is(":myStream1 > log")))
+				.andExpect(jsonPath("$.content[1].dslText", is(":myStream2 > log")));
 	}
 
 	@Test
@@ -431,32 +455,26 @@ public class StreamControllerTests {
 				.accept(MediaType.APPLICATION_JSON)).andDo(print()).andExpect(status().isCreated());
 
 		assertEquals(15, repository.count());
-		String response = mockMvc
-				.perform(get("/streams/definitions/").accept(MediaType.APPLICATION_JSON))
-				.andReturn().getResponse().getContentAsString();
+		mockMvc.perform(get("/streams/definitions/").accept(MediaType.APPLICATION_JSON))
+				.andDo(print())
+				.andExpect(status().isOk())
 
-		assertTrue(response.contains("time --password='******' | log"));
-		assertTrue(response.contains("time --foo=bar | log"));
-
-		assertTrue(response.contains(":myStream1.time > log"));
-		assertTrue(response.contains("time | log"));
-		assertTrue(response.contains(":myStream1 > log"));
-		assertTrue(response.contains(":myStream1.time > log"));
-		assertTrue(response.contains("time | log"));
-		assertTrue(response.contains(":myAnotherStream1 > log"));
-		assertTrue(response.contains("time | log"));
-		assertTrue(response.contains(":myStream1 > log"));
-		assertTrue(response.contains(":myStream2 > log"));
-		assertTrue(response.contains(":myStream3 > log"));
-		assertTrue(response.contains("time --format='YYYY MM DD' | log"));
-		assertTrue(response.contains("a: time --format='YYYY MM DD' | log"));
-		assertTrue(response.contains("time --password='******' | log --password='******'"));
-		assertTrue(response.contains("time --password='******' > :foobar"));
-		assertTrue(response.contains("time --password='******' --arg=foo | log"));
-		assertTrue(response.contains("time --password='******' --arg=bar | log"));
-
-		assertTrue(response.contains("\"totalElements\":15"));
-
+				.andExpect(jsonPath("$.content.*", hasSize(15)))
+				.andExpect(jsonPath("$.content[0].dslText", is("time --password='******' | log")))
+				.andExpect(jsonPath("$.content[1].dslText", is("time --foo=bar | log")))
+				.andExpect(jsonPath("$.content[2].dslText", is("time | log")))
+				.andExpect(jsonPath("$.content[3].dslText", is(":myStream1 > log")))
+				.andExpect(jsonPath("$.content[4].dslText", is(":myStream2 > log")))
+				.andExpect(jsonPath("$.content[5].dslText", is(":myStream1.time > log")))
+				.andExpect(jsonPath("$.content[6].dslText", is(":myStream3 > log")))
+				.andExpect(jsonPath("$.content[7].dslText", is(":TapOnMyStream3 > log")))
+				.andExpect(jsonPath("$.content[8].dslText", is(":myAnotherStream1 > log")))
+				.andExpect(jsonPath("$.content[9].dslText", is("time --format='YYYY MM DD' | log")))
+				.andExpect(jsonPath("$.content[10].dslText", is("a: time --format='YYYY MM DD' | log")))
+				.andExpect(jsonPath("$.content[11].dslText", is("time --password='******' | log --password='******'")))
+				.andExpect(jsonPath("$.content[12].dslText", is("time --password='******' > :foobar")))
+				.andExpect(jsonPath("$.content[13].dslText", is("time --password='******' --arg=foo | log")))
+				.andExpect(jsonPath("$.content[14].dslText", is("time --password='******' --arg=bar | log")));
 	}
 
 	@Test
@@ -629,7 +647,6 @@ public class StreamControllerTests {
 
 	@Test
 	public void testDestinationsOnBothSides() throws Exception {
-
 		assertEquals(0, repository.count());
 		String definition = ":bar > filter > :foo";
 
@@ -767,7 +784,6 @@ public class StreamControllerTests {
 
 	@Test
 	public void testDeploy() throws Exception {
-
 		repository.save(new StreamDefinition("myStream", "time | log"));
 		mockMvc.perform(post("/streams/deployments/myStream")
 				.accept(MediaType.APPLICATION_JSON)).andDo(print())
@@ -785,7 +801,6 @@ public class StreamControllerTests {
 
 	@Test
 	public void testDeployWithSensitiveData() throws Exception {
-
 		repository.save(new StreamDefinition("myStream", "time --some.password=foobar --another-secret=kenny | log"));
 		mockMvc.perform(post("/streams/deployments/myStream")
 				.accept(MediaType.APPLICATION_JSON)).andDo(print())
@@ -804,8 +819,8 @@ public class StreamControllerTests {
 
 		final List<AuditRecord> auditRecords = auditRecordRepository.findAll();
 
-		assertEquals(6, auditRecords.size()); // TODO (Tzolov) This looks wrong! only one Audit record should exist
-		final AuditRecord auditRecord = auditRecords.get(5);
+		assertEquals(5, auditRecords.size());
+		final AuditRecord auditRecord = auditRecords.get(4);
 
 		assertEquals(
 				"{\"streamDefinitionDslText\":\"time --some.password='******' --another-secret='******' | log\",\"deploymentProperties\":{}}",
@@ -848,7 +863,6 @@ public class StreamControllerTests {
 
 	@Test
 	public void testDeployWithAppPropertiesOverride() throws Exception {
-
 		repository.save(new StreamDefinition("myStream", "time --fixed-delay=2 | log --level=WARN"));
 		Map<String, String> properties = new HashMap<>();
 		properties.put("app.time.fixed-delay", "4");
@@ -882,7 +896,6 @@ public class StreamControllerTests {
 
 	@Test
 	public void testDeployWithAppPropertiesOverrideWithLabel() throws Exception {
-
 		repository.save(new StreamDefinition("myStream", "a: time --fixed-delay=2 | b: log --level=WARN"));
 		Map<String, String> properties = new HashMap<>();
 		properties.put("app.a.fixed-delay", "4");
@@ -914,7 +927,6 @@ public class StreamControllerTests {
 
 	@Test
 	public void testDuplicateDeploy() throws Exception {
-
 		repository.save(new StreamDefinition("myStream", "time | log"));
 
 		mockMvc.perform(post("/streams/deployments/myStream")
@@ -952,7 +964,6 @@ public class StreamControllerTests {
 
 	@Test
 	public void testUndeployNonDeployedStream() throws Exception {
-
 		when(skipperClient.search(eq("myStream"), eq(false))).thenReturn(
 				new Resources(Arrays.asList(new PackageMetadata()), new Link[0]));
 
@@ -998,7 +1009,6 @@ public class StreamControllerTests {
 
 	@Test
 	public void testDeployWithProperties() throws Exception {
-
 		repository.save(new StreamDefinition("myStream", "time | log"));
 		Map<String, String> properties = new HashMap<>();
 		properties.put("app.*.producer.partitionKeyExpression", "payload");
@@ -1055,7 +1065,6 @@ public class StreamControllerTests {
 
 	@Test
 	public void testDeployWithWildcardProperties() throws Exception {
-
 		repository.save(new StreamDefinition("myStream", "time | log"));
 		Map<String, String> properties = new HashMap<>();
 		properties.put("app.*.producer.partitionKeyExpression", "payload");
@@ -1114,7 +1123,6 @@ public class StreamControllerTests {
 
 	@Test
 	public void testDeployWithCommonApplicationProperties() throws Exception {
-
 		repository.save(new StreamDefinition("myStream", "time | log"));
 		assertThat(appsProperties.getStream().values(), empty());
 		appsProperties.getStream().put("spring.cloud.stream.fake.binder.host", "fakeHost");
