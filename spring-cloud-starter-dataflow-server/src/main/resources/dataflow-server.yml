@@ -24,3 +24,7 @@ spring:
     username: sa
     password:
     driverClassName: org.h2.Driver
+  dataflow:
+    embedded:
+      database:
+        enabled: true
