@@ -322,7 +322,7 @@ With:
 ----
 ====
 
-. Modify the `app-import` service definition `command` attribute to replace `http://bit.ly/Einstein-GA-stream-applications-kafka-maven` with `http://bit.ly/Einstein-GA-stream-applications-rabbit-maven`.
+. Modify the `app-import` service definition `command` attribute to replace `http://bit.ly/Einstein-SR2-stream-applications-kafka-maven` with `http://bit.ly/Einstein-SR2-stream-applications-rabbit-maven`.
 
 
 [[getting-started-local-customizing-spring-cloud-dataflow-docker-mysql]]

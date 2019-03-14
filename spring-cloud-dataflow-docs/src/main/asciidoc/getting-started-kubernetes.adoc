@@ -878,8 +878,8 @@ dataflow:>app register --type sink --name log --uri docker://springcloudstream/l
 
 Alternatively, if you want to register all out-of-the-box stream applications for a particular binder in bulk, you can use one of the following commands:
 
-* RabbitMQ: `dataflow:>app import --uri http://bit.ly/Einstein-GA-stream-applications-rabbit-docker`
-* Kafka: `dataflow:>app import --uri http://bit.ly/Einstein-GA-stream-applications-kafka-docker`
+* RabbitMQ: `dataflow:>app import --uri http://bit.ly/Einstein-SR2-stream-applications-rabbit-docker`
+* Kafka: `dataflow:>app import --uri http://bit.ly/Einstein-SR2-stream-applications-kafka-docker`
 
 For more details, review how to link:http://docs.spring.io/spring-cloud-dataflow/docs/{scdf-core-version}/reference/html/spring-cloud-dataflow-register-apps.html[register applications].
 =====
