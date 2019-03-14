@@ -20,6 +20,8 @@ import java.net.URI;
 import java.util.HashMap;
 import java.util.Map;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 import org.springframework.batch.core.ExitStatus;
 import org.springframework.batch.core.JobExecution;
 import org.springframework.batch.core.JobInstance;
@@ -28,7 +30,6 @@ import org.springframework.batch.core.JobParameters;
 import org.springframework.batch.core.StepExecution;
 import org.springframework.batch.item.ExecutionContext;
 import org.springframework.cloud.dataflow.rest.Version;
-import org.springframework.cloud.dataflow.rest.client.support.ExecutionContextJacksonMixIn;
 import org.springframework.cloud.dataflow.rest.client.support.ExitStatusJacksonMixIn;
 import org.springframework.cloud.dataflow.rest.client.support.JobExecutionJacksonMixIn;
 import org.springframework.cloud.dataflow.rest.client.support.JobInstanceJacksonMixIn;
@@ -39,6 +40,7 @@ import org.springframework.cloud.dataflow.rest.client.support.StepExecutionJacks
 import org.springframework.cloud.dataflow.rest.job.StepExecutionHistory;
 import org.springframework.cloud.dataflow.rest.resource.RootResource;
 import org.springframework.cloud.dataflow.rest.resource.about.AboutResource;
+import org.springframework.cloud.dataflow.rest.support.jackson.ExecutionContextJacksonMixIn;
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.ResourceSupport;
 import org.springframework.hateoas.UriTemplate;
@@ -252,16 +254,7 @@ public class DataFlowTemplate implements DataFlowOperations {
 			if (converter instanceof MappingJackson2HttpMessageConverter) {
 				containsMappingJackson2HttpMessageConverter = true;
 				final MappingJackson2HttpMessageConverter jacksonConverter = (MappingJackson2HttpMessageConverter) converter;
-				jacksonConverter.getObjectMapper()
-						.registerModule(new Jackson2HalModule())
-						.addMixIn(JobExecution.class, JobExecutionJacksonMixIn.class)
-						.addMixIn(JobParameters.class, JobParametersJacksonMixIn.class)
-						.addMixIn(JobParameter.class, JobParameterJacksonMixIn.class)
-						.addMixIn(JobInstance.class, JobInstanceJacksonMixIn.class)
-						.addMixIn(ExitStatus.class, ExitStatusJacksonMixIn.class)
-						.addMixIn(StepExecution.class, StepExecutionJacksonMixIn.class)
-						.addMixIn(ExecutionContext.class, ExecutionContextJacksonMixIn.class)
-						.addMixIn(StepExecutionHistory.class, StepExecutionHistoryJacksonMixIn.class);
+				DataFlowTemplate.prepareObjectMapper(jacksonConverter.getObjectMapper());
 			}
 		}
 
@@ -270,6 +263,27 @@ public class DataFlowTemplate implements DataFlowOperations {
 					"The RestTemplate does not contain a required " + "MappingJackson2HttpMessageConverter.");
 		}
 		return restTemplate;
+	}
+
+	/**
+	 * Mutable operation to add several required MixIns to the provided
+	 * {@link ObjectMapper}.
+	 *
+	 * @param objectMapper Must not be null
+	 * @return ObjectMapper with several mixIns applied
+	 */
+	public static ObjectMapper prepareObjectMapper(ObjectMapper objectMapper) {
+		Assert.notNull(objectMapper, "The objectMapper must not be null.");
+		return objectMapper
+			.registerModule(new Jackson2HalModule())
+			.addMixIn(JobExecution.class, JobExecutionJacksonMixIn.class)
+			.addMixIn(JobParameters.class, JobParametersJacksonMixIn.class)
+			.addMixIn(JobParameter.class, JobParameterJacksonMixIn.class)
+			.addMixIn(JobInstance.class, JobInstanceJacksonMixIn.class)
+			.addMixIn(ExitStatus.class, ExitStatusJacksonMixIn.class)
+			.addMixIn(StepExecution.class, StepExecutionJacksonMixIn.class)
+			.addMixIn(ExecutionContext.class, ExecutionContextJacksonMixIn.class)
+			.addMixIn(StepExecutionHistory.class, StepExecutionHistoryJacksonMixIn.class);
 	}
 
 	/**

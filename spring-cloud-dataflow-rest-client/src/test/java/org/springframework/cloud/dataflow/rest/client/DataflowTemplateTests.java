@@ -87,6 +87,25 @@ public class DataflowTemplateTests {
 	}
 
 	@Test
+	public void testThatObjectMapperGetsPrepared() {
+		final ObjectMapper objectMapper = new ObjectMapper();
+		DataFlowTemplate.prepareObjectMapper(objectMapper);
+		assertCorrectMixins(objectMapper);
+	}
+
+	@Test
+	public void testPrepareObjectMapperWithNullObjectMapper() {
+		try {
+			DataFlowTemplate.prepareObjectMapper(null);
+		}
+		catch (IllegalArgumentException e) {
+			assertEquals("The objectMapper must not be null.", e.getMessage());
+			return;
+		}
+		fail("Expected an IllegalArgumentException to be thrown.");
+	}
+
+	@Test
 	public void testThatDefaultDataflowRestTemplateContainsMixins() {
 		final RestTemplate restTemplate = DataFlowTemplate.getDefaultDataflowRestTemplate();
 
@@ -105,16 +124,7 @@ public class DataflowTemplateTests {
 				containsMappingJackson2HttpMessageConverter = true;
 
 				final MappingJackson2HttpMessageConverter jacksonConverter = (MappingJackson2HttpMessageConverter) converter;
-				final ObjectMapper objectMapper = jacksonConverter.getObjectMapper();
-
-				assertNotNull(objectMapper.findMixInClassFor(JobExecution.class));
-				assertNotNull(objectMapper.findMixInClassFor(JobParameters.class));
-				assertNotNull(objectMapper.findMixInClassFor(JobParameter.class));
-				assertNotNull(objectMapper.findMixInClassFor(JobInstance.class));
-				assertNotNull(objectMapper.findMixInClassFor(ExitStatus.class));
-				assertNotNull(objectMapper.findMixInClassFor(StepExecution.class));
-				assertNotNull(objectMapper.findMixInClassFor(ExecutionContext.class));
-				assertNotNull(objectMapper.findMixInClassFor(StepExecutionHistory.class));
+				assertCorrectMixins(jacksonConverter.getObjectMapper());
 			}
 		}
 
@@ -123,6 +133,18 @@ public class DataflowTemplateTests {
 					+ "MappingJackson2HttpMessageConverter");
 		}
 	}
+
+	private void assertCorrectMixins(ObjectMapper objectMapper) {
+		assertNotNull(objectMapper.findMixInClassFor(JobExecution.class));
+		assertNotNull(objectMapper.findMixInClassFor(JobParameters.class));
+		assertNotNull(objectMapper.findMixInClassFor(JobParameter.class));
+		assertNotNull(objectMapper.findMixInClassFor(JobInstance.class));
+		assertNotNull(objectMapper.findMixInClassFor(ExitStatus.class));
+		assertNotNull(objectMapper.findMixInClassFor(StepExecution.class));
+		assertNotNull(objectMapper.findMixInClassFor(ExecutionContext.class));
+		assertNotNull(objectMapper.findMixInClassFor(StepExecutionHistory.class));
+	}
+
 
 	@Test
 	public void testThatPrepareRestTemplateWithNullContructorValueContainsMixins() {

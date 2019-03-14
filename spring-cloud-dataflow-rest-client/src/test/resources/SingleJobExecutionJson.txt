@@ -81,7 +81,12 @@
           "dirty": false,
           "empty": true,
           "values": [
-
+              {
+                "batch.taskletType": "org.springframework.cloud.task.app.timestamp.batch.TimestampBatchTaskConfiguration$1"
+              },
+              {
+                "batch.stepType": "org.springframework.batch.core.step.tasklet.TaskletStep"
+              }
           ]
         },
         "exitStatus": {
