@@ -346,7 +346,7 @@ all the application-URIs in bulk. Otherwise, as explained previously, you can re
 custom property file with only the required application-URIs in it. It is recommended, however, to have a "`focused`"
 list of desired application-URIs in a custom property file.
 
-===== Sprfing Cloud Stream App Starters
+===== Spring Cloud Stream App Starters
 
 The following table includes the bit.ly links to the available Stream Application Starters based on Spring Cloud Stream 2.0.x
 and Spring Boot 2.0.x:
