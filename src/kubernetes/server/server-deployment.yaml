@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
       - name: scdf-server
-        image: springcloud/spring-cloud-dataflow-server:2.0.1.RELEASE
+        image: springcloud/spring-cloud-dataflow-server:2.0.2.BUILD-SNAPSHOT
         imagePullPolicy: Always
         ports:
         - containerPort: 80
