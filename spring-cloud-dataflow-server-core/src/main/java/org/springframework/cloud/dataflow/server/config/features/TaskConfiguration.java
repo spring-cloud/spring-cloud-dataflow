@@ -28,10 +28,6 @@ import org.springframework.batch.core.launch.support.SimpleJobLauncher;
 import org.springframework.batch.core.repository.support.JobRepositoryFactoryBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.autoconfigure.batch.BatchDataSourceInitializer;
-import org.springframework.boot.autoconfigure.batch.BatchProperties;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.cloud.dataflow.audit.service.AuditRecordService;
@@ -66,11 +62,9 @@ import org.springframework.cloud.deployer.spi.local.LocalDeployerProperties;
 import org.springframework.cloud.deployer.spi.local.LocalTaskLauncher;
 import org.springframework.cloud.task.repository.TaskExplorer;
 import org.springframework.cloud.task.repository.TaskRepository;
-import org.springframework.cloud.task.repository.support.TaskRepositoryInitializer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Conditional;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.core.io.ResourceLoader;
 import org.springframework.data.map.repository.config.EnableMapRepositories;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
@@ -217,61 +211,13 @@ public class TaskConfiguration {
 		return jobExplorerFactoryBean;
 	}
 
-	@Configuration
-	@ConditionalOnProperty(name = "spring.dataflow.embedded.database.enabled", havingValue = "true", matchIfMissing = true)
-	@ConditionalOnExpression("#{'${spring.datasource.url:}'.startsWith('jdbc:h2:tcp://localhost:')}")
-	public static class H2ServerConfiguration {
-
-		@Bean
-		public JobRepositoryFactoryBean jobRepositoryFactoryBeanForServer(DataSource dataSource,
-				PlatformTransactionManager dataSourceTransactionManager) {
-			JobRepositoryFactoryBean repositoryFactoryBean = new JobRepositoryFactoryBean();
-			repositoryFactoryBean.setDataSource(dataSource);
-			repositoryFactoryBean.setTransactionManager(dataSourceTransactionManager);
-			return repositoryFactoryBean;
-		}
-
-		@Bean
-		public BatchDataSourceInitializer batchRepositoryInitializerForDefaultDBForServer(DataSource dataSource,
-				ResourceLoader resourceLoader, BatchProperties properties) {
-			return new BatchDataSourceInitializer(dataSource, resourceLoader, properties);
-		}
-
-		@Bean
-		public TaskRepositoryInitializer taskRepositoryInitializerForDefaultDB(DataSource dataSource) {
-			TaskRepositoryInitializer taskRepositoryInitializer = new TaskRepositoryInitializer();
-			taskRepositoryInitializer.setDataSource(dataSource);
-			return taskRepositoryInitializer;
-		}
-	}
-
-	@Configuration
-	@ConditionalOnExpression("#{!'${spring.datasource.url:}'.startsWith('jdbc:h2:tcp://localhost:') || "
-			+ "('${spring.datasource.url:}'.startsWith('jdbc:h2:tcp://localhost:') &&"
-			+ "'${spring.dataflow.embedded.database.enabled}'.equals('false'))}")
-	public static class NoH2ServerConfiguration {
-
-		@Bean
-		public JobRepositoryFactoryBean jobRepositoryFactoryBean(DataSource dataSource,
-				PlatformTransactionManager platformTransactionManager) {
-			JobRepositoryFactoryBean repositoryFactoryBean = new JobRepositoryFactoryBean();
-			repositoryFactoryBean.setDataSource(dataSource);
-			repositoryFactoryBean.setTransactionManager(platformTransactionManager);
-			return repositoryFactoryBean;
-		}
-
-		@Bean
-		public BatchDataSourceInitializer batchRepositoryInitializerForDefaultDB(DataSource dataSource,
-				ResourceLoader resourceLoader, BatchProperties properties) {
-			return new BatchDataSourceInitializer(dataSource, resourceLoader, properties);
-		}
-
-		@Bean
-		public TaskRepositoryInitializer taskRepositoryInitializerForDB(DataSource dataSource) {
-			TaskRepositoryInitializer taskRepositoryInitializer = new TaskRepositoryInitializer();
-			taskRepositoryInitializer.setDataSource(dataSource);
-			return taskRepositoryInitializer;
-		}
+	@Bean
+	public JobRepositoryFactoryBean jobRepositoryFactoryBean(DataSource dataSource,
+			PlatformTransactionManager platformTransactionManager) {
+		JobRepositoryFactoryBean repositoryFactoryBean = new JobRepositoryFactoryBean();
+		repositoryFactoryBean.setDataSource(dataSource);
+		repositoryFactoryBean.setTransactionManager(platformTransactionManager);
+		return repositoryFactoryBean;
 	}
 
 }

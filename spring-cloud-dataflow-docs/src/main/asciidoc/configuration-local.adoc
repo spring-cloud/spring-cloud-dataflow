@@ -83,12 +83,7 @@ java -jar spring-cloud-dataflow-server/target/spring-cloud-dataflow-server-{proj
     --spring.datasource.driver-class-name=org.hsqldb.jdbc.JDBCDriver &
 ----
 
-NOTE: If you wish to use an external H2 database instance instead of the one
-embedded with Spring Cloud Data Flow, set the
-`spring.dataflow.embedded.database.enabled` property to false.  If
-`spring.dataflow.embedded.database.enabled` is set to false or a database
-other than h2 is specified as the datasource, the embedded database does not
-start.
+NOTE: H2 database is not supported as an external mode.
 
 ==== Disabling database schema creation and migration strategies
 
