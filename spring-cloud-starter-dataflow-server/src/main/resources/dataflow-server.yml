@@ -19,12 +19,7 @@ spring:
       uri: http://localhost:8888
 
   datasource:
-#    url: jdbc:h2:tcp://localhost:19092/mem:dataflow;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
     url: jdbc:h2:tcp://localhost:19092/mem:dataflow
     username: sa
     password:
     driverClassName: org.h2.Driver
-  dataflow:
-    embedded:
-      database:
-        enabled: true
