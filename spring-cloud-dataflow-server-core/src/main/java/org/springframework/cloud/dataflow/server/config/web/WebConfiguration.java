@@ -71,9 +71,6 @@ public class WebConfiguration implements ServletContextInitializer, ApplicationL
 	@Value("${spring.datasource.url:#{null}}")
 	private String dataSourceUrl;
 
-	@Value("${spring.dataflow.embedded.database.enabled:false}")
-	private boolean embeddedDatabasedEnabled;
-
 	private Server server = null;
 
 	public Server initH2TCPServer() {
@@ -96,8 +93,7 @@ public class WebConfiguration implements ServletContextInitializer, ApplicationL
 
 	@Override
 	public void onStartup(ServletContext servletContext) {
-		if (this.embeddedDatabasedEnabled && StringUtils.hasText(dataSourceUrl)
-				&& dataSourceUrl.startsWith("jdbc:h2:tcp://localhost:")) {
+		if (StringUtils.hasText(dataSourceUrl) && dataSourceUrl.startsWith("jdbc:h2:tcp://localhost:")) {
 			logger.info("Start Embedded H2");
 			initH2TCPServer();
 		}
