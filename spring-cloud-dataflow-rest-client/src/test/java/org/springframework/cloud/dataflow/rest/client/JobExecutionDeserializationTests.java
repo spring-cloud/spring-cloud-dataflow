@@ -49,14 +49,13 @@ public class JobExecutionDeserializationTests {
 
 		final String json = new String(StreamUtils.copyToByteArray(inputStream));
 
-		PagedResources<Resource<JobExecutionResource>> paged = objectMapper.readValue(json,
+		final PagedResources<Resource<JobExecutionResource>> paged = objectMapper.readValue(json,
 				new TypeReference<PagedResources<Resource<JobExecutionResource>>>() {
 				});
-		JobExecutionResource jobExecutionResource = paged.getContent().iterator().next().getContent();
+		final JobExecutionResource jobExecutionResource = paged.getContent().iterator().next().getContent();
 		assertEquals("Expect 1 JobExecutionInfoResource", 6, paged.getContent().size());
 		assertEquals(Long.valueOf(6), jobExecutionResource.getJobId());
 		assertEquals("job200616815", jobExecutionResource.getName());
-		assertEquals("COMPLETED", jobExecutionResource.getJobExecution().getStatus().name());
 		assertEquals("COMPLETED", jobExecutionResource.getJobExecution().getStatus().name());
 	}
 
@@ -78,10 +77,10 @@ public class JobExecutionDeserializationTests {
 		assertEquals("COMPLETED", jobExecutionInfoResource.getJobExecution().getStatus().name());
 		assertEquals(1, jobExecutionInfoResource.getJobExecution().getStepExecutions().size());
 
-		StepExecution stepExecution = jobExecutionInfoResource.getJobExecution().getStepExecutions().iterator().next();
+		final StepExecution stepExecution = jobExecutionInfoResource.getJobExecution().getStepExecutions().iterator().next();
 		assertNotNull(stepExecution);
 
-		ExecutionContext stepExecutionExecutionContext = stepExecution.getExecutionContext();
+		final ExecutionContext stepExecutionExecutionContext = stepExecution.getExecutionContext();
 
 		assertNotNull(stepExecutionExecutionContext);
 		assertEquals(2, stepExecutionExecutionContext.size());

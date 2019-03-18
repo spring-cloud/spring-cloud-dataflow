@@ -97,12 +97,12 @@ public class DataflowTemplateTests {
 	public void testPrepareObjectMapperWithNullObjectMapper() {
 		try {
 			DataFlowTemplate.prepareObjectMapper(null);
+			fail("Expected an IllegalArgumentException to be thrown.");
 		}
 		catch (IllegalArgumentException e) {
 			assertEquals("The objectMapper must not be null.", e.getMessage());
 			return;
 		}
-		fail("Expected an IllegalArgumentException to be thrown.");
 	}
 
 	@Test
