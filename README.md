@@ -22,14 +22,6 @@
     <img src="https://build.spring.io/plugins/servlet/wittified/build-status/SCD-BMASTER"
          alt="Build Status" />
   </a>
-  <a href="http://waffle.io/spring-cloud/spring-cloud-dataflow">
-    <img src="https://badge.waffle.io/spring-cloud/spring-cloud-dataflow.svg?label=ready&title=Ready"
-         alt="Stories Ready" />
-  </a>
-  <a href="http://waffle.io/spring-cloud/spring-cloud-dataflow">
-    <img src="https://badge.waffle.io/spring-cloud/spring-cloud-dataflow.svg?label=In%20Progress&title=In%20Progress"
-         alt="Stories In Progress" />
-  </a>
 </p>
 
 
