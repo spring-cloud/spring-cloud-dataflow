@@ -4,11 +4,10 @@ services:
   # Grafana is configured with the Prometheus datasource.
   # Use `docker exec -it prometheus /bin/sh` to logging in the container
   prometheus:
-    image: prom/prometheus:v2.7.1
+    image: springcloud/spring-cloud-dataflow-prometheus-local:${DATAFLOW_VERSION:?DATAFLOW_VERSION is not set! Use 'export DATAFLOW_VERSION=local-server-image-tag'}
     container_name: 'prometheus'
     volumes:
       - 'scdf-targets:/etc/prometheus/'
-      - './prometheus-local-file.yml:/etc/prometheus/prometheus.yml'
     ports:
       - '9090:9090'
 

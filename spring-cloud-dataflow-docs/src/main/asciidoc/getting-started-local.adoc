@@ -59,18 +59,21 @@ To get started, you need to start Docker Compose. To do so:
 ----
 $ export DATAFLOW_VERSION={local-server-image-tag}
 $ export SKIPPER_VERSION={skipper-version}
+$ export SCDF_HOST_IP=your-hsot-ip
 $ docker-compose up
 ----
 ====
 
-The `docker-compose.yml` file defines `DATAFLOW_VERSION` and `SKIPPER_VERSION` variables, so that those values can be easily changed. The preceding commands first set the `DATAFLOW_VERSION` and `SKIPPER_VERSION` to use in the environment. Then `docker-compose` is started.
+The `docker-compose.yml` file defines `DATAFLOW_VERSION`, `SKIPPER_VERSION` and `SCDF_HOST_IP` variables, so that those values can be easily changed. The preceding commands first set the `DATAFLOW_VERSION`, `SKIPPER_VERSION` and `SCDF_HOST_IP` to use in the environment. Then `docker-compose` is started.
 
-You can also use a  shorthand version that exposes only the `DATAFLOW_VERSION` and `SKIPPER_VERSION` variables to the `docker-compose` process (rather than setting it in the environment), as follows:
+You can use the `ifconfig` (for linux/macos) or `ipconfig` (for Windows) command line toolkit to obtain the IP address to set in `SCDF_HOST_IP`. Note that `127.0.0.1` is not a valid option.
+
+You can also use a  shorthand version that exposes only the `DATAFLOW_VERSION`, `SKIPPER_VERSION` and `SCDF_HOST_IP` variables to the `docker-compose` process (rather than setting it in the environment), as follows:
 
 ====
 [source,bash,subs=attributes]
 ----
-$ DATAFLOW_VERSION={local-server-image-tag} SKIPPER_VERSION={skipper-version} docker-compose up
+$ DATAFLOW_VERSION={local-server-image-tag} SKIPPER_VERSION={skipper-version} SCDF_HOST_IP=Your-Host-IP docker-compose up
 ----
 ====
 
@@ -81,6 +84,7 @@ If you use Windows, environment variables are defined by using the `set` command
 ----
 C:\ set DATAFLOW_VERSION={local-server-image-tag}
 C:\ set SKIPPER_VERSION={skipper-version}
+C:\ set SCDF_HOST_IP=Your-Host-IP
 C:\ docker-compose up
 ----
 ====
@@ -192,10 +196,9 @@ $ DATAFLOW_VERSION={local-server-image-tag} SKIPPER_VERSION={skipper-version} do
 NOTE: Some stream applications may open a port, for example `http --server.port=`. By default, a port range of `9000-9010` is exposed from the container to the host. If you would need to change this range, you can modify the `ports` block of the `dataflow-server` service in the `docker-compose.yml` file.
 
 
-
 [[getting-started-local-customizing-spring-cloud-dataflow-docker]]
 
-==== Spring Cloud Data Flow Shell
+=== Spring Cloud Data Flow Shell
 
 For convenience and as an alternative to using the Spring Cloud Data Flow Dashboard, Spring Cloud Data Flow Shell is also included in the springcloud/spring-cloud-dataflow-server Docker image.
 To use it, open another console window and type the following:
@@ -209,15 +212,15 @@ $ docker exec -it dataflow-server java -jar shell.jar
 
 Using Spring Cloud Data Flow Shell is further described in <<shell,Shell>>.
 
-==== Spring Cloud Data Flow Monitoring
+=== Spring Cloud Data Flow Monitoring
 
-By default, the Data Flow `docker-compose` configures Stream monitoring with InfluxDB and pre-built dashboards for Grafana.
+By default, the Data Flow `docker-compose` configures Stream monitoring with Prometheus and pre-built dashboards for Grafana.
+For further instructions about Data Flow monitoring, see <<streams-monitoring-local-prometheus,Streams Monitoring Prometheus >>.
+If required follow the instruction below to customize the docker-compose to replace Prometheus with InfluxDB.
 
-For further instructions about Data Flow monitoring, see <<streams-monitoring-local-influx,Streams Monitoring InfluxDB >>.
+image::{dataflow-asciidoc}/images/grafana-prometheus-scdf-applications-dashboard.png[Grafana InfluxDB Dashboard, scaledwidth="50%"]
 
-image::{dataflow-asciidoc}/images/grafana-influxdb-scdf-streams-dashboard.png[Grafana InfluxDB Dashboard, scaledwidth="50%"]
-
-==== Docker Compose Customization
+=== Docker Compose Customization
 
 Out of the box, Spring Cloud Data Flow uses the H2 embedded database for storing state and Kafka for communication.
 You can make customizations to these components by editing the `docker-compose.yml` file. To do so:
@@ -407,6 +410,81 @@ You can also pre-register the apps directly in the docker-compose. For every pre
 
 See the https://docs.spring.io/spring-cloud-dataflow/docs/current/reference/htmlsingle/#resources-registered-applications[SCDF REST API] for further details.
 
+[[getting-started-local-customizing-spring-cloud-dataflow-docker-influxdb]]
+===== Using InfluxDB Instead of Prometheus for Monitoring
+
+You can use InfluxDB rather than Prometheus for monitoring time-series database. To do so:
+
+. Replace the following configuration under the `services` section:
++
+====
+[source,yaml,subs=attributes]
+----
+  prometheus:
+    image: springcloud/spring-cloud-dataflow-prometheus-local:${DATAFLOW_VERSION:?DATAFLOW_VERSION is not set! Use 'export DATAFLOW_VERSION=local-server-image-tag'}
+    container_name: 'prometheus'
+    volumes:
+      - 'scdf-targets:/etc/prometheus/'
+    ports:
+      - '9090:9090'
+    depends_on:
+      - service-discovery
+
+  service-discovery:
+    image: springcloud/spring-cloud-dataflow-prometheus-service-discovery:0.0.3
+    container_name: 'service-discovery'
+    volumes:
+      - 'scdf-targets:/tmp/scdf-targets/'
+    expose:
+      - '8181'
+    ports:
+      - '8181:8181'
+    environment:
+      - metrics.prometheus.target.refresh.cron=0/20 * * * * *
+      - metrics.prometheus.target.discovery.url=http://localhost:9393/runtime/apps
+      - metrics.prometheus.target.file.path=/tmp/targets.json
+      - 'SCDF_HOST_IP=${SCDF_HOST_IP:?SCDF_HOST_IP is not set! Use "export SCDF_HOST_IP=<SCDF Server IP>". Note: 127.0.0.1 is not a valid option!}'
+    depends_on:
+      - dataflow-server
+----
+====
++
+With the following:
++
+====
+[source,yaml,subs=attributes]
+----
+  influxdb:
+    image: influxdb:1.7.4
+    container_name: 'influxdb'
+    ports:
+      - '8086:8086'
+----
+====
+
+. In the `dataflow-server` services configuration block, replace the following `environment` entries:
++
+====
+[source,yaml,subs=attributes]
+----
+      - spring.cloud.dataflow.applicationProperties.stream.management.metrics.export.prometheus.enabled=true
+      - spring.cloud.dataflow.applicationProperties.stream.spring.cloud.streamapp.security.enabled=false
+      - spring.cloud.dataflow.applicationProperties.stream.management.endpoints.web.exposure.include=prometheus,info,health
+----
+====
++
+With the following:
++
+====
+[source,yaml,subs=attributes]
+----
+      - spring.cloud.dataflow.applicationProperties.stream.management.metrics.export.influx.enabled=true
+      - spring.cloud.dataflow.applicationProperties.stream.management.metrics.export.influx.db=myinfluxdb
+      - spring.cloud.dataflow.applicationProperties.stream.management.metrics.export.influx.uri=http://influxdb:8086
+----
+====
+
+. Modify the `grafana` service definition `image` attribute to replace `spring-cloud-dataflow-grafana-prometheus` with `spring-cloud-dataflow-grafana-influxdb`.
 
 
 [[getting-started-local-deploying-spring-cloud-dataflow]]
