@@ -40,7 +40,7 @@
 
         <java-cfenv-boot.version>1.0.1.RELEASE</java-cfenv-boot.version>
         <spring-cloud-deployer.version>2.0.0.RELEASE</spring-cloud-deployer.version>
-        <spring-cloud-deployer-local.version>2.0.0.RELEASE</spring-cloud-deployer-local.version>
+        <spring-cloud-deployer-local.version>2.0.1.BUILD-SNAPSHOT</spring-cloud-deployer-local.version>
 	    <!-- note - check version of reactor at deployer-cf/cf-java-client uses -->
         <spring-cloud-deployer-cloudfoundry.version>2.0.0.RELEASE</spring-cloud-deployer-cloudfoundry.version>
         <reactor.version>3.2.0.RELEASE</reactor.version>
