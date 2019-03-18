@@ -43,7 +43,6 @@ import org.springframework.cloud.skipper.domain.Info;
 import org.springframework.cloud.skipper.domain.Status;
 import org.springframework.cloud.skipper.domain.StatusCode;
 import org.springframework.http.MediaType;
-import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.annotation.DirtiesContext.ClassMode;
 import org.springframework.test.context.junit4.SpringRunner;
@@ -51,17 +50,19 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 
-import static org.hamcrest.CoreMatchers.containsString;
-import static org.junit.Assert.assertThat;
+import static org.hamcrest.Matchers.hasSize;
+import static org.hamcrest.Matchers.is;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 /**
  * Tests for metrics controller.
  *
  * @author Christian Tzolov
+ * @author Daniel Serleg
  */
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = TestDependencies.class)
@@ -89,14 +90,12 @@ public class RuntimeStreamsControllerTests {
 				.defaultRequest(get("/").accept(MediaType.APPLICATION_JSON)).build();
 		this.appRegistrationRepository.deleteAll();
 
-
 		StreamDefinition streamDefinition1 = new StreamDefinition("ticktock1", "time1|log1");
 		StreamDefinition streamDefinition2 = new StreamDefinition("ticktock2", "time2|log2");
 		StreamDefinition streamDefinition3 = new StreamDefinition("ticktock3", "time3|log3");
 		streamDefinitionRepository.save(streamDefinition1);
 		streamDefinitionRepository.save(streamDefinition2);
 		streamDefinitionRepository.save(streamDefinition3);
-
 
 		List<AppStatus> appStatues1 = Arrays.asList( // CF deployer id
 				AppStatus.of("boza-ticktock1-log1-v1")
@@ -132,32 +131,34 @@ public class RuntimeStreamsControllerTests {
 
 	@Test
 	public void testGetResponse() throws Exception {
-		MockHttpServletResponse responseString = mockMvc
-				.perform(
-						get("/runtime/streams")
-								.param("names", "ticktock1,ticktock2,ticktock3")
-								.accept(MediaType.APPLICATION_JSON))
+		mockMvc.perform(
+				get("/runtime/streams")
+						.param("names", "ticktock1,ticktock2,ticktock3")
+						.accept(MediaType.APPLICATION_JSON))
 				.andDo(print())
-				.andExpect(status().isOk()).andReturn().getResponse();
+				.andExpect(status().isOk())
 
-		assertThat(responseString.getContentAsString(), containsString("ticktock1"));
-		assertThat(responseString.getContentAsString(), containsString("time1"));
-		assertThat(responseString.getContentAsString(), containsString("log1"));
-		assertThat(responseString.getContentAsString(), containsString("guid1"));
-		assertThat(responseString.getContentAsString(), containsString("guid2"));
+				.andExpect(jsonPath("$.**", hasSize(3)))
+				.andExpect(jsonPath("$.[0].name", is("ticktock1")))
+				.andExpect(jsonPath("$.[0].applications.*", hasSize(2)))
+				.andExpect(jsonPath("$.[0].applications[0].name", is("log1")))
+				.andExpect(jsonPath("$.[0].applications[0].instances[0].guid", is("guid1")))
+				.andExpect(jsonPath("$.[0].applications[1].name", is("time1")))
+				.andExpect(jsonPath("$.[0].applications[1].instances[0].guid", is("guid2")))
 
-		assertThat(responseString.getContentAsString(), containsString("ticktock2"));
-		assertThat(responseString.getContentAsString(), containsString("time2"));
-		assertThat(responseString.getContentAsString(), containsString("log2"));
-		assertThat(responseString.getContentAsString(), containsString("guid3"));
-		assertThat(responseString.getContentAsString(), containsString("guid4"));
+				.andExpect(jsonPath("$.[1].name", is("ticktock2")))
+				.andExpect(jsonPath("$.[1].applications.*", hasSize(2)))
+				.andExpect(jsonPath("$.[1].applications[0].name", is("log2")))
+				.andExpect(jsonPath("$.[1].applications[0].instances[0].guid", is("guid3")))
+				.andExpect(jsonPath("$.[1].applications[1].name", is("time2")))
+				.andExpect(jsonPath("$.[1].applications[1].instances[0].guid", is("guid4")))
 
-		assertThat(responseString.getContentAsString(), containsString("ticktock3"));
-		assertThat(responseString.getContentAsString(), containsString("log3"));
-		assertThat(responseString.getContentAsString(), containsString("log3"));
-		assertThat(responseString.getContentAsString(), containsString("ticktock3.log3-v1-0"));
-		assertThat(responseString.getContentAsString(), containsString("ticktock3.time3-v1"));
-
+				.andExpect(jsonPath("$.[2].name", is("ticktock3")))
+				.andExpect(jsonPath("$.[2].applications.*", hasSize(2)))
+				.andExpect(jsonPath("$.[2].applications[0].name", is("log3")))
+				.andExpect(jsonPath("$.[2].applications[0].instances[0].guid", is("ticktock3.log3-v1-0")))
+				.andExpect(jsonPath("$.[2].applications[1].name", is("time3")))
+				.andExpect(jsonPath("$.[2].applications[1].instances[0].guid", is("ticktock3.time3-v1-0")));
 	}
 
 	private AppInstanceStatus instance(String id, String guid, String appName) {

@@ -126,7 +126,7 @@ public class StreamDeploymentControllerTests {
 		ArgumentCaptor<Integer> argumentCaptor2 = ArgumentCaptor.forClass(Integer.class);
 		verify(streamService).rollbackStream(argumentCaptor1.capture(), argumentCaptor2.capture());
 		Assert.assertEquals(argumentCaptor1.getValue(), "test1");
-		Assert.assertTrue("Rollback version is incorrect", argumentCaptor2.getValue() == 2);
+		Assert.assertEquals("Rollback version is incorrect", 2, (int) argumentCaptor2.getValue());
 	}
 
 	@Test
@@ -159,11 +159,11 @@ public class StreamDeploymentControllerTests {
 		when(this.streamService.state(anyList())).thenReturn(streamDeploymentStates);
 
 		StreamDeploymentResource streamDeploymentResource = this.controller.info(streamDefinition.getName());
-		Assert.assertTrue(streamDeploymentResource.getStreamName().equals(streamDefinition.getName()));
-		Assert.assertTrue(streamDeploymentResource.getDslText().equals(streamDefinition.getDslText()));
-		Assert.assertTrue(streamDeploymentResource.getStreamName().equals(streamDefinition.getName()));
-		Assert.assertTrue(streamDeploymentResource.getDeploymentProperties().equals("{\"log\":{\"test2\":\"value2\"},\"time\":{\"test1\":\"value1\"}}"));
-		Assert.assertTrue(streamDeploymentResource.getStatus().equals(DeploymentState.deployed.name()));
+		Assert.assertEquals(streamDeploymentResource.getStreamName(), streamDefinition.getName());
+		Assert.assertEquals(streamDeploymentResource.getDslText(), streamDefinition.getDslText());
+		Assert.assertEquals(streamDeploymentResource.getStreamName(), streamDefinition.getName());
+		Assert.assertEquals("{\"log\":{\"test2\":\"value2\"},\"time\":{\"test1\":\"value1\"}}", streamDeploymentResource.getDeploymentProperties());
+		Assert.assertEquals(streamDeploymentResource.getStatus(), DeploymentState.deployed.name());
 	}
 
 }

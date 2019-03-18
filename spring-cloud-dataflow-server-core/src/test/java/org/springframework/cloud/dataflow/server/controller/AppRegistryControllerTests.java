@@ -152,12 +152,19 @@ public class AppRegistryControllerTests {
 	@Test
 	public void testDefaultVersion() throws Exception {
 		this.mockMvc.perform(post("/apps/sink/log1").param("uri", "maven://org.springframework.cloud.stream.app:log-sink-rabbit:1.2.0.RELEASE").accept(MediaType.APPLICATION_JSON))
-				.andDo(print()).andExpect(status().isCreated());
-		MvcResult mvcResult = this.mockMvc.perform(get("/apps/sink/log1")).andDo(print()).andExpect(status().isOk()).andReturn();
-		Assert.isTrue(mvcResult.getResponse().getContentAsString().contains("{\"name\":\"log1\",\"type\":\"sink\"," +
-				"\"uri\":\"maven://org.springframework.cloud.stream.app:log-sink-rabbit:1.2.0.RELEASE\"," +
-				"\"version\":\"1.2.0.RELEASE\",\"defaultVersion\":true"), "Default version is incorrect");
-	}
+				.andDo(print())
+                .andExpect(status().isCreated());
+
+        this.mockMvc.perform(get("/apps/sink/log1"))
+                .andDo(print())
+                .andExpect(status().isOk())
+
+                .andExpect(jsonPath("$.name", is("log1")))
+                .andExpect(jsonPath("$.type", is("sink")))
+                .andExpect(jsonPath("$.uri", is("maven://org.springframework.cloud.stream.app:log-sink-rabbit:1.2.0.RELEASE")))
+                .andExpect(jsonPath("$.version", is("1.2.0.RELEASE")))
+                .andExpect(jsonPath("$.defaultVersion", is(true)));
+    }
 
 	@Test
 	public void testVersionOverride() throws Exception {
@@ -166,10 +173,16 @@ public class AppRegistryControllerTests {
 		this.mockMvc.perform(post("/apps/sink/log1").param("uri", "maven://org.springframework.cloud.stream.app:log-sink-rabbit:1.3.0.RELEASE").accept(MediaType.APPLICATION_JSON))
 				.andDo(print()).andExpect(status().isCreated());
 		this.mockMvc.perform(put("/apps/sink/log1/1.3.0.RELEASE")).andDo(print()).andExpect(status().isAccepted());
-		MvcResult mvcResult = this.mockMvc.perform(get("/apps/sink/log1")).andDo(print()).andExpect(status().isOk()).andReturn();
-		Assert.isTrue(mvcResult.getResponse().getContentAsString().contains("{\"name\":\"log1\",\"type\":\"sink\"," +
-				"\"uri\":\"maven://org.springframework.cloud.stream.app:log-sink-rabbit:1.3.0.RELEASE\"," +
-				"\"version\":\"1.3.0.RELEASE\",\"defaultVersion\":true"), "Make version as default is incorrect");
+
+		this.mockMvc.perform(get("/apps/sink/log1"))
+                .andDo(print())
+                .andExpect(status().isOk())
+
+                .andExpect(jsonPath("$.name", is("log1")))
+                .andExpect(jsonPath("$.type", is("sink")))
+                .andExpect(jsonPath("$.uri", is("maven://org.springframework.cloud.stream.app:log-sink-rabbit:1.3.0.RELEASE")))
+                .andExpect(jsonPath("$.version", is("1.3.0.RELEASE")))
+                .andExpect(jsonPath("$.defaultVersion", is(true)));
 	}
 
 	@Test
