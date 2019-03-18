@@ -1,6 +1,6 @@
 image:https://codecov.io/gh/spring-cloud/spring-cloud-skipper/branch/master/graph/badge.svg["Codecov", link="https://codecov.io/gh/spring-cloud/spring-cloud-skipper/branch/master"]
 
-== Spring Cloud Skipper image:https://build.spring.io/plugins/servlet/wittified/build-status/SCSKIP-BMASTER[Build Status, link=https://build.spring.io/browse/SCSKIP] image:https://badge.waffle.io/spring-cloud/spring-cloud-skipper.svg?label=ready&title=Ready[Stories Ready, link=http://waffle.io/spring-cloud/spring-cloud-skipper] image:https://badge.waffle.io/spring-cloud/spring-cloud-skipper.svg?label=In%20Progress&title=In%20Progress[Stories In Progress, link=http://waffle.io/spring-cloud/spring-cloud-skipper]
+== Spring Cloud Skipper image:https://build.spring.io/plugins/servlet/wittified/build-status/SCSKIP-BMASTER[Build Status, link=https://build.spring.io/browse/SCSKIP]
 
 == Spring Cloud Skipper
 
