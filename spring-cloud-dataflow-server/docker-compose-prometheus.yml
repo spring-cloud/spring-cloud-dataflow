@@ -79,7 +79,7 @@ services:
   # The service-discovery container.
   # Use `docker exec -it service-discovery /bin/sh` to logging the container
   service-discovery:
-    image: springcloud/spring-cloud-dataflow-prometheus-service-discovery:0.0.2
+    image: springcloud/spring-cloud-dataflow-prometheus-service-discovery:0.0.3
     container_name: 'service-discovery'
     volumes:
       - 'scdf-targets:/tmp/scdf-targets/'
@@ -88,8 +88,10 @@ services:
     ports:
       - '8181:8181'
     environment:
-      - 'SCDF_HOST_IP=${SCDF_HOST_IP:?SCDF_HOST_IP is not set!
-      Use "export SCDF_HOST_IP=<SCDF Server IP>". Note: 127.0.0.1 is not a valid option!}'
+      - metrics.prometheus.target.refresh.cron=0/20 * * * * *
+      - metrics.prometheus.target.discovery.url=http://localhost:9393/runtime/apps
+      - metrics.prometheus.target.file.path=/tmp/targets.json
+      - 'SCDF_HOST_IP=${SCDF_HOST_IP:?SCDF_HOST_IP is not set! Use "export SCDF_HOST_IP=<SCDF Server IP>". Note: 127.0.0.1 is not a valid option!}'
     depends_on:
       - dataflow-server
 
