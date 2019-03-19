@@ -74,7 +74,7 @@ The Data Flow server is responsible for creating the destinations/topics that co
 
 The interaction of the main components for the three types of DSLs are shown in the following images.
 
-.The Spring Cloud Data Flow Stream DSL Architecure
+.The Spring Cloud Data Flow Stream DSL Architecture
 image::{dataflow-asciidoc}/images/arch-stream-dsl.png[The Spring Cloud Data Flow Streaming Application Architecture, scaledwidth="60%"]
 
 In this architecture, the Stream DSL is POSTed to the Data Flow Server.
