@@ -580,7 +580,7 @@ public abstract class DefaultTaskExecutionServiceTests {
 
 	private static void initializeSuccessfulRegistry(AppRegistryService appRegistry) {
 		when(appRegistry.find(anyString(), any(ApplicationType.class))).thenReturn(
-				new AppRegistration("some-name", ApplicationType.task, URI.create("http://helloworld")));
+				new AppRegistration("some-name", ApplicationType.task, URI.create("https://helloworld")));
 		when(appRegistry.getAppResource(any())).thenReturn(new FileSystemResource("src/test/resources/apps/foo-task"));
 		when(appRegistry.getAppMetadataResource(any())).thenReturn(null);
 	}
@@ -589,7 +589,7 @@ public abstract class DefaultTaskExecutionServiceTests {
 		when(appRegistry.find("BBB", ApplicationType.task)).thenThrow(new IllegalArgumentException(
 				String.format("Application name '%s' with type '%s' does not exist in the app registry.", "fake",
 						ApplicationType.task)));
-		when(appRegistry.find("AAA", ApplicationType.task)).thenReturn(new AppRegistration("some-name", ApplicationType.task, URI.create("http://helloworld")));
+		when(appRegistry.find("AAA", ApplicationType.task)).thenReturn(new AppRegistration("some-name", ApplicationType.task, URI.create("https://helloworld")));
 		when(appRegistry.getAppResource(any())).thenReturn(new FileSystemResource("src/test/resources/apps/foo-task/bad.jar"));
 	}
 

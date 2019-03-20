@@ -246,7 +246,7 @@ sdataflow:>stream deploy foo --properties "deployer.http.cloudfoundry.domain=myd
 ----
 
 
-The preceding example binds the `http` app to the `http://myhost.mydomain.com/my-path` URL. Note that this
+The preceding example binds the `http` app to the `https://myhost.mydomain.com/my-path` URL. Note that this
 example shows *all* of the available customization options. In practice, you can use only one or two out of the three.
 
 [[configuration-cloudfoundry-docker-apps]]
@@ -476,7 +476,7 @@ The following example shows how to deploy the `http` health check type to an end
 [[configuration-cloudfoundry-app-resolution-options]]
 === Application Resolution Alternatives
 
-Though we highly recommend using Maven Repository for application link:http://docs.spring.io/spring-cloud-dataflow/docs/{scdf-core-version}/reference/htmlsingle/#spring-cloud-dataflow-register-stream-apps[resolution and registration]
+Though we highly recommend using Maven Repository for application link:https://docs.spring.io/spring-cloud-dataflow/docs/{scdf-core-version}/reference/htmlsingle/#spring-cloud-dataflow-register-stream-apps[resolution and registration]
 in Cloud Foundry, there might be situations where an alternative approach would make sense. The following alternative options
 could help you resolve applications when running on Cloud Foundry.
 
@@ -488,7 +488,7 @@ application with the name `http-source.jar` by using `--uri=http://<Route-To-Sta
 * The über-jar's can be hosted on any external server that's reachable over HTTP. They can be resolved from raw GitHub URIs
 as well. From the shell, you can, for example, register the app with the name `http-source.jar` by using `--uri=http://<Raw_GitHub_URI>/http-source.jar`.
 
-* link:http://docs.cloudfoundry.org/buildpacks/staticfile/index.html[Static Buildpack] support in Cloud Foundry is another
+* link:https://docs.cloudfoundry.org/buildpacks/staticfile/index.html[Static Buildpack] support in Cloud Foundry is another
 option. A similar HTTP resolution works on this model, too.
 
 * link:https://docs.cloudfoundry.org/devguide/services/using-vol-services.html[Volume Services] is another great option.
@@ -502,7 +502,7 @@ By default, the Data Flow server is unsecured and runs on an unencrypted HTTP co
 (as well as the Data Flow Dashboard) by enabling HTTPS and requiring clients to authenticate.
 For more details about securing the
 REST endpoints and configuring to authenticate against an OAUTH backend (UAA and SSO running on Cloud Foundry),
-see the security section from the core http://docs.spring.io/spring-cloud-dataflow/docs/{scdf-core-version}/reference/htmlsingle/#configuration-security[reference guide]. You can configure the security details in `dataflow-server.yml` or pass them as environment variables through `cf set-env` commands.
+see the security section from the core https://docs.spring.io/spring-cloud-dataflow/docs/{scdf-core-version}/reference/htmlsingle/#configuration-security[reference guide]. You can configure the security details in `dataflow-server.yml` or pass them as environment variables through `cf set-env` commands.
 
 [[configuration-cloudfoundry-authentication]]
 ==== Authentication
@@ -535,12 +535,12 @@ SECURITY_OAUTH2_RESOURCE_USERINFOURI: "${security.oauth2.resource.userInfoUri}"
 <1> It is important that the property `spring.cloud.dataflow.security.cf-use-uaa` is set to `false`
 
 Authorization is similarly supported for non-Cloud Foundry security scenarios.
-See the security section from the core Data Flow http://docs.spring.io/spring-cloud-dataflow/docs/{scdf-core-version}/reference/htmlsingle/#configuration-security[reference guide].
+See the security section from the core Data Flow https://docs.spring.io/spring-cloud-dataflow/docs/{scdf-core-version}/reference/htmlsingle/#configuration-security[reference guide].
 
 As the provisioning of roles can vary widely across environments, we by
 default assign all Spring Cloud Data Flow roles to users.
 
-You can customize this behavior by providing your own http://docs.spring.io/spring-boot/docs/current/api/org/springframework/boot/autoconfigure/security/oauth2/resource/AuthoritiesExtractor.html[`AuthoritiesExtractor`].
+You can customize this behavior by providing your own https://docs.spring.io/spring-boot/docs/current/api/org/springframework/boot/autoconfigure/security/oauth2/resource/AuthoritiesExtractor.html[`AuthoritiesExtractor`].
 
 The following example shows one possible approach to set the custom `AuthoritiesExtractor` on the `UserInfoTokenServices`:
 
@@ -604,7 +604,7 @@ The following JSON example shows how to create a security configuration:
 
 
 By default, the `spring.cloud.dataflow.security.cf-use-uaa`  property is set to `true`. This property activates a special
-http://docs.spring.io/spring-boot/docs/current/api/org/springframework/boot/autoconfigure/security/oauth2/resource/AuthoritiesExtractor.html[`AuthoritiesExtractor`] called `CloudFoundryDataflowAuthoritiesExtractor`.
+https://docs.spring.io/spring-boot/docs/current/api/org/springframework/boot/autoconfigure/security/oauth2/resource/AuthoritiesExtractor.html[`AuthoritiesExtractor`] called `CloudFoundryDataflowAuthoritiesExtractor`.
 
 If you do not use CloudFoundry UAA, you should set `spring.cloud.dataflow.security.cf-use-uaa` to `false`.
 
@@ -717,9 +717,9 @@ a configuration server to use the same capabilities.
 Similar to Spring Cloud Data Flow server, you can configure both the stream and task applications to resolve the centralized properties from the configuration server.
 Setting the `spring.cloud.config.uri` property for the deployed applications is a common way to bind to the configuration server.
 See the link:https://cloud.spring.io/spring-cloud-config/spring-cloud-config.html#_spring_cloud_config_client[Spring Cloud Config Client] reference guide for more information.
-Since this property is likely to be used across all applications deployed by the Data Flow server, the Data Flow server's `spring.cloud.dataflow.applicationProperties.stream` property for stream applications and `spring.cloud.dataflow.applicationProperties.task` property for task applications can be used to pass the `uri` of the Config Server to each deployed stream or task application. See the section on http://docs.spring.io/spring-cloud-dataflow/docs/{scdf-core-version}/reference/htmlsingle/#spring-cloud-dataflow-global-properties[common application properties] for more information.
+Since this property is likely to be used across all applications deployed by the Data Flow server, the Data Flow server's `spring.cloud.dataflow.applicationProperties.stream` property for stream applications and `spring.cloud.dataflow.applicationProperties.task` property for task applications can be used to pass the `uri` of the Config Server to each deployed stream or task application. See the section on https://docs.spring.io/spring-cloud-dataflow/docs/{scdf-core-version}/reference/htmlsingle/#spring-cloud-dataflow-global-properties[common application properties] for more information.
 
-Note that, if you use applications from the link:http://cloud.spring.io/spring-cloud-stream-app-starters/[App Starters project], these applications already embed the `spring-cloud-services-starter-config-client` dependency.
+Note that, if you use applications from the link:https://cloud.spring.io/spring-cloud-stream-app-starters/[App Starters project], these applications already embed the `spring-cloud-services-starter-config-client` dependency.
 If you build your application from scratch and want to add the client side support for config server, you can add a dependency reference to the config server client library. The following snippet shows a Maven example:
 
 

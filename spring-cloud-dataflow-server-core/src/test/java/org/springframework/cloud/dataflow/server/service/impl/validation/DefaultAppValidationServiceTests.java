@@ -118,7 +118,7 @@ public class DefaultAppValidationServiceTests {
 
 	private void initializeSuccessfulRegistry(AppRegistryService appRegistry) {
 		when(appRegistry.find(anyString(), any(ApplicationType.class))).thenReturn(
-				new AppRegistration("some-name", ApplicationType.task, URI.create("http://helloworld")));
+				new AppRegistration("some-name", ApplicationType.task, URI.create("https://helloworld")));
 		when(appRegistry.getAppResource(any())).thenReturn(new FileSystemResource("src/test/resources/apps/foo-task"));
 		when(appRegistry.getAppMetadataResource(any())).thenReturn(null);
 	}

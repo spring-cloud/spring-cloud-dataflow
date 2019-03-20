@@ -28,7 +28,7 @@ Out of the box, each binder middleware configuration file defines attributes to 
                     security:
                       enabled: false
           grafana-info:
-            url: 'http://grafana:3000'
+            url: 'https://grafana:3000'
 ----
 
 In this configuration, Prometheus metrics are enabled along with the appropriate endpoints and security settings.
@@ -42,14 +42,14 @@ To obtain the URL of the Grafana UI when deployed to Minikube, run the following
 [source,bash]
 ----
 $ minikube service --url grafana
-http://192.168.99.100:31595
+https://192.168.99.100:31595
 ----
 
-In the above example, the Grafana dashboard can be reached at http://192.168.99.100:31595. The default credentials are username: `admin` and password: `password`. The Grafana instance is pre-provisioned with two dashboards:
+In the above example, the Grafana dashboard can be reached at https://192.168.99.100:31595. The default credentials are username: `admin` and password: `password`. The Grafana instance is pre-provisioned with two dashboards:
 
-. Streams: http://192.168.99.100:31595/d/scdf-streams/streams?refresh=10s
+. Streams: https://192.168.99.100:31595/d/scdf-streams/streams?refresh=10s
 
-. Applications: http://192.168.99.100:31595/d/scdf-applications/applications?refresh=10s
+. Applications: https://192.168.99.100:31595/d/scdf-applications/applications?refresh=10s
 
 Metrics can be collected on a per application / stream basis, or applied to all deployed applications globally.
 

@@ -12,11 +12,11 @@ For example, there is a timestamp application that prints the timestamp to the c
 All the applications are based on link:https://projects.spring.io/spring-boot/[Spring Boot] and link:https://cloud.spring.io/spring-cloud-task/[Spring Cloud Task].
 
 Applications are published as Maven artifacts as well as Docker images.
-For GA releases, the Maven artifacts are published to Maven central and the link:http://repo.spring.io/release[Spring Release Repository].
-Milestone and snapshot releases are published to the link:http://repo.spring.io/milestone[Spring Milestone] and link:http://repo.spring.io/snapshot[Spring Snapshot] repositories, respectively.
+For GA releases, the Maven artifacts are published to Maven central and the link:https://repo.spring.io/release[Spring Release Repository].
+Milestone and snapshot releases are published to the link:https://repo.spring.io/milestone[Spring Milestone] and link:https://repo.spring.io/snapshot[Spring Snapshot] repositories, respectively.
 Docker images are pushed to link:https://hub.docker.com/u/springcloudtask/[Docker Hub]
 
-The root location of the Spring Repository that hosts the GA artifacts of prebuilt applications is http://repo.spring.io/release/org/springframework/cloud/task/app/
+The root location of the Spring Repository that hosts the GA artifacts of prebuilt applications is https://repo.spring.io/release/org/springframework/cloud/task/app/
 
 [[task-dev-guide-running-prebuilt-apps]]
 == Running Prebuilt Applications

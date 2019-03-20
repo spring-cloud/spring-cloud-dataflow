@@ -142,13 +142,13 @@ public class TaskServiceUtilsTests {
 
 	@Test
 	public void testDataFlowUriProperty() throws Exception {
-		final String DATA_FLOW_SERVICE_URI = "http://myserver:9191";
+		final String DATA_FLOW_SERVICE_URI = "https://myserver:9191";
 		List<String> cmdLineArgs = new ArrayList<>();
 		Map<String, String> appDeploymentProperties = new HashMap<>();
 		TaskServiceUtils.updateDataFlowUriIfNeeded(DATA_FLOW_SERVICE_URI, appDeploymentProperties, cmdLineArgs);
 		assertTrue(appDeploymentProperties.containsKey("dataflowServerUri"));
 		assertTrue("dataflowServerUri is expected to be in the app deployment properties",
-				appDeploymentProperties.get("dataflowServerUri").equals("http://myserver:9191"));
+				appDeploymentProperties.get("dataflowServerUri").equals("https://myserver:9191"));
 		appDeploymentProperties.clear();
 		appDeploymentProperties.put("dataflow-server-uri", "http://localhost:8080");
 		TaskServiceUtils.updateDataFlowUriIfNeeded(DATA_FLOW_SERVICE_URI, appDeploymentProperties, cmdLineArgs);

@@ -83,7 +83,7 @@ public class DataflowTemplateTests {
 
 	@Test(expected = ResourceAccessException.class)
 	public void testDataFlowTemplateContructorWithNonExistingUri() throws URISyntaxException {
-		new DataFlowTemplate(new URI("http://doesnotexist:1234"));
+		new DataFlowTemplate(new URI("https://doesnotexist:1234"));
 	}
 
 	@Test
@@ -245,7 +245,7 @@ public class DataflowTemplateTests {
 		RestTemplate restTemplate = mock(RestTemplate.class);
 		RootResource rootResource = mock(RootResource.class);
 		Link link = mock(Link.class);
-		when(link.getHref()).thenReturn("http://whereever");
+		when(link.getHref()).thenReturn("https://whereever");
 		when(rootResource.getApiRevision()).thenReturn(Version.REVISION);
 		when(rootResource.hasLink(any())).thenReturn(isLinksActive);
 		when(rootResource.getLink(any())).thenReturn(link);

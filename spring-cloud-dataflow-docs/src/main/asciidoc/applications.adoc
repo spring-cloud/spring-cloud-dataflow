@@ -3,7 +3,7 @@
 
 [partintro]
 --
-A selection of pre-built link:http://cloud.spring.io/spring-cloud-stream-app-starters/[stream] and link:http://cloud.spring.io/spring-cloud-task-app-starters/[task/batch] starter apps for various data integration and processing scenarios to facilitate learning and experimentation. The table below includes the pre-built applications at a glance. For more details, review how to <<index.adoc#supported-apps-and-tasks, register supported applications>>.
+A selection of pre-built link:https://cloud.spring.io/spring-cloud-stream-app-starters/[stream] and link:https://cloud.spring.io/spring-cloud-task-app-starters/[task/batch] starter apps for various data integration and processing scenarios to facilitate learning and experimentation. The table below includes the pre-built applications at a glance. For more details, review how to <<index.adoc#supported-apps-and-tasks, register supported applications>>.
 --
 
 == Available Applications

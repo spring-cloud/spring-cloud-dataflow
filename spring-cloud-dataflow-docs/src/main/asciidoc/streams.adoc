@@ -4,7 +4,7 @@
 [partintro]
 --
 This section goes into more detail about how you can create Streams, which are collections of
-http://cloud.spring.io/spring-cloud-stream/[Spring Cloud Stream] applications. It covers topics such as
+https://cloud.spring.io/spring-cloud-stream/[Spring Cloud Stream] applications. It covers topics such as
 creating and deploying Streams.
 
 If you are just starting out with Spring Cloud Data Flow, you should probably read the
@@ -14,7 +14,7 @@ this section.
 
 [[spring-cloud-dataflow-stream-intro]]
 == Introduction
-A Stream is are a collection of long-lived http://cloud.spring.io/spring-cloud-stream/[Spring Cloud Stream] applications that communicate with each other over messaging middleware.
+A Stream is are a collection of long-lived https://cloud.spring.io/spring-cloud-stream/[Spring Cloud Stream] applications that communicate with each other over messaging middleware.
 A text-based DSL defines the configuration and data flow between the applications.  While many applications are provided for you to implement common use-cases, you typically create a custom Spring Cloud Stream application to implement custom business logic.
 
 The general lifecycle of a Stream is:
@@ -25,7 +25,7 @@ The general lifecycle of a Stream is:
 . Undeploy or Destroy the Stream.
 . Upgrade or Rollback applications in the Stream.
 
-For deploying streams, the Data Flow Server has to be configured to delegate the deployment to a new server in the Spring Cloud ecosystem named http://cloud.spring.io/spring-cloud-skipper/[Skipper].
+For deploying streams, the Data Flow Server has to be configured to delegate the deployment to a new server in the Spring Cloud ecosystem named https://cloud.spring.io/spring-cloud-skipper/[Skipper].
 
 Furthermore you can configure Skipper to deploy applications to one or more Cloud Foundry orgs and spaces, one or more namespaces on a Kubernetes cluster, or to the local machine.
 When deploying a stream in Data Flow, you can specify which platform to use at deployment time.
@@ -43,7 +43,7 @@ The output of `grep` in turn is sent to the input of the `less` process.
 Each `|` symbol connects the standard output of the command on the left to the standard input of the command on the right.
 Data flows through the pipeline from left to right.
 
-In Data Flow, the Unix command is replaced by a http://cloud.spring.io/spring-cloud-stream/[Spring Cloud Stream] application and each pipe symbol represents connecting the input and output of applications over messaging middleware, such as RabbitMQ or Apache Kafka.
+In Data Flow, the Unix command is replaced by a https://cloud.spring.io/spring-cloud-stream/[Spring Cloud Stream] application and each pipe symbol represents connecting the input and output of applications over messaging middleware, such as RabbitMQ or Apache Kafka.
 
 Each Spring Cloud Stream application is registered under a simple name.
 The registration process specifies where the application can be obtained (for example, in a Maven Repository or a Docker registry).  You can find out more information on how to register Spring Cloud Stream applications in this <<spring-cloud-dataflow-register-stream-apps,section>>.
@@ -202,7 +202,7 @@ dataflow:>app list --id source:mysource
 
 dataflow:>app register --name myprocessor --type processor --uri file:///Users/example/myprocessor-1.2.3.jar
 
-dataflow:>app register --name mysink --type sink --uri http://example.com/mysink-2.0.1.jar
+dataflow:>app register --name mysink --type sink --uri https://example.com/mysink-2.0.1.jar
 
 ----
 
@@ -356,20 +356,20 @@ and Spring Boot 2.0.x:
 |Artifact Type |Stable Release |SNAPSHOT Release
 
 |RabbitMQ + Maven
-|http://bit.ly/Darwin-SR3-stream-applications-rabbit-maven
-|http://bit.ly/Darwin-BUILD-SNAPSHOT-stream-applications-rabbit-maven
+|https://bit.ly/Darwin-SR3-stream-applications-rabbit-maven
+|https://bit.ly/Darwin-BUILD-SNAPSHOT-stream-applications-rabbit-maven
 
 |RabbitMQ + Docker
-|http://bit.ly/Darwin-SR3-stream-applications-rabbit-docker
-|http://bit.ly/Darwin-BUILD-SNAPSHOT-stream-applications-rabbit-docker
+|https://bit.ly/Darwin-SR3-stream-applications-rabbit-docker
+|https://bit.ly/Darwin-BUILD-SNAPSHOT-stream-applications-rabbit-docker
 
 |Apache Kafka + Maven
-|http://bit.ly/Darwin-SR3-stream-applications-kafka-maven
-|http://bit.ly/Darwin-BUILD-SNAPSHOT-stream-applications-kafka-maven
+|https://bit.ly/Darwin-SR3-stream-applications-kafka-maven
+|https://bit.ly/Darwin-BUILD-SNAPSHOT-stream-applications-kafka-maven
 
 |Apache Kafka + Docker
-|http://bit.ly/Darwin-SR3-stream-applications-kafka-docker
-|http://bit.ly/Darwin-BUILD-SNAPSHOT-stream-applications-kafka-docker
+|https://bit.ly/Darwin-SR3-stream-applications-kafka-docker
+|https://bit.ly/Darwin-BUILD-SNAPSHOT-stream-applications-kafka-docker
 |======================
 
 The following table includes the bit.ly links to the available Stream Application Starters based on Spring Cloud Stream 2.1.x
@@ -380,20 +380,20 @@ and Spring Boot 2.1.x:
 |Artifact Type |Stable Release |SNAPSHOT Release
 
 |RabbitMQ + Maven
-|http://bit.ly/Einstein-SR2-stream-applications-rabbit-maven
-|http://bit.ly/Einstein-BUILD-SNAPSHOT-stream-applications-rabbit-maven
+|https://bit.ly/Einstein-SR2-stream-applications-rabbit-maven
+|https://bit.ly/Einstein-BUILD-SNAPSHOT-stream-applications-rabbit-maven
 
 |RabbitMQ + Docker
-|http://bit.ly/Einstein-SR2-stream-applications-rabbit-docker
-|http://bit.ly/Einstein-BUILD-SNAPSHOT-stream-applications-rabbit-docker
+|https://bit.ly/Einstein-SR2-stream-applications-rabbit-docker
+|https://bit.ly/Einstein-BUILD-SNAPSHOT-stream-applications-rabbit-docker
 
 |Apache Kafka + Maven
-|http://bit.ly/Einstein-SR2-stream-applications-kafka-maven
-|http://bit.ly/Einstein-BUILD-SNAPSHOT-stream-applications-kafka-maven
+|https://bit.ly/Einstein-SR2-stream-applications-kafka-maven
+|https://bit.ly/Einstein-BUILD-SNAPSHOT-stream-applications-kafka-maven
 
 |Apache Kafka + Docker
-|http://bit.ly/Einstein-SR2-stream-applications-kafka-docker
-|http://bit.ly/Einstein-BUILD-SNAPSHOT-stream-applications-kafka-docker
+|https://bit.ly/Einstein-SR2-stream-applications-kafka-docker
+|https://bit.ly/Einstein-BUILD-SNAPSHOT-stream-applications-kafka-docker
 |======================
 
 
@@ -417,12 +417,12 @@ The following table includes the available Task Application Starters based on Sp
 |Artifact Type |Stable Release |SNAPSHOT Release
 
 |Maven
-|http://bit.ly/Dearborn-SR1-task-applications-maven
-|http://bit.ly/Dearborn-BUILD-SNAPSHOT-task-applications-maven
+|https://bit.ly/Dearborn-SR1-task-applications-maven
+|https://bit.ly/Dearborn-BUILD-SNAPSHOT-task-applications-maven
 
 |Docker
-|http://bit.ly/Dearborn-SR1-task-applications-docker
-|http://bit.ly/Dearborn-BUILD-SNAPSHOT-task-applications-docker
+|https://bit.ly/Dearborn-SR1-task-applications-docker
+|https://bit.ly/Dearborn-BUILD-SNAPSHOT-task-applications-docker
 |======================
 
 The following table includes the available Task Application Starters based on Spring Cloud Task 2.1.x and Spring Boot 2.1.x:
@@ -432,30 +432,30 @@ The following table includes the available Task Application Starters based on Sp
 |Artifact Type |Milestone Release |SNAPSHOT Release
 
 |Maven
-|http://bit.ly/Elston-GA-task-applications-maven
-|http://bit.ly/Elston-BUILD-SNAPSHOT-task-applications-maven
+|https://bit.ly/Elston-GA-task-applications-maven
+|https://bit.ly/Elston-BUILD-SNAPSHOT-task-applications-maven
 
 |Docker
-|http://bit.ly/Elston-GA-task-applications-docker
-|http://bit.ly/Elston-BUILD-SNAPSHOT-task-applications-docker
+|https://bit.ly/Elston-GA-task-applications-docker
+|https://bit.ly/Elston-BUILD-SNAPSHOT-task-applications-docker
 |======================
 
-You can find more information about the available task starters in the http://cloud.spring.io/spring-cloud-task-app-starters/[Task App Starters Project Page] and
-related reference documentation.  For more information about the available stream starters, look at the http://cloud.spring.io/spring-cloud-stream-app-starters/[Stream App Starters Project Page]
+You can find more information about the available task starters in the https://cloud.spring.io/spring-cloud-task-app-starters/[Task App Starters Project Page] and
+related reference documentation.  For more information about the available stream starters, look at the https://cloud.spring.io/spring-cloud-stream-app-starters/[Stream App Starters Project Page]
 and related reference documentation.
 
 As an example, if you would like to register all out-of-the-box stream applications built with the Kafka binder in bulk, you can use the following command:
 
 [source,bash,subs=attributes]
 ----
-$ dataflow:>app import --uri http://bit.ly/Einstein-SR2-stream-applications-kafka-maven
+$ dataflow:>app import --uri https://bit.ly/Einstein-SR2-stream-applications-kafka-maven
 ----
 
 Alternatively you can register all the stream applications with the Rabbit binder, as follows:
 
 [source,bash,subs=attributes]
 ----
-$ dataflow:>app import --uri http://bit.ly/Einstein-SR2-stream-applications-rabbit-maven
+$ dataflow:>app import --uri https://bit.ly/Einstein-SR2-stream-applications-rabbit-maven
 ----
 
 You can also pass the `--local` option (which is `true` by default) to indicate whether the
@@ -604,7 +604,7 @@ source.http.metadata=maven://org.springframework.cloud.stream.app:http-source-ra
 
 While there are out-of-the-box source, processor, sink applications available, you can extend these applications or write a custom link:https://github.com/spring-cloud/spring-cloud-stream[Spring Cloud Stream] application.
 
-The process of creating Spring Cloud Stream applications with http://start.spring.io/[Spring Initializr] is detailed in the Spring Cloud Stream {spring-cloud-stream-docs}#_getting_started[documentation].
+The process of creating Spring Cloud Stream applications with https://start.spring.io/[Spring Initializr] is detailed in the Spring Cloud Stream {spring-cloud-stream-docs}#_getting_started[documentation].
 It is possible to include multiple binders to an application.
 If doing so, see the instructions in <<passing_producer_consumer_properties>> for how to configure them.
 
@@ -1474,7 +1474,7 @@ Consider the following example, using the `definition` style.
 URI dataFlowUri = URI.create("http://localhost:9393");
 DataFlowOperations dataFlowOperations = new DataFlowTemplate(dataFlowUri);
 dataFlowOperations.appRegistryOperations().importFromResource(
-                     "http://bit.ly/Darwin-SR3-stream-applications-rabbit-maven", true);
+                     "https://bit.ly/Darwin-SR3-stream-applications-rabbit-maven", true);
 StreamDefinition streamDefinition = Stream.builder(dataFlowOperations)
                                       .name("ticktock")
                                       .definition("time | log")
@@ -1592,7 +1592,7 @@ Attempting to create or deploy a stream that contains an unknown app throws an e
 [source,java,options="nowrap"]
 ----
 dataFlowOperations.appRegistryOperations().importFromResource(
-            "http://bit.ly/Darwin-SR3-stream-applications-rabbit-maven", true);
+            "https://bit.ly/Darwin-SR3-stream-applications-rabbit-maven", true);
 ----
 
 The Stream applications can also be beans within your application that are injected in other classes to create Streams.
@@ -1784,7 +1784,7 @@ dataflow:>runtime apps
 ║                    │           │       port = 24166                                                                                                                                        ║
 ║words.log-v1-0      │ deployed  │     stderr = /var/folders/js/7b_pn0t575l790x7j61slyxc0000gn/T/spring-cloud-deployer-6467595568759190742/words-1542803461063/words.log-v1/stderr_0.log     ║
 ║                    │           │     stdout = /var/folders/js/7b_pn0t575l790x7j61slyxc0000gn/T/spring-cloud-deployer-6467595568759190742/words-1542803461063/words.log-v1/stdout_0.log     ║
-║                    │           │        url = http://192.168.0.102:24166                                                                                                                   ║
+║                    │           │        url = https://192.168.0.102:24166                                                                                                                   ║
 ║                    │           │working.dir = /var/folders/js/7b_pn0t575l790x7j61slyxc0000gn/T/spring-cloud-deployer-6467595568759190742/words-1542803461063/words.log-v1                  ║
 ╟┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┼┈┈┈┈┈┈┈┈┈┈┈┼┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈╢
 ║                    │           │       guid = 41269                                                                                                                                        ║
@@ -1792,7 +1792,7 @@ dataflow:>runtime apps
 ║                    │           │       port = 41269                                                                                                                                        ║
 ║words.log-v1-1      │ deployed  │     stderr = /var/folders/js/7b_pn0t575l790x7j61slyxc0000gn/T/spring-cloud-deployer-6467595568759190742/words-1542803461063/words.log-v1/stderr_1.log     ║
 ║                    │           │     stdout = /var/folders/js/7b_pn0t575l790x7j61slyxc0000gn/T/spring-cloud-deployer-6467595568759190742/words-1542803461063/words.log-v1/stdout_1.log     ║
-║                    │           │        url = http://192.168.0.102:41269                                                                                                                   ║
+║                    │           │        url = https://192.168.0.102:41269                                                                                                                   ║
 ║                    │           │working.dir = /var/folders/js/7b_pn0t575l790x7j61slyxc0000gn/T/spring-cloud-deployer-6467595568759190742/words-1542803461063/words.log-v1                  ║
 ╟────────────────────┼───────────┼───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╢
 ║words.http-v1       │ deployed  │                                                                             1                                                                             ║
@@ -1802,7 +1802,7 @@ dataflow:>runtime apps
 ║                    │           │       port = 9900                                                                                                                                         ║
 ║words.http-v1-0     │ deployed  │     stderr = /var/folders/js/7b_pn0t575l790x7j61slyxc0000gn/T/spring-cloud-deployer-6467595568759190742/words-1542803461054/words.http-v1/stderr_0.log    ║
 ║                    │           │     stdout = /var/folders/js/7b_pn0t575l790x7j61slyxc0000gn/T/spring-cloud-deployer-6467595568759190742/words-1542803461054/words.http-v1/stdout_0.log    ║
-║                    │           │        url = http://192.168.0.102:9900                                                                                                                    ║
+║                    │           │        url = https://192.168.0.102:9900                                                                                                                    ║
 ║                    │           │working.dir = /var/folders/js/7b_pn0t575l790x7j61slyxc0000gn/T/spring-cloud-deployer-6467595568759190742/words-1542803461054/words.http-v1                 ║
 ╟────────────────────┼───────────┼───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╢
 ║words.splitter-v1   │ deployed  │                                                                             1                                                                             ║
@@ -1812,7 +1812,7 @@ dataflow:>runtime apps
 ║                    │           │       port = 33963                                                                                                                                        ║
 ║words.splitter-v1-0 │ deployed  │     stderr = /var/folders/js/7b_pn0t575l790x7j61slyxc0000gn/T/spring-cloud-deployer-6467595568759190742/words-1542803437542/words.splitter-v1/stderr_0.log║
 ║                    │           │     stdout = /var/folders/js/7b_pn0t575l790x7j61slyxc0000gn/T/spring-cloud-deployer-6467595568759190742/words-1542803437542/words.splitter-v1/stdout_0.log║
-║                    │           │        url = http://192.168.0.102:33963                                                                                                                   ║
+║                    │           │        url = https://192.168.0.102:33963                                                                                                                   ║
 ║                    │           │working.dir = /var/folders/js/7b_pn0t575l790x7j61slyxc0000gn/T/spring-cloud-deployer-6467595568759190742/words-1542803437542/words.splitter-v1             ║
 ╚════════════════════╧═══════════╧═══════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════╝
 
@@ -1871,7 +1871,7 @@ dataflow:>runtime apps
 ║                      │           │       port = 39628                                                                                                                                                  ║
 ║myhttpstream.log-v1-0 │ deploying │     stderr = /var/folders/js/7b_pn0t575l790x7j61slyxc0000gn/T/spring-cloud-deployer-6467595568759190742/myhttpstream-1542803867070/myhttpstream.log-v1/stderr_0.log ║
 ║                      │           │     stdout = /var/folders/js/7b_pn0t575l790x7j61slyxc0000gn/T/spring-cloud-deployer-6467595568759190742/myhttpstream-1542803867070/myhttpstream.log-v1/stdout_0.log ║
-║                      │           │        url = http://192.168.0.102:39628                                                                                                                             ║
+║                      │           │        url = https://192.168.0.102:39628                                                                                                                             ║
 ║                      │           │working.dir = /var/folders/js/7b_pn0t575l790x7j61slyxc0000gn/T/spring-cloud-deployer-6467595568759190742/myhttpstream-1542803867070/myhttpstream.log-v1              ║
 ╟──────────────────────┼───────────┼─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╢
 ║myhttpstream.http-v1  │ deploying │                                                                                  1                                                                                  ║
@@ -1881,7 +1881,7 @@ dataflow:>runtime apps
 ║                      │           │       port = 52143                                                                                                                                                  ║
 ║myhttpstream.http-v1-0│ deploying │     stderr = /var/folders/js/7b_pn0t575l790x7j61slyxc0000gn/T/spring-cloud-deployer-6467595568759190742/myhttpstream-1542803866800/myhttpstream.http-v1/stderr_0.log║
 ║                      │           │     stdout = /var/folders/js/7b_pn0t575l790x7j61slyxc0000gn/T/spring-cloud-deployer-6467595568759190742/myhttpstream-1542803866800/myhttpstream.http-v1/stdout_0.log║
-║                      │           │        url = http://192.168.0.102:52143                                                                                                                             ║
+║                      │           │        url = https://192.168.0.102:52143                                                                                                                             ║
 ║                      │           │working.dir = /var/folders/js/7b_pn0t575l790x7j61slyxc0000gn/T/spring-cloud-deployer-6467595568759190742/myhttpstream-1542803866800/myhttpstream.http-v1             ║
 ╚══════════════════════╧═══════════╧═════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════╝
 ----

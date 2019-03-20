@@ -147,12 +147,12 @@ public class DataFlowServerConfigurationTests {
 
 	@Test
 	public void testSkipperConfig() throws Exception {
-		TestPropertyValues.of("spring.cloud.skipper.client.serverUri=http://fakehost:1234/api").applyTo(context);
+		TestPropertyValues.of("spring.cloud.skipper.client.serverUri=https://fakehost:1234/api").applyTo(context);
 		this.context.refresh();
 		SkipperClient skipperClient = context.getBean(SkipperClient.class);
 		Object baseUri = TestUtils.readField("baseUri", skipperClient);
 		assertNotNull(baseUri);
-		assertTrue(baseUri.equals("http://fakehost:1234/api"));
+		assertTrue(baseUri.equals("https://fakehost:1234/api"));
 	}
 
 	@EnableDataFlowServer
