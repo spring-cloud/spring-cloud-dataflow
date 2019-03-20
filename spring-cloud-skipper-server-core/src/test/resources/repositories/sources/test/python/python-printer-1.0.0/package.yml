@@ -3,7 +3,7 @@ kind: SkipperPackageMetadata
 name: python-printer
 version: 1.0.0
 packageSourceUrl: https://testing
-packageHomeUrl: http://cloud.spring.io/spring-cloud-stream-app-starters/
+packageHomeUrl: https://cloud.spring.io/spring-cloud-stream-app-starters/
 tags: logging, printer
 maintainer: https://github.com/ilayaperumalg
 description: The python printer app that says hello.

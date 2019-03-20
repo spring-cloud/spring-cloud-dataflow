@@ -3,7 +3,7 @@ kind: SkipperPackageMetadata
 name: ticktock
 version: 1.0.0
 packageSourceUrl: https://example.com/dataflow/ticktock
-packageHomeUrl: http://example.com/dataflow/ticktock
+packageHomeUrl: https://example.com/dataflow/ticktock
 tags: stream, time, log
 maintainer: https://github.com/markpollack
 description: The ticktock stream sends a time stamp and logs the value.

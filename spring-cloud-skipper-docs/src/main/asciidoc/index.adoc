@@ -9,9 +9,9 @@ Mark Pollack; Ilayaperumal Gopinathan; Janne Valkealahti; Gunnar Hillert; Sabby 
 :hide-uri-scheme:
 :docinfo: shared
 
-:spring-cloud-skipper-docs: http://docs.spring.io/spring-cloud-skipper/docs/{project-version}/reference
-:spring-cloud-skipper-docs-current: http://docs.spring.io/spring-cloud-skipper/docs/current-SNAPSHOT/reference/htmlsingle/
-:spring-cloud-stream-docs: http://docs.spring.io/spring-cloud-stream/docs/current/reference/htmlsingle/index.html
+:spring-cloud-skipper-docs: https://docs.spring.io/spring-cloud-skipper/docs/{project-version}/reference
+:spring-cloud-skipper-docs-current: https://docs.spring.io/spring-cloud-skipper/docs/current-SNAPSHOT/reference/htmlsingle/
+:spring-cloud-stream-docs: https://docs.spring.io/spring-cloud-stream/docs/current/reference/htmlsingle/index.html
 :github-repo: spring-cloud/spring-cloud-skipper
 :github-code: https://github.com/{github-repo}
 

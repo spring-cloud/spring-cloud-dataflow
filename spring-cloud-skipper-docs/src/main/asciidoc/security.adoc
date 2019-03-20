@@ -284,7 +284,7 @@ where
 
 * HTTP_METHOD is one http method, capital case.
 * URL_PATTERN is an Ant-style URL pattern.
-* SECURITY_ATTRIBUTE is a SpEL expression (see http://docs.spring.io/spring-security/site/docs/current/reference/htmlsingle/#el-access)
+* SECURITY_ATTRIBUTE is a SpEL expression (see https://docs.spring.io/spring-security/site/docs/current/reference/htmlsingle/#el-access)
 * Each of those parts is separated by one or several white space characters (spaces, tabs, and others).
 
 Be mindful that the above is indeed a YAML list, not a map (thus the use of '-' dashes at the start of each line) that lives under the `spring.cloud.skipper.security.authorization.rules` key.
@@ -340,7 +340,7 @@ This section provides examples of some common security arrangements for Skipper:
 [[skipper-security-local-oauth2-server]]
 ==== Local OAuth2 Server
 
-With http://projects.spring.io/spring-security-oauth/[Spring Security OAuth], you
+With https://projects.spring.io/spring-security-oauth/[Spring Security OAuth], you
 can create your own OAuth2 Server by using the following annotations:
 
 * `@EnableResourceServer`

@@ -3,7 +3,7 @@ kind: SkipperPackageMetadata
 name: time
 version: 2.0.0
 packageSourceUrl: https://github.com/spring-cloud-stream-app-starters/time/tree/v1.2.0.RELEASE
-packageHomeUrl: http://cloud.spring.io/spring-cloud-stream-app-starters/
+packageHomeUrl: https://cloud.spring.io/spring-cloud-stream-app-starters/
 tags: time, source
 maintainer: https://github.com/sobychacko
 description: The time source periodically emits a timestamp string.

@@ -11,7 +11,7 @@
 # (1) linuxamd64_12102_database_se2_1of2.zip
 #     linuxamd64_12102_database_se2_2of2.zip
 #     Download Oracle Database 12c Release 1 Standard Edition 2 for Linux x64
-#     from http://www.oracle.com/technetwork/database/enterprise-edition/downloads/index.html
+#     from https://www.oracle.com/technetwork/database/enterprise-edition/downloads/index.html
 #
 # HOW TO BUILD THIS IMAGE
 # -----------------------

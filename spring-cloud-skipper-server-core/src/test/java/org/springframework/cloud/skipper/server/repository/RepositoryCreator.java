@@ -27,11 +27,11 @@ public class RepositoryCreator {
 	public static void createTwoRepositories(RepositoryRepository repositoryRepository) {
 		Repository repository = new Repository();
 		repository.setName("stable");
-		repository.setUrl("http://www.example.com/skipper/repository/stable");
+		repository.setUrl("https://www.example.com/skipper/repository/stable");
 		repositoryRepository.save(repository);
 		repository = new Repository();
 		repository.setName("unstable");
-		repository.setUrl("http://www.example.com/skipper/repository/unstable");
+		repository.setUrl("https://www.example.com/skipper/repository/unstable");
 		repositoryRepository.save(repository);
 	}
 
@@ -39,7 +39,7 @@ public class RepositoryCreator {
 			Integer repoOrder) {
 		Repository repository = new Repository();
 		repository.setName(repoName);
-		repository.setUrl("http://www.example.com/skipper/repository/" + repoName);
+		repository.setUrl("https://www.example.com/skipper/repository/" + repoName);
 		repositoryRepository.save(repository);
 		repository.setRepoOrder(repoOrder);
 		repositoryRepository.save(repository);

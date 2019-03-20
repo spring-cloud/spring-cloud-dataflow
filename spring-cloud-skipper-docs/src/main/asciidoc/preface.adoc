@@ -4,7 +4,7 @@
 [[skipper-documentation-about]]
 == About the Documentation
 
-The documentation for this release is available in http://docs.spring.io/spring-cloud-skipper/docs/{project-version}/reference/htmlsingle[HTML].
+The documentation for this release is available in https://docs.spring.io/spring-cloud-skipper/docs/{project-version}/reference/htmlsingle[HTML].
 
 The latest copy of the Spring Cloud Skipper reference guide can be found {spring-cloud-skipper-docs-current}[here].
 
@@ -17,8 +17,8 @@ print or electronically.
 == Getting Help
 If you are having trouble with Spring Cloud Skipper, we would like to help!
 
-* Ask a question. We monitor http://stackoverflow.com[stackoverflow.com] for questions
-  tagged with http://stackoverflow.com/tags/spring-cloud-skipper[`spring-cloud-skipper`].
+* Ask a question. We monitor https://stackoverflow.com[stackoverflow.com] for questions
+  tagged with https://stackoverflow.com/tags/spring-cloud-skipper[`spring-cloud-skipper`].
 * Reach out to us on https://gitter.im/spring-cloud/spring-cloud-skipper[gitter].
 * Report bugs with Spring Cloud Skipper at https://github.com/spring-cloud/spring-cloud-skipper/issues.
 

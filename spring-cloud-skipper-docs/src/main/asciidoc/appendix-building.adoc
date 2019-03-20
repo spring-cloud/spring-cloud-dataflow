@@ -82,7 +82,7 @@ Working build file for _Maven_ would look like something shown below:
 ----
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 
 	<groupId>com.example</groupId>
@@ -185,9 +185,9 @@ sourceCompatibility = 1.8
 repositories {
 	mavenLocal()
 	mavenCentral()
-	maven { url "http://repo.springsource.org/libs-snapshot" }
-	maven { url "http://repo.springsource.org/libs-release" }
-	maven { url "http://repo.springsource.org/libs-milestone" }
+	maven { url "https://repo.springsource.org/libs-snapshot" }
+	maven { url "https://repo.springsource.org/libs-release" }
+	maven { url "https://repo.springsource.org/libs-milestone" }
 }
 
 

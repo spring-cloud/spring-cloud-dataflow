@@ -873,8 +873,8 @@ skipper:>repo list
 ╔════════════╤═══════════════════════════════════════════════════════════╤═════╤═════╗
 ║    Name    │                            URL                            │Local│Order║
 ╠════════════╪═══════════════════════════════════════════════════════════╪═════╪═════╣
-║experimental│http://skipper-repository.cfapps.io/repository/experimental│false│0    ║
-║local       │http://10.55.13.45:7577                                    │true │1    ║
+║experimental│https://skipper-repository.cfapps.io/repository/experimental│false│0    ║
+║local       │https://10.55.13.45:7577                                    │true │1    ║
 ╚════════════╧═══════════════════════════════════════════════════════════╧═════╧═════╝
 ----
 

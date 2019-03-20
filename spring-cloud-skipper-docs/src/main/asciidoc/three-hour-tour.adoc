@@ -94,7 +94,7 @@ Usually, different `accounts` correspond to different orgs or spaces for Cloud F
 Platforms are defined by using Spring Boot's https://docs.spring.io/spring-boot/docs/current/reference/html/boot-features-external-config.html[Externalized Configuration] feature.
 To simplify the getting started experience, if a local platform account is not defined in your configuration, Skipper creates a `local` deployer implementation named `default`.
 
-You can make use of the http://cloud.spring.io/spring-cloud-static/spring-cloud-config/1.3.3.RELEASE/multi/multi__spring_cloud_config_server.html#_encryption_and_decryption[Encryption and Decryption] features of Spring Cloud Config as one way to secure credentials.
+You can make use of the https://cloud.spring.io/spring-cloud-static/spring-cloud-config/1.3.3.RELEASE/multi/multi__spring_cloud_config_server.html#_encryption_and_decryption[Encryption and Decryption] features of Spring Cloud Config as one way to secure credentials.
 
 Distinct from where Skipper deploys the application, you can also run the Skipper server itself on a platform.
 Installation on other platforms is covered in the <<skipper-installation>> section.
@@ -236,7 +236,7 @@ version: 1.0.0
 
 # Optional Fields
 packageSourceUrl: https://github.com/some-mypackage-project/v1.0.0.RELEASE
-packageHomeUrl: http://some-mypackage-project/
+packageHomeUrl: https://some-mypackage-project/
 tags: skipper, mypackage, sample
 maintainer: https://github.com/maintainer
 description: This is a mypackage sample.
@@ -270,7 +270,7 @@ Currently only supported _kind_ is *SkipperPackageMetadata*.
 Currently, the package search functionality is only a wildcard match against the name of the package.
 ====
 
-A Package Repository exposes an `index.yml` file that contains multiple metadata documents and that uses the standard three dash notation `---` to separate the documents -- for example, http://skipper-repository.cfapps.io/repository/experimental/index.yml[index.yml].
+A Package Repository exposes an `index.yml` file that contains multiple metadata documents and that uses the standard three dash notation `---` to separate the documents -- for example, https://skipper-repository.cfapps.io/repository/experimental/index.yml[index.yml].
 
 [[package-templates]]
 === Package Templates
@@ -472,12 +472,12 @@ The following example shows a typical spec for HTTP:
 [source,yaml]
 ----
 spec:
-  resource: http://example.com/app/hello-world
+  resource: https://example.com/app/hello-world
   version: 1.0.0.RELEASE
 ----
 
 There is a naming convention that must be followed for HTTP-based resources so that Skipper can assemble a full URL from the `resource` and `version` field and also parse the version number given the URL.
-The preceding `spec` references a URL at `http://example.com/app/hello-world-1.0.0.RELEASE.jar`.
+The preceding `spec` references a URL at `https://example.com/app/hello-world-1.0.0.RELEASE.jar`.
 The `resource` and `version` fields should not have any numbers after the `-` character.
 
 ===== Docker Resources
@@ -796,7 +796,7 @@ spring
       server:
         package-repositories:
           experimental:
-            url: http://skipper-repository.cfapps.io/repository/experimental
+            url: https://skipper-repository.cfapps.io/repository/experimental
             description: Experimental Skipper Repository
             repoOrder: 0
           local:
@@ -811,8 +811,8 @@ IMPORTANT: For Skipper 2.x, `spring.cloud.skipper.server.package-repositories` s
 
 The `repoOrder` determines which repository serves up a package if one with the same name is registered in two or more repositories.
 
-The directory structure assumed for a remote repository is the registered `url` value followed by the package name and then the zip file name (for example, `http://skipper-repository.cfapps.io/repository/experimental/helloworld/helloworld-1.0.0.zip` for the package `helloworld` with a version of `1.0.0`).
-A file named `index.yml` is expected to be directly under the registered `url` -- for example, http://skipper-repository.cfapps.io/repository/experimental/index.yml.
+The directory structure assumed for a remote repository is the registered `url` value followed by the package name and then the zip file name (for example, `https://skipper-repository.cfapps.io/repository/experimental/helloworld/helloworld-1.0.0.zip` for the package `helloworld` with a version of `1.0.0`).
+A file named `index.yml` is expected to be directly under the registered `url` -- for example, https://skipper-repository.cfapps.io/repository/experimental/index.yml.
 This file contains the package metadata for all the packages hosted by the repository.
 
 It is up to you to update the `index.yml` file "'by hand'" for remote repositories.
@@ -824,4 +824,4 @@ However, you can upload packages to a local repository and do not need to mainta
 See the "`<<skipper-commands-reference>>`" section for information on creating local repositories.
 
 A good example that shows using a Spring Boot web application with static resources to host a Repository can be found https://github.com/markpollack/skipper-sample-repository[here].
-This application is currently running under http://skipper-repository.cfapps.io/repository/experimental.
+This application is currently running under https://skipper-repository.cfapps.io/repository/experimental.

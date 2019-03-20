@@ -61,7 +61,7 @@ public class PackageMetadataServiceTests {
 		filename = packageMetadataService.computeFilename(urlResource);
 		assertThat(filename).isEqualTo("localhost_index.yml");
 
-		urlResource = new UrlResource("http://www.example.com/index.yml");
+		urlResource = new UrlResource("https://www.example.com/index.yml");
 		filename = packageMetadataService.computeFilename(urlResource);
 		assertThat(filename).isEqualTo("www.example.com_index.yml");
 	}

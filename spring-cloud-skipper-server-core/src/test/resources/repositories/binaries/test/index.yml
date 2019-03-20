@@ -6,7 +6,7 @@ origin: samples-package-repository
 name: log
 version: 1.0.0
 packageSourceUrl: https://github.com/spring-cloud-stream-app-starters/log/tree/v1.2.0.RC1
-packageHomeUrl: http://cloud.spring.io/spring-cloud-stream-app-starters/
+packageHomeUrl: https://cloud.spring.io/spring-cloud-stream-app-starters/
 tags: logging, sink
 maintainer: https://github.com/sobychacko
 description: The log sink uses the application logger to output the data for inspection.
@@ -18,7 +18,7 @@ origin: samples-package-repository
 name: log
 version: 1.1.0
 packageSourceUrl: https://github.com/spring-cloud-stream-app-starters/log/tree/v1.2.0.RELEASE
-packageHomeUrl: http://cloud.spring.io/spring-cloud-stream-app-starters/
+packageHomeUrl: https://cloud.spring.io/spring-cloud-stream-app-starters/
 tags: logging, sink
 maintainer: https://github.com/sobychacko
 description: The log sink uses the application logger to output the data for inspection.
@@ -30,7 +30,7 @@ origin: samples-package-repository
 name: log
 version: 2.0.0
 packageSourceUrl: https://github.com/spring-cloud-stream-app-starters/log/tree/v1.2.0.RELEASE
-packageHomeUrl: http://cloud.spring.io/spring-cloud-stream-app-starters/
+packageHomeUrl: https://cloud.spring.io/spring-cloud-stream-app-starters/
 tags: logging, sink
 maintainer: https://github.com/sobychacko
 description: The log sink uses the application logger to output the data for inspection.
@@ -42,7 +42,7 @@ origin: samples-package-repository
 name: time
 version: 2.0.0
 packageSourceUrl: https://github.com/spring-cloud-stream-app-starters/time/tree/v1.2.0.RELEASE
-packageHomeUrl: http://cloud.spring.io/spring-cloud-stream-app-starters/
+packageHomeUrl: https://cloud.spring.io/spring-cloud-stream-app-starters/
 tags: time, source
 maintainer: https://github.com/sobychacko
 description: The time source periodically emits a timestamp string.
@@ -54,7 +54,7 @@ origin: samples-package-repository
 name: ticktock
 version: 1.0.0
 packageSourceUrl: https://example.com/dataflow/ticktock
-packageHomeUrl: http://example.com/dataflow/ticktock
+packageHomeUrl: https://example.com/dataflow/ticktock
 tags: stream, time, log
 maintainer: https://github.com/markpollack
 description: The ticktock stream sends a time stamp and logs the value.
@@ -66,7 +66,7 @@ origin: samples-package-repository
 name: log-docker
 version: 1.0.0
 packageSourceUrl: https://github.com/spring-cloud-stream-app-starters/log/tree/v1.1.0.RELEASE
-packageHomeUrl: http://cloud.spring.io/spring-cloud-stream-app-starters/
+packageHomeUrl: https://cloud.spring.io/spring-cloud-stream-app-starters/
 tags: logging, sink
 maintainer: https://github.com/sobychacko
 description: Docker version of the log sink application
@@ -78,7 +78,7 @@ origin: samples-package-repository
 name: log-docker
 version: 2.0.0
 packageSourceUrl: https://github.com/spring-cloud-stream-app-starters/log/tree/v1.2.0.RELEASE
-packageHomeUrl: http://cloud.spring.io/spring-cloud-stream-app-starters/
+packageHomeUrl: https://cloud.spring.io/spring-cloud-stream-app-starters/
 tags: logging, sink
 maintainer: https://github.com/sobychacko
 description: Docker version of the log sink application
@@ -90,7 +90,7 @@ origin: samples-package-repository
 name: helloworld-docker
 version: 1.0.0
 packageSourceUrl: https://github.com/spring-cloud-stream-app-starters/log/tree/v1.1.0.RELEASE
-packageHomeUrl: http://cloud.spring.io/spring-cloud-stream-app-starters/
+packageHomeUrl: https://cloud.spring.io/spring-cloud-stream-app-starters/
 tags: helloworld
 maintainer: https://github.com/markpollack
 description: The hello world app says hello.

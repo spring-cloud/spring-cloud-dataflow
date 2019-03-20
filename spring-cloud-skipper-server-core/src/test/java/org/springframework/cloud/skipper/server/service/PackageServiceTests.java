@@ -114,7 +114,7 @@ public class PackageServiceTests extends AbstractIntegrationTest {
 		// Create throw away repository, treated to be a 'local' database repo by default for now.
 		Repository repository = new Repository();
 		repository.setName("database-repo");
-		repository.setUrl("http://example.com/repository/");
+		repository.setUrl("https://example.com/repository/");
 		this.repositoryRepository.save(repository);
 
 		// Package log 9.9.9 should not exist, since it hasn't been uploaded yet.

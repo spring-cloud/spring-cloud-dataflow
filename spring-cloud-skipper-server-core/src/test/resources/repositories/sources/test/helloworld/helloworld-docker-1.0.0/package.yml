@@ -3,7 +3,7 @@ kind: SkipperPackageMetadata
 name: helloworld-docker
 version: 1.0.0
 packageSourceUrl: https://github.com/spring-cloud-stream-app-starters/log/tree/v1.1.0.RELEASE
-packageHomeUrl: http://cloud.spring.io/spring-cloud-stream-app-starters/
+packageHomeUrl: https://cloud.spring.io/spring-cloud-stream-app-starters/
 tags: helloworld
 maintainer: https://github.com/markpollack
 description: The hello world app says hello.

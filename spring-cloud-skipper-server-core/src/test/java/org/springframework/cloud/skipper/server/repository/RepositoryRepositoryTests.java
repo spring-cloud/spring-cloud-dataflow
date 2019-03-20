@@ -55,8 +55,8 @@ public class RepositoryRepositoryTests extends AbstractIntegrationTest {
 		Iterable<Repository> repositories = repositoryRepository.findAll();
 		assertThat(repositories).isNotEmpty();
 		Repository repo1 = repositoryRepository.findByName("stable");
-		assertThat(repo1.getUrl()).isEqualTo("http://www.example.com/skipper/repository/stable");
+		assertThat(repo1.getUrl()).isEqualTo("https://www.example.com/skipper/repository/stable");
 		Repository repo2 = repositoryRepository.findByName("unstable");
-		assertThat(repo2.getUrl()).isEqualTo("http://www.example.com/skipper/repository/unstable");
+		assertThat(repo2.getUrl()).isEqualTo("https://www.example.com/skipper/repository/unstable");
 	}
 }

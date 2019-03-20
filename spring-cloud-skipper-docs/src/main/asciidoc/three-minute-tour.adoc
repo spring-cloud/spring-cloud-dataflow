@@ -210,8 +210,8 @@ skipper:>repo list
 ╔════════════╤═══════════════════════════════════════════════════════════╤═════╤═════╗
 ║    Name    │                            URL                            │Local│Order║
 ╠════════════╪═══════════════════════════════════════════════════════════╪═════╪═════╣
-║experimental│http://skipper-repository.cfapps.io/repository/experimental│false│0    ║
-║local       │http://d4d6d1b6-c7e5-4226-69ec-01d4:7577                   │true │1    ║
+║experimental│https://skipper-repository.cfapps.io/repository/experimental│false│0    ║
+║local       │https://d4d6d1b6-c7e5-4226-69ec-01d4:7577                   │true │1    ║
 ╚════════════╧═══════════════════════════════════════════════════════════╧═════╧═════╝
 ----
 
@@ -295,9 +295,9 @@ You can now curl the `greeting` endpoint and the `about` endpoint, as shown in t
 
 [source,bash,options="nowrap"]
 ----
-$ curl http://helloworldpcf.cfapps.io/greeting
+$ curl https://helloworldpcf.cfapps.io/greeting
 Hello World!
-$ curl http://helloworldpcf.cfapps.io/about
+$ curl https://helloworldpcf.cfapps.io/about
 Hello World v1.0.0.RELEASE
 ----
 
@@ -400,9 +400,9 @@ More flexible upgrade strategies are planned in a future release.
 You can now curl the `greeting` endpoint and the `about` endpoint, as shown in the following example:
 [source,bash,options="nowrap"]
 ----
-$ curl http://helloworldpcf.cfapps.io/greeting
+$ curl https://helloworldpcf.cfapps.io/greeting
 yo
-$ curl http://helloworldpcf.cfapps.io/about
+$ curl https://helloworldpcf.cfapps.io/about
 Hello World v1.0.0.RELEASE
 ----
 
@@ -464,9 +464,9 @@ Now a `curl` command shows the following output:
 
 [source,bash,options="nowrap"]
 ----
-curl http://helloworldpcf.cfapps.io/greeting
+curl https://helloworldpcf.cfapps.io/greeting
 Olá Mundo!
-$ curl http://helloworldpcf.cfapps.io/about
+$ curl https://helloworldpcf.cfapps.io/about
 Hello World v1.0.1.RELEASE
 ----
 
@@ -512,9 +512,9 @@ skipper:>release history --release-name helloworldpcf
 The `curl` commands shows the following output:
 [source,bash,options="nowrap"]
 ----
-$ curl http://helloworldpcf.cfapps.io/greeting
+$ curl https://helloworldpcf.cfapps.io/greeting
 yo
-$ curl http://helloworldpcf.cfapps.io/about
+$ curl https://helloworldpcf.cfapps.io/about
 Hello World v1.0.0.RELEASE
 ----
 
@@ -549,8 +549,8 @@ skipper:>repo list
 ╔════════════╤═══════════════════════════════════════════════════════════╤═════╤═════╗
 ║    Name    │                            URL                            │Local│Order║
 ╠════════════╪═══════════════════════════════════════════════════════════╪═════╪═════╣
-║experimental│http://skipper-repository.cfapps.io/repository/experimental│false│0    ║
-║local       │http://d4d6d1b6-c7e5-4226-69ec-01d4:7577                   │true │1    ║
+║experimental│https://skipper-repository.cfapps.io/repository/experimental│false│0    ║
+║local       │https://d4d6d1b6-c7e5-4226-69ec-01d4:7577                   │true │1    ║
 ╚════════════╧═══════════════════════════════════════════════════════════╧═════╧═════╝
 ----
 
@@ -625,15 +625,15 @@ To get the URL of this app on minikube, use the `minikube service` command, as f
 [source,bash,options="nowrap"]
 ----
 $ minikube service --url helloworldk8s-helloworld-docker-v1
-http://192.168.99.100:32123
+https://192.168.99.100:32123
 ----
 
 You can now curl the `greeting` endpoint and the `about` endpoint, as shown in the following example:
 [source,bash,options="nowrap"]
 ----
-$ curl http://192.168.99.100:32123/greeting
+$ curl https://192.168.99.100:32123/greeting
 Hello World!
-$ curl http://192.168.99.100:32123/about
+$ curl https://192.168.99.100:32123/about
 Hello World v1.0.0.RELEASE
 ----
 
@@ -726,9 +726,9 @@ You can now curl the `greeting` endpoint and the `about` endpoint, as follows:
 
 [source,bash,options="nowrap"]
 ----
-$ curl http://192.168.99.100:32124/greeting
+$ curl https://192.168.99.100:32124/greeting
 yo
-$ curl http://192.168.99.100:32124/about
+$ curl https://192.168.99.100:32124/about
 Hello World v1.0.0.RELEASE
 ----
 
@@ -784,10 +784,10 @@ skipper:>release status --release-name helloworldk8s
 A `curl` command shows the following output:
 [source,bash,options="nowrap"]
 ----
-$ curl http://192.168.99.100:32125/greeting
+$ curl https://192.168.99.100:32125/greeting
 Olá Mundo!
 
-$ curl http://192.168.99.100:32125/about
+$ curl https://192.168.99.100:32125/about
 Hello World v1.0.1.RELEASE
 ----
 
@@ -832,9 +832,9 @@ skipper:>release history --release-name helloworldk8s
 The `curl` commands now shows the following:
 [source,bash,options="nowrap"]
 ----
-$ curl http://192.168.99.100:32124/greeting
+$ curl https://192.168.99.100:32124/greeting
 yo
-$ curl http://192.168.99.100:32124/about
+$ curl https://192.168.99.100:32124/about
 Hello World v1.0.0.RELEASE
 ----
 

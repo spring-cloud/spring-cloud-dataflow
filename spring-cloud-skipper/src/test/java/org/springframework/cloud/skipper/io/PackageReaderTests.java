@@ -54,7 +54,7 @@ public class PackageReaderTests {
 		assertThat(metadata.getName()).isEqualTo("ticktock");
 		assertThat(metadata.getVersion()).isEqualTo("1.0.0");
 		assertThat(metadata.getPackageSourceUrl()).isEqualTo("https://example.com/dataflow/ticktock");
-		assertThat(metadata.getPackageHomeUrl()).isEqualTo("http://example.com/dataflow/ticktock");
+		assertThat(metadata.getPackageHomeUrl()).isEqualTo("https://example.com/dataflow/ticktock");
 		Set<String> tagSet = convertToSet(metadata.getTags());
 		assertThat(tagSet).hasSize(3).contains("stream", "time", "log");
 		assertThat(metadata.getMaintainer()).isEqualTo("https://github.com/markpollack");
@@ -87,7 +87,7 @@ public class PackageReaderTests {
 		assertThat(metadata.getVersion()).isEqualTo("2.0.0");
 		assertThat(metadata.getPackageSourceUrl())
 				.isEqualTo("https://github.com/spring-cloud-stream-app-starters/log/tree/v1.2.0.RELEASE");
-		assertThat(metadata.getPackageHomeUrl()).isEqualTo("http://cloud.spring.io/spring-cloud-stream-app-starters/");
+		assertThat(metadata.getPackageHomeUrl()).isEqualTo("https://cloud.spring.io/spring-cloud-stream-app-starters/");
 		Set<String> tagSet = convertToSet(metadata.getTags());
 		assertThat(tagSet).hasSize(2).contains("logging", "sink");
 		assertThat(metadata.getMaintainer()).isEqualTo("https://github.com/sobychacko");
@@ -103,7 +103,7 @@ public class PackageReaderTests {
 		assertThat(metadata.getVersion()).isEqualTo("2.0.0");
 		assertThat(metadata.getPackageSourceUrl())
 				.isEqualTo("https://github.com/spring-cloud-stream-app-starters/time/tree/v1.2.0.RELEASE");
-		assertThat(metadata.getPackageHomeUrl()).isEqualTo("http://cloud.spring.io/spring-cloud-stream-app-starters/");
+		assertThat(metadata.getPackageHomeUrl()).isEqualTo("https://cloud.spring.io/spring-cloud-stream-app-starters/");
 		Set<String> tagSet = convertToSet(metadata.getTags());
 		assertThat(tagSet).hasSize(2).contains("time", "source");
 		assertThat(metadata.getMaintainer()).isEqualTo("https://github.com/sobychacko");
