@@ -727,7 +727,7 @@ To download the Spring Cloud Data Flow shell, run the following command:
 ====
 [source,bash,subs=attributes]
 ----
-wget http://repo.spring.io/{version-type-lowercase}/org/springframework/cloud/spring-cloud-dataflow-shell/{scdf-core-version}/spring-cloud-dataflow-shell-{scdf-core-version}.jar
+wget http://repo.spring.io/{version-type-lowercase}/org/springframework/cloud/spring-cloud-dataflow-shell/{project-version}/spring-cloud-dataflow-shell-{project-version}.jar
 ----
 ====
 
@@ -739,7 +739,7 @@ To run the Spring Cloud Data Flow shell, run the following command:
 ====
 [source,bash,subs=attributes]
 ----
-java -jar spring-cloud-dataflow-shell-{scdf-core-version}.jar
+java -jar spring-cloud-dataflow-shell-{project-version}.jar
 ----
 ====
 
