@@ -426,6 +426,7 @@ wget https://repo.spring.io/{version-type-lowercase}/org/springframework/cloud/s
 . Download the Spring Cloud Data Flow Shell application by using the following command:
 +
 ====
+[source,bash,subs=attributes]
 ----
 wget https://repo.spring.io/{version-type-lowercase}/org/springframework/cloud/spring-cloud-dataflow-shell/{project-version}/spring-cloud-dataflow-shell-{project-version}.jar
 ----
