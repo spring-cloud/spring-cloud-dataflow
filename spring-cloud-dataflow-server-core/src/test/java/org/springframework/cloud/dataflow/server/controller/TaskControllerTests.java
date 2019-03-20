@@ -180,7 +180,7 @@ public class TaskControllerTests {
 	@Test
 	public void testSave() throws Exception {
 		assertEquals(0, repository.count());
-		this.registry.save("task", ApplicationType.task, "1.0.0", new URI("http://fake.example.com/"), null);
+		this.registry.save("task", ApplicationType.task, "1.0.0", new URI("https://fake.example.com/"), null);
 		mockMvc.perform(post("/tasks/definitions/").param("name", "myTask").param("definition", "task")
 				.accept(MediaType.APPLICATION_JSON)).andDo(print()).andExpect(status().isOk());
 
@@ -196,7 +196,7 @@ public class TaskControllerTests {
 
 	@Test
 	public void testSaveDuplicate() throws Exception {
-		this.registry.save("task", ApplicationType.task, "1.0.0", new URI("http://fake.example.com/"), null);
+		this.registry.save("task", ApplicationType.task, "1.0.0", new URI("https://fake.example.com/"), null);
 		repository.save(new TaskDefinition("myTask", "task"));
 		mockMvc.perform(post("/tasks/definitions/").param("name", "myTask").param("definition", "task")
 				.accept(MediaType.APPLICATION_JSON)).andExpect(status().isConflict());
@@ -206,7 +206,7 @@ public class TaskControllerTests {
 	@Test
 	public void testSaveWithParameters() throws Exception {
 
-		this.registry.save("task", ApplicationType.task, "1.0.0", new URI("http://fake.example.com/"), null);
+		this.registry.save("task", ApplicationType.task, "1.0.0", new URI("https://fake.example.com/"), null);
 		mockMvc.perform(post("/tasks/definitions/").param("name", "myTask")
 				.param("definition", "task --foo=bar --bar=baz").accept(MediaType.APPLICATION_JSON)).andDo(print())
 				.andExpect(status().isOk());
@@ -225,7 +225,7 @@ public class TaskControllerTests {
 	@Test
 	public void testSaveCompositeTaskWithParameters() throws Exception {
 
-		registry.save("task", ApplicationType.task, "1.0.0", new URI("http://fake.example.com/"), null);
+		registry.save("task", ApplicationType.task, "1.0.0", new URI("https://fake.example.com/"), null);
 		mockMvc.perform(post("/tasks/definitions/").param("name", "myTask")
 				.param("definition", "t1: task --foo='bar rab' && t2: task --foo='one two'")
 				.accept(MediaType.APPLICATION_JSON)).andDo(print())

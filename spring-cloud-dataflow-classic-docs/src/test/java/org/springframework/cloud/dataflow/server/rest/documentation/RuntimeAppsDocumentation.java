@@ -85,7 +85,7 @@ public class RuntimeAppsDocumentation extends BaseDocumentation {
 				+ "\"instances\":{\"mystream.log-0\":{\"instanceNumber\":0,\"id\":\"mystream.log-0\","
 				+ "\"state\":\"deployed\"}},\"state\":\"deployed\"},"
 				+ "{\"deploymentId\":\"mystream.http\",\"instances\":{\"mystream.http-0\":{\"instanceNumber\":0,"
-				+ "\"baseUrl\":\"http://192.168.1.100:32451\","
+				+ "\"baseUrl\":\"https://192.168.1.100:32451\","
 				+ "\"process\":{\"alive\":true,\"inputStream\":{},\"outputStream\":{},\"errorStream\":{}},"
 				+ "\"attributes\":{\"guid\":\"32451\",\"pid\":\"53492\",\"port\":\"32451\"},"
 				+ "\"id\":\"mystream.http-0\",\"state\":\"deployed\"}},\"state\":\"deployed\"}]");
@@ -109,7 +109,7 @@ public class RuntimeAppsDocumentation extends BaseDocumentation {
 				+ "\"instances\":{\"mystream.log-0\":{\"instanceNumber\":0,\"id\":\"mystream.log-0\","
 				+ "\"state\":\"deployed\"}},\"state\":\"deployed\"},"
 				+ "{\"deploymentId\":\"mystream.http\",\"instances\":{\"mystream.http-0\":{\"instanceNumber\":0,"
-				+ "\"baseUrl\":\"http://192.168.1.100:32451\","
+				+ "\"baseUrl\":\"https://192.168.1.100:32451\","
 				+ "\"process\":{\"alive\":true,\"inputStream\":{},\"outputStream\":{},\"errorStream\":{}},"
 				+ "\"attributes\":{\"guid\":\"32451\",\"pid\":\"53492\",\"port\":\"32451\"},"
 				+ "\"id\":\"mystream.http-0\",\"state\":\"deployed\"}},\"state\":\"deployed\"}]");

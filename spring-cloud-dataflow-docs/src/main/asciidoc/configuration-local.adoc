@@ -242,7 +242,7 @@ Data Flow Server delegates to the Skipper server the management of the Stream's 
 
 [source,bash,subs=attributes]
 ----
-$ java -jar spring-cloud-dataflow-server-{project-version}.jar --spring.cloud.skipper.client.serverUri=http://192.51.100.1:7577/api
+$ java -jar spring-cloud-dataflow-server-{project-version}.jar --spring.cloud.skipper.client.serverUri=https://192.51.100.1:7577/api
 ----
 
 The configuration of show streams are deployed and to which platforms, is done by configuration of `platform accounts` on the Skipper server.
@@ -479,7 +479,7 @@ security:
       user-authorization-uri: http://127.0.0.1:9999/oauth/authorize
     resource:
       user-info-uri: http://127.0.0.1:9999/me                         # <2>
-      token-info-uri: http://dataflow.local:8080/uaa/check_token      # <3>
+      token-info-uri: https://dataflow.local:8080/uaa/check_token      # <3>
 ----
 
 <1> Providing the Client ID in the OAuth Configuration Section activates OAuth2 security
@@ -672,7 +672,7 @@ where
 
 * HTTP_METHOD is one http method, capital case
 * URL_PATTERN is an Ant style URL pattern
-* SECURITY_ATTRIBUTE is a SpEL expression.  See http://docs.spring.io/spring-security/site/docs/current/reference/htmlsingle/#el-access[Expression-Based Access Control].
+* SECURITY_ATTRIBUTE is a SpEL expression.  See https://docs.spring.io/spring-security/site/docs/current/reference/htmlsingle/#el-access[Expression-Based Access Control].
 * Each of those separated by one or several blank characters (spaces, tabs, and so on)
 
 Be mindful that the above is indeed a YAML list, not a map (thus the use of '-' dashes
@@ -1016,7 +1016,7 @@ a Composed Task using this security setup.
 
 For local testing and development, you may also use the Resource and Authorization
 Server support provided by
-http://projects.spring.io/spring-security-oauth/[Spring Security OAuth]. It
+https://projects.spring.io/spring-security-oauth/[Spring Security OAuth]. It
 allows you to easily create your own (very basic) OAuth2 Server with the following simple annotations:
 
 * `@EnableResourceServer`

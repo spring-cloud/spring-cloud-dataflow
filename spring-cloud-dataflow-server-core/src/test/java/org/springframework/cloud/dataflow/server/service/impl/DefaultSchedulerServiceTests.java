@@ -347,7 +347,7 @@ public class DefaultSchedulerServiceTests {
 
 	private void initializeSuccessfulRegistry() {
 		when(this.appRegistry.find(anyString(), any(ApplicationType.class)))
-				.thenReturn(new AppRegistration("demo", ApplicationType.task, URI.create("http://helloworld")));
+				.thenReturn(new AppRegistration("demo", ApplicationType.task, URI.create("https://helloworld")));
 		when(this.appRegistry.getAppResource(any())).thenReturn(mock(Resource.class));
 		when(this.appRegistry.getAppMetadataResource(any())).thenReturn(null);
 	}

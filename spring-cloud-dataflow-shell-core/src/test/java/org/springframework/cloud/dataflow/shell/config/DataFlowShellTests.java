@@ -42,7 +42,7 @@ public class DataFlowShellTests {
 
 	@Test
 	public void testHasAccessWithOperations() {
-		final Target target = new Target("http://myUri");
+		final Target target = new Target("https://myUri");
 
 		final DataFlowShell dataFlowShell = prepareDataFlowShellWithStreamOperations(target);
 		Assert.assertTrue(dataFlowShell.hasAccess(RoleType.VIEW, OpsType.STREAM));
@@ -51,7 +51,7 @@ public class DataFlowShellTests {
 
 	@Test
 	public void testHasAccessWithOperationsAndNullRole() {
-		final Target target = new Target("http://myUri");
+		final Target target = new Target("https://myUri");
 
 		final DataFlowShell dataFlowShell = prepareDataFlowShellWithStreamOperations(target);
 		Assert.assertTrue(dataFlowShell.hasAccess(null, OpsType.STREAM));
@@ -60,7 +60,7 @@ public class DataFlowShellTests {
 
 	@Test
 	public void testHasAccessWithOperationsAndAuthenticationEnabledButNotAuthenticated() {
-		final Target target = new Target("http://myUri");
+		final Target target = new Target("https://myUri");
 		target.setAuthenticationEnabled(true);
 
 		final DataFlowShell dataFlowShell = prepareDataFlowShellWithStreamOperations(target);
@@ -70,7 +70,7 @@ public class DataFlowShellTests {
 
 	@Test
 	public void testHasAccessWithOperationsAndAuthenticationEnabledAndAuthenticated() {
-		final Target target = new Target("http://myUri", "username", "password", true);
+		final Target target = new Target("https://myUri", "username", "password", true);
 		target.getTargetCredentials().getRoles().add(RoleType.VIEW);
 		target.setAuthenticationEnabled(true);
 		target.setAuthenticated(true);
@@ -81,7 +81,7 @@ public class DataFlowShellTests {
 
 	@Test
 	public void testHasNotAccessWithOperationsAndAuthenticationEnabledAndAuthenticated() {
-		final Target target = new Target("http://myUri", "username", "password", true);
+		final Target target = new Target("https://myUri", "username", "password", true);
 		target.getTargetCredentials().getRoles().add(RoleType.CREATE);
 		target.setAuthenticationEnabled(true);
 		target.setAuthenticated(true);
@@ -92,7 +92,7 @@ public class DataFlowShellTests {
 	@Test
 	public void testHasWrongRoleWithOperationsAndAuthenticationEnabledAndAuthenticated() {
 
-		final Target target = new Target("http://myUri", "username", "password", true);
+		final Target target = new Target("https://myUri", "username", "password", true);
 		target.getTargetCredentials().getRoles().add(RoleType.CREATE);
 		target.setAuthenticationEnabled(true);
 		target.setAuthenticated(true);
@@ -104,7 +104,7 @@ public class DataFlowShellTests {
 	@Test
 	public void testHasNullRoleWithOperationsAndAuthenticationEnabledAndAuthenticated() {
 
-		final Target target = new Target("http://myUri", "username", "password", true);
+		final Target target = new Target("https://myUri", "username", "password", true);
 		target.getTargetCredentials().getRoles().add(RoleType.CREATE);
 		target.setAuthenticationEnabled(true);
 		target.setAuthenticated(true);
