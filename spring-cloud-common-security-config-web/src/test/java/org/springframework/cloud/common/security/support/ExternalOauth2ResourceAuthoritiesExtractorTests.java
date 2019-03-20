@@ -48,9 +48,9 @@ public class ExternalOauth2ResourceAuthoritiesExtractorTests {
 	@Test
 	public void testExtractAuthorities() {
 		assertAuthorities(URI.create("http://test/authorities"), "VIEW");
-		assertAuthorities(URI.create("http://the.authorities.server/authorities"), "VIEW", "CREATE", "MANAGE");
-		assertAuthorities(URI.create("http://server/"), "MANAGE");
-		assertAuthorities(URI.create("http://scdf2/"), "DEPLOY", "DESTROY", "MODIFY", "SCHEDULE");
+		assertAuthorities(URI.create("https://the.authorities.server/authorities"), "VIEW", "CREATE", "MANAGE");
+		assertAuthorities(URI.create("https://server/"), "MANAGE");
+		assertAuthorities(URI.create("https://scdf2/"), "DEPLOY", "DESTROY", "MODIFY", "SCHEDULE");
 	}
 
 	private void assertAuthorities(URI uri, String... roles) {
