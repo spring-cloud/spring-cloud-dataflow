@@ -229,11 +229,17 @@ overrides the common property).
 
 [[spring-cloud-dataflow-task-limit-concurrent-executions]]
 === Limit the number concurrent task launches
-Spring Cloud Data Flow allows a user establish the maximum number of concurrently running tasks to prevent the saturation of IaaS/hardware resources.
-This limit can be configured by setting the `spring.cloud.dataflow.task.maximum-concurrent-tasks` property.   By default it is set to `20`.
-If the number of concurrently running tasks is equal or greater than the value set by `spring.cloud.dataflow.task.maximum-concurrent-tasks` the next
-task launch request will be declined and a warning message will be returned via the RESTful API, Shell or UI.
+Spring Cloud Data Flow allows a user limit the maximum number of concurrently running tasks for each configured platform to prevent the saturation of IaaS/hardware resources.
+The limit is set to `20` for all supported platforms by default. If the number of concurrently running tasks on a platform instance is greater or equal to the limit, the next task launch request will fail and an error message will be returned via the RESTful API, Shell or UI.
+This limit can be configured for a platform instance by setting the corresponding deployer property, `spring.cloud.dataflow.task.platform.<platform-type>.accounts[<account-name>].maximum-concurrent-tasks` property, where `<account-name>` is the name of a configured platform account (`default` if no accounts are explicitly configured).
+The `<platform-type>` refers to one of the currently supported deployers: `local`, `cloudfoundry`, or `kubernetes`.
 
+The TaskLauncher implementation for each supported platform determines the number of currently executing tasks by querying the underlying platform's runtime state if possible. The method for identifying a `task` varies by platform.
+For example, launching a task on the local host uses the `LocalTaskLauncher`. The LocalTaskLauncher executes a process for each launch request and keeps track of these processes in memory. In this case, we don't query the underlying OS, as it is impractical to identify tasks this way.
+For Cloud Foundry, tasks are a core concept supported by its deployment model. The state of all tasks, running, completed, or failed, is available directly via the API.
+This means that every running task container in the account's org and space is included in the running execution count, whether or not it was launched using Spring Cloud Data Flow, or invoking the `CloudFoundryTaskLauncher` directly.
+In contrast, Kubernetes has no native concept of a task. Launching a task via the `KubernetesTaskLauncher`, if successful, results in a running pod, which we expect to eventually complete or fail.
+In this environment, we only count pods that were launched by the `KubernetesTaskLauncher`. Since the task launcher provides `task-name` label in the pod's metadata, we filter all running pods by the presence of this label.
 
 [[spring-cloud-dataflow-task-review-executions]]
 === Reviewing Task Executions
