@@ -18,7 +18,6 @@ package org.springframework.cloud.dataflow.server.config.features;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 import javax.sql.DataSource;
 
@@ -113,10 +112,6 @@ public class TaskConfiguration {
 				.entrySet()) {
 			LocalDeployerProperties localDeployerProperties = entry.getValue();
 
-			validateLauncherMaximumConcurrentTasks(entry.getKey(),"Local",
-				localDeployerProperties.getMaximumConcurrentTasks(),
-				localPlatformProperties.getMaximumConcurrentTasks());
-
 			LocalTaskLauncher localTaskLauncher = new LocalTaskLauncher(localDeployerProperties);
 			Launcher launcher = new Launcher(entry.getKey(), "local", localTaskLauncher);
 			launcher.setDescription(prettyPrintLocalDeployerProperties(entry.getValue()));
@@ -125,19 +120,6 @@ public class TaskConfiguration {
 
 		return new TaskPlatform("Local", launchers);
 	}
-
-	public void validateLauncherMaximumConcurrentTasks(String deployerName, String platformName,
-			int maxConcurrentTasks, Optional<Integer> platformMaxConcurrentTasks) {
-		if (platformMaxConcurrentTasks.isPresent())
-			if (maxConcurrentTasks > platformMaxConcurrentTasks.get()) {
-				throw new IllegalStateException(
-						String.format("'maximumConcurrentTasks' [%d] for launcher instance %s cannot be greater than "
-								+ "%s platform maximum [%d].", maxConcurrentTasks,
-								deployerName, platformName, platformMaxConcurrentTasks.get()));
-			}
-
-	}
-
 
 	private String prettyPrintLocalDeployerProperties(LocalDeployerProperties localDeployerProperties) {
 		StringBuilder builder = new StringBuilder();
