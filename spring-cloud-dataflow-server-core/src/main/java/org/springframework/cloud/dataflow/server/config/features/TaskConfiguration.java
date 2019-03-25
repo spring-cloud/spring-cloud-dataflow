@@ -21,6 +21,9 @@ import java.util.Map;
 
 import javax.sql.DataSource;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import org.springframework.batch.core.configuration.support.MapJobRegistry;
 import org.springframework.batch.core.explore.JobExplorer;
 import org.springframework.batch.core.explore.support.JobExplorerFactoryBean;
@@ -68,6 +71,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.data.map.repository.config.EnableMapRepositories;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
+import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
 /**
@@ -78,6 +82,7 @@ import org.springframework.util.StringUtils;
  * @author Ilayaperumal Gopinathan
  * @author Gunnar Hillert
  * @author Christian Tzolov
+ * @author David Turanski
  */
 @Configuration
 @ConditionalOnTasksEnabled
@@ -87,6 +92,9 @@ import org.springframework.util.StringUtils;
 @EnableMapRepositories(basePackages = "org.springframework.cloud.dataflow.server.job")
 @EnableTransactionManagement
 public class TaskConfiguration {
+
+	private final Logger logger = LoggerFactory
+		.getLogger(LauncherInitializationService.class);
 
 	@Autowired
 	DataSourceProperties dataSourceProperties;
@@ -106,28 +114,21 @@ public class TaskConfiguration {
 	public TaskPlatform localTaskPlatform(LocalPlatformProperties localPlatformProperties) {
 		List<Launcher> launchers = new ArrayList<>();
 		Map<String, LocalDeployerProperties> localDeployerPropertiesMap = localPlatformProperties.getAccounts();
-		for (Map.Entry<String, LocalDeployerProperties> entry : localDeployerPropertiesMap
-				.entrySet()) {
-			LocalTaskLauncher localTaskLauncher = new LocalTaskLauncher(entry.getValue());
-			Launcher launcher = new Launcher(entry.getKey(), "local", localTaskLauncher);
-			launcher.setDescription(prettyPrintLocalDeployerProperties(entry.getValue()));
-			launchers.add(launcher);
-		}
-		return new TaskPlatform("Local", launchers);
-	}
 
-	private String prettyPrintLocalDeployerProperties(LocalDeployerProperties localDeployerProperties) {
-		StringBuilder builder = new StringBuilder();
-		if (localDeployerProperties.getJavaOpts() != null) {
-			builder.append("JavaOpts = [" + localDeployerProperties.getJavaOpts() + "], ");
+		if (CollectionUtils.isEmpty(localDeployerPropertiesMap)) {
+			logger.info("Creating Local Task Launcher named 'default' since no Task Launchers configured.");
+			launchers.add(createDefaultLauncher());
+		} else {
+			for (Map.Entry<String, LocalDeployerProperties> entry : localDeployerPropertiesMap
+				.entrySet()) {
+				LocalTaskLauncher localTaskLauncher = new LocalTaskLauncher(entry.getValue());
+				Launcher launcher = new Launcher(entry.getKey(), "local", localTaskLauncher);
+				launcher.setDescription(prettyPrintLocalDeployerProperties(entry.getValue()));
+				launchers.add(launcher);
+			}
 		}
-		builder.append("ShutdownTimeout = [" + localDeployerProperties.getShutdownTimeout() + "], ");
-		builder.append("EnvVarsToInherit = ["
-				+ StringUtils.arrayToCommaDelimitedString(localDeployerProperties.getEnvVarsToInherit()) + "], ");
-		builder.append("JavaCmd = [" + localDeployerProperties.getJavaCmd() + "], ");
-		builder.append("WorkingDirectoriesRoot = [" + localDeployerProperties.getWorkingDirectoriesRoot() + "], ");
-		builder.append("DeleteFilesOnExit = [" + localDeployerProperties.isDeleteFilesOnExit() + "]");
-		return builder.toString();
+
+		return new TaskPlatform("Local", launchers);
 	}
 
 	@Bean
@@ -218,6 +219,28 @@ public class TaskConfiguration {
 		repositoryFactoryBean.setDataSource(dataSource);
 		repositoryFactoryBean.setTransactionManager(platformTransactionManager);
 		return repositoryFactoryBean;
+	}
+
+	private Launcher createDefaultLauncher() {
+		LocalDeployerProperties localDeployerProperties = new LocalDeployerProperties();
+		LocalTaskLauncher localTaskLauncher = new LocalTaskLauncher(localDeployerProperties);
+		Launcher launcher = new Launcher("default", "local", localTaskLauncher);
+		launcher.setDescription(prettyPrintLocalDeployerProperties(localDeployerProperties));
+		return launcher;
+	}
+
+	private String prettyPrintLocalDeployerProperties(LocalDeployerProperties localDeployerProperties) {
+		StringBuilder builder = new StringBuilder();
+		if (localDeployerProperties.getJavaOpts() != null) {
+			builder.append("JavaOpts = [" + localDeployerProperties.getJavaOpts() + "], ");
+		}
+		builder.append("ShutdownTimeout = [" + localDeployerProperties.getShutdownTimeout() + "], ");
+		builder.append("EnvVarsToInherit = ["
+			+ StringUtils.arrayToCommaDelimitedString(localDeployerProperties.getEnvVarsToInherit()) + "], ");
+		builder.append("JavaCmd = [" + localDeployerProperties.getJavaCmd() + "], ");
+		builder.append("WorkingDirectoriesRoot = [" + localDeployerProperties.getWorkingDirectoriesRoot() + "], ");
+		builder.append("DeleteFilesOnExit = [" + localDeployerProperties.isDeleteFilesOnExit() + "]");
+		return builder.toString();
 	}
 
 }

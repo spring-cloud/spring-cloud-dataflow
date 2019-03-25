@@ -24,12 +24,13 @@ import org.springframework.context.annotation.ConditionContext;
 import org.springframework.core.type.AnnotatedTypeMetadata;
 
 /**
- * When Server in not deployed on a cloud platform, it is considered to be on a Local platform.
+ * When Server in not deployed on a cloud platform, it is considered to be on a Local
+ * platform.
  *
  * @author Christian Tzolov
+ * @author David Turanski
  */
 public class OnLocalPlatform extends SpringBootCondition {
-
 
 	@Override
 	public ConditionOutcome getMatchOutcome(ConditionContext context, AnnotatedTypeMetadata metadata) {
@@ -41,9 +42,11 @@ public class OnLocalPlatform extends SpringBootCondition {
 				onLocalPlatform = false;
 			}
 		}
+
 		if (onLocalPlatform) {
 			return new ConditionOutcome(onLocalPlatform, "On local platform.");
-		} else {
+		}
+		else {
 			return new ConditionOutcome(onLocalPlatform, "On cloud platform.");
 		}
 	}

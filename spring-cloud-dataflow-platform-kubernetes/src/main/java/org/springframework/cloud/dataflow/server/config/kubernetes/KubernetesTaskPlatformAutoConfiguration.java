@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 the original author or authors.
+ * Copyright 2018-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,15 +36,14 @@ import org.springframework.cloud.scheduler.spi.kubernetes.KubernetesScheduler;
 import org.springframework.cloud.scheduler.spi.kubernetes.KubernetesSchedulerProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Profile;
 
 /**
  * Creates TaskPlatform implementations to launch/schedule tasks on Kubernetes.
  * @author Mark Pollack
+ * @author David Turanski
  */
 @Configuration
 @EnableConfigurationProperties(KubernetesPlatformProperties.class)
-@Profile("kubernetes")
 public class KubernetesTaskPlatformAutoConfiguration {
 
 	@Value("${spring.cloud.dataflow.features.schedules-enabled:false}")
