@@ -41,6 +41,7 @@ public class OnLocalPlatform extends SpringBootCondition {
 				onLocalPlatform = false;
 			}
 		}
+
 		if (onLocalPlatform) {
 			return new ConditionOutcome(onLocalPlatform, "On local platform.");
 		} else {

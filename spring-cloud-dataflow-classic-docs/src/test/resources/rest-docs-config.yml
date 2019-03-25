@@ -9,7 +9,14 @@ spring:
         collector:
           uri: http://localhost:${fakeMetricsCollector.port}
   autoconfigure:
-    exclude: org.springframework.cloud.deployer.spi.cloudfoundry.CloudFoundryDeployerAutoConfiguration,org.springframework.cloud.deployer.spi.kubernetes.KubernetesAutoConfiguration,org.springframework.cloud.dataflow.rest.client.config.DataFlowClientAutoConfiguration,org.springframework.boot.autoconfigure.session.SessionAutoConfiguration,org.springframework.cloud.dataflow.shell.autoconfigure.BaseShellAutoConfiguration
+    exclude: >-
+      org.springframework.cloud.deployer.spi.cloudfoundry.CloudFoundryDeployerAutoConfiguration,
+      org.springframework.cloud.deployer.spi.kubernetes.KubernetesAutoConfiguration,
+      org.springframework.cloud.dataflow.rest.client.config.DataFlowClientAutoConfiguration,
+      org.springframework.boot.autoconfigure.session.SessionAutoConfiguration,
+      org.springframework.cloud.dataflow.shell.autoconfigure.BaseShellAutoConfiguration,
+      org.springframework.cloud.dataflow.server.config.cloudfoundry.CloudFoundryTaskPlatformAutoConfiguration,
+      org.springframework.cloud.dataflow.server.config.kubernetes.KubernetesTaskPlatformAutoConfiguration
 maven:
   remoteRepositories:
     springRepo:

@@ -271,7 +271,7 @@ public class TaskCommandTests extends AbstractShellIntegrationTest {
 		assertEquals("First Row Second Value should be: Platform Type", "Platform Type", table.getModel().getValue(0, 1));
 		assertEquals("First Row Second Value should be: Description", "Description", table.getModel().getValue(0, 2));
 		assertEquals("Second Row First Value should be: default", "default", table.getModel().getValue(1, 0));
-		assertEquals("Second Row Second Value should be: local", "local", table.getModel().getValue(1, 1));
+		assertEquals("Second Row Second Value should be: Local", "Local", table.getModel().getValue(1, 1));
 	}
 
 }
