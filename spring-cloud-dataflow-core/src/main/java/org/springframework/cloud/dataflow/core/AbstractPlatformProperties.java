@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 the original author or authors.
+ * Copyright 2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,38 +13,32 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.cloud.dataflow.core;
 
-import java.util.List;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 /**
- * @author Donovan Muller
- */
-public class TaskPlatform {
+ * @author David Turanski
+ **/
+public abstract class AbstractPlatformProperties<P> {
+	private Map<String, P> accounts = new LinkedHashMap<>();
 
-	private String name;
-
-	private List<Launcher> launchers;
-
-	public TaskPlatform(String name, List<Launcher> launchers) {
-		this.name = name;
-		this.launchers = launchers;
+	public Map<String, P> getAccounts() {
+		return accounts;
 	}
 
-	public String getName() {
-		return name;
+	public void setAccounts(Map<String, P> accounts) {
+		this.accounts = accounts;
 	}
 
-	public void setName(String name) {
-		this.name = name;
+	public P accountProperties(String account) {
+		P properties = this.getAccounts().get(account);
+		if (properties == null) {
+			throw new IllegalArgumentException("Account " + account + " does not exist");
+		}
+		return properties;
 	}
 
-	public List<Launcher> getLaunchers() {
-		return launchers;
-	}
-
-	public void setLaunchers(List<Launcher> launchers) {
-		this.launchers = launchers;
-	}
 }
-
