@@ -4,6 +4,9 @@
 [[streams-monitoring-local-prometheus]]
 === Prometheus
 
+NOTE: The <<getting-started-local-deploying-spring-cloud-dataflow-docker,Data Flow docker-compose >> comes already configured with `Prometheus` and `Grafana` for monitoring.
+When installing Data Flow manually (e.g. without `docker-compose`) follow the instructions below to configure `Prometheus` and `Grafana` in your Data Flow installations.
+
 https://prometheus.io/[Prometheus] is a popular pull based time series database that pulls the metrics from the target applications from preconfigured endpoints.
 Prometheus needs to be regularly provided with the URLs of the target applications to monitor.
  This task is delegated to a component called Service Discovery, which usually a platform specific implementation.
@@ -108,9 +111,9 @@ docker-compose down
 [[streams-monitoring-local-influx]]
 === InfluxDB
 
-NOTE: By default the <<getting-started-local-deploying-spring-cloud-dataflow-docker,Data Flow docker-compose >> configures Stream monitoring with InfluxDB and pre-built dashboards for Grafana.
-The follow instructions are provided to let you configure InfluxDB and Grafana in case you decide to install Data Flow manually, without the the help of the getting started `docker-compose`.
-
+NOTE: The <<getting-started-local-deploying-spring-cloud-dataflow-docker,Data Flow docker-compose >> is pre-configured with `Prometheus` for monitoring.
+Follow the <<getting-started-local-customizing-spring-cloud-dataflow-docker-influxdb,customization instructions>> to replace `Prometheus` with `InfluxDB` inside the docker-compose script.
+When installing Data Flow manually (e.g. without `docker-compose`) follow the instructions below to configure InfluxDB and Grafana in your Data Flow installations.
 
 https://github.com/influxdata/influxdb[InfluxDB] is a popular open-source push based time series database.
 It supports downsampling, automatically expiring and deleting unwanted data, as well as backup and restore. Analysis of data is done via a  https://docs.influxdata.com/influxdb/v1.5/query_language/[SQL-like query] language.

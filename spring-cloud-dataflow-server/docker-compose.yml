@@ -11,10 +11,12 @@ services:
       - KAFKA_ADVERTISED_HOST_NAME=kafka
     depends_on:
       - zookeeper
+
   zookeeper:
     image: wurstmeister/zookeeper
     expose:
       - "2181"
+
   dataflow-server:
     image: springcloud/spring-cloud-dataflow-server:${DATAFLOW_VERSION:?DATAFLOW_VERSION is not set!}
     container_name: dataflow-server
@@ -26,12 +28,13 @@ services:
       - spring.cloud.dataflow.applicationProperties.stream.spring.cloud.stream.kafka.binder.zkNodes=zookeeper:2181
       - spring.cloud.dataflow.applicationProperties.stream.spring.cloud.stream.kafka.streams.binder.zkNodes=zookeeper:2181
       - spring.cloud.skipper.client.serverUri=http://skipper-server:7577/api
-      - spring.cloud.dataflow.applicationProperties.stream.management.metrics.export.influx.enabled=true
-      - spring.cloud.dataflow.applicationProperties.stream.management.metrics.export.influx.db=myinfluxdb
-      - spring.cloud.dataflow.applicationProperties.stream.management.metrics.export.influx.uri=http://influxdb:8086
+      - spring.cloud.dataflow.applicationProperties.stream.management.metrics.export.prometheus.enabled=true
+      - spring.cloud.dataflow.applicationProperties.stream.spring.cloud.streamapp.security.enabled=false
+      - spring.cloud.dataflow.applicationProperties.stream.management.endpoints.web.exposure.include=prometheus,info,health
       - spring.cloud.dataflow.grafana-info.url=http://localhost:3000
     depends_on:
       - kafka
+
   app-import:
     image: springcloud/openjdk:latest
     depends_on:
@@ -46,23 +49,55 @@ services:
         echo 'Stream apps imported'
         wget -qO- 'http://dataflow-server:9393/apps' --post-data='uri=http://bit.ly/Dearborn-SR1-task-applications-maven&force=true';
         echo 'Task apps imported'"
+
   skipper-server:
     image: springcloud/spring-cloud-skipper-server:${SKIPPER_VERSION:?SKIPPER_VERSION is not set!}
     container_name: skipper
     ports:
-    - "7577:7577"
-    - "9000-9010:9000-9010"
+      - "7577:7577"
+      - "9000-9010:9000-9010"
+      - "20000-20105:20000-20105"
+    environment:
+      - SPRING_CLOUD_SKIPPER_SERVER_PLATFORM_LOCAL_ACCOUNTS_DEFAULT_PORTRANGE_LOW=20000
+      - SPRING_CLOUD_SKIPPER_SERVER_PLATFORM_LOCAL_ACCOUNTS_DEFAULT_PORTRANGE_HIGH=20100
 
-  influxdb:
-    image: influxdb:1.7.4
-    container_name: 'influxdb'
+  # Grafana is configured with the Prometheus datasource.
+  # Use `docker exec -it prometheus /bin/sh` to logging in the container
+  prometheus:
+    image: springcloud/spring-cloud-dataflow-prometheus-local:${DATAFLOW_VERSION:?DATAFLOW_VERSION is not set! Use 'export DATAFLOW_VERSION=local-server-image-tag'}
+    container_name: 'prometheus'
+    volumes:
+      - 'scdf-targets:/etc/prometheus/'
     ports:
-      - '8086:8086'
+      - '9090:9090'
+    depends_on:
+      - service-discovery
 
+  # The service-discovery container. Required for Prometheus setup only
+  # Use `docker exec -it service-discovery /bin/sh` to logging the container
+  service-discovery:
+    image: springcloud/spring-cloud-dataflow-prometheus-service-discovery:0.0.3
+    container_name: 'service-discovery'
+    volumes:
+      - 'scdf-targets:/tmp/scdf-targets/'
+    expose:
+      - '8181'
+    ports:
+      - '8181:8181'
+    environment:
+      - metrics.prometheus.target.refresh.cron=0/20 * * * * *
+      - metrics.prometheus.target.discovery.url=http://localhost:9393/runtime/apps
+      - metrics.prometheus.target.file.path=/tmp/targets.json
+      - 'SCDF_HOST_IP=${SCDF_HOST_IP:?SCDF_HOST_IP is not set! Use "export SCDF_HOST_IP=<SCDF Server IP>". Note: 127.0.0.1 is not a valid option!}'
+    depends_on:
+      - dataflow-server
+
+  # Grafana SCDF Prometheus/InfluxDB pre-built image:
   grafana:
-    image: springcloud/spring-cloud-dataflow-grafana-influxdb:${DATAFLOW_VERSION:?DATAFLOW_VERSION is not set!}
+    image: springcloud/spring-cloud-dataflow-grafana-prometheus:${DATAFLOW_VERSION:?DATAFLOW_VERSION is not set! Use 'export DATAFLOW_VERSION=local-server-image-tag'}
     container_name: 'grafana'
     ports:
       - '3000:3000'
+
 volumes:
   scdf-targets:
