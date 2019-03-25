@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 the original author or authors.
+ * Copyright 2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,16 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.springframework.cloud.dataflow.server.config.features;
 
-import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.cloud.dataflow.core.AbstractPlatformProperties;
-import org.springframework.cloud.deployer.spi.local.LocalDeployerProperties;
+package org.springframework.cloud.dataflow.core;
 
 /**
- * @author Mark Pollack
  * @author David Turanski
- */
-@ConfigurationProperties("spring.cloud.dataflow.task.platform.local")
-public class LocalPlatformProperties extends AbstractPlatformProperties<LocalDeployerProperties> {
+ **/
+public interface TaskPlatformFactory {
+	TaskPlatform createTaskPlatform();
+	Launcher createLauncher(String account);
 }

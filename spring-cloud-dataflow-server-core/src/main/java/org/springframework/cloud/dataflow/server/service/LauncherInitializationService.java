@@ -15,25 +15,21 @@
  */
 package org.springframework.cloud.dataflow.server.service;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import org.springframework.boot.context.event.ApplicationReadyEvent;
-import org.springframework.cloud.dataflow.core.Launcher;
 import org.springframework.cloud.dataflow.core.TaskPlatform;
 import org.springframework.cloud.dataflow.server.job.LauncherRepository;
-import org.springframework.cloud.deployer.spi.local.LocalDeployerProperties;
-import org.springframework.cloud.deployer.spi.local.LocalTaskLauncher;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.StringUtils;
 
 /**
  * @author Mark Pollack
+ * @author David Turanski
  */
 @Component
 public class LauncherInitializationService {
@@ -51,21 +47,6 @@ public class LauncherInitializationService {
 	@EventListener
 	@Transactional
 	public void initialize(ApplicationReadyEvent event) {
-		if (noTaskLauncherExists()) {
-			LocalDeployerProperties localDeployerProperties = new LocalDeployerProperties();
-			LocalTaskLauncher localTaskLauncher = new LocalTaskLauncher(localDeployerProperties);
-			Launcher launcher = new Launcher("default", "local", localTaskLauncher);
-			launcher.setDescription(prettyPrintLocalDeployerProperties(localDeployerProperties));
-			List<Launcher> localLaunchers = new ArrayList<>();
-			localLaunchers.add(launcher);
-			for (TaskPlatform taskPlatform : taskPlatforms) {
-				if (taskPlatform.getName().equalsIgnoreCase("Local")) {
-					logger.info("Creating Local Task Launcher named 'default' since no Task Launchers configured.");
-					taskPlatform.setLaunchers(localLaunchers);
-				}
-			}
-		}
-
 		this.taskPlatforms.forEach(platform -> {
 			platform.getLaunchers().forEach(launcher -> {
 				this.launcherRepository.save(launcher);
@@ -75,27 +56,5 @@ public class LauncherInitializationService {
 						launcher.getName()));
 			});
 		});
-	}
-
-	private String prettyPrintLocalDeployerProperties(LocalDeployerProperties localDeployerProperties) {
-		StringBuilder builder = new StringBuilder();
-		if (localDeployerProperties.getJavaOpts() != null) {
-			builder.append("JavaOpts = [" + localDeployerProperties.getJavaOpts() + "], ");
-		}
-		builder.append("ShutdownTimeout = [" + localDeployerProperties.getShutdownTimeout() + "], ");
-		builder.append("EnvVarsToInherit = ["
-				+ StringUtils.arrayToCommaDelimitedString(localDeployerProperties.getEnvVarsToInherit()) + "], ");
-		builder.append("JavaCmd = [" + localDeployerProperties.getJavaCmd() + "], ");
-		builder.append("WorkingDirectoriesRoot = [" + localDeployerProperties.getWorkingDirectoriesRoot() + "], ");
-		builder.append("DeleteFilesOnExit = [" + localDeployerProperties.isDeleteFilesOnExit() + "]");
-		return builder.toString();
-	}
-
-	private boolean noTaskLauncherExists() {
-		int taskLauncherCount = 0;
-		for (TaskPlatform platform : this.taskPlatforms) {
-			taskLauncherCount = taskLauncherCount + platform.getLaunchers().size();
-		}
-		return (taskLauncherCount == 0);
 	}
 }

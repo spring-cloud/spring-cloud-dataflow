@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2019 the original author or authors.
+ * Copyright 2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,14 +16,23 @@
 
 package org.springframework.cloud.dataflow.server.config.kubernetes;
 
-import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.cloud.dataflow.core.AbstractPlatformProperties;
-import org.springframework.cloud.deployer.spi.kubernetes.KubernetesDeployerProperties;
+import io.fabric8.kubernetes.client.KubernetesClient;
+
+import org.springframework.cloud.deployer.spi.kubernetes.KubernetesClientFactory;
 
 /**
- * @author Ilayaperumal Gopinathan
  * @author David Turanski
- */
-@ConfigurationProperties("spring.cloud.dataflow.task.platform.kubernetes")
-public class KubernetesPlatformProperties extends AbstractPlatformProperties<KubernetesDeployerProperties> {
+ **/
+public class KubernetesPlatformClientProvider {
+
+	private final KubernetesPlatformProperties platformProperties;
+
+	public KubernetesPlatformClientProvider(KubernetesPlatformProperties platformProperties) {
+		this.platformProperties = platformProperties;
+	}
+
+	public KubernetesClient kubenertesClient(String account) {
+		return KubernetesClientFactory.getKubernetesClient(this.platformProperties.accountProperties(account));
+	}
+
 }
