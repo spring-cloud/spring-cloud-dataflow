@@ -22,7 +22,9 @@ services:
       - "9393:9393"
     environment:
       - spring.cloud.dataflow.applicationProperties.stream.spring.cloud.stream.kafka.binder.brokers=kafka:9092
+      - spring.cloud.dataflow.applicationProperties.stream.spring.cloud.stream.kafka.streams.binder.brokers=kafka:9092
       - spring.cloud.dataflow.applicationProperties.stream.spring.cloud.stream.kafka.binder.zkNodes=zookeeper:2181
+      - spring.cloud.dataflow.applicationProperties.stream.spring.cloud.stream.kafka.streams.binder.zkNodes=zookeeper:2181
       - spring.cloud.skipper.client.serverUri=http://skipper-server:7577/api
       - spring.cloud.dataflow.applicationProperties.stream.management.metrics.export.influx.enabled=true
       - spring.cloud.dataflow.applicationProperties.stream.management.metrics.export.influx.db=myinfluxdb
