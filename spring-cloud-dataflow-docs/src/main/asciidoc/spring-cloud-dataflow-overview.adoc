@@ -12,7 +12,7 @@ fashion, or you can skip sections if something doesn't interest you.
 == Introducing Spring Cloud Data Flow
 Spring Cloud Data Flow is a cloud native programming and operating model for composable data microservices on modern runtimes.  With Spring Cloud Data Flow, developers can create and orchestrate data pipelines for common use cases such as data ingest, real-time analytics, and data import/export.
 
-Spring Cloud Data Flow is the cloud native redesign of link:http://projects.spring.io/spring-xd/[Spring XD] – a project that aimed to simplify development of Big Data applications.  The streaming and batch modules from Spring XD are refactored into Spring Boot link:http://cloud.spring.io/spring-cloud-stream-modules/[data microservice] applications that are now autonomous deployment units and they can "natively" run in modern runtimes such as Cloud Foundry, Apache YARN, Apache Mesos, and Kubernetes.
+Spring Cloud Data Flow is the cloud native redesign of link:https://projects.spring.io/spring-xd/[Spring XD] – a project that aimed to simplify development of Big Data applications.  The streaming and batch modules from Spring XD are refactored into Spring Boot link:https://cloud.spring.io/spring-cloud-stream-modules/[data microservice] applications that are now autonomous deployment units and they can "natively" run in modern runtimes such as Cloud Foundry, Apache YARN, Apache Mesos, and Kubernetes.
 
 Spring Cloud Data Flow offers a collection of patterns and best practices for microservices-based distributed streaming and batch data pipelines. 
 

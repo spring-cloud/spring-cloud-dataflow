@@ -80,4 +80,4 @@ public class TimerSourceApplicationTests {
 NOTE: In this case there is only one `Source` in the application context so there is no need to qualify it when it is autowired. If there is ambiguity, e.g. if you are composing one app from some others, you can use the `@Bindings` qualifier to inject a specific channel set. The `@Bindings` qualifier takes a parameter which is the class that carries the `@EnableBinding` annotation (in this case the `TimerSource`).
 
 For more information, including how to run `spring-cloud-stream` applications autonomously (without Spring Cloud Data Flow),
-visit the link:http://cloud.spring.io/spring-cloud-stream[Spring Cloud Stream project home page].
+visit the link:https://cloud.spring.io/spring-cloud-stream[Spring Cloud Stream project home page].

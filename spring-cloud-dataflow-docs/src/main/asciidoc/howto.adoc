@@ -7,7 +7,7 @@ This section provides answers to some common '`how do I do that...`' type of que
 that often arise when using Spring Cloud Data Flow. 
 
 If you are having a specific problem that we don't cover here, you might want to check out
-http://stackoverflow.com/tags/spring-cloud-dataflow[stackoverflow.com] to see if someone has
+https://stackoverflow.com/tags/spring-cloud-dataflow[stackoverflow.com] to see if someone has
 already provided an answer; this is also a great place to ask new questions (please use
 the `spring-cloud-dataflow` tag).
 

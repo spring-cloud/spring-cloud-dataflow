@@ -17,9 +17,9 @@ You need Java installed (Java 7 or better, we recommend Java 8), and to build, y
 
 You need to have an RDBMS for storing stream, task and app states in the database. The `local` Data Flow server by default uses embedded H2 database for this.
 
-You also need to have link:http://redis.io[Redis] running if you are running any streams that involve analytics applications. Redis may also be required run the unit/integration tests.
+You also need to have link:https://redis.io[Redis] running if you are running any streams that involve analytics applications. Redis may also be required run the unit/integration tests.
 
-For the deployed streams and tasks to communicate, either link:http://rabbitmq.com[RabbitMQ] or link:http://kafka.apache.org[Kafka] needs to be installed.  The local server registers sources, sink, processors and tasks the are published from the link:https://github.com/spring-cloud/spring-cloud-stream-app-starters[Spring Cloud Stream App Starters] and link:https://github.com/spring-cloud/spring-cloud-task-app-starters[Spring Cloud Task App Starters] repository.  By default the server registers these applications that use Kafka, but setting the property `binding` to `rabbit` will register a list of applications that use RabbitMQ as the message broker.
+For the deployed streams and tasks to communicate, either link:https://rabbitmq.com[RabbitMQ] or link:https://kafka.apache.org[Kafka] needs to be installed.  The local server registers sources, sink, processors and tasks the are published from the link:https://github.com/spring-cloud/spring-cloud-stream-app-starters[Spring Cloud Stream App Starters] and link:https://github.com/spring-cloud/spring-cloud-task-app-starters[Spring Cloud Task App Starters] repository.  By default the server registers these applications that use Kafka, but setting the property `binding` to `rabbit` will register a list of applications that use RabbitMQ as the message broker.
 
 [[enable-disable-specific-features]]
 == Controlling features with Data Flow server
@@ -48,9 +48,9 @@ The REST endpoint `/features` provides information on the features enabled/disab
 +
 [source,bash,subs=attributes]
 ----
-wget http://repo.spring.io/{version-type-lowercase}/org/springframework/cloud/spring-cloud-dataflow-server-local/{project-version}/spring-cloud-dataflow-server-local-{project-version}.jar
+wget https://repo.spring.io/{version-type-lowercase}/org/springframework/cloud/spring-cloud-dataflow-server-local/{project-version}/spring-cloud-dataflow-server-local-{project-version}.jar
 
-wget http://repo.spring.io/{version-type-lowercase}/org/springframework/cloud/spring-cloud-dataflow-shell/{project-version}/spring-cloud-dataflow-shell-{project-version}.jar
+wget https://repo.spring.io/{version-type-lowercase}/org/springframework/cloud/spring-cloud-dataflow-shell/{project-version}/spring-cloud-dataflow-shell-{project-version}.jar
 ----
 +
 . Launch the Data Flow Server
@@ -105,8 +105,8 @@ If the Data Flow Server and shell are not running on the same host, point the sh
 +
 [source,bash]
 ----
-server-unknown:>dataflow config server http://dataflow-server.cfapps.io
-Successfully targeted http://dataflow-server.cfapps.io
+server-unknown:>dataflow config server https://dataflow-server.cfapps.io
+Successfully targeted https://dataflow-server.cfapps.io
 dataflow:>
 ----
 +
@@ -114,7 +114,7 @@ By default, the application registry will be empty. If you would like to registe
 +
 [source,bash,subs=attributes]
 ----
-$ dataflow:>app import --uri http://bit.ly/stream-applications-kafka-maven
+$ dataflow:>app import --uri https://bit.ly/stream-applications-kafka-maven
 ----
 +
 . You can now use the shell commands to list available applications (source/processors/sink) and create streams. For example:
@@ -307,7 +307,7 @@ dataflow:> dataflow config server https://localhost:8443/
 
 By default, the REST endpoints (administration, management and health), as well
 as the Dashboard UI do not require authenticated access. However, authentication can
-be provided via http://oauth.net/2/[OAuth 2.0], thus allowing you to also integrate Spring Cloud
+be provided via https://oauth.net/2/[OAuth 2.0], thus allowing you to also integrate Spring Cloud
 Data Flow into Single Sign On (SSO) environments. The following 2 OAuth2 Grant Types will be used:
 
 * _Authorization Code_ - Used for the GUI (Browser) integration. You will be redirected to your OAuth Service for authentication
@@ -394,7 +394,7 @@ dataflow config info
 
 ==== Local OAuth2 Server
 
-With http://projects.spring.io/spring-security-oauth/[Spring Security OAuth] you
+With https://projects.spring.io/spring-security-oauth/[Spring Security OAuth] you
 can easily create your own OAuth2 Server with the following 2 simple annotations:
 
 * @EnableResourceServer

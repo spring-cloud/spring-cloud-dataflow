@@ -115,7 +115,7 @@ In this case the String payload of a message coming on the input channel, is han
 [[arch-streaming-functional-programming]]
 === Functional Programming Model
 
-However, Spring Cloud Stream can support other programming styles.  There is initial support for functional style programming via link:http://docs.spring.io/spring-cloud-stream/docs/1.0.2.RELEASE/reference/htmlsingle/index.html#_rxjava_support[RxJava Observable APIs] and upcoming versions will support callback methods with Project Reactor’s Flux API and Apache Kafka’s KStream API.
+However, Spring Cloud Stream can support other programming styles.  There is initial support for functional style programming via link:https://docs.spring.io/spring-cloud-stream/docs/1.0.2.RELEASE/reference/htmlsingle/index.html#_rxjava_support[RxJava Observable APIs] and upcoming versions will support callback methods with Project Reactor’s Flux API and Apache Kafka’s KStream API.
 
 [[arch-streams]]
 == Streams
@@ -128,7 +128,7 @@ Taps can be used to ‘listen in’ to the data that if flowing across any of th
 
 [[arch-streams-concurrency]]
 === Concurrency
-For an application that will consume events, Spring Cloud stream exposes a concurrency setting that controls the size of a thread pool used for dispatching incoming messages.  See the link:http://docs.spring.io/spring-cloud-stream/docs/1.0.2.RELEASE/reference/htmlsingle/index.html#_consumer_properties[Consumer properties] documentation for more information.
+For an application that will consume events, Spring Cloud stream exposes a concurrency setting that controls the size of a thread pool used for dispatching incoming messages.  See the link:https://docs.spring.io/spring-cloud-stream/docs/1.0.2.RELEASE/reference/htmlsingle/index.html#_consumer_properties[Consumer properties] documentation for more information.
 
 [[arch-streams-partitioning]]
 === Partitioning
@@ -149,7 +149,7 @@ app.http.producer.partitionKeyExpression=payload.sensorId
 ----
 will deploy the stream such that all the input and output destinations are configured for data to flow through the applications but also ensure that a unique set of data is always delivered to each averageprocessor instance.  In this case the default algorithm is to evaluate `payload.sensorId % partitionCount` where the `partitionCount` is the application count in the case of RabbitMQ and the partition count of the topic in the case of Kafka.
 
-Please refer to <<passing_stream_partition_properties>> for additional strategies to partition streams during deployment and how they map onto the underlying link:http://docs.spring.io/spring-cloud-stream/docs/1.0.2.RELEASE/reference/htmlsingle/index.html#_partitioning[Spring Cloud Stream Partitioning properties].
+Please refer to <<passing_stream_partition_properties>> for additional strategies to partition streams during deployment and how they map onto the underlying link:https://docs.spring.io/spring-cloud-stream/docs/1.0.2.RELEASE/reference/htmlsingle/index.html#_partitioning[Spring Cloud Stream Partitioning properties].
 
 Also note, that you can't currently scale partitioned streams.  Read the section <<arch-runtime-scaling>> for more information.
 
@@ -160,7 +160,7 @@ For consumer applications, there is a retry policy for exceptions generated duri
 
 If there is still an exception on the last retry attempt, and dead letter queues are enabled, the message and exception message are published to the dead letter queue.  The dead letter queue is a destination and its nature depends on the messaging middleware (e.g in the case of Kafka it is a dedicated topic).  If dead letter functionality is not enabled, the message and exception is sent to the error channel, which by default logs the message and exception.
 
-Additional messaging delivery guarantees are those provided by the underlying messaging middleware that is chosen for the application for both producing and consuming applications.  Refer to the Kafka link:http://docs.spring.io/spring-cloud-stream/docs/1.0.2.RELEASE/reference/htmlsingle/index.html#_kafka_consumer_properties[Consumer] and link:http://docs.spring.io/spring-cloud-stream/docs/1.0.2.RELEASE/reference/htmlsingle/index.html#_kafka_producer_properties[Producer] and Rabbit link:http://docs.spring.io/spring-cloud-stream/docs/1.0.3.BUILD-SNAPSHOT/reference/htmlsingle/index.html#_rabbitmq_consumer_properties[Consumer] and link:http://docs.spring.io/spring-cloud-stream/docs/1.0.3.BUILD-SNAPSHOT/reference/htmlsingle/index.html#_rabbit_producer_properties[Producer] documentation for more details.  You will find there to be extensive declarative support for all the native QOS options.
+Additional messaging delivery guarantees are those provided by the underlying messaging middleware that is chosen for the application for both producing and consuming applications.  Refer to the Kafka link:https://docs.spring.io/spring-cloud-stream/docs/1.0.2.RELEASE/reference/htmlsingle/index.html#_kafka_consumer_properties[Consumer] and link:https://docs.spring.io/spring-cloud-stream/docs/1.0.2.RELEASE/reference/htmlsingle/index.html#_kafka_producer_properties[Producer] and Rabbit link:https://docs.spring.io/spring-cloud-stream/docs/1.0.3.BUILD-SNAPSHOT/reference/htmlsingle/index.html#_rabbitmq_consumer_properties[Consumer] and link:https://docs.spring.io/spring-cloud-stream/docs/1.0.3.BUILD-SNAPSHOT/reference/htmlsingle/index.html#_rabbit_producer_properties[Producer] documentation for more details.  You will find there to be extensive declarative support for all the native QOS options.
 
 [[arch-analytics]]
 == Analytics
