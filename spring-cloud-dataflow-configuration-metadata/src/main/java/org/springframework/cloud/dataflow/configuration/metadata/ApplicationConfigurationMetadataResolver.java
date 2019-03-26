@@ -49,7 +49,7 @@ public abstract class ApplicationConfigurationMetadataResolver {
 
 	/**
 	 * Return metadata about configuration properties that are documented via <a href=
-	 * "http://docs.spring.io/spring-boot/docs/current/reference/html/configuration-metadata.html">
+	 * "https://docs.spring.io/spring-boot/docs/current/reference/html/configuration-metadata.html">
 	 * Spring Boot configuration metadata</a> and visible in an app.
 	 *
 	 * @param metadataResource the metadata file that contains app specific configuration
