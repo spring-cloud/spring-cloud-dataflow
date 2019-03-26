@@ -36,8 +36,8 @@ services:
         do
           sleep 1;
         done;
-        wget -qO- 'http://dataflow-server:9393/apps' --post-data='uri=http://bit.ly/Celsius-SR3-stream-applications-kafka-10-maven&force=true';
+        wget -qO- 'http://dataflow-server:9393/apps' --post-data='uri=https://bit.ly/Celsius-SR3-stream-applications-kafka-10-maven&force=true';
         echo 'Stream apps imported'
-        wget -qO- 'http://dataflow-server:9393/apps' --post-data='uri=http://bit.ly/Clark-GA-task-applications-maven&force=true';
+        wget -qO- 'http://dataflow-server:9393/apps' --post-data='uri=https://bit.ly/Clark-GA-task-applications-maven&force=true';
         echo 'Task apps imported'"
 
