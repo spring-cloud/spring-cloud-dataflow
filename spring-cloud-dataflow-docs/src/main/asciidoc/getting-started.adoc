@@ -20,7 +20,7 @@ By default, the Data Flow server uses embedded H2 database for this purpose but 
 
 You also need to have link:https://redis.io[Redis] running if you are running any streams that involve analytics applications. Redis may also be required to run the unit/integration tests.
 
-For the deployed streams applications communicate, either link:http://www.rabbitmq.com[RabbitMQ] or link:http://kafka.apache.org[Kafka] needs to be installed.
+For the deployed streams applications communicate, either link:https://www.rabbitmq.com[RabbitMQ] or link:https://kafka.apache.org[Kafka] needs to be installed.
 
 If you would like to have the feature of upgrading and rolling back applications in Streams at runtime, you should install the Spring Cloud Skipper server.
 
@@ -191,7 +191,7 @@ With:
       - rabbitmq
 ----
 +
-And finally, modify the `app-import` service definition `command` attribute to replace `http://bit.ly/Celsius-SR1-stream-applications-kafka-10-maven` with `http://bit.ly/Celsius-SR1-stream-applications-rabbit-maven`.
+And finally, modify the `app-import` service definition `command` attribute to replace `https://bit.ly/Celsius-SR1-stream-applications-kafka-10-maven` with `https://bit.ly/Celsius-SR1-stream-applications-rabbit-maven`.
 
 
 . To enable analytics using redis as a backend, add the following configuration under the `services` section:
@@ -238,7 +238,7 @@ The `classic` mode is how the Data Flow Server worked in the 1.2.x releases.
 The mode is specified when starting the Data Flow server using the property `spring.cloud.dataflow.features.skipper-enabled`.
 By default, the `classic` mode is enabled.
 +
-. Download http://cloud.spring.io/spring-cloud-skipper/[Skipper] if you would like the added features of upgrading and rolling back applications inside Streams, since Data Flow delegates to Skipper for those features.
+. Download https://cloud.spring.io/spring-cloud-skipper/[Skipper] if you would like the added features of upgrading and rolling back applications inside Streams, since Data Flow delegates to Skipper for those features.
 +
 [source,yaml,options=nowrap,subs=attributes]
 ----
@@ -278,7 +278,7 @@ If Skipper and the Data Flow server are not running on the same host, set the co
 +
 [source,bash,subs=attributes]
 ----
-$ java -jar spring-cloud-dataflow-server-local-{project-version}.jar --spring.cloud.skipper.client.serverUri=http://192.51.100.1:7577/api
+$ java -jar spring-cloud-dataflow-server-local-{project-version}.jar --spring.cloud.skipper.client.serverUri=https://192.51.100.1:7577/api
 ----
 +
 . Launch the Data Flow Shell, as follows:
@@ -306,8 +306,8 @@ If the Data Flow Server and shell are not running on the same host, point the sh
 +
 [source,bash]
 ----
-server-unknown:>dataflow config server http://198.51.100.0
-Successfully targeted http://198.51.100.0
+server-unknown:>dataflow config server https://198.51.100.0
+Successfully targeted https://198.51.100.0
 dataflow:>
 ----
 +

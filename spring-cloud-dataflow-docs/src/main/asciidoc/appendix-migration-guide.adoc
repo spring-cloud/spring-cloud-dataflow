@@ -37,8 +37,8 @@ As you convert custom applications, keep the following information in mind:
 * Spring XD's stream and batch modules are refactored into the link:https://github.com/spring-cloud-stream-app-starters[Spring Cloud Stream] and link:https://github.com/spring-cloud-task-app-starters[Spring Cloud Task] application-starters, respectively.
 These applications can be used as the reference while refactoring Spring XD modules.
 * There are also some samples for link:https://github.com/spring-cloud/spring-cloud-stream-samples[Spring Cloud Stream] and link:https://github.com/spring-cloud/spring-cloud-task/tree/master/spring-cloud-task-samples[Spring Cloud Task] applications for reference.
-* If you want to create a brand new custom application, use the getting started guide for link:http://docs.spring.io/spring-cloud-stream/docs/current/reference/htmlsingle/#_getting_started[Spring Cloud Stream] and link:http://docs.spring.io/spring-cloud-task/docs/current/reference/htmlsingle/#getting-started[Spring Cloud Task] applications and as well as  review the link:http://docs.spring.io/spring-cloud-stream-app-starters/docs/current/reference/htmlsingle/#_creating_your_own_applications[develeopment guide].
-* Alternatively, if you want to patch any of the out-of-the-box stream applications, you can follow the procedure link:http://docs.spring.io/spring-cloud-stream-app-starters/docs/current/reference/htmlsingle/#_patching_pre_built_applications[described here].
+* If you want to create a brand new custom application, use the getting started guide for link:https://docs.spring.io/spring-cloud-stream/docs/current/reference/htmlsingle/#_getting_started[Spring Cloud Stream] and link:https://docs.spring.io/spring-cloud-task/docs/current/reference/htmlsingle/#getting-started[Spring Cloud Task] applications and as well as  review the link:https://docs.spring.io/spring-cloud-stream-app-starters/docs/current/reference/htmlsingle/#_creating_your_own_applications[develeopment guide].
+* Alternatively, if you want to patch any of the out-of-the-box stream applications, you can follow the procedure link:https://docs.spring.io/spring-cloud-stream-app-starters/docs/current/reference/htmlsingle/#_patching_pre_built_applications[described here].
 
 
 
@@ -51,7 +51,7 @@ As you register your applications, keep the following information in mind:
 Instead, you need to <<spring-cloud-dataflow-register-stream-apps, register>> the application coordinates that are hosted in the Maven repository or by other means as discussed in the previous bullet.
 * By default, none of the out-of-the-box applications are preloaded. It is intentionally designed to provide the flexibility to register apps as you find appropriate for the given use-case requirement.
 * Depending on the binder choice, you can manually add the appropriate binder dependency to build applications specific to that binder-type.
-Alternatively, you can follow the http://start.spring.io[Spring Initializr] link:https://github.com/spring-cloud/spring-cloud-stream-app-starters/blob/master/spring-cloud-stream-app-starters-docs/src/main/asciidoc/overview.adoc#using-the-starters-to-create-custom-components[procedure] to create an application with binder embedded in it.
+Alternatively, you can follow the https://start.spring.io[Spring Initializr] link:https://github.com/spring-cloud/spring-cloud-stream-app-starters/blob/master/spring-cloud-stream-app-starters-docs/src/main/asciidoc/overview.adoc#using-the-starters-to-create-custom-components[procedure] to create an application with binder embedded in it.
 
 
 
@@ -100,9 +100,9 @@ If you to create a custom application with Kafka binder, you need add the follow
 * Spring Cloud Stream supports link:https://github.com/spring-cloud/spring-cloud-stream-binder-kafka[Apache Kafka] and  link:https://github.com/spring-cloud/spring-cloud-stream-binder-rabbit[RabbitMQ].
 All binder implementations are maintained and managed in their individual repositories.
 * Every Stream/Task application can be built with the binder implementation of your choice.
-All the out-of-the-box applications are pre-built for both Kafka and Rabbit and are readily available for use as Maven artifacts (link:http://repo.spring.io/libs-milestone/org/springframework/cloud/stream/app/[Spring Cloud Stream] or link:http://repo.spring.io/libs-milestone/org/springframework/cloud/task/app/[Spring Cloud Task]) or as Docker images (link:https://hub.docker.com/r/springcloudstream/[Spring Cloud Stream] or link:https://hub.docker.com/r/springcloudtask/[Spring Cloud Task]).
-Changing the binder requires selecting the right binder link:http://docs.spring.io/spring-cloud-stream/docs/current/reference/htmlsingle/#_binders[dependency].
-Alternatively, you can download the pre-built application from this version of link:http://start-scs.cfapps.io/[Spring Initializr] with the desired “binder-starter” dependency.
+All the out-of-the-box applications are pre-built for both Kafka and Rabbit and are readily available for use as Maven artifacts (link:https://repo.spring.io/libs-milestone/org/springframework/cloud/stream/app/[Spring Cloud Stream] or link:https://repo.spring.io/libs-milestone/org/springframework/cloud/task/app/[Spring Cloud Task]) or as Docker images (link:https://hub.docker.com/r/springcloudstream/[Spring Cloud Stream] or link:https://hub.docker.com/r/springcloudtask/[Spring Cloud Task]).
+Changing the binder requires selecting the right binder link:https://docs.spring.io/spring-cloud-stream/docs/current/reference/htmlsingle/#_binders[dependency].
+Alternatively, you can download the pre-built application from this version of link:https://start-scs.cfapps.io/[Spring Initializr] with the desired “binder-starter” dependency.
 
 
 
@@ -148,9 +148,9 @@ stream create r --definition "http | router --expression=payload.contains('a')?'
 A Task, by definition, is any application that does not run forever, and they end at some point.
 Tasks include Spring Batch jobs.
 Task applications can be used for on-demand use cases, such as database migration, machine learning, scheduled operations, and others.
-With link:http://cloud.spring.io/spring-cloud-task/[Spring Cloud Task], you can build Spring Batch jobs as microservice applications.
+With link:https://cloud.spring.io/spring-cloud-task/[Spring Cloud Task], you can build Spring Batch jobs as microservice applications.
 
-* Spring Batch link:http://docs.spring.io/spring-xd/docs/current-SNAPSHOT/reference/html/#jobs[jobs] from Spring XD are being refactored to Spring Boot applications, also known as Spring Cloud Task link:https://github.com/spring-cloud-task-app-starters[applications].
+* Spring Batch link:https://docs.spring.io/spring-xd/docs/current-SNAPSHOT/reference/html/#jobs[jobs] from Spring XD are being refactored to Spring Boot applications, also known as Spring Cloud Task link:https://github.com/spring-cloud-task-app-starters[applications].
 * Unlike Spring XD, these tasks do not require explicit deployment. Instead, a task is ready to be launched directly once the definition is declared.
 
 
@@ -257,7 +257,7 @@ To support centralized and consistent management of an application’s configura
 
 === Distribution
 
-Spring Cloud Data Flow is a Spring Boot application. Depending on the platform of your choice, you can download the respective release uber jar and deploy or push it to the runtime platform (Cloud Foundry, Apache Yarn, Kubernetes, or Apache Mesos). For example, if you run Spring Cloud Data Flow on Cloud Foundry, you can download the Cloud Foundry server implementation and do a `cf push`, as explained in the link:http://docs.spring.io/spring-cloud-dataflow-server-cloudfoundry/docs/current-SNAPSHOT/reference/htmlsingle/#getting-started[Cloud Foundry Reference Guide].
+Spring Cloud Data Flow is a Spring Boot application. Depending on the platform of your choice, you can download the respective release uber jar and deploy or push it to the runtime platform (Cloud Foundry, Apache Yarn, Kubernetes, or Apache Mesos). For example, if you run Spring Cloud Data Flow on Cloud Foundry, you can download the Cloud Foundry server implementation and do a `cf push`, as explained in the link:https://docs.spring.io/spring-cloud-dataflow-server-cloudfoundry/docs/current-SNAPSHOT/reference/htmlsingle/#getting-started[Cloud Foundry Reference Guide].
 
 
 
@@ -279,8 +279,8 @@ with the following Hadoop distributions:
 
 Spring Cloud Data Flow can be deployed and used with Apche YARN in two different ways:
 
-* Deploy the server link:http://docs.spring.io/spring-cloud-dataflow-server-yarn/docs/current-SNAPSHOT/reference/htmlsingle/#yarn-deploying-on-yarn[directly] in a YARN cluster.
-* Use the Apache Ambari link:http://docs.spring.io/spring-cloud-dataflow-server-yarn/docs/current-SNAPSHOT/reference/htmlsingle/#yarn-deploying-on-ambari[plugin] to provision Spring Cloud Data Flow as a service.
+* Deploy the server link:https://docs.spring.io/spring-cloud-dataflow-server-yarn/docs/current-SNAPSHOT/reference/htmlsingle/#yarn-deploying-on-yarn[directly] in a YARN cluster.
+* Use the Apache Ambari link:https://docs.spring.io/spring-cloud-dataflow-server-yarn/docs/current-SNAPSHOT/reference/htmlsingle/#yarn-deploying-on-ambari[plugin] to provision Spring Cloud Data Flow as a service.
 
 
 
