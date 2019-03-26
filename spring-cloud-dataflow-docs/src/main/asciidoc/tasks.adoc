@@ -3,7 +3,7 @@
 
 [partintro]
 --
-This section goes into more detail about how you can work with http://cloud.spring.io/spring-cloud-task/[Spring Cloud Task].
+This section goes into more detail about how you can work with https://cloud.spring.io/spring-cloud-task/[Spring Cloud Task].
 It covers topics such as creating and running task applications.
 
 If you are just starting out with Spring Cloud Data Flow, you should probably read the "`<<getting-started.adoc#getting-started, Getting Started>>`" guide before diving into this section.
@@ -13,11 +13,11 @@ If you are just starting out with Spring Cloud Data Flow, you should probably re
 == Introduction
 
 A task executes a process on demand.
-In the case of Spring Cloud Task, a task is a http://projects.spring.io/spring-boot/[Spring Boot] application that is annotated with `@EnableTask`.
+In the case of Spring Cloud Task, a task is a https://projects.spring.io/spring-boot/[Spring Boot] application that is annotated with `@EnableTask`.
 A user launches a task that performs a certain process, and, once complete, the task ends.  Unlike a stream where a stream definition can have at most one deployment a single task definition can be launched multiple times simultaneously.
 An example of a task would be a Spring Boot application that exports data from a JDBC repository to an HDFS instance.
 Tasks record the start time and the end time as well as the boot exit code in a relational database.
-The task implementation is based on the http://cloud.spring.io/spring-cloud-task/[Spring Cloud Task] project.
+The task implementation is based on the https://cloud.spring.io/spring-cloud-task/[Spring Cloud Task] project.
 
 === Application properties
 
@@ -56,7 +56,7 @@ Before we dive deeper into the details of creating Tasks, we need to understand 
 While Spring Cloud Task does provide a number of out-of-the-box applications (at https://github.com/spring-cloud-task-app-starters[spring-cloud-task-app-starters]), most task applications require custom development.
   To create a custom task application:
 
-.  Use the http://start.spring.io[Spring Initializer] to create a new project, making sure to select the following starters:
+.  Use the https://start.spring.io[Spring Initializer] to create a new project, making sure to select the following starters:
 .. `Cloud Task`: This dependency is the `spring-cloud-starter-task`.
 .. `JDBC`: This dependency is the `spring-jdbc` starter.
 . Within your new project, create a new class to serve as your main class, as follows:
@@ -102,7 +102,7 @@ dataflow:>app register --name task1 --type task --uri maven://com.example:mytask
 
 dataflow:>app register --name task2 --type task --uri file:///Users/example/mytask-1.0.2.jar
 
-dataflow:>app register --name task3 --type task --uri http://example.com/mytask-1.0.2.jar
+dataflow:>app register --name task3 --type task --uri https://example.com/mytask-1.0.2.jar
 ----
 
 When providing a URI with the `maven` scheme, the format should conform to the following:
@@ -131,13 +131,13 @@ The following table lists the available static property files:
 [width="100%",frame="topbot",options="header"]
 |======================
 |Artifact Type |Stable Release |SNAPSHOT Release
-|Maven   | http://bit.ly/Clark-GA-task-applications-maven | http://bit.ly/Clark-BUILD-SNAPSHOT-task-applications-maven
-|Docker  | http://bit.ly/Clark-GA-task-applications-docker | http://bit.ly/Clark-BUILD-SNAPSHOT-task-applications-docker
+|Maven   | https://bit.ly/Clark-GA-task-applications-maven | https://bit.ly/Clark-BUILD-SNAPSHOT-task-applications-maven
+|Docker  | https://bit.ly/Clark-GA-task-applications-docker | https://bit.ly/Clark-BUILD-SNAPSHOT-task-applications-docker
 |======================
 
 For example, if you would like to register all out-of-the-box task applications in bulk, you can do so with the following command:
 
-`dataflow:>app import --uri http://bit.ly/Clark-GA-task-applications-maven`
+`dataflow:>app import --uri https://bit.ly/Clark-GA-task-applications-maven`
 
 You can also pass the `--local` option (which is `TRUE` by default) to indicate whether the properties file location should be resolved within the shell process itself.
 If the location should be resolved from the Data Flow Server process, specify `--local false`.
@@ -674,7 +674,7 @@ The https://github.com/spring-cloud-stream-app-starters/tasklauncher-local/blob/
 `app register --name task-launcher-local --type sink --uri maven://org.springframework.cloud.stream.app:task-launcher-local-sink-rabbit:jar:1.2.0.RELEASE`
 
 In the case of a Maven-based task that is to be launched, the `task-launcher` application is responsible for downloading the artifact.
-You *must* configure the `task-launcher` with the appropriate configuration of https://github.com/spring-cloud/spring-cloud-deployer/blob/master/spring-cloud-deployer-resource-maven/src/main/java/org/springframework/cloud/deployer/resource/maven/MavenProperties.java[Maven Properties], such as `--maven.remote-repositories.repo1.url=http://repo.spring.io/libs-milestone"` to resolve artifacts (in this case against a milestone repo).  Note that this repostory can be different than the one used to register the `task-launcher` application itself.
+You *must* configure the `task-launcher` with the appropriate configuration of https://github.com/spring-cloud/spring-cloud-deployer/blob/master/spring-cloud-deployer-resource-maven/src/main/java/org/springframework/cloud/deployer/resource/maven/MavenProperties.java[Maven Properties], such as `--maven.remote-repositories.repo1.url=https://repo.spring.io/libs-milestone"` to resolve artifacts (in this case against a milestone repo).  Note that this repostory can be different than the one used to register the `task-launcher` application itself.
 
 
 
@@ -689,7 +689,7 @@ The `triggertask` can be added to the available sources by running the app regis
 For example, to launch the timestamp task once every 60 seconds, the stream implementation would be as follows:
 
 [source]
-stream create foo --definition "triggertask --triggertask.uri=maven://org.springframework.cloud.task.app:timestamp-task:jar:1.2.0.RELEASE --trigger.fixed-delay=60 --triggertask.environment-properties=spring.datasource.url=jdbc:h2:tcp://localhost:19092/mem:dataflow,spring.datasource.username=sa | task-launcher-local --maven.remote-repositories.repo1.url=http://repo.spring.io/libs-release" --deploy
+stream create foo --definition "triggertask --triggertask.uri=maven://org.springframework.cloud.task.app:timestamp-task:jar:1.2.0.RELEASE --trigger.fixed-delay=60 --triggertask.environment-properties=spring.datasource.url=jdbc:h2:tcp://localhost:19092/mem:dataflow,spring.datasource.username=sa | task-launcher-local --maven.remote-repositories.repo1.url=https://repo.spring.io/libs-release" --deploy
 
 If you run `runtime apps`, you can find the log file for the task launcher sink.
 By using the `tail` command on that file, you can find the log file for the launched tasks.
@@ -722,7 +722,7 @@ The `tasklaunchrequest-transform` can be added to the available processors by ex
 
 The following example shows the creation of a task that includes the `tasklaunchrequest-transform`:
 
-`stream create task-stream --definition "http --port=9000 | tasklaunchrequest-transform --uri=maven://org.springframework.cloud.task.app:timestamp-task:jar:1.2.0.RELEASE | task-launcher-local --maven.remote-repositories.repo1.url=http://repo.spring.io/libs-release"`
+`stream create task-stream --definition "http --port=9000 | tasklaunchrequest-transform --uri=maven://org.springframework.cloud.task.app:timestamp-task:jar:1.2.0.RELEASE | task-launcher-local --maven.remote-repositories.repo1.url=https://repo.spring.io/libs-release"`
 
 
 
@@ -761,7 +761,7 @@ For now, we focus on the configuration that is required to launch the `ComposedT
 * *graph*: this is the graph that is to be executed by the `ComposedTaskRunner`.
 In this case it is `AAA&&BBB`.
 * *increment-instance-enabled*: This lets each execution of `ComposedTaskRunner` be unique.
-`ComposedTaskRunner` is built by using http://projects.spring.io/spring-batch/[Spring Batch].
+`ComposedTaskRunner` is built by using https://projects.spring.io/spring-batch/[Spring Batch].
 Thus, we want a new Job Instance for each launch of the `ComposedTaskRunner`.
 To do this, we set `increment-instance-enabled` to be `true`.
 * *spring.datasource.**: The datasource that is used by Spring Cloud

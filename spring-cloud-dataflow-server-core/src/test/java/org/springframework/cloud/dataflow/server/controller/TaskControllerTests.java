@@ -136,7 +136,7 @@ public class TaskControllerTests {
 	@Test
 	public void testSave() throws Exception {
 		assertEquals(0, repository.count());
-		appRegistry.save("task", ApplicationType.task, new URI("http://fake.example.com/"), null);
+		appRegistry.save("task", ApplicationType.task, new URI("https://fake.example.com/"), null);
 		mockMvc.perform(post("/tasks/definitions/").param("name", "myTask").param("definition", "task")
 				.accept(MediaType.APPLICATION_JSON)).andDo(print()).andExpect(status().isOk());
 
@@ -280,6 +280,6 @@ public class TaskControllerTests {
 	private void createTaskDefinition(String taskName) throws URISyntaxException {
 		String taskAppName = "faketask" + taskName;
 		repository.save(new TaskDefinition(taskName, taskAppName));
-		appRegistry.save(taskAppName, ApplicationType.task, new URI("http://fake.example.com/"), null);
+		appRegistry.save(taskAppName, ApplicationType.task, new URI("https://fake.example.com/"), null);
 	}
 }

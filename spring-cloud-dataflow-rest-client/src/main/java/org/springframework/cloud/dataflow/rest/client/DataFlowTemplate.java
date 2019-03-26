@@ -136,7 +136,7 @@ public class DataFlowTemplate implements DataFlowOperations {
 	 * </ul>
 	 * <p>
 	 * For more information see <a href=
-	 * "http://docs.oracle.com/javase/7/docs/technotes/guides/net/properties.html">this
+	 * "https://docs.oracle.com/javase/7/docs/technotes/guides/net/properties.html">this
 	 * link</a>
 	 *
 	 * @param baseURI Must not be null
@@ -167,7 +167,7 @@ public class DataFlowTemplate implements DataFlowOperations {
 				throw new IllegalStateException("Incompatible version of Data Flow server detected.\n"
 						+ "Follow instructions in the documentation for the version of the server you are "
 						+ "using to download a compatible version of the shell.\n"
-						+ "Documentation can be accessed at http://cloud.spring.io/spring-cloud-dataflow/");
+						+ "Documentation can be accessed at https://cloud.spring.io/spring-cloud-dataflow/");
 			}
 			String serverRevision = resourceSupport.getApiRevision().toString();
 			if (!String.valueOf(Version.REVISION).equals(serverRevision)) {

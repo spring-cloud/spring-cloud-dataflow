@@ -7,16 +7,16 @@ It also shows how to map these applications into Spring Cloud Data Flow and depl
 [[task-dev-guide-prebuilt-apps]]
 == Prebuilt Applications
 
-The link:http://cloud.spring.io/spring-cloud-task-app-starters/[Spring Cloud Task App Starters] project provides many applications that you can start using right away.
+The link:https://cloud.spring.io/spring-cloud-task-app-starters/[Spring Cloud Task App Starters] project provides many applications that you can start using right away.
 For example, there is a timestamp application that prints the timestamp to the console.
 All the applications are based on link:https://projects.spring.io/spring-boot/[Spring Boot] and link:https://cloud.spring.io/spring-cloud-task/[Spring Cloud Task].
 
 Applications are published as Maven artifacts as well as Docker images.
-For GA releases, the Maven artifacts are published to Maven central and the link:http://repo.spring.io/release[Spring Release Repository].
-Milestone and snapshot releases are published to the link:http://repo.spring.io/milestone[Spring Milestone] and link:http://repo.spring.io/snapshot[Spring Snapshot] repositories, respectively.
+For GA releases, the Maven artifacts are published to Maven central and the link:https://repo.spring.io/release[Spring Release Repository].
+Milestone and snapshot releases are published to the link:https://repo.spring.io/milestone[Spring Milestone] and link:https://repo.spring.io/snapshot[Spring Snapshot] repositories, respectively.
 Docker images are pushed to link:https://hub.docker.com/u/springcloudtask/[Docker Hub]
 
-The root location of the Spring Repository that hosts the GA artifacts of prebuilt applications is http://repo.spring.io/release/org/springframework/cloud/task/app/
+The root location of the Spring Repository that hosts the GA artifacts of prebuilt applications is https://repo.spring.io/release/org/springframework/cloud/task/app/
 
 [[task-dev-guide-running-prebuilt-apps]]
 == Running Prebuilt Applications
@@ -28,7 +28,7 @@ To get started, download the sample application, as follows:
 [source,bash]
 wget https://repo.spring.io/libs-release/org/springframework/cloud/task/app/timestamp-task/1.3.0.RELEASE/timestamp-task-1.3.0.RELEASE.jar
 
-That file contains a Spring Boot applications that includes the link:http://docs.spring.io/spring-boot/docs/current/reference/html/production-ready.html[Spring Boot Actuator] and the link:http://docs.spring.io/spring-boot/docs/current/reference/html/boot-features-security.html[Spring Security Starter].
+That file contains a Spring Boot applications that includes the link:https://docs.spring.io/spring-boot/docs/current/reference/html/production-ready.html[Spring Boot Actuator] and the link:https://docs.spring.io/spring-boot/docs/current/reference/html/boot-features-security.html[Spring Security Starter].
 You can specify link:https://docs.spring.io/spring-boot/docs/current/reference/html/common-application-properties.html[common Spring Boot properties] to configure each application.
 
 Now you can run the timestamp application, as follows:
