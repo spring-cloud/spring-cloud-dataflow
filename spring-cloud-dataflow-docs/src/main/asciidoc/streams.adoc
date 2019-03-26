@@ -4,7 +4,7 @@
 [partintro]
 --
 This section goes into more detail about how you can create Streams, which are collections of
-http://cloud.spring.io/spring-cloud-stream/[Spring Cloud Stream] applications. It covers topics such as
+https://cloud.spring.io/spring-cloud-stream/[Spring Cloud Stream] applications. It covers topics such as
 creating and deploying Streams.
 
 If you are just starting out with Spring Cloud Data Flow, you should probably read the
@@ -14,7 +14,7 @@ this section.
 
 [[spring-cloud-dataflow-stream-intro]]
 == Introduction
-A Stream is are a collection of long-lived http://cloud.spring.io/spring-cloud-stream/[Spring Cloud Stream] applications that communicate with each other over messaging middleware.
+A Stream is are a collection of long-lived https://cloud.spring.io/spring-cloud-stream/[Spring Cloud Stream] applications that communicate with each other over messaging middleware.
 A text-based DSL defines the configuration and data flow between the applications.  While many applications are provided for you to implement common use-cases, you typically create a custom Spring Cloud Stream application to implement custom business logic.
 
 The general lifecycle of a Stream is:
@@ -30,12 +30,12 @@ If you use Skipper, you can upgrade or rollback applications in the Stream.
 There are two options for deploying streams:
 
 * Use a Data Flow Server implementation that deploys to a single platform.
-* Configure the Data Flow Server to delegate the deployment to a new server in the Spring Cloud ecosystem named http://cloud.spring.io/spring-cloud-skipper/[Skipper].
+* Configure the Data Flow Server to delegate the deployment to a new server in the Spring Cloud ecosystem named https://cloud.spring.io/spring-cloud-skipper/[Skipper].
 
 
 When using the first option, you can use the Local Data Flow Server to deploy streams to your local machine, the Data Flow Server for Cloud Foundry to deploy streams to a single org and space on Cloud Foundry.
 Similarly, you can use Data Flow Server for Kuberenetes to deploy a stream to a single namespace on a Kubernetes cluster.
-See http://cloud.spring.io/spring-cloud-dataflow/#platform-implementations[the Spring Cloud Data Flow project page] for a list of Data Flow server implementations.
+See https://cloud.spring.io/spring-cloud-dataflow/#platform-implementations[the Spring Cloud Data Flow project page] for a list of Data Flow server implementations.
 
 When using the second option, you can configure Skipper to deploy applications to one or more Cloud Foundry orgs and spaces, one or more namespaces on a Kubernetes cluster, or to the local machine.
 When deploying a stream in Data Flow using Skipper, you can specify which platform to use at deployment time.
@@ -53,7 +53,7 @@ The output of `grep` in turn is sent to the input of the `less` process.
 Each `|` symbol connects the standard output of the command on the left to the standard input of the command on the right.
 Data flows through the pipeline from left to right.
 
-In Data Flow, the Unix command is replaced by a http://cloud.spring.io/spring-cloud-stream/[Spring Cloud Stream] application and each pipe symbol represents connecting the input and output of applications over messaging middleware, such as RabbitMQ or Apache Kafka.
+In Data Flow, the Unix command is replaced by a https://cloud.spring.io/spring-cloud-stream/[Spring Cloud Stream] application and each pipe symbol represents connecting the input and output of applications over messaging middleware, such as RabbitMQ or Apache Kafka.
 
 Each Spring Cloud Stream application is registered under a simple name.
 The registration process specifies where the application can be obtained (for example, in a Maven Repository or a Docker registry).  You can find out more information on how to register Spring Cloud Stream applications in this <<spring-cloud-dataflow-register-stream-apps,section>>.
@@ -124,7 +124,7 @@ dataflow:>app register --name mysource --type source --uri maven://com.example:m
 
 dataflow:>app register --name myprocessor --type processor --uri file:///Users/example/myprocessor-1.2.3.jar
 
-dataflow:>app register --name mysink --type sink --uri http://example.com/mysink-2.0.1.jar
+dataflow:>app register --name mysink --type sink --uri https://example.com/mysink-2.0.1.jar
 ```
 
 When providing a URI with the `maven` scheme, the format should conform to the following:
@@ -171,20 +171,20 @@ The following table lists the bit.ly links to the available Stream Application S
 |Artifact Type |Stable Release |SNAPSHOT Release
 
 |RabbitMQ + Maven
-|http://bit.ly/Celsius-SR3-stream-applications-rabbit-maven
-|http://bit.ly/Celsius-BUILD-SNAPSHOT-stream-applications-rabbit-maven
+|https://bit.ly/Celsius-SR3-stream-applications-rabbit-maven
+|https://bit.ly/Celsius-BUILD-SNAPSHOT-stream-applications-rabbit-maven
 
 |RabbitMQ + Docker
-|http://bit.ly/Celsius-SR3-stream-applications-rabbit-docker
-|http://bit.ly/Celsius-BUILD-SNAPSHOT-stream-applications-rabbit-docker
+|https://bit.ly/Celsius-SR3-stream-applications-rabbit-docker
+|https://bit.ly/Celsius-BUILD-SNAPSHOT-stream-applications-rabbit-docker
 
 |Kafka 0.10 + Maven
-|http://bit.ly/Celsius-SR3-stream-applications-kafka-10-maven
-|http://bit.ly/Celsius-BUILD-SNAPSHOT-stream-applications-kafka-10-maven
+|https://bit.ly/Celsius-SR3-stream-applications-kafka-10-maven
+|https://bit.ly/Celsius-BUILD-SNAPSHOT-stream-applications-kafka-10-maven
 
 |Kafka 0.10 + Docker
-|http://bit.ly/Celsius-SR3-stream-applications-kafka-10-docker
-|http://bit.ly/Celsius-BUILD-SNAPSHOT-stream-applications-kafka-10-docker
+|https://bit.ly/Celsius-SR3-stream-applications-kafka-10-docker
+|https://bit.ly/Celsius-BUILD-SNAPSHOT-stream-applications-kafka-10-docker
 |======================
 
 The following table lists the bit.ly links to the available Stream Application Starters based on Spring Boot 2.0.x:
@@ -198,20 +198,20 @@ NOTE: App Starter actuator endpoints are secured by default.  You can disable se
 |Artifact Type |Stable Release |SNAPSHOT Release
 
 |RabbitMQ + Maven
-|http://bit.ly/Darwin-GA-stream-applications-rabbit-maven
-|http://bit.ly/Darwin-BUILD-SNAPSHOT-stream-applications-rabbit-maven
+|https://bit.ly/Darwin-GA-stream-applications-rabbit-maven
+|https://bit.ly/Darwin-BUILD-SNAPSHOT-stream-applications-rabbit-maven
 
 |RabbitMQ + Docker
-|http://bit.ly/Darwin-GA-stream-applications-rabbit-docker
-|http://bit.ly/Darwin-BUILD-SNAPSHOT-stream-applications-rabbit-docker
+|https://bit.ly/Darwin-GA-stream-applications-rabbit-docker
+|https://bit.ly/Darwin-BUILD-SNAPSHOT-stream-applications-rabbit-docker
 
 |Kafka 0.11 and above + Maven
-|http://bit.ly/Darwin-GA-stream-applications-kafka-10-maven
-|http://bit.ly/Darwin-BUILD-SNAPSHOT-stream-applications-kafka-10-maven
+|https://bit.ly/Darwin-GA-stream-applications-kafka-10-maven
+|https://bit.ly/Darwin-BUILD-SNAPSHOT-stream-applications-kafka-10-maven
 
 |Kafka 0.11 and above + Docker
-|http://bit.ly/Darwin-GA-stream-applications-kafka-10-docker
-|http://bit.ly/Darwin-BUILD-SNAPSHOT-stream-applications-kafka-10-docker
+|https://bit.ly/Darwin-GA-stream-applications-kafka-10-docker
+|https://bit.ly/Darwin-BUILD-SNAPSHOT-stream-applications-kafka-10-docker
 |======================
 
 The following table lists the available Task Application Starters:
@@ -221,30 +221,30 @@ The following table lists the available Task Application Starters:
 |Artifact Type |Stable Release |SNAPSHOT Release
 
 |Maven
-|http://bit.ly/Clark-GA-task-applications-maven
-|http://bit.ly/Clark-BUILD-SNAPSHOT-task-applications-maven
+|https://bit.ly/Clark-GA-task-applications-maven
+|https://bit.ly/Clark-BUILD-SNAPSHOT-task-applications-maven
 
 |Docker
-|http://bit.ly/Clark-GA-task-applications-docker
-|http://bit.ly/Clark-BUILD-SNAPSHOT-task-applications-docker
+|https://bit.ly/Clark-GA-task-applications-docker
+|https://bit.ly/Clark-BUILD-SNAPSHOT-task-applications-docker
 |======================
 
-You can find more information about the available task starters in the http://cloud.spring.io/spring-cloud-task-app-starters/[Task App Starters Project Page] and
-related reference documentation.  For more information about the available stream starters, look at the http://cloud.spring.io/spring-cloud-stream-app-starters/[Stream App Starters Project Page]
+You can find more information about the available task starters in the https://cloud.spring.io/spring-cloud-task-app-starters/[Task App Starters Project Page] and
+related reference documentation.  For more information about the available stream starters, look at the https://cloud.spring.io/spring-cloud-stream-app-starters/[Stream App Starters Project Page]
 and related reference documentation.
 
 As an example, if you would like to register all out-of-the-box stream applications built with the Kafka binder in bulk, you can use the following command:
 
 [source,bash,subs=attributes]
 ----
-$ dataflow:>app import --uri http://bit.ly/Darwin-GA-stream-applications-kafka-10-maven
+$ dataflow:>app import --uri https://bit.ly/Darwin-GA-stream-applications-kafka-10-maven
 ----
 
 Alternatively you can register all the stream applications with the Rabbit binder, as follows:
 
 [source,bash,subs=attributes]
 ----
-$ dataflow:>app import --uri http://bit.ly/Darwin-GA-stream-applications-rabbit-maven
+$ dataflow:>app import --uri https://bit.ly/Darwin-GA-stream-applications-rabbit-maven
 ----
 
 You can also pass the `--local` option (which is `true` by default) to indicate whether the
@@ -393,7 +393,7 @@ source.http.metadata=maven://org.springframework.cloud.stream.app:http-source-ra
 
 While there are out-of-the-box source, processor, sink applications available, you can extend these applications or write a custom link:https://github.com/spring-cloud/spring-cloud-stream[Spring Cloud Stream] application.
 
-The process of creating Spring Cloud Stream applications with http://start.spring.io/[Spring Initializr] is detailed in the Spring Cloud Stream {spring-cloud-stream-docs}#_getting_started[documentation].
+The process of creating Spring Cloud Stream applications with https://start.spring.io/[Spring Initializr] is detailed in the Spring Cloud Stream {spring-cloud-stream-docs}#_getting_started[documentation].
 It is possible to include multiple binders to an application.
 If doing so, see the instructions in <<passing_producer_consumer_properties>> for how to configure them.
 
@@ -1325,7 +1325,7 @@ Consider the following example, using the `definition` style.
 URI dataFlowUri = URI.create("http://localhost:9393");
 DataFlowOperations dataFlowOperations = new DataFlowTemplate(dataFlowUri);
 dataFlowOperations.appRegistryOperations().importFromResource(
-                     "http://bit.ly/Darwin-GA-stream-applications-rabbit-maven", true);
+                     "https://bit.ly/Darwin-GA-stream-applications-rabbit-maven", true);
 StreamDefinition streamDefinition = Stream.builder(dataFlowOperations)
                                       .name("ticktock")
                                       .definition("time | log")
@@ -1452,7 +1452,7 @@ Attempting to create or deploy a stream that contains an unknown app throws an e
 [source,java,options="nowrap"]
 ----
 dataFlowOperations.appRegistryOperations().importFromResource(
-            "http://bit.ly/Darwin-GA-stream-applications-rabbit-maven", true);
+            "https://bit.ly/Darwin-GA-stream-applications-rabbit-maven", true);
 ----
 
 The Stream applications can also be beans within your application that are injected in other classes to create Streams.

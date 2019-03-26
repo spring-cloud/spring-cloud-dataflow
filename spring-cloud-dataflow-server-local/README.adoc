@@ -97,13 +97,13 @@ If you tail the `stdout_0.log` file from the directory mentioned, you should see
 ## Configuration
 
 ### Default
-To configure the Data Flow Server you can follow the configuration setup guidelines specified in the boot documentation found http://docs.spring.io/spring-boot/docs/1.5.13.RELEASE/reference/html/boot-features-external-config.html[here]
+To configure the Data Flow Server you can follow the configuration setup guidelines specified in the boot documentation found https://docs.spring.io/spring-boot/docs/1.5.13.RELEASE/reference/html/boot-features-external-config.html[here]
 
 Note: The `dataflow-server.yml` containing the defaults can be found https://github.com/spring-cloud/spring-cloud-dataflow/blob/master/spring-cloud-starter-dataflow-server-local/src/main/resources/dataflow-server.yml[here]
 
 ### Spring Cloud Configuration
 The Spring Cloud Data Flow Server offers the user the ability to configure properties via
-http://cloud.spring.io/spring-cloud-config/spring-cloud-config.html[spring-cloud-config].
+https://cloud.spring.io/spring-cloud-config/spring-cloud-config.html[spring-cloud-config].
 All configurations retrieved from the cloud config will take precedence over Boot's
 defaults enumerated above. The Spring Cloud Data Flow Server will look for the server at
 `localhost:8888`, however this can be overwritten by setting the `spring.cloud.config.uri`
