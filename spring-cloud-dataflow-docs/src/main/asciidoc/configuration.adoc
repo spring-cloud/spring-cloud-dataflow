@@ -238,7 +238,7 @@ To use features such as Stream update and rollback, the Data Flow Server delegat
 +
 [source,bash,subs=attributes]
 ----
-$ java -jar spring-cloud-dataflow-server-local-{project-version}.jar --spring.cloud.skipper.client.serverUri=http://192.51.100.1:7577/api --spring.cloud.dataflow.features.skipper-enabled=true
+$ java -jar spring-cloud-dataflow-server-local-{project-version}.jar --spring.cloud.skipper.client.serverUri=https://192.51.100.1:7577/api --spring.cloud.dataflow.features.skipper-enabled=true
 ----
 
 [[configuration-security]]
@@ -583,7 +583,7 @@ spring:
 <6> The search filter for the DN of the authenticating user
 
 TIP: For more information, please also see the
-http://docs.spring.io/spring-security/site/docs/current/reference/html/ldap.html[LDAP Authentication]
+https://docs.spring.io/spring-security/site/docs/current/reference/html/ldap.html[LDAP Authentication]
 chapter of the Spring Security reference guide.
 
 ===== LDAP Role Mapping
@@ -658,7 +658,7 @@ this option is currently not supported out-of-the-box by Spring Cloud Data Flow.
 Please follow the following https://github.com/spring-cloud/spring-cloud-dataflow/issues/963[issue
 tracker ticket] to track its implementation. You may also want to look at the
 Spring LDAP reference documentation chapter on
-http://docs.spring.io/spring-ldap/docs/current/reference/#custom-dircontext-authentication-processing[Custom DirContext Authentication Processing] for further details.
+https://docs.spring.io/spring-ldap/docs/current/reference/#custom-dircontext-authentication-processing[Custom DirContext Authentication Processing] for further details.
 
 [[configuration-security-authentication-via-shell]]
 ==== Shell Authentication
@@ -821,7 +821,7 @@ where
 
 * HTTP_METHOD is one http method, capital case
 * URL_PATTERN is an Ant style URL pattern
-* SECURITY_ATTRIBUTE is a SpEL expression.  See http://docs.spring.io/spring-security/site/docs/current/reference/htmlsingle/#el-access[Expression-Based Access Control].
+* SECURITY_ATTRIBUTE is a SpEL expression.  See https://docs.spring.io/spring-security/site/docs/current/reference/htmlsingle/#el-access[Expression-Based Access Control].
 * Each of those separated by one or several blank characters (spaces, tabs, and so on)
 
 Be mindful that the above is indeed a YAML list, not a map (thus the use of '-' dashes at the start of each line) that lives under the `spring.cloud.dataflow.security.authorization.rules` key.
@@ -872,7 +872,7 @@ in conjunction with `group-search-base` and `group-search-filter`.
 The group role attribute contains the name of the role. If not specified, the
 `ROLE_MANAGE` role is populated by default.
 
-For further information, please refer to http://docs.spring.io/spring-security/site/docs/current/reference/htmlsingle/#loading-authorities[Configuring an LDAP Server] in the Spring Security reference guide.
+For further information, please refer to https://docs.spring.io/spring-security/site/docs/current/reference/htmlsingle/#loading-authorities[Configuring an LDAP Server] in the Spring Security reference guide.
 
 [[configuration-security-oauth2]]
 === OAuth 2.0
@@ -1027,7 +1027,7 @@ This section offers the following authentication examples:
 [[oauth2-examples-local]]
 ===== Local OAuth2 Server
 
-With http://projects.spring.io/spring-security-oauth/[Spring Security OAuth], you
+With https://projects.spring.io/spring-security-oauth/[Spring Security OAuth], you
 can easily create your own OAuth2 Server with the following simple annotations:
 
 * `@EnableResourceServer`
@@ -1231,7 +1231,7 @@ A few additional Spring projects provide support for sending metrics data to ext
 * https://github.com/spring-cloud/spring-cloud-dataflow-metrics-datadog[Spring Cloud Data Flow Metrics Datadog Metrics] provides `DatadogMetricWriter` that writes to https://www.datadoghq.com/[Datadog].
 
 To make use of this functionality, you need to build the Stream application with the additional pom dependency of the MetricWriter implementation you want to use.
-To customize the "`out of the box`" Stream applications, use the http://start-scs.cfapps.io/[Spring Cloud Stream Initializr] to generate a project and then modify the pom.
+To customize the "`out of the box`" Stream applications, use the https://start-scs.cfapps.io/[Spring Cloud Stream Initializr] to generate a project and then modify the pom.
 The documentation on the Data Flow Metrics project pages provides the additional information you need to get started.
 
 == About Configuration
