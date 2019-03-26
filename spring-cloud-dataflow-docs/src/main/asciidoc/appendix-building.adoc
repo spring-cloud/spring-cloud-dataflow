@@ -30,7 +30,7 @@ source control.
 
 The projects that require middleware generally include a
 `docker-compose.yml`, so consider using
-http://compose.docker.io/[Docker Compose] to run the middeware servers
+https://compose.docker.io/[Docker Compose] to run the middeware servers
 in Docker containers. See the README in the
 https://github.com/spring-cloud-samples/scripts[scripts demo
 repository] for specific instructions about the common cases of mongo,
@@ -44,13 +44,13 @@ There is a "full" profile that will generate documentation. You can build just t
 
 === Working with the code
 If you don't have an IDE preference we would recommend that you use
-http://www.springsource.com/developer/sts[Spring Tools Suite] or
-http://eclipse.org[Eclipse] when working with the code. We use the
-http://eclipse.org/m2e/[m2eclipe] eclipse plugin for maven support. Other IDEs and tools
+https://www.springsource.com/developer/sts[Spring Tools Suite] or
+https://eclipse.org[Eclipse] when working with the code. We use the
+https://eclipse.org/m2e/[m2eclipe] eclipse plugin for maven support. Other IDEs and tools
 should also work without issue.
 
 ==== Importing into eclipse with m2eclipse
-We recommend the http://eclipse.org/m2e/[m2eclipe] eclipse plugin when working with
+We recommend the https://eclipse.org/m2e/[m2eclipe] eclipse plugin when working with
 eclipse. If you don't already have m2eclipse installed it is available from the "eclipse
 marketplace".
 

@@ -7,7 +7,7 @@ This section provides answers to some common '`how do I do that...`' type of que
 that often arise when using Spring Cloud Data Flow. 
 
 If you are having a specific problem that we don't cover here, you might want to check out
-http://stackoverflow.com/tags/spring-cloud-dataflow[stackoverflow.com] to see if someone has
+https://stackoverflow.com/tags/spring-cloud-dataflow[stackoverflow.com] to see if someone has
 already provided an answer; this is also a great place to ask new questions (please use
 the `spring-cloud-dataflow` tag).
 
@@ -85,7 +85,7 @@ in Cloud Foundry, you'd be passing them as `cf set-env SPRING_APPLICATION_JSON`.
 == Logging
 
 Spring Cloud Data Flow is built upon several Spring projects, but ultimately the dataflow-server is a 
-Spring Boot app, so the logging techniques that apply to any link:http://docs.spring.io/spring-boot/docs/current/reference/html/howto-logging.html#howto-logging[Spring Boot]
+Spring Boot app, so the logging techniques that apply to any link:https://docs.spring.io/spring-boot/docs/current/reference/html/howto-logging.html#howto-logging[Spring Boot]
 application are applicable here as well.
 
 

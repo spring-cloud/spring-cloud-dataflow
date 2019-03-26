@@ -88,7 +88,7 @@ By default, the Data Flow server is unsecured and runs on an unencrypted HTTP co
 You can secure your REST endpoints, as well as the Data Flow Dashboard by enabling HTTPS
 and requiring clients to authenticate using either:
 
-* http://oauth.net/2/[OAuth 2.0]
+* https://oauth.net/2/[OAuth 2.0]
 * Basic Authentication
 
 NOTE:
@@ -356,7 +356,7 @@ dataflow:
 <6> The search filter for the DN of the authenticating user
 
 TIP: For more information, please also see the chapter
-http://docs.spring.io/spring-security/site/docs/current/reference/html/ldap.html[LDAP Authentication]
+https://docs.spring.io/spring-security/site/docs/current/reference/html/ldap.html[LDAP Authentication]
 of the Spring Security reference guide.
 
 ===== LDAP Transport Security
@@ -398,13 +398,13 @@ this option is currently not supported out-of-the-box by Spring Cloud Data Flow.
 Please follow the following https://github.com/spring-cloud/spring-cloud-dataflow/issues/963[issue
 tracker ticket] to track its implementation. You may also want to look at the
 Spring LDAP reference documentation chapter on
-http://docs.spring.io/spring-ldap/docs/current/reference/#custom-dircontext-authentication-processing[Custom DirContext Authentication Processing] for further details.
+https://docs.spring.io/spring-ldap/docs/current/reference/#custom-dircontext-authentication-processing[Custom DirContext Authentication Processing] for further details.
 
 
 [[configuration-security-oauth2]]
 === OAuth 2.0
 
-http://oauth.net/2/[OAuth 2.0] allows you to integrate Spring Cloud
+https://oauth.net/2/[OAuth 2.0] allows you to integrate Spring Cloud
 Data Flow into Single Sign On (SSO) environments. The following 2 OAuth2 Grant Types will be used:
 
 * _Authorization Code_ - Used for the GUI (Browser) integration. You will be redirected to your OAuth Service for authentication
@@ -491,7 +491,7 @@ dataflow config info
 
 ===== Local OAuth2 Server
 
-With http://projects.spring.io/spring-security-oauth/[Spring Security OAuth] you
+With https://projects.spring.io/spring-security-oauth/[Spring Security OAuth] you
 can easily create your own OAuth2 Server with the following 2 simple annotations:
 
 * @EnableResourceServer
@@ -540,7 +540,7 @@ IMPORTANT: GitHub does not support the OAuth2 password grant type. As such you c
 
 === Securing the Spring Boot Management Endpoints
 
-When enabling security, please also make sure that the http://docs.spring.io/spring-boot/docs/current/reference/html/production-ready-monitoring.html[Spring Boot HTTP Management Endpoints]
+When enabling security, please also make sure that the https://docs.spring.io/spring-boot/docs/current/reference/html/production-ready-monitoring.html[Spring Boot HTTP Management Endpoints]
 are secured as well. You can enable security for the management endpoints by adding the following to `application.yml`:
 
 [source,yaml]
@@ -557,7 +557,7 @@ being set to `true`.
 
 [[configuration-monitoring-management]]
 == Monitoring and Management
-The Spring Cloud Data Flow server is a Spring Boot application that includes the http://docs.spring.io/spring-boot/docs/current/reference/htmlsingle/#production-ready[Actuator
+The Spring Cloud Data Flow server is a Spring Boot application that includes the https://docs.spring.io/spring-boot/docs/current/reference/htmlsingle/#production-ready[Actuator
 library], which adds several production ready features to help you monitor and manage your application.
 
 The Actuator library adds http endpoints under the context path `/management` that is also
@@ -565,7 +565,7 @@ a discovery page for available endpoints.  For example, there is a `health` endp
 that shows application health information and an `env` that lists properties from
 Spring's `ConfigurableEnvironment`.  By default only the health and application info
 endpoints are accessible.  The other endpoints are considered to be _sensitive_
-and need to be http://docs.spring.io/spring-boot/docs/current/reference/htmlsingle/#production-ready-customizing-endpoints[enabled explicitly via configuration].  If you are enabling
+and need to be https://docs.spring.io/spring-boot/docs/current/reference/htmlsingle/#production-ready-customizing-endpoints[enabled explicitly via configuration].  If you are enabling
 _sensitive_ endpoints then you should also
 <<configuration-security,secure the Data Flow server's endpoints>> so that
 information is not inadvertently exposed to unauthenticated users.  The local Data Flow server has security disabled by default, so all actuator endpoints are available.
@@ -577,14 +577,14 @@ autoconfigure the https://github.com/spring-projects/spring-boot/blob/v1.4.1.REL
 === Spring Boot Admin
 A nice way to visualize and interact with actuator endpoints is to incorporate the
 https://github.com/codecentric/spring-boot-admin[Spring Boot Admin] client library into the Spring Cloud Data Flow server.  You can create the Spring Boot Admin application by following
-http://codecentric.github.io/spring-boot-admin/1.4.3/#set-up-admin-server[a few simple steps].
+https://codecentric.github.io/spring-boot-admin/1.4.3/#set-up-admin-server[a few simple steps].
 
 An easy way to include the client library into the Data Flow server is to create a
-new Data Flow Server project from http://start.spring.io.  Type 'flow' in the
+new Data Flow Server project from https://start.spring.io.  Type 'flow' in the
 "Search for dependencies" text box and select the server runtime you want to customize.
 A simple way to have the Spring Cloud Data Flow server be a client to the Spring Boot
 Admin Server is by adding a dependency to the Data Flow server's pom and an additional
-configuration property as documented in http://codecentric.github.io/spring-boot-admin/1.4.3/#register-clients-via-spring-boot-admin[Registering Client Applications].
+configuration property as documented in https://codecentric.github.io/spring-boot-admin/1.4.3/#register-clients-via-spring-boot-admin[Registering Client Applications].
 
 This will result in a UI with tabs for each of the actuator endpoints.
 
@@ -594,18 +594,18 @@ image::{dataflow-asciidoc}/images/spring-boot-admin.png[Spring Boot Admin UI, sc
 Additional configuration is required to interact with JMX beans and logging levels. Refer
 to the Spring Boot admin documentation for more information.  As only the `info`
 and `health` endpoints are available to unauthenticated users, you should enable security on
-the Data Flow Server and also http://codecentric.github.io/spring-boot-admin/1.4.3/#_securing_spring_boot_admin_server[configure Spring Boot Admin server's security] so that it
+the Data Flow Server and also https://codecentric.github.io/spring-boot-admin/1.4.3/#_securing_spring_boot_admin_server[configure Spring Boot Admin server's security] so that it
 can securely access the actuator endpoints.
 
 === Monitoring Deployed Applications
 
 The applications that are deployed by Spring Cloud Data Flow are based on Spring Boot which
 contains several features for monitoring your application in production.  Each deployed
-application contains http://docs.spring.io/spring-boot/docs/current/reference/html/production-ready-endpoints.html[several web endpoints] for monitoring and interacting with Stream and Task applications.
+application contains https://docs.spring.io/spring-boot/docs/current/reference/html/production-ready-endpoints.html[several web endpoints] for monitoring and interacting with Stream and Task applications.
 
 In particular, the metrics endpoint contains counters
-and gauges for HTTP requests, http://docs.spring.io/spring-boot/docs/current/reference/html/production-ready-metrics.html#production-ready-system-metrics[System Metrics] (such as JVM stats), http://docs.spring.io/spring-boot/docs/current/reference/html/production-ready-metrics.html#production-ready-datasource-metrics[DataSource Metrics] and http://docs.spring.io/spring-integration/reference/htmlsingle/#mgmt-channel-features[Message Channel Metrics] (such as message rates).  In turn, these metrics can be exported periodically to various application monitoring tools via
-http://docs.spring.io/spring-boot/docs/current/reference/html/production-ready-metrics.html#production-ready-metric-writers[MetricWriter] implementations.  You can control how often and which Spring Boot metrics are exported through the use of include and exclude name filters.
+and gauges for HTTP requests, https://docs.spring.io/spring-boot/docs/current/reference/html/production-ready-metrics.html#production-ready-system-metrics[System Metrics] (such as JVM stats), https://docs.spring.io/spring-boot/docs/current/reference/html/production-ready-metrics.html#production-ready-datasource-metrics[DataSource Metrics] and https://docs.spring.io/spring-integration/reference/htmlsingle/#mgmt-channel-features[Message Channel Metrics] (such as message rates).  In turn, these metrics can be exported periodically to various application monitoring tools via
+https://docs.spring.io/spring-boot/docs/current/reference/html/production-ready-metrics.html#production-ready-metric-writers[MetricWriter] implementations.  You can control how often and which Spring Boot metrics are exported through the use of include and exclude name filters.
 
 The project https://github.com/spring-cloud/spring-cloud-dataflow-metrics[Spring Cloud Data Flow Metrics] provides the foundation for
 exporting Spring Boot metrics.  The main project provides Spring Boots AutoConfiguration to setup the exporting process and common
@@ -619,7 +619,7 @@ The project https://github.com/spring-cloud/spring-cloud-dataflow-metrics-datado
 integration to export Spring Boot metrics to https://www.datadoghq.com/[Datadog].
 
 To make use of this functionality, you will need to add additional dependencies into your Stream and Task applications.  To customize
-the "out of the box" Task and Stream applications you can use the http://start-scs.cfapps.io/[Data Flow Initializr] to generate a
+the "out of the box" Task and Stream applications you can use the https://start-scs.cfapps.io/[Data Flow Initializr] to generate a
 project and then add to the generated Maven pom file the MetricWriter implementation you want to use.  The documentation on the
 Data Flow Metrics project pages provides the additional information you need to get started.
 
