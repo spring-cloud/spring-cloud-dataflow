@@ -1,8 +1,8 @@
-image:https://spring.io/badges/spring-cloud-dataflow/ga.svg[Latest Release Version, link=http://cloud.spring.io/spring-cloud-dataflow/#quick-start]
-image:https://spring.io/badges/spring-cloud-dataflow/snapshot.svg[Latest Snapshot Version, link=http://cloud.spring.io/spring-cloud-dataflow/#quick-start]
+image:https://spring.io/badges/spring-cloud-dataflow/ga.svg[Latest Release Version, link=https://cloud.spring.io/spring-cloud-dataflow/#quick-start]
+image:https://spring.io/badges/spring-cloud-dataflow/snapshot.svg[Latest Snapshot Version, link=https://cloud.spring.io/spring-cloud-dataflow/#quick-start]
 image:https://codecov.io/gh/spring-cloud/spring-cloud-dataflow/branch/master/graph/badge.svg["Codecov", link="https://codecov.io/gh/spring-cloud/spring-cloud-dataflow/branch/master"]
 
-== Spring Cloud Data Flow image:https://build.spring.io/plugins/servlet/wittified/build-status/SCD-BMASTER[Build Status, link=https://build.spring.io/browse/SCD-BMASTER] image:https://badge.waffle.io/spring-cloud/spring-cloud-dataflow.svg?label=ready&title=Ready[Stories Ready, link=http://waffle.io/spring-cloud/spring-cloud-dataflow] image:https://badge.waffle.io/spring-cloud/spring-cloud-dataflow.svg?label=In%20Progress&title=In%20Progress[Stories In Progress, link=http://waffle.io/spring-cloud/spring-cloud-dataflow]
+== Spring Cloud Data Flow image:https://build.spring.io/plugins/servlet/wittified/build-status/SCD-BMASTER[Build Status, link=https://build.spring.io/browse/SCD-BMASTER] image:https://badge.waffle.io/spring-cloud/spring-cloud-dataflow.svg?label=ready&title=Ready[Stories Ready, link=https://waffle.io/spring-cloud/spring-cloud-dataflow] image:https://badge.waffle.io/spring-cloud/spring-cloud-dataflow.svg?label=In%20Progress&title=In%20Progress[Stories In Progress, link=https://waffle.io/spring-cloud/spring-cloud-dataflow]
 
 Spring Cloud Data Flow is a toolkit for building data integration and real-time data processing pipelines. 
 

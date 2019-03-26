@@ -9,19 +9,19 @@ It also shows how to map these applications into Spring Cloud Data Flow and depl
 [[streams-dev-guide-prebuilt-apps]]
 == Prebuilt Applications
 
-The link:http://cloud.spring.io/spring-cloud-stream-app-starters/[Spring Cloud Stream App Starters] project provides many applications that you can start using right away.
+The link:https://cloud.spring.io/spring-cloud-stream-app-starters/[Spring Cloud Stream App Starters] project provides many applications that you can start using right away.
 For example, there is an HTTP source application that receives messages posted to an HTTP endpoint and publishes the data to the messaging middleware.
 Each existing application comes in three variations, one for each type of messaging middleware that is supported.
 The current supported messaging middleware systems are RabbitMQ, Apache Kafka 0.9, and Apache Kafka 0.10.
 All the applications are based on link:https://projects.spring.io/spring-boot/[Spring Boot] and link:https://cloud.spring.io/spring-cloud-stream/[Spring Cloud Stream].
 
 Applications are published as a Maven artifact as well as a Docker image.
-For GA releases, the Maven artifacts are published to Maven central and the link:http://repo.spring.io/release[Spring Release Repository].
-Milestone and snapshot releases are published to the link:http://repo.spring.io/milestone[Spring Milestone] and link:http://repo.spring.io/snapshot[Spring Snapshot] repositories, respectively.
+For GA releases, the Maven artifacts are published to Maven central and the link:https://repo.spring.io/release[Spring Release Repository].
+Milestone and snapshot releases are published to the link:https://repo.spring.io/milestone[Spring Milestone] and link:https://repo.spring.io/snapshot[Spring Snapshot] repositories, respectively.
 Docker images are pushed to link:https://hub.docker.com/u/springcloudstream/[Docker Hub].
 
 We use the Maven artifacts for our examples.
-The root location of the Spring Repository that hosts the GA artifacts of prebuilt applications is http://repo.spring.io/release/org/springframework/cloud/stream/app/
+The root location of the Spring Repository that hosts the GA artifacts of prebuilt applications is https://repo.spring.io/release/org/springframework/cloud/stream/app/
 
 
 
@@ -225,7 +225,7 @@ To pre-create durable queues and bind them to the exchange, producer application
 The `requiredGroups` property accepts a comma-separated list of groups to which the producer must ensure message delivery even if they start after it has been created.
 The consumer applications should then specify the `spring.cloud.stream.bindings.<channelName>.group` property to consume from the durable queue.
 The comma-separated list of groups for both properties should generally match.
-link:http://docs.spring.io/spring-cloud-stream/docs/current/reference/htmlsingle/#consumer-groups[Consumer groups] are also the means by which multiple instances of a consuming application can participate in a competing consumer relationship with other members of the same consumer group.
+link:https://docs.spring.io/spring-cloud-stream/docs/current/reference/htmlsingle/#consumer-groups[Consumer groups] are also the means by which multiple instances of a consuming application can participate in a competing consumer relationship with other members of the same consumer group.
 
 The following listing shows multiple applications sharing the same groups:
 
