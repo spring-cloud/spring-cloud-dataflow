@@ -133,7 +133,7 @@ public class ApplicationConfigurationMetadataResolver {
 
 	/**
 	 * Return metadata about configuration properties that are documented via
-	 * <a href="http://docs.spring.io/spring-boot/docs/current/reference/html/configuration-metadata.html">
+	 * <a href="https://docs.spring.io/spring-boot/docs/current/reference/html/configuration-metadata.html">
 	 * Spring Boot configuration metadata</a> and visible in an app.
 	 * @param app a Spring Cloud Stream app; typically a Boot uberjar,
 	 *            but directories are supported as well
