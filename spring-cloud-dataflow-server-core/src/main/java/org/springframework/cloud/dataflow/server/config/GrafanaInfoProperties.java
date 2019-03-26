@@ -35,7 +35,7 @@ public class GrafanaInfoProperties {
 
 	/**
 	 * If provided, can be used to authenticate with Grafana.
-	 * http://docs.grafana.org/http_api/auth/#create-api-token
+	 * https://docs.grafana.org/http_api/auth/#create-api-token
 	 *
 	 * The 'Authorization' header value should be: 'Bearer (your api key)'.
 	 */

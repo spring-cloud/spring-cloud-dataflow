@@ -14,7 +14,7 @@ You have two options when you provision Spring Cloud Data Flow and related servi
 
 * The simplest (and automated) method is to use the link:https://network.pivotal.io/products/p-dataflow[Spring Cloud Data Flow for PCF] tile.
 This is an opinionated tile for Pivotal Cloud Foundry.
-It automatically provisions the server and the required data services, thus simplifying the overall getting-started experience. You can read more about the installation link:http://docs.pivotal.io/scdf/[here].
+It automatically provisions the server and the required data services, thus simplifying the overall getting-started experience. You can read more about the installation link:https://docs.pivotal.io/scdf/[here].
 * Alternatively, you can provision all the components manually. The following section goes into the specifics of how to do so.
 
 ==== Provisioning a Rabbit Service Instance on Cloud Foundry
@@ -69,13 +69,13 @@ wget https://repo.spring.io/{version-type-lowercase}/org/springframework/cloud/s
 ----
 ====
 
-. Download http://cloud.spring.io/spring-cloud-skipper/[Skipper], to which Data Flow delegates stream lifecycle operations, such as deployment, upgrading and rolling back.
+. Download https://cloud.spring.io/spring-cloud-skipper/[Skipper], to which Data Flow delegates stream lifecycle operations, such as deployment, upgrading and rolling back.
 To do so, use the following command:
 +
 ====
 [source,yaml,options=nowrap,subs=attributes]
 ----
-wget http://repo.spring.io/{skipper-version-type-lowercase}/org/springframework/cloud/spring-cloud-skipper-server/{skipper-version}/spring-cloud-skipper-server-{skipper-version}.jar
+wget https://repo.spring.io/{skipper-version-type-lowercase}/org/springframework/cloud/spring-cloud-skipper-server/{skipper-version}/spring-cloud-skipper-server-{skipper-version}.jar
 ----
 ====
 
@@ -149,7 +149,7 @@ Also, the Data Flow server itself implements a Last-Recently-Used algorithm to f
 NOTE: If you push to a space with multiple users (for example, on PWS), the route you chose for your application name may already be taken.
 You can use the `--random-route` option to avoid this when you push the server application.
 
-NOTE: If you need to configure multiple Maven repositories, a proxy, or authorization for a private repository, see link:http://docs.spring.io/spring-cloud-dataflow/docs/{scdf-core-version}/reference/htmlsingle/#getting-started-maven-configuration[Maven Configuration].
+NOTE: If you need to configure multiple Maven repositories, a proxy, or authorization for a private repository, see link:https://docs.spring.io/spring-cloud-dataflow/docs/{scdf-core-version}/reference/htmlsingle/#getting-started-maven-configuration[Maven Configuration].
 
 
 [[getting-started-cloudfoundry-deploying-using-env-vars]]
@@ -340,8 +340,8 @@ If the Data Flow Server and shell are not running on the same host, you can poin
 ====
 [source,bash,subs=attributes]
 ----
-server-unknown:>dataflow config server http://dataflow-server.cfapps.io
-Successfully targeted http://dataflow-server.cfapps.io
+server-unknown:>dataflow config server https://dataflow-server.cfapps.io
+Successfully targeted https://dataflow-server.cfapps.io
 dataflow:>
 ----
 ====
@@ -677,7 +677,7 @@ To run a simple task application, you can register all the out-of-the-box task a
 ====
 [source,bash,subs=attributes]
 ----
-dataflow:>app import --uri http://bit.ly/Dearborn-SR1-task-applications-maven
+dataflow:>app import --uri https://bit.ly/Dearborn-SR1-task-applications-maven
 ----
 ====
 

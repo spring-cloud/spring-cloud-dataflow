@@ -13,7 +13,7 @@ If you are just starting out with Spring Cloud Data Flow, you should probably re
 
 A task application is short lived, meaning it stops running on purpose, and can be executed on demand or scheduled for execution.
 A use case might be to scrape a web page and write to the database.
-The http://cloud.spring.io/spring-cloud-task/[Spring Cloud Task] framework is based on Spring Boot and adds the capability for Boot applications to record the lifecycle events of a short lived application such as when it starts, when it ends and the exit status.
+The https://cloud.spring.io/spring-cloud-task/[Spring Cloud Task] framework is based on Spring Boot and adds the capability for Boot applications to record the lifecycle events of a short lived application such as when it starts, when it ends and the exit status.
 The https://docs.spring.io/spring-cloud-task/docs/{spring-cloud-task-version}/reference/htmlsingle/#features-task-execution-details[TaskExecution] documentation shows which information is stored in the database.
 The entry point for code execution in a Spring Cloud Task application is most often an implementation of Boot's CommandLineRunner interface as shown in this https://docs.spring.io/spring-cloud-task/docs/{spring-cloud-task-version}/reference/htmlsingle/#getting-started-writing-the-code[example].
 
@@ -43,7 +43,7 @@ Before we dive deeper into the details of creating Tasks, we need to understand 
 While Spring Cloud Task does provide a number of out-of-the-box applications (at https://github.com/spring-cloud-task-app-starters[spring-cloud-task-app-starters]), most task applications require custom development.
   To create a custom task application:
 
-.  Use the http://start.spring.io[Spring Initializer] to create a new project, making sure to select the following starters:
+.  Use the https://start.spring.io[Spring Initializer] to create a new project, making sure to select the following starters:
 .. `Cloud Task`: This dependency is the `spring-cloud-starter-task`.
 .. `JDBC`: This dependency is the `spring-jdbc` starter.
 .. Select your database dependency: Enter the database dependency that Data Flow is currently using.  For example: `H2`.
@@ -86,7 +86,7 @@ dataflow:>app register --name task1 --type task --uri maven://com.example:mytask
 
 dataflow:>app register --name task2 --type task --uri file:///Users/example/mytask-1.0.2.jar
 
-dataflow:>app register --name task3 --type task --uri http://example.com/mytask-1.0.2.jar
+dataflow:>app register --name task3 --type task --uri https://example.com/mytask-1.0.2.jar
 ----
 
 When providing a URI with the `maven` scheme, the format should conform to the following:
@@ -118,14 +118,14 @@ The following table lists the available static property files:
 [width="100%",frame="topbot",options="header"]
 |======================
 |Artifact Type |Stable Release |SNAPSHOT Release
-|Maven   | http://bit.ly/Dearborn-SR1-task-applications-maven | http://bit.ly/Dearborn-BUILD-SNAPSHOT-task-applications-maven
-|Docker  | http://bit.ly/Dearborn-SR1-task-applications-docker | http://bit.ly/Dearborn-BUILD-SNAPSHOT-task-applications-docker
+|Maven   | https://bit.ly/Dearborn-SR1-task-applications-maven | https://bit.ly/Dearborn-BUILD-SNAPSHOT-task-applications-maven
+|Docker  | https://bit.ly/Dearborn-SR1-task-applications-docker | https://bit.ly/Dearborn-BUILD-SNAPSHOT-task-applications-docker
 |======================
 
 For example, if you would like to register all out-of-the-box task applications in bulk, you can do so with the following command:
 
 ```
-dataflow:>app import --uri http://bit.ly/Dearborn-SR1-task-applications-maven
+dataflow:>app import --uri https://bit.ly/Dearborn-SR1-task-applications-maven
 ```
 
 You can also pass the `--local` option (which is `TRUE` by default) to indicate whether the properties file location should be resolved within the shell process itself.
@@ -903,7 +903,7 @@ For now, we focus on the configuration that is required to launch the `ComposedT
 * *graph*: this is the graph that is to be executed by the `ComposedTaskRunner`.
 In this case it is `AAA&&BBB`.
 * *increment-instance-enabled*: This lets each execution of `ComposedTaskRunner` be unique.
-`ComposedTaskRunner` is built by using http://projects.spring.io/spring-batch/[Spring Batch].
+`ComposedTaskRunner` is built by using https://projects.spring.io/spring-batch/[Spring Batch].
 Thus, we want a new Job Instance for each launch of the `ComposedTaskRunner`.
 To do this, we set `increment-instance-enabled` to be `true`.
 

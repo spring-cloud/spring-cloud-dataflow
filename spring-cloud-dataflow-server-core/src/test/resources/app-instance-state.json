@@ -4,14 +4,14 @@
     "instances": {
       "stream1.log-v4-0": {
         "instanceNumber": 0,
-        "baseUrl": "http://192.168.178.10:41371",
+        "baseUrl": "https://192.168.178.10:41371",
         "attributes": {
           "guid": "41371",
           "pid": "33546",
           "port": "41371",
           "stderr": "/var/folders/js/7b_pn0t575l790x7j61slyxc0000gn/T/spring-cloud-deployer-1261882090629035193/stream1-1548176585911/stream1.log-v4/stderr_0.log",
           "stdout": "/var/folders/js/7b_pn0t575l790x7j61slyxc0000gn/T/spring-cloud-deployer-1261882090629035193/stream1-1548176585911/stream1.log-v4/stdout_0.log",
-          "url": "http://192.168.178.10:41371",
+          "url": "https://192.168.178.10:41371",
           "working.dir": "/var/folders/js/7b_pn0t575l790x7j61slyxc0000gn/T/spring-cloud-deployer-1261882090629035193/stream1-1548176585911/stream1.log-v4"
         },
         "process": {
@@ -34,14 +34,14 @@
     "instances": {
       "stream1.time-v4-0": {
         "instanceNumber": 0,
-        "baseUrl": "http://192.168.178.10:23345",
+        "baseUrl": "https://192.168.178.10:23345",
         "attributes": {
           "guid": "23345",
           "pid": "33545",
           "port": "23345",
           "stderr": "/var/folders/js/7b_pn0t575l790x7j61slyxc0000gn/T/spring-cloud-deployer-1261882090629035193/stream1-1548176585800/stream1.time-v4/stderr_0.log",
           "stdout": "/var/folders/js/7b_pn0t575l790x7j61slyxc0000gn/T/spring-cloud-deployer-1261882090629035193/stream1-1548176585800/stream1.time-v4/stdout_0.log",
-          "url": "http://192.168.178.10:23345",
+          "url": "https://192.168.178.10:23345",
           "working.dir": "/var/folders/js/7b_pn0t575l790x7j61slyxc0000gn/T/spring-cloud-deployer-1261882090629035193/stream1-1548176585800/stream1.time-v4"
         },
         "process": {
@@ -64,14 +64,14 @@
     "instances": {
       "stream1.t1-v4-0": {
         "instanceNumber": 0,
-        "baseUrl": "http://192.168.178.10:27735",
+        "baseUrl": "https://192.168.178.10:27735",
         "attributes": {
           "guid": "27735",
           "pid": "33547",
           "port": "27735",
           "stderr": "/var/folders/js/7b_pn0t575l790x7j61slyxc0000gn/T/spring-cloud-deployer-1261882090629035193/stream1-1548176586033/stream1.t1-v4/stderr_0.log",
           "stdout": "/var/folders/js/7b_pn0t575l790x7j61slyxc0000gn/T/spring-cloud-deployer-1261882090629035193/stream1-1548176586033/stream1.t1-v4/stdout_0.log",
-          "url": "http://192.168.178.10:27735",
+          "url": "https://192.168.178.10:27735",
           "working.dir": "/var/folders/js/7b_pn0t575l790x7j61slyxc0000gn/T/spring-cloud-deployer-1261882090629035193/stream1-1548176586033/stream1.t1-v4"
         },
         "process": {
@@ -94,14 +94,14 @@
     "instances": {
       "stream1.t2-v4-0": {
         "instanceNumber": 0,
-        "baseUrl": "http://192.168.178.10:38561",
+        "baseUrl": "https://192.168.178.10:38561",
         "attributes": {
           "guid": "38561",
           "pid": "33543",
           "port": "38561",
           "stderr": "/var/folders/js/7b_pn0t575l790x7j61slyxc0000gn/T/spring-cloud-deployer-1261882090629035193/stream1-1548176585562/stream1.t2-v4/stderr_0.log",
           "stdout": "/var/folders/js/7b_pn0t575l790x7j61slyxc0000gn/T/spring-cloud-deployer-1261882090629035193/stream1-1548176585562/stream1.t2-v4/stdout_0.log",
-          "url": "http://192.168.178.10:38561",
+          "url": "https://192.168.178.10:38561",
           "working.dir": "/var/folders/js/7b_pn0t575l790x7j61slyxc0000gn/T/spring-cloud-deployer-1261882090629035193/stream1-1548176585562/stream1.t2-v4"
         },
         "process": {
@@ -118,14 +118,14 @@
       },
       "stream1.t2-v4-1": {
         "instanceNumber": 1,
-        "baseUrl": "http://192.168.178.10:50817",
+        "baseUrl": "https://192.168.178.10:50817",
         "attributes": {
           "guid": "50817",
           "pid": "33544",
           "port": "50817",
           "stderr": "/var/folders/js/7b_pn0t575l790x7j61slyxc0000gn/T/spring-cloud-deployer-1261882090629035193/stream1-1548176585562/stream1.t2-v4/stderr_1.log",
           "stdout": "/var/folders/js/7b_pn0t575l790x7j61slyxc0000gn/T/spring-cloud-deployer-1261882090629035193/stream1-1548176585562/stream1.t2-v4/stdout_1.log",
-          "url": "http://192.168.178.10:50817",
+          "url": "https://192.168.178.10:50817",
           "working.dir": "/var/folders/js/7b_pn0t575l790x7j61slyxc0000gn/T/spring-cloud-deployer-1261882090629035193/stream1-1548176585562/stream1.t2-v4"
         },
         "process": {
