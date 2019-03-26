@@ -5,7 +5,7 @@
 
 --
 This section goes into more detail about how you can create Streams which are a collection of
-http://cloud.spring.io/spring-cloud-stream/[Spring Cloud Stream]. It covers topics such as
+https://cloud.spring.io/spring-cloud-stream/[Spring Cloud Stream]. It covers topics such as
 creating and deploying Streams.
 
 If you're just starting out with Spring Cloud Data Flow, you should probably read the
@@ -15,7 +15,7 @@ this section.
 
 [[spring-cloud-dataflow-stream-intro]]
 == Introduction
-Streams are a collection of long lived http://cloud.spring.io/spring-cloud-stream/[Spring Cloud Stream] applications that communicate with each other over messaging middleware.
+Streams are a collection of long lived https://cloud.spring.io/spring-cloud-stream/[Spring Cloud Stream] applications that communicate with each other over messaging middleware.
 A text based DSL defines the configuration and data flow between the applications.  While many applications are provided for you to implement common use-cases, you will typically create a custom Spring Cloud Stream application to implement custom business logic.
 
 [[spring-cloud-dataflow-stream-intro-dsl]]
@@ -28,7 +28,7 @@ The output of `grep` in turn is sent to the input of the `less` process.
 Each `|` symbol will connect the standard ouput of the program on the left to the standard input of the command on the right.
 Data flows through the pipeline from left to right.
 
-In Data Flow, the Unix command is replaced by a http://cloud.spring.io/spring-cloud-stream/[Spring Cloud Stream] application and each pipe symbol represents connecting the input and output of applications via messaging middleware, such as RabbitMQ or Apache Kafka.
+In Data Flow, the Unix command is replaced by a https://cloud.spring.io/spring-cloud-stream/[Spring Cloud Stream] application and each pipe symbol represents connecting the input and output of applications via messaging middleware, such as RabbitMQ or Apache Kafka.
 
 Each Spring Cloud Stream application is registered under a simple name.
 The registration process specifies where the application can be obtained, for example in a Maven Repository or a Docker registry.  You can find out more information on how to register Spring Cloud Stream applications in this <<spring-cloud-dataflow-register-stream-apps,section>>.
@@ -92,7 +92,7 @@ dataflow:>app register --name mysource --type source --uri maven://com.example:m
 
 dataflow:>app register --name myprocessor --type processor --uri file:///Users/example/myprocessor-1.2.3.jar
 
-dataflow:>app register --name mysink --type sink --uri http://example.com/mysink-2.0.1.jar
+dataflow:>app register --name mysink --type sink --uri https://example.com/mysink-2.0.1.jar
 ```
 
 When providing a URI with the `maven` scheme, the format should conform to the following:
@@ -137,27 +137,27 @@ List of available Stream Application Starters:
 |Artifact Type |Stable Release |SNAPSHOT Release
 
 |RabbitMQ + Maven
-|http://bit.ly/Bacon-RELEASE-stream-applications-rabbit-maven
-|http://bit.ly/Bacon-BUILD-SNAPSHOT-stream-applications-rabbit-maven
+|https://bit.ly/Bacon-RELEASE-stream-applications-rabbit-maven
+|https://bit.ly/Bacon-BUILD-SNAPSHOT-stream-applications-rabbit-maven
 
 |RabbitMQ + Docker
-|http://bit.ly/Bacon-RELEASE-stream-applications-rabbit-docker
+|https://bit.ly/Bacon-RELEASE-stream-applications-rabbit-docker
 |N/A
 
 |Kafka 0.9 + Maven
-|http://bit.ly/Bacon-RELEASE-stream-applications-kafka-09-maven
-|http://bit.ly/Bacon-BUILD-SNAPSHOT-stream-applications-kafka-09-maven
+|https://bit.ly/Bacon-RELEASE-stream-applications-kafka-09-maven
+|https://bit.ly/Bacon-BUILD-SNAPSHOT-stream-applications-kafka-09-maven
 
 |Kafka 0.9 + Docker
-|http://bit.ly/Bacon-RELEASE-stream-applications-kafka-09-docker
+|https://bit.ly/Bacon-RELEASE-stream-applications-kafka-09-docker
 |N/A
 
 |Kafka 0.10 + Maven
-|http://bit.ly/Bacon-RELEASE-stream-applications-kafka-10-maven
-|http://bit.ly/Bacon-BUILD-SNAPSHOT-stream-applications-kafka-10-maven
+|https://bit.ly/Bacon-RELEASE-stream-applications-kafka-10-maven
+|https://bit.ly/Bacon-BUILD-SNAPSHOT-stream-applications-kafka-10-maven
 
 |Kafka 0.10 + Docker
-|http://bit.ly/Bacon-RELEASE-stream-applications-kafka-10-docker
+|https://bit.ly/Bacon-RELEASE-stream-applications-kafka-10-docker
 |N/A
 |======================
 
@@ -168,23 +168,23 @@ List of available Task Application Starters:
 |Artifact Type |Stable Release |SNAPSHOT Release
 
 |Maven
-|http://bit.ly/Belmont-GA-task-applications-maven
-|http://bit.ly/Belmont-BUILD-SNAPSHOT-task-applications-maven
+|https://bit.ly/Belmont-GA-task-applications-maven
+|https://bit.ly/Belmont-BUILD-SNAPSHOT-task-applications-maven
 
 |Docker
-|http://bit.ly/Belmont-GA-task-applications-docker
+|https://bit.ly/Belmont-GA-task-applications-docker
 |N/A
 |======================
 
-You can find more information about the available task starters in the http://cloud.spring.io/spring-cloud-task-app-starters/[Task App Starters Project Page] and
-related reference documentation.  For more information about the available stream starters look at the http://cloud.spring.io/spring-cloud-stream-app-starters/[Stream App Starters Project Page]
+You can find more information about the available task starters in the https://cloud.spring.io/spring-cloud-task-app-starters/[Task App Starters Project Page] and
+related reference documentation.  For more information about the available stream starters look at the https://cloud.spring.io/spring-cloud-stream-app-starters/[Stream App Starters Project Page]
 and related reference documentation.
 
 As an example, if you would like to register all out-of-the-box stream applications built with the RabbitMQ binder in bulk, you can with
 the following command.
 
 ```
-dataflow:>app import --uri http://bit.ly/Bacon-RELEASE-stream-applications-rabbit-maven
+dataflow:>app import --uri https://bit.ly/Bacon-RELEASE-stream-applications-rabbit-maven
 ```
 
 You can also pass the `--local` option (which is `true` by default) to indicate whether the
@@ -884,7 +884,7 @@ Would direct the data payloads from the Amazon S3, FTP, and HTTP sources to the 
 would have all the data from those three sources sent to the file sink.
 
 The Fan-out use case is when you determine the destination of a stream based on some information that is only known at runtime.
-In this case, the link:http://docs.spring.io/spring-cloud-stream-app-starters/docs/Bacon.RELEASE/reference/html/spring-cloud-stream-modules-sinks.html#spring-cloud-stream-modules-router-sink[Router Application] can be used to specify how to direct the incoming message to one of N named destinations.
+In this case, the link:https://docs.spring.io/spring-cloud-stream-app-starters/docs/Bacon.RELEASE/reference/html/spring-cloud-stream-modules-sinks.html#spring-cloud-stream-modules-router-sink[Router Application] can be used to specify how to direct the incoming message to one of N named destinations.
 
 
 [[spring-cloud-dataflow-stream-multi-binder]]
