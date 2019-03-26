@@ -45,12 +45,12 @@ There is a "full" profile that will generate documentation. You can build just t
 === Working with the code
 If you don't have an IDE preference we would recommend that you use
 https://spring.io/tools[Spring Tools Suite] or
-http://www.eclipse.org[Eclipse] when working with the code. We use the
-http://www.eclipse.org/m2e/[m2eclipe] eclipse plugin for maven support. Other IDEs and tools
+https://www.eclipse.org[Eclipse] when working with the code. We use the
+https://www.eclipse.org/m2e/[m2eclipe] eclipse plugin for maven support. Other IDEs and tools
 should also work without issue.
 
 ==== Importing into eclipse with m2eclipse
-We recommend the http://www.eclipse.org/m2e/[m2eclipe] eclipse plugin when working with
+We recommend the https://www.eclipse.org/m2e/[m2eclipe] eclipse plugin when working with
 eclipse. If you don't already have m2eclipse installed it is available from the "eclipse
 marketplace".
 

@@ -19,7 +19,7 @@ You need to have an RDBMS for storing stream, task and app states in the databas
 
 You also need to have link:https://redis.io[Redis] running if you are running any streams that involve analytics applications. Redis may also be required run the unit/integration tests.
 
-For the deployed streams and tasks to communicate, either link:http://www.rabbitmq.com[RabbitMQ] or link:http://kafka.apache.org[Kafka] needs to be installed.
+For the deployed streams and tasks to communicate, either link:https://www.rabbitmq.com[RabbitMQ] or link:https://kafka.apache.org[Kafka] needs to be installed.
 
 [[getting-started-deploying-spring-cloud-dataflow]]
 == Deploying Spring Cloud Data Flow Local Server
@@ -28,9 +28,9 @@ For the deployed streams and tasks to communicate, either link:http://www.rabbit
 +
 [source,bash,subs=attributes]
 ----
-wget http://repo.spring.io/{version-type-lowercase}/org/springframework/cloud/spring-cloud-dataflow-server-local/{project-version}/spring-cloud-dataflow-server-local-{project-version}.jar
+wget https://repo.spring.io/{version-type-lowercase}/org/springframework/cloud/spring-cloud-dataflow-server-local/{project-version}/spring-cloud-dataflow-server-local-{project-version}.jar
 
-wget http://repo.spring.io/{version-type-lowercase}/org/springframework/cloud/spring-cloud-dataflow-shell/{project-version}/spring-cloud-dataflow-shell-{project-version}.jar
+wget https://repo.spring.io/{version-type-lowercase}/org/springframework/cloud/spring-cloud-dataflow-shell/{project-version}/spring-cloud-dataflow-shell-{project-version}.jar
 ----
 +
 . Launch the Data Flow Server
@@ -53,8 +53,8 @@ If the Data Flow Server and shell are not running on the same host, point the sh
 +
 [source,bash]
 ----
-server-unknown:>dataflow config server http://198.51.100.0
-Successfully targeted http://198.51.100.0
+server-unknown:>dataflow config server https://198.51.100.0
+Successfully targeted https://198.51.100.0
 dataflow:>
 ----
 +
@@ -62,7 +62,7 @@ By default, the application registry will be empty. If you would like to registe
 +
 [source,bash,subs=attributes]
 ----
-$ dataflow:>app import --uri http://bit.ly/Bacon-RELEASE-stream-applications-kafka-10-maven
+$ dataflow:>app import --uri https://bit.ly/Bacon-RELEASE-stream-applications-kafka-10-maven
 ----
 +
 NOTE: Depending on your environment, you may need to configure the Data Flow Server to point to a custom

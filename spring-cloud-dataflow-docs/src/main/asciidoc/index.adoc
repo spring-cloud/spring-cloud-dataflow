@@ -9,9 +9,9 @@ Sabby Anandan; Marius Bogoevici; Eric Bottard; Mark Fisher; Ilayaperumal Gopinat
 :hide-uri-scheme:
 :docinfo: shared
 
-:spring-cloud-dataflow-docs: http://docs.spring.io/spring-cloud-dataflow/docs/{project-version}/reference
-:spring-cloud-dataflow-docs-current: http://docs.spring.io/spring-cloud-dataflow/docs/current-SNAPSHOT/reference/html/
-:spring-cloud-stream-docs: http://docs.spring.io/spring-cloud-stream/docs/current/reference/htmlsingle/index.html
+:spring-cloud-dataflow-docs: https://docs.spring.io/spring-cloud-dataflow/docs/{project-version}/reference
+:spring-cloud-dataflow-docs-current: https://docs.spring.io/spring-cloud-dataflow/docs/current-SNAPSHOT/reference/html/
+:spring-cloud-stream-docs: https://docs.spring.io/spring-cloud-stream/docs/current/reference/htmlsingle/index.html
 :github-repo: spring-cloud/spring-cloud-dataflow
 :github-code: https://github.com/{github-repo}
 

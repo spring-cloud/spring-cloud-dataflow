@@ -8,7 +8,7 @@ This section provides answers to some common '`how do I do that...`' type of que
 that often arise when using Spring Cloud Data Flow.
 
 If you are having a specific problem that we don't cover here, you might want to check out
-http://stackoverflow.com/tags/spring-cloud-dataflow[stackoverflow.com] to see if someone has
+https://stackoverflow.com/tags/spring-cloud-dataflow[stackoverflow.com] to see if someone has
 already provided an answer; this is also a great place to ask new questions (please use
 the `spring-cloud-dataflow` tag).
 
@@ -85,7 +85,7 @@ in Cloud Foundry, you'd be passing them as `cf set-env SPRING_APPLICATION_JSON`.
 === Logging
 
 Spring Cloud Data Flow is built upon several Spring projects, but ultimately the dataflow-server is a
-Spring Boot app, so the logging techniques that apply to any link:http://docs.spring.io/spring-boot/docs/current/reference/html/howto-logging.html#howto-logging[Spring Boot]
+Spring Boot app, so the logging techniques that apply to any link:https://docs.spring.io/spring-boot/docs/current/reference/html/howto-logging.html#howto-logging[Spring Boot]
 application are applicable here as well.
 
 
@@ -212,8 +212,8 @@ In this section, we will review the frequently discussed questions in Spring Clo
 
 ==== Advanced SpEL expressions
 
-One of the powerful features of SpEL expressions is http://docs.spring.io/spring/docs/current/spring-framework-reference/html/expressions.html#expressions-ref-functions[functions].
-Spring Integration provides `jsonPath()` and `xpath()` out-of-the-box http://docs.spring.io/spring-integration/reference/html/spel.html#spel-functions[SpEL-functions], if appropriate libraries are in the classpath.
+One of the powerful features of SpEL expressions is https://docs.spring.io/spring/docs/current/spring-framework-reference/html/expressions.html#expressions-ref-functions[functions].
+Spring Integration provides `jsonPath()` and `xpath()` out-of-the-box https://docs.spring.io/spring-integration/reference/html/spel.html#spel-functions[SpEL-functions], if appropriate libraries are in the classpath.
 All the provided Spring Cloud Stream application starters are supplied with the `json-path` and `spring-integration-xml` jars, thus we can use those SpEL-functions in Spring Cloud Data Flow streams whenever expressions are possible.
 For example we can transform JSON-aware `payload` from the HTTP request using some `jsonPath()` expression:
 
@@ -243,7 +243,7 @@ The target Spring Cloud Stream application starter should be re-packaged to supp
 The JDBC-sink can be used to insert message payload data into a relational database table. By default,
 it inserts the entire payload into a table named after the `jdbc.table-name` property, and if it is not set,
 by default the application expects to use a table with the name `messages`. To alter this behavior, the
-JDBC sink accepts link:http://docs.spring.io/spring-cloud-stream-app-starters/docs/current/reference/html/spring-cloud-stream-modules-sinks.html#spring-cloud-stream-modules-jdbc-sink[several options] that you can pass using the --foo=bar notation in the stream, or change globally. 
+JDBC sink accepts link:https://docs.spring.io/spring-cloud-stream-app-starters/docs/current/reference/html/spring-cloud-stream-modules-sinks.html#spring-cloud-stream-modules-jdbc-sink[several options] that you can pass using the --foo=bar notation in the stream, or change globally. 
 The JDBC sink has a `jdbc.initialize` property that if set to `true` will result in the sink creating a table based on the specified configuration when the it starts up. If that initialize property is `false`, which is the default, you will have to make sure that the table to use is already available.
 
 A stream definition using `jdbc` sink relying on all defaults with MySQL as the backing database looks
@@ -331,9 +331,9 @@ java -jar spring-cloud-dataflow-server-local/target/spring-cloud-dataflow-server
 Spring Cloud Data Flow internally uses `bridge-processor` to directly connect different named channel
 destinations. Since we are publishing and subscribing from two different messaging systems, you'd have
 to build the `bridge-processor` with both RabbitMQ and Apache Kafka binders in the classpath. To do that,
-head over to http://start-scs.cfapps.io/ and select `Bridge Processor`, `Kafka binder starter`, and
+head over to https://start-scs.cfapps.io/ and select `Bridge Processor`, `Kafka binder starter`, and
 `Rabbit binder starter` as the dependencies and follow the patching procedure described in the
-link:http://docs.spring.io/spring-cloud-stream-app-starters/docs/Bacon.RELEASE/reference/html/_introduction.html#customizing-binder[reference guide].
+link:https://docs.spring.io/spring-cloud-stream-app-starters/docs/Bacon.RELEASE/reference/html/_introduction.html#customizing-binder[reference guide].
 Specifically, for the `bridge-processor`, you'd have to import the `BridgeProcessorConfiguration`
 provided by the starter.
 
