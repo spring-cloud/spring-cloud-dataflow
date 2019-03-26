@@ -36,20 +36,20 @@ public class ResourceUtilsTests {
 
 	@Test(expected = IllegalArgumentException.class)
 	public void testBadNamedJars() throws Exception {
-		UrlResource urlResource = new UrlResource("http://repo.spring.io/libs-release/org/springframework/cloud/stream/app/file-sink-rabbit/1.2.0.RELEASE/file-sink-rabbit.jar");
+		UrlResource urlResource = new UrlResource("https://repo.spring.io/libs-release/org/springframework/cloud/stream/app/file-sink-rabbit/1.2.0.RELEASE/file-sink-rabbit.jar");
 		ResourceUtils.getUrlResourceVersion(urlResource);
 	}
 
 	@Test(expected = IllegalArgumentException.class)
 	public void testInvalidUrlResourceWithoutVersion() throws Exception {
-		UrlResource urlResource = new UrlResource("http://repo.spring"
+		UrlResource urlResource = new UrlResource("https://repo.spring"
 				+ ".io/libs-release/org/springframework/cloud/stream/app/file-sink-rabbit/1.2.0.RELEASE/file-sink-rabbit-1.2.0.RELEASE.jar");
 		ResourceUtils.getUrlResourceWithoutVersion(urlResource);
 	}
 
 	@Test
 	public void testInvalidURIPath() throws Exception {
-		UrlResource urlResource = new UrlResource("http://com.com-0.0.2-SNAPSHOT");
+		UrlResource urlResource = new UrlResource("https://com.com-0.0.2-SNAPSHOT");
 		try {
 			ResourceUtils.getUrlResourceVersion(urlResource);
 			fail("Excepted IllegalArgumentException for an invalid URI path");
@@ -69,7 +69,7 @@ public class ResourceUtilsTests {
 
 	@Test
 	public void testResourceURIWithMissingFileNameExtension() throws Exception {
-		UrlResource urlResource = new UrlResource("http://com.com-0.0.2-SNAPSHOT/test");
+		UrlResource urlResource = new UrlResource("https://com.com-0.0.2-SNAPSHOT/test");
 		try {
 			ResourceUtils.getUrlResourceVersion(urlResource);
 			fail("Excepted IllegalArgumentException for an invalid URI path");
@@ -81,53 +81,53 @@ public class ResourceUtilsTests {
 
 	@Test
 	public void testInvalidUrlResourceURI() throws Exception {
-		UrlResource urlResource = new UrlResource("http://com.com-0.0.2-SNAPSHOT/test.zip");
+		UrlResource urlResource = new UrlResource("https://com.com-0.0.2-SNAPSHOT/test.zip");
 		try {
 			ResourceUtils.getUrlResourceVersion(urlResource);
 			fail("Excepted IllegalArgumentException for an invalid URL resource URI");
 		}
 		catch (Exception e) {
-			assertThat(e.getMessage().equals("Could not parse version from http://com.com-0.0.2-SNAPSHOT/test.zip, expected format is <artifactId>-<version>.jar"));
+			assertThat(e.getMessage().equals("Could not parse version from https://com.com-0.0.2-SNAPSHOT/test.zip, expected format is <artifactId>-<version>.jar"));
 		}
 	}
 
 	@Test
 	public void testJars() throws MalformedURLException {
 		//Dashes in artifact name
-		UrlResource urlResource = new UrlResource("http://repo.spring.io/libs-release/org/springframework/cloud/stream/app/file-sink-rabbit/file-sink-rabbit-1.2.0.RELEASE.jar");
+		UrlResource urlResource = new UrlResource("https://repo.spring.io/libs-release/org/springframework/cloud/stream/app/file-sink-rabbit/file-sink-rabbit-1.2.0.RELEASE.jar");
 		String version = ResourceUtils.getUrlResourceVersion(urlResource);
 		assertThat(version).isEqualTo("1.2.0.RELEASE");
 
 		String theRest = ResourceUtils.getResourceWithoutVersion(urlResource);
-		assertThat(theRest).isEqualTo("http://repo.spring.io/libs-release/org/springframework/cloud/stream/app/file-sink-rabbit/file-sink-rabbit");
+		assertThat(theRest).isEqualTo("https://repo.spring.io/libs-release/org/springframework/cloud/stream/app/file-sink-rabbit/file-sink-rabbit");
 
 		//No dashes in artfiact name - BUILD-SNAPSHOT
-		urlResource = new UrlResource("http://repo.spring.io/libs-release/org/springframework/cloud/stream/app/file/file-1.2.0.BUILD-SNAPSHOT.jar");
+		urlResource = new UrlResource("https://repo.spring.io/libs-release/org/springframework/cloud/stream/app/file/file-1.2.0.BUILD-SNAPSHOT.jar");
 		version = ResourceUtils.getUrlResourceVersion(urlResource);
 		assertThat(version).isEqualTo("1.2.0.BUILD-SNAPSHOT");
 		theRest = ResourceUtils.getResourceWithoutVersion(urlResource);
-		assertThat(theRest).isEqualTo("http://repo.spring.io/libs-release/org/springframework/cloud/stream/app/file/file");
+		assertThat(theRest).isEqualTo("https://repo.spring.io/libs-release/org/springframework/cloud/stream/app/file/file");
 
 		//No dashes in artfiact name - RELEASE
-		urlResource = new UrlResource("http://repo.spring.io/libs-release/org/springframework/cloud/stream/app/file/file-1.2.0.RELEASE.jar");
+		urlResource = new UrlResource("https://repo.spring.io/libs-release/org/springframework/cloud/stream/app/file/file-1.2.0.RELEASE.jar");
 		version = ResourceUtils.getUrlResourceVersion(urlResource);
 		assertThat(version).isEqualTo("1.2.0.RELEASE");
 		theRest = ResourceUtils.getResourceWithoutVersion(urlResource);
-		assertThat(theRest).isEqualTo("http://repo.spring.io/libs-release/org/springframework/cloud/stream/app/file/file");
+		assertThat(theRest).isEqualTo("https://repo.spring.io/libs-release/org/springframework/cloud/stream/app/file/file");
 
 		//Spring style snapshots naming scheme
-		urlResource = new UrlResource("http://repo.spring.io/libs-release/org/springframework/cloud/stream/app/file-sink-rabbit/file-sink-rabbit-1.2.0.BUILD-SNAPSHOT.jar");
+		urlResource = new UrlResource("https://repo.spring.io/libs-release/org/springframework/cloud/stream/app/file-sink-rabbit/file-sink-rabbit-1.2.0.BUILD-SNAPSHOT.jar");
 		version = ResourceUtils.getUrlResourceVersion(urlResource);
 		assertThat(version).isEqualTo("1.2.0.BUILD-SNAPSHOT");
 		theRest = ResourceUtils.getResourceWithoutVersion(urlResource);
-		assertThat(theRest).isEqualTo("http://repo.spring.io/libs-release/org/springframework/cloud/stream/app/file-sink-rabbit/file-sink-rabbit");
+		assertThat(theRest).isEqualTo("https://repo.spring.io/libs-release/org/springframework/cloud/stream/app/file-sink-rabbit/file-sink-rabbit");
 
 		//Standard maven style naming scheme
-		urlResource = new UrlResource("http://repo.spring.io/libs-release/org/springframework/cloud/stream/app/file-sink-rabbit/file-sink-rabbit-1.2.0-SNAPSHOT.jar");
+		urlResource = new UrlResource("https://repo.spring.io/libs-release/org/springframework/cloud/stream/app/file-sink-rabbit/file-sink-rabbit-1.2.0-SNAPSHOT.jar");
 		version = ResourceUtils.getUrlResourceVersion(urlResource);
 		assertThat(version).isEqualTo("1.2.0-SNAPSHOT");
 		theRest = ResourceUtils.getResourceWithoutVersion(urlResource);
-		assertThat(theRest).isEqualTo("http://repo.spring.io/libs-release/org/springframework/cloud/stream/app/file-sink-rabbit/file-sink-rabbit");
+		assertThat(theRest).isEqualTo("https://repo.spring.io/libs-release/org/springframework/cloud/stream/app/file-sink-rabbit/file-sink-rabbit");
 	}
 
 	@Test

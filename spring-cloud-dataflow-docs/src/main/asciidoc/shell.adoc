@@ -197,7 +197,7 @@ Many applications accept options that are to be interpreted as SpEL expressions,
 * Literals can be enclosed in either single or double quotes.
 * Quotes need to be doubled to embed a literal quote. Single quotes inside double quotes need no special treatment, and the reverse is also true.
 
-As a last example, assume you want to use the link:http://docs.spring.io/spring-cloud-stream-app-starters/docs/Celsius.SR1/reference/html/spring-cloud-stream-modules-processors.html#spring-clound-stream-modules-transform-processor[transform processor].
+As a last example, assume you want to use the link:https://docs.spring.io/spring-cloud-stream-app-starters/docs/Celsius.SR1/reference/html/spring-cloud-stream-modules-processors.html#spring-clound-stream-modules-transform-processor[transform processor].
 This processor accepts an `expression` option which is a SpEL expression. It is to be evaluated against the incoming message, with a default of `payload` (which forwards the message payload untouched).
 
 It is important to understand that the following statements are equivalent:
