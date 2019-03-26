@@ -127,12 +127,12 @@ public class LocalServerSecurityWithUsersFileTestsWithoutTasks {
 				{ HttpMethod.POST, HttpStatus.FORBIDDEN, "/apps", viewOnlyUser,
 						TestUtils.toImmutableMap("uri", "???", "apps", "??", "force", "true") },
 				{ HttpMethod.POST, HttpStatus.CREATED, "/apps", createOnlyUser,
-						TestUtils.toImmutableMap("uri", "http://repo.spring.io/libs-release/org/springframework/cloud/stream/app/spring-cloud-stream-app-descriptor/Celsius.SR1/spring-cloud-stream-app-descriptor-Celsius.SR1.stream-apps-rabbit-maven", "apps",
+						TestUtils.toImmutableMap("uri", "https://repo.spring.io/libs-release/org/springframework/cloud/stream/app/spring-cloud-stream-app-descriptor/Celsius.SR1/spring-cloud-stream-app-descriptor-Celsius.SR1.stream-apps-rabbit-maven", "apps",
 								"app=is_ignored", "force", "false") },
 				// Should be 400 -
 				// See https://github.com/spring-cloud/spring-cloud-dataflow/issues/1071
 				{ HttpMethod.POST, HttpStatus.CREATED, "/apps", createOnlyUser,
-						TestUtils.toImmutableMap("uri", "http://repo.spring.io/libs-release/org/springframework/cloud/stream/app/spring-cloud-stream-app-descriptor/Celsius.SR1/spring-cloud-stream-app-descriptor-Celsius.SR1.stream-apps-rabbit-maven", "force",
+						TestUtils.toImmutableMap("uri", "https://repo.spring.io/libs-release/org/springframework/cloud/stream/app/spring-cloud-stream-app-descriptor/Celsius.SR1/spring-cloud-stream-app-descriptor-Celsius.SR1.stream-apps-rabbit-maven", "force",
 								"false") },
 				{ HttpMethod.POST, HttpStatus.INTERNAL_SERVER_ERROR, "/apps", createOnlyUser,
 						TestUtils.toImmutableMap("apps",

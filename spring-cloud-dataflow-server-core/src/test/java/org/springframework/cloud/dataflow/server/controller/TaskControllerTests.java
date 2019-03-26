@@ -135,7 +135,7 @@ public class TaskControllerTests {
 	@Test
 	public void testSave() throws Exception {
 		assertEquals(0, repository.count());
-		appRegistry.save("task", ApplicationType.task, new URI("http://fake.example.com/"), null);
+		appRegistry.save("task", ApplicationType.task, new URI("https://fake.example.com/"), null);
 		mockMvc.perform(post("/tasks/definitions/").param("name", "myTask").param("definition", "task")
 				.accept(MediaType.APPLICATION_JSON)).andDo(print()).andExpect(status().isOk());
 
@@ -151,7 +151,7 @@ public class TaskControllerTests {
 
 	@Test
 	public void testSaveDuplicate() throws Exception {
-		appRegistry.save("task", ApplicationType.task, new URI("http://fake.example.com/"), null);
+		appRegistry.save("task", ApplicationType.task, new URI("https://fake.example.com/"), null);
 		repository.save(new TaskDefinition("myTask", "task"));
 		mockMvc.perform(post("/tasks/definitions/").param("name", "myTask").param("definition", "task")
 				.accept(MediaType.APPLICATION_JSON)).andExpect(status().isConflict());
@@ -161,7 +161,7 @@ public class TaskControllerTests {
 	@Test
 	public void testSaveWithParameters() throws Exception {
 
-		appRegistry.save("task", ApplicationType.task, new URI("http://fake.example.com/"), null);
+		appRegistry.save("task", ApplicationType.task, new URI("https://fake.example.com/"), null);
 		mockMvc.perform(post("/tasks/definitions/").param("name", "myTask")
 				.param("definition", "task --foo=bar --bar=baz").accept(MediaType.APPLICATION_JSON)).andDo(print())
 				.andExpect(status().isOk());
@@ -180,7 +180,7 @@ public class TaskControllerTests {
 	@Test
 	public void testSaveCompositeTaskWithParameters() throws Exception {
 
-		appRegistry.save("task", ApplicationType.task, new URI("http://fake.example.com/"), null);
+		appRegistry.save("task", ApplicationType.task, new URI("https://fake.example.com/"), null);
 		mockMvc.perform(post("/tasks/definitions/").param("name", "myTask")
 				.param("definition", "t1: task --foo='bar rab' && t2: task --foo='one two'").accept(MediaType.APPLICATION_JSON)).andDo(print())
 				.andExpect(status().isOk());
