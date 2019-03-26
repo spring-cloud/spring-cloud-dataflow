@@ -4,7 +4,7 @@
 [partintro]
 --
 This section goes into more detail about how you can work with
-http://cloud.spring.io/spring-cloud-task/[Spring Cloud Tasks]. It covers topics such as
+https://cloud.spring.io/spring-cloud-task/[Spring Cloud Tasks]. It covers topics such as
 creating and running task applications.
 
 If you're just starting out with Spring Cloud Data Flow, you should probably read the
@@ -15,12 +15,12 @@ this section.
 [[spring-cloud-dataflow-task-intro]]
 == Introducing Spring Cloud Task
 A task executes a process on demand.  In this case a task is a
-http://projects.spring.io/spring-boot/[Spring Boot] application that is annotated with
+https://projects.spring.io/spring-boot/[Spring Boot] application that is annotated with
 `@EnableTask`.  Hence a user launches a task that performs a certain process, and once
 complete the task ends. An example of a task would be a boot application that exports
 data from a JDBC repository to an HDFS instance.  Tasks record the start time and the end
 time as well as the boot exit code in a relational database. The task implementation is
-based on the http://cloud.spring.io/spring-cloud-task/[Spring Cloud Task] project.
+based on the https://cloud.spring.io/spring-cloud-task/[Spring Cloud Task] project.
 
 == The Lifecycle of a task
 Before we dive deeper into the details of creating Tasks, we need to understand the
@@ -37,7 +37,7 @@ While Spring Cloud Task does provide a number of out of the box applications (vi
 https://github.com/spring-cloud/spring-cloud-task-app-starters[spring-cloud-task-app-starters]),
 most task applications will be custom developed.  In order to create a custom task application:
 
-. Create a new project via http://start.spring.io[Spring Initializer] via either the
+. Create a new project via https://start.spring.io[Spring Initializer] via either the
 website or your IDE making sure to select the following starters:
 .. `Cloud Task` - This dependency is the `spring-cloud-starter-task`.
 .. `JDBC` - This is the dependency for the `spring-jdbc` starter.
@@ -71,7 +71,7 @@ dataflow:>app register --name task1 --type task --uri maven://com.example:mytask
 
 dataflow:>app register --name task2 --type task --uri file:///Users/example/mytask-1.0.2.jar
 
-dataflow:>app register --name task3 --type task --uri http://example.com/mytask-1.0.2.jar
+dataflow:>app register --name task3 --type task --uri https://example.com/mytask-1.0.2.jar
 ```
 
 When providing a URI with the `maven` scheme, the format should conform to the following:
@@ -105,15 +105,15 @@ List of available static property files:
 [width="100%",frame="topbot",options="header"]
 |======================
 |Artifact Type |Stable Release |SNAPSHOT Release
-|Maven   |link:http://bit.ly/1-0-1-GA-task-applications-maven[http://bit.ly/1-0-1-GA-task-applications-maven] |link:http://bit.ly/1-0-2-SNAPSHOT-task-applications-maven[http://bit.ly/1-0-2-SNAPSHOT-task-applications-maven]
-|Docker  |link:http://bit.ly/1-0-1-GA-task-applications-docker[http://bit.ly/1-0-1-GA-task-applications-docker] | link:http://bit.ly/1-0-2-SNAPSHOT-task-applications-docker[http://bit.ly/1-0-2-SNAPSHOT-task-applications-docker]
+|Maven   |link:https://bit.ly/1-0-1-GA-task-applications-maven[https://bit.ly/1-0-1-GA-task-applications-maven] |link:https://bit.ly/1-0-2-SNAPSHOT-task-applications-maven[https://bit.ly/1-0-2-SNAPSHOT-task-applications-maven]
+|Docker  |link:https://bit.ly/1-0-1-GA-task-applications-docker[https://bit.ly/1-0-1-GA-task-applications-docker] | link:https://bit.ly/1-0-2-SNAPSHOT-task-applications-docker[https://bit.ly/1-0-2-SNAPSHOT-task-applications-docker]
 |======================
 
 For example, if you would like to register all out-of-the-box task applications in bulk, you can with
 the following command.
 
 ```
-dataflow:>app import --uri http://bit.ly/1-0-1-GA-task-applications-maven
+dataflow:>app import --uri https://bit.ly/1-0-1-GA-task-applications-maven
 ```
 
 You can also pass the `--local` option (which is TRUE by default) to indicate whether the

@@ -127,7 +127,7 @@ public class DataFlowTemplate implements DataFlowOperations {
 	 * </ul><p>
 	 *
 	 * For more information see
-	 * <a href="http://docs.oracle.com/javase/7/docs/technotes/guides/net/properties.html">this link</a>
+	 * <a href="https://docs.oracle.com/javase/7/docs/technotes/guides/net/properties.html">this link</a>
 	 *
 	 * @param baseURI Must not be null
 	 */

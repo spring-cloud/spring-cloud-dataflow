@@ -9,7 +9,7 @@ In this section you will learn all about Streams and how to use them with Spring
 [[spring-cloud-dataflow-stream-intro]]
 == Introduction
 
-In Spring Cloud Data Flow, a basic stream defines the ingestion of event data from a _source_ to a _sink_ that passes through any number of _processors_. Streams are composed of http://cloud.spring.io/spring-cloud-stream/[Spring Cloud Stream] applications and the deployment of stream definitions is done via the Data Flow Server (REST API). The xref:getting-started#getting-started[Getting Started] section shows you how to start the server and how to start and use the Spring Cloud Data Flow shell.
+In Spring Cloud Data Flow, a basic stream defines the ingestion of event data from a _source_ to a _sink_ that passes through any number of _processors_. Streams are composed of https://cloud.spring.io/spring-cloud-stream/[Spring Cloud Stream] applications and the deployment of stream definitions is done via the Data Flow Server (REST API). The xref:getting-started#getting-started[Getting Started] section shows you how to start the server and how to start and use the Spring Cloud Data Flow shell.
 
 A high level DSL is used to create stream definitions. The DSL to define a stream that has an http source and a file sink (with no processors) is shown below
 
@@ -46,7 +46,7 @@ dataflow:>app register --name mysource --type source --uri maven://com.example:m
 
 dataflow:>app register --name myprocessor --type processor --uri file:///Users/example/myprocessor-1.2.3.jar
 
-dataflow:>app register --name mysink --type sink --uri http://example.com/mysink-2.0.1.jar
+dataflow:>app register --name mysink --type sink --uri https://example.com/mysink-2.0.1.jar
 ```
 
 When providing a URI with the `maven` scheme, the format should conform to the following:
@@ -89,12 +89,12 @@ List of available Stream Application Starters:
 [width="100%",frame="topbot",options="header"]
 |======================
 |Artifact Type |Stable Release |SNAPSHOT Release
-|RabbitMQ + Maven |link:http://bit.ly/Avogadro-SR1-stream-applications-rabbit-maven[http://bit.ly/Avogadro-SR1-stream-applications-rabbit-maven] |link:http://bit.ly/Bacon-BUILD-SNAPSHOT-stream-applications-rabbit-maven[http://bit.ly/Bacon-BUILD-SNAPSHOT-stream-applications-rabbit-maven]
-|RabbitMQ + Docker|link:http://bit.ly/Avogadro-SR1-stream-applications-rabbit-docker[http://bit.ly/Avogadro-SR1-stream-applications-rabbit-docker] | N/A ]
-|Kafka 0.9 + Maven 	  |link:http://bit.ly/Avogadro-SR1-stream-applications-kafka-09-maven[http://bit.ly/Avogadro-SR1-stream-applications-kafka-09-maven] |link:http://bit.ly/Bacon-BUILD-SNAPSHOT-stream-applications-kafka-09-maven[http://bit.ly/Bacon-BUILD-SNAPSHOT-stream-applications-kafka-09-maven]
-|Kafka 0.9 + Docker   |link:http://bit.ly/Avogadro-SR1-stream-applications-kafka-09-docker[http://bit.ly/Avogadro-SR1-stream-applications-kafka-09-docker] | N/A ]
-|Kafka 0.10 + Maven 	  |link:http://bit.ly/Avogadro-SR1-stream-applications-kafka-10-maven[http://bit.ly/Avogadro-SR1-stream-applications-kafka-10-maven] |link:http://bit.ly/Bacon-BUILD-SNAPSHOT-stream-applications-kafka-10-maven[http://bit.ly/Bacon-BUILD-SNAPSHOT-stream-applications-kafka-10-maven]
-|Kafka 0.10 + Docker   |http://bit.ly/Avogadro-SR1-stream-applications-kafka-10-docker[http://bit.ly/Avogadro-SR1-stream-applications-kafka-10-docker] | N/A ]
+|RabbitMQ + Maven |link:https://bit.ly/Avogadro-SR1-stream-applications-rabbit-maven[https://bit.ly/Avogadro-SR1-stream-applications-rabbit-maven] |link:https://bit.ly/Bacon-BUILD-SNAPSHOT-stream-applications-rabbit-maven[https://bit.ly/Bacon-BUILD-SNAPSHOT-stream-applications-rabbit-maven]
+|RabbitMQ + Docker|link:https://bit.ly/Avogadro-SR1-stream-applications-rabbit-docker[https://bit.ly/Avogadro-SR1-stream-applications-rabbit-docker] | N/A ]
+|Kafka 0.9 + Maven 	  |link:https://bit.ly/Avogadro-SR1-stream-applications-kafka-09-maven[https://bit.ly/Avogadro-SR1-stream-applications-kafka-09-maven] |link:https://bit.ly/Bacon-BUILD-SNAPSHOT-stream-applications-kafka-09-maven[https://bit.ly/Bacon-BUILD-SNAPSHOT-stream-applications-kafka-09-maven]
+|Kafka 0.9 + Docker   |link:https://bit.ly/Avogadro-SR1-stream-applications-kafka-09-docker[https://bit.ly/Avogadro-SR1-stream-applications-kafka-09-docker] | N/A ]
+|Kafka 0.10 + Maven 	  |link:https://bit.ly/Avogadro-SR1-stream-applications-kafka-10-maven[https://bit.ly/Avogadro-SR1-stream-applications-kafka-10-maven] |link:https://bit.ly/Bacon-BUILD-SNAPSHOT-stream-applications-kafka-10-maven[https://bit.ly/Bacon-BUILD-SNAPSHOT-stream-applications-kafka-10-maven]
+|Kafka 0.10 + Docker   |https://bit.ly/Avogadro-SR1-stream-applications-kafka-10-docker[https://bit.ly/Avogadro-SR1-stream-applications-kafka-10-docker] | N/A ]
 |======================
 
 List of available Task Application Starters:
@@ -102,19 +102,19 @@ List of available Task Application Starters:
 [width="100%",frame="topbot",options="header"]
 |======================
 |Artifact Type |Stable Release |SNAPSHOT Release
-|Maven   |http://bit.ly/Addison-GA-task-applications-maven[http://bit.ly/Addison-GA-task-applications-maven] |link:http://bit.ly/Belmont-BUILD-SNAPSHOT-task-applications-maven[http://bit.ly/Belmont-BUILD-SNAPSHOT-task-applications-maven]
-|Docker  |link:http://bit.ly/Addison-GA-task-applications-docker[http://bit.ly/Addison-GA-task-applications-docker] | N/A ]
+|Maven   |https://bit.ly/Addison-GA-task-applications-maven[https://bit.ly/Addison-GA-task-applications-maven] |link:https://bit.ly/Belmont-BUILD-SNAPSHOT-task-applications-maven[https://bit.ly/Belmont-BUILD-SNAPSHOT-task-applications-maven]
+|Docker  |link:https://bit.ly/Addison-GA-task-applications-docker[https://bit.ly/Addison-GA-task-applications-docker] | N/A ]
 |======================
 
-You can find more information about the available task starters look the http://cloud.spring.io/spring-cloud-task-app-starters/[Task App Starters Project Page] and
-related reference documentation.  For more information about the available stream starters look at the http://cloud.spring.io/spring-cloud-stream-app-starters/[Stream App Starters Project Page]
+You can find more information about the available task starters look the https://cloud.spring.io/spring-cloud-task-app-starters/[Task App Starters Project Page] and
+related reference documentation.  For more information about the available stream starters look at the https://cloud.spring.io/spring-cloud-stream-app-starters/[Stream App Starters Project Page]
 and related reference documentation.
 
 As an example, if you would like to register all out-of-the-box stream applications built with the RabbitMQ binder in bulk, you can with
 the following command.
 
 ```
-dataflow:>app import --uri http://bit.ly/Avogadro-SR1-stream-applications-rabbit-maven
+dataflow:>app import --uri https://bit.ly/Avogadro-SR1-stream-applications-rabbit-maven
 ```
 
 You can also pass the `--local` option (which is TRUE by default) to indicate whether the

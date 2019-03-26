@@ -137,7 +137,7 @@ public class TaskControllerTests {
 	@Test
 	public void testSave() throws Exception {
 		assertEquals(0, repository.count());
-		appRegistry.save("task", ApplicationType.task, new URI("http://fake.example.com/"));
+		appRegistry.save("task", ApplicationType.task, new URI("https://fake.example.com/"));
 		mockMvc.perform(
 				post("/tasks/definitions/").param("name", "myTask").param("definition", "task")
 						.accept(MediaType.APPLICATION_JSON)).andDo(print())
