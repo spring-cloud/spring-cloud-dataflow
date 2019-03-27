@@ -244,12 +244,13 @@ public class SkipperStreamDeployer implements StreamDeployer {
 			release = this.skipperClient.install(installRequest);
 		}
 		catch (Exception e) {
-			logger.error("Skipper install failed. Deleting the package: " + packageName);
+			logger.error("Skipper install failed. Undeploying the stream and deleting the package: " + packageName);
 			try {
+				undeployStream(streamName);
 				this.skipperClient.packageDelete(packageName);
 			}
 			catch (Exception e1) {
-				logger.error("Package delete threw exception: " + e1.getMessage());
+				logger.error("Undeploying the stream threw exception: " + e1.getMessage());
 			}
 			throw new SkipperException(e.getMessage());
 		}

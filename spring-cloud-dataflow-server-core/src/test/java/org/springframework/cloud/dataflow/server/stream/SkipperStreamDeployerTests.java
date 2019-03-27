@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2018 the original author or authors.
+ * Copyright 2017-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -43,6 +43,7 @@ import org.springframework.cloud.deployer.spi.core.AppDefinition;
 import org.springframework.cloud.deployer.spi.core.AppDeploymentRequest;
 import org.springframework.cloud.deployer.spi.core.RuntimeEnvironmentInfo;
 import org.springframework.cloud.skipper.ReleaseNotFoundException;
+import org.springframework.cloud.skipper.SkipperException;
 import org.springframework.cloud.skipper.client.SkipperClient;
 import org.springframework.cloud.skipper.domain.AboutResource;
 import org.springframework.cloud.skipper.domain.Dependency;
@@ -63,6 +64,7 @@ import org.springframework.util.StreamUtils;
 
 import static junit.framework.TestCase.fail;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
@@ -171,6 +173,34 @@ public class SkipperStreamDeployerTests {
 		assertThat(uploadRequestCaptor.getValue().getVersion()).isEqualTo("1.0.1");
 		assertThat(installRequestCaptor.getValue().getPackageIdentifier().getRepositoryName()).isEqualTo("mylocal-repo1");
 		assertThat(installRequestCaptor.getValue().getInstallProperties().getPlatformName()).isEqualTo("testPlatform");
+	}
+
+	@Test
+	public void testUndeployStreamOnInstallFailure() {
+		Map<String, String> skipperDeployerProperties = new HashMap<>();
+		skipperDeployerProperties.put(SkipperStream.SKIPPER_PACKAGE_NAME, "package1");
+		skipperDeployerProperties.put(SkipperStream.SKIPPER_PACKAGE_VERSION, "1.0.1");
+		skipperDeployerProperties.put(SkipperStream.SKIPPER_PLATFORM_NAME, "testPlatform");
+		skipperDeployerProperties.put(SkipperStream.SKIPPER_REPO_NAME, "mylocal-repo1");
+		String streamName = "test1";
+		StreamDeploymentRequest streamDeploymentRequest = new StreamDeploymentRequest("test1", "time | log",
+				new ArrayList<>(),
+				skipperDeployerProperties);
+
+		SkipperClient skipperClient = MockUtils.createSkipperClientMock();
+		SkipperStreamDeployer skipperStreamDeployer = new SkipperStreamDeployer(skipperClient,
+				mock(StreamDefinitionRepository.class), mock(AppRegistryService.class), mock(ForkJoinPool.class));
+		when(skipperClient.search(eq(streamName), eq(false)))
+				.thenReturn(new Resources(Collections.singleton(new PackageMetadata())));
+		when(skipperClient.install(any(InstallRequest.class))).thenThrow(RuntimeException.class);
+		try {
+			skipperStreamDeployer.deployStream(streamDeploymentRequest);
+			fail("Expected to throw Skipper Exception");
+		}
+		catch (SkipperException se) {
+			verify(skipperClient, times(1)).delete(eq(streamName), eq(true));
+			verify(skipperClient, times(1)).packageDelete(eq("package1"));
+		}
 	}
 
 	@Test
