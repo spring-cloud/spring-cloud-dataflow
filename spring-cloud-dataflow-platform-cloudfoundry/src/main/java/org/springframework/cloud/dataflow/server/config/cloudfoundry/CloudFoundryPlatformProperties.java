@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 the original author or authors.
+ * Copyright 2018-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,10 +16,9 @@
 
 package org.springframework.cloud.dataflow.server.config.cloudfoundry;
 
-import java.util.LinkedHashMap;
-import java.util.Map;
-
 import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.cloud.dataflow.core.AbstractPlatformProperties;
+import org.springframework.cloud.dataflow.server.config.cloudfoundry.CloudFoundryPlatformProperties.CloudFoundryProperties;
 import org.springframework.cloud.deployer.spi.cloudfoundry.CloudFoundryConnectionProperties;
 import org.springframework.cloud.deployer.spi.cloudfoundry.CloudFoundryDeploymentProperties;
 
@@ -27,21 +26,12 @@ import org.springframework.cloud.deployer.spi.cloudfoundry.CloudFoundryDeploymen
  * @author Mark Pollack
  * @author Ilayaperumal Gopinathan
  * @author Donovan Muller
+ * @author David Turanski
  *
  * @since 2.0
  */
 @ConfigurationProperties("spring.cloud.dataflow.task.platform.cloudfoundry")
-public class CloudFoundryPlatformProperties {
-
-	private Map<String, CloudFoundryProperties> accounts = new LinkedHashMap<>();
-
-	public Map<String, CloudFoundryProperties> getAccounts() {
-		return accounts;
-	}
-
-	public void setAccounts(Map<String, CloudFoundryProperties> accounts) {
-		this.accounts = accounts;
-	}
+public class CloudFoundryPlatformProperties extends AbstractPlatformProperties<CloudFoundryProperties> {
 
 	public static class CloudFoundryProperties {
 

@@ -15,28 +15,14 @@
  */
 package org.springframework.cloud.dataflow.server.config.features;
 
-import java.util.LinkedHashMap;
-import java.util.Map;
-
 import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.cloud.dataflow.core.AbstractPlatformProperties;
 import org.springframework.cloud.deployer.spi.local.LocalDeployerProperties;
 
 /**
  * @author Mark Pollack
+ * @author David Turanski
  */
 @ConfigurationProperties("spring.cloud.dataflow.task.platform.local")
-public class LocalPlatformProperties {
-
-	private Map<String, LocalDeployerProperties> accounts = new LinkedHashMap<>();
-
-	public LocalPlatformProperties() {
-	}
-
-	public Map<String, LocalDeployerProperties> getAccounts() {
-		return accounts;
-	}
-
-	public void setAccounts(Map<String, LocalDeployerProperties> accounts) {
-		this.accounts = accounts;
-	}
+public class LocalPlatformProperties extends AbstractPlatformProperties<LocalDeployerProperties> {
 }

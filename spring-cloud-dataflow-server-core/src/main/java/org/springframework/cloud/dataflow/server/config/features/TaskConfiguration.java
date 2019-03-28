@@ -15,9 +15,7 @@
  */
 package org.springframework.cloud.dataflow.server.config.features;
 
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 import javax.sql.DataSource;
 
@@ -35,7 +33,6 @@ import org.springframework.boot.autoconfigure.jdbc.DataSourceProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.cloud.dataflow.audit.service.AuditRecordService;
 import org.springframework.cloud.dataflow.configuration.metadata.ApplicationConfigurationMetadataResolver;
-import org.springframework.cloud.dataflow.core.Launcher;
 import org.springframework.cloud.dataflow.core.TaskPlatform;
 import org.springframework.cloud.dataflow.registry.service.AppRegistryService;
 import org.springframework.cloud.dataflow.server.DockerValidatorProperties;
@@ -61,8 +58,6 @@ import org.springframework.cloud.dataflow.server.service.impl.DefaultTaskJobServ
 import org.springframework.cloud.dataflow.server.service.impl.DefaultTaskSaveService;
 import org.springframework.cloud.dataflow.server.service.impl.TaskAppDeploymentRequestCreator;
 import org.springframework.cloud.dataflow.server.service.impl.TaskConfigurationProperties;
-import org.springframework.cloud.deployer.spi.local.LocalDeployerProperties;
-import org.springframework.cloud.deployer.spi.local.LocalTaskLauncher;
 import org.springframework.cloud.task.repository.TaskExplorer;
 import org.springframework.cloud.task.repository.TaskRepository;
 import org.springframework.context.annotation.Bean;
@@ -71,8 +66,6 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.data.map.repository.config.EnableMapRepositories;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
-import org.springframework.util.CollectionUtils;
-import org.springframework.util.StringUtils;
 
 /**
  * @author Thomas Risberg
@@ -112,23 +105,7 @@ public class TaskConfiguration {
 	@Bean
 	@Conditional(OnLocalPlatform.class)
 	public TaskPlatform localTaskPlatform(LocalPlatformProperties localPlatformProperties) {
-		List<Launcher> launchers = new ArrayList<>();
-		Map<String, LocalDeployerProperties> localDeployerPropertiesMap = localPlatformProperties.getAccounts();
-
-		if (CollectionUtils.isEmpty(localDeployerPropertiesMap)) {
-			logger.info("Creating Local Task Launcher named 'default' since no Task Launchers configured.");
-			launchers.add(createDefaultLauncher());
-		} else {
-			for (Map.Entry<String, LocalDeployerProperties> entry : localDeployerPropertiesMap
-				.entrySet()) {
-				LocalTaskLauncher localTaskLauncher = new LocalTaskLauncher(entry.getValue());
-				Launcher launcher = new Launcher(entry.getKey(), "local", localTaskLauncher);
-				launcher.setDescription(prettyPrintLocalDeployerProperties(entry.getValue()));
-				launchers.add(launcher);
-			}
-		}
-
-		return new TaskPlatform("Local", launchers);
+		return new LocalTaskPlatformFactory(localPlatformProperties).createTaskPlatform();
 	}
 
 	@Bean
@@ -220,27 +197,4 @@ public class TaskConfiguration {
 		repositoryFactoryBean.setTransactionManager(platformTransactionManager);
 		return repositoryFactoryBean;
 	}
-
-	private Launcher createDefaultLauncher() {
-		LocalDeployerProperties localDeployerProperties = new LocalDeployerProperties();
-		LocalTaskLauncher localTaskLauncher = new LocalTaskLauncher(localDeployerProperties);
-		Launcher launcher = new Launcher("default", "local", localTaskLauncher);
-		launcher.setDescription(prettyPrintLocalDeployerProperties(localDeployerProperties));
-		return launcher;
-	}
-
-	private String prettyPrintLocalDeployerProperties(LocalDeployerProperties localDeployerProperties) {
-		StringBuilder builder = new StringBuilder();
-		if (localDeployerProperties.getJavaOpts() != null) {
-			builder.append("JavaOpts = [" + localDeployerProperties.getJavaOpts() + "], ");
-		}
-		builder.append("ShutdownTimeout = [" + localDeployerProperties.getShutdownTimeout() + "], ");
-		builder.append("EnvVarsToInherit = ["
-			+ StringUtils.arrayToCommaDelimitedString(localDeployerProperties.getEnvVarsToInherit()) + "], ");
-		builder.append("JavaCmd = [" + localDeployerProperties.getJavaCmd() + "], ");
-		builder.append("WorkingDirectoriesRoot = [" + localDeployerProperties.getWorkingDirectoriesRoot() + "], ");
-		builder.append("DeleteFilesOnExit = [" + localDeployerProperties.isDeleteFilesOnExit() + "]");
-		return builder.toString();
-	}
-
 }

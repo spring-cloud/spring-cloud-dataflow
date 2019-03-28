@@ -16,11 +16,10 @@
 
 package org.springframework.cloud.dataflow.core;
 
-import java.util.List;
-
 /**
  * @author David Turanski
  **/
-public interface LauncherFactory {
-	List<Launcher> createLaunchers();
+public interface TaskPlatformFactory {
+	TaskPlatform createTaskPlatform();
+	Launcher createLauncher(String account);
 }
