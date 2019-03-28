@@ -16,9 +16,9 @@
 
 package org.springframework.cloud.dataflow.server.single.security;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.junit.rules.ExternalResource;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.cloud.dataflow.server.single.security.support.OAuth2TestServer;
@@ -36,7 +36,7 @@ public class OAuth2ServerResource extends ExternalResource {
 
 	private static final String OAUTH2_PORT_PROPERTY = "oauth2.port";
 
-	private final Log LOGGER = LogFactory.getLog(OAuth2ServerResource.class);
+	private static final Logger logger = LoggerFactory.getLogger(OAuth2ServerResource.class);
 
 	private String originalOAuth2Port;
 
@@ -55,7 +55,7 @@ public class OAuth2ServerResource extends ExternalResource {
 
 		this.oauth2ServerPort = SocketUtils.findAvailableTcpPort();
 
-		LOGGER.info("Setting OAuth2 Server port to " + this.oauth2ServerPort);
+		logger.info("Setting OAuth2 Server port to " + this.oauth2ServerPort);
 
 		System.setProperty(OAUTH2_PORT_PROPERTY, String.valueOf(this.oauth2ServerPort));
 

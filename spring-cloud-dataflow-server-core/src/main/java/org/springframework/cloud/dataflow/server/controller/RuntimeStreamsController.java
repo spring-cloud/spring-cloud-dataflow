@@ -23,8 +23,8 @@ import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import org.springframework.cloud.dataflow.server.controller.support.StreamStatus;
 import org.springframework.cloud.dataflow.server.stream.StreamDeployer;
@@ -49,7 +49,7 @@ public class RuntimeStreamsController {
 	public static final String ATTRIBUTE_SKIPPER_RELEASE_VERSION = "skipper.release.version";
 	public static final String ATTRIBUTE_GUID = "guid";
 
-	private static Log logger = LogFactory.getLog(RuntimeStreamsController.class);
+	private static final Logger logger = LoggerFactory.getLogger(RuntimeStreamsController.class);
 
 	private final StreamDeployer streamDeployer;
 
