@@ -22,8 +22,8 @@ import java.util.concurrent.ForkJoinPool;
 
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
@@ -149,7 +149,7 @@ import org.springframework.web.client.RestTemplate;
 @EnableTransactionManagement
 public class DataFlowControllerAutoConfiguration {
 
-	private static Log logger = LogFactory.getLog(DataFlowControllerAutoConfiguration.class);
+	private static final Logger logger = LoggerFactory.getLogger(DataFlowControllerAutoConfiguration.class);
 
 	@Bean
 	public RootController rootController(EntityLinks entityLinks) {

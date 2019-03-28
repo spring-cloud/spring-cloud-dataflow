@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 the original author or authors.
+ * Copyright 2017-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,8 +22,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import org.springframework.cloud.dataflow.configuration.metadata.ApplicationConfigurationMetadataResolver;
 import org.springframework.cloud.dataflow.core.AppRegistration;
@@ -57,7 +57,7 @@ public class AppDeploymentRequestCreator {
 
 	private static final String DEFAULT_PARTITION_KEY_EXPRESSION = "payload";
 
-	private static Log logger = LogFactory.getLog(AppDeploymentRequestCreator.class);
+	private static final Logger logger = LoggerFactory.getLogger(AppDeploymentRequestCreator.class);
 
 	private final AppRegistryService appRegistry;
 
