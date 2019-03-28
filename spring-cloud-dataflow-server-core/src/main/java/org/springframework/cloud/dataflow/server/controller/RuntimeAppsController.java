@@ -21,8 +21,8 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import org.springframework.cloud.dataflow.rest.resource.AppInstanceStatusResource;
 import org.springframework.cloud.dataflow.rest.resource.AppStatusResource;
@@ -58,7 +58,7 @@ import org.springframework.web.bind.annotation.RestController;
 @ExposesResourceFor(AppStatusResource.class)
 public class RuntimeAppsController {
 
-	private static Log logger = LogFactory.getLog(RuntimeAppsController.class);
+	private static final Logger logger = LoggerFactory.getLogger(RuntimeAppsController.class);
 
 	private static final Comparator<? super AppInstanceStatus> INSTANCE_SORTER = Comparator.comparing(i -> i.getId());
 

@@ -25,8 +25,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.yaml.snakeyaml.DumperOptions;
 import org.yaml.snakeyaml.Yaml;
 
@@ -89,7 +89,7 @@ public class DefaultStreamService implements StreamService {
 
 	public static final String DEFAULT_SKIPPER_PACKAGE_VERSION = "1.0.0";
 
-	private static Log logger = LogFactory.getLog(DefaultStreamService.class);
+	private static final Logger logger = LoggerFactory.getLogger(DefaultStreamService.class);
 
 	/**
 	 * The repository this controller will use for stream CRUD operations.

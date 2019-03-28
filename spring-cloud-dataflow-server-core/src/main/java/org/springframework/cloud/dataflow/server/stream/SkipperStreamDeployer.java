@@ -34,9 +34,9 @@ import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.module.SimpleAbstractTypeResolver;
 import com.fasterxml.jackson.databind.module.SimpleModule;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.json.JSONObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.yaml.snakeyaml.DumperOptions;
 import org.yaml.snakeyaml.Yaml;
 
@@ -96,7 +96,7 @@ import org.springframework.util.StringUtils;
  */
 public class SkipperStreamDeployer implements StreamDeployer {
 
-	private static Log logger = LogFactory.getLog(SkipperStreamDeployer.class);
+	private static final Logger logger = LoggerFactory.getLogger(SkipperStreamDeployer.class);
 
 	private final SkipperClient skipperClient;
 
