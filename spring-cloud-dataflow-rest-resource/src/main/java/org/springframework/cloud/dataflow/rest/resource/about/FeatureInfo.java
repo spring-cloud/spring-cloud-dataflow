@@ -30,7 +30,7 @@ public class FeatureInfo {
 
 	private boolean tasksEnabled = true;
 
-	private boolean schedulerEnabled = false;
+	private boolean schedulesEnabled = false;
 
 	private boolean grafanaEnabled = false;
 
@@ -64,12 +64,12 @@ public class FeatureInfo {
 		this.tasksEnabled = tasksEnabled;
 	}
 
-	public boolean isSchedulerEnabled() {
-		return schedulerEnabled;
+	public boolean isSchedulesEnabled() {
+		return schedulesEnabled;
 	}
 
-	public void setSchedulerEnabled(boolean schedulerEnabled) {
-		this.schedulerEnabled = schedulerEnabled;
+	public void setSchedulesEnabled(boolean schedulesEnabled) {
+		this.schedulesEnabled = schedulesEnabled;
 	}
 
 	public boolean isGrafanaEnabled() {

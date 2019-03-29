@@ -102,7 +102,7 @@ public class AboutControllerTests {
 				.andExpect(jsonPath("$.securityInfo.username", isEmptyOrNullString()))
 				.andExpect(jsonPath("$.featureInfo.streamsEnabled", is(true)))
 				.andExpect(jsonPath("$.featureInfo.tasksEnabled", is(true)))
-				.andExpect(jsonPath("$.featureInfo.schedulerEnabled", is(false)))
+				.andExpect(jsonPath("$.featureInfo.schedulesEnabled", is(false)))
 				.andExpect(jsonPath("$.runtimeEnvironment.appDeployer.deployerName", not(isEmptyOrNullString())));
 	}
 

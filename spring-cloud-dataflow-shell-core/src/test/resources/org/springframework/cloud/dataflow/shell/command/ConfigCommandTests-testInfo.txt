@@ -3,7 +3,7 @@
 ╟─────────────────┼─────────────────────────────────────╢
 ║                 │Analytics Enabled: true              ║
 ║                 │  Grafana Enabled: false             ║
-║    Features     │Scheduler Enabled: false             ║
+║    Features     │Schedules Enabled: false             ║
 ║                 │  Streams Enabled: true              ║
 ║                 │    Tasks Enabled: false             ║
 ╟─────────────────┼─────────────────────────────────────╢
