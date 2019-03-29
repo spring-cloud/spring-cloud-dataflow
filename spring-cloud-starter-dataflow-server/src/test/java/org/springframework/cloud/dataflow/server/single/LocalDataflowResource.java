@@ -69,7 +69,7 @@ public class LocalDataflowResource extends ExternalResource {
 
 	final boolean tasksEnabled;
 
-	final boolean schedulerEnabled;
+	final boolean schedulesEnabled;
 
 	private String originalConfigLocation = null;
 
@@ -95,36 +95,36 @@ public class LocalDataflowResource extends ExternalResource {
 		this.configurationLocation = configurationLocation;
 		this.streamsEnabled = true;
 		this.tasksEnabled = true;
-		this.schedulerEnabled = false;
+		this.schedulesEnabled = false;
 	}
 
 	public LocalDataflowResource(String configurationLocation, boolean streamsEnabled, boolean tasksEnabled) {
 		this.configurationLocation = configurationLocation;
 		this.streamsEnabled = streamsEnabled;
 		this.tasksEnabled = tasksEnabled;
-		this.schedulerEnabled = false;
+		this.schedulesEnabled = false;
 	}
 
 	public LocalDataflowResource(String configurationLocation, boolean streamsEnabled, boolean tasksEnabled, boolean metricsEnabled) {
 		this.configurationLocation = configurationLocation;
 		this.streamsEnabled = streamsEnabled;
 		this.tasksEnabled = tasksEnabled;
-		this.schedulerEnabled = false;
+		this.schedulesEnabled = false;
 	}
 
-	public LocalDataflowResource(String configurationLocation, boolean streamsEnabled, boolean tasksEnabled, boolean metricsEnabled, boolean schedulerEnabled) {
+	public LocalDataflowResource(String configurationLocation, boolean streamsEnabled, boolean tasksEnabled, boolean metricsEnabled, boolean schedulesEnabled) {
 		this.configurationLocation = configurationLocation;
 		this.streamsEnabled = streamsEnabled;
 		this.tasksEnabled = tasksEnabled;
-		this.schedulerEnabled = schedulerEnabled;
+		this.schedulesEnabled = schedulesEnabled;
 	}
 
 	public LocalDataflowResource(String configurationLocation, boolean streamsEnabled, boolean tasksEnabled,
-			boolean metricsEnabled, boolean schedulerEnabled, String skipperServerPort) {
+			boolean metricsEnabled, boolean schedulesEnabled, String skipperServerPort) {
 		this.configurationLocation = configurationLocation;
 		this.streamsEnabled = streamsEnabled;
 		this.tasksEnabled = tasksEnabled;
-		this.schedulerEnabled = schedulerEnabled;
+		this.schedulesEnabled = schedulesEnabled;
 		this.skipperServerPort = skipperServerPort;
 	}
 
@@ -150,7 +150,7 @@ public class LocalDataflowResource extends ExternalResource {
 				"--" + FeaturesProperties.FEATURES_PREFIX + "." + FeaturesProperties.TASKS_ENABLED + "="
 						+ this.tasksEnabled,
 				"--" + FeaturesProperties.FEATURES_PREFIX + "." + FeaturesProperties.SCHEDULES_ENABLED + "="
-						+ this.schedulerEnabled,
+						+ this.schedulesEnabled,
 				"--spring.cloud.skipper.client.serverUri=http://localhost:" + this.skipperServerPort + "/api"
 		});
 		skipperClient = configurableApplicationContext.getBean(SkipperClient.class);

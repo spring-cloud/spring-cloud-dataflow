@@ -122,7 +122,7 @@ public class AboutController {
 		final FeatureInfo featureInfo = new FeatureInfo();
 		featureInfo.setStreamsEnabled(featuresProperties.isStreamsEnabled());
 		featureInfo.setTasksEnabled(featuresProperties.isTasksEnabled());
-		featureInfo.setSchedulerEnabled(featuresProperties.isSchedulesEnabled());
+		featureInfo.setSchedulesEnabled(featuresProperties.isSchedulesEnabled());
 		featureInfo.setGrafanaEnabled(this.grafanaProperties.isGrafanaEnabled());
 
 		final VersionInfo versionInfo = getVersionInfo();
