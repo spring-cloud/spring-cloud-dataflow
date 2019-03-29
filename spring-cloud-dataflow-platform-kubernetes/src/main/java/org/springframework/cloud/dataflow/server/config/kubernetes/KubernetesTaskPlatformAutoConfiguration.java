@@ -34,19 +34,11 @@ import org.springframework.context.annotation.Configuration;
 public class KubernetesTaskPlatformAutoConfiguration {
 
 	@Bean
-	public KubernetesPlatformClientProvider kubernetesClientProvider(
-			KubernetesPlatformProperties platformProperties) {
-		return new KubernetesPlatformClientProvider(platformProperties);
-	}
-
-	@Bean
 	public KubernetesTaskPlatformFactory kubernetesTaskPlatformFactory(
 			KubernetesPlatformProperties platformProperties,
-			KubernetesPlatformClientProvider kubernetesClientProvider,
 			Optional<KubernetesSchedulerProperties> schedulerProperties,
 			@Value("${spring.cloud.dataflow.features.schedules-enabled:false}") boolean schedulesEnabled) {
-		return new KubernetesTaskPlatformFactory(platformProperties, kubernetesClientProvider, schedulerProperties,
-				schedulesEnabled);
+		return new KubernetesTaskPlatformFactory(platformProperties, schedulerProperties, schedulesEnabled);
 	}
 
 	@Bean

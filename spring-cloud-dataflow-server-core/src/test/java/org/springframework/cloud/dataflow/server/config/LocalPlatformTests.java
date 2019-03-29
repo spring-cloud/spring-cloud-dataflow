@@ -46,10 +46,10 @@ public class LocalPlatformTests {
 		Map<String, TaskPlatform> taskPlatforms = context.getBeansOfType(TaskPlatform.class);
 		assertThat(taskPlatforms).hasSize(1);
 		TaskPlatform taskPlatform = taskPlatforms.values().iterator().next();
-		assertThat(taskPlatform.getName()).isEqualToIgnoringCase("local");
+		assertThat(taskPlatform.getName()).isEqualTo("Local");
 		assertThat(taskPlatform.getLaunchers()).hasSize(1);
-		assertThat(taskPlatform.getLaunchers().get(0).getName().equals("default"));
-		assertThat(taskPlatform.getLaunchers().get(0).getType().equalsIgnoreCase("local"));
+		assertThat(taskPlatform.getLaunchers().get(0).getName()).isEqualTo("default");
+		assertThat(taskPlatform.getLaunchers().get(0).getType()).isEqualTo("Local");
 		assertThat(taskPlatform.getLaunchers().get(0).getTaskLauncher()).isInstanceOf(LocalTaskLauncher.class);
 	}
 
@@ -65,11 +65,10 @@ public class LocalPlatformTests {
 		Map<String, TaskPlatform> taskPlatforms = context.getBeansOfType(TaskPlatform.class);
 		assertThat(taskPlatforms).hasSize(1);
 		TaskPlatform taskPlatform = taskPlatforms.values().iterator().next();
-		assertThat(taskPlatform.getName()).isEqualToIgnoringCase("local");
+		assertThat(taskPlatform.getName()).isEqualTo("Local");
 		assertThat(taskPlatform.getLaunchers()).hasSize(2);
-		assertThat(taskPlatform.getLaunchers()).allMatch(launcher -> launcher.getType().equalsIgnoreCase("local"));
-		assertThat(taskPlatform.getLaunchers()).filteredOn(launcher -> launcher.getName().equals("big")).hasSize(1);
-		assertThat(taskPlatform.getLaunchers()).filteredOn(launcher -> launcher.getName().equals("small")).hasSize(1);
+		assertThat(taskPlatform.getLaunchers()).extracting("type").containsExactly("Local","Local");
+		assertThat(taskPlatform.getLaunchers()).extracting("name").containsExactlyInAnyOrder("big", "small");
 	}
 
 	@SpringBootApplication

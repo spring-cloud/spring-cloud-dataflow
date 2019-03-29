@@ -58,7 +58,7 @@ public class MultiplePlatformTypeTests {
 	List<TaskPlatform> taskPlatforms;
 
 	@Test
-	public void multipleTaskPlatforms() {
+	public void localTaskPlatform() {
 		assertThat(taskPlatforms).hasSize(3);
 
 		TaskPlatform localDefault =
@@ -66,13 +66,13 @@ public class MultiplePlatformTypeTests {
 
 		assertThat(localDefault).isNotNull();
 		assertThat(localDefault.getLaunchers()).hasSize(1);
-		assertThat(localDefault.getLaunchers().get(0).getType()).isEqualToIgnoringCase(localDefault.getName());
+		assertThat(localDefault.getLaunchers().get(0).getType()).isEqualTo(localDefault.getName());
 		assertThat(localDefault.getLaunchers().get(0).getName()).isEqualTo("default");
 		assertThat(localDefault.getLaunchers().get(0).getTaskLauncher()).isInstanceOf(LocalTaskLauncher.class);
 	}
 
 	@Test
-	public void cloudFoundryPlatform() {
+	public void cloudFoundryTaskPlatform() {
 		TaskPlatform cloudFoundry =
 			taskPlatforms.stream().filter(taskPlatform -> taskPlatform.getName().equals("Cloud Foundry")).findFirst().get();
 
@@ -85,9 +85,9 @@ public class MultiplePlatformTypeTests {
 	}
 
 	@Test
-	public void kubernetesPlatform() {
+	public void kubernetesTaskPlatform() {
 		TaskPlatform kubernetes =
-			taskPlatforms.stream().filter(taskPlatform -> taskPlatform.getName().equals("kubernetes")).findFirst().get();
+			taskPlatforms.stream().filter(taskPlatform -> taskPlatform.getName().equals("Kubernetes")).findFirst().get();
 
 		assertThat(kubernetes).isNotNull();
 		assertThat(kubernetes.getLaunchers()).hasSize(1);

@@ -16,9 +16,6 @@
 
 package org.springframework.cloud.dataflow.server.config.kubernetes;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import io.fabric8.kubernetes.client.KubernetesClient;
 
 import org.springframework.cloud.deployer.spi.kubernetes.KubernetesClientFactory;
@@ -29,16 +26,13 @@ import org.springframework.cloud.deployer.spi.kubernetes.KubernetesClientFactory
 public class KubernetesPlatformClientProvider {
 
 	private final KubernetesPlatformProperties platformProperties;
-	private final Map<String, KubernetesClient> clients = new HashMap<>();
 
 	public KubernetesPlatformClientProvider(KubernetesPlatformProperties platformProperties) {
 		this.platformProperties = platformProperties;
 	}
 
 	public KubernetesClient kubenertesClient(String account) {
-		clients.putIfAbsent(account,
-			KubernetesClientFactory.getKubernetesClient(this.platformProperties.accountProperties(account)));
-		return clients.get(account);
+		return KubernetesClientFactory.getKubernetesClient(this.platformProperties.accountProperties(account));
 	}
 
 }

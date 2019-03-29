@@ -40,17 +40,15 @@ public class KubernetesTaskPlatformFactoryTests {
 		platformProperties.setAccounts(Collections.singletonMap("k8s", deployerProperties));
 
 		KubernetesTaskPlatformFactory kubernetesTaskPlatformFactory = new KubernetesTaskPlatformFactory(
-				platformProperties,
-				new KubernetesPlatformClientProvider(platformProperties),
-				Optional.empty(), false);
+				platformProperties, Optional.empty(), false);
 
 		TaskPlatform taskPlatform = kubernetesTaskPlatformFactory.createTaskPlatform();
-		assertThat(taskPlatform.getName()).isEqualTo("kubernetes");
+		assertThat(taskPlatform.getName()).isEqualTo("Kubernetes");
 		assertThat(taskPlatform.getLaunchers()).hasSize(1);
 		assertThat(taskPlatform.getLaunchers().get(0).getScheduler()).isNull();
 		assertThat(taskPlatform.getLaunchers().get(0).getTaskLauncher()).isInstanceOf(KubernetesTaskLauncher.class);
 		assertThat(taskPlatform.getLaunchers().get(0).getName()).isEqualTo("k8s");
-		assertThat(taskPlatform.getLaunchers().get(0).getType()).isEqualTo("kubernetes");
+		assertThat(taskPlatform.getLaunchers().get(0).getType()).isEqualTo("Kubernetes");
 
 	}
 
@@ -62,16 +60,15 @@ public class KubernetesTaskPlatformFactoryTests {
 
 		KubernetesTaskPlatformFactory kubernetesTaskPlatformFactory = new KubernetesTaskPlatformFactory(
 				platformProperties,
-				new KubernetesPlatformClientProvider(platformProperties),
 				Optional.of(new KubernetesSchedulerProperties()), true);
 
 		TaskPlatform taskPlatform = kubernetesTaskPlatformFactory.createTaskPlatform();
-		assertThat(taskPlatform.getName()).isEqualTo("kubernetes");
+		assertThat(taskPlatform.getName()).isEqualTo("Kubernetes");
 		assertThat(taskPlatform.getLaunchers()).hasSize(1);
 		assertThat(taskPlatform.getLaunchers().get(0).getScheduler()).isNotNull();
 		assertThat(taskPlatform.getLaunchers().get(0).getTaskLauncher()).isInstanceOf(KubernetesTaskLauncher.class);
 		assertThat(taskPlatform.getLaunchers().get(0).getName()).isEqualTo("k8s");
-		assertThat(taskPlatform.getLaunchers().get(0).getType()).isEqualTo("kubernetes");
+		assertThat(taskPlatform.getLaunchers().get(0).getType()).isEqualTo("Kubernetes");
 
 	}
 

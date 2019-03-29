@@ -35,7 +35,7 @@ import org.springframework.cloud.scheduler.spi.kubernetes.KubernetesSchedulerPro
  **/
 public class KubernetesTaskPlatformFactory extends AbstractTaskPlatformFactory<KubernetesPlatformProperties> {
 
-	private final static String PLATFORM_TYPE = "kubernetes";
+	private final static String PLATFORM_TYPE = "Kubernetes";
 
 	private final KubernetesPlatformClientProvider kubernetesClientProvider;
 
@@ -45,11 +45,10 @@ public class KubernetesTaskPlatformFactory extends AbstractTaskPlatformFactory<K
 
 	public KubernetesTaskPlatformFactory(
 			KubernetesPlatformProperties platformProperties,
-			KubernetesPlatformClientProvider kubernetesClientProvider,
 			Optional<KubernetesSchedulerProperties> schedulerProperties,
 			boolean schedulesEnabled) {
 		super(platformProperties, PLATFORM_TYPE);
-		this.kubernetesClientProvider = kubernetesClientProvider;
+		this.kubernetesClientProvider = new KubernetesPlatformClientProvider(platformProperties);
 		this.schedulerProperties = schedulerProperties;
 		this.schedulesEnabled = schedulesEnabled;
 	}
