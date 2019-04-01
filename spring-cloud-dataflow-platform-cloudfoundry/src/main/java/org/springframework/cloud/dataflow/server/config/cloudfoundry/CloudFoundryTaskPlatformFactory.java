@@ -90,13 +90,18 @@ public class CloudFoundryTaskPlatformFactory extends AbstractTaskPlatformFactory
 				deploymentProperties(account),
 				cloudFoundryOperations,
 				runtimeEnvironmentInfo(cloudFoundryClient, account));
-		return new Launcher(account, PLATFORM_TYPE, taskLauncher,
+		Launcher launcher =  new Launcher(account, PLATFORM_TYPE, taskLauncher,
 				scheduler(
 						account,
 						taskLauncher,
 						cloudFoundryOperations,
 						connectionContext,
 						tokenProvider));
+		CloudFoundryConnectionProperties connectionProperties = connectionProperties(account);
+		launcher.setDescription(String.format("org = [%s], space = [%s], url = [%s]",
+			connectionProperties.getOrg(), connectionProperties.getSpace(),
+			connectionProperties.getUrl()));
+		return launcher;
 	}
 
 	private Scheduler scheduler(String key, CloudFoundry2630AndLaterTaskLauncher taskLauncher,
