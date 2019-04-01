@@ -41,6 +41,7 @@ public class LocalTaskPlatformFactoryTests {
 		assertThat(taskPlatform.getLaunchers().get(0).getType()).isEqualTo(taskPlatform.getName());
 		assertThat(taskPlatform.getLaunchers().get(0).getName()).isEqualTo("default");
 		assertThat(taskPlatform.getLaunchers().get(0).getTaskLauncher()).isInstanceOf(LocalTaskLauncher.class);
+		assertThat(taskPlatform.getLaunchers().get(0).getDescription()).isNotEmpty();
 	}
 
 	@Test
@@ -54,6 +55,7 @@ public class LocalTaskPlatformFactoryTests {
 		assertThat(taskPlatform.getLaunchers().get(0).getType()).isEqualTo(taskPlatform.getName());
 		assertThat(taskPlatform.getLaunchers().get(0).getName()).isEqualTo("custom");
 		assertThat(taskPlatform.getLaunchers().get(0).getTaskLauncher()).isInstanceOf(LocalTaskLauncher.class);
+		assertThat(taskPlatform.getLaunchers().get(0).getDescription()).isNotEmpty();
 	}
 
 }

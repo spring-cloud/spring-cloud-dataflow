@@ -102,6 +102,8 @@ public class CloudFoundryTaskPlatformFactoryTests {
 		assertThat(taskPlatform.getLaunchers().get(0).getName()).isEqualTo("default");
 		assertThat(taskPlatform.getLaunchers().get(0).getTaskLauncher()).isInstanceOf(
 				CloudFoundry2630AndLaterTaskLauncher.class);
+		assertThat(taskPlatform.getLaunchers().get(0).getDescription()).isEqualTo(
+			"org = [org], space = [space], url = [https://localhost:9999]");
 		assertThat(taskPlatform.getLaunchers().get(0).getScheduler()).isNull();
 	}
 
@@ -128,6 +130,8 @@ public class CloudFoundryTaskPlatformFactoryTests {
 		assertThat(taskPlatform.getLaunchers().get(0).getName()).isEqualTo("default");
 		assertThat(taskPlatform.getLaunchers().get(0).getTaskLauncher()).isInstanceOf(
 				CloudFoundry2630AndLaterTaskLauncher.class);
+		assertThat(taskPlatform.getLaunchers().get(0).getDescription()).isEqualTo(
+			"org = [org], space = [space], url = [https://localhost:9999]");
 		assertThat(taskPlatform.getLaunchers().get(0).getScheduler()).isNotNull();
 	}
 }

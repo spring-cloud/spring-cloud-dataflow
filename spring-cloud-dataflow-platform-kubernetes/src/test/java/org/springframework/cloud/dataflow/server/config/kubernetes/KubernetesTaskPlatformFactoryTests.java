@@ -49,6 +49,8 @@ public class KubernetesTaskPlatformFactoryTests {
 		assertThat(taskPlatform.getLaunchers().get(0).getTaskLauncher()).isInstanceOf(KubernetesTaskLauncher.class);
 		assertThat(taskPlatform.getLaunchers().get(0).getName()).isEqualTo("k8s");
 		assertThat(taskPlatform.getLaunchers().get(0).getType()).isEqualTo("Kubernetes");
+		assertThat(taskPlatform.getLaunchers().get(0).getDescription()).matches("^master url = \\[.+\\], namespace = "
+			+ "\\[.+\\], api version = \\[.+\\]$");
 
 	}
 
@@ -69,6 +71,8 @@ public class KubernetesTaskPlatformFactoryTests {
 		assertThat(taskPlatform.getLaunchers().get(0).getTaskLauncher()).isInstanceOf(KubernetesTaskLauncher.class);
 		assertThat(taskPlatform.getLaunchers().get(0).getName()).isEqualTo("k8s");
 		assertThat(taskPlatform.getLaunchers().get(0).getType()).isEqualTo("Kubernetes");
+		assertThat(taskPlatform.getLaunchers().get(0).getDescription()).matches("^master url = \\[.+\\], namespace = "
+			+ "\\[.+\\], api version = \\[.+\\]$");
 
 	}
 
