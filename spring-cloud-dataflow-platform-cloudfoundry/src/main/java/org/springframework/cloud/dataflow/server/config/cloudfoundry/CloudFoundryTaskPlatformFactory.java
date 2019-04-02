@@ -20,7 +20,7 @@ import java.util.Optional;
 
 import com.github.zafarkhaja.semver.Version;
 import io.jsonwebtoken.lang.Assert;
-import io.pivotal.reactor.scheduler.ReactorSchedulerClient;
+import io.pivotal.scheduler.SchedulerClient;
 import org.cloudfoundry.client.CloudFoundryClient;
 import org.cloudfoundry.client.v2.info.GetInfoRequest;
 import org.cloudfoundry.operations.CloudFoundryOperations;
@@ -29,7 +29,6 @@ import org.cloudfoundry.reactor.ConnectionContext;
 import org.cloudfoundry.reactor.TokenProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import reactor.core.publisher.Mono;
 
 import org.springframework.cloud.dataflow.core.AbstractTaskPlatformFactory;
 import org.springframework.cloud.dataflow.core.Launcher;
@@ -49,13 +48,9 @@ import org.springframework.cloud.scheduler.spi.core.Scheduler;
  **/
 public class CloudFoundryTaskPlatformFactory extends AbstractTaskPlatformFactory<CloudFoundryPlatformProperties> {
 
-	private final boolean schedulerEnabled;
-
 	private final static String PLATFORM_TYPE = "Cloud Foundry";
 
 	private final static Logger logger = LoggerFactory.getLogger(CloudFoundryTaskPlatformFactory.class);
-
-	private final CloudFoundrySchedulerProperties schedulerProperties;
 
 	private final CloudFoundryPlatformTokenProvider platformTokenProvider;
 
@@ -63,19 +58,20 @@ public class CloudFoundryTaskPlatformFactory extends AbstractTaskPlatformFactory
 
 	private final CloudFoundryPlatformClientProvider cloudFoundryClientProvider;
 
+	private final Optional<CloudFoundrySchedulerClientProvider> cloudFoundrySchedulerClientProvider;
+
+
 	private CloudFoundryTaskPlatformFactory(CloudFoundryPlatformProperties cloudFoundryPlatformProperties,
 			CloudFoundryPlatformTokenProvider platformTokenProvider,
 			CloudFoundryPlatformConnectionContextProvider connectionContextProvider,
 			CloudFoundryPlatformClientProvider cloudFoundryClientProvider,
-			Optional<CloudFoundrySchedulerProperties> schedulerProperties,
-			boolean schedulerEnabled) {
-		super(cloudFoundryPlatformProperties, PLATFORM_TYPE);
+			Optional<CloudFoundrySchedulerClientProvider> cloudFoundrySchedulerClientProvider) {
 
-		this.schedulerEnabled = schedulerEnabled;
-		this.schedulerProperties = schedulerProperties.orElseGet(CloudFoundrySchedulerProperties::new);
+		super(cloudFoundryPlatformProperties, PLATFORM_TYPE);
 		this.platformTokenProvider = platformTokenProvider;
 		this.connectionContextProvider = connectionContextProvider;
 		this.cloudFoundryClientProvider = cloudFoundryClientProvider;
+		this.cloudFoundrySchedulerClientProvider = cloudFoundrySchedulerClientProvider;
 	}
 
 	@Override
@@ -89,36 +85,27 @@ public class CloudFoundryTaskPlatformFactory extends AbstractTaskPlatformFactory
 				deploymentProperties(account),
 				cloudFoundryOperations,
 				runtimeEnvironmentInfo(cloudFoundryClient, account));
-		Launcher launcher =  new Launcher(account, PLATFORM_TYPE, taskLauncher,
-				scheduler(
-						account,
-						taskLauncher,
-						cloudFoundryOperations,
-						connectionContext,
-						tokenProvider));
+		Launcher launcher = new Launcher(account, PLATFORM_TYPE, taskLauncher,
+				scheduler(account, taskLauncher, cloudFoundryOperations));
 		CloudFoundryConnectionProperties connectionProperties = connectionProperties(account);
 		launcher.setDescription(String.format("org = [%s], space = [%s], url = [%s]",
-			connectionProperties.getOrg(), connectionProperties.getSpace(),
-			connectionProperties.getUrl()));
+				connectionProperties.getOrg(), connectionProperties.getSpace(),
+				connectionProperties.getUrl()));
 		return launcher;
 	}
 
-	private Scheduler scheduler(String key, CloudFoundry2630AndLaterTaskLauncher taskLauncher,
-			CloudFoundryOperations cloudFoundryOperations, ConnectionContext connectionContext,
-			TokenProvider tokenProvider) {
+	private Scheduler scheduler(String account, CloudFoundry2630AndLaterTaskLauncher taskLauncher,
+			CloudFoundryOperations cloudFoundryOperations) {
 		Scheduler scheduler = null;
-		if (schedulerEnabled) {
-			ReactorSchedulerClient reactorSchedulerClient = ReactorSchedulerClient.builder()
-					.connectionContext(connectionContext)
-					.tokenProvider(tokenProvider)
-					.root(Mono.just(schedulerProperties.getSchedulerUrl()))
-					.build();
-
-			scheduler = new CloudFoundryAppScheduler(reactorSchedulerClient,
+		if (cloudFoundrySchedulerClientProvider.isPresent()) {
+			SchedulerClient schedulerClient =
+				cloudFoundrySchedulerClientProvider.get().cloudFoundrySchedulerClient(account);
+			scheduler = new CloudFoundryAppScheduler(
+					schedulerClient,
 					cloudFoundryOperations,
-					connectionProperties(key),
+					connectionProperties(account),
 					taskLauncher,
-					schedulerProperties);
+					cloudFoundrySchedulerClientProvider.get().schedulerProperties());
 		}
 		return scheduler;
 	}
@@ -196,6 +183,8 @@ public class CloudFoundryTaskPlatformFactory extends AbstractTaskPlatformFactory
 
 		private CloudFoundryPlatformClientProvider cloudFoundryClientProvider;
 
+		private Optional<CloudFoundrySchedulerClientProvider> cloudFoundrySchedulerClientProvider = Optional.empty();
+
 		public Builder platformProperties(CloudFoundryPlatformProperties platformProperties) {
 			this.platformProperties = platformProperties;
 			return this;
@@ -211,19 +200,25 @@ public class CloudFoundryTaskPlatformFactory extends AbstractTaskPlatformFactory
 			return this;
 		}
 
+		public Builder cloudFoundrySchedulerClientProvider(Optional<CloudFoundrySchedulerClientProvider>
+			cloudFoundrySchedulerClientProvider) {
+			this.cloudFoundrySchedulerClientProvider = cloudFoundrySchedulerClientProvider;
+			return this;
+		}
+
 		public Builder platformTokenProvider(CloudFoundryPlatformTokenProvider platformTokenProvider) {
 			this.platformTokenProvider = platformTokenProvider;
 			return this;
 		}
 
 		public Builder connectionContextProvider(
-			CloudFoundryPlatformConnectionContextProvider connectionContextProvider) {
+				CloudFoundryPlatformConnectionContextProvider connectionContextProvider) {
 			this.connectionContextProvider = connectionContextProvider;
 			return this;
 		}
 
 		public Builder cloudFoundryClientProvider(
-			CloudFoundryPlatformClientProvider cloudFoundryClientProvider) {
+				CloudFoundryPlatformClientProvider cloudFoundryClientProvider) {
 			this.cloudFoundryClientProvider = cloudFoundryClientProvider;
 			return this;
 		}
@@ -235,12 +230,11 @@ public class CloudFoundryTaskPlatformFactory extends AbstractTaskPlatformFactory
 			Assert.notNull(cloudFoundryClientProvider, "'cloudFoundryClientProvider' is required.");
 
 			return new CloudFoundryTaskPlatformFactory(
-				platformProperties,
-				platformTokenProvider,
-				connectionContextProvider,
-				cloudFoundryClientProvider,
-				schedulerProperties,
-				schedulesEnabled);
+					platformProperties,
+					platformTokenProvider,
+					connectionContextProvider,
+					cloudFoundryClientProvider,
+					cloudFoundrySchedulerClientProvider);
 		}
 	}
 }

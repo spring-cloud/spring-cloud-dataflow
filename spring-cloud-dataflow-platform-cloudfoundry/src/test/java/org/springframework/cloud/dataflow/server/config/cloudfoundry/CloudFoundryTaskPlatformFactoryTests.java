@@ -19,6 +19,7 @@ import java.net.URL;
 import java.util.Collections;
 import java.util.Optional;
 
+import io.pivotal.scheduler.SchedulerClient;
 import org.cloudfoundry.client.CloudFoundryClient;
 import org.cloudfoundry.client.v2.info.GetInfoResponse;
 import org.cloudfoundry.reactor.TokenProvider;
@@ -50,6 +51,9 @@ public class CloudFoundryTaskPlatformFactoryTests {
 
 	private CloudFoundryPlatformClientProvider cloudFoundryClientProvider = mock(
 			CloudFoundryPlatformClientProvider.class);
+
+	private CloudFoundrySchedulerClientProvider cloudFoundrySchedulerClientProvider = mock(
+			CloudFoundrySchedulerClientProvider.class);
 
 	private CloudFoundryClient cloudFoundryClient = mock(CloudFoundryClient.class);
 
@@ -102,12 +106,17 @@ public class CloudFoundryTaskPlatformFactoryTests {
 		assertThat(taskPlatform.getLaunchers().get(0).getTaskLauncher()).isInstanceOf(
 				CloudFoundry2630AndLaterTaskLauncher.class);
 		assertThat(taskPlatform.getLaunchers().get(0).getDescription()).isEqualTo(
-			"org = [org], space = [space], url = [https://localhost:9999]");
+				"org = [org], space = [space], url = [https://localhost:9999]");
 		assertThat(taskPlatform.getLaunchers().get(0).getScheduler()).isNull();
 	}
 
 	@Test
 	public void cloudFoundryTaskPlatformWithScheduler() {
+
+		when(cloudFoundrySchedulerClientProvider.cloudFoundrySchedulerClient(anyString())).thenReturn(
+				mock(SchedulerClient.class));
+		when(cloudFoundrySchedulerClientProvider.schedulerProperties())
+				.thenReturn(new CloudFoundrySchedulerProperties());
 
 		CloudFoundrySchedulerProperties schedulerProperties = new CloudFoundrySchedulerProperties();
 		schedulerProperties.setSchedulerUrl("https://localhost:9999");
@@ -118,6 +127,7 @@ public class CloudFoundryTaskPlatformFactoryTests {
 				.platformTokenProvider(platformTokenProvider)
 				.connectionContextProvider(connectionContextProvider)
 				.cloudFoundryClientProvider(cloudFoundryClientProvider)
+				.cloudFoundrySchedulerClientProvider(Optional.of(cloudFoundrySchedulerClientProvider))
 				.schedulesEnabled(true)
 				.schedulerProperties(Optional.of(schedulerProperties))
 				.build();
@@ -130,7 +140,7 @@ public class CloudFoundryTaskPlatformFactoryTests {
 		assertThat(taskPlatform.getLaunchers().get(0).getTaskLauncher()).isInstanceOf(
 				CloudFoundry2630AndLaterTaskLauncher.class);
 		assertThat(taskPlatform.getLaunchers().get(0).getDescription()).isEqualTo(
-			"org = [org], space = [space], url = [https://localhost:9999]");
+				"org = [org], space = [space], url = [https://localhost:9999]");
 		assertThat(taskPlatform.getLaunchers().get(0).getScheduler()).isNotNull();
 	}
 }

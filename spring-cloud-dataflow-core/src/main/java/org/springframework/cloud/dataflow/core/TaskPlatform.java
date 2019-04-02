@@ -19,11 +19,16 @@ package org.springframework.cloud.dataflow.core;
 import java.util.List;
 
 /**
+ * For a given platform, Cloud Foundry, Kubernetes, etc, associate a list of Task Launchers.
+ *
  * @author Donovan Muller
+ * @author David Turanski
  */
 public class TaskPlatform {
 
 	private String name;
+
+	private boolean primary;
 
 	private List<Launcher> launchers;
 
@@ -46,6 +51,19 @@ public class TaskPlatform {
 
 	public void setLaunchers(List<Launcher> launchers) {
 		this.launchers = launchers;
+	}
+
+	/**
+	 * If true, identifies which Platform the Data Flow Server is running on.  This information is used to select
+	 * the TaskPlatform used by Scheduler.  @see SchedulerConfiguration.
+	 * @return true if the TaskPlatform is the same as where the Data Flow Server is running.
+	 */
+	public boolean isPrimary() {
+		return primary;
+	}
+
+	public void setPrimary(boolean primary) {
+		this.primary = primary;
 	}
 }
 
