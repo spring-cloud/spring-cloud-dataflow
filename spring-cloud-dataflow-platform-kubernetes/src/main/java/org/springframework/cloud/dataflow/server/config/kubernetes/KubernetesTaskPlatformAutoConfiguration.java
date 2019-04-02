@@ -20,9 +20,12 @@ import java.util.Optional;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.cloud.dataflow.core.TaskPlatform;
+import org.springframework.cloud.dataflow.server.config.CloudProfileProvider;
+import org.springframework.cloud.dataflow.server.config.features.ConditionalOnTasksEnabled;
 import org.springframework.cloud.scheduler.spi.kubernetes.KubernetesSchedulerProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.env.Environment;
 
 /**
  * Creates TaskPlatform implementations to launch/schedule tasks on Kubernetes.
@@ -31,6 +34,7 @@ import org.springframework.context.annotation.Configuration;
  */
 @Configuration
 @EnableConfigurationProperties(KubernetesPlatformProperties.class)
+@ConditionalOnTasksEnabled
 public class KubernetesTaskPlatformAutoConfiguration {
 
 	@Bean
@@ -42,7 +46,13 @@ public class KubernetesTaskPlatformAutoConfiguration {
 	}
 
 	@Bean
-	public TaskPlatform kubernetesTaskPlatform(KubernetesTaskPlatformFactory kubernetesTaskPlatformFactory) {
-		return kubernetesTaskPlatformFactory.createTaskPlatform();
+	public TaskPlatform kubernetesTaskPlatform(KubernetesTaskPlatformFactory kubernetesTaskPlatformFactory,
+			Environment environment) {
+		TaskPlatform taskPlatform = kubernetesTaskPlatformFactory.createTaskPlatform();
+		CloudProfileProvider cloudProfileProvider = new KubernetesCloudProfileProvider();
+		if (cloudProfileProvider.isCloudPlatform(environment)) {
+			taskPlatform.setPrimary(true);
+		}
+		return taskPlatform;
 	}
 }
