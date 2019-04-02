@@ -19,9 +19,6 @@ import java.util.List;
 
 import javax.sql.DataSource;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import org.springframework.batch.core.configuration.support.MapJobRegistry;
 import org.springframework.batch.core.explore.JobExplorer;
 import org.springframework.batch.core.explore.support.JobExplorerFactoryBean;
@@ -38,7 +35,6 @@ import org.springframework.cloud.dataflow.registry.service.AppRegistryService;
 import org.springframework.cloud.dataflow.server.DockerValidatorProperties;
 import org.springframework.cloud.dataflow.server.batch.JobService;
 import org.springframework.cloud.dataflow.server.batch.SimpleJobServiceFactoryBean;
-import org.springframework.cloud.dataflow.server.config.OnLocalPlatform;
 import org.springframework.cloud.dataflow.server.config.apps.CommonApplicationProperties;
 import org.springframework.cloud.dataflow.server.job.LauncherRepository;
 import org.springframework.cloud.dataflow.server.repository.TaskDefinitionRepository;
@@ -61,8 +57,8 @@ import org.springframework.cloud.dataflow.server.service.impl.TaskConfigurationP
 import org.springframework.cloud.task.repository.TaskExplorer;
 import org.springframework.cloud.task.repository.TaskRepository;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Conditional;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Profile;
 import org.springframework.data.map.repository.config.EnableMapRepositories;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
@@ -86,9 +82,6 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 @EnableTransactionManagement
 public class TaskConfiguration {
 
-	private final Logger logger = LoggerFactory
-		.getLogger(LauncherInitializationService.class);
-
 	@Autowired
 	DataSourceProperties dataSourceProperties;
 
@@ -102,10 +95,13 @@ public class TaskConfiguration {
 		return new LauncherInitializationService(launcherRepository, platforms);
 	}
 
+	@Profile({"local", "default"})
 	@Bean
-	@Conditional(OnLocalPlatform.class)
 	public TaskPlatform localTaskPlatform(LocalPlatformProperties localPlatformProperties) {
-		return new LocalTaskPlatformFactory(localPlatformProperties).createTaskPlatform();
+		TaskPlatform taskPlatform = new
+			LocalTaskPlatformFactory(localPlatformProperties).createTaskPlatform();
+		taskPlatform.setPrimary(true);
+		return taskPlatform;
 	}
 
 	@Bean
