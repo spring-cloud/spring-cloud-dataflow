@@ -17,12 +17,18 @@ package org.springframework.cloud.dataflow.server.config.cloudfoundry;
 
 import java.util.Optional;
 
-import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnCloudPlatform;
+import org.springframework.boot.cloud.CloudPlatform;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.cloud.dataflow.core.TaskPlatform;
+import org.springframework.cloud.dataflow.server.config.CloudProfileProvider;
+import org.springframework.cloud.dataflow.server.config.features.ConditionalOnTasksEnabled;
+import org.springframework.cloud.dataflow.server.config.features.SchedulerConfiguration.SchedulerConfigurationPropertyChecker;
 import org.springframework.cloud.scheduler.spi.cloudfoundry.CloudFoundrySchedulerProperties;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Conditional;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.env.Environment;
 
 /**
  * Creates TaskPlatform implementations to launch/schedule tasks on Cloud Foundry.
@@ -30,12 +36,19 @@ import org.springframework.context.annotation.Configuration;
  * @author David Turanski
  */
 @Configuration
+@ConditionalOnTasksEnabled
 @EnableConfigurationProperties(CloudFoundryPlatformProperties.class)
 public class CloudFoundryTaskPlatformAutoConfiguration {
 
 	@Bean
-	public TaskPlatform cloudFoundryPlatform(CloudFoundryTaskPlatformFactory cloudFoundryTaskPlatformFactory) {
-		return cloudFoundryTaskPlatformFactory.createTaskPlatform();
+	public TaskPlatform cloudFoundryPlatform(CloudFoundryTaskPlatformFactory cloudFoundryTaskPlatformFactory,
+		Environment environment) {
+		TaskPlatform taskPlatform = cloudFoundryTaskPlatformFactory.createTaskPlatform();
+		CloudProfileProvider cloudProfileProvider = new CloudFoundryCloudProfileProvider();
+		if (cloudProfileProvider.isCloudPlatform(environment)) {
+			taskPlatform.setPrimary(true);
+		}
+		return taskPlatform;
 	}
 
 	@Bean
@@ -60,20 +73,29 @@ public class CloudFoundryTaskPlatformAutoConfiguration {
 	}
 
 	@Bean
+	@ConditionalOnCloudPlatform(CloudPlatform.CLOUD_FOUNDRY)
+	@Conditional(SchedulerConfigurationPropertyChecker.class)
+	public CloudFoundrySchedulerClientProvider schedulerClientProvider(
+			CloudFoundryPlatformConnectionContextProvider connectionContextProvider,
+			CloudFoundryPlatformTokenProvider platformTokenProvider,
+			Optional<CloudFoundrySchedulerProperties> schedulerProperties) {
+		return new CloudFoundrySchedulerClientProvider(
+				connectionContextProvider, platformTokenProvider, schedulerProperties);
+	}
+
+	@Bean
 	public CloudFoundryTaskPlatformFactory cloudFoundryTaskPlatformFactory(
 			CloudFoundryPlatformProperties cloudFoundryPlatformProperties,
 			CloudFoundryPlatformTokenProvider platformTokenProvider,
 			CloudFoundryPlatformConnectionContextProvider connectionContextProvider,
 			CloudFoundryPlatformClientProvider cloudFoundryClientProvider,
-			Optional<CloudFoundrySchedulerProperties> schedulerProperties,
-			@Value("${spring.cloud.dataflow.features.schedules-enabled:false}") boolean schedulesEnabled) {
+			Optional<CloudFoundrySchedulerClientProvider> cloudFoundrySchedulerClientProvider) {
 		return CloudFoundryTaskPlatformFactory.builder()
 				.platformProperties(cloudFoundryPlatformProperties)
 				.platformTokenProvider(platformTokenProvider)
 				.connectionContextProvider(connectionContextProvider)
 				.cloudFoundryClientProvider(cloudFoundryClientProvider)
-				.schedulesEnabled(schedulesEnabled)
-				.schedulerProperties(schedulerProperties)
+				.cloudFoundrySchedulerClientProvider(cloudFoundrySchedulerClientProvider)
 				.build();
 	}
 }

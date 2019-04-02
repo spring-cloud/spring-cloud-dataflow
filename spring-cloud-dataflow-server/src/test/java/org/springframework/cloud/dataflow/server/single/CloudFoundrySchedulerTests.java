@@ -18,6 +18,7 @@ package org.springframework.cloud.dataflow.server.single;
 
 import java.util.List;
 
+import io.pivotal.scheduler.SchedulerClient;
 import org.cloudfoundry.client.CloudFoundryClient;
 import org.cloudfoundry.client.v2.info.GetInfoResponse;
 import org.cloudfoundry.reactor.TokenProvider;
@@ -30,12 +31,13 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.cloud.dataflow.core.TaskPlatform;
 import org.springframework.cloud.dataflow.server.config.cloudfoundry.CloudFoundryPlatformClientProvider;
 import org.springframework.cloud.dataflow.server.config.cloudfoundry.CloudFoundryPlatformTokenProvider;
-import org.springframework.cloud.deployer.spi.cloudfoundry.CloudFoundry2630AndLaterTaskLauncher;
-import org.springframework.cloud.deployer.spi.kubernetes.KubernetesTaskLauncher;
-import org.springframework.cloud.deployer.spi.local.LocalTaskLauncher;
+import org.springframework.cloud.dataflow.server.config.cloudfoundry.CloudFoundrySchedulerClientProvider;
+import org.springframework.cloud.dataflow.server.service.SchedulerService;
+import org.springframework.cloud.scheduler.spi.cloudfoundry.CloudFoundrySchedulerProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -46,61 +48,36 @@ import static org.mockito.Mockito.when;
 /**
  * @author David Turanski
  **/
+@ActiveProfiles("cloud")
 @SpringBootTest(
-	classes = { DataFlowServerApplication.class, MultiplePlatformTypeTests.TestConfig.class },
+	classes = { DataFlowServerApplication.class, CloudFoundrySchedulerTests.TestConfig.class },
 	webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT,
 	properties = {
-		"spring.cloud.dataflow.features.schedules-enabled=true",
-		"spring.cloud.dataflow.task.platform.kubernetes.accounts[k8s].namespace=default",
-		"spring.cloud.dataflow.task.platform.cloudfoundry.accounts[cf].connection.url=https://localhost",
-		"spring.cloud.dataflow.task.platform.cloudfoundry.accounts[cf].connection.org=org",
-		"spring.cloud.dataflow.task.platform.cloudfoundry.accounts[cf].connection.space=space",
-		"spring.cloud.scheduler.cloudfoundry.scheduler-url=https://localhost"
+	"spring.cloud.dataflow.features.schedules-enabled=true",
+	"VCAP_SERVICES=foo",
+	"spring.cloud.dataflow.task.platform.cloudfoundry.accounts[cf].connection.url=https://localhost",
+	"spring.cloud.dataflow.task.platform.cloudfoundry.accounts[cf].connection.org=org",
+	"spring.cloud.dataflow.task.platform.cloudfoundry.accounts[cf].connection.space=space",
+	"spring.cloud.scheduler.cloudfoundry.scheduler-url=https://localhost"
 	})
 @RunWith(SpringRunner.class)
-public class MultiplePlatformTypeTests {
+public class CloudFoundrySchedulerTests {
 
 	@Autowired
 	List<TaskPlatform> taskPlatforms;
 
-	@Test
-	public void localTaskPlatform() {
-		assertThat(taskPlatforms).hasSize(3);
-
-		TaskPlatform localDefault = taskPlatforms.stream()
-				.filter(taskPlatform -> taskPlatform.getName().equals("Local")).findFirst().get();
-
-		assertThat(localDefault.isPrimary());
-		assertThat(localDefault).isNotNull();
-		assertThat(localDefault.getLaunchers()).hasSize(1);
-		assertThat(localDefault.getLaunchers().get(0).getType()).isEqualTo(localDefault.getName());
-		assertThat(localDefault.getLaunchers().get(0).getName()).isEqualTo("default");
-		assertThat(localDefault.getLaunchers().get(0).getTaskLauncher()).isInstanceOf(LocalTaskLauncher.class);
-	}
+	@Autowired
+	SchedulerService schedulerService;
 
 	@Test
-	public void cloudFoundryTaskPlatform() {
-		TaskPlatform cloudFoundry = taskPlatforms.stream()
-				.filter(taskPlatform -> taskPlatform.getName().equals("Cloud Foundry")).findFirst().get();
+	public void schedulerServiceCreated() {
+		for (TaskPlatform taskPlatform: taskPlatforms) {
+			if (taskPlatform.isPrimary()) {
+				assertThat(taskPlatform.getName()).isEqualTo("Cloud Foundry");
+			}
+		}
 
-		assertThat(cloudFoundry).isNotNull();
-		assertThat(cloudFoundry.getLaunchers()).hasSize(1);
-		assertThat(cloudFoundry.getLaunchers().get(0).getType()).isEqualTo(cloudFoundry.getName());
-		assertThat(cloudFoundry.getLaunchers().get(0).getName()).isEqualTo("cf");
-		assertThat(cloudFoundry.getLaunchers().get(0).getTaskLauncher()).isInstanceOf(
-				CloudFoundry2630AndLaterTaskLauncher.class);
-	}
-
-	@Test
-	public void kubernetesTaskPlatform() {
-		TaskPlatform kubernetes = taskPlatforms.stream()
-				.filter(taskPlatform -> taskPlatform.getName().equals("Kubernetes")).findFirst().get();
-
-		assertThat(kubernetes).isNotNull();
-		assertThat(kubernetes.getLaunchers()).hasSize(1);
-		assertThat(kubernetes.getLaunchers().get(0).getType()).isEqualTo(kubernetes.getName());
-		assertThat(kubernetes.getLaunchers().get(0).getName()).isEqualTo("k8s");
-		assertThat(kubernetes.getLaunchers().get(0).getTaskLauncher()).isInstanceOf(KubernetesTaskLauncher.class);
+		assertThat(schedulerService).isNotNull();
 	}
 
 	@Configuration
@@ -113,14 +90,26 @@ public class MultiplePlatformTypeTests {
 		@Primary
 		public CloudFoundryPlatformClientProvider mockCloudFoundryClientProvider() {
 			when(cloudFoundryClient.info())
-					.thenReturn(getInfoRequest -> Mono.just(GetInfoResponse.builder().apiVersion("0.0.0").build()));
+				.thenReturn(getInfoRequest -> Mono.just(GetInfoResponse.builder().apiVersion("0.0.0").build()));
 			CloudFoundryPlatformClientProvider cloudFoundryClientProvider = mock(
-					CloudFoundryPlatformClientProvider.class);
+				CloudFoundryPlatformClientProvider.class);
 			when(cloudFoundryClientProvider.cloudFoundryClient(anyString())).thenAnswer(invocation -> {
 				System.out.println("Returning " + cloudFoundryClient);
 				return cloudFoundryClient;
 			});
 			return cloudFoundryClientProvider;
+		}
+
+		@Bean
+		@Primary
+		public CloudFoundrySchedulerClientProvider mockCloudFoundryShedulerClientProvider() {
+			CloudFoundrySchedulerClientProvider cloudFoundrySchedulerClientProvider =
+				mock(CloudFoundrySchedulerClientProvider.class);
+			when(cloudFoundrySchedulerClientProvider.cloudFoundrySchedulerClient(anyString()))
+				.thenReturn(mock(SchedulerClient.class));
+			when(cloudFoundrySchedulerClientProvider.schedulerProperties()).thenReturn(
+				new CloudFoundrySchedulerProperties());
+			return cloudFoundrySchedulerClientProvider;
 		}
 
 		@Bean

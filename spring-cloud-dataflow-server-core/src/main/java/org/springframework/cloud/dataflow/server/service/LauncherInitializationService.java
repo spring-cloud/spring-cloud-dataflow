@@ -34,8 +34,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Component
 public class LauncherInitializationService {
 
-	private final Logger logger = LoggerFactory
-			.getLogger(LauncherInitializationService.class);
+	private final Logger logger = LoggerFactory.getLogger(LauncherInitializationService.class);
 	private final List<TaskPlatform> taskPlatforms;
 	private LauncherRepository launcherRepository;
 

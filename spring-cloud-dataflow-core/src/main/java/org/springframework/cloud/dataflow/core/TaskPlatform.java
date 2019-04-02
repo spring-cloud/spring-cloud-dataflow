@@ -20,10 +20,13 @@ import java.util.List;
 
 /**
  * @author Donovan Muller
+ * @author David Turanski
  */
 public class TaskPlatform {
 
 	private String name;
+
+	private boolean primary;
 
 	private List<Launcher> launchers;
 
@@ -46,6 +49,13 @@ public class TaskPlatform {
 
 	public void setLaunchers(List<Launcher> launchers) {
 		this.launchers = launchers;
+	}
+
+	public boolean isPrimary() {
+		return primary;
+	}
+	public void setPrimary(boolean primary) {
+		this.primary = primary;
 	}
 }
 

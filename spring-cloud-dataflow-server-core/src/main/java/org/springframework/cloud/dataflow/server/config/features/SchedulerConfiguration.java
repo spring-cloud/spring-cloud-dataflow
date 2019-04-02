@@ -16,6 +16,12 @@
 
 package org.springframework.cloud.dataflow.server.config.features;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.AllNestedConditions;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
@@ -36,18 +42,23 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Conditional;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.io.ResourceLoader;
+import org.springframework.util.StringUtils;
 
 /**
  * Establishes the {@link SchedulerService} instance to be used by SCDF.
  *
  * @author Glenn Renfro
  * @author Gunnar Hillert
+ * @author David Turanski
  */
 
 @Configuration
-@Conditional({SchedulerConfiguration.SchedulerConfigurationPropertyChecker.class})
-@EnableConfigurationProperties({TaskConfigurationProperties.class, CommonApplicationProperties.class, SchedulerServiceProperties.class})
+@Conditional({ SchedulerConfiguration.SchedulerConfigurationPropertyChecker.class })
+@EnableConfigurationProperties({ TaskConfigurationProperties.class, CommonApplicationProperties.class,
+		SchedulerServiceProperties.class })
 public class SchedulerConfiguration {
+
+	private static Logger logger = LoggerFactory.getLogger(SchedulerConfiguration.class);
 
 	@Value("${spring.cloud.dataflow.server.uri:}")
 	private String dataflowServerUri;
@@ -55,17 +66,51 @@ public class SchedulerConfiguration {
 	@Bean
 	@ConditionalOnMissingBean
 	public SchedulerService schedulerService(CommonApplicationProperties commonApplicationProperties,
-											 TaskPlatform taskPlatform, TaskDefinitionRepository taskDefinitionRepository,
-											 AppRegistryService registry, ResourceLoader resourceLoader,
-											 TaskConfigurationProperties taskConfigurationProperties,
-											 DataSourceProperties dataSourceProperties,
-											 ApplicationConfigurationMetadataResolver metaDataResolver,
-											 SchedulerServiceProperties schedulerServiceProperties,
-											 AuditRecordService auditRecordService) {
+			List<TaskPlatform> taskPlatforms, TaskDefinitionRepository taskDefinitionRepository,
+			AppRegistryService registry, ResourceLoader resourceLoader,
+			TaskConfigurationProperties taskConfigurationProperties,
+			DataSourceProperties dataSourceProperties,
+			ApplicationConfigurationMetadataResolver metaDataResolver,
+			SchedulerServiceProperties schedulerServiceProperties,
+			AuditRecordService auditRecordService) {
 		return new DefaultSchedulerService(commonApplicationProperties,
-				taskPlatform, taskDefinitionRepository, registry, resourceLoader,
+				primaryTaskPlatform(taskPlatforms), taskDefinitionRepository, registry, resourceLoader,
 				taskConfigurationProperties, dataSourceProperties,
 				this.dataflowServerUri, metaDataResolver, schedulerServiceProperties, auditRecordService);
+	}
+
+	private TaskPlatform primaryTaskPlatform(List<TaskPlatform> taskPlatforms) {
+
+		List<TaskPlatform> candidatePlatforms = new ArrayList<>();
+
+		for (TaskPlatform taskPlatform : taskPlatforms) {
+			if (taskPlatform.isPrimary()) {
+				if (taskPlatform.getLaunchers().size() == 0) {
+					logger.warn("TaskPlatform {} is selected as primary but has no TaskLaunchers configured",
+						taskPlatform.getName());
+				} else {
+					logger.debug("TaskPlatform {} is selected as primary", taskPlatform.getName());
+					candidatePlatforms.add(taskPlatform);
+				}
+			}
+		}
+
+		if (candidatePlatforms.size() > 1) {
+			String[] platformNames = new String[candidatePlatforms.size()];
+			int i = 0;
+			for (TaskPlatform taskPlatform: candidatePlatforms) {
+				platformNames[i++] = taskPlatform.getName();
+			}
+			throw new IllegalStateException(
+				String.format("Expecting 1 primary TaskPlatform., got %d: %s)",
+					candidatePlatforms.size(), StringUtils.arrayToCommaDelimitedString(platformNames)));
+		}
+
+		if (candidatePlatforms.size() == 0) {
+			throw new IllegalStateException("No valid primary TaskPlatform configured");
+		}
+
+		return candidatePlatforms.get(0);
 	}
 
 	public static class SchedulerConfigurationPropertyChecker extends AllNestedConditions {
