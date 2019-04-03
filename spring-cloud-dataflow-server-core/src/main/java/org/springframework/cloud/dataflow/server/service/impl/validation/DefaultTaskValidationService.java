@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 the original author or authors.
+ * Copyright 2018-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,6 +26,7 @@ import org.springframework.cloud.dataflow.server.service.TaskValidationService;
 import org.springframework.cloud.dataflow.server.service.ValidationStatus;
 import org.springframework.cloud.dataflow.server.service.impl.NodeStatus;
 import org.springframework.cloud.dataflow.server.service.impl.TaskServiceUtils;
+import org.springframework.cloud.task.listener.TaskException;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
@@ -35,8 +36,11 @@ import org.springframework.util.StringUtils;
  *
  * @author Glenn Renfro
  * @author Mark Pollack
+ * @author Ilayaperumal Gopinathan
  */
 public class DefaultTaskValidationService extends DefaultValidationService implements TaskValidationService {
+
+	private static final int MAX_APPNAME_LENGTH = 63;
 
 	private final TaskDefinitionRepository taskDefinitionRepository;
 
@@ -54,6 +58,7 @@ public class DefaultTaskValidationService extends DefaultValidationService imple
 
 	@Override
 	public ValidationStatus validateTask(String name) {
+		validateTaskName(name);
 		TaskDefinition definition = this.taskDefinitionRepository.findByTaskName(name);
 		ValidationStatus validationStatus = new ValidationStatus(
 				definition.getName(),
@@ -68,6 +73,7 @@ public class DefaultTaskValidationService extends DefaultValidationService imple
 				String childTaskPrefix = TaskNode.getTaskPrefix(name);
 				taskNode.getTaskApps().stream().forEach(task -> {
 					TaskDefinition childDefinition = this.taskDefinitionRepository.findByTaskName(childTaskPrefix + task.getName());
+					validateTaskName(childTaskPrefix + task.getName());
 					boolean status = this.validate(childDefinition.getRegisteredAppName(), ApplicationType.task);
 					validationStatus.getAppsStatuses().put(
 							String.format("%s:%s", appType.name(), childDefinition.getName()),
@@ -87,5 +93,11 @@ public class DefaultTaskValidationService extends DefaultValidationService imple
 					(status) ? NodeStatus.valid.name() : NodeStatus.invalid.name());
 		}
 		return validationStatus;
+	}
+
+	private void validateTaskName(String taskName) {
+		if (taskName.length() > MAX_APPNAME_LENGTH) {
+			throw new TaskException("The task name should not exceed "+ MAX_APPNAME_LENGTH+ " in length.");
+		}
 	}
 }
