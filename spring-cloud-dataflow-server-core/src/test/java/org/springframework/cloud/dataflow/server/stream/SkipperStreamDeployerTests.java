@@ -33,6 +33,7 @@ import org.springframework.cloud.dataflow.core.ApplicationType;
 import org.springframework.cloud.dataflow.core.StreamDefinition;
 import org.springframework.cloud.dataflow.registry.service.AppRegistryService;
 import org.springframework.cloud.dataflow.rest.SkipperStream;
+import org.springframework.cloud.dataflow.server.controller.support.InvalidStreamDefinitionException;
 import org.springframework.cloud.dataflow.server.repository.StreamDefinitionRepository;
 import org.springframework.cloud.dataflow.server.support.MockUtils;
 import org.springframework.cloud.dataflow.server.support.SkipperPackageUtils;
@@ -373,6 +374,50 @@ public class SkipperStreamDeployerTests {
 		assertThat(state.size()).isEqualTo(1);
 		assertThat(state.get(streamDefinition).equals(DeploymentState.unknown));
 
+	}
+
+	@Test
+	public void testStreamDeployWithLongAppName() {
+
+		AppRegistryService appRegistryService = mock(AppRegistryService.class);
+
+		when(appRegistryService.appExist(eq("time"), eq(ApplicationType.source), eq("1.2.0.RELEASE")))
+				.thenReturn(true);
+		when(appRegistryService.appExist(eq("log"), eq(ApplicationType.sink), eq("1.2.0.RELEASE")))
+				.thenReturn(true);
+
+		AppDefinition timeAppDefinition = new AppDefinition("time", new HashMap<>());
+		MavenResource timeResource = new MavenResource.Builder()
+				.artifactId("time-source-rabbit").groupId("org.springframework.cloud.stream.app")
+				.version("1.2.0.RELEASE").build();
+		when(appRegistryService.getResourceVersion(timeResource)).thenReturn(timeResource.getVersion());
+		AppDeploymentRequest timeAppDeploymentRequest = new AppDeploymentRequest(timeAppDefinition, timeResource);
+
+		List<AppDeploymentRequest> appDeploymentRequests = Arrays.asList(timeAppDeploymentRequest);
+
+		String streamName = "asdfkdunfdnereerejrerkjelkraerkldjkfdjfkdsjflkjdflkdjflsdflsdjfldlfdlsfjdlfjdlfjdslfdnmdfndfmdsfmndsdfafdsfmdnfdske";
+
+		String streamDSL = "time | log";
+
+		StreamDeploymentRequest streamDeploymentRequest = new StreamDeploymentRequest(streamName, streamDSL,
+								appDeploymentRequests,
+				new HashMap<>());
+
+		SkipperClient skipperClient = MockUtils.createSkipperClientMock();
+
+		StreamDefinitionRepository streamDefinitionRepository = mock(StreamDefinitionRepository.class);
+		SkipperStreamDeployer skipperStreamDeployer = new SkipperStreamDeployer(skipperClient,
+				streamDefinitionRepository, appRegistryService, mock(ForkJoinPool.class));
+
+		when(streamDefinitionRepository.findById(streamName)).thenReturn(Optional.of(new StreamDefinition(streamName, streamDSL)));
+		try {
+			skipperStreamDeployer.deployStream(streamDeploymentRequest);
+			fail("Expected InvalidStreamDefinitionException");
+		}
+		catch (Exception e) {
+			assertThat(e instanceof InvalidStreamDefinitionException).isTrue();
+			assertThat(e.getMessage().equals("The runtime application name for the app time in the stream "+streamName+" should not exceed 63 in length. Currently it is: "+streamName+"-time-v{version-2digits}"));
+		}
 	}
 
 	private Info createInfo(StatusCode statusCode) {
