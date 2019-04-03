@@ -48,6 +48,7 @@ import org.springframework.cloud.dataflow.core.StreamDeployment;
 import org.springframework.cloud.dataflow.registry.service.AppRegistryService;
 import org.springframework.cloud.dataflow.rest.SkipperStream;
 import org.springframework.cloud.dataflow.server.controller.NoSuchAppException;
+import org.springframework.cloud.dataflow.server.controller.support.InvalidStreamDefinitionException;
 import org.springframework.cloud.dataflow.server.repository.NoSuchStreamDefinitionException;
 import org.springframework.cloud.dataflow.server.repository.StreamDefinitionRepository;
 import org.springframework.cloud.deployer.spi.app.AppInstanceStatus;
@@ -97,6 +98,9 @@ import org.springframework.util.StringUtils;
 public class SkipperStreamDeployer implements StreamDeployer {
 
 	private static Log logger = LogFactory.getLog(SkipperStreamDeployer.class);
+
+	//Assume version suffix added by skipper is 5 chars.
+	private static final int MAX_APPNAME_LENGTH = 63-5;
 
 	private final SkipperClient skipperClient;
 
@@ -200,7 +204,7 @@ public class SkipperStreamDeployer implements StreamDeployer {
 	}
 
 	public Release deployStream(StreamDeploymentRequest streamDeploymentRequest) {
-		validateAllAppsRegistered(streamDeploymentRequest);
+		validateStreamDeploymentRequest(streamDeploymentRequest);
 		Map<String, String> streamDeployerProperties = streamDeploymentRequest.getStreamDeployerProperties();
 		String packageVersion = streamDeployerProperties.get(SkipperStream.SKIPPER_PACKAGE_VERSION);
 		Assert.isTrue(StringUtils.hasText(packageVersion), "Package Version must be set");
@@ -283,21 +287,32 @@ public class SkipperStreamDeployer implements StreamDeployer {
 		}
 	}
 
-	private void validateAllAppsRegistered(StreamDeploymentRequest streamDeploymentRequest) {
+	private void validateStreamDeploymentRequest(StreamDeploymentRequest streamDeploymentRequest) {
 		if (streamDeploymentRequest.getAppDeploymentRequests() == null
 				|| streamDeploymentRequest.getAppDeploymentRequests().isEmpty()) {
 			// nothing to validate.
 			return;
 		}
-
+		String streamName = streamDeploymentRequest.getStreamName();
 		// throw as at this point we should have definition
 		StreamDefinition streamDefinition = this.streamDefinitionRepository
-				.findById(streamDeploymentRequest.getStreamName())
+				.findById(streamName)
 				.orElseThrow(() -> new NoSuchStreamDefinitionException(streamDeploymentRequest.getStreamName()));
 
 		for (AppDeploymentRequest adr : streamDeploymentRequest.getAppDeploymentRequests()) {
+			String registeredAppName = getRegisteredName(streamDefinition, adr.getDefinition().getName());
+			String appName =  String.format("%s-%s-v", streamName, registeredAppName);
+			if (appName.length() > 40) {
+				logger.warn("The stream name plus application name [" + appName + "] is longer than 40 characters." +
+						"  This can not exceed " + MAX_APPNAME_LENGTH + " in length.");
+			}
+			if (appName.length() > MAX_APPNAME_LENGTH) {
+				throw new InvalidStreamDefinitionException(
+						String.format("The runtime application name for the app %s in the stream %s "
+						+ "should not exceed %s in length. The runtime application name is: %s", registeredAppName, streamName, MAX_APPNAME_LENGTH, appName));
+			}
 			String version = this.appRegistryService.getResourceVersion(adr.getResource());
-			validateAppVersionIsRegistered(getRegisteredName(streamDefinition, adr.getDefinition().getName()), adr, version);
+			validateAppVersionIsRegistered(registeredAppName, adr, version);
 		}
 	}
 
