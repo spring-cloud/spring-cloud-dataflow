@@ -27,7 +27,7 @@ services:
       - spring.cloud.dataflow.applicationProperties.stream.spring.cloud.stream.kafka.streams.binder.brokers=kafka:9092
       - spring.cloud.dataflow.applicationProperties.stream.spring.cloud.stream.kafka.binder.zkNodes=zookeeper:2181
       - spring.cloud.dataflow.applicationProperties.stream.spring.cloud.stream.kafka.streams.binder.zkNodes=zookeeper:2181
-      - spring.cloud.skipper.client.serverUri=https://skipper-server:7577/api
+      - spring.cloud.skipper.client.serverUri=http://skipper-server:7577/api
       - spring.cloud.dataflow.applicationProperties.stream.management.metrics.export.prometheus.enabled=true
       - spring.cloud.dataflow.applicationProperties.stream.spring.cloud.streamapp.security.enabled=false
       - spring.cloud.dataflow.applicationProperties.stream.management.endpoints.web.exposure.include=prometheus,info,health
