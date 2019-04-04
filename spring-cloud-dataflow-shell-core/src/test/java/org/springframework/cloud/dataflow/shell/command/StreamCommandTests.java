@@ -1,5 +1,5 @@
 /*
- * Copyright 2015-2018 the original author or authors.
+ * Copyright 2015-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -69,14 +69,14 @@ public class StreamCommandTests extends AbstractShellIntegrationTest {
 	public void testStreamLifecycleForTickTock() throws InterruptedException {
 		logger.info("Starting Stream Test for TickTock");
 		Thread.sleep(2000);
-		String streamName = generateUniqueName();
+		String streamName = generateUniqueStreamOrTaskName();
 		stream().create(streamName, "time | log");
 	}
 
 	@Test
 	public void testValidate() throws InterruptedException {
 		Thread.sleep(2000);
-		String streamName = generateUniqueName();
+		String streamName = generateUniqueStreamOrTaskName();
 		Info info = new Info();
 		Status status = new Status();
 		status.setStatusCode(StatusCode.UNKNOWN);

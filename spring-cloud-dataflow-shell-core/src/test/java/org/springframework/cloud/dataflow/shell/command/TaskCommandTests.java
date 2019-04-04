@@ -114,7 +114,7 @@ public class TaskCommandTests extends AbstractShellIntegrationTest {
 	@Test
 	public void testTaskLaunch() {
 		logger.info("Launching instance of task");
-		String taskName = generateUniqueName();
+		String taskName = generateUniqueStreamOrTaskName();
 		task().create(taskName, "timestamp");
 		task().launch(taskName);
 	}
@@ -122,14 +122,14 @@ public class TaskCommandTests extends AbstractShellIntegrationTest {
 	@Test
 	public void testCreateTask() {
 		logger.info("Create Task Test");
-		String taskName = generateUniqueName();
+		String taskName = generateUniqueStreamOrTaskName();
 		task().create(taskName, "timestamp");
 	}
 
 	@Test
 	public void destroySpecificTask() {
 		logger.info("Create Task Test");
-		String taskName = generateUniqueName();
+		String taskName = generateUniqueStreamOrTaskName();
 		task().create(taskName, "timestamp");
 		logger.info("Destroy created task");
 		task().destroyTask(taskName);
@@ -138,9 +138,9 @@ public class TaskCommandTests extends AbstractShellIntegrationTest {
 	@Test
 	public void destroyAllTasks() {
 		logger.info("Create Task Test");
-		String taskName1 = generateUniqueName();
+		String taskName1 = generateUniqueStreamOrTaskName();
 		task().create(taskName1, "timestamp");
-		String taskName2 = generateUniqueName();
+		String taskName2 = generateUniqueStreamOrTaskName();
 		task().create(taskName2, "timestamp");
 		task().destroyAllTasks();
 	}
@@ -218,7 +218,7 @@ public class TaskCommandTests extends AbstractShellIntegrationTest {
 
 	@Test
 	public void testValidate() {
-		String taskName = generateUniqueName();
+		String taskName = generateUniqueStreamOrTaskName();
 		task().create(taskName, "timestamp");
 
 		CommandResult cr = task().taskValidate(taskName);
