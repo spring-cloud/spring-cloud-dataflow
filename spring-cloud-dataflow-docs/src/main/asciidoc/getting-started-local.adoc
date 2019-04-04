@@ -167,6 +167,7 @@ $ docker exec -it skipper tail -f /path/from/stdout/textbox/in/dashboard
 The output of the log sink appears in the new window, printing a timestamp once per second.
 . When you have seen enough of that output, press Ctrl+C to end the `tail` command.
 [[getting-started-local-deploying-spring-cloud-dataflow-docker-deleting-stream]]
+
 === Deleting a Stream
 
 Now you can delete the stream you created. To do so:
