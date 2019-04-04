@@ -203,7 +203,7 @@ public class SkipperStreamDeployer implements StreamDeployer {
 	}
 
 	public Release deployStream(StreamDeploymentRequest streamDeploymentRequest) {
-		validateAllAppsRegistered(streamDeploymentRequest);
+		validateStreamDeploymentRequest(streamDeploymentRequest);
 		Map<String, String> streamDeployerProperties = streamDeploymentRequest.getStreamDeployerProperties();
 		String packageVersion = streamDeployerProperties.get(SkipperStream.SKIPPER_PACKAGE_VERSION);
 		Assert.isTrue(StringUtils.hasText(packageVersion), "Package Version must be set");
@@ -286,7 +286,7 @@ public class SkipperStreamDeployer implements StreamDeployer {
 		}
 	}
 
-	private void validateAllAppsRegistered(StreamDeploymentRequest streamDeploymentRequest) {
+	private void validateStreamDeploymentRequest(StreamDeploymentRequest streamDeploymentRequest) {
 		if (streamDeploymentRequest.getAppDeploymentRequests() == null
 				|| streamDeploymentRequest.getAppDeploymentRequests().isEmpty()) {
 			// nothing to validate.
@@ -301,11 +301,17 @@ public class SkipperStreamDeployer implements StreamDeployer {
 		for (AppDeploymentRequest adr : streamDeploymentRequest.getAppDeploymentRequests()) {
 			String registeredAppName = getRegisteredName(streamDefinition, adr.getDefinition().getName());
 			String appName =  String.format("%s-%s-v", streamName, registeredAppName);
+			if (streamName.length() > 20) {
+				logger.warn("Stream name is lengthier and the resolved app name "+appName+" cannot exceed "+MAX_APPNAME_LENGTH+" in length.");
+			}
+			if (appName.length() > 20) {
+				logger.warn("Application name is lengthier and the resolved app name "+appName+" cannot exceed "+MAX_APPNAME_LENGTH+" in length.");
+			}
 			// Give 2 digits for version for now
-			if (appName.length()+2 > MAX_APPNAME_LENGTH) {
+			if (appName.length()+5 > MAX_APPNAME_LENGTH) {
 				throw new InvalidStreamDefinitionException(
 						String.format("The runtime application name for the app %s in the stream %s "
-						+ "should not exceed %s in length. Currently it is: %s{version-2digits}", registeredAppName, streamName, MAX_APPNAME_LENGTH, appName));
+						+ "should not exceed %s in length. Currently it is: %s{version-5digits}", registeredAppName, streamName, MAX_APPNAME_LENGTH, appName));
 			}
 			String version = this.appRegistryService.getResourceVersion(adr.getResource());
 			validateAppVersionIsRegistered(registeredAppName, adr, version);
