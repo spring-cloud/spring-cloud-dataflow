@@ -1,5 +1,5 @@
 /*
- * Copyright 2015-2017 the original author or authors.
+ * Copyright 2015-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -184,8 +184,12 @@ public abstract class AbstractShellIntegrationTest {
 	 * @param name name to use as part of stream/task name
 	 * @return unique random stream/task name
 	 */
-	protected String generateUniqueName(String name) {
-		return name + "-" + idGenerator.generateId();
+	protected String generateUniqueStreamOrTaskName(String name) {
+		// Return stream name of 20 characters of length
+		if (name.length() > 16) {
+			name = name.substring(0, 16);
+		}
+		return name + "-" + idGenerator.generateId().toString().substring(0, 4);
 	}
 
 	/**
@@ -193,8 +197,8 @@ public abstract class AbstractShellIntegrationTest {
 	 *
 	 * @return unique random stream/task name
 	 */
-	protected String generateUniqueName() {
-		return generateUniqueName(name.getMethodName().replace('[', '-').replace("]", ""));
+	protected String generateUniqueStreamOrTaskName() {
+		return generateUniqueStreamOrTaskName(name.getMethodName().replace('[', '-').replace("]", ""));
 	}
 
 	private static class DataFlowShell extends JLineShellComponent {
