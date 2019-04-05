@@ -13,10 +13,6 @@
     <img src="https://spring.io/badges/spring-cloud-dataflow/snapshot.svg"
          alt="Latest Snapshot Version" />
   </a>
-  <a href="https://codecov.io/gh/spring-cloud/spring-cloud-dataflow/branch/master">
-    <img src="https://codecov.io/gh/spring-cloud/spring-cloud-dataflow/branch/master/graph/badge.svg"
-         alt="Codecov" />
-  </a>
   <br>
   <a href="https://build.spring.io/browse/SCD-BMASTER">
     <img src="https://build.spring.io/plugins/servlet/wittified/build-status/SCD-BMASTER"

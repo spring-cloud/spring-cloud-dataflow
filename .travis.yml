@@ -8,6 +8,3 @@ jdk:
 install: true
 script:
   - './mvnw package -Pfull -U -Dmaven.test.redirectTestOutputToFile=true'
-
-after_success:
-  - bash <(curl -s https://codecov.io/bash)
