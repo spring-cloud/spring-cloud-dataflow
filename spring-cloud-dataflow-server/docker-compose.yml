@@ -31,7 +31,7 @@ services:
       - spring.cloud.dataflow.applicationProperties.stream.management.metrics.export.prometheus.enabled=true
       - spring.cloud.dataflow.applicationProperties.stream.spring.cloud.streamapp.security.enabled=false
       - spring.cloud.dataflow.applicationProperties.stream.management.endpoints.web.exposure.include=prometheus,info,health
-      - spring.cloud.dataflow.grafana-info.url=https://localhost:3000
+      - spring.cloud.dataflow.grafana-info.url=http://localhost:3000
     depends_on:
       - kafka
 
