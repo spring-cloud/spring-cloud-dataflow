@@ -188,7 +188,7 @@ public class PackageMetadataService implements ResourceLoaderAware {
 				try {
 					if (!packageRepository.isLocal()) {
 						Resource resource = resourceLoader.getResource(packageRepository.getUrl()
-								+ File.separator + "index.yml");
+								+ "/index.yml");
 						if (resource.exists()) {
 							logger.info("Downloading package metadata from " + resource);
 							File downloadedFile = new File(targetPath.toFile(), computeFilename(resource));
