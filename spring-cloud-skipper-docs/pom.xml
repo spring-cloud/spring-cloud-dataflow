@@ -12,6 +12,14 @@
     <properties>
         <main.basedir>${basedir}/..</main.basedir>
     </properties>
+    <repositories>
+      <repository>
+        <id>spring-repository</id>
+        <name>Spring Repository</name>
+        <url>https://repo.spring.io/plugins-release</url>
+      </repository>
+    </repositories>
+
 	<dependencies>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
@@ -47,6 +55,13 @@
 		<dependency>
 			<groupId>org.springframework.cloud</groupId>
 			<artifactId>spring-cloud-skipper-client</artifactId>
+		</dependency>
+    <dependency>
+			<groupId>io.spring.docresources</groupId>
+			<artifactId>spring-doc-resources</artifactId>
+			<version>0.1.0.RELEASE</version>
+			<type>zip</type>
+			<optional>true</optional>
 		</dependency>
 	</dependencies>
     <profiles>
@@ -94,6 +109,48 @@
                         </executions>
                     </plugin>
                     <plugin>
+              				<groupId>org.apache.maven.plugins</groupId>
+              				<artifactId>maven-dependency-plugin</artifactId>
+              				<executions>
+              					<execution>
+              					<id>unpack-doc-resources</id>
+              					<goals>
+              						<goal>unpack-dependencies</goal>
+              					</goals>
+              					<phase>generate-resources</phase>
+              					<configuration>
+              						<includeGroupIds>io.spring.docresources</includeGroupIds>
+              						<includeArtifactIds>spring-doc-resources</includeArtifactIds>
+              						<includeTypes>zip</includeTypes>
+              						<excludeTransitive>true</excludeTransitive>
+              						<outputDirectory>${project.build.directory}/refdocs/</outputDirectory>
+              					</configuration>
+              				</execution>
+              			</executions>
+              			</plugin>
+              			<plugin>
+              				<groupId>org.apache.maven.plugins</groupId>
+              				<artifactId>maven-resources-plugin</artifactId>
+              				<executions>
+              					<execution>
+              						<id>copy-asciidoc-resources</id>
+              						<phase>generate-resources</phase>
+              						<goals>
+              							<goal>copy-resources</goal>
+              						</goals>
+              						<configuration>
+              							<outputDirectory>${project.build.directory}/refdocs/</outputDirectory>
+              							<resources>
+              								<resource>
+              									<directory>src/main/asciidoc</directory>
+              									<filtering>false</filtering>
+              								</resource>
+              							</resources>
+              						</configuration>
+              					</execution>
+              				</executions>
+              			</plugin>
+                    <plugin>
                         <groupId>org.asciidoctor</groupId>
                         <artifactId>asciidoctor-maven-plugin</artifactId>
                         <version>${asciidoctor-maven-plugin.version}</version>
@@ -105,6 +162,7 @@
                             </dependency>
                         </dependencies>
                         <configuration>
+                            <sourceDirectory>${project.build.directory}/refdocs/</sourceDirectory>
                             <sourceDocumentName>index.adoc</sourceDocumentName>
                             <doctype>book</doctype>
                             <attributes>
@@ -125,10 +183,36 @@
                                 </goals>
                                 <configuration>
                                     <backend>html5</backend>
+                                    <sourceHighlighter>highlight.js</sourceHighlighter>
                                     <attributes>
-                                        <toc2 />
+                                      <sectanchors>true</sectanchors>
+                                      <sectnums></sectnums>
+                      								<docinfo>shared</docinfo>
+                      								<stylesdir>css/</stylesdir>
+                      								<stylesheet>spring.css</stylesheet>
+                      								<linkcss>true</linkcss>
+                      								<icons>font</icons>
+                      								<highlightjsdir>js/highlight</highlightjsdir>
+                      								<highlightjs-theme>atom-one-dark-reasonable</highlightjs-theme>
                                     </attributes>
                                 </configuration>
+                            </execution>
+                            <execution>
+                              <id>generate-pdf</id>
+                              <phase>generate-resources</phase>
+                              <goals>
+                                <goal>process-asciidoc</goal>
+                              </goals>
+                              <configuration>
+                                <backend>pdf</backend>
+                                <sourceHighlighter>coderay</sourceHighlighter>
+                                <attributes>
+                                  <icons>font</icons>
+                                  <sectnums></sectnums>
+                                  <pagenums/>
+                                  <toc/>
+                                </attributes>
+                              </configuration>
                             </execution>
                         </executions>
                     </plugin>
@@ -173,6 +257,11 @@
                                             <zipfileset dir="${project.build.directory}/generated-docs" prefix="reference/htmlsingle">
                                                 <include name="index.html" />
                                                 <include name="images/**" />
+                                                <include name="css/**" />
+                                                <include name="js/**" />
+                                            </zipfileset>
+                                            <zipfileset dir="${project.build.directory}/generated-docs" prefix="reference/pdf">
+                                                <include name="index.pdf" />
                                             </zipfileset>
                                         </zip>
                                     </target>

@@ -42,23 +42,23 @@ If there are any arguments that do not have the prefix `spring.cloud.skipper.cli
 Consider the following example:
 
 [source,bash,subs=attributes]
-```
+----
 java -jar spring-cloud-skipper-shell-{project-version}.jar --spring.cloud.skipper.client.serverUri=http://localhost:9123/api
-```
+----
 The preceding example brings up the interactive shell and connects to `http://localhost:9123/api`.
 Now consider the following command:
 
 [source,bash,subs=attributes]
-```
+----
 $ java -jar spring-cloud-skipper-shell-{project-version}.jar --spring.cloud.skipper.client.serverUri=http://localhost:9123/api search
-```
+----
 
 The preceding command connects to `http://localhost:9123/api`, executes the `search` command, and then exits.
 
 A more common use case would be to update a package from within a CI job -- for example, in a Jenkins Stage, as shown in the following example:
 
 [source,groovy]
-```
+----
 stage ('Build') {
     steps {
         checkout([
@@ -78,7 +78,7 @@ stage ('Build') {
         '''
     }
 }
-```
+----
 
 
 [[using-platforms]]
@@ -215,7 +215,7 @@ inside the `packages` directory of the root package, `mypackagegroup`.
 
 The  https://github.com/spring-cloud/spring-cloud-skipper/blob/master/spring-cloud-skipper-server-core/src/test/resources/repositories/binaries/test/ticktock/ticktock-1.0.0.zip[ticktock-1.0.0.zip]
 file is a good example to use as a basis for creating your own package 'by-hand'.
- 
+
 [NOTE]
 ====
 Packages with template kind _CloudFoundryApplication_ currently doesn't support multiple applications format.
@@ -280,7 +280,7 @@ implementations (CF, Kubernetes Deployer, and so on). Other is having `CloudFoun
 applications are directly deployed into _Cloud Foundry_ using its manifest support.
 
 [[package-templates-scdep]]
-==== Spring Cloud Deployer 
+==== Spring Cloud Deployer
 
 The `template.yml` file has a package structure similar to that of the following example:
 
@@ -396,11 +396,11 @@ Possible values of a `spec.manifest` are:
 
 | `memory`
 | (String or Integer)
-| _memory_ attribute as is if type is Integer, String is converted using same format in a CF, like `1024M` or `2G`. `1024` and `1024M` are equivalent. 
+| _memory_ attribute as is if type is Integer, String is converted using same format in a CF, like `1024M` or `2G`. `1024` and `1024M` are equivalent.
 
 | `disk-quota`
 | (String or Integer)
-| _disk_quota_ attribute as is if type is Integer, String is converted using same format in a CF, like `1024M` or `2G`. `1024` and `1024M` are equivalent. 
+| _disk_quota_ attribute as is if type is Integer, String is converted using same format in a CF, like `1024M` or `2G`. `1024` and `1024M` are equivalent.
 
 | `timeout`
 | (Integer)
@@ -423,7 +423,7 @@ Possible values of a `spec.manifest` are:
 | _random-route_ attribute as is.
 
 | `health-check-type`
-| (String) 
+| (String)
 | _health-check-type_ having possible values of `port`, `process` or `http`.
 
 | `health-check-http-endpoint`
