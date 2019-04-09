@@ -12,6 +12,14 @@
 
     <dependencies>
         <dependency>
+            <groupId>org.springframework.hateoas</groupId>
+            <artifactId>spring-hateoas</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-configuration-metadata</artifactId>
+        </dependency>      
+        <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-validation</artifactId>
         </dependency>
@@ -50,6 +58,8 @@
             <groupId>org.springframework.cloud</groupId>
             <artifactId>spring-cloud-deployer-spi</artifactId>
         </dependency>
+
+	<!-- TEST DEPS -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-test</artifactId>
@@ -61,13 +71,6 @@
             <version>${equalverifier.version}</version>
             <scope>test</scope>
         </dependency>
-        <dependency>
-            <groupId>org.springframework.hateoas</groupId>
-            <artifactId>spring-hateoas</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-configuration-metadata</artifactId>
-        </dependency>
+
     </dependencies>
 </project>
