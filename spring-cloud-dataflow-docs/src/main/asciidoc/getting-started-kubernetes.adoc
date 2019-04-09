@@ -47,6 +47,7 @@ The following listing outlines the compatibility between Spring Cloud Data Flow 
 | Server: 1.5.x - Deployer: 1.3.6                       | ✓     | ✓      | ✓      |
 | Server: 1.6.x - Deployer: 1.3.7                       | ✓     | ✓      | ✓      |
 | Server: 1.7.x - Deployer: 1.3.9                       | ✓     | ✓      | ✓      |
+| Server: 2.0.x - Deployer: 2.0.1                       | ✓     | ✓      | ✓      |
 |---------------------------------------------------------------------------------|
 ----
 ====
