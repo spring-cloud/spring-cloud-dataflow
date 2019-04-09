@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2018 the original author or authors.
+ * Copyright 2017-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,13 +17,17 @@ package org.springframework.cloud.skipper.server.service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import org.springframework.boot.configurationmetadata.ConfigurationMetadataProperty;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.cloud.skipper.domain.Deployer;
 import org.springframework.cloud.skipper.domain.Platform;
+import org.springframework.cloud.skipper.domain.deployer.ConfigurationMetadataPropertyEntity;
+import org.springframework.cloud.skipper.server.deployer.metadata.DeployerConfigurationMetadataResolver;
 import org.springframework.cloud.skipper.server.repository.map.DeployerRepository;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
@@ -42,19 +46,22 @@ public class DeployerInitializationService {
 
 	private final Logger logger = LoggerFactory
 			.getLogger(DeployerInitializationService.class);
-
-	private DeployerRepository deployerRepository;
-
+	private static final String KEY_PREFIX = "spring.cloud.deployer.";
+	private final DeployerRepository deployerRepository;
 	private final List<Platform> platforms;
+	private final DeployerConfigurationMetadataResolver resolver;
 
-	public DeployerInitializationService(DeployerRepository deployerRepository, List<Platform> platforms) {
+	public DeployerInitializationService(DeployerRepository deployerRepository, List<Platform> platforms,
+			DeployerConfigurationMetadataResolver resolver) {
 		this.deployerRepository = deployerRepository;
 		this.platforms = platforms;
+		this.resolver = resolver;
 	}
 
 	@EventListener
 	@Transactional
 	public void initialize(ApplicationReadyEvent event) {
+		List<ConfigurationMetadataProperty> metadataProperties = this.resolver.resolve();
 		if (singleDeployerExists()) {
 			for (Platform platform : this.platforms) {
 				if (platform.getDeployers().size() == 1) {
@@ -62,6 +69,9 @@ public class DeployerInitializationService {
 					List<Deployer> deployers = platform.getDeployers();
 
 					Deployer existingDeployer = deployers.get(0);
+					List<ConfigurationMetadataPropertyEntity> options = createMetadataPropertyEntities(
+							metadataProperties, existingDeployer.getType());
+					existingDeployer.setOptions(options);
 					if (!"default".equalsIgnoreCase(existingDeployer.getName())) {
 						Deployer defaultDeployer = new Deployer("default",
 								existingDeployer.getType(), existingDeployer.getAppDeployer());
@@ -75,6 +85,9 @@ public class DeployerInitializationService {
 		}
 		this.platforms.forEach(platform -> {
 			platform.getDeployers().forEach(deployer -> {
+				List<ConfigurationMetadataPropertyEntity> options = createMetadataPropertyEntities(metadataProperties,
+						deployer.getType());
+				deployer.setOptions(options);
 				this.deployerRepository.save(deployer);
 				logger.info(String.format(
 						"Added '%s' platform account '%s' into deployer repository.",
@@ -82,6 +95,15 @@ public class DeployerInitializationService {
 						deployer.getName()));
 			});
 		});
+	}
+
+	private List<ConfigurationMetadataPropertyEntity> createMetadataPropertyEntities(
+			List<ConfigurationMetadataProperty> metadataProperties, String type) {
+		String prefix = KEY_PREFIX + type;
+		return metadataProperties.stream()
+			.filter(p -> p.getId().startsWith(prefix))
+			.map(ConfigurationMetadataPropertyEntity::new)
+			.collect(Collectors.toList());
 	}
 
 	private boolean singleDeployerExists() {

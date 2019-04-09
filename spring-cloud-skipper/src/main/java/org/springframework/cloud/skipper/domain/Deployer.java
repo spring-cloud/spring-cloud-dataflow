@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 the original author or authors.
+ * Copyright 2017-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,11 +15,16 @@
  */
 package org.springframework.cloud.skipper.domain;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import org.springframework.cloud.deployer.spi.app.AppDeployer;
+import org.springframework.cloud.skipper.domain.deployer.ConfigurationMetadataPropertyEntity;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.keyvalue.annotation.KeySpace;
+
 
 /**
  * @author Mark Pollack
@@ -38,6 +43,8 @@ public class Deployer {
 
 	@JsonIgnore
 	private AppDeployer appDeployer;
+
+	private List<ConfigurationMetadataPropertyEntity> options = new ArrayList<>();
 
 	Deployer() {
 	}
@@ -86,5 +93,13 @@ public class Deployer {
 
 	public void setDescription(String description) {
 		this.description = description;
+	}
+
+	public List<ConfigurationMetadataPropertyEntity> getOptions() {
+		return options;
+	}
+
+	public void setOptions(List<ConfigurationMetadataPropertyEntity> options) {
+		this.options = options;
 	}
 }

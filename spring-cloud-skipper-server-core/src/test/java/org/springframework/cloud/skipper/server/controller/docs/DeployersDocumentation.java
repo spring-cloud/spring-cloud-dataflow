@@ -49,6 +49,32 @@ public class DeployersDocumentation extends BaseDocumentation {
 								fieldWithPath("_embedded.deployers[].description")
 										.description("Description providing some deployer properties"),
 								fieldWithPath("_embedded.deployers[]._links.self.href").ignored(),
+								fieldWithPath("_embedded.deployers[].options")
+										.description("Array containing Deployer deployment properties"),
+								fieldWithPath("_embedded.deployers[].options[].id")
+										.description("Deployment property id"),
+								fieldWithPath("_embedded.deployers[].options[].name")
+										.description("Deployment property name"),
+								fieldWithPath("_embedded.deployers[].options[].type")
+										.description("Deployment property type").optional(),
+								fieldWithPath("_embedded.deployers[].options[].description")
+										.description("Deployment property description").optional(),
+								fieldWithPath("_embedded.deployers[].options[].shortDescription")
+										.description("Deployment property short description").optional(),
+								fieldWithPath("_embedded.deployers[].options[].defaultValue")
+										.description("Deployment property default value").optional(),
+								fieldWithPath("_embedded.deployers[].options[].hints")
+										.description("Object containing deployment property hints"),
+								fieldWithPath("_embedded.deployers[].options[].hints.keyHints")
+										.description("Deployment property key hints"),
+								fieldWithPath("_embedded.deployers[].options[].hints.keyProviders")
+										.description("Deployment property key hints"),
+								fieldWithPath("_embedded.deployers[].options[].hints.valueHints")
+										.description("Deployment property key hints"),
+								fieldWithPath("_embedded.deployers[].options[].hints.valueProviders")
+										.description("Deployment property key hints"),
+								fieldWithPath("_embedded.deployers[].options[].deprecation").description(""),
+								fieldWithPath("_embedded.deployers[].options[].deprecated").description(""),
 								fieldWithPath("_embedded.deployers[]._links.deployer.href").ignored())
 								.and(super.defaultLinkProperties),
 						super.linksForSkipper()));

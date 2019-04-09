@@ -23,6 +23,7 @@ import org.springframework.cloud.deployer.spi.local.LocalAppDeployer;
 import org.springframework.cloud.deployer.spi.local.LocalDeployerProperties;
 import org.springframework.cloud.skipper.domain.Deployer;
 import org.springframework.cloud.skipper.domain.Platform;
+import org.springframework.cloud.skipper.server.deployer.metadata.DeployerConfigurationMetadataResolver;
 import org.springframework.cloud.skipper.server.repository.map.DeployerRepository;
 import org.springframework.cloud.skipper.server.service.DeployerInitializationService;
 import org.springframework.context.annotation.Bean;
@@ -34,10 +35,15 @@ import org.springframework.util.StringUtils;
 public class SkipperServerPlatformConfiguration {
 
 	@Bean
+	public DeployerConfigurationMetadataResolver deployerConfigurationMetadataResolver() {
+		return new DeployerConfigurationMetadataResolver();
+	}
+
+	@Bean
 	public DeployerInitializationService deployerInitializationService(
 			DeployerRepository deployerRepository,
-			List<Platform> platforms) {
-		return new DeployerInitializationService(deployerRepository, platforms);
+			List<Platform> platforms, DeployerConfigurationMetadataResolver resolver) {
+		return new DeployerInitializationService(deployerRepository, platforms, resolver);
 	}
 
 	@Bean
