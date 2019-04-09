@@ -41,7 +41,7 @@
 		<kubernetes-client.version>4.0.4</kubernetes-client.version>
 		<spring-cloud-kubernetes.version>0.3.0.RELEASE</spring-cloud-kubernetes.version>
 
-		<spring-cloud-skipper.version>2.1.0.BUILD-SNAPSHOT</spring-cloud-skipper.version>
+		<spring-cloud-skipper.version>2.0.2.BUILD-SNAPSHOT</spring-cloud-skipper.version>
 
 		<spring-cloud-task.version>2.1.2.BUILD-SNAPSHOT</spring-cloud-task.version>
 
