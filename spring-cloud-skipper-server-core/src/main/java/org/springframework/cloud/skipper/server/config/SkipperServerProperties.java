@@ -46,6 +46,8 @@ public class SkipperServerProperties {
 	 */
 	private boolean enableReleaseStateUpdateService;
 
+	private DeployerProperties deployerProperties = new DeployerProperties();
+
 	public Map<String, PackageRepository> getPackageRepositories() {
 		return packageRepositories;
 	}
@@ -68,6 +70,14 @@ public class SkipperServerProperties {
 
 	public void setEnableReleaseStateUpdateService(boolean enableReleaseStateUpdateService) {
 		this.enableReleaseStateUpdateService = enableReleaseStateUpdateService;
+	}
+
+	public DeployerProperties getDeployerProperties() {
+		return deployerProperties;
+	}
+
+	public void setDeployerProperties(DeployerProperties deployerProperties) {
+		this.deployerProperties = deployerProperties;
 	}
 
 	public static class PackageRepository {
@@ -116,6 +126,46 @@ public class SkipperServerProperties {
 
 		public void setRepoOrder(Integer repoOrder) {
 			this.repoOrder = repoOrder;
+		}
+	}
+
+	public static class DeployerProperties {
+
+		private String[] propertyIncludes = new String[0];
+		private String[] groupIncludes = new String[0];
+		private String[] propertyExcludes = new String[0];
+		private String[] groupExcludes = new String[0];
+
+		public String[] getPropertyIncludes() {
+			return propertyIncludes;
+		}
+
+		public void setPropertyIncludes(String[] propertyIncludes) {
+			this.propertyIncludes = propertyIncludes;
+		}
+
+		public String[] getGroupIncludes() {
+			return groupIncludes;
+		}
+
+		public void setGroupIncludes(String[] groupIncludes) {
+			this.groupIncludes = groupIncludes;
+		}
+
+		public String[] getPropertyExcludes() {
+			return propertyExcludes;
+		}
+
+		public void setPropertyExcludes(String[] propertyExcludes) {
+			this.propertyExcludes = propertyExcludes;
+		}
+
+		public String[] getGroupExcludes() {
+			return groupExcludes;
+		}
+
+		public void setGroupExcludes(String[] groupExcludes) {
+			this.groupExcludes = groupExcludes;
 		}
 	}
 }

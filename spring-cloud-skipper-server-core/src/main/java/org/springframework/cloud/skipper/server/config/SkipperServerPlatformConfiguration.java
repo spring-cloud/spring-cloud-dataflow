@@ -35,13 +35,13 @@ import org.springframework.util.StringUtils;
 public class SkipperServerPlatformConfiguration {
 
 	@Bean
-	public DeployerConfigurationMetadataResolver deployerConfigurationMetadataResolver() {
-		return new DeployerConfigurationMetadataResolver();
+	public DeployerConfigurationMetadataResolver deployerConfigurationMetadataResolver(
+			SkipperServerProperties skipperServerProperties) {
+		return new DeployerConfigurationMetadataResolver(skipperServerProperties.getDeployerProperties());
 	}
 
 	@Bean
-	public DeployerInitializationService deployerInitializationService(
-			DeployerRepository deployerRepository,
+	public DeployerInitializationService deployerInitializationService(DeployerRepository deployerRepository,
 			List<Platform> platforms, DeployerConfigurationMetadataResolver resolver) {
 		return new DeployerInitializationService(deployerRepository, platforms, resolver);
 	}

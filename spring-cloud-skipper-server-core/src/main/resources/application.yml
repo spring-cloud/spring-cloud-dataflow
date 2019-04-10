@@ -42,6 +42,9 @@ spring:
             local: true
             description: Default local database backed repository
             repoOrder: 1
+        deployer-properties:
+          group-excludes:
+            - spring.cloud.deployer.kubernetes.fabric8
       security:
         authorization:
           enabled: true
