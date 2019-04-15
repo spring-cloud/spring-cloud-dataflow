@@ -5,7 +5,7 @@ metadata:
   labels:
     app: skipper
 spec:
-  # If you are running k8s on a local dev box or using minikube, you can use type NodePort instead
+  # If you are running k8s on a local dev box, using minikube, or Kubernetes on docker desktop you can use type NodePort instead
   type: LoadBalancer
   ports:
   - port: 80

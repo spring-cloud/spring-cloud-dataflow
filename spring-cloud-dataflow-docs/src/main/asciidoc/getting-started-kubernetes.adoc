@@ -334,6 +334,8 @@ environmentVariables: 'SPRING_CLOUD_STREAM_KAFKA_BINDER_BROKERS=${KAFKA_SERVICE_
 
 Run the following commands to start Skipper as the companion server for Spring Cloud Data Flow:
 
+NOTE: If using a platform such as Kubernetes on Docker Desktop which provides a local `LoadBalancer` implementation, edit `src/kubernetes/skipper/skipper-svc.yaml` replacing `LoadBalancer` with `NodePort` to avoid port conflicts.
+
 ====
 [source,bash]
 ----
