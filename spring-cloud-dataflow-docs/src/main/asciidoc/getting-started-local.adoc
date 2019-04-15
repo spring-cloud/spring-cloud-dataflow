@@ -59,21 +59,18 @@ To get started, you need to start Docker Compose. To do so:
 ----
 $ export DATAFLOW_VERSION={local-server-image-tag}
 $ export SKIPPER_VERSION={skipper-version}
-$ export SCDF_HOST_IP=your-hsot-ip
 $ docker-compose up
 ----
 ====
 
-The `docker-compose.yml` file defines `DATAFLOW_VERSION`, `SKIPPER_VERSION` and `SCDF_HOST_IP` variables, so that those values can be easily changed. The preceding commands first set the `DATAFLOW_VERSION`, `SKIPPER_VERSION` and `SCDF_HOST_IP` to use in the environment. Then `docker-compose` is started.
+The `docker-compose.yml` file defines `DATAFLOW_VERSION` and `SKIPPER_VERSION` variables, so that those values can be easily changed. The preceding commands first set the `DATAFLOW_VERSION` and`SKIPPER_VERSION` to use in the environment. Then `docker-compose` is started.
 
-You can use the `ifconfig` (for linux/macos) or `ipconfig` (for Windows) command line toolkit to obtain the IP address to set in `SCDF_HOST_IP`. Note that `127.0.0.1` is not a valid option.
-
-You can also use a  shorthand version that exposes only the `DATAFLOW_VERSION`, `SKIPPER_VERSION` and `SCDF_HOST_IP` variables to the `docker-compose` process (rather than setting it in the environment), as follows:
+You can also use a  shorthand version that exposes only the `DATAFLOW_VERSION` and `SKIPPER_VERSION` variables to the `docker-compose` process (rather than setting it in the environment), as follows:
 
 ====
 [source,bash,subs=attributes]
 ----
-$ DATAFLOW_VERSION={local-server-image-tag} SKIPPER_VERSION={skipper-version} SCDF_HOST_IP=Your-Host-IP docker-compose up
+$ DATAFLOW_VERSION={local-server-image-tag} SKIPPER_VERSION={skipper-version} docker-compose up
 ----
 ====
 
@@ -84,7 +81,6 @@ If you use Windows, environment variables are defined by using the `set` command
 ----
 C:\ set DATAFLOW_VERSION={local-server-image-tag}
 C:\ set SKIPPER_VERSION={skipper-version}
-C:\ set SCDF_HOST_IP=Your-Host-IP
 C:\ docker-compose up
 ----
 ====
@@ -444,7 +440,6 @@ You can use InfluxDB rather than Prometheus for monitoring time-series database.
       - metrics.prometheus.target.refresh.cron=0/20 * * * * *
       - metrics.prometheus.target.discovery.url=http://localhost:9393/runtime/apps
       - metrics.prometheus.target.file.path=/tmp/targets.json
-      - 'SCDF_HOST_IP=${SCDF_HOST_IP:?SCDF_HOST_IP is not set! Use "export SCDF_HOST_IP=<SCDF Server IP>". Note: 127.0.0.1 is not a valid option!}'
     depends_on:
       - dataflow-server
 ----

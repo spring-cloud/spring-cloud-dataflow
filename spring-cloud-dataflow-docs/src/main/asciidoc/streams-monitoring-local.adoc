@@ -43,11 +43,6 @@ You can use `ifconfig` to find out your IP address.
 ----
 export SCDF_HOST_IP=<YOUR locahost IP address>
 ----
-In many cases the provided `find_host_ip.sh` script will give you the IP address.
-[source,bash]
-----
-source ./find_host_ip.sh
-----
 
 Start Prometheus, Grafana + Service-Discovery using `docker-compose`.
 [source,bash]

@@ -79,7 +79,7 @@ services:
   # The service-discovery container. Required for Prometheus setup only
   # Use `docker exec -it service-discovery /bin/sh` to logging the container
   service-discovery:
-    image: springcloud/spring-cloud-dataflow-prometheus-service-discovery:0.0.3.RELEASE
+    image: springcloud/spring-cloud-dataflow-prometheus-service-discovery:0.0.4.RELEASE
     container_name: 'service-discovery'
     volumes:
       - 'scdf-targets:/tmp/scdf-targets/'
@@ -90,12 +90,13 @@ services:
     environment:
       - metrics.prometheus.target.cron=0/20 * * * * *
       - metrics.prometheus.target.filePath=/tmp/scdf-targets/targets.json
+      - metrics.prometheus.target.discoveryUrl=http://dataflow-server:9393/runtime/apps
+      - metrics.prometheus.target.overrideIp=skipper-server
       - server.port=8181
-      - 'SCDF_HOST_IP=${SCDF_HOST_IP:?SCDF_HOST_IP is not set! Use "export SCDF_HOST_IP=<SCDF Server IP>". Note: 127.0.0.1 is not a valid option!}'
     depends_on:
       - dataflow-server
 
-  # Grafana SCDF Prometheus/InfluxDB pre-built image:
+  # Grafana SCDF Prometheus pre-built image:
   grafana:
     image: springcloud/spring-cloud-dataflow-grafana-prometheus:${DATAFLOW_VERSION:?DATAFLOW_VERSION is not set! Use 'export DATAFLOW_VERSION=local-server-image-tag'}
     container_name: 'grafana'
