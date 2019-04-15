@@ -34,7 +34,7 @@ public class LocalTaskPlatformFactoryTests {
 	@Test
 	public void createsDefaultPlatform() {
 		LocalPlatformProperties platformProperties = new LocalPlatformProperties();
-		LocalTaskPlatformFactory taskPlatformFactory = new LocalTaskPlatformFactory(platformProperties);
+		LocalTaskPlatformFactory taskPlatformFactory = new LocalTaskPlatformFactory(platformProperties, null);
 		TaskPlatform taskPlatform = taskPlatformFactory.createTaskPlatform();
 		assertThat(taskPlatform.getLaunchers()).hasSize(1);
 		assertThat(taskPlatform.getName()).isEqualTo("Local");
@@ -48,7 +48,7 @@ public class LocalTaskPlatformFactoryTests {
 	public void createsConfiguredPlatform() {
 		LocalPlatformProperties platformProperties = new LocalPlatformProperties();
 		platformProperties.setAccounts(Collections.singletonMap("custom",new LocalDeployerProperties()));
-		LocalTaskPlatformFactory taskPlatformFactory = new LocalTaskPlatformFactory(platformProperties);
+		LocalTaskPlatformFactory taskPlatformFactory = new LocalTaskPlatformFactory(platformProperties, null);
 		TaskPlatform taskPlatform = taskPlatformFactory.createTaskPlatform();
 		assertThat(taskPlatform.getLaunchers()).hasSize(1);
 		assertThat(taskPlatform.getName()).isEqualTo("Local");
