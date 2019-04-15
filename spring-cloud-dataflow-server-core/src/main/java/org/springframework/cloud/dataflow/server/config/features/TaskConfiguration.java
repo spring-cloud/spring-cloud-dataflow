@@ -61,6 +61,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
 import org.springframework.data.map.repository.config.EnableMapRepositories;
+import org.springframework.lang.Nullable;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 
@@ -97,16 +98,17 @@ public class TaskConfiguration {
 	}
 
 	/**
-	 * The default profile is active is no other profiles are active.  This is configured so that several tests
-	 * will pass without having to explicitly enable the local profile.
+	 * The default profile is active is no other profiles are active. This is configured so
+	 * that several tests will pass without having to explicitly enable the local profile.
 	 * @param localPlatformProperties
 	 * @return
 	 */
-	@Profile({"local", "default"})
+	@Profile({ "local", "default" })
 	@Bean
-	public TaskPlatform localTaskPlatform(LocalPlatformProperties localPlatformProperties, Scheduler localScheduler) {
-		TaskPlatform taskPlatform = new
-			LocalTaskPlatformFactory(localPlatformProperties, localScheduler).createTaskPlatform();
+	public TaskPlatform localTaskPlatform(LocalPlatformProperties localPlatformProperties,
+			@Nullable Scheduler localScheduler) {
+		TaskPlatform taskPlatform = new LocalTaskPlatformFactory(localPlatformProperties, localScheduler)
+				.createTaskPlatform();
 		taskPlatform.setPrimary(true);
 		return taskPlatform;
 	}
