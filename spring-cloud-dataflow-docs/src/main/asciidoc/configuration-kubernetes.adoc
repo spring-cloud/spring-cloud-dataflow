@@ -197,6 +197,10 @@ These properties are also used when configuring the <<configuration-kubernetes-t
 |The Spring Boot major version to use. Currently only used to configure Spring Boot version specific probe paths automatically. Valid options are `1` or `2`.
 |2
 
+|tolerations
+|Toleration configuration to set on created pod's.
+|<none>
+
 |===
 
 [[configuration-kubernetes-tasks]]
