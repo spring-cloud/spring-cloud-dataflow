@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 the original author or authors.
+ * Copyright 2018-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,10 +16,15 @@
 package org.springframework.cloud.dataflow.shell;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.cloud.dataflow.rest.client.config.DataFlowClientAutoConfiguration;
 import org.springframework.cloud.dataflow.server.EnableDataFlowServer;
+import org.springframework.cloud.scheduler.spi.core.ScheduleInfo;
+import org.springframework.cloud.scheduler.spi.core.ScheduleRequest;
+import org.springframework.cloud.scheduler.spi.core.Scheduler;
 import org.springframework.cloud.skipper.client.SkipperClient;
 import org.springframework.cloud.skipper.domain.AboutResource;
 import org.springframework.cloud.skipper.domain.Dependency;
@@ -40,6 +45,33 @@ import static org.mockito.Mockito.when;
 @EnableDataFlowServer
 @Configuration
 public class TestConfig {
+
+	@Bean
+	public Scheduler localScheduler() {
+		// This is in auto-config package and we can depend on that, use same
+		// dummy no-op impl here.
+		return new Scheduler() {
+			@Override
+			public void schedule(ScheduleRequest scheduleRequest) {
+				throw new UnsupportedOperationException("Scheduling is not implemented for local platform.");
+			}
+
+			@Override
+			public void unschedule(String scheduleName) {
+				throw new UnsupportedOperationException("Scheduling is not implemented for local platform.");
+			}
+
+			@Override
+			public List<ScheduleInfo> list(String taskDefinitionName) {
+				return Collections.emptyList();
+			}
+
+			@Override
+			public List<ScheduleInfo> list() {
+				return Collections.emptyList();
+			}
+		};
+	}
 
 	@Bean
 	@Primary

@@ -22,6 +22,7 @@ import org.springframework.cloud.dataflow.core.Launcher;
 import org.springframework.cloud.dataflow.core.TaskPlatform;
 import org.springframework.cloud.deployer.spi.local.LocalDeployerProperties;
 import org.springframework.cloud.deployer.spi.local.LocalTaskLauncher;
+import org.springframework.cloud.scheduler.spi.core.Scheduler;
 import org.springframework.util.StringUtils;
 
 /**
@@ -30,9 +31,11 @@ import org.springframework.util.StringUtils;
 public class LocalTaskPlatformFactory extends AbstractTaskPlatformFactory<LocalPlatformProperties> {
 
 	private static final String PLATFORM_TYPE = "Local";
+	private final Scheduler localScheduler;
 
-	public LocalTaskPlatformFactory(LocalPlatformProperties platformProperties) {
+	public LocalTaskPlatformFactory(LocalPlatformProperties platformProperties, Scheduler localScheduler) {
 		super(platformProperties, PLATFORM_TYPE);
+		this.localScheduler = localScheduler;
 	}
 
 	@Override
@@ -56,7 +59,7 @@ public class LocalTaskPlatformFactory extends AbstractTaskPlatformFactory<LocalP
 
 	private Launcher doCreateLauncher(String account, LocalDeployerProperties deployerProperties) {
 		LocalTaskLauncher localTaskLauncher = new LocalTaskLauncher(deployerProperties);
-		Launcher launcher = new Launcher(account, PLATFORM_TYPE, localTaskLauncher);
+		Launcher launcher = new Launcher(account, PLATFORM_TYPE, localTaskLauncher, localScheduler);
 		launcher.setDescription(prettyPrintLocalDeployerProperties(deployerProperties));
 		return launcher;
 	}

@@ -15,6 +15,7 @@
  */
 package org.springframework.cloud.dataflow.autoconfigure.local;
 
+import java.util.Collections;
 import java.util.List;
 
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
@@ -40,22 +41,22 @@ public class LocalSchedulerAutoConfiguration {
 		return new Scheduler() {
 			@Override
 			public void schedule(ScheduleRequest scheduleRequest) {
-				throw new UnsupportedOperationException("Interface is not implemented for schedule method.");
+				throw new UnsupportedOperationException("Scheduling is not implemented for local platform.");
 			}
 
 			@Override
 			public void unschedule(String scheduleName) {
-				throw new UnsupportedOperationException("Interface is not implemented for unschedule method.");
+				throw new UnsupportedOperationException("Scheduling is not implemented for local platform.");
 			}
 
 			@Override
 			public List<ScheduleInfo> list(String taskDefinitionName) {
-				throw new UnsupportedOperationException("Interface is not implemented for list method.");
+				return Collections.emptyList();
 			}
 
 			@Override
 			public List<ScheduleInfo> list() {
-				throw new UnsupportedOperationException("Interface is not implemented for list method.");
+				return Collections.emptyList();
 			}
 		};
 	}
