@@ -2006,3 +2006,70 @@ Additionally, you can apply multiple labels, as the following example shows:
 deployer.<app>.kubernetes.deploymentLabels=myLabelName:myLabelValue,myLabelName2:myLabelValue2
 ----
 ====
+
+==== Tolerations
+
+Tolerations work with taints to ensure pods are not scheduled onto particular nodes.
+Tolerations are set into the pod configuration while taints are set onto nodes.
+Refer to the https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/[Taints and Tolerations] section of the Kubernetes reference for more information.
+
+The following example shows how you can individually configure applications:
+
+====
+[source,options=nowrap]
+----
+deployer.<app>.kubernetes.tolerations=[{key: 'mykey' operator: 'Equal', value: 'myvalue', effect: 'NoSchedule'}]
+----
+====
+
+Replace `<app>` with the name of your application and the key / value pairs according to your desired toleration configuration.
+
+You can configure tolerations at the global server level as well.
+
+The following example shows how to do so for streams:
+
+====
+[source,yaml]
+----
+data:
+  application.yaml: |-
+    spring:
+      cloud:
+        skipper:
+          server:
+            platform:
+              kubernetes:
+                accounts:
+                  default:
+                    tolerations:
+                      - key: mykey
+                        operator: Equal
+                        value: myvalue
+                        effect: NoSchedule
+----
+====
+
+The following example shows how to do so for tasks:
+
+====
+[source,yaml]
+----
+data:
+  application.yaml: |-
+    spring:
+      cloud:
+        dataflow:
+          task:
+            platform:
+              kubernetes:
+                accounts:
+                  default:
+                    tolerations:
+                      - key: mykey
+                        operator: Equal
+                        value: myvalue
+                        effect: NoSchedule
+----
+====
+
+Replacing the `tolerations` key / value pairs according to your desired toleration configuration.
