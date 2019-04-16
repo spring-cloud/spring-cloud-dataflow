@@ -57,7 +57,7 @@ services:
     - "9000-9010:9000-9010"
 
   influxdb:
-    image: influxdb:1.7.4
+    image: influxdb:1.7.5
     container_name: 'influxdb'
     ports:
       - '8086:8086'

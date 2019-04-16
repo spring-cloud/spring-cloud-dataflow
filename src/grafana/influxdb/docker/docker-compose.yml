@@ -3,7 +3,7 @@ services:
 
   # Grafana uses the InfluxDB datasource
   influxdb:
-    image: influxdb:1.7.4
+    image: influxdb:1.7.5
     container_name: 'influxdb'
     ports:
       - '8086:8086'

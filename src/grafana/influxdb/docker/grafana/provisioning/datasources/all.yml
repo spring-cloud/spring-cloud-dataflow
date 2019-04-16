@@ -3,7 +3,7 @@ datasources:
     type: 'influxdb'
     access: 'proxy'
     org_id: 1
-    url: 'https://influxdb:8086'
+    url: 'http://influxdb:8086'
     database: 'myinfluxdb'
     is_default: true
     version: 5
