@@ -30,7 +30,7 @@ services:
     ports:
       - '8181:8181'
     environment:
-      - metrics.prometheus.target.discoveryUrl=http://${SCDF_HOST_IP}r:9393/runtime/apps
+      - metrics.prometheus.target.discoveryUrl=http://${SCDF_HOST_IP}:9393/runtime/apps
       - metrics.prometheus.target.overrideIp=${SCDF_HOST_IP}
 
 volumes:
