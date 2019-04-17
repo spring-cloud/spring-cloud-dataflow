@@ -45,6 +45,10 @@ spring:
         deployer-properties:
           group-excludes:
             - spring.cloud.deployer.kubernetes.fabric8
+          property-excludes:
+            - spring.cloud.deployer.local.maximum-concurrent-tasks
+            - spring.cloud.deployer.kubernetes.maximum-concurrent-tasks
+            - spring.cloud.deployer.cloundfoundry.maximum-concurrent-tasks
       security:
         authorization:
           enabled: true
