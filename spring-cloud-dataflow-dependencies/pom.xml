@@ -15,7 +15,7 @@
 		the Spring Initializr.
 	</description>
 	<properties>
-		<mariadb.version>2.4.0</mariadb.version>
+		<mariadb.version>2.4.1</mariadb.version>
 	</properties>
 	<dependencyManagement>
 		<dependencies>
