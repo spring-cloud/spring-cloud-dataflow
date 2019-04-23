@@ -58,7 +58,7 @@
         <commons-lang.version>3.4</commons-lang.version>
         <equalverifier.version>2.4.1</equalverifier.version>
         <hibernate.jpa.version>1.0.0.Final</hibernate.jpa.version>
-        <mariadb.version>2.4.0</mariadb.version>
+        <mariadb.version>2.4.1</mariadb.version>
 
         <jacoco-maven-plugin.version>0.7.9</jacoco-maven-plugin.version>
         <surefire-maven-plugin.version>2.20</surefire-maven-plugin.version>
