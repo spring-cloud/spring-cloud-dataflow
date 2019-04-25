@@ -62,6 +62,21 @@ java -jar spring-cloud-dataflow-server/target/spring-cloud-dataflow-server-{proj
     --spring.datasource.driver-class-name=org.mariadb.jdbc.Driver &
 ----
 
+The following example shows how to define a MariaDB database connection with command Line arguments
+
+[source,bash,subs=attributes]
+----
+java -jar spring-cloud-dataflow-server/target/spring-cloud-dataflow-server-{project-version}.jar \
+    --spring.datasource.url=jdbc:mariadb://localhost:3306/mydb?useMysqlMetadata=true \
+    --spring.datasource.username=<user> \
+    --spring.datasource.password=<password> \
+    --spring.datasource.driver-class-name=org.mariadb.jdbc.Driver &
+----
+
+NOTE: Starting with MariaDB connector 2.4.1, it is required to add option `useMysqlMetadata=true`
+      to jdbc url. This is a workaround until world is fully ready for separation of a
+      MySQL and MariaDB.
+
 The following example shows how to define a PostgreSQL database connection with command line arguments:
 
 [source,bash,subs=attributes]
