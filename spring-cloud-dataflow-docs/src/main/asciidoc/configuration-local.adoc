@@ -73,9 +73,9 @@ java -jar spring-cloud-dataflow-server/target/spring-cloud-dataflow-server-{proj
     --spring.datasource.driver-class-name=org.mariadb.jdbc.Driver &
 ----
 
-NOTE: Starting with MariaDB connector 2.4.1, it is required to add option `useMysqlMetadata=true`
-      to jdbc url. This is a workaround until world is fully ready for separation of a
-      MySQL and MariaDB.
+NOTE: Starting with MariaDB v2.4.1 connector release, it is required to also add `useMysqlMetadata=true`
+      to the JDBC URL. This is a required workaround until when MySQL and MariaDB entirely switch as two
+      different databases.
 
 The following example shows how to define a PostgreSQL database connection with command line arguments:
 
