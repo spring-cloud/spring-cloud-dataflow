@@ -1,0 +1,35 @@
+Spring Cloud Data Flow Server deploys streaming and task/batch applications onto the target runtime that conforms to the microservice architectural-style. Both Streaming and Task-based microservice applications build upon Spring Boot as the foundational library. This gives all microservice applications functionality such as health checks, security, configurable logging, monitoring, and management functionality, as well as executable JAR packaging.
+
+## Getting Started
+
+Step 1 - There are two ways to [get started](https://docs.spring.io/spring-cloud-dataflow/docs/current/reference/htmlsingle/#getting-started). The quickest is to download the Spring Cloud Data Flow Local-Server's Docker Compose artifact. (_Mac users can use 'curl -O' instead of 'wget'_) 
+
+----
+wget https://raw.githubusercontent.com/spring-cloud/spring-cloud-dataflow/v1.5.1.RELEASE/spring-cloud-dataflow-server-local/docker-compose.yml
+----
+
+Step 2 - From the directory where you downloaded `docker-compose.yml`, start the system.
+
+----
+DATAFLOW_VERSION=1.5.1.RELEASE docker-compose up
+----
+
+Step 3 - Open the dashboard at http://localhost:9393/dashboard[http://localhost:9393/dashboard].
+
+Step 4 - Use 'Create Stream' under STREAMS Tab to define and deploy a stream `time | log` called 'ticktock'.
+
+image::http://github.com/spring-cloud/spring-cloud-dataflow/blob/ea39fb107257f766b4f6a9e8ad6dc9f562bc841c/img/create-ticktock-stream.png[Create TickTock Stream]
+
+image::img/deploy-ticktock-stream.png[Deploy TickTock Stream]
+
+Once the ‘ticktock’ stream is deployed, two running stream apps will appear under RUNTIME. Click on 'ticktock.log' to determine the location of the stdout log file.
+
+image::img/ticktock-log-runtime.png[Runtime app details]
+
+Step 5 - Verify that events are being written to the ticktock log every second. To view the stream logs, copy the path in the "stdout" text box on the dashboard and in another console type:
+
+----
+docker exec -it dataflow-server tail -f <COPIED-STDOUT-PATH>
+----
+
+

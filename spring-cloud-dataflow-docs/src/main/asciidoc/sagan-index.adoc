@@ -1,0 +1,58 @@
+Spring Cloud Data Flow is a toolkit for building data integration and real-time data processing pipelines.
+
+Pipelines consist of http://projects.spring.io/spring-boot/[Spring Boot] apps, built using the http://cloud.spring.io/spring-cloud-stream/[Spring Cloud Stream] or http://cloud.spring.io/spring-cloud-task/[Spring Cloud Task] microservice frameworks. This makes Spring Cloud Data Flow suitable for a range of data processing use cases, from import/export to event streaming and predictive analytics.
+
+## Overview
+
+The Spring Cloud Data Flow server uses https://github.com/spring-cloud/spring-cloud-deployer/[Spring Cloud Deployer], to deploy pipelines onto modern runtimes such as Cloud Foundry, Kubernetes, Apache Mesos or Apache YARN.
+
+A selection of pre-built http://cloud.spring.io/spring-cloud-stream-app-starters/[stream] and http://cloud.spring.io/spring-cloud-task-app-starters/[task/batch] starter apps for various data integration and processing scenarios facilitate learning and experimentation.
+
+http://docs.spring.io/spring-cloud-dataflow/docs/current-SNAPSHOT/reference/htmlsingle/#custom-applications[Custom] stream and task applications, targeting different middleware or data services, can be built using the familiar Spring Boot style programming model.
+
+A simple http://docs.spring.io/spring-cloud-dataflow/docs/current-SNAPSHOT/reference/htmlsingle/#_stream_dsl[stream pipeline DSL] makes it easy to specify which apps to deploy and how to connect outputs and inputs. A new http://docs.spring.io/spring-cloud-dataflow/docs/current-SNAPSHOT/reference/htmlsingle/#_composed_task_dsl[composed task DSL] was added in v1.2.
+
+The http://docs.spring.io/spring-cloud-dataflow/docs/current-SNAPSHOT/reference/htmlsingle/#dashboard-introduction[dashboard] offers a graphical editor for building new pipelines interactively, as well as views of deployable apps and running apps with metrics.
+
+The Spring Could Data Flow server exposes a http://docs.spring.io/spring-cloud-dataflow/docs/current-SNAPSHOT/reference/htmlsingle/#api-guide-overview[REST API] for composing and deploying data pipelines. A separate http://docs.spring.io/spring-cloud-dataflow/docs/current-SNAPSHOT/reference/htmlsingle/#getting-started-deploying-spring-cloud-dataflow[shell] makes it easy to work with the API from the command line.
+
+## Platform Implementations
+
+An easy way to get started on Spring Cloud Data Flow would be to follow the platform-specific implementation links from the table below. Each of the implementations evolves in isolation with independent release cadences. It is highly recommended to review the platform-specific reference docs to learn more about the feature capabilities.
+
+[cols = "3" options="headers,nowrap"]
+|============================
+|__Server Type__
+|__Stable Release__
+|__Milestone/Snapshot Release__
+
+|Local Server
+|https://repo.spring.io/release/org/springframework/cloud/spring-cloud-dataflow-server-local/1.5.1.RELEASE/spring-cloud-dataflow-server-local-1.5.1.RELEASE.jar[1.5.1.RELEASE][http://docs.spring.io/spring-cloud-dataflow/docs/1.5.1.RELEASE/reference/htmlsingle/#getting-started[docs]]
+|http://repo.spring.io/libs-snapshot/org/springframework/cloud/spring-cloud-dataflow-server-local/1.5.2.BUILD-SNAPSHOT/spring-cloud-dataflow-server-local-1.5.2.BUILD-SNAPSHOT.jar[1.5.2.BUILD-SNAPSHOT][http://docs.spring.io/spring-cloud-dataflow/docs/1.5.2.BUILD-SNAPSHOT/reference/htmlsingle/#getting-started[docs]]
+
+|http://cloud.spring.io/spring-cloud-dataflow-server-cloudfoundry/[Cloud Foundry Server]
+|http://repo.spring.io/release/org/springframework/cloud/spring-cloud-dataflow-server-cloudfoundry/1.5.1.RELEASE/spring-cloud-dataflow-server-cloudfoundry-1.5.1.RELEASE.jar[1.5.1.RELEASE][https://docs.spring.io/spring-cloud-dataflow-server-cloudfoundry/docs/1.5.1.RELEASE/reference/htmlsingle/#getting-started[docs]]
+|http://repo.spring.io/libs-snapshot/org/springframework/cloud/spring-cloud-dataflow-server-cloudfoundry/1.5.2.BUILD-SNAPSHOT/spring-cloud-dataflow-server-cloudfoundry-1.5.2.BUILD-SNAPSHOT.jar[1.5.2.BUILD-SNAPSHOT][http://docs.spring.io/spring-cloud-dataflow-server-cloudfoundry/docs/1.5.2.BUILD-SNAPSHOT/reference/htmlsingle/#getting-started[docs]]
+
+|http://cloud.spring.io/spring-cloud-dataflow-server-kubernetes/[Kubernetes Server]
+|https://repo.spring.io/libs-release/org/springframework/cloud/spring-cloud-dataflow-server-kubernetes/1.5.1.RELEASE/spring-cloud-dataflow-server-kubernetes-1.5.1.RELEASE.jar[1.5.1.RELEASE][https://docs.spring.io/spring-cloud-dataflow-server-kubernetes/docs/1.5.1.RELEASE/reference/htmlsingle/#kubernetes-getting-started[docs]]
+|http://repo.spring.io/libs-snapshot/org/springframework/cloud/spring-cloud-dataflow-server-kubernetes/1.5.2.BUILD-SNAPSHOT/spring-cloud-dataflow-server-kubernetes-1.5.2.BUILD-SNAPSHOT.jar[1.5.2.BUILD-SNAPSHOT][http://docs.spring.io/spring-cloud-dataflow-server-kubernetes/docs/1.5.2.BUILD-SNAPSHOT/reference/htmlsingle/#kubernetes-getting-started[docs]]
+
+|http://cloud.spring.io/spring-cloud-dataflow-server-yarn/[Apache YARN Server]
+|http://repo.spring.io/libs-release/org/springframework/cloud/spring-cloud-dataflow-server-yarn/1.2.2.RELEASE/spring-cloud-dataflow-server-yarn-1.2.2.RELEASE.jar[1.2.2.RELEASE][http://docs.spring.io/spring-cloud-dataflow-server-yarn/docs/1.2.2.RELEASE/reference/htmlsingle/#yarn-deploying-on-yarn[docs]]
+|http://repo.spring.io/libs-snapshot/org/springframework/cloud/spring-cloud-dataflow-server-yarn/1.2.3.BUILD-SNAPSHOT/spring-cloud-dataflow-server-yarn-1.2.3.BUILD-SNAPSHOT.jar[1.2.3.BUILD-SNAPSHOT][http://docs.spring.io/spring-cloud-dataflow-server-yarn/docs/1.2.3.BUILD-SNAPSHOT/reference/htmlsingle/#yarn-deploying-on-yarn[docs]] 
+
+|http://cloud.spring.io/spring-cloud-dataflow-server-mesos/[Apache Mesos Server]
+|http://repo.spring.io/libs-milestone/org/springframework/cloud/spring-cloud-dataflow-server-mesos/1.0.0.RELEASE/spring-cloud-dataflow-server-mesos-1.0.0.RELEASE.jar[1.0.0.RELEASE][http://docs.spring.io/spring-cloud-dataflow-server-mesos/docs/1.0.0.RELEASE/reference/htmlsingle/#_getting_started[docs]]
+|https://github.com/spring-cloud/spring-cloud-dataflow-server-mesos#building[1.1.0.BUILD-SNAPSHOT][http://docs.spring.io/spring-cloud-dataflow-server-mesos/docs/current-SNAPSHOT/reference/htmlsingle/#_getting_started[docs]]
+|===
+
+TEST 1!
+
+## Community Implementations
+
+TEST 2!
+
+
+
+
