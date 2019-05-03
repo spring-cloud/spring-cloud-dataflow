@@ -1,6 +1,15 @@
 version: '3'
 
 services:
+  mysql:
+    image: mysql:5.7.25
+    environment:
+      MYSQL_DATABASE: dataflow
+      MYSQL_USER: root
+      MYSQL_ROOT_PASSWORD: rootpw
+    expose:
+      - 3306
+
   kafka:
     image: confluentinc/cp-kafka:5.2.1
     expose:
@@ -35,6 +44,10 @@ services:
       - spring.cloud.dataflow.applicationProperties.stream.spring.cloud.streamapp.security.enabled=false
       - spring.cloud.dataflow.applicationProperties.stream.management.endpoints.web.exposure.include=prometheus,info,health
       - spring.cloud.dataflow.grafana-info.url=http://localhost:3000
+      - SPRING_DATASOURCE_URL=jdbc:mysql://mysql:3306/dataflow
+      - SPRING_DATASOURCE_USERNAME=root
+      - SPRING_DATASOURCE_PASSWORD=rootpw
+      - SPRING_DATASOURCE_DRIVER_CLASS_NAME=org.mariadb.jdbc.Driver
     depends_on:
       - kafka
 
@@ -63,6 +76,10 @@ services:
     environment:
       - SPRING_CLOUD_SKIPPER_SERVER_PLATFORM_LOCAL_ACCOUNTS_DEFAULT_PORTRANGE_LOW=20000
       - SPRING_CLOUD_SKIPPER_SERVER_PLATFORM_LOCAL_ACCOUNTS_DEFAULT_PORTRANGE_HIGH=20100
+      - SPRING_DATASOURCE_URL=jdbc:mysql://mysql:3306/dataflow
+      - SPRING_DATASOURCE_USERNAME=root
+      - SPRING_DATASOURCE_PASSWORD=rootpw
+      - SPRING_DATASOURCE_DRIVER_CLASS_NAME=org.mariadb.jdbc.Driver
 
   # Grafana is configured with the Prometheus datasource.
   # Use `docker exec -it prometheus /bin/sh` to logging in the container

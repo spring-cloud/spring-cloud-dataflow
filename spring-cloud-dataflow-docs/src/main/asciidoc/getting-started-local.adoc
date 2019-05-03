@@ -219,42 +219,8 @@ image::{dataflow-asciidoc}/images/grafana-prometheus-scdf-applications-dashboard
 
 === Docker Compose Customization
 
-Out of the box, Spring Cloud Data Flow uses the H2 embedded database for storing state and Kafka for communication.
+Out of the box, Spring Cloud Data Flow uses a MySQL database for storing state and Kafka for communication.
 You can make customizations to these components by editing the `docker-compose.yml` file. To do so:
-
-[[getting-started-local-customizing-spring-cloud-dataflow-docker-mysql]]
-===== Using MySQL Rather than the H2 Embedded Database
-
-You can use MySQL rather than the H2 embedded database.
-To do so:
-
-. Add the following configuration under the `services` section:
-+
-====
-[source,yaml,subs=attributes]
-----
-  mysql:
-    image: mysql:5.7.25
-    environment:
-      MYSQL_DATABASE: dataflow
-      MYSQL_USER: root
-      MYSQL_ROOT_PASSWORD: rootpw
-    expose:
-      - 3306
-----
-====
-
-. Add the following entries to the `environment` block of the `dataflow-server` service definition:
-+
-====
-[source,yaml,subs=attributes]
-----
-      - spring.datasource.url=jdbc:mysql://mysql:3306/dataflow
-      - spring.datasource.username=root
-      - spring.datasource.password=rootpw
-      - spring.datasource.driver-class-name=org.mariadb.jdbc.Driver
-----
-====
 
 [[getting-started-local-customizing-spring-cloud-dataflow-docker-rabbitmq]]
 ===== Using RabbitMQ Instead of Kafka for Communication
