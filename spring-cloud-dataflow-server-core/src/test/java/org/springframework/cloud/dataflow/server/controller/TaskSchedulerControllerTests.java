@@ -191,15 +191,35 @@ public class TaskSchedulerControllerTests {
 
 	@Test
 	public void testCreateScheduleWithSensitiveFields() throws Exception {
-		AppRegistration registration = this.registry.save("testApp", ApplicationType.task,
-				"1.0.0", new URI("file:src/test/resources/apps/foo-task"), null);
+		String auditData = createScheduleWithArguments("argument1=foo password=secret");
+
+		assertEquals(
+				"{\"commandlineArguments\":[\"argument1=foo\",\"password=******\"],\"taskDefinitionName\":\"testDefinition\","
+						+ "\"taskDefinitionProperties\":{\"prop1\":\"foo\",\"spring.datasource.username\":null,\"prop2.secret\":\"******\",\"spring.datasource.url\":null,\"spring.datasource.driverClassName\":null,\"spring.cloud.task.name\":\"testDefinition\"},"
+						+ "\"deploymentProperties\":{\"spring.cloud.deployer.prop1.secret\":\"******\",\"spring.cloud.deployer.prop2.password\":\"******\"}}",
+				auditData);
+	}
+
+	@Test
+	public void testCreateScheduleCommaDelimitedArgs() throws Exception {
+		String auditData = createScheduleWithArguments("argument1=foo spring.profiles.active=k8s,master argument3=bar");
+
+		assertEquals(
+				"{\"commandlineArguments\":[\"argument1=foo\",\"spring.profiles.active=k8s,master\",\"argument3=bar\"],\"taskDefinitionName\":\"testDefinition\","
+						+ "\"taskDefinitionProperties\":{\"prop1\":\"foo\",\"spring.datasource.username\":null,\"prop2.secret\":\"******\",\"spring.datasource.url\":null,\"spring.datasource.driverClassName\":null,\"spring.cloud.task.name\":\"testDefinition\"},"
+						+ "\"deploymentProperties\":{\"spring.cloud.deployer.prop1.secret\":\"******\",\"spring.cloud.deployer.prop2.password\":\"******\"}}",
+				auditData);
+	}
+
+	private String createScheduleWithArguments(String arguments) throws Exception {
+		this.registry.save("testApp", ApplicationType.task, "1.0.0", new URI("file:src/test/resources/apps/foo-task"), null);
 
 		repository.save(new TaskDefinition("testDefinition", "testApp"));
 		mockMvc.perform(post("/tasks/schedules/").param("taskDefinitionName", "testDefinition")
 				.param("scheduleName", "mySchedule")
 				.param("properties",
 						"scheduler.cron.expression=* * * * *,app.testApp.prop1=foo,app.testApp.prop2.secret=kenny,deployer.*.prop1.secret=cartman,deployer.*.prop2.password=kyle")
-				.param("arguments", "argument1=foo,password=secret")
+				.param("arguments", arguments)
 				.accept(MediaType.APPLICATION_JSON)).andDo(print()).andExpect(status().isCreated());
 		assertEquals(1, simpleTestScheduler.list().size());
 		ScheduleInfo scheduleInfo = simpleTestScheduler.list().get(0);
@@ -216,12 +236,7 @@ public class TaskSchedulerControllerTests {
 		assertEquals(AuditActionType.CREATE, auditRecord.getAuditAction());
 		assertEquals("mySchedule", auditRecord.getCorrelationId());
 
-		assertEquals(
-				"{\"commandlineArguments\":[\"argument1=foo\",\"password=******\"],\"taskDefinitionName\":\"testDefinition\","
-						+ "\"taskDefinitionProperties\":{\"prop1\":\"foo\",\"spring.datasource.username\":null,\"prop2.secret\":\"******\",\"spring.datasource.url\":null,\"spring.datasource.driverClassName\":null,\"spring.cloud.task.name\":\"testDefinition\"},"
-						+ "\"deploymentProperties\":{\"spring.cloud.deployer.prop1.secret\":\"******\",\"spring.cloud.deployer.prop2.password\":\"******\"}}",
-				auditRecord.getAuditData());
-
+		return auditRecord.getAuditData();
 	}
 
 	@Test

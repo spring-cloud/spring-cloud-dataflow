@@ -136,9 +136,10 @@ public class TaskSchedulerController {
 	public void save(@RequestParam("scheduleName") String scheduleName,
 			@RequestParam("taskDefinitionName") String taskDefinitionName,
 			@RequestParam String properties,
-			@RequestParam(required = false) List<String> arguments) {
+			@RequestParam(required = false) String arguments) {
 		Map<String, String> propertiesToUse = DeploymentPropertiesUtils.parse(properties);
-		schedulerService.schedule(scheduleName, taskDefinitionName, propertiesToUse, arguments);
+		List<String> argumentsToUse = DeploymentPropertiesUtils.parseParamList(arguments, " ");
+		schedulerService.schedule(scheduleName, taskDefinitionName, propertiesToUse, argumentsToUse);
 	}
 
 	/**
