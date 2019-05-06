@@ -1,6 +1,15 @@
 version: '3'
 
 services:
+  mysql:
+    image: mysql:5.7.25
+    environment:
+      MYSQL_DATABASE: dataflow
+      MYSQL_USER: root
+      MYSQL_ROOT_PASSWORD: rootpw
+    expose:
+      - 3306
+
   kafka:
     image: confluentinc/cp-kafka:5.2.1
     expose:
@@ -12,12 +21,14 @@ services:
       - KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR=1
     depends_on:
       - zookeeper
+
   zookeeper:
     image: confluentinc/cp-zookeeper:5.2.1
     expose:
       - "2181"
     environment:
       - ZOOKEEPER_CLIENT_PORT=2181
+
   dataflow-server:
     image: springcloud/spring-cloud-dataflow-server:${DATAFLOW_VERSION:?DATAFLOW_VERSION is not set!}
     container_name: dataflow-server
@@ -33,8 +44,13 @@ services:
       - spring.cloud.dataflow.applicationProperties.stream.management.metrics.export.influx.db=myinfluxdb
       - spring.cloud.dataflow.applicationProperties.stream.management.metrics.export.influx.uri=http://influxdb:8086
       - spring.cloud.dataflow.grafana-info.url=http://localhost:3000
+      - SPRING_DATASOURCE_URL=jdbc:mysql://mysql:3306/dataflow
+      - SPRING_DATASOURCE_USERNAME=root
+      - SPRING_DATASOURCE_PASSWORD=rootpw
+      - SPRING_DATASOURCE_DRIVER_CLASS_NAME=org.mariadb.jdbc.Driver
     depends_on:
       - kafka
+
   app-import:
     image: springcloud/openjdk:latest
     depends_on:
@@ -49,12 +65,18 @@ services:
         echo 'Stream apps imported'
         wget -qO- 'http://dataflow-server:9393/apps' --post-data='uri=http://bit.ly/Dearborn-SR1-task-applications-maven&force=true';
         echo 'Task apps imported'"
+
   skipper-server:
     image: springcloud/spring-cloud-skipper-server:${SKIPPER_VERSION:?SKIPPER_VERSION is not set!}
     container_name: skipper
     ports:
     - "7577:7577"
     - "9000-9010:9000-9010"
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:mysql://mysql:3306/dataflow
+      - SPRING_DATASOURCE_USERNAME=root
+      - SPRING_DATASOURCE_PASSWORD=rootpw
+      - SPRING_DATASOURCE_DRIVER_CLASS_NAME=org.mariadb.jdbc.Driver
 
   influxdb:
     image: influxdb:1.7.5
