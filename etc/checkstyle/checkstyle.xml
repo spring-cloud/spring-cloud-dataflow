@@ -4,7 +4,6 @@
         "https://www.puppycrawl.com/dtds/configuration_1_3.dtd">
 <module name="Checker">
     <!-- Root Checks -->
-    <module name="SuppressionCommentFilter"/>
     <module name="RegexpHeader">
         <property name="headerFile" value="etc/checkstyle/checkstyle-header.txt"/>
         <property name="fileExtensions" value="java"/>
