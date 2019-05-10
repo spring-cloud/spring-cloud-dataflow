@@ -4,7 +4,7 @@
     <parent>
         <groupId>org.springframework.cloud</groupId>
         <artifactId>spring-cloud-skipper-parent</artifactId>
-        <version>2.0.2.BUILD-SNAPSHOT</version>
+        <version>2.0.3.BUILD-SNAPSHOT</version>
     </parent>
     <artifactId>spring-cloud-skipper-docs</artifactId>
     <name>Spring Cloud Skipper :: Docs</name>
@@ -186,7 +186,7 @@
                                     <sourceHighlighter>highlight.js</sourceHighlighter>
                                     <attributes>
                                       <sectanchors>true</sectanchors>
-                                      <sectnums></sectnums>
+                                      <sectnums />
                       								<docinfo>shared</docinfo>
                       								<stylesdir>css/</stylesdir>
                       								<stylesheet>spring.css</stylesheet>
@@ -208,9 +208,9 @@
                                 <sourceHighlighter>coderay</sourceHighlighter>
                                 <attributes>
                                   <icons>font</icons>
-                                  <sectnums></sectnums>
-                                  <pagenums/>
-                                  <toc/>
+                                  <sectnums />
+                                  <pagenums />
+                                  <toc />
                                 </attributes>
                               </configuration>
                             </execution>
