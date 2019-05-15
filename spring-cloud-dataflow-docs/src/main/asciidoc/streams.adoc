@@ -75,9 +75,8 @@ Note that the shell calls the Data Flow Servers' REST API. For more information 
 [[spring-cloud-dataflow-stream-app-dsl]]
 === Stream Application DSL
 
-The Stream Pipeline DSL described in the previous section automatically sets the input and output binding properties of each Spring Cloud Stream application.
-This can be done because there is only one input and/or output destination in a Spring Cloud Stream application that uses the provided binding interface of a `Source`, `Processor`, or `Sink`.
-However, a Spring Cloud Stream application can define a custom binding interface such as the one shown below
+The Stream Application DSL can be used to define custom binding properties for each of the Spring Cloud Stream applications.
+Please see the link:https://dataflow.spring.io/documentation/{microsite-version}/feature-guides/streams/stream-application-dsl/[Stream Application DSL] section of the microsite for more information.
 
 [source,java]
 ----
@@ -821,282 +820,8 @@ The next sections cover this feature in detail.
 
 ==== Deployment Properties
 
-When deploying a stream, you can specify properties that fall into two groups:
+When deploying a stream, you can specify properties that can control how apps are deployed and configured. Please see the link:https://dataflow.spring.io/documentation/{microsite-version}/feature-guides/streams/deployment-properties/[Deployment Properties] section of the microsite for more information.
 
-* Properties that control how the apps are deployed to the target platform.
-These properties use a `deployer` prefix and are referred to as `deployer` properties.
-* Properties that set application properties or override application properties set during stream creation and are referred to as `application` properties.
-
-The syntax for `deployer` properties is `deployer.<app-name>.<short-property-name>=<value>`, and the syntax for `application` properties `app.<app-name>.<property-name>=<value>`. This syntax is used when passing deployment properties through the shell. You may also specify them in a YAML file, which is discussed later in this chapter.
-
-The following table shows the difference in behavior between setting `deployer` and `application` properties when deploying an application.
-
-|===
-| | Application Properties | Deployer Properties
-
-| *Example Syntax*
-| `app.filter.expression=something`
-| `deployer.filter.count=3`
-
-| *What the application "sees"*
-| `expression=something` or, if `expression` is one of the whitelisted properties, `<some-prefix>.expression=something`
-| Nothing
-
-| *What the deployer "sees"*
-| Nothing
-| `spring.cloud.deployer.count=3`. The `spring.cloud.deployer` prefix is automatically and always prepended to the property name.
-
-| *Typical usage*
-| Passing/Overriding application properties, passing Spring Cloud Stream binder or partitioning properties
-| Setting the number of instances, memory, disk, and others
-
-|===
-
-
-===== Passing Instance Count
-
-If you would like to have multiple instances of an application in the stream, you
-can include a deployer property called `count` with the `deploy` command:
-
-[source,bash,subs=attributes]
-----
-dataflow:> stream deploy --name ticktock --properties "deployer.time.count=3"
-----
-
-Note that `count` is the reserved property name used by the underlying deployer. Consequently, if the application also has a custom property named `count`, it is not supported
-when specified in 'short-form' form during stream deployment as it could conflict with the instance `count` deployer property. Instead, the `count` as a custom application property can be
-specified in its fully qualified form (for example, `app.something.somethingelse.count`) during stream deployment or it can be specified by using the 'short-form' or the fully qualified form during the stream creation,
-where it is processed as an app property.
-
-IMPORTANT: See <<spring-cloud-dataflow-stream-dsl-labels>>.
-
-
-===== Inline Versus File-based Properties
-
-When using the Spring Cloud Data Flow Shell, there are two ways to provide deployment
-properties: either *inline* or through a *file reference*. Those two ways are exclusive.
-
-Inline properties use the `--properties` shell option and list properties as a comma separated
-list of key=value pairs, as shown in the following example:
-
-[source,bash]
-----
-stream deploy foo
-    --properties "deployer.transform.count=2,app.transform.producer.partitionKeyExpression=payload"
-----
-
-File references use the `--propertiesFile` option and point it to a local `.properties`, `.yaml` or `.yml` file
-(that is, a file that resides in the filesystem of the machine running the shell). Being read
-as a `.properties` file, normal rules apply (ISO 8859-1 encoding, `=`, `<space>` or
-`:` delimiter, and others), although we recommend using `=` as a key-value pair delimiter,
-for consistency. The following example shows a `stream deploy` command that uses the `--propertiesFile` option:
-
-[source,bash]
-----
-stream deploy something --propertiesFile myprops.properties
-----
-
-Assume that `myprops.properties` contains the following properties:
-
-```
-deployer.transform.count=2
-app.transform.producer.partitionKeyExpression=payload
-```
-
-Both of the properties are passed as deployment properties for the `something` stream.
-
-If you use YAML as the format for the deployment properties, use the `.yaml` or `.yml` file extention when deploying the stream, as shown in the following example:
-
-[source,bash]
-----
-stream deploy foo --propertiesFile myprops.yaml
-----
-
-In that case, the `myprops.yaml` file might contain the following content:
-
-[source]
-deployer:
-  transform:
-    count: 2
-app:
-  transform:
-    producer:
-      partitionKeyExpression: payload
-
-
-
-===== Passing application properties
-
-The application properties can also be specified when deploying a stream. When specified during deployment, these application properties can either be specified as
- 'short-form' property names (applicable for white-listed properties) or as fully qualified property names. The application properties should have the prefix `app.<appName/label>`.
-
-For example, consider the following stream command:
-
-[source,bash]
-----
-dataflow:> stream create --definition "time | log" --name ticktock
-----
-
-The stream in the precedig example can also be deployed with application properties by using the 'short-form' property names, as shown in the following example:
-
-[source,bash]
-----
-dataflow:>stream deploy ticktock --properties "app.time.fixed-delay=5,app.log.level=ERROR"
-----
-
-Consider the following example:
-
-[source,bash]
-----
-stream create ticktock --definition "a: time | b: log"
-----
-
-When using the app label, the application properties can be defined as follows:
-
-[source,bash]
-----
-stream deploy ticktock --properties "app.a.fixed-delay=4,app.b.level=ERROR"
-----
-
-
-
-[[passing_producer_consumer_properties]]
-===== Passing Spring Cloud Stream properties
-Spring Cloud Data Flow sets the `required` Spring Cloud Stream properties for the applications inside the stream. Most importantly, the `spring.cloud.stream.bindings.<input/output>.destination` is set internally for the apps to bind.
-
-If you want to override any of the Spring Cloud Stream properties, they can be set with deployment properties.
-
-For example, consider the following stream definition:
-
-[source,bash]
-----
-dataflow:> stream create --definition "http | transform --expression=payload.getValue('hello').toUpperCase() | log" --name ticktock
-----
-
-If there are multiple binders available in the classpath for each of the applications and the binder is chosen for each deployment, then the stream can be deployed with the specific Spring Cloud Stream properties, as follows:
-
-[source,bash]
-----
-dataflow:>stream deploy ticktock --properties "app.time.spring.cloud.stream.bindings.output.binder=kafka,app.transform.spring.cloud.stream.bindings.input.binder=kafka,app.transform.spring.cloud.stream.bindings.output.binder=rabbit,app.log.spring.cloud.stream.bindings.input.binder=rabbit"
-----
-
-NOTE: Overriding the destination names is not recommended, because Spring Cloud Data Flow internally takes care of setting this property.
-
-===== Passing Per-binding Producer and Consumer Properties
-A Spring Cloud Stream application can have producer and consumer properties set on a `per-binding` basis.
-While Spring Cloud Data Flow supports specifying short-hand notation for per-binding producer properties such as `partitionKeyExpression` and `partitionKeyExtractorClass` (as described in <<passing_stream_partition_properties>>), all the supported Spring Cloud Stream producer/consumer properties can be set as Spring Cloud Stream properties for the app directly as well.
-
-The consumer properties can be set for the `inbound` channel name with the prefix `app.[app/label name].spring.cloud.stream.bindings.<channelName>.consumer.`. The producer properties can be set for the `outbound` channel name with the prefix `app.[app/label name].spring.cloud.stream.bindings.<channelName>.producer.`.
-Consider the following example:
-
-[source,bash]
-----
-dataflow:> stream create --definition "time | log" --name ticktock
-----
-
-The stream can be deployed with producer and consumer properties, as follows:
-
-[source,bash]
-----
-dataflow:>stream deploy ticktock --properties "app.time.spring.cloud.stream.bindings.output.producer.requiredGroups=myGroup,app.time.spring.cloud.stream.bindings.output.producer.headerMode=raw,app.log.spring.cloud.stream.bindings.input.consumer.concurrency=3,app.log.spring.cloud.stream.bindings.input.consumer.maxAttempts=5"
-----
-
-The `binder`-specific producer and consumer properties can also be specified in a similar way, as shown in the following example:
-
-[source,bash]
-----
-dataflow:>stream deploy ticktock --properties "app.time.spring.cloud.stream.rabbit.bindings.output.producer.autoBindDlq=true,app.log.spring.cloud.stream.rabbit.bindings.input.consumer.transacted=true"
-----
-
-[[passing_stream_partition_properties]]
-===== Passing Stream Partition Properties
-A common pattern in stream processing is to partition the data as it is streamed.
-This entails deploying multiple instances of a message-consuming app and using
-content-based routing so that messages with a given key (as determined at runtime)
-are always routed to the same app instance. You can pass the partition properties during
-stream deployment to declaratively configure a partitioning strategy to route each
-message to a specific consumer instance.
-
-The following list shows variations of deploying partitioned streams:
-
-* *app.[app/label name].producer.partitionKeyExtractorClass*:
-  The class name of a `PartitionKeyExtractorStrategy` (default: `null`)
-
-* *app.[app/label name].producer.partitionKeyExpression*:
-  A SpEL expression, evaluated against the message, to determine the partition key.
-  Only applies if `partitionKeyExtractorClass` is null. If both are null, the app
-  is not partitioned (default: `null`)
-
-* *app.[app/label name].producer.partitionSelectorClass*:
-  The class name of a `PartitionSelectorStrategy` (default: `null`)
-
-* *app.[app/label name].producer.partitionSelectorExpression*:
-  A SpEL expression, evaluated against the partition key, to determine the partition
-  index to which the message is routed. The final partition index is the
-  return value (an integer) modulo `[nextModule].count`. If both the class and
-  expression are null, the underlying binder's default `PartitionSelectorStrategy`
-  is applied to the key (default: `null`)
-
-In summary, an app is partitioned if its count is > 1 and the previous app has a
-`partitionKeyExtractorClass` or `partitionKeyExpression` (`partitionKeyExtractorClass` takes precedence).
-When a partition key is extracted, the partitioned app instance is determined by
-invoking the `partitionSelectorClass`, if present, or the `partitionSelectorExpression % partitionCount`.
-`partitionCount` is application count, in the case of RabbitMQ, or the underlying
-partition count of the topic, in the case of Kafka.
-
-If neither a `partitionSelectorClass` nor a `partitionSelectorExpression` is
-present, the result is `key.hashCode() % partitionCount`.
-
-[[passing_content_type_properties]]
-===== Passing application content type properties
-In a stream definition, you can specify that the input or the output of an application must be converted to a different type.
-You can use the `inputType` and `outputType` properties to specify the content type for the incoming data and outgoing data, respectively.
-
-For example, consider the following stream:
-
-[source]
-dataflow:>stream create tuple --definition "http | filter --inputType=application/x-spring-tuple
- --expression=payload.hasFieldName('hello') | transform --expression=payload.getValue('hello').toUpperCase()
- | log" --deploy
-
-The `http` app is expected to send the data in JSON and the `filter` app receives the JSON data
-and processes it as a Spring Tuple.
-In order to do so, we use the `inputType` property on the filter app to convert the data into the expected Spring Tuple format.
-The `transform` application processes the Tuple data and sends the processed data to the downstream `log` application.
-
-Consider the following example of sending some data to the `http` application:
-
-[source,bash]
-----
-dataflow:>http post --data {"hello":"world","something":"somethingelse"} --contentType application/json --target http://localhost:<http-port>
-----
-
-At the log application, you see the content as follows:
-
-`INFO 18745 --- [transform.tuple-1] log.sink                                 : WORLD`
-
-Depending on how applications are chained, the content type conversion can be specified either as an `--outputType` in the upstream app or as an `--inputType` in the downstream app.
-For instance, in the above stream, instead of specifying the `--inputType` on the 'transform' application to convert, the option `--outputType=application/x-spring-tuple` can also be specified on the 'http' application.
-
-For the complete list of message conversion and message converters, please refer to Spring Cloud Stream {spring-cloud-stream-docs}#contenttypemanagement[documentation].
-
-===== Overriding Application Properties During Stream Deployment
-
-Application properties that are defined during deployment override the same properties defined during the stream creation.
-
-For example, the following stream has application properties defined during stream creation:
-
-[source,bash]
-----
-dataflow:> stream create --definition "time --fixed-delay=5 | log --level=WARN" --name ticktock
-----
-
-To override these application properties, you can specify the new property values during deployment, as follows:
-
-[source,bash]
-----
-dataflow:>stream deploy ticktock --properties "app.time.fixed-delay=4,app.log.level=ERROR"
-----
 
 [[spring-cloud-dataflow-destroy-stream]]
 === Destroying a Stream
@@ -1346,8 +1071,7 @@ If not specified, the rollback goes to the previous stream version.
 
 === Application Count
 
-The application count is a dynamic property of the system.
-If, due to scaling at runtime, the application to be upgraded has 5 instances running, then 5 instances of the upgraded application are deployed.
+The application count is a dynamic property of the system used to specify the number of instances of applications. Please see the link:https://dataflow.spring.io/documentation/{microsite-version}/feature-guides/streams/application-count/[Application Count] section of the microsite for more information.
 
 === Skipper's Upgrade Strategy
 
@@ -1364,32 +1088,13 @@ This section covers additional features of the Stream DSL not covered in the  <<
 [[spring-cloud-dataflow-stream-dsl-tap]]
 === Tap a Stream
 
-Taps can be created at various producer endpoints in a stream. For a stream such as that defined in the following example, taps can be created at the output of `http`, `step1` and `step2`:
-
-`stream create --definition "http | step1: transform --expression=payload.toUpperCase() | step2: transform --expression=payload+'!' | log" --name mainstream --deploy`
-
-To create a stream that acts as a 'tap' on another stream requires specifying the `source destination name` for the tap stream. The syntax for the source destination name is as follows:
-
-`:<streamName>.<label/appName>`
-
-To create a tap at the output of `http` in the preceding stream, the source destination name is `mainstream.http`
-To create a tap at the output of the first transform app in the stream above, the source destination name is `mainstream.step1`
-
-The tap stream DSL resembles the following:
-
-[source]
-----
-stream create --definition ":mainstream.http > counter" --name tap_at_http --deploy
-
-stream create --definition ":mainstream.step1 > jdbc" --name tap_at_step1_transformer --deploy
-----
-
-Note the colon (`:`) prefix before the destination names. The colon lets the parser recognize this as a destination name instead of an app name.
+Taps can be created at various producer endpoints in a stream. Please see the link:https://dataflow.spring.io/documentation/{microsite-version}/feature-guides/streams/taps/[Tapping a Stream] section of the microsite for more information.
 
 [[spring-cloud-dataflow-stream-dsl-labels]]
 === Using Labels in a Stream
-When a stream is made up of multiple apps with the same name, they must be qualified with labels:
-`stream create --definition "http | firstLabel: transform --expression=payload.toUpperCase() | secondLabel: transform --expression=payload+'!' | log" --name myStreamWithLabels --deploy`
+When a stream is made up of multiple apps with the same name, they must be qualified with labels.
+Please see the link:https://dataflow.spring.io/documentation/{microsite-version}/feature-guides/streams/labels/[Labeling Applications] section of the microsite for more information.
+
 
 
 
@@ -1397,292 +1102,20 @@ When a stream is made up of multiple apps with the same name, they must be quali
 === Named Destinations
 
 Instead of referencing a source or sink application, you can use a named destination.
-A named destination corresponds to a specific destination name in the middleware broker (Rabbit, Kafka, and others).
-When using the `|` symbol, applications are connected to each other with messaging middleware destination names created by the Data Flow server.
-In keeping with the Unix analogy, one can redirect standard input and output using the less-than (`<`) and greater-than (`>`) characters.
-To specify the name of the destination, prefix it with a colon (`:`).
-For example, the following stream has the destination name in the `source` position:
-
-`dataflow:>stream create --definition ":myDestination > log" --name ingest_from_broker --deploy`
-
-
-This stream receives messages from the destination called `myDestination`, located at the broker, and connects it to the `log` app. You can also create additional streams that consume data from the same named destination.
-
-The following stream has the destination name in the `sink` position:
-
-`dataflow:>stream create --definition "http > :myDestination" --name ingest_to_broker --deploy`
-
-
-It is also possible to connect two different destinations (`source` and `sink` positions) at the broker in a stream, as shown in the following example:
-
-`dataflow:>stream create --definition ":destination1 > :destination2" --name bridge_destinations --deploy`
-
-In the preceding stream, both the destinations (`destination1` and `destination2`) are located in the broker. The messages flow from the source destination to the sink destination over a `bridge` app that connects them.
-
+Please see the link:https://dataflow.spring.io/documentation/{microsite-version}/feature-guides/streams/named-destinations/[Named Destinations] section of the microsite for more information.
 
 [[spring-cloud-dataflow-stream-dsl-fanin-fanout]]
 === Fan-in and Fan-out
 
-By using named destinations, you can support fan-in and fan-out use cases.  Fan-in use cases are when multiple sources all send data to the same named destination, as shown in the following example:
+By using named destinations, you can support fan-in and fan-out use cases.
+Please see the link:https://dataflow.spring.io/documentation/{microsite-version}/feature-guides/streams/fanin-fanout/[Fan-in and Fan-out] section of the microsite for more information.
 
-[source,bash,subs=attributes]
-----
-s3 > :data
-ftp > :data
-http > :data
-----
-
-The preceding example directs the data payloads from the Amazon S3, FTP, and HTTP sources to the same named destination called `data`. Then an additional stream created with the following DSL expression would have all the data from those three sources sent to the file sink:
-
-`:data > file`
-
-The fan-out use case is when you determine the destination of a stream based on some information that is only known at runtime.
-In this case, the link:{scs-app-starters-docs}/spring-cloud-stream-modules-sinks.html#spring-cloud-stream-modules-router-sink[Router Application] can be used to specify how to direct the incoming message to one of N named destinations.
-
-A nice link:https://youtu.be/l8SgHtP5QCI[Video] showing Fan-in and Fan-out behavior is also available.
 
 [[spring-cloud-dataflow-stream-java-dsl]]
 == Stream Java DSL
 
 Instead of using the shell to create and deploy streams, you can use the Java-based DSL provided by the `spring-cloud-dataflow-rest-client` module.
-The Java DSL is a convenient wrapper around the `DataFlowTemplate` class that enables creating and deploying streams programmatically.
-
-To get started, you need to add the following dependency to your project, as follows:
-
-[source,xml,subs="attributes+"]
-----
-<dependency>
-	<groupId>org.springframework.cloud</groupId>
-	<artifactId>spring-cloud-dataflow-rest-client</artifactId>
-	<version>{project-version}</version>
-</dependency>
-----
-
-NOTE: A complete sample can be found in the https://github.com/spring-cloud/spring-cloud-dataflow-samples[Spring Cloud Data Flow Samples Repository].
-
-=== Overview
-The classes at the heart of the Java DSL are `StreamBuilder`, `StreamDefinition`, `Stream`,  `StreamApplication`, and `DataFlowTemplate`.
-The entry point is a `builder` method on `Stream` that takes an instance of a `DataFlowTemplate`.
-To create an instance of a `DataFlowTemplate`, you need to provide a `URI` location of the Data Flow Server.
-
-Spring Boot auto-configuration for `StreamBuilder` and `DataFlowTemplate` is also available.  The properties in https://github.com/spring-cloud/spring-cloud-dataflow/blob/master/spring-cloud-dataflow-rest-client/src/main/java/org/springframework/cloud/dataflow/rest/client/config/DataFlowClientProperties.java[DataFlowClientProperties] can be used to configure the connection to the Data Flow server.  The common property to start using is `spring.cloud.dataflow.client.uri`
-
-Consider the following example, using the `definition` style.
-
-[source,java,options="nowrap"]
-----
-URI dataFlowUri = URI.create("http://localhost:9393");
-DataFlowOperations dataFlowOperations = new DataFlowTemplate(dataFlowUri);
-dataFlowOperations.appRegistryOperations().importFromResource(
-                     "https://bit.ly/Darwin-SR3-stream-applications-rabbit-maven", true);
-StreamDefinition streamDefinition = Stream.builder(dataFlowOperations)
-                                      .name("ticktock")
-                                      .definition("time | log")
-                                      .create();
-----
-
-The `create` method returns an instance of a `StreamDefinition` representing a Stream that has been created but not deployed.
-This is called the `definition` style since it takes a single string for the stream definition, same as in the shell.
-If applications have not yet been registered in the Data Flow server, you can use the `DataFlowOperations` class to register them.
-With the `StreamDefinition` instance, you have methods available to `deploy` or `destory` the stream.
-[source,java]
-----
-Stream stream = streamDefinition.deploy();
-----
-The `Stream` instance provides `getStatus`, `destroy` and `undeploy` methods to control and query the stream.
-If you are going to immediately deploy the stream, there is no need to create a separate local variable of the type `StreamDefinition`.  You can just chain the calls together, as follows:
-[source,java,options="nowrap"]
-----
-Stream stream = Stream.builder(dataFlowOperations)
-                  .name("ticktock")
-                  .definition("time | log")
-                  .create()
-                  .deploy();
-----
-
-The `deploy` method is overloaded to take a `java.util.Map` of deployment properties.
-
-The `StreamApplication` class is used in the 'fluent' Java DSL style and is discussed in the next section. The `StreamBuilder` class is returned from the method `Stream.builder(dataFlowOperations)`. In larger applications, it is common to create a single instance of the `StreamBuilder` as a Spring `@Bean` and share it across the application.
-
-=== Java DSL styles
-
-The Java DSL offers two styles to create Streams.
-
-* The `definition` style keeps the feel of using the pipes and filters textual DSL in the shell. This style is selected by using the `definition` method after setting the stream name - for example, `Stream.builder(dataFlowOperations).name("ticktock").definition(<definition goes here>)`.
-* The `fluent` style lets you chain together sources, processors, and sinks by passing in an instance of a `StreamApplication`. This style is selected by using the `source` method after setting the stream name - for example, `Stream.builder(dataFlowOperations).name("ticktock").source(<stream application instance goes here>)`. You then chain together `processor()` and `sink()` methods to create a stream definition.
-
-To demonstrate both styles, we include a simple stream that uses both approaches.
-A complete sample for you to get started can be found in the https://github.com/spring-cloud/spring-cloud-dataflow-samples[Spring Cloud Data Flow Samples Repository].
-
-The following example demonstrates the definition approach:
-
-[source,java,options="nowrap"]
-----
-public void definitionStyle() throws Exception{
-
-  Map<String, String> deploymentProperties = createDeploymentProperties();
-
-  Stream woodchuck = Stream.builder(dataFlowOperations)
-          .name("woodchuck")
-          .definition("http --server.port=9900 | splitter --expression=payload.split(' ') | log")
-          .create()
-          .deploy(deploymentProperties);
-
-  waitAndDestroy(woodchuck)
-}
-----
-
-The following example demonstrates the fluent approach:
-
-[source,java,options="nowrap"]
-----
-private void fluentStyle(DataFlowOperations dataFlowOperations) throws InterruptedException {
-
-  logger.info("Deploying stream.");
-
-  Stream woodchuck = builder
-    .name("woodchuck")
-    .source(source)
-    .processor(processor)
-    .sink(sink)
-    .create()
-    .deploy();
-
-  waitAndDestroy(woodchuck);
-}
-----
-The `waitAndDestroy` method uses the `getStatus` method to poll for the stream's status, as shown in the following example:
-[source,java,options="nowrap"]
-----
-private void waitAndDestroy(Stream stream) throws InterruptedException {
-
-  while(!stream.getStatus().equals("deployed")){
-    System.out.println("Wating for deployment of stream.");
-    Thread.sleep(5000);
-  }
-
-  System.out.println("Letting the stream run for 2 minutes.");
-  // Let the stream run for 2 minutes
-  Thread.sleep(120000);
-
-  System.out.println("Destroying stream");
-  stream.destroy();
-}
-----
-
-When using the definition style, the deployment properties are specified as a `java.util.Map` in the same manner as using the shell. The `createDeploymentProperties` method is defined as follows:
-
-[source,java,options="nowrap"]
-----
-private Map<String, String> createDeploymentProperties() {
-  DeploymentPropertiesBuilder propertiesBuilder = new DeploymentPropertiesBuilder();
-  propertiesBuilder.memory("log", 512);
-  propertiesBuilder.count("log",2);
-  propertiesBuilder.put("app.splitter.producer.partitionKeyExpression", "payload");
-  return propertiesBuilder.build();
-}
-----
-
-Is this case, application properties are also overridden at deployment time in addition to setting the deployer property `count` for the log application.
-When using the fluent style, the deployment properties are added by using the method `addDeploymentProperty` (for example, `new StreamApplication("log").addDeploymentProperty("count", 2)`), and you do not need to prefix the property with `deployer.<app_name>`.
-
-[NOTE]
-In order to create and deploy your streams, you need to make sure that the corresponding apps have been registered in the DataFlow server first.
-Attempting to create or deploy a stream that contains an unknown app throws an exception. You can register your application by using the `DataFlowTemplate`, as follows:
-[source,java,options="nowrap"]
-----
-dataFlowOperations.appRegistryOperations().importFromResource(
-            "https://bit.ly/Darwin-SR3-stream-applications-rabbit-maven", true);
-----
-
-The Stream applications can also be beans within your application that are injected in other classes to create Streams.
-There are many ways to structure Spring applications, but one way is to have an `@Configuration` class define the `StreamBuilder` and `StreamApplications`, as shown in the following example:
-
-[source,java,options="nowrap"]
-----
-@Configuration
-public class StreamConfiguration {
-
-  @Bean
-  public StreamBuilder builder() {
-    return Stream.builder(new DataFlowTemplate(URI.create("http://localhost:9393")));
-  }
-
-  @Bean
-  public StreamApplication httpSource(){
-    return new StreamApplication("http");
-  }
-
-  @Bean
-  public StreamApplication logSink(){
-    return new StreamApplication("log");
-  }
-}
-----
-
-Then in another class you can `@Autowire` these classes and deploy a stream.
-
-[source,java,options="nowrap"]
-----
-@Component
-public class MyStreamApps {
-
-  @Autowired
-  private StreamBuilder streamBuilder;
-
-  @Autowired
-  private StreamApplication httpSource;
-
-  @Autowired
-  private StreamApplication logSink;
-
-
-  public void deploySimpleStream() {
-    Stream simpleStream = streamBuilder.name("simpleStream")
-                            .source(httpSource)
-                            .sink(logSink)
-                            .create()
-                            .deploy();
-  }
-}
-----
-
-This style lets you share `StreamApplications` across multiple Streams.
-
-=== Using the DeploymentPropertiesBuilder
-
-Regardless of style you choose, the `deploy(Map<String, String> deploymentProperties)` method allows customization of how your streams will be deployed. We made it a easier to create a map with properties by using a builder style, as well as creating static methods for some properties so you don't need to remember the name of such properties. If you take the previous example of `createDeploymentProperties` it could be rewritten as:
-
-[source,java,options="nowrap"]
-----
-private Map<String, String> createDeploymentProperties() {
-	return new DeploymentPropertiesBuilder()
-		.count("log", 2)
-		.memory("log", 512)
-		.put("app.splitter.producer.partitionKeyExpression", "payload")
-		.build();
-}
-----
-
-This utility class is meant to help with the creation of a Map and adds a few methods to assist with defining pre-defined properties.
-
-=== Skipper Deployment Properties
-
-In addition to Spring Cloud Data Flow, you need to pass certain Skipper specific deployment properties, for example selecting the target platform.
-The `SkipperDeploymentPropertiesBuilder` provides you all the properties in `DeploymentPropertiesBuilder` and adds those needed for Skipper.
-
-[source,java,options="nowrap"]
-----
-private Map<String, String> createDeploymentProperties() {
-	return new SkipperDeploymentPropertiesBuilder()
-		.count("log", 2)
-		.memory("log", 512)
-		.put("app.splitter.producer.partitionKeyExpression", "payload")
-		.platformName("pcf")
-		.build();
-}
-----
-
+Please see the link:https://dataflow.spring.io/documentation/{microsite-version}/feature-guides/streams/java-dsl/[Java DSL] section of the microsite for more information.
 
 [[spring-cloud-dataflow-stream-multi-binder]]
 == Stream Applications with Multiple Binder Configurations
@@ -1723,6 +1156,12 @@ app.multibindertransform.spring.cloud.stream.bindings.output.binder=kafka1,app.l
 ----
 
 One can override any of the binder configuration properties by specifying them through deployment properties.
+
+[[spring-cloud-dataflow-stream-function-composition]]
+== Function Composition
+
+Function composition allows you can attach a functional logic dynamically to an existing event streaming application. Please see the link:https://dataflow.spring.io/documentation/{microsite-version}/feature-guides/streams/function-composition/[Function Composition] section of the microsite for more details.
+
 
 [[spring-cloud-dataflow-stream-examples]]
 == Examples
