@@ -10,7 +10,7 @@ This project provides support for using Spring Cloud Data Flow with Kubernetes a
 
 Please see the link:https://dataflow.spring.io/documentation/{microsite-version}/installation/kubernetes/[Kubernetes] section of the microsite for more information on installing Spring Cloud Data Flow on Kubernetes.
 
-Once you have the Data Flow server installed on Kubernetes, you will want to get started deploying pre-built microservices that Data Flow orchestrates. Below we have guides on how to get started with both link:https://dataflow.spring.io/documentation/{microsite-version}/stream-developer-guides/[Stream] and link:https://dataflow.spring.io/documentation/{microsite-version}/batch-developer-guides/[Batch] processing.
+Once you have the Data Flow server installed on Kubernetes, you will want to get started with orchestrating the deployment of readily available pre-built applications into a coherent streaming or batch data pipelines. Below we have guides on how to get started with both link:https://dataflow.spring.io/documentation/{microsite-version}/stream-developer-guides/[Stream] and link:https://dataflow.spring.io/documentation/{microsite-version}/batch-developer-guides/[Batch] processing.
 
 === Application and Server Properties
 

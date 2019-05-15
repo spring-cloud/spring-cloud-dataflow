@@ -395,7 +395,7 @@ endif::omit-tasks-docs[]
 [[dashboard-task-scheduling]]
 == Scheduling
 
-Schedules can be created from Task Definitions. Please see the https://dataflow.spring.io/documentation/{microsite-version}/feature-guides/batch/scheduling/[Scheduling Batch Jobs] section of the microsite for more information.
+You can create schedules from the SCDF Dashboard for the Task Definitions. Please see the https://dataflow.spring.io/documentation/{microsite-version}/feature-guides/batch/scheduling/[Scheduling Batch Jobs] section of the microsite for more information.
 
 [[dashboard-auditing]]
 == Auditing
