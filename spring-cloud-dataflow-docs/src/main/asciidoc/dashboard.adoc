@@ -395,33 +395,7 @@ endif::omit-tasks-docs[]
 [[dashboard-task-scheduling]]
 == Scheduling
 
-=== Creating or deleting a Schedule from the Task Definition's page
-From the Task Definitions page a user can create or delete a schedule for a specific task definition.
-
-.Task Definitions with Schedule controls
-image::{dataflow-asciidoc}/images/dataflow-scheduling-task-definition.png[Task Definitions with Schedule Controls, scaledwidth="50%"]
-
-On this screen you can perform the following actions:
-
-* The user can click the clock icon and this will take you to the Schedule Creation screen.
-* The user can click the clock icon with the `x` to the upper right to delete the schedule(s) associated with the task definition.
-
-=== Creating a Schedule
-.Create Schedule for Task Execution
-image::{dataflow-asciidoc}/images/dataflow-scheduling-create.png[Create Schedule for Task Execution, scaledwidth="50%"]
-
-Once the user clicks the clock icon on the Task Definition screen, Spring Cloud Data Flow will take the user to the Schedule Creation screen.
-On this screen a user can establish the schedule name, the cron expression as well as establish the properties and arguments to be used when the task is launched by this schedule.
-
-=== Listing Available Schedules
-
-.List Available Schedules
-image::{dataflow-asciidoc}/images/dataflow-scheduling-list.png[List Available Schedules, scaledwidth="50%"]
-
-On this screen you can perform the following actions:
-
-* Delete a schedule
-* Get details for a schedule
+Schedules can be created from Task Definitions. Please see the https://dataflow.spring.io/documentation/{microsite-version}/feature-guides/batch/scheduling/[Scheduling Batch Jobs] section of the microsite for more information.
 
 [[dashboard-auditing]]
 == Auditing
