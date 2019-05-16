@@ -118,14 +118,14 @@ The following table lists the available static property files:
 [width="100%",frame="topbot",options="header"]
 |======================
 |Artifact Type |Stable Release |SNAPSHOT Release
-|Maven   | https://bit.ly/Dearborn-SR1-task-applications-maven | https://bit.ly/Dearborn-BUILD-SNAPSHOT-task-applications-maven
-|Docker  | https://bit.ly/Dearborn-SR1-task-applications-docker | https://bit.ly/Dearborn-BUILD-SNAPSHOT-task-applications-docker
+|Maven   | https://dataflow.spring.io/Dearborn-SR1-task-applications-maven | https://dataflow.spring.io/Dearborn-BUILD-SNAPSHOT-task-applications-maven
+|Docker  | https://dataflow.spring.io/Dearborn-SR1-task-applications-docker | https://dataflow.spring.io/Dearborn-BUILD-SNAPSHOT-task-applications-docker
 |======================
 
 For example, if you would like to register all out-of-the-box task applications in bulk, you can do so with the following command:
 
 ```
-dataflow:>app import --uri https://bit.ly/Dearborn-SR1-task-applications-maven
+dataflow:>app import --uri https://dataflow.spring.io/Dearborn-SR1-task-applications-maven
 ```
 
 You can also pass the `--local` option (which is `TRUE` by default) to indicate whether the properties file location should be resolved within the shell process itself.

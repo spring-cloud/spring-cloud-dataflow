@@ -347,7 +347,7 @@ list of desired application-URIs in a custom property file.
 
 ===== Spring Cloud Stream App Starters
 
-The following table includes the bit.ly links to the available Stream Application Starters based on Spring Cloud Stream 2.0.x
+The following table includes the dataflow.spring.io links to the available Stream Application Starters based on Spring Cloud Stream 2.0.x
 and Spring Boot 2.0.x:
 
 [width="100%",frame="topbot",options="header"]
@@ -355,23 +355,23 @@ and Spring Boot 2.0.x:
 |Artifact Type |Stable Release |SNAPSHOT Release
 
 |RabbitMQ + Maven
-|https://bit.ly/Darwin-SR3-stream-applications-rabbit-maven
-|https://bit.ly/Darwin-BUILD-SNAPSHOT-stream-applications-rabbit-maven
+|https://dataflow.spring.io/Darwin-SR3-stream-applications-rabbit-maven
+|https://dataflow.spring.io/Darwin-BUILD-SNAPSHOT-stream-applications-rabbit-maven
 
 |RabbitMQ + Docker
-|https://bit.ly/Darwin-SR3-stream-applications-rabbit-docker
-|https://bit.ly/Darwin-BUILD-SNAPSHOT-stream-applications-rabbit-docker
+|https://dataflow.spring.io/Darwin-SR3-stream-applications-rabbit-docker
+|https://dataflow.spring.io/Darwin-BUILD-SNAPSHOT-stream-applications-rabbit-docker
 
 |Apache Kafka + Maven
-|https://bit.ly/Darwin-SR3-stream-applications-kafka-maven
-|https://bit.ly/Darwin-BUILD-SNAPSHOT-stream-applications-kafka-maven
+|https://dataflow.spring.io/Darwin-SR3-stream-applications-kafka-maven
+|https://dataflow.spring.io/Darwin-BUILD-SNAPSHOT-stream-applications-kafka-maven
 
 |Apache Kafka + Docker
-|https://bit.ly/Darwin-SR3-stream-applications-kafka-docker
-|https://bit.ly/Darwin-BUILD-SNAPSHOT-stream-applications-kafka-docker
+|https://dataflow.spring.io/Darwin-SR3-stream-applications-kafka-docker
+|https://dataflow.spring.io/Darwin-BUILD-SNAPSHOT-stream-applications-kafka-docker
 |======================
 
-The following table includes the bit.ly links to the available Stream Application Starters based on Spring Cloud Stream 2.1.x
+The following table includes the dataflow.spring.io links to the available Stream Application Starters based on Spring Cloud Stream 2.1.x
 and Spring Boot 2.1.x:
 
 [width="100%",frame="topbot",options="header"]
@@ -379,20 +379,20 @@ and Spring Boot 2.1.x:
 |Artifact Type |Stable Release |SNAPSHOT Release
 
 |RabbitMQ + Maven
-|https://bit.ly/Einstein-SR2-stream-applications-rabbit-maven
-|https://bit.ly/Einstein-BUILD-SNAPSHOT-stream-applications-rabbit-maven
+|https://dataflow.spring.io/Einstein-SR2-stream-applications-rabbit-maven
+|https://dataflow.spring.io/Einstein-BUILD-SNAPSHOT-stream-applications-rabbit-maven
 
 |RabbitMQ + Docker
-|https://bit.ly/Einstein-SR2-stream-applications-rabbit-docker
-|https://bit.ly/Einstein-BUILD-SNAPSHOT-stream-applications-rabbit-docker
+|https://dataflow.spring.io/Einstein-SR2-stream-applications-rabbit-docker
+|https://dataflow.spring.io/Einstein-BUILD-SNAPSHOT-stream-applications-rabbit-docker
 
 |Apache Kafka + Maven
-|https://bit.ly/Einstein-SR2-stream-applications-kafka-maven
-|https://bit.ly/Einstein-BUILD-SNAPSHOT-stream-applications-kafka-maven
+|https://dataflow.spring.io/Einstein-SR2-stream-applications-kafka-maven
+|https://dataflow.spring.io/Einstein-BUILD-SNAPSHOT-stream-applications-kafka-maven
 
 |Apache Kafka + Docker
-|https://bit.ly/Einstein-SR2-stream-applications-kafka-docker
-|https://bit.ly/Einstein-BUILD-SNAPSHOT-stream-applications-kafka-docker
+|https://dataflow.spring.io/Einstein-SR2-stream-applications-kafka-docker
+|https://dataflow.spring.io/Einstein-BUILD-SNAPSHOT-stream-applications-kafka-docker
 |======================
 
 
@@ -416,12 +416,12 @@ The following table includes the available Task Application Starters based on Sp
 |Artifact Type |Stable Release |SNAPSHOT Release
 
 |Maven
-|https://bit.ly/Dearborn-SR1-task-applications-maven
-|https://bit.ly/Dearborn-BUILD-SNAPSHOT-task-applications-maven
+|https://dataflow.spring.io/Dearborn-SR1-task-applications-maven
+|https://dataflow.spring.io/Dearborn-BUILD-SNAPSHOT-task-applications-maven
 
 |Docker
-|https://bit.ly/Dearborn-SR1-task-applications-docker
-|https://bit.ly/Dearborn-BUILD-SNAPSHOT-task-applications-docker
+|https://dataflow.spring.io/Dearborn-SR1-task-applications-docker
+|https://dataflow.spring.io/Dearborn-BUILD-SNAPSHOT-task-applications-docker
 |======================
 
 The following table includes the available Task Application Starters based on Spring Cloud Task 2.1.x and Spring Boot 2.1.x:
@@ -431,12 +431,12 @@ The following table includes the available Task Application Starters based on Sp
 |Artifact Type |Milestone Release |SNAPSHOT Release
 
 |Maven
-|https://bit.ly/Elston-GA-task-applications-maven
-|https://bit.ly/Elston-BUILD-SNAPSHOT-task-applications-maven
+|https://dataflow.spring.io/Elston-GA-task-applications-maven
+|https://dataflow.spring.io/Elston-BUILD-SNAPSHOT-task-applications-maven
 
 |Docker
-|https://bit.ly/Elston-GA-task-applications-docker
-|https://bit.ly/Elston-BUILD-SNAPSHOT-task-applications-docker
+|https://dataflow.spring.io/Elston-GA-task-applications-docker
+|https://dataflow.spring.io/Elston-BUILD-SNAPSHOT-task-applications-docker
 |======================
 
 You can find more information about the available task starters in the https://cloud.spring.io/spring-cloud-task-app-starters/[Task App Starters Project Page] and
@@ -447,14 +447,14 @@ As an example, if you would like to register all out-of-the-box stream applicati
 
 [source,bash,subs=attributes]
 ----
-$ dataflow:>app import --uri https://bit.ly/Einstein-SR2-stream-applications-kafka-maven
+$ dataflow:>app import --uri https://dataflow.spring.io/kafka-maven-latest
 ----
 
 Alternatively you can register all the stream applications with the Rabbit binder, as follows:
 
 [source,bash,subs=attributes]
 ----
-$ dataflow:>app import --uri https://bit.ly/Einstein-SR2-stream-applications-rabbit-maven
+$ dataflow:>app import --uri https://dataflow.spring.io/rabbitmq-maven-latest
 ----
 
 You can also pass the `--local` option (which is `true` by default) to indicate whether the
