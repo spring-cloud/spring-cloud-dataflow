@@ -77,10 +77,10 @@ NOTE: Depending on the Spring Cloud Data Flow server implementation, you may hav
 
 === Troubleshooting
 
-This section covers how to troubleshoot Spring Cloud Data Flow on your platform of choice. Please visit the Troubleshooting sections of the microsite for link:https://dataflow.spring.io/documentation/{microsite-version}/stream-developer-guides/troubleshooting/[Stream] and link:https://dataflow.spring.io/documentation/{microsite-version}/batch-developer-guides/troubleshooting/[Batch] processing.
+This section covers how to troubleshoot Spring Cloud Data Flow on your platform of choice. Please visit the Troubleshooting sections of the microsite for link:https://dataflow.spring.io/docs/stream-developer-guides/troubleshooting/[Stream] and link:https://dataflow.spring.io/docs/batch-developer-guides/troubleshooting/[Batch] processing.
 
 
 [[faqs]]
 === Frequently Asked Questions
 In this section, we review the frequently asked questions in Spring Cloud Data Flow.
-Please see the https://dataflow.spring.io/documentation/{microsite-version}/resources/faq/[Frequently Asked Questions] section of the microsite for more information.
+Please see the https://dataflow.spring.io/docs/resources/faq/[Frequently Asked Questions] section of the microsite for more information.

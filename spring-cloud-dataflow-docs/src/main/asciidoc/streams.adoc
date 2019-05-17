@@ -76,7 +76,7 @@ Note that the shell calls the Data Flow Servers' REST API. For more information 
 === Stream Application DSL
 
 The Stream Application DSL can be used to define custom binding properties for each of the Spring Cloud Stream applications.
-Please see the link:https://dataflow.spring.io/documentation/{microsite-version}/feature-guides/streams/stream-application-dsl/[Stream Application DSL] section of the microsite for more information.
+Please see the link:https://dataflow.spring.io/docs/feature-guides/streams/stream-application-dsl/[Stream Application DSL] section of the microsite for more information.
 
 [source,java]
 ----
@@ -820,7 +820,7 @@ The next sections cover this feature in detail.
 
 ==== Deployment Properties
 
-When deploying a stream, you can specify properties that can control how apps are deployed and configured. Please see the link:https://dataflow.spring.io/documentation/{microsite-version}/feature-guides/streams/deployment-properties/[Deployment Properties] section of the microsite for more information.
+When deploying a stream, you can specify properties that can control how apps are deployed and configured. Please see the link:https://dataflow.spring.io/docs/feature-guides/streams/deployment-properties/[Deployment Properties] section of the microsite for more information.
 
 
 [[spring-cloud-dataflow-destroy-stream]]
@@ -1071,7 +1071,7 @@ If not specified, the rollback goes to the previous stream version.
 
 === Application Count
 
-The application count is a dynamic property of the system used to specify the number of instances of applications. Please see the link:https://dataflow.spring.io/documentation/{microsite-version}/feature-guides/streams/application-count/[Application Count] section of the microsite for more information.
+The application count is a dynamic property of the system used to specify the number of instances of applications. Please see the link:https://dataflow.spring.io/docs/feature-guides/streams/application-count/[Application Count] section of the microsite for more information.
 
 === Skipper's Upgrade Strategy
 
@@ -1088,12 +1088,12 @@ This section covers additional features of the Stream DSL not covered in the  <<
 [[spring-cloud-dataflow-stream-dsl-tap]]
 === Tap a Stream
 
-Taps can be created at various producer endpoints in a stream. Please see the link:https://dataflow.spring.io/documentation/{microsite-version}/feature-guides/streams/taps/[Tapping a Stream] section of the microsite for more information.
+Taps can be created at various producer endpoints in a stream. Please see the link:https://dataflow.spring.io/docs/feature-guides/streams/taps/[Tapping a Stream] section of the microsite for more information.
 
 [[spring-cloud-dataflow-stream-dsl-labels]]
 === Using Labels in a Stream
 When a stream is made up of multiple apps with the same name, they must be qualified with labels.
-Please see the link:https://dataflow.spring.io/documentation/{microsite-version}/feature-guides/streams/labels/[Labeling Applications] section of the microsite for more information.
+Please see the link:https://dataflow.spring.io/docs/feature-guides/streams/labels/[Labeling Applications] section of the microsite for more information.
 
 
 
@@ -1102,20 +1102,20 @@ Please see the link:https://dataflow.spring.io/documentation/{microsite-version}
 === Named Destinations
 
 Instead of referencing a source or sink application, you can use a named destination.
-Please see the link:https://dataflow.spring.io/documentation/{microsite-version}/feature-guides/streams/named-destinations/[Named Destinations] section of the microsite for more information.
+Please see the link:https://dataflow.spring.io/docs/feature-guides/streams/named-destinations/[Named Destinations] section of the microsite for more information.
 
 [[spring-cloud-dataflow-stream-dsl-fanin-fanout]]
 === Fan-in and Fan-out
 
 By using named destinations, you can support fan-in and fan-out use cases.
-Please see the link:https://dataflow.spring.io/documentation/{microsite-version}/feature-guides/streams/fanin-fanout/[Fan-in and Fan-out] section of the microsite for more information.
+Please see the link:https://dataflow.spring.io/docs/feature-guides/streams/fanin-fanout/[Fan-in and Fan-out] section of the microsite for more information.
 
 
 [[spring-cloud-dataflow-stream-java-dsl]]
 == Stream Java DSL
 
 Instead of using the shell to create and deploy streams, you can use the Java-based DSL provided by the `spring-cloud-dataflow-rest-client` module.
-Please see the link:https://dataflow.spring.io/documentation/{microsite-version}/feature-guides/streams/java-dsl/[Java DSL] section of the microsite for more information.
+Please see the link:https://dataflow.spring.io/docs/feature-guides/streams/java-dsl/[Java DSL] section of the microsite for more information.
 
 [[spring-cloud-dataflow-stream-multi-binder]]
 == Stream Applications with Multiple Binder Configurations
@@ -1160,7 +1160,7 @@ One can override any of the binder configuration properties by specifying them t
 [[spring-cloud-dataflow-stream-function-composition]]
 == Function Composition
 
-Function composition allows you can attach a functional logic dynamically to an existing event streaming application. Please see the link:https://dataflow.spring.io/documentation/{microsite-version}/feature-guides/streams/function-composition/[Function Composition] section of the microsite for more details.
+Function composition allows you can attach a functional logic dynamically to an existing event streaming application. Please see the link:https://dataflow.spring.io/docs/feature-guides/streams/function-composition/[Function Composition] section of the microsite for more details.
 
 
 [[spring-cloud-dataflow-stream-examples]]
