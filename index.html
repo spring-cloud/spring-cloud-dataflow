@@ -50,10 +50,11 @@ badges:
 
 {% capture billboard_description %}
 
-Spring Cloud Data Flow is a toolkit for building data integration and real-time data processing pipelines.
+Microservice based Streaming and Batch data processing for Cloud Foundry and Kubernetes
 
 <br>
 
+Data Flow allows to to create complex topologies for streaming and batch data pipelines.  
 Pipelines consist of [Spring Boot](https://projects.spring.io/spring-boot/) apps, built using the [Spring Cloud Stream](https://cloud.spring.io/spring-cloud-stream/) or [Spring Cloud Task](https://cloud.spring.io/spring-cloud-task/) microservice frameworks. This makes Spring Cloud Data Flow suitable for a range of data processing use cases, from import/export to event streaming and predictive analytics.
 
 {% endcapture %}
@@ -76,60 +77,11 @@ The [dashboard](https://docs.spring.io/spring-cloud-dataflow/docs/current-SNAPSH
 
 The Spring Could Data Flow server exposes a [REST API](https://docs.spring.io/spring-cloud-dataflow/docs/current-SNAPSHOT/reference/htmlsingle/#api-guide-overview) for composing and deploying data pipelines. A separate [shell](https://docs.spring.io/spring-cloud-dataflow/docs/current-SNAPSHOT/reference/htmlsingle/#shell) makes it easy to work with the API from the command line.
 
-## Platform Implementations
-
-An easy way to get started on Spring Cloud Data Flow would be to follow the platform-specific implementation links from the table below.
-
-| __Getting Started__      | __Stable Release__                                                                                                                                                                                                                                                                                                  | __Milestone/Snapshot Release__                                                                                                                                                                                                                                                                       |
-|:---------------------|:--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|:-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| Local          | 2.0.2.RELEASE[[docs](https://docs.spring.io/spring-cloud-dataflow/docs/2.0.2.RELEASE/reference/htmlsingle/#getting-started)]                                   | 2.1.0.M1[[docs](https://docs.spring.io/spring-cloud-dataflow/docs/2.1.0.M1/reference/htmlsingle/#getting-started)]                                   |
-| Cloud Foundry | 2.0.2.RELEASE[[docs](https://docs.spring.io/spring-cloud-dataflow/docs/2.0.2.RELEASE/reference/htmlsingle/#getting-started-cloudfoundry)] | 2.1.0.M1[[docs](https://docs.spring.io/spring-cloud-dataflow/docs/2.1.0.M1/reference/htmlsingle/#getting-started-cloudfoundry)] |
-| Kubernetes | 2.0.2.RELEASE[[docs](https://docs.spring.io/spring-cloud-dataflow/docs/2.0.2.RELEASE/reference/htmlsingle/#getting-started-kubernetes)]      | 2.1.0.M1[[docs](https://docs.spring.io/spring-cloud-dataflow/docs/2.1.0.M1/reference/htmlsingle/#getting-started-kubernetes)]       |
-
-
-## Community Implementations
-
-- [Spring Cloud Data Flow for HashiCorp Nomad](https://github.com/donovanmuller/spring-cloud-dataflow-server-nomad)
-- [Spring Cloud Data Flow for Red Hat OpenShift](https://github.com/donovanmuller/spring-cloud-dataflow-server-openshift)
-- [Spring Cloud Data Flow for Apache Mesos](https://github.com/trustedchoice/spring-cloud-dataflow-server-mesos)
-  
 <span id="quick-start"></span>
 
 ## Quick Start
 
-<u><b>Step 1</b></u> - There are two ways to [get started](https://docs.spring.io/spring-cloud-dataflow/docs/current/reference/htmlsingle/#getting-started). The quickest is to download the Spring Cloud Data Flow Local-Server's Docker Compose artifact. (_Mac users can use 'curl -O' instead of 'wget'_) <br>
-
-```
-wget https://raw.githubusercontent.com/spring-cloud/spring-cloud-dataflow/v2.0.2.RELEASE/spring-cloud-dataflow-server/docker-compose.yml
-```
-
-<u><b>Step 2</b></u> - From the directory where you downloaded `docker-compose.yml`, start the SCDF system.
-<br>
-
-```
-DATAFLOW_VERSION=2.0.2.RELEASE SKIPPER_VERSION=2.0.1.RELEASE docker-compose up
-```
-
-<u><b>Step 3</b></u> - Open the dashboard at [http://localhost:9393/dashboard](http://localhost:9393/dashboard).
-
-<u><b>Step 4</b></u> - Use 'Create Stream(s)' under "Streams" Menu to define and deploy a stream `time | log` with the name 'ticktock'.
-
-<img class="styled-image" src="img/create-ticktock-stream.png" alt="Create TickTock Stream" title="The Create Stream Flo Canvas"/>
-<br>
-<br>
-<img class="styled-image" src="img/deploy-ticktock-stream.png" alt="Deploy TickTock Stream" title="Name and deploy the stream"/>
-<br>
-
-Once the ‘ticktock’ stream is deployed, you will notice two stream-apps (`ticktock.log` and `ticktock.time`) under the "Runtime" tab. Click the `i` icon of the 'ticktock.log' app to copy the path of the streamed logs.
-
-<img class="styled-image" src="img/ticktock-log-runtime.png" alt="Deploy TickTock Stream" title="Runtime app details"/>
-<br>
-
-<u><b>Step 5</b></u> - To verify the deployed stream and the results, copy the path in the "stdout" text box from the dashboard. From another terminal-console type:
-
-```
-docker exec -it skipper tail -f <COPIED-STDOUT-PATH>
-```
+Our new web site is the best place to visit to get started with Data Flow.  Check out the [Getting Started](https://dataflow-dev.netlify.com/getting-started/)section for more information.
 
 <br>
 
