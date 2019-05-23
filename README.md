@@ -1,15 +1,15 @@
 <p align="center">
-  <a href="https://cloud.spring.io/spring-cloud-dataflow/">
+  <a href="https://dataflow.spring.io/">
     <img alt="Spring Data Flow Dashboard" title="Spring Data Flow" src="https://i.imgur.com/hpeKaRk.png" width="450" />
   </a>
 </p>
 
 <p align="center">
-  <a href="https://cloud.spring.io/spring-cloud-dataflow/#quick-start">
+  <a href="https://dataflow.spring.io/getting-started/">
     <img src="https://spring.io/badges/spring-cloud-dataflow/ga.svg"
          alt="Latest Release Version" />
   </a>
-  <a href="https://cloud.spring.io/spring-cloud-dataflow/#quick-start">
+  <a href="https://dataflow.spring.io/getting-started/">
     <img src="https://spring.io/badges/spring-cloud-dataflow/snapshot.svg"
          alt="Latest Snapshot Version" />
   </a>
