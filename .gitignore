@@ -20,6 +20,7 @@ target/
 test-output
 logs/
 scdf-logs/
+.attach_pid*
 
 # Eclipse artifacts, including WTP generated manifests
 .classpath
@@ -33,4 +34,5 @@ spring-*/src/main/java/META-INF/MANIFEST.MF
 *.ipr
 *.iws
 .idea/
+.vscode/
 rebel.xml
