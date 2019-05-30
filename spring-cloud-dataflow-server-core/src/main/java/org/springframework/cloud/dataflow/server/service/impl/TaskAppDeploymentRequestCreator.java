@@ -16,11 +16,10 @@
 
 package org.springframework.cloud.dataflow.server.service.impl;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -46,6 +45,10 @@ import org.springframework.util.StringUtils;
 public class TaskAppDeploymentRequestCreator {
 
 	private static final Logger logger = LoggerFactory.getLogger(TaskAppDeploymentRequestCreator.class);
+
+	private static final String TASK_EXECUTION_KEY = "--spring.cloud.task.executionid=";
+
+	private static final String PLATFORM_NAME_KEY = "--spring.cloud.data.flow.platformname=";
 
 	private final CommonApplicationProperties commonApplicationProperties;
 
@@ -81,7 +84,8 @@ public class TaskAppDeploymentRequestCreator {
 	public AppDeploymentRequest createRequest(
 			TaskExecution taskExecution,
 			TaskExecutionInformation taskExecutionInformation,
-			List<String> commandLineArgs) {
+			List<String> commandLineArgs,
+			String platformName) {
 		TaskDefinition taskDefinition = taskExecutionInformation.getTaskDefinition();
 		String registeredAppName = taskDefinition.getRegisteredAppName();
 		Map<String, String> appDeploymentProperties = new HashMap<>(commonApplicationProperties.getTask());
@@ -100,7 +104,7 @@ public class TaskAppDeploymentRequestCreator {
 				taskExecutionInformation.getMetadataResource(),
 				appDeploymentProperties, this.whitelistProperties);
 
-		List<String> updatedCmdLineArgs = this.updateCommandLineArgs(commandLineArgs, taskExecution);
+		List<String> updatedCmdLineArgs = this.updateCommandLineArgs(commandLineArgs, taskExecution, platformName);
 		AppDeploymentRequest request = new AppDeploymentRequest(revisedDefinition,
 				taskExecutionInformation.getAppResource(),
 				deployerDeploymentProperties, updatedCmdLineArgs);
@@ -110,10 +114,15 @@ public class TaskAppDeploymentRequestCreator {
 		return request;
 	}
 
-	private List<String> updateCommandLineArgs(List<String> commandLineArgs, TaskExecution taskExecution) {
-		return Stream
-				.concat(commandLineArgs.stream().filter(a -> !a.startsWith("--spring.cloud.task.executionid=")),
-						Stream.of("--spring.cloud.task.executionid=" + taskExecution.getExecutionId()))
-				.collect(Collectors.toList());
+	private List<String> updateCommandLineArgs(List<String> commandLineArgs, TaskExecution taskExecution, String platformName) {
+		List<String> results = new ArrayList();
+		commandLineArgs.stream()
+				.filter(arg -> !arg.startsWith(TASK_EXECUTION_KEY)
+						&& !arg.startsWith(PLATFORM_NAME_KEY))
+				.forEach(results::add);
+
+		results.add(PLATFORM_NAME_KEY + platformName);
+		results.add(TASK_EXECUTION_KEY + taskExecution.getExecutionId());
+		return results;
 	}
 }

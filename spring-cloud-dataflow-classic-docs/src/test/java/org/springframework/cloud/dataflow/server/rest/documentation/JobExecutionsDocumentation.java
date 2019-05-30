@@ -18,6 +18,8 @@ package org.springframework.cloud.dataflow.server.rest.documentation;
 
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -25,6 +27,7 @@ import org.junit.runner.RunWith;
 
 import org.springframework.batch.core.BatchStatus;
 import org.springframework.batch.core.JobExecution;
+import org.springframework.batch.core.JobParameter;
 import org.springframework.batch.core.JobParameters;
 import org.springframework.batch.core.repository.JobRepository;
 import org.springframework.batch.core.repository.support.JobRepositoryFactoryBean;
@@ -216,6 +219,7 @@ public class JobExecutionsDocumentation extends BaseDocumentation {
 					fieldWithPath("defined").description("The status defined of the job execution"),
 					fieldWithPath("timeZone").description("The time zone of the job execution"),
 					subsectionWithPath("jobExecution").description("The details of the job execution"),
+					subsectionWithPath("jobParameters").description("The job parameters associated with the job execution"),
 					subsectionWithPath("_links.self").description("Link to the stream definition resource")
 				)
 			));
@@ -258,7 +262,10 @@ public class JobExecutionsDocumentation extends BaseDocumentation {
 
 	private void createJobExecution(String name, BatchStatus status) {
 		TaskExecution taskExecution = this.dao.createTaskExecution(name, new Date(), new ArrayList<>(), null);
-		JobExecution jobExecution = this.jobRepository.createJobExecution(this.jobRepository.createJobInstance(name, new JobParameters()), new JobParameters(), null);
+		Map<String, JobParameter> jobParameterMap = new HashMap<>();
+		jobParameterMap.put("-spring.cloud.data.flow.platformname", new JobParameter("default"));
+		JobParameters jobParameters = new JobParameters(jobParameterMap);
+		JobExecution jobExecution = this.jobRepository.createJobExecution(this.jobRepository.createJobInstance(name, new JobParameters()), jobParameters, null);
 		this.taskBatchDao.saveRelationship(taskExecution, jobExecution);
 		jobExecution.setStatus(status);
 		jobExecution.setStartTime(new Date());
