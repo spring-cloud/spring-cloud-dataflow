@@ -158,7 +158,7 @@ public class DefaultTaskExecutionService implements TaskExecutionService {
 		TaskExecution taskExecution = taskExecutionRepositoryService.createTaskExecution(taskName);
 
 		AppDeploymentRequest request = this.taskAppDeploymentRequestCreator.
-				createRequest(taskExecution, taskExecutionInformation, commandLineArgs);
+				createRequest(taskExecution, taskExecutionInformation, commandLineArgs, platformName);
 
 		String id = taskLauncher.launch(request);
 		if (!StringUtils.hasText(id)) {
