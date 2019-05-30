@@ -388,7 +388,7 @@ public class TaskControllerTests {
 		verify(this.taskLauncher, atLeast(1)).launch(argumentCaptor.capture());
 
 		AppDeploymentRequest request = argumentCaptor.getValue();
-		assertThat(request.getCommandlineArguments().size(), is(3 + 1)); // +1 for spring.cloud.task.executionid
+		assertThat(request.getCommandlineArguments().size(), is(3 + 2)); // +2 for spring.cloud.task.executionid and spring.cloud.data.flow.platformname
 		assertThat(request.getCommandlineArguments().get(0), is("--foobar=jee"));
 		assertThat(request.getCommandlineArguments().get(1), is("--foobar2=jee2,foo=bar"));
 		assertThat(request.getCommandlineArguments().get(2), is("--foobar3='jee3 jee3'"));
