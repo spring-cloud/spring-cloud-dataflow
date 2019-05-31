@@ -31,7 +31,7 @@
 
 		<spring-cloud-dataflow-ui.version>2.1.0.RELEASE</spring-cloud-dataflow-ui.version>
 
-		<spring-cloud-deployer.version>2.0.1.RELEASE</spring-cloud-deployer.version>
+		<spring-cloud-deployer.version>2.0.2.BUILD-SNAPSHOT</spring-cloud-deployer.version>
 		<spring-cloud-deployer-local.version>2.0.2.RELEASE</spring-cloud-deployer-local.version>
 
 		<!-- note - check version of reactor at deployer-cf/cf-java-client uses -->
