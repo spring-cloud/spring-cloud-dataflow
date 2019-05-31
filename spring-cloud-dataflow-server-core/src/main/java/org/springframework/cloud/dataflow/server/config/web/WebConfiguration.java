@@ -78,7 +78,8 @@ public class WebConfiguration implements ServletContextInitializer, ApplicationL
 	public Server initH2TCPServer() {
 		logger.info("Starting H2 Server with URL: " + dataSourceUrl);
 		try {
-			this.server = Server.createTcpServer("-tcp", "-tcpAllowOthers", "-tcpPort", getH2Port(dataSourceUrl))
+			this.server = Server
+					.createTcpServer("-ifNotExists", "-tcp", "-tcpAllowOthers", "-tcpPort", getH2Port(dataSourceUrl))
 					.start();
 		}
 		catch (SQLException e) {
