@@ -1,7 +1,0 @@
-FROM java:8
-VOLUME /tmp
-ARG JAR_FILE
-ARG ENTRYPOINT_FILE
-ADD ${JAR_FILE} app.jar
-ADD ${ENTRYPOINT_FILE} entrypoint.sh
-ENTRYPOINT ["/entrypoint.sh"]

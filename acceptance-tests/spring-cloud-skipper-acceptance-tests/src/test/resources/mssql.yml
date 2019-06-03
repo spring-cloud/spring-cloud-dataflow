@@ -1,8 +1,0 @@
-version: '3'
-services:
-  mssql:
-    image: 'springsource-docker-private-local.jfrog.io/mssql/database-prebuilt:2017-CU12-ubuntu'
-    container_name: mssql
-    network_mode: bridge
-    ports:
-      - 1433
