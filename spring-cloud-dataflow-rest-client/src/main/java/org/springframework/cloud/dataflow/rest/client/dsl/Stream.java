@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 the original author or authors.
+ * Copyright 2017-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,12 +15,20 @@
  */
 package org.springframework.cloud.dataflow.rest.client.dsl;
 
+import java.io.IOException;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.springframework.cloud.dataflow.rest.client.DataFlowOperations;
 import org.springframework.cloud.dataflow.rest.resource.StreamDefinitionResource;
+import org.springframework.cloud.dataflow.rest.resource.StreamDeploymentResource;
+import org.springframework.cloud.dataflow.rest.util.DeploymentPropertiesUtils;
+import org.springframework.cloud.skipper.domain.PackageIdentifier;
+import org.springframework.cloud.skipper.domain.Release;
 import org.springframework.util.Assert;
 
 /**
@@ -39,13 +47,14 @@ import org.springframework.util.Assert;
  *     }
  * </pre>
  * @author Vinicius Carvalho
+ * @author Christian Tzolov
  *
  */
 public class Stream {
 
 	private String name;
 
-	private List<StreamApplication> applications = new LinkedList<>();
+	private List<StreamApplication> applications;
 
 	private String definition;
 
@@ -57,6 +66,13 @@ public class Stream {
 		this.applications = applications;
 		this.definition = definition;
 		this.client = client;
+	}
+
+	/**
+	 * @return Stream name
+	 */
+	public String getName() {
+		return name;
 	}
 
 	/**
@@ -73,28 +89,87 @@ public class Stream {
 	}
 
 	/**
-	 * Undeploy the current {@link Stream}. This method invokes the remote server
-	 * @return A reference the the {@link StreamDefinition} so one can invoke other builder operations such as {@link StreamDefinition#deploy()}
+	 * Unforced Stream Update with properties string definition
+	 *
+	 * @param properties application properties to update.
 	 */
-	public StreamDefinition undeploy() {
-		client.streamOperations().undeploy(this.name);
-		return new StreamDefinition(this.name, this.client, this.definition,
-				this.applications);
+	public void update(String properties) {
+		try {
+			this.update(DeploymentPropertiesUtils.parseDeploymentProperties(properties, null, 0));
+		}
+		catch (IOException e) {
+			throw new RuntimeException("Could not update Stream with property string = " + properties, e);
+		}
+	}
+
+	/**
+	 * Unforced Stream Update with properties map
+	 *
+	 * @param propertiesToUse application properties to update.
+	 */
+	public void update(Map<String, String> propertiesToUse) {
+
+		PackageIdentifier packageIdentifier = new PackageIdentifier();
+		packageIdentifier.setPackageName(this.name);
+		this.client.streamOperations().updateStream(this.name, this.name, packageIdentifier, propertiesToUse, false, null);
+
+		StreamDeploymentResource info = this.client.streamOperations().info(this.name);
+		this.name = info.getStreamName();
+		this.definition = info.getDslText();
+	}
+
+	/**
+	 * Rollback the stream to the previous or a specific release version.
+	 *
+	 * @param streamVersion the version to rollback to. If the version is 0, then rollback to the previous release.
+	 *                         The version can not be less than zero.
+	 */
+	public void rollback(int streamVersion) {
+		this.client.streamOperations().rollbackStream(this.name, streamVersion);
+		StreamDeploymentResource info = this.client.streamOperations().info(this.name);
+		this.name = info.getStreamName();
+		this.definition = info.getDslText();
+	}
+
+	/**
+	 * Undeploy the current {@link Stream}. This method invokes the remote server
+	 */
+	public void undeploy() {
+		this.client.streamOperations().undeploy(this.name);
 	}
 
 	/**
 	 * Destroy the stream from the server. This method invokes the remote server
 	 */
 	public void destroy() {
-		client.streamOperations().destroy(this.name);
+		this.client.streamOperations().destroy(this.name);
+	}
+
+	/**
+	 * @return list of stream versions and their statuses.
+	 */
+	public Map<Integer, String> history() {
+		Collection<Release> history = this.client.streamOperations().history(this.name);
+		return history.stream().collect(Collectors.toMap(
+				r -> r.getVersion(),
+				r -> r.getInfo().getStatus().getStatusCode().toString().toLowerCase()));
+	}
+
+	/**
+	 * Get manifest for the given stream deployed via Skipper. Optionally, the version can be
+	 * used to retrieve the version for a specific version of the stream.
+	 * @param streamVersion the version of the release
+	 * @return the manifest for the given stream and version
+	 */
+	public String manifest(int streamVersion) {
+		return this.client.streamOperations().getManifest(this.name, streamVersion);
 	}
 
 	/**
 	 * @return Status of the deployed stream
 	 */
 	public String getStatus() {
-		StreamDefinitionResource resource = client.streamOperations()
-				.getStreamDefinition(this.name);
+		StreamDefinitionResource resource = client.streamOperations().getStreamDefinition(this.name);
 		return resource.getStatus();
 	}
 
@@ -238,6 +313,7 @@ public class Stream {
 					processor.type(StreamApplication.ApplicationType.PROCESSOR),
 					this.parent);
 		}
+
 		/**
 		 * Appends a {@link StreamApplication} as a sink for this stream
 		 * @param sink - The {@link StreamApplication} being added

@@ -38,7 +38,7 @@ public class DataFlowClientException extends RuntimeException {
 	/**
 	 * Initializes a {@link DataFlowClientException} with the provided (mandatory error).
 	 *
-	 * @param error Must not be null
+	 * @param vndErrors Must not be null
 	 */
 	public DataFlowClientException(VndErrors vndErrors) {
 		Assert.notNull(vndErrors, "The provided vndErrors parameter must not be null.");
