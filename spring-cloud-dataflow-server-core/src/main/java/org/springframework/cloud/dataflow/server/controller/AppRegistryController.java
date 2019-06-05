@@ -202,6 +202,8 @@ public class AppRegistryController {
 			@PathVariable("version") String version,
 			@RequestParam("uri") String uri, @RequestParam(name = "metadata-uri", required = false) String metadataUri,
 			@RequestParam(value = "force", defaultValue = "false") boolean force) {
+
+		appRegistryService.validate(appRegistryService.getDefaultApp(name, type), uri, version);
 		AppRegistration previous = appRegistryService.find(name, type, version);
 		if (!force && previous != null) {
 			throw new AppAlreadyRegisteredException(previous);

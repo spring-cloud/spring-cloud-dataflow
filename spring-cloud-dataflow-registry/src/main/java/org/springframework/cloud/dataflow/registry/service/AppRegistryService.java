@@ -40,6 +40,17 @@ public interface AppRegistryService {
 	AppRegistration getDefaultApp(String name, ApplicationType type);
 
 	/**
+	 * Validate given registration with given uri and version. Validation
+	 * will fail if given uri logically impossible to use with further
+	 * expected logic with using versions.
+	 *
+	 * @param registration app registration
+	 * @param uri uri of the registration
+	 * @param version version of the registration
+	 */
+	void validate(AppRegistration registration, String uri, String version);
+
+	/**
 	 * Set an application with name, type and version as the default for all name:type
 	 * applications. The previous default name:type application is set to non-default.
 	 * @param name application name

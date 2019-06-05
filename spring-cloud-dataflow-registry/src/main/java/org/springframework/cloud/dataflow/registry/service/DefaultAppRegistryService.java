@@ -45,6 +45,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Assert;
+import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 
 /**
@@ -107,6 +108,27 @@ public class DefaultAppRegistryService implements AppRegistryService {
 	@Override
 	public AppRegistration getDefaultApp(String name, ApplicationType type) {
 		return this.appRegistrationRepository.findAppRegistrationByNameAndTypeAndDefaultVersionIsTrue(name, type);
+	}
+
+	@Override
+	public void validate(AppRegistration registration, String uri, String version) {
+		if (registration != null && StringUtils.hasText(version)) {
+			String defaultAppUri = registration.getUri().toString();
+			String defaultAppUriNoVersion = removeLastMatch(defaultAppUri, registration.getVersion());
+			String newAppUriNoVersion = removeLastMatch(uri, version);
+			if (!ObjectUtils.nullSafeEquals(defaultAppUriNoVersion, newAppUriNoVersion)) {
+				throw new IllegalArgumentException("Existing default application [" + defaultAppUri
+						+ "] can only differ by a version but is [" + uri + "]");
+			}
+		}
+	}
+
+	private static String removeLastMatch(String original, String match) {
+		StringBuilder builder = new StringBuilder();
+		int start = original.lastIndexOf(match);
+		builder.append(original.substring(0, start));
+		builder.append(original.substring(start + match.length()));
+		return builder.toString();
 	}
 
 	@Override
