@@ -202,6 +202,36 @@ public class AppRegistryControllerTests {
 	}
 
 	@Test
+	public void testVersionWithMismatchBaseUri() throws Exception {
+		mockMvc.perform(post("/apps/processor/maven1").param("uri", "maven://org.springframework.cloud.stream.app:log-sink-rabbit:1.2.0.RELEASE").accept(MediaType.APPLICATION_JSON))
+				.andDo(print()).andExpect(status().isCreated());
+		mockMvc.perform(post("/apps/processor/maven1").param("uri", "maven://org.springframework.cloud.stream.app:time-source-rabbit:1.2.1.RELEASE").accept(MediaType.APPLICATION_JSON))
+				.andDo(print()).andExpect(status().is5xxServerError());
+		mockMvc.perform(post("/apps/processor/docker1").param("uri", "docker:prefix1/my-source:0.1.0").accept(MediaType.APPLICATION_JSON))
+				.andDo(print()).andExpect(status().isCreated());
+		mockMvc.perform(post("/apps/processor/docker1").param("uri", "docker:prefix2/my-source:0.2.0").accept(MediaType.APPLICATION_JSON))
+				.andDo(print()).andExpect(status().is5xxServerError());
+		mockMvc.perform(post("/apps/processor/http1").param("uri", "https://example.com/my-app1-1.1.1.RELEASE.jar").accept(MediaType.APPLICATION_JSON))
+				.andDo(print()).andExpect(status().isCreated());
+		mockMvc.perform(post("/apps/processor/http1").param("uri", "https://example.com/my-app2-1.1.2.RELEASE.jar").accept(MediaType.APPLICATION_JSON))
+				.andDo(print()).andExpect(status().is5xxServerError());
+
+		// in case you actually have version in part of an uri
+		mockMvc.perform(post("/apps/processor/maven2").param("uri", "maven://org.springframework.cloud.stream.app.1.2.0.RELEASE:log-sink-rabbit:1.2.0.RELEASE").accept(MediaType.APPLICATION_JSON))
+				.andDo(print()).andExpect(status().isCreated());
+		mockMvc.perform(post("/apps/processor/maven2").param("uri", "maven://org.springframework.cloud.stream.app.1.2.0.RELEASE:time-source-rabbit:1.2.1.RELEASE").accept(MediaType.APPLICATION_JSON))
+				.andDo(print()).andExpect(status().is5xxServerError());
+		mockMvc.perform(post("/apps/processor/docker2").param("uri", "docker:prefix1.0.1.0/my-source:0.1.0").accept(MediaType.APPLICATION_JSON))
+				.andDo(print()).andExpect(status().isCreated());
+		mockMvc.perform(post("/apps/processor/docker2").param("uri", "docker:prefix2.0.1.0/my-source:0.2.0").accept(MediaType.APPLICATION_JSON))
+				.andDo(print()).andExpect(status().is5xxServerError());
+		mockMvc.perform(post("/apps/processor/http2").param("uri", "https://1.1.1.example.com/my-app1-1.1.1.RELEASE.jar").accept(MediaType.APPLICATION_JSON))
+				.andDo(print()).andExpect(status().isCreated());
+		mockMvc.perform(post("/apps/processor/http2").param("uri", "https://1.1.1.example.com/my-app2-1.1.2.RELEASE.jar").accept(MediaType.APPLICATION_JSON))
+				.andDo(print()).andExpect(status().is5xxServerError());
+	}
+
+	@Test
 	public void testRegisterAll() throws Exception {
 		mockMvc.perform(post("/apps").param("apps", "sink.foo=maven://org.springframework.cloud.stream.app:log-sink-rabbit:1.2.0.RELEASE").accept(MediaType.APPLICATION_JSON))
 				.andDo(print()).andExpect(status().isCreated());

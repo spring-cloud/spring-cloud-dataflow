@@ -60,6 +60,7 @@ import org.springframework.hateoas.PagedResources;
 import org.springframework.hateoas.mvc.ResourceAssemblerSupport;
 import org.springframework.http.HttpStatus;
 import org.springframework.util.CollectionUtils;
+import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -202,6 +203,20 @@ public class AppRegistryController {
 			@PathVariable("version") String version,
 			@RequestParam("uri") String uri, @RequestParam(name = "metadata-uri", required = false) String metadataUri,
 			@RequestParam(value = "force", defaultValue = "false") boolean force) {
+
+		// compare existing default app and deny registration if base path of uri's
+		// don't match as registering app with different version can only differ by version
+		AppRegistration defaultApp = appRegistryService.getDefaultApp(name, type);
+		if  (defaultApp != null && StringUtils.hasText(version)) {
+			String defaultAppUri = defaultApp.getUri().toString();
+			String defaultAppUriNoVersion = removeLastMatch(defaultAppUri, defaultApp.getVersion());
+			String newAppUriNoVersion = removeLastMatch(uri, version);
+			if (!ObjectUtils.nullSafeEquals(defaultAppUriNoVersion, newAppUriNoVersion)) {
+				throw new IllegalArgumentException("Existing default application [" + defaultAppUri
+						+ "] can only differ by a version but is [" + uri + "]");
+			}
+		}
+
 		AppRegistration previous = appRegistryService.find(name, type, version);
 		if (!force && previous != null) {
 			throw new AppAlreadyRegisteredException(previous);
@@ -214,6 +229,14 @@ public class AppRegistryController {
 		catch (URISyntaxException e) {
 			throw new IllegalArgumentException(e);
 		}
+	}
+
+	private static String removeLastMatch(String original, String match) {
+		StringBuilder builder = new StringBuilder();
+		int start = original.lastIndexOf(match);
+		builder.append(original.substring(0, start));
+		builder.append(original.substring(start + match.length()));
+		return builder.toString();
 	}
 
 	@Deprecated
