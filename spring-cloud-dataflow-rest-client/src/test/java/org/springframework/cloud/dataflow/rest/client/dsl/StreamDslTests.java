@@ -1,5 +1,5 @@
 /*
- * Copyright 2016-2018 the original author or authors.
+ * Copyright 2016-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,20 +22,31 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
-import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 
 import org.springframework.cloud.dataflow.rest.SkipperStream;
 import org.springframework.cloud.dataflow.rest.client.DataFlowOperations;
 import org.springframework.cloud.dataflow.rest.client.StreamOperations;
 import org.springframework.cloud.dataflow.rest.resource.StreamDefinitionResource;
+import org.springframework.cloud.dataflow.rest.resource.StreamDeploymentResource;
+import org.springframework.cloud.skipper.domain.PackageIdentifier;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.anyBoolean;
+import static org.mockito.Mockito.anyMap;
+import static org.mockito.Mockito.anyString;
+import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.eq;
+import static org.mockito.Mockito.isA;
+import static org.mockito.Mockito.isNull;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 /**
  * @author Vinicius Carvalho
+ * @author Christian Tzolov
  */
 @SuppressWarnings("unchecked")
 public class StreamDslTests {
@@ -55,11 +66,11 @@ public class StreamDslTests {
 	@Before
 	public void init() {
 		MockitoAnnotations.initMocks(this);
-		Mockito.when(client.streamOperations()).thenReturn(this.streamOperations);
+		when(client.streamOperations()).thenReturn(this.streamOperations);
 	}
 
 	@Test
-	public void simpleDefinition() throws Exception {
+	public void simpleDefinition() {
 		StreamApplication time = new StreamApplication("time");
 		StreamApplication log = new StreamApplication("log");
 		Stream stream = Stream.builder(client).name("foo").source(time).sink(log).create()
@@ -68,7 +79,7 @@ public class StreamDslTests {
 	}
 
 	@Test
-	public void definitionWithLabel() throws Exception {
+	public void definitionWithLabel() {
 		StreamApplication time = new StreamApplication("time").label("tick");
 		StreamApplication log = new StreamApplication("log");
 
@@ -78,7 +89,7 @@ public class StreamDslTests {
 	}
 
 	@Test
-	public void definitionWithProcessor() throws Exception {
+	public void definitionWithProcessor() {
 		StreamApplication time = new StreamApplication("time").label("tick");
 		StreamApplication filter = new StreamApplication("filter");
 		StreamApplication log = new StreamApplication("log");
@@ -88,7 +99,7 @@ public class StreamDslTests {
 	}
 
 	@Test
-	public void definitionWithProperties() throws Exception {
+	public void definitionWithProperties() {
 		StreamApplication time = new StreamApplication("time").label("tick")
 				.addProperty("fixed-delay", 5000);
 		StreamApplication log = new StreamApplication("log");
@@ -99,7 +110,7 @@ public class StreamDslTests {
 	}
 
 	@Test
-	public void definitionWithDeploymentProperties() throws Exception {
+	public void definitionWithDeploymentProperties() {
 		StreamApplication time = new StreamApplication("time").label("tick")
 				.addProperty("fixed-delay", "5000").addDeploymentProperty("count", 2);
 
@@ -108,12 +119,12 @@ public class StreamDslTests {
 	}
 
 	@Test
-	public void definitionWithDeploymentPropertiesBuilder() throws Exception {
+	public void definitionWithDeploymentPropertiesBuilder() {
 		StreamDefinitionResource resource = new StreamDefinitionResource("ticktock",
 				"tick: time | log");
 		resource.setStatus("deploying");
-		Mockito.when(streamOperations.createStream(Mockito.anyString(),
-				Mockito.anyString(), Mockito.anyBoolean())).thenReturn(resource);
+		when(streamOperations.createStream(anyString(),
+				anyString(), anyBoolean())).thenReturn(resource);
 		SkipperDeploymentPropertiesBuilder propertiesBuilder = new SkipperDeploymentPropertiesBuilder();
 		Map<String, String> props = propertiesBuilder.count("tick", 2)
 				.memory("tick", 2048)
@@ -123,7 +134,7 @@ public class StreamDslTests {
 		Stream.builder(client).name("ticktock").definition("tick: time | log").create()
 				.deploy(props);
 		ArgumentCaptor<Map> mapArgumentCaptor = ArgumentCaptor.forClass(Map.class);
-		Mockito.verify(streamOperations, Mockito.times(1)).deploy(Mockito.eq("ticktock"),
+		verify(streamOperations, times(1)).deploy(eq("ticktock"),
 				mapArgumentCaptor.capture());
 		assertThat(mapArgumentCaptor.getValue()).containsKeys("deployer.tick.count",
 				"deployer.tick.memory", SkipperStream.SKIPPER_PLATFORM_NAME,
@@ -131,134 +142,190 @@ public class StreamDslTests {
 	}
 
 	@Test
-	public void deployWithCreate() throws Exception {
+	public void deployWithCreate() {
 		StreamDefinitionResource resource = new StreamDefinitionResource("ticktock",
 				"time | log");
 		resource.setStatus("deploying");
-		Mockito.when(streamOperations.createStream(Mockito.anyString(),
-				Mockito.anyString(), Mockito.anyBoolean())).thenReturn(resource);
+		when(streamOperations.createStream(anyString(),
+				anyString(), anyBoolean())).thenReturn(resource);
 		StreamApplication time = new StreamApplication("time");
 		StreamApplication log = new StreamApplication("log");
 		Stream stream = Stream.builder(client).name("ticktock").source(time).sink(log)
 				.create().deploy();
-		Mockito.verify(streamOperations, Mockito.times(1)).createStream(
-				Mockito.eq("ticktock"), Mockito.eq("time | log"), Mockito.eq(false));
-		Mockito.verify(streamOperations, Mockito.times(1)).deploy(Mockito.eq("ticktock"),
-				Mockito.anyMap());
+		verify(streamOperations, times(1)).createStream(
+				eq("ticktock"), eq("time | log"), eq(false));
+		verify(streamOperations, times(1)).deploy(eq("ticktock"),
+				anyMap());
 	}
 
 	@Test
-	public void deployWithDefinition() throws Exception {
+	public void deployWithDefinition() {
 		StreamDefinitionResource resource = new StreamDefinitionResource("ticktock",
 				"time | log");
 		resource.setStatus("deploying");
-		Mockito.when(streamOperations.createStream(Mockito.anyString(),
-				Mockito.anyString(), Mockito.anyBoolean())).thenReturn(resource);
+		when(streamOperations.createStream(anyString(),
+				anyString(), anyBoolean())).thenReturn(resource);
 
 		Stream stream = Stream.builder(client).name("ticktock").definition("time | log")
 				.create().deploy(Collections.singletonMap("deployer.log.count", "2"));
-		Mockito.verify(streamOperations, Mockito.times(1)).createStream(
-				Mockito.eq("ticktock"), Mockito.eq("time | log"), Mockito.eq(false));
-		Mockito.verify(streamOperations, Mockito.times(1)).deploy(Mockito.eq("ticktock"),
-				Mockito.eq(Collections.singletonMap("deployer.log.count", "2")));
+		verify(streamOperations, times(1)).createStream(
+				eq("ticktock"), eq("time | log"), eq(false));
+		verify(streamOperations, times(1)).deploy(eq("ticktock"),
+				eq(Collections.singletonMap("deployer.log.count", "2")));
 
 	}
 
 	@Test
-	public void getStatus() throws Exception {
+	public void getStatus() {
 		StreamDefinitionResource resource = new StreamDefinitionResource("ticktock",
 				"time | log");
 		resource.setStatus("unknown");
-		Mockito.when(streamOperations.getStreamDefinition(Mockito.eq("ticktock")))
+		when(streamOperations.getStreamDefinition(eq("ticktock")))
 				.thenReturn(resource);
-		Mockito.when(streamOperations.createStream(Mockito.anyString(),
-				Mockito.anyString(), Mockito.anyBoolean())).thenReturn(resource);
-		Mockito.doAnswer(new Answer<Void>() {
-			@Override
-			public Void answer(InvocationOnMock invocationOnMock) throws Throwable {
-				resource.setStatus("deploying");
-				return null;
-			}
-		}).when(streamOperations).deploy(Mockito.eq("ticktock"), Mockito.anyMap());
+		when(streamOperations.createStream(anyString(),
+				anyString(), anyBoolean())).thenReturn(resource);
+		doAnswer((Answer<Void>) invocationOnMock -> {
+			resource.setStatus("deploying");
+			return null;
+		}).when(streamOperations).deploy(eq("ticktock"), anyMap());
 
 		StreamDefinition streamDefinition = Stream.builder(client).name("ticktock")
 				.definition("time | log").create();
-		Mockito.verify(streamOperations, Mockito.times(1)).createStream(
-				Mockito.eq("ticktock"), Mockito.eq("time | log"), Mockito.eq(false));
+		verify(streamOperations, times(1)).createStream(
+				eq("ticktock"), eq("time | log"), eq(false));
 		Stream stream = streamDefinition.deploy();
 		assertThat("deploying").isEqualTo(stream.getStatus());
 	}
 
 	@Test
-	public void createStream() throws Exception {
+	public void createStream() {
 		StreamDefinitionResource resource = new StreamDefinitionResource("ticktock",
 				"time | log");
 		resource.setStatus("deploying");
-		Mockito.when(streamOperations.createStream(Mockito.anyString(),
-				Mockito.anyString(), Mockito.anyBoolean())).thenReturn(resource);
+		when(streamOperations.createStream(anyString(),
+				anyString(), anyBoolean())).thenReturn(resource);
 		StreamApplication time = new StreamApplication("time");
 		StreamApplication log = new StreamApplication("log");
 		Stream.builder(client).name("ticktock").source(time).sink(log).create();
-		Mockito.verify(streamOperations, Mockito.times(1)).createStream(
-				Mockito.eq("ticktock"), Mockito.eq("time | log"), Mockito.eq(false));
+		verify(streamOperations, times(1)).createStream(
+				eq("ticktock"), eq("time | log"), eq(false));
 	}
 
 	@Test
-	public void testDuplicateNameWithLabel() throws Exception {
+	public void testDuplicateNameWithLabel() {
 		StreamApplication filter2 = new StreamApplication("filter").label("filter2");
 		Stream.builder(client).name("test").source(timeApplication)
 				.processor(filterApplication).processor(filter2).sink(logApplication)
 				.create();
-		Mockito.verify(streamOperations, Mockito.times(1)).createStream(
-				Mockito.eq("test"), Mockito.eq("time | filter | filter2: filter | log"),
-				Mockito.eq(false));
+		verify(streamOperations, times(1)).createStream(
+				eq("test"), eq("time | filter | filter2: filter | log"),
+				eq(false));
 	}
 
 	@Test(expected = IllegalStateException.class)
-	public void testDuplicateNameNoLabel() throws Exception {
+	public void testDuplicateNameNoLabel() {
 		Stream.builder(client).name("test").source(timeApplication)
 				.processor(filterApplication).processor(filterApplication)
 				.sink(logApplication).create();
 	}
 
 	@Test
-	public void undeploy() throws Exception {
-		StreamDefinitionResource resource = new StreamDefinitionResource("ticktock",
-				"time | log");
-		resource.setStatus("deploying");
-		Mockito.when(streamOperations.createStream(Mockito.anyString(),
-				Mockito.anyString(), Mockito.anyBoolean())).thenReturn(resource);
-		StreamApplication time = new StreamApplication("time");
-		StreamApplication log = new StreamApplication("log");
+	public void update() {
+		StreamDefinitionResource ticktockDefinition = new StreamDefinitionResource("ticktock", "time | log");
+		ticktockDefinition.setStatus("deploying");
+		when(streamOperations.createStream(anyString(), anyString(), anyBoolean())).thenReturn(ticktockDefinition);
 
-		Stream stream = Stream.builder(client).name("ticktock").source(time).sink(log)
-				.create().deploy();
-		Mockito.verify(streamOperations, Mockito.times(1)).createStream(
-				Mockito.eq("ticktock"), Mockito.eq("time | log"), Mockito.eq(false));
-		Mockito.verify(streamOperations, Mockito.times(1)).deploy(Mockito.eq("ticktock"),
-				Mockito.anyMap());
-		stream.undeploy();
-		Mockito.verify(streamOperations, Mockito.times(1))
-				.undeploy(Mockito.eq("ticktock"));
+		Stream stream = Stream.builder(client).name("ticktock").definition(ticktockDefinition.getDslText()).create().deploy();
+
+		when(streamOperations.info(eq("ticktock"))).thenReturn(new StreamDeploymentResource("ticktock", "time | log"));
+
+		stream.update("app.log.log.expression='TIMESTAMP: '.concat(payload)");
+
+		verify(streamOperations, times(1)).updateStream(eq("ticktock"),
+				eq("ticktock"), isA(PackageIdentifier.class), isA(Map.class), eq(false), isNull());
+
+		verify(streamOperations, times(1)).info(eq("ticktock"));
 	}
 
 	@Test
-	public void destroy() throws Exception {
+	public void rollback() {
+		StreamDefinitionResource ticktockDefinition = new StreamDefinitionResource("ticktock", "time | log");
+		ticktockDefinition.setStatus("deploying");
+		when(streamOperations.createStream(anyString(), anyString(), anyBoolean())).thenReturn(ticktockDefinition);
+
+		Stream stream = Stream.builder(client).name("ticktock").definition(ticktockDefinition.getDslText()).create().deploy();
+
+		when(streamOperations.info(eq("ticktock"))).thenReturn(new StreamDeploymentResource("ticktock", "time | log"));
+
+		stream.rollback(666);
+
+		verify(streamOperations, times(1)).rollbackStream(eq("ticktock"), eq(666));
+		verify(streamOperations, times(1)).info(eq("ticktock"));
+	}
+
+	@Test
+	public void manifest() {
+		StreamDefinitionResource ticktockDefinition = new StreamDefinitionResource("ticktock", "time | log");
+		ticktockDefinition.setStatus("deploying");
+		when(streamOperations.createStream(anyString(), anyString(), anyBoolean())).thenReturn(ticktockDefinition);
+
+		Stream stream = Stream.builder(client).name("ticktock").definition(ticktockDefinition.getDslText()).create().deploy();
+
+		stream.manifest(666);
+
+		verify(streamOperations, times(1)).getManifest(eq("ticktock"), eq(666));
+	}
+
+	@Test
+	public void history() {
+		StreamDefinitionResource ticktockDefinition = new StreamDefinitionResource("ticktock", "time | log");
+		ticktockDefinition.setStatus("deploying");
+		when(streamOperations.createStream(anyString(), anyString(), anyBoolean())).thenReturn(ticktockDefinition);
+
+		Stream stream = Stream.builder(client).name("ticktock").definition(ticktockDefinition.getDslText()).create().deploy();
+
+		stream.history();
+
+		verify(streamOperations, times(1)).history(eq("ticktock"));
+	}
+
+	@Test
+	public void undeploy() {
+		StreamDefinitionResource resource = new StreamDefinitionResource("ticktock", "time | log");
+		resource.setStatus("deploying");
+		when(streamOperations.createStream(anyString(),
+				anyString(), anyBoolean())).thenReturn(resource);
+		StreamApplication time = new StreamApplication("time");
+		StreamApplication log = new StreamApplication("log");
+
+		Stream stream = Stream.builder(client).name("ticktock").source(time).sink(log)
+				.create().deploy();
+		verify(streamOperations, times(1)).createStream(
+				eq("ticktock"), eq("time | log"), eq(false));
+		verify(streamOperations, times(1)).deploy(eq("ticktock"),
+				anyMap());
+		stream.undeploy();
+		verify(streamOperations, times(1))
+				.undeploy(eq("ticktock"));
+	}
+
+	@Test
+	public void destroy() {
 		StreamDefinitionResource resource = new StreamDefinitionResource("ticktock",
 				"time | log");
 		resource.setStatus("deploying");
-		Mockito.when(streamOperations.createStream(Mockito.anyString(),
-				Mockito.anyString(), Mockito.anyBoolean())).thenReturn(resource);
+		when(streamOperations.createStream(anyString(),
+				anyString(), anyBoolean())).thenReturn(resource);
 		StreamApplication time = new StreamApplication("time");
 		StreamApplication log = new StreamApplication("log");
 		Stream stream = Stream.builder(client).name("ticktock").source(time).sink(log)
 				.create().deploy();
-		Mockito.verify(streamOperations, Mockito.times(1)).createStream(
-				Mockito.eq("ticktock"), Mockito.eq("time | log"), Mockito.eq(false));
-		Mockito.verify(streamOperations, Mockito.times(1)).deploy(Mockito.eq("ticktock"),
-				Mockito.anyMap());
+		verify(streamOperations, times(1)).createStream(
+				eq("ticktock"), eq("time | log"), eq(false));
+		verify(streamOperations, times(1)).deploy(eq("ticktock"),
+				anyMap());
 		stream.destroy();
-		Mockito.verify(streamOperations, Mockito.times(1))
-				.destroy(Mockito.eq("ticktock"));
+		verify(streamOperations, times(1))
+				.destroy(eq("ticktock"));
 	}
 }
