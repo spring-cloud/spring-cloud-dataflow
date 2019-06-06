@@ -103,6 +103,7 @@ spring:
             - GET    /jobs/executions                => hasRole('ROLE_VIEW')
             - PUT    /jobs/executions/**             => hasRole('ROLE_MODIFY')
             - GET    /jobs/executions/**             => hasRole('ROLE_VIEW')
+            - GET    /jobs/thinexecutions            => hasRole('ROLE_VIEW')
 
             # Batch Job Instances
 
