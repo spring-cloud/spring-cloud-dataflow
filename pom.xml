@@ -11,20 +11,50 @@
 	</organization>
 	<parent>
 		<!-- Note: Make sure to update `spring-cloud-build` version and `spring-cloud-dependencies` version (spring-cloud.version)
-		     are in sync with the https://github.com/spring-cloud/spring-cloud-release/blob/master/pom.xml updates for the respective
-		     release versions -->
+			 are in sync with the https://github.com/spring-cloud/spring-cloud-release/blob/master/pom.xml updates for the respective
+			 release versions -->
 		<!-- Note: Also make sure the parent pom version in spring-cloud-dataflow-dependencies/pom.xml is in sync -->
 		<groupId>org.springframework.cloud</groupId>
 		<artifactId>spring-cloud-build</artifactId>
 		<version>2.1.5.RELEASE</version>
 		<relativePath />
 	</parent>
+	<licenses>
+		<license>
+			<name>Apache License, Version 2.0</name>
+			<url>https://www.apache.org/licenses/LICENSE-2.0</url>
+			<comments>
+				Copyright 2014-2019 the original author or authors.
+
+				Licensed under the Apache License, Version 2.0 (the "License");
+				you may not use this file except in compliance with the License.
+				You may obtain a copy of the License at
+
+				https://www.apache.org/licenses/LICENSE-2.0
+
+				Unless required by applicable law or agreed to in writing, software
+				distributed under the License is distributed on an "AS IS" BASIS,
+				WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or
+				implied.
+
+				See the License for the specific language governing permissions and
+				limitations under the License.
+			</comments>
+		</license>
+	</licenses>
 	<scm>
 		<url>https://github.com/spring-cloud/spring-cloud-dataflow</url>
 		<connection>scm:git:git://github.com/spring-cloud/spring-cloud-dataflow.git</connection>
 		<developerConnection>scm:git:ssh://git@github.com/spring-cloud/spring-cloud-dataflow.git</developerConnection>
 		<tag>HEAD</tag>
 	</scm>
+	<developers>
+		<developer>
+			<id>scdf-team</id>
+			<name>Data Flow Team</name>
+			<organizationUrl>https://github.com/spring-cloud/spring-cloud-dataflow/graphs/contributors</organizationUrl>
+		</developer>
+	</developers>
 	<properties>
 		<java.version>1.8</java.version>
 		<javadoc.opts>-Xdoclint:none</javadoc.opts>
@@ -39,15 +69,15 @@
 		<reactor.version>3.2.0.RELEASE</reactor.version>
 		<spring-cloud-deployer-kubernetes.version>2.0.3.BUILD-SNAPSHOT</spring-cloud-deployer-kubernetes.version>
 		<kubernetes-client.version>4.0.4</kubernetes-client.version>
-		<spring-cloud-kubernetes.version>0.3.0.RELEASE</spring-cloud-kubernetes.version>
+		<spring-cloud-kubernetes.version>1.0.1.RELEASE</spring-cloud-kubernetes.version>
 
 		<spring-cloud-skipper.version>2.1.0.BUILD-SNAPSHOT</spring-cloud-skipper.version>
 
 		<spring-cloud-task.version>2.1.1.RELEASE</spring-cloud-task.version>
 
 		<!-- Note: Make sure to update `spring-cloud-build` version and `spring-cloud-dependencies` version (spring-cloud.version)
-		     are in sync with the https://github.com/spring-cloud/spring-cloud-release/blob/master/pom.xml updates for the respective
-		     release versions -->
+			 are in sync with the https://github.com/spring-cloud/spring-cloud-release/blob/master/pom.xml updates for the respective
+			 release versions -->
 		<spring-cloud.version>Greenwich.SR1</spring-cloud.version>
 		<java-cfenv-boot.version>1.0.1.RELEASE</java-cfenv-boot.version>
 
@@ -65,6 +95,8 @@
 		<sonar-maven-plugin.version>3.0.2</sonar-maven-plugin.version>
 		<checkstyle.config.location>src/checkstyle/checkstyle.xml</checkstyle.config.location>
 		<semver.version>2.2.0</semver.version>
+		<apache-directory-server.version>1.5.5</apache-directory-server.version>
+		<codearte-props2yml.version>0.5</codearte-props2yml.version>
 	</properties>
 	<modules>
 		<module>spring-cloud-dataflow-configuration-metadata</module>
@@ -79,7 +111,6 @@
 		<module>spring-cloud-dataflow-shell-core</module>
 		<module>spring-cloud-dataflow-classic-docs</module>
 		<module>spring-cloud-dataflow-docs</module>
-
 		<module>spring-cloud-dataflow-completion</module>
 		<module>spring-cloud-dataflow-dependencies</module>
 		<module>spring-cloud-dataflow-platform-kubernetes</module>
@@ -100,6 +131,13 @@
 				<groupId>org.springframework.cloud</groupId>
 				<artifactId>spring-cloud-dependencies</artifactId>
 				<version>${spring-cloud.version}</version>
+				<type>pom</type>
+				<scope>import</scope>
+			</dependency>
+			<dependency>
+				<groupId>org.springframework.cloud</groupId>
+				<artifactId>spring-cloud-skipper-dependencies</artifactId>
+				<version>${spring-cloud-skipper.version}</version>
 				<type>pom</type>
 				<scope>import</scope>
 			</dependency>
@@ -141,6 +179,31 @@
 				<version>${spring-cloud-deployer-local.version}</version>
 			</dependency>
 			<dependency>
+				<groupId>org.springframework.cloud</groupId>
+				<artifactId>spring-cloud-deployer-cloudfoundry</artifactId>
+				<version>${spring-cloud-deployer-cloudfoundry.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.springframework.cloud</groupId>
+				<artifactId>spring-cloud-scheduler-cloudfoundry</artifactId>
+				<version>${spring-cloud-scheduler-cloudfoundry}</version>
+			</dependency>
+			<dependency>
+				<groupId>io.pivotal.cfenv</groupId>
+				<artifactId>java-cfenv-boot</artifactId>
+				<version>${java-cfenv-boot.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>io.pivotal.cfenv</groupId>
+				<artifactId>java-cfenv-boot-pivotal-scs</artifactId>
+				<version>${java-cfenv-boot.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>io.pivotal.cfenv</groupId>
+				<artifactId>java-cfenv-boot-pivotal-sso</artifactId>
+				<version>${java-cfenv-boot.version}</version>
+			</dependency>
+			<dependency>
 				<groupId>org.springframework.shell</groupId>
 				<artifactId>spring-shell</artifactId>
 				<version>${spring-shell.version}</version>
@@ -171,6 +234,36 @@
 				<groupId>org.springframework.security.oauth.boot</groupId>
 				<artifactId>spring-security-oauth2-autoconfigure</artifactId>
 				<version>${spring-boot.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>io.fabric8</groupId>
+				<artifactId>kubernetes-client</artifactId>
+				<version>${kubernetes-client.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.springframework.cloud</groupId>
+				<artifactId>spring-cloud-deployer-kubernetes</artifactId>
+				<version>${spring-cloud-deployer-kubernetes.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.springframework.cloud</groupId>
+				<artifactId>spring-cloud-scheduler-kubernetes</artifactId>
+				<version>${spring-cloud-scheduler-kubernetes.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.springframework.cloud</groupId>
+				<artifactId>spring-cloud-starter-kubernetes-config</artifactId>
+				<version>${spring-cloud-kubernetes.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.apache.directory.server</groupId>
+				<artifactId>apacheds-protocol-ldap</artifactId>
+				<version>${apache-directory-server.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>io.codearte.props2yaml</groupId>
+				<artifactId>props2yaml</artifactId>
+				<version>${codearte-props2yml.version}</version>
 			</dependency>
 		</dependencies>
 	</dependencyManagement>

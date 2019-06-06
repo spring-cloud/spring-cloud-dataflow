@@ -86,7 +86,23 @@
 			</dependency>
 			<dependency>
 				<groupId>org.springframework.cloud</groupId>
+				<artifactId>spring-cloud-starter-dataflow-server</artifactId>
+				<version>2.2.0.BUILD-SNAPSHOT</version>
+				<type>test-jar</type>
+			</dependency>
+			<dependency>
+				<groupId>org.springframework.cloud</groupId>
 				<artifactId>spring-cloud-dataflow-audit</artifactId>
+				<version>2.2.0.BUILD-SNAPSHOT</version>
+			</dependency>
+			<dependency>
+				<groupId>org.springframework.cloud</groupId>
+				<artifactId>spring-cloud-dataflow-platform-kubernetes</artifactId>
+				<version>2.2.0.BUILD-SNAPSHOT</version>
+			</dependency>
+			<dependency>
+				<groupId>org.springframework.cloud</groupId>
+				<artifactId>spring-cloud-dataflow-platform-cloudfoundry</artifactId>
 				<version>2.2.0.BUILD-SNAPSHOT</version>
 			</dependency>
 		</dependencies>
