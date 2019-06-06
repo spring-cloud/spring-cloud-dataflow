@@ -291,6 +291,41 @@ public class LocalServerSecurityWithUsersFileTests {
 				{ HttpMethod.PUT, HttpStatus.UNAUTHORIZED, "/jobs/executions/123", null,
 						TestUtils.toImmutableMap("restart", "true") },
 
+				/* JobExecutionThinController */
+
+
+				{ HttpMethod.GET, HttpStatus.FORBIDDEN, "/jobs/thinexecutions", manageOnlyUser, null },
+				{ HttpMethod.GET, HttpStatus.OK, "/jobs/thinexecutions", viewOnlyUser, null },
+				{ HttpMethod.GET, HttpStatus.FORBIDDEN, "/jobs/thinexecutions", createOnlyUser, null },
+				{ HttpMethod.GET, HttpStatus.UNAUTHORIZED, "/jobs/thinexecutions", null, null },
+
+				{ HttpMethod.GET, HttpStatus.FORBIDDEN, "/jobs/thinexecutions", manageOnlyUser,
+						TestUtils.toImmutableMap("page", "0", "size", "10") },
+				{ HttpMethod.GET, HttpStatus.OK, "/jobs/thinexecutions", viewOnlyUser,
+						TestUtils.toImmutableMap("page", "0", "size", "10") },
+				{ HttpMethod.GET, HttpStatus.FORBIDDEN, "/jobs/thinexecutions", createOnlyUser,
+						TestUtils.toImmutableMap("page", "0", "size", "10") },
+				{ HttpMethod.GET, HttpStatus.UNAUTHORIZED, "/jobs/thinexecutions", null,
+						TestUtils.toImmutableMap("page", "0", "size", "10") },
+
+				{ HttpMethod.GET, HttpStatus.FORBIDDEN, "/jobs/thinexecutions", manageOnlyUser,
+						TestUtils.toImmutableMap("name", "myname") },
+				{ HttpMethod.GET, HttpStatus.NOT_FOUND, "/jobs/thinexecutions", viewOnlyUser,
+						TestUtils.toImmutableMap("name", "myname") },
+				{ HttpMethod.GET, HttpStatus.FORBIDDEN, "/jobs/thinexecutions", createOnlyUser,
+						TestUtils.toImmutableMap("name", "myname") },
+				{ HttpMethod.GET, HttpStatus.UNAUTHORIZED, "/jobs/thinexecutions", null,
+						TestUtils.toImmutableMap("name", "myname") },
+
+				{ HttpMethod.GET, HttpStatus.FORBIDDEN, "/jobs/thinexecutions", manageOnlyUser,
+						TestUtils.toImmutableMap("name", "myname", "page", "0", "size", "10") },
+				{ HttpMethod.GET, HttpStatus.NOT_FOUND, "/jobs/thinexecutions", viewOnlyUser,
+						TestUtils.toImmutableMap("name", "myname", "page", "0", "size", "10") },
+				{ HttpMethod.GET, HttpStatus.FORBIDDEN, "/jobs/thinexecutions", createOnlyUser,
+						TestUtils.toImmutableMap("name", "myname", "page", "0", "size", "10") },
+				{ HttpMethod.GET, HttpStatus.UNAUTHORIZED, "/jobs/thinexecutions", null,
+						TestUtils.toImmutableMap("name", "myname", "page", "0", "size", "10") },
+
 				/* JobInstanceController */
 
 				{ HttpMethod.GET, HttpStatus.FORBIDDEN, "/jobs/instances", manageOnlyUser,
