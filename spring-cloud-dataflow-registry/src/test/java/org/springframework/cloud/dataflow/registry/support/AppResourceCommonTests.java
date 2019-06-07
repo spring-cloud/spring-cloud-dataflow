@@ -71,6 +71,19 @@ public class AppResourceCommonTests {
 	}
 
 	@Test
+	public void testInvalidUriSchema() {
+		try {
+			appResourceCommon.getResource("springcloud/polyglot-python-processor:0.1");
+			fail("Excepted IllegalArgumentException for an invalid URI schema prefix");
+		}
+		catch (IllegalArgumentException iae) {
+			assertThat(iae.getMessage().equals("Invalid URI schema for resource: " +
+					"springcloud/polyglot-python-processor:0.1 Expected URI schema prefix like file://, " +
+					"http:// or classpath:// but got none"));
+		}
+	}
+
+	@Test
 	public void testDefaultResource() {
 		String classpathUri = "classpath:AppRegistryTests-importAll.properties";
 		Resource resource = appResourceCommon.getResource(classpathUri);
