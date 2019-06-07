@@ -151,7 +151,12 @@ public class AppResourceCommon {
 	public Resource getResource(String resourceUri) {
 		Assert.isTrue(StringUtils.hasText(resourceUri), "Resource URI must not be empty");
 		try {
-			String scheme = new URI(resourceUri).getScheme().toLowerCase();
+			String scheme = new URI(resourceUri).getScheme();
+			if (scheme == null) {
+				throw new IllegalArgumentException("Invalid URI schema for resource: " + resourceUri
+						+ " Expected URI schema prefix like file://, http:// or classpath:// but got none");
+			}
+			scheme = scheme.toLowerCase();
 			Assert.notNull(scheme, "a scheme (prefix) is required");
 
 			switch (scheme) {
