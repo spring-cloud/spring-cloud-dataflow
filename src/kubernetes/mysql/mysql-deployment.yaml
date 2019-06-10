@@ -16,8 +16,10 @@ spec:
         name: mysql
         env:
           - name: MYSQL_ROOT_PASSWORD
-            # You can change this password - if you do change the base64 encoded value in the secrets file
-            value: yourpassword
+            valueFrom:
+              secretKeyRef:
+                key: mysql-root-password
+                name: mysql
         ports:
           - containerPort: 3306
             name: mysql
