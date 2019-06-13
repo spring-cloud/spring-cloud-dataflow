@@ -100,6 +100,7 @@
 	</properties>
 	<modules>
 		<module>spring-cloud-dataflow-configuration-metadata</module>
+		<module>spring-cloud-dataflow-core-dsl</module>
 		<module>spring-cloud-dataflow-core</module>
 		<module>spring-cloud-dataflow-registry</module>
 		<module>spring-cloud-dataflow-rest-resource</module>
