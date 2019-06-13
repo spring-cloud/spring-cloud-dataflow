@@ -137,3 +137,13 @@ following warning message will be logged:
 `WARN 42924 --- [           main] c.c.c.ConfigServicePropertySourceLocator : Could not locate PropertySource: I/O error on GET request for "http://localhost:8888/spring-cloud-dataflow-server/default":Connection refused; nested exception is java.net.ConnectException: Connection refused`
 ----
 To disable the cloud config server set the `spring.cloud.config.enabled` property to `false`.
+
+## Docker-Compose Integration Tests
+
+To run the docker compose integration, enable the `-Pfailsafe` maven profile.
+
+. You can run only the integration tests like this:
++
+----
+./mvnw clean test-compile failsafe:integration-test -pl spring-cloud-dataflow-server -Pfailsafe
+----

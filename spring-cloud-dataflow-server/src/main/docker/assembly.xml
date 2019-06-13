@@ -18,5 +18,8 @@
 			<outputDirectory>.</outputDirectory>
 			<destName>shell.jar</destName>
 		</file>
+		<file>
+			<source>./wait-for-it.sh</source>
+		</file>
 	</files>
 </assembly>

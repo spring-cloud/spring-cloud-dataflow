@@ -37,6 +37,19 @@
 			<artifactId>spring-boot-devtools</artifactId>
 			<optional>true</optional>
 		</dependency>
+
+		<dependency>
+			<groupId>com.palantir.docker.compose</groupId>
+			<artifactId>docker-compose-rule-junit4</artifactId>
+			<version>0.35.0</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.cloud</groupId>
+			<artifactId>spring-cloud-dataflow-rest-client</artifactId>
+			<scope>test</scope>
+		</dependency>
+
 	</dependencies>
 
 	<build>
@@ -154,6 +167,25 @@
 
 	<profiles>
 		<profile>
+			<id>failsafe</id>
+			<build>
+				<plugins>
+					<plugin>
+						<artifactId>maven-failsafe-plugin</artifactId>
+						<version>3.0.0-M3</version>
+						<executions>
+							<execution>
+								<goals>
+									<goal>integration-test</goal>
+									<goal>verify</goal>
+								</goals>
+							</execution>
+						</executions>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
+		<profile>
 			<id>spring</id>
 			<repositories>
 				<repository>
@@ -201,4 +233,11 @@
 			</pluginRepositories>
 		</profile>
 	</profiles>
+
+	<repositories>
+		<repository>
+			<id>palantir</id>
+			<url>https://dl.bintray.com/palantir/releases</url>
+		</repository>
+	</repositories>
 </project>

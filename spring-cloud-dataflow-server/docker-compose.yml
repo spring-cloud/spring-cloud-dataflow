@@ -3,6 +3,7 @@ version: '3'
 services:
   mysql:
     image: mysql:5.7.25
+    container_name: dataflow-mysql
     environment:
       MYSQL_DATABASE: dataflow
       MYSQL_USER: root
@@ -12,6 +13,7 @@ services:
 
   kafka:
     image: confluentinc/cp-kafka:5.2.1
+    container_name: dataflow-kafka
     expose:
       - "9092"
     environment:
@@ -24,6 +26,7 @@ services:
 
   zookeeper:
     image: confluentinc/cp-zookeeper:5.2.1
+    container_name: dataflow-kafka-zookeeper
     expose:
       - "2181"
     environment:
@@ -50,9 +53,11 @@ services:
       - SPRING_DATASOURCE_DRIVER_CLASS_NAME=org.mariadb.jdbc.Driver
     depends_on:
       - kafka
+    entrypoint: "./wait-for-it.sh mysql:3306 -- java -jar /maven/spring-cloud-dataflow-server.jar"
 
   app-import:
     image: springcloud/openjdk:latest
+    container_name: dataflow-app-import
     depends_on:
       - dataflow-server
     command: >
@@ -80,12 +85,13 @@ services:
       - SPRING_DATASOURCE_USERNAME=root
       - SPRING_DATASOURCE_PASSWORD=rootpw
       - SPRING_DATASOURCE_DRIVER_CLASS_NAME=org.mariadb.jdbc.Driver
+    entrypoint: "./wait-for-it.sh mysql:3306 -- java -Djava.security.egd=file:/dev/./urandom -jar /spring-cloud-skipper-server.jar"
 
   # Grafana is configured with the Prometheus datasource.
   # Use `docker exec -it prometheus /bin/sh` to logging in the container
   prometheus:
     image: springcloud/spring-cloud-dataflow-prometheus-local:${DATAFLOW_VERSION:?DATAFLOW_VERSION is not set! Use 'export DATAFLOW_VERSION=local-server-image-tag'}
-    container_name: 'prometheus'
+    container_name: prometheus
     volumes:
       - 'scdf-targets:/etc/prometheus/'
     ports:
@@ -97,7 +103,7 @@ services:
   # Use `docker exec -it service-discovery /bin/sh` to logging the container
   service-discovery:
     image: springcloud/spring-cloud-dataflow-prometheus-service-discovery:0.0.4.RELEASE
-    container_name: 'service-discovery'
+    container_name: service-discovery
     volumes:
       - 'scdf-targets:/tmp/scdf-targets/'
     expose:
@@ -116,7 +122,7 @@ services:
   # Grafana SCDF Prometheus pre-built image:
   grafana:
     image: springcloud/spring-cloud-dataflow-grafana-prometheus:${DATAFLOW_VERSION:?DATAFLOW_VERSION is not set! Use 'export DATAFLOW_VERSION=local-server-image-tag'}
-    container_name: 'grafana'
+    container_name: grafana
     ports:
       - '3000:3000'
 
