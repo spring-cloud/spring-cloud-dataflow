@@ -84,7 +84,7 @@ public class DockerComposeIT {
 					(port) -> port.inFormat("http://$HOST:$EXTERNAL_PORT")))
 			.waitingForService("skipper-server", HealthChecks.toRespond2xxOverHttp(7577,
 					(port) -> port.inFormat("http://$HOST:$EXTERNAL_PORT")))
-			.pullOnStartup(false)
+			.pullOnStartup(true)
 			.build();
 
 	/**
