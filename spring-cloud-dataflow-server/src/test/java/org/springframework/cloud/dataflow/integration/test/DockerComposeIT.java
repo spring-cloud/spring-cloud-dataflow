@@ -63,12 +63,12 @@ public class DockerComposeIT {
 
 	private static final Logger logger = LoggerFactory.getLogger(DockerComposeIT.class);
 
-	public static final String DOCKER_COMPOSE_PATH = "docker-compose.yml"; //src/main/resources/docker-compose.yml
+	private static final String DOCKER_COMPOSE_PATH = "docker-compose.yml"; //src/main/resources/docker-compose.yml
 
-	public static final String DEPLOYED = "deployed";
-	public static final String DELETED = "deleted";
-	public static final String UNDEPLOYED = "undeployed";
-	public static final String DEPLOYING = "deploying";
+	private static final String DEPLOYED = "deployed";
+	private static final String DELETED = "deleted";
+	private static final String UNDEPLOYED = "undeployed";
+	private static final String DEPLOYING = "deploying";
 
 	// TODO parametrize DATAFLOW_VERSION and SKIPPER_VERSION
 	private static DockerMachine dockerMachine = DockerMachine.localMachine()
@@ -76,7 +76,7 @@ public class DockerComposeIT {
 			.withAdditionalEnvironmentVariable("SKIPPER_VERSION", "2.1.0.BUILD-SNAPSHOT")
 			.build();
 
-	public static DockerComposeRule docker = DockerComposeRule.builder()
+	private static DockerComposeRule docker = DockerComposeRule.builder()
 			.file(DOCKER_COMPOSE_PATH)
 			.machine(dockerMachine)
 			.saveLogsTo("target/dockerLogs/dockerComposeRuleTest")
@@ -84,13 +84,13 @@ public class DockerComposeIT {
 					(port) -> port.inFormat("http://$HOST:$EXTERNAL_PORT")))
 			.waitingForService("skipper-server", HealthChecks.toRespond2xxOverHttp(7577,
 					(port) -> port.inFormat("http://$HOST:$EXTERNAL_PORT")))
-			.pullOnStartup(true)
+			.pullOnStartup(true) // set to false to test with local dataflow and skipper images.
 			.build();
 
 	/**
 	 * DockerComposeRule doesnt't release the created containers if the before() fails.
 	 * The dockerRuleWrapper ensures that all containers are shutdown in case of failure.
- 	 */
+	 */
 	@ClassRule
 	public static ExternalResource dockerRuleWrapper = new ExternalResource() {
 		@Override

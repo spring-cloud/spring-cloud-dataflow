@@ -62,10 +62,7 @@ services:
       - dataflow-server
     command: >
       /bin/sh -c "
-        while ! nc -z dataflow-server 9393;
-        do
-          sleep 1;
-        done;
+        ./wait-for-it.sh -t 180 dataflow-server:9393;
         wget -qO- 'http://dataflow-server:9393/apps' --post-data='uri=http://bit.ly/Einstein-SR2-stream-applications-kafka-maven&force=true';
         echo 'Stream apps imported'
         wget -qO- 'http://dataflow-server:9393/apps' --post-data='uri=http://bit.ly/Dearborn-SR1-task-applications-maven&force=true';
