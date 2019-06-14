@@ -16,6 +16,8 @@
 
 package org.springframework.cloud.dataflow.server.config;
 
+import javax.servlet.Filter;
+
 import org.springframework.boot.autoconfigure.batch.BatchProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.cloud.dataflow.completion.CompletionConfiguration;
@@ -28,6 +30,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.data.web.config.EnableSpringDataWebSupport;
 import org.springframework.hateoas.config.EnableHypermediaSupport;
+import org.springframework.web.filter.ForwardedHeaderFilter;
 
 /**
  * Configuration for the Data Flow Server application context. This includes support for
@@ -53,5 +56,10 @@ public class DataFlowServerConfiguration {
 	@Bean
 	public DataFlowFlywayConfigurationCustomizer dataFlowFlywayConfigurationCustomizer() {
 		return new DataFlowFlywayConfigurationCustomizer();
+	}
+
+	@Bean
+	public Filter forwardedHeaderFilter() {
+		return new ForwardedHeaderFilter();
 	}
 }
