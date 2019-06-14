@@ -2,6 +2,7 @@
 .#*
 *#
 *.sw*
+**/.attach*
 _site/
 .factorypath
 .gradletasknamecache
