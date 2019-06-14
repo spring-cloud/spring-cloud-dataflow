@@ -3,6 +3,7 @@ version: '3'
 services:
   mysql:
     image: mysql:5.7.25
+    container_name: dataflow-mysql
     environment:
       MYSQL_DATABASE: dataflow
       MYSQL_USER: root
@@ -12,6 +13,7 @@ services:
 
   kafka:
     image: confluentinc/cp-kafka:5.2.1
+    container_name: dataflow-kafka
     expose:
       - "9092"
     environment:
@@ -24,6 +26,7 @@ services:
 
   zookeeper:
     image: confluentinc/cp-zookeeper:5.2.1
+    container_name: dataflow-kafka-zookeeper
     expose:
       - "2181"
     environment:
@@ -50,17 +53,16 @@ services:
       - SPRING_DATASOURCE_DRIVER_CLASS_NAME=org.mariadb.jdbc.Driver
     depends_on:
       - kafka
+    entrypoint: "./wait-for-it.sh mysql:3306 -- java -jar /maven/spring-cloud-dataflow-server.jar"
 
   app-import:
     image: springcloud/openjdk:latest
+    container_name: dataflow-app-import
     depends_on:
       - dataflow-server
     command: >
       /bin/sh -c "
-        while ! nc -z dataflow-server 9393;
-        do
-          sleep 1;
-        done;
+        ./wait-for-it.sh -t 180 dataflow-server:9393;
         wget -qO- 'http://dataflow-server:9393/apps' --post-data='uri=http://bit.ly/Einstein-SR2-stream-applications-kafka-maven&force=true';
         echo 'Stream apps imported'
         wget -qO- 'http://dataflow-server:9393/apps' --post-data='uri=http://bit.ly/Dearborn-SR1-task-applications-maven&force=true';
@@ -70,23 +72,27 @@ services:
     image: springcloud/spring-cloud-skipper-server:${SKIPPER_VERSION:?SKIPPER_VERSION is not set!}
     container_name: skipper
     ports:
-    - "7577:7577"
-    - "9000-9010:9000-9010"
+      - "7577:7577"
+      - "9000-9010:9000-9010"
+      - "20000-20105:20000-20105"
     environment:
+      - SPRING_CLOUD_SKIPPER_SERVER_PLATFORM_LOCAL_ACCOUNTS_DEFAULT_PORTRANGE_LOW=20000
+      - SPRING_CLOUD_SKIPPER_SERVER_PLATFORM_LOCAL_ACCOUNTS_DEFAULT_PORTRANGE_HIGH=20100
       - SPRING_DATASOURCE_URL=jdbc:mysql://mysql:3306/dataflow
       - SPRING_DATASOURCE_USERNAME=root
       - SPRING_DATASOURCE_PASSWORD=rootpw
       - SPRING_DATASOURCE_DRIVER_CLASS_NAME=org.mariadb.jdbc.Driver
+    entrypoint: "./wait-for-it.sh mysql:3306 -- java -Djava.security.egd=file:/dev/./urandom -jar /spring-cloud-skipper-server.jar"
 
   influxdb:
     image: influxdb:1.7.5
-    container_name: 'influxdb'
+    container_name: influxdb
     ports:
       - '8086:8086'
 
   grafana:
     image: springcloud/spring-cloud-dataflow-grafana-influxdb:${DATAFLOW_VERSION:?DATAFLOW_VERSION is not set!}
-    container_name: 'grafana'
+    container_name: grafana
     ports:
       - '3000:3000'
 volumes:
