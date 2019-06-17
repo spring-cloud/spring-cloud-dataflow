@@ -4,6 +4,7 @@
 	<artifactId>spring-cloud-skipper-autoconfigure</artifactId>
 	<packaging>jar</packaging>
 	<name>Spring Cloud Skipper :: Autoconfigure</name>
+
 	<parent>
 		<groupId>org.springframework.cloud</groupId>
 		<artifactId>spring-cloud-skipper-parent</artifactId>
@@ -31,7 +32,6 @@
 		<dependency>
 			<groupId>org.jmockit</groupId>
 			<artifactId>jmockit</artifactId>
-			<version>${jmockit.version}</version>
 			<scope>test</scope>
 		</dependency>
 	</dependencies>
