@@ -80,14 +80,14 @@ public class ResourceUtilsTests {
 		assertThat(appResourceService.getResourceWithoutVersion(resource)).isEqualTo("file:/springcloudstream/file-source-kafka-10");
 		assertThat(appResourceService.getResourceVersion(resource)).isEqualTo("1.2.0.BUILD-SNAPSHOT");
 
-		resource = new UrlResource("http://springcloudstream/file-source-kafka-10-1.2.0.RELEASE.jar");
-		assertThat(appResourceService.getResourceWithoutVersion(resource)).isEqualTo("http://springcloudstream/file-source-kafka-10");
+		resource = new UrlResource("https://springcloudstream/file-source-kafka-10-1.2.0.RELEASE.jar");
+		assertThat(appResourceService.getResourceWithoutVersion(resource)).isEqualTo("https://springcloudstream/file-source-kafka-10");
 		assertThat(appResourceService.getResourceVersion(resource)).isEqualTo("1.2.0.RELEASE");
 	}
 
 	@Test(expected = IllegalArgumentException.class)
 	public void testFileResourceWithoutVersion() throws MalformedURLException {
-		Resource resource = new UrlResource("http://springcloudstream/filesourcekafkacrap.jar");
-		assertThat(appResourceService.getResourceWithoutVersion(resource)).isEqualTo("http://springcloudstream/filesourcekafkacrap.jar");
+		Resource resource = new UrlResource("https://springcloudstream/filesourcekafkacrap.jar");
+		assertThat(appResourceService.getResourceWithoutVersion(resource)).isEqualTo("https://springcloudstream/filesourcekafkacrap.jar");
 	}
 }

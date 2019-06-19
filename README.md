@@ -5,11 +5,11 @@
 </p>
 
 <p align="center">
-  <a href="http://cloud.spring.io/spring-cloud-dataflow/#quick-start">
+  <a href="https://cloud.spring.io/spring-cloud-dataflow/#quick-start">
     <img src="https://spring.io/badges/spring-cloud-dataflow/ga.svg"
          alt="Latest Release Version" />
   </a>
-  <a href="http://cloud.spring.io/spring-cloud-dataflow/#quick-start">
+  <a href="https://cloud.spring.io/spring-cloud-dataflow/#quick-start">
     <img src="https://spring.io/badges/spring-cloud-dataflow/snapshot.svg"
          alt="Latest Snapshot Version" />
   </a>

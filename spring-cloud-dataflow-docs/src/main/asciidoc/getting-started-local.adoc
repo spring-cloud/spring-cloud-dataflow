@@ -20,7 +20,7 @@ Both the Data Flow Server and Skipper Server need to have an RDBMS installed.  T
 By default, the Data Flow server uses embedded H2 database for this purpose but you can easily configure the server to use another external database.
 
 For the deployed streams applications communicate a messaging middleware product needs to be installed.
-We provide prebuilt stream applications that use link:http://www.rabbitmq.com[RabbitMQ] or link:http://kafka.apache.org[Kafka], however other https://cloud.spring.io/spring-cloud-stream/#binder-implementations[messaging middleware products] are supported.
+We provide prebuilt stream applications that use link:https://www.rabbitmq.com[RabbitMQ] or link:https://kafka.apache.org[Kafka], however other https://cloud.spring.io/spring-cloud-stream/#binder-implementations[messaging middleware products] are supported.
 
 [[getting-started-local-deploying-spring-cloud-dataflow-docker]]
 === Getting Started with Docker Compose
@@ -323,7 +323,7 @@ With:
 ----
 ====
 
-. Modify the `app-import` service definition `command` attribute to replace `http://bit.ly/Einstein-SR2-stream-applications-kafka-maven` with `http://bit.ly/Einstein-SR2-stream-applications-rabbit-maven`.
+. Modify the `app-import` service definition `command` attribute to replace `https://bit.ly/Einstein-SR2-stream-applications-kafka-maven` with `https://bit.ly/Einstein-SR2-stream-applications-rabbit-maven`.
 
 
 [[getting-started-local-customizing-spring-cloud-dataflow-docker-mysql]]
@@ -433,7 +433,7 @@ wget https://repo.spring.io/{version-type-lowercase}/org/springframework/cloud/s
 ----
 ====
 
-. If you need to enable Stream features, download http://cloud.spring.io/spring-cloud-skipper/[Skipper] (because Data Flow delegates to Skipper for those features), by running the following commands:
+. If you need to enable Stream features, download https://cloud.spring.io/spring-cloud-skipper/[Skipper] (because Data Flow delegates to Skipper for those features), by running the following commands:
 +
 ====
 [source,yaml,options=nowrap,subs=attributes]
@@ -471,7 +471,7 @@ If Skipper and the Data Flow server are not running on the same host, set the `s
 ====
 [source,bash,subs=attributes]
 ----
-$ java -jar spring-cloud-dataflow-server-{project-version}.jar --spring.cloud.skipper.client.serverUri=http://192.51.100.1:7577/api
+$ java -jar spring-cloud-dataflow-server-{project-version}.jar --spring.cloud.skipper.client.serverUri=https://192.51.100.1:7577/api
 ----
 ====
 
@@ -491,8 +491,8 @@ If the Data Flow Server and shell are not running on the same host, point the sh
 ====
 [source,bash]
 ----
-server-unknown:>dataflow config server http://198.51.100.0
-Successfully targeted http://198.51.100.0
+server-unknown:>dataflow config server https://198.51.100.0
+Successfully targeted https://198.51.100.0
 dataflow:>
 ----
 ====

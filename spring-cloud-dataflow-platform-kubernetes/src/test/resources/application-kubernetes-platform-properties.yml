@@ -7,7 +7,7 @@ spring:
             accounts:
               dev:
                 fabric8:
-                  masterUrl: http://192.168.0.1:8443
+                  masterUrl: https://192.168.0.1:8443
                   namespace: dev1
                 imagePullPolicy: Always
                 entryPointStyle: exec
@@ -15,7 +15,7 @@ spring:
                   cpu: 4
               qa:
                 fabric8:
-                  masterUrl: http://192.168.0.2:8443
+                  masterUrl: https://192.168.0.2:8443
                 namespace: qaNamespace
                 imagePullPolicy: IfNotPresent
                 entryPointStyle: boot

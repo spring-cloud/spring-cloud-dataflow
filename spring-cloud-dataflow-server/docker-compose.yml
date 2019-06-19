@@ -40,9 +40,9 @@ services:
         do
           sleep 1;
         done;
-        wget -qO- 'http://dataflow-server:9393/apps' --post-data='uri=http://bit.ly/Einstein-GA-stream-applications-kafka-maven&force=true';
+        wget -qO- 'http://dataflow-server:9393/apps' --post-data='uri=https://bit.ly/Einstein-GA-stream-applications-kafka-maven&force=true';
         echo 'Stream apps imported'
-        wget -qO- 'http://dataflow-server:9393/apps' --post-data='uri=http://bit.ly/Dearborn-SR1-task-applications-maven&force=true';
+        wget -qO- 'http://dataflow-server:9393/apps' --post-data='uri=https://bit.ly/Dearborn-SR1-task-applications-maven&force=true';
         echo 'Task apps imported'"
   skipper-server:
     image: springcloud/spring-cloud-skipper-server:${SKIPPER_VERSION:?SKIPPER_VERSION is not set!}

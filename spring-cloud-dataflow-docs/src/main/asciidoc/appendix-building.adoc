@@ -27,14 +27,14 @@ There is a `full` profile that generates documentation. You can build only the d
 
 === Working with the Code
 
-If you do not have an IDE preference, we recommend that you use https://spring.io/tools[Spring Tools Suite] or http://www.eclipse.org[Eclipse] when working with the code.
-We use the http://www.eclipse.org/m2e/[m2eclipse] Eclipse plugin for Maven support.
+If you do not have an IDE preference, we recommend that you use https://spring.io/tools[Spring Tools Suite] or https://www.eclipse.org[Eclipse] when working with the code.
+We use the https://www.eclipse.org/m2e/[m2eclipse] Eclipse plugin for Maven support.
 Other IDEs and tools generally also work without issue.
 
 
 
 ==== Importing into Eclipse with m2eclipse
-We recommend the http://www.eclipse.org/m2e/[m2eclipe] eclipse plugin when working with Eclipse.
+We recommend the https://www.eclipse.org/m2e/[m2eclipe] eclipse plugin when working with Eclipse.
 If you do not already have m2eclipse installed, it is available from the Eclipse marketplace.
 
 Unfortunately, m2e does not yet support Maven 3.3.
