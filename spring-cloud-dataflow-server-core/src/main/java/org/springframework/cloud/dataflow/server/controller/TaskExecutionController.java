@@ -17,9 +17,12 @@
 package org.springframework.cloud.dataflow.server.controller;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.springframework.cloud.dataflow.core.PlatformTaskExecutionInformation;
@@ -28,6 +31,7 @@ import org.springframework.cloud.dataflow.rest.resource.CurrentTaskExecutionsRes
 import org.springframework.cloud.dataflow.rest.resource.TaskExecutionResource;
 import org.springframework.cloud.dataflow.rest.util.ArgumentSanitizer;
 import org.springframework.cloud.dataflow.rest.util.DeploymentPropertiesUtils;
+import org.springframework.cloud.dataflow.server.controller.support.TaskExecutionControllerDeleteAction;
 import org.springframework.cloud.dataflow.server.repository.NoSuchTaskDefinitionException;
 import org.springframework.cloud.dataflow.server.repository.NoSuchTaskExecutionException;
 import org.springframework.cloud.dataflow.server.repository.TaskDefinitionRepository;
@@ -62,6 +66,7 @@ import org.springframework.web.bind.annotation.RestController;
  * @author Ilayaperumal Gopinathan
  * @author Christian Tzolov
  * @author David Turanski
+ * @author Gunnar Hillert
  */
 @RestController
 @RequestMapping("/tasks/executions")
@@ -199,18 +204,22 @@ public class TaskExecutionController {
 	}
 
 	/**
-	 * Cleanup resources associated with a single task execution, specified by id.
+	 * Cleanup resources associated with one or more task executions, specified by id(s). The
+	 * optional {@code actions} parameter can be used to not only clean up task execution resources,
+	 * but can also trigger the deletion of task execution and job data in the persistence store.
 	 *
-	 * @param id the id of the {@link TaskExecution} to clean up
+	 * @param ids The id of the {@link TaskExecution}s to clean up
+	 * @param actions Defaults to "CLEANUP" if not specified
 	 */
 	@RequestMapping(value = "/{id}", method = RequestMethod.DELETE)
 	@ResponseStatus(HttpStatus.OK)
-	public void cleanup(@PathVariable("id") long id) {
-		TaskExecution taskExecution = this.explorer.getTaskExecution(id);
-		if (taskExecution == null) {
-			throw new NoSuchTaskExecutionException(id);
-		}
-		this.taskDeleteService.cleanupExecution(id);
+	public void cleanup(
+			@PathVariable("id") Set<Long> ids,
+			@RequestParam(defaultValue = "CLEANUP", name="action") TaskExecutionControllerDeleteAction[] actions) {
+
+		final Set<TaskExecutionControllerDeleteAction> actionsAsSet = new HashSet<>(Arrays.asList(actions));
+
+		this.taskDeleteService.cleanupExecutions(actionsAsSet, ids);
 	}
 
 	private Page<TaskJobExecutionRel> getPageableRelationships(Page<TaskExecution> taskExecutions, Pageable pageable) {

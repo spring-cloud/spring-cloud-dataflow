@@ -64,7 +64,6 @@ import static org.mockito.Mockito.mock;
  * @author Glenn Renfro
  * @author Ilayaperumal Gopinathan
  */
-@SuppressWarnings("unchecked")
 public class DataFlowServerConfigurationTests {
 
 	private AnnotationConfigApplicationContext context;
@@ -101,7 +100,7 @@ public class DataFlowServerConfigurationTests {
 	@Test
 	@Ignore
 	public void testStartEmbeddedH2Server() {
-		Map myMap = new HashMap();
+		Map<String, Object> myMap = new HashMap<>();
 		myMap.put("spring.datasource.url", "jdbc:h2:tcp://localhost:19092/mem:dataflow");
 		myMap.put("spring.dataflow.embedded.database.enabled", "true");
 		propertySources.addFirst(new MapPropertySource("EnvironmentTestPropsource", myMap));
@@ -120,7 +119,7 @@ public class DataFlowServerConfigurationTests {
 	@Test(expected = ConnectException.class)
 	public void testDoNotStartEmbeddedH2Server() throws Throwable {
 		Throwable exceptionResult = null;
-		Map myMap = new HashMap();
+		Map<String, Object> myMap = new HashMap<>();
 		myMap.put("spring.datasource.url", "jdbc:h2:tcp://localhost:19092/mem:dataflow");
 		myMap.put("spring.dataflow.embedded.database.enabled", "false");
 		myMap.put("spring.jpa.database", "H2");

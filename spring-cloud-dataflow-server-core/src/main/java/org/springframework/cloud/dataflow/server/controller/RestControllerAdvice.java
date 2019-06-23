@@ -1,5 +1,5 @@
 /*
- * Copyright 2015-2018 the original author or authors.
+ * Copyright 2015-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,6 +31,7 @@ import org.springframework.cloud.dataflow.server.batch.NoSuchStepExecutionExcept
 import org.springframework.cloud.dataflow.server.controller.support.InvalidDateRangeException;
 import org.springframework.cloud.dataflow.server.controller.support.InvalidStreamDefinitionException;
 import org.springframework.cloud.dataflow.server.job.support.JobNotRestartableException;
+import org.springframework.cloud.dataflow.server.repository.CannotDeleteNonParentTaskExecutionException;
 import org.springframework.cloud.dataflow.server.repository.DuplicateStreamDefinitionException;
 import org.springframework.cloud.dataflow.server.repository.DuplicateTaskException;
 import org.springframework.cloud.dataflow.server.repository.NoSuchAuditRecordException;
@@ -175,7 +176,7 @@ public class RestControllerAdvice {
 	 */
 	@ExceptionHandler({ MissingServletRequestParameterException.class, HttpMessageNotReadableException.class,
 			UnsatisfiedServletRequestParameterException.class, MethodArgumentTypeMismatchException.class,
-			InvalidDateRangeException.class,
+			InvalidDateRangeException.class, CannotDeleteNonParentTaskExecutionException.class,
 			InvalidStreamDefinitionException.class, CreateScheduleException.class, OffsetOutOfBoundsException.class })
 	@ResponseStatus(HttpStatus.BAD_REQUEST)
 	@ResponseBody
@@ -184,8 +185,35 @@ public class RestControllerAdvice {
 		if (logger.isTraceEnabled()) {
 			logTraceLevelStrackTrace(e);
 		}
-		String msg = getExceptionMessage(e);
-		return new VndErrors(logref, msg);
+
+		String message = null;
+		if (e instanceof MethodArgumentTypeMismatchException) {
+			final MethodArgumentTypeMismatchException methodArgumentTypeMismatchException = (MethodArgumentTypeMismatchException) e;
+			final Class<?> requiredType = methodArgumentTypeMismatchException.getRequiredType();
+
+			final Class<?> enumType;
+
+			if (requiredType.isEnum()) {
+				enumType = requiredType;
+			}
+			else if (requiredType.isArray() && requiredType.getComponentType().isEnum()) {
+				enumType = requiredType.getComponentType();
+			}
+			else {
+				enumType = null;
+			}
+
+			if (enumType != null) {
+				final String enumValues = StringUtils.arrayToDelimitedString(enumType.getEnumConstants(), ", ");
+				message = String.format("The parameter '%s' must contain one of the following values: '%s'.", methodArgumentTypeMismatchException.getName(), enumValues);
+			}
+		}
+
+		if (message == null) {
+			message = getExceptionMessage(e);
+		}
+
+		return new VndErrors(logref, message);
 	}
 
 	/**
