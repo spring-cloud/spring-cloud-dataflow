@@ -17,9 +17,14 @@
 package org.springframework.cloud.dataflow.server.controller;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.SortedSet;
+import java.util.TreeSet;
 import java.util.stream.Collectors;
 
 import org.springframework.cloud.dataflow.core.PlatformTaskExecutionInformation;
@@ -28,6 +33,7 @@ import org.springframework.cloud.dataflow.rest.resource.CurrentTaskExecutionsRes
 import org.springframework.cloud.dataflow.rest.resource.TaskExecutionResource;
 import org.springframework.cloud.dataflow.rest.util.ArgumentSanitizer;
 import org.springframework.cloud.dataflow.rest.util.DeploymentPropertiesUtils;
+import org.springframework.cloud.dataflow.server.controller.support.TaskExecutionControllerDeleteAction;
 import org.springframework.cloud.dataflow.server.repository.NoSuchTaskDefinitionException;
 import org.springframework.cloud.dataflow.server.repository.NoSuchTaskExecutionException;
 import org.springframework.cloud.dataflow.server.repository.TaskDefinitionRepository;
@@ -62,6 +68,7 @@ import org.springframework.web.bind.annotation.RestController;
  * @author Ilayaperumal Gopinathan
  * @author Christian Tzolov
  * @author David Turanski
+ * @author Gunnar Hillert
  */
 @RestController
 @RequestMapping("/tasks/executions")
@@ -205,12 +212,40 @@ public class TaskExecutionController {
 	 */
 	@RequestMapping(value = "/{id}", method = RequestMethod.DELETE)
 	@ResponseStatus(HttpStatus.OK)
-	public void cleanup(@PathVariable("id") long id) {
-		TaskExecution taskExecution = this.explorer.getTaskExecution(id);
-		if (taskExecution == null) {
-			throw new NoSuchTaskExecutionException(id);
+	public void cleanup(
+			@PathVariable("id") Set<Long> ids,
+			@RequestParam(defaultValue = "CLEANUP", name="action") TaskExecutionControllerDeleteAction[] actions) {
+
+		final Set<TaskExecutionControllerDeleteAction> actionsAsSet = new HashSet<>(Arrays.asList(actions));
+		final SortedSet<Long> nonExistingTaskExecutions = new TreeSet<>();
+
+		// Should move to service to ensure TX
+
+		for (Long id : ids) {
+			final TaskExecution taskExecution = this.explorer.getTaskExecution(id);
+			if (taskExecution == null) {
+				nonExistingTaskExecutions.add(id);
+			}
 		}
-		this.taskDeleteService.cleanupExecution(id);
+
+		if (!nonExistingTaskExecutions.isEmpty()) {
+			if (nonExistingTaskExecutions.size() == 1) {
+				throw new NoSuchTaskExecutionException(nonExistingTaskExecutions.first());
+			}
+			else {
+				throw new NoSuchTaskExecutionException(nonExistingTaskExecutions);
+			}
+		}
+
+		if (actionsAsSet.contains(TaskExecutionControllerDeleteAction.CLEANUP)) {
+			for (Long id : ids) {
+				this.taskDeleteService.cleanupExecution(id);
+			}
+		}
+
+		if (actionsAsSet.contains(TaskExecutionControllerDeleteAction.REMOVE_DATA)) {
+			this.taskDeleteService.deleteOneOrMoreTaskExecutions(ids);
+		}
 	}
 
 	private Page<TaskJobExecutionRel> getPageableRelationships(Page<TaskExecution> taskExecutions, Pageable pageable) {

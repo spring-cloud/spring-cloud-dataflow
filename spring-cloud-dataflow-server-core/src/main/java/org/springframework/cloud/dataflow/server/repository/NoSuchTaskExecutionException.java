@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 the original author or authors.
+ * Copyright 2016-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,12 +16,21 @@
 
 package org.springframework.cloud.dataflow.server.repository;
 
+import java.util.Set;
+
 import org.springframework.cloud.task.repository.TaskExecution;
+import org.springframework.util.StringUtils;
 
 /**
  * @author Glenn Renfro
+ * @author Gunnar Hillert
  */
 public class NoSuchTaskExecutionException extends RuntimeException {
+
+	/**
+	 *
+	 */
+	private static final long serialVersionUID = 1L;
 
 	/**
 	 * Create a new exception.
@@ -30,5 +39,14 @@ public class NoSuchTaskExecutionException extends RuntimeException {
 	 */
 	public NoSuchTaskExecutionException(long id) {
 		super("Could not find TaskExecution with id " + id);
+	}
+
+	/**
+	 * Create a new exception.
+	 *
+	 * @param ids the ids of the {@link TaskExecution} that could not be found
+	 */
+	public NoSuchTaskExecutionException(Set<Long> ids) {
+		super("Could not find TaskExecutions with the following ids: " + StringUtils.collectionToDelimitedString(ids, ", "));
 	}
 }

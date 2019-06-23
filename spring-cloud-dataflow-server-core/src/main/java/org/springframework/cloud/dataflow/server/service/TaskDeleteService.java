@@ -16,10 +16,13 @@
 
 package org.springframework.cloud.dataflow.server.service;
 
+import java.util.Set;
+
 /**
  * Provides task deletion services.
  *
  * @author Daniel Serleg
+ * @author Gunnar Hillert
  */
 public interface TaskDeleteService {
 	/**
@@ -28,6 +31,13 @@ public interface TaskDeleteService {
 	 * @param id the execution id
 	 */
 	void cleanupExecution(long id);
+
+	/**
+	 * Delete one or more Task executions.
+	 *
+	 * @param id the execution id
+	 */
+	void deleteOneOrMoreTaskExecutions(Set<Long> ids);
 
 	/**
 	 * Destroy the task definition. If it is a Composed Task then the task definitions

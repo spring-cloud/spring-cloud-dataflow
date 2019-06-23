@@ -60,6 +60,10 @@ import org.springframework.cloud.dataflow.server.controller.TaskExecutionControl
 import org.springframework.cloud.dataflow.server.controller.TaskLogsController;
 import org.springframework.cloud.dataflow.server.controller.TaskPlatformController;
 import org.springframework.cloud.dataflow.server.job.LauncherRepository;
+import org.springframework.cloud.dataflow.server.repository.DataflowJobExecutionDao;
+import org.springframework.cloud.dataflow.server.repository.DataflowTaskExecutionDao;
+import org.springframework.cloud.dataflow.server.repository.JdbcDataflowJobExecutionDao;
+import org.springframework.cloud.dataflow.server.repository.JdbcDataflowTaskExecutionDao;
 import org.springframework.cloud.dataflow.server.repository.TaskDefinitionRepository;
 import org.springframework.cloud.dataflow.server.repository.TaskDeploymentRepository;
 import org.springframework.cloud.dataflow.server.service.TaskDeleteService;
@@ -209,10 +213,13 @@ public class JobDependencies {
 	public TaskDeleteService deleteTaskService(TaskExplorer taskExplorer, LauncherRepository launcherRepository,
 			TaskDefinitionRepository taskDefinitionRepository,
 			TaskDeploymentRepository taskDeploymentRepository,
-			AuditRecordService auditRecordService) {
+			AuditRecordService auditRecordService,
+			DataflowTaskExecutionDao dataflowTaskExecutionDao,
+			DataflowJobExecutionDao dataflowJobExecutionDao) {
 		return new DefaultTaskDeleteService(taskExplorer, launcherRepository, taskDefinitionRepository,
 				taskDeploymentRepository,
-				auditRecordService);
+				auditRecordService, dataflowTaskExecutionDao,
+				dataflowJobExecutionDao);
 	}
 
 	@Bean
@@ -261,6 +268,16 @@ public class JobDependencies {
 	@Bean
 	public TaskRepository taskRepository() {
 		return new SimpleTaskRepository(new TaskExecutionDaoFactoryBean());
+	}
+
+	@Bean
+	DataflowTaskExecutionDao dataflowTaskExecutionDao(DataSource dataSource) {
+		return new JdbcDataflowTaskExecutionDao(dataSource);
+	}
+
+	@Bean
+	DataflowJobExecutionDao dataflowJobExecutionDao(DataSource dataSource) {
+		return new JdbcDataflowJobExecutionDao(dataSource);
 	}
 
 	@Bean

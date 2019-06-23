@@ -69,6 +69,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -276,8 +277,21 @@ public class TaskExecutionControllerTests {
 	@Test
 	public void testCleanup() throws Exception {
 		mockMvc.perform(delete("/tasks/executions/1")).andExpect(status().is(200));
-
 		verify(taskLauncher).cleanup("foobar");
+	}
+
+	@Test
+	public void testCleanupWithActionParam() throws Exception {
+		mockMvc.perform(delete("/tasks/executions/1").param("action", "CLEANUP")).andExpect(status().is(200));
+		verify(taskLauncher).cleanup("foobar");
+	}
+
+	@Test
+	public void testCleanupWithInvalidAction() throws Exception {
+		mockMvc.perform(delete("/tasks/executions/1").param("action", "does_not_exist").accept(MediaType.APPLICATION_JSON))
+		.andDo(print())
+		.andExpect(status().is(400))
+		.andExpect(jsonPath("$[0].message", is("The parameter 'action' must contain one of the following values: 'CLEANUP, REMOVE_DATA, REMOVE_BATCH_DATA'.")));
 	}
 
 	@Test
