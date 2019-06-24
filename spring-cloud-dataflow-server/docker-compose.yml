@@ -63,9 +63,9 @@ services:
     command: >
       /bin/sh -c "
         ./wait-for-it.sh -t 180 dataflow-server:9393;
-        wget -qO- 'http://dataflow-server:9393/apps' --post-data='uri=http://bit.ly/Einstein-SR2-stream-applications-kafka-maven&force=true';
+        wget -qO- 'http://dataflow-server:9393/apps' --post-data='uri=https://dataflow.spring.io/kafka-maven-latest&force=true';
         echo 'Stream apps imported'
-        wget -qO- 'http://dataflow-server:9393/apps' --post-data='uri=http://bit.ly/Dearborn-SR1-task-applications-maven&force=true';
+        wget -qO- 'http://dataflow-server:9393/apps' --post-data='uri=https://dataflow.spring.io/task-maven-latest&force=true';
         echo 'Task apps imported'"
 
   skipper-server:

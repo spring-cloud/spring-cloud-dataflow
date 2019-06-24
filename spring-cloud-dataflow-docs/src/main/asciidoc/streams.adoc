@@ -376,22 +376,26 @@ and Spring Boot 2.1.x:
 
 [width="100%",frame="topbot",options="header"]
 |======================
-|Artifact Type |Stable Release |SNAPSHOT Release
+|Artifact Type |Latest Release|Stable Release |SNAPSHOT Release
 
 |RabbitMQ + Maven
-|https://dataflow.spring.io/Einstein-SR2-stream-applications-rabbit-maven
+|https://dataflow.spring.io/rabbitmq-maven-latest
+|https://dataflow.spring.io/Einstein-SR3-stream-applications-rabbit-maven
 |https://dataflow.spring.io/Einstein-BUILD-SNAPSHOT-stream-applications-rabbit-maven
 
 |RabbitMQ + Docker
-|https://dataflow.spring.io/Einstein-SR2-stream-applications-rabbit-docker
+|https://dataflow.spring.io/rabbitmq-docker-latest
+|https://dataflow.spring.io/Einstein-SR3-stream-applications-rabbit-docker
 |https://dataflow.spring.io/Einstein-BUILD-SNAPSHOT-stream-applications-rabbit-docker
 
 |Apache Kafka + Maven
-|https://dataflow.spring.io/Einstein-SR2-stream-applications-kafka-maven
+|https://dataflow.spring.io/kafka-maven-latest
+|https://dataflow.spring.io/Einstein-SR3-stream-applications-kafka-maven
 |https://dataflow.spring.io/Einstein-BUILD-SNAPSHOT-stream-applications-kafka-maven
 
 |Apache Kafka + Docker
-|https://dataflow.spring.io/Einstein-SR2-stream-applications-kafka-docker
+|https://dataflow.spring.io/kafka-docker-latest
+|https://dataflow.spring.io/Einstein-SR3-stream-applications-kafka-docker
 |https://dataflow.spring.io/Einstein-BUILD-SNAPSHOT-stream-applications-kafka-docker
 |======================
 
@@ -428,13 +432,15 @@ The following table includes the available Task Application Starters based on Sp
 
 [width="100%",frame="topbot",options="header"]
 |======================
-|Artifact Type |Milestone Release |SNAPSHOT Release
+|Artifact Type |Latest Release|Stable Release |SNAPSHOT Release
 
 |Maven
+|https://dataflow.spring.io/task-maven-latest
 |https://dataflow.spring.io/Elston-GA-task-applications-maven
 |https://dataflow.spring.io/Elston-BUILD-SNAPSHOT-task-applications-maven
 
 |Docker
+|https://dataflow.spring.io/task-docker-latest
 |https://dataflow.spring.io/Elston-GA-task-applications-docker
 |https://dataflow.spring.io/Elston-BUILD-SNAPSHOT-task-applications-docker
 |======================
