@@ -69,9 +69,11 @@ import org.springframework.cloud.dataflow.server.controller.RuntimeAppsControlle
 import org.springframework.cloud.dataflow.server.controller.RuntimeStreamsController;
 import org.springframework.cloud.dataflow.server.controller.StreamDefinitionController;
 import org.springframework.cloud.dataflow.server.controller.StreamDeploymentController;
+import org.springframework.cloud.dataflow.server.controller.StreamLogsController;
 import org.springframework.cloud.dataflow.server.controller.StreamValidationController;
 import org.springframework.cloud.dataflow.server.controller.TaskDefinitionController;
 import org.springframework.cloud.dataflow.server.controller.TaskExecutionController;
+import org.springframework.cloud.dataflow.server.controller.TaskLogsController;
 import org.springframework.cloud.dataflow.server.controller.TaskPlatformController;
 import org.springframework.cloud.dataflow.server.controller.TaskSchedulerController;
 import org.springframework.cloud.dataflow.server.controller.ToolsController;
@@ -290,6 +292,11 @@ public class DataFlowControllerAutoConfiguration {
 		public TaskValidationController taskValidationController(TaskValidationService taskValidationService) {
 			return new TaskValidationController(taskValidationService);
 		}
+
+		@Bean
+		public TaskLogsController taskLogsController(TaskExecutionService taskExecutionService) {
+			return new TaskLogsController(taskExecutionService);
+		}
 	}
 
 	@Configuration
@@ -330,6 +337,11 @@ public class DataFlowControllerAutoConfiguration {
 		@Bean
 		public RuntimeStreamsController runtimeStreamsController(StreamDeployer streamDeployer) {
 			return new RuntimeStreamsController(streamDeployer);
+		}
+
+		@Bean
+		public StreamLogsController streamLogsController(StreamDeployer streamDeployer) {
+			return new StreamLogsController(streamDeployer);
 		}
 
 		@Bean

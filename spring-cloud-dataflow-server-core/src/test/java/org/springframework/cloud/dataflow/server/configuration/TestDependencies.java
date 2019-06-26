@@ -74,6 +74,7 @@ import org.springframework.cloud.dataflow.server.controller.RuntimeAppsControlle
 import org.springframework.cloud.dataflow.server.controller.RuntimeStreamsController;
 import org.springframework.cloud.dataflow.server.controller.StreamDefinitionController;
 import org.springframework.cloud.dataflow.server.controller.StreamDeploymentController;
+import org.springframework.cloud.dataflow.server.controller.StreamLogsController;
 import org.springframework.cloud.dataflow.server.controller.StreamValidationController;
 import org.springframework.cloud.dataflow.server.controller.TaskDefinitionController;
 import org.springframework.cloud.dataflow.server.controller.TaskExecutionController;
@@ -226,6 +227,11 @@ public class TestDependencies extends WebMvcConfigurationSupport {
 	public StreamDeploymentController updatableStreamDeploymentController(StreamDefinitionRepository repository,
 			StreamService streamService) {
 		return new StreamDeploymentController(repository, streamService);
+	}
+
+	@Bean
+	public StreamLogsController streamLogsController(StreamDeployer streamDeployer) {
+		return new StreamLogsController(streamDeployer);
 	}
 
 	@Bean

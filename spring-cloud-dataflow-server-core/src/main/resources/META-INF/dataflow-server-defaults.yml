@@ -137,6 +137,9 @@ spring:
             - GET /streams/validation/               => hasRole('ROLE_VIEW')
             - GET /streams/validation/*              => hasRole('ROLE_VIEW')
 
+            # Stream Logs
+            - GET /streams/logs/*                    => hasRole('ROLE_VIEW')
+
             # Task Definitions
 
             - POST   /tasks/definitions              => hasRole('ROLE_CREATE')
@@ -168,6 +171,9 @@ spring:
 
             - GET    /tasks/validation/               => hasRole('ROLE_VIEW')
             - GET    /tasks/validation/*              => hasRole('ROLE_VIEW')
+
+            # Task Logs
+            - GET /tasks/logs/*                       => hasRole('ROLE_VIEW')
 
             # Tools
 

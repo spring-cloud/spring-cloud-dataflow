@@ -42,4 +42,13 @@ public interface TaskExecutionService {
 	 */
 	long executeTask(String taskName, Map<String, String> taskDeploymentProperties, List<String> commandLineArgs);
 
+	/**
+	 * Retrieve logs for the task application.
+	 *
+	 * @param platformName the name of the platform
+	 * @param taskId the ID that uniquely identifies the task
+	 * @return the logs of the task application.
+	 */
+	String getLog(String platformName, String taskId);
+
 }

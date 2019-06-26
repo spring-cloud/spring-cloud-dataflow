@@ -31,6 +31,7 @@ import org.springframework.cloud.dataflow.core.StreamDefinition;
 import org.springframework.cloud.dataflow.registry.repository.AppRegistrationRepository;
 import org.springframework.cloud.dataflow.server.configuration.TestDependencies;
 import org.springframework.cloud.dataflow.server.repository.StreamDefinitionRepository;
+import org.springframework.cloud.dataflow.server.stream.SkipperStreamDeployer;
 import org.springframework.cloud.deployer.spi.app.AppStatus;
 import org.springframework.cloud.deployer.spi.app.DeploymentState;
 import org.springframework.cloud.skipper.client.SkipperClient;
@@ -77,6 +78,9 @@ public class RuntimeAppsControllerTests {
 
 	@Autowired
 	private SkipperClient skipperClient;
+
+	@Autowired
+	private SkipperStreamDeployer skipperStreamDeployer;
 
 	@Before
 	public void setupMocks() {

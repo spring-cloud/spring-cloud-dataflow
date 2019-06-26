@@ -28,6 +28,7 @@ import org.cloudfoundry.operations.CloudFoundryOperations;
 import org.cloudfoundry.operations.DefaultCloudFoundryOperations;
 import org.cloudfoundry.reactor.ConnectionContext;
 import org.cloudfoundry.reactor.TokenProvider;
+import org.cloudfoundry.reactor.doppler.ReactorDopplerClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -46,6 +47,7 @@ import org.springframework.cloud.scheduler.spi.core.Scheduler;
 
 /**
  * @author David Turanski
+ * @author Ilayaperumal Gopinathan
  **/
 public class CloudFoundryTaskPlatformFactory extends AbstractTaskPlatformFactory<CloudFoundryPlatformProperties> {
 
@@ -138,6 +140,9 @@ public class CloudFoundryTaskPlatformFactory extends AbstractTaskPlatformFactory
 		return DefaultCloudFoundryOperations
 				.builder().cloudFoundryClient(cloudFoundryClient)
 				.organization(connectionProperties(account).getOrg())
+				.dopplerClient(ReactorDopplerClient.builder()
+						.connectionContext(connectionContext(account))
+						.tokenProvider(tokenProvider(account)).build())
 				.space(connectionProperties(account).getSpace()).build();
 	}
 

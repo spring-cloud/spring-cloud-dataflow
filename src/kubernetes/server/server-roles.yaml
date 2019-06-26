@@ -4,7 +4,7 @@ metadata:
   name: scdf-role
 rules:
   - apiGroups: [""]
-    resources: ["services", "pods", "replicationcontrollers", "persistentvolumeclaims"]
+    resources: ["services", "pods", "pods/log", "replicationcontrollers", "persistentvolumeclaims"]
     verbs: ["get", "list", "watch", "create", "delete", "update"]
   - apiGroups: [""]
     resources: ["configmaps", "secrets"]
