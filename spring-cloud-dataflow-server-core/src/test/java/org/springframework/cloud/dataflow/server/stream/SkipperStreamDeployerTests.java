@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2018 the original author or authors.
+ * Copyright 2017-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -576,6 +576,26 @@ public class SkipperStreamDeployerTests {
 		verify(skipperClient).rollback(rollbackRequestCaptor.capture());
 		assertThat(rollbackRequestCaptor.getValue().getReleaseName()).isEqualTo("release666");
 		assertThat(rollbackRequestCaptor.getValue().getVersion()).isEqualTo(666);
+	}
+
+	@Test
+	public void testGetLogByReleaseName() {
+		SkipperClient skipperClient = mock(SkipperClient.class);
+		when(skipperClient.getLog(eq("release1"))).thenReturn(mock(Release.class));
+		SkipperStreamDeployer skipperStreamDeployer = new SkipperStreamDeployer(skipperClient,
+				mock(StreamDefinitionRepository.class), mock(AppRegistryService.class), mock(ForkJoinPool.class));
+		skipperStreamDeployer.getLog("release1");
+		verify(skipperClient, times(1)).getLog(eq("release1"));
+	}
+
+	@Test
+	public void testGetLogByReleaseNameAndAppName() {
+		SkipperClient skipperClient = mock(SkipperClient.class);
+		when(skipperClient.getLog(eq("release1"), eq("myapp"))).thenReturn(mock(Release.class));
+		SkipperStreamDeployer skipperStreamDeployer = new SkipperStreamDeployer(skipperClient,
+				mock(StreamDefinitionRepository.class), mock(AppRegistryService.class), mock(ForkJoinPool.class));
+		skipperStreamDeployer.getLog("release1", "myapp");
+		verify(skipperClient, times(1)).getLog(eq("release1"), eq("myapp"));
 	}
 
 	@Test

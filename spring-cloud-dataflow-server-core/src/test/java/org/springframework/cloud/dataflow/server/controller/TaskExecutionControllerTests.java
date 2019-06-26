@@ -256,6 +256,13 @@ public class TaskExecutionControllerTests {
 	}
 
 	@Test
+	public void testGetCurrentExecutionLog() throws Exception {
+		when(taskLauncher.getLog("mytask1")).thenReturn("Log");
+		mockMvc.perform(get("/tasks/executions/logs?name=mytask1").accept(MediaType.APPLICATION_JSON))
+				.andExpect(status().isOk());
+	}
+
+	@Test
 	public void testGetExecutionsByName() throws Exception {
 		verifyTaskArgs(SAMPLE_CLEANSED_ARGUMENT_LIST, "$.content[0].", mockMvc
 				.perform(get("/tasks/executions/").param("name", TASK_NAME_ORIG).accept(MediaType.APPLICATION_JSON))

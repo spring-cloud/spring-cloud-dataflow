@@ -22,6 +22,9 @@ import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 import org.springframework.cloud.dataflow.audit.service.AuditRecordService;
 import org.springframework.cloud.dataflow.core.AuditActionType;
 import org.springframework.cloud.dataflow.core.AuditOperationType;
@@ -91,6 +94,8 @@ public class DefaultTaskExecutionService implements TaskExecutionService {
 	public static final String COMMAND_LINE_ARGS = "commandLineArgs";
 
 	public static final String TASK_PLATFORM_NAME = "spring.cloud.dataflow.task.platformName";
+
+	protected final Log logger = LogFactory.getLog(getClass().getName());
 
 	/**
 	 * Initializes the {@link DefaultTaskExecutionService}.
@@ -180,6 +185,11 @@ public class DefaultTaskExecutionService implements TaskExecutionService {
 						request.getCommandlineArguments()));
 
 		return taskExecution.getExecutionId();
+	}
+
+	@Override
+	public String getLog(String platformName, String taskId) {
+		return findTaskLauncher(platformName).getLog(taskId);
 	}
 
 	private TaskLauncher findTaskLauncher(String platformName) {

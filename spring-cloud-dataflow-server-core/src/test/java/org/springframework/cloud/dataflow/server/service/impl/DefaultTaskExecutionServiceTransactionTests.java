@@ -185,6 +185,11 @@ public class DefaultTaskExecutionServiceTransactionTests {
 			throw new UnsupportedOperationException();
 		}
 
+		@Override
+		public String getLog(String taskDeploymentId) {
+			return null;
+		}
+
 		public String getResult() {
 			return result;
 		}

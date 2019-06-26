@@ -163,6 +163,13 @@ public class TaskExecutionController {
 		return this.taskExecutionService.executeTask(taskName, propertiesToUse, argumentsToUse);
 	}
 
+	@RequestMapping(value = "/logs", method = RequestMethod.GET, params = "name")
+	@ResponseStatus(HttpStatus.OK)
+	public String getLog(@RequestParam(required = false, defaultValue = "default") String platformName,
+			@RequestParam("name") String taskName) {
+		return this.taskExecutionService.getLog(platformName, taskName);
+	}
+
 	/**
 	 * View the details of a single task execution, specified by id.
 	 *

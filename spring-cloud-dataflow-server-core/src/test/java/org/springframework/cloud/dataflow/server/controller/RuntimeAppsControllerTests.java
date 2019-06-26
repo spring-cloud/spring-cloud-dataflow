@@ -31,10 +31,12 @@ import org.springframework.cloud.dataflow.core.StreamDefinition;
 import org.springframework.cloud.dataflow.registry.repository.AppRegistrationRepository;
 import org.springframework.cloud.dataflow.server.configuration.TestDependencies;
 import org.springframework.cloud.dataflow.server.repository.StreamDefinitionRepository;
+import org.springframework.cloud.dataflow.server.stream.SkipperStreamDeployer;
 import org.springframework.cloud.deployer.spi.app.AppStatus;
 import org.springframework.cloud.deployer.spi.app.DeploymentState;
 import org.springframework.cloud.skipper.client.SkipperClient;
 import org.springframework.cloud.skipper.domain.Info;
+import org.springframework.cloud.skipper.domain.Release;
 import org.springframework.cloud.skipper.domain.Status;
 import org.springframework.cloud.skipper.domain.StatusCode;
 import org.springframework.http.MediaType;
@@ -48,6 +50,7 @@ import org.springframework.web.context.WebApplicationContext;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.Matchers.hasSize;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
@@ -77,6 +80,9 @@ public class RuntimeAppsControllerTests {
 
 	@Autowired
 	private SkipperClient skipperClient;
+
+	@Autowired
+	private SkipperStreamDeployer skipperStreamDeployer;
 
 	@Before
 	public void setupMocks() {
@@ -246,5 +252,19 @@ public class RuntimeAppsControllerTests {
 				.andExpect(status().isOk())
 
 				.andExpect(jsonPath("$.content.*", hasSize(0)));
+	}
+
+	@Test
+	public void testGetLogs() throws Exception {
+		when(this.skipperClient.getLog("ticktock4")).thenReturn(mock(Release.class));
+		mockMvc.perform(
+				get("/runtime/apps/logs/ticktock4").accept(MediaType.APPLICATION_JSON))
+				.andDo(print())
+				.andExpect(status().isOk());
+		when(this.skipperClient.getLog("ticktock4", "myapp")).thenReturn(mock(Release.class));
+		mockMvc.perform(
+				get("/runtime/apps/logs/ticktock4/myapp").accept(MediaType.APPLICATION_JSON))
+				.andDo(print())
+				.andExpect(status().isOk());
 	}
 }

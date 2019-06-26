@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 the original author or authors.
+ * Copyright 2017-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -81,4 +81,21 @@ public interface StreamDeployer {
 	 * @return stream deployment information
 	 */
 	StreamDeployment getStreamInfo(String streamName);
+
+	/**
+	 * Returns the logs of all the applications of the stream identified by the stream name.
+	 *
+	 * @param streamName the stream name
+	 * @return the logs content
+	 */
+	String getLog(String streamName);
+
+	/**
+	 * Returns the logs of a specific application in the stream identified by the stream name.
+	 *
+	 * @param streamName the stream name
+	 * @param appName specific application name inside the stream
+	 * @return the logs content
+	 */
+	String getLog(String streamName, String appName);
 }

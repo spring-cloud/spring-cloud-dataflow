@@ -488,6 +488,16 @@ public class SkipperStreamDeployer implements StreamDeployer {
 		return skipperStatus(streamName);
 	}
 
+	@Override
+	public String getLog(String streamName) {
+		return this.skipperClient.getLog(streamName).getLogs();
+	}
+
+	@Override
+	public String getLog(String streamName, String appName) {
+		return this.skipperClient.getLog(streamName, appName).getLogs();
+	}
+
 	private List<AppStatus> getStreamsStatuses(List<String> streamNames) {
 		try {
 			return this.forkJoinPool.submit(() -> streamNames.stream().parallel()

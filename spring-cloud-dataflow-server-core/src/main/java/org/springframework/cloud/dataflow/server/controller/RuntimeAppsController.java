@@ -90,6 +90,16 @@ public class RuntimeAppsController {
 		return statusAssembler.toResource(status);
 	}
 
+	@RequestMapping("/logs/{streamName}")
+	public String getLog(@PathVariable String streamName) {
+		return this.streamDeployer.getLog(streamName);
+	}
+
+	@RequestMapping("/logs/{streamName}/{appName}")
+	public String getLog(@PathVariable String streamName, @PathVariable String appName) {
+		return this.streamDeployer.getLog(streamName, appName);
+	}
+
 	private static class Assembler extends ResourceAssemblerSupport<AppStatus, AppStatusResource> {
 
 		public Assembler() {
