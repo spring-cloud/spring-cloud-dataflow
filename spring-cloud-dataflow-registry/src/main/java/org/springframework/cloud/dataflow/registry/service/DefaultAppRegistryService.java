@@ -16,14 +16,15 @@
 
 package org.springframework.cloud.dataflow.registry.service;
 
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.net.URI;
-import java.net.URISyntaxException;
-import java.util.AbstractMap;
+import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Properties;
-import java.util.function.Function;
+import java.util.function.BiFunction;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -288,76 +289,12 @@ public class DefaultAppRegistryService implements AppRegistryService {
 		return this.getResourceVersion(this.appResourceCommon.getResource(uriString));
 	}
 
-	private String getVersionOrBroken(String uri) {
-		try {
-			return this.getResourceVersion(uri);
-		}
-		catch (IllegalStateException ise) {
-			logger.warn("", ise);
-			return "broken";
-		}
-	}
-
 	protected Properties loadProperties(Resource resource) {
 		try {
 			return PropertiesLoaderUtils.loadProperties(resource);
 		}
 		catch (IOException e) {
 			throw new RuntimeException("Error reading from " + resource.getDescription(), e);
-		}
-	}
-
-	@Override
-	public List<AppRegistration> importAll(boolean overwrite, Resource... resources) {
-		return Stream.of(resources)
-				.map(this::loadProperties)
-				.flatMap(prop -> prop.entrySet().stream()
-						.map(toStringAndUriFunc)
-						.flatMap(kv -> toValidAppRegistration(kv, metadataUriFromProperties(kv.getKey(), prop)))
-						.filter(a -> isOverwrite(a, overwrite))
-						.map(ar -> save(ar)))
-				.collect(Collectors.toList());
-	}
-
-	/**
-	 * Builds a {@link Stream} from key/value mapping.
-	 * @return
-	 * <ul>
-	 * <li>valid AppRegistration as single element Stream</li>
-	 * <li>silently ignores well malformed metadata entries (0 element Stream) or</li>
-	 * <li>fails otherwise.</li>
-	 * </ul>
-	 *
-	 * @param kv key/value representing app key (key) and app URI (value)
-	 * @param metadataURI metadataUri computed from a given app key
-	 */
-	protected Stream<AppRegistration> toValidAppRegistration(Map.Entry<String, URI> kv, URI metadataURI) {
-		String key = kv.getKey();
-		String[] tokens = key.split("\\.");
-		if (tokens.length == 2) {
-			String name = tokens[1];
-			ApplicationType type = ApplicationType.valueOf(tokens[0]);
-			URI appURI = warnOnMalformedURI(key, kv.getValue());
-
-			String version = getVersionOrBroken(appURI.toString());
-
-			return Stream.of(new AppRegistration(name, type, version, appURI, metadataURI));
-		}
-		else {
-			Assert.isTrue(tokens.length == 3 && METADATA_KEY_SUFFIX.equals(tokens[2]),
-					"Invalid format for app key '" + key + "'in file. Must be <type>.<name> or <type>.<name>"
-							+ ".metadata");
-			return Stream.empty();
-		}
-	}
-
-	protected URI metadataUriFromProperties(String key, Properties properties) {
-		String metadataValue = properties.getProperty(key + "." + METADATA_KEY_SUFFIX);
-		try {
-			return metadataValue != null ? warnOnMalformedURI(key, new URI(metadataValue)) : null;
-		}
-		catch (URISyntaxException e) {
-			throw new IllegalArgumentException(e);
 		}
 	}
 
@@ -376,12 +313,97 @@ public class DefaultAppRegistryService implements AppRegistryService {
 		return uri;
 	}
 
-	protected static final Function<Map.Entry<Object, Object>, AbstractMap.SimpleImmutableEntry<String, URI>> toStringAndUriFunc = kv -> {
+	@Override
+	public List<AppRegistration> importAll(boolean overwrite, Resource... resources) {
+		return Stream.of(resources)
+			// parallel takes effect if multiple resources
+			.parallel()
+			// take lines
+			.flatMap(this::resourceAsLines)
+			// take valid splitted lines
+			.flatMap(this::splitValidLines)
+			// reduce to AppRegistration map key'd by <type><name><version>
+			.reduce(new HashMap<String, AppRegistration>(), reduceToAppRegistrations(), (left, right) -> {
+				// combiner is used if multiple resources caused parallel stream,
+				// then just let last processed resource to override.
+				left.putAll(right);
+				return left;
+			})
+			// don't care about keys anymore
+			.values()
+			// back to stream
+			.stream()
+			// drop registration if it doesn't have main uri as user only had metadata
+			.filter(ar -> ar.getUri() != null)
+			// filter by overriding, save to repo and collect updated registrations
+			.filter(ar -> isOverwrite(ar, overwrite))
+			.map(ar -> save(ar))
+			.collect(Collectors.toList());
+	}
+
+	private BiFunction<HashMap<String, AppRegistration>,
+			? super String[],
+			HashMap<String, AppRegistration>> reduceToAppRegistrations() {
+		return (map, lineSplit) -> {
+			String[] typeName = lineSplit[0].split("\\.");
+			if (typeName.length < 2 || typeName.length > 3) {
+				throw new IllegalArgumentException("Invalid format for app key '" + lineSplit[0]
+						+ "'in file. Must be <type>.<name> or <type>.<name>.metadata");
+			}
+			String type = typeName[0].trim();
+			String name = typeName[1].trim();
+			String version = getResourceVersion(lineSplit[1]);
+			// This is now versioned key
+			String key = type + name + version;
+			AppRegistration ar = map.getOrDefault(key, new AppRegistration());
+			ar.setName(name);
+			ar.setType(ApplicationType.valueOf(type));
+			ar.setVersion(version);
+			if (typeName.length == 2) {
+				// normal app uri
+				try {
+					ar.setUri(new URI(lineSplit[1]));
+					warnOnMalformedURI(lineSplit[0], ar.getUri());
+				} catch (Exception e) {
+					throw new IllegalArgumentException(e);
+				}
+			}
+			else if (typeName.length == 3) {
+				// metadata app uri
+				try {
+					ar.setMetadataUri(new URI(lineSplit[1]));
+					warnOnMalformedURI(lineSplit[0], ar.getMetadataUri());
+				} catch (Exception e) {
+					throw new IllegalArgumentException(e);
+				}
+			}
+			map.put(key, ar);
+			return map;
+		};
+	}
+
+	private Stream<String> resourceAsLines(Resource resource) {
 		try {
-			return new AbstractMap.SimpleImmutableEntry<>((String) kv.getKey(), new URI((String) kv.getValue()));
+			BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(resource.getInputStream()));
+			return bufferedReader.lines();
+		} catch (Exception e) {
+			throw new RuntimeException("Error reading from " + resource.getDescription(), e);
 		}
-		catch (URISyntaxException e) {
-			throw new IllegalArgumentException(e);
-		}
-	};
+	}
+
+	private Stream<String[]> splitValidLines(String line) {
+		// split to key/value, filter out non valid lines and trim key and value.
+		return Stream.of(line)
+			.filter(skipCommentLines())
+			.map(l -> l.split("="))
+			.filter(split -> split.length == 2)
+			.map(split -> new String[] { split[0].trim(), split[1].trim() });
+	}
+
+	private Predicate<String> skipCommentLines() {
+		// skipping obvious lines which we don't even try to parse
+		return line -> line != null &&
+			StringUtils.hasText(line) &&
+			(!line.startsWith("#") || !line.startsWith("/"));
+	}
 }

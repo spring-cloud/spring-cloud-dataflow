@@ -53,6 +53,8 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 
+import static org.hamcrest.Matchers.contains;
+import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertEquals;
@@ -176,32 +178,8 @@ public class AuditRecordControllerTests {
 				.andExpect(status().isOk())
 				.andExpect(jsonPath("$.content.*", hasSize(9)))
 
-				.andExpect(jsonPath("$.content[0].auditRecordId", is(4)))
-				.andExpect(jsonPath("$.content[0].correlationId", is("filter")))
-
-				.andExpect(jsonPath("$.content[1].auditRecordId", is(6)))
-				.andExpect(jsonPath("$.content[1].correlationId", is("log")))
-
-				.andExpect(jsonPath("$.content[2].auditRecordId", is(9)))
-				.andExpect(jsonPath("$.content[2].correlationId", is("myStream")))
-
-				.andExpect(jsonPath("$.content[3].auditRecordId", is(12)))
-				.andExpect(jsonPath("$.content[3].correlationId", is("myStream")))
-
-				.andExpect(jsonPath("$.content[4].auditRecordId", is(13)))
-				.andExpect(jsonPath("$.content[4].correlationId", is("myStream")))
-
-				.andExpect(jsonPath("$.content[5].auditRecordId", is(10)))
-				.andExpect(jsonPath("$.content[5].correlationId", is("myStream1")))
-
-				.andExpect(jsonPath("$.content[6].auditRecordId", is(11)))
-				.andExpect(jsonPath("$.content[6].correlationId", is("myStream2")))
-
-				.andExpect(jsonPath("$.content[7].auditRecordId", is(2)))
-				.andExpect(jsonPath("$.content[7].correlationId", is("time")))
-
-				.andExpect(jsonPath("$.content[8].auditRecordId", is(8)))
-				.andExpect(jsonPath("$.content[8].correlationId", is("timestamp")));
+				.andExpect(jsonPath("$.content[*].correlationId", contains("filter", "log", "myStream",
+						"myStream", "myStream", "myStream1", "myStream2", "time", "timestamp")));
 	}
 
 	@Test
@@ -214,33 +192,8 @@ public class AuditRecordControllerTests {
 				.andExpect(status().isOk())
 				.andExpect(jsonPath("$.content.*", hasSize(9)))
 
-				.andExpect(jsonPath("$.content[0].auditRecordId", is(8)))
-				.andExpect(jsonPath("$.content[0].correlationId", is("timestamp")))
-
-				.andExpect(jsonPath("$.content[1].auditRecordId", is(2)))
-				.andExpect(jsonPath("$.content[1].correlationId", is("time")))
-
-				.andExpect(jsonPath("$.content[2].auditRecordId", is(11)))
-				.andExpect(jsonPath("$.content[2].correlationId", is("myStream2")))
-
-				.andExpect(jsonPath("$.content[3].auditRecordId", is(10)))
-				.andExpect(jsonPath("$.content[3].correlationId", is("myStream1")))
-
-				.andExpect(jsonPath("$.content[4].auditRecordId", is(13)))
-				.andExpect(jsonPath("$.content[4].correlationId", is("myStream")))
-
-				.andExpect(jsonPath("$.content[5].auditRecordId", is(12)))
-				.andExpect(jsonPath("$.content[5].correlationId", is("myStream")))
-
-				.andExpect(jsonPath("$.content[6].auditRecordId", is(9)))
-				.andExpect(jsonPath("$.content[6].correlationId", is("myStream")))
-
-				.andExpect(jsonPath("$.content[7].auditRecordId", is(6)))
-				.andExpect(jsonPath("$.content[7].correlationId", is("log")))
-
-				.andExpect(jsonPath("$.content[8].auditRecordId", is(4)))
-				.andExpect(jsonPath("$.content[8].correlationId", is("filter")));
-
+				.andExpect(jsonPath("$.content[*].correlationId", containsInAnyOrder("timestamp", "time", "filter",
+						"myStream2", "myStream1", "myStream", "myStream", "myStream", "log")));
 	}
 
 	@Test
@@ -368,17 +321,8 @@ public class AuditRecordControllerTests {
 				.andExpect(status().isOk())
 				.andExpect(jsonPath("$.content.*", hasSize(4)))
 
-				.andExpect(jsonPath("$.content[0].auditRecordId", is(2)))
-				.andExpect(jsonPath("$.content[0].correlationId", is("time")))
-
-				.andExpect(jsonPath("$.content[1].auditRecordId", is(4)))
-				.andExpect(jsonPath("$.content[1].correlationId", is("filter")))
-
-				.andExpect(jsonPath("$.content[2].auditRecordId", is(6)))
-				.andExpect(jsonPath("$.content[2].correlationId", is("log")))
-
-				.andExpect(jsonPath("$.content[3].auditRecordId", is(8)))
-				.andExpect(jsonPath("$.content[3].correlationId", is("timestamp")));
+				.andExpect(jsonPath("$.content[*].correlationId",
+						containsInAnyOrder("filter", "log", "time", "timestamp")));
 	}
 
 	@Test

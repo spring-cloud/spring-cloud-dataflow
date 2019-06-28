@@ -16,7 +16,6 @@
 
 package org.springframework.cloud.dataflow.server.controller;
 
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -26,7 +25,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Properties;
 import java.util.concurrent.ForkJoinPool;
 
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -59,7 +57,6 @@ import org.springframework.hateoas.ExposesResourceFor;
 import org.springframework.hateoas.PagedResources;
 import org.springframework.hateoas.mvc.ResourceAssemblerSupport;
 import org.springframework.http.HttpStatus;
-import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -379,17 +376,15 @@ public class AppRegistryController {
 			Pageable pageable,
 			PagedResourcesAssembler<AppRegistration> pagedResourcesAssembler,
 			@RequestParam(value = "uri", required = false) String uri,
-			@RequestParam(value = "apps", required = false) Properties apps,
+			@RequestParam(value = "apps", required = false) String apps,
 			@RequestParam(value = "force", defaultValue = "false") boolean force) throws IOException {
 		List<AppRegistration> registrations = new ArrayList<>();
 
 		if (StringUtils.hasText(uri)) {
 			registrations.addAll(this.appRegistryService.importAll(force, this.resourceLoader.getResource(uri)));
 		}
-		else if (!CollectionUtils.isEmpty(apps)) {
-			ByteArrayOutputStream baos = new ByteArrayOutputStream();
-			apps.store(baos, "");
-			ByteArrayResource bar = new ByteArrayResource(baos.toByteArray(), "Inline properties");
+		else if (!StringUtils.isEmpty(apps)) {
+			ByteArrayResource bar = new ByteArrayResource(apps.getBytes());
 			registrations.addAll(this.appRegistryService.importAll(force, bar));
 		}
 

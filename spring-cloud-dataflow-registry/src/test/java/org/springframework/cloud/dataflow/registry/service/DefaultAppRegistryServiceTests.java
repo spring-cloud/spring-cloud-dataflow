@@ -278,6 +278,206 @@ public class DefaultAppRegistryServiceTests {
 	}
 
 	@Test
+	@SuppressWarnings("unchecked")
+	public void testImportMixedVersions() {
+
+		final boolean overwrite = true;
+
+		when(appRegistrationRepository.findAppRegistrationByNameAndTypeAndVersion(
+				eq("foo"), eq(ApplicationType.source), eq("1.0"))).thenReturn(appRegistration());
+
+		appRegistryService.importAll(!overwrite,
+				new ClassPathResource("AppRegistryTests-importMixedVersions1.properties", getClass()));
+
+		ArgumentCaptor<AppRegistration> appRegistrationCaptor = ArgumentCaptor.forClass(AppRegistration.class);
+		verify(appRegistrationRepository, times(4)).save(appRegistrationCaptor.capture());
+
+		List<AppRegistration> registrations = appRegistrationCaptor.getAllValues();
+
+		assertThat(registrations,
+				containsInAnyOrder(
+						allOf(
+								hasProperty("name", is("time")),
+								hasProperty("uri", is(URI.create("maven://org.springframework.cloud.stream.app:time-source-rabbit:2.0.1.RELEASE"))),
+								hasProperty("metadataUri", is(URI.create("maven://org.springframework.cloud.stream.app:time-source-rabbit:jar:metadata:2.0.1.RELEASE"))),
+								hasProperty("type", is(ApplicationType.source))),
+						allOf(
+								hasProperty("name", is("time")),
+								hasProperty("uri", is(URI.create("maven://org.springframework.cloud.stream.app:time-source-rabbit:2.0.0.RELEASE"))),
+								hasProperty("metadataUri", is(URI.create("maven://org.springframework.cloud.stream.app:time-source-rabbit:jar:metadata:2.0.0.RELEASE"))),
+								hasProperty("type", is(ApplicationType.source))),
+						allOf(
+								hasProperty("name", is("log")),
+								hasProperty("uri", is(URI.create("maven://org.springframework.cloud.stream.app:log-sink-rabbit:2.0.2.RELEASE"))),
+								hasProperty("metadataUri", is(URI.create("maven://org.springframework.cloud.stream.app:log-sink-rabbit:jar:metadata:2.0.2.RELEASE"))),
+								hasProperty("type", is(ApplicationType.sink))),
+						allOf(
+								hasProperty("name", is("log")),
+								hasProperty("uri", is(URI.create("maven://org.springframework.cloud.stream.app:log-sink-rabbit:2.0.1.RELEASE"))),
+								hasProperty("metadataUri", is(URI.create("maven://org.springframework.cloud.stream.app:log-sink-rabbit:jar:metadata:2.0.1.RELEASE"))),
+								hasProperty("type", is(ApplicationType.sink)))));
+	}
+
+	@Test
+	@SuppressWarnings("unchecked")
+	public void testImportMixedVersionsMultiFile() {
+
+		final boolean overwrite = true;
+
+		when(appRegistrationRepository.findAppRegistrationByNameAndTypeAndVersion(
+				eq("foo"), eq(ApplicationType.source), eq("1.0"))).thenReturn(appRegistration());
+
+		appRegistryService.importAll(!overwrite,
+				new ClassPathResource("AppRegistryTests-importMixedVersions2.properties", getClass()),
+				new ClassPathResource("AppRegistryTests-importMixedVersions3.properties", getClass()));
+
+		ArgumentCaptor<AppRegistration> appRegistrationCaptor = ArgumentCaptor.forClass(AppRegistration.class);
+		verify(appRegistrationRepository, times(4)).save(appRegistrationCaptor.capture());
+
+		List<AppRegistration> registrations = appRegistrationCaptor.getAllValues();
+
+		assertThat(registrations,
+				containsInAnyOrder(
+						allOf(
+								hasProperty("name", is("time")),
+								hasProperty("uri", is(URI.create("maven://org.springframework.cloud.stream.app:time-source-rabbit:2.0.1.RELEASE"))),
+								hasProperty("metadataUri", is(URI.create("maven://org.springframework.cloud.stream.app:time-source-rabbit:jar:metadata:2.0.1.RELEASE"))),
+								hasProperty("type", is(ApplicationType.source))),
+						allOf(
+								hasProperty("name", is("time")),
+								hasProperty("uri", is(URI.create("maven://org.springframework.cloud.stream.app:time-source-rabbit:2.0.0.RELEASE"))),
+								hasProperty("metadataUri", is(URI.create("maven://org.springframework.cloud.stream.app:time-source-rabbit:jar:metadata:2.0.0.RELEASE"))),
+								hasProperty("type", is(ApplicationType.source))),
+						allOf(
+								hasProperty("name", is("log")),
+								hasProperty("uri", is(URI.create("maven://org.springframework.cloud.stream.app:log-sink-rabbit:2.0.2.RELEASE"))),
+								hasProperty("metadataUri", is(URI.create("maven://org.springframework.cloud.stream.app:log-sink-rabbit:jar:metadata:2.0.2.RELEASE"))),
+								hasProperty("type", is(ApplicationType.sink))),
+						allOf(
+								hasProperty("name", is("log")),
+								hasProperty("uri", is(URI.create("maven://org.springframework.cloud.stream.app:log-sink-rabbit:2.0.1.RELEASE"))),
+								hasProperty("metadataUri", is(URI.create("maven://org.springframework.cloud.stream.app:log-sink-rabbit:jar:metadata:2.0.1.RELEASE"))),
+								hasProperty("type", is(ApplicationType.sink)))));
+	}
+
+	@Test
+	@SuppressWarnings("unchecked")
+	public void testImportMixedVersionsWithSpaceAndComments() {
+
+		final boolean overwrite = true;
+
+		when(appRegistrationRepository.findAppRegistrationByNameAndTypeAndVersion(
+				eq("foo"), eq(ApplicationType.source), eq("1.0"))).thenReturn(appRegistration());
+
+		appRegistryService.importAll(!overwrite,
+				new ClassPathResource("AppRegistryTests-importMixedVersions4.properties", getClass()));
+
+		ArgumentCaptor<AppRegistration> appRegistrationCaptor = ArgumentCaptor.forClass(AppRegistration.class);
+		verify(appRegistrationRepository, times(4)).save(appRegistrationCaptor.capture());
+
+		List<AppRegistration> registrations = appRegistrationCaptor.getAllValues();
+
+		assertThat(registrations,
+				containsInAnyOrder(
+						allOf(
+								hasProperty("name", is("time")),
+								hasProperty("uri", is(URI.create("maven://org.springframework.cloud.stream.app:time-source-rabbit:2.0.1.RELEASE"))),
+								hasProperty("metadataUri", is(URI.create("maven://org.springframework.cloud.stream.app:time-source-rabbit:jar:metadata:2.0.1.RELEASE"))),
+								hasProperty("type", is(ApplicationType.source))),
+						allOf(
+								hasProperty("name", is("time")),
+								hasProperty("uri", is(URI.create("maven://org.springframework.cloud.stream.app:time-source-rabbit:2.0.0.RELEASE"))),
+								hasProperty("metadataUri", is(URI.create("maven://org.springframework.cloud.stream.app:time-source-rabbit:jar:metadata:2.0.0.RELEASE"))),
+								hasProperty("type", is(ApplicationType.source))),
+						allOf(
+								hasProperty("name", is("log")),
+								hasProperty("uri", is(URI.create("maven://org.springframework.cloud.stream.app:log-sink-rabbit:2.0.2.RELEASE"))),
+								hasProperty("metadataUri", is(URI.create("maven://org.springframework.cloud.stream.app:log-sink-rabbit:jar:metadata:2.0.2.RELEASE"))),
+								hasProperty("type", is(ApplicationType.sink))),
+						allOf(
+								hasProperty("name", is("log")),
+								hasProperty("uri", is(URI.create("maven://org.springframework.cloud.stream.app:log-sink-rabbit:2.0.1.RELEASE"))),
+								hasProperty("metadataUri", is(URI.create("maven://org.springframework.cloud.stream.app:log-sink-rabbit:jar:metadata:2.0.1.RELEASE"))),
+								hasProperty("type", is(ApplicationType.sink)))));
+	}
+
+	@Test
+	@SuppressWarnings("unchecked")
+	public void testImportMixedVersionsWithMixedOrder() {
+
+		final boolean overwrite = true;
+
+		when(appRegistrationRepository.findAppRegistrationByNameAndTypeAndVersion(
+				eq("foo"), eq(ApplicationType.source), eq("1.0"))).thenReturn(appRegistration());
+
+		appRegistryService.importAll(!overwrite,
+				new ClassPathResource("AppRegistryTests-importMixedVersions5.properties", getClass()));
+
+		ArgumentCaptor<AppRegistration> appRegistrationCaptor = ArgumentCaptor.forClass(AppRegistration.class);
+		verify(appRegistrationRepository, times(4)).save(appRegistrationCaptor.capture());
+
+		List<AppRegistration> registrations = appRegistrationCaptor.getAllValues();
+
+		assertThat(registrations,
+				containsInAnyOrder(
+						allOf(
+								hasProperty("name", is("time")),
+								hasProperty("uri", is(URI.create("maven://org.springframework.cloud.stream.app:time-source-rabbit:2.0.1.RELEASE"))),
+								hasProperty("metadataUri", is(URI.create("maven://org.springframework.cloud.stream.app:time-source-rabbit:jar:metadata:2.0.1.RELEASE"))),
+								hasProperty("type", is(ApplicationType.source))),
+						allOf(
+								hasProperty("name", is("time")),
+								hasProperty("uri", is(URI.create("maven://org.springframework.cloud.stream.app:time-source-rabbit:2.0.0.RELEASE"))),
+								hasProperty("metadataUri", is(URI.create("maven://org.springframework.cloud.stream.app:time-source-rabbit:jar:metadata:2.0.0.RELEASE"))),
+								hasProperty("type", is(ApplicationType.source))),
+						allOf(
+								hasProperty("name", is("log")),
+								hasProperty("uri", is(URI.create("maven://org.springframework.cloud.stream.app:log-sink-rabbit:2.0.2.RELEASE"))),
+								hasProperty("metadataUri", is(URI.create("maven://org.springframework.cloud.stream.app:log-sink-rabbit:jar:metadata:2.0.2.RELEASE"))),
+								hasProperty("type", is(ApplicationType.sink))),
+						allOf(
+								hasProperty("name", is("log")),
+								hasProperty("uri", is(URI.create("maven://org.springframework.cloud.stream.app:log-sink-rabbit:2.0.1.RELEASE"))),
+								hasProperty("metadataUri", is(URI.create("maven://org.springframework.cloud.stream.app:log-sink-rabbit:jar:metadata:2.0.1.RELEASE"))),
+								hasProperty("type", is(ApplicationType.sink)))));
+	}
+
+	@Test
+	@SuppressWarnings("unchecked")
+	public void testImportMixedVersionsWithMissingAndOnlyMetadata() {
+
+		final boolean overwrite = true;
+
+		when(appRegistrationRepository.findAppRegistrationByNameAndTypeAndVersion(
+				eq("foo"), eq(ApplicationType.source), eq("1.0"))).thenReturn(appRegistration());
+
+		appRegistryService.importAll(!overwrite,
+				new ClassPathResource("AppRegistryTests-importMixedVersions6.properties", getClass()));
+
+		ArgumentCaptor<AppRegistration> appRegistrationCaptor = ArgumentCaptor.forClass(AppRegistration.class);
+		verify(appRegistrationRepository, times(3)).save(appRegistrationCaptor.capture());
+
+		List<AppRegistration> registrations = appRegistrationCaptor.getAllValues();
+
+		assertThat(registrations,
+				containsInAnyOrder(
+						allOf(
+								hasProperty("name", is("time")),
+								hasProperty("uri", is(URI.create("maven://org.springframework.cloud.stream.app:time-source-rabbit:2.0.1.RELEASE"))),
+								hasProperty("metadataUri", is(URI.create("maven://org.springframework.cloud.stream.app:time-source-rabbit:jar:metadata:2.0.1.RELEASE"))),
+								hasProperty("type", is(ApplicationType.source))),
+						allOf(
+								hasProperty("name", is("time")),
+								hasProperty("uri", is(URI.create("maven://org.springframework.cloud.stream.app:time-source-rabbit:2.0.0.RELEASE"))),
+								hasProperty("metadataUri", nullValue()),
+								hasProperty("type", is(ApplicationType.source))),
+						allOf(
+								hasProperty("name", is("log")),
+								hasProperty("uri", is(URI.create("maven://org.springframework.cloud.stream.app:log-sink-rabbit:2.0.2.RELEASE"))),
+								hasProperty("metadataUri", is(URI.create("maven://org.springframework.cloud.stream.app:log-sink-rabbit:jar:metadata:2.0.2.RELEASE"))),
+								hasProperty("type", is(ApplicationType.sink)))));
+	}
+	@Test
 	public void testDelete() throws URISyntaxException {
 		AppRegistration fooSource = appRegistration("foo", ApplicationType.source, true);
 		appRegistryService.delete(fooSource.getName(), fooSource.getType(), fooSource.getVersion());
