@@ -151,8 +151,10 @@ public class DefaultTaskExecutionService implements TaskExecutionService {
 		this.dataflowTaskExecutionDao = dataflowTaskExecutionDao;
 	}
 
+
+
 	@Override
-	public long executeTask(String taskName, Map<String, String> taskDeploymentProperties, List<String> commandLineArgs) {
+	public long executeTask(String taskName, Map<String, String> taskDeploymentProperties, List<String> commandLineArgs, String userComposedTaskRunnerName) {
 
 		String platformName = taskDeploymentProperties.get(TASK_PLATFORM_NAME);
 		if (!StringUtils.hasText(platformName)) {
@@ -178,7 +180,8 @@ public class DefaultTaskExecutionService implements TaskExecutionService {
 			}
 		}
 		TaskExecutionInformation taskExecutionInformation = taskExecutionInfoService
-				.findTaskExecutionInformation(taskName, taskDeploymentProperties);
+				.findTaskExecutionInformation(taskName, taskDeploymentProperties, userComposedTaskRunnerName);
+
 		TaskExecution taskExecution = taskExecutionRepositoryService.createTaskExecution(taskName);
 
 		AppDeploymentRequest request = this.taskAppDeploymentRequestCreator.
@@ -204,6 +207,11 @@ public class DefaultTaskExecutionService implements TaskExecutionService {
 						request.getCommandlineArguments()));
 
 		return taskExecution.getExecutionId();
+	}
+
+	@Override
+	public long executeTask(String taskName, Map<String, String> taskDeploymentProperties, List<String> commandLineArgs) {
+		return executeTask(taskName, taskDeploymentProperties, commandLineArgs, null);
 	}
 
 	@Override

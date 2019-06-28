@@ -53,8 +53,13 @@ public class TaskServiceUtilsTests {
 	public void testCreateComposedTaskDefinition() {
 		TaskConfigurationProperties props = new TaskConfigurationProperties();
 		props.setComposedTaskRunnerName("FOO");
-		TaskServiceUtils.createComposedTaskDefinition(BASE_GRAPH, props);
 		assertThat(TaskServiceUtils.createComposedTaskDefinition(BASE_GRAPH, props)).isEqualTo("FOO --graph=\"AAA && BBB\"");
+	}
+
+	@Test
+	public void testCreateComposedTaskDefinitionWithUserCTRName() {
+		TaskConfigurationProperties props = new TaskConfigurationProperties();
+		assertThat(TaskServiceUtils.createComposedTaskDefinition("FOO", BASE_GRAPH, props)).isEqualTo("FOO --graph=\"AAA && BBB\"");
 	}
 
 	@Test
