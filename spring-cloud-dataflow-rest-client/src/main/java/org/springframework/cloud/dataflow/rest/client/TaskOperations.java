@@ -65,9 +65,10 @@ public interface TaskOperations {
 	 * @param name the name of the task
 	 * @param properties the deployment properties
 	 * @param arguments the command line arguments
+	 * @param alternateComposedTaskRunnerApp  app to use when running composed tasks instead of default
 	 * @return long containing the TaskExecutionId
 	 */
-	long launch(String name, Map<String, String> properties, List<String> arguments);
+	long launch(String name, Map<String, String> properties, List<String> arguments, String alternateComposedTaskRunnerApp);
 
 	/**
 	 * Request the stop of a group {@link org.springframework.cloud.task.repository.TaskExecution}s.

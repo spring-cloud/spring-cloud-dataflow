@@ -120,6 +120,41 @@ public class TaskCommandTests extends AbstractShellIntegrationTest {
 	}
 
 	@Test
+	public void testTaskLaunchCTRUsingAltCtrName() {
+		logger.info("Launching instance of task");
+		String taskName = generateUniqueStreamOrTaskName();
+		task().create(taskName, "1: timestamp && 2: timestamp");
+		//You can launch with an task, doesn't have to be a CTR.
+		task().launchWithAlternateCTR(taskName, "timestamp");
+	}
+
+	@Test
+	public void testTaskLaunchCTRUsingInvalidAltCtrAppName() {
+		testInvalidCTRLaunch("1: timestamp && 2: timestamp", "timesdaftamp",
+				"The 'timesdaftamp' application could not be found.");
+	}
+
+	@Test
+	public void testTaskLaunchAltNameAgainstaNonCTRTaskDefinition() {
+		testInvalidCTRLaunch("timestamp", "composed-task-runner",
+				"Can not specify a Composed Task Runner Name when launching a non composed task definition");
+	}
+
+	private void testInvalidCTRLaunch(String taskDefinition, String ctrAppName, String expectedExceptionMessage) {
+		logger.info("Launching instance of task");
+		String taskName = generateUniqueStreamOrTaskName();
+		task().create(taskName, taskDefinition);
+		boolean isExceptionThrown = false;
+		try {
+			task().launchWithAlternateCTR(taskName, ctrAppName);
+		} catch (IllegalArgumentException e) {
+			assertTrue(e.getMessage().contains(expectedExceptionMessage));
+			isExceptionThrown =  true;
+		}
+		assertTrue("Expected IllegalArgumentException to have been thrown", isExceptionThrown);
+	}
+
+	@Test
 	public void testExecutionStop() {
 		logger.info("Launching instance of task");
 		String taskName = generateUniqueStreamOrTaskName();

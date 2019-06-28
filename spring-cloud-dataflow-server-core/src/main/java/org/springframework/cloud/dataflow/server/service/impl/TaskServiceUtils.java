@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 the original author or authors.
+ * Copyright 2018-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -50,6 +50,7 @@ public class TaskServiceUtils {
 		TaskParser taskParser = new TaskParser("__dummy", dsl, true, true);
 		return taskParser.parse().isComposed();
 	}
+
 	/**
 	 * Creates a properly formatted CTR definition based on the graph provided.
 	 * @param graph the graph for the CTR to execute.
@@ -59,12 +60,29 @@ public class TaskServiceUtils {
 	 */
 	public static String createComposedTaskDefinition(String graph,
 			TaskConfigurationProperties taskConfigurationProperties) {
+			return createComposedTaskDefinition(null, graph, taskConfigurationProperties);
+	}
+
+	/**
+	 * Creates a properly formatted CTR definition based on the graph provided.
+	 * @param alternateComposedTaskRunnerName a ctr name to be used instead of the default.
+	 * @param graph the graph for the CTR to execute.
+	 * @param taskConfigurationProperties the properties that contain the name
+	 * of the CTR app to be launched.
+	 * @return String containing the CTR task definition.
+	 */
+	public static String createComposedTaskDefinition(String alternateComposedTaskRunnerName, String graph,
+			TaskConfigurationProperties taskConfigurationProperties) {
 		Assert.hasText(graph, "graph must not be empty or null");
 		Assert.notNull(taskConfigurationProperties,
 				"taskConfigurationProperties must not be null");
 		Assert.hasText(taskConfigurationProperties.getComposedTaskRunnerName(),
 				"taskConfigurationProperties.composedTaskRunnerName must not be null");
-		return String.format("%s --graph=\"%s\"", taskConfigurationProperties.getComposedTaskRunnerName(), graph);
+		String composedTaskRunnerName = taskConfigurationProperties.getComposedTaskRunnerName();
+		if(StringUtils.hasText(alternateComposedTaskRunnerName)) {
+			composedTaskRunnerName = alternateComposedTaskRunnerName;
+		}
+		return String.format("%s --graph=\"%s\"", composedTaskRunnerName, graph);
 	}
 
 	/**

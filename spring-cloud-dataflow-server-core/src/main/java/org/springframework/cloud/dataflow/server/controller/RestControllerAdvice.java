@@ -97,7 +97,7 @@ public class RestControllerAdvice {
 	 */
 	@ExceptionHandler({ AppAlreadyRegisteredException.class, DuplicateStreamDefinitionException.class,
 			DuplicateTaskException.class, StreamAlreadyDeployedException.class, StreamAlreadyDeployingException.class,
-			UnregisterAppException.class})
+			UnregisterAppException.class, InvalidCTRLaunchRequestException.class})
 	@ResponseStatus(HttpStatus.CONFLICT)
 	@ResponseBody
 	public VndErrors onConflictException(Exception e) {

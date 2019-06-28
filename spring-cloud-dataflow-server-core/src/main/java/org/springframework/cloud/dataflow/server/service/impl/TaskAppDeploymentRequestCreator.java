@@ -50,6 +50,8 @@ public class TaskAppDeploymentRequestCreator {
 
 	private static final String PLATFORM_NAME_KEY = "--spring.cloud.data.flow.platformname=";
 
+	private static final String TASK_EXECUTION_APP_NAME = "--spring.cloud.data.flow.taskappname=";
+
 	private final CommonApplicationProperties commonApplicationProperties;
 
 	private final WhitelistProperties whitelistProperties;
@@ -90,12 +92,13 @@ public class TaskAppDeploymentRequestCreator {
 		String registeredAppName = taskDefinition.getRegisteredAppName();
 		Map<String, String> appDeploymentProperties = new HashMap<>(commonApplicationProperties.getTask());
 		appDeploymentProperties.putAll(
-				TaskServiceUtils.extractAppProperties(registeredAppName,
+				TaskServiceUtils.extractAppProperties(
+						taskExecutionInformation.isComposed()? "composed-task-runner" : registeredAppName,
 						taskExecutionInformation.getTaskDeploymentProperties()));
 
 		Map<String, String> deployerDeploymentProperties = DeploymentPropertiesUtils
 				.extractAndQualifyDeployerProperties(taskExecutionInformation.getTaskDeploymentProperties(),
-						registeredAppName);
+						taskExecutionInformation.isComposed()? "composed-task-runner" : registeredAppName);
 		if (StringUtils.hasText(this.dataflowServerUri) && taskExecutionInformation.isComposed()) {
 			TaskServiceUtils.updateDataFlowUriIfNeeded(this.dataflowServerUri, appDeploymentProperties,
 					commandLineArgs);
@@ -104,7 +107,9 @@ public class TaskAppDeploymentRequestCreator {
 				taskExecutionInformation.getMetadataResource(),
 				appDeploymentProperties, this.whitelistProperties);
 
-		List<String> updatedCmdLineArgs = this.updateCommandLineArgs(commandLineArgs, taskExecution, platformName);
+		List<String> updatedCmdLineArgs = (taskExecutionInformation.isComposed())?this.updateCommandLineArgs(commandLineArgs,
+				taskExecution, platformName, taskExecutionInformation.getTaskDefinition().getTaskName()):this.updateCommandLineArgs(commandLineArgs,
+				taskExecution, platformName);
 		AppDeploymentRequest request = new AppDeploymentRequest(revisedDefinition,
 				taskExecutionInformation.getAppResource(),
 				deployerDeploymentProperties, updatedCmdLineArgs);
@@ -113,7 +118,6 @@ public class TaskAppDeploymentRequestCreator {
 				+ request.getDefinition().toString());
 		return request;
 	}
-
 	private List<String> updateCommandLineArgs(List<String> commandLineArgs, TaskExecution taskExecution, String platformName) {
 		List<String> results = new ArrayList();
 		commandLineArgs.stream()
@@ -123,6 +127,19 @@ public class TaskAppDeploymentRequestCreator {
 
 		results.add(PLATFORM_NAME_KEY + platformName);
 		results.add(TASK_EXECUTION_KEY + taskExecution.getExecutionId());
+		return results;
+	}
+	private List<String> updateCommandLineArgs(List<String> commandLineArgs, TaskExecution taskExecution, String platformName, String appName) {
+		List<String> results = new ArrayList();
+		commandLineArgs.stream()
+				.filter(arg -> !arg.startsWith(TASK_EXECUTION_KEY)
+						&& !arg.startsWith(PLATFORM_NAME_KEY)
+						&& !arg.startsWith(TASK_EXECUTION_APP_NAME))
+				.forEach(results::add);
+
+		results.add(PLATFORM_NAME_KEY + platformName);
+		results.add(TASK_EXECUTION_KEY + taskExecution.getExecutionId());
+		results.add(TASK_EXECUTION_APP_NAME + appName);
 		return results;
 	}
 }

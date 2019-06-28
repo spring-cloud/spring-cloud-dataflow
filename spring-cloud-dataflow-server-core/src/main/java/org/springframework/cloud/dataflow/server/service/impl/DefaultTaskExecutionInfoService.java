@@ -28,12 +28,15 @@ import org.springframework.cloud.dataflow.core.TaskPlatform;
 import org.springframework.cloud.dataflow.core.dsl.TaskNode;
 import org.springframework.cloud.dataflow.core.dsl.TaskParser;
 import org.springframework.cloud.dataflow.registry.service.AppRegistryService;
+import org.springframework.cloud.dataflow.server.controller.InvalidCTRLaunchRequestException;
+import org.springframework.cloud.dataflow.server.controller.NoSuchAppException;
 import org.springframework.cloud.dataflow.server.job.LauncherRepository;
 import org.springframework.cloud.dataflow.server.repository.NoSuchTaskDefinitionException;
 import org.springframework.cloud.dataflow.server.repository.TaskDefinitionRepository;
 import org.springframework.cloud.dataflow.server.service.TaskExecutionInfoService;
 import org.springframework.cloud.task.repository.TaskExplorer;
 import org.springframework.util.Assert;
+import org.springframework.util.StringUtils;
 
 /**
  * Default implementation of the {@link DefaultTaskExecutionInfoService} interface.
@@ -110,7 +113,7 @@ public class DefaultTaskExecutionInfoService implements TaskExecutionInfoService
 
 	@Override
 	public TaskExecutionInformation findTaskExecutionInformation(String taskName,
-			Map<String, String> taskDeploymentProperties) {
+			Map<String, String> taskDeploymentProperties, String composedTaskRunnerName) {
 		Assert.hasText(taskName, "The provided taskName must not be null or empty.");
 		Assert.notNull(taskDeploymentProperties, "The provided runtimeProperties must not be null.");
 
@@ -123,9 +126,15 @@ public class DefaultTaskExecutionInfoService implements TaskExecutionInfoService
 		TaskNode taskNode = taskParser.parse();
 		// if composed task definition replace definition with one composed task
 		// runner and executable graph.
+		if(!taskNode.isComposed() && StringUtils.hasText(composedTaskRunnerName)) {
+			throw new InvalidCTRLaunchRequestException(taskName);
+		}
 		if (taskNode.isComposed()) {
+			if(StringUtils.hasText(composedTaskRunnerName) && !this.appRegistryService.appExist(composedTaskRunnerName, ApplicationType.task)) {
+				throw new NoSuchAppException(composedTaskRunnerName);
+			}
 			taskDefinition = new TaskDefinition(taskDefinition.getName(),
-					TaskServiceUtils.createComposedTaskDefinition(
+					TaskServiceUtils.createComposedTaskDefinition(composedTaskRunnerName,
 							taskNode.toExecutableDSL(), taskConfigurationProperties));
 			retData.setTaskDeploymentProperties(
 					TaskServiceUtils.establishComposedTaskProperties(taskDeploymentProperties,
