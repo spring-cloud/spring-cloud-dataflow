@@ -37,7 +37,7 @@ These properties are also used when configuring the <<configuration-kubernetes-t
 |Namespace to use
 |environment variable `KUBERNETES_NAMESPACE`, otherwise `default`
 
-|nodeSelector
+|deployment.nodeSelector
 |The node selectors to apply to the deployment in `key:value` format. Multiple node selectors are comma separated.
 |<none>
 
@@ -197,9 +197,29 @@ These properties are also used when configuring the <<configuration-kubernetes-t
 |The Spring Boot major version to use. Currently only used to configure Spring Boot version specific probe paths automatically. Valid options are `1` or `2`.
 |2
 
-|tolerations
-|Toleration configuration to set on created pod's.
+|tolerations.key
+|The key to use for the toleration.
 |<none>
+
+|tolerations.effect
+|The toleration effect. See https://kubernetes.io/docs/concepts/configuration/taint-and-toleration for valid options.
+|<none>
+
+|tolerations.operator
+|The toleration operator. See https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/ for valid options.
+|<none>
+
+|tolerations.tolerationSeconds
+|The number of seconds defining how long the pod will stay bound to the node after a taint is added.
+|<none>
+
+|tolerations.value
+|The toleration value to apply, used in conjunction with `operator` to select to appropriate `effect`.
+|<none>
+
+|maximumConcurrentTasks
+|The maximum concurrent tasks allowed for this platform instance.
+|20
 
 |===
 
