@@ -22,6 +22,7 @@ import org.springframework.test.context.ActiveProfiles;
 
 import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.get;
 import static org.springframework.restdocs.payload.PayloadDocumentation.fieldWithPath;
+import static org.springframework.restdocs.payload.PayloadDocumentation.subsectionWithPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -65,14 +66,14 @@ public class DeployersDocumentation extends BaseDocumentation {
 										.description("Deployment property default value").optional(),
 								fieldWithPath("_embedded.deployers[].options[].hints")
 										.description("Object containing deployment property hints"),
-								fieldWithPath("_embedded.deployers[].options[].hints.keyHints")
+								subsectionWithPath("_embedded.deployers[].options[].hints.keyHints")
 										.description("Deployment property key hints"),
-								fieldWithPath("_embedded.deployers[].options[].hints.keyProviders")
-										.description("Deployment property key hints"),
-								fieldWithPath("_embedded.deployers[].options[].hints.valueHints")
-										.description("Deployment property key hints"),
-								fieldWithPath("_embedded.deployers[].options[].hints.valueProviders")
-										.description("Deployment property key hints"),
+								subsectionWithPath("_embedded.deployers[].options[].hints.keyProviders")
+										.description("Deployment property key hint providers"),
+								subsectionWithPath("_embedded.deployers[].options[].hints.valueHints")
+										.description("Deployment property value hints"),
+								subsectionWithPath("_embedded.deployers[].options[].hints.valueProviders")
+										.description("Deployment property value hint providers"),
 								fieldWithPath("_embedded.deployers[].options[].deprecation").description(""),
 								fieldWithPath("_embedded.deployers[].options[].deprecated").description(""),
 								fieldWithPath("_embedded.deployers[]._links.deployer.href").ignored())
