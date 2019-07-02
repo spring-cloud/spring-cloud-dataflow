@@ -19,8 +19,10 @@ package org.springframework.cloud.dataflow.server.service.impl;
 import java.net.URI;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.Map;
+import java.util.Set;
 
 import org.junit.Before;
 import org.junit.Rule;
@@ -34,6 +36,7 @@ import org.springframework.boot.autoconfigure.jdbc.DataSourceProperties;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase.Replace;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.rule.OutputCapture;
 import org.springframework.cloud.dataflow.audit.service.AuditRecordService;
 import org.springframework.cloud.dataflow.core.AppRegistration;
 import org.springframework.cloud.dataflow.core.ApplicationType;
@@ -44,8 +47,10 @@ import org.springframework.cloud.dataflow.core.TaskPlatform;
 import org.springframework.cloud.dataflow.registry.service.AppRegistryService;
 import org.springframework.cloud.dataflow.server.configuration.TaskServiceDependencies;
 import org.springframework.cloud.dataflow.server.job.LauncherRepository;
+import org.springframework.cloud.dataflow.server.repository.DataflowTaskExecutionDao;
 import org.springframework.cloud.dataflow.server.repository.DuplicateTaskException;
 import org.springframework.cloud.dataflow.server.repository.NoSuchTaskDefinitionException;
+import org.springframework.cloud.dataflow.server.repository.NoSuchTaskExecutionException;
 import org.springframework.cloud.dataflow.server.repository.TaskDefinitionRepository;
 import org.springframework.cloud.dataflow.server.repository.TaskDeploymentRepository;
 import org.springframework.cloud.dataflow.server.service.TaskDeleteService;
@@ -95,6 +100,9 @@ public abstract class DefaultTaskExecutionServiceTests {
 
 	@Rule
 	public ExpectedException thrown = ExpectedException.none();
+
+	@Rule
+	public OutputCapture outputCapture = new OutputCapture();
 
 	private final static String BASE_TASK_NAME = "myTask";
 
@@ -148,6 +156,9 @@ public abstract class DefaultTaskExecutionServiceTests {
 	@Autowired
 	TaskAppDeploymentRequestCreator taskAppDeploymentRequestCreator;
 
+	@Autowired
+	DataflowTaskExecutionDao dataflowTaskExecutionDao;
+
 	@TestPropertySource(properties = { "spring.cloud.dataflow.task.maximum-concurrent-tasks=10" })
 	@AutoConfigureTestDatabase(replace = Replace.ANY)
 	public static class SimpleTaskTests extends DefaultTaskExecutionServiceTests {
@@ -180,6 +191,33 @@ public abstract class DefaultTaskExecutionServiceTests {
 			assertEquals(TASK_NAME_ORIG, taskDeployment.getTaskDefinitionName());
 			assertEquals("default", taskDeployment.getPlatformName());
 			assertNotNull("TaskDeployment createdOn field should not be null", taskDeployment.getCreatedOn());
+		}
+
+		@Test
+		@DirtiesContext
+		public void executeStopTaskTest() {
+			initializeSuccessfulRegistry(appRegistry);
+			when(taskLauncher.launch(any())).thenReturn("0");
+			assertEquals(1L, this.taskExecutionService.executeTask(TASK_NAME_ORIG, new HashMap<>(), new LinkedList<>()));
+
+			Set<Long> executionIds = new HashSet<>(1);
+			executionIds.add(1L);
+			taskExecutionService.stopTaskExecution(executionIds);
+			String logEntries = outputCapture.toString();
+			assertTrue(logEntries.contains("Task execution stop request for id 1 has been submitted"));
+		}
+
+		@Test(expected = NoSuchTaskExecutionException.class)
+		@DirtiesContext
+		public void executeStopInvalidIdTaskTest() {
+			initializeSuccessfulRegistry(appRegistry);
+			when(taskLauncher.launch(any())).thenReturn("0");
+			assertEquals(1L, this.taskExecutionService.executeTask(TASK_NAME_ORIG, new HashMap<>(), new LinkedList<>()));
+
+			Set<Long> executionIds = new HashSet<>(2);
+			executionIds.add(1L);
+			executionIds.add(5L);
+			taskExecutionService.stopTaskExecution(executionIds);
 		}
 
 		@Test
@@ -242,7 +280,8 @@ public abstract class DefaultTaskExecutionServiceTests {
 			TaskExecutionService taskExecutionService = new DefaultTaskExecutionService(
 					launcherRepository, auditRecordService, taskRepository,
 					taskExecutionInfoService, mock(TaskDeploymentRepository.class),
-					taskExecutionRepositoryService, taskAppDeploymentRequestCreator);
+					taskExecutionRepositoryService, taskAppDeploymentRequestCreator,
+					this.taskExplorer, this.dataflowTaskExecutionDao);
 			try {
 				taskExecutionService.executeTask(TASK_NAME_ORIG, new HashMap<>(), new LinkedList<>());
 			}

@@ -244,17 +244,24 @@ public class JobDependencies {
 	}
 
 	@Bean
+	public DataflowTaskExecutionDao dataflowTaskExecutionDao(DataSource dataSource) {
+		return new JdbcDataflowTaskExecutionDao(dataSource, new TaskProperties());
+	}
+
+	@Bean
 	public TaskExecutionService taskService(LauncherRepository launcherRepository,
 			AuditRecordService auditRecordService, TaskRepository taskRepository,
 			TaskExecutionInfoService taskExecutionInfoService,
 			TaskDeploymentRepository taskDeploymentRepository,
 			TaskExecutionCreationService taskExecutionRepositoryService,
-			TaskAppDeploymentRequestCreator taskAppDeploymentRequestCreator) {
+			TaskAppDeploymentRequestCreator taskAppDeploymentRequestCreator,
+			TaskExplorer taskExplorer, DataflowTaskExecutionDao dataflowTaskExecutionDao) {
 		return new DefaultTaskExecutionService(
 				launcherRepository, auditRecordService,
 				taskRepository,
 				taskExecutionInfoService, taskDeploymentRepository,
-				taskExecutionRepositoryService, taskAppDeploymentRequestCreator);
+				taskExecutionRepositoryService, taskAppDeploymentRequestCreator,
+				taskExplorer, dataflowTaskExecutionDao);
 	}
 
 	@Bean
@@ -270,11 +277,6 @@ public class JobDependencies {
 	@Bean
 	public TaskRepository taskRepository() {
 		return new SimpleTaskRepository(new TaskExecutionDaoFactoryBean());
-	}
-
-	@Bean
-	public DataflowTaskExecutionDao dataflowTaskExecutionDao(DataSource dataSource, TaskProperties taskProperties) {
-		return new JdbcDataflowTaskExecutionDao(dataSource, taskProperties.getTablePrefix());
 	}
 
 	@Bean

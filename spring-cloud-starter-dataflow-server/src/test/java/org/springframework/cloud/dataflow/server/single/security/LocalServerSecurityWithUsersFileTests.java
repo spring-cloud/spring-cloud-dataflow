@@ -575,6 +575,11 @@ public class LocalServerSecurityWithUsersFileTests {
 				{ HttpMethod.POST, HttpStatus.BAD_REQUEST, "/tasks/executions", createOnlyUser, null },
 				{ HttpMethod.POST, HttpStatus.UNAUTHORIZED, "/tasks/executions", null, null },
 
+				{ HttpMethod.POST, HttpStatus.FORBIDDEN, "/tasks/executions/stop", manageOnlyUser, null },
+				{ HttpMethod.POST, HttpStatus.FORBIDDEN, "/tasks/executions/stop", viewOnlyUser, null },
+				{ HttpMethod.POST, HttpStatus.FORBIDDEN, "/tasks/executions/stop", createOnlyUser, null },
+				{ HttpMethod.POST, HttpStatus.UNAUTHORIZED, "/tasks/executions/stop", null, null },
+
 				{ HttpMethod.POST, HttpStatus.FORBIDDEN, "/tasks/executions", manageOnlyUser,
 						TestUtils.toImmutableMap("name", "my-task-name") },
 				{ HttpMethod.POST, HttpStatus.FORBIDDEN, "/tasks/executions", viewOnlyUser,

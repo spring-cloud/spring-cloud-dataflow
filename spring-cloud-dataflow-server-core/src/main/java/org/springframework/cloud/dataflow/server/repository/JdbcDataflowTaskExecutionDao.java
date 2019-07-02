@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 the original author or authors.
+ * Copyright 2017-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,6 +25,7 @@ import java.util.TreeSet;
 import javax.sql.DataSource;
 
 import org.springframework.cloud.task.repository.dao.JdbcTaskExecutionDao;
+import org.springframework.cloud.task.configuration.TaskProperties;
 import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.ResultSetExtractor;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
@@ -38,12 +39,11 @@ import org.springframework.util.StringUtils;
  * be migrated to Spring Cloud Task itself eventually.
  *
  * @author Gunnar Hillert
+ * @author Glenn Renfro
  */
 public class JdbcDataflowTaskExecutionDao implements DataflowTaskExecutionDao {
 
 	private final NamedParameterJdbcTemplate jdbcTemplate;
-
-	private final String tablePrefix;
 
 	private static final String DELETE_TASK_EXECUTIONS = "DELETE FROM %PREFIX%EXECUTION "
 			+ "WHERE task_execution_id in (:taskExecutionIds)";
@@ -57,17 +57,17 @@ public class JdbcDataflowTaskExecutionDao implements DataflowTaskExecutionDao {
 	private static final String SELECT_CHILD_TASK_EXECUTION_IDS = "SELECT task_execution_id FROM %PREFIX%EXECUTION "
 			+ "WHERE parent_execution_id in (:parentTaskExecutionIds)";
 
+	private TaskProperties taskProperties;
+
 	/**
-	 * Initializes the JdbcTaskExecutionDao.
-	 *
-	 * @param dataSource used by the dao to execute queries and updates the tables. Must not be null.
-	 * @param tablePrefix Must not be null or empty.
+	 * @param dataSource  used by the dao to execute queries and updates the tables.
+	 * @param taskProperties the {@link TaskProperties} to use for this dao.
 	 */
-	public JdbcDataflowTaskExecutionDao(DataSource dataSource, String tablePrefix) {
-		Assert.hasText(tablePrefix, "tablePrefix must not be null nor empty.");
+	public JdbcDataflowTaskExecutionDao(DataSource dataSource, TaskProperties taskProperties) {
 		Assert.notNull(dataSource, "The dataSource must not be null.");
-		this.tablePrefix = tablePrefix;
+		Assert.notNull(taskProperties, "taskProperties must not be null");
 		this.jdbcTemplate = new NamedParameterJdbcTemplate(dataSource);
+		this.taskProperties = taskProperties;
 	}
 
 	@Override
@@ -95,7 +95,7 @@ public class JdbcDataflowTaskExecutionDao implements DataflowTaskExecutionDao {
 	}
 
 	private String getQuery(String base) {
-		return StringUtils.replace(base, "%PREFIX%", this.tablePrefix);
+		return StringUtils.replace(base, "%PREFIX%", this.taskProperties.getTablePrefix());
 	}
 
 	@Override
@@ -111,14 +111,15 @@ public class JdbcDataflowTaskExecutionDao implements DataflowTaskExecutionDao {
 						@Override
 						public Set<Long> extractData(ResultSet resultSet)
 								throws SQLException, DataAccessException {
-							final Set<Long> taskExecutionIds = new TreeSet<>();
+
+							Set<Long> jobExecutionIds = new TreeSet<>();
 
 							while (resultSet.next()) {
-								taskExecutionIds
+								jobExecutionIds
 										.add(resultSet.getLong("TASK_EXECUTION_ID"));
 							}
 
-							return taskExecutionIds;
+							return jobExecutionIds;
 						}
 					});
 		}
@@ -131,5 +132,6 @@ public class JdbcDataflowTaskExecutionDao implements DataflowTaskExecutionDao {
 		}
 
 		return childTaskExecutionIds;
+
 	}
 }
