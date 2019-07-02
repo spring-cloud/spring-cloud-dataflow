@@ -81,7 +81,7 @@ public class ResourceUtilsTests {
 		assertThat(appResourceService.getResourceVersion(resource)).isEqualTo("1.2.0.BUILD-SNAPSHOT");
 
 		resource = new UrlResource("https://springcloudstream/file-source-kafka-10-1.2.0.RELEASE.jar");
-		assertThat(appResourceService.getResourceWithoutVersion(resource)).isEqualTo("http://springcloudstream/file-source-kafka-10");
+		assertThat(appResourceService.getResourceWithoutVersion(resource)).isEqualTo("https://springcloudstream/file-source-kafka-10");
 		assertThat(appResourceService.getResourceVersion(resource)).isEqualTo("1.2.0.RELEASE");
 	}
 
