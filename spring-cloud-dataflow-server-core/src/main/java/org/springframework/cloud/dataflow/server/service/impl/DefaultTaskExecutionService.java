@@ -17,13 +17,18 @@
 package org.springframework.cloud.dataflow.server.service.impl;
 
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.SortedSet;
+import java.util.TreeSet;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import org.springframework.cloud.dataflow.audit.service.AuditRecordService;
 import org.springframework.cloud.dataflow.core.AuditActionType;
@@ -34,6 +39,8 @@ import org.springframework.cloud.dataflow.core.TaskDeployment;
 import org.springframework.cloud.dataflow.rest.util.ArgumentSanitizer;
 import org.springframework.cloud.dataflow.rest.util.DeploymentPropertiesUtils;
 import org.springframework.cloud.dataflow.server.job.LauncherRepository;
+import org.springframework.cloud.dataflow.server.repository.DataflowTaskExecutionDao;
+import org.springframework.cloud.dataflow.server.repository.NoSuchTaskExecutionException;
 import org.springframework.cloud.dataflow.server.repository.TaskDeploymentRepository;
 import org.springframework.cloud.dataflow.server.service.TaskExecutionCreationService;
 import org.springframework.cloud.dataflow.server.service.TaskExecutionInfoService;
@@ -41,6 +48,7 @@ import org.springframework.cloud.dataflow.server.service.TaskExecutionService;
 import org.springframework.cloud.deployer.spi.core.AppDeploymentRequest;
 import org.springframework.cloud.deployer.spi.task.TaskLauncher;
 import org.springframework.cloud.task.repository.TaskExecution;
+import org.springframework.cloud.task.repository.TaskExplorer;
 import org.springframework.cloud.task.repository.TaskRepository;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Assert;
@@ -65,6 +73,8 @@ import org.springframework.util.StringUtils;
 @Transactional
 public class DefaultTaskExecutionService implements TaskExecutionService {
 
+	private static final Logger logger = LoggerFactory.getLogger(DefaultTaskExecutionService.class);
+
 	/**
 	 * Used to launch apps as tasks.
 	 */
@@ -87,6 +97,10 @@ public class DefaultTaskExecutionService implements TaskExecutionService {
 
 	private final TaskAppDeploymentRequestCreator taskAppDeploymentRequestCreator;
 
+	private final TaskExplorer taskExplorer;
+
+	private final DataflowTaskExecutionDao dataflowTaskExecutionDao;
+
 	public static final String TASK_DEFINITION_DSL_TEXT = "taskDefinitionDslText";
 
 	public static final String TASK_DEPLOYMENT_PROPERTIES = "taskDeploymentProperties";
@@ -95,7 +109,8 @@ public class DefaultTaskExecutionService implements TaskExecutionService {
 
 	public static final String TASK_PLATFORM_NAME = "spring.cloud.dataflow.task.platformName";
 
-	protected final Log logger = LogFactory.getLog(getClass().getName());
+
+
 
 	/**
 	 * Initializes the {@link DefaultTaskExecutionService}.
@@ -113,15 +128,19 @@ public class DefaultTaskExecutionService implements TaskExecutionService {
 			TaskExecutionInfoService taskExecutionInfoService,
 			TaskDeploymentRepository taskDeploymentRepository,
 			TaskExecutionCreationService taskExecutionRepositoryService,
-			TaskAppDeploymentRequestCreator taskAppDeploymentRequestCreator) {
+			TaskAppDeploymentRequestCreator taskAppDeploymentRequestCreator,
+			TaskExplorer taskExplorer,
+			DataflowTaskExecutionDao dataflowTaskExecutionDao) {
 		Assert.notNull(launcherRepository, "launcherRepository must not be null");
 		Assert.notNull(auditRecordService, "auditRecordService must not be null");
-		Assert.notNull(taskExecutionInfoService, "taskDefinitionRetriever must not be null");
+		Assert.notNull(taskExecutionInfoService, "taskExecutionInfoService must not be null");
 		Assert.notNull(taskRepository, "taskRepository must not be null");
 		Assert.notNull(taskExecutionInfoService, "taskExecutionInfoService must not be null");
 		Assert.notNull(taskDeploymentRepository, "taskDeploymentRepository must not be null");
 		Assert.notNull(taskExecutionRepositoryService, "taskExecutionRepositoryService must not be null");
 		Assert.notNull(taskAppDeploymentRequestCreator, "taskAppDeploymentRequestCreator must not be null");
+		Assert.notNull(taskExplorer, "taskExplorer must not be null");
+		Assert.notNull(dataflowTaskExecutionDao, "dataflowTaskExecutionDao must not be null");
 
 		this.launcherRepository = launcherRepository;
 		this.auditRecordService = auditRecordService;
@@ -130,6 +149,8 @@ public class DefaultTaskExecutionService implements TaskExecutionService {
 		this.taskDeploymentRepository = taskDeploymentRepository;
 		this.taskExecutionRepositoryService = taskExecutionRepositoryService;
 		this.taskAppDeploymentRequestCreator = taskAppDeploymentRequestCreator;
+		this.taskExplorer = taskExplorer;
+		this.dataflowTaskExecutionDao = dataflowTaskExecutionDao;
 	}
 
 	@Override
@@ -192,6 +213,29 @@ public class DefaultTaskExecutionService implements TaskExecutionService {
 		return findTaskLauncher(platformName).getLog(taskId);
 	}
 
+	@Override
+	public void stopTaskExecution(Set<Long> ids) {
+		final Map<String, Object> auditData = new LinkedHashMap<>();
+		logger.info("Stopping {} task executions.", ids.size());
+		Set<TaskExecution> taskExecutions = getTaskExecutions(ids);
+		Set<Long> childTaskExecutionIds = this.dataflowTaskExecutionDao.findChildTaskExecutionIds(ids);
+		Set<TaskExecution> childTaskExecutions = getTaskExecutions(childTaskExecutionIds);
+		for (TaskExecution taskExecution : taskExecutions) {
+			cancelTaskExecution(taskExecution);
+		}
+
+		childTaskExecutions.forEach(childTaskExecution -> {
+			cancelTaskExecution(childTaskExecution);
+		});
+
+		long numberOfExecutionsStopped = ids.size() + childTaskExecutionIds.size();
+
+		auditData.put("Stopped Task Executions", numberOfExecutionsStopped);
+		this.auditRecordService.populateAndSaveAuditRecordUsingMapData(
+				AuditOperationType.TASK, AuditActionType.UNDEPLOY,
+				numberOfExecutionsStopped + " Task Execution Stopped", auditData);
+	}
+
 	private TaskLauncher findTaskLauncher(String platformName) {
 		Launcher launcher = this.launcherRepository.findByName(platformName);
 		if (launcher == null) {
@@ -223,6 +267,36 @@ public class DefaultTaskExecutionService implements TaskExecutionService {
 				this.argumentSanitizer.sanitizeProperties(taskDeploymentProperties));
 		auditedData.put(COMMAND_LINE_ARGS, this.argumentSanitizer.sanitizeArguments(commandLineArgs));
 		return auditedData;
+	}
+
+	private void cancelTaskExecution(TaskExecution taskExecution) {
+		String platformName = this.taskDeploymentRepository.findByTaskDeploymentId(taskExecution.getExternalExecutionId()).getPlatformName();
+		TaskLauncher taskLauncher = findTaskLauncher(platformName);
+		taskLauncher.cancel(taskExecution.getExternalExecutionId());
+		this.logger.info(String.format("Task execution stop request for id %s has been submitted", taskExecution.getExecutionId()));
+	}
+
+	private Set<TaskExecution> getTaskExecutions(Set<Long> ids) {
+		Set<TaskExecution> taskExecutions = new HashSet<>();
+		final SortedSet<Long> nonExistingTaskExecutions = new TreeSet<>();
+		for (Long id : ids) {
+			final TaskExecution taskExecution = this.taskExplorer.getTaskExecution(id);
+			if (taskExecution == null) {
+				nonExistingTaskExecutions.add(id);
+			}
+			else {
+				taskExecutions.add(taskExecution);
+			}
+		}
+		if (!nonExistingTaskExecutions.isEmpty()) {
+			if (nonExistingTaskExecutions.size() == 1) {
+				throw new NoSuchTaskExecutionException(nonExistingTaskExecutions.first());
+			}
+			else {
+				throw new NoSuchTaskExecutionException(nonExistingTaskExecutions);
+			}
+		}
+		return taskExecutions;
 	}
 
 }

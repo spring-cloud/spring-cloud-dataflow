@@ -17,6 +17,7 @@ package org.springframework.cloud.dataflow.server.service;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * Provides Task related services.
@@ -51,4 +52,10 @@ public interface TaskExecutionService {
 	 */
 	String getLog(String platformName, String taskId);
 
+	/**
+	 * Request the platform to stop the task executions for the ids provided.
+	 *
+	 * @param ids a set of ids for the task executions to be stopped.
+	 */
+	void stopTaskExecution(Set<Long> ids);
 }

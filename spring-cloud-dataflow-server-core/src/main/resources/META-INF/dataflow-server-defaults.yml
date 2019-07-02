@@ -152,6 +152,7 @@ spring:
             - GET    /tasks/executions               => hasRole('ROLE_VIEW')
             - GET    /tasks/executions/*             => hasRole('ROLE_VIEW')
             - POST   /tasks/executions               => hasRole('ROLE_DEPLOY')
+            - POST   /tasks/executions/*             => hasRole('ROLE_DEPLOY')
             - DELETE /tasks/executions/*             => hasRole('ROLE_DESTROY')
 
             # Task Schedules

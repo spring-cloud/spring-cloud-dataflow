@@ -70,13 +70,19 @@ public class DataFlowServerConfiguration {
 		return new ForwardedHeaderFilter();
 	}
 
-	@Bean
-	DataflowTaskExecutionDao dataflowTaskExecutionDao(DataSource dataSource, TaskProperties taskProperties) {
-		return new JdbcDataflowTaskExecutionDao(dataSource, taskProperties.getTablePrefix());
-	}
 
 	@Bean
 	DataflowJobExecutionDao dataflowJobExecutionDao(DataSource dataSource) {
 		return new JdbcDataflowJobExecutionDao(dataSource, AbstractJdbcBatchMetadataDao.DEFAULT_TABLE_PREFIX);
+	}
+
+	@Bean
+	public TaskProperties taskProperties() {
+		return new TaskProperties();
+	}
+
+	@Bean
+	DataflowTaskExecutionDao dataflowTaskExecutionDao(DataSource dataSource, TaskProperties taskProperties) {
+		return new JdbcDataflowTaskExecutionDao(dataSource, taskProperties);
 	}
 }

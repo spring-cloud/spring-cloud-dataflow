@@ -1714,6 +1714,7 @@ The task executions endpoint provides information about the task executions that
 The following topics provide more detail:
 
 * <<api-guide-resources-task-executions-launching>>
+* <<api-guide-resources-task-executions-stopping>>
 * <<api-guide-resources-task-executions-list>>
 * <<api-guide-resources-task-executions-list-by-name>>
 * <<api-guide-resources-task-executions-detail>>
@@ -1760,7 +1761,43 @@ include::{snippets}/task-executions-documentation/launch-task/curl-request.adoc[
 
 include::{snippets}/task-executions-documentation/launch-task/http-response.adoc[]
 
+[[api-guide-resources-task-executions-stopping]]
+==== Stopping a Task
 
+Stopping a task is done by posting the id of an existing task execution.
+The following topics provide more detail:
+
+* <<api-guide-resources-task-executions-stopping-request-structure>>
+* <<api-guide-resources-task-executions-stopping-path-parameters>>
+* <<api-guide-resources-task-executions-stopping-example-request>>
+* <<api-guide-resources-task-executions-stopping-response-structure>>
+
+
+
+[[api-guide-resources-task-executions-stopping-request-structure]]
+===== Request Structure
+
+include::{snippets}/task-executions-documentation/stop-task/http-request.adoc[]
+
+
+
+[[api-guide-resources-task-executions-stopping-path-parameters]]
+===== Path Parameters
+
+include::{snippets}/task-executions-documentation/stop-task/path-parameters.adoc[]
+
+
+
+[[api-guide-resources-task-executions-stopping-example-request]]
+===== Example Request
+
+include::{snippets}/task-executions-documentation/stop-task/curl-request.adoc[]
+
+
+[[api-guide-resources-task-executions-stopping-response-structure]]
+===== Response Structure
+
+include::{snippets}/task-executions-documentation/stop-task/http-response.adoc[]
 
 [[api-guide-resources-task-executions-list]]
 ==== List All Task Executions

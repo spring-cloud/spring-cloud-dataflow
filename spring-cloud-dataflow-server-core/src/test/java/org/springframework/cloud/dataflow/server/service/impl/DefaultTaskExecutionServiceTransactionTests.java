@@ -46,6 +46,7 @@ import org.springframework.cloud.dataflow.core.TaskDefinition;
 import org.springframework.cloud.dataflow.registry.service.AppRegistryService;
 import org.springframework.cloud.dataflow.server.configuration.TaskServiceDependencies;
 import org.springframework.cloud.dataflow.server.job.LauncherRepository;
+import org.springframework.cloud.dataflow.server.repository.DataflowTaskExecutionDao;
 import org.springframework.cloud.dataflow.server.repository.TaskDefinitionRepository;
 import org.springframework.cloud.dataflow.server.repository.TaskDeploymentRepository;
 import org.springframework.cloud.dataflow.server.service.TaskExecutionCreationService;
@@ -55,6 +56,7 @@ import org.springframework.cloud.deployer.spi.core.AppDeploymentRequest;
 import org.springframework.cloud.deployer.spi.core.RuntimeEnvironmentInfo;
 import org.springframework.cloud.deployer.spi.task.TaskLauncher;
 import org.springframework.cloud.deployer.spi.task.TaskStatus;
+import org.springframework.cloud.task.repository.TaskExplorer;
 import org.springframework.cloud.task.repository.TaskRepository;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.data.domain.Page;
@@ -113,6 +115,12 @@ public class DefaultTaskExecutionServiceTransactionTests {
 	@Autowired
 	TaskAppDeploymentRequestCreator taskAppDeploymentRequestCreator;
 
+	@Autowired
+	TaskExplorer taskExplorer;
+
+	@Autowired
+	DataflowTaskExecutionDao dataflowTaskExecutionDao;
+
 	private TaskExecutionService transactionTaskService;
 
 	@Before
@@ -123,7 +131,8 @@ public class DefaultTaskExecutionServiceTransactionTests {
 		this.transactionTaskService = new DefaultTaskExecutionService(
 				launcherRepository, auditRecordService, taskRepository,
 				taskExecutionInfoService, mock(TaskDeploymentRepository.class),
-				taskExecutionRepositoryService, taskAppDeploymentRequestCreator);
+				taskExecutionRepositoryService, taskAppDeploymentRequestCreator,
+				this.taskExplorer, this.dataflowTaskExecutionDao);
 
 	}
 

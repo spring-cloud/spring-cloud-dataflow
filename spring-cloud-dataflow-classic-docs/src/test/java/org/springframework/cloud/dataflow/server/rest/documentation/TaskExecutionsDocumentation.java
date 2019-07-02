@@ -79,6 +79,24 @@ public class TaskExecutionsDocumentation extends BaseDocumentation {
 	}
 
 	@Test
+	public void stopTask() throws Exception {
+		this.mockMvc.perform(
+				post("/tasks/executions")
+						.param("name", "taskA")
+						.param("properties", "app.my-task.foo=bar,deployer.my-task.something-else=3")
+						.param("arguments", "--server.port=8080 --foo=bar"))
+				.andExpect(status().isCreated());
+		this.mockMvc.perform(
+				post("/tasks/executions/{id}", 1))
+				.andDo(print())
+				.andExpect(status().isOk())
+				.andDo(this.documentationHandler.document(
+						pathParameters(
+								parameterWithName("id").description("The id of an existing task execution (required)")
+						)));
+	}
+
+	@Test
 	public void listTaskExecutions() throws Exception {
 		documentation.dontDocument( () -> this.mockMvc.perform(
 				post("/tasks/executions")

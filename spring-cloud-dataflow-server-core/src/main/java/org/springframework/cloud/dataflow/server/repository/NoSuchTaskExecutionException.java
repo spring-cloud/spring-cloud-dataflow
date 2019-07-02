@@ -22,6 +22,8 @@ import org.springframework.cloud.task.repository.TaskExecution;
 import org.springframework.util.StringUtils;
 
 /**
+ * This exception is used when requesting a {@link TaskExecution} that does not exist.
+ *
  * @author Glenn Renfro
  * @author Gunnar Hillert
  */
@@ -30,7 +32,7 @@ public class NoSuchTaskExecutionException extends RuntimeException {
 	private static final long serialVersionUID = -303914974762305117L;
 
 	/**
-	 * Create a new exception.
+	 * Create a new exception that can handle a single {@link TaskExecution} id.
 	 *
 	 * @param id the id of the {@link TaskExecution} that could not be found
 	 */
@@ -39,7 +41,7 @@ public class NoSuchTaskExecutionException extends RuntimeException {
 	}
 
 	/**
-	 * Create a new exception.
+	 * Create a new exception that handles multiple {@link TaskExecution} ids.
 	 *
 	 * @param ids the ids of the {@link TaskExecution} that could not be found
 	 */

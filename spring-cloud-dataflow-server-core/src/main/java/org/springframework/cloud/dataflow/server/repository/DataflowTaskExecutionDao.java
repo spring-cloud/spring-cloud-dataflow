@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 the original author or authors.
+ * Copyright 2017-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,6 +26,7 @@ import org.springframework.cloud.task.repository.dao.TaskExecutionDao;
  * be migrated to Spring Cloud Task itself.
  *
  * @author Gunnar Hillert
+ * @author Glenn Renfro
  */
 public interface DataflowTaskExecutionDao {
 
@@ -55,11 +56,9 @@ public interface DataflowTaskExecutionDao {
 	int deleteTaskTaskBatchRelationshipsByTaskExecutionIds(Set<Long> taskExecutionIds);
 
 	/**
-	 * Find all child task execution ids for the provided task execution ids.
-	 *
-	 * @param taskExecutionId Must contain at least 1 taskExecutionId
-	 * @return A set of task execution or an empty collection, but never null
+	 * Finds all the child tasks for the taskExecution that is provided.
+	 * @param taskExecutionIds The ids to the{@link TaskExecution}s to be searched
+	 * @return a list of child {@link TaskExecution}s that correspond to the {@link TaskExecution}s passed.
 	 */
 	Set<Long> findChildTaskExecutionIds(Set<Long> taskExecutionIds);
-
 }
