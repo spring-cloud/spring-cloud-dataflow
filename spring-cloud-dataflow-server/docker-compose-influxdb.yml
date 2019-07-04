@@ -35,8 +35,6 @@ services:
   dataflow-server:
     image: springcloud/spring-cloud-dataflow-server:${DATAFLOW_VERSION:?DATAFLOW_VERSION is not set!}
     container_name: dataflow-server
-    volumes:
-      - '/tmp/apps:/apps/'
     ports:
       - "9393:9393"
     environment:
