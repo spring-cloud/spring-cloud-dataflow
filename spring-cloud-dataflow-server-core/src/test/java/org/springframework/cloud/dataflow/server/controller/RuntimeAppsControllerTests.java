@@ -256,12 +256,12 @@ public class RuntimeAppsControllerTests {
 	public void testGetLogs() throws Exception {
 		when(this.skipperClient.getLog("ticktock4")).thenReturn("Logs");
 		mockMvc.perform(
-				get("/runtime/apps/logs/ticktock4").accept(MediaType.APPLICATION_JSON))
+				get("/runtime/apps/ticktock4/logs").accept(MediaType.APPLICATION_JSON))
 				.andDo(print())
 				.andExpect(status().isOk());
 		when(this.skipperClient.getLog("ticktock4", "myapp")).thenReturn("Logs");
 		mockMvc.perform(
-				get("/runtime/apps/logs/ticktock4/myapp").accept(MediaType.APPLICATION_JSON))
+				get("/runtime/apps/ticktock4/myapp/logs").accept(MediaType.APPLICATION_JSON))
 				.andDo(print())
 				.andExpect(status().isOk());
 	}

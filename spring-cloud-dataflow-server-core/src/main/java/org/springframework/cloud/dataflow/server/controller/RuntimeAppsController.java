@@ -90,12 +90,12 @@ public class RuntimeAppsController {
 		return statusAssembler.toResource(status);
 	}
 
-	@RequestMapping("/logs/{streamName}")
+	@RequestMapping("{streamName}/logs")
 	public String getLog(@PathVariable String streamName) {
 		return this.streamDeployer.getLog(streamName);
 	}
 
-	@RequestMapping("/logs/{streamName}/{appName}")
+	@RequestMapping("{streamName}/{appName}/logs")
 	public String getLog(@PathVariable String streamName, @PathVariable String appName) {
 		return this.streamDeployer.getLog(streamName, appName);
 	}
