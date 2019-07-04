@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2018 the original author or authors.
+ * Copyright 2017-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -267,6 +267,19 @@ public class ReleaseService {
 	@Transactional
 	public Info status(String releaseName, Integer version) {
 		return status(this.releaseRepository.findByNameAndVersion(releaseName, version)).getInfo();
+	}
+
+	@Transactional
+	public String getLog(String releaseName) {
+		return this.getLog(releaseName, null);
+	}
+
+	@Transactional
+	public String getLog(String releaseName, String appName) {
+		Release release = this.releaseRepository.findTopByNameOrderByVersionDesc(releaseName);
+		String kind = ManifestUtils.resolveKind(release.getManifest().getData());
+		ReleaseManager releaseManager = this.releaseManagerFactory.getReleaseManager(kind);
+		return releaseManager.getLog(release, appName);
 	}
 
 	/**

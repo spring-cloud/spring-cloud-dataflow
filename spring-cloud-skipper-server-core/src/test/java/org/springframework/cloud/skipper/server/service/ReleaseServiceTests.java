@@ -24,7 +24,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cloud.deployer.resource.support.DelegatingResourceLoader;
 import org.springframework.cloud.deployer.spi.app.AppInstanceStatus;
 import org.springframework.cloud.deployer.spi.app.AppStatus;
 import org.springframework.cloud.deployer.spi.app.DeploymentState;
@@ -70,9 +69,6 @@ public class ReleaseServiceTests extends AbstractIntegrationTest {
 
 	@Autowired
 	private AppDeployerDataRepository appDeployerDataRepository;
-
-	@Autowired
-	private DelegatingResourceLoader delegatingResourceLoader;
 
 	@Autowired
 	private RepositoryRepository repositoryRepository;
@@ -170,6 +166,23 @@ public class ReleaseServiceTests extends AbstractIntegrationTest {
 		assertThat(appInstanceState.getAttributes().get(DefaultReleaseManager.SKIPPER_RELEASE_NAME_ATTRIBUTE)).isEqualTo("logrelease");
 		assertThat(appInstanceState.getAttributes().get(DefaultReleaseManager.SKIPPER_RELEASE_VERSION_ATTRIBUTE)).isEqualTo("1");
 		assertThat(appInstanceState.getAttributes().get(DefaultReleaseManager.SKIPPER_APPLICATION_NAME_ATTRIBUTE)).isEqualTo("log");
+	}
+
+	@Test
+	public void testLogs() throws InterruptedException {
+		String releaseName = "myapp-release";
+		InstallRequest installRequest = new InstallRequest();
+		installRequest.setInstallProperties(createInstallProperties(releaseName));
+		PackageIdentifier packageIdentifier = new PackageIdentifier();
+		packageIdentifier.setPackageName("log");
+		packageIdentifier.setPackageVersion("1.0.0");
+		installRequest.setPackageIdentifier(packageIdentifier);
+		Release release = install(installRequest);
+		installRequest.setPackageIdentifier(packageIdentifier);
+		assertThat(release).isNotNull();
+		assertThat(release.getPkg().getMetadata().getVersion()).isEqualTo("1.0.0");
+		String logContent = this.releaseService.getLog(releaseName);
+		assertThat(logContent).isNotNull();
 	}
 
 	@Test

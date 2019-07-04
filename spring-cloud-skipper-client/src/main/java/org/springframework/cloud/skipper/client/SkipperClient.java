@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2018 the original author or authors.
+ * Copyright 2017-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -208,4 +208,24 @@ public interface SkipperClient {
 	 * @return the manifest info of a release
 	 */
 	String manifest(String releaseName, int releaseVersion);
+
+
+	/**
+	 * Fetch the logs of the latest release identified by the given name.
+	 *
+	 * @param releaseName the release name
+	 * @return the log content
+	 */
+	String getLog(String releaseName);
+
+
+	/**
+	 * Fetch the logs of the latest release identified by the given release name
+	 * and a specific application name inside the release.
+	 *
+	 * @param releaseName the release name
+	 * @param appName the application name
+	 * @return the log content
+	 */
+	String getLog(String releaseName, String appName);
 }

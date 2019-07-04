@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2018 the original author or authors.
+ * Copyright 2017-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,6 +15,7 @@
  */
 package org.springframework.cloud.skipper.deployer.cloudfoundry;
 
+import java.time.Duration;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
@@ -22,7 +23,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
 import org.cloudfoundry.operations.applications.ApplicationManifest;
+import org.cloudfoundry.operations.applications.LogsRequest;
 import org.cloudfoundry.operations.applications.PushApplicationManifestRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -38,6 +43,7 @@ import org.springframework.cloud.skipper.server.repository.jpa.AppDeployerDataRe
 import org.springframework.cloud.skipper.server.repository.jpa.ReleaseRepository;
 import org.springframework.cloud.skipper.server.util.ArgumentSanitizer;
 import org.springframework.util.Assert;
+import org.springframework.util.StringUtils;
 
 import static org.springframework.cloud.skipper.deployer.cloudfoundry.CloudFoundryManifestApplicationDeployer.PUSH_REQUEST_TIMEOUT;
 import static org.springframework.cloud.skipper.deployer.cloudfoundry.CloudFoundryManifestApplicationDeployer.STAGING_TIMEOUT;
@@ -53,7 +59,7 @@ import static org.springframework.cloud.skipper.deployer.cloudfoundry.CloudFound
  */
 public class CloudFoundryReleaseManager implements ReleaseManager {
 
-	public static final String SPRING_CLOUD_DEPLOYER_COUNT = "spring.cloud.deployer.count";
+	public static final Duration API_TIMEOUT = Duration.ofSeconds(30L);
 
 	private static final Logger logger = LoggerFactory.getLogger(CloudFoundryReleaseManager.class);
 
@@ -161,6 +167,35 @@ public class CloudFoundryReleaseManager implements ReleaseManager {
 	public Release delete(Release release) {
 		this.releaseRepository.save(this.cfManifestApplicationDeployer.delete(release));
 		return release;
+	}
+
+	@Override
+	public String getLog(Release release) {
+		return getLog(release, null);
+	}
+
+	@Override
+	public String getLog(Release release, String appName) {
+		logger.info("Checking application status for the release: " + release.getName());
+		ApplicationManifest applicationManifest = CloudFoundryApplicationManifestUtils.updateApplicationName(release);
+		String applicationName = applicationManifest.getName();
+		if (StringUtils.hasText(appName)) {
+			Assert.isTrue(applicationName.equalsIgnoreCase(appName),
+					String.format("Application name % is different from the CF manifest: %", appName, applicationName));
+		}
+		String logMessage = this.platformCloudFoundryOperations.getCloudFoundryOperations(release.getPlatformName()).applications()
+				.logs(LogsRequest.builder().name(applicationName).build())
+				.blockFirst(Duration.ofMillis(API_TIMEOUT.toMillis())).getMessage();
+		ObjectMapper objectMapper = new ObjectMapper();
+		// Avoids serializing objects such as OutputStreams in LocalDeployer.
+		objectMapper.configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false);
+		try {
+			return objectMapper.writeValueAsString(logMessage);
+		}
+		catch (JsonProcessingException e) {
+			// TODO replace with SkipperException when it moves to domain module.
+			throw new IllegalArgumentException("Could not serialize logs", e);
+		}
 	}
 
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2018 the original author or authors.
+ * Copyright 2017-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -155,6 +155,39 @@ public class DefaultSkipperClient implements SkipperClient {
 						typeReference,
 						uriVariables);
 		return resourceResponseEntity.getBody().getContent();
+	}
+
+	@Override
+	public String getLog(String releaseName) {
+		ParameterizedTypeReference<String> typeReference =
+				new ParameterizedTypeReference<String>() { };
+		Map<String, String> uriVariables = new HashMap<String, String>();
+		uriVariables.put("releaseName", releaseName);
+
+		ResponseEntity<String> resourceResponseEntity =
+				restTemplate.exchange(baseUri + "/release/logs/{releaseName}",
+						HttpMethod.GET,
+						null,
+						typeReference,
+						uriVariables);
+		return resourceResponseEntity.getBody();
+	}
+
+	@Override
+	public String getLog(String releaseName, String appName) {
+		ParameterizedTypeReference<String> typeReference =
+				new ParameterizedTypeReference<String>() { };
+		Map<String, String> uriVariables = new HashMap<String, String>();
+		uriVariables.put("releaseName", releaseName);
+		uriVariables.put("appName", appName);
+
+		ResponseEntity<String> resourceResponseEntity =
+				restTemplate.exchange(baseUri + "/release/logs/{releaseName}/{appName}",
+						HttpMethod.GET,
+						null,
+						typeReference,
+						uriVariables);
+		return resourceResponseEntity.getBody();
 	}
 
 	@Override

@@ -134,6 +134,11 @@ public class SkipperServerPlatformConfigurationTests {
 						public RuntimeEnvironmentInfo environmentInfo() {
 							return null;
 						}
+
+						@Override
+						public String getLog(String id) {
+							return null;
+						}
 					})));
 		}
 	}

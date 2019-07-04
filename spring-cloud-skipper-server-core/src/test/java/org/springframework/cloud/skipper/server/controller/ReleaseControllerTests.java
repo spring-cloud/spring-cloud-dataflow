@@ -100,6 +100,17 @@ public class ReleaseControllerTests extends AbstractControllerTests {
 	}
 
 	@Test
+	public void getReleaseLogs() throws Exception {
+		// Deploy
+		String releaseName = "testLogs";
+		install("log", "1.0.0", releaseName);
+		MvcResult result = mockMvc.perform(get("/api/release/logs/" + releaseName)).andDo(print())
+				.andExpect(status().isOk()).andReturn();
+		assertThat(result.getResponse().getContentAsString()).isNotEmpty();
+	}
+
+
+	@Test
 	public void checkDeleteReleaseWithPackage() throws Exception {
 
 		// Make the test repo Local

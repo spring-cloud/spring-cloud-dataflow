@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2018 the original author or authors.
+ * Copyright 2017-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,6 +39,7 @@ import org.springframework.hateoas.ResourceSupport;
 import org.springframework.hateoas.Resources;
 import org.springframework.hateoas.mvc.ControllerLinkBuilder;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -113,6 +114,18 @@ public class ReleaseController {
 	@ResponseStatus(HttpStatus.OK)
 	public Resource<Info> status(@PathVariable("name") String name, @PathVariable("version") Integer version) {
 		return this.infoResourceAssembler.toResource(this.releaseService.status(name, version));
+	}
+
+	@RequestMapping(path = "/logs/{name}", method = RequestMethod.GET)
+	@ResponseStatus(HttpStatus.OK)
+	public ResponseEntity<String> log(@PathVariable("name") String name) {
+		return new ResponseEntity<>(this.releaseService.getLog(name), HttpStatus.OK);
+	}
+
+	@RequestMapping(path = "/logs/{name}/{appName}", method = RequestMethod.GET)
+	@ResponseStatus(HttpStatus.OK)
+	public ResponseEntity<String> log(@PathVariable("name") String name, @PathVariable("appName") String appName) {
+		return new ResponseEntity<>(this.releaseService.getLog(name, appName), HttpStatus.OK);
 	}
 
 	@RequestMapping(path = "/manifest/{name}", method = RequestMethod.GET)

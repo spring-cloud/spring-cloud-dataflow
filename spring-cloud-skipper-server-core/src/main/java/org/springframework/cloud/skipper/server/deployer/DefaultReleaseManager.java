@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2018 the original author or authors.
+ * Copyright 2017-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,6 +23,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -303,6 +306,48 @@ public class DefaultReleaseManager implements ReleaseManager {
 			release.getInfo().getStatus().setPlatformStatusAsAppStatusList(appStatusList);
 		}
 		return release;
+	}
+
+	@Override
+	public String getLog(Release release) {
+		return getLog(release, null);
+	}
+
+	@Override
+	public String getLog(Release release, String appName) {
+		if (release.getInfo().getStatus().getStatusCode().equals(StatusCode.DELETED)) {
+			return "";
+		}
+		AppDeployerData appDeployerData = this.appDeployerDataRepository
+				.findByReleaseNameAndReleaseVersion(release.getName(), release.getVersion());
+		AppDeployer appDeployer = this.deployerRepository.findByNameRequired(release.getPlatformName())
+				.getAppDeployer();
+		Map<String, String> logMap = new HashMap<>();
+		Map<String, String> appNameDeploymentIdMap = appDeployerData.getDeploymentDataAsMap();
+		Map<String, String> logApps = new HashMap<>();
+		if (StringUtils.hasText(appName)) {
+			for (Map.Entry<String, String> nameDeploymentId : appNameDeploymentIdMap.entrySet()) {
+				if (appName.equalsIgnoreCase(nameDeploymentId.getValue())) {
+					logApps.put(nameDeploymentId.getKey(), nameDeploymentId.getValue());
+				}
+			}
+		}
+		else {
+			logApps = appNameDeploymentIdMap;
+		}
+		for (Map.Entry<String, String> deploymentIdEntry: logApps.entrySet()) {
+			logMap.put(deploymentIdEntry.getKey(), appDeployer.getLog(deploymentIdEntry.getValue()));
+		}
+		ObjectMapper objectMapper = new ObjectMapper();
+		// Avoids serializing objects such as OutputStreams in LocalDeployer.
+		objectMapper.configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false);
+		try {
+			return objectMapper.writeValueAsString(logMap);
+		}
+		catch (JsonProcessingException e) {
+			// TODO replace with SkipperException when it moves to domain module.
+			throw new IllegalArgumentException("Could not serialize logs", e);
+		}
 	}
 
 	public Release delete(Release release) {

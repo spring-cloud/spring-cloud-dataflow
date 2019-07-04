@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2018 the original author or authors.
+ * Copyright 2017-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,6 +28,7 @@ import org.cloudfoundry.reactor.ConnectionContext;
 import org.cloudfoundry.reactor.DefaultConnectionContext;
 import org.cloudfoundry.reactor.TokenProvider;
 import org.cloudfoundry.reactor.client.ReactorCloudFoundryClient;
+import org.cloudfoundry.reactor.doppler.ReactorDopplerClient;
 import org.cloudfoundry.reactor.tokenprovider.PasswordGrantTokenProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -115,9 +116,14 @@ public class CloudFoundryPlatformAutoConfiguration {
 					.addPlatformSpecificInfo("API Endpoint",
 							connectionProperties.getUrl().toString())
 					.build();
+			ReactorDopplerClient dopplerClient = ReactorDopplerClient.builder()
+					.connectionContext(connectionContext)
+					.tokenProvider(tokenProvider)
+					.build();
 			CloudFoundryOperations cloudFoundryOperations = DefaultCloudFoundryOperations
 					.builder().cloudFoundryClient(cloudFoundryClient)
 					.organization(connectionProperties.getOrg())
+					.dopplerClient(dopplerClient)
 					.space(connectionProperties.getSpace()).build();
 			CloudFoundryAppNameGenerator appNameGenerator = new CloudFoundryAppNameGenerator(
 					cloudFoundryProperties.getDeployment());

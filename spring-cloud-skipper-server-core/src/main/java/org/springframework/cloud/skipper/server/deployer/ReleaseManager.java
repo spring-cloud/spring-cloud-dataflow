@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2018 the original author or authors.
+ * Copyright 2017-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -74,5 +74,22 @@ public interface ReleaseManager {
 	 * @return the updated release
 	 */
 	Release status(Release release);
+
+	/**
+	 * Get the logs of the applications inside the release.
+	 *
+	 * @param release the release
+	 * @return the log content
+	 */
+	String getLog(Release release);
+
+	/**
+	 * Get the logs of a specific application inside the release.
+	 *
+	 * @param release the release
+	 * @param appName the application name
+	 * @return the log content
+	 */
+	String getLog(Release release, String appName);
 
 }

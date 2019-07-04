@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2018 the original author or authors.
+ * Copyright 2017-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -146,5 +146,33 @@ public class DefaultSkipperClientTests {
 		mockServer.expect(requestTo("/release/release1/package"))
 				.andRespond(withStatus(HttpStatus.CONFLICT).body(ERROR3).contentType(MediaType.APPLICATION_JSON));
 		skipperClient.delete("release1", true);
+	}
+
+	@Test
+	public void testLogByReleaseName() {
+		RestTemplate restTemplate = new RestTemplate();
+		SkipperClient skipperClient = new DefaultSkipperClient("", restTemplate);
+
+		MockRestServiceServer mockServer = MockRestServiceServer.bindTo(restTemplate).build();
+		mockServer.expect(requestTo("/release/logs/mylog")).andRespond(withSuccess("{}", MediaType.APPLICATION_JSON));
+
+		String logContent = skipperClient.getLog("mylog");
+		mockServer.verify();
+
+		assertThat(logContent).isNotNull();
+	}
+
+	@Test
+	public void testLogByReleaseAndAppNames() {
+		RestTemplate restTemplate = new RestTemplate();
+		SkipperClient skipperClient = new DefaultSkipperClient("", restTemplate);
+
+		MockRestServiceServer mockServer = MockRestServiceServer.bindTo(restTemplate).build();
+		mockServer.expect(requestTo("/release/logs/mylog/app")).andRespond(withSuccess("{}", MediaType.APPLICATION_JSON));
+
+		String logContent = skipperClient.getLog("mylog", "app");
+		mockServer.verify();
+
+		assertThat(logContent).isNotNull();
 	}
 }
