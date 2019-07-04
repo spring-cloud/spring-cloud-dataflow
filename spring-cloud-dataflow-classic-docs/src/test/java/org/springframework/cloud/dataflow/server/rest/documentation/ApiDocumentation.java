@@ -106,6 +106,7 @@ public class ApiDocumentation extends BaseDocumentation {
 				linkWithRel("tasks/executions/name").description("Returns all task executions for a given Task name"),
 				linkWithRel("tasks/executions/execution").description("Provides details for a specific task execution"),
 				linkWithRel("tasks/platforms").description("Provides platform accounts for launching tasks"),
+				linkWithRel("tasks/logs").description("Retrieve the task application log"),
 
 				linkWithRel("streams/definitions").description("Exposes the Streams resource"),
 				linkWithRel("streams/definitions/definition").description("Handle a specific Stream definition"),
@@ -118,6 +119,10 @@ public class ApiDocumentation extends BaseDocumentation {
 				linkWithRel("streams/deployments/rollback/{name}/{version}").description("Rollback the stream to the previous or a specific version of the stream"),
 				linkWithRel("streams/deployments/update/{name}").description("Update the stream."),
 				linkWithRel("streams/deployments/platform/list").description("List of supported deployment platforms"),
+				linkWithRel("streams/logs").description("Retrieve application logs of the stream"),
+				linkWithRel("streams/logs/{streamName}").description("Retrieve application logs of the stream"),
+				linkWithRel("streams/logs/{streamName}/{appName}").description("Retrieve a specific application log of the stream"),
+
 
 				linkWithRel("tools/parseTaskTextToGraph").description("Parse a task definition into a graph structure"),
 				linkWithRel("tools/convertTaskGraphToText").description("Convert a graph format into " + "DSL text format")),
@@ -141,6 +146,12 @@ public class ApiDocumentation extends BaseDocumentation {
 
 						fieldWithPath("_links.runtime/streams.href").description("Link to the runtime/streams"),
 						fieldWithPath("_links.runtime/streams.templated").type(JsonFieldType.BOOLEAN).optional().description("Link runtime/streams is templated"),
+
+						fieldWithPath("_links.streams/logs.href").description("Link to the streams/logs"),
+						fieldWithPath("_links.streams/logs/{streamName}.href").description("Link to the streams/logs/{streamName}"),
+						fieldWithPath("_links.streams/logs/{streamName}/{appName}.href").description("Link to the streams/logs/{streamName}/{appName}"),
+						fieldWithPath("_links.streams/logs/{streamName}.templated").type(JsonFieldType.BOOLEAN).optional().description("Link streams/logs/{streamName} is templated"),
+						fieldWithPath("_links.streams/logs/{streamName}/{appName}.templated").type(JsonFieldType.BOOLEAN).optional().description("Link streams/logs/{streamName}/{appName} is templated"),
 
 						fieldWithPath("_links.streams/deployments.href").description("Link to the streams/deployments"),
 						fieldWithPath("_links.streams/deployments/{name}.href").description("Link to the streams/deployments/{name}"),
@@ -172,6 +183,9 @@ public class ApiDocumentation extends BaseDocumentation {
 						fieldWithPath("_links.tasks/executions/current.href").description("Link to the tasks/executions/current"),
 						fieldWithPath("_links.tasks/executions/execution.href").description("Link to the tasks/executions/execution"),
 						fieldWithPath("_links.tasks/executions/execution.templated").type(JsonFieldType.BOOLEAN).optional().description("Link tasks/executions/execution is templated"),
+
+						fieldWithPath("_links.tasks/logs.href").description("Link to the tasks/logs"),
+						fieldWithPath("_links.tasks/logs.templated").type(JsonFieldType.BOOLEAN).optional().description("Link tasks/logs is templated"),
 
 						fieldWithPath("_links.tasks/schedules.href").description("Link to the tasks/executions/schedules"),
 						fieldWithPath("_links.tasks/schedules/instances.href").description("Link to the tasks/schedules/instances"),

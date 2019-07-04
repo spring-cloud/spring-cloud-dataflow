@@ -136,7 +136,6 @@ public class RootController {
 					.withRel("tasks/executions/execution")));
 			root.add(unescapeTemplateVariables(entityLinks.linkToSingleResource(TaskAppStatusResource.class, "{name}")
 					.withRel("tasks/validation")));
-			root.add(ControllerLinkBuilder.linkTo(TaskLogsController.class).withRel("tasks/logs"));
 			root.add(ControllerLinkBuilder.linkTo(ControllerLinkBuilder.methodOn(TaskLogsController.class).getLog(null, null)).withRel("tasks/logs"));
 
 			if (featuresProperties.isSchedulesEnabled()) {

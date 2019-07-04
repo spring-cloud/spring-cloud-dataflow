@@ -248,18 +248,11 @@ public class TaskExecutionControllerTests {
 
 	@Test
 	public void testGetCurrentExecutions() throws Exception {
-			when(taskLauncher.getRunningTaskExecutionCount()).thenReturn(4);
-			mockMvc.perform(get("/tasks/executions/current").accept(MediaType.APPLICATION_JSON))
-					.andExpect(status().isOk())
-					.andExpect(jsonPath("$[0].runningExecutionCount", is(4)));
+		when(taskLauncher.getRunningTaskExecutionCount()).thenReturn(4);
+		mockMvc.perform(get("/tasks/executions/current").accept(MediaType.APPLICATION_JSON))
+				.andExpect(status().isOk())
+				.andExpect(jsonPath("$[0].runningExecutionCount", is(4)));
 
-	}
-
-	@Test
-	public void testGetCurrentExecutionLog() throws Exception {
-		when(taskLauncher.getLog("mytask1")).thenReturn("Log");
-		mockMvc.perform(get("/tasks/executions/logs?name=mytask1").accept(MediaType.APPLICATION_JSON))
-				.andExpect(status().isOk());
 	}
 
 	@Test
