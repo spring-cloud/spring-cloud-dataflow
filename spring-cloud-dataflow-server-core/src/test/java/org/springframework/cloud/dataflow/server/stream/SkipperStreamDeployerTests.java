@@ -581,7 +581,7 @@ public class SkipperStreamDeployerTests {
 	@Test
 	public void testGetLogByReleaseName() {
 		SkipperClient skipperClient = mock(SkipperClient.class);
-		when(skipperClient.getLog(eq("release1"))).thenReturn(mock(Release.class));
+		when(skipperClient.getLog(eq("release1"))).thenReturn("Log");
 		SkipperStreamDeployer skipperStreamDeployer = new SkipperStreamDeployer(skipperClient,
 				mock(StreamDefinitionRepository.class), mock(AppRegistryService.class), mock(ForkJoinPool.class));
 		skipperStreamDeployer.getLog("release1");
@@ -591,7 +591,7 @@ public class SkipperStreamDeployerTests {
 	@Test
 	public void testGetLogByReleaseNameAndAppName() {
 		SkipperClient skipperClient = mock(SkipperClient.class);
-		when(skipperClient.getLog(eq("release1"), eq("myapp"))).thenReturn(mock(Release.class));
+		when(skipperClient.getLog(eq("release1"), eq("myapp"))).thenReturn("Log");
 		SkipperStreamDeployer skipperStreamDeployer = new SkipperStreamDeployer(skipperClient,
 				mock(StreamDefinitionRepository.class), mock(AppRegistryService.class), mock(ForkJoinPool.class));
 		skipperStreamDeployer.getLog("release1", "myapp");

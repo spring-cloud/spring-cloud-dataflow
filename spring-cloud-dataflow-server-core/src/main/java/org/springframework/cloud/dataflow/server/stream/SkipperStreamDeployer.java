@@ -490,12 +490,12 @@ public class SkipperStreamDeployer implements StreamDeployer {
 
 	@Override
 	public String getLog(String streamName) {
-		return this.skipperClient.getLog(streamName).getLogs();
+		return this.skipperClient.getLog(streamName);
 	}
 
 	@Override
 	public String getLog(String streamName, String appName) {
-		return this.skipperClient.getLog(streamName, appName).getLogs();
+		return this.skipperClient.getLog(streamName, appName);
 	}
 
 	private List<AppStatus> getStreamsStatuses(List<String> streamNames) {
