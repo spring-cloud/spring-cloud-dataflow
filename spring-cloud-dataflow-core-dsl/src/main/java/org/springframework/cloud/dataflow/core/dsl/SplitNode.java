@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 the original author or authors.
+ * Copyright 2017-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -45,22 +45,17 @@ public class SplitNode extends LabelledTaskNode {
 
 	@Override
 	public String stringify(boolean includePositionInfo) {
-		if (parallelTaskApps.size() == 1) {
-			return parallelTaskApps.get(0).stringify(includePositionInfo);
-		}
-		else {
-			StringBuilder s = new StringBuilder();
-			s.append(TokenKind.LT.tokenChars);
-			for (int i = 0; i < parallelTaskApps.size(); i++) {
-				LabelledTaskNode jn = parallelTaskApps.get(i);
-				if (i > 0) {
-					s.append(" ").append(TokenKind.DOUBLEPIPE.tokenChars).append(" ");
-				}
-				s.append(jn.stringify(includePositionInfo));
+		StringBuilder s = new StringBuilder();
+		s.append(TokenKind.LT.tokenChars);
+		for (int i = 0; i < parallelTaskApps.size(); i++) {
+			LabelledTaskNode jn = parallelTaskApps.get(i);
+			if (i > 0) {
+				s.append(" ").append(TokenKind.DOUBLEPIPE.tokenChars).append(" ");
 			}
-			s.append(TokenKind.GT.tokenChars);
-			return s.toString();
+			s.append(jn.stringify(includePositionInfo));
 		}
+		s.append(TokenKind.GT.tokenChars);
+		return s.toString();
 	}
 
 	@Override

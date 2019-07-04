@@ -488,6 +488,29 @@ public class TaskParserTests {
 	}
 
 	@Test
+	public void oneAppSplit() {
+		ctn = parse("< FooApp>");
+
+		assertEquals("< FooApp>", ctn.getTaskText());
+		assertEquals(0, ctn.getStartPos());
+		assertEquals(9, ctn.getEndPos());
+		assertEquals("<FooApp>", ctn.stringify());
+
+		LabelledTaskNode node = ctn.getStart();
+		assertTrue(node.isFlow());
+		node = ((FlowNode) node).getSeriesElement(0);
+		assertTrue(node.isSplit());
+		assertFalse(node.isTaskApp());
+
+		SplitNode split = (SplitNode) node;
+		List<LabelledTaskNode> series = split.getSeries();
+		assertEquals(1, series.size());
+		assertEquals(1, split.getSeriesLength());
+		assertFlow(series.get(0), "FooApp");
+		assertFlow(split.getSeriesElement(0), "FooApp");
+	}
+
+	@Test
 	public void twoAppSplit() {
 		ctn = parse("< FooApp  ||    BarApp>");
 
@@ -661,6 +684,13 @@ public class TaskParserTests {
 	}
 
 	@Test
+	public void singleSplitToGraph() {
+		String spec = "<appA 'fail'-> appB>";
+		assertGraph("[0:START][1:appA][2:appB][3:END]"
+				+ "[0-1][fail:1-2][1-3][2-3]", spec);
+	}
+
+	@Test
 	public void secondarySequencesHaveFurtherTransitions() {
 		String spec = " appA 'fail'->:two && appB;two: appD 'fail2'->:three && appE;three: appF && appG";
 		assertGraph("[0:START][1:appA][2:appB][3:END][12:appD][13:appE][14:appF][15:appG]"
@@ -813,16 +843,6 @@ public class TaskParserTests {
 				problems.get(0).toStringWithContext());
 
 		validator.reset();
-		ctn = parse("<appA>", false);
-		ctn.accept(validator);
-		problems = validator.getProblems();
-		assertEquals(1, problems.size());
-		assertEquals(DSLMessage.TASK_VALIDATION_SPLIT_WITH_ONE_FLOW, problems.get(0).getMessage());
-		assertEquals(0, problems.get(0).getOffset());
-		assertEquals("167E:(pos 0): unnecessary use of split construct when only one flow to execute in parallel",
-				problems.get(0).toString());
-
-		validator.reset();
 		ctn = parse("appA && appA", false);
 		ctn.accept(validator);
 		problems = validator.getProblems();
@@ -918,6 +938,49 @@ public class TaskParserTests {
 		graph.links.get(0).properties = new HashMap<>();
 		graph.links.get(1).properties = new HashMap<>();
 		assertEquals("timestamp", graph.toDSLText());
+	}
+	
+	@Test
+	public void graphToTextSingleAppInSplit() {
+		// Note the graph here does not include anything special
+		// to preserve the split because the split is unnecessary
+		// and is removed when the text is recomputed for it.
+		assertGraph("[0:START][1:AppA][2:END][0-1][1-2]","<AppA>");
+		TaskNode ctn = parse("<AppA>");
+		Graph graph = ctn.toGraph();
+		assertEquals("AppA", graph.toDSLText());
+		
+		assertGraph("[0:START][1:AppA][2:AppB][3:END][0-1][1-2][2-3]","<AppA> && AppB");
+		ctn = parse("<AppA> && AppB");
+		graph = ctn.toGraph();
+		assertEquals("AppA && AppB", graph.toDSLText());
+		
+		assertGraph("[0:START][1:AppA][2:AppC][3:AppB][4:END][0-1][99:1-2][1-3][2-3][3-4]","<AppA 99 -> AppC> && AppB");
+		ctn = parse("<AppA 99->AppC> && AppB");
+		graph = ctn.toGraph();
+		assertEquals("<AppA 99->AppC> && AppB", graph.toDSLText());
+
+		// Check it still does the right thing when the split does have multple:
+		ctn = parse("<AppA 99->AppC || AppD> && AppB");
+		graph = ctn.toGraph();
+		assertEquals("<AppA 99->AppC || AppD> && AppB", graph.toDSLText());
+		
+		// This is the test specifically for issue 3263
+		ctn = parse("<Import: timestamp 'Error2'->T2: timestamp 'Error'->T1: timestamp> && Backwards: timestamp");
+		// Key thing to note from here is that the links from  the transition nodes connect 
+		// Import to Backwards and don't go straight to END
+		assertGraph("[0:START][1:Import:timestamp][2:T2:timestamp][3:T1:timestamp][4:Backwards:timestamp][5:END][0-1][Error2:1-2][Error:1-3][1-4][2-4][3-4][4-5]",
+			"<Import: timestamp 'Error2'->T2: timestamp 'Error'->T1: timestamp> && Backwards: timestamp");
+		graph = ctn.toGraph();
+		assertEquals("<Import: timestamp 'Error2'->T2: timestamp 'Error'->T1: timestamp> && Backwards: timestamp", graph.toDSLText());
+		
+		// This is the variant of the above without the <...>
+		// Now notice the links from the transition nodes go direct to END
+		ctn = parse("Import: timestamp 'Error2'->T2: timestamp 'Error'->T1: timestamp && Backwards: timestamp");
+		assertGraph("[0:START][1:Import:timestamp][2:T2:timestamp][3:T1:timestamp][4:Backwards:timestamp][5:END][0-1][Error2:1-2][Error:1-3][1-4][4-5][2-5][3-5]",
+			"Import: timestamp 'Error2'->T2: timestamp 'Error'->T1: timestamp && Backwards: timestamp");
+		graph = ctn.toGraph();
+		assertEquals("Import: timestamp 'Error2'->T2: timestamp 'Error'->T1: timestamp && Backwards: timestamp", graph.toDSLText());
 	}
 
 	@Test

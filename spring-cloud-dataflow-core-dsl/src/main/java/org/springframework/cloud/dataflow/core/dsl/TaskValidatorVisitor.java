@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 the original author or authors.
+ * Copyright 2017-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -81,9 +81,9 @@ public class TaskValidatorVisitor extends TaskVisitor {
 
 	@Override
 	public boolean preVisit(SplitNode split) {
-		if (split.getSeriesLength() == 1) {
-			pushProblem(split.startPos, DSLMessage.TASK_VALIDATION_SPLIT_WITH_ONE_FLOW);
-		}
+		// This used to check there were multiple entries in the split otherwise it threw an error.
+		// It could conditionally still throw that error if there is one entry in the split
+		// and it has no transitions (since that is the only scenario that needs a single entry split)
 		if (split.hasLabel()) {
 			String labelString = split.getLabelString();
 			if (labelsDefined.contains(labelString)) {
