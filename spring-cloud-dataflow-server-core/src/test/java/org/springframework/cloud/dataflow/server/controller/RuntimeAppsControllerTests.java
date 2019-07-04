@@ -251,18 +251,4 @@ public class RuntimeAppsControllerTests {
 
 				.andExpect(jsonPath("$.content.*", hasSize(0)));
 	}
-
-	@Test
-	public void testGetLogs() throws Exception {
-		when(this.skipperClient.getLog("ticktock4")).thenReturn("Logs");
-		mockMvc.perform(
-				get("/runtime/apps/ticktock4/logs").accept(MediaType.APPLICATION_JSON))
-				.andDo(print())
-				.andExpect(status().isOk());
-		when(this.skipperClient.getLog("ticktock4", "myapp")).thenReturn("Logs");
-		mockMvc.perform(
-				get("/runtime/apps/ticktock4/myapp/logs").accept(MediaType.APPLICATION_JSON))
-				.andDo(print())
-				.andExpect(status().isOk());
-	}
 }
