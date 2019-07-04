@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2018 the original author or authors.
+ * Copyright 2017-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -179,7 +179,7 @@ public class Graph {
 		while (toFollow.size() != 0) {
 			if (toFollow.size() > 1) { // SPLIT
 				if (!inNestedSplit && graphText.length() != 0) {
-					// If there is something already in the text, a || is needed to
+					// If there is something already in the text, a && is needed to
 					// join it to the preceding element
 					graphText.append(" && ");
 				}
@@ -500,10 +500,57 @@ public class Graph {
 
 	private void followNode(StringBuilder graphText, Node node, Node nodeToFinishFollowingAt, List<Node> unvisitedNodes,
 			List<Link> unfollowedLinks) {
-		printNode(graphText, node, unvisitedNodes);
 		List<Link> toFollow = findLinksFrom(node, false);
-		printTransitions(graphText, unvisitedNodes, unfollowedLinks, toFollow, nodeToFinishFollowingAt);
+		boolean singleSplitNecessary = false;
+		Node commonTarget = null;
+		if (toFollow.size()>1 && allTransitionsButOne(toFollow)) {
+			// This is checking for the situation in https://github.com/spring-cloud/spring-cloud-dataflow/issues/3263
+			// where a split node needs to be used to capture a node with branching outputs that wants to run
+			// something after any of those branches complete (if a split wasn't included here then after
+			// the transition nodes, the next step would be END on those branches)
+			try {
+				commonTarget = findEndOfSplit(sortNotTransitionLinkFirst(toFollow));
+				singleSplitNecessary = 
+					commonTarget != null && !commonTarget.name.equals("END") && 
+					// This checks we aren't already dealing with a split that targets the same thing
+					(nodeToFinishFollowingAt == null || !nodeToFinishFollowingAt.equals(commonTarget));
+			} catch (IllegalStateException ise) {
+				// There is no common target
+			}
+		}
+
+		if (singleSplitNecessary) {
+			graphText.append("<");
+			printNode(graphText, node, unvisitedNodes);
+			printTransitions(graphText, unvisitedNodes, unfollowedLinks, toFollow, commonTarget);
+			graphText.append(">");
+		} else {
+			printNode(graphText, node, unvisitedNodes);
+			printTransitions(graphText, unvisitedNodes, unfollowedLinks, toFollow, nodeToFinishFollowingAt);
+		}
 		followLinks(graphText, toFollow, nodeToFinishFollowingAt, unvisitedNodes, unfollowedLinks, false);
+	}
+	
+	List<Link> sortNotTransitionLinkFirst(List<Link> links) {
+		List<Link> result = new ArrayList<>();
+		for (Link l: links) {
+			if (l.hasTransitionSet()) {
+				result.add(0,l);
+			} else {
+				result.add(l);
+			}
+		}
+		return result;
+	}
+
+	private boolean allTransitionsButOne(List<Link> links) {
+		int transitionCount = 0;
+		for (Link l: links) {
+			if (l.hasTransitionSet()) {
+				transitionCount++;
+			}
+		}
+		return (links.size()-transitionCount) == 1;
 	}
 
 	private void followLink(StringBuilder graphText, Link link, Node nodeToFinishFollowingAt, List<Node> unvisitedNodes,
