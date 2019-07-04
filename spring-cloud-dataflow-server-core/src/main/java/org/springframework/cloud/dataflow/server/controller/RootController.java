@@ -114,10 +114,12 @@ public class RootController {
 			root.add(ControllerLinkBuilder.linkTo(ControllerLinkBuilder.methodOn(StreamDeploymentController.class).platformList()).withRel("streams/deployments/platform/list"));
 			root.add(ControllerLinkBuilder.linkTo(ControllerLinkBuilder.methodOn(StreamDeploymentController.class).rollback(null, null)).withRel("streams/deployments/rollback/{name}/{version}"));
 			root.add(ControllerLinkBuilder.linkTo(ControllerLinkBuilder.methodOn(StreamDeploymentController.class).update(null, null)).withRel("streams/deployments/update/{name}"));
-
 			root.add(
 					unescapeTemplateVariables(entityLinks.linkToSingleResource(StreamDeploymentResource.class, "{name}")
 							.withRel("streams/deployments/deployment")));
+			root.add(ControllerLinkBuilder.linkTo(StreamLogsController.class).withRel("streams/logs"));
+			root.add(ControllerLinkBuilder.linkTo(ControllerLinkBuilder.methodOn(StreamLogsController.class).getLog(null)).withRel("streams/logs/{streamName}"));
+			root.add(ControllerLinkBuilder.linkTo(ControllerLinkBuilder.methodOn(StreamLogsController.class).getLog(null, null)).withRel("streams/logs/{streamName}/{appName}"));
 		}
 		if (featuresProperties.isTasksEnabled()) {
 			root.add(entityLinks.linkToCollectionResource(LauncherResource.class).withRel("tasks/platforms"));
@@ -134,6 +136,8 @@ public class RootController {
 					.withRel("tasks/executions/execution")));
 			root.add(unescapeTemplateVariables(entityLinks.linkToSingleResource(TaskAppStatusResource.class, "{name}")
 					.withRel("tasks/validation")));
+			root.add(ControllerLinkBuilder.linkTo(TaskLogsController.class).withRel("tasks/logs"));
+			root.add(ControllerLinkBuilder.linkTo(ControllerLinkBuilder.methodOn(TaskLogsController.class).getLog(null, null)).withRel("tasks/logs"));
 
 			if (featuresProperties.isSchedulesEnabled()) {
 				root.add(entityLinks.linkToCollectionResource(ScheduleInfoResource.class).withRel("tasks/schedules"));
@@ -162,6 +166,7 @@ public class RootController {
 			root.add(entityLinks.linkToCollectionResource(JobExecutionThinResource.class).withRel("jobs/thinexecutions"));
 			taskTemplated = entityLinks.linkToCollectionResource(JobExecutionThinResource.class).getHref() + "{?name}";
 			root.add(new Link(taskTemplated).withRel("jobs/thinexecutions/name"));
+
 
 		}
 		root.add(entityLinks.linkToCollectionResource(AppRegistrationResource.class).withRel("apps"));

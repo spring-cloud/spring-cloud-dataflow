@@ -18,6 +18,7 @@ package org.springframework.cloud.dataflow.server.controller;
 
 import org.springframework.cloud.dataflow.server.service.TaskExecutionService;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -49,8 +50,8 @@ public class TaskLogsController {
 
 	@RequestMapping(value = "", method = RequestMethod.GET, params = "name")
 	@ResponseStatus(HttpStatus.OK)
-	public String getLog(@RequestParam(required = false, defaultValue = "default") String platformName,
+	public ResponseEntity<String> getLog(@RequestParam(required = false, defaultValue = "default") String platformName,
 			@RequestParam("name") String taskName) {
-		return this.taskExecutionService.getLog(platformName, taskName);
+		return new ResponseEntity<>(this.taskExecutionService.getLog(platformName, taskName), HttpStatus.OK);
 	}
 }
