@@ -16,12 +16,18 @@
 
 package org.springframework.cloud.dataflow.server.repository;
 
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.Collections;
 import java.util.Set;
+import java.util.TreeSet;
 
 import javax.sql.DataSource;
 
 import org.springframework.cloud.task.configuration.TaskProperties;
 import org.springframework.cloud.task.repository.dao.JdbcTaskExecutionDao;
+import org.springframework.dao.DataAccessException;
+import org.springframework.jdbc.core.ResultSetExtractor;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.util.Assert;
@@ -44,6 +50,9 @@ public class JdbcDataflowTaskExecutionDao implements DataflowTaskExecutionDao {
 
 	private static final String DELETE_TASK_TASK_BATCH = "DELETE FROM %PREFIX%TASK_BATCH "
 			+ "WHERE task_execution_id in (:taskExecutionIds)";
+
+	private static final String SELECT_CHILD_TASK_EXECUTION_IDS = "SELECT task_execution_id FROM %PREFIX%EXECUTION "
+			+ "WHERE parent_execution_id in (:parentTaskExecutionIds)";
 
 
 	private final NamedParameterJdbcTemplate jdbcTemplate;
@@ -72,30 +81,65 @@ public class JdbcDataflowTaskExecutionDao implements DataflowTaskExecutionDao {
 	}
 
 	@Override
-	public int deleteTaskExecutionsByTaskExecitionIds(Set<Long> taskExecitionIds) {
+	public int deleteTaskExecutionsByTaskExecutionIds(Set<Long> taskExecutionIds) {
 		final MapSqlParameterSource queryParameters = new MapSqlParameterSource()
-				.addValue("taskExecutionIds", taskExecitionIds);
+				.addValue("taskExecutionIds", taskExecutionIds);
 		final String query = getQuery(DELETE_TASK_EXECUTIONS);
 		return this.jdbcTemplate.update(query, queryParameters);
 	}
 
 	@Override
-	public int deleteTaskExecutionParamsByTaskExecitionIds(Set<Long> taskExecitionIds) {
+	public int deleteTaskExecutionParamsByTaskExecutionIds(Set<Long> taskExecutionIds) {
 		final MapSqlParameterSource queryParameters = new MapSqlParameterSource()
-				.addValue("taskExecutionIds", taskExecitionIds);
+				.addValue("taskExecutionIds", taskExecutionIds);
 		final String query = getQuery(DELETE_TASK_EXECUTION_PARAMS);
 		return this.jdbcTemplate.update(query, queryParameters);
 	}
 
 	@Override
-	public int deleteTaskTaskBatchRelationshipsByTaskExecitionIds(Set<Long> taskExecitionIds) {
+	public int deleteTaskTaskBatchRelationshipsByTaskExecutionIds(Set<Long> taskExecutionIds) {
 		final MapSqlParameterSource queryParameters = new MapSqlParameterSource()
-				.addValue("taskExecutionIds", taskExecitionIds);
+				.addValue("taskExecutionIds", taskExecutionIds);
 		final String query = getQuery(DELETE_TASK_TASK_BATCH);
 		return this.jdbcTemplate.update(query, queryParameters);
 	}
 
 	private String getQuery(String base) {
 		return StringUtils.replace(base, "%PREFIX%", this.tablePrefix);
+	}
+
+	@Override
+	public Set<Long> findChildTaskExecutionIds(Set<Long> taskExecutionIds) {
+		final MapSqlParameterSource queryParameters = new MapSqlParameterSource()
+				.addValue("parentTaskExecutionIds", taskExecutionIds);
+
+		Set<Long> childTaskExecutionIds;
+		try {
+			childTaskExecutionIds = this.jdbcTemplate.query(
+					getQuery(SELECT_CHILD_TASK_EXECUTION_IDS), queryParameters,
+					new ResultSetExtractor<Set<Long>>() {
+						@Override
+						public Set<Long> extractData(ResultSet resultSet)
+								throws SQLException, DataAccessException {
+							Set<Long> jobExecutionIds = new TreeSet<>();
+
+							while (resultSet.next()) {
+								jobExecutionIds
+										.add(resultSet.getLong("TASK_EXECUTION_ID"));
+							}
+
+							return jobExecutionIds;
+						}
+					});
+		}
+		catch (DataAccessException e) {
+			childTaskExecutionIds = Collections.emptySet();
+		}
+
+		if (!childTaskExecutionIds.isEmpty()) {
+			childTaskExecutionIds.addAll(this.findChildTaskExecutionIds(childTaskExecutionIds));
+		}
+
+		return childTaskExecutionIds;
 	}
 }

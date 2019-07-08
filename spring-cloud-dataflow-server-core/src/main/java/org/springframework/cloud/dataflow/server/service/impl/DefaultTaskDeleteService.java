@@ -21,6 +21,8 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.SortedSet;
+import java.util.TreeSet;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -34,10 +36,13 @@ import org.springframework.cloud.dataflow.core.TaskDeployment;
 import org.springframework.cloud.dataflow.core.dsl.TaskNode;
 import org.springframework.cloud.dataflow.core.dsl.TaskParser;
 import org.springframework.cloud.dataflow.rest.util.ArgumentSanitizer;
+import org.springframework.cloud.dataflow.server.controller.support.TaskExecutionControllerDeleteAction;
 import org.springframework.cloud.dataflow.server.job.LauncherRepository;
+import org.springframework.cloud.dataflow.server.repository.CannotDeleteNonParentTaskExecutionException;
 import org.springframework.cloud.dataflow.server.repository.DataflowJobExecutionDao;
 import org.springframework.cloud.dataflow.server.repository.DataflowTaskExecutionDao;
 import org.springframework.cloud.dataflow.server.repository.NoSuchTaskDefinitionException;
+import org.springframework.cloud.dataflow.server.repository.NoSuchTaskExecutionException;
 import org.springframework.cloud.dataflow.server.repository.TaskDefinitionRepository;
 import org.springframework.cloud.dataflow.server.repository.TaskDeploymentRepository;
 import org.springframework.cloud.dataflow.server.service.TaskDeleteService;
@@ -133,20 +138,74 @@ public class DefaultTaskDeleteService implements TaskDeleteService {
 	}
 
 	@Override
+	public void cleanupExecutions(Set<TaskExecutionControllerDeleteAction> actionsAsSet, Set<Long> ids) {
+		final SortedSet<Long> nonExistingTaskExecutions = new TreeSet<>();
+		final SortedSet<Long> nonParentTaskExecutions = new TreeSet<>();
+
+		for (Long id : ids) {
+			final TaskExecution taskExecution = this.taskExplorer.getTaskExecution(id);
+			if (taskExecution == null) {
+				nonExistingTaskExecutions.add(id);
+			}
+			else {
+				final Long parentExecutionId = taskExecution.getParentExecutionId();
+
+				if (parentExecutionId != null) {
+					nonParentTaskExecutions.add(parentExecutionId);
+				}
+			}
+		}
+
+		if (!nonExistingTaskExecutions.isEmpty()) {
+			if (nonExistingTaskExecutions.size() == 1) {
+				throw new NoSuchTaskExecutionException(nonExistingTaskExecutions.first());
+			}
+			else {
+				throw new NoSuchTaskExecutionException(nonExistingTaskExecutions);
+			}
+		}
+
+		if (actionsAsSet.contains(TaskExecutionControllerDeleteAction.CLEANUP)) {
+			for (Long id : ids) {
+				this.cleanupExecution(id);
+			}
+		}
+
+		if (!nonParentTaskExecutions.isEmpty()) {
+			if (nonParentTaskExecutions.size() == 1) {
+				throw new CannotDeleteNonParentTaskExecutionException(nonParentTaskExecutions.first());
+			}
+			else {
+				throw new CannotDeleteNonParentTaskExecutionException(nonParentTaskExecutions);
+			}
+		}
+
+		if (actionsAsSet.contains(TaskExecutionControllerDeleteAction.REMOVE_DATA)) {
+			this.deleteOneOrMoreTaskExecutions(ids);
+		}
+	}
+
+	@Override
 	@Transactional
-	public void deleteOneOrMoreTaskExecutions(Set<Long> taskExecitionIds) {
-		Assert.notEmpty(taskExecitionIds, "You must provide at least 1 task execution id.");
+	public void deleteOneOrMoreTaskExecutions(Set<Long> taskExecutionIds) {
+		Assert.notEmpty(taskExecutionIds, "You must provide at least 1 task execution id.");
+
+		final Set<Long> taskExecutionIdsWithChildren = new HashSet<>(taskExecutionIds);
+
+		final Set<Long> childTaskExecutionIds = dataflowTaskExecutionDao.findChildTaskExecutionIds(taskExecutionIds);
+		logger.info("Found {} child task execution ids: {}.", childTaskExecutionIds.size(), StringUtils.collectionToCommaDelimitedString(childTaskExecutionIds));
+		taskExecutionIdsWithChildren.addAll(childTaskExecutionIds);
 
 		final Map<String, Object> auditData = new LinkedHashMap<>();
-		auditData.put("Deleted Task Executions", taskExecitionIds.size());
+		auditData.put("Deleted Task Executions", taskExecutionIdsWithChildren.size());
 
-		logger.info("Deleting {} task executions.", taskExecitionIds.size());
+		logger.info("Deleting {} task executions.", taskExecutionIdsWithChildren.size());
 
 		// Retrieve Related Job Executions
 
 		final Set<Long> jobExecutionIds = new HashSet<>();
 
-		for (Long taskExecutionId : taskExecitionIds) {
+		for (Long taskExecutionId : taskExecutionIdsWithChildren) {
 			jobExecutionIds.addAll(taskExplorer.getJobExecutionIdsByTaskExecutionId(taskExecutionId));
 		}
 
@@ -157,11 +216,11 @@ public class DefaultTaskDeleteService implements TaskDeleteService {
 		auditData.put("Deleted Job Execution IDs", StringUtils.collectionToDelimitedString(jobExecutionIds, ", "));
 
 		if (!jobExecutionIds.isEmpty()) {
-			final int numberOfDeletedBatchStepExecutionContextRows = dataflowJobExecutionDao.deleteBatchStepExecutionContextByJobExecitionIds(jobExecutionIds);
-			final int numberOfDeletedBatchStepExecutionRows = dataflowJobExecutionDao.deleteBatchStepExecutionsByJobExecitionIds(jobExecutionIds);
-			final int numberOfDeletedBatchJobExecutionContextRows = dataflowJobExecutionDao.deleteBatchJobExecutionContextByJobExecitionIds(jobExecutionIds);
-			final int numberOfDeletedBatchJobExecutionParamRows = dataflowJobExecutionDao.deleteBatchJobExecutionParamsByJobExecitionIds(jobExecutionIds);
-			final int numberOfDeletedBatchJobExecutionRows = dataflowJobExecutionDao.deleteBatchJobExecutionByJobExecitionIds(jobExecutionIds);
+			final int numberOfDeletedBatchStepExecutionContextRows = dataflowJobExecutionDao.deleteBatchStepExecutionContextByJobExecutionIds(jobExecutionIds);
+			final int numberOfDeletedBatchStepExecutionRows = dataflowJobExecutionDao.deleteBatchStepExecutionsByJobExecutionIds(jobExecutionIds);
+			final int numberOfDeletedBatchJobExecutionContextRows = dataflowJobExecutionDao.deleteBatchJobExecutionContextByJobExecutionIds(jobExecutionIds);
+			final int numberOfDeletedBatchJobExecutionParamRows = dataflowJobExecutionDao.deleteBatchJobExecutionParamsByJobExecutionIds(jobExecutionIds);
+			final int numberOfDeletedBatchJobExecutionRows = dataflowJobExecutionDao.deleteBatchJobExecutionByJobExecutionIds(jobExecutionIds);
 			final int numberOfDeletedUnusedBatchJobInstanceRows = dataflowJobExecutionDao.deleteUnusedBatchJobInstances();
 
 			logger.info("Deleted the following Batch Job Execution related data for {} Job Executions.\n" +
@@ -190,17 +249,17 @@ public class DefaultTaskDeleteService implements TaskDeleteService {
 
 		// Delete Task Related Data
 
-		auditData.put("Deleted # of Task Executions", taskExecitionIds.size());
-		auditData.put("Deleted Task Execution IDs", StringUtils.collectionToDelimitedString(taskExecitionIds, ", "));
-		final int numberOfDeletedTaskExecutionParamRows = dataflowTaskExecutionDao.deleteTaskExecutionParamsByTaskExecitionIds(taskExecitionIds);
-		final int numberOfDeletedTaskTaskBatchRelationshipRows = dataflowTaskExecutionDao.deleteTaskTaskBatchRelationshipsByTaskExecitionIds(taskExecitionIds);
-		final int numberOfDeletedTaskExecutionRows = dataflowTaskExecutionDao.deleteTaskExecutionsByTaskExecitionIds(taskExecitionIds);
+		auditData.put("Deleted # of Task Executions", taskExecutionIdsWithChildren.size());
+		auditData.put("Deleted Task Execution IDs", StringUtils.collectionToDelimitedString(taskExecutionIdsWithChildren, ", "));
+		final int numberOfDeletedTaskExecutionParamRows = dataflowTaskExecutionDao.deleteTaskExecutionParamsByTaskExecutionIds(taskExecutionIdsWithChildren);
+		final int numberOfDeletedTaskTaskBatchRelationshipRows = dataflowTaskExecutionDao.deleteTaskTaskBatchRelationshipsByTaskExecutionIds(taskExecutionIdsWithChildren);
+		final int numberOfDeletedTaskExecutionRows = dataflowTaskExecutionDao.deleteTaskExecutionsByTaskExecutionIds(taskExecutionIdsWithChildren);
 
 		logger.info("Deleted the following Task Execution related data for {} Task Executions:\n" +
 				"Task Execution Param Rows:    {}\n" +
 				"Task Batch Relationship Rows: {}\n" +
 				"Task Execution Rows:          {}.",
-				taskExecitionIds.size(),
+				taskExecutionIdsWithChildren.size(),
 				numberOfDeletedTaskExecutionParamRows,
 				numberOfDeletedTaskTaskBatchRelationshipRows,
 				numberOfDeletedTaskExecutionRows
@@ -210,7 +269,7 @@ public class DefaultTaskDeleteService implements TaskDeleteService {
 
 		auditRecordService.populateAndSaveAuditRecordUsingMapData(
 				AuditOperationType.TASK, AuditActionType.DELETE,
-				taskExecitionIds.size() + " Task Execution Delete(s)", auditData);
+				taskExecutionIdsWithChildren.size() + " Task Execution Delete(s)", auditData);
 	}
 
 	@Override

@@ -112,7 +112,7 @@ public class JdbcDataflowJobExecutionDao implements DataflowJobExecutionDao {
 	}
 
 	@Override
-	public int deleteBatchStepExecutionContextByJobExecitionIds(Set<Long> jobExecutionIds) {
+	public int deleteBatchStepExecutionContextByJobExecutionIds(Set<Long> jobExecutionIds) {
 		final MapSqlParameterSource queryParameters = new MapSqlParameterSource()
 				.addValue("jobExecutionIds", jobExecutionIds);
 		final String query = getQuery(SQL_DELETE_BATCH_STEP_EXECUTION_CONTEXT);
@@ -120,7 +120,7 @@ public class JdbcDataflowJobExecutionDao implements DataflowJobExecutionDao {
 	}
 
 	@Override
-	public int deleteBatchStepExecutionsByJobExecitionIds(Set<Long> jobExecutionIds) {
+	public int deleteBatchStepExecutionsByJobExecutionIds(Set<Long> jobExecutionIds) {
 		final MapSqlParameterSource queryParameters = new MapSqlParameterSource()
 				.addValue("jobExecutionIds", jobExecutionIds);
 		final String query = getQuery(SQL_DELETE_BATCH_STEP_EXECUTION);
@@ -128,7 +128,7 @@ public class JdbcDataflowJobExecutionDao implements DataflowJobExecutionDao {
 	}
 
 	@Override
-	public int deleteBatchJobExecutionContextByJobExecitionIds(Set<Long> jobExecutionIds) {
+	public int deleteBatchJobExecutionContextByJobExecutionIds(Set<Long> jobExecutionIds) {
 		final MapSqlParameterSource queryParameters = new MapSqlParameterSource()
 				.addValue("jobExecutionIds", jobExecutionIds);
 		final String query = getQuery(SQL_DELETE_BATCH_JOB_EXECUTION_CONTEXT);
@@ -136,7 +136,7 @@ public class JdbcDataflowJobExecutionDao implements DataflowJobExecutionDao {
 	}
 
 	@Override
-	public int deleteBatchJobExecutionParamsByJobExecitionIds(Set<Long> jobExecutionIds) {
+	public int deleteBatchJobExecutionParamsByJobExecutionIds(Set<Long> jobExecutionIds) {
 		final MapSqlParameterSource queryParameters = new MapSqlParameterSource()
 				.addValue("jobExecutionIds", jobExecutionIds);
 		final String query = getQuery(SQL_DELETE_BATCH_JOB_EXECUTION_PARAMS);
@@ -144,7 +144,7 @@ public class JdbcDataflowJobExecutionDao implements DataflowJobExecutionDao {
 	}
 
 	@Override
-	public int deleteBatchJobExecutionByJobExecitionIds(Set<Long> jobExecutionIds) {
+	public int deleteBatchJobExecutionByJobExecutionIds(Set<Long> jobExecutionIds) {
 		final MapSqlParameterSource queryParameters = new MapSqlParameterSource()
 				.addValue("jobExecutionIds", jobExecutionIds);
 		final String query = getQuery(SQL_DELETE_BATCH_JOB_EXECUTION);

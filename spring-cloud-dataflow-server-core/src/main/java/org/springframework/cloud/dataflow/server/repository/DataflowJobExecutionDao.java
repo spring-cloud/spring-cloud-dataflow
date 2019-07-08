@@ -31,49 +31,49 @@ public interface DataflowJobExecutionDao {
 
 	/**
 	 *
-	 * @return
+	 * @return The number of affected records
 	 */
 	int deleteUnusedBatchJobInstances();
 
 	/**
 	 *
 	 * @param jobInstanceIds
-	 * @return
+	 * @return The number of affected records
 	 */
 	int deleteBatchJobExecutionByJobInstanceIds(Set<Long> jobInstanceIds);
 
 	/**
 	 *
 	 * @param jobExecutionIds
-	 * @return
+	 * @return The number of affected records
 	 */
-	int deleteBatchJobExecutionByJobExecitionIds(Set<Long> jobExecutionIds);
+	int deleteBatchJobExecutionByJobExecutionIds(Set<Long> jobExecutionIds);
 
 	/**
 	 *
 	 * @param jobExecutionIds
-	 * @return
+	 * @return The number of affected records
 	 */
-	int deleteBatchJobExecutionParamsByJobExecitionIds(Set<Long> jobExecutionIds);
+	int deleteBatchJobExecutionParamsByJobExecutionIds(Set<Long> jobExecutionIds);
 
 	/**
 	 *
 	 * @param jobExecutionIds
-	 * @return
+	 * @return The number of affected records
 	 */
-	int deleteBatchJobExecutionContextByJobExecitionIds(Set<Long> jobExecutionIds);
+	int deleteBatchJobExecutionContextByJobExecutionIds(Set<Long> jobExecutionIds);
 
 	/**
 	 *
 	 * @param jobExecutionIds
-	 * @return
+	 * @return The number of affected records
 	 */
-	int deleteBatchStepExecutionsByJobExecitionIds(Set<Long> jobExecutionIds);
+	int deleteBatchStepExecutionsByJobExecutionIds(Set<Long> jobExecutionIds);
 
 	/**
 	 *
 	 * @param jobExecutionIds
-	 * @return
+	 * @return The number of affected records
 	 */
-	int deleteBatchStepExecutionContextByJobExecitionIds(Set<Long> jobExecutionIds);
+	int deleteBatchStepExecutionContextByJobExecutionIds(Set<Long> jobExecutionIds);
 }

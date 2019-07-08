@@ -31,20 +31,27 @@ public interface DataflowTaskExecutionDao {
 
 	/**
 	 * Deletes 1 or more Task Executions
-	 * @param taskExecitionIds Must contain at least 1 taskExecitionId
+	 * @param taskExecutionIds Must contain at least 1 taskExecutionId
 	 */
-	int deleteTaskExecutionsByTaskExecitionIds(Set<Long> taskExecitionIds);
+	int deleteTaskExecutionsByTaskExecutionIds(Set<Long> taskExecutionIds);
 
 	/**
 	 * Deletes 1 or more Task Executions
-	 * @param taskExecitionIds Must contain at least 1 taskExecitionId
+	 * @param taskExecutionIds Must contain at least 1 taskExecutionId
 	 */
-	int deleteTaskExecutionParamsByTaskExecitionIds(Set<Long> taskExecitionIds);
+	int deleteTaskExecutionParamsByTaskExecutionIds(Set<Long> taskExecutionIds);
 
 	/**
 	 * Deletes 1 or more Task Executions
-	 * @param taskExecitionIds Must contain at least 1 taskExecitionId
+	 * @param taskExecutionIds Must contain at least 1 taskExecutionId
 	 */
-	int deleteTaskTaskBatchRelationshipsByTaskExecitionIds(Set<Long> taskExecitionIds);
+	int deleteTaskTaskBatchRelationshipsByTaskExecutionIds(Set<Long> taskExecutionIds);
+
+	/**
+	 *
+	 * @param taskExecutionId
+	 * @return
+	 */
+	Set<Long> findChildTaskExecutionIds(Set<Long> taskExecutionIds);
 
 }
