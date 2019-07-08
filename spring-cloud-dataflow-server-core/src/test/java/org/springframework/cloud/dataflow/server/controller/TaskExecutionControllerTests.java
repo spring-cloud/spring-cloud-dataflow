@@ -179,7 +179,7 @@ public class TaskExecutionControllerTests {
 			taskBatchDao.saveRelationship(taskExecution, jobExecution);
 			TaskDeployment taskDeployment = new TaskDeployment();
 			taskDeployment.setTaskDefinitionName(TASK_NAME_ORIG);
-			taskDeployment.setTaskDeploymentId("1");
+			taskDeployment.setTaskDeploymentId("foobar");
 			taskDeployment.setPlatformName("default");
 			taskDeployment.setCreatedOn(Instant.now());
 			taskDeploymentRepository.save(taskDeployment);
