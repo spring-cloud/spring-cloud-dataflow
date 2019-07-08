@@ -61,7 +61,7 @@ public class JdbcDataflowTaskExecutionDao implements DataflowTaskExecutionDao {
 
 	/**
 	 * Initializes the JdbcTaskExecutionDao.
-	 * @param dataSource used by the dao to execute queries and update the tables.
+	 * @param dataSource used by the dao to execute queries and updates the tables.
 	 * @param tablePrefix the table prefix to use for this dao.
 	 */
 	public JdbcDataflowTaskExecutionDao(DataSource dataSource, String tablePrefix) {

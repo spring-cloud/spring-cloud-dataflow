@@ -27,10 +27,7 @@ import org.springframework.util.StringUtils;
  */
 public class NoSuchTaskExecutionException extends RuntimeException {
 
-	/**
-	 *
-	 */
-	private static final long serialVersionUID = 1L;
+	private static final long serialVersionUID = -303914974762305117L;
 
 	/**
 	 * Create a new exception.

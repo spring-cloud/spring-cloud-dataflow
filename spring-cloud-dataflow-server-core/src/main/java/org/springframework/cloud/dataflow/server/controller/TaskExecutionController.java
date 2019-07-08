@@ -204,7 +204,9 @@ public class TaskExecutionController {
 	}
 
 	/**
-	 * Cleanup resources associated with one or more task executions, specified by id(s).
+	 * Cleanup resources associated with one or more task executions, specified by id(s). The
+	 * optional {@code actions} parameter can be used to not only clean up task execution resources,
+	 * but can also trigger the deletion of task execution and job data in the persistence store.
 	 *
 	 * @param ids The id of the {@link TaskExecution}s to clean up
 	 * @param actions Defaults to "CLEANUP" if not specified

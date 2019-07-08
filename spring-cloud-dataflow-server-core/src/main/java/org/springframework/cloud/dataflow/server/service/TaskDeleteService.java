@@ -44,9 +44,9 @@ public interface TaskDeleteService {
 	/**
 	 * Delete one or more Task executions.
 	 *
-	 * @param id the execution id
+	 * @param ids Collection of task execution ids to delete. Must contain at least 1 id.
 	 */
-	void deleteOneOrMoreTaskExecutions(Set<Long> ids);
+	void deleteTaskExecutions(Set<Long> ids);
 
 	/**
 	 * Destroy the task definition. If it is a Composed Task then the task definitions
