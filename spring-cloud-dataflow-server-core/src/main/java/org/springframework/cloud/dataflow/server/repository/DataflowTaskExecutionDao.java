@@ -30,27 +30,35 @@ import org.springframework.cloud.task.repository.dao.TaskExecutionDao;
 public interface DataflowTaskExecutionDao {
 
 	/**
-	 * Deletes 1 or more Task Executions
+	 * Deletes 1 or more task execution parameter records.
+	 *
 	 * @param taskExecutionIds Must contain at least 1 taskExecutionId
-	 */
-	int deleteTaskExecutionsByTaskExecutionIds(Set<Long> taskExecutionIds);
-
-	/**
-	 * Deletes 1 or more Task Executions
-	 * @param taskExecutionIds Must contain at least 1 taskExecutionId
+	 * @return The number of affected records
 	 */
 	int deleteTaskExecutionParamsByTaskExecutionIds(Set<Long> taskExecutionIds);
 
 	/**
-	 * Deletes 1 or more Task Executions
+	 * Deletes 1 or more task executions
+	 *
 	 * @param taskExecutionIds Must contain at least 1 taskExecutionId
+	 * @return The number of affected records
+	 */
+	int deleteTaskExecutionsByTaskExecutionIds(Set<Long> taskExecutionIds);
+
+	/**
+	 * Deletes 1 or more task batch relationship records that links batch executions
+	 * to task executions.
+	 *
+	 * @param taskExecutionIds Must contain at least 1 taskExecutionId
+	 * @return The number of affected records
 	 */
 	int deleteTaskTaskBatchRelationshipsByTaskExecutionIds(Set<Long> taskExecutionIds);
 
 	/**
+	 * Find all child task execution ids for the provided task execution ids.
 	 *
-	 * @param taskExecutionId
-	 * @return
+	 * @param taskExecutionId Must contain at least 1 taskExecutionId
+	 * @return A set of task execution or an empty collection, but never null
 	 */
 	Set<Long> findChildTaskExecutionIds(Set<Long> taskExecutionIds);
 

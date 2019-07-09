@@ -21,14 +21,13 @@ import java.util.Set;
 import javax.sql.DataSource;
 
 import org.springframework.batch.core.repository.dao.JdbcJobExecutionDao;
-import org.springframework.cloud.task.configuration.TaskProperties;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
 /**
- * Stores Task Execution Information to a JDBC DataSource. Mirrors the {@link JdbcJobExecutionDao}
+ * Stores job execution information to a JDBC DataSource. Mirrors the {@link JdbcJobExecutionDao}
  * but contains Spring Cloud Data Flow specific operations. This functionality might
  * be migrated to Spring Batch itself eventually.
  *
@@ -37,9 +36,7 @@ import org.springframework.util.StringUtils;
 public class JdbcDataflowJobExecutionDao implements DataflowJobExecutionDao {
 
 	private final NamedParameterJdbcTemplate jdbcTemplate;
-
-	// private String tablePrefix = BatchProperties.DEFAULT_TABLE_PREFIX;
-	private String tablePrefix = "BATCH_";
+	private final String tablePrefix;
 
 	/**
 	 * SQL statements for removing the Step Execution Context.
@@ -91,23 +88,15 @@ public class JdbcDataflowJobExecutionDao implements DataflowJobExecutionDao {
 			"SELECT JOB_INSTANCE_ID FROM %PREFIX%JOB_EXECUTION BJE WHERE BJI.JOB_INSTANCE_ID = BJE.JOB_INSTANCE_ID)";
 
 	/**
-	 * Initializes the JdbcTaskExecutionDao.
-	 * @param dataSource used by the dao to execute queries and update the tables.
-	 * @param tablePrefix the table prefix to use for this dao.
+	 * Initializes the JdbcDataflowJobExecutionDao.
+	 *
+	 * @param dataSource used by the dao to execute queries and update the tables. Must not be null.
+	 * @param tablePrefix Must not be null or empty.
 	 */
 	public JdbcDataflowJobExecutionDao(DataSource dataSource, String tablePrefix) {
-		this(dataSource);
-		Assert.hasText(tablePrefix, "tablePrefix must not be null nor empty");
-		this.tablePrefix = tablePrefix;
-	}
-
-	/**
-	 * Initializes the JdbTaskExecutionDao and defaults the table prefix to
-	 * {@link TaskProperties#DEFAULT_TABLE_PREFIX}.
-	 * @param dataSource used by the dao to execute queries and update the tables.
-	 */
-	public JdbcDataflowJobExecutionDao(DataSource dataSource) {
+		Assert.hasText(tablePrefix, "tablePrefix must not be null nor empty.");
 		Assert.notNull(dataSource, "The dataSource must not be null.");
+		this.tablePrefix = tablePrefix;
 		this.jdbcTemplate = new NamedParameterJdbcTemplate(dataSource);
 	}
 
@@ -148,14 +137,6 @@ public class JdbcDataflowJobExecutionDao implements DataflowJobExecutionDao {
 		final MapSqlParameterSource queryParameters = new MapSqlParameterSource()
 				.addValue("jobExecutionIds", jobExecutionIds);
 		final String query = getQuery(SQL_DELETE_BATCH_JOB_EXECUTION);
-		return this.jdbcTemplate.update(query, queryParameters);
-	}
-
-	@Override
-	public int deleteBatchJobExecutionByJobInstanceIds(Set<Long> jobInstanceIds) {
-		final MapSqlParameterSource queryParameters = new MapSqlParameterSource()
-				.addValue("jobInstanceIds", jobInstanceIds);
-		final String query = getQuery(SQL_DELETE_BATCH_JOB_INSTANCE);
 		return this.jdbcTemplate.update(query, queryParameters);
 	}
 

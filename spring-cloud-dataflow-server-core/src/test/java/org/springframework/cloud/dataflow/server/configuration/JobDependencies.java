@@ -26,6 +26,7 @@ import org.springframework.batch.core.configuration.support.MapJobRegistry;
 import org.springframework.batch.core.explore.JobExplorer;
 import org.springframework.batch.core.explore.support.JobExplorerFactoryBean;
 import org.springframework.batch.core.launch.support.SimpleJobLauncher;
+import org.springframework.batch.core.repository.dao.AbstractJdbcBatchMetadataDao;
 import org.springframework.batch.core.repository.support.JobRepositoryFactoryBean;
 import org.springframework.boot.autoconfigure.ImportAutoConfiguration;
 import org.springframework.boot.autoconfigure.batch.BatchDataSourceInitializer;
@@ -86,6 +87,7 @@ import org.springframework.cloud.deployer.resource.maven.MavenProperties;
 import org.springframework.cloud.deployer.spi.task.TaskLauncher;
 import org.springframework.cloud.task.batch.listener.TaskBatchDao;
 import org.springframework.cloud.task.batch.listener.support.JdbcTaskBatchDao;
+import org.springframework.cloud.task.configuration.TaskProperties;
 import org.springframework.cloud.task.repository.TaskExplorer;
 import org.springframework.cloud.task.repository.TaskRepository;
 import org.springframework.cloud.task.repository.support.SimpleTaskExplorer;
@@ -129,7 +131,7 @@ import static org.mockito.Mockito.mock;
 		"org.springframework.cloud.dataflow.audit.repository"
 })
 @EnableJpaAuditing
-@EnableConfigurationProperties({ DockerValidatorProperties.class, TaskConfigurationProperties.class })
+@EnableConfigurationProperties({ DockerValidatorProperties.class, TaskConfigurationProperties.class, TaskProperties.class })
 @EnableMapRepositories(basePackages = "org.springframework.cloud.dataflow.server.job")
 public class JobDependencies {
 
@@ -271,13 +273,13 @@ public class JobDependencies {
 	}
 
 	@Bean
-	DataflowTaskExecutionDao dataflowTaskExecutionDao(DataSource dataSource) {
-		return new JdbcDataflowTaskExecutionDao(dataSource);
+	public DataflowTaskExecutionDao dataflowTaskExecutionDao(DataSource dataSource, TaskProperties taskProperties) {
+		return new JdbcDataflowTaskExecutionDao(dataSource, taskProperties.getTablePrefix());
 	}
 
 	@Bean
-	DataflowJobExecutionDao dataflowJobExecutionDao(DataSource dataSource) {
-		return new JdbcDataflowJobExecutionDao(dataSource);
+	public DataflowJobExecutionDao dataflowJobExecutionDao(DataSource dataSource) {
+		return new JdbcDataflowJobExecutionDao(dataSource, AbstractJdbcBatchMetadataDao.DEFAULT_TABLE_PREFIX);
 	}
 
 	@Bean

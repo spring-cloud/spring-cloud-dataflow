@@ -19,6 +19,7 @@ package org.springframework.cloud.dataflow.server.config;
 import javax.servlet.Filter;
 import javax.sql.DataSource;
 
+import org.springframework.batch.core.repository.dao.AbstractJdbcBatchMetadataDao;
 import org.springframework.boot.autoconfigure.batch.BatchProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.cloud.dataflow.completion.CompletionConfiguration;
@@ -30,6 +31,7 @@ import org.springframework.cloud.dataflow.server.repository.DataflowJobExecution
 import org.springframework.cloud.dataflow.server.repository.DataflowTaskExecutionDao;
 import org.springframework.cloud.dataflow.server.repository.JdbcDataflowJobExecutionDao;
 import org.springframework.cloud.dataflow.server.repository.JdbcDataflowTaskExecutionDao;
+import org.springframework.cloud.task.configuration.TaskProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
@@ -69,11 +71,12 @@ public class DataFlowServerConfiguration {
 	}
 
 	@Bean
-	DataflowTaskExecutionDao dataflowTaskExecutionDao(DataSource dataSource) {
-		return new JdbcDataflowTaskExecutionDao(dataSource);
+	DataflowTaskExecutionDao dataflowTaskExecutionDao(DataSource dataSource, TaskProperties taskProperties) {
+		return new JdbcDataflowTaskExecutionDao(dataSource, taskProperties.getTablePrefix());
 	}
+
 	@Bean
 	DataflowJobExecutionDao dataflowJobExecutionDao(DataSource dataSource) {
-		return new JdbcDataflowJobExecutionDao(dataSource);
+		return new JdbcDataflowJobExecutionDao(dataSource, AbstractJdbcBatchMetadataDao.DEFAULT_TABLE_PREFIX);
 	}
 }

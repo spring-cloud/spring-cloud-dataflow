@@ -21,6 +21,7 @@ import java.util.List;
 
 import javax.sql.DataSource;
 
+import org.springframework.batch.core.repository.dao.AbstractJdbcBatchMetadataDao;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.ImportAutoConfiguration;
 import org.springframework.boot.autoconfigure.domain.EntityScan;
@@ -66,6 +67,7 @@ import org.springframework.cloud.dataflow.server.service.impl.TaskConfigurationP
 import org.springframework.cloud.dataflow.server.service.impl.validation.DefaultTaskValidationService;
 import org.springframework.cloud.deployer.spi.task.TaskLauncher;
 import org.springframework.cloud.scheduler.spi.core.Scheduler;
+import org.springframework.cloud.task.configuration.TaskProperties;
 import org.springframework.cloud.task.repository.TaskExplorer;
 import org.springframework.cloud.task.repository.TaskRepository;
 import org.springframework.cloud.task.repository.support.SimpleTaskExplorer;
@@ -106,6 +108,7 @@ import static org.mockito.Mockito.when;
 		VersionInfoProperties.class,
 		DockerValidatorProperties.class,
 		TaskConfigurationProperties.class,
+		TaskProperties.class,
 		DockerValidatorProperties.class })
 @EntityScan({
 		"org.springframework.cloud.dataflow.registry.domain",
@@ -152,13 +155,13 @@ public class TaskServiceDependencies extends WebMvcConfigurationSupport {
 	}
 
 	@Bean
-	DataflowTaskExecutionDao dataflowTaskExecutionDao(DataSource dataSource) {
-		return new JdbcDataflowTaskExecutionDao(dataSource);
+	public DataflowTaskExecutionDao dataflowTaskExecutionDao(DataSource dataSource, TaskProperties taskProperties) {
+		return new JdbcDataflowTaskExecutionDao(dataSource, taskProperties.getTablePrefix());
 	}
 
 	@Bean
-	DataflowJobExecutionDao dataflowJobExecutionDao(DataSource dataSource) {
-		return new JdbcDataflowJobExecutionDao(dataSource);
+	public DataflowJobExecutionDao dataflowJobExecutionDao(DataSource dataSource) {
+		return new JdbcDataflowJobExecutionDao(dataSource, AbstractJdbcBatchMetadataDao.DEFAULT_TABLE_PREFIX);
 	}
 
 	@Bean

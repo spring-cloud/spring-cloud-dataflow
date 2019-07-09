@@ -22,30 +22,31 @@ import org.springframework.cloud.task.repository.TaskExecution;
 import org.springframework.util.StringUtils;
 
 /**
+ * Exception that allows to indicate that 1 or more {@link TaskExecution}s
+ * could not be deleted.
+ *
  * @author Gunnar Hillert
  */
 public class CannotDeleteNonParentTaskExecutionException extends RuntimeException {
 
-	/**
-	 *
-	 */
-	private static final long serialVersionUID = 1L;
+	private static final long serialVersionUID = 6186330473012259152L;
 
 	/**
-	 * Create a new exception.
+	 * Create a new exception for 1 {@link TaskExecution} id that could not be deleted.
 	 *
-	 * @param id the id of the {@link TaskExecution} that could not be found
+	 * @param taskExecutionId the id of the {@link TaskExecution} that could not be found
 	 */
-	public CannotDeleteNonParentTaskExecutionException(long id) {
-		super("Cannot delete non-parent TaskExecution with id " + id);
+	public CannotDeleteNonParentTaskExecutionException(Long taskExecutionId) {
+		super("Cannot delete non-parent TaskExecution with id " + taskExecutionId);
 	}
 
 	/**
-	 * Create a new exception.
+	 * Create a new exception for multiple {@link TaskExecution} ids
+	 * that could not be deleted.
 	 *
-	 * @param ids the ids of the {@link TaskExecution} that could not be found
+	 * @param taskExecutionIds the ids of the {@link TaskExecution} that could not be found
 	 */
-	public CannotDeleteNonParentTaskExecutionException(Set<Long> ids) {
-		super("Cannot delete non-parent TaskExecutions with the following ids: " + StringUtils.collectionToDelimitedString(ids, ", "));
+	public CannotDeleteNonParentTaskExecutionException(Set<Long> taskExecutionIds) {
+		super("Cannot delete non-parent TaskExecutions with the following ids: " + StringUtils.collectionToDelimitedString(taskExecutionIds, ", "));
 	}
 }

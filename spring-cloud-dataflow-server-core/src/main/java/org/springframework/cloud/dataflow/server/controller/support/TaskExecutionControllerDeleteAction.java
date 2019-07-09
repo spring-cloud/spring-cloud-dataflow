@@ -15,13 +15,23 @@
  */
 package org.springframework.cloud.dataflow.server.controller.support;
 
+import org.springframework.cloud.dataflow.server.controller.TaskExecutionController;
+
 /**
+ * This enum is used by the {@link TaskExecutionController#cleanup(java.util.Set, TaskExecutionControllerDeleteAction[])}.
  *
  * @author Gunnar Hillert
  *
  */
 public enum TaskExecutionControllerDeleteAction {
+
+	/**
+	 * Cleanup resources associated with one or more task executions.
+	 */
 	CLEANUP,
-	REMOVE_DATA,
-	REMOVE_BATCH_DATA;
+
+	/**
+	 * Removed task execution and job execution data from the persistence store.
+	 */
+	REMOVE_DATA
 }

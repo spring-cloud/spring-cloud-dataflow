@@ -30,50 +30,52 @@ import org.springframework.batch.core.repository.dao.JobExecutionDao;
 public interface DataflowJobExecutionDao {
 
 	/**
+	 * Delete the batch job execution records from the persistence store for
+	 * the provided job execution ids.
 	 *
-	 * @return The number of affected records
-	 */
-	int deleteUnusedBatchJobInstances();
-
-	/**
-	 *
-	 * @param jobInstanceIds
-	 * @return The number of affected records
-	 */
-	int deleteBatchJobExecutionByJobInstanceIds(Set<Long> jobInstanceIds);
-
-	/**
-	 *
-	 * @param jobExecutionIds
+	 * @param jobExecutionIds Must contain at least 1 value
 	 * @return The number of affected records
 	 */
 	int deleteBatchJobExecutionByJobExecutionIds(Set<Long> jobExecutionIds);
 
 	/**
+	 * Delete the batch job execution context records from the persistence store for
+	 * the provided job execution ids.
 	 *
-	 * @param jobExecutionIds
-	 * @return The number of affected records
-	 */
-	int deleteBatchJobExecutionParamsByJobExecutionIds(Set<Long> jobExecutionIds);
-
-	/**
-	 *
-	 * @param jobExecutionIds
+	 * @param jobExecutionIds Must contain at least 1 value
 	 * @return The number of affected records
 	 */
 	int deleteBatchJobExecutionContextByJobExecutionIds(Set<Long> jobExecutionIds);
 
 	/**
+	 * Delete the batch job execution parameter records from the persistence store for
+	 * the provided job execution ids.
 	 *
-	 * @param jobExecutionIds
+	 * @param jobExecutionIds Must contain at least 1 value
+	 * @return The number of affected records
+	 */
+	int deleteBatchJobExecutionParamsByJobExecutionIds(Set<Long> jobExecutionIds);
+
+	/**
+	 * Delete the batch step execution context records from the persistence store for
+	 * the provided job execution ids.
+	 *
+	 * @param jobExecutionIds Must contain at least 1 value
+	 * @return The number of affected records
+	 */
+	int deleteBatchStepExecutionContextByJobExecutionIds(Set<Long> jobExecutionIds);
+
+	/**
+	 *
+	 * @param jobExecutionIds Must contain at least 1 value
 	 * @return The number of affected records
 	 */
 	int deleteBatchStepExecutionsByJobExecutionIds(Set<Long> jobExecutionIds);
 
 	/**
+	 * Will delete any unused job instance records from the persistence store.
 	 *
-	 * @param jobExecutionIds
 	 * @return The number of affected records
 	 */
-	int deleteBatchStepExecutionContextByJobExecutionIds(Set<Long> jobExecutionIds);
+	int deleteUnusedBatchJobInstances();
 }

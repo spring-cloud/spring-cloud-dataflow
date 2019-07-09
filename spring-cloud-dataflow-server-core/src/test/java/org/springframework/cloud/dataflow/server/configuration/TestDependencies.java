@@ -29,6 +29,7 @@ import javax.sql.DataSource;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 
 import org.springframework.batch.core.StepExecution;
+import org.springframework.batch.core.repository.dao.AbstractJdbcBatchMetadataDao;
 import org.springframework.batch.item.ExecutionContext;
 import org.springframework.boot.autoconfigure.ImportAutoConfiguration;
 import org.springframework.boot.autoconfigure.domain.EntityScan;
@@ -128,6 +129,7 @@ import org.springframework.cloud.skipper.client.SkipperClient;
 import org.springframework.cloud.skipper.domain.AboutResource;
 import org.springframework.cloud.skipper.domain.Dependency;
 import org.springframework.cloud.skipper.domain.Deployer;
+import org.springframework.cloud.task.configuration.TaskProperties;
 import org.springframework.cloud.task.repository.TaskExplorer;
 import org.springframework.cloud.task.repository.TaskRepository;
 import org.springframework.cloud.task.repository.support.SimpleTaskRepository;
@@ -170,6 +172,7 @@ import static org.mockito.Mockito.when;
 		VersionInfoProperties.class,
 		DockerValidatorProperties.class,
 		TaskConfigurationProperties.class,
+		TaskProperties.class,
 		DockerValidatorProperties.class,
 		GrafanaInfoProperties.class })
 @EntityScan({
@@ -415,13 +418,13 @@ public class TestDependencies extends WebMvcConfigurationSupport {
 	}
 
 	@Bean
-	DataflowTaskExecutionDao dataflowTaskExecutionDao(DataSource dataSource) {
-		return new JdbcDataflowTaskExecutionDao(dataSource);
+	public DataflowTaskExecutionDao dataflowTaskExecutionDao(DataSource dataSource, TaskProperties taskProperties) {
+		return new JdbcDataflowTaskExecutionDao(dataSource, taskProperties.getTablePrefix());
 	}
 
 	@Bean
-	DataflowJobExecutionDao dataflowJobExecutionDao(DataSource dataSource) {
-		return new JdbcDataflowJobExecutionDao(dataSource);
+	public DataflowJobExecutionDao dataflowJobExecutionDao(DataSource dataSource) {
+		return new JdbcDataflowJobExecutionDao(dataSource, AbstractJdbcBatchMetadataDao.DEFAULT_TABLE_PREFIX);
 	}
 
 	@Bean

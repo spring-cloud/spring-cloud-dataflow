@@ -181,13 +181,13 @@ public class DefaultTaskDeleteService implements TaskDeleteService {
 		}
 
 		if (actionsAsSet.contains(TaskExecutionControllerDeleteAction.REMOVE_DATA)) {
-			this.deleteOneOrMoreTaskExecutions(ids);
+			this.deleteTaskExecutions(ids);
 		}
 	}
 
 	@Override
 	@Transactional
-	public void deleteOneOrMoreTaskExecutions(Set<Long> taskExecutionIds) {
+	public void deleteTaskExecutions(Set<Long> taskExecutionIds) {
 		Assert.notEmpty(taskExecutionIds, "You must provide at least 1 task execution id.");
 
 		final Set<Long> taskExecutionIdsWithChildren = new HashSet<>(taskExecutionIds);
