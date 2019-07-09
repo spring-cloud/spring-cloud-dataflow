@@ -15,7 +15,8 @@
   "editable": true,
   "gnetId": null,
   "graphTooltip": 0,
-  "iteration": 1562156612387,
+  "id": 3,
+  "iteration": 1562672233488,
   "links": [
     {
       "icon": "external link",
@@ -62,14 +63,8 @@
       "steppedLine": true,
       "targets": [
         {
-          "alias": "$task_name  - $task_execution_id",
+          "alias": "",
           "groupBy": [
-            {
-              "params": [
-                "task_external_execution_id"
-              ],
-              "type": "tag"
-            },
             {
               "params": [
                 "task_name"
@@ -221,7 +216,7 @@
       "timeFrom": null,
       "timeRegions": [],
       "timeShift": null,
-      "title": "Job duration",
+      "title": "Batch Job duration",
       "tooltip": {
         "shared": true,
         "sort": 0,
@@ -274,14 +269,14 @@
           ]
         },
         "datasource": "influx_auto_DataFlowMetricsCollector",
-        "definition": "select distinct(\"name\") from (select  * from \"spring_batch_job\" WHERE time > now() -  6000s)",
+        "definition": "select distinct(\"name\") from (select  * from \"spring_batch_job\")",
         "hide": 0,
         "includeAll": true,
         "label": "job_name",
         "multi": true,
         "name": "job_name",
         "options": [],
-        "query": "select distinct(\"name\") from (select  * from \"spring_batch_job\" WHERE time > now() -  6000s)",
+        "query": "select distinct(\"name\") from (select  * from \"spring_batch_job\")",
         "refresh": 2,
         "regex": "",
         "skipUrlSync": false,
@@ -328,25 +323,21 @@
       {
         "allValue": null,
         "current": {
-          "text": "none",
-          "value": "none"
+          "text": "All",
+          "value": [
+            "$__all"
+          ]
         },
         "datasource": "influx_auto_DataFlowMetricsCollector",
-        "definition": "select distinct(\"task_name\") from (select  * from \"spring_cloud_task\" WHERE time > now() -  160s)",
+        "definition": "select distinct(\"task_name\") from (select  * from \"spring_cloud_task\")",
         "hide": 0,
         "includeAll": true,
         "label": "task_name",
         "multi": true,
         "name": "task_name",
-        "options": [
-          {
-            "selected": false,
-            "text": "All",
-            "value": "$__all"
-          }
-        ],
-        "query": "select distinct(\"task_name\") from (select  * from \"spring_cloud_task\" WHERE time > now() -  160s)",
-        "refresh": 0,
+        "options": [],
+        "query": "select distinct(\"task_name\") from (select  * from \"spring_cloud_task\")",
+        "refresh": 2,
         "regex": "",
         "skipUrlSync": false,
         "sort": 0,
@@ -363,26 +354,15 @@
           "value": "1"
         },
         "datasource": "influx_auto_DataFlowMetricsCollector",
-        "definition": "show tag values with key=\"task_execution_id\"  WHERE \"task_name\"='$task_name'",
+        "definition": "show tag values with key=\"task_execution_id\"  WHERE \"task_name\"=$task_name",
         "hide": 0,
         "includeAll": false,
         "label": "task_execution_id",
         "multi": false,
         "name": "task_execution_id",
-        "options": [
-          {
-            "selected": true,
-            "text": "1",
-            "value": "1"
-          },
-          {
-            "selected": false,
-            "text": "2",
-            "value": "2"
-          }
-        ],
-        "query": "show tag values with key=\"task_execution_id\"  WHERE \"task_name\"='$task_name'",
-        "refresh": 0,
+        "options": [],
+        "query": "show tag values with key=\"task_execution_id\"  WHERE \"task_name\"=$task_name",
+        "refresh": 1,
         "regex": "",
         "skipUrlSync": false,
         "sort": 0,
@@ -395,7 +375,7 @@
     ]
   },
   "time": {
-    "from": "now-15m",
+    "from": "now-30m",
     "to": "now"
   },
   "timepicker": {
@@ -424,7 +404,7 @@
     ]
   },
   "timezone": "",
-  "title": "Spring Cloud Task & Batch",
+  "title": "Task & Batch",
   "uid": "Z8fhFe7Wk",
   "version": 1
 }
