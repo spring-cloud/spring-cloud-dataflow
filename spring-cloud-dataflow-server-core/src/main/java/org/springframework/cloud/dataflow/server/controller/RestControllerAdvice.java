@@ -31,6 +31,7 @@ import org.springframework.cloud.dataflow.server.batch.NoSuchStepExecutionExcept
 import org.springframework.cloud.dataflow.server.controller.support.InvalidDateRangeException;
 import org.springframework.cloud.dataflow.server.controller.support.InvalidStreamDefinitionException;
 import org.springframework.cloud.dataflow.server.job.support.JobNotRestartableException;
+import org.springframework.cloud.dataflow.server.repository.CannotDeleteNonParentTaskExecutionException;
 import org.springframework.cloud.dataflow.server.repository.DuplicateStreamDefinitionException;
 import org.springframework.cloud.dataflow.server.repository.DuplicateTaskException;
 import org.springframework.cloud.dataflow.server.repository.NoSuchAuditRecordException;
@@ -175,7 +176,7 @@ public class RestControllerAdvice {
 	 */
 	@ExceptionHandler({ MissingServletRequestParameterException.class, HttpMessageNotReadableException.class,
 			UnsatisfiedServletRequestParameterException.class, MethodArgumentTypeMismatchException.class,
-			InvalidDateRangeException.class,
+			InvalidDateRangeException.class, CannotDeleteNonParentTaskExecutionException.class,
 			InvalidStreamDefinitionException.class, CreateScheduleException.class, OffsetOutOfBoundsException.class })
 	@ResponseStatus(HttpStatus.BAD_REQUEST)
 	@ResponseBody
