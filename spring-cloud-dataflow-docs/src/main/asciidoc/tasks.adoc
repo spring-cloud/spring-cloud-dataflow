@@ -231,7 +231,7 @@ overrides the common property).
 === Limit the number concurrent task launches
 Spring Cloud Data Flow allows a user to limit the maximum number of concurrently running tasks for each configured platform to prevent the saturation of IaaS/hardware resources.
 The limit is set to `20` for all supported platforms by default. If the number of concurrently running tasks on a platform instance is greater or equal to the limit, the next task launch request will fail and an error message will be returned via the RESTful API, Shell or UI.
-This limit can be configured for a platform instance by setting the corresponding deployer property, `spring.cloud.dataflow.task.platform.<platform-type>.accounts[<account-name>].maximum-concurrent-tasks` property, where `<account-name>` is the name of a configured platform account (`default` if no accounts are explicitly configured).
+This limit can be configured for a platform instance by setting the corresponding deployer property, `spring.cloud.dataflow.task.platform.<platform-type>.accounts[<account-name>].deployment.maximumConcurrentTasks` property, where `<account-name>` is the name of a configured platform account (`default` if no accounts are explicitly configured).
 The `<platform-type>` refers to one of the currently supported deployers: `local`, `cloudfoundry`, or `kubernetes`.
 
 The TaskLauncher implementation for each supported platform determines the number of currently executing tasks by querying the underlying platform's runtime state if possible. The method for identifying a `task` varies by platform.
