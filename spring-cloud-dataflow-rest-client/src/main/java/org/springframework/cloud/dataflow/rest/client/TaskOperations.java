@@ -70,6 +70,13 @@ public interface TaskOperations {
 	long launch(String name, Map<String, String> properties, List<String> arguments);
 
 	/**
+	 * Request the stop of a group {@link org.springframework.cloud.task.repository.TaskExecution}s.
+	 *
+	 * @param ids comma delimited set of {@link org.springframework.cloud.task.repository.TaskExecution} ids to stop.
+	 */
+	void stop(String ids);
+
+	/**
 	 * Destroy an existing task.
 	 *
 	 * @param name the name of the task

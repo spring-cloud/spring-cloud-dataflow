@@ -120,6 +120,29 @@ public class TaskCommandTests extends AbstractShellIntegrationTest {
 	}
 
 	@Test
+	public void testExecutionStop() {
+		logger.info("Launching instance of task");
+		String taskName = generateUniqueStreamOrTaskName();
+		task().create(taskName, "timestamp");
+		long id = task().launch(taskName);
+		CommandResult cr = task().stop(id);
+		assertTrue(cr.toString().contains(
+				String.format("Request to stop task execution %s has been submitted", id)));
+	}
+
+	@Test
+	public void testExecutionStopInvalid() {
+		boolean isException = false;
+		try {
+			task().stop(9001);
+		} catch (IllegalArgumentException dfce) {
+			assertTrue(dfce.getMessage().contains("Could not find TaskExecution with id 9001"));
+			isException = true;
+		}
+		assertTrue("Expected IllegalArgumentException to have been thrown", isException);
+	}
+
+	@Test
 	public void testCreateTask() {
 		logger.info("Create Task Test");
 		String taskName = generateUniqueStreamOrTaskName();
@@ -256,7 +279,6 @@ public class TaskCommandTests extends AbstractShellIntegrationTest {
 
 		verifyTableValue(table, 1, 0, "default");
 		verifyTableValue(table, 1, 1, "Local");
-		verifyTableValue(table, 1, 2, 0);
 		verifyTableValue(table, 1, 3, 20);
 	}
 
