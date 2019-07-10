@@ -72,7 +72,7 @@ public class TaskCommandTemplate {
 	 *
 	 * @param taskName the name of the task
 	 */
-	public void  launch(String taskName) {
+	public long launch(String taskName) {
 		// add the task name to the tasks list before assertion
 		tasks.add(taskName);
 		CommandResult cr = shell.executeCommand("task launch " + taskName);
@@ -81,7 +81,19 @@ public class TaskCommandTemplate {
 
 		long value = (long) result.getModel().getValue(1, 1);
 		assertTrue(cr.toString().contains("with execution id " + value));
+		return value;
 	}
+
+	/**
+	 * Stop a task execution.
+	 *
+	 * @param id the id of a {@link org.springframework.cloud.task.repository.TaskExecution}
+	 */
+	public CommandResult stop(long id) {
+		CommandResult cr = shell.executeCommand("task execution stop --ids "+ id);
+		return cr;
+	}
+
 
 	/**
 	 * Executes a task execution list.
