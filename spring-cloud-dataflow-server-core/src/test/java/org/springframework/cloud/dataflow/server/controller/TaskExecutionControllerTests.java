@@ -65,6 +65,7 @@ import org.springframework.web.context.WebApplicationContext;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.nullValue;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
@@ -232,6 +233,16 @@ public class TaskExecutionControllerTests {
 		verifyTaskArgs(SAMPLE_CLEANSED_ARGUMENT_LIST, "",
 				mockMvc.perform(get("/tasks/executions/1").accept(MediaType.APPLICATION_JSON))
 						.andExpect(status().isOk()).andExpect(content().json("{taskName: \"" + TASK_NAME_ORIG + "\"}"))
+						.andExpect(jsonPath("$.parentExecutionId", is(nullValue())))
+						.andExpect(jsonPath("jobExecutionIds", hasSize(0))));
+	}
+
+	@Test
+	public void testGetChildTaskExecution() throws Exception {
+		verifyTaskArgs(SAMPLE_CLEANSED_ARGUMENT_LIST, "",
+				mockMvc.perform(get("/tasks/executions/2").accept(MediaType.APPLICATION_JSON))
+						.andExpect(status().isOk())
+						.andExpect(jsonPath("$.parentExecutionId", is(1)))
 						.andExpect(jsonPath("jobExecutionIds", hasSize(0))));
 	}
 
@@ -247,6 +258,7 @@ public class TaskExecutionControllerTests {
 		verifyTaskArgs(SAMPLE_CLEANSED_ARGUMENT_LIST, "$.content[0].",
 				mockMvc.perform(get("/tasks/executions/").accept(MediaType.APPLICATION_JSON)).andExpect(status().isOk())
 						.andExpect(jsonPath("$.content[*].executionId", containsInAnyOrder(4, 3, 2, 1)))
+						.andExpect(jsonPath("$.content[*].parentExecutionId", containsInAnyOrder(null, null, null, 1)))
 						.andExpect(jsonPath("$.content", hasSize(4))));
 	}
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2016-2018 the original author or authors.
+ * Copyright 2016-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -88,6 +88,12 @@ public class TaskExecutionResource extends ResourceSupport {
 	 */
 	private String externalExecutionId;
 
+	/**
+	 * This Task Execution might be a child task as part of a composed
+	 * task and have a parent task execution id. This property can be null.
+	 */
+	private Long parentExecutionId;
+
 	public TaskExecutionResource() {
 		arguments = new ArrayList<>();
 	}
@@ -102,6 +108,7 @@ public class TaskExecutionResource extends ResourceSupport {
 	public TaskExecutionResource(TaskJobExecutionRel taskJobExecutionRel) {
 		Assert.notNull(taskJobExecutionRel, "taskJobExecutionDTO must not be null");
 		this.executionId = taskJobExecutionRel.getTaskExecution().getExecutionId();
+		this.parentExecutionId = taskJobExecutionRel.getTaskExecution().getParentExecutionId();
 		this.exitCode = taskJobExecutionRel.getTaskExecution().getExitCode();
 		this.taskName = taskJobExecutionRel.getTaskExecution().getTaskName();
 		this.exitMessage = taskJobExecutionRel.getTaskExecution().getExitMessage();
@@ -180,6 +187,10 @@ public class TaskExecutionResource extends ResourceSupport {
 
 	public String getExternalExecutionId() {
 		return externalExecutionId;
+	}
+
+	public Long getParentExecutionId() {
+		return parentExecutionId;
 	}
 
 	/**
