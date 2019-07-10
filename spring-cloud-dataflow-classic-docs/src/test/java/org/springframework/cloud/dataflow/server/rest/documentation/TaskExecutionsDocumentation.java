@@ -87,7 +87,7 @@ public class TaskExecutionsDocumentation extends BaseDocumentation {
 						.param("arguments", "--server.port=8080 --foo=bar"))
 				.andExpect(status().isCreated());
 		this.mockMvc.perform(
-				post("/tasks/executions/stop/{id}", 1))
+				post("/tasks/executions/{id}", 1))
 				.andDo(print())
 				.andExpect(status().isOk())
 				.andDo(this.documentationHandler.document(

@@ -227,7 +227,7 @@ public class TaskExecutionController {
 	 *
 	 * @param ids the ids of the {@link TaskExecution}s to stop
 	 */
-	@RequestMapping(value = "/stop/{id}", method = RequestMethod.POST)
+	@RequestMapping(value = "/{id}", method = RequestMethod.POST)
 	@ResponseStatus(HttpStatus.OK)
 	public void stop(@PathVariable("id") Set<Long> ids) {
 		this.taskExecutionService.stopTaskExecution(ids);
