@@ -34,6 +34,7 @@ import org.springframework.cloud.skipper.domain.ConfigValues;
 import org.springframework.cloud.skipper.domain.Info;
 import org.springframework.cloud.skipper.domain.InstallProperties;
 import org.springframework.cloud.skipper.domain.InstallRequest;
+import org.springframework.cloud.skipper.domain.LogInfo;
 import org.springframework.cloud.skipper.domain.PackageIdentifier;
 import org.springframework.cloud.skipper.domain.PackageMetadata;
 import org.springframework.cloud.skipper.domain.Release;
@@ -181,7 +182,7 @@ public class ReleaseServiceTests extends AbstractIntegrationTest {
 		installRequest.setPackageIdentifier(packageIdentifier);
 		assertThat(release).isNotNull();
 		assertThat(release.getPkg().getMetadata().getVersion()).isEqualTo("1.0.0");
-		String logContent = this.releaseService.getLog(releaseName);
+		LogInfo logContent = this.releaseService.getLog(releaseName);
 		assertThat(logContent).isNotNull();
 	}
 

@@ -25,6 +25,7 @@ import org.springframework.cloud.skipper.domain.CancelRequest;
 import org.springframework.cloud.skipper.domain.CancelResponse;
 import org.springframework.cloud.skipper.domain.DeleteProperties;
 import org.springframework.cloud.skipper.domain.Info;
+import org.springframework.cloud.skipper.domain.LogInfo;
 import org.springframework.cloud.skipper.domain.Manifest;
 import org.springframework.cloud.skipper.domain.Release;
 import org.springframework.cloud.skipper.domain.RollbackRequest;
@@ -32,6 +33,7 @@ import org.springframework.cloud.skipper.domain.UpgradeRequest;
 import org.springframework.cloud.skipper.server.controller.support.InfoResourceAssembler;
 import org.springframework.cloud.skipper.server.controller.support.ManifestResourceAssembler;
 import org.springframework.cloud.skipper.server.controller.support.ReleaseResourceAssembler;
+import org.springframework.cloud.skipper.server.controller.support.SimpleResourceAssembler;
 import org.springframework.cloud.skipper.server.service.ReleaseService;
 import org.springframework.cloud.skipper.server.statemachine.SkipperStateMachineService;
 import org.springframework.hateoas.Resource;
@@ -39,7 +41,6 @@ import org.springframework.hateoas.ResourceSupport;
 import org.springframework.hateoas.Resources;
 import org.springframework.hateoas.mvc.ControllerLinkBuilder;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -118,14 +119,14 @@ public class ReleaseController {
 
 	@RequestMapping(path = "/logs/{name}", method = RequestMethod.GET)
 	@ResponseStatus(HttpStatus.OK)
-	public ResponseEntity<String> log(@PathVariable("name") String name) {
-		return new ResponseEntity<>(this.releaseService.getLog(name), HttpStatus.OK);
+	public Resource<LogInfo> log(@PathVariable("name") String name) {
+		return new SimpleResourceAssembler<LogInfo>().toResource(this.releaseService.getLog(name));
 	}
 
 	@RequestMapping(path = "/logs/{name}/{appName}", method = RequestMethod.GET)
 	@ResponseStatus(HttpStatus.OK)
-	public ResponseEntity<String> log(@PathVariable("name") String name, @PathVariable("appName") String appName) {
-		return new ResponseEntity<>(this.releaseService.getLog(name, appName), HttpStatus.OK);
+	public Resource<LogInfo> log(@PathVariable("name") String name, @PathVariable("appName") String appName) {
+		return new SimpleResourceAssembler<LogInfo>().toResource(this.releaseService.getLog(name, appName));
 	}
 
 	@RequestMapping(path = "/manifest/{name}", method = RequestMethod.GET)

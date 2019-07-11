@@ -28,6 +28,7 @@ import org.springframework.cloud.skipper.SkipperException;
 import org.springframework.cloud.skipper.domain.Info;
 import org.springframework.cloud.skipper.domain.InstallProperties;
 import org.springframework.cloud.skipper.domain.InstallRequest;
+import org.springframework.cloud.skipper.domain.LogInfo;
 import org.springframework.cloud.skipper.domain.Manifest;
 import org.springframework.cloud.skipper.domain.Package;
 import org.springframework.cloud.skipper.domain.PackageIdentifier;
@@ -270,12 +271,12 @@ public class ReleaseService {
 	}
 
 	@Transactional
-	public String getLog(String releaseName) {
+	public LogInfo getLog(String releaseName) {
 		return this.getLog(releaseName, null);
 	}
 
 	@Transactional
-	public String getLog(String releaseName, String appName) {
+	public LogInfo getLog(String releaseName, String appName) {
 		Release release = this.releaseRepository.findTopByNameOrderByVersionDesc(releaseName);
 		String kind = ManifestUtils.resolveKind(release.getManifest().getData());
 		ReleaseManager releaseManager = this.releaseManagerFactory.getReleaseManager(kind);

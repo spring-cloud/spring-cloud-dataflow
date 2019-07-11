@@ -33,6 +33,7 @@ import org.springframework.cloud.skipper.domain.CancelResponse;
 import org.springframework.cloud.skipper.domain.Deployer;
 import org.springframework.cloud.skipper.domain.Info;
 import org.springframework.cloud.skipper.domain.InstallRequest;
+import org.springframework.cloud.skipper.domain.LogInfo;
 import org.springframework.cloud.skipper.domain.Manifest;
 import org.springframework.cloud.skipper.domain.PackageMetadata;
 import org.springframework.cloud.skipper.domain.Release;
@@ -158,13 +159,13 @@ public class DefaultSkipperClient implements SkipperClient {
 	}
 
 	@Override
-	public String getLog(String releaseName) {
-		ParameterizedTypeReference<String> typeReference =
-				new ParameterizedTypeReference<String>() { };
+	public LogInfo getLog(String releaseName) {
+		ParameterizedTypeReference<LogInfo> typeReference =
+				new ParameterizedTypeReference<LogInfo>() { };
 		Map<String, String> uriVariables = new HashMap<String, String>();
 		uriVariables.put("releaseName", releaseName);
 
-		ResponseEntity<String> resourceResponseEntity =
+		ResponseEntity<LogInfo> resourceResponseEntity =
 				restTemplate.exchange(baseUri + "/release/logs/{releaseName}",
 						HttpMethod.GET,
 						null,
@@ -174,14 +175,14 @@ public class DefaultSkipperClient implements SkipperClient {
 	}
 
 	@Override
-	public String getLog(String releaseName, String appName) {
-		ParameterizedTypeReference<String> typeReference =
-				new ParameterizedTypeReference<String>() { };
+	public LogInfo getLog(String releaseName, String appName) {
+		ParameterizedTypeReference<LogInfo> typeReference =
+				new ParameterizedTypeReference<LogInfo>() { };
 		Map<String, String> uriVariables = new HashMap<String, String>();
 		uriVariables.put("releaseName", releaseName);
 		uriVariables.put("appName", appName);
 
-		ResponseEntity<String> resourceResponseEntity =
+		ResponseEntity<LogInfo> resourceResponseEntity =
 				restTemplate.exchange(baseUri + "/release/logs/{releaseName}/{appName}",
 						HttpMethod.GET,
 						null,

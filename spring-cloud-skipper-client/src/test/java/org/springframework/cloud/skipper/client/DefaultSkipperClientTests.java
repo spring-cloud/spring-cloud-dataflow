@@ -24,6 +24,7 @@ import org.springframework.cloud.skipper.PackageDeleteException;
 import org.springframework.cloud.skipper.ReleaseNotFoundException;
 import org.springframework.cloud.skipper.SkipperException;
 import org.springframework.cloud.skipper.domain.Info;
+import org.springframework.cloud.skipper.domain.LogInfo;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.client.MockRestServiceServer;
@@ -156,7 +157,7 @@ public class DefaultSkipperClientTests {
 		MockRestServiceServer mockServer = MockRestServiceServer.bindTo(restTemplate).build();
 		mockServer.expect(requestTo("/release/logs/mylog")).andRespond(withSuccess("{}", MediaType.APPLICATION_JSON));
 
-		String logContent = skipperClient.getLog("mylog");
+		LogInfo logContent = skipperClient.getLog("mylog");
 		mockServer.verify();
 
 		assertThat(logContent).isNotNull();
@@ -170,7 +171,7 @@ public class DefaultSkipperClientTests {
 		MockRestServiceServer mockServer = MockRestServiceServer.bindTo(restTemplate).build();
 		mockServer.expect(requestTo("/release/logs/mylog/app")).andRespond(withSuccess("{}", MediaType.APPLICATION_JSON));
 
-		String logContent = skipperClient.getLog("mylog", "app");
+		LogInfo logContent = skipperClient.getLog("mylog", "app");
 		mockServer.verify();
 
 		assertThat(logContent).isNotNull();
