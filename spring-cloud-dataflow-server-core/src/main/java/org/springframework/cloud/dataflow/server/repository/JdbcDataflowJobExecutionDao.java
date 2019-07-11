@@ -16,11 +16,17 @@
 
 package org.springframework.cloud.dataflow.server.repository;
 
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.Collections;
 import java.util.Set;
+import java.util.TreeSet;
 
 import javax.sql.DataSource;
 
 import org.springframework.batch.core.repository.dao.JdbcJobExecutionDao;
+import org.springframework.dao.DataAccessException;
+import org.springframework.jdbc.core.ResultSetExtractor;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.util.Assert;
@@ -38,17 +44,27 @@ public class JdbcDataflowJobExecutionDao implements DataflowJobExecutionDao {
 	private final NamedParameterJdbcTemplate jdbcTemplate;
 	private final String tablePrefix;
 
+	//	/**
+	//	 * SQL statements for removing the Step Execution Context.
+	//	 */
+	//	private static final String  SQL_DELETE_BATCH_STEP_EXECUTION_CONTEXT =
+
+	/**
+	 * SQL statements for retrieving Step Execution Ids.
+	 */
+	private static final String SELECT_STEP_EXECUTION_IDS =
+			"SELECT SEC.STEP_EXECUTION_ID AS STEP_EXECUTION_ID " +
+			"FROM %PREFIX%STEP_EXECUTION_CONTEXT SEC " +
+			"JOIN %PREFIX%STEP_EXECUTION SE ON SE.STEP_EXECUTION_ID = SEC.STEP_EXECUTION_ID " +
+			"WHERE SE.JOB_EXECUTION_ID in (:jobExecutionIds)";
+
 	/**
 	 * SQL statements for removing the Step Execution Context.
 	 */
 	private static final String  SQL_DELETE_BATCH_STEP_EXECUTION_CONTEXT =
 			"DELETE FROM %PREFIX%STEP_EXECUTION_CONTEXT " +
 			"WHERE STEP_EXECUTION_ID " +
-			"IN ( " +
-			"SELECT SEC.STEP_EXECUTION_ID " +
-			"FROM %PREFIX%STEP_EXECUTION_CONTEXT SEC " +
-			"JOIN %PREFIX%STEP_EXECUTION SE ON SE.STEP_EXECUTION_ID = SEC.STEP_EXECUTION_ID " +
-			"WHERE SE.JOB_EXECUTION_ID in (:jobExecutionIds))";
+			"IN (:stepExecutionIds)";
 
 	/**
 	 * SQL statements for removing the Step Executions.
@@ -101,9 +117,9 @@ public class JdbcDataflowJobExecutionDao implements DataflowJobExecutionDao {
 	}
 
 	@Override
-	public int deleteBatchStepExecutionContextByJobExecutionIds(Set<Long> jobExecutionIds) {
+	public int deleteBatchStepExecutionContextByStepExecutionIds(Set<Long> stepExecutionIds) {
 		final MapSqlParameterSource queryParameters = new MapSqlParameterSource()
-				.addValue("jobExecutionIds", jobExecutionIds);
+				.addValue("stepExecutionIds", stepExecutionIds);
 		final String query = getQuery(SQL_DELETE_BATCH_STEP_EXECUTION_CONTEXT);
 		return this.jdbcTemplate.update(query, queryParameters);
 	}
@@ -145,6 +161,39 @@ public class JdbcDataflowJobExecutionDao implements DataflowJobExecutionDao {
 		final MapSqlParameterSource queryParameters = new MapSqlParameterSource();
 		final String query = getQuery(SQL_DELETE_BATCH_JOB_INSTANCE);
 		return this.jdbcTemplate.update(query, queryParameters);
+	}
+
+	@Override
+	public Set<Long> findStepExecutionIds(Set<Long> jobExecutionIds) {
+		final MapSqlParameterSource queryParameters = new MapSqlParameterSource()
+				.addValue("jobExecutionIds", jobExecutionIds);
+
+		Set<Long> stepExecutionIds;
+		try {
+			stepExecutionIds = this.jdbcTemplate.query(
+					getQuery(SELECT_STEP_EXECUTION_IDS), queryParameters,
+					new ResultSetExtractor<Set<Long>>() {
+						@Override
+						public Set<Long> extractData(ResultSet resultSet)
+								throws SQLException, DataAccessException {
+
+							Set<Long> stepExecutionIds = new TreeSet<>();
+
+							while (resultSet.next()) {
+								stepExecutionIds
+										.add(resultSet.getLong("STEP_EXECUTION_ID"));
+							}
+
+							return stepExecutionIds;
+						}
+					});
+		}
+		catch (DataAccessException e) {
+			stepExecutionIds = Collections.emptySet();
+		}
+
+		return stepExecutionIds;
+
 	}
 
 	private String getQuery(String base) {

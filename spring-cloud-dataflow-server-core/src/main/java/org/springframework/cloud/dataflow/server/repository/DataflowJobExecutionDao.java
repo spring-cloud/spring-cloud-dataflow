@@ -58,12 +58,12 @@ public interface DataflowJobExecutionDao {
 
 	/**
 	 * Delete the batch step execution context records from the persistence store for
-	 * the provided job execution ids.
+	 * the provided step execution ids.
 	 *
-	 * @param jobExecutionIds Must contain at least 1 value
+	 * @param stepExecutionIds Must contain at least 1 value
 	 * @return The number of affected records
 	 */
-	int deleteBatchStepExecutionContextByJobExecutionIds(Set<Long> jobExecutionIds);
+	int deleteBatchStepExecutionContextByStepExecutionIds(Set<Long> stepExecutionIds);
 
 	/**
 	 *
@@ -78,4 +78,13 @@ public interface DataflowJobExecutionDao {
 	 * @return The number of affected records
 	 */
 	int deleteUnusedBatchJobInstances();
+
+	/**
+	 * Retrieve the step execution ids for 1 or more job execution ids.
+	 *
+	 * @param jobExecutionIds Must contain at least 1 value
+	 *
+	 * @return If no step execution ids are found, an empty collection is returned
+	 */
+	Set<Long> findStepExecutionIds(Set<Long> jobExecutionIds);
 }
