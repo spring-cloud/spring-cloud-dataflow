@@ -127,7 +127,7 @@ public class TaskCommandTests extends AbstractShellIntegrationTest {
 		long id = task().launch(taskName);
 		CommandResult cr = task().stop(id);
 		assertTrue(cr.toString().contains(
-				String.format("Request to stop task execution %s has been submitted", id)));
+				String.format("Request to stop the task execution with id(s): %s has been submitted", id)));
 	}
 
 	@Test
