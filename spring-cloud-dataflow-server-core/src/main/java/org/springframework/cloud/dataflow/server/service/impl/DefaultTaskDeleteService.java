@@ -216,7 +216,16 @@ public class DefaultTaskDeleteService implements TaskDeleteService {
 		auditData.put("Deleted Job Execution IDs", StringUtils.collectionToDelimitedString(jobExecutionIds, ", "));
 
 		if (!jobExecutionIds.isEmpty()) {
-			final int numberOfDeletedBatchStepExecutionContextRows = dataflowJobExecutionDao.deleteBatchStepExecutionContextByJobExecutionIds(jobExecutionIds);
+			final Set<Long> stepExecutionIds = dataflowJobExecutionDao.findStepExecutionIds(jobExecutionIds);
+
+			final int numberOfDeletedBatchStepExecutionContextRows;
+			if (!stepExecutionIds.isEmpty()) {
+				numberOfDeletedBatchStepExecutionContextRows = dataflowJobExecutionDao.deleteBatchStepExecutionContextByStepExecutionIds(stepExecutionIds);
+			}
+			else {
+				numberOfDeletedBatchStepExecutionContextRows = 0;
+			}
+
 			final int numberOfDeletedBatchStepExecutionRows = dataflowJobExecutionDao.deleteBatchStepExecutionsByJobExecutionIds(jobExecutionIds);
 			final int numberOfDeletedBatchJobExecutionContextRows = dataflowJobExecutionDao.deleteBatchJobExecutionContextByJobExecutionIds(jobExecutionIds);
 			final int numberOfDeletedBatchJobExecutionParamRows = dataflowJobExecutionDao.deleteBatchJobExecutionParamsByJobExecutionIds(jobExecutionIds);
