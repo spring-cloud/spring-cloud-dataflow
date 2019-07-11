@@ -23,6 +23,7 @@ import org.springframework.cloud.dataflow.core.StreamDeployment;
 import org.springframework.cloud.deployer.spi.app.AppStatus;
 import org.springframework.cloud.deployer.spi.app.DeploymentState;
 import org.springframework.cloud.deployer.spi.core.RuntimeEnvironmentInfo;
+import org.springframework.cloud.skipper.domain.LogInfo;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
@@ -88,7 +89,7 @@ public interface StreamDeployer {
 	 * @param streamName the stream name
 	 * @return the logs content
 	 */
-	String getLog(String streamName);
+	LogInfo getLog(String streamName);
 
 	/**
 	 * Returns the logs of a specific application in the stream identified by the stream name.
@@ -97,5 +98,5 @@ public interface StreamDeployer {
 	 * @param appName specific application name inside the stream
 	 * @return the logs content
 	 */
-	String getLog(String streamName, String appName);
+	LogInfo getLog(String streamName, String appName);
 }

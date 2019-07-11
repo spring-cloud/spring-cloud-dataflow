@@ -20,6 +20,7 @@ import org.springframework.cloud.dataflow.server.service.TaskExecutionService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.Assert;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -48,10 +49,15 @@ public class TaskLogsController {
 		this.taskExecutionService = taskExecutionService;
 	}
 
-	@RequestMapping(value = "", method = RequestMethod.GET, params = "name")
+	/**
+	 * Retrieve logs for the task execution identified by the provided external execution ID
+	 * @param taskExternalExecutionId the external execution ID returned by the platform when launching the task
+	 * @param platformName the platform name
+	 * @return the log content represented as String
+	 */
+	@RequestMapping(value = "/{taskExternalExecutionId}", method = RequestMethod.GET)
 	@ResponseStatus(HttpStatus.OK)
-	public ResponseEntity<String> getLog(@RequestParam(required = false, defaultValue = "default") String platformName,
-			@RequestParam("name") String taskName) {
-		return new ResponseEntity<>(this.taskExecutionService.getLog(platformName, taskName), HttpStatus.OK);
+	public ResponseEntity<String> getLog(@PathVariable String taskExternalExecutionId, @RequestParam(required = false, defaultValue = "default") String platformName) {
+		return new ResponseEntity<>(this.taskExecutionService.getLog(platformName, taskExternalExecutionId), HttpStatus.OK);
 	}
 }

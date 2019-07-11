@@ -65,6 +65,7 @@ import org.springframework.cloud.skipper.domain.Deployer;
 import org.springframework.cloud.skipper.domain.Info;
 import org.springframework.cloud.skipper.domain.InstallProperties;
 import org.springframework.cloud.skipper.domain.InstallRequest;
+import org.springframework.cloud.skipper.domain.LogInfo;
 import org.springframework.cloud.skipper.domain.Package;
 import org.springframework.cloud.skipper.domain.PackageIdentifier;
 import org.springframework.cloud.skipper.domain.PackageMetadata;
@@ -489,12 +490,12 @@ public class SkipperStreamDeployer implements StreamDeployer {
 	}
 
 	@Override
-	public String getLog(String streamName) {
+	public LogInfo getLog(String streamName) {
 		return this.skipperClient.getLog(streamName);
 	}
 
 	@Override
-	public String getLog(String streamName, String appName) {
+	public LogInfo getLog(String streamName, String appName) {
 		return this.skipperClient.getLog(streamName, appName);
 	}
 

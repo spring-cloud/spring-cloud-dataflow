@@ -82,7 +82,7 @@ public class TaskLogsControllerTests {
 	@Test
 	public void testGetCurrentExecutionLog() throws Exception {
 		when(taskLauncher.getLog("mytask1")).thenReturn("Log");
-		mockMvc.perform(get("/tasks/logs?name=mytask1").accept(MediaType.APPLICATION_JSON))
+		mockMvc.perform(get("/tasks/logs/mytask1").accept(MediaType.APPLICATION_JSON))
 				.andExpect(status().isOk());
 	}
 }

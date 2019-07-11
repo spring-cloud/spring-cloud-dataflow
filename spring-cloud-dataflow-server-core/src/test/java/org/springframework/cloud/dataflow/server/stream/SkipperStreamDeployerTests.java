@@ -50,6 +50,7 @@ import org.springframework.cloud.skipper.domain.Dependency;
 import org.springframework.cloud.skipper.domain.Deployer;
 import org.springframework.cloud.skipper.domain.Info;
 import org.springframework.cloud.skipper.domain.InstallRequest;
+import org.springframework.cloud.skipper.domain.LogInfo;
 import org.springframework.cloud.skipper.domain.Package;
 import org.springframework.cloud.skipper.domain.PackageMetadata;
 import org.springframework.cloud.skipper.domain.Release;
@@ -581,7 +582,7 @@ public class SkipperStreamDeployerTests {
 	@Test
 	public void testGetLogByReleaseName() {
 		SkipperClient skipperClient = mock(SkipperClient.class);
-		when(skipperClient.getLog(eq("release1"))).thenReturn("Log");
+		when(skipperClient.getLog(eq("release1"))).thenReturn(new LogInfo(Collections.EMPTY_MAP));
 		SkipperStreamDeployer skipperStreamDeployer = new SkipperStreamDeployer(skipperClient,
 				mock(StreamDefinitionRepository.class), mock(AppRegistryService.class), mock(ForkJoinPool.class));
 		skipperStreamDeployer.getLog("release1");
@@ -591,7 +592,7 @@ public class SkipperStreamDeployerTests {
 	@Test
 	public void testGetLogByReleaseNameAndAppName() {
 		SkipperClient skipperClient = mock(SkipperClient.class);
-		when(skipperClient.getLog(eq("release1"), eq("myapp"))).thenReturn("Log");
+		when(skipperClient.getLog(eq("release1"), eq("myapp"))).thenReturn(new LogInfo(Collections.EMPTY_MAP));
 		SkipperStreamDeployer skipperStreamDeployer = new SkipperStreamDeployer(skipperClient,
 				mock(StreamDefinitionRepository.class), mock(AppRegistryService.class), mock(ForkJoinPool.class));
 		skipperStreamDeployer.getLog("release1", "myapp");
