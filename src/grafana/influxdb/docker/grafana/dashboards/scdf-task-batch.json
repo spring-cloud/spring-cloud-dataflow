@@ -16,7 +16,7 @@
   "gnetId": null,
   "graphTooltip": 0,
   "id": 3,
-  "iteration": 1562672233488,
+  "iteration": 1562914194392,
   "links": [
     {
       "icon": "external link",
@@ -33,7 +33,7 @@
       "datasource": "influx_auto_DataFlowMetricsCollector",
       "fill": 1,
       "gridPos": {
-        "h": 9,
+        "h": 8,
         "w": 12,
         "x": 0,
         "y": 0
@@ -63,7 +63,7 @@
       "steppedLine": true,
       "targets": [
         {
-          "alias": "",
+          "alias": "$task_name",
           "groupBy": [
             {
               "params": [
@@ -139,13 +139,14 @@
     },
     {
       "aliasColors": {},
-      "bars": false,
+      "bars": true,
       "dashLength": 10,
       "dashes": false,
       "datasource": "influx_auto_DataFlowMetricsCollector",
+      "description": "Time durations for all jobs part of the selected Task execution ID ",
       "fill": 1,
       "gridPos": {
-        "h": 9,
+        "h": 8,
         "w": 12,
         "x": 12,
         "y": 0
@@ -158,17 +159,17 @@
         "hideZero": false,
         "max": false,
         "min": false,
-        "show": true,
+        "show": false,
         "total": false,
         "values": false
       },
-      "lines": true,
+      "lines": false,
       "linewidth": 1,
       "links": [],
       "nullPointMode": "null as zero",
       "options": {},
       "percentage": false,
-      "pointradius": 5,
+      "pointradius": 4,
       "points": false,
       "renderer": "flot",
       "seriesOverrides": [],
@@ -177,7 +178,7 @@
       "steppedLine": true,
       "targets": [
         {
-          "alias": "$job_name",
+          "alias": "",
           "groupBy": [
             {
               "params": [
@@ -205,7 +206,127 @@
           ],
           "tags": [
             {
-              "key": "name",
+              "key": "task_execution_id",
+              "operator": "=~",
+              "value": "/^$task_execution_id$/"
+            }
+          ]
+        }
+      ],
+      "thresholds": [],
+      "timeFrom": null,
+      "timeRegions": [],
+      "timeShift": null,
+      "title": "Job Duration",
+      "tooltip": {
+        "shared": false,
+        "sort": 0,
+        "value_type": "individual"
+      },
+      "type": "graph",
+      "xaxis": {
+        "buckets": null,
+        "mode": "series",
+        "name": null,
+        "show": true,
+        "values": [
+          "total"
+        ]
+      },
+      "yaxes": [
+        {
+          "format": "ms",
+          "label": null,
+          "logBase": 1,
+          "max": null,
+          "min": "0",
+          "show": true
+        },
+        {
+          "format": "short",
+          "label": null,
+          "logBase": 1,
+          "max": null,
+          "min": null,
+          "show": false
+        }
+      ],
+      "yaxis": {
+        "align": false,
+        "alignLevel": null
+      }
+    },
+    {
+      "aliasColors": {},
+      "bars": true,
+      "dashLength": 10,
+      "dashes": false,
+      "datasource": "influx_auto_DataFlowMetricsCollector",
+      "fill": 1,
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 8
+      },
+      "id": 8,
+      "legend": {
+        "avg": false,
+        "current": false,
+        "max": false,
+        "min": false,
+        "show": false,
+        "total": false,
+        "values": false
+      },
+      "lines": false,
+      "linewidth": 1,
+      "links": [],
+      "nullPointMode": "null",
+      "options": {},
+      "percentage": false,
+      "pointradius": 4,
+      "points": false,
+      "renderer": "flot",
+      "seriesOverrides": [],
+      "spaceLength": 10,
+      "stack": false,
+      "steppedLine": true,
+      "targets": [
+        {
+          "alias": "",
+          "groupBy": [
+            {
+              "params": [
+                "name"
+              ],
+              "type": "tag"
+            }
+          ],
+          "measurement": "spring_batch_step",
+          "orderByTime": "ASC",
+          "policy": "default",
+          "refId": "A",
+          "resultFormat": "time_series",
+          "select": [
+            [
+              {
+                "params": [
+                  "upper"
+                ],
+                "type": "field"
+              }
+            ]
+          ],
+          "tags": [
+            {
+              "key": "task_execution_id",
+              "operator": "=~",
+              "value": "/^$task_execution_id$/"
+            },
+            {
+              "condition": "AND",
+              "key": "job_name",
               "operator": "=~",
               "value": "/^$job_name$/"
             }
@@ -216,19 +337,21 @@
       "timeFrom": null,
       "timeRegions": [],
       "timeShift": null,
-      "title": "Batch Job duration",
+      "title": "Step Duration",
       "tooltip": {
-        "shared": true,
+        "shared": false,
         "sort": 0,
         "value_type": "individual"
       },
       "type": "graph",
       "xaxis": {
         "buckets": null,
-        "mode": "time",
+        "mode": "series",
         "name": null,
         "show": true,
-        "values": []
+        "values": [
+          "total"
+        ]
       },
       "yaxes": [
         {
@@ -236,7 +359,199 @@
           "label": null,
           "logBase": 1,
           "max": null,
-          "min": "0",
+          "min": null,
+          "show": true
+        },
+        {
+          "format": "short",
+          "label": null,
+          "logBase": 1,
+          "max": null,
+          "min": null,
+          "show": false
+        }
+      ],
+      "yaxis": {
+        "align": false,
+        "alignLevel": null
+      }
+    },
+    {
+      "aliasColors": {},
+      "bars": true,
+      "dashLength": 10,
+      "dashes": false,
+      "datasource": "influx_auto_DataFlowMetricsCollector",
+      "fill": 1,
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 8
+      },
+      "id": 10,
+      "legend": {
+        "avg": false,
+        "current": false,
+        "max": false,
+        "min": false,
+        "show": false,
+        "total": false,
+        "values": false
+      },
+      "lines": false,
+      "linewidth": 1,
+      "links": [],
+      "nullPointMode": "null",
+      "options": {},
+      "percentage": false,
+      "pointradius": 2,
+      "points": false,
+      "renderer": "flot",
+      "seriesOverrides": [],
+      "spaceLength": 10,
+      "stack": false,
+      "steppedLine": false,
+      "targets": [
+        {
+          "groupBy": [],
+          "measurement": "spring_batch_item_read",
+          "orderByTime": "ASC",
+          "policy": "default",
+          "refId": "A",
+          "resultFormat": "time_series",
+          "select": [
+            [
+              {
+                "params": [
+                  "upper"
+                ],
+                "type": "field"
+              }
+            ]
+          ],
+          "tags": [
+            {
+              "key": "task_execution_id",
+              "operator": "=~",
+              "value": "/^$task_execution_id$/"
+            },
+            {
+              "condition": "AND",
+              "key": "job_name",
+              "operator": "=~",
+              "value": "/^$job_name$/"
+            },
+            {
+              "condition": "AND",
+              "key": "step_name",
+              "operator": "=~",
+              "value": "/^$step_name$/"
+            }
+          ]
+        },
+        {
+          "groupBy": [],
+          "measurement": "spring_batch_chunk_write",
+          "orderByTime": "ASC",
+          "policy": "default",
+          "refId": "B",
+          "resultFormat": "time_series",
+          "select": [
+            [
+              {
+                "params": [
+                  "upper"
+                ],
+                "type": "field"
+              }
+            ]
+          ],
+          "tags": [
+            {
+              "key": "task_execution_id",
+              "operator": "=~",
+              "value": "/^$task_execution_id$/"
+            },
+            {
+              "condition": "AND",
+              "key": "job_name",
+              "operator": "=~",
+              "value": "/^$job_name$/"
+            },
+            {
+              "condition": "AND",
+              "key": "step_name",
+              "operator": "=~",
+              "value": "/^$step_name$/"
+            }
+          ]
+        },
+        {
+          "groupBy": [],
+          "measurement": "spring_batch_item_process",
+          "orderByTime": "ASC",
+          "policy": "default",
+          "refId": "C",
+          "resultFormat": "time_series",
+          "select": [
+            [
+              {
+                "params": [
+                  "upper"
+                ],
+                "type": "field"
+              }
+            ]
+          ],
+          "tags": [
+            {
+              "key": "task_execution_id",
+              "operator": "=~",
+              "value": "/^$task_execution_id$/"
+            },
+            {
+              "condition": "AND",
+              "key": "job_name",
+              "operator": "=~",
+              "value": "/^$job_name$/"
+            },
+            {
+              "condition": "AND",
+              "key": "step_name",
+              "operator": "=~",
+              "value": "/^$step_name$/"
+            }
+          ]
+        }
+      ],
+      "thresholds": [],
+      "timeFrom": null,
+      "timeRegions": [],
+      "timeShift": null,
+      "title": "Item Read/Write",
+      "tooltip": {
+        "shared": false,
+        "sort": 0,
+        "value_type": "individual"
+      },
+      "type": "graph",
+      "xaxis": {
+        "buckets": null,
+        "mode": "series",
+        "name": null,
+        "show": true,
+        "values": [
+          "total"
+        ]
+      },
+      "yaxes": [
+        {
+          "format": "ms",
+          "label": null,
+          "logBase": 1,
+          "max": null,
+          "min": null,
           "show": true
         },
         {
@@ -263,77 +578,15 @@
       {
         "allValue": null,
         "current": {
-          "text": "All",
-          "value": [
-            "$__all"
-          ]
-        },
-        "datasource": "influx_auto_DataFlowMetricsCollector",
-        "definition": "select distinct(\"name\") from (select  * from \"spring_batch_job\")",
-        "hide": 0,
-        "includeAll": true,
-        "label": "job_name",
-        "multi": true,
-        "name": "job_name",
-        "options": [],
-        "query": "select distinct(\"name\") from (select  * from \"spring_batch_job\")",
-        "refresh": 2,
-        "regex": "",
-        "skipUrlSync": false,
-        "sort": 0,
-        "tagValuesQuery": "",
-        "tags": [],
-        "tagsQuery": "",
-        "type": "query",
-        "useTags": false
-      },
-      {
-        "allValue": null,
-        "current": {
-          "isNone": true,
-          "text": "None",
+          "text": "",
           "value": ""
-        },
-        "datasource": "influx_auto_DataFlowMetricsCollector",
-        "definition": "show tag values with key=\"status\"  WHERE \"name\"='$job_name'",
-        "hide": 0,
-        "includeAll": false,
-        "label": "job_status",
-        "multi": false,
-        "name": "job_status",
-        "options": [
-          {
-            "isNone": true,
-            "selected": true,
-            "text": "None",
-            "value": ""
-          }
-        ],
-        "query": "show tag values with key=\"status\"  WHERE \"name\"='$job_name'",
-        "refresh": 0,
-        "regex": "",
-        "skipUrlSync": false,
-        "sort": 0,
-        "tagValuesQuery": "",
-        "tags": [],
-        "tagsQuery": "",
-        "type": "query",
-        "useTags": false
-      },
-      {
-        "allValue": null,
-        "current": {
-          "text": "All",
-          "value": [
-            "$__all"
-          ]
         },
         "datasource": "influx_auto_DataFlowMetricsCollector",
         "definition": "select distinct(\"task_name\") from (select  * from \"spring_cloud_task\")",
         "hide": 0,
-        "includeAll": true,
+        "includeAll": false,
         "label": "task_name",
-        "multi": true,
+        "multi": false,
         "name": "task_name",
         "options": [],
         "query": "select distinct(\"task_name\") from (select  * from \"spring_cloud_task\")",
@@ -350,19 +603,69 @@
       {
         "allValue": null,
         "current": {
-          "text": "1",
-          "value": "1"
+          "text": "",
+          "value": ""
         },
         "datasource": "influx_auto_DataFlowMetricsCollector",
-        "definition": "show tag values with key=\"task_execution_id\"  WHERE \"task_name\"=$task_name",
+        "definition": "show tag values with key=\"task_execution_id\"  WHERE \"task_name\"='$task_name'",
         "hide": 0,
         "includeAll": false,
         "label": "task_execution_id",
         "multi": false,
         "name": "task_execution_id",
         "options": [],
-        "query": "show tag values with key=\"task_execution_id\"  WHERE \"task_name\"=$task_name",
-        "refresh": 1,
+        "query": "show tag values with key=\"task_execution_id\"  WHERE \"task_name\"='$task_name'",
+        "refresh": 2,
+        "regex": "",
+        "skipUrlSync": false,
+        "sort": 0,
+        "tagValuesQuery": "",
+        "tags": [],
+        "tagsQuery": "",
+        "type": "query",
+        "useTags": false
+      },
+      {
+        "allValue": null,
+        "current": {
+          "text": "",
+          "value": ""
+        },
+        "datasource": "influx_auto_DataFlowMetricsCollector",
+        "definition": "select distinct(\"name\") from (select  * from \"spring_batch_job\")  WHERE \"task_execution_id\"='$task_execution_id'",
+        "hide": 0,
+        "includeAll": false,
+        "label": "job_name",
+        "multi": false,
+        "name": "job_name",
+        "options": [],
+        "query": "select distinct(\"name\") from (select  * from \"spring_batch_job\")  WHERE \"task_execution_id\"='$task_execution_id'",
+        "refresh": 2,
+        "regex": "",
+        "skipUrlSync": false,
+        "sort": 0,
+        "tagValuesQuery": "",
+        "tags": [],
+        "tagsQuery": "",
+        "type": "query",
+        "useTags": false
+      },
+      {
+        "allValue": null,
+        "current": {
+          "text": "",
+          "value": ""
+        },
+        "datasource": "influx_auto_DataFlowMetricsCollector",
+        "definition": "select distinct(\"name\") from (select  * from \"spring_batch_step\")  WHERE \"task_execution_id\"='$task_execution_id' and \"job_name\"='$job_name'",
+        "hide": 0,
+        "includeAll": false,
+        "label": "step_name",
+        "multi": false,
+        "name": "step_name",
+        "options": [],
+        "query": "select distinct(\"name\") from (select  * from \"spring_batch_step\")  WHERE \"task_execution_id\"='$task_execution_id' and \"job_name\"='$job_name'",
+        "refresh": 2,
         "regex": "",
         "skipUrlSync": false,
         "sort": 0,
@@ -375,7 +678,7 @@
     ]
   },
   "time": {
-    "from": "now-30m",
+    "from": "now-15m",
     "to": "now"
   },
   "timepicker": {
@@ -404,7 +707,7 @@
     ]
   },
   "timezone": "",
-  "title": "Task & Batch",
-  "uid": "Z8fhFe7Wk",
+  "title": "Tasks",
+  "uid": "scdf-tasks",
   "version": 1
 }
