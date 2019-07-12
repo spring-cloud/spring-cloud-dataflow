@@ -634,3 +634,67 @@ data:
 ====
 
 Replacing the `tolerations` key / value pairs according to your desired toleration configuration.
+
+==== Secret Key References
+
+Secrets can be referenced and their decoded value inserted into the pod(s) environment.
+Refer to the https://kubernetes.io/docs/concepts/configuration/secret/#using-secrets-as-environment-variables[Using Secrets as Environment Variables] section of the Kubernetes reference for more information.
+
+The following example shows how you can individually configure applications:
+
+====
+[source,options=nowrap]
+----
+deployer.<app>.kubernetes.secretKeyRefs=[{envVarName: 'MY_SECRET', secretName: 'testsecret', dataKey: 'password'}]
+----
+====
+
+Replace `<app>` with the name of your application and the `envVarName`, `secretName` and `dataKey` attributes with the appropriate values for your application environment and secret.
+
+You can configure secret key references at the global server level as well.
+
+The following example shows how to do so for streams:
+
+====
+[source,yaml]
+----
+data:
+  application.yaml: |-
+    spring:
+      cloud:
+        skipper:
+          server:
+            platform:
+              kubernetes:
+                accounts:
+                  default:
+                    secretKeyRefs:
+                      - envVarName: MY_SECRET
+                        secretName: testsecret
+                        dataKey: password
+----
+====
+
+The following example shows how to do so for tasks:
+
+====
+[source,yaml]
+----
+data:
+  application.yaml: |-
+    spring:
+      cloud:
+        dataflow:
+          task:
+            platform:
+              kubernetes:
+                accounts:
+                  default:
+                    secretKeyRefs:
+                      - envVarName: MY_SECRET
+                        secretName: testsecret
+                        dataKey: password
+----
+====
+
+Replacing the `envVarName`, `secretName` and `dataKey` attributes with the appropriate values for your secret.
