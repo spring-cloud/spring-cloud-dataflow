@@ -217,6 +217,18 @@ These properties are also used when configuring the <<configuration-kubernetes-t
 |The toleration value to apply, used in conjunction with `operator` to select to appropriate `effect`.
 |<none>
 
+|secretKeyRefs.envVarName
+|The environment variable name to hold the secret data
+|<none>
+
+|secretKeyRefs.secretName
+|The secret name to access
+|<none>
+
+|secretKeyRefs.dataKey
+|The key name to obtain secret data from
+|<none>
+
 |maximumConcurrentTasks
 |The maximum concurrent tasks allowed for this platform instance.
 |20
