@@ -36,6 +36,7 @@ import org.springframework.cloud.dataflow.core.AuditOperationType;
 import org.springframework.cloud.dataflow.core.Launcher;
 import org.springframework.cloud.dataflow.core.TaskDefinition;
 import org.springframework.cloud.dataflow.core.TaskDeployment;
+import org.springframework.cloud.dataflow.core.TaskPlatformFactory;
 import org.springframework.cloud.dataflow.rest.util.ArgumentSanitizer;
 import org.springframework.cloud.dataflow.rest.util.DeploymentPropertiesUtils;
 import org.springframework.cloud.dataflow.server.job.LauncherRepository;
@@ -108,9 +109,6 @@ public class DefaultTaskExecutionService implements TaskExecutionService {
 	public static final String COMMAND_LINE_ARGS = "commandLineArgs";
 
 	public static final String TASK_PLATFORM_NAME = "spring.cloud.dataflow.task.platformName";
-
-
-
 
 	/**
 	 * Initializes the {@link DefaultTaskExecutionService}.
@@ -210,6 +208,13 @@ public class DefaultTaskExecutionService implements TaskExecutionService {
 
 	@Override
 	public String getLog(String platformName, String taskId) {
+		Launcher launcher = this.launcherRepository.findByName(platformName);
+		// In case of Cloud Foundry, fetching logs by external execution Id isn't valid as the execution instance is destroyed.
+		// We need to use the task name instead.
+		if (launcher != null && launcher.getType().equals(TaskPlatformFactory.CLOUDFOUNDRY_PLATFORM_TYPE)) {
+			TaskDeployment taskDeployment = this.taskDeploymentRepository.findByTaskDeploymentId(taskId);
+			taskId = taskDeployment.getTaskDefinitionName();
+		}
 		return findTaskLauncher(platformName).getLog(taskId);
 	}
 

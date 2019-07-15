@@ -51,8 +51,6 @@ import org.springframework.cloud.scheduler.spi.core.Scheduler;
  **/
 public class CloudFoundryTaskPlatformFactory extends AbstractTaskPlatformFactory<CloudFoundryPlatformProperties> {
 
-	private final static String PLATFORM_TYPE = "Cloud Foundry";
-
 	private final static Logger logger = LoggerFactory.getLogger(CloudFoundryTaskPlatformFactory.class);
 
 	private final CloudFoundryPlatformTokenProvider platformTokenProvider;
@@ -70,7 +68,7 @@ public class CloudFoundryTaskPlatformFactory extends AbstractTaskPlatformFactory
 			CloudFoundryPlatformClientProvider cloudFoundryClientProvider,
 			Optional<CloudFoundrySchedulerClientProvider> cloudFoundrySchedulerClientProvider) {
 
-		super(cloudFoundryPlatformProperties, PLATFORM_TYPE);
+		super(cloudFoundryPlatformProperties, CLOUDFOUNDRY_PLATFORM_TYPE);
 		this.platformTokenProvider = platformTokenProvider;
 		this.connectionContextProvider = connectionContextProvider;
 		this.cloudFoundryClientProvider = cloudFoundryClientProvider;
@@ -88,7 +86,7 @@ public class CloudFoundryTaskPlatformFactory extends AbstractTaskPlatformFactory
 				deploymentProperties(account),
 				cloudFoundryOperations,
 				runtimeEnvironmentInfo(cloudFoundryClient, account));
-		Launcher launcher = new Launcher(account, PLATFORM_TYPE, taskLauncher,
+		Launcher launcher = new Launcher(account, CLOUDFOUNDRY_PLATFORM_TYPE, taskLauncher,
 				scheduler(account, taskLauncher, cloudFoundryOperations));
 		CloudFoundryConnectionProperties connectionProperties = connectionProperties(account);
 		launcher.setDescription(String.format("org = [%s], space = [%s], url = [%s]",

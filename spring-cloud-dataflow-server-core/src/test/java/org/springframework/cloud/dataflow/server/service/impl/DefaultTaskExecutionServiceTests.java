@@ -44,6 +44,7 @@ import org.springframework.cloud.dataflow.core.Launcher;
 import org.springframework.cloud.dataflow.core.TaskDefinition;
 import org.springframework.cloud.dataflow.core.TaskDeployment;
 import org.springframework.cloud.dataflow.core.TaskPlatform;
+import org.springframework.cloud.dataflow.core.TaskPlatformFactory;
 import org.springframework.cloud.dataflow.registry.service.AppRegistryService;
 import org.springframework.cloud.dataflow.server.configuration.TaskServiceDependencies;
 import org.springframework.cloud.dataflow.server.job.LauncherRepository;
@@ -228,6 +229,39 @@ public abstract class DefaultTaskExecutionServiceTests {
 			assertEquals(1L, this.taskExecutionService.executeTask(TASK_NAME_ORIG, new HashMap<>(), new LinkedList<>()));
 			assertEquals(2L, this.taskExecutionService.executeTask(TASK_NAME_ORIG, new HashMap<>(), new LinkedList<>()));
 		}
+
+		@Test
+		@DirtiesContext
+		public void getTaskLog() {
+			String platformName = "test-platform";
+			String taskDefinitionName = "test";
+			String taskDeploymentId = "12345";
+			TaskDeployment taskDeployment = new TaskDeployment();
+			taskDeployment.setPlatformName(platformName);
+			taskDeployment.setTaskDefinitionName(taskDefinitionName);
+			taskDeployment.setTaskDeploymentId(taskDeploymentId);
+			this.launcherRepository.save(new Launcher(platformName, "local", taskLauncher));
+			when(taskLauncher.getLog(taskDeploymentId)).thenReturn("Logs");
+			assertEquals("Logs", this.taskExecutionService.getLog(taskDeployment.getPlatformName(), taskDeploymentId));
+		}
+
+		@Test
+		@DirtiesContext
+		public void getCFTaskLog() {
+			String platformName = "cf-test-platform";
+			String taskDefinitionName = "test";
+			String taskDeploymentId = "12345";
+			TaskDeployment taskDeployment = new TaskDeployment();
+			taskDeployment.setPlatformName(platformName);
+			taskDeployment.setTaskDefinitionName(taskDefinitionName);
+			taskDeployment.setTaskDeploymentId(taskDeploymentId);
+			this.taskDeploymentRepository.save(taskDeployment);
+			this.launcherRepository.save(new Launcher(platformName,
+					TaskPlatformFactory.CLOUDFOUNDRY_PLATFORM_TYPE, taskLauncher));
+			when(taskLauncher.getLog(taskDefinitionName)).thenReturn("Logs");
+			assertEquals("Logs", this.taskExecutionService.getLog(taskDeployment.getPlatformName(), taskDeploymentId));
+		}
+
 
 		@Test
 		@DirtiesContext
