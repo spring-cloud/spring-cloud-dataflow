@@ -698,3 +698,67 @@ data:
 ====
 
 Replacing the `envVarName`, `secretName` and `dataKey` attributes with the appropriate values for your secret.
+
+==== Config Map Key References
+
+ConfigMap's can be referenced and their associated key value inserted into the pod(s) environment.
+Refer to the https://kubernetes.io/docs/tasks/configure-pod-container/configure-pod-configmap/#define-container-environment-variables-using-configmap-data[Define container environment variables using ConfigMap data] section of the Kubernetes reference for more information.
+
+The following example shows how you can individually configure applications:
+
+====
+[source,options=nowrap]
+----
+deployer.<app>.kubernetes.configMapKeyRefs=[{envVarName: 'MY_CM', configMapName: 'testcm', dataKey: 'platform'}]
+----
+====
+
+Replace `<app>` with the name of your application and the `envVarName`, `configMapName` and `dataKey` attributes with the appropriate values for your application environment and ConfigMap.
+
+You can configure ConfigMap references at the global server level as well.
+
+The following example shows how to do so for streams:
+
+====
+[source,yaml]
+----
+data:
+  application.yaml: |-
+    spring:
+      cloud:
+        skipper:
+          server:
+            platform:
+              kubernetes:
+                accounts:
+                  default:
+                    configMapKeyRefs:
+                      - envVarName: MY_CM
+                        configMapName: testcm
+                        dataKey: platform
+----
+====
+
+The following example shows how to do so for tasks:
+
+====
+[source,yaml]
+----
+data:
+  application.yaml: |-
+    spring:
+      cloud:
+        dataflow:
+          task:
+            platform:
+              kubernetes:
+                accounts:
+                  default:
+                    configMapKeyRefs:
+                      - envVarName: MY_CM
+                        configMapName: testcm
+                        dataKey: platform
+----
+====
+
+Replacing the `envVarName`, `configMapName` and `dataKey` attributes with the appropriate values for your ConfigMap.
