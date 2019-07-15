@@ -44,11 +44,6 @@ public class JdbcDataflowJobExecutionDao implements DataflowJobExecutionDao {
 	private final NamedParameterJdbcTemplate jdbcTemplate;
 	private final String tablePrefix;
 
-	//	/**
-	//	 * SQL statements for removing the Step Execution Context.
-	//	 */
-	//	private static final String  SQL_DELETE_BATCH_STEP_EXECUTION_CONTEXT =
-
 	/**
 	 * SQL statements for retrieving Step Execution Ids.
 	 */
@@ -99,9 +94,9 @@ public class JdbcDataflowJobExecutionDao implements DataflowJobExecutionDao {
 	 * SQL statements for removing Job Instances.
 	 */
 	private static final String  SQL_DELETE_BATCH_JOB_INSTANCE =
-			"DELETE FROM %PREFIX%JOB_INSTANCE BJI " +
+			"DELETE FROM %PREFIX%JOB_INSTANCE " +
 			"WHERE NOT EXISTS ( " +
-			"SELECT JOB_INSTANCE_ID FROM %PREFIX%JOB_EXECUTION BJE WHERE BJI.JOB_INSTANCE_ID = BJE.JOB_INSTANCE_ID)";
+			"SELECT JOB_INSTANCE_ID FROM %PREFIX%JOB_EXECUTION BJE WHERE JOB_INSTANCE_ID = BJE.JOB_INSTANCE_ID)";
 
 	/**
 	 * Initializes the JdbcDataflowJobExecutionDao.
