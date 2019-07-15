@@ -231,6 +231,39 @@ public abstract class DefaultTaskExecutionServiceTests {
 
 		@Test
 		@DirtiesContext
+		public void getTaskLog() {
+			String platformName = "test-platform";
+			String taskDefinitionName = "test";
+			String taskDeploymentId = "12345";
+			TaskDeployment taskDeployment = new TaskDeployment();
+			taskDeployment.setPlatformName(platformName);
+			taskDeployment.setTaskDefinitionName(taskDefinitionName);
+			taskDeployment.setTaskDeploymentId(taskDeploymentId);
+			this.launcherRepository.save(new Launcher(platformName, "local", taskLauncher));
+			when(taskLauncher.getLog(taskDeploymentId)).thenReturn("Logs");
+			assertEquals("Logs", this.taskExecutionService.getLog(taskDeployment.getPlatformName(), taskDeploymentId));
+		}
+
+		@Test
+		@DirtiesContext
+		public void getCFTaskLog() {
+			String platformName = "cf-test-platform";
+			String taskDefinitionName = "test";
+			String taskDeploymentId = "12345";
+			TaskDeployment taskDeployment = new TaskDeployment();
+			taskDeployment.setPlatformName(platformName);
+			taskDeployment.setTaskDefinitionName(taskDefinitionName);
+			taskDeployment.setTaskDeploymentId(taskDeploymentId);
+			this.taskDeploymentRepository.save(taskDeployment);
+			this.launcherRepository.save(new Launcher(platformName,
+					DefaultTaskExecutionService.CLOUDFOUNDRY_PLATFORM_TYPE, taskLauncher));
+			when(taskLauncher.getLog(taskDefinitionName)).thenReturn("Logs");
+			assertEquals("Logs", this.taskExecutionService.getLog(taskDeployment.getPlatformName(), taskDeploymentId));
+		}
+
+
+		@Test
+		@DirtiesContext
 		public void executeSameTaskDefinitionOnMultiplePlatforms() {
 			initializeSuccessfulRegistry(appRegistry);
 			when(taskLauncher.launch(any())).thenReturn("0");
