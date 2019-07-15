@@ -351,6 +351,40 @@ bad-timestamp is an invalid task.
 
 In this case Spring Cloud Data Flow states that the task is invalid because task:badtimestamp has an invalid URI.
 
+[[spring-cloud-dataflow-stopping-task-execution]]
+=== Stopping a Task Execution
+
+In some cases a task that is executing on a platform may not stop because of a problem on the platform or the software itself.
+For such cases Spring Cloud Data Flow offers the user the ability to send a request to the platform to terminate the task execution.
+To do this a user can submit a `task execution stop` for a given set of task executions.  For example:
+
+[source,bash]
+----
+task execution stop --ids 5
+
+Request to stop the task execution with id(s): 5 has been submitted
+----
+In the example above we see that the user has requested that task execution id 5 to be stopped.
+In these cases the platform will stop the execution.  When we view the result for the task execution we will see that the task execution completed with a 0 exit code.
+
+[source,bash]
+----
+dataflow:>task execution list
+╔══════════╤══╤════════════════════════════╤════════════════════════════╤═════════╗
+║Task Name │ID│         Start Time         │          End Time          │Exit Code║
+╠══════════╪══╪════════════════════════════╪════════════════════════════╪═════════╣
+║batch-demo│5 │Mon Jul 15 13:58:41 EDT 2019│Mon Jul 15 13:58:55 EDT 2019│0        ║
+║timestamp │1 │Mon Jul 15 09:26:41 EDT 2019│Mon Jul 15 09:26:41 EDT 2019│0        ║
+╚══════════╧══╧════════════════════════════╧════════════════════════════╧═════════╝
+----
+
+[WARNING]
+====
+When stopping a task execution that has a running Spring Batch job, the job will be left with the batch status of `STARTED`.
+====
+
+If a user submits a stop for a task execution that has child task executions associated with it, like a composed task, a stop request will be sent for each of the child task executions.
+
 [[spring-cloud-dataflow-task-events]]
 == Subscribing to Task/Batch Events
 
