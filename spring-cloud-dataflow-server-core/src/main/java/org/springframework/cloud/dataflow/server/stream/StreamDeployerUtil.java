@@ -48,24 +48,25 @@ public class StreamDeployerUtil {
 				return state;
 			}
 		}
+		DeploymentState result = DeploymentState.partial;
 		if (states.isEmpty() || states.contains(DeploymentState.error)) {
 			logger.debug("aggregateState: Returning " + DeploymentState.error);
-			return DeploymentState.error;
+			result = DeploymentState.error;
 		}
-		if (states.contains(DeploymentState.deployed) && states.contains(DeploymentState.failed)) {
+		else if (states.contains(DeploymentState.deployed) && states.contains(DeploymentState.failed)) {
 			logger.debug("aggregateState: Returning " + DeploymentState.partial);
-			return DeploymentState.partial;
+			result = DeploymentState.partial;
 		}
-		if (states.contains(DeploymentState.failed)) {
+		else if (states.contains(DeploymentState.failed)) {
 			logger.debug("aggregateState: Returning " + DeploymentState.failed);
-			return DeploymentState.failed;
+			result = DeploymentState.failed;
 		}
-		if (states.contains(DeploymentState.deploying)) {
+		else if (states.contains(DeploymentState.deploying)) {
 			logger.debug("aggregateState: Returning " + DeploymentState.deploying);
-			return DeploymentState.deploying;
+			result = DeploymentState.deploying;
 		}
 
-		logger.debug("aggregateState: Returing " + DeploymentState.partial);
-		return DeploymentState.partial;
+		logger.debug("aggregateState: Returning " + DeploymentState.partial);
+		return result;
 	}
 }

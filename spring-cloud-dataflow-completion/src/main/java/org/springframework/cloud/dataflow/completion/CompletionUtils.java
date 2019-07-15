@@ -57,6 +57,7 @@ public class CompletionUtils {
 	 */
 	static ApplicationType[] determinePotentialTypes(StreamAppDefinition appDefinition,
 			boolean multipleAppsInStreamDefinition) {
+		ApplicationType[] result = null;
 		Set<String> properties = appDefinition.getProperties().keySet();
 		if (properties.contains(BindingPropertyKeys.INPUT_DESTINATION)) {
 			// Can't be source. For the purpose of completion, being the last app
@@ -65,21 +66,22 @@ public class CompletionUtils {
 			// with a sink (could be an unfinished "source | processor | processor"
 			// stream)
 			if (properties.contains(BindingPropertyKeys.OUTPUT_DESTINATION)) {
-				return new ApplicationType[] { ApplicationType.processor };
+				result = new ApplicationType[] { ApplicationType.processor };
 			}
 			else {
-				return new ApplicationType[] { ApplicationType.processor, ApplicationType.sink };
+				result = new ApplicationType[] { ApplicationType.processor, ApplicationType.sink };
 			}
 		}
 		else {
 			// Multiple apps and no binding properties indicates unbound app sequence (a,b,c)
 			if (multipleAppsInStreamDefinition) {
-				return new ApplicationType[] { ApplicationType.app };
+				result = new ApplicationType[] { ApplicationType.app };
 			}
 			else {
-				return new ApplicationType[] { ApplicationType.source, ApplicationType.app };
+				result = new ApplicationType[] { ApplicationType.source, ApplicationType.app };
 			}
 		}
+		return result;
 	}
 
 	/**

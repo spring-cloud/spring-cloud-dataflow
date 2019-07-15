@@ -150,22 +150,24 @@ public class TaskServiceUtils {
 			Map<String, String> appDeploymentProperties, List<String> commandLineArgs) {
 		Assert.notNull(appDeploymentProperties, "appDeploymentProperties must not be null");
 		Assert.notNull(commandLineArgs, "commandLineArgs must not be null");
-		if (StringUtils.isEmpty(dataflowServerUri)) {
-			return;
-		}
-
-		RelaxedNames relaxedNames = new RelaxedNames(DATAFLOW_SERVER_URI_KEY);
-		for (String dataFlowUriKey : relaxedNames) {
-			if (appDeploymentProperties.containsKey(dataFlowUriKey)) {
-				return;
-			}
-			for (String cmdLineArg : commandLineArgs) {
-				if (cmdLineArg.contains(dataFlowUriKey + "=")) {
-					return;
+		if (!StringUtils.isEmpty(dataflowServerUri)) {
+			RelaxedNames relaxedNames = new RelaxedNames(DATAFLOW_SERVER_URI_KEY);
+			boolean isPutDataFlowServerUriKey = true;
+			for (String dataFlowUriKey : relaxedNames) {
+				if (appDeploymentProperties.containsKey(dataFlowUriKey)) {
+					isPutDataFlowServerUriKey = false;
+					break;
+				}
+				for (String cmdLineArg : commandLineArgs) {
+					if (cmdLineArg.contains(dataFlowUriKey + "=")) {
+						return;
+					}
 				}
 			}
+			if(isPutDataFlowServerUriKey) {
+				appDeploymentProperties.put(DATAFLOW_SERVER_URI_KEY, dataflowServerUri);
+			}
 		}
-		appDeploymentProperties.put(DATAFLOW_SERVER_URI_KEY, dataflowServerUri);
 	}
 
 	private static Map<String, String> extractPropertiesByPrefix(String type,

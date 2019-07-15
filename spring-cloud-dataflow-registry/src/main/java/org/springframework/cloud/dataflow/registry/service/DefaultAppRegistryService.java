@@ -164,18 +164,20 @@ public class DefaultAppRegistryService implements AppRegistryService {
 
 	@Override
 	public Page<AppRegistration> findAllByTypeAndNameIsLike(ApplicationType type, String name, Pageable pageable) {
+		Page<AppRegistration> result = null;
 		if (!StringUtils.hasText(name) && type == null) {
-			return findAll(pageable);
+			result = findAll(pageable);
 		}
 		else if (StringUtils.hasText(name) && type == null) {
-			return this.appRegistrationRepository.findAllByNameContainingIgnoreCase(name, pageable);
+			result = this.appRegistrationRepository.findAllByNameContainingIgnoreCase(name, pageable);
 		}
 		else if (StringUtils.hasText(name)) {
-			return this.appRegistrationRepository.findAllByTypeAndNameContainingIgnoreCase(type, name, pageable);
+			result = this.appRegistrationRepository.findAllByTypeAndNameContainingIgnoreCase(type, name, pageable);
 		}
 		else {
-			return this.appRegistrationRepository.findAllByType(type, pageable);
+			result = this.appRegistrationRepository.findAllByType(type, pageable);
 		}
+		return result;
 	}
 
 	@Override

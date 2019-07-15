@@ -99,36 +99,39 @@ class ProposalsCollectorSupportUtils {
 
 	boolean addAlreadyTypedValueHintsProposals(final String text, AppRegistration appRegistration, final List<CompletionProposal> collector, final String propertyName, final ValueHintProvider[] valueHintProviders, final String alreadyTyped){
 		final Resource metadataResource = this.appRegistry.getAppMetadataResource(appRegistration);
+		boolean result = false;
 		if (metadataResource == null) {
-			return false;
-		}
-		final URLClassLoader classLoader = metadataResolver.createAppClassLoader(metadataResource);
-		return this.doWithClassLoader(classLoader, () -> {
-			CompletionProposal.Factory proposals = CompletionProposal.expanding(text);
-			List<ConfigurationMetadataProperty> allProps = metadataResolver.listProperties(metadataResource, true);
-			List<ConfigurationMetadataProperty> whiteListedProps = metadataResolver.listProperties(metadataResource);
-			for (ConfigurationMetadataProperty property : allProps) {
-				if (CompletionUtils.isMatchingProperty(propertyName, property, whiteListedProps)) {
-					for (ValueHintProvider valueHintProvider : valueHintProviders) {
-						List<ValueHint> valueHints = valueHintProvider.generateValueHints(property, classLoader);
-						if (!valueHints.isEmpty() && valueHintProvider.isExclusive(property)) {
-							collector.clear();
-						}
-						for (ValueHint valueHint : valueHints) {
-							String candidate = String.valueOf(valueHint.getValue());
-							if (!candidate.equals(alreadyTyped) && candidate.startsWith(alreadyTyped)) {
-								collector.add(proposals.withSuffix(candidate.substring(alreadyTyped.length()),
-										valueHint.getShortDescription()));
+			result = false;
+		} else {
+			final URLClassLoader classLoader = metadataResolver.createAppClassLoader(metadataResource);
+			result =  this.doWithClassLoader(classLoader, () -> {
+				CompletionProposal.Factory proposals = CompletionProposal.expanding(text);
+				List<ConfigurationMetadataProperty> allProps = metadataResolver.listProperties(metadataResource, true);
+				List<ConfigurationMetadataProperty> whiteListedProps = metadataResolver.listProperties(metadataResource);
+				for (ConfigurationMetadataProperty property : allProps) {
+					if (CompletionUtils.isMatchingProperty(propertyName, property, whiteListedProps)) {
+						for (ValueHintProvider valueHintProvider : valueHintProviders) {
+							List<ValueHint> valueHints = valueHintProvider.generateValueHints(property, classLoader);
+							if (!valueHints.isEmpty() && valueHintProvider.isExclusive(property)) {
+								collector.clear();
 							}
-						}
-						if (!valueHints.isEmpty() && valueHintProvider.isExclusive(property)) {
-							return true;
+							for (ValueHint valueHint : valueHints) {
+								String candidate = String.valueOf(valueHint.getValue());
+								if (!candidate.equals(alreadyTyped) && candidate.startsWith(alreadyTyped)) {
+									collector.add(proposals.withSuffix(candidate.substring(alreadyTyped.length()),
+											valueHint.getShortDescription()));
+								}
+							}
+							if (!valueHints.isEmpty() && valueHintProvider.isExclusive(property)) {
+								return true;
+							}
 						}
 					}
 				}
-			}
-			return false;
-		});
+				return false;
+			});
+		}
+		return result;
 	}
 
 	AppRegistration findAppRegistration(String appName, ApplicationType... appTypes){
