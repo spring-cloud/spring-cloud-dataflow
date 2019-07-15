@@ -1114,7 +1114,7 @@ However, you can set the property:
 
 `spring.cloud.dataflow.security.authorization.map-oauth-scopes: true`
 
-This will instruct the the underlying `DefaultAuthoritiesExtractor` to map
+This will instruct the underlying `DefaultAuthoritiesExtractor` to map
 OAuth scopes to the respective authorities. The following scopes are supported:
 
 * Scope `dataflow.create` maps to the `CREATE` role

@@ -129,7 +129,7 @@ cf set-env dataflow-server SPRING_CLOUD_DATAFLOW_TASK_PLATFORM_CLOUDFOUNDRY_ACCO
 * You can customize the health check mechanism used by Cloud Foundry to assert whether apps are running by using the `SPRING_CLOUD_DATAFLOW_TASK_PLATFORM_CLOUDFOUNDRY_ACCOUNTS[default]_DEPLOYMENT_HEALTH_CHECK` environment variable. The current supported options
 are `http` (the default), `port`, and `none`.
 
-You can also set environment variables that specify the the HTTP-based health check endpoint and timeout: `SPRING_CLOUD_DATAFLOW_TASK_PLATFORM_CLOUDFOUNDRY_ACCOUNTS[default]_DEPLOYMENT_HEALTH_CHECK_ENDPOINT` and `SPRING_CLOUD_DATAFLOW_TASK_PLATFORM_CLOUDFOUNDRY_ACCOUNTS[default]_DEPLOYMENT_HEALTH_CHECK_TIMEOUT`, respectively. These default to `/health` (the Spring Boot default location) and `120` seconds.
+You can also set environment variables that specify the HTTP-based health check endpoint and timeout: `SPRING_CLOUD_DATAFLOW_TASK_PLATFORM_CLOUDFOUNDRY_ACCOUNTS[default]_DEPLOYMENT_HEALTH_CHECK_ENDPOINT` and `SPRING_CLOUD_DATAFLOW_TASK_PLATFORM_CLOUDFOUNDRY_ACCOUNTS[default]_DEPLOYMENT_HEALTH_CHECK_TIMEOUT`, respectively. These default to `/health` (the Spring Boot default location) and `120` seconds.
 
 * You can also specify deployment properties by using the DSL. For instance, if you want to set the allocated memory for the `http` application to 512m and also bind a mysql service to the `jdbc` application, you can run the following commands:
 
