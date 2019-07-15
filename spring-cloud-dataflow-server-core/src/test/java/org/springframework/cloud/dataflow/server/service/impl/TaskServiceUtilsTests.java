@@ -66,7 +66,7 @@ public class TaskServiceUtilsTests {
 	}
 
 	@Test
-	public void tesetCreateComposeTaskDefinitionNullProperties() {
+	public void testCreateComposeTaskDefinitionNullProperties() {
 		this.expectedException.expect(IllegalArgumentException.class);
 		TaskServiceUtils.createComposedTaskDefinition(BASE_GRAPH, null);
 	}

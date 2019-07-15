@@ -570,13 +570,9 @@ public class SimpleJobService implements JobService, DisposableBean {
 	}
 
 	private void checkJobExists(String jobName) throws NoSuchJobException {
-		if(getJsrJobNames().contains(jobName)) {
-			return;
-		}
-		if (jobLocator.getJobNames().contains(jobName)) {
-			return;
-		}
-		if (jobInstanceDao.countJobInstances(jobName) > 0) {
+		if(getJsrJobNames().contains(jobName) ||
+				jobLocator.getJobNames().contains(jobName) ||
+				jobInstanceDao.countJobInstances(jobName) > 0) {
 			return;
 		}
 		throw new NoSuchJobException("No Job with that name either current or historic: [" + jobName + "]");

@@ -187,17 +187,21 @@ public class SkipperStreamDeployer implements StreamDeployer {
 	}
 
 	private DeploymentState getDeploymentStateFromStatusInfo(Info info) {
+		DeploymentState result = DeploymentState.unknown;
 		switch (info.getStatus().getStatusCode()) {
 		case FAILED:
-			return DeploymentState.failed;
+			result = DeploymentState.failed;
+			break;
 		case DELETED:
-			return DeploymentState.undeployed;
+			result = DeploymentState.undeployed;
+			break;
 		case UNKNOWN:
-			return DeploymentState.unknown;
+			result = DeploymentState.unknown;
+			break;
 		case DEPLOYED:
-			return DeploymentState.deployed;
+			result = DeploymentState.deployed;
 		}
-		return DeploymentState.unknown;
+		return result;
 	}
 
 	private boolean streamDefinitionExists(String streamName) {

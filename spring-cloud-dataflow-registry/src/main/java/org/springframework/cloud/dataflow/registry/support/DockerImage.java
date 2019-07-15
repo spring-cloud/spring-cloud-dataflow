@@ -56,22 +56,25 @@ public class DockerImage {
 	 */
 	public static DockerImage fromImageName(String imageName) {
 		String[] parts = imageName.split(SECTION_SEPARATOR);
+		DockerImage result = null;
 		switch (parts.length) {
 		case 0:
 			throw new IllegalArgumentException("Invalid image format: " + imageName);
 
 		case 1:
 			// only one section - it is the repository name with optional tag
-			return fromParts(null, null, parts[0]);
+			result = fromParts(null, null, parts[0]);
+			break;
 
 		case 2:
 			// since there are two sections the second one can be either a host or a namespace
 			if (isValidNamespace(parts[0])) {
-				return fromParts(null, parts[0], parts[1]);
+				result = fromParts(null, parts[0], parts[1]);
 			}
 			else {
-				return fromParts(parts[0], null, parts[1]);
+				result = fromParts(parts[0], null, parts[1]);
 			}
+			break;
 
 		default:
 			// three or more sections present: host, namespace and repo. According to Docker
@@ -86,9 +89,10 @@ public class DockerImage {
 			String repo = parts[parts.length - 1];
 			String namespace = imageName.substring(host.length() + SECTION_SEPARATOR.length(),
 					imageName.length() - repo.length() - SECTION_SEPARATOR.length());
-			return fromParts(host, namespace, repo);
+			result = fromParts(host, namespace, repo);
 
 		}
+		return result;
 	}
 
 	public static DockerImage fromParts(String hostPart, String namespacePart, String repoAndTagPart) {

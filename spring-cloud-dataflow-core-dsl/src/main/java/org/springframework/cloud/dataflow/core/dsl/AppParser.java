@@ -247,12 +247,10 @@ public class AppParser {
 	 * @return true if name is valid
 	 */
 	protected boolean isValidName(String name) {
-		if (name.length() == 0) {
+		if (name.length() == 0 || !Character.isJavaIdentifierStart(name.charAt(0))) {
 			return false;
 		}
-		if (!Character.isJavaIdentifierStart(name.charAt(0))) {
-			return false;
-		}
+
 		for (int i = 1, max = name.length(); i < max; i++) {
 			char ch = name.charAt(i);
 			if (!(Character.isJavaIdentifierPart(ch) || ch == '-')) {

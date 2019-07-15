@@ -106,14 +106,16 @@ public class StepExecutionProgressInfo {
 
 		CumulativeHistory readHistory = stepExecutionHistory.getReadCount();
 
+		double result = 0.0;
 		if (readHistory.getMean() == 0) {
 			percentCompleteBasis = PercentCompleteBasis.DURATION;
-			return getDurationBasedEstimate(duration);
+			result = getDurationBasedEstimate(duration);
 		}
-
-		percentCompleteBasis = PercentCompleteBasis.READCOUNT;
-		return stepExecution.getReadCount() / readHistory.getMean();
-
+		else {
+			percentCompleteBasis = PercentCompleteBasis.READCOUNT;
+			result = stepExecution.getReadCount() / readHistory.getMean();
+		}
+		return result;
 	}
 
 	private double getDurationBasedEstimate(double duration) {

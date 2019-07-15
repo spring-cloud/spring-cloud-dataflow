@@ -150,6 +150,7 @@ public class AppResourceCommon {
 	 */
 	public Resource getResource(String resourceUri) {
 		Assert.isTrue(StringUtils.hasText(resourceUri), "Resource URI must not be empty");
+		Resource result = null;
 		try {
 			String scheme = new URI(resourceUri).getScheme();
 			if (scheme == null) {
@@ -162,20 +163,24 @@ public class AppResourceCommon {
 			switch (scheme) {
 			case "maven":
 				String coordinates = resourceUri.replaceFirst("maven:\\/*", "");
-				return MavenResource.parse(coordinates, mavenProperties);
+				result = MavenResource.parse(coordinates, mavenProperties);
+				break;
 			case "docker":
 				String dockerUri = resourceUri.replaceFirst("docker:\\/*", "");
-				return new DockerResource(dockerUri);
+				result = new DockerResource(dockerUri);
+				break;
 			case "http":
 			case "https":
-				return new DownloadingUrlResourceLoader().getResource(resourceUri);
+				result = new DownloadingUrlResourceLoader().getResource(resourceUri);
+				break;
 			default:
-				return new DefaultResourceLoader().getResource(resourceUri);
+				result = new DefaultResourceLoader().getResource(resourceUri);
 			}
 		}
 		catch (URISyntaxException e) {
 			throw new RuntimeException(e);
 		}
+		return result;
 	}
 
 	/**

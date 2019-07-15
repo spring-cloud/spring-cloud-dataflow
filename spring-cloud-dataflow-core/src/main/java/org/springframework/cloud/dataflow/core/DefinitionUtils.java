@@ -33,17 +33,18 @@ public class DefinitionUtils {
 			return propertyValue;
 		}
 
+		String result = propertyValue;
 		if (!propertyValue.contains("'")) {
 			if (propertyValue.contains(" ") || propertyValue.contains(";") || propertyValue.contains("*")) {
-				return "'" + propertyValue + "'";
+				result = "'" + propertyValue + "'";
 			}
 		}
 		else {
 			if (propertyValue.contains(" ") || propertyValue.contains(";") || propertyValue.contains("*")) {
-				return "\"" + propertyValue + "\"";
+				result = "\"" + propertyValue + "\"";
 			}
 		}
 
-		return propertyValue;
+		return result;
 	}
 }
