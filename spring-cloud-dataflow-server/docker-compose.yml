@@ -56,7 +56,7 @@ services:
     entrypoint: "./wait-for-it.sh mysql:3306 -- java -jar /maven/spring-cloud-dataflow-server.jar"
 
   app-import:
-    image: springcloud/openjdk:latest
+    image: springcloud/openjdk:2.0.0.RELEASE
     container_name: dataflow-app-import
     depends_on:
       - dataflow-server

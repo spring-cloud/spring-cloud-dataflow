@@ -128,7 +128,7 @@
 							  <tag>latest</tag>
 							  <tag>${project.version}</tag>
 						  </tags>
-						<from>springcloud/openjdk:latest</from>
+						<from>springcloud/openjdk:2.0.0.RELEASE</from>
 						<volumes>
 							<volume>/tmp</volume>
 						</volumes>
