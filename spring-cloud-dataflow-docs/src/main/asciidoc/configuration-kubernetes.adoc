@@ -229,6 +229,18 @@ These properties are also used when configuring the <<configuration-kubernetes-t
 |The key name to obtain secret data from
 |<none>
 
+|configMapKeyRefs.envVarName
+|The environment variable name to hold the ConfigMap data
+|<none>
+
+|configMapKeyRefs.configMapName
+|The ConfigMap name to access
+|<none>
+
+|configMapKeyRefs.dataKey
+|The key name to obtain ConfigMap data from
+|<none>
+
 |maximumConcurrentTasks
 |The maximum concurrent tasks allowed for this platform instance.
 |20
