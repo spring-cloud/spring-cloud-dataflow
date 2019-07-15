@@ -46,7 +46,7 @@ public class AuditRecordResource extends ResourceSupport {
 	private String correlationId;
 
 	/**
-	 * Data associated with the the audited operation.
+	 * Data associated with the audited operation.
 	 */
 	private String auditData;
 

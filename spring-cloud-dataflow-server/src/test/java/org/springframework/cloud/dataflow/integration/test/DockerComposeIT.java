@@ -320,7 +320,7 @@ public class DockerComposeIT {
 		}
 
 		/**
-		 * Return the the attributes for each application instance for all applications in all deployed streams.
+		 * Return the attributes for each application instance for all applications in all deployed streams.
 		 * @return Returns map of map with following structure: (appInstanceId, (propertyName, propertyValue))
 		 */
 		public Map<String, Map<String, String>> appInstanceAttributes() {
