@@ -322,7 +322,7 @@ On this screen the user can view not only the information from the Task Executio
 ==== Stop Executing Tasks
 
 To submit a stop task execution request to the platform, click the drop down button next to the task execution that needs to be stopped.
-Now click the `Stop task` option.   The  dashboard will the present a dialog box asking if you are sure that you want to stop the task execution, click `Stop Task Execution(s)`.
+Now click the `Stop task` option.  The dashboard will the present a dialog box asking if you are sure that you want to stop the task execution, click `Stop Task Execution(s)`.
 
 image::{dataflow-asciidoc}/images/dataflow-task-execution-stop.png[Stop Executing Tasks, scaledwidth="100%"]
 

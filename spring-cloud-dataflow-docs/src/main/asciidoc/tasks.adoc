@@ -354,7 +354,7 @@ In this case Spring Cloud Data Flow states that the task is invalid because task
 [[spring-cloud-dataflow-stopping-task-execution]]
 === Stopping a Task Execution
 
-In some cases a task that is executing on a platform may not stop because of a problem on the platform or the software itself.
+In some cases a task that is executing on a platform may not stop because of a problem on the platform or the application business logic itself.
 For such cases Spring Cloud Data Flow offers the user the ability to send a request to the platform to terminate the task execution.
 To do this a user can submit a `task execution stop` for a given set of task executions.  For example:
 
@@ -364,8 +364,7 @@ task execution stop --ids 5
 
 Request to stop the task execution with id(s): 5 has been submitted
 ----
-In the example above we see that the user has requested that task execution id 5 to be stopped.
-In these cases the platform will stop the execution.  When we view the result for the task execution we will see that the task execution completed with a 0 exit code.
+With the above command, the trigger to stop the execution of id=5 will be submitted to the underlying deployer implementation, and as a result, the operation will stop the execution of that task. When we view the result for the task execution, we will see that the task execution completed with a 0 exit code.
 
 [source,bash]
 ----
