@@ -377,12 +377,12 @@ dataflow:>task execution list
 ╚══════════╧══╧════════════════════════════╧════════════════════════════╧═════════╝
 ----
 
+If a user submits a stop for a task execution that has child task executions associated with it, like a composed task, a stop request will be sent for each of the child task executions.
 [WARNING]
 ====
 When stopping a task execution that has a running Spring Batch job, the job will be left with the batch status of `STARTED`.
+Each of the supported platforms send a SIG-INT to the task application  when a stop is requested that allows Spring Cloud Task to capture the state of the app, however Spring Batch does not handle a SIG-INT and thus the job stops in the STARTED status. 
 ====
-
-If a user submits a stop for a task execution that has child task executions associated with it, like a composed task, a stop request will be sent for each of the child task executions.
 
 [[spring-cloud-dataflow-task-events]]
 == Subscribing to Task/Batch Events
