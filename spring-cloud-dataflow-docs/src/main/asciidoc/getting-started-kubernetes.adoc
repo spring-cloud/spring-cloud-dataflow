@@ -717,7 +717,7 @@ Replace `<app>` with the name of your application and the `envVarName`, `configM
 
 You can configure ConfigMap references at the global server level as well.
 
-The following example shows how to do so for streams:
+The following example shows how to do so for streams. Edit the appropriate `skipper-config-(binder).yaml`, replacing `(binder)` with the corresponding binder in use:
 
 ====
 [source,yaml]
@@ -739,7 +739,7 @@ data:
 ----
 ====
 
-The following example shows how to do so for tasks:
+The following example shows how to do so for tasks by editing the `server-deployment.yaml` file:
 
 ====
 [source,yaml]
