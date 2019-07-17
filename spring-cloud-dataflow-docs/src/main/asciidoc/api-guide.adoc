@@ -122,7 +122,6 @@ The API includes the following resources:
 * <<api-guide-resources-job-instances>>
 * <<api-guide-resources-job-step-executions>>
 * <<api-guide-resources-runtime-information-applications>>
-* <<api-guide-resources-metrics-stream-applications>>
 
 
 
