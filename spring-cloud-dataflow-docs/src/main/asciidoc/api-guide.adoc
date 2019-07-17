@@ -122,7 +122,8 @@ The API includes the following resources:
 * <<api-guide-resources-job-instances>>
 * <<api-guide-resources-job-step-executions>>
 * <<api-guide-resources-runtime-information-applications>>
-
+* <<api-guide-resources-stream-logs>>
+* <<api-guide-resources-task-logs>>
 
 
 [[api-guide-resources-index]]
@@ -2642,4 +2643,119 @@ include::{snippets}/runtime-apps-documentation/list-all-apps/curl-request.adoc[]
 ===== Response Structure
 
 include::{snippets}/runtime-apps-documentation/list-all-apps/http-response.adoc[]
+
+
+[[api-guide-resources-stream-logs]]
+=== Stream Logs
+
+It is possible to get the application logs of the stream for the entire stream or a specific application inside the stream.
+The following topics provide more detail:
+
+* <<api-guide-resources-stream-logs-by-stream-name>>
+* <<api-guide-resources-stream-logs-by-app-name>>
+
+
+
+[[api-guide-resources-stream-logs-by-stream-name]]
+==== Get the applications' logs by the stream name
+
+To retrieve the logs of all the application of stream by the given stream name, query the `/streams/logs/<streamName>` endpoint by using `GET`.
+The following topics provide more detail:
+
+* <<api-guide-resources-stream-logs-by-stream-name-request-structure>>
+* <<api-guide-resources-stream-logs-by-stream-name-example-request>>
+* <<api-guide-resources-stream-logs-by-stream-name-response-structure>>
+
+
+[[api-guide-resources-stream-logs-by-stream-name-request-structure]]
+===== Request Structure
+
+include::{snippets}/stream-logs-documentation/get-logs-by-stream-name/http-request.adoc[]
+
+
+[[api-guide-resources-stream-logs-by-stream-name-example-request]]
+===== Example Request
+
+include::{snippets}/stream-logs-documentation/get-logs-by-stream-name/curl-request.adoc[]
+
+
+[[api-guide-resources-stream-logs-by-stream-name-response-structure]]
+===== Response Structure
+
+include::{snippets}/stream-logs-documentation/get-logs-by-stream-name/http-response.adoc[]
+
+
+[[api-guide-resources-stream-logs-by-app-name]]
+==== Get the logs of a specific application from the stream
+
+To retrieve the logs of a specific application from the stream, query the `/streams/logs/<streamName>/<appName>` endpoint by using `GET`.
+The following topics provide more detail:
+
+* <<api-guide-resources-stream-logs-by-app-name-request-structure>>
+* <<api-guide-resources-stream-logs-by-app-name-example-request>>
+* <<api-guide-resources-stream-logs-by-app-name-response-structure>>
+
+
+[[api-guide-resources-stream-logs-by-app-name-request-structure]]
+===== Request Structure
+
+include::{snippets}/stream-logs-documentation/get-logs-by-app-name/http-request.adoc[]
+
+
+[[api-guide-resources-stream-logs-by-app-name-example-request]]
+===== Example Request
+
+include::{snippets}/stream-logs-documentation/get-logs-by-app-name/curl-request.adoc[]
+
+
+[[api-guide-resources-stream-logs-by-app-name-response-structure]]
+===== Response Structure
+
+include::{snippets}/stream-logs-documentation/get-logs-by-app-name/http-response.adoc[]
+
+
+
+[[api-guide-resources-task-logs]]
+=== Task Logs
+
+It is possible to get the task execution log of a specific task execution.
+
+The following topics provide more detail:
+
+* <<api-guide-resources-stream-logs-by-task-id>>
+
+
+[[api-guide-resources-stream-logs-by-task-id]]
+==== Get the task execution log
+
+To retrieve the logs of the task execution, query the `/tasks/logs/<ExternalTaskExecutionId>` endpoint by using `GET`.
+The following topics provide more detail:
+
+* <<api-guide-resources-task-logs-by-task-id-request-structure>>
+* <<api-guide-resources-task-logs-by-task-id-request-parameters>>
+* <<api-guide-resources-task-logs-by-task-id-example-request>>
+* <<api-guide-resources-task-logs-by-task-id-response-structure>>
+
+
+[[api-guide-resources-task-logs-by-task-id-request-structure]]
+===== Request Structure
+
+include::{snippets}/task-logs-documentation/get-logs-by-task-id/http-request.adoc[]
+
+
+[[api-guide-resources-task-logs-by-task-id-request-parameters]]
+===== Request Parameters
+
+include::{snippets}/task-logs-documentation/get-logs-by-task-id/request-parameters.adoc[]
+
+[[api-guide-resources-task-logs-by-task-id-example-request]]
+===== Example Request
+
+include::{snippets}/task-logs-documentation/get-logs-by-task-id/curl-request.adoc[]
+
+
+[[api-guide-resources-task-logs-by-task-id-response-structure]]
+===== Response Structure
+
+include::{snippets}/task-logs-documentation/get-logs-by-task-id/http-response.adoc[]
 
