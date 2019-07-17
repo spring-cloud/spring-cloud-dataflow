@@ -122,14 +122,15 @@ The API includes the following resources:
 * <<api-guide-resources-job-instances>>
 * <<api-guide-resources-job-step-executions>>
 * <<api-guide-resources-runtime-information-applications>>
-
+* <<api-guide-resources-stream-logs>>
+* <<api-guide-resources-task-logs>>
 
 
 [[api-guide-resources-index]]
 === Index
 
 The index provides the entry point into Spring Cloud Data Flow's REST API.
-The following topics provide more detail:
+The following topics provide more details:
 
 * <<api-guide-resources-index-access>>
 * <<api-guide-resources-index-request-structure>>
@@ -189,7 +190,7 @@ include::{snippets}/api-documentation/index/links.adoc[]
 === Server Meta Information
 
 The server meta information endpoint provides more information about the server itself.
-The following topics provide more detail:
+The following topics provide more details:
 
 * <<api-guide-resources-server-meta-retrieving>>
 * <<api-guide-resources-server-meta-request-structure>>
@@ -233,7 +234,7 @@ include::{snippets}/about-documentation/get-meta-information/http-response.adoc[
 === Registered Applications
 
 The registered applications endpoint provides information about the applications that are registered with the Spring Cloud Data Flow server.
-The following topics provide more detail:
+The following topics provide more details:
 
 * <<resources-app-registry-list>>
 * <<resources-app-registry-get>>
@@ -249,7 +250,7 @@ The following topics provide more detail:
 [[resources-app-registry-list]]
 ==== Listing Applications
 A `GET` request will list all applications known to Spring Cloud Data Flow.
-The following topics provide more detail:
+The following topics provide more details:
 
 * <<api-guide-resources-app-registry-request-structure>>
 * <<api-guide-resources-app-registry-request-parameters>>
@@ -290,7 +291,7 @@ include::{snippets}/app-registry-documentation/get-applications-filtered/http-re
 ==== Getting Information on a Particular Application
 
 A `GET` request on `/apps/<type>/<name>` gets info on a particular application.
-The following topics provide more detail:
+The following topics provide more details:
 
 * <<api-guide-resources-app-registry-get-request-structure>>
 * <<api-guide-resources-app-registry-get-path-parameters>>
@@ -337,7 +338,7 @@ include::{snippets}/app-registry-documentation/get-single-application/http-respo
 [[resources-app-registry-post]]
 ==== Registering a New Application
 A `POST` request on `/apps/<type>/<name>` allows registration of a new application.
-The following topics provide more detail:
+The following topics provide more details:
 
 * <<api-guide-resources-app-registry-post-request-structure>>
 * <<api-guide-resources-app-registry-post-request-parameters>>
@@ -384,7 +385,7 @@ include::{snippets}/app-registry-documentation/registering-an-application/http-r
 ==== Registering a New Application with version
 
 A `POST` request on `/apps/<type>/<name>/<version>` allows registration of a new application
-The following topics provide more detail:
+The following topics provide more details:
 
 * <<api-guide-resources-app-registry-post-versioned-request-structure>>
 * <<api-guide-resources-app-registry-post-versioned-request-parameters>>
@@ -431,7 +432,7 @@ include::{snippets}/app-registry-documentation/registering-an-application-versio
 [[resources-app-registry-bulk]]
 ==== Registering Applications in Bulk
 A `POST` request on `/apps` allows registering multiple applications at once.
-The following topics provide more detail:
+The following topics provide more details:
 
 * <<api-guide-resources-app-registry-bulk-request-structure>>
 * <<api-guide-resources-app-registry-bulk-request-parameters>>
@@ -474,7 +475,7 @@ include::{snippets}/app-registry-documentation/bulk-registering-apps/http-respon
 For an application with the `name` and `type`, multiple versions can be registered.
 In this case, one of the versions can be chosen as the default application.
 
-The following topics provide more detail:
+The following topics provide more details:
 
 * <<api-guide-resources-app-registry-default-request-structure>>
 * <<api-guide-resources-app-registry-default-path-parameters>>
@@ -513,7 +514,7 @@ include::{snippets}/app-registry-documentation/app-default/http-response.adoc[]
 [[resources-app-registry-delete]]
 ==== Unregistering an Application
 A `DELETE` request on `/apps/<type>/<name>` unregisters a previously registered application.
-The following topics provide more detail:
+The following topics provide more details:
 
 * <<api-guide-resources-app-registry-delete-request-structure>>
 * <<api-guide-resources-app-registry-delete-path-parameters>>
@@ -553,7 +554,7 @@ include::{snippets}/app-registry-documentation/unregistering-an-application/http
 [[resources-app-registry-delete-all]]
 ==== Unregistering all Applications
 A `DELETE` request on `/apps` unregisters all the applications.
-The following topics provide more detail:
+The following topics provide more details:
 
 * <<api-guide-resources-app-registry-delete-all-request-structure>>
 * <<api-guide-resources-app-registry-delete-all-example-request>>
@@ -584,7 +585,7 @@ include::{snippets}/app-registry-documentation/unregistering-all-applications/ht
 [[api-guide-resources-audit-records]]
 === Audit Records
 
-The audit records endpoint provides information about the audit records. The following topics provide more detail:
+The audit records endpoint provides information about the audit records. The following topics provide more details:
 
 * <<api-guide-resources-audit-records-list>>
 * <<api-guide-resources-audit-record-get>>
@@ -596,7 +597,7 @@ The audit records endpoint provides information about the audit records. The fol
 
 The audit records endpoint lets you retrieve audit trail information.
 
-The following topics provide more detail:
+The following topics provide more details:
 
 * <<api-guide-resources-audit-records-list-request-structure>>
 * <<api-guide-resources-audit-records-list-request-parameters>>
@@ -627,7 +628,7 @@ include::{snippets}/audit-records-documentation/list-all-audit-records/http-resp
 [[api-guide-resources-audit-record-get]]
 ==== Retrieve Audit Record Detail
 
-The audit record endpoint lets you get a single audit record. The following topics provide more detail:
+The audit record endpoint lets you get a single audit record. The following topics provide more details:
 
 * <<api-guide-resources-audit-record-get-request-structure>>
 * <<api-guide-resources-audit-record-get-path-parameters>>
@@ -658,7 +659,7 @@ include::{snippets}/audit-records-documentation/get-audit-record/http-response.a
 [[api-guide-resources-audit-action-types]]
 ==== List all the Audit Action Types
 
-The audit record endpoint lets you get the action types. The following topics provide more detail:
+The audit record endpoint lets you get the action types. The following topics provide more details:
 
 * <<api-guide-resources-audit-action-types-request-structure>>
 * <<api-guide-resources-audit-action-types-example-request>>
@@ -683,7 +684,7 @@ include::{snippets}/audit-records-documentation/get-audit-action-types/http-resp
 [[api-guide-resources-audit-operation-types]]
 ==== List all the Audit Operation Types
 
-The audit record endpoint lets you get the operation types. The following topics provide more detail:
+The audit record endpoint lets you get the operation types. The following topics provide more details:
 
 * <<api-guide-resources-audit-operation-types-request-structure>>
 * <<api-guide-resources-audit-operation-types-example-request>>
@@ -709,7 +710,7 @@ include::{snippets}/audit-records-documentation/get-audit-operation-types/http-r
 === Stream Definitions
 
 The registered applications endpoint provides information about the stream definitions that are registered with the Spring Cloud Data Flow server.
-The following topics provide more detail:
+The following topics provide more details:
 
 * <<api-guide-resources-stream-definitions-create>>
 * <<api-guide-resources-stream-definitions-list>>
@@ -737,7 +738,7 @@ curl -X POST -d "name=ticktock&definition=time | log" localhost:9393/streams/def
 A stream definition can also contain additional parameters.
 For instance, in the example shown under "`<<api-guide-resources-stream-definitions-create-request-structure>>`", we also provide the date-time format.
 
-The following topics provide more detail:
+The following topics provide more details:
 
 * <<api-guide-resources-stream-definitions-create-request-structure>>
 * <<api-guide-resources-stream-definitions-create-request-parameters>>
@@ -778,7 +779,7 @@ include::{snippets}/stream-definitions-documentation/create-definition/http-resp
 ==== List All Stream Definitions
 
 The streams endpoint lets you list all the stream definitions.
-The following topics provide more detail:
+The following topics provide more details:
 
 * <<api-guide-resources-stream-definitions-list-request-structure>>
 * <<api-guide-resources-stream-definitions-list-request-parameters>>
@@ -817,7 +818,7 @@ include::{snippets}/stream-definitions-documentation/list-all-stream-definitions
 ==== List Related Stream Definitions
 
 The streams endpoint lets you list related stream definitions.
-The following topics provide more detail:
+The following topics provide more details:
 
 * <<api-guide-resources-stream-definitions-list-related-request-structure>>
 * <<api-guide-resources-stream-definitions-list-related-request-parameters>>
@@ -858,7 +859,7 @@ include::{snippets}/stream-definitions-documentation/list-related-stream-definit
 ==== Retrieve Stream Definition Detail
 
 The stream definition endpoint lets you get a single stream definition.
-The following topics provide more detail:
+The following topics provide more details:
 
 * <<api-guide-resources-stream-definition-get-request-structure>>
 * <<api-guide-resources-stream-definition-get-path-parameters>>
@@ -899,7 +900,7 @@ include::{snippets}/stream-definitions-documentation/get-stream-definition/http-
 
 The streams endpoint lets you delete a single stream definition.
 (See also: <<api-guide-resources-stream-definitions-delete-all>>.)
-The following topics provide more detail:
+The following topics provide more details:
 
 * <<api-guide-resources-stream-definitions-delete-one-request-structure>>
 * <<api-guide-resources-stream-definitions-delete-one-request-parameters>>
@@ -941,7 +942,7 @@ include::{snippets}/stream-definitions-documentation/stream-definition-delete1/h
 
 The streams endpoint lets you delete all single stream definitions.
 (See also: <<api-guide-resources-stream-definitions-delete-one>>.)
-The following topics provide more detail:
+The following topics provide more details:
 
 * <<api-guide-resources-stream-definitions-delete-all-request-structure>>
 * <<api-guide-resources-stream-definitions-delete-all-request-parameters>>
@@ -981,7 +982,7 @@ include::{snippets}/stream-definitions-documentation/stream-definition-delete-al
 === Stream Validation
 
 The stream validation endpoint lets you validate the apps in a stream definition.
-The following topics provide more detail:
+The following topics provide more details:
 
 * <<api-guide-resources-stream-validation-request-structure>>
 * <<api-guide-resources-stream-validation-path-parameters>>
@@ -1013,7 +1014,7 @@ include::{snippets}/stream-validation-documentation/validate-stream/http-respons
 === Stream Deployments
 
 The deployment definitions endpoint provides information about the deployments that are registered with the Spring Cloud Data Flow server.
-The following topics provide more detail:
+The following topics provide more details:
 
 * <<api-guide-resources-stream-deployment-deploy>>
 * <<api-guide-resources-stream-deployment-undeploy>>
@@ -1029,7 +1030,7 @@ The following topics provide more detail:
 
 The stream definition endpoint lets you deploy a single stream definition.
 Optionally, you can pass application parameters as properties in the request body.
-The following topics provide more detail:
+The following topics provide more details:
 
 * <<api-guide-resources-stream-definitions-deployment-deploy-request-structure>>
 * <<api-guide-resources-stream-definitions-deployment-deploy-request-parameters>>
@@ -1070,7 +1071,7 @@ include::{snippets}/stream-deployments-documentation/deploy/http-response.adoc[]
 ==== Undeploy Stream Definition
 
 The stream definition endpoint lets you undeploy a single stream definition.
-The following topics provide more detail:
+The following topics provide more details:
 
 * <<api-guide-resources-stream-definitions-deployment-undeploy-request-structure>>
 * <<api-guide-resources-stream-definitions-deployment-undeploy-request-parameters>>
@@ -1112,7 +1113,7 @@ include::{snippets}/stream-deployments-documentation/un-deploy/http-response.ado
 ==== Undeploy All Stream Definitions
 
 The stream definition endpoint lets you undeploy all single stream definitions.
-The following topics provide more detail:
+The following topics provide more details:
 
 * <<api-guide-resources-stream-definitions-deployment-undeploy-all-request-structure>>
 * <<api-guide-resources-stream-definitions-deployment-undeploy-all-request-parameters>>
@@ -1323,7 +1324,7 @@ include::{snippets}/stream-deployments-documentation/platform-list/http-response
 === Task Definitions
 
 The task definitions endpoint provides information about the task definitions that are registered with the Spring Cloud Data Flow server.
-The following topics provide more detail:
+The following topics provide more details:
 
 * <<api-guide-resources-task-definitions-creating>>
 * <<api-guide-resources-task-definitions-list>>
@@ -1336,7 +1337,7 @@ The following topics provide more detail:
 ==== Creating a New Task Definition
 
 The task definition endpoint lets you create a new task definition.
-The following topics provide more detail:
+The following topics provide more details:
 
 * <<api-guide-resources-stream-task-definitions-creating-request-structure>>
 * <<api-guide-resources-stream-task-definitions-creating-request-parameters>>
@@ -1377,7 +1378,7 @@ include::{snippets}/task-definitions-documentation/create-definition/http-respon
 ==== List All Task Definitions
 
 The task definition endpoint lets you get all task definitions.
-The following topics provide more detail:
+The following topics provide more details:
 
 * <<api-guide-resources-stream-task-definitions-list-request-structure>>
 * <<api-guide-resources-stream-task-definitions-list-request-parameters>>
@@ -1418,7 +1419,7 @@ include::{snippets}/task-definitions-documentation/list-all-task-definitions/htt
 ==== Retrieve Task Definition Detail
 
 The task definition endpoint lets you get a single task definition.
-The following topics provide more detail:
+The following topics provide more details:
 
 * <<api-guide-resources-stream-task-definitions-detail-request-structure>>
 * <<api-guide-resources-stream-task-definitions-detail-request-parameters>>
@@ -1462,7 +1463,7 @@ include::{snippets}/task-definitions-documentation/display-detail/http-response.
 ==== Delete Task Definition
 
 The task definition endpoint lets you delete a single task definition.
-The following topics provide more detail:
+The following topics provide more details:
 
 * <<api-guide-resources-delete-task-definition-request-structure>>
 * <<api-guide-resources-delete-task-definition-request-parameters>>
@@ -1504,7 +1505,7 @@ include::{snippets}/task-definitions-documentation/task-definition-delete/http-r
 === Task Scheduler
 
 The task scheduler endpoint provides information about the task schedules that are registered with the Scheduler Implementation.
-The following topics provide more detail:
+The following topics provide more details:
 
 * <<api-guide-resources-task-schedule-creating>>
 * <<api-guide-resources-task-schedule-list>>
@@ -1515,7 +1516,7 @@ The following topics provide more detail:
 ==== Creating a New Task Schedule
 
 The task schedule endpoint lets you create a new task schedule.
-The following topics provide more detail:
+The following topics provide more details:
 
 * <<api-guide-resources-stream-task-schedule-creating-request-structure>>
 * <<api-guide-resources-stream-task-schedule-creating-request-parameters>>
@@ -1555,7 +1556,7 @@ include::{snippets}/task-scheduler-documentation/create-schedule/http-response.a
 ==== List All Schedules
 
 The task schedules endpoint lets you get all task schedules.
-The following topics provide more detail:
+The following topics provide more details:
 
 * <<api-guide-resources-stream-task-schedule-list-request-structure>>
 * <<api-guide-resources-stream-task-schedule-list-request-parameters>>
@@ -1594,7 +1595,7 @@ include::{snippets}/task-scheduler-documentation/list-all-schedules/http-respons
 ==== List Filtered Schedules
 
 The task schedules endpoint lets you get all task schedules that have the specified task definition name.
-The following topics provide more detail:
+The following topics provide more details:
 
 * <<api-guide-resources-stream-task-schedule-list-filtered-request-structure>>
 * <<api-guide-resources-stream-task-schedule-list-filtered-request-parameters>>
@@ -1636,7 +1637,7 @@ include::{snippets}/task-scheduler-documentation/list-filtered-schedules/http-re
 ==== Delete Task Schedule
 
 The task schedule endpoint lets you delete a single task schedule.
-The following topics provide more detail:
+The following topics provide more details:
 
 * <<api-guide-resources-delete-task-schedule-request-structure>>
 * <<api-guide-resources-delete-task-schedule-request-parameters>>
@@ -1676,7 +1677,7 @@ include::{snippets}/task-scheduler-documentation/delete-schedule/http-response.a
 === Task Validation
 
 The task validation endpoint lets you validate the apps in a task definition.
-The following topics provide more detail:
+The following topics provide more details:
 
 * <<api-guide-resources-task-validation-request-structure>>
 * <<api-guide-resources-task-validation-path-parameters>>
@@ -1710,7 +1711,7 @@ include::{snippets}/task-validation-documentation/validate-task/http-response.ad
 === Task Executions
 
 The task executions endpoint provides information about the task executions that are registered with the Spring Cloud Data Flow server.
-The following topics provide more detail:
+The following topics provide more details:
 
 * <<api-guide-resources-task-executions-launching>>
 * <<api-guide-resources-task-executions-stopping>>
@@ -1726,7 +1727,7 @@ The following topics provide more detail:
 ==== Launching a Task
 
 Launching a task is done by requesting the creation of a new task execution.
-The following topics provide more detail:
+The following topics provide more details:
 
 * <<api-guide-resources-task-executions-launching-request-structure>>
 * <<api-guide-resources-task-executions-launching-request-parameters>>
@@ -1764,7 +1765,7 @@ include::{snippets}/task-executions-documentation/launch-task/http-response.adoc
 ==== Stopping a Task
 
 Stopping a task is done by posting the id of an existing task execution.
-The following topics provide more detail:
+The following topics provide more details:
 
 * <<api-guide-resources-task-executions-stopping-request-structure>>
 * <<api-guide-resources-task-executions-stopping-path-parameters>>
@@ -1802,7 +1803,7 @@ include::{snippets}/task-executions-documentation/stop-task/http-response.adoc[]
 ==== List All Task Executions
 
 The task executions endpoint lets you list all task executions.
-The following topics provide more detail:
+The following topics provide more details:
 
 * <<api-guide-resources-task-executions-list-request-structure>>
 * <<api-guide-resources-task-executions-list-request-parameters>>
@@ -1843,7 +1844,7 @@ include::{snippets}/task-executions-documentation/list-task-executions/http-resp
 ==== List All Task Executions With a Specified Task Name
 
 The task executions endpoint lets you list task executions with a specified task name.
-The following topics provide more detail:
+The following topics provide more details:
 
 * <<api-guide-resources-task-executions-list-by-name-request-structure>>
 * <<api-guide-resources-task-executions-list-by-name-request-parameters>>
@@ -1884,7 +1885,7 @@ include::{snippets}/task-executions-documentation/list-task-executions-by-name/h
 ==== Task Execution Detail
 
 The task executions endpoint lets you get the details about a task execution.
-The following topics provide more detail:
+The following topics provide more details:
 
 * <<api-guide-resources-task-executions-detail-request-structure>>
 * <<api-guide-resources-task-executions-detail-request-parameters>>
@@ -1930,7 +1931,7 @@ The task executions endpoint lets you clean up resources used to deploy the task
 
 NOTE: The cleanup implementation is platform specific.
 
-The following topics provide more detail:
+The following topics provide more details:
 
 * <<api-guide-resources-task-executions-delete-request-structure>>
 * <<api-guide-resources-task-executions-delete-request-parameters>>
@@ -1972,7 +1973,7 @@ include::{snippets}/task-executions-documentation/remove-task-execution/http-res
 ==== Task Execution Current Count
 
 The task executions current endpoint lets you retrieve the current number of running executions.
-The following topics provide more detail:
+The following topics provide more details:
 
 * <<api-guide-resources-task-executions-current-count-request-structure>>
 * <<api-guide-resources-task-executions-current-count-request-parameters>>
@@ -2005,7 +2006,7 @@ include::{snippets}/task-executions-documentation/launch-task-current-count/http
 === Job Executions
 
 The job executions endpoint provides information about the job executions that are registered with the Spring Cloud Data Flow server.
-The following topics provide more detail:
+The following topics provide more details:
 
 * <<api-guide-resources-job-executions-list>>
 * <<api-guide-resources-job-executions-thin-job-execution-list>>
@@ -2021,7 +2022,7 @@ The following topics provide more detail:
 ==== List All Job Executions
 
 The job executions endpoint lets you list all job executions.
-The following topics provide more detail:
+The following topics provide more details:
 
 * <<api-guide-resources-job-executions-list-request-structure>>
 * <<api-guide-resources-job-executions-list-request-parameters>>
@@ -2060,7 +2061,7 @@ include::{snippets}/job-executions-documentation/list-job-executions/http-respon
 ==== List All Job Executions Without Step Executions Included
 
 The job executions endpoint lets you list all job executions without step executions included.
-The following topics provide more detail:
+The following topics provide more details:
 
 * <<api-guide-resources-job-executions-thin-job-execution-list-request-structure>>
 * <<api-guide-resources-job-executions-thin-job-execution-list-request-parameters>>
@@ -2099,7 +2100,7 @@ include::{snippets}/job-executions-documentation/list-thin-job-executions/http-r
 ==== List All Job Executions With a Specified Job Name
 
 The job executions endpoint lets you list all job executions.
-The following topics provide more detail:
+The following topics provide more details:
 
 * <<api-guide-resources-job-executions-list-by-name-request-structure>>
 * <<api-guide-resources-job-executions-list-by-name-request-parameters>>
@@ -2138,7 +2139,7 @@ include::{snippets}/job-executions-documentation/list-job-executions-by-name/htt
 ==== List All Job Executions With a Specified Job Name Without Step Executions Included
 
 The job executions endpoint lets you list all job executions.
-The following topics provide more detail:
+The following topics provide more details:
 
 * <<api-guide-resources-job-executions-thin-list-by-name-request-structure>>
 * <<api-guide-resources-job-executions-thin-list-by-name-request-parameters>>
@@ -2177,7 +2178,7 @@ include::{snippets}/job-executions-documentation/list-thin-job-executions-by-nam
 ==== Job Execution Detail
 
 The job executions endpoint lets you get the details about a job execution.
-The following topics provide more detail:
+The following topics provide more details:
 
 * <<api-guide-resources-job-executions-detail-request-structure>>
 * <<api-guide-resources-job-executions-detail-request-parameters>>
@@ -2220,7 +2221,7 @@ include::{snippets}/job-executions-documentation/job-display-detail/http-respons
 ==== Stop Job Execution
 
 The job executions endpoint lets you stop a job execution.
-The following topics provide more detail:
+The following topics provide more details:
 
 * <<api-guide-resources-job-executions-stop-request-structure>>
 * <<api-guide-resources-job-executions-stop-request-parameters>>
@@ -2263,7 +2264,7 @@ include::{snippets}/job-executions-documentation/job-stop/http-response.adoc[]
 ==== Restart Job Execution
 
 The job executions endpoint lets you restart a job execution.
-The following topics provide more detail:
+The following topics provide more details:
 
 * <<api-guide-resources-job-executions-restart-request-structure>>
 * <<api-guide-resources-job-executions-restart-request-parameters>>
@@ -2306,7 +2307,7 @@ include::{snippets}/job-executions-documentation/job-restart/http-response.adoc[
 === Job Instances
 
 The job instances endpoint provides information about the job instances that are registered with the Spring Cloud Data Flow server.
-The following topics provide more detail:
+The following topics provide more details:
 
 * <<api-guide-resources-job-instances-list>>
 * <<api-guide-resources-job-instances-detail>>
@@ -2317,7 +2318,7 @@ The following topics provide more detail:
 ==== List All Job Instances
 
 The job instances endpoint lets you list all job instances.
-The following topics provide more detail:
+The following topics provide more details:
 
 * <<api-guide-resources-job-instances-list-request-structure>>
 * <<api-guide-resources-job-instances-list-request-parameters>>
@@ -2358,7 +2359,7 @@ include::{snippets}/job-instances-documentation/list-job-instances/http-response
 ==== Job Instance Detail
 
 The job instances endpoint lets you list all job instances.
-The following topics provide more detail:
+The following topics provide more details:
 
 * <<api-guide-resources-job-instances-detail-request-structure>>
 * <<api-guide-resources-job-instances-detail-request-parameters>>
@@ -2401,7 +2402,7 @@ include::{snippets}/job-instances-documentation/job-display-detail/http-response
 === Job Step Executions
 
 The job step executions endpoint provides information about the job step executions that are registered with the Spring Cloud Data Flow server.
-The following topics provide more detail:
+The following topics provide more details:
 
 * <<api-guide-resources-job-step-executions-list>>
 * <<api-guide-resources-job-step-execution-detail>>
@@ -2413,7 +2414,7 @@ The following topics provide more detail:
 ==== List All Step Executions For a Job Execution
 
 The job step executions endpoint lets you list all job step executions.
-The following topics provide more detail:
+The following topics provide more details:
 
 * <<api-guide-resources-job-step-executions-list-request-structure>>
 * <<api-guide-resources-job-step-executions-list-request-parameters>>
@@ -2454,7 +2455,7 @@ include::{snippets}/job-step-executions-documentation/list-step-executions-for-j
 ==== Job Step Execution Detail
 
 The job step executions endpoint lets you get details about a job step execution.
-The following topics provide more detail:
+The following topics provide more details:
 
 * <<api-guide-resources-job-step-execution-detail-request-structure>>
 * <<api-guide-resources-job-step-execution-detail-request-parameters>>
@@ -2495,7 +2496,7 @@ include::{snippets}/job-step-executions-documentation/step-detail/http-response.
 ==== Job Step Execution Progress
 
 The job step executions endpoint lets you get details about the progress of a job step execution.
-The following topics provide more detail:
+The following topics provide more details:
 
 * <<api-guide-resources-job-step-execution-progress-request-structure>>
 * <<api-guide-resources-job-step-execution-progress-request-parameters>>
@@ -2538,7 +2539,7 @@ include::{snippets}/job-step-executions-documentation/step-progress/http-respons
 === Runtime Information about Applications
 
 It is possible to get information about running apps known to the system, either globally or individually.
-The following topics provide more detail:
+The following topics provide more details:
 
 * <<api-guide-resources-runtime-information-applications-listing-all>>
 * <<api-guide-resources-runtime-information-applications-querying-all-instances-single-app>>
@@ -2550,7 +2551,7 @@ The following topics provide more detail:
 ==== Listing All Applications at Runtime
 
 To retrieve information about all instances of all apps, query the `/runtime/apps` endpoint by using `GET`.
-The following topics provide more detail:
+The following topics provide more details:
 
 * <<api-guide-resources-runtime-information-applications-listing-all-request-structure>>
 * <<api-guide-resources-runtime-information-applications-listing-all-example-request>>
@@ -2583,7 +2584,7 @@ include::{snippets}/runtime-apps-documentation/list-all-apps/http-response.adoc[
 ==== Querying All Instances of a Single App
 
 To retrieve information about all instances of a particular app, query the `/runtime/apps/<appId>/instances` endpoint by using `GET`.
-The following topics provide more detail:
+The following topics provide more details:
 
 * <<api-guide-resources-runtime-information-applications-querying-all-instances-single-app-request-structure>>
 * <<api-guide-resources-runtime-information-applications-querying-all-instances-single-app-example-request>>
@@ -2616,7 +2617,7 @@ include::{snippets}/runtime-apps-documentation/list-all-apps/http-response.adoc[
 ==== Querying a Single Instance of a Single App
 
 Finally, to retrieve information about a particular instance of a particular app, query the `/runtime/apps/<appId>/instances/<instanceId>` endpoint by using `GET`.
-The following topics provide more detail:
+The following topics provide more details:
 
 * <<api-guide-resources-runtime-information-applications-querying-single-instance-single-app-request-structure>>
 * <<api-guide-resources-runtime-information-applications-querying-single-instance-single-app-example-request>>
@@ -2642,4 +2643,119 @@ include::{snippets}/runtime-apps-documentation/list-all-apps/curl-request.adoc[]
 ===== Response Structure
 
 include::{snippets}/runtime-apps-documentation/list-all-apps/http-response.adoc[]
+
+
+[[api-guide-resources-stream-logs]]
+=== Stream Logs
+
+It is possible to get the application logs of the stream for the entire stream or a specific application inside the stream.
+The following topics provide more details:
+
+* <<api-guide-resources-stream-logs-by-stream-name>>
+* <<api-guide-resources-stream-logs-by-app-name>>
+
+
+
+[[api-guide-resources-stream-logs-by-stream-name]]
+==== Get the applications' logs by the stream name
+
+Use the HTTP `GET` method with the `/streams/logs/<streamName>` REST endpoint to retrieve all the applications' logs for the given stream name.
+The following topics provide more details:
+
+* <<api-guide-resources-stream-logs-by-stream-name-request-structure>>
+* <<api-guide-resources-stream-logs-by-stream-name-example-request>>
+* <<api-guide-resources-stream-logs-by-stream-name-response-structure>>
+
+
+[[api-guide-resources-stream-logs-by-stream-name-request-structure]]
+===== Request Structure
+
+include::{snippets}/stream-logs-documentation/get-logs-by-stream-name/http-request.adoc[]
+
+
+[[api-guide-resources-stream-logs-by-stream-name-example-request]]
+===== Example Request
+
+include::{snippets}/stream-logs-documentation/get-logs-by-stream-name/curl-request.adoc[]
+
+
+[[api-guide-resources-stream-logs-by-stream-name-response-structure]]
+===== Response Structure
+
+include::{snippets}/stream-logs-documentation/get-logs-by-stream-name/http-response.adoc[]
+
+
+[[api-guide-resources-stream-logs-by-app-name]]
+==== Get the logs of a specific application from the stream
+
+To retrieve the logs of a specific application from the stream, query the `/streams/logs/<streamName>/<appName>` endpoint using the `GET` HTTP method.
+The following topics provide more details:
+
+* <<api-guide-resources-stream-logs-by-app-name-request-structure>>
+* <<api-guide-resources-stream-logs-by-app-name-example-request>>
+* <<api-guide-resources-stream-logs-by-app-name-response-structure>>
+
+
+[[api-guide-resources-stream-logs-by-app-name-request-structure]]
+===== Request Structure
+
+include::{snippets}/stream-logs-documentation/get-logs-by-app-name/http-request.adoc[]
+
+
+[[api-guide-resources-stream-logs-by-app-name-example-request]]
+===== Example Request
+
+include::{snippets}/stream-logs-documentation/get-logs-by-app-name/curl-request.adoc[]
+
+
+[[api-guide-resources-stream-logs-by-app-name-response-structure]]
+===== Response Structure
+
+include::{snippets}/stream-logs-documentation/get-logs-by-app-name/http-response.adoc[]
+
+
+
+[[api-guide-resources-task-logs]]
+=== Task Logs
+
+It is possible to get the task execution log for a specific task execution.
+
+The following topic provides more details:
+
+* <<api-guide-resources-stream-logs-by-task-id>>
+
+
+[[api-guide-resources-stream-logs-by-task-id]]
+==== Get the task execution log
+
+To retrieve the logs of the task execution, query the `/tasks/logs/<ExternalTaskExecutionId>` endpoint using the HTTP `GET` method..
+The following topics provide more details:
+
+* <<api-guide-resources-task-logs-by-task-id-request-structure>>
+* <<api-guide-resources-task-logs-by-task-id-request-parameters>>
+* <<api-guide-resources-task-logs-by-task-id-example-request>>
+* <<api-guide-resources-task-logs-by-task-id-response-structure>>
+
+
+[[api-guide-resources-task-logs-by-task-id-request-structure]]
+===== Request Structure
+
+include::{snippets}/task-logs-documentation/get-logs-by-task-id/http-request.adoc[]
+
+
+[[api-guide-resources-task-logs-by-task-id-request-parameters]]
+===== Request Parameters
+
+include::{snippets}/task-logs-documentation/get-logs-by-task-id/request-parameters.adoc[]
+
+[[api-guide-resources-task-logs-by-task-id-example-request]]
+===== Example Request
+
+include::{snippets}/task-logs-documentation/get-logs-by-task-id/curl-request.adoc[]
+
+
+[[api-guide-resources-task-logs-by-task-id-response-structure]]
+===== Response Structure
+
+include::{snippets}/task-logs-documentation/get-logs-by-task-id/http-response.adoc[]
 
