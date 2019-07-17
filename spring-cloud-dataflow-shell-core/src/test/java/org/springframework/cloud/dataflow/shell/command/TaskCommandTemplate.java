@@ -84,6 +84,25 @@ public class TaskCommandTemplate {
 		return value;
 	}
 
+
+	/**
+	 * Launch a task and validate the result from shell.
+	 *
+	 * @param taskName the name of the task
+	 * @param alternateCTRApp the app to use when launching a ComposedTask if default is not wanted.
+	 */
+	public long launchWithAlternateCTR(String taskName, String alternateCTRApp) {
+		// add the task name to the tasks list before assertion
+		tasks.add(taskName);
+		CommandResult cr = shell.executeCommand(String.format("task launch %s --alternateComposedTaskRunnerApp %s", taskName, alternateCTRApp));
+		CommandResult idResult = shell.executeCommand("task execution list --name " + taskName);
+		Table result = (Table) idResult.getResult();
+
+		long value = (long) result.getModel().getValue(1, 1);
+		assertTrue(cr.toString().contains("with execution id " + value));
+		return value;
+	}
+
 	/**
 	 * Stop a task execution.
 	 *

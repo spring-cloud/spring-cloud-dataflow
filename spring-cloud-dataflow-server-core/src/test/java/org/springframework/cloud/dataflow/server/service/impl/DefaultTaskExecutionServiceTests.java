@@ -48,6 +48,7 @@ import org.springframework.cloud.dataflow.core.TaskPlatformFactory;
 import org.springframework.cloud.dataflow.registry.service.AppRegistryService;
 import org.springframework.cloud.dataflow.server.configuration.TaskServiceDependencies;
 import org.springframework.cloud.dataflow.server.controller.InvalidCTRLaunchRequestException;
+import org.springframework.cloud.dataflow.server.controller.NoSuchAppException;
 import org.springframework.cloud.dataflow.server.job.LauncherRepository;
 import org.springframework.cloud.dataflow.server.repository.DataflowTaskExecutionDao;
 import org.springframework.cloud.dataflow.server.repository.DuplicateTaskException;
@@ -423,7 +424,7 @@ public abstract class DefaultTaskExecutionServiceTests {
 
 			taskSaveService.saveTaskDefinition("seqTask", dsl);
 			when(taskLauncher.launch(any())).thenReturn("0");
-
+			when(appRegistry.appExist(anyString(), any(ApplicationType.class))).thenReturn(true);
 			Map<String, String> properties = new HashMap<>();
 			properties.put("app.foo", "bar");
 			properties.put("app.seqTask.AAA.timestamp.format", "YYYY");
@@ -444,6 +445,23 @@ public abstract class DefaultTaskExecutionServiceTests {
 			assertFalse(request.getDefinition().getProperties().containsKey("app.foo"));
 			assertEquals("globalvalue", request.getDefinition().getProperties().get("globalkey"));
 			assertNull(request.getDefinition().getProperties().get("globalstreamkey"));
+		}
+
+
+		@Test(expected = NoSuchAppException.class)
+		@DirtiesContext
+		public void executeComposedTaskwithUserCTRNameInvalidAppName() {
+			String dsl = "AAA && BBB";
+			initializeSuccessfulRegistry(appRegistry);
+
+			taskSaveService.saveTaskDefinition("seqTask", dsl);
+			when(taskLauncher.launch(any())).thenReturn("0");
+			Map<String, String> properties = new HashMap<>();
+			properties.put("app.foo", "bar");
+			properties.put("app.seqTask.AAA.timestamp.format", "YYYY");
+			properties.put("deployer.seqTask.AAA.memory", "1240m");
+			properties.put("app.composed-task-runner.interval-time-between-checks", "1000");
+			this.taskExecutionService.executeTask("seqTask", properties, new LinkedList<>(), "anotherctr");
 		}
 
 		@Test

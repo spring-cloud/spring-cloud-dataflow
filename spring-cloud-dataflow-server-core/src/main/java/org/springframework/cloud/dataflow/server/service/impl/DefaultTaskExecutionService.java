@@ -154,7 +154,7 @@ public class DefaultTaskExecutionService implements TaskExecutionService {
 
 
 	@Override
-	public long executeTask(String taskName, Map<String, String> taskDeploymentProperties, List<String> commandLineArgs, String userComposedTaskRunnerName) {
+	public long executeTask(String taskName, Map<String, String> taskDeploymentProperties, List<String> commandLineArgs, String composedTaskRunnerName) {
 
 		String platformName = taskDeploymentProperties.get(TASK_PLATFORM_NAME);
 		if (!StringUtils.hasText(platformName)) {
@@ -180,7 +180,7 @@ public class DefaultTaskExecutionService implements TaskExecutionService {
 			}
 		}
 		TaskExecutionInformation taskExecutionInformation = taskExecutionInfoService
-				.findTaskExecutionInformation(taskName, taskDeploymentProperties, userComposedTaskRunnerName);
+				.findTaskExecutionInformation(taskName, taskDeploymentProperties, composedTaskRunnerName);
 
 		TaskExecution taskExecution = taskExecutionRepositoryService.createTaskExecution(taskName);
 

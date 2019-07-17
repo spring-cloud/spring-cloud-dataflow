@@ -57,12 +57,6 @@ public class TaskServiceUtilsTests {
 	}
 
 	@Test
-	public void testCreateComposedTaskDefinitionWithUserCTRName() {
-		TaskConfigurationProperties props = new TaskConfigurationProperties();
-		assertThat(TaskServiceUtils.createComposedTaskDefinition("FOO", BASE_GRAPH, props)).isEqualTo("FOO --graph=\"AAA && BBB\"");
-	}
-
-	@Test
 	public void testCreateComposeTaskDefinitionNullNameCheck() {
 		this.expectedException.expect(IllegalArgumentException.class);
 		TaskConfigurationProperties props = new TaskConfigurationProperties();

@@ -65,12 +65,13 @@ public class TaskServiceUtils {
 
 	/**
 	 * Creates a properly formatted CTR definition based on the graph provided.
+	 * @param alternateComposedTaskRunnerName a ctr name to be used instead of the default.
 	 * @param graph the graph for the CTR to execute.
 	 * @param taskConfigurationProperties the properties that contain the name
 	 * of the CTR app to be launched.
 	 * @return String containing the CTR task definition.
 	 */
-	public static String createComposedTaskDefinition(String userComposedTaskRunnerName, String graph,
+	public static String createComposedTaskDefinition(String alternateComposedTaskRunnerName, String graph,
 			TaskConfigurationProperties taskConfigurationProperties) {
 		Assert.hasText(graph, "graph must not be empty or null");
 		Assert.notNull(taskConfigurationProperties,
@@ -78,8 +79,8 @@ public class TaskServiceUtils {
 		Assert.hasText(taskConfigurationProperties.getComposedTaskRunnerName(),
 				"taskConfigurationProperties.composedTaskRunnerName must not be null");
 		String composedTaskRunnerName = taskConfigurationProperties.getComposedTaskRunnerName();
-		if(StringUtils.hasText(userComposedTaskRunnerName)) {
-			composedTaskRunnerName = userComposedTaskRunnerName;
+		if(StringUtils.hasText(alternateComposedTaskRunnerName)) {
+			composedTaskRunnerName = alternateComposedTaskRunnerName;
 		}
 		return String.format("%s --graph=\"%s\"", composedTaskRunnerName, graph);
 	}

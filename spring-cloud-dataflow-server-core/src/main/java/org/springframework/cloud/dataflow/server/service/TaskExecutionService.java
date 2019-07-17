@@ -39,10 +39,10 @@ public interface TaskExecutionService {
 	 * @param taskName Name of the task. Must not be null or empty.
 	 * @param taskDeploymentProperties Optional deployment properties. Must not be null.
 	 * @param commandLineArgs Optional runtime commandline argument
-	 * @param userComposedTaskRunnerName the name of the app the user would like to use if they don't want the default.  If null default will be used.
+	 * @param composedTaskRunnerName the name of the app the user would like to use if they don't want the default.  If null default will be used.
 	 * @return the taskExecutionId for the executed task.
 	 */
-	long executeTask(String taskName, Map<String, String> taskDeploymentProperties, List<String> commandLineArgs, String userComposedTaskRunnerName);
+	long executeTask(String taskName, Map<String, String> taskDeploymentProperties, List<String> commandLineArgs, String composedTaskRunnerName);
 
 	/**
 	 * Execute a task with the provided task name and optional runtime properties.

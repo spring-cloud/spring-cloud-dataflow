@@ -36,11 +36,11 @@ public interface TaskExecutionInfoService {
 	 * Create a the {@link TaskExecutionInformation} instance for the information provided.
 	 * @param taskName the name of the task definition
 	 * @param taskDeploymentProperties the deployment properties to use for the {@link TaskExecutionInformation}
-	 * @param userComposedTaskRunnerName user provided CTR app name to use.
+	 * @param composedTaskRunnerName user provided CTR app name to use.
 	 * @return instance of {@link TaskExecutionInformation}
 	 */
 	TaskExecutionInformation findTaskExecutionInformation(String taskName,
-			Map<String, String> taskDeploymentProperties, String userComposedTaskRunnerName);
+			Map<String, String> taskDeploymentProperties, String composedTaskRunnerName);
 
 	AllPlatformsTaskExecutionInformation findAllPlatformTaskExecutionInformation();
 }
