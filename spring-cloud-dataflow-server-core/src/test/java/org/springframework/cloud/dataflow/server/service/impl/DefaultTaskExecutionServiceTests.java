@@ -44,6 +44,7 @@ import org.springframework.cloud.dataflow.core.Launcher;
 import org.springframework.cloud.dataflow.core.TaskDefinition;
 import org.springframework.cloud.dataflow.core.TaskDeployment;
 import org.springframework.cloud.dataflow.core.TaskPlatform;
+import org.springframework.cloud.dataflow.core.TaskPlatformFactory;
 import org.springframework.cloud.dataflow.registry.service.AppRegistryService;
 import org.springframework.cloud.dataflow.server.configuration.TaskServiceDependencies;
 import org.springframework.cloud.dataflow.server.job.LauncherRepository;
@@ -256,7 +257,7 @@ public abstract class DefaultTaskExecutionServiceTests {
 			taskDeployment.setTaskDeploymentId(taskDeploymentId);
 			this.taskDeploymentRepository.save(taskDeployment);
 			this.launcherRepository.save(new Launcher(platformName,
-					DefaultTaskExecutionService.CLOUDFOUNDRY_PLATFORM_TYPE, taskLauncher));
+					TaskPlatformFactory.CLOUDFOUNDRY_PLATFORM_TYPE, taskLauncher));
 			when(taskLauncher.getLog(taskDefinitionName)).thenReturn("Logs");
 			assertEquals("Logs", this.taskExecutionService.getLog(taskDeployment.getPlatformName(), taskDeploymentId));
 		}

@@ -45,8 +45,6 @@ import org.springframework.cloud.scheduler.spi.cloudfoundry.CloudFoundryAppSched
 import org.springframework.cloud.scheduler.spi.cloudfoundry.CloudFoundrySchedulerProperties;
 import org.springframework.cloud.scheduler.spi.core.Scheduler;
 
-import static org.springframework.cloud.dataflow.server.service.impl.DefaultTaskExecutionService.CLOUDFOUNDRY_PLATFORM_TYPE;
-
 /**
  * @author David Turanski
  * @author Ilayaperumal Gopinathan

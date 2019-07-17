@@ -18,8 +18,24 @@ package org.springframework.cloud.dataflow.core;
 
 /**
  * @author David Turanski
+ * @author Ilayaperumal Gopinathan
  **/
 public interface TaskPlatformFactory {
+
+	String CLOUDFOUNDRY_PLATFORM_TYPE = "Cloud Foundry";
+
+	/**
+	 * Create the {@link TaskPlatform} instance with the launchers.
+	 *
+	 * @return the task platform
+	 */
 	TaskPlatform createTaskPlatform();
+
+	/**
+	 * Create the {@link Launcher} by the given name.
+	 *
+	 * @param account the name of the launcher
+	 * @return the launcher instance.
+	 */
 	Launcher createLauncher(String account);
 }
