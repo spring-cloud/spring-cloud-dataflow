@@ -739,7 +739,7 @@ data:
 ----
 ====
 
-The following example shows how to do so for tasks by editing the `server-deployment.yaml` file:
+The following example shows how to do so for tasks by editing the `server-config.yaml` file:
 
 ====
 [source,yaml]
@@ -762,3 +762,68 @@ data:
 ====
 
 Replacing the `envVarName`, `configMapName` and `dataKey` attributes with the appropriate values for your ConfigMap.
+
+==== Pod Security Context
+
+The pod security context can be configured to run processes under the specified UID (user ID) or GID (group ID).
+This is useful when its preferred not to run processes under the default `root` UID and GID.
+Either the `runAsUser` (UID) or `fsGroup` (GID) can be defined, as well as configured together.
+Refer to the https://kubernetes.io/docs/tasks/configure-pod-container/security-context/[Security Context] section of the Kubernetes reference for more information.
+
+The following example shows how you can individually configure application pods:
+
+====
+[source,options=nowrap]
+----
+deployer.<app>.kubernetes.podSecurityContext={runAsUser: 65534, fsGroup: 65534}
+----
+====
+
+Replace `<app>` with the name of your application and the `runAsUser` and/or `fsGroup` attributes with the appropriate values for your container environment.
+
+You can configure the pod security context at the global server level as well.
+
+The following example shows how to do so for streams. Edit the appropriate `skipper-config-(binder).yaml`, replacing `(binder)` with the corresponding binder in use:
+
+====
+[source,yaml]
+----
+data:
+  application.yaml: |-
+    spring:
+      cloud:
+        skipper:
+          server:
+            platform:
+              kubernetes:
+                accounts:
+                  default:
+                    podSecurityContext:
+                      runAsUser: 65534
+                      fsGroup: 65534
+----
+====
+
+The following example shows how to do so for tasks by editing the `server-config.yaml` file:
+
+====
+[source,yaml]
+----
+data:
+  application.yaml: |-
+    spring:
+      cloud:
+        dataflow:
+          task:
+            platform:
+              kubernetes:
+                accounts:
+                  default:
+                    podSecurityContext:
+                      runAsUser: 65534
+                      fsGroup: 65534
+----
+====
+
+Replacing the `runAsUser` and/or `fsGroup` attributes with the appropriate values for your container environment.
+

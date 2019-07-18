@@ -245,6 +245,14 @@ These properties are also used when configuring the <<configuration-kubernetes-t
 |The maximum concurrent tasks allowed for this platform instance.
 |20
 
+|podSecurityContext.runAsUser
+|The numeric user ID to run pod container processes under
+|<none>
+
+|podSecurityContext.fsGroup
+|The numeric group ID to run pod container processes under
+|<none>
+
 |===
 
 [[configuration-kubernetes-tasks]]
