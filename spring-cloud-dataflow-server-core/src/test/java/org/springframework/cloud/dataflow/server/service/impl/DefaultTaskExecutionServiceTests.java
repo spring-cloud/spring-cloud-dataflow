@@ -262,6 +262,17 @@ public abstract class DefaultTaskExecutionServiceTests {
 			assertEquals("Logs", this.taskExecutionService.getLog(taskDeployment.getPlatformName(), taskDeploymentId));
 		}
 
+		@Test
+		@DirtiesContext
+		public void getCFTaskLogByInvalidTaskId() {
+			String platformName = "cf-test-platform";
+			String taskDeploymentId = "12345";
+			this.launcherRepository.save(new Launcher(platformName,
+					TaskPlatformFactory.CLOUDFOUNDRY_PLATFORM_TYPE, taskLauncher));
+			assertEquals("Log could not be retrieved as the task instance is not running by the ID: 12345",
+					this.taskExecutionService.getLog(platformName, taskDeploymentId));
+		}
+
 
 		@Test
 		@DirtiesContext
