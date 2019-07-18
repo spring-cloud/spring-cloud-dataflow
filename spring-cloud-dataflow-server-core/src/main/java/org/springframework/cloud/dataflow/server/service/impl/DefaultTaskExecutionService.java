@@ -212,8 +212,16 @@ public class DefaultTaskExecutionService implements TaskExecutionService {
 		// In case of Cloud Foundry, fetching logs by external execution Id isn't valid as the execution instance is destroyed.
 		// We need to use the task name instead.
 		if (launcher != null && launcher.getType().equals(TaskPlatformFactory.CLOUDFOUNDRY_PLATFORM_TYPE)) {
-			TaskDeployment taskDeployment = this.taskDeploymentRepository.findByTaskDeploymentId(taskId);
-			taskId = taskDeployment.getTaskDefinitionName();
+			try {
+				TaskDeployment taskDeployment = this.taskDeploymentRepository.findByTaskDeploymentId(taskId);
+				if (taskDeployment == null) {
+					throw new IllegalArgumentException();
+				}
+				taskId = taskDeployment.getTaskDefinitionName();
+			}
+			catch (Exception e) {
+				return "Log could not be retrieved as the task instance is not running by the ID: "+ taskId;
+			}
 		}
 		return findTaskLauncher(platformName).getLog(taskId);
 	}
