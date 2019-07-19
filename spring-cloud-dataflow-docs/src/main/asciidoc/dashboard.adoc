@@ -296,7 +296,9 @@ To do so, click the Definitions tab and select the task you want to launch by pr
 [[dashboard-tasks-executions]]
 === Executions
 
-The Executions tab shows the current running and completed tasks.
+The Executions tab shows the current running and completed task executions. From this page you can drill down into the Task Execution details page. Furthermore, you can relaunch a Task Execution or stop a running execution.
+
+Lastly, you can clean up 1 or more Task Executions. This operation will remove any associated Task and/or Batch Job from the underlying persistence store. This operation can only be triggered for _parent_ Task Executions and will cascade down to the child Task Executions (if there are any).
 
 The following image shows the Executions tab:
 
@@ -309,7 +311,6 @@ For each task execution on the Executions page, a user can retrieve detailed inf
 
 image::{dataflow-asciidoc}/images/dataflow-task-execution-detail.png[List of Task Executions, scaledwidth="100%"]
 
-
 On this screen the user can view not only the information from the Task Executions page but also:
 
 * Task Arguments
@@ -318,6 +319,13 @@ On this screen the user can view not only the information from the Task Executio
 * Job Execution Ids links (Clicking the Job Execution Id will take you to the <<dashboard-job-executions-details>> for that Job Execution Id.)
 * Task Execution Duration
 * Task Execution Exit Message
+* Logging output from the Task Execution
+
+Additionally, users can trigger the following operations:
+
+* Relaunch the Task
+* Stop a running Task
+* Task Execution cleanup (For parent Task Executions only)
 
 ==== Stop Executing Tasks
 
