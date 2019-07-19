@@ -1926,9 +1926,13 @@ include::{snippets}/task-executions-documentation/launch-task-display-detail/htt
 [[api-guide-resources-task-executions-delete]]
 ==== Delete Task Execution
 
-The task executions endpoint lets you clean up resources used to deploy the task.
+The task executions endpoint lets you:
 
-NOTE: The cleanup implementation is platform specific.
+- Clean up resources used to deploy the task
+- Remove relevant task data as well as possibly associated Batch job data from the persistence store
+
+NOTE: The cleanup implementation (first option) is platform specific. Both operations can be triggered
+at once or separately.
 
 The following topics provide more detail:
 
@@ -1937,7 +1941,7 @@ The following topics provide more detail:
 * <<api-guide-resources-task-executions-delete-example-request>>
 * <<api-guide-resources-task-executions-delete-response-structure>>
 
-
+Please refer to the following section in regards to <<api-guide-resources-task-executions-delete-multiple-and-task-data>>.
 
 [[api-guide-resources-task-executions-delete-request-structure]]
 ===== Request Structure
@@ -1946,27 +1950,55 @@ include::{snippets}/task-executions-documentation/remove-task-execution/http-req
 
 include::{snippets}/task-executions-documentation/remove-task-execution/path-parameters.adoc[]
 
-
+[IMPORTANT]
+====
+You must ensure to only provide task execution ids that actually exist. Otherwise a `404` (Not Found) HTTP status is returned.
+In case of submitting multiple task execution ids, the invalidity of a single task execution id will cause the entire request to fail,
+without performing any operation.
+====
 
 [[api-guide-resources-task-executions-delete-request-parameters]]
 ===== Request Parameters
 
-There are no request parameters for this endpoint.
+This endpoint supports 1 optional request parameter named **action**. It is an enumeration and supports the following
+2 values:
 
+- CLEANUP
+- REMOVE_DATA
 
+include::{snippets}/task-executions-documentation/remove-task-execution/request-parameters.adoc[]
 
 [[api-guide-resources-task-executions-delete-example-request]]
 ===== Example Request
 
 include::{snippets}/task-executions-documentation/remove-task-execution/curl-request.adoc[]
 
-
-
 [[api-guide-resources-task-executions-delete-response-structure]]
 ===== Response Structure
 
 include::{snippets}/task-executions-documentation/remove-task-execution/http-response.adoc[]
 
+[[api-guide-resources-task-executions-delete-multiple-and-task-data]]
+==== Deleting Task Execution Data
+
+Not only can you clean up resources that were used to deploy tasks but you can also delete the data associated with
+task executions from the underlying persistence store. Also, if a task execution is associated with one or
+more batch job executions, these will be removed as well.
+
+The following example illustrates how a request can be made using multiple task execution ids and multiple actions:
+
+include::{snippets}/task-executions-documentation/task-execution-remove-and-task-data-remove/curl-request.adoc[]
+
+include::{snippets}/task-executions-documentation/task-execution-remove-and-task-data-remove/path-parameters.adoc[]
+
+include::{snippets}/task-executions-documentation/task-execution-remove-and-task-data-remove/request-parameters.adoc[]
+
+[IMPORTANT]
+====
+When deleting data from the persistence store using the `REMOVE_DATA` action parameter, you must ensure to provide
+only task execution ids that represent parent task executions. When providing child task executions (Executed as part of a composed task),
+then a `400` (Bad Request) HTTP status is returned.
+====
 
 [[api-guide-resources-task-executions-current-count]]
 ==== Task Execution Current Count
