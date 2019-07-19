@@ -42,6 +42,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  * @author Eric Bottard
  * @author Glenn Renfro
  * @author David Turanski
+ * @author Gunnar Hillert
  */
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 public class TaskExecutionsDocumentation extends BaseDocumentation {
@@ -79,21 +80,48 @@ public class TaskExecutionsDocumentation extends BaseDocumentation {
 	}
 
 	@Test
-	public void stopTask() throws Exception {
+	public void launchTaskCurrentCount() throws Exception {
 		this.mockMvc.perform(
-				post("/tasks/executions")
-						.param("name", "taskA")
-						.param("properties", "app.my-task.foo=bar,deployer.my-task.something-else=3")
-						.param("arguments", "--server.port=8080 --foo=bar"))
-				.andExpect(status().isCreated());
+				get("/tasks/executions/current"))
+				.andDo(print())
+				.andExpect(status().isOk())
+				.andDo(this.documentationHandler.document(
+					responseFields(
+						fieldWithPath("[].name").description("The name of the platform instance (account)"),
+						fieldWithPath("[].type").description("The platform type"),
+						fieldWithPath("[].maximumTaskExecutions").description("The number of maximum task execution"),
+						fieldWithPath("[].runningExecutionCount").description("The number of running executions")
+					)
+				));
+	}
+
+	@Test
+	public void launchTaskDisplayDetail() throws Exception {
 		this.mockMvc.perform(
-				post("/tasks/executions/{id}", 1))
+				get("/tasks/executions/{id}", "1"))
 				.andDo(print())
 				.andExpect(status().isOk())
 				.andDo(this.documentationHandler.document(
 						pathParameters(
 								parameterWithName("id").description("The id of an existing task execution (required)")
-						)));
+						),
+						responseFields(
+								fieldWithPath("executionId").description("The id of the task execution"),
+								fieldWithPath("exitCode").description("The exit code of the task execution"),
+								fieldWithPath("taskName").description("The task name related to the task execution"),
+								fieldWithPath("startTime").description("The start time of the task execution"),
+								fieldWithPath("endTime").description("The end time of the task execution"),
+								fieldWithPath("exitMessage").description("The exit message of the task execution"),
+								fieldWithPath("arguments").description("The arguments of the task execution"),
+								fieldWithPath("jobExecutionIds").description("The job executions ids of the task executions"),
+								fieldWithPath("errorMessage").description("The error message of the task execution"),
+								fieldWithPath("externalExecutionId").description("The external id of the task execution"),
+								fieldWithPath("taskExecutionStatus").description("The status of the task execution"),
+								fieldWithPath("parentExecutionId").description("The id of parent task execution, " +
+										"null if task execution does not have parent"),
+								subsectionWithPath("_links.self").description("Link to the task execution resource")
+						)
+				));
 	}
 
 	@Test
@@ -147,52 +175,25 @@ public class TaskExecutionsDocumentation extends BaseDocumentation {
 	}
 
 	@Test
-	public void launchTaskDisplayDetail() throws Exception {
+	public void stopTask() throws Exception {
 		this.mockMvc.perform(
-				get("/tasks/executions/{id}", "1"))
+				post("/tasks/executions")
+						.param("name", "taskA")
+						.param("properties", "app.my-task.foo=bar,deployer.my-task.something-else=3")
+						.param("arguments", "--server.port=8080 --foo=bar"))
+				.andExpect(status().isCreated());
+		this.mockMvc.perform(
+				post("/tasks/executions/{id}", 1))
 				.andDo(print())
 				.andExpect(status().isOk())
 				.andDo(this.documentationHandler.document(
 						pathParameters(
-								parameterWithName("id").description("The id of an existing task execution (required)")
-						),
-						responseFields(
-								fieldWithPath("executionId").description("The id of the task execution"),
-								fieldWithPath("exitCode").description("The exit code of the task execution"),
-								fieldWithPath("taskName").description("The task name related to the task execution"),
-								fieldWithPath("startTime").description("The start time of the task execution"),
-								fieldWithPath("endTime").description("The end time of the task execution"),
-								fieldWithPath("exitMessage").description("The exit message of the task execution"),
-								fieldWithPath("arguments").description("The arguments of the task execution"),
-								fieldWithPath("jobExecutionIds").description("The job executions ids of the task execution"),
-								fieldWithPath("errorMessage").description("The error message of the task execution"),
-								fieldWithPath("externalExecutionId").description("The external id of the task execution"),
-								fieldWithPath("taskExecutionStatus").description("The status of the task execution"),
-								fieldWithPath("parentExecutionId").description("The id of parent task execution, " +
-										"null if task execution does not have parent"),
-								subsectionWithPath("_links.self").description("Link to the task execution resource")
-						)
-				));
+								parameterWithName("id").description("The ids of an existing task execution (required)")
+						)));
 	}
 
 	@Test
-	public void launchTaskCurrentCount() throws Exception {
-		this.mockMvc.perform(
-				get("/tasks/executions/current"))
-				.andDo(print())
-				.andExpect(status().isOk())
-				.andDo(this.documentationHandler.document(
-                    responseFields(
-						fieldWithPath("[].name").description("The name of the platform instance (account)"),
-						fieldWithPath("[].type").description("The platform type"),
-                        fieldWithPath("[].maximumTaskExecutions").description("The number of maximum task execution"),
-                        fieldWithPath("[].runningExecutionCount").description("The number of number execution")
-                    )
-                ));
-	}
-
-	@Test
-	public void removeTaskExecution() throws Exception {
+	public void taskExecutionRemove() throws Exception {
 
 		documentation.dontDocument( () -> this.mockMvc.perform(
 				post("/tasks/executions")
@@ -202,13 +203,43 @@ public class TaskExecutionsDocumentation extends BaseDocumentation {
 				.andExpect(status().isCreated()));
 
 		this.mockMvc.perform(
-				delete("/tasks/executions/{id}", "1"))
+				delete("/tasks/executions/{ids}?action=CLEANUP", "1"))
 				.andDo(print())
 				.andExpect(status().isOk())
 				.andDo(this.documentationHandler.document(
-						pathParameters(parameterWithName("id")
-								.description("The id of an existing task execution (required)"))
+						requestParameters(parameterWithName("action").description("Optional. Defaults to: CLEANUP.")),
+						pathParameters(parameterWithName("ids")
+								.description("The id of an existing task execution (required). Multiple comma separated values are accepted."))
 				));
+	}
+
+	@Test
+	public void taskExecutionRemoveAndTaskDataRemove() throws Exception {
+
+		documentation.dontDocument( () -> this.mockMvc.perform(
+				post("/tasks/executions")
+						.param("name", "taskB")
+						.param("properties", "app.my-task.foo=bar,deployer.my-task.something-else=3")
+						.param("arguments", "--server.port=8080 --foo=bar"))
+				.andExpect(status().isCreated()));
+
+		documentation.dontDocument( () -> this.mockMvc.perform(
+				post("/tasks/executions")
+						.param("name", "taskB")
+						.param("properties", "app.my-task.foo=bar2,deployer.my-task.something-else=3")
+						.param("arguments", "--server.port=8082 --foo=bar2"))
+				.andExpect(status().isCreated()));
+
+		this.mockMvc.perform(
+				delete("/tasks/executions/{ids}?action=CLEANUP,REMOVE_DATA", "1,2"))
+				.andDo(print())
+				.andExpect(status().isOk())
+				.andDo(this.documentationHandler.document(
+						requestParameters(parameterWithName("action").description("Using both actions CLEANUP and REMOVE_DATA simultaneously.")),
+						pathParameters(parameterWithName("ids")
+								.description("Providing 2 comma separated task execution id values."))
+				));
+
 	}
 
 	private void createTaskDefinition(String taskName) throws Exception{
