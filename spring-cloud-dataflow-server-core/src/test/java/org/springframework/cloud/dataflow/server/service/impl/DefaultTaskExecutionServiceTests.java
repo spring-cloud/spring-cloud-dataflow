@@ -365,6 +365,14 @@ public abstract class DefaultTaskExecutionServiceTests {
 			assertEquals("valid", validationStatus.getAppsStatuses().get("task:simpleTask"));
 		}
 
+		@Test(expected = NoSuchTaskDefinitionException.class)
+		@DirtiesContext
+		public void validateMissingTaskDefinitionTest() {
+			initializeSuccessfulRegistry(appRegistry);
+			ValidationStatus validationStatus = taskValidationService.validateTask("simpleTask");
+			assertEquals("valid", validationStatus.getAppsStatuses().get("task:simpleTask"));
+		}
+
 		@Test
 		@DirtiesContext
 		public void validateInvalidTaskTest() {
