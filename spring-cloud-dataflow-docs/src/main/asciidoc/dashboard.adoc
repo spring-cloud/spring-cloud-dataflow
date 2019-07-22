@@ -334,6 +334,9 @@ Now click the `Stop task` option.  The dashboard will the present a dialog box a
 
 image::{dataflow-asciidoc}/images/dataflow-task-execution-stop.png[Stop Executing Tasks, scaledwidth="100%"]
 
+
+NOTE: Child Spring Cloud Task applications launched via Spring Batch applications that utilize remote partitioning will not be stopped.
+
 [[dashboard-jobs]]
 == Jobs
 
