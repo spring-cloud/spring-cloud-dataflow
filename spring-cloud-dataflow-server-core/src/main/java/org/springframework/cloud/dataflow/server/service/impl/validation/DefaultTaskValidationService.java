@@ -21,6 +21,7 @@ import org.springframework.cloud.dataflow.core.dsl.TaskNode;
 import org.springframework.cloud.dataflow.core.dsl.TaskParser;
 import org.springframework.cloud.dataflow.registry.service.AppRegistryService;
 import org.springframework.cloud.dataflow.server.DockerValidatorProperties;
+import org.springframework.cloud.dataflow.server.repository.NoSuchTaskDefinitionException;
 import org.springframework.cloud.dataflow.server.repository.TaskDefinitionRepository;
 import org.springframework.cloud.dataflow.server.service.TaskValidationService;
 import org.springframework.cloud.dataflow.server.service.ValidationStatus;
@@ -60,6 +61,9 @@ public class DefaultTaskValidationService extends DefaultValidationService imple
 	public ValidationStatus validateTask(String name) {
 		validateTaskName(name);
 		TaskDefinition definition = this.taskDefinitionRepository.findByTaskName(name);
+		if(definition == null) {
+			throw new NoSuchTaskDefinitionException(name);
+		}
 		ValidationStatus validationStatus = new ValidationStatus(
 				definition.getName(),
 				definition.getDslText());
