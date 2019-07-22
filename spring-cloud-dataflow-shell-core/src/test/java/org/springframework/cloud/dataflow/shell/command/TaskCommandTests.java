@@ -140,13 +140,13 @@ public class TaskCommandTests extends AbstractShellIntegrationTest {
 				"Can not specify a Composed Task Runner Name when launching a non composed task definition");
 	}
 
-	private void testInvalidCTRLaunch(String taskDefinition, String alternateCTRName, String expectedExceptionMessage) {
+	private void testInvalidCTRLaunch(String taskDefinition, String ctrAppName, String expectedExceptionMessage) {
 		logger.info("Launching instance of task");
 		String taskName = generateUniqueStreamOrTaskName();
 		task().create(taskName, taskDefinition);
 		boolean isExceptionThrown = false;
 		try {
-			task().launchWithAlternateCTR(taskName, alternateCTRName);
+			task().launchWithAlternateCTR(taskName, ctrAppName);
 		} catch (IllegalArgumentException e) {
 			assertTrue(e.getMessage().contains(expectedExceptionMessage));
 			isExceptionThrown =  true;

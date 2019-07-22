@@ -469,6 +469,7 @@ public abstract class DefaultTaskExecutionServiceTests {
 		public void executeComposedTaskwithUserCTRName() {
 			String dsl = "AAA && BBB";
 			initializeSuccessfulRegistry(appRegistry);
+			when(appRegistry.appExist(anyString(), any(ApplicationType.class))).thenReturn(true);
 
 			taskSaveService.saveTaskDefinition("seqTask", dsl);
 			when(taskLauncher.launch(any())).thenReturn("0");
