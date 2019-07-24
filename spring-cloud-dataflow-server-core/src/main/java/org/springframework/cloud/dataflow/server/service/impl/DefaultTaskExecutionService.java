@@ -43,6 +43,7 @@ import org.springframework.cloud.dataflow.server.job.LauncherRepository;
 import org.springframework.cloud.dataflow.server.repository.DataflowTaskExecutionDao;
 import org.springframework.cloud.dataflow.server.repository.NoSuchTaskExecutionException;
 import org.springframework.cloud.dataflow.server.repository.TaskDeploymentRepository;
+import org.springframework.cloud.dataflow.server.repository.TaskExecutionMissingExternalIdException;
 import org.springframework.cloud.dataflow.server.service.TaskExecutionCreationService;
 import org.springframework.cloud.dataflow.server.service.TaskExecutionInfoService;
 import org.springframework.cloud.dataflow.server.service.TaskExecutionService;
@@ -239,8 +240,10 @@ public class DefaultTaskExecutionService implements TaskExecutionService {
 		final Map<String, Object> auditData = new LinkedHashMap<>();
 		logger.info("Stopping {} task executions.", ids.size());
 		Set<TaskExecution> taskExecutions = getTaskExecutions(ids);
+		validateExternalExecutionIds(taskExecutions);
 		Set<Long> childTaskExecutionIds = this.dataflowTaskExecutionDao.findChildTaskExecutionIds(ids);
 		Set<TaskExecution> childTaskExecutions = getTaskExecutions(childTaskExecutionIds);
+		validateExternalExecutionIds(childTaskExecutions);
 		for (TaskExecution taskExecution : taskExecutions) {
 			cancelTaskExecution(taskExecution);
 		}
@@ -255,6 +258,18 @@ public class DefaultTaskExecutionService implements TaskExecutionService {
 		this.auditRecordService.populateAndSaveAuditRecordUsingMapData(
 				AuditOperationType.TASK, AuditActionType.UNDEPLOY,
 				numberOfExecutionsStopped + " Task Execution Stopped", auditData);
+	}
+
+	private void validateExternalExecutionIds(Set<TaskExecution> taskExecutions) {
+		Set<Long> invalidIds = new HashSet<>();
+		for(TaskExecution taskExecution: taskExecutions) {
+			if(taskExecution.getExternalExecutionId() == null) {
+				invalidIds.add(taskExecution.getExecutionId());
+			}
+		}
+		if(!invalidIds.isEmpty()) {
+			throw new TaskExecutionMissingExternalIdException(invalidIds);
+		}
 	}
 
 	private TaskLauncher findTaskLauncher(String platformName) {
