@@ -18,6 +18,7 @@ package org.springframework.cloud.dataflow.server.service.impl;
 
 import java.net.URI;
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -56,6 +57,7 @@ import org.springframework.cloud.dataflow.server.repository.NoSuchTaskDefinition
 import org.springframework.cloud.dataflow.server.repository.NoSuchTaskExecutionException;
 import org.springframework.cloud.dataflow.server.repository.TaskDefinitionRepository;
 import org.springframework.cloud.dataflow.server.repository.TaskDeploymentRepository;
+import org.springframework.cloud.dataflow.server.repository.TaskExecutionMissingExternalIdException;
 import org.springframework.cloud.dataflow.server.service.TaskDeleteService;
 import org.springframework.cloud.dataflow.server.service.TaskExecutionCreationService;
 import org.springframework.cloud.dataflow.server.service.TaskExecutionInfoService;
@@ -65,6 +67,7 @@ import org.springframework.cloud.dataflow.server.service.TaskValidationService;
 import org.springframework.cloud.dataflow.server.service.ValidationStatus;
 import org.springframework.cloud.deployer.spi.core.AppDeploymentRequest;
 import org.springframework.cloud.deployer.spi.task.TaskLauncher;
+import org.springframework.cloud.task.repository.TaskExecution;
 import org.springframework.cloud.task.repository.TaskExplorer;
 import org.springframework.cloud.task.repository.TaskRepository;
 import org.springframework.core.io.FileSystemResource;
@@ -223,6 +226,40 @@ public abstract class DefaultTaskExecutionServiceTests {
 			taskExecutionService.stopTaskExecution(executionIds);
 			String logEntries = outputCapture.toString();
 			assertTrue(logEntries.contains("Task execution stop request for id 1 has been submitted"));
+		}
+
+		@Test
+		@DirtiesContext
+		public void executeStopTaskWithNoChildExternalIdTest() {
+			initializeSuccessfulRegistry(this.appRegistry);
+			when(this.taskLauncher.launch(any())).thenReturn("0");
+			assertEquals(1L, this.taskExecutionService.executeTask(TASK_NAME_ORIG, new HashMap<>(), new LinkedList<>()));
+			TaskExecution taskExecution = this.taskRepository.createTaskExecution();
+			this.taskRepository.startTaskExecution(taskExecution.getExecutionId(), "invalidChildTaskExecution", new Date(), Collections.emptyList(),null,1L);
+			validateFailedTaskStop(2);
+		}
+
+		@Test
+		@DirtiesContext
+		public void executeStopTaskWithNoExternalIdTest() {
+			this.taskRepository.createTaskExecution("invalidExternalTaskId");
+			validateFailedTaskStop(1);
+		}
+
+		private void validateFailedTaskStop(long id) {
+			boolean errorCaught = false;
+			Set<Long> executionIds = new HashSet<>(1);
+			executionIds.add(1L);
+			try {
+				this.taskExecutionService.stopTaskExecution(executionIds);
+
+			} catch (TaskExecutionMissingExternalIdException ise) {
+				errorCaught = true;
+				assertEquals(String.format("The TaskExecutions with the following ids: %s do not have external execution ids.", id), ise.getMessage());
+			}
+			if (!errorCaught) {
+				fail();
+			}
 		}
 
 		@Test(expected = NoSuchTaskExecutionException.class)
