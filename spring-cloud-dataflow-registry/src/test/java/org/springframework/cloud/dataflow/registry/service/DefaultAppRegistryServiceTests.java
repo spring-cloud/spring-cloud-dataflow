@@ -42,6 +42,7 @@ import org.springframework.data.domain.PageRequest;
 
 import static org.hamcrest.Matchers.allOf;
 import static org.hamcrest.Matchers.containsInAnyOrder;
+import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasProperty;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.nullValue;
@@ -61,6 +62,7 @@ import static org.mockito.Mockito.when;
  *
  * @author Christian Tzolov
  * @author Chris Schaefer
+ * @author Ilayaperumal Gopinathan
  */
 public class DefaultAppRegistryServiceTests {
 
@@ -215,6 +217,16 @@ public class DefaultAppRegistryServiceTests {
 
 		assertEquals(fooSource.getUri(), fooSource2.getUri());
 		assertEquals(fooSource.getMetadataUri(), fooSource2.getMetadataUri());
+	}
+
+	@Test
+	public void testImportAllOverwrite() {
+		when(appRegistrationRepository.findAppRegistrationByNameAndTypeAndVersion(
+				eq("foo"), eq(ApplicationType.source), eq("1.0"))).thenReturn(appRegistration());
+		when(appRegistrationRepository.findAppRegistrationByNameAndTypeAndVersion(
+				eq("bar"), eq(ApplicationType.sink), eq("1.0"))).thenReturn(appRegistration());
+		assertThat(appRegistryService.importAll(false,
+				new ClassPathResource("AppRegistryTests-importAllOverwrite.properties", getClass())).size(), equalTo(0));
 	}
 
 	@Test

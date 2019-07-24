@@ -20,6 +20,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.URI;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Properties;
@@ -317,7 +318,8 @@ public class DefaultAppRegistryService implements AppRegistryService {
 
 	@Override
 	public List<AppRegistration> importAll(boolean overwrite, Resource... resources) {
-		return Stream.of(resources)
+		List<AppRegistration> registrations = new ArrayList<>();
+		Stream.of(resources)
 			// parallel takes effect if multiple resources
 			.parallel()
 			// take lines
@@ -339,8 +341,12 @@ public class DefaultAppRegistryService implements AppRegistryService {
 			.filter(ar -> ar.getUri() != null)
 			// filter by overriding, save to repo and collect updated registrations
 			.filter(ar -> isOverwrite(ar, overwrite))
-			.map(ar -> save(ar))
-			.collect(Collectors.toList());
+			.map(ar -> {
+				save(ar);
+				registrations.add(ar);
+				return ar;
+			}).collect(Collectors.toList());
+		return registrations;
 	}
 
 	private BiFunction<HashMap<String, AppRegistration>,
