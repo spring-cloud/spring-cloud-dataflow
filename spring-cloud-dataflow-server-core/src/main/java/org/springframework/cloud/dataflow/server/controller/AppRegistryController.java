@@ -51,6 +51,7 @@ import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.DefaultResourceLoader;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PagedResourcesAssembler;
 import org.springframework.hateoas.ExposesResourceFor;
@@ -390,7 +391,7 @@ public class AppRegistryController {
 
 		Collections.sort(registrations);
 		prefetchMetadata(registrations);
-		return pagedResourcesAssembler.toResource(this.appRegistryService.findAll(pageable), this.assembler);
+		return pagedResourcesAssembler.toResource(new PageImpl<>(registrations, pageable, registrations.size()), this.assembler);
 	}
 
 	/**
