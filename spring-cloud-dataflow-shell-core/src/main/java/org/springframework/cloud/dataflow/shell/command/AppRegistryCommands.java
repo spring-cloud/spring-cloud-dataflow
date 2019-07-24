@@ -336,6 +336,7 @@ public class AppRegistryCommands implements CommandMarker, ResourceLoaderAware {
 			@CliOption(mandatory = true, key = { "", "uri" }, help = "URI for the properties file") String uri,
 			@CliOption(key = "local", help = "whether to resolve the URI locally (as opposed to on the server)", specifiedDefaultValue = "true", unspecifiedDefaultValue = "true") boolean local,
 			@CliOption(key = "force", help = "force update if any module already exists (only if not in use)", specifiedDefaultValue = "true", unspecifiedDefaultValue = "false") boolean force) {
+		long countBefore = appRegistryOperations().list().getMetadata().getTotalElements();
 		if (local) {
 			try {
 				Resource resource = this.resourceLoader.getResource(uri);
@@ -347,10 +348,10 @@ public class AppRegistryCommands implements CommandMarker, ResourceLoaderAware {
 				catch (Exception e) {
 					return "Error when registering applications from " + uri + ": " + e.getMessage();
 				}
-				long numRegistered = registered.getMetadata().getTotalElements();
-				return (applications.keySet().size() == numRegistered)
+				long countDelta = registered.getMetadata().getTotalElements() - countBefore;
+				return (countDelta < 1)
 						? String.format("Successfully registered applications: %s", applications.keySet())
-						: String.format("Successfully registered %d applications from %s", numRegistered,
+						: String.format("Successfully registered %d new applications from %s", countDelta,
 						applications.keySet());
 			}
 			catch (IOException e) {
@@ -359,8 +360,9 @@ public class AppRegistryCommands implements CommandMarker, ResourceLoaderAware {
 		}
 		else {
 			PagedResources<AppRegistrationResource> registered = appRegistryOperations().importFromResource(uri, force);
-			return String.format("Successfully registered %d applications from '%s'",
-					registered.getMetadata().getTotalElements(), uri);
+			long countDelta = registered.getMetadata().getTotalElements() - countBefore;
+			return String.format("Successfully registered %d new applications from '%s'",
+					countDelta, uri);
 		}
 	}
 
