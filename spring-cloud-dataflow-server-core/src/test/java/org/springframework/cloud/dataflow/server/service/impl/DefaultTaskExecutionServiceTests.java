@@ -181,6 +181,7 @@ public abstract class DefaultTaskExecutionServiceTests {
 		@Autowired
 		DataSource dataSource;
 
+
 		@Before
 		public void setupMocks() {
 			// not adding platform name as default as we want to check that this only one

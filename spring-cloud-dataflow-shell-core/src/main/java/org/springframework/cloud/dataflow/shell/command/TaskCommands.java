@@ -92,7 +92,6 @@ public class TaskCommands implements CommandMarker {
 	private static final String TASK_EXECUTION_CURRENT = "task execution current";
 	private static final String TASK_EXECUTION_STATUS = "task execution status";
 	private static final String VALIDATE = "task validate";
-	private static final String PLATFORM_NAME = "platformName";
 	private static final String CTR_APP_NAME = "composedTaskRunnerName";
 
 
@@ -202,8 +201,7 @@ public class TaskCommands implements CommandMarker {
 			@CliOption(key = {
 					ARGUMENTS_OPTION }, help = "the commandline arguments for this launch") String arguments,
 			@CliOption(key = {
-					PLATFORM_NAME}, help = "the platform name to use for this launch",
-					unspecifiedDefaultValue = "default") String platformName,
+					PLATFORM_OPTION}, help = "the platform name to use for this launch") String platformName,
 			@CliOption(key = {
 					CTR_APP_NAME}, help = "Composed Task Runner app to use for this launch when not using default") String composedTaskRunnerApp)
 
