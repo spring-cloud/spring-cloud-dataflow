@@ -40,6 +40,7 @@ import org.springframework.cloud.dataflow.server.repository.NoSuchStreamDefiniti
 import org.springframework.cloud.dataflow.server.repository.NoSuchTaskBatchException;
 import org.springframework.cloud.dataflow.server.repository.NoSuchTaskDefinitionException;
 import org.springframework.cloud.dataflow.server.repository.NoSuchTaskExecutionException;
+import org.springframework.cloud.dataflow.server.repository.TaskExecutionMissingExternalIdException;
 import org.springframework.cloud.dataflow.server.service.impl.OffsetOutOfBoundsException;
 import org.springframework.cloud.scheduler.spi.core.CreateScheduleException;
 import org.springframework.hateoas.VndErrors;
@@ -177,7 +178,8 @@ public class RestControllerAdvice {
 	@ExceptionHandler({ MissingServletRequestParameterException.class, HttpMessageNotReadableException.class,
 			UnsatisfiedServletRequestParameterException.class, MethodArgumentTypeMismatchException.class,
 			InvalidDateRangeException.class, CannotDeleteNonParentTaskExecutionException.class,
-			InvalidStreamDefinitionException.class, CreateScheduleException.class, OffsetOutOfBoundsException.class })
+			InvalidStreamDefinitionException.class, CreateScheduleException.class, OffsetOutOfBoundsException.class,
+			TaskExecutionMissingExternalIdException.class})
 	@ResponseStatus(HttpStatus.BAD_REQUEST)
 	@ResponseBody
 	public VndErrors onClientGenericBadRequest(Exception e) {
