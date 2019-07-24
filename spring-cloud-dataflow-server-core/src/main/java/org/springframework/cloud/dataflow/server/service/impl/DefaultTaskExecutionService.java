@@ -153,15 +153,23 @@ public class DefaultTaskExecutionService implements TaskExecutionService {
 		this.dataflowTaskExecutionDao = dataflowTaskExecutionDao;
 	}
 
-
-
 	@Override
-	public long executeTask(String taskName, Map<String, String> taskDeploymentProperties, List<String> commandLineArgs, String composedTaskRunnerName) {
+	public long executeTask(String taskName, Map<String, String> taskDeploymentProperties, List<String> commandLineArgs,
+			String composedTaskRunnerName) {
 
 		String platformName = taskDeploymentProperties.get(TASK_PLATFORM_NAME);
+
+		// If not given, use 'default'
 		if (!StringUtils.hasText(platformName)) {
 			platformName = "default";
 		}
+		// In case we have exactly one launcher, we override to that
+		List<String> launcherNames = StreamSupport.stream(launcherRepository.findAll().spliterator(), false)
+				.map(Launcher::getName).collect(Collectors.toList());
+		if (launcherNames.size() == 1) {
+			platformName = launcherNames.get(0);
+		}
+
 		// Remove since the key for task platform name will not pass validation for app, deployer, or scheduler prefix
 		if (taskDeploymentProperties.containsKey(TASK_PLATFORM_NAME)) {
 			taskDeploymentProperties.remove(TASK_PLATFORM_NAME);
