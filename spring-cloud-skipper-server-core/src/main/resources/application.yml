@@ -79,6 +79,10 @@ spring:
 
             - GET /api/release/manifest/**       => hasRole('ROLE_VIEW')
 
+            # Logs
+
+            - GET /api/release/logs/**           => hasRole('ROLE_VIEW')
+
             # Upgrade
 
             - POST /api/release/upgrade          => hasRole('ROLE_CREATE')
