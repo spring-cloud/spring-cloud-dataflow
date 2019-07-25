@@ -50,7 +50,7 @@ As shown in the preceding example, the remote repositories can be specified alon
 The repository policies can be specified for each remote repository configuration as shown in the preceding example.
 The key `policy` is applicable to both `snapshot` and the `release` repository policies.
 
-You can refer to https://github.com/eclipse/aether-core/blob/4cf5f7a406b516a45d8bf15e7dfe3fb3849cb87b/aether-api/src/main/java/org/eclipse/aether/repository/RepositoryPolicy.java#L16[Repository Policies] for the list of
+You can refer to https://github.com/apache/maven-resolver/blob/master/maven-resolver-api/src/main/java/org/eclipse/aether/repository/RepositoryPolicy.java[Repository Policies] for the list of
 supported repository policies.
 
 As these are Spring Boot `@ConfigurationProperties`, that you need to specify by adding them to the `SPRING_APPLICATION_JSON` environment variable. The following example shows how the JSON is structured:
