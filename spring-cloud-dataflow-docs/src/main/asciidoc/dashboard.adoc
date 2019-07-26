@@ -98,6 +98,7 @@ The Streams tab has two child tabs: Definitions and Create Stream. The following
 * <<dashboard-stream-definitions>>
 * <<dashboard-flo-streams-designer>>
 * <<dashboard-stream-deploy>>
+* <<dashboard-stream-logs>>
 
 
 
@@ -163,7 +164,12 @@ image::{dataflow-asciidoc}/images/dataflow-stream-deploy-builder.png[Form builde
 .The following image shows the same properties in the free text
 image::{dataflow-asciidoc}/images/dataflow-stream-deploy-freetext.png[Free text, scaledwidth="100%"]
 
+[[dashboard-stream-logs]]
+=== Accessing Stream Logs
 
+Once the stream applications are deployed, their logs can be accessed from the Stream `summary` page as below:
+
+image::{dataflow-asciidoc}/images/dataflow-stream-logs.png[Stream Logs, scaledwidth="100%"]
 
 [dashboard-flo-streams-designer-fanin-fanout]]
 === Creating Fan-In/Fan-Out Streams
