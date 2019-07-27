@@ -33,6 +33,8 @@ public class TaskDefinitionResource extends ResourceSupport {
 
 	private String dslText;
 
+	private String description;
+
 	/**
 	 * Indicates whether this is a composed task.
 	 */
@@ -50,9 +52,10 @@ public class TaskDefinitionResource extends ResourceSupport {
 	protected TaskDefinitionResource() {
 	}
 
-	public TaskDefinitionResource(String name, String dslText) {
+	public TaskDefinitionResource(String name, String dslText, String description) {
 		this.name = name;
 		this.dslText = dslText;
+		this.description = description;
 	}
 
 	public String getName() {
@@ -61,6 +64,10 @@ public class TaskDefinitionResource extends ResourceSupport {
 
 	public String getDslText() {
 		return dslText;
+	}
+
+	public String getDescription() {
+		return description;
 	}
 
 	/**

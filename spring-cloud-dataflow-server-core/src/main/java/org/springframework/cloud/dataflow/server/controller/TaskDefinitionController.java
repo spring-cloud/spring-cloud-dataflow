@@ -112,7 +112,7 @@ public class TaskDefinitionController {
 	public TaskDefinitionResource save(@RequestParam("name") String name, @RequestParam("definition") String dsl,
 									   @RequestParam(value = "description", defaultValue = "") String description) {
 		TaskDefinition taskDefinition = new TaskDefinition(name, dsl, description);
-		taskSaveService.saveTaskDefinition(name, dsl);
+		taskSaveService.saveTaskDefinition(taskDefinition);
 		return taskAssembler.toResource(new TaskExecutionAwareTaskDefinition(taskDefinition));
 	}
 
@@ -224,7 +224,8 @@ public class TaskDefinitionController {
 					.isComposedTaskDefinition(taskExecutionAwareTaskDefinition.getTaskDefinition().getDslText());
 			TaskDefinitionResource taskDefinitionResource = new TaskDefinitionResource(
 					taskExecutionAwareTaskDefinition.getTaskDefinition().getName(),
-					argumentSanitizer.sanitizeTaskDsl(taskExecutionAwareTaskDefinition.getTaskDefinition()));
+					argumentSanitizer.sanitizeTaskDsl(taskExecutionAwareTaskDefinition.getTaskDefinition()),
+					taskExecutionAwareTaskDefinition.getTaskDefinition().getDescription());
 			if (taskExecutionAwareTaskDefinition.getLatestTaskExecution() != null) {
 				taskDefinitionResource.setLastTaskExecution(
 						new TaskExecutionResource(taskExecutionAwareTaskDefinition.getLatestTaskExecution()));
