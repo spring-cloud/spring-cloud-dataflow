@@ -61,6 +61,12 @@ public class TaskDefinition extends DataFlowAppDefinition {
 	@Lob
 	private String dslText;
 
+	/**
+	 * Description of the definition (Optional).
+	 */
+	@Column(name = "DESCRIPTION")
+	private String description;
+
 	public TaskDefinition() {
 	}
 
@@ -70,6 +76,12 @@ public class TaskDefinition extends DataFlowAppDefinition {
 		this.dslText = "";
 	}
 
+	/**
+	 * Construct a {@code TaskDefinition}
+	 *
+	 * @param name task definition name
+	 * @param dsl task definition DSL expression
+	 */
 	public TaskDefinition(String name, String dsl) {
 		this.taskName = name;
 		this.dslText = dsl;
@@ -89,6 +101,22 @@ public class TaskDefinition extends DataFlowAppDefinition {
 		}
 		properties.put(SPRING_CLOUD_TASK_NAME, name);
 		this.appDefinition = new AppDefinition(name, properties);
+	}
+
+	/**
+	 * Construct a {@code TaskDefinition}
+	 *
+	 * @param name task definition name
+	 * @param dsl task definition DSL expression
+	 * @param description description of the definition
+	 */
+	public TaskDefinition(String name, String dsl, String description) {
+		this(name, dsl);
+		this.description = description;
+	}
+
+	public String getDescription() {
+		return description;
 	}
 
 	public String getTaskName() {

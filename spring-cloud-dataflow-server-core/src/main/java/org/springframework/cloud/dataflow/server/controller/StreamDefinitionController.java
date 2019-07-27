@@ -107,6 +107,7 @@ public class StreamDefinitionController {
 	 * @param dsl DSL definition for stream
 	 * @param deploy if {@code true}, the stream is deployed upon creation (default is
 	 * {@code false})
+	 * @param description description of the stream definition
 	 * @return the created stream definition
 	 * @throws DuplicateStreamDefinitionException if a stream definition with the same name
 	 * already exists
@@ -116,9 +117,10 @@ public class StreamDefinitionController {
 	@RequestMapping(value = "", method = RequestMethod.POST)
 	@ResponseStatus(HttpStatus.CREATED)
 	public StreamDefinitionResource save(@RequestParam("name") String name, @RequestParam("definition") String dsl,
-			@RequestParam(value = "deploy", defaultValue = "false") boolean deploy) {
+											@RequestParam(value = "description", defaultValue = "") String description,
+											@RequestParam(value = "deploy", defaultValue = "false") boolean deploy) {
 
-		StreamDefinition streamDefinition = this.streamService.createStream(name, dsl, deploy);
+		StreamDefinition streamDefinition = this.streamService.createStream(name, dsl, description, deploy);
 		return new Assembler(new PageImpl<>(Collections.singletonList(streamDefinition))).toResource(streamDefinition);
 	}
 

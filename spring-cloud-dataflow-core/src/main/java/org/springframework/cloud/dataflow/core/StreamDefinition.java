@@ -65,6 +65,12 @@ public class StreamDefinition {
 	private String dslText;
 
 	/**
+	 * Custom description of the stream definition. (Optional)
+	 */
+	@Column(name = "DESCRIPTION")
+	private String description;
+
+	/**
 	 * Ordered list of {@link StreamAppDefinition}s comprising this stream. The source is
 	 * the first entry and the sink is the last entry.
 	 */
@@ -89,6 +95,18 @@ public class StreamDefinition {
 	}
 
 	/**
+	 * Construct a {@code StreamDefinition}.
+	 *
+	 * @param name name of stream
+	 * @param dslText DSL definition for stream
+	 * @param description custom description of the stream definition (Optional)
+	 */
+	public StreamDefinition(String name, String dslText, String description) {
+		this(name, dslText);
+		this.description = description;
+	}
+
+	/**
 	 * Return the name of this stream.
 	 *
 	 * @return stream name
@@ -104,6 +122,15 @@ public class StreamDefinition {
 	 */
 	public String getDslText() {
 		return dslText;
+	}
+
+	/**
+	 * Return the custom definition of the stream definition.
+	 *
+	 * @return stream definition description string
+	 */
+	public String getDescription() {
+		return description;
 	}
 
 	private LinkedList<StreamAppDefinition> getAppDefinitions(String name, String dslText) {

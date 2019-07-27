@@ -105,11 +105,13 @@ public class TaskDefinitionController {
 	 *
 	 * @param name name the name of the task
 	 * @param dsl DSL definition for the task
+	 * @param description description of the task definition
 	 * @return the task definition
 	 */
 	@RequestMapping(value = "", method = RequestMethod.POST)
-	public TaskDefinitionResource save(@RequestParam("name") String name, @RequestParam("definition") String dsl) {
-		TaskDefinition taskDefinition = new TaskDefinition(name, dsl);
+	public TaskDefinitionResource save(@RequestParam("name") String name, @RequestParam("definition") String dsl,
+									   @RequestParam(value = "description", defaultValue = "") String description) {
+		TaskDefinition taskDefinition = new TaskDefinition(name, dsl, description);
 		taskSaveService.saveTaskDefinition(name, dsl);
 		return taskAssembler.toResource(new TaskExecutionAwareTaskDefinition(taskDefinition));
 	}
