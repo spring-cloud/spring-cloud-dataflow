@@ -357,7 +357,7 @@ public class DefaultStreamService implements StreamService {
 	 * resolving the name, or type of applications in the stream
 	 */
 	public StreamDefinition createStream(String streamName, String dsl, String description, boolean deploy) {
-		StreamDefinition streamDefinition = createStreamDefinition(streamName, description, dsl);
+		StreamDefinition streamDefinition = createStreamDefinition(streamName, dsl, description);
 		List<String> errorMessages = new ArrayList<>();
 
 		for (StreamAppDefinition streamAppDefinition : streamDefinition.getAppDefinitions()) {

@@ -121,7 +121,7 @@ public class StreamDslTests {
 	@Test
 	public void definitionWithDeploymentPropertiesBuilder() {
 		StreamDefinitionResource resource = new StreamDefinitionResource("ticktock",
-				"tick: time | log");
+				"tick: time | log", "demo stream");
 		resource.setStatus("deploying");
 		when(streamOperations.createStream(anyString(),
 				anyString(), anyBoolean())).thenReturn(resource);
@@ -144,7 +144,7 @@ public class StreamDslTests {
 	@Test
 	public void deployWithCreate() {
 		StreamDefinitionResource resource = new StreamDefinitionResource("ticktock",
-				"time | log");
+				"time | log", "demo stream");
 		resource.setStatus("deploying");
 		when(streamOperations.createStream(anyString(),
 				anyString(), anyBoolean())).thenReturn(resource);
@@ -161,7 +161,7 @@ public class StreamDslTests {
 	@Test
 	public void deployWithDefinition() {
 		StreamDefinitionResource resource = new StreamDefinitionResource("ticktock",
-				"time | log");
+				"time | log", "demo stream");
 		resource.setStatus("deploying");
 		when(streamOperations.createStream(anyString(),
 				anyString(), anyBoolean())).thenReturn(resource);
@@ -178,7 +178,7 @@ public class StreamDslTests {
 	@Test
 	public void getStatus() {
 		StreamDefinitionResource resource = new StreamDefinitionResource("ticktock",
-				"time | log");
+				"time | log", "demo stream");
 		resource.setStatus("unknown");
 		when(streamOperations.getStreamDefinition(eq("ticktock")))
 				.thenReturn(resource);
@@ -200,7 +200,7 @@ public class StreamDslTests {
 	@Test
 	public void createStream() {
 		StreamDefinitionResource resource = new StreamDefinitionResource("ticktock",
-				"time | log");
+				"time | log", "demo stream");
 		resource.setStatus("deploying");
 		when(streamOperations.createStream(anyString(),
 				anyString(), anyBoolean())).thenReturn(resource);
@@ -231,7 +231,7 @@ public class StreamDslTests {
 
 	@Test
 	public void update() {
-		StreamDefinitionResource ticktockDefinition = new StreamDefinitionResource("ticktock", "time | log");
+		StreamDefinitionResource ticktockDefinition = new StreamDefinitionResource("ticktock", "time | log", "demo stream");
 		ticktockDefinition.setStatus("deploying");
 		when(streamOperations.createStream(anyString(), anyString(), anyBoolean())).thenReturn(ticktockDefinition);
 
@@ -249,7 +249,7 @@ public class StreamDslTests {
 
 	@Test
 	public void rollback() {
-		StreamDefinitionResource ticktockDefinition = new StreamDefinitionResource("ticktock", "time | log");
+		StreamDefinitionResource ticktockDefinition = new StreamDefinitionResource("ticktock", "time | log", "demo stream");
 		ticktockDefinition.setStatus("deploying");
 		when(streamOperations.createStream(anyString(), anyString(), anyBoolean())).thenReturn(ticktockDefinition);
 
@@ -265,7 +265,7 @@ public class StreamDslTests {
 
 	@Test
 	public void manifest() {
-		StreamDefinitionResource ticktockDefinition = new StreamDefinitionResource("ticktock", "time | log");
+		StreamDefinitionResource ticktockDefinition = new StreamDefinitionResource("ticktock", "time | log", "demo stream");
 		ticktockDefinition.setStatus("deploying");
 		when(streamOperations.createStream(anyString(), anyString(), anyBoolean())).thenReturn(ticktockDefinition);
 
@@ -278,7 +278,7 @@ public class StreamDslTests {
 
 	@Test
 	public void history() {
-		StreamDefinitionResource ticktockDefinition = new StreamDefinitionResource("ticktock", "time | log");
+		StreamDefinitionResource ticktockDefinition = new StreamDefinitionResource("ticktock", "time | log", "demo stream");
 		ticktockDefinition.setStatus("deploying");
 		when(streamOperations.createStream(anyString(), anyString(), anyBoolean())).thenReturn(ticktockDefinition);
 
@@ -291,7 +291,7 @@ public class StreamDslTests {
 
 	@Test
 	public void undeploy() {
-		StreamDefinitionResource resource = new StreamDefinitionResource("ticktock", "time | log");
+		StreamDefinitionResource resource = new StreamDefinitionResource("ticktock", "time | log", "demo stream");
 		resource.setStatus("deploying");
 		when(streamOperations.createStream(anyString(),
 				anyString(), anyBoolean())).thenReturn(resource);
@@ -312,7 +312,7 @@ public class StreamDslTests {
 	@Test
 	public void destroy() {
 		StreamDefinitionResource resource = new StreamDefinitionResource("ticktock",
-				"time | log");
+				"time | log", "demo stream");
 		resource.setStatus("deploying");
 		when(streamOperations.createStream(anyString(),
 				anyString(), anyBoolean())).thenReturn(resource);
