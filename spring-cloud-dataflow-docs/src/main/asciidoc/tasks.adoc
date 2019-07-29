@@ -625,9 +625,20 @@ In some cases a user will need to launch a composed task using a Composed Task R
 To do this a user will need to specify the `--composedTaskRunnerName`  at task launch time as shown below:
 [source,bash,options="nowrap"]
 ----
-dataflow:>task launch myComposedTask --composedTaskRunnerName myComposedTaskRunnerApp
-Launched task 'myComposedTask' with execution id 110
-dataflow:>
+dataflow:>app register --name best-ctr --type task --uri maven://the.best.ctr.composed-task-runner:1.0.0.RELEASE
+
+dataflow:>task create mycomposedtask --definition "te:timestamp &&  tr:timestamp"
+Created new task 'mycomposedtask'
+
+dataflow:>task launch --name mycomposedtask
+mycomposedtask      mycomposedtask-te   mycomposedtask-tr
+
+dataflow:>task launch --name mycomposedtask --
+task launch --name mycomposedtask --arguments                 task launch --name mycomposedtask --composedTaskRunnerName
+task launch --name mycomposedtask --platformName              task launch --name mycomposedtask --properties
+task launch --name mycomposedtask --propertiesFile
+
+dataflow:>task launch --name mycomposedtask --composedTaskRunnerName best-ctr
 ----
 
 NOTE: The app specified by the  `composedTaskRunnerName` needs to be a task registered in the Application Registry.
