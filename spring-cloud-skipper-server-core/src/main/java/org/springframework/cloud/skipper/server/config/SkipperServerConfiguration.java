@@ -89,6 +89,7 @@ import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.data.map.repository.config.EnableMapRepositories;
 import org.springframework.scheduling.annotation.AsyncConfigurer;
 import org.springframework.scheduling.annotation.EnableAsync;
+import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 
@@ -109,6 +110,7 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 @EnableJpaRepositories(basePackages = "org.springframework.cloud.skipper.server.repository.jpa")
 @EnableTransactionManagement
 @EnableAsync
+@EnableScheduling
 @Import({ StateMachinePersistConfiguration.class, StateMachineExecutorConfiguration.class,
 		StateMachineConfiguration.class })
 public class SkipperServerConfiguration implements AsyncConfigurer {
