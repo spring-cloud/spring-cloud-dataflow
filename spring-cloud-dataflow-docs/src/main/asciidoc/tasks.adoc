@@ -621,22 +621,14 @@ Launched task 'my-composed-task'
 
 ===== Launching a Composed Task using Custom Composed Task Runner
 
-In some cases a user will need to launch a composed task using a Composed Task Runner other than the one specified with `spring.cloud.dataflow.task.composedTaskRunnerName` property.
-To do this a user will need to specify the `--composedTaskRunnerName`  at task launch time as shown below:
+In some cases a user will need to launch a composed task using a custom version of a Composed Task Runner other than default application that is shipped out-of-the-box.
+To do this, a user will need to register the custom version of the Composed Task Runner and then specify the --composedTaskRunnerName property pointing to the custom application at task launch as shown below:
 [source,bash,options="nowrap"]
 ----
 dataflow:>app register --name best-ctr --type task --uri maven://the.best.ctr.composed-task-runner:1.0.0.RELEASE
 
 dataflow:>task create mycomposedtask --definition "te:timestamp &&  tr:timestamp"
 Created new task 'mycomposedtask'
-
-dataflow:>task launch --name mycomposedtask
-mycomposedtask      mycomposedtask-te   mycomposedtask-tr
-
-dataflow:>task launch --name mycomposedtask --
-task launch --name mycomposedtask --arguments                 task launch --name mycomposedtask --composedTaskRunnerName
-task launch --name mycomposedtask --platformName              task launch --name mycomposedtask --properties
-task launch --name mycomposedtask --propertiesFile
 
 dataflow:>task launch --name mycomposedtask --composedTaskRunnerName best-ctr
 ----
