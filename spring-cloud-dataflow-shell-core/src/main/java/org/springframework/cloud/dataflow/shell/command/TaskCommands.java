@@ -75,6 +75,7 @@ public class TaskCommands implements CommandMarker {
 
 	private static final String LAUNCH = "task launch";
 	private static final String STOP = "task execution stop";
+	private static final String LOG = "task execution log";
 
 	// Destroy Role
 
@@ -227,6 +228,20 @@ public class TaskCommands implements CommandMarker {
 	public String stop(@CliOption(key = { "", "ids" }, help = "the task execution id", mandatory = true) String ids) {
 		taskOperations().stop(ids);
 		return String.format("Request to stop the task execution with id(s): %s has been submitted", ids);
+	}
+
+	@CliCommand(value = LOG, help = "Retrieve task execution log")
+	public String retrieveTaskExecutionLog(@CliOption(key = { "", "id" }, help = "the task execution id", mandatory = true) long id,
+			@CliOption(key = { "", "platform" }, help = "the platform of the task execution", mandatory = false) String platform) {
+		TaskExecutionResource taskExecutionResource = taskOperations().taskExecutionStatus(id);
+		String result;
+		if(platform != null) {
+			result = taskOperations().taskExecutionLog(taskExecutionResource.getExternalExecutionId(), platform);
+		}
+		else {
+			result = taskOperations().taskExecutionLog(taskExecutionResource.getExternalExecutionId());
+		}
+		return result;
 	}
 
 	@CliCommand(value = DESTROY, help = "Destroy an existing task")
