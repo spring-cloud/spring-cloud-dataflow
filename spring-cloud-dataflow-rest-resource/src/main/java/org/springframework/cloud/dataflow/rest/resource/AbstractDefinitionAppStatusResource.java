@@ -29,18 +29,28 @@ import org.springframework.hateoas.ResourceSupport;
 public abstract class AbstractDefinitionAppStatusResource extends ResourceSupport {
 
 	private String appName;
-	private String  dsl;
+	private String dsl;
+	private String description;
 
 	Map<String,String> appStatuses;
 
 	protected AbstractDefinitionAppStatusResource() {
 	}
 
-	public AbstractDefinitionAppStatusResource(String appName, String dsl, Map<String, String> appStatuses) {
+	public AbstractDefinitionAppStatusResource(String appName, String dsl, String description, Map<String, String> appStatuses) {
 		this.dsl = dsl;
 		this.appName = appName;
+		this.description = description;
 		this.appStatuses = new HashMap<>();
 		this.appStatuses.putAll(appStatuses);
+	}
+
+	public String getDescription() {
+		return description;
+	}
+
+	public void setDescription(String description) {
+		this.description = description;
 	}
 
 	public String getAppName() {

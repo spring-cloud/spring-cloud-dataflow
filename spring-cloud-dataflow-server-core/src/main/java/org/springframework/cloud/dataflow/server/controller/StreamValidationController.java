@@ -86,7 +86,7 @@ public class StreamValidationController {
 
 		@Override
 		public StreamAppStatusResource toResource(ValidationStatus entity) {
-			return new StreamAppStatusResource(entity.getDefinitionName(), entity.getDefinitionDsl(), entity.getAppsStatuses());
+			return new StreamAppStatusResource(entity.getDefinitionName(), entity.getDefinitionDsl(), entity.getDescription(), entity.getAppsStatuses());
 		}
 	}
 }

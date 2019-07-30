@@ -65,6 +65,7 @@ public class StreamValidationDocumentation extends BaseDocumentation {
 			post("/streams/definitions")
 					.param("name", "timelog")
 					.param("definition", "time --format='YYYY MM DD' | log")
+					.param("description", "Demo stream for testing")
 					.param("deploy", "false"))
 			.andExpect(status().isCreated());
 
@@ -78,6 +79,7 @@ public class StreamValidationDocumentation extends BaseDocumentation {
 				responseFields(
 					fieldWithPath("appName").description("The name of a stream definition"),
 					fieldWithPath("dsl").description("The dsl of a stream definition"),
+					fieldWithPath("description").description("The description of the stream definition"),
 					subsectionWithPath("appStatuses").description("The status of the application instances")
 				)
 			));
