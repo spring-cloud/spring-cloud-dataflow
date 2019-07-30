@@ -347,6 +347,8 @@ spring:
 
 ----
 
+TIP: By defining one platform as `default` allows you to skip using `platformName` where its use would otherwise be required.
+
 When launching a task, pass the value of the platform account name using the task launch option `--platformName`  If you do not pass a value for `platformName`, the value `default` will be used.
 
 NOTE: When deploying a task to multiple platforms, the configuration of the task needs to connect to the same database as the Data Flow Server.
