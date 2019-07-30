@@ -39,6 +39,10 @@ import static org.junit.Assert.fail;
  */
 public class TaskCommandTemplate {
 
+	private final static int WAIT_INTERVAL = 500;
+
+	private final static int MAX_WAIT_TIME = 3000;
+
 	private final JLineShellComponent shell;
 
 	private List<String> tasks = new ArrayList<String>();
@@ -103,6 +107,65 @@ public class TaskCommandTemplate {
 		return value;
 	}
 
+	/**
+	 * Launch a task and validate the result from shell on default platform.
+	 *
+	 * @param taskName the name of the task
+	 */
+	public String getTaskExecutionLog(String taskName) throws Exception{
+		long id = launchTaskExecutionForLog(taskName);
+		CommandResult cr = shell.executeCommand("task execution log --id " + id);
+		assertTrue(cr.toString().contains("Starting"));
+
+		return cr.toString();
+	}
+
+	/**
+	 * Launch a task with invalid platform.
+	 *
+	 * @param taskName the name of the task
+	 */
+	public void getTaskExecutionLogInvalidPlatform(String taskName) throws Exception{
+		long id = launchTaskExecutionForLog(taskName);
+		shell.executeCommand(String.format("task execution log --id %s --platform %s", id, "foo"));
+	}
+
+	/**
+	 * Launch a task with invalid task execution id
+
+	 */
+	public void getTaskExecutionLogInvalidId() throws Exception{
+		CommandResult cr = shell.executeCommand(String.format("task execution log --id %s", 88));
+	}
+
+	private long launchTaskExecutionForLog(String taskName) throws Exception{
+		// add the task name to the tasks list before assertion
+		tasks.add(taskName);
+		CommandResult cr = shell.executeCommand(String.format("task launch %s", taskName));
+		CommandResult idResult = shell.executeCommand("task execution list --name " + taskName);
+		Table taskExecutionResult = (Table) idResult.getResult();
+
+		long id = (long) taskExecutionResult.getModel().getValue(1, 1);
+		assertTrue(cr.toString().contains("with execution id " + id));
+		waitForDBToBePopulated(id);
+		return id;
+	}
+
+	private void waitForDBToBePopulated(long id) throws Exception {
+		for (int waitTime = 0; waitTime <= MAX_WAIT_TIME; waitTime += WAIT_INTERVAL) {
+			Thread.sleep(WAIT_INTERVAL);
+			if (isEndTime(id)) {
+				break;
+			}
+		}
+	}
+
+	private boolean isEndTime(long id) {
+		CommandResult cr = taskExecutionStatus(id);
+		Table table = (Table) cr.getResult();
+		return (table.getModel().getValue(6, 1) != null);
+
+	}
 	/**
 	 * Stop a task execution.
 	 *

@@ -106,6 +106,23 @@ public interface TaskOperations {
 	TaskExecutionResource taskExecutionStatus(long id);
 
 	/**
+	 * Return the task execution log.  The platform from which to retrieve the log will be set to {@code default}.
+	 *
+	 * @param externalExecutionId the external execution identifier of the task execution.
+	 * @return {@link String} containing the log.
+	 */
+	String taskExecutionLog(String externalExecutionId);
+
+	/**
+	 * Return the task execution log.
+	 *
+	 * @param externalExecutionId the external execution identifier of the task execution.
+	 * @param platform the platform from which to obtain the log.
+	 * @return {@link String} containing the log.
+	 */
+	String taskExecutionLog(String externalExecutionId, String platform);
+
+	/**
 	 * Return information including the count of currently executing tasks and task execution
 	 * limits.
 	 * @return Collection of {@link CurrentTaskExecutionsResource}
