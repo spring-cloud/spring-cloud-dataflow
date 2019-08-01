@@ -180,8 +180,9 @@ public class DefaultTaskExecutionService implements TaskExecutionService {
 						taskName, existingTaskDeployment.getPlatformName(), platformName));
 			}
 		}
+
 		TaskExecutionInformation taskExecutionInformation = taskExecutionInfoService
-				.findTaskExecutionInformation(taskName, taskDeploymentProperties, composedTaskRunnerName);
+				.findTaskExecutionInformation(taskName, taskDeploymentProperties, composedTaskRunnerName, commandLineArgsContainNoDataSourceInfo(commandLineArgs));
 
 		TaskExecution taskExecution = taskExecutionRepositoryService.createTaskExecution(taskName);
 
@@ -208,6 +209,16 @@ public class DefaultTaskExecutionService implements TaskExecutionService {
 						request.getCommandlineArguments()));
 
 		return taskExecution.getExecutionId();
+	}
+
+	private boolean commandLineArgsContainNoDataSourceInfo(List<String> commandLineArgs) {
+		boolean result = true;
+		for(String commandLineArg : commandLineArgs) {
+			if(commandLineArg.startsWith("--spring.datasource.")) {
+				result = false;
+			}
+		}
+		return result;
 	}
 
 	@Override

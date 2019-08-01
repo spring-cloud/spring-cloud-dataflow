@@ -37,10 +37,11 @@ public interface TaskExecutionInfoService {
 	 * @param taskName the name of the task definition
 	 * @param taskDeploymentProperties the deployment properties to use for the {@link TaskExecutionInformation}
 	 * @param composedTaskRunnerName user provided CTR app name to use.
+	 * @param addDataFlowProperties if true DataSource properties should be added to the TaskDefinition.
 	 * @return instance of {@link TaskExecutionInformation}
 	 */
 	TaskExecutionInformation findTaskExecutionInformation(String taskName,
-			Map<String, String> taskDeploymentProperties, String composedTaskRunnerName);
+			Map<String, String> taskDeploymentProperties, String composedTaskRunnerName, boolean addDataFlowProperties);
 
 	AllPlatformsTaskExecutionInformation findAllPlatformTaskExecutionInformation();
 }

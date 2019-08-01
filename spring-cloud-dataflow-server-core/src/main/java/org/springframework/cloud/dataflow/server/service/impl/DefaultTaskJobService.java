@@ -184,13 +184,20 @@ public class DefaultTaskJobService implements TaskJobService {
 		TaskDefinition taskDefinition = this.taskDefinitionRepository.findById(taskExecution.getTaskName())
 				.orElseThrow(() -> new NoSuchTaskDefinitionException(taskExecution.getTaskName()));
 
+		// Remove Duplicate Task Name from arg list if present.
+		List<String> updatedTaskArguments = new  ArrayList<>();
+		for (String argument : taskExecution.getArguments()) {
+			if(!argument.startsWith("--spring.cloud.task.name=")) {
+				updatedTaskArguments.add(argument);
+			}
+		}
 		String platformName = taskJobExecution.getJobExecution().getJobParameters().getString("-spring.cloud.data.flow.platformname");
 		if (platformName != null) {
 			Map<String, String> deploymentProperties = new HashMap<>();
 			deploymentProperties.put(DefaultTaskExecutionService.TASK_PLATFORM_NAME, platformName);
 			String taskAppName = taskJobExecution.getJobExecution().getJobParameters().getString("-spring.cloud.data.flow.taskappname");
 			taskExecutionService.executeTask(taskDefinition.getName(), deploymentProperties,
-					taskExecution.getArguments(), taskAppName);
+					updatedTaskArguments, taskAppName);
 		} else {
 			throw new IllegalStateException(String.format("Did not find platform for taskName=[%s] , taskId=[%s]",
 					taskExecution.getTaskName(),taskJobExecution.getTaskId()));

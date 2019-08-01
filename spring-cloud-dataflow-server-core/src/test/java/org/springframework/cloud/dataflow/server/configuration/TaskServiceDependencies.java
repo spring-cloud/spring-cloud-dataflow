@@ -21,7 +21,12 @@ import java.util.List;
 
 import javax.sql.DataSource;
 
+import org.springframework.batch.core.configuration.support.MapJobRegistry;
+import org.springframework.batch.core.explore.JobExplorer;
+import org.springframework.batch.core.explore.support.JobExplorerFactoryBean;
+import org.springframework.batch.core.launch.support.SimpleJobLauncher;
 import org.springframework.batch.core.repository.dao.AbstractJdbcBatchMetadataDao;
+import org.springframework.batch.core.repository.support.JobRepositoryFactoryBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.ImportAutoConfiguration;
 import org.springframework.boot.autoconfigure.domain.EntityScan;
@@ -38,6 +43,8 @@ import org.springframework.cloud.dataflow.core.Launcher;
 import org.springframework.cloud.dataflow.core.TaskPlatform;
 import org.springframework.cloud.dataflow.registry.service.AppRegistryService;
 import org.springframework.cloud.dataflow.server.DockerValidatorProperties;
+import org.springframework.cloud.dataflow.server.batch.JobService;
+import org.springframework.cloud.dataflow.server.batch.SimpleJobServiceFactoryBean;
 import org.springframework.cloud.dataflow.server.config.VersionInfoProperties;
 import org.springframework.cloud.dataflow.server.config.apps.CommonApplicationProperties;
 import org.springframework.cloud.dataflow.server.config.features.FeaturesProperties;
@@ -54,6 +61,7 @@ import org.springframework.cloud.dataflow.server.service.TaskDeleteService;
 import org.springframework.cloud.dataflow.server.service.TaskExecutionCreationService;
 import org.springframework.cloud.dataflow.server.service.TaskExecutionInfoService;
 import org.springframework.cloud.dataflow.server.service.TaskExecutionService;
+import org.springframework.cloud.dataflow.server.service.TaskJobService;
 import org.springframework.cloud.dataflow.server.service.TaskSaveService;
 import org.springframework.cloud.dataflow.server.service.TaskValidationService;
 import org.springframework.cloud.dataflow.server.service.impl.DefaultSchedulerService;
@@ -61,6 +69,7 @@ import org.springframework.cloud.dataflow.server.service.impl.DefaultTaskDeleteS
 import org.springframework.cloud.dataflow.server.service.impl.DefaultTaskExecutionInfoService;
 import org.springframework.cloud.dataflow.server.service.impl.DefaultTaskExecutionRepositoryService;
 import org.springframework.cloud.dataflow.server.service.impl.DefaultTaskExecutionService;
+import org.springframework.cloud.dataflow.server.service.impl.DefaultTaskJobService;
 import org.springframework.cloud.dataflow.server.service.impl.DefaultTaskSaveService;
 import org.springframework.cloud.dataflow.server.service.impl.TaskAppDeploymentRequestCreator;
 import org.springframework.cloud.dataflow.server.service.impl.TaskConfigurationProperties;
@@ -83,6 +92,8 @@ import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.data.map.repository.config.EnableMapRepositories;
 import org.springframework.data.web.config.EnableSpringDataWebSupport;
 import org.springframework.hateoas.config.EnableHypermediaSupport;
+import org.springframework.jdbc.datasource.DataSourceTransactionManager;
+import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurationSupport;
@@ -169,6 +180,44 @@ public class TaskServiceDependencies extends WebMvcConfigurationSupport {
 	@Bean
 	public TaskExecutionDaoFactoryBean taskExecutionDaoFactoryBean(DataSource dataSource) {
 		return new TaskExecutionDaoFactoryBean(dataSource);
+	}
+
+	@Bean
+	public TaskJobService taskJobService(JobService jobService, TaskExplorer taskExplorer,
+			TaskDefinitionRepository taskDefinitionRepository, TaskExecutionService taskExecutionService) {
+		return new DefaultTaskJobService(jobService, taskExplorer,
+				taskDefinitionRepository, taskExecutionService);
+	}
+
+	@Bean
+	public SimpleJobServiceFactoryBean simpleJobServiceFactoryBean(DataSource dataSource,
+			JobRepositoryFactoryBean repositoryFactoryBean, JobExplorer jobExplorer,
+			PlatformTransactionManager dataSourceTransactionManager) throws Exception {
+		SimpleJobServiceFactoryBean factoryBean = new SimpleJobServiceFactoryBean();
+		factoryBean.setDataSource(dataSource);
+		factoryBean.setJobRepository(repositoryFactoryBean.getObject());
+		factoryBean.setJobLocator(new MapJobRegistry());
+		factoryBean.setJobLauncher(new SimpleJobLauncher());
+		factoryBean.setDataSource(dataSource);
+		factoryBean.setJobExplorer(jobExplorer);
+		factoryBean.setTransactionManager(dataSourceTransactionManager);
+		return factoryBean;
+	}
+
+	@Bean
+	public JobRepositoryFactoryBean jobRepository(DataSource dataSource) throws Exception {
+		JobRepositoryFactoryBean repositoryFactoryBean = new JobRepositoryFactoryBean();
+		repositoryFactoryBean.setDataSource(dataSource);
+		repositoryFactoryBean.setTransactionManager(new DataSourceTransactionManager(
+				dataSource));
+		return repositoryFactoryBean;
+	}
+
+	@Bean
+	public JobExplorerFactoryBean jobExplorerFactoryBean(DataSource dataSource) {
+		JobExplorerFactoryBean jobExplorerFactoryBean = new JobExplorerFactoryBean();
+		jobExplorerFactoryBean.setDataSource(dataSource);
+		return jobExplorerFactoryBean;
 	}
 
 	@Bean
