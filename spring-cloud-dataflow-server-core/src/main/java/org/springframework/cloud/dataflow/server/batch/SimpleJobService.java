@@ -105,12 +105,6 @@ public class SimpleJobService implements JobService, DisposableBean {
 
 	public SimpleJobService(SearchableJobInstanceDao jobInstanceDao, SearchableJobExecutionDao jobExecutionDao,
 			SearchableStepExecutionDao stepExecutionDao, JobRepository jobRepository, JobLauncher jobLauncher,
-			ListableJobLocator jobLocator, ExecutionContextDao executionContextDao) {
-		this(jobInstanceDao, jobExecutionDao, stepExecutionDao, jobRepository, jobLauncher, jobLocator, executionContextDao, null);
-	}
-
-	public SimpleJobService(SearchableJobInstanceDao jobInstanceDao, SearchableJobExecutionDao jobExecutionDao,
-			SearchableStepExecutionDao stepExecutionDao, JobRepository jobRepository, JobLauncher jobLauncher,
 			ListableJobLocator jobLocator, ExecutionContextDao executionContextDao, JobOperator jsrJobOperator) {
 		super();
 		this.jobInstanceDao = jobInstanceDao;
@@ -138,40 +132,6 @@ public class SimpleJobService implements JobService, DisposableBean {
 		}
 
 		stepExecutionDao.addStepExecutions(jobExecution);
-
-		String jobName = jobExecution.getJobInstance() == null ? jobInstanceDao.getJobInstance(jobExecution).getJobName() : jobExecution.getJobInstance().getJobName();
-		Collection<String> missingStepNames = new LinkedHashSet<String>();
-
-		if (jobName != null) {
-			missingStepNames.addAll(stepExecutionDao.findStepNamesForJobExecution(jobName, "*:partition*"));
-			logger.debug("Found step executions in repository: " + missingStepNames);
-		}
-
-		Job job = null;
-		try {
-			job = jobLocator.getJob(jobName);
-		}
-		catch (NoSuchJobException e) {
-			// expected
-		}
-		if (job instanceof StepLocator) {
-			Collection<String> stepNames = ((StepLocator) job).getStepNames();
-			missingStepNames.addAll(stepNames);
-			logger.debug("Added step executions from job: " + missingStepNames);
-		}
-
-		for (StepExecution stepExecution : jobExecution.getStepExecutions()) {
-			String stepName = stepExecution.getStepName();
-			if (missingStepNames.contains(stepName)) {
-				missingStepNames.remove(stepName);
-			}
-			logger.debug("Removed step executions from job execution: " + missingStepNames);
-		}
-
-		for (String stepName : missingStepNames) {
-			StepExecution stepExecution = jobExecution.createStepExecution(stepName);
-			stepExecution.setStatus(BatchStatus.UNKNOWN);
-		}
 
 		return jobExecution.getStepExecutions();
 
