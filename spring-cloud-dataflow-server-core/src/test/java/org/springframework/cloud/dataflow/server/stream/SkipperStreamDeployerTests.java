@@ -60,7 +60,7 @@ import org.springframework.cloud.skipper.domain.StatusCode;
 import org.springframework.cloud.skipper.domain.UploadRequest;
 import org.springframework.cloud.skipper.domain.VersionInfo;
 import org.springframework.core.io.DefaultResourceLoader;
-import org.springframework.hateoas.Resources;
+import org.springframework.hateoas.CollectionModel;
 import org.springframework.util.StreamUtils;
 
 import static junit.framework.TestCase.fail;
@@ -210,7 +210,7 @@ public class SkipperStreamDeployerTests {
 				skipperDeployerProperties);
 
 		SkipperClient skipperClient = mock(SkipperClient.class);
-		when(skipperClient.listDeployers()).thenReturn(new Resources<>(new ArrayList<>(), new ArrayList<>()));
+		when(skipperClient.listDeployers()).thenReturn(new CollectionModel<>(new ArrayList<>(), new ArrayList<>()));
 
 		SkipperStreamDeployer skipperStreamDeployer = new SkipperStreamDeployer(skipperClient,
 				mock(StreamDefinitionRepository.class), mock(AppRegistryService.class), mock(ForkJoinPool.class));
@@ -498,7 +498,7 @@ public class SkipperStreamDeployerTests {
 		StreamDefinition streamDefinition = new StreamDefinition("foo", "foo|bar");
 
 		when(skipperClient.search(eq(streamDefinition.getName()), eq(false)))
-				.thenReturn(new Resources(Collections.EMPTY_LIST));
+				.thenReturn(new CollectionModel(Collections.EMPTY_LIST));
 
 		skipperStreamDeployer.undeployStream(streamDefinition.getName());
 
@@ -518,7 +518,7 @@ public class SkipperStreamDeployerTests {
 		StreamDefinition streamDefinition = new StreamDefinition("foo", "foo|bar");
 
 		when(skipperClient.search(eq(streamDefinition.getName()), eq(false)))
-				.thenReturn(new Resources(Collections.singleton(new PackageMetadata())));
+				.thenReturn(new CollectionModel(Collections.singleton(new PackageMetadata())));
 
 		skipperStreamDeployer.undeployStream(streamDefinition.getName());
 		verify(skipperClient, times(1)).delete(eq(streamDefinition.getName()), eq(true));
@@ -550,7 +550,7 @@ public class SkipperStreamDeployerTests {
 	@Test
 	public void testPlatformList() {
 		SkipperClient skipperClient = mock(SkipperClient.class);
-		when(skipperClient.listDeployers()).thenReturn(new Resources<>(new ArrayList<>(), new ArrayList<>()));
+		when(skipperClient.listDeployers()).thenReturn(new CollectionModel<>(new ArrayList<>(), new ArrayList<>()));
 		SkipperStreamDeployer skipperStreamDeployer = new SkipperStreamDeployer(skipperClient,
 				mock(StreamDefinitionRepository.class), mock(AppRegistryService.class), mock(ForkJoinPool.class));
 		skipperStreamDeployer.platformList();
@@ -560,7 +560,7 @@ public class SkipperStreamDeployerTests {
 	@Test
 	public void testHistory() {
 		SkipperClient skipperClient = mock(SkipperClient.class);
-		when(skipperClient.history(eq("release1"))).thenReturn(new Resources<Release>(new ArrayList<>()));
+		when(skipperClient.history(eq("release1"))).thenReturn(new CollectionModel<Release>(new ArrayList<>()));
 		SkipperStreamDeployer skipperStreamDeployer = new SkipperStreamDeployer(skipperClient,
 				mock(StreamDefinitionRepository.class), mock(AppRegistryService.class), mock(ForkJoinPool.class));
 		skipperStreamDeployer.history("release1");
@@ -606,7 +606,7 @@ public class SkipperStreamDeployerTests {
 		about.setVersionInfo(new VersionInfo());
 		about.getVersionInfo().setServer(new Dependency("d1", "v1", "check", "check2", "url"));
 		when(skipperClient.info()).thenReturn(about);
-		when(skipperClient.listDeployers()).thenReturn(new Resources<>(Arrays.asList(new Deployer("d1", "t1", null))));
+		when(skipperClient.listDeployers()).thenReturn(new CollectionModel<>(Arrays.asList(new Deployer("d1", "t1", null))));
 
 		SkipperStreamDeployer skipperStreamDeployer = new SkipperStreamDeployer(skipperClient,
 				mock(StreamDefinitionRepository.class), mock(AppRegistryService.class), mock(ForkJoinPool.class));

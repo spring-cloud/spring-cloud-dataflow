@@ -36,9 +36,9 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PagedResourcesAssembler;
-import org.springframework.hateoas.ExposesResourceFor;
-import org.springframework.hateoas.PagedResources;
-import org.springframework.hateoas.mvc.ResourceAssemblerSupport;
+import org.springframework.hateoas.PagedModel;
+import org.springframework.hateoas.server.ExposesResourceFor;
+import org.springframework.hateoas.server.mvc.RepresentationModelAssemblerSupport;
 import org.springframework.http.HttpStatus;
 import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -94,10 +94,10 @@ public class StreamDefinitionController {
 	 */
 	@RequestMapping(value = "", method = RequestMethod.GET)
 	@ResponseStatus(HttpStatus.OK)
-	public PagedResources<StreamDefinitionResource> list(Pageable pageable,
+	public PagedModel<StreamDefinitionResource> list(Pageable pageable,
 			@RequestParam(required = false) String search, PagedResourcesAssembler<StreamDefinition> assembler) {
 		Page<StreamDefinition> streamDefinitions = this.streamService.findDefinitionByNameContains(pageable, search);
-		return assembler.toResource(streamDefinitions, new Assembler(streamDefinitions));
+		return assembler.toModel(streamDefinitions, new Assembler(streamDefinitions));
 	}
 
 	/**
@@ -119,7 +119,7 @@ public class StreamDefinitionController {
 			@RequestParam(value = "deploy", defaultValue = "false") boolean deploy) {
 
 		StreamDefinition streamDefinition = this.streamService.createStream(name, dsl, deploy);
-		return new Assembler(new PageImpl<>(Collections.singletonList(streamDefinition))).toResource(streamDefinition);
+		return new Assembler(new PageImpl<>(Collections.singletonList(streamDefinition))).toModel(streamDefinition);
 	}
 
 	/**
@@ -145,13 +145,13 @@ public class StreamDefinitionController {
 	 */
 	@RequestMapping(value = "/{name}/related", method = RequestMethod.GET)
 	@ResponseStatus(HttpStatus.OK)
-	public PagedResources<StreamDefinitionResource> listRelated(Pageable pageable,
+	public PagedModel<StreamDefinitionResource> listRelated(Pageable pageable,
 			@PathVariable("name") String name,
 			@RequestParam(value = "nested", required = false, defaultValue = "false") boolean nested,
 			PagedResourcesAssembler<StreamDefinition> assembler) {
 		List<StreamDefinition> result = this.streamService.findRelatedStreams(name, nested);
 		Page<StreamDefinition> page = new PageImpl<>(result, pageable, result.size());
-		return assembler.toResource(page, new Assembler(page));
+		return assembler.toModel(page, new Assembler(page));
 	}
 
 
@@ -165,7 +165,7 @@ public class StreamDefinitionController {
 	@ResponseStatus(HttpStatus.OK)
 	public StreamDefinitionResource display(@PathVariable("name") String name) {
 		StreamDefinition definition = this.streamService.findOne(name);
-		return new Assembler(new PageImpl<>(Collections.singletonList(definition))).toResource(definition);
+		return new Assembler(new PageImpl<>(Collections.singletonList(definition))).toModel(definition);
 	}
 
 	/**
@@ -178,10 +178,10 @@ public class StreamDefinitionController {
 	}
 
 	/**
-	 * {@link org.springframework.hateoas.ResourceAssembler} implementation that converts
+	 * {@link org.springframework.hateoas.server.ResourceAssembler} implementation that converts
 	 * {@link StreamDefinition}s to {@link StreamDefinitionResource}s.
 	 */
-	class Assembler extends ResourceAssemblerSupport<StreamDefinition, StreamDefinitionResource> {
+	class Assembler extends RepresentationModelAssemblerSupport<StreamDefinition, StreamDefinitionResource> {
 
 		private final Map<StreamDefinition, DeploymentState> streamDeploymentStates;
 
@@ -193,9 +193,9 @@ public class StreamDefinitionController {
 		}
 
 		@Override
-		public StreamDefinitionResource toResource(StreamDefinition stream) {
+		public StreamDefinitionResource toModel(StreamDefinition stream) {
 			try {
-				return createResourceWithId(stream.getName(), stream);
+				return createModelWithId(stream.getName(), stream);
 			}
 			catch (IllegalStateException e) {
 				logger.warn("Failed to create StreamDefinitionResource. " + e.getMessage());
@@ -204,7 +204,7 @@ public class StreamDefinitionController {
 		}
 
 		@Override
-		public StreamDefinitionResource instantiateResource(StreamDefinition stream) {
+		public StreamDefinitionResource instantiateModel(StreamDefinition stream) {
 			final StreamDefinitionResource resource = new StreamDefinitionResource(stream.getName(),
 					new ArgumentSanitizer().sanitizeStream(stream));
 			DeploymentState deploymentState = streamDeploymentStates.get(stream);

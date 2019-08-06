@@ -44,7 +44,7 @@ import org.springframework.context.ApplicationListener;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.event.ContextClosedEvent;
-import org.springframework.hateoas.core.DefaultRelProvider;
+import org.springframework.hateoas.server.core.DefaultLinkRelationProvider;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.util.Assert;
@@ -140,13 +140,13 @@ public class WebConfiguration implements ServletContextInitializer, ApplicationL
 		return new BeanPostProcessor() {
 			@Override
 			public Object postProcessBeforeInitialization(Object bean, String beanName) throws BeansException {
-				// Override the RelProvider to DefaultRelProvider
+				// Override the LinkRelationProvider to DefaultRelProvider
 				// Since DataFlow UI expects DefaultRelProvider to be used, override any
 				// other instance of
 				// DefaultRelProvider (EvoInflectorRelProvider for instance) with the
 				// DefaultRelProvider.
 				if (beanName != null && beanName.equals(REL_PROVIDER_BEAN_NAME)) {
-					return new DefaultRelProvider();
+					return new DefaultLinkRelationProvider();
 				}
 				return bean;
 			}

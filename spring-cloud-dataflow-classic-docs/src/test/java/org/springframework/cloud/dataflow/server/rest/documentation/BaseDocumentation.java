@@ -47,8 +47,8 @@ import org.springframework.cloud.skipper.domain.Info;
 import org.springframework.cloud.skipper.domain.Status;
 import org.springframework.cloud.skipper.domain.StatusCode;
 import org.springframework.cloud.skipper.domain.VersionInfo;
+import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.Link;
-import org.springframework.hateoas.Resources;
 import org.springframework.restdocs.JUnitRestDocumentation;
 import org.springframework.restdocs.mockmvc.RestDocumentationResultHandler;
 import org.springframework.test.web.servlet.MockMvc;
@@ -90,7 +90,7 @@ public abstract class BaseDocumentation {
 		about.getVersionInfo().getServer().setName("Test Server");
 		about.getVersionInfo().getServer().setVersion("Test Version");
 		when(springDataflowServer.getSkipperClient().info()).thenReturn(about);
-		when(springDataflowServer.getSkipperClient().listDeployers()).thenReturn(new Resources<>(new ArrayList<>(), new ArrayList<>()));
+		when(springDataflowServer.getSkipperClient().listDeployers()).thenReturn(new CollectionModel<>(new ArrayList<>(), new ArrayList<>()));
 
 		Info info = new Info();
 		info.setStatus(new Status());
@@ -98,9 +98,9 @@ public abstract class BaseDocumentation {
 		when(springDataflowServer.getSkipperClient().status(ArgumentMatchers.anyString())).thenReturn(info);
 
 		Deployer deployer = new Deployer("default", "local", mock(AppDeployer.class));
-		when(springDataflowServer.getSkipperClient().listDeployers()).thenReturn(new Resources<>(Arrays.asList(deployer), new Link[0]));
+		when(springDataflowServer.getSkipperClient().listDeployers()).thenReturn(new CollectionModel<>(Arrays.asList(deployer), new Link[0]));
 
-		when(springDataflowServer.getSkipperClient().search(ArgumentMatchers.anyString(), ArgumentMatchers.anyBoolean())).thenReturn(new Resources(Collections.EMPTY_LIST));
+		when(springDataflowServer.getSkipperClient().search(ArgumentMatchers.anyString(), ArgumentMatchers.anyBoolean())).thenReturn(new CollectionModel(Collections.EMPTY_LIST));
 
 		this.prepareDocumentationTests(springDataflowServer.getWebApplicationContext());
 	}
@@ -192,7 +192,7 @@ public abstract class BaseDocumentation {
 	 * restful interfaces.  This can be removed when a Local Scheduler impl is created.
 	 */
 	private void createMockScheduler() {
-		AutowireCapableBeanFactory factory = springDataflowServer.getWebApplicationContext().getAutowireCapableBeanFactory();	
+		AutowireCapableBeanFactory factory = springDataflowServer.getWebApplicationContext().getAutowireCapableBeanFactory();
 		TaskPlatform taskPlatform = springDataflowServer.getWebApplicationContext().getBean(TaskPlatform.class);
 		List<Launcher> launchers = taskPlatform.getLaunchers();
 		for (Launcher launcher : launchers) {

@@ -20,7 +20,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.springframework.cloud.dataflow.core.dsl.graph.Graph;
-import org.springframework.hateoas.ResourceSupport;
+import org.springframework.hateoas.RepresentationModel;
 
 /**
  * Represents a response from the tools endpoint. Depending on whether the request was to
@@ -29,7 +29,7 @@ import org.springframework.hateoas.ResourceSupport;
  *
  * @author Andy Clement
  */
-public class TaskToolsResource extends ResourceSupport {
+public class TaskToolsResource extends RepresentationModel<TaskToolsResource> {
 
 	private Graph graph;
 

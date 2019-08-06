@@ -23,7 +23,7 @@ import java.util.Map;
  *
  * @author Glenn Renfro
  */
-public class StreamAppStatusResource extends AbstractDefinitionAppStatusResource {
+public class StreamAppStatusResource extends AbstractDefinitionAppStatusResource<StreamAppStatusResource> {
 
 	protected StreamAppStatusResource() {
 	}

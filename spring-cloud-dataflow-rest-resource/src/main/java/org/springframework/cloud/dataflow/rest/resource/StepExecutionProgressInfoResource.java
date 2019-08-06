@@ -18,8 +18,8 @@ package org.springframework.cloud.dataflow.rest.resource;
 
 import org.springframework.batch.core.StepExecution;
 import org.springframework.cloud.dataflow.rest.job.StepExecutionHistory;
-import org.springframework.hateoas.PagedResources;
-import org.springframework.hateoas.ResourceSupport;
+import org.springframework.hateoas.PagedModel;
+import org.springframework.hateoas.RepresentationModel;
 import org.springframework.util.Assert;
 
 /**
@@ -30,7 +30,7 @@ import org.springframework.util.Assert;
  * @since 1.0
  */
 
-public class StepExecutionProgressInfoResource extends ResourceSupport {
+public class StepExecutionProgressInfoResource extends RepresentationModel<StepExecutionProgressInfoResource> {
 
 	private StepExecution stepExecution;
 
@@ -87,6 +87,6 @@ public class StepExecutionProgressInfoResource extends ResourceSupport {
 		return stepExecutionHistory;
 	}
 
-	public static class Page extends PagedResources<StepExecutionProgressInfoResource> {
+	public static class Page extends PagedModel<StepExecutionProgressInfoResource> {
 	}
 }

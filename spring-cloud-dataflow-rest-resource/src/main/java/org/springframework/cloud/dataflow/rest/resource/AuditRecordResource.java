@@ -18,8 +18,8 @@ package org.springframework.cloud.dataflow.rest.resource;
 
 import java.time.Instant;
 
-import org.springframework.hateoas.PagedResources;
-import org.springframework.hateoas.ResourceSupport;
+import org.springframework.hateoas.PagedModel;
+import org.springframework.hateoas.RepresentationModel;
 
 /**
  * A HATEOAS representation of an {@link org.springframework.cloud.dataflow.core.AuditRecord}.
@@ -28,7 +28,7 @@ import org.springframework.hateoas.ResourceSupport;
  *
  * @author Gunnar Hillert
  */
-public class AuditRecordResource extends ResourceSupport {
+public class AuditRecordResource extends RepresentationModel<AuditRecordResource> {
 
 	/**
 	 * The id of the audit record
@@ -127,7 +127,7 @@ public class AuditRecordResource extends ResourceSupport {
 		this.auditRecordId = auditRecordId;
 	}
 
-	public static class Page extends PagedResources<AuditRecordResource> {
+	public static class Page extends PagedModel<AuditRecordResource> {
 	}
 
 }

@@ -32,7 +32,7 @@ import org.springframework.cloud.skipper.domain.VersionInfo;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
-import org.springframework.hateoas.Resources;
+import org.springframework.hateoas.CollectionModel;
 
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -83,7 +83,7 @@ public class TestConfig {
 		about.getVersionInfo().getServer().setName("Test Server");
 		about.getVersionInfo().getServer().setVersion("Test Version");
 		when(skipperClient.info()).thenReturn(about);
-		when(skipperClient.listDeployers()).thenReturn(new Resources<>(new ArrayList<>(), new ArrayList<>()));
+		when(skipperClient.listDeployers()).thenReturn(new CollectionModel<>(new ArrayList<>(), new ArrayList<>()));
 		return skipperClient;
 	}
 

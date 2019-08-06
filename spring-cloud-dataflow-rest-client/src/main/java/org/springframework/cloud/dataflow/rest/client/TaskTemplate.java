@@ -33,7 +33,7 @@ import org.springframework.cloud.dataflow.rest.resource.TaskExecutionResource;
 import org.springframework.cloud.dataflow.rest.util.DeploymentPropertiesUtils;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.hateoas.Link;
-import org.springframework.hateoas.ResourceSupport;
+import org.springframework.hateoas.RepresentationModel;
 import org.springframework.http.HttpMethod;
 import org.springframework.util.Assert;
 import org.springframework.util.LinkedMultiValueMap;
@@ -96,8 +96,8 @@ public class TaskTemplate implements TaskOperations {
 
 	private final Link retrieveLogLink;
 
-	TaskTemplate(RestTemplate restTemplate, ResourceSupport resources, String dataFlowServerVersion) {
-		Assert.notNull(resources, "URI Resources must not be be null");
+	TaskTemplate(RestTemplate restTemplate, RepresentationModel<?> resources, String dataFlowServerVersion) {
+		Assert.notNull(resources, "URI CollectionModel must not be be null");
 		Assert.notNull(resources.getLink(EXECUTIONS_RELATION), "Executions relation is required");
 		Assert.notNull(resources.getLink(DEFINITIONS_RELATION), "Definitions relation is required");
 		Assert.notNull(resources.getLink(DEFINITION_RELATION), "Definition relation is required");
@@ -123,15 +123,15 @@ public class TaskTemplate implements TaskOperations {
 		}
 
 		this.restTemplate = restTemplate;
-		this.definitionsLink = resources.getLink(DEFINITIONS_RELATION);
-		this.definitionLink = resources.getLink(DEFINITION_RELATION);
-		this.executionsLink = resources.getLink(EXECUTIONS_RELATION);
-		this.executionLink = resources.getLink(EXECUTION_RELATION);
-		this.executionByNameLink = resources.getLink(EXECUTION_RELATION_BY_NAME);
-		this.executionsCurrentLink = resources.getLink(EXECUTIONS_CURRENT_RELATION);
-		this.validationLink = resources.getLink(VALIDATION_REL);
-		this.platformListLink = resources.getLink(PLATFORM_LIST_RELATION);
-		this.retrieveLogLink = resources.getLink(RETRIEVE_LOG);
+		this.definitionsLink = resources.getLink(DEFINITIONS_RELATION).get();
+		this.definitionLink = resources.getLink(DEFINITION_RELATION).get();
+		this.executionsLink = resources.getLink(EXECUTIONS_RELATION).get();
+		this.executionLink = resources.getLink(EXECUTION_RELATION).get();
+		this.executionByNameLink = resources.getLink(EXECUTION_RELATION_BY_NAME).get();
+		this.executionsCurrentLink = resources.getLink(EXECUTIONS_CURRENT_RELATION).get();
+		this.validationLink = resources.getLink(VALIDATION_REL).get();
+		this.platformListLink = resources.getLink(PLATFORM_LIST_RELATION).get();
+		this.retrieveLogLink = resources.getLink(RETRIEVE_LOG).get();
 	}
 
 	@Override

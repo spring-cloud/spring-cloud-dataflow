@@ -16,7 +16,7 @@
 		<!-- Note: Also make sure the parent pom version in spring-cloud-dataflow-dependencies/pom.xml is in sync -->
 		<groupId>org.springframework.cloud</groupId>
 		<artifactId>spring-cloud-build</artifactId>
-		<version>2.1.6.RELEASE</version>
+		<version>2.2.0.BUILD-SNAPSHOT</version>
 		<relativePath />
 	</parent>
 	<licenses>
@@ -61,24 +61,24 @@
 
 		<spring-cloud-dataflow-ui.version>2.3.0.BUILD-SNAPSHOT</spring-cloud-dataflow-ui.version>
 
-		<spring-cloud-deployer.version>2.0.4.BUILD-SNAPSHOT</spring-cloud-deployer.version>
-		<spring-cloud-deployer-local.version>2.0.5.BUILD-SNAPSHOT</spring-cloud-deployer-local.version>
+		<spring-cloud-deployer.version>2.1.0.BUILD-SNAPSHOT</spring-cloud-deployer.version>
+		<spring-cloud-deployer-local.version>2.1.0.BUILD-SNAPSHOT</spring-cloud-deployer-local.version>
 
 		<!-- note - check version of reactor at deployer-cf/cf-java-client uses -->
-		<spring-cloud-deployer-cloudfoundry.version>2.0.7.BUILD-SNAPSHOT</spring-cloud-deployer-cloudfoundry.version>
+		<spring-cloud-deployer-cloudfoundry.version>2.1.0.BUILD-SNAPSHOT</spring-cloud-deployer-cloudfoundry.version>
 		<reactor.version>3.2.0.RELEASE</reactor.version>
-		<spring-cloud-deployer-kubernetes.version>2.0.5.BUILD-SNAPSHOT</spring-cloud-deployer-kubernetes.version>
+		<spring-cloud-deployer-kubernetes.version>2.1.0.BUILD-SNAPSHOT</spring-cloud-deployer-kubernetes.version>
 		<kubernetes-client.version>4.1.0</kubernetes-client.version>
 		<spring-cloud-kubernetes.version>1.0.2.RELEASE</spring-cloud-kubernetes.version>
 
-		<spring-cloud-skipper.version>2.1.1.BUILD-SNAPSHOT</spring-cloud-skipper.version>
+		<spring-cloud-skipper.version>2.2.0.BUILD-SNAPSHOT</spring-cloud-skipper.version>
 
 		<spring-cloud-task.version>2.1.3.BUILD-SNAPSHOT</spring-cloud-task.version>
 
 		<!-- Note: Make sure to update `spring-cloud-build` version and `spring-cloud-dependencies` version (spring-cloud.version)
 			 are in sync with the https://github.com/spring-cloud/spring-cloud-release/blob/master/pom.xml updates for the respective
 			 release versions -->
-		<spring-cloud.version>Greenwich.SR2</spring-cloud.version>
+		<spring-cloud.version>Hoxton.BUILD-SNAPSHOT</spring-cloud.version>
 		<java-cfenv-boot.version>1.1.1.BUILD-SNAPSHOT</java-cfenv-boot.version>
 
 		<spring-cloud-scheduler-spi.version>2.0.1.BUILD-SNAPSHOT</spring-cloud-scheduler-spi.version>

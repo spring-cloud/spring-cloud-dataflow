@@ -19,8 +19,8 @@ package org.springframework.cloud.dataflow.rest.client;
 import java.io.IOException;
 import java.util.List;
 
-import org.springframework.hateoas.VndErrors;
-import org.springframework.hateoas.VndErrors.VndError;
+import org.springframework.hateoas.mediatype.vnderrors.VndErrors;
+import org.springframework.hateoas.mediatype.vnderrors.VndErrors.VndError;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.client.ClientHttpResponse;
 import org.springframework.http.converter.HttpMessageConverter;

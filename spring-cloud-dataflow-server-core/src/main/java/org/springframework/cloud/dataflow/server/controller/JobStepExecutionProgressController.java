@@ -25,8 +25,8 @@ import org.springframework.cloud.dataflow.rest.resource.StepExecutionProgressInf
 import org.springframework.cloud.dataflow.server.batch.JobService;
 import org.springframework.cloud.dataflow.server.batch.NoSuchStepExecutionException;
 import org.springframework.cloud.dataflow.server.job.support.StepExecutionProgressInfo;
-import org.springframework.hateoas.ExposesResourceFor;
-import org.springframework.hateoas.mvc.ResourceAssemblerSupport;
+import org.springframework.hateoas.server.ExposesResourceFor;
+import org.springframework.hateoas.server.mvc.RepresentationModelAssemblerSupport;
 import org.springframework.http.HttpStatus;
 import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -85,7 +85,7 @@ public class JobStepExecutionProgressController {
 			}
 			String jobName = stepExecution.getJobExecution().getJobInstance().getJobName();
 			StepExecutionHistory stepExecutionHistory = computeHistory(jobName, stepName);
-			return stepAssembler.toResource(new StepExecutionProgressInfo(stepExecution, stepExecutionHistory));
+			return stepAssembler.toModel(new StepExecutionProgressInfo(stepExecution, stepExecutionHistory));
 		}
 		catch (NoSuchStepExecutionException e) {
 			throw new NoSuchStepExecutionException(String.valueOf(stepExecutionId));
@@ -114,24 +114,24 @@ public class JobStepExecutionProgressController {
 	}
 
 	/**
-	 * {@link org.springframework.hateoas.ResourceAssembler} implementation that converts
+	 * {@link org.springframework.hateoas.server.ResourceAssembler} implementation that converts
 	 * {@link StepExecutionProgressInfo}s to a {@link StepExecutionProgressInfoResource}.
 	 */
 	private static class Assembler
-			extends ResourceAssemblerSupport<StepExecutionProgressInfo, StepExecutionProgressInfoResource> {
+			extends RepresentationModelAssemblerSupport<StepExecutionProgressInfo, StepExecutionProgressInfoResource> {
 
 		public Assembler() {
 			super(JobStepExecutionProgressController.class, StepExecutionProgressInfoResource.class);
 		}
 
 		@Override
-		public StepExecutionProgressInfoResource toResource(StepExecutionProgressInfo entity) {
-			return createResourceWithId(entity.getStepExecutionId(), entity,
+		public StepExecutionProgressInfoResource toModel(StepExecutionProgressInfo entity) {
+			return createModelWithId(entity.getStepExecutionId(), entity,
 					entity.getStepExecution().getJobExecutionId());
 		}
 
 		@Override
-		protected StepExecutionProgressInfoResource instantiateResource(StepExecutionProgressInfo entity) {
+		protected StepExecutionProgressInfoResource instantiateModel(StepExecutionProgressInfo entity) {
 			return new StepExecutionProgressInfoResource(entity.getStepExecution(), entity.getStepExecutionHistory(),
 					entity.getEstimatedPercentComplete(), entity.isFinished(), entity.getDuration());
 		}

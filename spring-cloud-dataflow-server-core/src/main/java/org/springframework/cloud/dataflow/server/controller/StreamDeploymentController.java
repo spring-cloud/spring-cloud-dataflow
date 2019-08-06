@@ -36,8 +36,8 @@ import org.springframework.cloud.dataflow.server.service.StreamService;
 import org.springframework.cloud.deployer.spi.app.DeploymentState;
 import org.springframework.cloud.skipper.domain.Deployer;
 import org.springframework.cloud.skipper.domain.Release;
-import org.springframework.hateoas.ExposesResourceFor;
-import org.springframework.hateoas.mvc.ResourceAssemblerSupport;
+import org.springframework.hateoas.server.ExposesResourceFor;
+import org.springframework.hateoas.server.mvc.RepresentationModelAssemblerSupport;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.Assert;
@@ -167,7 +167,7 @@ public class StreamDeploymentController {
 			final DeploymentStateResource deploymentStateResource = ControllerUtils.mapState(deploymentState);
 			status = deploymentStateResource.getKey();
 		}
-		return new Assembler(streamDefinition.getDslText(), status).toResource(streamDeployment);
+		return new Assembler(streamDefinition.getDslText(), status).toModel(streamDeployment);
 	}
 
 	/**
@@ -185,10 +185,10 @@ public class StreamDeploymentController {
 	}
 
 	/**
-	 * {@link org.springframework.hateoas.ResourceAssembler} implementation that converts
+	 * {@link org.springframework.hateoas.server.ResourceAssembler} implementation that converts
 	 * {@link StreamDeployment}s to {@link StreamDeploymentResource}s.
 	 */
-	class Assembler extends ResourceAssemblerSupport<StreamDeployment, StreamDeploymentResource> {
+	class Assembler extends RepresentationModelAssemblerSupport<StreamDeployment, StreamDeploymentResource> {
 
 		private final String dslText;
 
@@ -201,9 +201,9 @@ public class StreamDeploymentController {
 		}
 
 		@Override
-		public StreamDeploymentResource toResource(StreamDeployment streamDeployment) {
+		public StreamDeploymentResource toModel(StreamDeployment streamDeployment) {
 			try {
-				return createResourceWithId(streamDeployment.getStreamName(), streamDeployment);
+				return createModelWithId(streamDeployment.getStreamName(), streamDeployment);
 			}
 			catch (IllegalStateException e) {
 				logger.warn("Failed to create StreamDeploymentResource. " + e.getMessage());
@@ -212,7 +212,7 @@ public class StreamDeploymentController {
 		}
 
 		@Override
-		public StreamDeploymentResource instantiateResource(StreamDeployment streamDeployment) {
+		public StreamDeploymentResource instantiateModel(StreamDeployment streamDeployment) {
 			String deploymentProperties = "";
 			if (StringUtils.hasText(streamDeployment.getDeploymentProperties()) && canDisplayDeploymentProperties()) {
 				deploymentProperties = streamDeployment.getDeploymentProperties();

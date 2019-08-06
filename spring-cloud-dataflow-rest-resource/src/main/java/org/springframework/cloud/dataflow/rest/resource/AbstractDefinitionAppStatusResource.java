@@ -19,14 +19,14 @@ package org.springframework.cloud.dataflow.rest.resource;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.springframework.hateoas.ResourceSupport;
+import org.springframework.hateoas.RepresentationModel;
 
 /**
  * Resource representing the status of an app in a definition.
  *
  * @author Glenn Renfro
  */
-public abstract class AbstractDefinitionAppStatusResource extends ResourceSupport {
+public abstract class AbstractDefinitionAppStatusResource<T extends RepresentationModel<? extends T>> extends RepresentationModel<T> {
 
 	private String appName;
 	private String  dsl;

@@ -20,8 +20,8 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.springframework.hateoas.PagedResources;
-import org.springframework.hateoas.ResourceSupport;
+import org.springframework.hateoas.PagedModel;
+import org.springframework.hateoas.RepresentationModel;
 import org.springframework.util.Assert;
 
 /**
@@ -29,7 +29,7 @@ import org.springframework.util.Assert;
  *
  * @author Glenn Renfro
  */
-public class ScheduleInfoResource extends ResourceSupport {
+public class ScheduleInfoResource extends RepresentationModel<ScheduleInfoResource> {
 
 	/**
 	 * The name to be associated with the Schedule instance.
@@ -88,6 +88,6 @@ public class ScheduleInfoResource extends ResourceSupport {
 		this.scheduleProperties.putAll(scheduleProperties);
 	}
 
-	public static class Page extends PagedResources<ScheduleInfoResource> {
+	public static class Page extends PagedModel<ScheduleInfoResource> {
 	}
 }

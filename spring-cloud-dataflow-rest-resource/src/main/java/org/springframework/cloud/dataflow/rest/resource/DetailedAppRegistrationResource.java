@@ -20,7 +20,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.boot.configurationmetadata.ConfigurationMetadataProperty;
-import org.springframework.hateoas.PagedResources;
+import org.springframework.hateoas.PagedModel;
 
 /**
  * Extension of {@link AppRegistrationResource} that contains application options and
@@ -112,7 +112,7 @@ public class DetailedAppRegistrationResource extends AppRegistrationResource {
 	/**
 	 * Dedicated subclass to workaround type erasure.
 	 */
-	public static class Page extends PagedResources<DetailedAppRegistrationResource> {
+	public static class Page extends PagedModel<DetailedAppRegistrationResource> {
 	}
 
 }

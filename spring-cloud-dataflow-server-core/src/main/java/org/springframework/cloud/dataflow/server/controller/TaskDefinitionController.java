@@ -37,9 +37,9 @@ import org.springframework.cloud.task.repository.TaskExplorer;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PagedResourcesAssembler;
-import org.springframework.hateoas.ExposesResourceFor;
-import org.springframework.hateoas.PagedResources;
-import org.springframework.hateoas.mvc.ResourceAssemblerSupport;
+import org.springframework.hateoas.PagedModel;
+import org.springframework.hateoas.server.ExposesResourceFor;
+import org.springframework.hateoas.server.mvc.RepresentationModelAssemblerSupport;
 import org.springframework.http.HttpStatus;
 import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -111,7 +111,7 @@ public class TaskDefinitionController {
 	public TaskDefinitionResource save(@RequestParam("name") String name, @RequestParam("definition") String dsl) {
 		TaskDefinition taskDefinition = new TaskDefinition(name, dsl);
 		taskSaveService.saveTaskDefinition(name, dsl);
-		return taskAssembler.toResource(new TaskExecutionAwareTaskDefinition(taskDefinition));
+		return taskAssembler.toModel(new TaskExecutionAwareTaskDefinition(taskDefinition));
 	}
 
 	/**
@@ -145,7 +145,7 @@ public class TaskDefinitionController {
 	 */
 	@RequestMapping(value = "", method = RequestMethod.GET)
 	@ResponseStatus(HttpStatus.OK)
-	public PagedResources<TaskDefinitionResource> list(Pageable pageable, @RequestParam(required = false) String search,
+	public PagedModel<TaskDefinitionResource> list(Pageable pageable, @RequestParam(required = false) String search,
 			PagedResourcesAssembler<TaskExecutionAwareTaskDefinition> assembler) {
 
 		final Page<TaskDefinition> taskDefinitions;
@@ -175,7 +175,7 @@ public class TaskDefinitionController {
 		final Page<TaskExecutionAwareTaskDefinition> taskExecutionAwareTaskDefinitions = taskDefinitions
 				.map(new TaskDefinitionConverter(taskExecutions));
 
-		return assembler.toResource(taskExecutionAwareTaskDefinitions, taskAssembler);
+		return assembler.toModel(taskExecutionAwareTaskDefinitions, taskAssembler);
 	}
 
 	/**
@@ -192,31 +192,31 @@ public class TaskDefinitionController {
 		final TaskExecution taskExecution = this.explorer.getLatestTaskExecutionForTaskName(name);
 
 		if (taskExecution != null) {
-			return taskAssembler.toResource(new TaskExecutionAwareTaskDefinition(definition, taskExecution));
+			return taskAssembler.toModel(new TaskExecutionAwareTaskDefinition(definition, taskExecution));
 		}
 		else {
-			return taskAssembler.toResource(new TaskExecutionAwareTaskDefinition(definition));
+			return taskAssembler.toModel(new TaskExecutionAwareTaskDefinition(definition));
 		}
 	}
 
 	/**
-	 * {@link org.springframework.hateoas.ResourceAssembler} implementation that converts
+	 * {@link org.springframework.hateoas.server.ResourceAssembler} implementation that converts
 	 * {@link TaskDefinition}s to {@link TaskDefinitionResource}s.
 	 */
-	class Assembler extends ResourceAssemblerSupport<TaskExecutionAwareTaskDefinition, TaskDefinitionResource> {
+	class Assembler extends RepresentationModelAssemblerSupport<TaskExecutionAwareTaskDefinition, TaskDefinitionResource> {
 
 		public Assembler() {
 			super(TaskDefinitionController.class, TaskDefinitionResource.class);
 		}
 
 		@Override
-		public TaskDefinitionResource toResource(TaskExecutionAwareTaskDefinition taskExecutionAwareTaskDefinition) {
-			return createResourceWithId(taskExecutionAwareTaskDefinition.getTaskDefinition().getName(),
+		public TaskDefinitionResource toModel(TaskExecutionAwareTaskDefinition taskExecutionAwareTaskDefinition) {
+			return createModelWithId(taskExecutionAwareTaskDefinition.getTaskDefinition().getName(),
 					taskExecutionAwareTaskDefinition);
 		}
 
 		@Override
-		public TaskDefinitionResource instantiateResource(
+		public TaskDefinitionResource instantiateModel(
 				TaskExecutionAwareTaskDefinition taskExecutionAwareTaskDefinition) {
 			boolean composed = TaskServiceUtils
 					.isComposedTaskDefinition(taskExecutionAwareTaskDefinition.getTaskDefinition().getDslText());

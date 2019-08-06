@@ -19,7 +19,7 @@ package org.springframework.cloud.dataflow.rest.resource.security;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.springframework.hateoas.ResourceSupport;
+import org.springframework.hateoas.RepresentationModel;
 
 /**
  * Provides security related meta-information. E.g. is security enabled, username, roles
@@ -27,7 +27,7 @@ import org.springframework.hateoas.ResourceSupport;
  *
  * @author Gunnar Hillert
  */
-public class SecurityInfoResource extends ResourceSupport {
+public class SecurityInfoResource extends RepresentationModel {
 
 	private boolean authenticationEnabled;
 

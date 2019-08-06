@@ -43,8 +43,8 @@ import org.springframework.cloud.skipper.domain.Info;
 import org.springframework.cloud.skipper.domain.PackageMetadata;
 import org.springframework.cloud.skipper.domain.Status;
 import org.springframework.cloud.skipper.domain.StatusCode;
+import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.Link;
-import org.springframework.hateoas.Resources;
 import org.springframework.http.MediaType;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.annotation.DirtiesContext.ClassMode;
@@ -115,7 +115,7 @@ public class AuditRecordControllerTests {
 		when(skipperClient.status(ArgumentMatchers.anyString())).thenReturn(info);
 
 		when(skipperClient.search(ArgumentMatchers.anyString(), ArgumentMatchers.eq(false)))
-				.thenReturn(new Resources(new ArrayList<PackageMetadata>(), new Link[0]));
+				.thenReturn(new CollectionModel(new ArrayList<PackageMetadata>(), new Link[0]));
 
 		startDate = ZonedDateTime.now();
 

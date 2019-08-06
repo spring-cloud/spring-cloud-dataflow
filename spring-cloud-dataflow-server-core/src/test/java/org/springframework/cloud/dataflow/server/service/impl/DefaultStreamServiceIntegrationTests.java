@@ -59,7 +59,7 @@ import org.springframework.cloud.skipper.domain.Release;
 import org.springframework.cloud.skipper.domain.RollbackRequest;
 import org.springframework.cloud.skipper.domain.UpgradeRequest;
 import org.springframework.cloud.skipper.domain.UploadRequest;
-import org.springframework.hateoas.Resources;
+import org.springframework.hateoas.CollectionModel;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
@@ -107,7 +107,7 @@ public class DefaultStreamServiceIntegrationTests {
 	@After
 	public void destroyStream() {
 		when(this.skipperClient.search(anyString(), anyBoolean()))
-				.thenReturn(new Resources<>(Collections.singletonList(new PackageMetadata())));
+				.thenReturn(new CollectionModel<>(Collections.singletonList(new PackageMetadata())));
 		streamService.undeployStream("ticktock");
 		streamDefinitionRepository.deleteAll();
 	}

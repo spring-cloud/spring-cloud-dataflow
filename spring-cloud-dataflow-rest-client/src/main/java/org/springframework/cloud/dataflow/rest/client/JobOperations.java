@@ -21,7 +21,7 @@ import org.springframework.cloud.dataflow.rest.resource.JobExecutionThinResource
 import org.springframework.cloud.dataflow.rest.resource.JobInstanceResource;
 import org.springframework.cloud.dataflow.rest.resource.StepExecutionProgressInfoResource;
 import org.springframework.cloud.dataflow.rest.resource.StepExecutionResource;
-import org.springframework.hateoas.PagedResources;
+import org.springframework.hateoas.PagedModel;
 
 /**
  * Interface defining operations available for jobs.
@@ -33,18 +33,18 @@ public interface JobOperations {
 	/**
 	 * @return the list job executions known to the system.
 	 */
-	PagedResources<JobExecutionResource> executionList();
+	PagedModel<JobExecutionResource> executionList();
 
 	/**
 	 * @return the list job executions without step executions known to the system.
 	 */
-	PagedResources<JobExecutionThinResource> executionThinList();
+	PagedModel<JobExecutionThinResource> executionThinList();
 
 	/**
 	 * @param jobName the name of the job
 	 * @return the list job instances for the specified jobName.
 	 */
-	PagedResources<JobInstanceResource> instanceList(String jobName);
+	PagedModel<JobInstanceResource> instanceList(String jobName);
 
 	/**
 	 * List job executions without step executions known to the system filtered by job name.
@@ -52,7 +52,7 @@ public interface JobOperations {
 	 * @param jobName of the executions.
 	 * @return the list of job executions
 	 */
-	PagedResources<JobExecutionThinResource> executionThinListByJobName(String jobName);
+	PagedModel<JobExecutionThinResource> executionThinListByJobName(String jobName);
 
 	/**
 	 * List job executions known to the system filtered by job name.
@@ -60,7 +60,7 @@ public interface JobOperations {
 	 * @param jobName of the executions.
 	 * @return the list of job executions
 	 */
-	PagedResources<JobExecutionResource> executionListByJobName(String jobName);
+	PagedModel<JobExecutionResource> executionListByJobName(String jobName);
 
 
 	/**
@@ -85,7 +85,7 @@ public interface JobOperations {
 	 * @param jobExecutionId the id of the job execution.
 	 * @return the paged list of step executions
 	 */
-	PagedResources<StepExecutionResource> stepExecutionList(long jobExecutionId);
+	PagedModel<StepExecutionResource> stepExecutionList(long jobExecutionId);
 
 	/**
 	 * Return StepExecutionProgressInfoResource for a specific job execution id and step

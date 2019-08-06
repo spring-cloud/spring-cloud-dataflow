@@ -24,8 +24,8 @@ import java.util.List;
 import org.springframework.batch.core.JobExecution;
 import org.springframework.cloud.dataflow.rest.job.TaskJobExecutionRel;
 import org.springframework.cloud.task.repository.TaskExecution;
-import org.springframework.hateoas.PagedResources;
-import org.springframework.hateoas.ResourceSupport;
+import org.springframework.hateoas.PagedModel;
+import org.springframework.hateoas.RepresentationModel;
 import org.springframework.util.Assert;
 
 /**
@@ -35,7 +35,7 @@ import org.springframework.util.Assert;
  * @author Gunnar Hillert
  * @author Ilayaperumal Gopinathan
  */
-public class TaskExecutionResource extends ResourceSupport {
+public class TaskExecutionResource extends RepresentationModel<TaskExecutionResource> {
 
 	/**
 	 * The unique id associated with the task execution.
@@ -220,6 +220,6 @@ public class TaskExecutionResource extends ResourceSupport {
 		}
 	}
 
-	public static class Page extends PagedResources<TaskExecutionResource> {
+	public static class Page extends PagedModel<TaskExecutionResource> {
 	}
 }

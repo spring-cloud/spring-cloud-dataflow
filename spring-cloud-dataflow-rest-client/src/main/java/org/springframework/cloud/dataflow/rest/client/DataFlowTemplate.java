@@ -42,9 +42,9 @@ import org.springframework.cloud.dataflow.rest.resource.RootResource;
 import org.springframework.cloud.dataflow.rest.resource.about.AboutResource;
 import org.springframework.cloud.dataflow.rest.support.jackson.ExecutionContextJacksonMixIn;
 import org.springframework.hateoas.Link;
-import org.springframework.hateoas.ResourceSupport;
+import org.springframework.hateoas.RepresentationModel;
 import org.springframework.hateoas.UriTemplate;
-import org.springframework.hateoas.hal.Jackson2HalModule;
+import org.springframework.hateoas.mediatype.hal.Jackson2HalModule;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.util.Assert;
@@ -172,7 +172,7 @@ public class DataFlowTemplate implements DataFlowOperations {
 						Version.REVISION, serverRevision, downloadURL));
 			}
 
-			this.aboutOperations = new AboutTemplate(restTemplate, resourceSupport.getLink(AboutTemplate.ABOUT_REL));
+			this.aboutOperations = new AboutTemplate(restTemplate, resourceSupport.getLink(AboutTemplate.ABOUT_REL).get());
 
 			if (resourceSupport.hasLink(StreamTemplate.DEFINITIONS_REL)) {
 				this.streamOperations = new StreamTemplate(restTemplate, resourceSupport, getVersion());
@@ -199,7 +199,7 @@ public class DataFlowTemplate implements DataFlowOperations {
 			}
 			this.appRegistryOperations = new AppRegistryTemplate(restTemplate, resourceSupport);
 			this.completionOperations = new CompletionTemplate(restTemplate,
-					resourceSupport.getLink("completions/stream"), resourceSupport.getLink("completions/task"));
+					resourceSupport.getLink("completions/stream").get(), resourceSupport.getLink("completions/task").get());
 		}
 		else {
 			this.aboutOperations = null;
@@ -295,8 +295,8 @@ public class DataFlowTemplate implements DataFlowOperations {
 		return prepareRestTemplate(null);
 	}
 
-	public Link getLink(ResourceSupport resourceSupport, String rel) {
-		Link link = resourceSupport.getLink(rel);
+	public Link getLink(RepresentationModel<?> resourceSupport, String rel) {
+		Link link = resourceSupport.getLink(rel).get();
 		if (link == null) {
 			throw new DataFlowServerException(
 					"Server did not return a link for '" + rel + "', links: '" + resourceSupport + "'");

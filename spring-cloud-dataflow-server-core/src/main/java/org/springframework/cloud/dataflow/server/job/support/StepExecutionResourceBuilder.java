@@ -33,7 +33,7 @@ import org.springframework.util.Assert;
  */
 public class StepExecutionResourceBuilder {
 
-	static public StepExecutionResource toResource(StepExecution entity) {
+	static public StepExecutionResource toModel(StepExecution entity) {
 		return new StepExecutionResource(entity.getJobExecution().getId(), entity, generateStepType(entity));
 	}
 

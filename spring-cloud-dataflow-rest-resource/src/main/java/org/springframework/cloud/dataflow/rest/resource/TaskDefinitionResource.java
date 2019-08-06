@@ -17,8 +17,8 @@ package org.springframework.cloud.dataflow.rest.resource;
 
 import org.springframework.cloud.dataflow.core.TaskDefinition;
 import org.springframework.cloud.task.repository.TaskExecution;
-import org.springframework.hateoas.PagedResources;
-import org.springframework.hateoas.ResourceSupport;
+import org.springframework.hateoas.PagedModel;
+import org.springframework.hateoas.RepresentationModel;
 
 /**
  * A HATEOAS representation of a {@link TaskDefinition}.
@@ -27,7 +27,7 @@ import org.springframework.hateoas.ResourceSupport;
  * @author Glenn Renfro
  * @author Gunnar Hillert
  */
-public class TaskDefinitionResource extends ResourceSupport {
+public class TaskDefinitionResource extends RepresentationModel<TaskDefinitionResource> {
 
 	private String name;
 
@@ -109,6 +109,6 @@ public class TaskDefinitionResource extends ResourceSupport {
 		this.lastTaskExecution = lastTaskExecution;
 	}
 
-	public static class Page extends PagedResources<TaskDefinitionResource> {
+	public static class Page extends PagedModel<TaskDefinitionResource> {
 	}
 }

@@ -21,7 +21,7 @@ import java.util.Map;
 
 import org.springframework.cloud.dataflow.rest.resource.ScheduleInfoResource;
 import org.springframework.cloud.scheduler.spi.core.ScheduleInfo;
-import org.springframework.hateoas.PagedResources;
+import org.springframework.hateoas.PagedModel;
 
 /**
  * Interface defining operations available against schedules.
@@ -63,14 +63,14 @@ public interface SchedulerOperations {
 	 * @param taskDefinitionName to retrieve Schedules for a specified taskDefinitionName.
 	 * @return A List of Schedules configured for the provided taskDefinitionName.
 	 */
-	PagedResources<ScheduleInfoResource> list(String taskDefinitionName) ;
+	PagedModel<ScheduleInfoResource> list(String taskDefinitionName) ;
 
 	/**
 	 * List all of the schedules registered with the system.
 	 *
 	 * @return A List of Schedules for the given system.
 	 */
-	PagedResources<ScheduleInfoResource> list();
+	PagedModel<ScheduleInfoResource> list();
 
 	/**
 	 * Retrieves the {@link ScheduleInfo} for the specified ScheduleName.

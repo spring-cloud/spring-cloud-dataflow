@@ -44,9 +44,9 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PagedResourcesAssembler;
-import org.springframework.hateoas.ExposesResourceFor;
-import org.springframework.hateoas.PagedResources;
-import org.springframework.hateoas.mvc.ResourceAssemblerSupport;
+import org.springframework.hateoas.PagedModel;
+import org.springframework.hateoas.server.ExposesResourceFor;
+import org.springframework.hateoas.server.mvc.RepresentationModelAssemblerSupport;
 import org.springframework.http.HttpStatus;
 import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -122,11 +122,11 @@ public class TaskExecutionController {
 	 */
 	@RequestMapping(value = "", method = RequestMethod.GET)
 	@ResponseStatus(HttpStatus.OK)
-	public PagedResources<TaskExecutionResource> list(Pageable pageable,
+	public PagedModel<TaskExecutionResource> list(Pageable pageable,
 			PagedResourcesAssembler<TaskJobExecutionRel> assembler) {
 		Page<TaskExecution> taskExecutions = this.explorer.findAll(pageable);
 		Page<TaskJobExecutionRel> result = getPageableRelationships(taskExecutions, pageable);
-		return assembler.toResource(result, this.taskAssembler);
+		return assembler.toModel(result, this.taskAssembler);
 	}
 
 	/**
@@ -139,13 +139,13 @@ public class TaskExecutionController {
 	 */
 	@RequestMapping(value = "", method = RequestMethod.GET, params = "name")
 	@ResponseStatus(HttpStatus.OK)
-	public PagedResources<TaskExecutionResource> retrieveTasksByName(@RequestParam("name") String taskName,
+	public PagedModel<TaskExecutionResource> retrieveTasksByName(@RequestParam("name") String taskName,
 			Pageable pageable, PagedResourcesAssembler<TaskJobExecutionRel> assembler) {
 		this.taskDefinitionRepository.findById(taskName)
 				.orElseThrow(() -> new NoSuchTaskDefinitionException(taskName));
 		Page<TaskExecution> taskExecutions = this.explorer.findTaskExecutionsByName(taskName, pageable);
 		Page<TaskJobExecutionRel> result = getPageableRelationships(taskExecutions, pageable);
-		return assembler.toResource(result, this.taskAssembler);
+		return assembler.toModel(result, this.taskAssembler);
 	}
 
 	/**
@@ -186,7 +186,7 @@ public class TaskExecutionController {
 		taskExecution = sanitizePotentialSensitiveKeys(taskExecution);
 		TaskJobExecutionRel taskJobExecutionRel = new TaskJobExecutionRel(taskExecution,
 				new ArrayList<>(this.explorer.getJobExecutionIdsByTaskExecutionId(taskExecution.getExecutionId())));
-		return this.taskAssembler.toResource(taskJobExecutionRel);
+		return this.taskAssembler.toModel(taskJobExecutionRel);
 	}
 
 	@RequestMapping(value = "/current", method = RequestMethod.GET)
@@ -253,22 +253,22 @@ public class TaskExecutionController {
 	}
 
 	/**
-	 * {@link org.springframework.hateoas.ResourceAssembler} implementation that converts
+	 * {@link org.springframework.hateoas.server.ResourceAssembler} implementation that converts
 	 * {@link TaskJobExecutionRel}s to {@link TaskExecutionResource}s.
 	 */
-	private static class Assembler extends ResourceAssemblerSupport<TaskJobExecutionRel, TaskExecutionResource> {
+	private static class Assembler extends RepresentationModelAssemblerSupport<TaskJobExecutionRel, TaskExecutionResource> {
 
 		public Assembler() {
 			super(TaskExecutionController.class, TaskExecutionResource.class);
 		}
 
 		@Override
-		public TaskExecutionResource toResource(TaskJobExecutionRel taskJobExecutionRel) {
-			return createResourceWithId(taskJobExecutionRel.getTaskExecution().getExecutionId(), taskJobExecutionRel);
+		public TaskExecutionResource toModel(TaskJobExecutionRel taskJobExecutionRel) {
+			return createModelWithId(taskJobExecutionRel.getTaskExecution().getExecutionId(), taskJobExecutionRel);
 		}
 
 		@Override
-		public TaskExecutionResource instantiateResource(TaskJobExecutionRel taskJobExecutionRel) {
+		public TaskExecutionResource instantiateModel(TaskJobExecutionRel taskJobExecutionRel) {
 			return new TaskExecutionResource(taskJobExecutionRel);
 		}
 	}

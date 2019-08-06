@@ -19,7 +19,7 @@ package org.springframework.cloud.dataflow.rest.client;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.springframework.hateoas.VndErrors;
+import org.springframework.hateoas.mediatype.vnderrors.VndErrors;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 

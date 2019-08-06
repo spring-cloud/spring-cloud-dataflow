@@ -33,7 +33,7 @@ import org.springframework.cloud.skipper.domain.PackageIdentifier;
 import org.springframework.cloud.skipper.domain.Release;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.hateoas.Link;
-import org.springframework.hateoas.ResourceSupport;
+import org.springframework.hateoas.RepresentationModel;
 import org.springframework.http.HttpMethod;
 import org.springframework.util.Assert;
 import org.springframework.util.LinkedMultiValueMap;
@@ -75,8 +75,8 @@ public class StreamTemplate implements StreamOperations {
 
 	private final String dataFlowServerVersion;
 
-	StreamTemplate(RestTemplate restTemplate, ResourceSupport resources, String dataFlowServerVersion) {
-		Assert.notNull(resources, "URI Resources can't be null");
+	StreamTemplate(RestTemplate restTemplate, RepresentationModel<?> resources, String dataFlowServerVersion) {
+		Assert.notNull(resources, "URI CollectionModel can't be null");
 		Assert.notNull(resources.getLink(DEFINITIONS_REL), "Definitions relation is required");
 		Assert.notNull(resources.getLink(DEFINITION_REL), "Definition relation is required");
 		Assert.notNull(resources.getLink(DEPLOYMENTS_REL), "Deployments relation is required");
@@ -90,11 +90,11 @@ public class StreamTemplate implements StreamOperations {
 
 		this.dataFlowServerVersion = dataFlowServerVersion;
 		this.restTemplate = restTemplate;
-		this.definitionsLink = resources.getLink(DEFINITIONS_REL);
-		this.deploymentsLink = resources.getLink(DEPLOYMENTS_REL);
-		this.definitionLink = resources.getLink(DEFINITION_REL);
-		this.deploymentLink = resources.getLink(DEPLOYMENT_REL);
-		this.validationLink = resources.getLink(VALIDATION_REL);
+		this.definitionsLink = resources.getLink(DEFINITIONS_REL).get();
+		this.deploymentsLink = resources.getLink(DEPLOYMENTS_REL).get();
+		this.definitionLink = resources.getLink(DEFINITION_REL).get();
+		this.deploymentLink = resources.getLink(DEPLOYMENT_REL).get();
+		this.validationLink = resources.getLink(VALIDATION_REL).get();
 
 	}
 

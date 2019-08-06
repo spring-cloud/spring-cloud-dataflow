@@ -20,9 +20,9 @@ import org.springframework.cloud.dataflow.rest.resource.LauncherResource;
 import org.springframework.cloud.dataflow.server.job.LauncherRepository;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PagedResourcesAssembler;
-import org.springframework.hateoas.ExposesResourceFor;
-import org.springframework.hateoas.PagedResources;
-import org.springframework.hateoas.mvc.ResourceAssemblerSupport;
+import org.springframework.hateoas.PagedModel;
+import org.springframework.hateoas.server.ExposesResourceFor;
+import org.springframework.hateoas.server.mvc.RepresentationModelAssemblerSupport;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -55,28 +55,28 @@ public class TaskPlatformController {
 	 */
 	@RequestMapping(value = "", method = RequestMethod.GET)
 	@ResponseStatus(HttpStatus.OK)
-	public PagedResources<LauncherResource> list(Pageable pageable,
+	public PagedModel<LauncherResource> list(Pageable pageable,
 			PagedResourcesAssembler<Launcher> assembler) {
-		return assembler.toResource(this.launcherRepository.findAll(pageable), this.launcherAssembler);
+		return assembler.toModel(this.launcherRepository.findAll(pageable), this.launcherAssembler);
 	}
 
 	/**
-	 * {@link org.springframework.hateoas.ResourceAssembler} implementation that converts
+	 * {@link org.springframework.hateoas.server.ResourceAssembler} implementation that converts
 	 * {@link Launcher}s to {@link LauncherResource}s.
 	 */
-	private static class Assembler extends ResourceAssemblerSupport<Launcher, LauncherResource> {
+	private static class Assembler extends RepresentationModelAssemblerSupport<Launcher, LauncherResource> {
 
 		public Assembler() {
 			super(TaskPlatformController.class, LauncherResource.class);
 		}
 
 		@Override
-		public LauncherResource toResource(Launcher launcher) {
-			return createResourceWithId(launcher.getId(), launcher);
+		public LauncherResource toModel(Launcher launcher) {
+			return createModelWithId(launcher.getId(), launcher);
 		}
 
 		@Override
-		public LauncherResource instantiateResource(Launcher launcher) {
+		public LauncherResource instantiateModel(Launcher launcher) {
 			return new LauncherResource(launcher);
 		}
 	}

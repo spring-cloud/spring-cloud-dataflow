@@ -28,7 +28,7 @@ import org.springframework.cloud.dataflow.rest.resource.StreamDeploymentResource
 import org.springframework.cloud.skipper.domain.Deployer;
 import org.springframework.cloud.skipper.domain.PackageIdentifier;
 import org.springframework.cloud.skipper.domain.Release;
-import org.springframework.hateoas.PagedResources;
+import org.springframework.hateoas.PagedModel;
 
 /**
  * Interface defining operations available against streams.
@@ -42,7 +42,7 @@ public interface StreamOperations {
 	/**
 	 * @return the list streams known to the system.
 	 */
-	PagedResources<StreamDefinitionResource> list();
+	PagedModel<StreamDefinitionResource> list();
 
 	/**
 	 * @param name the name of the stream

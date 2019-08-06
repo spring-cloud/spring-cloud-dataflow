@@ -17,7 +17,7 @@
 package org.springframework.cloud.dataflow.rest.client;
 
 import org.springframework.cloud.dataflow.rest.resource.AppStatusResource;
-import org.springframework.hateoas.PagedResources;
+import org.springframework.hateoas.PagedModel;
 
 /**
  * Defines operations available for obtaining information about deployed apps.
@@ -30,7 +30,7 @@ public interface RuntimeOperations {
 	/**
 	 * @return the runtime information about all deployed apps.
 	 */
-	PagedResources<AppStatusResource> status();
+	PagedModel<AppStatusResource> status();
 
 	/**
 	 * @param deploymentId the deployment id

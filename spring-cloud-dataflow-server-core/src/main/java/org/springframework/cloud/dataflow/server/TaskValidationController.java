@@ -22,8 +22,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.cloud.dataflow.rest.resource.TaskAppStatusResource;
 import org.springframework.cloud.dataflow.server.service.TaskValidationService;
 import org.springframework.cloud.dataflow.server.service.ValidationStatus;
-import org.springframework.hateoas.ExposesResourceFor;
-import org.springframework.hateoas.mvc.ResourceAssemblerSupport;
+import org.springframework.hateoas.server.ExposesResourceFor;
+import org.springframework.hateoas.server.mvc.RepresentationModelAssemblerSupport;
 import org.springframework.http.HttpStatus;
 import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -36,7 +36,7 @@ import org.springframework.web.bind.annotation.RestController;
  * Controller for operations on {@link ValidationStatus}.
  *
  * @author Glenn Renfro
- * 
+ *
  */
 @RestController
 @RequestMapping("/tasks/validation")
@@ -72,21 +72,21 @@ public class TaskValidationController {
 	public TaskAppStatusResource validate(
 			@PathVariable("name") String name) {
 		ValidationStatus result = this.taskValidationService.validateTask(name);
-		return new Assembler().toResource(result);
+		return new Assembler().toModel(result);
 	}
 
 	/**
-	 * {@link org.springframework.hateoas.ResourceAssembler} implementation that converts
+	 * {@link org.springframework.hateoas.server.ResourceAssembler} implementation that converts
 	 * {@link ValidationStatus}s to {@link TaskAppStatusResource}s.
 	 */
-	class Assembler extends ResourceAssemblerSupport<ValidationStatus, TaskAppStatusResource> {
+	class Assembler extends RepresentationModelAssemblerSupport<ValidationStatus, TaskAppStatusResource> {
 
 		public Assembler() {
 			super(TaskValidationController.class, TaskAppStatusResource.class);
 		}
 
 		@Override
-		public TaskAppStatusResource toResource(ValidationStatus entity) {
+		public TaskAppStatusResource toModel(ValidationStatus entity) {
 			return new TaskAppStatusResource(entity.getDefinitionName(), entity.getDefinitionDsl(), entity.getAppsStatuses());
 		}
 	}
