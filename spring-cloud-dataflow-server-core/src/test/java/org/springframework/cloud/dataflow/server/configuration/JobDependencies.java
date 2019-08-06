@@ -93,7 +93,6 @@ import org.springframework.cloud.task.repository.TaskRepository;
 import org.springframework.cloud.task.repository.support.SimpleTaskExplorer;
 import org.springframework.cloud.task.repository.support.SimpleTaskRepository;
 import org.springframework.cloud.task.repository.support.TaskExecutionDaoFactoryBean;
-import org.springframework.cloud.task.repository.support.TaskRepositoryInitializer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.io.DefaultResourceLoader;
@@ -196,13 +195,6 @@ public class JobDependencies {
 	@Bean
 	public TaskLogsController taskLogsController(TaskExecutionService taskExecutionService) {
 		return new TaskLogsController(taskExecutionService);
-	}
-
-	@Bean
-	public TaskRepositoryInitializer taskExecutionRepository(DataSource dataSource) {
-		TaskRepositoryInitializer taskRepositoryInitializer = new TaskRepositoryInitializer();
-		taskRepositoryInitializer.setDataSource(dataSource);
-		return taskRepositoryInitializer;
 	}
 
 	@Bean
