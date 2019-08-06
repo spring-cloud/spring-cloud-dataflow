@@ -43,8 +43,6 @@ import org.springframework.web.bind.annotation.RestController;
 @ExposesResourceFor(StreamAppStatusResource.class)
 public class StreamValidationController {
 
-	private static final Logger logger = LoggerFactory.getLogger(StreamValidationController.class);
-
 	/**
 	 * The service that is responsible for validating streams.
 	 */

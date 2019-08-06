@@ -66,6 +66,7 @@ public class TaskValidationDocumentation extends BaseDocumentation {
                 responseFields(
                     fieldWithPath("appName").description("The name of a task definition"),
                     fieldWithPath("dsl").description("The dsl of a task definition"),
+                    fieldWithPath("description").description("The description of the task definition"),
                     subsectionWithPath("appStatuses").description("The status of the application instances")
                 )
             ));

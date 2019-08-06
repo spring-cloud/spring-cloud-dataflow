@@ -8,6 +8,3 @@
         created_On datetime2,
         primary key (id)
     );
-
-    alter table stream_definitions add description varchar(255)
-    alter table task_definitions add description varchar(255)

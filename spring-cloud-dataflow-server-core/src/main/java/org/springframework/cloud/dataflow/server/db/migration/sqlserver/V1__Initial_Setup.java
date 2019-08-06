@@ -59,6 +59,7 @@ public class V1__Initial_Setup extends AbstractInitialSetupMigration {
 			"create table stream_definitions (\n" +
 			"  definition_name varchar(255) not null,\n" +
 			"  definition varchar(MAX),\n" +
+			"  description varchar(255),\n" +
 			"  primary key (definition_name)\n" +
 			")";
 
@@ -66,6 +67,7 @@ public class V1__Initial_Setup extends AbstractInitialSetupMigration {
 			"create table task_definitions (\n" +
 			"  definition_name varchar(255) not null,\n" +
 			"  definition varchar(MAX),\n" +
+			"  description varchar(255),\n" +
 			"  primary key (definition_name)\n" +
 			")";
 
