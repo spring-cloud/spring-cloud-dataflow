@@ -18,13 +18,14 @@ package org.springframework.cloud.dataflow.rest.client;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
 import org.springframework.hateoas.Link;
-import org.springframework.hateoas.ResourceSupport;
+import org.springframework.hateoas.RepresentationModel;
 import org.springframework.web.client.RestTemplate;
 
 import static org.mockito.Mockito.mock;
@@ -76,11 +77,11 @@ public class TaskTemplateTests {
 		Assert.assertFalse(testResource.isLinkRequested(CURRENT_TASK_EXECUTION_LINK));
 	}
 
-	public static class TestResource extends ResourceSupport {
+	public static class TestResource extends RepresentationModel {
 
 		private Map<String, Long> linksRequested = new HashMap<>();
 
-		public Link getLink(String rel) {
+		public Optional<Link> getLink(String rel) {
 			if (this.linksRequested.containsKey(rel)) {
 				Long count = this.linksRequested.get(rel);
 				this.linksRequested.put(rel, count + 1L);
@@ -88,7 +89,8 @@ public class TaskTemplateTests {
 			else {
 				this.linksRequested.put(rel, 1L);
 			}
-			return new Link("foo", "bar");
+
+			return Optional.of(new Link("foo", "bar"));
 		}
 
 		public boolean isLinkRequested(String linkName) {

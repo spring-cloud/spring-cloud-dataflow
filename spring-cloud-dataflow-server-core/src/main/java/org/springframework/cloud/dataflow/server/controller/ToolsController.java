@@ -26,8 +26,8 @@ import org.springframework.cloud.dataflow.core.dsl.TaskValidationException;
 import org.springframework.cloud.dataflow.core.dsl.TaskValidationProblem;
 import org.springframework.cloud.dataflow.core.dsl.graph.Graph;
 import org.springframework.cloud.dataflow.rest.resource.TaskToolsResource;
-import org.springframework.hateoas.ExposesResourceFor;
-import org.springframework.hateoas.mvc.ResourceAssemblerSupport;
+import org.springframework.hateoas.server.ExposesResourceFor;
+import org.springframework.hateoas.server.mvc.RepresentationModelAssemblerSupport;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -78,7 +78,7 @@ public class ToolsController {
 				errors.add(problem.toExceptionDescriptor());
 			}
 		}
-		return taskGraphAssembler.toResource(new ParsedGraphOutput(graph, errors));
+		return taskGraphAssembler.toModel(new ParsedGraphOutput(graph, errors));
 	}
 
 	/**
@@ -97,7 +97,7 @@ public class ToolsController {
 		catch (ParseException pe) {
 			errors.add(pe.toExceptionDescriptor());
 		}
-		return taskDslAssembler.toResource(new GraphToDslOutput(dsl, errors));
+		return taskDslAssembler.toModel(new GraphToDslOutput(dsl, errors));
 	}
 
 	private static class ParsedGraphOutput {
@@ -123,33 +123,33 @@ public class ToolsController {
 	}
 
 	/**
-	 * {@link org.springframework.hateoas.ResourceAssembler} implementation that converts
+	 * {@link org.springframework.hateoas.server.ResourceAssembler} implementation that converts
 	 * a {@link ParsedGraphOutput} to a {@link TaskToolsResource}.
 	 */
-	static class TaskToolsAssembler extends ResourceAssemblerSupport<ParsedGraphOutput, TaskToolsResource> {
+	static class TaskToolsAssembler extends RepresentationModelAssemblerSupport<ParsedGraphOutput, TaskToolsResource> {
 
 		public TaskToolsAssembler() {
 			super(ToolsController.class, TaskToolsResource.class);
 		}
 
 		@Override
-		public TaskToolsResource toResource(ParsedGraphOutput graph) {
+		public TaskToolsResource toModel(ParsedGraphOutput graph) {
 			return new TaskToolsResource(graph.graph, graph.errors);
 		}
 	}
 
 	/**
-	 * {@link org.springframework.hateoas.ResourceAssembler} implementation that converts
+	 * {@link org.springframework.hateoas.server.ResourceAssembler} implementation that converts
 	 * a {@link GraphToDslOutput} to a {@link TaskToolsResource}.
 	 */
-	static class TaskDslAssembler extends ResourceAssemblerSupport<GraphToDslOutput, TaskToolsResource> {
+	static class TaskDslAssembler extends RepresentationModelAssemblerSupport<GraphToDslOutput, TaskToolsResource> {
 
 		public TaskDslAssembler() {
 			super(ToolsController.class, TaskToolsResource.class);
 		}
 
 		@Override
-		public TaskToolsResource toResource(GraphToDslOutput output) {
+		public TaskToolsResource toModel(GraphToDslOutput output) {
 			return new TaskToolsResource(output.dsl, output.errors);
 		}
 	}

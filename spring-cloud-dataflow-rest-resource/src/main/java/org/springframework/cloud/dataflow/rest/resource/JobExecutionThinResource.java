@@ -32,8 +32,8 @@ import org.springframework.cloud.dataflow.rest.job.TaskJobExecution;
 import org.springframework.cloud.dataflow.rest.job.support.JobUtils;
 import org.springframework.cloud.dataflow.rest.job.support.TimeUtils;
 import org.springframework.cloud.dataflow.rest.util.ArgumentSanitizer;
-import org.springframework.hateoas.PagedResources;
-import org.springframework.hateoas.ResourceSupport;
+import org.springframework.hateoas.PagedModel;
+import org.springframework.hateoas.RepresentationModel;
 import org.springframework.util.Assert;
 
 /**
@@ -43,7 +43,7 @@ import org.springframework.util.Assert;
  *
  * @since 2.0
  */
-public class JobExecutionThinResource extends ResourceSupport {
+public class JobExecutionThinResource extends RepresentationModel<JobExecutionThinResource> {
 
 	private static final String LINE_SEPARATOR = System.getProperty("line.separator");
 
@@ -229,6 +229,6 @@ public class JobExecutionThinResource extends ResourceSupport {
 
 	}
 
-	public static class Page extends PagedResources<JobExecutionThinResource> {
+	public static class Page extends PagedModel<JobExecutionThinResource> {
 	}
 }

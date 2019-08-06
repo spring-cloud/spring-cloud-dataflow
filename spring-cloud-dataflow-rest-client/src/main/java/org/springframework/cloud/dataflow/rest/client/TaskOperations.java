@@ -27,7 +27,7 @@ import org.springframework.cloud.dataflow.rest.resource.LauncherResource;
 import org.springframework.cloud.dataflow.rest.resource.TaskAppStatusResource;
 import org.springframework.cloud.dataflow.rest.resource.TaskDefinitionResource;
 import org.springframework.cloud.dataflow.rest.resource.TaskExecutionResource;
-import org.springframework.hateoas.PagedResources;
+import org.springframework.hateoas.PagedModel;
 
 /**
  * Interface defining operations available against tasks.
@@ -42,13 +42,13 @@ public interface TaskOperations {
 	/**
 	 * @return the list tasks known to the system.
 	 */
-	PagedResources<TaskDefinitionResource> list();
+	PagedModel<TaskDefinitionResource> list();
 
 
 	/**
 	 * @return the list of platform accounts for tasks.
 	 */
-	PagedResources<LauncherResource> listPlatforms();
+	PagedModel<LauncherResource> listPlatforms();
 
 	/**
 	 * Create a new task definition
@@ -87,7 +87,7 @@ public interface TaskOperations {
 	/**
 	 * @return the list task executions known to the system.
 	 */
-	PagedResources<TaskExecutionResource> executionList();
+	PagedModel<TaskExecutionResource> executionList();
 
 	/**
 	 * List task executions known to the system filtered by task name.
@@ -95,7 +95,7 @@ public interface TaskOperations {
 	 * @param taskName of the executions.
 	 * @return the paged list of task executions for the given task name
 	 */
-	PagedResources<TaskExecutionResource> executionListByTaskName(String taskName);
+	PagedModel<TaskExecutionResource> executionListByTaskName(String taskName);
 
 	/**
 	 * Return the {@link TaskExecutionResource} for the id specified.
@@ -104,6 +104,23 @@ public interface TaskOperations {
 	 * @return {@link TaskExecutionResource}
 	 */
 	TaskExecutionResource taskExecutionStatus(long id);
+
+	/**
+	 * Return the task execution log.  The platform from which to retrieve the log will be set to {@code default}.
+	 *
+	 * @param externalExecutionId the external execution identifier of the task execution.
+	 * @return {@link String} containing the log.
+	 */
+	String taskExecutionLog(String externalExecutionId);
+
+	/**
+	 * Return the task execution log.
+	 *
+	 * @param externalExecutionId the external execution identifier of the task execution.
+	 * @param platform the platform from which to obtain the log.
+	 * @return {@link String} containing the log.
+	 */
+	String taskExecutionLog(String externalExecutionId, String platform);
 
 	/**
 	 * Return information including the count of currently executing tasks and task execution

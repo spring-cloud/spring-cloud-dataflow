@@ -17,15 +17,15 @@
 package org.springframework.cloud.dataflow.rest.resource;
 
 import org.springframework.cloud.dataflow.core.PlatformTaskExecutionInformation;
-import org.springframework.hateoas.PagedResources;
-import org.springframework.hateoas.ResourceSupport;
+import org.springframework.hateoas.PagedModel;
+import org.springframework.hateoas.RepresentationModel;
 
 /**
  *  A HATEOAS representation of a the currently running task executions and server limits.
  *
  * @author David Turanski
  **/
-public class CurrentTaskExecutionsResource extends ResourceSupport {
+public class CurrentTaskExecutionsResource extends RepresentationModel {
 
 	/**
 	 * The platform instance (account) name.
@@ -86,7 +86,7 @@ public class CurrentTaskExecutionsResource extends ResourceSupport {
 		return resource;
 	}
 
-	public static class Page extends PagedResources<CurrentTaskExecutionsResource> {
+	public static class Page extends PagedModel<CurrentTaskExecutionsResource> {
 	}
 
 }

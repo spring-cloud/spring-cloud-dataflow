@@ -32,7 +32,7 @@ import org.springframework.cloud.dataflow.rest.UpdateStreamRequest;
 import org.springframework.cloud.skipper.domain.PackageIdentifier;
 import org.springframework.cloud.skipper.domain.Release;
 import org.springframework.cloud.skipper.domain.RollbackRequest;
-import org.springframework.hateoas.Resources;
+import org.springframework.hateoas.CollectionModel;
 import org.springframework.http.MediaType;
 
 import static org.mockito.ArgumentMatchers.anyString;
@@ -178,7 +178,7 @@ public class StreamDeploymentsDocumentation extends BaseDocumentation {
 	@Test
 	public void history() throws Exception {
 		when(this.springDataflowServer.getSkipperClient().history(anyString()))
-				.thenReturn(new Resources<>(Arrays.asList(new Release())));
+				.thenReturn(new CollectionModel<>(Arrays.asList(new Release())));
 
 		this.mockMvc.perform(
 				get("/streams/deployments/history/{name}", "timelog1")

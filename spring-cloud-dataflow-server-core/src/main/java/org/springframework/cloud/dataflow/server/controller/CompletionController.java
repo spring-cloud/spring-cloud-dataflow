@@ -24,8 +24,8 @@ import org.springframework.cloud.dataflow.completion.CompletionProposal;
 import org.springframework.cloud.dataflow.completion.StreamCompletionProvider;
 import org.springframework.cloud.dataflow.completion.TaskCompletionProvider;
 import org.springframework.cloud.dataflow.rest.resource.CompletionProposalsResource;
-import org.springframework.hateoas.ExposesResourceFor;
-import org.springframework.hateoas.mvc.ResourceAssemblerSupport;
+import org.springframework.hateoas.server.ExposesResourceFor;
+import org.springframework.hateoas.server.mvc.RepresentationModelAssemblerSupport;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -75,7 +75,7 @@ public class CompletionController {
 	@RequestMapping("/stream")
 	public CompletionProposalsResource completions(@RequestParam("start") String start,
 			@RequestParam(value = "detailLevel", defaultValue = "1") @Min(value = 1, message = "The provided detail level must be greater than zero.") int detailLevel) {
-		return assembler.toResource(completionProvider.complete(start, detailLevel));
+		return assembler.toModel(completionProvider.complete(start, detailLevel));
 	}
 
 	/**
@@ -90,21 +90,21 @@ public class CompletionController {
 	@RequestMapping("/task")
 	public CompletionProposalsResource taskCompletions(@RequestParam("start") String start,
 			@RequestParam(value = "detailLevel", defaultValue = "1") @Min(value = 1, message = "The provided detail level must be greater than zero.") int detailLevel) {
-		return assembler.toResource(taskCompletionProvider.complete(start, detailLevel));
+		return assembler.toModel(taskCompletionProvider.complete(start, detailLevel));
 	}
 
 	/**
-	 * {@link org.springframework.hateoas.ResourceAssembler} implementation that converts
+	 * {@link org.springframework.hateoas.server.ResourceAssembler} implementation that converts
 	 * {@link CompletionProposal}s to {@link CompletionProposalsResource}s.
 	 */
-	static class Assembler extends ResourceAssemblerSupport<List<CompletionProposal>, CompletionProposalsResource> {
+	static class Assembler extends RepresentationModelAssemblerSupport<List<CompletionProposal>, CompletionProposalsResource> {
 
 		public Assembler() {
 			super(CompletionController.class, CompletionProposalsResource.class);
 		}
 
 		@Override
-		public CompletionProposalsResource toResource(List<CompletionProposal> proposals) {
+		public CompletionProposalsResource toModel(List<CompletionProposal> proposals) {
 			CompletionProposalsResource result = new CompletionProposalsResource();
 			for (CompletionProposal proposal : proposals) {
 				result.addProposal(proposal.getText(), proposal.getExplanation());

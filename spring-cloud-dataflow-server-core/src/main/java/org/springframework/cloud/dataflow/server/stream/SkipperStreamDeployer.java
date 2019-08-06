@@ -83,7 +83,7 @@ import org.springframework.cloud.skipper.io.PackageWriter;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
-import org.springframework.hateoas.Resources;
+import org.springframework.hateoas.CollectionModel;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
@@ -267,7 +267,7 @@ public class SkipperStreamDeployer implements StreamDeployer {
 	}
 
 	private String determinePlatformName(final String platformName) {
-		Resources<Deployer> deployerResources = skipperClient.listDeployers();
+		CollectionModel<Deployer> deployerResources = skipperClient.listDeployers();
 		Collection<Deployer> deployers = deployerResources.getContent();
 		if (StringUtils.hasText(platformName)) {
 			List<Deployer> filteredDeployers = deployers.stream()
@@ -446,7 +446,7 @@ public class SkipperStreamDeployer implements StreamDeployer {
 	}
 
 	public void undeployStream(String streamName) {
-		Resources<PackageMetadata> packageMetadataResources = this.skipperClient.search(streamName, false);
+		CollectionModel<PackageMetadata> packageMetadataResources = this.skipperClient.search(streamName, false);
 		if (!packageMetadataResources.getContent().isEmpty()) {
 			try {
 				this.skipperClient.delete(streamName, true);
@@ -517,7 +517,7 @@ public class SkipperStreamDeployer implements StreamDeployer {
 	@Override
 	public RuntimeEnvironmentInfo environmentInfo() {
 		AboutResource skipperInfo = skipperClient.info();
-		Resources<Deployer> deployers = skipperClient.listDeployers();
+		CollectionModel<Deployer> deployers = skipperClient.listDeployers();
 		RuntimeEnvironmentInfo.Builder builder = new RuntimeEnvironmentInfo.Builder()
 				.implementationName(skipperInfo.getVersionInfo().getServer().getName())
 				.implementationVersion(skipperInfo.getVersionInfo().getServer().getVersion())

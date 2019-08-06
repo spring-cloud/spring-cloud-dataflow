@@ -23,8 +23,6 @@ import javax.persistence.Version;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
-import org.springframework.hateoas.Identifiable;
-
 /**
  * Base class for entity implementations. Uses a {@link Long} id.
  *
@@ -32,7 +30,7 @@ import org.springframework.hateoas.Identifiable;
  * @author Gunnar Hillert
  */
 @MappedSuperclass
-public class AbstractEntity implements Identifiable<Long> {
+public class AbstractEntity {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.AUTO)
@@ -47,7 +45,6 @@ public class AbstractEntity implements Identifiable<Long> {
 		this.id = null;
 	}
 
-	@Override
 	public Long getId() {
 		return this.id;
 	}

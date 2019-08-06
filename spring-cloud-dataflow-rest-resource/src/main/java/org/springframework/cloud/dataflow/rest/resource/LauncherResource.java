@@ -17,13 +17,13 @@
 package org.springframework.cloud.dataflow.rest.resource;
 
 import org.springframework.cloud.dataflow.core.Launcher;
-import org.springframework.hateoas.PagedResources;
-import org.springframework.hateoas.ResourceSupport;
+import org.springframework.hateoas.PagedModel;
+import org.springframework.hateoas.RepresentationModel;
 
 /**
  * @author Ilayaperumal Gopinathan
  */
-public class LauncherResource extends ResourceSupport {
+public class LauncherResource extends RepresentationModel<LauncherResource> {
 
 	private String name;
 
@@ -61,7 +61,7 @@ public class LauncherResource extends ResourceSupport {
 		this.description = description;
 	}
 
-	public static class Page extends PagedResources<LauncherResource> {
+	public static class Page extends PagedModel<LauncherResource> {
 
 	}
 }

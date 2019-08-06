@@ -19,8 +19,8 @@ package org.springframework.cloud.dataflow.rest.resource;
 import java.util.Collections;
 import java.util.List;
 
-import org.springframework.hateoas.PagedResources;
-import org.springframework.hateoas.ResourceSupport;
+import org.springframework.hateoas.PagedModel;
+import org.springframework.hateoas.RepresentationModel;
 import org.springframework.util.Assert;
 
 /**
@@ -28,7 +28,7 @@ import org.springframework.util.Assert;
  *
  * @author Glenn Renfro
  */
-public class JobInstanceResource extends ResourceSupport {
+public class JobInstanceResource extends RepresentationModel<JobInstanceResource> {
 
 	private String jobName;
 
@@ -68,6 +68,6 @@ public class JobInstanceResource extends ResourceSupport {
 		return jobExecutions;
 	}
 
-	public static class Page extends PagedResources<JobInstanceResource> {
+	public static class Page extends PagedModel<JobInstanceResource> {
 	}
 }

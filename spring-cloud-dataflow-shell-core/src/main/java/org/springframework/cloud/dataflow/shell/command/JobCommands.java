@@ -30,7 +30,7 @@ import org.springframework.cloud.dataflow.rest.util.ArgumentSanitizer;
 import org.springframework.cloud.dataflow.shell.command.support.OpsType;
 import org.springframework.cloud.dataflow.shell.command.support.RoleType;
 import org.springframework.cloud.dataflow.shell.config.DataFlowShell;
-import org.springframework.hateoas.PagedResources;
+import org.springframework.hateoas.PagedModel;
 import org.springframework.shell.core.CommandMarker;
 import org.springframework.shell.core.annotation.CliAvailabilityIndicator;
 import org.springframework.shell.core.annotation.CliCommand;
@@ -75,7 +75,7 @@ public class JobCommands implements CommandMarker {
 	public Table executionList(
 			@CliOption(key = { "name" }, help = "the job name to be used as a filter", mandatory = false) String name) {
 
-		final PagedResources<JobExecutionThinResource> jobs;
+		final PagedModel<JobExecutionThinResource> jobs;
 		if (name == null) {
 			jobs = jobOperations().executionThinList();
 		}
@@ -171,7 +171,7 @@ public class JobCommands implements CommandMarker {
 	public Table stepExecutionList(@CliOption(key = {
 			"id" }, help = "the job execution id to be used as a filter", mandatory = true) long id) {
 
-		final PagedResources<StepExecutionResource> steps = jobOperations().stepExecutionList(id);
+		final PagedModel<StepExecutionResource> steps = jobOperations().stepExecutionList(id);
 
 		TableModelBuilder<Object> modelBuilder = new TableModelBuilder<>();
 

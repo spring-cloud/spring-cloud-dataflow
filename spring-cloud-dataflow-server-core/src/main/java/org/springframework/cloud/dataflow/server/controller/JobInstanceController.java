@@ -36,9 +36,9 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PagedResourcesAssembler;
-import org.springframework.hateoas.ExposesResourceFor;
-import org.springframework.hateoas.PagedResources;
-import org.springframework.hateoas.mvc.ResourceAssemblerSupport;
+import org.springframework.hateoas.PagedModel;
+import org.springframework.hateoas.server.ExposesResourceFor;
+import org.springframework.hateoas.server.mvc.RepresentationModelAssemblerSupport;
 import org.springframework.http.HttpStatus;
 import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -87,12 +87,12 @@ public class JobInstanceController {
 	 */
 	@RequestMapping(value = "", method = RequestMethod.GET, params = "name")
 	@ResponseStatus(HttpStatus.OK)
-	public PagedResources<JobInstanceResource> list(@RequestParam("name") String jobName, Pageable pageable,
+	public PagedModel<JobInstanceResource> list(@RequestParam("name") String jobName, Pageable pageable,
 			PagedResourcesAssembler<JobInstanceExecutions> assembler) throws NoSuchJobException {
 		List<JobInstanceExecutions> jobInstances = taskJobService.listTaskJobInstancesForJobName(pageable, jobName);
 		Page<JobInstanceExecutions> page = new PageImpl<>(jobInstances, pageable,
 				taskJobService.countJobInstances(jobName));
-		return assembler.toResource(page, jobAssembler);
+		return assembler.toModel(page, jobAssembler);
 	}
 
 	/**
@@ -107,14 +107,14 @@ public class JobInstanceController {
 	@ResponseStatus(HttpStatus.OK)
 	public JobInstanceResource view(@PathVariable("id") long id) throws NoSuchJobInstanceException, NoSuchJobException {
 		JobInstanceExecutions jobInstance = taskJobService.getJobInstance(id);
-		return jobAssembler.toResource(jobInstance);
+		return jobAssembler.toModel(jobInstance);
 	}
 
 	/**
-	 * {@link org.springframework.hateoas.ResourceAssembler} implementation that converts
+	 * {@link org.springframework.hateoas.server.ResourceAssembler} implementation that converts
 	 * {@link JobInstance}s to {@link JobInstanceResource}s.
 	 */
-	private static class Assembler extends ResourceAssemblerSupport<JobInstanceExecutions, JobInstanceResource> {
+	private static class Assembler extends RepresentationModelAssemblerSupport<JobInstanceExecutions, JobInstanceResource> {
 
 		private TimeZone timeZone = TimeUtils.getDefaultTimeZone();
 
@@ -132,12 +132,12 @@ public class JobInstanceController {
 		}
 
 		@Override
-		public JobInstanceResource toResource(JobInstanceExecutions jobInstance) {
-			return createResourceWithId(jobInstance.getJobInstance().getInstanceId(), jobInstance);
+		public JobInstanceResource toModel(JobInstanceExecutions jobInstance) {
+			return createModelWithId(jobInstance.getJobInstance().getInstanceId(), jobInstance);
 		}
 
 		@Override
-		public JobInstanceResource instantiateResource(JobInstanceExecutions jobInstance) {
+		public JobInstanceResource instantiateModel(JobInstanceExecutions jobInstance) {
 			List<JobExecutionResource> jobExecutions = new ArrayList<>();
 			for (TaskJobExecution taskJobExecution : jobInstance.getTaskJobExecutions()) {
 				jobExecutions.add(new JobExecutionResource(taskJobExecution, timeZone));

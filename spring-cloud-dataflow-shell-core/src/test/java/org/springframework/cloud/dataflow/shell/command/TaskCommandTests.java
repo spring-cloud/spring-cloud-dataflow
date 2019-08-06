@@ -129,6 +129,27 @@ public class TaskCommandTests extends AbstractShellIntegrationTest {
 	}
 
 	@Test
+	public void testGetLog() throws Exception{
+		logger.info("Retrieving task execution log");
+		String taskName = generateUniqueStreamOrTaskName();
+		task().create(taskName, "timestamp");
+		task().getTaskExecutionLog(taskName);
+	}
+
+	@Test(expected = IllegalArgumentException.class)
+	public void testGetLogInvalidPlatform() throws Exception{
+		logger.info("Retrieving task execution log");
+		String taskName = generateUniqueStreamOrTaskName();
+		task().create(taskName, "timestamp");
+		task().getTaskExecutionLogInvalidPlatform(taskName);
+	}
+
+	@Test(expected = IllegalArgumentException.class)
+	public void testGetLogInvalidId() throws Exception{
+		task().getTaskExecutionLogInvalidId();
+	}
+
+	@Test
 	public void testTaskLaunchCTRUsingInvalidAltCtrAppName() {
 		testInvalidCTRLaunch("1: timestamp && 2: timestamp", "timesdaftamp",
 				"The 'timesdaftamp' application could not be found.");
@@ -245,8 +266,7 @@ public class TaskCommandTests extends AbstractShellIntegrationTest {
 
 		CommandResult idResult = task().taskExecutionList();
 		Table result = (Table) idResult.getResult();
-
-		long value = (long) result.getModel().getValue(1, 1);
+		long value = (long) result.getModel().getValue(findRowForExecutionId(result, TASK_EXECUTION_ID), 1);
 		logger.info("Looking up id " + value);
 		CommandResult cr = task().taskExecutionStatus(value);
 		assertTrue("task execution status command must be successful", cr.isSuccess());
@@ -339,4 +359,17 @@ public class TaskCommandTests extends AbstractShellIntegrationTest {
 		assertEquals(String.format("Row %d, Column %d should be: %s", row, col, expected),expected,
 			table.getModel().getValue(row, col));
 	}
+
+	private int findRowForExecutionId(Table table, long id) {
+		int result = -1;
+		for(int rowNum = 0; rowNum < table.getModel().getRowCount(); rowNum++) {
+			if(table.getModel().getValue(rowNum, 1).equals(id)) {
+				result = rowNum;
+				break;
+			}
+		}
+		assertTrue("Task Execution Id specified was not found in execution list", id > -1);
+		return result;
+	}
+
 }

@@ -29,9 +29,9 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PagedResourcesAssembler;
-import org.springframework.hateoas.ExposesResourceFor;
-import org.springframework.hateoas.PagedResources;
-import org.springframework.hateoas.mvc.ResourceAssemblerSupport;
+import org.springframework.hateoas.PagedModel;
+import org.springframework.hateoas.server.ExposesResourceFor;
+import org.springframework.hateoas.server.mvc.RepresentationModelAssemblerSupport;
 import org.springframework.http.HttpStatus;
 import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -79,10 +79,10 @@ public class TaskSchedulerController {
 	 */
 	@RequestMapping(value = "", method = RequestMethod.GET)
 	@ResponseStatus(HttpStatus.OK)
-	public PagedResources<ScheduleInfoResource> list(Pageable pageable,
+	public PagedModel<ScheduleInfoResource> list(Pageable pageable,
 			PagedResourcesAssembler<ScheduleInfo> assembler) {
 		List<ScheduleInfo> result = this.schedulerService.list();
-		return assembler.toResource(new PageImpl<>(result, pageable, result.size()), taskAssembler);
+		return assembler.toModel(new PageImpl<>(result, pageable, result.size()), taskAssembler);
 	}
 
 	/**
@@ -98,7 +98,7 @@ public class TaskSchedulerController {
 		if (schedule == null) {
 			throw new NoSuchScheduleException(String.format("Schedule [%s] doesn't exist" , scheduleName));
 		}
-		return taskAssembler.toResource(schedule);
+		return taskAssembler.toModel(schedule);
 	}
 
 	/**
@@ -110,7 +110,7 @@ public class TaskSchedulerController {
 	 * @return a list of Schedules.
 	 */
 	@RequestMapping("/instances/{taskDefinitionName}")
-	public PagedResources<ScheduleInfoResource> filteredList(@PathVariable String taskDefinitionName,
+	public PagedModel<ScheduleInfoResource> filteredList(@PathVariable String taskDefinitionName,
 			PagedResourcesAssembler<ScheduleInfo> assembler) {
 		List<ScheduleInfo> result = this.schedulerService.list(taskDefinitionName);
 		int resultSize = result.size();
@@ -118,7 +118,7 @@ public class TaskSchedulerController {
 				(resultSize == 0) ? resultSize = 1 : resultSize); //handle empty result set
 		Page<ScheduleInfo> page = new PageImpl<>(result, pageable,
 				result.size());
-		return assembler.toResource(page, taskAssembler);
+		return assembler.toModel(page, taskAssembler);
 	}
 
 	/**
@@ -154,22 +154,22 @@ public class TaskSchedulerController {
 	}
 
 	/**
-	 * {@link org.springframework.hateoas.ResourceAssembler} implementation that converts
+	 * {@link org.springframework.hateoas.server.ResourceAssembler} implementation that converts
 	 * {@link ScheduleInfo}s to {@link ScheduleInfoResource}s.
 	 */
-	class Assembler extends ResourceAssemblerSupport<ScheduleInfo, ScheduleInfoResource> {
+	class Assembler extends RepresentationModelAssemblerSupport<ScheduleInfo, ScheduleInfoResource> {
 
 		public Assembler() {
 			super(TaskSchedulerController.class, ScheduleInfoResource.class);
 		}
 
 		@Override
-		public ScheduleInfoResource toResource(ScheduleInfo scheduleInfo) {
-			return createResourceWithId(scheduleInfo.getScheduleName(), scheduleInfo);
+		public ScheduleInfoResource toModel(ScheduleInfo scheduleInfo) {
+			return createModelWithId(scheduleInfo.getScheduleName(), scheduleInfo);
 		}
 
 		@Override
-		public ScheduleInfoResource instantiateResource(ScheduleInfo scheduleInfo) {
+		public ScheduleInfoResource instantiateModel(ScheduleInfo scheduleInfo) {
 			return new ScheduleInfoResource(scheduleInfo.getScheduleName(),
 					scheduleInfo.getTaskDefinitionName(), scheduleInfo.getScheduleProperties());
 		}

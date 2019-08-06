@@ -143,9 +143,9 @@ import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.data.map.repository.config.EnableMapRepositories;
 import org.springframework.data.web.config.EnableSpringDataWebSupport;
-import org.springframework.hateoas.EntityLinks;
-import org.springframework.hateoas.Resources;
+import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.config.EnableHypermediaSupport;
+import org.springframework.hateoas.server.EntityLinks;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 import org.springframework.validation.beanvalidation.MethodValidationPostProcessor;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
@@ -310,7 +310,7 @@ public class TestDependencies extends WebMvcConfigurationSupport {
 		// Handle Skipper List Deployers
 		List<Deployer> deployers = new ArrayList<>();
 		// deployers.add(new Deployer("", "", null));
-		when(skipperClient.listDeployers()).thenReturn(new Resources<>(deployers, new ArrayList<>()));
+		when(skipperClient.listDeployers()).thenReturn(new CollectionModel<>(deployers, new ArrayList<>()));
 
 		return skipperClient;
 	}

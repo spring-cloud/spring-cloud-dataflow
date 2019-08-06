@@ -54,9 +54,9 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PagedResourcesAssembler;
-import org.springframework.hateoas.ExposesResourceFor;
-import org.springframework.hateoas.PagedResources;
-import org.springframework.hateoas.mvc.ResourceAssemblerSupport;
+import org.springframework.hateoas.PagedModel;
+import org.springframework.hateoas.server.ExposesResourceFor;
+import org.springframework.hateoas.server.mvc.RepresentationModelAssemblerSupport;
 import org.springframework.http.HttpStatus;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -123,7 +123,7 @@ public class AppRegistryController {
 	 */
 	@RequestMapping(method = RequestMethod.GET)
 	@ResponseStatus(HttpStatus.OK)
-	public PagedResources<? extends AppRegistrationResource> list(
+	public PagedModel<? extends AppRegistrationResource> list(
 			Pageable pageable,
 			PagedResourcesAssembler<AppRegistration> pagedResourcesAssembler,
 			@RequestParam(value = "type", required = false) ApplicationType type,
@@ -132,7 +132,7 @@ public class AppRegistryController {
 		Page<AppRegistration> pagedRegistrations = this.appRegistryService.findAllByTypeAndNameIsLike(type, search,
 				pageable);
 
-		return pagedResourcesAssembler.toResource(pagedRegistrations, this.assembler);
+		return pagedResourcesAssembler.toModel(pagedRegistrations, this.assembler);
 	}
 
 	/**
@@ -175,7 +175,7 @@ public class AppRegistryController {
 			throw new NoSuchAppRegistrationException(name, type, version);
 		}
 		DetailedAppRegistrationResource result = new DetailedAppRegistrationResource(
-				assembler.toResource(registration));
+				assembler.toModel(registration));
 		List<ConfigurationMetadataProperty> properties = metadataResolver
 				.listProperties(appRegistryService.getAppMetadataResource(registration), allProperties);
 		for (ConfigurationMetadataProperty property : properties) {
@@ -373,7 +373,7 @@ public class AppRegistryController {
 	 */
 	@RequestMapping(method = RequestMethod.POST)
 	@ResponseStatus(HttpStatus.CREATED)
-	public PagedResources<? extends AppRegistrationResource> registerAll(
+	public PagedModel<? extends AppRegistrationResource> registerAll(
 			Pageable pageable,
 			PagedResourcesAssembler<AppRegistration> pagedResourcesAssembler,
 			@RequestParam(value = "uri", required = false) String uri,
@@ -391,7 +391,7 @@ public class AppRegistryController {
 
 		Collections.sort(registrations);
 		prefetchMetadata(registrations);
-		return pagedResourcesAssembler.toResource(new PageImpl<>(registrations, pageable, registrations.size()), this.assembler);
+		return pagedResourcesAssembler.toModel(new PageImpl<>(registrations, pageable, registrations.size()), this.assembler);
 	}
 
 	/**
@@ -413,20 +413,20 @@ public class AppRegistryController {
 		});
 	}
 
-	class Assembler extends ResourceAssemblerSupport<AppRegistration, AppRegistrationResource> {
+	class Assembler extends RepresentationModelAssemblerSupport<AppRegistration, AppRegistrationResource> {
 
 		public Assembler() {
 			super(AppRegistryController.class, AppRegistrationResource.class);
 		}
 
 		@Override
-		public AppRegistrationResource toResource(AppRegistration registration) {
-			return createResourceWithId(String.format("%s/%s/%s", registration.getType(), registration.getName(),
+		public AppRegistrationResource toModel(AppRegistration registration) {
+			return createModelWithId(String.format("%s/%s/%s", registration.getType(), registration.getName(),
 					registration.getVersion()), registration);
 		}
 
 		@Override
-		protected AppRegistrationResource instantiateResource(AppRegistration registration) {
+		protected AppRegistrationResource instantiateModel(AppRegistration registration) {
 			return new AppRegistrationResource(registration.getName(), registration.getType().name(),
 					registration.getVersion(), registration.getUri().toString(), registration.isDefaultVersion());
 		}

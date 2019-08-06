@@ -33,9 +33,9 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PagedResourcesAssembler;
-import org.springframework.hateoas.ExposesResourceFor;
-import org.springframework.hateoas.PagedResources;
-import org.springframework.hateoas.mvc.ResourceAssemblerSupport;
+import org.springframework.hateoas.PagedModel;
+import org.springframework.hateoas.server.ExposesResourceFor;
+import org.springframework.hateoas.server.mvc.RepresentationModelAssemblerSupport;
 import org.springframework.http.HttpStatus;
 import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -86,11 +86,11 @@ public class JobExecutionThinController {
 	 */
 	@RequestMapping(value = "", method = RequestMethod.GET, produces = "application/json")
 	@ResponseStatus(HttpStatus.OK)
-	public PagedResources<JobExecutionThinResource> listJobsOnly(Pageable pageable,
+	public PagedModel<JobExecutionThinResource> listJobsOnly(Pageable pageable,
 			PagedResourcesAssembler<TaskJobExecution> assembler) throws NoSuchJobExecutionException {
 		List<TaskJobExecution> jobExecutions = taskJobService.listJobExecutionsWithStepCount(pageable);
 		Page<TaskJobExecution> page = new PageImpl<>(jobExecutions, pageable, taskJobService.countJobExecutions());
-		return assembler.toResource(page, jobAssembler);
+		return assembler.toModel(page, jobAssembler);
 	}
 	/**
 	 * Retrieve all task job executions with the task name specified
@@ -103,21 +103,21 @@ public class JobExecutionThinController {
 	 */
 	@RequestMapping(value = "", method = RequestMethod.GET, params = "name", produces = "application/json")
 	@ResponseStatus(HttpStatus.OK)
-	public PagedResources<JobExecutionThinResource> retrieveJobsByName(@RequestParam("name") String jobName,
+	public PagedModel<JobExecutionThinResource> retrieveJobsByName(@RequestParam("name") String jobName,
 			Pageable pageable, PagedResourcesAssembler<TaskJobExecution> assembler) throws NoSuchJobException {
 		List<TaskJobExecution> jobExecutions = taskJobService.listJobExecutionsForJobWithStepCount(pageable, jobName);
 		Page<TaskJobExecution> page = new PageImpl<>(jobExecutions, pageable,
 				taskJobService.countJobExecutionsForJob(jobName));
-		return assembler.toResource(page, jobAssembler);
+		return assembler.toModel(page, jobAssembler);
 	}
 
 
 
 	/**
-	 * {@link org.springframework.hateoas.ResourceAssembler} implementation that converts
+	 * {@link org.springframework.hateoas.server.ResourceAssembler} implementation that converts
 	 * {@link JobExecution}s to {@link JobExecutionThinResource}s.
 	 */
-	private static class Assembler extends ResourceAssemblerSupport<TaskJobExecution, JobExecutionThinResource> {
+	private static class Assembler extends RepresentationModelAssemblerSupport<TaskJobExecution, JobExecutionThinResource> {
 
 		private TimeZone timeZone = TimeUtils.getDefaultTimeZone();
 
@@ -135,12 +135,12 @@ public class JobExecutionThinController {
 		}
 
 		@Override
-		public JobExecutionThinResource toResource(TaskJobExecution taskJobExecution) {
-			return createResourceWithId(taskJobExecution.getJobExecution().getId(), taskJobExecution);
+		public JobExecutionThinResource toModel(TaskJobExecution taskJobExecution) {
+			return createModelWithId(taskJobExecution.getJobExecution().getId(), taskJobExecution);
 		}
 
 		@Override
-		public JobExecutionThinResource instantiateResource(TaskJobExecution taskJobExecution) {
+		public JobExecutionThinResource instantiateModel(TaskJobExecution taskJobExecution) {
 			return new JobExecutionThinResource(taskJobExecution, timeZone);
 		}
 	}

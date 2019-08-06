@@ -20,6 +20,7 @@ import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Optional;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.After;
@@ -37,6 +38,7 @@ import org.springframework.cloud.dataflow.rest.Version;
 import org.springframework.cloud.dataflow.rest.job.StepExecutionHistory;
 import org.springframework.cloud.dataflow.rest.resource.RootResource;
 import org.springframework.hateoas.Link;
+import org.springframework.hateoas.LinkRelation;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.web.client.ResourceAccessException;
@@ -48,6 +50,7 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -247,8 +250,10 @@ public class DataflowTemplateTests {
 		Link link = mock(Link.class);
 		when(link.getHref()).thenReturn("https://whereever");
 		when(rootResource.getApiRevision()).thenReturn(Version.REVISION);
-		when(rootResource.hasLink(any())).thenReturn(isLinksActive);
-		when(rootResource.getLink(any())).thenReturn(link);
+		when(rootResource.getLink(any(LinkRelation.class))).thenReturn(Optional.of(link));
+		when(rootResource.hasLink(any(LinkRelation.class))).thenReturn(isLinksActive);
+		when(rootResource.getLink(anyString())).thenReturn(Optional.of(link));
+		when(rootResource.hasLink(anyString())).thenReturn(isLinksActive);
 		when(restTemplate.getForObject(any(),any())).thenReturn(rootResource);
 		List<HttpMessageConverter<?>> converters = new ArrayList<>();
 		converters.add(new MappingJackson2HttpMessageConverter());

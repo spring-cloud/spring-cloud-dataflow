@@ -29,9 +29,9 @@ import org.springframework.cloud.deployer.spi.app.DeploymentState;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PagedResourcesAssembler;
-import org.springframework.hateoas.ExposesResourceFor;
-import org.springframework.hateoas.PagedResources;
-import org.springframework.hateoas.mvc.ResourceAssemblerSupport;
+import org.springframework.hateoas.PagedModel;
+import org.springframework.hateoas.server.ExposesResourceFor;
+import org.springframework.hateoas.server.mvc.RepresentationModelAssemblerSupport;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -62,7 +62,7 @@ public class RuntimeAppInstanceController {
 	}
 
 	@RequestMapping
-	public PagedResources<AppInstanceStatusResource> list(Pageable pageable, @PathVariable String appId,
+	public PagedModel<AppInstanceStatusResource> list(Pageable pageable, @PathVariable String appId,
 			PagedResourcesAssembler<AppInstanceStatus> assembler) {
 		AppStatus status = streamDeployer.getAppStatus(appId);
 		if (status.getState().equals(DeploymentState.unknown)) {
@@ -70,7 +70,7 @@ public class RuntimeAppInstanceController {
 		}
 		List<AppInstanceStatus> appInstanceStatuses = new ArrayList<>(status.getInstances().values());
 		Collections.sort(appInstanceStatuses, RuntimeAppInstanceController.INSTANCE_SORTER);
-		return assembler.toResource(new PageImpl<>(appInstanceStatuses, pageable,
+		return assembler.toModel(new PageImpl<>(appInstanceStatuses, pageable,
 				appInstanceStatuses.size()), new RuntimeAppInstanceController.InstanceAssembler(status));
 	}
 
@@ -84,11 +84,11 @@ public class RuntimeAppInstanceController {
 		if (appInstanceStatus == null) {
 			throw new NoSuchAppInstanceException(instanceId);
 		}
-		return new RuntimeAppInstanceController.InstanceAssembler(status).toResource(appInstanceStatus);
+		return new RuntimeAppInstanceController.InstanceAssembler(status).toModel(appInstanceStatus);
 	}
 
 	static class InstanceAssembler
-			extends ResourceAssemblerSupport<AppInstanceStatus, AppInstanceStatusResource> {
+			extends RepresentationModelAssemblerSupport<AppInstanceStatus, AppInstanceStatusResource> {
 
 		private final AppStatus owningApp;
 
@@ -98,12 +98,12 @@ public class RuntimeAppInstanceController {
 		}
 
 		@Override
-		public AppInstanceStatusResource toResource(AppInstanceStatus entity) {
-			return createResourceWithId("/" + entity.getId(), entity, owningApp.getDeploymentId());
+		public AppInstanceStatusResource toModel(AppInstanceStatus entity) {
+			return createModelWithId("/" + entity.getId(), entity, owningApp.getDeploymentId());
 		}
 
 		@Override
-		protected AppInstanceStatusResource instantiateResource(AppInstanceStatus entity) {
+		protected AppInstanceStatusResource instantiateModel(AppInstanceStatus entity) {
 			return new AppInstanceStatusResource(entity.getId(), ControllerUtils.mapState(entity.getState()).getKey(),
 					entity.getAttributes());
 		}
