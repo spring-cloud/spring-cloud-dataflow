@@ -21,7 +21,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.skipper.client.SkipperClient;
 import org.springframework.cloud.skipper.domain.Repository;
 import org.springframework.cloud.skipper.shell.command.support.TableUtils;
-import org.springframework.hateoas.Resources;
+import org.springframework.hateoas.CollectionModel;
 import org.springframework.shell.standard.ShellComponent;
 import org.springframework.shell.standard.ShellMethod;
 import org.springframework.shell.table.BeanListTableModel;
@@ -45,7 +45,7 @@ public class RepositoryCommands extends AbstractSkipperCommand {
 
 	@ShellMethod(key = "repo list", value = "List package repositories")
 	public Table list() {
-		Resources<Repository> repositoryResources = this.skipperClient.listRepositories();
+		CollectionModel<Repository> repositoryResources = this.skipperClient.listRepositories();
 		LinkedHashMap<String, Object> headers = new LinkedHashMap<>();
 		headers.put("name", "Name");
 		headers.put("url", "URL");

@@ -15,7 +15,7 @@
  */
 package org.springframework.cloud.skipper.domain;
 
-import org.springframework.hateoas.ResourceSupport;
+import org.springframework.hateoas.RepresentationModel;
 
 /**
  * Provides meta-information about the Spring Cloud Skipper server.
@@ -23,7 +23,7 @@ import org.springframework.hateoas.ResourceSupport;
  * @author Janne Valkealahti
  *
  */
-public class AboutResource extends ResourceSupport {
+public class AboutResource extends RepresentationModel {
 
 	private VersionInfo versionInfo = new VersionInfo();
 

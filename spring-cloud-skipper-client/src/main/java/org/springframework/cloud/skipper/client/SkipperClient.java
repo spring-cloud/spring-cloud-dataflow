@@ -31,7 +31,7 @@ import org.springframework.cloud.skipper.domain.RollbackRequest;
 import org.springframework.cloud.skipper.domain.Template;
 import org.springframework.cloud.skipper.domain.UpgradeRequest;
 import org.springframework.cloud.skipper.domain.UploadRequest;
-import org.springframework.hateoas.Resources;
+import org.springframework.hateoas.CollectionModel;
 
 /**
  * The main client side interface to communicate with the Skipper Server.
@@ -63,7 +63,7 @@ public interface SkipperClient {
 	 * @param details boolean flag to fetch all the metadata
 	 * @return the package metadata with the projection set to summary
 	 */
-	Resources<PackageMetadata> search(String name, boolean details);
+	CollectionModel<PackageMetadata> search(String name, boolean details);
 
 	/**
 	 * Install the package
@@ -142,7 +142,7 @@ public interface SkipperClient {
 	 * @param releaseName the release name of the release to search for
 	 * @return the list of all releases by the given name
 	 */
-	Resources<Release> history(String releaseName);
+	CollectionModel<Release> history(String releaseName);
 
 	/**
 	 * Add a new Package Repository.
@@ -166,14 +166,14 @@ public interface SkipperClient {
 	 *
 	 * @return the list of package repositories
 	 */
-	Resources<Repository> listRepositories();
+	CollectionModel<Repository> listRepositories();
 
 	/**
 	 * List Platform Deployers
 	 *
 	 * @return the list of platforms deployers
 	 */
-	Resources<Deployer> listDeployers();
+	CollectionModel<Deployer> listDeployers();
 
 	/**
 	 * Return a status info of a last known release.

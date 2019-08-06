@@ -17,10 +17,10 @@ package org.springframework.cloud.skipper.server.controller.support;
 
 import org.springframework.cloud.skipper.domain.PackageMetadata;
 import org.springframework.cloud.skipper.server.controller.PackageController;
-import org.springframework.hateoas.Resource;
+import org.springframework.hateoas.EntityModel;
 
-import static org.springframework.hateoas.mvc.ControllerLinkBuilder.linkTo;
-import static org.springframework.hateoas.mvc.ControllerLinkBuilder.methodOn;
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
 /**
  * @author Mark Pollack
@@ -28,7 +28,7 @@ import static org.springframework.hateoas.mvc.ControllerLinkBuilder.methodOn;
 public class PackageMetadataResourceAssembler extends SimpleResourceAssembler<PackageMetadata> {
 
 	@Override
-	protected void addLinks(Resource<PackageMetadata> resource) {
+	protected void addLinks(EntityModel<PackageMetadata> resource) {
 		super.addLinks(resource);
 
 		resource.add(linkTo(methodOn(PackageController.class).install(null)).withRel("install"));

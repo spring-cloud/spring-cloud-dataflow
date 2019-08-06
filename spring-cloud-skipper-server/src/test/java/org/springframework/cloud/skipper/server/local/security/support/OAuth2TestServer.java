@@ -16,85 +16,87 @@
 
 package org.springframework.cloud.skipper.server.local.security.support;
 
-import java.security.Principal;
-import java.util.Collections;
-import java.util.Map;
+// import java.security.Principal;
+// import java.util.Collections;
+// import java.util.Map;
 
-import org.springframework.beans.factory.ObjectProvider;
-import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.boot.autoconfigure.integration.IntegrationAutoConfiguration;
-import org.springframework.boot.autoconfigure.jmx.JmxAutoConfiguration;
-import org.springframework.boot.autoconfigure.security.oauth2.authserver.AuthorizationServerProperties;
-import org.springframework.boot.autoconfigure.security.oauth2.authserver.OAuth2AuthorizationServerConfiguration;
-import org.springframework.boot.autoconfigure.session.SessionAutoConfiguration;
-import org.springframework.boot.builder.SpringApplicationBuilder;
-import org.springframework.cloud.deployer.spi.cloudfoundry.CloudFoundryDeployerAutoConfiguration;
-import org.springframework.cloud.deployer.spi.kubernetes.KubernetesAutoConfiguration;
-import org.springframework.cloud.deployer.spi.local.LocalDeployerAutoConfiguration;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
-import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.oauth2.config.annotation.web.configuration.EnableAuthorizationServer;
-import org.springframework.security.oauth2.config.annotation.web.configuration.EnableResourceServer;
-import org.springframework.security.oauth2.config.annotation.web.configuration.ResourceServerConfigurerAdapter;
-import org.springframework.security.oauth2.config.annotation.web.configurers.AuthorizationServerSecurityConfigurer;
-import org.springframework.security.oauth2.provider.client.BaseClientDetails;
-import org.springframework.security.oauth2.provider.token.AccessTokenConverter;
-import org.springframework.security.oauth2.provider.token.TokenStore;
-import org.springframework.util.SocketUtils;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+// import org.springframework.beans.factory.ObjectProvider;
+// import org.springframework.boot.autoconfigure.SpringBootApplication;
+// import org.springframework.boot.autoconfigure.integration.IntegrationAutoConfiguration;
+// import org.springframework.boot.autoconfigure.jmx.JmxAutoConfiguration;
+// import org.springframework.boot.autoconfigure.security.oauth2.authserver.AuthorizationServerProperties;
+// import org.springframework.boot.autoconfigure.security.oauth2.authserver.OAuth2AuthorizationServerConfiguration;
+// import org.springframework.boot.autoconfigure.session.SessionAutoConfiguration;
+// import org.springframework.boot.builder.SpringApplicationBuilder;
+// import org.springframework.cloud.deployer.spi.cloudfoundry.CloudFoundryDeployerAutoConfiguration;
+// import org.springframework.cloud.deployer.spi.kubernetes.KubernetesAutoConfiguration;
+// import org.springframework.cloud.deployer.spi.local.LocalDeployerAutoConfiguration;
+// import org.springframework.context.annotation.Configuration;
+// import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
+// import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+// import org.springframework.security.oauth2.config.annotation.configurers.ClientDetailsServiceConfigurer;
+// import org.springframework.security.oauth2.config.annotation.web.configuration.AuthorizationServerConfigurerAdapter;
+// import org.springframework.security.oauth2.config.annotation.web.configuration.EnableAuthorizationServer;
+// import org.springframework.security.oauth2.config.annotation.web.configuration.EnableResourceServer;
+// import org.springframework.security.oauth2.config.annotation.web.configuration.ResourceServerConfigurerAdapter;
+// import org.springframework.security.oauth2.config.annotation.web.configurers.AuthorizationServerSecurityConfigurer;
+// import org.springframework.security.oauth2.provider.client.BaseClientDetails;
+// import org.springframework.security.oauth2.provider.token.AccessTokenConverter;
+// import org.springframework.security.oauth2.provider.token.TokenStore;
+// import org.springframework.util.SocketUtils;
+// import org.springframework.web.bind.annotation.RequestMapping;
+// import org.springframework.web.bind.annotation.RestController;
 
 /**
  * @author Gunnar Hillert
  */
-@RestController
-@SpringBootApplication(excludeName = { }, exclude = {
-		JmxAutoConfiguration.class,
-		LocalDeployerAutoConfiguration.class,
-		IntegrationAutoConfiguration.class,
-		CloudFoundryDeployerAutoConfiguration.class,
-		KubernetesAutoConfiguration.class,
-		SessionAutoConfiguration.class
-		})
+// @RestController
+// @SpringBootApplication(excludeName = { }, exclude = {
+// 		JmxAutoConfiguration.class,
+// 		LocalDeployerAutoConfiguration.class,
+// 		IntegrationAutoConfiguration.class,
+// 		CloudFoundryDeployerAutoConfiguration.class,
+// 		KubernetesAutoConfiguration.class,
+// 		SessionAutoConfiguration.class
+// 		})
 public class OAuth2TestServer {
 
-	public static void main(String[] args) {
-		new SpringApplicationBuilder(OAuth2TestServer.class)
-				.properties("server.port:" + SocketUtils.findAvailableTcpPort()).build()
-				.run("--debug --spring.config.additional-location=classpath:/org/springframework/cloud/skipper/server/local"
-						+ "/security/support/oauth2TestServerConfig.yml");
-	}
+	// public static void main(String[] args) {
+	// 	new SpringApplicationBuilder(OAuth2TestServer.class)
+	// 			.properties("server.port:" + SocketUtils.findAvailableTcpPort()).build()
+	// 			.run("--debug --spring.config.additional-location=classpath:/org/springframework/cloud/skipper/server/local"
+	// 					+ "/security/support/oauth2TestServerConfig.yml");
+	// }
 
-	@RequestMapping({ "/user", "/me" })
-	public Map<String, String> user(Principal principal) {
-		return Collections.singletonMap("name", principal.getName());
-	}
+	// @RequestMapping({ "/user", "/me" })
+	// public Map<String, String> user(Principal principal) {
+	// 	return Collections.singletonMap("name", principal.getName());
+	// }
 
-	@Configuration
-	@EnableAuthorizationServer
-	protected static class MyOAuth2AuthorizationServerConfiguration extends OAuth2AuthorizationServerConfiguration {
-		public MyOAuth2AuthorizationServerConfiguration(BaseClientDetails details,
-				AuthenticationConfiguration authenticationConfiguration, ObjectProvider<TokenStore> tokenStore,
-				ObjectProvider<AccessTokenConverter> tokenConverter, AuthorizationServerProperties properties)
-				throws Exception {
-			super(details, authenticationConfiguration, tokenStore, tokenConverter, properties);
-		}
+	// @Configuration
+	// @EnableAuthorizationServer
+	// protected static class MyOAuth2AuthorizationServerConfiguration extends OAuth2AuthorizationServerConfiguration {
+	// 	public MyOAuth2AuthorizationServerConfiguration(BaseClientDetails details,
+	// 			AuthenticationConfiguration authenticationConfiguration, ObjectProvider<TokenStore> tokenStore,
+	// 			ObjectProvider<AccessTokenConverter> tokenConverter, AuthorizationServerProperties properties)
+	// 			throws Exception {
+	// 		super(details, authenticationConfiguration, tokenStore, tokenConverter, properties);
+	// 	}
 
-		@Override
-		public void configure(AuthorizationServerSecurityConfigurer security) throws Exception {
-			super.configure(security);
-			security.allowFormAuthenticationForClients();
-		}
-	}
+	// 	@Override
+	// 	public void configure(AuthorizationServerSecurityConfigurer security) throws Exception {
+	// 		super.configure(security);
+	// 		security.allowFormAuthenticationForClients();
+	// 	}
+	// }
 
-	@Configuration
-	@EnableResourceServer
-	protected static class ResourceServerConfiguration extends ResourceServerConfigurerAdapter {
-		@Override
-		public void configure(HttpSecurity http) throws Exception {
-			http.antMatcher("/me").authorizeRequests().anyRequest().authenticated();
-		}
-	}
+	// @Configuration
+	// @EnableResourceServer
+	// protected static class ResourceServerConfiguration extends ResourceServerConfigurerAdapter {
+	// 	@Override
+	// 	public void configure(HttpSecurity http) throws Exception {
+	// 		http.antMatcher("/me").authorizeRequests().anyRequest().authenticated();
+	// 	}
+	// }
 
 }

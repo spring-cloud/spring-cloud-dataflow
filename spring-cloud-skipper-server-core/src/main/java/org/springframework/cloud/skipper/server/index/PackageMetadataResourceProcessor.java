@@ -17,23 +17,23 @@ package org.springframework.cloud.skipper.server.index;
 
 import org.springframework.cloud.skipper.domain.PackageMetadata;
 import org.springframework.cloud.skipper.server.controller.PackageController;
+import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.Link;
-import org.springframework.hateoas.Resource;
-import org.springframework.hateoas.ResourceProcessor;
+import org.springframework.hateoas.server.RepresentationModelProcessor;
 import org.springframework.stereotype.Component;
 
-import static org.springframework.hateoas.mvc.ControllerLinkBuilder.linkTo;
-import static org.springframework.hateoas.mvc.ControllerLinkBuilder.methodOn;
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
 /**
  * @author Mark Pollack
  * @author Ilayaperumal Gopinathan
  */
 @Component
-public class PackageMetadataResourceProcessor implements ResourceProcessor<Resource<PackageMetadata>> {
+public class PackageMetadataResourceProcessor implements RepresentationModelProcessor<EntityModel<PackageMetadata>> {
 
 	@Override
-	public Resource<PackageMetadata> process(Resource<PackageMetadata> packageMetadataResource) {
+	public EntityModel<PackageMetadata> process(EntityModel<PackageMetadata> packageMetadataResource) {
 		Link installLink = linkTo(
 				methodOn(PackageController.class).install(packageMetadataResource.getContent().getId(), null))
 				.withRel("install");

@@ -42,7 +42,7 @@ import org.springframework.cloud.skipper.domain.Release;
 import org.springframework.cloud.skipper.domain.UploadRequest;
 import org.springframework.cloud.skipper.shell.command.support.TableUtils;
 import org.springframework.cloud.skipper.shell.command.support.YmlUtils;
-import org.springframework.hateoas.Resources;
+import org.springframework.hateoas.CollectionModel;
 import org.springframework.shell.standard.ShellComponent;
 import org.springframework.shell.standard.ShellMethod;
 import org.springframework.shell.standard.ShellOption;
@@ -74,7 +74,7 @@ public class PackageCommands extends AbstractSkipperCommand {
 			@ShellOption(help = "wildcard expression to search for the package name", defaultValue = NULL) String name,
 			@ShellOption(help = "boolean to set for more detailed package metadata") boolean details)
 			throws Exception {
-		Resources<PackageMetadata> resources = skipperClient.search(name, details);
+		CollectionModel<PackageMetadata> resources = skipperClient.search(name, details);
 		if (!details) {
 			LinkedHashMap<String, Object> headers = new LinkedHashMap<>();
 			headers.put("name", "Name");

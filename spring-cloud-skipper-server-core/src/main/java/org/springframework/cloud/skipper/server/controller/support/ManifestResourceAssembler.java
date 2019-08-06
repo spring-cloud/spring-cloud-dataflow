@@ -17,10 +17,10 @@ package org.springframework.cloud.skipper.server.controller.support;
 
 import org.springframework.cloud.skipper.domain.Manifest;
 import org.springframework.cloud.skipper.server.controller.ReleaseController;
-import org.springframework.hateoas.Resource;
+import org.springframework.hateoas.EntityModel;
 
-import static org.springframework.hateoas.mvc.ControllerLinkBuilder.linkTo;
-import static org.springframework.hateoas.mvc.ControllerLinkBuilder.methodOn;
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
 /**
  * @author Mark Pollack
@@ -28,7 +28,7 @@ import static org.springframework.hateoas.mvc.ControllerLinkBuilder.methodOn;
 public class ManifestResourceAssembler extends SimpleResourceAssembler<Manifest> {
 
 	@Override
-	protected void addLinks(Resource<Manifest> resource) {
+	protected void addLinks(EntityModel<Manifest> resource) {
 		super.addLinks(resource);
 		resource.add(linkTo(methodOn(ReleaseController.class).status(null)).withRel("status"));
 	}

@@ -17,10 +17,10 @@ package org.springframework.cloud.skipper.server.controller.support;
 
 import org.springframework.cloud.skipper.domain.Release;
 import org.springframework.cloud.skipper.server.controller.ReleaseController;
-import org.springframework.hateoas.Resource;
+import org.springframework.hateoas.EntityModel;
 
-import static org.springframework.hateoas.mvc.ControllerLinkBuilder.linkTo;
-import static org.springframework.hateoas.mvc.ControllerLinkBuilder.methodOn;
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
 /**
  * @author Mark Pollack
@@ -28,7 +28,7 @@ import static org.springframework.hateoas.mvc.ControllerLinkBuilder.methodOn;
 public class ReleaseResourceAssembler extends SimpleResourceAssembler<Release> {
 
 	@Override
-	protected void addLinks(Resource<Release> resource) {
+	protected void addLinks(EntityModel<Release> resource) {
 		super.addLinks(resource);
 		resource.add(linkTo(methodOn(ReleaseController.class).status(null)).withRel("status"));
 	}

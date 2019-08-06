@@ -18,9 +18,9 @@ package org.springframework.cloud.skipper.server.controller.support;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.springframework.hateoas.Resource;
-import org.springframework.hateoas.ResourceAssembler;
-import org.springframework.hateoas.Resources;
+import org.springframework.hateoas.CollectionModel;
+import org.springframework.hateoas.EntityModel;
+import org.springframework.hateoas.server.RepresentationModelAssembler;
 import org.springframework.util.Assert;
 
 /**
@@ -30,7 +30,7 @@ import org.springframework.util.Assert;
  *
  * @author Greg Turnquist
  */
-public class SimpleResourceAssembler<T> implements ResourceAssembler<T, Resource<T>>, ResourcesAssembler<T, Resource<T>> {
+public class SimpleResourceAssembler<T> implements RepresentationModelAssembler<T, EntityModel<T>>, ResourcesAssembler<T, EntityModel<T>> {
 
 	/**
 	 * Converts the given entity into a {@link Resource}.
@@ -39,9 +39,9 @@ public class SimpleResourceAssembler<T> implements ResourceAssembler<T, Resource
 	 * @return a resource for the entity.
 	 */
 	@Override
-	public Resource<T> toResource(T entity) {
+	public EntityModel<T> toModel(T entity) {
 
-		Resource<T> resource = new Resource<T>(entity);
+		EntityModel<T> resource = new EntityModel<T>(entity);
 
 		addLinks(resource);
 
@@ -51,20 +51,20 @@ public class SimpleResourceAssembler<T> implements ResourceAssembler<T, Resource
 	/**
 	 * Converts all given entities into resources and wraps the collection as a resource as well.
 	 *
-	 * @see #toResource(Object)
+	 * @see #toModel(Object)
 	 * @param entities must not be {@literal null}.
 	 * @return {@link Resources} containing {@link Resource} of {@code T}.
 	 */
-	public Resources<Resource<T>> toResources(Iterable<? extends T> entities) {
+	public CollectionModel<EntityModel<T>> toCollectionModel(Iterable<? extends T> entities) {
 
 		Assert.notNull(entities, "Entities must not be null!");
-		List<Resource<T>> result = new ArrayList<Resource<T>>();
+		List<EntityModel<T>> result = new ArrayList<EntityModel<T>>();
 
 		for (T entity : entities) {
-			result.add(toResource(entity));
+			result.add(toModel(entity));
 		}
 
-		Resources<Resource<T>> resources = new Resources<>(result);
+		CollectionModel<EntityModel<T>> resources = new CollectionModel<>(result);
 
 		addLinks(resources);
 
@@ -76,7 +76,7 @@ public class SimpleResourceAssembler<T> implements ResourceAssembler<T, Resource
 	 *
 	 * @param resource
 	 */
-	protected void addLinks(Resource<T> resource) {
+	protected void addLinks(EntityModel<T> resource) {
 		// Default adds no links
 	}
 
@@ -85,7 +85,7 @@ public class SimpleResourceAssembler<T> implements ResourceAssembler<T, Resource
 	 *
 	 * @param resources
 	 */
-	protected void addLinks(Resources<Resource<T>> resources) {
+	protected void addLinks(CollectionModel<EntityModel<T>> resources) {
 		// Default adds no links.
 	}
 }

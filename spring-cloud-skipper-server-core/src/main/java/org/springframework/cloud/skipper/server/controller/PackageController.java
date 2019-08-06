@@ -28,9 +28,9 @@ import org.springframework.cloud.skipper.server.controller.support.ReleaseResour
 import org.springframework.cloud.skipper.server.service.PackageMetadataService;
 import org.springframework.cloud.skipper.server.service.PackageService;
 import org.springframework.cloud.skipper.server.statemachine.SkipperStateMachineService;
-import org.springframework.hateoas.Resource;
-import org.springframework.hateoas.ResourceSupport;
-import org.springframework.hateoas.mvc.ControllerLinkBuilder;
+import org.springframework.hateoas.EntityModel;
+import org.springframework.hateoas.RepresentationModel;
+import org.springframework.hateoas.server.mvc.WebMvcLinkBuilder;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -40,7 +40,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
-import static org.springframework.hateoas.mvc.ControllerLinkBuilder.methodOn;
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
 /**
  * REST controller for Skipper package related operations.
@@ -73,31 +73,31 @@ public class PackageController {
 	public PackageControllerLinksResource resourceLinks() {
 		PackageControllerLinksResource resource = new PackageControllerLinksResource();
 		resource.add(
-				ControllerLinkBuilder.linkTo(methodOn(PackageController.class).upload(null))
+				WebMvcLinkBuilder.linkTo(methodOn(PackageController.class).upload(null))
 						.withRel("upload"));
-		resource.add(ControllerLinkBuilder.linkTo(methodOn(PackageController.class).install(null))
+		resource.add(WebMvcLinkBuilder.linkTo(methodOn(PackageController.class).install(null))
 				.withRel("install"));
-		resource.add(ControllerLinkBuilder.linkTo(methodOn(PackageController.class).install(null, null))
+		resource.add(WebMvcLinkBuilder.linkTo(methodOn(PackageController.class).install(null, null))
 				.withRel("install/id"));
 		return resource;
 	}
 
 	@RequestMapping(path = "/upload", method = RequestMethod.POST)
 	@ResponseStatus(HttpStatus.CREATED)
-	public Resource<PackageMetadata> upload(@RequestBody UploadRequest uploadRequest) {
-		return this.packageMetadataResourceAssembler.toResource(this.packageService.upload(uploadRequest));
+	public EntityModel<PackageMetadata> upload(@RequestBody UploadRequest uploadRequest) {
+		return this.packageMetadataResourceAssembler.toModel(this.packageService.upload(uploadRequest));
 	}
 
 	@RequestMapping(path = "/install", method = RequestMethod.POST)
 	@ResponseStatus(HttpStatus.CREATED)
-	public Resource<Release> install(@RequestBody InstallRequest installRequest) {
-		return this.releaseResourceAssembler.toResource(this.skipperStateMachineService.installRelease(installRequest));
+	public EntityModel<Release> install(@RequestBody InstallRequest installRequest) {
+		return this.releaseResourceAssembler.toModel(this.skipperStateMachineService.installRelease(installRequest));
 	}
 
 	@RequestMapping(path = "/install/{id}", method = RequestMethod.POST)
 	@ResponseStatus(HttpStatus.CREATED)
-	public Resource<Release> install(@PathVariable("id") Long id, @RequestBody InstallProperties installProperties) {
-		return this.releaseResourceAssembler.toResource(this.skipperStateMachineService.installRelease(id, installProperties));
+	public EntityModel<Release> install(@PathVariable("id") Long id, @RequestBody InstallProperties installProperties) {
+		return this.releaseResourceAssembler.toModel(this.skipperStateMachineService.installRelease(id, installProperties));
 	}
 
 	@RequestMapping(path = "/{name}", method = RequestMethod.DELETE)
@@ -124,7 +124,7 @@ public class PackageController {
 		// needed for server not to log 500 errors
 	}
 
-	public static class PackageControllerLinksResource extends ResourceSupport {
+	public static class PackageControllerLinksResource extends RepresentationModel {
 
 		public PackageControllerLinksResource() {
 		}

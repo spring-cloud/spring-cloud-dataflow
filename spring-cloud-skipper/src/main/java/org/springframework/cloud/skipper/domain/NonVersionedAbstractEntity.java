@@ -22,8 +22,6 @@ import javax.persistence.MappedSuperclass;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
-import org.springframework.hateoas.Identifiable;
-
 /**
  * Base class for entity implementations that don't need optimistic locking.
  * Uses a {@link Long} id.
@@ -31,7 +29,7 @@ import org.springframework.hateoas.Identifiable;
  * @author Glenn Renfro
  */
 @MappedSuperclass
-public class NonVersionedAbstractEntity implements Identifiable<Long> {
+public class NonVersionedAbstractEntity {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.AUTO)
@@ -42,7 +40,6 @@ public class NonVersionedAbstractEntity implements Identifiable<Long> {
 		this.id = null;
 	}
 
-	@Override
 	public Long getId() {
 		return this.id;
 	}

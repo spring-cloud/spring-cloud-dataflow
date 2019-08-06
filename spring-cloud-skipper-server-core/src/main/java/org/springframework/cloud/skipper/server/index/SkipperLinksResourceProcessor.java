@@ -19,25 +19,25 @@ import org.springframework.cloud.skipper.server.controller.AboutController;
 import org.springframework.cloud.skipper.server.controller.PackageController;
 import org.springframework.cloud.skipper.server.controller.ReleaseController;
 import org.springframework.data.rest.webmvc.RepositoryLinksResource;
-import org.springframework.hateoas.ResourceProcessor;
-import org.springframework.hateoas.mvc.ControllerLinkBuilder;
+import org.springframework.hateoas.server.RepresentationModelProcessor;
+import org.springframework.hateoas.server.mvc.WebMvcLinkBuilder;
 import org.springframework.stereotype.Component;
 
-import static org.springframework.hateoas.mvc.ControllerLinkBuilder.methodOn;
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
 /**
  * @author Gunnar Hillert
  * @author Ilayaperumal Gopinathan
  */
 @Component
-public class SkipperLinksResourceProcessor implements ResourceProcessor<RepositoryLinksResource> {
+public class SkipperLinksResourceProcessor implements RepresentationModelProcessor<RepositoryLinksResource> {
 
 
 	@Override
 	public RepositoryLinksResource process(RepositoryLinksResource resource) {
-		resource.add(ControllerLinkBuilder.linkTo(methodOn(AboutController.class).getAboutResource()).withRel("about"));
-		resource.add(ControllerLinkBuilder.linkTo(ReleaseController.class).withRel("release"));
-		resource.add(ControllerLinkBuilder.linkTo(PackageController.class).withRel("package"));
+		resource.add(WebMvcLinkBuilder.linkTo(methodOn(AboutController.class).getAboutResource()).withRel("about"));
+		resource.add(WebMvcLinkBuilder.linkTo(ReleaseController.class).withRel("release"));
+		resource.add(WebMvcLinkBuilder.linkTo(PackageController.class).withRel("package"));
 		return resource;
 	}
 }
