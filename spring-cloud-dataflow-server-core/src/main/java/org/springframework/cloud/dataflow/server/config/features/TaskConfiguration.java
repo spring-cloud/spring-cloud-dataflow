@@ -165,11 +165,13 @@ public class TaskConfiguration {
 			TaskExecutionCreationService taskExecutionRepositoryService,
 			TaskAppDeploymentRequestCreator taskAppDeploymentRequestCreator,
 			TaskExplorer taskExplorer,
-			DataflowTaskExecutionDao dataflowTaskExecutionDao) {
+			DataflowTaskExecutionDao dataflowTaskExecutionDao,
+			TaskConfigurationProperties taskConfigurationProperties) {
 		return new DefaultTaskExecutionService(
 				launcherRepository, auditRecordService, taskRepository,
 				taskExecutionInfoService, taskDeploymentRepository, taskExecutionRepositoryService,
-				taskAppDeploymentRequestCreator, taskExplorer, dataflowTaskExecutionDao);
+				taskAppDeploymentRequestCreator, taskExplorer, dataflowTaskExecutionDao,
+				taskConfigurationProperties);
 	}
 
 	@Bean

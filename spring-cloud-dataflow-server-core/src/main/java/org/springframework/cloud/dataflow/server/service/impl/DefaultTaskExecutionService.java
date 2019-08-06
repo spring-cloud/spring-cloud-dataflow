@@ -30,6 +30,7 @@ import java.util.stream.StreamSupport;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import org.springframework.cloud.common.security.ManualOAuthAuthenticationDetails;
 import org.springframework.cloud.dataflow.audit.service.AuditRecordService;
 import org.springframework.cloud.dataflow.core.AuditActionType;
 import org.springframework.cloud.dataflow.core.AuditOperationType;
@@ -52,6 +53,10 @@ import org.springframework.cloud.deployer.spi.task.TaskLauncher;
 import org.springframework.cloud.task.repository.TaskExecution;
 import org.springframework.cloud.task.repository.TaskExplorer;
 import org.springframework.cloud.task.repository.TaskRepository;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.oauth2.provider.OAuth2Authentication;
+import org.springframework.security.oauth2.provider.authentication.OAuth2AuthenticationDetails;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
@@ -103,6 +108,8 @@ public class DefaultTaskExecutionService implements TaskExecutionService {
 
 	private final DataflowTaskExecutionDao dataflowTaskExecutionDao;
 
+	private final TaskConfigurationProperties taskConfigurationProperties;
+
 	public static final String TASK_DEFINITION_DSL_TEXT = "taskDefinitionDslText";
 
 	public static final String TASK_DEPLOYMENT_PROPERTIES = "taskDeploymentProperties";
@@ -129,7 +136,8 @@ public class DefaultTaskExecutionService implements TaskExecutionService {
 			TaskExecutionCreationService taskExecutionRepositoryService,
 			TaskAppDeploymentRequestCreator taskAppDeploymentRequestCreator,
 			TaskExplorer taskExplorer,
-			DataflowTaskExecutionDao dataflowTaskExecutionDao) {
+			DataflowTaskExecutionDao dataflowTaskExecutionDao,
+			TaskConfigurationProperties taskConfigurationProperties) {
 		Assert.notNull(launcherRepository, "launcherRepository must not be null");
 		Assert.notNull(auditRecordService, "auditRecordService must not be null");
 		Assert.notNull(taskExecutionInfoService, "taskExecutionInfoService must not be null");
@@ -140,6 +148,7 @@ public class DefaultTaskExecutionService implements TaskExecutionService {
 		Assert.notNull(taskAppDeploymentRequestCreator, "taskAppDeploymentRequestCreator must not be null");
 		Assert.notNull(taskExplorer, "taskExplorer must not be null");
 		Assert.notNull(dataflowTaskExecutionDao, "dataflowTaskExecutionDao must not be null");
+		Assert.notNull(taskConfigurationProperties, "taskConfigurationProperties must not be null");
 
 		this.launcherRepository = launcherRepository;
 		this.auditRecordService = auditRecordService;
@@ -150,6 +159,7 @@ public class DefaultTaskExecutionService implements TaskExecutionService {
 		this.taskAppDeploymentRequestCreator = taskAppDeploymentRequestCreator;
 		this.taskExplorer = taskExplorer;
 		this.dataflowTaskExecutionDao = dataflowTaskExecutionDao;
+		this.taskConfigurationProperties = taskConfigurationProperties;
 	}
 
 
@@ -184,6 +194,46 @@ public class DefaultTaskExecutionService implements TaskExecutionService {
 				.findTaskExecutionInformation(taskName, taskDeploymentProperties, composedTaskRunnerName);
 
 		TaskExecution taskExecution = taskExecutionRepositoryService.createTaskExecution(taskName);
+
+		if (taskConfigurationProperties.getComposedTaskRunnerName().equals(taskExecutionInformation.getTaskDefinition().getTaskName())) {
+			boolean containsAccessToken = false;
+
+			for (String commandLineArg : commandLineArgs) {
+				if (commandLineArg.startsWith("--dataflow-server-access-token")) {
+					containsAccessToken = true;
+				}
+			}
+
+			if (!containsAccessToken) {
+				final Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+				final String token;
+				if (authentication != null && authentication instanceof OAuth2Authentication) {
+					final OAuth2Authentication auth2Authentication = (OAuth2Authentication) authentication;
+
+					if (auth2Authentication.getDetails() instanceof OAuth2AuthenticationDetails) {
+						final OAuth2AuthenticationDetails auth2AuthenticationDetails =
+							(OAuth2AuthenticationDetails) auth2Authentication.getDetails();
+						token = auth2AuthenticationDetails.getTokenValue();
+					}
+					else if (auth2Authentication.getDetails() instanceof ManualOAuthAuthenticationDetails) {
+						ManualOAuthAuthenticationDetails manualOAuthAuthenticationDetails =
+							(ManualOAuthAuthenticationDetails) auth2Authentication.getDetails();
+						token = manualOAuthAuthenticationDetails.getAccessToken().getValue();
+					}
+					else {
+						token = null;
+					}
+				}
+				else {
+					token = null;
+				}
+
+				if (token != null) {
+					final String accessTokenCommandLineArg = "--dataflow-server-access-token=" + token;
+					commandLineArgs.add(accessTokenCommandLineArg);
+				}
+			}
+		}
 
 		AppDeploymentRequest request = this.taskAppDeploymentRequestCreator.
 				createRequest(taskExecution, taskExecutionInformation, commandLineArgs, platformName);
@@ -309,7 +359,7 @@ public class DefaultTaskExecutionService implements TaskExecutionService {
 		String platformName = this.taskDeploymentRepository.findByTaskDeploymentId(taskExecution.getExternalExecutionId()).getPlatformName();
 		TaskLauncher taskLauncher = findTaskLauncher(platformName);
 		taskLauncher.cancel(taskExecution.getExternalExecutionId());
-		this.logger.info(String.format("Task execution stop request for id %s has been submitted", taskExecution.getExecutionId()));
+		logger.info(String.format("Task execution stop request for id %s has been submitted", taskExecution.getExecutionId()));
 	}
 
 	private Set<TaskExecution> getTaskExecutions(Set<Long> ids) {

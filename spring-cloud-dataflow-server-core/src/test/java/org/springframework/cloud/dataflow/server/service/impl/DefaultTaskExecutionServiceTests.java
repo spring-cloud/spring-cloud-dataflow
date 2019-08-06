@@ -165,6 +165,9 @@ public abstract class DefaultTaskExecutionServiceTests {
 	@Autowired
 	DataflowTaskExecutionDao dataflowTaskExecutionDao;
 
+	@Autowired
+	TaskConfigurationProperties taskConfigurationProperties;
+
 	@TestPropertySource(properties = { "spring.cloud.dataflow.task.maximum-concurrent-tasks=10" })
 	@AutoConfigureTestDatabase(replace = Replace.ANY)
 	public static class SimpleTaskTests extends DefaultTaskExecutionServiceTests {
@@ -380,7 +383,8 @@ public abstract class DefaultTaskExecutionServiceTests {
 					launcherRepository, auditRecordService, taskRepository,
 					taskExecutionInfoService, mock(TaskDeploymentRepository.class),
 					taskExecutionRepositoryService, taskAppDeploymentRequestCreator,
-					this.taskExplorer, this.dataflowTaskExecutionDao);
+					this.taskExplorer, this.dataflowTaskExecutionDao,
+					this.taskConfigurationProperties);
 			try {
 				taskExecutionService.executeTask(TASK_NAME_ORIG, new HashMap<>(), new LinkedList<>());
 			}

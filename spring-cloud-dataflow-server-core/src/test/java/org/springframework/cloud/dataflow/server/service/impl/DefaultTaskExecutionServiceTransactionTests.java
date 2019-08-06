@@ -119,6 +119,9 @@ public class DefaultTaskExecutionServiceTransactionTests {
 	TaskExplorer taskExplorer;
 
 	@Autowired
+	TaskConfigurationProperties taskConfigurationProperties;
+
+	@Autowired
 	DataflowTaskExecutionDao dataflowTaskExecutionDao;
 
 	private TaskExecutionService transactionTaskService;
@@ -132,7 +135,7 @@ public class DefaultTaskExecutionServiceTransactionTests {
 				launcherRepository, auditRecordService, taskRepository,
 				taskExecutionInfoService, mock(TaskDeploymentRepository.class),
 				taskExecutionRepositoryService, taskAppDeploymentRequestCreator,
-				this.taskExplorer, this.dataflowTaskExecutionDao);
+				this.taskExplorer, this.dataflowTaskExecutionDao, this.taskConfigurationProperties);
 
 	}
 
