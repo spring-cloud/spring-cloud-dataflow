@@ -19,8 +19,8 @@ package org.springframework.cloud.dataflow.server.controller;
 import org.springframework.cloud.dataflow.rest.resource.StreamAppStatusResource;
 import org.springframework.cloud.dataflow.server.service.StreamService;
 import org.springframework.cloud.dataflow.server.service.ValidationStatus;
-import org.springframework.hateoas.ExposesResourceFor;
-import org.springframework.hateoas.mvc.ResourceAssemblerSupport;
+import org.springframework.hateoas.server.ExposesResourceFor;
+import org.springframework.hateoas.server.mvc.RepresentationModelAssemblerSupport;
 import org.springframework.http.HttpStatus;
 import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -66,14 +66,14 @@ public class StreamValidationController {
 	public StreamAppStatusResource validate(
 			@PathVariable("name") String name) {
 		ValidationStatus result = this.streamService.validateStream(name);
-		return new Assembler().toResource(result);
+		return new Assembler().toModel(result);
 	}
 
 	/**
-	 * {@link org.springframework.hateoas.ResourceAssembler} implementation that converts
+	 * {@link org.springframework.hateoas.server.ResourceAssembler} implementation that converts
 	 * {@link ValidationStatus}s to {@link StreamAppStatusResource}s.
 	 */
-	class Assembler extends ResourceAssemblerSupport<ValidationStatus, StreamAppStatusResource> {
+	class Assembler extends RepresentationModelAssemblerSupport<ValidationStatus, StreamAppStatusResource> {
 
 		public Assembler() {
 			super(StreamValidationController.class, StreamAppStatusResource.class);

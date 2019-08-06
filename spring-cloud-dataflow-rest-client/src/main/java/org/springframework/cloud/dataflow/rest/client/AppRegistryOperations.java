@@ -21,7 +21,7 @@ import java.util.Properties;
 import org.springframework.cloud.dataflow.core.ApplicationType;
 import org.springframework.cloud.dataflow.rest.resource.AppRegistrationResource;
 import org.springframework.cloud.dataflow.rest.resource.DetailedAppRegistrationResource;
-import org.springframework.hateoas.PagedResources;
+import org.springframework.hateoas.PagedModel;
 
 /**
  * Interface defining operations available for application registrations.
@@ -40,7 +40,7 @@ public interface AppRegistryOperations {
 	 *
 	 * @return list of all application registrations
 	 */
-	PagedResources<AppRegistrationResource> list();
+	PagedModel<AppRegistrationResource> list();
 
 	/**
 	 * Return a list of all application registrations for the given
@@ -49,7 +49,7 @@ public interface AppRegistryOperations {
 	 * @param type application type for which to return a list of registrations
 	 * @return list of all application registrations for the given application type
 	 */
-	PagedResources<AppRegistrationResource> list(ApplicationType type);
+	PagedModel<AppRegistrationResource> list(ApplicationType type);
 
 	/**
 	 * Retrieve information about an application registration.
@@ -135,7 +135,7 @@ public interface AppRegistryOperations {
 	 * @param force if {@code true}, overwrites any pre-existing registrations
 	 * @return the paged list of new app registrations
 	 */
-	PagedResources<AppRegistrationResource> importFromResource(String uri, boolean force);
+	PagedModel<AppRegistrationResource> importFromResource(String uri, boolean force);
 
 
 	/**
@@ -145,6 +145,6 @@ public interface AppRegistryOperations {
 	 * @param force if {@code true}, overwrites any pre-existing registrations
 	 * @return the paged list of new app registrations
 	 */
-	PagedResources<AppRegistrationResource> registerAll(Properties apps, boolean force);
+	PagedModel<AppRegistrationResource> registerAll(Properties apps, boolean force);
 
 }

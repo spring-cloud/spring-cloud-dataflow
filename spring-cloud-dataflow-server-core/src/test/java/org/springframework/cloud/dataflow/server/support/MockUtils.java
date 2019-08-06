@@ -24,7 +24,7 @@ import org.springframework.cloud.deployer.spi.core.AppDeploymentRequest;
 import org.springframework.cloud.deployer.spi.core.RuntimeEnvironmentInfo;
 import org.springframework.cloud.skipper.client.SkipperClient;
 import org.springframework.cloud.skipper.domain.Deployer;
-import org.springframework.hateoas.Resources;
+import org.springframework.hateoas.CollectionModel;
 
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -39,7 +39,7 @@ public class MockUtils {
 	public static SkipperClient configureMock(SkipperClient skipperClient) {
 		List<Deployer> deployers = new ArrayList<>();
 		deployers.add(createTestDeployer());
-		when(skipperClient.listDeployers()).thenReturn(new Resources<>(deployers, new ArrayList<>()));
+		when(skipperClient.listDeployers()).thenReturn(new CollectionModel<>(deployers, new ArrayList<>()));
 		return skipperClient;
 	}
 	/**

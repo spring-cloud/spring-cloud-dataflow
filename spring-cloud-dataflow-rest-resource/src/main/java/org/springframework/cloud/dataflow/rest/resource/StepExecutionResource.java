@@ -17,14 +17,14 @@
 package org.springframework.cloud.dataflow.rest.resource;
 
 import org.springframework.batch.core.StepExecution;
-import org.springframework.hateoas.PagedResources;
-import org.springframework.hateoas.ResourceSupport;
+import org.springframework.hateoas.PagedModel;
+import org.springframework.hateoas.RepresentationModel;
 import org.springframework.util.Assert;
 
 /**
  * @author Glenn Renfro
  */
-public class StepExecutionResource extends ResourceSupport {
+public class StepExecutionResource extends RepresentationModel<StepExecutionResource> {
 
 	private final Long jobExecutionId;
 
@@ -76,7 +76,7 @@ public class StepExecutionResource extends ResourceSupport {
 		return this.stepType;
 	}
 
-	public static class Page extends PagedResources<StepExecutionResource> {
+	public static class Page extends PagedModel<StepExecutionResource> {
 	}
 
 }

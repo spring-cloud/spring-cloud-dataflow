@@ -22,8 +22,8 @@ import org.springframework.cloud.dataflow.rest.resource.JobInstanceResource;
 import org.springframework.cloud.dataflow.rest.resource.StepExecutionProgressInfoResource;
 import org.springframework.cloud.dataflow.rest.resource.StepExecutionResource;
 import org.springframework.hateoas.Link;
-import org.springframework.hateoas.PagedResources;
-import org.springframework.hateoas.ResourceSupport;
+import org.springframework.hateoas.PagedModel;
+import org.springframework.hateoas.RepresentationModel;
 import org.springframework.util.Assert;
 import org.springframework.web.client.RestTemplate;
 
@@ -66,8 +66,8 @@ public class JobTemplate implements JobOperations {
 
 	private final Link stepExecutionLink;
 
-	JobTemplate(RestTemplate restTemplate, ResourceSupport resources) {
-		Assert.notNull(resources, "URI Resources must not be be null");
+	JobTemplate(RestTemplate restTemplate, RepresentationModel<?> resources) {
+		Assert.notNull(resources, "URI CollectionModel must not be be null");
 		Assert.notNull(restTemplate, "RestTemplate must not be null");
 		Assert.notNull(resources.getLink(EXECUTIONS_RELATION), "Executions relation is required");
 		Assert.notNull(resources.getLink(EXECUTION_RELATION), "Execution relation is required");
@@ -81,19 +81,19 @@ public class JobTemplate implements JobOperations {
 				"Step Execution View by id relation" + " is required");
 
 		this.restTemplate = restTemplate;
-		this.executionsLink = resources.getLink(EXECUTIONS_RELATION);
-		this.executionLink = resources.getLink(EXECUTION_RELATION);
-		this.executionByNameLink = resources.getLink(EXECUTION_RELATION_BY_NAME);
-		this.instanceLink = resources.getLink(INSTANCE_RELATION);
-		this.instanceByNameLink = resources.getLink(INSTANCE_RELATION_BY_NAME);
-		this.stepExecutionsLink = resources.getLink(STEP_EXECUTION_RELATION_BY_ID);
-		this.stepExecutionProgressLink = resources.getLink(STEP_EXECUTION_PROGRESS_RELATION_BY_ID);
-		this.stepExecutionLink = resources.getLink(STEP_EXECUTION_PROGRESS_RELATION_BY_ID);
+		this.executionsLink = resources.getLink(EXECUTIONS_RELATION).get();
+		this.executionLink = resources.getLink(EXECUTION_RELATION).get();
+		this.executionByNameLink = resources.getLink(EXECUTION_RELATION_BY_NAME).get();
+		this.instanceLink = resources.getLink(INSTANCE_RELATION).get();
+		this.instanceByNameLink = resources.getLink(INSTANCE_RELATION_BY_NAME).get();
+		this.stepExecutionsLink = resources.getLink(STEP_EXECUTION_RELATION_BY_ID).get();
+		this.stepExecutionProgressLink = resources.getLink(STEP_EXECUTION_PROGRESS_RELATION_BY_ID).get();
+		this.stepExecutionLink = resources.getLink(STEP_EXECUTION_PROGRESS_RELATION_BY_ID).get();
 
 	}
 
 	@Override
-	public PagedResources<JobExecutionResource> executionList() {
+	public PagedModel<JobExecutionResource> executionList() {
 		String uriTemplate = executionsLink.getHref().toString();
 		uriTemplate = uriTemplate + "?size=2000";
 
@@ -101,7 +101,7 @@ public class JobTemplate implements JobOperations {
 	}
 
 	@Override
-	public PagedResources<JobExecutionThinResource> executionThinList() {
+	public PagedModel<JobExecutionThinResource> executionThinList() {
 		String uriTemplate = executionsLink.getHref().toString();
 		uriTemplate = uriTemplate + "?size=2000";
 
@@ -109,18 +109,18 @@ public class JobTemplate implements JobOperations {
 	}
 
 	@Override
-	public PagedResources<JobInstanceResource> instanceList(String jobName) {
+	public PagedModel<JobInstanceResource> instanceList(String jobName) {
 		return restTemplate.getForObject(instanceByNameLink.expand(jobName).getHref(), JobInstanceResource.Page.class);
 	}
 
 	@Override
-	public PagedResources<JobExecutionThinResource> executionThinListByJobName(String jobName) {
+	public PagedModel<JobExecutionThinResource> executionThinListByJobName(String jobName) {
 		return restTemplate.getForObject(executionByNameLink.expand(jobName).getHref(),
 				JobExecutionThinResource.Page.class);
 	}
 
 	@Override
-	public PagedResources<JobExecutionResource> executionListByJobName(String jobName) {
+	public PagedModel<JobExecutionResource> executionListByJobName(String jobName) {
 		return restTemplate.getForObject(executionByNameLink.expand(jobName).getHref(),
 				JobExecutionResource.Page.class);
 	}
@@ -136,7 +136,7 @@ public class JobTemplate implements JobOperations {
 	}
 
 	@Override
-	public PagedResources<StepExecutionResource> stepExecutionList(long jobExecutionId) {
+	public PagedModel<StepExecutionResource> stepExecutionList(long jobExecutionId) {
 		return restTemplate.getForObject(stepExecutionsLink.expand(jobExecutionId).getHref(),
 				StepExecutionResource.Page.class);
 	}

@@ -265,6 +265,7 @@ public class ConfigCommands implements CommandMarker, InitializingBean, Applicat
 
 		}
 		catch (Exception e) {
+			e.printStackTrace();
 			this.targetHolder.getTarget().setTargetException(e);
 			this.shell.setDataFlowOperations(null);
 			handleTargetException(this.targetHolder.getTarget());

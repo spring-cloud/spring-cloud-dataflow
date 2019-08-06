@@ -22,8 +22,8 @@ import java.util.Map;
 import org.springframework.cloud.dataflow.rest.resource.ScheduleInfoResource;
 import org.springframework.cloud.dataflow.rest.util.DeploymentPropertiesUtils;
 import org.springframework.hateoas.Link;
-import org.springframework.hateoas.PagedResources;
-import org.springframework.hateoas.ResourceSupport;
+import org.springframework.hateoas.PagedModel;
+import org.springframework.hateoas.RepresentationModel;
 import org.springframework.util.Assert;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
@@ -48,15 +48,15 @@ public class SchedulerTemplate implements SchedulerOperations {
 
 	private final Link schedulesInstanceLink;
 
-	SchedulerTemplate(RestTemplate restTemplate, ResourceSupport resources) {
-		Assert.notNull(resources, "URI Resources must not be be null");
+	SchedulerTemplate(RestTemplate restTemplate, RepresentationModel<?> resources) {
+		Assert.notNull(resources, "URI CollectionModel must not be be null");
 		Assert.notNull(resources.getLink(SCHEDULES_RELATION), "Schedules relation is required");
 		Assert.notNull(resources.getLink(SCHEDULES_INSTANCE_RELATION), "Schedules instance relation is required");
 		Assert.notNull(restTemplate, "RestTemplate must not be null");
 
 		this.restTemplate = restTemplate;
-		this.schedulesLink = resources.getLink(SCHEDULES_RELATION);
-		this.schedulesInstanceLink = resources.getLink(SCHEDULES_INSTANCE_RELATION);
+		this.schedulesLink = resources.getLink(SCHEDULES_RELATION).get();
+		this.schedulesInstanceLink = resources.getLink(SCHEDULES_INSTANCE_RELATION).get();
 
 	}
 
@@ -76,13 +76,13 @@ public class SchedulerTemplate implements SchedulerOperations {
 	}
 
 	@Override
-	public PagedResources<ScheduleInfoResource> list(String taskDefinitionName) {
+	public PagedModel<ScheduleInfoResource> list(String taskDefinitionName) {
 		return restTemplate.getForObject(schedulesInstanceLink.expand(taskDefinitionName).getHref(),
 				ScheduleInfoResource.Page.class);
 	}
 
 	@Override
-	public PagedResources<ScheduleInfoResource> list() {
+	public PagedModel<ScheduleInfoResource> list() {
 		return restTemplate.getForObject(schedulesLink.getHref(), ScheduleInfoResource.Page.class);
 	}
 

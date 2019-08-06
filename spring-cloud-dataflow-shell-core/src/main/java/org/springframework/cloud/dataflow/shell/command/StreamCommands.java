@@ -40,7 +40,7 @@ import org.springframework.cloud.dataflow.shell.config.DataFlowShell;
 import org.springframework.cloud.skipper.domain.Deployer;
 import org.springframework.cloud.skipper.domain.PackageIdentifier;
 import org.springframework.cloud.skipper.domain.Release;
-import org.springframework.hateoas.PagedResources;
+import org.springframework.hateoas.PagedModel;
 import org.springframework.shell.core.CommandMarker;
 import org.springframework.shell.core.annotation.CliAvailabilityIndicator;
 import org.springframework.shell.core.annotation.CliCommand;
@@ -269,7 +269,7 @@ public class StreamCommands implements CommandMarker {
 
 	@CliCommand(value = LIST_STREAM, help = "List created streams")
 	public Table listStreams() {
-		final PagedResources<StreamDefinitionResource> streams = streamOperations().list();
+		final PagedModel<StreamDefinitionResource> streams = streamOperations().list();
 		LinkedHashMap<String, Object> headers = new LinkedHashMap<>();
 		headers.put("name", "Stream Name");
 		headers.put("dslText", "Stream Definition");

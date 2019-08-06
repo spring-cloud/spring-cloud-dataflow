@@ -43,8 +43,8 @@ import org.springframework.cloud.dataflow.server.job.LauncherRepository;
 import org.springframework.cloud.dataflow.server.stream.StreamDeployer;
 import org.springframework.cloud.deployer.spi.core.RuntimeEnvironmentInfo;
 import org.springframework.cloud.deployer.spi.task.TaskLauncher;
-import org.springframework.hateoas.ExposesResourceFor;
-import org.springframework.hateoas.mvc.ControllerLinkBuilder;
+import org.springframework.hateoas.server.ExposesResourceFor;
+import org.springframework.hateoas.server.mvc.WebMvcLinkBuilder;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -209,7 +209,7 @@ public class AboutController {
 			aboutResource.setGrafanaInfo(grafanaInfo);
 		}
 
-		aboutResource.add(ControllerLinkBuilder.linkTo(AboutController.class).withSelfRel());
+		aboutResource.add(WebMvcLinkBuilder.linkTo(AboutController.class).withSelfRel());
 
 		return aboutResource;
 	}

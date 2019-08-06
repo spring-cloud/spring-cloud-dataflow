@@ -21,7 +21,7 @@ import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 
-import org.springframework.hateoas.ResourceSupport;
+import org.springframework.hateoas.RepresentationModel;
 
 /**
  * Represents a list of completion proposals for the DSL when using <i>e.g.</i> TAB
@@ -29,7 +29,7 @@ import org.springframework.hateoas.ResourceSupport;
  *
  * @author Eric Bottard
  */
-public class CompletionProposalsResource extends ResourceSupport {
+public class CompletionProposalsResource extends RepresentationModel<CompletionProposalsResource> {
 
 	private List<Proposal> proposals = new ArrayList<>();
 

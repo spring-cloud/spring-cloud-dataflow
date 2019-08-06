@@ -17,8 +17,8 @@
 package org.springframework.cloud.dataflow.rest.resource;
 
 import org.springframework.cloud.dataflow.core.StreamDefinition;
-import org.springframework.hateoas.PagedResources;
-import org.springframework.hateoas.ResourceSupport;
+import org.springframework.hateoas.PagedModel;
+import org.springframework.hateoas.RepresentationModel;
 
 /**
  * A HATEOAS representation of a {@link StreamDefinition}. This class also includes a
@@ -30,7 +30,7 @@ import org.springframework.hateoas.ResourceSupport;
  * @author Ilayaperumal Gopinathan
  * @author Gunnar Hillert
  */
-public class StreamDefinitionResource extends ResourceSupport {
+public class StreamDefinitionResource extends RepresentationModel<StreamDefinitionResource> {
 
 	/**
 	 * Stream name.
@@ -140,7 +140,7 @@ public class StreamDefinitionResource extends ResourceSupport {
 		this.statusDescription = statusDescription;
 	}
 
-	public static class Page extends PagedResources<StreamDefinitionResource> {
+	public static class Page extends PagedModel<StreamDefinitionResource> {
 
 	}
 

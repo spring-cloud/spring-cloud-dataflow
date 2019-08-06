@@ -79,8 +79,8 @@ public class DefaultEnvironmentPostProcessor implements EnvironmentPostProcessor
 
 		if (!existingPropertySources.contains(defaultPropertiesKey)
 				|| existingPropertySources.get(defaultPropertiesKey) == null) {
-			existingPropertySources.addLast(new MapPropertySource(defaultPropertiesKey, internalDefaults));
-			existingPropertySources.addLast(new MapPropertySource(defaultPropertiesKey, defaults));
+			existingPropertySources.addLast(new MapPropertySource("defaultPropertiesScdfInternalDefaults", internalDefaults));
+			existingPropertySources.addLast(new MapPropertySource("defaultPropertiesScdfDefaults", defaults));
 		}
 		else {
 			PropertySource<?> propertySource = existingPropertySources.get(defaultPropertiesKey);

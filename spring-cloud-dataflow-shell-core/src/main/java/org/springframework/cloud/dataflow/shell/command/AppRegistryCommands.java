@@ -38,7 +38,7 @@ import org.springframework.core.io.DefaultResourceLoader;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.core.io.support.PropertiesLoaderUtils;
-import org.springframework.hateoas.PagedResources;
+import org.springframework.hateoas.PagedModel;
 import org.springframework.shell.core.CommandMarker;
 import org.springframework.shell.core.annotation.CliAvailabilityIndicator;
 import org.springframework.shell.core.annotation.CliCommand;
@@ -217,7 +217,7 @@ public class AppRegistryCommands implements CommandMarker, ResourceLoaderAware {
 		StringBuilder msg = new StringBuilder()
 				.append("Successfully unregistered applications.");
 
-		PagedResources<AppRegistrationResource> appRegistrationResources = appRegistryOperations().list();
+		PagedModel<AppRegistrationResource> appRegistrationResources = appRegistryOperations().list();
 
 		if (!appRegistrationResources.getContent().isEmpty()) {
 			msg.append(" The following were not unregistered as they are associated with an existing stream:");
@@ -262,7 +262,7 @@ public class AppRegistryCommands implements CommandMarker, ResourceLoaderAware {
 	public Object list(@CliOption(
 			key = { "", "id" },
 			help = "id of the application to query in the form of 'type:name'") QualifiedApplicationName application) {
-		PagedResources<AppRegistrationResource> appRegistrations = appRegistryOperations().list();
+		PagedModel<AppRegistrationResource> appRegistrations = appRegistryOperations().list();
 
 		// TODO This can go outside the method
 		final LinkedHashMap<String, List<String>> mappings = new LinkedHashMap<>();
@@ -340,7 +340,7 @@ public class AppRegistryCommands implements CommandMarker, ResourceLoaderAware {
 			try {
 				Resource resource = this.resourceLoader.getResource(uri);
 				Properties applications = PropertiesLoaderUtils.loadProperties(resource);
-				PagedResources<AppRegistrationResource> registered = null;
+				PagedModel<AppRegistrationResource> registered = null;
 				try {
 					registered = appRegistryOperations().registerAll(applications, force);
 				}
@@ -358,7 +358,7 @@ public class AppRegistryCommands implements CommandMarker, ResourceLoaderAware {
 			}
 		}
 		else {
-			PagedResources<AppRegistrationResource> registered = appRegistryOperations().importFromResource(uri, force);
+			PagedModel<AppRegistrationResource> registered = appRegistryOperations().importFromResource(uri, force);
 			return String.format("Successfully registered %d applications from '%s'",
 					registered.getMetadata().getTotalElements(), uri);
 		}

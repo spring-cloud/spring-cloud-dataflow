@@ -33,7 +33,7 @@ import org.springframework.cloud.dataflow.rest.client.RuntimeOperations;
 import org.springframework.cloud.dataflow.rest.resource.AppInstanceStatusResource;
 import org.springframework.cloud.dataflow.rest.resource.AppStatusResource;
 import org.springframework.cloud.dataflow.shell.config.DataFlowShell;
-import org.springframework.hateoas.PagedResources;
+import org.springframework.hateoas.PagedModel;
 import org.springframework.shell.table.TableModel;
 
 import static org.junit.Assert.assertThat;
@@ -77,9 +77,9 @@ public class RuntimeCommandsTests {
 		List<AppInstanceStatusResource> instanceStatusResources1 = new ArrayList<>();
 		instanceStatusResources1.add(instanceStatusResource1);
 		instanceStatusResources1.add(instanceStatusResource2);
-		PagedResources.PageMetadata metadata1 = new PagedResources.PageMetadata(instanceStatusResources1.size(), 1,
+		PagedModel.PageMetadata metadata1 = new PagedModel.PageMetadata(instanceStatusResources1.size(), 1,
 				instanceStatusResources1.size(), 1);
-		PagedResources<AppInstanceStatusResource> resources = new PagedResources<>(instanceStatusResources1, metadata1);
+		PagedModel<AppInstanceStatusResource> resources = new PagedModel<>(instanceStatusResources1, metadata1);
 		appStatusResource1.setInstances(resources);
 		appStatusResource2 = new AppStatusResource("2", "undeployed");
 		AppInstanceStatusResource instanceStatusResource3 = new AppInstanceStatusResource("30", "undeployed", null);
@@ -87,9 +87,9 @@ public class RuntimeCommandsTests {
 		List<AppInstanceStatusResource> instanceStatusResources2 = new ArrayList<>();
 		instanceStatusResources1.add(instanceStatusResource3);
 		instanceStatusResources1.add(instanceStatusResource4);
-		PagedResources.PageMetadata metadata3 = new PagedResources.PageMetadata(instanceStatusResources2.size(), 1,
+		PagedModel.PageMetadata metadata3 = new PagedModel.PageMetadata(instanceStatusResources2.size(), 1,
 				instanceStatusResources2.size(), 1);
-		PagedResources<AppInstanceStatusResource> resources2 = new PagedResources<>(instanceStatusResources2,
+		PagedModel<AppInstanceStatusResource> resources2 = new PagedModel<>(instanceStatusResources2,
 				metadata3);
 		appStatusResource2.setInstances(resources2);
 		appStatusResource3 = new AppStatusResource("3", "failed");
@@ -98,9 +98,9 @@ public class RuntimeCommandsTests {
 		List<AppInstanceStatusResource> instanceStatusResources3 = new ArrayList<>();
 		instanceStatusResources1.add(instanceStatusResource5);
 		instanceStatusResources1.add(instanceStatusResource6);
-		PagedResources.PageMetadata metadata4 = new PagedResources.PageMetadata(instanceStatusResources3.size(), 1,
+		PagedModel.PageMetadata metadata4 = new PagedModel.PageMetadata(instanceStatusResources3.size(), 1,
 				instanceStatusResources3.size(), 1);
-		PagedResources<AppInstanceStatusResource> resources3 = new PagedResources<>(instanceStatusResources3,
+		PagedModel<AppInstanceStatusResource> resources3 = new PagedModel<>(instanceStatusResources3,
 				metadata4);
 		appStatusResource3.setInstances(resources3);
 	}
@@ -111,8 +111,8 @@ public class RuntimeCommandsTests {
 		data.add(appStatusResource1);
 		data.add(appStatusResource2);
 		data.add(appStatusResource3);
-		PagedResources.PageMetadata metadata = new PagedResources.PageMetadata(data.size(), 1, data.size(), 1);
-		PagedResources<AppStatusResource> result = new PagedResources<>(data, metadata);
+		PagedModel.PageMetadata metadata = new PagedModel.PageMetadata(data.size(), 1, data.size(), 1);
+		PagedModel<AppStatusResource> result = new PagedModel<>(data, metadata);
 		when(runtimeOperations.status()).thenReturn(result);
 		Object[][] expected = new String[][] { { "1", "deployed", "2" }, { "2", "undeployed", "0" },
 				{ "3", "failed", "0" } };
@@ -129,8 +129,8 @@ public class RuntimeCommandsTests {
 		Collection<AppStatusResource> data = new ArrayList<>();
 		data.add(appStatusResource1);
 		data.add(appStatusResource2);
-		PagedResources.PageMetadata metadata = new PagedResources.PageMetadata(data.size(), 1, data.size(), 1);
-		PagedResources<AppStatusResource> result = new PagedResources<>(data, metadata);
+		PagedModel.PageMetadata metadata = new PagedModel.PageMetadata(data.size(), 1, data.size(), 1);
+		PagedModel<AppStatusResource> result = new PagedModel<>(data, metadata);
 		when(runtimeOperations.status()).thenReturn(result);
 		Object[][] expected = new String[][] { { "1", "deployed", "2" }, { "10", "deployed" }, { "20", "deployed" },
 				{ "2", "undeployed", "0" } };

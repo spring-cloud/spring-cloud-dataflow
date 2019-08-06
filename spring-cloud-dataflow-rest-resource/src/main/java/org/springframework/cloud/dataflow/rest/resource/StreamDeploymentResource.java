@@ -16,8 +16,8 @@
 
 package org.springframework.cloud.dataflow.rest.resource;
 
-import org.springframework.hateoas.PagedResources;
-import org.springframework.hateoas.ResourceSupport;
+import org.springframework.hateoas.PagedModel;
+import org.springframework.hateoas.RepresentationModel;
 
 /**
  * A HATEOAS representation of a stream deployment.
@@ -25,7 +25,7 @@ import org.springframework.hateoas.ResourceSupport;
  * @author Eric Bottard
  * @author Ilayaperumal Gopinathan
  */
-public class StreamDeploymentResource extends ResourceSupport {
+public class StreamDeploymentResource extends RepresentationModel<StreamDeploymentResource> {
 
 	/**
 	 * The name of the stream under deployment.
@@ -84,7 +84,7 @@ public class StreamDeploymentResource extends ResourceSupport {
 		return status;
 	}
 
-	public static class Page extends PagedResources<StreamDeploymentResource> {
+	public static class Page extends PagedModel<StreamDeploymentResource> {
 
 	}
 

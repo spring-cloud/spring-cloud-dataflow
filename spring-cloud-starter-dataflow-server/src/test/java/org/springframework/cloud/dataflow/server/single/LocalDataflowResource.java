@@ -50,7 +50,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
-import org.springframework.hateoas.Resources;
+import org.springframework.hateoas.CollectionModel;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.util.StringUtils;
@@ -196,7 +196,7 @@ public class LocalDataflowResource extends ExternalResource {
 		about.getVersionInfo().getServer().setName("Test Server");
 		about.getVersionInfo().getServer().setVersion("Test Version");
 		when(this.skipperClient.info()).thenReturn(about);
-		when(this.skipperClient.listDeployers()).thenReturn(new Resources<>(new ArrayList<>(), new ArrayList<>()));
+		when(this.skipperClient.listDeployers()).thenReturn(new CollectionModel<>(new ArrayList<>(), new ArrayList<>()));
 	}
 
 	@EnableAutoConfiguration(
@@ -224,7 +224,7 @@ public class LocalDataflowResource extends ExternalResource {
 			about.getVersionInfo().getServer().setName("Test Server");
 			about.getVersionInfo().getServer().setVersion("Test Version");
 			when(skipperClient.info()).thenReturn(about);
-			when(skipperClient.listDeployers()).thenReturn(new Resources<>(new ArrayList<>(), new ArrayList<>()));
+			when(skipperClient.listDeployers()).thenReturn(new CollectionModel<>(new ArrayList<>(), new ArrayList<>()));
 			return skipperClient;
 		}
 

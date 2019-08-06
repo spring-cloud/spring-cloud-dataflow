@@ -22,8 +22,8 @@ import org.springframework.cloud.dataflow.core.ApplicationType;
 import org.springframework.cloud.dataflow.rest.resource.AppRegistrationResource;
 import org.springframework.cloud.dataflow.rest.resource.DetailedAppRegistrationResource;
 import org.springframework.hateoas.Link;
-import org.springframework.hateoas.PagedResources;
-import org.springframework.hateoas.ResourceSupport;
+import org.springframework.hateoas.PagedModel;
+import org.springframework.hateoas.RepresentationModel;
 import org.springframework.util.Assert;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
@@ -63,21 +63,21 @@ public class AppRegistryTemplate implements AppRegistryOperations {
 	 * @param restTemplate template for HTTP/rest commands
 	 * @param resourceSupport HATEOAS link support
 	 */
-	public AppRegistryTemplate(RestTemplate restTemplate, ResourceSupport resourceSupport) {
-		Assert.notNull(resourceSupport, "URI Resources can't be null");
+	public AppRegistryTemplate(RestTemplate restTemplate, RepresentationModel<?> resourceSupport) {
+		Assert.notNull(resourceSupport, "URI CollectionModel can't be null");
 		Assert.notNull(resourceSupport.getLink(APPS_REL), "Apps relation is required");
 
 		this.restTemplate = restTemplate;
-		this.appsLink = resourceSupport.getLink(APPS_REL);
+		this.appsLink = resourceSupport.getLink(APPS_REL).get();
 	}
 
 	@Override
-	public PagedResources<AppRegistrationResource> list() {
+	public PagedModel<AppRegistrationResource> list() {
 		return list(/* ApplicationType */null);
 	}
 
 	@Override
-	public PagedResources<AppRegistrationResource> list(ApplicationType type) {
+	public PagedModel<AppRegistrationResource> list(ApplicationType type) {
 		String uri = appsLink.getHref() + "?size=2000" + ((type == null) ? "" : "&type=" + type.name());
 		return restTemplate.getForObject(uri, AppRegistrationResource.Page.class);
 	}
@@ -140,7 +140,7 @@ public class AppRegistryTemplate implements AppRegistryOperations {
 	}
 
 	@Override
-	public PagedResources<AppRegistrationResource> importFromResource(String uri, boolean force) {
+	public PagedModel<AppRegistrationResource> importFromResource(String uri, boolean force) {
 		MultiValueMap<String, Object> values = new LinkedMultiValueMap<>();
 		values.add("uri", uri);
 		values.add("force", Boolean.toString(force));
@@ -148,7 +148,7 @@ public class AppRegistryTemplate implements AppRegistryOperations {
 	}
 
 	@Override
-	public PagedResources<AppRegistrationResource> registerAll(Properties apps, boolean force) {
+	public PagedModel<AppRegistrationResource> registerAll(Properties apps, boolean force) {
 		MultiValueMap<String, Object> values = new LinkedMultiValueMap<>();
 		StringBuffer buffer = new StringBuffer();
 		for (String key : apps.stringPropertyNames()) {

@@ -16,8 +16,8 @@
 
 package org.springframework.cloud.dataflow.rest.resource;
 
-import org.springframework.hateoas.PagedResources;
-import org.springframework.hateoas.ResourceSupport;
+import org.springframework.hateoas.PagedModel;
+import org.springframework.hateoas.RepresentationModel;
 
 /**
  * Rest resource for an app registration.
@@ -26,7 +26,7 @@ import org.springframework.hateoas.ResourceSupport;
  * @author Mark Fisher
  * @author Patrick Peralta
  */
-public class AppRegistrationResource extends ResourceSupport {
+public class AppRegistrationResource extends RepresentationModel<AppRegistrationResource> {
 
 	/**
 	 * App name.
@@ -119,7 +119,7 @@ public class AppRegistrationResource extends ResourceSupport {
 	/**
 	 * Dedicated subclass to workaround type erasure.
 	 */
-	public static class Page extends PagedResources<AppRegistrationResource> {
+	public static class Page extends PagedModel<AppRegistrationResource> {
 	}
 
 }

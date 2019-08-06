@@ -26,8 +26,8 @@ import org.junit.Test;
 import org.springframework.batch.core.StepExecution;
 import org.springframework.batch.item.ExecutionContext;
 import org.springframework.cloud.dataflow.rest.resource.JobExecutionResource;
-import org.springframework.hateoas.PagedResources;
-import org.springframework.hateoas.Resource;
+import org.springframework.hateoas.EntityModel;
+import org.springframework.hateoas.PagedModel;
 import org.springframework.util.StreamUtils;
 
 import static org.junit.Assert.assertEquals;
@@ -49,8 +49,8 @@ public class JobExecutionDeserializationTests {
 
 		final String json = new String(StreamUtils.copyToByteArray(inputStream));
 
-		final PagedResources<Resource<JobExecutionResource>> paged = objectMapper.readValue(json,
-				new TypeReference<PagedResources<Resource<JobExecutionResource>>>() {
+		final PagedModel<EntityModel<JobExecutionResource>> paged = objectMapper.readValue(json,
+				new TypeReference<PagedModel<EntityModel<JobExecutionResource>>>() {
 				});
 		final JobExecutionResource jobExecutionResource = paged.getContent().iterator().next().getContent();
 		assertEquals("Expect 1 JobExecutionInfoResource", 6, paged.getContent().size());

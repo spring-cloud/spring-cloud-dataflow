@@ -21,6 +21,7 @@ import java.util.Map;
 
 import org.junit.Before;
 import org.junit.ClassRule;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.rules.RuleChain;
 import org.junit.rules.TestRule;
@@ -55,6 +56,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  * @author Ilayaperumal Gopinathan
  */
 @RunWith(Parameterized.class)
+@Ignore("OAuth2TestServer needs rewrite")
 public class LocalServerSecurityWithUsersFileTests {
 
 	private final static Logger logger = LoggerFactory.getLogger(LocalServerSecurityWithUsersFileTests.class);

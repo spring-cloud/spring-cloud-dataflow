@@ -18,7 +18,7 @@ package org.springframework.cloud.dataflow.rest.resource;
 
 import java.util.Map;
 
-import org.springframework.hateoas.ResourceSupport;
+import org.springframework.hateoas.RepresentationModel;
 
 /**
  * REST representation for an AppInstanceStatus.
@@ -26,7 +26,7 @@ import org.springframework.hateoas.ResourceSupport;
  * @author Eric Bottard
  * @author Mark Fisher
  */
-public class AppInstanceStatusResource extends ResourceSupport {
+public class AppInstanceStatusResource extends RepresentationModel<AppInstanceStatusResource> {
 
 	private String instanceId;
 

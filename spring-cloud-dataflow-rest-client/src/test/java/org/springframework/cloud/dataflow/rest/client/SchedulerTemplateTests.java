@@ -19,6 +19,7 @@ package org.springframework.cloud.dataflow.rest.client;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -51,8 +52,8 @@ public class SchedulerTemplateTests {
 	@Before
 	public void setup() {
 		rootResource = mock(RootResource.class);
-		when(rootResource.getLink(SCHEDULES_RELATION)).thenReturn(new Link(SCHEDULES_RELATION));
-		when(rootResource.getLink(SCHEDULES_RELATION_INSTANCE)).thenReturn(new Link(SCHEDULES_RELATION_INSTANCE));
+		when(rootResource.getLink(SCHEDULES_RELATION)).thenReturn(Optional.of(new Link(SCHEDULES_RELATION)));
+		when(rootResource.getLink(SCHEDULES_RELATION_INSTANCE)).thenReturn(Optional.of(new Link(SCHEDULES_RELATION_INSTANCE)));
 		restTemplate = mock(RestTemplate.class);
 		template = new SchedulerTemplate(restTemplate, rootResource);
 	}

@@ -36,9 +36,9 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PagedResourcesAssembler;
-import org.springframework.hateoas.ExposesResourceFor;
-import org.springframework.hateoas.PagedResources;
-import org.springframework.hateoas.mvc.ResourceAssemblerSupport;
+import org.springframework.hateoas.PagedModel;
+import org.springframework.hateoas.server.ExposesResourceFor;
+import org.springframework.hateoas.server.mvc.RepresentationModelAssemblerSupport;
 import org.springframework.http.HttpStatus;
 import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -93,7 +93,7 @@ public class AuditRecordController {
 	 */
 	@RequestMapping(value = "", method = RequestMethod.GET)
 	@ResponseStatus(HttpStatus.OK)
-	public PagedResources<AuditRecordResource> list(Pageable pageable,
+	public PagedModel<AuditRecordResource> list(Pageable pageable,
 			@RequestParam(required = false) AuditActionType[] actions,
 			@RequestParam(required = false) AuditOperationType[] operations,
 			@RequestParam(required = false) String fromDate,
@@ -111,7 +111,7 @@ public class AuditRecordController {
 				.findAuditRecordByAuditOperationTypeAndAuditActionTypeAndDate(pageable, actions, operations,
 						fromDateAsInstant,
 						toDateAsInstant);
-		return assembler.toResource(auditRecords, new Assembler(auditRecords));
+		return assembler.toModel(auditRecords, new Assembler(auditRecords));
 	}
 
 	/**
@@ -125,7 +125,7 @@ public class AuditRecordController {
 	public AuditRecordResource display(@PathVariable("id") Long id) {
 		AuditRecord auditRecord = this.auditRecordService.findById(id)
 				.orElseThrow(() -> new NoSuchAuditRecordException(id));
-		return new Assembler(new PageImpl<>(Collections.singletonList(auditRecord))).toResource(auditRecord);
+		return new Assembler(new PageImpl<>(Collections.singletonList(auditRecord))).toModel(auditRecord);
 	}
 
 	/**
@@ -160,19 +160,19 @@ public class AuditRecordController {
 	}
 
 	/**
-	 * {@link org.springframework.hateoas.ResourceAssembler} implementation that converts
+	 * {@link org.springframework.hateoas.server.ResourceAssembler} implementation that converts
 	 * {@link AuditRecord}s to {@link AuditRecordResource}s.
 	 */
-	class Assembler extends ResourceAssemblerSupport<AuditRecord, AuditRecordResource> {
+	class Assembler extends RepresentationModelAssemblerSupport<AuditRecord, AuditRecordResource> {
 
 		public Assembler(Page<AuditRecord> auditRecords) {
 			super(AuditRecordController.class, AuditRecordResource.class);
 		}
 
 		@Override
-		public AuditRecordResource toResource(AuditRecord auditRecord) {
+		public AuditRecordResource toModel(AuditRecord auditRecord) {
 			try {
-				return createResourceWithId(auditRecord.getId(), auditRecord);
+				return createModelWithId(auditRecord.getId(), auditRecord);
 			}
 			catch (IllegalStateException e) {
 				logger.warn("Failed to create StreamDefinitionResource. " + e.getMessage());
@@ -181,7 +181,7 @@ public class AuditRecordController {
 		}
 
 		@Override
-		public AuditRecordResource instantiateResource(AuditRecord auditRecord) {
+		public AuditRecordResource instantiateModel(AuditRecord auditRecord) {
 			final AuditRecordResource resource = new AuditRecordResource();
 			resource.setAuditRecordId(auditRecord.getId());
 			resource.setAuditAction(auditRecord.getAuditAction() != null ? auditRecord.getAuditAction().name() : null);

@@ -37,7 +37,7 @@ import org.springframework.cloud.dataflow.rest.util.DeploymentPropertiesUtils;
 import org.springframework.cloud.dataflow.shell.command.support.OpsType;
 import org.springframework.cloud.dataflow.shell.command.support.RoleType;
 import org.springframework.cloud.dataflow.shell.config.DataFlowShell;
-import org.springframework.hateoas.PagedResources;
+import org.springframework.hateoas.PagedModel;
 import org.springframework.shell.core.CommandMarker;
 import org.springframework.shell.core.annotation.CliAvailabilityIndicator;
 import org.springframework.shell.core.annotation.CliCommand;
@@ -75,6 +75,7 @@ public class TaskCommands implements CommandMarker {
 
 	private static final String LAUNCH = "task launch";
 	private static final String STOP = "task execution stop";
+	private static final String LOG = "task execution log";
 
 	// Destroy Role
 
@@ -128,7 +129,7 @@ public class TaskCommands implements CommandMarker {
 
 	@CliCommand(value = LIST, help = "List created tasks")
 	public Table list() {
-		final PagedResources<TaskDefinitionResource> tasks = taskOperations().list();
+		final PagedModel<TaskDefinitionResource> tasks = taskOperations().list();
 		LinkedHashMap<String, Object> headers = new LinkedHashMap<>();
 		headers.put("name", "Task Name");
 		headers.put("dslText", "Task Definition");
@@ -139,7 +140,7 @@ public class TaskCommands implements CommandMarker {
 
 	@CliCommand(value = PLATFORM_LIST, help = "List platform accounts for tasks")
 	public Table listPlatforms() {
-		final PagedResources<LauncherResource> platforms = taskOperations().listPlatforms();
+		final PagedModel<LauncherResource> platforms = taskOperations().listPlatforms();
 		LinkedHashMap<String, Object> headers = new LinkedHashMap<>();
 		headers.put("name", "Platform Name");
 		headers.put("type", "Platform Type");
@@ -229,6 +230,20 @@ public class TaskCommands implements CommandMarker {
 		return String.format("Request to stop the task execution with id(s): %s has been submitted", ids);
 	}
 
+	@CliCommand(value = LOG, help = "Retrieve task execution log")
+	public String retrieveTaskExecutionLog(@CliOption(key = { "", "id" }, help = "the task execution id", mandatory = true) long id,
+			@CliOption(key = { "platform" }, help = "the platform of the task execution", mandatory = false) String platform) {
+		TaskExecutionResource taskExecutionResource = taskOperations().taskExecutionStatus(id);
+		String result;
+		if(platform != null) {
+			result = taskOperations().taskExecutionLog(taskExecutionResource.getExternalExecutionId(), platform);
+		}
+		else {
+			result = taskOperations().taskExecutionLog(taskExecutionResource.getExternalExecutionId());
+		}
+		return result;
+	}
+
 	@CliCommand(value = DESTROY, help = "Destroy an existing task")
 	public String destroy(
 			@CliOption(key = { "", "name" }, help = "the name of the task to destroy", mandatory = true,
@@ -252,7 +267,7 @@ public class TaskCommands implements CommandMarker {
 	public Table executionListByName(@CliOption(key = "name", help = "the task name to be used as a filter",
 		optionContext = "existing-task disable-string-converter") String name) {
 
-		final PagedResources<TaskExecutionResource> tasks;
+		final PagedModel<TaskExecutionResource> tasks;
 		if (name == null) {
 			tasks = taskOperations().executionList();
 		}

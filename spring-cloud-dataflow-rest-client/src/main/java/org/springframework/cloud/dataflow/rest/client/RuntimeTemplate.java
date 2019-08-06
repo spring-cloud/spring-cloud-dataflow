@@ -18,8 +18,8 @@ package org.springframework.cloud.dataflow.rest.client;
 
 import org.springframework.cloud.dataflow.rest.resource.AppStatusResource;
 import org.springframework.hateoas.Link;
-import org.springframework.hateoas.PagedResources;
-import org.springframework.hateoas.ResourceSupport;
+import org.springframework.hateoas.PagedModel;
+import org.springframework.hateoas.RepresentationModel;
 import org.springframework.web.client.RestTemplate;
 
 /**
@@ -42,14 +42,17 @@ public class RuntimeTemplate implements RuntimeOperations {
 	 */
 	private final Link appStatusUriTemplate;
 
-	RuntimeTemplate(RestTemplate restTemplate, ResourceSupport resources) {
+	RuntimeTemplate(RestTemplate restTemplate, RepresentationModel<?> resources) {
 		this.restTemplate = restTemplate;
-		this.appStatusesUriTemplate = resources.getLink("runtime/apps");
-		this.appStatusUriTemplate = resources.getLink("runtime/apps/app");
+		this.appStatusesUriTemplate = resources.getLink("runtime/apps").get();
+		// TODO: Looks like this used to return null even with old impl
+		//       so deploymentId status doesn't work
+		// this.appStatusUriTemplate = resources.getLink("runtime/apps/app").get();
+		this.appStatusUriTemplate = null;
 	}
 
 	@Override
-	public PagedResources<AppStatusResource> status() {
+	public PagedModel<AppStatusResource> status() {
 		String uriTemplate = appStatusesUriTemplate.expand().getHref();
 		uriTemplate = uriTemplate + "?size=2000";
 		return restTemplate.getForObject(uriTemplate, AppStatusResource.Page.class);

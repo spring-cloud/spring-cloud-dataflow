@@ -23,7 +23,7 @@ import java.util.Map;
  *
  * @author Glenn Renfro
  */
-public class TaskAppStatusResource extends AbstractDefinitionAppStatusResource {
+public class TaskAppStatusResource extends AbstractDefinitionAppStatusResource<TaskAppStatusResource> {
 
 	protected TaskAppStatusResource() {
 	}

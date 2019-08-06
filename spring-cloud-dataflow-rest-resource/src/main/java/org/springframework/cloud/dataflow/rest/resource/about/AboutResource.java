@@ -16,14 +16,14 @@
 
 package org.springframework.cloud.dataflow.rest.resource.about;
 
-import org.springframework.hateoas.ResourceSupport;
+import org.springframework.hateoas.RepresentationModel;
 
 /**
  * Provides meta-information about the Spring Cloud Data Flow server.
  *
  * @author Gunnar Hillert
  */
-public class AboutResource extends ResourceSupport {
+public class AboutResource extends RepresentationModel {
 
 	private FeatureInfo featureInfo = new FeatureInfo();
 

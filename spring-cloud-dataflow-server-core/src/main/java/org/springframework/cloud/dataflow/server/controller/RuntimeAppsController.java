@@ -33,11 +33,11 @@ import org.springframework.cloud.deployer.spi.app.AppStatus;
 import org.springframework.cloud.deployer.spi.app.DeploymentState;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PagedResourcesAssembler;
-import org.springframework.hateoas.ExposesResourceFor;
-import org.springframework.hateoas.PagedResources;
-import org.springframework.hateoas.ResourceAssembler;
-import org.springframework.hateoas.Resources;
-import org.springframework.hateoas.mvc.ResourceAssemblerSupport;
+import org.springframework.hateoas.CollectionModel;
+import org.springframework.hateoas.PagedModel;
+import org.springframework.hateoas.server.ExposesResourceFor;
+import org.springframework.hateoas.server.RepresentationModelAssembler;
+import org.springframework.hateoas.server.mvc.RepresentationModelAssemblerSupport;
 import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -64,7 +64,7 @@ public class RuntimeAppsController {
 
 	private final StreamDeployer streamDeployer;
 
-	private final ResourceAssembler<AppStatus, AppStatusResource> statusAssembler = new Assembler();
+	private final RepresentationModelAssembler<AppStatus, AppStatusResource> statusAssembler = new Assembler();
 
 	/**
 	 * Construct a new runtime apps controller.
@@ -77,8 +77,8 @@ public class RuntimeAppsController {
 	}
 
 	@RequestMapping
-	public PagedResources<AppStatusResource> list(Pageable pageable, PagedResourcesAssembler<AppStatus> assembler) {
-		return assembler.toResource(streamDeployer.getAppStatuses(pageable), statusAssembler);
+	public PagedModel<AppStatusResource> list(Pageable pageable, PagedResourcesAssembler<AppStatus> assembler) {
+		return assembler.toModel(streamDeployer.getAppStatuses(pageable), statusAssembler);
 	}
 
 	@RequestMapping("/{appId}")
@@ -87,22 +87,22 @@ public class RuntimeAppsController {
 		if (status.getState().equals(DeploymentState.unknown)) {
 			throw new NoSuchAppException(appId);
 		}
-		return statusAssembler.toResource(status);
+		return statusAssembler.toModel(status);
 	}
 
-	private static class Assembler extends ResourceAssemblerSupport<AppStatus, AppStatusResource> {
+	private static class Assembler extends RepresentationModelAssemblerSupport<AppStatus, AppStatusResource> {
 
 		public Assembler() {
 			super(RuntimeAppsController.class, AppStatusResource.class);
 		}
 
 		@Override
-		public AppStatusResource toResource(AppStatus entity) {
-			return createResourceWithId(entity.getDeploymentId(), entity);
+		public AppStatusResource toModel(AppStatus entity) {
+			return createModelWithId(entity.getDeploymentId(), entity);
 		}
 
 		@Override
-		protected AppStatusResource instantiateResource(AppStatus entity) {
+		protected AppStatusResource instantiateModel(AppStatus entity) {
 			AppStatusResource resource = new AppStatusResource(entity.getDeploymentId(),
 					ControllerUtils.mapState(entity.getState()).getKey());
 			List<AppInstanceStatusResource> instanceStatusResources = new ArrayList<>();
@@ -111,9 +111,9 @@ public class RuntimeAppsController {
 			List<AppInstanceStatus> instanceStatuses = new ArrayList<>(entity.getInstances().values());
 			Collections.sort(instanceStatuses, INSTANCE_SORTER);
 			for (AppInstanceStatus appInstanceStatus : instanceStatuses) {
-				instanceStatusResources.add(instanceAssembler.toResource(appInstanceStatus));
+				instanceStatusResources.add(instanceAssembler.toModel(appInstanceStatus));
 			}
-			resource.setInstances(new Resources<>(instanceStatusResources));
+			resource.setInstances(new CollectionModel<>(instanceStatusResources));
 			return resource;
 		}
 	}
