@@ -30,6 +30,7 @@ import java.util.stream.StreamSupport;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import org.springframework.cloud.common.security.support.TokenUtils;
 import org.springframework.cloud.dataflow.audit.service.AuditRecordService;
 import org.springframework.cloud.dataflow.core.AuditActionType;
 import org.springframework.cloud.dataflow.core.AuditOperationType;
@@ -185,6 +186,33 @@ public class DefaultTaskExecutionService implements TaskExecutionService {
 
 		TaskExecution taskExecution = taskExecutionRepositoryService.createTaskExecution(taskName);
 
+		if (taskExecutionInformation.isComposed()) {
+			boolean containsAccessToken = false;
+
+			final String dataflowAccessTokenKey = "dataflow-server-access-token";
+
+			for (String commandLineArg : commandLineArgs) {
+				if (commandLineArg.startsWith("--" + dataflowAccessTokenKey)) {
+					containsAccessToken = true;
+				}
+			}
+
+			final String dataflowAccessTokenPropertyKey = "app." + taskExecutionInformation.getTaskDefinition().getRegisteredAppName() + "." + dataflowAccessTokenKey;
+			for (Map.Entry<String, String> taskDeploymentProperty : taskExecutionInformation.getTaskDeploymentProperties().entrySet()) {
+				if (taskDeploymentProperty.getKey().equals(dataflowAccessTokenPropertyKey)) {
+					containsAccessToken = true;
+				}
+			}
+
+			if (!containsAccessToken) {
+				final String token = TokenUtils.getAccessToken();
+
+				if (token != null) {
+					taskExecutionInformation.getTaskDeploymentProperties().put(dataflowAccessTokenPropertyKey, token);
+				}
+			}
+		}
+
 		AppDeploymentRequest request = this.taskAppDeploymentRequestCreator.
 				createRequest(taskExecution, taskExecutionInformation, commandLineArgs, platformName);
 
@@ -309,7 +337,7 @@ public class DefaultTaskExecutionService implements TaskExecutionService {
 		String platformName = this.taskDeploymentRepository.findByTaskDeploymentId(taskExecution.getExternalExecutionId()).getPlatformName();
 		TaskLauncher taskLauncher = findTaskLauncher(platformName);
 		taskLauncher.cancel(taskExecution.getExternalExecutionId());
-		this.logger.info(String.format("Task execution stop request for id %s has been submitted", taskExecution.getExecutionId()));
+		logger.info(String.format("Task execution stop request for id %s has been submitted", taskExecution.getExecutionId()));
 	}
 
 	private Set<TaskExecution> getTaskExecutions(Set<Long> ids) {

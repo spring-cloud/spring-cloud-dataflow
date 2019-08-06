@@ -119,6 +119,9 @@ public class DefaultTaskExecutionServiceTransactionTests {
 	TaskExplorer taskExplorer;
 
 	@Autowired
+	TaskConfigurationProperties taskConfigurationProperties;
+
+	@Autowired
 	DataflowTaskExecutionDao dataflowTaskExecutionDao;
 
 	private TaskExecutionService transactionTaskService;
