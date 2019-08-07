@@ -16,6 +16,7 @@
 
 package org.springframework.cloud.dataflow.server.service;
 
+import java.util.List;
 import java.util.Map;
 
 import org.springframework.cloud.dataflow.core.AllPlatformsTaskExecutionInformation;
@@ -37,11 +38,11 @@ public interface TaskExecutionInfoService {
 	 * @param taskName the name of the task definition
 	 * @param taskDeploymentProperties the deployment properties to use for the {@link TaskExecutionInformation}
 	 * @param composedTaskRunnerName user provided CTR app name to use.
-	 * @param addDataFlowProperties if true DataSource properties should be added to the TaskDefinition.
+	 * @param commandLineArgs the command line args to be used for task execution
 	 * @return instance of {@link TaskExecutionInformation}
 	 */
 	TaskExecutionInformation findTaskExecutionInformation(String taskName,
-			Map<String, String> taskDeploymentProperties, String composedTaskRunnerName, boolean addDataFlowProperties);
+			Map<String, String> taskDeploymentProperties, String composedTaskRunnerName, List<String> commandLineArgs);
 
 	AllPlatformsTaskExecutionInformation findAllPlatformTaskExecutionInformation();
 }

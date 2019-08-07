@@ -40,6 +40,12 @@ import org.springframework.util.StringUtils;
 public class TaskServiceUtils {
 	private static final String DATAFLOW_SERVER_URI_KEY = "dataflowServerUri";
 
+	private static final String BASE_DATASOURCE_= "spring.datasource.";
+	private static final String DATASOURCE_URL = BASE_DATASOURCE_+ "url";
+	private static final String DATASOURCE_USER_NAME = BASE_DATASOURCE_+ "username";
+	private static final String DATASOURCE_PASSWORD = BASE_DATASOURCE_+ "password";
+	private static final String DATASOURCE_DRIVER_CLASS_NAME = BASE_DATASOURCE_+ "driverClassName";
+
 	/**
 	 * Parses the task DSL to see if it is a composed task definition
 	 * @param dsl task DSL
@@ -114,19 +120,42 @@ public class TaskServiceUtils {
 	 * @return the updated {@link TaskDefinition}
 	 */
 	public static TaskDefinition updateTaskProperties(TaskDefinition taskDefinition,
-			DataSourceProperties dataSourceProperties) {
+			DataSourceProperties dataSourceProperties, List<String> commandLineArgs) {
 		Assert.notNull(taskDefinition, "taskDefinition must not be null");
 		Assert.notNull(dataSourceProperties, "dataSourceProperties must not be null");
 		TaskDefinition.TaskDefinitionBuilder builder = TaskDefinition.TaskDefinitionBuilder.from(taskDefinition);
-		builder.setProperty("spring.datasource.url", dataSourceProperties.getUrl());
-		builder.setProperty("spring.datasource.username", dataSourceProperties.getUsername());
+		if(!commandLineStartsWith(commandLineArgs, DATASOURCE_URL)) {
+			builder.setProperty("spring.datasource.url", dataSourceProperties.getUrl());
+		}
+		if(!commandLineStartsWith(commandLineArgs, DATASOURCE_USER_NAME)) {
+			builder.setProperty("spring.datasource.username", dataSourceProperties.getUsername());
+		}
 		// password may be empty
 		if (StringUtils.hasText(dataSourceProperties.getPassword())) {
-			builder.setProperty("spring.datasource.password", dataSourceProperties.getPassword());
+			if(!commandLineStartsWith(commandLineArgs, DATASOURCE_PASSWORD)) {
+				builder.setProperty("spring.datasource.password", dataSourceProperties.getPassword());
+			}
 		}
-		builder.setProperty("spring.datasource.driverClassName", dataSourceProperties.getDriverClassName());
+		if(!commandLineStartsWith(commandLineArgs, DATASOURCE_DRIVER_CLASS_NAME)) {
+			builder.setProperty("spring.datasource.driverClassName", dataSourceProperties.getDriverClassName());
+		}
 
 		return builder.build();
+	}
+
+	private static boolean commandLineStartsWith(List<String> commandLineArgs, String startsWithPrefix) {
+
+		boolean result = false;
+		if(commandLineArgs != null) {
+			String nonIdentifyingstartsWithPrefix = "--" + startsWithPrefix;
+			for (String commandLineArg : commandLineArgs) {
+				if (commandLineArg.startsWith(startsWithPrefix) || commandLineArg.startsWith(nonIdentifyingstartsWithPrefix)) {
+					result = true;
+					break;
+				}
+			}
+		}
+		return result;
 	}
 
 	/**

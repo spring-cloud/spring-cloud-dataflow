@@ -130,7 +130,7 @@ public class DefaultSchedulerService implements SchedulerService {
 		Assert.notNull(appRegistration, "Unknown task app: " + taskDefinition.getRegisteredAppName());
 		Resource metadataResource = this.registry.getAppMetadataResource(appRegistration);
 
-		taskDefinition = TaskServiceUtils.updateTaskProperties(taskDefinition, this.dataSourceProperties);
+		taskDefinition = TaskServiceUtils.updateTaskProperties(taskDefinition, this.dataSourceProperties, commandLineArgs);
 
 		Map<String, String> appDeploymentProperties = new HashMap<>(commonApplicationProperties.getTask());
 		appDeploymentProperties.putAll(

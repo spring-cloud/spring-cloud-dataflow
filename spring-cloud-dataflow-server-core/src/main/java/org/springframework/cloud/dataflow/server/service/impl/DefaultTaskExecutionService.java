@@ -182,7 +182,7 @@ public class DefaultTaskExecutionService implements TaskExecutionService {
 		}
 
 		TaskExecutionInformation taskExecutionInformation = taskExecutionInfoService
-				.findTaskExecutionInformation(taskName, taskDeploymentProperties, composedTaskRunnerName, commandLineArgsContainNoDataSourceInfo(commandLineArgs));
+				.findTaskExecutionInformation(taskName, taskDeploymentProperties, composedTaskRunnerName, commandLineArgs);
 
 		TaskExecution taskExecution = taskExecutionRepositoryService.createTaskExecution(taskName);
 

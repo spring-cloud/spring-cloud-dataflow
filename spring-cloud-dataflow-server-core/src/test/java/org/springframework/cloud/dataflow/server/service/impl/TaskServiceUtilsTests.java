@@ -17,6 +17,7 @@
 package org.springframework.cloud.dataflow.server.service.impl;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -95,13 +96,62 @@ public class TaskServiceUtilsTests {
 		dataSourceProperties.setUrl("myUrl");
 		TaskDefinition definition = TaskServiceUtils.updateTaskProperties(
 				taskDefinition,
-				dataSourceProperties);
+				dataSourceProperties,
+				Collections.emptyList());
 
 		assertThat(definition.getProperties().size()).isEqualTo(5);
 		assertThat(definition.getProperties().get("spring.datasource.url")).isEqualTo("myUrl");
 		assertThat(definition.getProperties().get("spring.datasource.driverClassName")).isEqualTo("myDriver");
 		assertThat(definition.getProperties().get("spring.datasource.username")).isEqualTo("myUser");
 		assertThat(definition.getProperties().get("spring.datasource.password")).isEqualTo("myPassword");
+
+		definition = TaskServiceUtils.updateTaskProperties(
+				taskDefinition,
+				dataSourceProperties,
+				Collections.singletonList("spring.datasource.url=baz"));
+		assertThat(definition.getProperties().size()).isEqualTo(4);
+		assertThat(definition.getProperties().get("spring.datasource.driverClassName")).isEqualTo("myDriver");
+		assertThat(definition.getProperties().get("spring.datasource.username")).isEqualTo("myUser");
+		assertThat(definition.getProperties().get("spring.datasource.password")).isEqualTo("myPassword");
+
+		definition = TaskServiceUtils.updateTaskProperties(
+				taskDefinition,
+				dataSourceProperties,
+				Collections.singletonList("spring.datasource.driverClassName=baz"));
+		assertThat(definition.getProperties().size()).isEqualTo(4);
+		assertThat(definition.getProperties().get("spring.datasource.url")).isEqualTo("myUrl");
+		assertThat(definition.getProperties().get("spring.datasource.username")).isEqualTo("myUser");
+		assertThat(definition.getProperties().get("spring.datasource.password")).isEqualTo("myPassword");
+
+		definition = TaskServiceUtils.updateTaskProperties(
+				taskDefinition,
+				dataSourceProperties,
+				Collections.singletonList("spring.datasource.username=baz"));
+		assertThat(definition.getProperties().size()).isEqualTo(4);
+		assertThat(definition.getProperties().get("spring.datasource.url")).isEqualTo("myUrl");
+		assertThat(definition.getProperties().get("spring.datasource.driverClassName")).isEqualTo("myDriver");
+		assertThat(definition.getProperties().get("spring.datasource.password")).isEqualTo("myPassword");
+
+		definition = TaskServiceUtils.updateTaskProperties(
+				taskDefinition,
+				dataSourceProperties,
+				Collections.singletonList("spring.datasource.password=baz"));
+		assertThat(definition.getProperties().size()).isEqualTo(4);
+		assertThat(definition.getProperties().get("spring.datasource.url")).isEqualTo("myUrl");
+		assertThat(definition.getProperties().get("spring.datasource.driverClassName")).isEqualTo("myDriver");
+		assertThat(definition.getProperties().get("spring.datasource.username")).isEqualTo("myUser");
+
+		List<String> commandLineArgs = new ArrayList<>(2);
+		commandLineArgs.add("--spring.datasource.url=boo");
+		commandLineArgs.add("--spring.datasource.driverClassName=boo");
+
+		definition = TaskServiceUtils.updateTaskProperties(
+				taskDefinition,
+				dataSourceProperties,
+				commandLineArgs);
+		assertThat(definition.getProperties().size()).isEqualTo(3);
+		assertThat(definition.getProperties().get("spring.datasource.password")).isEqualTo("myPassword");
+		assertThat(definition.getProperties().get("spring.datasource.username")).isEqualTo("myUser");
 	}
 
 	@Test
