@@ -45,10 +45,7 @@ public class RuntimeTemplate implements RuntimeOperations {
 	RuntimeTemplate(RestTemplate restTemplate, RepresentationModel<?> resources) {
 		this.restTemplate = restTemplate;
 		this.appStatusesUriTemplate = resources.getLink("runtime/apps").get();
-		// TODO: Looks like this used to return null even with old impl
-		//       so deploymentId status doesn't work
-		// this.appStatusUriTemplate = resources.getLink("runtime/apps/app").get();
-		this.appStatusUriTemplate = null;
+		this.appStatusUriTemplate = resources.getLink("runtime/apps/{appId}").get();
 	}
 
 	@Override
