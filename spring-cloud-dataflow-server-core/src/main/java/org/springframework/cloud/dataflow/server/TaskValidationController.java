@@ -86,7 +86,7 @@ public class TaskValidationController {
 		}
 
 		@Override
-		public TaskAppStatusResource toResource(ValidationStatus entity) {
+		public TaskAppStatusResource toModel(ValidationStatus entity) {
 			return new TaskAppStatusResource(entity.getDefinitionName(), entity.getDefinitionDsl(), entity.getDescription(), entity.getAppsStatuses());
 		}
 	}

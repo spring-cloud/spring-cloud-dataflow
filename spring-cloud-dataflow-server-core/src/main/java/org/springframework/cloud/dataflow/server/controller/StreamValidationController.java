@@ -80,7 +80,7 @@ public class StreamValidationController {
 		}
 
 		@Override
-		public StreamAppStatusResource toResource(ValidationStatus entity) {
+		public StreamAppStatusResource toModel(ValidationStatus entity) {
 			return new StreamAppStatusResource(entity.getDefinitionName(), entity.getDefinitionDsl(), entity.getDescription(), entity.getAppsStatuses());
 		}
 	}
