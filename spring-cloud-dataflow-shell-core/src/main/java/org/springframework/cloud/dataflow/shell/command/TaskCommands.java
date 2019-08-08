@@ -225,9 +225,20 @@ public class TaskCommands implements CommandMarker {
 	}
 
 	@CliCommand(value = STOP, help = "Stop executing tasks")
-	public String stop(@CliOption(key = { "", "ids" }, help = "the task execution id", mandatory = true) String ids) {
-		taskOperations().stop(ids);
-		return String.format("Request to stop the task execution with id(s): %s has been submitted", ids);
+	public String stop(@CliOption(key = { "", "ids" }, help = "the task execution id", mandatory = true) String ids,
+			@CliOption(key = {
+					PLATFORM_OPTION }, help = "the name of the platform where the task is executing") String platform) {
+
+		String message = null;
+		if(StringUtils.hasText(platform)) {
+			taskOperations().stop(ids, platform);
+			message = String.format("Request to stop the task execution with id(s): %s for platform %s has been submitted", ids, platform);
+		}
+		else {
+			taskOperations().stop(ids);
+			message = String.format("Request to stop the task execution with id(s): %s has been submitted", ids);
+		}
+		return message;
 	}
 
 	@CliCommand(value = LOG, help = "Retrieve task execution log")

@@ -72,9 +72,11 @@ public class CurrentTaskExecutionsResource extends RepresentationModel {
 	public void setRunningExecutionCount(int runningExecutionCount) {
 		this.runningExecutionCount = runningExecutionCount;
 	}
-	/**
-	 *
-	 * @param taskExecutionInformation
+
+	/***
+	 * Create a CurrentTaskExecutionsResource
+	 * @param taskExecutionInformation domain object used to create resource
+	 * @return CurrentTaskExecutionsResource to send to the client
 	 */
 	public static CurrentTaskExecutionsResource fromTaskExecutionInformation(
 		PlatformTaskExecutionInformation taskExecutionInformation) {

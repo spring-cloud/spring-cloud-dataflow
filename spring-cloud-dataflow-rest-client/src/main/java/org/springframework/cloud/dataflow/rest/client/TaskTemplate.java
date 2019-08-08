@@ -176,6 +176,13 @@ public class TaskTemplate implements TaskOperations {
 	}
 
 	@Override
+	public void stop(String ids, String platform) {
+		MultiValueMap<String, Object> values = new LinkedMultiValueMap<>();
+		values.add("platform", platform);
+		restTemplate.postForLocation(executionLink.expand(ids).getHref(),values);
+	}
+
+	@Override
 	public void destroy(String name) {
 		restTemplate.delete(definitionLink.expand(name).getHref(), Collections.singletonMap("name", name));
 	}

@@ -187,6 +187,17 @@ public class TaskCommandTests extends AbstractShellIntegrationTest {
 	}
 
 	@Test
+	public void testExecutionStopWithPlatform() {
+		logger.info("Launching instance of task");
+		String taskName = generateUniqueStreamOrTaskName();
+		task().create(taskName, "timestamp");
+		long id = task().launch(taskName);
+		CommandResult cr = task().stopForPlatform(id, "default");
+		assertTrue(cr.toString().contains(
+				String.format("Request to stop the task execution with id(s): %s for platform %s has been submitted", id, "default")));
+	}
+
+	@Test
 	public void testExecutionStopInvalid() {
 		boolean isException = false;
 		try {

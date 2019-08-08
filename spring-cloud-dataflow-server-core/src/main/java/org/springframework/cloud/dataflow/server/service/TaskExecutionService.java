@@ -69,4 +69,12 @@ public interface TaskExecutionService {
 	 * @param ids a set of ids for the task executions to be stopped.
 	 */
 	void stopTaskExecution(Set<Long> ids);
+
+	/**
+	 * Request the platform to stop the task executions for the ids provided.
+	 *
+	 * @param ids a set of ids for the task executions to be stopped.
+	 * @param platform The name of the platform where the tasks are executing.
+	 */
+	void stopTaskExecution(Set<Long> ids, String platform);
 }

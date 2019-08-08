@@ -179,6 +179,8 @@ public abstract class DefaultTaskExecutionServiceTests {
 		@Before
 		public void setupMocks() {
 			this.launcherRepository.save(new Launcher("default", "local", taskLauncher));
+			this.launcherRepository.save(new Launcher("MyPlatform", "local", taskLauncher));
+
 			taskDefinitionRepository.save(new TaskDefinition(TASK_NAME_ORIG, "demo"));
 			taskDefinitionRepository.findAll();
 		}
@@ -232,7 +234,21 @@ public abstract class DefaultTaskExecutionServiceTests {
 			executionIds.add(1L);
 			taskExecutionService.stopTaskExecution(executionIds);
 			String logEntries = outputCapture.toString();
-			assertTrue(logEntries.contains("Task execution stop request for id 1 has been submitted"));
+			assertTrue(logEntries.contains("Task execution stop request for id 1 for platform default has been submitted"));
+		}
+
+		@Test
+		@DirtiesContext
+		public void executeStopForSpecificPlatformTaskTest() {
+			initializeSuccessfulRegistry(appRegistry);
+			when(taskLauncher.launch(any())).thenReturn("0");
+			assertEquals(1L, this.taskExecutionService.executeTask(TASK_NAME_ORIG, new HashMap<>(), new LinkedList<>()));
+
+			Set<Long> executionIds = new HashSet<>(1);
+			executionIds.add(1L);
+			taskExecutionService.stopTaskExecution(executionIds, "MyPlatform");
+			String logEntries = outputCapture.toString();
+			assertTrue(logEntries.contains("Task execution stop request for id 1 for platform MyPlatform has been submitted"));
 		}
 
 		@Test
@@ -466,6 +482,7 @@ public abstract class DefaultTaskExecutionServiceTests {
 		@Before
 		public void setupMocks() {
 			this.launcherRepository.save(new Launcher("default", "local", taskLauncher));
+			this.launcherRepository.save(new Launcher("MyPlatform", "local", taskLauncher));
 		}
 
 		@Test

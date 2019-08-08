@@ -1769,6 +1769,7 @@ The following topics provide more details:
 
 * <<api-guide-resources-task-executions-stopping-request-structure>>
 * <<api-guide-resources-task-executions-stopping-path-parameters>>
+* <<api-guide-resources-task-executions-stopping-request-parameters>>
 * <<api-guide-resources-task-executions-stopping-example-request>>
 * <<api-guide-resources-task-executions-stopping-response-structure>>
 
@@ -1786,7 +1787,10 @@ include::{snippets}/task-executions-documentation/stop-task/http-request.adoc[]
 
 include::{snippets}/task-executions-documentation/stop-task/path-parameters.adoc[]
 
+[[api-guide-resources-task-executions-stopping-request-parameters]]
+===== Request Parameters
 
+include::{snippets}/task-executions-documentation/stop-task/request-parameters.adoc[]
 
 [[api-guide-resources-task-executions-stopping-example-request]]
 ===== Example Request
