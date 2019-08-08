@@ -16,9 +16,9 @@
 
 package org.springframework.cloud.dataflow.server.service.impl;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -265,24 +265,40 @@ public class DefaultTaskExecutionService implements TaskExecutionService {
 
 	@Override
 	public void stopTaskExecution(Set<Long> ids) {
-		final Map<String, Object> auditData = new LinkedHashMap<>();
+		stopTaskExecution(ids, null);
+	}
+
+	@Override
+	public void stopTaskExecution(Set<Long> ids, String platform) {
 		logger.info("Stopping {} task executions.", ids.size());
+
+		Set<TaskExecution> taskExecutions = getValidStopExecutions(ids);
+		Set<TaskExecution> childTaskExecutions = getValidStopChildExecutions(ids);
+		for (TaskExecution taskExecution : taskExecutions) {
+			cancelTaskExecution(taskExecution, platform);
+		}
+		childTaskExecutions.forEach(childTaskExecution -> {
+			cancelTaskExecution(childTaskExecution, platform);
+		});
+
+		updateAuditInfoForTaskStops(taskExecutions.size() + childTaskExecutions.size());
+	}
+
+	private Set<TaskExecution> getValidStopExecutions(Set<Long> ids) {
 		Set<TaskExecution> taskExecutions = getTaskExecutions(ids);
 		validateExternalExecutionIds(taskExecutions);
+		return taskExecutions;
+	}
+
+	private Set<TaskExecution> getValidStopChildExecutions(Set<Long> ids) {
 		Set<Long> childTaskExecutionIds = this.dataflowTaskExecutionDao.findChildTaskExecutionIds(ids);
 		Set<TaskExecution> childTaskExecutions = getTaskExecutions(childTaskExecutionIds);
 		validateExternalExecutionIds(childTaskExecutions);
-		for (TaskExecution taskExecution : taskExecutions) {
-			cancelTaskExecution(taskExecution);
-		}
+		return childTaskExecutions;
+	}
 
-		childTaskExecutions.forEach(childTaskExecution -> {
-			cancelTaskExecution(childTaskExecution);
-		});
-
-		long numberOfExecutionsStopped = ids.size() + childTaskExecutionIds.size();
-
-		auditData.put("Stopped Task Executions", numberOfExecutionsStopped);
+	private void updateAuditInfoForTaskStops(long numberOfExecutionsStopped) {
+		final Map<String, Object> auditData = Collections.singletonMap("Stopped Task Executions", numberOfExecutionsStopped);
 		this.auditRecordService.populateAndSaveAuditRecordUsingMapData(
 				AuditOperationType.TASK, AuditActionType.UNDEPLOY,
 				numberOfExecutionsStopped + " Task Execution Stopped", auditData);
@@ -333,11 +349,18 @@ public class DefaultTaskExecutionService implements TaskExecutionService {
 		return auditedData;
 	}
 
-	private void cancelTaskExecution(TaskExecution taskExecution) {
-		String platformName = this.taskDeploymentRepository.findByTaskDeploymentId(taskExecution.getExternalExecutionId()).getPlatformName();
-		TaskLauncher taskLauncher = findTaskLauncher(platformName);
+	private void cancelTaskExecution(TaskExecution taskExecution, String platformName) {
+		String platformNameToUse;
+		if (StringUtils.hasText(platformName)) {
+			platformNameToUse = platformName;
+		} else {
+			TaskDeployment taskDeployment = this.taskDeploymentRepository.findByTaskDeploymentId(taskExecution.getExternalExecutionId());
+			platformNameToUse = taskDeployment.getPlatformName();
+		}
+		TaskLauncher taskLauncher = findTaskLauncher(platformNameToUse);
 		taskLauncher.cancel(taskExecution.getExternalExecutionId());
-		logger.info(String.format("Task execution stop request for id %s has been submitted", taskExecution.getExecutionId()));
+		this.logger.info(String.format("Task execution stop request for id %s for platform %s has been submitted", taskExecution.getExecutionId(), platformNameToUse));
+
 	}
 
 	private Set<TaskExecution> getTaskExecutions(Set<Long> ids) {

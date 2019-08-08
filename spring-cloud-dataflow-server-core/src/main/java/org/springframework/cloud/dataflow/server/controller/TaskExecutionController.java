@@ -231,8 +231,9 @@ public class TaskExecutionController {
 	 */
 	@RequestMapping(value = "/{id}", method = RequestMethod.POST)
 	@ResponseStatus(HttpStatus.OK)
-	public void stop(@PathVariable("id") Set<Long> ids) {
-		this.taskExecutionService.stopTaskExecution(ids);
+	public void stop(@PathVariable("id") Set<Long> ids,
+	@RequestParam(defaultValue = "", name="platform") String platform) {
+		this.taskExecutionService.stopTaskExecution(ids, platform);
 	}
 
 	private Page<TaskJobExecutionRel> getPageableRelationships(Page<TaskExecution> taskExecutions, Pageable pageable) {

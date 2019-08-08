@@ -63,6 +63,7 @@ public class StreamDefinitionResource extends ResourceSupport {
 	 *
 	 * @param name stream name
 	 * @param dslText stream definition DSL text
+	 * @param description Description of the stream definition
 	 */
 	public StreamDefinitionResource(String name, String dslText) {
 		this.name = name;

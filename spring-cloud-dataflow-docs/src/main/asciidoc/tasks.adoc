@@ -384,6 +384,18 @@ When stopping a task execution that has a running Spring Batch job, the job will
 Each of the supported platforms send a SIG-INT to the task application  when a stop is requested that allows Spring Cloud Task to capture the state of the app, however Spring Batch does not handle a SIG-INT and thus the job stops in the STARTED status. 
 ====
 
+==== Stopping a Task Execution that was started outside of Spring Cloud Data Flow
+
+You may wish to stop a task that has been launched outside of Spring Cloud Data Flow.  An example of this is the worker applications launched by a Remote Batch Partitioned application.
+In such cases the Remote Batch Partitioned Application stores the external-execution-id for each of the worker applications, however no platform information is stored.
+So when Spring Cloud Data Flow has to stop a Remote Batch Partitioned application and its worker applications, you will need to specify the platform name as shown below:
+
+[source,bash]
+----
+dataflow:>task execution stop --ids 1 --platform myplatform
+Request to stop the task execution with id(s): 1 for platform myplatform has been submitted
+----
+
 [[spring-cloud-dataflow-task-events]]
 == Subscribing to Task/Batch Events
 

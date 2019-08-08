@@ -25,7 +25,7 @@ import org.springframework.hateoas.ResourceSupport;
 import org.springframework.util.Assert;
 
 /**
- * A HATEOAS representation of a {@link org.springframework.cloud.scheduler.spi.core.ScheduleInfo}.
+ * A HATEOAS representation of a {@link org.springframework.cloud.deployer.scheduler.spi.core.ScheduleInfo}.
  *
  * @author Glenn Renfro
  */

@@ -78,6 +78,14 @@ public interface TaskOperations {
 	void stop(String ids);
 
 	/**
+	 * Request the stop of a group {@link org.springframework.cloud.task.repository.TaskExecution}s.
+	 *
+	 * @param ids comma delimited set of {@link org.springframework.cloud.task.repository.TaskExecution} ids to stop.
+	 * @param platform the platform name where the task is executing.
+	 */
+	void stop(String ids, String platform);
+
+	/**
 	 * Destroy an existing task.
 	 *
 	 * @param name the name of the task

@@ -127,7 +127,7 @@ public class TaskCommandTemplate {
 	 */
 	public void getTaskExecutionLogInvalidPlatform(String taskName) throws Exception{
 		long id = launchTaskExecutionForLog(taskName);
-		shell.executeCommand(String.format("task execution log --id %s --platform %s", id, "foo"));
+		shell.executeCommand(String.format("task execution log --id %s --platformName %s", id, "foo"));
 	}
 
 	/**
@@ -173,6 +173,17 @@ public class TaskCommandTemplate {
 	 */
 	public CommandResult stop(long id) {
 		CommandResult cr = shell.executeCommand("task execution stop --ids "+ id);
+		return cr;
+	}
+
+	/**
+	 * Stop a task execution.
+	 *
+	 * @param id the id of a {@link org.springframework.cloud.task.repository.TaskExecution}
+	 * @param platform the name of the platform where the task is executing.
+	 */
+	public CommandResult stopForPlatform(long id, String platform) {
+		CommandResult cr = shell.executeCommand(String.format("task execution stop --ids %s --platformName %s", id, platform));
 		return cr;
 	}
 
