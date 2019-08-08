@@ -183,13 +183,16 @@ public class TaskExecutionsDocumentation extends BaseDocumentation {
 						.param("arguments", "--server.port=8080 --foo=bar"))
 				.andExpect(status().isCreated());
 		this.mockMvc.perform(
-				post("/tasks/executions/{id}", 1))
+				post("/tasks/executions/{id}", 1)
+						.param("platform", "default"))
 				.andDo(print())
 				.andExpect(status().isOk())
 				.andDo(this.documentationHandler.document(
 						pathParameters(
 								parameterWithName("id").description("The ids of an existing task execution (required)")
-						)));
+						),
+						requestParameters(parameterWithName("platform")
+								.description("The platform associated with the task execution(optional)"))));
 	}
 
 	@Test

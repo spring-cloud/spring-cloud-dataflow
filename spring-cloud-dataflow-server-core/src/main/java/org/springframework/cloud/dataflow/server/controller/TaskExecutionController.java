@@ -49,6 +49,7 @@ import org.springframework.hateoas.server.ExposesResourceFor;
 import org.springframework.hateoas.server.mvc.RepresentationModelAssemblerSupport;
 import org.springframework.http.HttpStatus;
 import org.springframework.util.Assert;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -231,8 +232,14 @@ public class TaskExecutionController {
 	 */
 	@RequestMapping(value = "/{id}", method = RequestMethod.POST)
 	@ResponseStatus(HttpStatus.OK)
-	public void stop(@PathVariable("id") Set<Long> ids) {
-		this.taskExecutionService.stopTaskExecution(ids);
+	public void stop(@PathVariable("id") Set<Long> ids,
+	@RequestParam(defaultValue = "", name="platform") String platform) {
+		if(StringUtils.hasText(platform)) {
+			this.taskExecutionService.stopTaskExecution(ids, platform);
+		}
+		else {
+			this.taskExecutionService.stopTaskExecution(ids);
+		}
 	}
 
 	private Page<TaskJobExecutionRel> getPageableRelationships(Page<TaskExecution> taskExecutions, Pageable pageable) {

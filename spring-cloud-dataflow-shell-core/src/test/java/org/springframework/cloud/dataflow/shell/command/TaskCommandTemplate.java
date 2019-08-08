@@ -176,6 +176,17 @@ public class TaskCommandTemplate {
 		return cr;
 	}
 
+	/**
+	 * Stop a task execution.
+	 *
+	 * @param id the id of a {@link org.springframework.cloud.task.repository.TaskExecution}
+	 * @param platform the name of the platform where the task is executing.
+	 */
+	public CommandResult stopForPlatform(long id, String platform) {
+		CommandResult cr = shell.executeCommand(String.format("task execution stop --ids %s --platform %s", id, platform));
+		return cr;
+	}
+
 
 	/**
 	 * Executes a task execution list.
