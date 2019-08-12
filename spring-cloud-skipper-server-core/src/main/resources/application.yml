@@ -48,7 +48,13 @@ spring:
           property-excludes:
             - spring.cloud.deployer.local.maximum-concurrent-tasks
             - spring.cloud.deployer.kubernetes.maximum-concurrent-tasks
-            - spring.cloud.deployer.cloundfoundry.maximum-concurrent-tasks
+            - spring.cloud.deployer.cloudfoundry.maximum-concurrent-tasks
+            - spring.cloud.deployer.cloudfoundry.org
+            - spring.cloud.deployer.cloudfoundry.space
+            - spring.cloud.deployer.cloudfoundry.url
+            - spring.cloud.deployer.cloudfoundry.username
+            - spring.cloud.deployer.cloudfoundry.password
+            - spring.cloud.deployer.cloudfoundry.skip-ssl-validation
       security:
         authorization:
           enabled: true
