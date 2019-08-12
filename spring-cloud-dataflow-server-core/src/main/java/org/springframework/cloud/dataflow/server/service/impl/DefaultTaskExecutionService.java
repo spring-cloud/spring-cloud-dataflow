@@ -30,7 +30,7 @@ import java.util.stream.StreamSupport;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import org.springframework.cloud.common.security.ManualOAuthAuthenticationDetails;
+import org.springframework.cloud.common.security.support.TokenUtils;
 import org.springframework.cloud.dataflow.audit.service.AuditRecordService;
 import org.springframework.cloud.dataflow.core.AuditActionType;
 import org.springframework.cloud.dataflow.core.AuditOperationType;
@@ -53,10 +53,6 @@ import org.springframework.cloud.deployer.spi.task.TaskLauncher;
 import org.springframework.cloud.task.repository.TaskExecution;
 import org.springframework.cloud.task.repository.TaskExplorer;
 import org.springframework.cloud.task.repository.TaskRepository;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.oauth2.provider.OAuth2Authentication;
-import org.springframework.security.oauth2.provider.authentication.OAuth2AuthenticationDetails;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
@@ -205,28 +201,7 @@ public class DefaultTaskExecutionService implements TaskExecutionService {
 			}
 
 			if (!containsAccessToken) {
-				final Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-				final String token;
-				if (authentication != null && authentication instanceof OAuth2Authentication) {
-					final OAuth2Authentication auth2Authentication = (OAuth2Authentication) authentication;
-
-					if (auth2Authentication.getDetails() instanceof OAuth2AuthenticationDetails) {
-						final OAuth2AuthenticationDetails auth2AuthenticationDetails =
-							(OAuth2AuthenticationDetails) auth2Authentication.getDetails();
-						token = auth2AuthenticationDetails.getTokenValue();
-					}
-					else if (auth2Authentication.getDetails() instanceof ManualOAuthAuthenticationDetails) {
-						ManualOAuthAuthenticationDetails manualOAuthAuthenticationDetails =
-							(ManualOAuthAuthenticationDetails) auth2Authentication.getDetails();
-						token = manualOAuthAuthenticationDetails.getAccessToken().getValue();
-					}
-					else {
-						token = null;
-					}
-				}
-				else {
-					token = null;
-				}
+				final String token = TokenUtils.getAccessToken();
 
 				if (token != null) {
 					final String accessTokenCommandLineArg = "--dataflow-server-access-token=" + token;
