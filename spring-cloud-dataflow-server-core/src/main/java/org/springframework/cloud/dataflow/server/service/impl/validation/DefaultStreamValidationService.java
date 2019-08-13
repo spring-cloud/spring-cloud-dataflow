@@ -48,7 +48,8 @@ public class DefaultStreamValidationService extends DefaultValidationService imp
 				.orElseThrow(() -> new NoSuchStreamDefinitionException(name));
 		ValidationStatus validationStatus = new ValidationStatus(
 				definition.getName(),
-				definition.getDslText());
+				definition.getDslText(),
+				definition.getDescription());
 		for (StreamAppDefinition streamAppDefinition : definition.getAppDefinitions()) {
 			ApplicationType appType = streamAppDefinition.getApplicationType();
 			boolean status = this.validate(streamAppDefinition.getName(), appType);

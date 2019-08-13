@@ -67,18 +67,21 @@ public class StreamDefinitionsDocumentation extends BaseDocumentation {
 			post("/streams/definitions")
 					.param("name", "timelog")
 					.param("definition", "time --format='YYYY MM DD' | log")
+					.param("description", "Demo stream for testing")
 					.param("deploy", "false"))
 			.andExpect(status().isCreated())
 			.andDo(this.documentationHandler.document(
 				requestParameters(
 					parameterWithName("name").description("The name for the created task definitions"),
 					parameterWithName("definition").description("The definition for the stream, using Data Flow DSL"),
+					parameterWithName("description").description("The description of the stream definition"),
 					parameterWithName("deploy")
 						.description("If true, the stream is deployed upon creation (default is false)")),
 				responseFields(
 						fieldWithPath("name").description("The name of the created stream definition"),
 						fieldWithPath("dslText").description("The DSL of the created stream definition"),
 						fieldWithPath("status").description("The status of the created stream definition"),
+						fieldWithPath("description").description("The description of the stream definition"),
 						fieldWithPath("statusDescription")
 								.description("The status description of the created stream definition"),
 						subsectionWithPath("_links.self").description("Link to the created stream definition resource")
@@ -123,6 +126,7 @@ public class StreamDefinitionsDocumentation extends BaseDocumentation {
 					fieldWithPath("name").description("The name of the stream definition"),
 					fieldWithPath("dslText").description("The DSL of the stream definition"),
 					fieldWithPath("status").description("The status of the stream definition"),
+					fieldWithPath("description").description("The description of the stream definition"),
 					fieldWithPath("statusDescription")
 							.description("The status description of the stream definition"),
 					subsectionWithPath("_links.self").description("Link to the stream definition resource")

@@ -16,6 +16,8 @@
 
 package org.springframework.cloud.dataflow.server.service;
 
+import org.springframework.cloud.dataflow.core.TaskDefinition;
+
 /**
  * Provides task saving service.
  *
@@ -26,8 +28,7 @@ public interface TaskSaveService {
      * Saves the task definition. If it is a Composed Task then the task definitions required
      * for a ComposedTaskRunner task are also created.
      *
-     * @param name The name of the task.
-     * @param dsl The dsl that comprises the task.
+     * @param taskDefinition the task definition object
      */
-    void saveTaskDefinition(String name, String dsl);
+    void saveTaskDefinition(TaskDefinition taskDefinition);
 }

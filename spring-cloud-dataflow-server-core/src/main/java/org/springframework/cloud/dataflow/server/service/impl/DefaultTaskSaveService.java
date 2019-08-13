@@ -77,14 +77,13 @@ public class DefaultTaskSaveService implements TaskSaveService {
 
 	@Override
 	@Transactional
-	public void saveTaskDefinition(String name, String dsl) {
-		TaskParser taskParser = new TaskParser(name, dsl, true, true);
+	public void saveTaskDefinition(TaskDefinition taskDefinition) {
+		TaskParser taskParser = new TaskParser(taskDefinition.getTaskName(), taskDefinition.getDslText(), true, true);
 		TaskNode taskNode = taskParser.parse();
-		TaskDefinition taskDefinition = new TaskDefinition(name, dsl);
-		if (taskDefinitionRepository.existsById(name)) {
+		if (taskDefinitionRepository.existsById(taskDefinition.getTaskName())) {
 			throw new DuplicateTaskException(String.format(
 					"Cannot register task %s because another one has already " + "been registered with the same name",
-					name));
+					taskDefinition.getTaskName()));
 		}
 		if (taskNode.isComposed()) {
 			// Create the child task definitions needed for the composed task
@@ -105,7 +104,7 @@ public class DefaultTaskSaveService implements TaskSaveService {
 		}
 		auditRecordService.populateAndSaveAuditRecord(
 				AuditOperationType.TASK, AuditActionType.CREATE,
-				name, argumentSanitizer.sanitizeTaskDsl(taskDefinition));
+				taskDefinition.getTaskName(), argumentSanitizer.sanitizeTaskDsl(taskDefinition));
 	}
 
 	private void saveStandardTaskDefinition(TaskDefinition taskDefinition) {

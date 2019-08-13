@@ -28,7 +28,7 @@ public class TaskAppStatusResource extends AbstractDefinitionAppStatusResource<T
 	protected TaskAppStatusResource() {
 	}
 
-	public TaskAppStatusResource(String appName, String DSL, Map<String, String> appStatuses) {
-		super(appName, DSL, appStatuses);
+	public TaskAppStatusResource(String appName, String dsl, String description, Map<String, String> appStatuses) {
+		super(appName, dsl, description, appStatuses);
 	}
 }

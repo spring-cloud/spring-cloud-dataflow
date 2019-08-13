@@ -30,12 +30,23 @@ public class ValidationStatus {
 
 	private String definitionDsl;
 
+	private String description;
+
 	private Map<String, String> appsStatuses;
 
-	public ValidationStatus(String definitionName, String definitionDsl) {
+	public ValidationStatus(String definitionName, String definitionDsl, String description) {
 		this.definitionName = definitionName;
 		this.definitionDsl = definitionDsl;
+		this.description = description;
 		this.appsStatuses = new HashMap<>();
+	}
+
+	public String getDescription() {
+		return description;
+	}
+
+	public void setDescription(String description) {
+		this.description = description;
 	}
 
 	public String getDefinitionName() {

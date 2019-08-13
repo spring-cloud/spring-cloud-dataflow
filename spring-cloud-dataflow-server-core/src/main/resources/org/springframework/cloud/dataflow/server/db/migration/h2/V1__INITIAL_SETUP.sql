@@ -37,12 +37,14 @@ create table audit_records (
 create table stream_definitions (
   definition_name varchar(255) not null,
   definition clob,
+  description varchar(255),
   primary key (definition_name)
 );
 
 create table task_definitions (
   definition_name varchar(255) not null,
   definition clob,
+  description varchar(255),
   primary key (definition_name)
 );
 

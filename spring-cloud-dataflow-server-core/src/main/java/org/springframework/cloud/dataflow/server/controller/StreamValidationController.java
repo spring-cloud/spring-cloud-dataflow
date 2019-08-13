@@ -16,9 +16,6 @@
 
 package org.springframework.cloud.dataflow.server.controller;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import org.springframework.cloud.dataflow.rest.resource.StreamAppStatusResource;
 import org.springframework.cloud.dataflow.server.service.StreamService;
 import org.springframework.cloud.dataflow.server.service.ValidationStatus;
@@ -42,8 +39,6 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/streams/validation")
 @ExposesResourceFor(StreamAppStatusResource.class)
 public class StreamValidationController {
-
-	private static final Logger logger = LoggerFactory.getLogger(StreamValidationController.class);
 
 	/**
 	 * The service that is responsible for validating streams.
@@ -86,7 +81,7 @@ public class StreamValidationController {
 
 		@Override
 		public StreamAppStatusResource toModel(ValidationStatus entity) {
-			return new StreamAppStatusResource(entity.getDefinitionName(), entity.getDefinitionDsl(), entity.getAppsStatuses());
+			return new StreamAppStatusResource(entity.getDefinitionName(), entity.getDefinitionDsl(), entity.getDescription(), entity.getAppsStatuses());
 		}
 	}
 }

@@ -105,12 +105,14 @@ public class TaskDefinitionController {
 	 *
 	 * @param name name the name of the task
 	 * @param dsl DSL definition for the task
+	 * @param description description of the task definition
 	 * @return the task definition
 	 */
 	@RequestMapping(value = "", method = RequestMethod.POST)
-	public TaskDefinitionResource save(@RequestParam("name") String name, @RequestParam("definition") String dsl) {
-		TaskDefinition taskDefinition = new TaskDefinition(name, dsl);
-		taskSaveService.saveTaskDefinition(name, dsl);
+	public TaskDefinitionResource save(@RequestParam("name") String name, @RequestParam("definition") String dsl,
+									   @RequestParam(value = "description", defaultValue = "") String description) {
+		TaskDefinition taskDefinition = new TaskDefinition(name, dsl, description);
+		taskSaveService.saveTaskDefinition(taskDefinition);
 		return taskAssembler.toModel(new TaskExecutionAwareTaskDefinition(taskDefinition));
 	}
 
@@ -222,7 +224,8 @@ public class TaskDefinitionController {
 					.isComposedTaskDefinition(taskExecutionAwareTaskDefinition.getTaskDefinition().getDslText());
 			TaskDefinitionResource taskDefinitionResource = new TaskDefinitionResource(
 					taskExecutionAwareTaskDefinition.getTaskDefinition().getName(),
-					argumentSanitizer.sanitizeTaskDsl(taskExecutionAwareTaskDefinition.getTaskDefinition()));
+					argumentSanitizer.sanitizeTaskDsl(taskExecutionAwareTaskDefinition.getTaskDefinition()),
+					taskExecutionAwareTaskDefinition.getTaskDefinition().getDescription());
 			if (taskExecutionAwareTaskDefinition.getLatestTaskExecution() != null) {
 				taskDefinitionResource.setLastTaskExecution(
 						new TaskExecutionResource(taskExecutionAwareTaskDefinition.getLatestTaskExecution()));

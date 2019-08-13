@@ -48,6 +48,11 @@ public class StreamDefinitionResource extends RepresentationModel<StreamDefiniti
 	private String status;
 
 	/**
+	 * Description of the stream definition.
+	 */
+	private String description;
+
+	/**
 	 * Description of the Stream status.
 	 */
 	private String statusDescription;
@@ -64,9 +69,10 @@ public class StreamDefinitionResource extends RepresentationModel<StreamDefiniti
 	 * @param name stream name
 	 * @param dslText stream definition DSL text
 	 */
-	public StreamDefinitionResource(String name, String dslText) {
+	public StreamDefinitionResource(String name, String dslText, String description) {
 		this.name = name;
 		this.dslText = dslText;
+		this.description = description;
 	}
 
 	/**
@@ -85,6 +91,15 @@ public class StreamDefinitionResource extends RepresentationModel<StreamDefiniti
 	 */
 	public String getDslText() {
 		return this.dslText;
+	}
+
+	/**
+	 * Return the description of the stream definition.
+	 *
+	 * @return stream definition description
+	 */
+	public String getDescription() {
+		return description;
 	}
 
 	/**

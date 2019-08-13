@@ -60,16 +60,19 @@ public class TaskDefinitionsDocumentation extends BaseDocumentation {
 		this.mockMvc.perform(
 			post("/tasks/definitions")
 				.param("name", "my-task")
-				.param("definition", "timestamp --format='YYYY MM DD'"))
+				.param("definition", "timestamp --format='YYYY MM DD'")
+				.param("description", "Demo task definition for testing"))
 			.andExpect(status().isOk())
 			.andDo(this.documentationHandler.document(
 				requestParameters(
 					parameterWithName("name").description("The name for the created task definition"),
-					parameterWithName("definition").description("The definition for the task, using Data Flow DSL")
+					parameterWithName("definition").description("The definition for the task, using Data Flow DSL"),
+					parameterWithName("description").description("The description of the task definition")
 				),
 				responseFields(
 					fieldWithPath("name").description("The name of the created task definition"),
 					fieldWithPath("dslText").description("The DSL of the created task definition"),
+					fieldWithPath("description").description("The description of the task definition"),
 					fieldWithPath("composed").description("The compose attribute of the created task definition"),
 					fieldWithPath("lastTaskExecution")
 							.description("The last task execution of the created task definition"),
@@ -117,6 +120,7 @@ public class TaskDefinitionsDocumentation extends BaseDocumentation {
 				responseFields(
 					fieldWithPath("name").description("The name of the created task definition"),
 					fieldWithPath("dslText").description("The DSL of the created task definition"),
+					fieldWithPath("description").description("The description of the task definition"),
 					fieldWithPath("composed").description("The compose attribute of the created task definition"),
 					fieldWithPath("lastTaskExecution")
 						.description("The last task execution of the created task definition"),

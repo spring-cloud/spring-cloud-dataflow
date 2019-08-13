@@ -180,7 +180,7 @@ public abstract class DefaultTaskExecutionServiceTests {
 		@DirtiesContext
 		public void createSimpleTask() {
 			initializeSuccessfulRegistry(appRegistry);
-			taskSaveService.saveTaskDefinition("simpleTask", "AAA --foo=bar");
+			taskSaveService.saveTaskDefinition(new TaskDefinition("simpleTask", "AAA --foo=bar"));
 			verifyTaskExistsInRepo("simpleTask", "AAA --foo=bar", taskDefinitionRepository);
 		}
 
@@ -397,7 +397,7 @@ public abstract class DefaultTaskExecutionServiceTests {
 		@DirtiesContext
 		public void validateValidTaskTest() {
 			initializeSuccessfulRegistry(appRegistry);
-			taskSaveService.saveTaskDefinition("simpleTask", "AAA --foo=bar");
+			taskSaveService.saveTaskDefinition(new TaskDefinition("simpleTask", "AAA --foo=bar"));
 			ValidationStatus validationStatus = taskValidationService.validateTask("simpleTask");
 			assertEquals("valid", validationStatus.getAppsStatuses().get("task:simpleTask"));
 		}
@@ -414,7 +414,7 @@ public abstract class DefaultTaskExecutionServiceTests {
 		@DirtiesContext
 		public void validateInvalidTaskTest() {
 			initializeFailRegistry(appRegistry);
-			taskSaveService.saveTaskDefinition("simpleTask", "AAA --foo=bar");
+			taskSaveService.saveTaskDefinition(new TaskDefinition("simpleTask", "AAA --foo=bar"));
 			ValidationStatus validationStatus = taskValidationService.validateTask("simpleTask");
 			assertEquals("invalid", validationStatus.getAppsStatuses().get("task:simpleTask"));
 		}
@@ -423,7 +423,7 @@ public abstract class DefaultTaskExecutionServiceTests {
 		@DirtiesContext
 		public void validateNullResourceTaskTest() {
 			initializeNullRegistry(appRegistry);
-			taskSaveService.saveTaskDefinition("simpleTask", "AAA --foo=bar");
+			taskSaveService.saveTaskDefinition(new TaskDefinition("simpleTask", "AAA --foo=bar"));
 			ValidationStatus validationStatus = taskValidationService.validateTask("simpleTask");
 			assertEquals("invalid", validationStatus.getAppsStatuses().get("task:simpleTask"));
 		}
@@ -467,7 +467,7 @@ public abstract class DefaultTaskExecutionServiceTests {
 			String dsl = "AAA && BBB";
 			initializeSuccessfulRegistry(appRegistry);
 
-			taskSaveService.saveTaskDefinition("seqTask", dsl);
+			taskSaveService.saveTaskDefinition(new TaskDefinition("seqTask", dsl));
 			when(taskLauncher.launch(any())).thenReturn("0");
 			when(appRegistry.appExist(anyString(), any(ApplicationType.class))).thenReturn(true);
 			Map<String, String> properties = new HashMap<>();
@@ -499,7 +499,7 @@ public abstract class DefaultTaskExecutionServiceTests {
 			String dsl = "AAA && BBB";
 			initializeSuccessfulRegistry(appRegistry);
 
-			taskSaveService.saveTaskDefinition("seqTask", dsl);
+			taskSaveService.saveTaskDefinition(new TaskDefinition("seqTask", dsl));
 			when(taskLauncher.launch(any())).thenReturn("0");
 			Map<String, String> properties = new HashMap<>();
 			properties.put("app.foo", "bar");
@@ -516,7 +516,7 @@ public abstract class DefaultTaskExecutionServiceTests {
 			initializeSuccessfulRegistry(appRegistry);
 			when(appRegistry.appExist(anyString(), any(ApplicationType.class))).thenReturn(true);
 
-			taskSaveService.saveTaskDefinition("seqTask", dsl);
+			taskSaveService.saveTaskDefinition(new TaskDefinition("seqTask", dsl));
 			when(taskLauncher.launch(any())).thenReturn("0");
 
 			Map<String, String> properties = new HashMap<>();
@@ -548,7 +548,7 @@ public abstract class DefaultTaskExecutionServiceTests {
 			String dsl = "t1: AAA && t2: BBB";
 			initializeSuccessfulRegistry(appRegistry);
 
-			taskSaveService.saveTaskDefinition("seqTask", dsl);
+			taskSaveService.saveTaskDefinition(new TaskDefinition("seqTask", dsl));
 			when(taskLauncher.launch(any())).thenReturn("0");
 
 			Map<String, String> properties = new HashMap<>();
@@ -572,7 +572,7 @@ public abstract class DefaultTaskExecutionServiceTests {
 		public void createSequenceComposedTask() {
 			initializeSuccessfulRegistry(appRegistry);
 			String dsl = "AAA && BBB";
-			taskSaveService.saveTaskDefinition("seqTask", dsl);
+			taskSaveService.saveTaskDefinition(new TaskDefinition("seqTask", dsl));
 			verifyTaskExistsInRepo("seqTask", dsl, taskDefinitionRepository);
 
 			verifyTaskExistsInRepo("seqTask-AAA", "AAA", taskDefinitionRepository);
@@ -584,7 +584,7 @@ public abstract class DefaultTaskExecutionServiceTests {
 		public void createSplitComposedTask() {
 			initializeSuccessfulRegistry(appRegistry);
 			String dsl = "<AAA || BBB>";
-			taskSaveService.saveTaskDefinition("splitTask", dsl);
+			taskSaveService.saveTaskDefinition(new TaskDefinition("splitTask", dsl));
 			verifyTaskExistsInRepo("splitTask", dsl, taskDefinitionRepository);
 
 			verifyTaskExistsInRepo("splitTask-AAA", "AAA", taskDefinitionRepository);
@@ -613,7 +613,7 @@ public abstract class DefaultTaskExecutionServiceTests {
 		public void createTransitionComposedTask() {
 			initializeSuccessfulRegistry(appRegistry);
 			String dsl = "AAA 'FAILED' -> BBB '*' -> CCC";
-			taskSaveService.saveTaskDefinition("transitionTask", dsl);
+			taskSaveService.saveTaskDefinition(new TaskDefinition("transitionTask", dsl));
 			verifyTaskExistsInRepo("transitionTask", dsl, taskDefinitionRepository);
 
 			verifyTaskExistsInRepo("transitionTask-AAA", "AAA", taskDefinitionRepository);
@@ -626,8 +626,8 @@ public abstract class DefaultTaskExecutionServiceTests {
 			initializeSuccessfulRegistry(appRegistry);
 			String taskDsl1 = "AAA && BBB && CCC";
 			String taskDsl2 = "DDD";
-			taskSaveService.saveTaskDefinition("deleteTask1", taskDsl1);
-			taskSaveService.saveTaskDefinition("deleteTask2", taskDsl2);
+			taskSaveService.saveTaskDefinition(new TaskDefinition("deleteTask1", taskDsl1));
+			taskSaveService.saveTaskDefinition(new TaskDefinition("deleteTask2", taskDsl2));
 			verifyTaskExistsInRepo("deleteTask1-AAA", "AAA", taskDefinitionRepository);
 			verifyTaskExistsInRepo("deleteTask1-BBB", "BBB", taskDefinitionRepository);
 			verifyTaskExistsInRepo("deleteTask1-CCC", "CCC", taskDefinitionRepository);
@@ -644,7 +644,7 @@ public abstract class DefaultTaskExecutionServiceTests {
 		public void deleteComposedTask() {
 			initializeSuccessfulRegistry(appRegistry);
 			String dsl = "AAA && BBB && CCC";
-			taskSaveService.saveTaskDefinition("deleteTask", dsl);
+			taskSaveService.saveTaskDefinition(new TaskDefinition("deleteTask", dsl));
 			verifyTaskExistsInRepo("deleteTask-AAA", "AAA", taskDefinitionRepository);
 			verifyTaskExistsInRepo("deleteTask-BBB", "BBB", taskDefinitionRepository);
 			verifyTaskExistsInRepo("deleteTask-CCC", "CCC", taskDefinitionRepository);
@@ -660,7 +660,7 @@ public abstract class DefaultTaskExecutionServiceTests {
 		public void deleteComposedTaskMissingChildTasks() {
 			initializeSuccessfulRegistry(appRegistry);
 			String dsl = "AAA && BBB && CCC";
-			taskSaveService.saveTaskDefinition("deleteTask", dsl);
+			taskSaveService.saveTaskDefinition(new TaskDefinition("deleteTask", dsl));
 			verifyTaskExistsInRepo("deleteTask-AAA", "AAA", taskDefinitionRepository);
 			verifyTaskExistsInRepo("deleteTask-BBB", "BBB", taskDefinitionRepository);
 			verifyTaskExistsInRepo("deleteTask-CCC", "CCC", taskDefinitionRepository);
@@ -675,9 +675,9 @@ public abstract class DefaultTaskExecutionServiceTests {
 		@DirtiesContext
 		public void deleteComposedTaskDeleteOnlyChildren() {
 			initializeSuccessfulRegistry(appRegistry);
-			taskSaveService.saveTaskDefinition("deleteTask-AAA", "AAA");
+			taskSaveService.saveTaskDefinition(new TaskDefinition("deleteTask-AAA", "AAA"));
 			String dsl = "BBB && CCC";
-			taskSaveService.saveTaskDefinition("deleteTask", dsl);
+			taskSaveService.saveTaskDefinition(new TaskDefinition("deleteTask", dsl));
 			verifyTaskExistsInRepo("deleteTask-AAA", "AAA", taskDefinitionRepository);
 			verifyTaskExistsInRepo("deleteTask-BBB", "BBB", taskDefinitionRepository);
 			verifyTaskExistsInRepo("deleteTask-CCC", "CCC", taskDefinitionRepository);
@@ -694,7 +694,7 @@ public abstract class DefaultTaskExecutionServiceTests {
 		public void deleteComposedTaskWithLabel() {
 			initializeSuccessfulRegistry(appRegistry);
 			String dsl = "LLL: AAA && BBB";
-			taskSaveService.saveTaskDefinition("deleteTask", dsl);
+			taskSaveService.saveTaskDefinition(new TaskDefinition("deleteTask", dsl));
 			verifyTaskExistsInRepo("deleteTask-LLL", "AAA", taskDefinitionRepository);
 			verifyTaskExistsInRepo("deleteTask-BBB", "BBB", taskDefinitionRepository);
 			verifyTaskExistsInRepo("deleteTask", dsl, taskDefinitionRepository);
@@ -711,7 +711,7 @@ public abstract class DefaultTaskExecutionServiceTests {
 			initializeFailRegistry(appRegistry);
 			boolean isExceptionThrown = false;
 			try {
-				taskSaveService.saveTaskDefinition("splitTask", dsl);
+				taskSaveService.saveTaskDefinition(new TaskDefinition("splitTask", dsl));
 			}
 			catch (IllegalArgumentException iae) {
 				isExceptionThrown = true;
@@ -728,9 +728,9 @@ public abstract class DefaultTaskExecutionServiceTests {
 			String dsl = "AAA && BBB";
 			initializeSuccessfulRegistry(appRegistry);
 			boolean isExceptionThrown = false;
-			taskSaveService.saveTaskDefinition("splitTask", dsl);
+			taskSaveService.saveTaskDefinition(new TaskDefinition("splitTask", dsl));
 			try {
-				taskSaveService.saveTaskDefinition("splitTask", dsl);
+				taskSaveService.saveTaskDefinition(new TaskDefinition("splitTask", dsl));
 			}
 			catch (DuplicateTaskException de) {
 				isExceptionThrown = true;
@@ -747,9 +747,9 @@ public abstract class DefaultTaskExecutionServiceTests {
 			String dsl = "AAA && BBB";
 			initializeSuccessfulRegistry(appRegistry);
 			boolean isExceptionThrown = false;
-			taskSaveService.saveTaskDefinition("splitTask-BBB", "BBB");
+			taskSaveService.saveTaskDefinition(new TaskDefinition("splitTask-BBB", "BBB"));
 			try {
-				taskSaveService.saveTaskDefinition("splitTask", dsl);
+				taskSaveService.saveTaskDefinition(new TaskDefinition("splitTask", dsl));
 			}
 			catch (DuplicateTaskException de) {
 				isExceptionThrown = true;

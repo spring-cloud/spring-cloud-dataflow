@@ -41,7 +41,7 @@ import org.springframework.util.StringUtils;
  */
 public class DefaultTaskValidationService extends DefaultValidationService implements TaskValidationService {
 
-	private static final int MAX_APPNAME_LENGTH = 63;
+	private static final int MAX_APP_NAME_LENGTH = 63;
 
 	private final TaskDefinitionRepository taskDefinitionRepository;
 
@@ -66,7 +66,8 @@ public class DefaultTaskValidationService extends DefaultValidationService imple
 		}
 		ValidationStatus validationStatus = new ValidationStatus(
 				definition.getName(),
-				definition.getDslText());
+				definition.getDslText(),
+				definition.getDescription());
 		ApplicationType appType = ApplicationType.task;
 		if (TaskServiceUtils.isComposedTaskDefinition(definition.getDslText())) {
 			// First verify that CTR is valid
@@ -100,8 +101,8 @@ public class DefaultTaskValidationService extends DefaultValidationService imple
 	}
 
 	private void validateTaskName(String taskName) {
-		if (taskName.length() > MAX_APPNAME_LENGTH) {
-			throw new TaskException("The task name should not exceed "+ MAX_APPNAME_LENGTH+ " in length.");
+		if (taskName.length() > MAX_APP_NAME_LENGTH) {
+			throw new TaskException("The task name should not exceed "+ MAX_APP_NAME_LENGTH + " in length.");
 		}
 	}
 }

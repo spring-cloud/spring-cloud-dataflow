@@ -28,7 +28,7 @@ public class StreamAppStatusResource extends AbstractDefinitionAppStatusResource
 	protected StreamAppStatusResource() {
 	}
 
-	public StreamAppStatusResource(String appName, String DSL, Map<String, String> appStatuses) {
-		super(appName, DSL, appStatuses);
+	public StreamAppStatusResource(String appName, String dsl, String description, Map<String, String> appStatuses) {
+		super(appName, dsl, description, appStatuses);
 	}
 }
