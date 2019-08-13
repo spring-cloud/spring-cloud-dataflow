@@ -135,7 +135,7 @@ public class DefaultTaskExecutionServiceTransactionTests {
 				launcherRepository, auditRecordService, taskRepository,
 				taskExecutionInfoService, mock(TaskDeploymentRepository.class),
 				taskExecutionRepositoryService, taskAppDeploymentRequestCreator,
-				this.taskExplorer, this.dataflowTaskExecutionDao, this.taskConfigurationProperties);
+				this.taskExplorer, this.dataflowTaskExecutionDao);
 
 	}
 

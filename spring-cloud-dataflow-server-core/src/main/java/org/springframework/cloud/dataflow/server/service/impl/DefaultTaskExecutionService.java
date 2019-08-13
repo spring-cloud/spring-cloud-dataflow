@@ -104,8 +104,6 @@ public class DefaultTaskExecutionService implements TaskExecutionService {
 
 	private final DataflowTaskExecutionDao dataflowTaskExecutionDao;
 
-	private final TaskConfigurationProperties taskConfigurationProperties;
-
 	public static final String TASK_DEFINITION_DSL_TEXT = "taskDefinitionDslText";
 
 	public static final String TASK_DEPLOYMENT_PROPERTIES = "taskDeploymentProperties";
@@ -132,8 +130,7 @@ public class DefaultTaskExecutionService implements TaskExecutionService {
 			TaskExecutionCreationService taskExecutionRepositoryService,
 			TaskAppDeploymentRequestCreator taskAppDeploymentRequestCreator,
 			TaskExplorer taskExplorer,
-			DataflowTaskExecutionDao dataflowTaskExecutionDao,
-			TaskConfigurationProperties taskConfigurationProperties) {
+			DataflowTaskExecutionDao dataflowTaskExecutionDao) {
 		Assert.notNull(launcherRepository, "launcherRepository must not be null");
 		Assert.notNull(auditRecordService, "auditRecordService must not be null");
 		Assert.notNull(taskExecutionInfoService, "taskExecutionInfoService must not be null");
@@ -144,7 +141,6 @@ public class DefaultTaskExecutionService implements TaskExecutionService {
 		Assert.notNull(taskAppDeploymentRequestCreator, "taskAppDeploymentRequestCreator must not be null");
 		Assert.notNull(taskExplorer, "taskExplorer must not be null");
 		Assert.notNull(dataflowTaskExecutionDao, "dataflowTaskExecutionDao must not be null");
-		Assert.notNull(taskConfigurationProperties, "taskConfigurationProperties must not be null");
 
 		this.launcherRepository = launcherRepository;
 		this.auditRecordService = auditRecordService;
@@ -155,7 +151,6 @@ public class DefaultTaskExecutionService implements TaskExecutionService {
 		this.taskAppDeploymentRequestCreator = taskAppDeploymentRequestCreator;
 		this.taskExplorer = taskExplorer;
 		this.dataflowTaskExecutionDao = dataflowTaskExecutionDao;
-		this.taskConfigurationProperties = taskConfigurationProperties;
 	}
 
 
@@ -191,7 +186,8 @@ public class DefaultTaskExecutionService implements TaskExecutionService {
 
 		TaskExecution taskExecution = taskExecutionRepositoryService.createTaskExecution(taskName);
 
-		if (taskConfigurationProperties.getComposedTaskRunnerName().equals(taskExecutionInformation.getTaskDefinition().getTaskName())) {
+		if (StringUtils.hasText(taskExecutionInformation.getTaskDefinition().getDslText())
+				&& TaskServiceUtils.isComposedTaskDefinition(taskExecutionInformation.getTaskDefinition().getDslText())) {
 			boolean containsAccessToken = false;
 
 			for (String commandLineArg : commandLineArgs) {

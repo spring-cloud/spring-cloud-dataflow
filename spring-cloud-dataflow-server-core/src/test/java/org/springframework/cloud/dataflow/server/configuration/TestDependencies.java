@@ -498,13 +498,12 @@ public class TestDependencies extends WebMvcConfigurationSupport {
 			TaskDeploymentRepository taskDeploymentRepository,
 			TaskExecutionCreationService taskExecutionRepositoryService,
 			TaskAppDeploymentRequestCreator taskAppDeploymentRequestCreator,
-			TaskExplorer taskExplorer, DataflowTaskExecutionDao dataflowTaskExecutionDao,
-			TaskConfigurationProperties taskConfigurationProperties) {
+			TaskExplorer taskExplorer, DataflowTaskExecutionDao dataflowTaskExecutionDao) {
 		return new DefaultTaskExecutionService(
 				launcherRepository, auditRecordService, taskRepository,
 				taskExecutionInfoService, taskDeploymentRepository,
 				taskExecutionRepositoryService, taskAppDeploymentRequestCreator,
-				taskExplorer, dataflowTaskExecutionDao, taskConfigurationProperties);
+				taskExplorer, dataflowTaskExecutionDao);
 	}
 
 	@Bean

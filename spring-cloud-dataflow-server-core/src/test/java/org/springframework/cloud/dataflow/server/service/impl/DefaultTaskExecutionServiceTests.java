@@ -383,8 +383,7 @@ public abstract class DefaultTaskExecutionServiceTests {
 					launcherRepository, auditRecordService, taskRepository,
 					taskExecutionInfoService, mock(TaskDeploymentRepository.class),
 					taskExecutionRepositoryService, taskAppDeploymentRequestCreator,
-					this.taskExplorer, this.dataflowTaskExecutionDao,
-					this.taskConfigurationProperties);
+					this.taskExplorer, this.dataflowTaskExecutionDao);
 			try {
 				taskExecutionService.executeTask(TASK_NAME_ORIG, new HashMap<>(), new LinkedList<>());
 			}
