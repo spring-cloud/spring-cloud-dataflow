@@ -186,8 +186,7 @@ public class DefaultTaskExecutionService implements TaskExecutionService {
 
 		TaskExecution taskExecution = taskExecutionRepositoryService.createTaskExecution(taskName);
 
-		if (StringUtils.hasText(taskExecutionInformation.getTaskDefinition().getDslText())
-				&& TaskServiceUtils.isComposedTaskDefinition(taskExecutionInformation.getTaskDefinition().getDslText())) {
+		if (taskExecutionInformation.isComposed()) {
 			boolean containsAccessToken = false;
 
 			for (String commandLineArg : commandLineArgs) {
