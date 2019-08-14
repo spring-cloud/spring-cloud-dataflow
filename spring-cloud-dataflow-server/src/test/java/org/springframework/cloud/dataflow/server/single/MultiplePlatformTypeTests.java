@@ -30,7 +30,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.cloud.dataflow.core.TaskPlatform;
 import org.springframework.cloud.dataflow.server.config.cloudfoundry.CloudFoundryPlatformClientProvider;
 import org.springframework.cloud.dataflow.server.config.cloudfoundry.CloudFoundryPlatformTokenProvider;
-import org.springframework.cloud.deployer.spi.cloudfoundry.CloudFoundry2630AndLaterTaskLauncher;
+import org.springframework.cloud.deployer.spi.cloudfoundry.CloudFoundryTaskLauncher;
 import org.springframework.cloud.deployer.spi.kubernetes.KubernetesTaskLauncher;
 import org.springframework.cloud.deployer.spi.local.LocalTaskLauncher;
 import org.springframework.context.annotation.Bean;
@@ -88,7 +88,7 @@ public class MultiplePlatformTypeTests {
 		assertThat(cloudFoundry.getLaunchers().get(0).getType()).isEqualTo(cloudFoundry.getName());
 		assertThat(cloudFoundry.getLaunchers().get(0).getName()).isEqualTo("cf");
 		assertThat(cloudFoundry.getLaunchers().get(0).getTaskLauncher()).isInstanceOf(
-				CloudFoundry2630AndLaterTaskLauncher.class);
+				CloudFoundryTaskLauncher.class);
 	}
 
 	@Test

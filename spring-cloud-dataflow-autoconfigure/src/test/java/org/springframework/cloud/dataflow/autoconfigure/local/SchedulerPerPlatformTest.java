@@ -22,9 +22,9 @@ import org.junit.runner.RunWith;
 
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.boot.cloud.CloudPlatform;
-import org.springframework.cloud.scheduler.spi.cloudfoundry.CloudFoundrySchedulerProperties;
-import org.springframework.cloud.scheduler.spi.core.Scheduler;
-import org.springframework.cloud.scheduler.spi.kubernetes.KubernetesSchedulerProperties;
+import org.springframework.cloud.deployer.scheduler.spi.cloudfoundry.CloudFoundrySchedulerProperties;
+import org.springframework.cloud.deployer.scheduler.spi.core.Scheduler;
+import org.springframework.cloud.deployer.scheduler.spi.kubernetes.KubernetesSchedulerProperties;
 import org.springframework.test.context.TestPropertySource;
 
 import static org.junit.Assert.assertFalse;

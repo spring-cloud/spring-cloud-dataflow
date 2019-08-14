@@ -33,7 +33,7 @@ import org.springframework.cloud.dataflow.server.config.cloudfoundry.CloudFoundr
 import org.springframework.cloud.dataflow.server.config.cloudfoundry.CloudFoundryPlatformTokenProvider;
 import org.springframework.cloud.dataflow.server.config.cloudfoundry.CloudFoundrySchedulerClientProvider;
 import org.springframework.cloud.dataflow.server.service.SchedulerService;
-import org.springframework.cloud.scheduler.spi.cloudfoundry.CloudFoundrySchedulerProperties;
+import org.springframework.cloud.deployer.scheduler.spi.cloudfoundry.CloudFoundrySchedulerProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;

@@ -54,10 +54,10 @@ import org.springframework.cloud.dataflow.server.repository.TaskDefinitionReposi
 import org.springframework.cloud.dataflow.server.service.SchedulerService;
 import org.springframework.cloud.dataflow.server.service.SchedulerServiceProperties;
 import org.springframework.cloud.deployer.resource.docker.DockerResource;
-import org.springframework.cloud.scheduler.spi.core.CreateScheduleException;
-import org.springframework.cloud.scheduler.spi.core.ScheduleInfo;
-import org.springframework.cloud.scheduler.spi.core.ScheduleRequest;
-import org.springframework.cloud.scheduler.spi.core.Scheduler;
+import org.springframework.cloud.deployer.scheduler.spi.core.CreateScheduleException;
+import org.springframework.cloud.deployer.scheduler.spi.core.ScheduleInfo;
+import org.springframework.cloud.deployer.scheduler.spi.core.ScheduleRequest;
+import org.springframework.cloud.deployer.scheduler.spi.core.Scheduler;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.data.domain.PageRequest;

@@ -34,16 +34,16 @@ import org.slf4j.LoggerFactory;
 
 import org.springframework.cloud.dataflow.core.AbstractTaskPlatformFactory;
 import org.springframework.cloud.dataflow.core.Launcher;
+import org.springframework.cloud.deployer.scheduler.spi.cloudfoundry.CloudFoundryAppScheduler;
+import org.springframework.cloud.deployer.scheduler.spi.cloudfoundry.CloudFoundrySchedulerProperties;
+import org.springframework.cloud.deployer.scheduler.spi.core.Scheduler;
 import org.springframework.cloud.deployer.spi.app.AppDeployer;
-import org.springframework.cloud.deployer.spi.cloudfoundry.CloudFoundry2630AndLaterTaskLauncher;
 import org.springframework.cloud.deployer.spi.cloudfoundry.CloudFoundryAppDeployer;
 import org.springframework.cloud.deployer.spi.cloudfoundry.CloudFoundryConnectionProperties;
 import org.springframework.cloud.deployer.spi.cloudfoundry.CloudFoundryDeploymentProperties;
+import org.springframework.cloud.deployer.spi.cloudfoundry.CloudFoundryTaskLauncher;
 import org.springframework.cloud.deployer.spi.core.RuntimeEnvironmentInfo;
 import org.springframework.cloud.deployer.spi.util.RuntimeVersionUtils;
-import org.springframework.cloud.scheduler.spi.cloudfoundry.CloudFoundryAppScheduler;
-import org.springframework.cloud.scheduler.spi.cloudfoundry.CloudFoundrySchedulerProperties;
-import org.springframework.cloud.scheduler.spi.core.Scheduler;
 
 /**
  * @author David Turanski
@@ -81,7 +81,7 @@ public class CloudFoundryTaskPlatformFactory extends AbstractTaskPlatformFactory
 		TokenProvider tokenProvider = tokenProvider(account);
 		CloudFoundryClient cloudFoundryClient = cloudFoundryClient(account);
 		CloudFoundryOperations cloudFoundryOperations = cloudFoundryOperations(cloudFoundryClient, account);
-		CloudFoundry2630AndLaterTaskLauncher taskLauncher = new CloudFoundry2630AndLaterTaskLauncher(
+		CloudFoundryTaskLauncher taskLauncher = new CloudFoundryTaskLauncher(
 				cloudFoundryClient,
 				deploymentProperties(account),
 				cloudFoundryOperations,
@@ -95,7 +95,7 @@ public class CloudFoundryTaskPlatformFactory extends AbstractTaskPlatformFactory
 		return launcher;
 	}
 
-	private Scheduler scheduler(String account, CloudFoundry2630AndLaterTaskLauncher taskLauncher,
+	private Scheduler scheduler(String account, CloudFoundryTaskLauncher taskLauncher,
 			CloudFoundryOperations cloudFoundryOperations) {
 		Scheduler scheduler = null;
 		if (cloudFoundrySchedulerClientProvider.isPresent()) {

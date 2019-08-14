@@ -19,7 +19,7 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnCloudPlatfo
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.cloud.CloudPlatform;
 import org.springframework.cloud.dataflow.server.config.features.SchedulerConfiguration;
-import org.springframework.cloud.scheduler.spi.cloudfoundry.CloudFoundrySchedulerProperties;
+import org.springframework.cloud.deployer.scheduler.spi.cloudfoundry.CloudFoundrySchedulerProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Conditional;
 import org.springframework.context.annotation.Configuration;

@@ -27,10 +27,10 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnCloudPlatfo
 import org.springframework.boot.cloud.CloudPlatform;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.cloud.deployer.spi.cloudfoundry.CloudFoundry2630AndLaterTaskLauncher;
+import org.springframework.cloud.deployer.scheduler.spi.cloudfoundry.CloudFoundrySchedulerProperties;
 import org.springframework.cloud.deployer.spi.cloudfoundry.CloudFoundryConnectionProperties;
 import org.springframework.cloud.deployer.spi.cloudfoundry.CloudFoundryDeployerAutoConfiguration;
-import org.springframework.cloud.scheduler.spi.cloudfoundry.CloudFoundrySchedulerProperties;
+import org.springframework.cloud.deployer.spi.cloudfoundry.CloudFoundryTaskLauncher;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -81,8 +81,8 @@ public abstract class AbstractSchedulerPerPlatformTest {
 
 			@Bean
 			@Primary
-			public CloudFoundry2630AndLaterTaskLauncher cloudFoundry2630AndLaterTaskLauncher() {
-				return Mockito.mock(CloudFoundry2630AndLaterTaskLauncher.class);
+			public CloudFoundryTaskLauncher CloudFoundryTaskLauncher() {
+				return Mockito.mock(CloudFoundryTaskLauncher.class);
 			}
 		}
 	}

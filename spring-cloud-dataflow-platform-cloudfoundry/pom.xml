@@ -18,10 +18,6 @@
 			<artifactId>spring-cloud-deployer-cloudfoundry</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>org.springframework.cloud</groupId>
-			<artifactId>spring-cloud-scheduler-cloudfoundry</artifactId>
-		</dependency>
-		<dependency>
 		  <groupId>org.springframework.boot</groupId>
 		  <artifactId>spring-boot-configuration-processor</artifactId>
 		  <optional>true</optional>
