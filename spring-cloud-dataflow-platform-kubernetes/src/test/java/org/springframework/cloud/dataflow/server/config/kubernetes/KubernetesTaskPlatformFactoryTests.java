@@ -22,9 +22,9 @@ import java.util.Optional;
 import org.junit.Test;
 
 import org.springframework.cloud.dataflow.core.TaskPlatform;
+import org.springframework.cloud.deployer.scheduler.spi.kubernetes.KubernetesSchedulerProperties;
 import org.springframework.cloud.deployer.spi.kubernetes.KubernetesDeployerProperties;
 import org.springframework.cloud.deployer.spi.kubernetes.KubernetesTaskLauncher;
-import org.springframework.cloud.scheduler.spi.kubernetes.KubernetesSchedulerProperties;
 
 import static org.assertj.core.api.Assertions.assertThat;
 

@@ -22,7 +22,7 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.cloud.dataflow.core.TaskPlatform;
 import org.springframework.cloud.dataflow.server.config.CloudProfileProvider;
 import org.springframework.cloud.dataflow.server.config.features.ConditionalOnTasksEnabled;
-import org.springframework.cloud.scheduler.spi.kubernetes.KubernetesSchedulerProperties;
+import org.springframework.cloud.deployer.scheduler.spi.kubernetes.KubernetesSchedulerProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.env.Environment;

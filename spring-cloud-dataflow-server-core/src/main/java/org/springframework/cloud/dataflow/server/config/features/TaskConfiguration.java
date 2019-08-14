@@ -56,7 +56,7 @@ import org.springframework.cloud.dataflow.server.service.impl.DefaultTaskJobServ
 import org.springframework.cloud.dataflow.server.service.impl.DefaultTaskSaveService;
 import org.springframework.cloud.dataflow.server.service.impl.TaskAppDeploymentRequestCreator;
 import org.springframework.cloud.dataflow.server.service.impl.TaskConfigurationProperties;
-import org.springframework.cloud.scheduler.spi.core.Scheduler;
+import org.springframework.cloud.deployer.scheduler.spi.core.Scheduler;
 import org.springframework.cloud.task.repository.TaskExplorer;
 import org.springframework.cloud.task.repository.TaskRepository;
 import org.springframework.context.annotation.Bean;

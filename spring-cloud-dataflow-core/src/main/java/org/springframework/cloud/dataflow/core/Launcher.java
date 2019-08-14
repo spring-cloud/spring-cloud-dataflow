@@ -17,8 +17,8 @@ package org.springframework.cloud.dataflow.core;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
+import org.springframework.cloud.deployer.scheduler.spi.core.Scheduler;
 import org.springframework.cloud.deployer.spi.task.TaskLauncher;
-import org.springframework.cloud.scheduler.spi.core.Scheduler;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.keyvalue.annotation.KeySpace;
 

@@ -20,10 +20,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import org.springframework.cloud.scheduler.spi.core.CreateScheduleException;
-import org.springframework.cloud.scheduler.spi.core.ScheduleInfo;
-import org.springframework.cloud.scheduler.spi.core.ScheduleRequest;
-import org.springframework.cloud.scheduler.spi.core.Scheduler;
+import org.springframework.cloud.deployer.scheduler.spi.core.CreateScheduleException;
+import org.springframework.cloud.deployer.scheduler.spi.core.ScheduleInfo;
+import org.springframework.cloud.deployer.scheduler.spi.core.ScheduleRequest;
+import org.springframework.cloud.deployer.scheduler.spi.core.Scheduler;
 
 
 /**

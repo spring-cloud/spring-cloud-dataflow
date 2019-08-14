@@ -31,10 +31,10 @@ import reactor.core.publisher.Mono;
 import org.springframework.cloud.dataflow.core.TaskPlatform;
 import org.springframework.cloud.dataflow.core.TaskPlatformFactory;
 import org.springframework.cloud.dataflow.server.config.cloudfoundry.CloudFoundryPlatformProperties.CloudFoundryProperties;
-import org.springframework.cloud.deployer.spi.cloudfoundry.CloudFoundry2630AndLaterTaskLauncher;
+import org.springframework.cloud.deployer.scheduler.spi.cloudfoundry.CloudFoundrySchedulerProperties;
 import org.springframework.cloud.deployer.spi.cloudfoundry.CloudFoundryConnectionProperties;
 import org.springframework.cloud.deployer.spi.cloudfoundry.CloudFoundryDeploymentProperties;
-import org.springframework.cloud.scheduler.spi.cloudfoundry.CloudFoundrySchedulerProperties;
+import org.springframework.cloud.deployer.spi.cloudfoundry.CloudFoundryTaskLauncher;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -105,7 +105,7 @@ public class CloudFoundryTaskPlatformFactoryTests {
 		assertThat(taskPlatform.getLaunchers().get(0).getType()).isEqualTo("Cloud Foundry");
 		assertThat(taskPlatform.getLaunchers().get(0).getName()).isEqualTo("default");
 		assertThat(taskPlatform.getLaunchers().get(0).getTaskLauncher()).isInstanceOf(
-				CloudFoundry2630AndLaterTaskLauncher.class);
+				CloudFoundryTaskLauncher.class);
 		assertThat(taskPlatform.getLaunchers().get(0).getDescription()).isEqualTo(
 				"org = [org], space = [space], url = [https://localhost:9999]");
 		assertThat(taskPlatform.getLaunchers().get(0).getScheduler()).isNull();
@@ -139,7 +139,7 @@ public class CloudFoundryTaskPlatformFactoryTests {
 		assertThat(taskPlatform.getLaunchers().get(0).getType()).isEqualTo("Cloud Foundry");
 		assertThat(taskPlatform.getLaunchers().get(0).getName()).isEqualTo("default");
 		assertThat(taskPlatform.getLaunchers().get(0).getTaskLauncher()).isInstanceOf(
-				CloudFoundry2630AndLaterTaskLauncher.class);
+				CloudFoundryTaskLauncher.class);
 		assertThat(taskPlatform.getLaunchers().get(0).getDescription()).isEqualTo(
 				"org = [org], space = [space], url = [https://localhost:9999]");
 		assertThat(taskPlatform.getLaunchers().get(0).getScheduler()).isNotNull();

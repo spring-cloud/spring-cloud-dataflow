@@ -83,10 +83,6 @@
 		<spring-cloud.version>Hoxton.BUILD-SNAPSHOT</spring-cloud.version>
 		<java-cfenv-boot.version>1.1.2.BUILD-SNAPSHOT</java-cfenv-boot.version>
 
-		<spring-cloud-scheduler-spi.version>2.0.1.BUILD-SNAPSHOT</spring-cloud-scheduler-spi.version>
-		<spring-cloud-scheduler-kubernetes.version>2.0.1.BUILD-SNAPSHOT</spring-cloud-scheduler-kubernetes.version>
-		<spring-cloud-scheduler-cloudfoundry>2.0.1.BUILD-SNAPSHOT</spring-cloud-scheduler-cloudfoundry>
-
 		<spring-cloud-common-security-config.version>1.2.0.BUILD-SNAPSHOT</spring-cloud-common-security-config.version>
 
 		<spring-shell.version>1.2.0.RELEASE</spring-shell.version>
@@ -187,11 +183,6 @@
 				<version>${spring-cloud-deployer-cloudfoundry.version}</version>
 			</dependency>
 			<dependency>
-				<groupId>org.springframework.cloud</groupId>
-				<artifactId>spring-cloud-scheduler-cloudfoundry</artifactId>
-				<version>${spring-cloud-scheduler-cloudfoundry}</version>
-			</dependency>
-			<dependency>
 				<groupId>io.pivotal.cfenv</groupId>
 				<artifactId>java-cfenv-boot</artifactId>
 				<version>${java-cfenv-boot.version}</version>
@@ -226,11 +217,6 @@
 				<artifactId>commons-lang</artifactId>
 				<version>${commons-lang.version}</version>
 			</dependency>
-			<dependency>
-				<groupId>org.springframework.cloud</groupId>
-				<artifactId>spring-cloud-scheduler-spi</artifactId>
-				<version>${spring-cloud-scheduler-spi.version}</version>
-			</dependency>
 			<!-- Required to override the spring-cloud-sso-connector versions. Related to
 			https://github.com/spring-cloud/spring-cloud-skipper/issues/750 -->
 			<dependency>
@@ -247,11 +233,6 @@
 				<groupId>org.springframework.cloud</groupId>
 				<artifactId>spring-cloud-deployer-kubernetes</artifactId>
 				<version>${spring-cloud-deployer-kubernetes.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.springframework.cloud</groupId>
-				<artifactId>spring-cloud-scheduler-kubernetes</artifactId>
-				<version>${spring-cloud-scheduler-kubernetes.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.springframework.cloud</groupId>
