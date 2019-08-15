@@ -650,11 +650,12 @@ To influence the environment settings for a given application, you can take adva
 For example, a common requirement in production settings is to influence the JVM memory arguments.
 You can achieve this by using the `JAVA_TOOL_OPTIONS` environment variable, as the following example shows:
 
-
 [source]
 ----
 scheduler.kubernetes.environmentVariables=JAVA_TOOL_OPTIONS=-Xmx1024m
 ----
+
+NOTE: When deploying stream applications or launching task applications where some of the properties may contain sensitive information, use the `shell` or `boot` as the `entryPointStyle`. This is because the `exec` (default) converts all properties to command line arguments and thus may not be secure in some environments.
 
 
 Additionally you can configure environment variables at the server level in the container `env` section of a deployment YAML, as the following example shows:

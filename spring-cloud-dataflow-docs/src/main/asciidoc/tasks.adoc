@@ -201,10 +201,13 @@ One may also specify the longhand version as well, as shown in the following exa
 This shorthand behavior is discussed more in the section on <<spring-cloud-dataflow-stream-app-whitelisting>>.
 If you have <<spring-cloud-dataflow-stream-app-metadata-artifact, registered application property metadata>> you can use tab completion in the shell after typing `--` to get a list of candidate property names.
 
-The shell provides tab completion for application properties. The shell command `app info --name <appName> --type <appType>` provides additional documentation for all the supported properties.
+The shell provides tab completion for application properties. The shell command `app info --name <appName> --type <appType>` provides additional documentation for all the supported properties.  The supported Task `<appType>` is task.
 
-NOTE: The supported Task `<appType>` is task.
+NOTE: When restarting Spring Batch Jobs on Kubernetes, you must use the entry point of `shell` or `boot`.
 
+===== Application Properties With Sensitive Information on Kubernetes
+
+When launching task applications where some of the properties may contain sensitive information, use the `shell` or `boot` as the `entryPointStyle`. This is because the `exec` (default) converts all properties to command line arguments and thus may not be secure in some environments.
 
 ==== Common application properties
 
@@ -469,6 +472,7 @@ The ComposedTaskRunner task has the following options:
 Allows a single ComposedTaskRunner instance to be re-executed without changing the parameters. Default is false which means a ComposedTaskRunner instance can only be executed once with a given set of parameters, if true it can be re-executed. (Boolean, default: false).
 ComposedTaskRunner is built using https://github.com/spring-projects/spring-batch[Spring Batch] and thus upon a successful execution the batch job is considered complete.
 To launch the same ComposedTaskRunner definition multiple times you must set the `increment-instance-enabled` property to true or change the parameters for the definition for each launch.
+When using this option it must be applied for all task launches for the desired application including the first launch.
 
 * *interval-time-between-checks*
 The amount of time in millis that the ComposedTaskRunner will wait between checks of the database to see if a task has completed. (Integer, default: 10000).
