@@ -410,7 +410,7 @@ data:
 ----
 ====
 
-Replace `entryPointStye` with the desired entry point style.
+Replace `entryPointStyle` with the desired entry point style.
 
 You should choose an Entry Point Style of either `exec` or `shell`, to correspond to how the `ENTRYPOINT` syntax is defined in the container's `Dockerfile`. For more information and uses cases on `exec` versus `shell`, see the https://docs.docker.com/engine/reference/builder/#entrypoint[ENTRYPOINT] section of the Docker documentation.
 
