@@ -253,6 +253,18 @@ These properties are also used when configuring the <<configuration-kubernetes-t
 |The numeric group ID to run pod container processes under
 |<none>
 
+|affinity.nodeAffinity
+|The node affinity expressed in YAML format.  e.g. ```{ requiredDuringSchedulingIgnoredDuringExecution: { nodeSelectorTerms: [ { matchExpressions: [ { key: 'kubernetes.io/e2e-az-name', operator: 'In', values: [ 'e2e-az1', 'e2e-az2']}]}]}, preferredDuringSchedulingIgnoredDuringExecution: [ { weight: 1, preference: { matchExpressions: [ { key: 'another-node-label-key', operator: 'In', values: [ 'another-node-label-value' ]}]}}]}```
+|<none>
+
+|affinity.podAffinity
+|The pod affinity expressed in YAML format.  e.g. ```{ requiredDuringSchedulingIgnoredDuringExecution: { labelSelector: [ { matchExpressions: [ { key: 'app', operator: 'In', values: [ 'store']}]}], topologyKey: 'kubernetes.io/hostnam'}, preferredDuringSchedulingIgnoredDuringExecution: [ { weight: 1, podAffinityTerm: { labelSelector: { matchExpressions: [ { key: 'security', operator: 'In', values: [ 'S2' ]}]}, topologyKey: 'failure-domain.beta.kubernetes.io/zone'}}]}```
+|<none>
+
+|affinity.podAntiAffinity
+|The pod anti-affinity expressed in YAML format.  e.g. ```{ requiredDuringSchedulingIgnoredDuringExecution: { labelSelector: { matchExpressions: [ { key: 'app', operator: 'In', values: [ 'store']}]}], topologyKey: 'kubernetes.io/hostname'}, preferredDuringSchedulingIgnoredDuringExecution: [ { weight: 1, podAffinityTerm: { labelSelector: { matchExpressions: [ { key: 'security', operator: 'In', values: [ 'S2' ]}]}, topologyKey: 'failure-domain.beta.kubernetes.io/zone'}}]}```
+|<none>
+
 |===
 
 [[configuration-kubernetes-tasks]]
