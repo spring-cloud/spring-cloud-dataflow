@@ -189,8 +189,17 @@ public class DefaultTaskExecutionService implements TaskExecutionService {
 		if (taskExecutionInformation.isComposed()) {
 			boolean containsAccessToken = false;
 
+			final String dataflowAccessTokenKey = "dataflow-server-access-token";
+
 			for (String commandLineArg : commandLineArgs) {
-				if (commandLineArg.startsWith("--dataflow-server-access-token")) {
+				if (commandLineArg.startsWith("--" + dataflowAccessTokenKey)) {
+					containsAccessToken = true;
+				}
+			}
+
+			final String dataflowAccessTokenPropertyKey = "app." + taskExecutionInformation.getTaskDefinition().getRegisteredAppName() + "." + dataflowAccessTokenKey;
+			for (Map.Entry<String, String> taskDeploymentProperty : taskExecutionInformation.getTaskDeploymentProperties().entrySet()) {
+				if (taskDeploymentProperty.getKey().equals(dataflowAccessTokenPropertyKey)) {
 					containsAccessToken = true;
 				}
 			}
@@ -199,8 +208,7 @@ public class DefaultTaskExecutionService implements TaskExecutionService {
 				final String token = TokenUtils.getAccessToken();
 
 				if (token != null) {
-					final String accessTokenCommandLineArg = "--dataflow-server-access-token=" + token;
-					commandLineArgs.add(accessTokenCommandLineArg);
+					taskExecutionInformation.getTaskDeploymentProperties().put(dataflowAccessTokenPropertyKey, token);
 				}
 			}
 		}
