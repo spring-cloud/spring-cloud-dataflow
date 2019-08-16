@@ -468,6 +468,9 @@ Using information from the table, it determines how it should navigate the graph
 
 The ComposedTaskRunner task has the following options:
 
+* *composed-task-arguments*
+The command line arguments to be used for each of the tasks.  (String, default: <none>).
+
 * *increment-instance-enabled*
 Allows a single ComposedTaskRunner instance to be re-executed without changing the parameters. Default is false which means a ComposedTaskRunner instance can only be executed once with a given set of parameters, if true it can be re-executed. (Boolean, default: false).
 ComposedTaskRunner is built using https://github.com/spring-projects/spring-batch[Spring Batch] and thus upon a successful execution the batch job is considered complete.
@@ -525,8 +528,9 @@ This property sets optional OAuth2 Access Token.
 Typically the value is automatically set using the token from the currently logged in user, if available.
 However, for special use-cases this value can also be set explicitly.
 
-Note
-when using the options above as environment variables, convert to uppercase, remove the dash character and replace with the underscore character. For example: increment-instance-enabled would be INCREMENT_INSTANCE_ENABLED.
+Note when using the options above as environment variables, convert to uppercase, remove the dash character and replace with the underscore character. For example: increment-instance-enabled would be INCREMENT_INSTANCE_ENABLED.
+
+NOTE: For the latest configuration options for Composed Task Runner click the link https://github.com/spring-cloud-task-app-starters/composed-task-runner/blob/master/spring-cloud-starter-task-composedtaskrunner/README.adoc#options[here].
 
 === The Lifecycle of a Composed Task
 
