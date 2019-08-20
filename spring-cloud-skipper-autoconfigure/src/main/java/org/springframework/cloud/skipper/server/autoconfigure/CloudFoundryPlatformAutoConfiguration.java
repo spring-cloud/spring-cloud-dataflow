@@ -126,7 +126,7 @@ public class CloudFoundryPlatformAutoConfiguration {
 					.dopplerClient(dopplerClient)
 					.space(connectionProperties.getSpace()).build();
 			CloudFoundryAppNameGenerator appNameGenerator = new CloudFoundryAppNameGenerator(
-					cloudFoundryProperties.getDeployment());
+					deploymentProperties);
 			appNameGenerator.afterPropertiesSet();
 			CloudFoundryAppDeployer cfAppDeployer = new CloudFoundryAppDeployer(
 					appNameGenerator, deploymentProperties, cloudFoundryOperations,
