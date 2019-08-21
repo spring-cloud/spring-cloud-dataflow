@@ -1,0 +1,10 @@
+# $ docker run --name test-postgres -d -p 5432:5432 -e POSTGRES_PASSWORD=spring -e POSTGRES_USER=spring -e POSTGRES_DB=dataflow postgres:10
+# $ docker stop test-postgres
+# $ docker rm test-postgres
+# $ docker exec -it test-postgres psql -U spring -d dataflow
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5432/dataflow
+    username: spring
+    password: spring
+    driverClassName: org.postgresql.Driver

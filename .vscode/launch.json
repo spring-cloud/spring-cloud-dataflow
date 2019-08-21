@@ -1,0 +1,24 @@
+{
+    "configurations": [
+        {
+            "type": "java",
+            "name": "SKIPPER default",
+            "request": "launch",
+            "cwd": "${workspaceFolder}",
+            "console": "internalConsole",
+            "mainClass": "org.springframework.cloud.skipper.server.app.SkipperServerApplication",
+            "projectName": "spring-cloud-skipper-server",
+            "args": ""
+        },
+        {
+            "type": "java",
+            "name": "SKIPPER postgres",
+            "request": "launch",
+            "cwd": "${workspaceFolder}",
+            "console": "internalConsole",
+            "mainClass": "org.springframework.cloud.skipper.server.app.SkipperServerApplication",
+            "projectName": "spring-cloud-skipper-server",
+            "args": "--spring.config.additional-location=etc/config/skipper-postgres.yml"
+        }
+    ]
+}
