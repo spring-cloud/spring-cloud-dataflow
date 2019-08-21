@@ -80,7 +80,7 @@ public class SkipperServerPlatformConfigurationTests {
 
 		@Test
 		public void singlePlatformsConfiguredTest() {
-			assertThat(platforms.get(0).getDeployers()).extracting("name").containsExactly("default", "test");
+			assertThat(platforms.get(0).getDeployers()).extracting("name").containsExactly("test");
 		}
 	}
 

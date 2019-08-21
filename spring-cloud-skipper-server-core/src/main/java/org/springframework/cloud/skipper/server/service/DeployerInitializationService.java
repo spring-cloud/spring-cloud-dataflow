@@ -15,7 +15,6 @@
  */
 package org.springframework.cloud.skipper.server.service;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -24,7 +23,6 @@ import org.slf4j.LoggerFactory;
 
 import org.springframework.boot.configurationmetadata.ConfigurationMetadataProperty;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
-import org.springframework.cloud.skipper.domain.Deployer;
 import org.springframework.cloud.skipper.domain.Platform;
 import org.springframework.cloud.skipper.domain.deployer.ConfigurationMetadataPropertyEntity;
 import org.springframework.cloud.skipper.server.deployer.metadata.DeployerConfigurationMetadataResolver;
@@ -62,27 +60,6 @@ public class DeployerInitializationService {
 	@Transactional
 	public void initialize(ApplicationReadyEvent event) {
 		List<ConfigurationMetadataProperty> metadataProperties = this.resolver.resolve();
-		if (singleDeployerExists()) {
-			for (Platform platform : this.platforms) {
-				if (platform.getDeployers().size() == 1) {
-					List<Deployer> updatedDeployers = new ArrayList<>();
-					List<Deployer> deployers = platform.getDeployers();
-
-					Deployer existingDeployer = deployers.get(0);
-					List<ConfigurationMetadataPropertyEntity> options = createMetadataPropertyEntities(
-							metadataProperties, existingDeployer.getType());
-					existingDeployer.setOptions(options);
-					if (!"default".equalsIgnoreCase(existingDeployer.getName())) {
-						Deployer defaultDeployer = new Deployer("default",
-								existingDeployer.getType(), existingDeployer.getAppDeployer());
-						defaultDeployer.setDescription(existingDeployer.getDescription());
-						updatedDeployers.add(defaultDeployer);
-					}
-					updatedDeployers.addAll(deployers);
-					platform.setDeployers(updatedDeployers);
-				}
-			}
-		}
 		this.platforms.forEach(platform -> {
 			platform.getDeployers().forEach(deployer -> {
 				List<ConfigurationMetadataPropertyEntity> options = createMetadataPropertyEntities(metadataProperties,
@@ -104,13 +81,5 @@ public class DeployerInitializationService {
 			.filter(p -> p.getId().startsWith(prefix))
 			.map(ConfigurationMetadataPropertyEntity::new)
 			.collect(Collectors.toList());
-	}
-
-	private boolean singleDeployerExists() {
-		int deployersCount = 0;
-		for (Platform platform : this.platforms) {
-			deployersCount = deployersCount + platform.getDeployers().size();
-		}
-		return (deployersCount > 1) ? false : true;
 	}
 }
