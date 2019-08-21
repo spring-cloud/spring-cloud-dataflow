@@ -1,0 +1,60 @@
+version: '3'
+
+services:
+
+  dataflow-server:
+    image: springcloud/spring-cloud-dataflow-server:${DATAFLOW_VERSION:?DATAFLOW_VERSION is not set!}
+    container_name: dataflow-server
+    volumes:
+      - '/tmp/apps:/apps/'
+    ports:
+      - "9393:9393"
+    environment:
+      - spring.cloud.dataflow.applicationProperties.stream.spring.cloud.stream.kafka.binder.brokers=PLAINTEXT://kafka:9092
+      - spring.cloud.dataflow.applicationProperties.stream.spring.cloud.stream.kafka.streams.binder.brokers=PLAINTEXT://kafka:9092
+      - spring.cloud.dataflow.applicationProperties.stream.spring.cloud.stream.kafka.binder.zkNodes=zookeeper:2181
+      - spring.cloud.dataflow.applicationProperties.stream.spring.cloud.stream.kafka.streams.binder.zkNodes=zookeeper:2181
+      - spring.cloud.skipper.client.serverUri=http://skipper-server:7577/api
+      - spring.cloud.dataflow.applicationProperties.stream.management.metrics.export.prometheus.enabled=true
+      - spring.cloud.dataflow.applicationProperties.stream.spring.cloud.streamapp.security.enabled=false
+      - spring.cloud.dataflow.applicationProperties.stream.management.endpoints.web.exposure.include=prometheus,info,health
+      - spring.cloud.dataflow.applicationProperties.task.management.metrics.export.prometheus.enabled=true
+      - spring.cloud.dataflow.applicationProperties.task.management.metrics.export.prometheus.rsocket.enabled=true
+      - spring.cloud.dataflow.applicationProperties.task.management.metrics.export.prometheus.rsocket.host=prometheus-rsocket-proxy
+      - spring.cloud.dataflow.applicationProperties.task.management.metrics.export.prometheus.rsocket.port=7001
+      - spring.cloud.dataflow.applicationProperties.task.management.metrics.export.prometheus.rsocket.max-retries=10000
+      - spring.cloud.dataflow.applicationProperties.task.management.metrics.export.prometheus.rsocket.first-backoff=10s
+      - spring.cloud.dataflow.applicationProperties.task.management.metrics.export.prometheus.rsocket.max-backoff=10m
+      - spring.cloud.dataflow.grafana-info.url=http://localhost:3000
+      - SPRING_DATASOURCE_URL=jdbc:mysql://mysql:3306/dataflow
+      - SPRING_DATASOURCE_USERNAME=root
+      - SPRING_DATASOURCE_PASSWORD=rootpw
+      - SPRING_DATASOURCE_DRIVER_CLASS_NAME=org.mariadb.jdbc.Driver
+    depends_on:
+      - kafka
+    entrypoint: "./wait-for-it.sh mysql:3306 -- java -jar /maven/spring-cloud-dataflow-server.jar"
+
+  prometheus-rsocket-proxy:
+    image: micrometermetrics/prometheus-rsocket-proxy:0.8.0-SNAPSHOT
+    container_name: prometheus-rsocket-proxy
+    expose:
+      - '9096'
+      - '7001'
+      - '8081'
+    ports:
+      - '9096:9096'
+      - '7001:7001'
+      - '8081:8081'
+    environment:
+      - server.port=9096
+
+  dataflow-rsocket-task-import:
+    image: springcloud/openjdk:2.0.0.RELEASE
+    container_name: dataflow-rsocket-task-import
+    depends_on:
+      - dataflow-server
+    command: >
+      /bin/sh -c "
+        ./wait-for-it.sh -t 180 dataflow-server:9393;
+        wget -qO- 'http://dataflow-server:9393/apps/task/rsocket-task/0.0.1' --post-data='uri=https://raw.githubusercontent.com/tzolov/task-demo-metrics/prometheus-rsocket-proxy/apps/task-demo-metrics-0.0.1-SNAPSHOT.jar&force=true'
+        echo 'RSocket Task imported'"
