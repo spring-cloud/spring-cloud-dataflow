@@ -1,0 +1,53 @@
+version: '3'
+
+# Extends the default docker-compose.yml with Prometheus/Grafana monitoring configuration
+# Usage: docker-compose -f ./docker-compose.yml -f ./docker-compose-prometheus.yml up
+services:
+
+  dataflow-server:
+    environment:
+      - |
+        SPRING_APPLICATION_JSON=
+        {
+          "spring.cloud.dataflow.applicationProperties":{
+             "task.management.metrics.export.prometheus":{
+                "enabled":true,
+                "rsocket.enabled":true,
+                "rsocket.host":"prometheus-rsocket-proxy",
+                "rsocket.port":7001
+             },
+             "stream.management.metrics.export.prometheus":{
+                "enabled":true,
+                "rsocket.enabled":true,
+                "rsocket.host":"prometheus-rsocket-proxy",
+                "rsocket.port":7001
+             }
+          },
+          "spring.cloud.dataflow.grafana-info.url":"http://localhost:3000"
+        }
+
+  prometheus-rsocket-proxy:
+    image: micrometermetrics/prometheus-rsocket-proxy:0.8.0-SNAPSHOT
+    container_name: prometheus-rsocket-proxy
+    expose:
+      - '9096'
+      - '7001'
+      - '8081'
+    ports:
+      - '9096:9096'
+      - '7001:7001'
+      - '8081:8081'
+    environment:
+      - server.port=9096
+
+  grafana:
+    image: springcloud/spring-cloud-dataflow-grafana-prometheus:${DATAFLOW_VERSION:?DATAFLOW_VERSION is not set! Use 'export DATAFLOW_VERSION=local-server-image-tag'}
+    container_name: grafana
+    ports:
+      - '3000:3000'
+
+  prometheus:
+    image: springcloud/spring-cloud-dataflow-prometheus-local:${DATAFLOW_VERSION:?DATAFLOW_VERSION is not set! Use 'export DATAFLOW_VERSION=local-server-image-tag'}
+    container_name: prometheus
+    ports:
+      - '9090:9090'
