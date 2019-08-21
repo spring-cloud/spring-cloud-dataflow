@@ -1,19 +1,11 @@
 server:
   port: ${oauth2.port}
-spring:
-  application:
-    name: my-app-name
-  jmx:
-    default-domain: my-app-name
-  security:
-    user:
-      password: "{noop}secret10"
 security:
   oauth2:
     client:
       id: local
       client-id: myclient
-      client-secret: mysecret
+      client-secret: "{noop}mysecret"
       scope: dataflow.view,dataflow.manage,dataflow.create
       registered-redirect-uri:
       - http://localhost:9393/login
@@ -22,8 +14,6 @@ security:
       - authorization_code
       - client_credentials
       - password
-    authorization:
-      checkTokenAccess: isAuthenticated()
   authentication:
     file:
       enabled: true

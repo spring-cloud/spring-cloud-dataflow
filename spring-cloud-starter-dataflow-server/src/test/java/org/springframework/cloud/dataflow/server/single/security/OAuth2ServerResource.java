@@ -21,14 +21,14 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import org.springframework.boot.builder.SpringApplicationBuilder;
-import org.springframework.cloud.dataflow.server.single.security.support.OAuth2TestServer;
+import org.springframework.cloud.dataflow.server.single.security.support.oauth2testserver.OAuth2TestServerApplication;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import org.springframework.util.SocketUtils;
 
 /**
- * Bootstraps an embedded OAuth2 server using {@link OAuth2TestServer}.
+ * Bootstraps an embedded OAuth2 server using {@link OAuth2TestServerApplication}.
  *
  * @author Gunnar Hillert
  */
@@ -60,17 +60,18 @@ public class OAuth2ServerResource extends ExternalResource {
 		System.setProperty(OAUTH2_PORT_PROPERTY, String.valueOf(this.oauth2ServerPort));
 
 		final String configurationLocation =
-			"classpath:/org/springframework/cloud/dataflow/server/single/security/support/oauth2TestServerConfig.yml";
+			"classpath:org/springframework/cloud/dataflow/server/single/security/support/oauth2testserver/oauth2TestServerConfig.yml";
 
 		final Resource resource = new PathMatchingResourcePatternResolver().getResource(configurationLocation);
 		if (!resource.exists()) {
 		  throw new IllegalArgumentException(String.format("Resource 'configurationLocation' ('%s') does not exist.", configurationLocation));
 		}
 
-		this.application = new SpringApplicationBuilder(OAuth2TestServer.class).build()
+		this.application = new SpringApplicationBuilder(OAuth2TestServerApplication.class).build()
 				.run("--spring.cloud.common.security.enabled=false",
 					"--spring.cloud.kubernetes.enabled=false",
-					"--spring.config.additional-location=" + configurationLocation);
+					"--spring.config.location=" + configurationLocation);
+		logger.info("OAuth Server is UP!");
 	}
 
 	@Override

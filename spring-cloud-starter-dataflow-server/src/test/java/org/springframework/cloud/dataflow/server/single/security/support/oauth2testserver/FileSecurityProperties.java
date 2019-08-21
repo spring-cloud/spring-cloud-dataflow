@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 the original author or authors.
+ * Copyright 2016-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.springframework.cloud.dataflow.server.single.security.support;
+package org.springframework.cloud.dataflow.server.single.security.support.oauth2testserver;
 
 import java.util.Properties;
 
@@ -23,6 +23,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
  * Properties for the File based security authentication.
  *
  * @author Ilayaperumal Gopinathan
+ * @author Gunnar Hillert
  */
 
 @ConfigurationProperties(prefix="security.authentication.file")
@@ -46,7 +47,7 @@ public class FileSecurityProperties {
 
 	/**
 	 * Set users as {@link Properties}. Value (String) of the property must be in the
-	 * format e.g.: {@code bobspassword, ROLE_NAME}.
+	 * format e.g.: {@code {noop}bobspassword, ROLE_NAME}.
 	 *
 	 * @param users the property object with user password and roles
 	 */
