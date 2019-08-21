@@ -38,7 +38,7 @@ import org.springframework.boot.autoconfigure.jdbc.DataSourceProperties;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase.Replace;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.system.OutputCaptureRule;
+import org.springframework.boot.test.rule.OutputCapture;
 import org.springframework.cloud.dataflow.audit.service.AuditRecordService;
 import org.springframework.cloud.dataflow.core.AppRegistration;
 import org.springframework.cloud.dataflow.core.ApplicationType;
@@ -112,7 +112,7 @@ public abstract class DefaultTaskExecutionServiceTests {
 	public ExpectedException thrown = ExpectedException.none();
 
 	@Rule
-	public OutputCaptureRule outputCapture = new OutputCaptureRule();
+	public OutputCapture outputCapture = new OutputCapture();
 
 	private final static String BASE_TASK_NAME = "myTask";
 
@@ -569,7 +569,7 @@ public abstract class DefaultTaskExecutionServiceTests {
 			when(oAuth2Authentication.getDetails()).thenReturn(oAuth2AuthenticationDetails);
 			SecurityContextHolder.getContext().setAuthentication(oAuth2Authentication);
 
-			taskSaveService.saveTaskDefinition(new TaskDefinition("seqTask", "AAA && BBB"));
+			taskSaveService.saveTaskDefinition("seqTask", "AAA && BBB");
 			when(taskLauncher.launch(any())).thenReturn("0");
 			when(appRegistry.appExist(anyString(), any(ApplicationType.class))).thenReturn(true);
 			Map<String, String> properties = new HashMap<>();
