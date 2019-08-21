@@ -1,0 +1,24 @@
+{
+    "configurations": [
+        {
+            "type": "java",
+            "name": "SCDF default",
+            "request": "launch",
+            "cwd": "${workspaceFolder}",
+            "console": "internalConsole",
+            "mainClass": "org.springframework.cloud.dataflow.server.single.DataFlowServerApplication",
+            "projectName": "spring-cloud-dataflow-server",
+            "args": ""
+        },
+        {
+            "type": "java",
+            "name": "SCDF postgres",
+            "request": "launch",
+            "cwd": "${workspaceFolder}",
+            "console": "internalConsole",
+            "mainClass": "org.springframework.cloud.dataflow.server.single.DataFlowServerApplication",
+            "projectName": "spring-cloud-dataflow-server",
+            "args": "--spring.config.additional-location=src/config/scdf-postgres.yml"
+        }
+    ]
+}
