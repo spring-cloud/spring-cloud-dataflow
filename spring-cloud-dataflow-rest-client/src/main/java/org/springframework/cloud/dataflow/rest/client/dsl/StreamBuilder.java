@@ -28,7 +28,8 @@ public class StreamBuilder {
 
 	/**
 	 * Construct a new StreamBuilder given a {@link DataFlowOperations} instance.
-	 * @param dataFlowOperations the dataflowOperations instance used to communicate to the Data Flow server
+	 * @param dataFlowOperations the dataflowOperations instance used to communicate to the
+	 *     Data Flow server
 	 */
 	public StreamBuilder(DataFlowOperations dataFlowOperations) {
 		this.dataFlowOperations = dataFlowOperations;
@@ -37,7 +38,8 @@ public class StreamBuilder {
 	/**
 	 * Fluent API method to set the name of the stream.
 	 * @param name - The unique identifier of a Stream with the server
-	 * @return A {@link Stream.StreamNameBuilder} that provides the next navigation step in the DSL.
+	 * @return A {@link Stream.StreamNameBuilder} that provides the next navigation step in
+	 * the DSL.
 	 */
 	public Stream.StreamNameBuilder name(String name) {
 		return new Stream.StreamNameBuilder(name, dataFlowOperations);

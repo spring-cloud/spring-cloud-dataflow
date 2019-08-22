@@ -44,18 +44,21 @@ public class StreamDefinition {
 
 	private String definition;
 
-	private List<StreamApplication> applications = new LinkedList<>();
+	private String description;
 
-	public StreamDefinition(String name, DataFlowOperations client, String definition,
+	private List<StreamApplication> applications;
+
+	public StreamDefinition(String name, DataFlowOperations client, String definition, String description,
 			List<StreamApplication> applications) {
 		this.name = name;
 		this.client = client;
 		this.definition = definition;
+		this.description = description;
 		this.applications = applications;
 		if (StringUtils.isEmpty(definition)) {
 			createStreamDefinition();
 		}
-		this.client.streamOperations().createStream(this.name, this.definition,
+		this.client.streamOperations().createStream(this.name, this.definition, this.description,
 				false);
 	}
 
@@ -76,7 +79,7 @@ public class StreamDefinition {
 		Map<String, String> resolvedProperties = resolveDeploymentProperties(
 				deploymentProperties);
 		client.streamOperations().deploy(this.name, resolvedProperties);
-		return new Stream(this.name, this.applications, this.definition, this.client);
+		return new Stream(this.name, this.applications, this.definition, this.description, this.client);
 	}
 
 	/**
@@ -88,7 +91,6 @@ public class StreamDefinition {
 	}
 
 	private void createStreamDefinition() {
-		StringBuilder buffer = new StringBuilder();
 		this.definition = StringUtils.collectionToDelimitedString(applications,
 				" | ");
 	}

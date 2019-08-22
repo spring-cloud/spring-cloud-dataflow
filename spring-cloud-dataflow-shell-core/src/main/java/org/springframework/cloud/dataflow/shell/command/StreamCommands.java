@@ -68,11 +68,11 @@ import org.springframework.util.StringUtils;
 @Component
 public class StreamCommands implements CommandMarker {
 
-	protected static final String PROPERTIES_OPTION = "properties";
-	protected static final String PROPERTIES_FILE_OPTION = "propertiesFile";
+	private static final String PROPERTIES_OPTION = "properties";
+	private static final String PROPERTIES_FILE_OPTION = "propertiesFile";
 
 	protected DataFlowShell dataFlowShell;
-	protected UserInput userInput;
+	private UserInput userInput;
 
 	// Create Role
 
@@ -258,8 +258,9 @@ public class StreamCommands implements CommandMarker {
 			@CliOption(mandatory = true, key = { "", "name" }, help = "the name to give to the stream") String name,
 			@CliOption(mandatory = true, key = { "definition" }, help = "a stream definition, using the DSL (e.g. "
 					+ "\"http --port=9000 | hdfs\")", optionContext = "disable-string-converter completion-stream") String dsl,
+			@CliOption(mandatory = false, key = {"description"}, help = "a sort description about the stream", unspecifiedDefaultValue = "") String description,
 			@CliOption(key = "deploy", help = "whether to deploy the stream immediately", unspecifiedDefaultValue = "false", specifiedDefaultValue = "true") boolean deploy) {
-		streamOperations().createStream(name, dsl, deploy);
+		streamOperations().createStream(name, dsl, description, deploy);
 		String message = String.format("Created new stream '%s'", name);
 		if (deploy) {
 			message += "\nDeployment request has been sent";

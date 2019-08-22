@@ -55,10 +55,11 @@ public interface StreamOperations {
 	 *
 	 * @param name the name of the stream
 	 * @param definition the stream definition DSL
+	 * @param description the description of the stream
 	 * @param deploy whether to deploy the stream after creating its definition
 	 * @return the new stream definition
 	 */
-	StreamDefinitionResource createStream(String name, String definition, boolean deploy);
+	StreamDefinitionResource createStream(String name, String definition, String description, boolean deploy);
 
 	/**
 	 * Deploy an already created stream.
