@@ -42,7 +42,7 @@ public class StreamBuilder {
 	 * the DSL.
 	 */
 	public Stream.StreamNameBuilder name(String name) {
-		return new Stream.StreamNameBuilder(name, dataFlowOperations);
+		return new Stream.StreamNameBuilder(name, "", dataFlowOperations);
 	}
 
 }

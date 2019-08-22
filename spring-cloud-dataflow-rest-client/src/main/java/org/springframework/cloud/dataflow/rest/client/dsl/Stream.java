@@ -191,10 +191,11 @@ public class Stream {
 
 		private String description;
 
-		StreamNameBuilder(String name, DataFlowOperations client) {
+		StreamNameBuilder(String name, String description, DataFlowOperations client) {
 			this.client = client;
 			Assert.hasLength(name, "Stream name can't be empty");
 			this.name = name;
+			this.description = description;
 		}
 
 		/**
@@ -351,7 +352,7 @@ public class Stream {
 		 * @return StreamDefinition to allow deploying operations on the created Stream
 		 */
 		public StreamDefinition create() {
-			return new StreamDefinition(this.name, this.client, this.definition, description,
+			return new StreamDefinition(this.name, this.client, this.definition, this.description,
 					Collections.emptyList());
 		}
 	}
