@@ -57,14 +57,3 @@ services:
     container_name: prometheus
     ports:
       - '9090:9090'
-
-  dataflow-rsocket-task-import:
-    image: springcloud/openjdk:2.0.0.RELEASE
-    container_name: dataflow-rsocket-task-import
-    depends_on:
-      - dataflow-server
-    command: >
-      /bin/sh -c "
-        ./wait-for-it.sh -t 180 dataflow-server:9393;
-        wget -qO- 'http://dataflow-server:9393/apps/task/rsocket-task/0.0.1' --post-data='uri=https://raw.githubusercontent.com/tzolov/task-demo-metrics/prometheus-rsocket-proxy/apps/task-demo-metrics-0.0.1-SNAPSHOT.jar&force=true'
-        echo 'RSocket Task imported'"
