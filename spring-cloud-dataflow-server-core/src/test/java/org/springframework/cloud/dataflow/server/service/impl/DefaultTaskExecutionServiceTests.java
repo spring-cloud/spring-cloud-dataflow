@@ -26,6 +26,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import javax.sql.DataSource;
+
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -72,6 +74,7 @@ import org.springframework.cloud.task.repository.TaskExecution;
 import org.springframework.cloud.task.repository.TaskExplorer;
 import org.springframework.cloud.task.repository.TaskRepository;
 import org.springframework.core.io.FileSystemResource;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.provider.OAuth2Authentication;
 import org.springframework.security.oauth2.provider.authentication.OAuth2AuthenticationDetails;
@@ -175,6 +178,9 @@ public abstract class DefaultTaskExecutionServiceTests {
 	@AutoConfigureTestDatabase(replace = Replace.ANY)
 	public static class SimpleDefaultPlatformTests extends DefaultTaskExecutionServiceTests {
 
+		@Autowired
+		DataSource dataSource;
+
 		@Before
 		public void setupMocks() {
 			// not adding platform name as default as we want to check that this only one
@@ -182,6 +188,9 @@ public abstract class DefaultTaskExecutionServiceTests {
 			this.launcherRepository.save(new Launcher("fakeplatformname", "local", taskLauncher));
 			taskDefinitionRepository.save(new TaskDefinition(TASK_NAME_ORIG, "demo"));
 			taskDefinitionRepository.findAll();
+			JdbcTemplate template = new JdbcTemplate(this.dataSource);
+			template.execute("DELETE FROM TASK_EXECUTION_PARAMS");
+			template.execute("DELETE FROM TASK_EXECUTION;");
 		}
 
 		@Test

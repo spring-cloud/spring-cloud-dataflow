@@ -21,6 +21,7 @@ import org.flywaydb.core.api.callback.Callback;
 import org.flywaydb.core.api.callback.Context;
 import org.flywaydb.core.api.callback.Event;
 
+import org.springframework.jdbc.BadSqlGrammarException;
 import org.springframework.util.ObjectUtils;
 
 /**
@@ -67,7 +68,18 @@ public abstract class AbstractCallback implements Callback {
 
 	@Override
 	public void handle(Event event, Context context) {
-		runner.execute(context.getConnection(), getCommands(event, context));
+		try {
+			runner.execute(context.getConnection(), getCommands(event, context));
+		}
+		catch(Exception sqe) {
+			if (sqe instanceof BadSqlGrammarException && sqe.getMessage().contains("already exists")) {
+				throw new DataFlowSchemaMigrationException(
+						"An exception occured during migration.  This may indicate " +
+								"that you have run Spring Batch Jobs or Spring Cloud " +
+								"Tasks prior to running Spring Cloud Data Flow first", sqe);
+			}
+			throw sqe;
+		}
 	}
 
 	/**
