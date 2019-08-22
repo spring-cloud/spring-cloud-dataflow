@@ -26,6 +26,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import javax.sql.DataSource;
+
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -72,6 +74,7 @@ import org.springframework.cloud.task.repository.TaskExecution;
 import org.springframework.cloud.task.repository.TaskExplorer;
 import org.springframework.cloud.task.repository.TaskRepository;
 import org.springframework.core.io.FileSystemResource;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.provider.OAuth2Authentication;
 import org.springframework.security.oauth2.provider.authentication.OAuth2AuthenticationDetails;
@@ -171,6 +174,40 @@ public abstract class DefaultTaskExecutionServiceTests {
 
 	@Autowired
 	TaskConfigurationProperties taskConfigurationProperties;
+
+	@AutoConfigureTestDatabase(replace = Replace.ANY)
+	public static class SimpleDefaultPlatformTests extends DefaultTaskExecutionServiceTests {
+
+		@Autowired
+		DataSource dataSource;
+
+		@Before
+		public void setupMocks() {
+			// not adding platform name as default as we want to check that this only one
+			// gets replaced
+			this.launcherRepository.save(new Launcher("fakeplatformname", "local", taskLauncher));
+			taskDefinitionRepository.save(new TaskDefinition(TASK_NAME_ORIG, "demo"));
+			taskDefinitionRepository.findAll();
+			JdbcTemplate template = new JdbcTemplate(this.dataSource);
+			template.execute("DELETE FROM TASK_EXECUTION_PARAMS");
+			template.execute("DELETE FROM TASK_EXECUTION;");
+		}
+
+		@Test
+		@DirtiesContext
+		public void executeSingleTaskDefaultsToExistingSinglePlatformTest() {
+			initializeSuccessfulRegistry(appRegistry);
+			when(taskLauncher.launch(any())).thenReturn("0");
+			assertEquals(1L, this.taskExecutionService.executeTask(TASK_NAME_ORIG, new HashMap<>(), new LinkedList<>()));
+
+			TaskDeployment taskDeployment = taskDeploymentRepository.findByTaskDeploymentId("0");
+			assertNotNull("TaskDeployment should not be null", taskDeployment);
+			assertEquals("0", taskDeployment.getTaskDeploymentId());
+			assertEquals(TASK_NAME_ORIG, taskDeployment.getTaskDefinitionName());
+			assertEquals("fakeplatformname", taskDeployment.getPlatformName());
+			assertNotNull("TaskDeployment createdOn field should not be null", taskDeployment.getCreatedOn());
+		}
+	}
 
 	@TestPropertySource(properties = { "spring.cloud.dataflow.task.maximum-concurrent-tasks=10" })
 	@AutoConfigureTestDatabase(replace = Replace.ANY)
