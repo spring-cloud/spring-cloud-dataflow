@@ -132,6 +132,7 @@ public class TaskCommands implements CommandMarker {
 		LinkedHashMap<String, Object> headers = new LinkedHashMap<>();
 		headers.put("name", "Task Name");
 		headers.put("dslText", "Task Definition");
+		headers.put("description", "description");
 		headers.put("status", "Task Status");
 		final TableBuilder builder = new TableBuilder(new BeanListTableModel<>(tasks, headers));
 		return DataFlowTables.applyStyle(builder).build();

@@ -274,6 +274,7 @@ public class StreamCommands implements CommandMarker {
 		LinkedHashMap<String, Object> headers = new LinkedHashMap<>();
 		headers.put("name", "Stream Name");
 		headers.put("dslText", "Stream Definition");
+		headers.put("description", "Description");
 		headers.put("statusDescription", "Status");
 		BeanListTableModel<StreamDefinitionResource> model = new BeanListTableModel<>(streams, headers);
 		return DataFlowTables.applyStyle(new TableBuilder(model)).build();
@@ -285,9 +286,10 @@ public class StreamCommands implements CommandMarker {
 		List<Object> result = new ArrayList<>();
 		final StreamDeploymentResource stream = streamOperations().info(name);
 		TableModelBuilder<Object> modelBuilder = new TableModelBuilder<>();
-		modelBuilder.addRow().addValue("Stream Name").addValue("Stream Definition").addValue("Status");
+		modelBuilder.addRow().addValue("Stream Name").addValue("Stream Definition").addValue("Description").addValue("Status");
 		modelBuilder.addRow().addValue(stream.getStreamName())
 				.addValue(stream.getDslText())
+				.addValue(stream.getDescription())
 				.addValue(stream.getStatus());
 		TableBuilder builder = DataFlowTables.applyStyle(new TableBuilder(modelBuilder.build()));
 		result.add(builder.build());

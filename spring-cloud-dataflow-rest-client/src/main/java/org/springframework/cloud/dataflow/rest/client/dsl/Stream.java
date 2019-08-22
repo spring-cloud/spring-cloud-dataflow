@@ -23,7 +23,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import org.apache.logging.log4j.util.Strings;
 import org.springframework.cloud.dataflow.rest.client.DataFlowOperations;
 import org.springframework.cloud.dataflow.rest.resource.StreamDefinitionResource;
 import org.springframework.cloud.dataflow.rest.resource.StreamDeploymentResource;
@@ -221,6 +220,11 @@ public class Stream {
 			return new StreamDefinitionBuilder(this.name, this.client, this.description, this.definition);
 		}
 
+		/**
+		 * Sets the description of the stream.
+		 * @param description the description text
+		 * @return A {@link StreamDescriptionBuilder} object
+		 */
 		public StreamDescriptionBuilder description(String description) {
 			this.description = description;
 			return new StreamDescriptionBuilder(this.name, this.description, this.client);

@@ -38,6 +38,11 @@ public class StreamDeploymentResource extends RepresentationModel<StreamDeployme
 	private String dslText;
 
 	/**
+	 * Stream description text.
+	 */
+	private String description;
+
+	/**
 	 * Stream status (i.e. deployed, undeployed, etc).
 	 */
 	private String status;
@@ -68,6 +73,11 @@ public class StreamDeploymentResource extends RepresentationModel<StreamDeployme
 		this.status = status;
 	}
 
+	public StreamDeploymentResource(String streamName, String dslText, String description, String deploymentProperties, String status) {
+		this(streamName, dslText, deploymentProperties, status);
+		this.description = description;
+	}
+
 	public String getStreamName() {
 		return streamName;
 	}
@@ -82,6 +92,10 @@ public class StreamDeploymentResource extends RepresentationModel<StreamDeployme
 
 	public String getStatus() {
 		return status;
+	}
+
+	public String getDescription() {
+		return description;
 	}
 
 	public static class Page extends PagedModel<StreamDeploymentResource> {
