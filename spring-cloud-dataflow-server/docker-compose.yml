@@ -16,6 +16,8 @@ services:
     container_name: dataflow-kafka
     expose:
       - "9092"
+    ports:
+      - "9092:9092"
     environment:
       - KAFKA_ADVERTISED_LISTENERS=PLAINTEXT://kafka:9092
       - KAFKA_ZOOKEEPER_CONNECT=zookeeper:2181
@@ -43,10 +45,7 @@ services:
       - spring.cloud.dataflow.applicationProperties.stream.spring.cloud.stream.kafka.binder.zkNodes=zookeeper:2181
       - spring.cloud.dataflow.applicationProperties.stream.spring.cloud.stream.kafka.streams.binder.zkNodes=zookeeper:2181
       - spring.cloud.skipper.client.serverUri=http://skipper-server:7577/api
-      - spring.cloud.dataflow.applicationProperties.stream.management.metrics.export.prometheus.enabled=true
       - spring.cloud.dataflow.applicationProperties.stream.spring.cloud.streamapp.security.enabled=false
-      - spring.cloud.dataflow.applicationProperties.stream.management.endpoints.web.exposure.include=prometheus,info,health
-      - spring.cloud.dataflow.grafana-info.url=http://localhost:3000
       - SPRING_DATASOURCE_URL=jdbc:mysql://mysql:3306/dataflow
       - SPRING_DATASOURCE_USERNAME=root
       - SPRING_DATASOURCE_PASSWORD=rootpw
@@ -71,6 +70,8 @@ services:
   skipper-server:
     image: springcloud/spring-cloud-skipper-server:${SKIPPER_VERSION:?SKIPPER_VERSION is not set!}
     container_name: skipper
+    volumes:
+      - '/tmp/apps:/apps/'
     ports:
       - "7577:7577"
       - "9000-9010:9000-9010"
@@ -83,45 +84,3 @@ services:
       - SPRING_DATASOURCE_PASSWORD=rootpw
       - SPRING_DATASOURCE_DRIVER_CLASS_NAME=org.mariadb.jdbc.Driver
     entrypoint: "./wait-for-it.sh mysql:3306 -- java -Djava.security.egd=file:/dev/./urandom -jar /spring-cloud-skipper-server.jar"
-
-  # Grafana is configured with the Prometheus datasource.
-  # Use `docker exec -it prometheus /bin/sh` to logging in the container
-  prometheus:
-    image: springcloud/spring-cloud-dataflow-prometheus-local:${DATAFLOW_VERSION:?DATAFLOW_VERSION is not set! Use 'export DATAFLOW_VERSION=local-server-image-tag'}
-    container_name: prometheus
-    volumes:
-      - 'scdf-targets:/etc/prometheus/'
-    ports:
-      - '9090:9090'
-    depends_on:
-      - service-discovery
-
-  # The service-discovery container. Required for Prometheus setup only
-  # Use `docker exec -it service-discovery /bin/sh` to logging the container
-  service-discovery:
-    image: springcloud/spring-cloud-dataflow-prometheus-service-discovery:0.0.4.RELEASE
-    container_name: service-discovery
-    volumes:
-      - 'scdf-targets:/tmp/scdf-targets/'
-    expose:
-      - '8181'
-    ports:
-      - '8181:8181'
-    environment:
-      - metrics.prometheus.target.cron=0/20 * * * * *
-      - metrics.prometheus.target.filePath=/tmp/scdf-targets/targets.json
-      - metrics.prometheus.target.discoveryUrl=http://dataflow-server:9393/runtime/apps
-      - metrics.prometheus.target.overrideIp=skipper-server
-      - server.port=8181
-    depends_on:
-      - dataflow-server
-
-  # Grafana SCDF Prometheus pre-built image:
-  grafana:
-    image: springcloud/spring-cloud-dataflow-grafana-prometheus:${DATAFLOW_VERSION:?DATAFLOW_VERSION is not set! Use 'export DATAFLOW_VERSION=local-server-image-tag'}
-    container_name: grafana
-    ports:
-      - '3000:3000'
-
-volumes:
-  scdf-targets:
