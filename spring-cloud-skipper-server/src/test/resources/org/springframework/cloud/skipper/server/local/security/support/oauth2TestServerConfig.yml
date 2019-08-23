@@ -1,22 +1,28 @@
-spring:
-  application:
-    name: my-app-name
-  jmx:
-    default-domain: my-app-name
-  flyway:
-    locations: /db/migration/{vendor}
-    check-location: false
-  security:
-    user:
-      password: "{noop}secret10"
 server:
   port: ${oauth2.port}
 security:
   oauth2:
     client:
-      clientId: myclient
-      clientSecret: mysecret
-      scope: access
+      id: local
+      client-id: myclient
+      client-secret: "{noop}mysecret"
+      scope: dataflow.view,dataflow.manage,dataflow.create
+      registered-redirect-uri:
+      - http://localhost:9393/login
       auto-approve-scopes: '.*'
-    authorization:
-      checkTokenAccess: permitAll()
+      authorized-grant-types:
+      - authorization_code
+      - client_credentials
+      - password
+  authentication:
+    file:
+      enabled: true
+      users:
+        user: "{noop}secret10, ROLE_DATAFLOW.VIEW, ROLE_DATAFLOW.MANAGE, ROLE_DATAFLOW.CREATE"
+        bob: "{noop}bobspassword, ROLE_DATAFLOW.VIEW"
+        alice: "{noop}alicepwd, ROLE_DATAFLOW.MANAGE"
+        cartman: "{noop}cartmanpwd, ROLE_DATAFLOW.CREATE"
+logging:
+  level:
+    org.springframework.security: DEBUG
+    org.springframework.web: INFO

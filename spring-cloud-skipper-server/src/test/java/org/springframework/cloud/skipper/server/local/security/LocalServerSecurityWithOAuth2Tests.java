@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2018 the original author or authors.
+ * Copyright 2017-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,6 @@
 package org.springframework.cloud.skipper.server.local.security;
 
 import org.junit.ClassRule;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.rules.RuleChain;
 import org.junit.rules.TestRule;
@@ -37,8 +36,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 /**
  * @author Gunnar Hillert
  */
-// TODO Tzolov
-@Ignore("TODO fix before 2.1.x release")
 public class LocalServerSecurityWithOAuth2Tests {
 
 	private final static OAuth2ServerResource oAuth2ServerResource = new OAuth2ServerResource();
@@ -75,7 +72,9 @@ public class LocalServerSecurityWithOAuth2Tests {
 	public void testAccessRootUrlWithBasicAuthCredentials() throws Exception {
 		localSkipperResource.getWebApplicationContext().getEnvironment().getPropertySources();
 		localSkipperResource.getMockMvc()
-				.perform(get("/").header("Authorization", basicAuthorizationHeader("user", "secret10"))).andDo(print())
+				.perform(get("/")
+				.header("Authorization", basicAuthorizationHeader("user", "secret10")))
+				.andDo(print())
 				.andExpect(status().is3xxRedirection());
 	}
 

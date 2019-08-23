@@ -70,8 +70,8 @@ public class SkipperOAuthSecurityConfiguration extends OAuthSecurityConfiguratio
 				http.authorizeRequests()
 						.antMatchers(this.authorizationProperties.getPermitAllPaths().toArray(new String[0]))
 						.permitAll()
-						.antMatchers(this.authorizationProperties.getAuthenticatedPaths().toArray(new String[0]))
-						.authenticated();
+		.antMatchers(this.authorizationProperties.getAuthenticatedPaths().toArray(new String[0]))
+		.authenticated();
 
 		security = SecurityConfigUtils.configureSimpleSecurity(security, this.authorizationProperties);
 		security.anyRequest().denyAll();

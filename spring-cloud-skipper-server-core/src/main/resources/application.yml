@@ -59,7 +59,7 @@ spring:
         authorization:
           enabled: true
           permit-all-paths: "/authenticate,/security/info,/features,/assets/**,/dashboard/logout-success-oauth.html"
-          authenticated-paths: "/api/**,/,/api"
+          authenticated-paths: "/,/api"
           rules:
             # About
 
@@ -112,7 +112,7 @@ spring:
 
             # Packages
 
-            - GET /api/packages                    => hasRole('ROLE_VIEW')
+            - GET /api/package                   => hasRole('ROLE_VIEW')
 
             # Upload
 

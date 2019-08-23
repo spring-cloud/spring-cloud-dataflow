@@ -1,5 +1,5 @@
 /*
- * Copyright 2016-2018 the original author or authors.
+ * Copyright 2016-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,8 @@ import java.util.Collection;
 import javax.servlet.Filter;
 
 import org.junit.rules.ExternalResource;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.builder.SpringApplicationBuilder;
@@ -35,6 +37,8 @@ import org.springframework.web.context.WebApplicationContext;
  * @author Ilayaperumal Gopinathan
  */
 public class LocalSkipperResource extends ExternalResource {
+
+	private final Logger LOGGER = LoggerFactory.getLogger(LocalSkipperResource.class);
 
 	private SpringApplication app;
 
@@ -80,14 +84,13 @@ public class LocalSkipperResource extends ExternalResource {
 
 		this.app = builder.build();
 
-
-
 		configurableApplicationContext = app.run(this.args);
 
 		Collection<Filter> filters = configurableApplicationContext.getBeansOfType(Filter.class).values();
 		mockMvc = MockMvcBuilders.webAppContextSetup((WebApplicationContext) configurableApplicationContext)
 				.addFilters(filters.toArray(new Filter[filters.size()])).build();
 		skipperPort = configurableApplicationContext.getEnvironment().resolvePlaceholders("${server.port}");
+		LOGGER.info("Skipper Server is UP on port {}!", skipperPort);
 	}
 
 	@Override
