@@ -26,6 +26,7 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Properties;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import javax.batch.operations.JobOperator;
 
@@ -530,12 +531,23 @@ public class SimpleJobService implements JobService, DisposableBean {
 	}
 
 	private void checkJobExists(String jobName) throws NoSuchJobException {
-		if(getJsrJobNames().contains(jobName) ||
-				jobLocator.getJobNames().contains(jobName) ||
-				jobInstanceDao.countJobInstances(jobName) > 0) {
+		String jobNameWithoutExtra = jobName
+				.replaceAll("%","")
+				.replaceAll("_","")
+				.replaceAll("\\[" ,"")
+				.replaceAll("\\]","")
+				.replaceAll("^","")
+				.replaceAll("-","");
+		if (collectionContainsJobName(jobNameWithoutExtra, getJsrJobNames()) ||
+			collectionContainsJobName(jobNameWithoutExtra, jobLocator.getJobNames()) ||
+			jobInstanceDao.countJobInstances(jobName) > 0) {
 			return;
 		}
 		throw new NoSuchJobException("No Job with that name either current or historic: [" + jobName + "]");
+	}
+
+	private boolean collectionContainsJobName(String jobName, Collection<String> collection) {
+		return collection.stream().anyMatch(e -> e.indexOf(jobName) > 0);
 	}
 
 	/**
