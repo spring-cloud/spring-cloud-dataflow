@@ -96,7 +96,7 @@ public class JobExecutionController {
 	/**
 	 * Retrieve all task job executions with the task name specified
 	 *
-	 * @param jobName name of the job
+	 * @param jobName name of the job. SQL server specific wildcards are enabled (eg.: myJob%, m_Job, ...)
 	 * @param pageable page-able collection of {@code TaskJobExecution}s.
 	 * @param assembler for the {@link TaskJobExecution}s
 	 * @return list task/job executions with the specified jobName.

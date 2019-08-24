@@ -26,7 +26,6 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Properties;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import javax.batch.operations.JobOperator;
 
@@ -472,8 +471,7 @@ public class SimpleJobService implements JobService, DisposableBean {
 	public Collection<JobExecutionWithStepCount> listJobExecutionsForJobWithStepCount(String jobName, int start, int count)
 			throws NoSuchJobException {
 		checkJobExists(jobName);
-		List<JobExecutionWithStepCount> jobExecutions = jobExecutionDao.getJobExecutionsWithStepCount(jobName, start, count);
-		return jobExecutions;
+		return jobExecutionDao.getJobExecutionsWithStepCount(jobName, start, count);
 	}
 
 	@Override
@@ -531,15 +529,8 @@ public class SimpleJobService implements JobService, DisposableBean {
 	}
 
 	private void checkJobExists(String jobName) throws NoSuchJobException {
-		String jobNameWithoutExtra = jobName
-				.replaceAll("%","")
-				.replaceAll("_","")
-				.replaceAll("\\[" ,"")
-				.replaceAll("\\]","")
-				.replaceAll("^","")
-				.replaceAll("-","");
-		if (collectionContainsJobName(jobNameWithoutExtra, getJsrJobNames()) ||
-			collectionContainsJobName(jobNameWithoutExtra, jobLocator.getJobNames()) ||
+		if (collectionContainsJobName(jobName, getJsrJobNames()) ||
+			collectionContainsJobName(jobName, jobLocator.getJobNames()) ||
 			jobInstanceDao.countJobInstances(jobName) > 0) {
 			return;
 		}
@@ -547,7 +538,7 @@ public class SimpleJobService implements JobService, DisposableBean {
 	}
 
 	private boolean collectionContainsJobName(String jobName, Collection<String> collection) {
-		return collection.stream().anyMatch(e -> e.indexOf(jobName) > 0);
+		return collection.stream().anyMatch(e -> e.contains(jobName));
 	}
 
 	/**

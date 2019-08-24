@@ -210,6 +210,25 @@ public class JobExecutionControllerTests {
 				.andExpect(status().isNotFound());
 	}
 
+	@Test
+	public void testWildcardMatchMultipleResult() throws Exception {
+		mockMvc.perform(get("/jobs/executions/")
+				.param("name", JobExecutionUtils.BASE_JOB_NAME + "_FOO_ST%").accept(MediaType.APPLICATION_JSON))
+				.andExpect(status().isOk())
+				.andExpect(jsonPath("$.content[0].jobExecution.jobInstance.jobName", is(JobExecutionUtils.JOB_NAME_STOPPED)))
+				.andExpect(jsonPath("$.content[1].jobExecution.jobInstance.jobName", is(JobExecutionUtils.JOB_NAME_STARTED)))
+				.andExpect(jsonPath("$.content", hasSize(2)));
+	}
+
+	@Test
+	public void testWildcardMatchSingleResult() throws Exception {
+		mockMvc.perform(get("/jobs/executions/")
+				.param("name", "m_Job_ORIG").accept(MediaType.APPLICATION_JSON))
+				.andExpect(status().isOk())
+				.andExpect(jsonPath("$.content[0].jobExecution.jobInstance.jobName", is(JobExecutionUtils.JOB_NAME_ORIG)))
+				.andExpect(jsonPath("$.content", hasSize(1)));
+	}
+
 	private void createDirtyJob() {
 		JobInstance instance = jobRepository.createJobInstance(JobExecutionUtils.BASE_JOB_NAME + "_NO_TASK", new JobParameters());
 		JobExecution jobExecution = jobRepository.createJobExecution(
