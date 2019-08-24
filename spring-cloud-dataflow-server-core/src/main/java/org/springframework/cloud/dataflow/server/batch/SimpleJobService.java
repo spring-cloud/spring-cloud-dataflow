@@ -471,8 +471,7 @@ public class SimpleJobService implements JobService, DisposableBean {
 	public Collection<JobExecutionWithStepCount> listJobExecutionsForJobWithStepCount(String jobName, int start, int count)
 			throws NoSuchJobException {
 		checkJobExists(jobName);
-		List<JobExecutionWithStepCount> jobExecutions = jobExecutionDao.getJobExecutionsWithStepCount(jobName, start, count);
-		return jobExecutions;
+		return jobExecutionDao.getJobExecutionsWithStepCount(jobName, start, count);
 	}
 
 	@Override
@@ -530,12 +529,16 @@ public class SimpleJobService implements JobService, DisposableBean {
 	}
 
 	private void checkJobExists(String jobName) throws NoSuchJobException {
-		if(getJsrJobNames().contains(jobName) ||
-				jobLocator.getJobNames().contains(jobName) ||
-				jobInstanceDao.countJobInstances(jobName) > 0) {
+		if (collectionContainsJobName(jobName, getJsrJobNames()) ||
+			collectionContainsJobName(jobName, jobLocator.getJobNames()) ||
+			jobInstanceDao.countJobInstances(jobName) > 0) {
 			return;
 		}
 		throw new NoSuchJobException("No Job with that name either current or historic: [" + jobName + "]");
+	}
+
+	private boolean collectionContainsJobName(String jobName, Collection<String> collection) {
+		return collection.stream().anyMatch(e -> e.contains(jobName));
 	}
 
 	/**
