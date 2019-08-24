@@ -25,6 +25,7 @@ import javax.sql.DataSource;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -129,6 +130,7 @@ public class TaskCommandTests extends AbstractShellIntegrationTest {
 	}
 
 	@Test
+	@Ignore
 	public void testGetLog() throws Exception{
 		logger.info("Retrieving task execution log");
 		String taskName = generateUniqueStreamOrTaskName();

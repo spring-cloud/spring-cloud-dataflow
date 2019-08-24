@@ -114,6 +114,7 @@ public class TaskCommandTemplate {
 	 */
 	public String getTaskExecutionLog(String taskName) throws Exception{
 		long id = launchTaskExecutionForLog(taskName);
+		Thread.sleep(10000);
 		CommandResult cr = shell.executeCommand("task execution log --id " + id);
 		assertTrue(cr.toString().contains("Starting"));
 
