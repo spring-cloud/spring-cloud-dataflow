@@ -26,7 +26,7 @@ import org.springframework.jdbc.support.incrementer.AbstractDataFieldMaxValueInc
 public class JdbcSearchableJobInstanceDao extends JdbcJobInstanceDao implements SearchableJobInstanceDao {
 
 	private static final String GET_COUNT_BY_JOB_NAME = "SELECT COUNT(1) from %PREFIX%JOB_INSTANCE "
-			+ "where JOB_NAME=?";
+			+ "where JOB_NAME LIKE ?";
 
 	/**
 	 * @see JdbcJobExecutionDao#afterPropertiesSet()
