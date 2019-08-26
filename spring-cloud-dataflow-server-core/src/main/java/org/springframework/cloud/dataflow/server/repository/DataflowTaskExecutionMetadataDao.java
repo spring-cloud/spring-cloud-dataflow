@@ -13,15 +13,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.springframework.cloud.dataflow.server.service.impl;
+package org.springframework.cloud.dataflow.server.repository;
 
-import com.fasterxml.jackson.annotation.JsonValue;
+import org.springframework.cloud.dataflow.core.TaskManifest;
+import org.springframework.cloud.task.repository.TaskExecution;
 
 /**
- * @author Mark Pollack
+ * @author Michael Minella
  */
-public abstract class ResourceMixin {
+public interface DataflowTaskExecutionMetadataDao {
 
-	@JsonValue
-	public abstract String getURI();
+	void save(TaskExecution taskExecution, TaskManifest manifest);
+
+	TaskManifest getLastManifest(String taskName);
 }

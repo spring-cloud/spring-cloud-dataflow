@@ -16,6 +16,8 @@
 
 package org.springframework.cloud.dataflow.server.service.impl;
 
+import java.io.IOException;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -24,6 +26,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
@@ -31,22 +34,19 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import org.springframework.cloud.common.security.support.TokenUtils;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
-
 import org.springframework.cloud.dataflow.audit.service.AuditRecordService;
 import org.springframework.cloud.dataflow.core.AuditActionType;
 import org.springframework.cloud.dataflow.core.AuditOperationType;
 import org.springframework.cloud.dataflow.core.Launcher;
 import org.springframework.cloud.dataflow.core.TaskDefinition;
 import org.springframework.cloud.dataflow.core.TaskDeployment;
-import org.springframework.cloud.dataflow.core.TaskPlatformFactory;
 import org.springframework.cloud.dataflow.core.TaskManifest;
+import org.springframework.cloud.dataflow.core.TaskPlatformFactory;
 import org.springframework.cloud.dataflow.rest.util.ArgumentSanitizer;
 import org.springframework.cloud.dataflow.rest.util.DeploymentPropertiesUtils;
 import org.springframework.cloud.dataflow.server.job.LauncherRepository;
 import org.springframework.cloud.dataflow.server.repository.DataflowTaskExecutionDao;
+import org.springframework.cloud.dataflow.server.repository.DataflowTaskExecutionMetadataDao;
 import org.springframework.cloud.dataflow.server.repository.NoSuchTaskExecutionException;
 import org.springframework.cloud.dataflow.server.repository.TaskDeploymentRepository;
 import org.springframework.cloud.dataflow.server.repository.TaskExecutionMissingExternalIdException;
@@ -59,6 +59,8 @@ import org.springframework.cloud.task.repository.TaskExecution;
 import org.springframework.cloud.task.repository.TaskExplorer;
 import org.springframework.cloud.task.repository.TaskRepository;
 import org.springframework.core.io.Resource;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
@@ -118,13 +120,9 @@ public class DefaultTaskExecutionService implements TaskExecutionService {
 
 	private final DataflowTaskExecutionDao dataflowTaskExecutionDao;
 
-	public static final String TASK_DEFINITION_DSL_TEXT = "taskDefinitionDslText";
+	private final DataflowTaskExecutionMetadataDao dataflowTaskExecutionMetadataDao;
 
-	public static final String TASK_DEPLOYMENT_PROPERTIES = "taskDeploymentProperties";
-
-	public static final String COMMAND_LINE_ARGS = "commandLineArgs";
-
-	public static final String TASK_PLATFORM_NAME = "spring.cloud.dataflow.task.platformName";
+	private final Map<String, List<String>> tasksBeingUpgraded = new ConcurrentHashMap<>();
 
 	/**
 	 * Initializes the {@link DefaultTaskExecutionService}.
@@ -144,7 +142,8 @@ public class DefaultTaskExecutionService implements TaskExecutionService {
 			TaskExecutionCreationService taskExecutionRepositoryService,
 			TaskAppDeploymentRequestCreator taskAppDeploymentRequestCreator,
 			TaskExplorer taskExplorer,
-			DataflowTaskExecutionDao dataflowTaskExecutionDao) {
+			DataflowTaskExecutionDao dataflowTaskExecutionDao,
+			DataflowTaskExecutionMetadataDao dataflowTaskExecutionMetadataDao) {
 		Assert.notNull(launcherRepository, "launcherRepository must not be null");
 		Assert.notNull(auditRecordService, "auditRecordService must not be null");
 		Assert.notNull(taskExecutionInfoService, "taskExecutionInfoService must not be null");
@@ -155,6 +154,7 @@ public class DefaultTaskExecutionService implements TaskExecutionService {
 		Assert.notNull(taskAppDeploymentRequestCreator, "taskAppDeploymentRequestCreator must not be null");
 		Assert.notNull(taskExplorer, "taskExplorer must not be null");
 		Assert.notNull(dataflowTaskExecutionDao, "dataflowTaskExecutionDao must not be null");
+		Assert.notNull(dataflowTaskExecutionMetadataDao, "dataflowTaskExecutionMetadataDao must not be null");
 
 		this.launcherRepository = launcherRepository;
 		this.auditRecordService = auditRecordService;
@@ -165,17 +165,28 @@ public class DefaultTaskExecutionService implements TaskExecutionService {
 		this.taskAppDeploymentRequestCreator = taskAppDeploymentRequestCreator;
 		this.taskExplorer = taskExplorer;
 		this.dataflowTaskExecutionDao = dataflowTaskExecutionDao;
+		this.dataflowTaskExecutionMetadataDao = dataflowTaskExecutionMetadataDao;
 	}
 
 	@Override
 	public long executeTask(String taskName, Map<String, String> taskDeploymentProperties, List<String> commandLineArgs,
 			String composedTaskRunnerName) {
 
+		System.out.println(">> DEPLOYMENT PROPERTIES: " + taskDeploymentProperties);
+
 		String platformName = taskDeploymentProperties.get(TASK_PLATFORM_NAME);
 
 		// If not given, use 'default'
 		if (!StringUtils.hasText(platformName)) {
 			platformName = "default";
+		}
+
+		if(this.tasksBeingUpgraded.containsKey(taskName)) {
+			List<String> platforms = this.tasksBeingUpgraded.get(taskName);
+
+			if(platforms.contains(platformName)) {
+				throw new IllegalStateException(String.format("Unable to launch %s on platform %s because it is being upgraded", taskName, platformName));
+			}
 		}
 
 		// In case we have exactly one launcher, we override to that
@@ -206,8 +217,6 @@ public class DefaultTaskExecutionService implements TaskExecutionService {
 		}
 		TaskExecutionInformation taskExecutionInformation = taskExecutionInfoService
 				.findTaskExecutionInformation(taskName, taskDeploymentProperties, composedTaskRunnerName);
-
-		TaskExecution taskExecution = taskExecutionRepositoryService.createTaskExecution(taskName);
 
 		if (taskExecutionInformation.isComposed()) {
 			boolean containsAccessToken = false;
@@ -241,33 +250,100 @@ public class DefaultTaskExecutionService implements TaskExecutionService {
 			}
 		}
 
-		AppDeploymentRequest request = this.taskAppDeploymentRequestCreator.
+		TaskExecution taskExecution = taskExecutionRepositoryService.createTaskExecution(taskName);
+
+		AppDeploymentRequest appDeploymentRequest = this.taskAppDeploymentRequestCreator.
 				createRequest(taskExecution, taskExecutionInformation, commandLineArgs, platformName);
 
 		// Task Manifest
 		TaskManifest taskManifest = new TaskManifest();
+		System.out.println(">> taskExecutionInformation: " + taskExecutionInformation);
+		System.out.println(">> taskExecutionInformation.taskDefinition: " + taskExecutionInformation.getTaskDefinition());
+		System.out.println(">> taskExecutionInformation.taskDefinition.dslText: " + taskExecutionInformation.getTaskDefinition().getDslText());
+		taskManifest.setPlatformName(platformName);
 		String composedTaskDsl = taskExecutionInformation.getTaskDefinition().getProperties().get("graph");
 		if (StringUtils.hasText(composedTaskDsl)) {
-			taskManifest.setDslText(composedTaskDsl); // this is now empty.
 			taskManifest.setTaskDeploymentRequest(appDeploymentRequest);
 			List<AppDeploymentRequest> subTaskAppDeploymentRequests = this.taskExecutionInfoService.createRequests(
 					taskExecutionInformation.getTaskDefinition().getTaskName(),
-					taskManifest.getDslText());
+					taskExecutionInformation.getTaskDefinition().getDslText());
 			taskManifest.setSubTaskDeploymentRequests(subTaskAppDeploymentRequests);
 
-			ObjectMapper objectMapper = new ObjectMapper();
-			objectMapper.addMixIn(Resource.class, ResourceMixin.class);
-			objectMapper.configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false);
-			try {
-				String manifestAsString = objectMapper.writeValueAsString(taskManifest);
-				System.out.println(manifestAsString);
-				// taskDeployment.setTaskManifestString(manifestAsString);
-			}
-			catch (JsonProcessingException e) {
-				throw new IllegalArgumentException("Could not serialize Task Manifest", e);
-			}
+		}
+		else {
+			taskManifest.setTaskDeploymentRequest(appDeploymentRequest);
 		}
 
+		TaskManifest previousManifest = this.dataflowTaskExecutionMetadataDao.getLastManifest(taskName);
+
+		if(previousManifest != null && !isAppDeploymentSame(previousManifest, taskManifest)) {
+
+			Page<TaskExecution> runningTaskExecutions =
+					this.taskExplorer.findRunningTaskExecutions(taskName, PageRequest.of(0, 1));
+
+			//TODO add force flag to allow overriding this
+			if(runningTaskExecutions.getTotalElements() > 0) {
+				throw new IllegalStateException("Unable to update application due to currently running applications");
+			}
+			else if(this.tasksBeingUpgraded.containsKey(taskName)) {
+				this.tasksBeingUpgraded.get(taskName).add(platformName);
+			}
+			else {
+				this.tasksBeingUpgraded.put(taskName, Arrays.asList(platformName));
+			}
+
+			System.out.println(">> going to destroy the app");
+			taskLauncher.destroy(taskName);
+
+			//TODO: Need to update the CF TaskLauncher to block so we know the task has been destroyed before proceeding.
+			try {
+				System.out.println(">> waiting 15 seconds for destroy to complete");
+				Thread.sleep(15000);
+				System.out.println(">> done waiting 15 seconds for destroy to complete...fingers crossed");
+			}
+			catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+
+			if(taskDeploymentProperties.isEmpty()) {
+				System.out.println(">> replacing deployment properties");
+				TaskExecutionInformation info = new TaskExecutionInformation();
+				info.setTaskDefinition(taskExecutionInformation.getTaskDefinition());
+				info.setAppResource(taskExecutionInformation.getAppResource());
+				info.setComposed(taskExecutionInformation.isComposed());
+				info.setMetadataResource(taskExecutionInformation.getMetadataResource());
+				info.setOriginalTaskDefinition(taskExecutionInformation.getOriginalTaskDefinition());
+				info.setTaskDeploymentProperties(previousManifest.getTaskDeploymentRequest().getDeploymentProperties());
+				System.out.println(">> new deployment properties are: " + info.getTaskDeploymentProperties());
+
+				AppDeploymentRequest manifestRequest = new AppDeploymentRequest(appDeploymentRequest.getDefinition(),
+						appDeploymentRequest.getResource(),
+						previousManifest.getTaskDeploymentRequest().getDeploymentProperties(),
+						appDeploymentRequest.getCommandlineArguments());
+
+				appDeploymentRequest = this.taskAppDeploymentRequestCreator.
+						createRequest(taskExecution, info, commandLineArgs, platformName);
+				System.out.println(">> deployment props after replacement: " + appDeploymentRequest.getDeploymentProperties());
+
+				taskManifest.setTaskDeploymentRequest(manifestRequest);
+			}
+
+			System.out.println(">> deployment after the if statement: " + appDeploymentRequest.getDeploymentProperties());
+		}
+		else {
+			AppDeploymentRequest request = new AppDeploymentRequest(appDeploymentRequest.getDefinition(),
+					appDeploymentRequest.getResource(),
+					taskDeploymentProperties,
+					appDeploymentRequest.getCommandlineArguments());
+
+			taskManifest.setTaskDeploymentRequest(request);
+
+			System.out.println(">> The app lives!!!");
+		}
+
+		this.dataflowTaskExecutionMetadataDao.save(taskExecution, taskManifest);
+
+		System.out.println(">> deployment props before launch: " + appDeploymentRequest.getDeploymentProperties());
 		String taskDeploymentId = taskLauncher.launch(appDeploymentRequest);
 		if (!StringUtils.hasText(taskDeploymentId)) {
 			throw new IllegalStateException("Deployment ID is null for the task:" + taskName);
@@ -288,6 +364,37 @@ public class DefaultTaskExecutionService implements TaskExecutionService {
 						appDeploymentRequest.getCommandlineArguments()));
 
 		return taskExecution.getExecutionId();
+	}
+
+	private boolean isAppDeploymentSame(TaskManifest previousManifest, TaskManifest newManifest) {
+		boolean same;
+
+		Resource previousResource = previousManifest.getTaskDeploymentRequest().getResource();
+		Resource newResource = newManifest.getTaskDeploymentRequest().getResource();
+
+		try {
+			System.out.println(">>> previousResource = " + previousResource.getURI());
+			System.out.println(">>> newResource = " + newResource.getURI());
+		}
+		catch (IOException e) {
+			e.printStackTrace();
+		}
+
+		same = previousResource.equals(newResource);
+
+		//TODO: Add comparison for app properties
+
+		Map<String, String> previousDeploymentProperties = previousManifest.getTaskDeploymentRequest().getDeploymentProperties();
+		Map<String, String> newDeploymentProperties = newManifest.getTaskDeploymentRequest().getDeploymentProperties();
+
+		System.out.println(">> pdp: + " + previousDeploymentProperties.toString());
+		System.out.println(">> ndp: + " + newDeploymentProperties.toString());
+
+		same = same && (newDeploymentProperties.isEmpty() || previousDeploymentProperties.equals(newDeploymentProperties));
+
+		System.out.println(">>> same = " + same);
+
+		return same;
 	}
 
 	@Override

@@ -13,15 +13,21 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.springframework.cloud.dataflow.server.service.impl;
+package org.springframework.cloud.dataflow.server.repository.support;
 
-import com.fasterxml.jackson.annotation.JsonValue;
+import java.util.Map;
+
+import com.fasterxml.jackson.annotation.JsonProperty;
+
+import org.springframework.cloud.deployer.spi.core.AppDefinition;
+import org.springframework.core.io.Resource;
 
 /**
- * @author Mark Pollack
+ * @author Michael Minella
  */
-public abstract class ResourceMixin {
+public abstract class AppDeploymentRequestMixin {
 
-	@JsonValue
-	public abstract String getURI();
+	AppDeploymentRequestMixin(@JsonProperty("definition")AppDefinition definition,
+			@JsonProperty("resource") Resource resource,
+			@JsonProperty("deploymentProperties") Map<String, String> deploymentProperties){}
 }

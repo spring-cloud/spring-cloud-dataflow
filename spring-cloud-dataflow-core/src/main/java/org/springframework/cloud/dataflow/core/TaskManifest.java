@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -24,18 +24,18 @@ import org.springframework.cloud.deployer.spi.core.AppDeploymentRequest;
  */
 public class TaskManifest {
 
-	private String dslText;
-
 	private AppDeploymentRequest taskDeploymentRequest;
 
 	private List<AppDeploymentRequest> subTaskDeploymentRequests;
 
-	public String getDslText() {
-		return dslText;
+	private String platformName;
+
+	public String getPlatformName() {
+		return platformName;
 	}
 
-	public void setDslText(String dslText) {
-		this.dslText = dslText;
+	public void setPlatformName(String platformName) {
+		this.platformName = platformName;
 	}
 
 	public AppDeploymentRequest getTaskDeploymentRequest() {

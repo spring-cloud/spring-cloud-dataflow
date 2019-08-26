@@ -143,7 +143,7 @@ public class DefaultTaskExecutionInfoService implements TaskExecutionInfoService
 			}
 
 			taskDefinitionToUse = new TaskDefinition(originalTaskDefinition.getName(),
-					TaskServiceUtils.createComposedTaskDefinition(
+					TaskServiceUtils.createComposedTaskDefinition(composedTaskRunnerName,
 							taskNode.toExecutableDSL(), taskConfigurationProperties));
 			taskExecutionInformation.setTaskDeploymentProperties(
 					TaskServiceUtils.establishComposedTaskProperties(taskDeploymentProperties,
