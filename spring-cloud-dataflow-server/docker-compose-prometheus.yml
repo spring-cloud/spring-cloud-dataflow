@@ -1,6 +1,7 @@
 version: '3'
 
 services:
+
   dataflow-server:
     image: springcloud/spring-cloud-dataflow-server:${DATAFLOW_VERSION:?DATAFLOW_VERSION is not set!}
     container_name: dataflow-server
@@ -24,32 +25,47 @@ services:
                 "binder.zkNodes":"zookeeper:2181",
                 "streams.binder.zkNodes":"zookeeper:2181"
              },
-             "task.management.metrics.export.influx":{
+             "task.management.metrics.export.prometheus":{
                 "enabled":true,
-                "db":"myinfluxdb",
-                "uri":"http://influxdb:8086"
+                "rsocket.enabled":true,
+                "rsocket.host":"prometheus-rsocket-proxy",
+                "rsocket.port":7001
              },
-             "stream.management.metrics.export.influx":{
+             "stream.management.metrics.export.prometheus":{
                 "enabled":true,
-                "db":"myinfluxdb",
-                "uri":"http://influxdb:8086"
+                "rsocket.enabled":true,
+                "rsocket.host":"prometheus-rsocket-proxy",
+                "rsocket.port":7001
              }
           },
           "spring.cloud.dataflow.grafana-info.url":"http://localhost:3000"
         }
     depends_on:
       - kafka
-    entrypoint: "./wait-for-it.sh -t 120 mysql:3306 -- java -jar /maven/spring-cloud-dataflow-server.jar"
+    entrypoint: "./wait-for-it.sh mysql:3306 -- java -jar /maven/spring-cloud-dataflow-server.jar"
 
-  influxdb:
-    image: influxdb:1.7.7
-    container_name: influxdb
+  prometheus-rsocket-proxy:
+    image: micrometermetrics/prometheus-rsocket-proxy:0.8.0-SNAPSHOT
+    container_name: prometheus-rsocket-proxy
+    expose:
+      - '9096'
+      - '7001'
+      - '8081'
     ports:
-      - '8086:8086'
+      - '9096:9096'
+      - '7001:7001'
+      - '8081:8081'
+    environment:
+      - server.port=9096
 
   grafana:
-    image: springcloud/spring-cloud-dataflow-grafana-influxdb:${DATAFLOW_VERSION:?DATAFLOW_VERSION is not set!}
+    image: springcloud/spring-cloud-dataflow-grafana-prometheus:${DATAFLOW_VERSION:?DATAFLOW_VERSION is not set! Use 'export DATAFLOW_VERSION=local-server-image-tag'}
     container_name: grafana
     ports:
       - '3000:3000'
 
+  prometheus:
+    image: springcloud/spring-cloud-dataflow-prometheus-local:${DATAFLOW_VERSION:?DATAFLOW_VERSION is not set! Use 'export DATAFLOW_VERSION=local-server-image-tag'}
+    container_name: prometheus
+    ports:
+      - '9090:9090'
