@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.springframework.cloud.dataflow.server.db.migration.oracle;
+package org.springframework.cloud.dataflow.server.db.migration.postgresql;
 
 import java.util.Arrays;
 
@@ -25,23 +25,27 @@ import org.springframework.cloud.dataflow.server.db.migration.SqlCommandsRunner;
 
 /**
  * This migration class adds description column to stream_definitions and task_definitions
- * tables.
+ * tables and original_definition column to stream_definitions.
  *
  * @author Daniel Serleg
+ * @author Ilayaperumal Gopinathan
  */
-public class V2__Add_Descriptions extends BaseJavaMigration {
+public class V2__Add_Descriptions_OriginalDefinition extends BaseJavaMigration {
 
-	public final static String ALTER_STREAM_DEFINITION_TABLE = "alter table stream_definitions add description varchar2(255)";
+	public final static String ALTER_STREAM_DEFINITION_TABLE_DESC = "alter table stream_definitions add column description varchar(255)";
+
+	public final static String ALTER_STREAM_DEFINITION_TABLE_ORIG_DEF = "alter table stream_definitions add column original_definition text";
 
 	public final static String ALTER_TASK_DEFINITION_TABLE = "" +
-			"alter table task_definitions add description varchar2(255)";
+			"alter table task_definitions add column description varchar(255)";
 
 	private final SqlCommandsRunner runner = new SqlCommandsRunner();
 
 	@Override
 	public void migrate(Context context) throws Exception {
 		runner.execute(context.getConnection(), Arrays.asList(
-				SqlCommand.from(ALTER_STREAM_DEFINITION_TABLE),
+				SqlCommand.from(ALTER_STREAM_DEFINITION_TABLE_DESC),
+				SqlCommand.from(ALTER_STREAM_DEFINITION_TABLE_ORIG_DEF),
 				SqlCommand.from(ALTER_TASK_DEFINITION_TABLE)));
 	}
 }

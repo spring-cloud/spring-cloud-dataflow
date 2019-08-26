@@ -25,13 +25,16 @@ import org.springframework.cloud.dataflow.server.db.migration.SqlCommandsRunner;
 
 /**
  * This migration class adds description column to stream_definitions and task_definitions
- * tables.
+ * tables and original_definition column to stream_definitions.
  *
  * @author Daniel Serleg
+ * @author Ilayaperumal Gopinathan
  */
-public class V2__Add_Descriptions extends BaseJavaMigration {
+public class V2__Add_Descriptions_And_OriginalDefinition extends BaseJavaMigration {
 
-	public final static String ALTER_STREAM_DEFINITION_TABLE = "alter table stream_definitions add description varchar(255)";
+	public final static String ALTER_STREAM_DEFINITION_TABLE_DESC = "alter table stream_definitions add description varchar(255)";
+
+	public final static String ALTER_STREAM_DEFINITION_TABLE_ORIG_DEF = "alter table stream_definitions add original_definition varchar(MAX)";
 
 	public final static String ALTER_TASK_DEFINITION_TABLE = "" +
 			"alter table task_definitions add description varchar(255)";
@@ -41,7 +44,8 @@ public class V2__Add_Descriptions extends BaseJavaMigration {
 	@Override
 	public void migrate(Context context) throws Exception {
 		runner.execute(context.getConnection(), Arrays.asList(
-				SqlCommand.from(ALTER_STREAM_DEFINITION_TABLE),
+				SqlCommand.from(ALTER_STREAM_DEFINITION_TABLE_DESC),
+				SqlCommand.from(ALTER_STREAM_DEFINITION_TABLE_ORIG_DEF),
 				SqlCommand.from(ALTER_TASK_DEFINITION_TABLE)));
 	}
 }
