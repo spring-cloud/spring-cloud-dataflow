@@ -55,9 +55,10 @@ public interface TaskOperations {
 	 *
 	 * @param name the name of the task
 	 * @param definition the task definition DSL
+	 * @param description the description of the task definition
 	 * @return the task definition
 	 */
-	TaskDefinitionResource create(String name, String definition);
+	TaskDefinitionResource create(String name, String definition, String description);
 
 	/**
 	 * Launch an already created task.

@@ -50,8 +50,8 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
- * Controller for deployment operations on {@link StreamDefinition}s. Support for stream update, rollback, and
- * update history by delegating to {@link StreamService}.
+ * Controller for deployment operations on {@link StreamDefinition}s. Support for stream
+ * update, rollback, and update history by delegating to {@link StreamService}.
  *
  * @author Eric Bottard
  * @author Mark Fisher
@@ -71,6 +71,7 @@ public class StreamDeploymentController {
 	private static final Logger logger = LoggerFactory.getLogger(StreamDeploymentController.class);
 
 	private final StreamService streamService;
+
 	/**
 	 * The repository this controller will use for stream CRUD operations.
 	 */
@@ -94,7 +95,8 @@ public class StreamDeploymentController {
 	}
 
 	@RequestMapping(value = "/update/{name}", method = RequestMethod.POST)
-	public ResponseEntity<Void> update(@PathVariable("name") String name, @RequestBody UpdateStreamRequest updateStreamRequest) {
+	public ResponseEntity<Void> update(@PathVariable("name") String name,
+			@RequestBody UpdateStreamRequest updateStreamRequest) {
 		this.streamService.updateStream(name, updateStreamRequest);
 		return new ResponseEntity<>(HttpStatus.CREATED);
 	}
@@ -106,7 +108,8 @@ public class StreamDeploymentController {
 	}
 
 	@RequestMapping(value = "/manifest/{name}/{version}", method = RequestMethod.GET)
-	public ResponseEntity<String> manifest(@PathVariable("name") String name, @PathVariable("version") Integer version) {
+	public ResponseEntity<String> manifest(@PathVariable("name") String name,
+			@PathVariable("version") Integer version) {
 		return new ResponseEntity<>(this.streamService.manifest(name, version), HttpStatus.OK);
 	}
 
@@ -159,22 +162,23 @@ public class StreamDeploymentController {
 		StreamDefinition streamDefinition = this.repository.findById(name)
 				.orElseThrow(() -> new NoSuchStreamDefinitionException(name));
 		StreamDeployment streamDeployment = this.streamService.info(name);
-		Map<StreamDefinition, DeploymentState> streamDeploymentStates =
-				this.streamService.state(Arrays.asList(streamDefinition));
+		Map<StreamDefinition, DeploymentState> streamDeploymentStates = this.streamService
+				.state(Arrays.asList(streamDefinition));
 		DeploymentState deploymentState = streamDeploymentStates.get(streamDefinition);
 		String status = "";
 		if (deploymentState != null) {
 			final DeploymentStateResource deploymentStateResource = ControllerUtils.mapState(deploymentState);
 			status = deploymentStateResource.getKey();
 		}
-		return new Assembler(streamDefinition.getDslText(), status).toModel(streamDeployment);
+		return new Assembler(streamDefinition.getDslText(), streamDefinition.getDescription(), status)
+				.toModel(streamDeployment);
 	}
 
 	/**
 	 * Request deployment of an existing stream definition.
 	 * @param name the name of an existing stream definition (required)
 	 * @param properties the deployment properties for the stream as a comma-delimited list of
-	 * key=value pairs
+	 *     key=value pairs
 	 * @return response without a body
 	 */
 	@RequestMapping(value = "/{name}", method = RequestMethod.POST)
@@ -185,8 +189,8 @@ public class StreamDeploymentController {
 	}
 
 	/**
-	 * {@link org.springframework.hateoas.server.ResourceAssembler} implementation that converts
-	 * {@link StreamDeployment}s to {@link StreamDeploymentResource}s.
+	 * {@link org.springframework.hateoas.server.ResourceAssembler} implementation that
+	 * converts {@link StreamDeployment}s to {@link StreamDeploymentResource}s.
 	 */
 	class Assembler extends RepresentationModelAssemblerSupport<StreamDeployment, StreamDeploymentResource> {
 
@@ -194,9 +198,12 @@ public class StreamDeploymentController {
 
 		private final String status;
 
-		public Assembler(String dslText, String status) {
+		private final String description;
+
+		public Assembler(String dslText, String description, String status) {
 			super(StreamDeploymentController.class, StreamDeploymentResource.class);
 			this.dslText = dslText;
+			this.description = description;
 			this.status = status;
 		}
 
@@ -220,6 +227,7 @@ public class StreamDeploymentController {
 			return new StreamDeploymentResource(streamDeployment.getStreamName(),
 					new ArgumentSanitizer().sanitizeStream(
 							new StreamDefinition(streamDeployment.getStreamName(), this.dslText)),
+					this.description,
 					deploymentProperties, this.status);
 		}
 

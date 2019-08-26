@@ -58,14 +58,17 @@ public class Stream {
 
 	private String definition;
 
+	private String description;
+
 	private DataFlowOperations client;
 
-	Stream(String name, List<StreamApplication> applications, String definition,
+	Stream(String name, List<StreamApplication> applications, String definition, String description,
 			DataFlowOperations client) {
 		this.name = name;
 		this.applications = applications;
 		this.definition = definition;
 		this.client = client;
+		this.description = description;
 	}
 
 	/**
@@ -73,6 +76,10 @@ public class Stream {
 	 */
 	public String getName() {
 		return name;
+	}
+
+	public String getDescription() {
+		return description;
 	}
 
 	/**
@@ -108,7 +115,6 @@ public class Stream {
 	 * @param propertiesToUse application properties to update.
 	 */
 	public void update(Map<String, String> propertiesToUse) {
-
 		PackageIdentifier packageIdentifier = new PackageIdentifier();
 		packageIdentifier.setPackageName(this.name);
 		this.client.streamOperations().updateStream(this.name, this.name, packageIdentifier, propertiesToUse, false, null);
@@ -151,7 +157,7 @@ public class Stream {
 	public Map<Integer, String> history() {
 		Collection<Release> history = this.client.streamOperations().history(this.name);
 		return history.stream().collect(Collectors.toMap(
-				r -> r.getVersion(),
+				Release::getVersion,
 				r -> r.getInfo().getStatus().getStatusCode().toString().toLowerCase()));
 	}
 
@@ -173,7 +179,7 @@ public class Stream {
 		return resource.getStatus();
 	}
 
-	public static class StreamNameBuilder {
+	public static class StreamNameBuilder extends PropertyBuilder{
 
 		private String name;
 
@@ -183,10 +189,93 @@ public class Stream {
 
 		private String definition;
 
-		StreamNameBuilder(String name, DataFlowOperations client) {
+		private String description;
+
+		StreamNameBuilder(String name, String description, DataFlowOperations client) {
 			this.client = client;
 			Assert.hasLength(name, "Stream name can't be empty");
 			this.name = name;
+			this.description = description;
+		}
+
+		/**
+		 * Appends a {@link StreamApplication} as a source for this stream
+		 * @param source - The {@link StreamApplication} being added
+		 * @return a {@link SourceBuilder} to continue the building of the Stream
+		 */
+		public SourceBuilder source(StreamApplication source) {
+			Assert.notNull(source, "Source application can't be null");
+			return new SourceBuilder(
+					source.type(StreamApplication.ApplicationType.SOURCE), this);
+		}
+
+		/**
+		 * Creates a Stream bypassing the fluent API and just using the provided
+		 * definition
+		 * @param definition the Stream definition to use
+		 * @return A {@link Stream} object
+		 */
+		public StreamDefinitionBuilder definition(String definition) {
+			Assert.hasLength(name, "Stream definition can't be empty");
+			this.definition = definition;
+			return new StreamDefinitionBuilder(this.name, this.client, this.description, this.definition);
+		}
+
+		/**
+		 * Sets the description of the stream.
+		 * @param description the description text
+		 * @return A {@link StreamDescriptionBuilder} object
+		 */
+		public StreamDescriptionBuilder description(String description) {
+			this.description = description;
+			return new StreamDescriptionBuilder(this.name, this.description, this.client);
+		}
+
+		/**
+		 * Creates the Stream. This method will invoke the remote server and create a stream
+		 * @return StreamDefinition to allow deploying operations on the created Stream
+		 */
+		protected StreamDefinition create() {
+			return new StreamDefinition(this.name, this.client, this.definition, this.description,
+					this.applications);
+		}
+
+		protected void addApplication(StreamApplication application) {
+			if (contains(application)) {
+				throw new IllegalStateException(
+						"There's already an application with the same definition in this stream");
+			}
+			this.applications.add(application);
+		}
+
+		private boolean contains(StreamApplication application) {
+			for (StreamApplication app : this.applications) {
+				if (app.getType().equals(application.getType())
+						&& app.getIdentity().equals(application.getIdentity())) {
+					return true;
+				}
+			}
+			return false;
+		}
+	}
+
+	public static class StreamDescriptionBuilder extends PropertyBuilder {
+
+		private String name;
+
+		private List<StreamApplication> applications = new LinkedList<>();
+
+		private DataFlowOperations client;
+
+		private String definition;
+
+		private String description;
+
+		StreamDescriptionBuilder(String name, String description, DataFlowOperations client) {
+			this.client = client;
+			Assert.hasLength(name, "Stream name can't be empty");
+			this.name = name;
+			this.description = description;
 		}
 
 		/**
@@ -209,19 +298,19 @@ public class Stream {
 		public StreamDefinitionBuilder definition(String definiton) {
 			Assert.hasLength(name, "Stream definition can't be empty");
 			this.definition = definiton;
-			return new StreamDefinitionBuilder(this.name, this.client, this.definition);
+			return new StreamDefinitionBuilder(this.name, this.client, this.description, this.definition);
 		}
 
 		/**
 		 * Creates the Stream. This method will invoke the remote server and create a stream
 		 * @return StreamDefinition to allow deploying operations on the created Stream
 		 */
-		private StreamDefinition create() {
-			return new StreamDefinition(this.name, this.client, this.definition,
+		protected StreamDefinition create() {
+			return new StreamDefinition(this.name, this.client, this.definition, this.description,
 					this.applications);
 		}
 
-		private void addApplication(StreamApplication application) {
+		protected void addApplication(StreamApplication application) {
 			if (contains(application)) {
 				throw new IllegalStateException(
 						"There's already an application with the same definition in this stream");
@@ -248,11 +337,14 @@ public class Stream {
 
 		private String definition;
 
-		private StreamDefinitionBuilder(String name, DataFlowOperations client,
+		private String description;
+
+		private StreamDefinitionBuilder(String name, DataFlowOperations client, String description,
 				String definition) {
 			this.name = name;
 			this.client = client;
 			this.definition = definition;
+			this.description = description;
 		}
 
 		/**
@@ -260,14 +352,14 @@ public class Stream {
 		 * @return StreamDefinition to allow deploying operations on the created Stream
 		 */
 		public StreamDefinition create() {
-			return new StreamDefinition(this.name, this.client, this.definition,
+			return new StreamDefinition(this.name, this.client, this.definition, this.description,
 					Collections.emptyList());
 		}
 	}
 
 	public static class SourceBuilder extends BaseBuilder {
 
-		private SourceBuilder(StreamApplication source, StreamNameBuilder parent) {
+		private SourceBuilder(StreamApplication source, PropertyBuilder parent) {
 			super(source, parent);
 		}
 
@@ -298,7 +390,7 @@ public class Stream {
 	public static class ProcessorBuilder extends BaseBuilder {
 
 		private ProcessorBuilder(StreamApplication application,
-				StreamNameBuilder parent) {
+				PropertyBuilder parent) {
 			super(application, parent);
 		}
 
@@ -329,7 +421,7 @@ public class Stream {
 
 	public static class SinkBuilder extends BaseBuilder {
 
-		private SinkBuilder(StreamApplication application, StreamNameBuilder parent) {
+		private SinkBuilder(StreamApplication application, PropertyBuilder parent) {
 			super(application, parent);
 		}
 
@@ -339,18 +431,22 @@ public class Stream {
 
 	}
 
+	static abstract class PropertyBuilder {
+		protected abstract StreamDefinition create();
+
+		protected abstract void addApplication(StreamApplication application);
+	}
+
 	static abstract class BaseBuilder {
 
 		protected StreamApplication application;
 
-		protected StreamNameBuilder parent;
+		protected PropertyBuilder parent;
 
-		public BaseBuilder(StreamApplication application, StreamNameBuilder parent) {
+		public BaseBuilder(StreamApplication application, PropertyBuilder parent) {
 			this.application = application;
 			this.parent = parent;
 			this.parent.addApplication(application);
 		}
-
 	}
-
 }

@@ -149,13 +149,13 @@ public class TaskTemplate implements TaskOperations {
 	}
 
 	@Override
-	public TaskDefinitionResource create(String name, String definition) {
+	public TaskDefinitionResource create(String name, String definition, String description) {
 		MultiValueMap<String, Object> values = new LinkedMultiValueMap<String, Object>();
 		values.add("name", name);
 		values.add("definition", definition);
-		TaskDefinitionResource task = restTemplate.postForObject(definitionsLink.expand().getHref(), values,
-				TaskDefinitionResource.class);
-		return task;
+		values.add("description", description);
+        return restTemplate.postForObject(definitionsLink.expand().getHref(), values,
+                TaskDefinitionResource.class);
 	}
 
 	@Override
@@ -244,6 +244,5 @@ public class TaskTemplate implements TaskOperations {
 		}
 		String uriTemplate = this.validationLink.expand(taskDefinitionName).getHref();
 		return restTemplate.getForObject(uriTemplate, TaskAppStatusResource.class);
-
 	}
 }

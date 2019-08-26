@@ -112,10 +112,11 @@ public class StreamTemplate implements StreamOperations {
 	}
 
 	@Override
-	public StreamDefinitionResource createStream(String name, String definition, boolean deploy) {
+	public StreamDefinitionResource createStream(String name, String definition, String description, boolean deploy) {
 		MultiValueMap<String, Object> values = new LinkedMultiValueMap<>();
 		values.add("name", name);
 		values.add("definition", definition);
+		values.add("description", description);
 		values.add("deploy", Boolean.toString(deploy));
 		StreamDefinitionResource stream = restTemplate.postForObject(definitionsLink.expand().getHref(), values,
 				StreamDefinitionResource.class);

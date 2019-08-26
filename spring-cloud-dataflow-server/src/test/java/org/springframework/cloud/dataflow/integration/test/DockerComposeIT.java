@@ -152,7 +152,7 @@ public class DockerComposeIT {
 				.build());
 
 		assertThat(stream.getStatus(), is(DEPLOYING));
-		Wait.on(stream).until(s -> s.getStatus().equals(DEPLOYING) == false); //E.g. blocks until in `deploying` state.
+		Wait.on(stream).until(s -> !s.getStatus().equals(DEPLOYING)); //E.g. blocks until in `deploying` state.
 
 		assertThat(stream.getStatus(), is(DEPLOYED));
 
