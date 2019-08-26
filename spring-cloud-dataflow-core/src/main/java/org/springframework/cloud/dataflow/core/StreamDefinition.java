@@ -65,6 +65,13 @@ public class StreamDefinition {
 	private String dslText;
 
 	/**
+	 * Original DSL definition for stream.
+	 */
+	@Column(name = "ORIGINAL_DEFINITION")
+	@Lob
+	private String originalDslText;
+
+	/**
 	 * Custom description of the stream definition. (Optional)
 	 */
 	@Column(name = "DESCRIPTION")
@@ -91,6 +98,7 @@ public class StreamDefinition {
 		Assert.hasText(dslText, "dslText is required");
 		this.name = name;
 		this.dslText = dslText;
+		this.originalDslText = dslText;
 		this.applicationDefinitions = getAppDefinitions(name, dslText);
 	}
 
@@ -99,10 +107,16 @@ public class StreamDefinition {
 	 *
 	 * @param name name of stream
 	 * @param dslText DSL definition for stream
-	 * @param description custom description of the stream definition (Optional)
+	 * @param originalDslText the original DSL definition for stream
 	 */
-	public StreamDefinition(String name, String dslText, String description) {
+	public StreamDefinition(String name, String dslText, String originalDslText) {
 		this(name, dslText);
+		this.originalDslText = originalDslText;
+	}
+
+	public StreamDefinition(String name, String dslText, String originalDslText, String description) {
+		this(name, dslText);
+		this.originalDslText = originalDslText;
 		this.description = description;
 	}
 
@@ -118,10 +132,19 @@ public class StreamDefinition {
 	/**
 	 * Return the DSL definition for this stream.
 	 *
-	 * @return stream definition DSL
+	 * @return the stream definition DSL
 	 */
 	public String getDslText() {
 		return dslText;
+	}
+
+	/**
+	 * Return the Original DSL definition for this stream.
+	 *
+	 * @return the original stream definition DSL
+	 */
+	public String getOriginalDslText() {
+		return this.originalDslText;
 	}
 
 	/**
