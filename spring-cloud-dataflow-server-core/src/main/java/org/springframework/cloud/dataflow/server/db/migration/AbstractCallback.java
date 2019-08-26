@@ -72,11 +72,13 @@ public abstract class AbstractCallback implements Callback {
 			runner.execute(context.getConnection(), getCommands(event, context));
 		}
 		catch(Exception sqe) {
-			if (sqe instanceof BadSqlGrammarException && sqe.getMessage().contains("already exists")) {
+			if (sqe instanceof BadSqlGrammarException) {
 				throw new DataFlowSchemaMigrationException(
 						"An exception occured during migration.  This may indicate " +
 								"that you have run Spring Batch Jobs or Spring Cloud " +
-								"Tasks prior to running Spring Cloud Data Flow first", sqe);
+								"Tasks prior to running Spring Cloud Data Flow first. " +
+								"Data Flow must create these tables.", sqe);
+
 			}
 			throw sqe;
 		}
