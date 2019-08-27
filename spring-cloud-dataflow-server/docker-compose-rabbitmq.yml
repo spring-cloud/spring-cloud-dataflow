@@ -1,0 +1,29 @@
+version: '3'
+
+services:
+
+  kafka:
+    entrypoint: ["echo", "Kafka service is disabled"]
+
+  zookeeper:
+    entrypoint: ["echo", "zookeeper service is disabled"]
+
+  rabbitmq:
+    image: rabbitmq:3.7
+    container_name: dataflow-rabbitmq
+    expose:
+      - '5672'
+
+  dataflow-server:
+    environment:
+      - spring.cloud.dataflow.applicationProperties.stream.spring.rabbitmq.host=rabbitmq
+
+  app-import:
+    command: >
+      /bin/sh -c "
+        ./wait-for-it.sh -t 180 dataflow-server:9393;
+        wget -qO- 'http://dataflow-server:9393/apps' --post-data='uri=https://dataflow.spring.io/rabbitmq-maven-latest&force=true';
+        echo 'Stream apps imported'
+        wget -qO- 'http://dataflow-server:9393/apps' --post-data='uri=https://dataflow.spring.io/task-maven-latest&force=true';
+        echo 'Task apps imported'"
+

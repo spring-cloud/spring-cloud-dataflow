@@ -2,20 +2,10 @@ version: '3'
 
 services:
   dataflow-server:
-    image: springcloud/spring-cloud-dataflow-server:${DATAFLOW_VERSION:?DATAFLOW_VERSION is not set!}
-    container_name: dataflow-server
-    ports:
-      - "9393:9393"
     environment:
       - |
         SPRING_APPLICATION_JSON=
         {
-          "spring.datasource":{
-             "url":"jdbc:mysql://mysql:3306/dataflow",
-             "username":"root",
-             "password":"rootpw",
-             "driverClassName":"org.mariadb.jdbc.Driver"
-          },
           "spring.cloud.skipper.client.serverUri":"http://skipper-server:7577/api",
           "spring.cloud.dataflow.applicationProperties":{
              "stream.spring.cloud.stream.kafka":{
@@ -37,9 +27,6 @@ services:
           },
           "spring.cloud.dataflow.grafana-info.url":"http://localhost:3000"
         }
-    depends_on:
-      - kafka
-    entrypoint: "./wait-for-it.sh -t 120 mysql:3306 -- java -jar /maven/spring-cloud-dataflow-server.jar"
 
   influxdb:
     image: influxdb:1.7.7

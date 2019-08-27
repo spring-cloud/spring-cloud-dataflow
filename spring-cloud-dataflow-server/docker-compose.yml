@@ -40,15 +40,13 @@ services:
     ports:
       - "9393:9393"
     environment:
+      - SPRING_DATASOURCE_URL=jdbc:mysql://mysql:3306/dataflow
+      - SPRING_DATASOURCE_USERNAME=root
+      - SPRING_DATASOURCE_PASSWORD=rootpw
+      - SPRING_DATASOURCE_DRIVER_CLASS_NAME=org.mariadb.jdbc.Driver
       - |
         SPRING_APPLICATION_JSON=
         {
-          "spring.datasource":{
-             "url":"jdbc:mysql://mysql:3306/dataflow",
-             "username":"root",
-             "password":"rootpw",
-             "driverClassName":"org.mariadb.jdbc.Driver"
-          },
           "spring.cloud.skipper.client.serverUri":"http://skipper-server:7577/api",
           "spring.cloud.dataflow.applicationProperties":{
              "stream.spring.cloud.stream.kafka":{
@@ -84,15 +82,13 @@ services:
       - "9000-9010:9000-9010"
       - "20000-20105:20000-20105"
     environment:
+      - SPRING_DATASOURCE_URL=jdbc:mysql://mysql:3306/dataflow
+      - SPRING_DATASOURCE_USERNAME=root
+      - SPRING_DATASOURCE_PASSWORD=rootpw
+      - SPRING_DATASOURCE_DRIVER_CLASS_NAME=org.mariadb.jdbc.Driver
       - |
         SPRING_APPLICATION_JSON=
         {
-          "spring.datasource":{
-             "url":"jdbc:mysql://mysql:3306/dataflow",
-             "username":"root",
-             "password":"rootpw",
-             "driverClassName":"org.mariadb.jdbc.Driver"
-          },
           "spring.cloud.skipper.server.platform.local.accounts.default.portrange":{
              "low":20000,
              "high":20100
