@@ -7,14 +7,7 @@ services:
       - |
         SPRING_APPLICATION_JSON=
         {
-          "spring.cloud.skipper.client.serverUri":"http://skipper-server:7577/api",
           "spring.cloud.dataflow.applicationProperties":{
-             "stream.spring.cloud.stream.kafka":{
-                "binder.brokers":"PLAINTEXT://kafka:9092",
-                "streams.binder.brokers":"PLAINTEXT://kafka:9092",
-                "binder.zkNodes":"zookeeper:2181",
-                "streams.binder.zkNodes":"zookeeper:2181"
-             },
              "task.management.metrics.export.prometheus":{
                 "enabled":true,
                 "rsocket.enabled":true,

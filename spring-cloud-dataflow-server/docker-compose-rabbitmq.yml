@@ -3,7 +3,7 @@ version: '3'
 services:
 
   kafka:
-    entrypoint: ["echo", "Kafka service is disabled"]
+    entrypoint: ["echo", "kafka service is disabled"]
 
   zookeeper:
     entrypoint: ["echo", "zookeeper service is disabled"]
@@ -23,7 +23,7 @@ services:
       /bin/sh -c "
         ./wait-for-it.sh -t 180 dataflow-server:9393;
         wget -qO- 'http://dataflow-server:9393/apps' --post-data='uri=https://dataflow.spring.io/rabbitmq-maven-latest&force=true';
-        echo 'Stream apps imported'
+        echo 'RabbitMQ Stream apps imported'
         wget -qO- 'http://dataflow-server:9393/apps' --post-data='uri=https://dataflow.spring.io/task-maven-latest&force=true';
         echo 'Task apps imported'"
 

@@ -26,7 +26,6 @@ services:
       - SPRING_DATASOURCE_DRIVER_CLASS_NAME=org.postgresql.Driver
     entrypoint: "./wait-for-it.sh -t 240 postgres:5432 -- java -jar /maven/spring-cloud-dataflow-server.jar"
 
-
   skipper-server:
     environment:
       - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/dataflow
