@@ -10,6 +10,7 @@
     <properties>
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
+        <spring-security-oauth-boot.version>2.2.0.M5</spring-security-oauth-boot.version>
     </properties>
 
     <parent>
@@ -22,6 +23,16 @@
         <module>spring-cloud-common-security-config-web</module>
         <module>spring-cloud-starter-common-security-config-web</module>
     </modules>
+
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>org.springframework.security.oauth.boot</groupId>
+                <artifactId>spring-security-oauth2-autoconfigure</artifactId>
+                <version>${spring-security-oauth-boot.version}</version>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
 
     <organization>
         <name>Pivotal Software, Inc.</name>
