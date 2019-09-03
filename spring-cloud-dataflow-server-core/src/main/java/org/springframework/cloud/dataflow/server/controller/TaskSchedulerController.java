@@ -23,7 +23,7 @@ import org.springframework.cloud.dataflow.rest.resource.ScheduleInfoResource;
 import org.springframework.cloud.dataflow.rest.util.DeploymentPropertiesUtils;
 import org.springframework.cloud.dataflow.server.repository.NoSuchScheduleException;
 import org.springframework.cloud.dataflow.server.service.SchedulerService;
-import org.springframework.cloud.deployer.scheduler.spi.core.ScheduleInfo;
+import org.springframework.cloud.deployer.spi.scheduler.ScheduleInfo;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;

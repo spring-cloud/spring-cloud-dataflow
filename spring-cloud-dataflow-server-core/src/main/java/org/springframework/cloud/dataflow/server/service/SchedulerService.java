@@ -20,7 +20,7 @@ package org.springframework.cloud.dataflow.server.service;
 import java.util.List;
 import java.util.Map;
 
-import org.springframework.cloud.deployer.scheduler.spi.core.ScheduleInfo;
+import org.springframework.cloud.deployer.spi.scheduler.ScheduleInfo;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 

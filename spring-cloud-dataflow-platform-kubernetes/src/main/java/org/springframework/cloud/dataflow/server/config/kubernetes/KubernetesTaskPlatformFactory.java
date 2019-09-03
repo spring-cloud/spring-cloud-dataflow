@@ -22,14 +22,14 @@ import io.fabric8.kubernetes.client.KubernetesClient;
 
 import org.springframework.cloud.dataflow.core.AbstractTaskPlatformFactory;
 import org.springframework.cloud.dataflow.core.Launcher;
-import org.springframework.cloud.deployer.scheduler.spi.core.Scheduler;
-import org.springframework.cloud.deployer.scheduler.spi.kubernetes.KubernetesScheduler;
-import org.springframework.cloud.deployer.scheduler.spi.kubernetes.KubernetesSchedulerProperties;
 import org.springframework.cloud.deployer.spi.kubernetes.ContainerFactory;
 import org.springframework.cloud.deployer.spi.kubernetes.DefaultContainerFactory;
 import org.springframework.cloud.deployer.spi.kubernetes.KubernetesClientFactory;
 import org.springframework.cloud.deployer.spi.kubernetes.KubernetesDeployerProperties;
 import org.springframework.cloud.deployer.spi.kubernetes.KubernetesTaskLauncher;
+import org.springframework.cloud.deployer.spi.scheduler.Scheduler;
+import org.springframework.cloud.deployer.spi.scheduler.kubernetes.KubernetesScheduler;
+import org.springframework.cloud.deployer.spi.scheduler.kubernetes.KubernetesSchedulerProperties;
 
 /**
  * @author David Turanski

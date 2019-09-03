@@ -22,7 +22,7 @@ import io.pivotal.reactor.scheduler.ReactorSchedulerClient;
 import io.pivotal.scheduler.SchedulerClient;
 import reactor.core.publisher.Mono;
 
-import org.springframework.cloud.deployer.scheduler.spi.cloudfoundry.CloudFoundrySchedulerProperties;
+import org.springframework.cloud.deployer.spi.scheduler.cloudfoundry.CloudFoundrySchedulerProperties;
 
 /**
  * @author David Turanski
