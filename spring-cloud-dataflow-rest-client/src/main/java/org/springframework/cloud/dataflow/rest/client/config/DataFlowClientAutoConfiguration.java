@@ -1,5 +1,5 @@
 /*
- * Copyright 2016-2018 the original author or authors.
+ * Copyright 2016-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,9 +17,13 @@ package org.springframework.cloud.dataflow.rest.client.config;
 
 import java.net.URI;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.cloud.common.security.support.OAuth2AccessTokenProvidingClientHttpRequestInterceptor;
 import org.springframework.cloud.dataflow.rest.client.DataFlowOperations;
 import org.springframework.cloud.dataflow.rest.client.DataFlowTemplate;
 import org.springframework.cloud.dataflow.rest.client.dsl.Stream;
@@ -39,6 +43,8 @@ import org.springframework.web.client.RestTemplate;
 @EnableConfigurationProperties(DataFlowClientProperties.class)
 public class DataFlowClientAutoConfiguration {
 
+	private static Log logger = LogFactory.getLog(DataFlowClientAutoConfiguration.class);
+
 	@Autowired
 	private DataFlowClientProperties properties;
 
@@ -51,10 +57,18 @@ public class DataFlowClientAutoConfiguration {
 		RestTemplate template = DataFlowTemplate.prepareRestTemplate(restTemplate);
 		final HttpClientConfigurer httpClientConfigurer = HttpClientConfigurer.create(new URI(properties.getServerUri()))
 				.skipTlsCertificateVerification(properties.isSkipSslValidation());
-		if(!StringUtils.isEmpty(properties.getAuthentication().getBasic().getUsername()) &&
+
+		if (StringUtils.hasText(this.properties.getAuthentication().getAccessToken())) {
+			template.getInterceptors().add(new OAuth2AccessTokenProvidingClientHttpRequestInterceptor(this.properties.getAuthentication().getAccessToken()));
+			logger.debug("Configured OAuth2 Access Token for accessing the Data Flow Server");
+		}
+		else if(!StringUtils.isEmpty(properties.getAuthentication().getBasic().getUsername()) &&
 				!StringUtils.isEmpty(properties.getAuthentication().getBasic().getPassword())){
 			httpClientConfigurer.basicAuthCredentials(properties.getAuthentication().getBasic().getUsername(), properties.getAuthentication().getBasic().getPassword());
 			template.setRequestFactory(httpClientConfigurer.buildClientHttpRequestFactory());
+		}
+		else {
+			logger.debug("Not configuring security for accessing the Data Flow Server");
 		}
 		return new DataFlowTemplate(new URI(properties.getServerUri()), template);
 	}
