@@ -19,7 +19,7 @@ import org.springframework.security.oauth2.common.OAuth2AccessToken;
 
 /**
  * Holder class for an {@link OAuth2AccessToken}. To be used in conjunction with
- * the {@link ManualOAuthAuthenticationProvider}.
+ * the ManualOAuthAuthenticationProvider.
  *
  * @author Gunnar Hillert
  */

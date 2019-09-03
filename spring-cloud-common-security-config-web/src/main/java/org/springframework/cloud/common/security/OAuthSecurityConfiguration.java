@@ -130,6 +130,7 @@ public class OAuthSecurityConfiguration extends WebSecurityConfigurerAdapter {
 		final RequestMatcher textHtmlMatcher = new MediaTypeRequestMatcher(
 				new BrowserDetectingContentNegotiationStrategy(),
 				MediaType.TEXT_HTML);
+
 		final BasicAuthenticationEntryPoint basicAuthenticationEntryPoint = new BasicAuthenticationEntryPoint();
 		basicAuthenticationEntryPoint.setRealmName(SecurityConfigUtils.BASIC_AUTH_REALM_NAME);
 		basicAuthenticationEntryPoint.afterPropertiesSet();
@@ -139,6 +140,7 @@ public class OAuthSecurityConfiguration extends WebSecurityConfigurerAdapter {
 		http.addFilterAfter(oauthFilter, basicAuthenticationFilter.getClass());
 		http.addFilterBefore(basicAuthenticationFilter, oauthFilter.getClass());
 		http.addFilterBefore(oAuth2AuthenticationProcessingFilter(), basicAuthenticationFilter.getClass());
+
 		this.authorizationProperties.getAuthenticatedPaths().add("/");
 		this.authorizationProperties.getAuthenticatedPaths().add(dashboard("/**"));
 		this.authorizationProperties.getAuthenticatedPaths().add(this.authorizationProperties.getDashboardUrl());
@@ -153,6 +155,7 @@ public class OAuthSecurityConfiguration extends WebSecurityConfigurerAdapter {
 						.authenticated();
 		security = SecurityConfigUtils.configureSimpleSecurity(security, this.authorizationProperties);
 		security.anyRequest().denyAll();
+
 		http.httpBasic().and()
 				.logout()
 				.logoutSuccessUrl(dashboard("/logout-success-oauth.html"))

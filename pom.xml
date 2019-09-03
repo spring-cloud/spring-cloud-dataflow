@@ -10,6 +10,7 @@
     <properties>
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
+        <spring-security-oauth2.version>2.3.5.RELEASE</spring-security-oauth2.version>
         <spring-security-oauth-boot.version>2.2.0.M5</spring-security-oauth-boot.version>
     </properties>
 
@@ -20,12 +21,18 @@
     </parent>
 
     <modules>
+        <module>spring-cloud-common-security-config-core</module>
         <module>spring-cloud-common-security-config-web</module>
         <module>spring-cloud-starter-common-security-config-web</module>
     </modules>
 
     <dependencyManagement>
         <dependencies>
+            <dependency>
+                <groupId>org.springframework.security.oauth</groupId>
+                <artifactId>spring-security-oauth2</artifactId>
+                <version>${spring-security-oauth2.version}</version>
+            </dependency>
             <dependency>
                 <groupId>org.springframework.security.oauth.boot</groupId>
                 <artifactId>spring-security-oauth2-autoconfigure</artifactId>
