@@ -83,7 +83,7 @@
 		<spring-cloud.version>Hoxton.M2</spring-cloud.version>
 		<java-cfenv-boot.version>1.1.1.RELEASE</java-cfenv-boot.version>
 
-		<spring-cloud-common-security-config.version>1.2.0.M1</spring-cloud-common-security-config.version>
+		<spring-cloud-common-security-config.version>1.2.0.BUILD-SNAPSHOT</spring-cloud-common-security-config.version>
 
 		<spring-shell.version>1.2.0.RELEASE</spring-shell.version>
 		<commons-io.version>2.4</commons-io.version>
