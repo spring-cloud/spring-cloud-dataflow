@@ -21,9 +21,9 @@ import java.util.Collections;
 import org.springframework.cloud.dataflow.core.AbstractTaskPlatformFactory;
 import org.springframework.cloud.dataflow.core.Launcher;
 import org.springframework.cloud.dataflow.core.TaskPlatform;
-import org.springframework.cloud.deployer.scheduler.spi.core.Scheduler;
 import org.springframework.cloud.deployer.spi.local.LocalDeployerProperties;
 import org.springframework.cloud.deployer.spi.local.LocalTaskLauncher;
+import org.springframework.cloud.deployer.spi.scheduler.Scheduler;
 import org.springframework.util.StringUtils;
 
 /**

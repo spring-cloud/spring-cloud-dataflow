@@ -21,7 +21,7 @@ import java.util.Map;
 import org.springframework.cloud.dataflow.core.AppRegistration;
 import org.springframework.cloud.dataflow.core.StreamDefinition;
 import org.springframework.cloud.dataflow.rest.util.ArgumentSanitizer;
-import org.springframework.cloud.deployer.scheduler.spi.core.ScheduleRequest;
+import org.springframework.cloud.deployer.spi.scheduler.ScheduleRequest;
 import org.springframework.util.Assert;
 
 /**
