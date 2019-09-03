@@ -39,14 +39,14 @@
 		<spring-cloud.version>Hoxton.M2</spring-cloud.version>
 
 		<java-cfenv-boot.version>1.1.1.RELEASE</java-cfenv-boot.version>
-		<spring-cloud-deployer.version>2.1.0.M1</spring-cloud-deployer.version>
-		<spring-cloud-deployer-local.version>2.1.0.M1</spring-cloud-deployer-local.version>
+		<spring-cloud-deployer.version>2.1.0.BUILD-SNAPSHOT</spring-cloud-deployer.version>
+		<spring-cloud-deployer-local.version>2.1.0.BUILD-SNAPSHOT</spring-cloud-deployer-local.version>
 		<!-- note - check version of reactor at deployer-cf/cf-java-client uses -->
-		<spring-cloud-deployer-cloudfoundry.version>2.1.0.M1</spring-cloud-deployer-cloudfoundry.version>
+		<spring-cloud-deployer-cloudfoundry.version>2.1.0.BUILD-SNAPSHOT</spring-cloud-deployer-cloudfoundry.version>
 		<reactor.version>3.2.0.RELEASE</reactor.version>
 
 		<kubernetes-client.version>4.1.0</kubernetes-client.version>
-		<spring-cloud-deployer-kubernetes.version>2.1.0.M1</spring-cloud-deployer-kubernetes.version>
+		<spring-cloud-deployer-kubernetes.version>2.1.0.BUILD-SNAPSHOT</spring-cloud-deployer-kubernetes.version>
 		<spring-cloud-kubernetes.version>1.0.2.RELEASE</spring-cloud-kubernetes.version>
 
 		<dockerfile-maven-plugin.version>1.4.9</dockerfile-maven-plugin.version>
