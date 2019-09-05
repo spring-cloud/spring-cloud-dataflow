@@ -26,6 +26,8 @@ spec:
         volumeMounts:
           - name: data
             mountPath: /var/lib/mysql
+        args:
+          - "--ignore-db-dir=lost+found"
       volumes:
       - name: data
         persistentVolumeClaim:
