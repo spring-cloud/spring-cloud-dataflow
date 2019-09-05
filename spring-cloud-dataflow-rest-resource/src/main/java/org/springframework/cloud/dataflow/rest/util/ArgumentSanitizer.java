@@ -156,6 +156,16 @@ public class ArgumentSanitizer {
 	}
 
 	/**
+	 * Redacts sensitive property values in a stream.
+	 *
+	 * @param streamDefinition the stream definition to sanitize
+	 * @return Stream definition with the original DSL text that has sensitive data redacted.
+	 */
+	public String sanitizeOriginalStreamDsl(StreamDefinition streamDefinition) {
+		return sanitizeStream(new StreamDefinition(streamDefinition.getName(), streamDefinition.getOriginalDslText()));
+	}
+
+	/**
 	 * Redacts sensitive property values in a task.
 	 *
 	 * @param taskDefinition the task definition to sanitize
