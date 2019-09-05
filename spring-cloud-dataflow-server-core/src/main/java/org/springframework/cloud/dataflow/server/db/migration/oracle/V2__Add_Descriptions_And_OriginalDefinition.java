@@ -39,6 +39,9 @@ public class V2__Add_Descriptions_And_OriginalDefinition extends BaseJavaMigrati
 	public final static String ALTER_TASK_DEFINITION_TABLE = "" +
 			"alter table task_definitions add description varchar2(255)";
 
+	public final static String UPDATE_STREAM_DEFINITION_TABLE_ORIG_DEF = "update table set original_definition=definition";
+
+
 	private final SqlCommandsRunner runner = new SqlCommandsRunner();
 
 	@Override
@@ -46,6 +49,8 @@ public class V2__Add_Descriptions_And_OriginalDefinition extends BaseJavaMigrati
 		runner.execute(context.getConnection(), Arrays.asList(
 				SqlCommand.from(ALTER_STREAM_DEFINITION_TABLE_DESC),
 				SqlCommand.from(ALTER_STREAM_DEFINITION_TABLE_ORIG_DEF),
-				SqlCommand.from(ALTER_TASK_DEFINITION_TABLE)));
+				SqlCommand.from(ALTER_TASK_DEFINITION_TABLE),
+				SqlCommand.from(UPDATE_STREAM_DEFINITION_TABLE_ORIG_DEF)));
+
 	}
 }
