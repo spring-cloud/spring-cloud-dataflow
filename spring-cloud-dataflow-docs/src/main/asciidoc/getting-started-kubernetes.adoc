@@ -827,3 +827,19 @@ data:
 
 Replacing the `runAsUser` and/or `fsGroup` attributes with the appropriate values for your container environment.
 
+==== Service Ports
+
+When deploying applications a kubernetes Service object is created with a default port of `8080` or, if set the application property value of `server.port`. Additional ports can be added to the Service object on a per-application basis. Multiple ports can be added when specified with a comma delimiter.
+
+The following example shows how you can configure additional ports on a Service object for an application:
+
+====
+[source,options=nowrap]
+----
+deployer.<app>.kubernetes.servicePorts=5000
+deployer.<app>.kubernetes.servicePorts=5000,9000
+----
+====
+
+Replace `<app>` with the name of your application and the value of your port(s).
+
