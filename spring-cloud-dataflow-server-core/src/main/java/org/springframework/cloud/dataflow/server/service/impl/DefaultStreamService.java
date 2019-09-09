@@ -205,7 +205,8 @@ public class DefaultStreamService implements StreamService {
 
 		String updatedDslText = new StreamDefinitionToDslConverter().toDsl(updatedStreamAppDefinitions);
 
-		StreamDefinition updatedStreamDefinition = new StreamDefinition(streamName, updatedDslText, streamDefinition.getOriginalDslText());
+		StreamDefinition updatedStreamDefinition = new StreamDefinition(streamName, updatedDslText,
+				streamDefinition.getOriginalDslText(), streamDefinition.getDescription());
 		logger.debug("Updated StreamDefinition: " + updatedStreamDefinition);
 
 		// TODO consider adding an explicit UPDATE method to the streamDefRepository
