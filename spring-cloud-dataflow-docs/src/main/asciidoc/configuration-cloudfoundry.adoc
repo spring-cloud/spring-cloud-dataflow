@@ -149,7 +149,7 @@ substitute `TASK` for `STREAM` in the property name, as the following example sh
 
 [source,bash,subs=attributes]
 ----
-cf set-env dataflow-server SPRING_CLOUD_DATAFLOW_TASK_PLATFORM_CLOUDFOUNDRY_ACCOUNTS[default]_DEPLOYMENT_TASK_MEMORY 512
+cf set-env dataflow-server SPRING_CLOUD_DATAFLOW_TASK_PLATFORM_CLOUDFOUNDRY_ACCOUNTS[default]_DEPLOYMENT_MEMORY 512
 ----
 
 =====
