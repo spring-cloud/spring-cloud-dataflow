@@ -17,7 +17,7 @@
 package org.springframework.cloud.dataflow.server.service.impl;
 
 import java.io.IOException;
-import java.util.Arrays;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -183,7 +183,6 @@ public class DefaultTaskExecutionService implements TaskExecutionService {
 
 		if(this.tasksBeingUpgraded.containsKey(taskName)) {
 			List<String> platforms = this.tasksBeingUpgraded.get(taskName);
-
 			if(platforms.contains(platformName)) {
 				throw new IllegalStateException(String.format("Unable to launch %s on platform %s because it is being upgraded", taskName, platformName));
 			}
@@ -211,7 +210,7 @@ public class DefaultTaskExecutionService implements TaskExecutionService {
 			if (!existingTaskDeployment.getPlatformName().equals(platformName)) {
 				throw new IllegalStateException(String.format(
 						"Task definition [%s] has already been deployed on platform [%s].  " +
-						"Requested to deploy on platform [%s].",
+								"Requested to deploy on platform [%s].",
 						taskName, existingTaskDeployment.getPlatformName(), platformName));
 			}
 		}
@@ -289,7 +288,9 @@ public class DefaultTaskExecutionService implements TaskExecutionService {
 				this.tasksBeingUpgraded.get(taskName).add(platformName);
 			}
 			else {
-				this.tasksBeingUpgraded.put(taskName, Arrays.asList(platformName));
+				List<String> platformList = new ArrayList<>();
+				platformList.add(platformName);
+				this.tasksBeingUpgraded.put(taskName, platformList);
 			}
 
 			System.out.println(">> going to destroy the app");
@@ -345,6 +346,11 @@ public class DefaultTaskExecutionService implements TaskExecutionService {
 
 		System.out.println(">> deployment props before launch: " + appDeploymentRequest.getDeploymentProperties());
 		String taskDeploymentId = taskLauncher.launch(appDeploymentRequest);
+
+		if(this.tasksBeingUpgraded.containsKey(taskName)) {
+			this.tasksBeingUpgraded.get(taskName).remove(platformName);
+		}
+
 		if (!StringUtils.hasText(taskDeploymentId)) {
 			throw new IllegalStateException("Deployment ID is null for the task:" + taskName);
 		}
@@ -482,7 +488,7 @@ public class DefaultTaskExecutionService implements TaskExecutionService {
 					.map(Launcher::getName)
 					.collect(Collectors.toList());
 			throw new IllegalStateException(String.format("No Launcher found for the platform named '%s'.  " +
-					"Available platform names are %s",
+							"Available platform names are %s",
 					platformName, launcherNames));
 		}
 		TaskLauncher taskLauncher = launcher.getTaskLauncher();

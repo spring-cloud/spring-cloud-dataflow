@@ -52,7 +52,6 @@ import org.springframework.core.io.ResourceLoader;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.util.Assert;
-import org.springframework.util.StringUtils;
 
 /**
  * Default implementation of the {@link SchedulerService} interface. Provide service methods
@@ -138,19 +137,19 @@ public class DefaultSchedulerService implements SchedulerService {
 
 		Map<String, String> deployerDeploymentProperties = DeploymentPropertiesUtils
 				.extractAndQualifyDeployerProperties(taskDeploymentProperties, taskDefinition.getRegisteredAppName());
-		if (StringUtils.hasText(this.dataflowServerUri) && taskNode.isComposed()) {
-			TaskServiceUtils.updateDataFlowUriIfNeeded(this.dataflowServerUri, appDeploymentProperties, commandLineArgs);
-		}
+		TaskServiceUtils.updateDataFlowUriIfNeeded(this.dataflowServerUri, appDeploymentProperties, commandLineArgs);
 		AppDefinition revisedDefinition = TaskServiceUtils.mergeAndExpandAppProperties(taskDefinition, metadataResource,
 				appDeploymentProperties, whitelistProperties);
+		revisedDefinition = new AppDefinition(taskConfigurationProperties.getSchedulerTaskLauncher(), revisedDefinition.getProperties());
 		DeploymentPropertiesUtils.validateDeploymentProperties(taskDeploymentProperties);
 		taskDeploymentProperties = extractAndQualifySchedulerProperties(taskDeploymentProperties);
+		commandLineArgs.add("--taskName=" + taskDefinitionName);
 		ScheduleRequest scheduleRequest = new ScheduleRequest(revisedDefinition, taskDeploymentProperties,
 				deployerDeploymentProperties, commandLineArgs, scheduleName, getTaskResource(taskDefinitionName));
 		Launcher launcher = getDefaultLauncher();
 		launcher.getScheduler().schedule(scheduleRequest);
 		this.auditRecordService.populateAndSaveAuditRecordUsingMapData(AuditOperationType.SCHEDULE, AuditActionType.CREATE,
-			scheduleRequest.getScheduleName(), this.auditServiceUtils.convertScheduleRequestToAuditData(scheduleRequest));
+				scheduleRequest.getScheduleName(), this.auditServiceUtils.convertScheduleRequestToAuditData(scheduleRequest));
 	}
 
 	private Launcher getDefaultLauncher() {
@@ -257,8 +256,8 @@ public class DefaultSchedulerService implements SchedulerService {
 					ApplicationType.task);
 		}
 		else {
-			appRegistration = this.registry.find(taskDefinition.getRegisteredAppName(),
-					ApplicationType.task);
+			appRegistration = this.registry.find(taskConfigurationProperties.getSchedulerTaskLauncher(),
+					ApplicationType.app);
 		}
 		Assert.notNull(appRegistration, "Unknown task app: " + taskDefinition.getRegisteredAppName());
 		return this.registry.getAppResource(appRegistration);
