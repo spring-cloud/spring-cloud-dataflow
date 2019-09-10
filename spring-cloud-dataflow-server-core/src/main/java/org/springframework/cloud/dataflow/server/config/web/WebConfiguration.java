@@ -46,6 +46,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.event.ContextClosedEvent;
 import org.springframework.hateoas.core.DefaultRelProvider;
 import org.springframework.http.converter.HttpMessageConverter;
+import org.springframework.http.converter.ResourceHttpMessageConverter;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
@@ -107,8 +108,8 @@ public class WebConfiguration implements ServletContextInitializer, ApplicationL
 		return new HttpMessageConverters(
 				// Prevent default converters
 				false,
-				// Have Jackson2 converter as the sole converter
-				Arrays.<HttpMessageConverter<?>>asList(new MappingJackson2HttpMessageConverter(objectMapper)));
+				Arrays.<HttpMessageConverter<?>>asList(new MappingJackson2HttpMessageConverter(objectMapper),
+						new ResourceHttpMessageConverter()));
 	}
 
 	@Bean
