@@ -172,27 +172,13 @@ public class DefaultTaskExecutionService implements TaskExecutionService {
 	public long executeTask(String taskName, Map<String, String> taskDeploymentProperties, List<String> commandLineArgs,
 			String composedTaskRunnerName) {
 
-		System.out.println(">> DEPLOYMENT PROPERTIES: " + taskDeploymentProperties);
-
-		String platformName = taskDeploymentProperties.get(TASK_PLATFORM_NAME);
-
-		// If not given, use 'default'
-		if (!StringUtils.hasText(platformName)) {
-			platformName = "default";
-		}
+		String platformName = getPlatform(taskDeploymentProperties);
 
 		if(this.tasksBeingUpgraded.containsKey(taskName)) {
 			List<String> platforms = this.tasksBeingUpgraded.get(taskName);
 			if(platforms.contains(platformName)) {
 				throw new IllegalStateException(String.format("Unable to launch %s on platform %s because it is being upgraded", taskName, platformName));
 			}
-		}
-
-		// In case we have exactly one launcher, we override to that
-		List<String> launcherNames = StreamSupport.stream(launcherRepository.findAll().spliterator(), false)
-				.map(Launcher::getName).collect(Collectors.toList());
-		if (launcherNames.size() == 1) {
-			platformName = launcherNames.get(0);
 		}
 
 		// Remove since the key for task platform name will not pass validation for app, deployer, or scheduler prefix
@@ -214,39 +200,12 @@ public class DefaultTaskExecutionService implements TaskExecutionService {
 						taskName, existingTaskDeployment.getPlatformName(), platformName));
 			}
 		}
+
 		TaskExecutionInformation taskExecutionInformation = taskExecutionInfoService
 				.findTaskExecutionInformation(taskName, taskDeploymentProperties, composedTaskRunnerName);
 
 		if (taskExecutionInformation.isComposed()) {
-			boolean containsAccessToken = false;
-			boolean useUserAccessToken = false;
-
-			final String dataflowServerAccessTokenKey = "dataflow-server-access-token";
-			final String dataflowServerUseUserAccessToken = "dataflow-server-use-user-access-token";
-
-			for (String commandLineArg : commandLineArgs) {
-				if (commandLineArg.startsWith("--" + dataflowServerAccessTokenKey)) {
-					containsAccessToken = true;
-				}
-				if (StringUtils.trimAllWhitespace(commandLineArg).equalsIgnoreCase("--" + dataflowServerUseUserAccessToken + "=true")) {
-					useUserAccessToken = true;
-				}
-			}
-
-			final String dataflowAccessTokenPropertyKey = "app." + taskExecutionInformation.getTaskDefinition().getRegisteredAppName() + "." + dataflowServerAccessTokenKey;
-			for (Map.Entry<String, String> taskDeploymentProperty : taskExecutionInformation.getTaskDeploymentProperties().entrySet()) {
-				if (taskDeploymentProperty.getKey().equals(dataflowAccessTokenPropertyKey)) {
-					containsAccessToken = true;
-				}
-			}
-
-			if (!containsAccessToken && useUserAccessToken) {
-				final String token = TokenUtils.getAccessToken();
-
-				if (token != null) {
-					taskExecutionInformation.getTaskDeploymentProperties().put(dataflowAccessTokenPropertyKey, token);
-				}
-			}
+			handleAccessToken(commandLineArgs, taskExecutionInformation);
 		}
 
 		TaskExecution taskExecution = taskExecutionRepositoryService.createTaskExecution(taskName);
@@ -254,107 +213,51 @@ public class DefaultTaskExecutionService implements TaskExecutionService {
 		AppDeploymentRequest appDeploymentRequest = this.taskAppDeploymentRequestCreator.
 				createRequest(taskExecution, taskExecutionInformation, commandLineArgs, platformName);
 
-		// Task Manifest
-		TaskManifest taskManifest = new TaskManifest();
-		System.out.println(">> taskExecutionInformation: " + taskExecutionInformation);
-		System.out.println(">> taskExecutionInformation.taskDefinition: " + taskExecutionInformation.getTaskDefinition());
-		System.out.println(">> taskExecutionInformation.taskDefinition.dslText: " + taskExecutionInformation.getTaskDefinition().getDslText());
-		taskManifest.setPlatformName(platformName);
-		String composedTaskDsl = taskExecutionInformation.getTaskDefinition().getProperties().get("graph");
-		if (StringUtils.hasText(composedTaskDsl)) {
-			taskManifest.setTaskDeploymentRequest(appDeploymentRequest);
-			List<AppDeploymentRequest> subTaskAppDeploymentRequests = this.taskExecutionInfoService.createRequests(
-					taskExecutionInformation.getTaskDefinition().getTaskName(),
-					taskExecutionInformation.getTaskDefinition().getDslText());
-			taskManifest.setSubTaskDeploymentRequests(subTaskAppDeploymentRequests);
-
-		}
-		else {
-			taskManifest.setTaskDeploymentRequest(appDeploymentRequest);
-		}
+		TaskManifest taskManifest = createTaskManifest(platformName, taskExecutionInformation, appDeploymentRequest);
 
 		TaskManifest previousManifest = this.dataflowTaskExecutionMetadataDao.getLastManifest(taskName);
 
-		if(previousManifest != null && !isAppDeploymentSame(previousManifest, taskManifest)) {
-
-			Page<TaskExecution> runningTaskExecutions =
-					this.taskExplorer.findRunningTaskExecutions(taskName, PageRequest.of(0, 1));
-
-			//TODO add force flag to allow overriding this
-			if(runningTaskExecutions.getTotalElements() > 0) {
-				throw new IllegalStateException("Unable to update application due to currently running applications");
-			}
-			else if(this.tasksBeingUpgraded.containsKey(taskName)) {
-				this.tasksBeingUpgraded.get(taskName).add(platformName);
-			}
-			else {
-				List<String> platformList = new ArrayList<>();
-				platformList.add(platformName);
-				this.tasksBeingUpgraded.put(taskName, platformList);
-			}
-
-			System.out.println(">> going to destroy the app");
-			taskLauncher.destroy(taskName);
-
-			//TODO: Need to update the CF TaskLauncher to block so we know the task has been destroyed before proceeding.
-			try {
-				System.out.println(">> waiting 15 seconds for destroy to complete");
-				Thread.sleep(15000);
-				System.out.println(">> done waiting 15 seconds for destroy to complete...fingers crossed");
-			}
-			catch (InterruptedException e) {
-				e.printStackTrace();
-			}
-
-			if(taskDeploymentProperties.isEmpty()) {
-				System.out.println(">> replacing deployment properties");
-				TaskExecutionInformation info = new TaskExecutionInformation();
-				info.setTaskDefinition(taskExecutionInformation.getTaskDefinition());
-				info.setAppResource(taskExecutionInformation.getAppResource());
-				info.setComposed(taskExecutionInformation.isComposed());
-				info.setMetadataResource(taskExecutionInformation.getMetadataResource());
-				info.setOriginalTaskDefinition(taskExecutionInformation.getOriginalTaskDefinition());
-				info.setTaskDeploymentProperties(previousManifest.getTaskDeploymentRequest().getDeploymentProperties());
-				System.out.println(">> new deployment properties are: " + info.getTaskDeploymentProperties());
-
-				AppDeploymentRequest manifestRequest = new AppDeploymentRequest(appDeploymentRequest.getDefinition(),
-						appDeploymentRequest.getResource(),
-						previousManifest.getTaskDeploymentRequest().getDeploymentProperties(),
-						appDeploymentRequest.getCommandlineArguments());
-
-				appDeploymentRequest = this.taskAppDeploymentRequestCreator.
-						createRequest(taskExecution, info, commandLineArgs, platformName);
-				System.out.println(">> deployment props after replacement: " + appDeploymentRequest.getDeploymentProperties());
-
-				taskManifest.setTaskDeploymentRequest(manifestRequest);
-			}
-
-			System.out.println(">> deployment after the if statement: " + appDeploymentRequest.getDeploymentProperties());
+		if(!taskDeploymentProperties.isEmpty()) {
+			taskDeploymentProperties = appDeploymentRequest.getDeploymentProperties();
 		}
 		else {
-			AppDeploymentRequest request = new AppDeploymentRequest(appDeploymentRequest.getDefinition(),
-					appDeploymentRequest.getResource(),
-					taskDeploymentProperties,
-					appDeploymentRequest.getCommandlineArguments());
+			if(previousManifest != null && !previousManifest.getTaskDeploymentRequest().getDeploymentProperties().equals(taskDeploymentProperties)) {
+				appDeploymentRequest = updateDeploymentProperties(commandLineArgs, platformName, taskExecutionInformation, taskExecution, previousManifest);
 
-			taskManifest.setTaskDeploymentRequest(request);
+				taskDeploymentProperties = previousManifest.getTaskDeploymentRequest().getDeploymentProperties();
+			}
+		}
 
-			System.out.println(">> The app lives!!!");
+		AppDeploymentRequest request = new AppDeploymentRequest(appDeploymentRequest.getDefinition(),
+				appDeploymentRequest.getResource(),
+				taskDeploymentProperties,
+				appDeploymentRequest.getCommandlineArguments());
+
+		taskManifest.setTaskDeploymentRequest(request);
+
+		if(!isAppDeploymentSame(previousManifest, taskManifest)) {
+
+			validateAndLockUpgrade(taskName, platformName);
+
+			logger.debug("Deleting %s and all related resources from the platform", taskName);
+			taskLauncher.destroy(taskName);
+
 		}
 
 		this.dataflowTaskExecutionMetadataDao.save(taskExecution, taskManifest);
 
-		System.out.println(">> deployment props before launch: " + appDeploymentRequest.getDeploymentProperties());
 		String taskDeploymentId = taskLauncher.launch(appDeploymentRequest);
 
-		if(this.tasksBeingUpgraded.containsKey(taskName)) {
-			this.tasksBeingUpgraded.get(taskName).remove(platformName);
-		}
+		saveExternalExecutionId(taskName, taskExecution, taskDeploymentId);
 
-		if (!StringUtils.hasText(taskDeploymentId)) {
-			throw new IllegalStateException("Deployment ID is null for the task:" + taskName);
+		if(this.tasksBeingUpgraded.containsKey(taskName)) {
+			List<String> platforms = this.tasksBeingUpgraded.get(taskName);
+			platforms.remove(platformName);
+
+			if(platforms.isEmpty()) {
+				this.tasksBeingUpgraded.remove(taskName);
+			}
 		}
-		this.updateExternalExecutionId(taskExecution.getExecutionId(), taskDeploymentId);
 
 		TaskDeployment taskDeployment = new TaskDeployment();
 		taskDeployment.setTaskDeploymentId(taskDeploymentId);
@@ -372,33 +275,140 @@ public class DefaultTaskExecutionService implements TaskExecutionService {
 		return taskExecution.getExecutionId();
 	}
 
+	private void handleAccessToken(List<String> commandLineArgs, TaskExecutionInformation taskExecutionInformation) {
+		boolean containsAccessToken = false;
+		boolean useUserAccessToken = false;
+
+		final String dataflowServerAccessTokenKey = "dataflow-server-access-token";
+		final String dataflowServerUseUserAccessToken = "dataflow-server-use-user-access-token";
+
+		for (String commandLineArg : commandLineArgs) {
+			if (commandLineArg.startsWith("--" + dataflowServerAccessTokenKey)) {
+				containsAccessToken = true;
+			}
+			if (StringUtils.trimAllWhitespace(commandLineArg).equalsIgnoreCase("--" + dataflowServerUseUserAccessToken + "=true")) {
+				useUserAccessToken = true;
+			}
+		}
+
+		final String dataflowAccessTokenPropertyKey = "app." + taskExecutionInformation.getTaskDefinition().getRegisteredAppName() + "." + dataflowServerAccessTokenKey;
+		for (Map.Entry<String, String> taskDeploymentProperty : taskExecutionInformation.getTaskDeploymentProperties().entrySet()) {
+			if (taskDeploymentProperty.getKey().equals(dataflowAccessTokenPropertyKey)) {
+				containsAccessToken = true;
+			}
+		}
+
+		if (!containsAccessToken && useUserAccessToken) {
+			final String token = TokenUtils.getAccessToken();
+
+			if (token != null) {
+				taskExecutionInformation.getTaskDeploymentProperties().put(dataflowAccessTokenPropertyKey, token);
+			}
+		}
+	}
+
+	private void saveExternalExecutionId(String taskName, TaskExecution taskExecution, String taskDeploymentId) {
+		if (!StringUtils.hasText(taskDeploymentId)) {
+			throw new IllegalStateException("Deployment ID is null for the task:" + taskName);
+		}
+		this.updateExternalExecutionId(taskExecution.getExecutionId(), taskDeploymentId);
+	}
+
+	private AppDeploymentRequest updateDeploymentProperties(List<String> commandLineArgs, String platformName, TaskExecutionInformation taskExecutionInformation, TaskExecution taskExecution, TaskManifest previousManifest) {
+		AppDeploymentRequest appDeploymentRequest;
+		TaskExecutionInformation info = new TaskExecutionInformation();
+		info.setTaskDefinition(taskExecutionInformation.getTaskDefinition());
+		info.setAppResource(taskExecutionInformation.getAppResource());
+		info.setComposed(taskExecutionInformation.isComposed());
+		info.setMetadataResource(taskExecutionInformation.getMetadataResource());
+		info.setOriginalTaskDefinition(taskExecutionInformation.getOriginalTaskDefinition());
+		info.setTaskDeploymentProperties(previousManifest.getTaskDeploymentRequest().getDeploymentProperties());
+
+		appDeploymentRequest = this.taskAppDeploymentRequestCreator.
+				createRequest(taskExecution, info, commandLineArgs, platformName);
+		return appDeploymentRequest;
+	}
+
+	private void validateAndLockUpgrade(String taskName, String platformName) {
+		Page<TaskExecution> runningTaskExecutions =
+				this.taskExplorer.findRunningTaskExecutions(taskName, PageRequest.of(0, 1));
+
+		//TODO add force flag to allow overriding this
+		if(runningTaskExecutions.getTotalElements() > 0) {
+			throw new IllegalStateException("Unable to update application due to currently running applications");
+		}
+		else if(this.tasksBeingUpgraded.containsKey(taskName)) {
+			this.tasksBeingUpgraded.get(taskName).add(platformName);
+		}
+		else {
+			List<String> platformList = new ArrayList<>();
+			platformList.add(platformName);
+			this.tasksBeingUpgraded.put(taskName, platformList);
+		}
+	}
+
+	private TaskManifest createTaskManifest(String platformName, TaskExecutionInformation taskExecutionInformation, AppDeploymentRequest appDeploymentRequest) {
+		TaskManifest taskManifest = new TaskManifest();
+		taskManifest.setPlatformName(platformName);
+		String composedTaskDsl = taskExecutionInformation.getTaskDefinition().getProperties().get("graph");
+		if (StringUtils.hasText(composedTaskDsl)) {
+			taskManifest.setTaskDeploymentRequest(appDeploymentRequest);
+			List<AppDeploymentRequest> subTaskAppDeploymentRequests = this.taskExecutionInfoService.createRequests(
+					taskExecutionInformation.getTaskDefinition().getTaskName(),
+					taskExecutionInformation.getTaskDefinition().getDslText());
+			taskManifest.setSubTaskDeploymentRequests(subTaskAppDeploymentRequests);
+		}
+		else {
+			taskManifest.setTaskDeploymentRequest(appDeploymentRequest);
+		}
+		return taskManifest;
+	}
+
+	private String getPlatform(Map<String, String> taskDeploymentProperties) {
+		String platformName = taskDeploymentProperties.get(TASK_PLATFORM_NAME);
+
+		// If not given, use 'default'
+		if (!StringUtils.hasText(platformName)) {
+			platformName = "default";
+		}
+
+		// In case we have exactly one launcher, we override to that
+		List<String> launcherNames = StreamSupport.stream(launcherRepository.findAll().spliterator(), false)
+				.map(Launcher::getName).collect(Collectors.toList());
+
+		if (launcherNames.size() == 1) {
+			platformName = launcherNames.get(0);
+		}
+
+		return platformName;
+	}
+
 	private boolean isAppDeploymentSame(TaskManifest previousManifest, TaskManifest newManifest) {
 		boolean same;
+
+		if(previousManifest == null) {
+			return true;
+		}
 
 		Resource previousResource = previousManifest.getTaskDeploymentRequest().getResource();
 		Resource newResource = newManifest.getTaskDeploymentRequest().getResource();
 
 		try {
-			System.out.println(">>> previousResource = " + previousResource.getURI());
-			System.out.println(">>> newResource = " + newResource.getURI());
+			logger.debug("Previous resource was %s and new resource is %s", previousResource.getURI().toString(), newResource.getURI().toString());
 		}
 		catch (IOException e) {
-			e.printStackTrace();
+			logger.debug("Unable to obtain URIs from resources to be compared in debug log statement", e);
 		}
 
 		same = previousResource.equals(newResource);
 
-		//TODO: Add comparison for app properties
+		Map<String, String> previousAppProperties = previousManifest.getTaskDeploymentRequest().getDefinition().getProperties();
+		Map<String, String> newAppProperties = newManifest.getTaskDeploymentRequest().getDefinition().getProperties();
 
 		Map<String, String> previousDeploymentProperties = previousManifest.getTaskDeploymentRequest().getDeploymentProperties();
 		Map<String, String> newDeploymentProperties = newManifest.getTaskDeploymentRequest().getDeploymentProperties();
 
-		System.out.println(">> pdp: + " + previousDeploymentProperties.toString());
-		System.out.println(">> ndp: + " + newDeploymentProperties.toString());
-
-		same = same && (newDeploymentProperties.isEmpty() || previousDeploymentProperties.equals(newDeploymentProperties));
-
-		System.out.println(">>> same = " + same);
+		same = same && previousDeploymentProperties.equals(newDeploymentProperties) && previousAppProperties.equals(newAppProperties);
 
 		return same;
 	}
