@@ -220,7 +220,6 @@ public class TaskDefinition extends DataFlowAppDefinition {
 
 		private String taskName;
 
-
 		/**
 		 * Create a new builder that is initialized with properties of the given
 		 * definition. Useful for "mutating" a definition by building a slightly different

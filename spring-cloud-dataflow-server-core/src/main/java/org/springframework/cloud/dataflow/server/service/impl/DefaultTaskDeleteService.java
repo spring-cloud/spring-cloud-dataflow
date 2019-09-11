@@ -46,6 +46,7 @@ import org.springframework.cloud.dataflow.server.repository.NoSuchTaskDefinition
 import org.springframework.cloud.dataflow.server.repository.NoSuchTaskExecutionException;
 import org.springframework.cloud.dataflow.server.repository.TaskDefinitionRepository;
 import org.springframework.cloud.dataflow.server.repository.TaskDeploymentRepository;
+import org.springframework.cloud.dataflow.server.service.SchedulerService;
 import org.springframework.cloud.dataflow.server.service.TaskDeleteService;
 import org.springframework.cloud.deployer.spi.task.TaskLauncher;
 import org.springframework.cloud.task.repository.TaskExecution;
@@ -88,9 +89,12 @@ public class DefaultTaskDeleteService implements TaskDeleteService {
 	protected final AuditRecordService auditRecordService;
 
 	protected final DataflowTaskExecutionDao dataflowTaskExecutionDao;
+
 	protected final DataflowJobExecutionDao dataflowJobExecutionDao;
 
 	protected final DataflowTaskExecutionMetadataDao dataflowTaskExecutionMetadataDao;
+
+	private SchedulerService schedulerService;
 
 	private final ArgumentSanitizer argumentSanitizer = new ArgumentSanitizer();
 
@@ -100,7 +104,8 @@ public class DefaultTaskDeleteService implements TaskDeleteService {
 			AuditRecordService auditRecordService,
 			DataflowTaskExecutionDao dataflowTaskExecutionDao,
 			DataflowJobExecutionDao dataflowJobExecutionDao,
-			DataflowTaskExecutionMetadataDao dataflowTaskExecutionMetadataDao) {
+			DataflowTaskExecutionMetadataDao dataflowTaskExecutionMetadataDao,
+			SchedulerService schedulerService) {
 		Assert.notNull(taskExplorer, "TaskExplorer must not be null");
 		Assert.notNull(launcherRepository, "LauncherRepository must not be null");
 		Assert.notNull(taskDefinitionRepository, "TaskDefinitionRepository must not be null");
@@ -109,6 +114,7 @@ public class DefaultTaskDeleteService implements TaskDeleteService {
 		Assert.notNull(dataflowTaskExecutionDao, "DataflowTaskExecutionDao must not be null");
 		Assert.notNull(dataflowJobExecutionDao, "DataflowJobExecutionDao must not be null");
 		Assert.notNull(dataflowTaskExecutionMetadataDao, "DataflowTaskExecutionMetadataDao must not be null");
+		Assert.notNull(schedulerService, "SchedulerService must not be null");
 		this.taskExplorer = taskExplorer;
 		this.launcherRepository = launcherRepository;
 		this.taskDefinitionRepository = taskDefinitionRepository;
@@ -117,6 +123,7 @@ public class DefaultTaskDeleteService implements TaskDeleteService {
 		this.dataflowTaskExecutionDao = dataflowTaskExecutionDao;
 		this.dataflowJobExecutionDao = dataflowJobExecutionDao;
 		this.dataflowTaskExecutionMetadataDao = dataflowTaskExecutionMetadataDao;
+		this.schedulerService = schedulerService;
 	}
 
 	@Override
@@ -317,6 +324,7 @@ public class DefaultTaskDeleteService implements TaskDeleteService {
 
 	private void deleteTaskDefinition(TaskDefinition taskDefinition) {
 		TaskParser taskParser = new TaskParser(taskDefinition.getName(), taskDefinition.getDslText(), true, true);
+		schedulerService.unscheduleForTaskDefinition(taskDefinition.getTaskName());
 		TaskNode taskNode = taskParser.parse();
 		// if composed-task-runner definition then destroy all child tasks associated with it.
 		if (taskNode.isComposed()) {

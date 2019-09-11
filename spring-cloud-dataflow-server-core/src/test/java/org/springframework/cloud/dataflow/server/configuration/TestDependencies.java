@@ -27,6 +27,7 @@ import java.util.concurrent.ForkJoinPool;
 import javax.sql.DataSource;
 
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import org.mockito.Mockito;
 
 import org.springframework.batch.core.StepExecution;
 import org.springframework.batch.core.repository.dao.AbstractJdbcBatchMetadataDao;
@@ -466,13 +467,15 @@ public class TestDependencies extends WebMvcConfigurationSupport {
 			AuditRecordService auditRecordService,
 			DataflowTaskExecutionDao dataflowTaskExecutionDao,
 			DataflowJobExecutionDao dataflowJobExecutionDao,
-			DataflowTaskExecutionMetadataDao dataflowTaskExecutionMetadataDao) {
+			DataflowTaskExecutionMetadataDao dataflowTaskExecutionMetadataDao,
+			SchedulerService schedulerService) {
 		return new DefaultTaskDeleteService(taskExplorer, launcherRepository, taskDefinitionRepository,
 				taskDeploymentRepository,
 				auditRecordService,
 				dataflowTaskExecutionDao,
 				dataflowJobExecutionDao,
-				dataflowTaskExecutionMetadataDao);
+				dataflowTaskExecutionMetadataDao,
+				schedulerService);
 	}
 
 	@Bean
@@ -554,14 +557,13 @@ public class TestDependencies extends WebMvcConfigurationSupport {
 		return new DefaultSchedulerService(commonApplicationProperties,
 				taskPlatform, taskDefinitionRepository,
 				registry, resourceLoader,
-				new TaskConfigurationProperties(),
-				dataSourceProperties, null,
+				new TaskConfigurationProperties(), null,
 				metaDataResolver, new SchedulerServiceProperties(), auditRecordService);
 	}
 
 	@Bean
 	public TaskPlatform taskPlatform(Scheduler scheduler) {
-		Launcher launcher = new Launcher("default", "defaultType", null, scheduler);
+		Launcher launcher = new Launcher("default", "defaultType", Mockito.mock(TaskLauncher.class), scheduler);
 		List<Launcher> launchers = new ArrayList<>();
 		launchers.add(launcher);
 		TaskPlatform taskPlatform = new TaskPlatform("testTaskPlatform", launchers);
