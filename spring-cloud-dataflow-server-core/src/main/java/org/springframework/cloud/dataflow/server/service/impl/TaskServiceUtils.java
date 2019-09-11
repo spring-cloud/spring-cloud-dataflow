@@ -125,9 +125,8 @@ public class TaskServiceUtils {
 			builder.setProperty("spring.datasource.password", dataSourceProperties.getPassword());
 		}
 		builder.setProperty("spring.datasource.driverClassName", dataSourceProperties.getDriverClassName());
-		builder.setDslText(taskDefinition.getDslText());
 		builder.setTaskName(taskDefinition.getTaskName());
-
+		builder.setDslText(taskDefinition.getDslText());
 		return builder.build();
 	}
 
@@ -139,7 +138,7 @@ public class TaskServiceUtils {
 	 */
 	public static Map<String, String> extractAppProperties(String name, Map<String, String> taskDeploymentProperties) {
 		Assert.hasText(name, "name must not be empty or null");
-		Assert.notNull(taskDeploymentProperties, "taskDeploymentProoperties must not be null");
+		Assert.notNull(taskDeploymentProperties, "taskDeploymentProperties must not be null");
 		return extractPropertiesByPrefix("app", name, taskDeploymentProperties);
 	}
 
@@ -168,10 +167,15 @@ public class TaskServiceUtils {
 
 	public static void updateDataFlowUriIfNeeded(String dataflowServerUri,
 			Map<String, String> appDeploymentProperties, List<String> commandLineArgs) {
+		updateDataFlowUriIfNeeded(DATAFLOW_SERVER_URI_KEY, dataflowServerUri, appDeploymentProperties, commandLineArgs);
+	}
+
+	public static void updateDataFlowUriIfNeeded(String dataFlowServerUriKey, String dataflowServerUri,
+			Map<String, String> appDeploymentProperties, List<String> commandLineArgs) {
 		Assert.notNull(appDeploymentProperties, "appDeploymentProperties must not be null");
 		Assert.notNull(commandLineArgs, "commandLineArgs must not be null");
 		if (!StringUtils.isEmpty(dataflowServerUri)) {
-			RelaxedNames relaxedNames = new RelaxedNames(DATAFLOW_SERVER_URI_KEY);
+			RelaxedNames relaxedNames = new RelaxedNames(dataFlowServerUriKey);
 			boolean isPutDataFlowServerUriKey = true;
 			for (String dataFlowUriKey : relaxedNames) {
 				if (appDeploymentProperties.containsKey(dataFlowUriKey)) {
@@ -185,7 +189,7 @@ public class TaskServiceUtils {
 				}
 			}
 			if(isPutDataFlowServerUriKey) {
-				appDeploymentProperties.put(DATAFLOW_SERVER_URI_KEY, dataflowServerUri);
+				appDeploymentProperties.put(dataFlowServerUriKey, dataflowServerUri);
 			}
 		}
 	}

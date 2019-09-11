@@ -21,6 +21,8 @@ import java.util.List;
 
 import javax.sql.DataSource;
 
+import org.mockito.Mockito;
+
 import org.springframework.batch.core.repository.dao.AbstractJdbcBatchMetadataDao;
 import org.springframework.batch.item.database.support.DataFieldMaxValueIncrementerFactory;
 import org.springframework.batch.item.database.support.DefaultDataFieldMaxValueIncrementerFactory;
@@ -159,6 +161,20 @@ public class TaskServiceDependencies extends WebMvcConfigurationSupport {
 	}
 
 	@Bean
+	public DataflowTaskExecutionMetadataDao dataflowTaskExecutionMetadataDao(DataSource dataSource, ApplicationContext context) {
+		DataFieldMaxValueIncrementerFactory incrementerFactory = new DefaultDataFieldMaxValueIncrementerFactory(dataSource);
+		String databaseType;
+		try {
+			databaseType = DatabaseType.fromMetaData(dataSource).name();
+		}
+		catch (MetaDataAccessException e) {
+			throw new IllegalStateException(e);
+		}
+		return new JdbcDataflowTaskExecutionMetadataDao(dataSource, incrementerFactory.getIncrementer(databaseType,
+				"task_execution_metadata_seq"), context);
+	}
+
+	@Bean
 	public DataflowJobExecutionDao dataflowJobExecutionDao(DataSource dataSource) {
 		return new JdbcDataflowJobExecutionDao(dataSource, AbstractJdbcBatchMetadataDao.DEFAULT_TABLE_PREFIX);
 	}
@@ -217,13 +233,16 @@ public class TaskServiceDependencies extends WebMvcConfigurationSupport {
 			AuditRecordService auditRecordService,
 			DataflowTaskExecutionDao dataflowTaskExecutionDao,
 			DataflowJobExecutionDao dataflowJobExecutionDao,
-			DataflowTaskExecutionMetadataDao dataflowTaskExecutionMetadataDao) {
+			DataflowTaskExecutionMetadataDao dataflowTaskExecutionMetadataDao,
+			SchedulerService schedulerService) {
+
 		return new DefaultTaskDeleteService(taskExplorer, launcherRepository, taskDefinitionRepository,
 				taskDeploymentRepository,
 				auditRecordService,
 				dataflowTaskExecutionDao,
 				dataflowJobExecutionDao,
-				dataflowTaskExecutionMetadataDao);
+				dataflowTaskExecutionMetadataDao,
+				schedulerService);
 	}
 
 	@Bean
@@ -280,43 +299,29 @@ public class TaskServiceDependencies extends WebMvcConfigurationSupport {
 	public SchedulerService schedulerService(CommonApplicationProperties commonApplicationProperties,
 											 TaskPlatform taskPlatform, TaskDefinitionRepository taskDefinitionRepository,
 											 AppRegistryService registry, ResourceLoader resourceLoader,
-											 DataSourceProperties dataSourceProperties,
 											 ApplicationConfigurationMetadataResolver metaDataResolver,
 											 SchedulerServiceProperties schedulerServiceProperties,
-											 AuditRecordService auditRecordService) {
+											 AuditRecordService auditRecordService,
+											 TaskConfigurationProperties taskConfigurationProperties) {
 		return new DefaultSchedulerService(commonApplicationProperties,
 				taskPlatform, taskDefinitionRepository,
 				registry, resourceLoader,
-				new TaskConfigurationProperties(),
-				dataSourceProperties, null,
+				taskConfigurationProperties, null,
 				metaDataResolver, schedulerServiceProperties, auditRecordService);
 	}
 
 	@Bean
 	public TaskPlatform taskPlatform(Scheduler scheduler) {
-		Launcher launcher = new Launcher("default", "defaultType", null, scheduler);
+		Launcher launcher = new Launcher("default", "defaultType", Mockito.mock(TaskLauncher.class), scheduler);
 		List<Launcher> launchers = new ArrayList<>();
 		launchers.add(launcher);
 		TaskPlatform taskPlatform = new TaskPlatform("testTaskPlatform", launchers);
 		return taskPlatform;
 	}
 
+
 	@Bean
 	public Scheduler scheduler() {
 		return new SimpleTestScheduler();
-	}
-
-	@Bean
-	public DataflowTaskExecutionMetadataDao dataflowTaskExecutionMetadataDao(DataSource dataSource, ApplicationContext context) {
-		DataFieldMaxValueIncrementerFactory incrementerFactory = new DefaultDataFieldMaxValueIncrementerFactory(dataSource);
-		String databaseType;
-		try {
-			databaseType = DatabaseType.fromMetaData(dataSource).name();
-		}
-		catch (MetaDataAccessException e) {
-			throw new IllegalStateException(e);
-		}
-		return new JdbcDataflowTaskExecutionMetadataDao(dataSource, incrementerFactory.getIncrementer(databaseType,
-				"task_execution_metadata_seq"), context);
 	}
 }
