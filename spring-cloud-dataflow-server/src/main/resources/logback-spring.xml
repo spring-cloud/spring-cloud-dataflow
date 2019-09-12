@@ -11,7 +11,7 @@
     <property name="FILE_LOG_PATTERN"
               value="${FILE_LOG_PATTERN:-%d{${LOG_DATEFORMAT_PATTERN:-yyyy-MM-dd HH:mm:ss.SSS}} ${LOG_LEVEL_PATTERN:-%5p} ${PID:- } --- [%t] %-40.40logger{39} : %m%n${LOG_EXCEPTION_CONVERSION_WORD:-%wEx}}"/>
     <property name="LOG_FILE"
-              value="${LOG_FILE:-${LOG_PATH:-${LOG_TEMP:-${java.io.tmpdir:-/tmp}}}/spring-cloud-dataflow-server-local}"/>
+              value="${LOG_FILE:-${LOG_PATH:-${LOG_TEMP:-${java.io.tmpdir:-/tmp}}}/spring-cloud-dataflow-server-local.log}"/>
 
     <logger name="org.springframework.beans" level="WARN"/>
     <logger name="org.springframework.context" level="WARN"/>
@@ -26,7 +26,7 @@
     <springProfile name="local">
         <appender name="FILE"
                   class="ch.qos.logback.core.rolling.RollingFileAppender">
-            <file>${LOG_FILE}.log</file>
+            <file>${LOG_FILE}</file>
             <rollingPolicy
                     class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
                 <!-- daily rolling -->
