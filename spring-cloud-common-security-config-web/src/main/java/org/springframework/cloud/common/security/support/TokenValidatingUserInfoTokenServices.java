@@ -18,6 +18,7 @@ package org.springframework.cloud.common.security.support;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -211,14 +212,22 @@ public class TokenValidatingUserInfoTokenServices extends DefaultTokenServices {
 		final OAuth2AccessToken remoteOAuth2AccessToken = retrieveAccessTokenFromOAuthServer(accessTokenValue);
 		this.restTemplate.getOAuth2ClientContext().setAccessToken(remoteOAuth2AccessToken);
 
-		// Now let's update the User Information
-		final Map<String, Object> map = getUserInfoMap(this.userInfoEndpointUrl);
-		if (map.containsKey("error")) {
-			if (this.logger.isDebugEnabled()) {
-				this.logger.debug("userinfo returned error: " + map.get("error"));
+		final Map<String, Object> map;
+		if (remoteOAuth2AccessToken.getScope().contains("openid")) {
+
+			// Now let's update the User Information
+			map = getUserInfoMap(this.userInfoEndpointUrl);
+			if (map.containsKey("error")) {
+				if (this.logger.isDebugEnabled()) {
+					this.logger.debug("userinfo returned error: " + map.get("error"));
+				}
+				throw new InvalidTokenException(accessTokenValue);
 			}
-			throw new InvalidTokenException(accessTokenValue);
 		}
+		else {
+			map = remoteOAuth2AccessToken.getAdditionalInformation();
+		}
+
 		final OAuth2Authentication authentication = extractAuthentication(map);
 		this.tokenStore.storeAccessToken(remoteOAuth2AccessToken, authentication);
 		return authentication;
