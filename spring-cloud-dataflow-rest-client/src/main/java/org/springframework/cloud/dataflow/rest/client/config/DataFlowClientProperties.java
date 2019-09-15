@@ -81,6 +81,19 @@ public class DataFlowClientProperties {
 
 		private Basic basic = new Basic();
 
+		/**
+		 * OAuth2 Access Token.
+		 */
+		private String accessToken;
+
+		public String getAccessToken() {
+			return accessToken;
+		}
+
+		public void setAccessToken(String accessToken) {
+			this.accessToken = accessToken;
+		}
+
 		public Basic getBasic() {
 			return basic;
 		}

@@ -70,7 +70,7 @@ spring:
         authorization:
           enabled: true
           loginUrl: "/"
-          permit-all-paths: "/authenticate,/security/info,/assets/**,/dashboard/logout-success-oauth.html"
+          permit-all-paths: "/authenticate,/security/info,/assets/**,/dashboard/logout-success-oauth.html,/favicon.ico"
           rules:
             # About
 
