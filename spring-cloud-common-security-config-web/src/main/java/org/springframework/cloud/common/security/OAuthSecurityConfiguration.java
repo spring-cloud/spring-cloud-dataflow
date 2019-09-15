@@ -29,6 +29,7 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
 import org.springframework.boot.autoconfigure.security.SecurityProperties;
+import org.springframework.boot.autoconfigure.security.oauth2.OAuth2ClientProperties;
 import org.springframework.boot.autoconfigure.security.oauth2.resource.AuthoritiesExtractor;
 import org.springframework.boot.autoconfigure.security.oauth2.resource.PrincipalExtractor;
 import org.springframework.boot.autoconfigure.security.oauth2.resource.ResourceServerProperties;
@@ -39,6 +40,7 @@ import org.springframework.cloud.common.security.support.ExternalOauth2ResourceA
 import org.springframework.cloud.common.security.support.OnOAuth2SecurityEnabled;
 import org.springframework.cloud.common.security.support.SecurityConfigUtils;
 import org.springframework.cloud.common.security.support.SecurityStateBean;
+import org.springframework.cloud.common.security.support.TokenStoreClearingLogoutSuccessHandler;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Conditional;
@@ -67,8 +69,10 @@ import org.springframework.security.oauth2.config.annotation.web.configurers.Res
 import org.springframework.security.oauth2.provider.authentication.OAuth2AuthenticationManager;
 import org.springframework.security.oauth2.provider.authentication.OAuth2AuthenticationProcessingFilter;
 import org.springframework.security.oauth2.provider.token.ResourceServerTokenServices;
+import org.springframework.security.oauth2.provider.token.TokenStore;
 import org.springframework.security.oauth2.provider.token.store.InMemoryTokenStore;
 import org.springframework.security.web.authentication.LoginUrlAuthenticationEntryPoint;
+import org.springframework.security.web.authentication.logout.LogoutSuccessHandler;
 import org.springframework.security.web.authentication.www.BasicAuthenticationEntryPoint;
 import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
 import org.springframework.security.web.util.matcher.AnyRequestMatcher;
@@ -110,6 +114,9 @@ public class OAuthSecurityConfiguration extends WebSecurityConfigurerAdapter {
 
 	@Autowired
 	protected ResourceServerProperties resourceServerProperties;
+
+	@Autowired
+	protected OAuth2ClientProperties oAuth2ClientProperties;
 
 	@Autowired
 	protected ApplicationEventPublisher applicationEventPublisher;
@@ -156,9 +163,10 @@ public class OAuthSecurityConfiguration extends WebSecurityConfigurerAdapter {
 		security = SecurityConfigUtils.configureSimpleSecurity(security, this.authorizationProperties);
 		security.anyRequest().denyAll();
 
+
 		http.httpBasic().and()
 				.logout()
-				.logoutSuccessUrl(dashboard("/logout-success-oauth.html"))
+				.logoutSuccessHandler(logoutSuccessHandler())
 				.and().csrf().disable()
 				.exceptionHandling()
 				.defaultAuthenticationEntryPointFor(
@@ -166,6 +174,18 @@ public class OAuthSecurityConfiguration extends WebSecurityConfigurerAdapter {
 						textHtmlMatcher)
 				.defaultAuthenticationEntryPointFor(basicAuthenticationEntryPoint, AnyRequestMatcher.INSTANCE);
 		this.securityStateBean.setAuthenticationEnabled(true);
+	}
+
+	@Bean
+	LogoutSuccessHandler logoutSuccessHandler() {
+		final TokenStoreClearingLogoutSuccessHandler logoutSuccessHandler = new TokenStoreClearingLogoutSuccessHandler(tokenStore(), oAuth2ClientProperties);
+		logoutSuccessHandler.setDefaultTargetUrl(dashboard("/logout-success-oauth.html"));
+		return logoutSuccessHandler;
+	}
+
+	@Bean
+	TokenStore tokenStore() {
+		return new InMemoryTokenStore();
 	}
 
 	@Bean
@@ -177,7 +197,7 @@ public class OAuthSecurityConfiguration extends WebSecurityConfigurerAdapter {
 				authorizationCodeResourceDetails.getClientId(),
 				authorizationCodeResourceDetails.getClientSecret());
 
-		tokenServices.setTokenStore(new InMemoryTokenStore());
+		tokenServices.setTokenStore(tokenStore());
 		tokenServices.setSupportRefreshToken(true);
 
 		tokenServices.setRestTemplate(oAuth2RestTemplate());
