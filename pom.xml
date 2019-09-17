@@ -66,7 +66,7 @@
 
 		<!-- note - check version of reactor at deployer-cf/cf-java-client uses -->
 		<spring-cloud-deployer-cloudfoundry.version>2.1.0.BUILD-SNAPSHOT</spring-cloud-deployer-cloudfoundry.version>
-		<reactor.version>3.2.0.RELEASE</reactor.version>
+		<reactor-core.version>3.2.0.RELEASE</reactor-core.version>
 		<spring-cloud-deployer-kubernetes.version>2.1.0.BUILD-SNAPSHOT</spring-cloud-deployer-kubernetes.version>
 		<kubernetes-client.version>4.1.0</kubernetes-client.version>
 
