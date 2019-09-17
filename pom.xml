@@ -66,7 +66,7 @@
 
 		<!-- note - check version of reactor at deployer-cf/cf-java-client uses -->
 		<spring-cloud-deployer-cloudfoundry.version>2.1.0.BUILD-SNAPSHOT</spring-cloud-deployer-cloudfoundry.version>
-		<reactor.version>3.2.0.RELEASE</reactor.version>
+		<reactor-core.version>3.2.0.RELEASE</reactor-core.version>
 		<spring-cloud-deployer-kubernetes.version>2.1.0.BUILD-SNAPSHOT</spring-cloud-deployer-kubernetes.version>
 		<kubernetes-client.version>4.1.0</kubernetes-client.version>
 		<spring-cloud-kubernetes.version>1.0.2.RELEASE</spring-cloud-kubernetes.version>
@@ -255,6 +255,11 @@
 				<groupId>io.codearte.props2yaml</groupId>
 				<artifactId>props2yaml</artifactId>
 				<version>${codearte-props2yml.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>io.projectreactor</groupId>
+				<artifactId>reactor-core</artifactId>
+				<version>${reactor-core.version}</version>
 			</dependency>
 		</dependencies>
 	</dependencyManagement>
