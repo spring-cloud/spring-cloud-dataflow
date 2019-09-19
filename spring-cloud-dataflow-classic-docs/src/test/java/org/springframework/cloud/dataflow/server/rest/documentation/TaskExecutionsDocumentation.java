@@ -19,6 +19,7 @@ package org.springframework.cloud.dataflow.server.rest.documentation;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.FixMethodOrder;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runners.MethodSorters;
 
@@ -217,6 +218,7 @@ public class TaskExecutionsDocumentation extends BaseDocumentation {
 	}
 
 	@Test
+	@Ignore
 	public void taskExecutionRemoveAndTaskDataRemove() throws Exception {
 
 		documentation.dontDocument( () -> this.mockMvc.perform(

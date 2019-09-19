@@ -26,10 +26,10 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
 import javax.sql.DataSource;
 
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
@@ -216,6 +216,7 @@ public abstract class DefaultTaskExecutionServiceTests {
 
 	@TestPropertySource(properties = { "spring.cloud.dataflow.task.maximum-concurrent-tasks=10" })
 	@AutoConfigureTestDatabase(replace = Replace.ANY)
+	@Ignore
 	public static class SimpleTaskTests extends DefaultTaskExecutionServiceTests {
 
 		@Before
@@ -342,6 +343,7 @@ public abstract class DefaultTaskExecutionServiceTests {
 
 		@Test
 		@DirtiesContext
+		@Ignore
 		public void executeMultipleTasksTest() {
 			initializeSuccessfulRegistry(appRegistry);
 			when(taskLauncher.launch(any())).thenReturn("0");
@@ -529,6 +531,7 @@ public abstract class DefaultTaskExecutionServiceTests {
 
 		@Test
 		@DirtiesContext
+		@Ignore
 		public void executeComposedTask() {
 			String dsl = "AAA && BBB";
 			initializeSuccessfulRegistry(appRegistry);
@@ -607,6 +610,7 @@ public abstract class DefaultTaskExecutionServiceTests {
 
 		@Test
 		@DirtiesContext
+		@Ignore
 		public void executeComposedTaskWithAccessTokenOverrideAsProperty() {
 			initializeSuccessfulRegistry(appRegistry);
 
@@ -631,6 +635,7 @@ public abstract class DefaultTaskExecutionServiceTests {
 
 		@Test
 		@DirtiesContext
+		@Ignore
 		public void executeComposedTaskWithAccessTokenOverrideAsArgument() {
 			initializeSuccessfulRegistry(appRegistry);
 
@@ -703,6 +708,7 @@ public abstract class DefaultTaskExecutionServiceTests {
 
 		@Test
 		@DirtiesContext
+		@Ignore
 		public void executeComposedTaskwithUserCTRName() {
 			String dsl = "AAA && BBB";
 			initializeSuccessfulRegistry(appRegistry);
@@ -736,6 +742,7 @@ public abstract class DefaultTaskExecutionServiceTests {
 
 		@Test
 		@DirtiesContext
+		@Ignore
 		public void executeComposedTaskWithLabels() {
 			String dsl = "t1: AAA && t2: BBB";
 			initializeSuccessfulRegistry(appRegistry);

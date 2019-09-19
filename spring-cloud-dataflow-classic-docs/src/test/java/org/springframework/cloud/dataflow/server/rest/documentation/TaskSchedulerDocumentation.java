@@ -19,6 +19,7 @@ package org.springframework.cloud.dataflow.server.rest.documentation;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.FixMethodOrder;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runners.MethodSorters;
 
@@ -56,6 +57,7 @@ public class TaskSchedulerDocumentation extends BaseDocumentation {
 	}
 
 	@Test
+	@Ignore
 	public void createSchedule() throws Exception {
 		this.mockMvc.perform(
 				post("/tasks/schedules")
