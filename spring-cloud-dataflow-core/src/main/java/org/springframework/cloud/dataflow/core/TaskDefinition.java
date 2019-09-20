@@ -79,6 +79,21 @@ public class TaskDefinition extends DataFlowAppDefinition {
 	/**
 	 * Construct a {@code TaskDefinition}
 	 *
+	 * @param registeredAppName the application name
+	 * @param label the label associated with the definition
+	 * @param properties the properties for the definition
+	 * @param name task definition name
+	 * @param dsl task definition DSL expression
+	 */
+	TaskDefinition(String name, String registeredAppName, String label, Map<String, String> properties, String dsl) {
+		super(registeredAppName, label, ApplicationType.task, properties);
+		this.taskName = name;
+		this.dslText = dsl;
+	}
+
+	/**
+	 * Construct a {@code TaskDefinition}
+	 *
 	 * @param name task definition name
 	 * @param dsl task definition DSL expression
 	 */
@@ -200,6 +215,11 @@ public class TaskDefinition extends DataFlowAppDefinition {
 		 */
 		private String label;
 
+		private String dslText;
+
+		private String taskName;
+
+
 		/**
 		 * Create a new builder that is initialized with properties of the given
 		 * definition. Useful for "mutating" a definition by building a slightly different
@@ -225,6 +245,30 @@ public class TaskDefinition extends DataFlowAppDefinition {
 		 */
 		public TaskDefinitionBuilder setProperty(String name, String value) {
 			this.properties.put(name, value);
+			return this;
+		}
+
+		/**
+		 * Establish the DSL Text for a task definition.
+		 *
+		 * @param dslText the dsl to be used by the TaskDefinition
+		 * @return this builder object
+		 * @see AppDefinition#getProperties()
+		 */
+		public TaskDefinitionBuilder setDslText(String dslText) {
+			this.dslText = dslText;
+			return this;
+		}
+
+		/**
+		 * Establish the DSL Text for a task definition.
+		 *
+		 * @param taskName the name to be used by the TaskDefinition
+		 * @return this builder object
+		 * @see AppDefinition#getProperties()
+		 */
+		public TaskDefinitionBuilder setTaskName(String taskName) {
+			this.taskName = taskName;
 			return this;
 		}
 
@@ -315,7 +359,7 @@ public class TaskDefinition extends DataFlowAppDefinition {
 			if (this.label == null) {
 				this.label = this.registeredAppName;
 			}
-			return new TaskDefinition(this.registeredAppName, this.label, this.properties);
+			return new TaskDefinition(this.taskName, this.registeredAppName, this.label, this.properties, this.dslText);
 		}
 	}
 }

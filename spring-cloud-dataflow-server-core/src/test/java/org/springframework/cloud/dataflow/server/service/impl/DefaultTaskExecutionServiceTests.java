@@ -16,6 +16,7 @@
 
 package org.springframework.cloud.dataflow.server.service.impl;
 
+import java.net.MalformedURLException;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -29,7 +30,6 @@ import java.util.Set;
 import javax.sql.DataSource;
 
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
@@ -76,6 +76,7 @@ import org.springframework.cloud.task.repository.TaskExecution;
 import org.springframework.cloud.task.repository.TaskExplorer;
 import org.springframework.cloud.task.repository.TaskRepository;
 import org.springframework.core.io.FileSystemResource;
+import org.springframework.core.io.FileUrlResource;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.provider.OAuth2Authentication;
@@ -216,7 +217,6 @@ public abstract class DefaultTaskExecutionServiceTests {
 
 	@TestPropertySource(properties = { "spring.cloud.dataflow.task.maximum-concurrent-tasks=10" })
 	@AutoConfigureTestDatabase(replace = Replace.ANY)
-	@Ignore
 	public static class SimpleTaskTests extends DefaultTaskExecutionServiceTests {
 
 		@Before
@@ -343,7 +343,6 @@ public abstract class DefaultTaskExecutionServiceTests {
 
 		@Test
 		@DirtiesContext
-		@Ignore
 		public void executeMultipleTasksTest() {
 			initializeSuccessfulRegistry(appRegistry);
 			when(taskLauncher.launch(any())).thenReturn("0");
@@ -531,7 +530,6 @@ public abstract class DefaultTaskExecutionServiceTests {
 
 		@Test
 		@DirtiesContext
-		@Ignore
 		public void executeComposedTask() {
 			String dsl = "AAA && BBB";
 			initializeSuccessfulRegistry(appRegistry);
@@ -610,7 +608,6 @@ public abstract class DefaultTaskExecutionServiceTests {
 
 		@Test
 		@DirtiesContext
-		@Ignore
 		public void executeComposedTaskWithAccessTokenOverrideAsProperty() {
 			initializeSuccessfulRegistry(appRegistry);
 
@@ -635,7 +632,6 @@ public abstract class DefaultTaskExecutionServiceTests {
 
 		@Test
 		@DirtiesContext
-		@Ignore
 		public void executeComposedTaskWithAccessTokenOverrideAsArgument() {
 			initializeSuccessfulRegistry(appRegistry);
 
@@ -708,7 +704,6 @@ public abstract class DefaultTaskExecutionServiceTests {
 
 		@Test
 		@DirtiesContext
-		@Ignore
 		public void executeComposedTaskwithUserCTRName() {
 			String dsl = "AAA && BBB";
 			initializeSuccessfulRegistry(appRegistry);
@@ -742,7 +737,6 @@ public abstract class DefaultTaskExecutionServiceTests {
 
 		@Test
 		@DirtiesContext
-		@Ignore
 		public void executeComposedTaskWithLabels() {
 			String dsl = "t1: AAA && t2: BBB";
 			initializeSuccessfulRegistry(appRegistry);
@@ -963,7 +957,12 @@ public abstract class DefaultTaskExecutionServiceTests {
 	private static void initializeSuccessfulRegistry(AppRegistryService appRegistry) {
 		when(appRegistry.find(anyString(), any(ApplicationType.class))).thenReturn(
 				new AppRegistration("some-name", ApplicationType.task, URI.create("https://helloworld")));
-		when(appRegistry.getAppResource(any())).thenReturn(new FileSystemResource("src/test/resources/apps/foo-task"));
+		try {
+			when(appRegistry.getAppResource(any())).thenReturn(new FileUrlResource("src/test/resources/apps/foo-task"));
+		}
+		catch (MalformedURLException e) {
+			throw new IllegalStateException("Invalid File Resource Specified", e);
+		}
 		when(appRegistry.getAppMetadataResource(any())).thenReturn(null);
 	}
 
