@@ -196,23 +196,28 @@ public class DefaultTaskExecutionService implements TaskExecutionService {
 
 		if (taskExecutionInformation.isComposed()) {
 			boolean containsAccessToken = false;
+			boolean useUserAccessToken = false;
 
-			final String dataflowAccessTokenKey = "dataflow-server-access-token";
+			final String dataflowServerAccessTokenKey = "dataflow-server-access-token";
+			final String dataflowServerUseUserAccessToken = "dataflow-server-use-user-access-token";
 
 			for (String commandLineArg : commandLineArgs) {
-				if (commandLineArg.startsWith("--" + dataflowAccessTokenKey)) {
+				if (commandLineArg.startsWith("--" + dataflowServerAccessTokenKey)) {
 					containsAccessToken = true;
+				}
+				if (StringUtils.trimAllWhitespace(commandLineArg).equalsIgnoreCase("--" + dataflowServerUseUserAccessToken + "=true")) {
+					useUserAccessToken = true;
 				}
 			}
 
-			final String dataflowAccessTokenPropertyKey = "app." + taskExecutionInformation.getTaskDefinition().getRegisteredAppName() + "." + dataflowAccessTokenKey;
+			final String dataflowAccessTokenPropertyKey = "app." + taskExecutionInformation.getTaskDefinition().getRegisteredAppName() + "." + dataflowServerAccessTokenKey;
 			for (Map.Entry<String, String> taskDeploymentProperty : taskExecutionInformation.getTaskDeploymentProperties().entrySet()) {
 				if (taskDeploymentProperty.getKey().equals(dataflowAccessTokenPropertyKey)) {
 					containsAccessToken = true;
 				}
 			}
 
-			if (!containsAccessToken) {
+			if (!containsAccessToken && useUserAccessToken) {
 				final String token = TokenUtils.getAccessToken();
 
 				if (token != null) {

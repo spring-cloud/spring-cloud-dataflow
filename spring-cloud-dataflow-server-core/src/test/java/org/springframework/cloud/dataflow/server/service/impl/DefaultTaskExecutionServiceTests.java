@@ -17,6 +17,7 @@
 package org.springframework.cloud.dataflow.server.service.impl;
 
 import java.net.URI;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
@@ -555,11 +556,46 @@ public abstract class DefaultTaskExecutionServiceTests {
 
 		@Test
 		@DirtiesContext
-		public void executeComposedTaskWithAccessToken() {
+		public void executeComposedTaskWithAccessTokenDisabled1() {
+			initializeSuccessfulRegistry(appRegistry);
+			AppDeploymentRequest request = getAppDeploymentRequestForToken(prepareEnvironmentForTokenTests(), Collections.emptyList());
+			assertFalse("Should not contain the property 'dataflow-server-access-token'",
+				request.getDefinition().getProperties().containsKey("dataflow-server-access-token"));
+		}
+
+		@Test
+		@DirtiesContext
+		public void executeComposedTaskWithAccessTokenDisabled2() {
 			initializeSuccessfulRegistry(appRegistry);
 
+			final List<String> arguments = new ArrayList<>();
+			arguments.add("--dataflow-server-use-user-access-token=false");
 			AppDeploymentRequest request = getAppDeploymentRequestForToken(prepareEnvironmentForTokenTests(), Collections.emptyList());
+			assertFalse("Should not contain the property 'dataflow-server-access-token'",
+				request.getDefinition().getProperties().containsKey("dataflow-server-access-token"));
+		}
 
+		@Test
+		@DirtiesContext
+		public void executeComposedTaskWithEnabledUserAccessToken1() {
+			initializeSuccessfulRegistry(appRegistry);
+
+			final List<String> arguments = new ArrayList<>();
+			arguments.add("--dataflow-server-use-user-access-token=true");
+			AppDeploymentRequest request = getAppDeploymentRequestForToken(prepareEnvironmentForTokenTests(), arguments);
+			assertTrue("Should contain the property 'dataflow-server-access-token'",
+				request.getDefinition().getProperties().containsKey("dataflow-server-access-token"));
+			assertEquals("foo-bar-123-token", request.getDefinition().getProperties().get("dataflow-server-access-token"));
+		}
+
+		@Test
+		@DirtiesContext
+		public void executeComposedTaskWithEnabledUserAccessToken2() {
+			initializeSuccessfulRegistry(appRegistry);
+
+			final List<String> arguments = new ArrayList<>();
+			arguments.add("--dataflow-server-use-user-access-token =  true");
+			AppDeploymentRequest request = getAppDeploymentRequestForToken(prepareEnvironmentForTokenTests(), arguments);
 			assertTrue("Should contain the property 'dataflow-server-access-token'",
 				request.getDefinition().getProperties().containsKey("dataflow-server-access-token"));
 			assertEquals("foo-bar-123-token", request.getDefinition().getProperties().get("dataflow-server-access-token"));
