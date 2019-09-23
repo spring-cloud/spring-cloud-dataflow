@@ -15,6 +15,8 @@
  */
 package org.springframework.cloud.dataflow.server.repository;
 
+import java.util.Set;
+
 import org.springframework.cloud.dataflow.core.TaskManifest;
 import org.springframework.cloud.task.repository.TaskExecution;
 
@@ -26,4 +28,6 @@ public interface DataflowTaskExecutionMetadataDao {
 	void save(TaskExecution taskExecution, TaskManifest manifest);
 
 	TaskManifest getLastManifest(String taskName);
+
+	int deleteManifestsByTaskExecutionIds(Set<Long> taskExecutionIds);
 }

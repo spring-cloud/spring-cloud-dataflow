@@ -16,6 +16,7 @@
 package org.springframework.cloud.dataflow.server.repository;
 
 import java.io.IOException;
+import java.util.Set;
 
 import javax.sql.DataSource;
 
@@ -56,6 +57,11 @@ public class JdbcDataflowTaskExecutionMetadataDao implements DataflowTaskExecuti
 			"where e.TASK_NAME = :taskName\n" +
 			"order by e.TASK_EXECUTION_ID desc\n" +
 			"limit 0,1;";
+
+	private static final String DELETE_MANIFEST_BY_TASK_EXECUTION_IDS =
+			"DELETE FROM task_execution_metadata " +
+			"WHERE task_execution_id " +
+			"IN (:taskExecutionIds)";
 
 	private final NamedParameterJdbcTemplate jdbcTemplate;
 
@@ -119,5 +125,12 @@ public class JdbcDataflowTaskExecutionMetadataDao implements DataflowTaskExecuti
 		catch (EmptyResultDataAccessException erdae) {
 			return null;
 		}
+	}
+
+	@Override
+	public int deleteManifestsByTaskExecutionIds(Set<Long> taskExecutionIds) {
+		final MapSqlParameterSource queryParameters = new MapSqlParameterSource()
+				.addValue("taskExecutionIds", taskExecutionIds);
+		return this.jdbcTemplate.update(DELETE_MANIFEST_BY_TASK_EXECUTION_IDS, queryParameters);
 	}
 }
