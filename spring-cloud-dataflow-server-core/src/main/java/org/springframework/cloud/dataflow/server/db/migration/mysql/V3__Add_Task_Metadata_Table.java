@@ -24,7 +24,10 @@ import org.springframework.cloud.dataflow.server.db.migration.SqlCommand;
 import org.springframework.cloud.dataflow.server.db.migration.SqlCommandsRunner;
 
 /**
+ * Adds the database table to store task manifests in (one for each execution).
+ *
  * @author Michael Minella
+ * @since 2.3
  */
 public class V3__Add_Task_Metadata_Table extends BaseJavaMigration {
 

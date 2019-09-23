@@ -28,7 +28,10 @@ import org.springframework.cloud.dataflow.registry.support.AppResourceCommon;
 import org.springframework.core.io.Resource;
 
 /**
+ * Custom Jackson deserializer used to convert the URL of a resource (as it has been serialized) back to a Resource
+ *
  * @author Michael Minella
+ * @since 2.3
  */
 public class ResourceDeserializer extends JsonDeserializer<Resource> {
 
@@ -44,8 +47,6 @@ public class ResourceDeserializer extends JsonDeserializer<Resource> {
 		JsonNode node = oc.readTree(jsonParser);
 
 		final String url = node.asText();
-
-		System.out.println(">> url from serialized metadata: " + url);
 
 		return this.appResourceCommon.getResource(url);
 	}

@@ -18,9 +18,15 @@ package org.springframework.cloud.dataflow.core;
 import java.util.List;
 
 import org.springframework.cloud.deployer.spi.core.AppDeploymentRequest;
+import org.springframework.core.style.ToStringCreator;
 
 /**
+ * Description of an execution of a task including resource to be executed and how it was configured via Spring Cloud
+ * Data Flow
+ *
  * @author Mark Pollack
+ * @author Michael Minella
+ * @since 2.3
  */
 public class TaskManifest {
 
@@ -30,27 +36,62 @@ public class TaskManifest {
 
 	private String platformName;
 
+	/**
+	 * Name of the platform the related task execution was executed on.
+	 *
+	 * @return name of the platform
+	 */
 	public String getPlatformName() {
 		return platformName;
 	}
 
+	/**
+	 * Name of the platform the related task execution was executed on.
+	 *
+	 * @param platformName platform name
+	 */
 	public void setPlatformName(String platformName) {
 		this.platformName = platformName;
 	}
 
+	/**
+	 * {@code AppDeploymentRequest} representing the task being executed
+	 *
+	 * @return {@code AppDeploymentRequest}
+	 */
 	public AppDeploymentRequest getTaskDeploymentRequest() {
 		return taskDeploymentRequest;
 	}
 
+	/**
+	 * Task deployment
+	 *
+	 * @param taskDeploymentRequest {@code AppDeploymentRequest}
+	 */
 	public void setTaskDeploymentRequest(AppDeploymentRequest taskDeploymentRequest) {
 		this.taskDeploymentRequest = taskDeploymentRequest;
 	}
 
+	/**
+	 * For composed task executions, this will contain the children deployment requests.
+	 *
+	 * @return list of deployment requests (one for each child)
+	 */
 	public List<AppDeploymentRequest> getSubTaskDeploymentRequests() {
 		return subTaskDeploymentRequests;
 	}
 
+	/**
+	 * For composed task executions, the list of deployment requests (one for each child)
+	 *
+	 * @param subTaskDeploymentRequests child deployment requests
+	 */
 	public void setSubTaskDeploymentRequests(List<AppDeploymentRequest> subTaskDeploymentRequests) {
 		this.subTaskDeploymentRequests = subTaskDeploymentRequests;
 	}
+
+	public String toString() {
+		return (new ToStringCreator(this)).append("taskDeploymentRequest", this.taskDeploymentRequest).append("platformName", this.platformName).append("subTaskDeploymentRequests", this.subTaskDeploymentRequests).toString();
+	}
+
 }

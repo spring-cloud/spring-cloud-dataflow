@@ -52,10 +52,6 @@ public class TaskDeployment extends AbstractEntity {
 	@Column(name = "created_on")
 	private Instant createdOn;
 
-	// @NotNull
-	// @Lob
-	// private String taskManifestString;
-
 	public TaskDeployment() {
 	}
 
@@ -90,14 +86,6 @@ public class TaskDeployment extends AbstractEntity {
 	public void setCreatedOn(Instant createdOn) {
 		this.createdOn = createdOn;
 	}
-
-	// public String getTaskManifestString() {
-	// return taskManifestString;
-	// }
-	//
-	// public void setTaskManifestString(String taskManifestString) {
-	// this.taskManifestString = taskManifestString;
-	// }
 
 	@Override
 	public String toString() {

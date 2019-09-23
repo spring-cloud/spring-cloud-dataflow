@@ -237,7 +237,7 @@ public class DefaultTaskExecutionService implements TaskExecutionService {
 
 		if(!isAppDeploymentSame(previousManifest, taskManifest)) {
 
-			validateAndLockUpgrade(taskName, platformName);
+			validateAndLockUpgrade(taskName, platformName, taskExecution);
 
 			logger.debug("Deleting %s and all related resources from the platform", taskName);
 			taskLauncher.destroy(taskName);
@@ -248,7 +248,7 @@ public class DefaultTaskExecutionService implements TaskExecutionService {
 
 		String taskDeploymentId = taskLauncher.launch(appDeploymentRequest);
 
-		saveExternalExecutionId(taskName, taskExecution, taskDeploymentId);
+		saveExternalExecutionId(taskExecution, taskDeploymentId);
 
 		if(this.tasksBeingUpgraded.containsKey(taskName)) {
 			List<String> platforms = this.tasksBeingUpgraded.get(taskName);
@@ -275,6 +275,12 @@ public class DefaultTaskExecutionService implements TaskExecutionService {
 		return taskExecution.getExecutionId();
 	}
 
+	/**
+	 * Determines if an OAuth token is available and if so, sets it as a deployment property.
+	 *
+	 * @param commandLineArgs args for the task execution
+	 * @param taskExecutionInformation source of deployment properties
+	 */
 	private void handleAccessToken(List<String> commandLineArgs, TaskExecutionInformation taskExecutionInformation) {
 		boolean containsAccessToken = false;
 		boolean useUserAccessToken = false;
@@ -307,13 +313,29 @@ public class DefaultTaskExecutionService implements TaskExecutionService {
 		}
 	}
 
-	private void saveExternalExecutionId(String taskName, TaskExecution taskExecution, String taskDeploymentId) {
+	/**
+	 * Stores the platform specific execution id for a given task execution
+	 *
+	 * @param taskExecution task execution id to associate the external execution id with
+	 * @param taskDeploymentId platform specific execution id
+	 */
+	private void saveExternalExecutionId(TaskExecution taskExecution, String taskDeploymentId) {
 		if (!StringUtils.hasText(taskDeploymentId)) {
-			throw new IllegalStateException("Deployment ID is null for the task:" + taskName);
+			throw new IllegalStateException("Deployment ID is null for the task:" + taskExecution.getTaskName());
 		}
 		this.updateExternalExecutionId(taskExecution.getExecutionId(), taskDeploymentId);
 	}
 
+	/**
+	 * Updates the deployment properties on the provided {@code AppDeploymentRequest}
+	 *
+	 * @param commandLineArgs command line args for the task execution
+	 * @param platformName name of the platform configuration to use
+	 * @param taskExecutionInformation details about the task execution request
+	 * @param taskExecution task execution data
+	 * @param previousManifest manifest from the last execution of the same task definition
+	 * @return an updated {@code AppDeploymentRequest}
+	 */
 	private AppDeploymentRequest updateDeploymentProperties(List<String> commandLineArgs, String platformName, TaskExecutionInformation taskExecutionInformation, TaskExecution taskExecution, TaskManifest previousManifest) {
 		AppDeploymentRequest appDeploymentRequest;
 		TaskExecutionInformation info = new TaskExecutionInformation();
@@ -329,12 +351,20 @@ public class DefaultTaskExecutionService implements TaskExecutionService {
 		return appDeploymentRequest;
 	}
 
-	private void validateAndLockUpgrade(String taskName, String platformName) {
+	/**
+	 * A task should not be allowed ot be launched when an upgrade is required and one is running (allowing the upgrade
+	 * to proceed may kill running task instances of that definition on certain platforms).
+	 *
+	 * @param taskName task name to check or lock
+	 * @param platformName the platform configuration to confirm if the task is being run on
+	 */
+	private void validateAndLockUpgrade(String taskName, String platformName, TaskExecution taskExecution) {
 		Page<TaskExecution> runningTaskExecutions =
 				this.taskExplorer.findRunningTaskExecutions(taskName, PageRequest.of(0, 1));
 
 		//TODO add force flag to allow overriding this
-		if(runningTaskExecutions.getTotalElements() > 0) {
+		if(!(runningTaskExecutions.getTotalElements() == 1 && runningTaskExecutions.toList().get(0).getExecutionId() == taskExecution.getExecutionId()) &&
+				runningTaskExecutions.getTotalElements() > 0) {
 			throw new IllegalStateException("Unable to update application due to currently running applications");
 		}
 		else if(this.tasksBeingUpgraded.containsKey(taskName)) {
@@ -347,6 +377,14 @@ public class DefaultTaskExecutionService implements TaskExecutionService {
 		}
 	}
 
+	/**
+	 * Create a {@code TaskManifest}
+	 *
+	 * @param platformName name of the platform configuration to run the task on
+	 * @param taskExecutionInformation details about the task to be run
+	 * @param appDeploymentRequest the details about the deployment to be executed
+	 * @return {@code TaskManifest}
+	 */
 	private TaskManifest createTaskManifest(String platformName, TaskExecutionInformation taskExecutionInformation, AppDeploymentRequest appDeploymentRequest) {
 		TaskManifest taskManifest = new TaskManifest();
 		taskManifest.setPlatformName(platformName);
@@ -364,6 +402,12 @@ public class DefaultTaskExecutionService implements TaskExecutionService {
 		return taskManifest;
 	}
 
+	/**
+	 * Return the platform specified.  If none have been specified, then "default" will be returned.
+	 *
+	 * @param taskDeploymentProperties properties to interrogate if a platform has been specified
+	 * @return name of the platform configuration to execute the task on
+	 */
 	private String getPlatform(Map<String, String> taskDeploymentProperties) {
 		String platformName = taskDeploymentProperties.get(TASK_PLATFORM_NAME);
 
@@ -383,6 +427,15 @@ public class DefaultTaskExecutionService implements TaskExecutionService {
 		return platformName;
 	}
 
+	/**
+	 * Determines if the requested deployment is the same (thereby not needing an upgrade) vs different and needing to
+	 * be upgraded via the data in the manifests.  Specifically, the URI of the {@code Resource}, the app properties
+	 * and the deployment properties are all evaluated in this comparison.
+	 *
+	 * @param previousManifest the manifest for the last task execution
+	 * @param newManifest the manifest for the task execution currently being requested
+	 * @return {@code true} if no upgrade is required, {@code false} if an upgrade is required.
+	 */
 	private boolean isAppDeploymentSame(TaskManifest previousManifest, TaskManifest newManifest) {
 		boolean same;
 

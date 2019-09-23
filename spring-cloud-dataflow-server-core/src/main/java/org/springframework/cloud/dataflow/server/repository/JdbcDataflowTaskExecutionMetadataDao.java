@@ -44,7 +44,11 @@ import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.jdbc.support.incrementer.DataFieldMaxValueIncrementer;
 
 /**
+ * JDBC implementation for the {@code DataflowTaskExecutionMetadataDao}
+ *
  * @author Michael Minella
+ * @since 2.3
+ * @see DataflowTaskExecutionMetadataDao
  */
 public class JdbcDataflowTaskExecutionMetadataDao implements DataflowTaskExecutionMetadataDao {
 

@@ -45,5 +45,15 @@ public interface TaskExecutionInfoService {
 			Map<String, String> taskDeploymentProperties, String composedTaskRunnerName);
 
 	AllPlatformsTaskExecutionInformation findAllPlatformTaskExecutionInformation();
+
+	/**
+	 * Creates requests for a composed task
+	 *
+	 * @param taskName name of the task
+	 * @param dslText String of the dsl text
+	 * @return a list of {@code AppDeploymentRequest} based on the dsl provided
+	 *
+	 * @since 2.3
+	 */
 	List<AppDeploymentRequest> createRequests(String taskName, String dslText);
 }

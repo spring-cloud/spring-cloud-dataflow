@@ -18,7 +18,11 @@ package org.springframework.cloud.dataflow.server.service.impl;
 import com.fasterxml.jackson.annotation.JsonValue;
 
 /**
+ * Jackson mixin used to serialize a {@code Resource} as its URI
+ *
  * @author Mark Pollack
+ * @author Michael Minella
+ * @since 2.3
  */
 public abstract class ResourceMixin {
 

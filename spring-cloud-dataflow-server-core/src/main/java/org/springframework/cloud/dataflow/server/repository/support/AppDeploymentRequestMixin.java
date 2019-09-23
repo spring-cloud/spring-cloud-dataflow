@@ -23,7 +23,10 @@ import org.springframework.cloud.deployer.spi.core.AppDefinition;
 import org.springframework.core.io.Resource;
 
 /**
+ * Jackson Mixin used to create a new {@code AppDeploymentRequest} during deserialization
+ *
  * @author Michael Minella
+ * @since 2.3
  */
 public abstract class AppDeploymentRequestMixin {
 

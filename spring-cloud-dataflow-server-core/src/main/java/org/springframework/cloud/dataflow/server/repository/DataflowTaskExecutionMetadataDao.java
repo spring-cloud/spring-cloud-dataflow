@@ -21,13 +21,34 @@ import org.springframework.cloud.dataflow.core.TaskManifest;
 import org.springframework.cloud.task.repository.TaskExecution;
 
 /**
+ * Data access object used for manipulating task manifests
+ *
  * @author Michael Minella
+ * @since 2.3
  */
 public interface DataflowTaskExecutionMetadataDao {
 
+	/**
+	 * Saves a {@code TaskManifest} related to the supplied {@code TaskExecution}
+	 *
+	 * @param taskExecution execution this manifest is associated with
+	 * @param manifest manifest
+	 */
 	void save(TaskExecution taskExecution, TaskManifest manifest);
 
+	/**
+	 * Returns the manifest for the most recently launched instance of the task name requested.
+	 *
+	 * @param taskName name of task defintion
+	 * @return {@code TaskManifest}
+	 */
 	TaskManifest getLastManifest(String taskName);
 
+	/**
+	 * Deletes the task manifest records associated with the collection of task execution ids provided.
+	 *
+	 * @param taskExecutionIds collection of ids to delete the manifests for
+	 * @return number of manifests deleted
+	 */
 	int deleteManifestsByTaskExecutionIds(Set<Long> taskExecutionIds);
 }

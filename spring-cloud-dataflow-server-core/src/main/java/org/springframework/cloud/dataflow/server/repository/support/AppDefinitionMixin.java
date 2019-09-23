@@ -20,7 +20,10 @@ import java.util.Map;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
+ * Jackson Mixin used to define how to create an {@code AppDefinition} when deserializing JSON
+ *
  * @author Michael Minella
+ * @since 2.3
  */
 public abstract class AppDefinitionMixin {
 
