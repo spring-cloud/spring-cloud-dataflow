@@ -16,7 +16,7 @@
 		 release versions -->
 		<groupId>org.springframework.cloud</groupId>
 		<artifactId>spring-cloud-build</artifactId>
-		<version>2.2.0.M4</version>
+		<version>2.2.0.BUILD-SNAPSHOT</version>
 		<relativePath />
 	</parent>
 
@@ -67,6 +67,8 @@
 		<javadoc.opts>-Xdoclint:none</javadoc.opts>
 		<checkstyle.config.location>etc/checkstyle/checkstyle.xml</checkstyle.config.location>
 
+		<!-- Use older flyway until we can use flaway 6.x given to us from boot -->
+		<flyway.version>5.2.4</flyway.version>
 		<commons-io.version>2.5</commons-io.version>
 		<jmockit.version>1.24</jmockit.version>
 
@@ -235,6 +237,11 @@
 				<groupId>io.projectreactor</groupId>
 				<artifactId>reactor-core</artifactId>
 				<version>${reactor.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.flywaydb</groupId>
+				<artifactId>flyway-core</artifactId>
+				<version>${flyway.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>commons-io</groupId>
