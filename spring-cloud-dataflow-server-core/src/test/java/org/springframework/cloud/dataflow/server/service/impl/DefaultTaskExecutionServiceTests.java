@@ -388,6 +388,27 @@ public abstract class DefaultTaskExecutionServiceTests {
 					this.taskExecutionService.getLog(platformName, taskDeploymentId));
 		}
 
+		@Test
+		@DirtiesContext
+		public void getCFTaskLogByTaskIdOtherThanLatest() {
+			String taskName = "test-task";
+			String platformName = "cf-test-platform";
+			String taskDeploymentId = "12345";
+			TaskDeployment taskDeployment = new TaskDeployment();
+			taskDeployment.setPlatformName(platformName);
+			taskDeployment.setTaskDeploymentId(taskDeploymentId);
+			taskDeployment.setTaskDefinitionName(taskName);
+			this.taskDeploymentRepository.save(taskDeployment);
+			TaskExecution taskExecution = new TaskExecution();
+			taskExecution.setStartTime(new Date());
+			taskExecution.setTaskName(taskName);
+			taskExecution.setExternalExecutionId("12346");
+			this.taskRepository.createTaskExecution(taskExecution);
+			this.launcherRepository.save(new Launcher(platformName,
+					TaskPlatformFactory.CLOUDFOUNDRY_PLATFORM_TYPE, taskLauncher));
+			assertEquals("", this.taskExecutionService.getLog(platformName, taskDeploymentId));
+		}
+
 
 		@Test
 		@DirtiesContext
