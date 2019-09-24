@@ -4,7 +4,7 @@
 	<parent>
 		<artifactId>spring-cloud-dependencies-parent</artifactId>
 		<groupId>org.springframework.cloud</groupId>
-		<version>2.2.0.M4</version>
+		<version>2.2.0.BUILD-SNAPSHOT</version>
 		<relativePath />
 	</parent>
 	<artifactId>spring-cloud-dataflow-dependencies</artifactId>
