@@ -15,7 +15,6 @@
  */
 package org.springframework.cloud.dataflow.scheduler.launcher;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
@@ -25,17 +24,8 @@ import org.springframework.cloud.dataflow.server.EnableDataFlowServer;
 import org.springframework.cloud.deployer.spi.scheduler.ScheduleInfo;
 import org.springframework.cloud.deployer.spi.scheduler.ScheduleRequest;
 import org.springframework.cloud.deployer.spi.scheduler.Scheduler;
-import org.springframework.cloud.skipper.client.SkipperClient;
-import org.springframework.cloud.skipper.domain.AboutResource;
-import org.springframework.cloud.skipper.domain.Dependency;
-import org.springframework.cloud.skipper.domain.VersionInfo;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Primary;
-import org.springframework.hateoas.CollectionModel;
-
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 
 /**
  * @author Mark Pollack
@@ -72,20 +62,6 @@ public class TestConfig {
 				return Collections.emptyList();
 			}
 		};
-	}
-
-	@Bean
-	@Primary
-	public SkipperClient skipperClientMock() {
-		SkipperClient skipperClient = mock(SkipperClient.class);
-		AboutResource about = new AboutResource();
-		about.setVersionInfo(new VersionInfo());
-		about.getVersionInfo().setServer(new Dependency());
-		about.getVersionInfo().getServer().setName("Test Server");
-		about.getVersionInfo().getServer().setVersion("Test Version");
-		when(skipperClient.info()).thenReturn(about);
-		when(skipperClient.listDeployers()).thenReturn(new CollectionModel<>(new ArrayList<>(), new ArrayList<>()));
-		return skipperClient;
 	}
 
 }

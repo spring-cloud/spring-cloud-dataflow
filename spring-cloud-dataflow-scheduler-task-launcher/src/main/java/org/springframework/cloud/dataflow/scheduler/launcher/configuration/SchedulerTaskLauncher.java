@@ -58,17 +58,18 @@ public class SchedulerTaskLauncher {
 
 	private Environment environment;
 
-	public SchedulerTaskLauncher(String taskName, String platformName,
-			TaskOperations taskOperations, SchedulerTaskLauncherProperties schedulerTaskLauncherProperties,
+	public SchedulerTaskLauncher(TaskOperations taskOperations,
+			SchedulerTaskLauncherProperties schedulerTaskLauncherProperties,
 			Environment environment) {
-		Assert.hasText(taskName, "`taskName` cannot be null");
 		Assert.notNull(taskOperations, "`taskOperations` must not be null");
-		Assert.hasText(platformName, "`platformName` cannot be null");
-		Assert.notNull(schedulerTaskLauncherProperties, "`taskLauncherProperties` must not be null");
+		Assert.notNull(schedulerTaskLauncherProperties, "`schedulerTaskLauncherProperties` must not be null");
 		Assert.notNull(environment, "`environment` must not be null");
+		Assert.hasText(schedulerTaskLauncherProperties.getTaskName(), "`taskName` must not be empty or null");
+		Assert.hasText(schedulerTaskLauncherProperties.getPlatformName(), "`platformName` must not be empty or null");
+
 		this.taskOperations = taskOperations;
-		this.taskName = taskName;
-		this.platformName = platformName;
+		this.taskName = schedulerTaskLauncherProperties.getTaskName();
+		this.platformName = schedulerTaskLauncherProperties.getPlatformName();
 		this.schedulerTaskLauncherProperties = schedulerTaskLauncherProperties;
 		this.environment = environment;
 	}

@@ -95,10 +95,22 @@ public class SchedulerTaskLauncherTests {
 		SchedulerTaskLauncherProperties schedulerTaskLauncherProperties = new SchedulerTaskLauncherProperties();
 
 		thrown.expect(IllegalArgumentException.class);
-		thrown.expectMessage("`taskName` cannot be null");
+		thrown.expectMessage("`taskName` must not be empty or null");
 
-		new SchedulerTaskLauncher(schedulerTaskLauncherProperties.getTaskName(),
-				schedulerTaskLauncherProperties.getPlatformName(), taskOperations,
+		new SchedulerTaskLauncher(taskOperations,
+				schedulerTaskLauncherProperties, new MockEnvironment());
+	}
+
+	@Test
+	public void testPlatformNameNotProvided() {
+		SchedulerTaskLauncherProperties schedulerTaskLauncherProperties = new SchedulerTaskLauncherProperties();
+		schedulerTaskLauncherProperties.setTaskName("TEST_VAL");
+		schedulerTaskLauncherProperties.setPlatformName("");
+
+		thrown.expect(IllegalArgumentException.class);
+		thrown.expectMessage("`platformName` must not be empty or null");
+
+		new SchedulerTaskLauncher(taskOperations,
 				schedulerTaskLauncherProperties, new MockEnvironment());
 	}
 
@@ -122,8 +134,7 @@ public class SchedulerTaskLauncherTests {
 	private SchedulerTaskLauncher getSchedulerTaskLauncher(SchedulerTaskLauncherProperties schedulerTaskLauncherProperties,
 			Environment environment) {
 		schedulerTaskLauncherProperties.setTaskName(TASK_NAME);
-		return new SchedulerTaskLauncher(schedulerTaskLauncherProperties.getTaskName(),
-				schedulerTaskLauncherProperties.getPlatformName(), taskOperations,
+		return new SchedulerTaskLauncher(this.taskOperations,
 				schedulerTaskLauncherProperties, environment);
 	}
 

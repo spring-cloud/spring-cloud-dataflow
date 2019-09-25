@@ -21,6 +21,11 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.builder.SpringApplicationBuilder;
 
 /**
+ * This the purpose of this application is to be used by platform schedulers to
+ * launch Spring Cloud Task Applications.  The way this application launches
+ * Spring Cloud Task apps is to utilize the Restful API provided by Spring Cloud
+ * Data Flow to launch the applications.
+ *
  * @author Glenn Renfro
  */
 @SpringBootApplication

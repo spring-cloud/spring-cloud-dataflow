@@ -44,9 +44,8 @@ public class LauncherConfiguration {
 	public SchedulerTaskLauncher launchRequestConsumer(
 			SchedulerTaskLauncherProperties schedulerTaskLauncherProperties,
 			TaskOperations taskOperations, Environment environment) {
-		return new SchedulerTaskLauncher(schedulerTaskLauncherProperties.getTaskName(),
-				schedulerTaskLauncherProperties.getPlatformName(), taskOperations,
-				schedulerTaskLauncherProperties, environment);
+		return new SchedulerTaskLauncher(taskOperations, schedulerTaskLauncherProperties,
+				environment);
 	}
 
 	@Bean
@@ -55,7 +54,7 @@ public class LauncherConfiguration {
 			final URI dataFlowUri = new URI(schedulerTaskLauncherProperties.getDataflowServerUri());
 			final DataFlowOperations dataFlowOperations = new DataFlowTemplate(dataFlowUri);
 			if (dataFlowOperations.taskOperations() == null) {
-				throw new SchedulerTaskLauncherException("The SCDF server does not support task operations");
+				throw new SchedulerTaskLauncherException("The task operations are not enabled in the Spring Cloud Data Flow server");
 			}
 			return dataFlowOperations.taskOperations();
 		}
