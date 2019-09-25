@@ -79,10 +79,10 @@ public class TaskDefinition extends DataFlowAppDefinition {
 	/**
 	 * Construct a {@code TaskDefinition}
 	 *
+	 * @param name task definition name
 	 * @param registeredAppName the application name
 	 * @param label the label associated with the definition
 	 * @param properties the properties for the definition
-	 * @param name task definition name
 	 * @param dsl task definition DSL expression
 	 * @since 2.3
 	 */
@@ -254,7 +254,7 @@ public class TaskDefinition extends DataFlowAppDefinition {
 		 *
 		 * @param dslText the dsl to be used by the TaskDefinition
 		 * @return this builder object
-		 * @see AppDefinition#getProperties()
+		 *
 		 * @since 2.3
 		 */
 		public TaskDefinitionBuilder setDslText(String dslText) {

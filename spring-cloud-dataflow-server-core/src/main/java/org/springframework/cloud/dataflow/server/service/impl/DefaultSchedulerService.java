@@ -140,7 +140,7 @@ public class DefaultSchedulerService implements SchedulerService {
 		TaskServiceUtils.updateDataFlowUriIfNeeded(this.dataflowServerUri, appDeploymentProperties, commandLineArgs);
 		AppDefinition revisedDefinition = TaskServiceUtils.mergeAndExpandAppProperties(taskDefinition, metadataResource,
 				appDeploymentProperties, whitelistProperties);
-		revisedDefinition = new AppDefinition(taskConfigurationProperties.getSchedulerTaskLauncher(), revisedDefinition.getProperties());
+		revisedDefinition = new AppDefinition(taskConfigurationProperties.getSchedulerTaskLauncherName(), revisedDefinition.getProperties());
 		DeploymentPropertiesUtils.validateDeploymentProperties(taskDeploymentProperties);
 		taskDeploymentProperties = extractAndQualifySchedulerProperties(taskDeploymentProperties);
 		commandLineArgs.add("--taskName=" + taskDefinitionName);
@@ -256,7 +256,7 @@ public class DefaultSchedulerService implements SchedulerService {
 					ApplicationType.task);
 		}
 		else {
-			appRegistration = this.registry.find(taskConfigurationProperties.getSchedulerTaskLauncher(),
+			appRegistration = this.registry.find(taskConfigurationProperties.getSchedulerTaskLauncherName(),
 					ApplicationType.app);
 		}
 		Assert.notNull(appRegistration, "Unknown task app: " + taskDefinition.getRegisteredAppName());

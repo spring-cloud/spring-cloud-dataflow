@@ -55,5 +55,5 @@ public interface TaskExecutionInfoService {
 	 *
 	 * @since 2.3
 	 */
-	List<AppDeploymentRequest> createRequests(String taskName, String dslText);
+	List<AppDeploymentRequest> createTaskDeploymentRequests(String taskName, String dslText);
 }

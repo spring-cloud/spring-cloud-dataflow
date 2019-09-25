@@ -168,7 +168,7 @@ public class DefaultTaskExecutionInfoService implements TaskExecutionInfoService
 		return taskExecutionInformation;
 	}
 
-	public List<AppDeploymentRequest> createRequests(String taskName, String dslText) {
+	public List<AppDeploymentRequest> createTaskDeploymentRequests(String taskName, String dslText) {
 		List<AppDeploymentRequest> appDeploymentRequests = new ArrayList<>();
 		TaskParser taskParser = new TaskParser(taskName, dslText, true, true);
 		TaskNode taskNode = taskParser.parse();

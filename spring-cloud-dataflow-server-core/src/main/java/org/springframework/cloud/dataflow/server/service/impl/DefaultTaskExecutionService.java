@@ -133,6 +133,7 @@ public class DefaultTaskExecutionService implements TaskExecutionService {
 	 * @param taskDeploymentRepository the repository to track task deployment
 	 * @param taskExecutionInfoService the service used to setup a task execution
 	 * @param taskExecutionRepositoryService the service used to create the task execution
+	 * @param dataflowTaskExecutionMetadataDao repository used to manipulate task manifests
 	 */
 	public DefaultTaskExecutionService(LauncherRepository launcherRepository,
 			AuditRecordService auditRecordService,
@@ -215,7 +216,7 @@ public class DefaultTaskExecutionService implements TaskExecutionService {
 
 		TaskManifest taskManifest = createTaskManifest(platformName, taskExecutionInformation, appDeploymentRequest);
 
-		TaskManifest previousManifest = this.dataflowTaskExecutionMetadataDao.getLastManifest(taskName);
+		TaskManifest previousManifest = this.dataflowTaskExecutionMetadataDao.getLatestManifest(taskName);
 
 		if(!taskDeploymentProperties.isEmpty()) {
 			taskDeploymentProperties = appDeploymentRequest.getDeploymentProperties();
@@ -235,27 +236,32 @@ public class DefaultTaskExecutionService implements TaskExecutionService {
 
 		taskManifest.setTaskDeploymentRequest(request);
 
-		if(!isAppDeploymentSame(previousManifest, taskManifest)) {
+		String taskDeploymentId = null;
 
-			validateAndLockUpgrade(taskName, platformName, taskExecution);
+		try {
+			if(!isAppDeploymentSame(previousManifest, taskManifest)) {
 
-			logger.debug("Deleting %s and all related resources from the platform", taskName);
-			taskLauncher.destroy(taskName);
+				validateAndLockUpgrade(taskName, platformName, taskExecution);
 
+				logger.debug("Deleting %s and all related resources from the platform", taskName);
+				taskLauncher.destroy(taskName);
+
+			}
+
+			this.dataflowTaskExecutionMetadataDao.save(taskExecution, taskManifest);
+
+			taskDeploymentId = taskLauncher.launch(appDeploymentRequest);
+
+			saveExternalExecutionId(taskExecution, taskDeploymentId);
 		}
+		finally {
+			if(this.tasksBeingUpgraded.containsKey(taskName)) {
+				List<String> platforms = this.tasksBeingUpgraded.get(taskName);
+				platforms.remove(platformName);
 
-		this.dataflowTaskExecutionMetadataDao.save(taskExecution, taskManifest);
-
-		String taskDeploymentId = taskLauncher.launch(appDeploymentRequest);
-
-		saveExternalExecutionId(taskExecution, taskDeploymentId);
-
-		if(this.tasksBeingUpgraded.containsKey(taskName)) {
-			List<String> platforms = this.tasksBeingUpgraded.get(taskName);
-			platforms.remove(platformName);
-
-			if(platforms.isEmpty()) {
-				this.tasksBeingUpgraded.remove(taskName);
+				if(platforms.isEmpty()) {
+					this.tasksBeingUpgraded.remove(taskName);
+				}
 			}
 		}
 
@@ -352,7 +358,7 @@ public class DefaultTaskExecutionService implements TaskExecutionService {
 	}
 
 	/**
-	 * A task should not be allowed ot be launched when an upgrade is required and one is running (allowing the upgrade
+	 * A task should not be allowed to be launched when an upgrade is required and one is running (allowing the upgrade
 	 * to proceed may kill running task instances of that definition on certain platforms).
 	 *
 	 * @param taskName task name to check or lock
@@ -368,7 +374,13 @@ public class DefaultTaskExecutionService implements TaskExecutionService {
 			throw new IllegalStateException("Unable to update application due to currently running applications");
 		}
 		else if(this.tasksBeingUpgraded.containsKey(taskName)) {
-			this.tasksBeingUpgraded.get(taskName).add(platformName);
+			List<String> platforms = this.tasksBeingUpgraded.get(taskName);
+
+			if(platforms.contains(platformName)) {
+				throw new IllegalStateException(String.format("Currently upgrading %s on platform %s", taskName, platformName));
+			}
+
+			platforms.add(platformName);
 		}
 		else {
 			List<String> platformList = new ArrayList<>();
@@ -391,7 +403,7 @@ public class DefaultTaskExecutionService implements TaskExecutionService {
 		String composedTaskDsl = taskExecutionInformation.getTaskDefinition().getProperties().get("graph");
 		if (StringUtils.hasText(composedTaskDsl)) {
 			taskManifest.setTaskDeploymentRequest(appDeploymentRequest);
-			List<AppDeploymentRequest> subTaskAppDeploymentRequests = this.taskExecutionInfoService.createRequests(
+			List<AppDeploymentRequest> subTaskAppDeploymentRequests = this.taskExecutionInfoService.createTaskDeploymentRequests(
 					taskExecutionInformation.getTaskDefinition().getTaskName(),
 					taskExecutionInformation.getTaskDefinition().getDslText());
 			taskManifest.setSubTaskDeploymentRequests(subTaskAppDeploymentRequests);

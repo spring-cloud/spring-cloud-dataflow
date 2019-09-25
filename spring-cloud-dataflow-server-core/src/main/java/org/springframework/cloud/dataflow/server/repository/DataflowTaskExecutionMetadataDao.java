@@ -42,7 +42,7 @@ public interface DataflowTaskExecutionMetadataDao {
 	 * @param taskName name of task defintion
 	 * @return {@code TaskManifest}
 	 */
-	TaskManifest getLastManifest(String taskName);
+	TaskManifest getLatestManifest(String taskName);
 
 	/**
 	 * Deletes the task manifest records associated with the collection of task execution ids provided.

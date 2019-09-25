@@ -108,7 +108,7 @@ public class TaskAppDeploymentRequestCreator {
 				appDeploymentProperties, this.whitelistProperties);
 
 		List<String> updatedCmdLineArgs = (taskExecutionInformation.isComposed())?this.updateCommandLineArgs(commandLineArgs,
-				taskExecution, platformName, taskExecutionInformation.getTaskDefinition().getRegisteredAppName()):this.updateCommandLineArgs(commandLineArgs,
+				taskExecution, platformName, registeredAppName):this.updateCommandLineArgs(commandLineArgs,
 				taskExecution, platformName);
 		AppDeploymentRequest request = new AppDeploymentRequest(revisedDefinition,
 				taskExecutionInformation.getAppResource(),

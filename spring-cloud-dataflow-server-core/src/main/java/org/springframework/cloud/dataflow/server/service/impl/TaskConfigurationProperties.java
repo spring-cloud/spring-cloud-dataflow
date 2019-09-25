@@ -42,7 +42,7 @@ public class TaskConfigurationProperties {
 	private String composedTaskRunnerName = "composed-task-runner";
 
 	@NotBlank
-	private String schedulerTaskLauncher = "scheduler-task-launcher";
+	private String schedulerTaskLauncherName = "scheduler-task-launcher";
 
 	public String getComposedTaskRunnerName() {
 		return composedTaskRunnerName;
@@ -52,11 +52,11 @@ public class TaskConfigurationProperties {
 		this.composedTaskRunnerName = taskName;
 	}
 
-	public String getSchedulerTaskLauncher() {
-		return schedulerTaskLauncher;
+	public String getSchedulerTaskLauncherName() {
+		return schedulerTaskLauncherName;
 	}
 
-	public void setSchedulerTaskLauncher(String schedulerTaskLauncher) {
-		this.schedulerTaskLauncher = schedulerTaskLauncher;
+	public void setSchedulerTaskLauncherName(String schedulerTaskLauncherName) {
+		this.schedulerTaskLauncherName = schedulerTaskLauncherName;
 	}
 }

@@ -110,7 +110,7 @@ public class JdbcDataflowTaskExecutionMetadataDao implements DataflowTaskExecuti
 	}
 
 	@Override
-	public TaskManifest getLastManifest(String taskName) {
+	public TaskManifest getLatestManifest(String taskName) {
 		final MapSqlParameterSource queryParameters = new MapSqlParameterSource()
 				.addValue("taskName", taskName);
 

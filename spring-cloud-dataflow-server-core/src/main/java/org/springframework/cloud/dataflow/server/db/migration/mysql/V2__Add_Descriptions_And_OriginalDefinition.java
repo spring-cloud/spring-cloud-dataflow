@@ -29,6 +29,9 @@ import org.springframework.cloud.dataflow.server.db.migration.SqlCommandsRunner;
  *
  * @author Daniel Serleg
  * @author Ilayaperumal Gopinathan
+ * @author Michael Minella
+ *
+ * @since 2.3
  */
 public class V2__Add_Descriptions_And_OriginalDefinition extends BaseJavaMigration {
 
@@ -41,6 +44,26 @@ public class V2__Add_Descriptions_And_OriginalDefinition extends BaseJavaMigrati
 
 	public final static String UPDATE_STREAM_DEFINITION_TABLE_ORIG_DEF = "update stream_definitions set original_definition=definition";
 
+	public final static String CREATE_TASK_METADATA_TABLE =
+			"CREATE TABLE task_execution_metadata (\n" +
+					"    id BIGINT NOT NULL,\n" +
+					"    task_execution_id BIGINT NOT NULL,\n" +
+					"    task_execution_manifest LONGTEXT,\n" +
+					"    primary key (id),\n" +
+					"    CONSTRAINT TASK_METADATA_FK FOREIGN KEY (TASK_EXECUTION_ID)\n" +
+					"    REFERENCES TASK_EXECUTION(TASK_EXECUTION_ID)\n" +
+					")";
+
+	public final static String CREATE_TASK_METADATA_SEQUENCE =
+			"CREATE TABLE task_execution_metadata_seq (\n" +
+					"  ID BIGINT NOT NULL,\n" +
+					"  UNIQUE_KEY CHAR(1) NOT NULL,\n" +
+					"  constraint UNIQUE_KEY_UN unique (UNIQUE_KEY)\n" +
+					")";
+
+	public final static String INSERT_TASK_METADATA_SEQUENCE =
+			"INSERT INTO task_execution_metadata_seq (ID, UNIQUE_KEY) select * from (select 0 as ID, '0' as UNIQUE_KEY) as tmp where not exists(select * from task_execution_metadata_seq)";
+
 	private final SqlCommandsRunner runner = new SqlCommandsRunner();
 
 	@Override
@@ -49,6 +72,9 @@ public class V2__Add_Descriptions_And_OriginalDefinition extends BaseJavaMigrati
 				SqlCommand.from(ALTER_STREAM_DEFINITION_TABLE_DESC),
 				SqlCommand.from(ALTER_STREAM_DEFINITION_TABLE_ORIG_DEF),
 				SqlCommand.from(ALTER_TASK_DEFINITION_TABLE),
-				SqlCommand.from(UPDATE_STREAM_DEFINITION_TABLE_ORIG_DEF)));
+				SqlCommand.from(UPDATE_STREAM_DEFINITION_TABLE_ORIG_DEF),			SqlCommand.from(CREATE_TASK_METADATA_TABLE),
+				SqlCommand.from(CREATE_TASK_METADATA_SEQUENCE),
+				SqlCommand.from(INSERT_TASK_METADATA_SEQUENCE)));
+
 	}
 }

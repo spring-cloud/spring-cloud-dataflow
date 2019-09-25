@@ -263,7 +263,7 @@ public abstract class DefaultTaskExecutionServiceTests {
 
 			this.taskExecutionService.executeTask(TASK_NAME_ORIG, new HashMap<>(), new LinkedList<>());
 
-			TaskManifest lastManifest = this.dataflowTaskExecutionMetadataDao.getLastManifest(TASK_NAME_ORIG);
+			TaskManifest lastManifest = this.dataflowTaskExecutionMetadataDao.getLatestManifest(TASK_NAME_ORIG);
 			assertEquals("file:src/test/resources/apps/foo-task", lastManifest.getTaskDeploymentRequest().getResource().getURL().toString());
 			assertEquals("default", lastManifest.getPlatformName());
 			assertTrue(lastManifest.getSubTaskDeploymentRequests() == null);
@@ -295,7 +295,7 @@ public abstract class DefaultTaskExecutionServiceTests {
 
 			this.taskExecutionService.executeTask(TASK_NAME_ORIG, Collections.emptyMap(), new LinkedList<>());
 
-			TaskManifest lastManifest = this.dataflowTaskExecutionMetadataDao.getLastManifest(TASK_NAME_ORIG);
+			TaskManifest lastManifest = this.dataflowTaskExecutionMetadataDao.getLatestManifest(TASK_NAME_ORIG);
 
 			assertEquals("file:src/test/resources/apps/foo-task", lastManifest.getTaskDeploymentRequest().getResource().getURL().toString());
 			assertEquals("default", lastManifest.getPlatformName());
@@ -329,7 +329,7 @@ public abstract class DefaultTaskExecutionServiceTests {
 
 			this.taskExecutionService.executeTask(TASK_NAME_ORIG, deploymentProperties, new LinkedList<>());
 
-			TaskManifest lastManifest = this.dataflowTaskExecutionMetadataDao.getLastManifest(TASK_NAME_ORIG);
+			TaskManifest lastManifest = this.dataflowTaskExecutionMetadataDao.getLatestManifest(TASK_NAME_ORIG);
 
 			assertEquals("file:src/test/resources/apps/foo-task", lastManifest.getTaskDeploymentRequest().getResource().getURL().toString());
 			assertEquals("default", lastManifest.getPlatformName());
@@ -363,7 +363,7 @@ public abstract class DefaultTaskExecutionServiceTests {
 
 			this.taskExecutionService.executeTask(TASK_NAME_ORIG, deploymentProperties, new LinkedList<>());
 
-			TaskManifest lastManifest = this.dataflowTaskExecutionMetadataDao.getLastManifest(TASK_NAME_ORIG);
+			TaskManifest lastManifest = this.dataflowTaskExecutionMetadataDao.getLatestManifest(TASK_NAME_ORIG);
 
 			assertEquals("file:src/test/resources/apps/foo-task", lastManifest.getTaskDeploymentRequest().getResource().getURL().toString());
 			assertEquals("default", lastManifest.getPlatformName());
