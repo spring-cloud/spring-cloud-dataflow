@@ -40,6 +40,8 @@ import org.springframework.cloud.dataflow.rest.client.DataFlowOperations;
 import org.springframework.cloud.dataflow.rest.client.DataFlowTemplate;
 import org.springframework.cloud.dataflow.rest.resource.TaskExecutionResource;
 import org.springframework.context.ApplicationContext;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
 import org.springframework.hateoas.PagedModel;
 import org.springframework.util.SocketUtils;
 
@@ -143,11 +145,10 @@ public class LauncherConfigurationTests {
 	private boolean runTaskLauncher(String dataFlowUri) {
 		ExecutorService executorService = Executors.newFixedThreadPool(1);
 		Future<?> completed = executorService.submit(() -> {
-			new SpringApplicationBuilder(SchedulerTaskLauncherApplication.class)
+			new SpringApplicationBuilder(SchedulerTaskLauncherApplication.class, LauncherConfigurationTests.AppConfig.class)
 					.bannerMode(Banner.Mode.OFF)
 					.run(
-							"--taskName=my-task",
-							"--dataflowServerUri=" + dataFlowUri
+							"--spring.cloud.scheduler.task.launcher.taskName=my-task"
 					);
 		});
 
@@ -168,6 +169,14 @@ public class LauncherConfigurationTests {
 			executorService.shutdownNow();
 		}
 
+	}
+
+	@Configuration
+	public static class AppConfig {
+		@Bean
+		public DataFlowOperations dataFlowOperations() throws Exception {
+			return new DataFlowTemplate(new URI(applicationContext.getEnvironment().getProperty("dataflow.uri")));
+		}
 	}
 
 }

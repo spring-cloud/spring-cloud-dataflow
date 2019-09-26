@@ -16,7 +16,6 @@
 
 package org.springframework.cloud.dataflow.scheduler.launcher;
 
-import org.springframework.boot.Banner;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.builder.SpringApplicationBuilder;
 
@@ -32,6 +31,6 @@ import org.springframework.boot.builder.SpringApplicationBuilder;
 public class SchedulerTaskLauncherApplication {
 
 	public static void main(String[] args) {
-		new SpringApplicationBuilder().sources(SchedulerTaskLauncherApplication.class).bannerMode(Banner.Mode.OFF).run(args);
+		new SpringApplicationBuilder().sources(SchedulerTaskLauncherApplication.class).run(args);
 	}
 }

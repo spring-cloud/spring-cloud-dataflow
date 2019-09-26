@@ -23,7 +23,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
  *
  * @author Glenn Renfro
  **/
-@ConfigurationProperties
+@ConfigurationProperties(prefix = "spring.cloud.scheduler.task.launcher")
 public class SchedulerTaskLauncherProperties {
 	/**
 	 * The Spring Cloud Data Flow platform to use for launching tasks.

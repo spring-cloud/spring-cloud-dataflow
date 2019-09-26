@@ -20,12 +20,9 @@ import java.net.URI;
 import java.net.URISyntaxException;
 
 import org.springframework.boot.CommandLineRunner;
-import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.cloud.dataflow.rest.client.DataFlowOperations;
-import org.springframework.cloud.dataflow.rest.client.DataFlowTemplate;
 import org.springframework.cloud.dataflow.rest.client.TaskOperations;
-import org.springframework.cloud.dataflow.rest.client.config.DataFlowClientAutoConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.env.Environment;
@@ -37,7 +34,6 @@ import org.springframework.core.env.Environment;
  */
 @Configuration
 @EnableConfigurationProperties({SchedulerTaskLauncherProperties.class})
-@EnableAutoConfiguration(exclude = {DataFlowClientAutoConfiguration.class})
 public class LauncherConfiguration {
 
 	@Bean
@@ -49,10 +45,10 @@ public class LauncherConfiguration {
 	}
 
 	@Bean
-	public TaskOperations getTaskOperations(SchedulerTaskLauncherProperties schedulerTaskLauncherProperties) {
+	public TaskOperations getTaskOperations(SchedulerTaskLauncherProperties schedulerTaskLauncherProperties,
+			DataFlowOperations dataFlowOperations) {
 		try {
 			final URI dataFlowUri = new URI(schedulerTaskLauncherProperties.getDataflowServerUri());
-			final DataFlowOperations dataFlowOperations = new DataFlowTemplate(dataFlowUri);
 			if (dataFlowOperations.taskOperations() == null) {
 				throw new SchedulerTaskLauncherException("The task operations are not enabled in the Spring Cloud Data Flow server");
 			}
