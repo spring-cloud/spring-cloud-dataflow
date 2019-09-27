@@ -104,6 +104,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.atLeast;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -273,26 +274,16 @@ public abstract class DefaultTaskExecutionServiceTests {
 
 		@Test
 		@DirtiesContext
-		public void testRestoreDeploymentProperties() throws IOException {
-			TaskExecution myTask = this.taskRepository.createTaskExecution(TASK_NAME_ORIG);
-			TaskManifest manifest = new TaskManifest();
-			manifest.setPlatformName("default");
-
-			Map<String,String> deploymentProperties = new HashMap<>(1);
-			deploymentProperties.put("deployer.demo.memory", "10000GB");
-
-			AppDeploymentRequest request = new AppDeploymentRequest(new AppDefinition("some-name", deploymentProperties),
-					new FileUrlResource("src/test/resources/apps/foo-task"), deploymentProperties);
-			manifest.setTaskDeploymentRequest(request);
-
-			this.dataflowTaskExecutionMetadataDao.save(myTask, manifest);
-			this.taskRepository.startTaskExecution(myTask.getExecutionId(), TASK_NAME_ORIG, new Date(), new ArrayList<>(), null);
-			this.taskRepository.completeTaskExecution(myTask.getExecutionId(), 0, new Date(), null);
-
+		public void testRestoreAppPropertiesV2() throws IOException {
 			initializeSuccessfulRegistry(appRegistry);
 
-			when(taskLauncher.launch(any())).thenReturn("0");
+			when(taskLauncher.launch(any())).thenReturn("0", "1");
 
+			Map<String, String> properties = new HashMap<>(1);
+			properties.put("app.demo.foo", "bar");
+
+			long firstTaskExecutionId = this.taskExecutionService.executeTask(TASK_NAME_ORIG, properties, new LinkedList<>());
+			this.taskRepository.completeTaskExecution(firstTaskExecutionId, 0, new Date(), "all done");
 			this.taskExecutionService.executeTask(TASK_NAME_ORIG, Collections.emptyMap(), new LinkedList<>());
 
 			TaskManifest lastManifest = this.dataflowTaskExecutionMetadataDao.getLatestManifest(TASK_NAME_ORIG);
@@ -301,9 +292,34 @@ public abstract class DefaultTaskExecutionServiceTests {
 			assertEquals("default", lastManifest.getPlatformName());
 			assertTrue(lastManifest.getSubTaskDeploymentRequests() == null);
 			assertEquals(1, lastManifest.getTaskDeploymentRequest().getDeploymentProperties().size());
-			assertEquals("10000GB", lastManifest.getTaskDeploymentRequest().getDeploymentProperties().get("deployer.demo.memory"));
+			assertEquals("bar", lastManifest.getTaskDeploymentRequest().getDeploymentProperties().get("app.demo.foo"));
 
-			verify(this.taskLauncher).destroy(TASK_NAME_ORIG);
+			verify(this.taskLauncher, never()).destroy(TASK_NAME_ORIG);
+		}
+
+		@Test
+		@DirtiesContext
+		public void testRestoreDeployerPropertiesV2() throws IOException {
+			initializeSuccessfulRegistry(appRegistry);
+
+			when(taskLauncher.launch(any())).thenReturn("0", "1");
+
+			Map<String, String> properties = new HashMap<>(1);
+			properties.put("deployer.demo.memory", "100000GB");
+
+			long firstTaskExecutionId = this.taskExecutionService.executeTask(TASK_NAME_ORIG, properties, new LinkedList<>());
+			this.taskRepository.completeTaskExecution(firstTaskExecutionId, 0, new Date(), "all done");
+			this.taskExecutionService.executeTask(TASK_NAME_ORIG, Collections.emptyMap(), new LinkedList<>());
+
+			TaskManifest lastManifest = this.dataflowTaskExecutionMetadataDao.getLatestManifest(TASK_NAME_ORIG);
+
+			assertEquals("file:src/test/resources/apps/foo-task", lastManifest.getTaskDeploymentRequest().getResource().getURL().toString());
+			assertEquals("default", lastManifest.getPlatformName());
+			assertTrue(lastManifest.getSubTaskDeploymentRequests() == null);
+			assertEquals(1, lastManifest.getTaskDeploymentRequest().getDeploymentProperties().size());
+			assertEquals("100000GB", lastManifest.getTaskDeploymentRequest().getDeploymentProperties().get("deployer.demo.memory"));
+
+			verify(this.taskLauncher, never()).destroy(TASK_NAME_ORIG);
 		}
 
 		@Test
@@ -335,7 +351,7 @@ public abstract class DefaultTaskExecutionServiceTests {
 			assertEquals("default", lastManifest.getPlatformName());
 			assertTrue(lastManifest.getSubTaskDeploymentRequests() == null);
 			assertEquals(1, lastManifest.getTaskDeploymentRequest().getDeploymentProperties().size());
-			assertEquals("10000GB", lastManifest.getTaskDeploymentRequest().getDeploymentProperties().get("spring.cloud.deployer.memory"));
+			assertEquals("10000GB", lastManifest.getTaskDeploymentRequest().getDeploymentProperties().get("deployer.demo.memory"));
 
 			verify(this.taskLauncher).destroy(TASK_NAME_ORIG);
 		}

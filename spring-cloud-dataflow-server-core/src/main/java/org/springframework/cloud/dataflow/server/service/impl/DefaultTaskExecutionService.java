@@ -218,10 +218,7 @@ public class DefaultTaskExecutionService implements TaskExecutionService {
 
 		TaskManifest previousManifest = this.dataflowTaskExecutionMetadataDao.getLatestManifest(taskName);
 
-		if(!taskDeploymentProperties.isEmpty()) {
-			taskDeploymentProperties = appDeploymentRequest.getDeploymentProperties();
-		}
-		else {
+		if(taskDeploymentProperties.isEmpty()) {
 			if(previousManifest != null && !previousManifest.getTaskDeploymentRequest().getDeploymentProperties().equals(taskDeploymentProperties)) {
 				appDeploymentRequest = updateDeploymentProperties(commandLineArgs, platformName, taskExecutionInformation, taskExecution, previousManifest);
 
