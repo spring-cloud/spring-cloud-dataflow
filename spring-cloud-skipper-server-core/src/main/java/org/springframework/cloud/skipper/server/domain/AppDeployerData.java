@@ -16,7 +16,6 @@
 package org.springframework.cloud.skipper.server.domain;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -87,8 +86,7 @@ public class AppDeployerData extends AbstractEntity {
 			mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
 			TypeReference<Map<String, String>> typeRef = new TypeReference<Map<String, String>>() {
 			};
-			HashMap<String, String> result = mapper.readValue(this.deploymentData, typeRef);
-			return result;
+			return mapper.readValue(this.deploymentData, typeRef);
 		}
 		catch (Exception e) {
 			throw new SkipperException("Could not parse appNameDeploymentIdMap JSON:" + this.deploymentData, e);
