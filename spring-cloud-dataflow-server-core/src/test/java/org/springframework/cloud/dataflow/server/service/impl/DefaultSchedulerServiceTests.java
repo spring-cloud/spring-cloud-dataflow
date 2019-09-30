@@ -77,7 +77,8 @@ import static org.mockito.Mockito.when;
 		PropertyPlaceholderAutoConfiguration.class }, properties = {
 		"spring.cloud.dataflow.applicationProperties.task.globalkey=globalvalue",
 		"spring.cloud.dataflow.applicationProperties.stream.globalstreamkey=nothere",
-		"spring.main.allow-bean-definition-overriding=true"})
+		"spring.main.allow-bean-definition-overriding=true",
+		"spring.cloud.dataflow.task.scheduler-task-launcher-url=https://test.test"})
 @EnableConfigurationProperties({ CommonApplicationProperties.class, TaskConfigurationProperties.class, DockerValidatorProperties.class})
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
 @AutoConfigureTestDatabase(replace = Replace.ANY)
@@ -303,7 +304,7 @@ public class DefaultSchedulerServiceTests {
 		assertEquals("Missing task name", "--spring.cloud.scheduler.task.launcher.taskName=myTaskDefinition",commandLineArguments.get(0));
 	}
 
-	private List<String> getCommandLineArguments(List<String> commandLineArguments) throws Exception {
+	private List<String> getCommandLineArguments(List<String> commandLineArguments) {
 		Scheduler mockScheduler = mock(SimpleTestScheduler.class);
 		TaskDefinitionRepository mockTaskDefinitionRepository = mock(TaskDefinitionRepository.class);
 		AppRegistryService mockAppRegistryService = mock(AppRegistryService.class);
@@ -314,7 +315,7 @@ public class DefaultSchedulerServiceTests {
 		TaskPlatform taskPlatform = new TaskPlatform("testTaskPlatform", launchers);
 		SchedulerService mockSchedulerService = new DefaultSchedulerService(mock(CommonApplicationProperties.class),
 				taskPlatform, mockTaskDefinitionRepository, mockAppRegistryService, mock(ResourceLoader.class),
-				new TaskConfigurationProperties(), "uri",
+				this.taskConfigurationProperties, "uri",
 				mock(ApplicationConfigurationMetadataResolver.class), mock(SchedulerServiceProperties.class),
 				mock(AuditRecordService.class));
 

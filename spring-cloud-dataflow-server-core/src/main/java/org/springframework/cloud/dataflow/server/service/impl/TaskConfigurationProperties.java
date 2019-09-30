@@ -50,7 +50,7 @@ public class TaskConfigurationProperties {
 	/**
 	 * The URI of the resource to be used for launching apps via a schedule.
 	 */
-	private String schedulerTaskLauncherUrl = "maven://org.springframework.cloud:spring-cloud-dataflow-scheduler-task-launcher:2.3.0.BUILD-SNAPSHOT";
+	private String schedulerTaskLauncherUrl;
 	/**
 	 * The prefix to be applied to schedule names.
 	 */
@@ -60,6 +60,11 @@ public class TaskConfigurationProperties {
 	 * The prefix to attach to the application properties to be sent to the schedule task launcher.
 	 */
 	private String taskLauncherPrefix = "tasklauncher.";
+
+	/**
+	 * The Spring Cloud Data Flow version.
+	 */
+	private String version;
 
 	public String getComposedTaskRunnerName() {
 		return composedTaskRunnerName;
@@ -99,5 +104,13 @@ public class TaskConfigurationProperties {
 
 	public void setSchedulerTaskLauncherUrl(String schedulerTaskLauncherUrl) {
 		this.schedulerTaskLauncherUrl = schedulerTaskLauncherUrl;
+	}
+
+	public String getVersion() {
+		return version;
+	}
+
+	public void setVersion(String version) {
+		this.version = version;
 	}
 }

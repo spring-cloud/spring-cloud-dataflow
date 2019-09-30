@@ -37,9 +37,6 @@ info:
 #     config:
 #        discovery:
 #           enabled: true
-#     dataflow:
-#            task:
-#               schedulerTaskLauncherURL: "maven://org.springframework.cloud:spring-cloud-dataflow-scheduler-task-launcher:2.3.0.BUILD-SNAPSHOT"
 #eureka:
 #  client:
 #    serviceUrl:

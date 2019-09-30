@@ -299,14 +299,14 @@ public class TaskServiceDependencies extends WebMvcConfigurationSupport {
 	public SchedulerService schedulerService(CommonApplicationProperties commonApplicationProperties,
 											 TaskPlatform taskPlatform, TaskDefinitionRepository taskDefinitionRepository,
 											 AppRegistryService registry, ResourceLoader resourceLoader,
-											 DataSourceProperties dataSourceProperties,
 											 ApplicationConfigurationMetadataResolver metaDataResolver,
 											 SchedulerServiceProperties schedulerServiceProperties,
-											 AuditRecordService auditRecordService) {
+											 AuditRecordService auditRecordService,
+											 TaskConfigurationProperties taskConfigurationProperties) {
 		return new DefaultSchedulerService(commonApplicationProperties,
 				taskPlatform, taskDefinitionRepository,
 				registry, resourceLoader,
-				new TaskConfigurationProperties(), null,
+				taskConfigurationProperties, null,
 				metaDataResolver, schedulerServiceProperties, auditRecordService);
 	}
 
