@@ -39,6 +39,7 @@ import org.springframework.cloud.dataflow.server.config.apps.CommonApplicationPr
 import org.springframework.cloud.dataflow.server.job.LauncherRepository;
 import org.springframework.cloud.dataflow.server.repository.DataflowJobExecutionDao;
 import org.springframework.cloud.dataflow.server.repository.DataflowTaskExecutionDao;
+import org.springframework.cloud.dataflow.server.repository.DataflowTaskExecutionMetadataDao;
 import org.springframework.cloud.dataflow.server.repository.TaskDefinitionRepository;
 import org.springframework.cloud.dataflow.server.repository.TaskDeploymentRepository;
 import org.springframework.cloud.dataflow.server.service.LauncherInitializationService;
@@ -129,12 +130,14 @@ public class TaskConfiguration {
 			TaskDefinitionRepository taskDefinitionRepository, TaskDeploymentRepository taskDeploymentRepository,
 			AuditRecordService auditRecordService,
 			DataflowTaskExecutionDao dataflowTaskExecutionDao,
-			DataflowJobExecutionDao dataflowJobExecutionDao) {
+			DataflowJobExecutionDao dataflowJobExecutionDao,
+			DataflowTaskExecutionMetadataDao dataflowTaskExecutionMetadataDao) {
 		return new DefaultTaskDeleteService(taskExplorer, launcherRepository, taskDefinitionRepository,
 				taskDeploymentRepository,
 				auditRecordService,
 				dataflowTaskExecutionDao,
-				dataflowJobExecutionDao);
+				dataflowJobExecutionDao,
+				dataflowTaskExecutionMetadataDao);
 	}
 
 	@Bean
@@ -165,11 +168,13 @@ public class TaskConfiguration {
 			TaskExecutionCreationService taskExecutionRepositoryService,
 			TaskAppDeploymentRequestCreator taskAppDeploymentRequestCreator,
 			TaskExplorer taskExplorer,
-			DataflowTaskExecutionDao dataflowTaskExecutionDao) {
+			DataflowTaskExecutionDao dataflowTaskExecutionDao,
+			DataflowTaskExecutionMetadataDao dataflowTaskExecutionMetadataDao) {
 		return new DefaultTaskExecutionService(
 				launcherRepository, auditRecordService, taskRepository,
 				taskExecutionInfoService, taskDeploymentRepository, taskExecutionRepositoryService,
-				taskAppDeploymentRequestCreator, taskExplorer, dataflowTaskExecutionDao);
+				taskAppDeploymentRequestCreator, taskExplorer, dataflowTaskExecutionDao,
+				dataflowTaskExecutionMetadataDao);
 	}
 
 	@Bean

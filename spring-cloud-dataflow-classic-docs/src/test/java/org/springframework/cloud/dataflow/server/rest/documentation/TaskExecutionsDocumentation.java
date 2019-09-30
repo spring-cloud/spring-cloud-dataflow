@@ -218,21 +218,6 @@ public class TaskExecutionsDocumentation extends BaseDocumentation {
 
 	@Test
 	public void taskExecutionRemoveAndTaskDataRemove() throws Exception {
-
-		documentation.dontDocument( () -> this.mockMvc.perform(
-				post("/tasks/executions")
-						.param("name", "taskB")
-						.param("properties", "app.my-task.foo=bar,deployer.my-task.something-else=3")
-						.param("arguments", "--server.port=8080 --foo=bar"))
-				.andExpect(status().isCreated()));
-
-		documentation.dontDocument( () -> this.mockMvc.perform(
-				post("/tasks/executions")
-						.param("name", "taskB")
-						.param("properties", "app.my-task.foo=bar2,deployer.my-task.something-else=3")
-						.param("arguments", "--server.port=8082 --foo=bar2"))
-				.andExpect(status().isCreated()));
-
 		this.mockMvc.perform(
 				delete("/tasks/executions/{ids}?action=CLEANUP,REMOVE_DATA", "1,2"))
 				.andDo(print())

@@ -42,3 +42,6 @@ rebel.xml
 !.vscode/tasks.json
 !.vscode/launch.json
 !.vscode/extensions.json
+
+manifest.yml
+cleanup.sh

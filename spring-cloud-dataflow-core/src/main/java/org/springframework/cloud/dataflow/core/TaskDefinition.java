@@ -1,5 +1,5 @@
 /*
- * Copyright 2015-2017 the original author or authors.
+ * Copyright 2015-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -74,6 +74,22 @@ public class TaskDefinition extends DataFlowAppDefinition {
 		super(registeredAppName, label, ApplicationType.task, properties);
 		this.taskName = registeredAppName;
 		this.dslText = "";
+	}
+
+	/**
+	 * Construct a {@code TaskDefinition}
+	 *
+	 * @param name task definition name
+	 * @param registeredAppName the application name
+	 * @param label the label associated with the definition
+	 * @param properties the properties for the definition
+	 * @param dsl task definition DSL expression
+	 * @since 2.3
+	 */
+	TaskDefinition(String name, String registeredAppName, String label, Map<String, String> properties, String dsl) {
+		super(registeredAppName, label, ApplicationType.task, properties);
+		this.taskName = name;
+		this.dslText = dsl;
 	}
 
 	/**
@@ -200,6 +216,11 @@ public class TaskDefinition extends DataFlowAppDefinition {
 		 */
 		private String label;
 
+		private String dslText;
+
+		private String taskName;
+
+
 		/**
 		 * Create a new builder that is initialized with properties of the given
 		 * definition. Useful for "mutating" a definition by building a slightly different
@@ -225,6 +246,32 @@ public class TaskDefinition extends DataFlowAppDefinition {
 		 */
 		public TaskDefinitionBuilder setProperty(String name, String value) {
 			this.properties.put(name, value);
+			return this;
+		}
+
+		/**
+		 * Establish the DSL Text for a task definition.
+		 *
+		 * @param dslText the dsl to be used by the TaskDefinition
+		 * @return this builder object
+		 *
+		 * @since 2.3
+		 */
+		public TaskDefinitionBuilder setDslText(String dslText) {
+			this.dslText = dslText;
+			return this;
+		}
+
+		/**
+		 * Establish the task name for a task definition.
+		 *
+		 * @param taskName the name to be used by the TaskDefinition
+		 * @return this builder object
+		 * @see AppDefinition#getProperties()
+		 * @since 2.3
+		 */
+		public TaskDefinitionBuilder setTaskName(String taskName) {
+			this.taskName = taskName;
 			return this;
 		}
 
@@ -315,7 +362,7 @@ public class TaskDefinition extends DataFlowAppDefinition {
 			if (this.label == null) {
 				this.label = this.registeredAppName;
 			}
-			return new TaskDefinition(this.registeredAppName, this.label, this.properties);
+			return new TaskDefinition(this.taskName, this.registeredAppName, this.label, this.properties, this.dslText);
 		}
 	}
 }
