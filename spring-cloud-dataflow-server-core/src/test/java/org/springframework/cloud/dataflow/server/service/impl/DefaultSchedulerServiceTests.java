@@ -270,7 +270,7 @@ public class DefaultSchedulerServiceTests {
 		schedulerService.schedule(BASE_SCHEDULE_NAME + 3,
 				BASE_DEFINITION_NAME, this.testProperties, this.commandLineArgs);
 
-		List<ScheduleInfo> schedules = schedulerService.list(getFullyQualifiedScheduleName(BASE_DEFINITION_NAME, BASE_SCHEDULE_NAME) + 1);
+		List<ScheduleInfo> schedules = schedulerService.list(BASE_DEFINITION_NAME + 1);
 		assertThat(schedules.size()).isEqualTo(1);
 		verifyScheduleExistsInScheduler(schedules.get(0));
 	}

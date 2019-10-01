@@ -120,6 +120,18 @@ public class TaskSchedulerController {
 				result.size());
 		return assembler.toModel(page, taskAssembler);
 	}
+	/**
+	 * Return a page-able list of {@link ScheduleInfo}s for a specific
+	 * {@link org.springframework.cloud.dataflow.core.TaskDefinition} name.
+	 *
+	 * @param taskDefinitionName name of the taskDefinition to search.
+	 * @return a list of Schedules.
+	 */
+	@RequestMapping(value = "/instances/{taskDefinitionName}", method = RequestMethod.DELETE)
+	@ResponseStatus(HttpStatus.OK)
+	public void deleteSchedulesforDefinition(@PathVariable String taskDefinitionName) {
+		this.schedulerService.unscheduleForTaskDefinition(taskDefinitionName);
+	}
 
 	/**
 	 * Create a schedule for an existing

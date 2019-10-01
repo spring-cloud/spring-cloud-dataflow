@@ -156,7 +156,7 @@ public class TaskSchedulerControllerTests {
 
 		createSampleSchedule("foo", "schedule1");
 		createSampleSchedule("bar", "schedule2");
-		mockMvc.perform(get("/tasks/schedules/instances/scdf-bar-schedule2").accept(MediaType.APPLICATION_JSON)).andDo(print())
+		mockMvc.perform(get("/tasks/schedules/instances/bar").accept(MediaType.APPLICATION_JSON)).andDo(print())
 				.andExpect(status().isOk())
 				.andExpect(jsonPath("$.content[*].scheduleName", containsInAnyOrder("scdf-bar-schedule2")))
 				.andExpect(jsonPath("$.content", hasSize(1)));
@@ -256,6 +256,21 @@ public class TaskSchedulerControllerTests {
 	}
 
 	@Test
+	public void testRemoveSchedulesByTaskName() throws Exception {
+		AppRegistration registration = this.registry.save("testApp", ApplicationType.task,
+				"1.0.0", new URI("file:src/test/resources/apps/foo-task"), null);
+
+		repository.save(new TaskDefinition("testDefinition", "testApp"));
+		createSampleSchedule("mySchedule");
+		createSampleSchedule("mySchedule2");
+		assertEquals(2, simpleTestScheduler.list().size());
+		mockMvc.perform(delete("/tasks/schedules/instances/testDefinition").accept(MediaType.APPLICATION_JSON)).andDo(print())
+				.andExpect(status().isOk());
+		assertEquals(0, simpleTestScheduler.list().size());
+	}
+
+
+		@Test
 	public void testRemoveSchedule() throws Exception {
 		AppRegistration registration = this.registry.save("testApp", ApplicationType.task,
 				"1.0.0", new URI("file:src/test/resources/apps/foo-task"), null);
