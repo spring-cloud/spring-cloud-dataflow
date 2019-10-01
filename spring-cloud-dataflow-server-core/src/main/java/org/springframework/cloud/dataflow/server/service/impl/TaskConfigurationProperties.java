@@ -61,11 +61,6 @@ public class TaskConfigurationProperties {
 	 */
 	private String taskLauncherPrefix = "tasklauncher.";
 
-	/**
-	 * The Spring Cloud Data Flow version.
-	 */
-	private String version;
-
 	public String getComposedTaskRunnerName() {
 		return composedTaskRunnerName;
 	}
@@ -104,13 +99,5 @@ public class TaskConfigurationProperties {
 
 	public void setSchedulerTaskLauncherUrl(String schedulerTaskLauncherUrl) {
 		this.schedulerTaskLauncherUrl = schedulerTaskLauncherUrl;
-	}
-
-	public String getVersion() {
-		return version;
-	}
-
-	public void setVersion(String version) {
-		this.version = version;
 	}
 }

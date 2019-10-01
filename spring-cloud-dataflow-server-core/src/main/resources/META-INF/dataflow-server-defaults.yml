@@ -67,8 +67,7 @@ spring:
             checksum-sha1-url: "{repository}/org/springframework/cloud/spring-cloud-dataflow-shell/{version}/spring-cloud-dataflow-shell-{version}.jar.sha1"
             checksum-sha256-url: "{repository}/org/springframework/cloud/spring-cloud-dataflow-shell/{version}/spring-cloud-dataflow-shell-{version}.jar.sha256"
       task:
-        version: "@project.version@"
-        scheduler-task-launcher-url: "maven://org.springframework.cloud:spring-cloud-dataflow-scheduler-task-launcher:{version}"
+        scheduler-task-launcher-url: "maven://org.springframework.cloud:spring-cloud-dataflow-scheduler-task-launcher:@project.version@"
       security:
         authorization:
           enabled: true

@@ -344,25 +344,13 @@ public class DefaultSchedulerService implements SchedulerService {
 	protected Resource getTaskLauncherResource() {
 		final URI url;
 		try {
-			url = new URI(getSchedulerTaskLauncherURL());
+			url = new URI(this.taskConfigurationProperties.getSchedulerTaskLauncherUrl());
 		} catch (URISyntaxException urise) {
 			throw new IllegalStateException(urise);
 		}
 
 		AppRegistration appRegistration = new AppRegistration(this.taskConfigurationProperties.getSchedulerTaskLauncherName(), ApplicationType.app, url);
 		return this.registry.getAppResource(appRegistration);
-	}
-
-	private String getSchedulerTaskLauncherURL() {
-		final String VERSION_TAG = "{version}";
-		String url = this.taskConfigurationProperties.getSchedulerTaskLauncherUrl();
-		if (!StringUtils.hasText(url)) {
-			throw new IllegalStateException("Scheduler Task Launcher URL must be specified");
-		}
-		if (url.contains(VERSION_TAG)) {
-			url = StringUtils.replace(url, VERSION_TAG, this.taskConfigurationProperties.getVersion());
-		}
-		return url;
 	}
 
 }
