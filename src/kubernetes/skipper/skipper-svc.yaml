@@ -4,6 +4,7 @@ metadata:
   name: skipper
   labels:
     app: skipper
+    spring-deployment-id: scdf
 spec:
   # If you are running k8s on a local dev box, using minikube, or Kubernetes on docker desktop you can use type NodePort instead
   type: LoadBalancer
