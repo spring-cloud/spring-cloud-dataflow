@@ -72,7 +72,8 @@ public class V2__Add_Descriptions_And_OriginalDefinition extends BaseJavaMigrati
 				SqlCommand.from(ALTER_STREAM_DEFINITION_TABLE_DESC),
 				SqlCommand.from(ALTER_STREAM_DEFINITION_TABLE_ORIG_DEF),
 				SqlCommand.from(ALTER_TASK_DEFINITION_TABLE),
-				SqlCommand.from(UPDATE_STREAM_DEFINITION_TABLE_ORIG_DEF),			SqlCommand.from(CREATE_TASK_METADATA_TABLE),
+				SqlCommand.from(UPDATE_STREAM_DEFINITION_TABLE_ORIG_DEF),
+				SqlCommand.from(CREATE_TASK_METADATA_TABLE),
 				SqlCommand.from(CREATE_TASK_METADATA_SEQUENCE),
 				SqlCommand.from(INSERT_TASK_METADATA_SEQUENCE)));
 
