@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 the original author or authors.
+ * Copyright 2018-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,11 +16,14 @@
 package org.springframework.cloud.dataflow.server.service;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import org.springframework.boot.configurationmetadata.ConfigurationMetadataProperty;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
+import org.springframework.cloud.dataflow.core.ConfigurationMetadataPropertyEntity;
 import org.springframework.cloud.dataflow.core.TaskPlatform;
 import org.springframework.cloud.dataflow.server.job.LauncherRepository;
 import org.springframework.context.event.EventListener;
@@ -37,17 +40,25 @@ public class LauncherInitializationService {
 	private final Logger logger = LoggerFactory.getLogger(LauncherInitializationService.class);
 	private final List<TaskPlatform> taskPlatforms;
 	private LauncherRepository launcherRepository;
+	private final DeployerConfigurationMetadataResolver resolver;
+	private static final String KEY_PREFIX = "spring.cloud.deployer.";
 
-	public LauncherInitializationService(LauncherRepository launcherRepository, List<TaskPlatform> taskPlatforms) {
+	public LauncherInitializationService(LauncherRepository launcherRepository, List<TaskPlatform> taskPlatforms,
+			DeployerConfigurationMetadataResolver resolver) {
 		this.launcherRepository = launcherRepository;
 		this.taskPlatforms = taskPlatforms;
+		this.resolver = resolver;
 	}
 
 	@EventListener
 	@Transactional
 	public void initialize(ApplicationReadyEvent event) {
+		List<ConfigurationMetadataProperty> metadataProperties = this.resolver.resolve();
 		this.taskPlatforms.forEach(platform -> {
 			platform.getLaunchers().forEach(launcher -> {
+				List<ConfigurationMetadataPropertyEntity> options = createMetadataPropertyEntities(metadataProperties,
+						launcher.getType());
+				launcher.setOptions(options);
 				this.launcherRepository.save(launcher);
 				logger.info(String.format(
 						"Added '%s' platform account '%s' into Task Launcher repository.",
@@ -55,5 +66,14 @@ public class LauncherInitializationService {
 						launcher.getName()));
 			});
 		});
+	}
+
+	private List<ConfigurationMetadataPropertyEntity> createMetadataPropertyEntities(
+			List<ConfigurationMetadataProperty> metadataProperties, String type) {
+		String prefix = KEY_PREFIX + type.toLowerCase();
+		return metadataProperties.stream()
+			.filter(p -> p.getId().startsWith(prefix))
+			.map(ConfigurationMetadataPropertyEntity::new)
+			.collect(Collectors.toList());
 	}
 }

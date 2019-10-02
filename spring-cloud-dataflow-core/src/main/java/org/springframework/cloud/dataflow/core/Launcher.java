@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 the original author or authors.
+ * Copyright 2018-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,6 +14,9 @@
  * limitations under the License.
  */
 package org.springframework.cloud.dataflow.core;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
@@ -36,6 +39,8 @@ public class Launcher {
 	private String type;
 
 	private String description;
+
+	private List<ConfigurationMetadataPropertyEntity> options = new ArrayList<>();
 
 	@JsonIgnore
 	private TaskLauncher taskLauncher;
@@ -103,6 +108,14 @@ public class Launcher {
 
 	public void setDescription(String description) {
 		this.description = description;
+	}
+
+	public List<ConfigurationMetadataPropertyEntity> getOptions() {
+		return options;
+	}
+
+	public void setOptions(List<ConfigurationMetadataPropertyEntity> options) {
+		this.options = options;
 	}
 
 	@Override

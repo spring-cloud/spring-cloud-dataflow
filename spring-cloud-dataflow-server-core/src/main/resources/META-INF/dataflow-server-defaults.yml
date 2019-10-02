@@ -1,7 +1,7 @@
 management:
   endpoints:
     web:
-      base-path: /management  
+      base-path: /management
   security:
     roles: MANAGE
 logging:
@@ -68,6 +68,19 @@ spring:
             checksum-sha256-url: "{repository}/org/springframework/cloud/spring-cloud-dataflow-shell/{version}/spring-cloud-dataflow-shell-{version}.jar.sha256"
       task:
         scheduler-task-launcher-url: "maven://org.springframework.cloud:spring-cloud-dataflow-scheduler-task-launcher:@project.version@"
+        deployer-properties:
+          group-excludes:
+            - spring.cloud.deployer.kubernetes.fabric8
+          property-excludes:
+            - spring.cloud.deployer.local.maximum-concurrent-tasks
+            - spring.cloud.deployer.kubernetes.maximum-concurrent-tasks
+            - spring.cloud.deployer.cloudfoundry.maximum-concurrent-tasks
+            - spring.cloud.deployer.cloudfoundry.org
+            - spring.cloud.deployer.cloudfoundry.space
+            - spring.cloud.deployer.cloudfoundry.url
+            - spring.cloud.deployer.cloudfoundry.username
+            - spring.cloud.deployer.cloudfoundry.password
+            - spring.cloud.deployer.cloudfoundry.skip-ssl-validation
       security:
         authorization:
           enabled: true

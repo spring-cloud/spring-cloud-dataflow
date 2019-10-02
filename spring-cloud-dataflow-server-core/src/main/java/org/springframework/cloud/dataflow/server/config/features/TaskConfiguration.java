@@ -44,6 +44,7 @@ import org.springframework.cloud.dataflow.server.repository.DataflowTaskExecutio
 import org.springframework.cloud.dataflow.server.repository.DataflowTaskExecutionMetadataDao;
 import org.springframework.cloud.dataflow.server.repository.TaskDefinitionRepository;
 import org.springframework.cloud.dataflow.server.repository.TaskDeploymentRepository;
+import org.springframework.cloud.dataflow.server.service.DeployerConfigurationMetadataResolver;
 import org.springframework.cloud.dataflow.server.service.LauncherInitializationService;
 import org.springframework.cloud.dataflow.server.service.SchedulerService;
 import org.springframework.cloud.dataflow.server.service.TaskDeleteService;
@@ -100,10 +101,17 @@ public class TaskConfiguration {
 	private String dataflowServerUri;
 
 	@Bean
+	public DeployerConfigurationMetadataResolver deployerConfigurationMetadataResolver(
+			TaskConfigurationProperties taskConfigurationProperties) {
+		return new DeployerConfigurationMetadataResolver(taskConfigurationProperties.getDeployerProperties());
+	}
+
+	@Bean
 	public LauncherInitializationService launcherInitializationService(
 			LauncherRepository launcherRepository,
-			List<TaskPlatform> platforms) {
-		return new LauncherInitializationService(launcherRepository, platforms);
+			List<TaskPlatform> platforms,
+			DeployerConfigurationMetadataResolver resolver) {
+		return new LauncherInitializationService(launcherRepository, platforms, resolver);
 	}
 
 	/**
