@@ -29,6 +29,9 @@ import org.springframework.cloud.dataflow.server.db.migration.SqlCommandsRunner;
  *
  * @author Daniel Serleg
  * @author Ilayaperumal Gopinathan
+ * @author Michael Minella
+ *
+ * @since 2.3
  */
 public class V2__Add_Descriptions_OriginalDefinition extends BaseJavaMigration {
 
@@ -41,6 +44,18 @@ public class V2__Add_Descriptions_OriginalDefinition extends BaseJavaMigration {
 
 	public final static String UPDATE_STREAM_DEFINITION_TABLE_ORIG_DEF = "update stream_definitions set original_definition=definition";
 
+	public final static String CREATE_TASK_METADATA_TABLE =
+			"CREATE TABLE task_execution_metadata (\n" +
+					"    id int8 NOT NULL,\n" +
+					"    task_execution_id int8 NOT NULL,\n" +
+					"    task_execution_manifest TEXT,\n" +
+					"    primary key (id),\n" +
+					"    CONSTRAINT TASK_METADATA_FK FOREIGN KEY (TASK_EXECUTION_ID)\n" +
+					"    REFERENCES TASK_EXECUTION(TASK_EXECUTION_ID)\n" +
+					")";
+
+	private final static String CREATE_TASK_METADATA_SEQUENCE =
+			"CREATE SEQUENCE task_execution_metadata_seq MAXVALUE 9223372036854775807 NOCYCLE";
 
 	private final SqlCommandsRunner runner = new SqlCommandsRunner();
 
@@ -50,7 +65,8 @@ public class V2__Add_Descriptions_OriginalDefinition extends BaseJavaMigration {
 				SqlCommand.from(ALTER_STREAM_DEFINITION_TABLE_DESC),
 				SqlCommand.from(ALTER_STREAM_DEFINITION_TABLE_ORIG_DEF),
 				SqlCommand.from(ALTER_TASK_DEFINITION_TABLE),
-				SqlCommand.from(UPDATE_STREAM_DEFINITION_TABLE_ORIG_DEF)));
-
+				SqlCommand.from(UPDATE_STREAM_DEFINITION_TABLE_ORIG_DEF),
+				SqlCommand.from(CREATE_TASK_METADATA_TABLE),
+				SqlCommand.from(CREATE_TASK_METADATA_SEQUENCE)));
 	}
 }
