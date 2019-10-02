@@ -1,0 +1,11 @@
+# $ docker run --name test-mysql -d -p 3306:3306 -e MYSQL_ROOT_PASSWORD=spring -e MYSQL_USER=spring -e MYSQL_PASSWORD=spring -e MYSQL_DATABASE=dataflow mysql:5.6
+# $ docker run --name test-mysql -d -p 3306:3306 -e MYSQL_ROOT_PASSWORD=spring -e MYSQL_USER=spring -e MYSQL_PASSWORD=spring -e MYSQL_DATABASE=dataflow mysql:5.7
+# $ docker stop test-mysql
+# $ docker rm test-mysql
+# $ docker exec -it test-mysql mysql -h127.0.0.1 -P3306 -uspring -pspring dataflow
+spring:
+  datasource:
+    url: jdbc:mariadb://localhost:3306/dataflow
+    username: spring
+    password: spring
+    driverClassName: org.mariadb.jdbc.Driver
