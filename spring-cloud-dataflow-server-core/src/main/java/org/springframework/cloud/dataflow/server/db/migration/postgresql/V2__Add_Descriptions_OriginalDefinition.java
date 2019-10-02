@@ -55,7 +55,7 @@ public class V2__Add_Descriptions_OriginalDefinition extends BaseJavaMigration {
 					")";
 
 	private final static String CREATE_TASK_METADATA_SEQUENCE =
-			"CREATE SEQUENCE task_execution_metadata_seq MAXVALUE 9223372036854775807 NOCYCLE";
+			"CREATE SEQUENCE task_execution_metadata_seq MAXVALUE 9223372036854775807 NO CYCLE";
 
 	private final SqlCommandsRunner runner = new SqlCommandsRunner();
 

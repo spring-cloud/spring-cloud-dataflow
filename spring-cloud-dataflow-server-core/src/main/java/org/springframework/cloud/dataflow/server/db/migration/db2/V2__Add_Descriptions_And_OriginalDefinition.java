@@ -33,7 +33,7 @@ import org.springframework.cloud.dataflow.server.db.migration.SqlCommandsRunner;
  *
  * @since 2.3
  */
-public class V2_Add_Descriptions_And_OriginalDefinition extends BaseJavaMigration {
+public class V2__Add_Descriptions_And_OriginalDefinition extends BaseJavaMigration {
 
 	public final static String ALTER_STREAM_DEFINITION_TABLE_DESC = "alter table stream_definitions add description varchar(255)";
 	public final static String ALTER_STREAM_DEFINITION_TABLE_ORIG_DEF = "alter table stream_definitions add original_definition clob(255)";
@@ -66,6 +66,5 @@ public class V2_Add_Descriptions_And_OriginalDefinition extends BaseJavaMigratio
 				SqlCommand.from(UPDATE_STREAM_DEFINITION_TABLE_ORIG_DEF),
 				SqlCommand.from(CREATE_TASK_METADATA_TABLE),
 				SqlCommand.from(CREATE_TASK_METADATA_SEQUENCE)));
-		;
 	}
 }
