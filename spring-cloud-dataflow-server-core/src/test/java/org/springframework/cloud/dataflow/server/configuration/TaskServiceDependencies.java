@@ -171,7 +171,7 @@ public class TaskServiceDependencies extends WebMvcConfigurationSupport {
 			throw new IllegalStateException(e);
 		}
 		return new JdbcDataflowTaskExecutionMetadataDao(dataSource, incrementerFactory.getIncrementer(databaseType,
-				"task_execution_metadata_seq"), context);
+				"task_execution_metadata_seq"));
 	}
 
 	@Bean

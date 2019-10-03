@@ -87,6 +87,28 @@ public class SqlPagingQueryUtils {
 		}
 	}
 
+
+	/**
+	 * Generate SQL query string using a TOP clause
+	 *
+	 * @param provider {@link org.springframework.batch.item.database.support.AbstractSqlPagingQueryProvider} providing the
+	 * implementation specifics
+	 * @param remainingPageQuery is this query for the remaining pages (true) as
+	 * opposed to the first page (false)
+	 * @param topClause the implementation specific top clause to be used
+	 * @return the generated query
+	 */
+	public static String generateTopSqlQuery(AbstractSqlPagingQueryProvider provider, boolean remainingPageQuery,
+			String topClause) {
+		StringBuilder sql = new StringBuilder();
+		sql.append("SELECT ").append(topClause).append(" ").append(provider.getSelectClause());
+		sql.append(" FROM ").append(provider.getFromClause());
+		buildWhereClause(provider, remainingPageQuery, sql);
+		sql.append(" ORDER BY ").append(buildSortClause(provider));
+
+		return sql.toString();
+	}
+
 	/**
 	 * Generates ORDER BY attributes based on the sort keys.
 	 *
