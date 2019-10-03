@@ -28,21 +28,10 @@ public class SqlServerPagingQueryProvider extends AbstractSqlPagingQueryProvider
 
 	@Override
 	public String getPageQuery(Pageable pageable) {
-		long offset = pageable.getOffset() + 1;
-		return generateRowNumSqlQueryWithNesting(getSelectClause(), false,
-				"TMP_ROW_NUM >= " + offset + " AND TMP_ROW_NUM < " + (offset + pageable.getPageSize()));
+		return SqlPagingQueryUtils.generateTopSqlQuery(this, false, buildTopClause(pageable.getPageSize()));
 	}
 
-	private String generateRowNumSqlQueryWithNesting(String selectClause, boolean remainingPageQuery,
-			String rowNumClause) {
-		StringBuilder sql = new StringBuilder();
-		sql.append("SELECT ").append(selectClause).append(" FROM (SELECT ").append(selectClause).append(", ")
-				.append("ROW_NUMBER() OVER (ORDER BY ").append(SqlPagingQueryUtils.buildSortClause(this))
-				.append(") AS TMP_ROW_NUM ").append(" FROM ").append(getFromClause());
-		SqlPagingQueryUtils.buildWhereClause(this, remainingPageQuery, sql);
-		sql.append(") SCDF_PAGE ");
-		sql.append(" WHERE ").append(rowNumClause);
-		sql.append(" ORDER BY ").append(SqlPagingQueryUtils.buildSortClause(this));
-		return sql.toString();
+	private String buildTopClause(int pageSize) {
+		return new StringBuilder().append("TOP ").append(pageSize).toString();
 	}
 }
