@@ -19,6 +19,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.springframework.cloud.dataflow.core.TaskManifest;
+
 /**
  * Provides Task related services.
  *
@@ -77,4 +79,11 @@ public interface TaskExecutionService {
 	 * @param platform The name of the platform where the tasks are executing.
 	 */
 	void stopTaskExecution(Set<Long> ids, String platform);
+
+	/**
+	 * Retrieve the TaskManifest for the execution id provided
+	 * @param id task exectution id
+	 * @return {@code TaskManifest} or null if not found.
+	 */
+	TaskManifest findTaskManifestById(Long id);
 }

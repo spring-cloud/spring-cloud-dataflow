@@ -20,6 +20,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.batch.core.JobExecution;
 import org.springframework.cloud.dataflow.rest.job.TaskJobExecutionRel;
@@ -94,6 +95,18 @@ public class TaskExecutionResource extends RepresentationModel<TaskExecutionReso
 	 */
 	private Long parentExecutionId;
 
+	/**
+	 * The resource that defines the task.
+	 */
+	private String resourceUrl;
+
+	/**
+	 * The application arguments, typically set via SPRING_APPLICATION_JSON env-var on deployment
+	 */
+	private Map<String, String> appProperties;
+
+	private Map<String, String> deploymentProperties;
+
 	public TaskExecutionResource() {
 		arguments = new ArrayList<>();
 	}
@@ -123,6 +136,11 @@ public class TaskExecutionResource extends RepresentationModel<TaskExecutionReso
 		else {
 			this.jobExecutionIds = Collections
 					.unmodifiableList(new ArrayList<>(taskJobExecutionRel.getJobExecutionIds()));
+		}
+		if (taskJobExecutionRel.getTaskManifest() != null) {
+			this.resourceUrl = taskJobExecutionRel.getTaskManifest().getTaskDeploymentRequest().getResource().toString();
+			this.appProperties = taskJobExecutionRel.getTaskManifest().getTaskDeploymentRequest().getDefinition().getProperties();
+			this.deploymentProperties = taskJobExecutionRel.getTaskManifest().getTaskDeploymentRequest().getDeploymentProperties();
 		}
 	}
 
@@ -191,6 +209,18 @@ public class TaskExecutionResource extends RepresentationModel<TaskExecutionReso
 
 	public Long getParentExecutionId() {
 		return parentExecutionId;
+	}
+
+	public String getResourceUrl() {
+		return resourceUrl;
+	}
+
+	public Map<String, String> getAppProperties() {
+		return appProperties;
+	}
+
+	public Map<String, String> getDeploymentProperties() {
+		return deploymentProperties;
 	}
 
 	/**

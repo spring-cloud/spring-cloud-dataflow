@@ -285,24 +285,27 @@ public class TaskCommandTests extends AbstractShellIntegrationTest {
 		assertEquals("Number of columns returned was not expected", 2, table.getModel().getColumnCount());
 		verifyTableValue(table, 0, 0, "Key ");
 		verifyTableValue(table, 1, 0, "Id ");
-		verifyTableValue(table, 2, 0, "Name ");
-		verifyTableValue(table, 3, 0, "Arguments ");
-		verifyTableValue(table, 4, 0, "Job Execution Ids ");
-		verifyTableValue(table, 5, 0, "Start Time ");
-		verifyTableValue(table, 6, 0, "End Time ");
-		verifyTableValue(table, 7, 0, "Exit Code ");
-		verifyTableValue(table, 8, 0, "Exit Message ");
-		verifyTableValue(table, 9, 0, "Error Message ");
-		verifyTableValue(table, 10, 0, "External Execution Id ");
+		verifyTableValue(table, 2, 0, "Resource URL ");
+		verifyTableValue(table, 3, 0, "Name ");
+		verifyTableValue(table, 4, 0, "CLI Arguments ");
+		verifyTableValue(table, 5, 0, "App Arguments ");
+		verifyTableValue(table, 6, 0, "Deployment Properties ");
+		verifyTableValue(table, 7, 0, "Job Execution Ids ");
+		verifyTableValue(table, 8, 0, "Start Time ");
+		verifyTableValue(table, 9, 0, "End Time ");
+		verifyTableValue(table, 10, 0, "Exit Code ");
+		verifyTableValue(table, 11, 0, "Exit Message ");
+		verifyTableValue(table, 12, 0, "Error Message ");
+		verifyTableValue(table, 13, 0, "External Execution Id ");
 
 		verifyTableValue(table, 1, 1, TASK_EXECUTION_ID);
-		verifyTableValue(table, 2, 1, TASK_NAME);
-		verifyTableValue(table, 5, 1, startTime);
-		verifyTableValue(table, 6, 1, endTime);
-		verifyTableValue(table, 7, 1, EXIT_CODE);
-		verifyTableValue(table, 8, 1, EXIT_MESSAGE);
-		verifyTableValue(table, 9, 1, ERROR_MESSAGE);
-		verifyTableValue(table, 10, 1, EXTERNAL_EXECUTION_ID);
+		verifyTableValue(table, 3, 1, TASK_NAME);
+		verifyTableValue(table, 8, 1, startTime);
+		verifyTableValue(table, 9, 1, endTime);
+		verifyTableValue(table, 10, 1, EXIT_CODE);
+		verifyTableValue(table, 11, 1, EXIT_MESSAGE);
+		verifyTableValue(table, 12, 1, ERROR_MESSAGE);
+		verifyTableValue(table, 13, 1, EXTERNAL_EXECUTION_ID);
 	}
 
 	@Test

@@ -304,8 +304,11 @@ public class TaskCommands implements CommandMarker {
 
 		modelBuilder.addRow().addValue("Key ").addValue("Value ");
 		modelBuilder.addRow().addValue("Id ").addValue(taskExecutionResource.getExecutionId());
+		modelBuilder.addRow().addValue("Resource URL ").addValue(taskExecutionResource.getResourceUrl());
 		modelBuilder.addRow().addValue("Name ").addValue(taskExecutionResource.getTaskName());
-		modelBuilder.addRow().addValue("Arguments ").addValue(taskExecutionResource.getArguments());
+		modelBuilder.addRow().addValue("CLI Arguments ").addValue(taskExecutionResource.getArguments());
+		modelBuilder.addRow().addValue("App Arguments ").addValue(taskExecutionResource.getAppProperties());
+		modelBuilder.addRow().addValue("Deployment Properties ").addValue(taskExecutionResource.getDeploymentProperties());
 		modelBuilder.addRow().addValue("Job Execution Ids ").addValue(taskExecutionResource.getJobExecutionIds());
 		modelBuilder.addRow().addValue("Start Time ").addValue(taskExecutionResource.getStartTime());
 		modelBuilder.addRow().addValue("End Time ").addValue(taskExecutionResource.getEndTime());

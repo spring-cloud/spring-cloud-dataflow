@@ -45,6 +45,13 @@ public interface DataflowTaskExecutionMetadataDao {
 	TaskManifest getLatestManifest(String taskName);
 
 	/**
+	 * Returns the manifest for the given execution id.
+	 * @param id execution id
+	 * @return {@code TaskManifest}
+	 */
+	TaskManifest findManifestById(Long id);
+
+	/**
 	 * Deletes the task manifest records associated with the collection of task execution ids provided.
 	 *
 	 * @param taskExecutionIds collection of ids to delete the manifests for
