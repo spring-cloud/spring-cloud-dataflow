@@ -78,8 +78,6 @@ public class SimpleJobServiceFactoryBean implements FactoryBean<JobService>, Ini
 
 	private JobLauncher jobLauncher;
 
-	private ListableJobLocator jobLocator;
-
 	private JobExplorer jobExplorer;
 
 	private ExecutionContextSerializer serializer;
@@ -175,14 +173,6 @@ public class SimpleJobServiceFactoryBean implements FactoryBean<JobService>, Ini
 	}
 
 	/**
-	 * A registry that can be used to locate jobs to run.
-	 * @param jobLocator a {@link JobLocator}
-	 */
-	public void setJobLocator(ListableJobLocator jobLocator) {
-		this.jobLocator = jobLocator;
-	}
-
-	/**
 	 * A custom implementation of the {@link ExecutionContextSerializer}.
 	 *
 	 * @param serializer
@@ -195,10 +185,8 @@ public class SimpleJobServiceFactoryBean implements FactoryBean<JobService>, Ini
 
 	@Override
 	public void afterPropertiesSet() throws Exception {
-
 		Assert.notNull(dataSource, "DataSource must not be null.");
 		Assert.notNull(jobRepository, "JobRepository must not be null.");
-		Assert.notNull(jobLocator, "JobLocator must not be null.");
 		Assert.notNull(jobLauncher, "JobLauncher must not be null.");
 		Assert.notNull(jobExplorer, "JobExplorer must not be null.");
 
@@ -296,7 +284,7 @@ public class SimpleJobServiceFactoryBean implements FactoryBean<JobService>, Ini
 		JsrJobOperator jsrJobOperator = new JsrJobOperator(jobExplorer, jobRepository, jobParametersConverter, transactionManager);
 		jsrJobOperator.afterPropertiesSet();
 		return new SimpleJobService(createJobInstanceDao(), createJobExecutionDao(), createStepExecutionDao(),
-				jobRepository, jobLauncher, jobLocator, createExecutionContextDao(), jsrJobOperator);
+				jobRepository, createExecutionContextDao(), jsrJobOperator);
 	}
 
 	/**

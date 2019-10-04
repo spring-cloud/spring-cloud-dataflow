@@ -49,17 +49,6 @@ import org.springframework.batch.core.step.tasklet.Tasklet;
 public interface JobService {
 
 	/**
-	 * Convenience method to determine if a job is available for launching. Job
-	 * names returned from {@link #listJobs(int, int)} might be in the
-	 * repository, but not be launchable if the host application has no
-	 * configuration for them.
-	 * 
-	 * @param jobName the name of the job
-	 * @return true if the job is available for launching
-	 */
-	boolean isLaunchable(String jobName);
-
-	/**
 	 * Launch a job with the parameters provided. If an instance with the
 	 * parameters provided has already failed (and is not abandoned) it will be
 	 * restarted.
@@ -351,14 +340,6 @@ public interface JobService {
 	 * @return the number of executions affected
 	 */
 	int stopAll();
-
-	/**
-	 * Check if a job has a {@link JobParametersIncrementer}.
-	 * 
-	 * @param jobName the job name
-	 * @return true if the job exists and has an incrementer
-	 */
-	boolean isIncrementable(String jobName);
 
 	/**
 	 * Get the names of the steps in a job (or a historical list of recent

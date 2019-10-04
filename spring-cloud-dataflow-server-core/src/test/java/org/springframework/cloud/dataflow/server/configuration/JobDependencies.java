@@ -130,7 +130,8 @@ import static org.mockito.Mockito.mock;
 		"org.springframework.cloud.dataflow.audit.repository"
 })
 @EnableJpaAuditing
-@EnableConfigurationProperties({ DockerValidatorProperties.class, TaskConfigurationProperties.class, TaskProperties.class })
+@EnableConfigurationProperties({ DockerValidatorProperties.class, TaskConfigurationProperties.class,
+		TaskProperties.class })
 @EnableMapRepositories(basePackages = "org.springframework.cloud.dataflow.server.job")
 public class JobDependencies {
 
@@ -289,7 +290,6 @@ public class JobDependencies {
 		factoryBean.setDataSource(dataSource);
 		try {
 			factoryBean.setJobRepository(repositoryFactoryBean.getObject());
-			factoryBean.setJobLocator(new MapJobRegistry());
 			factoryBean.setJobLauncher(new SimpleJobLauncher());
 			factoryBean.setJobExplorer(jobExplorer);
 			factoryBean.setTransactionManager(dataSourceTransactionManager);
@@ -362,5 +362,4 @@ public class JobDependencies {
 	public TaskLauncher taskLauncher() {
 		return mock(TaskLauncher.class);
 	}
-
 }

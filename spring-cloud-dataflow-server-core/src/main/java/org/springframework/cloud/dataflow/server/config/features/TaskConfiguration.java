@@ -185,7 +185,6 @@ public class TaskConfiguration {
 		SimpleJobServiceFactoryBean factoryBean = new SimpleJobServiceFactoryBean();
 		factoryBean.setDataSource(dataSource);
 		factoryBean.setJobRepository(repositoryFactoryBean.getObject());
-		factoryBean.setJobLocator(new MapJobRegistry());
 		factoryBean.setJobLauncher(new SimpleJobLauncher());
 		factoryBean.setDataSource(dataSource);
 		factoryBean.setJobExplorer(jobExplorer);
