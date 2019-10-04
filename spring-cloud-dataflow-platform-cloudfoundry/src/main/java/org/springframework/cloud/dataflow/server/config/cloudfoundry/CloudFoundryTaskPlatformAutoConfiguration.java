@@ -24,7 +24,7 @@ import org.springframework.cloud.dataflow.core.TaskPlatform;
 import org.springframework.cloud.dataflow.server.config.CloudProfileProvider;
 import org.springframework.cloud.dataflow.server.config.features.ConditionalOnTasksEnabled;
 import org.springframework.cloud.dataflow.server.config.features.SchedulerConfiguration.SchedulerConfigurationPropertyChecker;
-import org.springframework.cloud.deployer.scheduler.spi.cloudfoundry.CloudFoundrySchedulerProperties;
+import org.springframework.cloud.deployer.spi.scheduler.cloudfoundry.CloudFoundrySchedulerProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Conditional;
 import org.springframework.context.annotation.Configuration;

@@ -12,3 +12,19 @@ scrape_configs:
       - files:
           - /etc/prometheus/targets.json
         refresh_interval: 30s
+
+  - job_name: 'local-rsocket-proxy'
+
+    scrape_interval: 10s
+    scrape_timeout: 9s
+    metrics_path: '/metrics/proxy'
+    static_configs:
+      - targets: ['prometheus-rsocket-proxy:9096']
+
+  - job_name: 'local-rsocket-connected'
+
+    scrape_interval: 10s
+    scrape_timeout: 9s
+    metrics_path: '/metrics/connected'
+    static_configs:
+      - targets: ['prometheus-rsocket-proxy:9096']

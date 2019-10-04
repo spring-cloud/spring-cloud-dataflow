@@ -1,0 +1,37 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: prometheus-proxy
+  labels:
+    app: prometheus-proxy
+spec:
+#  replicas: 3
+  selector:
+    matchLabels:
+      app: prometheus-proxy
+  template:
+    metadata:
+      labels:
+        app: prometheus-proxy
+    spec:
+      serviceAccountName: prometheus-proxy
+      containers:
+        - name: prometheus-proxy
+          image: micrometermetrics/prometheus-rsocket-proxy:latest
+          imagePullPolicy: Always
+          ports:
+            - name: scrape
+              containerPort: 8080
+            - name: rsocket
+              containerPort: 7001
+          resources:
+            limits:
+              cpu: 1.0
+              memory: 2048Mi
+            requests:
+              cpu: 0.5
+              memory: 1024Mi
+      securityContext:
+        fsGroup: 2000
+        runAsNonRoot: true
+        runAsUser: 1000

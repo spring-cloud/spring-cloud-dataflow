@@ -203,9 +203,10 @@ public class DefaultStreamService implements StreamService {
 			updatedStreamAppDefinitions.addLast(appDefinitionBuilder.build(streamDefinition.getName()));
 		}
 
-		String dslText = new StreamDefinitionToDslConverter().toDsl(updatedStreamAppDefinitions);
+		String updatedDslText = new StreamDefinitionToDslConverter().toDsl(updatedStreamAppDefinitions);
 
-		StreamDefinition updatedStreamDefinition = new StreamDefinition(streamName, dslText);
+		StreamDefinition updatedStreamDefinition = new StreamDefinition(streamName, updatedDslText,
+				streamDefinition.getOriginalDslText(), streamDefinition.getDescription());
 		logger.debug("Updated StreamDefinition: " + updatedStreamDefinition);
 
 		// TODO consider adding an explicit UPDATE method to the streamDefRepository
@@ -396,7 +397,7 @@ public class DefaultStreamService implements StreamService {
 
 	public StreamDefinition createStreamDefinition(String streamName, String dsl, String description) {
 		try {
-			return new StreamDefinition(streamName, dsl, description);
+			return new StreamDefinition(streamName, dsl, dsl, description);
 		}
 		catch (ParseException ex) {
 			throw new InvalidStreamDefinitionException(ex.getMessage());

@@ -19,6 +19,16 @@
             "mainClass": "org.springframework.cloud.dataflow.server.single.DataFlowServerApplication",
             "projectName": "spring-cloud-dataflow-server",
             "args": "--spring.config.additional-location=src/config/scdf-postgres.yml"
+        },
+        {
+            "type": "java",
+            "name": "SCDF mysql",
+            "request": "launch",
+            "cwd": "${workspaceFolder}",
+            "console": "internalConsole",
+            "mainClass": "org.springframework.cloud.dataflow.server.single.DataFlowServerApplication",
+            "projectName": "spring-cloud-dataflow-server",
+            "args": "--spring.config.additional-location=src/config/scdf-mysql.yml"
         }
     ]
 }

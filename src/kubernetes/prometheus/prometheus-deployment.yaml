@@ -15,12 +15,14 @@ spec:
     spec:
       containers:
         - name: prometheus
-          image: prom/prometheus:v2.6.0
+          image: prom/prometheus:v2.12.0
           args:
             - "--config.file=/etc/prometheus/prometheus.yml"
             - "--storage.tsdb.path=/prometheus/"
+            - "--web.enable-lifecycle"
           ports:
-            - containerPort: 9090
+            - name: prometheus
+              containerPort: 9090
           volumeMounts:
             - name: prometheus-config-volume
               mountPath: /etc/prometheus/

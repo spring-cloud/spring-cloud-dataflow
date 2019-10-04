@@ -70,6 +70,16 @@ public class StreamCommandTests extends AbstractShellIntegrationTest {
 		logger.info("Starting Stream Test for TickTock");
 		Thread.sleep(2000);
 		String streamName = generateUniqueStreamOrTaskName();
+		Info info = new Info();
+		Status status = new Status();
+		status.setStatusCode(StatusCode.UNKNOWN);
+		status.setPlatformStatus(null);
+		info.setStatus(status);
+
+		when(skipperClient.status(ArgumentMatchers.anyString())).thenReturn(info);
+		AppDeployer appDeployer = applicationContext.getBean(AppDeployer.class);
+		Deployer deployer = new Deployer("testDeployer", "testType", appDeployer);
+		when(skipperClient.listDeployers()).thenReturn(new CollectionModel<>(Arrays.asList(deployer), new Link[0]));
 		stream().create(streamName, "time | log");
 	}
 
