@@ -64,8 +64,6 @@ public class JobTemplate implements JobOperations {
 
 	private final Link stepExecutionProgressLink;
 
-	private final Link stepExecutionLink;
-
 	JobTemplate(RestTemplate restTemplate, RepresentationModel<?> resources) {
 		Assert.notNull(resources, "URI CollectionModel must not be be null");
 		Assert.notNull(restTemplate, "RestTemplate must not be null");
@@ -88,21 +86,27 @@ public class JobTemplate implements JobOperations {
 		this.instanceByNameLink = resources.getLink(INSTANCE_RELATION_BY_NAME).get();
 		this.stepExecutionsLink = resources.getLink(STEP_EXECUTION_RELATION_BY_ID).get();
 		this.stepExecutionProgressLink = resources.getLink(STEP_EXECUTION_PROGRESS_RELATION_BY_ID).get();
-		this.stepExecutionLink = resources.getLink(STEP_EXECUTION_PROGRESS_RELATION_BY_ID).get();
-
 	}
 
 	@Override
 	public PagedModel<JobExecutionResource> executionList() {
-		String uriTemplate = executionsLink.getHref().toString();
+		String uriTemplate = executionsLink.getHref();
 		uriTemplate = uriTemplate + "?size=2000";
 
 		return restTemplate.getForObject(uriTemplate, JobExecutionResource.Page.class);
 	}
 
 	@Override
+	public void executionRestart(long id) {
+		String uriTemplate = executionLink.expand(id).getHref();
+		uriTemplate = uriTemplate + "?restart=true";
+
+		restTemplate.put(uriTemplate, null);
+	}
+
+	@Override
 	public PagedModel<JobExecutionThinResource> executionThinList() {
-		String uriTemplate = executionsLink.getHref().toString();
+		String uriTemplate = executionsLink.getHref();
 		uriTemplate = uriTemplate + "?size=2000";
 
 		return restTemplate.getForObject(uriTemplate, JobExecutionThinResource.Page.class);
