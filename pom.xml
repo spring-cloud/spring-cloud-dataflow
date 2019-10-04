@@ -72,7 +72,7 @@
 
 		<spring-cloud-skipper.version>2.2.0.M2</spring-cloud-skipper.version>
 
-		<spring-cloud-task.version>2.2.0.BUILD-SNAPSHOT</spring-cloud-task.version>
+		<spring-cloud-task.version>2.2.0.M3</spring-cloud-task.version>
 
 		<spring-security-oauth2-autoconfigure.version>2.2.0.RC1</spring-security-oauth2-autoconfigure.version>
 
