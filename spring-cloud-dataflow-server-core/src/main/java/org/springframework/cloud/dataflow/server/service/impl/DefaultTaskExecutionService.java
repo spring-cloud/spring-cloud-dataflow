@@ -536,7 +536,7 @@ public class DefaultTaskExecutionService implements TaskExecutionService {
 	@Override
 	public TaskManifest findTaskManifestById(Long id) {
 		TaskExecution taskExecution = this.taskExplorer.getTaskExecution(id);
-		return this.dataflowTaskExecutionMetadataDao.getLatestManifest(taskExecution.getTaskName());
+		return this.dataflowTaskExecutionMetadataDao.findManifestById(taskExecution.getExecutionId());
 	}
 
 	private Set<TaskExecution> getValidStopExecutions(Set<Long> ids) {
