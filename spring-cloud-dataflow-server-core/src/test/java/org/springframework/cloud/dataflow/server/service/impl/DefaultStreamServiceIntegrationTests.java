@@ -208,7 +208,7 @@ public class DefaultStreamServiceIntegrationTests {
 
 		// Create stream
 		StreamDefinition streamDefinition = new StreamDefinition("ticktock",
-				"time --fixed-delay=100 | log --level=DEBUG");
+				"time --fixed-delay=100 | log --level=DEBUG", "time | log", "demo");
 		this.streamDefinitionRepository.deleteById(streamDefinition.getName());
 		this.streamDefinitionRepository.save(streamDefinition);
 
@@ -219,6 +219,7 @@ public class DefaultStreamServiceIntegrationTests {
 		StreamDefinition streamDefinitionBeforeDeploy = this.streamDefinitionRepository.findById("ticktock").get();
 		assertThat(streamDefinitionBeforeDeploy.getDslText())
 				.isEqualTo("time --fixed-delay=100 | log --level=DEBUG");
+		assertThat(streamDefinitionBeforeDeploy.getDescription()).isEqualTo("demo");
 
 		String expectedReleaseManifest = StreamUtils.copyToString(
 				TestResourceUtils.qualifiedResource(getClass(), "upgradeManifest.yml").getInputStream(),
@@ -237,6 +238,8 @@ public class DefaultStreamServiceIntegrationTests {
 		StreamDefinition streamDefinitionAfterDeploy = this.streamDefinitionRepository.findById("ticktock").get();
 		assertThat(streamDefinitionAfterDeploy.getDslText())
 				.isEqualTo("time --trigger.fixed-delay=200 | log --log.level=INFO");
+		assertThat(streamDefinitionAfterDeploy.getOriginalDslText()).isEqualTo("time | log");
+		assertThat(streamDefinitionAfterDeploy.getDescription()).isEqualTo("demo");
 	}
 
 	@Test

@@ -16,6 +16,10 @@
 
 package org.springframework.cloud.dataflow.rest.resource;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import org.springframework.cloud.dataflow.core.ConfigurationMetadataPropertyEntity;
 import org.springframework.cloud.dataflow.core.Launcher;
 import org.springframework.hateoas.PagedModel;
 import org.springframework.hateoas.RepresentationModel;
@@ -31,6 +35,8 @@ public class LauncherResource extends RepresentationModel<LauncherResource> {
 
 	private String description;
 
+	private List<ConfigurationMetadataPropertyEntity> options = new ArrayList<>();
+
 	@SuppressWarnings("unused")
 	private LauncherResource() {
 	}
@@ -39,6 +45,7 @@ public class LauncherResource extends RepresentationModel<LauncherResource> {
 		this.name = launcher.getName();
 		this.type = launcher.getType();
 		this.description = launcher.getDescription();
+		this.options = launcher.getOptions();
 	}
 
 	public String getName() {
@@ -59,6 +66,14 @@ public class LauncherResource extends RepresentationModel<LauncherResource> {
 
 	public void setDescription(String description) {
 		this.description = description;
+	}
+
+	public List<ConfigurationMetadataPropertyEntity> getOptions() {
+		return options;
+	}
+
+	public void setOptions(List<ConfigurationMetadataPropertyEntity> options) {
+		this.options = options;
 	}
 
 	public static class Page extends PagedModel<LauncherResource> {

@@ -16,7 +16,11 @@
 
 package org.springframework.cloud.dataflow.server.service.impl;
 
+import java.io.IOException;
+import java.net.MalformedURLException;
 import java.net.URI;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
@@ -47,6 +51,7 @@ import org.springframework.cloud.dataflow.core.ApplicationType;
 import org.springframework.cloud.dataflow.core.Launcher;
 import org.springframework.cloud.dataflow.core.TaskDefinition;
 import org.springframework.cloud.dataflow.core.TaskDeployment;
+import org.springframework.cloud.dataflow.core.TaskManifest;
 import org.springframework.cloud.dataflow.core.TaskPlatform;
 import org.springframework.cloud.dataflow.core.TaskPlatformFactory;
 import org.springframework.cloud.dataflow.registry.service.AppRegistryService;
@@ -55,6 +60,7 @@ import org.springframework.cloud.dataflow.server.controller.InvalidCTRLaunchRequ
 import org.springframework.cloud.dataflow.server.controller.NoSuchAppException;
 import org.springframework.cloud.dataflow.server.job.LauncherRepository;
 import org.springframework.cloud.dataflow.server.repository.DataflowTaskExecutionDao;
+import org.springframework.cloud.dataflow.server.repository.DataflowTaskExecutionMetadataDao;
 import org.springframework.cloud.dataflow.server.repository.DuplicateTaskException;
 import org.springframework.cloud.dataflow.server.repository.NoSuchTaskDefinitionException;
 import org.springframework.cloud.dataflow.server.repository.NoSuchTaskExecutionException;
@@ -68,12 +74,14 @@ import org.springframework.cloud.dataflow.server.service.TaskExecutionService;
 import org.springframework.cloud.dataflow.server.service.TaskSaveService;
 import org.springframework.cloud.dataflow.server.service.TaskValidationService;
 import org.springframework.cloud.dataflow.server.service.ValidationStatus;
+import org.springframework.cloud.deployer.spi.core.AppDefinition;
 import org.springframework.cloud.deployer.spi.core.AppDeploymentRequest;
 import org.springframework.cloud.deployer.spi.task.TaskLauncher;
 import org.springframework.cloud.task.repository.TaskExecution;
 import org.springframework.cloud.task.repository.TaskExplorer;
 import org.springframework.cloud.task.repository.TaskRepository;
 import org.springframework.core.io.FileSystemResource;
+import org.springframework.core.io.FileUrlResource;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.provider.OAuth2Authentication;
@@ -81,6 +89,7 @@ import org.springframework.security.oauth2.provider.authentication.OAuth2Authent
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.test.util.ReflectionTestUtils;
 
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.core.Is.is;
@@ -95,6 +104,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.atLeast;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -173,6 +183,9 @@ public abstract class DefaultTaskExecutionServiceTests {
 	DataflowTaskExecutionDao dataflowTaskExecutionDao;
 
 	@Autowired
+	DataflowTaskExecutionMetadataDao dataflowTaskExecutionMetadataDao;
+
+	@Autowired
 	TaskConfigurationProperties taskConfigurationProperties;
 
 	@AutoConfigureTestDatabase(replace = Replace.ANY)
@@ -182,7 +195,7 @@ public abstract class DefaultTaskExecutionServiceTests {
 		DataSource dataSource;
 
 		@Before
-		public void setupMocks() {
+		public void setup() {
 			// not adding platform name as default as we want to check that this only one
 			// gets replaced
 			this.launcherRepository.save(new Launcher("fakeplatformname", "local", taskLauncher));
@@ -208,13 +221,198 @@ public abstract class DefaultTaskExecutionServiceTests {
 			assertNotNull("TaskDeployment createdOn field should not be null", taskDeployment.getCreatedOn());
 		}
 	}
+	@TestPropertySource(properties = { "spring.cloud.dataflow.task.maximum-concurrent-tasks=10" })
+	@AutoConfigureTestDatabase(replace = Replace.ANY)
+	public static class CICDTaskTests extends DefaultTaskExecutionServiceTests {
+
+		@Before
+		public void setup() {
+			this.launcherRepository.save(new Launcher("default", "local", taskLauncher));
+
+			taskDefinitionRepository.save(new TaskDefinition(TASK_NAME_ORIG, "demo"));
+			taskDefinitionRepository.findAll();
+		}
+
+		@Test(expected = IllegalStateException.class)
+		@DirtiesContext
+		public void testTaskLaunchRequestUnderUpgrade() {
+			Map<String, List<String>> tasksBeingUpgraded =
+					(Map<String, List<String>>) ReflectionTestUtils.getField(this.taskExecutionService, "tasksBeingUpgraded");
+
+			tasksBeingUpgraded.put("myTask", Arrays.asList("default"));
+
+			this.taskExecutionService.executeTask("myTask", Collections.emptyMap(), Collections.emptyList());
+		}
+
+		@Test
+		@DirtiesContext
+		public void testUpgradeDueToResourceChange() throws IOException {
+			TaskExecution myTask = this.taskRepository.createTaskExecution(TASK_NAME_ORIG);
+			TaskManifest manifest = new TaskManifest();
+			manifest.setPlatformName("default");
+			AppDeploymentRequest request = new AppDeploymentRequest(new AppDefinition("some-name", null),
+					new FileUrlResource("src/test/resources/apps"));
+			manifest.setTaskDeploymentRequest(request);
+
+			this.dataflowTaskExecutionMetadataDao.save(myTask, manifest);
+			this.taskRepository.startTaskExecution(myTask.getExecutionId(), TASK_NAME_ORIG, new Date(), new ArrayList<>(), null);
+			this.taskRepository.completeTaskExecution(myTask.getExecutionId(), 0, new Date(), null);
+
+			initializeSuccessfulRegistry(appRegistry);
+
+			when(taskLauncher.launch(any())).thenReturn("0");
+
+			this.taskExecutionService.executeTask(TASK_NAME_ORIG, new HashMap<>(), new LinkedList<>());
+
+			TaskManifest lastManifest = this.dataflowTaskExecutionMetadataDao.getLatestManifest(TASK_NAME_ORIG);
+			assertEquals("file:src/test/resources/apps/foo-task", lastManifest.getTaskDeploymentRequest().getResource().getURL().toString());
+			assertEquals("default", lastManifest.getPlatformName());
+			assertTrue(lastManifest.getSubTaskDeploymentRequests() == null);
+
+			verify(this.taskLauncher).destroy(TASK_NAME_ORIG);
+		}
+
+		@Test
+		@DirtiesContext
+		public void testRestoreAppPropertiesV2() throws IOException {
+			initializeSuccessfulRegistry(appRegistry);
+
+			when(taskLauncher.launch(any())).thenReturn("0", "1");
+
+			Map<String, String> properties = new HashMap<>(1);
+			properties.put("app.demo.foo", "bar");
+
+			long firstTaskExecutionId = this.taskExecutionService.executeTask(TASK_NAME_ORIG, properties, new LinkedList<>());
+			this.taskRepository.completeTaskExecution(firstTaskExecutionId, 0, new Date(), "all done");
+			this.taskExecutionService.executeTask(TASK_NAME_ORIG, Collections.emptyMap(), new LinkedList<>());
+
+			TaskManifest lastManifest = this.dataflowTaskExecutionMetadataDao.getLatestManifest(TASK_NAME_ORIG);
+
+			assertEquals("file:src/test/resources/apps/foo-task", lastManifest.getTaskDeploymentRequest().getResource().getURL().toString());
+			assertEquals("default", lastManifest.getPlatformName());
+			assertTrue(lastManifest.getSubTaskDeploymentRequests() == null);
+			assertEquals(1, lastManifest.getTaskDeploymentRequest().getDeploymentProperties().size());
+			assertEquals("bar", lastManifest.getTaskDeploymentRequest().getDeploymentProperties().get("app.demo.foo"));
+
+			verify(this.taskLauncher, never()).destroy(TASK_NAME_ORIG);
+		}
+
+		@Test
+		@DirtiesContext
+		public void testRestoreDeployerPropertiesV2() throws IOException {
+			initializeSuccessfulRegistry(appRegistry);
+
+			when(taskLauncher.launch(any())).thenReturn("0", "1");
+
+			Map<String, String> properties = new HashMap<>(1);
+			properties.put("deployer.demo.memory", "100000GB");
+
+			long firstTaskExecutionId = this.taskExecutionService.executeTask(TASK_NAME_ORIG, properties, new LinkedList<>());
+			this.taskRepository.completeTaskExecution(firstTaskExecutionId, 0, new Date(), "all done");
+			this.taskExecutionService.executeTask(TASK_NAME_ORIG, Collections.emptyMap(), new LinkedList<>());
+
+			TaskManifest lastManifest = this.dataflowTaskExecutionMetadataDao.getLatestManifest(TASK_NAME_ORIG);
+
+			assertEquals("file:src/test/resources/apps/foo-task", lastManifest.getTaskDeploymentRequest().getResource().getURL().toString());
+			assertEquals("default", lastManifest.getPlatformName());
+			assertTrue(lastManifest.getSubTaskDeploymentRequests() == null);
+			assertEquals(1, lastManifest.getTaskDeploymentRequest().getDeploymentProperties().size());
+			assertEquals("100000GB", lastManifest.getTaskDeploymentRequest().getDeploymentProperties().get("deployer.demo.memory"));
+
+			verify(this.taskLauncher, never()).destroy(TASK_NAME_ORIG);
+		}
+
+		@Test
+		@DirtiesContext
+		public void testUpgradeDueToDeploymentPropsChange() throws IOException {
+			TaskExecution myTask = this.taskRepository.createTaskExecution(TASK_NAME_ORIG);
+			TaskManifest manifest = new TaskManifest();
+			manifest.setPlatformName("default");
+			AppDeploymentRequest request = new AppDeploymentRequest(new AppDefinition("some-name", null),
+					new FileUrlResource("src/test/resources/apps/foo-task"));
+			manifest.setTaskDeploymentRequest(request);
+
+			this.dataflowTaskExecutionMetadataDao.save(myTask, manifest);
+			this.taskRepository.startTaskExecution(myTask.getExecutionId(), TASK_NAME_ORIG, new Date(), new ArrayList<>(), null);
+			this.taskRepository.completeTaskExecution(myTask.getExecutionId(), 0, new Date(), null);
+
+			initializeSuccessfulRegistry(appRegistry);
+
+			when(taskLauncher.launch(any())).thenReturn("0");
+
+			Map<String,String> deploymentProperties = new HashMap<>(1);
+			deploymentProperties.put("deployer.demo.memory", "10000GB");
+
+			this.taskExecutionService.executeTask(TASK_NAME_ORIG, deploymentProperties, new LinkedList<>());
+
+			TaskManifest lastManifest = this.dataflowTaskExecutionMetadataDao.getLatestManifest(TASK_NAME_ORIG);
+
+			assertEquals("file:src/test/resources/apps/foo-task", lastManifest.getTaskDeploymentRequest().getResource().getURL().toString());
+			assertEquals("default", lastManifest.getPlatformName());
+			assertTrue(lastManifest.getSubTaskDeploymentRequests() == null);
+			assertEquals(1, lastManifest.getTaskDeploymentRequest().getDeploymentProperties().size());
+			assertEquals("10000GB", lastManifest.getTaskDeploymentRequest().getDeploymentProperties().get("deployer.demo.memory"));
+
+			verify(this.taskLauncher).destroy(TASK_NAME_ORIG);
+		}
+
+		@Test
+		@DirtiesContext
+		public void testUpgradeDueToAppPropsChange() throws IOException {
+			TaskExecution myTask = this.taskRepository.createTaskExecution(TASK_NAME_ORIG);
+			TaskManifest manifest = new TaskManifest();
+			manifest.setPlatformName("default");
+			AppDeploymentRequest request = new AppDeploymentRequest(new AppDefinition("some-name", null),
+					new FileUrlResource("src/test/resources/apps/foo-task"));
+			manifest.setTaskDeploymentRequest(request);
+
+			this.dataflowTaskExecutionMetadataDao.save(myTask, manifest);
+			this.taskRepository.startTaskExecution(myTask.getExecutionId(), TASK_NAME_ORIG, new Date(), new ArrayList<>(), null);
+			this.taskRepository.completeTaskExecution(myTask.getExecutionId(), 0, new Date(), null);
+
+			initializeSuccessfulRegistry(appRegistry);
+
+			when(taskLauncher.launch(any())).thenReturn("0");
+
+			Map<String,String> deploymentProperties = new HashMap<>(1);
+			deploymentProperties.put("app.demo.foo", "bar");
+
+			this.taskExecutionService.executeTask(TASK_NAME_ORIG, deploymentProperties, new LinkedList<>());
+
+			TaskManifest lastManifest = this.dataflowTaskExecutionMetadataDao.getLatestManifest(TASK_NAME_ORIG);
+
+			assertEquals("file:src/test/resources/apps/foo-task", lastManifest.getTaskDeploymentRequest().getResource().getURL().toString());
+			assertEquals("default", lastManifest.getPlatformName());
+			assertTrue(lastManifest.getSubTaskDeploymentRequests() == null);
+			assertEquals(5, lastManifest.getTaskDeploymentRequest().getDefinition().getProperties().size());
+			assertEquals("bar", lastManifest.getTaskDeploymentRequest().getDefinition().getProperties().get("foo"));
+
+			verify(this.taskLauncher).destroy(TASK_NAME_ORIG);
+		}
+
+		@Test(expected = IllegalStateException.class)
+		@DirtiesContext
+		public void testUpgradeFailureTaskCurrentlyRunning() throws MalformedURLException {
+			TaskExecution myTask = this.taskRepository.createTaskExecution(TASK_NAME_ORIG);
+			TaskManifest manifest = new TaskManifest();
+			manifest.setPlatformName("default");
+			AppDeploymentRequest request = new AppDeploymentRequest(new AppDefinition("some-name", null),
+					new FileUrlResource("src/test/resources/apps/foo-task"));
+			manifest.setTaskDeploymentRequest(request);
+
+			this.dataflowTaskExecutionMetadataDao.save(myTask, manifest);
+
+			initializeSuccessfulRegistry(appRegistry);
+			this.taskExecutionService.executeTask(TASK_NAME_ORIG, new HashMap<>(), new LinkedList<>());
+		}
+	}
 
 	@TestPropertySource(properties = { "spring.cloud.dataflow.task.maximum-concurrent-tasks=10" })
 	@AutoConfigureTestDatabase(replace = Replace.ANY)
 	public static class SimpleTaskTests extends DefaultTaskExecutionServiceTests {
 
 		@Before
-		public void setupMocks() {
+		public void setup() {
 			this.launcherRepository.save(new Launcher("default", "local", taskLauncher));
 			this.launcherRepository.save(new Launcher("MyPlatform", "local", taskLauncher));
 
@@ -387,6 +585,27 @@ public abstract class DefaultTaskExecutionServiceTests {
 					this.taskExecutionService.getLog(platformName, taskDeploymentId));
 		}
 
+		@Test
+		@DirtiesContext
+		public void getCFTaskLogByTaskIdOtherThanLatest() {
+			String taskName = "test-task";
+			String platformName = "cf-test-platform";
+			String taskDeploymentId = "12345";
+			TaskDeployment taskDeployment = new TaskDeployment();
+			taskDeployment.setPlatformName(platformName);
+			taskDeployment.setTaskDeploymentId(taskDeploymentId);
+			taskDeployment.setTaskDefinitionName(taskName);
+			this.taskDeploymentRepository.save(taskDeployment);
+			TaskExecution taskExecution = new TaskExecution();
+			taskExecution.setStartTime(new Date());
+			taskExecution.setTaskName(taskName);
+			taskExecution.setExternalExecutionId("12346");
+			this.taskRepository.createTaskExecution(taskExecution);
+			this.launcherRepository.save(new Launcher(platformName,
+					TaskPlatformFactory.CLOUDFOUNDRY_PLATFORM_TYPE, taskLauncher));
+			assertEquals("", this.taskExecutionService.getLog(platformName, taskDeploymentId));
+		}
+
 
 		@Test
 		@DirtiesContext
@@ -440,7 +659,7 @@ public abstract class DefaultTaskExecutionServiceTests {
 					launcherRepository, auditRecordService, taskRepository,
 					taskExecutionInfoService, mock(TaskDeploymentRepository.class),
 					taskExecutionRepositoryService, taskAppDeploymentRequestCreator,
-					this.taskExplorer, this.dataflowTaskExecutionDao);
+					this.taskExplorer, this.dataflowTaskExecutionDao, this.dataflowTaskExecutionMetadataDao);
 			try {
 				taskExecutionService.executeTask(TASK_NAME_ORIG, new HashMap<>(), new LinkedList<>());
 			}
@@ -555,11 +774,46 @@ public abstract class DefaultTaskExecutionServiceTests {
 
 		@Test
 		@DirtiesContext
-		public void executeComposedTaskWithAccessToken() {
+		public void executeComposedTaskWithAccessTokenDisabled1() {
+			initializeSuccessfulRegistry(appRegistry);
+			AppDeploymentRequest request = getAppDeploymentRequestForToken(prepareEnvironmentForTokenTests(), Collections.emptyList());
+			assertFalse("Should not contain the property 'dataflow-server-access-token'",
+				request.getDefinition().getProperties().containsKey("dataflow-server-access-token"));
+		}
+
+		@Test
+		@DirtiesContext
+		public void executeComposedTaskWithAccessTokenDisabled2() {
 			initializeSuccessfulRegistry(appRegistry);
 
+			final List<String> arguments = new ArrayList<>();
+			arguments.add("--dataflow-server-use-user-access-token=false");
 			AppDeploymentRequest request = getAppDeploymentRequestForToken(prepareEnvironmentForTokenTests(), Collections.emptyList());
+			assertFalse("Should not contain the property 'dataflow-server-access-token'",
+				request.getDefinition().getProperties().containsKey("dataflow-server-access-token"));
+		}
 
+		@Test
+		@DirtiesContext
+		public void executeComposedTaskWithEnabledUserAccessToken1() {
+			initializeSuccessfulRegistry(appRegistry);
+
+			final List<String> arguments = new ArrayList<>();
+			arguments.add("--dataflow-server-use-user-access-token=true");
+			AppDeploymentRequest request = getAppDeploymentRequestForToken(prepareEnvironmentForTokenTests(), arguments);
+			assertTrue("Should contain the property 'dataflow-server-access-token'",
+				request.getDefinition().getProperties().containsKey("dataflow-server-access-token"));
+			assertEquals("foo-bar-123-token", request.getDefinition().getProperties().get("dataflow-server-access-token"));
+		}
+
+		@Test
+		@DirtiesContext
+		public void executeComposedTaskWithEnabledUserAccessToken2() {
+			initializeSuccessfulRegistry(appRegistry);
+
+			final List<String> arguments = new ArrayList<>();
+			arguments.add("--dataflow-server-use-user-access-token =  true");
+			AppDeploymentRequest request = getAppDeploymentRequestForToken(prepareEnvironmentForTokenTests(), arguments);
 			assertTrue("Should contain the property 'dataflow-server-access-token'",
 				request.getDefinition().getProperties().containsKey("dataflow-server-access-token"));
 			assertEquals("foo-bar-123-token", request.getDefinition().getProperties().get("dataflow-server-access-token"));
@@ -916,7 +1170,12 @@ public abstract class DefaultTaskExecutionServiceTests {
 	private static void initializeSuccessfulRegistry(AppRegistryService appRegistry) {
 		when(appRegistry.find(anyString(), any(ApplicationType.class))).thenReturn(
 				new AppRegistration("some-name", ApplicationType.task, URI.create("https://helloworld")));
-		when(appRegistry.getAppResource(any())).thenReturn(new FileSystemResource("src/test/resources/apps/foo-task"));
+		try {
+			when(appRegistry.getAppResource(any())).thenReturn(new FileUrlResource("src/test/resources/apps/foo-task"));
+		}
+		catch (MalformedURLException e) {
+			throw new IllegalStateException("Invalid File Resource Specified", e);
+		}
 		when(appRegistry.getAppMetadataResource(any())).thenReturn(null);
 	}
 

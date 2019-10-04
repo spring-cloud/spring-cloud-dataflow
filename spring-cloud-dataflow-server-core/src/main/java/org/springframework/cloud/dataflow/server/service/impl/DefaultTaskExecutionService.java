@@ -16,6 +16,8 @@
 
 package org.springframework.cloud.dataflow.server.service.impl;
 
+import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -24,6 +26,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
@@ -37,11 +40,13 @@ import org.springframework.cloud.dataflow.core.AuditOperationType;
 import org.springframework.cloud.dataflow.core.Launcher;
 import org.springframework.cloud.dataflow.core.TaskDefinition;
 import org.springframework.cloud.dataflow.core.TaskDeployment;
+import org.springframework.cloud.dataflow.core.TaskManifest;
 import org.springframework.cloud.dataflow.core.TaskPlatformFactory;
 import org.springframework.cloud.dataflow.rest.util.ArgumentSanitizer;
 import org.springframework.cloud.dataflow.rest.util.DeploymentPropertiesUtils;
 import org.springframework.cloud.dataflow.server.job.LauncherRepository;
 import org.springframework.cloud.dataflow.server.repository.DataflowTaskExecutionDao;
+import org.springframework.cloud.dataflow.server.repository.DataflowTaskExecutionMetadataDao;
 import org.springframework.cloud.dataflow.server.repository.NoSuchTaskExecutionException;
 import org.springframework.cloud.dataflow.server.repository.TaskDeploymentRepository;
 import org.springframework.cloud.dataflow.server.repository.TaskExecutionMissingExternalIdException;
@@ -53,6 +58,9 @@ import org.springframework.cloud.deployer.spi.task.TaskLauncher;
 import org.springframework.cloud.task.repository.TaskExecution;
 import org.springframework.cloud.task.repository.TaskExplorer;
 import org.springframework.cloud.task.repository.TaskRepository;
+import org.springframework.core.io.Resource;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
@@ -78,14 +86,22 @@ public class DefaultTaskExecutionService implements TaskExecutionService {
 
 	private static final Logger logger = LoggerFactory.getLogger(DefaultTaskExecutionService.class);
 
+	public static final String TASK_DEFINITION_DSL_TEXT = "taskDefinitionDslText";
+
+	public static final String TASK_DEPLOYMENT_PROPERTIES = "taskDeploymentProperties";
+
+	public static final String COMMAND_LINE_ARGS = "commandLineArgs";
+
+	public static final String TASK_PLATFORM_NAME = "spring.cloud.dataflow.task.platformName";
+
+	protected final AuditRecordService auditRecordService;
+
 	/**
 	 * Used to launch apps as tasks.
 	 */
 	private final LauncherRepository launcherRepository;
 
 	private final TaskExecutionCreationService taskExecutionRepositoryService;
-
-	protected final AuditRecordService auditRecordService;
 
 	/**
 	 * Used to create TaskExecutions.
@@ -104,13 +120,9 @@ public class DefaultTaskExecutionService implements TaskExecutionService {
 
 	private final DataflowTaskExecutionDao dataflowTaskExecutionDao;
 
-	public static final String TASK_DEFINITION_DSL_TEXT = "taskDefinitionDslText";
+	private final DataflowTaskExecutionMetadataDao dataflowTaskExecutionMetadataDao;
 
-	public static final String TASK_DEPLOYMENT_PROPERTIES = "taskDeploymentProperties";
-
-	public static final String COMMAND_LINE_ARGS = "commandLineArgs";
-
-	public static final String TASK_PLATFORM_NAME = "spring.cloud.dataflow.task.platformName";
+	private final Map<String, List<String>> tasksBeingUpgraded = new ConcurrentHashMap<>();
 
 	/**
 	 * Initializes the {@link DefaultTaskExecutionService}.
@@ -121,6 +133,7 @@ public class DefaultTaskExecutionService implements TaskExecutionService {
 	 * @param taskDeploymentRepository the repository to track task deployment
 	 * @param taskExecutionInfoService the service used to setup a task execution
 	 * @param taskExecutionRepositoryService the service used to create the task execution
+	 * @param dataflowTaskExecutionMetadataDao repository used to manipulate task manifests
 	 */
 	public DefaultTaskExecutionService(LauncherRepository launcherRepository,
 			AuditRecordService auditRecordService,
@@ -130,7 +143,8 @@ public class DefaultTaskExecutionService implements TaskExecutionService {
 			TaskExecutionCreationService taskExecutionRepositoryService,
 			TaskAppDeploymentRequestCreator taskAppDeploymentRequestCreator,
 			TaskExplorer taskExplorer,
-			DataflowTaskExecutionDao dataflowTaskExecutionDao) {
+			DataflowTaskExecutionDao dataflowTaskExecutionDao,
+			DataflowTaskExecutionMetadataDao dataflowTaskExecutionMetadataDao) {
 		Assert.notNull(launcherRepository, "launcherRepository must not be null");
 		Assert.notNull(auditRecordService, "auditRecordService must not be null");
 		Assert.notNull(taskExecutionInfoService, "taskExecutionInfoService must not be null");
@@ -141,6 +155,7 @@ public class DefaultTaskExecutionService implements TaskExecutionService {
 		Assert.notNull(taskAppDeploymentRequestCreator, "taskAppDeploymentRequestCreator must not be null");
 		Assert.notNull(taskExplorer, "taskExplorer must not be null");
 		Assert.notNull(dataflowTaskExecutionDao, "dataflowTaskExecutionDao must not be null");
+		Assert.notNull(dataflowTaskExecutionMetadataDao, "dataflowTaskExecutionMetadataDao must not be null");
 
 		this.launcherRepository = launcherRepository;
 		this.auditRecordService = auditRecordService;
@@ -151,23 +166,20 @@ public class DefaultTaskExecutionService implements TaskExecutionService {
 		this.taskAppDeploymentRequestCreator = taskAppDeploymentRequestCreator;
 		this.taskExplorer = taskExplorer;
 		this.dataflowTaskExecutionDao = dataflowTaskExecutionDao;
+		this.dataflowTaskExecutionMetadataDao = dataflowTaskExecutionMetadataDao;
 	}
 
 	@Override
 	public long executeTask(String taskName, Map<String, String> taskDeploymentProperties, List<String> commandLineArgs,
 			String composedTaskRunnerName) {
 
-		String platformName = taskDeploymentProperties.get(TASK_PLATFORM_NAME);
+		String platformName = getPlatform(taskDeploymentProperties);
 
-		// If not given, use 'default'
-		if (!StringUtils.hasText(platformName)) {
-			platformName = "default";
-		}
-		// In case we have exactly one launcher, we override to that
-		List<String> launcherNames = StreamSupport.stream(launcherRepository.findAll().spliterator(), false)
-				.map(Launcher::getName).collect(Collectors.toList());
-		if (launcherNames.size() == 1) {
-			platformName = launcherNames.get(0);
+		if(this.tasksBeingUpgraded.containsKey(taskName)) {
+			List<String> platforms = this.tasksBeingUpgraded.get(taskName);
+			if(platforms.contains(platformName)) {
+				throw new IllegalStateException(String.format("Unable to launch %s on platform %s because it is being upgraded", taskName, platformName));
+			}
 		}
 
 		// Remove since the key for task platform name will not pass validation for app, deployer, or scheduler prefix
@@ -179,59 +191,79 @@ public class DefaultTaskExecutionService implements TaskExecutionService {
 
 		TaskLauncher taskLauncher = findTaskLauncher(platformName);
 
-		TaskDeployment existingTaskDeployment =
-				taskDeploymentRepository.findTopByTaskDefinitionNameOrderByCreatedOnAsc(taskName);
+		TaskDeployment existingTaskDeployment = taskDeploymentRepository
+				.findTopByTaskDefinitionNameOrderByCreatedOnAsc(taskName);
 		if (existingTaskDeployment != null) {
 			if (!existingTaskDeployment.getPlatformName().equals(platformName)) {
 				throw new IllegalStateException(String.format(
 						"Task definition [%s] has already been deployed on platform [%s].  " +
-						"Requested to deploy on platform [%s].",
+								"Requested to deploy on platform [%s].",
 						taskName, existingTaskDeployment.getPlatformName(), platformName));
 			}
 		}
+
 		TaskExecutionInformation taskExecutionInformation = taskExecutionInfoService
 				.findTaskExecutionInformation(taskName, taskDeploymentProperties, composedTaskRunnerName);
 
+		if (taskExecutionInformation.isComposed()) {
+			handleAccessToken(commandLineArgs, taskExecutionInformation);
+		}
+
 		TaskExecution taskExecution = taskExecutionRepositoryService.createTaskExecution(taskName);
 
-		if (taskExecutionInformation.isComposed()) {
-			boolean containsAccessToken = false;
-
-			final String dataflowAccessTokenKey = "dataflow-server-access-token";
-
-			for (String commandLineArg : commandLineArgs) {
-				if (commandLineArg.startsWith("--" + dataflowAccessTokenKey)) {
-					containsAccessToken = true;
-				}
-			}
-
-			final String dataflowAccessTokenPropertyKey = "app." + taskExecutionInformation.getTaskDefinition().getRegisteredAppName() + "." + dataflowAccessTokenKey;
-			for (Map.Entry<String, String> taskDeploymentProperty : taskExecutionInformation.getTaskDeploymentProperties().entrySet()) {
-				if (taskDeploymentProperty.getKey().equals(dataflowAccessTokenPropertyKey)) {
-					containsAccessToken = true;
-				}
-			}
-
-			if (!containsAccessToken) {
-				final String token = TokenUtils.getAccessToken();
-
-				if (token != null) {
-					taskExecutionInformation.getTaskDeploymentProperties().put(dataflowAccessTokenPropertyKey, token);
-				}
-			}
-		}
-
-		AppDeploymentRequest request = this.taskAppDeploymentRequestCreator.
+		AppDeploymentRequest appDeploymentRequest = this.taskAppDeploymentRequestCreator.
 				createRequest(taskExecution, taskExecutionInformation, commandLineArgs, platformName);
 
-		String id = taskLauncher.launch(request);
-		if (!StringUtils.hasText(id)) {
-			throw new IllegalStateException("Deployment ID is null for the task:" + taskName);
+		TaskManifest taskManifest = createTaskManifest(platformName, taskExecutionInformation, appDeploymentRequest);
+
+		TaskManifest previousManifest = this.dataflowTaskExecutionMetadataDao.getLatestManifest(taskName);
+
+		if(taskDeploymentProperties.isEmpty()) {
+			if(previousManifest != null && !previousManifest.getTaskDeploymentRequest().getDeploymentProperties().equals(taskDeploymentProperties)) {
+				appDeploymentRequest = updateDeploymentProperties(commandLineArgs, platformName, taskExecutionInformation, taskExecution, previousManifest);
+
+				taskDeploymentProperties = previousManifest.getTaskDeploymentRequest().getDeploymentProperties();
+			}
 		}
-		this.updateExternalExecutionId(taskExecution.getExecutionId(), id);
+
+		AppDeploymentRequest request = new AppDeploymentRequest(appDeploymentRequest.getDefinition(),
+				appDeploymentRequest.getResource(),
+				taskDeploymentProperties,
+				appDeploymentRequest.getCommandlineArguments());
+
+		taskManifest.setTaskDeploymentRequest(request);
+
+		String taskDeploymentId = null;
+
+		try {
+			if(!isAppDeploymentSame(previousManifest, taskManifest)) {
+
+				validateAndLockUpgrade(taskName, platformName, taskExecution);
+
+				logger.debug("Deleting %s and all related resources from the platform", taskName);
+				taskLauncher.destroy(taskName);
+
+			}
+
+			this.dataflowTaskExecutionMetadataDao.save(taskExecution, taskManifest);
+
+			taskDeploymentId = taskLauncher.launch(appDeploymentRequest);
+
+			saveExternalExecutionId(taskExecution, taskDeploymentId);
+		}
+		finally {
+			if(this.tasksBeingUpgraded.containsKey(taskName)) {
+				List<String> platforms = this.tasksBeingUpgraded.get(taskName);
+				platforms.remove(platformName);
+
+				if(platforms.isEmpty()) {
+					this.tasksBeingUpgraded.remove(taskName);
+				}
+			}
+		}
 
 		TaskDeployment taskDeployment = new TaskDeployment();
-		taskDeployment.setTaskDeploymentId(id);
+		taskDeployment.setTaskDeploymentId(taskDeploymentId);
 		taskDeployment.setPlatformName(platformName);
 		taskDeployment.setTaskDefinitionName(taskName);
 		this.taskDeploymentRepository.save(taskDeployment);
@@ -241,9 +273,206 @@ public class DefaultTaskExecutionService implements TaskExecutionService {
 				taskExecutionInformation.getTaskDefinition().getName(),
 				getAudited(taskExecutionInformation.getTaskDefinition(),
 						taskExecutionInformation.getTaskDeploymentProperties(),
-						request.getCommandlineArguments()));
+						appDeploymentRequest.getCommandlineArguments()));
 
 		return taskExecution.getExecutionId();
+	}
+
+	/**
+	 * Determines if an OAuth token is available and if so, sets it as a deployment property.
+	 *
+	 * @param commandLineArgs args for the task execution
+	 * @param taskExecutionInformation source of deployment properties
+	 */
+	private void handleAccessToken(List<String> commandLineArgs, TaskExecutionInformation taskExecutionInformation) {
+		boolean containsAccessToken = false;
+		boolean useUserAccessToken = false;
+
+		final String dataflowServerAccessTokenKey = "dataflow-server-access-token";
+		final String dataflowServerUseUserAccessToken = "dataflow-server-use-user-access-token";
+
+		for (String commandLineArg : commandLineArgs) {
+			if (commandLineArg.startsWith("--" + dataflowServerAccessTokenKey)) {
+				containsAccessToken = true;
+			}
+			if (StringUtils.trimAllWhitespace(commandLineArg).equalsIgnoreCase("--" + dataflowServerUseUserAccessToken + "=true")) {
+				useUserAccessToken = true;
+			}
+		}
+
+		final String dataflowAccessTokenPropertyKey = "app." + taskExecutionInformation.getTaskDefinition().getRegisteredAppName() + "." + dataflowServerAccessTokenKey;
+		for (Map.Entry<String, String> taskDeploymentProperty : taskExecutionInformation.getTaskDeploymentProperties().entrySet()) {
+			if (taskDeploymentProperty.getKey().equals(dataflowAccessTokenPropertyKey)) {
+				containsAccessToken = true;
+			}
+		}
+
+		if (!containsAccessToken && useUserAccessToken) {
+			final String token = TokenUtils.getAccessToken();
+
+			if (token != null) {
+				taskExecutionInformation.getTaskDeploymentProperties().put(dataflowAccessTokenPropertyKey, token);
+			}
+		}
+	}
+
+	/**
+	 * Stores the platform specific execution id for a given task execution
+	 *
+	 * @param taskExecution task execution id to associate the external execution id with
+	 * @param taskDeploymentId platform specific execution id
+	 */
+	private void saveExternalExecutionId(TaskExecution taskExecution, String taskDeploymentId) {
+		if (!StringUtils.hasText(taskDeploymentId)) {
+			throw new IllegalStateException("Deployment ID is null for the task:" + taskExecution.getTaskName());
+		}
+		this.updateExternalExecutionId(taskExecution.getExecutionId(), taskDeploymentId);
+	}
+
+	/**
+	 * Updates the deployment properties on the provided {@code AppDeploymentRequest}
+	 *
+	 * @param commandLineArgs command line args for the task execution
+	 * @param platformName name of the platform configuration to use
+	 * @param taskExecutionInformation details about the task execution request
+	 * @param taskExecution task execution data
+	 * @param previousManifest manifest from the last execution of the same task definition
+	 * @return an updated {@code AppDeploymentRequest}
+	 */
+	private AppDeploymentRequest updateDeploymentProperties(List<String> commandLineArgs, String platformName, TaskExecutionInformation taskExecutionInformation, TaskExecution taskExecution, TaskManifest previousManifest) {
+		AppDeploymentRequest appDeploymentRequest;
+		TaskExecutionInformation info = new TaskExecutionInformation();
+		info.setTaskDefinition(taskExecutionInformation.getTaskDefinition());
+		info.setAppResource(taskExecutionInformation.getAppResource());
+		info.setComposed(taskExecutionInformation.isComposed());
+		info.setMetadataResource(taskExecutionInformation.getMetadataResource());
+		info.setOriginalTaskDefinition(taskExecutionInformation.getOriginalTaskDefinition());
+		info.setTaskDeploymentProperties(previousManifest.getTaskDeploymentRequest().getDeploymentProperties());
+
+		appDeploymentRequest = this.taskAppDeploymentRequestCreator.
+				createRequest(taskExecution, info, commandLineArgs, platformName);
+		return appDeploymentRequest;
+	}
+
+	/**
+	 * A task should not be allowed to be launched when an upgrade is required and one is running (allowing the upgrade
+	 * to proceed may kill running task instances of that definition on certain platforms).
+	 *
+	 * @param taskName task name to check or lock
+	 * @param platformName the platform configuration to confirm if the task is being run on
+	 */
+	private void validateAndLockUpgrade(String taskName, String platformName, TaskExecution taskExecution) {
+		Page<TaskExecution> runningTaskExecutions =
+				this.taskExplorer.findRunningTaskExecutions(taskName, PageRequest.of(0, 1));
+
+		//TODO add force flag to allow overriding this
+		if(!(runningTaskExecutions.getTotalElements() == 1 && runningTaskExecutions.toList().get(0).getExecutionId() == taskExecution.getExecutionId()) &&
+				runningTaskExecutions.getTotalElements() > 0) {
+			throw new IllegalStateException("Unable to update application due to currently running applications");
+		}
+		else if(this.tasksBeingUpgraded.containsKey(taskName)) {
+			List<String> platforms = this.tasksBeingUpgraded.get(taskName);
+
+			if(platforms.contains(platformName)) {
+				throw new IllegalStateException(String.format("Currently upgrading %s on platform %s", taskName, platformName));
+			}
+
+			platforms.add(platformName);
+		}
+		else {
+			List<String> platformList = new ArrayList<>();
+			platformList.add(platformName);
+			this.tasksBeingUpgraded.put(taskName, platformList);
+		}
+	}
+
+	/**
+	 * Create a {@code TaskManifest}
+	 *
+	 * @param platformName name of the platform configuration to run the task on
+	 * @param taskExecutionInformation details about the task to be run
+	 * @param appDeploymentRequest the details about the deployment to be executed
+	 * @return {@code TaskManifest}
+	 */
+	private TaskManifest createTaskManifest(String platformName, TaskExecutionInformation taskExecutionInformation, AppDeploymentRequest appDeploymentRequest) {
+		TaskManifest taskManifest = new TaskManifest();
+		taskManifest.setPlatformName(platformName);
+		String composedTaskDsl = taskExecutionInformation.getTaskDefinition().getProperties().get("graph");
+		if (StringUtils.hasText(composedTaskDsl)) {
+			taskManifest.setTaskDeploymentRequest(appDeploymentRequest);
+			List<AppDeploymentRequest> subTaskAppDeploymentRequests = this.taskExecutionInfoService.createTaskDeploymentRequests(
+					taskExecutionInformation.getTaskDefinition().getTaskName(),
+					taskExecutionInformation.getTaskDefinition().getDslText());
+			taskManifest.setSubTaskDeploymentRequests(subTaskAppDeploymentRequests);
+		}
+		else {
+			taskManifest.setTaskDeploymentRequest(appDeploymentRequest);
+		}
+		return taskManifest;
+	}
+
+	/**
+	 * Return the platform specified.  If none have been specified, then "default" will be returned.
+	 *
+	 * @param taskDeploymentProperties properties to interrogate if a platform has been specified
+	 * @return name of the platform configuration to execute the task on
+	 */
+	private String getPlatform(Map<String, String> taskDeploymentProperties) {
+		String platformName = taskDeploymentProperties.get(TASK_PLATFORM_NAME);
+
+		// If not given, use 'default'
+		if (!StringUtils.hasText(platformName)) {
+			platformName = "default";
+		}
+
+		// In case we have exactly one launcher, we override to that
+		List<String> launcherNames = StreamSupport.stream(launcherRepository.findAll().spliterator(), false)
+				.map(Launcher::getName).collect(Collectors.toList());
+
+		if (launcherNames.size() == 1) {
+			platformName = launcherNames.get(0);
+		}
+
+		return platformName;
+	}
+
+	/**
+	 * Determines if the requested deployment is the same (thereby not needing an upgrade) vs different and needing to
+	 * be upgraded via the data in the manifests.  Specifically, the URI of the {@code Resource}, the app properties
+	 * and the deployment properties are all evaluated in this comparison.
+	 *
+	 * @param previousManifest the manifest for the last task execution
+	 * @param newManifest the manifest for the task execution currently being requested
+	 * @return {@code true} if no upgrade is required, {@code false} if an upgrade is required.
+	 */
+	private boolean isAppDeploymentSame(TaskManifest previousManifest, TaskManifest newManifest) {
+		boolean same;
+
+		if(previousManifest == null) {
+			return true;
+		}
+
+		Resource previousResource = previousManifest.getTaskDeploymentRequest().getResource();
+		Resource newResource = newManifest.getTaskDeploymentRequest().getResource();
+
+		try {
+			logger.debug("Previous resource was %s and new resource is %s", previousResource.getURI().toString(), newResource.getURI().toString());
+		}
+		catch (IOException e) {
+			logger.debug("Unable to obtain URIs from resources to be compared in debug log statement", e);
+		}
+
+		same = previousResource.equals(newResource);
+
+		Map<String, String> previousAppProperties = previousManifest.getTaskDeploymentRequest().getDefinition().getProperties();
+		Map<String, String> newAppProperties = newManifest.getTaskDeploymentRequest().getDefinition().getProperties();
+
+		Map<String, String> previousDeploymentProperties = previousManifest.getTaskDeploymentRequest().getDeploymentProperties();
+		Map<String, String> newDeploymentProperties = newManifest.getTaskDeploymentRequest().getDeploymentProperties();
+
+		same = same && previousDeploymentProperties.equals(newDeploymentProperties) && previousAppProperties.equals(newAppProperties);
+
+		return same;
 	}
 
 	@Override
@@ -252,6 +481,12 @@ public class DefaultTaskExecutionService implements TaskExecutionService {
 	}
 
 	@Override
+	/**
+	 * Return the log content of the task execution identified by the given task deployment ID (external execution ID).
+	 * In case of concurrent task executions on Cloud Foundry, the logs of all the concurrent executions are displayed.
+	 * Also, on Cloud Foundry, the task execution log is retrieved only for the latest execution that matches the
+	 * given deployment ID (external execution ID).
+	 */
 	public String getLog(String platformName, String taskId) {
 		Launcher launcher = this.launcherRepository.findByName(platformName);
 		// In case of Cloud Foundry, fetching logs by external execution Id isn't valid as the execution instance is destroyed.
@@ -262,7 +497,13 @@ public class DefaultTaskExecutionService implements TaskExecutionService {
 				if (taskDeployment == null) {
 					throw new IllegalArgumentException();
 				}
-				taskId = taskDeployment.getTaskDefinitionName();
+				String taskName = taskDeployment.getTaskDefinitionName();
+				TaskExecution taskExecution = this.taskExplorer.getLatestTaskExecutionForTaskName(taskName);
+				if (taskExecution != null && !taskExecution.getExternalExecutionId().equals(taskId)) {
+					return "";
+				}
+				// Override the task ID to be task name as task execution log is identified by the task name on CF.
+				taskId = taskName;
 			}
 			catch (Exception e) {
 				return "Log could not be retrieved as the task instance is not running by the ID: "+ taskId;
@@ -327,10 +568,9 @@ public class DefaultTaskExecutionService implements TaskExecutionService {
 	private TaskLauncher findTaskLauncher(String platformName) {
 		Launcher launcher = this.launcherRepository.findByName(platformName);
 		if (launcher == null) {
-			List<String> launcherNames =
-					StreamSupport.stream(launcherRepository.findAll().spliterator(), false)
-							.map(Launcher::getName)
-							.collect(Collectors.toList());
+			List<String> launcherNames = StreamSupport.stream(launcherRepository.findAll().spliterator(), false)
+					.map(Launcher::getName)
+					.collect(Collectors.toList());
 			throw new IllegalStateException(String.format("No Launcher found for the platform named '%s'.  " +
 							"Available platform names are %s",
 					platformName, launcherNames));

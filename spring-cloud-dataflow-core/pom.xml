@@ -10,6 +10,17 @@
 	<packaging>jar</packaging>
 	<dependencies>
 		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-configuration-metadata</artifactId>
+			<exclusions>
+				<!-- We're only interested in the DTO classes, so exclude everything -->
+				<exclusion>
+					<groupId>org.json</groupId>
+					<artifactId>json</artifactId>
+				</exclusion>
+			</exclusions>
+		</dependency>
+		<dependency>
 			<groupId>org.springframework.cloud</groupId>
 			<artifactId>spring-cloud-dataflow-core-dsl</artifactId>
 		</dependency>

@@ -15,7 +15,9 @@
  */
 package org.springframework.cloud.dataflow.server.config.features;
 
+import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 import javax.sql.DataSource;
 
@@ -38,9 +40,12 @@ import org.springframework.cloud.dataflow.server.config.apps.CommonApplicationPr
 import org.springframework.cloud.dataflow.server.job.LauncherRepository;
 import org.springframework.cloud.dataflow.server.repository.DataflowJobExecutionDao;
 import org.springframework.cloud.dataflow.server.repository.DataflowTaskExecutionDao;
+import org.springframework.cloud.dataflow.server.repository.DataflowTaskExecutionMetadataDao;
 import org.springframework.cloud.dataflow.server.repository.TaskDefinitionRepository;
 import org.springframework.cloud.dataflow.server.repository.TaskDeploymentRepository;
+import org.springframework.cloud.dataflow.server.service.DeployerConfigurationMetadataResolver;
 import org.springframework.cloud.dataflow.server.service.LauncherInitializationService;
+import org.springframework.cloud.dataflow.server.service.SchedulerService;
 import org.springframework.cloud.dataflow.server.service.TaskDeleteService;
 import org.springframework.cloud.dataflow.server.service.TaskExecutionCreationService;
 import org.springframework.cloud.dataflow.server.service.TaskExecutionInfoService;
@@ -55,12 +60,15 @@ import org.springframework.cloud.dataflow.server.service.impl.DefaultTaskJobServ
 import org.springframework.cloud.dataflow.server.service.impl.DefaultTaskSaveService;
 import org.springframework.cloud.dataflow.server.service.impl.TaskAppDeploymentRequestCreator;
 import org.springframework.cloud.dataflow.server.service.impl.TaskConfigurationProperties;
-import org.springframework.cloud.deployer.scheduler.spi.core.Scheduler;
+import org.springframework.cloud.deployer.spi.scheduler.ScheduleInfo;
+import org.springframework.cloud.deployer.spi.scheduler.Scheduler;
 import org.springframework.cloud.task.repository.TaskExplorer;
 import org.springframework.cloud.task.repository.TaskRepository;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.map.repository.config.EnableMapRepositories;
 import org.springframework.lang.Nullable;
 import org.springframework.transaction.PlatformTransactionManager;
@@ -92,14 +100,21 @@ public class TaskConfiguration {
 	private String dataflowServerUri;
 
 	@Bean
+	public DeployerConfigurationMetadataResolver deployerConfigurationMetadataResolver(
+			TaskConfigurationProperties taskConfigurationProperties) {
+		return new DeployerConfigurationMetadataResolver(taskConfigurationProperties.getDeployerProperties());
+	}
+
+	@Bean
 	public LauncherInitializationService launcherInitializationService(
 			LauncherRepository launcherRepository,
-			List<TaskPlatform> platforms) {
-		return new LauncherInitializationService(launcherRepository, platforms);
+			List<TaskPlatform> platforms,
+			DeployerConfigurationMetadataResolver resolver) {
+		return new LauncherInitializationService(launcherRepository, platforms, resolver);
 	}
 
 	/**
-	 * The default profile is active is no other profiles are active. This is configured so
+	 * The default profile is active when no other profiles are active. This is configured so
 	 * that several tests will pass without having to explicitly enable the local profile.
 	 * @param localPlatformProperties
 	 * @return
@@ -113,6 +128,55 @@ public class TaskConfiguration {
 		taskPlatform.setPrimary(true);
 		return taskPlatform;
 	}
+
+	/**
+	 * The default profile is active when no other profiles are active. This is configured so
+	 * that several tests will pass without having to explicitly enable the local profile.
+	 * @return a no-op {@link SchedulerService}
+	 */
+	@Profile({ "local", "default" })
+	@Bean
+	public SchedulerService schedulerService() {
+		return new SchedulerService() {
+			@Override
+			public void schedule(String scheduleName, String taskDefinitionName, Map<String, String> taskProperties, List<String> commandLineArgs) {
+			}
+
+			@Override
+			public void unschedule(String scheduleName) {
+			}
+
+			@Override
+			public void unscheduleForTaskDefinition(String taskDefinitionName) {
+			}
+
+			@Override
+			public List<ScheduleInfo> list(Pageable pageable, String taskDefinitionName) {
+				return null;
+			}
+
+			@Override
+			public Page<ScheduleInfo> list(Pageable pageable) {
+				return null;
+			}
+
+			@Override
+			public List<ScheduleInfo> list(String taskDefinitionName) {
+				return Collections.emptyList();
+			}
+
+			@Override
+			public List<ScheduleInfo> list() {
+				return Collections.emptyList();
+			}
+
+			@Override
+			public ScheduleInfo getSchedule(String scheduleName) {
+				return null;
+			}
+		};
+	}
+
 
 	@Bean
 	public TaskExecutionInfoService taskDefinitionRetriever(AppRegistryService registry,
@@ -128,12 +192,16 @@ public class TaskConfiguration {
 			TaskDefinitionRepository taskDefinitionRepository, TaskDeploymentRepository taskDeploymentRepository,
 			AuditRecordService auditRecordService,
 			DataflowTaskExecutionDao dataflowTaskExecutionDao,
-			DataflowJobExecutionDao dataflowJobExecutionDao) {
+			DataflowJobExecutionDao dataflowJobExecutionDao,
+			DataflowTaskExecutionMetadataDao dataflowTaskExecutionMetadataDao,
+			SchedulerService schedulerService) {
 		return new DefaultTaskDeleteService(taskExplorer, launcherRepository, taskDefinitionRepository,
 				taskDeploymentRepository,
 				auditRecordService,
 				dataflowTaskExecutionDao,
-				dataflowJobExecutionDao);
+				dataflowJobExecutionDao,
+				dataflowTaskExecutionMetadataDao,
+				schedulerService);
 	}
 
 	@Bean
@@ -164,11 +232,13 @@ public class TaskConfiguration {
 			TaskExecutionCreationService taskExecutionRepositoryService,
 			TaskAppDeploymentRequestCreator taskAppDeploymentRequestCreator,
 			TaskExplorer taskExplorer,
-			DataflowTaskExecutionDao dataflowTaskExecutionDao) {
+			DataflowTaskExecutionDao dataflowTaskExecutionDao,
+			DataflowTaskExecutionMetadataDao dataflowTaskExecutionMetadataDao) {
 		return new DefaultTaskExecutionService(
 				launcherRepository, auditRecordService, taskRepository,
 				taskExecutionInfoService, taskDeploymentRepository, taskExecutionRepositoryService,
-				taskAppDeploymentRequestCreator, taskExplorer, dataflowTaskExecutionDao);
+				taskAppDeploymentRequestCreator, taskExplorer, dataflowTaskExecutionDao,
+				dataflowTaskExecutionMetadataDao);
 	}
 
 	@Bean

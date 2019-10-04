@@ -80,6 +80,7 @@ public class StreamDefinitionsDocumentation extends BaseDocumentation {
 				responseFields(
 						fieldWithPath("name").description("The name of the created stream definition"),
 						fieldWithPath("dslText").description("The DSL of the created stream definition"),
+						fieldWithPath("originalDslText").description("The original DSL of the created stream definition"),
 						fieldWithPath("status").description("The status of the created stream definition"),
 						fieldWithPath("description").description("The description of the stream definition"),
 						fieldWithPath("statusDescription")
@@ -125,6 +126,7 @@ public class StreamDefinitionsDocumentation extends BaseDocumentation {
 				responseFields(
 					fieldWithPath("name").description("The name of the stream definition"),
 					fieldWithPath("dslText").description("The DSL of the stream definition"),
+					fieldWithPath("originalDslText").description("The original DSL of the stream definition"),
 					fieldWithPath("status").description("The status of the stream definition"),
 					fieldWithPath("description").description("The description of the stream definition"),
 					fieldWithPath("statusDescription")

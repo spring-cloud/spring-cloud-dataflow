@@ -16,7 +16,7 @@
 		<!-- Note: Also make sure the parent pom version in spring-cloud-dataflow-dependencies/pom.xml is in sync -->
 		<groupId>org.springframework.cloud</groupId>
 		<artifactId>spring-cloud-build</artifactId>
-		<version>2.2.0.BUILD-SNAPSHOT</version>
+		<version>2.2.0.M6</version>
 		<relativePath />
 	</parent>
 	<licenses>
@@ -59,33 +59,34 @@
 		<java.version>1.8</java.version>
 		<javadoc.opts>-Xdoclint:none</javadoc.opts>
 
-		<spring-cloud-dataflow-ui.version>2.3.0.BUILD-SNAPSHOT</spring-cloud-dataflow-ui.version>
+		<spring-cloud-dataflow-ui.version>2.3.0.M2</spring-cloud-dataflow-ui.version>
 
-		<spring-cloud-deployer.version>2.1.0.BUILD-SNAPSHOT</spring-cloud-deployer.version>
-		<spring-cloud-deployer-local.version>2.1.0.BUILD-SNAPSHOT</spring-cloud-deployer-local.version>
+		<spring-cloud-deployer.version>2.1.0.M2</spring-cloud-deployer.version>
+		<spring-cloud-deployer-local.version>2.1.0.M2</spring-cloud-deployer-local.version>
 
 		<!-- note - check version of reactor at deployer-cf/cf-java-client uses -->
-		<spring-cloud-deployer-cloudfoundry.version>2.1.0.BUILD-SNAPSHOT</spring-cloud-deployer-cloudfoundry.version>
+		<spring-cloud-deployer-cloudfoundry.version>2.1.0.M2</spring-cloud-deployer-cloudfoundry.version>
 		<reactor.version>3.2.0.RELEASE</reactor.version>
-		<spring-cloud-deployer-kubernetes.version>2.1.0.BUILD-SNAPSHOT</spring-cloud-deployer-kubernetes.version>
+		<spring-cloud-deployer-kubernetes.version>2.1.0.M2</spring-cloud-deployer-kubernetes.version>
 		<kubernetes-client.version>4.1.0</kubernetes-client.version>
-		<spring-cloud-kubernetes.version>1.0.2.RELEASE</spring-cloud-kubernetes.version>
 
-		<spring-cloud-skipper.version>2.2.0.BUILD-SNAPSHOT</spring-cloud-skipper.version>
+		<spring-cloud-skipper.version>2.2.0.M2</spring-cloud-skipper.version>
 
-		<spring-cloud-task.version>2.2.0.BUILD-SNAPSHOT</spring-cloud-task.version>
+		<spring-cloud-task.version>2.2.0.M3</spring-cloud-task.version>
 
-		<spring-security-oauth2-autoconfigure.version>2.2.0.M4</spring-security-oauth2-autoconfigure.version>
+		<spring-security-oauth2-autoconfigure.version>2.2.0.RC1</spring-security-oauth2-autoconfigure.version>
 
 		<!-- Note: Make sure to update `spring-cloud-build` version and `spring-cloud-dependencies` version (spring-cloud.version)
 			 are in sync with the https://github.com/spring-cloud/spring-cloud-release/blob/master/pom.xml updates for the respective
 			 release versions -->
-		<spring-cloud.version>Hoxton.BUILD-SNAPSHOT</spring-cloud.version>
-		<java-cfenv-boot.version>1.1.2.BUILD-SNAPSHOT</java-cfenv-boot.version>
+		<spring-cloud.version>Hoxton.M3</spring-cloud.version>
+		<java-cfenv-boot.version>1.1.1.RELEASE</java-cfenv-boot.version>
 
-		<spring-cloud-common-security-config.version>1.2.0.BUILD-SNAPSHOT</spring-cloud-common-security-config.version>
+		<spring-cloud-common-security-config.version>1.2.0.M2</spring-cloud-common-security-config.version>
 
 		<spring-shell.version>1.2.0.RELEASE</spring-shell.version>
+		<!-- Use older flyway until we can use flaway 6.x given to us from boot -->
+		<flyway.version>5.2.4</flyway.version>
 		<commons-io.version>2.4</commons-io.version>
 		<commons-lang.version>2.4</commons-lang.version>
 
@@ -108,6 +109,7 @@
 		<module>spring-cloud-dataflow-rest-client</module>
 		<module>spring-cloud-dataflow-shell</module>
 		<module>spring-cloud-dataflow-shell-core</module>
+		<module>spring-cloud-dataflow-scheduler-task-launcher</module>
 		<module>spring-cloud-dataflow-classic-docs</module>
 		<module>spring-cloud-dataflow-docs</module>
 		<module>spring-cloud-dataflow-completion</module>
@@ -208,6 +210,11 @@
 				<version>${spring-cloud-common-security-config.version}</version>
 			</dependency>
 			<dependency>
+				<groupId>org.flywaydb</groupId>
+				<artifactId>flyway-core</artifactId>
+				<version>${flyway.version}</version>
+			</dependency>
+			<dependency>
 				<groupId>commons-io</groupId>
 				<artifactId>commons-io</artifactId>
 				<version>${commons-io.version}</version>
@@ -235,11 +242,6 @@
 				<version>${spring-cloud-deployer-kubernetes.version}</version>
 			</dependency>
 			<dependency>
-				<groupId>org.springframework.cloud</groupId>
-				<artifactId>spring-cloud-starter-kubernetes-config</artifactId>
-				<version>${spring-cloud-kubernetes.version}</version>
-			</dependency>
-			<dependency>
 				<groupId>org.apache.directory.server</groupId>
 				<artifactId>apacheds-protocol-ldap</artifactId>
 				<version>${apache-directory-server.version}</version>
@@ -248,6 +250,11 @@
 				<groupId>io.codearte.props2yaml</groupId>
 				<artifactId>props2yaml</artifactId>
 				<version>${codearte-props2yml.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>io.projectreactor</groupId>
+				<artifactId>reactor-core</artifactId>
+				<version>${reactor.version}</version>
 			</dependency>
 		</dependencies>
 	</dependencyManagement>

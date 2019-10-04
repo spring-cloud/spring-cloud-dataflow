@@ -34,15 +34,15 @@ import org.slf4j.LoggerFactory;
 
 import org.springframework.cloud.dataflow.core.AbstractTaskPlatformFactory;
 import org.springframework.cloud.dataflow.core.Launcher;
-import org.springframework.cloud.deployer.scheduler.spi.cloudfoundry.CloudFoundryAppScheduler;
-import org.springframework.cloud.deployer.scheduler.spi.cloudfoundry.CloudFoundrySchedulerProperties;
-import org.springframework.cloud.deployer.scheduler.spi.core.Scheduler;
 import org.springframework.cloud.deployer.spi.app.AppDeployer;
 import org.springframework.cloud.deployer.spi.cloudfoundry.CloudFoundryAppDeployer;
 import org.springframework.cloud.deployer.spi.cloudfoundry.CloudFoundryConnectionProperties;
 import org.springframework.cloud.deployer.spi.cloudfoundry.CloudFoundryDeploymentProperties;
 import org.springframework.cloud.deployer.spi.cloudfoundry.CloudFoundryTaskLauncher;
 import org.springframework.cloud.deployer.spi.core.RuntimeEnvironmentInfo;
+import org.springframework.cloud.deployer.spi.scheduler.Scheduler;
+import org.springframework.cloud.deployer.spi.scheduler.cloudfoundry.CloudFoundryAppScheduler;
+import org.springframework.cloud.deployer.spi.scheduler.cloudfoundry.CloudFoundrySchedulerProperties;
 import org.springframework.cloud.deployer.spi.util.RuntimeVersionUtils;
 
 /**

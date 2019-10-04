@@ -20,12 +20,13 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.springframework.cloud.deployer.spi.scheduler.ScheduleInfo;
 import org.springframework.hateoas.PagedModel;
 import org.springframework.hateoas.RepresentationModel;
 import org.springframework.util.Assert;
 
 /**
- * A HATEOAS representation of a {@link org.springframework.cloud.deployer.scheduler.spi.core.ScheduleInfo}.
+ * A HATEOAS representation of a {@link ScheduleInfo}.
  *
  * @author Glenn Renfro
  */
