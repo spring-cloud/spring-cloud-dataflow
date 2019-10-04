@@ -54,6 +54,8 @@ public class JobCommands implements CommandMarker {
 
 	private static final String EXECUTION_LIST = "job execution list";
 
+	private static final String EXECUTION_RESTART = "job execution restart";
+
 	private static final String STEP_EXECUTION_LIST = "job execution step list";
 
 	private static final String INSTANCE_DISPLAY = "job instance display";
@@ -65,8 +67,8 @@ public class JobCommands implements CommandMarker {
 	@Autowired
 	private DataFlowShell dataFlowShell;
 
-	@CliAvailabilityIndicator({ EXECUTION_DISPLAY, EXECUTION_LIST, STEP_EXECUTION_LIST, INSTANCE_DISPLAY,
-			STEP_EXECUTION_PROGRESS, STEP_EXECUTION_DISPLAY })
+	@CliAvailabilityIndicator({ EXECUTION_DISPLAY, EXECUTION_LIST, EXECUTION_RESTART, STEP_EXECUTION_LIST,
+			INSTANCE_DISPLAY, STEP_EXECUTION_PROGRESS, STEP_EXECUTION_DISPLAY })
 	public boolean availableWithViewRole() {
 		return dataFlowShell.hasAccess(RoleType.VIEW, OpsType.JOB);
 	}
@@ -99,6 +101,14 @@ public class JobCommands implements CommandMarker {
 		DataFlowTables.applyStyle(builder);
 
 		return builder.build();
+	}
+
+	@CliCommand(value = EXECUTION_RESTART, help = "Restart a failed job by jobExecutionId")
+	public String executionRestart(
+			@CliOption(key = { "id" }, help = "the job execution id", mandatory = true) long id) {
+		jobOperations().executionRestart(id);
+
+		return String.format("Restart request has been sent for job execution '%s'", id);
 	}
 
 	@CliCommand(value = EXECUTION_DISPLAY, help = "Display the details of a specific job execution")

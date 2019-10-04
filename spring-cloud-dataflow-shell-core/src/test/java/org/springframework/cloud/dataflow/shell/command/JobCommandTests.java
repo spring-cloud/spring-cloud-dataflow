@@ -66,8 +66,6 @@ public class JobCommandTests extends AbstractShellIntegrationTest {
 
 	private static final Logger logger = LoggerFactory.getLogger(JobCommandTests.class);
 
-	private static DataSource dataSource;
-
 	private static TaskExecutionDao dao;
 
 	private static JobRepository jobRepository;
@@ -80,7 +78,7 @@ public class JobCommandTests extends AbstractShellIntegrationTest {
 
 	@BeforeClass
 	public static void setUp() throws Exception {
-		dataSource = applicationContext.getBean(DataSource.class);
+		DataSource dataSource = applicationContext.getBean(DataSource.class);
 		taskBatchDao = new JdbcTaskBatchDao(dataSource);
 		JobRepositoryFactoryBean repositoryFactoryBean = new JobRepositoryFactoryBean();
 		repositoryFactoryBean.setDataSource(dataSource);
@@ -109,12 +107,12 @@ public class JobCommandTests extends AbstractShellIntegrationTest {
 	private static long createSampleJob(String jobName, int jobExecutionCount) {
 		JobInstance instance = jobRepository.createJobInstance(jobName, new JobParameters());
 		jobInstances.add(instance);
-		TaskExecution taskExecution = dao.createTaskExecution(jobName, new Date(), new ArrayList<String>(), null);
+		TaskExecution taskExecution = dao.createTaskExecution(jobName, new Date(), new ArrayList<>(), null);
 		Map<String, JobParameter> jobParameterMap = new HashMap<>();
 		jobParameterMap.put("foo", new JobParameter("FOO", true));
 		jobParameterMap.put("bar", new JobParameter("BAR", false));
 		JobParameters jobParameters = new JobParameters(jobParameterMap);
-		JobExecution jobExecution = null;
+		JobExecution jobExecution;
 		for (int i = 0; i < jobExecutionCount; i++) {
 			jobExecution = jobRepository.createJobExecution(instance, jobParameters, null);
 			taskBatchDao.saveRelationship(taskExecution, jobExecution);

@@ -36,6 +36,13 @@ public interface JobOperations {
 	PagedModel<JobExecutionResource> executionList();
 
 	/**
+	 * Restarts a job by id
+	 *
+	 * @param id job execution id
+	 */
+	void executionRestart(long id);
+
+	/**
 	 * @return the list job executions without step executions known to the system.
 	 */
 	PagedModel<JobExecutionThinResource> executionThinList();

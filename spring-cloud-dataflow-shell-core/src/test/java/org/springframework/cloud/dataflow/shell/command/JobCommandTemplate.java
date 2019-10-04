@@ -16,9 +16,6 @@
 
 package org.springframework.cloud.dataflow.shell.command;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import org.springframework.shell.core.CommandResult;
 import org.springframework.shell.core.JLineShellComponent;
 
@@ -32,8 +29,6 @@ import org.springframework.shell.core.JLineShellComponent;
 public class JobCommandTemplate {
 
 	private final JLineShellComponent shell;
-
-	private List<String> tasks = new ArrayList<String>();
 
 	/**
 	 * Construct a new JobCommandTemplate, given a spring shell.
