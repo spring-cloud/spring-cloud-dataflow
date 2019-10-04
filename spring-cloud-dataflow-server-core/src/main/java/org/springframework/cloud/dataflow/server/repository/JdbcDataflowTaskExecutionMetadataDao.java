@@ -118,7 +118,7 @@ public class JdbcDataflowTaskExecutionMetadataDao implements DataflowTaskExecuti
 		SqlPagingQueryProviderFactoryBean sqlPagingQueryProviderFactoryBean = new SqlPagingQueryProviderFactoryBean();
 
 		sqlPagingQueryProviderFactoryBean.setDataSource(this.dataSource);
-		sqlPagingQueryProviderFactoryBean.setSelectClause("m.task_execution_manifest as task_execution_manifest");
+		sqlPagingQueryProviderFactoryBean.setSelectClause("task_execution_manifest");
 		sqlPagingQueryProviderFactoryBean.setFromClause("task_execution_metadata m inner join TASK_EXECUTION e on m.task_execution_id = e.TASK_EXECUTION_ID");
 		sqlPagingQueryProviderFactoryBean.setWhereClause("e.TASK_NAME = :taskName");
 		sqlPagingQueryProviderFactoryBean.setSortKeys(sortKeys);
