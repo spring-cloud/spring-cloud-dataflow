@@ -50,7 +50,7 @@ import org.springframework.util.Assert;
  * @author Christian Tzolov
  *
  */
-public class Stream {
+public class Stream implements AutoCloseable {
 
 	private String name;
 
@@ -177,6 +177,11 @@ public class Stream {
 	public String getStatus() {
 		StreamDefinitionResource resource = client.streamOperations().getStreamDefinition(this.name);
 		return resource.getStatus();
+	}
+
+	@Override
+	public void close() {
+		this.destroy();
 	}
 
 	public static class StreamNameBuilder extends PropertyBuilder{
