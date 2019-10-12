@@ -13,23 +13,27 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.springframework.cloud.dataflow.integration.test;
 
 import java.net.URI;
 import java.nio.charset.Charset;
 import java.time.Duration;
-import java.util.HashMap;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
 import java.util.Map;
-import java.util.concurrent.TimeUnit;
-import java.util.function.Predicate;
+import java.util.Random;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import com.palantir.docker.compose.DockerComposeRule;
+import com.palantir.docker.compose.configuration.DockerComposeFiles;
 import com.palantir.docker.compose.connection.DockerMachine;
 import com.palantir.docker.compose.connection.waiting.HealthChecks;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.ClassRule;
 import org.junit.Test;
@@ -38,12 +42,18 @@ import org.junit.runner.RunWith;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import org.springframework.cloud.dataflow.integration.test.util.ClosableDockerComposeRule;
+import org.springframework.cloud.dataflow.integration.test.util.RuntimeApplicationHelper;
+import org.springframework.cloud.dataflow.integration.test.util.Wait;
 import org.springframework.cloud.dataflow.rest.client.DataFlowTemplate;
+import org.springframework.cloud.dataflow.rest.client.TaskOperations;
 import org.springframework.cloud.dataflow.rest.client.dsl.DeploymentPropertiesBuilder;
 import org.springframework.cloud.dataflow.rest.client.dsl.Stream;
 import org.springframework.cloud.dataflow.rest.client.dsl.StreamDefinition;
-import org.springframework.cloud.dataflow.rest.resource.AppInstanceStatusResource;
-import org.springframework.cloud.dataflow.rest.resource.AppStatusResource;
+import org.springframework.cloud.dataflow.rest.resource.JobExecutionResource;
+import org.springframework.cloud.dataflow.rest.resource.TaskDefinitionResource;
+import org.springframework.cloud.dataflow.rest.resource.TaskExecutionResource;
+import org.springframework.cloud.dataflow.rest.resource.about.AboutResource;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.util.StreamUtils;
@@ -52,334 +62,514 @@ import org.springframework.web.client.RestTemplate;
 
 import static org.hamcrest.Matchers.greaterThanOrEqualTo;
 import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.oneOf;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 
 /**
+ * DataFlow smoke tests that uses docker-compose to create fully fledged, local test environment.
+ *
+ * Test fixture applies the same docker compose files used for the Data Flow local installation:
+ *  - https://dataflow.spring.io/docs/installation/local/docker/
+ *  - https://dataflow.spring.io/docs/installation/local/docker-customize/
+ *
+ * The Palantir DockerMachine and DockerComposeRule are used to programmatically deploy the docker-compose files.
+ *
+ * The DOCKER_COMPOSE_PATHS allow to configure the list of docker-compose files used for the test.
+ * The DATAFLOW_VERSION, SKIPPER_VERSION, STREAM_APPS_URI and TASK_APPS_URI variables (configured via the DockerMachine)
+ * allow to specify the dataflow/skipper versions to be used in the tests as well as the version of the Apps and Tasks
+ * used.
+ *
+ * The ClosableDockerComposeRule will ensure that all docker containers are removed on tests completion of failure.
+ *
+ * Logs for all docker containers (expect deployed apps) are saved under target/dockerLogs/dockerComposeRuleTest
+ *
+ * The Data Flow REST API (https://docs.spring.io/spring-cloud-dataflow/docs/current/reference/htmlsingle/#api-guide),
+ * Java REST Clients (such as DataFlowTemplate, RuntimeOperations, TaskOperations) and the
+ * Java DSL (https://dataflow.spring.io/docs/feature-guides/streams/java-dsl/) are used by the tests to interact with
+ * the Data Flow environment.
+ *
+ * The {@link Wait} is DSL utility that allows to timeout block the test execution until certain stream or application
+ * state is reached or certain log content appears.
+ *
+ * The {@link RuntimeApplicationHelper} help to retrieve the application attributes and log files across the Local,
+ * CF and K8s platforms.
+ *
+ * -------------------------------------------------------------------------------
+ * Advanced Configurations: Testing streams on remote platforms (k8s and CF)
+ * -------------------------------------------------------------------------------
+ *
+ * 1. Run stream tests on Kubernetes (k8s) platform
+ *
+ * 1.1 Create a docker-compose-k8s.yml with the following content and add the path to the DOCKER_COMPOSE_PATHS list.
+ * <code>
+ * version: '3'
+ *  services:
+ *   skipper-server:
+ *     environment:
+ *       - SPRING_CLOUD_SKIPPER_SERVER_PLATFORM_KUBERNETES_ACCOUNTS_K8S_FABRIC8_MASTER_URL=[Your k8s master URL]
+ *       - SPRING_CLOUD_SKIPPER_SERVER_PLATFORM_KUBERNETES_ACCOUNTS_K8S_FABRIC8_USERNAME=[Your k8s Username]
+ *       - SPRING_CLOUD_SKIPPER_SERVER_PLATFORM_KUBERNETES_ACCOUNTS_K8S_FABRIC8_PASSWORD=[Your k8s Password]
+ *       - SPRING_CLOUD_SKIPPER_SERVER_PLATFORM_KUBERNETES_ACCOUNTS_K8S_FABRIC8_NAMESPACE=default
+ *       - SPRING_CLOUD_SKIPPER_SERVER_PLATFORM_KUBERNETES_ACCOUNTS_K8S_FABRIC8_TRUST_CERTS=true
+ *       - SPRING_CLOUD_SKIPPER_SERVER_PLATFORM_KUBERNETES_ACCOUNTS_K8S_CREATE_LOAD_BALANCER=true
+ * </code>
+ *
+ * 1.2 Start Kafka message broker on the k8s cluster. Follow the kubectl DataFlow instructions:
+ * https://dataflow.spring.io/docs/installation/kubernetes/kubectl/#choose-a-message-broker
+ *
+ * 1.3 Set the TEST_PLATFORM_NAME to 'k8s'
+ * <code>
+ *     private static final String TEST_PLATFORM_NAME = "k8s";
+ * </code>
+ *
+ * 1.4. In the DockerMachine configuration set the STREAM_APPS_URI variable to link loading Kafka/Docker apps.
+ * For example: https://dataflow.spring.io/rabbitmq-maven-latest
+ *
+ * 2. Run stream tests on CloudFoundry (CF) platform
+ *
+ * 2.1  Create a docker-compose-cf.yml with the following content and add the path to the DOCKER_COMPOSE_PATHS list.
+ * <code>
+ * version: '3'
+ *  services:
+ *   skipper-server:
+ *     environment:
+ *       - SPRING_CLOUD_SKIPPER_SERVER_PLATFORM_CLOUDFOUNDRY_ACCOUNTS_CF_CONNECTION_URL=[CF API URL]
+ *       - SPRING_CLOUD_SKIPPER_SERVER_PLATFORM_CLOUDFOUNDRY_ACCOUNTS_CF_CONNECTION_DOMAIN=[DOMAIN]
+ *       - SPRING_CLOUD_SKIPPER_SERVER_PLATFORM_CLOUDFOUNDRY_ACCOUNTS_CF_CONNECTION_ORG=[ORG]
+ *       - SPRING_CLOUD_SKIPPER_SERVER_PLATFORM_CLOUDFOUNDRY_ACCOUNTS_CF_CONNECTION_SPACE=[SPACE]
+ *       - SPRING_CLOUD_SKIPPER_SERVER_PLATFORM_CLOUDFOUNDRY_ACCOUNTS_CF_CONNECTION_USERNAME=[USERNAME]
+ *       - SPRING_CLOUD_SKIPPER_SERVER_PLATFORM_CLOUDFOUNDRY_ACCOUNTS_CF_CONNECTION_PASSWORD=[PASSWORD]
+ *       - SPRING_CLOUD_SKIPPER_SERVER_PLATFORM_CLOUDFOUNDRY_ACCOUNTS_CF_CONNECTION_SKIP_SSL_VALIDATION=true
+ *       - SPRING_CLOUD_SKIPPER_SERVER_PLATFORM_CLOUDFOUNDRY_ACCOUNTS_CF_DEPLOYMENT_DELETE_ROUTES=false
+ *       - SPRING_CLOUD_SKIPPER_SERVER_PLATFORM_CLOUDFOUNDRY_ACCOUNTS_CF_DEPLOYMENT_SERVICES=rabbit
+ *       - SPRING_CLOUD_SKIPPER_SERVER_PLATFORM_CLOUDFOUNDRY_ACCOUNTS_CF_DEPLOYMENT_ENABLE_RANDOM_APP_NAME_PREFIX=true
+ *       - SPRING_CLOUD_SKIPPER_SERVER_PLATFORM_CLOUDFOUNDRY_ACCOUNTS_CF_DEPLOYMENT_MEMORY=2048
+ * </code>
+ *
+ * 2.2 on the CF platform start a RabbitMQ service called 'rabbit'.
+ *
+ * 2.3 Set the TEST_PLATFORM_NAME to 'cf'
+ * <code>
+ *     private static final String TEST_PLATFORM_NAME = "cf";
+ * </code>
+ *
+ * 2.4. In the DockerMachine configuration set the STREAM_APPS_URI variable to link loading Rabbit/Maven apps.
+ * For example: https://dataflow.spring.io/rabbitmq-maven-latest
+ *
+ * NOTE: if you manually interrupt the test execution before it has completed of failed, it is likely that some docker
+ * containers will be left hanging. Use 'docker rm $(docker ps -a -q) -f' to remove all docker containers. To clean all
+ * Spring app on K8s platform use 'kubectl delete all,cm -l role=spring-app'
+ *
  * @author Christian Tzolov
- **/
+ */
 @RunWith(SpringRunner.class)
 public class DockerComposeIT {
 
 	private static final Logger logger = LoggerFactory.getLogger(DockerComposeIT.class);
 
-	private static final String DOCKER_COMPOSE_PATH = "docker-compose.yml"; //src/main/resources/docker-compose.yml
-
+	// Stream lifecycle states
 	private static final String DEPLOYED = "deployed";
 	private static final String DELETED = "deleted";
 	private static final String UNDEPLOYED = "undeployed";
 	private static final String DEPLOYING = "deploying";
+	private static final String PARTIAL = "partial";
 
-	// TODO parametrize DATAFLOW_VERSION and SKIPPER_VERSION
+	/**
+	 * Data Flow version to use for the tests. The findCurrentDataFlowVersion will try to retrieve the latest BS version
+	 * or will fall back to the default version provided as parameter.
+	 */
+	private static final String DATAFLOW_VERSION = findCurrentDataFlowVersion("2.3.0.BUILD-SNAPSHOT");
+
+	/**
+	 * Skipper version used for the tests.
+	 */
+	private static final String SKIPPER_VERSION = "2.2.0.BUILD-SNAPSHOT";
+
+	/**
+	 * Pre-registered Task apps used for testing.
+	 */
+	private static final String TASK_APPS_URI = "https://dataflow.spring.io/task-maven-latest&force=true";
+
+	/**
+	 * Common Apps URIs
+	 */
+	private static final String KAFKA_MAVEN_STREAM_APPS_URI = "https://dataflow.spring.io/kafka-maven-latest&force=true"; // local/kafka
+	private static final String RABBITMQ_MAVEN_STREAM_APPS_URI = "https://dataflow.spring.io/rabbitmq-maven-latest&force=true"; // cf or local/rabbit
+	private static final String KAFKA_DOCKER_STREAM_APPS_URI = "https://dataflow.spring.io/kafka-docker-latest&force=true"; // k8s
+
+	/**
+	 * Pre-registered Stream apps used in the tests
+	 */
+	private static final String STREAM_APPS_URI = KAFKA_MAVEN_STREAM_APPS_URI;
+
+	/**
+	 * default - local platform (e.g. docker-compose)
+	 * cf - Cloud Foundry platform, configured in docker-compose-cf.yml
+	 * k8s - GKE/Kubernetes platform, configured via docker-compose-k8s.yml.
+	 */
+	private static final String TEST_PLATFORM_NAME = "default";
+
+	/**
+	 * Target Data FLow platform to use for the testing: https://dataflow.spring.io/docs/concepts/architecture/#platforms
+	 *
+	 * By default the Local (e.g. platformName=default) Data Flow environment is used for testing. If you have
+	 * provisioned docker-compose file to add remote access ot CF or K8s environments you can use the target
+	 * platform/account name instead.
+	 */
+	private static final String SPRING_CLOUD_DATAFLOW_SKIPPER_PLATFORM_NAME = "spring.cloud.dataflow.skipper.platformName";
+
+	/**
+	 * List of docker compose files to mix to bootstrap as a test environment. Most files are found under the
+	 * 'spring-cloud-dataflow/spring-cloud-dataflow-server' folder.
+	 */
+	private static final String[] DOCKER_COMPOSE_PATHS = {
+			"docker-compose.yml",              // Configures DataFlow, Skipper, Kafka/Zookeeper and MySQL
+			//"docker-compose-prometheus.yml",   // metrics collection/visualization with Prometheus and Grafana.
+			//"docker-compose-influxdb.yml",     // metrics collection/visualization with InfluxDB and Grafana.
+			//"docker-compose-postgres.yml",     // Replaces local MySQL database by Postgres.
+			//"docker-compose-rabbitmq.yml",     // Replaces local Kafka message broker by RabbitMQ.
+			//"docker-compose-k8s.yml",          // Adds K8s target platform (called k8s).
+			//"docker-compose-cf.yml"            // Adds CloudFoundry target platform (called cf).
+	};
+
+	/**
+	 * Initialize the docker machine with the required environment variables.
+	 */
 	private static DockerMachine dockerMachine = DockerMachine.localMachine()
-			.withAdditionalEnvironmentVariable("DATAFLOW_VERSION", findCurrentDataFlowVersion("2.2.0.BUILD-SNAPSHOT"))
-			.withAdditionalEnvironmentVariable("SKIPPER_VERSION", "2.1.0.BUILD-SNAPSHOT")
+			.withAdditionalEnvironmentVariable("DATAFLOW_VERSION", DATAFLOW_VERSION)
+			.withAdditionalEnvironmentVariable("SKIPPER_VERSION", SKIPPER_VERSION)
+			.withAdditionalEnvironmentVariable("STREAM_APPS_URI", STREAM_APPS_URI)
+			.withAdditionalEnvironmentVariable("TASK_APPS_URI", TASK_APPS_URI)
 			.build();
-
-	private static DockerComposeRule docker = DockerComposeRule.builder()
-			.file(DOCKER_COMPOSE_PATH)
-			.machine(dockerMachine)
-			.saveLogsTo("target/dockerLogs/dockerComposeRuleTest")
-			.waitingForService("dataflow-server", HealthChecks.toRespond2xxOverHttp(9393,
-					(port) -> port.inFormat("http://$HOST:$EXTERNAL_PORT")))
-			.waitingForService("skipper-server", HealthChecks.toRespond2xxOverHttp(7577,
-					(port) -> port.inFormat("http://$HOST:$EXTERNAL_PORT")))
-			.pullOnStartup(true) // set to false to test with local dataflow and skipper images.
-			.build();
-
 	/**
 	 * DockerComposeRule doesnt't release the created containers if the before() fails.
 	 * The dockerRuleWrapper ensures that all containers are shutdown in case of failure.
 	 */
 	@ClassRule
-	public static ExternalResource dockerRuleWrapper = new ExternalResource() {
-		@Override
-		protected void before() throws Throwable {
-			try {
-				docker.before();
-			}
-			catch (Exception ex) {
-				docker.after();
-				throw ex;
-			}
-		}
-
-		@Override
-		protected void after() {
-			docker.after();
-		}
-	};
+	public static ExternalResource dockerRuleWrapper = ClosableDockerComposeRule.of(
+			DockerComposeRule.builder()
+					.files(DockerComposeFiles.from(DOCKER_COMPOSE_PATHS))
+					.machine(dockerMachine)
+					.saveLogsTo("target/dockerLogs/dockerComposeRuleTest")
+					.waitingForService("dataflow-server", HealthChecks.toRespond2xxOverHttp(9393,
+							(port) -> port.inFormat("http://$HOST:$EXTERNAL_PORT")))
+					.waitingForService("skipper-server", HealthChecks.toRespond2xxOverHttp(7577,
+							(port) -> port.inFormat("http://$HOST:$EXTERNAL_PORT")))
+					.pullOnStartup(true) // set to false to test with local dataflow and skipper images.
+					.build());
 
 	private DataFlowTemplate dataFlowOperations;
-
 	private RuntimeApplicationHelper runtimeApps;
+	private TaskOperations taskOperations;
+	private RestTemplate restTemplate;
 
 	@Before
 	public void before() {
 		dataFlowOperations = new DataFlowTemplate(URI.create("http://localhost:9393"));
-		runtimeApps = new RuntimeApplicationHelper(dataFlowOperations);
+		logger.info("Configured platforms: " + dataFlowOperations.streamOperations().listPlatforms().stream()
+				.map(d -> String.format("[%s:%s]", d.getName(), d.getType())).collect(Collectors.joining()));
+		runtimeApps = new RuntimeApplicationHelper(dataFlowOperations, TEST_PLATFORM_NAME);
+		taskOperations = dataFlowOperations.taskOperations();
+		Wait.on(dataFlowOperations.appRegistryOperations()).until(appRegistry ->
+				appRegistry.list().getMetadata().getTotalElements() >= 68L);
+		restTemplate = new RestTemplate(); // used for HTTP post in tests
+	}
+
+	@After
+	public void after() {
+		dataFlowOperations.streamOperations().destroyAll();
+		dataFlowOperations.taskOperations().destroyAll();
 	}
 
 	@Test
-	public void testFeatureInfo() {
-		assertTrue(dataFlowOperations.aboutOperation().get().getFeatureInfo().isGrafanaEnabled());
-		assertTrue(dataFlowOperations.aboutOperation().get().getFeatureInfo().isAnalyticsEnabled());
-		assertTrue(dataFlowOperations.aboutOperation().get().getFeatureInfo().isStreamsEnabled());
-		assertTrue(dataFlowOperations.aboutOperation().get().getFeatureInfo().isTasksEnabled());
+	public void featureInfo() {
+		AboutResource about = dataFlowOperations.aboutOperation().get();
+		//assertTrue(about.getFeatureInfo().isGrafanaEnabled()); // true only if the influxdb or prometheus is enabled.
+		assertTrue(about.getFeatureInfo().isAnalyticsEnabled());
+		assertTrue(about.getFeatureInfo().isStreamsEnabled());
+		assertTrue(about.getFeatureInfo().isTasksEnabled());
+		assertFalse(about.getFeatureInfo().isSchedulesEnabled());
 	}
 
 	@Test
-	public void testApps() {
+	public void appsCount() {
 		assertThat(dataFlowOperations.appRegistryOperations().list().getMetadata().getTotalElements(),
 				greaterThanOrEqualTo(68L));
 	}
 
+	// -----------------------------------------------------------------------
+	//                            STREAM  TESTS
+	// -----------------------------------------------------------------------
 	@Test
-	public void testStream() {
+	public void streamTransform() {
 
 		StreamDefinition streamDefinition = Stream.builder(dataFlowOperations)
-				.name("ticktock")
+				.name("transform-test")
+				.definition("http | transform --expression=payload.toUpperCase() | log")
+				.create();
+
+		// DEPLOY
+		logger.info("transform-test: DEPLOY");
+		try (Stream stream = streamDefinition.deploy(new DeploymentPropertiesBuilder()
+				.put(SPRING_CLOUD_DATAFLOW_SKIPPER_PLATFORM_NAME, runtimeApps.getPlatformName())
+				.put("app.*.logging.file", "${PID}-test.log")
+				.put("app.*.endpoints.logfile.sensitive", "false")
+				.put("app.*.management.endpoints.web.exposure.include", "*")
+				.put("app.*.spring.cloud.streamapp.security.enabled", "false")
+				.build())) {
+
+			assertThat(stream.getStatus(), is(oneOf(DEPLOYING, PARTIAL)));
+			Wait.on(stream).withTimeout(Duration.ofMinutes(10)).until(s -> s.getStatus().equals(DEPLOYED));
+
+
+			Map<String, String> httpApp = runtimeApps.getApplicationInstances(stream.getName(), "http")
+					.values().iterator().next();
+
+			String httpAppUrl = runtimeApps.getApplicationInstanceUrl(httpApp);
+
+			String message = "Unique Test message: " + new Random().nextInt();
+
+			logger.info("transform-test: send massage - " + message);
+			restTemplate.postForObject(httpAppUrl, message, String.class);
+
+			Wait.on(stream).until(s -> runtimeApps.getFirstInstanceLog(s.getName(), "log")
+					.contains(message.toUpperCase()));
+
+			logger.info("transform-test: message received");
+		}
+	}
+
+	@Test
+	public void streamPartitioning() {
+
+		StreamDefinition streamDefinition = Stream.builder(dataFlowOperations)
+				.name("partitioning-test")
+				.definition("http | splitter --expression=payload.split(' ') | log")
+				.create();
+
+		logger.info("partitioning-test: DEPLOY");
+		try (Stream stream = streamDefinition.deploy(new DeploymentPropertiesBuilder()
+				.put(SPRING_CLOUD_DATAFLOW_SKIPPER_PLATFORM_NAME, runtimeApps.getPlatformName())
+				.put("app.*.logging.file", "${PID}-test.log")
+				.put("app.*.endpoints.logfile.sensitive", "false")
+				.put("app.*.management.endpoints.web.exposure.include", "*")
+				.put("app.*.spring.cloud.streamapp.security.enabled", "false")
+				// Create 2 log instances with partition key computed from the payload.
+				.put("deployer.log.count", "2")
+				.put("app.splitter.producer.partitionKeyExpression", "payload")
+				.put("app.log.spring.cloud.stream.kafka.bindings.input.consumer.autoRebalanceEnabled", "false")
+				.put("app.log.logging.pattern.level", "WOODCHUCK-${INSTANCE_INDEX:${CF_INSTANCE_INDEX:${spring.cloud.stream.instanceIndex:0}}} %5p")
+				.build())) {
+
+			assertThat(stream.getStatus(), is(oneOf(DEPLOYING, PARTIAL)));
+			Wait.on(stream).withTimeout(Duration.ofMinutes(10)).until(s -> s.getStatus().equals(DEPLOYED));
+
+			logger.info("partitioning-test:" + stream.getStatus());
+
+			Map<String, String> httpApp = runtimeApps.getApplicationInstances(stream.getName(), "http")
+					.values().iterator().next();
+
+			String httpAppUrl = runtimeApps.getApplicationInstanceUrl(httpApp);
+
+			String message = "How much wood would a woodchuck chuck if a woodchuck could chuck wood";
+			restTemplate.postForObject(httpAppUrl, message, String.class);
+
+			logger.info("partitioning-test: send - " + message);
+
+			Wait.on(stream)
+					.withDescription("Each partition should contain parts of the message")
+					.withTimeout(Duration.ofSeconds(60))
+					.until(s -> {
+						Collection<String> logs = runtimeApps.applicationInstanceLogs(s.getName(), "log").values();
+
+						if (logs.size() != 2) return false;
+
+						return logs.stream()
+								// partition order is undetermined
+								.map(log -> (log.contains("WOODCHUCK-0")) ?
+										allMatch(log, "WOODCHUCK-0", "How", "chuck") :
+										allMatch(log, "WOODCHUCK-1", "much", "wood", "would", "if", "a", "woodchuck", "could"))
+								.reduce(Boolean::logicalAnd)
+								.orElse(false);
+					});
+
+			logger.info("partitioning-test: message partitions received by both log apps");
+		}
+	}
+
+	private boolean allMatch(String inputStr, String... items) {
+		return Arrays.stream(items).allMatch(inputStr::contains);
+	}
+
+	@Test
+	public void streamLifecycle() {
+		// CREATE
+		StreamDefinition streamDefinition = Stream.builder(dataFlowOperations)
+				.name("lifecycle-test")
 				.definition("time | log --log.expression='TICKTOCK - TIMESTAMP: '.concat(payload)")
 				.create();
 
 		// DEPLOY
-		Stream stream = streamDefinition.deploy(new DeploymentPropertiesBuilder()
+		logger.info("lifecycle-test: DEPLOY");
+		try (Stream stream = streamDefinition.deploy(new DeploymentPropertiesBuilder()
+				.put(SPRING_CLOUD_DATAFLOW_SKIPPER_PLATFORM_NAME, runtimeApps.getPlatformName())
 				.put("app.*.logging.file", "${PID}-test.log")
 				.put("app.*.endpoints.logfile.sensitive", "false")
-				// Specific to Boot 2.x applications, also allows access without authentication
 				.put("app.*.management.endpoints.web.exposure.include", "*")
 				.put("app.*.spring.cloud.streamapp.security.enabled", "false")
-				.build());
+				.build())) {
 
-		assertThat(stream.getStatus(), is(DEPLOYING));
-		Wait.on(stream).until(s -> !s.getStatus().equals(DEPLOYING)); //E.g. blocks until in `deploying` state.
+			assertThat(stream.getStatus(), is(oneOf(DEPLOYING, PARTIAL)));
+			Wait.on(stream).withTimeout(Duration.ofMinutes(5)).until(s -> s.getStatus().equals(DEPLOYED));
 
-		assertThat(stream.getStatus(), is(DEPLOYED));
+			logger.info("lifecycle-test: " + stream.getStatus());
 
-		Wait.on(stream).until(s -> runtimeApps.getFirstInstanceLog(s.getName(), "log")
-				.contains("TICKTOCK - TIMESTAMP:"));
+			Wait.on(stream).until(s -> runtimeApps.getFirstInstanceLog(s.getName(), "log")
+					.contains("TICKTOCK - TIMESTAMP:"));
 
-		assertThat(stream.history().size(), is(1));
-		assertThat(stream.history().get(1), is(DEPLOYED));
+			assertThat(stream.history().size(), is(1));
+			assertThat(stream.history().get(1), is(DEPLOYED));
 
-		// UPDATE
-		stream.update(new DeploymentPropertiesBuilder()
-				.put("app.log.log.expression", "'Updated TICKTOCK - TIMESTAMP: '.concat(payload)")
-				// TODO investigate why on update the app-starters-core overrides the original web.exposure.include!!!
-				.put("app.*.management.endpoints.web.exposure.include", "*")
-				.build());
+			// UPDATE
+			logger.info("lifecycle-test: UPDATE");
+			stream.update(new DeploymentPropertiesBuilder()
+					.put("app.log.log.expression", "'Updated TICKTOCK - TIMESTAMP: '.concat(payload)")
+					// TODO investigate why on update the app-starters-core overrides the original web.exposure.include!!!
+					.put("app.*.management.endpoints.web.exposure.include", "*")
+					.build());
 
-		Wait.on(stream).withTimeout(Duration.ofMinutes(5)).until(s -> s.getStatus().equals(DEPLOYED));
-		assertThat(stream.getStatus(), is(DEPLOYED));
+			Wait.on(stream).withTimeout(Duration.ofMinutes(5)).until(s -> s.getStatus().equals(DEPLOYED));
+			assertThat(stream.getStatus(), is(DEPLOYED));
 
-		Wait.on(stream).until(s -> runtimeApps.getFirstInstanceLog(s.getName(), "log")
-				.contains("Updated TICKTOCK - TIMESTAMP:"));
+			Wait.on(stream).until(s -> runtimeApps.getFirstInstanceLog(s.getName(), "log")
+					.contains("Updated TICKTOCK - TIMESTAMP:"));
 
-		assertThat(stream.history().size(), is(2));
-		assertThat(stream.history().get(1), is(DELETED));
-		assertThat(stream.history().get(2), is(DEPLOYED));
+			logger.info("lifecycle-test: updated");
 
-		// ROLLBACK
-		stream.rollback(0);
+			assertThat(stream.history().size(), is(2));
+			assertThat(stream.history().get(1), is(DELETED));
+			assertThat(stream.history().get(2), is(DEPLOYED));
 
-		Wait.on(stream).until(s -> s.getStatus().equals(DEPLOYED));
-		assertThat(stream.getStatus(), is(DEPLOYED));
+			// ROLLBACK
+			logger.info("lifecycle-test: ROLLBACK");
+			stream.rollback(0);
 
-		Wait.on(stream).until(s -> runtimeApps.getFirstInstanceLog(s.getName(), "log")
-				.contains("TICKTOCK - TIMESTAMP:"));
+			Wait.on(stream).until(s -> s.getStatus().equals(DEPLOYED));
+			assertThat(stream.getStatus(), is(DEPLOYED));
 
-		assertThat(stream.history().size(), is(3));
-		assertThat(stream.history().get(1), is(DELETED));
-		assertThat(stream.history().get(2), is(DELETED));
-		assertThat(stream.history().get(3), is(DEPLOYED));
+			Wait.on(stream).until(s -> runtimeApps.getFirstInstanceLog(s.getName(), "log")
+					.contains("TICKTOCK - TIMESTAMP:"));
 
-		// UNDEPLOY
-		stream.undeploy();
+			logger.info("lifecycle-test: rolled back");
+			assertThat(stream.history().size(), is(3));
+			assertThat(stream.history().get(1), is(DELETED));
+			assertThat(stream.history().get(2), is(DELETED));
+			assertThat(stream.history().get(3), is(DEPLOYED));
 
-		Wait.on(stream).until(s -> s.getStatus().equals(UNDEPLOYED));
-		assertThat(stream.getStatus(), is(UNDEPLOYED));
+			// UNDEPLOY
+			logger.info("lifecycle-test: UNDEPLOY");
+			stream.undeploy();
 
-		assertThat(stream.history().size(), is(3));
-		assertThat(stream.history().get(1), is(DELETED));
-		assertThat(stream.history().get(2), is(DELETED));
-		assertThat(stream.history().get(3), is(DELETED));
+			Wait.on(stream).until(s -> s.getStatus().equals(UNDEPLOYED));
+			assertThat(stream.getStatus(), is(UNDEPLOYED));
 
-		// DESTROY
-		assertThat(dataFlowOperations.streamOperations().list().getMetadata().getTotalElements(), is(1L));
+			logger.info("lifecycle-test: undeployed");
 
-		stream.destroy();
+			assertThat(stream.history().size(), is(3));
+			assertThat(stream.history().get(1), is(DELETED));
+			assertThat(stream.history().get(2), is(DELETED));
+			assertThat(stream.history().get(3), is(DELETED));
 
+			assertThat(dataFlowOperations.streamOperations().list().getMetadata().getTotalElements(), is(1L));
+			// DESTROY
+		}
 		assertThat(dataFlowOperations.streamOperations().list().getMetadata().getTotalElements(), is(0L));
 	}
 
-	// TODO add Task smoking tests
+	// -----------------------------------------------------------------------
+	//                               TASK TESTS
+	// -----------------------------------------------------------------------
 	@Test
-	public void testTasks() {
-		assertTrue(true);
+	public void timestampTask() {
+		String taskDefinitionName = "task-" + UUID.randomUUID().toString().substring(0, 10);
+		TaskDefinitionResource tdr = taskOperations.create(taskDefinitionName,
+				"timestamp", "Test timestamp task");
+
+		long id1 = taskOperations.launch(taskDefinitionName, Collections.EMPTY_MAP, Collections.EMPTY_LIST, null);
+		waitTaskCompletion(taskDefinitionName, 1);
+		assertCompletionWithExitCode(taskDefinitionName, 0);
+
+		// Launch existing task
+		taskOperations.launch(taskDefinitionName, Collections.EMPTY_MAP, Collections.EMPTY_LIST, null);
+		waitTaskCompletion(taskDefinitionName, 2);
+		assertCompletionWithExitCode(taskDefinitionName, 0);
+
+		taskOperations.destroy(taskDefinitionName);
 	}
 
+	@Test
+	public void composedTask() {
+		String taskDefinitionName = "task-" + UUID.randomUUID().toString().substring(0, 10);
+		TaskDefinitionResource tdr = taskOperations.create(taskDefinitionName,
+				"a: timestamp && b:timestamp", "Test composedTask");
 
-	// TODO Perhaps we should move the utilities below in their own standalone classes?
+		taskOperations.launch(taskDefinitionName, Collections.EMPTY_MAP, Collections.EMPTY_LIST, null);
+		waitTaskCompletion(taskDefinitionName, 1);
+		waitTaskCompletion(taskDefinitionName + "-a", 1);
+		waitTaskCompletion(taskDefinitionName + "-b", 1);
 
-	/**
-	 * Utilities that helps to blocks execution until a predicate is satisfied or throws a IllegalStateException if
-	 * the preconfigured timeout duration is exceeded. The until method, repeatedly tests the predicate
-	 * in pauseDuration intervals. For instance:
-	 *  <pre>
-	 *     {@code
-	 *     Wait.on(stream).withTimeout(Duration.ofMinutes(5)).until(s -> s.getStatus().equals("deployed"));
-	 *     }
-	 * </pre>
-	 *
-	 * For void targets use the following syntax:
-	 *  <pre>
-	 *     {@code
-	 *     Wait.on(Void.class).until(() -> System.currentTimeMillis() > someValue);
-	 *     }
-	 * </pre>
-	 *
-	 * @param <T> An argument passed to the predicate on every test.
-	 */
-	public static class Wait<T> {
+		assertCompletionWithExitCode(taskDefinitionName, 0);
 
-		/**
-		 * An argument passed to the predicate on every test.
-		 */
-		private T target;
-
-		/**
-		 * Total time to wait until the predicate is satisfied. When the timeoutDuration is exceeded
-		 * an {@link IllegalStateException} is thrown.
-		 */
-		private Duration timeoutDuration = Duration.ofMinutes(5);
-
-		/**
-		 * Time for waiting between two consecutive predicate tests.
-		 */
-		private Duration pauseDuration = Duration.ofSeconds(10);
-
-		private Wait(T target) {
-			this.target = target;
-		}
-
-		public static <T> Wait<T> on(T t) {
-			return new Wait<>(t);
-		}
-
-		public Wait<T> withTimeout(Duration timeout) {
-			this.timeoutDuration = timeout;
-			return this;
-		}
-
-		public Wait<T> withPause(Duration timeout) {
-			this.pauseDuration = timeout;
-			return this;
-		}
-
-		/**
-		 * Blocks until the wait-predicate is satisfied or throws a IllegalStateException if the timeoutDuration expires.
-		 * Repeatedly tests the predicate in pauseDuration intervals.
-		 *
-		 * TODO: for Java9 consider using CompletableFuture instead.
-		 *
-		 * @param waitPredicate Condition which when satisfied (e.g. #test() returns true) unblocks the call.
-		 */
-		public void until(Predicate<T> waitPredicate) {
-
-			final long timeout = System.currentTimeMillis() + this.timeoutDuration.toMillis();
-
-			while (System.currentTimeMillis() < timeout) {
-				if (waitPredicate.test(this.target)) {
-					return;
-				}
-				try {
-					TimeUnit.SECONDS.sleep(this.pauseDuration.getSeconds());
-				}
-				catch (InterruptedException e) {
-					Thread.currentThread().interrupt();
-					throw new IllegalStateException(e.getMessage(), e);
-				}
-			}
-			throw new IllegalStateException("Wait timeout after " + this.timeoutDuration + " seconds");
-		}
+		assertThat(taskOperations.list().getContent().size(), is(3));
+		taskOperations.destroy(taskDefinitionName);
+		assertThat(taskOperations.list().getContent().size(), is(0));
 	}
 
-	/**
-	 * Helper class to retrieve runtime information form DataFlow server.
-	 */
-	public static class RuntimeApplicationHelper {
+	@Test
+	public void multipleComposedTaskWithArguments() {
+		String taskDefinitionName = "task-" + UUID.randomUUID().toString().substring(0, 10);
+		TaskDefinitionResource tdr =
+				taskOperations.create(taskDefinitionName, "a: timestamp && b:timestamp", "Test multipleComposedTaskhWithArguments");
 
-		private final Logger logger = LoggerFactory.getLogger(RuntimeApplicationHelper.class);
+		List<String> arguments = Arrays.asList("--increment-instance-enabled=true");
+		taskOperations.launch(taskDefinitionName, Collections.EMPTY_MAP, arguments, null);
+		waitTaskCompletion(taskDefinitionName, 1);
+		waitTaskCompletion(taskDefinitionName + "-a", 1);
+		waitTaskCompletion(taskDefinitionName + "-b", 1);
 
-		private RestTemplate restTemplate = new RestTemplate();
+		assertCompletionWithExitCode(taskDefinitionName, 0);
 
-		private DataFlowTemplate dataFlowOperations;
+		taskOperations.launch(taskDefinitionName, Collections.EMPTY_MAP, arguments, null);
+		waitTaskCompletion(taskDefinitionName, 2);
+		waitTaskCompletion(taskDefinitionName + "-a", 2);
+		waitTaskCompletion(taskDefinitionName + "-b", 2);
 
-		public RuntimeApplicationHelper(DataFlowTemplate dataFlowOperations) {
-			this.dataFlowOperations = dataFlowOperations;
-		}
+		assertCompletionWithExitCode(taskDefinitionName, 0);
 
-		/**
-		 * Return the attributes for each application instance for all applications in all deployed streams.
-		 * @return Returns map of map with following structure: (appInstanceId, (propertyName, propertyValue))
-		 */
-		public Map<String, Map<String, String>> appInstanceAttributes() {
-			Map<String, Map<String, String>> appInstanceAttributes = new HashMap<>();
-			Iterable<AppStatusResource> apps = dataFlowOperations.runtimeOperations().status();
-			for (AppStatusResource app : apps) {
-				Iterable<AppInstanceStatusResource> instances = app.getInstances();
-				for (AppInstanceStatusResource instance : instances) {
-					Map<String, String> attrs = instance.getAttributes();
-					appInstanceAttributes.put(instance.getInstanceId(), attrs);
-				}
-			}
-			return appInstanceAttributes;
-		}
+		Collection<JobExecutionResource> jobExecutionResources =
+				dataFlowOperations.jobOperations().executionListByJobName(taskDefinitionName).getContent();
+		assertThat(jobExecutionResources.size(), is(2));
 
-		/**
-		 * Extract the Logs from the first instance of an application in a stream.
-		 * @param streamName Name of the stream where the application is defined.
-		 * @param appName Name of the applications to retrieve the applicationInstanceLogs for.
-		 * @return Returns the applicationInstanceLogs of the first instance of the specified application.
-		 */
-		public String getFirstInstanceLog(String streamName, String appName) {
-			return this.applicationInstanceLogs(streamName, appName).values().iterator().next();
-		}
+		taskOperations.destroy(taskDefinitionName);
+	}
 
-		/**
-		 * For given stream name and application name retrieves the logs for application instances (if more then one)
-		 * belonging to this application.
-		 *
-		 * @param streamName DataFlow stream for which the log is retrieved.
-		 * @param appName Application inside the stream name for which logs are trieved.
-		 * @return Returns a map of app instance GUIDs and their Log content. A single entry per app instance.
-		 */
-		public Map<String, String> applicationInstanceLogs(String streamName, String appName) {
-			return this.appInstanceAttributes().values().stream()
-					.filter(v -> v.get("skipper.release.name").equals(streamName))
-					.filter(v -> v.get("skipper.application.name").equals(appName))
-					.collect(Collectors.toMap(v -> v.get("guid"), v -> getAppInstanceLogContent(v.get("port"))));
-		}
+	private void waitTaskCompletion(String taskDefinitionName, int taskExecutionCount) {
+		Wait.on(taskDefinitionName).until(taskDefName -> {
+			Collection<TaskExecutionResource> taskExecutions =
+					taskOperations.executionListByTaskName(taskDefName).getContent();
+			return (taskExecutions.size() >= taskExecutionCount) &&
+					taskExecutions.stream()
+							.map(execution -> execution != null && execution.getEndTime() != null)
+							.reduce(Boolean::logicalAnd)
+							.orElse(false);
+		});
+	}
 
-		/**
-		 * Retrieve the log for an app.
-		 * @param port of the application as exposed to the HOST
-		 * @return String containing the contents of the log or 'null' if not found.
-		 */
-		private String getAppInstanceLogContent(String port) {
-			String logContent = null;
-			String logFileUrl = String.format("http://localhost:%s/actuator/logfile", port);
-			try {
-				logContent = restTemplate.getForObject(logFileUrl, String.class);
-				if (logContent == null) {
-					logger.warn("Unable to retrieve logfile from '" + logFileUrl);
-				}
-			}
-			catch (Exception e) {
-				logger.warn("Error while trying to access logfile from '" + logFileUrl + "' due to : " + e);
-			}
-			return logContent;
-		}
+	private void assertCompletionWithExitCode(String taskDefinitionName, int exitCode) {
+		taskOperations.executionListByTaskName(taskDefinitionName).getContent().stream()
+				.forEach(taskExecution -> assertThat(taskExecution.getExitCode(), is(exitCode)));
 	}
 
 	/**
@@ -388,16 +578,15 @@ public class DockerComposeIT {
 	 * @return If available returns the DataFlow version from the application.yml or default version otherwise.
 	 */
 	private static String findCurrentDataFlowVersion(String defaultVersion) {
-		String dataFlowVersion = defaultVersion;
 		try {
 			String content = StreamUtils.copyToString(new ClassPathResource("application.yml").getInputStream(),
 					Charset.forName("UTF-8"));
 			Map<String, Map<String, Map<String, String>>> map = new ObjectMapper(new YAMLFactory())
 					.readValue(content, Map.class);
 			String version = map.get("info").get("app").get("version");
-			if (!StringUtils.isEmpty(version)) {
-				dataFlowVersion = version;
-				logger.info("Retrieved current DATAFLOW_VERSION as: " + dataFlowVersion);
+			if (!StringUtils.isEmpty(version) && !version.contains("@")) {
+				logger.info("Retrieved current DATAFLOW_VERSION as: " + version);
+				return version;
 			}
 			else {
 				logger.warn("Failed to retrieve the DATAFLOW_VERSION and defaults to " + defaultVersion);
@@ -407,6 +596,6 @@ public class DockerComposeIT {
 			logger.warn("Failed to retrieve the DATAFLOW_VERSION and defaults to " + defaultVersion, e);
 		}
 
-		return dataFlowVersion;
+		return defaultVersion;
 	}
 }
