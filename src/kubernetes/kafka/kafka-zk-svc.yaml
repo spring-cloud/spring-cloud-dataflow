@@ -3,7 +3,7 @@ kind: Service
 metadata:
   name: kafka-zk
   labels:
-    app: kafka
+    app: kafka-broker
     component: kafka-zk
 spec:
   ports:

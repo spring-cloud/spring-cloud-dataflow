@@ -3,7 +3,7 @@ kind: Deployment
 metadata:
   name: kafka-zk
   labels:
-    app: kafka
+    app: kafka-broker
     component: kafka-zk
 spec:
   replicas: 1
@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
       - name: kafka-zk
-        image: digitalwonderland/zookeeper
+        image: confluentinc/cp-zookeeper:5.3.1
         ports:
         - containerPort: 2181
         env:
@@ -23,3 +23,6 @@ spec:
           value: "1"
         - name: ZOOKEEPER_SERVER_1
           value: kafka-zk
+        - name: ZOOKEEPER_CLIENT_PORT
+          value: "2181"
+
