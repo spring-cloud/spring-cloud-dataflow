@@ -60,6 +60,12 @@ public class JdbcDataflowTaskExecutionMetadataDao implements DataflowTaskExecuti
 	private static final String INSERT_SQL = "INSERT INTO task_execution_metadata (id, task_execution_id, " +
 			"task_execution_manifest) VALUES (:id, :taskExecutionId, :taskExecutionManifest)";
 
+	private static final String FIND_MANIFEST_BY_TASK_EXECUTION_ID = "select m.task_execution_manifest as task_execution_manifest\n" +
+			"from task_execution_metadata m inner join\n" +
+			"        TASK_EXECUTION e on m.task_execution_id = e.TASK_EXECUTION_ID\n" +
+			"where e.TASK_EXECUTION_ID = :taskExecutionId\n" +
+			";";
+
 	private static final String DELETE_MANIFEST_BY_TASK_EXECUTION_IDS =
 			"DELETE FROM task_execution_metadata " +
 			"WHERE task_execution_id " +
@@ -146,6 +152,28 @@ public class JdbcDataflowTaskExecutionMetadataDao implements DataflowTaskExecuti
 		}
 		catch (Exception e) {
 			throw new IllegalStateException("Unable to generate query", e);
+		}
+	}
+
+	@Override
+	public TaskManifest findManifestById(Long id) {
+		final MapSqlParameterSource queryParameters = new MapSqlParameterSource()
+				.addValue("taskExecutionId", id);
+
+		try {
+			return this.jdbcTemplate.queryForObject(FIND_MANIFEST_BY_TASK_EXECUTION_ID,
+					queryParameters,
+					(resultSet, i) -> {
+						try {
+							return objectMapper.readValue(resultSet.getString("task_execution_manifest"), TaskManifest.class);
+						}
+						catch (IOException e) {
+							throw new IllegalArgumentException("Unable to deserialize manifest", e);
+						}
+					});
+		}
+		catch (EmptyResultDataAccessException erdae) {
+			return null;
 		}
 	}
 

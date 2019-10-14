@@ -26,6 +26,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.springframework.cloud.dataflow.core.PlatformTaskExecutionInformation;
+import org.springframework.cloud.dataflow.core.TaskManifest;
 import org.springframework.cloud.dataflow.rest.job.TaskJobExecutionRel;
 import org.springframework.cloud.dataflow.rest.resource.CurrentTaskExecutionsResource;
 import org.springframework.cloud.dataflow.rest.resource.TaskExecutionResource;
@@ -38,6 +39,8 @@ import org.springframework.cloud.dataflow.server.repository.TaskDefinitionReposi
 import org.springframework.cloud.dataflow.server.service.TaskDeleteService;
 import org.springframework.cloud.dataflow.server.service.TaskExecutionInfoService;
 import org.springframework.cloud.dataflow.server.service.TaskExecutionService;
+import org.springframework.cloud.deployer.spi.core.AppDefinition;
+import org.springframework.cloud.deployer.spi.core.AppDeploymentRequest;
 import org.springframework.cloud.task.repository.TaskExecution;
 import org.springframework.cloud.task.repository.TaskExplorer;
 import org.springframework.data.domain.Page;
@@ -183,9 +186,12 @@ public class TaskExecutionController {
 		if (taskExecution == null) {
 			throw new NoSuchTaskExecutionException(id);
 		}
-		taskExecution = sanitizePotentialSensitiveKeys(taskExecution);
+		taskExecution = sanitizeTaskExecutionArguments(taskExecution);
+		TaskManifest taskManifest = this.taskExecutionService.findTaskManifestById(id);
+		taskManifest = sanitizeTaskManifest(taskManifest);
 		TaskJobExecutionRel taskJobExecutionRel = new TaskJobExecutionRel(taskExecution,
-				new ArrayList<>(this.explorer.getJobExecutionIdsByTaskExecutionId(taskExecution.getExecutionId())));
+				new ArrayList<>(this.explorer.getJobExecutionIdsByTaskExecutionId(taskExecution.getExecutionId())),
+				taskManifest);
 		return this.taskAssembler.toModel(taskJobExecutionRel);
 	}
 
@@ -239,18 +245,52 @@ public class TaskExecutionController {
 	private Page<TaskJobExecutionRel> getPageableRelationships(Page<TaskExecution> taskExecutions, Pageable pageable) {
 		List<TaskJobExecutionRel> taskJobExecutionRels = new ArrayList<>();
 		for (TaskExecution taskExecution : taskExecutions.getContent()) {
+			TaskManifest taskManifest = this.taskExecutionService.findTaskManifestById(taskExecution.getExecutionId());
+			taskManifest = sanitizeTaskManifest(taskManifest);
+			List<Long> jobExecutionIds = new ArrayList<>(
+					this.explorer.getJobExecutionIdsByTaskExecutionId(taskExecution.getExecutionId()));
 			taskJobExecutionRels
-					.add(new TaskJobExecutionRel(sanitizePotentialSensitiveKeys(taskExecution), new ArrayList<>(
-							this.explorer.getJobExecutionIdsByTaskExecutionId(taskExecution.getExecutionId()))));
+					.add(new TaskJobExecutionRel(sanitizeTaskExecutionArguments(taskExecution),
+							jobExecutionIds,
+							taskManifest));
 		}
 		return new PageImpl<>(taskJobExecutionRels, pageable, taskExecutions.getTotalElements());
 	}
 
-	private TaskExecution sanitizePotentialSensitiveKeys(TaskExecution taskExecution) {
+	private TaskExecution sanitizeTaskExecutionArguments(TaskExecution taskExecution) {
 		List<String> args = taskExecution.getArguments().stream()
 				.map(argument -> (this.argumentSanitizer.sanitize(argument))).collect(Collectors.toList());
 		taskExecution.setArguments(args);
 		return taskExecution;
+	}
+
+	private TaskManifest sanitizeTaskManifest(TaskManifest taskManifest) {
+		if (taskManifest == null) {
+			return null;
+		}
+		//TODO move into a service for testability
+		TaskManifest sanitizedTaskManifest = new TaskManifest();
+		sanitizedTaskManifest.setPlatformName(taskManifest.getPlatformName());
+		AppDeploymentRequest existingAppDeploymentRequest = taskManifest.getTaskDeploymentRequest();
+		// Sanitize App Properties
+		Map<String, String> existingAppProperties = existingAppDeploymentRequest.getDefinition().getProperties();
+		Map<String, String> sanitizedAppProperties = this.argumentSanitizer.sanitizeProperties(existingAppProperties);
+
+		// Sanitize Deployment Properties
+		Map<String, String> existingDeploymentProperties = existingAppDeploymentRequest.getDeploymentProperties();
+		Map<String, String> sanitizedDeploymentProperties = this.argumentSanitizer.sanitizeProperties(existingDeploymentProperties);
+
+		AppDefinition sanitizedAppDefinition = new AppDefinition(existingAppDeploymentRequest.getDefinition().getName(),
+				sanitizedAppProperties);
+		List<String> sanitizedCommandLineArgs = existingAppDeploymentRequest.getCommandlineArguments().stream()
+				.map(argument -> (this.argumentSanitizer.sanitize(argument))).collect(Collectors.toList());
+		AppDeploymentRequest sanitizedAppDeploymentRequest = new AppDeploymentRequest(
+				sanitizedAppDefinition,
+				existingAppDeploymentRequest.getResource(),
+				sanitizedDeploymentProperties,
+				sanitizedCommandLineArgs);
+		sanitizedTaskManifest.setTaskDeploymentRequest(sanitizedAppDeploymentRequest);
+		return taskManifest;
 	}
 
 	/**
