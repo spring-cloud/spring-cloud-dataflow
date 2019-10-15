@@ -15,9 +15,7 @@
  */
 package org.springframework.cloud.dataflow.server.config.features;
 
-import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 
 import javax.sql.DataSource;
 
@@ -61,15 +59,12 @@ import org.springframework.cloud.dataflow.server.service.impl.DefaultTaskJobServ
 import org.springframework.cloud.dataflow.server.service.impl.DefaultTaskSaveService;
 import org.springframework.cloud.dataflow.server.service.impl.TaskAppDeploymentRequestCreator;
 import org.springframework.cloud.dataflow.server.service.impl.TaskConfigurationProperties;
-import org.springframework.cloud.deployer.spi.scheduler.ScheduleInfo;
 import org.springframework.cloud.deployer.spi.scheduler.Scheduler;
 import org.springframework.cloud.task.repository.TaskExplorer;
 import org.springframework.cloud.task.repository.TaskRepository;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 import org.springframework.data.map.repository.config.EnableMapRepositories;
 import org.springframework.lang.Nullable;
 import org.springframework.transaction.PlatformTransactionManager;
@@ -96,6 +91,9 @@ public class TaskConfiguration {
 
 	@Autowired
 	DataSourceProperties dataSourceProperties;
+
+	@Autowired(required = false)
+	SchedulerService schedulerService;
 
 	@Value("${spring.cloud.dataflow.server.uri:}")
 	private String dataflowServerUri;
@@ -130,55 +128,6 @@ public class TaskConfiguration {
 		return taskPlatform;
 	}
 
-	/**
-	 * The default profile is active when no other profiles are active. This is configured so
-	 * that several tests will pass without having to explicitly enable the local profile.
-	 * @return a no-op {@link SchedulerService}
-	 */
-	@Profile({ "local", "default" })
-	@Bean
-	public SchedulerService schedulerService() {
-		return new SchedulerService() {
-			@Override
-			public void schedule(String scheduleName, String taskDefinitionName, Map<String, String> taskProperties, List<String> commandLineArgs) {
-			}
-
-			@Override
-			public void unschedule(String scheduleName) {
-			}
-
-			@Override
-			public void unscheduleForTaskDefinition(String taskDefinitionName) {
-			}
-
-			@Override
-			public List<ScheduleInfo> list(Pageable pageable, String taskDefinitionName) {
-				return null;
-			}
-
-			@Override
-			public Page<ScheduleInfo> list(Pageable pageable) {
-				return null;
-			}
-
-			@Override
-			public List<ScheduleInfo> list(String taskDefinitionName) {
-				return Collections.emptyList();
-			}
-
-			@Override
-			public List<ScheduleInfo> list() {
-				return Collections.emptyList();
-			}
-
-			@Override
-			public ScheduleInfo getSchedule(String scheduleName) {
-				return null;
-			}
-		};
-	}
-
-
 	@Bean
 	public TaskExecutionInfoService taskDefinitionRetriever(AppRegistryService registry,
 			TaskExplorer taskExplorer, TaskDefinitionRepository taskDefinitionRepository,
@@ -194,15 +143,14 @@ public class TaskConfiguration {
 			AuditRecordService auditRecordService,
 			DataflowTaskExecutionDao dataflowTaskExecutionDao,
 			DataflowJobExecutionDao dataflowJobExecutionDao,
-			DataflowTaskExecutionMetadataDao dataflowTaskExecutionMetadataDao,
-			SchedulerService schedulerService) {
+			DataflowTaskExecutionMetadataDao dataflowTaskExecutionMetadataDao) {
 		return new DefaultTaskDeleteService(taskExplorer, launcherRepository, taskDefinitionRepository,
 				taskDeploymentRepository,
 				auditRecordService,
 				dataflowTaskExecutionDao,
 				dataflowJobExecutionDao,
 				dataflowTaskExecutionMetadataDao,
-				schedulerService);
+				this.schedulerService);
 	}
 
 	@Bean

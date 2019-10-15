@@ -114,7 +114,6 @@ public class DefaultTaskDeleteService implements TaskDeleteService {
 		Assert.notNull(dataflowTaskExecutionDao, "DataflowTaskExecutionDao must not be null");
 		Assert.notNull(dataflowJobExecutionDao, "DataflowJobExecutionDao must not be null");
 		Assert.notNull(dataflowTaskExecutionMetadataDao, "DataflowTaskExecutionMetadataDao must not be null");
-		Assert.notNull(schedulerService, "SchedulerService must not be null");
 		this.taskExplorer = taskExplorer;
 		this.launcherRepository = launcherRepository;
 		this.taskDefinitionRepository = taskDefinitionRepository;
@@ -324,7 +323,9 @@ public class DefaultTaskDeleteService implements TaskDeleteService {
 
 	private void deleteTaskDefinition(TaskDefinition taskDefinition) {
 		TaskParser taskParser = new TaskParser(taskDefinition.getName(), taskDefinition.getDslText(), true, true);
-		schedulerService.unscheduleForTaskDefinition(taskDefinition.getTaskName());
+		if (this.schedulerService != null) {
+			schedulerService.unscheduleForTaskDefinition(taskDefinition.getTaskName());
+		}
 		TaskNode taskNode = taskParser.parse();
 		// if composed-task-runner definition then destroy all child tasks associated with it.
 		if (taskNode.isComposed()) {

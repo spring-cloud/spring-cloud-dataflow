@@ -78,7 +78,8 @@ import static org.mockito.Mockito.when;
 		"spring.cloud.dataflow.applicationProperties.task.globalkey=globalvalue",
 		"spring.cloud.dataflow.applicationProperties.stream.globalstreamkey=nothere",
 		"spring.main.allow-bean-definition-overriding=true",
-		"spring.cloud.dataflow.task.scheduler-task-launcher-url=https://test.test"})
+		"spring.cloud.dataflow.task.scheduler-task-launcher-url=https://test.test",
+		"spring.cloud.dataflow.features.schedules-enabled=true"})
 @EnableConfigurationProperties({ CommonApplicationProperties.class, TaskConfigurationProperties.class, DockerValidatorProperties.class})
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
 @AutoConfigureTestDatabase(replace = Replace.ANY)

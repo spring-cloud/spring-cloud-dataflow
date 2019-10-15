@@ -32,11 +32,15 @@ import org.junit.Rule;
 import org.mockito.ArgumentMatchers;
 
 import org.springframework.cloud.dataflow.core.ApplicationType;
+import org.springframework.cloud.dataflow.core.Launcher;
+import org.springframework.cloud.dataflow.core.TaskPlatform;
 import org.springframework.cloud.dataflow.server.controller.TaskSchedulerController;
 import org.springframework.cloud.dataflow.server.service.SchedulerService;
 import org.springframework.cloud.dataflow.server.single.LocalDataflowResource;
 import org.springframework.cloud.deployer.spi.app.AppDeployer;
 import org.springframework.cloud.deployer.spi.scheduler.ScheduleInfo;
+import org.springframework.cloud.deployer.spi.scheduler.ScheduleRequest;
+import org.springframework.cloud.deployer.spi.scheduler.Scheduler;
 import org.springframework.cloud.skipper.domain.AboutResource;
 import org.springframework.cloud.skipper.domain.Dependency;
 import org.springframework.cloud.skipper.domain.Deployer;
@@ -129,7 +133,9 @@ public abstract class BaseDocumentation {
 		this.dataSource = springDataflowServer.getWebApplicationContext().getBean(DataSource.class);
 		TaskSchedulerController controller = this.springDataflowServer.getWebApplicationContext().getBean(TaskSchedulerController.class);
 		ReflectionTestUtils.setField(controller, "schedulerService", schedulerService());
-
+		TaskPlatform taskPlatform = this.springDataflowServer.getWebApplicationContext().getBean(TaskPlatform.class);
+		Launcher launcher = taskPlatform.getLaunchers().stream().filter(launcherToFilter -> launcherToFilter.getName().equals("default")).findFirst().get();
+		ReflectionTestUtils.setField(launcher, "scheduler", localTestScheduler());
 	}
 
 	/**
@@ -271,17 +277,41 @@ public abstract class BaseDocumentation {
 			public ScheduleInfo getSchedule(String scheduleName) {
 				return null;
 			}
+		};
+	}
 
-			private List<ScheduleInfo> getSampleList() {
-				List<ScheduleInfo> result = new ArrayList<>();
-				ScheduleInfo scheduleInfo = new ScheduleInfo();
-				scheduleInfo.setScheduleName("FOO");
-				scheduleInfo.setTaskDefinitionName("BAR");
-				Map<String, String> props = new HashMap<>(1);
-				props.put("scheduler.AAA.spring.cloud.scheduler.cron.expression", "00 41 17 ? * *");
-				scheduleInfo.setScheduleProperties(props);
-				result.add(scheduleInfo);
-				return result;
+	private List<ScheduleInfo> getSampleList() {
+		List<ScheduleInfo> result = new ArrayList<>();
+		ScheduleInfo scheduleInfo = new ScheduleInfo();
+		scheduleInfo.setScheduleName("FOO");
+		scheduleInfo.setTaskDefinitionName("BAR");
+		Map<String, String> props = new HashMap<>(1);
+		props.put("scheduler.AAA.spring.cloud.scheduler.cron.expression", "00 41 17 ? * *");
+		scheduleInfo.setScheduleProperties(props);
+		result.add(scheduleInfo);
+		return result;
+	}
+
+	public Scheduler localTestScheduler() {
+		return new Scheduler() {
+			@Override
+			public void schedule(ScheduleRequest scheduleRequest) {
+				throw new UnsupportedOperationException("Interface is not implemented for schedule method.");
+			}
+
+			@Override
+			public void unschedule(String scheduleName) {
+				throw new UnsupportedOperationException("Interface is not implemented for unschedule method.");
+			}
+
+			@Override
+			public List<ScheduleInfo> list(String taskDefinitionName) {
+				throw new UnsupportedOperationException("Interface is not implemented for list method.");
+			}
+
+			@Override
+			public List<ScheduleInfo> list() {
+				return getSampleList();
 			}
 		};
 	}

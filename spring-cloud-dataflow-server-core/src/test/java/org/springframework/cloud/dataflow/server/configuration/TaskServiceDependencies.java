@@ -45,6 +45,7 @@ import org.springframework.cloud.dataflow.server.DockerValidatorProperties;
 import org.springframework.cloud.dataflow.server.config.VersionInfoProperties;
 import org.springframework.cloud.dataflow.server.config.apps.CommonApplicationProperties;
 import org.springframework.cloud.dataflow.server.config.features.FeaturesProperties;
+import org.springframework.cloud.dataflow.server.config.features.SchedulerConfiguration;
 import org.springframework.cloud.dataflow.server.job.LauncherRepository;
 import org.springframework.cloud.dataflow.server.repository.DataflowJobExecutionDao;
 import org.springframework.cloud.dataflow.server.repository.DataflowTaskExecutionDao;
@@ -82,6 +83,7 @@ import org.springframework.cloud.task.repository.support.SimpleTaskRepository;
 import org.springframework.cloud.task.repository.support.TaskExecutionDaoFactoryBean;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Conditional;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.core.io.Resource;
@@ -104,6 +106,7 @@ import static org.mockito.Mockito.when;
  * @author Glenn Renfro
  * @author David Turanski
  * @author Gunnar Hillert
+ * @author Ilayaperumal Gopinathan
  */
 @Configuration
 @EnableSpringDataWebSupport
@@ -234,7 +237,7 @@ public class TaskServiceDependencies extends WebMvcConfigurationSupport {
 			DataflowTaskExecutionDao dataflowTaskExecutionDao,
 			DataflowJobExecutionDao dataflowJobExecutionDao,
 			DataflowTaskExecutionMetadataDao dataflowTaskExecutionMetadataDao,
-			SchedulerService schedulerService) {
+			@Autowired(required = false) SchedulerService schedulerService) {
 
 		return new DefaultTaskDeleteService(taskExplorer, launcherRepository, taskDefinitionRepository,
 				taskDeploymentRepository,
@@ -296,6 +299,7 @@ public class TaskServiceDependencies extends WebMvcConfigurationSupport {
 	}
 
 	@Bean
+	@Conditional({ SchedulerConfiguration.SchedulerConfigurationPropertyChecker.class })
 	public SchedulerService schedulerService(CommonApplicationProperties commonApplicationProperties,
 											 TaskPlatform taskPlatform, TaskDefinitionRepository taskDefinitionRepository,
 											 AppRegistryService registry, ResourceLoader resourceLoader,
