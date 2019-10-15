@@ -115,7 +115,7 @@ public class TaskCommandTemplate {
 	public String getTaskExecutionLog(String taskName) throws Exception{
 		long id = launchTaskExecutionForLog(taskName);
 		// TODO  investigate race condition, getting null results for execution log.
-		Thread.sleep(1000);
+		Thread.sleep(5000);
 		CommandResult cr = shell.executeCommand("task execution log --id " + id);
 
 		assertTrue("Task execution log = " + cr.toString(), cr.toString().contains("Starting"));
