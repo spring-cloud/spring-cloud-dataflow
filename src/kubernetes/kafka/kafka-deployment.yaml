@@ -31,5 +31,3 @@ spec:
                 fieldPath: status.podIP
           - name: KAFKA_ZOOKEEPER_CONNECT
             value: kafka-zk:2181
-          - name: KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR
-            value: "1"
