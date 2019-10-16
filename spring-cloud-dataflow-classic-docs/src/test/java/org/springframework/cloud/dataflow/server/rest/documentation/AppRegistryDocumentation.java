@@ -118,15 +118,21 @@ public class AppRegistryDocumentation extends BaseDocumentation {
         registerApp(ApplicationType.source, "time", "1.2.0.RELEASE");
         this.mockMvc.perform(
             get("/apps")
-                .param("name", "")
+                .param("search", "")
                 .param("type", "source").accept(MediaType.APPLICATION_JSON)
+				.param("page", "0")
+				.param("size", "10")
+				.param("sort", "name,ASC")
             )
             .andExpect(status().isOk())
             .andDo(this.documentationHandler.document(
                 requestParameters(
-                    parameterWithName("name").description("The search string performed on the name (optional)"),
+                    parameterWithName("search").description("The search string performed on the name (optional)"),
                     parameterWithName("type")
-                        .description("Restrict the returned apps to the type of the app. One of " + Arrays.asList(ApplicationType.values()))
+                        .description("Restrict the returned apps to the type of the app. One of " + Arrays.asList(ApplicationType.values())),
+					parameterWithName("page").description("The zero-based page number (optional)"),
+					parameterWithName("sort").description("The sort on the list (optional)"),
+					parameterWithName("size").description("The requested page size (optional)")
                 ),
                 responseFields(
                     subsectionWithPath("_embedded.appRegistrationResourceList")
