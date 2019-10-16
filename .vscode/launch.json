@@ -19,6 +19,16 @@
             "mainClass": "org.springframework.cloud.skipper.server.app.SkipperServerApplication",
             "projectName": "spring-cloud-skipper-server",
             "args": "--spring.config.additional-location=etc/config/skipper-postgres.yml"
+        },
+        {
+            "type": "java",
+            "name": "SKIPPER mysql",
+            "request": "launch",
+            "cwd": "${workspaceFolder}",
+            "console": "internalConsole",
+            "mainClass": "org.springframework.cloud.skipper.server.app.SkipperServerApplication",
+            "projectName": "spring-cloud-skipper-server",
+            "args": "--spring.config.additional-location=etc/config/skipper-mysql.yml"
         }
     ]
 }
