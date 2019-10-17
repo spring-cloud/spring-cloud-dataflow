@@ -96,71 +96,32 @@ import static org.junit.Assert.assertTrue;
  * The {@link RuntimeApplicationHelper} help to retrieve the application attributes and log files across the Local,
  * CF and K8s platforms.
  *
- * -------------------------------------------------------------------------------
- * Advanced Configurations: Testing streams on remote platforms (k8s and CF)
- * -------------------------------------------------------------------------------
- *
- * 1. Run stream tests on Kubernetes (k8s) platform
- *
- * 1.1 Create a docker-compose-k8s.yml with the following content and add the path to the DOCKER_COMPOSE_PATHS list.
- * <code>
- * version: '3'
- *  services:
- *   skipper-server:
- *     environment:
- *       - SPRING_CLOUD_SKIPPER_SERVER_PLATFORM_KUBERNETES_ACCOUNTS_K8S_FABRIC8_MASTER_URL=[Your k8s master URL]
- *       - SPRING_CLOUD_SKIPPER_SERVER_PLATFORM_KUBERNETES_ACCOUNTS_K8S_FABRIC8_USERNAME=[Your k8s Username]
- *       - SPRING_CLOUD_SKIPPER_SERVER_PLATFORM_KUBERNETES_ACCOUNTS_K8S_FABRIC8_PASSWORD=[Your k8s Password]
- *       - SPRING_CLOUD_SKIPPER_SERVER_PLATFORM_KUBERNETES_ACCOUNTS_K8S_FABRIC8_NAMESPACE=default
- *       - SPRING_CLOUD_SKIPPER_SERVER_PLATFORM_KUBERNETES_ACCOUNTS_K8S_FABRIC8_TRUST_CERTS=true
- *       - SPRING_CLOUD_SKIPPER_SERVER_PLATFORM_KUBERNETES_ACCOUNTS_K8S_CREATE_LOAD_BALANCER=true
- * </code>
- *
- * 1.2 Start Kafka message broker on the k8s cluster. Follow the kubectl DataFlow instructions:
- * https://dataflow.spring.io/docs/installation/kubernetes/kubectl/#choose-a-message-broker
- *
- * 1.3 Set the TEST_PLATFORM_NAME to 'k8s'
- * <code>
- *     private static final String TEST_PLATFORM_NAME = "k8s";
- * </code>
- *
- * 1.4. In the DockerMachine configuration set the STREAM_APPS_URI variable to link loading Kafka/Docker apps.
- * For example: https://dataflow.spring.io/rabbitmq-maven-latest
- *
- * 2. Run stream tests on CloudFoundry (CF) platform
- *
- * 2.1  Create a docker-compose-cf.yml with the following content and add the path to the DOCKER_COMPOSE_PATHS list.
- * <code>
- * version: '3'
- *  services:
- *   skipper-server:
- *     environment:
- *       - SPRING_CLOUD_SKIPPER_SERVER_PLATFORM_CLOUDFOUNDRY_ACCOUNTS_CF_CONNECTION_URL=[CF API URL]
- *       - SPRING_CLOUD_SKIPPER_SERVER_PLATFORM_CLOUDFOUNDRY_ACCOUNTS_CF_CONNECTION_DOMAIN=[DOMAIN]
- *       - SPRING_CLOUD_SKIPPER_SERVER_PLATFORM_CLOUDFOUNDRY_ACCOUNTS_CF_CONNECTION_ORG=[ORG]
- *       - SPRING_CLOUD_SKIPPER_SERVER_PLATFORM_CLOUDFOUNDRY_ACCOUNTS_CF_CONNECTION_SPACE=[SPACE]
- *       - SPRING_CLOUD_SKIPPER_SERVER_PLATFORM_CLOUDFOUNDRY_ACCOUNTS_CF_CONNECTION_USERNAME=[USERNAME]
- *       - SPRING_CLOUD_SKIPPER_SERVER_PLATFORM_CLOUDFOUNDRY_ACCOUNTS_CF_CONNECTION_PASSWORD=[PASSWORD]
- *       - SPRING_CLOUD_SKIPPER_SERVER_PLATFORM_CLOUDFOUNDRY_ACCOUNTS_CF_CONNECTION_SKIP_SSL_VALIDATION=true
- *       - SPRING_CLOUD_SKIPPER_SERVER_PLATFORM_CLOUDFOUNDRY_ACCOUNTS_CF_DEPLOYMENT_DELETE_ROUTES=false
- *       - SPRING_CLOUD_SKIPPER_SERVER_PLATFORM_CLOUDFOUNDRY_ACCOUNTS_CF_DEPLOYMENT_SERVICES=rabbit
- *       - SPRING_CLOUD_SKIPPER_SERVER_PLATFORM_CLOUDFOUNDRY_ACCOUNTS_CF_DEPLOYMENT_ENABLE_RANDOM_APP_NAME_PREFIX=true
- *       - SPRING_CLOUD_SKIPPER_SERVER_PLATFORM_CLOUDFOUNDRY_ACCOUNTS_CF_DEPLOYMENT_MEMORY=2048
- * </code>
- *
- * 2.2 on the CF platform start a RabbitMQ service called 'rabbit'.
- *
- * 2.3 Set the TEST_PLATFORM_NAME to 'cf'
- * <code>
- *     private static final String TEST_PLATFORM_NAME = "cf";
- * </code>
- *
- * 2.4. In the DockerMachine configuration set the STREAM_APPS_URI variable to link loading Rabbit/Maven apps.
- * For example: https://dataflow.spring.io/rabbitmq-maven-latest
- *
  * NOTE: if you manually interrupt the test execution before it has completed of failed, it is likely that some docker
  * containers will be left hanging. Use 'docker rm $(docker ps -a -q) -f' to remove all docker containers. To clean all
  * Spring app on K8s platform use 'kubectl delete all,cm -l role=spring-app'
+ *
+ * --------------------------------------------------------------------------------------------------------------------
+ * For testing streams on remote platforms (k8s and CF). If you configure K8s or CF runtime platforms as explained below,
+ * you can have the test feature that uses the local run SCDF/Skipper/MySQL to deploy and run Stream only test to the
+ * remote K8s or CF environments. Note that Tasks can only be run locally!
+ *
+ * Follow the https://dataflow.spring.io/docs/2.3.0.SNAPSHOT/installation/local/docker-customize/#docker-compose-extensions
+ * multi-platform instructions to prepare docker-compose-k8s.yml and docker-compose-cf.yml files.
+ *
+ * Stream tests on Kubernetes (k8s) platform:
+ * - Add  the docker-compose-k8s.yml to the DOCKER_COMPOSE_PATHS list.
+ * - Start Kafka message broker on the k8s cluster. Follow the kubectl DataFlow instructions:
+ *   https://dataflow.spring.io/docs/installation/kubernetes/kubectl/#choose-a-message-broker
+ * - Set the TEST_PLATFORM_NAME to 'k8s'.
+ * - In the DockerMachine configuration set the STREAM_APPS_URI variable to link loading Kafka/Docker apps (e.g
+ *   https://dataflow.spring.io/rabbitmq-maven-latest).
+ *
+ * Stream tests on CloudFoundry (CF) platform:
+ * - Add the docker-compose-cf.yml to the DOCKER_COMPOSE_PATHS list.
+ * - On the CF platform start a RabbitMQ service called 'rabbit'.
+ * - Set the TEST_PLATFORM_NAME to 'cf'.
+ * - In the DockerMachine configuration set the STREAM_APPS_URI variable to link loading Rabbit/Maven apps. (e.g.
+ *   https://dataflow.spring.io/rabbitmq-maven-latest)
  *
  * @author Christian Tzolov
  */
