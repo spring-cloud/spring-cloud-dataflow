@@ -34,6 +34,7 @@ import org.springframework.cloud.skipper.domain.Manifest;
 import org.springframework.cloud.skipper.domain.Package;
 import org.springframework.cloud.skipper.domain.PackageMetadata;
 import org.springframework.cloud.skipper.domain.Release;
+import org.springframework.cloud.skipper.domain.ScaleRequest;
 import org.springframework.cloud.skipper.domain.Status;
 import org.springframework.cloud.skipper.domain.StatusCode;
 import org.springframework.cloud.skipper.domain.UpgradeRequest;
@@ -517,6 +518,41 @@ public class StateMachineTests {
 						.expectStateChanged(3)
 						.expectStateEntered(SkipperStates.DELETE,
 								SkipperStates.DELETE_DELETE,
+								SkipperStates.INITIAL)
+						.and()
+					.build();
+		plan.test();
+
+		Mockito.verify(errorAction, never()).execute(any());
+	}
+
+	@Test
+	public void testScaleSucceed() throws Exception {
+		Mockito.when(releaseService.scale(any(String.class), any(ScaleRequest.class))).thenReturn(new Release());
+		ScaleRequest scaleRequest = new ScaleRequest();
+		Message<SkipperEvents> message1 = MessageBuilder
+				.withPayload(SkipperEvents.SCALE)
+				.setHeader(SkipperEventHeaders.RELEASE_NAME, "testScaleSucceed")
+				.setHeader(SkipperEventHeaders.SCALE_REQUEST, scaleRequest)
+				.build();
+
+		StateMachineFactory<SkipperStates, SkipperEvents> factory = context.getBean(StateMachineFactory.class);
+		StateMachine<SkipperStates, SkipperEvents> stateMachine = factory.getStateMachine("testScaleSucceed");
+
+		StateMachineTestPlan<SkipperStates, SkipperEvents> plan =
+				StateMachineTestPlanBuilder.<SkipperStates, SkipperEvents>builder()
+					.defaultAwaitTime(10)
+					.stateMachine(stateMachine)
+					.step()
+						.expectStateMachineStarted(1)
+						.expectStates(SkipperStates.INITIAL)
+						.and()
+					.step()
+						.sendEvent(message1)
+						.expectStates(SkipperStates.INITIAL)
+						.expectStateChanged(3)
+						.expectStateEntered(SkipperStates.SCALE,
+								SkipperStates.SCALE_SCALE,
 								SkipperStates.INITIAL)
 						.and()
 					.build();

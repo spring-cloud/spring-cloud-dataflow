@@ -39,6 +39,7 @@ import org.springframework.cloud.skipper.domain.PackageMetadata;
 import org.springframework.cloud.skipper.domain.Release;
 import org.springframework.cloud.skipper.domain.Repository;
 import org.springframework.cloud.skipper.domain.RollbackRequest;
+import org.springframework.cloud.skipper.domain.ScaleRequest;
 import org.springframework.cloud.skipper.domain.Template;
 import org.springframework.cloud.skipper.domain.UpgradeRequest;
 import org.springframework.cloud.skipper.domain.UploadRequest;
@@ -63,6 +64,7 @@ import org.springframework.web.client.RestTemplate;
  *
  * @author Mark Pollack
  * @author Ilayaperumal Gopinathan
+ * @author Janne Valkealahti
  */
 public class DefaultSkipperClient implements SkipperClient {
 
@@ -190,6 +192,23 @@ public class DefaultSkipperClient implements SkipperClient {
 						typeReference,
 						uriVariables);
 		return resourceResponseEntity.getBody();
+	}
+
+	@Override
+	public Release scale(String releaseName, ScaleRequest scaleRequest) {
+		ParameterizedTypeReference<EntityModel<Release>> typeReference =
+				new ParameterizedTypeReference<EntityModel<Release>>() { };
+		Map<String, String> uriVariables = new HashMap<String, String>();
+		uriVariables.put("releaseName", releaseName);
+
+		HttpEntity<ScaleRequest> httpEntity = new HttpEntity<>(scaleRequest);
+		ResponseEntity<EntityModel<Release>> resourceResponseEntity =
+				restTemplate.exchange(baseUri + "/release/scale/{releaseName}",
+						HttpMethod.POST,
+						httpEntity,
+						typeReference,
+						uriVariables);
+		return resourceResponseEntity.getBody().getContent();
 	}
 
 	@Override

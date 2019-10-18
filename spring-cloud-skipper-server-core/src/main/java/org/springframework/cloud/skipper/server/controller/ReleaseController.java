@@ -29,6 +29,7 @@ import org.springframework.cloud.skipper.domain.LogInfo;
 import org.springframework.cloud.skipper.domain.Manifest;
 import org.springframework.cloud.skipper.domain.Release;
 import org.springframework.cloud.skipper.domain.RollbackRequest;
+import org.springframework.cloud.skipper.domain.ScaleRequest;
 import org.springframework.cloud.skipper.domain.UpgradeRequest;
 import org.springframework.cloud.skipper.server.controller.support.InfoResourceAssembler;
 import org.springframework.cloud.skipper.server.controller.support.ManifestResourceAssembler;
@@ -140,6 +141,13 @@ public class ReleaseController {
 	public EntityModel<Manifest> manifest(@PathVariable("name") String name,
 			@PathVariable("version") Integer version) {
 		return this.manifestResourceAssembler.toModel(this.releaseService.manifest(name, version));
+	}
+
+	@RequestMapping(path = "/scale/{name}", method = RequestMethod.POST)
+	@ResponseStatus(HttpStatus.CREATED)
+	public EntityModel<Release> scale(@PathVariable("name") String name, @RequestBody ScaleRequest scaleRequest) {
+		Release release = this.skipperStateMachineService.scaleRelease(name, scaleRequest);
+		return this.releaseResourceAssembler.toModel(release);
 	}
 
 	@RequestMapping(path = "/upgrade", method = RequestMethod.POST)

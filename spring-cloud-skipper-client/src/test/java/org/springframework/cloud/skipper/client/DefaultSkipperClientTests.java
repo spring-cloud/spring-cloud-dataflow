@@ -25,12 +25,15 @@ import org.springframework.cloud.skipper.ReleaseNotFoundException;
 import org.springframework.cloud.skipper.SkipperException;
 import org.springframework.cloud.skipper.domain.Info;
 import org.springframework.cloud.skipper.domain.LogInfo;
+import org.springframework.cloud.skipper.domain.Release;
+import org.springframework.cloud.skipper.domain.ScaleRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.client.MockRestServiceServer;
 import org.springframework.web.client.RestTemplate;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.springframework.test.web.client.match.MockRestRequestMatchers.content;
 import static org.springframework.test.web.client.match.MockRestRequestMatchers.requestTo;
 import static org.springframework.test.web.client.response.MockRestResponseCreators.withStatus;
 import static org.springframework.test.web.client.response.MockRestResponseCreators.withSuccess;
@@ -175,5 +178,23 @@ public class DefaultSkipperClientTests {
 		mockServer.verify();
 
 		assertThat(logContent).isNotNull();
+	}
+
+	@Test
+	public void testScaleByReleaseAndScaleRequest() {
+		RestTemplate restTemplate = new RestTemplate();
+		SkipperClient skipperClient = new DefaultSkipperClient("", restTemplate);
+
+		MockRestServiceServer mockServer = MockRestServiceServer.bindTo(restTemplate).build();
+		mockServer
+			.expect(requestTo("/release/scale/mylog"))
+			.andExpect(content().json("{\"scale\":[{\"name\":\"app\",\"count\":2,\"properties\":{}}]}"))
+			.andRespond(withSuccess("{}", MediaType.APPLICATION_JSON));
+
+		ScaleRequest scaleRequest = ScaleRequest.of("app", 2);
+		Release release = skipperClient.scale("mylog", scaleRequest);
+		mockServer.verify();
+
+		assertThat(release).isNotNull();
 	}
 }

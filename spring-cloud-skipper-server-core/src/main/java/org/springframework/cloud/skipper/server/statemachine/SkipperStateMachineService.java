@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2018 the original author or authors.
+ * Copyright 2017-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,6 +28,7 @@ import org.springframework.cloud.skipper.domain.InstallRequest;
 import org.springframework.cloud.skipper.domain.PackageMetadata;
 import org.springframework.cloud.skipper.domain.Release;
 import org.springframework.cloud.skipper.domain.RollbackRequest;
+import org.springframework.cloud.skipper.domain.ScaleRequest;
 import org.springframework.cloud.skipper.domain.UpgradeRequest;
 import org.springframework.cloud.skipper.server.deployer.ReleaseAnalysisReport;
 import org.springframework.messaging.Message;
@@ -102,6 +103,22 @@ public class SkipperStateMachineService {
 				.setHeader(SkipperEventHeaders.UPGRADE_TIMEOUT, upgradeRequest.getTimeout())
 				.build();
 		return handleMessageAndWait(message, releaseName, SkipperStates.UPGRADE_WAIT_TARGET_APPS);
+	}
+
+	/**
+	 * Scale release.
+	 *
+	 * @param releaseName the release name
+	 * @param scaleRequest the scale request
+	 * @return the release
+	 */
+	public Release scaleRelease(String releaseName, ScaleRequest scaleRequest) {
+		Message<SkipperEvents> message = MessageBuilder
+				.withPayload(SkipperEvents.SCALE)
+				.setHeader(SkipperEventHeaders.RELEASE_NAME, releaseName)
+				.setHeader(SkipperEventHeaders.SCALE_REQUEST, scaleRequest)
+				.build();
+		return handleMessageAndWait(message, releaseName);
 	}
 
 	/**
@@ -333,6 +350,21 @@ public class SkipperStateMachineService {
 		UPGRADE_EXIT,
 
 		/**
+		 * Parent state of all scale related states.
+		 */
+		SCALE,
+
+		/**
+		 * State where release scale happens.
+		 */
+		SCALE_SCALE,
+
+		/**
+		 * Pseudostate used as a controlled exit point from {@link #SCALE}.
+		 */
+		SCALE_EXIT,
+
+		/**
 		 * Parent state of all delete related states.
 		 */
 		DELETE,
@@ -395,6 +427,11 @@ public class SkipperStateMachineService {
 		 * Main level event instructing a delete request.
 		 */
 		DELETE,
+
+		/**
+		 * Main level event instructing a scale request.
+		 */
+		SCALE,
 
 		/**
 		 * Main level event instructing an upgrade request.
@@ -481,6 +518,11 @@ public class SkipperStateMachineService {
 		 * SCDF specific extension to allow deletion of
 		 */
 		public static final String RELEASE_DELETE_PROPERTIES = "RELEASE_DELETE_PROPERTIES";
+
+		/**
+		 * Header for {@link ScaleRequest}.
+		 */
+		public static final String SCALE_REQUEST = "SCALE_REQUEST";
 	}
 
 	/**

@@ -20,6 +20,7 @@ import java.util.List;
 
 import org.springframework.cloud.skipper.domain.LogInfo;
 import org.springframework.cloud.skipper.domain.Release;
+import org.springframework.cloud.skipper.domain.ScaleRequest;
 
 /**
  * Manages the lifecycle of a releases.
@@ -93,4 +94,12 @@ public interface ReleaseManager {
 	 */
 	LogInfo getLog(Release release, String appName);
 
+	/**
+	 * Scale a release and return an original release.
+	 *
+	 * @param release
+	 * @param scaleRequest
+	 * @return the original release
+	 */
+	Release scale(Release release, ScaleRequest scaleRequest);
 }

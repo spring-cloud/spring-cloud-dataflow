@@ -31,6 +31,7 @@ import org.slf4j.LoggerFactory;
 
 import org.springframework.cloud.skipper.domain.LogInfo;
 import org.springframework.cloud.skipper.domain.Release;
+import org.springframework.cloud.skipper.domain.ScaleRequest;
 import org.springframework.cloud.skipper.domain.SkipperManifestKind;
 import org.springframework.cloud.skipper.domain.Status;
 import org.springframework.cloud.skipper.domain.StatusCode;
@@ -189,4 +190,9 @@ public class CloudFoundryReleaseManager implements ReleaseManager {
 		return new LogInfo(logMap);
 	}
 
+	@Override
+	public Release scale(Release release, ScaleRequest scaleRequest) {
+		// TODO: implement for cf
+		throw new UnsupportedOperationException();
+	}
 }

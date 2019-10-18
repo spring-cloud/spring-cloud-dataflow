@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2018 the original author or authors.
+ * Copyright 2017-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -128,6 +128,7 @@ public class StateMachineConfiguration {
 					.stateExit(SkipperStates.INITIAL, resetVariablesAction())
 					.state(SkipperStates.INSTALL)
 					.state(SkipperStates.DELETE)
+					.state(SkipperStates.SCALE)
 					.state(SkipperStates.UPGRADE)
 					.state(SkipperStates.ROLLBACK)
 					.junction(SkipperStates.ERROR_JUNCTION)
@@ -154,6 +155,13 @@ public class StateMachineConfiguration {
 						.stateEntry(SkipperStates.UPGRADE_DELETE_SOURCE_APPS, upgradeDeleteSourceAppsAction())
 						.choice(SkipperStates.UPGRADE_CHECK_CHOICE)
 						.exit(SkipperStates.UPGRADE_EXIT)
+						.and()
+					.withStates()
+						// substates for scale
+						.parent(SkipperStates.SCALE)
+						.initial(SkipperStates.SCALE_SCALE)
+						.stateEntry(SkipperStates.SCALE_SCALE, scaleScaleAction())
+						.exit(SkipperStates.SCALE_EXIT)
 						.and()
 					.withStates()
 						// substates for delete
@@ -200,6 +208,10 @@ public class StateMachineConfiguration {
 					.and()
 				.withExternal()
 					.source(SkipperStates.DELETE).target(SkipperStates.ERROR_JUNCTION)
+					.guard(errorGuard())
+					.and()
+				.withExternal()
+					.source(SkipperStates.SCALE).target(SkipperStates.ERROR_JUNCTION)
 					.guard(errorGuard())
 					.and()
 				.withExternal()
@@ -280,6 +292,18 @@ public class StateMachineConfiguration {
 					.and()
 				.withExit()
 					.source(SkipperStates.DELETE_EXIT).target(SkipperStates.ERROR_JUNCTION)
+					.and()
+
+				// scale transitions
+				.withExternal()
+					.source(SkipperStates.INITIAL).target(SkipperStates.SCALE)
+					.event(SkipperEvents.SCALE)
+					.and()
+				.withExternal()
+					.source(SkipperStates.SCALE_SCALE).target(SkipperStates.SCALE_EXIT)
+					.and()
+				.withExit()
+					.source(SkipperStates.SCALE_EXIT).target(SkipperStates.ERROR_JUNCTION)
 					.and()
 
 				// rollback transitions
@@ -369,6 +393,11 @@ public class StateMachineConfiguration {
 		@Bean
 		public UpgradeDeleteSourceAppsAction upgradeDeleteSourceAppsAction() {
 			return new UpgradeDeleteSourceAppsAction(releaseReportService, upgradeStrategyFactory);
+		}
+
+		@Bean
+		public ScaleScaleAction scaleScaleAction() {
+			return new ScaleScaleAction(releaseService);
 		}
 
 		@Bean

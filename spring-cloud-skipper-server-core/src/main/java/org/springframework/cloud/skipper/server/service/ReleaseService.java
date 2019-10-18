@@ -34,6 +34,7 @@ import org.springframework.cloud.skipper.domain.Package;
 import org.springframework.cloud.skipper.domain.PackageIdentifier;
 import org.springframework.cloud.skipper.domain.PackageMetadata;
 import org.springframework.cloud.skipper.domain.Release;
+import org.springframework.cloud.skipper.domain.ScaleRequest;
 import org.springframework.cloud.skipper.domain.StatusCode;
 import org.springframework.cloud.skipper.server.deployer.ReleaseAnalysisReport;
 import org.springframework.cloud.skipper.server.deployer.ReleaseManager;
@@ -281,6 +282,14 @@ public class ReleaseService {
 		String kind = ManifestUtils.resolveKind(release.getManifest().getData());
 		ReleaseManager releaseManager = this.releaseManagerFactory.getReleaseManager(kind);
 		return releaseManager.getLog(release, appName);
+	}
+
+	@Transactional
+	public Release scale(String releaseName, ScaleRequest scaleRequest) {
+		Release release = this.releaseRepository.findTopByNameOrderByVersionDesc(releaseName);
+		String kind = ManifestUtils.resolveKind(release.getManifest().getData());
+		ReleaseManager releaseManager = this.releaseManagerFactory.getReleaseManager(kind);
+		return releaseManager.scale(release, scaleRequest);
 	}
 
 	/**

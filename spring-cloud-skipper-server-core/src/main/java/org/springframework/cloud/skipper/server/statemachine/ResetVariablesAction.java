@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2018 the original author or authors.
+ * Copyright 2017-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,7 @@ import org.springframework.cloud.skipper.domain.DeleteProperties;
 import org.springframework.cloud.skipper.domain.InstallProperties;
 import org.springframework.cloud.skipper.domain.InstallRequest;
 import org.springframework.cloud.skipper.domain.RollbackRequest;
+import org.springframework.cloud.skipper.domain.ScaleRequest;
 import org.springframework.cloud.skipper.domain.UpgradeRequest;
 import org.springframework.cloud.skipper.server.statemachine.SkipperStateMachineService.SkipperEventHeaders;
 import org.springframework.cloud.skipper.server.statemachine.SkipperStateMachineService.SkipperEvents;
@@ -90,6 +91,13 @@ public class ResetVariablesAction implements Action<SkipperStates, SkipperEvents
 		if (deleteProperties != null) {
 			context.getExtendedState().getVariables().put(SkipperEventHeaders.RELEASE_DELETE_PROPERTIES,
 					deleteProperties);
+		}
+
+		// for scale
+		ScaleRequest scaleRequest = context.getMessageHeaders().get(SkipperEventHeaders.SCALE_REQUEST,
+				ScaleRequest.class);
+		if (scaleRequest != null) {
+			context.getExtendedState().getVariables().put(SkipperEventHeaders.SCALE_REQUEST, scaleRequest);
 		}
 	}
 }
