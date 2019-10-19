@@ -43,6 +43,7 @@ import org.springframework.cloud.dataflow.core.StreamDeployment;
 import org.springframework.cloud.dataflow.core.dsl.ParseException;
 import org.springframework.cloud.dataflow.core.dsl.StreamNode;
 import org.springframework.cloud.dataflow.core.dsl.StreamParser;
+import org.springframework.cloud.dataflow.rest.ScaleAppRequest;
 import org.springframework.cloud.dataflow.rest.SkipperStream;
 import org.springframework.cloud.dataflow.rest.UpdateStreamRequest;
 import org.springframework.cloud.dataflow.rest.util.DeploymentPropertiesUtils;
@@ -57,6 +58,7 @@ import org.springframework.cloud.dataflow.server.service.StreamValidationService
 import org.springframework.cloud.dataflow.server.service.ValidationStatus;
 import org.springframework.cloud.dataflow.server.stream.SkipperStreamDeployer;
 import org.springframework.cloud.dataflow.server.stream.StreamDeploymentRequest;
+import org.springframework.cloud.deployer.spi.app.AppStatus;
 import org.springframework.cloud.deployer.spi.app.DeploymentState;
 import org.springframework.cloud.deployer.spi.core.AppDeploymentRequest;
 import org.springframework.cloud.skipper.domain.Deployer;
@@ -69,6 +71,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Assert;
+import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
 /**
@@ -215,6 +218,43 @@ public class DefaultStreamService implements StreamService {
 		this.streamDefinitionRepository.save(updatedStreamDefinition);
 		this.auditRecordService.populateAndSaveAuditRecord(
 				AuditOperationType.STREAM, AuditActionType.UPDATE, streamName, this.auditServiceUtils.convertStreamDefinitionToAuditData(streamDefinition));
+	}
+
+	@Override
+	public void scaleStream(String streamName, List<ScaleAppRequest> scaleAppRequests) {
+
+		if (CollectionUtils.isEmpty(scaleAppRequests)) {
+			logger.warn("No apps to scale for stream:" + streamName);
+			return;
+		}
+
+		Map<String, String> appNameToDeployerId = new HashMap<>();
+		List<AppStatus> appStatuses = this.skipperStreamDeployer.getStreamStatuses(streamName);
+		if (!CollectionUtils.isEmpty(appStatuses)) {
+			for (AppStatus appStatus : appStatuses) {
+				try {
+					String appName = appStatus.getInstances().values().iterator().next().getAttributes().get("skipper.application.name");
+					String deploymentId = appStatus.getDeploymentId();
+					appNameToDeployerId.put(appName, deploymentId);
+				}
+				catch (Throwable throwable) {
+					logger.warn("Failed to retrieve runtime status for " + appStatus.getDeploymentId(), throwable);
+				}
+			}
+		}
+
+		for (ScaleAppRequest scaleAppRequest : scaleAppRequests) {
+			String appDeploymentId = appNameToDeployerId.get(scaleAppRequest.getName());
+			if (!StringUtils.hasText(appDeploymentId)) {
+				throw new IllegalStateException(
+						String.format("Could not find deployment id for stream: %s, and app name: %s", streamName, scaleAppRequest.getName()));
+			}
+
+			logger.info(String.format("Scale %s:%s to %s", streamName, appDeploymentId, scaleAppRequest.getCount()));
+		}
+
+		// TODO: 1. Use Skipper's Scale API to send the scale request(s)
+		// TODO: 2. Figure out whether skipper requires the deploymentId or we can pass the App Name?
 	}
 
 	@Override

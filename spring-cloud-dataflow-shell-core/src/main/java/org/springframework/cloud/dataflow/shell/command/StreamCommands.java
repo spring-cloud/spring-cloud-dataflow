@@ -20,6 +20,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -93,6 +94,7 @@ public class StreamCommands implements CommandMarker {
 
 	private static final String STREAM_ROLLBACK = "stream rollback";
 	private static final String STREAM_UPDATE = "stream update";
+	private static final String STREAM_SCALE = "stream scale";
 
 	// View Role
 
@@ -128,7 +130,7 @@ public class StreamCommands implements CommandMarker {
 		return dataFlowShell.hasAccess(RoleType.DESTROY, OpsType.STREAM);
 	}
 
-	@CliAvailabilityIndicator({ STREAM_ROLLBACK, STREAM_UPDATE })
+	@CliAvailabilityIndicator({ STREAM_ROLLBACK, STREAM_UPDATE, STREAM_SCALE })
 	public boolean availableWithModifyRole() {
 		return dataFlowShell.hasAccess(RoleType.MODIFY, OpsType.STREAM);
 	}
@@ -241,6 +243,19 @@ public class StreamCommands implements CommandMarker {
 		streamOperations().updateStream(name, name, packageIdentifier, propertiesToUse, force,
 				new ArrayList<>(StringUtils.commaDelimitedListToSet(appNames)));
 		return String.format("Update request has been sent for the stream '%s'", name);
+	}
+
+	@CliCommand(value = STREAM_SCALE, help = "Scale app instances in a stream")
+	public String scaleStream(
+			@CliOption(key = { "",
+					"name" }, help = "the name of the stream to scale", mandatory = true, optionContext = "existing-stream disable-string-converter") String name,
+			@CliOption(key = {
+					"applicationName" }, help = "the name/label of the application to scale", mandatory = true) String applicationName,
+			@CliOption(key = {
+					"count" }, help = "desired number of application instances", mandatory = true) Integer count) {
+
+		streamOperations().scaleStream(name, Collections.singletonMap(applicationName, "" + count));
+		return String.format("Scale request has been sent for the stream '%s'", name);
 	}
 
 	@CliCommand(value = STREAM_ROLLBACK, help = "Rollback a stream using Skipper")
@@ -362,7 +377,7 @@ public class StreamCommands implements CommandMarker {
 		}
 		builder = DataFlowTables.applyStyle(new TableBuilder(modelBuilder.build()));
 
-		if(isValidStream) {
+		if (isValidStream) {
 			result.add(String.format("\n%s is a valid stream.", stream.getAppName()));
 		}
 		else {

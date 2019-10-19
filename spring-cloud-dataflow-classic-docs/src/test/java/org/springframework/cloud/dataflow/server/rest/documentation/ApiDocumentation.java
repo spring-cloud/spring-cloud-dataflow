@@ -119,6 +119,7 @@ public class ApiDocumentation extends BaseDocumentation {
 				linkWithRel("streams/deployments/rollback/{name}/{version}").description("Rollback the stream to the previous or a specific version of the stream"),
 				linkWithRel("streams/deployments/update/{name}").description("Update the stream."),
 				linkWithRel("streams/deployments/platform/list").description("List of supported deployment platforms"),
+				linkWithRel("streams/deployments/scale/{streamName}").description("Scale up or down number of instances for a selected list applications in a stream"),
 				linkWithRel("streams/logs").description("Retrieve application logs of the stream"),
 				linkWithRel("streams/logs/{streamName}").description("Retrieve application logs of the stream"),
 				linkWithRel("streams/logs/{streamName}/{appName}").description("Retrieve a specific application log of the stream"),
@@ -167,6 +168,8 @@ public class ApiDocumentation extends BaseDocumentation {
 						fieldWithPath("_links.streams/deployments/update/{name}.href").description("Link to the streams/deployments/update/{name}"),
 						fieldWithPath("_links.streams/deployments/update/{name}.templated").type(JsonFieldType.BOOLEAN).optional().description("Link streams/deployments/update/{name} is templated"),
 						fieldWithPath("_links.streams/deployments/platform/list.href").description("Link to the streams/deployments/platform/list"),
+						fieldWithPath("_links.streams/deployments/scale/{streamName}.href").description("Link to the streams/deployments/scale/{streamName}"),
+						fieldWithPath("_links.streams/deployments/scale/{streamName}.templated").type(JsonFieldType.BOOLEAN).optional().description("Link streams/deployments/scale/{streamName} is templated"),
 
 						fieldWithPath("_links.streams/validation.href").description("Link to the streams/validation"),
 						fieldWithPath("_links.streams/validation.templated").type(JsonFieldType.BOOLEAN).optional().description("Link streams/validation is templated"),

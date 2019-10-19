@@ -30,6 +30,7 @@ import org.springframework.cloud.dataflow.rest.util.DeploymentPropertiesUtils;
 import org.springframework.cloud.skipper.domain.PackageIdentifier;
 import org.springframework.cloud.skipper.domain.Release;
 import org.springframework.util.Assert;
+import org.springframework.util.StringUtils;
 
 /**
  * Represents a Stream deployed on DataFlow server. Instances of this class are created using a fluent style builder
@@ -107,6 +108,21 @@ public class Stream implements AutoCloseable {
 		catch (IOException e) {
 			throw new RuntimeException("Could not update Stream with property string = " + properties, e);
 		}
+	}
+
+	public void scale(StreamApplication application, int count) {
+		this.client.streamOperations().scaleStream(this.name,
+				Collections.singletonMap(getAppLabelOrName(application), "" + count));
+	}
+
+	public void scale(Map<StreamApplication, Integer> applicationCounts) {
+		Map<String, String> apps = applicationCounts.entrySet().stream()
+				.collect(Collectors.toMap(e -> getAppLabelOrName(e.getKey()), e -> e.getValue() + ""));
+		this.client.streamOperations().scaleStream(this.name, apps);
+	}
+
+	private String getAppLabelOrName(StreamApplication application) {
+		return StringUtils.hasText(application.getLabel()) ? application.getLabel() : application.getName();
 	}
 
 	/**

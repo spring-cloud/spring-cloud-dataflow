@@ -16,8 +16,10 @@
 
 package org.springframework.cloud.dataflow.server.controller;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
@@ -35,6 +37,7 @@ import org.mockito.junit.MockitoJUnitRunner;
 
 import org.springframework.cloud.dataflow.core.StreamDefinition;
 import org.springframework.cloud.dataflow.core.StreamDeployment;
+import org.springframework.cloud.dataflow.rest.ScaleAppRequest;
 import org.springframework.cloud.dataflow.rest.SkipperStream;
 import org.springframework.cloud.dataflow.rest.UpdateStreamRequest;
 import org.springframework.cloud.dataflow.rest.resource.StreamDeploymentResource;
@@ -91,6 +94,20 @@ public class StreamDeploymentControllerTests {
 		ArgumentCaptor<Map> argumentCaptor2 = ArgumentCaptor.forClass(Map.class);
 		verify(streamService).deployStream(argumentCaptor1.capture(), argumentCaptor2.capture());
 		Assert.assertEquals(argumentCaptor1.getValue(), "test");
+	}
+
+	@Test
+	public void testScaleStream() {
+		ScaleAppRequest sar = new ScaleAppRequest();
+		sar.setCount("666");
+		sar.setName("time");
+		List<ScaleAppRequest> res = new ArrayList<>();
+		res.add(sar);
+		this.controller.scale("ticktock", res);
+
+		ArgumentCaptor<List<ScaleAppRequest>> argumentCaptor1 = ArgumentCaptor.forClass(List.class);
+		verify(streamService).scaleStream(ArgumentMatchers.eq("ticktock"), argumentCaptor1.capture());
+		Assert.assertEquals(res, argumentCaptor1.getValue());
 	}
 
 	@Test

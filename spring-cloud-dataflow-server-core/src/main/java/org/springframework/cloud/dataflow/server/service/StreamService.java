@@ -21,6 +21,7 @@ import java.util.Map;
 
 import org.springframework.cloud.dataflow.core.StreamDefinition;
 import org.springframework.cloud.dataflow.core.StreamDeployment;
+import org.springframework.cloud.dataflow.rest.ScaleAppRequest;
 import org.springframework.cloud.dataflow.rest.UpdateStreamRequest;
 import org.springframework.cloud.dataflow.server.controller.support.InvalidStreamDefinitionException;
 import org.springframework.cloud.dataflow.server.repository.NoSuchStreamDefinitionException;
@@ -39,6 +40,13 @@ import org.springframework.data.domain.Pageable;
  * @author Christian Tzolov
  */
 public interface StreamService {
+
+	/**
+	 *
+	 * @param streamName
+	 * @param scaleAppRequests
+	 */
+	void scaleStream(String streamName, List<ScaleAppRequest> scaleAppRequests);
 
 	/**
 	 * Update the stream using the UpdateStreamRequest.

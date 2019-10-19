@@ -347,4 +347,31 @@ public class StreamDslTests {
 		verify(streamOperations, times(1))
 				.destroy(eq("ticktock"));
 	}
+
+	@Test
+	public void scale() {
+		StreamDefinitionResource resource = new StreamDefinitionResource("ticktock",
+				"time | log", "time | log", "demo stream");
+		resource.setStatus("deploying");
+		when(streamOperations.createStream(anyString(),
+				anyString(), anyString(), anyBoolean())).thenReturn(resource);
+		StreamApplication time = new StreamApplication("time");
+		StreamApplication log = new StreamApplication("log");
+		Stream stream = Stream.builder(client).name("ticktock").description("demo stream")
+				.source(time).sink(log)
+				.create().deploy();
+		verify(streamOperations, times(1)).createStream(
+				eq("ticktock"), eq("time | log"), eq("demo stream"), eq(false));
+		verify(streamOperations, times(1)).deploy(eq("ticktock"),
+				anyMap());
+		stream.scale(time, 3);
+
+		verify(streamOperations, times(1))
+				.scaleStream(eq("ticktock"), eq(Collections.singletonMap(time.getName(), "3")));
+
+		stream.scale(Collections.singletonMap(log, 2));
+
+		verify(streamOperations, times(1))
+				.scaleStream(eq("ticktock"), eq(Collections.singletonMap(log.getName(), "2")));
+	}
 }
