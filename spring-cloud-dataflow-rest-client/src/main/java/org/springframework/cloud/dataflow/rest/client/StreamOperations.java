@@ -151,4 +151,14 @@ public interface StreamOperations {
 	 * @throws OperationNotSupportedException if the server does not support stream validation
 	 */
 	StreamAppStatusResource validateStreamDefinition(String streamDefinitionName) throws OperationNotSupportedException;
+
+	/**
+	 * Scales number of application instances in a stream.
+	 *
+	 * @param streamName the stream(release) name.
+	 * @param appName name of application in the stream to scale.
+	 * @param count number of instances to scale to.
+	 * @param properties scale deployment properties.
+	 */
+	void scaleApplicationInstances(String streamName, String appName, Integer count, Map<String, String> properties);
 }

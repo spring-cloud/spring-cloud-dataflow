@@ -145,7 +145,7 @@ public class StreamDslTests {
 	@Test
 	public void deployWithCreate() {
 		StreamDefinitionResource resource = new StreamDefinitionResource("ticktock",
-				"time | log", "time | log","demo stream");
+				"time | log", "time | log", "demo stream");
 		resource.setStatus("deploying");
 		when(streamOperations.createStream(anyString(),
 				anyString(), anyString(), anyBoolean())).thenReturn(resource);
@@ -161,7 +161,7 @@ public class StreamDslTests {
 	@Test
 	public void deployWithDefinition() {
 		StreamDefinitionResource resource = new StreamDefinitionResource("ticktock",
-				"time | log", "time | log","demo stream");
+				"time | log", "time | log", "demo stream");
 		resource.setStatus("deploying");
 		when(streamOperations.createStream(anyString(),
 				anyString(), anyString(), anyBoolean())).thenReturn(resource);
@@ -178,7 +178,7 @@ public class StreamDslTests {
 	@Test
 	public void getStatus() {
 		StreamDefinitionResource resource = new StreamDefinitionResource("ticktock",
-				"time | log", "time | log","demo stream");
+				"time | log", "time | log", "demo stream");
 		resource.setStatus("unknown");
 		when(streamOperations.getStreamDefinition(eq("ticktock")))
 				.thenReturn(resource);
@@ -200,7 +200,7 @@ public class StreamDslTests {
 	@Test
 	public void createStream() {
 		StreamDefinitionResource resource = new StreamDefinitionResource("ticktock",
-				"time | log", "time | log","demo stream");
+				"time | log", "time | log", "demo stream");
 		resource.setStatus("deploying");
 		when(streamOperations.createStream(anyString(),
 				anyString(), anyString(), anyBoolean())).thenReturn(resource);
@@ -346,5 +346,32 @@ public class StreamDslTests {
 		stream.destroy();
 		verify(streamOperations, times(1))
 				.destroy(eq("ticktock"));
+	}
+
+	@Test
+	public void scaleApplicationInstances() {
+		StreamDefinitionResource resource = new StreamDefinitionResource("ticktock",
+				"time | log", "time | log", "demo stream");
+		resource.setStatus("deploying");
+		when(streamOperations.createStream(anyString(),
+				anyString(), anyString(), anyBoolean())).thenReturn(resource);
+		StreamApplication time = new StreamApplication("time");
+		StreamApplication log = new StreamApplication("log");
+		Stream stream = Stream.builder(client).name("ticktock").description("demo stream")
+				.source(time).sink(log)
+				.create().deploy();
+		verify(streamOperations, times(1)).createStream(
+				eq("ticktock"), eq("time | log"), eq("demo stream"), eq(false));
+		verify(streamOperations, times(1)).deploy(eq("ticktock"),
+				anyMap());
+		stream.scaleApplicationInstances(time, 3, Collections.emptyMap());
+
+		stream.scaleApplicationInstances(log, 2, Collections.singletonMap("key", "value"));
+
+		verify(streamOperations, times(1))
+				.scaleApplicationInstances(eq("ticktock"), eq("time"), eq(3), isA(Map.class));
+
+		verify(streamOperations, times(1))
+				.scaleApplicationInstances(eq("ticktock"), eq("log"), eq(2), eq(Collections.singletonMap("key", "value")));
 	}
 }

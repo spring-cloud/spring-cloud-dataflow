@@ -17,6 +17,7 @@
 package org.springframework.cloud.dataflow.server.controller;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -29,7 +30,6 @@ import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
-import org.mockito.ArgumentMatchers;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
@@ -48,6 +48,9 @@ import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
 import static org.mockito.ArgumentMatchers.anyList;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.isA;
+import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -94,6 +97,20 @@ public class StreamDeploymentControllerTests {
 	}
 
 	@Test
+	public void testScaleApplicationInstances() {
+		this.controller.scaleApplicationInstances("ticktock", "time", 666, null);
+		verify(streamService).scaleApplicationInstances(eq("ticktock"), eq("time"), eq(666), isNull());
+
+		this.controller.scaleApplicationInstances("stream", "foo", 2, new HashMap<>());
+		verify(streamService).scaleApplicationInstances(eq("stream"), eq("foo"), eq(2), isA(Map.class));
+
+		this.controller.scaleApplicationInstances("stream", "bar", 3,
+				Collections.singletonMap("key", "value"));
+		verify(streamService).scaleApplicationInstances(eq("stream"), eq("bar"), eq(3),
+				eq(Collections.singletonMap("key", "value")));
+	}
+
+	@Test
 	public void testUpdateStream() {
 		Map<String, String> deploymentProperties = new HashMap<>();
 		deploymentProperties.put(SkipperStream.SKIPPER_PACKAGE_NAME, "ticktock");
@@ -103,20 +120,20 @@ public class StreamDeploymentControllerTests {
 		UpdateStreamRequest updateStreamRequest = new UpdateStreamRequest("ticktock", new PackageIdentifier(), deploymentProperties);
 		this.controller.update("ticktock", updateStreamRequest);
 		ArgumentCaptor<UpdateStreamRequest> argumentCaptor1 = ArgumentCaptor.forClass(UpdateStreamRequest.class);
-		verify(streamService).updateStream(ArgumentMatchers.eq("ticktock"), argumentCaptor1.capture());
+		verify(streamService).updateStream(eq("ticktock"), argumentCaptor1.capture());
 		Assert.assertEquals(updateStreamRequest, argumentCaptor1.getValue());
 	}
 
 	@Test
 	public void testStreamManifest() {
 		this.controller.manifest("ticktock", 666);
-		verify(streamService, times(1)).manifest(ArgumentMatchers.eq("ticktock"), ArgumentMatchers.eq(666));
+		verify(streamService, times(1)).manifest(eq("ticktock"), eq(666));
 	}
 
 	@Test
 	public void testStreamHistory() {
 		this.controller.history("releaseName");
-		verify(streamService, times(1)).history(ArgumentMatchers.eq("releaseName"));
+		verify(streamService, times(1)).history(eq("releaseName"));
 	}
 
 	@Test

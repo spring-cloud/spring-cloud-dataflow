@@ -149,6 +149,13 @@ public class StreamTemplate implements StreamOperations {
 	}
 
 	@Override
+	public void scaleApplicationInstances(String streamName,
+			String appName, Integer count, Map<String, String> properties) {
+		String url = String.format("%s/scale/%s/%s/instances/%s", deploymentsLink.getHref(), streamName, appName, count);
+		restTemplate.postForObject(url, properties, Object.class);
+	}
+
+	@Override
 	public void updateStream(String streamName, String releaseName, PackageIdentifier packageIdentifier,
 			Map<String, String> updateProperties, boolean force, List<String> appNames) {
 		Assert.hasText(streamName, "Stream name cannot be null or empty");

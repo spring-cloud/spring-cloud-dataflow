@@ -71,6 +71,7 @@ import org.springframework.cloud.skipper.domain.PackageIdentifier;
 import org.springframework.cloud.skipper.domain.PackageMetadata;
 import org.springframework.cloud.skipper.domain.Release;
 import org.springframework.cloud.skipper.domain.RollbackRequest;
+import org.springframework.cloud.skipper.domain.ScaleRequest;
 import org.springframework.cloud.skipper.domain.SpringCloudDeployerApplicationManifest;
 import org.springframework.cloud.skipper.domain.SpringCloudDeployerApplicationManifestReader;
 import org.springframework.cloud.skipper.domain.SpringCloudDeployerApplicationSpec;
@@ -206,6 +207,11 @@ public class SkipperStreamDeployer implements StreamDeployer {
 
 	private boolean streamDefinitionExists(String streamName) {
 		return this.streamDefinitionRepository.findById(streamName).isPresent();
+	}
+
+	@Override
+	public void scale(String streamName, String appName, int count, Map<String, String> properties) {
+		this.skipperClient.scale(streamName, ScaleRequest.of(appName, count, properties));
 	}
 
 	public Release deployStream(StreamDeploymentRequest streamDeploymentRequest) {
