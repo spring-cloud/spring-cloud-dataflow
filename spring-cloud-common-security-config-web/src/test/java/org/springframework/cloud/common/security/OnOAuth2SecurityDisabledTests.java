@@ -37,7 +37,8 @@ public class OnOAuth2SecurityDisabledTests {
 
 	@Test
 	public void propertyClientIdSet() throws Exception {
-		AnnotationConfigApplicationContext context = load(Config.class, "security.oauth2.client.client-id:12345");
+		AnnotationConfigApplicationContext context =
+			load(Config.class, "spring.security.oauth2.client.registration.uaa.client-id:12345");
 		assertThat(context.containsBean("myBean"), equalTo(false));
 		context.close();
 	}

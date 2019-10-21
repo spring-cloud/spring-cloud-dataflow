@@ -48,6 +48,11 @@ public class SecurityConfigUtils {
 
 	/**
 	 * Read the configuration for "simple" (that is, not ACL based) security and apply it.
+	 *
+	 * @param security The ExpressionUrlAuthorizationConfigurer to apply the authorization rules to
+	 * @param authorizationProperties Contains the rules to configure authorization
+	 *
+	 * @return ExpressionUrlAuthorizationConfigurer
 	 */
 	public static ExpressionUrlAuthorizationConfigurer<HttpSecurity>.ExpressionInterceptUrlRegistry configureSimpleSecurity(
 			ExpressionUrlAuthorizationConfigurer<HttpSecurity>.ExpressionInterceptUrlRegistry security,

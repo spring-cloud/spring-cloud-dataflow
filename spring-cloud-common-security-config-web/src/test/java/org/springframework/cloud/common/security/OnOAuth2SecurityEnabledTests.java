@@ -40,19 +40,19 @@ public class OnOAuth2SecurityEnabledTests {
 
 	@Test(expected=IllegalStateException.class)
 	public void propertySecurityOauth() throws Exception {
-		load(Config.class, "security.oauth2");
+		load(Config.class, "spring.security.oauth2");
 	}
 
 	@Test
 	public void propertyClientId() throws Exception {
-		AnnotationConfigApplicationContext context = load(Config.class, "security.oauth2.client.client-id:12345");
+		AnnotationConfigApplicationContext context = load(Config.class, "spring.security.oauth2.client.registration.uaa.client-id:12345");
 		assertThat(context.containsBean("myBean"), equalTo(true));
 		context.close();
 	}
 
 	@Test
 	public void clientIdOnlyWithNoValue() throws Exception {
-		AnnotationConfigApplicationContext context = load(Config.class, "security.oauth2.client.client-id");
+		AnnotationConfigApplicationContext context = load(Config.class, "spring.security.oauth2.client.registration.uaa.client-id");
 		assertThat(context.containsBean("myBean"), equalTo(true));
 		context.close();
 	}

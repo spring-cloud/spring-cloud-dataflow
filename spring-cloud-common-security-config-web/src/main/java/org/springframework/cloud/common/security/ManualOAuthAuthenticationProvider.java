@@ -1,5 +1,5 @@
 /*
- * Copyright 2016-2018 the original author or authors.
+ * Copyright 2016-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,28 +16,25 @@
 package org.springframework.cloud.common.security;
 
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.autoconfigure.security.oauth2.OAuth2ClientProperties;
-import org.springframework.boot.autoconfigure.security.oauth2.resource.UserInfoTokenServices;
+
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.AuthenticationServiceException;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
-import org.springframework.security.oauth2.client.DefaultOAuth2ClientContext;
-import org.springframework.security.oauth2.client.OAuth2ClientContext;
-import org.springframework.security.oauth2.client.OAuth2RestTemplate;
-import org.springframework.security.oauth2.client.resource.OAuth2AccessDeniedException;
-import org.springframework.security.oauth2.client.token.AccessTokenProvider;
-import org.springframework.security.oauth2.client.token.DefaultAccessTokenRequest;
-import org.springframework.security.oauth2.client.token.grant.password.ResourceOwnerPasswordAccessTokenProvider;
-import org.springframework.security.oauth2.client.token.grant.password.ResourceOwnerPasswordResourceDetails;
-import org.springframework.security.oauth2.common.OAuth2AccessToken;
-import org.springframework.security.oauth2.common.exceptions.OAuth2Exception;
-import org.springframework.security.oauth2.provider.OAuth2Authentication;
-import org.springframework.security.oauth2.provider.token.ResourceServerTokenServices;
+import org.springframework.security.core.context.SecurityContext;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.oauth2.client.endpoint.OAuth2AccessTokenResponseClient;
+import org.springframework.security.oauth2.client.endpoint.OAuth2PasswordGrantRequest;
+import org.springframework.security.oauth2.client.registration.ClientRegistration;
+import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository;
+import org.springframework.security.oauth2.core.AuthorizationGrantType;
+import org.springframework.security.oauth2.core.OAuth2AuthorizationException;
+import org.springframework.security.oauth2.core.endpoint.OAuth2AccessTokenResponse;
+import org.springframework.security.oauth2.server.resource.BearerTokenAuthenticationToken;
+import org.springframework.security.oauth2.server.resource.authentication.OpaqueTokenAuthenticationProvider;
+import org.springframework.security.oauth2.server.resource.introspection.OpaqueTokenIntrospector;
 import org.springframework.web.client.ResourceAccessException;
 
 /**
@@ -50,26 +47,22 @@ public class ManualOAuthAuthenticationProvider implements AuthenticationProvider
 
 	private static final org.slf4j.Logger logger = LoggerFactory.getLogger(ManualOAuthAuthenticationProvider.class);
 
-	@Autowired
-	private OAuth2ClientProperties oAuth2ClientProperties;
-
-	@Value("${security.oauth2.client.access-token-uri}")
-	private String accessTokenUri;
-
-	private final ResourceServerTokenServices resourceServerTokenServices;
-	private final OAuth2ClientContext oauth2ClientContext;
+	private final OAuth2AccessTokenResponseClient<OAuth2PasswordGrantRequest> oAuth2PasswordTokenResponseClient;
+	private final ClientRegistrationRepository clientRegistrationRepository;
+	private final AuthenticationProvider authenticationProvider;
+	private final String providerId;
 
 	public ManualOAuthAuthenticationProvider(
-		ResourceServerTokenServices resourceServerTokenServices,
-		OAuth2ClientContext oauth2ClientContext) {
+			OAuth2AccessTokenResponseClient<OAuth2PasswordGrantRequest> oAuth2PasswordTokenResponseClient,
+			ClientRegistrationRepository clientRegistrationRepository,
+			OpaqueTokenIntrospector opaqueTokenIntrospector,
+			String providerId) {
 
-		this.resourceServerTokenServices = resourceServerTokenServices;
-		this.oauth2ClientContext = oauth2ClientContext;
-	}
-
-	public AccessTokenProvider userAccessTokenProvider() {
-		ResourceOwnerPasswordAccessTokenProvider accessTokenProvider = new ResourceOwnerPasswordAccessTokenProvider();
-		return accessTokenProvider;
+		this.oAuth2PasswordTokenResponseClient = oAuth2PasswordTokenResponseClient;
+		this.clientRegistrationRepository = clientRegistrationRepository;
+		this.authenticationProvider =
+				new OpaqueTokenAuthenticationProvider(opaqueTokenIntrospector);
+		this.providerId = providerId;
 	}
 
 	@Override
@@ -77,43 +70,46 @@ public class ManualOAuthAuthenticationProvider implements AuthenticationProvider
 		final String username = authentication.getName();
 		final String password = authentication.getCredentials().toString();
 
-		final ResourceOwnerPasswordResourceDetails resource = new ResourceOwnerPasswordResourceDetails();
+		final ClientRegistration clientRegistration = clientRegistrationRepository.findByRegistrationId(providerId);
+		final ClientRegistration clientRegistrationPassword = ClientRegistration.withClientRegistration(clientRegistration).authorizationGrantType(AuthorizationGrantType.PASSWORD).build();
 
-		resource.setUsername(username);
-		resource.setPassword(password);
+		final OAuth2PasswordGrantRequest grantRequest = new OAuth2PasswordGrantRequest(clientRegistrationPassword, username, password);
+		final OAuth2AccessTokenResponse accessTokenResponse;
+		final String accessTokenUri = clientRegistration.getProviderDetails().getTokenUri();
 
-		resource.setAccessTokenUri(accessTokenUri);
-		resource.setClientId(oAuth2ClientProperties.getClientId());
-		resource.setClientSecret(oAuth2ClientProperties.getClientSecret());
-		resource.setGrantType("password");
-
-		final OAuth2RestTemplate template = new OAuth2RestTemplate(resource, this.oauth2ClientContext);
-		template.setAccessTokenProvider(userAccessTokenProvider());
-
-		final OAuth2AccessToken accessToken;
 		try {
+			accessTokenResponse = oAuth2PasswordTokenResponseClient.getTokenResponse(grantRequest);
 			logger.warn("Authenticating user '{}' using accessTokenUri '{}'.", username, accessTokenUri);
-			accessToken = template.getAccessToken();
 		}
-		catch (OAuth2AccessDeniedException e) {
+		catch (OAuth2AuthorizationException e) {
 			if (e.getCause() instanceof ResourceAccessException) {
-				final String errorMessage = String.format(
+					final String errorMessage = String.format(
 						"While authenticating user '%s': " + "Unable to access accessTokenUri '%s'.", username,
 						accessTokenUri);
 				logger.error(errorMessage + " Error message: {}.", e.getCause().getMessage());
 				throw new AuthenticationServiceException(errorMessage, e);
 			}
-			throw new BadCredentialsException(String.format("Access denied for user '%s'.", username), e);
-		}
-		catch (OAuth2Exception e) {
-			throw new AuthenticationServiceException(
-					String.format("Unable to perform OAuth authentication for user '%s'.", username), e);
+			else {
+				throw new BadCredentialsException(String.format("Access denied for user '%s'.", username), e);
+			}
+
 		}
 
-		final ManualOAuthAuthenticationDetails details = new ManualOAuthAuthenticationDetails(accessToken);
-		final OAuth2Authentication auth2Authentication = resourceServerTokenServices.loadAuthentication(accessToken.getValue());
-		auth2Authentication.setDetails(details);
-		return auth2Authentication;
+		final BearerTokenAuthenticationToken authenticationRequest = new BearerTokenAuthenticationToken(accessTokenResponse.getAccessToken().getTokenValue());
+
+		Authentication newAuthentication = null;
+		try {
+			newAuthentication = this.authenticationProvider.authenticate(authenticationRequest);
+			SecurityContext context = SecurityContextHolder.createEmptyContext();
+			context.setAuthentication(newAuthentication);
+			SecurityContextHolder.setContext(context);
+		} catch (AuthenticationException failed) {
+			SecurityContextHolder.clearContext();
+			logger.warn("Authentication request for failed!", failed);
+			//this.authenticationFailureHandler.onAuthenticationFailure(request, response, failed);
+		}
+
+		return newAuthentication;
 	}
 
 	@Override

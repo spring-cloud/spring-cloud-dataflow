@@ -15,32 +15,29 @@
  */
 package org.springframework.cloud.common.security;
 
-import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import javax.servlet.Filter;
-
 import org.slf4j.LoggerFactory;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
 import org.springframework.boot.autoconfigure.security.SecurityProperties;
-import org.springframework.boot.autoconfigure.security.oauth2.OAuth2ClientProperties;
-import org.springframework.boot.autoconfigure.security.oauth2.resource.AuthoritiesExtractor;
-import org.springframework.boot.autoconfigure.security.oauth2.resource.PrincipalExtractor;
-import org.springframework.boot.autoconfigure.security.oauth2.resource.ResourceServerProperties;
-import org.springframework.cloud.common.security.support.TokenValidatingUserInfoTokenServices;
-import org.springframework.cloud.common.security.support.DataflowPrincipalExtractor;
-import org.springframework.cloud.common.security.support.DefaultAuthoritiesExtractor;
-import org.springframework.cloud.common.security.support.ExternalOauth2ResourceAuthoritiesExtractor;
+import org.springframework.boot.autoconfigure.security.oauth2.client.OAuth2ClientProperties;
+import org.springframework.boot.autoconfigure.security.oauth2.resource.OAuth2ResourceServerProperties;
+import org.springframework.cloud.common.security.support.AuthoritiesMapper;
+import org.springframework.cloud.common.security.support.CustomAuthoritiesOpaqueTokenIntrospector;
+import org.springframework.cloud.common.security.support.CustomOAuth2OidcUserService;
+import org.springframework.cloud.common.security.support.CustomPlainOAuth2UserService;
+import org.springframework.cloud.common.security.support.DefaultAuthoritiesMapper;
+import org.springframework.cloud.common.security.support.DefaultOAuth2TokenUtilsService;
 import org.springframework.cloud.common.security.support.OnOAuth2SecurityEnabled;
 import org.springframework.cloud.common.security.support.SecurityConfigUtils;
 import org.springframework.cloud.common.security.support.SecurityStateBean;
-import org.springframework.cloud.common.security.support.TokenStoreClearingLogoutSuccessHandler;
+import org.springframework.cloud.common.security.core.support.OAuth2TokenUtilsService;
+import org.springframework.cloud.common.security.support.AccessTokenClearingLogoutSuccessHandler;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Conditional;
@@ -48,29 +45,30 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.event.EventListener;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
-import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.ProviderManager;
+import org.springframework.security.authentication.event.AbstractAuthenticationFailureEvent;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.config.annotation.web.configurers.ExpressionUrlAuthorizationConfigurer;
-import org.springframework.security.oauth2.client.OAuth2ClientContext;
-import org.springframework.security.oauth2.client.OAuth2RestTemplate;
-import org.springframework.security.oauth2.client.filter.OAuth2AuthenticationFailureEvent;
-import org.springframework.security.oauth2.client.filter.OAuth2ClientAuthenticationProcessingFilter;
-import org.springframework.security.oauth2.client.resource.BaseOAuth2ProtectedResourceDetails;
-import org.springframework.security.oauth2.client.token.AccessTokenProvider;
-import org.springframework.security.oauth2.client.token.grant.code.AuthorizationCodeResourceDetails;
-import org.springframework.security.oauth2.client.token.grant.password.ResourceOwnerPasswordAccessTokenProvider;
-import org.springframework.security.oauth2.config.annotation.web.configuration.EnableOAuth2Client;
-import org.springframework.security.oauth2.config.annotation.web.configuration.ResourceServerConfigurerAdapter;
-import org.springframework.security.oauth2.config.annotation.web.configurers.ResourceServerSecurityConfigurer;
-import org.springframework.security.oauth2.provider.authentication.OAuth2AuthenticationManager;
-import org.springframework.security.oauth2.provider.authentication.OAuth2AuthenticationProcessingFilter;
-import org.springframework.security.oauth2.provider.token.ResourceServerTokenServices;
-import org.springframework.security.oauth2.provider.token.TokenStore;
-import org.springframework.security.oauth2.provider.token.store.InMemoryTokenStore;
+import org.springframework.security.oauth2.client.OAuth2AuthorizedClientManager;
+import org.springframework.security.oauth2.client.OAuth2AuthorizedClientProvider;
+import org.springframework.security.oauth2.client.OAuth2AuthorizedClientProviderBuilder;
+import org.springframework.security.oauth2.client.OAuth2AuthorizedClientService;
+import org.springframework.security.oauth2.client.endpoint.DefaultPasswordTokenResponseClient;
+import org.springframework.security.oauth2.client.endpoint.OAuth2AccessTokenResponseClient;
+import org.springframework.security.oauth2.client.endpoint.OAuth2PasswordGrantRequest;
+import org.springframework.security.oauth2.client.oidc.userinfo.OidcUserRequest;
+import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository;
+import org.springframework.security.oauth2.client.userinfo.OAuth2UserRequest;
+import org.springframework.security.oauth2.client.userinfo.OAuth2UserService;
+import org.springframework.security.oauth2.client.web.DefaultOAuth2AuthorizedClientManager;
+import org.springframework.security.oauth2.client.web.OAuth2AuthorizedClientRepository;
+import org.springframework.security.oauth2.client.web.reactive.function.client.ServletOAuth2AuthorizedClientExchangeFilterFunction;
+import org.springframework.security.oauth2.core.oidc.user.OidcUser;
+import org.springframework.security.oauth2.core.user.OAuth2User;
+import org.springframework.security.oauth2.server.resource.introspection.OpaqueTokenIntrospector;
 import org.springframework.security.web.authentication.LoginUrlAuthenticationEntryPoint;
 import org.springframework.security.web.authentication.logout.LogoutSuccessHandler;
 import org.springframework.security.web.authentication.www.BasicAuthenticationEntryPoint;
@@ -82,6 +80,7 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.HttpMediaTypeNotAcceptableException;
 import org.springframework.web.accept.HeaderContentNegotiationStrategy;
 import org.springframework.web.context.request.NativeWebRequest;
+import org.springframework.web.reactive.function.client.WebClient;
 
 /**
  * Setup Spring Security OAuth for the Rest Endpoints of Spring Cloud Data Flow.
@@ -89,7 +88,6 @@ import org.springframework.web.context.request.NativeWebRequest;
  * @author Gunnar Hillert
  * @author Ilayaperumal Gopinathan
  */
-@EnableOAuth2Client
 @Configuration
 @ConditionalOnClass(WebSecurityConfigurerAdapter.class)
 @ConditionalOnMissingBean(WebSecurityConfigurerAdapter.class)
@@ -101,22 +99,13 @@ public class OAuthSecurityConfiguration extends WebSecurityConfigurerAdapter {
 	private static final org.slf4j.Logger logger = LoggerFactory.getLogger(OAuthSecurityConfiguration.class);
 
 	@Autowired
+	protected OAuth2ClientProperties oauth2ClientProperties;
+
+	@Autowired
 	protected SecurityStateBean securityStateBean;
 
 	@Autowired
 	protected SecurityProperties securityProperties;
-
-	@Autowired
-	protected OAuth2ClientContext oauth2ClientContext;
-
-	@Autowired
-	protected AuthorizationCodeResourceDetails authorizationCodeResourceDetails;
-
-	@Autowired
-	protected ResourceServerProperties resourceServerProperties;
-
-	@Autowired
-	protected OAuth2ClientProperties oAuth2ClientProperties;
 
 	@Autowired
 	protected ApplicationEventPublisher applicationEventPublisher;
@@ -125,11 +114,17 @@ public class OAuthSecurityConfiguration extends WebSecurityConfigurerAdapter {
 	protected AuthorizationProperties authorizationProperties;
 
 	@Autowired
-	protected BaseOAuth2ProtectedResourceDetails clientCredentialsResourceDetails;
+	protected OAuth2ResourceServerProperties oAuth2ResourceServerProperties;
 
+	@Autowired
+	protected OAuth2AccessTokenResponseClient<OAuth2PasswordGrantRequest> oAuth2PasswordTokenResponseClient;
+	@Autowired
+	protected ClientRegistrationRepository clientRegistrationRepository;
+	@Autowired
+	protected OpaqueTokenIntrospector opaqueTokenIntrospector;
 
-	@Autowired(required = false)
-	private PrincipalExtractor principalExtractor;
+	@Autowired
+	protected OAuth2AuthorizedClientService oauth2AuthorizedClientService;
 
 	@Override
 	protected void configure(HttpSecurity http) throws Exception {
@@ -141,12 +136,11 @@ public class OAuthSecurityConfiguration extends WebSecurityConfigurerAdapter {
 		final BasicAuthenticationEntryPoint basicAuthenticationEntryPoint = new BasicAuthenticationEntryPoint();
 		basicAuthenticationEntryPoint.setRealmName(SecurityConfigUtils.BASIC_AUTH_REALM_NAME);
 		basicAuthenticationEntryPoint.afterPropertiesSet();
-		final Filter oauthFilter = oauthFilter();
+
 		BasicAuthenticationFilter basicAuthenticationFilter = new BasicAuthenticationFilter(
 				providerManager(), basicAuthenticationEntryPoint);
-		http.addFilterAfter(oauthFilter, basicAuthenticationFilter.getClass());
-		http.addFilterBefore(basicAuthenticationFilter, oauthFilter.getClass());
-		http.addFilterBefore(oAuth2AuthenticationProcessingFilter(), basicAuthenticationFilter.getClass());
+
+		http.addFilter(basicAuthenticationFilter);
 
 		this.authorizationProperties.getAuthenticatedPaths().add("/");
 		this.authorizationProperties.getAuthenticatedPaths().add(dashboard("/**"));
@@ -173,106 +167,109 @@ public class OAuthSecurityConfiguration extends WebSecurityConfigurerAdapter {
 						new LoginUrlAuthenticationEntryPoint(this.authorizationProperties.getLoginProcessingUrl()),
 						textHtmlMatcher)
 				.defaultAuthenticationEntryPointFor(basicAuthenticationEntryPoint, AnyRequestMatcher.INSTANCE);
+
+		http.oauth2Login().userInfoEndpoint()
+			.userService(this.plainOauth2UserService())
+			.oidcUserService(this.oidcUserService());
+		http.oauth2ResourceServer()
+		.opaqueToken().introspector(opaqueTokenIntrospector());
+
 		this.securityStateBean.setAuthenticationEnabled(true);
 	}
 
 	@Bean
+	protected OpaqueTokenIntrospector opaqueTokenIntrospector() {
+		return new CustomAuthoritiesOpaqueTokenIntrospector(
+				this.oAuth2ResourceServerProperties.getOpaquetoken().getIntrospectionUri(),
+				this.oAuth2ResourceServerProperties.getOpaquetoken().getClientId(),
+				this.oAuth2ResourceServerProperties.getOpaquetoken().getClientSecret(),
+				authorityMapper());
+	}
+
+	@Bean
+	protected OAuth2UserService<OidcUserRequest, OidcUser> oidcUserService() {
+		return new CustomOAuth2OidcUserService(authorityMapper());
+	}
+
+	@Bean
+	protected OAuth2UserService<OAuth2UserRequest, OAuth2User> plainOauth2UserService() {
+		return new CustomPlainOAuth2UserService(authorityMapper());
+	}
+
+	@Bean
+	public AuthoritiesMapper authorityMapper() {
+		return new DefaultAuthoritiesMapper(
+				authorizationProperties.getProviderRoleMappings(),
+				this.calculateDefaultProviderId());
+	}
+
+	@Bean
+	public OAuth2AuthorizedClientManager authorizedClientManager(
+			ClientRegistrationRepository clientRegistrationRepository,
+			OAuth2AuthorizedClientRepository authorizedClientRepository) {
+
+		OAuth2AuthorizedClientProvider authorizedClientProvider =
+				OAuth2AuthorizedClientProviderBuilder.builder()
+						.authorizationCode()
+						.refreshToken()
+						.clientCredentials()
+						.password()
+						.build();
+
+		DefaultOAuth2AuthorizedClientManager authorizedClientManager =
+				new DefaultOAuth2AuthorizedClientManager(
+						clientRegistrationRepository, authorizedClientRepository);
+		authorizedClientManager.setAuthorizedClientProvider(authorizedClientProvider);
+
+		return authorizedClientManager;
+	}
+
+	@Bean
+	WebClient webClient(OAuth2AuthorizedClientManager authorizedClientManager) {
+		ServletOAuth2AuthorizedClientExchangeFilterFunction oauth2Client =
+				new ServletOAuth2AuthorizedClientExchangeFilterFunction(authorizedClientManager);
+		oauth2Client.setDefaultOAuth2AuthorizedClient(true);
+		return WebClient.builder()
+				.apply(oauth2Client.oauth2Configuration())
+				.build();
+	}
+
+	@Bean
 	LogoutSuccessHandler logoutSuccessHandler() {
-		final TokenStoreClearingLogoutSuccessHandler logoutSuccessHandler = new TokenStoreClearingLogoutSuccessHandler(tokenStore(), oAuth2ClientProperties);
+		final AccessTokenClearingLogoutSuccessHandler logoutSuccessHandler =
+				new AccessTokenClearingLogoutSuccessHandler(this.oauth2TokenUtilsService());
 		logoutSuccessHandler.setDefaultTargetUrl(dashboard("/logout-success-oauth.html"));
 		return logoutSuccessHandler;
 	}
 
 	@Bean
-	TokenStore tokenStore() {
-		return new InMemoryTokenStore();
-	}
-
-	@Bean
-	protected TokenValidatingUserInfoTokenServices resourceServerTokenServices() {
-
-		final TokenValidatingUserInfoTokenServices tokenServices = new TokenValidatingUserInfoTokenServices(
-				resourceServerProperties.getUserInfoUri(),
-				resourceServerProperties.getTokenInfoUri(),
-				authorizationCodeResourceDetails.getClientId(),
-				authorizationCodeResourceDetails.getClientSecret());
-
-		tokenServices.setTokenStore(tokenStore());
-		tokenServices.setSupportRefreshToken(true);
-
-		tokenServices.setRestTemplate(oAuth2RestTemplate());
-		final AuthoritiesExtractor authoritiesExtractor;
-		if (StringUtils.isEmpty(authorizationProperties.getExternalAuthoritiesUrl())) {
-			authoritiesExtractor = new DefaultAuthoritiesExtractor(authorizationProperties.isMapOauthScopes(), authorizationProperties.getRoleMappings(), oAuth2RestTemplate());
-		}
-		else {
-			authoritiesExtractor = new ExternalOauth2ResourceAuthoritiesExtractor(
-					oAuth2RestTemplate(), URI.create(authorizationProperties.getExternalAuthoritiesUrl()));
-		}
-		tokenServices.setAuthoritiesExtractor(authoritiesExtractor);
-
-		if (this.principalExtractor == null) {
-			tokenServices.setPrincipalExtractor(new DataflowPrincipalExtractor());
-		}
-		else {
-			tokenServices.setPrincipalExtractor(this.principalExtractor);
-		}
-		return tokenServices;
-	}
-
-	@Bean
-	protected OAuth2RestTemplate oAuth2RestTemplate() {
-		final OAuth2RestTemplate oAuth2RestTemplate = new OAuth2RestTemplate(authorizationCodeResourceDetails,
-				oauth2ClientContext);
-		return oAuth2RestTemplate;
-	}
-
-	public AccessTokenProvider userAccessTokenProvider() {
-		ResourceOwnerPasswordAccessTokenProvider accessTokenProvider = new ResourceOwnerPasswordAccessTokenProvider();
-		return accessTokenProvider;
-	}
-
-	@Bean
 	protected AuthenticationProvider authenticationProvider() {
-		return new ManualOAuthAuthenticationProvider(this.resourceServerTokenServices(), oauth2ClientContext);
+		return new ManualOAuthAuthenticationProvider(
+			this.oAuth2PasswordTokenResponseClient,
+			this.clientRegistrationRepository,
+			this.opaqueTokenIntrospector,
+			this.calculateDefaultProviderId());
+
 	}
 
 	@Bean
 	protected ProviderManager providerManager() {
 		List<AuthenticationProvider> providers = new ArrayList<>();
-		providers.add(this.authenticationProvider());
+		providers.add(authenticationProvider());
 		ProviderManager providerManager = new ProviderManager(providers);
 		return providerManager;
 	}
 
-	protected Filter oauthFilter() {
-		final OAuth2ClientAuthenticationProcessingFilter oauthFilter = new OAuth2ClientAuthenticationProcessingFilter(
-				"/login");
-		oauthFilter.setRestTemplate(oAuth2RestTemplate());
-		oauthFilter.setTokenServices(resourceServerTokenServices());
-		oauthFilter.setApplicationEventPublisher(this.applicationEventPublisher);
-		return oauthFilter;
-	}
-
-	protected OAuth2AuthenticationProcessingFilter oAuth2AuthenticationProcessingFilter() {
-		final OAuth2AuthenticationProcessingFilter oAuth2AuthenticationProcessingFilter = new OAuth2AuthenticationProcessingFilter();
-		oAuth2AuthenticationProcessingFilter.setAuthenticationManager(oauthAuthenticationManager());
-		oAuth2AuthenticationProcessingFilter.setStateless(false);
-		return oAuth2AuthenticationProcessingFilter;
-	}
-
 	@Bean
-	public AuthenticationManager oauthAuthenticationManager() {
-		final OAuth2AuthenticationManager oauthAuthenticationManager = new OAuth2AuthenticationManager();
-		oauthAuthenticationManager.setTokenServices(resourceServerTokenServices());
-		return oauthAuthenticationManager;
+	protected OAuth2TokenUtilsService oauth2TokenUtilsService() {
+		return new DefaultOAuth2TokenUtilsService(this.oauth2AuthorizedClientService);
 	}
 
 	@EventListener
 	public void handleOAuth2AuthenticationFailureEvent(
-			OAuth2AuthenticationFailureEvent oAuth2AuthenticationFailureEvent) {
-		logger.error("An error occurred while accessing an authentication REST resource.",
-				oAuth2AuthenticationFailureEvent.getException());
+			AbstractAuthenticationFailureEvent authenticationFailureEvent) {
+		logger.warn("An authentication failure event occurred while accessing a REST resource that requires authentication.",
+				authenticationFailureEvent.getException());
 	}
 
 	protected String dashboard(String path) {
@@ -296,18 +293,25 @@ public class OAuthSecurityConfiguration extends WebSecurityConfigurerAdapter {
 		}
 	}
 
-	@Configuration
-	protected static class ResourceServerConfiguration
-			extends ResourceServerConfigurerAdapter {
+	@Bean
+	OAuth2AccessTokenResponseClient<OAuth2PasswordGrantRequest> oAuth2PasswordTokenResponseClient() {
+		return new DefaultPasswordTokenResponseClient();
+	}
 
-		@Autowired ResourceServerTokenServices resourceServerTokenServices;
-
-		@Override
-		public void configure(ResourceServerSecurityConfigurer resources) throws Exception {
-			super.configure(resources);
-			resources.tokenServices(resourceServerTokenServices);
+	private String calculateDefaultProviderId() {
+		if (this.authorizationProperties.getDefaultProviderId() != null) {
+			return this.authorizationProperties.getDefaultProviderId();
 		}
-
+		else if (this.oauth2ClientProperties.getRegistration().size() == 1) {
+			return this.oauth2ClientProperties.getRegistration().entrySet().iterator().next().getKey();
+		}
+		else if (this.oauth2ClientProperties.getRegistration().size() > 1
+				&& StringUtils.isEmpty(this.authorizationProperties.getDefaultProviderId())) {
+			throw new IllegalStateException("defaultProviderId must be set if more than 1 Registration is provided.");
+		}
+		else {
+			throw new IllegalStateException("Unable to retrieve default provider id.");
+		}
 	}
 
 }

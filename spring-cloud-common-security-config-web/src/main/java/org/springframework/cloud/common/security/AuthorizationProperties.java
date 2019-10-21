@@ -1,5 +1,5 @@
 /*
- * Copyright 2016-2018 the original author or authors.
+ * Copyright 2016-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -48,9 +48,16 @@ public class AuthorizationProperties {
 
 	private List<String> authenticatedPaths = new ArrayList<>();
 
-	private boolean mapOauthScopes = false;
+	/**
+	 * Role-mapping configuration per OAuth2 provider.
+	 */
+	private final Map<String, ProviderRoleMapping> providerRoleMappings = new HashMap<>();
 
-	private Map<String, String> roleMappings = new HashMap<>(0);
+	private String defaultProviderId;
+
+	public Map<String, ProviderRoleMapping> getProviderRoleMappings() {
+		return providerRoleMappings;
+	}
 
 	public List<String> getRules() {
 		return rules;
@@ -124,34 +131,12 @@ public class AuthorizationProperties {
 		this.authenticatedPaths = authenticatedPaths;
 	}
 
-	public boolean isMapOauthScopes() {
-		return mapOauthScopes;
+	public void setDefaultProviderId(String defaultProviderId) {
+		this.defaultProviderId = defaultProviderId;
 	}
 
-	/**
-	 * If set to true, Oauth scopes will be mapped to corresponding Data Flow roles.
-	 * Otherwise, if set to false, or not set at all, all roles will be assigned to users.
-	 *
-	 * @param mapOauthScopes If not set defaults to false
-	 */
-	public void setMapOauthScopes(boolean mapOauthScopes) {
-		this.mapOauthScopes = mapOauthScopes;
+	public String getDefaultProviderId() {
+		return defaultProviderId;
 	}
 
-	/**
-	 * When using OAuth2 with enabled {@link #setMapOauthScopes(boolean)}, you can optionally specify a custom
-	 * mapping of OAuth scopes to role names as they exist in the Data Flow application. If not
-	 * set, then the OAuth scopes themselves must match the role names:
-	 *
-	 * <ul>
-	 *   <li>MANAGE = dataflow.manage
-	 *   <li>VIEW = dataflow.view
-	 *   <li>CREATE = dataflow.create
-	 * </ul>
-	 *
-	 * @return Optional (May be null). Returns a map of scope-to-role mappings.
-	 */
-	public Map<String, String> getRoleMappings() {
-		return roleMappings;
-	}
 }

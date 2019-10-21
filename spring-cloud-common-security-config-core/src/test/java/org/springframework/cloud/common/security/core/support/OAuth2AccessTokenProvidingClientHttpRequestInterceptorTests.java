@@ -13,18 +13,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.springframework.cloud.common.security.support;
+package org.springframework.cloud.common.security.core.support;
 
 import java.io.IOException;
 
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
+import org.springframework.cloud.common.security.core.support.OAuth2AccessTokenProvidingClientHttpRequestInterceptor;
+import org.springframework.cloud.common.security.core.support.OAuth2TokenUtilsService;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpRequest;
 import org.springframework.http.client.ClientHttpRequestExecution;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.oauth2.provider.OAuth2Authentication;
-import org.springframework.security.oauth2.provider.authentication.OAuth2AuthenticationDetails;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import static org.junit.Assert.assertEquals;
@@ -73,14 +72,11 @@ class OAuth2AccessTokenProvidingClientHttpRequestInterceptorTests {
 
 	@Test
 	void testInterceptWithAuthentication() throws IOException {
-		final OAuth2Authentication oAuth2Authentication = mock(OAuth2Authentication.class);
-		final OAuth2AuthenticationDetails oAuth2AuthenticationDetails = mock(OAuth2AuthenticationDetails.class);
-		when(oAuth2AuthenticationDetails.getTokenValue()).thenReturn("foo-bar-123-token");
-		when(oAuth2Authentication.getDetails()).thenReturn(oAuth2AuthenticationDetails);
-		SecurityContextHolder.getContext().setAuthentication(oAuth2Authentication);
+		final OAuth2TokenUtilsService oauth2TokenUtilsService = mock(OAuth2TokenUtilsService.class);
+		when(oauth2TokenUtilsService.getAccessTokenOfAuthenticatedUser()).thenReturn("foo-bar-123-token");
 
 		final OAuth2AccessTokenProvidingClientHttpRequestInterceptor interceptor =
-			new OAuth2AccessTokenProvidingClientHttpRequestInterceptor();
+			new OAuth2AccessTokenProvidingClientHttpRequestInterceptor(oauth2TokenUtilsService);
 		final HttpHeaders headers = setupTest(interceptor);
 
 		assertEquals(1, headers.size());
@@ -89,11 +85,8 @@ class OAuth2AccessTokenProvidingClientHttpRequestInterceptorTests {
 
 	@Test
 	void testInterceptWithAuthenticationAndStaticToken() throws IOException {
-		final OAuth2Authentication oAuth2Authentication = mock(OAuth2Authentication.class);
-		final OAuth2AuthenticationDetails oAuth2AuthenticationDetails = mock(OAuth2AuthenticationDetails.class);
-		when(oAuth2AuthenticationDetails.getTokenValue()).thenReturn("foo-bar-123-token");
-		when(oAuth2Authentication.getDetails()).thenReturn(oAuth2AuthenticationDetails);
-		SecurityContextHolder.getContext().setAuthentication(oAuth2Authentication);
+		final OAuth2TokenUtilsService oauth2TokenUtilsService = mock(OAuth2TokenUtilsService.class);
+		when(oauth2TokenUtilsService.getAccessTokenOfAuthenticatedUser()).thenReturn("foo-bar-123-token");
 
 		final OAuth2AccessTokenProvidingClientHttpRequestInterceptor interceptor =
 				new OAuth2AccessTokenProvidingClientHttpRequestInterceptor("foobar");

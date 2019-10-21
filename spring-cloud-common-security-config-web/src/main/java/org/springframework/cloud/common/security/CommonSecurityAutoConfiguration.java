@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 the original author or authors.
+ * Copyright 2018-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,14 +17,19 @@ package org.springframework.cloud.common.security;
 
 import org.springframework.boot.actuate.autoconfigure.security.servlet.ManagementWebSecurityAutoConfiguration;
 import org.springframework.boot.autoconfigure.AutoConfigureBefore;
-import org.springframework.boot.autoconfigure.security.oauth2.OAuth2AutoConfiguration;
+import org.springframework.boot.autoconfigure.security.oauth2.client.servlet.OAuth2ClientAutoConfiguration;
+import org.springframework.boot.autoconfigure.security.oauth2.resource.servlet.OAuth2ResourceServerAutoConfiguration;
+//import org.springframework.boot.autoconfigure.security.oauth2.OAuth2AutoConfiguration;
 import org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 
 @Configuration
-@AutoConfigureBefore({ SecurityAutoConfiguration.class, ManagementWebSecurityAutoConfiguration.class,
-		OAuth2AutoConfiguration.class })
+@AutoConfigureBefore({
+	SecurityAutoConfiguration.class,
+	ManagementWebSecurityAutoConfiguration.class,
+	OAuth2ClientAutoConfiguration.class,
+	OAuth2ResourceServerAutoConfiguration.class})
 @Import({IgnoreAllSecurityConfiguration.class, OAuthSecurityConfiguration.class})
 public class CommonSecurityAutoConfiguration {
 }

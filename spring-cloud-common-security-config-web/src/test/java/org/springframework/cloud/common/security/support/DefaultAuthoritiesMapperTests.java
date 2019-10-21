@@ -18,47 +18,69 @@ package org.springframework.cloud.common.security.support;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.hasSize;
 import static org.junit.Assert.assertThat;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.junit.Assert;
 import org.junit.Test;
+import org.springframework.cloud.common.security.ProviderRoleMapping;
 import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.oauth2.client.OAuth2RestTemplate;
-import org.springframework.security.oauth2.common.OAuth2AccessToken;
 
 /**
  * @author Gunnar Hillert
  */
-public class DefaultAuthoritiesExtractorTests {
+public class DefaultAuthoritiesMapperTests {
 
 	@Test
-	public void testNullMapParameter() throws Exception {
-		final DefaultAuthoritiesExtractor authoritiesExtractor = new DefaultAuthoritiesExtractor();
+	public void testNullConstructor() throws Exception {
 		try {
-			authoritiesExtractor.extractAuthorities(null);
+			new DefaultAuthoritiesMapper(null, "");
 		}
 		catch (IllegalArgumentException e) {
-			Assert.assertEquals("The map argument must not be null.", e.getMessage());
+			Assert.assertEquals("providerRoleMappings must not be null.", e.getMessage());
+			return;
+		}
+		Assert.fail("Expected an IllegalArgumentException to be thrown.");
+	}
+
+	@Test
+	public void testMapScopesToAuthoritiesWithNullParameters() throws Exception {
+		final DefaultAuthoritiesMapper authoritiesMapper = new DefaultAuthoritiesMapper(Collections.emptyMap(), "");
+		try {
+			authoritiesMapper.mapScopesToAuthorities(null, null);
+		}
+		catch (IllegalArgumentException e) {
+			Assert.assertEquals("The clientId argument must not be empty or null.", e.getMessage());
 			return;
 		}
 		Assert.fail("Expected an IllegalStateException to be thrown.");
 	}
 
 	@Test
-	public void testThat7AuthoritiesAreReturned() throws Exception {
-		final DefaultAuthoritiesExtractor authoritiesExtractor = new DefaultAuthoritiesExtractor();
+	public void testMapScopesToAuthoritiesWithNullParameters2() throws Exception {
+		final DefaultAuthoritiesMapper authoritiesMapper = new DefaultAuthoritiesMapper(Collections.emptyMap(), "");
+		try {
+			authoritiesMapper.mapScopesToAuthorities("myClientId", null);
+		}
+		catch (IllegalArgumentException e) {
+			Assert.assertEquals("The scopes argument must not be null.", e.getMessage());
+			return;
+		}
+		Assert.fail("Expected an IllegalStateException to be thrown.");
+	}
 
-		final List<GrantedAuthority> authorities = authoritiesExtractor.extractAuthorities(new HashMap<>());
+
+	@Test
+	public void testThat7AuthoritiesAreReturned() throws Exception {
+		final DefaultAuthoritiesMapper authoritiesMapper = new DefaultAuthoritiesMapper("uaa", false);
+
+		final Set<GrantedAuthority> authorities = authoritiesMapper.mapScopesToAuthorities("uaa", Collections.emptySet());
 		assertThat(authorities, hasSize(7));
 
 		assertThat(authorities.stream().map(authority -> authority.getAuthority()).collect(Collectors.toList()),
@@ -72,12 +94,9 @@ public class DefaultAuthoritiesExtractorTests {
 		scopes.add("dataflow.view");
 		scopes.add("dataflow.create");
 
-		final OAuth2RestTemplate template = mock(OAuth2RestTemplate.class);
-		final OAuth2AccessToken accessToken = mock(OAuth2AccessToken.class);
-		when(template.getAccessToken()).thenReturn(accessToken);
-		when(accessToken.getScope()).thenReturn(scopes);
+		final DefaultAuthoritiesMapper authoritiesMapper = new DefaultAuthoritiesMapper("uaa", true);
 
-		final Collection<? extends GrantedAuthority> authorities = new DefaultAuthoritiesExtractor(true, new HashMap<>(), template).extractAuthorities(new HashMap<>());
+		final Collection<? extends GrantedAuthority> authorities = authoritiesMapper.mapScopesToAuthorities("uaa", scopes);
 		assertThat(authorities, hasSize(3));
 
 		assertThat(authorities.stream().map(authority -> authority.getAuthority()).collect(Collectors.toList()),
@@ -86,8 +105,12 @@ public class DefaultAuthoritiesExtractorTests {
 
 	@Test
 	public void testMapConstructorWithIncompleteRoleMappings() throws Exception {
+		final ProviderRoleMapping roleMapping = new ProviderRoleMapping();
+		roleMapping.setMapOauthScopes(true);
+		roleMapping.addRoleMapping("ROLE_MANAGE", "foo-scope-in-oauth");
+
 		try {
-			new DefaultAuthoritiesExtractor(true, Collections.singletonMap("ROLE_MANAGE", "foo-scope-in-oauth"), mock(OAuth2RestTemplate.class));
+			new DefaultAuthoritiesMapper("uaa", roleMapping);
 		}
 		catch (IllegalArgumentException e) {
 			Assert.assertEquals("The following 6 roles are not mapped: CREATE, DEPLOY, DESTROY, MODIFY, SCHEDULE, VIEW.", e.getMessage());
@@ -110,8 +133,9 @@ public class DefaultAuthoritiesExtractorTests {
 		roleMappings.put("ROLE_DESTROY", "foo-destroy");
 		roleMappings.put("ROLE_SCHEDULE", "foo-schedule");
 
-		final OAuth2RestTemplate template = mock(OAuth2RestTemplate.class);
-		final OAuth2AccessToken accessToken = mock(OAuth2AccessToken.class);
+		final ProviderRoleMapping providerRoleMapping = new ProviderRoleMapping();
+		providerRoleMapping.setMapOauthScopes(true);
+		providerRoleMapping.getRoleMappings().putAll(roleMappings);
 
 		final Set<String> scopes = new HashSet<>();
 		scopes.add("foo-manage");
@@ -122,12 +146,9 @@ public class DefaultAuthoritiesExtractorTests {
 		scopes.add("foo-destroy");
 		scopes.add("foo-schedule");
 
-		when(template.getAccessToken()).thenReturn(accessToken);
-		when(accessToken.getScope()).thenReturn(scopes);
+		final DefaultAuthoritiesMapper defaultAuthoritiesMapper = new DefaultAuthoritiesMapper("uaa", providerRoleMapping);
 
-		final DefaultAuthoritiesExtractor defaultAuthoritiesExtractor = new DefaultAuthoritiesExtractor(true, roleMappings, template);
-
-		final Collection<? extends GrantedAuthority> authorities = defaultAuthoritiesExtractor.extractAuthorities(new HashMap<>());
+		final Collection<? extends GrantedAuthority> authorities = defaultAuthoritiesMapper.mapScopesToAuthorities("uaa", scopes);
 
 		assertThat(authorities, hasSize(7));
 
@@ -138,20 +159,17 @@ public class DefaultAuthoritiesExtractorTests {
 	@Test
 	public void testThat3MappedAuthoritiesAreReturnedForDefaultMapping() throws Exception {
 
-		final OAuth2RestTemplate template = mock(OAuth2RestTemplate.class);
-		final OAuth2AccessToken accessToken = mock(OAuth2AccessToken.class);
+		final ProviderRoleMapping providerRoleMapping = new ProviderRoleMapping();
+		providerRoleMapping.setMapOauthScopes(true);
 
 		final Set<String> scopes = new HashSet<>();
 		scopes.add("dataflow.manage");
 		scopes.add("dataflow.view");
 		scopes.add("dataflow.create");
 
-		when(template.getAccessToken()).thenReturn(accessToken);
-		when(accessToken.getScope()).thenReturn(scopes);
+		final DefaultAuthoritiesMapper defaultAuthoritiesExtractor = new DefaultAuthoritiesMapper("uaa", providerRoleMapping);
 
-		final DefaultAuthoritiesExtractor defaultAuthoritiesExtractor = new DefaultAuthoritiesExtractor(true, null, template);
-
-		final Collection<? extends GrantedAuthority> authorities = defaultAuthoritiesExtractor.extractAuthorities(new HashMap<>());
+		final Collection<? extends GrantedAuthority> authorities = defaultAuthoritiesExtractor.mapScopesToAuthorities("uaa", scopes);
 
 		assertThat(authorities, hasSize(3));
 
@@ -162,20 +180,17 @@ public class DefaultAuthoritiesExtractorTests {
 	@Test
 	public void testThat7MappedAuthoritiesAreReturnedForDefaultMappingWithoutMappingScopes() throws Exception {
 
-		final OAuth2RestTemplate template = mock(OAuth2RestTemplate.class);
-		final OAuth2AccessToken accessToken = mock(OAuth2AccessToken.class);
+		final ProviderRoleMapping providerRoleMapping = new ProviderRoleMapping();
+		providerRoleMapping.setMapOauthScopes(false);
 
 		final Set<String> scopes = new HashSet<>();
 		scopes.add("dataflow.manage");
 		scopes.add("dataflow.view");
 		scopes.add("dataflow.create");
 
-		when(template.getAccessToken()).thenReturn(accessToken);
-		when(accessToken.getScope()).thenReturn(scopes);
+		final DefaultAuthoritiesMapper defaultAuthoritiesExtractor = new DefaultAuthoritiesMapper("uaa", false);
 
-		final DefaultAuthoritiesExtractor defaultAuthoritiesExtractor = new DefaultAuthoritiesExtractor(false, null, template);
-
-		final Collection<? extends GrantedAuthority> authorities = defaultAuthoritiesExtractor.extractAuthorities(new HashMap<>());
+		final Collection<? extends GrantedAuthority> authorities = defaultAuthoritiesExtractor.mapScopesToAuthorities("uaa", scopes);
 
 		assertThat(authorities, hasSize(7));
 
@@ -186,19 +201,13 @@ public class DefaultAuthoritiesExtractorTests {
 	@Test
 	public void testThat2MappedAuthoritiesAreReturnedForDefaultMapping() throws Exception {
 
-		final OAuth2RestTemplate template = mock(OAuth2RestTemplate.class);
-		final OAuth2AccessToken accessToken = mock(OAuth2AccessToken.class);
-
 		final Set<String> scopes = new HashSet<>();
 		scopes.add("dataflow.view");
 		scopes.add("dataflow.create");
 
-		when(template.getAccessToken()).thenReturn(accessToken);
-		when(accessToken.getScope()).thenReturn(scopes);
+		final DefaultAuthoritiesMapper defaultAuthoritiesExtractor = new DefaultAuthoritiesMapper("uaa", true);
 
-		final DefaultAuthoritiesExtractor defaultAuthoritiesExtractor = new DefaultAuthoritiesExtractor(true, null, template);
-
-		final Collection<? extends GrantedAuthority> authorities = defaultAuthoritiesExtractor.extractAuthorities(new HashMap<>());
+		final Collection<? extends GrantedAuthority> authorities = defaultAuthoritiesExtractor.mapScopesToAuthorities("uaa", scopes);
 
 		assertThat(authorities, hasSize(2));
 
@@ -218,23 +227,18 @@ public class DefaultAuthoritiesExtractorTests {
 		roleMappings.put("ROLE_SCHEDULE", "foo-manage");
 		roleMappings.put("ROLE_CREATE", "blubba-create");
 
-		final OAuth2RestTemplate template = mock(OAuth2RestTemplate.class);
-		final OAuth2AccessToken accessToken = mock(OAuth2AccessToken.class);
-
 		final Set<String> scopes = new HashSet<>();
 		scopes.add("foo-manage");
 		scopes.add("blubba-create");
 
-		when(template.getAccessToken()).thenReturn(accessToken);
-		when(accessToken.getScope()).thenReturn(scopes);
+		final DefaultAuthoritiesMapper defaultAuthoritiesExtractor = new DefaultAuthoritiesMapper("uaa", true, roleMappings);
 
-		final DefaultAuthoritiesExtractor defaultAuthoritiesExtractor = new DefaultAuthoritiesExtractor(true, roleMappings, template);
-
-		final Collection<? extends GrantedAuthority> authorities = defaultAuthoritiesExtractor.extractAuthorities(new HashMap<>());
+		final Collection<? extends GrantedAuthority> authorities = defaultAuthoritiesExtractor.mapScopesToAuthorities("uaa", scopes);
 
 		assertThat(authorities, hasSize(7));
 
 		assertThat(authorities.stream().map(authority -> authority.getAuthority()).collect(Collectors.toList()),
 			containsInAnyOrder("ROLE_CREATE", "ROLE_DEPLOY", "ROLE_DESTROY", "ROLE_MANAGE", "ROLE_MODIFY", "ROLE_SCHEDULE", "ROLE_VIEW"));
 	}
+
 }

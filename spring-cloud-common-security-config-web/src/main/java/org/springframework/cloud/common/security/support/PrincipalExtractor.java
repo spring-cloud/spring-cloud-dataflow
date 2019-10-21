@@ -13,26 +13,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.springframework.cloud.common.security;
+package org.springframework.cloud.common.security.support;
 
-import org.springframework.security.oauth2.common.OAuth2AccessToken;
+import java.util.Map;
 
 /**
- * Holder class for an {@link OAuth2AccessToken}. To be used in conjunction with
- * the ManualOAuthAuthenticationProvider.
- *
  * @author Gunnar Hillert
+ * @since 1.3.0
+ *
  */
-public class ManualOAuthAuthenticationDetails {
+public interface PrincipalExtractor {
 
-	private OAuth2AccessToken accessToken;
-
-	public ManualOAuthAuthenticationDetails(OAuth2AccessToken accessToken) {
-		this.accessToken = accessToken;
-	}
-
-	public OAuth2AccessToken getAccessToken() {
-		return accessToken;
-	}
+	Object extractPrincipal(Map<String, Object> map);
 
 }

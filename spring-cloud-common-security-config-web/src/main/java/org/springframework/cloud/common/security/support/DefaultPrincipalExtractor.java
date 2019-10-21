@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 the original author or authors.
+ * Copyright 2018-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,17 +17,14 @@ package org.springframework.cloud.common.security.support;
 
 import java.util.Map;
 
-import org.springframework.boot.autoconfigure.security.oauth2.resource.FixedPrincipalExtractor;
-import org.springframework.boot.autoconfigure.security.oauth2.resource.PrincipalExtractor;
-
 /**
- * A slightly customized {@link PrincipalExtractor} that extracts the username.
+ * The default implementation of the {@link PrincipalExtractor} that extracts the username
+ * of the principal.
  *
  * @author Gunnar Hillert
- * @see FixedPrincipalExtractor
  *
  */
-public class DataflowPrincipalExtractor implements PrincipalExtractor {
+public class DefaultPrincipalExtractor implements PrincipalExtractor {
 
 	private static final String[] PRINCIPAL_KEYS = new String[] { "user_name", "user", "username",
 			"userid", "user_id", "login", "id", "name", "cid", "client_id" };

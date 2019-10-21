@@ -38,7 +38,7 @@ public class OnOAuth2SecurityEnabled extends SpringBootCondition {
 
 	@Override
 	public ConditionOutcome getMatchOutcome(ConditionContext context, AnnotatedTypeMetadata metadata) {
-		Map<String, String> properties = getSubProperties(context.getEnvironment(), "security.oauth2");
+		Map<String, String> properties = getSubProperties(context.getEnvironment(), "spring.security.oauth2");
 		return new ConditionOutcome(!properties.isEmpty(), "OAuth2 Enabled");
 	}
 

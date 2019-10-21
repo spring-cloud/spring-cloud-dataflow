@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.springframework.cloud.common.security.support;
+package org.springframework.cloud.common.security.core.support;
 
 import java.io.IOException;
 
@@ -22,7 +22,7 @@ import org.springframework.http.HttpRequest;
 import org.springframework.http.client.ClientHttpRequestExecution;
 import org.springframework.http.client.ClientHttpRequestInterceptor;
 import org.springframework.http.client.ClientHttpResponse;
-import org.springframework.security.oauth2.common.OAuth2AccessToken;
+import org.springframework.security.oauth2.core.OAuth2AccessToken;
 import org.springframework.util.Assert;
 
 /**
@@ -35,14 +35,18 @@ public class OAuth2AccessTokenProvidingClientHttpRequestInterceptor implements C
 
 	private final String staticOauthAccessToken;
 
+	private final OAuth2TokenUtilsService oauth2TokenUtilsService;
+
 	public OAuth2AccessTokenProvidingClientHttpRequestInterceptor(String staticOauthAccessToken) {
 		super();
 		Assert.hasText(staticOauthAccessToken, "staticOauthAccessToken must not be null or empty.");
 		this.staticOauthAccessToken = staticOauthAccessToken;
+		this.oauth2TokenUtilsService = null;
 	}
 
-	public OAuth2AccessTokenProvidingClientHttpRequestInterceptor() {
+	public OAuth2AccessTokenProvidingClientHttpRequestInterceptor(OAuth2TokenUtilsService oauth2TokenUtilsService) {
 		super();
+		this.oauth2TokenUtilsService = oauth2TokenUtilsService;
 		this.staticOauthAccessToken = null;
 	}
 
@@ -55,12 +59,15 @@ public class OAuth2AccessTokenProvidingClientHttpRequestInterceptor implements C
 		if (this.staticOauthAccessToken != null) {
 			tokenToUse = this.staticOauthAccessToken;
 		}
+		else if (this.oauth2TokenUtilsService != null){
+			tokenToUse = this.oauth2TokenUtilsService.getAccessTokenOfAuthenticatedUser();
+		}
 		else {
-			tokenToUse = TokenUtils.getAccessToken();
+			tokenToUse = null;
 		}
 
 		if (tokenToUse != null) {
-			request.getHeaders().add(HttpHeaders.AUTHORIZATION, OAuth2AccessToken.BEARER_TYPE + " " + tokenToUse);
+			request.getHeaders().add(HttpHeaders.AUTHORIZATION, OAuth2AccessToken.TokenType.BEARER.getValue() + " " + tokenToUse);
 		}
 		return execution.execute(request, body);
 	}

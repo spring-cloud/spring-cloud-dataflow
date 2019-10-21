@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 the original author or authors.
+ * Copyright 2018-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,21 +15,20 @@
  */package org.springframework.cloud.common.security.support;
 
 import java.net.URI;
-import java.util.HashMap;
-import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.UUID;
 
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
+import org.springframework.cloud.common.security.core.support.OAuth2TokenUtilsService;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.RequestEntity;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.security.oauth2.client.OAuth2RestTemplate;
-import org.springframework.security.oauth2.common.DefaultOAuth2AccessToken;
-import org.springframework.security.oauth2.common.OAuth2AccessToken;
+import org.springframework.web.client.RestTemplate;
 
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.equalTo;
@@ -42,8 +41,9 @@ import static org.mockito.Mockito.when;
 
 /**
  * @author Mike Heath
+ * @author Gunnar Hillert
  */
-public class ExternalOauth2ResourceAuthoritiesExtractorTests {
+public class ExternalOauth2ResourceAuthoritiesMapperTests {
 
 	@Test
 	public void testExtractAuthorities() {
@@ -54,16 +54,18 @@ public class ExternalOauth2ResourceAuthoritiesExtractorTests {
 	}
 
 	private void assertAuthorities(URI uri, String... roles) {
-		final OAuth2RestTemplate mockRestTemplate = mock(OAuth2RestTemplate.class);
 		final String accessToken = UUID.randomUUID().toString();
-		final OAuth2AccessToken oAuth2AccessToken = new DefaultOAuth2AccessToken(accessToken);
+		final OAuth2TokenUtilsService oauth2TokenUtilsService = mock(DefaultOAuth2TokenUtilsService.class);
+		when(oauth2TokenUtilsService.getAccessTokenOfAuthenticatedUser()).thenReturn(accessToken);
+
+		final RestTemplate mockRestTemplate = mock(RestTemplate.class);
+
 		final ArgumentCaptor<RequestEntity> requestArgumentCaptor = ArgumentCaptor.forClass(RequestEntity.class);
-		when(mockRestTemplate.getAccessToken()).thenReturn(oAuth2AccessToken);
 		when(mockRestTemplate.exchange(requestArgumentCaptor.capture(), (Class<String[]>)any())).thenReturn(new ResponseEntity<>(roles, HttpStatus.OK));
 
-		final ExternalOauth2ResourceAuthoritiesExtractor authoritiesExtractor =
-				new ExternalOauth2ResourceAuthoritiesExtractor(mockRestTemplate, uri);
-		final List<GrantedAuthority> grantedAuthorities = authoritiesExtractor.extractAuthorities(new HashMap<>());
+		final ExternalOauth2ResourceAuthoritiesMapper authoritiesExtractor =
+				new ExternalOauth2ResourceAuthoritiesMapper(mockRestTemplate, uri, oauth2TokenUtilsService);
+		final Set<GrantedAuthority> grantedAuthorities = authoritiesExtractor.mapScopesToAuthorities(new HashSet<>());
 		for (String role : roles) {
 			assertThat(grantedAuthorities, hasItem(new SimpleGrantedAuthority(SecurityConfigUtils.ROLE_PREFIX + role)));
 		}
