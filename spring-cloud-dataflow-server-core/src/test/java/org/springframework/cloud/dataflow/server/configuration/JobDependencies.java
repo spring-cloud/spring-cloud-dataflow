@@ -31,6 +31,7 @@ import org.springframework.batch.core.repository.support.JobRepositoryFactoryBea
 import org.springframework.boot.autoconfigure.ImportAutoConfiguration;
 import org.springframework.boot.autoconfigure.batch.BatchDataSourceInitializer;
 import org.springframework.boot.autoconfigure.batch.BatchProperties;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.domain.EntityScan;
 import org.springframework.boot.autoconfigure.flyway.FlywayAutoConfiguration;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceProperties;
@@ -249,6 +250,7 @@ public class JobDependencies {
 	}
 
 	@Bean
+	@ConditionalOnMissingBean
 	public TaskExecutionService taskService(LauncherRepository launcherRepository,
 			AuditRecordService auditRecordService, TaskRepository taskRepository,
 			TaskExecutionInfoService taskExecutionInfoService,
@@ -351,6 +353,7 @@ public class JobDependencies {
 	}
 
 	@Bean
+	@ConditionalOnMissingBean
 	public AppRegistryService appRegistryService(AppRegistrationRepository appRegistrationRepository,
 			AuditRecordService auditRecordService) {
 		return new DefaultAppRegistryService(appRegistrationRepository,
