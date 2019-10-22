@@ -27,6 +27,8 @@ import org.slf4j.LoggerFactory;
 
 import org.springframework.batch.core.JobExecution;
 import org.springframework.batch.core.JobInstance;
+import org.springframework.batch.core.JobParameter;
+import org.springframework.batch.core.JobParameters;
 import org.springframework.batch.core.StepExecution;
 import org.springframework.batch.core.launch.JobExecutionNotRunningException;
 import org.springframework.batch.core.launch.NoSuchJobException;
@@ -190,12 +192,43 @@ public class DefaultTaskJobService implements TaskJobService {
 			deploymentProperties.put(DefaultTaskExecutionService.TASK_PLATFORM_NAME, platformName);
 			String taskAppName = taskJobExecution.getJobExecution().getJobParameters().getString("-spring.cloud.data.flow.taskappname");
 			taskExecutionService.executeTask(taskDefinition.getName(), deploymentProperties,
-					taskExecution.getArguments(), taskAppName);
+					restartExecutionArgs(taskExecution.getArguments(),
+							taskJobExecution.getJobExecution().getJobParameters()),
+					taskAppName);
 		} else {
 			throw new IllegalStateException(String.format("Did not find platform for taskName=[%s] , taskId=[%s]",
 					taskExecution.getTaskName(),taskJobExecution.getTaskId()));
 		}
 
+	}
+
+	/**
+	 * Apply identifying job parameters to arguments.  There are cases (incrementers)
+	 * that add parameters to a job and thus must be added for each restart so that the
+	 * JobInstanceId does not change.
+	 * @param taskExecutionArgs original set of task execution arguments
+	 * @param jobParameters for the job to be restarted.
+	 * @return deduped list of arguments that contains the original arguments and any
+	 * identifying job parameters not in the original task execution arguments.
+	 */
+	private List<String>restartExecutionArgs(List<String> taskExecutionArgs, JobParameters jobParameters) {
+		List<String> result = new ArrayList<>(taskExecutionArgs);
+		Map<String, JobParameter> jobParametersMap = jobParameters.getParameters();
+		for (String key : jobParametersMap.keySet()) {
+			if (!key.startsWith("-")) {
+				boolean existsFlag = false;
+				for(String arg : taskExecutionArgs) {
+					if(arg.startsWith(key)) {
+						existsFlag = true;
+						break;
+					}
+				}
+				if(!existsFlag) {
+					result.add(String.format("%s(%s)=%s", key, jobParametersMap.get(key).getType().toString().toLowerCase(), jobParameters.getString(key)));
+				}
+			}
+		}
+		return result;
 	}
 
 	@Override
