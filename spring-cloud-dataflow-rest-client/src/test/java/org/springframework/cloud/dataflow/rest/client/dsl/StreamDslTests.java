@@ -145,7 +145,7 @@ public class StreamDslTests {
 	@Test
 	public void deployWithCreate() {
 		StreamDefinitionResource resource = new StreamDefinitionResource("ticktock",
-				"time | log", "time | log","demo stream");
+				"time | log", "time | log", "demo stream");
 		resource.setStatus("deploying");
 		when(streamOperations.createStream(anyString(),
 				anyString(), anyString(), anyBoolean())).thenReturn(resource);
@@ -161,7 +161,7 @@ public class StreamDslTests {
 	@Test
 	public void deployWithDefinition() {
 		StreamDefinitionResource resource = new StreamDefinitionResource("ticktock",
-				"time | log", "time | log","demo stream");
+				"time | log", "time | log", "demo stream");
 		resource.setStatus("deploying");
 		when(streamOperations.createStream(anyString(),
 				anyString(), anyString(), anyBoolean())).thenReturn(resource);
@@ -178,7 +178,7 @@ public class StreamDslTests {
 	@Test
 	public void getStatus() {
 		StreamDefinitionResource resource = new StreamDefinitionResource("ticktock",
-				"time | log", "time | log","demo stream");
+				"time | log", "time | log", "demo stream");
 		resource.setStatus("unknown");
 		when(streamOperations.getStreamDefinition(eq("ticktock")))
 				.thenReturn(resource);
@@ -200,7 +200,7 @@ public class StreamDslTests {
 	@Test
 	public void createStream() {
 		StreamDefinitionResource resource = new StreamDefinitionResource("ticktock",
-				"time | log", "time | log","demo stream");
+				"time | log", "time | log", "demo stream");
 		resource.setStatus("deploying");
 		when(streamOperations.createStream(anyString(),
 				anyString(), anyString(), anyBoolean())).thenReturn(resource);
@@ -349,7 +349,7 @@ public class StreamDslTests {
 	}
 
 	@Test
-	public void scale() {
+	public void scaleApplicationInstances() {
 		StreamDefinitionResource resource = new StreamDefinitionResource("ticktock",
 				"time | log", "time | log", "demo stream");
 		resource.setStatus("deploying");
@@ -364,14 +364,14 @@ public class StreamDslTests {
 				eq("ticktock"), eq("time | log"), eq("demo stream"), eq(false));
 		verify(streamOperations, times(1)).deploy(eq("ticktock"),
 				anyMap());
-		stream.scale(time, 3);
+		stream.scaleApplicationInstances(time, 3);
+
+		stream.scaleApplicationInstances(log, 2, Collections.singletonMap("key", "value"));
 
 		verify(streamOperations, times(1))
-				.scaleStream(eq("ticktock"), eq(Collections.singletonMap(time.getName(), "3")));
-
-		stream.scale(Collections.singletonMap(log, 2));
+				.scaleApplicationInstances(eq("ticktock"), eq("time"), eq("3"), isA(Map.class));
 
 		verify(streamOperations, times(1))
-				.scaleStream(eq("ticktock"), eq(Collections.singletonMap(log.getName(), "2")));
+				.scaleApplicationInstances(eq("ticktock"), eq("log"), eq("2"), eq(Collections.singletonMap("key", "value")));
 	}
 }

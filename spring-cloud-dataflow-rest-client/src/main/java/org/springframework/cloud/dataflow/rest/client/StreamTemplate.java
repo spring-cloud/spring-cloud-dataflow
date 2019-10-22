@@ -16,7 +16,6 @@
 
 package org.springframework.cloud.dataflow.rest.client;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
@@ -24,7 +23,6 @@ import java.util.Map;
 
 import javax.naming.OperationNotSupportedException;
 
-import org.springframework.cloud.dataflow.rest.ScaleAppRequest;
 import org.springframework.cloud.dataflow.rest.UpdateStreamRequest;
 import org.springframework.cloud.dataflow.rest.client.support.VersionUtils;
 import org.springframework.cloud.dataflow.rest.resource.StreamAppStatusResource;
@@ -151,16 +149,10 @@ public class StreamTemplate implements StreamOperations {
 	}
 
 	@Override
-	public void scaleStream(String streamName, Map<String, String> applicationCounts) {
-		String url = deploymentsLink.getHref() + "/scale/" + streamName;
-		List<ScaleAppRequest> scaleAppRequests = new ArrayList<>(applicationCounts.size());
-		for (Map.Entry<String, String> appCount : applicationCounts.entrySet()) {
-			ScaleAppRequest scaleAppRequest = new ScaleAppRequest();
-			scaleAppRequest.setName(appCount.getKey());
-			scaleAppRequest.setCount(appCount.getValue());
-			scaleAppRequests.add(scaleAppRequest);
-		}
-		restTemplate.postForObject(url, scaleAppRequests, Object.class);
+	public void scaleApplicationInstances(String streamName,
+			String appName, String count, Map<String, String> properties) {
+		String url = String.format("%s/scale/%s/%s/instances/%s", deploymentsLink.getHref(), appName, count);
+		restTemplate.postForObject(url, properties, Object.class);
 	}
 
 	@Override

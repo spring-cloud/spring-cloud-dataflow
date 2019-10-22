@@ -114,7 +114,7 @@ public class RootController {
 			root.add(WebMvcLinkBuilder.linkTo(WebMvcLinkBuilder.methodOn(StreamDeploymentController.class).rollback(null, null)).withRel("streams/deployments/rollback/{name}/{version}"));
 			root.add(WebMvcLinkBuilder.linkTo(WebMvcLinkBuilder.methodOn(StreamDeploymentController.class).update(null, null)).withRel("streams/deployments/update/{name}"));
 			root.add(unescapeTemplateVariables(entityLinks.linkToItemResource(StreamDeploymentResource.class, "{name}").withRel("streams/deployments/deployment")));
-			root.add(WebMvcLinkBuilder.linkTo(WebMvcLinkBuilder.methodOn(StreamDeploymentController.class).scale(null, null)).withRel("streams/deployments/scale/{streamName}"));
+			root.add(WebMvcLinkBuilder.linkTo(WebMvcLinkBuilder.methodOn(StreamDeploymentController.class).scaleApplicationInstances(null, null, null, null)).withRel("streams/deployments/scale/{streamName}/{appName}/instances/{count}"));
 			root.add(WebMvcLinkBuilder.linkTo(StreamLogsController.class).withRel("streams/logs"));
 			root.add(WebMvcLinkBuilder.linkTo(WebMvcLinkBuilder.methodOn(StreamLogsController.class).getLog(null)).withRel("streams/logs/{streamName}"));
 			root.add(WebMvcLinkBuilder.linkTo(WebMvcLinkBuilder.methodOn(StreamLogsController.class).getLog(null, null)).withRel("streams/logs/{streamName}/{appName}"));

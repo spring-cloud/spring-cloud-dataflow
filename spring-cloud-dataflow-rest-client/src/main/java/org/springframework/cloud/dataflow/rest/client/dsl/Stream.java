@@ -18,6 +18,7 @@ package org.springframework.cloud.dataflow.rest.client.dsl;
 import java.io.IOException;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -110,15 +111,13 @@ public class Stream implements AutoCloseable {
 		}
 	}
 
-	public void scale(StreamApplication application, int count) {
-		this.client.streamOperations().scaleStream(this.name,
-				Collections.singletonMap(getAppLabelOrName(application), "" + count));
+	public void scaleApplicationInstances(StreamApplication application, int count) {
+		this.scaleApplicationInstances(application, count, new HashMap<>());
 	}
 
-	public void scale(Map<StreamApplication, Integer> applicationCounts) {
-		Map<String, String> apps = applicationCounts.entrySet().stream()
-				.collect(Collectors.toMap(e -> getAppLabelOrName(e.getKey()), e -> e.getValue() + ""));
-		this.client.streamOperations().scaleStream(this.name, apps);
+	public void scaleApplicationInstances(StreamApplication application, int count, Map<String, String> properties) {
+		this.client.streamOperations().scaleApplicationInstances(this.name,
+				getAppLabelOrName(application), "" + count, properties);
 	}
 
 	private String getAppLabelOrName(StreamApplication application) {
@@ -200,7 +199,7 @@ public class Stream implements AutoCloseable {
 		this.destroy();
 	}
 
-	public static class StreamNameBuilder extends PropertyBuilder{
+	public static class StreamNameBuilder extends PropertyBuilder {
 
 		private String name;
 

@@ -20,7 +20,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -94,7 +94,7 @@ public class StreamCommands implements CommandMarker {
 
 	private static final String STREAM_ROLLBACK = "stream rollback";
 	private static final String STREAM_UPDATE = "stream update";
-	private static final String STREAM_SCALE = "stream scale";
+	private static final String STREAM_SCALE = "stream scale app instances";
 
 	// View Role
 
@@ -252,9 +252,11 @@ public class StreamCommands implements CommandMarker {
 			@CliOption(key = {
 					"applicationName" }, help = "the name/label of the application to scale", mandatory = true) String applicationName,
 			@CliOption(key = {
-					"count" }, help = "desired number of application instances", mandatory = true) Integer count) {
+					"count" }, help = "desired number of application instances", mandatory = true) String count,
+			@CliOption(key = {
+					PROPERTIES_OPTION }, help = "the properties for this scale") String scaleProperties) {
 
-		streamOperations().scaleStream(name, Collections.singletonMap(applicationName, "" + count));
+		streamOperations().scaleApplicationInstances(name, applicationName, count, new HashMap<>());
 		return String.format("Scale request has been sent for the stream '%s'", name);
 	}
 

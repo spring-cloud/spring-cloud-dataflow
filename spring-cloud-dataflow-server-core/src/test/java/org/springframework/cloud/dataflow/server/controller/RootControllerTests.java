@@ -16,7 +16,7 @@
 
 package org.springframework.cloud.dataflow.server.controller;
 
-import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 
 import org.junit.Assert;
 import org.junit.Before;
@@ -65,7 +65,7 @@ public class RootControllerTests {
 
 		String expectedResult = StreamUtils.copyToString(
 				new DefaultResourceLoader().getResource("classpath:/root-controller-result.json").getInputStream(),
-				Charset.forName("UTF-8"));
+				StandardCharsets.UTF_8);
 
 		Assert.assertEquals(expectedResult.replace("\n", ""), mvcResult);
 	}

@@ -18,7 +18,6 @@ package org.springframework.cloud.dataflow.server.controller;
 
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.List;
 import java.util.Map;
 
 import org.slf4j.Logger;
@@ -26,7 +25,6 @@ import org.slf4j.LoggerFactory;
 
 import org.springframework.cloud.dataflow.core.StreamDefinition;
 import org.springframework.cloud.dataflow.core.StreamDeployment;
-import org.springframework.cloud.dataflow.rest.ScaleAppRequest;
 import org.springframework.cloud.dataflow.rest.UpdateStreamRequest;
 import org.springframework.cloud.dataflow.rest.resource.DeploymentStateResource;
 import org.springframework.cloud.dataflow.rest.resource.StreamDeploymentResource;
@@ -97,16 +95,22 @@ public class StreamDeploymentController {
 	}
 
 	/**
-	 * Request deployment of an existing stream definition.
+	 * Scale application instances in a deployed stream.
 	 * @param streamName the name of an existing stream definition (required)
-	 * @param scaleAppRequests list of stream apps and desired scale for each (required)
+	 * @param appName in stream application name to scale (required)
+	 * @param count number of instances for the selected stream application (required)
+	 * @param properties scale deployment specific properties (optional)
 	 * @return response without a body
 	 */
-	@RequestMapping(value = "/scale/{streamName}", method = RequestMethod.POST)
-	public ResponseEntity<Void> scale(@PathVariable("streamName") String streamName,
-			@RequestBody List<ScaleAppRequest> scaleAppRequests) {
-		logger.info(String.format("Scale stream: %s, apps: %s", streamName, scaleAppRequests));
-		this.streamService.scaleStream(streamName, scaleAppRequests);
+	@RequestMapping(value = "/scale/{streamName}/{appName}/instances/{count}", method = RequestMethod.POST)
+	public ResponseEntity<Void> scaleApplicationInstances(
+			@PathVariable("streamName") String streamName,
+			@PathVariable("appName") String appName,
+			@PathVariable("count") String count,
+			@RequestBody(required = false) Map<String, String> properties) {
+
+		logger.info(String.format("Scale stream: %s, apps: %s instances to %s", streamName, appName, count));
+		this.streamService.scaleApplicationInstances(streamName, appName, count, properties);
 		return new ResponseEntity<>(HttpStatus.CREATED);
 	}
 

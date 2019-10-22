@@ -16,10 +16,9 @@
 
 package org.springframework.cloud.dataflow.server.controller;
 
-import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
@@ -31,13 +30,11 @@ import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
-import org.mockito.ArgumentMatchers;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
 import org.springframework.cloud.dataflow.core.StreamDefinition;
 import org.springframework.cloud.dataflow.core.StreamDeployment;
-import org.springframework.cloud.dataflow.rest.ScaleAppRequest;
 import org.springframework.cloud.dataflow.rest.SkipperStream;
 import org.springframework.cloud.dataflow.rest.UpdateStreamRequest;
 import org.springframework.cloud.dataflow.rest.resource.StreamDeploymentResource;
@@ -51,6 +48,9 @@ import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
 import static org.mockito.ArgumentMatchers.anyList;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.isA;
+import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -97,17 +97,17 @@ public class StreamDeploymentControllerTests {
 	}
 
 	@Test
-	public void testScaleStream() {
-		ScaleAppRequest sar = new ScaleAppRequest();
-		sar.setCount("666");
-		sar.setName("time");
-		List<ScaleAppRequest> res = new ArrayList<>();
-		res.add(sar);
-		this.controller.scale("ticktock", res);
+	public void testScaleApplicationInstances() {
+		this.controller.scaleApplicationInstances("ticktock", "time", "666", null);
+		verify(streamService).scaleApplicationInstances(eq("ticktock"), eq("time"), eq("666"), isNull());
 
-		ArgumentCaptor<List<ScaleAppRequest>> argumentCaptor1 = ArgumentCaptor.forClass(List.class);
-		verify(streamService).scaleStream(ArgumentMatchers.eq("ticktock"), argumentCaptor1.capture());
-		Assert.assertEquals(res, argumentCaptor1.getValue());
+		this.controller.scaleApplicationInstances("stream", "foo", "2", new HashMap<>());
+		verify(streamService).scaleApplicationInstances(eq("stream"), eq("foo"), eq("2"), isA(Map.class));
+
+		this.controller.scaleApplicationInstances("stream", "bar", "3",
+				Collections.singletonMap("key", "value"));
+		verify(streamService).scaleApplicationInstances(eq("stream"), eq("bar"), eq("3"),
+				eq(Collections.singletonMap("key", "value")));
 	}
 
 	@Test
@@ -120,20 +120,20 @@ public class StreamDeploymentControllerTests {
 		UpdateStreamRequest updateStreamRequest = new UpdateStreamRequest("ticktock", new PackageIdentifier(), deploymentProperties);
 		this.controller.update("ticktock", updateStreamRequest);
 		ArgumentCaptor<UpdateStreamRequest> argumentCaptor1 = ArgumentCaptor.forClass(UpdateStreamRequest.class);
-		verify(streamService).updateStream(ArgumentMatchers.eq("ticktock"), argumentCaptor1.capture());
+		verify(streamService).updateStream(eq("ticktock"), argumentCaptor1.capture());
 		Assert.assertEquals(updateStreamRequest, argumentCaptor1.getValue());
 	}
 
 	@Test
 	public void testStreamManifest() {
 		this.controller.manifest("ticktock", 666);
-		verify(streamService, times(1)).manifest(ArgumentMatchers.eq("ticktock"), ArgumentMatchers.eq(666));
+		verify(streamService, times(1)).manifest(eq("ticktock"), eq(666));
 	}
 
 	@Test
 	public void testStreamHistory() {
 		this.controller.history("releaseName");
-		verify(streamService, times(1)).history(ArgumentMatchers.eq("releaseName"));
+		verify(streamService, times(1)).history(eq("releaseName"));
 	}
 
 	@Test
