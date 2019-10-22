@@ -4,8 +4,8 @@ version: '3'
 # Usage: docker-compose -f ./docker-compose.yml -f ./docker-compose-postgres.yml up
 services:
 
-  kafka:
-    entrypoint: ["echo", "kafka service is disabled"]
+  kafka-broker:
+    entrypoint: ["echo", "kafka-broker service is disabled"]
 
   zookeeper:
     entrypoint: ["echo", "zookeeper service is disabled"]
