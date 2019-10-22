@@ -111,10 +111,21 @@ public class Stream implements AutoCloseable {
 		}
 	}
 
+	/**
+	 * Scale up or down the number of application instances.
+	 * @param application App in the stream to scale.
+	 * @param count Number of instance to scale to.
+	 */
 	public void scaleApplicationInstances(StreamApplication application, int count) {
 		this.scaleApplicationInstances(application, count, new HashMap<>());
 	}
 
+	/**
+	 * Scale up or down the number of application instances.
+	 * @param application App in the stream to scale.
+	 * @param count Number of instance to scale to.
+	 * @param properties optional scale properties.
+	 */
 	public void scaleApplicationInstances(StreamApplication application, int count, Map<String, String> properties) {
 		this.client.streamOperations().scaleApplicationInstances(this.name,
 				getAppLabelOrName(application), "" + count, properties);
