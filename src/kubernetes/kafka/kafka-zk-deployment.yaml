@@ -1,4 +1,4 @@
-apiVersion: extensions/v1beta1
+apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: kafka-zk
@@ -7,6 +7,9 @@ metadata:
     component: kafka-zk
 spec:
   replicas: 1
+  selector:
+    matchLabels:
+      app: kafka-zk
   template:
     metadata:
       labels:
