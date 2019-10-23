@@ -157,7 +157,6 @@ public class DefaultSchedulerService implements SchedulerService {
 			List<String> commandLineArgs) {
 		Assert.hasText(taskDefinitionName, "The provided taskName must not be null or empty.");
 		Assert.notNull(taskDeploymentProperties, "The provided taskDeploymentProperties must not be null.");
-		scheduleName = getSchedulePrefix(taskDefinitionName) + "-" + scheduleName;
 		TaskDefinition taskDefinition = this.taskDefinitionRepository.findById(taskDefinitionName)
 				.orElseThrow(() -> new NoSuchTaskDefinitionException(taskDefinitionName));
 		TaskParser taskParser = new TaskParser(taskDefinition.getName(), taskDefinition.getDslText(), true, true);
@@ -186,7 +185,7 @@ public class DefaultSchedulerService implements SchedulerService {
 		AppDefinition revisedDefinition =
 				TaskServiceUtils.mergeAndExpandAppProperties(taskDefinition, metadataResource,
 						tagAppProperties(null, appProperties), whitelistProperties);
-		revisedDefinition = new AppDefinition(scheduleName,
+		revisedDefinition = new AppDefinition(taskDefinitionName,
 				cleanseTaskProperties(revisedDefinition.getProperties()));
 
 		DeploymentPropertiesUtils.validateDeploymentProperties(taskDeploymentProperties);
@@ -272,9 +271,8 @@ public class DefaultSchedulerService implements SchedulerService {
 
 	@Override
 	public void unscheduleForTaskDefinition(String taskDefinitionName) {
-		String schedulePrefix = getSchedulePrefix(taskDefinitionName);
 		for(ScheduleInfo scheduleInfo : list()) {
-			if(scheduleInfo.getScheduleName().startsWith(schedulePrefix)) {
+			if(scheduleInfo.getTaskDefinitionName().equals(taskDefinitionName)) {
 				unschedule(scheduleInfo.getScheduleName());
 			}
 		}
@@ -296,16 +294,12 @@ public class DefaultSchedulerService implements SchedulerService {
 		List<ScheduleInfo> list = launcher.getScheduler().list();
 		List<ScheduleInfo> result = new ArrayList<>();
 		for(ScheduleInfo scheduleInfo: list) {
-			if(scheduleInfo.getScheduleName().startsWith(getSchedulePrefix(taskDefinitionName))) {
+			if(scheduleInfo.getTaskDefinitionName().equals(taskDefinitionName)) {
 				result.add(scheduleInfo);
 			}
 		}
 		return limitScheduleInfoResultSize(result,
 				this.schedulerServiceProperties.getMaxSchedulesReturned());
-	}
-
-	private String getSchedulePrefix(String taskDefinitionName) {
-		return taskConfigurationProperties.getScheduleNamePrefix() + taskDefinitionName;
 	}
 
 	@Override

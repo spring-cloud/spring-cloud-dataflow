@@ -206,15 +206,12 @@ public class DefaultSchedulerServiceTests {
 		verifyScheduleExistsInScheduler(createScheduleInfo(BASE_SCHEDULE_NAME + 2));
 		verifyScheduleExistsInScheduler(createScheduleInfo(BASE_SCHEDULE_NAME + 3));
 
-		schedulerService.unschedule(getFullyQualifiedScheduleName(BASE_DEFINITION_NAME, BASE_SCHEDULE_NAME + 2));
+		schedulerService.unschedule(BASE_SCHEDULE_NAME + 2);
 		validateSchedulesCount(2);
 		verifyScheduleExistsInScheduler(createScheduleInfo(BASE_SCHEDULE_NAME + 1));
 		verifyScheduleExistsInScheduler(createScheduleInfo(BASE_SCHEDULE_NAME + 3));
 	}
 
-	private String getFullyQualifiedScheduleName(String taskDefinitionName, String scheduleName) {
-		return this.taskConfigurationProperties.getScheduleNamePrefix() + taskDefinitionName + "-" + scheduleName;
-	}
 
 	@Test
 	public void testEmptyUnschedule(){
@@ -343,7 +340,7 @@ public class DefaultSchedulerServiceTests {
 
 		assertThat(scheduleInfos.size()).isEqualTo(1);
 		assertThat(scheduleInfos.get(0).getTaskDefinitionName()).isEqualTo(
-				scheduleInfo.getScheduleName());
+				scheduleInfo.getTaskDefinitionName());
 
 		for(String key: scheduleInfo.getScheduleProperties().keySet()) {
 			assertThat(scheduleInfos.get(0).getScheduleProperties().
@@ -363,7 +360,7 @@ public class DefaultSchedulerServiceTests {
 
 	private ScheduleInfo createScheduleInfo(String scheduleName, String taskDefinitionName) {
 		ScheduleInfo scheduleInfo = new ScheduleInfo();
-		scheduleInfo.setScheduleName(getFullyQualifiedScheduleName(taskDefinitionName, scheduleName));
+		scheduleInfo.setScheduleName(scheduleName);
 		scheduleInfo.setTaskDefinitionName(taskDefinitionName);
 		scheduleInfo.setScheduleProperties(this.resolvedProperties);
 		return scheduleInfo;
