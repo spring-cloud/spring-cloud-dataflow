@@ -208,6 +208,11 @@ public class SkipperStreamDeployer implements StreamDeployer {
 		return this.streamDefinitionRepository.findById(streamName).isPresent();
 	}
 
+	@Override
+	public void scale(String streamName, String appName, int count, Map<String, String> properties) {
+		this.skipperClient.scale(streamName, appName, count, properties);
+	}
+
 	public Release deployStream(StreamDeploymentRequest streamDeploymentRequest) {
 		validateStreamDeploymentRequest(streamDeploymentRequest);
 		Map<String, String> streamDeployerProperties = streamDeploymentRequest.getStreamDeployerProperties();

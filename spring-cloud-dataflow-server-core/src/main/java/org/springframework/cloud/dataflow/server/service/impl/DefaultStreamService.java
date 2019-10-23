@@ -221,7 +221,7 @@ public class DefaultStreamService implements StreamService {
 	public void scaleApplicationInstances(String streamName, String appName, String count, Map<String, String> properties) {
 		// Skipper expects app names / labels not deployment ids
 		logger.info(String.format("Scale %s:%s to %s with properties: %s", streamName, appName, count, properties));
-		// TODO: 1. Use Skipper's Scale API to send the scale request(s)
+		this.skipperStreamDeployer.scale(streamName, appName, Integer.valueOf(count), properties);
 	}
 
 	@Override
