@@ -98,15 +98,15 @@ public class StreamDeploymentControllerTests {
 
 	@Test
 	public void testScaleApplicationInstances() {
-		this.controller.scaleApplicationInstances("ticktock", "time", "666", null);
-		verify(streamService).scaleApplicationInstances(eq("ticktock"), eq("time"), eq("666"), isNull());
+		this.controller.scaleApplicationInstances("ticktock", "time", 666, null);
+		verify(streamService).scaleApplicationInstances(eq("ticktock"), eq("time"), eq(666), isNull());
 
-		this.controller.scaleApplicationInstances("stream", "foo", "2", new HashMap<>());
-		verify(streamService).scaleApplicationInstances(eq("stream"), eq("foo"), eq("2"), isA(Map.class));
+		this.controller.scaleApplicationInstances("stream", "foo", 2, new HashMap<>());
+		verify(streamService).scaleApplicationInstances(eq("stream"), eq("foo"), eq(2), isA(Map.class));
 
-		this.controller.scaleApplicationInstances("stream", "bar", "3",
+		this.controller.scaleApplicationInstances("stream", "bar", 3,
 				Collections.singletonMap("key", "value"));
-		verify(streamService).scaleApplicationInstances(eq("stream"), eq("bar"), eq("3"),
+		verify(streamService).scaleApplicationInstances(eq("stream"), eq("bar"), eq(3),
 				eq(Collections.singletonMap("key", "value")));
 	}
 

@@ -106,7 +106,7 @@ public class StreamDeploymentController {
 	public ResponseEntity<Void> scaleApplicationInstances(
 			@PathVariable("streamName") String streamName,
 			@PathVariable("appName") String appName,
-			@PathVariable("count") String count,
+			@PathVariable("count") Integer count,
 			@RequestBody(required = false) Map<String, String> properties) {
 
 		logger.info(String.format("Scale stream: %s, apps: %s instances to %s", streamName, appName, count));

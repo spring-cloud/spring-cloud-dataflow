@@ -47,7 +47,7 @@ public interface StreamService {
 	 * @param count number of instances for the selected stream application (required)
 	 * @param properties scale deployment specific properties (optional)
 	 */
-	void scaleApplicationInstances(String streamName, String appName, String count, Map<String, String> properties);
+	void scaleApplicationInstances(String streamName, String appName, int count, Map<String, String> properties);
 
 	/**
 	 * Update the stream using the UpdateStreamRequest.

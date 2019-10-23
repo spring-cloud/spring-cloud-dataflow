@@ -252,11 +252,13 @@ public class StreamCommands implements CommandMarker {
 			@CliOption(key = {
 					"applicationName" }, help = "the name/label of the application to scale", mandatory = true) String applicationName,
 			@CliOption(key = {
-					"count" }, help = "desired number of application instances", mandatory = true) String count,
+					"count" }, help = "desired number of application instances", mandatory = true) Integer count,
 			@CliOption(key = {
-					PROPERTIES_OPTION }, help = "the properties for this scale") String scaleProperties) {
+					PROPERTIES_OPTION }, help = "the properties for this scale") String scaleProperties) throws IOException{
 
-		streamOperations().scaleApplicationInstances(name, applicationName, count, new HashMap<>());
+		Map<String, String> propertiesToUse = DeploymentPropertiesUtils.parseDeploymentProperties(scaleProperties,
+				null, 0);
+		streamOperations().scaleApplicationInstances(name, applicationName, count, propertiesToUse);
 		return String.format("Scale request has been sent for the stream '%s'", name);
 	}
 

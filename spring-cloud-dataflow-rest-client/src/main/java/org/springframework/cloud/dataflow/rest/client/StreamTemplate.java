@@ -150,7 +150,7 @@ public class StreamTemplate implements StreamOperations {
 
 	@Override
 	public void scaleApplicationInstances(String streamName,
-			String appName, String count, Map<String, String> properties) {
+			String appName, Integer count, Map<String, String> properties) {
 		String url = String.format("%s/scale/%s/%s/instances/%s", deploymentsLink.getHref(), streamName, appName, count);
 		restTemplate.postForObject(url, properties, Object.class);
 	}

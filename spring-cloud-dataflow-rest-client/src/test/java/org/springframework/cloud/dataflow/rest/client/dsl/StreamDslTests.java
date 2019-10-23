@@ -364,14 +364,14 @@ public class StreamDslTests {
 				eq("ticktock"), eq("time | log"), eq("demo stream"), eq(false));
 		verify(streamOperations, times(1)).deploy(eq("ticktock"),
 				anyMap());
-		stream.scaleApplicationInstances(time, 3);
+		stream.scaleApplicationInstances(time, 3, Collections.emptyMap());
 
 		stream.scaleApplicationInstances(log, 2, Collections.singletonMap("key", "value"));
 
 		verify(streamOperations, times(1))
-				.scaleApplicationInstances(eq("ticktock"), eq("time"), eq("3"), isA(Map.class));
+				.scaleApplicationInstances(eq("ticktock"), eq("time"), eq(3), isA(Map.class));
 
 		verify(streamOperations, times(1))
-				.scaleApplicationInstances(eq("ticktock"), eq("log"), eq("2"), eq(Collections.singletonMap("key", "value")));
+				.scaleApplicationInstances(eq("ticktock"), eq("log"), eq(2), eq(Collections.singletonMap("key", "value")));
 	}
 }

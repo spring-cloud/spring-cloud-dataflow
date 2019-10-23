@@ -160,5 +160,5 @@ public interface StreamOperations {
 	 * @param count number of instances to scale to.
 	 * @param properties scale deployment properties.
 	 */
-	void scaleApplicationInstances(String streamName, String appName, String count, Map<String, String> properties);
+	void scaleApplicationInstances(String streamName, String appName, Integer count, Map<String, String> properties);
 }
