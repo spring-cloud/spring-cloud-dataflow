@@ -724,5 +724,11 @@ public class LocalServerSecurityWithUsersFileTests {
 		public String getPassword() {
 			return password;
 		}
+
+		@Override
+		public String toString() {
+			return String.format("UserCredentials: %s/%s.", this.username, this.password);
+		}
+
 	}
 }

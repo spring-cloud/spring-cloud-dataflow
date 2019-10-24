@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 the original author or authors.
+ * Copyright 2017-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,15 +16,16 @@
 package org.springframework.cloud.dataflow.server.config.cloudfoundry.security.support;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
-import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import org.springframework.boot.autoconfigure.security.oauth2.resource.AuthoritiesExtractor;
+import org.springframework.cloud.common.security.support.AuthoritiesMapper;
 import org.springframework.cloud.common.security.support.CoreSecurityRoles;
 import org.springframework.cloud.common.security.support.SecurityConfigUtils;
 import org.springframework.security.config.core.GrantedAuthorityDefaults;
@@ -34,21 +35,21 @@ import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
 /**
- * This Spring Cloud Data Flow {@link AuthoritiesExtractor} will assign all
+ * This Spring Cloud Data Flow {@link AuthoritiesMapper} will assign all
  * {@link CoreSecurityRoles} to the authenticated OAuth2 user IF the user is a "Space
  * Developer" in Cloud Foundry.
  *
  * @author Gunnar Hillert
  *
  */
-public class CloudFoundryDataflowAuthoritiesExtractor implements AuthoritiesExtractor {
+public class CloudFoundryDataflowAuthoritiesMapper implements AuthoritiesMapper {
 
 	private static final Logger logger = LoggerFactory
-			.getLogger(CloudFoundryDataflowAuthoritiesExtractor.class);
+			.getLogger(CloudFoundryDataflowAuthoritiesMapper.class);
 
 	private final CloudFoundrySecurityService cloudFoundrySecurityService;
 
-	public CloudFoundryDataflowAuthoritiesExtractor(CloudFoundrySecurityService cloudFoundrySecurityService) {
+	public CloudFoundryDataflowAuthoritiesMapper(CloudFoundrySecurityService cloudFoundrySecurityService) {
 		this.cloudFoundrySecurityService = cloudFoundrySecurityService;
 	}
 
@@ -60,24 +61,29 @@ public class CloudFoundryDataflowAuthoritiesExtractor implements AuthoritiesExtr
 	 * @param map Must not be null. Is only used for logging
 	 */
 	@Override
-	public List<GrantedAuthority> extractAuthorities(Map<String, Object> map) {
-		Assert.notNull(map, "The map argument must not be null.");
+	public Set<GrantedAuthority> mapScopesToAuthorities(Set<String> scopes) {
+		Assert.notNull(scopes, "The scopes argument must not be null.");
 
 		if (cloudFoundrySecurityService.isSpaceDeveloper()) {
 			final List<String> rolesAsStrings = new ArrayList<>();
-			final List<GrantedAuthority> grantedAuthorities = Stream.of(CoreSecurityRoles.values())
+			final Set<GrantedAuthority> grantedAuthorities = Stream.of(CoreSecurityRoles.values())
 					.map(roleEnum -> {
 						final String roleName = SecurityConfigUtils.ROLE_PREFIX + roleEnum.getKey();
 						rolesAsStrings.add(roleName);
 						return new SimpleGrantedAuthority(roleName);
 					})
-					.collect(Collectors.toList());
-			logger.info("Adding ALL roles {} to Cloud Foundry Space Developer user {}",
-					StringUtils.collectionToCommaDelimitedString(rolesAsStrings), map);
+					.collect(Collectors.toSet());
+			logger.info("Adding ALL roles {} to Cloud Foundry Space Developer user.",
+					StringUtils.collectionToCommaDelimitedString(rolesAsStrings));
 			return grantedAuthorities;
 		}
 		else {
-			return new ArrayList<>(0);
+			return Collections.emptySet();
 		}
+	}
+
+	@Override
+	public Set<GrantedAuthority> mapScopesToAuthorities(String providerId, Set<String> scopes) {
+		throw new UnsupportedOperationException("Don't call this AuthoritiesMapper with a providerId.");
 	}
 }

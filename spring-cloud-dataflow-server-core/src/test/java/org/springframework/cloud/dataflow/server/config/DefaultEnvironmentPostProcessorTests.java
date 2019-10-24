@@ -22,6 +22,7 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.autoconfigure.flyway.FlywayAutoConfiguration;
 import org.springframework.boot.autoconfigure.session.SessionAutoConfiguration;
+import org.springframework.cloud.common.security.core.support.OAuth2TokenUtilsService;
 import org.springframework.cloud.dataflow.server.EnableDataFlowServer;
 import org.springframework.cloud.dataflow.server.service.SchedulerService;
 import org.springframework.cloud.dataflow.server.service.TaskExecutionService;
@@ -114,6 +115,11 @@ public class DefaultEnvironmentPostProcessorTests {
 		@Bean
 		public Scheduler scheduler() {
 			return mock(Scheduler.class);
+		}
+
+		@Bean
+		public OAuth2TokenUtilsService oauth2TokenUtilsService() {
+			return mock(OAuth2TokenUtilsService.class);
 		}
 	}
 }

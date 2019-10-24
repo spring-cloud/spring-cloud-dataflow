@@ -33,7 +33,7 @@ import java.util.stream.StreamSupport;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import org.springframework.cloud.common.security.support.TokenUtils;
+import org.springframework.cloud.common.security.core.support.OAuth2TokenUtilsService;
 import org.springframework.cloud.dataflow.audit.service.AuditRecordService;
 import org.springframework.cloud.dataflow.core.AuditActionType;
 import org.springframework.cloud.dataflow.core.AuditOperationType;
@@ -124,6 +124,8 @@ public class DefaultTaskExecutionService implements TaskExecutionService {
 
 	private final DataflowTaskExecutionMetadataDao dataflowTaskExecutionMetadataDao;
 
+	private OAuth2TokenUtilsService oauth2TokenUtilsService;
+
 	private final Map<String, List<String>> tasksBeingUpgraded = new ConcurrentHashMap<>();
 
 	private final TaskAnalyzer taskAnalyzer = new TaskAnalyzer();
@@ -148,7 +150,8 @@ public class DefaultTaskExecutionService implements TaskExecutionService {
 			TaskAppDeploymentRequestCreator taskAppDeploymentRequestCreator,
 			TaskExplorer taskExplorer,
 			DataflowTaskExecutionDao dataflowTaskExecutionDao,
-			DataflowTaskExecutionMetadataDao dataflowTaskExecutionMetadataDao) {
+			DataflowTaskExecutionMetadataDao dataflowTaskExecutionMetadataDao,
+			OAuth2TokenUtilsService oauth2TokenUtilsService) {
 		Assert.notNull(launcherRepository, "launcherRepository must not be null");
 		Assert.notNull(auditRecordService, "auditRecordService must not be null");
 		Assert.notNull(taskExecutionInfoService, "taskExecutionInfoService must not be null");
@@ -161,6 +164,7 @@ public class DefaultTaskExecutionService implements TaskExecutionService {
 		Assert.notNull(dataflowTaskExecutionDao, "dataflowTaskExecutionDao must not be null");
 		Assert.notNull(dataflowTaskExecutionMetadataDao, "dataflowTaskExecutionMetadataDao must not be null");
 
+		this.oauth2TokenUtilsService = oauth2TokenUtilsService;
 		this.launcherRepository = launcherRepository;
 		this.auditRecordService = auditRecordService;
 		this.taskRepository = taskRepository;
@@ -314,8 +318,8 @@ public class DefaultTaskExecutionService implements TaskExecutionService {
 			}
 		}
 
-		if (!containsAccessToken && useUserAccessToken) {
-			final String token = TokenUtils.getAccessToken();
+		if (!containsAccessToken && useUserAccessToken && oauth2TokenUtilsService != null) {
+			final String token = oauth2TokenUtilsService.getAccessTokenOfAuthenticatedUser();
 
 			if (token != null) {
 				taskExecutionInformation.getTaskDeploymentProperties().put(dataflowAccessTokenPropertyKey, token);

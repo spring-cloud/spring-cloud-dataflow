@@ -264,11 +264,9 @@ public class LocalServerSecurityWithOAuth2Tests {
 
 		assertTrue(Boolean.valueOf(oAuthServerResponse));
 
-		// At this point the Token is still cached by the Data Flow Server, and therefore a positive response is expected
-
 		localDataflowResource.getMockMvc()
 			.perform(get("/security/info").header("Authorization", "bearer " + accessTokenAsString)).andDo(print())
-			.andExpect(status().isOk());
+			.andExpect(status().isUnauthorized());
 
 		localDataflowResource.getMockMvc()
 			.perform(get("/logout").header("Authorization", "bearer " + accessTokenAsString)).andDo(print())
@@ -276,7 +274,7 @@ public class LocalServerSecurityWithOAuth2Tests {
 
 		localDataflowResource.getMockMvc()
 			.perform(get("/security/info").header("Authorization", "bearer " + accessTokenAsString)).andDo(print())
-			.andExpect(status().isOk()); //FIXME
+			.andExpect(status().isUnauthorized());
 
 	}
 

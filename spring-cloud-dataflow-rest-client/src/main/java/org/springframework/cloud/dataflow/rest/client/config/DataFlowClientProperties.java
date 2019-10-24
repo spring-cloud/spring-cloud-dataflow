@@ -37,7 +37,7 @@ public class DataFlowClientProperties {
 	/**
 	 * Skip Ssl validation.
 	 */
-	private boolean skipSslValidation = true;
+	private boolean skipSslValidation;
 
 
 	/**

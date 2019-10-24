@@ -33,6 +33,7 @@ import org.springframework.boot.autoconfigure.orm.jpa.HibernateJpaAutoConfigurat
 import org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration;
 import org.springframework.boot.autoconfigure.web.client.RestTemplateAutoConfiguration;
 import org.springframework.boot.test.util.TestPropertyValues;
+import org.springframework.cloud.common.security.core.support.OAuth2TokenUtilsService;
 import org.springframework.cloud.dataflow.server.EnableDataFlowServer;
 import org.springframework.cloud.dataflow.server.config.features.SchedulerConfiguration;
 import org.springframework.cloud.dataflow.server.config.web.WebConfiguration;
@@ -63,6 +64,7 @@ import static org.mockito.Mockito.mock;
 /**
  * @author Glenn Renfro
  * @author Ilayaperumal Gopinathan
+ * @author Gunnar Hillert
  */
 public class DataFlowServerConfigurationTests {
 
@@ -190,6 +192,11 @@ public class DataFlowServerConfigurationTests {
 		@Bean
 		public StreamValidationService streamValidationService() {
 			return mock(StreamValidationService.class);
+		}
+
+		@Bean
+		public OAuth2TokenUtilsService oauth2TokenUtilsService() {
+			return mock(OAuth2TokenUtilsService.class);
 		}
 	}
 }
