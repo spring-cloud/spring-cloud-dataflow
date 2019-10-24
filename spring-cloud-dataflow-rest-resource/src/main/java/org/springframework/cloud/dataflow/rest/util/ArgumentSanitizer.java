@@ -45,6 +45,7 @@ import org.springframework.util.StringUtils;
  * @author Ilayaperumal Gopinathan
  */
 public class ArgumentSanitizer {
+
 	private static final String[] REGEX_PARTS = { "*", "$", "^", "+" };
 
 	private static final String REDACTION_STRING = "******";
