@@ -39,6 +39,7 @@ import org.springframework.cloud.skipper.domain.PackageIdentifier;
 import org.springframework.cloud.skipper.domain.PackageMetadata;
 import org.springframework.cloud.skipper.domain.Release;
 import org.springframework.cloud.skipper.domain.Repository;
+import org.springframework.cloud.skipper.domain.ScaleRequest;
 import org.springframework.cloud.skipper.domain.StatusCode;
 import org.springframework.cloud.skipper.domain.UpgradeProperties;
 import org.springframework.cloud.skipper.domain.UpgradeRequest;
@@ -185,6 +186,29 @@ public class ReleaseServiceTests extends AbstractIntegrationTest {
 		LogInfo logContent = this.releaseService.getLog(releaseName);
 		assertThat(logContent).isNotNull();
 	}
+
+	@Test
+	public void testLogsByNonExistingRelease() {
+		try {
+			this.releaseService.getLog("invalid");
+			fail();
+		}
+		catch (ReleaseNotFoundException e) {
+			assertThat(e.getMessage()).isEqualTo("Release with the name [invalid] doesn't exist");
+		}
+	}
+
+	@Test
+	public void testScaleByNonExistingRelease() {
+		try {
+			this.releaseService.scale("invalid", new ScaleRequest());
+			fail();
+		}
+		catch (ReleaseNotFoundException e) {
+			assertThat(e.getMessage()).isEqualTo("Release with the name [invalid] doesn't exist");
+		}
+	}
+
 
 	@Test
 	public void testInstallByLatestPackage() throws InterruptedException {

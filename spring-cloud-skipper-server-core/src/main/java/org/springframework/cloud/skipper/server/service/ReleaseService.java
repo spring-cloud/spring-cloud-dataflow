@@ -279,6 +279,9 @@ public class ReleaseService {
 	@Transactional
 	public LogInfo getLog(String releaseName, String appName) {
 		Release release = this.releaseRepository.findTopByNameOrderByVersionDesc(releaseName);
+		if (release == null) {
+			throw new ReleaseNotFoundException(releaseName);
+		}
 		String kind = ManifestUtils.resolveKind(release.getManifest().getData());
 		ReleaseManager releaseManager = this.releaseManagerFactory.getReleaseManager(kind);
 		return releaseManager.getLog(release, appName);
@@ -287,6 +290,9 @@ public class ReleaseService {
 	@Transactional
 	public Release scale(String releaseName, ScaleRequest scaleRequest) {
 		Release release = this.releaseRepository.findTopByNameOrderByVersionDesc(releaseName);
+		if (release == null) {
+			throw new ReleaseNotFoundException(releaseName);
+		}
 		String kind = ManifestUtils.resolveKind(release.getManifest().getData());
 		ReleaseManager releaseManager = this.releaseManagerFactory.getReleaseManager(kind);
 		return releaseManager.scale(release, scaleRequest);
