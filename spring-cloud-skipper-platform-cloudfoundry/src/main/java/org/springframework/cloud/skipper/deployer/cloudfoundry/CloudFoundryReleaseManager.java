@@ -26,6 +26,7 @@ import java.util.Map;
 import org.cloudfoundry.operations.applications.ApplicationManifest;
 import org.cloudfoundry.operations.applications.LogsRequest;
 import org.cloudfoundry.operations.applications.PushApplicationManifestRequest;
+import org.cloudfoundry.operations.applications.ScaleApplicationRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -192,7 +193,23 @@ public class CloudFoundryReleaseManager implements ReleaseManager {
 
 	@Override
 	public Release scale(Release release, ScaleRequest scaleRequest) {
-		// TODO: implement for cf
-		throw new UnsupportedOperationException();
+		logger.info("Scaling the application instance using ", scaleRequest.toString());
+		for (ScaleRequest.ScaleRequestItem scaleRequestItem: scaleRequest.getScale()) {
+			ScaleApplicationRequest scaleApplicationRequest = ScaleApplicationRequest.builder()
+					.name(scaleRequestItem.getName())
+					.instances(scaleRequestItem.getCount())
+					.stagingTimeout(STAGING_TIMEOUT)
+					.startupTimeout(STARTUP_TIMEOUT)
+					.build();
+			this.platformCloudFoundryOperations.getCloudFoundryOperations(release.getPlatformName()).applications()
+					.scale(scaleApplicationRequest)
+					.timeout(Duration.ofSeconds(API_TIMEOUT.toMillis()))
+					.doOnSuccess(v -> logger.info("Scaled the application with deploymentId = {}",
+							scaleRequestItem.getName()))
+					.doOnError(e -> logger.error("Error: {} scaling the app instance {}", e.getMessage(),
+							scaleRequestItem.getName()))
+					.subscribe();
+		}
+		return release;
 	}
 }
