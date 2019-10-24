@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 the original author or authors.
+ * Copyright 2017-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,20 +24,19 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnCloudPlatform;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
-import org.springframework.boot.autoconfigure.security.oauth2.resource.PrincipalExtractor;
-import org.springframework.boot.autoconfigure.security.oauth2.resource.UserInfoTokenServices;
 import org.springframework.boot.cloud.CloudPlatform;
 import org.springframework.cloud.common.security.OAuthSecurityConfiguration;
-import org.springframework.cloud.common.security.support.DefaultAuthoritiesExtractor;
+import org.springframework.cloud.common.security.support.CustomAuthoritiesOpaqueTokenIntrospector;
+import org.springframework.cloud.common.security.support.DefaultAuthoritiesMapper;
+import org.springframework.cloud.common.security.support.OAuth2TokenUtilsService;
 import org.springframework.cloud.common.security.support.OnOAuth2SecurityEnabled;
-import org.springframework.cloud.dataflow.server.config.cloudfoundry.security.support.CloudFoundryDataflowAuthoritiesExtractor;
-import org.springframework.cloud.dataflow.server.config.cloudfoundry.security.support.CloudFoundryPrincipalExtractor;
+import org.springframework.cloud.dataflow.server.config.cloudfoundry.security.support.CloudFoundryDataflowAuthoritiesMapper;
 import org.springframework.cloud.dataflow.server.config.cloudfoundry.security.support.CloudFoundrySecurityService;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Conditional;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
-import org.springframework.security.oauth2.client.OAuth2RestTemplate;
+import org.springframework.web.client.RestTemplate;
 
 /**
  * When running inside Cloud Foundry, this {@link Configuration} class will reconfigure
@@ -48,7 +47,7 @@ import org.springframework.security.oauth2.client.OAuth2RestTemplate;
  * {@code Space Developers} have access to the underlying REST API's.
  * <p>
  * For this to happen, a REST call will be made to the Cloud Foundry Permissions API via
- * CloudFoundrySecurityService inside the {@link DefaultAuthoritiesExtractor}.
+ * CloudFoundrySecurityService inside the {@link DefaultAuthoritiesMapper}.
  * <p>
  * If the user has the respective permissions, the CF_SPACE_DEVELOPER_ROLE will be
  * assigned to the user.
@@ -68,26 +67,16 @@ public class CloudFoundryOAuthSecurityConfiguration {
 	private static final Logger logger = LoggerFactory.getLogger(CloudFoundryOAuthSecurityConfiguration.class);
 
 	@Autowired
-	private UserInfoTokenServices userInfoTokenServices;
+	private CustomAuthoritiesOpaqueTokenIntrospector customAuthoritiesOpaqueTokenIntrospector;
 
 	@Autowired(required = false)
-	private CloudFoundryDataflowAuthoritiesExtractor cloudFoundryDataflowAuthoritiesExtractor;
-
-	@Autowired(required = false)
-	private PrincipalExtractor principalExtractor;
+	private CloudFoundryDataflowAuthoritiesMapper cloudFoundryDataflowAuthoritiesExtractor;
 
 	@PostConstruct
 	public void init() {
 		if (this.cloudFoundryDataflowAuthoritiesExtractor != null) {
 			logger.info("Setting up Cloud Foundry AuthoritiesExtractor for UAA.");
-			this.userInfoTokenServices.setAuthoritiesExtractor(this.cloudFoundryDataflowAuthoritiesExtractor);
-		}
-		if (this.principalExtractor != null) {
-			logger.info("Setting up Cloud Foundry PrincipalExtractor.");
-			this.userInfoTokenServices.setPrincipalExtractor(this.principalExtractor);
-		}
-		else {
-			this.userInfoTokenServices.setPrincipalExtractor(new CloudFoundryPrincipalExtractor());
+			this.customAuthoritiesOpaqueTokenIntrospector.setAuthorityMapper(this.cloudFoundryDataflowAuthoritiesExtractor);
 		}
 	}
 
@@ -101,17 +90,19 @@ public class CloudFoundryOAuthSecurityConfiguration {
 		@Value("${vcap.application.application_id}")
 		private String applicationId;
 
-		@Autowired
-		private OAuth2RestTemplate oAuth2RestTemplate;
-
 		@Bean
-		public CloudFoundryDataflowAuthoritiesExtractor authoritiesExtractor() {
-			return new CloudFoundryDataflowAuthoritiesExtractor(cloudFoundrySecurityService());
+		public CloudFoundryDataflowAuthoritiesMapper authoritiesExtractor(
+			CloudFoundrySecurityService cloudFoundrySecurityService
+				) {
+			return new CloudFoundryDataflowAuthoritiesMapper(cloudFoundrySecurityService);
 		}
 
 		@Bean
-		public CloudFoundrySecurityService cloudFoundrySecurityService() {
-			return new CloudFoundrySecurityService(this.oAuth2RestTemplate, this.cloudControllerUrl,
+		public CloudFoundrySecurityService cloudFoundrySecurityService(
+				OAuth2TokenUtilsService oauth2TokenUtilsService,
+				RestTemplate restTemplate) {
+			return new CloudFoundrySecurityService(oauth2TokenUtilsService, restTemplate,
+					this.cloudControllerUrl,
 					this.applicationId);
 		}
 

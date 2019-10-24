@@ -34,6 +34,7 @@ import org.springframework.boot.autoconfigure.jackson.JacksonAutoConfiguration;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceProperties;
 import org.springframework.boot.autoconfigure.orm.jpa.HibernateJpaAutoConfiguration;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.cloud.common.security.support.OAuth2TokenUtilsService;
 import org.springframework.cloud.dataflow.audit.service.AuditRecordService;
 import org.springframework.cloud.dataflow.audit.service.DefaultAuditRecordService;
 import org.springframework.cloud.dataflow.completion.CompletionConfiguration;
@@ -280,12 +281,14 @@ public class TaskServiceDependencies extends WebMvcConfigurationSupport {
 			TaskExecutionCreationService taskExecutionRepositoryService,
 			TaskAppDeploymentRequestCreator taskAppDeploymentRequestCreator,
 			TaskExplorer taskExplorer, DataflowTaskExecutionDao dataflowTaskExecutionDao,
-			DataflowTaskExecutionMetadataDao dataflowTaskExecutionMetadataDao) {
+			DataflowTaskExecutionMetadataDao dataflowTaskExecutionMetadataDao,
+			OAuth2TokenUtilsService oauth2TokenUtilsService) {
 		return new DefaultTaskExecutionService(
 				launcherRepository, auditRecordService, taskRepository,
 				taskExecutionInfoService, taskDeploymentRepository,
 				taskExecutionRepositoryService, taskAppDeploymentRequestCreator,
-				taskExplorer, dataflowTaskExecutionDao, dataflowTaskExecutionMetadataDao);
+				taskExplorer, dataflowTaskExecutionDao, dataflowTaskExecutionMetadataDao,
+				oauth2TokenUtilsService);
 	}
 
 	@Bean
@@ -327,5 +330,12 @@ public class TaskServiceDependencies extends WebMvcConfigurationSupport {
 	@Bean
 	public Scheduler scheduler() {
 		return new SimpleTestScheduler();
+	}
+
+	@Bean
+	public OAuth2TokenUtilsService oauth2TokenUtilsService() {
+		final OAuth2TokenUtilsService oauth2TokenUtilsService = mock(OAuth2TokenUtilsService.class);
+		when(oauth2TokenUtilsService.getAccessTokenOfAuthenticatedUser()).thenReturn("foo-bar-123-token");
+		return oauth2TokenUtilsService;
 	}
 }

@@ -8,7 +8,7 @@ security:
       client-secret: "{noop}mysecret"
       scope: dataflow.view,dataflow.manage,dataflow.create
       registered-redirect-uri:
-      - http://localhost:9393/login
+      - http://localhost:${dataflow.port}/login/oauth2/code/uaa
       auto-approve-scopes: '.*'
       authorized-grant-types:
       - authorization_code

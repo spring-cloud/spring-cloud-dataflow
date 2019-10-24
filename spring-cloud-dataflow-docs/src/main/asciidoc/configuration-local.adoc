@@ -537,25 +537,45 @@ NOTE: When authentication is set up, it is strongly recommended to enable HTTPS
 as well, especially in production environments.
 
 You can turn on OAuth2 authentication by adding the following to `application.yml` or by setting
-environment variables:
+environment variables. The following example shows the minimal setup needed for
+https://github.com/cloudfoundry/uaa[CloudFoundry User Account and Authentication (UAA) Server]:
 
 [source,yaml]
 ----
-security:
-  oauth2:
-    client:
-      client-id: myclient                                             # <1>
-      client-secret: mysecret
-      access-token-uri: http://127.0.0.1:9999/oauth/token
-      user-authorization-uri: http://127.0.0.1:9999/oauth/authorize
-    resource:
-      user-info-uri: http://127.0.0.1:9999/me                         # <2>
-      token-info-uri: https://dataflow.local:8080/uaa/check_token      # <3>
+spring:
+  security:
+    oauth2:                                                           # <1>
+      client:
+        registration:
+          uaa:                                                        # <2>
+            client-id: myclient
+            client-secret: mysecret
+            redirect-uri: '{baseUrl}/login/oauth2/code/{registrationId}'
+            authorization-grant-type: authorization_code
+            scope:
+            - openid                                                  # <3>
+        provider:
+          uaa:
+            jwk-set-uri: http://uaa.local:8080/uaa/token_keys
+            token-uri: http://uaa.local:8080/uaa/oauth/token
+            user-info-uri: http://uaa.local:8080/uaa/userinfo    # <4>
+            user-name-attribute: user_name                            # <5>
+            authorization-uri: http://uaa.local:8080/uaa/oauth/authorize
+      resourceserver:
+        opaquetoken:
+          introspection-uri: http://uaa.local:8080/uaa/introspect # <6>
+          client-id: dataflow
+          client-secret: dataflow
 ----
 
-<1> Providing the Client ID in the OAuth Configuration Section activates OAuth2 security
-<2> Used to retrieve user information such as the username. Mandatory.
-<3> Used to introspect and validate a directly passed-in token. Mandatory.
+<1> Providing this property activates OAuth2 security
+<2> The provider id. It is possible to specify more than 1 provider
+<3> As the UAA is an OpenID provider, you must at least specify the `openid` scope.
+    If your provider also provides additional scopes to control the role assignments,
+    you must specify those scopes here as well
+<4> OpenID endpoint. Used to retrieve user information such as the username. Mandatory.
+<5> The JSON property of the response that contains the username
+<6> Used to introspect and validate a directly passed-in token. Mandatory.
 
 You can verify that basic authentication is working properly by using curl, as follows:
 
@@ -597,11 +617,14 @@ Spring Cloud Data Flow, assigns all roles to authenticated OAuth2
 users by default. The `DefaultDataflowAuthoritiesExtractor` class is used for that purpose.
 
 Alternatively, Spring Cloud Data Flow can map OAuth2 scopes to Data Flow roles by
-setting `spring.cloud.dataflow.security.authorization.map-oauth-scopes` to `true.` For more
-details, please see the chapter on <<configuration-security-role-mapping>>.
+setting the boolean property `map-oauth-scopes` for your provider to `true` (False is the default).
+For example, if your provider's id is `uaa`, the property would be
+`spring.cloud.dataflow.security.authorization.provider-role-mappings.uaa.map-oauth-scopes`.
+
+For more details, please see the chapter on <<configuration-security-role-mapping>>.
 
 Lastly, you can customize the role mapping behavior by providing your own Spring bean definition that
-extends Spring Security OAuth's `AuthoritiesExtractor` interface. In that case,
+extends Spring Cloud Data Flow's `AuthorityMapper` interface. In that case,
 the custom bean definition takes precedence over the default one provided by
 Spring Cloud Data Flow.
 
@@ -635,6 +658,8 @@ spring:
       security:
         authorization:
           enabled: true
+          loginUrl: "/"
+          permit-all-paths: "/authenticate,/security/info,/assets/**,/dashboard/logout-success-oauth.html,/favicon.ico"
           rules:
             # About
 
@@ -667,6 +692,7 @@ spring:
             - GET    /jobs/executions                => hasRole('ROLE_VIEW')
             - PUT    /jobs/executions/**             => hasRole('ROLE_MODIFY')
             - GET    /jobs/executions/**             => hasRole('ROLE_VIEW')
+            - GET    /jobs/thinexecutions            => hasRole('ROLE_VIEW')
 
             # Batch Job Instances
 
@@ -700,6 +726,9 @@ spring:
             - GET /streams/validation/               => hasRole('ROLE_VIEW')
             - GET /streams/validation/*              => hasRole('ROLE_VIEW')
 
+            # Stream Logs
+            - GET /streams/logs/*                    => hasRole('ROLE_VIEW')
+
             # Task Definitions
 
             - POST   /tasks/definitions              => hasRole('ROLE_CREATE')
@@ -712,6 +741,7 @@ spring:
             - GET    /tasks/executions               => hasRole('ROLE_VIEW')
             - GET    /tasks/executions/*             => hasRole('ROLE_VIEW')
             - POST   /tasks/executions               => hasRole('ROLE_DEPLOY')
+            - POST   /tasks/executions/*             => hasRole('ROLE_DEPLOY')
             - DELETE /tasks/executions/*             => hasRole('ROLE_DESTROY')
 
             # Task Schedules
@@ -723,10 +753,17 @@ spring:
             - POST   /tasks/schedules                => hasRole('ROLE_SCHEDULE')
             - DELETE /tasks/schedules/*              => hasRole('ROLE_SCHEDULE')
 
+            # Task Platform Account List */
+
+            - GET    /tasks/platforms                => hasRole('ROLE_VIEW')
+
             # Task Validations
 
             - GET    /tasks/validation/               => hasRole('ROLE_VIEW')
             - GET    /tasks/validation/*              => hasRole('ROLE_VIEW')
+
+            # Task Logs
+            - GET /tasks/logs/*                       => hasRole('ROLE_VIEW')
 
             # Tools
 
@@ -798,44 +835,105 @@ While the UAA is used by https://www.cloudfoundry.org/[Cloud Foundry],
 it is also a fully featured stand alone OAuth2 server with enterprise features such as
 https://github.com/cloudfoundry/uaa/blob/develop/docs/UAA-LDAP.md[LDAP integration].
 
+===== Requirements
+
 Checkout, Build and Run UAA:
 
-[source,bash]
-----
-$ git clone https://github.com/cloudfoundry/uaa.git
-$ cd uaa/
-$ ./gradlew  run
-----
+- Make sure you use Java 8
+- https://git-scm.com/[Git] installed
+- You need the https://github.com/cloudfoundry/cf-uaac[CloudFoundry UAA Command Line Client] installed
+- Use a different host name for UAA when running on the same machine, e.g. `http://uaa/`
 
-IMPORTANT: The UAA requires *Java 8*.
-
-The configuration of the UAA is driven by a
-https://github.com/cloudfoundry/uaa/blob/develop/uaa/src/main/resources/uaa.yml[uaa.yml]
-file. You can provide custom configuration but in this case we will use the
-embedded default configuration that provides also a default user:
+In case you run into issues installing _uaac_, you may have to set the `GEM_HOME` environment
+variable:
 
 [source,bash]
 ----
-curl -v -d"username=marissa&password=koala&client_id=app&grant_type=password" -u "app:appclientsecret" http://localhost:8080/uaa/oauth/token -d 'token_format=opaque'
+export GEM_HOME="$HOME/.gem"
+----
+
+and add `~/.gem/gems/cf-uaac-4.2.0/bin` to your path.
+
+===== Prepare UAA for JWT
+
+As the UAA is an OpenID provider it uses JSON Web Tokens (JWT) it needs to have
+a private key for signing those JWTs:
+
+[source,bash]
+----
+openssl genrsa -out signingkey.pem 2048
+openssl rsa -in signingkey.pem -pubout -out verificationkey.pem
+export JWT_TOKEN_SIGNING_KEY=$(cat signingkey.pem)
+export JWT_TOKEN_VERIFICATION_KEY=$(cat verificationkey.pem)
+----
+
+Later, once the UAA is started you can see the keys when accessing `http://uaa:8080/uaa/token_keys`
+
+===== Download + Start UAA
+
+[source,bash]
+----
+git clone https://github.com/pivotal/uaa-bundled.git
+cd uaa-bundled
+./mvnw clean install
+java -jar target/uaa-bundled-1.0.0.BUILD-SNAPSHOT.jar
+----
+
+The configuration of the UAA is driven by either a Yaml file `uaa.yml` or you can script the configuration
+using the UAA Command Line Client:
+
+[source,bash]
+----
+uaac target http://uaa:8080/uaa
+uaac token client get admin -s adminsecret
+uaac client add dataflow \
+  --name dataflow \
+  --secret dataflow \
+  --scope cloud_controller.read,cloud_controller.write,openid,password.write,scim.userids,foo.create,foo.view \
+  --authorized_grant_types password,authorization_code,client_credentials,refresh_token \
+  --authorities uaa.resource,dataflow.create,dataflow.deploy,dataflow.destroy,dataflow.manage,dataflow.modify,dataflow.schedule,dataflow.view,foo.view,foo.create\
+  --redirect_uri http://localhost:9393/login \
+  --autoapprove openid \
+
+uaac group add "foo.view"
+uaac group add "foo.create"
+
+uaac user add springrocks -p mysecret --emails springrocks@someplace.com
+uaac user add vieweronly -p mysecret --emails mrviewer@someplace.com
+
+uaac member add "foo.view" springrocks
+uaac member add "foo.create" springrocks
+uaac member add "foo.view" vieweronly
+----
+
+This script will set up the dataflow client as well as 2 users:
+
+- User _springrocks_ will have both scopes `foo.view` and `foo.create`
+- User _vieweronly_ will only have one scope `foo.view`
+
+Once added, you can quickly double-check that the UAA has the users created:
+[source,bash]
+----
+curl -v -d"username=springrocks&password=mysecret&client_id=dataflow&grant_type=password" -u "dataflow:dataflow" http://uaa:8080/uaa/oauth/token -d 'token_format=opaque'
 ----
 
 This should produce output similar to the following:
 
 [source,bash]
 ----
-*   Trying ::1...
+*   Trying 127.0.0.1...
 * TCP_NODELAY set
-* Connected to localhost (::1) port 8080 (#0)
-* Server auth using Basic with user 'app'
+* Connected to uaa (127.0.0.1) port 8080 (#0)
+* Server auth using Basic with user 'dataflow'
 > POST /uaa/oauth/token HTTP/1.1
-> Host: localhost:8080
-> Authorization: Basic YXBwOmFwcGNsaWVudHNlY3JldA==
+> Host: uaa:8080
+> Authorization: Basic ZGF0YWZsb3c6ZGF0YWZsb3c=
 > User-Agent: curl/7.54.0
 > Accept: */*
-> Content-Length: 85
+> Content-Length: 97
 > Content-Type: application/x-www-form-urlencoded
 >
-* upload completely sent off: 85 out of 85 bytes
+* upload completely sent off: 97 out of 97 bytes
 < HTTP/1.1 200
 < Cache-Control: no-store
 < Pragma: no-cache
@@ -844,10 +942,10 @@ This should produce output similar to the following:
 < X-Content-Type-Options: nosniff
 < Content-Type: application/json;charset=UTF-8
 < Transfer-Encoding: chunked
-< Date: Mon, 03 Dec 2018 23:58:41 GMT
+< Date: Thu, 31 Oct 2019 21:22:59 GMT
 <
-* Connection #0 to host localhost left intact
-{"access_token":"0f935cea42fd4516bb36e4088f6d7c44","token_type":"bearer","id_token":"eyJhbGciOiJIUzI1NiIsImprdSI6Imh0dHBzOi8vbG9jYWxob3N0OjgwODAvdWFhL3Rva2VuX2tleXMiLCJraWQiOiJsZWdhY3ktdG9rZW4ta2V5IiwidHlwIjoiSldUIn0.eyJzdWIiOiI1ODExMWNlNC02NGRlLTQ3ZDYtYjZiZi0wZDRhNDFhNGFlMDAiLCJhdWQiOlsiYXBwIl0sImlzcyI6Imh0dHA6Ly9sb2NhbGhvc3Q6ODA4MC91YWEvb2F1dGgvdG9rZW4iLCJleHAiOjE1NDM5MjQ3MjEsImlhdCI6MTU0Mzg4MTUyMSwiYW1yIjpbInB3ZCJdLCJhenAiOiJhcHAiLCJzY29wZSI6WyJvcGVuaWQiXSwiZW1haWwiOiJtYXJpc3NhQHRlc3Qub3JnIiwiemlkIjoidWFhIiwib3JpZ2luIjoidWFhIiwianRpIjoiMGY5MzVjZWE0MmZkNDUxNmJiMzZlNDA4OGY2ZDdjNDQiLCJwcmV2aW91c19sb2dvbl90aW1lIjoxNTQzODgxMTk1NzU2LCJlbWFpbF92ZXJpZmllZCI6dHJ1ZSwiY2xpZW50X2lkIjoiYXBwIiwiY2lkIjoiYXBwIiwiZ3JhbnRfdHlwZSI6InBhc3N3b3JkIiwidXNlcl9uYW1lIjoibWFyaXNzYSIsInJldl9zaWciOiI1ZmI4N2M1NiIsInVzZXJfaWQiOiI1ODExMWNlNC02NGRlLTQ3ZDYtYjZiZi0wZDRhNDFhNGFlMDAiLCJhdXRoX3RpbWUiOjE1NDM4ODE1MjF9.qSxoygd7LUUJSEN0wGI3-U0x2tYZzHnTDuzk6AJUfBk","refresh_token":"d106513b98804a508c35d3f7b656a7fe-r","expires_in":43199,"scope":"scim.userids openid cloud_controller.read password.write cloud_controller.write","jti":"0f935cea42fd4516bb36e4088f6d7c44"}
+* Connection #0 to host uaa left intact
+{"access_token":"0329c8ecdf594ee78c271e022138be9d","token_type":"bearer","id_token":"eyJhbGciOiJSUzI1NiIsImprdSI6Imh0dHBzOi8vbG9jYWxob3N0OjgwODAvdWFhL3Rva2VuX2tleXMiLCJraWQiOiJsZWdhY3ktdG9rZW4ta2V5IiwidHlwIjoiSldUIn0.eyJzdWIiOiJlZTg4MDg4Ny00MWM2LTRkMWQtYjcyZC1hOTQ4MmFmNGViYTQiLCJhdWQiOlsiZGF0YWZsb3ciXSwiaXNzIjoiaHR0cDovL2xvY2FsaG9zdDo4MDkwL3VhYS9vYXV0aC90b2tlbiIsImV4cCI6MTU3MjYwMDE3OSwiaWF0IjoxNTcyNTU2OTc5LCJhbXIiOlsicHdkIl0sImF6cCI6ImRhdGFmbG93Iiwic2NvcGUiOlsib3BlbmlkIl0sImVtYWlsIjoic3ByaW5ncm9ja3NAc29tZXBsYWNlLmNvbSIsInppZCI6InVhYSIsIm9yaWdpbiI6InVhYSIsImp0aSI6IjAzMjljOGVjZGY1OTRlZTc4YzI3MWUwMjIxMzhiZTlkIiwiZW1haWxfdmVyaWZpZWQiOnRydWUsImNsaWVudF9pZCI6ImRhdGFmbG93IiwiY2lkIjoiZGF0YWZsb3ciLCJncmFudF90eXBlIjoicGFzc3dvcmQiLCJ1c2VyX25hbWUiOiJzcHJpbmdyb2NrcyIsInJldl9zaWciOiJlOTkyMDQxNSIsInVzZXJfaWQiOiJlZTg4MDg4Ny00MWM2LTRkMWQtYjcyZC1hOTQ4MmFmNGViYTQiLCJhdXRoX3RpbWUiOjE1NzI1NTY5Nzl9.bqYvicyCPB5cIIu_2HEe5_c7nSGXKw7B8-reTvyYjOQ2qXSMq7gzS4LCCQ-CMcb4IirlDaFlQtZJSDE-_UsM33-ThmtFdx--TujvTR1u2nzot4Pq5A_ThmhhcCB21x6-RNNAJl9X9uUcT3gKfKVs3gjE0tm2K1vZfOkiGhjseIbwht2vBx0MnHteJpVW6U0pyCWG_tpBjrNBSj9yLoQZcqrtxYrWvPHaa9ljxfvaIsOnCZBGT7I552O1VRHWMj1lwNmRNZy5koJFPF7SbhiTM8eLkZVNdR3GEiofpzLCfoQXrr52YbiqjkYT94t3wz5C6u1JtBtgc2vq60HmR45bvg","refresh_token":"6ee95d017ada408697f2d19b04f7aa6c-r","expires_in":43199,"scope":"scim.userids openid foo.create cloud_controller.read password.write cloud_controller.write foo.view","jti":"0329c8ecdf594ee78c271e022138be9d"}
 ----
 
 Using `token_format` parameter you can requested token to be either:
@@ -855,95 +953,89 @@ Using `token_format` parameter you can requested token to be either:
 - opaque
 - jwt
 
-In order to configure the UAA, it is recommended to use the `uaac` command line tool and target the UAA server:
+===== Start Skipper
 
 [source,bash]
 ----
-$ gem install cf-uaac
-$ uaac target http://localhost:8080/uaa
+git clone https://github.com/spring-cloud/spring-cloud-skipper.git
+cd spring-cloud/spring-cloud-skipper
+./mvnw clean package -DskipTests=true
+java -jar spring-cloud-skipper-server/target/spring-cloud-skipper-server-2.2.0.BUILD-SNAPSHOT.jar
 ----
 
-Check out the user details of user `marissa`:
-
-[source,bash]
-----
-$ uaac token owner get cf marissa -s "" -p koala
-$ uaac contexts
-----
-
-This should also provide the relevant token details. Next, switch to the
-admin user (password is `adminsecret`):
+===== Start Spring Cloud Data Flow
 
 [source,bash]
 ----
-$ uaac token client get admin -s adminsecret
+git clone https://github.com/spring-cloud/spring-cloud-dataflow.git
+cd spring-cloud-dataflow
+./mvnw clean package -DskipTests=true
+cd ..
 ----
 
-Get a list of all configured clients:
-
-[source,bash]
-----
-$ uaac clients
-----
-
-This returns the interesting client app among others:
-
-[source,bash]
-----
-…
-  app
-    scope: cloud_controller.read cloud_controller.write openid password.write scim.userids organizations.acme
-    resource_ids: none
-    authorized_grant_types: password implicit authorization_code client_credentials refresh_token
-    redirect_uri: http://localhost:8080/** http://localhost:8080/app/
-    autoapprove: openid
-    authorities: uaa.resource
-    name: The Ultimate Oauth App
-    signup_redirect_url: http://localhost:8080/app/
-    change_email_redirect_url: http://localhost:8080/app/
-    lastmodified: 1543879731285
-…
-----
-
-We are going to use that `app` for Spring Cloud Data Flow but need to update
-the `redirect_uri`. We will also update the client secret:
-
-[source,bash]
-----
-$ uaac client update app --redirect_uri http://localhost:9393/login
-$ uaac secret set app --secret dataflow
-----
-
-Now we can update the relavant OAuth configuration in Spring Cloud Data Flow:
+Create a yaml file scdf.yml with the following contents:
 
 [source,yaml]
 ----
-security:
-  oauth2:
-    client:
-      client-id: app
-      client-secret: dataflow
-      scope: openid                                                     # <1>
-      access-token-uri: http://localhost:8080/uaa/oauth/token
-      user-authorization-uri: http://localhost:8080/uaa/oauth/authorize
-    resource:
-      user-info-uri: http://localhost:8080/uaa/userinfo                 # <2>
-      token-info-uri: http://localhost:8080/uaa/check_token             # <3>
+spring:
+  cloud:
+    dataflow:
+      security:
+        authorization:
+          provider-role-mappings:
+            uaa:
+              map-oauth-scopes: true
+              role-mappings:
+                ROLE_CREATE: foo.create
+                ROLE_DEPLOY: foo.create
+                ROLE_DESTROY: foo.create
+                ROLE_MANAGE: foo.create
+                ROLE_MODIFY: foo.create
+                ROLE_SCHEDULE: foo.create
+                ROLE_VIEW: foo.view
+  security:
+    oauth2:
+      client:
+        registration:
+          uaa:
+            redirect-uri: '{baseUrl}/login/oauth2/code/{registrationId}'
+            authorization-grant-type: authorization_code
+            client-id: dataflow
+            client-secret: dataflow
+            scope:                                                       <1>
+            - openid
+            - foo.create
+            - foo.view
+        provider:
+          uaa:
+            jwk-set-uri: http://uaa:8080/uaa/token_keys
+            token-uri: http://uaa:8080/uaa/oauth/token
+            user-info-uri: http://uaa:8080/uaa/userinfo                  <2>
+            user-name-attribute: user_name
+            authorization-uri: http://uaa:8080/uaa/oauth/authorize
+      resourceserver:
+        opaquetoken:                                                     <3>
+          introspection-uri: http://uaa:8080/uaa/introspect
+          client-id: dataflow
+          client-secret: dataflow
 ----
 
 <1> If you use scopes to identify roles, please make sure to also request
-the relevant scopes, e.g `dataflow.view`, `dataflow.create` etc.
+    the relevant scopes, e.g `dataflow.view`, `dataflow.create` and don't forget to request the `openid` scope
 <2> Used to retrieve profile information, e.g. username for display purposes (mandatory)
 <3> Used for token introspection and validation (mandatory)
 
-The `token-info-uri` property is especially important when passing an externally retrieved OAuth Access Token
-to Spring Cloud Data Flow. In that case Spring Cloud Data Flow will take the OAuth Access Token via the
-https://github.com/spring-cloud/spring-cloud-common-security-config/blob/master/spring-cloud-common-security-config-web/src/main/java/org/springframework/cloud/common/security/support/TokenValidatingUserInfoTokenServices.java[TokenValidatingUserInfoTokenServices]
-, and use the UAA's
-https://docs.cloudfoundry.org/api/uaa/version/4.27.0/index.html#check-token[Check Token Endpoint]
+The `introspection-uri` property is especially important when passing an externally retrieved (opaque)
+OAuth Access Token to Spring Cloud Data Flow. In that case Spring Cloud Data Flow will take the OAuth Access,
+and use the UAA's https://docs.cloudfoundry.org/api/uaa/version/74.4.0/index.html#introspect-token[Introspect Token Endpoint]
 to not only check the validity of the token but also retrieve the associated OAuth scopes from the UAA
-and store the successful authentication in Spring Cloud Data Flow's
-https://docs.spring.io/spring-security/oauth/apidocs/org/springframework/security/oauth2/provider/token/TokenStore.html[TokenStore].
+
+Finally startup Spring Cloud Data Flow:
+
+[source,bash]
+----
+java -jar spring-cloud-dataflow/spring-cloud-dataflow-server/target/spring-cloud-dataflow-server-2.3.0.BUILD-SNAPSHOT.jar --spring.config.additional-location=scdf.yml
+----
 
 [[configuration-security-role-mapping]]
 ===== Role Mappings
@@ -951,7 +1043,7 @@ https://docs.spring.io/spring-security/oauth/apidocs/org/springframework/securit
 By default all roles are assigned to users that login to Spring Cloud Data Flow.
 However, you can set the property:
 
-`spring.cloud.dataflow.security.authorization.map-oauth-scopes: true`
+`spring.cloud.dataflow.security.authorization.provider-role-mappings.uaa.map-oauth-scopes: true`
 
 This will instruct the underlying `DefaultAuthoritiesExtractor` to map
 OAuth scopes to the respective authorities. The following scopes are supported:
@@ -970,21 +1062,20 @@ Additionally you can also map arbitrary scopes to each of the Data Flow roles:
 ----
 spring:
   cloud:
-    deployer:
-      local:
-        free-disk-space-percentage: 0
     dataflow:
       security:
         authorization:
-          map-oauth-scopes: true                                    # <1>
-          role-mappings:
-            ROLE_CREATE: dataflow.create                            # <2>
-            ROLE_DEPLOY: dataflow.deploy
-            ROLE_DESTROY: dataflow.destoy
-            ROLE_MANAGE: dataflow.manage
-            ROLE_MODIFY: dataflow.modify
-            ROLE_SCHEDULE: dataflow.schedule
-            ROLE_VIEW: dataflow.view
+          provider-role-mappings:
+            uaa:
+              map-oauth-scopes: true                                    # <1>
+              role-mappings:
+                ROLE_CREATE: dataflow.create                            # <2>
+                ROLE_DEPLOY: dataflow.deploy
+                ROLE_DESTROY: dataflow.destoy
+                ROLE_MANAGE: dataflow.manage
+                ROLE_MODIFY: dataflow.modify
+                ROLE_SCHEDULE: dataflow.schedule
+                ROLE_VIEW: dataflow.view
 ----
 
 <1> Enables explicit mapping support from OAuth scopes to Data Flow roles

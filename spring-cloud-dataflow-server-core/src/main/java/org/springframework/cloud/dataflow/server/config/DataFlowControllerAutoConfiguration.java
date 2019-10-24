@@ -26,6 +26,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import org.springframework.beans.factory.ObjectProvider;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
@@ -35,6 +36,7 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.cloud.common.security.AuthorizationProperties;
 import org.springframework.cloud.common.security.support.OAuth2AccessTokenProvidingClientHttpRequestInterceptor;
+import org.springframework.cloud.common.security.support.OAuth2TokenUtilsService;
 import org.springframework.cloud.common.security.support.SecurityStateBean;
 import org.springframework.cloud.dataflow.audit.repository.AuditRecordRepository;
 import org.springframework.cloud.dataflow.audit.service.AuditRecordService;
@@ -363,7 +365,8 @@ public class DataFlowControllerAutoConfiguration {
 
 		@Bean
 		public SkipperClient skipperClient(SkipperClientProperties properties,
-				RestTemplateBuilder restTemplateBuilder, ObjectMapper objectMapper) {
+				RestTemplateBuilder restTemplateBuilder, ObjectMapper objectMapper,
+				@Autowired(required = false) OAuth2TokenUtilsService oauth2TokenUtilsService) {
 
 			// TODO (Tzolov) review the manual Hal convertion configuration
 			objectMapper.registerModule(new Jackson2HalModule());
@@ -373,7 +376,7 @@ public class DataFlowControllerAutoConfiguration {
 
 			RestTemplate restTemplate = restTemplateBuilder
 					.errorHandler(new SkipperClientResponseErrorHandler(objectMapper))
-					.interceptors(new OAuth2AccessTokenProvidingClientHttpRequestInterceptor())
+					.interceptors(new OAuth2AccessTokenProvidingClientHttpRequestInterceptor(oauth2TokenUtilsService))
 					.messageConverters(Arrays.asList(new StringHttpMessageConverter(),
 							new MappingJackson2HttpMessageConverter(objectMapper)))
 					.build();

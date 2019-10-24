@@ -42,6 +42,7 @@ import org.springframework.boot.autoconfigure.jackson.JacksonAutoConfiguration;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceProperties;
 import org.springframework.boot.autoconfigure.orm.jpa.HibernateJpaAutoConfiguration;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.cloud.common.security.support.OAuth2TokenUtilsService;
 import org.springframework.cloud.common.security.support.SecurityStateBean;
 import org.springframework.cloud.dataflow.audit.repository.AuditRecordRepository;
 import org.springframework.cloud.dataflow.audit.service.AuditRecordService;
@@ -510,12 +511,14 @@ public class TestDependencies extends WebMvcConfigurationSupport {
 			TaskExecutionCreationService taskExecutionRepositoryService,
 			TaskAppDeploymentRequestCreator taskAppDeploymentRequestCreator,
 			TaskExplorer taskExplorer, DataflowTaskExecutionDao dataflowTaskExecutionDao,
-			DataflowTaskExecutionMetadataDao dataflowTaskExecutionMetadataDao) {
+			DataflowTaskExecutionMetadataDao dataflowTaskExecutionMetadataDao,
+			OAuth2TokenUtilsService oauth2TokenUtilsService) {
 		return new DefaultTaskExecutionService(
 				launcherRepository, auditRecordService, taskRepository,
 				taskExecutionInfoService, taskDeploymentRepository,
 				taskExecutionRepositoryService, taskAppDeploymentRequestCreator,
-				taskExplorer, dataflowTaskExecutionDao, dataflowTaskExecutionMetadataDao);
+				taskExplorer, dataflowTaskExecutionDao, dataflowTaskExecutionMetadataDao,
+				oauth2TokenUtilsService);
 	}
 
 	@Bean
@@ -623,5 +626,10 @@ public class TestDependencies extends WebMvcConfigurationSupport {
 	@Bean
 	public JobInstanceController jobInstanceController() {
 		return mock(JobInstanceController.class);
+	}
+
+	@Bean
+	public OAuth2TokenUtilsService oauth2TokenUtilsService() {
+		return mock(OAuth2TokenUtilsService.class);
 	}
 }
