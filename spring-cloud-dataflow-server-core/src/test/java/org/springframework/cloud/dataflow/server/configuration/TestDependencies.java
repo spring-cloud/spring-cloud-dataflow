@@ -150,7 +150,6 @@ import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.data.map.repository.config.EnableMapRepositories;
 import org.springframework.data.web.config.EnableSpringDataWebSupport;
-import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.config.EnableHypermediaSupport;
 import org.springframework.hateoas.server.EntityLinks;
 import org.springframework.jdbc.support.MetaDataAccessException;
@@ -318,7 +317,7 @@ public class TestDependencies extends WebMvcConfigurationSupport {
 		// Handle Skipper List Deployers
 		List<Deployer> deployers = new ArrayList<>();
 		// deployers.add(new Deployer("", "", null));
-		when(skipperClient.listDeployers()).thenReturn(new CollectionModel<>(deployers, new ArrayList<>()));
+		when(skipperClient.listDeployers()).thenReturn(deployers);
 
 		return skipperClient;
 	}
