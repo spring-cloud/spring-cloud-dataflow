@@ -18,7 +18,6 @@ package org.springframework.cloud.dataflow.server.rest.documentation;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -50,8 +49,6 @@ import org.springframework.cloud.skipper.domain.StatusCode;
 import org.springframework.cloud.skipper.domain.VersionInfo;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.hateoas.CollectionModel;
-import org.springframework.hateoas.Link;
 import org.springframework.restdocs.JUnitRestDocumentation;
 import org.springframework.restdocs.mockmvc.RestDocumentationResultHandler;
 import org.springframework.test.util.ReflectionTestUtils;
@@ -94,7 +91,7 @@ public abstract class BaseDocumentation {
 		about.getVersionInfo().getServer().setName("Test Server");
 		about.getVersionInfo().getServer().setVersion("Test Version");
 		when(springDataflowServer.getSkipperClient().info()).thenReturn(about);
-		when(springDataflowServer.getSkipperClient().listDeployers()).thenReturn(new CollectionModel<>(new ArrayList<>(), new ArrayList<>()));
+		when(springDataflowServer.getSkipperClient().listDeployers()).thenReturn(new ArrayList<>());
 
 		Info info = new Info();
 		info.setStatus(new Status());
@@ -102,9 +99,9 @@ public abstract class BaseDocumentation {
 		when(springDataflowServer.getSkipperClient().status(ArgumentMatchers.anyString())).thenReturn(info);
 
 		Deployer deployer = new Deployer("default", "local", mock(AppDeployer.class));
-		when(springDataflowServer.getSkipperClient().listDeployers()).thenReturn(new CollectionModel<>(Arrays.asList(deployer), new Link[0]));
+		when(springDataflowServer.getSkipperClient().listDeployers()).thenReturn(Arrays.asList(deployer));
 
-		when(springDataflowServer.getSkipperClient().search(ArgumentMatchers.anyString(), ArgumentMatchers.anyBoolean())).thenReturn(new CollectionModel(Collections.EMPTY_LIST));
+		when(springDataflowServer.getSkipperClient().search(ArgumentMatchers.anyString(), ArgumentMatchers.anyBoolean())).thenReturn(new ArrayList<>());
 
 		this.prepareDocumentationTests(springDataflowServer.getWebApplicationContext());
 	}

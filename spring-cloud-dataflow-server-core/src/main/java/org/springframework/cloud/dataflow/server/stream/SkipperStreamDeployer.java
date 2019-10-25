@@ -84,7 +84,6 @@ import org.springframework.cloud.skipper.io.PackageWriter;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
-import org.springframework.hateoas.CollectionModel;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
@@ -273,8 +272,7 @@ public class SkipperStreamDeployer implements StreamDeployer {
 	}
 
 	private String determinePlatformName(final String platformName) {
-		CollectionModel<Deployer> deployerResources = skipperClient.listDeployers();
-		Collection<Deployer> deployers = deployerResources.getContent();
+		Collection<Deployer> deployers = skipperClient.listDeployers();
 		if (StringUtils.hasText(platformName)) {
 			List<Deployer> filteredDeployers = deployers.stream()
 					.filter(d -> d.getName().equals(platformName))
@@ -452,8 +450,8 @@ public class SkipperStreamDeployer implements StreamDeployer {
 	}
 
 	public void undeployStream(String streamName) {
-		CollectionModel<PackageMetadata> packageMetadataResources = this.skipperClient.search(streamName, false);
-		if (!packageMetadataResources.getContent().isEmpty()) {
+		Collection<PackageMetadata> packageMetadataResources = this.skipperClient.search(streamName, false);
+		if (!packageMetadataResources.isEmpty()) {
 			try {
 				this.skipperClient.delete(streamName, true);
 			}
@@ -523,7 +521,7 @@ public class SkipperStreamDeployer implements StreamDeployer {
 	@Override
 	public RuntimeEnvironmentInfo environmentInfo() {
 		AboutResource skipperInfo = skipperClient.info();
-		CollectionModel<Deployer> deployers = skipperClient.listDeployers();
+		Collection<Deployer> deployers = skipperClient.listDeployers();
 		RuntimeEnvironmentInfo.Builder builder = new RuntimeEnvironmentInfo.Builder()
 				.implementationName(skipperInfo.getVersionInfo().getServer().getName())
 				.implementationVersion(skipperInfo.getVersionInfo().getServer().getVersion())
@@ -624,10 +622,10 @@ public class SkipperStreamDeployer implements StreamDeployer {
 	}
 
 	public Collection<Release> history(String releaseName) {
-		return this.skipperClient.history(releaseName).getContent();
+		return this.skipperClient.history(releaseName);
 	}
 
 	public Collection<Deployer> platformList() {
-		return this.skipperClient.listDeployers().getContent();
+		return this.skipperClient.listDeployers();
 	}
 }

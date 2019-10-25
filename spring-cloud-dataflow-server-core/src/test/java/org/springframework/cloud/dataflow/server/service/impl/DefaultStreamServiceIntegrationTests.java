@@ -19,7 +19,7 @@ import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.charset.Charset;
-import java.util.Collections;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -59,7 +59,6 @@ import org.springframework.cloud.skipper.domain.Release;
 import org.springframework.cloud.skipper.domain.RollbackRequest;
 import org.springframework.cloud.skipper.domain.UpgradeRequest;
 import org.springframework.cloud.skipper.domain.UploadRequest;
-import org.springframework.hateoas.CollectionModel;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
@@ -106,8 +105,7 @@ public class DefaultStreamServiceIntegrationTests {
 
 	@After
 	public void destroyStream() {
-		when(this.skipperClient.search(anyString(), anyBoolean()))
-				.thenReturn(new CollectionModel<>(Collections.singletonList(new PackageMetadata())));
+		when(this.skipperClient.search(anyString(), anyBoolean())).thenReturn(Arrays.asList(new PackageMetadata()));
 		streamService.undeployStream("ticktock");
 		streamDefinitionRepository.deleteAll();
 	}
