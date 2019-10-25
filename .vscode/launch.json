@@ -29,6 +29,13 @@
             "mainClass": "org.springframework.cloud.skipper.server.app.SkipperServerApplication",
             "projectName": "spring-cloud-skipper-server",
             "args": "--spring.config.additional-location=etc/config/skipper-mysql.yml"
+        },
+        {
+            "type": "java",
+            "name": "SKIPPER SHELL",
+            "request": "launch",
+            "mainClass": "org.springframework.cloud.skipper.shell.ShellApplication",
+            "projectName": "spring-cloud-skipper-shell"
         }
     ]
 }

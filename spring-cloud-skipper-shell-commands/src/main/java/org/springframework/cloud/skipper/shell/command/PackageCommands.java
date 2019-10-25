@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 the original author or authors.
+ * Copyright 2018-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -42,7 +43,6 @@ import org.springframework.cloud.skipper.domain.Release;
 import org.springframework.cloud.skipper.domain.UploadRequest;
 import org.springframework.cloud.skipper.shell.command.support.TableUtils;
 import org.springframework.cloud.skipper.shell.command.support.YmlUtils;
-import org.springframework.hateoas.CollectionModel;
 import org.springframework.shell.standard.ShellComponent;
 import org.springframework.shell.standard.ShellMethod;
 import org.springframework.shell.standard.ShellOption;
@@ -74,13 +74,13 @@ public class PackageCommands extends AbstractSkipperCommand {
 			@ShellOption(help = "wildcard expression to search for the package name", defaultValue = NULL) String name,
 			@ShellOption(help = "boolean to set for more detailed package metadata") boolean details)
 			throws Exception {
-		CollectionModel<PackageMetadata> resources = skipperClient.search(name, details);
+		Collection<PackageMetadata> resources = skipperClient.search(name, details);
 		if (!details) {
 			LinkedHashMap<String, Object> headers = new LinkedHashMap<>();
 			headers.put("name", "Name");
 			headers.put("version", "Version");
 			headers.put("description", "Description");
-			TableModel model = new BeanListTableModel<>(resources.getContent(), headers);
+			TableModel model = new BeanListTableModel<>(resources, headers);
 			TableBuilder tableBuilder = new TableBuilder(model);
 			TableUtils.applyStyle(tableBuilder);
 			return tableBuilder.build();
@@ -88,9 +88,9 @@ public class PackageCommands extends AbstractSkipperCommand {
 		else {
 			ObjectMapper mapper = new ObjectMapper();
 			mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-			PackageMetadata[] packageMetadataResources = resources.getContent().toArray(new PackageMetadata[0]);
+			PackageMetadata[] packageMetadataResources = resources.toArray(new PackageMetadata[0]);
 			List<Table> tableList = new ArrayList<>();
-			for (int i = 0; i < resources.getContent().size(); i++) {
+			for (int i = 0; i < resources.size(); i++) {
 				String json = mapper.writeValueAsString(packageMetadataResources[i]);
 				Map<String, String> map = mapper.readValue(json, new TypeReference<Map<String, String>>() {
 				});
