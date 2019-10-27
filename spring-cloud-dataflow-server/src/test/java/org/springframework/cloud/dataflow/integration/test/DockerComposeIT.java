@@ -49,6 +49,7 @@ import org.springframework.cloud.dataflow.rest.client.DataFlowTemplate;
 import org.springframework.cloud.dataflow.rest.client.TaskOperations;
 import org.springframework.cloud.dataflow.rest.client.dsl.DeploymentPropertiesBuilder;
 import org.springframework.cloud.dataflow.rest.client.dsl.Stream;
+import org.springframework.cloud.dataflow.rest.client.dsl.StreamApplication;
 import org.springframework.cloud.dataflow.rest.client.dsl.StreamDefinition;
 import org.springframework.cloud.dataflow.rest.resource.JobExecutionResource;
 import org.springframework.cloud.dataflow.rest.resource.TaskDefinitionResource;
@@ -447,6 +448,48 @@ public class DockerComposeIT {
 			// DESTROY
 		}
 		assertThat(dataFlowOperations.streamOperations().list().getMetadata().getTotalElements(), is(0L));
+	}
+
+	@Test
+	public void scaleApplicationInstances() {
+		// CREATE
+		StreamDefinition streamDefinition = Stream.builder(dataFlowOperations)
+				.name("stream-scale-test")
+				.definition("time | log --log.expression='TICKTOCK - TIMESTAMP: '.concat(payload)")
+				.create();
+
+		// DEPLOY
+		logger.info("stream-scale-test: DEPLOY");
+		try (Stream stream = streamDefinition.deploy(new DeploymentPropertiesBuilder()
+				.put(SPRING_CLOUD_DATAFLOW_SKIPPER_PLATFORM_NAME, runtimeApps.getPlatformName())
+				.put("app.*.logging.file", "${PID}-test.log")
+				.put("app.*.endpoints.logfile.sensitive", "false")
+				.put("app.*.management.endpoints.web.exposure.include", "*")
+				.put("app.*.spring.cloud.streamapp.security.enabled", "false")
+				.build())) {
+
+			Wait.on(stream).withTimeout(Duration.ofMinutes(5)).until(s -> s.getStatus().equals(DEPLOYED));
+
+			final StreamApplication time = new StreamApplication("time");
+			final StreamApplication log = new StreamApplication("log");
+
+			Map<StreamApplication, Map<String, String>> streamApps = stream.runtimeApps();
+			assertThat(streamApps.size(), is(2));
+			assertThat(streamApps.get(time).size(), is(1));
+			assertThat(streamApps.get(log).size(), is(1));
+
+			// Scale up log
+			stream.scaleApplicationInstances(log, 2, Collections.emptyMap());
+
+			Wait.on(stream).withTimeout(Duration.ofMinutes(5)).until(s -> s.getStatus().equals(DEPLOYED));
+			Wait.on(stream).withTimeout(Duration.ofMinutes(5)).until(s -> s.runtimeApps().get(log).size() == 2);
+
+			assertThat(stream.getStatus(), is(DEPLOYED));
+			streamApps = stream.runtimeApps();
+			assertThat(streamApps.size(), is(2));
+			assertThat(streamApps.get(time).size(), is(1));
+			assertThat(streamApps.get(log).size(), is(2));
+		}
 	}
 
 	// -----------------------------------------------------------------------

@@ -1,5 +1,5 @@
 /*
- * Copyright 2015-2016 the original author or authors.
+ * Copyright 2015-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 
 package org.springframework.cloud.dataflow.rest.resource;
 
+import org.springframework.cloud.dataflow.core.StreamRuntimePropertyKeys;
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.PagedModel;
 import org.springframework.hateoas.RepresentationModel;
@@ -27,6 +28,8 @@ import org.springframework.hateoas.RepresentationModel;
  * @author Mark Fisher
  */
 public class AppStatusResource extends RepresentationModel<AppStatusResource> {
+
+	public static final String NO_INSTANCES = "no-instances";
 
 	private String deploymentId;
 
@@ -42,6 +45,12 @@ public class AppStatusResource extends RepresentationModel<AppStatusResource> {
 	public AppStatusResource(String deploymentId, String state) {
 		this.deploymentId = deploymentId;
 		this.state = state;
+	}
+
+	public String getName() {
+		AppInstanceStatusResource instance = this.instances.iterator().next();
+		return (instance != null && instance.getAttributes() != null) ?
+				instance.getAttributes().get(StreamRuntimePropertyKeys.ATTRIBUTE_SKIPPER_APPLICATION_NAME) : NO_INSTANCES;
 	}
 
 	public String getDeploymentId() {

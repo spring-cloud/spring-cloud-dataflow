@@ -22,6 +22,7 @@ import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import org.springframework.cloud.dataflow.core.StreamRuntimePropertyKeys;
 import org.springframework.cloud.dataflow.rest.client.DataFlowTemplate;
 import org.springframework.cloud.dataflow.rest.resource.AppInstanceStatusResource;
 import org.springframework.cloud.dataflow.rest.resource.AppStatusResource;
@@ -99,9 +100,9 @@ public class RuntimeApplicationHelper {
 	 */
 	public Map<String, Map<String, String>> getApplicationInstances(String streamName, String appName) {
 		return this.appInstanceAttributes().values().stream()
-				.filter(v -> v.get("skipper.release.name").equals(streamName))
-				.filter(v -> v.get("skipper.application.name").equals(appName))
-				.collect(Collectors.toMap(v -> v.get("guid"), v -> v));
+				.filter(v -> v.get(StreamRuntimePropertyKeys.ATTRIBUTE_SKIPPER_RELEASE_NAME).equals(streamName))
+				.filter(v -> v.get(StreamRuntimePropertyKeys.ATTRIBUTE_SKIPPER_APPLICATION_NAME).equals(appName))
+				.collect(Collectors.toMap(v -> v.get(StreamRuntimePropertyKeys.ATTRIBUTE_GUID), v -> v));
 	}
 
 	/**
@@ -114,10 +115,10 @@ public class RuntimeApplicationHelper {
 	 */
 	public Map<String, String> applicationInstanceLogs(String streamName, String appName) {
 		return this.appInstanceAttributes().values().stream()
-				.filter(v -> v.get("skipper.release.name").equals(streamName))
-				.filter(v -> v.get("skipper.application.name").equals(appName))
+				.filter(v -> v.get(StreamRuntimePropertyKeys.ATTRIBUTE_SKIPPER_RELEASE_NAME).equals(streamName))
+				.filter(v -> v.get(StreamRuntimePropertyKeys.ATTRIBUTE_SKIPPER_APPLICATION_NAME).equals(appName))
 				.collect(Collectors.toMap(
-						v -> v.get("guid"),
+						v -> v.get(StreamRuntimePropertyKeys.ATTRIBUTE_GUID),
 						v -> getAppInstanceLogContent(getApplicationInstanceUrl(v))));
 	}
 
@@ -140,31 +141,32 @@ public class RuntimeApplicationHelper {
 	}
 
 	private String localApplicationInstanceUrl(Map<String, String> instanceAttributes) {
-		return String.format("http://localhost:%s", instanceAttributes.get("port")); // Local Platform only
+		return String.format("http://localhost:%s",
+				instanceAttributes.get(StreamRuntimePropertyKeys.ATTRIBUTE_PORT)); // Local Platform only
 	}
 
 	private String cloudFoundryApplicationInstanceUrl(Map<String, String> instanceAttributes) {
-		return instanceAttributes.get("url").replace("http:", "https:").toLowerCase();
+		return instanceAttributes.get(StreamRuntimePropertyKeys.ATTRIBUTE_URL).replace("http:", "https:").toLowerCase();
 	}
 
 	private String kubernetesApplicationInstanceUrl(Map<String, String> instanceAttributes) {
 
-		if (instanceAttributes.containsKey("url")) {
-			return instanceAttributes.get("url");
+		if (instanceAttributes.containsKey(StreamRuntimePropertyKeys.ATTRIBUTE_URL)) {
+			return instanceAttributes.get(StreamRuntimePropertyKeys.ATTRIBUTE_URL);
 		}
 
 		// Wait until all apps External-IP are exposed (K8s specific)
-		String streamName = instanceAttributes.get("skipper.release.name");
-		String appName = instanceAttributes.get("skipper.application.name");
-		String guid = instanceAttributes.get("guid");
+		String streamName = instanceAttributes.get(StreamRuntimePropertyKeys.ATTRIBUTE_SKIPPER_RELEASE_NAME);
+		String appName = instanceAttributes.get(StreamRuntimePropertyKeys.ATTRIBUTE_SKIPPER_APPLICATION_NAME);
+		String guid = instanceAttributes.get(StreamRuntimePropertyKeys.ATTRIBUTE_GUID);
 		Wait.on(streamName)
 				.withDescription("Wait for " + streamName + ":" + appName + " ExternalIP")
 				.until(s -> this.appInstanceAttributes().values().stream()
-						.filter(m -> m.get("skipper.release.name").equals(streamName))
-						.filter(m -> m.get("skipper.application.name").equals(appName))
-						.allMatch(m -> m.containsKey("url")));
+						.filter(m -> m.get(StreamRuntimePropertyKeys.ATTRIBUTE_SKIPPER_RELEASE_NAME).equals(streamName))
+						.filter(m -> m.get(StreamRuntimePropertyKeys.ATTRIBUTE_SKIPPER_APPLICATION_NAME).equals(appName))
+						.allMatch(m -> m.containsKey(StreamRuntimePropertyKeys.ATTRIBUTE_URL)));
 
-		return this.getApplicationInstances(streamName, appName).get(guid).get("url");
+		return this.getApplicationInstances(streamName, appName).get(guid).get(StreamRuntimePropertyKeys.ATTRIBUTE_URL);
 	}
 
 	/**

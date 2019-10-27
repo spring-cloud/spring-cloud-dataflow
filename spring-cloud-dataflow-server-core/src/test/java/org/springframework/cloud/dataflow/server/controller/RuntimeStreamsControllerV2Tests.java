@@ -48,6 +48,7 @@ import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.annotation.DirtiesContext.ClassMode;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 
@@ -69,7 +70,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @SpringBootTest(classes = TestDependencies.class)
 @DirtiesContext(classMode = ClassMode.BEFORE_EACH_TEST_METHOD)
 @AutoConfigureTestDatabase(replace = Replace.ANY)
-public class RuntimeStreamsControllerTests {
+public class RuntimeStreamsControllerV2Tests {
 
 	private MockMvc mockMvc;
 
@@ -132,34 +133,35 @@ public class RuntimeStreamsControllerTests {
 
 	@Test
 	public void testGetResponse() throws Exception {
-		mockMvc.perform(
-				get("/runtime/streams")
-						.param("names", "ticktock1,ticktock2,ticktock3")
+		ResultActions b = mockMvc.perform(
+				get("/runtime/streams/ticktock1,ticktock2,ticktock3")
 						.accept(MediaType.APPLICATION_JSON))
 				.andDo(print())
 				.andExpect(status().isOk())
 
 				.andExpect(jsonPath("$.**", hasSize(3)))
-				.andExpect(jsonPath("$.[0].name", is("ticktock1")))
-				.andExpect(jsonPath("$.[0].applications.*", hasSize(2)))
-				.andExpect(jsonPath("$.[0].applications[0].name", is("log1")))
-				.andExpect(jsonPath("$.[0].applications[0].instances[0].guid", is("guid1")))
-				.andExpect(jsonPath("$.[0].applications[1].name", is("time1")))
-				.andExpect(jsonPath("$.[0].applications[1].instances[0].guid", is("guid2")))
+				.andExpect(jsonPath("$.content[0].name", is("ticktock1")))
+				.andExpect(jsonPath("$.content[0].applications.content.*", hasSize(2)))
+				.andExpect(jsonPath("$.content[0].applications.content[0].name", is("log1")))
+				.andExpect(jsonPath("$.content[0].applications.content[0].instances.content[0].guid", is("guid1")))
+				.andExpect(jsonPath("$.content[0].applications.content[1].name", is("time1")))
+				.andExpect(jsonPath("$.content[0].applications.content[1].instances.content[0].guid", is("guid2")))
 
-				.andExpect(jsonPath("$.[1].name", is("ticktock2")))
-				.andExpect(jsonPath("$.[1].applications.*", hasSize(2)))
-				.andExpect(jsonPath("$.[1].applications[0].name", is("log2")))
-				.andExpect(jsonPath("$.[1].applications[0].instances[0].guid", is("guid3")))
-				.andExpect(jsonPath("$.[1].applications[1].name", is("time2")))
-				.andExpect(jsonPath("$.[1].applications[1].instances[0].guid", is("guid4")))
+				.andExpect(jsonPath("$.content[1].name", is("ticktock2")))
+				.andExpect(jsonPath("$.content[1].applications.content.*", hasSize(2)))
+				.andExpect(jsonPath("$.content[1].applications.content[0].name", is("log2")))
+				.andExpect(jsonPath("$.content[1].applications.content[0].instances.content[0].guid", is("guid3")))
+				.andExpect(jsonPath("$.content[1].applications.content[1].name", is("time2")))
+				.andExpect(jsonPath("$.content[1].applications.content[1].instances.content[0].guid", is("guid4")))
 
-				.andExpect(jsonPath("$.[2].name", is("ticktock3")))
-				.andExpect(jsonPath("$.[2].applications.*", hasSize(2)))
-				.andExpect(jsonPath("$.[2].applications[0].name", is("log3")))
-				.andExpect(jsonPath("$.[2].applications[0].instances[0].guid", is("ticktock3.log3-v1-0")))
-				.andExpect(jsonPath("$.[2].applications[1].name", is("time3")))
-				.andExpect(jsonPath("$.[2].applications[1].instances[0].guid", is("ticktock3.time3-v1-0")));
+				.andExpect(jsonPath("$.content[2].name", is("ticktock3")))
+				.andExpect(jsonPath("$.content[2].applications.content.*", hasSize(2)))
+				.andExpect(jsonPath("$.content[2].applications.content[0].name", is("log3")))
+				.andExpect(jsonPath("$.content[2].applications.content[0].instances.content[0].guid", is("ticktock3.log3-v1-0")))
+				.andExpect(jsonPath("$.content[2].applications.content[1].name", is("time3")))
+				.andExpect(jsonPath("$.content[2].applications.content[1].instances.content[0].guid", is("ticktock3.time3-v1-0")));
+
+		System.out.println(b);
 	}
 
 	private AppInstanceStatus instance(String id, String guid, String appName) {

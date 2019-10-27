@@ -17,6 +17,7 @@ package org.springframework.cloud.dataflow.rest.client.dsl;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
@@ -53,23 +54,23 @@ public class StreamApplication {
 		return name;
 	}
 
-	public StreamApplication label(String label){
+	public StreamApplication label(String label) {
 		Assert.hasLength(label, "Label can't be empty");
 		this.label = label;
 		return this;
 	}
 
-	public StreamApplication addProperty(String key, Object value){
+	public StreamApplication addProperty(String key, Object value) {
 		this.properties.put(key, value);
 		return this;
 	}
 
-	public StreamApplication addDeploymentProperty(String key, Object value){
+	public StreamApplication addDeploymentProperty(String key, Object value) {
 		this.deploymentProperties.put(key, value);
 		return this;
 	}
 
-	public StreamApplication addProperties(Map<String, Object> properties){
+	public StreamApplication addProperties(Map<String, Object> properties) {
 		this.properties.putAll(properties);
 		return this;
 	}
@@ -82,16 +83,16 @@ public class StreamApplication {
 		return properties;
 	}
 
-	public StreamApplication type(ApplicationType type){
+	public StreamApplication type(ApplicationType type) {
 		this.type = type;
 		return this;
 	}
 
-	public Map<String, Object> getDeploymentProperties(){
+	public Map<String, Object> getDeploymentProperties() {
 		Map<String, Object> formattedProperties = new HashMap<>();
 		String id = StringUtils.isEmpty(label) ? name : label;
-		for(Map.Entry<String, Object> entry : deploymentProperties.entrySet()){
-			formattedProperties.put(String.format(deployerPrefix, id)+entry.getKey(), entry.getValue());
+		for (Map.Entry<String, Object> entry : deploymentProperties.entrySet()) {
+			formattedProperties.put(String.format(deployerPrefix, id) + entry.getKey(), entry.getValue());
 		}
 		return formattedProperties;
 	}
@@ -102,25 +103,41 @@ public class StreamApplication {
 	 *
 	 */
 	public String getIdentity() {
-		if(!StringUtils.isEmpty(label)){
-			return label+": "+name;
-		}else{
+		if (!StringUtils.isEmpty(label)) {
+			return label + ": " + name;
+		}
+		else {
 			return name;
 		}
 	}
 
-	public String getDefinition(){
+	public String getDefinition() {
 		StringBuilder buffer = new StringBuilder();
 
 		buffer.append(getIdentity());
-		for(Map.Entry<String, Object> entry : properties.entrySet()){
-			buffer.append(" --"+entry.getKey()+"="+entry.getValue());
+		for (Map.Entry<String, Object> entry : properties.entrySet()) {
+			buffer.append(" --" + entry.getKey() + "=" + entry.getValue());
 		}
 		return buffer.toString();
 	}
 
 	public ApplicationType getType() {
 		return type;
+	}
+
+	@Override
+	public boolean equals(Object o) {
+		if (this == o) return true;
+		if (o == null || getClass() != o.getClass()) return false;
+		StreamApplication that = (StreamApplication) o;
+		return getName().equals(that.getName()) &&
+				Objects.equals(getLabel(), that.getLabel()) &&
+				getType() == that.getType();
+	}
+
+	@Override
+	public int hashCode() {
+		return Objects.hash(getName(), getLabel(), getType());
 	}
 
 	@Override
