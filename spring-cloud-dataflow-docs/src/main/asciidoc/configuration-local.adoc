@@ -702,6 +702,7 @@ spring:
             # Running Applications
 
             - GET    /runtime/streams                => hasRole('ROLE_VIEW')
+            - GET    /runtime/streams/**             => hasRole('ROLE_VIEW')
             - GET    /runtime/apps                   => hasRole('ROLE_VIEW')
             - GET    /runtime/apps/**                => hasRole('ROLE_VIEW')
 

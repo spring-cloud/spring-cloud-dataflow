@@ -44,6 +44,12 @@ public class AppStatusResource extends RepresentationModel<AppStatusResource> {
 		this.state = state;
 	}
 
+	public String getName() {
+		AppInstanceStatusResource instance = this.instances.iterator().next();
+		return (instance != null && instance.getAttributes() != null) ?
+				instance.getAttributes().get("skipper.application.name") : "no-instances";
+	}
+
 	public String getDeploymentId() {
 		return deploymentId;
 	}

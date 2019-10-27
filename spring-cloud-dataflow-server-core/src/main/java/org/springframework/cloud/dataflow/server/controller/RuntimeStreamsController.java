@@ -37,12 +37,17 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
+ * @deprecated
+ * Deprecated and replaced by the {@link RuntimeStreamsControllerV2} instead.
+ * The new controller uses the /runtime/streams/{streamNames} query syntax.
+ *
  * Exposes runtime status of deployed streams.
  *
  * @author Christian Tzolov
  */
 @RestController
 @RequestMapping("/runtime/streams")
+@Deprecated
 public class RuntimeStreamsController {
 
 	public static final String ATTRIBUTE_SKIPPER_APPLICATION_NAME = "skipper.application.name";

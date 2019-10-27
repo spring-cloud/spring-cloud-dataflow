@@ -18,14 +18,18 @@ package org.springframework.cloud.dataflow.rest.client.dsl;
 import java.io.IOException;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.springframework.cloud.dataflow.rest.client.DataFlowOperations;
+import org.springframework.cloud.dataflow.rest.resource.AppInstanceStatusResource;
+import org.springframework.cloud.dataflow.rest.resource.AppStatusResource;
 import org.springframework.cloud.dataflow.rest.resource.StreamDefinitionResource;
 import org.springframework.cloud.dataflow.rest.resource.StreamDeploymentResource;
+import org.springframework.cloud.dataflow.rest.resource.StreamStatusResource;
 import org.springframework.cloud.dataflow.rest.util.DeploymentPropertiesUtils;
 import org.springframework.cloud.skipper.domain.PackageIdentifier;
 import org.springframework.cloud.skipper.domain.Release;
@@ -193,6 +197,25 @@ public class Stream implements AutoCloseable {
 	public String getStatus() {
 		StreamDefinitionResource resource = client.streamOperations().getStreamDefinition(this.name);
 		return resource.getStatus();
+	}
+
+	public Map<StreamApplication, Map<String, String>> runtimeApps() {
+
+		StreamStatusResource streamStatus = client.runtimeOperations()
+				.streamStatus(this.name).getContent().iterator().next();;
+		Map<StreamApplication, Map<String, String>> applications = new HashMap<>();
+		for (AppStatusResource appStatusResource : streamStatus.getApplications().getContent()) {
+			StreamApplication app = new StreamApplication(appStatusResource.getName());
+			app.addProperty("state", appStatusResource.getState());
+
+			Map<String, String> appInstances = new HashMap<>();
+			for (AppInstanceStatusResource inst : appStatusResource.getInstances().getContent()) {
+				appInstances.put(inst.getInstanceId(), inst.getState());
+			}
+			applications.put(app, appInstances);
+		}
+
+		return applications;
 	}
 
 	@Override

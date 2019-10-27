@@ -69,6 +69,7 @@ import org.springframework.cloud.dataflow.server.controller.RootController;
 import org.springframework.cloud.dataflow.server.controller.RuntimeAppInstanceController;
 import org.springframework.cloud.dataflow.server.controller.RuntimeAppsController;
 import org.springframework.cloud.dataflow.server.controller.RuntimeStreamsController;
+import org.springframework.cloud.dataflow.server.controller.RuntimeStreamsControllerV2;
 import org.springframework.cloud.dataflow.server.controller.StreamDefinitionController;
 import org.springframework.cloud.dataflow.server.controller.StreamDeploymentController;
 import org.springframework.cloud.dataflow.server.controller.StreamLogsController;
@@ -341,6 +342,11 @@ public class DataFlowControllerAutoConfiguration {
 		@Bean
 		public RuntimeStreamsController runtimeStreamsController(StreamDeployer streamDeployer) {
 			return new RuntimeStreamsController(streamDeployer);
+		}
+
+		@Bean
+		public RuntimeStreamsControllerV2 runtimeStreamsControllerV2(StreamDeployer streamDeployer) {
+			return new RuntimeStreamsControllerV2(streamDeployer);
 		}
 
 		@Bean

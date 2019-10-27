@@ -28,6 +28,8 @@ import org.springframework.hateoas.RepresentationModel;
  */
 public class AppInstanceStatusResource extends RepresentationModel<AppInstanceStatusResource> {
 
+	public static final String ATTRIBUTE_GUID = "guid";
+
 	private String instanceId;
 
 	private String state;
@@ -58,6 +60,13 @@ public class AppInstanceStatusResource extends RepresentationModel<AppInstanceSt
 
 	public void setState(String state) {
 		this.state = state;
+	}
+
+	public String getGuid() {
+		if (this.getAttributes() != null && this.getAttributes().containsKey(ATTRIBUTE_GUID)) {
+			return this.getAttributes().get(ATTRIBUTE_GUID);
+		}
+		return this.getInstanceId();
 	}
 
 	public Map<String, String> getAttributes() {
