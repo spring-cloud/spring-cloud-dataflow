@@ -213,7 +213,7 @@ public class DefaultSchedulerServiceTests {
 	}
 
 	private String getFullyQualifiedScheduleName(String taskDefinitionName, String scheduleName) {
-		return this.taskConfigurationProperties.getScheduleNamePrefix() + taskDefinitionName + "-" + scheduleName;
+		return scheduleName + "-" +  this.taskConfigurationProperties.getScheduleNamePrefix() + taskDefinitionName;
 	}
 
 	@Test
@@ -336,14 +336,14 @@ public class DefaultSchedulerServiceTests {
 	}
 
 	private void verifyScheduleExistsInScheduler(ScheduleInfo scheduleInfo) {
-		List<ScheduleInfo> scheduleInfos = ((SimpleTestScheduler)simpleTestScheduler).getSchedules();
+		List<ScheduleInfo> scheduleInfos = schedulerService.list();
 		scheduleInfos = scheduleInfos.stream().filter(s -> s.getScheduleName().
 				equals(scheduleInfo.getScheduleName())).
 				collect(Collectors.toList());
 
 		assertThat(scheduleInfos.size()).isEqualTo(1);
 		assertThat(scheduleInfos.get(0).getTaskDefinitionName()).isEqualTo(
-				scheduleInfo.getScheduleName());
+				scheduleInfo.getTaskDefinitionName());
 
 		for(String key: scheduleInfo.getScheduleProperties().keySet()) {
 			assertThat(scheduleInfos.get(0).getScheduleProperties().

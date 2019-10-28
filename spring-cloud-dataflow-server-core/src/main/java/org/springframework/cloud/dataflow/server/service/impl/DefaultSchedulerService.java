@@ -157,7 +157,7 @@ public class DefaultSchedulerService implements SchedulerService {
 			List<String> commandLineArgs) {
 		Assert.hasText(taskDefinitionName, "The provided taskName must not be null or empty.");
 		Assert.notNull(taskDeploymentProperties, "The provided taskDeploymentProperties must not be null.");
-		scheduleName = getSchedulePrefix(taskDefinitionName) + "-" + scheduleName;
+		scheduleName =  scheduleName + "-" + getSchedulePrefix(taskDefinitionName);
 		TaskDefinition taskDefinition = this.taskDefinitionRepository.findById(taskDefinitionName)
 				.orElseThrow(() -> new NoSuchTaskDefinitionException(taskDefinitionName));
 		TaskParser taskParser = new TaskParser(taskDefinition.getName(), taskDefinition.getDslText(), true, true);
@@ -274,7 +274,7 @@ public class DefaultSchedulerService implements SchedulerService {
 	public void unscheduleForTaskDefinition(String taskDefinitionName) {
 		String schedulePrefix = getSchedulePrefix(taskDefinitionName);
 		for(ScheduleInfo scheduleInfo : list()) {
-			if(scheduleInfo.getScheduleName().startsWith(schedulePrefix)) {
+			if(scheduleInfo.getScheduleName().endsWith(schedulePrefix)) {
 				unschedule(scheduleInfo.getScheduleName());
 			}
 		}
@@ -293,10 +293,10 @@ public class DefaultSchedulerService implements SchedulerService {
 	@Override
 	public List<ScheduleInfo> list(String taskDefinitionName) {
 		Launcher launcher = getDefaultLauncher();
-		List<ScheduleInfo> list = launcher.getScheduler().list();
+		List<ScheduleInfo> list = updateTaskDefinitionNames(launcher.getScheduler().list());
 		List<ScheduleInfo> result = new ArrayList<>();
 		for(ScheduleInfo scheduleInfo: list) {
-			if(scheduleInfo.getScheduleName().startsWith(getSchedulePrefix(taskDefinitionName))) {
+			if(scheduleInfo.getScheduleName().endsWith(getSchedulePrefix(taskDefinitionName))) {
 				result.add(scheduleInfo);
 			}
 		}
@@ -308,18 +308,32 @@ public class DefaultSchedulerService implements SchedulerService {
 		return taskConfigurationProperties.getScheduleNamePrefix() + taskDefinitionName;
 	}
 
+	private List<ScheduleInfo> updateTaskDefinitionNames(List<ScheduleInfo> scheduleInfos) {
+		int schedulerTagNameLength = taskConfigurationProperties.getScheduleNamePrefix().length();
+		for(ScheduleInfo scheduleInfo : scheduleInfos) {
+			int taskDefinitionNameOffset = scheduleInfo.getScheduleName().indexOf(
+					taskConfigurationProperties.getScheduleNamePrefix());
+			if(taskDefinitionNameOffset > -1) {
+				String taskDefinitionName = scheduleInfo.getScheduleName().substring(
+						taskDefinitionNameOffset + schedulerTagNameLength);
+					scheduleInfo.setTaskDefinitionName(taskDefinitionName);
+				}
+			}
+		return scheduleInfos;
+	}
+
 	@Override
 	public List<ScheduleInfo> list() {
 		Launcher launcher = getDefaultLauncher();
-		return limitScheduleInfoResultSize(launcher.getScheduler().list(),
-				this.schedulerServiceProperties.getMaxSchedulesReturned());
+		return updateTaskDefinitionNames(limitScheduleInfoResultSize(launcher.getScheduler().list(),
+				this.schedulerServiceProperties.getMaxSchedulesReturned()));
 	}
 
 	@Override
 	public ScheduleInfo getSchedule(String scheduleName) {
-		List<ScheduleInfo> result = list().stream()
+		List<ScheduleInfo> result = updateTaskDefinitionNames(list().stream()
 				.filter(scheduleInfo -> scheduleInfo.getScheduleName().equals(scheduleName))
-				.collect(Collectors.toList());
+				.collect(Collectors.toList()));
 		Assert.isTrue(!(result.size() > 1), "more than one schedule was returned for scheduleName, should only be one");
 		return result.size() > 0 ? result.get(0) : null;
 	}
