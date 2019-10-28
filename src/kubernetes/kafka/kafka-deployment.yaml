@@ -1,38 +1,37 @@
-apiVersion: apps/v1
+apiVersion: extensions/v1beta1
 kind: Deployment
 metadata:
   name: kafka-broker
   labels:
-    app: kafka-broker
+    app: kafka
     component: kafka-broker
 spec:
   replicas: 1
-  selector:
-    matchLabels:
-      app: kafka-broker
   template:
     metadata:
       labels:
-        app: kafka-broker
-        component: kafka-broker-c
+        app: kafka
+        component: kafka-broker
     spec:
       containers:
-      - name: kafka-broker
-        image: confluentinc/cp-kafka:5.3.1
+      - name: kafka
+        image: wurstmeister/kafka:2.12-2.3.0
         ports:
         - containerPort: 9092
         env:
-          - name: KAFKA_ADVERTISED_LISTENERS
-            value: PLAINTEXT://kafka-broker:9092
           - name: ENABLE_AUTO_EXTEND
             value: "true"
           - name: KAFKA_RESERVED_BROKER_MAX_ID
             value: "999999999"
+          - name: KAFKA_AUTO_CREATE_TOPICS_ENABLE
+            value: "false"
+          - name: KAFKA_PORT
+            value: "9092"
+          - name: KAFKA_ADVERTISED_PORT
+            value: "9092"
           - name: KAFKA_ADVERTISED_HOST_NAME
             valueFrom:
               fieldRef:
                 fieldPath: status.podIP
           - name: KAFKA_ZOOKEEPER_CONNECT
             value: kafka-zk:2181
-          - name: KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR
-            value: "1"
