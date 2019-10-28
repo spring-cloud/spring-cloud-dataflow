@@ -19,7 +19,6 @@ import java.util.List;
 
 import javax.sql.DataSource;
 
-import org.springframework.batch.core.configuration.support.MapJobRegistry;
 import org.springframework.batch.core.explore.JobExplorer;
 import org.springframework.batch.core.explore.support.JobExplorerFactoryBean;
 import org.springframework.batch.core.launch.support.SimpleJobLauncher;
@@ -203,7 +202,6 @@ public class TaskConfiguration {
 		SimpleJobServiceFactoryBean factoryBean = new SimpleJobServiceFactoryBean();
 		factoryBean.setDataSource(dataSource);
 		factoryBean.setJobRepository(repositoryFactoryBean.getObject());
-		factoryBean.setJobLocator(new MapJobRegistry());
 		factoryBean.setJobLauncher(new SimpleJobLauncher());
 		factoryBean.setDataSource(dataSource);
 		factoryBean.setJobExplorer(jobExplorer);

@@ -23,7 +23,6 @@ import java.util.Map;
 import javax.persistence.EntityManagerFactory;
 import javax.sql.DataSource;
 
-import org.springframework.batch.core.configuration.support.MapJobRegistry;
 import org.springframework.batch.core.explore.JobExplorer;
 import org.springframework.batch.core.explore.support.JobExplorerFactoryBean;
 import org.springframework.batch.core.launch.support.SimpleJobLauncher;
@@ -307,7 +306,6 @@ public class JobDependencies {
 		factoryBean.setDataSource(dataSource);
 		try {
 			factoryBean.setJobRepository(repositoryFactoryBean.getObject());
-			factoryBean.setJobLocator(new MapJobRegistry());
 			factoryBean.setJobLauncher(new SimpleJobLauncher());
 			factoryBean.setJobExplorer(jobExplorer);
 			factoryBean.setTransactionManager(dataSourceTransactionManager);
