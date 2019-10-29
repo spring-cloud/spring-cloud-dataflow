@@ -198,7 +198,7 @@ public class TaskSchedulerControllerTests {
 
 		assertEquals(
 				"{\"commandlineArguments\":[\"argument1=foo\",\"password=******\",\"--spring.cloud.scheduler.task.launcher.taskName=testDefinition\"],\"taskDefinitionName\":\"mySchedule-scdf-testDefinition\","
-						+ "\"taskDefinitionProperties\":{\"tasklauncher.app.testApp.prop1\":\"foo\",\"tasklauncher.app.testApp.prop2.secret\":\"******\"},"
+						+ "\"taskDefinitionProperties\":{\"tasklauncher.app.testApp.prop2.secret\":\"******\",\"tasklauncher.deployer.*.prop2.password\":\"******\",\"tasklauncher.app.testApp.prop1\":\"foo\",\"tasklauncher.deployer.*.prop1.secret\":\"******\"},"
 						+ "\"deploymentProperties\":{\"spring.cloud.deployer.prop1.secret\":\"******\",\"spring.cloud.deployer.prop2.password\":\"******\"}}",
 				auditData);
 	}
@@ -209,7 +209,7 @@ public class TaskSchedulerControllerTests {
 
 		assertEquals(
 				"{\"commandlineArguments\":[\"argument1=foo\",\"spring.profiles.active=k8s,master\",\"argument3=bar\",\"--spring.cloud.scheduler.task.launcher.taskName=testDefinition\"],\"taskDefinitionName\":\"mySchedule-scdf-testDefinition\","
-						+ "\"taskDefinitionProperties\":{\"tasklauncher.app.testApp.prop1\":\"foo\",\"tasklauncher.app.testApp.prop2.secret\":\"******\"},"
+						+ "\"taskDefinitionProperties\":{\"tasklauncher.app.testApp.prop2.secret\":\"******\",\"tasklauncher.deployer.*.prop2.password\":\"******\",\"tasklauncher.app.testApp.prop1\":\"foo\",\"tasklauncher.deployer.*.prop1.secret\":\"******\"},"
 						+ "\"deploymentProperties\":{\"spring.cloud.deployer.prop1.secret\":\"******\",\"spring.cloud.deployer.prop2.password\":\"******\"}}",
 				auditData);
 	}

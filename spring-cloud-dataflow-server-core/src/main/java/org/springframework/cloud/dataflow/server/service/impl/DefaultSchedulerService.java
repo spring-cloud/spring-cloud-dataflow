@@ -67,6 +67,7 @@ import org.springframework.util.StringUtils;
 public class DefaultSchedulerService implements SchedulerService {
 
 	private final static String APP_PREFIX = "app.";
+	private final static String DEPLOYER_PREFIX = "deployer.";
 	private final static String DATA_FLOW_URI_KEY = "spring.cloud.dataflow.client.serverUri";
 
 	private CommonApplicationProperties commonApplicationProperties;
@@ -177,15 +178,22 @@ public class DefaultSchedulerService implements SchedulerService {
 
 		Map<String, String> appProperties = new HashMap<>(commonApplicationProperties.getTask());
 		appProperties.putAll(
-				extractPropertiesByPrefix(taskDeploymentProperties));
+				extractPropertiesByPrefix(taskDeploymentProperties, APP_PREFIX));
+
+		Map<String, String> deployerProperties = new HashMap<>(commonApplicationProperties.getTask());
+		deployerProperties.putAll(
+				extractPropertiesByPrefix(taskDeploymentProperties, DEPLOYER_PREFIX));
 
 		Map<String, String> deployerDeploymentProperties = DeploymentPropertiesUtils
 				.extractAndQualifyDeployerProperties(taskDeploymentProperties, taskDefinition.getRegisteredAppName());
 		TaskServiceUtils.updateDataFlowUriIfNeeded(DATA_FLOW_URI_KEY, this.dataflowServerUri, appProperties, commandLineArgs);
 
+		appProperties = tagProperties(null, appProperties, APP_PREFIX);
+		deployerProperties = tagProperties(null, deployerProperties, DEPLOYER_PREFIX);
+		appProperties.putAll(deployerProperties);
 		AppDefinition revisedDefinition =
 				TaskServiceUtils.mergeAndExpandAppProperties(taskDefinition, metadataResource,
-						tagAppProperties(null, appProperties), whitelistProperties);
+						appProperties, whitelistProperties);
 		revisedDefinition = new AppDefinition(scheduleName,
 				cleanseTaskProperties(revisedDefinition.getProperties()));
 
@@ -200,13 +208,13 @@ public class DefaultSchedulerService implements SchedulerService {
 		this.auditRecordService.populateAndSaveAuditRecordUsingMapData(AuditOperationType.SCHEDULE, AuditActionType.CREATE,
 				scheduleRequest.getScheduleName(), this.auditServiceUtils.convertScheduleRequestToAuditData(scheduleRequest));
 	}
-	private static Map<String, String> extractPropertiesByPrefix(Map<String, String> taskDeploymentProperties) {
+	private static Map<String, String> extractPropertiesByPrefix(Map<String, String> taskDeploymentProperties, String prefix) {
 		return taskDeploymentProperties.entrySet().stream()
-				.filter(kv -> kv.getKey().startsWith(APP_PREFIX))
-				.collect(Collectors.toMap(kv -> kv.getKey().substring(APP_PREFIX.length()), kv -> kv.getValue()));
+				.filter(kv -> kv.getKey().startsWith(prefix))
+				.collect(Collectors.toMap(kv -> kv.getKey().substring(prefix.length()), kv -> kv.getValue()));
 	}
 
-	private Map<String, String> tagAppProperties(String appName, Map<String, String> appProperties) {
+	private Map<String, String> tagProperties(String appName, Map<String, String> appProperties, String prefix) {
 		Map<String, String> taggedAppProperties = new HashMap<>(appProperties.size());
 
 		for(String key : appProperties.keySet()) {
@@ -217,11 +225,11 @@ public class DefaultSchedulerService implements SchedulerService {
 			if (!key.startsWith(DATA_FLOW_URI_KEY)) {
 				if (StringUtils.hasText(appName)) {
 					updatedKey = taskConfigurationProperties.getTaskLauncherPrefix() +
-							APP_PREFIX + appName + "." + key;
+							prefix + appName + "." + key;
 				}
 				else {
 					updatedKey = taskConfigurationProperties.getTaskLauncherPrefix() +
-							APP_PREFIX + key;
+							prefix + key;
 				}
 			}
 			taggedAppProperties.put(updatedKey, appProperties.get(key));
