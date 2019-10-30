@@ -20,59 +20,60 @@
   </a>
 </p>
 
+*Spring Cloud Data Flow* is a microservices-based streaming and batch data processing pipelines in Cloud Foundry and
+Kubernetes.
 
-*Spring Cloud Data Flow* is a toolkit for building data integration and real-time data processing pipelines. 
-
-Pipelines consist of Spring Boot apps, built using the [Spring Cloud Stream](https://github.com/spring-cloud/spring-cloud-stream)
+Data processing pipelines consist of Spring Boot apps, built using the [Spring Cloud Stream](https://github.com/spring-cloud/spring-cloud-stream)
 or [Spring Cloud Task](https://github.com/spring-cloud/spring-cloud-task) microservice frameworks. 
 
-This makes Spring Cloud Data Flow suitable for a range of data processing use cases, from import/export to 
-event streaming and predictive analytics.
+This makes Spring Cloud Data Flow suitable for a range of data processing use cases, from import/export to event streaming
+and predictive analytics.
 
 ----
 
 ## Components
 
-The [Core](https://github.com/spring-cloud/spring-cloud-dataflow/tree/master/spring-cloud-dataflow-core)
-domain module includes the concept of a *stream* that is a composition of spring-cloud-stream
-modules in a linear pipeline from a *source* to a *sink*, optionally including *processor* application(s)
-in between. The domain also includes the concept of a *task*, which may be any process that does
-not run indefinitely, including [Spring Batch](https://github.com/spring-projects/spring-batch) jobs.
+**Architecture**: The Data Flow Server is a Spring Boot application that provides REST APIs, UI, and Java DSL.
+A single Data Flow Server instance can support deploying streams and tasks to Local, Cloud Foundry, and Kubernetes.
 
-The [App Registry](https://github.com/spring-cloud/spring-cloud-dataflow/tree/master/spring-cloud-dataflow-registry)
-maintains the set of available apps, and their mappings to URIs.
-For example, if relying on Maven coordinates, an app's URI would be of the format:
-`maven://<groupId>:<artifactId>:<version>`
+Familiarize yourself with the Spring Cloud Data Flow [architecture](https://dataflow.spring.io/docs/concepts/architecture/)
+and [feature capabilities](https://dataflow.spring.io/features/).
 
-The Data Flow Server is a Spring Boot application that provides a common REST API and UI.
-As of version 2.0 a single Data Flow Server supports deploying tasks to Local, Cloud Foundry, and Kubernetes.
-Also as of version 2.0, the Skipper Server is required for deploying streams to Local, Cloud Foundry and Kubernetes.
-The github locations for the Data Flow Server is:
+**Deployer SPI**: A Service Provide Interface (SPI) is defined in the [Spring Cloud Deployer](https://github.com/spring-cloud/spring-cloud-deployer)
+project. The SPI provides an abstraction layer for deploying the apps for a given streaming or batch data pipeline,
+and managing the application lifecycle.
 
-* https://github.com/spring-cloud/spring-cloud-dataflow/tree/master/spring-cloud-dataflow-server
-
-There are also community maintained *Spring Cloud Data Flow* implementations that are currently based on the 1.7.x series of Data Flow but will eventually get updated to the 2.0 baseline.
-
- * [HashiCorp Nomad](https://github.com/donovanmuller/spring-cloud-dataflow-server-nomad)
- * [OpenShift](https://github.com/donovanmuller/spring-cloud-dataflow-server-openshift)
- * [Apache Mesos](https://github.com/trustedchoice/spring-cloud-dataflow-server-mesos)
-
-The [Apache YARN](https://github.com/spring-cloud/spring-cloud-dataflow-server-yarn) implementation has reached end-of-line status. Let us know at [Gitter](https://gitter.im/spring-cloud/spring-cloud-dataflow) if youare interested in forking the project to continue developing and maintaining it.
-
-The deployer SPI mentioned above is defined within the [Spring Cloud Deployer](https://github.com/spring-cloud/spring-cloud-deployer)
-project. That provides an abstraction layer for deploying the apps of a given stream or task and managing their lifecycle.
-The github locations for the corresponding Spring Cloud Deployer SPI implementations are:
+Spring Cloud Deployer Implementations:
 
 * [Local](https://github.com/spring-cloud/spring-cloud-deployer-local)
 * [Cloud Foundry](https://github.com/spring-cloud/spring-cloud-deployer-cloudfoundry)
 * [Kubernetes](https://github.com/spring-cloud/spring-cloud-deployer-kubernetes)
 
+**Domain Model**: The Spring Cloud Data Flow [domain module](https://github.com/spring-cloud/spring-cloud-dataflow/tree/master/spring-cloud-dataflow-core)
+includes the concept of a *stream* that is a composition of Spring Cloud Stream applications in a linear data pipeline
+from a *source* to a *sink*, optionally including *processor* application(s) in between. The domain also includes the
+concept of a *task*, which may be any process that does not run indefinitely, including [Spring Batch](https://github.com/spring-projects/spring-batch)
+jobs.
 
-The [Shell](https://github.com/spring-cloud/spring-cloud-dataflow/tree/master/spring-cloud-dataflow-shell)
-connects to the Data Flow Server's REST API and supports a DSL that simplifies the process of
-defining a stream or task and managing its lifecycle.
+**Application Registry**: The [App Registry](https://github.com/spring-cloud/spring-cloud-dataflow/tree/master/spring-cloud-dataflow-registry)
+maintains the metadata of the catalog of reusable applications.
+For example, if relying on Maven coordinates, an application URI would be of the format:
+`maven://<groupId>:<artifactId>:<version>`.
 
-Instructions for running the Data Flow Server for each runtime environment can be found in their respective github repositories.
+**Shell/CLI**: The [Shell](https://github.com/spring-cloud/spring-cloud-dataflow/tree/master/spring-cloud-dataflow-shell)
+connects to the Data Flow Server's REST API and supports a DSL that simplifies the process of defining a stream or task
+and managing its lifecycle.
+
+**Community Implementations**: There are also community maintained Spring Cloud Data Flow implementations that are currently
+based on the 1.7.x series of Data Flow.
+
+ * [HashiCorp Nomad](https://github.com/donovanmuller/spring-cloud-dataflow-server-nomad)
+ * [OpenShift](https://github.com/donovanmuller/spring-cloud-dataflow-server-openshift)
+ * [Apache Mesos](https://github.com/trustedchoice/spring-cloud-dataflow-server-mesos)
+
+The [Apache YARN](https://github.com/spring-cloud/spring-cloud-dataflow-server-yarn) implementation has reached end-of-line
+status. Let us know at [Gitter](https://gitter.im/spring-cloud/spring-cloud-dataflow) if you are interested in forking
+the project to continue developing and maintaining it.
 
 ----
 
@@ -82,25 +83,22 @@ Clone the repo and type
 
     $ ./mvnw clean install 
 
-For more information on building, see this [link](https://github.com/spring-cloud/spring-cloud-dataflow/blob/master/spring-cloud-dataflow-docs/src/main/asciidoc/appendix-building.adoc).
+Looking for more information? Follow this [link](https://github.com/spring-cloud/spring-cloud-dataflow/blob/master/spring-cloud-dataflow-docs/src/main/asciidoc/appendix-building.adoc).
 
 ### Building on Windows
 
-When using Git on Windows to check out the project, it is important to handle line-endings correctly during checkouts. By default Git will change the line-endings during checkout to `CRLF`. This is, however, not desired for _Spring Cloud Data Flow_ as this may lead to test failures under Windows.
+When using Git on Windows to check out the project, it is important to handle line-endings correctly during checkouts.
+By default Git will change the line-endings during checkout to `CRLF`. This is, however, not desired for _Spring Cloud Data Flow_
+as this may lead to test failures under Windows.
 
-Therefore, please ensure that you set Git property `core.autocrlf` to `false`, e.g. using: `$ git config core.autocrlf false`. Fore more information please refer to the [Git documentation, Formatting and Whitespace](https://git-scm.com/book/en/v2/Customizing-Git-Git-Configuration).
+Therefore, please ensure that you set Git property `core.autocrlf` to `false`, e.g. using: `$ git config core.autocrlf false`.
+Fore more information please refer to the [Git documentation, Formatting and Whitespace](https://git-scm.com/book/en/v2/Customizing-Git-Git-Configuration).
 
 ----
 
 ## Contributing
 
 We welcome contributions! Follow this [link](https://github.com/spring-cloud/spring-cloud-dataflow/blob/master/spring-cloud-dataflow-docs/src/main/asciidoc/appendix-contributing.adoc) for more information on how to contribute.
-
-----
-
-## Reporting Issues
-
-When reporting problems, it'd be helpful if the bug report includes the details listed on this [wiki-article](https://github.com/spring-cloud/spring-cloud-dataflow/wiki/Reporting-Issues). 
 
 ----
 
