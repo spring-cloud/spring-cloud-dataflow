@@ -269,6 +269,10 @@ These properties are also used when configuring the <<configuration-kubernetes-t
 |A custom image name to use for the StatefulSet Init Container
 |<none>
 
+|initContainer
+|An Init Container experessed in YAML format to be applied to a pod. e.g. ```{containerName: 'test', imageName: 'busybox:latest', commands: ['sh', '-c', 'echo hello']}```
+|<none>
+
 |===
 
 [[configuration-kubernetes-tasks]]

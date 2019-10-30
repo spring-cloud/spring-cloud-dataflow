@@ -901,3 +901,18 @@ data:
 
 Replacing the `statefulSetInitContainerImageName` attribute with the appropriate value for your environment.
 
+==== Init Containers
+
+When applications are deployed, a custom Init Container can be set on a per application basis.
+Refer to the https://kubernetes.io/docs/concepts/workloads/pods/init-containers/[Init Containers] section of the Kubernetes reference for more information.
+
+The following example shows how you can configure an Init Container for an application:
+
+====
+[source,options=nowrap]
+----
+deployer.<app>.kubernetes.initContainer={containerName: 'test', imageName: 'busybox:latest', commands: ['sh', '-c', 'echo hello']}
+----
+====
+
+Replace `<app>` with the name of your application and set the values of the `initContainer` attributes appropriate for your Init Container.
