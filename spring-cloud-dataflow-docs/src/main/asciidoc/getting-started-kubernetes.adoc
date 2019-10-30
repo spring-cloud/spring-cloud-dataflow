@@ -843,3 +843,61 @@ deployer.<app>.kubernetes.servicePorts=5000,9000
 
 Replace `<app>` with the name of your application and the value of your port(s).
 
+==== StatefulSet Init Container
+
+When deploying an application using a StatefulSet, an Init Container is used to set the instance index into the pod.
+By default the image used is `busybox`, which can be customized if needed.
+
+The following example shows how you can individually configure application pods:
+
+====
+[source,options=nowrap]
+----
+deployer.<app>.kubernetes.statefulSetInitContainerImageName=myimage:mylabel
+----
+====
+
+Replace `<app>` with the name of your application and the `statefulSetInitContainerImageName` attribute with the appropriate value for your environment.
+
+You can configure the StatefulSet Init Container at the global server level as well.
+
+The following example shows how to do so for streams. Edit the appropriate `skipper-config-(binder).yaml`, replacing `(binder)` with the corresponding binder in use:
+
+====
+[source,yaml]
+----
+data:
+  application.yaml: |-
+    spring:
+      cloud:
+        skipper:
+          server:
+            platform:
+              kubernetes:
+                accounts:
+                  default:
+                    statefulSetInitContainerImageName: myimage:mylabel
+----
+====
+
+The following example shows how to do so for tasks by editing the `server-config.yaml` file:
+
+====
+[source,yaml]
+----
+data:
+  application.yaml: |-
+    spring:
+      cloud:
+        dataflow:
+          task:
+            platform:
+              kubernetes:
+                accounts:
+                  default:
+                    statefulSetInitContainerImageName: myimage:mylabel
+----
+====
+
+Replacing the `statefulSetInitContainerImageName` attribute with the appropriate value for your environment.
+
