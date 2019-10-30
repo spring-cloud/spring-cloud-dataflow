@@ -53,6 +53,8 @@ import org.springframework.cloud.dataflow.server.repository.TaskExecutionMissing
 import org.springframework.cloud.dataflow.server.service.TaskExecutionCreationService;
 import org.springframework.cloud.dataflow.server.service.TaskExecutionInfoService;
 import org.springframework.cloud.dataflow.server.service.TaskExecutionService;
+import org.springframework.cloud.dataflow.server.service.impl.diff.TaskAnalysisReport;
+import org.springframework.cloud.dataflow.server.service.impl.diff.TaskAnalyzer;
 import org.springframework.cloud.deployer.spi.core.AppDeploymentRequest;
 import org.springframework.cloud.deployer.spi.task.TaskLauncher;
 import org.springframework.cloud.task.repository.TaskExecution;
@@ -124,6 +126,8 @@ public class DefaultTaskExecutionService implements TaskExecutionService {
 
 	private final Map<String, List<String>> tasksBeingUpgraded = new ConcurrentHashMap<>();
 
+	private final TaskAnalyzer taskAnalyzer = new TaskAnalyzer();
+
 	/**
 	 * Initializes the {@link DefaultTaskExecutionService}.
 	 *
@@ -172,25 +176,27 @@ public class DefaultTaskExecutionService implements TaskExecutionService {
 	@Override
 	public long executeTask(String taskName, Map<String, String> taskDeploymentProperties, List<String> commandLineArgs,
 			String composedTaskRunnerName) {
-
+		// Get platform name and fallback to 'default'
 		String platformName = getPlatform(taskDeploymentProperties);
 
+		// Naive local state to prevent parallel launches to break things up
 		if(this.tasksBeingUpgraded.containsKey(taskName)) {
 			List<String> platforms = this.tasksBeingUpgraded.get(taskName);
 			if(platforms.contains(platformName)) {
-				throw new IllegalStateException(String.format("Unable to launch %s on platform %s because it is being upgraded", taskName, platformName));
+				throw new IllegalStateException(String.format(
+						"Unable to launch %s on platform %s because it is being upgraded", taskName, platformName));
 			}
 		}
 
-		// Remove since the key for task platform name will not pass validation for app, deployer, or scheduler prefix
+		// Remove since the key for task platform name will not pass validation for app,
+		// deployer, or scheduler prefix.
+		// Then validate
 		if (taskDeploymentProperties.containsKey(TASK_PLATFORM_NAME)) {
 			taskDeploymentProperties.remove(TASK_PLATFORM_NAME);
 		}
-
 		DeploymentPropertiesUtils.validateDeploymentProperties(taskDeploymentProperties);
 
-		TaskLauncher taskLauncher = findTaskLauncher(platformName);
-
+		// TODO: Same task name can only exist in one platform, um why?
 		TaskDeployment existingTaskDeployment = taskDeploymentRepository
 				.findTopByTaskDefinitionNameOrderByCreatedOnAsc(taskName);
 		if (existingTaskDeployment != null) {
@@ -202,53 +208,54 @@ public class DefaultTaskExecutionService implements TaskExecutionService {
 			}
 		}
 
+		// Build execution info and stash deploy props there
 		TaskExecutionInformation taskExecutionInformation = taskExecutionInfoService
 				.findTaskExecutionInformation(taskName, taskDeploymentProperties, composedTaskRunnerName);
-
 		if (taskExecutionInformation.isComposed()) {
 			handleAccessToken(commandLineArgs, taskExecutionInformation);
 		}
 
+		// Build app deploy request and stash deploy props there
 		TaskExecution taskExecution = taskExecutionRepositoryService.createTaskExecution(taskName);
-
 		AppDeploymentRequest appDeploymentRequest = this.taskAppDeploymentRequestCreator.
 				createRequest(taskExecution, taskExecutionInformation, commandLineArgs, platformName);
 
+		// Come up with existing and new manifests, analyze difference and update
+		// new new manifest accordingly.
 		TaskManifest taskManifest = createTaskManifest(platformName, taskExecutionInformation, appDeploymentRequest);
-
 		TaskManifest previousManifest = this.dataflowTaskExecutionMetadataDao.getLatestManifest(taskName);
 
-		if(taskDeploymentProperties.isEmpty()) {
-			if(previousManifest != null && !previousManifest.getTaskDeploymentRequest().getDeploymentProperties().equals(taskDeploymentProperties)) {
-				appDeploymentRequest = updateDeploymentProperties(commandLineArgs, platformName, taskExecutionInformation, taskExecution, previousManifest);
+		// Analysing task to know what to bring forward from existing
+		TaskAnalysisReport report = taskAnalyzer.analyze(previousManifest, taskManifest);
+		logger.debug("Task analysis report {}", report);
 
-				taskDeploymentProperties = previousManifest.getTaskDeploymentRequest().getDeploymentProperties();
-			}
-		}
+		// We now have a new props and args what should really get used.
+		Map<String, String> mergedTaskDeploymentProperties = report.getMergedDeploymentProperties();
+		List<String> mergedCommandLineArguments = report.getMergedCommandLineArguments();
+
+		taskExecutionInformation.setTaskDeploymentProperties(mergedTaskDeploymentProperties);
+		appDeploymentRequest = updateDeploymentProperties(mergedCommandLineArguments, platformName, taskExecutionInformation,
+				taskExecution, mergedTaskDeploymentProperties);
+		taskDeploymentProperties = mergedTaskDeploymentProperties;
 
 		AppDeploymentRequest request = new AppDeploymentRequest(appDeploymentRequest.getDefinition(),
 				appDeploymentRequest.getResource(),
-				taskDeploymentProperties,
+				mergedTaskDeploymentProperties,
 				appDeploymentRequest.getCommandlineArguments());
 
 		taskManifest.setTaskDeploymentRequest(request);
 
 		String taskDeploymentId = null;
-
 		try {
+			TaskLauncher taskLauncher = findTaskLauncher(platformName);
 			if(!isAppDeploymentSame(previousManifest, taskManifest)) {
-
 				validateAndLockUpgrade(taskName, platformName, taskExecution);
-
 				logger.debug("Deleting %s and all related resources from the platform", taskName);
 				taskLauncher.destroy(taskName);
-
 			}
 
 			this.dataflowTaskExecutionMetadataDao.save(taskExecution, taskManifest);
-
 			taskDeploymentId = taskLauncher.launch(appDeploymentRequest);
-
 			saveExternalExecutionId(taskExecution, taskDeploymentId);
 		}
 		finally {
@@ -273,7 +280,8 @@ public class DefaultTaskExecutionService implements TaskExecutionService {
 				taskExecutionInformation.getTaskDefinition().getName(),
 				getAudited(taskExecutionInformation.getTaskDefinition(),
 						taskExecutionInformation.getTaskDeploymentProperties(),
-						appDeploymentRequest.getCommandlineArguments()));
+						request.getCommandlineArguments()
+						));
 
 		return taskExecution.getExecutionId();
 	}
@@ -339,7 +347,10 @@ public class DefaultTaskExecutionService implements TaskExecutionService {
 	 * @param previousManifest manifest from the last execution of the same task definition
 	 * @return an updated {@code AppDeploymentRequest}
 	 */
-	private AppDeploymentRequest updateDeploymentProperties(List<String> commandLineArgs, String platformName, TaskExecutionInformation taskExecutionInformation, TaskExecution taskExecution, TaskManifest previousManifest) {
+	// private AppDeploymentRequest updateDeploymentProperties(List<String> commandLineArgs, String platformName, TaskExecutionInformation taskExecutionInformation, TaskExecution taskExecution, TaskManifest previousManifest) {
+	private AppDeploymentRequest updateDeploymentProperties(List<String> commandLineArgs, String platformName,
+			TaskExecutionInformation taskExecutionInformation, TaskExecution taskExecution,
+			Map<String, String> deploymentProperties) {
 		AppDeploymentRequest appDeploymentRequest;
 		TaskExecutionInformation info = new TaskExecutionInformation();
 		info.setTaskDefinition(taskExecutionInformation.getTaskDefinition());
@@ -347,7 +358,8 @@ public class DefaultTaskExecutionService implements TaskExecutionService {
 		info.setComposed(taskExecutionInformation.isComposed());
 		info.setMetadataResource(taskExecutionInformation.getMetadataResource());
 		info.setOriginalTaskDefinition(taskExecutionInformation.getOriginalTaskDefinition());
-		info.setTaskDeploymentProperties(previousManifest.getTaskDeploymentRequest().getDeploymentProperties());
+		// info.setTaskDeploymentProperties(previousManifest.getTaskDeploymentRequest().getDeploymentProperties());
+		info.setTaskDeploymentProperties(deploymentProperties);
 
 		appDeploymentRequest = this.taskAppDeploymentRequestCreator.
 				createRequest(taskExecution, info, commandLineArgs, platformName);
@@ -394,7 +406,8 @@ public class DefaultTaskExecutionService implements TaskExecutionService {
 	 * @param appDeploymentRequest the details about the deployment to be executed
 	 * @return {@code TaskManifest}
 	 */
-	private TaskManifest createTaskManifest(String platformName, TaskExecutionInformation taskExecutionInformation, AppDeploymentRequest appDeploymentRequest) {
+	private TaskManifest createTaskManifest(String platformName, TaskExecutionInformation taskExecutionInformation,
+			AppDeploymentRequest appDeploymentRequest) {
 		TaskManifest taskManifest = new TaskManifest();
 		taskManifest.setPlatformName(platformName);
 		String composedTaskDsl = taskExecutionInformation.getTaskDefinition().getProperties().get("graph");

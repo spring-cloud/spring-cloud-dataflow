@@ -26,7 +26,6 @@ import org.slf4j.LoggerFactory;
 
 import org.springframework.cloud.dataflow.configuration.metadata.ApplicationConfigurationMetadataResolver;
 import org.springframework.cloud.dataflow.core.TaskDefinition;
-import org.springframework.cloud.dataflow.rest.util.DeploymentPropertiesUtils;
 import org.springframework.cloud.dataflow.server.config.apps.CommonApplicationProperties;
 import org.springframework.cloud.dataflow.server.controller.WhitelistProperties;
 import org.springframework.cloud.deployer.spi.core.AppDefinition;
@@ -96,9 +95,9 @@ public class TaskAppDeploymentRequestCreator {
 						taskExecutionInformation.isComposed()? "composed-task-runner" : registeredAppName,
 						taskExecutionInformation.getTaskDeploymentProperties()));
 
-		Map<String, String> deployerDeploymentProperties = DeploymentPropertiesUtils
-				.extractAndQualifyDeployerProperties(taskExecutionInformation.getTaskDeploymentProperties(),
-						taskExecutionInformation.isComposed()? "composed-task-runner" : registeredAppName);
+		// Need to keep all properties around, not just 'deployer.*'
+		// as those are a source to restore app specific props
+		Map<String, String> deployerDeploymentProperties = taskExecutionInformation.getTaskDeploymentProperties();
 		if (StringUtils.hasText(this.dataflowServerUri) && taskExecutionInformation.isComposed()) {
 			TaskServiceUtils.updateDataFlowUriIfNeeded(this.dataflowServerUri, appDeploymentProperties,
 					commandLineArgs);
