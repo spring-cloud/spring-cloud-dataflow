@@ -657,6 +657,10 @@ SPRING_CLOUD_DATAFLOW_TASK_PLATFORM_CLOUDFOUNDRY_ACCOUNTS[default]_CONNECTION_DO
 SPRING_CLOUD_DATAFLOW_TASK_PLATFORM_CLOUDFOUNDRY_ACCOUNTS[default]_CONNECTION_USERNAME=
 SPRING_CLOUD_DATAFLOW_TASK_PLATFORM_CLOUDFOUNDRY_ACCOUNTS[default]_CONNECTION_PASSWORD
 
+# The identity provider to be used when accessing the Cloud Foundry API (optional).
+# The passed string has to be a URL-Encoded JSON Object, containing the field origin with value as origin_key of an identity provider - for example, {"origin":"uaa"}
+SPRING_CLOUD_DATAFLOW_TASK_PLATFORM_CLOUDFOUNDRY_ACCOUNTS[default]_CONNECTION_LOGIN_HINT=
+
 # Whether to allow self-signed certificates during SSL validation (you should NOT do so in production)
 SPRING_CLOUD_DATAFLOW_TASK_PLATFORM_CLOUDFOUNDRY_ACCOUNTS[default]_CONNECTION_SKIP_SSL_VALIDATION
 
