@@ -20,27 +20,28 @@
   </a>
 </p>
 
-*Spring Cloud Data Flow* is a microservices-based streaming and batch data processing pipelines in Cloud Foundry and
-Kubernetes.
+*Spring Cloud Data Flow* is a microservices-based toolkit for building streaming and batch data processing pipelines in
+Cloud Foundry and Kubernetes.
 
 Data processing pipelines consist of Spring Boot apps, built using the [Spring Cloud Stream](https://github.com/spring-cloud/spring-cloud-stream)
 or [Spring Cloud Task](https://github.com/spring-cloud/spring-cloud-task) microservice frameworks. 
 
-This makes Spring Cloud Data Flow suitable for a range of data processing use cases, from import/export to event streaming
+This makes Spring Cloud Data Flow ideal for a range of data processing use cases, from import/export to event streaming
 and predictive analytics.
 
 ----
 
 ## Components
 
-**Architecture**: The Data Flow Server is a Spring Boot application that provides REST APIs, UI, and Java DSL.
-A single Data Flow Server instance can support deploying streams and tasks to Local, Cloud Foundry, and Kubernetes.
+**Architecture**: The Data Flow Server is a Spring Boot application that provides RESTful API and REST clients (Shell,
+Dashboard, Java DSL).
+A single Data Flow Server installation can support deploying streams and tasks to Local, Cloud Foundry, and Kubernetes.
 
 Familiarize yourself with the Spring Cloud Data Flow [architecture](https://dataflow.spring.io/docs/concepts/architecture/)
 and [feature capabilities](https://dataflow.spring.io/features/).
 
-**Deployer SPI**: A Service Provide Interface (SPI) is defined in the [Spring Cloud Deployer](https://github.com/spring-cloud/spring-cloud-deployer)
-project. The SPI provides an abstraction layer for deploying the apps for a given streaming or batch data pipeline,
+**Deployer SPI**: A Service Provider Interface (SPI) is defined in the [Spring Cloud Deployer](https://github.com/spring-cloud/spring-cloud-deployer)
+project. The Deployer SPI provides an abstraction layer for deploying the apps for a given streaming or batch data pipeline,
 and managing the application lifecycle.
 
 Spring Cloud Deployer Implementations:
