@@ -37,6 +37,8 @@ public class CloudFoundryPlatformTokenProvider {
 		CloudFoundryConnectionProperties connectionProperties = platformProperties.accountProperties(account).getConnection();
 		return PasswordGrantTokenProvider.builder()
 			.username(connectionProperties.getUsername())
-			.password(connectionProperties.getPassword()).build();
+			.password(connectionProperties.getPassword())
+			.loginHint(connectionProperties.getLoginHint())
+			.build();
 	}
 }
