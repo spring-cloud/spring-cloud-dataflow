@@ -68,6 +68,7 @@ public class DefaultSchedulerService implements SchedulerService {
 
 	private final static String APP_PREFIX = "app.";
 	private final static String DEPLOYER_PREFIX = "deployer.";
+	private final static String COMMAND_ARGUMENT_PREFIX = "cmdarg.";
 	private final static String DATA_FLOW_URI_KEY = "spring.cloud.dataflow.client.serverUri";
 
 	private CommonApplicationProperties commonApplicationProperties;
@@ -199,7 +200,7 @@ public class DefaultSchedulerService implements SchedulerService {
 
 		DeploymentPropertiesUtils.validateDeploymentProperties(taskDeploymentProperties);
 		taskDeploymentProperties = extractAndQualifySchedulerProperties(taskDeploymentProperties);
-		List<String> revisedCommandLineArgs = new ArrayList<>(commandLineArgs);
+		List<String> revisedCommandLineArgs = tagCommandLineArgs(new ArrayList<>(commandLineArgs));
 		revisedCommandLineArgs.add("--spring.cloud.scheduler.task.launcher.taskName=" + taskDefinitionName);
 		ScheduleRequest scheduleRequest = new ScheduleRequest(revisedDefinition, taskDeploymentProperties,
 				deployerDeploymentProperties, revisedCommandLineArgs, scheduleName, getTaskLauncherResource());
@@ -212,6 +213,23 @@ public class DefaultSchedulerService implements SchedulerService {
 		return taskDeploymentProperties.entrySet().stream()
 				.filter(kv -> kv.getKey().startsWith(prefix))
 				.collect(Collectors.toMap(kv -> kv.getKey().substring(prefix.length()), kv -> kv.getValue()));
+	}
+
+	private List<String> tagCommandLineArgs(List<String> args) {
+		List<String> taggedArgs = new ArrayList<>();
+
+		for(String arg : args) {
+			if(arg.contains("spring.cloud.task.name")) {
+				continue;
+			}
+			String updatedArg = arg;
+			if (!arg.startsWith(DATA_FLOW_URI_KEY) && !"--".concat(arg).startsWith(DATA_FLOW_URI_KEY)) {
+					updatedArg = COMMAND_ARGUMENT_PREFIX +
+							taskConfigurationProperties.getTaskLauncherPrefix() + "." + arg;
+			}
+			taggedArgs.add(updatedArg);
+		}
+		return taggedArgs;
 	}
 
 	private Map<String, String> tagProperties(String appName, Map<String, String> appProperties, String prefix) {
