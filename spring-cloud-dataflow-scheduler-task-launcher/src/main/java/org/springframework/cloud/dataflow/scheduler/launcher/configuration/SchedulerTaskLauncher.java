@@ -46,6 +46,8 @@ public class SchedulerTaskLauncher {
 
 	static final String TASK_PLATFORM_NAME = "spring.cloud.dataflow.task.platformName";
 
+	public final static String COMMAND_ARGUMENT_PREFIX = "cmdarg";
+
 	private static final Log log = LogFactory.getLog(SchedulerTaskLauncher.class);
 
 	private final String taskName;
@@ -76,13 +78,27 @@ public class SchedulerTaskLauncher {
 
 	public void launchTask(String... args) {
 		verifyTaskPlatform(this.taskOperations);
+		List<String> argList = extractLaunchArgs(args);
 		try {
 			log.info(String.format("Launching Task %s on the %s platform.", this.taskName, this.platformName));
-			this.taskOperations.launch(this.taskName, enrichDeploymentProperties(getDeploymentProperties()), Arrays.asList(args), null);
+			this.taskOperations.launch(this.taskName, enrichDeploymentProperties(getDeploymentProperties()), argList, null);
 		}
 		catch (DataFlowClientException e) {
 			throw new SchedulerTaskLauncherException(e);
 		}
+	}
+
+	private List<String> extractLaunchArgs(String... args) {
+		List<String> result = new ArrayList<>();
+		for(String arg : args) {
+			String prefix = COMMAND_ARGUMENT_PREFIX + "." +
+					this.schedulerTaskLauncherProperties.getTaskLauncherPropertyPrefix() + ".";
+
+			if (arg.startsWith(prefix)) {
+				result.add(arg.substring(prefix.length()));
+			}
+		}
+		return result;
 	}
 
 	private Map<String, String> enrichDeploymentProperties(Map<String, String> deploymentProperties) {

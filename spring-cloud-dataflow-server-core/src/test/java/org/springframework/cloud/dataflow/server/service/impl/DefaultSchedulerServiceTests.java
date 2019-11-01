@@ -291,8 +291,8 @@ public class DefaultSchedulerServiceTests {
 
 		assertNotNull("Command line arguments should not be null", commandLineArguments);
 		assertEquals("Invalid number of command line arguments", 3, commandLineArguments.size());
-		assertEquals("Invalid command line argument", "--myArg1", commandLineArguments.get(0));
-		assertEquals("Invalid command line argument", "--myArg2", commandLineArguments.get(1));
+		assertEquals("Invalid command line argument", "cmdarg.tasklauncher.--myArg1", commandLineArguments.get(0));
+		assertEquals("Invalid command line argument", "cmdarg.tasklauncher.--myArg2", commandLineArguments.get(1));
 		assertEquals("Missing task name", "--spring.cloud.scheduler.task.launcher.taskName=myTaskDefinition",commandLineArguments.get(2));
 	}
 

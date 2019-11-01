@@ -18,6 +18,7 @@ package org.springframework.cloud.dataflow.scheduler.launcher;
 
 
 import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 
 import org.junit.Assert;
@@ -129,6 +130,22 @@ public class SchedulerTaskLauncherTests {
 		verify(this.taskOperations, times(1)).launch(Mockito.any(), argument.capture(), Mockito.any(), Mockito.any());
 		Assert.assertTrue(argument.getValue().containsKey(propertyPrefix));
 		Assert.assertEquals("YYYY", argument.getValue().get(propertyPrefix));
+	}
+
+	@Test
+	public void testValidWithArgs() {
+		SchedulerTaskLauncherProperties schedulerTaskLauncherProperties = new SchedulerTaskLauncherProperties();
+		final String argPrefix = SchedulerTaskLauncher.COMMAND_ARGUMENT_PREFIX + "." +
+				schedulerTaskLauncherProperties.getTaskLauncherPropertyPrefix() + ".";
+		final String baseArg = "app.timestamp.timestamp=YYYY";
+		final String arg =  argPrefix + baseArg;
+		final ArgumentCaptor<List> argument = ArgumentCaptor.forClass(List.class);
+		MockEnvironment mockEnvironment = new MockEnvironment();
+		SchedulerTaskLauncher schedulerTaskLauncher = getSchedulerTaskLauncher(schedulerTaskLauncherProperties, mockEnvironment);
+
+		schedulerTaskLauncher.launchTask(arg);
+		verify(this.taskOperations, times(1)).launch(Mockito.any(), Mockito.any(), argument.capture(), Mockito.any());
+		Assert.assertTrue(argument.getValue().contains(baseArg));
 	}
 
 	private SchedulerTaskLauncher getSchedulerTaskLauncher(SchedulerTaskLauncherProperties schedulerTaskLauncherProperties,
