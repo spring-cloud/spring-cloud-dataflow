@@ -22,7 +22,6 @@ import javax.sql.DataSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import org.springframework.batch.core.configuration.JobLocator;
 import org.springframework.batch.core.configuration.ListableJobLocator;
 import org.springframework.batch.core.explore.JobExplorer;
 import org.springframework.batch.core.jsr.JsrJobParametersConverter;
@@ -50,8 +49,8 @@ import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
 /**
- * A factory for a {@link JobService} that makes the configuration of its
- * various ingredients as convenient as possible.
+ * A factory for a {@link JobService} that makes the configuration of its various
+ * ingredients as convenient as possible.
  *
  * @author Dave Syer
  *
@@ -91,9 +90,8 @@ public class SimpleJobServiceFactoryBean implements FactoryBean<JobService>, Ini
 	}
 
 	/**
-	 * A special handler for large objects. The default is usually fine, except
-	 * for some (usually older) versions of Oracle. The default is determined
-	 * from the data base type.
+	 * A special handler for large objects. The default is usually fine, except for some
+	 * (usually older) versions of Oracle. The default is determined from the data base type.
 	 *
 	 * @param lobHandler the {@link LobHandler} to set
 	 *
@@ -104,14 +102,12 @@ public class SimpleJobServiceFactoryBean implements FactoryBean<JobService>, Ini
 	}
 
 	/**
-	 * Public setter for the length of long string columns in database. Do not
-	 * set this if you haven't modified the schema. Note this value will be used
-	 * for the exit message in both {@link JdbcJobExecutionDao} and
-	 * {@link JdbcStepExecutionDao} and also the short version of the execution
-	 * context in {@link JdbcExecutionContextDao} . For databases with
-	 * multi-byte character sets this number can be smaller (by up to a factor
-	 * of 2 for 2-byte characters) than the declaration of the column length in
-	 * the DDL for the tables.
+	 * Public setter for the length of long string columns in database. Do not set this if you
+	 * haven't modified the schema. Note this value will be used for the exit message in both
+	 * {@link JdbcJobExecutionDao} and {@link JdbcStepExecutionDao} and also the short version
+	 * of the execution context in {@link JdbcExecutionContextDao} . For databases with
+	 * multi-byte character sets this number can be smaller (by up to a factor of 2 for 2-byte
+	 * characters) than the declaration of the column length in the DDL for the tables.
 	 *
 	 * @param maxVarCharLength the exitMessageLength to set
 	 */
@@ -129,8 +125,7 @@ public class SimpleJobServiceFactoryBean implements FactoryBean<JobService>, Ini
 
 	/**
 	 * Sets the database type.
-	 * @param dbType as specified by
-	 * {@link DefaultDataFieldMaxValueIncrementerFactory}
+	 * @param dbType as specified by {@link DefaultDataFieldMaxValueIncrementerFactory}
 	 */
 	public void setDatabaseType(String dbType) {
 		this.databaseType = dbType;
@@ -145,8 +140,8 @@ public class SimpleJobServiceFactoryBean implements FactoryBean<JobService>, Ini
 	}
 
 	/**
-	 * A factory for incrementers (used to build primary keys for meta data).
-	 * Defaults to {@link DefaultDataFieldMaxValueIncrementerFactory}.
+	 * A factory for incrementers (used to build primary keys for meta data). Defaults to
+	 * {@link DefaultDataFieldMaxValueIncrementerFactory}.
 	 * @param incrementerFactory the incrementer factory to set
 	 */
 	public void setIncrementerFactory(DataFieldMaxValueIncrementerFactory incrementerFactory) {
@@ -175,18 +170,9 @@ public class SimpleJobServiceFactoryBean implements FactoryBean<JobService>, Ini
 	}
 
 	/**
-	 * A registry that can be used to locate jobs to run.
-	 * @param jobLocator a {@link JobLocator}
-	 */
-	public void setJobLocator(ListableJobLocator jobLocator) {
-		this.jobLocator = jobLocator;
-	}
-
-	/**
 	 * A custom implementation of the {@link ExecutionContextSerializer}.
 	 *
-	 * @param serializer
-	 *            the serializer to set
+	 * @param serializer the serializer to set
 	 * @see ExecutionContextSerializer
 	 */
 	public void setSerializer(ExecutionContextSerializer serializer) {
@@ -198,7 +184,6 @@ public class SimpleJobServiceFactoryBean implements FactoryBean<JobService>, Ini
 
 		Assert.notNull(dataSource, "DataSource must not be null.");
 		Assert.notNull(jobRepository, "JobRepository must not be null.");
-		Assert.notNull(jobLocator, "JobLocator must not be null.");
 		Assert.notNull(jobLauncher, "JobLauncher must not be null.");
 		Assert.notNull(jobExplorer, "JobExplorer must not be null.");
 
@@ -293,10 +278,11 @@ public class SimpleJobServiceFactoryBean implements FactoryBean<JobService>, Ini
 	public JobService getObject() throws Exception {
 		JsrJobParametersConverter jobParametersConverter = new JsrJobParametersConverter(dataSource);
 		jobParametersConverter.afterPropertiesSet();
-		JsrJobOperator jsrJobOperator = new JsrJobOperator(jobExplorer, jobRepository, jobParametersConverter, transactionManager);
+		JsrJobOperator jsrJobOperator = new JsrJobOperator(jobExplorer, jobRepository, jobParametersConverter,
+				transactionManager);
 		jsrJobOperator.afterPropertiesSet();
 		return new SimpleJobService(createJobInstanceDao(), createJobExecutionDao(), createStepExecutionDao(),
-				jobRepository, jobLauncher, jobLocator, createExecutionContextDao(), jsrJobOperator);
+				jobRepository, createExecutionContextDao(), jsrJobOperator);
 	}
 
 	/**

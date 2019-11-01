@@ -41,6 +41,15 @@ import org.springframework.data.domain.Pageable;
 public interface StreamService {
 
 	/**
+	 * Scale application instances in a deployed stream.
+	 * @param streamName the name of an existing stream definition (required)
+	 * @param appName in stream application name to scale (required)
+	 * @param count number of instances for the selected stream application (required)
+	 * @param properties scale deployment specific properties (optional)
+	 */
+	void scaleApplicationInstances(String streamName, String appName, int count, Map<String, String> properties);
+
+	/**
 	 * Update the stream using the UpdateStreamRequest.
 	 *
 	 * @param streamName the name of the stream to update

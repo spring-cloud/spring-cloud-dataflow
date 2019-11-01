@@ -65,8 +65,6 @@ import org.springframework.cloud.skipper.domain.SpringCloudDeployerApplicationSp
 import org.springframework.cloud.skipper.domain.Status;
 import org.springframework.cloud.skipper.domain.StatusCode;
 import org.springframework.cloud.skipper.domain.UploadRequest;
-import org.springframework.hateoas.CollectionModel;
-import org.springframework.hateoas.Link;
 import org.springframework.http.MediaType;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.annotation.DirtiesContext.ClassMode;
@@ -146,10 +144,9 @@ public class StreamControllerTests {
 		when(skipperClient.status(anyString())).thenReturn(streamStatusInfo);
 
 		Deployer deployer = new Deployer("default", "local", mock(AppDeployer.class));
-		when(skipperClient.listDeployers()).thenReturn(new CollectionModel<>(Arrays.asList(deployer), new Link[0]));
+		when(skipperClient.listDeployers()).thenReturn(Arrays.asList(deployer));
 
-		when(skipperClient.search(anyString(), eq(false))).thenReturn(
-				new CollectionModel(new ArrayList<PackageMetadata>(), new Link[0]));
+		when(skipperClient.search(anyString(), eq(false))).thenReturn(new ArrayList<PackageMetadata>());
 	}
 
 	@After
@@ -964,8 +961,7 @@ public class StreamControllerTests {
 
 	@Test
 	public void testUndeployNonDeployedStream() throws Exception {
-		when(skipperClient.search(eq("myStream"), eq(false))).thenReturn(
-				new CollectionModel(Arrays.asList(new PackageMetadata()), new Link[0]));
+		when(skipperClient.search(eq("myStream"), eq(false))).thenReturn(Arrays.asList(new PackageMetadata()));
 
 		repository.save(new StreamDefinition("myStream", "time | log"));
 		mockMvc.perform(delete("/streams/deployments/myStream")
@@ -984,10 +980,8 @@ public class StreamControllerTests {
 
 	@Test
 	public void testUndeployAllNonDeployedStream() throws Exception {
-		when(skipperClient.search(eq("myStream1"), eq(false))).thenReturn(
-				new CollectionModel(Arrays.asList(new PackageMetadata()), new Link[0]));
-		when(skipperClient.search(eq("myStream2"), eq(false))).thenReturn(
-				new CollectionModel(Arrays.asList(new PackageMetadata()), new Link[0]));
+		when(skipperClient.search(eq("myStream1"), eq(false))).thenReturn(Arrays.asList(new PackageMetadata()));
+		when(skipperClient.search(eq("myStream2"), eq(false))).thenReturn(Arrays.asList(new PackageMetadata()));
 
 		repository.save(new StreamDefinition("myStream1", "time | log"));
 		repository.save(new StreamDefinition("myStream2", "time | log"));

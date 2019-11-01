@@ -827,3 +827,92 @@ data:
 
 Replacing the `runAsUser` and/or `fsGroup` attributes with the appropriate values for your container environment.
 
+==== Service Ports
+
+When deploying applications a kubernetes Service object is created with a default port of `8080` or, if set the application property value of `server.port`. Additional ports can be added to the Service object on a per-application basis. Multiple ports can be added when specified with a comma delimiter.
+
+The following example shows how you can configure additional ports on a Service object for an application:
+
+====
+[source,options=nowrap]
+----
+deployer.<app>.kubernetes.servicePorts=5000
+deployer.<app>.kubernetes.servicePorts=5000,9000
+----
+====
+
+Replace `<app>` with the name of your application and the value of your port(s).
+
+==== StatefulSet Init Container
+
+When deploying an application using a StatefulSet, an Init Container is used to set the instance index into the pod.
+By default the image used is `busybox`, which can be customized if needed.
+
+The following example shows how you can individually configure application pods:
+
+====
+[source,options=nowrap]
+----
+deployer.<app>.kubernetes.statefulSetInitContainerImageName=myimage:mylabel
+----
+====
+
+Replace `<app>` with the name of your application and the `statefulSetInitContainerImageName` attribute with the appropriate value for your environment.
+
+You can configure the StatefulSet Init Container at the global server level as well.
+
+The following example shows how to do so for streams. Edit the appropriate `skipper-config-(binder).yaml`, replacing `(binder)` with the corresponding binder in use:
+
+====
+[source,yaml]
+----
+data:
+  application.yaml: |-
+    spring:
+      cloud:
+        skipper:
+          server:
+            platform:
+              kubernetes:
+                accounts:
+                  default:
+                    statefulSetInitContainerImageName: myimage:mylabel
+----
+====
+
+The following example shows how to do so for tasks by editing the `server-config.yaml` file:
+
+====
+[source,yaml]
+----
+data:
+  application.yaml: |-
+    spring:
+      cloud:
+        dataflow:
+          task:
+            platform:
+              kubernetes:
+                accounts:
+                  default:
+                    statefulSetInitContainerImageName: myimage:mylabel
+----
+====
+
+Replacing the `statefulSetInitContainerImageName` attribute with the appropriate value for your environment.
+
+==== Init Containers
+
+When applications are deployed, a custom Init Container can be set on a per application basis.
+Refer to the https://kubernetes.io/docs/concepts/workloads/pods/init-containers/[Init Containers] section of the Kubernetes reference for more information.
+
+The following example shows how you can configure an Init Container for an application:
+
+====
+[source,options=nowrap]
+----
+deployer.<app>.kubernetes.initContainer={containerName: 'test', imageName: 'busybox:latest', commands: ['sh', '-c', 'echo hello']}
+----
+====
+
+Replace `<app>` with the name of your application and set the values of the `initContainer` attributes appropriate for your Init Container.

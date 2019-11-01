@@ -21,7 +21,11 @@ import java.util.List;
 
 import javax.sql.DataSource;
 
+import org.mockito.Mockito;
+
 import org.springframework.batch.core.repository.dao.AbstractJdbcBatchMetadataDao;
+import org.springframework.batch.item.database.support.DataFieldMaxValueIncrementerFactory;
+import org.springframework.batch.item.database.support.DefaultDataFieldMaxValueIncrementerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.ImportAutoConfiguration;
 import org.springframework.boot.autoconfigure.domain.EntityScan;
@@ -41,11 +45,14 @@ import org.springframework.cloud.dataflow.server.DockerValidatorProperties;
 import org.springframework.cloud.dataflow.server.config.VersionInfoProperties;
 import org.springframework.cloud.dataflow.server.config.apps.CommonApplicationProperties;
 import org.springframework.cloud.dataflow.server.config.features.FeaturesProperties;
+import org.springframework.cloud.dataflow.server.config.features.SchedulerConfiguration;
 import org.springframework.cloud.dataflow.server.job.LauncherRepository;
 import org.springframework.cloud.dataflow.server.repository.DataflowJobExecutionDao;
 import org.springframework.cloud.dataflow.server.repository.DataflowTaskExecutionDao;
+import org.springframework.cloud.dataflow.server.repository.DataflowTaskExecutionMetadataDao;
 import org.springframework.cloud.dataflow.server.repository.JdbcDataflowJobExecutionDao;
 import org.springframework.cloud.dataflow.server.repository.JdbcDataflowTaskExecutionDao;
+import org.springframework.cloud.dataflow.server.repository.JdbcDataflowTaskExecutionMetadataDao;
 import org.springframework.cloud.dataflow.server.repository.TaskDefinitionRepository;
 import org.springframework.cloud.dataflow.server.repository.TaskDeploymentRepository;
 import org.springframework.cloud.dataflow.server.service.SchedulerService;
@@ -65,15 +72,18 @@ import org.springframework.cloud.dataflow.server.service.impl.DefaultTaskSaveSer
 import org.springframework.cloud.dataflow.server.service.impl.TaskAppDeploymentRequestCreator;
 import org.springframework.cloud.dataflow.server.service.impl.TaskConfigurationProperties;
 import org.springframework.cloud.dataflow.server.service.impl.validation.DefaultTaskValidationService;
-import org.springframework.cloud.deployer.scheduler.spi.core.Scheduler;
+import org.springframework.cloud.deployer.spi.scheduler.Scheduler;
 import org.springframework.cloud.deployer.spi.task.TaskLauncher;
 import org.springframework.cloud.task.configuration.TaskProperties;
 import org.springframework.cloud.task.repository.TaskExplorer;
 import org.springframework.cloud.task.repository.TaskRepository;
+import org.springframework.cloud.task.repository.support.DatabaseType;
 import org.springframework.cloud.task.repository.support.SimpleTaskExplorer;
 import org.springframework.cloud.task.repository.support.SimpleTaskRepository;
 import org.springframework.cloud.task.repository.support.TaskExecutionDaoFactoryBean;
+import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Conditional;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.core.io.Resource;
@@ -83,6 +93,7 @@ import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.data.map.repository.config.EnableMapRepositories;
 import org.springframework.data.web.config.EnableSpringDataWebSupport;
 import org.springframework.hateoas.config.EnableHypermediaSupport;
+import org.springframework.jdbc.support.MetaDataAccessException;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurationSupport;
@@ -95,6 +106,7 @@ import static org.mockito.Mockito.when;
  * @author Glenn Renfro
  * @author David Turanski
  * @author Gunnar Hillert
+ * @author Ilayaperumal Gopinathan
  */
 @Configuration
 @EnableSpringDataWebSupport
@@ -149,6 +161,20 @@ public class TaskServiceDependencies extends WebMvcConfigurationSupport {
 	@Bean
 	public DataflowTaskExecutionDao dataflowTaskExecutionDao(DataSource dataSource, TaskProperties taskProperties) {
 		return new JdbcDataflowTaskExecutionDao(dataSource, taskProperties);
+	}
+
+	@Bean
+	public DataflowTaskExecutionMetadataDao dataflowTaskExecutionMetadataDao(DataSource dataSource, ApplicationContext context) {
+		DataFieldMaxValueIncrementerFactory incrementerFactory = new DefaultDataFieldMaxValueIncrementerFactory(dataSource);
+		String databaseType;
+		try {
+			databaseType = DatabaseType.fromMetaData(dataSource).name();
+		}
+		catch (MetaDataAccessException e) {
+			throw new IllegalStateException(e);
+		}
+		return new JdbcDataflowTaskExecutionMetadataDao(dataSource, incrementerFactory.getIncrementer(databaseType,
+				"task_execution_metadata_seq"));
 	}
 
 	@Bean
@@ -209,12 +235,17 @@ public class TaskServiceDependencies extends WebMvcConfigurationSupport {
 			TaskDeploymentRepository taskDeploymentRepository,
 			AuditRecordService auditRecordService,
 			DataflowTaskExecutionDao dataflowTaskExecutionDao,
-			DataflowJobExecutionDao dataflowJobExecutionDao) {
+			DataflowJobExecutionDao dataflowJobExecutionDao,
+			DataflowTaskExecutionMetadataDao dataflowTaskExecutionMetadataDao,
+			@Autowired(required = false) SchedulerService schedulerService) {
+
 		return new DefaultTaskDeleteService(taskExplorer, launcherRepository, taskDefinitionRepository,
 				taskDeploymentRepository,
 				auditRecordService,
 				dataflowTaskExecutionDao,
-				dataflowJobExecutionDao);
+				dataflowJobExecutionDao,
+				dataflowTaskExecutionMetadataDao,
+				schedulerService);
 	}
 
 	@Bean
@@ -248,12 +279,13 @@ public class TaskServiceDependencies extends WebMvcConfigurationSupport {
 			TaskDeploymentRepository taskDeploymentRepository,
 			TaskExecutionCreationService taskExecutionRepositoryService,
 			TaskAppDeploymentRequestCreator taskAppDeploymentRequestCreator,
-			TaskExplorer taskExplorer, DataflowTaskExecutionDao dataflowTaskExecutionDao) {
+			TaskExplorer taskExplorer, DataflowTaskExecutionDao dataflowTaskExecutionDao,
+			DataflowTaskExecutionMetadataDao dataflowTaskExecutionMetadataDao) {
 		return new DefaultTaskExecutionService(
 				launcherRepository, auditRecordService, taskRepository,
 				taskExecutionInfoService, taskDeploymentRepository,
 				taskExecutionRepositoryService, taskAppDeploymentRequestCreator,
-				taskExplorer, dataflowTaskExecutionDao);
+				taskExplorer, dataflowTaskExecutionDao, dataflowTaskExecutionMetadataDao);
 	}
 
 	@Bean
@@ -267,24 +299,24 @@ public class TaskServiceDependencies extends WebMvcConfigurationSupport {
 	}
 
 	@Bean
+	@Conditional({ SchedulerConfiguration.SchedulerConfigurationPropertyChecker.class })
 	public SchedulerService schedulerService(CommonApplicationProperties commonApplicationProperties,
 											 TaskPlatform taskPlatform, TaskDefinitionRepository taskDefinitionRepository,
 											 AppRegistryService registry, ResourceLoader resourceLoader,
-											 DataSourceProperties dataSourceProperties,
 											 ApplicationConfigurationMetadataResolver metaDataResolver,
 											 SchedulerServiceProperties schedulerServiceProperties,
-											 AuditRecordService auditRecordService) {
+											 AuditRecordService auditRecordService,
+											 TaskConfigurationProperties taskConfigurationProperties) {
 		return new DefaultSchedulerService(commonApplicationProperties,
 				taskPlatform, taskDefinitionRepository,
 				registry, resourceLoader,
-				new TaskConfigurationProperties(),
-				dataSourceProperties, null,
+				taskConfigurationProperties, null,
 				metaDataResolver, schedulerServiceProperties, auditRecordService);
 	}
 
 	@Bean
 	public TaskPlatform taskPlatform(Scheduler scheduler) {
-		Launcher launcher = new Launcher("default", "defaultType", null, scheduler);
+		Launcher launcher = new Launcher("default", "defaultType", Mockito.mock(TaskLauncher.class), scheduler);
 		List<Launcher> launchers = new ArrayList<>();
 		launchers.add(launcher);
 		TaskPlatform taskPlatform = new TaskPlatform("testTaskPlatform", launchers);
@@ -296,5 +328,4 @@ public class TaskServiceDependencies extends WebMvcConfigurationSupport {
 	public Scheduler scheduler() {
 		return new SimpleTestScheduler();
 	}
-
 }

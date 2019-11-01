@@ -27,6 +27,7 @@ import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.cloud.common.security.CommonSecurityAutoConfiguration;
 import org.springframework.cloud.dataflow.autoconfigure.local.LocalDataFlowServerAutoConfiguration;
 import org.springframework.cloud.dataflow.configuration.metadata.ApplicationConfigurationMetadataResolverAutoConfiguration;
+import org.springframework.cloud.dataflow.rest.client.config.DataFlowClientAutoConfiguration;
 import org.springframework.cloud.deployer.spi.cloudfoundry.CloudFoundryDeployerAutoConfiguration;
 import org.springframework.cloud.deployer.spi.kubernetes.KubernetesAutoConfiguration;
 import org.springframework.cloud.deployer.spi.local.LocalDeployerAutoConfiguration;
@@ -43,6 +44,7 @@ import org.springframework.security.oauth2.config.annotation.web.configuration.E
 		excludeName = {
 		"org.springframework.cloud.dataflow.shell.autoconfigure.BaseShellAutoConfiguration" },
 		exclude = {
+				DataFlowClientAutoConfiguration.class,
 				CommonSecurityAutoConfiguration.class,
 				SessionAutoConfiguration.class,
 				ManagementWebSecurityAutoConfiguration.class,

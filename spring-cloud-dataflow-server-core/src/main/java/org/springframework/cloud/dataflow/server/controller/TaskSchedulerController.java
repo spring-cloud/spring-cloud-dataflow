@@ -23,7 +23,7 @@ import org.springframework.cloud.dataflow.rest.resource.ScheduleInfoResource;
 import org.springframework.cloud.dataflow.rest.util.DeploymentPropertiesUtils;
 import org.springframework.cloud.dataflow.server.repository.NoSuchScheduleException;
 import org.springframework.cloud.dataflow.server.service.SchedulerService;
-import org.springframework.cloud.deployer.scheduler.spi.core.ScheduleInfo;
+import org.springframework.cloud.deployer.spi.scheduler.ScheduleInfo;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
@@ -119,6 +119,16 @@ public class TaskSchedulerController {
 		Page<ScheduleInfo> page = new PageImpl<>(result, pageable,
 				result.size());
 		return assembler.toModel(page, taskAssembler);
+	}
+	/**
+	 * Remove schedules for a specific {@link org.springframework.cloud.dataflow.core.TaskDefinition} name .
+	 *
+	 * @param taskDefinitionName the name of the {@link org.springframework.cloud.dataflow.core.TaskDefinition}.
+	 */
+	@RequestMapping(value = "/instances/{taskDefinitionName}", method = RequestMethod.DELETE)
+	@ResponseStatus(HttpStatus.OK)
+	public void deleteSchedulesforDefinition(@PathVariable String taskDefinitionName) {
+		this.schedulerService.unscheduleForTaskDefinition(taskDefinitionName);
 	}
 
 	/**

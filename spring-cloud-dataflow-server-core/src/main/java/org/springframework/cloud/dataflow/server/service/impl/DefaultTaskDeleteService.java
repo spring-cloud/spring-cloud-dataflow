@@ -41,10 +41,12 @@ import org.springframework.cloud.dataflow.server.job.LauncherRepository;
 import org.springframework.cloud.dataflow.server.repository.CannotDeleteNonParentTaskExecutionException;
 import org.springframework.cloud.dataflow.server.repository.DataflowJobExecutionDao;
 import org.springframework.cloud.dataflow.server.repository.DataflowTaskExecutionDao;
+import org.springframework.cloud.dataflow.server.repository.DataflowTaskExecutionMetadataDao;
 import org.springframework.cloud.dataflow.server.repository.NoSuchTaskDefinitionException;
 import org.springframework.cloud.dataflow.server.repository.NoSuchTaskExecutionException;
 import org.springframework.cloud.dataflow.server.repository.TaskDefinitionRepository;
 import org.springframework.cloud.dataflow.server.repository.TaskDeploymentRepository;
+import org.springframework.cloud.dataflow.server.service.SchedulerService;
 import org.springframework.cloud.dataflow.server.service.TaskDeleteService;
 import org.springframework.cloud.deployer.spi.task.TaskLauncher;
 import org.springframework.cloud.task.repository.TaskExecution;
@@ -87,7 +89,12 @@ public class DefaultTaskDeleteService implements TaskDeleteService {
 	protected final AuditRecordService auditRecordService;
 
 	protected final DataflowTaskExecutionDao dataflowTaskExecutionDao;
+
 	protected final DataflowJobExecutionDao dataflowJobExecutionDao;
+
+	protected final DataflowTaskExecutionMetadataDao dataflowTaskExecutionMetadataDao;
+
+	private SchedulerService schedulerService;
 
 	private final ArgumentSanitizer argumentSanitizer = new ArgumentSanitizer();
 
@@ -96,7 +103,9 @@ public class DefaultTaskDeleteService implements TaskDeleteService {
 			TaskDeploymentRepository taskDeploymentRepository,
 			AuditRecordService auditRecordService,
 			DataflowTaskExecutionDao dataflowTaskExecutionDao,
-			DataflowJobExecutionDao dataflowJobExecutionDao) {
+			DataflowJobExecutionDao dataflowJobExecutionDao,
+			DataflowTaskExecutionMetadataDao dataflowTaskExecutionMetadataDao,
+			SchedulerService schedulerService) {
 		Assert.notNull(taskExplorer, "TaskExplorer must not be null");
 		Assert.notNull(launcherRepository, "LauncherRepository must not be null");
 		Assert.notNull(taskDefinitionRepository, "TaskDefinitionRepository must not be null");
@@ -104,6 +113,7 @@ public class DefaultTaskDeleteService implements TaskDeleteService {
 		Assert.notNull(auditRecordService, "AuditRecordService must not be null");
 		Assert.notNull(dataflowTaskExecutionDao, "DataflowTaskExecutionDao must not be null");
 		Assert.notNull(dataflowJobExecutionDao, "DataflowJobExecutionDao must not be null");
+		Assert.notNull(dataflowTaskExecutionMetadataDao, "DataflowTaskExecutionMetadataDao must not be null");
 		this.taskExplorer = taskExplorer;
 		this.launcherRepository = launcherRepository;
 		this.taskDefinitionRepository = taskDefinitionRepository;
@@ -111,6 +121,8 @@ public class DefaultTaskDeleteService implements TaskDeleteService {
 		this.auditRecordService = auditRecordService;
 		this.dataflowTaskExecutionDao = dataflowTaskExecutionDao;
 		this.dataflowJobExecutionDao = dataflowJobExecutionDao;
+		this.dataflowTaskExecutionMetadataDao = dataflowTaskExecutionMetadataDao;
+		this.schedulerService = schedulerService;
 	}
 
 	@Override
@@ -262,15 +274,18 @@ public class DefaultTaskDeleteService implements TaskDeleteService {
 		auditData.put("Deleted Task Execution IDs", StringUtils.collectionToDelimitedString(taskExecutionIdsWithChildren, ", "));
 		final int numberOfDeletedTaskExecutionParamRows = dataflowTaskExecutionDao.deleteTaskExecutionParamsByTaskExecutionIds(taskExecutionIdsWithChildren);
 		final int numberOfDeletedTaskTaskBatchRelationshipRows = dataflowTaskExecutionDao.deleteTaskTaskBatchRelationshipsByTaskExecutionIds(taskExecutionIdsWithChildren);
+		final int numberOfDeletedTaskManifestRows = this.dataflowTaskExecutionMetadataDao.deleteManifestsByTaskExecutionIds(taskExecutionIdsWithChildren);
 		final int numberOfDeletedTaskExecutionRows = dataflowTaskExecutionDao.deleteTaskExecutionsByTaskExecutionIds(taskExecutionIdsWithChildren);
 
 		logger.info("Deleted the following Task Execution related data for {} Task Executions:\n" +
 				"Task Execution Param Rows:    {}\n" +
 				"Task Batch Relationship Rows: {}\n" +
+				"Task Manifest Rows:           {}\n" +
 				"Task Execution Rows:          {}.",
 				taskExecutionIdsWithChildren.size(),
 				numberOfDeletedTaskExecutionParamRows,
 				numberOfDeletedTaskTaskBatchRelationshipRows,
+				numberOfDeletedTaskManifestRows,
 				numberOfDeletedTaskExecutionRows
 				);
 
@@ -308,6 +323,9 @@ public class DefaultTaskDeleteService implements TaskDeleteService {
 
 	private void deleteTaskDefinition(TaskDefinition taskDefinition) {
 		TaskParser taskParser = new TaskParser(taskDefinition.getName(), taskDefinition.getDslText(), true, true);
+		if (this.schedulerService != null) {
+			schedulerService.unscheduleForTaskDefinition(taskDefinition.getTaskName());
+		}
 		TaskNode taskNode = taskParser.parse();
 		// if composed-task-runner definition then destroy all child tasks associated with it.
 		if (taskNode.isComposed()) {

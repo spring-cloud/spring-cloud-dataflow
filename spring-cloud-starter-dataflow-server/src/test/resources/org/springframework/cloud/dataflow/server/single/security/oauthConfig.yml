@@ -1,3 +1,5 @@
+server:
+  port: ${dataflow.port}
 management:
   endpoints:
     web:

@@ -20,7 +20,7 @@ package org.springframework.cloud.dataflow.server.service;
 import java.util.List;
 import java.util.Map;
 
-import org.springframework.cloud.deployer.scheduler.spi.core.ScheduleInfo;
+import org.springframework.cloud.deployer.spi.scheduler.ScheduleInfo;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
@@ -36,10 +36,10 @@ public interface SchedulerService {
 	 * platform specific scheduler.  To setup the task with the scheduler set
 	 * the properties required to process the schedule within the taskProperties map.
 	 * Each scheduler property should be prefixed with
-	 * {@value org.springframework.cloud.scheduler.spi.core.SchedulerPropertyKeys#PREFIX}.
+	 * {@value org.springframework.cloud.deployer.spi.scheduler.SchedulerPropertyKeys#PREFIX}.
 	 * The schedule expression (cron for example)
 	 * are specified within the task properties using the
-	 * {@value org.springframework.cloud.scheduler.spi.core.SchedulerPropertyKeys#CRON_EXPRESSION} as the key
+	 * {@value org.springframework.cloud.deployer.spi.scheduler.SchedulerPropertyKeys#CRON_EXPRESSION} as the key
 	 * and the associated value would be the cron expression to be used.
 	 *
 	 * @param scheduleName A name to be associated with the schedule.
@@ -57,6 +57,13 @@ public interface SchedulerService {
 	 * @param scheduleName the name of the schedule to be removed.
 	 */
 	void unschedule(String scheduleName);
+
+	/**
+	 *  Unschedule all schedules that have been created for this task definition name.
+	 *
+	 * @param taskDefinitionName the name of the task definition.
+	 */
+	void unscheduleForTaskDefinition(String taskDefinitionName);
 
 	/**
 	 * List all of the Schedules associated with the provided TaskDefinition.

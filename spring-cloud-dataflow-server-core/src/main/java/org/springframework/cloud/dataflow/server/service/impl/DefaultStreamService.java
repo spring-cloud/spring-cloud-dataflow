@@ -203,9 +203,10 @@ public class DefaultStreamService implements StreamService {
 			updatedStreamAppDefinitions.addLast(appDefinitionBuilder.build(streamDefinition.getName()));
 		}
 
-		String dslText = new StreamDefinitionToDslConverter().toDsl(updatedStreamAppDefinitions);
+		String updatedDslText = new StreamDefinitionToDslConverter().toDsl(updatedStreamAppDefinitions);
 
-		StreamDefinition updatedStreamDefinition = new StreamDefinition(streamName, dslText);
+		StreamDefinition updatedStreamDefinition = new StreamDefinition(streamName, updatedDslText,
+				streamDefinition.getOriginalDslText(), streamDefinition.getDescription());
 		logger.debug("Updated StreamDefinition: " + updatedStreamDefinition);
 
 		// TODO consider adding an explicit UPDATE method to the streamDefRepository
@@ -214,6 +215,13 @@ public class DefaultStreamService implements StreamService {
 		this.streamDefinitionRepository.save(updatedStreamDefinition);
 		this.auditRecordService.populateAndSaveAuditRecord(
 				AuditOperationType.STREAM, AuditActionType.UPDATE, streamName, this.auditServiceUtils.convertStreamDefinitionToAuditData(streamDefinition));
+	}
+
+	@Override
+	public void scaleApplicationInstances(String streamName, String appName, int count, Map<String, String> properties) {
+		// Skipper expects app names / labels not deployment ids
+		logger.info(String.format("Scale %s:%s to %s with properties: %s", streamName, appName, count, properties));
+		this.skipperStreamDeployer.scale(streamName, appName, count, properties);
 	}
 
 	@Override
@@ -396,7 +404,7 @@ public class DefaultStreamService implements StreamService {
 
 	public StreamDefinition createStreamDefinition(String streamName, String dsl, String description) {
 		try {
-			return new StreamDefinition(streamName, dsl, description);
+			return new StreamDefinition(streamName, dsl, dsl, description);
 		}
 		catch (ParseException ex) {
 			throw new InvalidStreamDefinitionException(ex.getMessage());

@@ -34,8 +34,6 @@ import org.springframework.cloud.skipper.domain.Info;
 import org.springframework.cloud.skipper.domain.Status;
 import org.springframework.cloud.skipper.domain.StatusCode;
 import org.springframework.core.io.ClassPathResource;
-import org.springframework.hateoas.CollectionModel;
-import org.springframework.hateoas.Link;
 import org.springframework.shell.core.CommandResult;
 import org.springframework.shell.table.Table;
 
@@ -70,6 +68,16 @@ public class StreamCommandTests extends AbstractShellIntegrationTest {
 		logger.info("Starting Stream Test for TickTock");
 		Thread.sleep(2000);
 		String streamName = generateUniqueStreamOrTaskName();
+		Info info = new Info();
+		Status status = new Status();
+		status.setStatusCode(StatusCode.UNKNOWN);
+		status.setPlatformStatus(null);
+		info.setStatus(status);
+
+		when(skipperClient.status(ArgumentMatchers.anyString())).thenReturn(info);
+		AppDeployer appDeployer = applicationContext.getBean(AppDeployer.class);
+		Deployer deployer = new Deployer("testDeployer", "testType", appDeployer);
+		when(skipperClient.listDeployers()).thenReturn(Arrays.asList(deployer));
 		stream().create(streamName, "time | log");
 	}
 
@@ -86,7 +94,7 @@ public class StreamCommandTests extends AbstractShellIntegrationTest {
 		when(skipperClient.status(ArgumentMatchers.anyString())).thenReturn(info);
 		AppDeployer appDeployer = applicationContext.getBean(AppDeployer.class);
 		Deployer deployer = new Deployer("testDeployer", "testType", appDeployer);
-		when(skipperClient.listDeployers()).thenReturn(new CollectionModel<>(Arrays.asList(deployer), new Link[0]));
+		when(skipperClient.listDeployers()).thenReturn(Arrays.asList(deployer));
 
 		//stream().create(streamName, "time | log");
 		stream().createDontDeploy(streamName, "time | log");

@@ -45,6 +45,7 @@ import org.springframework.util.StringUtils;
  * @author Ilayaperumal Gopinathan
  */
 public class ArgumentSanitizer {
+
 	private static final String[] REGEX_PARTS = { "*", "$", "^", "+" };
 
 	private static final String REDACTION_STRING = "******";
@@ -153,6 +154,16 @@ public class ArgumentSanitizer {
 				).collect(Collectors.toList());
 
 		return this.streamDslConverter.toDsl(sanitizedAppDefinitions);
+	}
+
+	/**
+	 * Redacts sensitive property values in a stream.
+	 *
+	 * @param streamDefinition the stream definition to sanitize
+	 * @return Stream definition with the original DSL text that has sensitive data redacted.
+	 */
+	public String sanitizeOriginalStreamDsl(StreamDefinition streamDefinition) {
+		return sanitizeStream(new StreamDefinition(streamDefinition.getName(), streamDefinition.getOriginalDslText()));
 	}
 
 	/**

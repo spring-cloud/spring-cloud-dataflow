@@ -119,6 +119,9 @@ public class TaskExecutionsDocumentation extends BaseDocumentation {
 								fieldWithPath("taskExecutionStatus").description("The status of the task execution"),
 								fieldWithPath("parentExecutionId").description("The id of parent task execution, " +
 										"null if task execution does not have parent"),
+								fieldWithPath("resourceUrl").description("The resource URL that defines the task that was executed"),
+								subsectionWithPath("appProperties").description("The application properties of the task execution"),
+								subsectionWithPath("deploymentProperties").description("The deployment properties of the task exectuion"),
 								subsectionWithPath("_links.self").description("Link to the task execution resource")
 						)
 				));
@@ -218,21 +221,6 @@ public class TaskExecutionsDocumentation extends BaseDocumentation {
 
 	@Test
 	public void taskExecutionRemoveAndTaskDataRemove() throws Exception {
-
-		documentation.dontDocument( () -> this.mockMvc.perform(
-				post("/tasks/executions")
-						.param("name", "taskB")
-						.param("properties", "app.my-task.foo=bar,deployer.my-task.something-else=3")
-						.param("arguments", "--server.port=8080 --foo=bar"))
-				.andExpect(status().isCreated()));
-
-		documentation.dontDocument( () -> this.mockMvc.perform(
-				post("/tasks/executions")
-						.param("name", "taskB")
-						.param("properties", "app.my-task.foo=bar2,deployer.my-task.something-else=3")
-						.param("arguments", "--server.port=8082 --foo=bar2"))
-				.andExpect(status().isCreated()));
-
 		this.mockMvc.perform(
 				delete("/tasks/executions/{ids}?action=CLEANUP,REMOVE_DATA", "1,2"))
 				.andDo(print())

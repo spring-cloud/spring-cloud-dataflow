@@ -16,6 +16,7 @@
 
 package org.springframework.cloud.dataflow.server.service.impl;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -25,6 +26,7 @@ import org.springframework.cloud.dataflow.core.AppRegistration;
 import org.springframework.cloud.dataflow.core.ApplicationType;
 import org.springframework.cloud.dataflow.core.TaskDefinition;
 import org.springframework.cloud.dataflow.core.TaskPlatform;
+import org.springframework.cloud.dataflow.core.dsl.TaskApp;
 import org.springframework.cloud.dataflow.core.dsl.TaskNode;
 import org.springframework.cloud.dataflow.core.dsl.TaskParser;
 import org.springframework.cloud.dataflow.registry.service.AppRegistryService;
@@ -34,7 +36,10 @@ import org.springframework.cloud.dataflow.server.job.LauncherRepository;
 import org.springframework.cloud.dataflow.server.repository.NoSuchTaskDefinitionException;
 import org.springframework.cloud.dataflow.server.repository.TaskDefinitionRepository;
 import org.springframework.cloud.dataflow.server.service.TaskExecutionInfoService;
+import org.springframework.cloud.deployer.spi.core.AppDefinition;
+import org.springframework.cloud.deployer.spi.core.AppDeploymentRequest;
 import org.springframework.cloud.task.repository.TaskExplorer;
+import org.springframework.core.io.Resource;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
@@ -117,41 +122,79 @@ public class DefaultTaskExecutionInfoService implements TaskExecutionInfoService
 		Assert.hasText(taskName, "The provided taskName must not be null or empty.");
 		Assert.notNull(taskDeploymentProperties, "The provided runtimeProperties must not be null.");
 
-		TaskExecutionInformation retData = new TaskExecutionInformation();
-		retData.setTaskDeploymentProperties(taskDeploymentProperties);
+		TaskExecutionInformation taskExecutionInformation = new TaskExecutionInformation();
+		taskExecutionInformation.setTaskDeploymentProperties(taskDeploymentProperties);
 
-		TaskDefinition taskDefinition = taskDefinitionRepository.findById(taskName)
+		TaskDefinition originalTaskDefinition = taskDefinitionRepository.findById(taskName)
 				.orElseThrow(() -> new NoSuchTaskDefinitionException(taskName));
-		TaskParser taskParser = new TaskParser(taskDefinition.getName(), taskDefinition.getDslText(), true, true);
+		TaskParser taskParser = new TaskParser(originalTaskDefinition.getName(), originalTaskDefinition.getDslText(),
+				true, true);
 		TaskNode taskNode = taskParser.parse();
 		// if composed task definition replace definition with one composed task
 		// runner and executable graph.
+		TaskDefinition taskDefinitionToUse;
 		if(!taskNode.isComposed() && StringUtils.hasText(composedTaskRunnerName)) {
 			throw new InvalidCTRLaunchRequestException(taskName);
 		}
+
 		if (taskNode.isComposed()) {
 			if(StringUtils.hasText(composedTaskRunnerName) && !this.appRegistryService.appExist(composedTaskRunnerName, ApplicationType.task)) {
 				throw new NoSuchAppException(composedTaskRunnerName);
 			}
-			taskDefinition = new TaskDefinition(taskDefinition.getName(),
+
+			taskDefinitionToUse = new TaskDefinition(originalTaskDefinition.getName(),
 					TaskServiceUtils.createComposedTaskDefinition(composedTaskRunnerName,
 							taskNode.toExecutableDSL(), taskConfigurationProperties));
-			retData.setTaskDeploymentProperties(
+			taskExecutionInformation.setTaskDeploymentProperties(
 					TaskServiceUtils.establishComposedTaskProperties(taskDeploymentProperties,
 							taskNode));
+			taskDefinitionToUse = TaskServiceUtils.updateTaskProperties(taskDefinitionToUse,
+					dataSourceProperties);
 		}
-		taskDefinition = TaskServiceUtils.updateTaskProperties(taskDefinition,
-				dataSourceProperties);
+		else {
+			taskDefinitionToUse = TaskServiceUtils.updateTaskProperties(originalTaskDefinition,
+					dataSourceProperties);
+		}
 
-		AppRegistration appRegistration = appRegistryService.find(taskDefinition.getRegisteredAppName(),
+		AppRegistration appRegistration = appRegistryService.find(taskDefinitionToUse.getRegisteredAppName(),
 				ApplicationType.task);
-		Assert.notNull(appRegistration, "Unknown task app: " + taskDefinition.getRegisteredAppName());
+		Assert.notNull(appRegistration, "Unknown task app: " + taskDefinitionToUse.getRegisteredAppName());
 
-		retData.setTaskDefinition(taskDefinition);
-		retData.setComposed(taskNode.isComposed());
-		retData.setAppResource(appRegistryService.getAppResource(appRegistration));
-		retData.setMetadataResource(appRegistryService.getAppMetadataResource(appRegistration));
-		return retData;
+		taskExecutionInformation.setTaskDefinition(taskDefinitionToUse);
+		taskExecutionInformation.setOriginalTaskDefinition(originalTaskDefinition);
+		taskExecutionInformation.setComposed(taskNode.isComposed());
+		taskExecutionInformation.setAppResource(appRegistryService.getAppResource(appRegistration));
+		taskExecutionInformation.setMetadataResource(appRegistryService.getAppMetadataResource(appRegistration));
+		return taskExecutionInformation;
+	}
+
+	public List<AppDeploymentRequest> createTaskDeploymentRequests(String taskName, String dslText) {
+		List<AppDeploymentRequest> appDeploymentRequests = new ArrayList<>();
+		TaskParser taskParser = new TaskParser(taskName, dslText, true, true);
+		TaskNode taskNode = taskParser.parse();
+		if (taskNode.isComposed()) {
+			for (TaskApp subTask : taskNode.getTaskApps()) {
+				// composed tasks have taskDefinitions in the graph
+				TaskDefinition subTaskDefinition = taskDefinitionRepository.findByTaskName(subTask.getName());
+				String subTaskDsl = subTaskDefinition.getDslText();
+				TaskParser subTaskParser = new TaskParser(subTaskDefinition.getTaskName(), subTaskDsl, true, true);
+				TaskNode subTaskNode = subTaskParser.parse();
+				String subTaskName = subTaskNode.getTaskApp().getName();
+				AppRegistration appRegistration = appRegistryService.find(subTaskName,
+						ApplicationType.task);
+				Assert.notNull(appRegistration, "Unknown task app: " + subTask.getName());
+				Resource appResource = appRegistryService.getAppResource(appRegistration);
+
+				// TODO whitelist args
+				// TODO incoropate the label somehow, ea. 1:timestamp --format=YYYY
+				AppDefinition appDefinition = new AppDefinition(subTask.getName(), subTaskNode.getTaskApp().getArgumentsAsMap());
+
+				AppDeploymentRequest appDeploymentRequest = new AppDeploymentRequest(appDefinition,
+						appResource, null, null);
+				appDeploymentRequests.add(appDeploymentRequest);
+			}
+		}
+		return appDeploymentRequests;
 	}
 	@Override
 	public AllPlatformsTaskExecutionInformation findAllPlatformTaskExecutionInformation() {

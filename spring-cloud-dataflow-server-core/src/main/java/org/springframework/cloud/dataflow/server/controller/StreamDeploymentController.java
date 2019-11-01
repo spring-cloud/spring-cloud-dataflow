@@ -94,6 +94,26 @@ public class StreamDeploymentController {
 		this.streamService = streamService;
 	}
 
+	/**
+	 * Scale application instances in a deployed stream.
+	 * @param streamName the name of an existing stream definition (required)
+	 * @param appName in stream application name to scale (required)
+	 * @param count number of instances for the selected stream application (required)
+	 * @param properties scale deployment specific properties (optional)
+	 * @return response without a body
+	 */
+	@RequestMapping(value = "/scale/{streamName}/{appName}/instances/{count}", method = RequestMethod.POST)
+	public ResponseEntity<Void> scaleApplicationInstances(
+			@PathVariable("streamName") String streamName,
+			@PathVariable("appName") String appName,
+			@PathVariable("count") Integer count,
+			@RequestBody(required = false) Map<String, String> properties) {
+
+		logger.info(String.format("Scale stream: %s, apps: %s instances to %s", streamName, appName, count));
+		this.streamService.scaleApplicationInstances(streamName, appName, count, properties);
+		return new ResponseEntity<>(HttpStatus.CREATED);
+	}
+
 	@RequestMapping(value = "/update/{name}", method = RequestMethod.POST)
 	public ResponseEntity<Void> update(@PathVariable("name") String name,
 			@RequestBody UpdateStreamRequest updateStreamRequest) {

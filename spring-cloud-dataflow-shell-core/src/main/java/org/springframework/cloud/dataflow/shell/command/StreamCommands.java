@@ -93,6 +93,7 @@ public class StreamCommands implements CommandMarker {
 
 	private static final String STREAM_ROLLBACK = "stream rollback";
 	private static final String STREAM_UPDATE = "stream update";
+	private static final String STREAM_SCALE = "stream scale app instances";
 
 	// View Role
 
@@ -128,7 +129,7 @@ public class StreamCommands implements CommandMarker {
 		return dataFlowShell.hasAccess(RoleType.DESTROY, OpsType.STREAM);
 	}
 
-	@CliAvailabilityIndicator({ STREAM_ROLLBACK, STREAM_UPDATE })
+	@CliAvailabilityIndicator({ STREAM_ROLLBACK, STREAM_UPDATE, STREAM_SCALE })
 	public boolean availableWithModifyRole() {
 		return dataFlowShell.hasAccess(RoleType.MODIFY, OpsType.STREAM);
 	}
@@ -243,6 +244,23 @@ public class StreamCommands implements CommandMarker {
 		return String.format("Update request has been sent for the stream '%s'", name);
 	}
 
+	@CliCommand(value = STREAM_SCALE, help = "Scale app instances in a stream")
+	public String scaleStream(
+			@CliOption(key = { "",
+					"name" }, help = "the name of the stream to scale", mandatory = true, optionContext = "existing-stream disable-string-converter") String name,
+			@CliOption(key = {
+					"applicationName" }, help = "the name/label of the application to scale", mandatory = true) String applicationName,
+			@CliOption(key = {
+					"count" }, help = "desired number of application instances", mandatory = true) Integer count,
+			@CliOption(key = {
+					PROPERTIES_OPTION }, help = "the properties for this scale") String scaleProperties) throws IOException{
+
+		Map<String, String> propertiesToUse = DeploymentPropertiesUtils.parseDeploymentProperties(scaleProperties,
+				null, 0);
+		streamOperations().scaleApplicationInstances(name, applicationName, count, propertiesToUse);
+		return String.format("Scale request has been sent for the stream '%s'", name);
+	}
+
 	@CliCommand(value = STREAM_ROLLBACK, help = "Rollback a stream using Skipper")
 	public String rollbackStreamUsingSkipper(
 			@CliOption(key = { "", "name" }, help = "the name of the stream to rollback", mandatory = true,
@@ -273,8 +291,8 @@ public class StreamCommands implements CommandMarker {
 		final PagedModel<StreamDefinitionResource> streams = streamOperations().list();
 		LinkedHashMap<String, Object> headers = new LinkedHashMap<>();
 		headers.put("name", "Stream Name");
-		headers.put("dslText", "Stream Definition");
 		headers.put("description", "Description");
+		headers.put("originalDslText", "Stream Definition");
 		headers.put("statusDescription", "Status");
 		BeanListTableModel<StreamDefinitionResource> model = new BeanListTableModel<>(streams, headers);
 		return DataFlowTables.applyStyle(new TableBuilder(model)).build();
@@ -362,7 +380,7 @@ public class StreamCommands implements CommandMarker {
 		}
 		builder = DataFlowTables.applyStyle(new TableBuilder(modelBuilder.build()));
 
-		if(isValidStream) {
+		if (isValidStream) {
 			result.add(String.format("\n%s is a valid stream.", stream.getAppName()));
 		}
 		else {

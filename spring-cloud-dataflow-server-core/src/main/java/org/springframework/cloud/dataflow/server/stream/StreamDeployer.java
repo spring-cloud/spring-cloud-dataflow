@@ -99,4 +99,14 @@ public interface StreamDeployer {
 	 * @return the logs content
 	 */
 	LogInfo getLog(String streamName, String appName);
+
+	/**
+	 * For a selected stream scales the number of appName instances to count.
+	 *
+	 * @param streamName
+	 * @param appName
+	 * @param count
+	 * @param properties
+	 */
+	void scale(String streamName, String appName, int count, Map<String, String> properties);
 }

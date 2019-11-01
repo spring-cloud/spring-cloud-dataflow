@@ -22,6 +22,8 @@ import java.util.List;
 import javax.servlet.Filter;
 
 import org.junit.rules.ExternalResource;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.actuate.autoconfigure.security.servlet.ManagementWebSecurityAutoConfiguration;
@@ -30,17 +32,18 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean
 import org.springframework.boot.autoconfigure.security.servlet.UserDetailsServiceAutoConfiguration;
 import org.springframework.boot.autoconfigure.session.SessionAutoConfiguration;
 import org.springframework.cloud.dataflow.core.Launcher;
+import org.springframework.cloud.dataflow.rest.client.config.DataFlowClientAutoConfiguration;
 import org.springframework.cloud.dataflow.server.EnableDataFlowServer;
 import org.springframework.cloud.dataflow.server.config.features.FeaturesProperties;
 import org.springframework.cloud.dataflow.server.job.LauncherRepository;
-import org.springframework.cloud.deployer.scheduler.spi.core.ScheduleInfo;
-import org.springframework.cloud.deployer.scheduler.spi.core.ScheduleRequest;
-import org.springframework.cloud.deployer.scheduler.spi.core.Scheduler;
 import org.springframework.cloud.deployer.spi.cloudfoundry.CloudFoundryDeployerAutoConfiguration;
 import org.springframework.cloud.deployer.spi.kubernetes.KubernetesAutoConfiguration;
 import org.springframework.cloud.deployer.spi.local.LocalDeployerAutoConfiguration;
 import org.springframework.cloud.deployer.spi.local.LocalDeployerProperties;
 import org.springframework.cloud.deployer.spi.local.LocalTaskLauncher;
+import org.springframework.cloud.deployer.spi.scheduler.ScheduleInfo;
+import org.springframework.cloud.deployer.spi.scheduler.ScheduleRequest;
+import org.springframework.cloud.deployer.spi.scheduler.Scheduler;
 import org.springframework.cloud.skipper.client.SkipperClient;
 import org.springframework.cloud.skipper.domain.AboutResource;
 import org.springframework.cloud.skipper.domain.Dependency;
@@ -50,9 +53,9 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
-import org.springframework.hateoas.CollectionModel;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+import org.springframework.util.SocketUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.context.WebApplicationContext;
 
@@ -64,6 +67,14 @@ import static org.mockito.Mockito.when;
  * @author Gunnar Hillert
  */
 public class LocalDataflowResource extends ExternalResource {
+
+	private static final String DATAFLOW_PORT_PROPERTY = "dataflow.port";
+
+	private static final Logger logger = LoggerFactory.getLogger(LocalDataflowResource.class);
+
+	private String originalDataflowServerPort;
+
+	private int dataflowServerPort;
 
 	final boolean streamsEnabled;
 
@@ -130,6 +141,14 @@ public class LocalDataflowResource extends ExternalResource {
 
 	@Override
 	protected void before() {
+		originalDataflowServerPort = System.getProperty(DATAFLOW_PORT_PROPERTY);
+
+		this.dataflowServerPort = SocketUtils.findAvailableTcpPort();
+
+		logger.info("Setting Dataflow Server port to " + this.dataflowServerPort);
+
+		System.setProperty(DATAFLOW_PORT_PROPERTY, String.valueOf(this.dataflowServerPort));
+
 		originalConfigLocation = System.getProperty("spring.config.additional-locationn");
 
 		if (!StringUtils.isEmpty(configurationLocation)) {
@@ -144,7 +163,6 @@ public class LocalDataflowResource extends ExternalResource {
 
 		configurableApplicationContext = (WebApplicationContext) app.run(new String[] {
 				"--spring.cloud.kubernetes.enabled=false",
-				"--server.port=0",
 				"--" + FeaturesProperties.FEATURES_PREFIX + "." + FeaturesProperties.STREAMS_ENABLED + "="
 						+ this.streamsEnabled,
 				"--" + FeaturesProperties.FEATURES_PREFIX + "." + FeaturesProperties.TASKS_ENABLED + "="
@@ -166,6 +184,12 @@ public class LocalDataflowResource extends ExternalResource {
 	protected void after() {
 		SpringApplication.exit(configurableApplicationContext);
 		resetConfigLocation();
+		if (originalDataflowServerPort != null) {
+			System.setProperty(DATAFLOW_PORT_PROPERTY, originalDataflowServerPort);
+		}
+		else {
+			System.clearProperty(DATAFLOW_PORT_PROPERTY);
+		}
 	}
 
 	private void resetConfigLocation() {
@@ -196,11 +220,12 @@ public class LocalDataflowResource extends ExternalResource {
 		about.getVersionInfo().getServer().setName("Test Server");
 		about.getVersionInfo().getServer().setVersion("Test Version");
 		when(this.skipperClient.info()).thenReturn(about);
-		when(this.skipperClient.listDeployers()).thenReturn(new CollectionModel<>(new ArrayList<>(), new ArrayList<>()));
+		when(this.skipperClient.listDeployers()).thenReturn(new ArrayList<>());
 	}
 
 	@EnableAutoConfiguration(
 		exclude = {
+				DataFlowClientAutoConfiguration.class,
 				SessionAutoConfiguration.class,
 				ManagementWebSecurityAutoConfiguration.class,
 				//SecurityAutoConfiguration.class,
@@ -224,7 +249,7 @@ public class LocalDataflowResource extends ExternalResource {
 			about.getVersionInfo().getServer().setName("Test Server");
 			about.getVersionInfo().getServer().setVersion("Test Version");
 			when(skipperClient.info()).thenReturn(about);
-			when(skipperClient.listDeployers()).thenReturn(new CollectionModel<>(new ArrayList<>(), new ArrayList<>()));
+			when(skipperClient.listDeployers()).thenReturn(new ArrayList<>());
 			return skipperClient;
 		}
 

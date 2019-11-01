@@ -384,7 +384,7 @@ If a user submits a stop for a task execution that has child task executions ass
 [WARNING]
 ====
 When stopping a task execution that has a running Spring Batch job, the job will be left with the batch status of `STARTED`.
-Each of the supported platforms send a SIG-INT to the task application  when a stop is requested that allows Spring Cloud Task to capture the state of the app, however Spring Batch does not handle a SIG-INT and thus the job stops in the STARTED status. 
+Each of the supported platforms send a SIG-INT to the task application  when a stop is requested that allows Spring Cloud Task to capture the state of the app, however Spring Batch does not handle a SIG-INT and thus the job stops in the STARTED status.
 ====
 
 ==== Stopping a Task Execution that was started outside of Spring Cloud Data Flow
@@ -539,6 +539,13 @@ Used to access the the dataflow server using Basic Authentication. Not used if 	
 This property sets optional OAuth2 Access Token.
 Typically the value is automatically set using the token from the currently logged in user, if available.
 However, for special use-cases this value can also be set explicitly.
+
+[INFO]
+====
+A special boolean property `dataflow-server-use-user-access-token` exists for the case
+where you want to use the access token of the currently logged user and propgate it to the Composed Task Runner. This property is only used
+by Spring Cloud Data Flow and if set to `true` will auto-populate the property `dataflow-server-access-token`.
+====
 
 Note when using the options above as environment variables, convert to uppercase, remove the dash character and replace with the underscore character. For example: increment-instance-enabled would be INCREMENT_INSTANCE_ENABLED.
 

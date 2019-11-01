@@ -27,6 +27,8 @@ import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 /**
+ * Records the association of taskDeploymentId to the platfornName the task was launched
+ * on.
  * @author Mark Pollack
  */
 @Entity

@@ -22,9 +22,9 @@ import java.util.List;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.cloud.dataflow.rest.client.config.DataFlowClientAutoConfiguration;
 import org.springframework.cloud.dataflow.server.EnableDataFlowServer;
-import org.springframework.cloud.deployer.scheduler.spi.core.ScheduleInfo;
-import org.springframework.cloud.deployer.scheduler.spi.core.ScheduleRequest;
-import org.springframework.cloud.deployer.scheduler.spi.core.Scheduler;
+import org.springframework.cloud.deployer.spi.scheduler.ScheduleInfo;
+import org.springframework.cloud.deployer.spi.scheduler.ScheduleRequest;
+import org.springframework.cloud.deployer.spi.scheduler.Scheduler;
 import org.springframework.cloud.skipper.client.SkipperClient;
 import org.springframework.cloud.skipper.domain.AboutResource;
 import org.springframework.cloud.skipper.domain.Dependency;
@@ -32,7 +32,6 @@ import org.springframework.cloud.skipper.domain.VersionInfo;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
-import org.springframework.hateoas.CollectionModel;
 
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -83,7 +82,7 @@ public class TestConfig {
 		about.getVersionInfo().getServer().setName("Test Server");
 		about.getVersionInfo().getServer().setVersion("Test Version");
 		when(skipperClient.info()).thenReturn(about);
-		when(skipperClient.listDeployers()).thenReturn(new CollectionModel<>(new ArrayList<>(), new ArrayList<>()));
+		when(skipperClient.listDeployers()).thenReturn(new ArrayList<>());
 		return skipperClient;
 	}
 

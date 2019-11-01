@@ -242,7 +242,7 @@
       "steppedLine": false,
       "targets": [
         {
-          "expr": "avg(jvm_memory_used_bytes{stream_name=~\"$stream_name\",application_name=~\"$application_name\"}) by (application_name,application_guid)",
+          "expr": "sum(jvm_memory_used_bytes{stream_name=~\"$stream_name\",application_name=~\"$application_name\"}) by (application_name,application_guid)",
           "format": "time_series",
           "intervalFactor": 1,
           "legendFormat": "{{application_name}} [{{application_guid}}]",

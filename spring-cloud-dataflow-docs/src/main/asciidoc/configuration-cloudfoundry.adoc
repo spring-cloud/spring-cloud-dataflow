@@ -112,6 +112,14 @@ These properties are also used when configuring the <<configuration-cloudfoundry
 |The Java Options to pass to the JVM, e.g -Dtest=foo
 |<none>
 
+|pushTasksEnabled
+|Whether to push task applications or assume that the application already exists when launched.
+|true
+
+|autoDeleteMavenArtifacts
+|Whether to automatically delete Maven artifacts from the local repository when deployed.
+|true
+
 |===
 
 Here are some examples using the Cloud Foundry deployment properties:
@@ -149,7 +157,7 @@ substitute `TASK` for `STREAM` in the property name, as the following example sh
 
 [source,bash,subs=attributes]
 ----
-cf set-env dataflow-server SPRING_CLOUD_DATAFLOW_TASK_PLATFORM_CLOUDFOUNDRY_ACCOUNTS[default]_DEPLOYMENT_TASK_MEMORY 512
+cf set-env dataflow-server SPRING_CLOUD_DATAFLOW_TASK_PLATFORM_CLOUDFOUNDRY_ACCOUNTS[default]_DEPLOYMENT_MEMORY 512
 ----
 
 =====
@@ -455,7 +463,12 @@ dataflow-server   started           1/1         1.1G     10G    dataflow-server.
 === Managing Disk Use
 
 Even when configuring the Data Flow server to use 10G of space, there is the possibility of exhausting
-the available space on the local disk.
+the available space on the local disk. To prevent this, `jar` artifacts downloaded from external sources, i.e., apps registered as `http` or `maven` resources, are automatically deleted whenever the application is deployed, whether or not the deployment request succeeds.
+This behavior is optimal for production environments in which container runtime stability is more critical than I/O latency incurred during deployment.
+In development environments deployment happens more frequently. Additionally, the `jar` artifact (or a lighter `metadata` jar) contains metadata describing application configuration properties
+which is used by various operations related to application configuration, more frequently performed during pre-production activities.
+To provide a more responsive interactive developer experience at the expense of more disk usage in pre-production environments, you can set the CloudFoundry deployer property `autoDeleteMavenArtifacts` to `false`.
+
 If you deploy the Data Flow server by using the default `port` health check type, you must explicitly monitor the disk space on the server in order to avoid running out space.
 If you deploy the server by using the `http` health check type (see the next example), the Data Flow server is restarted if there is low disk space.
 This is due to Spring Boot's link:https://github.com/spring-projects/spring-boot/blob/v1.5.14.RELEASE/spring-boot-actuator/src/main/java/org/springframework/boot/actuate/health/DiskSpaceHealthIndicator.java[Disk Space Health Indicator].
@@ -473,7 +486,6 @@ The following example shows how to deploy the `http` health check type to an end
   health-check-type: http
   health-check-http-endpoint: /management/health
 ----
-
 
 [[configuration-cloudfoundry-app-resolution-options]]
 === Application Resolution Alternatives

@@ -42,7 +42,7 @@ import org.springframework.cloud.dataflow.server.repository.NoSuchTaskDefinition
 import org.springframework.cloud.dataflow.server.repository.NoSuchTaskExecutionException;
 import org.springframework.cloud.dataflow.server.repository.TaskExecutionMissingExternalIdException;
 import org.springframework.cloud.dataflow.server.service.impl.OffsetOutOfBoundsException;
-import org.springframework.cloud.deployer.scheduler.spi.core.CreateScheduleException;
+import org.springframework.cloud.deployer.spi.scheduler.CreateScheduleException;
 import org.springframework.hateoas.mediatype.vnderrors.VndErrors;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.converter.HttpMessageNotReadableException;

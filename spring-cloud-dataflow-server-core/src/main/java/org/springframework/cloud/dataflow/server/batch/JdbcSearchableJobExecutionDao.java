@@ -64,7 +64,7 @@ public class JdbcSearchableJobExecutionDao extends JdbcJobExecutionDao implement
 			+ " from %PREFIX%JOB_EXECUTION E, %PREFIX%JOB_INSTANCE I "
 			+ "where E.JOB_INSTANCE_ID=I.JOB_INSTANCE_ID and E.END_TIME is NULL";
 
-	private static final String NAME_FILTER = "I.JOB_NAME=?";
+	private static final String NAME_FILTER = "I.JOB_NAME LIKE ?";
 
 	private PagingQueryProvider allExecutionsPagingQueryProvider;
 

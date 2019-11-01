@@ -33,15 +33,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import org.springframework.batch.core.BatchStatus;
-import org.springframework.batch.core.Job;
 import org.springframework.batch.core.JobExecution;
 import org.springframework.batch.core.JobInstance;
 import org.springframework.batch.core.JobParameters;
 import org.springframework.batch.core.JobParametersInvalidException;
 import org.springframework.batch.core.StepExecution;
-import org.springframework.batch.core.configuration.ListableJobLocator;
 import org.springframework.batch.core.launch.JobExecutionNotRunningException;
-import org.springframework.batch.core.launch.JobLauncher;
 import org.springframework.batch.core.launch.NoSuchJobException;
 import org.springframework.batch.core.launch.NoSuchJobExecutionException;
 import org.springframework.batch.core.launch.NoSuchJobInstanceException;
@@ -51,7 +48,6 @@ import org.springframework.batch.core.repository.JobRepository;
 import org.springframework.batch.core.repository.JobRestartException;
 import org.springframework.batch.core.repository.dao.ExecutionContextDao;
 import org.springframework.batch.core.step.NoSuchStepException;
-import org.springframework.batch.core.step.StepLocator;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
@@ -80,10 +76,6 @@ public class SimpleJobService implements JobService, DisposableBean {
 
 	private final JobRepository jobRepository;
 
-	private final JobLauncher jobLauncher;
-
-	private final ListableJobLocator jobLocator;
-
 	private final SearchableStepExecutionDao stepExecutionDao;
 
 	private final ExecutionContextDao executionContextDao;
@@ -94,6 +86,24 @@ public class SimpleJobService implements JobService, DisposableBean {
 
 	private int shutdownTimeout = DEFAULT_SHUTDOWN_TIMEOUT;
 
+	public SimpleJobService(SearchableJobInstanceDao jobInstanceDao, SearchableJobExecutionDao jobExecutionDao,
+			SearchableStepExecutionDao stepExecutionDao, JobRepository jobRepository,
+			ExecutionContextDao executionContextDao, JobOperator jsrJobOperator) {
+		super();
+		this.jobInstanceDao = jobInstanceDao;
+		this.jobExecutionDao = jobExecutionDao;
+		this.stepExecutionDao = stepExecutionDao;
+		this.jobRepository = jobRepository;
+		this.executionContextDao = executionContextDao;
+
+		if (jsrJobOperator == null) {
+			logger.warn("No JobOperator compatible with JSR-352 was provided.");
+		}
+		else {
+			this.jsrJobOperator = jsrJobOperator;
+		}
+	}
+
 	/**
 	 * Timeout for shutdown waiting for jobs to finish processing.
 	 *
@@ -101,26 +111,6 @@ public class SimpleJobService implements JobService, DisposableBean {
 	 */
 	public void setShutdownTimeout(int shutdownTimeout) {
 		this.shutdownTimeout = shutdownTimeout;
-	}
-
-	public SimpleJobService(SearchableJobInstanceDao jobInstanceDao, SearchableJobExecutionDao jobExecutionDao,
-			SearchableStepExecutionDao stepExecutionDao, JobRepository jobRepository, JobLauncher jobLauncher,
-			ListableJobLocator jobLocator, ExecutionContextDao executionContextDao, JobOperator jsrJobOperator) {
-		super();
-		this.jobInstanceDao = jobInstanceDao;
-		this.jobExecutionDao = jobExecutionDao;
-		this.stepExecutionDao = stepExecutionDao;
-		this.jobRepository = jobRepository;
-		this.jobLauncher = jobLauncher;
-		this.jobLocator = jobLocator;
-		this.executionContextDao = executionContextDao;
-
-		if(jsrJobOperator == null) {
-			logger.warn("No JobOperator compatible with JSR-352 was provided.");
-		}
-		else {
-			this.jsrJobOperator = jsrJobOperator;
-		}
 	}
 
 	@Override
@@ -137,29 +127,13 @@ public class SimpleJobService implements JobService, DisposableBean {
 
 	}
 
-	@Override
-	public boolean isLaunchable(String jobName) {
-		return jobLocator.getJobNames().contains(jobName) || getJsrJobNames().contains(jobName);
-	}
-
-	@Override
-	public boolean isIncrementable(String jobName) {
-		try {
-			return jobLocator.getJobNames().contains(jobName)
-					&& jobLocator.getJob(jobName).getJobParametersIncrementer() != null;
-		}
-		catch (NoSuchJobException e) {
-			// Should not happen
-			throw new IllegalStateException("Unexpected non-existent job: " + jobName);
-		}
-	}
-
 	/**
-	 * Delegates launching to {@link org.springframework.cloud.dataflow.server.batch.SimpleJobService#restart(Long, org.springframework.batch.core.JobParameters)}
+	 * Delegates launching to
+	 * {@link org.springframework.cloud.dataflow.server.batch.SimpleJobService#restart(Long, org.springframework.batch.core.JobParameters)}
 	 *
 	 * @param jobExecutionId the job execution to restart
 	 * @return Instance of {@link JobExecution} associated with the restart.
-
+	 * 
 	 * @throws NoSuchJobExecutionException thrown if job execution specified does not exist
 	 * @throws JobExecutionAlreadyRunningException thrown if job is already running
 	 * @throws JobRestartException thrown if job can not be restarted
@@ -168,42 +142,30 @@ public class SimpleJobService implements JobService, DisposableBean {
 	 * @throws JobParametersInvalidException the parameters specified are invalid
 	 */
 	@Override
-	public JobExecution restart(Long jobExecutionId) throws NoSuchJobExecutionException, JobExecutionAlreadyRunningException, JobRestartException, JobInstanceAlreadyCompleteException, NoSuchJobException, JobParametersInvalidException {
+	public JobExecution restart(Long jobExecutionId)
+			throws NoSuchJobExecutionException, JobExecutionAlreadyRunningException, JobRestartException,
+			JobInstanceAlreadyCompleteException, NoSuchJobException, JobParametersInvalidException {
 		return restart(jobExecutionId, null);
 	}
 
 	@Override
 	public JobExecution restart(Long jobExecutionId, JobParameters params) throws NoSuchJobExecutionException,
-	JobExecutionAlreadyRunningException, JobRestartException, JobInstanceAlreadyCompleteException,
-	NoSuchJobException, JobParametersInvalidException {
+			JobExecutionAlreadyRunningException, JobRestartException, JobInstanceAlreadyCompleteException,
+			NoSuchJobException, JobParametersInvalidException {
 
-		JobExecution jobExecution = null;
+		JobExecution jobExecution;
 
-		JobExecution target = getJobExecution(jobExecutionId);
-		JobInstance lastInstance = target.getJobInstance();
-
-		if(jobLocator.getJobNames().contains(lastInstance.getJobName())) {
-			Job job = jobLocator.getJob(lastInstance.getJobName());
-
-			jobExecution = jobLauncher.run(job, target.getJobParameters());
-
-			if (jobExecution.isRunning()) {
-				activeExecutions.add(jobExecution);
+		if (jsrJobOperator != null) {
+			if (params != null) {
+				jobExecution = new JobExecution(jsrJobOperator.restart(jobExecutionId, params.toProperties()));
+			}
+			else {
+				jobExecution = new JobExecution(jsrJobOperator.restart(jobExecutionId, new Properties()));
 			}
 		}
 		else {
-			if(jsrJobOperator != null) {
-				if(params != null) {
-					jobExecution = new JobExecution(jsrJobOperator.restart(jobExecutionId, params.toProperties()));
-				}
-				else {
-					jobExecution = new JobExecution(jsrJobOperator.restart(jobExecutionId, new Properties()));
-				}
-			}
-			else {
-				throw new NoSuchJobException(String.format("Can't find job associated with job execution id %s to restart",
-						String.valueOf(jobExecutionId)));
-			}
+			throw new NoSuchJobException(String.format("Can't find job associated with job execution id %s to restart",
+					String.valueOf(jobExecutionId)));
 		}
 
 		return jobExecution;
@@ -211,41 +173,17 @@ public class SimpleJobService implements JobService, DisposableBean {
 
 	@Override
 	public JobExecution launch(String jobName, JobParameters jobParameters) throws NoSuchJobException,
-	JobExecutionAlreadyRunningException, JobRestartException, JobInstanceAlreadyCompleteException,
-	JobParametersInvalidException {
+			JobExecutionAlreadyRunningException, JobRestartException, JobInstanceAlreadyCompleteException,
+			JobParametersInvalidException {
 
 		JobExecution jobExecution = null;
 
-		if(jobLocator.getJobNames().contains(jobName)) {
-			Job job = jobLocator.getJob(jobName);
-
-			JobExecution lastJobExecution = jobRepository.getLastJobExecution(jobName, jobParameters);
-			boolean restart = false;
-			if (lastJobExecution != null) {
-				BatchStatus status = lastJobExecution.getStatus();
-				if (status.isUnsuccessful() && status!=BatchStatus.ABANDONED) {
-					restart = true;
-				}
-			}
-
-			if (job.getJobParametersIncrementer() != null && !restart) {
-				jobParameters = job.getJobParametersIncrementer().getNext(jobParameters);
-			}
-
-			jobExecution = jobLauncher.run(job, jobParameters);
-
-			if (jobExecution.isRunning()) {
-				activeExecutions.add(jobExecution);
-			}
+		if (jsrJobOperator != null) {
+			jobExecution = new JobExecution(jsrJobOperator.start(jobName, jobParameters.toProperties()));
 		}
 		else {
-			if(jsrJobOperator != null) {
-				jobExecution = new JobExecution(jsrJobOperator.start(jobName, jobParameters.toProperties()));
-			}
-			else {
-				throw new NoSuchJobException(String.format("Unable to find job %s to launch",
-						String.valueOf(jobName)));
-			}
+			throw new NoSuchJobException(String.format("Unable to find job %s to launch",
+					String.valueOf(jobName)));
 		}
 
 		return jobExecution;
@@ -287,18 +225,8 @@ public class SimpleJobService implements JobService, DisposableBean {
 
 	@Override
 	public Collection<String> listJobs(int start, int count) {
-		Collection<String> jobNames = new LinkedHashSet<String>(jobLocator.getJobNames());
-		jobNames.addAll(getJsrJobNames());
-		if (start + count > jobNames.size()) {
-			jobNames.addAll(jobInstanceDao.getJobNames());
-		}
-		if (start >= jobNames.size()) {
-			start = jobNames.size();
-		}
-		if (start + count >= jobNames.size()) {
-			count = jobNames.size() - start;
-		}
-		return new ArrayList<String>(jobNames).subList(start, start + count);
+		Collection<String> jobNames = jobInstanceDao.getJobNames();
+		return new ArrayList<>(jobNames).subList(start, start + count);
 	}
 
 	private Collection<String> getJsrJobNames() {
@@ -307,13 +235,15 @@ public class SimpleJobService implements JobService, DisposableBean {
 
 		try {
 			PathMatchingResourcePatternResolver pathMatchingResourcePatternResolver = new org.springframework.core.io.support.PathMatchingResourcePatternResolver();
-			Resource[] resources = pathMatchingResourcePatternResolver.getResources("classpath*:/META-INF/batch-jobs/**/*.xml");
+			Resource[] resources = pathMatchingResourcePatternResolver
+					.getResources("classpath*:/META-INF/batch-jobs/**/*.xml");
 
 			for (Resource resource : resources) {
 				String jobXmlFileName = resource.getFilename();
 				jsr352JobNames.add(jobXmlFileName.substring(0, jobXmlFileName.length() - 4));
 			}
-		} catch (IOException e) {
+		}
+		catch (IOException e) {
 			logger.debug("Unable to list JSR-352 batch jobs", e);
 		}
 
@@ -322,9 +252,7 @@ public class SimpleJobService implements JobService, DisposableBean {
 
 	@Override
 	public int countJobs() {
-		Collection<String> names = new HashSet<String>(jobLocator.getJobNames());
-		names.addAll(jobInstanceDao.getJobNames());
-		return names.size();
+		return jobInstanceDao.getJobNames().size();
 	}
 
 	@Override
@@ -333,7 +261,7 @@ public class SimpleJobService implements JobService, DisposableBean {
 		Collection<String> jsrJobNames = getJsrJobNames();
 
 		for (JobExecution jobExecution : result) {
-			if(jsrJobOperator != null && jsrJobNames.contains(jobExecution.getJobInstance().getJobName())) {
+			if (jsrJobOperator != null && jsrJobNames.contains(jobExecution.getJobInstance().getJobName())) {
 				jsrJobOperator.stop(jobExecution.getId());
 			}
 			else {
@@ -357,7 +285,7 @@ public class SimpleJobService implements JobService, DisposableBean {
 
 		Collection<String> jsrJobNames = getJsrJobNames();
 
-		if(jsrJobOperator != null && jsrJobNames.contains(jobExecution.getJobInstance().getJobName())) {
+		if (jsrJobOperator != null && jsrJobNames.contains(jobExecution.getJobInstance().getJobName())) {
 			jsrJobOperator.stop(jobExecutionId);
 			jobExecution = getJobExecution(jobExecutionId);
 		}
@@ -371,7 +299,7 @@ public class SimpleJobService implements JobService, DisposableBean {
 
 	@Override
 	public JobExecution abandon(Long jobExecutionId) throws NoSuchJobExecutionException,
-	JobExecutionAlreadyRunningException {
+			JobExecutionAlreadyRunningException {
 
 		JobExecution jobExecution = getJobExecution(jobExecutionId);
 		if (jobExecution.getStatus().isLessThan(BatchStatus.STOPPING)) {
@@ -384,7 +312,7 @@ public class SimpleJobService implements JobService, DisposableBean {
 		Collection<String> jsrJobNames = getJsrJobNames();
 
 		JobInstance jobInstance = jobExecution.getJobInstance();
-		if(jsrJobOperator != null && jsrJobNames.contains(jobInstance.getJobName())) {
+		if (jsrJobOperator != null && jsrJobNames.contains(jobInstance.getJobName())) {
 			jsrJobOperator.abandon(jobExecutionId);
 			jobExecution = getJobExecution(jobExecutionId);
 		}
@@ -468,11 +396,11 @@ public class SimpleJobService implements JobService, DisposableBean {
 	}
 
 	@Override
-	public Collection<JobExecutionWithStepCount> listJobExecutionsForJobWithStepCount(String jobName, int start, int count)
+	public Collection<JobExecutionWithStepCount> listJobExecutionsForJobWithStepCount(String jobName, int start,
+			int count)
 			throws NoSuchJobException {
 		checkJobExists(jobName);
-		List<JobExecutionWithStepCount> jobExecutions = jobExecutionDao.getJobExecutionsWithStepCount(jobName, start, count);
-		return jobExecutions;
+		return jobExecutionDao.getJobExecutionsWithStepCount(jobName, start, count);
 	}
 
 	@Override
@@ -511,16 +439,7 @@ public class SimpleJobService implements JobService, DisposableBean {
 
 	@Override
 	public Collection<String> getStepNamesForJob(String jobName) throws NoSuchJobException {
-		try {
-			Job job = jobLocator.getJob(jobName);
-			if (job instanceof StepLocator) {
-				return ((StepLocator) job).getStepNames();
-			}
-		}
-		catch (NoSuchJobException e) {
-			// ignore
-		}
-		Collection<String> stepNames = new LinkedHashSet<String>();
+		Collection<String> stepNames = new LinkedHashSet<>();
 		for (JobExecution jobExecution : listJobExecutionsForJob(jobName, 0, 100)) {
 			for (StepExecution stepExecution : jobExecution.getStepExecutions()) {
 				stepNames.add(stepExecution.getStepName());
@@ -530,17 +449,19 @@ public class SimpleJobService implements JobService, DisposableBean {
 	}
 
 	private void checkJobExists(String jobName) throws NoSuchJobException {
-		if(getJsrJobNames().contains(jobName) ||
-				jobLocator.getJobNames().contains(jobName) ||
+		if (getJsrJobNames().stream().anyMatch(e -> e.contains(jobName)) ||
 				jobInstanceDao.countJobInstances(jobName) > 0) {
 			return;
 		}
 		throw new NoSuchJobException("No Job with that name either current or historic: [" + jobName + "]");
 	}
 
+	private boolean collectionContainsJobName(String jobName, Collection<String> collection) {
+		return collection.stream().anyMatch(e -> e.contains(jobName));
+	}
+
 	/**
-	 * Stop all the active jobs and wait for them (up to a time out) to finish
-	 * processing.
+	 * Stop all the active jobs and wait for them (up to a time out) to finish processing.
 	 */
 	@Override
 	public void destroy() throws Exception {
@@ -579,8 +500,8 @@ public class SimpleJobService implements JobService, DisposableBean {
 	}
 
 	/**
-	 * Check all the active executions and see if they are still actually
-	 * running. Remove the ones that have completed.
+	 * Check all the active executions and see if they are still actually running. Remove the
+	 * ones that have completed.
 	 */
 	@Scheduled(fixedDelay = 60000)
 	public void removeInactiveExecutions() {

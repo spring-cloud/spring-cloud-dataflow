@@ -1,4 +1,4 @@
-apiVersion: extensions/v1beta1
+apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: mysql
@@ -6,13 +6,16 @@ metadata:
     app: mysql
 spec:
   replicas: 1
+  selector:
+    matchLabels:
+      app: mysql
   template:
     metadata:
       labels:
         app: mysql
     spec:
       containers:
-      - image: mysql:5.6
+      - image: mysql:5.7.25
         name: mysql
         env:
           - name: MYSQL_ROOT_PASSWORD
@@ -26,6 +29,8 @@ spec:
         volumeMounts:
           - name: data
             mountPath: /var/lib/mysql
+        args:
+          - "--ignore-db-dir=lost+found"
       volumes:
       - name: data
         persistentVolumeClaim:

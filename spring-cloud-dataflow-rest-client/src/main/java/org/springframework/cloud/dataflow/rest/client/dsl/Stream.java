@@ -30,6 +30,7 @@ import org.springframework.cloud.dataflow.rest.util.DeploymentPropertiesUtils;
 import org.springframework.cloud.skipper.domain.PackageIdentifier;
 import org.springframework.cloud.skipper.domain.Release;
 import org.springframework.util.Assert;
+import org.springframework.util.StringUtils;
 
 /**
  * Represents a Stream deployed on DataFlow server. Instances of this class are created using a fluent style builder
@@ -50,7 +51,7 @@ import org.springframework.util.Assert;
  * @author Christian Tzolov
  *
  */
-public class Stream {
+public class Stream implements AutoCloseable {
 
 	private String name;
 
@@ -107,6 +108,21 @@ public class Stream {
 		catch (IOException e) {
 			throw new RuntimeException("Could not update Stream with property string = " + properties, e);
 		}
+	}
+
+	/**
+	 * Scale up or down the number of application instances.
+	 * @param application App in the stream to scale.
+	 * @param count Number of instance to scale to.
+	 * @param properties optional scale properties.
+	 */
+	public void scaleApplicationInstances(StreamApplication application, int count, Map<String, String> properties) {
+		this.client.streamOperations().scaleApplicationInstances(this.name,
+				getAppLabelOrName(application), count, properties);
+	}
+
+	private String getAppLabelOrName(StreamApplication application) {
+		return StringUtils.hasText(application.getLabel()) ? application.getLabel() : application.getName();
 	}
 
 	/**
@@ -179,7 +195,12 @@ public class Stream {
 		return resource.getStatus();
 	}
 
-	public static class StreamNameBuilder extends PropertyBuilder{
+	@Override
+	public void close() {
+		this.destroy();
+	}
+
+	public static class StreamNameBuilder extends PropertyBuilder {
 
 		private String name;
 

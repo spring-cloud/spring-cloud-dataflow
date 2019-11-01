@@ -23,14 +23,14 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import org.springframework.cloud.dataflow.core.PlatformTaskExecutionInformation;
+import org.springframework.cloud.dataflow.core.TaskManifest;
 import org.springframework.cloud.dataflow.rest.job.TaskJobExecutionRel;
 import org.springframework.cloud.dataflow.rest.resource.CurrentTaskExecutionsResource;
 import org.springframework.cloud.dataflow.rest.resource.TaskExecutionResource;
-import org.springframework.cloud.dataflow.rest.util.ArgumentSanitizer;
 import org.springframework.cloud.dataflow.rest.util.DeploymentPropertiesUtils;
+import org.springframework.cloud.dataflow.rest.util.TaskSanitizer;
 import org.springframework.cloud.dataflow.server.controller.support.TaskExecutionControllerDeleteAction;
 import org.springframework.cloud.dataflow.server.repository.NoSuchTaskDefinitionException;
 import org.springframework.cloud.dataflow.server.repository.NoSuchTaskExecutionException;
@@ -85,7 +85,7 @@ public class TaskExecutionController {
 
 	private final TaskDefinitionRepository taskDefinitionRepository;
 
-	private final ArgumentSanitizer argumentSanitizer = new ArgumentSanitizer();
+	private final TaskSanitizer taskSanitizer = new TaskSanitizer();
 
 	/**
 	 * Creates a {@code TaskExecutionController} that retrieves Task Execution information
@@ -183,9 +183,12 @@ public class TaskExecutionController {
 		if (taskExecution == null) {
 			throw new NoSuchTaskExecutionException(id);
 		}
-		taskExecution = sanitizePotentialSensitiveKeys(taskExecution);
+		taskExecution = this.taskSanitizer.sanitizeTaskExecutionArguments(taskExecution);
+		TaskManifest taskManifest = this.taskExecutionService.findTaskManifestById(id);
+		taskManifest = this.taskSanitizer.sanitizeTaskManifest(taskManifest);
 		TaskJobExecutionRel taskJobExecutionRel = new TaskJobExecutionRel(taskExecution,
-				new ArrayList<>(this.explorer.getJobExecutionIdsByTaskExecutionId(taskExecution.getExecutionId())));
+				new ArrayList<>(this.explorer.getJobExecutionIdsByTaskExecutionId(taskExecution.getExecutionId())),
+				taskManifest);
 		return this.taskAssembler.toModel(taskJobExecutionRel);
 	}
 
@@ -239,22 +242,20 @@ public class TaskExecutionController {
 	private Page<TaskJobExecutionRel> getPageableRelationships(Page<TaskExecution> taskExecutions, Pageable pageable) {
 		List<TaskJobExecutionRel> taskJobExecutionRels = new ArrayList<>();
 		for (TaskExecution taskExecution : taskExecutions.getContent()) {
+			TaskManifest taskManifest = this.taskExecutionService.findTaskManifestById(taskExecution.getExecutionId());
+			taskManifest = this.taskSanitizer.sanitizeTaskManifest(taskManifest);
+			List<Long> jobExecutionIds = new ArrayList<>(
+					this.explorer.getJobExecutionIdsByTaskExecutionId(taskExecution.getExecutionId()));
 			taskJobExecutionRels
-					.add(new TaskJobExecutionRel(sanitizePotentialSensitiveKeys(taskExecution), new ArrayList<>(
-							this.explorer.getJobExecutionIdsByTaskExecutionId(taskExecution.getExecutionId()))));
+					.add(new TaskJobExecutionRel(this.taskSanitizer.sanitizeTaskExecutionArguments(taskExecution),
+							jobExecutionIds,
+							taskManifest));
 		}
 		return new PageImpl<>(taskJobExecutionRels, pageable, taskExecutions.getTotalElements());
 	}
 
-	private TaskExecution sanitizePotentialSensitiveKeys(TaskExecution taskExecution) {
-		List<String> args = taskExecution.getArguments().stream()
-				.map(argument -> (this.argumentSanitizer.sanitize(argument))).collect(Collectors.toList());
-		taskExecution.setArguments(args);
-		return taskExecution;
-	}
-
 	/**
-	 * {@link org.springframework.hateoas.server.ResourceAssembler} implementation that converts
+	 * {@link org.springframework.hateoas.server.RepresentationModelAssembler} implementation that converts
 	 * {@link TaskJobExecutionRel}s to {@link TaskExecutionResource}s.
 	 */
 	private static class Assembler extends RepresentationModelAssemblerSupport<TaskJobExecutionRel, TaskExecutionResource> {
