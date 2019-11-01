@@ -33,9 +33,10 @@ and predictive analytics.
 
 ## Components
 
-**Architecture**: The Data Flow Server is a Spring Boot application that provides RESTful API and REST clients (Shell,
-Dashboard, Java DSL).
-A single Data Flow Server installation can support deploying streams and tasks to Local, Cloud Foundry, and Kubernetes.
+**Architecture**: The Spring Cloud Data Flow Server is a Spring Boot application that provides RESTful API and REST clients
+(Shell, Dashboard, Java DSL).
+A single Spring Cloud Data Flow installation can support orchestrating the deployment of streams and tasks to Local,
+Cloud Foundry, and Kubernetes.
 
 Familiarize yourself with the Spring Cloud Data Flow [architecture](https://dataflow.spring.io/docs/concepts/architecture/)
 and [feature capabilities](https://dataflow.spring.io/features/).
@@ -62,11 +63,11 @@ For example, if relying on Maven coordinates, an application URI would be of the
 `maven://<groupId>:<artifactId>:<version>`.
 
 **Shell/CLI**: The [Shell](https://github.com/spring-cloud/spring-cloud-dataflow/tree/master/spring-cloud-dataflow-shell)
-connects to the Data Flow Server's REST API and supports a DSL that simplifies the process of defining a stream or task
-and managing its lifecycle.
+connects to the Spring Cloud Data Flow Server's REST API and supports a DSL that simplifies the process of defining a
+stream or task and managing its lifecycle.
 
 **Community Implementations**: There are also community maintained Spring Cloud Data Flow implementations that are currently
-based on the 1.7.x series of Data Flow.
+based on the 1.7.x series of Spring Cloud Data Flow.
 
  * [HashiCorp Nomad](https://github.com/donovanmuller/spring-cloud-dataflow-server-nomad)
  * [OpenShift](https://github.com/donovanmuller/spring-cloud-dataflow-server-openshift)
