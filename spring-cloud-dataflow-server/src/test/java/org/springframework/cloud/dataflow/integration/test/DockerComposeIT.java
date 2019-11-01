@@ -219,7 +219,7 @@ public class DockerComposeIT {
 							(port) -> port.inFormat("http://$HOST:$EXTERNAL_PORT")))
 					.waitingForService("skipper-server", HealthChecks.toRespond2xxOverHttp(7577,
 							(port) -> port.inFormat("http://$HOST:$EXTERNAL_PORT")))
-					//.pullOnStartup(true) // set to false to test with local dataflow and skipper images.
+					.pullOnStartup(true) // set to false to test with local dataflow and skipper images.
 					.build());
 
 	private DataFlowTemplate dataFlowOperations;
