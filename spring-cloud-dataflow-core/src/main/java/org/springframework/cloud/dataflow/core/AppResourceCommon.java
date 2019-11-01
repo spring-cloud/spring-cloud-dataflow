@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.cloud.dataflow.registry.support;
+package org.springframework.cloud.dataflow.core;
 
 import java.io.File;
 import java.io.IOException;

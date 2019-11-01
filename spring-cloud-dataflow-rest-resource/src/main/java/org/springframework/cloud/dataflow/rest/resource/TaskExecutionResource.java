@@ -23,6 +23,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.springframework.batch.core.JobExecution;
+import org.springframework.cloud.dataflow.core.TaskExecutionManifest;
 import org.springframework.cloud.dataflow.rest.job.TaskJobExecutionRel;
 import org.springframework.cloud.task.repository.TaskExecution;
 import org.springframework.hateoas.PagedModel;
@@ -138,9 +139,11 @@ public class TaskExecutionResource extends RepresentationModel<TaskExecutionReso
 					.unmodifiableList(new ArrayList<>(taskJobExecutionRel.getJobExecutionIds()));
 		}
 		if (taskJobExecutionRel.getTaskManifest() != null) {
-			this.resourceUrl = taskJobExecutionRel.getTaskManifest().getTaskDeploymentRequest().getResource().toString();
-			this.appProperties = taskJobExecutionRel.getTaskManifest().getTaskDeploymentRequest().getDefinition().getProperties();
-			this.deploymentProperties = taskJobExecutionRel.getTaskManifest().getTaskDeploymentRequest().getDeploymentProperties();
+			TaskExecutionManifest.Manifest manifest = taskJobExecutionRel.getTaskManifest().getManifest();
+
+			this.resourceUrl = manifest.getTaskDeploymentRequest().getResource().toString();
+			this.appProperties = manifest.getTaskDeploymentRequest().getDefinition().getProperties();
+			this.deploymentProperties = manifest.getTaskDeploymentRequest().getDeploymentProperties();
 		}
 	}
 

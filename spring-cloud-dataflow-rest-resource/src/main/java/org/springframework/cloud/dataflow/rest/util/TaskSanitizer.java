@@ -20,7 +20,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import org.springframework.cloud.dataflow.core.TaskManifest;
+import org.springframework.cloud.dataflow.core.TaskExecutionManifest;
 import org.springframework.cloud.deployer.spi.core.AppDefinition;
 import org.springframework.cloud.deployer.spi.core.AppDeploymentRequest;
 import org.springframework.cloud.task.repository.TaskExecution;
@@ -42,13 +42,15 @@ public class TaskSanitizer {
 		return taskExecution;
 	}
 
-	public TaskManifest sanitizeTaskManifest(TaskManifest taskManifest) {
+	public TaskExecutionManifest sanitizeTaskManifest(TaskExecutionManifest taskManifest) {
 		if (taskManifest == null) {
 			return null;
 		}
-		TaskManifest sanitizedTaskManifest = new TaskManifest();
-		sanitizedTaskManifest.setPlatformName(taskManifest.getPlatformName());
-		AppDeploymentRequest existingAppDeploymentRequest = taskManifest.getTaskDeploymentRequest();
+		TaskExecutionManifest sanitizedTaskExecutionManifest = new TaskExecutionManifest();
+		TaskExecutionManifest.Manifest sanitizedManifest = sanitizedTaskExecutionManifest.getManifest();
+		TaskExecutionManifest.Manifest dirtyTaskManifest = taskManifest.getManifest();
+		sanitizedManifest.setPlatformName(dirtyTaskManifest.getPlatformName());
+		AppDeploymentRequest existingAppDeploymentRequest = dirtyTaskManifest.getTaskDeploymentRequest();
 		// Sanitize App Properties
 		Map<String, String> existingAppProperties = existingAppDeploymentRequest.getDefinition().getProperties();
 		Map<String, String> sanitizedAppProperties = this.argumentSanitizer.sanitizeProperties(existingAppProperties);
@@ -66,7 +68,7 @@ public class TaskSanitizer {
 				existingAppDeploymentRequest.getResource(),
 				sanitizedDeploymentProperties,
 				sanitizedCommandLineArgs);
-		sanitizedTaskManifest.setTaskDeploymentRequest(sanitizedAppDeploymentRequest);
-		return sanitizedTaskManifest;
+		sanitizedManifest.setTaskDeploymentRequest(sanitizedAppDeploymentRequest);
+		return sanitizedTaskExecutionManifest;
 	}
 }

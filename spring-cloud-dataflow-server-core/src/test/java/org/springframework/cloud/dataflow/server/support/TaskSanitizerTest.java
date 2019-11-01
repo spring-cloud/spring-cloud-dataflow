@@ -24,7 +24,7 @@ import java.util.Map;
 import org.junit.Assert;
 import org.junit.Test;
 
-import org.springframework.cloud.dataflow.core.TaskManifest;
+import org.springframework.cloud.dataflow.core.TaskExecutionManifest;
 import org.springframework.cloud.dataflow.rest.util.TaskSanitizer;
 import org.springframework.cloud.deployer.spi.core.AppDefinition;
 import org.springframework.cloud.deployer.spi.core.AppDeploymentRequest;
@@ -54,7 +54,7 @@ public class TaskSanitizerTest {
 
 	@Test
 	public void testTaskManifest() {
-		TaskManifest taskManifest = new TaskManifest();
+		TaskExecutionManifest taskManifest = new TaskExecutionManifest();
 		AppDeploymentRequest appDeploymentRequest = mock(AppDeploymentRequest.class);
 		Map<String, String> appProperties = new HashMap<>();
 		appProperties.put("secret", "testing");
@@ -66,14 +66,15 @@ public class TaskSanitizerTest {
 		deploymentProperties.put("secret", "testing");
 		deploymentProperties.put("user.key", "dev");
 		when(appDeploymentRequest.getDeploymentProperties()).thenReturn(deploymentProperties);
-		taskManifest.setTaskDeploymentRequest(appDeploymentRequest);
-		TaskManifest sanitizedTaskManifest = this.taskSanitizer.sanitizeTaskManifest(taskManifest);
-		List<String> commandLineArgs = sanitizedTaskManifest.getTaskDeploymentRequest().getCommandlineArguments();
+		taskManifest.getManifest().setTaskDeploymentRequest(appDeploymentRequest);
+		TaskExecutionManifest sanitizedTaskManifest = this.taskSanitizer.sanitizeTaskManifest(taskManifest);
+		TaskExecutionManifest.Manifest manifest = sanitizedTaskManifest.getManifest();
+		List<String> commandLineArgs = manifest.getTaskDeploymentRequest().getCommandlineArguments();
 		Assert.assertEquals("--username=******", commandLineArgs.get(0));
 		Assert.assertEquals("--password=******", commandLineArgs.get(1));
-		Map<String, String> deploymentProps = sanitizedTaskManifest.getTaskDeploymentRequest().getDeploymentProperties();
-		Assert.assertEquals("******", sanitizedTaskManifest.getTaskDeploymentRequest().getDefinition().getProperties().get("secret"));
-		Assert.assertEquals("******", sanitizedTaskManifest.getTaskDeploymentRequest().getDefinition().getProperties().get("user.key"));
+		Map<String, String> deploymentProps = manifest.getTaskDeploymentRequest().getDeploymentProperties();
+		Assert.assertEquals("******", manifest.getTaskDeploymentRequest().getDefinition().getProperties().get("secret"));
+		Assert.assertEquals("******", manifest.getTaskDeploymentRequest().getDefinition().getProperties().get("user.key"));
 		Assert.assertEquals("******", deploymentProps.get("secret"));
 		Assert.assertEquals("******", deploymentProps.get("user.key"));
 

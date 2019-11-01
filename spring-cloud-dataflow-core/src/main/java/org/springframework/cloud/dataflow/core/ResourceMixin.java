@@ -13,20 +13,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.springframework.cloud.dataflow.server.repository.support;
+package org.springframework.cloud.dataflow.core;
 
-import java.util.Map;
-
-import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonValue;
 
 /**
- * Jackson Mixin used to define how to create an {@code AppDefinition} when deserializing JSON
+ * Jackson mixin used to serialize a {@code Resource} as its URI
  *
+ * @author Mark Pollack
  * @author Michael Minella
  * @since 2.3
  */
-public abstract class AppDefinitionMixin {
+public abstract class ResourceMixin {
 
-	AppDefinitionMixin(@JsonProperty("name")String name, @JsonProperty("properties")Map<String, String> properties) {}
-
+	@JsonValue
+	public abstract String getURI();
 }

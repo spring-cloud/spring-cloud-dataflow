@@ -47,7 +47,9 @@ public class V2__Add_Descriptions_And_OriginalDefinition extends BaseJavaMigrati
 	public final static String CREATE_TASK_METADATA_TABLE =
 			"CREATE TABLE task_execution_metadata (\n" +
 					"    id number(19,0) NOT NULL,\n" +
+					"    object_version number(19,0),\n" +
 					"    task_execution_id  number(19,0) NOT NULL,\n" +
+					"    task_name varchar2(255) NOT NULL,\n" +
 					"    task_execution_manifest CLOB,\n" +
 					"    primary key (id),\n" +
 					"    CONSTRAINT TASK_METADATA_FK FOREIGN KEY (TASK_EXECUTION_ID)\n" +

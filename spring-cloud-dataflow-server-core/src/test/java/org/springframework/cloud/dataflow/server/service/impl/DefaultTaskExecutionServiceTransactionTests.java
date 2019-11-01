@@ -47,9 +47,9 @@ import org.springframework.cloud.dataflow.registry.service.AppRegistryService;
 import org.springframework.cloud.dataflow.server.configuration.TaskServiceDependencies;
 import org.springframework.cloud.dataflow.server.job.LauncherRepository;
 import org.springframework.cloud.dataflow.server.repository.DataflowTaskExecutionDao;
-import org.springframework.cloud.dataflow.server.repository.DataflowTaskExecutionMetadataDao;
 import org.springframework.cloud.dataflow.server.repository.TaskDefinitionRepository;
 import org.springframework.cloud.dataflow.server.repository.TaskDeploymentRepository;
+import org.springframework.cloud.dataflow.server.repository.TaskManifestRepository;
 import org.springframework.cloud.dataflow.server.service.TaskExecutionCreationService;
 import org.springframework.cloud.dataflow.server.service.TaskExecutionInfoService;
 import org.springframework.cloud.dataflow.server.service.TaskExecutionService;
@@ -126,7 +126,7 @@ public class DefaultTaskExecutionServiceTransactionTests {
 	DataflowTaskExecutionDao dataflowTaskExecutionDao;
 
 	@Autowired
-	DataflowTaskExecutionMetadataDao dataflowTaskExecutionMetadataDao;
+	TaskManifestRepository taskManifestRepository;
 
 	private TaskExecutionService transactionTaskService;
 
@@ -139,7 +139,7 @@ public class DefaultTaskExecutionServiceTransactionTests {
 				launcherRepository, auditRecordService, taskRepository,
 				taskExecutionInfoService, mock(TaskDeploymentRepository.class),
 				taskExecutionRepositoryService, taskAppDeploymentRequestCreator,
-				this.taskExplorer, this.dataflowTaskExecutionDao, this.dataflowTaskExecutionMetadataDao);
+				this.taskExplorer, this.dataflowTaskExecutionDao, this.taskManifestRepository);
 
 	}
 

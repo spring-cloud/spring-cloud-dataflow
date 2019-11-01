@@ -19,7 +19,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.springframework.cloud.dataflow.core.TaskManifest;
+import org.springframework.cloud.dataflow.core.TaskExecutionManifest;
 
 /**
  * Provides Task related services.
@@ -85,5 +85,5 @@ public interface TaskExecutionService {
 	 * @param id task exectution id
 	 * @return {@code TaskManifest} or null if not found.
 	 */
-	TaskManifest findTaskManifestById(Long id);
+	TaskExecutionManifest findTaskManifestById(Long id);
 }

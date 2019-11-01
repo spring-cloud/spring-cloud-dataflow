@@ -24,6 +24,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ForkJoinPool;
 
+import javax.persistence.EntityManager;
 import javax.sql.DataSource;
 
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
@@ -32,8 +33,6 @@ import org.mockito.Mockito;
 import org.springframework.batch.core.StepExecution;
 import org.springframework.batch.core.repository.dao.AbstractJdbcBatchMetadataDao;
 import org.springframework.batch.item.ExecutionContext;
-import org.springframework.batch.item.database.support.DataFieldMaxValueIncrementerFactory;
-import org.springframework.batch.item.database.support.DefaultDataFieldMaxValueIncrementerFactory;
 import org.springframework.boot.autoconfigure.ImportAutoConfiguration;
 import org.springframework.boot.autoconfigure.domain.EntityScan;
 import org.springframework.boot.autoconfigure.flyway.FlywayAutoConfiguration;
@@ -50,12 +49,12 @@ import org.springframework.cloud.dataflow.completion.CompletionConfiguration;
 import org.springframework.cloud.dataflow.completion.StreamCompletionProvider;
 import org.springframework.cloud.dataflow.completion.TaskCompletionProvider;
 import org.springframework.cloud.dataflow.configuration.metadata.ApplicationConfigurationMetadataResolver;
+import org.springframework.cloud.dataflow.core.AppResourceCommon;
 import org.springframework.cloud.dataflow.core.Launcher;
 import org.springframework.cloud.dataflow.core.TaskPlatform;
 import org.springframework.cloud.dataflow.registry.repository.AppRegistrationRepository;
 import org.springframework.cloud.dataflow.registry.service.AppRegistryService;
 import org.springframework.cloud.dataflow.registry.service.DefaultAppRegistryService;
-import org.springframework.cloud.dataflow.registry.support.AppResourceCommon;
 import org.springframework.cloud.dataflow.rest.support.jackson.ExecutionContextJacksonMixIn;
 import org.springframework.cloud.dataflow.rest.support.jackson.ISO8601DateFormatWithMilliSeconds;
 import org.springframework.cloud.dataflow.rest.support.jackson.StepExecutionJacksonMixIn;
@@ -92,13 +91,12 @@ import org.springframework.cloud.dataflow.server.job.LauncherRepository;
 import org.springframework.cloud.dataflow.server.registry.DataFlowAppRegistryPopulator;
 import org.springframework.cloud.dataflow.server.repository.DataflowJobExecutionDao;
 import org.springframework.cloud.dataflow.server.repository.DataflowTaskExecutionDao;
-import org.springframework.cloud.dataflow.server.repository.DataflowTaskExecutionMetadataDao;
 import org.springframework.cloud.dataflow.server.repository.JdbcDataflowJobExecutionDao;
 import org.springframework.cloud.dataflow.server.repository.JdbcDataflowTaskExecutionDao;
-import org.springframework.cloud.dataflow.server.repository.JdbcDataflowTaskExecutionMetadataDao;
 import org.springframework.cloud.dataflow.server.repository.StreamDefinitionRepository;
 import org.springframework.cloud.dataflow.server.repository.TaskDefinitionRepository;
 import org.springframework.cloud.dataflow.server.repository.TaskDeploymentRepository;
+import org.springframework.cloud.dataflow.server.repository.TaskManifestRepository;
 import org.springframework.cloud.dataflow.server.service.SchedulerService;
 import org.springframework.cloud.dataflow.server.service.SchedulerServiceProperties;
 import org.springframework.cloud.dataflow.server.service.StreamService;
@@ -137,10 +135,8 @@ import org.springframework.cloud.skipper.domain.Deployer;
 import org.springframework.cloud.task.configuration.TaskProperties;
 import org.springframework.cloud.task.repository.TaskExplorer;
 import org.springframework.cloud.task.repository.TaskRepository;
-import org.springframework.cloud.task.repository.support.DatabaseType;
 import org.springframework.cloud.task.repository.support.SimpleTaskRepository;
 import org.springframework.cloud.task.repository.support.TaskExecutionDaoFactoryBean;
-import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
@@ -152,7 +148,6 @@ import org.springframework.data.map.repository.config.EnableMapRepositories;
 import org.springframework.data.web.config.EnableSpringDataWebSupport;
 import org.springframework.hateoas.config.EnableHypermediaSupport;
 import org.springframework.hateoas.server.EntityLinks;
-import org.springframework.jdbc.support.MetaDataAccessException;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 import org.springframework.validation.beanvalidation.MethodValidationPostProcessor;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
@@ -392,10 +387,6 @@ public class TestDependencies extends WebMvcConfigurationSupport {
 
 	@Bean
 	public TaskExecutionController taskExecutionController(TaskExplorer explorer,
-			ApplicationConfigurationMetadataResolver metadataResolver,
-			AppRegistryService appRegistry, LauncherRepository launcherRepository,
-			AuditRecordService auditRecordService,
-			CommonApplicationProperties commonApplicationProperties, TaskValidationService taskValidationService,
 			TaskDefinitionRepository taskDefinitionRepository, TaskExecutionService taskExecutionService,
 			TaskExecutionInfoService taskExecutionInfoService, TaskDeleteService taskDeleteService) {
 		return new TaskExecutionController(
@@ -466,14 +457,16 @@ public class TestDependencies extends WebMvcConfigurationSupport {
 			AuditRecordService auditRecordService,
 			DataflowTaskExecutionDao dataflowTaskExecutionDao,
 			DataflowJobExecutionDao dataflowJobExecutionDao,
-			DataflowTaskExecutionMetadataDao dataflowTaskExecutionMetadataDao,
+			TaskManifestRepository taskManifestRepository,
+			EntityManager entityManager,
 			SchedulerService schedulerService) {
 		return new DefaultTaskDeleteService(taskExplorer, launcherRepository, taskDefinitionRepository,
 				taskDeploymentRepository,
 				auditRecordService,
 				dataflowTaskExecutionDao,
 				dataflowJobExecutionDao,
-				dataflowTaskExecutionMetadataDao,
+				taskManifestRepository,
+				entityManager,
 				schedulerService);
 	}
 
@@ -510,26 +503,12 @@ public class TestDependencies extends WebMvcConfigurationSupport {
 			TaskExecutionCreationService taskExecutionRepositoryService,
 			TaskAppDeploymentRequestCreator taskAppDeploymentRequestCreator,
 			TaskExplorer taskExplorer, DataflowTaskExecutionDao dataflowTaskExecutionDao,
-			DataflowTaskExecutionMetadataDao dataflowTaskExecutionMetadataDao) {
+			TaskManifestRepository taskManifestRepository) {
 		return new DefaultTaskExecutionService(
 				launcherRepository, auditRecordService, taskRepository,
 				taskExecutionInfoService, taskDeploymentRepository,
 				taskExecutionRepositoryService, taskAppDeploymentRequestCreator,
-				taskExplorer, dataflowTaskExecutionDao, dataflowTaskExecutionMetadataDao);
-	}
-
-	@Bean
-	public DataflowTaskExecutionMetadataDao dataflowTaskExecutionMetadataDao(DataSource dataSource, ApplicationContext context) {
-		DataFieldMaxValueIncrementerFactory incrementerFactory = new DefaultDataFieldMaxValueIncrementerFactory(dataSource);
-		String databaseType;
-		try {
-			databaseType = DatabaseType.fromMetaData(dataSource).name();
-		}
-		catch (MetaDataAccessException e) {
-			throw new IllegalStateException(e);
-		}
-		return new JdbcDataflowTaskExecutionMetadataDao(dataSource, incrementerFactory.getIncrementer(databaseType,
-				"task_execution_metadata_seq"));
+				taskExplorer, dataflowTaskExecutionDao, taskManifestRepository);
 	}
 
 	@Bean

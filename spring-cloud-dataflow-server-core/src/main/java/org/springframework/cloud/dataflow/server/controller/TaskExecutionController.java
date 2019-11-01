@@ -25,7 +25,7 @@ import java.util.Map;
 import java.util.Set;
 
 import org.springframework.cloud.dataflow.core.PlatformTaskExecutionInformation;
-import org.springframework.cloud.dataflow.core.TaskManifest;
+import org.springframework.cloud.dataflow.core.TaskExecutionManifest;
 import org.springframework.cloud.dataflow.rest.job.TaskJobExecutionRel;
 import org.springframework.cloud.dataflow.rest.resource.CurrentTaskExecutionsResource;
 import org.springframework.cloud.dataflow.rest.resource.TaskExecutionResource;
@@ -184,7 +184,7 @@ public class TaskExecutionController {
 			throw new NoSuchTaskExecutionException(id);
 		}
 		taskExecution = this.taskSanitizer.sanitizeTaskExecutionArguments(taskExecution);
-		TaskManifest taskManifest = this.taskExecutionService.findTaskManifestById(id);
+		TaskExecutionManifest taskManifest = this.taskExecutionService.findTaskManifestById(id);
 		taskManifest = this.taskSanitizer.sanitizeTaskManifest(taskManifest);
 		TaskJobExecutionRel taskJobExecutionRel = new TaskJobExecutionRel(taskExecution,
 				new ArrayList<>(this.explorer.getJobExecutionIdsByTaskExecutionId(taskExecution.getExecutionId())),
@@ -242,7 +242,7 @@ public class TaskExecutionController {
 	private Page<TaskJobExecutionRel> getPageableRelationships(Page<TaskExecution> taskExecutions, Pageable pageable) {
 		List<TaskJobExecutionRel> taskJobExecutionRels = new ArrayList<>();
 		for (TaskExecution taskExecution : taskExecutions.getContent()) {
-			TaskManifest taskManifest = this.taskExecutionService.findTaskManifestById(taskExecution.getExecutionId());
+			TaskExecutionManifest taskManifest = this.taskExecutionService.findTaskManifestById(taskExecution.getExecutionId());
 			taskManifest = this.taskSanitizer.sanitizeTaskManifest(taskManifest);
 			List<Long> jobExecutionIds = new ArrayList<>(
 					this.explorer.getJobExecutionIdsByTaskExecutionId(taskExecution.getExecutionId()));

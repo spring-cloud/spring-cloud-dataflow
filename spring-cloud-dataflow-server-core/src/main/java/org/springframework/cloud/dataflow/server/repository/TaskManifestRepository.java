@@ -13,19 +13,21 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.springframework.cloud.dataflow.server.service.impl;
+package org.springframework.cloud.dataflow.server.repository;
 
-import com.fasterxml.jackson.annotation.JsonValue;
+import org.springframework.cloud.dataflow.core.TaskExecutionManifest;
+import org.springframework.data.repository.PagingAndSortingRepository;
 
 /**
- * Jackson mixin used to serialize a {@code Resource} as its URI
- *
- * @author Mark Pollack
  * @author Michael Minella
+ *
  * @since 2.3
  */
-public abstract class ResourceMixin {
+public interface TaskManifestRepository extends PagingAndSortingRepository<TaskExecutionManifest, Long> {
 
-	@JsonValue
-	public abstract String getURI();
+	int deleteTaskExecutionManifestByTaskExecutionId(long taskExecutionid);
+
+	TaskExecutionManifest findFirstByTaskNameOrderByIdDesc(String taskName);
+
+	TaskExecutionManifest findByTaskExecutionId(long taskExecutionId);
 }

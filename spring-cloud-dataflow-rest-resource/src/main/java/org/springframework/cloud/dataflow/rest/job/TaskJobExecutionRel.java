@@ -20,7 +20,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import org.springframework.cloud.dataflow.core.TaskManifest;
+import org.springframework.cloud.dataflow.core.TaskExecutionManifest;
 import org.springframework.cloud.task.repository.TaskExecution;
 import org.springframework.util.Assert;
 
@@ -36,7 +36,7 @@ public class TaskJobExecutionRel {
 
 	private final List<Long> jobExecutionIds;
 
-	private final TaskManifest taskManifest;
+	private final TaskExecutionManifest taskManifest;
 
 	/**
 	 * Constructor that establishes the relationship between a {@link TaskExecution} and
@@ -57,7 +57,7 @@ public class TaskJobExecutionRel {
 	 * @param jobExecutionIds to be associated with the task execution.
 	 * @param taskManifest to be associated with the task execution
 	 */
-	public TaskJobExecutionRel(TaskExecution taskExecution, List<Long> jobExecutionIds, TaskManifest taskManifest) {
+	public TaskJobExecutionRel(TaskExecution taskExecution, List<Long> jobExecutionIds, TaskExecutionManifest taskManifest) {
 		Assert.notNull(taskExecution, "taskExecution must not be null");;
 		this.taskExecution = taskExecution;
 		this.taskManifest = taskManifest;
@@ -87,7 +87,7 @@ public class TaskJobExecutionRel {
 	/**
 	 * @return the task manifest associated with the {@link TaskExecution}.  Could be null.
 	 */
-	public TaskManifest getTaskManifest() {
+	public TaskExecutionManifest getTaskManifest() {
 		return taskManifest;
 	}
 }

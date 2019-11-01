@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.springframework.cloud.dataflow.server.service.impl;
+package org.springframework.cloud.dataflow.core;
 
 import java.io.IOException;
 
@@ -24,7 +24,6 @@ import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.JsonDeserializer;
 import com.fasterxml.jackson.databind.JsonNode;
 
-import org.springframework.cloud.dataflow.registry.support.AppResourceCommon;
 import org.springframework.core.io.Resource;
 
 /**

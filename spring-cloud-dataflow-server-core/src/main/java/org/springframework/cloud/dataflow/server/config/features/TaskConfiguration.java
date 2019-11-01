@@ -17,6 +17,7 @@ package org.springframework.cloud.dataflow.server.config.features;
 
 import java.util.List;
 
+import javax.persistence.EntityManager;
 import javax.sql.DataSource;
 
 import org.springframework.batch.core.explore.JobExplorer;
@@ -38,9 +39,9 @@ import org.springframework.cloud.dataflow.server.config.apps.CommonApplicationPr
 import org.springframework.cloud.dataflow.server.job.LauncherRepository;
 import org.springframework.cloud.dataflow.server.repository.DataflowJobExecutionDao;
 import org.springframework.cloud.dataflow.server.repository.DataflowTaskExecutionDao;
-import org.springframework.cloud.dataflow.server.repository.DataflowTaskExecutionMetadataDao;
 import org.springframework.cloud.dataflow.server.repository.TaskDefinitionRepository;
 import org.springframework.cloud.dataflow.server.repository.TaskDeploymentRepository;
+import org.springframework.cloud.dataflow.server.repository.TaskManifestRepository;
 import org.springframework.cloud.dataflow.server.service.DeployerConfigurationMetadataResolver;
 import org.springframework.cloud.dataflow.server.service.LauncherInitializationService;
 import org.springframework.cloud.dataflow.server.service.SchedulerService;
@@ -142,13 +143,15 @@ public class TaskConfiguration {
 			AuditRecordService auditRecordService,
 			DataflowTaskExecutionDao dataflowTaskExecutionDao,
 			DataflowJobExecutionDao dataflowJobExecutionDao,
-			DataflowTaskExecutionMetadataDao dataflowTaskExecutionMetadataDao) {
+			TaskManifestRepository taskManifestRepository,
+			EntityManager entityManager) {
 		return new DefaultTaskDeleteService(taskExplorer, launcherRepository, taskDefinitionRepository,
 				taskDeploymentRepository,
 				auditRecordService,
 				dataflowTaskExecutionDao,
 				dataflowJobExecutionDao,
-				dataflowTaskExecutionMetadataDao,
+				taskManifestRepository,
+				entityManager,
 				this.schedulerService);
 	}
 
@@ -181,12 +184,12 @@ public class TaskConfiguration {
 			TaskAppDeploymentRequestCreator taskAppDeploymentRequestCreator,
 			TaskExplorer taskExplorer,
 			DataflowTaskExecutionDao dataflowTaskExecutionDao,
-			DataflowTaskExecutionMetadataDao dataflowTaskExecutionMetadataDao) {
+			TaskManifestRepository taskManifestRepository) {
 		return new DefaultTaskExecutionService(
 				launcherRepository, auditRecordService, taskRepository,
 				taskExecutionInfoService, taskDeploymentRepository, taskExecutionRepositoryService,
 				taskAppDeploymentRequestCreator, taskExplorer, dataflowTaskExecutionDao,
-				dataflowTaskExecutionMetadataDao);
+				taskManifestRepository);
 	}
 
 	@Bean

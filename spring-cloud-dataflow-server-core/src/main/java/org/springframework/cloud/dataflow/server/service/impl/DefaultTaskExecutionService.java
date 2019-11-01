@@ -40,16 +40,16 @@ import org.springframework.cloud.dataflow.core.AuditOperationType;
 import org.springframework.cloud.dataflow.core.Launcher;
 import org.springframework.cloud.dataflow.core.TaskDefinition;
 import org.springframework.cloud.dataflow.core.TaskDeployment;
-import org.springframework.cloud.dataflow.core.TaskManifest;
+import org.springframework.cloud.dataflow.core.TaskExecutionManifest;
 import org.springframework.cloud.dataflow.core.TaskPlatformFactory;
 import org.springframework.cloud.dataflow.rest.util.ArgumentSanitizer;
 import org.springframework.cloud.dataflow.rest.util.DeploymentPropertiesUtils;
 import org.springframework.cloud.dataflow.server.job.LauncherRepository;
 import org.springframework.cloud.dataflow.server.repository.DataflowTaskExecutionDao;
-import org.springframework.cloud.dataflow.server.repository.DataflowTaskExecutionMetadataDao;
 import org.springframework.cloud.dataflow.server.repository.NoSuchTaskExecutionException;
 import org.springframework.cloud.dataflow.server.repository.TaskDeploymentRepository;
 import org.springframework.cloud.dataflow.server.repository.TaskExecutionMissingExternalIdException;
+import org.springframework.cloud.dataflow.server.repository.TaskManifestRepository;
 import org.springframework.cloud.dataflow.server.service.TaskExecutionCreationService;
 import org.springframework.cloud.dataflow.server.service.TaskExecutionInfoService;
 import org.springframework.cloud.dataflow.server.service.TaskExecutionService;
@@ -120,7 +120,7 @@ public class DefaultTaskExecutionService implements TaskExecutionService {
 
 	private final DataflowTaskExecutionDao dataflowTaskExecutionDao;
 
-	private final DataflowTaskExecutionMetadataDao dataflowTaskExecutionMetadataDao;
+	private final TaskManifestRepository taskManifestRepository;
 
 	private final Map<String, List<String>> tasksBeingUpgraded = new ConcurrentHashMap<>();
 
@@ -133,7 +133,7 @@ public class DefaultTaskExecutionService implements TaskExecutionService {
 	 * @param taskDeploymentRepository the repository to track task deployment
 	 * @param taskExecutionInfoService the service used to setup a task execution
 	 * @param taskExecutionRepositoryService the service used to create the task execution
-	 * @param dataflowTaskExecutionMetadataDao repository used to manipulate task manifests
+	 * @param taskManifestRepository repository used to manipulate task manifests
 	 */
 	public DefaultTaskExecutionService(LauncherRepository launcherRepository,
 			AuditRecordService auditRecordService,
@@ -144,7 +144,7 @@ public class DefaultTaskExecutionService implements TaskExecutionService {
 			TaskAppDeploymentRequestCreator taskAppDeploymentRequestCreator,
 			TaskExplorer taskExplorer,
 			DataflowTaskExecutionDao dataflowTaskExecutionDao,
-			DataflowTaskExecutionMetadataDao dataflowTaskExecutionMetadataDao) {
+			TaskManifestRepository taskManifestRepository) {
 		Assert.notNull(launcherRepository, "launcherRepository must not be null");
 		Assert.notNull(auditRecordService, "auditRecordService must not be null");
 		Assert.notNull(taskExecutionInfoService, "taskExecutionInfoService must not be null");
@@ -155,7 +155,7 @@ public class DefaultTaskExecutionService implements TaskExecutionService {
 		Assert.notNull(taskAppDeploymentRequestCreator, "taskAppDeploymentRequestCreator must not be null");
 		Assert.notNull(taskExplorer, "taskExplorer must not be null");
 		Assert.notNull(dataflowTaskExecutionDao, "dataflowTaskExecutionDao must not be null");
-		Assert.notNull(dataflowTaskExecutionMetadataDao, "dataflowTaskExecutionMetadataDao must not be null");
+		Assert.notNull(taskManifestRepository, "taskManifestRepository must not be null");
 
 		this.launcherRepository = launcherRepository;
 		this.auditRecordService = auditRecordService;
@@ -166,7 +166,7 @@ public class DefaultTaskExecutionService implements TaskExecutionService {
 		this.taskAppDeploymentRequestCreator = taskAppDeploymentRequestCreator;
 		this.taskExplorer = taskExplorer;
 		this.dataflowTaskExecutionDao = dataflowTaskExecutionDao;
-		this.dataflowTaskExecutionMetadataDao = dataflowTaskExecutionMetadataDao;
+		this.taskManifestRepository = taskManifestRepository;
 	}
 
 	@Override
@@ -214,15 +214,16 @@ public class DefaultTaskExecutionService implements TaskExecutionService {
 		AppDeploymentRequest appDeploymentRequest = this.taskAppDeploymentRequestCreator.
 				createRequest(taskExecution, taskExecutionInformation, commandLineArgs, platformName);
 
-		TaskManifest taskManifest = createTaskManifest(platformName, taskExecutionInformation, appDeploymentRequest);
+		TaskExecutionManifest taskExecutionManifest = createTaskManifest(platformName, taskExecutionInformation, appDeploymentRequest);
+		taskExecutionManifest.setTaskExecutionId(taskExecution.getExecutionId());
 
-		TaskManifest previousManifest = this.dataflowTaskExecutionMetadataDao.getLatestManifest(taskName);
+		TaskExecutionManifest previousManifest = this.taskManifestRepository.findFirstByTaskNameOrderByIdDesc(taskName);
 
 		if(taskDeploymentProperties.isEmpty()) {
-			if(previousManifest != null && !previousManifest.getTaskDeploymentRequest().getDeploymentProperties().equals(taskDeploymentProperties)) {
+			if(previousManifest != null && !previousManifest.getManifest().getTaskDeploymentRequest().getDeploymentProperties().equals(taskDeploymentProperties)) {
 				appDeploymentRequest = updateDeploymentProperties(commandLineArgs, platformName, taskExecutionInformation, taskExecution, previousManifest);
 
-				taskDeploymentProperties = previousManifest.getTaskDeploymentRequest().getDeploymentProperties();
+				taskDeploymentProperties = previousManifest.getManifest().getTaskDeploymentRequest().getDeploymentProperties();
 			}
 		}
 
@@ -231,12 +232,12 @@ public class DefaultTaskExecutionService implements TaskExecutionService {
 				taskDeploymentProperties,
 				appDeploymentRequest.getCommandlineArguments());
 
-		taskManifest.setTaskDeploymentRequest(request);
+		taskExecutionManifest.getManifest().setTaskDeploymentRequest(request);
 
 		String taskDeploymentId = null;
 
 		try {
-			if(!isAppDeploymentSame(previousManifest, taskManifest)) {
+			if(!isAppDeploymentSame(previousManifest, taskExecutionManifest)) {
 
 				validateAndLockUpgrade(taskName, platformName, taskExecution);
 
@@ -245,7 +246,8 @@ public class DefaultTaskExecutionService implements TaskExecutionService {
 
 			}
 
-			this.dataflowTaskExecutionMetadataDao.save(taskExecution, taskManifest);
+			taskExecutionManifest.setTaskExecutionId(taskExecution.getExecutionId());
+			this.taskManifestRepository.save(taskExecutionManifest);
 
 			taskDeploymentId = taskLauncher.launch(appDeploymentRequest);
 
@@ -339,7 +341,7 @@ public class DefaultTaskExecutionService implements TaskExecutionService {
 	 * @param previousManifest manifest from the last execution of the same task definition
 	 * @return an updated {@code AppDeploymentRequest}
 	 */
-	private AppDeploymentRequest updateDeploymentProperties(List<String> commandLineArgs, String platformName, TaskExecutionInformation taskExecutionInformation, TaskExecution taskExecution, TaskManifest previousManifest) {
+	private AppDeploymentRequest updateDeploymentProperties(List<String> commandLineArgs, String platformName, TaskExecutionInformation taskExecutionInformation, TaskExecution taskExecution, TaskExecutionManifest previousManifest) {
 		AppDeploymentRequest appDeploymentRequest;
 		TaskExecutionInformation info = new TaskExecutionInformation();
 		info.setTaskDefinition(taskExecutionInformation.getTaskDefinition());
@@ -347,7 +349,7 @@ public class DefaultTaskExecutionService implements TaskExecutionService {
 		info.setComposed(taskExecutionInformation.isComposed());
 		info.setMetadataResource(taskExecutionInformation.getMetadataResource());
 		info.setOriginalTaskDefinition(taskExecutionInformation.getOriginalTaskDefinition());
-		info.setTaskDeploymentProperties(previousManifest.getTaskDeploymentRequest().getDeploymentProperties());
+		info.setTaskDeploymentProperties(previousManifest.getManifest().getTaskDeploymentRequest().getDeploymentProperties());
 
 		appDeploymentRequest = this.taskAppDeploymentRequestCreator.
 				createRequest(taskExecution, info, commandLineArgs, platformName);
@@ -394,21 +396,22 @@ public class DefaultTaskExecutionService implements TaskExecutionService {
 	 * @param appDeploymentRequest the details about the deployment to be executed
 	 * @return {@code TaskManifest}
 	 */
-	private TaskManifest createTaskManifest(String platformName, TaskExecutionInformation taskExecutionInformation, AppDeploymentRequest appDeploymentRequest) {
-		TaskManifest taskManifest = new TaskManifest();
-		taskManifest.setPlatformName(platformName);
+	private TaskExecutionManifest createTaskManifest(String platformName, TaskExecutionInformation taskExecutionInformation, AppDeploymentRequest appDeploymentRequest) {
+		TaskExecutionManifest taskExecutionManifest = new TaskExecutionManifest();
+		taskExecutionManifest.getManifest().setPlatformName(platformName);
+		taskExecutionManifest.setTaskName(taskExecutionInformation.getTaskDefinition().getTaskName());
 		String composedTaskDsl = taskExecutionInformation.getTaskDefinition().getProperties().get("graph");
 		if (StringUtils.hasText(composedTaskDsl)) {
-			taskManifest.setTaskDeploymentRequest(appDeploymentRequest);
+			taskExecutionManifest.getManifest().setTaskDeploymentRequest(appDeploymentRequest);
 			List<AppDeploymentRequest> subTaskAppDeploymentRequests = this.taskExecutionInfoService.createTaskDeploymentRequests(
 					taskExecutionInformation.getTaskDefinition().getTaskName(),
 					taskExecutionInformation.getTaskDefinition().getDslText());
-			taskManifest.setSubTaskDeploymentRequests(subTaskAppDeploymentRequests);
+			taskExecutionManifest.getManifest().setSubTaskDeploymentRequests(subTaskAppDeploymentRequests);
 		}
 		else {
-			taskManifest.setTaskDeploymentRequest(appDeploymentRequest);
+			taskExecutionManifest.getManifest().setTaskDeploymentRequest(appDeploymentRequest);
 		}
-		return taskManifest;
+		return taskExecutionManifest;
 	}
 
 	/**
@@ -441,18 +444,20 @@ public class DefaultTaskExecutionService implements TaskExecutionService {
 	 * be upgraded via the data in the manifests.  Specifically, the URI of the {@code Resource}, the app properties
 	 * and the deployment properties are all evaluated in this comparison.
 	 *
-	 * @param previousManifest the manifest for the last task execution
-	 * @param newManifest the manifest for the task execution currently being requested
+	 * @param previousTaskExecutionManifest the manifest for the last task execution
+	 * @param newTaskExecutionManifest the manifest for the task execution currently being requested
 	 * @return {@code true} if no upgrade is required, {@code false} if an upgrade is required.
 	 */
-	private boolean isAppDeploymentSame(TaskManifest previousManifest, TaskManifest newManifest) {
+	private boolean isAppDeploymentSame(TaskExecutionManifest previousTaskExecutionManifest, TaskExecutionManifest newTaskExecutionManifest) {
 		boolean same;
 
-		if(previousManifest == null) {
+		if(previousTaskExecutionManifest == null) {
 			return true;
 		}
 
+		TaskExecutionManifest.Manifest previousManifest = previousTaskExecutionManifest.getManifest();
 		Resource previousResource = previousManifest.getTaskDeploymentRequest().getResource();
+		TaskExecutionManifest.Manifest newManifest = newTaskExecutionManifest.getManifest();
 		Resource newResource = newManifest.getTaskDeploymentRequest().getResource();
 
 		try {
@@ -534,9 +539,9 @@ public class DefaultTaskExecutionService implements TaskExecutionService {
 	}
 
 	@Override
-	public TaskManifest findTaskManifestById(Long id) {
+	public TaskExecutionManifest findTaskManifestById(Long id) {
 		TaskExecution taskExecution = this.taskExplorer.getTaskExecution(id);
-		return this.dataflowTaskExecutionMetadataDao.findManifestById(taskExecution.getExecutionId());
+		return this.taskManifestRepository.findByTaskExecutionId(taskExecution.getExecutionId());
 	}
 
 	private Set<TaskExecution> getValidStopExecutions(Set<Long> ids) {

@@ -51,7 +51,7 @@ import org.springframework.cloud.dataflow.core.ApplicationType;
 import org.springframework.cloud.dataflow.core.Launcher;
 import org.springframework.cloud.dataflow.core.TaskDefinition;
 import org.springframework.cloud.dataflow.core.TaskDeployment;
-import org.springframework.cloud.dataflow.core.TaskManifest;
+import org.springframework.cloud.dataflow.core.TaskExecutionManifest;
 import org.springframework.cloud.dataflow.core.TaskPlatform;
 import org.springframework.cloud.dataflow.core.TaskPlatformFactory;
 import org.springframework.cloud.dataflow.registry.service.AppRegistryService;
@@ -60,13 +60,13 @@ import org.springframework.cloud.dataflow.server.controller.InvalidCTRLaunchRequ
 import org.springframework.cloud.dataflow.server.controller.NoSuchAppException;
 import org.springframework.cloud.dataflow.server.job.LauncherRepository;
 import org.springframework.cloud.dataflow.server.repository.DataflowTaskExecutionDao;
-import org.springframework.cloud.dataflow.server.repository.DataflowTaskExecutionMetadataDao;
 import org.springframework.cloud.dataflow.server.repository.DuplicateTaskException;
 import org.springframework.cloud.dataflow.server.repository.NoSuchTaskDefinitionException;
 import org.springframework.cloud.dataflow.server.repository.NoSuchTaskExecutionException;
 import org.springframework.cloud.dataflow.server.repository.TaskDefinitionRepository;
 import org.springframework.cloud.dataflow.server.repository.TaskDeploymentRepository;
 import org.springframework.cloud.dataflow.server.repository.TaskExecutionMissingExternalIdException;
+import org.springframework.cloud.dataflow.server.repository.TaskManifestRepository;
 import org.springframework.cloud.dataflow.server.service.TaskDeleteService;
 import org.springframework.cloud.dataflow.server.service.TaskExecutionCreationService;
 import org.springframework.cloud.dataflow.server.service.TaskExecutionInfoService;
@@ -180,10 +180,10 @@ public abstract class DefaultTaskExecutionServiceTests {
 	TaskAppDeploymentRequestCreator taskAppDeploymentRequestCreator;
 
 	@Autowired
-	DataflowTaskExecutionDao dataflowTaskExecutionDao;
+	TaskManifestRepository taskManifestRepository;
 
 	@Autowired
-	DataflowTaskExecutionMetadataDao dataflowTaskExecutionMetadataDao;
+	DataflowTaskExecutionDao dataflowTaskExecutionDao;
 
 	@Autowired
 	TaskConfigurationProperties taskConfigurationProperties;
@@ -248,13 +248,15 @@ public abstract class DefaultTaskExecutionServiceTests {
 		@DirtiesContext
 		public void testUpgradeDueToResourceChange() throws IOException {
 			TaskExecution myTask = this.taskRepository.createTaskExecution(TASK_NAME_ORIG);
-			TaskManifest manifest = new TaskManifest();
-			manifest.setPlatformName("default");
+			TaskExecutionManifest manifest = new TaskExecutionManifest();
+			manifest.setTaskExecutionId(myTask.getExecutionId());
+			manifest.setTaskName(TASK_NAME_ORIG);
+			manifest.getManifest().setPlatformName("default");
 			AppDeploymentRequest request = new AppDeploymentRequest(new AppDefinition("some-name", null),
 					new FileUrlResource("src/test/resources/apps"));
-			manifest.setTaskDeploymentRequest(request);
+			manifest.getManifest().setTaskDeploymentRequest(request);
 
-			this.dataflowTaskExecutionMetadataDao.save(myTask, manifest);
+			this.taskManifestRepository.save(manifest);
 			this.taskRepository.startTaskExecution(myTask.getExecutionId(), TASK_NAME_ORIG, new Date(), new ArrayList<>(), null);
 			this.taskRepository.completeTaskExecution(myTask.getExecutionId(), 0, new Date(), null);
 
@@ -264,7 +266,8 @@ public abstract class DefaultTaskExecutionServiceTests {
 
 			this.taskExecutionService.executeTask(TASK_NAME_ORIG, new HashMap<>(), new LinkedList<>());
 
-			TaskManifest lastManifest = this.dataflowTaskExecutionMetadataDao.getLatestManifest(TASK_NAME_ORIG);
+			TaskExecutionManifest lastTaskExecutionManifest = this.taskManifestRepository.findFirstByTaskNameOrderByIdDesc(TASK_NAME_ORIG);
+			TaskExecutionManifest.Manifest lastManifest = lastTaskExecutionManifest.getManifest();
 			assertEquals("file:src/test/resources/apps/foo-task", lastManifest.getTaskDeploymentRequest().getResource().getURL().toString());
 			assertEquals("default", lastManifest.getPlatformName());
 			assertTrue(lastManifest.getSubTaskDeploymentRequests() == null);
@@ -286,8 +289,9 @@ public abstract class DefaultTaskExecutionServiceTests {
 			this.taskRepository.completeTaskExecution(firstTaskExecutionId, 0, new Date(), "all done");
 			this.taskExecutionService.executeTask(TASK_NAME_ORIG, Collections.emptyMap(), new LinkedList<>());
 
-			TaskManifest lastManifest = this.dataflowTaskExecutionMetadataDao.getLatestManifest(TASK_NAME_ORIG);
+			TaskExecutionManifest lastTaskExecutionManifest = this.taskManifestRepository.findFirstByTaskNameOrderByIdDesc(TASK_NAME_ORIG);
 
+			TaskExecutionManifest.Manifest lastManifest = lastTaskExecutionManifest.getManifest();
 			assertEquals("file:src/test/resources/apps/foo-task", lastManifest.getTaskDeploymentRequest().getResource().getURL().toString());
 			assertEquals("default", lastManifest.getPlatformName());
 			assertTrue(lastManifest.getSubTaskDeploymentRequests() == null);
@@ -311,8 +315,9 @@ public abstract class DefaultTaskExecutionServiceTests {
 			this.taskRepository.completeTaskExecution(firstTaskExecutionId, 0, new Date(), "all done");
 			this.taskExecutionService.executeTask(TASK_NAME_ORIG, Collections.emptyMap(), new LinkedList<>());
 
-			TaskManifest lastManifest = this.dataflowTaskExecutionMetadataDao.getLatestManifest(TASK_NAME_ORIG);
+			TaskExecutionManifest lastTaskExecutionManifest = this.taskManifestRepository.findFirstByTaskNameOrderByIdDesc(TASK_NAME_ORIG);
 
+			TaskExecutionManifest.Manifest lastManifest = lastTaskExecutionManifest.getManifest();
 			assertEquals("file:src/test/resources/apps/foo-task", lastManifest.getTaskDeploymentRequest().getResource().getURL().toString());
 			assertEquals("default", lastManifest.getPlatformName());
 			assertTrue(lastManifest.getSubTaskDeploymentRequests() == null);
@@ -326,13 +331,15 @@ public abstract class DefaultTaskExecutionServiceTests {
 		@DirtiesContext
 		public void testUpgradeDueToDeploymentPropsChange() throws IOException {
 			TaskExecution myTask = this.taskRepository.createTaskExecution(TASK_NAME_ORIG);
-			TaskManifest manifest = new TaskManifest();
-			manifest.setPlatformName("default");
+			TaskExecutionManifest manifest = new TaskExecutionManifest();
+			manifest.setTaskExecutionId(myTask.getExecutionId());
+			manifest.setTaskName(TASK_NAME_ORIG);
+			manifest.getManifest().setPlatformName("default");
 			AppDeploymentRequest request = new AppDeploymentRequest(new AppDefinition("some-name", null),
 					new FileUrlResource("src/test/resources/apps/foo-task"));
-			manifest.setTaskDeploymentRequest(request);
+			manifest.getManifest().setTaskDeploymentRequest(request);
 
-			this.dataflowTaskExecutionMetadataDao.save(myTask, manifest);
+			this.taskManifestRepository.save(manifest);
 			this.taskRepository.startTaskExecution(myTask.getExecutionId(), TASK_NAME_ORIG, new Date(), new ArrayList<>(), null);
 			this.taskRepository.completeTaskExecution(myTask.getExecutionId(), 0, new Date(), null);
 
@@ -345,8 +352,9 @@ public abstract class DefaultTaskExecutionServiceTests {
 
 			this.taskExecutionService.executeTask(TASK_NAME_ORIG, deploymentProperties, new LinkedList<>());
 
-			TaskManifest lastManifest = this.dataflowTaskExecutionMetadataDao.getLatestManifest(TASK_NAME_ORIG);
+			TaskExecutionManifest lastTaskExecutionManifest = this.taskManifestRepository.findFirstByTaskNameOrderByIdDesc(TASK_NAME_ORIG);
 
+			TaskExecutionManifest.Manifest lastManifest = lastTaskExecutionManifest.getManifest();
 			assertEquals("file:src/test/resources/apps/foo-task", lastManifest.getTaskDeploymentRequest().getResource().getURL().toString());
 			assertEquals("default", lastManifest.getPlatformName());
 			assertTrue(lastManifest.getSubTaskDeploymentRequests() == null);
@@ -360,13 +368,15 @@ public abstract class DefaultTaskExecutionServiceTests {
 		@DirtiesContext
 		public void testUpgradeDueToAppPropsChange() throws IOException {
 			TaskExecution myTask = this.taskRepository.createTaskExecution(TASK_NAME_ORIG);
-			TaskManifest manifest = new TaskManifest();
-			manifest.setPlatformName("default");
+			TaskExecutionManifest manifest = new TaskExecutionManifest();
+			manifest.setTaskExecutionId(myTask.getExecutionId());
+			manifest.setTaskName(TASK_NAME_ORIG);
+			manifest.getManifest().setPlatformName("default");
 			AppDeploymentRequest request = new AppDeploymentRequest(new AppDefinition("some-name", null),
 					new FileUrlResource("src/test/resources/apps/foo-task"));
-			manifest.setTaskDeploymentRequest(request);
+			manifest.getManifest().setTaskDeploymentRequest(request);
 
-			this.dataflowTaskExecutionMetadataDao.save(myTask, manifest);
+			this.taskManifestRepository.save(manifest);
 			this.taskRepository.startTaskExecution(myTask.getExecutionId(), TASK_NAME_ORIG, new Date(), new ArrayList<>(), null);
 			this.taskRepository.completeTaskExecution(myTask.getExecutionId(), 0, new Date(), null);
 
@@ -379,8 +389,9 @@ public abstract class DefaultTaskExecutionServiceTests {
 
 			this.taskExecutionService.executeTask(TASK_NAME_ORIG, deploymentProperties, new LinkedList<>());
 
-			TaskManifest lastManifest = this.dataflowTaskExecutionMetadataDao.getLatestManifest(TASK_NAME_ORIG);
+			TaskExecutionManifest lastTaskExecutionManifest = this.taskManifestRepository.findFirstByTaskNameOrderByIdDesc(TASK_NAME_ORIG);
 
+			TaskExecutionManifest.Manifest lastManifest = lastTaskExecutionManifest.getManifest();
 			assertEquals("file:src/test/resources/apps/foo-task", lastManifest.getTaskDeploymentRequest().getResource().getURL().toString());
 			assertEquals("default", lastManifest.getPlatformName());
 			assertTrue(lastManifest.getSubTaskDeploymentRequests() == null);
@@ -394,13 +405,15 @@ public abstract class DefaultTaskExecutionServiceTests {
 		@DirtiesContext
 		public void testUpgradeFailureTaskCurrentlyRunning() throws MalformedURLException {
 			TaskExecution myTask = this.taskRepository.createTaskExecution(TASK_NAME_ORIG);
-			TaskManifest manifest = new TaskManifest();
-			manifest.setPlatformName("default");
+			TaskExecutionManifest manifest = new TaskExecutionManifest();
+			manifest.setTaskExecutionId(myTask.getExecutionId());
+			manifest.setTaskName(TASK_NAME_ORIG);
+			manifest.getManifest().setPlatformName("default");
 			AppDeploymentRequest request = new AppDeploymentRequest(new AppDefinition("some-name", null),
 					new FileUrlResource("src/test/resources/apps/foo-task"));
-			manifest.setTaskDeploymentRequest(request);
+			manifest.getManifest().setTaskDeploymentRequest(request);
 
-			this.dataflowTaskExecutionMetadataDao.save(myTask, manifest);
+			this.taskManifestRepository.save(manifest);
 
 			initializeSuccessfulRegistry(appRegistry);
 			this.taskExecutionService.executeTask(TASK_NAME_ORIG, new HashMap<>(), new LinkedList<>());
@@ -659,7 +672,7 @@ public abstract class DefaultTaskExecutionServiceTests {
 					launcherRepository, auditRecordService, taskRepository,
 					taskExecutionInfoService, mock(TaskDeploymentRepository.class),
 					taskExecutionRepositoryService, taskAppDeploymentRequestCreator,
-					this.taskExplorer, this.dataflowTaskExecutionDao, this.dataflowTaskExecutionMetadataDao);
+					this.taskExplorer, this.dataflowTaskExecutionDao, this.taskManifestRepository);
 			try {
 				taskExecutionService.executeTask(TASK_NAME_ORIG, new HashMap<>(), new LinkedList<>());
 			}

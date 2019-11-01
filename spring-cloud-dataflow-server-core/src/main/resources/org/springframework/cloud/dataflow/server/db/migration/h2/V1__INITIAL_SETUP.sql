@@ -164,7 +164,9 @@ CREATE TABLE BATCH_JOB_EXECUTION_CONTEXT (
 
 create table task_execution_metadata (
      id bigint not null,
+     object_version bigint,
      task_execution_id bigint not null,
+     task_name varchar(255) not null,
      task_execution_manifest clob,
      primary key (id),
      constraint TASK_METADATA_FK foreign key (TASK_EXECUTION_ID)
