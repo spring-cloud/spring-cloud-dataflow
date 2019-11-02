@@ -57,7 +57,7 @@ public class LocalServerSecurityWithOAuth2Tests {
 
 	@Test
 	public void testAccessRootUrlWithoutCredentials() throws Exception {
-		localSkipperResource.getMockMvc().perform(get("/")).andDo(print()).andExpect(status().is3xxRedirection());
+		localSkipperResource.getMockMvc().perform(get("/")).andDo(print()).andExpect(status().isUnauthorized());
 	}
 
 	@Test

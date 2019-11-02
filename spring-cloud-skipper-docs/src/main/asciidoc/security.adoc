@@ -166,18 +166,59 @@ security:
       user-info-uri: http://127.0.0.1:9999/me
 ----
 
-<1> Providing the Client ID in the OAuth Configuration Section activates OAuth2 security.
+[source,yaml]
+----
+spring:
+  security:
+    oauth2:                                                           # <1>
+      client:
+        registration:
+          uaa:                                                        # <2>
+            client-id: myclient
+            client-secret: mysecret
+            redirect-uri: '{baseUrl}/login/oauth2/code/{registrationId}'
+            authorization-grant-type: authorization_code
+            scope:
+            - openid                                                  # <3>
+        provider:
+          uaa:
+            jwk-set-uri: http://uaa.local:8080/uaa/token_keys
+            token-uri: http://uaa.local:8080/uaa/oauth/token
+            user-info-uri: http://uaa.local:8080/uaa/userinfo         # <4>
+            user-name-attribute: user_name                            # <5>
+            authorization-uri: http://uaa.local:8080/uaa/oauth/authorize
+      resourceserver:
+        opaquetoken:
+          introspection-uri: http://uaa.local:8080/uaa/introspect # <6>
+          client-id: dataflow
+          client-secret: dataflow
+----
+
+<1> Providing this property activates OAuth2 security
+<2> The provider id. It is possible to specify more than 1 provider
+<3> As the UAA is an OpenID provider, you must at least specify the `openid` scope.
+    If your provider also provides additional scopes to control the role assignments,
+    you must specify those scopes here as well
+<4> OpenID endpoint. Used to retrieve user information such as the username. Mandatory.
+<5> The JSON property of the response that contains the username
+<6> Used to introspect and validate a directly passed-in token. Mandatory.
 
 You can verify that basic authentication is working properly by using `curl`, as follows:
 
-`$ curl -u myusername:mypassword http://localhost:7577/`
+[source,bash]
+----
+`curl -u myusername:mypassword http://localhost:7577/`
+----
 
 As a result, you should see a list of available REST endpoints.
 
 Besides Basic Authentication, you can also provide an Access Token to access the REST API.
 To make that happen, retrieve an OAuth2 Access Token from your OAuth2 provider and then pass that Access Token to the REST API by using the `Authorization` HTTP header, as follows:
 
-`$ curl -H "Authorization: Bearer <ACCESS_TOKEN>" http://localhost:7577/`
+[source,bash]
+----
+curl -H "Authorization: Bearer <ACCESS_TOKEN>" http://localhost:7577/
+----
 
 [[configuration-security-oauth2-authorization]]
 === OAuth REST Endpoint Authorization
@@ -200,19 +241,19 @@ The default rules are as follows:
 ----
             # About
 
-            - GET /api/about                      => hasRole('ROLE_VIEW')
+            - GET /api/about                     => hasRole('ROLE_VIEW')
 
             # AppDeployerDatas
 
-            - GET /api/appDeployerDatas           => hasRole('ROLE_VIEW')
+            - GET /api/appDeployerDatas          => hasRole('ROLE_VIEW')
 
             # Deployers
 
-            - GET /api/deployers                  => hasRole('ROLE_VIEW')
+            - GET /api/deployers                 => hasRole('ROLE_VIEW')
 
             ## Releases
 
-            - GET /api/releases                   => hasRole('ROLE_VIEW')
+            - GET /api/releases                  => hasRole('ROLE_VIEW')
 
             # Status
 
@@ -236,43 +277,43 @@ The default rules are as follows:
 
             # History
 
-            - GET /api/release/history/**           => hasRole('ROLE_VIEW')
+            - GET /api/release/history/**        => hasRole('ROLE_VIEW')
 
             # List
 
-            - GET /api/release/list                         => hasRole('ROLE_VIEW')
-            - GET /api/release/list/**                      => hasRole('ROLE_VIEW')
+            - GET /api/release/list              => hasRole('ROLE_VIEW')
+            - GET /api/release/list/**           => hasRole('ROLE_VIEW')
 
             # Packages
 
-            - GET /api/packages                    => hasRole('ROLE_VIEW')
+            - GET /api/packages                  => hasRole('ROLE_VIEW')
 
             # Upload
 
-            - POST /api/package/upload             => hasRole('ROLE_CREATE')
+            - POST /api/package/upload           => hasRole('ROLE_CREATE')
 
             # Install
 
-            - POST /api/package/install             => hasRole('ROLE_CREATE')
-            - POST /api/package/install/**          => hasRole('ROLE_CREATE')
+            - POST /api/package/install          => hasRole('ROLE_CREATE')
+            - POST /api/package/install/**       => hasRole('ROLE_CREATE')
 
             # Delete
 
-            - DELETE /api/package/**                => hasRole('ROLE_CREATE')
+            - DELETE /api/package/**             => hasRole('ROLE_CREATE')
 
             # PackageMetaData
 
-            - GET /api/packageMetadata              => hasRole('ROLE_VIEW')
-            - GET /api/packageMetadata/**           => hasRole('ROLE_VIEW')
+            - GET /api/packageMetadata           => hasRole('ROLE_VIEW')
+            - GET /api/packageMetadata/**        => hasRole('ROLE_VIEW')
 
             # Repositories
 
-            - GET /api/repositories                 => hasRole('ROLE_VIEW')
-            - GET /api/repositories/**              => hasRole('ROLE_VIEW')
+            - GET /api/repositories              => hasRole('ROLE_VIEW')
+            - GET /api/repositories/**           => hasRole('ROLE_VIEW')
 
             # Boot Endpoints
 
-            - GET  /actuator/**                     => hasRole('ROLE_MANAGE')
+            - GET  /actuator/**                  => hasRole('ROLE_MANAGE')
 
 ----
 
@@ -362,28 +403,3 @@ using the CloudFoundry User Account and Authentication (UAA) Server. While it is
 Cloud Foundry, it can also be used stand-alone. For more information see
 https://github.com/cloudfoundry/uaa.
 
-[[skipper-security-authentication-using-github]]
-==== Authentication using GitHub
-
-If you would like to use an existing OAuth2 provider, here is an example for GitHub.
-First, you need to register a new application under your GitHub account at: https://github.com/settings/developers[https://github.com/settings/developers]
-
-NOTE: For the Authorization callback URL, enter Spring Cloud Skippers's Login URL -- for example, `http://localhost:9393/login`.
-
-Configure Spring Cloud Skipper with the GitHub Client ID and Secret, as follows:
-
-[source,yaml]
-----
-security:
-  oauth2:
-    client:
-      client-id: your-github-client-id
-      client-secret: your-github-client-secret
-      access-token-uri: https://github.com/login/oauth/access_token
-      user-authorization-uri: https://github.com/login/oauth/authorize
-    resource:
-      user-info-uri: https://api.github.com/user
-----
-
-IMPORTANT: GitHub does not support the OAuth2 password grant type.
-As a result, you cannot use the Spring Cloud Skipper shell in conjunction with GitHub.

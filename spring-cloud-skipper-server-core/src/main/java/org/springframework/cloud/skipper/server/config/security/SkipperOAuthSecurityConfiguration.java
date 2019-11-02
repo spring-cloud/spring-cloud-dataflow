@@ -1,5 +1,5 @@
 /*
- * Copyright 2016-2017 the original author or authors.
+ * Copyright 2016-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,8 +15,6 @@
  */
 package org.springframework.cloud.skipper.server.config.security;
 
-import javax.servlet.Filter;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.common.security.AuthorizationProperties;
 import org.springframework.cloud.common.security.OAuthSecurityConfiguration;
@@ -28,11 +26,9 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.ExpressionUrlAuthorizationConfigurer;
 import org.springframework.security.oauth2.config.annotation.web.configuration.EnableOAuth2Client;
-import org.springframework.security.web.authentication.LoginUrlAuthenticationEntryPoint;
 import org.springframework.security.web.authentication.www.BasicAuthenticationEntryPoint;
 import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
-import org.springframework.security.web.util.matcher.AnyRequestMatcher;
 
 /**
  * Setup Spring Security OAuth for the Rest Endpoints of Spring Cloud Data Flow.
@@ -57,12 +53,10 @@ public class SkipperOAuthSecurityConfiguration extends OAuthSecurityConfiguratio
 		final BasicAuthenticationEntryPoint basicAuthenticationEntryPoint = new BasicAuthenticationEntryPoint();
 		basicAuthenticationEntryPoint.setRealmName(SecurityConfigUtils.BASIC_AUTH_REALM_NAME);
 		basicAuthenticationEntryPoint.afterPropertiesSet();
-		final Filter oauthFilter = oauthFilter();
 		final BasicAuthenticationFilter basicAuthenticationFilter = new BasicAuthenticationFilter(
 				providerManager(), basicAuthenticationEntryPoint);
-		http.addFilterAfter(oauthFilter, basicAuthenticationFilter.getClass());
-		http.addFilterBefore(basicAuthenticationFilter, oauthFilter.getClass());
-		http.addFilterBefore(oAuth2AuthenticationProcessingFilter(), basicAuthenticationFilter.getClass());
+
+		http.addFilter(basicAuthenticationFilter);
 		this.authorizationProperties.getAuthenticatedPaths().add(dashboard("/**"));
 		this.authorizationProperties.getAuthenticatedPaths().add(dashboard(""));
 
@@ -82,10 +76,11 @@ public class SkipperOAuthSecurityConfiguration extends OAuthSecurityConfiguratio
 				.and().csrf().disable()
 				.exceptionHandling()
 				.defaultAuthenticationEntryPointFor(basicAuthenticationEntryPoint, new AntPathRequestMatcher("/api/**"))
-				.defaultAuthenticationEntryPointFor(basicAuthenticationEntryPoint, new AntPathRequestMatcher("/actuator/**"))
-				.defaultAuthenticationEntryPointFor(
-						new LoginUrlAuthenticationEntryPoint(this.authorizationProperties.getLoginProcessingUrl()),
-						AnyRequestMatcher.INSTANCE);
+				.defaultAuthenticationEntryPointFor(basicAuthenticationEntryPoint, new AntPathRequestMatcher("/actuator/**"));
+
+		http.oauth2ResourceServer()
+			.opaqueToken().introspector(opaqueTokenIntrospector());
+
 		this.securityStateBean.setAuthenticationEnabled(true);
 	}
 }

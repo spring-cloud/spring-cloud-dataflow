@@ -8,27 +8,40 @@ spring:
     skipper:
       security:
         authorization:
-          map-oauth-scopes: true
-          role-mappings:
-            ROLE_VIEW: dataflow.view
-            ROLE_CREATE: dataflow.create
-            ROLE_MANAGE: dataflow.manage
-            ROLE_DEPLOY: dataflow.create
-            ROLE_DESTROY: dataflow.create
-            ROLE_MODIFY: dataflow.create
-            ROLE_SCHEDULE: dataflow.create
-security:
-  oauth2:
-    client:
-      client-id: myclient
-      client-secret: mysecret
-      access-token-uri: http://127.0.0.1:${oauth2.port}/oauth/token
-      user-authorization-uri: http://127.0.0.1:${oauth2.port}/oauth/authorize
-    resource:
-      user-info-uri: http://127.0.0.1:${oauth2.port}/me
-      token-info-uri: http://127.0.0.1:${oauth2.port}/oauth/check_token
-    authorization:
-      check-token-access: isAuthenticated()
+          provider-role-mappings:
+            uaa:
+              map-oauth-scopes: true
+              role-mappings:
+                ROLE_VIEW: dataflow.view
+                ROLE_CREATE: dataflow.create
+                ROLE_MANAGE: dataflow.manage
+                ROLE_DEPLOY: dataflow.create
+                ROLE_DESTROY: dataflow.create
+                ROLE_MODIFY: dataflow.create
+                ROLE_SCHEDULE: dataflow.create
+  security:
+    oauth2:
+      client:
+        registration:
+          uaa:
+            redirect-uri: '{baseUrl}/login/oauth2/code/{registrationId}'
+            authorization-grant-type: authorization_code
+            client-id: myclient
+            client-secret: mysecret
+            access-token-uri: http://127.0.0.1:${oauth2.port}/oauth/token
+            user-authorization-uri: http://127.0.0.1:${oauth2.port}/oauth/authorize
+        provider:
+          uaa:
+            authorization-uri: http://127.0.0.1:${oauth2.port}/oauth/authorize
+            user-info-uri: http://127.0.0.1:${oauth2.port}/me
+            token-uri: http://127.0.0.1:${oauth2.port}/oauth/token
+      resourceserver:
+        opaquetoken:
+          introspection-uri: http://127.0.0.1:${oauth2.port}/oauth/check_token
+          client-id: myclient
+          client-secret: mysecret
+      authorization:
+        check-token-access: isAuthenticated()
 logging:
   level:
     org.springframework.security: INFO

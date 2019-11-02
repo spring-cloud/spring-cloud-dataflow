@@ -36,7 +36,7 @@
 		<!-- NOTE: Make sure to update `spring-cloud-build` version and `spring-cloud-dependencies` version (spring-cloud.version)
 		are in sync with the https://github.com/spring-cloud/spring-cloud-release/blob/master/pom.xml updates for the respective
 		release versions -->
-		<spring-cloud.version>Hoxton.M3</spring-cloud.version>
+		<spring-cloud.version>Hoxton.BUILD-SNAPSHOT</spring-cloud.version>
 
 		<java-cfenv-boot.version>1.1.1.RELEASE</java-cfenv-boot.version>
 		<spring-cloud-deployer.version>2.1.0.BUILD-SNAPSHOT</spring-cloud-deployer.version>
@@ -52,8 +52,7 @@
 		<zeroturnaround.version>1.13</zeroturnaround.version>
 		<spring-restdocs.version>1.2.2.RELEASE</spring-restdocs.version>
 		<java-semver.version>0.9.0</java-semver.version>
-		<spring-cloud-common-security-config.version>1.2.0.M2</spring-cloud-common-security-config.version>
-		<spring-security-oauth2-autoconfigure.version>2.2.0.RC1</spring-security-oauth2-autoconfigure.version>
+		<spring-cloud-common-security-config.version>1.2.0.BUILD-SNAPSHOT</spring-cloud-common-security-config.version>
 
 		<jsonpath.version>2.4.0</jsonpath.version>
 		<equalverifier.version>2.4.1</equalverifier.version>
