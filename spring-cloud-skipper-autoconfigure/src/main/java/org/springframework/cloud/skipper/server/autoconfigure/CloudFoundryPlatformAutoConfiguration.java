@@ -92,7 +92,9 @@ public class CloudFoundryPlatformAutoConfiguration {
 					.build();
 			TokenProvider tokenProvider = PasswordGrantTokenProvider.builder()
 					.username(connectionProperties.getUsername())
-					.password(connectionProperties.getPassword()).build();
+					.password(connectionProperties.getPassword())
+					.loginHint(connectionProperties.getLoginHint())
+					.build();
 			CloudFoundryClient cloudFoundryClient = ReactorCloudFoundryClient.builder()
 					.connectionContext(connectionContext).tokenProvider(tokenProvider)
 					.build();
