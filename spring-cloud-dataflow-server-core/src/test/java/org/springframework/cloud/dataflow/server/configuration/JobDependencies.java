@@ -373,8 +373,7 @@ public class JobDependencies {
 		Launcher launcher = new Launcher("default", "defaultType", null, null);
 		List<Launcher> launchers = new ArrayList<>();
 		launchers.add(launcher);
-		TaskPlatform taskPlatform = new TaskPlatform("testTaskPlatform", launchers);
-		return taskPlatform;
+		return new TaskPlatform("testTaskPlatform", launchers);
 	}
 
 	@Bean

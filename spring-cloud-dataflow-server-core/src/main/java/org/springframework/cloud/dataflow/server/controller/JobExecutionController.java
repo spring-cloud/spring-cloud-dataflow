@@ -69,7 +69,6 @@ public class JobExecutionController {
 	 * @param taskJobService the service this controller will use for retrieving job
 	 * execution information. Must not be null.
 	 */
-	@Autowired
 	public JobExecutionController(TaskJobService taskJobService) {
 		Assert.notNull(taskJobService, "taskJobService must not be null");
 		this.taskJobService = taskJobService;
