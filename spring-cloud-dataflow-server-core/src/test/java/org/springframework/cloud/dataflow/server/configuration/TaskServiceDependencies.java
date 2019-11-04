@@ -280,12 +280,15 @@ public class TaskServiceDependencies extends WebMvcConfigurationSupport {
 			TaskExecutionCreationService taskExecutionRepositoryService,
 			TaskAppDeploymentRequestCreator taskAppDeploymentRequestCreator,
 			TaskExplorer taskExplorer, DataflowTaskExecutionDao dataflowTaskExecutionDao,
-			DataflowTaskExecutionMetadataDao dataflowTaskExecutionMetadataDao) {
-		return new DefaultTaskExecutionService(
+			DataflowTaskExecutionMetadataDao dataflowTaskExecutionMetadataDao,
+			TaskSaveService taskSaveService) {
+		DefaultTaskExecutionService taskExecutionService =  new DefaultTaskExecutionService(
 				launcherRepository, auditRecordService, taskRepository,
 				taskExecutionInfoService, taskDeploymentRepository,
 				taskExecutionRepositoryService, taskAppDeploymentRequestCreator,
-				taskExplorer, dataflowTaskExecutionDao, dataflowTaskExecutionMetadataDao);
+				taskExplorer, dataflowTaskExecutionDao, dataflowTaskExecutionMetadataDao, taskSaveService);
+		taskExecutionService.setAutoCreateTaskDefinitions(taskConfigurationProperties.isAutoCreateTaskDefinitions());
+		return taskExecutionService;
 	}
 
 	@Bean
