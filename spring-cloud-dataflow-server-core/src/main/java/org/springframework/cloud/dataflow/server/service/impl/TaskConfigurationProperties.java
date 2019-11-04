@@ -59,7 +59,7 @@ public class TaskConfigurationProperties {
 	/**
 	 * The prefix to attach to the application properties to be sent to the schedule task launcher.
 	 */
-	private String taskLauncherPrefix = "tasklauncher.";
+	private String taskLauncherPrefix = "tasklauncher";
 
 	/**
 	 * The properties for showing deployer properties.

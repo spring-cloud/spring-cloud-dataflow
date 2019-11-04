@@ -224,11 +224,11 @@ public class DefaultSchedulerService implements SchedulerService {
 			String updatedKey = key;
 			if (!key.startsWith(DATA_FLOW_URI_KEY)) {
 				if (StringUtils.hasText(appName)) {
-					updatedKey = taskConfigurationProperties.getTaskLauncherPrefix() +
+					updatedKey = taskConfigurationProperties.getTaskLauncherPrefix() + "." +
 							prefix + appName + "." + key;
 				}
 				else {
-					updatedKey = taskConfigurationProperties.getTaskLauncherPrefix() +
+					updatedKey = taskConfigurationProperties.getTaskLauncherPrefix() + "." +
 							prefix + key;
 				}
 			}
