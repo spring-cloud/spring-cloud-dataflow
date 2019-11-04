@@ -62,6 +62,12 @@ public class TaskConfigurationProperties {
 	private String taskLauncherPrefix = "tasklauncher";
 
 	/**
+	 * Whether the server should auto create task definitions if one does not exist for a launch request and
+	 * a registered task application with the same name does exist.
+	 */
+	private boolean autoCreateTaskDefinitions;
+
+	/**
 	 * The properties for showing deployer properties.
 	 */
 	private DeployerProperties deployerProperties = new DeployerProperties();
@@ -112,6 +118,14 @@ public class TaskConfigurationProperties {
 
 	public void setDeployerProperties(DeployerProperties deployerProperties) {
 		this.deployerProperties = deployerProperties;
+	}
+
+	public boolean isAutoCreateTaskDefinitions() {
+		return autoCreateTaskDefinitions;
+	}
+
+	public void setAutoCreateTaskDefinitions(boolean autoCreateTaskDefinitions) {
+		this.autoCreateTaskDefinitions = autoCreateTaskDefinitions;
 	}
 
 	public static class DeployerProperties {

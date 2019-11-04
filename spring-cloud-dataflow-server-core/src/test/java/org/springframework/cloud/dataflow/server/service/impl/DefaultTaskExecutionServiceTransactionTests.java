@@ -54,6 +54,7 @@ import org.springframework.cloud.dataflow.server.repository.TaskDeploymentReposi
 import org.springframework.cloud.dataflow.server.service.TaskExecutionCreationService;
 import org.springframework.cloud.dataflow.server.service.TaskExecutionInfoService;
 import org.springframework.cloud.dataflow.server.service.TaskExecutionService;
+import org.springframework.cloud.dataflow.server.service.TaskSaveService;
 import org.springframework.cloud.deployer.spi.core.AppDeploymentRequest;
 import org.springframework.cloud.deployer.spi.core.RuntimeEnvironmentInfo;
 import org.springframework.cloud.deployer.spi.task.TaskLauncher;
@@ -101,6 +102,9 @@ public class DefaultTaskExecutionServiceTransactionTests {
 	AppRegistryService appRegistry;
 
 	@Autowired
+	TaskSaveService taskSaveService;
+
+	@Autowired
 	TaskExecutionInfoService taskExecutionInfoService;
 
 	@Autowired
@@ -142,7 +146,7 @@ public class DefaultTaskExecutionServiceTransactionTests {
 				taskExecutionInfoService, mock(TaskDeploymentRepository.class),
 				taskExecutionRepositoryService, taskAppDeploymentRequestCreator,
 				this.taskExplorer, this.dataflowTaskExecutionDao, this.dataflowTaskExecutionMetadataDao,
-				mock(OAuth2TokenUtilsService.class));
+				mock(OAuth2TokenUtilsService.class), this.taskSaveService);
 	}
 
 	@Test

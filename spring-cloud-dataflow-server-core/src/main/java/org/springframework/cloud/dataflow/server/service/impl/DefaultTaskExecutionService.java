@@ -47,12 +47,14 @@ import org.springframework.cloud.dataflow.rest.util.DeploymentPropertiesUtils;
 import org.springframework.cloud.dataflow.server.job.LauncherRepository;
 import org.springframework.cloud.dataflow.server.repository.DataflowTaskExecutionDao;
 import org.springframework.cloud.dataflow.server.repository.DataflowTaskExecutionMetadataDao;
+import org.springframework.cloud.dataflow.server.repository.NoSuchTaskDefinitionException;
 import org.springframework.cloud.dataflow.server.repository.NoSuchTaskExecutionException;
 import org.springframework.cloud.dataflow.server.repository.TaskDeploymentRepository;
 import org.springframework.cloud.dataflow.server.repository.TaskExecutionMissingExternalIdException;
 import org.springframework.cloud.dataflow.server.service.TaskExecutionCreationService;
 import org.springframework.cloud.dataflow.server.service.TaskExecutionInfoService;
 import org.springframework.cloud.dataflow.server.service.TaskExecutionService;
+import org.springframework.cloud.dataflow.server.service.TaskSaveService;
 import org.springframework.cloud.dataflow.server.service.impl.diff.TaskAnalysisReport;
 import org.springframework.cloud.dataflow.server.service.impl.diff.TaskAnalyzer;
 import org.springframework.cloud.deployer.spi.core.AppDeploymentRequest;
@@ -130,6 +132,10 @@ public class DefaultTaskExecutionService implements TaskExecutionService {
 
 	private final TaskAnalyzer taskAnalyzer = new TaskAnalyzer();
 
+	private final TaskSaveService taskSaveService;
+
+	private boolean autoCreateTaskDefinitions;
+
 	/**
 	 * Initializes the {@link DefaultTaskExecutionService}.
 	 *
@@ -151,7 +157,8 @@ public class DefaultTaskExecutionService implements TaskExecutionService {
 			TaskExplorer taskExplorer,
 			DataflowTaskExecutionDao dataflowTaskExecutionDao,
 			DataflowTaskExecutionMetadataDao dataflowTaskExecutionMetadataDao,
-			OAuth2TokenUtilsService oauth2TokenUtilsService) {
+			OAuth2TokenUtilsService oauth2TokenUtilsService,
+			TaskSaveService taskSaveService) {
 		Assert.notNull(launcherRepository, "launcherRepository must not be null");
 		Assert.notNull(auditRecordService, "auditRecordService must not be null");
 		Assert.notNull(taskExecutionInfoService, "taskExecutionInfoService must not be null");
@@ -163,6 +170,7 @@ public class DefaultTaskExecutionService implements TaskExecutionService {
 		Assert.notNull(taskExplorer, "taskExplorer must not be null");
 		Assert.notNull(dataflowTaskExecutionDao, "dataflowTaskExecutionDao must not be null");
 		Assert.notNull(dataflowTaskExecutionMetadataDao, "dataflowTaskExecutionMetadataDao must not be null");
+		Assert.notNull(taskSaveService, "taskSaveService must not be null");
 
 		this.oauth2TokenUtilsService = oauth2TokenUtilsService;
 		this.launcherRepository = launcherRepository;
@@ -175,8 +183,18 @@ public class DefaultTaskExecutionService implements TaskExecutionService {
 		this.taskExplorer = taskExplorer;
 		this.dataflowTaskExecutionDao = dataflowTaskExecutionDao;
 		this.dataflowTaskExecutionMetadataDao = dataflowTaskExecutionMetadataDao;
+		this.taskSaveService = taskSaveService;
 	}
 
+	/**
+	 * Launch a task.
+	 * @param taskName Name of the task definition or registered task application.
+	 *                 If a task definition does not exist, one will be created if `autoCreateTask-Definitions` is true.  Must not be null or empty.
+	 * @param taskDeploymentProperties Optional deployment properties. Must not be null.
+	 * @param commandLineArgs Optional runtime commandline argument
+	 * @param composedTaskRunnerName the name of the app the user would like to use if they don't want the default.  If null default will be used.
+	 * @return the task execution ID.
+	 */
 	@Override
 	public long executeTask(String taskName, Map<String, String> taskDeploymentProperties, List<String> commandLineArgs,
 			String composedTaskRunnerName) {
@@ -212,9 +230,10 @@ public class DefaultTaskExecutionService implements TaskExecutionService {
 			}
 		}
 
-		// Build execution info and stash deploy props there
-		TaskExecutionInformation taskExecutionInformation = taskExecutionInfoService
-				.findTaskExecutionInformation(taskName, taskDeploymentProperties, composedTaskRunnerName);
+
+		TaskExecutionInformation taskExecutionInformation =
+				findOrCreateTaskExecutionInformation(taskName, taskDeploymentProperties, composedTaskRunnerName);
+
 		if (taskExecutionInformation.isComposed()) {
 			handleAccessToken(commandLineArgs, taskExecutionInformation);
 		}
@@ -287,6 +306,28 @@ public class DefaultTaskExecutionService implements TaskExecutionService {
 						));
 
 		return taskExecution.getExecutionId();
+	}
+
+	private TaskExecutionInformation findOrCreateTaskExecutionInformation(String taskName, Map<String, String> taskDeploymentProperties, String composedTaskRunnerName) {
+
+		TaskExecutionInformation taskExecutionInformation;
+		try {
+			 taskExecutionInformation = taskExecutionInfoService
+					.findTaskExecutionInformation(taskName, taskDeploymentProperties, composedTaskRunnerName);
+
+		} catch (NoSuchTaskDefinitionException e) {
+			if (autoCreateTaskDefinitions) {
+				logger.info("Creating a Task Definition {} for registered app name {}", taskName, taskName);
+				TaskDefinition taskDefinition = new TaskDefinition(taskName, taskName);
+				taskSaveService.saveTaskDefinition(taskDefinition);
+				taskExecutionInformation = taskExecutionInfoService
+						.findTaskExecutionInformation(taskName, taskDeploymentProperties, composedTaskRunnerName);
+			}
+			else {
+				throw e;
+			}
+		}
+		return taskExecutionInformation;
 	}
 
 	/**
@@ -541,6 +582,10 @@ public class DefaultTaskExecutionService implements TaskExecutionService {
 	public TaskManifest findTaskManifestById(Long id) {
 		TaskExecution taskExecution = this.taskExplorer.getTaskExecution(id);
 		return this.dataflowTaskExecutionMetadataDao.findManifestById(taskExecution.getExecutionId());
+	}
+
+	public void setAutoCreateTaskDefinitions(boolean autoCreateTaskDefinitions) {
+		this.autoCreateTaskDefinitions = autoCreateTaskDefinitions;
 	}
 
 	private Set<TaskExecution> getValidStopExecutions(Set<Long> ids) {

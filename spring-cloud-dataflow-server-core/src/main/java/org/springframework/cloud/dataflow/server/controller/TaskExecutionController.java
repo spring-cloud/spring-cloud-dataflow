@@ -149,10 +149,11 @@ public class TaskExecutionController {
 	}
 
 	/**
-	 * Request the launching of an existing task definition. The name must be included in the
-	 * path.
+	 * Request the launching of an existing task definition. The task definition will be created from a registered task application
+	 * if `spring.cloud.dataflow.task.auto-create-task-definitions` is true.
+	 * The name must be included in the path.
 	 *
-	 * @param taskName the name of the existing task to be executed (required)
+	 * @param taskName the name of the task to be executed (required)
 	 * @param ctrname user specified name of a ctr app if different than the default.
 	 * @param properties the runtime properties for the task, as a comma-delimited list of
 	 *     key=value pairs
@@ -167,6 +168,7 @@ public class TaskExecutionController {
 			@RequestParam(required = false) String arguments) {
 		Map<String, String> propertiesToUse = DeploymentPropertiesUtils.parse(properties);
 		List<String> argumentsToUse = DeploymentPropertiesUtils.parseParamList(arguments, " ");
+
 		return this.taskExecutionService.executeTask(taskName, propertiesToUse, argumentsToUse, ctrname);
 	}
 

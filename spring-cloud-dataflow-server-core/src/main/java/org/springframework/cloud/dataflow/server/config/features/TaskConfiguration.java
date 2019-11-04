@@ -98,6 +98,9 @@ public class TaskConfiguration {
 	@Value("${spring.cloud.dataflow.server.uri:}")
 	private String dataflowServerUri;
 
+	@Autowired
+	private TaskConfigurationProperties taskConfigurationProperties;
+
 	@Bean
 	public DeployerConfigurationMetadataResolver deployerConfigurationMetadataResolver(
 			TaskConfigurationProperties taskConfigurationProperties) {
@@ -183,13 +186,15 @@ public class TaskConfiguration {
 			TaskExplorer taskExplorer,
 			DataflowTaskExecutionDao dataflowTaskExecutionDao,
 			DataflowTaskExecutionMetadataDao dataflowTaskExecutionMetadataDao,
-			@Nullable OAuth2TokenUtilsService oauth2TokenUtilsService) {
-		return new DefaultTaskExecutionService(
+			@Nullable OAuth2TokenUtilsService oauth2TokenUtilsService,
+			TaskSaveService taskSaveService) {
+		DefaultTaskExecutionService defaultTaskExecutionService =  new DefaultTaskExecutionService(
 				launcherRepository, auditRecordService, taskRepository,
 				taskExecutionInfoService, taskDeploymentRepository, taskExecutionRepositoryService,
 				taskAppDeploymentRequestCreator, taskExplorer, dataflowTaskExecutionDao,
-				dataflowTaskExecutionMetadataDao, oauth2TokenUtilsService);
-
+				dataflowTaskExecutionMetadataDao, oauth2TokenUtilsService, taskSaveService);
+		defaultTaskExecutionService.setAutoCreateTaskDefinitions(taskConfigurationProperties.isAutoCreateTaskDefinitions());
+		return defaultTaskExecutionService;
 	}
 
 	@Bean

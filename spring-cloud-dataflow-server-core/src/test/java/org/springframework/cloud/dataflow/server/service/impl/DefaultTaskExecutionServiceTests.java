@@ -151,9 +151,6 @@ public abstract class DefaultTaskExecutionServiceTests {
 	TaskDeleteService taskDeleteService;
 
 	@Autowired
-	TaskExecutionInfoService taskExecutionInfoService;
-
-	@Autowired
 	TaskExecutionService taskExecutionService;
 
 	@Autowired
@@ -410,7 +407,6 @@ public abstract class DefaultTaskExecutionServiceTests {
 			this.launcherRepository.save(new Launcher("MyPlatform", "local", taskLauncher));
 
 			taskDefinitionRepository.save(new TaskDefinition(TASK_NAME_ORIG, "demo"));
-			taskDefinitionRepository.findAll();
 		}
 
 		@Test
@@ -653,8 +649,7 @@ public abstract class DefaultTaskExecutionServiceTests {
 					taskExecutionInfoService, mock(TaskDeploymentRepository.class),
 					taskExecutionRepositoryService, taskAppDeploymentRequestCreator,
 					this.taskExplorer, this.dataflowTaskExecutionDao, this.dataflowTaskExecutionMetadataDao,
-					mock(OAuth2TokenUtilsService.class));
-
+					mock(OAuth2TokenUtilsService.class), this.taskSaveService);
 			try {
 				taskExecutionService.executeTask(TASK_NAME_ORIG, new HashMap<>(), new LinkedList<>());
 			}
@@ -702,6 +697,32 @@ public abstract class DefaultTaskExecutionServiceTests {
 			assertEquals("invalid", validationStatus.getAppsStatuses().get("task:simpleTask"));
 		}
 	}
+
+	@TestPropertySource(properties = { "spring.cloud.dataflow.task.auto-create-task-definitions=true" })
+	@AutoConfigureTestDatabase(replace = Replace.ANY)
+	public static class AutoCreateTaskDefinitionTests extends DefaultTaskExecutionServiceTests {
+
+		@Autowired
+		TaskDefinitionRepository taskDefinitionRepository;
+
+		@Autowired
+		TaskExecutionInfoService taskExecutionInfoService;
+
+		@Before
+		public void setup() {
+			this.launcherRepository.save(new Launcher("default", "local", taskLauncher));
+		}
+
+		@Test
+		@DirtiesContext
+		public void executeTaskWithNullDefinitionCreatesDefinitionIfConfigured() {
+			initializeSuccessfulRegistry(appRegistry);
+			when(this.taskLauncher.launch(any())).thenReturn("0");
+			taskExecutionService.executeTask("demo", new HashMap<>(), new LinkedList<>());
+			assertNotNull(taskDefinitionRepository.findByTaskName("demo"));
+		}
+	}
+
 
 	@TestPropertySource(properties = { "spring.cloud.dataflow.applicationProperties.task.globalkey=globalvalue",
 			"spring.cloud.dataflow.applicationProperties.stream.globalstreamkey=nothere" })

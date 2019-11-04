@@ -127,6 +127,8 @@ public class DefaultTaskExecutionInfoService implements TaskExecutionInfoService
 
 		TaskDefinition originalTaskDefinition = taskDefinitionRepository.findById(taskName)
 				.orElseThrow(() -> new NoSuchTaskDefinitionException(taskName));
+		//TODO: This normally called by JPA automatically but `AutoCreateTaskDefinitionTests` fails without this.
+		originalTaskDefinition.initialize();
 		TaskParser taskParser = new TaskParser(originalTaskDefinition.getName(), originalTaskDefinition.getDslText(),
 				true, true);
 		TaskNode taskNode = taskParser.parse();

@@ -169,6 +169,7 @@ import static org.mockito.Mockito.when;
  * @author Ilayaperumal Gopinathan
  * @author Christian Tzolov
  * @author Gunnar Hillert
+ * @author David Turanski
  */
 @Configuration
 @EnableSpringDataWebSupport
@@ -512,13 +513,15 @@ public class TestDependencies extends WebMvcConfigurationSupport {
 			TaskAppDeploymentRequestCreator taskAppDeploymentRequestCreator,
 			TaskExplorer taskExplorer, DataflowTaskExecutionDao dataflowTaskExecutionDao,
 			DataflowTaskExecutionMetadataDao dataflowTaskExecutionMetadataDao,
-			OAuth2TokenUtilsService oauth2TokenUtilsService) {
+			OAuth2TokenUtilsService oauth2TokenUtilsService,
+			TaskSaveService taskSaveService) {
+
 		return new DefaultTaskExecutionService(
 				launcherRepository, auditRecordService, taskRepository,
 				taskExecutionInfoService, taskDeploymentRepository,
 				taskExecutionRepositoryService, taskAppDeploymentRequestCreator,
 				taskExplorer, dataflowTaskExecutionDao, dataflowTaskExecutionMetadataDao,
-				oauth2TokenUtilsService);
+				oauth2TokenUtilsService, taskSaveService);
 	}
 
 	@Bean
