@@ -581,7 +581,7 @@ You can verify that basic authentication is working properly by using curl, as f
 
 [source,bash]
 ----
-$ curl -u myusername:mypassword http://localhost:9393/ -H 'Accept: application/json'
+curl -u myusername:mypassword http://localhost:9393/ -H 'Accept: application/json'
 ----
 
 As a result, you should see a list of available REST endpoints.

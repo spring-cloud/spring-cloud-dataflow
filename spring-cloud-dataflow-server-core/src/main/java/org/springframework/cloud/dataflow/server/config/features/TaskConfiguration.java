@@ -183,7 +183,7 @@ public class TaskConfiguration {
 			TaskExplorer taskExplorer,
 			DataflowTaskExecutionDao dataflowTaskExecutionDao,
 			DataflowTaskExecutionMetadataDao dataflowTaskExecutionMetadataDao,
-			@Autowired(required = false) OAuth2TokenUtilsService oauth2TokenUtilsService) {
+			@Nullable OAuth2TokenUtilsService oauth2TokenUtilsService) {
 		return new DefaultTaskExecutionService(
 				launcherRepository, auditRecordService, taskRepository,
 				taskExecutionInfoService, taskDeploymentRepository, taskExecutionRepositoryService,
