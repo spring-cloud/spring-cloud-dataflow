@@ -16,9 +16,6 @@
 
 package org.springframework.cloud.dataflow.shell.command;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import org.springframework.shell.core.CommandResult;
 import org.springframework.shell.core.JLineShellComponent;
 
