@@ -478,9 +478,12 @@ The following example shows how to deploy the `http` health check type to an end
 [[configuration-cloudfoundry-app-resolution-options]]
 === Application Resolution Alternatives
 
-Though we highly recommend using Maven Repository for application link:https://docs.spring.io/spring-cloud-dataflow/docs/{scdf-core-version}/reference/htmlsingle/#spring-cloud-dataflow-register-stream-apps[resolution and registration]
-in Cloud Foundry, there might be situations where an alternative approach would make sense. The following alternative options
-could help you resolve applications when running on Cloud Foundry.
+Though we recommend using a Maven Artifactory for application link:https://docs.spring.io/spring-cloud-dataflow/docs/{scdf-core-version}/reference/htmlsingle/#spring-cloud-dataflow-register-stream-apps[resolution and registration],
+there might be situations where one of the following alternative approaches would make sense.
+
+* We have custom-built and maintain a link:https://github.com/spring-cloud-stream-app-starters/scdf-app-tool[SCDF APP Tool]
+that can run as a regular Spring Boot application in Cloud Foundry, but it will in turn host and serve the application
+JARs for SCDF at runtime.
 
 * With the help of Spring Boot, we can serve link:https://docs.spring.io/spring-boot/docs/current/reference/html/boot-features-developing-web-applications.html#boot-features-spring-mvc-static-content[static content]
 in Cloud Foundry. A simple Spring Boot application can bundle all the required stream and task applications. By having it
