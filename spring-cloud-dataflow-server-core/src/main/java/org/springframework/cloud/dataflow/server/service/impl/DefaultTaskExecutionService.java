@@ -145,7 +145,6 @@ public class DefaultTaskExecutionService implements TaskExecutionService {
 	 * @param taskExecutionRepositoryService the service used to create the task execution
 	 * @param dataflowTaskExecutionMetadataDao repository used to manipulate task manifests
 	 */
-	//@formatter:off
 	public DefaultTaskExecutionService(LauncherRepository launcherRepository,
 			AuditRecordService auditRecordService,
 			TaskRepository taskRepository,
@@ -157,7 +156,7 @@ public class DefaultTaskExecutionService implements TaskExecutionService {
 			DataflowTaskExecutionDao dataflowTaskExecutionDao,
 			DataflowTaskExecutionMetadataDao dataflowTaskExecutionMetadataDao,
 			TaskSaveService taskSaveService) {
-		//@formatter:on
+
 		Assert.notNull(launcherRepository, "launcherRepository must not be null");
 		Assert.notNull(auditRecordService, "auditRecordService must not be null");
 		Assert.notNull(taskExecutionInfoService, "taskExecutionInfoService must not be null");
