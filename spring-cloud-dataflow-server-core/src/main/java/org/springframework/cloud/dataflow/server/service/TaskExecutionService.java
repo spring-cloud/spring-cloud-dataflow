@@ -81,9 +81,9 @@ public interface TaskExecutionService {
 	void stopTaskExecution(Set<Long> ids, String platform);
 
 	/**
-	 * Retrieve the TaskManifest for the execution id provided
+	 * Retrieve the TaskExecutionManifest for the execution id provided
 	 * @param id task exectution id
-	 * @return {@code TaskManifest} or null if not found.
+	 * @return {@code TaskExecutionManifest} or null if not found.
 	 */
-	TaskExecutionManifest findTaskManifestById(Long id);
+	TaskExecutionManifest findTaskExecutionManifestById(Long id);
 }

@@ -45,7 +45,7 @@ public class V2__Add_Descriptions_OriginalDefinition extends BaseJavaMigration {
 	public final static String UPDATE_STREAM_DEFINITION_TABLE_ORIG_DEF = "update stream_definitions set original_definition=definition";
 
 	public final static String CREATE_TASK_METADATA_TABLE =
-			"CREATE TABLE task_execution_metadata (\n" +
+			"CREATE TABLE task_execution_manifest (\n" +
 					"    id int8 NOT NULL,\n" +
 					"    object_version int8,\n" +
 					"    task_execution_id int8 NOT NULL,\n" +
@@ -57,7 +57,7 @@ public class V2__Add_Descriptions_OriginalDefinition extends BaseJavaMigration {
 					")";
 
 	private final static String CREATE_TASK_METADATA_SEQUENCE =
-			"CREATE SEQUENCE task_execution_metadata_seq MAXVALUE 9223372036854775807 NO CYCLE";
+			"CREATE SEQUENCE task_execution_manifest_seq MAXVALUE 9223372036854775807 NO CYCLE";
 
 	private final SqlCommandsRunner runner = new SqlCommandsRunner();
 

@@ -53,8 +53,8 @@ public class TaskSanitizerTest {
 	}
 
 	@Test
-	public void testTaskManifest() {
-		TaskExecutionManifest taskManifest = new TaskExecutionManifest();
+	public void testTaskExecutionManifest() {
+		TaskExecutionManifest taskExecutionManifest = new TaskExecutionManifest();
 		AppDeploymentRequest appDeploymentRequest = mock(AppDeploymentRequest.class);
 		Map<String, String> appProperties = new HashMap<>();
 		appProperties.put("secret", "testing");
@@ -66,8 +66,8 @@ public class TaskSanitizerTest {
 		deploymentProperties.put("secret", "testing");
 		deploymentProperties.put("user.key", "dev");
 		when(appDeploymentRequest.getDeploymentProperties()).thenReturn(deploymentProperties);
-		taskManifest.getManifest().setTaskDeploymentRequest(appDeploymentRequest);
-		TaskExecutionManifest sanitizedTaskManifest = this.taskSanitizer.sanitizeTaskManifest(taskManifest);
+		taskExecutionManifest.getManifest().setTaskDeploymentRequest(appDeploymentRequest);
+		TaskExecutionManifest sanitizedTaskManifest = this.taskSanitizer.sanitizeTaskExecutionManifest(taskExecutionManifest);
 		TaskExecutionManifest.Manifest manifest = sanitizedTaskManifest.getManifest();
 		List<String> commandLineArgs = manifest.getTaskDeploymentRequest().getCommandlineArguments();
 		Assert.assertEquals("--username=******", commandLineArgs.get(0));

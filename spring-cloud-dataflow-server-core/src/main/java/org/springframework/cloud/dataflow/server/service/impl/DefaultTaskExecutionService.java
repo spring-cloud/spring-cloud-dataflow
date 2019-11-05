@@ -48,8 +48,8 @@ import org.springframework.cloud.dataflow.server.job.LauncherRepository;
 import org.springframework.cloud.dataflow.server.repository.DataflowTaskExecutionDao;
 import org.springframework.cloud.dataflow.server.repository.NoSuchTaskExecutionException;
 import org.springframework.cloud.dataflow.server.repository.TaskDeploymentRepository;
+import org.springframework.cloud.dataflow.server.repository.TaskExecutionManifestRepository;
 import org.springframework.cloud.dataflow.server.repository.TaskExecutionMissingExternalIdException;
-import org.springframework.cloud.dataflow.server.repository.TaskManifestRepository;
 import org.springframework.cloud.dataflow.server.service.TaskExecutionCreationService;
 import org.springframework.cloud.dataflow.server.service.TaskExecutionInfoService;
 import org.springframework.cloud.dataflow.server.service.TaskExecutionService;
@@ -120,7 +120,7 @@ public class DefaultTaskExecutionService implements TaskExecutionService {
 
 	private final DataflowTaskExecutionDao dataflowTaskExecutionDao;
 
-	private final TaskManifestRepository taskManifestRepository;
+	private final TaskExecutionManifestRepository taskExecutionManifestRepository;
 
 	private final Map<String, List<String>> tasksBeingUpgraded = new ConcurrentHashMap<>();
 
@@ -133,7 +133,7 @@ public class DefaultTaskExecutionService implements TaskExecutionService {
 	 * @param taskDeploymentRepository the repository to track task deployment
 	 * @param taskExecutionInfoService the service used to setup a task execution
 	 * @param taskExecutionRepositoryService the service used to create the task execution
-	 * @param taskManifestRepository repository used to manipulate task manifests
+	 * @param taskExecutionManifestRepository repository used to manipulate task manifests
 	 */
 	public DefaultTaskExecutionService(LauncherRepository launcherRepository,
 			AuditRecordService auditRecordService,
@@ -144,7 +144,7 @@ public class DefaultTaskExecutionService implements TaskExecutionService {
 			TaskAppDeploymentRequestCreator taskAppDeploymentRequestCreator,
 			TaskExplorer taskExplorer,
 			DataflowTaskExecutionDao dataflowTaskExecutionDao,
-			TaskManifestRepository taskManifestRepository) {
+			TaskExecutionManifestRepository taskExecutionManifestRepository) {
 		Assert.notNull(launcherRepository, "launcherRepository must not be null");
 		Assert.notNull(auditRecordService, "auditRecordService must not be null");
 		Assert.notNull(taskExecutionInfoService, "taskExecutionInfoService must not be null");
@@ -155,7 +155,7 @@ public class DefaultTaskExecutionService implements TaskExecutionService {
 		Assert.notNull(taskAppDeploymentRequestCreator, "taskAppDeploymentRequestCreator must not be null");
 		Assert.notNull(taskExplorer, "taskExplorer must not be null");
 		Assert.notNull(dataflowTaskExecutionDao, "dataflowTaskExecutionDao must not be null");
-		Assert.notNull(taskManifestRepository, "taskManifestRepository must not be null");
+		Assert.notNull(taskExecutionManifestRepository, "taskExecutionManifestRepository must not be null");
 
 		this.launcherRepository = launcherRepository;
 		this.auditRecordService = auditRecordService;
@@ -166,7 +166,7 @@ public class DefaultTaskExecutionService implements TaskExecutionService {
 		this.taskAppDeploymentRequestCreator = taskAppDeploymentRequestCreator;
 		this.taskExplorer = taskExplorer;
 		this.dataflowTaskExecutionDao = dataflowTaskExecutionDao;
-		this.taskManifestRepository = taskManifestRepository;
+		this.taskExecutionManifestRepository = taskExecutionManifestRepository;
 	}
 
 	@Override
@@ -214,10 +214,10 @@ public class DefaultTaskExecutionService implements TaskExecutionService {
 		AppDeploymentRequest appDeploymentRequest = this.taskAppDeploymentRequestCreator.
 				createRequest(taskExecution, taskExecutionInformation, commandLineArgs, platformName);
 
-		TaskExecutionManifest taskExecutionManifest = createTaskManifest(platformName, taskExecutionInformation, appDeploymentRequest);
+		TaskExecutionManifest taskExecutionManifest = createTaskExecutionManifest(platformName, taskExecutionInformation, appDeploymentRequest);
 		taskExecutionManifest.setTaskExecutionId(taskExecution.getExecutionId());
 
-		TaskExecutionManifest previousManifest = this.taskManifestRepository.findFirstByTaskNameOrderByIdDesc(taskName);
+		TaskExecutionManifest previousManifest = this.taskExecutionManifestRepository.findFirstByTaskNameOrderByIdDesc(taskName);
 
 		if(taskDeploymentProperties.isEmpty()) {
 			if(previousManifest != null && !previousManifest.getManifest().getTaskDeploymentRequest().getDeploymentProperties().equals(taskDeploymentProperties)) {
@@ -247,7 +247,7 @@ public class DefaultTaskExecutionService implements TaskExecutionService {
 			}
 
 			taskExecutionManifest.setTaskExecutionId(taskExecution.getExecutionId());
-			this.taskManifestRepository.save(taskExecutionManifest);
+			this.taskExecutionManifestRepository.save(taskExecutionManifest);
 
 			taskDeploymentId = taskLauncher.launch(appDeploymentRequest);
 
@@ -389,14 +389,14 @@ public class DefaultTaskExecutionService implements TaskExecutionService {
 	}
 
 	/**
-	 * Create a {@code TaskManifest}
+	 * Create a {@code TaskExecutionManifest}
 	 *
 	 * @param platformName name of the platform configuration to run the task on
 	 * @param taskExecutionInformation details about the task to be run
 	 * @param appDeploymentRequest the details about the deployment to be executed
-	 * @return {@code TaskManifest}
+	 * @return {@code TaskExecutionManifest}
 	 */
-	private TaskExecutionManifest createTaskManifest(String platformName, TaskExecutionInformation taskExecutionInformation, AppDeploymentRequest appDeploymentRequest) {
+	private TaskExecutionManifest createTaskExecutionManifest(String platformName, TaskExecutionInformation taskExecutionInformation, AppDeploymentRequest appDeploymentRequest) {
 		TaskExecutionManifest taskExecutionManifest = new TaskExecutionManifest();
 		taskExecutionManifest.getManifest().setPlatformName(platformName);
 		taskExecutionManifest.setTaskName(taskExecutionInformation.getTaskDefinition().getTaskName());
@@ -539,9 +539,9 @@ public class DefaultTaskExecutionService implements TaskExecutionService {
 	}
 
 	@Override
-	public TaskExecutionManifest findTaskManifestById(Long id) {
+	public TaskExecutionManifest findTaskExecutionManifestById(Long id) {
 		TaskExecution taskExecution = this.taskExplorer.getTaskExecution(id);
-		return this.taskManifestRepository.findByTaskExecutionId(taskExecution.getExecutionId());
+		return this.taskExecutionManifestRepository.findByTaskExecutionId(taskExecution.getExecutionId());
 	}
 
 	private Set<TaskExecution> getValidStopExecutions(Set<Long> ids) {

@@ -96,7 +96,7 @@ import org.springframework.cloud.dataflow.server.repository.JdbcDataflowTaskExec
 import org.springframework.cloud.dataflow.server.repository.StreamDefinitionRepository;
 import org.springframework.cloud.dataflow.server.repository.TaskDefinitionRepository;
 import org.springframework.cloud.dataflow.server.repository.TaskDeploymentRepository;
-import org.springframework.cloud.dataflow.server.repository.TaskManifestRepository;
+import org.springframework.cloud.dataflow.server.repository.TaskExecutionManifestRepository;
 import org.springframework.cloud.dataflow.server.service.SchedulerService;
 import org.springframework.cloud.dataflow.server.service.SchedulerServiceProperties;
 import org.springframework.cloud.dataflow.server.service.StreamService;
@@ -457,7 +457,7 @@ public class TestDependencies extends WebMvcConfigurationSupport {
 			AuditRecordService auditRecordService,
 			DataflowTaskExecutionDao dataflowTaskExecutionDao,
 			DataflowJobExecutionDao dataflowJobExecutionDao,
-			TaskManifestRepository taskManifestRepository,
+			TaskExecutionManifestRepository taskExecutionManifestRepository,
 			EntityManager entityManager,
 			SchedulerService schedulerService) {
 		return new DefaultTaskDeleteService(taskExplorer, launcherRepository, taskDefinitionRepository,
@@ -465,7 +465,7 @@ public class TestDependencies extends WebMvcConfigurationSupport {
 				auditRecordService,
 				dataflowTaskExecutionDao,
 				dataflowJobExecutionDao,
-				taskManifestRepository,
+				taskExecutionManifestRepository,
 				entityManager,
 				schedulerService);
 	}
@@ -503,12 +503,12 @@ public class TestDependencies extends WebMvcConfigurationSupport {
 			TaskExecutionCreationService taskExecutionRepositoryService,
 			TaskAppDeploymentRequestCreator taskAppDeploymentRequestCreator,
 			TaskExplorer taskExplorer, DataflowTaskExecutionDao dataflowTaskExecutionDao,
-			TaskManifestRepository taskManifestRepository) {
+			TaskExecutionManifestRepository taskExecutionManifestRepository) {
 		return new DefaultTaskExecutionService(
 				launcherRepository, auditRecordService, taskRepository,
 				taskExecutionInfoService, taskDeploymentRepository,
 				taskExecutionRepositoryService, taskAppDeploymentRequestCreator,
-				taskExplorer, dataflowTaskExecutionDao, taskManifestRepository);
+				taskExplorer, dataflowTaskExecutionDao, taskExecutionManifestRepository);
 	}
 
 	@Bean

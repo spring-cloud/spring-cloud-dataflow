@@ -36,7 +36,7 @@ public class TaskJobExecutionRel {
 
 	private final List<Long> jobExecutionIds;
 
-	private final TaskExecutionManifest taskManifest;
+	private final TaskExecutionManifest taskExecutionManifest;
 
 	/**
 	 * Constructor that establishes the relationship between a {@link TaskExecution} and
@@ -55,12 +55,12 @@ public class TaskJobExecutionRel {
 	 *
 	 * @param taskExecution to be associated with the job execution ids.
 	 * @param jobExecutionIds to be associated with the task execution.
-	 * @param taskManifest to be associated with the task execution
+	 * @param taskExecutionManifest to be associated with the task execution
 	 */
-	public TaskJobExecutionRel(TaskExecution taskExecution, List<Long> jobExecutionIds, TaskExecutionManifest taskManifest) {
+	public TaskJobExecutionRel(TaskExecution taskExecution, List<Long> jobExecutionIds, TaskExecutionManifest taskExecutionManifest) {
 		Assert.notNull(taskExecution, "taskExecution must not be null");;
 		this.taskExecution = taskExecution;
-		this.taskManifest = taskManifest;
+		this.taskExecutionManifest = taskExecutionManifest;
 		if (jobExecutionIds == null) {
 			this.jobExecutionIds = Collections.emptyList();
 		}
@@ -87,7 +87,7 @@ public class TaskJobExecutionRel {
 	/**
 	 * @return the task manifest associated with the {@link TaskExecution}.  Could be null.
 	 */
-	public TaskExecutionManifest getTaskManifest() {
-		return taskManifest;
+	public TaskExecutionManifest getTaskExecutionManifest() {
+		return taskExecutionManifest;
 	}
 }

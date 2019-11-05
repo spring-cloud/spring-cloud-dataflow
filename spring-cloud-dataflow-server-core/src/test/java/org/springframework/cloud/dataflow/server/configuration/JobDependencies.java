@@ -69,7 +69,7 @@ import org.springframework.cloud.dataflow.server.repository.JdbcDataflowJobExecu
 import org.springframework.cloud.dataflow.server.repository.JdbcDataflowTaskExecutionDao;
 import org.springframework.cloud.dataflow.server.repository.TaskDefinitionRepository;
 import org.springframework.cloud.dataflow.server.repository.TaskDeploymentRepository;
-import org.springframework.cloud.dataflow.server.repository.TaskManifestRepository;
+import org.springframework.cloud.dataflow.server.repository.TaskExecutionManifestRepository;
 import org.springframework.cloud.dataflow.server.service.SchedulerService;
 import org.springframework.cloud.dataflow.server.service.TaskDeleteService;
 import org.springframework.cloud.dataflow.server.service.TaskExecutionCreationService;
@@ -217,7 +217,7 @@ public class JobDependencies {
 			AuditRecordService auditRecordService,
 			DataflowTaskExecutionDao dataflowTaskExecutionDao,
 			DataflowJobExecutionDao dataflowJobExecutionDao,
-			TaskManifestRepository taskManifestRepository,
+			TaskExecutionManifestRepository taskExecutionManifestRepository,
 			EntityManager entityManager,
 			SchedulerService schedulerService) {
 
@@ -225,7 +225,7 @@ public class JobDependencies {
 				taskDeploymentRepository,
 				auditRecordService, dataflowTaskExecutionDao,
 				dataflowJobExecutionDao,
-				taskManifestRepository,
+				taskExecutionManifestRepository,
 				entityManager,
 				schedulerService);
 	}
@@ -263,14 +263,14 @@ public class JobDependencies {
 			TaskExecutionCreationService taskExecutionRepositoryService,
 			TaskAppDeploymentRequestCreator taskAppDeploymentRequestCreator,
 			TaskExplorer taskExplorer, DataflowTaskExecutionDao dataflowTaskExecutionDao,
-			TaskManifestRepository taskManifestRepository) {
+			TaskExecutionManifestRepository taskExecutionManifestRepository) {
 		return new DefaultTaskExecutionService(
 				launcherRepository, auditRecordService,
 				taskRepository,
 				taskExecutionInfoService, taskDeploymentRepository,
 				taskExecutionRepositoryService, taskAppDeploymentRequestCreator,
 				taskExplorer, dataflowTaskExecutionDao,
-				taskManifestRepository);
+				taskExecutionManifestRepository);
 	}
 
 	@Bean

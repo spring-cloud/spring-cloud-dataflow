@@ -138,8 +138,8 @@ public class TaskExecutionResource extends RepresentationModel<TaskExecutionReso
 			this.jobExecutionIds = Collections
 					.unmodifiableList(new ArrayList<>(taskJobExecutionRel.getJobExecutionIds()));
 		}
-		if (taskJobExecutionRel.getTaskManifest() != null) {
-			TaskExecutionManifest.Manifest manifest = taskJobExecutionRel.getTaskManifest().getManifest();
+		if (taskJobExecutionRel.getTaskExecutionManifest() != null) {
+			TaskExecutionManifest.Manifest manifest = taskJobExecutionRel.getTaskExecutionManifest().getManifest();
 
 			this.resourceUrl = manifest.getTaskDeploymentRequest().getResource().toString();
 			this.appProperties = manifest.getTaskDeploymentRequest().getDefinition().getProperties();

@@ -45,7 +45,7 @@ public class V2__Add_Descriptions_And_OriginalDefinition extends BaseJavaMigrati
 	public final static String UPDATE_STREAM_DEFINITION_TABLE_ORIG_DEF = "update stream_definitions set original_definition=definition";
 
 	public final static String CREATE_TASK_METADATA_TABLE =
-			"CREATE TABLE task_execution_metadata (\n" +
+			"CREATE TABLE task_execution_manifest (\n" +
 					"    id BIGINT NOT NULL PRIMARY KEY,\n" +
 					"    object_version BIGINT,\n" +
 					"    task_execution_id BIGINT NOT NULL,\n" +
@@ -56,7 +56,7 @@ public class V2__Add_Descriptions_And_OriginalDefinition extends BaseJavaMigrati
 					")";
 
 	public final static String CREATE_TASK_METADATA_SEQUENCE =
-			"CREATE TABLE task_execution_metadata_seq (\n" +
+			"CREATE TABLE task_execution_manifest_seq (\n" +
 					"  ID BIGINT IDENTITY)";
 
 	private final SqlCommandsRunner runner = new SqlCommandsRunner();

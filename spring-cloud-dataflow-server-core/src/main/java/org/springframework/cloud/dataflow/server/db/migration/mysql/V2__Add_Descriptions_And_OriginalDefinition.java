@@ -45,7 +45,7 @@ public class V2__Add_Descriptions_And_OriginalDefinition extends BaseJavaMigrati
 	public final static String UPDATE_STREAM_DEFINITION_TABLE_ORIG_DEF = "update stream_definitions set original_definition=definition";
 
 	public final static String CREATE_TASK_METADATA_TABLE =
-			"CREATE TABLE task_execution_metadata (\n" +
+			"CREATE TABLE task_execution_manifest (\n" +
 					"    id BIGINT NOT NULL,\n" +
 					"    object_version BIGINT,\n" +
 					"    task_execution_id BIGINT NOT NULL,\n" +
@@ -57,14 +57,14 @@ public class V2__Add_Descriptions_And_OriginalDefinition extends BaseJavaMigrati
 					")";
 
 	public final static String CREATE_TASK_METADATA_SEQUENCE =
-			"CREATE TABLE task_execution_metadata_seq (\n" +
+			"CREATE TABLE task_execution_manifest_seq (\n" +
 					"  ID BIGINT NOT NULL,\n" +
 					"  UNIQUE_KEY CHAR(1) NOT NULL,\n" +
 					"  constraint UNIQUE_KEY_UN unique (UNIQUE_KEY)\n" +
 					")";
 
 	public final static String INSERT_TASK_METADATA_SEQUENCE =
-			"INSERT INTO task_execution_metadata_seq (ID, UNIQUE_KEY) select * from (select 0 as ID, '0' as UNIQUE_KEY) as tmp where not exists(select * from task_execution_metadata_seq)";
+			"INSERT INTO task_execution_manifest_seq (ID, UNIQUE_KEY) select * from (select 0 as ID, '0' as UNIQUE_KEY) as tmp where not exists(select * from task_execution_manifest_seq)";
 
 	private final SqlCommandsRunner runner = new SqlCommandsRunner();
 

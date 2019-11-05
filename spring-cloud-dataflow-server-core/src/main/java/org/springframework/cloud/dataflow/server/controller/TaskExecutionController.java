@@ -184,11 +184,11 @@ public class TaskExecutionController {
 			throw new NoSuchTaskExecutionException(id);
 		}
 		taskExecution = this.taskSanitizer.sanitizeTaskExecutionArguments(taskExecution);
-		TaskExecutionManifest taskManifest = this.taskExecutionService.findTaskManifestById(id);
-		taskManifest = this.taskSanitizer.sanitizeTaskManifest(taskManifest);
+		TaskExecutionManifest taskExecutionManifest = this.taskExecutionService.findTaskExecutionManifestById(id);
+		taskExecutionManifest = this.taskSanitizer.sanitizeTaskExecutionManifest(taskExecutionManifest);
 		TaskJobExecutionRel taskJobExecutionRel = new TaskJobExecutionRel(taskExecution,
 				new ArrayList<>(this.explorer.getJobExecutionIdsByTaskExecutionId(taskExecution.getExecutionId())),
-				taskManifest);
+				taskExecutionManifest);
 		return this.taskAssembler.toModel(taskJobExecutionRel);
 	}
 
@@ -242,14 +242,14 @@ public class TaskExecutionController {
 	private Page<TaskJobExecutionRel> getPageableRelationships(Page<TaskExecution> taskExecutions, Pageable pageable) {
 		List<TaskJobExecutionRel> taskJobExecutionRels = new ArrayList<>();
 		for (TaskExecution taskExecution : taskExecutions.getContent()) {
-			TaskExecutionManifest taskManifest = this.taskExecutionService.findTaskManifestById(taskExecution.getExecutionId());
-			taskManifest = this.taskSanitizer.sanitizeTaskManifest(taskManifest);
+			TaskExecutionManifest taskExecutionManifest = this.taskExecutionService.findTaskExecutionManifestById(taskExecution.getExecutionId());
+			taskExecutionManifest = this.taskSanitizer.sanitizeTaskExecutionManifest(taskExecutionManifest);
 			List<Long> jobExecutionIds = new ArrayList<>(
 					this.explorer.getJobExecutionIdsByTaskExecutionId(taskExecution.getExecutionId()));
 			taskJobExecutionRels
 					.add(new TaskJobExecutionRel(this.taskSanitizer.sanitizeTaskExecutionArguments(taskExecution),
 							jobExecutionIds,
-							taskManifest));
+							taskExecutionManifest));
 		}
 		return new PageImpl<>(taskJobExecutionRels, pageable, taskExecutions.getTotalElements());
 	}

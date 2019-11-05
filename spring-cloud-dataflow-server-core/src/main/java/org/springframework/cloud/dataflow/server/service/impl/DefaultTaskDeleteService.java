@@ -47,7 +47,7 @@ import org.springframework.cloud.dataflow.server.repository.NoSuchTaskDefinition
 import org.springframework.cloud.dataflow.server.repository.NoSuchTaskExecutionException;
 import org.springframework.cloud.dataflow.server.repository.TaskDefinitionRepository;
 import org.springframework.cloud.dataflow.server.repository.TaskDeploymentRepository;
-import org.springframework.cloud.dataflow.server.repository.TaskManifestRepository;
+import org.springframework.cloud.dataflow.server.repository.TaskExecutionManifestRepository;
 import org.springframework.cloud.dataflow.server.service.SchedulerService;
 import org.springframework.cloud.dataflow.server.service.TaskDeleteService;
 import org.springframework.cloud.deployer.spi.task.TaskLauncher;
@@ -94,7 +94,7 @@ public class DefaultTaskDeleteService implements TaskDeleteService {
 
 	protected final DataflowJobExecutionDao dataflowJobExecutionDao;
 
-	protected final TaskManifestRepository taskManifestRepository;
+	protected final TaskExecutionManifestRepository taskExecutionManifestRepository;
 
 	private SchedulerService schedulerService;
 
@@ -108,7 +108,7 @@ public class DefaultTaskDeleteService implements TaskDeleteService {
 			AuditRecordService auditRecordService,
 			DataflowTaskExecutionDao dataflowTaskExecutionDao,
 			DataflowJobExecutionDao dataflowJobExecutionDao,
-			TaskManifestRepository taskManifestRepository,
+			TaskExecutionManifestRepository taskExecutionManifestRepository,
 			EntityManager entityManager,
 			SchedulerService schedulerService) {
 		Assert.notNull(taskExplorer, "TaskExplorer must not be null");
@@ -118,7 +118,7 @@ public class DefaultTaskDeleteService implements TaskDeleteService {
 		Assert.notNull(auditRecordService, "AuditRecordService must not be null");
 		Assert.notNull(dataflowTaskExecutionDao, "DataflowTaskExecutionDao must not be null");
 		Assert.notNull(dataflowJobExecutionDao, "DataflowJobExecutionDao must not be null");
-		Assert.notNull(taskManifestRepository, "TaskManifestRepository must not be null");
+		Assert.notNull(taskExecutionManifestRepository, "TaskExecutionManifestRepository must not be null");
 		this.taskExplorer = taskExplorer;
 		this.launcherRepository = launcherRepository;
 		this.taskDefinitionRepository = taskDefinitionRepository;
@@ -126,7 +126,7 @@ public class DefaultTaskDeleteService implements TaskDeleteService {
 		this.auditRecordService = auditRecordService;
 		this.dataflowTaskExecutionDao = dataflowTaskExecutionDao;
 		this.dataflowJobExecutionDao = dataflowJobExecutionDao;
-		this.taskManifestRepository = taskManifestRepository;
+		this.taskExecutionManifestRepository = taskExecutionManifestRepository;
 		this.schedulerService = schedulerService;
 		this.entityManager = entityManager;
 	}
@@ -280,9 +280,9 @@ public class DefaultTaskDeleteService implements TaskDeleteService {
 		final int numberOfDeletedTaskExecutionParamRows = dataflowTaskExecutionDao.deleteTaskExecutionParamsByTaskExecutionIds(taskExecutionIdsWithChildren);
 		final int numberOfDeletedTaskTaskBatchRelationshipRows = dataflowTaskExecutionDao.deleteTaskTaskBatchRelationshipsByTaskExecutionIds(taskExecutionIdsWithChildren);
 
-		int numberOfDeletedTaskManifestRows = 0;
+		int numberOfDeletedTaskExecutionManifestRows = 0;
 		for (Long taskExecutionId : taskExecutionIdsWithChildren) {
-			numberOfDeletedTaskManifestRows += this.taskManifestRepository.deleteTaskExecutionManifestByTaskExecutionId(taskExecutionId);
+			numberOfDeletedTaskExecutionManifestRows += this.taskExecutionManifestRepository.deleteTaskExecutionManifestByTaskExecutionId(taskExecutionId);
 		}
 
 		this.entityManager.flush();
@@ -300,7 +300,7 @@ public class DefaultTaskDeleteService implements TaskDeleteService {
 				taskExecutionIdsWithChildren.size(),
 				numberOfDeletedTaskExecutionParamRows,
 				numberOfDeletedTaskTaskBatchRelationshipRows,
-				numberOfDeletedTaskManifestRows,
+				numberOfDeletedTaskExecutionManifestRows,
 				numberOfDeletedTaskExecutionRows
 				);
 

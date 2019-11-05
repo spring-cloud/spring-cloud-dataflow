@@ -20,13 +20,11 @@ import java.util.List;
 import javax.persistence.Column;
 import javax.persistence.Convert;
 import javax.persistence.Entity;
-import javax.persistence.EntityListeners;
 import javax.persistence.Table;
 import javax.validation.constraints.NotNull;
 
 import org.springframework.cloud.deployer.spi.core.AppDeploymentRequest;
 import org.springframework.core.style.ToStringCreator;
-import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 /**
  * Description of an execution of a task including resource to be executed and how it was configured via Spring Cloud
@@ -37,8 +35,7 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
  * @since 2.3
  */
 @Entity
-@Table(name = "TaskExecutionMetadata")
-@EntityListeners(AuditingEntityListener.class)
+@Table(name = "TaskExecutionManifest")
 public class TaskExecutionManifest extends AbstractEntity {
 
 	@NotNull
@@ -51,7 +48,7 @@ public class TaskExecutionManifest extends AbstractEntity {
 
 	@NotNull
 	@Column(name = "task_execution_manifest")
-	@Convert(converter = TaskManifestConverter.class)
+	@Convert(converter = TaskExecutionManifestConverter.class)
 	private Manifest manifest = new Manifest();
 
 	public String getTaskName() {

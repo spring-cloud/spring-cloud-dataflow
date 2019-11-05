@@ -42,13 +42,13 @@ public class TaskSanitizer {
 		return taskExecution;
 	}
 
-	public TaskExecutionManifest sanitizeTaskManifest(TaskExecutionManifest taskManifest) {
-		if (taskManifest == null) {
+	public TaskExecutionManifest sanitizeTaskExecutionManifest(TaskExecutionManifest taskExecutionManifest) {
+		if (taskExecutionManifest == null) {
 			return null;
 		}
 		TaskExecutionManifest sanitizedTaskExecutionManifest = new TaskExecutionManifest();
 		TaskExecutionManifest.Manifest sanitizedManifest = sanitizedTaskExecutionManifest.getManifest();
-		TaskExecutionManifest.Manifest dirtyTaskManifest = taskManifest.getManifest();
+		TaskExecutionManifest.Manifest dirtyTaskManifest = taskExecutionManifest.getManifest();
 		sanitizedManifest.setPlatformName(dirtyTaskManifest.getPlatformName());
 		AppDeploymentRequest existingAppDeploymentRequest = dirtyTaskManifest.getTaskDeploymentRequest();
 		// Sanitize App Properties

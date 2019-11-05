@@ -23,7 +23,7 @@ import org.springframework.data.repository.PagingAndSortingRepository;
  *
  * @since 2.3
  */
-public interface TaskManifestRepository extends PagingAndSortingRepository<TaskExecutionManifest, Long> {
+public interface TaskExecutionManifestRepository extends PagingAndSortingRepository<TaskExecutionManifest, Long> {
 
 	int deleteTaskExecutionManifestByTaskExecutionId(long taskExecutionid);
 

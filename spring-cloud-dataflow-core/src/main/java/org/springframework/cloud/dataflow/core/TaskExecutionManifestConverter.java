@@ -31,11 +31,11 @@ import org.springframework.core.io.Resource;
 /**
  * @author Michael Minella
  */
-public class TaskManifestConverter implements AttributeConverter<TaskExecutionManifest.Manifest, String> {
+public class TaskExecutionManifestConverter implements AttributeConverter<TaskExecutionManifest.Manifest, String> {
 
 	private ObjectMapper objectMapper;
 
-	public TaskManifestConverter() {
+	public TaskExecutionManifestConverter() {
 		this.objectMapper = new ObjectMapper();
 		SimpleModule module = new SimpleModule();
 		module.addDeserializer(Resource.class,

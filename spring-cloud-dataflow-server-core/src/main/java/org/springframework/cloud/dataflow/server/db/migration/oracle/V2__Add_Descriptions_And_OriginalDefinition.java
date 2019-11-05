@@ -45,7 +45,7 @@ public class V2__Add_Descriptions_And_OriginalDefinition extends BaseJavaMigrati
 	public final static String UPDATE_STREAM_DEFINITION_TABLE_ORIG_DEF = "update stream_definitions set original_definition=definition";
 
 	public final static String CREATE_TASK_METADATA_TABLE =
-			"CREATE TABLE task_execution_metadata (\n" +
+			"CREATE TABLE task_execution_manifest (\n" +
 					"    id number(19,0) NOT NULL,\n" +
 					"    object_version number(19,0),\n" +
 					"    task_execution_id  number(19,0) NOT NULL,\n" +
@@ -57,7 +57,7 @@ public class V2__Add_Descriptions_And_OriginalDefinition extends BaseJavaMigrati
 					")";
 
 	private final static String CREATE_TASK_METADATA_SEQUENCE =
-			"CREATE SEQUENCE task_execution_metadata_seq START WITH 0 MINVALUE 0 MAXVALUE 9223372036854775807 NOCACHE NOCYCLE";
+			"CREATE SEQUENCE task_execution_manifest_seq START WITH 0 MINVALUE 0 MAXVALUE 9223372036854775807 NOCACHE NOCYCLE";
 
 	private final SqlCommandsRunner runner = new SqlCommandsRunner();
 
