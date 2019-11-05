@@ -39,7 +39,9 @@ public class TaskAnalyzer {
 	 */
 	public TaskAnalysisReport analyze(TaskManifest existing, TaskManifest replacing) {
 		Map<String, String> existingDeploymentProperties = null;
-		Map<String, String> existingCommandLineArgumentProperties = new HashMap<>();
+		Map<String, String> existingCommandLineArgumentPropertiesDoubleDash = new HashMap<>();
+		Map<String, String> existingCommandLineArgumentPropertiesSingleDash = new HashMap<>();
+		Map<String, String> existingCommandLineArgumentPropertiesNoDash = new HashMap<>();
 		if (existing != null) {
 			AppDeploymentRequest taskDeploymentRequest = existing.getTaskDeploymentRequest();
 			if (taskDeploymentRequest != null) {
@@ -49,7 +51,19 @@ public class TaskAnalyzer {
 					if (arg.startsWith("--")) {
 						String[] split = arg.substring(2).split("=", 2);
 						if (split.length == 2) {
-							existingCommandLineArgumentProperties.put(split[0], split[1]);
+							existingCommandLineArgumentPropertiesDoubleDash.put(split[0], split[1]);
+						}
+					}
+					else if (arg.startsWith("-")) {
+						String[] split = arg.substring(1).split("=", 2);
+						if (split.length == 2) {
+							existingCommandLineArgumentPropertiesSingleDash.put(split[0], split[1]);
+						}
+					}
+					else {
+						String[] split = arg.split("=", 2);
+						if (split.length == 2) {
+							existingCommandLineArgumentPropertiesNoDash.put(split[0], split[1]);
 						}
 					}
 				}
@@ -57,7 +71,9 @@ public class TaskAnalyzer {
 		}
 
 		Map<String, String> replacingDeploymentProperties = null;
-		Map<String, String> replacingCommandLineArgumentProperties = new HashMap<>();
+		Map<String, String> replacingCommandLineArgumentPropertiesDoubleDash = new HashMap<>();
+		Map<String, String> replacingCommandLineArgumentPropertiesSingleDash = new HashMap<>();
+		Map<String, String> replacingCommandLineArgumentPropertiesNoDash = new HashMap<>();
 		if (replacing != null) {
 			AppDeploymentRequest taskDeploymentRequest = replacing.getTaskDeploymentRequest();
 			if (taskDeploymentRequest != null) {
@@ -67,7 +83,19 @@ public class TaskAnalyzer {
 					if (arg.startsWith("--")) {
 						String[] split = arg.substring(2).split("=", 2);
 						if (split.length == 2) {
-							replacingCommandLineArgumentProperties.put(split[0], split[1]);
+							replacingCommandLineArgumentPropertiesDoubleDash.put(split[0], split[1]);
+						}
+					}
+					else if (arg.startsWith("-")) {
+						String[] split = arg.substring(1).split("=", 2);
+						if (split.length == 2) {
+							replacingCommandLineArgumentPropertiesSingleDash.put(split[0], split[1]);
+						}
+					}
+					else {
+						String[] split = arg.split("=", 2);
+						if (split.length == 2) {
+							replacingCommandLineArgumentPropertiesNoDash.put(split[0], split[1]);
 						}
 					}
 				}
@@ -77,11 +105,22 @@ public class TaskAnalyzer {
 		PropertiesDiff deploymentPropertiesDifference = PropertiesDiff.builder().left(existingDeploymentProperties)
 				.right(replacingDeploymentProperties).build();
 
-		PropertiesDiff existingCommandLineArgumentPropertiesDifference = PropertiesDiff.builder()
-				.left(existingCommandLineArgumentProperties).right(replacingCommandLineArgumentProperties).build();
+		PropertiesDiff existingCommandLineArgumentPropertiesDifferenceDoubleDash = PropertiesDiff.builder()
+				.left(existingCommandLineArgumentPropertiesDoubleDash)
+				.right(replacingCommandLineArgumentPropertiesDoubleDash).build();
+
+		PropertiesDiff existingCommandLineArgumentPropertiesDifferenceSingleDash = PropertiesDiff.builder()
+				.left(existingCommandLineArgumentPropertiesSingleDash)
+				.right(replacingCommandLineArgumentPropertiesSingleDash).build();
+
+		PropertiesDiff existingCommandLineArgumentPropertiesDifferenceNoDash = PropertiesDiff.builder()
+				.left(existingCommandLineArgumentPropertiesNoDash).right(replacingCommandLineArgumentPropertiesNoDash)
+				.build();
 
 		TaskManifestDifference taskManifestDifference = new TaskManifestDifference(deploymentPropertiesDifference,
-				existingCommandLineArgumentPropertiesDifference);
+				existingCommandLineArgumentPropertiesDifferenceDoubleDash,
+				existingCommandLineArgumentPropertiesDifferenceSingleDash,
+				existingCommandLineArgumentPropertiesDifferenceNoDash);
 		return new TaskAnalysisReport(taskManifestDifference);
 	}
 }

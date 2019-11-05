@@ -81,6 +81,8 @@ public class TaskAnalyzerTests {
 		Map<String, String> leftDeploymentProperties = new HashMap<>();
 		List<String> leftCommandlineArguments = new ArrayList<>();
 		leftCommandlineArguments.add("--key1=value1");
+		leftCommandlineArguments.add("-key2=value2");
+		leftCommandlineArguments.add("key3=value3");
 		AppDeploymentRequest leftAdr = new AppDeploymentRequest(leftAd, leftResource, leftDeploymentProperties,
 				leftCommandlineArguments);
 		TaskManifest leftManifest = new TaskManifest();
@@ -92,6 +94,8 @@ public class TaskAnalyzerTests {
 		Map<String, String> rightDeploymentProperties = new HashMap<>();
 		List<String> rightCommandlineArguments = new ArrayList<>();
 		rightCommandlineArguments.add("--key1=value1");
+		rightCommandlineArguments.add("-key2=value2");
+		rightCommandlineArguments.add("key3=value3");
 
 		AppDeploymentRequest rightAdr = new AppDeploymentRequest(rightAd, rightResource, rightDeploymentProperties,
 				rightCommandlineArguments);
@@ -101,18 +105,20 @@ public class TaskAnalyzerTests {
 
 		TaskAnalysisReport report = analyzer.analyze(leftManifest, rightManifest);
 		TaskManifestDifference taskManifestDifference = report.getTaskManifestDifference();
-		PropertiesDiff commandLineArgumentPropertiesDifference = taskManifestDifference.getCommandLineArgumentPropertiesDifference();
+		PropertiesDiff commandLineArgumentPropertiesDifference = taskManifestDifference.getCommandLineArgumentPropertiesDifferenceDoubleDash();
 		assertThat(commandLineArgumentPropertiesDifference.areEqual()).isTrue();
 
 		rightCommandlineArguments.add("--key1=value2");
+		rightCommandlineArguments.add("-key2=value3");
+		rightCommandlineArguments.add("key3=value4");
 
 		report = analyzer.analyze(leftManifest, rightManifest);
 		taskManifestDifference = report.getTaskManifestDifference();
 
-		commandLineArgumentPropertiesDifference = taskManifestDifference.getCommandLineArgumentPropertiesDifference();
+		commandLineArgumentPropertiesDifference = taskManifestDifference.getCommandLineArgumentPropertiesDifferenceDoubleDash();
 		assertThat(commandLineArgumentPropertiesDifference.areEqual()).isFalse();
-		assertThat(report.getMergedCommandLineArguments()).hasSize(1);
-		assertThat(report.getMergedCommandLineArguments()).containsOnly("--key1=value2");
+		assertThat(report.getMergedCommandLineArguments()).hasSize(3);
+		assertThat(report.getMergedCommandLineArguments()).containsOnly("--key1=value2", "-key2=value3", "key3=value4");
 	}
 
 }

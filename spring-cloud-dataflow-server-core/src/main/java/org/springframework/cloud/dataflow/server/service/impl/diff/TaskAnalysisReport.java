@@ -55,21 +55,25 @@ public class TaskAnalysisReport {
 
 	public List<String> getMergedCommandLineArguments() {
 		ArrayList<String> args = new ArrayList<>();
-		for (Entry<String, String> entry : getTaskManifestDifference().getCommandLineArgumentPropertiesDifference()
-				.getCommon().entrySet()) {
-			args.add("--" + entry.getKey() + "=" + entry.getValue());
+		args.addAll(buildArgsWithPrefix(getTaskManifestDifference().getCommandLineArgumentPropertiesDifferenceDoubleDash(), "--"));
+		args.addAll(buildArgsWithPrefix(getTaskManifestDifference().getCommandLineArgumentPropertiesDifferenceSingleDash(), "-"));
+		args.addAll(buildArgsWithPrefix(getTaskManifestDifference().getCommandLineArgumentPropertiesDifferenceNoDash(), ""));
+		return args;
+	}
+
+	private static List<String> buildArgsWithPrefix(PropertiesDiff diff, String prefix) {
+		ArrayList<String> args = new ArrayList<>();
+		for (Entry<String, String> entry : diff.getCommon().entrySet()) {
+			args.add(prefix + entry.getKey() + "=" + entry.getValue());
 		}
-		for (Entry<String, String> entry : getTaskManifestDifference().getCommandLineArgumentPropertiesDifference()
-				.getAdded().entrySet()) {
-			args.add("--" + entry.getKey() + "=" + entry.getValue());
+		for (Entry<String, String> entry : diff.getAdded().entrySet()) {
+			args.add(prefix + entry.getKey() + "=" + entry.getValue());
 		}
-		for (Entry<String, String> entry : getTaskManifestDifference().getCommandLineArgumentPropertiesDifference()
-				.getRemoved().entrySet()) {
-			args.add("--" + entry.getKey() + "=" + entry.getValue());
+		for (Entry<String, String> entry : diff.getRemoved().entrySet()) {
+			args.add(prefix + entry.getKey() + "=" + entry.getValue());
 		}
-		for (Map.Entry<String, PropertyChange> entry : getTaskManifestDifference()
-				.getCommandLineArgumentPropertiesDifference().getChanged().entrySet()) {
-			args.add("--" + entry.getKey() + "=" + entry.getValue().getReplaced());
+		for (Map.Entry<String, PropertyChange> entry : diff.getChanged().entrySet()) {
+			args.add(prefix + entry.getKey() + "=" + entry.getValue().getReplaced());
 		}
 		return args;
 	}
