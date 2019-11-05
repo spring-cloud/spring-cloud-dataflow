@@ -346,7 +346,6 @@ public class DefaultTaskExecutionService implements TaskExecutionService {
 	 * @param previousManifest manifest from the last execution of the same task definition
 	 * @return an updated {@code AppDeploymentRequest}
 	 */
-	// private AppDeploymentRequest updateDeploymentProperties(List<String> commandLineArgs, String platformName, TaskExecutionInformation taskExecutionInformation, TaskExecution taskExecution, TaskManifest previousManifest) {
 	private AppDeploymentRequest updateDeploymentProperties(List<String> commandLineArgs, String platformName,
 			TaskExecutionInformation taskExecutionInformation, TaskExecution taskExecution,
 			Map<String, String> deploymentProperties) {
@@ -357,7 +356,6 @@ public class DefaultTaskExecutionService implements TaskExecutionService {
 		info.setComposed(taskExecutionInformation.isComposed());
 		info.setMetadataResource(taskExecutionInformation.getMetadataResource());
 		info.setOriginalTaskDefinition(taskExecutionInformation.getOriginalTaskDefinition());
-		// info.setTaskDeploymentProperties(previousManifest.getTaskDeploymentRequest().getDeploymentProperties());
 		info.setTaskDeploymentProperties(deploymentProperties);
 
 		appDeploymentRequest = this.taskAppDeploymentRequestCreator.

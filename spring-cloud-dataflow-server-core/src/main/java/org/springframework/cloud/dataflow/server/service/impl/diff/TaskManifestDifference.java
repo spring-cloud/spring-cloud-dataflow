@@ -24,26 +24,42 @@ package org.springframework.cloud.dataflow.server.service.impl.diff;
 public class TaskManifestDifference {
 
 	private final PropertiesDiff deploymentPropertiesDifference;
-	private final PropertiesDiff commandLineArgumentPropertiesDifference;
+	private final PropertiesDiff commandLineArgumentPropertiesDifferenceDoubleDash;
+	private final PropertiesDiff commandLineArgumentPropertiesDifferenceSingleDash;
+	private final PropertiesDiff commandLineArgumentPropertiesDifferenceNoDash;
 
 	public TaskManifestDifference(PropertiesDiff deploymentPropertiesDifference,
-			PropertiesDiff commandLineArgumentPropertiesDifference) {
+			PropertiesDiff commandLineArgumentPropertiesDifferenceDoubleDash,
+			PropertiesDiff commandLineArgumentPropertiesDifferenceSingleDash,
+			PropertiesDiff commandLineArgumentPropertiesDifferenceNoDash) {
 		this.deploymentPropertiesDifference = deploymentPropertiesDifference;
-		this.commandLineArgumentPropertiesDifference = commandLineArgumentPropertiesDifference;
+		this.commandLineArgumentPropertiesDifferenceDoubleDash = commandLineArgumentPropertiesDifferenceDoubleDash;
+		this.commandLineArgumentPropertiesDifferenceSingleDash = commandLineArgumentPropertiesDifferenceSingleDash;
+		this.commandLineArgumentPropertiesDifferenceNoDash = commandLineArgumentPropertiesDifferenceNoDash;
 	}
 
 	public PropertiesDiff getDeploymentPropertiesDifference() {
 		return deploymentPropertiesDifference;
 	}
 
-	public PropertiesDiff getCommandLineArgumentPropertiesDifference() {
-		return commandLineArgumentPropertiesDifference;
+	public PropertiesDiff getCommandLineArgumentPropertiesDifferenceDoubleDash() {
+		return commandLineArgumentPropertiesDifferenceDoubleDash;
+	}
+
+	public PropertiesDiff getCommandLineArgumentPropertiesDifferenceSingleDash() {
+		return commandLineArgumentPropertiesDifferenceSingleDash;
+	}
+
+	public PropertiesDiff getCommandLineArgumentPropertiesDifferenceNoDash() {
+		return commandLineArgumentPropertiesDifferenceNoDash;
 	}
 
 	@Override
 	public String toString() {
-		return "TaskManifestDifference [commandLineArgumentPropertiesDifference="
-				+ commandLineArgumentPropertiesDifference + ", deploymentPropertiesDifference="
+		return "TaskManifestDifference [commandLineArgumentPropertiesDifferenceDoubleDash="
+				+ commandLineArgumentPropertiesDifferenceDoubleDash + ", commandLineArgumentPropertiesDifferenceNoDash="
+				+ commandLineArgumentPropertiesDifferenceNoDash + ", commandLineArgumentPropertiesDifferenceSingleDash="
+				+ commandLineArgumentPropertiesDifferenceSingleDash + ", deploymentPropertiesDifference="
 				+ deploymentPropertiesDifference + "]";
 	}
 }
