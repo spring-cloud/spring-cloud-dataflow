@@ -6,7 +6,7 @@ metadata:
     app: prometheus-proxy
 subjects:
   - kind: ServiceAccount
-    name: default
+    name: prometheus-proxy
     namespace: default
 roleRef:
   kind: ClusterRole
