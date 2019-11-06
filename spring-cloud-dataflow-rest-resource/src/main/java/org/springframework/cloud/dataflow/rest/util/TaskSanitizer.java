@@ -30,19 +30,20 @@ import org.springframework.cloud.task.repository.TaskExecution;
  *
  * @author Glenn Renfro
  * @author Ilayaperumal Gopinathan
+ * @author Michael Minella
  */
 public class TaskSanitizer {
 
-	private ArgumentSanitizer argumentSanitizer = new ArgumentSanitizer();
+	private static ArgumentSanitizer argumentSanitizer = new ArgumentSanitizer();
 
-	public TaskExecution sanitizeTaskExecutionArguments(TaskExecution taskExecution) {
+	public static TaskExecution sanitizeTaskExecutionArguments(TaskExecution taskExecution) {
 		List<String> args = taskExecution.getArguments().stream()
-				.map(argument -> (this.argumentSanitizer.sanitize(argument))).collect(Collectors.toList());
+				.map(argument -> (argumentSanitizer.sanitize(argument))).collect(Collectors.toList());
 		taskExecution.setArguments(args);
 		return taskExecution;
 	}
 
-	public TaskExecutionManifest sanitizeTaskExecutionManifest(TaskExecutionManifest taskExecutionManifest) {
+	public static TaskExecutionManifest sanitizeTaskExecutionManifest(TaskExecutionManifest taskExecutionManifest) {
 		if (taskExecutionManifest == null) {
 			return null;
 		}
@@ -53,16 +54,16 @@ public class TaskSanitizer {
 		AppDeploymentRequest existingAppDeploymentRequest = dirtyTaskManifest.getTaskDeploymentRequest();
 		// Sanitize App Properties
 		Map<String, String> existingAppProperties = existingAppDeploymentRequest.getDefinition().getProperties();
-		Map<String, String> sanitizedAppProperties = this.argumentSanitizer.sanitizeProperties(existingAppProperties);
+		Map<String, String> sanitizedAppProperties = argumentSanitizer.sanitizeProperties(existingAppProperties);
 
 		// Sanitize Deployment Properties
 		Map<String, String> existingDeploymentProperties = existingAppDeploymentRequest.getDeploymentProperties();
-		Map<String, String> sanitizedDeploymentProperties = this.argumentSanitizer.sanitizeProperties(existingDeploymentProperties);
+		Map<String, String> sanitizedDeploymentProperties = argumentSanitizer.sanitizeProperties(existingDeploymentProperties);
 
 		AppDefinition sanitizedAppDefinition = new AppDefinition(existingAppDeploymentRequest.getDefinition().getName(),
 				sanitizedAppProperties);
 		List<String> sanitizedCommandLineArgs = existingAppDeploymentRequest.getCommandlineArguments().stream()
-				.map(argument -> (this.argumentSanitizer.sanitize(argument))).collect(Collectors.toList());
+				.map(argument -> (argumentSanitizer.sanitize(argument))).collect(Collectors.toList());
 		AppDeploymentRequest sanitizedAppDeploymentRequest = new AppDeploymentRequest(
 				sanitizedAppDefinition,
 				existingAppDeploymentRequest.getResource(),

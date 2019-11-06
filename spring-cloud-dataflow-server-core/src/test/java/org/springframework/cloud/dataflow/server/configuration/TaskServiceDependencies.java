@@ -22,6 +22,9 @@ import java.util.List;
 import javax.persistence.EntityManager;
 import javax.sql.DataSource;
 
+import com.fasterxml.jackson.databind.module.SimpleModule;
+import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.mockito.Mockito;
 
 import org.springframework.batch.core.repository.dao.AbstractJdbcBatchMetadataDao;
@@ -29,6 +32,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.ImportAutoConfiguration;
 import org.springframework.boot.autoconfigure.domain.EntityScan;
 import org.springframework.boot.autoconfigure.flyway.FlywayAutoConfiguration;
+import org.springframework.boot.autoconfigure.jackson.Jackson2ObjectMapperBuilderCustomizer;
 import org.springframework.boot.autoconfigure.jackson.JacksonAutoConfiguration;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceProperties;
 import org.springframework.boot.autoconfigure.orm.jpa.HibernateJpaAutoConfiguration;
@@ -37,9 +41,15 @@ import org.springframework.cloud.dataflow.audit.service.AuditRecordService;
 import org.springframework.cloud.dataflow.audit.service.DefaultAuditRecordService;
 import org.springframework.cloud.dataflow.completion.CompletionConfiguration;
 import org.springframework.cloud.dataflow.configuration.metadata.ApplicationConfigurationMetadataResolver;
+import org.springframework.cloud.dataflow.core.AppDefinitionMixin;
+import org.springframework.cloud.dataflow.core.AppDeploymentRequestMixin;
+import org.springframework.cloud.dataflow.core.AppResourceCommon;
 import org.springframework.cloud.dataflow.core.Launcher;
+import org.springframework.cloud.dataflow.core.ResourceDeserializer;
+import org.springframework.cloud.dataflow.core.ResourceMixin;
 import org.springframework.cloud.dataflow.core.TaskPlatform;
 import org.springframework.cloud.dataflow.registry.service.AppRegistryService;
+import org.springframework.cloud.dataflow.rest.support.jackson.ISO8601DateFormatWithMilliSeconds;
 import org.springframework.cloud.dataflow.server.DockerValidatorProperties;
 import org.springframework.cloud.dataflow.server.config.VersionInfoProperties;
 import org.springframework.cloud.dataflow.server.config.apps.CommonApplicationProperties;
@@ -70,6 +80,9 @@ import org.springframework.cloud.dataflow.server.service.impl.DefaultTaskSaveSer
 import org.springframework.cloud.dataflow.server.service.impl.TaskAppDeploymentRequestCreator;
 import org.springframework.cloud.dataflow.server.service.impl.TaskConfigurationProperties;
 import org.springframework.cloud.dataflow.server.service.impl.validation.DefaultTaskValidationService;
+import org.springframework.cloud.deployer.resource.maven.MavenProperties;
+import org.springframework.cloud.deployer.spi.core.AppDefinition;
+import org.springframework.cloud.deployer.spi.core.AppDeploymentRequest;
 import org.springframework.cloud.deployer.spi.scheduler.Scheduler;
 import org.springframework.cloud.deployer.spi.task.TaskLauncher;
 import org.springframework.cloud.task.configuration.TaskProperties;
@@ -82,6 +95,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Conditional;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
+import org.springframework.core.io.DefaultResourceLoader;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
@@ -137,6 +151,22 @@ public class TaskServiceDependencies extends WebMvcConfigurationSupport {
 
 	@Autowired
 	DockerValidatorProperties dockerValidatorProperties;
+
+	@Bean
+	public Jackson2ObjectMapperBuilderCustomizer dataflowObjectMapperBuilderCustomizer() {
+		return (builder) -> {
+			builder.dateFormat(new ISO8601DateFormatWithMilliSeconds());
+			builder.mixIn(Resource.class, ResourceMixin.class);
+			builder.mixIn(AppDefinition.class, AppDefinitionMixin.class);
+			builder.mixIn(AppDeploymentRequest.class, AppDeploymentRequestMixin.class);
+
+			SimpleModule module = new SimpleModule();
+			module.addDeserializer(Resource.class,
+					new ResourceDeserializer(new AppResourceCommon(new MavenProperties(), new DefaultResourceLoader())));
+
+			builder.modules(new JavaTimeModule(), new Jdk8Module(), module);
+		};
+	}
 
 	@Bean
 	public TaskValidationService taskValidationService(AppRegistryService appRegistry,

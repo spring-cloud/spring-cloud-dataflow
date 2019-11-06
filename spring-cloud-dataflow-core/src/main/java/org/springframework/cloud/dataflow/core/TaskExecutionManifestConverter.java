@@ -19,32 +19,22 @@ import javax.persistence.AttributeConverter;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
-import com.fasterxml.jackson.databind.module.SimpleModule;
 
-import org.springframework.cloud.deployer.resource.maven.MavenProperties;
-import org.springframework.cloud.deployer.spi.core.AppDefinition;
-import org.springframework.cloud.deployer.spi.core.AppDeploymentRequest;
-import org.springframework.core.io.DefaultResourceLoader;
-import org.springframework.core.io.Resource;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 /**
  * @author Michael Minella
  */
+@Component
 public class TaskExecutionManifestConverter implements AttributeConverter<TaskExecutionManifest.Manifest, String> {
 
-	private ObjectMapper objectMapper;
+	private static ObjectMapper objectMapper;
 
-	public TaskExecutionManifestConverter() {
-		this.objectMapper = new ObjectMapper();
-		SimpleModule module = new SimpleModule();
-		module.addDeserializer(Resource.class,
-				new ResourceDeserializer(new AppResourceCommon(new MavenProperties(), new DefaultResourceLoader())));
-		this.objectMapper.registerModule(module);
-		this.objectMapper.addMixIn(Resource.class, ResourceMixin.class);
-		this.objectMapper.addMixIn(AppDefinition.class, AppDefinitionMixin.class);
-		this.objectMapper.addMixIn(AppDeploymentRequest.class, AppDeploymentRequestMixin.class);
-		this.objectMapper.configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false);
+	@Autowired
+	public void setObjectMapper(ObjectMapper objectMapper){
+		TaskExecutionManifestConverter.objectMapper = objectMapper;
+		System.out.println(">> Object Mapper is set: " + objectMapper);
 	}
 
 	@Override

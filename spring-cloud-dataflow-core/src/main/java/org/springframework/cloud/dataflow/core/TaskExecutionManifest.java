@@ -24,7 +24,6 @@ import javax.persistence.Table;
 import javax.validation.constraints.NotNull;
 
 import org.springframework.cloud.deployer.spi.core.AppDeploymentRequest;
-import org.springframework.core.style.ToStringCreator;
 
 /**
  * Description of an execution of a task including resource to be executed and how it was configured via Spring Cloud
@@ -83,14 +82,6 @@ public class TaskExecutionManifest extends AbstractEntity {
 	 */
 	public void setTaskExecutionId(Long taskExecutionId) {
 		this.taskExecutionId = taskExecutionId;
-	}
-
-	public String toString() {
-		return new ToStringCreator(this)
-				.append("manifest", this.manifest)
-				.append("platformName", this.manifest.getPlatformName())
-				.append("subTaskDeploymentRequests", this.manifest.getSubTaskDeploymentRequests())
-				.toString();
 	}
 
 	public static class Manifest {

@@ -23,6 +23,7 @@ import java.util.TimeZone;
 import javax.servlet.ServletContext;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.h2.tools.Server;
@@ -37,13 +38,23 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplicat
 import org.springframework.boot.autoconfigure.http.HttpMessageConverters;
 import org.springframework.boot.autoconfigure.jackson.Jackson2ObjectMapperBuilderCustomizer;
 import org.springframework.boot.web.servlet.ServletContextInitializer;
+import org.springframework.cloud.dataflow.core.AppDefinitionMixin;
+import org.springframework.cloud.dataflow.core.AppDeploymentRequestMixin;
+import org.springframework.cloud.dataflow.core.AppResourceCommon;
+import org.springframework.cloud.dataflow.core.ResourceDeserializer;
+import org.springframework.cloud.dataflow.core.ResourceMixin;
 import org.springframework.cloud.dataflow.rest.support.jackson.ExecutionContextJacksonMixIn;
 import org.springframework.cloud.dataflow.rest.support.jackson.ISO8601DateFormatWithMilliSeconds;
 import org.springframework.cloud.dataflow.rest.support.jackson.StepExecutionJacksonMixIn;
+import org.springframework.cloud.deployer.resource.maven.MavenProperties;
+import org.springframework.cloud.deployer.spi.core.AppDefinition;
+import org.springframework.cloud.deployer.spi.core.AppDeploymentRequest;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.event.ContextClosedEvent;
+import org.springframework.core.io.DefaultResourceLoader;
+import org.springframework.core.io.Resource;
 import org.springframework.hateoas.server.core.DefaultLinkRelationProvider;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.ResourceHttpMessageConverter;
@@ -132,7 +143,15 @@ public class WebConfiguration implements ServletContextInitializer, ApplicationL
 			// https://github.com/spring-projects/spring-hateoas/issues/333
 			builder.mixIn(StepExecution.class, StepExecutionJacksonMixIn.class);
 			builder.mixIn(ExecutionContext.class, ExecutionContextJacksonMixIn.class);
-			builder.modules(new JavaTimeModule(), new Jdk8Module());
+			builder.mixIn(Resource.class, ResourceMixin.class);
+			builder.mixIn(AppDefinition.class, AppDefinitionMixin.class);
+			builder.mixIn(AppDeploymentRequest.class, AppDeploymentRequestMixin.class);
+
+			SimpleModule module = new SimpleModule();
+			module.addDeserializer(Resource.class,
+					new ResourceDeserializer(new AppResourceCommon(new MavenProperties(), new DefaultResourceLoader())));
+
+			builder.modules(new JavaTimeModule(), new Jdk8Module(), module);
 		};
 	}
 

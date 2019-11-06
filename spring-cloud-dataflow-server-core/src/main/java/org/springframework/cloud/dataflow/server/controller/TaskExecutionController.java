@@ -85,8 +85,6 @@ public class TaskExecutionController {
 
 	private final TaskDefinitionRepository taskDefinitionRepository;
 
-	private final TaskSanitizer taskSanitizer = new TaskSanitizer();
-
 	/**
 	 * Creates a {@code TaskExecutionController} that retrieves Task Execution information
 	 * from a the {@link TaskExplorer}
@@ -183,9 +181,9 @@ public class TaskExecutionController {
 		if (taskExecution == null) {
 			throw new NoSuchTaskExecutionException(id);
 		}
-		taskExecution = this.taskSanitizer.sanitizeTaskExecutionArguments(taskExecution);
+		taskExecution = TaskSanitizer.sanitizeTaskExecutionArguments(taskExecution);
 		TaskExecutionManifest taskExecutionManifest = this.taskExecutionService.findTaskExecutionManifestById(id);
-		taskExecutionManifest = this.taskSanitizer.sanitizeTaskExecutionManifest(taskExecutionManifest);
+		taskExecutionManifest = TaskSanitizer.sanitizeTaskExecutionManifest(taskExecutionManifest);
 		TaskJobExecutionRel taskJobExecutionRel = new TaskJobExecutionRel(taskExecution,
 				new ArrayList<>(this.explorer.getJobExecutionIdsByTaskExecutionId(taskExecution.getExecutionId())),
 				taskExecutionManifest);
@@ -243,11 +241,11 @@ public class TaskExecutionController {
 		List<TaskJobExecutionRel> taskJobExecutionRels = new ArrayList<>();
 		for (TaskExecution taskExecution : taskExecutions.getContent()) {
 			TaskExecutionManifest taskExecutionManifest = this.taskExecutionService.findTaskExecutionManifestById(taskExecution.getExecutionId());
-			taskExecutionManifest = this.taskSanitizer.sanitizeTaskExecutionManifest(taskExecutionManifest);
+			taskExecutionManifest = TaskSanitizer.sanitizeTaskExecutionManifest(taskExecutionManifest);
 			List<Long> jobExecutionIds = new ArrayList<>(
 					this.explorer.getJobExecutionIdsByTaskExecutionId(taskExecution.getExecutionId()));
 			taskJobExecutionRels
-					.add(new TaskJobExecutionRel(this.taskSanitizer.sanitizeTaskExecutionArguments(taskExecution),
+					.add(new TaskJobExecutionRel(TaskSanitizer.sanitizeTaskExecutionArguments(taskExecution),
 							jobExecutionIds,
 							taskExecutionManifest));
 		}

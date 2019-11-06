@@ -39,15 +39,12 @@ import static org.mockito.Mockito.when;
  */
 public class TaskSanitizerTest {
 
-	private TaskSanitizer taskSanitizer = new TaskSanitizer();
-
-
 	@Test
 	public void testTaskExecutionArguments() {
 		TaskExecution taskExecution = new TaskExecution();
 		taskExecution.setTaskName("a1");
 		taskExecution.setArguments(Arrays.asList("--username=test", "--password=testing"));
-		TaskExecution sanitizedTaskExecution = this.taskSanitizer.sanitizeTaskExecutionArguments(taskExecution);
+		TaskExecution sanitizedTaskExecution = TaskSanitizer.sanitizeTaskExecutionArguments(taskExecution);
 		Assert.assertEquals("--username=******", sanitizedTaskExecution.getArguments().get(0));
 		Assert.assertEquals("--password=******", sanitizedTaskExecution.getArguments().get(1));
 	}
@@ -67,7 +64,7 @@ public class TaskSanitizerTest {
 		deploymentProperties.put("user.key", "dev");
 		when(appDeploymentRequest.getDeploymentProperties()).thenReturn(deploymentProperties);
 		taskExecutionManifest.getManifest().setTaskDeploymentRequest(appDeploymentRequest);
-		TaskExecutionManifest sanitizedTaskManifest = this.taskSanitizer.sanitizeTaskExecutionManifest(taskExecutionManifest);
+		TaskExecutionManifest sanitizedTaskManifest = TaskSanitizer.sanitizeTaskExecutionManifest(taskExecutionManifest);
 		TaskExecutionManifest.Manifest manifest = sanitizedTaskManifest.getManifest();
 		List<String> commandLineArgs = manifest.getTaskDeploymentRequest().getCommandlineArguments();
 		Assert.assertEquals("--username=******", commandLineArgs.get(0));
