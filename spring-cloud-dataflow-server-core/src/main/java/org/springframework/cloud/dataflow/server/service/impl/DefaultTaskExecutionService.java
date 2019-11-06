@@ -407,17 +407,7 @@ public class DefaultTaskExecutionService implements TaskExecutionService {
 			AppDeploymentRequest appDeploymentRequest) {
 		TaskManifest taskManifest = new TaskManifest();
 		taskManifest.setPlatformName(platformName);
-		String composedTaskDsl = taskExecutionInformation.getTaskDefinition().getProperties().get("graph");
-		if (StringUtils.hasText(composedTaskDsl)) {
-			taskManifest.setTaskDeploymentRequest(appDeploymentRequest);
-			List<AppDeploymentRequest> subTaskAppDeploymentRequests = this.taskExecutionInfoService.createTaskDeploymentRequests(
-					taskExecutionInformation.getTaskDefinition().getTaskName(),
-					taskExecutionInformation.getTaskDefinition().getDslText());
-			taskManifest.setSubTaskDeploymentRequests(subTaskAppDeploymentRequests);
-		}
-		else {
-			taskManifest.setTaskDeploymentRequest(appDeploymentRequest);
-		}
+		taskManifest.setTaskDeploymentRequest(appDeploymentRequest);
 		return taskManifest;
 	}
 

@@ -267,7 +267,6 @@ public abstract class DefaultTaskExecutionServiceTests {
 			TaskManifest lastManifest = this.dataflowTaskExecutionMetadataDao.getLatestManifest(TASK_NAME_ORIG);
 			assertEquals("file:src/test/resources/apps/foo-task", lastManifest.getTaskDeploymentRequest().getResource().getURL().toString());
 			assertEquals("default", lastManifest.getPlatformName());
-			assertTrue(lastManifest.getSubTaskDeploymentRequests() == null);
 
 			verify(this.taskLauncher).destroy(TASK_NAME_ORIG);
 		}
@@ -290,7 +289,6 @@ public abstract class DefaultTaskExecutionServiceTests {
 
 			assertEquals("file:src/test/resources/apps/foo-task", lastManifest.getTaskDeploymentRequest().getResource().getURL().toString());
 			assertEquals("default", lastManifest.getPlatformName());
-			assertTrue(lastManifest.getSubTaskDeploymentRequests() == null);
 			assertEquals(1, lastManifest.getTaskDeploymentRequest().getDeploymentProperties().size());
 			assertEquals("bar", lastManifest.getTaskDeploymentRequest().getDeploymentProperties().get("app.demo.foo"));
 
@@ -315,7 +313,6 @@ public abstract class DefaultTaskExecutionServiceTests {
 
 			assertEquals("file:src/test/resources/apps/foo-task", lastManifest.getTaskDeploymentRequest().getResource().getURL().toString());
 			assertEquals("default", lastManifest.getPlatformName());
-			assertTrue(lastManifest.getSubTaskDeploymentRequests() == null);
 			assertEquals(1, lastManifest.getTaskDeploymentRequest().getDeploymentProperties().size());
 			assertEquals("100000GB", lastManifest.getTaskDeploymentRequest().getDeploymentProperties().get("deployer.demo.memory"));
 
@@ -349,7 +346,6 @@ public abstract class DefaultTaskExecutionServiceTests {
 
 			assertEquals("file:src/test/resources/apps/foo-task", lastManifest.getTaskDeploymentRequest().getResource().getURL().toString());
 			assertEquals("default", lastManifest.getPlatformName());
-			assertTrue(lastManifest.getSubTaskDeploymentRequests() == null);
 			assertEquals(1, lastManifest.getTaskDeploymentRequest().getDeploymentProperties().size());
 			assertEquals("10000GB", lastManifest.getTaskDeploymentRequest().getDeploymentProperties().get("deployer.demo.memory"));
 
@@ -383,7 +379,6 @@ public abstract class DefaultTaskExecutionServiceTests {
 
 			assertEquals("file:src/test/resources/apps/foo-task", lastManifest.getTaskDeploymentRequest().getResource().getURL().toString());
 			assertEquals("default", lastManifest.getPlatformName());
-			assertTrue(lastManifest.getSubTaskDeploymentRequests() == null);
 			assertEquals(5, lastManifest.getTaskDeploymentRequest().getDefinition().getProperties().size());
 			assertEquals("bar", lastManifest.getTaskDeploymentRequest().getDefinition().getProperties().get("foo"));
 

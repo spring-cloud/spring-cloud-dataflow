@@ -15,8 +15,6 @@
  */
 package org.springframework.cloud.dataflow.core;
 
-import java.util.List;
-
 import org.springframework.cloud.deployer.spi.core.AppDeploymentRequest;
 import org.springframework.core.style.ToStringCreator;
 
@@ -31,8 +29,6 @@ import org.springframework.core.style.ToStringCreator;
 public class TaskManifest {
 
 	private AppDeploymentRequest taskDeploymentRequest;
-
-	private List<AppDeploymentRequest> subTaskDeploymentRequests;
 
 	private String platformName;
 
@@ -72,26 +68,8 @@ public class TaskManifest {
 		this.taskDeploymentRequest = taskDeploymentRequest;
 	}
 
-	/**
-	 * For composed task executions, this will contain the children deployment requests.
-	 *
-	 * @return list of deployment requests (one for each child)
-	 */
-	public List<AppDeploymentRequest> getSubTaskDeploymentRequests() {
-		return subTaskDeploymentRequests;
-	}
-
-	/**
-	 * For composed task executions, the list of deployment requests (one for each child)
-	 *
-	 * @param subTaskDeploymentRequests child deployment requests
-	 */
-	public void setSubTaskDeploymentRequests(List<AppDeploymentRequest> subTaskDeploymentRequests) {
-		this.subTaskDeploymentRequests = subTaskDeploymentRequests;
-	}
-
 	public String toString() {
-		return (new ToStringCreator(this)).append("taskDeploymentRequest", this.taskDeploymentRequest).append("platformName", this.platformName).append("subTaskDeploymentRequests", this.subTaskDeploymentRequests).toString();
+		return (new ToStringCreator(this)).append("taskDeploymentRequest", this.taskDeploymentRequest).append("platformName", this.platformName).toString();
 	}
 
 }
