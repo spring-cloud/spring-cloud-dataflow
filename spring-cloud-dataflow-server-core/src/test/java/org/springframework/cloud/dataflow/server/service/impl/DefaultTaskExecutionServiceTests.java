@@ -152,9 +152,6 @@ public abstract class DefaultTaskExecutionServiceTests {
 	@Autowired
 	TaskDeleteService taskDeleteService;
 
-	//@Autowired
-	//TaskExecutionInfoService taskExecutionInfoService;
-
 	@Autowired
 	TaskExecutionService taskExecutionService;
 
@@ -730,6 +727,7 @@ public abstract class DefaultTaskExecutionServiceTests {
 			initializeSuccessfulRegistry(appRegistry);
 			when(this.taskLauncher.launch(any())).thenReturn("0");
 			taskExecutionService.executeTask("demo", new HashMap<>(), new LinkedList<>());
+			assertNotNull(taskDefinitionRepository.findByTaskName("demo"));
 		}
 	}
 
