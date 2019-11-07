@@ -869,6 +869,8 @@ export JWT_TOKEN_VERIFICATION_KEY=$(cat verificationkey.pem)
 
 Later, once the UAA is started you can see the keys when accessing `http://uaa:8080/uaa/token_keys`
 
+NOTE: Here, the name `uaa` in the URL `http://uaa:8080/uaa/token_keys` is the hostname.
+
 ===== Download + Start UAA
 
 [source,bash]
@@ -889,20 +891,24 @@ uaac token client get admin -s adminsecret
 uaac client add dataflow \
   --name dataflow \
   --secret dataflow \
-  --scope cloud_controller.read,cloud_controller.write,openid,password.write,scim.userids,foo.create,foo.view \
+  --scope cloud_controller.read,cloud_controller.write,openid,password.write,scim.userids,foo.create,foo.view,dataflow.create,dataflow.deploy,dataflow.destroy,dataflow.manage,dataflow.modify,dataflow.schedule,dataflow.view \
   --authorized_grant_types password,authorization_code,client_credentials,refresh_token \
   --authorities uaa.resource,dataflow.create,dataflow.deploy,dataflow.destroy,dataflow.manage,dataflow.modify,dataflow.schedule,dataflow.view,foo.view,foo.create\
   --redirect_uri http://localhost:9393/login \
-  --autoapprove openid \
+  --autoapprove openid
 
 uaac group add "foo.view"
 uaac group add "foo.create"
+uaac group add "dataflow.view"
+uaac group add "dataflow.create"
 
 uaac user add springrocks -p mysecret --emails springrocks@someplace.com
 uaac user add vieweronly -p mysecret --emails mrviewer@someplace.com
 
 uaac member add "foo.view" springrocks
 uaac member add "foo.create" springrocks
+uaac member add "dataflow.view" springrocks
+uaac member add "dataflow.create" springrocks
 uaac member add "foo.view" vieweronly
 ----
 
