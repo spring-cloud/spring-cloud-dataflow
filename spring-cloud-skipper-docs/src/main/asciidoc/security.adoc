@@ -192,6 +192,17 @@ spring:
           introspection-uri: http://uaa.local:8080/uaa/introspect # <6>
           client-id: dataflow
           client-secret: dataflow
+  cloud:
+    skipper:
+      security:
+        authorization:
+          provider-role-mappings:                                    # <7>
+            uaa:
+              map-oauth-scopes: true
+              role-mappings:
+                ROLE_VIEW: skipper.view
+                ROLE_CREATE: skipper.create
+                ROLE_MANAGE: skipper.manage
 ----
 
 <1> Providing this property activates OAuth2 security
@@ -202,7 +213,7 @@ spring:
 <4> OpenID endpoint. Used to retrieve user information such as the username. Mandatory.
 <5> The JSON property of the response that contains the username
 <6> Used to introspect and validate a directly passed-in token. Mandatory.
-
+<7> Role mappings for authorization.
 You can verify that basic authentication is working properly by using `curl`, as follows:
 
 [source,bash]
