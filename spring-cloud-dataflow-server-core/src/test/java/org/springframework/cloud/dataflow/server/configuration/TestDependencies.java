@@ -50,7 +50,6 @@ import org.springframework.cloud.dataflow.completion.StreamCompletionProvider;
 import org.springframework.cloud.dataflow.completion.TaskCompletionProvider;
 import org.springframework.cloud.dataflow.configuration.metadata.ApplicationConfigurationMetadataResolver;
 import org.springframework.cloud.dataflow.core.Launcher;
-import org.springframework.cloud.dataflow.core.ResourceMixin;
 import org.springframework.cloud.dataflow.core.TaskPlatform;
 import org.springframework.cloud.dataflow.registry.repository.AppRegistrationRepository;
 import org.springframework.cloud.dataflow.registry.service.AppRegistryService;
@@ -117,6 +116,7 @@ import org.springframework.cloud.dataflow.server.service.impl.DefaultTaskExecuti
 import org.springframework.cloud.dataflow.server.service.impl.DefaultTaskExecutionRepositoryService;
 import org.springframework.cloud.dataflow.server.service.impl.DefaultTaskExecutionService;
 import org.springframework.cloud.dataflow.server.service.impl.DefaultTaskSaveService;
+import org.springframework.cloud.dataflow.server.service.impl.ResourceMixin;
 import org.springframework.cloud.dataflow.server.service.impl.TaskAppDeploymentRequestCreator;
 import org.springframework.cloud.dataflow.server.service.impl.TaskConfigurationProperties;
 import org.springframework.cloud.dataflow.server.service.impl.validation.DefaultStreamValidationService;
