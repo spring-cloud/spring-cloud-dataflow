@@ -40,12 +40,12 @@ import org.springframework.boot.autoconfigure.jackson.Jackson2ObjectMapperBuilde
 import org.springframework.boot.web.servlet.ServletContextInitializer;
 import org.springframework.cloud.dataflow.core.AppDefinitionMixin;
 import org.springframework.cloud.dataflow.core.AppDeploymentRequestMixin;
-import org.springframework.cloud.dataflow.core.AppResourceCommon;
-import org.springframework.cloud.dataflow.core.ResourceDeserializer;
 import org.springframework.cloud.dataflow.core.ResourceMixin;
+import org.springframework.cloud.dataflow.registry.support.AppResourceCommon;
 import org.springframework.cloud.dataflow.rest.support.jackson.ExecutionContextJacksonMixIn;
 import org.springframework.cloud.dataflow.rest.support.jackson.ISO8601DateFormatWithMilliSeconds;
 import org.springframework.cloud.dataflow.rest.support.jackson.StepExecutionJacksonMixIn;
+import org.springframework.cloud.dataflow.server.repository.support.ResourceDeserializer;
 import org.springframework.cloud.deployer.resource.maven.MavenProperties;
 import org.springframework.cloud.deployer.spi.core.AppDefinition;
 import org.springframework.cloud.deployer.spi.core.AppDeploymentRequest;
