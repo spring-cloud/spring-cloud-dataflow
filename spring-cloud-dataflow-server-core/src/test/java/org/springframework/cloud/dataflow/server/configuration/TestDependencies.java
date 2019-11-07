@@ -49,8 +49,6 @@ import org.springframework.cloud.dataflow.completion.CompletionConfiguration;
 import org.springframework.cloud.dataflow.completion.StreamCompletionProvider;
 import org.springframework.cloud.dataflow.completion.TaskCompletionProvider;
 import org.springframework.cloud.dataflow.configuration.metadata.ApplicationConfigurationMetadataResolver;
-import org.springframework.cloud.dataflow.core.AppDefinitionMixin;
-import org.springframework.cloud.dataflow.core.AppDeploymentRequestMixin;
 import org.springframework.cloud.dataflow.core.Launcher;
 import org.springframework.cloud.dataflow.core.ResourceMixin;
 import org.springframework.cloud.dataflow.core.TaskPlatform;
@@ -98,6 +96,8 @@ import org.springframework.cloud.dataflow.server.repository.StreamDefinitionRepo
 import org.springframework.cloud.dataflow.server.repository.TaskDefinitionRepository;
 import org.springframework.cloud.dataflow.server.repository.TaskDeploymentRepository;
 import org.springframework.cloud.dataflow.server.repository.TaskExecutionManifestRepository;
+import org.springframework.cloud.dataflow.server.repository.support.AppDefinitionMixin;
+import org.springframework.cloud.dataflow.server.repository.support.AppDeploymentRequestMixin;
 import org.springframework.cloud.dataflow.server.repository.support.ResourceDeserializer;
 import org.springframework.cloud.dataflow.server.service.SchedulerService;
 import org.springframework.cloud.dataflow.server.service.SchedulerServiceProperties;

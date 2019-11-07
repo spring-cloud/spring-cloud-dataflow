@@ -38,13 +38,13 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplicat
 import org.springframework.boot.autoconfigure.http.HttpMessageConverters;
 import org.springframework.boot.autoconfigure.jackson.Jackson2ObjectMapperBuilderCustomizer;
 import org.springframework.boot.web.servlet.ServletContextInitializer;
-import org.springframework.cloud.dataflow.core.AppDefinitionMixin;
-import org.springframework.cloud.dataflow.core.AppDeploymentRequestMixin;
 import org.springframework.cloud.dataflow.core.ResourceMixin;
 import org.springframework.cloud.dataflow.registry.support.AppResourceCommon;
 import org.springframework.cloud.dataflow.rest.support.jackson.ExecutionContextJacksonMixIn;
 import org.springframework.cloud.dataflow.rest.support.jackson.ISO8601DateFormatWithMilliSeconds;
 import org.springframework.cloud.dataflow.rest.support.jackson.StepExecutionJacksonMixIn;
+import org.springframework.cloud.dataflow.server.repository.support.AppDefinitionMixin;
+import org.springframework.cloud.dataflow.server.repository.support.AppDeploymentRequestMixin;
 import org.springframework.cloud.dataflow.server.repository.support.ResourceDeserializer;
 import org.springframework.cloud.deployer.resource.maven.MavenProperties;
 import org.springframework.cloud.deployer.spi.core.AppDefinition;
