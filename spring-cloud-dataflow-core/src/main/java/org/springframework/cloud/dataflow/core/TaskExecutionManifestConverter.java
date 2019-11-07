@@ -34,7 +34,6 @@ public class TaskExecutionManifestConverter implements AttributeConverter<TaskEx
 	@Autowired
 	public void setObjectMapper(ObjectMapper objectMapper){
 		TaskExecutionManifestConverter.objectMapper = objectMapper;
-		System.out.println(">> Object Mapper is set: " + objectMapper);
 	}
 
 	@Override
