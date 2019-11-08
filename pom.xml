@@ -65,13 +65,13 @@
 		<spring-cloud-deployer-local.version>2.0.5.RELEASE</spring-cloud-deployer-local.version>
 
 		<!-- note - check version of reactor at deployer-cf/cf-java-client uses -->
-		<spring-cloud-deployer-cloudfoundry.version>2.0.7.RELEASE</spring-cloud-deployer-cloudfoundry.version>
+		<spring-cloud-deployer-cloudfoundry.version>2.0.8.BUILD-SNAPSHOT</spring-cloud-deployer-cloudfoundry.version>
 		<reactor.version>3.2.0.RELEASE</reactor.version>
-		<spring-cloud-deployer-kubernetes.version>2.0.5.RELEASE</spring-cloud-deployer-kubernetes.version>
+		<spring-cloud-deployer-kubernetes.version>2.0.6.BUILD-SNAPSHOT</spring-cloud-deployer-kubernetes.version>
 		<kubernetes-client.version>4.1.0</kubernetes-client.version>
 		<spring-cloud-kubernetes.version>1.0.2.RELEASE</spring-cloud-kubernetes.version>
 
-		<spring-cloud-skipper.version>2.1.2.RELEASE</spring-cloud-skipper.version>
+		<spring-cloud-skipper.version>2.1.3.BUILD-SNAPSHOT</spring-cloud-skipper.version>
 
 		<spring-cloud-task.version>2.1.3.RELEASE</spring-cloud-task.version>
 
@@ -85,7 +85,7 @@
 		<spring-cloud-scheduler-kubernetes.version>2.0.0.RELEASE</spring-cloud-scheduler-kubernetes.version>
 		<spring-cloud-scheduler-cloudfoundry>2.0.0.RELEASE</spring-cloud-scheduler-cloudfoundry>
 
-		<spring-cloud-common-security-config.version>1.1.3.RELEASE</spring-cloud-common-security-config.version>
+		<spring-cloud-common-security-config.version>1.1.4.BUILD-SNAPSHOT</spring-cloud-common-security-config.version>
 
 		<spring-shell.version>1.2.0.RELEASE</spring-shell.version>
 		<commons-io.version>2.4</commons-io.version>
