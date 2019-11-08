@@ -1,5 +1,5 @@
 /*
- * Copyright 2016-2018 the original author or authors.
+ * Copyright 2016-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 package org.springframework.cloud.dataflow.rest.client.config;
+
+import java.util.Set;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.cloud.dataflow.core.DataFlowPropertyKeys;
@@ -86,12 +88,64 @@ public class DataFlowClientProperties {
 		 */
 		private String accessToken;
 
+		/**
+		 * OAuth2 Client Id.
+		 */
+		private String clientId;
+
+		/**
+		 * OAuth2 Client Secret.
+		 */
+		private String clientSecret;
+
+		/**
+		 * OAuth2 Token Uri.
+		 */
+		private String tokenUri;
+
+		/**
+		 * OAuth2 Scopes.
+		 */
+		private Set<String> scope;
+
 		public String getAccessToken() {
 			return accessToken;
 		}
 
 		public void setAccessToken(String accessToken) {
 			this.accessToken = accessToken;
+		}
+
+		public String getClientId() {
+			return clientId;
+		}
+
+		public void setClientId(String clientId) {
+			this.clientId = clientId;
+		}
+
+		public String getClientSecret() {
+			return clientSecret;
+		}
+
+		public void setClientSecret(String clientSecret) {
+			this.clientSecret = clientSecret;
+		}
+
+		public String getTokenUri() {
+			return tokenUri;
+		}
+
+		public void setTokenUri(String tokenUri) {
+			this.tokenUri = tokenUri;
+		}
+
+		public Set<String> getScope() {
+			return scope;
+		}
+
+		public void setScope(Set<String> scope) {
+			this.scope = scope;
 		}
 
 		public Basic getBasic() {
