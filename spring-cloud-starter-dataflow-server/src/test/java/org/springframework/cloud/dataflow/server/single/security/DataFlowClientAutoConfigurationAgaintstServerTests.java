@@ -20,6 +20,7 @@ import org.junit.Test;
 import org.junit.rules.RuleChain;
 import org.junit.rules.TestRule;
 
+import org.springframework.boot.test.util.TestPropertyValues;
 import org.springframework.cloud.dataflow.rest.client.DataFlowOperations;
 import org.springframework.cloud.dataflow.rest.client.config.DataFlowClientAutoConfiguration;
 import org.springframework.cloud.dataflow.rest.client.config.DataFlowClientProperties;
@@ -104,6 +105,30 @@ public class DataFlowClientAutoConfigurationAgaintstServerTests {
 		context.close();
 	}
 
+	@Test
+	public void usingUserWithViewRolesWithOauth() throws Exception {
+
+		final AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext();
+		TestPropertyValues.of(
+				"spring.cloud.dataflow.client.server-uri=" + "http://localhost:"
+						+ localDataflowResource.getDataflowPort(),
+				"spring.cloud.dataflow.client.authentication.client-id=myclient",
+				"spring.cloud.dataflow.client.authentication.client-secret=mysecret",
+				"spring.cloud.dataflow.client.authentication.token-uri=" + "http://localhost:"
+						+ oAuth2ServerResource.getOauth2ServerPort() + "/oauth/token",
+				"spring.cloud.dataflow.client.authentication.scope=dataflow.view").applyTo(context);
+		context.register(TestApplication2.class);
+		context.refresh();
+
+		final DataFlowOperations dataFlowOperations = context.getBean(DataFlowOperations.class);
+		final AboutResource about = dataFlowOperations.aboutOperation().get();
+
+		assertNotNull(about);
+		assertEquals("myclient", about.getSecurityInfo().getUsername());
+		assertEquals(1, about.getSecurityInfo().getRoles().size());
+		context.close();
+	}
+
 	@Import(DataFlowClientAutoConfiguration.class)
 	static class TestApplication {
 		@Bean
@@ -115,5 +140,9 @@ public class DataFlowClientAutoConfigurationAgaintstServerTests {
 			dataFlowClientProperties.setServerUri("http://localhost:" + localDataflowResource.getDataflowPort());
 			return dataFlowClientProperties;
 		}
+	}
+
+	@Import(DataFlowClientAutoConfiguration.class)
+	static class TestApplication2 {
 	}
 }
