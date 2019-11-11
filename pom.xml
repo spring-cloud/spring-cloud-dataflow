@@ -85,7 +85,7 @@
 		<spring-cloud-scheduler-kubernetes.version>2.0.0.RELEASE</spring-cloud-scheduler-kubernetes.version>
 		<spring-cloud-scheduler-cloudfoundry>2.0.0.RELEASE</spring-cloud-scheduler-cloudfoundry>
 
-		<spring-cloud-common-security-config.version>1.1.4.BUILD-SNAPSHOT</spring-cloud-common-security-config.version>
+		<spring-cloud-common-security-config.version>1.1.4.RELEASE</spring-cloud-common-security-config.version>
 
 		<spring-shell.version>1.2.0.RELEASE</spring-shell.version>
 		<commons-io.version>2.4</commons-io.version>
