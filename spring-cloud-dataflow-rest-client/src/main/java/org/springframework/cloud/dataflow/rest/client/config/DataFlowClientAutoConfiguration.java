@@ -56,6 +56,8 @@ public class DataFlowClientAutoConfiguration {
 
 	private static Log logger = LogFactory.getLog(DataFlowClientAutoConfiguration.class);
 
+	private static final String DEFAULT_REGISTRATION_ID = "default";
+
 	@Autowired
 	private DataFlowClientProperties properties;
 
@@ -80,7 +82,7 @@ public class DataFlowClientAutoConfiguration {
 			logger.debug("Configured OAuth2 Access Token for accessing the Data Flow Server");
 		}
 		else if (StringUtils.hasText(this.properties.getAuthentication().getClientId())) {
-			ClientRegistration clientRegistration = clientRegistrations.findByRegistrationId("default");
+			ClientRegistration clientRegistration = clientRegistrations.findByRegistrationId(DEFAULT_REGISTRATION_ID);
 			OAuth2ClientCredentialsGrantRequest grantRequest = new OAuth2ClientCredentialsGrantRequest(clientRegistration);
 			OAuth2AccessTokenResponse res = clientCredentialsTokenResponseClient.getTokenResponse(grantRequest);
 			String accessTokenValue = res.getAccessToken().getTokenValue();
@@ -112,7 +114,7 @@ public class DataFlowClientAutoConfiguration {
 		public InMemoryClientRegistrationRepository clientRegistrationRepository(
 			DataFlowClientProperties properties) {
 			ClientRegistration clientRegistration = ClientRegistration
-				.withRegistrationId("default")
+				.withRegistrationId(DEFAULT_REGISTRATION_ID)
 				.authorizationGrantType(AuthorizationGrantType.CLIENT_CREDENTIALS)
 				.tokenUri(properties.getAuthentication().getTokenUri())
 				.clientId(properties.getAuthentication().getClientId())

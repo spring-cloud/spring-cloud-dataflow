@@ -15,6 +15,7 @@
  */
 package org.springframework.cloud.dataflow.server.single.security;
 
+import org.junit.After;
 import org.junit.ClassRule;
 import org.junit.Test;
 import org.junit.rules.RuleChain;
@@ -47,6 +48,16 @@ public class DataFlowClientAutoConfigurationAgaintstServerTests {
 	private final static LocalDataflowResource localDataflowResource = new LocalDataflowResource(
 			"classpath:org/springframework/cloud/dataflow/server/single/security/oauthConfig.yml");
 
+	private AnnotationConfigApplicationContext context;
+
+	@After
+	public void clean() {
+		if (context != null) {
+			context.close();
+		}
+		context = null;
+	}
+
 	@ClassRule
 	public static TestRule springDataflowAndOAuth2Server = RuleChain.outerRule(oAuth2ServerResource)
 			.around(localDataflowResource);
@@ -67,7 +78,7 @@ public class DataFlowClientAutoConfigurationAgaintstServerTests {
 
 		System.setProperty("accessTokenAsString", accessToken.getValue());
 
-		final AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext(TestApplication.class);
+		context = new AnnotationConfigApplicationContext(TestApplication.class);
 
 		final DataFlowOperations dataFlowOperations = context.getBean(DataFlowOperations.class);
 		final AboutResource about = dataFlowOperations.aboutOperation().get();
@@ -75,7 +86,6 @@ public class DataFlowClientAutoConfigurationAgaintstServerTests {
 		assertNotNull(about);
 		assertEquals("user", about.getSecurityInfo().getUsername());
 		assertEquals(7, about.getSecurityInfo().getRoles().size());
-		context.close();
 	}
 
 	@Test
@@ -94,7 +104,7 @@ public class DataFlowClientAutoConfigurationAgaintstServerTests {
 
 		System.setProperty("accessTokenAsString", accessToken.getValue());
 
-		final AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext(TestApplication.class);
+		context = new AnnotationConfigApplicationContext(TestApplication.class);
 
 		final DataFlowOperations dataFlowOperations = context.getBean(DataFlowOperations.class);
 		final AboutResource about = dataFlowOperations.aboutOperation().get();
@@ -102,13 +112,11 @@ public class DataFlowClientAutoConfigurationAgaintstServerTests {
 		assertNotNull(about);
 		assertEquals("bob", about.getSecurityInfo().getUsername());
 		assertEquals(1, about.getSecurityInfo().getRoles().size());
-		context.close();
 	}
 
 	@Test
-	public void usingUserWithViewRolesWithOauth() throws Exception {
-
-		final AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext();
+	public void usingUserWithViewRolesWithOauth() {
+		context = new AnnotationConfigApplicationContext();
 		TestPropertyValues.of(
 				"spring.cloud.dataflow.client.server-uri=" + "http://localhost:"
 						+ localDataflowResource.getDataflowPort(),
@@ -126,7 +134,6 @@ public class DataFlowClientAutoConfigurationAgaintstServerTests {
 		assertNotNull(about);
 		assertEquals("myclient", about.getSecurityInfo().getUsername());
 		assertEquals(1, about.getSecurityInfo().getRoles().size());
-		context.close();
 	}
 
 	@Import(DataFlowClientAutoConfiguration.class)
