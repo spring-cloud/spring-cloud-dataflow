@@ -83,7 +83,7 @@
 		<spring-cloud-scheduler-kubernetes.version>2.0.0.RELEASE</spring-cloud-scheduler-kubernetes.version>
 		<spring-cloud-scheduler-cloudfoundry>2.0.1.BUILD-SNAPSHOT</spring-cloud-scheduler-cloudfoundry>
 
-		<spring-cloud-common-security-config.version>1.1.4.RELEASE</spring-cloud-common-security-config.version>
+		<spring-cloud-common-security-config.version>1.1.5.RELEASE</spring-cloud-common-security-config.version>
 		<!-- spring-security-oauth2-autoconfigure-2.1.10 had a mistake having 2.3.5 so need to override -->
 		<spring-security-oauth2.version>2.3.7.RELEASE</spring-security-oauth2.version>
 
