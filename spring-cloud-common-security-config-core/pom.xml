@@ -7,7 +7,7 @@
     <parent>
         <groupId>org.springframework.cloud</groupId>
         <artifactId>spring-cloud-common-security-config</artifactId>
-        <version>1.2.0.RC1</version>
+        <version>1.2.0.BUILD-SNAPSHOT</version>
     </parent>
 
     <build>
