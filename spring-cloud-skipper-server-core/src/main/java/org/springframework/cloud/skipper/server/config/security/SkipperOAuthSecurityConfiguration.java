@@ -25,7 +25,6 @@ import org.springframework.context.annotation.Conditional;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.ExpressionUrlAuthorizationConfigurer;
-import org.springframework.security.oauth2.config.annotation.web.configuration.EnableOAuth2Client;
 import org.springframework.security.web.authentication.www.BasicAuthenticationEntryPoint;
 import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
@@ -36,7 +35,6 @@ import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
  * @author Gunnar Hillert
  * @author Ilayaperumal Gopinathan
  */
-@EnableOAuth2Client
 @Configuration
 @Conditional(OnOAuth2SecurityEnabled.class)
 public class SkipperOAuthSecurityConfiguration extends OAuthSecurityConfiguration {
