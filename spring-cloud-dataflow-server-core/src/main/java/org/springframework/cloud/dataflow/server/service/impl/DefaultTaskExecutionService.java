@@ -554,7 +554,15 @@ public class DefaultTaskExecutionService implements TaskExecutionService {
 				return "Log could not be retrieved as the task instance is not running by the ID: "+ taskId;
 			}
 		}
-		return findTaskLauncher(platformName).getLog(taskId);
+		String result;
+		try {
+			result = findTaskLauncher(platformName).getLog(taskId);
+		}
+		catch (Exception iae) {
+			logger.warn("Failed to retrieve the log, returning verification message. ", iae);
+			result = "Log could not be retrieved.  Verify that deployments are still available.";
+		}
+		return result;
 	}
 
 	@Override
