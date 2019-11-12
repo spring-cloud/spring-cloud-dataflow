@@ -79,8 +79,8 @@
 		<spring-cloud.version>Greenwich.SR2</spring-cloud.version>
 		<java-cfenv-boot.version>1.1.2.RELEASE</java-cfenv-boot.version>
 
-		<spring-cloud-scheduler-spi.version>2.0.0.RELEASE</spring-cloud-scheduler-spi.version>
-		<spring-cloud-scheduler-kubernetes.version>2.0.0.RELEASE</spring-cloud-scheduler-kubernetes.version>
+		<spring-cloud-scheduler-spi.version>2.0.1.BUILD-SNAPSHOT</spring-cloud-scheduler-spi.version>
+		<spring-cloud-scheduler-kubernetes.version>2.0.1.BUILD-SNAPSHOT</spring-cloud-scheduler-kubernetes.version>
 		<spring-cloud-scheduler-cloudfoundry>2.0.1.BUILD-SNAPSHOT</spring-cloud-scheduler-cloudfoundry>
 
 		<spring-cloud-common-security-config.version>1.1.5.RELEASE</spring-cloud-common-security-config.version>
