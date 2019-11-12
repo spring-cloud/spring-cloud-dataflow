@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 the original author or authors.
+ * Copyright 2018-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,7 @@
 package org.springframework.cloud.dataflow.server.job;
 
 import org.springframework.cloud.dataflow.core.Launcher;
-import org.springframework.data.repository.PagingAndSortingRepository;
+import org.springframework.data.keyvalue.repository.KeyValueRepository;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
@@ -25,7 +25,7 @@ import org.springframework.transaction.annotation.Transactional;
  * @author Mark Pollack
  */
 @Transactional
-public interface LauncherRepository extends PagingAndSortingRepository<Launcher, String> {
+public interface LauncherRepository extends KeyValueRepository<Launcher, String> {
 
 	Launcher findByName(String name);
 }

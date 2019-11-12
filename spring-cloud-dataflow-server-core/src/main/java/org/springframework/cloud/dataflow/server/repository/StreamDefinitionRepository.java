@@ -19,7 +19,7 @@ package org.springframework.cloud.dataflow.server.repository;
 import org.springframework.cloud.dataflow.core.StreamDefinition;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.repository.PagingAndSortingRepository;
+import org.springframework.data.keyvalue.repository.KeyValueRepository;
 import org.springframework.stereotype.Repository;
 
 /**
@@ -28,7 +28,7 @@ import org.springframework.stereotype.Repository;
  * @author Mark Fisher
  */
 @Repository
-public interface StreamDefinitionRepository extends PagingAndSortingRepository<StreamDefinition, String> {
+public interface StreamDefinitionRepository extends KeyValueRepository<StreamDefinition, String> {
 
 	Page<StreamDefinition> findByNameContains(String name, Pageable pageable);
 }

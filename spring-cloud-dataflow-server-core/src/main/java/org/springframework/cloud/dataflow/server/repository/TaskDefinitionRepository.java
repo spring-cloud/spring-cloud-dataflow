@@ -18,7 +18,7 @@ package org.springframework.cloud.dataflow.server.repository;
 import org.springframework.cloud.dataflow.core.TaskDefinition;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.repository.PagingAndSortingRepository;
+import org.springframework.data.keyvalue.repository.KeyValueRepository;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
@@ -28,7 +28,7 @@ import org.springframework.transaction.annotation.Transactional;
  * @author Gunnar Hillert
  */
 @Transactional
-public interface TaskDefinitionRepository extends PagingAndSortingRepository<TaskDefinition, String> {
+public interface TaskDefinitionRepository extends KeyValueRepository<TaskDefinition, String> {
 
 	Page<TaskDefinition> findByTaskNameContains(String taskName, Pageable pageable);
 

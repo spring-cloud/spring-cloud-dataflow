@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 the original author or authors.
+ * Copyright 2018-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,7 +21,7 @@ import org.springframework.cloud.dataflow.core.AppRegistration;
 import org.springframework.cloud.dataflow.core.ApplicationType;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.repository.PagingAndSortingRepository;
+import org.springframework.data.keyvalue.repository.KeyValueRepository;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
@@ -30,7 +30,7 @@ import org.springframework.transaction.annotation.Transactional;
  * @author Ilayaperumal Gopinathan
  */
 @Transactional
-public interface AppRegistrationRepository extends PagingAndSortingRepository<AppRegistration, Long> {
+public interface AppRegistrationRepository extends KeyValueRepository<AppRegistration, Long> {
 
 	AppRegistration findAppRegistrationByNameAndTypeAndVersion(String name, ApplicationType type, String version);
 

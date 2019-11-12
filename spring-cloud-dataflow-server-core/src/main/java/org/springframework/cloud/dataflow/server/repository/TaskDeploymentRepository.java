@@ -16,14 +16,14 @@
 package org.springframework.cloud.dataflow.server.repository;
 
 import org.springframework.cloud.dataflow.core.TaskDeployment;
-import org.springframework.data.repository.PagingAndSortingRepository;
+import org.springframework.data.keyvalue.repository.KeyValueRepository;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
  * @author Mark Pollack
  */
 @Transactional
-public interface TaskDeploymentRepository extends PagingAndSortingRepository<TaskDeployment, Long> {
+public interface TaskDeploymentRepository extends KeyValueRepository<TaskDeployment, Long> {
 
 	TaskDeployment findByTaskDeploymentId(String taskDeploymentId);
 
