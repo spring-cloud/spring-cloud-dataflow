@@ -61,11 +61,11 @@
 
 		<spring-cloud-dataflow-ui.version>2.2.2.RELEASE</spring-cloud-dataflow-ui.version>
 
-		<spring-cloud-deployer.version>2.0.5.BUILD-SNAPSHOT</spring-cloud-deployer.version>
-		<spring-cloud-deployer-local.version>2.0.6.BUILD-SNAPSHOT</spring-cloud-deployer-local.version>
+		<spring-cloud-deployer.version>2.0.5.RELEASE</spring-cloud-deployer.version>
+		<spring-cloud-deployer-local.version>2.0.6.RELEASE</spring-cloud-deployer-local.version>
 
-		<spring-cloud-deployer-cloudfoundry.version>2.0.9.BUILD-SNAPSHOT</spring-cloud-deployer-cloudfoundry.version>
-		<spring-cloud-deployer-kubernetes.version>2.0.6.BUILD-SNAPSHOT</spring-cloud-deployer-kubernetes.version>
+		<spring-cloud-deployer-cloudfoundry.version>2.0.9.RELEASE</spring-cloud-deployer-cloudfoundry.version>
+		<spring-cloud-deployer-kubernetes.version>2.0.6.RELEASE</spring-cloud-deployer-kubernetes.version>
 		<kubernetes-client.version>4.1.0</kubernetes-client.version>
 		<spring-cloud-kubernetes.version>1.0.2.RELEASE</spring-cloud-kubernetes.version>
 
@@ -79,9 +79,9 @@
 		<spring-cloud.version>Greenwich.SR2</spring-cloud.version>
 		<java-cfenv-boot.version>1.1.1.RELEASE</java-cfenv-boot.version>
 
-		<spring-cloud-scheduler-spi.version>2.0.1.BUILD-SNAPSHOT</spring-cloud-scheduler-spi.version>
-		<spring-cloud-scheduler-kubernetes.version>2.0.1.BUILD-SNAPSHOT</spring-cloud-scheduler-kubernetes.version>
-		<spring-cloud-scheduler-cloudfoundry>2.0.1.BUILD-SNAPSHOT</spring-cloud-scheduler-cloudfoundry>
+		<spring-cloud-scheduler-spi.version>2.0.1.RELEASE</spring-cloud-scheduler-spi.version>
+		<spring-cloud-scheduler-kubernetes.version>2.0.1.RELEASE</spring-cloud-scheduler-kubernetes.version>
+		<spring-cloud-scheduler-cloudfoundry>2.0.1.RELEASE</spring-cloud-scheduler-cloudfoundry>
 
 		<spring-cloud-common-security-config.version>1.1.5.RELEASE</spring-cloud-common-security-config.version>
 		<!-- spring-security-oauth2-autoconfigure-2.1.10 had a mistake having 2.3.5 so need to override -->
