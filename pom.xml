@@ -38,7 +38,7 @@
 		release versions -->
 		<spring-cloud.version>Hoxton.RC1</spring-cloud.version>
 
-		<java-cfenv-boot.version>1.1.2.RELEASE</java-cfenv-boot.version>
+		<java-cfenv-boot.version>1.1.1.RELEASE</java-cfenv-boot.version>
 		<spring-cloud-deployer.version>2.1.0.RC1</spring-cloud-deployer.version>
 		<spring-cloud-deployer-local.version>2.1.0.RC1</spring-cloud-deployer-local.version>
 		<spring-cloud-deployer-cloudfoundry.version>2.1.0.RC1</spring-cloud-deployer-cloudfoundry.version>
