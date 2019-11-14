@@ -16,7 +16,7 @@
 package org.springframework.cloud.skipper.server.repository.map;
 
 import org.springframework.cloud.skipper.domain.Deployer;
-import org.springframework.data.repository.PagingAndSortingRepository;
+import org.springframework.data.keyvalue.repository.KeyValueRepository;
 import org.springframework.data.rest.core.annotation.RepositoryRestResource;
 import org.springframework.data.rest.core.annotation.RestResource;
 import org.springframework.transaction.annotation.Transactional;
@@ -28,7 +28,7 @@ import org.springframework.transaction.annotation.Transactional;
 @RepositoryRestResource
 @Transactional
 @SuppressWarnings("unchecked")
-public interface DeployerRepository extends PagingAndSortingRepository<Deployer, String>, DeployerRepositoryCustom {
+public interface DeployerRepository extends KeyValueRepository<Deployer, String>, DeployerRepositoryCustom {
 
 	Deployer findByName(String name);
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 the original author or authors.
+ * Copyright 2018-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,7 +18,7 @@ package org.springframework.cloud.skipper.server.repository.jpa;
 import java.util.List;
 
 import org.springframework.cloud.skipper.domain.Release;
-import org.springframework.data.repository.PagingAndSortingRepository;
+import org.springframework.data.keyvalue.repository.KeyValueRepository;
 import org.springframework.data.repository.query.Param;
 import org.springframework.data.rest.core.annotation.RepositoryRestResource;
 import org.springframework.data.rest.core.annotation.RestResource;
@@ -32,7 +32,7 @@ import org.springframework.transaction.annotation.Transactional;
 @RepositoryRestResource(path = "releases", collectionResourceRel = "releases")
 @Transactional
 @SuppressWarnings("unchecked")
-public interface ReleaseRepository extends PagingAndSortingRepository<Release, Long>, ReleaseRepositoryCustom {
+public interface ReleaseRepository extends KeyValueRepository<Release, Long>, ReleaseRepositoryCustom {
 
 	@Override
 	@RestResource(exported = false)
