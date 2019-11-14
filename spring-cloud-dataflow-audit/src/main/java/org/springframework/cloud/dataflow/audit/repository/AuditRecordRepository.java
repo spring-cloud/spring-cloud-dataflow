@@ -18,7 +18,7 @@ package org.springframework.cloud.dataflow.audit.repository;
 import java.util.List;
 
 import org.springframework.cloud.dataflow.core.AuditRecord;
-import org.springframework.data.repository.PagingAndSortingRepository;
+import org.springframework.data.keyvalue.repository.KeyValueRepository;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -31,7 +31,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional
 @Repository
 public interface AuditRecordRepository
-		extends PagingAndSortingRepository<AuditRecord, Long>, AuditRecordRepositoryCustom {
+		extends KeyValueRepository<AuditRecord, Long>, AuditRecordRepositoryCustom {
 
 	@Override
 	<S extends AuditRecord> S save(S s);
