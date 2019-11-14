@@ -24,6 +24,7 @@ import org.springframework.boot.autoconfigure.jmx.JmxAutoConfiguration;
 import org.springframework.boot.autoconfigure.orm.jpa.HibernateJpaAutoConfiguration;
 import org.springframework.boot.autoconfigure.session.SessionAutoConfiguration;
 import org.springframework.boot.builder.SpringApplicationBuilder;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.cloud.common.security.CommonSecurityAutoConfiguration;
 import org.springframework.cloud.dataflow.autoconfigure.local.LocalDataFlowServerAutoConfiguration;
 import org.springframework.cloud.dataflow.configuration.metadata.ApplicationConfigurationMetadataResolverAutoConfiguration;
@@ -40,6 +41,7 @@ import org.springframework.security.oauth2.config.annotation.web.configuration.E
  *
  */
 @EnableResourceServer
+@EnableConfigurationProperties({FileSecurityProperties.class})
 @SpringBootApplication(
 		excludeName = {
 		"org.springframework.cloud.dataflow.shell.autoconfigure.BaseShellAutoConfiguration" },
