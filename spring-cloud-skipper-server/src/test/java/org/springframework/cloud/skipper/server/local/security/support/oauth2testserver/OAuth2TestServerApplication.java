@@ -31,6 +31,7 @@ import org.springframework.boot.autoconfigure.session.SessionAutoConfiguration;
 import org.springframework.boot.autoconfigure.task.TaskExecutionAutoConfiguration;
 import org.springframework.boot.autoconfigure.task.TaskSchedulingAutoConfiguration;
 import org.springframework.boot.builder.SpringApplicationBuilder;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.cloud.client.serviceregistry.ServiceRegistryAutoConfiguration;
 import org.springframework.cloud.common.security.CommonSecurityAutoConfiguration;
 import org.springframework.cloud.deployer.spi.cloudfoundry.CloudFoundryDeployerAutoConfiguration;
@@ -48,6 +49,7 @@ import org.springframework.statemachine.boot.autoconfigure.StateMachineJpaReposi
  *
  */
 @EnableResourceServer
+@EnableConfigurationProperties({FileSecurityProperties.class})
 @SpringBootApplication(
 		excludeName = {
 				"org.springframework.cloud.dataflow.shell.autoconfigure.BaseShellAutoConfiguration" },
