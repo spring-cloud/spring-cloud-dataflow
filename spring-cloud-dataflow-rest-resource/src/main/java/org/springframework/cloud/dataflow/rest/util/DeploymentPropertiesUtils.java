@@ -234,6 +234,39 @@ public final class DeploymentPropertiesUtils {
 	}
 
 	/**
+	 * Retain all properties that are meant for the <em>deployer</em> of a given app
+	 * (those that start with {@code deployer.[appname]} or {@code deployer.*} or
+	 * {@code app.*}) and qualify all property values with the
+	 * {@code spring.cloud.deployer.} prefix.
+	 *
+	 * @param input   the deplopyment properties
+	 * @param appName the app name
+	 * @return deployment properties for the spepcific app name
+	 */
+	public static Map<String, String> qualifyDeployerProperties(Map<String, String> input, String appName) {
+		final String wildcardPrefix = "deployer.*.";
+		final int wildcardLength = wildcardPrefix.length();
+		final String appPrefix = String.format("deployer.%s.", appName);
+		final int appLength = appPrefix.length();
+
+		// Using a TreeMap makes sure wildcard entries appear before app specific ones
+		Map<String, String> resultDeployer = new TreeMap<>(input).entrySet().stream()
+				.filter(kv -> kv.getKey().startsWith(wildcardPrefix) || kv.getKey().startsWith(appPrefix))
+				.collect(Collectors.toMap(kv -> kv.getKey().startsWith(wildcardPrefix)
+								? "spring.cloud.deployer." + kv.getKey().substring(wildcardLength)
+								: "spring.cloud.deployer." + kv.getKey().substring(appLength), kv -> kv.getValue(),
+						(fromWildcard, fromApp) -> fromApp));
+
+		Map<String, String> resultApp = new TreeMap<>(input).entrySet().stream()
+				.filter(kv -> !kv.getKey().startsWith(wildcardPrefix) && !kv.getKey().startsWith(appPrefix))
+				.collect(Collectors.toMap(kv -> kv.getKey(), kv -> kv.getValue(),
+						(fromWildcard, fromApp) -> fromApp));
+
+		resultDeployer.putAll(resultApp);
+		return resultDeployer;
+	}
+
+	/**
 	 * Returns a String representation of deployment properties as a comma separated list of
 	 * key=value pairs.
 	 *

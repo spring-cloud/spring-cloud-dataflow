@@ -309,7 +309,7 @@ public abstract class DefaultTaskExecutionServiceTests {
 			assertEquals("file:src/test/resources/apps/foo-task", lastManifest.getTaskDeploymentRequest().getResource().getURL().toString());
 			assertEquals("default", lastManifest.getPlatformName());
 			assertEquals(1, lastManifest.getTaskDeploymentRequest().getDeploymentProperties().size());
-			assertEquals("100000GB", lastManifest.getTaskDeploymentRequest().getDeploymentProperties().get("deployer.demo.memory"));
+			assertEquals("100000GB", lastManifest.getTaskDeploymentRequest().getDeploymentProperties().get("spring.cloud.deployer.memory"));
 
 			verify(this.taskLauncher, never()).destroy(TASK_NAME_ORIG);
 		}
@@ -342,7 +342,7 @@ public abstract class DefaultTaskExecutionServiceTests {
 			assertEquals("file:src/test/resources/apps/foo-task", lastManifest.getTaskDeploymentRequest().getResource().getURL().toString());
 			assertEquals("default", lastManifest.getPlatformName());
 			assertEquals(1, lastManifest.getTaskDeploymentRequest().getDeploymentProperties().size());
-			assertEquals("10000GB", lastManifest.getTaskDeploymentRequest().getDeploymentProperties().get("deployer.demo.memory"));
+			assertEquals("10000GB", lastManifest.getTaskDeploymentRequest().getDeploymentProperties().get("spring.cloud.deployer.memory"));
 
 			verify(this.taskLauncher).destroy(TASK_NAME_ORIG);
 		}
