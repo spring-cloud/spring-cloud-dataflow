@@ -18,6 +18,7 @@ package org.springframework.cloud.skipper.client;
 import java.io.IOException;
 import java.nio.charset.Charset;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -260,7 +261,13 @@ public class DefaultSkipperClient implements SkipperClient {
 						null,
 						typeReference,
 						uriVariables);
-		return resourceResponseEntity.getBody().getEmbedded().getPackageMetadata();
+		PackageMetadatasResponseWrapper embedded = resourceResponseEntity.getBody().getEmbedded();
+		if (embedded != null) {
+			return embedded.getPackageMetadata();
+		}
+		else {
+			return Collections.emptyList();
+		}
 	}
 
 	public Release install(InstallRequest installRequest) {
@@ -329,8 +336,14 @@ public class DefaultSkipperClient implements SkipperClient {
 		else {
 			url = String.format("%s/%s/%s", baseUri, "release", "list");
 		}
-		return this.restTemplate.exchange(url, HttpMethod.GET, null, typeReference, new HashMap<>())
-				.getBody().getEmbedded().getReleases().stream().collect(Collectors.toList());
+		ReleasesResponseWrapper embedded = this.restTemplate
+				.exchange(url, HttpMethod.GET, null, typeReference, new HashMap<>()).getBody().getEmbedded();
+		if (embedded != null && embedded.getReleases() != null) {
+			return embedded.getReleases().stream().collect(Collectors.toList());
+		}
+		else {
+			return Collections.emptyList();
+		}
 	}
 
 	@Override
@@ -346,7 +359,13 @@ public class DefaultSkipperClient implements SkipperClient {
 						HttpMethod.GET,
 						null,
 						typeReference);
-		return resourceResponseEntity.getBody().getEmbedded().getReleases();
+		ReleasesResponseWrapper embedded = resourceResponseEntity.getBody().getEmbedded();
+		if (embedded != null) {
+			return embedded.getReleases();
+		}
+		else {
+			return Collections.emptyList();
+		}
 	}
 
 	@Override
@@ -361,7 +380,13 @@ public class DefaultSkipperClient implements SkipperClient {
 						HttpMethod.GET,
 						null,
 						typeReference);
-		return resourceResponseEntity.getBody().getEmbedded().getRepositories();
+		RepositoriesResponseWrapper embedded = resourceResponseEntity.getBody().getEmbedded();
+		if (embedded != null) {
+			return embedded.getRepositories();
+		}
+		else {
+			return Collections.emptyList();
+		}
 	}
 
 	@Override
@@ -376,7 +401,13 @@ public class DefaultSkipperClient implements SkipperClient {
 						HttpMethod.GET,
 						null,
 						typeReference);
-		return resourceResponseEntity.getBody().getEmbedded().getDeployers();
+		DeployersResponseWrapper embedded = resourceResponseEntity.getBody().getEmbedded();
+		if (embedded != null) {
+			return embedded.getDeployers();
+		}
+		else {
+			return Collections.emptyList();
+		}
 	}
 
 	@Override

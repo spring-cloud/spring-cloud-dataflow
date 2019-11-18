@@ -16,6 +16,7 @@
 package org.springframework.cloud.skipper.client;
 
 import java.nio.charset.Charset;
+import java.util.List;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Test;
@@ -196,5 +197,17 @@ public class DefaultSkipperClientTests {
 		mockServer.verify();
 
 		assertThat(release).isNotNull();
+	}
+
+	@Test
+	public void testReleaseList() {
+		RestTemplate restTemplate = new RestTemplate();
+		SkipperClient skipperClient = new DefaultSkipperClient("", restTemplate);
+
+		MockRestServiceServer mockServer = MockRestServiceServer.bindTo(restTemplate).build();
+		mockServer.expect(requestTo("/release/list")).andRespond(withSuccess("{}", MediaType.APPLICATION_JSON));
+
+		List<Release> list = skipperClient.list(null);
+		assertThat(list).isEmpty();
 	}
 }
