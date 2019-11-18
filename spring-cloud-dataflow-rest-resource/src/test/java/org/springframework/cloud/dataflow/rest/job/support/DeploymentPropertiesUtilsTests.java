@@ -31,8 +31,10 @@ import org.springframework.cloud.dataflow.rest.util.DeploymentPropertiesUtils;
 import org.springframework.util.FileCopyUtils;
 
 import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.CoreMatchers.not;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.hasEntry;
+import static org.hamcrest.Matchers.hasKey;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 
@@ -140,6 +142,7 @@ public class DeploymentPropertiesUtilsTests {
 	@Test
 	public void testDeployerProperties() {
 		Map<String, String> props = new LinkedHashMap<>();
+		props.put("app.myapp.foo", "bar");
 		props.put("deployer.myapp.count", "2");
 		props.put("deployer.myapp.foo", "bar");
 		props.put("deployer.otherapp.count", "5");
@@ -150,6 +153,24 @@ public class DeploymentPropertiesUtilsTests {
 		assertThat(result, hasEntry("spring.cloud.deployer.count", "2"));
 		assertThat(result, hasEntry("spring.cloud.deployer.foo", "bar"));
 		assertThat(result, hasEntry("spring.cloud.deployer.precedence", "app"));
+		assertThat(result, not(hasKey("app.myapp.foo")));
+	}
+
+	@Test
+	public void testDeployerPropertiesWithApp() {
+		Map<String, String> props = new LinkedHashMap<>();
+		props.put("app.myapp.foo", "bar");
+		props.put("deployer.myapp.count", "2");
+		props.put("deployer.myapp.foo", "bar");
+		props.put("deployer.otherapp.count", "5");
+		props.put("deployer.*.precedence", "wildcard");
+		props.put("deployer.myapp.precedence", "app");
+		Map<String, String> result = DeploymentPropertiesUtils.qualifyDeployerProperties(props, "myapp");
+
+		assertThat(result, hasEntry("spring.cloud.deployer.count", "2"));
+		assertThat(result, hasEntry("spring.cloud.deployer.foo", "bar"));
+		assertThat(result, hasEntry("spring.cloud.deployer.precedence", "app"));
+		assertThat(result, hasKey("app.myapp.foo"));
 	}
 
 	@Test
