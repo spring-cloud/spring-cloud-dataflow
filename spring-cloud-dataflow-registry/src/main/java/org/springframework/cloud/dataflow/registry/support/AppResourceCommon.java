@@ -37,6 +37,7 @@ import org.springframework.util.StringUtils;
 /**
  * @author Christian Tzolov
  * @author Ilayaperumal Gopinathan
+ * @author David Turanski
  */
 public class AppResourceCommon {
 
@@ -102,7 +103,7 @@ public class AppResourceCommon {
 	 * {@code <artifactId>-<version>.jar} formatted name. For example, a resource ending in
 	 * {@code file-sink-rabbit-1.2.0.RELEASE.jar} will return {@code 1.2.0.RELEASE}. Snapshot
 	 * builds of the form {@code file-sink-rabbit-1.2.0.BUILD-SNAPSHOT.jar} and
-	 * {@code file-sink-rabbit-1.2.0-SNAPSHOT.jar} are also supported
+	 * {@code file-sink-rabbit-1.2.0-SNAPSHOT.jar} and {@code file-sink-rabbit-1.2.0-SNAPSHOT-metadata.jar} are also supported
 	 * @param urlResource
 	 * @return
 	 */
@@ -114,10 +115,10 @@ public class AppResourceCommon {
 	private Matcher getMatcher(UrlResource urlResource) {
 		String fileNameNoExtension = getFileNameNoExtension(urlResource);
 		// Look for the last dash with a digit after it
-		Pattern pattern = Pattern.compile("(.*)-(\\d)(.*?)");
+		Pattern pattern = Pattern.compile("(.*)-(\\d)(.*?)(-metadata)?");
 		Matcher m = pattern.matcher(fileNameNoExtension);
 		Assert.isTrue(m.matches(), "Could not parse version from " + getUri(urlResource)
-				+ ", expected format is <artifactId>-<version>.jar");
+				+ ", expected format is <artifactId>-<version>.jar or  <artifactId>-<version>-metadata.jar");
 		return m;
 	}
 

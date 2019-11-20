@@ -63,6 +63,7 @@ import static org.mockito.Mockito.when;
  * @author Christian Tzolov
  * @author Chris Schaefer
  * @author Ilayaperumal Gopinathan
+ * @author David Turanski
  */
 public class DefaultAppRegistryServiceTests {
 
@@ -227,6 +228,22 @@ public class DefaultAppRegistryServiceTests {
 				eq("bar"), eq(ApplicationType.sink), eq("1.0"))).thenReturn(appRegistration());
 		assertThat(appRegistryService.importAll(false,
 				new ClassPathResource("AppRegistryTests-importAllOverwrite.properties", getClass())).size(), equalTo(0));
+	}
+
+	@Test
+	public void testImportRealWorldJarsWithMetadata() {
+		appRegistryService.importAll(true,
+				new ClassPathResource("AppRegistryTests-import-with-metadata.properties", getClass()));
+		ArgumentCaptor<AppRegistration> appRegistrationCaptor = ArgumentCaptor.forClass(AppRegistration.class);
+		verify(appRegistrationRepository, times(1)).save(appRegistrationCaptor.capture());
+		List<AppRegistration> registrations = appRegistrationCaptor.getAllValues();
+		AppRegistration appRegistration = registrations.get(0);
+		assertThat(appRegistration, hasProperty("name", is("cassandra")));
+		assertThat(appRegistration, hasProperty("uri",
+				is(URI.create("http://repo.spring.io/release/org/springframework/cloud/stream/app/cassandra-sink-rabbit/2.1.0.RELEASE/cassandra-sink-rabbit-2.1.0.RELEASE.jar"))));
+		assertThat(appRegistration, hasProperty("metadataUri",
+				is(URI.create("http://repo.spring.io/release/org/springframework/cloud/stream/app/cassandra-sink-rabbit/2.1.0.RELEASE/cassandra-sink-rabbit-2.1.0.RELEASE-metadata.jar"))));
+		assertThat(appRegistration,	hasProperty("type", is(ApplicationType.sink)));
 	}
 
 	@Test

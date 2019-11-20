@@ -210,4 +210,11 @@ public class AppResourceCommonTests {
 		String version = appResourceCommon.getResourceVersion(appResourceCommon.getResource(mavenUri));
 		assertThat(version).isEqualTo("1.3.0.RELEASE");
 	}
+
+	@Test
+	public void testGetMetatdataResourceVersion() {
+		String httpUri = "http://repo.spring.io/release/org/springframework/cloud/stream/app/cassandra-sink-rabbit/2.1.0.BUILD-SNAPSHOT/cassandra-sink-rabbit-2.1.0.BUILD-SNAPSHOT-metadata.jar";
+		String version = appResourceCommon.getResourceVersion(appResourceCommon.getResource(httpUri));
+		assertThat(version).isEqualTo("2.1.0.BUILD-SNAPSHOT");
+	}
 }
