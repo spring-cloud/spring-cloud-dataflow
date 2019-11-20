@@ -61,11 +61,11 @@
 
 		<spring-cloud-dataflow-ui.version>2.3.0.RELEASE</spring-cloud-dataflow-ui.version>
 
-		<spring-cloud-deployer.version>2.1.0.BUILD-SNAPSHOT</spring-cloud-deployer.version>
-		<spring-cloud-deployer-local.version>2.1.0.BUILD-SNAPSHOT</spring-cloud-deployer-local.version>
+		<spring-cloud-deployer.version>2.1.0.RELEASE</spring-cloud-deployer.version>
+		<spring-cloud-deployer-local.version>2.1.0.RELEASE</spring-cloud-deployer-local.version>
 
-		<spring-cloud-deployer-cloudfoundry.version>2.1.0.BUILD-SNAPSHOT</spring-cloud-deployer-cloudfoundry.version>
-		<spring-cloud-deployer-kubernetes.version>2.1.0.BUILD-SNAPSHOT</spring-cloud-deployer-kubernetes.version>
+		<spring-cloud-deployer-cloudfoundry.version>2.1.0.RELEASE</spring-cloud-deployer-cloudfoundry.version>
+		<spring-cloud-deployer-kubernetes.version>2.1.0.RELEASE</spring-cloud-deployer-kubernetes.version>
 		<kubernetes-client.version>4.1.0</kubernetes-client.version>
 
 		<spring-cloud-skipper.version>2.2.0.BUILD-SNAPSHOT</spring-cloud-skipper.version>
@@ -81,7 +81,7 @@
 		<spring-cloud.version>Hoxton.RC2</spring-cloud.version>
 		<java-cfenv-boot.version>1.1.1.RELEASE</java-cfenv-boot.version>
 
-		<spring-cloud-common-security-config.version>1.2.0.RC1</spring-cloud-common-security-config.version>
+		<spring-cloud-common-security-config.version>1.2.0.RELEASE</spring-cloud-common-security-config.version>
 
 		<spring-shell.version>1.2.0.RELEASE</spring-shell.version>
 		<!-- Use older flyway until we can use flaway 6.x given to us from boot -->
