@@ -1105,6 +1105,9 @@ A schedule can be created through the RESTful API or the Spring Cloud Data Flow 
 Spring Cloud Data Flow will schedule the execution of its tasks via a scheduling agent that is available on the cloud platform.
 When using the Cloud Foundry platform Spring Cloud Data Flow will use the https://www.cloudfoundry.org/the-foundry/scheduler/[PCF Scheduler].
 When using Kubernetes, a https://kubernetes.io/docs/concepts/workloads/controllers/cron-jobs/[CronJob] will be used.
+The way that Spring Cloud Data Flow does this is by deploying a SchedulerTaskLauncher application to the platform and then
+the scheduling agent is notified to schedule the SchedulerTaskLauncher.  When the scheduling agent launches the
+SchedulerTaskLauncher, the SchedulerTaskLauncher will utilize Spring Cloud Data Flow's RESTFul API to launch the task.
 
 .Architectural Overview
 image::{dataflow-asciidoc}/images/dataflow-scheduling-architecture.png[Scheduler Architecture Overview, scaledwidth="50%"]
@@ -1122,6 +1125,7 @@ The lifecycle of a schedule has 2 parts:
 
 * <<spring-cloud-data-flow-schedule-scheduling>>
 * <<spring-cloud-data-flow-schedule-unscheduling>>
+* <<spring-cloud-data-flow-schedule-list>>
 
 [[spring-cloud-data-flow-schedule-scheduling]]
 ==== Scheduling a Task Execution
@@ -1131,7 +1135,7 @@ You can schedule a task execution via the:
 * RESTful API
 * Spring Cloud Data Flow Dashboard
 
-To schedule a task from the UI click the Tasks tab at the top of the screen, this will take you to the Task Definitions screen.   Then from the Task Definition that you wish to schedule click the "clock" icon associated with task definition you wish to schedule.
+To schedule a task from the UI click the Tasks tab at the top of the screen, this will take you to the Task Definitions screen.   From the Task Definition that you wish to schedule click the drop down icon and then select the `Schedule Task` option.
 This will lead you to a `Create Schedule(s)` screen, where you will create a unique name for the schedule and enter the associated cron expression.
 Keep in mind you can always create multiple schedules for a single task definition.
 
@@ -1143,6 +1147,16 @@ You can delete a schedule via the:
 * RESTful API
 * Spring Cloud Data Flow Dashboard
 
-To delete a schedule through the dashboard, select the Schedule tab under Tasks tab and click the `garbage can` icon next to the schedule you wish to delete.
+To delete a schedule through the dashboard, select the Schedule tab under Tasks tab and click the dropdown icon next to the schedule you wish to delete and select the `Delete schedule` option.
 
 NOTE: Any currently running tasks that were run by the scheduling agent will not be stopped if the schedule is deleted.   It only prevents future executions.
+
+[[spring-cloud-data-flow-schedule-list]]
+==== Listing Schedules
+To view your tasks click the Tasks tab and then click the Schedules tab on the Tasks page.
+From here you will see your available schedules.  You will note that all schedules created by
+Spring Cloud Data Flow will have a suffix appended to it consisting of `-scdf-<task definition name>`.
+For example if I create a schedule name of `my-schedule` for a task definition of `tstamp` the
+schedule name will look like `my-schedule-scdf-tstamp`.
+
+NOTE: The `scdf-` separator is configurable by setting the `spring.cloud.dataflow.task.scheduleNamePrefix` property with the value you prefer.
