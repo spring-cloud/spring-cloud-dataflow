@@ -25,6 +25,7 @@ import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import org.springframework.batch.core.BatchStatus;
 import org.springframework.batch.core.JobExecution;
 import org.springframework.batch.core.JobInstance;
 import org.springframework.batch.core.JobParameter;
@@ -113,11 +114,11 @@ public class DefaultTaskJobService implements TaskJobService {
 	}
 
 	@Override
-	public List<TaskJobExecution> listJobExecutionsForJob(Pageable pageable, String jobName) throws NoSuchJobException {
+	public List<TaskJobExecution> listJobExecutionsForJob(Pageable pageable, String jobName, BatchStatus status) throws NoSuchJobException {
 		Assert.notNull(pageable, "pageable must not be null");
 		Assert.notNull(jobName, "jobName must not be null");
 		return getTaskJobExecutionsForList(
-				jobService.listJobExecutionsForJob(jobName, getPageOffset(pageable), pageable.getPageSize()));
+				jobService.listJobExecutionsForJob(jobName, status, getPageOffset(pageable), pageable.getPageSize()));
 	}
 
 	@Override
@@ -164,9 +165,9 @@ public class DefaultTaskJobService implements TaskJobService {
 	}
 
 	@Override
-	public int countJobExecutionsForJob(String jobName) throws NoSuchJobException {
+	public int countJobExecutionsForJob(String jobName, BatchStatus status) throws NoSuchJobException {
 		Assert.notNull(jobName, "jobName must not be null");
-		return jobService.countJobExecutionsForJob(jobName);
+		return jobService.countJobExecutionsForJob(jobName, status);
 	}
 
 	@Override

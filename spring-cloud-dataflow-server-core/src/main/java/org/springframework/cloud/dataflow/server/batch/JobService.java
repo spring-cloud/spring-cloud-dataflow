@@ -17,6 +17,7 @@ package org.springframework.cloud.dataflow.server.batch;
 
 import java.util.Collection;
 
+import org.springframework.batch.core.BatchStatus;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.JobExecution;
 import org.springframework.batch.core.JobInstance;
@@ -188,18 +189,6 @@ public interface JobService {
 	int countJobInstances(String jobName) throws NoSuchJobException;
 
 	/**
-	 * List the {@link JobExecution job executions} for a job in descending order of creation
-	 * (usually close to execution order).
-	 * 
-	 * @param jobName the job name
-	 * @param start the start index of the first job execution
-	 * @param count the maximum number of executions to return
-	 * @return a collection of {@link JobExecution}
-	 * @throws NoSuchJobException thrown if job specified does not exist
-	 */
-	Collection<JobExecution> listJobExecutionsForJob(String jobName, int start, int count) throws NoSuchJobException;
-
-	/**
 	 * List the {@link JobExecutionWithStepCount job executions} for a job in descending order
 	 * of creation (usually close to execution order).
 	 *
@@ -216,10 +205,11 @@ public interface JobService {
 	 * Count the job executions in the repository for a job.
 	 * 
 	 * @param jobName the job name
+	 * @param status the status of the job
 	 * @return the number of executions
 	 * @throws NoSuchJobException thrown if job specified does not exist
 	 */
-	int countJobExecutionsForJob(String jobName) throws NoSuchJobException;
+	int countJobExecutionsForJob(String jobName, BatchStatus status) throws NoSuchJobException;
 
 	/**
 	 * Get all the job executions for a given job instance. On a sunny day there would be only
@@ -346,4 +336,16 @@ public interface JobService {
 	 */
 	Collection<String> getStepNamesForJob(String jobName) throws NoSuchJobException;
 
+	/**
+	 * List the {@link JobExecution job executions} for a job in descending order of creation
+	 * (usually close to execution order).
+	 *
+	 * @param jobName the job name
+	 * @param status the status of the job execution
+	 * @param pageOffset the start index of the first job execution
+	 * @param pageSize the maximum number of executions to return
+	 * @return a collection of {@link JobExecution}
+	 * @throws NoSuchJobException thrown if job specified does not exist
+	 */
+    Collection<JobExecution> listJobExecutionsForJob(String jobName, BatchStatus status, int pageOffset, int pageSize) throws NoSuchJobException;
 }

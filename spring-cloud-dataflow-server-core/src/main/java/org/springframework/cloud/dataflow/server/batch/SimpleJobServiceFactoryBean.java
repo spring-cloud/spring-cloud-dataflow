@@ -77,8 +77,6 @@ public class SimpleJobServiceFactoryBean implements FactoryBean<JobService>, Ini
 
 	private JobLauncher jobLauncher;
 
-	private ListableJobLocator jobLocator;
-
 	private JobExplorer jobExplorer;
 
 	private ExecutionContextSerializer serializer;

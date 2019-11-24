@@ -19,6 +19,8 @@ package org.springframework.cloud.dataflow.server.controller;
 import java.util.List;
 import java.util.TimeZone;
 
+import javassist.tools.web.BadHttpRequest;
+import org.springframework.batch.core.BatchStatus;
 import org.springframework.batch.core.JobExecution;
 import org.springframework.batch.core.launch.JobExecutionNotRunningException;
 import org.springframework.batch.core.launch.NoSuchJobException;
@@ -103,11 +105,13 @@ public class JobExecutionController {
 	 */
 	@RequestMapping(value = "", method = RequestMethod.GET, params = "name", produces = "application/json")
 	@ResponseStatus(HttpStatus.OK)
-	public PagedModel<JobExecutionResource> retrieveJobsByName(@RequestParam("name") String jobName,
+	public PagedModel<JobExecutionResource> retrieveJobsByParameters(
+			@RequestParam("name") String jobName,
+			@RequestParam(value = "status", required = false) BatchStatus status,
 			Pageable pageable, PagedResourcesAssembler<TaskJobExecution> assembler) throws NoSuchJobException {
-		List<TaskJobExecution> jobExecutions = taskJobService.listJobExecutionsForJob(pageable, jobName);
+		List<TaskJobExecution> jobExecutions = taskJobService.listJobExecutionsForJob(pageable, jobName, status);
 		Page<TaskJobExecution> page = new PageImpl<>(jobExecutions, pageable,
-				taskJobService.countJobExecutionsForJob(jobName));
+				taskJobService.countJobExecutionsForJob(jobName, status));
 		return assembler.toModel(page, jobAssembler);
 	}
 

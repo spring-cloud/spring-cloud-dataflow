@@ -18,6 +18,7 @@ package org.springframework.cloud.dataflow.server.batch;
 import java.util.Collection;
 import java.util.List;
 
+import org.springframework.batch.core.BatchStatus;
 import org.springframework.batch.core.JobExecution;
 import org.springframework.batch.core.repository.dao.JobExecutionDao;
 
@@ -37,11 +38,34 @@ public interface SearchableJobExecutionDao extends JobExecutionDao {
 	 * reverse order of creation (so normally of execution).
 	 * 
 	 * @param jobName the name of the job
+	 * @param status the status of the job
 	 * @param start the start index of the instances
 	 * @param count the maximum number of instances to return
 	 * @return the {@link JobExecution} instances requested
 	 */
-	List<JobExecution> getJobExecutions(String jobName, int start, int count);
+	List<JobExecution> getJobExecutions(String jobName, BatchStatus status, int start, int count);
+
+    /**
+     * Get the {@link JobExecution JobExecutions} for a specific job name in
+     * reverse order of creation (so normally of execution).
+     *
+     * @param jobName the name of the job
+     * @param start the start index of the instances
+     * @param count the maximum number of instances to return
+     * @return the {@link JobExecution} instances requested
+     */
+    List<JobExecution> getJobExecutions(String jobName, int start, int count);
+
+	/**
+	 * Get the {@link JobExecution JobExecutions} for a specific status in
+	 * reverse order of creation (so normally of execution).
+	 *
+	 * @param start the start index of the instances
+	 * @param status the status of the job
+	 * @param count the maximum number of instances to return
+	 * @return the {@link JobExecution} instances requested
+	 */
+	List<JobExecution> getJobExecutions(BatchStatus status, int start, int count);
 
 	/**
 	 * Get the {@link JobExecutionWithStepCount JobExecutions} for a specific job name in
@@ -52,7 +76,7 @@ public interface SearchableJobExecutionDao extends JobExecutionDao {
 	 * @param count the maximum number of instances to return
 	 * @return the {@link JobExecutionWithStepCount} instances requested
 	 */
-	public List<JobExecutionWithStepCount> getJobExecutionsWithStepCount(String jobName, int start, int count);
+	List<JobExecutionWithStepCount> getJobExecutionsWithStepCount(String jobName, int start, int count);
 
 	/**
 	 * Get the {@link JobExecution JobExecutions} in reverse order of creation
@@ -88,4 +112,7 @@ public interface SearchableJobExecutionDao extends JobExecutionDao {
 	 */
 	Collection<JobExecution> getRunningJobExecutions();
 
+	int countJobExecutions(BatchStatus status);
+
+	int countJobExecutions(String jobName, BatchStatus status);
 }

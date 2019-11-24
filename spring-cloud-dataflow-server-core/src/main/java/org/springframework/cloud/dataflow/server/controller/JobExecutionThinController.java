@@ -107,7 +107,7 @@ public class JobExecutionThinController {
 			Pageable pageable, PagedResourcesAssembler<TaskJobExecution> assembler) throws NoSuchJobException {
 		List<TaskJobExecution> jobExecutions = taskJobService.listJobExecutionsForJobWithStepCount(pageable, jobName);
 		Page<TaskJobExecution> page = new PageImpl<>(jobExecutions, pageable,
-				taskJobService.countJobExecutionsForJob(jobName));
+				taskJobService.countJobExecutionsForJob(jobName, null));
 		return assembler.toModel(page, jobAssembler);
 	}
 

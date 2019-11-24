@@ -61,9 +61,13 @@ class JobExecutionUtils
 
 	final static String JOB_NAME_FOOBAR = BASE_JOB_NAME + "_FOOBAR";
 
-	private final static String JOB_NAME_FOO = BASE_JOB_NAME + "_FOO";
+	final static String JOB_NAME_FAILED1 = BASE_JOB_NAME + "1_FAILED";
 
-	private final static String JOB_NAME_COMPLETED = BASE_JOB_NAME + "_FOO_COMPLETED";
+	final static String JOB_NAME_FAILED2 = BASE_JOB_NAME + "2_FAILED";
+
+	final static String JOB_NAME_COMPLETED = BASE_JOB_NAME + "_FOO_COMPLETED";
+
+	private final static String JOB_NAME_FOO = BASE_JOB_NAME + "_FOO";
 
 	static MockMvc createBaseJobExecutionMockMvc(JobRepository jobRepository, TaskBatchDao taskBatchDao,
 			TaskExecutionDao taskExecutionDao, WebApplicationContext wac, RequestMappingHandlerAdapter adapter) {
@@ -75,6 +79,8 @@ class JobExecutionUtils
 		JobExecutionUtils.createSampleJob(jobRepository, taskBatchDao, taskExecutionDao, JOB_NAME_COMPLETED, 1, BatchStatus.COMPLETED);
 		JobExecutionUtils.createSampleJob(jobRepository, taskBatchDao, taskExecutionDao, JOB_NAME_STARTED, 1, BatchStatus.STARTED);
 		JobExecutionUtils.createSampleJob(jobRepository, taskBatchDao, taskExecutionDao, JOB_NAME_STOPPED, 1, BatchStatus.STOPPED);
+		JobExecutionUtils.createSampleJob(jobRepository, taskBatchDao, taskExecutionDao, JOB_NAME_FAILED1, 1, BatchStatus.FAILED);
+		JobExecutionUtils.createSampleJob(jobRepository, taskBatchDao, taskExecutionDao, JOB_NAME_FAILED2, 1, BatchStatus.FAILED);
 		for (HttpMessageConverter<?> converter : adapter.getMessageConverters()) {
 			if (converter instanceof MappingJackson2HttpMessageConverter) {
 				final MappingJackson2HttpMessageConverter jacksonConverter = (MappingJackson2HttpMessageConverter) converter;

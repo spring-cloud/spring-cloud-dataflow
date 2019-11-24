@@ -203,6 +203,28 @@ public class JobExecutionControllerTests {
 				.andExpect(jsonPath("$.content", hasSize(2)));
 	}
 
+	@Test
+	public void testFilteringByStatusAndName_EmptyNameAndStatusGiven() throws Exception {
+		mockMvc.perform(get("/jobs/executions/")
+				.param("name", "")
+				.param("status", "FAILED")
+				.accept(MediaType.APPLICATION_JSON))
+				.andExpect(status().isOk())
+				.andExpect(jsonPath("$.content[0].jobExecution.jobInstance.jobName", is(JobExecutionUtils.JOB_NAME_FAILED2)))
+				.andExpect(jsonPath("$.content[1].jobExecution.jobInstance.jobName", is(JobExecutionUtils.JOB_NAME_FAILED1)))
+				.andExpect(jsonPath("$.content", hasSize(2)));
+	}
+
+	@Test
+	public void testFilteringByStatusAndName_NameAndStatusGiven() throws Exception {
+		mockMvc.perform(get("/jobs/executions/")
+				.param("name", JobExecutionUtils.BASE_JOB_NAME + "%")
+				.param("status", "COMPLETED")
+				.accept(MediaType.APPLICATION_JSON))
+				.andExpect(status().isOk())
+				.andExpect(jsonPath("$.content[0].jobExecution.jobInstance.jobName", is(JobExecutionUtils.JOB_NAME_COMPLETED)))
+				.andExpect(jsonPath("$.content", hasSize(1)));
+	}
 
 	@Test
 	public void testGetExecutionsByNameNotFound() throws Exception {
