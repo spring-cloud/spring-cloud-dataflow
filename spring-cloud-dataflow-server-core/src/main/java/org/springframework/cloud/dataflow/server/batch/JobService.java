@@ -347,5 +347,6 @@ public interface JobService {
 	 * @return a collection of {@link JobExecution}
 	 * @throws NoSuchJobException thrown if job specified does not exist
 	 */
-    Collection<JobExecution> listJobExecutionsForJob(String jobName, BatchStatus status, int pageOffset, int pageSize) throws NoSuchJobException;
+	Collection<JobExecution> listJobExecutionsForJob(String jobName, BatchStatus status, int pageOffset, int pageSize)
+			throws NoSuchJobException;
 }

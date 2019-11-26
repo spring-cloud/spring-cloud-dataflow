@@ -19,7 +19,6 @@ package org.springframework.cloud.dataflow.server.controller;
 import java.util.List;
 import java.util.TimeZone;
 
-import javassist.tools.web.BadHttpRequest;
 import org.springframework.batch.core.BatchStatus;
 import org.springframework.batch.core.JobExecution;
 import org.springframework.batch.core.launch.JobExecutionNotRunningException;
@@ -65,11 +64,11 @@ public class JobExecutionController {
 	private final TaskJobService taskJobService;
 
 	/**
-	 * Creates a {@code JobExecutionController} that retrieves Job Execution information
-	 * from a the {@link JobService}
+	 * Creates a {@code JobExecutionController} that retrieves Job Execution information from
+	 * a the {@link JobService}
 	 *
-	 * @param taskJobService the service this controller will use for retrieving job
-	 * execution information. Must not be null.
+	 * @param taskJobService the service this controller will use for retrieving job execution
+	 *     information. Must not be null.
 	 */
 	public JobExecutionController(TaskJobService taskJobService) {
 		Assert.notNull(taskJobService, "taskJobService must not be null");
@@ -82,8 +81,8 @@ public class JobExecutionController {
 	 * @param pageable page-able collection of {@code TaskJobExecution}s.
 	 * @param assembler for the {@link TaskJobExecution}s
 	 * @return a list of Task/Job executions
-	 * @throws NoSuchJobExecutionException in the event that a job execution id specified
-	 * is not present when looking up stepExecutions for the result.
+	 * @throws NoSuchJobExecutionException in the event that a job execution id specified is
+	 *     not present when looking up stepExecutions for the result.
 	 */
 	@RequestMapping(value = "", method = RequestMethod.GET, produces = "application/json")
 	@ResponseStatus(HttpStatus.OK)
@@ -97,7 +96,8 @@ public class JobExecutionController {
 	/**
 	 * Retrieve all task job executions with the task name specified
 	 *
-	 * @param jobName name of the job. SQL server specific wildcards are enabled (eg.: myJob%, m_Job, ...)
+	 * @param jobName name of the job. SQL server specific wildcards are enabled (eg.: myJob%,
+	 *     m_Job, ...)
 	 * @param pageable page-able collection of {@code TaskJobExecution}s.
 	 * @param assembler for the {@link TaskJobExecution}s
 	 * @return list task/job executions with the specified jobName.
@@ -120,8 +120,8 @@ public class JobExecutionController {
 	 *
 	 * @param id the id of the requested {@link JobExecution}
 	 * @return the {@link JobExecution}
-	 * @throws NoSuchJobExecutionException if the specified job execution for the id does
-	 * not exist.
+	 * @throws NoSuchJobExecutionException if the specified job execution for the id does not
+	 *     exist.
 	 */
 	@RequestMapping(value = "/{id}", method = RequestMethod.GET, produces = "application/json")
 	@ResponseStatus(HttpStatus.OK)
@@ -139,9 +139,8 @@ public class JobExecutionController {
 	 *
 	 * @param jobExecutionId the executionId of the job execution to stop.
 	 * @throws JobExecutionNotRunningException if a stop is requested on a job that is not
-	 * running.
-	 * @throws NoSuchJobExecutionException if the job execution id specified does not
-	 * exist.
+	 *     running.
+	 * @throws NoSuchJobExecutionException if the job execution id specified does not exist.
 	 */
 	@RequestMapping(value = { "/{executionId}" }, method = RequestMethod.PUT, params = "stop=true")
 	@ResponseStatus(HttpStatus.OK)
@@ -151,13 +150,12 @@ public class JobExecutionController {
 	}
 
 	/**
-	 * Restart the Job Execution with the given jobExecutionId. Please be aware that you
-	 * must provide the request parameter {@code restart=true} in order to invoke this
-	 * endpoint.
+	 * Restart the Job Execution with the given jobExecutionId. Please be aware that you must
+	 * provide the request parameter {@code restart=true} in order to invoke this endpoint.
 	 *
 	 * @param jobExecutionId the executionId of the job execution to restart
 	 * @throws NoSuchJobExecutionException if the job execution for the jobExecutionId
-	 * specified does not exist.
+	 *     specified does not exist.
 	 */
 	@RequestMapping(value = { "/{executionId}" }, method = RequestMethod.PUT, params = "restart=true")
 	@ResponseStatus(HttpStatus.OK)
@@ -167,8 +165,8 @@ public class JobExecutionController {
 	}
 
 	/**
-	 * {@link org.springframework.hateoas.server.ResourceAssembler} implementation that converts
-	 * {@link JobExecution}s to {@link JobExecutionResource}s.
+	 * {@link org.springframework.hateoas.server.ResourceAssembler} implementation that
+	 * converts {@link JobExecution}s to {@link JobExecutionResource}s.
 	 */
 	private static class Assembler extends RepresentationModelAssemblerSupport<TaskJobExecution, JobExecutionResource> {
 

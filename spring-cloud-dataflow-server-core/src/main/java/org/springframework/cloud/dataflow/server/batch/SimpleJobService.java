@@ -320,16 +320,15 @@ public class SimpleJobService implements JobService, DisposableBean {
 			if (status != null) {
 				return jobExecutionDao.countJobExecutions(status);
 			}
-		} else {
+		}
+		else {
 			if (status != null) {
 				return jobExecutionDao.countJobExecutions(jobName, status);
-			} else {
-				checkJobExists(jobName);
-				return jobExecutionDao.countJobExecutions(jobName);
 			}
 		}
 
-		return 0;
+		checkJobExists(jobName);
+		return jobExecutionDao.countJobExecutions(jobName);
 	}
 
 	@Override
@@ -429,7 +428,7 @@ public class SimpleJobService implements JobService, DisposableBean {
 	@Override
 	public Collection<String> getStepNamesForJob(String jobName) throws NoSuchJobException {
 		Collection<String> stepNames = new LinkedHashSet<>();
-		for (JobExecution jobExecution : listJobExecutionsForJob(jobName, null,0, 100)) {
+		for (JobExecution jobExecution : listJobExecutionsForJob(jobName, null, 0, 100)) {
 			for (StepExecution stepExecution : jobExecution.getStepExecutions()) {
 				stepNames.add(stepExecution.getStepName());
 			}
@@ -438,7 +437,8 @@ public class SimpleJobService implements JobService, DisposableBean {
 	}
 
 	@Override
-	public Collection<JobExecution> listJobExecutionsForJob(String jobName, BatchStatus status, int pageOffset, int pageSize) {
+	public Collection<JobExecution> listJobExecutionsForJob(String jobName, BatchStatus status, int pageOffset,
+			int pageSize) {
 		List<JobExecution> jobExecutions = getJobExecutions(jobName, status, pageOffset, pageSize);
 
 		for (JobExecution jobExecution : jobExecutions) {
@@ -453,15 +453,14 @@ public class SimpleJobService implements JobService, DisposableBean {
 			if (status != null) {
 				return jobExecutionDao.getJobExecutions(status, pageOffset, pageSize);
 			}
-		} else {
+		}
+		else {
 			if (status != null) {
 				return jobExecutionDao.getJobExecutions(jobName, status, pageOffset, pageSize);
-			} else {
-				return jobExecutionDao.getJobExecutions(jobName, pageOffset, pageSize);
 			}
 		}
 
-		return Collections.emptyList();
+		return jobExecutionDao.getJobExecutions(jobName, pageOffset, pageSize);
 	}
 
 	private void checkJobExists(String jobName) throws NoSuchJobException {
