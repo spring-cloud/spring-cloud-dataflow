@@ -89,7 +89,7 @@ public class StreamDefinitionToDslConverter {
 				if (!dataFlowAddedProperties.contains(propertyName)) {
 					String propertyValue = unescape(props.get(propertyName));
 					dslBuilder.append(" --").append(propertyName).append("=").append(
-							DefinitionUtils.autoQuotes(propertyValue));
+							DefinitionUtils.escapeNewlines(DefinitionUtils.autoQuotes(propertyValue)));
 				}
 			}
 
