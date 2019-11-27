@@ -341,12 +341,16 @@ public class DefaultTaskDeleteService implements TaskDeleteService {
 					destroyChildTask(childTaskPrefix + childName);
 				}
 				catch (ObjectOptimisticLockingFailureException e) {
-					logger.warn("Attempted delete on a child task that is currently being deleted", e);
+					logger.warn("Attempted delete on a child task that is currently being deleted");
 				}
 			});
 		}
 		// destroy normal task or composed parent task
-		destroyPrimaryTask(taskDefinition.getTaskName());
+		try {
+			destroyPrimaryTask(taskDefinition.getTaskName());
+		}				catch (ObjectOptimisticLockingFailureException e) {
+			logger.warn(String.format("Attempted delete on task %s that is currently being deleted", taskDefinition.getTaskName()));
+		}
 	}
 
 	private void destroyPrimaryTask(String name) {
