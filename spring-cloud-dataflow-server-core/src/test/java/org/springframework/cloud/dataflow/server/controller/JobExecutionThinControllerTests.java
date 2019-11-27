@@ -89,19 +89,19 @@ public class JobExecutionThinControllerTests {
 	@Test
 	public void testGetAllExecutionsJobExecutionOnly() throws Exception {
 		mockMvc.perform(get("/jobs/thinexecutions").accept(MediaType.APPLICATION_JSON)).andExpect(status().isOk())
-				.andExpect(jsonPath("$.content[*].taskExecutionId", containsInAnyOrder(6, 5, 4, 3, 3, 2, 1)))
+				.andExpect(jsonPath("$.content[*].taskExecutionId", containsInAnyOrder(8, 7, 6, 5, 4, 3, 3, 2, 1)))
 				.andExpect(jsonPath("$.content[0].stepExecutionCount", is(1)))
-				.andExpect(jsonPath("$.content", hasSize(7)));
+				.andExpect(jsonPath("$.content", hasSize(9)));
 	}
 
 	@Test
 	public void testGetExecutionsByName() throws Exception {
-		mockMvc.perform(get("/jobs/thinexecutions/").param("name", JobExecutionUtils.JOB_NAME_ORIG).accept(MediaType.APPLICATION_JSON))
+		mockMvc.perform(get("/jobs/thinexecutions/").param("name", JobExecutionUtils.JOB_NAME_ORIG)
+				.accept(MediaType.APPLICATION_JSON))
 				.andDo(print())
 				.andExpect(status().isOk())
 				.andExpect(jsonPath("$.content[0].name", is(JobExecutionUtils.JOB_NAME_ORIG)))
 				.andExpect(jsonPath("$.content", hasSize(1)));
 	}
-
 
 }
