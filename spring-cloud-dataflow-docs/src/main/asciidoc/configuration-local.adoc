@@ -198,7 +198,7 @@ spring:
 ----
 
 [start=4]
-. Alternatively, you can build a custom Spring CLoud Data Flow server with your build files.
+. Alternatively, you can build a custom Spring Cloud Data Flow server with your build files.
 There are examples of a custom server builds in our https://github.com/spring-cloud/spring-cloud-dataflow-samples/tree/master/custom-dataflow-builds[samples repo] if there is a need to add a driver jars.
 
 [[configuration-local-deployer]]
