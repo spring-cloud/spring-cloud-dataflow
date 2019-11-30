@@ -17,7 +17,6 @@
 package org.springframework.cloud.dataflow.server.service.impl;
 
 import java.nio.charset.Charset;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
@@ -81,14 +80,19 @@ public class DefaultStreamServiceTests {
 	public ExpectedException thrown = ExpectedException.none();
 
 	private StreamDefinition streamDefinition1 = new StreamDefinition("test1", "time | log");
+
 	private StreamDefinition streamDefinition2 = new StreamDefinition("test2", "time | log");
 
 	private StreamDefinitionRepository streamDefinitionRepository;
+
 	private SkipperStreamDeployer skipperStreamDeployer;
+
 	private AppDeploymentRequestCreator appDeploymentRequestCreator;
 
 	private DefaultStreamService defaultStreamService;
+
 	private AppRegistryService appRegistryService;
+
 	private AuditRecordService auditRecordService;
 
 	private DefaultStreamValidationService streamValidationService;
@@ -98,7 +102,7 @@ public class DefaultStreamServiceTests {
 		this.streamDefinitionRepository = mock(StreamDefinitionRepository.class);
 		this.skipperStreamDeployer = mock(SkipperStreamDeployer.class);
 		this.appRegistryService = mock(AppRegistryService.class);
-		this.auditRecordService = mock(AuditRecordService.class); //FIXME
+		this.auditRecordService = mock(AuditRecordService.class); // FIXME
 		this.appDeploymentRequestCreator = new AppDeploymentRequestCreator(this.appRegistryService,
 				mock(CommonApplicationProperties.class),
 				new BootApplicationConfigurationMetadataResolver());
@@ -197,7 +201,8 @@ public class DefaultStreamServiceTests {
 		when(this.skipperStreamDeployer.getStreamInfo(streamDeployment1.getStreamName())).thenReturn(streamDeployment1);
 		StreamDeployment streamDeployment = this.defaultStreamService.info("test1");
 		Assert.assertEquals(streamDeployment.getStreamName(), streamDefinition1.getName());
-		Assert.assertEquals("{\"log\":{\"test2\":\"value2\"},\"time\":{\"test1\":\"value1\"}}", streamDeployment.getDeploymentProperties());
+		Assert.assertEquals("{\"log\":{\"test2\":\"value2\"},\"time\":{\"test1\":\"value1\"}}",
+				streamDeployment.getDeploymentProperties());
 	}
 
 	@Test
@@ -207,7 +212,8 @@ public class DefaultStreamServiceTests {
 		streamSates.put(streamDefinition, DeploymentState.deployed);
 		when(this.skipperStreamDeployer.streamsStates(eq(Arrays.asList(streamDefinition)))).thenReturn(streamSates);
 
-		Map<StreamDefinition, DeploymentState> resultStates = this.defaultStreamService.state(Arrays.asList(streamDefinition));
+		Map<StreamDefinition, DeploymentState> resultStates = this.defaultStreamService
+				.state(Arrays.asList(streamDefinition));
 
 		verify(this.skipperStreamDeployer, times(1)).streamsStates(any());
 
@@ -215,7 +221,6 @@ public class DefaultStreamServiceTests {
 		Assert.assertEquals(1, resultStates.size());
 		Assert.assertEquals(DeploymentState.deployed, resultStates.get(streamDefinition));
 	}
-
 
 	@Test
 	public void verifyStreamHistory() {
