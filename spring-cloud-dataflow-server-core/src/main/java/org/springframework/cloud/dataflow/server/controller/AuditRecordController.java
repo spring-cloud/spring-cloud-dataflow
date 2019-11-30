@@ -191,6 +191,7 @@ public class AuditRecordController {
 			resource.setCorrelationId(auditRecord.getCorrelationId());
 			resource.setCreatedBy(auditRecord.getCreatedBy());
 			resource.setCreatedOn(auditRecord.getCreatedOn());
+			resource.setPlatformName(auditRecord.getPlatformName());
 			return resource;
 		}
 
