@@ -76,6 +76,9 @@ public class AuditRecord {
 	@Column(name = "audit_operation")
 	private AuditOperationType auditOperation;
 
+	@Column(name = "platformName")
+	private String platformName;
+
 	public Long getId() {
 		return id;
 	}
@@ -136,10 +139,17 @@ public class AuditRecord {
 		this.createdOn = createdOn;
 	}
 
+	public String getPlatformName() {
+		return platformName;
+	}
+
+	public void setPlatformName(String platformName) {
+		this.platformName = platformName;
+	}
+
 	@Override
 	public String toString() {
 		return "AuditRecord [id=" + id + ", createdOn=" + createdOn + ", auditAction=" + auditAction
-				+ ", auditOperation=" + auditOperation + "]";
+				+ ", auditOperation=" + auditOperation + ", platformName=" + platformName + "]";
 	}
-
 }

@@ -82,11 +82,6 @@ public class DefaultStreamServiceTests {
 
 	private StreamDefinition streamDefinition1 = new StreamDefinition("test1", "time | log");
 	private StreamDefinition streamDefinition2 = new StreamDefinition("test2", "time | log");
-	private StreamDefinition streamDefinition3 = new StreamDefinition("test3", "time | log");
-	private StreamDefinition streamDefinition4 = new StreamDefinition("test4", "time | log");
-
-	private List<StreamDefinition> streamDefinitionList = new ArrayList<>();
-	private List<StreamDefinition> streamDefinitions = new ArrayList<>();
 
 	private StreamDefinitionRepository streamDefinitionRepository;
 	private SkipperStreamDeployer skipperStreamDeployer;
@@ -111,12 +106,6 @@ public class DefaultStreamServiceTests {
 		this.defaultStreamService = new DefaultStreamService(streamDefinitionRepository,
 				this.skipperStreamDeployer, this.appDeploymentRequestCreator, this.streamValidationService,
 				this.auditRecordService);
-		this.streamDefinitionList.add(streamDefinition1);
-		this.streamDefinitionList.add(streamDefinition2);
-		this.streamDefinitionList.add(streamDefinition3);
-		this.streamDefinitions.add(streamDefinition2);
-		this.streamDefinitions.add(streamDefinition3);
-		this.streamDefinitions.add(streamDefinition4);
 		when(streamDefinitionRepository.findById("test2")).thenReturn(Optional.of(streamDefinition2));
 	}
 
@@ -134,7 +123,7 @@ public class DefaultStreamServiceTests {
 		verify(this.streamValidationService).isRegistered("log", ApplicationType.sink);
 		verify(this.streamDefinitionRepository).save(expectedStreamDefinition);
 		verify(this.auditRecordService).populateAndSaveAuditRecord(
-				AuditOperationType.STREAM, AuditActionType.CREATE, "testStream", "time | log");
+				AuditOperationType.STREAM, AuditActionType.CREATE, "testStream", "time | log", null);
 
 		verifyNoMoreInteractions(this.skipperStreamDeployer);
 		verifyNoMoreInteractions(this.appRegistryService);
@@ -172,7 +161,7 @@ public class DefaultStreamServiceTests {
 		this.defaultStreamService.undeployStream(streamDefinition2.getName());
 		verify(this.skipperStreamDeployer, times(1)).undeployStream(streamDefinition2.getName());
 		verify(this.auditRecordService).populateAndSaveAuditRecord(
-				AuditOperationType.STREAM, AuditActionType.UNDEPLOY, "test2", "time | log");
+				AuditOperationType.STREAM, AuditActionType.UNDEPLOY, "test2", "time | log", null);
 		verifyNoMoreInteractions(this.skipperStreamDeployer);
 		verifyNoMoreInteractions(this.auditRecordService);
 	}
@@ -207,8 +196,8 @@ public class DefaultStreamServiceTests {
 				new JSONObject(streamDeploymentProperties).toString());
 		when(this.skipperStreamDeployer.getStreamInfo(streamDeployment1.getStreamName())).thenReturn(streamDeployment1);
 		StreamDeployment streamDeployment = this.defaultStreamService.info("test1");
-		Assert.assertTrue(streamDeployment.getStreamName().equals(streamDefinition1.getName()));
-		Assert.assertTrue(streamDeployment.getDeploymentProperties().equals("{\"log\":{\"test2\":\"value2\"},\"time\":{\"test1\":\"value1\"}}"));
+		Assert.assertEquals(streamDeployment.getStreamName(), streamDefinition1.getName());
+		Assert.assertEquals("{\"log\":{\"test2\":\"value2\"},\"time\":{\"test1\":\"value1\"}}", streamDeployment.getDeploymentProperties());
 	}
 
 	@Test
