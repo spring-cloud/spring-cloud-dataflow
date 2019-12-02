@@ -51,6 +51,7 @@ import org.springframework.cloud.dataflow.server.service.TaskDeleteService;
 import org.springframework.cloud.deployer.spi.task.TaskLauncher;
 import org.springframework.cloud.task.repository.TaskExecution;
 import org.springframework.cloud.task.repository.TaskExplorer;
+import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
@@ -336,11 +337,20 @@ public class DefaultTaskDeleteService implements TaskDeleteService {
 				if (task.getLabel() != null) {
 					childName = task.getLabel();
 				}
-				destroyChildTask(childTaskPrefix + childName);
+				try {
+					destroyChildTask(childTaskPrefix + childName);
+				}
+				catch (ObjectOptimisticLockingFailureException e) {
+					logger.warn("Attempted delete on a child task that is currently being deleted");
+				}
 			});
 		}
 		// destroy normal task or composed parent task
-		destroyPrimaryTask(taskDefinition.getTaskName());
+		try {
+			destroyPrimaryTask(taskDefinition.getTaskName());
+		}				catch (ObjectOptimisticLockingFailureException e) {
+			logger.warn(String.format("Attempted delete on task %s that is currently being deleted", taskDefinition.getTaskName()));
+		}
 	}
 
 	private void destroyPrimaryTask(String name) {

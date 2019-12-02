@@ -311,6 +311,24 @@ public class TaskControllerTests {
 	}
 
 	@Test
+	public void testCTRDeleteOutOfSequence() throws Exception {
+		repository.save(new TaskDefinition("myTask-1", "task"));
+		repository.save(new TaskDefinition("myTask", "1: task && 2: task2"));
+		repository.save(new TaskDefinition("myTask-2", "task"));
+
+		assertEquals(3, repository.count());
+		mockMvc.perform(get("/tasks/definitions/").accept(MediaType.APPLICATION_JSON)).andExpect(status().isOk())
+				.andExpect(jsonPath("$.content", hasSize(3)));
+
+		mockMvc.perform(delete("/tasks/definitions/myTask-1").accept(MediaType.APPLICATION_JSON)).andDo(print())
+				.andExpect(status().isOk());
+		mockMvc.perform(delete("/tasks/definitions/myTask").accept(MediaType.APPLICATION_JSON)).andDo(print())
+				.andExpect(status().isOk());
+
+		assertEquals(0, repository.count());
+	}
+
+	@Test
 	public void testMissingApplication() throws Exception {
 		repository.save(new TaskDefinition("myTask", "no-such-task-app"));
 
