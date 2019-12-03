@@ -34,7 +34,7 @@ import org.springframework.security.oauth2.server.resource.introspection.OpaqueT
  */
 public class CustomAuthoritiesOpaqueTokenIntrospector implements OpaqueTokenIntrospector {
 
-	final OpaqueTokenIntrospector delegate;
+	private final OpaqueTokenIntrospector delegate;
 	private DefaultPrincipalExtractor principalExtractor;
 	private AuthoritiesMapper authorityMapper;
 
@@ -52,13 +52,13 @@ public class CustomAuthoritiesOpaqueTokenIntrospector implements OpaqueTokenIntr
 		OAuth2AuthenticatedPrincipal principal = this.delegate.introspect(token);
 		Object principalName = principalExtractor.extractPrincipal(principal.getAttributes());
 		return new DefaultOAuth2AuthenticatedPrincipal(
-				principalName.toString(), principal.getAttributes(), extractAuthorities(principal));
+				principalName.toString(), principal.getAttributes(), extractAuthorities(principal, token));
 	}
 
-	private Collection<GrantedAuthority> extractAuthorities(OAuth2AuthenticatedPrincipal principal) {
+	private Collection<GrantedAuthority> extractAuthorities(OAuth2AuthenticatedPrincipal principal, String token) {
 		final List<String> scopes = principal.getAttribute(OAuth2IntrospectionClaimNames.SCOPE);
 		final Set<String> scopesAsSet = new HashSet<>(scopes);
-		final Set<GrantedAuthority> authorities = this.authorityMapper.mapScopesToAuthorities("uaa", scopesAsSet);
+		final Set<GrantedAuthority> authorities = this.authorityMapper.mapScopesToAuthorities(null, scopesAsSet, token);
 		return authorities;
 	}
 

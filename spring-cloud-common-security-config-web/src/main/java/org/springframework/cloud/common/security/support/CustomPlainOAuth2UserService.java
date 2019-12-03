@@ -46,7 +46,7 @@ public class CustomPlainOAuth2UserService implements OAuth2UserService<OAuth2Use
 		final OAuth2User oauth2User = delegate.loadUser(userRequest);
 
 		final OAuth2AccessToken accessToken = userRequest.getAccessToken();
-		final Set<GrantedAuthority> mappedAuthorities = this.authorityMapper.mapScopesToAuthorities(userRequest.getClientRegistration().getRegistrationId(), accessToken.getScopes());
+		final Set<GrantedAuthority> mappedAuthorities = this.authorityMapper.mapScopesToAuthorities(userRequest.getClientRegistration().getRegistrationId(), accessToken.getScopes(), accessToken.getTokenValue());
 
 		final String userNameAttributeName = userRequest.getClientRegistration()
 				.getProviderDetails().getUserInfoEndpoint().getUserNameAttributeName();

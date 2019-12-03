@@ -47,7 +47,7 @@ public class CustomOAuth2OidcUserService implements OAuth2UserService<OidcUserRe
 		final OidcUser oidcUser = delegate.loadUser(userRequest);
 
 		final OAuth2AccessToken accessToken = userRequest.getAccessToken();
-		final Set<GrantedAuthority> mappedAuthorities = this.authorityMapper.mapScopesToAuthorities(userRequest.getClientRegistration().getRegistrationId(), accessToken.getScopes());
+		final Set<GrantedAuthority> mappedAuthorities = this.authorityMapper.mapScopesToAuthorities(userRequest.getClientRegistration().getRegistrationId(), accessToken.getScopes(), accessToken.getTokenValue());
 
 		final String userNameAttributeName = userRequest.getClientRegistration()
 				.getProviderDetails().getUserInfoEndpoint().getUserNameAttributeName();

@@ -15,6 +15,7 @@
  */
 package org.springframework.cloud.common.security;
 
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -33,6 +34,7 @@ import org.springframework.cloud.common.security.support.CustomOAuth2OidcUserSer
 import org.springframework.cloud.common.security.support.CustomPlainOAuth2UserService;
 import org.springframework.cloud.common.security.support.DefaultAuthoritiesMapper;
 import org.springframework.cloud.common.security.support.DefaultOAuth2TokenUtilsService;
+import org.springframework.cloud.common.security.support.ExternalOauth2ResourceAuthoritiesMapper;
 import org.springframework.cloud.common.security.support.OnOAuth2SecurityEnabled;
 import org.springframework.cloud.common.security.support.SecurityConfigUtils;
 import org.springframework.cloud.common.security.support.SecurityStateBean;
@@ -118,8 +120,10 @@ public class OAuthSecurityConfiguration extends WebSecurityConfigurerAdapter {
 
 	@Autowired
 	protected OAuth2AccessTokenResponseClient<OAuth2PasswordGrantRequest> oAuth2PasswordTokenResponseClient;
+
 	@Autowired
 	protected ClientRegistrationRepository clientRegistrationRepository;
+
 	@Autowired
 	protected OpaqueTokenIntrospector opaqueTokenIntrospector;
 
@@ -197,13 +201,6 @@ public class OAuthSecurityConfiguration extends WebSecurityConfigurerAdapter {
 	}
 
 	@Bean
-	public AuthoritiesMapper authorityMapper() {
-		return new DefaultAuthoritiesMapper(
-				authorizationProperties.getProviderRoleMappings(),
-				this.calculateDefaultProviderId());
-	}
-
-	@Bean
 	public OAuth2AuthorizedClientManager authorizedClientManager(
 			ClientRegistrationRepository clientRegistrationRepository,
 			OAuth2AuthorizedClientRepository authorizedClientRepository) {
@@ -232,6 +229,22 @@ public class OAuthSecurityConfiguration extends WebSecurityConfigurerAdapter {
 		return WebClient.builder()
 				.apply(oauth2Client.oauth2Configuration())
 				.build();
+	}
+
+	@Bean
+	public AuthoritiesMapper authorityMapper() {
+		AuthoritiesMapper authorityMapper;
+
+		if (StringUtils.isEmpty(authorizationProperties.getExternalAuthoritiesUrl())) {
+			authorityMapper = new DefaultAuthoritiesMapper(
+					authorizationProperties.getProviderRoleMappings(),
+					this.calculateDefaultProviderId());
+		}
+		else {
+			authorityMapper = new ExternalOauth2ResourceAuthoritiesMapper(
+				URI.create(authorizationProperties.getExternalAuthoritiesUrl()));
+		}
+		return authorityMapper;
 	}
 
 	@Bean

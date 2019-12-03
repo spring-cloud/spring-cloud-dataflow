@@ -53,10 +53,10 @@ public class DefaultAuthoritiesMapperTests {
 	public void testMapScopesToAuthoritiesWithNullParameters() throws Exception {
 		final DefaultAuthoritiesMapper authoritiesMapper = new DefaultAuthoritiesMapper(Collections.emptyMap(), "");
 		try {
-			authoritiesMapper.mapScopesToAuthorities(null, null);
+			authoritiesMapper.mapScopesToAuthorities(null, null, null);
 		}
 		catch (IllegalArgumentException e) {
-			Assert.assertEquals("The clientId argument must not be empty or null.", e.getMessage());
+			Assert.assertEquals("The scopes argument must not be null.", e.getMessage());
 			return;
 		}
 		Assert.fail("Expected an IllegalStateException to be thrown.");
@@ -66,7 +66,7 @@ public class DefaultAuthoritiesMapperTests {
 	public void testMapScopesToAuthoritiesWithNullParameters2() throws Exception {
 		final DefaultAuthoritiesMapper authoritiesMapper = new DefaultAuthoritiesMapper(Collections.emptyMap(), "");
 		try {
-			authoritiesMapper.mapScopesToAuthorities("myClientId", null);
+			authoritiesMapper.mapScopesToAuthorities("myClientId", null, null);
 		}
 		catch (IllegalArgumentException e) {
 			Assert.assertEquals("The scopes argument must not be null.", e.getMessage());
@@ -80,7 +80,7 @@ public class DefaultAuthoritiesMapperTests {
 	public void testThat7AuthoritiesAreReturned() throws Exception {
 		final DefaultAuthoritiesMapper authoritiesMapper = new DefaultAuthoritiesMapper("uaa", false);
 
-		final Set<GrantedAuthority> authorities = authoritiesMapper.mapScopesToAuthorities("uaa", Collections.emptySet());
+		final Set<GrantedAuthority> authorities = authoritiesMapper.mapScopesToAuthorities("uaa", Collections.emptySet(), null);
 		assertThat(authorities, hasSize(7));
 
 		assertThat(authorities.stream().map(authority -> authority.getAuthority()).collect(Collectors.toList()),
@@ -96,7 +96,7 @@ public class DefaultAuthoritiesMapperTests {
 
 		final DefaultAuthoritiesMapper authoritiesMapper = new DefaultAuthoritiesMapper("uaa", true);
 
-		final Collection<? extends GrantedAuthority> authorities = authoritiesMapper.mapScopesToAuthorities("uaa", scopes);
+		final Collection<? extends GrantedAuthority> authorities = authoritiesMapper.mapScopesToAuthorities("uaa", scopes, null);
 		assertThat(authorities, hasSize(3));
 
 		assertThat(authorities.stream().map(authority -> authority.getAuthority()).collect(Collectors.toList()),
@@ -148,7 +148,7 @@ public class DefaultAuthoritiesMapperTests {
 
 		final DefaultAuthoritiesMapper defaultAuthoritiesMapper = new DefaultAuthoritiesMapper("uaa", providerRoleMapping);
 
-		final Collection<? extends GrantedAuthority> authorities = defaultAuthoritiesMapper.mapScopesToAuthorities("uaa", scopes);
+		final Collection<? extends GrantedAuthority> authorities = defaultAuthoritiesMapper.mapScopesToAuthorities("uaa", scopes, null);
 
 		assertThat(authorities, hasSize(7));
 
@@ -169,7 +169,7 @@ public class DefaultAuthoritiesMapperTests {
 
 		final DefaultAuthoritiesMapper defaultAuthoritiesExtractor = new DefaultAuthoritiesMapper("uaa", providerRoleMapping);
 
-		final Collection<? extends GrantedAuthority> authorities = defaultAuthoritiesExtractor.mapScopesToAuthorities("uaa", scopes);
+		final Collection<? extends GrantedAuthority> authorities = defaultAuthoritiesExtractor.mapScopesToAuthorities("uaa", scopes, null);
 
 		assertThat(authorities, hasSize(3));
 
@@ -190,7 +190,7 @@ public class DefaultAuthoritiesMapperTests {
 
 		final DefaultAuthoritiesMapper defaultAuthoritiesExtractor = new DefaultAuthoritiesMapper("uaa", false);
 
-		final Collection<? extends GrantedAuthority> authorities = defaultAuthoritiesExtractor.mapScopesToAuthorities("uaa", scopes);
+		final Collection<? extends GrantedAuthority> authorities = defaultAuthoritiesExtractor.mapScopesToAuthorities("uaa", scopes, null);
 
 		assertThat(authorities, hasSize(7));
 
@@ -207,7 +207,7 @@ public class DefaultAuthoritiesMapperTests {
 
 		final DefaultAuthoritiesMapper defaultAuthoritiesExtractor = new DefaultAuthoritiesMapper("uaa", true);
 
-		final Collection<? extends GrantedAuthority> authorities = defaultAuthoritiesExtractor.mapScopesToAuthorities("uaa", scopes);
+		final Collection<? extends GrantedAuthority> authorities = defaultAuthoritiesExtractor.mapScopesToAuthorities("uaa", scopes, null);
 
 		assertThat(authorities, hasSize(2));
 
@@ -233,7 +233,7 @@ public class DefaultAuthoritiesMapperTests {
 
 		final DefaultAuthoritiesMapper defaultAuthoritiesExtractor = new DefaultAuthoritiesMapper("uaa", true, roleMappings);
 
-		final Collection<? extends GrantedAuthority> authorities = defaultAuthoritiesExtractor.mapScopesToAuthorities("uaa", scopes);
+		final Collection<? extends GrantedAuthority> authorities = defaultAuthoritiesExtractor.mapScopesToAuthorities("uaa", scopes, null);
 
 		assertThat(authorities, hasSize(7));
 

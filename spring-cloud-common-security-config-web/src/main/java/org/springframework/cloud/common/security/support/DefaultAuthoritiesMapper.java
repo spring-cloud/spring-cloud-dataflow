@@ -117,12 +117,19 @@ public class DefaultAuthoritiesMapper implements AuthoritiesMapper {
 	 * {@link CoreSecurityRoles}. The roles are prefixed with the value specified in
 	 * {@link GrantedAuthorityDefaults}.
 	 *
-	 * @param clientId Must not be empty or null
+	 * @param clientIdParam If null, the default defaultProviderId is used
 	 * @param scopes Must not be null
+	 * @param token Ignored in this implementation
 	 */
 	@Override
-	public Set<GrantedAuthority> mapScopesToAuthorities(String clientId, Set<String> scopes) {
-		Assert.hasText(clientId, "The clientId argument must not be empty or null.");
+	public Set<GrantedAuthority> mapScopesToAuthorities(String clientIdParam, Set<String> scopes, String token) {
+		final String clientId;
+		if (clientIdParam == null) {
+			clientId = this.defaultProviderId;
+		}
+		else {
+			clientId = clientIdParam;
+		}
 		Assert.notNull(scopes, "The scopes argument must not be null.");
 
 		final ProviderRoleMapping roleMapping = this.providerRoleMappings.get(clientId);
@@ -165,8 +172,4 @@ public class DefaultAuthoritiesMapper implements AuthoritiesMapper {
 		return grantedAuthorities;
 	}
 
-	@Override
-	public Set<GrantedAuthority> mapScopesToAuthorities(Set<String> scopes) {
-		return this.mapScopesToAuthorities(this.defaultProviderId, scopes);
-	}
 }

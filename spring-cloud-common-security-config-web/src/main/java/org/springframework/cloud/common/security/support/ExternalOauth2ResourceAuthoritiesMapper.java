@@ -21,12 +21,17 @@ import java.util.Set;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.cloud.common.security.core.support.OAuth2TokenUtilsService;
-import org.springframework.http.RequestEntity;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.oauth2.client.http.OAuth2ErrorResponseErrorHandler;
+import org.springframework.security.oauth2.core.OAuth2AccessToken;
+import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
+import org.springframework.web.client.RestOperations;
 import org.springframework.web.client.RestTemplate;
 
 /**
@@ -54,37 +59,37 @@ public class ExternalOauth2ResourceAuthoritiesMapper implements AuthoritiesMappe
 	public static final GrantedAuthority SCHEDULE = new SimpleGrantedAuthority(SecurityConfigUtils.ROLE_PREFIX + CoreSecurityRoles.SCHEDULE.getKey());
 	public static final GrantedAuthority VIEW = new SimpleGrantedAuthority(SecurityConfigUtils.ROLE_PREFIX + CoreSecurityRoles.VIEW.getKey());
 
-	private final RestTemplate restTemplate;
 	private final URI roleProviderUri;
-	private final OAuth2TokenUtilsService oauth2TokenUtilsService;
+	private final RestOperations restOperations;
 
 	/**
 	 *
-	 * @param restTemplate used for acquiring the user's access token and
-	 *                     requesting the user's security roles
 	 * @param roleProviderUri a HTTP GET request is sent to this URI to fetch
 	 *                        the user's security roles
-	 * @param oauth2TokenUtilsService Service to look up Access Tokens for currently authenticated user
 	 */
 	public ExternalOauth2ResourceAuthoritiesMapper(
-		RestTemplate restTemplate,
-		URI roleProviderUri,
-		OAuth2TokenUtilsService oauth2TokenUtilsService) {
-		this.restTemplate = restTemplate;
+		URI roleProviderUri) {
+		Assert.notNull(roleProviderUri, "The provided roleProviderUri must not be null.");
 		this.roleProviderUri = roleProviderUri;
-		this.oauth2TokenUtilsService = oauth2TokenUtilsService;
+
+		final RestTemplate restTemplate = new RestTemplate();
+		restTemplate.setErrorHandler(new OAuth2ErrorResponseErrorHandler());
+		this.restOperations = restTemplate;
 	}
 
+
 	@Override
-	public Set<GrantedAuthority> mapScopesToAuthorities(Set<String> scopes) {
+	public Set<GrantedAuthority> mapScopesToAuthorities(String providerId, Set<String> scopes, String token) {
 		logger.debug("Getting permissions from {}", roleProviderUri);
-		final String token = this.oauth2TokenUtilsService.getAccessTokenOfAuthenticatedUser();
-		RequestEntity<?> request = RequestEntity.get(roleProviderUri)
-				.header("Authorization", "bearer " + token).build();
-		final ResponseEntity<String[]> entity = restTemplate.exchange(request, String[].class);
+
+		final HttpHeaders headers = new HttpHeaders();
+		headers.add(HttpHeaders.AUTHORIZATION, OAuth2AccessToken.TokenType.BEARER.getValue() + " " + token);
+
+		final HttpEntity<String> entity = new HttpEntity<>(null, headers);
+		final ResponseEntity<String[]> response = restOperations.exchange(roleProviderUri, HttpMethod.GET, entity, String[].class);
 
 		final Set<GrantedAuthority> authorities = new HashSet<>();
-		for (String permission : entity.getBody()) {
+		for (String permission : response.getBody()) {
 			if (StringUtils.isEmpty(permission)) {
 				logger.warn("Received an empty permission from {}", roleProviderUri);
 			} else {
@@ -120,11 +125,6 @@ public class ExternalOauth2ResourceAuthoritiesMapper implements AuthoritiesMappe
 		}
 		logger.info("Roles added for user: {}.", authorities);
 		return authorities;
-	}
-
-	@Override
-	public Set<GrantedAuthority> mapScopesToAuthorities(String providerId, Set<String> scopes) {
-		throw new UnsupportedOperationException("Don't call this AuthoritiesMapper with a providerId.");
 	}
 }
 

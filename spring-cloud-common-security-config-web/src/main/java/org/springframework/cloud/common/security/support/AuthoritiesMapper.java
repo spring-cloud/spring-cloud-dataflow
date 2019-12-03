@@ -31,20 +31,12 @@ public interface AuthoritiesMapper {
 	/**
 	 * Map the provided Scopes to authorities.
 	 *
-	 * @param providerId The OAuth provider for which to map the scopes
+	 * @param providerId If null, then the default providerId is used
 	 * @param scopes the scopes to map
+	 * @param token some implementation may need to make additional requests
 	 *
 	 * @return the mapped authorities
 	 */
-	Set<GrantedAuthority> mapScopesToAuthorities(String providerId, Set<String> scopes);
-
-	/**
-	 * Map the provided Scopes to authorities using the default provider id.
-	 *
-	 * @param scopes the scopes to map
-	 *
-	 * @return the mapped authorities
-	 */
-	Set<GrantedAuthority> mapScopesToAuthorities(Set<String> scopes);
+	Set<GrantedAuthority> mapScopesToAuthorities(String providerId, Set<String> scopes, String token);
 
 }
