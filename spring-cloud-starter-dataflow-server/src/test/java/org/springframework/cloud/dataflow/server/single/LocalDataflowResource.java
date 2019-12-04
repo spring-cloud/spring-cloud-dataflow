@@ -141,8 +141,7 @@ public class LocalDataflowResource extends ExternalResource {
 
 	@Override
 	protected void before() {
-		//System.setProperty("foo", "http://www.hillert.com");
-		System.out.println("externalAuthoritiesServer>>>>>>>>   " + System.getProperty("foo"));
+
 		originalDataflowServerPort = System.getProperty(DATAFLOW_PORT_PROPERTY);
 
 		this.dataflowServerPort = SocketUtils.findAvailableTcpPort();
