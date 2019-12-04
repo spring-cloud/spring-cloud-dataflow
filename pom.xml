@@ -44,7 +44,7 @@
 		<spring-cloud-deployer-cloudfoundry.version>2.1.1.BUILD-SNAPSHOT</spring-cloud-deployer-cloudfoundry.version>
 
 		<kubernetes-client.version>4.1.0</kubernetes-client.version>
-		<spring-cloud-deployer-kubernetes.version>2.1.0.RELEASE</spring-cloud-deployer-kubernetes.version>
+		<spring-cloud-deployer-kubernetes.version>2.1.1.RELEASE</spring-cloud-deployer-kubernetes.version>
 
 		<dockerfile-maven-plugin.version>1.4.13</dockerfile-maven-plugin.version>
 		<zeroturnaround.version>1.13</zeroturnaround.version>
