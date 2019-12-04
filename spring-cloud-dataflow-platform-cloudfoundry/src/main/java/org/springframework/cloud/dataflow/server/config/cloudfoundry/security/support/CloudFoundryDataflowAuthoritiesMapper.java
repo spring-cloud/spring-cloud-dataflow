@@ -59,11 +59,11 @@ public class CloudFoundryDataflowAuthoritiesMapper implements AuthoritiesMapper 
 	 *
 	 * @param providerId Not used
 	 * @param scopes Not used
-	 * @param token not used
+	 * @param token Must not be null or empty.
 	 */
 	@Override
 	public Set<GrantedAuthority> mapScopesToAuthorities(String providerId, Set<String> scopes, String token) {
-		if (cloudFoundrySecurityService.isSpaceDeveloper()) {
+		if (cloudFoundrySecurityService.isSpaceDeveloper(token)) {
 			final List<String> rolesAsStrings = new ArrayList<>();
 			final Set<GrantedAuthority> grantedAuthorities = Stream.of(CoreSecurityRoles.values())
 					.map(roleEnum -> {
