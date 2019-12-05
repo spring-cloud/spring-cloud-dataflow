@@ -219,22 +219,22 @@ wide variety of data sources and destinations.
 
 === Import/Export Streams
 
-The Streams section of the Dashboard includes an utils page, makes available the import and export streams.
+The Streams section of the Dashboard includes a new Utils page that provides the option to import and export streams.
 
 The following image shows the streams export page:
 
 . Stream Utils Export page
-image::{dataflow-asciidoc}/images/dataflow-streams-utils-export.png[Export streams, scaledwidth="100%"]
+image::{dataflow-asciidoc}/images/dataflow-streams-utils-export.png[Stream Utils Export, scaledwidth="100%"]
 
-On the streams import page, you have to provide a valid JSON file (generate an export file to see the structure).
+On the Streams import page, you have to import from a valid JSON file. You can either manually draft the file or export the file from the Streams export page.
 
 . Stream Utils Import page
-image::{dataflow-asciidoc}/images/dataflow-streams-utils-import.png[Import streams, scaledwidth="100%"]
+image::{dataflow-asciidoc}/images/dataflow-streams-utils-import.png[Stream Utils Import, scaledwidth="100%"]
 
-After running the import, the result will be displayed, showing success and/or error creations.
+After importing the file, you will get confirmation on whether the operation completed successfully.
 
-. Stream Utils Import result page
-image::{dataflow-asciidoc}/images/dataflow-streams-utils-import-result.png[Import result streams, scaledwidth="100%"]
+. Stream Utils Import Result     page
+image::{dataflow-asciidoc}/images/dataflow-streams-utils-import-result.png[Stream Utils Import Result, scaledwidth="100%"]
 
 
 ifndef::omit-tasks-docs[]
@@ -320,22 +320,22 @@ To do so, click the Definitions tab and select the task you want to launch by pr
 
 ==== Import/Export Tasks
 
-The Tasks section of the Dashboard includes an utils page, makes available the import and export tasks.
+The Tasks section of the Dashboard includes a new Utils page that provides the option to import and export tasks.
 
 The following image shows the tasks export page:
 
 . Tasks Utils Export page
-image::{dataflow-asciidoc}/images/dataflow-tasks-utils-export.png[Export tasks, scaledwidth="100%"]
+image::{dataflow-asciidoc}/images/dataflow-tasks-utils-export.png[Tasks Utils Export, scaledwidth="100%"]
 
-On the tasks import page, you have to provide a valid JSON file (generate an export file to see the structure).
+On the Tasks import page, you have to import from a valid JSON file. You can either manually draft the file or export the file from the Tasks export page.
 
 . Tasks Utils Import page
-image::{dataflow-asciidoc}/images/dataflow-tasks-utils-import.png[Import tasks, scaledwidth="100%"]
+image::{dataflow-asciidoc}/images/dataflow-tasks-utils-import.png[Tasks Utils Import, scaledwidth="100%"]
 
-After running the import, the result will be displayed, showing success and/or error creations.
+After importing the file, you will get confirmation on whether the operation completed successfully.
 
-. Tasks Utils Import result page
-image::{dataflow-asciidoc}/images/dataflow-tasks-utils-import-result.png[Import result tasks, scaledwidth="100%"]
+. Tasks Utils Import Result page
+image::{dataflow-asciidoc}/images/dataflow-tasks-utils-import-result.png[Tasks Utils Import Result, scaledwidth="100%"]
 
 
 
