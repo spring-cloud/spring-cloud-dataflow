@@ -217,6 +217,26 @@ there can be "n" combinations (Inputs/Outputs). This allows you to create comple
 wide variety of data sources and destinations.
 =======
 
+=== Import/Export Streams
+
+The Streams section of the Dashboard includes an utils page, makes available the import and export streams.
+
+The following image shows the streams export page:
+
+. Stream Utils Export page
+image::{dataflow-asciidoc}/images/dataflow-streams-utils-export.png[Export streams, scaledwidth="100%"]
+
+On the streams import page, you have to provide a valid JSON file (generate an export file to see the structure).
+
+. Stream Utils Import page
+image::{dataflow-asciidoc}/images/dataflow-streams-utils-import.png[Import streams, scaledwidth="100%"]
+
+After running the import, the result will be displayed, showing success and/or error creations.
+
+. Stream Utils Import result page
+image::{dataflow-asciidoc}/images/dataflow-streams-utils-import-result.png[Import result streams, scaledwidth="100%"]
+
+
 ifndef::omit-tasks-docs[]
 [[dashboard-tasks]]
 == Tasks
@@ -296,6 +316,26 @@ image::{dataflow-asciidoc}/images/dataflow-ctr-flo-tab.png[Composed Task Designe
 
 Once the task definition has been created, the tasks can be launched through the dashboard.
 To do so, click the Definitions tab and select the task you want to launch by pressing `Launch`.
+
+
+==== Import/Export Tasks
+
+The Tasks section of the Dashboard includes an utils page, makes available the import and export tasks.
+
+The following image shows the tasks export page:
+
+. Tasks Utils Export page
+image::{dataflow-asciidoc}/images/dataflow-tasks-utils-export.png[Export tasks, scaledwidth="100%"]
+
+On the tasks import page, you have to provide a valid JSON file (generate an export file to see the structure).
+
+. Tasks Utils Import page
+image::{dataflow-asciidoc}/images/dataflow-tasks-utils-import.png[Import tasks, scaledwidth="100%"]
+
+After running the import, the result will be displayed, showing success and/or error creations.
+
+. Tasks Utils Import result page
+image::{dataflow-asciidoc}/images/dataflow-tasks-utils-import-result.png[Import result tasks, scaledwidth="100%"]
 
 
 
