@@ -23,7 +23,8 @@ Sabby Anandan; Marius Bogoevici; Eric Bottard; Mark Fisher; Ilayaperumal Gopinat
 :github-code: https://github.com/{github-repo}
 :microsite-version: master
 
-:dataflow-asciidoc: https://raw.githubusercontent.com/spring-cloud/spring-cloud-dataflow/master/spring-cloud-dataflow-docs/src/main/asciidoc
+//:dataflow-asciidoc: https://raw.githubusercontent.com/spring-cloud/spring-cloud-dataflow/master/spring-cloud-dataflow-docs/src/main/asciidoc
+:dataflow-asciidoc: http://localhost:8000/src/main/asciidoc
 
 :docker-http-source-rabbit-version: 2.1.0.RELEASE
 :docker-time-source-rabbit-version: 2.1.0.RELEASE
