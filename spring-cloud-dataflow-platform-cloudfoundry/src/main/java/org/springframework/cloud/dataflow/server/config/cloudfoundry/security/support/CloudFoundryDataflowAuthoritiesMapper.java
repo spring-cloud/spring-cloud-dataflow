@@ -31,7 +31,6 @@ import org.springframework.cloud.common.security.support.SecurityConfigUtils;
 import org.springframework.security.config.core.GrantedAuthorityDefaults;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
 /**
@@ -58,12 +57,12 @@ public class CloudFoundryDataflowAuthoritiesMapper implements AuthoritiesMapper 
 	 * {@link CoreSecurityRoles}. The roles are prefixed with the value specified in
 	 * {@link GrantedAuthorityDefaults}.
 	 *
-	 * @param map Must not be null. Is only used for logging
+	 * @param providerId Not used
+	 * @param scopes Not used
+	 * @param token not used
 	 */
 	@Override
-	public Set<GrantedAuthority> mapScopesToAuthorities(Set<String> scopes) {
-		Assert.notNull(scopes, "The scopes argument must not be null.");
-
+	public Set<GrantedAuthority> mapScopesToAuthorities(String providerId, Set<String> scopes, String token) {
 		if (cloudFoundrySecurityService.isSpaceDeveloper()) {
 			final List<String> rolesAsStrings = new ArrayList<>();
 			final Set<GrantedAuthority> grantedAuthorities = Stream.of(CoreSecurityRoles.values())
@@ -80,10 +79,5 @@ public class CloudFoundryDataflowAuthoritiesMapper implements AuthoritiesMapper 
 		else {
 			return Collections.emptySet();
 		}
-	}
-
-	@Override
-	public Set<GrantedAuthority> mapScopesToAuthorities(String providerId, Set<String> scopes) {
-		throw new UnsupportedOperationException("Don't call this AuthoritiesMapper with a providerId.");
 	}
 }
