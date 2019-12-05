@@ -71,7 +71,11 @@ public class CloudFoundrySecurityService {
 	 */
 	public boolean isSpaceDeveloper() {
 		final String accessToken = this.oauth2TokenUtilsService.getAccessTokenOfAuthenticatedUser();
-		logger.info("The accessToken is: " + accessToken);
+		return isSpaceDeveloper(accessToken);
+	}
+
+	public boolean isSpaceDeveloper(String accessToken) {
+		Assert.hasText(accessToken, "The accessToken must not be null or empty.");
 		final AccessLevel accessLevel = getAccessLevel(
 				accessToken, applicationId);
 
