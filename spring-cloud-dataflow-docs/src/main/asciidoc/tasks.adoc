@@ -1210,7 +1210,7 @@ The second flow to consider when launching a task is whether there was a change 
 
 [start=4]
 4. If there is not another instance of the task definition currently running, the old deployment is deleted.
-5. On platforms that cache a deployed artifact (CloudFoundry at the writing of this documentation), Data Flow checks whether the application was previously deployed (this check is always be no in this flow).
+5. On platforms that cache a deployed artifact (CloudFoundry at the writing of this documentation), Data Flow checks whether the application was previously deployed (this check will evaluate to `false` in this flow since the old deployment was deleted).
 6. Data Flow does the deployment of the task application with the updated values (new application version, new merged properties, and new merged deployment properties).
 7. Data Flow launches the application.
 
