@@ -1040,7 +1040,7 @@ Finally startup Spring Cloud Data Flow:
 
 [source,bash]
 ----
-java -jar spring-cloud-dataflow/spring-cloud-dataflow-server/target/spring-cloud-dataflow-server-2.3.0.BUILD-SNAPSHOT.jar --spring.config.additional-location=scdf.yml
+java -jar spring-cloud-dataflow/spring-cloud-dataflow-server/target/spring-cloud-dataflow-server-2.4.0.BUILD-SNAPSHOT.jar --spring.config.additional-location=scdf.yml
 ----
 
 [[configuration-security-role-mapping]]
