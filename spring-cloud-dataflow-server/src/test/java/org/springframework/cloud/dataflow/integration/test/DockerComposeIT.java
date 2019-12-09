@@ -141,12 +141,12 @@ public class DockerComposeIT {
 	 * Data Flow version to use for the tests. The findCurrentDataFlowVersion will try to retrieve the latest BS version
 	 * or will fall back to the default version provided as parameter.
 	 */
-	private static final String DATAFLOW_VERSION = findCurrentDataFlowVersion("2.3.0.BUILD-SNAPSHOT");
+	private static final String DATAFLOW_VERSION = findCurrentDataFlowVersion("2.3.1.BUILD-SNAPSHOT");
 
 	/**
 	 * Skipper version used for the tests.
 	 */
-	private static final String SKIPPER_VERSION = "2.2.0.BUILD-SNAPSHOT";
+	private static final String SKIPPER_VERSION = "2.2.1.BUILD-SNAPSHOT";
 
 	/**
 	 * Pre-registered Task apps used for testing.
