@@ -254,10 +254,9 @@ public class DefaultTaskExecutionService implements TaskExecutionService {
 
 		// We now have a new props and args what should really get used.
 		Map<String, String> mergedTaskDeploymentProperties = report.getMergedDeploymentProperties();
-		List<String> mergedCommandLineArguments = report.getMergedCommandLineArguments();
 
 		taskExecutionInformation.setTaskDeploymentProperties(mergedTaskDeploymentProperties);
-		appDeploymentRequest = updateDeploymentProperties(mergedCommandLineArguments, platformName, taskExecutionInformation,
+		appDeploymentRequest = updateDeploymentProperties(commandLineArgs, platformName, taskExecutionInformation,
 				taskExecution, mergedTaskDeploymentProperties);
 
 		AppDeploymentRequest request = new AppDeploymentRequest(appDeploymentRequest.getDefinition(),

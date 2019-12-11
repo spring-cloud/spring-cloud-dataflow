@@ -24,42 +24,18 @@ package org.springframework.cloud.dataflow.server.service.impl.diff;
 public class TaskManifestDifference {
 
 	private final PropertiesDiff deploymentPropertiesDifference;
-	private final PropertiesDiff commandLineArgumentPropertiesDifferenceDoubleDash;
-	private final PropertiesDiff commandLineArgumentPropertiesDifferenceSingleDash;
-	private final PropertiesDiff commandLineArgumentPropertiesDifferenceNoDash;
 
-	public TaskManifestDifference(PropertiesDiff deploymentPropertiesDifference,
-			PropertiesDiff commandLineArgumentPropertiesDifferenceDoubleDash,
-			PropertiesDiff commandLineArgumentPropertiesDifferenceSingleDash,
-			PropertiesDiff commandLineArgumentPropertiesDifferenceNoDash) {
+	public TaskManifestDifference(PropertiesDiff deploymentPropertiesDifference) {
 		this.deploymentPropertiesDifference = deploymentPropertiesDifference;
-		this.commandLineArgumentPropertiesDifferenceDoubleDash = commandLineArgumentPropertiesDifferenceDoubleDash;
-		this.commandLineArgumentPropertiesDifferenceSingleDash = commandLineArgumentPropertiesDifferenceSingleDash;
-		this.commandLineArgumentPropertiesDifferenceNoDash = commandLineArgumentPropertiesDifferenceNoDash;
 	}
 
 	public PropertiesDiff getDeploymentPropertiesDifference() {
 		return deploymentPropertiesDifference;
 	}
 
-	public PropertiesDiff getCommandLineArgumentPropertiesDifferenceDoubleDash() {
-		return commandLineArgumentPropertiesDifferenceDoubleDash;
-	}
-
-	public PropertiesDiff getCommandLineArgumentPropertiesDifferenceSingleDash() {
-		return commandLineArgumentPropertiesDifferenceSingleDash;
-	}
-
-	public PropertiesDiff getCommandLineArgumentPropertiesDifferenceNoDash() {
-		return commandLineArgumentPropertiesDifferenceNoDash;
-	}
-
 	@Override
 	public String toString() {
 		return "TaskManifestDifference [commandLineArgumentPropertiesDifferenceDoubleDash="
-				+ commandLineArgumentPropertiesDifferenceDoubleDash + ", commandLineArgumentPropertiesDifferenceNoDash="
-				+ commandLineArgumentPropertiesDifferenceNoDash + ", commandLineArgumentPropertiesDifferenceSingleDash="
-				+ commandLineArgumentPropertiesDifferenceSingleDash + ", deploymentPropertiesDifference="
 				+ deploymentPropertiesDifference + "]";
 	}
 }
