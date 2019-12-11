@@ -109,24 +109,10 @@ Then you can use the `app import` command and provide the location of the proper
 app import --uri file:///tmp/task-apps.properties
 ```
 
-For convenience, we have the static files with application-URIs (for both maven and docker) available for all the out-of-the-box Task app-starters.
-You can point to this file and import all the application-URIs in bulk.
-Otherwise, as explained earlier in this chapter, you can register them individually or have your own custom property file with only the required application-URIs in it.
-It is recommended, however, to have a "`focused`" list of desired application-URIs in a custom property file.
-
-The following table lists the available static property files:
-
-[width="100%",frame="topbot",options="header"]
-|======================
-|Artifact Type |Stable Release |SNAPSHOT Release
-|Maven   | https://dataflow.spring.io/Dearborn-SR1-task-applications-maven | https://dataflow.spring.io/Dearborn-BUILD-SNAPSHOT-task-applications-maven
-|Docker  | https://dataflow.spring.io/Dearborn-SR1-task-applications-docker | https://dataflow.spring.io/Dearborn-BUILD-SNAPSHOT-task-applications-docker
-|======================
-
 For example, if you would like to register all out-of-the-box task applications in bulk, you can do so with the following command:
 
 ```
-dataflow:>app import --uri https://dataflow.spring.io/Dearborn-SR1-task-applications-maven
+dataflow:>app import --uri https://dataflow.spring.io/task-maven-latest
 ```
 
 You can also pass the `--local` option (which is `TRUE` by default) to indicate whether the properties file location should be resolved within the shell process itself.
