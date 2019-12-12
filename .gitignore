@@ -1,0 +1,47 @@
+*~
+.#*
+*#
+*.sw*
+_site/
+.factorypath
+.gradletasknamecache
+.DS_Store
+.checkstyle
+/application.yml
+/application.properties
+asciidoctor.css
+atlassian-ide-plugin.xml
+bin/
+build/
+dump.rdb
+out
+spring-shell.log
+target/
+test-output
+logs/
+scdf-logs/
+.attach_pid*
+
+# Eclipse artifacts, including WTP generated manifests
+.classpath
+.project
+.settings/
+.springBeans
+spring-*/src/main/java/META-INF/MANIFEST.MF
+
+# IDEA artifacts and output dirs
+*.iml
+*.ipr
+*.iws
+.idea/
+rebel.xml
+
+# Visual Studio Code
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+
+manifest.yml
+cleanup.sh
