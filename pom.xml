@@ -15,8 +15,8 @@
 		 are in sync with the https://github.com/spring-cloud/spring-cloud-release/blob/master/pom.xml updates for the respective
 		 release versions -->
 		<groupId>org.springframework.cloud</groupId>
-		<artifactId>spring-cloud-build</artifactId>
-		<version>2.2.0.RELEASE</version>
+		<artifactId>spring-cloud-dataflow-build</artifactId>
+		<version>2.4.0.BUILD-SNAPSHOT</version>
 		<relativePath />
 	</parent>
 
