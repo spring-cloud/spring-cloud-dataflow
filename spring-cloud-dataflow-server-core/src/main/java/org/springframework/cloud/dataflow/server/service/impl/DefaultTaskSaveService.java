@@ -104,7 +104,7 @@ public class DefaultTaskSaveService implements TaskSaveService {
 		}
 		auditRecordService.populateAndSaveAuditRecord(
 				AuditOperationType.TASK, AuditActionType.CREATE,
-				taskDefinition.getTaskName(), argumentSanitizer.sanitizeTaskDsl(taskDefinition));
+				taskDefinition.getTaskName(), argumentSanitizer.sanitizeTaskDsl(taskDefinition), null);
 	}
 
 	private void saveStandardTaskDefinition(TaskDefinition taskDefinition) {

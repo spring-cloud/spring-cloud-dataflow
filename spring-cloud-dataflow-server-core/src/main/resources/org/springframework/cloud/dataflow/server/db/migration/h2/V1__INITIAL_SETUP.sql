@@ -31,6 +31,7 @@ create table audit_records (
   correlation_id varchar(255),
   created_by varchar(255),
   created_on timestamp,
+  platform_name varchar(255),
   primary key (id)
 );
 

@@ -76,8 +76,8 @@ import org.springframework.util.StringUtils;
  * application property values, resolving wildcard deployment properties, and creates a
  * {@link StreamDeploymentRequest}.
  * <p>
- * The {@link StreamService} deployer is agnostic. For deploying streams on
- * Skipper use the {@link DefaultStreamService}.
+ * The {@link StreamService} deployer is agnostic. For deploying streams on Skipper use
+ * the {@link DefaultStreamService}.
  *
  * @author Mark Pollack
  * @author Ilayaperumal Gopinathan
@@ -95,8 +95,11 @@ public class DefaultStreamService implements StreamService {
 	 * The repository this controller will use for stream CRUD operations.
 	 */
 	protected final StreamDefinitionRepository streamDefinitionRepository;
+
 	protected final AuditRecordService auditRecordService;
+
 	protected final AuditServiceUtils auditServiceUtils;
+
 	protected final StreamValidationService streamValidationService;
 
 	/**
@@ -132,8 +135,9 @@ public class DefaultStreamService implements StreamService {
 	 *
 	 * @param streamDefinition the stream definition to deploy
 	 * @param deploymentProperties the deployment properties for the stream
+	 * @return return a skipper release {@link Release}
 	 */
-	public void doDeployStream(StreamDefinition streamDefinition, Map<String, String> deploymentProperties) {
+	private Release doDeployStream(StreamDefinition streamDefinition, Map<String, String> deploymentProperties) {
 		// Extract skipper properties
 		Map<String, String> skipperDeploymentProperties = getSkipperProperties(deploymentProperties);
 
@@ -161,6 +165,8 @@ public class DefaultStreamService implements StreamService {
 		else {
 			logger.error("Missing skipper release after Stream deploy!");
 		}
+
+		return release;
 	}
 
 	public DeploymentState doCalculateStreamState(String name) {
@@ -176,7 +182,8 @@ public class DefaultStreamService implements StreamService {
 
 		auditRecordService.populateAndSaveAuditRecord(
 				AuditOperationType.STREAM, AuditActionType.UNDEPLOY,
-				streamDefinition.getName(), this.auditServiceUtils.convertStreamDefinitionToAuditData(streamDefinition));
+				streamDefinition.getName(), this.auditServiceUtils.convertStreamDefinitionToAuditData(streamDefinition),
+				null);
 	}
 
 	private void updateStreamDefinitionFromReleaseManifest(String streamName, String releaseManifest) {
@@ -214,11 +221,13 @@ public class DefaultStreamService implements StreamService {
 		this.streamDefinitionRepository.delete(updatedStreamDefinition);
 		this.streamDefinitionRepository.save(updatedStreamDefinition);
 		this.auditRecordService.populateAndSaveAuditRecord(
-				AuditOperationType.STREAM, AuditActionType.UPDATE, streamName, this.auditServiceUtils.convertStreamDefinitionToAuditData(streamDefinition));
+				AuditOperationType.STREAM, AuditActionType.UPDATE, streamName,
+				this.auditServiceUtils.convertStreamDefinitionToAuditData(streamDefinition), null);
 	}
 
 	@Override
-	public void scaleApplicationInstances(String streamName, String appName, int count, Map<String, String> properties) {
+	public void scaleApplicationInstances(String streamName, String appName, int count,
+			Map<String, String> properties) {
 		// Skipper expects app names / labels not deployment ids
 		logger.info(String.format("Scale %s:%s to %s with properties: %s", streamName, appName, count, properties));
 		this.skipperStreamDeployer.scale(streamName, appName, count, properties);
@@ -253,7 +262,7 @@ public class DefaultStreamService implements StreamService {
 
 			this.auditRecordService.populateAndSaveAuditRecordUsingMapData(
 					AuditOperationType.STREAM, AuditActionType.UPDATE,
-					streamName, auditedData);
+					streamName, auditedData, release.getPlatformName());
 		}
 		else {
 			logger.error("Missing release after Stream Update!");
@@ -265,11 +274,17 @@ public class DefaultStreamService implements StreamService {
 	public void rollbackStream(String streamName, int releaseVersion) {
 		Assert.isTrue(StringUtils.hasText(streamName), "Stream name must not be null");
 		Release release = this.skipperStreamDeployer.rollbackStream(streamName, releaseVersion);
-		if (release != null && release.getManifest() != null) {
-			updateStreamDefinitionFromReleaseManifest(streamName, release.getManifest().getData());
+		String platformName = null;
+
+		if (release != null) {
+			platformName = release.getPlatformName();
+			if (release.getManifest() != null) {
+				updateStreamDefinitionFromReleaseManifest(streamName, release.getManifest().getData());
+			}
 		}
+
 		this.auditRecordService.populateAndSaveAuditRecord(AuditOperationType.STREAM, AuditActionType.ROLLBACK,
-				streamName, "Rollback to version: " + releaseVersion);
+				streamName, "Rollback to version: " + releaseVersion, platformName);
 	}
 
 	String convertPropertiesToSkipperYaml(StreamDefinition streamDefinition,
@@ -359,10 +374,10 @@ public class DefaultStreamService implements StreamService {
 	 * @param dsl DSL definition for stream
 	 * @param description description of the stream definition
 	 * @param deploy if {@code true}, the stream is deployed upon creation (default is
-	 * {@code false})
+	 *     {@code false})
 	 * @return the created stream definition already exists
 	 * @throws InvalidStreamDefinitionException if there are errors in parsing the stream DSL,
-	 * resolving the name, or type of applications in the stream
+	 *     resolving the name, or type of applications in the stream
 	 */
 	public StreamDefinition createStream(String streamName, String dsl, String description, boolean deploy) {
 		StreamDefinition streamDefinition = createStreamDefinition(streamName, dsl, description);
@@ -396,7 +411,7 @@ public class DefaultStreamService implements StreamService {
 
 		auditRecordService.populateAndSaveAuditRecord(
 				AuditOperationType.STREAM, AuditActionType.CREATE, streamDefinition.getName(),
-				this.auditServiceUtils.convertStreamDefinitionToAuditData(savedStreamDefinition));
+				this.auditServiceUtils.convertStreamDefinitionToAuditData(savedStreamDefinition), null);
 
 		return streamDefinition;
 
@@ -412,8 +427,8 @@ public class DefaultStreamService implements StreamService {
 	}
 
 	/**
-	 * Deploys the stream with the user provided deployment properties.
-	 * Implementations are responsible for expanding deployment wildcard expressions.
+	 * Deploys the stream with the user provided deployment properties. Implementations are
+	 * responsible for expanding deployment wildcard expressions.
 	 * @param streamName the name of the stream
 	 * @param deploymentProperties deployment properties to use as passed in from the client.
 	 */
@@ -432,12 +447,14 @@ public class DefaultStreamService implements StreamService {
 		else if (DeploymentState.deploying == status) {
 			throw new StreamAlreadyDeployingException(streamName);
 		}
-		doDeployStream(streamDefinition, deploymentProperties);
+		Release deploymentRelease = doDeployStream(streamDefinition, deploymentProperties);
+		String platformName = deploymentRelease == null ? null : deploymentRelease.getPlatformName();
 
 		auditRecordService.populateAndSaveAuditRecordUsingMapData(
 				AuditOperationType.STREAM, AuditActionType.DEPLOY,
 				streamDefinition.getName(),
-				this.auditServiceUtils.convertStreamDefinitionToAuditData(streamDefinition, deploymentProperties));
+				this.auditServiceUtils.convertStreamDefinitionToAuditData(streamDefinition, deploymentProperties),
+				platformName);
 	}
 
 	/**
@@ -452,7 +469,8 @@ public class DefaultStreamService implements StreamService {
 
 		auditRecordService.populateAndSaveAuditRecord(
 				AuditOperationType.STREAM, AuditActionType.DELETE,
-				streamDefinition.getName(), this.auditServiceUtils.convertStreamDefinitionToAuditData(streamDefinition));
+				streamDefinition.getName(),
+				this.auditServiceUtils.convertStreamDefinitionToAuditData(streamDefinition), null);
 	}
 
 	/**
@@ -468,14 +486,16 @@ public class DefaultStreamService implements StreamService {
 		for (StreamDefinition streamDefinition : streamDefinitions) {
 			auditRecordService.populateAndSaveAuditRecord(
 					AuditOperationType.STREAM, AuditActionType.DELETE,
-					streamDefinition.getName(), this.auditServiceUtils.convertStreamDefinitionToAuditData(streamDefinition));
+					streamDefinition.getName(),
+					this.auditServiceUtils.convertStreamDefinitionToAuditData(streamDefinition), null);
 		}
 	}
 
 	/**
 	 * Find streams related to the given stream name.
 	 * @param streamName name of the stream
-	 * @param nested if should recursively findByTaskNameContains for related stream definitions
+	 * @param nested if should recursively findByTaskNameContains for related stream
+	 *     definitions
 	 * @return a list of related stream definitions
 	 */
 	public List<StreamDefinition> findRelatedStreams(String streamName, boolean nested) {
@@ -541,7 +561,7 @@ public class DefaultStreamService implements StreamService {
 	/**
 	 * Verifies that all apps in the stream are valid.
 	 * @param name the name of the definition
-	 * @return  {@link ValidationStatus} for a stream.
+	 * @return {@link ValidationStatus} for a stream.
 	 */
 	public ValidationStatus validateStream(String name) {
 		return this.streamValidationService.validateStream(name);

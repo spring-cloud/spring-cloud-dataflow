@@ -303,7 +303,7 @@ public class DefaultTaskExecutionService implements TaskExecutionService {
 				getAudited(taskExecutionInformation.getTaskDefinition(),
 						taskExecutionInformation.getTaskDeploymentProperties(),
 						request.getCommandlineArguments()
-						));
+						), platformName);
 
 		return taskExecution.getExecutionId();
 	}
@@ -388,7 +388,7 @@ public class DefaultTaskExecutionService implements TaskExecutionService {
 	 * @param platformName name of the platform configuration to use
 	 * @param taskExecutionInformation details about the task execution request
 	 * @param taskExecution task execution data
-	 * @param previousManifest manifest from the last execution of the same task definition
+	 * @param deploymentProperties properties of the deployment
 	 * @return an updated {@code AppDeploymentRequest}
 	 */
 	private AppDeploymentRequest updateDeploymentProperties(List<String> commandLineArgs, String platformName,
@@ -613,7 +613,7 @@ public class DefaultTaskExecutionService implements TaskExecutionService {
 		final Map<String, Object> auditData = Collections.singletonMap("Stopped Task Executions", numberOfExecutionsStopped);
 		this.auditRecordService.populateAndSaveAuditRecordUsingMapData(
 				AuditOperationType.TASK, AuditActionType.UNDEPLOY,
-				numberOfExecutionsStopped + " Task Execution Stopped", auditData);
+				numberOfExecutionsStopped + " Task Execution Stopped", auditData, null);
 	}
 
 	private void validateExternalExecutionIds(Set<TaskExecution> taskExecutions) {

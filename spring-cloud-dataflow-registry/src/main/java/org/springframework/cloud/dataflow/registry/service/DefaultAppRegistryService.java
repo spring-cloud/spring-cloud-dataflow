@@ -155,7 +155,7 @@ public class DefaultAppRegistryService implements AppRegistryService {
 
 		this.auditRecordService.populateAndSaveAuditRecordUsingMapData(AuditOperationType.APP_REGISTRATION,
 				AuditActionType.UPDATE, newDefault.getName(),
-				this.auditServiceUtils.convertAppRegistrationToAuditData(newDefault));
+				this.auditServiceUtils.convertAppRegistrationToAuditData(newDefault), null);
 	}
 
 	@Override
@@ -223,7 +223,7 @@ public class DefaultAppRegistryService implements AppRegistryService {
 		else {
 			this.auditRecordService.populateAndSaveAuditRecordUsingMapData(AuditOperationType.APP_REGISTRATION,
 					auditActionType, appRegistration.getName(),
-					this.auditServiceUtils.convertAppRegistrationToAuditData(appRegistration));
+					this.auditServiceUtils.convertAppRegistrationToAuditData(appRegistration), null);
 		}
 	}
 

@@ -138,12 +138,12 @@ public class SkipperStreamDeployer implements StreamDeployer {
 				};
 				return mapper.readValue(platformStatus, typeRef);
 			}
-			return new ArrayList<AppStatus>();
+			return new ArrayList<>();
 		}
 		catch (Exception e) {
 			logger.error("Could not parse Skipper Platform Status JSON [" + platformStatus + "]. " +
 					"Exception message = " + e.getMessage());
-			return new ArrayList<AppStatus>();
+			return new ArrayList<>();
 		}
 	}
 
@@ -172,10 +172,9 @@ public class SkipperStreamDeployer implements StreamDeployer {
 				return getDeploymentStateFromStatusInfo(info);
 			}
 			List<AppStatus> appStatusList = deserializeAppStatus(info.getStatus().getPlatformStatus());
-			Set<DeploymentState> deploymentStateList = appStatusList.stream().map(appStatus -> appStatus.getState())
+			Set<DeploymentState> deploymentStateList = appStatusList.stream().map(AppStatus::getState)
 					.collect(Collectors.toSet());
-			DeploymentState aggregateState = StreamDeployerUtil.aggregateState(deploymentStateList);
-			state = aggregateState;
+			state = StreamDeployerUtil.aggregateState(deploymentStateList);
 		}
 		catch (ReleaseNotFoundException e) {
 			// a defined stream but unknown to skipper is considered to be in an undeployed state
@@ -194,9 +193,6 @@ public class SkipperStreamDeployer implements StreamDeployer {
 			break;
 		case DELETED:
 			result = DeploymentState.undeployed;
-			break;
-		case UNKNOWN:
-			result = DeploymentState.unknown;
 			break;
 		case DEPLOYED:
 			result = DeploymentState.deployed;

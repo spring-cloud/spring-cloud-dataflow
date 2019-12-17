@@ -220,12 +220,12 @@ public class DefaultTaskExecutionServiceTransactionTests {
 	private static class AuditRecordServiceStub implements AuditRecordService {
 
 		@Override
-		public AuditRecord populateAndSaveAuditRecord(AuditOperationType auditOperationType, AuditActionType auditActionType, String correlationId, String data) {
+		public AuditRecord populateAndSaveAuditRecord(AuditOperationType auditOperationType, AuditActionType auditActionType, String correlationId, String data, String platformName) {
 			return null;
 		}
 
 		@Override
-		public AuditRecord populateAndSaveAuditRecordUsingMapData(AuditOperationType auditOperationType, AuditActionType auditActionType, String correlationId, Map<String, Object> data) {
+		public AuditRecord populateAndSaveAuditRecordUsingMapData(AuditOperationType auditOperationType, AuditActionType auditActionType, String correlationId, Map<String, Object> data, String platformName) {
 			try {
 				Thread.sleep(1000);
 			}

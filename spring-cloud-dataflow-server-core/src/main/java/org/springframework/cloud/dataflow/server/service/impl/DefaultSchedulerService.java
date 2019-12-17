@@ -207,12 +207,13 @@ public class DefaultSchedulerService implements SchedulerService {
 		Launcher launcher = getDefaultLauncher();
 		launcher.getScheduler().schedule(scheduleRequest);
 		this.auditRecordService.populateAndSaveAuditRecordUsingMapData(AuditOperationType.SCHEDULE, AuditActionType.CREATE,
-				scheduleRequest.getScheduleName(), this.auditServiceUtils.convertScheduleRequestToAuditData(scheduleRequest));
+				scheduleRequest.getScheduleName(), this.auditServiceUtils.convertScheduleRequestToAuditData(scheduleRequest),
+				taskPlatform.getName());
 	}
 	private static Map<String, String> extractPropertiesByPrefix(Map<String, String> taskDeploymentProperties, String prefix) {
 		return taskDeploymentProperties.entrySet().stream()
 				.filter(kv -> kv.getKey().startsWith(prefix))
-				.collect(Collectors.toMap(kv -> kv.getKey().substring(prefix.length()), kv -> kv.getValue()));
+				.collect(Collectors.toMap(kv -> kv.getKey().substring(prefix.length()), Map.Entry::getValue));
 	}
 
 	private List<String> tagCommandLineArgs(List<String> args) {
@@ -292,7 +293,8 @@ public class DefaultSchedulerService implements SchedulerService {
 			this.auditRecordService.populateAndSaveAuditRecord(
 					AuditOperationType.SCHEDULE,
 					AuditActionType.DELETE, scheduleInfo.getScheduleName(),
-					scheduleInfo.getTaskDefinitionName());
+					scheduleInfo.getTaskDefinitionName(),
+					taskPlatform.getName());
 		}
 	}
 
@@ -384,12 +386,10 @@ public class DefaultSchedulerService implements SchedulerService {
 		final String prefix = "scheduler.";
 		final int prefixLength = prefix.length();
 
-		Map<String, String> result = new TreeMap<>(input).entrySet().stream()
+		return new TreeMap<>(input).entrySet().stream()
 				.filter(kv -> kv.getKey().startsWith(prefix))
-				.collect(Collectors.toMap(kv -> "spring.cloud.scheduler." + kv.getKey().substring(prefixLength), kv -> kv.getValue(),
+				.collect(Collectors.toMap(kv -> "spring.cloud.scheduler." + kv.getKey().substring(prefixLength), Map.Entry::getValue,
 						(fromWildcard, fromApp) -> fromApp));
-
-		return result;
 	}
 
 	protected Resource getTaskLauncherResource() {

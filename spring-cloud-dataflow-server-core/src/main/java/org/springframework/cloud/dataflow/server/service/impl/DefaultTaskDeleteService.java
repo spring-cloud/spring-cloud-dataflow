@@ -294,7 +294,7 @@ public class DefaultTaskDeleteService implements TaskDeleteService {
 
 		auditRecordService.populateAndSaveAuditRecordUsingMapData(
 				AuditOperationType.TASK, AuditActionType.DELETE,
-				taskExecutionIdsWithChildren.size() + " Task Execution Delete(s)", auditData);
+				taskExecutionIdsWithChildren.size() + " Task Execution Delete(s)", auditData, null);
 	}
 
 	@Override
@@ -306,7 +306,7 @@ public class DefaultTaskDeleteService implements TaskDeleteService {
 
 		auditRecordService.populateAndSaveAuditRecord(
 				AuditOperationType.TASK, AuditActionType.DELETE,
-				taskDefinition.getTaskName(), this.argumentSanitizer.sanitizeTaskDsl(taskDefinition));
+				taskDefinition.getTaskName(), this.argumentSanitizer.sanitizeTaskDsl(taskDefinition), null);
 	}
 
 	@Override
@@ -318,7 +318,7 @@ public class DefaultTaskDeleteService implements TaskDeleteService {
 
 			auditRecordService.populateAndSaveAuditRecord(
 					AuditOperationType.TASK, AuditActionType.DELETE,
-					taskDefinition.getTaskName(), this.argumentSanitizer.sanitizeTaskDsl(taskDefinition));
+					taskDefinition.getTaskName(), this.argumentSanitizer.sanitizeTaskDsl(taskDefinition), null);
 		}
 	}
 
