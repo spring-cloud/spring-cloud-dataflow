@@ -1024,6 +1024,7 @@ The following topics provide more details:
 * <<api-guide-resources-stream-deployment-manifest>>
 * <<api-guide-resources-stream-deployment-history>>
 * <<api-guide-resources-stream-deployment-platform-list>>
+* <<api-guide-resources-stream-deployment-scale>>
 
 [[api-guide-resources-stream-deployment-deploy]]
 ==== Deploying Stream Definition
@@ -1319,6 +1320,43 @@ include::{snippets}/stream-deployments-documentation/platform-list/curl-request.
 ===== Response Structure
 
 include::{snippets}/stream-deployments-documentation/platform-list/http-response.adoc[]
+
+[[api-guide-resources-stream-deployment-scale]]
+==== Scale Stream Definition
+
+The stream definition endpoint lets you scale a single app in a stream definition.
+Optionally, you can pass application parameters as properties in the request body.
+The following topics provide more details:
+
+* <<api-guide-resources-stream-definitions-deployment-scale-request-structure>>
+* <<api-guide-resources-stream-definitions-deployment-scale-request-parameters>>
+* <<api-guide-resources-stream-definitions-deployment-scale-example-request>>
+* <<api-guide-resources-stream-definitions-deployment-scale-response-structure>>
+
+[[api-guide-resources-stream-definitions-deployment-scale-request-structure]]
+===== Request Structure
+
+include::{snippets}/stream-deployments-documentation/scale/http-request.adoc[]
+
+include::{snippets}/stream-deployments-documentation/scale/path-parameters.adoc[]
+
+
+[[api-guide-resources-stream-definitions-deployment-scale-request-parameters]]
+===== Request Parameters
+
+There are no request parameters for this endpoint.
+
+
+[[api-guide-resources-stream-definitions-deployment-scale-example-request]]
+===== Example Request
+
+include::{snippets}/stream-deployments-documentation/scale/curl-request.adoc[]
+
+
+[[api-guide-resources-stream-definitions-deployment-scale-response-structure]]
+===== Response Structure
+
+include::{snippets}/stream-deployments-documentation/scale/http-response.adoc[]
 
 [[api-guide-resources-task-definitions]]
 === Task Definitions
