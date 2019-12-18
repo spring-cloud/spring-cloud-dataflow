@@ -86,6 +86,25 @@ public class StreamDeploymentsDocumentation extends BaseDocumentation {
 	}
 
 	@Test
+	public void scale() throws Exception {
+		String json = "{\"app.time.timestamp.format\":\"YYYY\"}";
+		this.mockMvc.perform(
+				post("/streams/deployments/scale/{streamName}/{appName}/instances/{count}", "timelog", "log", 1)
+						.contentType(MediaType.APPLICATION_JSON)
+						.content(json))
+				.andDo(print())
+				.andExpect(status().isCreated())
+				.andDo(this.documentationHandler.document(pathParameters(
+						parameterWithName("streamName")
+								.description("the name of an existing stream definition (required)"),
+						parameterWithName("appName")
+								.description("in stream application name to scale"),
+						parameterWithName("count")
+								.description("number of instances for the selected stream application (required)"))
+				));
+	}
+
+	@Test
 	public void unDeploy() throws Exception {
 		this.mockMvc.perform(
 				delete("/streams/deployments/{timelog}", "timelog"))
@@ -163,7 +182,7 @@ public class StreamDeploymentsDocumentation extends BaseDocumentation {
 		RollbackRequest rollbackRequest = new RollbackRequest();
 		rollbackRequest.setReleaseName("timelog1");
 		this.mockMvc.perform(
-				post("/streams/deployments//rollback/{name}/{version}", "timelog1", 1)
+				post("/streams/deployments/rollback/{name}/{version}", "timelog1", 1)
 						.contentType(MediaType.APPLICATION_JSON))
 				.andDo(print())
 				.andExpect(status().isCreated())
