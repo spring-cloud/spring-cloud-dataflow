@@ -164,16 +164,34 @@ public class TaskSchedulerControllerTests {
 
 	@Test
 	public void testCreateSchedule() throws Exception {
+		createAndVerifySchedule("mySchedule", "mySchedule-scdf-testDefinition");
+	}
+
+	@Test
+	public void testCreateScheduleWithLeadingAndTrailingBlanks() throws Exception {
+		createAndVerifySchedule("    mySchedule    ", "mySchedule-scdf-testDefinition");
+	}
+
+	@Test
+	public void testCreateScheduleLeadingBlanks() throws Exception {
+		createAndVerifySchedule("    mySchedule", "mySchedule-scdf-testDefinition");
+	}
+	@Test
+	public void testCreateScheduleTrailingBlanks() throws Exception {
+		createAndVerifySchedule("mySchedule      ", "mySchedule-scdf-testDefinition");
+	}
+
+	private void createAndVerifySchedule(String scheduleName, String createdScheduleName) throws Exception{
 		this.registry.save("testApp", ApplicationType.task,
 				"1.0.0", new URI("file:src/test/resources/apps/foo-task"), null);
 
 		repository.save(new TaskDefinition("testDefinition", "testApp"));
 		mockMvc.perform(post("/tasks/schedules/").param("taskDefinitionName", "testDefinition")
-				.param("scheduleName", "mySchedule").param("properties", "scheduler.cron.expression=* * * * *")
+				.param("scheduleName", scheduleName).param("properties", "scheduler.cron.expression=* * * * *")
 				.accept(MediaType.APPLICATION_JSON)).andDo(print()).andExpect(status().isCreated());
 		assertEquals(1, simpleTestScheduler.list().size());
 		ScheduleInfo scheduleInfo = simpleTestScheduler.list().get(0);
-		assertEquals("mySchedule-scdf-testDefinition", scheduleInfo.getScheduleName());
+		assertEquals(createdScheduleName, scheduleInfo.getScheduleName());
 		assertEquals(1, scheduleInfo.getScheduleProperties().size());
 		assertEquals("* * * * *", scheduleInfo.getScheduleProperties().get("spring.cloud.scheduler.cron.expression"));
 
@@ -189,7 +207,6 @@ public class TaskSchedulerControllerTests {
 		assertEquals("{\"commandlineArguments\":[\"--spring.cloud.scheduler.task.launcher.taskName=testDefinition\"],\"taskDefinitionName\":\"mySchedule-scdf-testDefinition\","
 				+ "\"taskDefinitionProperties\":{},"
 				+ "\"deploymentProperties\":{}}", auditRecord.getAuditData());
-
 	}
 
 	@Test
