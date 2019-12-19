@@ -70,7 +70,7 @@
 
 		<spring-cloud-skipper.version>2.2.1.RELEASE</spring-cloud-skipper.version>
 
-		<spring-cloud-task.version>2.2.1.RELEASE</spring-cloud-task.version>
+		<spring-cloud-task.version>2.2.2.RELEASE</spring-cloud-task.version>
 
 		<!-- Only used for tests -->
 		<spring-security-oauth2.version>2.3.7.RELEASE</spring-security-oauth2.version>
