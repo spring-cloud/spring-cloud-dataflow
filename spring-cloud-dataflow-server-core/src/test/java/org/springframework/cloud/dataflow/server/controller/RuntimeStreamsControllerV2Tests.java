@@ -32,6 +32,7 @@ import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabas
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase.Replace;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.cloud.dataflow.core.StreamDefinition;
+import org.springframework.cloud.dataflow.core.StreamRuntimePropertyKeys;
 import org.springframework.cloud.dataflow.registry.repository.AppRegistrationRepository;
 import org.springframework.cloud.dataflow.server.configuration.TestDependencies;
 import org.springframework.cloud.dataflow.server.repository.StreamDefinitionRepository;
@@ -178,9 +179,9 @@ public class RuntimeStreamsControllerV2Tests {
 			@Override
 			public Map<String, String> getAttributes() {
 				Map<String, String> attributes = new HashMap<>();
-				attributes.put(RuntimeStreamsController.ATTRIBUTE_SKIPPER_APPLICATION_NAME, appName);
+				attributes.put(StreamRuntimePropertyKeys.ATTRIBUTE_SKIPPER_APPLICATION_NAME, appName);
 				if (guid != null) {
-					attributes.put(RuntimeStreamsController.ATTRIBUTE_GUID, guid);
+					attributes.put(StreamRuntimePropertyKeys.ATTRIBUTE_GUID, guid);
 				}
 				return attributes;
 			}
