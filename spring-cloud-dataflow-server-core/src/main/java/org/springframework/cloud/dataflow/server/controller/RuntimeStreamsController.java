@@ -36,6 +36,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import org.springframework.cloud.dataflow.core.StreamRuntimePropertyKeys;
+
 /**
  * @deprecated
  * Deprecated and replaced by the {@link RuntimeStreamsControllerV2} instead.
@@ -49,10 +51,6 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/runtime/streams")
 @Deprecated
 public class RuntimeStreamsController {
-
-	public static final String ATTRIBUTE_SKIPPER_APPLICATION_NAME = "skipper.application.name";
-	public static final String ATTRIBUTE_SKIPPER_RELEASE_VERSION = "skipper.release.version";
-	public static final String ATTRIBUTE_GUID = "guid";
 
 	private static final Logger logger = LoggerFactory.getLogger(RuntimeStreamsController.class);
 
@@ -104,8 +102,10 @@ public class RuntimeStreamsController {
 						instance.setState(appInstanceStatus.getState().name());
 						instance.setProperties(Collections.emptyMap());
 
-						application.setName(appInstanceStatus.getAttributes().get(ATTRIBUTE_SKIPPER_APPLICATION_NAME));
-						streamStatus.setVersion(appInstanceStatus.getAttributes().get(ATTRIBUTE_SKIPPER_RELEASE_VERSION));
+						application.setName(appInstanceStatus.getAttributes()
+								.get(StreamRuntimePropertyKeys.ATTRIBUTE_SKIPPER_APPLICATION_NAME));
+						streamStatus.setVersion(appInstanceStatus.getAttributes()
+								.get(StreamRuntimePropertyKeys.ATTRIBUTE_SKIPPER_RELEASE_VERSION));
 					}
 				}
 				catch (Throwable throwable) {
@@ -117,7 +117,7 @@ public class RuntimeStreamsController {
 	}
 
 	private String getAppInstanceGuid(AppInstanceStatus instance) {
-		return instance.getAttributes().containsKey(ATTRIBUTE_GUID) ?
-				instance.getAttributes().get(ATTRIBUTE_GUID) : instance.getId();
+		return instance.getAttributes().containsKey(StreamRuntimePropertyKeys.ATTRIBUTE_GUID) ?
+				instance.getAttributes().get(StreamRuntimePropertyKeys.ATTRIBUTE_GUID) : instance.getId();
 	}
 }

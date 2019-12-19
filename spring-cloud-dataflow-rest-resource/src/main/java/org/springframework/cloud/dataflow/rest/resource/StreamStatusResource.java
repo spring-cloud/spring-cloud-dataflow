@@ -16,6 +16,7 @@
 
 package org.springframework.cloud.dataflow.rest.resource;
 
+import org.springframework.cloud.dataflow.core.StreamRuntimePropertyKeys;
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.PagedModel;
 import org.springframework.hateoas.RepresentationModel;
@@ -25,7 +26,6 @@ import org.springframework.hateoas.RepresentationModel;
  */
 public class StreamStatusResource extends RepresentationModel<StreamStatusResource> {
 
-	public static final String SKIPPER_RELEASE_VERSION = "skipper.release.version";
 	public static final String NO_APPS = "no apps";
 	private String name;
 
@@ -46,8 +46,8 @@ public class StreamStatusResource extends RepresentationModel<StreamStatusResour
 				if (instances != null && instances.iterator().hasNext()) {
 					AppInstanceStatusResource instance = instances.iterator().next();
 					if (instance != null && instance.getAttributes() != null
-							&& instance.getAttributes().containsKey(SKIPPER_RELEASE_VERSION)) {
-						String releaseVersion = instance.getAttributes().get(SKIPPER_RELEASE_VERSION);
+							&& instance.getAttributes().containsKey(StreamRuntimePropertyKeys.ATTRIBUTE_SKIPPER_RELEASE_VERSION)) {
+						String releaseVersion = instance.getAttributes().get(StreamRuntimePropertyKeys.ATTRIBUTE_SKIPPER_RELEASE_VERSION);
 						if (releaseVersion != null) {
 							return releaseVersion;
 						}

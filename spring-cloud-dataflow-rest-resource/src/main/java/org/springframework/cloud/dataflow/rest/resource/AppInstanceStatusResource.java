@@ -18,6 +18,7 @@ package org.springframework.cloud.dataflow.rest.resource;
 
 import java.util.Map;
 
+import org.springframework.cloud.dataflow.core.StreamRuntimePropertyKeys;
 import org.springframework.hateoas.RepresentationModel;
 
 /**
@@ -27,8 +28,6 @@ import org.springframework.hateoas.RepresentationModel;
  * @author Mark Fisher
  */
 public class AppInstanceStatusResource extends RepresentationModel<AppInstanceStatusResource> {
-
-	public static final String ATTRIBUTE_GUID = "guid";
 
 	private String instanceId;
 
@@ -63,8 +62,8 @@ public class AppInstanceStatusResource extends RepresentationModel<AppInstanceSt
 	}
 
 	public String getGuid() {
-		if (this.getAttributes() != null && this.getAttributes().containsKey(ATTRIBUTE_GUID)) {
-			return this.getAttributes().get(ATTRIBUTE_GUID);
+		if (this.getAttributes() != null && this.getAttributes().containsKey(StreamRuntimePropertyKeys.ATTRIBUTE_GUID)) {
+			return this.getAttributes().get(StreamRuntimePropertyKeys.ATTRIBUTE_GUID);
 		}
 		return this.getInstanceId();
 	}
