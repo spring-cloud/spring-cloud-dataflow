@@ -19,6 +19,8 @@ package org.springframework.cloud.dataflow.server.controller;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.lang.StringUtils;
+
 import org.springframework.cloud.dataflow.rest.resource.ScheduleInfoResource;
 import org.springframework.cloud.dataflow.rest.util.DeploymentPropertiesUtils;
 import org.springframework.cloud.dataflow.server.repository.NoSuchScheduleException;
@@ -149,7 +151,7 @@ public class TaskSchedulerController {
 			@RequestParam(required = false) String arguments) {
 		Map<String, String> propertiesToUse = DeploymentPropertiesUtils.parse(properties);
 		List<String> argumentsToUse = DeploymentPropertiesUtils.parseParamList(arguments, " ");
-		schedulerService.schedule(scheduleName, taskDefinitionName, propertiesToUse, argumentsToUse);
+		this.schedulerService.schedule(StringUtils.trim(scheduleName), taskDefinitionName, propertiesToUse, argumentsToUse);
 	}
 
 	/**
@@ -164,7 +166,7 @@ public class TaskSchedulerController {
 	}
 
 	/**
-	 * {@link org.springframework.hateoas.server.ResourceAssembler} implementation that converts
+	 * {@link org.springframework.hateoas.server.RepresentationModelAssembler} implementation that converts
 	 * {@link ScheduleInfo}s to {@link ScheduleInfoResource}s.
 	 */
 	class Assembler extends RepresentationModelAssemblerSupport<ScheduleInfo, ScheduleInfoResource> {
