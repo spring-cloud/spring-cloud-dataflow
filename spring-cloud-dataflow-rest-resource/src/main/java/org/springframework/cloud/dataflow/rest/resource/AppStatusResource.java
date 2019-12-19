@@ -28,6 +28,9 @@ import org.springframework.hateoas.RepresentationModel;
  */
 public class AppStatusResource extends RepresentationModel<AppStatusResource> {
 
+	public static final String SKIPPER_APPLICATION_NAME = "skipper.application.name";
+	public static final String NO_INSTANCES = "no-instances";
+
 	private String deploymentId;
 
 	private String state;
@@ -47,7 +50,7 @@ public class AppStatusResource extends RepresentationModel<AppStatusResource> {
 	public String getName() {
 		AppInstanceStatusResource instance = this.instances.iterator().next();
 		return (instance != null && instance.getAttributes() != null) ?
-				instance.getAttributes().get("skipper.application.name") : "no-instances";
+				instance.getAttributes().get(SKIPPER_APPLICATION_NAME) : NO_INSTANCES;
 	}
 
 	public String getDeploymentId() {

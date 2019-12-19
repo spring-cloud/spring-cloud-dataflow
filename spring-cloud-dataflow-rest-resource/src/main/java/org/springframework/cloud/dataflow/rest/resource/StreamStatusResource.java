@@ -25,6 +25,8 @@ import org.springframework.hateoas.RepresentationModel;
  */
 public class StreamStatusResource extends RepresentationModel<StreamStatusResource> {
 
+	public static final String SKIPPER_RELEASE_VERSION = "skipper.release.version";
+	public static final String NO_APPS = "no apps";
 	private String name;
 
 	private CollectionModel<AppStatusResource> applications;
@@ -39,12 +41,24 @@ public class StreamStatusResource extends RepresentationModel<StreamStatusResour
 
 	public String getVersion() {
 		try {
-			return applications.iterator().next()
-					.getInstances().iterator().next().getAttributes().get("skipper.release.version");
-		} catch (Throwable t) {
+			if (applications.iterator().hasNext()) {
+				CollectionModel<AppInstanceStatusResource> instances = applications.iterator().next().getInstances();
+				if (instances != null && instances.iterator().hasNext()) {
+					AppInstanceStatusResource instance = instances.iterator().next();
+					if (instance != null && instance.getAttributes() != null
+							&& instance.getAttributes().containsKey(SKIPPER_RELEASE_VERSION)) {
+						String releaseVersion = instance.getAttributes().get(SKIPPER_RELEASE_VERSION);
+						if (releaseVersion != null) {
+							return releaseVersion;
+						}
+					}
+				}
+			}
+		}
+		catch (Throwable t) {
 			// do nothing
 		}
-		return "no apps";
+		return NO_APPS;
 	}
 
 	public CollectionModel<AppStatusResource> getApplications() {
