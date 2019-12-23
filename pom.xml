@@ -11,6 +11,7 @@
 	<description>Spring Cloud Dataflow Build, managing plugins and dependencies</description>
 	<modules>
 		<module>spring-cloud-dataflow-build-dependencies</module>
+		<module>spring-cloud-dataflow-dependencies-parent</module>
 	</modules>
 	<url>https://spring.io/projects/spring-cloud-dataflow</url>
 	<properties>
