@@ -15,10 +15,12 @@
  */
 package org.springframework.cloud.dataflow.integration.test.util;
 
+import java.time.Duration;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import org.awaitility.Awaitility;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -54,7 +56,6 @@ public class RuntimeApplicationHelper {
 				.filter(p -> p.getName().equalsIgnoreCase(platformName))
 				.map(d -> d.getType()).findFirst().get();
 		Assert.hasText(this.platformType, "Could not find platform type for: " + platformName);
-		logger.info(String.format("Selected platform: [%s:%s]", platformName, platformType));
 	}
 
 	public String getPlatformName() {
@@ -123,6 +124,18 @@ public class RuntimeApplicationHelper {
 	}
 
 	/**
+	 * Retrieve application's REST url for Stream Application instance
+	 * @param streamName stream holding the application instance.
+	 * @param appName application name to retrieve the URL for.
+	 * @return Application URL
+	 */
+	public String getApplicationInstanceUrl(String streamName, String appName) {
+		Map<String, String> instanceAttributes = getApplicationInstances(streamName, appName)
+				.values().iterator().next();
+		return getApplicationInstanceUrl(instanceAttributes);
+	}
+
+	/**
 	 * Retrieve application's REST url from the runtime attributes.
 	 * @param instanceAttributes Application runtime attributes.
 	 * @return Application URL
@@ -159,12 +172,10 @@ public class RuntimeApplicationHelper {
 		String streamName = instanceAttributes.get(StreamRuntimePropertyKeys.ATTRIBUTE_SKIPPER_RELEASE_NAME);
 		String appName = instanceAttributes.get(StreamRuntimePropertyKeys.ATTRIBUTE_SKIPPER_APPLICATION_NAME);
 		String guid = instanceAttributes.get(StreamRuntimePropertyKeys.ATTRIBUTE_GUID);
-		Wait.on(streamName)
-				.withDescription("Wait for " + streamName + ":" + appName + " ExternalIP")
-				.until(s -> this.appInstanceAttributes().values().stream()
-						.filter(m -> m.get(StreamRuntimePropertyKeys.ATTRIBUTE_SKIPPER_RELEASE_NAME).equals(streamName))
-						.filter(m -> m.get(StreamRuntimePropertyKeys.ATTRIBUTE_SKIPPER_APPLICATION_NAME).equals(appName))
-						.allMatch(m -> m.containsKey(StreamRuntimePropertyKeys.ATTRIBUTE_URL)));
+			Awaitility.await().atMost(Duration.ofMinutes(10)).until(() -> this.appInstanceAttributes().values().stream()
+				.filter(m -> m.get(StreamRuntimePropertyKeys.ATTRIBUTE_SKIPPER_RELEASE_NAME).equals(streamName))
+				.filter(m -> m.get(StreamRuntimePropertyKeys.ATTRIBUTE_SKIPPER_APPLICATION_NAME).equals(appName))
+				.allMatch(m -> m.containsKey(StreamRuntimePropertyKeys.ATTRIBUTE_URL)));
 
 		return this.getApplicationInstances(streamName, appName).get(guid).get(StreamRuntimePropertyKeys.ATTRIBUTE_URL);
 	}
@@ -188,5 +199,21 @@ public class RuntimeApplicationHelper {
 			logger.warn("Error while trying to access logfile from '" + logFileUrl + "' due to : " + e);
 		}
 		return logContent;
+	}
+
+	/**
+	 * Performs serviceUrl to determine if a service is running at this URL
+	 * @param serviceUrl The full URL of the service to test.
+	 * @return Return ture if the response is not HTTP error and false otherwise.
+	 */
+	public boolean isServicePresent(String serviceUrl) {
+		try {
+			restTemplate.getForObject(serviceUrl, String.class);
+			return true;
+		}
+		catch (Exception e) {
+			//do nothing
+		}
+		return false;
 	}
 }
