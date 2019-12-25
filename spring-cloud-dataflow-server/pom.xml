@@ -53,7 +53,12 @@
 			<artifactId>spring-cloud-dataflow-rest-client</artifactId>
 			<scope>test</scope>
 		</dependency>
-
+		<dependency>
+			<groupId>net.javacrumbs.json-unit</groupId>
+			<artifactId>json-unit</artifactId>
+			<version>1.25.0</version>
+			<scope>test</scope>
+		</dependency>
 	</dependencies>
 
 	<build>

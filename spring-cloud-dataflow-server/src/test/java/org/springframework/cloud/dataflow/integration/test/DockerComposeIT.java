@@ -15,8 +15,10 @@
  */
 package org.springframework.cloud.dataflow.integration.test;
 
+import java.io.IOException;
 import java.net.URI;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.util.Arrays;
 import java.util.Collection;
@@ -29,16 +31,18 @@ import java.util.stream.Collectors;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
+import com.jayway.jsonpath.JsonPath;
 import com.palantir.docker.compose.DockerComposeRule;
 import com.palantir.docker.compose.configuration.DockerComposeFiles;
 import com.palantir.docker.compose.connection.DockerMachine;
 import com.palantir.docker.compose.connection.waiting.HealthChecks;
+import net.javacrumbs.jsonunit.JsonAssert;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.ClassRule;
 import org.junit.Test;
 import org.junit.rules.ExternalResource;
-import org.junit.runner.RunWith;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -56,7 +60,7 @@ import org.springframework.cloud.dataflow.rest.resource.TaskDefinitionResource;
 import org.springframework.cloud.dataflow.rest.resource.TaskExecutionResource;
 import org.springframework.cloud.dataflow.rest.resource.about.AboutResource;
 import org.springframework.core.io.ClassPathResource;
-import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.core.io.DefaultResourceLoader;
 import org.springframework.util.StreamUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.client.RestTemplate;
@@ -126,7 +130,6 @@ import static org.junit.Assert.assertTrue;
  *
  * @author Christian Tzolov
  */
-@RunWith(SpringRunner.class)
 public class DockerComposeIT {
 
 	private static final Logger logger = LoggerFactory.getLogger(DockerComposeIT.class);
@@ -188,7 +191,7 @@ public class DockerComposeIT {
 	 */
 	private static final String[] DOCKER_COMPOSE_PATHS = {
 			"docker-compose.yml",              // Configures DataFlow, Skipper, Kafka/Zookeeper and MySQL
-			//"docker-compose-prometheus.yml",   // metrics collection/visualization with Prometheus and Grafana.
+			"docker-compose-prometheus.yml",   // metrics collection/visualization with Prometheus and Grafana.
 			//"docker-compose-influxdb.yml",     // metrics collection/visualization with InfluxDB and Grafana.
 			//"docker-compose-postgres.yml",     // Replaces local MySQL database by Postgres.
 			//"docker-compose-rabbitmq.yml",     // Replaces local Kafka message broker by RabbitMQ.
@@ -222,21 +225,25 @@ public class DockerComposeIT {
 					.pullOnStartup(true) // set to false to test with local dataflow and skipper images.
 					.build());
 
-	private DataFlowTemplate dataFlowOperations;
-	private RuntimeApplicationHelper runtimeApps;
-	private TaskOperations taskOperations;
-	private RestTemplate restTemplate;
+	private static DataFlowTemplate dataFlowOperations;
+	private static RuntimeApplicationHelper runtimeApps;
+	private static TaskOperations taskOperations;
+	private static RestTemplate restTemplate;
 
-	@Before
-	public void before() {
+	@BeforeClass
+	public static void beforeClass() {
 		dataFlowOperations = new DataFlowTemplate(URI.create("http://localhost:9393"));
 		logger.info("Configured platforms: " + dataFlowOperations.streamOperations().listPlatforms().stream()
 				.map(d -> String.format("[%s:%s]", d.getName(), d.getType())).collect(Collectors.joining()));
 		runtimeApps = new RuntimeApplicationHelper(dataFlowOperations, TEST_PLATFORM_NAME);
 		taskOperations = dataFlowOperations.taskOperations();
+		restTemplate = new RestTemplate(); // used for HTTP post in tests
+	}
+
+	@Before
+	public void before() {
 		Wait.on(dataFlowOperations.appRegistryOperations()).until(appRegistry ->
 				appRegistry.list().getMetadata().getTotalElements() >= 68L);
-		restTemplate = new RestTemplate(); // used for HTTP post in tests
 	}
 
 	@After
@@ -248,7 +255,9 @@ public class DockerComposeIT {
 	@Test
 	public void featureInfo() {
 		AboutResource about = dataFlowOperations.aboutOperation().get();
-		//assertTrue(about.getFeatureInfo().isGrafanaEnabled()); // true only if the influxdb or prometheus is enabled.
+		if (isPrometheusPresent() || isInfluxPresent()) {
+			assertTrue(about.getFeatureInfo().isGrafanaEnabled());
+		}
 		assertTrue(about.getFeatureInfo().isAnalyticsEnabled());
 		assertTrue(about.getFeatureInfo().isStreamsEnabled());
 		assertTrue(about.getFeatureInfo().isTasksEnabled());
@@ -266,58 +275,39 @@ public class DockerComposeIT {
 	// -----------------------------------------------------------------------
 	@Test
 	public void streamTransform() {
-
-		StreamDefinition streamDefinition = Stream.builder(dataFlowOperations)
+		logger.info("stream-transform-test");
+		try (Stream stream = Stream.builder(dataFlowOperations)
 				.name("transform-test")
 				.definition("http | transform --expression=payload.toUpperCase() | log")
-				.create();
-
-		// DEPLOY
-		logger.info("transform-test: DEPLOY");
-		try (Stream stream = streamDefinition.deploy(new DeploymentPropertiesBuilder()
-				.put(SPRING_CLOUD_DATAFLOW_SKIPPER_PLATFORM_NAME, runtimeApps.getPlatformName())
-				.put("app.*.logging.file", "${PID}-test.log")
-				.put("app.*.endpoints.logfile.sensitive", "false")
-				.put("app.*.management.endpoints.web.exposure.include", "*")
-				.put("app.*.spring.cloud.streamapp.security.enabled", "false")
-				.build())) {
+				.create()
+				.deploy(testDeploymentProperties())) {
 
 			assertThat(stream.getStatus(), is(oneOf(DEPLOYING, PARTIAL)));
 			Wait.on(stream).withTimeout(Duration.ofMinutes(10)).until(s -> s.getStatus().equals(DEPLOYED));
 
-
 			Map<String, String> httpApp = runtimeApps.getApplicationInstances(stream.getName(), "http")
 					.values().iterator().next();
 
-			String httpAppUrl = runtimeApps.getApplicationInstanceUrl(httpApp);
-
 			String message = "Unique Test message: " + new Random().nextInt();
 
-			logger.info("transform-test: send massage - " + message);
-			restTemplate.postForObject(httpAppUrl, message, String.class);
+			restTemplate.postForObject(runtimeApps.getApplicationInstanceUrl(httpApp), message, String.class);
 
 			Wait.on(stream).until(s -> runtimeApps.getFirstInstanceLog(s.getName(), "log")
 					.contains(message.toUpperCase()));
-
-			logger.info("transform-test: message received");
 		}
 	}
 
 	@Test
 	public void streamPartitioning() {
-
+		logger.info("stream-partitioning-test");
 		StreamDefinition streamDefinition = Stream.builder(dataFlowOperations)
 				.name("partitioning-test")
 				.definition("http | splitter --expression=payload.split(' ') | log")
 				.create();
 
-		logger.info("partitioning-test: DEPLOY");
 		try (Stream stream = streamDefinition.deploy(new DeploymentPropertiesBuilder()
+				.putAll(testDeploymentProperties())
 				.put(SPRING_CLOUD_DATAFLOW_SKIPPER_PLATFORM_NAME, runtimeApps.getPlatformName())
-				.put("app.*.logging.file", "${PID}-test.log")
-				.put("app.*.endpoints.logfile.sensitive", "false")
-				.put("app.*.management.endpoints.web.exposure.include", "*")
-				.put("app.*.spring.cloud.streamapp.security.enabled", "false")
 				// Create 2 log instances with partition key computed from the payload.
 				.put("deployer.log.count", "2")
 				.put("app.splitter.producer.partitionKeyExpression", "payload")
@@ -328,8 +318,6 @@ public class DockerComposeIT {
 			assertThat(stream.getStatus(), is(oneOf(DEPLOYING, PARTIAL)));
 			Wait.on(stream).withTimeout(Duration.ofMinutes(10)).until(s -> s.getStatus().equals(DEPLOYED));
 
-			logger.info("partitioning-test:" + stream.getStatus());
-
 			Map<String, String> httpApp = runtimeApps.getApplicationInstances(stream.getName(), "http")
 					.values().iterator().next();
 
@@ -337,8 +325,6 @@ public class DockerComposeIT {
 
 			String message = "How much wood would a woodchuck chuck if a woodchuck could chuck wood";
 			restTemplate.postForObject(httpAppUrl, message, String.class);
-
-			logger.info("partitioning-test: send - " + message);
 
 			Wait.on(stream)
 					.withDescription("Each partition should contain parts of the message")
@@ -356,8 +342,6 @@ public class DockerComposeIT {
 								.reduce(Boolean::logicalAnd)
 								.orElse(false);
 					});
-
-			logger.info("partitioning-test: message partitions received by both log apps");
 		}
 	}
 
@@ -367,26 +351,15 @@ public class DockerComposeIT {
 
 	@Test
 	public void streamLifecycle() {
-		// CREATE
-		StreamDefinition streamDefinition = Stream.builder(dataFlowOperations)
+		logger.info("stream-lifecycle-test: DEPLOY");
+		try (Stream stream = Stream.builder(dataFlowOperations)
 				.name("lifecycle-test")
 				.definition("time | log --log.expression='TICKTOCK - TIMESTAMP: '.concat(payload)")
-				.create();
-
-		// DEPLOY
-		logger.info("lifecycle-test: DEPLOY");
-		try (Stream stream = streamDefinition.deploy(new DeploymentPropertiesBuilder()
-				.put(SPRING_CLOUD_DATAFLOW_SKIPPER_PLATFORM_NAME, runtimeApps.getPlatformName())
-				.put("app.*.logging.file", "${PID}-test.log")
-				.put("app.*.endpoints.logfile.sensitive", "false")
-				.put("app.*.management.endpoints.web.exposure.include", "*")
-				.put("app.*.spring.cloud.streamapp.security.enabled", "false")
-				.build())) {
+				.create()
+				.deploy(testDeploymentProperties())) {
 
 			assertThat(stream.getStatus(), is(oneOf(DEPLOYING, PARTIAL)));
 			Wait.on(stream).withTimeout(Duration.ofMinutes(5)).until(s -> s.getStatus().equals(DEPLOYED));
-
-			logger.info("lifecycle-test: " + stream.getStatus());
 
 			Wait.on(stream).until(s -> runtimeApps.getFirstInstanceLog(s.getName(), "log")
 					.contains("TICKTOCK - TIMESTAMP:"));
@@ -395,7 +368,7 @@ public class DockerComposeIT {
 			assertThat(stream.history().get(1), is(DEPLOYED));
 
 			// UPDATE
-			logger.info("lifecycle-test: UPDATE");
+			logger.info("stream-lifecycle-test: UPDATE");
 			stream.update(new DeploymentPropertiesBuilder()
 					.put("app.log.log.expression", "'Updated TICKTOCK - TIMESTAMP: '.concat(payload)")
 					// TODO investigate why on update the app-starters-core overrides the original web.exposure.include!!!
@@ -408,14 +381,12 @@ public class DockerComposeIT {
 			Wait.on(stream).until(s -> runtimeApps.getFirstInstanceLog(s.getName(), "log")
 					.contains("Updated TICKTOCK - TIMESTAMP:"));
 
-			logger.info("lifecycle-test: updated");
-
 			assertThat(stream.history().size(), is(2));
 			assertThat(stream.history().get(1), is(DELETED));
 			assertThat(stream.history().get(2), is(DEPLOYED));
 
 			// ROLLBACK
-			logger.info("lifecycle-test: ROLLBACK");
+			logger.info("stream-lifecycle-test: ROLLBACK");
 			stream.rollback(0);
 
 			Wait.on(stream).until(s -> s.getStatus().equals(DEPLOYED));
@@ -424,20 +395,17 @@ public class DockerComposeIT {
 			Wait.on(stream).until(s -> runtimeApps.getFirstInstanceLog(s.getName(), "log")
 					.contains("TICKTOCK - TIMESTAMP:"));
 
-			logger.info("lifecycle-test: rolled back");
 			assertThat(stream.history().size(), is(3));
 			assertThat(stream.history().get(1), is(DELETED));
 			assertThat(stream.history().get(2), is(DELETED));
 			assertThat(stream.history().get(3), is(DEPLOYED));
 
 			// UNDEPLOY
-			logger.info("lifecycle-test: UNDEPLOY");
+			logger.info("stream-lifecycle-test: UNDEPLOY");
 			stream.undeploy();
 
 			Wait.on(stream).until(s -> s.getStatus().equals(UNDEPLOYED));
 			assertThat(stream.getStatus(), is(UNDEPLOYED));
-
-			logger.info("lifecycle-test: undeployed");
 
 			assertThat(stream.history().size(), is(3));
 			assertThat(stream.history().get(1), is(DELETED));
@@ -447,26 +415,18 @@ public class DockerComposeIT {
 			assertThat(dataFlowOperations.streamOperations().list().getMetadata().getTotalElements(), is(1L));
 			// DESTROY
 		}
+		logger.info("stream-lifecycle-test: DESTROY");
 		assertThat(dataFlowOperations.streamOperations().list().getMetadata().getTotalElements(), is(0L));
 	}
 
 	@Test
 	public void scaleApplicationInstances() {
-		// CREATE
-		StreamDefinition streamDefinition = Stream.builder(dataFlowOperations)
+		logger.info("stream-scale-test");
+		try (Stream stream = Stream.builder(dataFlowOperations)
 				.name("stream-scale-test")
 				.definition("time | log --log.expression='TICKTOCK - TIMESTAMP: '.concat(payload)")
-				.create();
-
-		// DEPLOY
-		logger.info("stream-scale-test: DEPLOY");
-		try (Stream stream = streamDefinition.deploy(new DeploymentPropertiesBuilder()
-				.put(SPRING_CLOUD_DATAFLOW_SKIPPER_PLATFORM_NAME, runtimeApps.getPlatformName())
-				.put("app.*.logging.file", "${PID}-test.log")
-				.put("app.*.endpoints.logfile.sensitive", "false")
-				.put("app.*.management.endpoints.web.exposure.include", "*")
-				.put("app.*.spring.cloud.streamapp.security.enabled", "false")
-				.build())) {
+				.create()
+				.deploy(testDeploymentProperties())) {
 
 			Wait.on(stream).withTimeout(Duration.ofMinutes(5)).until(s -> s.getStatus().equals(DEPLOYED));
 
@@ -492,11 +452,227 @@ public class DockerComposeIT {
 		}
 	}
 
+	@Test
+	public void namedChannelDestination() {
+		logger.info("stream-named-channel-destination-test");
+		try (
+				Stream logStream = Stream.builder(dataFlowOperations)
+						.name("log-destination-sink")
+						.definition(":LOG-DESTINATION > log")
+						.create()
+						.deploy(testDeploymentProperties());
+				Stream httpStream = Stream.builder(dataFlowOperations)
+						.name("http-destination-source")
+						.definition("http > :LOG-DESTINATION")
+						.create()
+						.deploy(testDeploymentProperties())) {
+
+			Wait.on(logStream).withTimeout(Duration.ofMinutes(5)).until(s -> s.getStatus().equals(DEPLOYED));
+			Wait.on(httpStream).withTimeout(Duration.ofMinutes(5)).until(s -> s.getStatus().equals(DEPLOYED));
+
+			String message = "Unique Test message: " + new Random().nextInt();
+
+			String httpAppUrl = runtimeApps.getApplicationInstanceUrl(httpStream.getName(), "http");
+			restTemplate.postForObject(httpAppUrl, message, String.class);
+
+			Wait.on(logStream).until(s -> runtimeApps.getFirstInstanceLog(s.getName(), "log")
+					.contains(message));
+		}
+	}
+
+	@Test
+	public void namedChannelTap() {
+		logger.info("stream-named-channel-tap-test");
+		try (
+				Stream httpLogStream = Stream.builder(dataFlowOperations)
+						.name("taphttp")
+						.definition("http | log")
+						.create()
+						.deploy(testDeploymentProperties());
+				Stream tapStream = Stream.builder(dataFlowOperations)
+						.name("tapstream")
+						.definition(":taphttp.http > log")
+						.create()
+						.deploy(testDeploymentProperties())) {
+
+			Wait.on(httpLogStream).withTimeout(Duration.ofMinutes(5)).until(s -> s.getStatus().equals(DEPLOYED));
+			Wait.on(tapStream).withTimeout(Duration.ofMinutes(5)).until(s -> s.getStatus().equals(DEPLOYED));
+
+			String message = "Unique Test message: " + new Random().nextInt();
+
+			String httpAppUrl = runtimeApps.getApplicationInstanceUrl(httpLogStream.getName(), "http");
+			restTemplate.postForObject(httpAppUrl, message, String.class);
+
+			Wait.on(tapStream).until(s -> runtimeApps.getFirstInstanceLog(s.getName(), "log")
+					.contains(message));
+		}
+	}
+
+	@Test
+	public void namedChannelManyToOne() {
+		logger.info("stream-named-channel-many-to-one-test");
+		try (
+				Stream logStream = Stream.builder(dataFlowOperations)
+						.name("many-to-one")
+						.definition(":MANY-TO-ONE-DESTINATION > log")
+						.create()
+						.deploy(testDeploymentProperties());
+				Stream httpStreamOne = Stream.builder(dataFlowOperations)
+						.name("http-source-1")
+						.definition("http > :MANY-TO-ONE-DESTINATION")
+						.create()
+						.deploy(testDeploymentProperties());
+				Stream httpStreamTwo = Stream.builder(dataFlowOperations)
+						.name("http-source-2")
+						.definition("http > :MANY-TO-ONE-DESTINATION")
+						.create()
+						.deploy(testDeploymentProperties())) {
+
+			Wait.on(logStream).withTimeout(Duration.ofMinutes(5)).until(s -> s.getStatus().equals(DEPLOYED));
+			Wait.on(httpStreamOne).withTimeout(Duration.ofMinutes(5)).until(s -> s.getStatus().equals(DEPLOYED));
+			Wait.on(httpStreamTwo).withTimeout(Duration.ofMinutes(5)).until(s -> s.getStatus().equals(DEPLOYED));
+
+			String messageOne = "Unique Test message: " + new Random().nextInt();
+
+			String httpAppUrl = runtimeApps.getApplicationInstanceUrl(httpStreamOne.getName(), "http");
+			restTemplate.postForObject(httpAppUrl, messageOne, String.class);
+
+			Wait.on(logStream).until(s -> runtimeApps.getFirstInstanceLog(s.getName(), "log")
+					.contains(messageOne));
+
+			String messageTwo = "Unique Test message: " + new Random().nextInt();
+
+			String httpAppUrl2 = runtimeApps.getApplicationInstanceUrl(httpStreamTwo.getName(), "http");
+			restTemplate.postForObject(httpAppUrl2, messageTwo, String.class);
+
+			Wait.on(logStream).until(s -> runtimeApps.getFirstInstanceLog(s.getName(), "log")
+					.contains(messageTwo));
+		}
+	}
+
+	@Test
+	public void namedChannelDirectedGraph() {
+		logger.info("stream-named-channel-directed-graph-test");
+		try (
+				Stream fooLogStream = Stream.builder(dataFlowOperations)
+						.name("directed-graph-destination1")
+						.definition(":foo > transform --expression=payload+'-foo' | log")
+						.create()
+						.deploy(testDeploymentProperties());
+				Stream barLogStream = Stream.builder(dataFlowOperations)
+						.name("directed-graph-destination2")
+						.definition(":bar > transform --expression=payload+'-bar' | log")
+						.create()
+						.deploy(testDeploymentProperties());
+				Stream httpStream = Stream.builder(dataFlowOperations)
+						.name("directed-graph-http-source")
+						.definition("http | router --expression=payload.contains('a')?'foo':'bar'")
+						.create()
+						.deploy(testDeploymentProperties())) {
+
+			Wait.on(fooLogStream).withTimeout(Duration.ofMinutes(5)).until(s -> s.getStatus().equals(DEPLOYED));
+			Wait.on(barLogStream).withTimeout(Duration.ofMinutes(5)).until(s -> s.getStatus().equals(DEPLOYED));
+			Wait.on(httpStream).withTimeout(Duration.ofMinutes(5)).until(s -> s.getStatus().equals(DEPLOYED));
+
+			String httpAppUrl = runtimeApps.getApplicationInstanceUrl(httpStream.getName(), "http");
+			restTemplate.postForObject(httpAppUrl, "abcd", String.class);
+			restTemplate.postForObject(httpAppUrl, "defg", String.class);
+
+			Wait.on(fooLogStream).until(s -> runtimeApps.getFirstInstanceLog(s.getName(), "log")
+					.contains("abcd-foo"));
+			Wait.on(barLogStream).until(s -> runtimeApps.getFirstInstanceLog(s.getName(), "log")
+					.contains("defg-bar"));
+		}
+	}
+
+	// -----------------------------------------------------------------------
+	//                       STREAM  METRICS TESTS
+	// -----------------------------------------------------------------------
+	@Test
+	public void analyticsCounter() throws InterruptedException, IOException {
+		logger.info("stream-analytics-counter-test");
+		if (dataFlowOperations.aboutOperation().get().getFeatureInfo().isGrafanaEnabled()) {
+			if (!isPrometheusPresent() && !isInfluxPresent()) {
+				throw new IllegalStateException("Unknown TSDB!");
+			}
+			try (Stream stream = Stream.builder(dataFlowOperations)
+					.name("httpCounter")
+					.definition("http | counter --counter.name=my_http_counter --counter.tag.expression.msgSize=payload.length()")
+					.create()
+					.deploy(testDeploymentProperties())) {
+
+				Wait.on(stream).withTimeout(Duration.ofMinutes(10)).until(s -> s.getStatus().equals(DEPLOYED));
+
+				String message1 = "Test message 1";
+				String message2 = "Test message 2 with extension";
+				String message3 = "Test message 2 with double extension";
+
+				String httpAppUrl = runtimeApps.getApplicationInstanceUrl(stream.getName(), "http");
+				restTemplate.postForObject(httpAppUrl, message1, String.class);
+				restTemplate.postForObject(httpAppUrl, message2, String.class);
+				restTemplate.postForObject(httpAppUrl, message3, String.class);
+
+				// Wait for ~1 min for Micrometer to send first metrics to Prometheus.
+				Thread.sleep(Duration.ofMinutes(1).toMillis());
+
+				// Prometheus tests
+				if (isPrometheusPresent()) {
+					JsonAssert.assertJsonEquals(
+							StreamUtils.copyToString(new DefaultResourceLoader().getResource("classpath:/my_http_counter_total.json").getInputStream(), StandardCharsets.UTF_8),
+							restTemplate.getForObject("http://localhost:9090/api/v1/query?query=my_http_counter_total", String.class));
+
+					assertThat("Number of passed messages must match 3", JsonPath.read(
+							restTemplate.getForObject("http://localhost:9090/api/v1/query?query=message_my_http_counter_total", String.class),
+							"$.data.result[0].value[1]"), is("3"));
+				}
+				else if (isInfluxPresent()) {
+					//http://localhost:8086/query?db=myinfluxdb&q=SELECT%20%22count%22%20FROM%20%22spring_integration_send%22
+					//http://localhost:8086/query?db=myinfluxdb&q=SHOW%20MEASUREMENTS
+					Thread.sleep(Duration.ofSeconds(30).toMillis());
+
+					// http://localhost:8086/query?q=SHOW%20DATABASES
+					assertThat(JsonPath.read(
+							restTemplate.getForObject("http://localhost:8086/query?q=SHOW DATABASES", String.class),
+							"$.results[0].series[0].values[1][0]"), is("myinfluxdb"));
+
+					// http://localhost:8086/query?db=myinfluxdb&q=SELECT%20value%20FROM%20%22message_my_http_counter%22%20GROUP%20BY%20%2A%20ORDER%20BY%20ASC%20LIMIT%201
+					assertThat("Number of passed messages must match 3", JsonPath.read(
+							restTemplate.getForObject("http://localhost:8086/query?db=myinfluxdb&q=SELECT value FROM \"message_my_http_counter\" GROUP BY * ORDER BY ASC LIMIT 1", String.class),
+							"$.results[0].series[0].values[0][1]"), is(3));
+
+					// http://localhost:8086/query?db=myinfluxdb&q=SELECT%20%2A%20FROM%20%22my_http_counter%22
+					String myHttpCounter = restTemplate.getForObject("http://localhost:8086/query?db=myinfluxdb&q=SELECT * FROM \"my_http_counter\"", String.class);
+					assertThat(JsonPath.read(myHttpCounter, "$.results[0].series[0].values[0][6]"), is("" + message1.length()));
+					assertThat(JsonPath.read(myHttpCounter, "$.results[0].series[0].values[1][6]"), is("" + message2.length()));
+					assertThat(JsonPath.read(myHttpCounter, "$.results[0].series[0].values[2][6]"), is("" + message3.length()));
+				}
+			}
+		}
+		else {
+			logger.warn("Data Flow Monitoring is not enabled!");
+		}
+	}
+
+	/**
+	 * For the purpose of testing, disable security, expose the all actuators, and configure logfiles.
+	 * @return Deployment properties required for the deployment of all test pipelines.
+	 */
+	private Map<String, String> testDeploymentProperties() {
+		return new DeploymentPropertiesBuilder()
+				.put(SPRING_CLOUD_DATAFLOW_SKIPPER_PLATFORM_NAME, runtimeApps.getPlatformName())
+				.put("app.*.logging.file", "${PID}-test.log")
+				.put("app.*.endpoints.logfile.sensitive", "false")
+				.put("app.*.management.endpoints.web.exposure.include", "*")
+				.put("app.*.spring.cloud.streamapp.security.enabled", "false")
+				.build();
+	}
+
 	// -----------------------------------------------------------------------
 	//                               TASK TESTS
 	// -----------------------------------------------------------------------
 	@Test
 	public void timestampTask() {
+		logger.info("task-timestamp-test");
 		String taskDefinitionName = "task-" + UUID.randomUUID().toString().substring(0, 10);
 		TaskDefinitionResource tdr = taskOperations.create(taskDefinitionName,
 				"timestamp", "Test timestamp task");
@@ -515,6 +691,7 @@ public class DockerComposeIT {
 
 	@Test
 	public void composedTask() {
+		logger.info("task-composed-task-test");
 		String taskDefinitionName = "task-" + UUID.randomUUID().toString().substring(0, 10);
 		TaskDefinitionResource tdr = taskOperations.create(taskDefinitionName,
 				"a: timestamp && b:timestamp", "Test composedTask");
@@ -533,6 +710,7 @@ public class DockerComposeIT {
 
 	@Test
 	public void multipleComposedTaskWithArguments() {
+		logger.info("task-multiple-composed-task-with-arguments-test");
 		String taskDefinitionName = "task-" + UUID.randomUUID().toString().substring(0, 10);
 		TaskDefinitionResource tdr =
 				taskOperations.create(taskDefinitionName, "a: timestamp && b:timestamp", "Test multipleComposedTaskhWithArguments");
@@ -601,5 +779,13 @@ public class DockerComposeIT {
 		}
 
 		return defaultVersion;
+	}
+
+	private boolean isPrometheusPresent() {
+		return runtimeApps.isServicePresent("http://localhost:9090/api/v1/query?query=up");
+	}
+
+	private boolean isInfluxPresent() {
+		return runtimeApps.isServicePresent("http://localhost:8086/ping");
 	}
 }
