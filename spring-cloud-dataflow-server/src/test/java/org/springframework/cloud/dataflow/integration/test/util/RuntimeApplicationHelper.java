@@ -123,6 +123,18 @@ public class RuntimeApplicationHelper {
 	}
 
 	/**
+	 * Retrieve application's REST url for Stream Application instance
+	 * @param streamName stream holding the application instance.
+	 * @param appName application name to retrieve the URL for.
+	 * @return Application URL
+	 */
+	public String getApplicationInstanceUrl(String streamName, String appName) {
+		Map<String, String> instanceAttributes = getApplicationInstances(streamName, appName)
+				.values().iterator().next();
+		return getApplicationInstanceUrl(instanceAttributes);
+	}
+
+	/**
 	 * Retrieve application's REST url from the runtime attributes.
 	 * @param instanceAttributes Application runtime attributes.
 	 * @return Application URL
@@ -188,5 +200,21 @@ public class RuntimeApplicationHelper {
 			logger.warn("Error while trying to access logfile from '" + logFileUrl + "' due to : " + e);
 		}
 		return logContent;
+	}
+
+	/**
+	 * Performs serviceUrl to determine if a service is running at this URL
+	 * @param serviceUrl The full URL of the service to test.
+	 * @return Return ture if the response is not HTTP error and false otherwise.
+	 */
+	public boolean isServicePresent(String serviceUrl) {
+		try {
+			restTemplate.getForObject(serviceUrl, String.class);
+			return true;
+		}
+		catch (Exception e) {
+			//do nothing
+		}
+		return false;
 	}
 }
