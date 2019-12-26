@@ -28,6 +28,7 @@ import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.cloud.dataflow.shell.command.JobCommandTemplate;
 import org.springframework.cloud.dataflow.shell.command.StreamCommandTemplate;
 import org.springframework.cloud.dataflow.shell.command.TaskCommandTemplate;
+import org.springframework.cloud.dataflow.shell.command.TaskScheduleCommandTemplate;
 import org.springframework.cloud.skipper.client.SkipperClient;
 import org.springframework.context.ApplicationContext;
 import org.springframework.shell.core.CommandResult;
@@ -174,6 +175,10 @@ public abstract class AbstractShellIntegrationTest {
 	 */
 	protected JobCommandTemplate job() {
 		return new JobCommandTemplate(dataFlowShell);
+	}
+
+	protected TaskScheduleCommandTemplate schedule() {
+		return new TaskScheduleCommandTemplate(dataFlowShell, applicationContext);
 	}
 
 	// Util methods

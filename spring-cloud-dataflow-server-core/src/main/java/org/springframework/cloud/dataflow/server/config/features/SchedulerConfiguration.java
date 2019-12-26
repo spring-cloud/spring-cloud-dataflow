@@ -119,7 +119,7 @@ public class SchedulerConfiguration {
 			super(ConfigurationPhase.REGISTER_BEAN);
 		}
 
-		@ConditionalOnProperty(prefix = FeaturesProperties.FEATURES_PREFIX, name = FeaturesProperties.SCHEDULES_ENABLED)
+		@ConditionalOnProperty(prefix = FeaturesProperties.FEATURES_PREFIX, name = FeaturesProperties.SCHEDULES_ENABLED, matchIfMissing = true)
 		static class TestSchedulerProperty {
 		}
 
