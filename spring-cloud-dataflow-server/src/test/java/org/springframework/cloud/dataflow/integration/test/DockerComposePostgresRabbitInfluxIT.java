@@ -26,11 +26,6 @@ import org.junit.runners.Suite;
 
 import org.springframework.cloud.dataflow.integration.test.util.ClosableDockerComposeRule;
 
-import static org.springframework.cloud.dataflow.integration.test.DockerComposeIT.DATAFLOW_VERSION;
-import static org.springframework.cloud.dataflow.integration.test.DockerComposeIT.RABBITMQ_MAVEN_STREAM_APPS_URI;
-import static org.springframework.cloud.dataflow.integration.test.DockerComposeIT.SKIPPER_VERSION;
-import static org.springframework.cloud.dataflow.integration.test.DockerComposeIT.TASK_APPS_URI;
-
 /**
  * IT Tests with Postgres, InfluxDB and RabbitMQ
  *
@@ -53,10 +48,10 @@ public class DockerComposePostgresRabbitInfluxIT {
 							"docker-compose-postgres.yml",
 							"docker-compose-rabbitmq.yml"))
 					.machine(DockerMachine.localMachine()
-							.withAdditionalEnvironmentVariable("DATAFLOW_VERSION", DATAFLOW_VERSION)
-							.withAdditionalEnvironmentVariable("SKIPPER_VERSION", SKIPPER_VERSION)
-							.withAdditionalEnvironmentVariable("STREAM_APPS_URI", RABBITMQ_MAVEN_STREAM_APPS_URI)
-							.withAdditionalEnvironmentVariable("TASK_APPS_URI", TASK_APPS_URI)
+							.withAdditionalEnvironmentVariable("DATAFLOW_VERSION", DockerComposeIT.DATAFLOW_VERSION)
+							.withAdditionalEnvironmentVariable("SKIPPER_VERSION", DockerComposeIT.SKIPPER_VERSION)
+							.withAdditionalEnvironmentVariable("STREAM_APPS_URI", DockerComposeIT.RABBITMQ_MAVEN_STREAM_APPS_URI)
+							.withAdditionalEnvironmentVariable("TASK_APPS_URI", DockerComposeIT.TASK_APPS_URI)
 							.build())
 					.saveLogsTo("target/dockerLogs/DockerComposePostgresRabbitInfluxIT")
 					.waitingForService("dataflow-server", HealthChecks.toRespond2xxOverHttp(9393,
