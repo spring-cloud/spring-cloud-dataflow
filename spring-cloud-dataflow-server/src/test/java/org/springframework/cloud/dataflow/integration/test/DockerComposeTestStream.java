@@ -256,9 +256,9 @@ public class DockerComposeTestStream {
 
 	@Test
 	public void scaleApplicationInstances() {
-		logger.info("stream-scale-test");
+		logger.info("stream-scaling-test");
 		try (Stream stream = Stream.builder(dataFlowOperations)
-				.name("stream-scale-test")
+				.name("stream-scaling-test")
 				.definition("time | log --log.expression='TICKTOCK - TIMESTAMP: '.concat(payload)")
 				.create()
 				.deploy(testDeploymentProperties())) {
