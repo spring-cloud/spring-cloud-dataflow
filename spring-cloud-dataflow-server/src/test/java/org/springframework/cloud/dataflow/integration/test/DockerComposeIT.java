@@ -80,7 +80,7 @@ import org.springframework.util.StringUtils;
  * multi-platform instructions to prepare docker-compose-k8s.yml and docker-compose-cf.yml files.
  *
  * Stream tests on Kubernetes (k8s) platform:
- * - Add  the docker-compose-k8s.yml to the DOCKER_COMPOSE_PATHS list.
+ * - Add the docker-compose-k8s.yml to the DOCKER_COMPOSE_PATHS list.
  * - Start Kafka message broker on the k8s cluster. Follow the kubectl DataFlow instructions:
  *   https://dataflow.spring.io/docs/installation/kubernetes/kubectl/#choose-a-message-broker
  * - Set the TEST_PLATFORM_NAME to 'k8s'.
@@ -110,24 +110,24 @@ public class DockerComposeIT {
 	 * Data Flow version to use for the tests. The findCurrentDataFlowVersion will try to retrieve the latest BS version
 	 * or will fall back to the default version provided as parameter.
 	 */
-	private static final String DATAFLOW_VERSION = findCurrentDataFlowVersion("2.4.0.BUILD-SNAPSHOT");
+	public static final String DATAFLOW_VERSION = findCurrentDataFlowVersion("2.4.0.BUILD-SNAPSHOT");
 
 	/**
 	 * Skipper version used for the tests.
 	 */
-	private static final String SKIPPER_VERSION = "2.2.1.BUILD-SNAPSHOT";
+	public static final String SKIPPER_VERSION = "2.3.0.BUILD-SNAPSHOT";
 
 	/**
 	 * Pre-registered Task apps used for testing.
 	 */
-	private static final String TASK_APPS_URI = "https://dataflow.spring.io/task-maven-latest&force=true";
+	public static final String TASK_APPS_URI = "https://dataflow.spring.io/task-maven-latest&force=true";
 
 	/**
 	 * Common Apps URIs
 	 */
-	private static final String KAFKA_MAVEN_STREAM_APPS_URI = "https://dataflow.spring.io/kafka-maven-latest&force=true"; // local/kafka
-	private static final String RABBITMQ_MAVEN_STREAM_APPS_URI = "https://dataflow.spring.io/rabbitmq-maven-latest&force=true"; // cf or local/rabbit
-	private static final String KAFKA_DOCKER_STREAM_APPS_URI = "https://dataflow.spring.io/kafka-docker-latest&force=true"; // k8s
+	public static final String KAFKA_MAVEN_STREAM_APPS_URI = "https://dataflow.spring.io/kafka-maven-latest&force=true"; // local/kafka
+	public static final String RABBITMQ_MAVEN_STREAM_APPS_URI = "https://dataflow.spring.io/rabbitmq-maven-latest&force=true"; // cf or local/rabbit
+	public static final String KAFKA_DOCKER_STREAM_APPS_URI = "https://dataflow.spring.io/kafka-docker-latest&force=true"; // k8s
 
 	/**
 	 * Pre-registered Stream apps used in the tests
@@ -166,7 +166,7 @@ public class DockerComposeIT {
 			DockerComposeRule.builder()
 					.files(DockerComposeFiles.from(DOCKER_COMPOSE_PATHS))
 					.machine(dockerMachine)
-					.saveLogsTo("target/dockerLogs/dockerComposeRuleTest")
+					.saveLogsTo("target/dockerLogs/DockerComposeIT")
 					.waitingForService("dataflow-server", HealthChecks.toRespond2xxOverHttp(9393,
 							(port) -> port.inFormat("http://$HOST:$EXTERNAL_PORT")))
 					.waitingForService("skipper-server", HealthChecks.toRespond2xxOverHttp(7577,

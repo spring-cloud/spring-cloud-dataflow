@@ -255,7 +255,7 @@ public class DockerComposeTestStream {
 	}
 
 	@Test
-	public void scaleApplicationInstances() {
+	public void streamScaling() {
 		logger.info("stream-scaling-test");
 		try (Stream stream = Stream.builder(dataFlowOperations)
 				.name("stream-scaling-test")
