@@ -24,6 +24,7 @@ import com.palantir.docker.compose.DockerComposeRule;
 import com.palantir.docker.compose.configuration.DockerComposeFiles;
 import com.palantir.docker.compose.connection.DockerMachine;
 import com.palantir.docker.compose.connection.waiting.HealthChecks;
+import org.junit.BeforeClass;
 import org.junit.ClassRule;
 import org.junit.rules.ExternalResource;
 import org.junit.runner.RunWith;
@@ -173,6 +174,11 @@ public class DockerComposeIT {
 							(port) -> port.inFormat("http://$HOST:$EXTERNAL_PORT")))
 					.pullOnStartup(true) // set to false to test with local dataflow and skipper images.
 					.build());
+
+	@BeforeClass
+	public static void beforeClass() {
+		logger.info("DB: MySQL, Binder: Kafka, TSDB: Prometheus/RSocketProxy");
+	}
 
 	/**
 	 * Attempt to retrieve the current DataFlow version from the generated application.yml
