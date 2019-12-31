@@ -38,7 +38,8 @@ import org.springframework.cloud.dataflow.integration.test.util.ClosableDockerCo
 @Suite.SuiteClasses({
 		DockerComposeTestPlatform.class,
 		DockerComposeTestStream.class,
-		DockerComposeTestTask.class
+		DockerComposeTestTask.class,
+		DockerComposeTestTask2.class
 })
 public class DockerComposePostgresRabbitInfluxIT {
 
@@ -63,7 +64,7 @@ public class DockerComposePostgresRabbitInfluxIT {
 							(port) -> port.inFormat("http://$HOST:$EXTERNAL_PORT")))
 					.waitingForService("skipper-server", HealthChecks.toRespond2xxOverHttp(7577,
 							(port) -> port.inFormat("http://$HOST:$EXTERNAL_PORT")))
-					.pullOnStartup(true)
+					.pullOnStartup(DockerComposeIT.PULL_DOCKER_IMAGES_ON_STARTUP)
 					.build());
 
 	@BeforeClass

@@ -101,7 +101,8 @@ import org.springframework.util.StringUtils;
 @Suite.SuiteClasses({
 		DockerComposeTestPlatform.class,
 		DockerComposeTestStream.class,
-		DockerComposeTestTask.class
+		DockerComposeTestTask.class,
+		DockerComposeTestTask2.class
 })
 public class DockerComposeIT {
 
@@ -117,6 +118,12 @@ public class DockerComposeIT {
 	 * Skipper version used for the tests.
 	 */
 	public static final String SKIPPER_VERSION = "2.3.0.BUILD-SNAPSHOT";
+
+	/**
+	 * Forcefully pull docker images instead of using the locally cached versions.
+	 * Set to false to test with local DataFlow and Skipper images.
+	 */
+	public static final boolean PULL_DOCKER_IMAGES_ON_STARTUP = pullDockerImagesOnStartup(true);
 
 	/**
 	 * Pre-registered Task apps used for testing.
@@ -172,7 +179,7 @@ public class DockerComposeIT {
 							(port) -> port.inFormat("http://$HOST:$EXTERNAL_PORT")))
 					.waitingForService("skipper-server", HealthChecks.toRespond2xxOverHttp(7577,
 							(port) -> port.inFormat("http://$HOST:$EXTERNAL_PORT")))
-					.pullOnStartup(true) // set to false to test with local dataflow and skipper images.
+					.pullOnStartup(PULL_DOCKER_IMAGES_ON_STARTUP) // set to false to test with local dataflow and skipper images.
 					.build());
 
 	@BeforeClass
@@ -205,5 +212,15 @@ public class DockerComposeIT {
 		}
 
 		return defaultVersion;
+	}
+
+	private static boolean pullDockerImagesOnStartup(boolean defaultValue) {
+		if (System.getenv("DATAFLOW_TEST_PULL_ON_STARTUP") != null) {
+			return Boolean.parseBoolean(System.getenv("DATAFLOW_TEST_PULL_ON_STARTUP"));
+		}
+		else if (System.getProperty("dataflow.test.pull.on.startup") != null) {
+			return Boolean.parseBoolean(System.getProperty("dataflow.test.pull.on.startup"));
+		}
+		return defaultValue;
 	}
 }

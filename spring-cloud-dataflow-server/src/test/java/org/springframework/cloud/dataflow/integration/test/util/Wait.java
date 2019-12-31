@@ -112,6 +112,6 @@ public class Wait<T> {
 			}
 		}
 		throw new IllegalStateException(String.format("Timeout after: %s [sec], description: %s",
-				this.timeoutDuration.getSeconds(), this.description));
+				this.timeoutDuration.getSeconds(), "While waiting on (" + this.target + ") - " + this.description));
 	}
 }

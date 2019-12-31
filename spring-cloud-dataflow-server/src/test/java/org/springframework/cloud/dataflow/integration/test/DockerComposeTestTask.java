@@ -30,7 +30,6 @@ import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import org.springframework.cloud.dataflow.integration.test.util.RuntimeApplicationHelper;
 import org.springframework.cloud.dataflow.integration.test.util.Wait;
 import org.springframework.cloud.dataflow.rest.client.DataFlowTemplate;
 import org.springframework.cloud.dataflow.rest.client.TaskOperations;
@@ -49,15 +48,7 @@ public class DockerComposeTestTask {
 
 	private static final Logger logger = LoggerFactory.getLogger(DockerComposeTestTask.class);
 
-	/**
-	 * default - local platform (e.g. docker-compose)
-	 * cf - Cloud Foundry platform, configured in docker-compose-cf.yml
-	 * k8s - GKE/Kubernetes platform, configured via docker-compose-k8s.yml.
-	 */
-	private static final String TEST_PLATFORM_NAME = "default";
-
 	private static DataFlowTemplate dataFlowOperations;
-	private static RuntimeApplicationHelper runtimeApps;
 	private static TaskOperations taskOperations;
 
 	@BeforeClass
@@ -65,7 +56,6 @@ public class DockerComposeTestTask {
 		dataFlowOperations = new DataFlowTemplate(URI.create("http://localhost:9393"));
 		logger.info("Configured platforms: " + dataFlowOperations.streamOperations().listPlatforms().stream()
 				.map(d -> String.format("[%s:%s]", d.getName(), d.getType())).collect(Collectors.joining()));
-		runtimeApps = new RuntimeApplicationHelper(dataFlowOperations, TEST_PLATFORM_NAME);
 		taskOperations = dataFlowOperations.taskOperations();
 	}
 
@@ -86,7 +76,7 @@ public class DockerComposeTestTask {
 	@Test
 	public void timestampTask() {
 		logger.info("task-timestamp-test");
-		String taskDefinitionName = "task-" + UUID.randomUUID().toString().substring(0, 10);
+		String taskDefinitionName = randomTaskName();
 		TaskDefinitionResource tdr = taskOperations.create(taskDefinitionName,
 				"timestamp", "Test timestamp task");
 
@@ -105,7 +95,7 @@ public class DockerComposeTestTask {
 	@Test
 	public void composedTask() {
 		logger.info("task-composed-task-test");
-		String taskDefinitionName = "task-" + UUID.randomUUID().toString().substring(0, 10);
+		String taskDefinitionName = randomTaskName();
 		TaskDefinitionResource tdr = taskOperations.create(taskDefinitionName,
 				"a: timestamp && b:timestamp", "Test composedTask");
 
@@ -124,7 +114,7 @@ public class DockerComposeTestTask {
 	@Test
 	public void multipleComposedTaskWithArguments() {
 		logger.info("task-multiple-composed-task-with-arguments-test");
-		String taskDefinitionName = "task-" + UUID.randomUUID().toString().substring(0, 10);
+		String taskDefinitionName = randomTaskName();
 		TaskDefinitionResource tdr =
 				taskOperations.create(taskDefinitionName, "a: timestamp && b:timestamp", "Test multipleComposedTaskhWithArguments");
 
@@ -165,5 +155,9 @@ public class DockerComposeTestTask {
 	private void assertCompletionWithExitCode(String taskDefinitionName, int exitCode) {
 		taskOperations.executionListByTaskName(taskDefinitionName).getContent().stream()
 				.forEach(taskExecution -> assertThat(taskExecution.getExitCode(), is(exitCode)));
+	}
+
+	private String randomTaskName() {
+		return "task-" + UUID.randomUUID().toString().substring(0, 10);
 	}
 }
