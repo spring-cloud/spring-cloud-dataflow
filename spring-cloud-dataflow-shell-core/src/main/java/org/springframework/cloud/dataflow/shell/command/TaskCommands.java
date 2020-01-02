@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2019 the original author or authors.
+ * Copyright 2018-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,6 +25,9 @@ import java.util.List;
 import java.util.Map;
 
 import javax.naming.OperationNotSupportedException;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.dataflow.rest.client.TaskOperations;
@@ -58,13 +61,17 @@ import org.springframework.util.StringUtils;
  * @author Ilayaperumal Gopinathan
  * @author Janne Valkealahti
  * @author David Turanski
+ * @author Mike Baranski
  */
 @Component
 public class TaskCommands implements CommandMarker {
 
 	private static final String PROPERTIES_OPTION = "properties";
+
 	private static final String PROPERTIES_FILE_OPTION = "propertiesFile";
+
 	private static final String ARGUMENTS_OPTION = "arguments";
+
 	private static final String PLATFORM_OPTION = "platformName";
 
 	// Create Role
@@ -74,13 +81,17 @@ public class TaskCommands implements CommandMarker {
 	// Deploy Role
 
 	private static final String LAUNCH = "task launch";
+
 	private static final String STOP = "task execution stop";
+
 	private static final String LOG = "task execution log";
 
 	// Destroy Role
 
 	private static final String DESTROY = "task destroy";
+
 	private static final String DESTROY_TASK_ALL = "task all destroy";
+
 	private static final String TASK_EXECUTION_CLEANUP = "task execution cleanup";
 
 	// View Role
@@ -88,15 +99,22 @@ public class TaskCommands implements CommandMarker {
 	private static final String EXECUTION_LIST = "task execution list";
 
 	private static final String LIST = "task list";
-	private static final String PLATFORM_LIST = "task platform-list";
-	private static final String TASK_EXECUTION_CURRENT = "task execution current";
-	private static final String TASK_EXECUTION_STATUS = "task execution status";
-	private static final String VALIDATE = "task validate";
-	private static final String CTR_APP_NAME = "composedTaskRunnerName";
 
+	private static final String PLATFORM_LIST = "task platform-list";
+
+	private static final String TASK_EXECUTION_CURRENT = "task execution current";
+
+	private static final String TASK_EXECUTION_STATUS = "task execution status";
+
+	private static final String VALIDATE = "task validate";
+
+	private static final String CTR_APP_NAME = "composedTaskRunnerName";
 
 	@Autowired
 	protected UserInput userInput;
+
+	@Autowired
+	private ObjectMapper objectMapper;
 
 	@Autowired
 	private DataFlowShell dataFlowShell;
@@ -121,7 +139,8 @@ public class TaskCommands implements CommandMarker {
 		return dataFlowShell.hasAccess(RoleType.DESTROY, OpsType.TASK);
 	}
 
-	@CliAvailabilityIndicator({ EXECUTION_LIST, LIST, PLATFORM_LIST, TASK_EXECUTION_CURRENT, TASK_EXECUTION_STATUS, VALIDATE })
+	@CliAvailabilityIndicator({ EXECUTION_LIST, LIST, PLATFORM_LIST, TASK_EXECUTION_CURRENT, TASK_EXECUTION_STATUS,
+			VALIDATE })
 	public boolean availableWithViewRole() {
 		return dataFlowShell.hasAccess(RoleType.VIEW, OpsType.TASK);
 	}
@@ -150,7 +169,9 @@ public class TaskCommands implements CommandMarker {
 	}
 
 	@CliCommand(value = VALIDATE, help = "Validate apps contained in task definitions")
-	public List<Object> validate(@CliOption(key = { "", "name" }, help = "the task definition name", mandatory = true) String name) throws OperationNotSupportedException {
+	public List<Object> validate(
+			@CliOption(key = { "", "name" }, help = "the task definition name", mandatory = true) String name)
+			throws OperationNotSupportedException {
 		final TaskAppStatusResource task = taskOperations().validateTaskDefinition(name);
 		List<Object> result = new ArrayList<>();
 		TableModelBuilder<Object> modelBuilder = new TableModelBuilder<>();
@@ -163,7 +184,7 @@ public class TaskCommands implements CommandMarker {
 		modelBuilder = new TableModelBuilder<>();
 		modelBuilder.addRow().addValue("App Name").addValue("Validation Status");
 		boolean isValidStream = true;
-		for(Map.Entry<String,String> entry : task.getAppStatuses().entrySet()) {
+		for (Map.Entry<String, String> entry : task.getAppStatuses().entrySet()) {
 			modelBuilder.addRow().addValue(entry.getKey())
 					.addValue(entry.getValue());
 			if (entry.getValue().equals("invalid")) {
@@ -172,7 +193,7 @@ public class TaskCommands implements CommandMarker {
 		}
 		builder = DataFlowTables.applyStyle(new TableBuilder(modelBuilder.build()));
 
-		if(isValidStream) {
+		if (isValidStream) {
 			result.add(String.format("\n%s is a valid task.", task.getAppName()));
 		}
 		else {
@@ -187,15 +208,16 @@ public class TaskCommands implements CommandMarker {
 			@CliOption(mandatory = true, key = { "", "name" }, help = "the name to give to the task") String name,
 			@CliOption(mandatory = true, key = { "definition" }, help = "a task definition, using the DSL (e.g. "
 					+ "\"timestamp --format=YYYY\")", optionContext = "disable-string-converter completion-task") String dsl,
-			@CliOption(mandatory = false, key = {"description"}, help = "a sort description about the task", unspecifiedDefaultValue = "") String description) {
+			@CliOption(mandatory = false, key = {
+					"description" }, help = "a sort description about the task", unspecifiedDefaultValue = "") String description) {
 		this.taskOperations().create(name, dsl, description);
 		return String.format("Created new task '%s'", name);
 	}
 
 	@CliCommand(value = LAUNCH, help = "Launch a previously created task")
 	public String launch(
-			@CliOption(key = { "", "name" }, help = "the name of the task to launch", mandatory = true,
-				optionContext = "existing-task disable-string-converter") String name,
+			@CliOption(key = { "",
+					"name" }, help = "the name of the task to launch", mandatory = true, optionContext = "existing-task disable-string-converter") String name,
 			@CliOption(key = {
 					PROPERTIES_OPTION }, help = "the properties for this launch") String properties,
 			@CliOption(key = {
@@ -203,9 +225,9 @@ public class TaskCommands implements CommandMarker {
 			@CliOption(key = {
 					ARGUMENTS_OPTION }, help = "the commandline arguments for this launch") String arguments,
 			@CliOption(key = {
-					PLATFORM_OPTION}, help = "the platform name to use for this launch") String platformName,
+					PLATFORM_OPTION }, help = "the platform name to use for this launch") String platformName,
 			@CliOption(key = {
-					CTR_APP_NAME}, help = "Composed Task Runner app to use for this launch when not using default") String composedTaskRunnerApp)
+					CTR_APP_NAME }, help = "Composed Task Runner app to use for this launch when not using default") String composedTaskRunnerApp)
 
 			throws IOException {
 		int which = Assertions.atMostOneOf(PROPERTIES_OPTION, properties, PROPERTIES_FILE_OPTION, propertiesFile);
@@ -230,9 +252,11 @@ public class TaskCommands implements CommandMarker {
 					PLATFORM_OPTION }, help = "the name of the platform where the task is executing") String platform) {
 
 		String message = null;
-		if(StringUtils.hasText(platform)) {
+		if (StringUtils.hasText(platform)) {
 			taskOperations().stop(ids, platform);
-			message = String.format("Request to stop the task execution with id(s): %s for platform %s has been submitted", ids, platform);
+			message = String.format(
+					"Request to stop the task execution with id(s): %s for platform %s has been submitted", ids,
+					platform);
 		}
 		else {
 			taskOperations().stop(ids);
@@ -242,23 +266,26 @@ public class TaskCommands implements CommandMarker {
 	}
 
 	@CliCommand(value = LOG, help = "Retrieve task execution log")
-	public String retrieveTaskExecutionLog(@CliOption(key = { "", "id" }, help = "the task execution id", mandatory = true) long id,
-			@CliOption(key = { "platform" }, help = "the platform of the task execution", mandatory = false) String platform) {
+	public String retrieveTaskExecutionLog(
+			@CliOption(key = { "", "id" }, help = "the task execution id", mandatory = true) long id,
+			@CliOption(key = {
+					"platform" }, help = "the platform of the task execution", mandatory = false) String platform)
+	throws JsonProcessingException {
 		TaskExecutionResource taskExecutionResource = taskOperations().taskExecutionStatus(id);
 		String result;
-		if(platform != null) {
+		if (platform != null) {
 			result = taskOperations().taskExecutionLog(taskExecutionResource.getExternalExecutionId(), platform);
 		}
 		else {
 			result = taskOperations().taskExecutionLog(taskExecutionResource.getExternalExecutionId());
 		}
-		return result;
+		return objectMapper.readValue(result, String.class);
 	}
 
 	@CliCommand(value = DESTROY, help = "Destroy an existing task")
 	public String destroy(
-			@CliOption(key = { "", "name" }, help = "the name of the task to destroy", mandatory = true,
-				optionContext = "existing-task disable-string-converter") String name) {
+			@CliOption(key = { "",
+					"name" }, help = "the name of the task to destroy", mandatory = true, optionContext = "existing-task disable-string-converter") String name) {
 		taskOperations().destroy(name);
 		return String.format("Destroyed task '%s'", name);
 	}
@@ -269,14 +296,15 @@ public class TaskCommands implements CommandMarker {
 		if (force || "y".equalsIgnoreCase(userInput.promptWithOptions("Really destroy all tasks?", "n", "y", "n"))) {
 			taskOperations().destroyAll();
 			return String.format("All tasks destroyed");
-		} else {
+		}
+		else {
 			return "";
 		}
 	}
 
 	@CliCommand(value = EXECUTION_LIST, help = "List created task executions filtered by taskName")
-	public Table executionListByName(@CliOption(key = "name", help = "the task name to be used as a filter",
-		optionContext = "existing-task disable-string-converter") String name) {
+	public Table executionListByName(
+			@CliOption(key = "name", help = "the task name to be used as a filter", optionContext = "existing-task disable-string-converter") String name) {
 
 		final PagedModel<TaskExecutionResource> tasks;
 		if (name == null) {
@@ -308,7 +336,8 @@ public class TaskCommands implements CommandMarker {
 		modelBuilder.addRow().addValue("Name ").addValue(taskExecutionResource.getTaskName());
 		modelBuilder.addRow().addValue("CLI Arguments ").addValue(taskExecutionResource.getArguments());
 		modelBuilder.addRow().addValue("App Arguments ").addValue(taskExecutionResource.getAppProperties());
-		modelBuilder.addRow().addValue("Deployment Properties ").addValue(taskExecutionResource.getDeploymentProperties());
+		modelBuilder.addRow().addValue("Deployment Properties ")
+				.addValue(taskExecutionResource.getDeploymentProperties());
 		modelBuilder.addRow().addValue("Job Execution Ids ").addValue(taskExecutionResource.getJobExecutionIds());
 		modelBuilder.addRow().addValue("Start Time ").addValue(taskExecutionResource.getStartTime());
 		modelBuilder.addRow().addValue("End Time ").addValue(taskExecutionResource.getEndTime());
@@ -325,16 +354,14 @@ public class TaskCommands implements CommandMarker {
 		return builder.build();
 	}
 
-	@CliCommand(value = TASK_EXECUTION_CURRENT,
-		help = "Display count of currently executin tasks and related information")
+	@CliCommand(value = TASK_EXECUTION_CURRENT, help = "Display count of currently executin tasks and related information")
 	public Table currentExecutions() {
 		Collection<CurrentTaskExecutionsResource> taskExecutionsResources = taskOperations().currentTaskExecutions();
 		LinkedHashMap<String, Object> headers = new LinkedHashMap<>();
 		headers.put("name", "Platform Name");
 		headers.put("type", "Platform Type");
-		headers.put("runningExecutionCount","Execution Count");
-		headers.put("maximumTaskExecutions","Maximum Executions");
-
+		headers.put("runningExecutionCount", "Execution Count");
+		headers.put("maximumTaskExecutions", "Maximum Executions");
 
 		TableBuilder builder = new TableBuilder(new BeanListTableModel<>(taskExecutionsResources, headers));
 		DataFlowTables.applyStyle(builder);
