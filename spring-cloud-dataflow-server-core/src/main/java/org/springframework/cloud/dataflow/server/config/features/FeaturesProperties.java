@@ -39,7 +39,7 @@ public class FeaturesProperties {
 
 	private boolean tasksEnabled = true;
 
-	private boolean schedulesEnabled = true;
+	private boolean schedulesEnabled = false;
 
 	public boolean isStreamsEnabled() {
 		return this.streamsEnabled;
