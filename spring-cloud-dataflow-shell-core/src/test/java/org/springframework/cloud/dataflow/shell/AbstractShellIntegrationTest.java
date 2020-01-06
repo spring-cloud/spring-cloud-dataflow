@@ -28,6 +28,7 @@ import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.cloud.dataflow.shell.command.JobCommandTemplate;
 import org.springframework.cloud.dataflow.shell.command.StreamCommandTemplate;
 import org.springframework.cloud.dataflow.shell.command.TaskCommandTemplate;
+import org.springframework.cloud.dataflow.shell.command.TaskScheduleCommandTemplate;
 import org.springframework.cloud.skipper.client.SkipperClient;
 import org.springframework.context.ApplicationContext;
 import org.springframework.shell.core.CommandResult;
@@ -120,7 +121,8 @@ public abstract class AbstractShellIntegrationTest {
 					"--security.basic.enabled=false", "--spring.main.show_banner=false",
 					"--spring.cloud.config.enabled=false",
 					"--spring.autoconfigure.exclude=org.springframework.boot.autoconfigure.session.SessionAutoConfiguration,org.springframework.cloud.deployer.spi.cloudfoundry.CloudFoundryDeployerAutoConfiguration,org.springframework.cloud.deployer.spi.kubernetes.KubernetesAutoConfiguration",
-					"--spring.datasource.url=" + dataSourceUrl);
+					"--spring.datasource.url=" + dataSourceUrl,
+					"--spring.cloud.dataflow.features.schedules-enabled=true");
 
 			JLineShellComponent shell = applicationContext.getBean(JLineShellComponent.class);
 
@@ -174,6 +176,10 @@ public abstract class AbstractShellIntegrationTest {
 	 */
 	protected JobCommandTemplate job() {
 		return new JobCommandTemplate(dataFlowShell);
+	}
+
+	protected TaskScheduleCommandTemplate schedule() {
+		return new TaskScheduleCommandTemplate(dataFlowShell, applicationContext);
 	}
 
 	// Util methods
