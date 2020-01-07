@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 the original author or authors.
+ * Copyright 2019-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,10 +33,9 @@ import org.springframework.cloud.deployer.spi.scheduler.kubernetes.KubernetesSch
 
 /**
  * @author David Turanski
+ * @author Glenn Renfro
  **/
 public class KubernetesTaskPlatformFactory extends AbstractTaskPlatformFactory<KubernetesPlatformProperties> {
-
-	private final static String PLATFORM_TYPE = "Kubernetes";
 
 	private final Optional<KubernetesSchedulerProperties> schedulerProperties;
 
@@ -46,7 +45,7 @@ public class KubernetesTaskPlatformFactory extends AbstractTaskPlatformFactory<K
 			KubernetesPlatformProperties platformProperties,
 			Optional<KubernetesSchedulerProperties> schedulerProperties,
 			boolean schedulesEnabled) {
-		super(platformProperties, PLATFORM_TYPE);
+		super(platformProperties, KUBERNETES_PLATFORM_TYPE);
 		this.schedulerProperties = schedulerProperties;
 		this.schedulesEnabled = schedulesEnabled;
 	}
@@ -63,7 +62,7 @@ public class KubernetesTaskPlatformFactory extends AbstractTaskPlatformFactory<K
 				kubernetesProperties, kubernetesClient, containerFactory);
 
 		Scheduler scheduler = getScheduler(schedulerProperties, kubernetesClient);
-		Launcher launcher = new Launcher(account, PLATFORM_TYPE, kubernetesTaskLauncher, scheduler);
+		Launcher launcher = new Launcher(account, KUBERNETES_PLATFORM_TYPE, kubernetesTaskLauncher, scheduler);
 
 		launcher.setDescription(
 				String.format("master url = [%s], namespace = [%s], api version = [%s]",
