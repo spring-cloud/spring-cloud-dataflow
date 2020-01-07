@@ -70,6 +70,8 @@ public class DefaultSchedulerService implements SchedulerService {
 	private final static String DEPLOYER_PREFIX = "deployer.";
 	private final static String COMMAND_ARGUMENT_PREFIX = "cmdarg.";
 	private final static String DATA_FLOW_URI_KEY = "spring.cloud.dataflow.client.serverUri";
+	private final static String KUBERNETES = "kubernetes";
+	private final static int MAX_SCHEDULE_NAME_LEN = 52;
 
 	private CommonApplicationProperties commonApplicationProperties;
 	private TaskPlatform taskPlatform;
@@ -205,10 +207,24 @@ public class DefaultSchedulerService implements SchedulerService {
 		ScheduleRequest scheduleRequest = new ScheduleRequest(revisedDefinition, taskDeploymentProperties,
 				deployerDeploymentProperties, revisedCommandLineArgs, scheduleName, getTaskLauncherResource());
 		Launcher launcher = getDefaultLauncher();
+		validateScheduleNameForPlatform(launcher.getType(), revisedDefinition.getName());
 		launcher.getScheduler().schedule(scheduleRequest);
 		this.auditRecordService.populateAndSaveAuditRecordUsingMapData(AuditOperationType.SCHEDULE, AuditActionType.CREATE,
 				scheduleRequest.getScheduleName(), this.auditServiceUtils.convertScheduleRequestToAuditData(scheduleRequest),
 				taskPlatform.getName());
+	}
+
+	private void validateScheduleNameForPlatform(String type, String scheduleName) {
+		if(type.equals(KUBERNETES)) {
+			if(scheduleName.length() > MAX_SCHEDULE_NAME_LEN) {
+				throw new IllegalArgumentException(String.format("the name specified " +
+						"exceeds the maximum schedule name length of %s.   A SCDF " +
+						"schedule name is an aggregate of <task-definition-name>-%s" +
+						"<schedule-name>.  Consider using fewer characters for task definition" +
+						"name or the schedule-name.", MAX_SCHEDULE_NAME_LEN,
+						taskConfigurationProperties.getScheduleNamePrefix() ));
+			}
+		}
 	}
 	private static Map<String, String> extractPropertiesByPrefix(Map<String, String> taskDeploymentProperties, String prefix) {
 		return taskDeploymentProperties.entrySet().stream()

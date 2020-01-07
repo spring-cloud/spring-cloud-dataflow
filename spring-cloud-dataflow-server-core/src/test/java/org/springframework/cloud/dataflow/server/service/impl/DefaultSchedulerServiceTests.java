@@ -30,6 +30,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
+import org.mockito.Mockito;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.context.PropertyPlaceholderAutoConfiguration;
@@ -57,6 +58,7 @@ import org.springframework.cloud.deployer.spi.scheduler.CreateScheduleException;
 import org.springframework.cloud.deployer.spi.scheduler.ScheduleInfo;
 import org.springframework.cloud.deployer.spi.scheduler.ScheduleRequest;
 import org.springframework.cloud.deployer.spi.scheduler.Scheduler;
+import org.springframework.cloud.deployer.spi.task.TaskLauncher;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.data.domain.PageRequest;
@@ -113,6 +115,21 @@ public class DefaultSchedulerServiceTests {
 	@Autowired
 	private TaskConfigurationProperties taskConfigurationProperties;
 
+	@Autowired
+	private CommonApplicationProperties commonApplicationProperties;
+
+	@Autowired
+	private ResourceLoader resourceLoader;
+
+	@Autowired
+	private  AuditRecordService auditRecordService;
+
+	@Autowired
+	private ApplicationConfigurationMetadataResolver metaDataResolver;
+
+	@Autowired
+	private Scheduler scheduler;
+
 	private Map<String, String> testProperties;
 
 	private Map<String, String> resolvedProperties;
@@ -145,6 +162,27 @@ public class DefaultSchedulerServiceTests {
 	@Test
 	public void testSchedule(){
 		schedulerService.schedule(BASE_SCHEDULE_NAME, BASE_DEFINITION_NAME, this.testProperties, this.commandLineArgs);
+		verifyScheduleExistsInScheduler(createScheduleInfo(BASE_SCHEDULE_NAME));
+	}
+
+	@Test(expected = IllegalArgumentException.class)
+	public void testScheduleWithLongNameOnKuberenetesPlatform() {
+
+		Launcher launcher = new Launcher("default", "kubernetes", Mockito.mock(TaskLauncher.class), scheduler);
+		List<Launcher> launchers = new ArrayList<>();
+		launchers.add(launcher);
+		TaskPlatform taskPlatform = new TaskPlatform("testTaskPlatform", launchers);
+
+		SchedulerService testSchedulerService = new DefaultSchedulerService(this.commonApplicationProperties,
+				taskPlatform, this.taskDefinitionRepository,
+				this.appRegistry, this.resourceLoader,
+				this.taskConfigurationProperties, null,
+				this.metaDataResolver, this.schedulerServiceProperties, this.auditRecordService);
+		testSchedulerService.schedule(BASE_SCHEDULE_NAME + "12345677890123456", BASE_DEFINITION_NAME, this.testProperties, this.commandLineArgs);
+	}
+
+	public void testScheduleWithLongName(){
+		schedulerService.schedule(BASE_SCHEDULE_NAME + "12345677890123456", BASE_DEFINITION_NAME, this.testProperties, this.commandLineArgs);
 		verifyScheduleExistsInScheduler(createScheduleInfo(BASE_SCHEDULE_NAME));
 	}
 
