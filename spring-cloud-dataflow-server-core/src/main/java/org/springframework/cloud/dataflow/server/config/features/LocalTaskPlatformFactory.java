@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 the original author or authors.
+ * Copyright 2019-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,14 +28,14 @@ import org.springframework.util.StringUtils;
 
 /**
  * @author David Turanski
+ * @author Glenn Renfro
  **/
 public class LocalTaskPlatformFactory extends AbstractTaskPlatformFactory<LocalPlatformProperties> {
 
-	private static final String PLATFORM_TYPE = "Local";
 	private final Scheduler localScheduler;
 
 	public LocalTaskPlatformFactory(LocalPlatformProperties platformProperties, Scheduler localScheduler) {
-		super(platformProperties, PLATFORM_TYPE);
+		super(platformProperties, LOCAL_PLATFORM_TYPE);
 		this.localScheduler = localScheduler;
 	}
 
@@ -60,7 +60,7 @@ public class LocalTaskPlatformFactory extends AbstractTaskPlatformFactory<LocalP
 
 	private Launcher doCreateLauncher(String account, LocalDeployerProperties deployerProperties) {
 		LocalTaskLauncher localTaskLauncher = new LocalTaskLauncher(deployerProperties);
-		Launcher launcher = new Launcher(account, PLATFORM_TYPE, localTaskLauncher, localScheduler);
+		Launcher launcher = new Launcher(account, LOCAL_PLATFORM_TYPE, localTaskLauncher, localScheduler);
 		launcher.setDescription(prettyPrintLocalDeployerProperties(deployerProperties));
 		return launcher;
 	}
