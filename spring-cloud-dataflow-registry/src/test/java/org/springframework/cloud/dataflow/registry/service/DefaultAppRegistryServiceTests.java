@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2019 the original author or authors.
+ * Copyright 2018-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -506,6 +506,32 @@ public class DefaultAppRegistryServiceTests {
 								hasProperty("metadataUri", is(URI.create("maven://org.springframework.cloud.stream.app:log-sink-rabbit:jar:metadata:2.0.2.RELEASE"))),
 								hasProperty("type", is(ApplicationType.sink)))));
 	}
+
+	@Test
+	public void testImportAllDockerLatest() {
+
+		appRegistryService.importAll(false,
+				new ClassPathResource("AppRegistryTests-importAll-docker-latest.properties", getClass()));
+
+		ArgumentCaptor<AppRegistration> appRegistrationCaptor = ArgumentCaptor.forClass(AppRegistration.class);
+		verify(appRegistrationRepository, times(2)).save(appRegistrationCaptor.capture());
+
+		List<AppRegistration> registrations = appRegistrationCaptor.getAllValues();
+
+		assertThat(registrations,
+				containsInAnyOrder(
+						allOf(
+								hasProperty("name", is("foo")),
+								hasProperty("uri", is(URI.create("docker:springcloudstream/foo-source-kafka:latest"))),
+								hasProperty("metadataUri", is(URI.create("maven://org.springframework.cloud.stream.app:foo-source-kafka:jar:metadata:2.1.2.BUILD-SNAPSHOT"))),
+								hasProperty("type", is(ApplicationType.source))),
+						allOf(
+								hasProperty("name", is("foo")),
+								hasProperty("uri", is(URI.create("docker:springcloudstream/foo-sink-kafka:latest"))),
+								hasProperty("metadataUri", is(URI.create("maven://org.springframework.cloud.stream.app:foo-sink-kafka:jar:metadata:2.1.2.BUILD-SNAPSHOT"))),
+								hasProperty("type", is(ApplicationType.sink)))));
+	}
+
 	@Test
 	public void testDelete() throws URISyntaxException {
 		AppRegistration fooSource = appRegistration("foo", ApplicationType.source, true);
