@@ -36,6 +36,7 @@ import org.springframework.cloud.dataflow.core.AuditOperationType;
 import org.springframework.cloud.dataflow.core.Launcher;
 import org.springframework.cloud.dataflow.core.TaskDefinition;
 import org.springframework.cloud.dataflow.core.TaskPlatform;
+import org.springframework.cloud.dataflow.core.TaskPlatformFactory;
 import org.springframework.cloud.dataflow.core.dsl.TaskNode;
 import org.springframework.cloud.dataflow.core.dsl.TaskParser;
 import org.springframework.cloud.dataflow.registry.service.AppRegistryService;
@@ -70,7 +71,6 @@ public class DefaultSchedulerService implements SchedulerService {
 	private final static String DEPLOYER_PREFIX = "deployer.";
 	private final static String COMMAND_ARGUMENT_PREFIX = "cmdarg.";
 	private final static String DATA_FLOW_URI_KEY = "spring.cloud.dataflow.client.serverUri";
-	private final static String KUBERNETES = "kubernetes";
 	private final static int MAX_SCHEDULE_NAME_LEN = 52;
 
 	private CommonApplicationProperties commonApplicationProperties;
@@ -204,27 +204,30 @@ public class DefaultSchedulerService implements SchedulerService {
 		taskDeploymentProperties = extractAndQualifySchedulerProperties(taskDeploymentProperties);
 		List<String> revisedCommandLineArgs = tagCommandLineArgs(new ArrayList<>(commandLineArgs));
 		revisedCommandLineArgs.add("--spring.cloud.scheduler.task.launcher.taskName=" + taskDefinitionName);
-		ScheduleRequest scheduleRequest = new ScheduleRequest(revisedDefinition, taskDeploymentProperties,
-				deployerDeploymentProperties, revisedCommandLineArgs, scheduleName, getTaskLauncherResource());
 		Launcher launcher = getDefaultLauncher();
-		validateScheduleNameForPlatform(launcher.getType(), revisedDefinition.getName());
+		ScheduleRequest scheduleRequest = new ScheduleRequest(revisedDefinition, taskDeploymentProperties,
+				deployerDeploymentProperties, revisedCommandLineArgs,
+				validateScheduleNameForPlatform(launcher.getType(), scheduleName),
+				getTaskLauncherResource());
 		launcher.getScheduler().schedule(scheduleRequest);
 		this.auditRecordService.populateAndSaveAuditRecordUsingMapData(AuditOperationType.SCHEDULE, AuditActionType.CREATE,
 				scheduleRequest.getScheduleName(), this.auditServiceUtils.convertScheduleRequestToAuditData(scheduleRequest),
 				taskPlatform.getName());
 	}
 
-	private void validateScheduleNameForPlatform(String type, String scheduleName) {
-		if(type.equals(KUBERNETES)) {
+	private String validateScheduleNameForPlatform(String type, String scheduleName) {
+		if(type.equals(TaskPlatformFactory.KUBERNETES_PLATFORM_TYPE)) {
 			if(scheduleName.length() > MAX_SCHEDULE_NAME_LEN) {
 				throw new IllegalArgumentException(String.format("the name specified " +
 						"exceeds the maximum schedule name length of %s.   A SCDF " +
 						"schedule name is an aggregate of <task-definition-name>-%s" +
 						"<schedule-name>.  Consider using fewer characters for task definition" +
 						"name or the schedule-name.", MAX_SCHEDULE_NAME_LEN,
-						taskConfigurationProperties.getScheduleNamePrefix() ));
+						this.taskConfigurationProperties.getScheduleNamePrefix() ));
 			}
+			scheduleName = scheduleName.toLowerCase();
 		}
+		return scheduleName;
 	}
 	private static Map<String, String> extractPropertiesByPrefix(Map<String, String> taskDeploymentProperties, String prefix) {
 		return taskDeploymentProperties.entrySet().stream()
