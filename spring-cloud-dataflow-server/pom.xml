@@ -41,13 +41,6 @@
 			<artifactId>spring-boot-devtools</artifactId>
 			<optional>true</optional>
 		</dependency>
-
-		<dependency>
-			<groupId>com.palantir.docker.compose</groupId>
-			<artifactId>docker-compose-rule-junit4</artifactId>
-			<version>1.3.0</version>
-			<scope>test</scope>
-		</dependency>
 		<dependency>
 			<groupId>org.springframework.cloud</groupId>
 			<artifactId>spring-cloud-dataflow-rest-client</artifactId>
@@ -56,7 +49,11 @@
 		<dependency>
 			<groupId>net.javacrumbs.json-unit</groupId>
 			<artifactId>json-unit</artifactId>
-			<version>1.25.0</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>com.palantir.docker.compose</groupId>
+			<artifactId>docker-compose-rule-junit4</artifactId>
 			<scope>test</scope>
 		</dependency>
 	</dependencies>
@@ -181,15 +178,6 @@
 				<plugins>
 					<plugin>
 						<artifactId>maven-failsafe-plugin</artifactId>
-						<version>3.0.0-M4</version>
-						<executions>
-							<execution>
-								<goals>
-									<goal>integration-test</goal>
-									<goal>verify</goal>
-								</goals>
-							</execution>
-						</executions>
 					</plugin>
 				</plugins>
 			</build>
