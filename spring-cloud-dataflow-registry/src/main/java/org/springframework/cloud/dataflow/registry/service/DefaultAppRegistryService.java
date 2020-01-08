@@ -320,32 +320,32 @@ public class DefaultAppRegistryService implements AppRegistryService {
 	public List<AppRegistration> importAll(boolean overwrite, Resource... resources) {
 		List<AppRegistration> registrations = new ArrayList<>();
 		Stream.of(resources)
-			// parallel takes effect if multiple resources
-			.parallel()
-			// take lines
-			.flatMap(this::resourceAsLines)
-			// take valid splitted lines
-			.flatMap(this::splitValidLines)
-			// reduce to AppRegistration map key'd by <type><name><version>
-			.reduce(new HashMap<String, AppRegistration>(), reduceToAppRegistrations(), (left, right) -> {
-				// combiner is used if multiple resources caused parallel stream,
-				// then just let last processed resource to override.
-				left.putAll(right);
-				return left;
-			})
-			// don't care about keys anymore
-			.values()
-			// back to stream
-			.stream()
-			// drop registration if it doesn't have main uri as user only had metadata
-			.filter(ar -> ar.getUri() != null)
-			// filter by overriding, save to repo and collect updated registrations
-			.filter(ar -> isOverwrite(ar, overwrite))
-			.map(ar -> {
-				save(ar);
-				registrations.add(ar);
-				return ar;
-			}).collect(Collectors.toList());
+				// parallel takes effect if multiple resources
+				.parallel()
+				// take lines
+				.flatMap(this::resourceAsLines)
+				// take valid splitted lines
+				.flatMap(this::splitValidLines)
+				// reduce to AppRegistration map key'd by <type><name><version>
+				.reduce(new HashMap<String, AppRegistration>(), reduceToAppRegistrations(), (left, right) -> {
+					// combiner is used if multiple resources caused parallel stream,
+					// then just let last processed resource to override.
+					left.putAll(right);
+					return left;
+				})
+				// don't care about keys anymore
+				.values()
+				// back to stream
+				.stream()
+				// drop registration if it doesn't have main uri as user only had metadata
+				.filter(ar -> ar.getUri() != null)
+				// filter by overriding, save to repo and collect updated registrations
+				.filter(ar -> isOverwrite(ar, overwrite))
+				.map(ar -> {
+					save(ar);
+					registrations.add(ar);
+					return ar;
+				}).collect(Collectors.toList());
 		return registrations;
 	}
 
@@ -363,6 +363,9 @@ public class DefaultAppRegistryService implements AppRegistryService {
 			String version = getResourceVersion(lineSplit[1]);
 			// This is now versioned key
 			String key = type + name + version;
+			if (!map.containsKey(key) && map.containsKey(type + name + "latest")) {
+				key = type + name + "latest";
+			}
 			AppRegistration ar = map.getOrDefault(key, new AppRegistration());
 			ar.setName(name);
 			ar.setType(ApplicationType.valueOf(type));
@@ -372,7 +375,8 @@ public class DefaultAppRegistryService implements AppRegistryService {
 				try {
 					ar.setUri(new URI(lineSplit[1]));
 					warnOnMalformedURI(lineSplit[0], ar.getUri());
-				} catch (Exception e) {
+				}
+				catch (Exception e) {
 					throw new IllegalArgumentException(e);
 				}
 			}
@@ -381,7 +385,8 @@ public class DefaultAppRegistryService implements AppRegistryService {
 				try {
 					ar.setMetadataUri(new URI(lineSplit[1]));
 					warnOnMalformedURI(lineSplit[0], ar.getMetadataUri());
-				} catch (Exception e) {
+				}
+				catch (Exception e) {
 					throw new IllegalArgumentException(e);
 				}
 			}
@@ -394,7 +399,8 @@ public class DefaultAppRegistryService implements AppRegistryService {
 		try {
 			BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(resource.getInputStream()));
 			return bufferedReader.lines();
-		} catch (Exception e) {
+		}
+		catch (Exception e) {
 			throw new RuntimeException("Error reading from " + resource.getDescription(), e);
 		}
 	}
@@ -402,16 +408,16 @@ public class DefaultAppRegistryService implements AppRegistryService {
 	private Stream<String[]> splitValidLines(String line) {
 		// split to key/value, filter out non valid lines and trim key and value.
 		return Stream.of(line)
-			.filter(skipCommentLines())
-			.map(l -> l.split("="))
-			.filter(split -> split.length == 2)
-			.map(split -> new String[] { split[0].trim(), split[1].trim() });
+				.filter(skipCommentLines())
+				.map(l -> l.split("="))
+				.filter(split -> split.length == 2)
+				.map(split -> new String[] { split[0].trim(), split[1].trim() });
 	}
 
 	private Predicate<String> skipCommentLines() {
 		// skipping obvious lines which we don't even try to parse
 		return line -> line != null &&
-			StringUtils.hasText(line) &&
-			(!line.startsWith("#") || !line.startsWith("/"));
+				StringUtils.hasText(line) &&
+				(!line.startsWith("#") || !line.startsWith("/"));
 	}
 }
