@@ -675,6 +675,10 @@ public class DockerComposeIT {
 		return runtimeApps.isServicePresent("http://localhost:8086/ping");
 	}
 
+	private static Condition<String> condition(Predicate predicate) {
+		return new Condition<>(predicate, "");
+	}
+
 	// -----------------------------------------------------------------------
 	//                               TASK TESTS
 	// -----------------------------------------------------------------------
@@ -809,9 +813,5 @@ public class DockerComposeIT {
 
 	private static String randomTaskName() {
 		return "task-" + UUID.randomUUID().toString().substring(0, 10);
-	}
-
-	private static Condition<String> condition(Predicate predicate) {
-		return new Condition<>(predicate, "");
 	}
 }
