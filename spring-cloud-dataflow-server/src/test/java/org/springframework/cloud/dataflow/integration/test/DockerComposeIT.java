@@ -26,7 +26,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Random;
 import java.util.UUID;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
+
+import javax.swing.text.ParagraphView;
 
 import com.jayway.jsonpath.JsonPath;
 import com.palantir.docker.compose.DockerComposeExtension;
@@ -34,6 +37,8 @@ import com.palantir.docker.compose.configuration.DockerComposeFiles;
 import com.palantir.docker.compose.connection.DockerMachine;
 import com.palantir.docker.compose.connection.waiting.HealthChecks;
 import net.javacrumbs.jsonunit.JsonAssert;
+import org.assertj.core.api.Condition;
+import org.assertj.core.internal.Conditions;
 import org.awaitility.Awaitility;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
@@ -59,6 +64,7 @@ import org.springframework.core.io.DefaultResourceLoader;
 import org.springframework.util.StreamUtils;
 import org.springframework.web.client.RestTemplate;
 
+import static org.assertj.core.api.Assertions.anyOf;
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
@@ -276,7 +282,8 @@ public class DockerComposeIT {
 				.create()
 				.deploy(testDeploymentProperties())) {
 
-			//assertThat(stream.getStatus()).is(oneOf(DEPLOYING, PARTIAL));
+			assertThat(stream.getStatus()).is(
+					new Condition<>(status -> status.equals(DEPLOYING) || status.equals(PARTIAL), ""));
 
 			Awaitility.await().atMost(Duration.ofMinutes(10)).until(() -> stream.getStatus().equals(DEPLOYED));
 
