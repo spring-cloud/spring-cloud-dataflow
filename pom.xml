@@ -95,7 +95,7 @@
 		<semver.version>2.2.0</semver.version>
 		<apache-directory-server.version>1.5.5</apache-directory-server.version>
 		<codearte-props2yml.version>0.5</codearte-props2yml.version>
-		<json-unit.version>1.25.0</json-unit.version>
+		<json-unit.version>2.11.1</json-unit.version>
 		<docker-compose-rule.version>1.4.2</docker-compose-rule.version>
 	</properties>
 	<modules>
@@ -252,7 +252,7 @@
 			</dependency>
 			<dependency>
 				<groupId>net.javacrumbs.json-unit</groupId>
-				<artifactId>json-unit</artifactId>
+				<artifactId>json-unit-assertj</artifactId>
 				<version>${json-unit.version}</version>
 			</dependency>
 			<dependency>

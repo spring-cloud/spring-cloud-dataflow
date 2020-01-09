@@ -34,11 +34,10 @@ import com.palantir.docker.compose.DockerComposeExtension;
 import com.palantir.docker.compose.configuration.DockerComposeFiles;
 import com.palantir.docker.compose.connection.DockerMachine;
 import com.palantir.docker.compose.connection.waiting.HealthChecks;
-import net.javacrumbs.jsonunit.JsonAssert;
+import net.javacrumbs.jsonunit.assertj.JsonAssertions;
 import org.assertj.core.api.Condition;
 import org.awaitility.Awaitility;
 import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -50,7 +49,6 @@ import org.springframework.cloud.dataflow.integration.test.util.RuntimeApplicati
 import org.springframework.cloud.dataflow.integration.test.util.task.dsl.Task;
 import org.springframework.cloud.dataflow.integration.test.util.task.dsl.Tasks;
 import org.springframework.cloud.dataflow.rest.client.DataFlowTemplate;
-import org.springframework.cloud.dataflow.rest.client.TaskOperations;
 import org.springframework.cloud.dataflow.rest.client.dsl.DeploymentPropertiesBuilder;
 import org.springframework.cloud.dataflow.rest.client.dsl.Stream;
 import org.springframework.cloud.dataflow.rest.client.dsl.StreamApplication;
@@ -169,7 +167,6 @@ public class DockerComposeIT {
 	private static DataFlowTemplate dataFlowOperations;
 	private static RuntimeApplicationHelper runtimeApps;
 	private static RestTemplate restTemplate;
-	private static TaskOperations taskOperations;
 	private static Tasks tasks;
 
 	/**
@@ -236,13 +233,12 @@ public class DockerComposeIT {
 	public void featureInfo() {
 		logger.info("feature-info-test");
 		AboutResource about = dataFlowOperations.aboutOperation().get();
-		if (isPrometheusPresent() || isInfluxPresent()) {
-			Assertions.assertTrue(about.getFeatureInfo().isGrafanaEnabled());
-		}
-		Assertions.assertTrue(about.getFeatureInfo().isAnalyticsEnabled());
-		Assertions.assertTrue(about.getFeatureInfo().isStreamsEnabled());
-		Assertions.assertTrue(about.getFeatureInfo().isTasksEnabled());
-		Assertions.assertFalse(about.getFeatureInfo().isSchedulesEnabled());
+
+		assertThat(about.getFeatureInfo().isGrafanaEnabled()).isEqualTo(isPrometheusPresent() || isInfluxPresent());
+		assertThat(about.getFeatureInfo().isAnalyticsEnabled()).isTrue();
+		assertThat(about.getFeatureInfo().isStreamsEnabled()).isTrue();
+		assertThat(about.getFeatureInfo().isTasksEnabled()).isTrue();
+		assertThat(about.getFeatureInfo().isSchedulesEnabled()).isFalse();
 	}
 
 	@Test
@@ -586,8 +582,8 @@ public class DockerComposeIT {
 	// -----------------------------------------------------------------------
 	@Test
 	public void analyticsCounter() throws InterruptedException, IOException {
-		logger.info("stream-analytics-counter-test");
 		if (dataFlowOperations.aboutOperation().get().getFeatureInfo().isGrafanaEnabled()) {
+			logger.info("stream-analytics-counter-test");
 			if (!isPrometheusPresent() && !isInfluxPresent()) {
 				throw new IllegalStateException("Unknown TSDB!");
 			}
@@ -604,47 +600,48 @@ public class DockerComposeIT {
 				String message3 = "Test message 2 with double extension";
 
 				String httpAppUrl = runtimeApps.getApplicationInstanceUrl(stream.getName(), "http");
-				restTemplate.postForObject(httpAppUrl, message1, String.class);
-				restTemplate.postForObject(httpAppUrl, message2, String.class);
-				restTemplate.postForObject(httpAppUrl, message3, String.class);
+				httpPost(httpAppUrl, message1);
+				httpPost(httpAppUrl, message2);
+				httpPost(httpAppUrl, message3);
 
 				// Wait for ~1 min for Micrometer to send first metrics to Prometheus.
-				Thread.sleep(Duration.ofMinutes(1).toMillis());
+				Thread.sleep(Duration.ofSeconds(30).toMillis());
 
 				// Prometheus tests
 				if (isPrometheusPresent()) {
-					JsonAssert.assertJsonEquals(
-							StreamUtils.copyToString(new DefaultResourceLoader().getResource("classpath:/my_http_counter_total.json").getInputStream(), StandardCharsets.UTF_8),
-							restTemplate.getForObject("http://localhost:9090/api/v1/query?query=my_http_counter_total", String.class));
+					JsonAssertions.assertThatJson(httpGet("http://localhost:9090/api/v1/query?query=my_http_counter_total"))
+							.isEqualTo(resourceToString("classpath:/my_http_counter_total.json"));
 
-					String counterTotalValue = JsonPath.read(restTemplate.getForObject("http://localhost:9090/api/v1/query?query=message_my_http_counter_total", String.class), "$.data.result[0].value[1]");
-					assertThat(counterTotalValue).isEqualTo("3");
+					JsonAssertions.assertThatJson(httpGet("http://localhost:9090/api/v1/query?query=message_my_http_counter_total"))
+							.inPath("$.data.result[0].value[1]")
+							.isEqualTo("\"3\"");
 				}
 				else if (isInfluxPresent()) {
+					Thread.sleep(Duration.ofSeconds(30).toMillis());
 					//http://localhost:8086/query?db=myinfluxdb&q=SELECT%20%22count%22%20FROM%20%22spring_integration_send%22
 					//http://localhost:8086/query?db=myinfluxdb&q=SHOW%20MEASUREMENTS
 
-					// TODO: The message_my_http_counter measurement in some cases is not incremented!
-					//
 					// http://localhost:8086/query?db=myinfluxdb&q=SELECT%20value%20FROM%20%22message_my_http_counter%22%20GROUP%20BY%20%2A%20ORDER%20BY%20ASC%20LIMIT%201
-					//Wait.on(stream).withTimeout(Duration.ofMinutes(10))
-					//		.until(s -> {
-					//			Object messageCount = JsonPath.read(
-					//					restTemplate.getForObject("http://localhost:8086/query?db=myinfluxdb&q=SELECT value FROM \"message_my_http_counter\" GROUP BY * ORDER BY ASC LIMIT 1", String.class),
-					//					"$.results[0].series[0].values[0][1]");
-					//			return messageCount != null && ((Integer) messageCount) == 3;
-					//		});
+					Awaitility.await().until(() -> {
+						Object messageCount = JsonPath.read(
+								httpGet("http://localhost:8086/query?db=myinfluxdb&q=SELECT value FROM \"message_my_http_counter\" GROUP BY * ORDER BY ASC LIMIT 1"),
+								"$.results[0].series[0].values[0][1]");
+						return messageCount != null && ((Integer) messageCount) == 3;
+					});
 
 					// http://localhost:8086/query?q=SHOW%20DATABASES
-					assertThat((String) JsonPath.read(
-							restTemplate.getForObject("http://localhost:8086/query?q=SHOW DATABASES", String.class),
-							"$.results[0].series[0].values[1][0]")).isEqualTo("myinfluxdb");
+					JsonAssertions.assertThatJson(httpGet("http://localhost:8086/query?q=SHOW DATABASES"))
+							.inPath("$.results[0].series[0].values[1][0]")
+							.isEqualTo("myinfluxdb");
 
 					// http://localhost:8086/query?db=myinfluxdb&q=SELECT%20%2A%20FROM%20%22my_http_counter%22
-					String myHttpCounter = restTemplate.getForObject("http://localhost:8086/query?db=myinfluxdb&q=SELECT * FROM \"my_http_counter\"", String.class);
-					assertThat((String) JsonPath.read(myHttpCounter, "$.results[0].series[0].values[0][6]")).isEqualTo("" + message1.length());
-					assertThat((String) JsonPath.read(myHttpCounter, "$.results[0].series[0].values[1][6]")).isEqualTo("" + message2.length());
-					assertThat((String) JsonPath.read(myHttpCounter, "$.results[0].series[0].values[2][6]")).isEqualTo("" + message3.length());
+					String myHttpCounter = httpGet("http://localhost:8086/query?db=myinfluxdb&q=SELECT * FROM \"my_http_counter\"");
+					JsonAssertions.assertThatJson(myHttpCounter).inPath("$.results[0].series[0].values[0][6]")
+							.isEqualTo(String.format("\"%s\"", message1.length()));
+					JsonAssertions.assertThatJson(myHttpCounter).inPath("$.results[0].series[0].values[1][6]")
+							.isEqualTo(String.format("\"%s\"", message2.length()));
+					JsonAssertions.assertThatJson(myHttpCounter).inPath("$.results[0].series[0].values[2][6]")
+							.isEqualTo(String.format("\"%s\"", message3.length()));
 				}
 			}
 		}
@@ -665,6 +662,18 @@ public class DockerComposeIT {
 				.put("app.*.management.endpoints.web.exposure.include", "*")
 				.put("app.*.spring.cloud.streamapp.security.enabled", "false")
 				.build();
+	}
+
+	private void httpPost(String url, String message) {
+		restTemplate.postForObject(url, message, String.class);
+	}
+
+	private String httpGet(String url) {
+		return restTemplate.getForObject(url, String.class);
+	}
+
+	private static String resourceToString(String resourcePath) throws IOException {
+		return StreamUtils.copyToString(new DefaultResourceLoader().getResource(resourcePath).getInputStream(), StandardCharsets.UTF_8);
 	}
 
 	private boolean isPrometheusPresent() {
