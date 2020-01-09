@@ -209,7 +209,6 @@ public class DockerComposeIT {
 				.map(d -> String.format("[%s:%s]", d.getName(), d.getType())).collect(Collectors.joining()));
 		runtimeApps = new RuntimeApplicationHelper(dataFlowOperations, TEST_PLATFORM_NAME);
 		restTemplate = new RestTemplate(); // used for HTTP post in tests
-		taskOperations = dataFlowOperations.taskOperations();
 		tasks = new Tasks(dataFlowOperations);
 		Awaitility.setDefaultPollInterval(Duration.ofSeconds(5));
 		Awaitility.setDefaultTimeout(Duration.ofMinutes(10));
