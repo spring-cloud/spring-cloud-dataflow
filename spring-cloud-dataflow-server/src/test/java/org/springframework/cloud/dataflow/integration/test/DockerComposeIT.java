@@ -29,8 +29,6 @@ import java.util.UUID;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
-import javax.swing.text.ParagraphView;
-
 import com.jayway.jsonpath.JsonPath;
 import com.palantir.docker.compose.DockerComposeExtension;
 import com.palantir.docker.compose.configuration.DockerComposeFiles;
@@ -38,7 +36,6 @@ import com.palantir.docker.compose.connection.DockerMachine;
 import com.palantir.docker.compose.connection.waiting.HealthChecks;
 import net.javacrumbs.jsonunit.JsonAssert;
 import org.assertj.core.api.Condition;
-import org.assertj.core.internal.Conditions;
 import org.awaitility.Awaitility;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
@@ -50,21 +47,20 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import org.springframework.cloud.dataflow.integration.test.util.RuntimeApplicationHelper;
+import org.springframework.cloud.dataflow.integration.test.util.task.dsl.Task;
+import org.springframework.cloud.dataflow.integration.test.util.task.dsl.Tasks;
 import org.springframework.cloud.dataflow.rest.client.DataFlowTemplate;
 import org.springframework.cloud.dataflow.rest.client.TaskOperations;
 import org.springframework.cloud.dataflow.rest.client.dsl.DeploymentPropertiesBuilder;
 import org.springframework.cloud.dataflow.rest.client.dsl.Stream;
 import org.springframework.cloud.dataflow.rest.client.dsl.StreamApplication;
 import org.springframework.cloud.dataflow.rest.client.dsl.StreamDefinition;
-import org.springframework.cloud.dataflow.rest.resource.JobExecutionResource;
-import org.springframework.cloud.dataflow.rest.resource.TaskDefinitionResource;
-import org.springframework.cloud.dataflow.rest.resource.TaskExecutionResource;
+import org.springframework.cloud.dataflow.rest.resource.TaskExecutionStatus;
 import org.springframework.cloud.dataflow.rest.resource.about.AboutResource;
 import org.springframework.core.io.DefaultResourceLoader;
 import org.springframework.util.StreamUtils;
 import org.springframework.web.client.RestTemplate;
 
-import static org.assertj.core.api.Assertions.anyOf;
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
@@ -174,6 +170,7 @@ public class DockerComposeIT {
 	private static RuntimeApplicationHelper runtimeApps;
 	private static RestTemplate restTemplate;
 	private static TaskOperations taskOperations;
+	private static Tasks tasks;
 
 	/**
 	 * default - local platform (e.g. docker-compose)
@@ -216,6 +213,7 @@ public class DockerComposeIT {
 		runtimeApps = new RuntimeApplicationHelper(dataFlowOperations, TEST_PLATFORM_NAME);
 		restTemplate = new RestTemplate(); // used for HTTP post in tests
 		taskOperations = dataFlowOperations.taskOperations();
+		tasks = new Tasks(dataFlowOperations);
 		Awaitility.setDefaultPollInterval(Duration.ofSeconds(5));
 		Awaitility.setDefaultTimeout(Duration.ofMinutes(10));
 	}
@@ -283,7 +281,7 @@ public class DockerComposeIT {
 				.deploy(testDeploymentProperties())) {
 
 			assertThat(stream.getStatus()).is(
-					new Condition<>(status -> status.equals(DEPLOYING) || status.equals(PARTIAL), ""));
+					condition(status -> status.equals(DEPLOYING) || status.equals(PARTIAL)));
 
 			Awaitility.await().atMost(Duration.ofMinutes(10)).until(() -> stream.getStatus().equals(DEPLOYED));
 
@@ -317,7 +315,8 @@ public class DockerComposeIT {
 				.put("app.log.logging.pattern.level", "WOODCHUCK-${INSTANCE_INDEX:${CF_INSTANCE_INDEX:${spring.cloud.stream.instanceIndex:0}}} %5p")
 				.build())) {
 
-			//assertThat(stream.getStatus()).is(oneOf(DEPLOYING, PARTIAL)));
+			assertThat(stream.getStatus()).is(
+					condition(status -> status.equals(DEPLOYING) || status.equals(PARTIAL)));
 
 			Awaitility.await().atMost(Duration.ofMinutes(10)).until(() -> stream.getStatus().equals(DEPLOYED));
 
@@ -354,7 +353,9 @@ public class DockerComposeIT {
 				.create()
 				.deploy(testDeploymentProperties())) {
 
-			//assertThat(stream.getStatus()).is(oneOf(DEPLOYING, PARTIAL));
+			assertThat(stream.getStatus()).is(
+					condition(status -> status.equals(DEPLOYING) || status.equals(PARTIAL)));
+
 			Awaitility.await().atMost(Duration.ofMinutes(5)).until(() -> stream.getStatus().equals(DEPLOYED));
 
 			Awaitility.await().until(() -> runtimeApps.getFirstInstanceLog(stream.getName(), "log")
@@ -677,87 +678,140 @@ public class DockerComposeIT {
 	// -----------------------------------------------------------------------
 	//                               TASK TESTS
 	// -----------------------------------------------------------------------
+	public static final int EXIT_CODE_SUCCESS = 0;
+	public static final int EXIT_CODE_ERROR = 1;
+
 	@Test
 	public void timestampTask() {
 		logger.info("task-timestamp-test");
-		String taskDefinitionName = "task-" + UUID.randomUUID().toString().substring(0, 10);
-		TaskDefinitionResource tdr = taskOperations.create(taskDefinitionName,
-				"timestamp", "Test timestamp task");
 
-		long id1 = taskOperations.launch(taskDefinitionName, Collections.EMPTY_MAP, Collections.EMPTY_LIST, null);
-		waitTaskCompletion(taskDefinitionName, 1);
-		assertCompletionWithExitCode(taskDefinitionName, 0);
+		try (Task task = tasks.builder()
+				.name(randomTaskName())
+				.definition("timestamp")
+				.description("Test timestamp task")
+				.create()) {
 
-		// Launch existing task
-		taskOperations.launch(taskDefinitionName, Collections.EMPTY_MAP, Collections.EMPTY_LIST, null);
-		waitTaskCompletion(taskDefinitionName, 2);
-		assertCompletionWithExitCode(taskDefinitionName, 0);
+			// task first launch
+			long id1 = task.launch();
 
-		taskOperations.destroy(taskDefinitionName);
+			Awaitility.await().until(() -> task.executionStatus(id1) == TaskExecutionStatus.COMPLETE);
+			assertThat(task.executions().size()).isEqualTo(1);
+			assertThat(task.execution(id1).get().getExitCode()).isEqualTo(EXIT_CODE_SUCCESS);
+
+			// task second launch
+			long id2 = task.launch();
+
+			Awaitility.await().until(() -> task.executionStatus(id2) == TaskExecutionStatus.COMPLETE);
+			assertThat(task.executions().size()).isEqualTo(2);
+			assertThat(task.execution(id2).get().getExitCode()).isEqualTo(EXIT_CODE_SUCCESS);
+
+			// All
+			task.executions().forEach(execution -> assertThat(execution.getExitCode()).isEqualTo(EXIT_CODE_SUCCESS));
+		}
 	}
 
 	@Test
 	public void composedTask() {
-		logger.info("task-composed-task-test");
-		String taskDefinitionName = "task-" + UUID.randomUUID().toString().substring(0, 10);
-		TaskDefinitionResource tdr = taskOperations.create(taskDefinitionName,
-				"a: timestamp && b:timestamp", "Test composedTask");
+		try (Task task = tasks.builder()
+				.name(randomTaskName())
+				.definition("a: timestamp && b:timestamp")
+				.description("Test composedTask")
+				.create()) {
 
-		taskOperations.launch(taskDefinitionName, Collections.EMPTY_MAP, Collections.EMPTY_LIST, null);
-		waitTaskCompletion(taskDefinitionName, 1);
-		waitTaskCompletion(taskDefinitionName + "-a", 1);
-		waitTaskCompletion(taskDefinitionName + "-b", 1);
+			assertThat(task.children().size()).isEqualTo(2);
 
-		assertCompletionWithExitCode(taskDefinitionName, 0);
+			// first launch
+			logger.info("task-composed-task-runner-test: First Launch");
+			long firstExecutionId = task.launch();
 
-		assertThat(taskOperations.list().getContent().size()).isEqualTo(3);
-		taskOperations.destroy(taskDefinitionName);
-		assertThat(taskOperations.list().getContent().size()).isEqualTo(0);
+			Awaitility.await().until(() -> task.executionStatus(firstExecutionId) == TaskExecutionStatus.COMPLETE);
+
+			assertThat(task.executions().size()).isEqualTo(1);
+			assertThat(task.executionStatus(firstExecutionId)).isEqualTo(TaskExecutionStatus.COMPLETE);
+			assertThat(task.execution(firstExecutionId).get().getExitCode()).isEqualTo(EXIT_CODE_SUCCESS);
+
+			task.children().forEach(childTask -> {
+				assertThat(childTask.executions().size()).isEqualTo(1);
+				assertThat(childTask.executionByParentExecutionId(firstExecutionId).get().getExitCode()).isEqualTo(EXIT_CODE_SUCCESS);
+			});
+
+			task.executions().forEach(execution -> assertThat(execution.getExitCode()).isEqualTo(EXIT_CODE_SUCCESS));
+
+			// second launch
+			logger.info("task-composed-task-runner-test: Second Launch");
+			long secondExecutionId = task.launch();
+
+			Awaitility.await().until(() -> task.executionStatus(secondExecutionId) == TaskExecutionStatus.ERROR);
+
+			assertThat(task.executions().size()).isEqualTo(2);
+			assertThat(task.executionStatus(secondExecutionId)).isEqualTo(TaskExecutionStatus.ERROR);
+			assertThat(task.execution(secondExecutionId).get().getExitCode()).isEqualTo(EXIT_CODE_ERROR);
+
+			task.children().forEach(childTask -> {
+				assertThat(childTask.executions().size()).isEqualTo(1);
+				assertThat(childTask.executionByParentExecutionId(secondExecutionId).isPresent()).isFalse();
+			});
+
+			assertThat(tasks.list().size()).isEqualTo(3);
+		}
+		assertThat(tasks.list().size()).isEqualTo(0);
 	}
 
 	@Test
 	public void multipleComposedTaskWithArguments() {
-		logger.info("task-multiple-composed-task-with-arguments-test");
-		String taskDefinitionName = "task-" + UUID.randomUUID().toString().substring(0, 10);
-		TaskDefinitionResource tdr =
-				taskOperations.create(taskDefinitionName, "a: timestamp && b:timestamp", "Test multipleComposedTaskhWithArguments");
+		try (Task task = tasks.builder()
+				.name(randomTaskName())
+				.definition("a: timestamp && b:timestamp")
+				.description("Test multipleComposedTaskhWithArguments")
+				.create()) {
 
-		List<String> arguments = Arrays.asList("--increment-instance-enabled=true");
-		taskOperations.launch(taskDefinitionName, Collections.EMPTY_MAP, arguments, null);
-		waitTaskCompletion(taskDefinitionName, 1);
-		waitTaskCompletion(taskDefinitionName + "-a", 1);
-		waitTaskCompletion(taskDefinitionName + "-b", 1);
+			assertThat(task.children().size()).isEqualTo(2);
 
-		assertCompletionWithExitCode(taskDefinitionName, 0);
+			// first launch
+			logger.info("task-multiple-composed-task-with-arguments-test: First Launch");
+			List<String> arguments = Arrays.asList("--increment-instance-enabled=true");
+			long firstExecutionId = task.launch(arguments);
 
-		taskOperations.launch(taskDefinitionName, Collections.EMPTY_MAP, arguments, null);
-		waitTaskCompletion(taskDefinitionName, 2);
-		waitTaskCompletion(taskDefinitionName + "-a", 2);
-		waitTaskCompletion(taskDefinitionName + "-b", 2);
+			Awaitility.await().until(() -> task.executionStatus(firstExecutionId) == TaskExecutionStatus.COMPLETE);
 
-		assertCompletionWithExitCode(taskDefinitionName, 0);
+			assertThat(task.executions().size()).isEqualTo(1);
+			assertThat(task.executionStatus(firstExecutionId)).isEqualTo(TaskExecutionStatus.COMPLETE);
+			assertThat(task.execution(firstExecutionId).get().getExitCode()).isEqualTo(EXIT_CODE_SUCCESS);
 
-		Collection<JobExecutionResource> jobExecutionResources =
-				dataFlowOperations.jobOperations().executionListByJobName(taskDefinitionName).getContent();
-		assertThat(jobExecutionResources.size()).isEqualTo(2);
+			task.children().forEach(childTask -> {
+				assertThat(childTask.executions().size()).isEqualTo(1);
+				assertThat(childTask.executionByParentExecutionId(firstExecutionId).get().getExitCode()).isEqualTo(EXIT_CODE_SUCCESS);
+			});
 
-		taskOperations.destroy(taskDefinitionName);
+			task.executions().forEach(execution -> assertThat(execution.getExitCode()).isEqualTo(EXIT_CODE_SUCCESS));
+
+			// second launch
+			logger.info("task-multiple-composed-task-with-arguments-test: Second Launch");
+			long secondExecutionId = task.launch(arguments);
+
+			Awaitility.await().until(() -> task.executionStatus(secondExecutionId) == TaskExecutionStatus.COMPLETE);
+
+			assertThat(task.executions().size()).isEqualTo(2);
+			assertThat(task.executionStatus(secondExecutionId)).isEqualTo(TaskExecutionStatus.COMPLETE);
+			assertThat(task.execution(secondExecutionId).get().getExitCode()).isEqualTo(EXIT_CODE_SUCCESS);
+
+			task.children().forEach(childTask -> {
+				assertThat(childTask.executions().size()).isEqualTo(2);
+				assertThat(childTask.executionByParentExecutionId(secondExecutionId).get().getExitCode()).isEqualTo(EXIT_CODE_SUCCESS);
+			});
+
+			assertThat(task.jobExecutionResources().size()).isEqualTo(2);
+
+			assertThat(tasks.list().size()).isEqualTo(3);
+		}
+		assertThat(tasks.list().size()).isEqualTo(0);
 	}
 
-	private void waitTaskCompletion(String taskDefinitionName, int taskExecutionCount) {
-		Awaitility.await().until(() -> {
-			Collection<TaskExecutionResource> taskExecutions =
-					taskOperations.executionListByTaskName(taskDefinitionName).getContent();
-			return (taskExecutions.size() >= taskExecutionCount) &&
-					taskExecutions.stream()
-							.map(execution -> execution != null && execution.getEndTime() != null)
-							.reduce(Boolean::logicalAnd)
-							.orElse(false);
-		});
+	private static String randomTaskName() {
+		return "task-" + UUID.randomUUID().toString().substring(0, 10);
 	}
 
-	private void assertCompletionWithExitCode(String taskDefinitionName, int exitCode) {
-		taskOperations.executionListByTaskName(taskDefinitionName).getContent().stream()
-				.forEach(taskExecution -> assertThat(taskExecution.getExitCode()).isEqualTo(exitCode));
+	private static Condition<String> condition(Predicate predicate) {
+		return new Condition<>(predicate, "");
 	}
 }
