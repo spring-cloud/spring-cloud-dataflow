@@ -15,10 +15,12 @@
  */
 package org.springframework.cloud.dataflow.integration.test.util;
 
+import java.time.Duration;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import org.awaitility.Awaitility;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -171,12 +173,10 @@ public class RuntimeApplicationHelper {
 		String streamName = instanceAttributes.get(StreamRuntimePropertyKeys.ATTRIBUTE_SKIPPER_RELEASE_NAME);
 		String appName = instanceAttributes.get(StreamRuntimePropertyKeys.ATTRIBUTE_SKIPPER_APPLICATION_NAME);
 		String guid = instanceAttributes.get(StreamRuntimePropertyKeys.ATTRIBUTE_GUID);
-		Wait.on(streamName)
-				.withDescription("Wait for " + streamName + ":" + appName + " ExternalIP")
-				.until(s -> this.appInstanceAttributes().values().stream()
-						.filter(m -> m.get(StreamRuntimePropertyKeys.ATTRIBUTE_SKIPPER_RELEASE_NAME).equals(streamName))
-						.filter(m -> m.get(StreamRuntimePropertyKeys.ATTRIBUTE_SKIPPER_APPLICATION_NAME).equals(appName))
-						.allMatch(m -> m.containsKey(StreamRuntimePropertyKeys.ATTRIBUTE_URL)));
+		Awaitility.await().atMost(Duration.ofMinutes(10)).until(() -> this.appInstanceAttributes().values().stream()
+				.filter(m -> m.get(StreamRuntimePropertyKeys.ATTRIBUTE_SKIPPER_RELEASE_NAME).equals(streamName))
+				.filter(m -> m.get(StreamRuntimePropertyKeys.ATTRIBUTE_SKIPPER_APPLICATION_NAME).equals(appName))
+				.allMatch(m -> m.containsKey(StreamRuntimePropertyKeys.ATTRIBUTE_URL)));
 
 		return this.getApplicationInstances(streamName, appName).get(guid).get(StreamRuntimePropertyKeys.ATTRIBUTE_URL);
 	}
