@@ -38,9 +38,13 @@ import net.javacrumbs.jsonunit.assertj.JsonAssertions;
 import org.assertj.core.api.Condition;
 import org.awaitility.Awaitility;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Assumptions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.BeforeAllCallback;
+import org.junit.jupiter.api.extension.Extension;
 import org.junit.jupiter.api.extension.RegisterExtension;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -57,6 +61,7 @@ import org.springframework.cloud.dataflow.rest.resource.TaskExecutionStatus;
 import org.springframework.cloud.dataflow.rest.resource.about.AboutResource;
 import org.springframework.core.io.DefaultResourceLoader;
 import org.springframework.util.StreamUtils;
+import org.springframework.util.StringUtils;
 import org.springframework.web.client.RestTemplate;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -187,24 +192,46 @@ public class DockerComposeIT {
 			.build();
 
 	/**
-	 * DockerComposeRule doesnt't release the created containers if the before() fails.
-	 * The dockerRuleWrapper ensures that all containers are shutdown in case of failure.
+	 * A JUnit 5 extension to bring up Docker containers defined in docker-compose-xxx.yml files before running tests.
+	 * You can set either disable.docker.compose.extension property of DISABLE_DOCKER_COMPOSE_EXTENSION variable to
+	 * disable the extension.
 	 */
 	@RegisterExtension
-	public static DockerComposeExtension dockerCompose = DockerComposeExtension.builder()
-			.files(DockerComposeFiles.from(DOCKER_COMPOSE_PATHS))
-			.machine(dockerMachine)
-			.saveLogsTo("target/dockerLogs/DockerComposeIT")
-			.waitingForService("dataflow-server", HealthChecks.toRespond2xxOverHttp(9393,
-					(port) -> port.inFormat("http://$HOST:$EXTERNAL_PORT")), org.joda.time.Duration.standardMinutes(10))
-			.waitingForService("skipper-server", HealthChecks.toRespond2xxOverHttp(7577,
-					(port) -> port.inFormat("http://$HOST:$EXTERNAL_PORT")), org.joda.time.Duration.standardMinutes(10))
-			.pullOnStartup(true) // set to false to test with local dataflow and skipper images.
-			.build();
+	public static Extension dockerCompose = isDockerComposeExtensionDisabled() ?
+			(BeforeAllCallback) context -> logger.info("DockerComposeExtension is Disabled!") :
+			DockerComposeExtension.builder()
+					.files(DockerComposeFiles.from(DOCKER_COMPOSE_PATHS))
+					.machine(dockerMachine)
+					.saveLogsTo("target/dockerLogs/DockerComposeIT")
+					.waitingForService("dataflow-server", HealthChecks.toRespond2xxOverHttp(9393,
+							(port) -> port.inFormat("http://$HOST:$EXTERNAL_PORT")), org.joda.time.Duration.standardMinutes(10))
+					.waitingForService("skipper-server", HealthChecks.toRespond2xxOverHttp(7577,
+							(port) -> port.inFormat("http://$HOST:$EXTERNAL_PORT")), org.joda.time.Duration.standardMinutes(10))
+					.pullOnStartup(!isDockerComposePullOnStartupDisabled()) // set to false to test with local dataflow and skipper images.
+					.build();
+
+	/**
+	 * @return True if either disable.docker.compose.extension property of DISABLE_DOCKER_COMPOSE_EXTENSION
+	 * environment variable is set. The values of the variables is irrelevant.
+	 */
+	private static boolean isDockerComposeExtensionDisabled() {
+		return StringUtils.hasText(System.getProperty("disable.docker.compose.extension"))
+				|| StringUtils.hasText(System.getenv("DISABLE_DOCKER_COMPOSE_EXTENSION"));
+	}
+
+	/**
+	 * Set either the disable.docker.compose.pullOnStartup property or the DISABLE_DOCKER_COMPOSE_EXTENSION_PULLONSTARTUP
+	 * environment variable to disable docker image pulling on startup. The exact property or variable values
+	 * are irrelevant. The images are pulled by default.
+	 */
+	private static boolean isDockerComposePullOnStartupDisabled() {
+		return StringUtils.hasText(System.getProperty("disable.docker.compose.pullOnStartup"))
+				|| StringUtils.hasText(System.getenv("DISABLE_DOCKER_COMPOSE_EXTENSION_PULLONSTARTUP"));
+	}
 
 	@BeforeAll
 	public static void beforeClass() {
-		dataFlowOperations = new DataFlowTemplate(URI.create("http://localhost:9393"));
+		dataFlowOperations = new DataFlowTemplate(URI.create(getDataFlowServerUrl()));
 		logger.info("Configured platforms: " + dataFlowOperations.streamOperations().listPlatforms().stream()
 				.map(d -> String.format("[%s:%s]", d.getName(), d.getType())).collect(Collectors.joining()));
 		runtimeApps = new RuntimeApplicationHelper(dataFlowOperations, TEST_PLATFORM_NAME);
@@ -212,6 +239,21 @@ public class DockerComposeIT {
 		tasks = new Tasks(dataFlowOperations);
 		Awaitility.setDefaultPollInterval(Duration.ofSeconds(5));
 		Awaitility.setDefaultTimeout(Duration.ofMinutes(10));
+	}
+
+	/**
+	 * Allow to override and connect the tests to and external DataFlow server. Defaults to http://localhost:9393 if
+	 * neither test.dataflow.server.url property or TEST_DATAFLOW_SERVER_URL variable are set.
+	 */
+	private static String getDataFlowServerUrl() {
+		String dataFlowServerUrl = System.getProperty("test.dataflow.server.url");
+		if (!StringUtils.hasText(dataFlowServerUrl)) {
+			dataFlowServerUrl = System.getenv("TEST_DATAFLOW_SERVER_URL");
+		}
+		if (!StringUtils.hasText(dataFlowServerUrl)) {
+			dataFlowServerUrl = "http://localhost:9393";
+		}
+		return dataFlowServerUrl;
 	}
 
 	@BeforeEach
@@ -230,10 +272,10 @@ public class DockerComposeIT {
 	// -----------------------------------------------------------------------
 	@Test
 	public void featureInfo() {
-		logger.info("feature-info-test");
+		logger.info("platform-feature-info-test");
 		AboutResource about = dataFlowOperations.aboutOperation().get();
 
-		assertThat(about.getFeatureInfo().isGrafanaEnabled()).isEqualTo(isPrometheusPresent() || isInfluxPresent());
+		assertThat(about.getFeatureInfo().isGrafanaEnabled()).isEqualTo(prometheusPresent() || influxPresent());
 		assertThat(about.getFeatureInfo().isAnalyticsEnabled()).isTrue();
 		assertThat(about.getFeatureInfo().isStreamsEnabled()).isTrue();
 		assertThat(about.getFeatureInfo().isTasksEnabled()).isTrue();
@@ -242,7 +284,7 @@ public class DockerComposeIT {
 
 	@Test
 	public void appsCount() {
-		logger.info("apps-count-test");
+		logger.info("platform-apps-count-test");
 		assertThat(dataFlowOperations.appRegistryOperations().list().getMetadata().getTotalElements())
 				.isGreaterThanOrEqualTo(68L);
 	}
@@ -579,73 +621,81 @@ public class DockerComposeIT {
 	// -----------------------------------------------------------------------
 	//                       STREAM  METRICS TESTS
 	// -----------------------------------------------------------------------
+	@DisplayName("Test Analytics Counters")
 	@Test
-	public void analyticsCounter() throws InterruptedException, IOException {
-		if (dataFlowOperations.aboutOperation().get().getFeatureInfo().isGrafanaEnabled()) {
-			logger.info("stream-analytics-counter-test");
-			if (!isPrometheusPresent() && !isInfluxPresent()) {
-				throw new IllegalStateException("Unknown TSDB!");
-			}
-			try (Stream stream = Stream.builder(dataFlowOperations)
-					.name("httpCounter")
-					.definition("http | counter --counter.name=my_http_counter --counter.tag.expression.msgSize=payload.length()")
-					.create()
-					.deploy(testDeploymentProperties())) {
+	public void analyticsCounter() throws InterruptedException {
 
-				Awaitility.await().until(() -> stream.getStatus().equals(DEPLOYED));
+		Assumptions.assumeTrue(dataFlowOperations.aboutOperation().get().getFeatureInfo().isGrafanaEnabled());
 
-				String message1 = "Test message 1";
-				String message2 = "Test message 2 with extension";
-				String message3 = "Test message 2 with double extension";
+		logger.info("stream-analytics-counter-test");
 
-				String httpAppUrl = runtimeApps.getApplicationInstanceUrl(stream.getName(), "http");
-				httpPost(httpAppUrl, message1);
-				httpPost(httpAppUrl, message2);
-				httpPost(httpAppUrl, message3);
+		assertThat(prometheusPresent() || influxPresent())
+				.withFailMessage("Grafana is enabled only if Prometheus or Influx are enabled")
+				.isTrue();
 
-				// Wait for ~1 min for Micrometer to send first metrics to Prometheus.
+		try (Stream stream = Stream.builder(dataFlowOperations)
+				.name("httpCounter")
+				.definition("http | counter --counter.name=my_http_counter --counter.tag.expression.msgSize=payload.length()")
+				.create()
+				.deploy(testDeploymentProperties())) {
+
+			Awaitility.await().until(() -> stream.getStatus().equals(DEPLOYED));
+
+			String message1 = "Test message 1";
+			String message2 = "Test message 2 with extension";
+			String message3 = "Test message 2 with double extension";
+
+			String httpAppUrl = runtimeApps.getApplicationInstanceUrl(stream.getName(), "http");
+			httpPost(httpAppUrl, message1);
+			httpPost(httpAppUrl, message2);
+			httpPost(httpAppUrl, message3);
+
+			// Wait for ~1 min for Micrometer to send first metrics to Prometheus.
+			Thread.sleep(Duration.ofSeconds(30).toMillis());
+
+			// Prometheus tests
+			Assumptions.assumingThat(this::prometheusPresent, () -> {
+				logger.info("stream-analytics-counter-test: Prometheus");
+
+				JsonAssertions.assertThatJson(httpGet("http://localhost:9090/api/v1/query?query=my_http_counter_total"))
+						.isEqualTo(resourceToString("classpath:/my_http_counter_total.json"));
+
+				JsonAssertions.assertThatJson(httpGet("http://localhost:9090/api/v1/query?query=message_my_http_counter_total"))
+						.inPath("$.data.result[0].value[1]")
+						.isEqualTo("\"3\"");
+			});
+
+			// InfluxDB tests
+			Assumptions.assumingThat(this::influxPresent, () -> {
+				logger.info("stream-analytics-counter-test: InfluxDB");
+
 				Thread.sleep(Duration.ofSeconds(30).toMillis());
+				//http://localhost:8086/query?db=myinfluxdb&q=SELECT%20%22count%22%20FROM%20%22spring_integration_send%22
+				//http://localhost:8086/query?db=myinfluxdb&q=SHOW%20MEASUREMENTS
 
-				// Prometheus tests
-				if (isPrometheusPresent()) {
-					JsonAssertions.assertThatJson(httpGet("http://localhost:9090/api/v1/query?query=my_http_counter_total"))
-							.isEqualTo(resourceToString("classpath:/my_http_counter_total.json"));
+				// http://localhost:8086/query?db=myinfluxdb&q=SELECT%20value%20FROM%20%22message_my_http_counter%22%20GROUP%20BY%20%2A%20ORDER%20BY%20ASC%20LIMIT%201
+				Awaitility.await().until(() -> {
+					Object messageCount = JsonPath.read(
+							httpGet("http://localhost:8086/query?db=myinfluxdb&q=" +
+									"SELECT value FROM \"message_my_http_counter\" GROUP BY * ORDER BY ASC LIMIT 1"),
+							"$.results[0].series[0].values[0][1]");
+					return messageCount != null && ((Integer) messageCount) == 3;
+				});
 
-					JsonAssertions.assertThatJson(httpGet("http://localhost:9090/api/v1/query?query=message_my_http_counter_total"))
-							.inPath("$.data.result[0].value[1]")
-							.isEqualTo("\"3\"");
-				}
-				else if (isInfluxPresent()) {
-					Thread.sleep(Duration.ofSeconds(30).toMillis());
-					//http://localhost:8086/query?db=myinfluxdb&q=SELECT%20%22count%22%20FROM%20%22spring_integration_send%22
-					//http://localhost:8086/query?db=myinfluxdb&q=SHOW%20MEASUREMENTS
+				// http://localhost:8086/query?q=SHOW%20DATABASES
+				JsonAssertions.assertThatJson(httpGet("http://localhost:8086/query?q=SHOW DATABASES"))
+						.inPath("$.results[0].series[0].values[1][0]")
+						.isEqualTo("myinfluxdb");
 
-					// http://localhost:8086/query?db=myinfluxdb&q=SELECT%20value%20FROM%20%22message_my_http_counter%22%20GROUP%20BY%20%2A%20ORDER%20BY%20ASC%20LIMIT%201
-					Awaitility.await().until(() -> {
-						Object messageCount = JsonPath.read(
-								httpGet("http://localhost:8086/query?db=myinfluxdb&q=SELECT value FROM \"message_my_http_counter\" GROUP BY * ORDER BY ASC LIMIT 1"),
-								"$.results[0].series[0].values[0][1]");
-						return messageCount != null && ((Integer) messageCount) == 3;
-					});
-
-					// http://localhost:8086/query?q=SHOW%20DATABASES
-					JsonAssertions.assertThatJson(httpGet("http://localhost:8086/query?q=SHOW DATABASES"))
-							.inPath("$.results[0].series[0].values[1][0]")
-							.isEqualTo("myinfluxdb");
-
-					// http://localhost:8086/query?db=myinfluxdb&q=SELECT%20%2A%20FROM%20%22my_http_counter%22
-					String myHttpCounter = httpGet("http://localhost:8086/query?db=myinfluxdb&q=SELECT * FROM \"my_http_counter\"");
-					JsonAssertions.assertThatJson(myHttpCounter).inPath("$.results[0].series[0].values[0][6]")
-							.isEqualTo(String.format("\"%s\"", message1.length()));
-					JsonAssertions.assertThatJson(myHttpCounter).inPath("$.results[0].series[0].values[1][6]")
-							.isEqualTo(String.format("\"%s\"", message2.length()));
-					JsonAssertions.assertThatJson(myHttpCounter).inPath("$.results[0].series[0].values[2][6]")
-							.isEqualTo(String.format("\"%s\"", message3.length()));
-				}
-			}
-		}
-		else {
-			logger.warn("Data Flow Monitoring is not enabled!");
+				// http://localhost:8086/query?db=myinfluxdb&q=SELECT%20%2A%20FROM%20%22my_http_counter%22
+				String myHttpCounter = httpGet("http://localhost:8086/query?db=myinfluxdb&q=SELECT * FROM \"my_http_counter\"");
+				JsonAssertions.assertThatJson(myHttpCounter).inPath("$.results[0].series[0].values[0][6]")
+						.isEqualTo(String.format("\"%s\"", message1.length()));
+				JsonAssertions.assertThatJson(myHttpCounter).inPath("$.results[0].series[0].values[1][6]")
+						.isEqualTo(String.format("\"%s\"", message2.length()));
+				JsonAssertions.assertThatJson(myHttpCounter).inPath("$.results[0].series[0].values[2][6]")
+						.isEqualTo(String.format("\"%s\"", message3.length()));
+			});
 		}
 	}
 
@@ -675,11 +725,11 @@ public class DockerComposeIT {
 		return StreamUtils.copyToString(new DefaultResourceLoader().getResource(resourcePath).getInputStream(), StandardCharsets.UTF_8);
 	}
 
-	private boolean isPrometheusPresent() {
+	private boolean prometheusPresent() {
 		return runtimeApps.isServicePresent("http://localhost:9090/api/v1/query?query=up");
 	}
 
-	private boolean isInfluxPresent() {
+	private boolean influxPresent() {
 		return runtimeApps.isServicePresent("http://localhost:8086/ping");
 	}
 
@@ -704,18 +754,18 @@ public class DockerComposeIT {
 				.create()) {
 
 			// task first launch
-			long id1 = task.launch();
+			long launchId1 = task.launch();
 
-			Awaitility.await().until(() -> task.executionStatus(id1) == TaskExecutionStatus.COMPLETE);
+			Awaitility.await().until(() -> task.executionStatus(launchId1) == TaskExecutionStatus.COMPLETE);
 			assertThat(task.executions().size()).isEqualTo(1);
-			assertThat(task.execution(id1).get().getExitCode()).isEqualTo(EXIT_CODE_SUCCESS);
+			assertThat(task.execution(launchId1).get().getExitCode()).isEqualTo(EXIT_CODE_SUCCESS);
 
 			// task second launch
-			long id2 = task.launch();
+			long launchId2 = task.launch();
 
-			Awaitility.await().until(() -> task.executionStatus(id2) == TaskExecutionStatus.COMPLETE);
+			Awaitility.await().until(() -> task.executionStatus(launchId2) == TaskExecutionStatus.COMPLETE);
 			assertThat(task.executions().size()).isEqualTo(2);
-			assertThat(task.execution(id2).get().getExitCode()).isEqualTo(EXIT_CODE_SUCCESS);
+			assertThat(task.execution(launchId2).get().getExitCode()).isEqualTo(EXIT_CODE_SUCCESS);
 
 			// All
 			task.executions().forEach(execution -> assertThat(execution.getExitCode()).isEqualTo(EXIT_CODE_SUCCESS));
@@ -734,34 +784,34 @@ public class DockerComposeIT {
 
 			// first launch
 			logger.info("task-composed-task-runner-test: First Launch");
-			long firstExecutionId = task.launch();
+			long launchId1 = task.launch();
 
-			Awaitility.await().until(() -> task.executionStatus(firstExecutionId) == TaskExecutionStatus.COMPLETE);
+			Awaitility.await().until(() -> task.executionStatus(launchId1) == TaskExecutionStatus.COMPLETE);
 
 			assertThat(task.executions().size()).isEqualTo(1);
-			assertThat(task.executionStatus(firstExecutionId)).isEqualTo(TaskExecutionStatus.COMPLETE);
-			assertThat(task.execution(firstExecutionId).get().getExitCode()).isEqualTo(EXIT_CODE_SUCCESS);
+			assertThat(task.executionStatus(launchId1)).isEqualTo(TaskExecutionStatus.COMPLETE);
+			assertThat(task.execution(launchId1).get().getExitCode()).isEqualTo(EXIT_CODE_SUCCESS);
 
 			task.children().forEach(childTask -> {
 				assertThat(childTask.executions().size()).isEqualTo(1);
-				assertThat(childTask.executionByParentExecutionId(firstExecutionId).get().getExitCode()).isEqualTo(EXIT_CODE_SUCCESS);
+				assertThat(childTask.executionByParentExecutionId(launchId1).get().getExitCode()).isEqualTo(EXIT_CODE_SUCCESS);
 			});
 
 			task.executions().forEach(execution -> assertThat(execution.getExitCode()).isEqualTo(EXIT_CODE_SUCCESS));
 
 			// second launch
 			logger.info("task-composed-task-runner-test: Second Launch");
-			long secondExecutionId = task.launch();
+			long launchId2 = task.launch();
 
-			Awaitility.await().until(() -> task.executionStatus(secondExecutionId) == TaskExecutionStatus.ERROR);
+			Awaitility.await().until(() -> task.executionStatus(launchId2) == TaskExecutionStatus.ERROR);
 
 			assertThat(task.executions().size()).isEqualTo(2);
-			assertThat(task.executionStatus(secondExecutionId)).isEqualTo(TaskExecutionStatus.ERROR);
-			assertThat(task.execution(secondExecutionId).get().getExitCode()).isEqualTo(EXIT_CODE_ERROR);
+			assertThat(task.executionStatus(launchId2)).isEqualTo(TaskExecutionStatus.ERROR);
+			assertThat(task.execution(launchId2).get().getExitCode()).isEqualTo(EXIT_CODE_ERROR);
 
 			task.children().forEach(childTask -> {
 				assertThat(childTask.executions().size()).isEqualTo(1);
-				assertThat(childTask.executionByParentExecutionId(secondExecutionId).isPresent()).isFalse();
+				assertThat(childTask.executionByParentExecutionId(launchId2).isPresent()).isFalse();
 			});
 
 			assertThat(tasks.list().size()).isEqualTo(3);
@@ -782,34 +832,34 @@ public class DockerComposeIT {
 			// first launch
 			logger.info("task-multiple-composed-task-with-arguments-test: First Launch");
 			List<String> arguments = Arrays.asList("--increment-instance-enabled=true");
-			long firstExecutionId = task.launch(arguments);
+			long launchId1 = task.launch(arguments);
 
-			Awaitility.await().until(() -> task.executionStatus(firstExecutionId) == TaskExecutionStatus.COMPLETE);
+			Awaitility.await().until(() -> task.executionStatus(launchId1) == TaskExecutionStatus.COMPLETE);
 
 			assertThat(task.executions().size()).isEqualTo(1);
-			assertThat(task.executionStatus(firstExecutionId)).isEqualTo(TaskExecutionStatus.COMPLETE);
-			assertThat(task.execution(firstExecutionId).get().getExitCode()).isEqualTo(EXIT_CODE_SUCCESS);
+			assertThat(task.executionStatus(launchId1)).isEqualTo(TaskExecutionStatus.COMPLETE);
+			assertThat(task.execution(launchId1).get().getExitCode()).isEqualTo(EXIT_CODE_SUCCESS);
 
 			task.children().forEach(childTask -> {
 				assertThat(childTask.executions().size()).isEqualTo(1);
-				assertThat(childTask.executionByParentExecutionId(firstExecutionId).get().getExitCode()).isEqualTo(EXIT_CODE_SUCCESS);
+				assertThat(childTask.executionByParentExecutionId(launchId1).get().getExitCode()).isEqualTo(EXIT_CODE_SUCCESS);
 			});
 
 			task.executions().forEach(execution -> assertThat(execution.getExitCode()).isEqualTo(EXIT_CODE_SUCCESS));
 
 			// second launch
 			logger.info("task-multiple-composed-task-with-arguments-test: Second Launch");
-			long secondExecutionId = task.launch(arguments);
+			long launchId2 = task.launch(arguments);
 
-			Awaitility.await().until(() -> task.executionStatus(secondExecutionId) == TaskExecutionStatus.COMPLETE);
+			Awaitility.await().until(() -> task.executionStatus(launchId2) == TaskExecutionStatus.COMPLETE);
 
 			assertThat(task.executions().size()).isEqualTo(2);
-			assertThat(task.executionStatus(secondExecutionId)).isEqualTo(TaskExecutionStatus.COMPLETE);
-			assertThat(task.execution(secondExecutionId).get().getExitCode()).isEqualTo(EXIT_CODE_SUCCESS);
+			assertThat(task.executionStatus(launchId2)).isEqualTo(TaskExecutionStatus.COMPLETE);
+			assertThat(task.execution(launchId2).get().getExitCode()).isEqualTo(EXIT_CODE_SUCCESS);
 
 			task.children().forEach(childTask -> {
 				assertThat(childTask.executions().size()).isEqualTo(2);
-				assertThat(childTask.executionByParentExecutionId(secondExecutionId).get().getExitCode()).isEqualTo(EXIT_CODE_SUCCESS);
+				assertThat(childTask.executionByParentExecutionId(launchId2).get().getExitCode()).isEqualTo(EXIT_CODE_SUCCESS);
 			});
 
 			assertThat(task.jobExecutionResources().size()).isEqualTo(2);
