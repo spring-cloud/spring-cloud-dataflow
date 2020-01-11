@@ -86,49 +86,6 @@ public class Task implements AutoCloseable {
 				.orElse(TaskExecutionStatus.UNKNOWN);
 	}
 
-	// TODO Decide whether we should use the XXX Resource domain classes, the SCT and SBatch domain classes or create new for the DSL
-	//public Collection<TaskExecution> executions() {
-	//	return taskOperations.executionListByTaskName(this.taskName).getContent().stream()
-	//			.map(tr -> new TaskExecution(tr.getExecutionId(), tr.getExitCode(), tr.getTaskName(),
-	//					tr.getStartTime(), tr.getEndTime(), tr.getExitMessage(), tr.getArguments(),
-	//					tr.getErrorMessage(), tr.getExternalExecutionId(), tr.getParentExecutionId()))
-	//			.collect(Collectors.toList());
-	//}
-
-	//public Optional<TaskExecution> execution(long executionId) {
-	//	return this.executions().stream()
-	//			.filter(Objects::nonNull)
-	//			.filter(e -> e.getExecutionId() == executionId)
-	//			.findFirst();
-	//}
-
-	//public Optional<TaskExecution> executionByParentExecutionId(long parentExecutionId) {
-	//	return this.executions().stream()
-	//			.filter(Objects::nonNull)
-	//			.filter(e -> e.getParentExecutionId() == parentExecutionId)
-	//			.findFirst();
-	//}
-
-	//public TaskExecutionStatus executionStatus(long executionId) {
-	//	return this.execution(executionId)
-	//			.map(this::toTaskExecutionStatus)
-	//			.orElse(TaskExecutionStatus.UNKNOWN);
-	//}
-
-	//private TaskExecutionStatus toTaskExecutionStatus(TaskExecution te) {
-	//
-	//	if (te.getStartTime() == null) {
-	//		return TaskExecutionStatus.UNKNOWN;
-	//	}
-	//	if (te.getEndTime() == null) {
-	//		return TaskExecutionStatus.RUNNING;
-	//	}
-	//	else {
-	//		return (te.getExitCode() == null) ? TaskExecutionStatus.RUNNING :
-	//				((te.getExitCode() == 0) ? TaskExecutionStatus.COMPLETE : TaskExecutionStatus.ERROR);
-	//	}
-	//}
-
 	public List<Task> children() {
 		return !isComposed() ?
 				new ArrayList<>() :
