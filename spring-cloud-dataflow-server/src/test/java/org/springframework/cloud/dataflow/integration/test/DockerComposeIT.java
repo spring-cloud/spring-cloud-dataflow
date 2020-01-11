@@ -18,6 +18,7 @@ package org.springframework.cloud.dataflow.integration.test;
 import java.io.IOException;
 import java.net.URI;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Path;
 import java.time.Duration;
 import java.util.Arrays;
 import java.util.Collection;
@@ -29,27 +30,24 @@ import java.util.UUID;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
-import com.jayway.jsonpath.JsonPath;
-import com.palantir.docker.compose.DockerComposeExtension;
-import com.palantir.docker.compose.configuration.DockerComposeFiles;
-import com.palantir.docker.compose.connection.DockerMachine;
-import com.palantir.docker.compose.connection.waiting.HealthChecks;
 import net.javacrumbs.jsonunit.assertj.JsonAssertions;
 import org.assertj.core.api.Condition;
 import org.awaitility.Awaitility;
+import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assumptions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.BeforeAllCallback;
 import org.junit.jupiter.api.extension.Extension;
 import org.junit.jupiter.api.extension.RegisterExtension;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import org.springframework.cloud.dataflow.integration.test.util.ResourceExtractor;
 import org.springframework.cloud.dataflow.integration.test.util.RuntimeApplicationHelper;
+import org.springframework.cloud.dataflow.integration.test.util.TestProperties;
 import org.springframework.cloud.dataflow.integration.test.util.task.dsl.Task;
 import org.springframework.cloud.dataflow.integration.test.util.task.dsl.Tasks;
 import org.springframework.cloud.dataflow.rest.client.DataFlowTemplate;
@@ -61,7 +59,6 @@ import org.springframework.cloud.dataflow.rest.resource.TaskExecutionStatus;
 import org.springframework.cloud.dataflow.rest.resource.about.AboutResource;
 import org.springframework.core.io.DefaultResourceLoader;
 import org.springframework.util.StreamUtils;
-import org.springframework.util.StringUtils;
 import org.springframework.web.client.RestTemplate;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -73,16 +70,29 @@ import static org.assertj.core.api.Assertions.assertThat;
  *  - https://dataflow.spring.io/docs/installation/local/docker/
  *  - https://dataflow.spring.io/docs/installation/local/docker-customize/
  *
- * The Palantir DockerMachine and DockerComposeRule are used to programmatically deploy the docker-compose files.
+ * The Palantir DockerMachine and DockerComposeExtension are used to programmatically deploy the docker-compose files.
  *
- * The DOCKER_COMPOSE_PATHS allow to configure the list of docker-compose files used for the test.
- * The DATAFLOW_VERSION, SKIPPER_VERSION, STREAM_APPS_URI and TASK_APPS_URI variables (configured via the DockerMachine)
- * allow to specify the dataflow/skipper versions to be used in the tests as well as the version of the Apps and Tasks
- * used.
+ * All important bootstrap parameters are configurable via the {@link TestProperties} properties and variables.
  *
- * The ClosableDockerComposeRule will ensure that all docker containers are removed on tests completion of failure.
+ * The {@link TestProperties#TEST_DOCKER_COMPOSE_PATHS} property allow to configure the list of docker-compose files
+ * used for the test. It accepts a comma separated list of docker-compose yaml file names. It supports local files names
+ * as well  http:/https:, classpath: or specific file: locations. Consult the {@link ResourceExtractor} for further
+ * information.
  *
- * Logs for all docker containers (expect deployed apps) are saved under target/dockerLogs/dockerComposeRuleTest
+ * The {@link TestProperties#TEST_DOCKER_COMPOSE_DATAFLOW_VERSIONN}, {@link TestProperties#TEST_DOCKER_COMPOSE_SKIPPER_VERSIONN},
+ * {@link TestProperties#TEST_DOCKER_COMPOSE_STREAM_APPS_URI} and {@link TestProperties#TEST_DOCKER_COMPOSE_TASK_APPS_URI}
+ * properties (configured via the DockerMachine) allow to specify the dataflow/skipper versions as well as the version
+ * of the Apps and Tasks used.
+ *
+ * Set the {@link TestProperties#TEST_DOCKER_COMPOSE_PULLONSTARTUP} to false to use the local docker images instead
+ * of pulling latest on from the Docker Hub.
+ *
+ * The {@link TestProperties#TEST_DOCKER_COMPOSE_DISABLE_EXTENSION} allow to disable the Docker Compose installation
+ * all together and usually is used in combination with {@link TestProperties#TEST_DOCKER_COMPOSE_DATAFLOW_SERVER_URL}
+ * to connect the and run the test to an external pre-configured cluster.
+ * Use {@link TestProperties#TEST_DOCKER_COMPOSE_PLATFORM_NAME} to test no default platform on the SCDF cluster.
+ *
+ * Logs for all docker containers (expect deployed apps) are saved under target/dockerLogs/DockerComposeIT.
  *
  * The Data Flow REST API (https://docs.spring.io/spring-cloud-dataflow/docs/current/reference/htmlsingle/#api-guide),
  * Java REST Clients (such as DataFlowTemplate, RuntimeOperations, TaskOperations) and the
@@ -129,131 +139,59 @@ public class DockerComposeIT {
 	private static final Logger logger = LoggerFactory.getLogger(DockerComposeIT.class);
 
 	/**
-	 * Data Flow version to use for the tests.
+	 * Default url to connect to dataflow
 	 */
-	public static final String DATAFLOW_VERSION = "2.4.0.BUILD-SNAPSHOT";
-
-	/**
-	 * Skipper version used for the tests.
-	 */
-	public static final String SKIPPER_VERSION = "2.3.0.BUILD-SNAPSHOT";
-
-	/**
-	 * Pre-registered Task apps used for testing.
-	 */
-	public static final String TASK_APPS_URI = "https://dataflow.spring.io/task-maven-latest&force=true";
-
-	/**
-	 * Common Apps URIs
-	 */
-	public static final String KAFKA_MAVEN_STREAM_APPS_URI = "https://dataflow.spring.io/kafka-maven-latest&force=true"; // local/kafka
-	public static final String RABBITMQ_MAVEN_STREAM_APPS_URI = "https://dataflow.spring.io/rabbitmq-maven-latest&force=true"; // cf or local/rabbit
-	public static final String KAFKA_DOCKER_STREAM_APPS_URI = "https://dataflow.spring.io/kafka-docker-latest&force=true"; // k8s
-
-	/**
-	 * Pre-registered Stream apps used in the tests
-	 */
-	private static final String STREAM_APPS_URI = KAFKA_MAVEN_STREAM_APPS_URI;
-
-	/**
-	 * List of docker compose files to mix to bootstrap as a test environment. Most files are found under the
-	 * 'spring-cloud-dataflow/spring-cloud-dataflow-server' folder.
-	 */
-	private static final String[] DOCKER_COMPOSE_PATHS = {
-			"docker-compose.yml", // Configures DataFlow, Skipper, Kafka/Zookeeper and MySQL
-			"docker-compose-prometheus.yml" //,   // metrics collection/visualization with Prometheus and Grafana.
-			//"docker-compose-influxdb.yml",     // metrics collection/visualization with InfluxDB and Grafana.
-			//"docker-compose-postgres.yml",     // Replaces local MySQL database by Postgres.
-			//"docker-compose-rabbitmq.yml",     // Replaces local Kafka message broker by RabbitMQ.
-			//"docker-compose-k8s.yml",          // Adds K8s target platform (called k8s).
-			//"docker-compose-cf.yml"            // Adds CloudFoundry target platform (called cf).
-	};
-
-	private static DataFlowTemplate dataFlowOperations;
-	private static RuntimeApplicationHelper runtimeApps;
-	private static RestTemplate restTemplate;
-	private static Tasks tasks;
+	public static final String DEFAULT_DATAFLOW_URL = "http://localhost:9393";
 
 	/**
 	 * default - local platform (e.g. docker-compose)
 	 * cf - Cloud Foundry platform, configured in docker-compose-cf.yml
 	 * k8s - GKE/Kubernetes platform, configured via docker-compose-k8s.yml.
 	 */
-	private static final String TEST_PLATFORM_NAME = "default";
+	private static final String DEFAULT_TEST_PLATFORM_NAME = "default";
 
 	/**
-	 * Initialize the docker machine with the required environment variables.
+	 * REST and DSL clients used to interact with the SCDF server and run the tests.
 	 */
-	private static DockerMachine dockerMachine = DockerMachine.localMachine()
-			.withAdditionalEnvironmentVariable("DATAFLOW_VERSION", DATAFLOW_VERSION)
-			.withAdditionalEnvironmentVariable("SKIPPER_VERSION", SKIPPER_VERSION)
-			.withAdditionalEnvironmentVariable("STREAM_APPS_URI", STREAM_APPS_URI)
-			.withAdditionalEnvironmentVariable("TASK_APPS_URI", TASK_APPS_URI)
-			.build();
+	private static DataFlowTemplate dataFlowOperations;
+	private static RuntimeApplicationHelper runtimeApps;
+	private static RestTemplate restTemplate;
+	private static Tasks tasks;
+
+	/**
+	 * Folder that collects the external docker-compose YAML files such as
+	 * coming from external classpath, http/https or file locations.
+	 */
+	static Path tempYamlFolder = DockerComposeFactory.createTempDirectory();
 
 	/**
 	 * A JUnit 5 extension to bring up Docker containers defined in docker-compose-xxx.yml files before running tests.
-	 * You can set either disable.docker.compose.extension property of DISABLE_DOCKER_COMPOSE_EXTENSION variable to
+	 * You can set either test.docker.compose.disable.extension property of DISABLE_DOCKER_COMPOSE_EXTENSION variable to
 	 * disable the extension.
 	 */
 	@RegisterExtension
-	public static Extension dockerCompose = isDockerComposeExtensionDisabled() ?
-			(BeforeAllCallback) context -> logger.info("DockerComposeExtension is Disabled!") :
-			DockerComposeExtension.builder()
-					.files(DockerComposeFiles.from(DOCKER_COMPOSE_PATHS))
-					.machine(dockerMachine)
-					.saveLogsTo("target/dockerLogs/DockerComposeIT")
-					.waitingForService("dataflow-server", HealthChecks.toRespond2xxOverHttp(9393,
-							(port) -> port.inFormat("http://$HOST:$EXTERNAL_PORT")), org.joda.time.Duration.standardMinutes(10))
-					.waitingForService("skipper-server", HealthChecks.toRespond2xxOverHttp(7577,
-							(port) -> port.inFormat("http://$HOST:$EXTERNAL_PORT")), org.joda.time.Duration.standardMinutes(10))
-					.pullOnStartup(!isDockerComposePullOnStartupDisabled()) // set to false to test with local dataflow and skipper images.
-					.build();
-
-	/**
-	 * @return True if either disable.docker.compose.extension property of DISABLE_DOCKER_COMPOSE_EXTENSION
-	 * environment variable is set. The values of the variables is irrelevant.
-	 */
-	private static boolean isDockerComposeExtensionDisabled() {
-		return StringUtils.hasText(System.getProperty("disable.docker.compose.extension"))
-				|| StringUtils.hasText(System.getenv("DISABLE_DOCKER_COMPOSE_EXTENSION"));
-	}
-
-	/**
-	 * Set either the disable.docker.compose.pullOnStartup property or the DISABLE_DOCKER_COMPOSE_EXTENSION_PULLONSTARTUP
-	 * environment variable to disable docker image pulling on startup. The exact property or variable values
-	 * are irrelevant. The images are pulled by default.
-	 */
-	private static boolean isDockerComposePullOnStartupDisabled() {
-		return StringUtils.hasText(System.getProperty("disable.docker.compose.pullOnStartup"))
-				|| StringUtils.hasText(System.getenv("DISABLE_DOCKER_COMPOSE_EXTENSION_PULLONSTARTUP"));
-	}
+	public static Extension dockerCompose = DockerComposeFactory.startDockerCompose(tempYamlFolder);
 
 	@BeforeAll
 	public static void beforeClass() {
-		dataFlowOperations = new DataFlowTemplate(URI.create(getDataFlowServerUrl()));
+		String dataFlowUrl = TestProperties.get(
+				TestProperties.TEST_DOCKER_COMPOSE_DATAFLOW_SERVER_URL, DEFAULT_DATAFLOW_URL);
+		dataFlowOperations = new DataFlowTemplate(URI.create(dataFlowUrl));
 		logger.info("Configured platforms: " + dataFlowOperations.streamOperations().listPlatforms().stream()
 				.map(d -> String.format("[%s:%s]", d.getName(), d.getType())).collect(Collectors.joining()));
-		runtimeApps = new RuntimeApplicationHelper(dataFlowOperations, TEST_PLATFORM_NAME);
+		runtimeApps = new RuntimeApplicationHelper(dataFlowOperations,
+				TestProperties.get(TestProperties.TEST_DOCKER_COMPOSE_PLATFORM_NAME, DEFAULT_TEST_PLATFORM_NAME));
 		restTemplate = new RestTemplate(); // used for HTTP post in tests
 		tasks = new Tasks(dataFlowOperations);
 		Awaitility.setDefaultPollInterval(Duration.ofSeconds(5));
 		Awaitility.setDefaultTimeout(Duration.ofMinutes(10));
 	}
 
-	/**
-	 * Allow to override and connect the tests to and external DataFlow server. Defaults to http://localhost:9393 if
-	 * neither test.dataflow.server.url property or TEST_DATAFLOW_SERVER_URL variable are set.
-	 */
-	private static String getDataFlowServerUrl() {
-		String dataFlowServerUrl = System.getProperty("test.dataflow.server.url");
-		if (!StringUtils.hasText(dataFlowServerUrl)) {
-			dataFlowServerUrl = System.getenv("TEST_DATAFLOW_SERVER_URL");
+	@AfterAll
+	public static void afterAll() {
+		if (tempYamlFolder != null && tempYamlFolder.toFile().exists()) {
+			tempYamlFolder.toFile().delete();
 		}
-		if (!StringUtils.hasText(dataFlowServerUrl)) {
-			dataFlowServerUrl = "http://localhost:9393";
-		}
-		return dataFlowServerUrl;
 	}
 
 	@BeforeEach
@@ -327,7 +265,7 @@ public class DockerComposeIT {
 
 			String message = "Unique Test message: " + new Random().nextInt();
 
-			restTemplate.postForObject(runtimeApps.getApplicationInstanceUrl(httpApp), message, String.class);
+			httpPost(runtimeApps.getApplicationInstanceUrl(httpApp), message);
 
 			Awaitility.await().atMost(Duration.ofMinutes(10)).until(
 					() -> runtimeApps.getFirstInstanceLog(stream.getName(), "log").contains(message.toUpperCase()));
@@ -363,14 +301,12 @@ public class DockerComposeIT {
 			String httpAppUrl = runtimeApps.getApplicationInstanceUrl(httpApp);
 
 			String message = "How much wood would a woodchuck chuck if a woodchuck could chuck wood";
-			restTemplate.postForObject(httpAppUrl, message, String.class);
+			httpPost(httpAppUrl, message);
 
 			Awaitility.await().atMost(Duration.ofMinutes(10)).until(() -> {
 				Collection<String> logs = runtimeApps.applicationInstanceLogs(stream.getName(), "log").values();
 
-				if (logs.size() != 2) return false;
-
-				return logs.stream()
+				return (logs.size() == 2) && logs.stream()
 						// partition order is undetermined
 						.map(log -> (log.contains("WOODCHUCK-0")) ?
 								Arrays.asList("WOODCHUCK-0", "How", "chuck").stream().allMatch(log::contains) :
@@ -506,7 +442,7 @@ public class DockerComposeIT {
 			String message = "Unique Test message: " + new Random().nextInt();
 
 			String httpAppUrl = runtimeApps.getApplicationInstanceUrl(httpStream.getName(), "http");
-			restTemplate.postForObject(httpAppUrl, message, String.class);
+			httpPost(httpAppUrl, message);
 
 			Awaitility.await().until(() -> runtimeApps.getFirstInstanceLog(logStream.getName(), "log")
 					.contains(message));
@@ -534,7 +470,7 @@ public class DockerComposeIT {
 			String message = "Unique Test message: " + new Random().nextInt();
 
 			String httpAppUrl = runtimeApps.getApplicationInstanceUrl(httpLogStream.getName(), "http");
-			restTemplate.postForObject(httpAppUrl, message, String.class);
+			httpPost(httpAppUrl, message);
 
 			Awaitility.await().until(() -> runtimeApps.getFirstInstanceLog(tapStream.getName(), "log")
 					.contains(message));
@@ -568,7 +504,7 @@ public class DockerComposeIT {
 			String messageOne = "Unique Test message: " + new Random().nextInt();
 
 			String httpAppUrl = runtimeApps.getApplicationInstanceUrl(httpStreamOne.getName(), "http");
-			restTemplate.postForObject(httpAppUrl, messageOne, String.class);
+			httpPost(httpAppUrl, messageOne);
 
 			Awaitility.await().until(() -> runtimeApps.getFirstInstanceLog(logStream.getName(), "log")
 					.contains(messageOne));
@@ -576,7 +512,7 @@ public class DockerComposeIT {
 			String messageTwo = "Unique Test message: " + new Random().nextInt();
 
 			String httpAppUrl2 = runtimeApps.getApplicationInstanceUrl(httpStreamTwo.getName(), "http");
-			restTemplate.postForObject(httpAppUrl2, messageTwo, String.class);
+			httpPost(httpAppUrl2, messageTwo);
 
 			Awaitility.await().until(() -> runtimeApps.getFirstInstanceLog(logStream.getName(), "log")
 					.contains(messageTwo));
@@ -608,8 +544,8 @@ public class DockerComposeIT {
 			Awaitility.await().until(() -> httpStream.getStatus().equals(DEPLOYED));
 
 			String httpAppUrl = runtimeApps.getApplicationInstanceUrl(httpStream.getName(), "http");
-			restTemplate.postForObject(httpAppUrl, "abcd", String.class);
-			restTemplate.postForObject(httpAppUrl, "defg", String.class);
+			httpPost(httpAppUrl, "abcd");
+			httpPost(httpAppUrl, "defg");
 
 			Awaitility.await().until(() -> runtimeApps.getFirstInstanceLog(fooLogStream.getName(), "log")
 					.contains("abcd-foo"));
@@ -674,13 +610,6 @@ public class DockerComposeIT {
 				//http://localhost:8086/query?db=myinfluxdb&q=SHOW%20MEASUREMENTS
 
 				// http://localhost:8086/query?db=myinfluxdb&q=SELECT%20value%20FROM%20%22message_my_http_counter%22%20GROUP%20BY%20%2A%20ORDER%20BY%20ASC%20LIMIT%201
-				Awaitility.await().until(() -> {
-					Object messageCount = JsonPath.read(
-							httpGet("http://localhost:8086/query?db=myinfluxdb&q=" +
-									"SELECT value FROM \"message_my_http_counter\" GROUP BY * ORDER BY ASC LIMIT 1"),
-							"$.results[0].series[0].values[0][1]");
-					return messageCount != null && ((Integer) messageCount) == 3;
-				});
 
 				// http://localhost:8086/query?q=SHOW%20DATABASES
 				JsonAssertions.assertThatJson(httpGet("http://localhost:8086/query?q=SHOW DATABASES"))
@@ -774,6 +703,8 @@ public class DockerComposeIT {
 
 	@Test
 	public void composedTask() {
+		logger.info("task-composed-task-runner-test");
+
 		try (Task task = tasks.builder()
 				.name(randomTaskName())
 				.definition("a: timestamp && b:timestamp")
@@ -783,7 +714,7 @@ public class DockerComposeIT {
 			assertThat(task.children().size()).isEqualTo(2);
 
 			// first launch
-			logger.info("task-composed-task-runner-test: First Launch");
+
 			long launchId1 = task.launch();
 
 			Awaitility.await().until(() -> task.executionStatus(launchId1) == TaskExecutionStatus.COMPLETE);
@@ -800,7 +731,6 @@ public class DockerComposeIT {
 			task.executions().forEach(execution -> assertThat(execution.getExitCode()).isEqualTo(EXIT_CODE_SUCCESS));
 
 			// second launch
-			logger.info("task-composed-task-runner-test: Second Launch");
 			long launchId2 = task.launch();
 
 			Awaitility.await().until(() -> task.executionStatus(launchId2) == TaskExecutionStatus.ERROR);
@@ -821,6 +751,8 @@ public class DockerComposeIT {
 
 	@Test
 	public void multipleComposedTaskWithArguments() {
+		logger.info("task-multiple-composed-task-with-arguments-test");
+
 		try (Task task = tasks.builder()
 				.name(randomTaskName())
 				.definition("a: timestamp && b:timestamp")
@@ -830,7 +762,6 @@ public class DockerComposeIT {
 			assertThat(task.children().size()).isEqualTo(2);
 
 			// first launch
-			logger.info("task-multiple-composed-task-with-arguments-test: First Launch");
 			List<String> arguments = Arrays.asList("--increment-instance-enabled=true");
 			long launchId1 = task.launch(arguments);
 
@@ -848,7 +779,6 @@ public class DockerComposeIT {
 			task.executions().forEach(execution -> assertThat(execution.getExitCode()).isEqualTo(EXIT_CODE_SUCCESS));
 
 			// second launch
-			logger.info("task-multiple-composed-task-with-arguments-test: Second Launch");
 			long launchId2 = task.launch(arguments);
 
 			Awaitility.await().until(() -> task.executionStatus(launchId2) == TaskExecutionStatus.COMPLETE);

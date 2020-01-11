@@ -134,7 +134,7 @@ property `spring.cloud.config.failFast=true` and the client will halt with an Ex
 If the Data Flow Server cannot connect to the cloud config server, the
 following warning message will be logged: 
 ----
-`WARN 42924 --- [           main] c.c.c.ConfigServicePropertySourceLocator : Could not locate PropertySource: I/O error on GET request for "http://localhost:8888/spring-cloud-dataflow-server/default":Connection refused; nested exception is java.net.ConnectException: Connection refused`
+`WARN 42924 --- [main] c.c.c.ConfigServicePropertySourceLocator : Could not locate PropertySource: I/O error on GET request for "http://localhost:8888/spring-cloud-dataflow-server/default":Connection refused; nested exception is java.net.ConnectException: Connection refused`
 ----
 To disable the cloud config server set the `spring.cloud.config.enabled` property to `false`.
 
@@ -142,8 +142,21 @@ To disable the cloud config server set the `spring.cloud.config.enabled` propert
 
 To run the docker compose integration, enable the `-Pfailsafe` maven profile.
 
-. You can run only the integration tests like this:
-+
+. You can run just the integration tests like this:
+
 ----
 ./mvnw clean test-compile failsafe:integration-test -pl spring-cloud-dataflow-server -Pfailsafe
 ----
+
+It the help of the `TestProperties` properties one can change the docker-compose files used, the exact versions of the
+SCDF, Skipper servers installed or the versions Stream and Task apps:
+
+----
+./mvnw clean test-compile failsafe:integration-test -pl spring-cloud-dataflow-server -Pfailsafe
+   -Dtest.docker.compose.paths=docker-compose.yml,docker-compose-influxdb.yml,docker-compose-postgres.yml,docker-compose-rabbitmq.yml
+   -Dtest.docker.compose.stream.apps.uri=https://dataflow.spring.io/rabbitmq-maven-latest
+   -Dtest.docker.compose.dataflow.version=2.4.0.BUILD-SNAPSHOT
+   -Dtest.docker.compose.skipper.version=2.3.0.BUILD-SNAPSHOT
+----
+The `test.docker.compose.paths` property accepts comma separated list of docker compose files names and supports `file:`, `classpath:` and `http:`/`https:` URI schemas. If the schema prefix is not explicitly set the file is treated as local one.
+
