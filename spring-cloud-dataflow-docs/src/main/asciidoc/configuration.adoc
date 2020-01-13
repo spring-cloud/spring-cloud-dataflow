@@ -91,12 +91,12 @@ There is a limited support for using `Wagon` transport with maven. Currently thi
 exists to support _preemptive_ authentication with `http` based repositories
 and needs to be enabled manually.
 
-Wagon based http transport is enable by setting `maven.use-wagon` property
-to `true` and then _preemptive_ authentication authentication can be enabled
-per remote repository. Configuration loosely follows similar patterns found
-in https://maven.apache.org/guides/mini/guide-http-settings.html[HttpClient HTTP Wagon].
-Documentation in Maven's own site is slightly misleading and missing most
-of the possible config options.
+Wagon based http transport is enabled by setting `maven.use-wagon` property
+to `true` and then _preemptive_ authentication can be enabled per remote
+repository. Configuration loosely follows similar patterns found in
+https://maven.apache.org/guides/mini/guide-http-settings.html[HttpClient HTTP Wagon].
+At a time of writing this, documentation in Maven's own site is slightly misleading
+and missing most of the possible config options.
 
 Namespace `maven.remote-repositories.<repo>.wagon.http` contains all Wagon
 http related settings and keys directly under it maps to supported http methods,
