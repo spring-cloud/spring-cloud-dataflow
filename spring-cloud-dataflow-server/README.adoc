@@ -148,7 +148,7 @@ To run the docker compose integration, enable the `-Pfailsafe` maven profile.
 ./mvnw clean test-compile failsafe:integration-test -pl spring-cloud-dataflow-server -Pfailsafe
 ----
 
-It the help of the `TestProperties` properties one can change the docker-compose files used, the exact versions of the
+With the help of the `TestProperties` properties one can change the docker-compose files used, the exact versions of the
 SCDF, Skipper servers installed or the versions Stream and Task apps:
 
 ----

@@ -138,21 +138,4 @@ public class ResourceExtractor {
 		}
 		return null;
 	}
-
-	public static void main(String[] args) {
-
-		Path tempFolder = Paths.get("/tmp/test/yml");
-		tempFolder.toFile().deleteOnExit();
-		tempFolder.toFile().delete();
-		tempFolder.toFile().mkdirs();
-
-		String[] extractedResourcesUris = new ResourceExtractor(tempFolder).extract(
-				"https://raw.githubusercontent.com/spring-cloud/spring-cloud-dataflow/master/spring-cloud-dataflow-server/docker-compose.yml",
-				"classpath:/application.properties",
-				"file:/Users/ctzolov/Dev/projects/scdf/spring-cloud-dataflow/spring-cloud-dataflow-server/docker-compose-postgres.yml",
-				"file:spring-cloud-dataflow-server/docker-compose-cf.yml",
-				"docker-compose-debug-dataflow.yml");
-
-		System.out.println(Arrays.toString(extractedResourcesUris));
-	}
 }

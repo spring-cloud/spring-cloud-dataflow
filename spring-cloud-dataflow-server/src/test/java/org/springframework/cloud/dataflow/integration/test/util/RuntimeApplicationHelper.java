@@ -56,7 +56,6 @@ public class RuntimeApplicationHelper {
 				.filter(p -> p.getName().equalsIgnoreCase(platformName))
 				.map(d -> d.getType()).findFirst().get();
 		Assert.hasText(this.platformType, "Could not find platform type for: " + platformName);
-		logger.info(String.format("Selected platform: [%s:%s]", platformName, platformType));
 	}
 
 	public String getPlatformName() {
@@ -173,7 +172,7 @@ public class RuntimeApplicationHelper {
 		String streamName = instanceAttributes.get(StreamRuntimePropertyKeys.ATTRIBUTE_SKIPPER_RELEASE_NAME);
 		String appName = instanceAttributes.get(StreamRuntimePropertyKeys.ATTRIBUTE_SKIPPER_APPLICATION_NAME);
 		String guid = instanceAttributes.get(StreamRuntimePropertyKeys.ATTRIBUTE_GUID);
-		Awaitility.await().atMost(Duration.ofMinutes(10)).until(() -> this.appInstanceAttributes().values().stream()
+			Awaitility.await().atMost(Duration.ofMinutes(10)).until(() -> this.appInstanceAttributes().values().stream()
 				.filter(m -> m.get(StreamRuntimePropertyKeys.ATTRIBUTE_SKIPPER_RELEASE_NAME).equals(streamName))
 				.filter(m -> m.get(StreamRuntimePropertyKeys.ATTRIBUTE_SKIPPER_APPLICATION_NAME).equals(appName))
 				.allMatch(m -> m.containsKey(StreamRuntimePropertyKeys.ATTRIBUTE_URL)));

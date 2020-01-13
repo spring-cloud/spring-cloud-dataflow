@@ -30,24 +30,30 @@ import java.util.UUID;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
+import com.jayway.jsonpath.JsonPath;
 import net.javacrumbs.jsonunit.assertj.JsonAssertions;
 import org.assertj.core.api.Condition;
 import org.awaitility.Awaitility;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assumptions;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestMethodOrder;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.extension.Extension;
 import org.junit.jupiter.api.extension.RegisterExtension;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.cloud.dataflow.integration.test.util.DockerComposeFactory;
+import org.springframework.cloud.dataflow.integration.test.util.DockerComposeFactoryProperties;
 import org.springframework.cloud.dataflow.integration.test.util.ResourceExtractor;
 import org.springframework.cloud.dataflow.integration.test.util.RuntimeApplicationHelper;
-import org.springframework.cloud.dataflow.integration.test.util.TestProperties;
 import org.springframework.cloud.dataflow.integration.test.util.task.dsl.Task;
 import org.springframework.cloud.dataflow.integration.test.util.task.dsl.Tasks;
 import org.springframework.cloud.dataflow.rest.client.DataFlowTemplate;
@@ -58,6 +64,7 @@ import org.springframework.cloud.dataflow.rest.client.dsl.StreamDefinition;
 import org.springframework.cloud.dataflow.rest.resource.TaskExecutionStatus;
 import org.springframework.cloud.dataflow.rest.resource.about.AboutResource;
 import org.springframework.core.io.DefaultResourceLoader;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.util.StreamUtils;
 import org.springframework.web.client.RestTemplate;
 
@@ -72,25 +79,20 @@ import static org.assertj.core.api.Assertions.assertThat;
  *
  * The Palantir DockerMachine and DockerComposeExtension are used to programmatically deploy the docker-compose files.
  *
- * All important bootstrap parameters are configurable via the {@link TestProperties} properties and variables.
+ * All important bootstrap parameters are configurable via the {@link DockerComposeFactoryProperties} properties and variables.
  *
- * The {@link TestProperties#TEST_DOCKER_COMPOSE_PATHS} property allow to configure the list of docker-compose files
+ * The {@link DockerComposeFactoryProperties#TEST_DOCKER_COMPOSE_PATHS} property allow to configure the list of docker-compose files
  * used for the test. It accepts a comma separated list of docker-compose yaml file names. It supports local files names
  * as well  http:/https:, classpath: or specific file: locations. Consult the {@link ResourceExtractor} for further
  * information.
  *
- * The {@link TestProperties#TEST_DOCKER_COMPOSE_DATAFLOW_VERSIONN}, {@link TestProperties#TEST_DOCKER_COMPOSE_SKIPPER_VERSIONN},
- * {@link TestProperties#TEST_DOCKER_COMPOSE_STREAM_APPS_URI} and {@link TestProperties#TEST_DOCKER_COMPOSE_TASK_APPS_URI}
+ * The {@link DockerComposeFactoryProperties#TEST_DOCKER_COMPOSE_DATAFLOW_VERSIONN}, {@link DockerComposeFactoryProperties#TEST_DOCKER_COMPOSE_SKIPPER_VERSIONN},
+ * {@link DockerComposeFactoryProperties#TEST_DOCKER_COMPOSE_STREAM_APPS_URI} and {@link DockerComposeFactoryProperties#TEST_DOCKER_COMPOSE_TASK_APPS_URI}
  * properties (configured via the DockerMachine) allow to specify the dataflow/skipper versions as well as the version
  * of the Apps and Tasks used.
  *
- * Set the {@link TestProperties#TEST_DOCKER_COMPOSE_PULLONSTARTUP} to false to use the local docker images instead
+ * Set the {@link DockerComposeFactoryProperties#TEST_DOCKER_COMPOSE_PULLONSTARTUP} to false to use the local docker images instead
  * of pulling latest on from the Docker Hub.
- *
- * The {@link TestProperties#TEST_DOCKER_COMPOSE_DISABLE_EXTENSION} allow to disable the Docker Compose installation
- * all together and usually is used in combination with {@link TestProperties#TEST_DOCKER_COMPOSE_DATAFLOW_SERVER_URL}
- * to connect the and run the test to an external pre-configured cluster.
- * Use {@link TestProperties#TEST_DOCKER_COMPOSE_PLATFORM_NAME} to test no default platform on the SCDF cluster.
  *
  * Logs for all docker containers (expect deployed apps) are saved under target/dockerLogs/DockerComposeIT.
  *
@@ -98,6 +100,11 @@ import static org.assertj.core.api.Assertions.assertThat;
  * Java REST Clients (such as DataFlowTemplate, RuntimeOperations, TaskOperations) and the
  * Java DSL (https://dataflow.spring.io/docs/feature-guides/streams/java-dsl/) are used by the tests to interact with
  * the Data Flow environment.
+ *
+ * The {@link DockerComposeTestProperties} allow to disable the Docker Compose installation
+ * all together and usually is used in combination with {@link DockerComposeTestProperties#getDataflowServerUrl}
+ * to connect the and run the test to an external pre-configured cluster.
+ * Use {@link DockerComposeTestProperties#getPlatformName()} to test no default platform on the SCDF cluster.
  *
  * The {@link Awaitility} is DSL utility that allows to timeout block the test execution until certain stream or application
  * state is reached or certain log content appears.
@@ -134,29 +141,23 @@ import static org.assertj.core.api.Assertions.assertThat;
  *
  * @author Christian Tzolov
  */
+@ExtendWith(SpringExtension.class)
+@EnableConfigurationProperties({ DockerComposeTestProperties.class })
+@TestMethodOrder(MethodOrderer.Alphanumeric.class)
 public class DockerComposeIT {
 
 	private static final Logger logger = LoggerFactory.getLogger(DockerComposeIT.class);
 
-	/**
-	 * Default url to connect to dataflow
-	 */
-	public static final String DEFAULT_DATAFLOW_URL = "http://localhost:9393";
-
-	/**
-	 * default - local platform (e.g. docker-compose)
-	 * cf - Cloud Foundry platform, configured in docker-compose-cf.yml
-	 * k8s - GKE/Kubernetes platform, configured via docker-compose-k8s.yml.
-	 */
-	private static final String DEFAULT_TEST_PLATFORM_NAME = "default";
+	@Autowired
+	private DockerComposeTestProperties testProperties;
 
 	/**
 	 * REST and DSL clients used to interact with the SCDF server and run the tests.
 	 */
-	private static DataFlowTemplate dataFlowOperations;
-	private static RuntimeApplicationHelper runtimeApps;
-	private static RestTemplate restTemplate;
-	private static Tasks tasks;
+	private DataFlowTemplate dataFlowOperations;
+	private RuntimeApplicationHelper runtimeApps;
+	private RestTemplate restTemplate;
+	private Tasks tasks;
 
 	/**
 	 * Folder that collects the external docker-compose YAML files such as
@@ -172,21 +173,6 @@ public class DockerComposeIT {
 	@RegisterExtension
 	public static Extension dockerCompose = DockerComposeFactory.startDockerCompose(tempYamlFolder);
 
-	@BeforeAll
-	public static void beforeClass() {
-		String dataFlowUrl = TestProperties.get(
-				TestProperties.TEST_DOCKER_COMPOSE_DATAFLOW_SERVER_URL, DEFAULT_DATAFLOW_URL);
-		dataFlowOperations = new DataFlowTemplate(URI.create(dataFlowUrl));
-		logger.info("Configured platforms: " + dataFlowOperations.streamOperations().listPlatforms().stream()
-				.map(d -> String.format("[%s:%s]", d.getName(), d.getType())).collect(Collectors.joining()));
-		runtimeApps = new RuntimeApplicationHelper(dataFlowOperations,
-				TestProperties.get(TestProperties.TEST_DOCKER_COMPOSE_PLATFORM_NAME, DEFAULT_TEST_PLATFORM_NAME));
-		restTemplate = new RestTemplate(); // used for HTTP post in tests
-		tasks = new Tasks(dataFlowOperations);
-		Awaitility.setDefaultPollInterval(Duration.ofSeconds(5));
-		Awaitility.setDefaultTimeout(Duration.ofMinutes(10));
-	}
-
 	@AfterAll
 	public static void afterAll() {
 		if (tempYamlFolder != null && tempYamlFolder.toFile().exists()) {
@@ -196,6 +182,13 @@ public class DockerComposeIT {
 
 	@BeforeEach
 	public void before() {
+		dataFlowOperations = new DataFlowTemplate(URI.create(testProperties.getDataflowServerUrl()));
+		runtimeApps = new RuntimeApplicationHelper(dataFlowOperations, testProperties.getPlatformName());
+		tasks = new Tasks(dataFlowOperations);
+		restTemplate = new RestTemplate(); // used for HTTP post in tests
+
+		Awaitility.setDefaultPollInterval(Duration.ofSeconds(5));
+		Awaitility.setDefaultTimeout(Duration.ofMinutes(10));
 		Awaitility.await().until(() -> dataFlowOperations.appRegistryOperations().list().getMetadata().getTotalElements() >= 68L);
 	}
 
@@ -203,6 +196,13 @@ public class DockerComposeIT {
 	public void after() {
 		dataFlowOperations.streamOperations().destroyAll();
 		dataFlowOperations.taskOperations().destroyAll();
+	}
+
+	@Test
+	public void aboutTestInfo() {
+		logger.info("Configured server platforms: " + dataFlowOperations.streamOperations().listPlatforms().stream()
+				.map(d -> String.format("[name: %s, type: %s]", d.getName(), d.getType())).collect(Collectors.joining()));
+		logger.info(String.format("Selected platform: [name: %s, type: %s]", runtimeApps.getPlatformName(), runtimeApps.getPlatformType()));
 	}
 
 	// -----------------------------------------------------------------------
@@ -559,7 +559,7 @@ public class DockerComposeIT {
 	// -----------------------------------------------------------------------
 	@DisplayName("Test Analytics Counters")
 	@Test
-	public void analyticsCounter() throws InterruptedException {
+	public void analyticsCounter() {
 
 		Assumptions.assumeTrue(dataFlowOperations.aboutOperation().get().getFeatureInfo().isGrafanaEnabled());
 
@@ -586,17 +586,19 @@ public class DockerComposeIT {
 			httpPost(httpAppUrl, message2);
 			httpPost(httpAppUrl, message3);
 
-			// Wait for ~1 min for Micrometer to send first metrics to Prometheus.
-			Thread.sleep(Duration.ofSeconds(30).toMillis());
-
 			// Prometheus tests
 			Assumptions.assumingThat(this::prometheusPresent, () -> {
 				logger.info("stream-analytics-counter-test: Prometheus");
 
-				JsonAssertions.assertThatJson(httpGet("http://localhost:9090/api/v1/query?query=my_http_counter_total"))
+				// Wait for ~1 min for Micrometer to send first metrics to Prometheus.
+				Awaitility.await().until(() -> (int) JsonPath.parse(
+						httpGet(testProperties.getPrometheusUrl() + "/api/v1/query?query=my_http_counter_total"))
+						.read("$.data.result.length()") > 0);
+
+				JsonAssertions.assertThatJson(httpGet(testProperties.getPrometheusUrl() + "/api/v1/query?query=my_http_counter_total"))
 						.isEqualTo(resourceToString("classpath:/my_http_counter_total.json"));
 
-				JsonAssertions.assertThatJson(httpGet("http://localhost:9090/api/v1/query?query=message_my_http_counter_total"))
+				JsonAssertions.assertThatJson(httpGet(testProperties.getPrometheusUrl() + "/api/v1/query?query=message_my_http_counter_total"))
 						.inPath("$.data.result[0].value[1]")
 						.isEqualTo("\"3\"");
 			});
@@ -605,19 +607,22 @@ public class DockerComposeIT {
 			Assumptions.assumingThat(this::influxPresent, () -> {
 				logger.info("stream-analytics-counter-test: InfluxDB");
 
-				Thread.sleep(Duration.ofSeconds(30).toMillis());
+				// Wait for ~1 min for Micrometer to send first metrics to Influx.
+				Awaitility.await().until(() -> !JsonPath.parse(httpGet(testProperties.getInfluxUrl() + "/query?db=myinfluxdb&q=SELECT * FROM \"my_http_counter\""))
+						.read("$.results[0][?(@.series)].length()").toString().equals("[]"));
+
 				//http://localhost:8086/query?db=myinfluxdb&q=SELECT%20%22count%22%20FROM%20%22spring_integration_send%22
 				//http://localhost:8086/query?db=myinfluxdb&q=SHOW%20MEASUREMENTS
 
 				// http://localhost:8086/query?db=myinfluxdb&q=SELECT%20value%20FROM%20%22message_my_http_counter%22%20GROUP%20BY%20%2A%20ORDER%20BY%20ASC%20LIMIT%201
 
 				// http://localhost:8086/query?q=SHOW%20DATABASES
-				JsonAssertions.assertThatJson(httpGet("http://localhost:8086/query?q=SHOW DATABASES"))
+				JsonAssertions.assertThatJson(httpGet(testProperties.getInfluxUrl() + "/query?q=SHOW DATABASES"))
 						.inPath("$.results[0].series[0].values[1][0]")
 						.isEqualTo("myinfluxdb");
 
 				// http://localhost:8086/query?db=myinfluxdb&q=SELECT%20%2A%20FROM%20%22my_http_counter%22
-				String myHttpCounter = httpGet("http://localhost:8086/query?db=myinfluxdb&q=SELECT * FROM \"my_http_counter\"");
+				String myHttpCounter = httpGet(testProperties.getInfluxUrl() + "/query?db=myinfluxdb&q=SELECT * FROM \"my_http_counter\"");
 				JsonAssertions.assertThatJson(myHttpCounter).inPath("$.results[0].series[0].values[0][6]")
 						.isEqualTo(String.format("\"%s\"", message1.length()));
 				JsonAssertions.assertThatJson(myHttpCounter).inPath("$.results[0].series[0].values[1][6]")
