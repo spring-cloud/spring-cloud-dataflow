@@ -50,12 +50,12 @@
 		<checkstyle.version>${maven-checkstyle-plugin.version}</checkstyle.version>
 		<puppycrawl-tools-checkstyle.version>8.18</puppycrawl-tools-checkstyle.version>
 		<spring-javaformat.version>0.0.9</spring-javaformat.version>
-		<maven-failsafe-plugin.version>2.22.1</maven-failsafe-plugin.version>
+		<maven-failsafe-plugin.version>3.0.0-M4</maven-failsafe-plugin.version>
 		<maven-javadoc-plugin.version>3.1.0</maven-javadoc-plugin.version>
 		<maven-source-plugin.version>3.0.1</maven-source-plugin.version>
 		<maven-jar-plugin.version>3.1.0</maven-jar-plugin.version>
 		<maven-antrun-plugin.version>1.8</maven-antrun-plugin.version>
-		<maven-surefire-plugin.version>2.22.1</maven-surefire-plugin.version>
+		<maven-surefire-plugin.version>3.0.0-M4</maven-surefire-plugin.version>
 		<maven-war-plugin.version>3.2.2</maven-war-plugin.version>
 		<exec-maven-plugin.version>1.6.0</exec-maven-plugin.version>
 		<maven-resources-plugin.version>3.1.0</maven-resources-plugin.version>
@@ -92,6 +92,8 @@
 		<configprops.inclusionPattern>.*</configprops.inclusionPattern>
 		<maven-dependency-plugin-for-docs.phase>generate-resources</maven-dependency-plugin-for-docs.phase>
 		<maven-dependency-plugin-for-guides.phase>generate-resources</maven-dependency-plugin-for-guides.phase>
+		<groups></groups>
+		<excludedGroups>slow,docker</excludedGroups>
 	</properties>
 	<dependencyManagement>
 		<dependencies>
@@ -204,6 +206,10 @@
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-failsafe-plugin</artifactId>
 					<version>${maven-failsafe-plugin.version}</version>
+					<configuration>
+						<groups>${groups}</groups>
+						<excludedGroups>${excludedGroups}</excludedGroups>
+					</configuration>
 					<executions>
 						<execution>
 							<goals>
@@ -244,6 +250,8 @@
 						<excludes>
 							<exclude>**/Abstract*.java</exclude>
 						</excludes>
+						<groups>${groups}</groups>
+						<excludedGroups>${excludedGroups}</excludedGroups>
 					</configuration>
 				</plugin>
 				<plugin>
@@ -1268,6 +1276,18 @@
 			<properties>
 				<checkstyle.skip>true</checkstyle.skip>
 			</properties>
+		</profile>
+		<profile>
+			<id>failsafe</id>
+			<build>
+				<plugins>
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-failsafe-plugin</artifactId>
+						<version>${maven-failsafe-plugin.version}</version>
+					</plugin>
+				</plugins>
+			</build>
 		</profile>
 	</profiles>
 </project>
