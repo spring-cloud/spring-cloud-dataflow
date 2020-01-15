@@ -213,10 +213,10 @@ public class DockerComposeIT {
 	public void featureInfo() {
 		logger.info("platform-feature-info-test");
 		AboutResource about = dataFlowOperations.aboutOperation().get();
-		assertThat(about.getFeatureInfo().isGrafanaEnabled()).isEqualTo(prometheusPresent() || influxPresent())
+		assertThat(about.getFeatureInfo().isGrafanaEnabled())
 				.withFailMessage(String.format("Grafana should be enabled [%s] only if either Prometheus [%s] or " +
-								"Influx [%s] are enabled"), about.getFeatureInfo().isGrafanaEnabled(),
-						prometheusPresent(), influxPresent());
+						"Influx [%s] are enabled"), about.getFeatureInfo().isGrafanaEnabled(), prometheusPresent(), influxPresent())
+				.isEqualTo(prometheusPresent() || influxPresent());
 		assertThat(about.getFeatureInfo().isAnalyticsEnabled()).isTrue();
 		assertThat(about.getFeatureInfo().isStreamsEnabled()).isTrue();
 		assertThat(about.getFeatureInfo().isTasksEnabled()).isTrue();
