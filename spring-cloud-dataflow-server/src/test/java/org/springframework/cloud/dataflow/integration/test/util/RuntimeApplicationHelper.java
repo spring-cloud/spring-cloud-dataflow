@@ -34,6 +34,9 @@ import org.springframework.web.client.RestTemplate;
  */
 public class RuntimeApplicationHelper {
 
+	public static final String LOCAL_PLATFORM_TYPE = "local";
+	public static final String KUBERNETES_PLATFORM_TYPE = "kubernetes";
+	public static final String CLOUDFOUNDRY_PLATFORM_TYPE = "cloudfoundry";
 	private final Logger logger = LoggerFactory.getLogger(RuntimeApplicationHelper.class);
 
 	private final String platformType;
@@ -142,11 +145,11 @@ public class RuntimeApplicationHelper {
 	 */
 	public String getApplicationInstanceUrl(Map<String, String> instanceAttributes) {
 		switch (this.platformType) {
-		case "local":
+		case LOCAL_PLATFORM_TYPE:
 			return localApplicationInstanceUrl(instanceAttributes);
-		case "kubernetes":
+		case KUBERNETES_PLATFORM_TYPE:
 			return kubernetesApplicationInstanceUrl(instanceAttributes);
-		case "cloudfoundry":
+		case CLOUDFOUNDRY_PLATFORM_TYPE:
 			return cloudFoundryApplicationInstanceUrl(instanceAttributes);
 		}
 
@@ -211,7 +214,7 @@ public class RuntimeApplicationHelper {
 			}
 		}
 		catch (Exception e) {
-			logger.warn("Error while trying to access logfile from '" + logFileUrl + "' due to : " + e);
+			logger.warn("Error while trying to access logfile from '" + logFileUrl + "' due to : ", e);
 		}
 		return logContent;
 	}

@@ -190,7 +190,7 @@ public class DockerComposeIT {
 
 		Awaitility.setDefaultPollInterval(Duration.ofSeconds(5));
 		Awaitility.setDefaultTimeout(Duration.ofMinutes(10));
-		Awaitility.await().until(() -> dataFlowOperations.appRegistryOperations().list().getMetadata().getTotalElements() >= 68L);
+		Awaitility.await().until(() -> dataFlowOperations.appRegistryOperations().list().getMetadata().getTotalElements() >= 60L);
 	}
 
 	@AfterEach
@@ -213,11 +213,10 @@ public class DockerComposeIT {
 	public void featureInfo() {
 		logger.info("platform-feature-info-test");
 		AboutResource about = dataFlowOperations.aboutOperation().get();
-
-		assertThat(about.getFeatureInfo().isGrafanaEnabled()).isEqualTo(prometheusPresent() || influxPresent())
+		assertThat(about.getFeatureInfo().isGrafanaEnabled())
 				.withFailMessage(String.format("Grafana should be enabled [%s] only if either Prometheus [%s] or " +
-								"Influx [%s] are enabled"), about.getFeatureInfo().isGrafanaEnabled(),
-						prometheusPresent(), influxPresent());
+						"Influx [%s] are enabled"), about.getFeatureInfo().isGrafanaEnabled(), prometheusPresent(), influxPresent())
+				.isEqualTo(prometheusPresent() || influxPresent());
 		assertThat(about.getFeatureInfo().isAnalyticsEnabled()).isTrue();
 		assertThat(about.getFeatureInfo().isStreamsEnabled()).isTrue();
 		assertThat(about.getFeatureInfo().isTasksEnabled()).isTrue();
@@ -228,7 +227,7 @@ public class DockerComposeIT {
 	public void appsCount() {
 		logger.info("platform-apps-count-test");
 		assertThat(dataFlowOperations.appRegistryOperations().list().getMetadata().getTotalElements())
-				.isGreaterThanOrEqualTo(68L);
+				.isGreaterThanOrEqualTo(60L);
 	}
 
 	// -----------------------------------------------------------------------
@@ -291,7 +290,7 @@ public class DockerComposeIT {
 				.put("deployer.log.count", "2")
 				.put("app.splitter.producer.partitionKeyExpression", "payload")
 				.put("app.log.spring.cloud.stream.kafka.bindings.input.consumer.autoRebalanceEnabled", "false")
-				.put("app.log.logging.pattern.level", "WOODCHUCK-${INSTANCE_INDEX:${CF_INSTANCE_INDEX:${spring.cloud.stream.instanceIndex:0}}} %5p")
+				.put("app.log.logging.pattern.level", "WOODCHUCK-${INSTANCE_INDEX:${CF_INSTANCE_INDEX:${spring.cloud.stream.instanceIndex:666}}} %5p")
 				.build())) {
 
 			assertThat(stream.getStatus()).is(
@@ -642,13 +641,19 @@ public class DockerComposeIT {
 	 * @return Deployment properties required for the deployment of all test pipelines.
 	 */
 	private Map<String, String> testDeploymentProperties() {
-		return new DeploymentPropertiesBuilder()
+		DeploymentPropertiesBuilder propertiesBuilder = new DeploymentPropertiesBuilder()
 				.put(SPRING_CLOUD_DATAFLOW_SKIPPER_PLATFORM_NAME, runtimeApps.getPlatformName())
 				.put("app.*.logging.file", "${PID}-test.log")
 				.put("app.*.endpoints.logfile.sensitive", "false")
 				.put("app.*.management.endpoints.web.exposure.include", "*")
-				.put("app.*.spring.cloud.streamapp.security.enabled", "false")
-				.build();
+				.put("app.*.spring.cloud.streamapp.security.enabled", "false");
+
+		// TODO this misterious 80 port set for K8s comes from the ATs and i'm not sure why. But without it partition tests fail.
+		if (this.runtimeApps.getPlatformType().equalsIgnoreCase(RuntimeApplicationHelper.KUBERNETES_PLATFORM_TYPE)) {
+			propertiesBuilder.put("app.*.server.port", "80");
+		}
+
+		return propertiesBuilder.build();
 	}
 
 	private void httpPost(String url, String message) {
