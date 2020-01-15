@@ -60,7 +60,6 @@
 		<mariadb.version>2.4.1</mariadb.version>
 
 		<jacoco-maven-plugin.version>0.7.9</jacoco-maven-plugin.version>
-		<surefire-maven-plugin.version>2.20</surefire-maven-plugin.version>
 		<sonar-maven-plugin.version>3.0.2</sonar-maven-plugin.version>
 		<javadoc.opts>-Xdoclint:none</javadoc.opts>
 		<checkstyle.config.location>etc/checkstyle/checkstyle.xml</checkstyle.config.location>
@@ -275,22 +274,6 @@
 	</dependencyManagement>
 	<build>
 		<plugins>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-surefire-plugin</artifactId>
-				<version>${surefire-maven-plugin.version}</version>
-				<configuration>
-					<includes>
-						<include>**/*Tests.java</include>
-						<include>**/*Test.java</include>
-					</includes>
-					<excludes>
-						<exclude>**/Abstract*.java</exclude>
-					</excludes>
-					<!-- see https://stackoverflow.com/questions/18107375/getting-skipping-jacoco-execution-due-to-missing-execution-data-file-upon-exec -->
-					<argLine>${argLine}</argLine>
-				</configuration>
-			</plugin>
 			<plugin>
 				<groupId>org.jacoco</groupId>
 				<artifactId>jacoco-maven-plugin</artifactId>
