@@ -269,7 +269,8 @@ public class DefaultTaskExecutionService implements TaskExecutionService {
 		String taskDeploymentId = null;
 		try {
 			TaskLauncher taskLauncher = findTaskLauncher(platformName);
-			if(!isAppDeploymentSame(previousManifest, taskManifest)) {
+			Launcher launcher = this.launcherRepository.findByName(platformName);
+			if(launcher.getType().equals(TaskPlatformFactory.CLOUDFOUNDRY_PLATFORM_TYPE) && !isAppDeploymentSame(previousManifest, taskManifest)) {
 				validateAndLockUpgrade(taskName, platformName, taskExecution);
 				logger.debug("Deleting %s and all related resources from the platform", taskName);
 				taskLauncher.destroy(taskName);
