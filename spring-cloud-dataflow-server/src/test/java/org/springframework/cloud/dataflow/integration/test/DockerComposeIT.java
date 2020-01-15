@@ -183,7 +183,8 @@ public class DockerComposeIT {
 	@BeforeEach
 	public void before() {
 		dataFlowOperations = new DataFlowTemplate(URI.create(testProperties.getDataflowServerUrl()));
-		runtimeApps = new RuntimeApplicationHelper(dataFlowOperations, testProperties.getPlatformName());
+		runtimeApps = new RuntimeApplicationHelper(dataFlowOperations,
+				testProperties.getPlatformName(), testProperties.getKubernetesAppHostSuffix());
 		tasks = new Tasks(dataFlowOperations);
 		restTemplate = new RestTemplate(); // used for HTTP post in tests
 
@@ -213,7 +214,10 @@ public class DockerComposeIT {
 		logger.info("platform-feature-info-test");
 		AboutResource about = dataFlowOperations.aboutOperation().get();
 
-		assertThat(about.getFeatureInfo().isGrafanaEnabled()).isEqualTo(prometheusPresent() || influxPresent());
+		assertThat(about.getFeatureInfo().isGrafanaEnabled()).isEqualTo(prometheusPresent() || influxPresent())
+				.withFailMessage(String.format("Grafana should be enabled [%s] only if either Prometheus [%s] or " +
+								"Influx [%s] are enabled"), about.getFeatureInfo().isGrafanaEnabled(),
+						prometheusPresent(), influxPresent());
 		assertThat(about.getFeatureInfo().isAnalyticsEnabled()).isTrue();
 		assertThat(about.getFeatureInfo().isStreamsEnabled()).isTrue();
 		assertThat(about.getFeatureInfo().isTasksEnabled()).isTrue();
@@ -274,7 +278,7 @@ public class DockerComposeIT {
 
 	@Test
 	public void streamPartitioning() {
-		logger.info("stream-partitioning-test");
+		logger.info("stream-partitioning-test (aka. WoodChuckTests)");
 		StreamDefinition streamDefinition = Stream.builder(dataFlowOperations)
 				.name("partitioning-test")
 				.definition("http | splitter --expression=payload.split(' ') | log")
@@ -561,13 +565,13 @@ public class DockerComposeIT {
 	@Test
 	public void analyticsCounter() {
 
-		Assumptions.assumeTrue(dataFlowOperations.aboutOperation().get().getFeatureInfo().isGrafanaEnabled());
+		if (!prometheusPresent() && !influxPresent()) {
+			logger.info("stream-analytics-counter-test: SKIP - no metrics configured!");
+		}
+
+		Assumptions.assumeTrue(prometheusPresent() || influxPresent());
 
 		logger.info("stream-analytics-counter-test");
-
-		assertThat(prometheusPresent() || influxPresent())
-				.withFailMessage("Grafana is enabled only if Prometheus or Influx are enabled")
-				.isTrue();
 
 		try (Stream stream = Stream.builder(dataFlowOperations)
 				.name("httpCounter")
