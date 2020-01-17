@@ -104,14 +104,24 @@ public class DockerComposeFactory {
 
 	public static Extension startDockerCompose(Path tempFolder) {
 
-		if (DockerComposeFactoryProperties.getBoolean(DockerComposeFactoryProperties.TEST_DOCKER_COMPOSE_DISABLE_EXTENSION, false)) {
-			return (BeforeAllCallback) context -> logger.info("DockerComposeExtension is Disabled!");
+		if (DockerComposeFactoryProperties.isDockerComposeDisabled()) {
+			return (BeforeAllCallback) context -> logger.info("Docker Compose installation is disabled!");
 		}
+
+		logger.info("{} = {}", DockerComposeFactoryProperties.TEST_DOCKER_COMPOSE_DATAFLOW_VERSIONN,
+				DockerComposeFactoryProperties.get(DockerComposeFactoryProperties.TEST_DOCKER_COMPOSE_DATAFLOW_VERSIONN, DEFAULT_DATAFLOW_VERSION));
+		logger.info("{} = {}", DockerComposeFactoryProperties.TEST_DOCKER_COMPOSE_SKIPPER_VERSIONN,
+				DockerComposeFactoryProperties.get(DockerComposeFactoryProperties.TEST_DOCKER_COMPOSE_SKIPPER_VERSIONN, DEFAULT_SKIPPER_VERSION));
+		logger.info("{} = {}", DockerComposeFactoryProperties.TEST_DOCKER_COMPOSE_STREAM_APPS_URI,
+				DockerComposeFactoryProperties.get(DockerComposeFactoryProperties.TEST_DOCKER_COMPOSE_STREAM_APPS_URI, DEFAULT_STREAM_APPS_URI));
+		logger.info("{} = {}", DockerComposeFactoryProperties.TEST_DOCKER_COMPOSE_TASK_APPS_URI,
+				DockerComposeFactoryProperties.get(DockerComposeFactoryProperties.TEST_DOCKER_COMPOSE_TASK_APPS_URI, DEFAULT_TASK_APPS_URI));
+		logger.info("{} = {}", DockerComposeFactoryProperties.TEST_DOCKER_COMPOSE_PATHS,
+				DockerComposeFactoryProperties.getDockerComposePaths(DEFAULT_DOCKER_COMPOSE_PATHS));
 
 		String[] dockerComposePaths = new ResourceExtractor(tempFolder).extract(
 				DockerComposeFactoryProperties.getDockerComposePaths(DEFAULT_DOCKER_COMPOSE_PATHS));
-
-		logger.info("Extracted docker compose files: " + Arrays.toString(dockerComposePaths));
+		logger.info("Extracted docker compose files = {}", Arrays.toString(dockerComposePaths));
 
 		return DockerComposeExtension.builder()
 				.files(DockerComposeFiles.from(dockerComposePaths))
@@ -129,7 +139,7 @@ public class DockerComposeFactory {
 	public static Path createTempDirectory() {
 		try {
 			Path tempDirPath = Files.createTempDirectory(null);
-			logger.info("Temporal Directory: " + tempDirPath);
+			logger.info("Temp directory: " + tempDirPath);
 			return tempDirPath;
 		}
 		catch (IOException e) {

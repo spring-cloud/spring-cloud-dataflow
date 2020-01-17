@@ -111,6 +111,10 @@ public class Task implements AutoCloseable {
 				.findFirst().get();
 	}
 
+	public String getTaskName() {
+		return taskName;
+	}
+
 	@Override
 	public void close() {
 		destroy();
