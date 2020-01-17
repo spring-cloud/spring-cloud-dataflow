@@ -183,13 +183,14 @@ public class DockerComposeIT {
 	@BeforeEach
 	public void before() {
 		dataFlowOperations = new DataFlowTemplate(URI.create(testProperties.getDataflowServerUrl()));
-		runtimeApps = new RuntimeApplicationHelper(dataFlowOperations, testProperties.getPlatformName());
+		runtimeApps = new RuntimeApplicationHelper(dataFlowOperations,
+				testProperties.getPlatformName(), testProperties.getKubernetesAppHostSuffix());
 		tasks = new Tasks(dataFlowOperations);
 		restTemplate = new RestTemplate(); // used for HTTP post in tests
 
 		Awaitility.setDefaultPollInterval(Duration.ofSeconds(5));
 		Awaitility.setDefaultTimeout(Duration.ofMinutes(10));
-		Awaitility.await().until(() -> dataFlowOperations.appRegistryOperations().list().getMetadata().getTotalElements() >= 68L);
+		Awaitility.await().until(() -> dataFlowOperations.appRegistryOperations().list().getMetadata().getTotalElements() >= 60L);
 	}
 
 	@AfterEach
@@ -212,8 +213,10 @@ public class DockerComposeIT {
 	public void featureInfo() {
 		logger.info("platform-feature-info-test");
 		AboutResource about = dataFlowOperations.aboutOperation().get();
-
-		assertThat(about.getFeatureInfo().isGrafanaEnabled()).isEqualTo(prometheusPresent() || influxPresent());
+		assertThat(about.getFeatureInfo().isGrafanaEnabled())
+				.withFailMessage(String.format("Grafana should be enabled [%s] only if either Prometheus [%s] or " +
+						"Influx [%s] are enabled"), about.getFeatureInfo().isGrafanaEnabled(), prometheusPresent(), influxPresent())
+				.isEqualTo(prometheusPresent() || influxPresent());
 		assertThat(about.getFeatureInfo().isAnalyticsEnabled()).isTrue();
 		assertThat(about.getFeatureInfo().isStreamsEnabled()).isTrue();
 		assertThat(about.getFeatureInfo().isTasksEnabled()).isTrue();
@@ -224,7 +227,7 @@ public class DockerComposeIT {
 	public void appsCount() {
 		logger.info("platform-apps-count-test");
 		assertThat(dataFlowOperations.appRegistryOperations().list().getMetadata().getTotalElements())
-				.isGreaterThanOrEqualTo(68L);
+				.isGreaterThanOrEqualTo(60L);
 	}
 
 	// -----------------------------------------------------------------------
@@ -274,7 +277,7 @@ public class DockerComposeIT {
 
 	@Test
 	public void streamPartitioning() {
-		logger.info("stream-partitioning-test");
+		logger.info("stream-partitioning-test (aka. WoodChuckTests)");
 		StreamDefinition streamDefinition = Stream.builder(dataFlowOperations)
 				.name("partitioning-test")
 				.definition("http | splitter --expression=payload.split(' ') | log")
@@ -287,7 +290,7 @@ public class DockerComposeIT {
 				.put("deployer.log.count", "2")
 				.put("app.splitter.producer.partitionKeyExpression", "payload")
 				.put("app.log.spring.cloud.stream.kafka.bindings.input.consumer.autoRebalanceEnabled", "false")
-				.put("app.log.logging.pattern.level", "WOODCHUCK-${INSTANCE_INDEX:${CF_INSTANCE_INDEX:${spring.cloud.stream.instanceIndex:0}}} %5p")
+				.put("app.log.logging.pattern.level", "WOODCHUCK-${INSTANCE_INDEX:${CF_INSTANCE_INDEX:${spring.cloud.stream.instanceIndex:666}}} %5p")
 				.build())) {
 
 			assertThat(stream.getStatus()).is(
@@ -561,13 +564,13 @@ public class DockerComposeIT {
 	@Test
 	public void analyticsCounter() {
 
-		Assumptions.assumeTrue(dataFlowOperations.aboutOperation().get().getFeatureInfo().isGrafanaEnabled());
+		if (!prometheusPresent() && !influxPresent()) {
+			logger.info("stream-analytics-counter-test: SKIP - no metrics configured!");
+		}
+
+		Assumptions.assumeTrue(prometheusPresent() || influxPresent());
 
 		logger.info("stream-analytics-counter-test");
-
-		assertThat(prometheusPresent() || influxPresent())
-				.withFailMessage("Grafana is enabled only if Prometheus or Influx are enabled")
-				.isTrue();
 
 		try (Stream stream = Stream.builder(dataFlowOperations)
 				.name("httpCounter")
@@ -638,13 +641,19 @@ public class DockerComposeIT {
 	 * @return Deployment properties required for the deployment of all test pipelines.
 	 */
 	private Map<String, String> testDeploymentProperties() {
-		return new DeploymentPropertiesBuilder()
+		DeploymentPropertiesBuilder propertiesBuilder = new DeploymentPropertiesBuilder()
 				.put(SPRING_CLOUD_DATAFLOW_SKIPPER_PLATFORM_NAME, runtimeApps.getPlatformName())
 				.put("app.*.logging.file", "${PID}-test.log")
 				.put("app.*.endpoints.logfile.sensitive", "false")
 				.put("app.*.management.endpoints.web.exposure.include", "*")
-				.put("app.*.spring.cloud.streamapp.security.enabled", "false")
-				.build();
+				.put("app.*.spring.cloud.streamapp.security.enabled", "false");
+
+		// TODO this misterious 80 port set for K8s comes from the ATs and i'm not sure why. But without it partition tests fail.
+		if (this.runtimeApps.getPlatformType().equalsIgnoreCase(RuntimeApplicationHelper.KUBERNETES_PLATFORM_TYPE)) {
+			propertiesBuilder.put("app.*.server.port", "80");
+		}
+
+		return propertiesBuilder.build();
 	}
 
 	private void httpPost(String url, String message) {

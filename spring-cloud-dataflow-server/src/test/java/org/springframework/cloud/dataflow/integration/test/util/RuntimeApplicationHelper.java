@@ -15,12 +15,10 @@
  */
 package org.springframework.cloud.dataflow.integration.test.util;
 
-import java.time.Duration;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import org.awaitility.Awaitility;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -36,6 +34,9 @@ import org.springframework.web.client.RestTemplate;
  */
 public class RuntimeApplicationHelper {
 
+	public static final String LOCAL_PLATFORM_TYPE = "local";
+	public static final String KUBERNETES_PLATFORM_TYPE = "kubernetes";
+	public static final String CLOUDFOUNDRY_PLATFORM_TYPE = "cloudfoundry";
 	private final Logger logger = LoggerFactory.getLogger(RuntimeApplicationHelper.class);
 
 	private final String platformType;
@@ -45,11 +46,13 @@ public class RuntimeApplicationHelper {
 	private DataFlowTemplate dataFlowOperations;
 
 	private final String platformName;
+	private String kubernetesAppHostSuffix;
 
-	public RuntimeApplicationHelper(DataFlowTemplate dataFlowOperations, String platformName) {
+	public RuntimeApplicationHelper(DataFlowTemplate dataFlowOperations, String platformName, String kubernetesAppHost) {
 		Assert.notNull(dataFlowOperations, "Valid dataFlowOperations is expected but was: " + dataFlowOperations);
 		Assert.hasText(platformName, "Empty platform name: " + platformName);
 
+		this.kubernetesAppHostSuffix = kubernetesAppHost;
 		this.dataFlowOperations = dataFlowOperations;
 		this.platformName = platformName;
 		this.platformType = dataFlowOperations.streamOperations().listPlatforms().stream()
@@ -142,11 +145,11 @@ public class RuntimeApplicationHelper {
 	 */
 	public String getApplicationInstanceUrl(Map<String, String> instanceAttributes) {
 		switch (this.platformType) {
-		case "local":
+		case LOCAL_PLATFORM_TYPE:
 			return localApplicationInstanceUrl(instanceAttributes);
-		case "kubernetes":
+		case KUBERNETES_PLATFORM_TYPE:
 			return kubernetesApplicationInstanceUrl(instanceAttributes);
-		case "cloudfoundry":
+		case CLOUDFOUNDRY_PLATFORM_TYPE:
 			return cloudFoundryApplicationInstanceUrl(instanceAttributes);
 		}
 
@@ -162,22 +165,37 @@ public class RuntimeApplicationHelper {
 		return instanceAttributes.get(StreamRuntimePropertyKeys.ATTRIBUTE_URL).replace("http:", "https:").toLowerCase();
 	}
 
+	/**
+	 * Special installation for SCDF on ATs K8s environments involves ngix ingress server + special watchdog daemon that
+	 * exposes the host names of all Deployed names.
+	 *
+	 * For single instance app the watch dog uses the name convention:
+	 *  - https://[spring.deployment.id].[kubernetesAppHostSuffix] (For example  https://partitioning-test-log-v1.hydra.springapps.io/)
+	 *
+	 * For multiple instances app the watch dog uses the 2 name conventions:
+	 *  - https://[spring.deployment.id].[kubernetesAppHostSuffix] - round robing across all instances (for example  https://partitioning-test-log-v1.hydra.springapps.io/)
+	 *  - https://[pod.name].[kubernetesAppHostSuffix] - to target a particular instance ( for example https://partitioning-test-log-v1-0.hydra.springapps.io/)
+	 *
+	 * @param instanceAttributes runtime attributes of the app instance.
+	 * @return Externally accessible app instance URL
+	 */
 	private String kubernetesApplicationInstanceUrl(Map<String, String> instanceAttributes) {
+		String appHost = isKubernetesMultipleInstanceApp(instanceAttributes) ? instanceAttributes.get("pod.name")
+				: instanceAttributes.get("spring.deployment.id");
+		String appUrl = String.format("https://%s.%s", appHost, this.kubernetesAppHostSuffix);
+		return appUrl;
+	}
 
-		if (instanceAttributes.containsKey(StreamRuntimePropertyKeys.ATTRIBUTE_URL)) {
-			return instanceAttributes.get(StreamRuntimePropertyKeys.ATTRIBUTE_URL);
-		}
-
-		// Wait until all apps External-IP are exposed (K8s specific)
-		String streamName = instanceAttributes.get(StreamRuntimePropertyKeys.ATTRIBUTE_SKIPPER_RELEASE_NAME);
-		String appName = instanceAttributes.get(StreamRuntimePropertyKeys.ATTRIBUTE_SKIPPER_APPLICATION_NAME);
-		String guid = instanceAttributes.get(StreamRuntimePropertyKeys.ATTRIBUTE_GUID);
-			Awaitility.await().atMost(Duration.ofMinutes(10)).until(() -> this.appInstanceAttributes().values().stream()
-				.filter(m -> m.get(StreamRuntimePropertyKeys.ATTRIBUTE_SKIPPER_RELEASE_NAME).equals(streamName))
-				.filter(m -> m.get(StreamRuntimePropertyKeys.ATTRIBUTE_SKIPPER_APPLICATION_NAME).equals(appName))
-				.allMatch(m -> m.containsKey(StreamRuntimePropertyKeys.ATTRIBUTE_URL)));
-
-		return this.getApplicationInstances(streamName, appName).get(guid).get(StreamRuntimePropertyKeys.ATTRIBUTE_URL);
+	/**
+	 * Hack that uses the pod.name (e.g. instance id) suffix to determine if this is a single or multiple app instances.
+	 * If uses the pod.name suffix to determine if the app instance belongs to a stateful set or not.
+	 * The K8s deployer uses stateful set for multiple instances apps.
+	 */
+	private boolean isKubernetesMultipleInstanceApp(Map<String, String> instanceAttributes) {
+		String deploymentId = instanceAttributes.get("spring.deployment.id");
+		String instanceId = instanceAttributes.get("pod.name");
+		return instanceId.replace(deploymentId, "").toLowerCase().chars()
+				.filter(ch -> ch >= 'a' && ch <= 'z').distinct().count() == 0;
 	}
 
 	/**
@@ -186,7 +204,7 @@ public class RuntimeApplicationHelper {
 	 * @return String containing the contents of the log or 'null' if not found.
 	 */
 	private String getAppInstanceLogContent(String instanceUrl) {
-		String logContent = null;
+		String logContent = "";
 		String logFileUrl = String.format("%s/actuator/logfile", instanceUrl);
 		try {
 			logContent = restTemplate.getForObject(logFileUrl, String.class);
@@ -196,7 +214,7 @@ public class RuntimeApplicationHelper {
 			}
 		}
 		catch (Exception e) {
-			logger.warn("Error while trying to access logfile from '" + logFileUrl + "' due to : " + e);
+			logger.warn("Error while trying to access logfile from '" + logFileUrl + "' due to : ", e);
 		}
 		return logContent;
 	}

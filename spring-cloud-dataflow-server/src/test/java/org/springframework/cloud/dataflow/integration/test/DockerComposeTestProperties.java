@@ -46,6 +46,16 @@ public class DockerComposeTestProperties {
 	 */
 	private String influxUrl = "http://localhost:8086";
 
+	/**
+	 * Kubernetes tests require nginx-ingress and watchdog mechanism to expose the apps  URL
+	 * to public access. Later requires a preconfigured ingress servers domain name suffix.
+	 *
+	 * For example the Hydra AT environment hash the 'hydra.springapps.io' host name and app Urls
+	 * will have the form  https://partitioning-test-log-v1.hydra.springapps.io
+	 * or  https://partitioning-test-log-v1-1.hydra.springapps.io for multiple instance.
+	 */
+	private String kubernetesAppHostSuffix = "";
+
 	public String getDataflowServerUrl() {
 		return dataflowServerUrl;
 	}
@@ -76,5 +86,13 @@ public class DockerComposeTestProperties {
 
 	public void setInfluxUrl(String influxUrl) {
 		this.influxUrl = influxUrl;
+	}
+
+	public String getKubernetesAppHostSuffix() {
+		return kubernetesAppHostSuffix;
+	}
+
+	public void setKubernetesAppHostSuffix(String kubernetesAppHostSuffix) {
+		this.kubernetesAppHostSuffix = kubernetesAppHostSuffix;
 	}
 }
