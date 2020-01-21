@@ -84,6 +84,7 @@
 		<spring-cloud-common-security-config.version>1.2.1.RELEASE</spring-cloud-common-security-config.version>
 
 		<spring-shell.version>1.2.0.RELEASE</spring-shell.version>
+		<spring-hateoas.version>1.0.1.RELEASE</spring-hateoas.version>
 		<!-- Use older flyway until we can use flaway 6.x given to us from boot -->
 		<flyway.version>5.2.4</flyway.version>
 		<commons-io.version>2.4</commons-io.version>
@@ -247,6 +248,11 @@
 				<groupId>org.springframework.security.oauth</groupId>
 				<artifactId>spring-security-oauth2</artifactId>
 				<version>${spring-security-oauth2.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.springframework.hateoas</groupId>
+				<artifactId>spring-hateoas</artifactId>
+				<version>${spring-hateoas.version}</version>
 			</dependency>
 		</dependencies>
 	</dependencyManagement>
