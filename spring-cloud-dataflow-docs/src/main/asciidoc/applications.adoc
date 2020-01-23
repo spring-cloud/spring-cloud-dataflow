@@ -51,7 +51,7 @@ A selection of pre-built link:https://cloud.spring.io/spring-cloud-stream-app-st
 |link:{scs-app-starters-docs-htmlsingle}/#spring-cloud-stream-modules-router-sink[router]
 |
 
-|link:{scs-app-starters-docs-htmlsingle}/#spring-cloud-stream-modules-trigger-source[triggertask]
+|link:{scs-app-starters-docs-htmlsingle}/#spring-cloud-stream-modules-trigger-source[triggertask (deprecated)]
 |link:{scs-app-starters-docs-htmlsingle}/#spring-cloud-stream-modules-bridge-processor[bridge]
 |link:{scs-app-starters-docs-htmlsingle}/#spring-cloud-stream-modules-redis-sink[redis-pubsub]
 |
@@ -112,7 +112,7 @@ A selection of pre-built link:https://cloud.spring.io/spring-cloud-stream-app-st
 |
 
 |link:{scs-app-starters-docs-htmlsingle}/#spring-cloud-stream-modules-gemfire-source[gemfire]
-|link:{scs-app-starters-docs-htmlsingle}/#spring-cloud-stream-modules-tasklaunchrequest-transform[tasklaunchrequest-transform]
+|link:{scs-app-starters-docs-htmlsingle}/#spring-cloud-stream-modules-tasklaunchrequest-transform[tasklaunchrequest-transform (deprecated)]
 |link:{scs-app-starters-docs-htmlsingle}/#spring-cloud-stream-modules-gemfire-sink[gemfire]
 |
 
