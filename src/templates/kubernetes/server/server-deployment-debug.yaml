@@ -1,0 +1,10 @@
+spec:
+  template:
+    spec:
+      containers:
+      - name: scdf-server
+        ports:
+        - containerPort: 5005
+        env:
+        - name: JAVA_TOOL_OPTIONS
+          value: '-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=5005'

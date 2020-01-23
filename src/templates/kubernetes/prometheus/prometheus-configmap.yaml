@@ -1,0 +1,47 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: prometheus
+  labels:
+    app: prometheus
+data:
+  prometheus.yml: |-
+    global:
+      scrape_interval: 10s
+      scrape_timeout: 9s
+      evaluation_interval: 10s
+
+    scrape_configs:
+    - job_name: 'proxied-applications'
+      metrics_path: '/metrics/connected'
+      kubernetes_sd_configs:
+        - role: pod
+          namespaces:
+            names:
+              - default
+      relabel_configs:
+        - source_labels: [__meta_kubernetes_pod_label_app]
+          action: keep
+          regex: prometheus-proxy
+        - source_labels: [__meta_kubernetes_pod_container_port_number]
+          action: keep
+          regex: 8080
+    - job_name: 'proxies'
+      metrics_path: '/metrics/proxy'
+      kubernetes_sd_configs:
+        - role: pod
+          namespaces:
+            names:
+              - default
+      relabel_configs:
+        - source_labels: [__meta_kubernetes_pod_label_app]
+          action: keep
+          regex: prometheus-proxy
+        - source_labels: [__meta_kubernetes_pod_container_port_number]
+          action: keep
+          regex: 8080
+        - action: labelmap
+          regex: __meta_kubernetes_pod_label_(.+)
+        - source_labels: [__meta_kubernetes_pod_name]
+          action: replace
+          target_label: kubernetes_pod_name
