@@ -471,12 +471,6 @@ This defaults to `http://localhost:9393`. If you run a distributed Spring Cloud 
 You can either provide this `dataflow.server.uri` property for the Composed Task Runner application when launching a composed task or you can provide a `spring.cloud.dataflow.server.uri` property for the Spring Cloud Data Flow server when it is started.
 For the latter case, the `dataflow.server.uri` Composed Task Runner application property is automatically set when a composed task is launched.
 
-In some cases, you may wish to execute an instance of the Composed Task Runner through the Task Launcher sink.
-In that case, you must configure the Composed Task Runner to use the same datasource that the Spring Cloud Data Flow instance is using.
-The datasource properties are set with the `TaskLaunchRequest` through the use of the `commandlineArguments` or the `environmentProperties` switches.
-This is because the Composed Task Runner monitors the `task_executions` table to check the status of the tasks that it is running.
-Using information from the table, it determines how it should navigate the graph.
-
 ===== Configuration Options
 
 The ComposedTaskRunner task has the following options:
@@ -1040,35 +1034,12 @@ properties (`spring.datasource.url`, `spring.datasource.driverClassName`, `sprin
 to the app properties of the task being launched.  Thus a task application
 will record its task execution information to the Spring Cloud Data Flow repository.
 
-[[datasource-task-launcher-sink]]
-==== Task Launcher Sink
-The https://github.com/spring-cloud-stream-app-starters/tasklauncher-dataflow[Data Flow Task Launcher Sink] always uses the Data Flow Server's configured task database when launching tasks.
-
-Standalone Task Launcher Sink implementations are also available which allow you to store task executions in a separate database.
-Since these task launchers do not use the Data Flow Server, they are platform-specific and require additional configuration parameters, including data source configuration, and the resource location of the executable jar for the task application.
-Additionally, they do not provide a way to limit the number of concurrently running tasks, as the Data Flow Task Launcher does.
-
-The additional configuration requires a more complex form of the
-https://docs.spring.io/spring-cloud-task/docs/current/apidocs/org/springframework/cloud/task/launcher/TaskLaunchRequest.html[TaskLaunchRequest].
-Requests processed by a standalone Task Launcher Sink must include the required datasource information as app properties or command line arguments.
-Both https://github.com/spring-cloud-stream-app-starters/tasklaunchrequest-transform/blob/master/spring-cloud-starter-stream-processor-tasklaunchrequest-transform/README.adoc[TaskLaunchRequest-Transform]
-and https://github.com/spring-cloud-stream-app-starters/triggertask/blob/master/spring-cloud-starter-stream-source-triggertask/README.adoc[TriggerTask Source] provide examples of using a standalone Task Launcher Sink.
-
-
-Currently the platforms supported by the standalone `tasklauncher` sinks are:
-
-* https://github.com/spring-cloud-stream-app-starters/tasklauncher-local[local]
-* https://github.com/spring-cloud-stream-app-starters/tasklauncher-cloudfoundry[Cloud Foundry]
-* https://github.com/spring-cloud-stream-app-starters/tasklauncher-kubernetes[Kubernetes]
-
-CAUTION: `tasklauncher-local` is meant for development purposes only.
-
 ==== Composed Task Runner
 Spring Cloud Data Flow allows a user to create a directed graph where each node
 of the graph is a task application and this is done via the
 https://github.com/spring-cloud-task-app-starters/composed-task-runner/blob/master/spring-cloud-starter-task-composedtaskrunner/README.adoc[Composed Task Runner].
 In this case the rules that applied to a <<datasource-simple-task-launch, Simple Task Launch>>
-or <<datasource-task-launcher-sink, Task Launcher Sink>> apply to the composed task runner as well.
+or Task Launcher Sink apply to the composed task runner as well.
 All child apps must also have access to the datastore that is being used by the composed task runner
 Also, All child apps must have the same database dependency as the composed task runner enumerated in their `pom.xml` or `gradle.build` file.
 
