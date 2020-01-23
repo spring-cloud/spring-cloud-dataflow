@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
       - name: skipper
-        image: springcloud/spring-cloud-skipper-server:2.2.2.RELEASE
+        image: springcloud/spring-cloud-skipper-server:2.2.3.BUILD-SNAPSHOT
         imagePullPolicy: Always
         ports:
         - containerPort: 80
