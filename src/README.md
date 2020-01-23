@@ -3,9 +3,12 @@ This directory contains various build files and definitions for k8s deployment.
 
 ## Kubernetes deployment files
 
-IMPORTANT: Never ever directly modify files under kubernetes as
-           these are generated from templates/kubernetes during
+IMPORTANT: If you are planning to PR changes to deployment files, never ever
+           directly modify files under kubernetes as these
+           should get updated from templates/kubernetes during
            a maven build if profile `deploymentfiles` is enabled.
+           After maven build has done updates, resulting changes
+           can be PR'd.
 
 To generate kubernetes deployment files from templates run command:
 
