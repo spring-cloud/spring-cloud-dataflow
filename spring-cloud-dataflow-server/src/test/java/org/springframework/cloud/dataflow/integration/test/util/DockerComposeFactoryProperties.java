@@ -84,10 +84,12 @@ public class DockerComposeFactoryProperties {
 	}
 
 	public static String get(String propertyName, String defaultValue) {
-		String propertyValue = StringUtils.hasText(getPropertyOrVariableValue(propertyName)) ?
+		return StringUtils.hasText(getPropertyOrVariableValue(propertyName)) ?
 				getPropertyOrVariableValue(propertyName) : defaultValue;
-		logger.info("Set [" + propertyName + " = " + propertyValue + "]");
-		return propertyValue;
+	}
+
+	public static boolean isDockerComposeDisabled() {
+		return getBoolean(TEST_DOCKER_COMPOSE_DISABLE_EXTENSION, false);
 	}
 
 	/**
@@ -96,10 +98,8 @@ public class DockerComposeFactoryProperties {
 	 * @return Returns an arrays for the Docker Compose file paths to be deployed.
 	 */
 	public static String[] getDockerComposePaths(String[] defaultPaths) {
-		String[] filePaths = StringUtils.hasText(getPropertyOrVariableValue(TEST_DOCKER_COMPOSE_PATHS)) ?
+		return StringUtils.hasText(getPropertyOrVariableValue(TEST_DOCKER_COMPOSE_PATHS)) ?
 				toCSV(getPropertyOrVariableValue(TEST_DOCKER_COMPOSE_PATHS)) : defaultPaths;
-		logger.info("Set [" + TEST_DOCKER_COMPOSE_PATHS + " = " + Arrays.toString(filePaths) + "]");
-		return filePaths;
 	}
 
 	private static String[] toCSV(String txt) {

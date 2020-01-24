@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.cloud.dataflow.integration.test;
 
 import java.io.IOException;
@@ -40,8 +41,11 @@ import org.junit.jupiter.api.Assumptions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.MethodOrderer;
+import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestMethodOrder;
+import org.junit.jupiter.api.condition.DisabledIfSystemProperty;
+import org.junit.jupiter.api.condition.EnabledIfSystemProperty;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.extension.Extension;
 import org.junit.jupiter.api.extension.RegisterExtension;
@@ -71,25 +75,23 @@ import org.springframework.web.client.RestTemplate;
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
- * DataFlow smoke tests that uses docker-compose to create fully fledged, local test environment.
- *
- * Test fixture applies the same docker compose files used for the Data Flow local installation:
+ * DataFlow smoke tests that by default uses docker-compose files to install the Data Flow local platform:
  *  - https://dataflow.spring.io/docs/installation/local/docker/
  *  - https://dataflow.spring.io/docs/installation/local/docker-customize/
- *
  * The Palantir DockerMachine and DockerComposeExtension are used to programmatically deploy the docker-compose files.
  *
- * All important bootstrap parameters are configurable via the {@link DockerComposeFactoryProperties} properties and variables.
+ * The {@link DockerComposeFactoryProperties} properties and variables are used to configure the {@link DockerComposeFactory}.
  *
  * The {@link DockerComposeFactoryProperties#TEST_DOCKER_COMPOSE_PATHS} property allow to configure the list of docker-compose files
  * used for the test. It accepts a comma separated list of docker-compose yaml file names. It supports local files names
  * as well  http:/https:, classpath: or specific file: locations. Consult the {@link ResourceExtractor} for further
  * information.
  *
- * The {@link DockerComposeFactoryProperties#TEST_DOCKER_COMPOSE_DATAFLOW_VERSIONN}, {@link DockerComposeFactoryProperties#TEST_DOCKER_COMPOSE_SKIPPER_VERSIONN},
- * {@link DockerComposeFactoryProperties#TEST_DOCKER_COMPOSE_STREAM_APPS_URI} and {@link DockerComposeFactoryProperties#TEST_DOCKER_COMPOSE_TASK_APPS_URI}
- * properties (configured via the DockerMachine) allow to specify the dataflow/skipper versions as well as the version
- * of the Apps and Tasks used.
+ * The {@link DockerComposeFactoryProperties#TEST_DOCKER_COMPOSE_DATAFLOW_VERSIONN},
+ * {@link DockerComposeFactoryProperties#TEST_DOCKER_COMPOSE_SKIPPER_VERSIONN},
+ * {@link DockerComposeFactoryProperties#TEST_DOCKER_COMPOSE_STREAM_APPS_URI},
+ * {@link DockerComposeFactoryProperties#TEST_DOCKER_COMPOSE_TASK_APPS_URI}
+ * properties specify the dataflow/skipper versions as well as the version of the Apps and Tasks used.
  *
  * Set the {@link DockerComposeFactoryProperties#TEST_DOCKER_COMPOSE_PULLONSTARTUP} to false to use the local docker images instead
  * of pulling latest on from the Docker Hub.
@@ -101,10 +103,17 @@ import static org.assertj.core.api.Assertions.assertThat;
  * Java DSL (https://dataflow.spring.io/docs/feature-guides/streams/java-dsl/) are used by the tests to interact with
  * the Data Flow environment.
  *
- * The {@link DockerComposeTestProperties} allow to disable the Docker Compose installation
- * all together and usually is used in combination with {@link DockerComposeTestProperties#getDataflowServerUrl}
- * to connect the and run the test to an external pre-configured cluster.
- * Use {@link DockerComposeTestProperties#getPlatformName()} to test no default platform on the SCDF cluster.
+ * When the {@link DockerComposeFactoryProperties#TEST_DOCKER_COMPOSE_DISABLE_EXTENSION} is set to true the
+ * Docker Compose installation is skipped. In this case the {@link DataFlowITProperties#getDataflowServerUrl} should be
+ * used to connect the IT tests to an external pre-configured SCDF server.
+ *
+ * For example to run the following test suite against SCDF Kubernetes cluster deployed on GKE:
+ * <code>
+ *    ./mvnw clean install -pl spring-cloud-dataflow-server -Dtest=foo -DfailIfNoTests=false \
+ *        -Dtest.docker.compose.disable.extension=true \
+ *        -Dtest.docker.compose.dataflowServerUrl=https://scdf-server.gke.io \
+ *        -Pfailsafe
+ * </code>
  *
  * The {@link Awaitility} is DSL utility that allows to timeout block the test execution until certain stream or application
  * state is reached or certain log content appears.
@@ -142,14 +151,14 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author Christian Tzolov
  */
 @ExtendWith(SpringExtension.class)
-@EnableConfigurationProperties({ DockerComposeTestProperties.class })
-@TestMethodOrder(MethodOrderer.Alphanumeric.class)
-public class DockerComposeIT {
+@EnableConfigurationProperties({ DataFlowITProperties.class })
+@TestMethodOrder(MethodOrderer.OrderAnnotation.class)
+public class DataFlowIT {
 
-	private static final Logger logger = LoggerFactory.getLogger(DockerComposeIT.class);
+	private static final Logger logger = LoggerFactory.getLogger(DataFlowIT.class);
 
 	@Autowired
-	private DockerComposeTestProperties testProperties;
+	private DataFlowITProperties testProperties;
 
 	/**
 	 * REST and DSL clients used to interact with the SCDF server and run the tests.
@@ -190,7 +199,6 @@ public class DockerComposeIT {
 
 		Awaitility.setDefaultPollInterval(Duration.ofSeconds(5));
 		Awaitility.setDefaultTimeout(Duration.ofMinutes(10));
-		Awaitility.await().until(() -> dataFlowOperations.appRegistryOperations().list().getMetadata().getTotalElements() >= 60L);
 	}
 
 	@AfterEach
@@ -200,10 +208,13 @@ public class DockerComposeIT {
 	}
 
 	@Test
+	@Order(Integer.MIN_VALUE)
 	public void aboutTestInfo() {
-		logger.info("Configured server platforms: " + dataFlowOperations.streamOperations().listPlatforms().stream()
+		logger.info("Available platforms: " + dataFlowOperations.streamOperations().listPlatforms().stream()
 				.map(d -> String.format("[name: %s, type: %s]", d.getName(), d.getType())).collect(Collectors.joining()));
 		logger.info(String.format("Selected platform: [name: %s, type: %s]", runtimeApps.getPlatformName(), runtimeApps.getPlatformType()));
+		logger.info("Wait until at least 60 apps are registered in SCDF");
+		Awaitility.await().until(() -> dataFlowOperations.appRegistryOperations().list().getMetadata().getTotalElements() >= 60L);
 	}
 
 	// -----------------------------------------------------------------------
@@ -213,11 +224,10 @@ public class DockerComposeIT {
 	public void featureInfo() {
 		logger.info("platform-feature-info-test");
 		AboutResource about = dataFlowOperations.aboutOperation().get();
-		assertThat(about.getFeatureInfo().isGrafanaEnabled()).isEqualTo(prometheusPresent() || influxPresent());
+		//assertThat(about.getFeatureInfo().isGrafanaEnabled()).isEqualTo(prometheusPresent() || influxPresent());
 		assertThat(about.getFeatureInfo().isAnalyticsEnabled()).isTrue();
 		assertThat(about.getFeatureInfo().isStreamsEnabled()).isTrue();
 		assertThat(about.getFeatureInfo().isTasksEnabled()).isTrue();
-		assertThat(about.getFeatureInfo().isSchedulesEnabled()).isFalse();
 	}
 
 	@Test
@@ -258,7 +268,7 @@ public class DockerComposeIT {
 			assertThat(stream.getStatus()).is(
 					condition(status -> status.equals(DEPLOYING) || status.equals(PARTIAL)));
 
-			Awaitility.await().atMost(Duration.ofMinutes(10)).until(() -> stream.getStatus().equals(DEPLOYED));
+			Awaitility.await().until(() -> stream.getStatus().equals(DEPLOYED));
 
 			Map<String, String> httpApp = runtimeApps.getApplicationInstances(stream.getName(), "http")
 					.values().iterator().next();
@@ -267,7 +277,7 @@ public class DockerComposeIT {
 
 			httpPost(runtimeApps.getApplicationInstanceUrl(httpApp), message);
 
-			Awaitility.await().atMost(Duration.ofMinutes(10)).until(
+			Awaitility.await().until(
 					() -> runtimeApps.getFirstInstanceLog(stream.getName(), "log").contains(message.toUpperCase()));
 		}
 	}
@@ -293,7 +303,7 @@ public class DockerComposeIT {
 			assertThat(stream.getStatus()).is(
 					condition(status -> status.equals(DEPLOYING) || status.equals(PARTIAL)));
 
-			Awaitility.await().atMost(Duration.ofMinutes(10)).until(() -> stream.getStatus().equals(DEPLOYED));
+			Awaitility.await().until(() -> stream.getStatus().equals(DEPLOYED));
 
 			Map<String, String> httpApp = runtimeApps.getApplicationInstances(stream.getName(), "http")
 					.values().iterator().next();
@@ -303,7 +313,7 @@ public class DockerComposeIT {
 			String message = "How much wood would a woodchuck chuck if a woodchuck could chuck wood";
 			httpPost(httpAppUrl, message);
 
-			Awaitility.await().atMost(Duration.ofMinutes(10)).until(() -> {
+			Awaitility.await().until(() -> {
 				Collection<String> logs = runtimeApps.applicationInstanceLogs(stream.getName(), "log").values();
 
 				return (logs.size() == 2) && logs.stream()
@@ -329,7 +339,7 @@ public class DockerComposeIT {
 			assertThat(stream.getStatus()).is(
 					condition(status -> status.equals(DEPLOYING) || status.equals(PARTIAL)));
 
-			Awaitility.await().atMost(Duration.ofMinutes(5)).until(() -> stream.getStatus().equals(DEPLOYED));
+			Awaitility.await().until(() -> stream.getStatus().equals(DEPLOYED));
 
 			Awaitility.await().until(() -> runtimeApps.getFirstInstanceLog(stream.getName(), "log")
 					.contains("TICKTOCK - TIMESTAMP:"));
@@ -633,6 +643,42 @@ public class DockerComposeIT {
 		}
 	}
 
+	// -----------------------------------------------------------------------
+	//                     STREAM  CONFIG SERVER (PCF ONLY)
+	// -----------------------------------------------------------------------
+	@Test
+	@EnabledIfSystemProperty(named = "PLATFORM_TYPE", matches = "cloudfoundry")
+	@DisabledIfSystemProperty(named = "SKIP_CLOUD_CONFIG", matches = "true")
+	public void streamWithConfigServer() {
+
+		logger.info("stream-server-config-test");
+
+		try (Stream stream = Stream.builder(dataFlowOperations)
+				.name("TICKTOCK-config-server")
+				.definition("time | log")
+				.create()
+				.deploy(new DeploymentPropertiesBuilder()
+						.putAll(testDeploymentProperties())
+						.put("app.log.spring.profiles.active", "test")
+						.put("deployer.log.cloudfoundry.services", "cloud-config-server")
+						.put("app.log.spring.cloud.config.name", "MY_CONFIG_TICKTOCK_LOG_NAME")
+						.build())) {
+
+			Awaitility.await(stream.getName() + " failed to deploy!")
+					.until(() -> stream.getStatus().equals(DEPLOYED));
+
+			Awaitility.await().await("Source not started")
+					.until(() -> runtimeApps.getFirstInstanceLog(stream, "time")
+							.contains("Started TimeSource"));
+			Awaitility.await().await("Sink not started")
+					.until(() -> runtimeApps.getFirstInstanceLog(stream, "log")
+							.contains("Started LogSink"));
+			Awaitility.await().await("No output found")
+					.until(() -> runtimeApps.getFirstInstanceLog(stream, "log")
+							.contains("TICKTOCK CLOUD CONFIG - TIMESTAMP:"));
+		}
+	}
+
 	/**
 	 * For the purpose of testing, disable security, expose the all actuators, and configure logfiles.
 	 * @return Deployment properties required for the deployment of all test pipelines.
@@ -666,11 +712,11 @@ public class DockerComposeIT {
 	}
 
 	private boolean prometheusPresent() {
-		return runtimeApps.isServicePresent("http://localhost:9090/api/v1/query?query=up");
+		return runtimeApps.isServicePresent(testProperties.getPrometheusUrl() + "/api/v1/query?query=up");
 	}
 
 	private boolean influxPresent() {
-		return runtimeApps.isServicePresent("http://localhost:8086/ping");
+		return runtimeApps.isServicePresent(testProperties.getInfluxUrl() + "/ping");
 	}
 
 	private static Condition<String> condition(Predicate predicate) {

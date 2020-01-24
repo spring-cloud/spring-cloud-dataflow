@@ -22,7 +22,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
  * @author Christian Tzolov
  */
 @ConfigurationProperties(prefix = "test.docker.compose")
-public class DockerComposeTestProperties {
+public class DataFlowITProperties {
 
 	/**
 	 * Default url to connect to dataflow

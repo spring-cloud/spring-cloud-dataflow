@@ -39,4 +39,14 @@ public class Tasks {
 				.map(td -> new Task(td.getName(), this.dataFlowOperations.taskOperations(), this.dataFlowOperations.jobOperations()))
 				.collect(Collectors.toList());
 	}
+
+	public Task get(String taskName) {
+		return this.list().stream()
+				.filter(task -> task.getTaskName().equalsIgnoreCase(taskName))
+				.findFirst().get();
+	}
+
+	public void destroyAll() {
+		this.dataFlowOperations.taskOperations().destroyAll();
+	}
 }
