@@ -33,11 +33,6 @@
 		<spring-shell.version>2.0.1.RELEASE</spring-shell.version>
 		<spring-statemachine.version>2.1.2.RELEASE</spring-statemachine.version>
 
-		<!-- NOTE: Make sure to update `spring-cloud-build` version and `spring-cloud-dependencies` version (spring-cloud.version)
-		are in sync with the https://github.com/spring-cloud/spring-cloud-release/blob/master/pom.xml updates for the respective
-		release versions -->
-		<spring-cloud.version>Hoxton.RELEASE</spring-cloud.version>
-
 		<java-cfenv-boot.version>1.1.1.RELEASE</java-cfenv-boot.version>
 		<spring-cloud-deployer.version>2.2.0.BUILD-SNAPSHOT</spring-cloud-deployer.version>
 		<spring-cloud-deployer-local.version>2.2.0.BUILD-SNAPSHOT</spring-cloud-deployer-local.version>
@@ -96,13 +91,6 @@
 
 	<dependencyManagement>
 		<dependencies>
-			<dependency>
-				<groupId>org.springframework.cloud</groupId>
-				<artifactId>spring-cloud-dependencies</artifactId>
-				<version>${spring-cloud.version}</version>
-				<type>pom</type>
-				<scope>import</scope>
-			</dependency>
 			<dependency>
 				<groupId>org.springframework.cloud</groupId>
 				<artifactId>spring-cloud-deployer-dependencies</artifactId>
