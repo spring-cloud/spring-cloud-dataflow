@@ -364,6 +364,38 @@
 	</reporting>
 	<profiles>
 		<profile>
+			<id>deploymentfiles</id>
+			<build>
+				<plugins>
+					<plugin>
+						<artifactId>maven-resources-plugin</artifactId>
+						<executions>
+							<execution>
+								<id>replace-deployment-files</id>
+								<phase>process-resources</phase>
+								<goals>
+									<goal>copy-resources</goal>
+								</goals>
+								<configuration>
+									<overwrite>true</overwrite>
+									<outputDirectory>${basedir}/src</outputDirectory>
+									<resources>
+										<resource>
+											<directory>${basedir}/src/templates</directory>
+											<includes>
+												<include>**/*</include>
+											</includes>
+											<filtering>true</filtering>
+										</resource>
+									</resources>
+								</configuration>
+							</execution>
+						</executions>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
+		<profile>
 			<id>spring</id>
 			<repositories>
 				<repository>
