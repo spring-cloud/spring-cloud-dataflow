@@ -91,6 +91,8 @@
 		<json-unit.version>2.11.1</json-unit.version>
 		<docker-compose-rule.version>1.4.2</docker-compose-rule.version>
 		<findbugs.version>3.0.2</findbugs.version>
+		<aws-java-sdk-ecr.version>1.11.731</aws-java-sdk-ecr.version>
+		<commons-text.version>1.8</commons-text.version>
 	</properties>
 	<modules>
 		<module>spring-cloud-dataflow-configuration-metadata</module>

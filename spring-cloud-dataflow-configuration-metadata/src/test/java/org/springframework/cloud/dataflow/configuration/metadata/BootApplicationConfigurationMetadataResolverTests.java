@@ -1,5 +1,5 @@
 /*
- * Copyright 2016-2019 the original author or authors.
+ * Copyright 2016-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,28 +16,76 @@
 
 package org.springframework.cloud.dataflow.configuration.metadata;
 
+import java.io.IOException;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
+import org.apache.commons.text.StringEscapeUtils;
 import org.hamcrest.Matcher;
+import org.junit.Before;
 import org.junit.Test;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 
 import org.springframework.boot.configurationmetadata.ConfigurationMetadataProperty;
+import org.springframework.cloud.dataflow.configuration.metadata.container.ContainerImageMetadataResolver;
+import org.springframework.cloud.deployer.resource.docker.DockerResource;
 import org.springframework.core.io.ClassPathResource;
+import org.springframework.util.StreamUtils;
 
 import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.hasProperty;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.not;
 import static org.junit.Assert.assertThat;
+import static org.mockito.Mockito.when;
 
 /**
  * Unit tests for {@link ApplicationConfigurationMetadataResolver}.
  *
  * @author Eric Bottard
+ * @author Christian Tzolov
  */
 public class BootApplicationConfigurationMetadataResolverTests {
 
-	private ApplicationConfigurationMetadataResolver resolver = new BootApplicationConfigurationMetadataResolver();
+	@Mock
+	private ContainerImageMetadataResolver containerImageMetadataResolver;
+
+	private ApplicationConfigurationMetadataResolver resolver;
+
+	@Before
+	public void init() {
+		MockitoAnnotations.initMocks(this);
+		resolver = new BootApplicationConfigurationMetadataResolver(containerImageMetadataResolver);
+	}
+
+	@Test
+	public void appDockerResourceEmptyLabels() {
+		when(containerImageMetadataResolver.getImageLabels("test/test:latest")).thenReturn(new HashMap<>());
+		List<ConfigurationMetadataProperty> properties = resolver
+				.listProperties(new DockerResource("test/test:latest"));
+		assertThat(properties.size(), is(0));
+	}
+
+	@Test
+	public void appDockerResource() throws IOException {
+		byte[] bytes = StreamUtils.copyToByteArray(new ClassPathResource(
+				"apps/no-whitelist/META-INF/spring-configuration-metadata.json", getClass()).getInputStream());
+		when(containerImageMetadataResolver.getImageLabels("test/test:latest"))
+				.thenReturn(Collections.singletonMap("org.springframework.cloud.dataflow.spring-configuration-metadata.json", StringEscapeUtils.escapeJson(new String(bytes))));
+		List<ConfigurationMetadataProperty> properties = resolver.listProperties(new DockerResource("test/test:latest"));
+		assertThat(properties.size(), is(3));
+	}
+
+	@Test(expected = AppMetadataResolutionException.class)
+	public void appDockerResourceBrokenFormat() {
+		byte[] bytes = "Invalid metadata json content1".getBytes();
+		Map<String, String> result = Collections.singletonMap("org.springframework.cloud.dataflow.spring-configuration-metadata.json", StringEscapeUtils.escapeJson(new String(bytes)));
+		when(containerImageMetadataResolver.getImageLabels("test/test:latest")).thenReturn(result);
+		resolver.listProperties(new DockerResource("test/test:latest"));
+	}
 
 	@Test
 	public void appSpecificWhitelistedPropsShouldBeVisible() {

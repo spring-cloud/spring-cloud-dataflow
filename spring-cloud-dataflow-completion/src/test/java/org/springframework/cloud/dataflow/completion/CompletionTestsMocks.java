@@ -23,9 +23,11 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.cloud.dataflow.audit.service.DefaultAuditRecordService;
 import org.springframework.cloud.dataflow.configuration.metadata.ApplicationConfigurationMetadataResolver;
 import org.springframework.cloud.dataflow.configuration.metadata.BootApplicationConfigurationMetadataResolver;
+import org.springframework.cloud.dataflow.configuration.metadata.container.DefaultContainerImageMetadataResolver;
 import org.springframework.cloud.dataflow.core.AppRegistration;
 import org.springframework.cloud.dataflow.core.ApplicationType;
 import org.springframework.cloud.dataflow.registry.repository.AppRegistrationRepository;
@@ -109,9 +111,12 @@ public class CompletionTestsMocks {
 		};
 	}
 
+	@MockBean
+	DefaultContainerImageMetadataResolver containerImageMetadataResolver;
+
 	@Bean
 	public ApplicationConfigurationMetadataResolver metadataResolver() {
 		return new BootApplicationConfigurationMetadataResolver(
-				CompletionTestsMocks.class.getClassLoader());
+				CompletionTestsMocks.class.getClassLoader(), containerImageMetadataResolver);
 	}
 }

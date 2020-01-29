@@ -16,22 +16,68 @@
 
 package org.springframework.cloud.dataflow.configuration.metadata;
 
+import java.util.List;
+
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
+import org.springframework.cloud.dataflow.configuration.metadata.container.ContainerImageMetadataProperties;
+import org.springframework.cloud.dataflow.configuration.metadata.container.ContainerImageMetadataResolver;
+import org.springframework.cloud.dataflow.configuration.metadata.container.ContainerImageParser;
+import org.springframework.cloud.dataflow.configuration.metadata.container.DefaultContainerImageMetadataResolver;
+import org.springframework.cloud.dataflow.configuration.metadata.container.authorization.AwsEcrAuthorizer;
+import org.springframework.cloud.dataflow.configuration.metadata.container.authorization.BasicAuthRegistryAuthorizer;
+import org.springframework.cloud.dataflow.configuration.metadata.container.authorization.DockerHubRegistryAuthorizer;
+import org.springframework.cloud.dataflow.configuration.metadata.container.authorization.RegistryAuthorizer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.validation.annotation.Validated;
 
 /**
- * Automatically exposes an {@link ApplicationConfigurationMetadataResolver} if none is
- * already registered.
+ * Automatically exposes an {@link ApplicationConfigurationMetadataResolver} if none is already registered.
  *
  * @author Eric Bottard
+ * @author Christian Tzolov
  */
 @Configuration
 public class ApplicationConfigurationMetadataResolverAutoConfiguration {
 
 	@Bean
+	public RegistryAuthorizer dockerHubRegistryAuthorizer() {
+		return new DockerHubRegistryAuthorizer();
+	}
+
+	@Bean
+	public RegistryAuthorizer artifactoryRegistryAuthorizer() {
+		return new BasicAuthRegistryAuthorizer();
+	}
+
+	@Bean
+	public RegistryAuthorizer awsRegistryAuthorizer() {
+		return new AwsEcrAuthorizer();
+	}
+
+	@Bean
+	public ContainerImageParser containerImageParser(ContainerImageMetadataProperties properties) {
+		return new ContainerImageParser(properties.getDefaultRegistryHost(),
+				properties.getDefaultRepositoryTag(), properties.getOfficialRepositoryNamespace());
+	}
+
+	@Bean
+	@Validated
+	public ContainerImageMetadataProperties containerImageMetadataProperties() {
+		return new ContainerImageMetadataProperties();
+	}
+
+	@Bean
+	@ConditionalOnMissingBean(ContainerImageMetadataResolver.class)
+	public DefaultContainerImageMetadataResolver containerImageMetadataResolver(ContainerImageParser imageNameParser,
+			List<RegistryAuthorizer> registryAuthorizers, ContainerImageMetadataProperties properties) {
+		return new DefaultContainerImageMetadataResolver(imageNameParser, registryAuthorizers, properties);
+	}
+
+	@Bean
 	@ConditionalOnMissingBean(ApplicationConfigurationMetadataResolver.class)
-	public ApplicationConfigurationMetadataResolver metadataResolver() {
-		return new BootApplicationConfigurationMetadataResolver();
+	public ApplicationConfigurationMetadataResolver metadataResolver(
+			DefaultContainerImageMetadataResolver containerImageMetadataResolver) {
+		return new BootApplicationConfigurationMetadataResolver(containerImageMetadataResolver);
 	}
 }

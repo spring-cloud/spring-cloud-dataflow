@@ -16,8 +16,10 @@
 
 package org.springframework.cloud.dataflow.configuration.metadata;
 
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
+import java.net.URI;
 import java.net.URLClassLoader;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -25,30 +27,40 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
+import java.util.stream.Collectors;
+
+import org.apache.commons.text.StringEscapeUtils;
 
 import org.springframework.boot.configurationmetadata.ConfigurationMetadataGroup;
 import org.springframework.boot.configurationmetadata.ConfigurationMetadataProperty;
+import org.springframework.boot.configurationmetadata.ConfigurationMetadataRepository;
 import org.springframework.boot.configurationmetadata.ConfigurationMetadataRepositoryJsonBuilder;
 import org.springframework.boot.configurationmetadata.Deprecation.Level;
 import org.springframework.boot.loader.archive.Archive;
 import org.springframework.boot.loader.archive.ExplodedArchive;
 import org.springframework.boot.loader.archive.JarFileArchive;
 import org.springframework.boot.loader.jar.JarFile;
+import org.springframework.cloud.dataflow.configuration.metadata.container.ContainerImageMetadataResolver;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import org.springframework.core.io.support.ResourcePatternResolver;
+import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
 /**
- * An {@link ApplicationConfigurationMetadataResolver} that knows how to look inside
- * Spring Boot uber-jars.
+ * An {@link ApplicationConfigurationMetadataResolver} that knows how to look either inside Spring Boot uber-jars
+ * or an application Container Image's configuration labels.
+ *
  * <p>
- * Supports Boot 1.3 and 1.4+ layouts thanks to a pluggable BootClassLoaderCreation
- * strategy.
+ * Supports Boot 1.3 and 1.4+ layouts thanks to a pluggable BootClassLoaderCreation strategy.
+ * <p>
+ * Supports Docker and OCI image format for retrieving the metadata.
  *
  * @author Eric Bottard
+ * @author Christian Tzolov
  */
 public class BootApplicationConfigurationMetadataResolver extends ApplicationConfigurationMetadataResolver {
 
@@ -63,27 +75,33 @@ public class BootApplicationConfigurationMetadataResolver extends ApplicationCon
 
 	private static final String CONFIGURATION_PROPERTIES_NAMES = "configuration-properties.names";
 
+	private static final String CONTAINER_IMAGE_CONFIGURATION_METADATA_LABEL_NAME = "org.springframework.cloud.dataflow.spring-configuration-metadata.json";
+
 	private final Set<String> globalWhiteListedProperties = new HashSet<>();
 
 	private final Set<String> globalWhiteListedClasses = new HashSet<>();
 
 	private final ClassLoader parent;
 
-	public BootApplicationConfigurationMetadataResolver() {
-		this(null);
+	private ContainerImageMetadataResolver containerImageMetadataResolver;
+
+	public BootApplicationConfigurationMetadataResolver(ContainerImageMetadataResolver containerImageMetadataResolver) {
+		this(null, containerImageMetadataResolver);
 	}
 
-	public BootApplicationConfigurationMetadataResolver(ClassLoader parent) {
+	public BootApplicationConfigurationMetadataResolver(ClassLoader parent,
+			ContainerImageMetadataResolver containerImageMetadataResolver) {
 		this.parent = parent;
+		this.containerImageMetadataResolver = containerImageMetadataResolver;
 		JarFile.registerUrlProtocolHandler();
 		try {
 			// read both formats and concat
 			Resource[] globalLegacyResources = new PathMatchingResourcePatternResolver(
 					ApplicationConfigurationMetadataResolver.class.getClassLoader())
-							.getResources(WHITELIST_LEGACY_PROPERTIES);
+					.getResources(WHITELIST_LEGACY_PROPERTIES);
 			Resource[] globalResources = new PathMatchingResourcePatternResolver(
 					ApplicationConfigurationMetadataResolver.class.getClassLoader())
-							.getResources(WHITELIST_PROPERTIES);
+					.getResources(WHITELIST_PROPERTIES);
 			loadWhiteLists(concatArrays(globalLegacyResources, globalResources), globalWhiteListedClasses,
 					globalWhiteListedProperties);
 		}
@@ -108,15 +126,53 @@ public class BootApplicationConfigurationMetadataResolver extends ApplicationCon
 	public List<ConfigurationMetadataProperty> listProperties(Resource app, boolean exhaustive) {
 		try {
 			if (app != null) {
-				Archive archive = resolveAsArchive(app);
-				return listProperties(archive, exhaustive);
+				if (isDockerSchema(app.getURI())) {
+					return resolvePropertiesFromContainerImage(app.getURI());
+				}
+				else {
+					Archive archive = resolveAsArchive(app);
+					return listProperties(archive, exhaustive);
+				}
 			}
 		}
-		catch (IOException e) {
-			throw new RuntimeException("Failed to resolve application resource: " + app.getDescription());
+		catch (Exception e) {
+			throw new AppMetadataResolutionException("Failed to resolve application resource: " + app.getDescription(), e);
 		}
 
 		return Collections.emptyList();
+	}
+
+	private boolean isDockerSchema(URI uri) {
+		return uri != null && uri.getScheme() != null && uri.getScheme().contains("docker");
+	}
+
+	private List<ConfigurationMetadataProperty> resolvePropertiesFromContainerImage(URI imageUri) {
+		String imageName = imageUri.getSchemeSpecificPart();
+
+		Map<String, String> labels = this.containerImageMetadataResolver.getImageLabels(imageName);
+		if (CollectionUtils.isEmpty(labels)) {
+			return Collections.emptyList();
+		}
+
+		String encodedMetadata = labels.get(CONTAINER_IMAGE_CONFIGURATION_METADATA_LABEL_NAME);
+		if (!StringUtils.hasText(encodedMetadata)) {
+			return Collections.emptyList();
+		}
+
+		try {
+			String metadataJson = StringEscapeUtils.unescapeJson(encodedMetadata);
+			ConfigurationMetadataRepository configurationMetadataRepository =
+					ConfigurationMetadataRepositoryJsonBuilder.create().withJsonResource(
+							new ByteArrayInputStream(metadataJson.getBytes())).build();
+
+			List<ConfigurationMetadataProperty> result = configurationMetadataRepository.getAllProperties().entrySet().stream()
+					.map(e -> e.getValue())
+					.collect(Collectors.toList());
+			return result;
+		}
+		catch (Exception e) {
+			throw new AppMetadataResolutionException("Invalid Metadata for " + imageName);
+		}
 	}
 
 	public List<ConfigurationMetadataProperty> listProperties(Archive archive, boolean exhaustive) {

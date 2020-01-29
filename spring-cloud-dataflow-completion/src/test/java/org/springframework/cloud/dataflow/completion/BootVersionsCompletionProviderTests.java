@@ -25,9 +25,11 @@ import org.junit.runner.RunWith;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.cloud.dataflow.audit.service.DefaultAuditRecordService;
 import org.springframework.cloud.dataflow.configuration.metadata.ApplicationConfigurationMetadataResolver;
 import org.springframework.cloud.dataflow.configuration.metadata.BootApplicationConfigurationMetadataResolver;
+import org.springframework.cloud.dataflow.configuration.metadata.container.DefaultContainerImageMetadataResolver;
 import org.springframework.cloud.dataflow.core.AppRegistration;
 import org.springframework.cloud.dataflow.core.ApplicationType;
 import org.springframework.cloud.dataflow.registry.repository.AppRegistrationRepository;
@@ -56,7 +58,7 @@ import static org.mockito.Mockito.mock;
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = { CompletionConfiguration.class,
 		BootVersionsCompletionProviderTests.Mocks.class }, properties = {
-				"spring.main.allow-bean-definition-overriding=true" })
+		"spring.main.allow-bean-definition-overriding=true" })
 @SuppressWarnings("unchecked")
 public class BootVersionsCompletionProviderTests {
 
@@ -151,10 +153,13 @@ public class BootVersionsCompletionProviderTests {
 			};
 		}
 
+		@MockBean
+		private DefaultContainerImageMetadataResolver containerImageMetadataResolver;
+
 		@Bean
 		public ApplicationConfigurationMetadataResolver metadataResolver() {
 			return new BootApplicationConfigurationMetadataResolver(
-					StreamCompletionProviderTests.class.getClassLoader());
+					StreamCompletionProviderTests.class.getClassLoader(), containerImageMetadataResolver);
 		}
 	}
 }

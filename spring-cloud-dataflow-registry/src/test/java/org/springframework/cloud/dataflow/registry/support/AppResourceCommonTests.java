@@ -99,7 +99,7 @@ public class AppResourceCommonTests {
 	}
 
 	@Test
-	public void testMetadataUriHttpApp2() throws Exception {
+	public void testJarMetadataUriDockerApp() throws Exception {
 		String appUri = "docker:springcloudstream/log-sink-rabbit:1.2.0.RELEASE";
 		String metadataUri = "https://repo.spring.io/libs-release/org/springframework/cloud/stream/app/file-sink-rabbit/1.2.0.RELEASE/file-sink-rabbit-1.2.0.RELEASE.jar";
 		Resource metadataResource = appResourceCommon.getMetadataResource(new URI(appUri), new URI(metadataUri));
@@ -118,7 +118,8 @@ public class AppResourceCommonTests {
 	public void testMetadataUriDockerApp() throws Exception {
 		String appUri = "docker:springcloudstream/log-sink-rabbit:1.2.0.RELEASE";
 		Resource metadataResource = appResourceCommon.getMetadataResource(new URI(appUri), null);
-		assertThat(metadataResource).isNull();
+		assertThat(metadataResource).isNotNull();
+		assertTrue(metadataResource instanceof DockerResource);
 	}
 
 	@Test

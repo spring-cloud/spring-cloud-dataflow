@@ -54,6 +54,7 @@ import org.slf4j.LoggerFactory;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.cloud.dataflow.core.ApplicationType;
 import org.springframework.cloud.dataflow.integration.test.util.DockerComposeFactory;
 import org.springframework.cloud.dataflow.integration.test.util.DockerComposeFactoryProperties;
 import org.springframework.cloud.dataflow.integration.test.util.ResourceExtractor;
@@ -65,6 +66,7 @@ import org.springframework.cloud.dataflow.rest.client.dsl.DeploymentPropertiesBu
 import org.springframework.cloud.dataflow.rest.client.dsl.Stream;
 import org.springframework.cloud.dataflow.rest.client.dsl.StreamApplication;
 import org.springframework.cloud.dataflow.rest.client.dsl.StreamDefinition;
+import org.springframework.cloud.dataflow.rest.resource.DetailedAppRegistrationResource;
 import org.springframework.cloud.dataflow.rest.resource.TaskExecutionStatus;
 import org.springframework.cloud.dataflow.rest.resource.about.AboutResource;
 import org.springframework.core.io.DefaultResourceLoader;
@@ -215,6 +217,49 @@ public class DataFlowIT {
 		logger.info(String.format("Selected platform: [name: %s, type: %s]", runtimeApps.getPlatformName(), runtimeApps.getPlatformType()));
 		logger.info("Wait until at least 60 apps are registered in SCDF");
 		Awaitility.await().until(() -> dataFlowOperations.appRegistryOperations().list().getMetadata().getTotalElements() >= 60L);
+	}
+
+	@Test
+	public void applicationMetadataTests() {
+		// Maven app with metadata
+		DetailedAppRegistrationResource mavenAppWithJarMetadata = dataFlowOperations.appRegistryOperations()
+				.info("file", ApplicationType.sink, false);
+		assertThat(mavenAppWithJarMetadata.getOptions()).hasSize(8);
+
+		// Maven app without metadata
+		dataFlowOperations.appRegistryOperations().register("maven-app-without-metadata", ApplicationType.sink,
+				"maven://org.springframework.cloud.stream.app:file-sink-kafka:2.1.1.RELEASE", null, true);
+		DetailedAppRegistrationResource mavenAppWithoutMetadata = dataFlowOperations.appRegistryOperations()
+				.info("maven-app-without-metadata", ApplicationType.sink, false);
+		assertThat(mavenAppWithoutMetadata.getOptions()).hasSize(8);
+
+		// Docker app with container image metadata
+		dataFlowOperations.appRegistryOperations().register("docker-app-with-container-metadata", ApplicationType.sink,
+				"docker:springcloudstream/time-source-kafka:2.1.2.BUILD-SNAPSHOT", null, true);
+		DetailedAppRegistrationResource dockerAppWithContainerMetadata = dataFlowOperations.appRegistryOperations()
+				.info("docker-app-with-container-metadata", ApplicationType.sink, false);
+		assertThat(dockerAppWithContainerMetadata.getOptions()).hasSize(6);
+
+		// Docker app without metadata
+		dataFlowOperations.appRegistryOperations().register("docker-app-without-metadata", ApplicationType.sink,
+				"docker:springcloudstream/file-sink-kafka:2.1.1.RELEASE", null, true);
+		DetailedAppRegistrationResource dockerAppWithoutMetadata = dataFlowOperations.appRegistryOperations()
+				.info("docker-app-without-metadata", ApplicationType.sink, false);
+		assertThat(dockerAppWithoutMetadata.getOptions()).hasSize(0);
+
+		// Docker app with jar metadata
+		dataFlowOperations.appRegistryOperations().register("docker-app-with-jar-metadata", ApplicationType.sink,
+				"docker:springcloudstream/file-sink-kafka:2.1.1.RELEASE",
+				"maven://org.springframework.cloud.stream.app:file-sink-kafka:jar:metadata:2.1.1.RELEASE", true);
+		DetailedAppRegistrationResource dockerAppWithJarMetadata = dataFlowOperations.appRegistryOperations()
+				.info("docker-app-with-jar-metadata", ApplicationType.sink, false);
+		assertThat(dockerAppWithJarMetadata.getOptions()).hasSize(8);
+
+		// unregister the test apps
+		dataFlowOperations.appRegistryOperations().unregister("docker-app-with-container-metadata", ApplicationType.sink);
+		dataFlowOperations.appRegistryOperations().unregister("docker-app-without-metadata", ApplicationType.sink);
+		dataFlowOperations.appRegistryOperations().unregister("maven-app-without-metadata", ApplicationType.sink);
+		dataFlowOperations.appRegistryOperations().unregister("docker-app-with-jar-metadata", ApplicationType.sink);
 	}
 
 	// -----------------------------------------------------------------------

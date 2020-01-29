@@ -26,6 +26,7 @@ import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
 
 import org.springframework.cloud.dataflow.configuration.metadata.BootApplicationConfigurationMetadataResolver;
+import org.springframework.cloud.dataflow.configuration.metadata.container.ContainerImageMetadataResolver;
 import org.springframework.cloud.dataflow.core.ApplicationType;
 import org.springframework.cloud.dataflow.core.StreamAppDefinition;
 import org.springframework.cloud.dataflow.registry.service.AppRegistryService;
@@ -54,7 +55,7 @@ public class AppDeploymentRequestCreatorTests {
 	public void setupMock() {
 		this.appDeploymentRequestCreator = new AppDeploymentRequestCreator(mock(AppRegistryService.class),
 				mock(CommonApplicationProperties.class),
-				new BootApplicationConfigurationMetadataResolver());
+				new BootApplicationConfigurationMetadataResolver(mock(ContainerImageMetadataResolver.class)));
 	}
 
 	@Test

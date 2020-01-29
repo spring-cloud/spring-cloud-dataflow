@@ -182,7 +182,7 @@ public class TabOnTapCompletionProviderTests {
 
 		@Bean
 		public ApplicationConfigurationMetadataResolver configurationMetadataResolver() {
-			return new BootApplicationConfigurationMetadataResolver(null);
+			return new BootApplicationConfigurationMetadataResolver(null, null);
 		}
 	}
 }
