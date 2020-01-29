@@ -474,6 +474,10 @@ Make sure to add 'spring-boot-configuration-processor' as an optional dependency
     <optional>true</optional>
 </dependency>
 ----
+
+The whitelisting support works only for uber-jar application artifacts! At the moment, the metadata properties are not retrievable from the dockerized application images directly — a dedicated companion metadata JAR is required.
+
+The `configuration-properties.names` can whitelist properties that are defined in the property class annotated with `@ConfigurationProperties`. The properties defined with `@Value` annotations cannot be whitelisted.
 ====
 
 
