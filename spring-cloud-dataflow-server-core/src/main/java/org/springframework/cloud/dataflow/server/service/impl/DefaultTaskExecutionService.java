@@ -218,7 +218,6 @@ public class DefaultTaskExecutionService implements TaskExecutionService {
 		}
 		DeploymentPropertiesUtils.validateDeploymentProperties(taskDeploymentProperties);
 
-		// TODO: Same task name can only exist in one platform, um why?
 		TaskDeployment existingTaskDeployment = taskDeploymentRepository
 				.findTopByTaskDefinitionNameOrderByCreatedOnAsc(taskName);
 		if (existingTaskDeployment != null) {
