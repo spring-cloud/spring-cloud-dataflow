@@ -45,6 +45,7 @@ import org.springframework.cloud.dataflow.audit.service.AuditRecordService;
 import org.springframework.cloud.dataflow.audit.service.DefaultAuditRecordService;
 import org.springframework.cloud.dataflow.configuration.metadata.ApplicationConfigurationMetadataResolver;
 import org.springframework.cloud.dataflow.configuration.metadata.BootApplicationConfigurationMetadataResolver;
+import org.springframework.cloud.dataflow.configuration.metadata.container.ContainerImageMetadataResolver;
 import org.springframework.cloud.dataflow.core.Launcher;
 import org.springframework.cloud.dataflow.core.TaskPlatform;
 import org.springframework.cloud.dataflow.registry.repository.AppRegistrationRepository;
@@ -161,7 +162,7 @@ public class JobDependencies {
 
 	@Bean
 	public ApplicationConfigurationMetadataResolver metadataResolver() {
-		return new BootApplicationConfigurationMetadataResolver();
+		return new BootApplicationConfigurationMetadataResolver(mock(ContainerImageMetadataResolver.class));
 	}
 
 	@Bean
@@ -398,6 +399,7 @@ public class JobDependencies {
 		return new JdbcDataflowTaskExecutionMetadataDao(dataSource, incrementerFactory.getIncrementer(databaseType,
 				"task_execution_metadata_seq"));
 	}
+
 	@Bean
 	public SchedulerService schedulerService() {
 		return new SchedulerService() {

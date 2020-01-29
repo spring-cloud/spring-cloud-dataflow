@@ -261,9 +261,8 @@ public class AppResourceCommon {
 			return this.metadataResourceLoader.getResource(metadataUri.toString());
 		}
 		else {
-			Resource appResource = this.getResource(appUri.toString());
 			// If the metadata URI is not set, only the archive type app resource can serve as the metadata resource
-			return (appResource instanceof DockerResource) ? null : appResource;
+			return this.getResource(appUri.toString());
 		}
 	}
 
