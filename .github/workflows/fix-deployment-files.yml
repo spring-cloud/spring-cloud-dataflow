@@ -30,6 +30,7 @@ jobs:
         token: ${{ secrets.GITHUB_TOKEN }}
         commit-message: Update k8s deployment files
         committer: Spring Buildmaster <buildmaster@springframework.org>
+        author: Spring Buildmaster <buildmaster@springframework.org>
         body: |
           Detected a change with `mvn process-resources -P deploymentfiles`.
 
