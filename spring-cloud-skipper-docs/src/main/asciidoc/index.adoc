@@ -19,7 +19,7 @@ ifdef::backend-html5[]
 
 Version {project-version}
 
-(C) 2012-2019 Pivotal Software, Inc.
+(C) 2012-2020 Pivotal Software, Inc.
 
 _Copies of this document may be made for your own use and for distribution to
 others, provided that you do not charge any fee for such copies and further
