@@ -39,6 +39,7 @@ import org.springframework.cloud.dataflow.rest.resource.TaskToolsResource;
 import org.springframework.cloud.dataflow.rest.resource.about.AboutResource;
 import org.springframework.cloud.dataflow.server.config.features.FeaturesProperties;
 import org.springframework.hateoas.Link;
+import org.springframework.hateoas.RepresentationModel;
 import org.springframework.hateoas.server.EntityLinks;
 import org.springframework.hateoas.server.ExposesResourceFor;
 import org.springframework.hateoas.server.mvc.WebMvcLinkBuilder;
@@ -77,10 +78,10 @@ public class RootController {
 	}
 
 	/**
-	 * Return a {@link ResourceSupport} object containing the resources served by the Data
+	 * Return a {@link RepresentationModel} object containing the resources served by the Data
 	 * Flow server.
 	 *
-	 * @return {@code ResourceSupport} object containing the Data Flow server's resources
+	 * @return {@code RepresentationModel} object containing the Data Flow server's resources
 	 */
 	@RequestMapping("/")
 	public RootResource info() {

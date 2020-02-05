@@ -53,5 +53,10 @@
 			<artifactId>semver4j</artifactId>
 			<version>${semver.version}</version>
 		</dependency>
+		<dependency>
+			<groupId>com.google.code.findbugs</groupId>
+			<artifactId>jsr305</artifactId>
+			<scope>provided</scope>
+		</dependency>
 	</dependencies>
 </project>

@@ -49,6 +49,7 @@ public interface AuditRecordService {
 	 * @param auditActionType Must not be null
 	 * @param correlationId Id to identify the record
 	 * @param data The data as String to be audited
+	 * @param platformName the platform name
 	 *
 	 * @return newly created AuditRecord
 	 */
@@ -70,6 +71,7 @@ public interface AuditRecordService {
 	 * @param auditActionType Must not be null
 	 * @param correlationId Id to identify the record
 	 * @param data The data as a Map to be audited
+	 * @param platformName the platform name
 	 *
 	 * @return newly created AuditRecord
 	 */

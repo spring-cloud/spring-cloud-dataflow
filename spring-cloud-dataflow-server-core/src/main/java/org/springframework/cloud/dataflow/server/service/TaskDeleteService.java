@@ -35,9 +35,11 @@ public interface TaskDeleteService {
 	void cleanupExecution(long id);
 
 	/**
+	 *  Cleanup the resources that resulted from running the task with the given execution
+	 *  ids and actions.
 	 *
-	 * @param actionsAsSet
-	 * @param ids
+	 * @param actionsAsSet the actions
+	 * @param ids the id's
 	 */
 	void cleanupExecutions(Set<TaskExecutionControllerDeleteAction> actionsAsSet, Set<Long> ids);
 

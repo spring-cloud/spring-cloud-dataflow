@@ -9,6 +9,9 @@
 	<artifactId>spring-cloud-starter-dataflow-server</artifactId>
 	<description>Data Flow Server Starter</description>
 	<packaging>jar</packaging>
+	<properties>
+		<maven.javadoc.skip>true</maven.javadoc.skip>
+	</properties>
 	<dependencies>
 		<dependency>
 			<groupId>org.springframework.cloud</groupId>
@@ -84,23 +87,6 @@
 						</goals>
 					</execution>
 				</executions>
-			</plugin>
-			<plugin>
-				<artifactId>maven-javadoc-plugin</artifactId>
-				<executions>
-					<execution>
-						<id>javadoc</id>
-						<goals>
-							<goal>jar</goal>
-						</goals>
-						<phase>package</phase>
-					</execution>
-				</executions>
-				<configuration>
-					<quiet>true</quiet>
-					<sourcepath>${basedir}/src/test/java/org/springframework/cloud/dataflow/server/local/dataflowapp
-					</sourcepath>
-				</configuration>
 			</plugin>
 		</plugins>
 	</build>

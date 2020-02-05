@@ -103,10 +103,10 @@ public interface StreamDeployer {
 	/**
 	 * For a selected stream scales the number of appName instances to count.
 	 *
-	 * @param streamName
-	 * @param appName
-	 * @param count
-	 * @param properties
+	 * @param streamName the stream name
+	 * @param appName the app name
+	 * @param count the count
+	 * @param properties the properties
 	 */
 	void scale(String streamName, String appName, int count, Map<String, String> properties);
 }

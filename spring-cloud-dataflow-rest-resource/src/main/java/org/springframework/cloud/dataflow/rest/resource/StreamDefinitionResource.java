@@ -73,6 +73,7 @@ public class StreamDefinitionResource extends RepresentationModel<StreamDefiniti
 	 *
 	 * @param name stream name
 	 * @param dslText stream definition DSL text
+	 * @param originalDslText original stream definition DSL text
 	 * @param description Description of the stream definition
 	 */
 	public StreamDefinitionResource(String name, String dslText, String originalDslText, String description) {

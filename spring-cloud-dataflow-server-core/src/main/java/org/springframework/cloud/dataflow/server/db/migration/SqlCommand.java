@@ -110,6 +110,7 @@ public class SqlCommand {
 	 * Handle command in a given jdbc template.
 	 *
 	 * @param jdbcTemplate the jdbc template
+	 * @param connection the sql connection
 	 */
 	public void handle(JdbcTemplate jdbcTemplate, Connection connection) {
 		// expected to get handled in a sub-class
