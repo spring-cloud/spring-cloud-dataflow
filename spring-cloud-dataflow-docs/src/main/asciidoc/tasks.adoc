@@ -1102,7 +1102,7 @@ Created schedule 'mytaskschedule'
 ```
 In the example above we created a schedule `mytaskschedule` for the task definition `mytask`.  This schedule will launch `mytask` once a minute.
 
-NOTE: When using Cloud Foundry the cron expression will be: `*/1 * ? * *`.
+NOTE: If using Cloud Foundry the cron expression above would be: `*/1 * ? * *`.  This is because Cloud Foundry uses the Quartz cron expression format.
 
 [[spring-cloud-data-flow-schedule-unscheduling]]
 ==== Deleting a Schedule
