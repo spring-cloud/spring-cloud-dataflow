@@ -42,6 +42,11 @@ import org.springframework.cloud.dataflow.core.TaskDefinition;
 import org.springframework.cloud.dataflow.core.TaskDeployment;
 import org.springframework.cloud.dataflow.core.TaskManifest;
 import org.springframework.cloud.dataflow.core.TaskPlatformFactory;
+import org.springframework.cloud.dataflow.core.dsl.SplitNode;
+import org.springframework.cloud.dataflow.core.dsl.TaskAppNode;
+import org.springframework.cloud.dataflow.core.dsl.TaskNode;
+import org.springframework.cloud.dataflow.core.dsl.TaskParser;
+import org.springframework.cloud.dataflow.core.dsl.TaskVisitor;
 import org.springframework.cloud.dataflow.rest.util.ArgumentSanitizer;
 import org.springframework.cloud.dataflow.rest.util.DeploymentPropertiesUtils;
 import org.springframework.cloud.dataflow.server.job.LauncherRepository;
@@ -243,6 +248,11 @@ public class DefaultTaskExecutionService implements TaskExecutionService {
 			handleAccessToken(commandLineArgs, taskExecutionInformation);
 		}
 
+		TaskLauncher taskLauncher = findTaskLauncher(platformName);
+		if(taskExecutionInformation.isComposed()) {
+			isCTRSplitValidForCurrentCTR(taskLauncher, taskExecutionInformation.getTaskDefinition());
+		}
+
 		// Build app deploy request and stash deploy props there
 		TaskExecution taskExecution = taskExecutionRepositoryService.createTaskExecution(taskName);
 		AppDeploymentRequest appDeploymentRequest = this.taskAppDeploymentRequestCreator.
@@ -273,14 +283,12 @@ public class DefaultTaskExecutionService implements TaskExecutionService {
 
 		String taskDeploymentId = null;
 		try {
-			TaskLauncher taskLauncher = findTaskLauncher(platformName);
 			Launcher launcher = this.launcherRepository.findByName(platformName);
 			if(launcher.getType().equals(TaskPlatformFactory.CLOUDFOUNDRY_PLATFORM_TYPE) && !isAppDeploymentSame(previousManifest, taskManifest)) {
 				validateAndLockUpgrade(taskName, platformName, taskExecution);
 				logger.debug("Deleting %s and all related resources from the platform", taskName);
 				taskLauncher.destroy(taskName);
 			}
-
 			this.dataflowTaskExecutionMetadataDao.save(taskExecution, taskManifest);
 			taskDeploymentId = taskLauncher.launch(appDeploymentRequest);
 			saveExternalExecutionId(taskExecution, taskDeploymentId);
@@ -700,6 +708,52 @@ public class DefaultTaskExecutionService implements TaskExecutionService {
 			}
 		}
 		return taskExecutions;
+	}
+
+	private void isCTRSplitValidForCurrentCTR(TaskLauncher taskLauncher, TaskDefinition taskDefinition) {
+		TaskParser taskParser = new TaskParser("composed-task-runner", taskDefinition.getProperties().get("graph"), true, true);
+		TaskNode taskNode = taskParser.parse();
+		ComposedRunnerVisitor composedRunnerVisitor = new ComposedRunnerVisitor();
+		taskNode.accept(composedRunnerVisitor);
+		if(composedRunnerVisitor.highCount > taskLauncher.getMaximumConcurrentTasks()) {
+			throw new IllegalArgumentException(String.format("One or more of the " +
+					"splits in the composed task contains a task count that exceeds " +
+					"the maximumConcurrentTasks count of %s",
+					taskLauncher.getMaximumConcurrentTasks()));
+		}
+	}
+
+
+	private class ComposedRunnerVisitor extends TaskVisitor {
+
+		private int highCount;
+		private int currentCount;
+
+		/**
+		 * Reset current counter for a new split
+		 */
+		public void visit(SplitNode split) {
+			logger.debug("Visit Split:  " + split);
+			currentCount = 0;
+
+		}
+
+		/**
+		 * At end of split determine if the number of task apps in the split is greater than other splits.
+		 */
+		public void postVisit(SplitNode split) {
+			if(currentCount > highCount) {
+				highCount = currentCount;
+			}
+		}
+
+		/**
+		 * Count the number of tasks in a split.
+		 */
+		public void visit(TaskAppNode taskApp) {
+			currentCount++;
+		}
+
 	}
 
 }
