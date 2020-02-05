@@ -1,0 +1,17 @@
+#!/bin/sh
+
+# ----------------------------------------------------------------------------
+# Script maintaining versions
+#
+# Bump up next minor development version for parents.
+# ----------------------------------------------------------------------------
+
+find_basedir() {
+  local basedir=$(cd -P -- "$(dirname -- "$0")" && cd .. && cd .. && pwd -P)
+  echo "${basedir}"
+}
+
+export PROJECTBASEDIR=$(find_basedir)
+
+(cd $PROJECTBASEDIR && ./mvnw build-helper:parse-version versions:update-parent -DgenerateBackupPoms=false -DallowSnapshots=true -DparentVersion='${parsedVersion.majorVersion}.${parsedVersion.nextMinorVersion}' && ./mvnw build-helper:parse-version versions:update-property -DgenerateBackupPoms=false -DallowSnapshots=true -Dproperty=spring-cloud-deployer.version -DnewVersion='${parsedVersion.majorVersion}.${parsedVersion.nextMinorVersion}.0.BUILD-SNAPSHOT' && ./mvnw build-helper:parse-version versions:update-property -DgenerateBackupPoms=false -DallowSnapshots=true -Dproperty=spring-cloud-deployer-local.version -DnewVersion='${parsedVersion.majorVersion}.${parsedVersion.nextMinorVersion}.0.BUILD-SNAPSHOT' && ./mvnw build-helper:parse-version versions:update-property -DgenerateBackupPoms=false -DallowSnapshots=true -Dproperty=spring-cloud-deployer-cloudfoundry.version -DnewVersion='${parsedVersion.majorVersion}.${parsedVersion.nextMinorVersion}.0.BUILD-SNAPSHOT' && ./mvnw build-helper:parse-version versions:update-property -DgenerateBackupPoms=false -DallowSnapshots=true -Dproperty=spring-cloud-deployer-kubernetes.version -DnewVersion='${parsedVersion.majorVersion}.${parsedVersion.nextMinorVersion}.0.BUILD-SNAPSHOT')
+
