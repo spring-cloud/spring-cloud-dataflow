@@ -2,7 +2,7 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<artifactId>spring-cloud-dataflow-parent</artifactId>
-	<version>2.4.1.BUILD-SNAPSHOT</version>
+	<version>2.5.0.BUILD-SNAPSHOT</version>
 	<packaging>pom</packaging>
 	<url>https://cloud.spring.io/spring-cloud-dataflow/</url>
 	<organization>
@@ -12,7 +12,7 @@
 	<parent>
 		<groupId>org.springframework.cloud</groupId>
 		<artifactId>spring-cloud-dataflow-build</artifactId>
-		<version>2.4.0.RELEASE</version>
+		<version>2.5.0.BUILD-SNAPSHOT</version>
 		<relativePath />
 	</parent>
 	<licenses>
@@ -57,14 +57,14 @@
 
 		<spring-cloud-dataflow-ui.version>2.4.0.RELEASE</spring-cloud-dataflow-ui.version>
 
-		<spring-cloud-deployer.version>2.2.0.RELEASE</spring-cloud-deployer.version>
-		<spring-cloud-deployer-local.version>2.2.0.RELEASE</spring-cloud-deployer-local.version>
+		<spring-cloud-deployer.version>2.3.0.BUILD-SNAPSHOT</spring-cloud-deployer.version>
+		<spring-cloud-deployer-local.version>2.3.0.BUILD-SNAPSHOT</spring-cloud-deployer-local.version>
 
-		<spring-cloud-deployer-cloudfoundry.version>2.2.0.RELEASE</spring-cloud-deployer-cloudfoundry.version>
-		<spring-cloud-deployer-kubernetes.version>2.2.0.RELEASE</spring-cloud-deployer-kubernetes.version>
+		<spring-cloud-deployer-cloudfoundry.version>2.3.0.BUILD-SNAPSHOT</spring-cloud-deployer-cloudfoundry.version>
+		<spring-cloud-deployer-kubernetes.version>2.3.0.BUILD-SNAPSHOT</spring-cloud-deployer-kubernetes.version>
 		<kubernetes-client.version>4.1.0</kubernetes-client.version>
 
-		<spring-cloud-skipper.version>2.3.1.BUILD-SNAPSHOT</spring-cloud-skipper.version>
+		<spring-cloud-skipper.version>2.4.0.BUILD-SNAPSHOT</spring-cloud-skipper.version>
 
 		<spring-cloud-task.version>2.2.2.RELEASE</spring-cloud-task.version>
 
@@ -131,7 +131,7 @@
 			<dependency>
 				<groupId>org.springframework.cloud</groupId>
 				<artifactId>spring-cloud-dataflow-dependencies</artifactId>
-				<version>2.4.1.BUILD-SNAPSHOT</version>
+				<version>2.5.0.BUILD-SNAPSHOT</version>
 				<type>pom</type>
 				<scope>import</scope>
 			</dependency>
