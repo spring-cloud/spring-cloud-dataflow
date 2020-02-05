@@ -81,6 +81,12 @@ public class TaskAppDeploymentRequestCreator {
 	/**
 	 * Create a {@link AppDeploymentRequest} from the provided
 	 * {@link TaskExecutionInformation}, {@link TaskExecution}.
+	 *
+	 * @param taskExecution the task execution
+	 * @param taskExecutionInformation the task execution info
+	 * @param commandLineArgs the command line args
+	 * @param platformName the platform name
+	 *
 	 * @return an instance of {@link AppDeploymentRequest}
 	 */
 	public AppDeploymentRequest createRequest(

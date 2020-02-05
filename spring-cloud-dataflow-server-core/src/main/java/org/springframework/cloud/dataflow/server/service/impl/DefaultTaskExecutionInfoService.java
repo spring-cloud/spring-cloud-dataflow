@@ -91,6 +91,8 @@ public class DefaultTaskExecutionInfoService implements TaskExecutionInfoService
 	 * @param taskDefinitionRepository the {@link TaskDefinitionRepository} this service will
 	 *     use for task CRUD operations.
 	 * @param taskConfigurationProperties the properties used to define the behavior of tasks
+	 * @param launcherRepository the launcher repository
+	 * @param taskPlatforms the task platforms
 	 */
 	public DefaultTaskExecutionInfoService(DataSourceProperties dataSourceProperties,
 			AppRegistryService appRegistryService,

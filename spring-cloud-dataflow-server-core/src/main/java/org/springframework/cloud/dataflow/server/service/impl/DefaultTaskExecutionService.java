@@ -142,10 +142,16 @@ public class DefaultTaskExecutionService implements TaskExecutionService {
 	 * @param launcherRepository the repository of task launcher used to launch task apps.
 	 * @param auditRecordService the audit record service
 	 * @param taskRepository the repository to use for accessing and updating task executions
+	 * @param taskExecutionInfoService the task execution info service
 	 * @param taskDeploymentRepository the repository to track task deployment
 	 * @param taskExecutionInfoService the service used to setup a task execution
 	 * @param taskExecutionRepositoryService the service used to create the task execution
+	 * @param taskAppDeploymentRequestCreator the task app deployment request creator
+	 * @param taskExplorer the task explorer
+	 * @param dataflowTaskExecutionDao the dataflow task execution dao
 	 * @param dataflowTaskExecutionMetadataDao repository used to manipulate task manifests
+	 * @param oauth2TokenUtilsService the oauth2 token server
+	 * @param taskSaveService the task save service
 	 */
 	public DefaultTaskExecutionService(LauncherRepository launcherRepository,
 			AuditRecordService auditRecordService,

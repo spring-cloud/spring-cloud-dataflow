@@ -118,8 +118,10 @@ public class TaskConfiguration {
 	/**
 	 * The default profile is active when no other profiles are active. This is configured so
 	 * that several tests will pass without having to explicitly enable the local profile.
-	 * @param localPlatformProperties
-	 * @return
+	 * @param localPlatformProperties the local platform properties
+	 * @param localScheduler the local scheduler
+	 *
+	 * @return the task platform
 	 */
 	@Profile({ "local", "default" })
 	@Bean
