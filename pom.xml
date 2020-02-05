@@ -180,6 +180,11 @@
 			</dependency>
 			<dependency>
 				<groupId>org.springframework.cloud</groupId>
+				<artifactId>spring-cloud-deployer-local</artifactId>
+				<version>${spring-cloud-deployer-local.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.springframework.cloud</groupId>
 				<artifactId>spring-cloud-deployer-cloudfoundry</artifactId>
 				<version>${spring-cloud-deployer-cloudfoundry.version}</version>
 			</dependency>
