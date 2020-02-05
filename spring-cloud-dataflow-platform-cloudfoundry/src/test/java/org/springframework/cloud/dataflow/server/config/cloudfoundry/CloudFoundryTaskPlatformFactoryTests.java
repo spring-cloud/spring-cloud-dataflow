@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 the original author or authors.
+ * Copyright 2019-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,7 +22,14 @@ import java.util.Optional;
 
 import io.pivotal.scheduler.SchedulerClient;
 import org.cloudfoundry.client.CloudFoundryClient;
+import org.cloudfoundry.client.v2.Metadata;
 import org.cloudfoundry.client.v2.info.GetInfoResponse;
+import org.cloudfoundry.client.v2.organizations.ListOrganizationsResponse;
+import org.cloudfoundry.client.v2.organizations.OrganizationResource;
+import org.cloudfoundry.client.v2.organizations.Organizations;
+import org.cloudfoundry.client.v2.spaces.ListSpacesResponse;
+import org.cloudfoundry.client.v2.spaces.SpaceResource;
+import org.cloudfoundry.client.v2.spaces.Spaces;
 import org.cloudfoundry.reactor.TokenProvider;
 import org.junit.Before;
 import org.junit.Test;
@@ -37,6 +44,7 @@ import org.springframework.cloud.deployer.spi.cloudfoundry.CloudFoundryTaskLaunc
 import org.springframework.cloud.deployer.spi.scheduler.cloudfoundry.CloudFoundrySchedulerProperties;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -68,6 +76,10 @@ public class CloudFoundryTaskPlatformFactoryTests {
 	public void setUp() throws Exception {
 		when(cloudFoundryClient.info())
 				.thenReturn(getInfoRequest -> Mono.just(GetInfoResponse.builder().apiVersion("0.0.0").build()));
+		when(cloudFoundryClient.organizations()).thenReturn(mock(Organizations.class));
+		when(cloudFoundryClient.spaces()).thenReturn(mock(Spaces.class));
+		when(cloudFoundryClient.organizations().list(any())).thenReturn(listOrganizationsResponse());
+		when(cloudFoundryClient.spaces().list(any())).thenReturn(listSpacesResponse());
 		when(cloudFoundryClientProvider.cloudFoundryClient(anyString())).thenReturn(cloudFoundryClient);
 
 		cloudFoundryPlatformProperties = new CloudFoundryPlatformProperties();
@@ -143,5 +155,23 @@ public class CloudFoundryTaskPlatformFactoryTests {
 		assertThat(taskPlatform.getLaunchers().get(0).getDescription()).isEqualTo(
 				"org = [org], space = [space], url = [https://localhost:9999]");
 		assertThat(taskPlatform.getLaunchers().get(0).getScheduler()).isNotNull();
+	}
+
+	private Mono<ListOrganizationsResponse> listOrganizationsResponse() {
+		ListOrganizationsResponse response = ListOrganizationsResponse.builder()
+				.addAllResources(Collections.<OrganizationResource>singletonList(
+						OrganizationResource.builder()
+								.metadata(Metadata.builder().id("123").build()).build())
+				).build();
+		return Mono.just(response);
+	}
+
+	private Mono<ListSpacesResponse> listSpacesResponse() {
+		ListSpacesResponse response = ListSpacesResponse.builder()
+				.addAllResources(Collections.<SpaceResource>singletonList(
+						SpaceResource.builder()
+								.metadata(Metadata.builder().id("123").build()).build())
+				).build();
+		return Mono.just(response);
 	}
 }

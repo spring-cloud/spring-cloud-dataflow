@@ -16,10 +16,18 @@
 
 package org.springframework.cloud.dataflow.server.single;
 
+import java.util.Collections;
 import java.util.List;
 
 import org.cloudfoundry.client.CloudFoundryClient;
+import org.cloudfoundry.client.v2.Metadata;
 import org.cloudfoundry.client.v2.info.GetInfoResponse;
+import org.cloudfoundry.client.v2.organizations.ListOrganizationsResponse;
+import org.cloudfoundry.client.v2.organizations.OrganizationResource;
+import org.cloudfoundry.client.v2.organizations.Organizations;
+import org.cloudfoundry.client.v2.spaces.ListSpacesResponse;
+import org.cloudfoundry.client.v2.spaces.SpaceResource;
+import org.cloudfoundry.client.v2.spaces.Spaces;
 import org.cloudfoundry.reactor.TokenProvider;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -39,6 +47,7 @@ import org.springframework.context.annotation.Primary;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -114,6 +123,10 @@ public class MultiplePlatformTypeTests {
 		public CloudFoundryPlatformClientProvider mockCloudFoundryClientProvider() {
 			when(cloudFoundryClient.info())
 					.thenReturn(getInfoRequest -> Mono.just(GetInfoResponse.builder().apiVersion("0.0.0").build()));
+			when(cloudFoundryClient.organizations()).thenReturn(mock(Organizations.class));
+			when(cloudFoundryClient.spaces()).thenReturn(mock(Spaces.class));
+			when(cloudFoundryClient.organizations().list(any())).thenReturn(listOrganizationsResponse());
+			when(cloudFoundryClient.spaces().list(any())).thenReturn(listSpacesResponse());
 			CloudFoundryPlatformClientProvider cloudFoundryClientProvider = mock(
 					CloudFoundryPlatformClientProvider.class);
 			when(cloudFoundryClientProvider.cloudFoundryClient(anyString())).thenAnswer(invocation -> {
@@ -121,6 +134,24 @@ public class MultiplePlatformTypeTests {
 				return cloudFoundryClient;
 			});
 			return cloudFoundryClientProvider;
+		}
+
+		private Mono<ListOrganizationsResponse> listOrganizationsResponse() {
+			ListOrganizationsResponse response = ListOrganizationsResponse.builder()
+					.addAllResources(Collections.<OrganizationResource>singletonList(
+							OrganizationResource.builder()
+									.metadata(Metadata.builder().id("123").build()).build())
+					).build();
+			return Mono.just(response);
+		}
+
+		private Mono<ListSpacesResponse> listSpacesResponse() {
+			ListSpacesResponse response = ListSpacesResponse.builder()
+					.addAllResources(Collections.<SpaceResource>singletonList(
+							SpaceResource.builder()
+									.metadata(Metadata.builder().id("123").build()).build())
+					).build();
+			return Mono.just(response);
 		}
 
 		@Bean
