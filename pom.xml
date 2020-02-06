@@ -10,6 +10,7 @@
 	<modules>
 		<module>spring-cloud-dataflow-build-dependencies</module>
 		<module>spring-cloud-dataflow-dependencies-parent</module>
+		<module>spring-cloud-dataflow-build-tools</module>
 	</modules>
 	<url>https://spring.io/projects/spring-cloud-dataflow</url>
 	<properties>
@@ -72,10 +73,10 @@
 		<maven-checkstyle-plugin.includeTestSourceDirectory>true</maven-checkstyle-plugin.includeTestSourceDirectory>
 		<spring-cloud-build-checkstyle.branch>master</spring-cloud-build-checkstyle.branch>
 		<checkstyle.suppressions.file>
-			https://raw.githubusercontent.com/spring-cloud/spring-cloud-dataflow-build/${spring-cloud-build-checkstyle.branch}/src/checkstyle/checkstyle-suppressions.xml
+			https://raw.githubusercontent.com/spring-cloud/spring-cloud-dataflow-build/${spring-cloud-build-checkstyle.branch}/spring-cloud-dataflow-build-tools/src/checkstyle/checkstyle-suppressions.xml
 		</checkstyle.suppressions.file>
 		<checkstyle.nohttp.file>
-			https://raw.githubusercontent.com/spring-cloud/spring-cloud-dataflow-build/${spring-cloud-build-checkstyle.branch}/src/checkstyle/nohttp-checkstyle.xml
+			https://raw.githubusercontent.com/spring-cloud/spring-cloud-dataflow-build/${spring-cloud-build-checkstyle.branch}/spring-cloud-dataflow-build-tools/src/checkstyle/nohttp-checkstyle.xml
 		</checkstyle.nohttp.file>
 		<checkstyle.additional.suppressions.file>
 			${maven.multiModuleProjectDirectory}/src/checkstyle/checkstyle-suppressions.xml
@@ -300,6 +301,11 @@
 							<groupId>io.spring.javaformat</groupId>
 							<artifactId>spring-javaformat-checkstyle</artifactId>
 							<version>${spring-javaformat-checkstyle.version}</version>
+						</dependency>
+						<dependency>
+							<groupId>org.springframework.cloud</groupId>
+							<artifactId>spring-cloud-dataflow-build-tools</artifactId>
+							<version>2.5.0.BUILD-SNAPSHOT</version>
 						</dependency>
 						<dependency>
 							<groupId>io.spring.nohttp</groupId>
