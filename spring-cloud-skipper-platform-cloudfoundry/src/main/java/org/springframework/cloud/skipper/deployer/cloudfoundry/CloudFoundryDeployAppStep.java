@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 the original author or authors.
+ * Copyright 2018-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,8 +35,6 @@ import org.springframework.cloud.skipper.server.repository.jpa.ReleaseRepository
 import org.springframework.cloud.skipper.server.util.ArgumentSanitizer;
 import org.springframework.dao.DataAccessException;
 import org.springframework.transaction.annotation.Transactional;
-
-import static org.springframework.cloud.skipper.deployer.cloudfoundry.CloudFoundryManifestApplicationDeployer.isNotFoundError;
 
 /**
  * Responsible for taking the ReleaseAnalysisReport and deploying the apps in the
@@ -116,7 +114,7 @@ public class CloudFoundryDeployAppStep {
 					this.appDeployerDataRepository.save(appDeployerData);
 				})
 				.doOnError(error -> {
-					if (isNotFoundError().test(error)) {
+					if (CloudFoundryManifestApplicationDeployer.isNotFoundError().test(error)) {
 						logger.warn("Unable to deploy application. It may have been destroyed before start completed: " + error.getMessage());
 					}
 					else {

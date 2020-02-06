@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2019 the original author or authors.
+ * Copyright 2018-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -53,8 +53,6 @@ import org.springframework.shell.table.TableModel;
 import org.springframework.util.ResourceUtils;
 import org.springframework.util.StringUtils;
 
-import static org.springframework.shell.standard.ShellOption.NULL;
-
 /**
  * Commands related to packages.
  * @author Mark Pollack
@@ -71,7 +69,7 @@ public class PackageCommands extends AbstractSkipperCommand {
 
 	@ShellMethod(key = {"package search", "package list"}, value = "Search for packages.")
 	public Object search(
-			@ShellOption(help = "wildcard expression to search for the package name", defaultValue = NULL) String name,
+			@ShellOption(help = "wildcard expression to search for the package name", defaultValue = ShellOption.NULL) String name,
 			@ShellOption(help = "boolean to set for more detailed package metadata") boolean details)
 			throws Exception {
 		Collection<PackageMetadata> resources = skipperClient.search(name, details);
@@ -109,7 +107,7 @@ public class PackageCommands extends AbstractSkipperCommand {
 
 	@ShellMethod(key = "package upload", value = "Upload a package.")
 	public String upload(@ShellOption(help = "the package to be uploaded") String path,
-			@ShellOption(help = "the local repository name to upload to", defaultValue = NULL) String repoName) {
+			@ShellOption(help = "the local repository name to upload to", defaultValue = ShellOption.NULL) String repoName) {
 		UploadRequest uploadRequest = new UploadRequest();
 		try {
 			File file = ResourceUtils.getFile(path);
@@ -137,9 +135,9 @@ public class PackageCommands extends AbstractSkipperCommand {
 	@ShellMethod(key = "package install", value = "Install a package.")
 	public String install(
 			@ShellOption(help = "name of the package to install") String packageName,
-			@ShellOption(help = "version of the package to install, if not specified latest version will be used", defaultValue = NULL) String packageVersion,
-			@ShellOption(help = "specify values in a YAML file", defaultValue = NULL) File file,
-			@ShellOption(help = "the comma separated set of properties to override during install", defaultValue = NULL) String properties,
+			@ShellOption(help = "version of the package to install, if not specified latest version will be used", defaultValue = ShellOption.NULL) String packageVersion,
+			@ShellOption(help = "specify values in a YAML file", defaultValue = ShellOption.NULL) File file,
+			@ShellOption(help = "the comma separated set of properties to override during install", defaultValue = ShellOption.NULL) String properties,
 			@ShellOption(help = "the release name to use") String releaseName,
 			@ShellOption(help = "the platform name to use", defaultValue = "default") String platformName)
 			throws IOException {

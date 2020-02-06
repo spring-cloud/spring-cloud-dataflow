@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2018 the original author or authors.
+ * Copyright 2017-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 package org.springframework.cloud.skipper.shell.command;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cloud.skipper.client.SkipperClientProperties;
 import org.springframework.cloud.skipper.client.SkipperServerException;
 import org.springframework.cloud.skipper.domain.AboutResource;
 import org.springframework.cloud.skipper.shell.command.support.ConsoleUserInput;
@@ -24,9 +25,6 @@ import org.springframework.cloud.skipper.shell.command.support.TargetHolder;
 import org.springframework.shell.standard.ShellComponent;
 import org.springframework.shell.standard.ShellMethod;
 import org.springframework.shell.standard.ShellOption;
-
-import static org.springframework.cloud.skipper.client.SkipperClientProperties.DEFAULT_TARGET;
-import static org.springframework.shell.standard.ShellOption.NULL;
 
 /**
  * Configuration commands for the Shell. The default Skipper Server location is
@@ -57,14 +55,14 @@ public class ConfigCommands extends AbstractSkipperCommand {
 	// @formatter:off
 	@ShellMethod(key = "skipper config", value = "Configure the Spring Cloud Skipper REST server to use.")
 	public String target(
-			@ShellOption(help = "the location of the Spring Cloud Skipper REST endpoint", defaultValue = DEFAULT_TARGET)
+			@ShellOption(help = "the location of the Spring Cloud Skipper REST endpoint", defaultValue = SkipperClientProperties.DEFAULT_TARGET)
 					String uri,
-			@ShellOption(help = "the username for authenticated access to the Admin REST endpoint", defaultValue = NULL)
+			@ShellOption(help = "the username for authenticated access to the Admin REST endpoint", defaultValue = ShellOption.NULL)
 					String username,
 			@ShellOption(help = "the password for authenticated access to the Admin REST endpoint " +
-					"(valid only with a username)", defaultValue = NULL)
+					"(valid only with a username)", defaultValue = ShellOption.NULL)
 					String password,
-			@ShellOption(help = "a command to run that outputs the HTTP credentials used for authentication", defaultValue = NULL)
+			@ShellOption(help = "a command to run that outputs the HTTP credentials used for authentication", defaultValue = ShellOption.NULL)
 					String credentialsProviderCommand,
 			@ShellOption(help = "accept any SSL certificate (even self-signed)")
 					boolean skipSslValidation) throws Exception {

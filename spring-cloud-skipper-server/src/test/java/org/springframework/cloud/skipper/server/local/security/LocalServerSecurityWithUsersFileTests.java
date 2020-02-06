@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 the original author or authors.
+ * Copyright 2019-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,7 +37,6 @@ import org.springframework.test.web.servlet.ResultMatcher;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 import org.springframework.util.CollectionUtils;
 
-import static org.springframework.cloud.skipper.server.local.security.SecurityTestUtils.basicAuthorizationHeader;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -296,7 +295,7 @@ public class LocalServerSecurityWithUsersFileTests {
 
 		if (this.userCredentials != null) {
 			rb.header("Authorization",
-					basicAuthorizationHeader(this.userCredentials.getUsername(), this.userCredentials.getPassword()));
+				SecurityTestUtils.basicAuthorizationHeader(this.userCredentials.getUsername(), this.userCredentials.getPassword()));
 		}
 
 		if (!CollectionUtils.isEmpty(urlParameters)) {

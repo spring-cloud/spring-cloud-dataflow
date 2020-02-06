@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 the original author or authors.
+ * Copyright 2017-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,8 +28,6 @@ import org.springframework.shell.standard.ShellMethod;
 import org.springframework.shell.standard.ShellOption;
 import org.springframework.web.client.HttpStatusCodeException;
 
-import static org.springframework.shell.standard.ShellOption.NULL;
-
 /**
  * Commands that operation on the manifest.
  * @author Mark Pollack
@@ -51,7 +49,7 @@ public class ManifestCommands extends AbstractSkipperCommand {
 	@ShellMethod(key = "manifest get", value = "Get the manifest for a release")
 	public Object getManifest(
 			@ShellOption(help = "release name") @NotNull String releaseName,
-			@ShellOption(help = "specific release version.", defaultValue = NULL) Integer releaseVersion) {
+			@ShellOption(help = "specific release version.", defaultValue = ShellOption.NULL) Integer releaseVersion) {
 		String manifest;
 		try {
 			if (releaseVersion == null) {

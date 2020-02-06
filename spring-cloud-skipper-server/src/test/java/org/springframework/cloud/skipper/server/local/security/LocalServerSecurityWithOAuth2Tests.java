@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2019 the original author or authors.
+ * Copyright 2017-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,7 +27,6 @@ import org.springframework.security.oauth2.common.OAuth2AccessToken;
 
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
-import static org.springframework.cloud.skipper.server.local.security.SecurityTestUtils.basicAuthorizationHeader;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -64,7 +63,7 @@ public class LocalServerSecurityWithOAuth2Tests {
 	public void testAccessApiUrlWithBasicAuthCredentials() throws Exception {
 		localSkipperResource.getWebApplicationContext().getEnvironment().getPropertySources();
 		localSkipperResource.getMockMvc()
-				.perform(get("/api").header("Authorization", basicAuthorizationHeader("user", "secret10"))).andDo(print())
+				.perform(get("/api").header("Authorization", SecurityTestUtils.basicAuthorizationHeader("user", "secret10"))).andDo(print())
 				.andExpect(status().isOk());
 	}
 
@@ -73,7 +72,7 @@ public class LocalServerSecurityWithOAuth2Tests {
 		localSkipperResource.getWebApplicationContext().getEnvironment().getPropertySources();
 		localSkipperResource.getMockMvc()
 				.perform(get("/")
-				.header("Authorization", basicAuthorizationHeader("user", "secret10")))
+				.header("Authorization", SecurityTestUtils.basicAuthorizationHeader("user", "secret10")))
 				.andDo(print())
 				.andExpect(status().is3xxRedirection());
 	}
@@ -81,7 +80,7 @@ public class LocalServerSecurityWithOAuth2Tests {
 	@Test
 	public void testAccessRootUrlWithBasicAuthCredentialsWrongPassword() throws Exception {
 		localSkipperResource.getMockMvc()
-				.perform(get("/").header("Authorization", basicAuthorizationHeader("user", "wrong-password")))
+				.perform(get("/").header("Authorization", SecurityTestUtils.basicAuthorizationHeader("user", "wrong-password")))
 				.andDo(print()).andExpect(status().isUnauthorized());
 	}
 
@@ -95,21 +94,21 @@ public class LocalServerSecurityWithOAuth2Tests {
 	public void testAccessToActuatorEndpointWithBasicAuthCredentialsWrongPassword() throws Exception {
 		localSkipperResource.getMockMvc()
 				.perform(get("/actuator/env").header("Authorization",
-						basicAuthorizationHeader("user", "wrong-password")))
+					SecurityTestUtils.basicAuthorizationHeader("user", "wrong-password")))
 				.andDo(print()).andExpect(status().isUnauthorized());
 	}
 
 	@Test
 	public void testThatAccessToActuatorEndpointWithBasicAuthCredentialsSucceeds() throws Exception {
 		localSkipperResource.getMockMvc()
-				.perform(get("/actuator/env").header("Authorization", basicAuthorizationHeader("user", "secret10")))
+				.perform(get("/actuator/env").header("Authorization", SecurityTestUtils.basicAuthorizationHeader("user", "secret10")))
 				.andDo(print()).andExpect(status().isOk());
 	}
 
 	@Test
 	public void testThatAccessToActuatorEndpointRootWithBasicAuthCredentialsSucceeds() throws Exception {
 		localSkipperResource.getMockMvc()
-				.perform(get("/actuator").header("Authorization", basicAuthorizationHeader("user", "secret10")))
+				.perform(get("/actuator").header("Authorization", SecurityTestUtils.basicAuthorizationHeader("user", "secret10")))
 				.andDo(print()).andExpect(status().isOk());
 	}
 

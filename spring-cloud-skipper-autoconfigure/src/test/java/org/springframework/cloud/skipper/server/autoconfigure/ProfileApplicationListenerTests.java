@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 the original author or authors.
+ * Copyright 2019-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,8 +30,6 @@ import org.springframework.mock.env.MockEnvironment;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.when;
-import static org.springframework.cloud.skipper.server.autoconfigure.ProfileApplicationListener.IGNORE_PROFILEAPPLICATIONLISTENER_ENVVAR_NAME;
-import static org.springframework.cloud.skipper.server.autoconfigure.ProfileApplicationListener.IGNORE_PROFILEAPPLICATIONLISTENER_PROPERTY_NAME;
 
 /**
  * @author Chris Schaefer
@@ -107,13 +105,13 @@ public class ProfileApplicationListenerTests {
 	@Test
 	public void disableProfileApplicationListener() {
 		try {
-			System.setProperty(IGNORE_PROFILEAPPLICATIONLISTENER_PROPERTY_NAME, "true");
+			System.setProperty(ProfileApplicationListener.IGNORE_PROFILEAPPLICATIONLISTENER_PROPERTY_NAME, "true");
 			environment.setProperty("VCAP_APPLICATION", "true");
 			profileApplicationListener.onApplicationEvent(event);
 			assertThat(environment.getActiveProfiles()).isEmpty();
 		}
 		finally {
-			System.clearProperty(IGNORE_PROFILEAPPLICATIONLISTENER_PROPERTY_NAME);
+			System.clearProperty(ProfileApplicationListener.IGNORE_PROFILEAPPLICATIONLISTENER_PROPERTY_NAME);
 		}
 	}
 
@@ -135,7 +133,7 @@ public class ProfileApplicationListenerTests {
 		return new MockUp<System>() {
 			@mockit.Mock
 			public String getenv(String name) {
-				if (name.equalsIgnoreCase(IGNORE_PROFILEAPPLICATIONLISTENER_ENVVAR_NAME)) {
+				if (name.equalsIgnoreCase(ProfileApplicationListener.IGNORE_PROFILEAPPLICATIONLISTENER_ENVVAR_NAME)) {
 					return "true";
 				}
 				return env.get(name);

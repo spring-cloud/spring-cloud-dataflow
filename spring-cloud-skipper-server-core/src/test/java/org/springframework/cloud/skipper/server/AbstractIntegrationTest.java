@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2019 the original author or authors.
+ * Copyright 2017-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -54,8 +54,6 @@ import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 
-import static org.springframework.cloud.skipper.server.AbstractIntegrationTest.TestConfig;
-
 /**
  * Base class to implement integration tests using the root application configuration.
  * Does not use @Transactional annotation since the state is updated by multiple threads.
@@ -66,7 +64,7 @@ import static org.springframework.cloud.skipper.server.AbstractIntegrationTest.T
  * @author Glenn Renfro
  */
 @RunWith(SpringRunner.class)
-@SpringBootTest(classes = TestConfig.class, properties = "spring.main.allow-bean-definition-overriding=true")
+@SpringBootTest(classes = AbstractIntegrationTest.TestConfig.class, properties = "spring.main.allow-bean-definition-overriding=true")
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_CLASS)
 public abstract class AbstractIntegrationTest extends AbstractAssertReleaseDeployedTest {
 

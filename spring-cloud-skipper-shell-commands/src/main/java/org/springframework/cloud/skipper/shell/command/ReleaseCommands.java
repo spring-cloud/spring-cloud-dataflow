@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2019 the original author or authors.
+ * Copyright 2017-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -57,8 +57,6 @@ import org.springframework.shell.table.TableBuilder;
 import org.springframework.shell.table.TableModel;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
-
-import static org.springframework.shell.standard.ShellOption.NULL;
 
 /**
  * The main skipper commands that deal with releases.
@@ -132,13 +130,13 @@ public class ReleaseCommands extends AbstractSkipperCommand {
 	public Object upgrade(
 			@ShellOption(help = "the name of the release to upgrade") String releaseName,
 			@ShellOption(help = "the name of the package to use for the upgrade") String packageName,
-			@ShellOption(help = "the version of the package to use for the upgrade, if not specified latest version will be used", defaultValue = NULL) String packageVersion,
-			@ShellOption(help = "specify values in a YAML file", defaultValue = NULL) File file,
-			@ShellOption(help = "the expression for upgrade timeout", defaultValue = NULL) String timeoutExpression,
-			@ShellOption(help = "the comma separated set of properties to override during upgrade", defaultValue = NULL) String properties,
+			@ShellOption(help = "the version of the package to use for the upgrade, if not specified latest version will be used", defaultValue = ShellOption.NULL) String packageVersion,
+			@ShellOption(help = "specify values in a YAML file", defaultValue = ShellOption.NULL) File file,
+			@ShellOption(help = "the expression for upgrade timeout", defaultValue = ShellOption.NULL) String timeoutExpression,
+			@ShellOption(help = "the comma separated set of properties to override during upgrade", defaultValue = ShellOption.NULL) String properties,
 			@ShellOption(help = "force upgrade") boolean force,
 			@ShellOption(help = "application names to force upgrade. If no specific list is provided, all the apps in the packages are force upgraded",
-					defaultValue = NULL) String appNames)
+					defaultValue = ShellOption.NULL) String appNames)
 			throws IOException {
 		// Commented out until https://github.com/spring-cloud/spring-cloud-skipper/issues/263 is
 		// addressed
@@ -204,7 +202,7 @@ public class ReleaseCommands extends AbstractSkipperCommand {
 			@ShellOption(help = "the name of the release to rollback") String releaseName,
 			@ShellOption(help = "the specific release version to rollback to. " +
 					"Not specifying the value rolls back to the previous release.", defaultValue = "0") int releaseVersion,
-			@ShellOption(help = "the expression for rollback timeout", defaultValue = NULL) String timeoutExpression) {
+			@ShellOption(help = "the expression for rollback timeout", defaultValue = ShellOption.NULL) String timeoutExpression) {
 
 		RollbackRequest rollbackRequest = new RollbackRequest(releaseName, releaseVersion);
 		Duration duration = DurationUtils.convert(timeoutExpression);
@@ -240,7 +238,7 @@ public class ReleaseCommands extends AbstractSkipperCommand {
 
 	@ShellMethod(key = "release list", value = "List the latest version of releases with status of deployed or failed.")
 	public Table list(
-			@ShellOption(help = "wildcard expression to search by release name", defaultValue = NULL) String releaseName) {
+			@ShellOption(help = "wildcard expression to search by release name", defaultValue = ShellOption.NULL) String releaseName) {
 		List<Release> releases = this.skipperClient.list(releaseName);
 		LinkedHashMap<String, Object> headers = new LinkedHashMap<>();
 		headers.put("name", "Name");
@@ -278,7 +276,7 @@ public class ReleaseCommands extends AbstractSkipperCommand {
 	@ShellMethod(key = "release status", value = "Status for a last known release version.")
 	public Object status(
 			@ShellOption(help = "release name") @NotNull String releaseName,
-			@ShellOption(help = "the specific release version.", defaultValue = NULL) Integer releaseVersion) {
+			@ShellOption(help = "the specific release version.", defaultValue = ShellOption.NULL) Integer releaseVersion) {
 		Info info;
 		try {
 			if (releaseVersion == null) {

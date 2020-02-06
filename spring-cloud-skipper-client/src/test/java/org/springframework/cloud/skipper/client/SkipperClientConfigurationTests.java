@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 the original author or authors.
+ * Copyright 2017-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,7 +28,6 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.springframework.cloud.skipper.client.SkipperClientConfigurationTests.TestConfig;
 
 /**
  * Tests for {@link SkipperClientConfiguration}.
@@ -37,7 +36,7 @@ import static org.springframework.cloud.skipper.client.SkipperClientConfiguratio
  *
  */
 @RunWith(SpringRunner.class)
-@SpringBootTest(classes = TestConfig.class)
+@SpringBootTest(classes = SkipperClientConfigurationTests.TestConfig.class)
 public class SkipperClientConfigurationTests {
 
 	@Autowired

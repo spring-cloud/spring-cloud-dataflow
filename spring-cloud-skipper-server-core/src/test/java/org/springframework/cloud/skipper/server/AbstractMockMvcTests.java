@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2019 the original author or authors.
+ * Copyright 2017-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -56,14 +56,13 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 
-import static org.springframework.cloud.skipper.server.AbstractMockMvcTests.TestConfig;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 
 /**
  * @author Mark Pollack
  */
 @RunWith(SpringRunner.class)
-@SpringBootTest(classes = TestConfig.class, properties = "spring.main.allow-bean-definition-overriding=true")
+@SpringBootTest(classes = AbstractMockMvcTests.TestConfig.class, properties = "spring.main.allow-bean-definition-overriding=true")
 @AutoConfigureMockMvc
 public abstract class AbstractMockMvcTests extends AbstractAssertReleaseDeployedTest {
 

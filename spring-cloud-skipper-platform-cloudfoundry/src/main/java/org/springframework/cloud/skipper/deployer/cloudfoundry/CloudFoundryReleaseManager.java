@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2019 the original author or authors.
+ * Copyright 2017-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -44,11 +44,6 @@ import org.springframework.cloud.skipper.server.repository.jpa.ReleaseRepository
 import org.springframework.cloud.skipper.server.util.ArgumentSanitizer;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
-
-import static org.springframework.cloud.skipper.deployer.cloudfoundry.CloudFoundryManifestApplicationDeployer.PUSH_REQUEST_TIMEOUT;
-import static org.springframework.cloud.skipper.deployer.cloudfoundry.CloudFoundryManifestApplicationDeployer.STAGING_TIMEOUT;
-import static org.springframework.cloud.skipper.deployer.cloudfoundry.CloudFoundryManifestApplicationDeployer.STARTUP_TIMEOUT;
-import static org.springframework.cloud.skipper.deployer.cloudfoundry.CloudFoundryManifestApplicationDeployer.isNotFoundError;
 
 /**
  * A ReleaseManager implementation that uses an CF manifest based deployer.
@@ -104,14 +99,14 @@ public class CloudFoundryReleaseManager implements ReleaseManager {
 				.applications().pushManifest(
 				PushApplicationManifestRequest.builder()
 						.manifest(applicationManifest)
-						.stagingTimeout(STAGING_TIMEOUT)
-						.startupTimeout(STARTUP_TIMEOUT)
+						.stagingTimeout(CloudFoundryManifestApplicationDeployer.STAGING_TIMEOUT)
+						.startupTimeout(CloudFoundryManifestApplicationDeployer.STARTUP_TIMEOUT)
 						.build())
 				.doOnSuccess(v -> logger.info("Done uploading bits for {}", applicationName))
 				.doOnError(e -> logger.error(
 						String.format("Error creating app %s.  Exception Message %s", applicationName,
 								e.getMessage())))
-				.timeout(PUSH_REQUEST_TIMEOUT)
+				.timeout(CloudFoundryManifestApplicationDeployer.PUSH_REQUEST_TIMEOUT)
 				.doOnSuccess(item -> {
 					logger.info("Successfully deployed {}", applicationName);
 					saveAppDeployerData(release, appDeploymentData);
@@ -120,7 +115,7 @@ public class CloudFoundryReleaseManager implements ReleaseManager {
 					updateInstallComplete(release);
 				})
 				.doOnError(error -> {
-					if (isNotFoundError().test(error)) {
+					if (CloudFoundryManifestApplicationDeployer.isNotFoundError().test(error)) {
 						logger.warn("Unable to deploy application. It may have been destroyed before start completed: " + error.getMessage());
 					}
 					else {
@@ -198,8 +193,8 @@ public class CloudFoundryReleaseManager implements ReleaseManager {
 			ScaleApplicationRequest scaleApplicationRequest = ScaleApplicationRequest.builder()
 					.name(scaleRequestItem.getName())
 					.instances(scaleRequestItem.getCount())
-					.stagingTimeout(STAGING_TIMEOUT)
-					.startupTimeout(STARTUP_TIMEOUT)
+					.stagingTimeout(CloudFoundryManifestApplicationDeployer.STAGING_TIMEOUT)
+					.startupTimeout(CloudFoundryManifestApplicationDeployer.STARTUP_TIMEOUT)
 					.build();
 			this.platformCloudFoundryOperations.getCloudFoundryOperations(release.getPlatformName()).applications()
 					.scale(scaleApplicationRequest)
