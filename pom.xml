@@ -83,7 +83,6 @@
 
 		<jacoco-maven-plugin.version>0.7.9</jacoco-maven-plugin.version>
 		<sonar-maven-plugin.version>3.0.2</sonar-maven-plugin.version>
-		<checkstyle.config.location>src/checkstyle/checkstyle.xml</checkstyle.config.location>
 		<semver.version>2.2.0</semver.version>
 		<apache-directory-server.version>1.5.5</apache-directory-server.version>
 		<codearte-props2yml.version>0.5</codearte-props2yml.version>
@@ -293,23 +292,6 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-checkstyle-plugin</artifactId>
-				<executions>
-					<execution>
-						<id>checkstyle-validation</id>
-						<phase>validate</phase>
-						<configuration>
-							<encoding>UTF-8</encoding>
-							<failsOnError>true</failsOnError>
-							<failOnViolation>true</failOnViolation>
-							<violationSeverity>warning</violationSeverity>
-							<includeTestSourceDirectory>true</includeTestSourceDirectory>
-							<configLocation>${checkstyle.config.location}</configLocation>
-						</configuration>
-						<goals>
-							<goal>check</goal>
-						</goals>
-					</execution>
-				</executions>
 			</plugin>
 		</plugins>
 		<pluginManagement>
