@@ -1090,34 +1090,63 @@ The lifecycle of a schedule has 2 parts:
 
 You can schedule a task execution via the:
 
-* RESTful API
+* Spring Cloud Data Flow Shell
 * Spring Cloud Data Flow Dashboard
+* Spring Cloud Data Flow RESTful API
 
-To schedule a task from the UI click the Tasks tab at the top of the screen, this will take you to the Task Definitions screen.  From the Task Definition that you wish to schedule, please click the dropdown icon and then select the `Schedule Task` option.
-This will lead you to a `Create Schedule(s)` screen, where you will create a unique name for the schedule and enter the associated cron expression.
-Keep in mind you can always create multiple schedules for a single task definition.
+==== Scheduling a Task
+To schedule a task using the shell, use the `task schedule create` command to create the schedule as shown in the following example:
+```
+dataflow:>task schedule create --definitionName mytask --name mytaskschedule --expression '*/1 * * * *'
+Created schedule 'mytaskschedule'
+```
+In the example above we created a schedule `mytaskschedule` for the task definition `mytask`.  This schedule will launch `mytask` once a minute.
+
+NOTE: If using Cloud Foundry the cron expression above would be: `*/1 * ? * *`.  This is because Cloud Foundry uses the Quartz cron expression format.
 
 [[spring-cloud-data-flow-schedule-unscheduling]]
 ==== Deleting a Schedule
 
 You can delete a schedule via the:
 
-* RESTful API
+* Spring Cloud Data Flow Shell
 * Spring Cloud Data Flow Dashboard
+* Spring Cloud Data Flow RESTful API
 
-To delete a schedule through the dashboard, select the Schedule tab under Tasks tab and click the dropdown icon next to the schedule you wish to delete and select the `Delete schedule` option.
+To delete a task schedule using the shell, use the `task schedule destroy` command  as shown in the following example:
+```
+dataflow:>task schedule destroy --name mytaskschedule-scdf-mytask
+Deleted task schedule 'mytaskschedule-scdf-mytask'
+```
+
+In the example above we deleted the schedule `mytaskschedule-scdf-mytask`.  Notice that the name `mytaskschedule` given to the schedule has the suffix `-scdf-mytask`, this suffix is applied when the schedule is created.
+
+NOTE: The `scdf-` separator is configurable by setting the `spring.cloud.dataflow.task.scheduleNamePrefix` property with the value you prefer.
+
 
 NOTE: Any currently running tasks that were run by the scheduling agent will not be stopped if the schedule is deleted.   It only prevents future executions.
 
 [[spring-cloud-data-flow-schedule-list]]
 ==== Listing Schedules
-To view your schedules click the Tasks tab and then click the Schedules tab on the Tasks page.
-From here you will see your available schedules.  You will note that all schedules created by
-Spring Cloud Data Flow will have a suffix appended to it consisting of `-scdf-<task definition name>`.
-For example if I create a schedule name of `my-schedule` for a task definition of `tstamp` the
-schedule name will look like `my-schedule-scdf-tstamp`.
+You can view the available schedules via the:
 
-NOTE: The `scdf-` separator is configurable by setting the `spring.cloud.dataflow.task.scheduleNamePrefix` property with the value you prefer.
+* Spring Cloud Data Flow Shell
+* Spring Cloud Data Flow Dashboard
+* Spring Cloud Data Flow RESTful API
+
+To view your schedules via the shell use the `task schedule list` command as shown in the following example:
+
+[source,bas,options="nowrap"h]
+----
+dataflow:>task schedule list
+╔══════════════════════════╤════════════════════╤════════════════════════════════════════════════════╗
+║      Schedule Name       │Task Definition Name│                     Properties                     ║
+╠══════════════════════════╪════════════════════╪════════════════════════════════════════════════════╣
+║mytaskschedule-scdf-mytask│mytask              │spring.cloud.scheduler.cron.expression = */1 * * * *║
+╚══════════════════════════╧════════════════════╧════════════════════════════════════════════════════╝
+----
+
+NOTE: Instructions to create, delete and list schedules via the Spring Cloud Data Flow UI can be found https://dataflow.spring.io/docs/feature-guides/batch/scheduling/[here].
 
 [[spring-cloud-dataflow-task-cd]]
 == Continuous Deployment
@@ -1171,7 +1200,7 @@ The second flow to consider when launching a task is whether there was a change 
 6. Data Flow does the deployment of the task application with the updated values (new application version, new merged properties, and new merged deployment properties).
 7. Data Flow launches the application.
 
-This flow is what fundementally enables continuous deployment for Spring Cloud Data Flow.
+This flow is what fundamentally enables continuous deployment for Spring Cloud Data Flow.
 
 ==== Launch a Task With Changes While Another Instance Is Running
 The last main flow is when a launch request comes to Spring Cloud Data Flow to do an upgrade but the task definition is currently running.  In this case, the launch is blocked due to the requirement to delete the current application.  On some platforms (CloudFoundry at the writing of this document), deleting the application causes all currently running applications to be shut down.  This feature prevents that from happening.  The following process describes what happens when a task changes while another instance is running:
