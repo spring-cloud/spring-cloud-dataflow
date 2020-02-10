@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2019 the original author or authors.
+ * Copyright 2017-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,10 +15,6 @@
  */
 package org.springframework.cloud.common.security.support;
 
-import static org.hamcrest.Matchers.containsInAnyOrder;
-import static org.hamcrest.Matchers.hasSize;
-import static org.junit.Assert.assertThat;
-
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -29,8 +25,13 @@ import java.util.stream.Collectors;
 
 import org.junit.Assert;
 import org.junit.Test;
+
 import org.springframework.cloud.common.security.ProviderRoleMapping;
 import org.springframework.security.core.GrantedAuthority;
+
+import static org.hamcrest.Matchers.containsInAnyOrder;
+import static org.hamcrest.Matchers.hasSize;
+import static org.junit.Assert.assertThat;
 
 /**
  * @author Gunnar Hillert
