@@ -1,5 +1,17 @@
 version: '3'
 
+# The HOST_MOUNT_PATH and DOCKER_MOUNT_PATH are used to set the host and docker mount folders.
+# If not set HOST_MOUNT_PATH defaults to the local host folder where the docker compose is being started.
+# If not set DOCKER_MOUNT_PATH defaults to /root/scdf on dataflow-server and skipper containers.
+#
+# For example to mount the local Maven repository to docker path /root/apps on Linux/MacOS:
+#  HOST_MOUNT_PATH=~/.m2/repository/ DOCKER_MOUNT_PATH=/root/apps  docker-compose up
+#
+# Tips for different OS platforms:
+#  - Linux/MacOS: export HOST_MOUNT_PATH=<your host folder> (e.g. export HOST_MOUNT_PATH=/tmp/myfolder)
+#  - Windows Command Prompt: set HOST_MOUNT_PATH=<you host folder> (e.g. set HOST_MOUNT_PATH=C:\Users\User\MyDir)
+#  - Windows PowerShell: $Env:HOST_MOUNT_PATH=="<you host folder>" (e.g. $Env:HOST_MOUNT_PATH="C:\Users\User\MyDir)
+#
 services:
   mysql:
     image: mysql:5.7.25
@@ -50,6 +62,8 @@ services:
     depends_on:
       - kafka-broker
     entrypoint: "./wait-for-it.sh mysql:3306 -- java -jar /maven/spring-cloud-dataflow-server.jar"
+    volumes:
+      - ${HOST_MOUNT_PATH:-.}:${DOCKER_MOUNT_PATH:-/root/scdf}
 
   app-import:
     image: springcloud/openjdk:2.0.0.RELEASE
@@ -69,7 +83,6 @@ services:
     container_name: skipper
     ports:
       - "7577:7577"
-      - "9000-9010:9000-9010"
       - "20000-20105:20000-20105"
     environment:
       - SPRING_CLOUD_SKIPPER_SERVER_PLATFORM_LOCAL_ACCOUNTS_DEFAULT_PORTRANGE_LOW=20000
@@ -79,3 +92,5 @@ services:
       - SPRING_DATASOURCE_PASSWORD=rootpw
       - SPRING_DATASOURCE_DRIVER_CLASS_NAME=org.mariadb.jdbc.Driver
     entrypoint: "./wait-for-it.sh mysql:3306 -- java -Djava.security.egd=file:/dev/./urandom -jar /spring-cloud-skipper-server.jar"
+    volumes:
+      - ${HOST_MOUNT_PATH:-.}:${DOCKER_MOUNT_PATH:-/root/scdf}
