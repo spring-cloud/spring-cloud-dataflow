@@ -2,7 +2,7 @@ version: '3'
 
 # Configuration environment variables:
 # - DATAFLOW_VERSION and SKIPPER_VERSION specify what DataFlow and Skipper image versions to use.
-# - STREAM_APPS_URI and TASK_APPS_URI are used to specify what Stream and Task applications to pre-registered.
+# - STREAM_APPS_URI and TASK_APPS_URI are used to specify what Stream and Task applications to pre-register.
 # - HOST_MOUNT_PATH and DOCKER_MOUNT_PATH are used to set the host and docker mount folders.
 #   If not set HOST_MOUNT_PATH defaults to the local host folder where the docker compose is being started.
 #   If not set DOCKER_MOUNT_PATH defaults to /root/scdf on dataflow-server and skipper containers.
