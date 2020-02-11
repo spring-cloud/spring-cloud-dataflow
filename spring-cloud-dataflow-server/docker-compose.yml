@@ -1,17 +1,18 @@
 version: '3'
 
-# The HOST_MOUNT_PATH and DOCKER_MOUNT_PATH are used to set the host and docker mount folders.
-# If not set HOST_MOUNT_PATH defaults to the local host folder where the docker compose is being started.
-# If not set DOCKER_MOUNT_PATH defaults to /root/scdf on dataflow-server and skipper containers.
+# Configuration environment variables:
+# - DATAFLOW_VERSION and SKIPPER_VERSION specify what DataFlow and Skipper image versions use.
+# - STREAM_APPS_URI and TASK_APPS_URI are used to specify what Stream and Task applications to pre-registered.
+# - HOST_MOUNT_PATH and DOCKER_MOUNT_PATH are used to set the host and docker mount folders.
+#   If not set HOST_MOUNT_PATH defaults to the local host folder where the docker compose is being started.
+#   If not set DOCKER_MOUNT_PATH defaults to /root/scdf on dataflow-server and skipper containers.
+#   Example to mount the local Maven repository: HOST_MOUNT_PATH=~/.m2/repository/ DOCKER_MOUNT_PATH=/root/.m2  docker-compose up
 #
-# For example to mount the local Maven repository to docker path /root/apps on Linux/MacOS:
-#  HOST_MOUNT_PATH=~/.m2/repository/ DOCKER_MOUNT_PATH=/root/apps  docker-compose up
-#
-# Tips for different OS platforms:
-#  - Linux/MacOS: export HOST_MOUNT_PATH=<your host folder> (e.g. export HOST_MOUNT_PATH=/tmp/myfolder)
-#  - Windows Command Prompt: set HOST_MOUNT_PATH=<you host folder> (e.g. set HOST_MOUNT_PATH=C:\Users\User\MyDir)
-#  - Windows PowerShell: $Env:HOST_MOUNT_PATH=="<you host folder>" (e.g. $Env:HOST_MOUNT_PATH="C:\Users\User\MyDir)
-#
+# Exposed container ports:
+# - 9393:9393               - Data Flow server port (http://localhost:9393/dashboard)
+# - 7577:7577               - Skipper server port (http://localhost:7577/api)
+# - 20000-20105:20000-20105 - Port range for all deployed stream applications. That means you can reach the
+#                             application's actuator endpoints from your host machine.
 services:
   mysql:
     image: mysql:5.7.25
