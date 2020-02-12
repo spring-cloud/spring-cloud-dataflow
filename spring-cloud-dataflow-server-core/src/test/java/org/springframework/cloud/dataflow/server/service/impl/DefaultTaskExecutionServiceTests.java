@@ -1111,6 +1111,36 @@ public abstract class DefaultTaskExecutionServiceTests {
 
 		@Test
 		@DirtiesContext
+		public void verifyComposedTaskConcurrentCountExceeded() {
+			String dsl = "<AAA || BBB>";
+			initializeSuccessfulRegistry(appRegistry);
+
+			taskSaveService.saveTaskDefinition(new TaskDefinition("seqTask", dsl));
+			when(taskLauncher.getMaximumConcurrentTasks()).thenReturn(20);
+			when(taskLauncher.launch(any())).thenReturn("0");
+			when(appRegistry.appExist(anyString(), any(ApplicationType.class))).thenReturn(true);
+			Map<String, String> properties = new HashMap<>();
+			assertEquals(1L, this.taskExecutionService.executeTask("seqTask", properties, new LinkedList<>()));
+
+			initializeSuccessfulRegistry(appRegistry);
+			dsl = "<AAA||BBB||CCC>&&<AAA1||BBB1||CCC1||DDD1 --foo=bar||DDD2||DDD3||DDD4||DDD5||DDD6||" +
+					"DDD7||DDD8||DDD9||DDD10||DDD11||DDD12||DDD13||DDD14||DDD15||DDD16||" +
+					"DDD17||DDD18>&&<AAA2||BBB2>";
+			taskSaveService.saveTaskDefinition(new TaskDefinition("seqTask1", dsl));
+			try {
+				this.taskExecutionService.executeTask("seqTask1", properties, new LinkedList<>());
+			}
+			catch (IllegalArgumentException iae) {
+				assertEquals("One or more of the splits in the composed task contains " +
+						"a task count that exceeds the maximumConcurrentTasks count of 20",
+						iae.getMessage());
+				return;
+			}
+			fail("Expected IllegalArgumentException maxConcurrentTasks exceeded was not thrown");
+		}
+
+		@Test
+		@DirtiesContext
 		public void createTransitionComposedTask() {
 			initializeSuccessfulRegistry(appRegistry);
 			String dsl = "AAA 'FAILED' -> BBB '*' -> CCC";
