@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 the original author or authors.
+ * Copyright 2019-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,6 +38,7 @@ import org.springframework.cloud.deployer.spi.app.AppDeployer;
 import org.springframework.cloud.deployer.spi.cloudfoundry.CloudFoundryAppDeployer;
 import org.springframework.cloud.deployer.spi.cloudfoundry.CloudFoundryConnectionProperties;
 import org.springframework.cloud.deployer.spi.cloudfoundry.CloudFoundryDeploymentProperties;
+import org.springframework.cloud.deployer.spi.cloudfoundry.CloudFoundryPlatformSpecificInfo;
 import org.springframework.cloud.deployer.spi.cloudfoundry.CloudFoundryTaskLauncher;
 import org.springframework.cloud.deployer.spi.core.RuntimeEnvironmentInfo;
 import org.springframework.cloud.deployer.spi.scheduler.Scheduler;
@@ -156,17 +157,19 @@ public class CloudFoundryTaskPlatformFactory extends AbstractTaskPlatformFactory
 	}
 
 	private RuntimeEnvironmentInfo runtimeEnvironmentInfo(CloudFoundryClient cloudFoundryClient, String account) {
-		return new RuntimeEnvironmentInfo.Builder()
-				.implementationName(CloudFoundryAppDeployer.class.getSimpleName())
-				.spiClass(AppDeployer.class)
-				.implementationVersion(
+		return new CloudFoundryPlatformSpecificInfo(new RuntimeEnvironmentInfo.Builder())
+				.apiEndpoint(connectionProperties(account).getUrl().toString())
+				.org(connectionProperties(account).getOrg())
+				.space(connectionProperties(account).getSpace())
+				.builder()
+					.implementationName(CloudFoundryAppDeployer.class.getSimpleName())
+					.spiClass(AppDeployer.class)
+					.implementationVersion(
 						RuntimeVersionUtils.getVersion(CloudFoundryAppDeployer.class))
-				.platformType("Cloud Foundry")
-				.platformClientVersion(
+					.platformType("Cloud Foundry")
+					.platformClientVersion(
 						RuntimeVersionUtils.getVersion(cloudFoundryClient.getClass()))
-				.platformApiVersion(version(cloudFoundryClient, account).toString()).platformHostVersion("unknown")
-				.addPlatformSpecificInfo("API Endpoint",
-						connectionProperties(account).getUrl().toString())
+					.platformApiVersion(version(cloudFoundryClient, account).toString()).platformHostVersion("unknown")
 				.build();
 	}
 
