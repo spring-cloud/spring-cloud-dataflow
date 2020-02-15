@@ -76,24 +76,6 @@ public class JobExecutionController {
 	}
 
 	/**
-	 * Return a page-able list of {@link JobExecutionResource} defined jobs.
-	 *
-	 * @param pageable page-able collection of {@code TaskJobExecution}s.
-	 * @param assembler for the {@link TaskJobExecution}s
-	 * @return a list of Task/Job executions
-	 * @throws NoSuchJobExecutionException in the event that a job execution id specified is
-	 *     not present when looking up stepExecutions for the result.
-	 */
-	@RequestMapping(value = "", method = RequestMethod.GET, produces = "application/json")
-	@ResponseStatus(HttpStatus.OK)
-	public PagedModel<JobExecutionResource> list(Pageable pageable,
-			PagedResourcesAssembler<TaskJobExecution> assembler) throws NoSuchJobExecutionException {
-		List<TaskJobExecution> jobExecutions = taskJobService.listJobExecutions(pageable);
-		Page<TaskJobExecution> page = new PageImpl<>(jobExecutions, pageable, taskJobService.countJobExecutions());
-		return assembler.toModel(page, jobAssembler);
-	}
-
-	/**
 	 * Retrieve all task job executions with the task name specified
 	 *
 	 * @param jobName name of the job. SQL server specific wildcards are enabled (eg.: myJob%,
@@ -103,15 +85,24 @@ public class JobExecutionController {
 	 * @return list task/job executions with the specified jobName.
 	 * @throws NoSuchJobException if the job with the given name does not exist.
 	 */
-	@RequestMapping(value = "", method = RequestMethod.GET, params = "name", produces = "application/json")
+	@RequestMapping(value = "", method = RequestMethod.GET, produces = "application/json")
 	@ResponseStatus(HttpStatus.OK)
 	public PagedModel<JobExecutionResource> retrieveJobsByParameters(
-			@RequestParam("name") String jobName,
+			@RequestParam(value = "name", required = false) String jobName,
 			@RequestParam(value = "status", required = false) BatchStatus status,
-			Pageable pageable, PagedResourcesAssembler<TaskJobExecution> assembler) throws NoSuchJobException {
-		List<TaskJobExecution> jobExecutions = taskJobService.listJobExecutionsForJob(pageable, jobName, status);
-		Page<TaskJobExecution> page = new PageImpl<>(jobExecutions, pageable,
-				taskJobService.countJobExecutionsForJob(jobName, status));
+			Pageable pageable, PagedResourcesAssembler<TaskJobExecution> assembler) throws NoSuchJobException, NoSuchJobExecutionException {
+		List<TaskJobExecution> jobExecutions;
+		Page<TaskJobExecution> page;
+
+		if (jobName == null && status == null) {
+			jobExecutions = taskJobService.listJobExecutions(pageable);
+			page = new PageImpl<>(jobExecutions, pageable, taskJobService.countJobExecutions());
+		} else {
+			jobExecutions = taskJobService.listJobExecutionsForJob(pageable, jobName, status);
+			page = new PageImpl<>(jobExecutions, pageable,
+					taskJobService.countJobExecutionsForJob(jobName, status));
+		}
+
 		return assembler.toModel(page, jobAssembler);
 	}
 

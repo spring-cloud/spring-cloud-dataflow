@@ -226,6 +226,15 @@ public class JobExecutionControllerTests {
 	}
 
 	@Test
+	public void testFilteringByUnknownStatus() throws Exception {
+		mockMvc.perform(get("/jobs/executions/")
+				.param("status", "UNKNOWN")
+				.accept(MediaType.APPLICATION_JSON))
+				.andExpect(status().isOk())
+				.andExpect(jsonPath("$.content", hasSize(4)));
+	}
+
+	@Test
 	public void testFilteringByStatusAndName_NameAndStatusGiven() throws Exception {
 		mockMvc.perform(get("/jobs/executions/")
 				.param("name", JobExecutionUtils.BASE_JOB_NAME + "%")
