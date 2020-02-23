@@ -98,7 +98,7 @@ public class Status extends NonVersionedAbstractEntity {
 		for (AppStatus appStatus : appStatusList) {
 			statusMsg.append("[" + appStatus.getDeploymentId() + "]");
 			if (appStatus.getInstances().isEmpty()) {
-				statusMsg.append(", State = [" + appStatus.getState() + "]");
+				statusMsg.append(", State = [" + appStatus.getState() + "]\n");
 			}
 			else {
 				statusMsg.append(", State = [");

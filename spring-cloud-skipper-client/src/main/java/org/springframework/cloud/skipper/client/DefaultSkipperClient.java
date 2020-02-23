@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2019 the original author or authors.
+ * Copyright 2017-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,6 +28,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import org.springframework.cloud.deployer.spi.app.DeploymentState;
 import org.springframework.cloud.skipper.domain.AboutResource;
 import org.springframework.cloud.skipper.domain.CancelRequest;
 import org.springframework.cloud.skipper.domain.CancelResponse;
@@ -136,6 +137,38 @@ public class DefaultSkipperClient implements SkipperClient {
 						typeReference,
 						uriVariables);
 		return resourceResponseEntity.getBody();
+	}
+
+	@Override
+	public Map<String, Info> statuses(String... releaseNames) {
+		ParameterizedTypeReference<Map<String, Info>> typeReference =
+			new ParameterizedTypeReference<Map<String, Info>>() { };
+
+		UriComponentsBuilder builder = UriComponentsBuilder.fromHttpUrl(baseUri + "/release/statuses");
+		builder.queryParam("names", StringUtils.arrayToCommaDelimitedString(releaseNames));
+
+		ResponseEntity<Map<String, Info>> responseEntity =
+				restTemplate.exchange(builder.toUriString(),
+						HttpMethod.GET,
+						null,
+						typeReference);
+		return responseEntity.getBody();
+	}
+
+	@Override
+	public Map<String, Map<String, DeploymentState>> states(String... releaseNames) {
+		ParameterizedTypeReference<Map<String, Map<String, DeploymentState>>> typeReference =
+				new ParameterizedTypeReference<Map<String, Map<String, DeploymentState>>>() { };
+
+		UriComponentsBuilder builder = UriComponentsBuilder.fromHttpUrl(baseUri + "/release/states");
+		builder.queryParam("names", StringUtils.arrayToCommaDelimitedString(releaseNames));
+
+		ResponseEntity<Map<String, Map<String, DeploymentState>>> responseEntity =
+				restTemplate.exchange(builder.toUriString(),
+						HttpMethod.GET,
+						null,
+						typeReference);
+		return responseEntity.getBody();
 	}
 
 	@Override

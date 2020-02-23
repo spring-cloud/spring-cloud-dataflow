@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 the original author or authors.
+ * Copyright 2017-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,9 +19,10 @@ import java.util.Date;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
 import org.springframework.cloud.skipper.domain.Info;
-import org.springframework.cloud.skipper.domain.Release;
 import org.springframework.cloud.skipper.server.deployer.ReleaseManager;
 import org.springframework.cloud.skipper.server.deployer.ReleaseManagerFactory;
 import org.springframework.cloud.skipper.server.repository.jpa.ReleaseRepository;
@@ -48,6 +49,8 @@ public class ReleaseStateUpdateService {
 
 	private long nextFullPoll;
 
+	private boolean initialPoll = true;
+
 	/**
 	 * Instantiates a new release state update service.
 	 *
@@ -66,56 +69,60 @@ public class ReleaseStateUpdateService {
 
 	@Scheduled(initialDelay = 5000, fixedRate = 5000)
 	@Transactional
-	public synchronized void update() {
+	public synchronized void updateReactively() {
 		log.debug("Scheduled update state method running...");
 		long now = System.currentTimeMillis();
+
 		boolean fullPoll = now > this.nextFullPoll;
 		if (fullPoll) {
 			// setup next full poll
 			this.nextFullPoll = getNextFullPoll();
 			log.debug("Setup next full poll at {}", new Date(this.nextFullPoll));
 		}
-		Iterable<Release> releases = this.releaseRepository.findLatestDeployedOrFailed();
-		for (Release release : releases) {
-			String kind = ManifestUtils.resolveKind(release.getManifest().getData());
-			ReleaseManager releaseManager = this.releaseManagerFactory.getReleaseManager(kind);
 
-			Info info = release.getInfo();
-			if (checkInfo(info)) {
-				// poll new apps every time or we do full poll anyway
+		boolean doInitialPoll = initialPoll;
+		if (initialPoll) {
+			log.debug("Looks like first invocation, forcing polling as initialPoll");
+			initialPoll = false;
+		}
+
+		Flux.fromIterable(this.releaseRepository.findLatestDeployedOrFailed())
+			.flatMap(release -> {
+				Info info = release.getInfo();
+				if (info == null) {
+					log.error("Info can not be null for release {}", release);
+					return Mono.empty();
+				}
+				else if (info.getLastDeployed() == null) {
+					log.error("Info.LastDeployed can not be null for release {}", release);
+					return Mono.empty();
+				}
 				boolean isNewApp = (info.getLastDeployed().getTime() > (now - 120000));
 				log.debug("Considering updating state for {}-v{}", release.getName(), release.getVersion());
-				log.debug("fullPoll = {}, isNewApp = {}", fullPoll, isNewApp);
-				boolean poll = fullPoll || (isNewApp);
+				log.debug("fullPoll = {}, isNewApp = {}, doInitialPoll = {}", fullPoll, isNewApp, doInitialPoll);
+				boolean poll = fullPoll || (isNewApp) || doInitialPoll;
 				if (poll) {
-					try {
-						release = releaseManager.status(release);
-						log.debug("New Release state {} {}", release.getName(), release.getInfo().getStatus(),
-								release.getInfo().getStatus() != null
-										? release.getInfo().getStatus().getPlatformStatusPrettyPrint()
-										: "");
-						this.releaseRepository.save(release);
-					}
-					catch (Exception e) {
-						log.warn("Unable to update release status for release " + release.getName() + "-v"
-								+ release.getVersion(), e);
-					}
+					String kind = ManifestUtils.resolveKind(release.getManifest().getData());
+					ReleaseManager releaseManager = this.releaseManagerFactory.getReleaseManager(kind);
+					return releaseManager.statusReactive(release);
 				}
 				else {
 					log.debug("Not updating state for {}-v{}", release.getName(), release.getVersion());
+					return Mono.empty();
 				}
-			}
-		}
-	}
-
-	private boolean checkInfo(Info info) {
-		if (info == null) {
-			throw new IllegalStateException("Info can not be null.");
-		}
-		if (info.getLastDeployed() == null) {
-			throw new IllegalStateException("Info.LastDeployed can not be null.");
-		}
-		return true;
+			})
+			.doOnNext(release -> {
+				log.debug("New Release state {} {}", release.getName(), release.getInfo().getStatus(),
+				release.getInfo().getStatus() != null
+						? release.getInfo().getStatus().getPlatformStatusPrettyPrint()
+						: "");
+				// TODO: should not block in a side effect but we don't have reactive db access
+				this.releaseRepository.save(release);
+			})
+			// framework don't yet know how to handle reactive types, meaning we can't just
+			// fire and forget with subscribe() as it would mess up times between invocations.
+			// block was kinda recommended by framework guys.
+			.blockLast();
 	}
 
 	/**

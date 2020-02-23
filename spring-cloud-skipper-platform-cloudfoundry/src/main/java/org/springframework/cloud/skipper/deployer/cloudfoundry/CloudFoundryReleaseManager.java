@@ -29,7 +29,9 @@ import org.cloudfoundry.operations.applications.PushApplicationManifestRequest;
 import org.cloudfoundry.operations.applications.ScaleApplicationRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import reactor.core.publisher.Mono;
 
+import org.springframework.cloud.deployer.spi.app.DeploymentState;
 import org.springframework.cloud.skipper.domain.LogInfo;
 import org.springframework.cloud.skipper.domain.Release;
 import org.springframework.cloud.skipper.domain.ScaleRequest;
@@ -157,6 +159,17 @@ public class CloudFoundryReleaseManager implements ReleaseManager {
 		release.getInfo().getStatus().setPlatformStatusAsAppStatusList(
 				Collections.singletonList(this.cfManifestApplicationDeployer.status(release)));
 		return release;
+	}
+
+	public Mono<Map<String, Map<String, DeploymentState>>> deploymentState(List<Release> releases) {
+		//todo:
+		return null;
+	}
+
+	@Override
+	public Mono<Release> statusReactive(Release release) {
+		// TODO: should convert to full reactive chain
+		return Mono.defer(() -> Mono.just(status(release)));
 	}
 
 	public Release delete(Release release) {

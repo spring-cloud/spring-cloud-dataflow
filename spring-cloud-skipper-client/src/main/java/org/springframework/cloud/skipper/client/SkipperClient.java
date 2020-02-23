@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2019 the original author or authors.
+ * Copyright 2017-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,9 @@ package org.springframework.cloud.skipper.client;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 
+import org.springframework.cloud.deployer.spi.app.DeploymentState;
 import org.springframework.cloud.skipper.domain.AboutResource;
 import org.springframework.cloud.skipper.domain.CancelRequest;
 import org.springframework.cloud.skipper.domain.CancelResponse;
@@ -166,6 +168,23 @@ public interface SkipperClient {
 	 * @return the status info of a release
 	 */
 	Info status(String releaseName);
+
+	/**
+	 * Return a status info of a last known releases mapped back to release names.
+	 *
+	 * @param releaseNames the release names
+	 * @return the status info of a releases
+	 */
+	Map<String, Info> statuses(String... releaseNames);
+
+
+	/**
+	 * Return the deployment state of a last known releases mapped back to release names.
+	 *
+	 * @param releaseNames the release names
+	 * @return the deployment state of a releases
+	 */
+	Map<String, Map<String, DeploymentState>> states(String... releaseNames);
 
 	/**
 	 * Return a status info of a release version.
