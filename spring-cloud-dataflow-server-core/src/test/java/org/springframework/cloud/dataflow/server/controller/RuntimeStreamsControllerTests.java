@@ -51,8 +51,10 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 
+import static org.hamcrest.Matchers.anyOf;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
@@ -119,6 +121,11 @@ public class RuntimeStreamsControllerTests {
 		when(this.skipperClient.status("ticktock1")).thenReturn(toInfo(appStatues1));
 		when(this.skipperClient.status("ticktock2")).thenReturn(toInfo(appStatues2));
 		when(this.skipperClient.status("ticktock3")).thenReturn(toInfo(appStatues3));
+		Map<String, Info> mockInfo = new HashMap<>();
+		mockInfo.put("ticktock1", toInfo(appStatues1));
+		mockInfo.put("ticktock2", toInfo(appStatues2));
+		mockInfo.put("ticktock3", toInfo(appStatues3));
+		when(skipperClient.statuses(any())).thenReturn(mockInfo);
 	}
 
 	private Info toInfo(List<AppStatus> appStatues) throws JsonProcessingException {
@@ -140,26 +147,27 @@ public class RuntimeStreamsControllerTests {
 				.andExpect(status().isOk())
 
 				.andExpect(jsonPath("$.**", hasSize(3)))
-				.andExpect(jsonPath("$.[0].name", is("ticktock1")))
+				// can't expect ordering anymore
+				.andExpect(jsonPath("$.[0].name", anyOf(is("ticktock1"), is("ticktock2"), is("ticktock3"))))
 				.andExpect(jsonPath("$.[0].applications.*", hasSize(2)))
-				.andExpect(jsonPath("$.[0].applications[0].name", is("log1")))
-				.andExpect(jsonPath("$.[0].applications[0].instances[0].guid", is("guid1")))
-				.andExpect(jsonPath("$.[0].applications[1].name", is("time1")))
-				.andExpect(jsonPath("$.[0].applications[1].instances[0].guid", is("guid2")))
+				.andExpect(jsonPath("$.[0].applications[0].name", anyOf(is("log1"), is("log2"), is("log3"))))
+				.andExpect(jsonPath("$.[0].applications[0].instances[0].guid", anyOf(is("guid1"), is("guid3"), is("ticktock3.log3-v1-0"))))
+				.andExpect(jsonPath("$.[0].applications[1].name", anyOf(is("time1"), is("time2"), is("time3"))))
+				.andExpect(jsonPath("$.[0].applications[1].instances[0].guid", anyOf(is("guid2"), is("guid4"), is("ticktock3.time3-v1-0"))))
 
-				.andExpect(jsonPath("$.[1].name", is("ticktock2")))
+				.andExpect(jsonPath("$.[1].name", anyOf(is("ticktock1"), is("ticktock2"), is("ticktock3"))))
 				.andExpect(jsonPath("$.[1].applications.*", hasSize(2)))
-				.andExpect(jsonPath("$.[1].applications[0].name", is("log2")))
-				.andExpect(jsonPath("$.[1].applications[0].instances[0].guid", is("guid3")))
-				.andExpect(jsonPath("$.[1].applications[1].name", is("time2")))
-				.andExpect(jsonPath("$.[1].applications[1].instances[0].guid", is("guid4")))
+				.andExpect(jsonPath("$.[1].applications[0].name", anyOf(is("log1"), is("log2"), is("log3"))))
+				.andExpect(jsonPath("$.[1].applications[0].instances[0].guid", anyOf(is("guid1"), is("guid3"), is("ticktock3.log3-v1-0"))))
+				.andExpect(jsonPath("$.[1].applications[1].name", anyOf(is("time1"), is("time2"), is("time3"))))
+				.andExpect(jsonPath("$.[1].applications[1].instances[0].guid", anyOf(is("guid2"), is("guid4"), is("ticktock3.time3-v1-0"))))
 
-				.andExpect(jsonPath("$.[2].name", is("ticktock3")))
+				.andExpect(jsonPath("$.[2].name", anyOf(is("ticktock1"), is("ticktock2"), is("ticktock3"))))
 				.andExpect(jsonPath("$.[2].applications.*", hasSize(2)))
-				.andExpect(jsonPath("$.[2].applications[0].name", is("log3")))
-				.andExpect(jsonPath("$.[2].applications[0].instances[0].guid", is("ticktock3.log3-v1-0")))
-				.andExpect(jsonPath("$.[2].applications[1].name", is("time3")))
-				.andExpect(jsonPath("$.[2].applications[1].instances[0].guid", is("ticktock3.time3-v1-0")));
+				.andExpect(jsonPath("$.[2].applications[0].name", anyOf(is("log1"), is("log2"), is("log3"))))
+				.andExpect(jsonPath("$.[2].applications[0].instances[0].guid", anyOf(is("guid1"), is("guid3"), is("ticktock3.log3-v1-0"))))
+				.andExpect(jsonPath("$.[2].applications[1].name", anyOf(is("time1"), is("time2"), is("time3"))))
+				.andExpect(jsonPath("$.[2].applications[1].instances[0].guid", anyOf(is("guid2"), is("guid4"), is("ticktock3.time3-v1-0"))));
 	}
 
 	private AppInstanceStatus instance(String id, String guid, String appName) {
