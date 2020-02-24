@@ -22,6 +22,7 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -162,32 +163,17 @@ public class SkipperStreamDeployer implements StreamDeployer {
 			nameToDefinition.put(sd.getName(), sd);
 		});
 		String[] streamNames = streamNamesList.toArray(new String[0]);
-		Map<String, Info> statuses = this.skipperClient.statuses(streamNames);
-		statuses.entrySet().stream().forEach(e -> {
-			DeploymentState state = null;
-			Info info = e.getValue();
-			if (info.getStatus().getPlatformStatus() == null) {
-				state = getDeploymentStateFromStatusInfo(info);
-			} else {
-				List<AppStatus> appStatusList = deserializeAppStatus(info.getStatus().getPlatformStatus());
-				Set<DeploymentState> deploymentStateList = appStatusList.stream().map(AppStatus::getState)
-						.collect(Collectors.toSet());
-				state = StreamDeployerUtil.aggregateState(deploymentStateList);
+		Map<String, Map<String, DeploymentState>> statuses = this.skipperClient.states(streamNames);
+		for (Map.Entry<String, StreamDefinition> entry: nameToDefinition.entrySet()) {
+			String streamName = entry.getKey();
+			if (statuses.containsKey(streamName)) {
+				states.put(nameToDefinition.get(streamName),
+						StreamDeployerUtil.aggregateState(new HashSet<>(statuses.get(streamName).values())));
 			}
-			if (state != null) {
-				states.put(nameToDefinition.get(e.getKey()), state);
+			else {
+				states.put(nameToDefinition.get(streamName), DeploymentState.undeployed);
 			}
-		});
-		streamDefinitions.stream().forEach(sd -> {
-			String name = sd.getName();
-			if (!statuses.containsKey(name)) {
-				DeploymentState state = null;
-				if (streamDefinitionExists(name)) {
-					state = DeploymentState.undeployed;
-					states.put(sd, state);
-				}
-			}
-		});
+		}
 		return states;
 	}
 
@@ -487,18 +473,12 @@ public class SkipperStreamDeployer implements StreamDeployer {
 
 	@Override
 	public Page<AppStatus> getAppStatuses(Pageable pageable) {
-		List<String> skipperStreams = new ArrayList<>();
-		Iterable<StreamDefinition> streamDefinitions = this.streamDefinitionRepository.findAll();
-		for (StreamDefinition streamDefinition : streamDefinitions) {
-			skipperStreams.add(streamDefinition.getName());
+		List<String> streamNames = new ArrayList<>();
+		Page<StreamDefinition> streamDefinitions = this.streamDefinitionRepository.findAll(pageable);
+		for (StreamDefinition streamDefinition: streamDefinitions) {
+			streamNames.add(streamDefinition.getName());
 		}
-
-		List<AppStatus> allStatuses = getStreamsStatuses(skipperStreams);
-
-		List<AppStatus> pagedStatuses = allStatuses.stream().skip(pageable.getPageNumber() * pageable.getPageSize())
-				.limit(pageable.getPageSize()).parallel().collect(Collectors.toList());
-
-		return new PageImpl<>(pagedStatuses, pageable, allStatuses.size());
+		return new PageImpl<>(getStreamsStatuses(streamNames), pageable, streamDefinitions.getTotalElements());
 	}
 
 	@Override
