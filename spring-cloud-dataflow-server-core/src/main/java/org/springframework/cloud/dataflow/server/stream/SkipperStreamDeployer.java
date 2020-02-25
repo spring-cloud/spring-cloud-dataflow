@@ -166,7 +166,7 @@ public class SkipperStreamDeployer implements StreamDeployer {
 		Map<String, Map<String, DeploymentState>> statuses = this.skipperClient.states(streamNames);
 		for (Map.Entry<String, StreamDefinition> entry: nameToDefinition.entrySet()) {
 			String streamName = entry.getKey();
-			if (statuses.containsKey(streamName)) {
+			if (statuses != null && statuses.containsKey(streamName) && !statuses.get(streamName).isEmpty()) {
 				states.put(nameToDefinition.get(streamName),
 						StreamDeployerUtil.aggregateState(new HashSet<>(statuses.get(streamName).values())));
 			}
@@ -501,8 +501,8 @@ public class SkipperStreamDeployer implements StreamDeployer {
 	}
 
 	@Override
-	public Map<String, List<AppStatus>> getStreamStatuses(String[] streamName) {
-		Map<String, Info> statuses = this.skipperClient.statuses(streamName);
+	public Map<String, List<AppStatus>> getStreamStatuses(String[] streamNames) {
+		Map<String, Info> statuses = this.skipperClient.statuses(streamNames);
 		Map<String, List<AppStatus>> appStatuses = new HashMap<>();
 		statuses.entrySet().stream().forEach(e -> {
 			appStatuses.put(e.getKey(), e.getValue().getStatus().getAppStatusList());
@@ -521,14 +521,12 @@ public class SkipperStreamDeployer implements StreamDeployer {
 	}
 
 	private List<AppStatus> getStreamsStatuses(List<String> streamNames) {
-		try {
-			return this.forkJoinPool.submit(() -> streamNames.stream().parallel()
-					.map(this::skipperStatus).flatMap(List::stream).collect(Collectors.toList())).get();
-		}
-		catch (Exception e) {
-			logger.error("Failed to retrieve the Runtime Stream Statues", e);
-			throw new RuntimeException("Failed to retrieve the Runtime Stream Statues for " + streamNames);
-		}
+		Map<String, Info> statuses = this.skipperClient.statuses(streamNames.toArray(new String[0]));
+		List<AppStatus> appStatusList = new ArrayList<>();
+		statuses.entrySet().stream().forEach(e -> {
+			appStatusList.addAll(e.getValue().getStatus().getAppStatusList());
+		});
+		return appStatusList;
 	}
 
 	@Override
