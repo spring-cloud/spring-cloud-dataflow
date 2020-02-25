@@ -475,10 +475,12 @@ public class SkipperStreamDeployer implements StreamDeployer {
 	public Page<AppStatus> getAppStatuses(Pageable pageable) {
 		List<String> streamNames = new ArrayList<>();
 		Page<StreamDefinition> streamDefinitions = this.streamDefinitionRepository.findAll(pageable);
-		for (StreamDefinition streamDefinition: streamDefinitions) {
-			streamNames.add(streamDefinition.getName());
+		for (Map.Entry<StreamDefinition, DeploymentState> entry: this.streamsStates(streamDefinitions.getContent()).entrySet()) {
+			if (entry.getValue() != null && entry.getValue().equals(DeploymentState.deployed)) {
+				streamNames.add(entry.getKey().getName());
+			}
 		}
-		return new PageImpl<>(getStreamsStatuses(streamNames), pageable, streamDefinitions.getTotalElements());
+		return new PageImpl<>(getStreamsStatuses(streamNames), pageable, streamNames.size());
 	}
 
 	@Override

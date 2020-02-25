@@ -39,7 +39,7 @@ public class StreamDeployerUtil {
 			logger.debug("aggregateState: Deployment State Set Size = 1.  Deployment State " + state);
 			// a stream which is known to the stream definition streamDefinitionRepository
 			// but unknown to deployers is undeployed
-			if (state == DeploymentState.unknown) {
+			if (state == null || state == DeploymentState.unknown) {
 				logger.debug("aggregateState: Returning " + DeploymentState.undeployed);
 				return DeploymentState.undeployed;
 			}
