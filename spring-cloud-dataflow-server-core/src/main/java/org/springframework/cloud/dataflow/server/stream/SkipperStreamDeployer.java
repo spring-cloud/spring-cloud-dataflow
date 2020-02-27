@@ -476,7 +476,8 @@ public class SkipperStreamDeployer implements StreamDeployer {
 		List<String> streamNames = new ArrayList<>();
 		Page<StreamDefinition> streamDefinitions = this.streamDefinitionRepository.findAll(pageable);
 		for (Map.Entry<StreamDefinition, DeploymentState> entry: this.streamsStates(streamDefinitions.getContent()).entrySet()) {
-			if (entry.getValue() != null && entry.getValue().equals(DeploymentState.deployed)) {
+			if (entry.getValue() != null && (entry.getValue().equals(DeploymentState.deployed) ||
+					entry.getValue().equals(DeploymentState.partial))) {
 				streamNames.add(entry.getKey().getName());
 			}
 		}
