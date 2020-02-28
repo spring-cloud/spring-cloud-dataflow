@@ -22,6 +22,7 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -154,11 +155,23 @@ public class SkipperStreamDeployer implements StreamDeployer {
 
 	@Override
 	public Map<StreamDefinition, DeploymentState> streamsStates(List<StreamDefinition> streamDefinitions) {
+		Map<String, StreamDefinition> nameToDefinition = new HashMap<>();
 		Map<StreamDefinition, DeploymentState> states = new HashMap<>();
-		for (StreamDefinition streamDefinition : streamDefinitions) {
-			DeploymentState streamDeploymentState = getStreamDeploymentState(streamDefinition.getName());
-			if (streamDeploymentState != null) {
-				states.put(streamDefinition, streamDeploymentState);
+		List<String> streamNamesList = new ArrayList<>();
+		streamDefinitions.stream().forEach(sd -> {
+			streamNamesList.add(sd.getName());
+			nameToDefinition.put(sd.getName(), sd);
+		});
+		String[] streamNames = streamNamesList.toArray(new String[0]);
+		Map<String, Map<String, DeploymentState>> statuses = this.skipperClient.states(streamNames);
+		for (Map.Entry<String, StreamDefinition> entry: nameToDefinition.entrySet()) {
+			String streamName = entry.getKey();
+			if (statuses != null && statuses.containsKey(streamName) && !statuses.get(streamName).isEmpty()) {
+				states.put(nameToDefinition.get(streamName),
+						StreamDeployerUtil.aggregateState(new HashSet<>(statuses.get(streamName).values())));
+			}
+			else {
+				states.put(nameToDefinition.get(streamName), DeploymentState.undeployed);
 			}
 		}
 		return states;
@@ -460,18 +473,15 @@ public class SkipperStreamDeployer implements StreamDeployer {
 
 	@Override
 	public Page<AppStatus> getAppStatuses(Pageable pageable) {
-		List<String> skipperStreams = new ArrayList<>();
-		Iterable<StreamDefinition> streamDefinitions = this.streamDefinitionRepository.findAll();
-		for (StreamDefinition streamDefinition : streamDefinitions) {
-			skipperStreams.add(streamDefinition.getName());
+		List<String> streamNames = new ArrayList<>();
+		Page<StreamDefinition> streamDefinitions = this.streamDefinitionRepository.findAll(pageable);
+		for (Map.Entry<StreamDefinition, DeploymentState> entry: this.streamsStates(streamDefinitions.getContent()).entrySet()) {
+			if (entry.getValue() != null && (entry.getValue().equals(DeploymentState.deployed) ||
+					entry.getValue().equals(DeploymentState.partial))) {
+				streamNames.add(entry.getKey().getName());
+			}
 		}
-
-		List<AppStatus> allStatuses = getStreamsStatuses(skipperStreams);
-
-		List<AppStatus> pagedStatuses = allStatuses.stream().skip(pageable.getPageNumber() * pageable.getPageSize())
-				.limit(pageable.getPageSize()).parallel().collect(Collectors.toList());
-
-		return new PageImpl<>(pagedStatuses, pageable, allStatuses.size());
+		return new PageImpl<>(getStreamsStatuses(streamNames), pageable, streamNames.size());
 	}
 
 	@Override
@@ -494,6 +504,16 @@ public class SkipperStreamDeployer implements StreamDeployer {
 	}
 
 	@Override
+	public Map<String, List<AppStatus>> getStreamStatuses(String[] streamNames) {
+		Map<String, Info> statuses = this.skipperClient.statuses(streamNames);
+		Map<String, List<AppStatus>> appStatuses = new HashMap<>();
+		statuses.entrySet().stream().forEach(e -> {
+			appStatuses.put(e.getKey(), e.getValue().getStatus().getAppStatusList());
+		});
+		return appStatuses;
+	}
+
+	@Override
 	public LogInfo getLog(String streamName) {
 		return this.skipperClient.getLog(streamName);
 	}
@@ -504,14 +524,12 @@ public class SkipperStreamDeployer implements StreamDeployer {
 	}
 
 	private List<AppStatus> getStreamsStatuses(List<String> streamNames) {
-		try {
-			return this.forkJoinPool.submit(() -> streamNames.stream().parallel()
-					.map(this::skipperStatus).flatMap(List::stream).collect(Collectors.toList())).get();
-		}
-		catch (Exception e) {
-			logger.error("Failed to retrieve the Runtime Stream Statues", e);
-			throw new RuntimeException("Failed to retrieve the Runtime Stream Statues for " + streamNames);
-		}
+		Map<String, Info> statuses = this.skipperClient.statuses(streamNames.toArray(new String[0]));
+		List<AppStatus> appStatusList = new ArrayList<>();
+		statuses.entrySet().stream().forEach(e -> {
+			appStatusList.addAll(e.getValue().getStatus().getAppStatusList());
+		});
+		return appStatusList;
 	}
 
 	@Override

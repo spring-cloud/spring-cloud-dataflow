@@ -16,6 +16,8 @@
 
 package org.springframework.cloud.dataflow.rest.resource;
 
+import org.apache.commons.lang.StringUtils;
+
 import org.springframework.cloud.dataflow.core.StreamRuntimePropertyKeys;
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.PagedModel;
@@ -48,9 +50,14 @@ public class AppStatusResource extends RepresentationModel<AppStatusResource> {
 	}
 
 	public String getName() {
-		AppInstanceStatusResource instance = this.instances.iterator().next();
-		return (instance != null && instance.getAttributes() != null) ?
-				instance.getAttributes().get(StreamRuntimePropertyKeys.ATTRIBUTE_SKIPPER_APPLICATION_NAME) : NO_INSTANCES;
+		if (this.instances != null && this.instances.iterator().hasNext()) {
+			AppInstanceStatusResource instance = this.instances.iterator().next();
+			return (instance != null && instance.getAttributes() != null &&
+					!StringUtils.isEmpty(instance.getAttributes().get(StreamRuntimePropertyKeys.ATTRIBUTE_SKIPPER_APPLICATION_NAME))) ?
+					instance.getAttributes().get(StreamRuntimePropertyKeys.ATTRIBUTE_SKIPPER_APPLICATION_NAME) :
+					NO_INSTANCES;
+		}
+		return NO_INSTANCES;
 	}
 
 	public String getDeploymentId() {
