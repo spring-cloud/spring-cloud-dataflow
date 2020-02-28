@@ -148,26 +148,26 @@ public class RuntimeStreamsControllerTests {
 
 				.andExpect(jsonPath("$.**", hasSize(3)))
 				// can't expect ordering anymore
-				.andExpect(jsonPath("$.[0].name", anyOf(is("ticktock1"), is("ticktock2"), is("ticktock3"))))
-				.andExpect(jsonPath("$.[0].applications.*", hasSize(2)))
-				.andExpect(jsonPath("$.[0].applications[0].name", anyOf(is("log1"), is("log2"), is("log3"))))
-				.andExpect(jsonPath("$.[0].applications[0].instances[0].guid", anyOf(is("guid1"), is("guid3"), is("ticktock3.log3-v1-0"))))
-				.andExpect(jsonPath("$.[0].applications[1].name", anyOf(is("time1"), is("time2"), is("time3"))))
-				.andExpect(jsonPath("$.[0].applications[1].instances[0].guid", anyOf(is("guid2"), is("guid4"), is("ticktock3.time3-v1-0"))))
+				.andExpect(jsonPath("$.content[0].name", anyOf(is("ticktock1"), is("ticktock2"), is("ticktock3"))))
+				.andExpect(jsonPath("$.content[0].applications.*", hasSize(2)))
+				.andExpect(jsonPath("$.content[0].applications.content[0].name", anyOf(is("log1"), is("log2"), is("log3"))))
+				.andExpect(jsonPath("$.content[0].applications.content[0].instances.content[0].guid", anyOf(is("guid1"), is("guid3"), is("ticktock3.log3-v1-0"))))
+				.andExpect(jsonPath("$.content[0].applications.content[1].name", anyOf(is("time1"), is("time2"), is("time3"))))
+				.andExpect(jsonPath("$.content[0].applications.content[1].instances.content[0].guid", anyOf(is("guid2"), is("guid4"), is("ticktock3.time3-v1-0"))))
 
-				.andExpect(jsonPath("$.[1].name", anyOf(is("ticktock1"), is("ticktock2"), is("ticktock3"))))
-				.andExpect(jsonPath("$.[1].applications.*", hasSize(2)))
-				.andExpect(jsonPath("$.[1].applications[0].name", anyOf(is("log1"), is("log2"), is("log3"))))
-				.andExpect(jsonPath("$.[1].applications[0].instances[0].guid", anyOf(is("guid1"), is("guid3"), is("ticktock3.log3-v1-0"))))
-				.andExpect(jsonPath("$.[1].applications[1].name", anyOf(is("time1"), is("time2"), is("time3"))))
-				.andExpect(jsonPath("$.[1].applications[1].instances[0].guid", anyOf(is("guid2"), is("guid4"), is("ticktock3.time3-v1-0"))))
+				.andExpect(jsonPath("$.content[1].name", anyOf(is("ticktock1"), is("ticktock2"), is("ticktock3"))))
+				.andExpect(jsonPath("$.content[1].applications.*", hasSize(2)))
+				.andExpect(jsonPath("$.content[1].applications.content[0].name", anyOf(is("log1"), is("log2"), is("log3"))))
+				.andExpect(jsonPath("$.content[1].applications.content[0].instances.content[0].guid", anyOf(is("guid1"), is("guid3"), is("ticktock3.log3-v1-0"))))
+				.andExpect(jsonPath("$.content[1].applications.content[1].name", anyOf(is("time1"), is("time2"), is("time3"))))
+				.andExpect(jsonPath("$.content[1].applications.content[1].instances.content[0].guid", anyOf(is("guid2"), is("guid4"), is("ticktock3.time3-v1-0"))))
 
-				.andExpect(jsonPath("$.[2].name", anyOf(is("ticktock1"), is("ticktock2"), is("ticktock3"))))
-				.andExpect(jsonPath("$.[2].applications.*", hasSize(2)))
-				.andExpect(jsonPath("$.[2].applications[0].name", anyOf(is("log1"), is("log2"), is("log3"))))
-				.andExpect(jsonPath("$.[2].applications[0].instances[0].guid", anyOf(is("guid1"), is("guid3"), is("ticktock3.log3-v1-0"))))
-				.andExpect(jsonPath("$.[2].applications[1].name", anyOf(is("time1"), is("time2"), is("time3"))))
-				.andExpect(jsonPath("$.[2].applications[1].instances[0].guid", anyOf(is("guid2"), is("guid4"), is("ticktock3.time3-v1-0"))));
+				.andExpect(jsonPath("$.content[2].name", anyOf(is("ticktock1"), is("ticktock2"), is("ticktock3"))))
+				.andExpect(jsonPath("$.content[2].applications.*", hasSize(2)))
+				.andExpect(jsonPath("$.content[2].applications.content[0].name", anyOf(is("log1"), is("log2"), is("log3"))))
+				.andExpect(jsonPath("$.content[2].applications.content[0].instances.content[0].guid", anyOf(is("guid1"), is("guid3"), is("ticktock3.log3-v1-0"))))
+				.andExpect(jsonPath("$.content[2].applications.content[1].name", anyOf(is("time1"), is("time2"), is("time3"))))
+				.andExpect(jsonPath("$.content[2].applications.content[1].instances.content[0].guid", anyOf(is("guid2"), is("guid4"), is("ticktock3.time3-v1-0"))));
 	}
 
 	private AppInstanceStatus instance(String id, String guid, String appName) {

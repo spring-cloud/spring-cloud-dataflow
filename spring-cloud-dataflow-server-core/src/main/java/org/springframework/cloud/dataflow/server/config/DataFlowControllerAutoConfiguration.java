@@ -345,8 +345,9 @@ public class DataFlowControllerAutoConfiguration {
 		}
 
 		@Bean
-		public RuntimeStreamsControllerV2 runtimeStreamsControllerV2(StreamDeployer streamDeployer) {
-			return new RuntimeStreamsControllerV2(streamDeployer);
+		public RuntimeStreamsControllerV2 runtimeStreamsControllerV2(StreamDeployer streamDeployer,
+				StreamDefinitionRepository streamDefinitionRepository) {
+			return new RuntimeStreamsControllerV2(streamDeployer, streamDefinitionRepository);
 		}
 
 		@Bean

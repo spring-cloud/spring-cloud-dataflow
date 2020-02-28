@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 the original author or authors.
+ * Copyright 2019-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,16 +18,18 @@ package org.springframework.cloud.dataflow.server.controller;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
+import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import org.springframework.cloud.dataflow.core.StreamDefinition;
 import org.springframework.cloud.dataflow.rest.resource.AppStatusResource;
 import org.springframework.cloud.dataflow.rest.resource.StreamStatusResource;
+import org.springframework.cloud.dataflow.server.repository.StreamDefinitionRepository;
 import org.springframework.cloud.dataflow.server.stream.StreamDeployer;
 import org.springframework.cloud.deployer.spi.app.AppStatus;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.util.Pair;
@@ -46,6 +48,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 /**
  * @author Christian Tzolov
+ * @author Ilayaperumal Gopinathan
  */
 @RestController
 @RequestMapping("/runtime/streams")
@@ -56,6 +59,8 @@ public class RuntimeStreamsControllerV2 {
 
 	private final StreamDeployer streamDeployer;
 
+	private final StreamDefinitionRepository streamDefinitionRepository;
+
 	private final RepresentationModelAssembler<Pair<String, List<AppStatus>>, StreamStatusResource> statusAssembler
 			= new RuntimeStreamsControllerV2.Assembler();
 
@@ -63,10 +68,35 @@ public class RuntimeStreamsControllerV2 {
 	 * Construct a new runtime apps controller.
 	 * @param streamDeployer the deployer this controller will use to get the status of
 	 * deployed stream apps
+	 * @param streamDefinitionRepository the stream definition repository
 	 */
-	public RuntimeStreamsControllerV2(StreamDeployer streamDeployer) {
+	public RuntimeStreamsControllerV2(StreamDeployer streamDeployer, StreamDefinitionRepository streamDefinitionRepository) {
 		Assert.notNull(streamDeployer, "StreamDeployer must not be null");
+		Assert.notNull(streamDefinitionRepository, "StreamDefinitionRepository must not be null");
 		this.streamDeployer = streamDeployer;
+		this.streamDefinitionRepository = streamDefinitionRepository;
+	}
+
+	/**
+	 * @param pageable the page
+	 * @param assembler the resource assembler
+	 *
+	 * @return a paged model for stream statuses
+	 */
+	@RequestMapping(method = RequestMethod.GET)
+	public PagedModel<StreamStatusResource> streamStatus(Pageable pageable,
+			PagedResourcesAssembler<Pair<String, List<AppStatus>>> assembler) {
+		List<String> streamsToCheck = new ArrayList<>();
+		Page<StreamDefinition> streamDefinitions = this.streamDefinitionRepository.findAll(pageable);
+		streamDefinitions.forEach(streamDefinition -> {
+			streamsToCheck.add(streamDefinition.getName());
+		});
+		Map<String, List<AppStatus>> streamStatuses = this.streamDeployer.getStreamStatuses(streamsToCheck.toArray(new String[0]));
+		List<Pair<String, List<AppStatus>>> streamStatusList = new ArrayList<>();
+		streamStatuses.entrySet().forEach(entry -> {
+			streamStatusList.add(Pair.of(entry.getKey(), entry.getValue()));
+		});
+		return assembler.toModel(new PageImpl<>(streamStatusList, pageable, streamStatusList.size()), statusAssembler);
 	}
 
 	/**
@@ -75,11 +105,11 @@ public class RuntimeStreamsControllerV2 {
 	@RequestMapping(value = "/{streamNames}", method = RequestMethod.GET)
 	public PagedModel<StreamStatusResource> streamStatus(@PathVariable("streamNames") String[] streamNames, Pageable pageable,
 			PagedResourcesAssembler<Pair<String, List<AppStatus>>> assembler) {
-
-		List<Pair<String, List<AppStatus>>> streamStatusList = Stream.of(streamNames)
-				.map(streamName -> Pair.of(streamName, this.streamDeployer.getStreamStatuses(streamName)))
-				.collect(Collectors.toList());
-
+		Map<String, List<AppStatus>> streamStatuses = this.streamDeployer.getStreamStatuses(streamNames);
+		List<Pair<String, List<AppStatus>>> streamStatusList = new ArrayList<>();
+		streamStatuses.entrySet().forEach(entry -> {
+			streamStatusList.add(Pair.of(entry.getKey(), entry.getValue()));
+		});
 		return assembler.toModel(new PageImpl<>(streamStatusList, pageable, streamStatusList.size()), statusAssembler);
 	}
 
