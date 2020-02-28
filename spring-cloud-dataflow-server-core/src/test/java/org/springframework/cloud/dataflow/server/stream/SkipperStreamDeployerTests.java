@@ -312,7 +312,8 @@ public class SkipperStreamDeployerTests {
 		Map<StreamDefinition, DeploymentState> state = skipperStreamDeployer.streamsStates(Arrays.asList(streamDefinition));
 
 		assertThat(state).isNotNull();
-		assertThat(state.size()).isEqualTo(0);
+		assertThat(state.size()).isEqualTo(1);
+		assertThat(state.get(streamDefinition).equals(DeploymentState.undeployed));
 	}
 
 	@Test
