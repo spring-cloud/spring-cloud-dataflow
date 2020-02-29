@@ -101,7 +101,7 @@ public class DefaultReleaseManager implements ReleaseManager {
 					return multiAppDeployer.statesReactive(k.getDeploymentIds().toArray(new String[0])).cache();
 				}
 				// it wasn't MultiStateAppDeployer so we just return empty
-				return Mono.empty();
+				return Mono.just(new HashMap<>());
 			});
 
 
@@ -291,7 +291,7 @@ public class DefaultReleaseManager implements ReleaseManager {
 							.flatMap(ee -> e.getKey().statusReactive(ee))
 							.collectMap(AppStatus::getDeploymentId, AppStatus::getState);
 						Mono<Map<String, DeploymentState>> cachedEntry = cache.get(CacheKey.of(e.getValue(), e.getKey()));
-						return cachedEntry.switchIfEmpty(fallback);
+						return cachedEntry.flatMap(m -> m.isEmpty() ? fallback : Mono.just(m));
 					})
 					.reduce(new HashMap<String, DeploymentState>(), (to, from) -> {
 						to.putAll(from);
@@ -355,16 +355,14 @@ public class DefaultReleaseManager implements ReleaseManager {
 								instanceStatus.getAttributes().put(SKIPPER_RELEASE_NAME_ATTRIBUTE, release.getName());
 								instanceStatus.getAttributes().put(SKIPPER_RELEASE_VERSION_ATTRIBUTE,
 										"" + release.getVersion());
-							}
-						if (deploymentStateMap != null) {
-							if (appStatus.getState().equals(DeploymentState.failed)
-									|| appStatus.getState().equals(DeploymentState.error)) {
-								// check if we have 'early' status computed via multiStateAppDeployer
-								String deploymentId = appStatus.getDeploymentId();
-								if (deploymentStateMap.containsKey(deploymentId)) {
-									appStatus = AppStatus.of(deploymentId)
-											.generalState(deploymentStateMap.get(deploymentId)).build();
-								}
+						}
+						if (appStatus.getState().equals(DeploymentState.failed)
+								|| appStatus.getState().equals(DeploymentState.error)) {
+							// check if we have 'early' status computed via multiStateAppDeployer
+							String deploymentId = appStatus.getDeploymentId();
+							if (deploymentStateMap.containsKey(deploymentId)) {
+								appStatus = AppStatus.of(deploymentId)
+										.generalState(deploymentStateMap.get(deploymentId)).build();
 							}
 						}
 						return appStatus;
