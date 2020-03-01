@@ -118,4 +118,10 @@ public interface StreamDeployer {
 	 * @param properties
 	 */
 	void scale(String streamName, String appName, int count, Map<String, String> properties);
+
+	/**
+	 * Returns the list of stream names that correspond to the currently available skipper releases.
+	 * @return
+	 */
+	List<String> getStreams();
 }

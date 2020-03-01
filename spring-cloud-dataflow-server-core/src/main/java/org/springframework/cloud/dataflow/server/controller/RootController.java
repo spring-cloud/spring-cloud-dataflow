@@ -98,8 +98,8 @@ public class RootController {
 			root.add(unescapeTemplateVariables(entityLinks.linkToItemResource(StreamAppStatusResource.class, "{name}")
 					.withRel("streams/validation")));
 
-			root.add(WebMvcLinkBuilder.linkTo(WebMvcLinkBuilder.methodOn(RuntimeStreamsController.class).streamStatus(null)).withRel("runtime/streams"));
-			root.add(WebMvcLinkBuilder.linkTo(WebMvcLinkBuilder.methodOn(RuntimeStreamsControllerV2.class).streamStatus(null, null, null)).withRel("runtime/streams/{streamNames}"));
+			root.add(WebMvcLinkBuilder.linkTo(WebMvcLinkBuilder.methodOn(RuntimeStreamsControllerV2.class).status(null, null)).withRel("runtime/streams"));
+			root.add(WebMvcLinkBuilder.linkTo(WebMvcLinkBuilder.methodOn(RuntimeStreamsControllerV2.class).streamStatuses(null)).withRel("runtime/streams/status"));
 
 			root.add(WebMvcLinkBuilder.linkTo(WebMvcLinkBuilder.methodOn(RuntimeAppsController.class).list(null, null)).withRel("runtime/apps"));
 			root.add(WebMvcLinkBuilder.linkTo(WebMvcLinkBuilder.methodOn(RuntimeAppsController.class).display(null)).withRel("runtime/apps/{appId}"));
