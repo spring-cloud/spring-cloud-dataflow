@@ -16,6 +16,7 @@
 
 package org.springframework.cloud.dataflow.server.controller;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -41,6 +42,7 @@ import org.springframework.cloud.deployer.spi.app.AppStatus;
 import org.springframework.cloud.deployer.spi.app.DeploymentState;
 import org.springframework.cloud.skipper.client.SkipperClient;
 import org.springframework.cloud.skipper.domain.Info;
+import org.springframework.cloud.skipper.domain.Release;
 import org.springframework.cloud.skipper.domain.Status;
 import org.springframework.cloud.skipper.domain.StatusCode;
 import org.springframework.http.MediaType;
@@ -126,6 +128,17 @@ public class RuntimeStreamsControllerV2Tests {
 		mockInfo.put("ticktock2", toInfo(appStatues2));
 		mockInfo.put("ticktock3", toInfo(appStatues3));
 		when(skipperClient.statuses(any())).thenReturn(mockInfo);
+		List<Release> releaseList = new ArrayList<>();
+		Release release1 = new Release();
+		release1.setName("ticktock1");
+		releaseList.add(release1);
+		Release release2 = new Release();
+		release1.setName("ticktock2");
+		releaseList.add(release2);
+		Release release3 = new Release();
+		release1.setName("ticktock3");
+		releaseList.add(release3);
+		when(skipperClient.list(any())).thenReturn(releaseList);
 	}
 
 	private Info toInfo(List<AppStatus> appStatues) throws JsonProcessingException {
@@ -140,7 +153,39 @@ public class RuntimeStreamsControllerV2Tests {
 	@Test
 	public void testGetResponse() throws Exception {
 		this.mockMvc.perform(
-				get("/runtime/streams/ticktock1,ticktock2,ticktock3")
+				get("/runtime/streams/status?names=ticktock1,ticktock2,ticktock3")
+						.accept(MediaType.APPLICATION_JSON))
+				.andDo(print())
+				.andExpect(status().isOk())
+
+				.andExpect(jsonPath("$.**", hasSize(3)))
+				.andExpect(jsonPath("$.[0].name", anyOf(is("ticktock1"), is("ticktock2"), is("ticktock3"))))
+				.andExpect(jsonPath("$.[0].applications.*", hasSize(2)))
+				.andExpect(jsonPath("$.[0].applications.[0].name", anyOf(is("log1"), is("log2"), is("log3"))))
+				.andExpect(jsonPath("$.[0].applications.[0].instances.[0].guid", anyOf(is("guid1"), is("guid3"), is("ticktock3.log3-v1-0"))))
+				.andExpect(jsonPath("$.[0].applications.[1].name", anyOf(is("time1"), is("time2"), is("time3"))))
+				.andExpect(jsonPath("$.[0].applications.[1].instances.[0].guid", anyOf(is("guid2"), is("guid4"), is("ticktock3.time3-v1-0"))))
+
+				.andExpect(jsonPath("$.[1].name", anyOf(is("ticktock1"), is("ticktock2"), is("ticktock3"))))
+				.andExpect(jsonPath("$.[1].applications.*", hasSize(2)))
+				.andExpect(jsonPath("$.[1].applications.[0].name", anyOf(is("log1"), is("log2"), is("log3"))))
+				.andExpect(jsonPath("$.[1].applications.[0].instances.[0].guid", anyOf(is("guid1"), is("guid3"), is("ticktock3.log3-v1-0"))))
+				.andExpect(jsonPath("$.[1].applications.[1].name", anyOf(is("time1"), is("time2"), is("time3"))))
+				.andExpect(jsonPath("$.[1].applications.[1].instances.[0].guid", anyOf(is("guid2"), is("guid4"), is("ticktock3.time3-v1-0"))))
+
+				.andExpect(jsonPath("$.[2].name", anyOf(is("ticktock1"), is("ticktock2"), is("ticktock3"))))
+				.andExpect(jsonPath("$.[2].applications.*", hasSize(2)))
+				.andExpect(jsonPath("$.[2].applications.[0].name", anyOf(is("log1"), is("log2"), is("log3"))))
+				.andExpect(jsonPath("$.[2].applications.[0].instances.[0].guid", anyOf(is("guid1"), is("guid3"), is("ticktock3.log3-v1-0"))))
+				.andExpect(jsonPath("$.[2].applications.[1].name", anyOf(is("time1"), is("time2"), is("time3"))))
+				.andExpect(jsonPath("$.[2].applications.[1].instances.[0].guid", anyOf(is("guid2"), is("guid4"), is("ticktock3.time3-v1-0"))));
+
+	}
+
+	@Test
+	public void testGetResponseForAllRunningStreams() throws Exception {
+		this.mockMvc.perform(
+				get("/runtime/streams")
 						.accept(MediaType.APPLICATION_JSON))
 				.andDo(print())
 				.andExpect(status().isOk())
