@@ -23,14 +23,13 @@ import java.util.Map;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import org.springframework.cloud.dataflow.core.StreamDefinition;
 import org.springframework.cloud.dataflow.rest.resource.AppStatusResource;
 import org.springframework.cloud.dataflow.rest.resource.StreamStatusResource;
-import org.springframework.cloud.dataflow.server.repository.StreamDefinitionRepository;
 import org.springframework.cloud.dataflow.server.stream.StreamDeployer;
 import org.springframework.cloud.deployer.spi.app.AppStatus;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.util.Pair;
 import org.springframework.data.web.PagedResourcesAssembler;
@@ -59,8 +58,6 @@ public class RuntimeStreamsControllerV2 {
 
 	private final StreamDeployer streamDeployer;
 
-	private final StreamDefinitionRepository streamDefinitionRepository;
-
 	private final RepresentationModelAssembler<Pair<String, List<AppStatus>>, StreamStatusResource> statusAssembler
 			= new RuntimeStreamsControllerV2.Assembler();
 
@@ -68,13 +65,10 @@ public class RuntimeStreamsControllerV2 {
 	 * Construct a new runtime apps controller.
 	 * @param streamDeployer the deployer this controller will use to get the status of
 	 * deployed stream apps
-	 * @param streamDefinitionRepository the stream definition repository
 	 */
-	public RuntimeStreamsControllerV2(StreamDeployer streamDeployer, StreamDefinitionRepository streamDefinitionRepository) {
+	public RuntimeStreamsControllerV2(StreamDeployer streamDeployer) {
 		Assert.notNull(streamDeployer, "StreamDeployer must not be null");
-		Assert.notNull(streamDefinitionRepository, "StreamDefinitionRepository must not be null");
 		this.streamDeployer = streamDeployer;
-		this.streamDefinitionRepository = streamDefinitionRepository;
 	}
 
 	/**
@@ -86,17 +80,17 @@ public class RuntimeStreamsControllerV2 {
 	@RequestMapping(method = RequestMethod.GET)
 	public PagedModel<StreamStatusResource> streamStatus(Pageable pageable,
 			PagedResourcesAssembler<Pair<String, List<AppStatus>>> assembler) {
-		List<String> streamsToCheck = new ArrayList<>();
-		Page<StreamDefinition> streamDefinitions = this.streamDefinitionRepository.findAll(pageable);
-		streamDefinitions.forEach(streamDefinition -> {
-			streamsToCheck.add(streamDefinition.getName());
-		});
-		Map<String, List<AppStatus>> streamStatuses = this.streamDeployer.getStreamStatuses(streamsToCheck.toArray(new String[0]));
+		List<String> streams = this.streamDeployer.getStreams();
+		PageRequest page = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), pageable.getSort());
+		int start = (int) page.getOffset();
+		int end = (start + page.getPageSize()) > streams.size() ? streams.size() : (start + page.getPageSize());
+		Page<String> pagedStreams = new PageImpl<>(streams.subList(start, end), PageRequest.of(pageable.getPageNumber(), pageable.getPageSize()), streams.size());
+		Map<String, List<AppStatus>> streamStatuses = this.streamDeployer.getStreamStatuses(pagedStreams.getContent().toArray(new String[0]));
 		List<Pair<String, List<AppStatus>>> streamStatusList = new ArrayList<>();
 		streamStatuses.entrySet().forEach(entry -> {
 			streamStatusList.add(Pair.of(entry.getKey(), entry.getValue()));
 		});
-		return assembler.toModel(new PageImpl<>(streamStatusList, pageable, streamStatusList.size()), statusAssembler);
+		return assembler.toModel(new PageImpl<>(streamStatusList, pageable, streams.size()), statusAssembler);
 	}
 
 	/**
