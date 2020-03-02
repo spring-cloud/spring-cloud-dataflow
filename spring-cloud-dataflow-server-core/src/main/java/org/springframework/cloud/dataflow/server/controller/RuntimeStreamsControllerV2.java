@@ -17,15 +17,20 @@
 package org.springframework.cloud.dataflow.server.controller;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import org.springframework.cloud.dataflow.core.StreamRuntimePropertyKeys;
 import org.springframework.cloud.dataflow.rest.resource.AppStatusResource;
 import org.springframework.cloud.dataflow.rest.resource.StreamStatusResource;
+import org.springframework.cloud.dataflow.server.controller.support.StreamStatus;
 import org.springframework.cloud.dataflow.server.stream.StreamDeployer;
+import org.springframework.cloud.deployer.spi.app.AppInstanceStatus;
 import org.springframework.cloud.deployer.spi.app.AppStatus;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -43,6 +48,7 @@ import org.springframework.util.CollectionUtils;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
@@ -78,7 +84,7 @@ public class RuntimeStreamsControllerV2 {
 	 * @return a paged model for stream statuses
 	 */
 	@RequestMapping(method = RequestMethod.GET)
-	public PagedModel<StreamStatusResource> streamStatus(Pageable pageable,
+	public PagedModel<StreamStatusResource> status(Pageable pageable,
 			PagedResourcesAssembler<Pair<String, List<AppStatus>>> assembler) {
 		List<String> streams = this.streamDeployer.getStreams();
 		PageRequest page = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), pageable.getSort());
@@ -93,22 +99,52 @@ public class RuntimeStreamsControllerV2 {
 		return assembler.toModel(new PageImpl<>(streamStatusList, pageable, streams.size()), statusAssembler);
 	}
 
-	/**
-	 * @param streamNames comma separated list of streams to retrieve the statuses for
-	 * @param pageable the page
-	 * @param assembler the resource assembler
-	 *
-	 * @return a paged model for stream statuses
-	 */
-	@RequestMapping(value = "/{streamNames}", method = RequestMethod.GET)
-	public PagedModel<StreamStatusResource> streamStatus(@PathVariable("streamNames") String[] streamNames, Pageable pageable,
-			PagedResourcesAssembler<Pair<String, List<AppStatus>>> assembler) {
+	@RequestMapping(value = "/status", method = RequestMethod.GET)
+	public List<StreamStatus> streamStatuses(@RequestParam("names") String[] streamNames) {
 		Map<String, List<AppStatus>> streamStatuses = this.streamDeployer.getStreamStatuses(streamNames);
-		List<Pair<String, List<AppStatus>>> streamStatusList = new ArrayList<>();
-		streamStatuses.entrySet().forEach(entry -> {
-			streamStatusList.add(Pair.of(entry.getKey(), entry.getValue()));
-		});
-		return assembler.toModel(new PageImpl<>(streamStatusList, pageable, streamStatusList.size()), statusAssembler);
+		return streamStatuses.entrySet().stream()
+				.map(e -> {
+					StreamStatus streamStatus = new StreamStatus();
+					streamStatus.setName(e.getKey());
+					streamStatus.setApplications(new ArrayList<>());
+					List<AppStatus> appStatuses = e.getValue();
+					if (!CollectionUtils.isEmpty(appStatuses)) {
+						for (AppStatus appStatus : appStatuses) {
+							try {
+								StreamStatus.Application application = new StreamStatus.Application();
+								streamStatus.getApplications().add(application);
+								application.setInstances(new ArrayList<>());
+								application.setId(appStatus.getDeploymentId());
+
+								for (Map.Entry<String, AppInstanceStatus> instanceEntry : appStatus.getInstances().entrySet()) {
+									AppInstanceStatus appInstanceStatus = instanceEntry.getValue();
+									StreamStatus.Instance instance = new StreamStatus.Instance();
+									application.getInstances().add(instance);
+
+									instance.setId(appInstanceStatus.getId());
+									instance.setGuid(getAppInstanceGuid(appInstanceStatus));
+									instance.setState(appInstanceStatus.getState().name());
+									instance.setProperties(Collections.emptyMap());
+
+									application.setName(appInstanceStatus.getAttributes()
+											.get(StreamRuntimePropertyKeys.ATTRIBUTE_SKIPPER_APPLICATION_NAME));
+									streamStatus.setVersion(appInstanceStatus.getAttributes()
+											.get(StreamRuntimePropertyKeys.ATTRIBUTE_SKIPPER_RELEASE_VERSION));
+								}
+							}
+							catch (Throwable throwable) {
+								logger.warn("Failed to retrieve runtime status for " + appStatus.getDeploymentId(), throwable);
+							}
+						}
+					}
+					return streamStatus;
+				})
+				.collect(Collectors.toList());
+	}
+
+	private String getAppInstanceGuid(AppInstanceStatus instance) {
+		return instance.getAttributes().containsKey(StreamRuntimePropertyKeys.ATTRIBUTE_GUID) ?
+				instance.getAttributes().get(StreamRuntimePropertyKeys.ATTRIBUTE_GUID) : instance.getId();
 	}
 
 	private static class Assembler extends RepresentationModelAssemblerSupport<Pair<String, List<AppStatus>>, StreamStatusResource> {
