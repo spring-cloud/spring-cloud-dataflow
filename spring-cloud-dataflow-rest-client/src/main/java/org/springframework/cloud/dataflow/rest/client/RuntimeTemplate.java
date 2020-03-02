@@ -21,6 +21,7 @@ import org.springframework.cloud.dataflow.rest.resource.StreamStatusResource;
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.PagedModel;
 import org.springframework.hateoas.RepresentationModel;
+import org.springframework.util.StringUtils;
 import org.springframework.web.client.RestTemplate;
 
 /**
@@ -53,7 +54,7 @@ public class RuntimeTemplate implements RuntimeOperations {
 		this.restTemplate = restTemplate;
 		this.appStatusesUriTemplate = resources.getLink("runtime/apps").get();
 		this.appStatusUriTemplate = resources.getLink("runtime/apps/{appId}").get();
-		this.streamStatusUriTemplate = resources.getLink("runtime/streams/{streamNames}").get();
+		this.streamStatusUriTemplate = resources.getLink("runtime/streams/status").get();
 	}
 
 	@Override
@@ -70,7 +71,8 @@ public class RuntimeTemplate implements RuntimeOperations {
 
 	@Override
 	public PagedModel<StreamStatusResource> streamStatus(String... streamNames) {
-		return this.restTemplate.getForObject(streamStatusUriTemplate.expand(streamNames).getHref(),
+		return this.restTemplate.getForObject(streamStatusUriTemplate.getHref()+ "?names="+
+				StringUtils.arrayToCommaDelimitedString(streamNames),
 				StreamStatusResource.Page.class);
 	}
 
