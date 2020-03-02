@@ -575,12 +575,7 @@ public class SkipperStreamDeployer implements StreamDeployer {
 
 	@Override
 	public List<String> getStreams() {
-		List<String> streams = new ArrayList<>();
-		this.skipperClient.list("").stream().forEach(release ->
-		{
-			streams.add(release.getName());
-		});
-		return streams;
+		return this.skipperClient.list("").stream().map(Release::getName).collect(Collectors.toList());
 	}
 
 	private List<AppStatus> skipperStatus(String streamName) {
