@@ -92,7 +92,7 @@ public class ApiDocumentation extends BaseDocumentation {
 				linkWithRel("jobs/instances/name").description("Provides the Job instance resource for a specific job name"),
 
 				linkWithRel("runtime/streams").description("Exposes stream runtime status"),
-				linkWithRel("runtime/streams/{streamNames}").description("Exposes streams runtime status"),
+				linkWithRel("runtime/streams/status").description("Exposes streams runtime status"),
 				linkWithRel("runtime/apps").description("Provides the runtime application resource"),
 				linkWithRel("runtime/apps/{appId}").description("Exposes the runtime status for a specific app"),
 				linkWithRel("runtime/apps/{appId}/instances").description("Provides the status for app instances"),
@@ -148,8 +148,8 @@ public class ApiDocumentation extends BaseDocumentation {
 
 						fieldWithPath("_links.runtime/streams.href").description("Link to the runtime/streams"),
 						fieldWithPath("_links.runtime/streams.templated").type(JsonFieldType.BOOLEAN).optional().description("Link runtime/streams is templated"),
-						fieldWithPath("_links.runtime/streams/{streamNames}.href").description("Link to the runtime/streams/{streamNames}"),
-						fieldWithPath("_links.runtime/streams/{streamNames}.templated").type(JsonFieldType.BOOLEAN).optional().description("Link runtime/streams/{streamNames} is templated"),
+						fieldWithPath("_links.runtime/streams/status.href").description("Link to the runtime/streams/status"),
+						fieldWithPath("_links.runtime/streams/status.templated").type(JsonFieldType.BOOLEAN).optional().description("Link runtime/streams/status is templated"),
 
 						fieldWithPath("_links.streams/logs.href").description("Link to the streams/logs"),
 						fieldWithPath("_links.streams/logs/{streamName}.href").description("Link to the streams/logs/{streamName}"),
