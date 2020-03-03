@@ -626,7 +626,7 @@ public class DefaultReleaseManager implements ReleaseManager {
 		public int hashCode() {
 			final int prime = 31;
 			int result = 1;
-			result = prime * result + ((key == null) ? 0 : key.hashCode());
+			result = prime * result + ((appDeployer == null) ? 0 : appDeployer.hashCode());
 			return result;
 		}
 
@@ -639,10 +639,10 @@ public class DefaultReleaseManager implements ReleaseManager {
 			if (getClass() != obj.getClass())
 				return false;
 			CacheKey other = (CacheKey) obj;
-			if (key == null) {
-				if (other.key != null)
+			if (appDeployer == null) {
+				if (other.appDeployer != null)
 					return false;
-			} else if (!key.equals(other.key))
+			} else if (!appDeployer.equals(other.appDeployer))
 				return false;
 			return true;
 		}
