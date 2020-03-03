@@ -147,6 +147,9 @@ spring:
     locations:
       - classpath:org/springframework/cloud/skipper/server/db/migration/{vendor}
     check-location: false
+  mvc:
+    async:
+      request-timeout: 120000
   mustache:
     check-template-location: false
 
