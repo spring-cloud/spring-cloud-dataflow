@@ -20,6 +20,7 @@ logging:
     # Silence annoying exception trace logged on info level - gh-2750
     org.hibernate.engine.jdbc.env.internal.LobCreatorBuilderImpl: 'WARN'
 spring:
+  mvc.async.request-timeout: 120000
   batch:
     initialize-schema: never
   jpa:
