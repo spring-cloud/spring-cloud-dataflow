@@ -77,6 +77,14 @@ spring:
 
             - GET /api/releases                   => hasRole('ROLE_VIEW')
 
+            # Statuses
+
+            - GET /api/release/statuses          => hasRole('ROLE_VIEW')
+
+            # States
+
+            - GET /api/release/states            => hasRole('ROLE_VIEW')
+
             # Status
 
             - GET /api/release/status/**         => hasRole('ROLE_VIEW')
