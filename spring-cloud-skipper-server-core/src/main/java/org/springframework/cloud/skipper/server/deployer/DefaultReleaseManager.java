@@ -632,18 +632,24 @@ public class DefaultReleaseManager implements ReleaseManager {
 
 		@Override
 		public boolean equals(Object obj) {
-			if (this == obj)
+			if (this == obj) {
 				return true;
-			if (obj == null)
+			}
+			if (obj == null) {
 				return false;
-			if (getClass() != obj.getClass())
+			}
+			if (getClass() != obj.getClass()) {
 				return false;
+			}
 			CacheKey other = (CacheKey) obj;
 			if (appDeployer == null) {
-				if (other.appDeployer != null)
+				if (other.appDeployer != null) {
 					return false;
-			} else if (!appDeployer.equals(other.appDeployer))
+				}
+			}
+			else if (!appDeployer.equals(other.appDeployer)) {
 				return false;
+			}
 			return true;
 		}
 	}
