@@ -71,8 +71,7 @@ public class RuntimeTemplate implements RuntimeOperations {
 
 	@Override
 	public PagedModel<StreamStatusResource> streamStatus(String... streamNames) {
-		return this.restTemplate.getForObject(streamStatusUriTemplate.getHref()+ "?names="+
-				StringUtils.arrayToCommaDelimitedString(streamNames),
+		return this.restTemplate.getForObject(streamStatusUriTemplate.expand(streamNames).getHref(),
 				StreamStatusResource.Page.class);
 	}
 
