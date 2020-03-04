@@ -47,7 +47,7 @@
 	<developers>
 		<developer>
 			<id>scdf-team</id>
-			<name>Data Flow Team</name>
+			<name>Spring Cloud Data Flow Team</name>
 			<organizationUrl>https://github.com/spring-cloud/spring-cloud-dataflow/graphs/contributors</organizationUrl>
 		</developer>
 	</developers>
@@ -55,16 +55,16 @@
 		<java.version>1.8</java.version>
 		<javadoc.opts>-Xdoclint:none</javadoc.opts>
 
-		<spring-cloud-dataflow-ui.version>2.4.0.RELEASE</spring-cloud-dataflow-ui.version>
+		<spring-cloud-dataflow-ui.version>2.4.1.BUILD-SNAPSHOT</spring-cloud-dataflow-ui.version>
 
-		<spring-cloud-deployer.version>2.2.0.RELEASE</spring-cloud-deployer.version>
-		<spring-cloud-deployer-local.version>2.2.0.RELEASE</spring-cloud-deployer-local.version>
+		<spring-cloud-deployer.version>2.2.1.BUILD-SNAPSHOT</spring-cloud-deployer.version>
+		<spring-cloud-deployer-local.version>2.2.1.BUILD-SNAPSHOT</spring-cloud-deployer-local.version>
 
-		<spring-cloud-deployer-cloudfoundry.version>2.2.0.RELEASE</spring-cloud-deployer-cloudfoundry.version>
-		<spring-cloud-deployer-kubernetes.version>2.2.0.RELEASE</spring-cloud-deployer-kubernetes.version>
+		<spring-cloud-deployer-cloudfoundry.version>2.2.1.BUILD-SNAPSHOT</spring-cloud-deployer-cloudfoundry.version>
+		<spring-cloud-deployer-kubernetes.version>2.2.1.BUILD-SNAPSHOT</spring-cloud-deployer-kubernetes.version>
 		<kubernetes-client.version>4.1.0</kubernetes-client.version>
 
-		<spring-cloud-skipper.version>2.3.0.RELEASE</spring-cloud-skipper.version>
+		<spring-cloud-skipper.version>2.3.1.BUILD-SNAPSHOT</spring-cloud-skipper.version>
 
 		<spring-cloud-task.version>2.2.2.RELEASE</spring-cloud-task.version>
 
