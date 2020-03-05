@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2019 the original author or authors.
+ * Copyright 2017-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -86,8 +86,8 @@ public class LocalServerSecurityWithOAuth2Tests {
 				.andExpect(jsonPath("$._links.runtime/apps/{appId}.href", is("http://localhost/runtime/apps/{appId}")))
 				.andExpect(jsonPath("$._links.runtime/apps/{appId}/instances.href", is("http://localhost/runtime/apps/{appId}/instances")))
 				.andExpect(jsonPath("$._links.runtime/apps/{appId}/instances/{instanceId}.href", is("http://localhost/runtime/apps/{appId}/instances/{instanceId}")))
-				.andExpect(jsonPath("$._links.runtime/streams.href", is("http://localhost/runtime/streams")))
-				.andExpect(jsonPath("$._links.runtime/streams/status.href", is("http://localhost/runtime/streams/status?names={names}")))
+				.andExpect(jsonPath("$._links.runtime/streams.href", is("http://localhost/runtime/streams{?names}")))
+				.andExpect(jsonPath("$._links.runtime/streams/{streamNames}.href", is("http://localhost/runtime/streams/{streamNames}")))
 				.andExpect(jsonPath("$._links.tasks/definitions.href", is("http://localhost/tasks/definitions")))
 				.andExpect(jsonPath("$._links.tasks/definitions/definition.href", is("http://localhost/tasks/definitions/{name}")))
 				.andExpect(jsonPath("$._links.tasks/executions.href", is("http://localhost/tasks/executions")))
