@@ -28,6 +28,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ForkJoinPool;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import com.fasterxml.jackson.core.Version;
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -76,6 +77,7 @@ import org.springframework.cloud.skipper.domain.ScaleRequest;
 import org.springframework.cloud.skipper.domain.SpringCloudDeployerApplicationManifest;
 import org.springframework.cloud.skipper.domain.SpringCloudDeployerApplicationManifestReader;
 import org.springframework.cloud.skipper.domain.SpringCloudDeployerApplicationSpec;
+import org.springframework.cloud.skipper.domain.Status;
 import org.springframework.cloud.skipper.domain.Template;
 import org.springframework.cloud.skipper.domain.UpgradeProperties;
 import org.springframework.cloud.skipper.domain.UpgradeRequest;
@@ -86,6 +88,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.util.Assert;
+import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 
 /**
@@ -486,16 +489,24 @@ public class SkipperStreamDeployer implements StreamDeployer {
 
 	@Override
 	public AppStatus getAppStatus(String appDeploymentId) {
-		Iterable<StreamDefinition> streamDefinitions = this.streamDefinitionRepository.findAll();
-		for (StreamDefinition streamDefinition : streamDefinitions) {
-			List<AppStatus> appStatuses = skipperStatus(streamDefinition.getName());
-			for (AppStatus appStatus : appStatuses) {
-				if (appStatus.getDeploymentId().equals(appDeploymentId)) {
-					return appStatus;
+		// iteration through a real platform statuses one by one
+		// is too expensive instead we rely on what skipper
+		// already knows about it.
+		return this.skipperClient.list(null)
+			.stream()
+			.flatMap(r -> {
+				Info info = r.getInfo();
+				if (info != null) {
+					Status status = info.getStatus();
+					if (status != null) {
+						return status.getAppStatusList().stream();
+					}
 				}
-			}
-		}
-		throw new NoSuchAppException(appDeploymentId);
+				return Stream.empty();
+			})
+			.filter(as -> ObjectUtils.nullSafeEquals(appDeploymentId, as.getDeploymentId()))
+			.findFirst()
+			.orElseThrow(() -> new NoSuchAppException(appDeploymentId));
 	}
 
 	@Override
