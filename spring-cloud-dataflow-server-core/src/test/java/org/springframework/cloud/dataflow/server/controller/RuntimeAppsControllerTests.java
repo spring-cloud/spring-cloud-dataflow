@@ -16,8 +16,10 @@
 
 package org.springframework.cloud.dataflow.server.controller;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.junit.Before;
@@ -37,6 +39,7 @@ import org.springframework.cloud.deployer.spi.app.AppStatus;
 import org.springframework.cloud.deployer.spi.app.DeploymentState;
 import org.springframework.cloud.skipper.client.SkipperClient;
 import org.springframework.cloud.skipper.domain.Info;
+import org.springframework.cloud.skipper.domain.Release;
 import org.springframework.cloud.skipper.domain.Status;
 import org.springframework.cloud.skipper.domain.StatusCode;
 import org.springframework.http.MediaType;
@@ -50,6 +53,7 @@ import org.springframework.web.context.WebApplicationContext;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.Matchers.hasSize;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
@@ -131,6 +135,16 @@ public class RuntimeAppsControllerTests {
 		t3streamsInfo.put("ticktock3", ticktock3Info);
 		Map<String, Info> t4streamsInfo = new HashMap<>();
 		t4streamsInfo.put("ticktock4", ticktock4Info);
+
+		List<Release> releases = new ArrayList<>();
+		Release release3 = new Release();
+		release3.setInfo(ticktock3Info);
+		releases.add(release3);
+		Release release4 = new Release();
+		release4.setInfo(ticktock4Info);
+		releases.add(release4);
+		when(this.skipperClient.list(any())).thenReturn(releases);
+
 		when(this.skipperClient.statuses(new String[] {"ticktock3", "ticktock4"})).thenReturn(streamsInfo);
 		when(this.skipperClient.states(new String[] {"ticktock3", "ticktock4"})).thenReturn(streamDeploymentStates);
 		when(this.skipperClient.states(new String[] {"ticktock3"})).thenReturn(streamDeploymentStates);
@@ -173,7 +187,11 @@ public class RuntimeAppsControllerTests {
 		info.getStatus().setPlatformStatusAsAppStatusList(
 				Arrays.asList(AppStatus.of("ticktock5.log2-v1").generalState(DeploymentState.unknown).build()));
 
-		when(this.skipperClient.status("ticktock5")).thenReturn(info);
+		List<Release> releases = new ArrayList<>();
+		Release release = new Release();
+		release.setInfo(info);
+		releases.add(release);
+		when(this.skipperClient.list(any())).thenReturn(releases);
 		streamDefinitionRepository.save(new StreamDefinition("ticktock5", "time2|log2"));
 
 		mockMvc.perform(get("/runtime/apps/ticktock5.log2-v1/instances/log2-0").accept(MediaType.APPLICATION_JSON))
