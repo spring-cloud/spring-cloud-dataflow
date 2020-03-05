@@ -351,7 +351,7 @@ public class DefaultReleaseManager implements ReleaseManager {
 						Collection<AppInstanceStatus> instanceStatuses = appStatus.getInstances().values();
 						for (AppInstanceStatus instanceStatus : instanceStatuses) {
 								instanceStatus.getAttributes().put(SKIPPER_APPLICATION_NAME_ATTRIBUTE,
-										appStatus.getDeploymentId());
+										getAppNameByDeploymentId(appStatus.getDeploymentId(), appNameDeploymentIdMap));
 								instanceStatus.getAttributes().put(SKIPPER_RELEASE_NAME_ATTRIBUTE, release.getName());
 								instanceStatus.getAttributes().put(SKIPPER_RELEASE_VERSION_ATTRIBUTE,
 										"" + release.getVersion());
@@ -377,6 +377,16 @@ public class DefaultReleaseManager implements ReleaseManager {
 		});
 	}
 
+
+	private String getAppNameByDeploymentId(String deploymentId, Map<String, String> appNameDeploymentIdMap) {
+		for(Map.Entry<String, String> appNameDeploymentId: appNameDeploymentIdMap.entrySet()) {
+			if (deploymentId.equals(appNameDeploymentId.getValue())) {
+				return appNameDeploymentId.getKey();
+			}
+		}
+		// If no app name is found, return the deploymentId alone.
+		return deploymentId;
+	}
 
 	public Release status(Release release) {
 		if (release.getInfo().getStatus().getStatusCode().equals(StatusCode.DELETED)) {
