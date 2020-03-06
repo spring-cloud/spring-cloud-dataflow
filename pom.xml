@@ -57,11 +57,11 @@
 
 		<spring-cloud-dataflow-ui.version>2.4.1.BUILD-SNAPSHOT</spring-cloud-dataflow-ui.version>
 
-		<spring-cloud-deployer.version>2.2.1.BUILD-SNAPSHOT</spring-cloud-deployer.version>
-		<spring-cloud-deployer-local.version>2.2.1.BUILD-SNAPSHOT</spring-cloud-deployer-local.version>
+		<spring-cloud-deployer.version>2.2.1.RELEASE</spring-cloud-deployer.version>
+		<spring-cloud-deployer-local.version>2.2.1.RELEASE</spring-cloud-deployer-local.version>
 
-		<spring-cloud-deployer-cloudfoundry.version>2.2.1.BUILD-SNAPSHOT</spring-cloud-deployer-cloudfoundry.version>
-		<spring-cloud-deployer-kubernetes.version>2.2.1.BUILD-SNAPSHOT</spring-cloud-deployer-kubernetes.version>
+		<spring-cloud-deployer-cloudfoundry.version>2.2.1.RELEASE</spring-cloud-deployer-cloudfoundry.version>
+		<spring-cloud-deployer-kubernetes.version>2.2.1.RELEASE</spring-cloud-deployer-kubernetes.version>
 
 		<kubernetes-client.version>4.1.0</kubernetes-client.version>
 
