@@ -95,8 +95,12 @@ public class RuntimeStreamsController {
 	private String[] getPagedStreamNames(Pageable pageable, List<String> streamNames) {
 		PageRequest page = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), pageable.getSort());
 		int start = (int) page.getOffset();
-		int end = (start + page.getPageSize()) > streamNames.size() ? streamNames.size() : (start + page.getPageSize());
-		return new PageImpl<>(streamNames.subList(start, end),
+		List<String> streamsSubList = new ArrayList<>();
+		if ((streamNames.size() > start)) {
+			int end = (start + page.getPageSize()) > streamNames.size() ? streamNames.size() : (start + page.getPageSize());
+			streamsSubList = streamNames.subList(start, end);
+		}
+		return new PageImpl<>(streamsSubList,
 				PageRequest.of(pageable.getPageNumber(), pageable.getPageSize()), streamNames.size())
 				.getContent().toArray(new String[0]);
 	}

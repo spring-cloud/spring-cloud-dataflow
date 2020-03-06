@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 the original author or authors.
+ * Copyright 2019-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -68,6 +68,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  *
  * @author Christian Tzolov
  * @author Daniel Serleg
+ * @author Ilayaperumal Gopinathan
  */
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = TestDependencies.class)
@@ -123,20 +124,27 @@ public class RuntimeStreamsControllerTests {
 		when(this.skipperClient.status("ticktock1")).thenReturn(toInfo(appStatues1));
 		when(this.skipperClient.status("ticktock2")).thenReturn(toInfo(appStatues2));
 		when(this.skipperClient.status("ticktock3")).thenReturn(toInfo(appStatues3));
-		Map<String, Info> mockInfo = new HashMap<>();
-		mockInfo.put("ticktock1", toInfo(appStatues1));
-		mockInfo.put("ticktock2", toInfo(appStatues2));
-		mockInfo.put("ticktock3", toInfo(appStatues3));
-		when(skipperClient.statuses(any())).thenReturn(mockInfo);
+		Map<String, Info> mockInfoTwo = new HashMap<>();
+		mockInfoTwo.put("ticktock1", toInfo(appStatues1));
+		mockInfoTwo.put("ticktock2", toInfo(appStatues2));
+		when(skipperClient.statuses("ticktock1", "ticktock2")).thenReturn(mockInfoTwo);
+		Map<String, Info> mockInfoThree = new HashMap<>();
+		mockInfoThree.put("ticktock1", toInfo(appStatues1));
+		mockInfoThree.put("ticktock2", toInfo(appStatues2));
+		mockInfoThree.put("ticktock3", toInfo(appStatues3));
+		when(skipperClient.statuses("ticktock1", "ticktock2", "ticktock3")).thenReturn(mockInfoThree);
+		Map<String, Info> mockInfoOne = new HashMap<>();
+		mockInfoOne.put("ticktock3", toInfo(appStatues3));
+		when(skipperClient.statuses("ticktock3")).thenReturn(mockInfoOne);
 		List<Release> releaseList = new ArrayList<>();
 		Release release1 = new Release();
 		release1.setName("ticktock1");
 		releaseList.add(release1);
 		Release release2 = new Release();
-		release1.setName("ticktock2");
+		release2.setName("ticktock2");
 		releaseList.add(release2);
 		Release release3 = new Release();
-		release1.setName("ticktock3");
+		release3.setName("ticktock3");
 		releaseList.add(release3);
 		when(skipperClient.list(any())).thenReturn(releaseList);
 	}
@@ -180,6 +188,35 @@ public class RuntimeStreamsControllerTests {
 				.andExpect(jsonPath("$.content[2].applications.content[1].name", anyOf(is("time1"), is("time2"), is("time3"))))
 				.andExpect(jsonPath("$.content[2].applications.content[1].instances.content[0].guid", anyOf(is("guid2"), is("guid4"), is("ticktock3.time3-v1-0"))));
 
+	}
+
+
+	@Test
+	public void testPagedStreamNames() throws Exception {
+		this.mockMvc.perform(
+				get("/runtime/streams?page=0&size=2")
+						.accept(MediaType.APPLICATION_JSON))
+				.andDo(print())
+				.andExpect(status().isOk())
+				.andExpect(jsonPath("$.content.*", hasSize(2)));
+		this.mockMvc.perform(
+				get("/runtime/streams?page=1&size=2")
+						.accept(MediaType.APPLICATION_JSON))
+				.andDo(print())
+				.andExpect(status().isOk())
+				.andExpect(jsonPath("$.content.*", hasSize(1)));
+		this.mockMvc.perform(
+				get("/runtime/streams?page=1&size=3")
+						.accept(MediaType.APPLICATION_JSON))
+				.andDo(print())
+				.andExpect(status().isOk())
+				.andExpect(jsonPath("$.content.*", hasSize(0)));
+		this.mockMvc.perform(
+				get("/runtime/streams?page=1000&size=30")
+						.accept(MediaType.APPLICATION_JSON))
+				.andDo(print())
+				.andExpect(status().isOk())
+				.andExpect(jsonPath("$.content.*", hasSize(0)));
 	}
 
 	@Test
