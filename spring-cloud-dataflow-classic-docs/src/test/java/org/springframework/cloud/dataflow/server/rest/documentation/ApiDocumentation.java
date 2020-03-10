@@ -1,5 +1,5 @@
 /*
- * Copyright 2016-2019 the original author or authors.
+ * Copyright 2016-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,6 +37,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 /**
  * @author Gunnar Hillert
+ * @author Christian Tzolov
  */
 public class ApiDocumentation extends BaseDocumentation {
 
@@ -91,6 +92,7 @@ public class ApiDocumentation extends BaseDocumentation {
 				linkWithRel("jobs/instances/name").description("Provides the Job instance resource for a specific job name"),
 
 				linkWithRel("runtime/streams").description("Exposes stream runtime status"),
+				linkWithRel("runtime/streams/{streamNames}").description("Exposes streams runtime status for a given stream names"),
 				linkWithRel("runtime/apps").description("Provides the runtime application resource"),
 				linkWithRel("runtime/apps/{appId}").description("Exposes the runtime status for a specific app"),
 				linkWithRel("runtime/apps/{appId}/instances").description("Provides the status for app instances"),
@@ -146,6 +148,8 @@ public class ApiDocumentation extends BaseDocumentation {
 
 						fieldWithPath("_links.runtime/streams.href").description("Link to the runtime/streams"),
 						fieldWithPath("_links.runtime/streams.templated").type(JsonFieldType.BOOLEAN).optional().description("Link runtime/streams is templated"),
+						fieldWithPath("_links.runtime/streams/{streamNames}.href").description("Link to the runtime/streams/{streamNames}"),
+						fieldWithPath("_links.runtime/streams/{streamNames}.templated").type(JsonFieldType.BOOLEAN).optional().description("Link runtime/streams/{streamNames} is templated"),
 
 						fieldWithPath("_links.streams/logs.href").description("Link to the streams/logs"),
 						fieldWithPath("_links.streams/logs/{streamName}.href").description("Link to the streams/logs/{streamName}"),

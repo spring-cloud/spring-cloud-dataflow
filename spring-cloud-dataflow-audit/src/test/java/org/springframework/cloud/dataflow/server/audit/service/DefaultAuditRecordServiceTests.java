@@ -71,7 +71,7 @@ public class DefaultAuditRecordServiceTests {
 	public void testPopulateAndSaveAuditRecord() {
 		final AuditRecordService auditRecordService = new DefaultAuditRecordService(this.auditRecordRepository);
 		auditRecordService.populateAndSaveAuditRecord(AuditOperationType.SCHEDULE, AuditActionType.CREATE, "1234",
-				"my data");
+				"my data", "test-platform");
 
 		final ArgumentCaptor<AuditRecord> argument = ArgumentCaptor.forClass(AuditRecord.class);
 		verify(this.auditRecordRepository, times(1)).save(argument.capture());
@@ -83,6 +83,7 @@ public class DefaultAuditRecordServiceTests {
 		assertEquals(AuditOperationType.SCHEDULE, auditRecord.getAuditOperation());
 		assertEquals("1234", auditRecord.getCorrelationId());
 		assertEquals("my data", auditRecord.getAuditData());
+		assertEquals("test-platform", auditRecord.getPlatformName());
 	}
 
 	@Test
@@ -90,7 +91,7 @@ public class DefaultAuditRecordServiceTests {
 		final AuditRecordService auditRecordService = new DefaultAuditRecordService(this.auditRecordRepository);
 
 		try {
-			auditRecordService.populateAndSaveAuditRecord(AuditOperationType.SCHEDULE, null, "1234", "my audit data");
+			auditRecordService.populateAndSaveAuditRecord(AuditOperationType.SCHEDULE, null, "1234", "my audit data", "test-platform");
 		}
 		catch (IllegalArgumentException e) {
 			assertEquals("auditActionType must not be null.", e.getMessage());
@@ -104,7 +105,7 @@ public class DefaultAuditRecordServiceTests {
 		final AuditRecordService auditRecordService = new DefaultAuditRecordService(this.auditRecordRepository);
 
 		try {
-			auditRecordService.populateAndSaveAuditRecord(null, AuditActionType.CREATE, "1234", "my audit data");
+			auditRecordService.populateAndSaveAuditRecord(null, AuditActionType.CREATE, "1234", "my audit data", "test-platform");
 		}
 		catch (IllegalArgumentException e) {
 			assertEquals("auditOperationType must not be null.", e.getMessage());
@@ -122,7 +123,7 @@ public class DefaultAuditRecordServiceTests {
 		mapAuditData.put("foofoo", "barbar");
 
 		auditRecordService.populateAndSaveAuditRecordUsingMapData(AuditOperationType.SCHEDULE, AuditActionType.CREATE,
-				"1234", mapAuditData);
+				"1234", mapAuditData, "test-platform");
 
 		final ArgumentCaptor<AuditRecord> argument = ArgumentCaptor.forClass(AuditRecord.class);
 		verify(this.auditRecordRepository, times(1)).save(argument.capture());
@@ -134,6 +135,7 @@ public class DefaultAuditRecordServiceTests {
 		assertEquals(AuditOperationType.SCHEDULE, auditRecord.getAuditOperation());
 		assertEquals("1234", auditRecord.getCorrelationId());
 		assertEquals("{\"foofoo\":\"barbar\",\"foo1\":\"bar1\"}", auditRecord.getAuditData());
+		assertEquals("test-platform", auditRecord.getPlatformName());
 	}
 
 	@Test
@@ -145,7 +147,7 @@ public class DefaultAuditRecordServiceTests {
 
 		try {
 			auditRecordService.populateAndSaveAuditRecordUsingMapData(AuditOperationType.SCHEDULE, null, "1234",
-					mapAuditData);
+					mapAuditData, null);
 		}
 		catch (IllegalArgumentException e) {
 			assertEquals("auditActionType must not be null.", e.getMessage());
@@ -163,7 +165,7 @@ public class DefaultAuditRecordServiceTests {
 
 		try {
 			auditRecordService.populateAndSaveAuditRecordUsingMapData(null, AuditActionType.CREATE, "1234",
-					mapAuditData);
+					mapAuditData, null);
 		}
 		catch (IllegalArgumentException e) {
 			assertEquals("auditOperationType must not be null.", e.getMessage());
@@ -187,7 +189,7 @@ public class DefaultAuditRecordServiceTests {
 		mapAuditData.put("foo", "bar");
 
 		auditRecordService.populateAndSaveAuditRecordUsingMapData(AuditOperationType.SCHEDULE, AuditActionType.CREATE,
-				"1234", mapAuditData);
+				"1234", mapAuditData, "test-platform");
 
 		final ArgumentCaptor<AuditRecord> argument = ArgumentCaptor.forClass(AuditRecord.class);
 		verify(this.auditRecordRepository, times(1)).save(argument.capture());
@@ -199,6 +201,7 @@ public class DefaultAuditRecordServiceTests {
 		assertEquals(AuditOperationType.SCHEDULE, auditRecord.getAuditOperation());
 		assertEquals("1234", auditRecord.getCorrelationId());
 		assertEquals("Error serializing audit record data.  Data = {foo=bar}", auditRecord.getAuditData());
+		assertEquals("test-platform", auditRecord.getPlatformName());
 	}
 
 	@Test

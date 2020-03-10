@@ -22,11 +22,13 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ForkJoinPool;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import com.fasterxml.jackson.core.Version;
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -75,6 +77,7 @@ import org.springframework.cloud.skipper.domain.ScaleRequest;
 import org.springframework.cloud.skipper.domain.SpringCloudDeployerApplicationManifest;
 import org.springframework.cloud.skipper.domain.SpringCloudDeployerApplicationManifestReader;
 import org.springframework.cloud.skipper.domain.SpringCloudDeployerApplicationSpec;
+import org.springframework.cloud.skipper.domain.Status;
 import org.springframework.cloud.skipper.domain.Template;
 import org.springframework.cloud.skipper.domain.UpgradeProperties;
 import org.springframework.cloud.skipper.domain.UpgradeRequest;
@@ -85,6 +88,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.util.Assert;
+import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 
 /**
@@ -138,12 +142,12 @@ public class SkipperStreamDeployer implements StreamDeployer {
 				};
 				return mapper.readValue(platformStatus, typeRef);
 			}
-			return new ArrayList<AppStatus>();
+			return new ArrayList<>();
 		}
 		catch (Exception e) {
 			logger.error("Could not parse Skipper Platform Status JSON [" + platformStatus + "]. " +
 					"Exception message = " + e.getMessage());
-			return new ArrayList<AppStatus>();
+			return new ArrayList<>();
 		}
 	}
 
@@ -154,11 +158,23 @@ public class SkipperStreamDeployer implements StreamDeployer {
 
 	@Override
 	public Map<StreamDefinition, DeploymentState> streamsStates(List<StreamDefinition> streamDefinitions) {
+		Map<String, StreamDefinition> nameToDefinition = new HashMap<>();
 		Map<StreamDefinition, DeploymentState> states = new HashMap<>();
-		for (StreamDefinition streamDefinition : streamDefinitions) {
-			DeploymentState streamDeploymentState = getStreamDeploymentState(streamDefinition.getName());
-			if (streamDeploymentState != null) {
-				states.put(streamDefinition, streamDeploymentState);
+		List<String> streamNamesList = new ArrayList<>();
+		streamDefinitions.stream().forEach(sd -> {
+			streamNamesList.add(sd.getName());
+			nameToDefinition.put(sd.getName(), sd);
+		});
+		String[] streamNames = streamNamesList.toArray(new String[0]);
+		Map<String, Map<String, DeploymentState>> statuses = this.skipperClient.states(streamNames);
+		for (Map.Entry<String, StreamDefinition> entry: nameToDefinition.entrySet()) {
+			String streamName = entry.getKey();
+			if (statuses != null && statuses.containsKey(streamName) && !statuses.get(streamName).isEmpty()) {
+				states.put(nameToDefinition.get(streamName),
+						StreamDeployerUtil.aggregateState(new HashSet<>(statuses.get(streamName).values())));
+			}
+			else {
+				states.put(nameToDefinition.get(streamName), DeploymentState.undeployed);
 			}
 		}
 		return states;
@@ -172,10 +188,9 @@ public class SkipperStreamDeployer implements StreamDeployer {
 				return getDeploymentStateFromStatusInfo(info);
 			}
 			List<AppStatus> appStatusList = deserializeAppStatus(info.getStatus().getPlatformStatus());
-			Set<DeploymentState> deploymentStateList = appStatusList.stream().map(appStatus -> appStatus.getState())
+			Set<DeploymentState> deploymentStateList = appStatusList.stream().map(AppStatus::getState)
 					.collect(Collectors.toSet());
-			DeploymentState aggregateState = StreamDeployerUtil.aggregateState(deploymentStateList);
-			state = aggregateState;
+			state = StreamDeployerUtil.aggregateState(deploymentStateList);
 		}
 		catch (ReleaseNotFoundException e) {
 			// a defined stream but unknown to skipper is considered to be in an undeployed state
@@ -194,9 +209,6 @@ public class SkipperStreamDeployer implements StreamDeployer {
 			break;
 		case DELETED:
 			result = DeploymentState.undeployed;
-			break;
-		case UNKNOWN:
-			result = DeploymentState.unknown;
 			break;
 		case DEPLOYED:
 			result = DeploymentState.deployed;
@@ -464,37 +476,52 @@ public class SkipperStreamDeployer implements StreamDeployer {
 
 	@Override
 	public Page<AppStatus> getAppStatuses(Pageable pageable) {
-		List<String> skipperStreams = new ArrayList<>();
-		Iterable<StreamDefinition> streamDefinitions = this.streamDefinitionRepository.findAll();
-		for (StreamDefinition streamDefinition : streamDefinitions) {
-			skipperStreams.add(streamDefinition.getName());
+		List<String> streamNames = new ArrayList<>();
+		Page<StreamDefinition> streamDefinitions = this.streamDefinitionRepository.findAll(pageable);
+		for (Map.Entry<StreamDefinition, DeploymentState> entry: this.streamsStates(streamDefinitions.getContent()).entrySet()) {
+			if (entry.getValue() != null && (entry.getValue().equals(DeploymentState.deployed) ||
+					entry.getValue().equals(DeploymentState.partial))) {
+				streamNames.add(entry.getKey().getName());
+			}
 		}
-
-		List<AppStatus> allStatuses = getStreamsStatuses(skipperStreams);
-
-		List<AppStatus> pagedStatuses = allStatuses.stream().skip(pageable.getPageNumber() * pageable.getPageSize())
-				.limit(pageable.getPageSize()).parallel().collect(Collectors.toList());
-
-		return new PageImpl<>(pagedStatuses, pageable, allStatuses.size());
+		return new PageImpl<>(getStreamsStatuses(streamNames), pageable, streamNames.size());
 	}
 
 	@Override
 	public AppStatus getAppStatus(String appDeploymentId) {
-		Iterable<StreamDefinition> streamDefinitions = this.streamDefinitionRepository.findAll();
-		for (StreamDefinition streamDefinition : streamDefinitions) {
-			List<AppStatus> appStatuses = skipperStatus(streamDefinition.getName());
-			for (AppStatus appStatus : appStatuses) {
-				if (appStatus.getDeploymentId().equals(appDeploymentId)) {
-					return appStatus;
+		// iteration through a real platform statuses one by one
+		// is too expensive instead we rely on what skipper
+		// already knows about it.
+		return this.skipperClient.list(null)
+			.stream()
+			.flatMap(r -> {
+				Info info = r.getInfo();
+				if (info != null) {
+					Status status = info.getStatus();
+					if (status != null) {
+						return status.getAppStatusList().stream();
+					}
 				}
-			}
-		}
-		throw new NoSuchAppException(appDeploymentId);
+				return Stream.empty();
+			})
+			.filter(as -> ObjectUtils.nullSafeEquals(appDeploymentId, as.getDeploymentId()))
+			.findFirst()
+			.orElseThrow(() -> new NoSuchAppException(appDeploymentId));
 	}
 
 	@Override
 	public List<AppStatus> getStreamStatuses(String streamName) {
 		return skipperStatus(streamName);
+	}
+
+	@Override
+	public Map<String, List<AppStatus>> getStreamStatuses(String[] streamNames) {
+		Map<String, Info> statuses = this.skipperClient.statuses(streamNames);
+		Map<String, List<AppStatus>> appStatuses = new HashMap<>();
+		statuses.entrySet().stream().forEach(e -> {
+			appStatuses.put(e.getKey(), e.getValue().getStatus().getAppStatusList());
+		});
+		return appStatuses;
 	}
 
 	@Override
@@ -508,14 +535,12 @@ public class SkipperStreamDeployer implements StreamDeployer {
 	}
 
 	private List<AppStatus> getStreamsStatuses(List<String> streamNames) {
-		try {
-			return this.forkJoinPool.submit(() -> streamNames.stream().parallel()
-					.map(this::skipperStatus).flatMap(List::stream).collect(Collectors.toList())).get();
-		}
-		catch (Exception e) {
-			logger.error("Failed to retrieve the Runtime Stream Statues", e);
-			throw new RuntimeException("Failed to retrieve the Runtime Stream Statues for " + streamNames);
-		}
+		Map<String, Info> statuses = this.skipperClient.statuses(streamNames.toArray(new String[0]));
+		List<AppStatus> appStatusList = new ArrayList<>();
+		statuses.entrySet().stream().forEach(e -> {
+			appStatusList.addAll(e.getValue().getStatus().getAppStatusList());
+		});
+		return appStatusList;
 	}
 
 	@Override
@@ -557,6 +582,11 @@ public class SkipperStreamDeployer implements StreamDeployer {
 		catch (ReleaseNotFoundException e) {
 			return new StreamDeployment(streamName);
 		}
+	}
+
+	@Override
+	public List<String> getStreams() {
+		return this.skipperClient.list("").stream().map(Release::getName).collect(Collectors.toList());
 	}
 
 	private List<AppStatus> skipperStatus(String streamName) {

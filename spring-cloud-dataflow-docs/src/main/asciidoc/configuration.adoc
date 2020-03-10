@@ -15,7 +15,7 @@ where `maven.yaml` is
 
 [source,yml]
 ----
-maven
+maven:
   localRepository: mylocal
   remote-repositories:
     repo1:
@@ -57,10 +57,102 @@ As these are Spring Boot `@ConfigurationProperties`, that you need to specify by
 
 [source,bash,subs=attributes]
 ----
-$ SPRING_APPLICATION_JSON='{ "maven": { "local-repository": null,
-"remote-repositories": { "repo1": { "url": "https://repo1", "auth": { "username": "repo1user", "password": "repo1pass" } }, "repo2": { "url": "https://repo2" } },
-"proxy": { "host": "proxyhost", "port": 9018, "auth": { "username": "proxyuser", "password": "proxypass" } } } }' java -jar spring-cloud-dataflow-server-{project-version}.jar
+$ SPRING_APPLICATION_JSON='
+{
+  "maven": {
+    "local-repository": null,
+    "remote-repositories": {
+      "repo1": {
+        "url": "https://repo1",
+        "auth": {
+          "username": "repo1user",
+          "password": "repo1pass"
+        }
+      },
+      "repo2": {
+        "url": "https://repo2"
+      }
+    },
+    "proxy": {
+      "host": "proxyhost",
+      "port": 9018,
+      "auth": {
+        "username": "proxyuser",
+        "password": "proxypass"
+      }
+    }
+  }
+}
+'
 ----
+
+=== Wagon
+There is a limited support for using `Wagon` transport with maven. Currently this
+exists to support _preemptive_ authentication with `http` based repositories
+and needs to be enabled manually.
+
+Wagon based http transport is enabled by setting `maven.use-wagon` property
+to `true` and then _preemptive_ authentication can be enabled per remote
+repository. Configuration loosely follows similar patterns found in
+https://maven.apache.org/guides/mini/guide-http-settings.html[HttpClient HTTP Wagon].
+At a time of writing this, documentation in Maven's own site is slightly misleading
+and missing most of the possible config options.
+
+Namespace `maven.remote-repositories.<repo>.wagon.http` contains all Wagon
+http related settings and keys directly under it maps to supported http methods,
+namely `all`, `put`, `get` and `head` just like in Maven's own configuration.
+Under these method configurations you can then set various options like
+`use-preemptive`. Most simplest _preemptive_ configuration sending auth
+header with all requests to a specified remote repository would look like:
+
+[source,yml]
+----
+maven:
+  use-wagon: true
+  remote-repositories:
+    springRepo:
+      url: https://repo.example.org
+      wagon:
+        http:
+          all:
+            use-preemptive: true
+      auth:
+        username: user
+        password: password
+----
+
+Instead of configuring `all` methods it's possible to tune settings for `get`
+and `head` requests only:
+
+[source,yml]
+----
+maven:
+  use-wagon: true
+  remote-repositories:
+    springRepo:
+      url: https://repo.example.org
+      wagon:
+        http:
+          get:
+            use-preemptive: true
+          head:
+            use-preemptive: true
+            use-default-headers: true
+            connection-timeout: 1000
+            read-timeout: 1000
+            headers:
+              Foo: Bar
+            params:
+              http.socket.timeout: 1000
+              http.connection.stalecheck: true
+      auth:
+        username: user
+        password: password
+----
+
+There are settings for `use-default-headers`, `connection-timeout`,
+`read-timeout`, request `headers` and HttpClient `params`. More about params
+check https://github.com/apache/maven-wagon/blob/master/wagon-providers/wagon-http-shared/src/main/java/org/apache/maven/wagon/shared/http/ConfigurationUtils.java[Wagon ConfigurationUtils].
 
 include::configuration-local.adoc[]
 include::configuration-cloudfoundry.adoc[]

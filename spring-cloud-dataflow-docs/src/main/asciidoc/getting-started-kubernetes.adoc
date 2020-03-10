@@ -354,7 +354,7 @@ Replace `<app>` with the name of your application and the value of your annotati
 An entry point style affects how application properties are passed to the container to be deployed. Currently, three styles are supported:
 
 * `exec` (default): Passes all application properties and command line arguments in the deployment request as container arguments. Application properties are transformed into the format of `--key=value`.
-* `shell`: Passes all application properties as environment variables. Command line arguments from the deployment request are not converted into environment variables nor set on the container. Application properties are transformed into an uppercase string and `.` characters are replaced with `_`.
+* `shell`: Passes all application properties and command line arguments as environment variables. Each of the application/commandline argument properties is transformed into an uppercase string and `.` characters are replaced with `_`.
 * `boot`: Creates an environment variable called `SPRING_APPLICATION_JSON` that contains a JSON representation of all application properties. Command line arguments from the deployment request are set as container args.
 
 NOTE: In all cases, environment variables defined at the server-level configuration and on a per-application basis are set onto the container as is.

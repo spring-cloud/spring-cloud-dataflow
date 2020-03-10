@@ -37,7 +37,7 @@ ifdef::backend-html5[]
 
 Version {project-version}
 
-(C) 2012-2019 Pivotal Software, Inc.
+(C) 2012-2020 Pivotal Software, Inc.
 
 _Copies of this document may be made for your own use and for distribution to others, provided that you do not charge any fee for such copies and further provided that each copy contains this Copyright Notice, whether distributed in print or electronically._
 
@@ -56,6 +56,7 @@ include::streams-developer-guide.adoc[]
 include::streams-monitoring.adoc[]
 include::tasks.adoc[]
 include::task-developer-guide.adoc[]
+include::tasks-monitoring.adoc[]
 include::dashboard.adoc[]
 include::samples.adoc[]
 include::api-guide.adoc[]

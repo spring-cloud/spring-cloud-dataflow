@@ -63,6 +63,7 @@ import org.springframework.util.StreamUtils;
 
 import static junit.framework.TestCase.fail;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
@@ -311,7 +312,8 @@ public class SkipperStreamDeployerTests {
 		Map<StreamDefinition, DeploymentState> state = skipperStreamDeployer.streamsStates(Arrays.asList(streamDefinition));
 
 		assertThat(state).isNotNull();
-		assertThat(state.size()).isEqualTo(0);
+		assertThat(state.size()).isEqualTo(1);
+		assertThat(state.get(streamDefinition).equals(DeploymentState.undeployed));
 	}
 
 	@Test
@@ -339,7 +341,10 @@ public class SkipperStreamDeployerTests {
 
 		// Stream is undeployed
 		Info info = createInfo(StatusCode.DELETED);
+		Map<String, Info> mockInfo = new HashMap<>();
+		mockInfo.put("foo", info);
 		when(skipperClient.status(eq(streamDefinition.getName()))).thenReturn(info);
+		when(skipperClient.statuses(any())).thenReturn(mockInfo);
 
 		Map<StreamDefinition, DeploymentState> state = skipperStreamDeployer.streamsStates(Arrays.asList(streamDefinition));
 		assertThat(state).isNotNull();
@@ -349,6 +354,8 @@ public class SkipperStreamDeployerTests {
 		// Stream is in failed state
 		info = createInfo(StatusCode.FAILED);
 		when(skipperClient.status(eq(streamDefinition.getName()))).thenReturn(info);
+		mockInfo = new HashMap<>();
+		mockInfo.put("foo", info);
 
 		state = skipperStreamDeployer.streamsStates(Arrays.asList(streamDefinition));
 		assertThat(state).isNotNull();
@@ -357,6 +364,9 @@ public class SkipperStreamDeployerTests {
 
 		// Stream is deployed (rare case if ever...)
 		info = createInfo(StatusCode.DEPLOYED);
+		mockInfo = new HashMap<>();
+		mockInfo.put("foo", info);
+
 		when(skipperClient.status(eq(streamDefinition.getName()))).thenReturn(info);
 
 		state = skipperStreamDeployer.streamsStates(Arrays.asList(streamDefinition));
@@ -366,6 +376,9 @@ public class SkipperStreamDeployerTests {
 
 		// Stream is in unknown state
 		info = createInfo(StatusCode.UNKNOWN);
+		mockInfo = new HashMap<>();
+		mockInfo.put("foo", info);
+
 		when(skipperClient.status(eq(streamDefinition.getName()))).thenReturn(info);
 
 		state = skipperStreamDeployer.streamsStates(Arrays.asList(streamDefinition));

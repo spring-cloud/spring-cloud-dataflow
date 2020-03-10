@@ -103,6 +103,7 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.atLeast;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -220,10 +221,11 @@ public abstract class DefaultTaskExecutionServiceTests {
 	@AutoConfigureTestDatabase(replace = Replace.ANY)
 	public static class CICDTaskTests extends DefaultTaskExecutionServiceTests {
 
+		private Launcher launcher;
+
 		@Before
 		public void setup() {
-			this.launcherRepository.save(new Launcher("default", "local", taskLauncher));
-
+			this.launcher = this.launcherRepository.save(new Launcher("default", "local", taskLauncher));
 			taskDefinitionRepository.save(new TaskDefinition(TASK_NAME_ORIG, "demo"));
 			taskDefinitionRepository.findAll();
 		}
@@ -241,7 +243,22 @@ public abstract class DefaultTaskExecutionServiceTests {
 
 		@Test
 		@DirtiesContext
-		public void testUpgradeDueToResourceChange() throws IOException {
+		public void testUpgradeDueToResourceChangeForCloudFoundry() throws IOException {
+			this.launcherRepository.delete(this.launcher);
+			this.launcherRepository.save(new Launcher("default", "Cloud Foundry", taskLauncher));
+
+			setupUpgradeDueToResourceChange();
+			verify(this.taskLauncher).destroy(TASK_NAME_ORIG);
+		}
+
+		@Test
+		@DirtiesContext
+		public void testUpgradeDueToResourceChangeForOther() throws IOException {
+			setupUpgradeDueToResourceChange();
+			verify(this.taskLauncher, times(0)).destroy(TASK_NAME_ORIG);
+		}
+
+		private void setupUpgradeDueToResourceChange() throws IOException{
 			TaskExecution myTask = this.taskRepository.createTaskExecution(TASK_NAME_ORIG);
 			TaskManifest manifest = new TaskManifest();
 			manifest.setPlatformName("default");
@@ -262,8 +279,6 @@ public abstract class DefaultTaskExecutionServiceTests {
 			TaskManifest lastManifest = this.dataflowTaskExecutionMetadataDao.getLatestManifest(TASK_NAME_ORIG);
 			assertEquals("file:src/test/resources/apps/foo-task", lastManifest.getTaskDeploymentRequest().getResource().getURL().toString());
 			assertEquals("default", lastManifest.getPlatformName());
-
-			verify(this.taskLauncher).destroy(TASK_NAME_ORIG);
 		}
 
 		@Test
@@ -316,7 +331,21 @@ public abstract class DefaultTaskExecutionServiceTests {
 
 		@Test
 		@DirtiesContext
-		public void testUpgradeDueToDeploymentPropsChange() throws IOException {
+		public void testUpgradeDueToDeploymentPropsChangeForCloudFoundry() throws IOException {
+			this.launcherRepository.delete(this.launcher);
+			this.launcherRepository.save(new Launcher("default", "Cloud Foundry", taskLauncher));
+			setupUpgradeDueToDeploymentPropsChangeForCloudFoundry();
+			verify(this.taskLauncher).destroy(TASK_NAME_ORIG);
+		}
+
+		@Test
+		@DirtiesContext
+		public void testUpgradeDueToDeploymentPropsChangeForOther() throws IOException {
+			setupUpgradeDueToDeploymentPropsChangeForCloudFoundry();
+			verify(this.taskLauncher, times(0)).destroy(TASK_NAME_ORIG);
+		}
+
+		private void setupUpgradeDueToDeploymentPropsChangeForCloudFoundry() throws IOException {
 			TaskExecution myTask = this.taskRepository.createTaskExecution(TASK_NAME_ORIG);
 			TaskManifest manifest = new TaskManifest();
 			manifest.setPlatformName("default");
@@ -344,12 +373,70 @@ public abstract class DefaultTaskExecutionServiceTests {
 			assertEquals(1, lastManifest.getTaskDeploymentRequest().getDeploymentProperties().size());
 			assertEquals("10000GB", lastManifest.getTaskDeploymentRequest().getDeploymentProperties().get("spring.cloud.deployer.memory"));
 
+		}
+
+		@Test
+		@DirtiesContext
+		public void testUpgradeDueToAppPropsChangeCloudFoundry() throws IOException {
+			this.launcherRepository.delete(this.launcher);
+			this.launcherRepository.save(new Launcher("default", "Cloud Foundry", taskLauncher));
+			setupUpgradeForAppPropsChange();
 			verify(this.taskLauncher).destroy(TASK_NAME_ORIG);
 		}
 
 		@Test
 		@DirtiesContext
-		public void testUpgradeDueToAppPropsChange() throws IOException {
+		public void testCommandLineArgChangeCloudFoundry() throws IOException {
+			this.launcherRepository.delete(this.launcher);
+			this.launcherRepository.save(new Launcher("default", "Cloud Foundry", taskLauncher));
+			this.setupUpgradeForCommandLineArgsChange();
+
+			verify(this.taskLauncher).destroy(TASK_NAME_ORIG);
+		}
+		@Test
+		@DirtiesContext
+		public void testCommandLineArgChangeOther() throws IOException {
+			this.setupUpgradeForCommandLineArgsChange();
+
+			verify(this.taskLauncher, times(0)).destroy(TASK_NAME_ORIG);
+		}
+		
+		private void setupUpgradeForCommandLineArgsChange() throws IOException {
+			 TaskExecution myTask = this.taskRepository.createTaskExecution(TASK_NAME_ORIG);
+			 TaskManifest manifest = new TaskManifest();
+			 manifest.setPlatformName("default");
+			 AppDeploymentRequest request = new AppDeploymentRequest(new AppDefinition("some-name", null),
+					 new FileUrlResource("src/test/resources/apps/foo-task"));
+			 manifest.setTaskDeploymentRequest(request);
+
+			 this.dataflowTaskExecutionMetadataDao.save(myTask, manifest);
+			 this.taskRepository.startTaskExecution(myTask.getExecutionId(), TASK_NAME_ORIG, new Date(), new ArrayList<>(), null);
+			 this.taskRepository.completeTaskExecution(myTask.getExecutionId(), 0, new Date(), null);
+
+			 initializeSuccessfulRegistry(appRegistry);
+
+			 when(taskLauncher.launch(any())).thenReturn("0");
+
+			 Map<String,String> deploymentProperties = new HashMap<>(1);
+
+			 this.taskExecutionService.executeTask(TASK_NAME_ORIG, deploymentProperties, Collections.singletonList("--foo=bar"));
+			 TaskManifest lastManifest = this.dataflowTaskExecutionMetadataDao.getLatestManifest(TASK_NAME_ORIG);
+			 assertEquals(3, lastManifest.getTaskDeploymentRequest().getCommandlineArguments().size());
+			 assertEquals("--foo=bar", lastManifest.getTaskDeploymentRequest().getCommandlineArguments().get(0));
+
+			 this.taskExecutionService.executeTask(TASK_NAME_ORIG, deploymentProperties, Collections.emptyList());
+			 lastManifest = this.dataflowTaskExecutionMetadataDao.getLatestManifest(TASK_NAME_ORIG);
+			 assertEquals(2, lastManifest.getTaskDeploymentRequest().getCommandlineArguments().size());
+		 }
+
+		@Test
+		@DirtiesContext
+		public void testUpgradeDueToAppPropsChangeOther() throws IOException {
+			setupUpgradeForAppPropsChange();
+			verify(this.taskLauncher, times(0)).destroy(TASK_NAME_ORIG);
+		}
+
+		private void setupUpgradeForAppPropsChange() throws IOException {
 			TaskExecution myTask = this.taskRepository.createTaskExecution(TASK_NAME_ORIG);
 			TaskManifest manifest = new TaskManifest();
 			manifest.setPlatformName("default");
@@ -376,8 +463,6 @@ public abstract class DefaultTaskExecutionServiceTests {
 			assertEquals("default", lastManifest.getPlatformName());
 			assertEquals(5, lastManifest.getTaskDeploymentRequest().getDefinition().getProperties().size());
 			assertEquals("bar", lastManifest.getTaskDeploymentRequest().getDefinition().getProperties().get("foo"));
-
-			verify(this.taskLauncher).destroy(TASK_NAME_ORIG);
 		}
 
 		@Test(expected = IllegalStateException.class)
@@ -1022,6 +1107,36 @@ public abstract class DefaultTaskExecutionServiceTests {
 			nonComposedTaskDsl = "AAA --foo=bar";
 			assertFalse("Expected false for non-composed task",
 					TaskServiceUtils.isComposedTaskDefinition(nonComposedTaskDsl));
+		}
+
+		@Test
+		@DirtiesContext
+		public void verifyComposedTaskConcurrentCountExceeded() {
+			String dsl = "<AAA || BBB>";
+			initializeSuccessfulRegistry(appRegistry);
+
+			taskSaveService.saveTaskDefinition(new TaskDefinition("seqTask", dsl));
+			when(taskLauncher.getMaximumConcurrentTasks()).thenReturn(20);
+			when(taskLauncher.launch(any())).thenReturn("0");
+			when(appRegistry.appExist(anyString(), any(ApplicationType.class))).thenReturn(true);
+			Map<String, String> properties = new HashMap<>();
+			assertEquals(1L, this.taskExecutionService.executeTask("seqTask", properties, new LinkedList<>()));
+
+			initializeSuccessfulRegistry(appRegistry);
+			dsl = "<AAA||BBB||CCC>&&<AAA1||BBB1||CCC1||DDD1 --foo=bar||DDD2||DDD3||DDD4||DDD5||DDD6||" +
+					"DDD7||DDD8||DDD9||DDD10||DDD11||DDD12||DDD13||DDD14||DDD15||DDD16||" +
+					"DDD17||DDD18>&&<AAA2||BBB2>";
+			taskSaveService.saveTaskDefinition(new TaskDefinition("seqTask1", dsl));
+			try {
+				this.taskExecutionService.executeTask("seqTask1", properties, new LinkedList<>());
+			}
+			catch (IllegalArgumentException iae) {
+				assertEquals("One or more of the splits in the composed task contains " +
+						"a task count that exceeds the maximumConcurrentTasks count of 20",
+						iae.getMessage());
+				return;
+			}
+			fail("Expected IllegalArgumentException maxConcurrentTasks exceeded was not thrown");
 		}
 
 		@Test

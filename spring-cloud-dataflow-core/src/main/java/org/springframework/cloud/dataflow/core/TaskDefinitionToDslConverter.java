@@ -55,7 +55,7 @@ public class TaskDefinitionToDslConverter {
 			if (!dataFlowAddedProperties.contains(propertyName)) {
 				String propertyValue = StringEscapeUtils.unescapeHtml(properties.get(propertyName));
 				dslBuilder.append(" --").append(propertyName).append("=").append(
-						DefinitionUtils.autoQuotes(propertyValue));
+						DefinitionUtils.escapeNewlines(DefinitionUtils.autoQuotes(propertyValue)));
 			}
 		}
 		return dslBuilder.toString();

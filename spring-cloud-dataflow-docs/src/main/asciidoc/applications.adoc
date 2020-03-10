@@ -14,139 +14,115 @@ A selection of pre-built link:https://cloud.spring.io/spring-cloud-stream-app-st
 |link:{scs-app-starters-docs-htmlsingle}/#spring-cloud-stream-modules-sftp-source[sftp]
 |link:{scs-app-starters-docs-htmlsingle}/#spring-cloud-stream-modules-tcp-client-processor[tcp-client]
 |link:{scs-app-starters-docs-htmlsingle}/#spring-cloud-stream-modules-mqtt-sink[mqtt]
-|spark-yarn ~(deprecated)~
+|link:https://docs.spring.io/spring-cloud-task-app-starters/docs/current/reference/htmlsingle/#_timestamp_task[timestamp]
 
 |link:{scs-app-starters-docs-htmlsingle}/#spring-cloud-stream-modules-jms-source[jms]
 |link:{scs-app-starters-docs-htmlsingle}/#spring-cloud-stream-modules-scriptable-transform[scriptable-transform]
 |link:{scs-app-starters-docs-htmlsingle}/#spring-cloud-stream-modules-log-sink[log]
-|spark-cluster ~(deprecated)~
+|link:https://docs.spring.io/spring-cloud-task-app-starters/docs/current/reference/htmlsingle/#_composed_task_runner[composed-task-runner]
 
 |link:{scs-app-starters-docs-htmlsingle}/#spring-cloud-stream-modules-ftp-source[ftp]
 |link:{scs-app-starters-docs-htmlsingle}/#spring-clound-stream-modules-transform-processor[transform]
-|task-launcher-yarn ~(deprecated)~
-|spark-client ~(deprecated)~
+|link:{scs-app-starters-docs-htmlsingle}/#spring-cloud-stream-modules-throughput-sink[throughput]
+|link:https://docs.spring.io/spring-cloud-task-app-starters/docs/current/reference/htmlsingle/#_timestamp_batch_task[timestamp-batch]
 
 |link:{scs-app-starters-docs-htmlsingle}/#spring-cloud-stream-modules-time-source[time]
 |link:{scs-app-starters-docs-htmlsingle}/#spring-cloud-stream-modules-header-enricher-processor[header-enricher]
-|link:{scs-app-starters-docs-htmlsingle}/#spring-cloud-stream-modules-throughput-sink[throughput]
-|link:https://docs.spring.io/spring-cloud-task-app-starters/docs/current/reference/htmlsingle/#_timestamp_task[timestamp]
+|link:{scs-app-starters-docs-htmlsingle}/#spring-cloud-stream-modules-mongodb-sink[mongodb]
+|
 
 |link:{scs-app-starters-docs-htmlsingle}/#spring-cloud-stream-modules-load-generator-source[load-generator]
 |link:{scs-app-starters-docs-htmlsingle}/#spring-cloud-stream-modules-python-http-processor[python-http]
-|task-launcher-local ~(deprecated)~
-|jdbchdfs-local ~(deprecated)~
-
-|link:{scs-app-starters-docs-htmlsingle}/#spring-cloud-stream-modules-syslog-source[syslog]
-|link:{scs-app-starters-docs-htmlsingle}/#spring-cloud-stream-modules-twitter-sentiment-processor[twitter-sentiment]
-|link:{scs-app-starters-docs-htmlsingle}/#spring-cloud-stream-modules-mongodb-sink[mongodb]
-|link:https://docs.spring.io/spring-cloud-task-app-starters/docs/current/reference/htmlsingle/#_composed_task_runner[composed-task-runner]
-
-|link:{scs-app-starters-docs-htmlsingle}/#spring-cloud-stream-modules-aws-s3-source[s3]
-|link:{scs-app-starters-docs-htmlsingle}/#spring-cloud-stream-modules-splitter[splitter]
-|hdfs-dataset ~(deprecated)~
-|link:https://docs.spring.io/spring-cloud-task-app-starters/docs/current/reference/htmlsingle/#_timestamp_batch_task[timestamp-batch]
-
-|link:{scs-app-starters-docs-htmlsingle}/#spring-cloud-stream-modules-loggregator-source[loggregator]
-|link:{scs-app-starters-docs-htmlsingle}/#spring-cloud-stream-modules-image-recognition-processor[image-recognition]
 |link:{scs-app-starters-docs-htmlsingle}/#spring-cloud-stream-modules-ftp-sink[ftp]
 |
 
-|link:{scs-app-starters-docs-htmlsingle}/#spring-cloud-stream-modules-trigger-source[triggertask]
-|link:{scs-app-starters-docs-htmlsingle}/#spring-cloud-stream-modules-bridge-processor[bridge]
+|link:{scs-app-starters-docs-htmlsingle}/#spring-cloud-stream-modules-syslog-source[syslog]
+|link:{scs-app-starters-docs-htmlsingle}/#spring-cloud-stream-modules-twitter-sentiment-processor[twitter-sentiment]
 |link:{scs-app-starters-docs-htmlsingle}/#spring-cloud-stream-modules-jdbc-sink[jdbc]
+|
+
+|link:{scs-app-starters-docs-htmlsingle}/#spring-cloud-stream-modules-aws-s3-source[s3]
+|link:{scs-app-starters-docs-htmlsingle}/#spring-cloud-stream-modules-splitter[splitter]
+|link:{scs-app-starters-docs-htmlsingle}/#spring-cloud-stream-modules-cassandra-sink[cassandra]
+|
+
+|link:{scs-app-starters-docs-htmlsingle}/#spring-cloud-stream-modules-loggregator-source[loggregator]
+|link:{scs-app-starters-docs-htmlsingle}/#spring-cloud-stream-modules-image-recognition-processor[image-recognition]
+|link:{scs-app-starters-docs-htmlsingle}/#spring-cloud-stream-modules-router-sink[router]
+|
+
+|link:{scs-app-starters-docs-htmlsingle}/#spring-cloud-stream-modules-trigger-source[triggertask (deprecated)]
+|link:{scs-app-starters-docs-htmlsingle}/#spring-cloud-stream-modules-bridge-processor[bridge]
+|link:{scs-app-starters-docs-htmlsingle}/#spring-cloud-stream-modules-redis-sink[redis-pubsub]
 |
 
 |link:{scs-app-starters-docs-htmlsingle}/#spring-cloud-stream-modules-twitterstream-source[twitterstream]
 |link:{scs-app-starters-docs-htmlsingle}/#spring-cloud-stream-modules-pmml-processor[pmml]
-|aggregate-counter ~(deprecated)~
+|link:{scs-app-starters-docs-htmlsingle}/#spring-cloud-stream-modules-file-sink[file]
 |
 
 |link:{scs-app-starters-docs-htmlsingle}/#spring-cloud-stream-modules-mongodb-source[mongodb]
 |link:{scs-app-starters-docs-htmlsingle}/#spring-cloud-stream-modules-python-jython-processor[python-jython]
-|link:{scs-app-starters-docs-htmlsingle}/#spring-cloud-stream-modules-cassandra-sink[cassandra] ~(only:2.1.x)~
+|link:{scs-app-starters-docs-htmlsingle}/#spring-cloud-stream-modules-websocket-sink[websocket]
 |
 
 |link:{scs-app-starters-docs-htmlsingle}/#spring-cloud-stream-modules-gemfire-cq-source[gemfire-cq]
 |link:{scs-app-starters-docs-htmlsingle}/#spring-cloud-stream-modules-groovy-transform-processor[groovy-transform]
-|link:{scs-app-starters-docs-htmlsingle}/#spring-cloud-stream-modules-router-sink[router]
+|link:{scs-app-starters-docs-htmlsingle}/#spring-cloud-stream-modules-aws-s3-sink[s3]
 |
 
 |link:{scs-app-starters-docs-htmlsingle}/#spring-cloud-stream-modules-http-source[http]
 |link:{scs-app-starters-docs-htmlsingle}/#spring-cloud-stream-modules-httpclient-processor[httpclient]
-|link:{scs-app-starters-docs-htmlsingle}/#spring-cloud-stream-modules-redis-sink[redis-pubsub]
+|link:{scs-app-starters-docs-htmlsingle}/#spring-cloud-stream-modules-rabbit-sink[rabbit]
 |
 
 |link:{scs-app-starters-docs-htmlsingle}/#spring-cloud-stream-modules-rabbit-source[rabbit]
 |link:{scs-app-starters-docs-htmlsingle}/#spring-cloud-stream-modules-filter-processor[filter]
-|link:{scs-app-starters-docs-htmlsingle}/#spring-cloud-stream-modules-file-sink[file]
+|link:{scs-app-starters-docs-htmlsingle}/#spring-cloud-stream-modules-counter-sink[counter]
 |
 
 |link:{scs-app-starters-docs-htmlsingle}/#spring-cloud-stream-modules-tcp-source[tcp]
 |link:{scs-app-starters-docs-htmlsingle}/#spring-cloud-stream-modules-pose-estimation-processor[pose-estimation]
-|link:{scs-app-starters-docs-htmlsingle}/#spring-cloud-stream-modules-websocket-sink[websocket]
+|link:{scs-app-starters-docs-htmlsingle}/#spring-cloud-stream-modules-pgcopy-sink[pgcopy]
 |
 
 |link:{scs-app-starters-docs-htmlsingle}/#spring-cloud-stream-modules-trigger-source[trigger]
 |link:{scs-app-starters-docs-htmlsingle}/#spring-cloud-stream-modules-grpc-processor[grpc]
-|link:{scs-app-starters-docs-htmlsingle}/#spring-cloud-stream-modules-aws-s3-sink[s3]
+|link:https://github.com/spring-cloud-stream-app-starters/gpfdist[gpfdist]
 |
 
 |link:{scs-app-starters-docs-htmlsingle}/#spring-cloud-stream-modules-mqtt-source[mqtt]
 |link:{scs-app-starters-docs-htmlsingle}/#spring-cloud-stream-modules-groovy-filter-processor[groovy-filter]
-|link:{scs-app-starters-docs-htmlsingle}/#spring-cloud-stream-modules-rabbit-sink[rabbit]
+|link:{scs-app-starters-docs-htmlsingle}/#spring-cloud-stream-modules-sftp-sink[sftp]
 |
 
 |link:{scs-app-starters-docs-htmlsingle}/#spring-cloud-stream-modules-tcp-client-source[tcp-client]
 |link:{scs-app-starters-docs-htmlsingle}/#spring-cloud-stream-modules-aggregator-processor[aggregator]
-|link:{scs-app-starters-docs-htmlsingle}/#spring-cloud-stream-modules-counter-sink[counter]
+|link:{scs-app-starters-docs-htmlsingle}/#spring-cloud-stream-modules-task-launcher-dataflow-sink[tasklauncher-dataflow]
 |
 
 |link:{scs-app-starters-docs-htmlsingle}/#spring-cloud-stream-modules-mail-source[mail]
 |link:{scs-app-starters-docs-htmlsingle}/#spring-cloud-stream-modules-counter-processor[counter]
-|link:{scs-app-starters-docs-htmlsingle}/#spring-cloud-stream-modules-pgcopy-sink[pgcopy]
+|link:{scs-app-starters-docs-htmlsingle}/#spring-cloud-stream-modules-hdfs-sink[hdfs]
 |
 
 |link:{scs-app-starters-docs-htmlsingle}/#spring-cloud-stream-modules-jdbc-source[jdbc]
 |link:{scs-app-starters-docs-htmlsingle}/#spring-cloud-stream-modules-tensorflow-processor[tensorflow]
-|link:https://github.com/spring-cloud-stream-app-starters/gpfdist[gpfdist] ~(1.3.x)~
+|link:{scs-app-starters-docs-htmlsingle}/#spring-cloud-stream-modules-tcp-sink[tcp]
 |
 
 |link:{scs-app-starters-docs-htmlsingle}/#spring-cloud-stream-modules-gemfire-source[gemfire]
-|link:{scs-app-starters-docs-htmlsingle}/#spring-cloud-stream-modules-tasklaunchrequest-transform[tasklaunchrequest-transform]
-|link:{scs-app-starters-docs-htmlsingle}/#spring-cloud-stream-modules-sftp-sink[sftp]
+|link:{scs-app-starters-docs-htmlsingle}/#spring-cloud-stream-modules-tasklaunchrequest-transform[tasklaunchrequest-transform (deprecated)]
+|link:{scs-app-starters-docs-htmlsingle}/#spring-cloud-stream-modules-gemfire-sink[gemfire]
 |
 
 |link:{scs-app-starters-docs-htmlsingle}/#spring-cloud-stream-modules-file-source[file]
 |link:{scs-app-starters-docs-htmlsingle}/#spring-cloud-stream-modules-object-detection-processor[object-detection]
-|field-value-counter ~(deprecated)~
+|
 |
 
+|link:{scs-app-starters-docs-htmlsingle}/#spring-cloud-stream-modules-sftp-dataflow-source[sftp-dataflow]
 |
 |
-|link:{scs-app-starters-docs-htmlsingle}/#spring-cloud-stream-modules-task-launcher-dataflow-sink[tasklauncher-dataflow]
-|
-
-|
-|
-|link:{scs-app-starters-docs-htmlsingle}/#spring-cloud-stream-modules-hdfs-sink[hdfs]
-|
-
-|
-|
-|link:{scs-app-starters-docs-htmlsingle}/#spring-cloud-stream-modules-tcp-sink[tcp]
-|
-
-|
-|
-|link:{scs-app-starters-docs-htmlsingle}/#spring-cloud-stream-modules-gemfire-sink[gemfire]
-|
-
-|
-|
-|task-launcher-cloudfoundry ~(deprecated)~
 |
 |======================
-
-NOTE: The above table includes Applications that are compatible with two versions of Spring Boot and Spring Cloud Stream
-releases. Darwin-release-train _(Spring Boot 2.0.x + Spring Cloud Stream 2.0.x)_ and Einstein-release-train
-_(Spring Boot 2.1.x + Spring Cloud Stream 2.1.x)_, respectively.

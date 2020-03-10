@@ -49,6 +49,7 @@ public interface AuditRecordService {
 	 * @param auditActionType Must not be null
 	 * @param correlationId Id to identify the record
 	 * @param data The data as String to be audited
+	 * @param platformName the platform name
 	 *
 	 * @return newly created AuditRecord
 	 */
@@ -56,11 +57,12 @@ public interface AuditRecordService {
 			AuditOperationType auditOperationType,
 			AuditActionType auditActionType,
 			String correlationId,
-			String data);
+			String data,
+			String platformName);
 
 	/**
 	 * Similar to
-	 * {@link #populateAndSaveAuditRecord(AuditOperationType, AuditActionType, String, String)}
+	 * {@link #populateAndSaveAuditRecord(AuditOperationType, AuditActionType, String, String, String)}
 	 * but instead of a String users can provide a {@link Map} as the Audit Data parameter,
 	 * which will be persisted as a JSON a structure. Callers should therefore make sure that
 	 * the provided Map can indeed be serialized to JSON via Jackson.
@@ -69,13 +71,14 @@ public interface AuditRecordService {
 	 * @param auditActionType Must not be null
 	 * @param correlationId Id to identify the record
 	 * @param data The data as a Map to be audited
+	 * @param platformName the platform name
 	 *
 	 * @return newly created AuditRecord
 	 */
 	AuditRecord populateAndSaveAuditRecordUsingMapData(
 			AuditOperationType auditOperationType, AuditActionType auditActionType,
 			String correlationId,
-			Map<String, Object> data);
+			Map<String, Object> data, String platformName);
 
 	/**
 	 * Allows for querying of {@link AuditRecord}s.

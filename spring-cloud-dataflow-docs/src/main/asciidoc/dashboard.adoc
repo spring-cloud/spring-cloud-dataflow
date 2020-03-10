@@ -171,7 +171,7 @@ Once the stream applications are deployed, their logs can be accessed from the S
 
 image::{dataflow-asciidoc}/images/dataflow-stream-logs.png[Stream Logs, scaledwidth="100%"]
 
-[dashboard-flo-streams-designer-fanin-fanout]]
+[[dashboard-flo-streams-designer-fanin-fanout]]
 === Creating Fan-In/Fan-Out Streams
 
 In chapter <<spring-cloud-dataflow-stream-dsl-fanin-fanout>> you learned how we can support fan-in and fan-out use cases using <<spring-cloud-dataflow-stream-dsl-named-destinations,named destinations>>.
@@ -216,6 +216,26 @@ TIP: When interacting directly with <<spring-cloud-dataflow-stream-dsl-named-des
 there can be "n" combinations (Inputs/Outputs). This allows you to create complex topologies involving a
 wide variety of data sources and destinations.
 =======
+
+=== Import/Export Streams
+
+The Streams section of the Dashboard includes a new Utils page that provides the option to import and export streams.
+
+The following image shows the streams export page:
+
+.Stream Utils Export page
+image::{dataflow-asciidoc}/images/dataflow-streams-utils-export.png[Stream Utils Export, scaledwidth="100%"]
+
+On the Streams import page, you have to import from a valid JSON file. You can either manually draft the file or export the file from the Streams export page.
+
+.Stream Utils Import page
+image::{dataflow-asciidoc}/images/dataflow-streams-utils-import.png[Stream Utils Import, scaledwidth="100%"]
+
+After importing the file, you will get confirmation on whether the operation completed successfully.
+
+.Stream Utils Import Result page
+image::{dataflow-asciidoc}/images/dataflow-streams-utils-import-result.png[Stream Utils Import Result, scaledwidth="100%"]
+
 
 ifndef::omit-tasks-docs[]
 [[dashboard-tasks]]
@@ -296,6 +316,26 @@ image::{dataflow-asciidoc}/images/dataflow-ctr-flo-tab.png[Composed Task Designe
 
 Once the task definition has been created, the tasks can be launched through the dashboard.
 To do so, click the Definitions tab and select the task you want to launch by pressing `Launch`.
+
+
+==== Import/Export Tasks
+
+The Tasks section of the Dashboard includes a new Utils page that provides the option to import and export tasks.
+
+The following image shows the tasks export page:
+
+.Tasks Utils Export page
+image::{dataflow-asciidoc}/images/dataflow-tasks-utils-export.png[Tasks Utils Export, scaledwidth="100%"]
+
+On the Tasks import page, you have to import from a valid JSON file. You can either manually draft the file or export the file from the Tasks export page.
+
+.Tasks Utils Import page
+image::{dataflow-asciidoc}/images/dataflow-tasks-utils-import.png[Tasks Utils Import, scaledwidth="100%"]
+
+After importing the file, you will get confirmation on whether the operation completed successfully.
+
+.Tasks Utils Import Result page
+image::{dataflow-asciidoc}/images/dataflow-tasks-utils-import-result.png[Tasks Utils Import Result, scaledwidth="100%"]
 
 
 

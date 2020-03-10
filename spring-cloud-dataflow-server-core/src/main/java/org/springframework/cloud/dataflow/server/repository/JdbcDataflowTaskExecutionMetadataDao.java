@@ -60,11 +60,10 @@ public class JdbcDataflowTaskExecutionMetadataDao implements DataflowTaskExecuti
 	private static final String INSERT_SQL = "INSERT INTO task_execution_metadata (id, task_execution_id, " +
 			"task_execution_manifest) VALUES (:id, :taskExecutionId, :taskExecutionManifest)";
 
-	private static final String FIND_MANIFEST_BY_TASK_EXECUTION_ID = "select m.task_execution_manifest as task_execution_manifest\n" +
-			"from task_execution_metadata m inner join\n" +
-			"        TASK_EXECUTION e on m.task_execution_id = e.TASK_EXECUTION_ID\n" +
-			"where e.TASK_EXECUTION_ID = :taskExecutionId\n" +
-			";";
+	private static final String FIND_MANIFEST_BY_TASK_EXECUTION_ID = "select m.task_execution_manifest as task_execution_manifest " +
+			"from task_execution_metadata m inner join " +
+			"TASK_EXECUTION e on m.task_execution_id = e.TASK_EXECUTION_ID " +
+			"where e.TASK_EXECUTION_ID = :taskExecutionId";
 
 	private static final String DELETE_MANIFEST_BY_TASK_EXECUTION_IDS =
 			"DELETE FROM task_execution_metadata " +

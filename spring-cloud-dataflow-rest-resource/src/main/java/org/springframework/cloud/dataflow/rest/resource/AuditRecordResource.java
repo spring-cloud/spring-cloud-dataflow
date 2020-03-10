@@ -22,7 +22,8 @@ import org.springframework.hateoas.PagedModel;
 import org.springframework.hateoas.RepresentationModel;
 
 /**
- * A HATEOAS representation of an {@link org.springframework.cloud.dataflow.core.AuditRecord}.
+ * A HATEOAS representation of an
+ * {@link org.springframework.cloud.dataflow.core.AuditRecord}.
  * <p>
  * Note: this implementation is not thread safe.
  *
@@ -41,7 +42,8 @@ public class AuditRecordResource extends RepresentationModel<AuditRecordResource
 	private String createdBy;
 
 	/**
-	 * An identifier that identifies (in combination with the {@link #auditOperation}) the audited operation.
+	 * An identifier that identifies (in combination with the {@link #auditOperation}) the
+	 * audited operation.
 	 */
 	private String correlationId;
 
@@ -64,6 +66,12 @@ public class AuditRecordResource extends RepresentationModel<AuditRecordResource
 	 * What operation (section of the app) was the user performing, e.g. task, streams
 	 */
 	private String auditOperation;
+
+	/**
+	 * Name of the platform
+	 *
+	 */
+	private String platformName;
 
 	/**
 	 * Default constructor for serialization frameworks.
@@ -125,6 +133,14 @@ public class AuditRecordResource extends RepresentationModel<AuditRecordResource
 
 	public void setAuditRecordId(Long auditRecordId) {
 		this.auditRecordId = auditRecordId;
+	}
+
+	public String getPlatformName() {
+		return platformName;
+	}
+
+	public void setPlatformName(String platformName) {
+		this.platformName = platformName;
 	}
 
 	public static class Page extends PagedModel<AuditRecordResource> {

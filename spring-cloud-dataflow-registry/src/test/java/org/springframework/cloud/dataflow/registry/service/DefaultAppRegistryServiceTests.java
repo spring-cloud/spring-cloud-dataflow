@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2019 the original author or authors.
+ * Copyright 2018-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -63,6 +63,7 @@ import static org.mockito.Mockito.when;
  * @author Christian Tzolov
  * @author Chris Schaefer
  * @author Ilayaperumal Gopinathan
+ * @author David Turanski
  */
 public class DefaultAppRegistryServiceTests {
 
@@ -227,6 +228,22 @@ public class DefaultAppRegistryServiceTests {
 				eq("bar"), eq(ApplicationType.sink), eq("1.0"))).thenReturn(appRegistration());
 		assertThat(appRegistryService.importAll(false,
 				new ClassPathResource("AppRegistryTests-importAllOverwrite.properties", getClass())).size(), equalTo(0));
+	}
+
+	@Test
+	public void testImportRealWorldJarsWithMetadata() {
+		appRegistryService.importAll(true,
+				new ClassPathResource("AppRegistryTests-import-with-metadata.properties", getClass()));
+		ArgumentCaptor<AppRegistration> appRegistrationCaptor = ArgumentCaptor.forClass(AppRegistration.class);
+		verify(appRegistrationRepository, times(1)).save(appRegistrationCaptor.capture());
+		List<AppRegistration> registrations = appRegistrationCaptor.getAllValues();
+		AppRegistration appRegistration = registrations.get(0);
+		assertThat(appRegistration, hasProperty("name", is("cassandra")));
+		assertThat(appRegistration, hasProperty("uri",
+				is(URI.create("http://repo.spring.io/release/org/springframework/cloud/stream/app/cassandra-sink-rabbit/2.1.0.RELEASE/cassandra-sink-rabbit-2.1.0.RELEASE.jar"))));
+		assertThat(appRegistration, hasProperty("metadataUri",
+				is(URI.create("http://repo.spring.io/release/org/springframework/cloud/stream/app/cassandra-sink-rabbit/2.1.0.RELEASE/cassandra-sink-rabbit-2.1.0.RELEASE-metadata.jar"))));
+		assertThat(appRegistration,	hasProperty("type", is(ApplicationType.sink)));
 	}
 
 	@Test
@@ -489,6 +506,32 @@ public class DefaultAppRegistryServiceTests {
 								hasProperty("metadataUri", is(URI.create("maven://org.springframework.cloud.stream.app:log-sink-rabbit:jar:metadata:2.0.2.RELEASE"))),
 								hasProperty("type", is(ApplicationType.sink)))));
 	}
+
+	@Test
+	public void testImportAllDockerLatest() {
+
+		appRegistryService.importAll(false,
+				new ClassPathResource("AppRegistryTests-importAll-docker-latest.properties", getClass()));
+
+		ArgumentCaptor<AppRegistration> appRegistrationCaptor = ArgumentCaptor.forClass(AppRegistration.class);
+		verify(appRegistrationRepository, times(2)).save(appRegistrationCaptor.capture());
+
+		List<AppRegistration> registrations = appRegistrationCaptor.getAllValues();
+
+		assertThat(registrations,
+				containsInAnyOrder(
+						allOf(
+								hasProperty("name", is("foo")),
+								hasProperty("uri", is(URI.create("docker:springcloudstream/foo-source-kafka:latest"))),
+								hasProperty("metadataUri", is(URI.create("maven://org.springframework.cloud.stream.app:foo-source-kafka:jar:metadata:2.1.2.BUILD-SNAPSHOT"))),
+								hasProperty("type", is(ApplicationType.source))),
+						allOf(
+								hasProperty("name", is("foo")),
+								hasProperty("uri", is(URI.create("docker:springcloudstream/foo-sink-kafka:latest"))),
+								hasProperty("metadataUri", is(URI.create("maven://org.springframework.cloud.stream.app:foo-sink-kafka:jar:metadata:2.1.2.BUILD-SNAPSHOT"))),
+								hasProperty("type", is(ApplicationType.sink)))));
+	}
+
 	@Test
 	public void testDelete() throws URISyntaxException {
 		AppRegistration fooSource = appRegistration("foo", ApplicationType.source, true);

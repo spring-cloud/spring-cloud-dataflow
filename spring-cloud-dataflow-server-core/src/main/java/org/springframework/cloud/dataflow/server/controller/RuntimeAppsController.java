@@ -90,7 +90,7 @@ public class RuntimeAppsController {
 		return statusAssembler.toModel(status);
 	}
 
-	private static class Assembler extends RepresentationModelAssemblerSupport<AppStatus, AppStatusResource> {
+	static class Assembler extends RepresentationModelAssemblerSupport<AppStatus, AppStatusResource> {
 
 		public Assembler() {
 			super(RuntimeAppsController.class, AppStatusResource.class);

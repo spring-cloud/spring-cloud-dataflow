@@ -20,6 +20,7 @@ logging:
     # Silence annoying exception trace logged on info level - gh-2750
     org.hibernate.engine.jdbc.env.internal.LobCreatorBuilderImpl: 'WARN'
 spring:
+  mvc.async.request-timeout: 120000
   batch:
     initialize-schema: never
   jpa:
@@ -85,7 +86,7 @@ spring:
         authorization:
           enabled: true
           loginUrl: "/"
-          permit-all-paths: "/authenticate,/security/info,/assets/**,/dashboard/logout-success-oauth.html,/favicon.ico"
+          permit-all-paths: "/management/health,/authenticate,/security/info,/assets/**,/dashboard/logout-success-oauth.html,/favicon.ico"
           rules:
             # About
 
@@ -128,6 +129,7 @@ spring:
             # Running Applications
 
             - GET    /runtime/streams                => hasRole('ROLE_VIEW')
+            - GET    /runtime/streams/**             => hasRole('ROLE_VIEW')
             - GET    /runtime/apps                   => hasRole('ROLE_VIEW')
             - GET    /runtime/apps/**                => hasRole('ROLE_VIEW')
 

@@ -42,6 +42,9 @@ import org.springframework.cloud.dataflow.core.TaskDefinition;
 import org.springframework.cloud.dataflow.core.TaskDeployment;
 import org.springframework.cloud.dataflow.core.TaskManifest;
 import org.springframework.cloud.dataflow.core.TaskPlatformFactory;
+import org.springframework.cloud.dataflow.core.dsl.TaskNode;
+import org.springframework.cloud.dataflow.core.dsl.TaskParser;
+import org.springframework.cloud.dataflow.core.dsl.visitor.ComposedTaskRunnerVisitor;
 import org.springframework.cloud.dataflow.rest.util.ArgumentSanitizer;
 import org.springframework.cloud.dataflow.rest.util.DeploymentPropertiesUtils;
 import org.springframework.cloud.dataflow.server.job.LauncherRepository;
@@ -142,10 +145,16 @@ public class DefaultTaskExecutionService implements TaskExecutionService {
 	 * @param launcherRepository the repository of task launcher used to launch task apps.
 	 * @param auditRecordService the audit record service
 	 * @param taskRepository the repository to use for accessing and updating task executions
+	 * @param taskExecutionInfoService the task execution info service
 	 * @param taskDeploymentRepository the repository to track task deployment
 	 * @param taskExecutionInfoService the service used to setup a task execution
 	 * @param taskExecutionRepositoryService the service used to create the task execution
+	 * @param taskAppDeploymentRequestCreator the task app deployment request creator
+	 * @param taskExplorer the task explorer
+	 * @param dataflowTaskExecutionDao the dataflow task execution dao
 	 * @param dataflowTaskExecutionMetadataDao repository used to manipulate task manifests
+	 * @param oauth2TokenUtilsService the oauth2 token server
+	 * @param taskSaveService the task save service
 	 */
 	public DefaultTaskExecutionService(LauncherRepository launcherRepository,
 			AuditRecordService auditRecordService,
@@ -218,7 +227,6 @@ public class DefaultTaskExecutionService implements TaskExecutionService {
 		}
 		DeploymentPropertiesUtils.validateDeploymentProperties(taskDeploymentProperties);
 
-		// TODO: Same task name can only exist in one platform, um why?
 		TaskDeployment existingTaskDeployment = taskDeploymentRepository
 				.findTopByTaskDefinitionNameOrderByCreatedOnAsc(taskName);
 		if (existingTaskDeployment != null) {
@@ -238,6 +246,11 @@ public class DefaultTaskExecutionService implements TaskExecutionService {
 			handleAccessToken(commandLineArgs, taskExecutionInformation);
 		}
 
+		TaskLauncher taskLauncher = findTaskLauncher(platformName);
+		if(taskExecutionInformation.isComposed()) {
+			isCTRSplitValidForCurrentCTR(taskLauncher, taskExecutionInformation.getTaskDefinition());
+		}
+
 		// Build app deploy request and stash deploy props there
 		TaskExecution taskExecution = taskExecutionRepositoryService.createTaskExecution(taskName);
 		AppDeploymentRequest appDeploymentRequest = this.taskAppDeploymentRequestCreator.
@@ -254,10 +267,9 @@ public class DefaultTaskExecutionService implements TaskExecutionService {
 
 		// We now have a new props and args what should really get used.
 		Map<String, String> mergedTaskDeploymentProperties = report.getMergedDeploymentProperties();
-		List<String> mergedCommandLineArguments = report.getMergedCommandLineArguments();
 
 		taskExecutionInformation.setTaskDeploymentProperties(mergedTaskDeploymentProperties);
-		appDeploymentRequest = updateDeploymentProperties(mergedCommandLineArguments, platformName, taskExecutionInformation,
+		appDeploymentRequest = updateDeploymentProperties(commandLineArgs, platformName, taskExecutionInformation,
 				taskExecution, mergedTaskDeploymentProperties);
 
 		AppDeploymentRequest request = new AppDeploymentRequest(appDeploymentRequest.getDefinition(),
@@ -269,13 +281,12 @@ public class DefaultTaskExecutionService implements TaskExecutionService {
 
 		String taskDeploymentId = null;
 		try {
-			TaskLauncher taskLauncher = findTaskLauncher(platformName);
-			if(!isAppDeploymentSame(previousManifest, taskManifest)) {
+			Launcher launcher = this.launcherRepository.findByName(platformName);
+			if(launcher.getType().equals(TaskPlatformFactory.CLOUDFOUNDRY_PLATFORM_TYPE) && !isAppDeploymentSame(previousManifest, taskManifest)) {
 				validateAndLockUpgrade(taskName, platformName, taskExecution);
 				logger.debug("Deleting %s and all related resources from the platform", taskName);
 				taskLauncher.destroy(taskName);
 			}
-
 			this.dataflowTaskExecutionMetadataDao.save(taskExecution, taskManifest);
 			taskDeploymentId = taskLauncher.launch(appDeploymentRequest);
 			saveExternalExecutionId(taskExecution, taskDeploymentId);
@@ -303,7 +314,7 @@ public class DefaultTaskExecutionService implements TaskExecutionService {
 				getAudited(taskExecutionInformation.getTaskDefinition(),
 						taskExecutionInformation.getTaskDeploymentProperties(),
 						request.getCommandlineArguments()
-						));
+						), platformName);
 
 		return taskExecution.getExecutionId();
 	}
@@ -388,7 +399,7 @@ public class DefaultTaskExecutionService implements TaskExecutionService {
 	 * @param platformName name of the platform configuration to use
 	 * @param taskExecutionInformation details about the task execution request
 	 * @param taskExecution task execution data
-	 * @param previousManifest manifest from the last execution of the same task definition
+	 * @param deploymentProperties properties of the deployment
 	 * @return an updated {@code AppDeploymentRequest}
 	 */
 	private AppDeploymentRequest updateDeploymentProperties(List<String> commandLineArgs, String platformName,
@@ -613,7 +624,7 @@ public class DefaultTaskExecutionService implements TaskExecutionService {
 		final Map<String, Object> auditData = Collections.singletonMap("Stopped Task Executions", numberOfExecutionsStopped);
 		this.auditRecordService.populateAndSaveAuditRecordUsingMapData(
 				AuditOperationType.TASK, AuditActionType.UNDEPLOY,
-				numberOfExecutionsStopped + " Task Execution Stopped", auditData);
+				numberOfExecutionsStopped + " Task Execution Stopped", auditData, null);
 	}
 
 	private void validateExternalExecutionIds(Set<TaskExecution> taskExecutions) {
@@ -697,4 +708,16 @@ public class DefaultTaskExecutionService implements TaskExecutionService {
 		return taskExecutions;
 	}
 
+	private void isCTRSplitValidForCurrentCTR(TaskLauncher taskLauncher, TaskDefinition taskDefinition) {
+		TaskParser taskParser = new TaskParser("composed-task-runner", taskDefinition.getProperties().get("graph"), true, true);
+		TaskNode taskNode = taskParser.parse();
+		ComposedTaskRunnerVisitor composedRunnerVisitor = new ComposedTaskRunnerVisitor();
+		taskNode.accept(composedRunnerVisitor);
+		if(composedRunnerVisitor.getHighCount() > taskLauncher.getMaximumConcurrentTasks()) {
+			throw new IllegalArgumentException(String.format("One or more of the " +
+					"splits in the composed task contains a task count that exceeds " +
+					"the maximumConcurrentTasks count of %s",
+					taskLauncher.getMaximumConcurrentTasks()));
+		}
+	}
 }

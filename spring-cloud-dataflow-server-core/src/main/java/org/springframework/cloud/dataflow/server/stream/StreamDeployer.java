@@ -66,10 +66,19 @@ public interface StreamDeployer {
 
 	/**
 	 * Returns the deployed application statuses part for the streamName stream.
-	 * @param streamName Stream name to retrieve the runtime application statues for
-	 * @return List of runtime application statues, part of the requested streamName.
+	 *
+	 * @param streamName Stream name to retrieve the runtime application statuses for
+	 * @return List of runtime application statuses, part of the requested streamName.
 	 */
 	List<AppStatus> getStreamStatuses(String streamName);
+
+	/**
+	 * Returns the deployed application statuses part for the streamName streams.
+	 *
+	 * @param streamName Stream names to retrieve the runtime application statuses for
+	 * @return Map of runtime application statuses, part of the requested streamName.
+	 */
+	Map<String, List<AppStatus>> getStreamStatuses(String[] streamName);
 
 	/**
 	 * @return the runtime environment info for deploying streams.
@@ -103,10 +112,16 @@ public interface StreamDeployer {
 	/**
 	 * For a selected stream scales the number of appName instances to count.
 	 *
-	 * @param streamName
-	 * @param appName
-	 * @param count
-	 * @param properties
+	 * @param streamName the stream name
+	 * @param appName the app name
+	 * @param count the count
+	 * @param properties the properties
 	 */
 	void scale(String streamName, String appName, int count, Map<String, String> properties);
+
+	/**
+	 * Returns the list of stream names that correspond to the currently available skipper releases.
+	 * @return
+	 */
+	List<String> getStreams();
 }

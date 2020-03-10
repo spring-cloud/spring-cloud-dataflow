@@ -377,7 +377,7 @@ public class TestDependencies extends WebMvcConfigurationSupport {
 	}
 
 	@Bean
-	public RuntimeStreamsController runtimeStreamsController(StreamDeployer streamDeployer) {
+	public RuntimeStreamsController runtimeStreamsControllerV2(StreamDeployer streamDeployer) {
 		return new RuntimeStreamsController(streamDeployer);
 	}
 

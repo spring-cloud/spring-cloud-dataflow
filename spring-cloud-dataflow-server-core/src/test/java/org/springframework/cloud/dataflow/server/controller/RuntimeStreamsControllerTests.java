@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 the original author or authors.
+ * Copyright 2019-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 
 package org.springframework.cloud.dataflow.server.controller;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -32,6 +33,7 @@ import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabas
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase.Replace;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.cloud.dataflow.core.StreamDefinition;
+import org.springframework.cloud.dataflow.core.StreamRuntimePropertyKeys;
 import org.springframework.cloud.dataflow.registry.repository.AppRegistrationRepository;
 import org.springframework.cloud.dataflow.server.configuration.TestDependencies;
 import org.springframework.cloud.dataflow.server.repository.StreamDefinitionRepository;
@@ -40,6 +42,7 @@ import org.springframework.cloud.deployer.spi.app.AppStatus;
 import org.springframework.cloud.deployer.spi.app.DeploymentState;
 import org.springframework.cloud.skipper.client.SkipperClient;
 import org.springframework.cloud.skipper.domain.Info;
+import org.springframework.cloud.skipper.domain.Release;
 import org.springframework.cloud.skipper.domain.Status;
 import org.springframework.cloud.skipper.domain.StatusCode;
 import org.springframework.http.MediaType;
@@ -50,8 +53,10 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 
+import static org.hamcrest.Matchers.anyOf;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
@@ -63,6 +68,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  *
  * @author Christian Tzolov
  * @author Daniel Serleg
+ * @author Ilayaperumal Gopinathan
  */
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = TestDependencies.class)
@@ -118,6 +124,29 @@ public class RuntimeStreamsControllerTests {
 		when(this.skipperClient.status("ticktock1")).thenReturn(toInfo(appStatues1));
 		when(this.skipperClient.status("ticktock2")).thenReturn(toInfo(appStatues2));
 		when(this.skipperClient.status("ticktock3")).thenReturn(toInfo(appStatues3));
+		Map<String, Info> mockInfoTwo = new HashMap<>();
+		mockInfoTwo.put("ticktock1", toInfo(appStatues1));
+		mockInfoTwo.put("ticktock2", toInfo(appStatues2));
+		when(skipperClient.statuses("ticktock1", "ticktock2")).thenReturn(mockInfoTwo);
+		Map<String, Info> mockInfoThree = new HashMap<>();
+		mockInfoThree.put("ticktock1", toInfo(appStatues1));
+		mockInfoThree.put("ticktock2", toInfo(appStatues2));
+		mockInfoThree.put("ticktock3", toInfo(appStatues3));
+		when(skipperClient.statuses("ticktock1", "ticktock2", "ticktock3")).thenReturn(mockInfoThree);
+		Map<String, Info> mockInfoOne = new HashMap<>();
+		mockInfoOne.put("ticktock3", toInfo(appStatues3));
+		when(skipperClient.statuses("ticktock3")).thenReturn(mockInfoOne);
+		List<Release> releaseList = new ArrayList<>();
+		Release release1 = new Release();
+		release1.setName("ticktock1");
+		releaseList.add(release1);
+		Release release2 = new Release();
+		release2.setName("ticktock2");
+		releaseList.add(release2);
+		Release release3 = new Release();
+		release3.setName("ticktock3");
+		releaseList.add(release3);
+		when(skipperClient.list(any())).thenReturn(releaseList);
 	}
 
 	private Info toInfo(List<AppStatus> appStatues) throws JsonProcessingException {
@@ -130,7 +159,101 @@ public class RuntimeStreamsControllerTests {
 	}
 
 	@Test
-	public void testGetResponse() throws Exception {
+	public void testMultiStreamNames() throws Exception {
+		this.mockMvc.perform(
+				get("/runtime/streams/ticktock1,ticktock2,ticktock3")
+						.accept(MediaType.APPLICATION_JSON))
+				.andDo(print())
+				.andExpect(status().isOk())
+
+				.andExpect(jsonPath("$.**", hasSize(3)))
+				.andExpect(jsonPath("$.content[0].name", anyOf(is("ticktock1"), is("ticktock2"), is("ticktock3"))))
+				.andExpect(jsonPath("$.content[0].applications.*", hasSize(2)))
+				.andExpect(jsonPath("$.content[0].applications.content[0].name", anyOf(is("log1"), is("log2"), is("log3"))))
+				.andExpect(jsonPath("$.content[0].applications.content[0].instances.content[0].guid", anyOf(is("guid1"), is("guid3"), is("ticktock3.log3-v1-0"))))
+				.andExpect(jsonPath("$.content[0].applications.content[1].name", anyOf(is("time1"), is("time2"), is("time3"))))
+				.andExpect(jsonPath("$.content[0].applications.content[1].instances.content[0].guid", anyOf(is("guid2"), is("guid4"), is("ticktock3.time3-v1-0"))))
+
+				.andExpect(jsonPath("$.content[1].name", anyOf(is("ticktock1"), is("ticktock2"), is("ticktock3"))))
+				.andExpect(jsonPath("$.content[1].applications.*", hasSize(2)))
+				.andExpect(jsonPath("$.content[1].applications.content[0].name", anyOf(is("log1"), is("log2"), is("log3"))))
+				.andExpect(jsonPath("$.content[1].applications.content[0].instances.content[0].guid", anyOf(is("guid1"), is("guid3"), is("ticktock3.log3-v1-0"))))
+				.andExpect(jsonPath("$.content[1].applications.content[1].name", anyOf(is("time1"), is("time2"), is("time3"))))
+				.andExpect(jsonPath("$.content[1].applications.content[1].instances.content[0].guid", anyOf(is("guid2"), is("guid4"), is("ticktock3.time3-v1-0"))))
+
+				.andExpect(jsonPath("$.content[2].name", anyOf(is("ticktock1"), is("ticktock2"), is("ticktock3"))))
+				.andExpect(jsonPath("$.content[2].applications.*", hasSize(2)))
+				.andExpect(jsonPath("$.content[2].applications.content[0].name", anyOf(is("log1"), is("log2"), is("log3"))))
+				.andExpect(jsonPath("$.content[2].applications.content[0].instances.content[0].guid", anyOf(is("guid1"), is("guid3"), is("ticktock3.log3-v1-0"))))
+				.andExpect(jsonPath("$.content[2].applications.content[1].name", anyOf(is("time1"), is("time2"), is("time3"))))
+				.andExpect(jsonPath("$.content[2].applications.content[1].instances.content[0].guid", anyOf(is("guid2"), is("guid4"), is("ticktock3.time3-v1-0"))));
+
+	}
+
+
+	@Test
+	public void testPagedStreamNames() throws Exception {
+		this.mockMvc.perform(
+				get("/runtime/streams?page=0&size=2")
+						.accept(MediaType.APPLICATION_JSON))
+				.andDo(print())
+				.andExpect(status().isOk())
+				.andExpect(jsonPath("$.content.*", hasSize(2)));
+		this.mockMvc.perform(
+				get("/runtime/streams?page=1&size=2")
+						.accept(MediaType.APPLICATION_JSON))
+				.andDo(print())
+				.andExpect(status().isOk())
+				.andExpect(jsonPath("$.content.*", hasSize(1)));
+		this.mockMvc.perform(
+				get("/runtime/streams?page=1&size=3")
+						.accept(MediaType.APPLICATION_JSON))
+				.andDo(print())
+				.andExpect(status().isOk())
+				.andExpect(jsonPath("$.content.*", hasSize(0)));
+		this.mockMvc.perform(
+				get("/runtime/streams?page=1000&size=30")
+						.accept(MediaType.APPLICATION_JSON))
+				.andDo(print())
+				.andExpect(status().isOk())
+				.andExpect(jsonPath("$.content.*", hasSize(0)));
+	}
+
+	@Test
+	public void testGetResponseForAllRunningStreams() throws Exception {
+		this.mockMvc.perform(
+				get("/runtime/streams")
+						.accept(MediaType.APPLICATION_JSON))
+				.andDo(print())
+				.andExpect(status().isOk())
+
+				.andExpect(jsonPath("$.**", hasSize(3)))
+				.andExpect(jsonPath("$.content[0].name", anyOf(is("ticktock1"), is("ticktock2"), is("ticktock3"))))
+				.andExpect(jsonPath("$.content[0].applications.*", hasSize(2)))
+				.andExpect(jsonPath("$.content[0].applications.content[0].name", anyOf(is("log1"), is("log2"), is("log3"))))
+				.andExpect(jsonPath("$.content[0].applications.content[0].instances.content[0].guid", anyOf(is("guid1"), is("guid3"), is("ticktock3.log3-v1-0"))))
+				.andExpect(jsonPath("$.content[0].applications.content[1].name", anyOf(is("time1"), is("time2"), is("time3"))))
+				.andExpect(jsonPath("$.content[0].applications.content[1].instances.content[0].guid", anyOf(is("guid2"), is("guid4"), is("ticktock3.time3-v1-0"))))
+
+				.andExpect(jsonPath("$.content[1].name", anyOf(is("ticktock1"), is("ticktock2"), is("ticktock3"))))
+				.andExpect(jsonPath("$.content[1].applications.*", hasSize(2)))
+				.andExpect(jsonPath("$.content[1].applications.content[0].name", anyOf(is("log1"), is("log2"), is("log3"))))
+				.andExpect(jsonPath("$.content[1].applications.content[0].instances.content[0].guid", anyOf(is("guid1"), is("guid3"), is("ticktock3.log3-v1-0"))))
+				.andExpect(jsonPath("$.content[1].applications.content[1].name", anyOf(is("time1"), is("time2"), is("time3"))))
+				.andExpect(jsonPath("$.content[1].applications.content[1].instances.content[0].guid", anyOf(is("guid2"), is("guid4"), is("ticktock3.time3-v1-0"))))
+
+				.andExpect(jsonPath("$.content[2].name", anyOf(is("ticktock1"), is("ticktock2"), is("ticktock3"))))
+				.andExpect(jsonPath("$.content[2].applications.*", hasSize(2)))
+				.andExpect(jsonPath("$.content[2].applications.content[0].name", anyOf(is("log1"), is("log2"), is("log3"))))
+				.andExpect(jsonPath("$.content[2].applications.content[0].instances.content[0].guid", anyOf(is("guid1"), is("guid3"), is("ticktock3.log3-v1-0"))))
+				.andExpect(jsonPath("$.content[2].applications.content[1].name", anyOf(is("time1"), is("time2"), is("time3"))))
+				.andExpect(jsonPath("$.content[2].applications.content[1].instances.content[0].guid", anyOf(is("guid2"), is("guid4"), is("ticktock3.time3-v1-0"))));
+
+	}
+
+
+	@Test
+	public void testGetResponseByStreamNames() throws Exception {
 		mockMvc.perform(
 				get("/runtime/streams")
 						.param("names", "ticktock1,ticktock2,ticktock3")
@@ -139,26 +262,27 @@ public class RuntimeStreamsControllerTests {
 				.andExpect(status().isOk())
 
 				.andExpect(jsonPath("$.**", hasSize(3)))
-				.andExpect(jsonPath("$.[0].name", is("ticktock1")))
-				.andExpect(jsonPath("$.[0].applications.*", hasSize(2)))
-				.andExpect(jsonPath("$.[0].applications[0].name", is("log1")))
-				.andExpect(jsonPath("$.[0].applications[0].instances[0].guid", is("guid1")))
-				.andExpect(jsonPath("$.[0].applications[1].name", is("time1")))
-				.andExpect(jsonPath("$.[0].applications[1].instances[0].guid", is("guid2")))
+				// can't expect ordering anymore
+				.andExpect(jsonPath("$.content[0].name", anyOf(is("ticktock1"), is("ticktock2"), is("ticktock3"))))
+				.andExpect(jsonPath("$.content[0].applications.*", hasSize(2)))
+				.andExpect(jsonPath("$.content[0].applications.content[0].name", anyOf(is("log1"), is("log2"), is("log3"))))
+				.andExpect(jsonPath("$.content[0].applications.content[0].instances.content[0].guid", anyOf(is("guid1"), is("guid3"), is("ticktock3.log3-v1-0"))))
+				.andExpect(jsonPath("$.content[0].applications.content[1].name", anyOf(is("time1"), is("time2"), is("time3"))))
+				.andExpect(jsonPath("$.content[0].applications.content[1].instances.content[0].guid", anyOf(is("guid2"), is("guid4"), is("ticktock3.time3-v1-0"))))
 
-				.andExpect(jsonPath("$.[1].name", is("ticktock2")))
-				.andExpect(jsonPath("$.[1].applications.*", hasSize(2)))
-				.andExpect(jsonPath("$.[1].applications[0].name", is("log2")))
-				.andExpect(jsonPath("$.[1].applications[0].instances[0].guid", is("guid3")))
-				.andExpect(jsonPath("$.[1].applications[1].name", is("time2")))
-				.andExpect(jsonPath("$.[1].applications[1].instances[0].guid", is("guid4")))
+				.andExpect(jsonPath("$.content[1].name", anyOf(is("ticktock1"), is("ticktock2"), is("ticktock3"))))
+				.andExpect(jsonPath("$.content[1].applications.*", hasSize(2)))
+				.andExpect(jsonPath("$.content[1].applications.content[0].name", anyOf(is("log1"), is("log2"), is("log3"))))
+				.andExpect(jsonPath("$.content[1].applications.content[0].instances.content[0].guid", anyOf(is("guid1"), is("guid3"), is("ticktock3.log3-v1-0"))))
+				.andExpect(jsonPath("$.content[1].applications.content[1].name", anyOf(is("time1"), is("time2"), is("time3"))))
+				.andExpect(jsonPath("$.content[1].applications.content[1].instances.content[0].guid", anyOf(is("guid2"), is("guid4"), is("ticktock3.time3-v1-0"))))
 
-				.andExpect(jsonPath("$.[2].name", is("ticktock3")))
-				.andExpect(jsonPath("$.[2].applications.*", hasSize(2)))
-				.andExpect(jsonPath("$.[2].applications[0].name", is("log3")))
-				.andExpect(jsonPath("$.[2].applications[0].instances[0].guid", is("ticktock3.log3-v1-0")))
-				.andExpect(jsonPath("$.[2].applications[1].name", is("time3")))
-				.andExpect(jsonPath("$.[2].applications[1].instances[0].guid", is("ticktock3.time3-v1-0")));
+				.andExpect(jsonPath("$.content[2].name", anyOf(is("ticktock1"), is("ticktock2"), is("ticktock3"))))
+				.andExpect(jsonPath("$.content[2].applications.*", hasSize(2)))
+				.andExpect(jsonPath("$.content[2].applications.content[0].name", anyOf(is("log1"), is("log2"), is("log3"))))
+				.andExpect(jsonPath("$.content[2].applications.content[0].instances.content[0].guid", anyOf(is("guid1"), is("guid3"), is("ticktock3.log3-v1-0"))))
+				.andExpect(jsonPath("$.content[2].applications.content[1].name", anyOf(is("time1"), is("time2"), is("time3"))))
+				.andExpect(jsonPath("$.content[2].applications.content[1].instances.content[0].guid", anyOf(is("guid2"), is("guid4"), is("ticktock3.time3-v1-0"))));
 	}
 
 	private AppInstanceStatus instance(String id, String guid, String appName) {
@@ -176,9 +300,9 @@ public class RuntimeStreamsControllerTests {
 			@Override
 			public Map<String, String> getAttributes() {
 				Map<String, String> attributes = new HashMap<>();
-				attributes.put(RuntimeStreamsController.ATTRIBUTE_SKIPPER_APPLICATION_NAME, appName);
+				attributes.put(StreamRuntimePropertyKeys.ATTRIBUTE_SKIPPER_APPLICATION_NAME, appName);
 				if (guid != null) {
-					attributes.put(RuntimeStreamsController.ATTRIBUTE_GUID, guid);
+					attributes.put(StreamRuntimePropertyKeys.ATTRIBUTE_GUID, guid);
 				}
 				return attributes;
 			}

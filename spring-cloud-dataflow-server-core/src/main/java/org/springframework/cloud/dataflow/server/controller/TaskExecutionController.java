@@ -233,6 +233,7 @@ public class TaskExecutionController {
 	 * Stop a set of task executions.
 	 *
 	 * @param ids the ids of the {@link TaskExecution}s to stop
+	 * @param platform the platform name
 	 */
 	@RequestMapping(value = "/{id}", method = RequestMethod.POST)
 	@ResponseStatus(HttpStatus.OK)

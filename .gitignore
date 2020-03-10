@@ -45,3 +45,6 @@ rebel.xml
 
 manifest.yml
 cleanup.sh
+
+# GitHub actions
+.m2

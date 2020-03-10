@@ -2,7 +2,7 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<artifactId>spring-cloud-dataflow-parent</artifactId>
-	<version>2.3.0.BUILD-SNAPSHOT</version>
+	<version>2.5.0.BUILD-SNAPSHOT</version>
 	<packaging>pom</packaging>
 	<url>https://cloud.spring.io/spring-cloud-dataflow/</url>
 	<organization>
@@ -10,13 +10,9 @@
 		<url>https://www.spring.io</url>
 	</organization>
 	<parent>
-		<!-- Note: Make sure to update `spring-cloud-build` version and `spring-cloud-dependencies` version (spring-cloud.version)
-			 are in sync with the https://github.com/spring-cloud/spring-cloud-release/blob/master/pom.xml updates for the respective
-			 release versions -->
-		<!-- Note: Also make sure the parent pom version in spring-cloud-dataflow-dependencies/pom.xml is in sync -->
 		<groupId>org.springframework.cloud</groupId>
-		<artifactId>spring-cloud-build</artifactId>
-		<version>2.2.0.RELEASE</version>
+		<artifactId>spring-cloud-dataflow-build</artifactId>
+		<version>2.5.0.BUILD-SNAPSHOT</version>
 		<relativePath />
 	</parent>
 	<licenses>
@@ -24,7 +20,7 @@
 			<name>Apache License, Version 2.0</name>
 			<url>https://www.apache.org/licenses/LICENSE-2.0</url>
 			<comments>
-				Copyright 2014-2019 the original author or authors.
+				Copyright 2014-2020 the original author or authors.
 
 				Licensed under the Apache License, Version 2.0 (the "License");
 				you may not use this file except in compliance with the License.
@@ -59,29 +55,27 @@
 		<java.version>1.8</java.version>
 		<javadoc.opts>-Xdoclint:none</javadoc.opts>
 
-		<spring-cloud-dataflow-ui.version>2.3.0.RELEASE</spring-cloud-dataflow-ui.version>
+		<spring-cloud-dataflow-ui.version>2.4.2.RELEASE</spring-cloud-dataflow-ui.version>
 
-		<spring-cloud-deployer.version>2.1.0.RELEASE</spring-cloud-deployer.version>
-		<spring-cloud-deployer-local.version>2.1.0.RELEASE</spring-cloud-deployer-local.version>
+		<spring-cloud-deployer.version>2.3.0.BUILD-SNAPSHOT</spring-cloud-deployer.version>
+		<spring-cloud-deployer-local.version>2.3.0.BUILD-SNAPSHOT</spring-cloud-deployer-local.version>
 
-		<spring-cloud-deployer-cloudfoundry.version>2.1.0.RELEASE</spring-cloud-deployer-cloudfoundry.version>
-		<spring-cloud-deployer-kubernetes.version>2.1.0.RELEASE</spring-cloud-deployer-kubernetes.version>
+
+		<spring-cloud-deployer-cloudfoundry.version>2.3.0.BUILD-SNAPSHOT</spring-cloud-deployer-cloudfoundry.version>
+		<spring-cloud-deployer-kubernetes.version>2.3.0.BUILD-SNAPSHOT</spring-cloud-deployer-kubernetes.version>
+
 		<kubernetes-client.version>4.1.0</kubernetes-client.version>
 
-		<spring-cloud-skipper.version>2.2.0.RC2</spring-cloud-skipper.version>
+		<spring-cloud-skipper.version>2.4.0.BUILD-SNAPSHOT</spring-cloud-skipper.version>
 
-		<spring-cloud-task.version>2.2.0.RC1</spring-cloud-task.version>
+		<spring-cloud-task.version>2.2.2.RELEASE</spring-cloud-task.version>
 
 		<!-- Only used for tests -->
 		<spring-security-oauth2.version>2.3.7.RELEASE</spring-security-oauth2.version>
 
-		<!-- Note: Make sure to update `spring-cloud-build` version and `spring-cloud-dependencies` version (spring-cloud.version)
-			 are in sync with the https://github.com/spring-cloud/spring-cloud-release/blob/master/pom.xml updates for the respective
-			 release versions -->
-		<spring-cloud.version>Hoxton.RC2</spring-cloud.version>
-		<java-cfenv-boot.version>1.1.1.RELEASE</java-cfenv-boot.version>
+		<java-cfenv-boot.version>1.1.3.RELEASE</java-cfenv-boot.version>
 
-		<spring-cloud-common-security-config.version>1.2.0.RELEASE</spring-cloud-common-security-config.version>
+		<spring-cloud-common-security-config.version>1.2.2.RELEASE</spring-cloud-common-security-config.version>
 
 		<spring-shell.version>1.2.0.RELEASE</spring-shell.version>
 		<!-- Use older flyway until we can use flaway 6.x given to us from boot -->
@@ -91,10 +85,12 @@
 
 		<jacoco-maven-plugin.version>0.7.9</jacoco-maven-plugin.version>
 		<sonar-maven-plugin.version>3.0.2</sonar-maven-plugin.version>
-		<checkstyle.config.location>src/checkstyle/checkstyle.xml</checkstyle.config.location>
 		<semver.version>2.2.0</semver.version>
 		<apache-directory-server.version>1.5.5</apache-directory-server.version>
 		<codearte-props2yml.version>0.5</codearte-props2yml.version>
+		<json-unit.version>2.11.1</json-unit.version>
+		<docker-compose-rule.version>1.4.2</docker-compose-rule.version>
+		<findbugs.version>3.0.2</findbugs.version>
 	</properties>
 	<modules>
 		<module>spring-cloud-dataflow-configuration-metadata</module>
@@ -129,13 +125,6 @@
 			</dependency>
 			<dependency>
 				<groupId>org.springframework.cloud</groupId>
-				<artifactId>spring-cloud-dependencies</artifactId>
-				<version>${spring-cloud.version}</version>
-				<type>pom</type>
-				<scope>import</scope>
-			</dependency>
-			<dependency>
-				<groupId>org.springframework.cloud</groupId>
 				<artifactId>spring-cloud-skipper-dependencies</artifactId>
 				<version>${spring-cloud-skipper.version}</version>
 				<type>pom</type>
@@ -144,7 +133,7 @@
 			<dependency>
 				<groupId>org.springframework.cloud</groupId>
 				<artifactId>spring-cloud-dataflow-dependencies</artifactId>
-				<version>2.3.0.BUILD-SNAPSHOT</version>
+				<version>2.5.0.BUILD-SNAPSHOT</version>
 				<type>pom</type>
 				<scope>import</scope>
 			</dependency>
@@ -248,6 +237,21 @@
 				<artifactId>spring-security-oauth2</artifactId>
 				<version>${spring-security-oauth2.version}</version>
 			</dependency>
+			<dependency>
+				<groupId>net.javacrumbs.json-unit</groupId>
+				<artifactId>json-unit-assertj</artifactId>
+				<version>${json-unit.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>com.palantir.docker.compose</groupId>
+				<artifactId>docker-compose-junit-jupiter</artifactId>
+				<version>${docker-compose-rule.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>com.google.code.findbugs</groupId>
+				<artifactId>jsr305</artifactId>
+				<version>${findbugs.version}</version>
+			</dependency>
 		</dependencies>
 	</dependencyManagement>
 	<build>
@@ -288,26 +292,8 @@
 				</executions>
 			</plugin>
 			<plugin>
-				<!-- Note: Change ./spring-cloud-dataflow-server-local/pom.xml to match changes here -->
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-checkstyle-plugin</artifactId>
-				<executions>
-					<execution>
-						<id>checkstyle-validation</id>
-						<phase>validate</phase>
-						<configuration>
-							<encoding>UTF-8</encoding>
-							<!--<failsOnError>true</failsOnError>-->
-							<failOnViolation>true</failOnViolation>
-							<violationSeverity>warning</violationSeverity>
-							<includeTestSourceDirectory>true</includeTestSourceDirectory>
-							<configLocation>${checkstyle.config.location}</configLocation>
-						</configuration>
-						<goals>
-							<goal>check</goal>
-						</goals>
-					</execution>
-				</executions>
 			</plugin>
 		</plugins>
 		<pluginManagement>
@@ -337,22 +323,6 @@
 					<artifactId>maven-source-plugin</artifactId>
 					<version>3.0.1</version>
 				</plugin>
-				<plugin>
-					<groupId>org.apache.maven.plugins</groupId>
-					<artifactId>maven-javadoc-plugin</artifactId>
-					<version>2.10.4</version>
-					<executions>
-						<execution>
-							<id>attach-javadocs</id>
-							<goals>
-								<goal>jar</goal>
-							</goals>
-							<configuration>
-								<additionalparam>${javadoc.opts}</additionalparam>
-							</configuration>
-						</execution>
-					</executions>
-				</plugin>
 			</plugins>
 		</pluginManagement>
 	</build>
@@ -366,6 +336,38 @@
 		</plugins>
 	</reporting>
 	<profiles>
+		<profile>
+			<id>deploymentfiles</id>
+			<build>
+				<plugins>
+					<plugin>
+						<artifactId>maven-resources-plugin</artifactId>
+						<executions>
+							<execution>
+								<id>replace-deployment-files</id>
+								<phase>process-resources</phase>
+								<goals>
+									<goal>copy-resources</goal>
+								</goals>
+								<configuration>
+									<overwrite>true</overwrite>
+									<outputDirectory>${basedir}/src</outputDirectory>
+									<resources>
+										<resource>
+											<directory>${basedir}/src/templates</directory>
+											<includes>
+												<include>**/*</include>
+											</includes>
+											<filtering>true</filtering>
+										</resource>
+									</resources>
+								</configuration>
+							</execution>
+						</executions>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
 		<profile>
 			<id>spring</id>
 			<repositories>

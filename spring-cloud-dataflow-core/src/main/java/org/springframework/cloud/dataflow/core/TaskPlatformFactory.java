@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 the original author or authors.
+ * Copyright 2019-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,10 +19,13 @@ package org.springframework.cloud.dataflow.core;
 /**
  * @author David Turanski
  * @author Ilayaperumal Gopinathan
+ * @author Glenn Renfro
  **/
 public interface TaskPlatformFactory {
 
 	String CLOUDFOUNDRY_PLATFORM_TYPE = "Cloud Foundry";
+	String KUBERNETES_PLATFORM_TYPE = "Kubernetes";
+	String LOCAL_PLATFORM_TYPE = "Local";
 
 	/**
 	 * Create the {@link TaskPlatform} instance with the launchers.

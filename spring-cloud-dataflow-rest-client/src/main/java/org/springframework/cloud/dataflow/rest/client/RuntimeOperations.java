@@ -17,6 +17,7 @@
 package org.springframework.cloud.dataflow.rest.client;
 
 import org.springframework.cloud.dataflow.rest.resource.AppStatusResource;
+import org.springframework.cloud.dataflow.rest.resource.StreamStatusResource;
 import org.springframework.hateoas.PagedModel;
 
 /**
@@ -37,4 +38,10 @@ public interface RuntimeOperations {
 	 * @return the runtime information about a single app deployment.
 	 */
 	AppStatusResource status(String deploymentId);
+
+	/**
+	 * @param streamNames deployed stream names
+	 * @return the runtime information about the deployed streams their apps and instances.
+	 */
+	PagedModel<StreamStatusResource> streamStatus(String... streamNames);
 }

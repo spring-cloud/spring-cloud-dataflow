@@ -198,7 +198,7 @@ spring:
 ----
 
 [start=4]
-. Alternatively, you can build a custom Spring CLoud Data Flow server with your build files.
+. Alternatively, you can build a custom Spring Cloud Data Flow server with your build files.
 There are examples of a custom server builds in our https://github.com/spring-cloud/spring-cloud-dataflow-samples/tree/master/custom-dataflow-builds[samples repo] if there is a need to add a driver jars.
 
 [[configuration-local-deployer]]
@@ -702,6 +702,7 @@ spring:
             # Running Applications
 
             - GET    /runtime/streams                => hasRole('ROLE_VIEW')
+            - GET    /runtime/streams/**             => hasRole('ROLE_VIEW')
             - GET    /runtime/apps                   => hasRole('ROLE_VIEW')
             - GET    /runtime/apps/**                => hasRole('ROLE_VIEW')
 
@@ -1040,7 +1041,7 @@ Finally startup Spring Cloud Data Flow:
 
 [source,bash]
 ----
-java -jar spring-cloud-dataflow/spring-cloud-dataflow-server/target/spring-cloud-dataflow-server-2.3.0.BUILD-SNAPSHOT.jar --spring.config.additional-location=scdf.yml
+java -jar spring-cloud-dataflow/spring-cloud-dataflow-server/target/spring-cloud-dataflow-server-2.4.0.BUILD-SNAPSHOT.jar --spring.config.additional-location=scdf.yml
 ----
 
 [[configuration-security-role-mapping]]

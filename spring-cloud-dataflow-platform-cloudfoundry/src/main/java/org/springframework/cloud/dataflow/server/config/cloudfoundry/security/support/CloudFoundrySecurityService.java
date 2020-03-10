@@ -25,6 +25,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.cloud.common.security.core.support.OAuth2TokenUtilsService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.RequestEntity;
+import org.springframework.security.oauth2.client.OAuth2RestTemplate;
 import org.springframework.util.Assert;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.HttpServerErrorException;
@@ -71,7 +72,11 @@ public class CloudFoundrySecurityService {
 	 */
 	public boolean isSpaceDeveloper() {
 		final String accessToken = this.oauth2TokenUtilsService.getAccessTokenOfAuthenticatedUser();
-		logger.info("The accessToken is: " + accessToken);
+		return isSpaceDeveloper(accessToken);
+	}
+
+	public boolean isSpaceDeveloper(String accessToken) {
+		Assert.hasText(accessToken, "The accessToken must not be null or empty.");
 		final AccessLevel accessLevel = getAccessLevel(
 				accessToken, applicationId);
 

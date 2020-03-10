@@ -114,6 +114,7 @@ public class AuditRecordsDocumentation extends BaseDocumentation {
 					fieldWithPath("createdOn").description("The creation date of the audit record"),
 					fieldWithPath("auditAction").description("The action of the audit record"),
 					fieldWithPath("auditOperation").description("The operation of the audit record"),
+					fieldWithPath("platformName").description("The platform name of the audit record"),
 					subsectionWithPath("_links.self").description("Link to the audit record resource")
 				)
 			));

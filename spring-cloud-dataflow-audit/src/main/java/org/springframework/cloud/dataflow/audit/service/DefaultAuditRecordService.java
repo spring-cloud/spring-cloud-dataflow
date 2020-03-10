@@ -64,7 +64,7 @@ public class DefaultAuditRecordService implements AuditRecordService {
 	@Override
 	public AuditRecord populateAndSaveAuditRecord(AuditOperationType auditOperationType,
 			AuditActionType auditActionType,
-			String correlationId, String data) {
+			String correlationId, String data, String platformName) {
 		Assert.notNull(auditActionType, "auditActionType must not be null.");
 		Assert.notNull(auditOperationType, "auditOperationType must not be null.");
 
@@ -73,13 +73,14 @@ public class DefaultAuditRecordService implements AuditRecordService {
 		auditRecord.setAuditOperation(auditOperationType);
 		auditRecord.setCorrelationId(correlationId);
 		auditRecord.setAuditData(data);
+		auditRecord.setPlatformName(platformName);
 		return this.auditRecordRepository.save(auditRecord);
 	}
 
 	@Override
 	public AuditRecord populateAndSaveAuditRecordUsingMapData(AuditOperationType auditOperationType,
 			AuditActionType auditActionType,
-			String correlationId, Map<String, Object> data) {
+			String correlationId, Map<String, Object> data, String platformName) {
 		String dataAsString;
 		try {
 			dataAsString = objectMapper.writeValueAsString(data);
@@ -88,7 +89,7 @@ public class DefaultAuditRecordService implements AuditRecordService {
 			logger.error("Error serializing audit record data.  Data = " + data);
 			dataAsString = "Error serializing audit record data.  Data = " + data;
 		}
-		return this.populateAndSaveAuditRecord(auditOperationType, auditActionType, correlationId, dataAsString);
+		return this.populateAndSaveAuditRecord(auditOperationType, auditActionType, correlationId, dataAsString, platformName);
 	}
 
 	@Override

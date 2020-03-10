@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.cloud.dataflow.server.controller.support;
+package org.springframework.cloud.dataflow.core;
 
 import java.util.List;
 import java.util.Map;
