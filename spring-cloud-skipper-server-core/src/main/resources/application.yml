@@ -58,7 +58,7 @@ spring:
       security:
         authorization:
           enabled: true
-          permit-all-paths: "/authenticate,/security/info,/features,/assets/**,/dashboard/logout-success-oauth.html"
+          permit-all-paths: "/actuator/health,/authenticate,/security/info,/features,/assets/**,/dashboard/logout-success-oauth.html"
           authenticated-paths: "/,/api"
           rules:
             # About
