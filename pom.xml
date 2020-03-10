@@ -22,7 +22,7 @@
 		<maven.compiler.target>${java.version}</maven.compiler.target>
 		<main.basedir>${basedir}</main.basedir>
 		<docs.main>${project.artifactId}</docs.main>
-		<spring-boot.version>2.2.4.RELEASE</spring-boot.version>
+		<spring-boot.version>2.2.5.RELEASE</spring-boot.version>
 		<docs.resources.dir>${project.build.directory}/build-docs</docs.resources.dir>
 		<refdocs.build.directory>${project.build.directory}/refdocs/</refdocs.build.directory>
 		<spring-doc-resources.version>0.1.0.RELEASE</spring-doc-resources.version>
