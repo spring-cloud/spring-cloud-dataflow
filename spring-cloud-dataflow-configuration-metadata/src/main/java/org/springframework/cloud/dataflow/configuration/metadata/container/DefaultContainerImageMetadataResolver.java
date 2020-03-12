@@ -16,6 +16,8 @@
 
 package org.springframework.cloud.dataflow.configuration.metadata.container;
 
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -30,6 +32,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.Assert;
+import org.springframework.util.StringUtils;
 import org.springframework.web.client.RestTemplate;
 
 /**
@@ -39,6 +42,10 @@ import org.springframework.web.client.RestTemplate;
  * @author Christian Tzolov
  */
 public class DefaultContainerImageMetadataResolver implements ContainerImageMetadataResolver {
+
+	private static final List<String> SUPPORTED_MANIFEST_MEDIA_TYPES =
+			Collections.unmodifiableList(Arrays.asList(ContainerImageMetadataProperties.OCI_IMAGE_MANIFEST_MEDIA_TYPE,
+					ContainerImageMetadataProperties.DOCKER_IMAGE_MANIFEST_MEDIA_TYPE));
 
 	private final ContainerImageParser containerImageParser;
 	private final Map<RegistryConfiguration.AuthorizationType, RegistryAuthorizer> registryAuthorizerMap;
@@ -84,44 +91,52 @@ public class DefaultContainerImageMetadataResolver implements ContainerImageMeta
 	@Override
 	public Map<String, String> getImageLabels(String imageName) {
 
+		if (!StringUtils.hasText(imageName)) {
+			throw new AppMetadataResolutionException("Null or empty image name");
+		}
+
 		RegistryRequest registryRequest = this.getRegistryRequest(imageName);
 
 		Map manifest = this.getImageManifest(registryRequest, Map.class);
+
+		if (!isNotNullMap(manifest.get("config"))) {
+			throw new AppMetadataResolutionException(
+					String.format("Image [%s] has incorrect or missing manifest config element: %s",
+							imageName, manifest.toString()));
+		}
 		String configDigest = ((Map<String, String>) manifest.get("config")).get("digest");
+
+		if (!StringUtils.hasText(configDigest)) {
+			throw new AppMetadataResolutionException(
+					String.format("Missing or invalid Configuration Digest: [%s] for image [%s]", configDigest, imageName));
+		}
 
 		String configBlob = this.getImageBlob(registryRequest.getContainerImage(), registryRequest.getAuthHttpHeaders(),
 				configDigest, String.class);
 
+		// Parse the config blob string into JSON instance.
 		try {
 			Map<String, Object> configBlobMap = new ObjectMapper().readValue(configBlob, Map.class);
-			return (Map<String, String>) ((Map<String, Object>) configBlobMap.get("config")).get("Labels");
+
+			if (!isNotNullMap(configBlobMap.get("config"))) {
+				throw new AppMetadataResolutionException(
+						String.format("Configuration json for image [%s] with digest [%s] has incorrect Config Blog element",
+								imageName, configDigest));
+			}
+
+			Map<String, Object> configElement = (Map<String, Object>) configBlobMap.get("config");
+
+			return isNotNullMap(configElement.get("Labels")) ?
+					(Map<String, String>) configElement.get("Labels") : Collections.emptyMap();
 		}
 		catch (JsonProcessingException e) {
 			throw new AppMetadataResolutionException("Unable to extract the labels from the Config blob", e);
 		}
+
 	}
 
-	@Override
-	public Map<String, Object> getImageConfig(String imageName) {
-		return (Map<String, Object>) this.getImageManifest(
-				this.getRegistryRequest(imageName), Map.class).get("config");
-	}
-
-	@Override
-	public String getImageManifest(String imageName) {
-		return this.getImageManifest(this.getRegistryRequest(imageName), String.class);
-	}
-
-	@Override
-	public String[] getImageTags(String imageName) {
-		RegistryRequest registryRequest = this.getRegistryRequest(imageName);
-
-		// Docker Registry HTTP V2 API image tags list
-		ResponseEntity<Map> tagList = getRestTemplate().exchange("https://{registryHost}/v2/{repository}/tags/list",
-				HttpMethod.GET, new HttpEntity<>(registryRequest.getAuthHttpHeaders()), Map.class,
-				registryRequest.getContainerImage().getRegistryHost(),
-				registryRequest.getContainerImage().getRepository());
-		return (String[]) tagList.getBody().get("tags");
+	private boolean isNotNullMap(Object object) {
+		return object != null && (object instanceof Map);
 	}
 
 	protected RestTemplate getRestTemplate() {
@@ -129,7 +144,6 @@ public class DefaultContainerImageMetadataResolver implements ContainerImageMeta
 	}
 
 	private RegistryRequest getRegistryRequest(String imageName) {
-		Assert.hasText(imageName, "Non empty image name is required!");
 
 		// Convert the image name into a well-formed ContainerImage
 		ContainerImage containerImage = this.containerImageParser.parse(imageName);
@@ -159,8 +173,12 @@ public class DefaultContainerImageMetadataResolver implements ContainerImageMeta
 
 	private <T> T getImageManifest(RegistryRequest registryRequest, Class<T> responseClassType) {
 
+		String imageManifestMediaType = registryRequest.getRegistryConf().getManifestMediaType();
+		if (!SUPPORTED_MANIFEST_MEDIA_TYPES.contains(imageManifestMediaType)) {
+			throw new AppMetadataResolutionException("Not supported image manifest media type:" + imageManifestMediaType);
+		}
 		HttpHeaders httpHeaders = new HttpHeaders(registryRequest.getAuthHttpHeaders());
-		httpHeaders.set(HttpHeaders.ACCEPT, registryRequest.getRegistryConf().getManifestMediaType());
+		httpHeaders.set(HttpHeaders.ACCEPT, imageManifestMediaType);
 
 		// Docker Registry HTTP V2 API pull manifest
 		ResponseEntity<T> manifest = getRestTemplate().exchange("https://{registryHost}/v2/{repository}/manifests/{tag}",

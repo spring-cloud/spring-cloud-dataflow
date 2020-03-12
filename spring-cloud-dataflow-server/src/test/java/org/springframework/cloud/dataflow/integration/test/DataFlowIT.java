@@ -235,10 +235,10 @@ public class DataFlowIT {
 
 		// Docker app with container image metadata
 		dataFlowOperations.appRegistryOperations().register("docker-app-with-container-metadata", ApplicationType.sink,
-				"docker:springcloudstream/rabbit-sink-rabbit:latest", null, true);
+				"docker:springcloudstream/time-source-kafka:2.1.2.BUILD-SNAPSHOT", null, true);
 		DetailedAppRegistrationResource dockerAppWithContainerMetadata = dataFlowOperations.appRegistryOperations()
 				.info("docker-app-with-container-metadata", ApplicationType.sink, false);
-		assertThat(dockerAppWithContainerMetadata.getOptions()).hasSize(19);
+		assertThat(dockerAppWithContainerMetadata.getOptions()).hasSize(6);
 
 		// Docker app without metadata
 		dataFlowOperations.appRegistryOperations().register("docker-app-without-metadata", ApplicationType.sink,

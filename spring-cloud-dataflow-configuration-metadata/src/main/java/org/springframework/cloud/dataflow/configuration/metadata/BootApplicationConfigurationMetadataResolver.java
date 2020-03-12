@@ -50,11 +50,13 @@ import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
 /**
- * An {@link ApplicationConfigurationMetadataResolver} that knows how to look inside
- * Spring Boot uber-jars.
+ * An {@link ApplicationConfigurationMetadataResolver} that knows how to look either inside Spring Boot uber-jars
+ * or an application Container Image's configuration labels.
+ *
  * <p>
- * Supports Boot 1.3 and 1.4+ layouts thanks to a pluggable BootClassLoaderCreation
- * strategy.
+ * Supports Boot 1.3 and 1.4+ layouts thanks to a pluggable BootClassLoaderCreation strategy.
+ * <p>
+ * Supports Docker and OCI image format for retrieving the metadata.
  *
  * @author Eric Bottard
  * @author Christian Tzolov
@@ -124,32 +126,7 @@ public class BootApplicationConfigurationMetadataResolver extends ApplicationCon
 		try {
 			if (app != null) {
 				if (isDockerSchema(app.getURI())) {
-					String imageName = app.getURI().getSchemeSpecificPart();
-
-					Map<String, String> labels = this.containerImageMetadataResolver.getImageLabels(imageName);
-					if (CollectionUtils.isEmpty(labels)) {
-						return Collections.emptyList();
-					}
-
-					String encodedMetadata = labels.get(CONTAINER_IMAGE_CONFIGURATION_METADATA_LABEL_NAME);
-					if (!StringUtils.hasText(encodedMetadata)) {
-						return Collections.emptyList();
-					}
-
-					String metadataJson = new String(Base64.getDecoder().decode(encodedMetadata.getBytes()));
-
-					try {
-						ConfigurationMetadataRepository configurationMetadataRepository =
-								ConfigurationMetadataRepositoryJsonBuilder.create().withJsonResource(new ByteArrayInputStream(metadataJson.getBytes())).build();
-
-						List<ConfigurationMetadataProperty> result = configurationMetadataRepository.getAllProperties().entrySet().stream()
-								.map(e -> e.getValue())
-								.collect(Collectors.toList());
-						return result;
-					}
-					catch (Exception e) {
-						throw new AppMetadataResolutionException("Invalid Metadata JSON format: " + metadataJson);
-					}
+					return resolvePropertiesFromContainerImage(app.getURI());
 				}
 				else {
 					Archive archive = resolveAsArchive(app);
@@ -166,6 +143,36 @@ public class BootApplicationConfigurationMetadataResolver extends ApplicationCon
 
 	private boolean isDockerSchema(URI uri) {
 		return uri != null && uri.getScheme() != null && uri.getScheme().contains("docker");
+	}
+
+	private List<ConfigurationMetadataProperty> resolvePropertiesFromContainerImage(URI imageUri) {
+		String imageName = imageUri.getSchemeSpecificPart();
+
+		Map<String, String> labels = this.containerImageMetadataResolver.getImageLabels(imageName);
+		if (CollectionUtils.isEmpty(labels)) {
+			return Collections.emptyList();
+		}
+
+		String encodedMetadata = labels.get(CONTAINER_IMAGE_CONFIGURATION_METADATA_LABEL_NAME);
+		if (!StringUtils.hasText(encodedMetadata)) {
+			return Collections.emptyList();
+		}
+
+		try {
+			String metadataJson = new String(Base64.getDecoder().decode(encodedMetadata.getBytes()));
+
+			ConfigurationMetadataRepository configurationMetadataRepository =
+					ConfigurationMetadataRepositoryJsonBuilder.create().withJsonResource(
+							new ByteArrayInputStream(metadataJson.getBytes())).build();
+
+			List<ConfigurationMetadataProperty> result = configurationMetadataRepository.getAllProperties().entrySet().stream()
+					.map(e -> e.getValue())
+					.collect(Collectors.toList());
+			return result;
+		}
+		catch (Exception e) {
+			throw new AppMetadataResolutionException("Invalid Metadata for " + imageName);
+		}
 	}
 
 	public List<ConfigurationMetadataProperty> listProperties(Archive archive, boolean exhaustive) {

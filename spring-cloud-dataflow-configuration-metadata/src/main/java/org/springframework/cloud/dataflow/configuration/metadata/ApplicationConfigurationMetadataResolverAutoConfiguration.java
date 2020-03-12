@@ -23,7 +23,6 @@ import org.springframework.cloud.dataflow.configuration.metadata.container.Conta
 import org.springframework.cloud.dataflow.configuration.metadata.container.ContainerImageMetadataResolver;
 import org.springframework.cloud.dataflow.configuration.metadata.container.ContainerImageParser;
 import org.springframework.cloud.dataflow.configuration.metadata.container.DefaultContainerImageMetadataResolver;
-import org.springframework.cloud.dataflow.configuration.metadata.container.RegistryConfiguration;
 import org.springframework.cloud.dataflow.configuration.metadata.container.authorization.AwsEcrAuthorizer;
 import org.springframework.cloud.dataflow.configuration.metadata.container.authorization.BasicAuthRegistryAuthorizer;
 import org.springframework.cloud.dataflow.configuration.metadata.container.authorization.DockerHubRegistryAuthorizer;
@@ -65,15 +64,7 @@ public class ApplicationConfigurationMetadataResolverAutoConfiguration {
 	@Bean
 	@Validated
 	public ContainerImageMetadataProperties containerImageMetadataProperties() {
-		ContainerImageMetadataProperties properties = new ContainerImageMetadataProperties();
-
-		// Add the DockerHub registry configuration by default.
-		RegistryConfiguration dockerHubAuthConfig = new RegistryConfiguration();
-		dockerHubAuthConfig.setRegistryHost(ContainerImageMetadataProperties.DOCKER_HUB_HOST);
-		dockerHubAuthConfig.setAuthorizationType(RegistryConfiguration.AuthorizationType.dockerhub);
-		properties.getRegistryConfigurations().add(dockerHubAuthConfig);
-
-		return properties;
+		return new ContainerImageMetadataProperties();
 	}
 
 	@Bean

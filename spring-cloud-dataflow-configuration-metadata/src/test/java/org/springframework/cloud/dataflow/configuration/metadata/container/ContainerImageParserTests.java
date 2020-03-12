@@ -14,12 +14,9 @@
  * limitations under the License.
  */
 
-package org.springframework.cloud.dataflow.configuration.metadata.container.parser;
+package org.springframework.cloud.dataflow.configuration.metadata.container;
 
 import org.junit.Test;
-
-import org.springframework.cloud.dataflow.configuration.metadata.container.ContainerImage;
-import org.springframework.cloud.dataflow.configuration.metadata.container.ContainerImageParser;
 
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;

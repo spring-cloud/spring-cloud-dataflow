@@ -29,22 +29,4 @@ public interface ContainerImageMetadataResolver {
 	 * @return Returns map of all image configuration labels.
 	 */
 	Map<String, String> getImageLabels(String imageName);
-
-	/**
-	 * @param imageName container image name
-	 * @return Returns image's configuration object structured as nested Maps.
-	 */
-	Map<String, Object> getImageConfig(String imageName);
-
-	/**
-	 * @param imageName container image name
-	 * @return Returns the image's manifest as JSON.
-	 */
-	String getImageManifest(String imageName);
-
-	/**
-	 * @param imageName container image name
-	 * @return Returns all image tags.
-	 */
-	String[] getImageTags(String imageName);
 }

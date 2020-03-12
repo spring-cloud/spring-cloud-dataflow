@@ -196,4 +196,8 @@ spring:
             # Tools
 
             - POST   /tools/**                       => hasRole('ROLE_VIEW')
-
+      container:
+        metadata:
+          registry-configurations:
+            - registry-host: registry-1.docker.io
+              authorization-type: dockerhub
