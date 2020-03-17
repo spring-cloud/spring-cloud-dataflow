@@ -83,7 +83,7 @@ public class TaskSchedulerCommands implements CommandMarker {
 			@CliOption(key = {
 					"arguments" }, help = "command line args (space separated string eg.: --arguments 'a b c d'") String arguments) {
 		Map<String, String> params = DeploymentPropertiesUtils.parse(properties);
-		List<String> args = DeploymentPropertiesUtils.parseParamList(arguments, " ");
+		List<String> args = DeploymentPropertiesUtils.parseArgumentList(arguments, " ");
 		params.put("scheduler.cron.expression", expression);
 
 		scheduleOperations().schedule(name, definitionName, params, args);
