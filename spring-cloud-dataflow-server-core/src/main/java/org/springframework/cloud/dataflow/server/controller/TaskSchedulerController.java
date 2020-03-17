@@ -150,7 +150,7 @@ public class TaskSchedulerController {
 			@RequestParam String properties,
 			@RequestParam(required = false) String arguments) {
 		Map<String, String> propertiesToUse = DeploymentPropertiesUtils.parse(properties);
-		List<String> argumentsToUse = DeploymentPropertiesUtils.parseParamList(arguments, " ");
+		List<String> argumentsToUse = DeploymentPropertiesUtils.parseArgumentList(arguments, " ");
 		this.schedulerService.schedule(StringUtils.trim(scheduleName), taskDefinitionName, propertiesToUse, argumentsToUse);
 	}
 
