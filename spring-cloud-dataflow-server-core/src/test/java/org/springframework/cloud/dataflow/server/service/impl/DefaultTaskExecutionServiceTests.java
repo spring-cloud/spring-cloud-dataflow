@@ -77,7 +77,9 @@ import org.springframework.cloud.dataflow.server.service.TaskValidationService;
 import org.springframework.cloud.dataflow.server.service.ValidationStatus;
 import org.springframework.cloud.deployer.spi.core.AppDefinition;
 import org.springframework.cloud.deployer.spi.core.AppDeploymentRequest;
+import org.springframework.cloud.deployer.spi.task.LaunchState;
 import org.springframework.cloud.deployer.spi.task.TaskLauncher;
+import org.springframework.cloud.deployer.spi.task.TaskStatus;
 import org.springframework.cloud.task.repository.TaskExecution;
 import org.springframework.cloud.task.repository.TaskExplorer;
 import org.springframework.cloud.task.repository.TaskRepository;
@@ -217,6 +219,7 @@ public abstract class DefaultTaskExecutionServiceTests {
 			assertNotNull("TaskDeployment createdOn field should not be null", taskDeployment.getCreatedOn());
 		}
 	}
+
 	@TestPropertySource(properties = { "spring.cloud.dataflow.task.maximum-concurrent-tasks=10" })
 	@AutoConfigureTestDatabase(replace = Replace.ANY)
 	public static class CICDTaskTests extends DefaultTaskExecutionServiceTests {
@@ -226,6 +229,7 @@ public abstract class DefaultTaskExecutionServiceTests {
 		@Before
 		public void setup() {
 			this.launcher = this.launcherRepository.save(new Launcher("default", "local", taskLauncher));
+
 			taskDefinitionRepository.save(new TaskDefinition(TASK_NAME_ORIG, "demo"));
 			taskDefinitionRepository.findAll();
 		}
@@ -340,6 +344,49 @@ public abstract class DefaultTaskExecutionServiceTests {
 
 		@Test
 		@DirtiesContext
+		public void testUpgradeDueToDeploymentPropsChangeForCloudFoundryFailsWhenAlreadyRunning() throws IOException {
+			this.launcherRepository.delete(this.launcher);
+			this.launcherRepository.save(new Launcher("default", "Cloud Foundry", taskLauncher));
+			initializeSuccessfulRegistry(appRegistry);
+			TaskExecution myTask = this.taskRepository.createTaskExecution(TASK_NAME_ORIG);
+			TaskManifest manifest = new TaskManifest();
+			manifest.setPlatformName("default");
+			AppDeploymentRequest request = new AppDeploymentRequest(new AppDefinition("some-name", null),
+					new FileUrlResource("src/test/resources/apps/foo-task"));
+			manifest.setTaskDeploymentRequest(request);
+			this.dataflowTaskExecutionMetadataDao.save(myTask, manifest);
+			this.taskRepository.startTaskExecution(myTask.getExecutionId(), TASK_NAME_ORIG, new Date(), new ArrayList<>(), null);
+			this.taskRepository.updateExternalExecutionId(myTask.getExecutionId(), "abc");
+			when(this.taskLauncher.launch(any())).thenReturn("abc");
+			when(this.taskLauncher.status("abc")).thenReturn(new TaskStatus("abc", LaunchState.running,new HashMap<>()));
+			thrown.expect(IllegalStateException.class);
+			thrown.expectMessage("Unable to update application due to currently running applications");
+			this.taskExecutionService.executeTask(TASK_NAME_ORIG, new HashMap<>(), new LinkedList<>());
+		}
+
+		@Test
+		@DirtiesContext
+		public void testUpgradeDueToDeploymentPropsChangeForCloudFoundrySucceedsIfNotReallyRunning() throws IOException {
+			this.launcherRepository.delete(this.launcher);
+			this.launcherRepository.save(new Launcher("default", "Cloud Foundry", taskLauncher));
+			initializeSuccessfulRegistry(appRegistry);
+			TaskExecution myTask = this.taskRepository.createTaskExecution(TASK_NAME_ORIG);
+			TaskManifest manifest = new TaskManifest();
+			manifest.setPlatformName("default");
+			AppDeploymentRequest request = new AppDeploymentRequest(new AppDefinition("some-name", null),
+					new FileUrlResource("src/test/resources/apps/foo-task"));
+			manifest.setTaskDeploymentRequest(request);
+			this.dataflowTaskExecutionMetadataDao.save(myTask, manifest);
+			this.taskRepository.startTaskExecution(myTask.getExecutionId(), TASK_NAME_ORIG, new Date(), new ArrayList<>(), null);
+			this.taskRepository.updateExternalExecutionId(myTask.getExecutionId(), "abc");
+			when(this.taskLauncher.launch(any())).thenReturn("abc");
+			when(this.taskLauncher.status("abc")).thenReturn(new TaskStatus("abc", LaunchState.failed, new HashMap<>()));
+			this.taskExecutionService.executeTask(TASK_NAME_ORIG, new HashMap<>(), new LinkedList<>());
+			verify(this.taskLauncher).destroy(TASK_NAME_ORIG);
+		}
+
+		@Test
+		@DirtiesContext
 		public void testUpgradeDueToDeploymentPropsChangeForOther() throws IOException {
 			setupUpgradeDueToDeploymentPropsChangeForCloudFoundry();
 			verify(this.taskLauncher, times(0)).destroy(TASK_NAME_ORIG);
@@ -356,6 +403,7 @@ public abstract class DefaultTaskExecutionServiceTests {
 			this.dataflowTaskExecutionMetadataDao.save(myTask, manifest);
 			this.taskRepository.startTaskExecution(myTask.getExecutionId(), TASK_NAME_ORIG, new Date(), new ArrayList<>(), null);
 			this.taskRepository.completeTaskExecution(myTask.getExecutionId(), 0, new Date(), null);
+			this.taskRepository.updateExternalExecutionId(myTask.getExecutionId(), "0");
 
 			initializeSuccessfulRegistry(appRegistry);
 
