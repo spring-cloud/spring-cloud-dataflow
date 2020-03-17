@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2018 the original author or authors.
+ * Copyright 2017-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -46,6 +46,7 @@ import org.springframework.util.StringUtils;
  * @author Janne Valkealahti
  * @author Christian Tzolov
  * @author Gunnar Hillert
+ * @author Ilayaperumal Gopinathan
  */
 public final class DeploymentPropertiesUtils {
 
@@ -54,6 +55,9 @@ public final class DeploymentPropertiesUtils {
 	 */
 	private static final Pattern DEPLOYMENT_PARAMS_PATTERN = Pattern
 			.compile("(\\s(?=" + "([^\\\"']*[\\\"'][^\\\"']*[\\\"'])*[^\\\"']*$))");
+
+
+	private static final String[] DEPLOYMENT_PROPERTIES_PREFIX ={"deployer", "app", "version", "scheduler"};
 
 	private DeploymentPropertiesUtils() {
 		// prevent instantiation
@@ -104,6 +108,50 @@ public final class DeploymentPropertiesUtils {
 		// get raw candidates as simple comma split
 		String[] candidates = StringUtils.delimitedListToStringArray(s, delimiter);
 		for (int i = 0; i < candidates.length; i++) {
+			if (i > 0 && !candidates[i].contains("=") || (i > 0 && candidates[i].contains("=") && !startsWithDeploymentPropertyPrefix(candidates[i]))) {
+				// we don't have '=' so this has to be latter parts of
+				// a comma delimited value, append it to previously added
+				// key/value pair.
+				// we skip first as we would not have anything to append to. this
+				// would happen if dep prop string is malformed and first given
+				// key/value pair is not actually a key/value.
+				pairs.set(pairs.size() - 1, pairs.get(pairs.size() - 1) + delimiter + candidates[i]);
+			}
+			else {
+				// we have a key/value pair having '=', or malformed first pair
+				if (!startsWithDeploymentPropertyPrefix(candidates[i])) {
+					throw new IllegalArgumentException(
+							"Only deployment property keys starting with 'app.' or 'scheduler' or 'deployer.'  or 'version.'" +
+									" allowed.");
+				}
+				pairs.add(candidates[i]);
+			}
+		}
+
+		return pairs;
+	}
+
+
+	/**
+	 * Parses a String comprised of 0 or more delimited key=value pairs where each key
+	 * has the format: {@code app.[appname].[key]} or {@code deployer.[appname].[key]}. Values
+	 * may themselves contain commas, since the split points will be based upon the key
+	 * pattern.
+	 * <p>
+	 * Logic of parsing key/value pairs from a string is based on few rules and assumptions 1.
+	 * keys will not have commas or equals. 2. First raw split is done by commas which will
+	 * need to be fixed later if value is a comma-delimited list.
+	 *
+	 * @param s the string to parse
+	 * @param delimiter delimiter used to split the string into pairs
+	 * @return the List key=value pairs
+	 */
+	public static List<String> parseArgumentList(String s, String delimiter) {
+		ArrayList<String> pairs = new ArrayList<>();
+
+		// get raw candidates as simple comma split
+		String[] candidates = StringUtils.delimitedListToStringArray(s, delimiter);
+		for (int i = 0; i < candidates.length; i++) {
 			if (i > 0 && !candidates[i].contains("=")) {
 				// we don't have '=' so this has to be latter parts of
 				// a comma delimited value, append it to previously added
@@ -120,6 +168,19 @@ public final class DeploymentPropertiesUtils {
 		}
 
 		return pairs;
+	}
+
+
+	private static boolean startsWithDeploymentPropertyPrefix(String candidate) {
+		for (String deploymentPropertyPrefix: DEPLOYMENT_PROPERTIES_PREFIX) {
+			if (StringUtils.hasText(candidate)) {
+				String prefix = candidate.trim().startsWith("--") ? candidate.trim().substring(2) : candidate.trim();
+				if (prefix.startsWith(deploymentPropertyPrefix)) {
+					return true;
+				}
+			}
+		}
+		return false;
 	}
 
 	/**
