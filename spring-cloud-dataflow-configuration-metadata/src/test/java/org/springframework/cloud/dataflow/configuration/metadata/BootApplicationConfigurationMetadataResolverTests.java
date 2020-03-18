@@ -22,6 +22,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.text.StringEscapeUtils;
 import org.hamcrest.Matcher;
 import org.junit.Before;
 import org.junit.Test;
@@ -32,7 +33,6 @@ import org.springframework.boot.configurationmetadata.ConfigurationMetadataPrope
 import org.springframework.cloud.dataflow.configuration.metadata.container.ContainerImageMetadataResolver;
 import org.springframework.cloud.deployer.resource.docker.DockerResource;
 import org.springframework.core.io.ClassPathResource;
-import org.springframework.util.Base64Utils;
 import org.springframework.util.StreamUtils;
 
 import static org.hamcrest.Matchers.hasItem;
@@ -74,7 +74,7 @@ public class BootApplicationConfigurationMetadataResolverTests {
 		byte[] bytes = StreamUtils.copyToByteArray(new ClassPathResource(
 				"apps/no-whitelist/META-INF/spring-configuration-metadata.json", getClass()).getInputStream());
 		when(containerImageMetadataResolver.getImageLabels("test/test:latest"))
-				.thenReturn(Collections.singletonMap("spring.configuration.metadata", Base64Utils.encodeToString(bytes)));
+				.thenReturn(Collections.singletonMap("org.springframework.cloud.dataflow.spring-configuration-metadata.json", StringEscapeUtils.escapeJson(new String(bytes))));
 		List<ConfigurationMetadataProperty> properties = resolver.listProperties(new DockerResource("test/test:latest"));
 		assertThat(properties.size(), is(3));
 	}
@@ -82,7 +82,7 @@ public class BootApplicationConfigurationMetadataResolverTests {
 	@Test(expected = AppMetadataResolutionException.class)
 	public void appDockerResourceBrokenFormat() {
 		byte[] bytes = "Invalid metadata json content1".getBytes();
-		Map<String, String> result = Collections.singletonMap("spring.configuration.metadata", Base64Utils.encodeToString(bytes));
+		Map<String, String> result = Collections.singletonMap("org.springframework.cloud.dataflow.spring-configuration-metadata.json", StringEscapeUtils.escapeJson(new String(bytes)));
 		when(containerImageMetadataResolver.getImageLabels("test/test:latest")).thenReturn(result);
 		resolver.listProperties(new DockerResource("test/test:latest"));
 	}

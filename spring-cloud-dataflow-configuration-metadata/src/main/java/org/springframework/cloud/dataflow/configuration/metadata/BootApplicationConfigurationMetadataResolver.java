@@ -23,7 +23,6 @@ import java.net.URI;
 import java.net.URLClassLoader;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Base64;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
@@ -32,6 +31,8 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 import java.util.stream.Collectors;
+
+import org.apache.commons.text.StringEscapeUtils;
 
 import org.springframework.boot.configurationmetadata.ConfigurationMetadataGroup;
 import org.springframework.boot.configurationmetadata.ConfigurationMetadataProperty;
@@ -74,7 +75,7 @@ public class BootApplicationConfigurationMetadataResolver extends ApplicationCon
 
 	private static final String CONFIGURATION_PROPERTIES_NAMES = "configuration-properties.names";
 
-	private static final String CONTAINER_IMAGE_CONFIGURATION_METADATA_LABEL_NAME = "spring.configuration.metadata";
+	private static final String CONTAINER_IMAGE_CONFIGURATION_METADATA_LABEL_NAME = "org.springframework.cloud.dataflow.spring-configuration-metadata.json";
 
 	private final Set<String> globalWhiteListedProperties = new HashSet<>();
 
@@ -159,8 +160,7 @@ public class BootApplicationConfigurationMetadataResolver extends ApplicationCon
 		}
 
 		try {
-			String metadataJson = new String(Base64.getDecoder().decode(encodedMetadata.getBytes()));
-
+			String metadataJson = StringEscapeUtils.unescapeJson(encodedMetadata);
 			ConfigurationMetadataRepository configurationMetadataRepository =
 					ConfigurationMetadataRepositoryJsonBuilder.create().withJsonResource(
 							new ByteArrayInputStream(metadataJson.getBytes())).build();
