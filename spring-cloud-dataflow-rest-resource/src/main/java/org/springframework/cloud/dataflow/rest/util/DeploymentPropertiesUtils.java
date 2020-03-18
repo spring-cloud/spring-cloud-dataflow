@@ -57,7 +57,7 @@ public final class DeploymentPropertiesUtils {
 			.compile("(\\s(?=" + "([^\\\"']*[\\\"'][^\\\"']*[\\\"'])*[^\\\"']*$))");
 
 
-	private static final String[] DEPLOYMENT_PROPERTIES_PREFIX ={"deployer", "app", "version", "scheduler"};
+	private static final String[] DEPLOYMENT_PROPERTIES_PREFIX ={"deployer", "app", "version", "scheduler", "spring.cloud.dataflow.task"};
 
 	private DeploymentPropertiesUtils() {
 		// prevent instantiation
