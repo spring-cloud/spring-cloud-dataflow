@@ -1,5 +1,5 @@
 /*
- * Copyright 2015-2019 the original author or authors.
+ * Copyright 2015-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -58,6 +58,7 @@ import org.springframework.cloud.dataflow.server.service.TaskSaveService;
 import org.springframework.cloud.dataflow.server.service.impl.diff.TaskAnalysisReport;
 import org.springframework.cloud.dataflow.server.service.impl.diff.TaskAnalyzer;
 import org.springframework.cloud.deployer.spi.core.AppDeploymentRequest;
+import org.springframework.cloud.deployer.spi.task.LaunchState;
 import org.springframework.cloud.deployer.spi.task.TaskLauncher;
 import org.springframework.cloud.task.repository.TaskExecution;
 import org.springframework.cloud.task.repository.TaskExplorer;
@@ -270,7 +271,8 @@ public class DefaultTaskExecutionService implements TaskExecutionService {
 			TaskLauncher taskLauncher = findTaskLauncher(platformName);
 			Launcher launcher = this.launcherRepository.findByName(platformName);
 			if(launcher.getType().equals(TaskPlatformFactory.CLOUDFOUNDRY_PLATFORM_TYPE) && !isAppDeploymentSame(previousManifest, taskManifest)) {
-				validateAndLockUpgrade(taskName, platformName, taskExecution);
+				verifyTaskIsNotRunning(taskName, taskExecution, taskLauncher);
+				validateAndLockUpgrade(taskName, platformName);
 				logger.debug("Deleting %s and all related resources from the platform", taskName);
 				taskLauncher.destroy(taskName);
 			}
@@ -408,22 +410,47 @@ public class DefaultTaskExecutionService implements TaskExecutionService {
 	}
 
 	/**
-	 * A task should not be allowed to be launched when an upgrade is required and one is running (allowing the upgrade
+	 * A task should not be allowed to be launched when one is running (allowing the upgrade
 	 * to proceed may kill running task instances of that definition on certain platforms).
 	 *
-	 * @param taskName task name to check or lock
-	 * @param platformName the platform configuration to confirm if the task is being run on
+	 * @param taskName task name to check
+	 * @param taskExecution the candidate TaskExecution
+	 * @param taskLauncher the TaskLauncher used to verify the status of a recorded task execution.
 	 */
-	private void validateAndLockUpgrade(String taskName, String platformName, TaskExecution taskExecution) {
+	private void verifyTaskIsNotRunning(String taskName, TaskExecution taskExecution, TaskLauncher taskLauncher) {
 		Page<TaskExecution> runningTaskExecutions =
 				this.taskExplorer.findRunningTaskExecutions(taskName, PageRequest.of(0, 1));
 
-		//TODO add force flag to allow overriding this
-		if(!(runningTaskExecutions.getTotalElements() == 1 && runningTaskExecutions.toList().get(0).getExecutionId() == taskExecution.getExecutionId()) &&
-				runningTaskExecutions.getTotalElements() > 0) {
-			throw new IllegalStateException("Unable to update application due to currently running applications");
+		//Found only the candidate TaskExecution
+		if(runningTaskExecutions.getTotalElements() == 1 && runningTaskExecutions.toList().get(0).getExecutionId() == taskExecution.getExecutionId()) {
+			return;
 		}
-		else if(this.tasksBeingUpgraded.containsKey(taskName)) {
+
+		/*
+		 * The task repository recorded a different task execution for the task which is started but not completed.
+		 * It is possible that the task failed and terminated before updating the task repository.
+		 * Use the TaskLauncher to verify the actual state.
+		 */
+		if (runningTaskExecutions.getTotalElements() > 0) {
+
+			LaunchState launchState = taskLauncher.status(runningTaskExecutions.toList().get(0).getExternalExecutionId()).getState();
+			if (launchState.equals(LaunchState.running) || launchState.equals(LaunchState.launching)) {
+				throw new IllegalStateException("Unable to update application due to currently running applications");
+			}
+			else {
+				logger.warn("Task repository shows a running task execution for task {} but the actual state is {}."
+						+ launchState.toString(), taskName, launchState);
+			}
+		}
+	}
+
+	/**
+	 * A task should not be allowed to be launched when an upgrade is required
+	 * @param taskName task name to check or lock
+	 * @param platformName the platform configuration to confirm if the task is being run on
+	 */
+	private void validateAndLockUpgrade(String taskName, String platformName) {
+		if(this.tasksBeingUpgraded.containsKey(taskName)) {
 			List<String> platforms = this.tasksBeingUpgraded.get(taskName);
 
 			if(platforms.contains(platformName)) {
