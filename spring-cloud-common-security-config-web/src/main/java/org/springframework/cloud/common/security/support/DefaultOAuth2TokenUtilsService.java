@@ -21,7 +21,9 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.client.OAuth2AuthorizedClient;
 import org.springframework.security.oauth2.client.OAuth2AuthorizedClientService;
 import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
+import org.springframework.security.oauth2.core.AbstractOAuth2Token;
 import org.springframework.security.oauth2.server.resource.authentication.BearerTokenAuthentication;
+import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
@@ -63,8 +65,12 @@ public class DefaultOAuth2TokenUtilsService implements OAuth2TokenUtilsService {
 			final OAuth2AuthorizedClient oauth2AuthorizedClient = this.getAuthorizedClient(oauth2AuthenticationToken);
 			accessTokenOfAuthenticatedUser = oauth2AuthorizedClient.getAccessToken().getTokenValue();
 		}
+		else if (authentication instanceof JwtAuthenticationToken) {
+			AbstractOAuth2Token token = (AbstractOAuth2Token) authentication.getCredentials();
+			accessTokenOfAuthenticatedUser = token.getTokenValue();
+		}
 		else {
-			throw new IllegalStateException("Authentication object is not of type OAuth2AuthenticationToken.");
+			throw new IllegalStateException("Unsupported authentication object type " + authentication);
 		}
 
 		return accessTokenOfAuthenticatedUser;

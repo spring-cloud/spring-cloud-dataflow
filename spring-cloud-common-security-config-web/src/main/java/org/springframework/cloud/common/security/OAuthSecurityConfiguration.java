@@ -25,6 +25,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
 import org.springframework.boot.autoconfigure.security.SecurityProperties;
 import org.springframework.boot.autoconfigure.security.oauth2.client.OAuth2ClientProperties;
@@ -38,6 +39,7 @@ import org.springframework.cloud.common.security.support.CustomPlainOAuth2UserSe
 import org.springframework.cloud.common.security.support.DefaultAuthoritiesMapper;
 import org.springframework.cloud.common.security.support.DefaultOAuth2TokenUtilsService;
 import org.springframework.cloud.common.security.support.ExternalOauth2ResourceAuthoritiesMapper;
+import org.springframework.cloud.common.security.support.MappingJwtGrantedAuthoritiesConverter;
 import org.springframework.cloud.common.security.support.OnOAuth2SecurityEnabled;
 import org.springframework.cloud.common.security.support.SecurityConfigUtils;
 import org.springframework.cloud.common.security.support.SecurityStateBean;
@@ -46,8 +48,10 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Conditional;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.event.EventListener;
+import org.springframework.core.convert.converter.Converter;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
+import org.springframework.security.authentication.AbstractAuthenticationToken;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.ProviderManager;
 import org.springframework.security.authentication.event.AbstractAuthenticationFailureEvent;
@@ -71,6 +75,8 @@ import org.springframework.security.oauth2.client.web.OAuth2AuthorizedClientRepo
 import org.springframework.security.oauth2.client.web.reactive.function.client.ServletOAuth2AuthorizedClientExchangeFilterFunction;
 import org.springframework.security.oauth2.core.oidc.user.OidcUser;
 import org.springframework.security.oauth2.core.user.OAuth2User;
+import org.springframework.security.oauth2.jwt.Jwt;
+import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter;
 import org.springframework.security.oauth2.server.resource.introspection.OpaqueTokenIntrospector;
 import org.springframework.security.web.authentication.LoginUrlAuthenticationEntryPoint;
 import org.springframework.security.web.authentication.logout.LogoutSuccessHandler;
@@ -125,7 +131,7 @@ public class OAuthSecurityConfiguration extends WebSecurityConfigurerAdapter {
 	@Autowired
 	protected ClientRegistrationRepository clientRegistrationRepository;
 
-	@Autowired
+	@Autowired(required = false)
 	protected OpaqueTokenIntrospector opaqueTokenIntrospector;
 
 	@Autowired
@@ -142,10 +148,11 @@ public class OAuthSecurityConfiguration extends WebSecurityConfigurerAdapter {
 		basicAuthenticationEntryPoint.setRealmName(SecurityConfigUtils.BASIC_AUTH_REALM_NAME);
 		basicAuthenticationEntryPoint.afterPropertiesSet();
 
-		BasicAuthenticationFilter basicAuthenticationFilter = new BasicAuthenticationFilter(
-				providerManager(), basicAuthenticationEntryPoint);
-
-		http.addFilter(basicAuthenticationFilter);
+		if (opaqueTokenIntrospector != null) {
+			BasicAuthenticationFilter basicAuthenticationFilter = new BasicAuthenticationFilter(
+					providerManager(), basicAuthenticationEntryPoint);
+			http.addFilter(basicAuthenticationFilter);
+		}
 
 		this.authorizationProperties.getAuthenticatedPaths().add("/");
 		this.authorizationProperties.getAuthenticatedPaths().add(dashboard("/**"));
@@ -176,13 +183,39 @@ public class OAuthSecurityConfiguration extends WebSecurityConfigurerAdapter {
 		http.oauth2Login().userInfoEndpoint()
 			.userService(this.plainOauth2UserService())
 			.oidcUserService(this.oidcUserService());
-		http.oauth2ResourceServer()
-		.opaqueToken().introspector(opaqueTokenIntrospector());
+
+		if (opaqueTokenIntrospector != null) {
+			http.oauth2ResourceServer()
+				.opaqueToken()
+					.introspector(opaqueTokenIntrospector());
+		} else if (oAuth2ResourceServerProperties.getJwt().getJwkSetUri() != null) {
+			http.oauth2ResourceServer()
+				.jwt()
+					.jwtAuthenticationConverter(grantedAuthoritiesExtractor());
+		}
 
 		this.securityStateBean.setAuthenticationEnabled(true);
 	}
 
+	protected Converter<Jwt, AbstractAuthenticationToken> grantedAuthoritiesExtractor() {
+		String providerId = calculateDefaultProviderId();
+		ProviderRoleMapping providerRoleMapping = authorizationProperties.getProviderRoleMappings().get(providerId);
+
+		JwtAuthenticationConverter jwtAuthenticationConverter =
+				new JwtAuthenticationConverter();
+
+		MappingJwtGrantedAuthoritiesConverter converter = new MappingJwtGrantedAuthoritiesConverter();
+		converter.setAuthorityPrefix("");
+		jwtAuthenticationConverter.setJwtGrantedAuthoritiesConverter(converter);
+		if (providerRoleMapping != null) {
+			converter.setAuthoritiesMapping(providerRoleMapping.getRoleMappings());
+		}
+		return jwtAuthenticationConverter;
+	}
+
+
 	@Bean
+	@ConditionalOnProperty(prefix = "spring.security.oauth2.resourceserver.opaquetoken", value = "introspection-uri")
 	protected OpaqueTokenIntrospector opaqueTokenIntrospector() {
 		return new CustomAuthoritiesOpaqueTokenIntrospector(
 				this.oAuth2ResourceServerProperties.getOpaquetoken().getIntrospectionUri(),
@@ -257,6 +290,7 @@ public class OAuthSecurityConfiguration extends WebSecurityConfigurerAdapter {
 	}
 
 	@Bean
+	@ConditionalOnProperty(prefix = "spring.security.oauth2.resourceserver.opaquetoken", value = "introspection-uri")
 	protected AuthenticationProvider authenticationProvider() {
 		return new ManualOAuthAuthenticationProvider(
 			this.oAuth2PasswordTokenResponseClient,
@@ -267,6 +301,7 @@ public class OAuthSecurityConfiguration extends WebSecurityConfigurerAdapter {
 	}
 
 	@Bean
+	@ConditionalOnProperty(prefix = "spring.security.oauth2.resourceserver.opaquetoken", value = "introspection-uri")
 	protected ProviderManager providerManager() {
 		List<AuthenticationProvider> providers = new ArrayList<>();
 		providers.add(authenticationProvider());

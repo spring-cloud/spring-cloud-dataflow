@@ -32,6 +32,7 @@ import org.springframework.security.oauth2.core.OAuth2AccessToken.TokenType;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -73,9 +74,7 @@ public class OAuth2TokenUtilsServiceTests {
 			oAuth2TokenUtilsService.getAccessTokenOfAuthenticatedUser();
 		}
 		catch (IllegalStateException e) {
-			assertEquals(
-				"Authentication object is not of type OAuth2AuthenticationToken.",
-				e.getMessage());
+			assertTrue(e.getMessage().startsWith("Unsupported authentication object type"));
 			SecurityContextHolder.getContext().setAuthentication(null);
 			return;
 		}
