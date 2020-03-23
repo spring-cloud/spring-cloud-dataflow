@@ -42,6 +42,8 @@ public class Target {
 
 	public static final String DEFAULT_UNSPECIFIED_PASSWORD = "__NULL__";
 
+	public static final String DEFAULT_CLIENT_REGISTRATION_ID = "dataflow-shell";
+
 	public static final String DEFAULT_SPECIFIED_SKIP_SSL_VALIDATION = "true";
 
 	public static final String DEFAULT_UNSPECIFIED_SKIP_SSL_VALIDATION = "false";
