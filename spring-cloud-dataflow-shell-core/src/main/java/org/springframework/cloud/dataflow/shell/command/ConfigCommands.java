@@ -21,6 +21,7 @@ import java.io.StringWriter;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -32,6 +33,8 @@ import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.security.oauth2.client.OAuth2ClientProperties;
+import org.springframework.boot.autoconfigure.security.oauth2.client.OAuth2ClientPropertiesRegistrationAdapter;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.cloud.dataflow.rest.client.DataFlowServerException;
 import org.springframework.cloud.dataflow.rest.client.DataFlowTemplate;
@@ -55,6 +58,21 @@ import org.springframework.context.ApplicationListener;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.env.Environment;
+import org.springframework.http.client.ClientHttpRequestInterceptor;
+import org.springframework.security.authentication.AbstractAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.oauth2.client.AuthorizedClientServiceOAuth2AuthorizedClientManager;
+import org.springframework.security.oauth2.client.InMemoryOAuth2AuthorizedClientService;
+import org.springframework.security.oauth2.client.OAuth2AuthorizationContext;
+import org.springframework.security.oauth2.client.OAuth2AuthorizeRequest;
+import org.springframework.security.oauth2.client.OAuth2AuthorizedClient;
+import org.springframework.security.oauth2.client.OAuth2AuthorizedClientManager;
+import org.springframework.security.oauth2.client.OAuth2AuthorizedClientProvider;
+import org.springframework.security.oauth2.client.OAuth2AuthorizedClientProviderBuilder;
+import org.springframework.security.oauth2.client.OAuth2AuthorizedClientService;
+import org.springframework.security.oauth2.client.registration.ClientRegistration;
+import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository;
+import org.springframework.security.oauth2.client.registration.InMemoryClientRegistrationRepository;
 import org.springframework.shell.CommandLine;
 import org.springframework.shell.core.CommandMarker;
 import org.springframework.shell.core.annotation.CliCommand;
@@ -112,6 +130,9 @@ public class ConfigCommands implements CommandMarker, InitializingBean, Applicat
 	@Value("${dataflow.password:" + Target.DEFAULT_SPECIFIED_PASSWORD + "}")
 	private String password;
 
+	@Value("${dataflow.client-registration-id:" + Target.DEFAULT_CLIENT_REGISTRATION_ID + "}")
+	private String clientRegistrationId;
+
 	@Value("${dataflow.skip-ssl-validation:" + Target.DEFAULT_UNSPECIFIED_SKIP_SSL_VALIDATION + "}")
 	private boolean skipSslValidation;
 
@@ -137,6 +158,11 @@ public class ConfigCommands implements CommandMarker, InitializingBean, Applicat
 
 	@Autowired
 	private CommandLine commandLine;
+
+	@Autowired(required = false)
+	private OAuth2ClientProperties oauth2ClientProperties;
+
+	private static final Authentication DEFAULT_PRINCIPAL = createAuthentication("dataflow-shell-principal");
 
 	@Autowired
 	public void setUserInput(UserInput userInput) {
@@ -178,6 +204,8 @@ public class ConfigCommands implements CommandMarker, InitializingBean, Applicat
 			@CliOption(mandatory = false, key = {
 					"password" }, help = "the password for authenticated access to the Admin REST endpoint (valid only with a "
 					+ "username)", specifiedDefaultValue = Target.DEFAULT_SPECIFIED_PASSWORD, unspecifiedDefaultValue = Target.DEFAULT_UNSPECIFIED_PASSWORD) String targetPassword,
+			@CliOption(mandatory = false, key = {
+					"client-registration-id" }, help = "the registration id for oauth2 config ", unspecifiedDefaultValue = Target.DEFAULT_CLIENT_REGISTRATION_ID) String targetClientRegistrationId,
 			@CliOption(mandatory = false, key = {
 					"credentials-provider-command" }, help = "a command to run that outputs the HTTP credentials used for authentication", unspecifiedDefaultValue = Target.DEFAULT_CREDENTIALS_PROVIDER_COMMAND) String credentialsProviderCommand,
 			@CliOption(mandatory = false, key = {
@@ -237,7 +265,13 @@ public class ConfigCommands implements CommandMarker, InitializingBean, Applicat
 				httpClientConfigurer.addInterceptor(new ResourceBasedAuthorizationInterceptor(credentialsResource));
 			}
 
-			if (authenticationEnabled && StringUtils.hasText(targetUsername) && StringUtils.hasText(targetPassword)) {
+			if (oauth2ClientProperties != null && !oauth2ClientProperties.getRegistration().isEmpty()) {
+				ClientHttpRequestInterceptor bearerTokenResolvingInterceptor = bearerTokenResolvingInterceptor(
+						oauth2ClientProperties, targetUsername, targetPassword, targetClientRegistrationId);
+				this.restTemplate.getInterceptors().add(bearerTokenResolvingInterceptor);
+			}
+
+			else if (authenticationEnabled && StringUtils.hasText(targetUsername) && StringUtils.hasText(targetPassword)) {
 				httpClientConfigurer.basicAuthCredentials(targetUsername, targetPassword);
 			}
 
@@ -411,6 +445,7 @@ public class ConfigCommands implements CommandMarker, InitializingBean, Applicat
 				this.serverUri,
 				this.userName,
 				this.password,
+				this.clientRegistrationId,
 				this.credentialsProviderCommand,
 				this.skipSslValidation,
 				this.proxyUri,
@@ -455,5 +490,79 @@ public class ConfigCommands implements CommandMarker, InitializingBean, Applicat
 	@Override
 	public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
 		this.applicationContext = applicationContext;
+	}
+
+	private ClientRegistrationRepository shellClientRegistrationRepository(OAuth2ClientProperties properties) {
+		List<ClientRegistration> registrations = new ArrayList<>(
+				OAuth2ClientPropertiesRegistrationAdapter.getClientRegistrations(properties).values());
+		return new InMemoryClientRegistrationRepository(registrations);
+	}
+
+	private OAuth2AuthorizedClientService shellAuthorizedClientService(ClientRegistrationRepository shellClientRegistrationRepository) {
+		return new InMemoryOAuth2AuthorizedClientService(shellClientRegistrationRepository);
+	}
+
+	private OAuth2AuthorizedClientManager authorizedClientManager(
+			ClientRegistrationRepository shellClientRegistrationRepository,
+			OAuth2AuthorizedClientService shellAuthorizedClientService) {
+		AuthorizedClientServiceOAuth2AuthorizedClientManager manager = new AuthorizedClientServiceOAuth2AuthorizedClientManager(
+			shellClientRegistrationRepository, shellAuthorizedClientService);
+		OAuth2AuthorizedClientProvider authorizedClientProvider = OAuth2AuthorizedClientProviderBuilder.builder()
+			.password()
+			.refreshToken()
+			.build();
+		manager.setAuthorizedClientProvider(authorizedClientProvider);
+		manager.setContextAttributesMapper(request -> {
+			Map<String, Object> contextAttributes = new HashMap<>();
+			request.getAttributes().forEach((k, v) -> {
+				if (OAuth2AuthorizationContext.USERNAME_ATTRIBUTE_NAME.equals(k)
+						|| OAuth2AuthorizationContext.PASSWORD_ATTRIBUTE_NAME.equals(k)) {
+					contextAttributes.put(k, v);
+				}
+			});
+			return contextAttributes;
+		});
+		return manager;
+	}
+
+	private ClientHttpRequestInterceptor bearerTokenResolvingInterceptor(
+			OAuth2ClientProperties properties, String username, String password, String clientRegistrationId) {
+		ClientRegistrationRepository shellClientRegistrationRepository = shellClientRegistrationRepository(properties);
+		OAuth2AuthorizedClientService shellAuthorizedClientService = shellAuthorizedClientService(shellClientRegistrationRepository);
+		OAuth2AuthorizedClientManager authorizedClientManager = authorizedClientManager(
+				shellClientRegistrationRepository, shellAuthorizedClientService);
+
+		if (properties.getRegistration() != null && properties.getRegistration().size() == 1) {
+			// if we have only one, use that
+			clientRegistrationId = properties.getRegistration().entrySet().iterator().next().getKey();
+		}
+
+		OAuth2AuthorizeRequest authorizeRequest = OAuth2AuthorizeRequest.withClientRegistrationId(clientRegistrationId)
+				.principal(DEFAULT_PRINCIPAL)
+				.attribute(OAuth2AuthorizationContext.USERNAME_ATTRIBUTE_NAME, username)
+				.attribute(OAuth2AuthorizationContext.PASSWORD_ATTRIBUTE_NAME, password)
+				.build();
+
+		OAuth2AuthorizedClient authorizedClient = authorizedClientManager.authorize(authorizeRequest);
+		return (request, body, execution) -> {
+			request.getHeaders().setBearerAuth(authorizedClient.getAccessToken().getTokenValue());
+			return execution.execute(request, body);
+		};
+	}
+
+	private static Authentication createAuthentication(final String principalName) {
+		return new AbstractAuthenticationToken(null) {
+			private static final long serialVersionUID = -2038812908189509872L;
+
+			@Override
+			public Object getCredentials() {
+				return "";
+			}
+
+			@Override
+			public Object getPrincipal() {
+				return principalName;
+			}
+		};
 	}
 }
