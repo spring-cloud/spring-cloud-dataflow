@@ -51,10 +51,13 @@ public class SkipperOAuthSecurityConfiguration extends OAuthSecurityConfiguratio
 		final BasicAuthenticationEntryPoint basicAuthenticationEntryPoint = new BasicAuthenticationEntryPoint();
 		basicAuthenticationEntryPoint.setRealmName(SecurityConfigUtils.BASIC_AUTH_REALM_NAME);
 		basicAuthenticationEntryPoint.afterPropertiesSet();
-		final BasicAuthenticationFilter basicAuthenticationFilter = new BasicAuthenticationFilter(
-				providerManager(), basicAuthenticationEntryPoint);
 
-		http.addFilter(basicAuthenticationFilter);
+		if (opaqueTokenIntrospector != null) {
+			BasicAuthenticationFilter basicAuthenticationFilter = new BasicAuthenticationFilter(
+					providerManager(), basicAuthenticationEntryPoint);
+			http.addFilter(basicAuthenticationFilter);
+		}
+
 		this.authorizationProperties.getAuthenticatedPaths().add(dashboard("/**"));
 		this.authorizationProperties.getAuthenticatedPaths().add(dashboard(""));
 
@@ -76,8 +79,15 @@ public class SkipperOAuthSecurityConfiguration extends OAuthSecurityConfiguratio
 				.defaultAuthenticationEntryPointFor(basicAuthenticationEntryPoint, new AntPathRequestMatcher("/api/**"))
 				.defaultAuthenticationEntryPointFor(basicAuthenticationEntryPoint, new AntPathRequestMatcher("/actuator/**"));
 
-		http.oauth2ResourceServer()
-			.opaqueToken().introspector(opaqueTokenIntrospector());
+		if (opaqueTokenIntrospector != null) {
+			http.oauth2ResourceServer()
+				.opaqueToken()
+					.introspector(opaqueTokenIntrospector());
+		} else if (oAuth2ResourceServerProperties.getJwt().getJwkSetUri() != null) {
+			http.oauth2ResourceServer()
+				.jwt()
+					.jwtAuthenticationConverter(grantedAuthoritiesExtractor());
+		}
 
 		this.securityStateBean.setAuthenticationEnabled(true);
 	}
