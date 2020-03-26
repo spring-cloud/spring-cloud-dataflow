@@ -18,8 +18,8 @@ package org.springframework.cloud.dataflow.server.db.migration.mysql;
 import java.util.Arrays;
 import java.util.List;
 
+import org.springframework.cloud.dataflow.common.flyway.SqlCommand;
 import org.springframework.cloud.dataflow.server.db.migration.AbstractBaselineCallback;
-import org.springframework.cloud.dataflow.server.db.migration.SqlCommand;
 
 /**
  * Baselining schema setup for {@code postgres}.

@@ -57,8 +57,9 @@
 
 		<spring-cloud-dataflow-ui.version>2.4.2.RELEASE</spring-cloud-dataflow-ui.version>
 
-		<spring-cloud-deployer.version>2.3.0.M1</spring-cloud-deployer.version>
-		<spring-cloud-deployer-local.version>2.3.0.M1</spring-cloud-deployer-local.version>
+		<spring-cloud-dataflow-common.version>2.5.0.BUILD-SNAPSHOT</spring-cloud-dataflow-common.version>
+		<spring-cloud-deployer.version>2.3.0.BUILD-SNAPSHOT</spring-cloud-deployer.version>
+		<spring-cloud-deployer-local.version>2.3.0.BUILD-SNAPSHOT</spring-cloud-deployer-local.version>
 
 
 		<spring-cloud-deployer-cloudfoundry.version>2.3.0.M1</spring-cloud-deployer-cloudfoundry.version>
@@ -78,8 +79,6 @@
 		<spring-cloud-common-security-config.version>1.3.0.BUILD-SNAPSHOT</spring-cloud-common-security-config.version>
 
 		<spring-shell.version>1.2.0.RELEASE</spring-shell.version>
-		<!-- Use older flyway until we can use flaway 6.x given to us from boot -->
-		<flyway.version>5.2.4</flyway.version>
 		<commons-io.version>2.4</commons-io.version>
 		<commons-lang.version>2.4</commons-lang.version>
 
@@ -118,6 +117,13 @@
 	</modules>
 	<dependencyManagement>
 		<dependencies>
+			<dependency>
+				<groupId>org.springframework.cloud</groupId>
+				<artifactId>spring-cloud-dataflow-common-dependencies</artifactId>
+				<version>${spring-cloud-dataflow-common.version}</version>
+				<type>pom</type>
+				<scope>import</scope>
+			</dependency>
 			<dependency>
 				<groupId>org.springframework.cloud</groupId>
 				<artifactId>spring-cloud-task-dependencies</artifactId>
@@ -198,11 +204,6 @@
 				<groupId>org.springframework.cloud</groupId>
 				<artifactId>spring-cloud-starter-common-security-config-web</artifactId>
 				<version>${spring-cloud-common-security-config.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.flywaydb</groupId>
-				<artifactId>flyway-core</artifactId>
-				<version>${flyway.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>commons-io</groupId>

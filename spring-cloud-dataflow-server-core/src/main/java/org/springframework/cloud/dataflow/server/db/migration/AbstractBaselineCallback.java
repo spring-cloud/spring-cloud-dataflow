@@ -23,6 +23,8 @@ import org.flywaydb.core.api.callback.Event;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import org.springframework.cloud.dataflow.common.flyway.AbstractCallback;
+import org.springframework.cloud.dataflow.common.flyway.SqlCommand;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.datasource.SingleConnectionDataSource;
 
