@@ -18,8 +18,8 @@ package org.springframework.cloud.skipper.server.db.migration.postgresql;
 import java.util.Arrays;
 import java.util.List;
 
+import org.springframework.cloud.dataflow.common.flyway.SqlCommand;
 import org.springframework.cloud.skipper.server.db.migration.AbstractInitialSetupMigration;
-import org.springframework.cloud.skipper.server.db.migration.SqlCommand;
 
 public class V1__Initial_Setup extends AbstractInitialSetupMigration {
 

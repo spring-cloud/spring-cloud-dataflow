@@ -33,6 +33,7 @@
 		<spring-shell.version>2.0.1.RELEASE</spring-shell.version>
 		<spring-statemachine.version>2.2.0.RELEASE</spring-statemachine.version>
 
+		<spring-cloud-dataflow-common.version>2.5.0.BUILD-SNAPSHOT</spring-cloud-dataflow-common.version>
 		<java-cfenv-boot.version>1.1.3.RELEASE</java-cfenv-boot.version>
 		<spring-cloud-deployer.version>2.3.0.M1</spring-cloud-deployer.version>
 		<spring-cloud-deployer-local.version>2.3.0.M1</spring-cloud-deployer-local.version>
@@ -58,8 +59,6 @@
 		<sonar-maven-plugin.version>3.0.2</sonar-maven-plugin.version>
 		<javadoc.opts>-Xdoclint:none</javadoc.opts>
 
-		<!-- Use older flyway until we can use flaway 6.x given to us from boot -->
-		<flyway.version>5.2.4</flyway.version>
 		<commons-io.version>2.5</commons-io.version>
 		<jmockit.version>1.24</jmockit.version>
 
@@ -90,6 +89,13 @@
 
 	<dependencyManagement>
 		<dependencies>
+			<dependency>
+				<groupId>org.springframework.cloud</groupId>
+				<artifactId>spring-cloud-dataflow-common-dependencies</artifactId>
+				<version>${spring-cloud-dataflow-common.version}</version>
+				<type>pom</type>
+				<scope>import</scope>
+			</dependency>
 			<dependency>
 				<groupId>org.springframework.cloud</groupId>
 				<artifactId>spring-cloud-deployer-dependencies</artifactId>
@@ -216,11 +222,6 @@
 				<groupId>org.zeroturnaround</groupId>
 				<artifactId>zt-zip</artifactId>
 				<version>${zeroturnaround.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.flywaydb</groupId>
-				<artifactId>flyway-core</artifactId>
-				<version>${flyway.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>commons-io</groupId>

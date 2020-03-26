@@ -18,8 +18,8 @@ package org.springframework.cloud.skipper.server.db.migration.oracle;
 import java.util.Arrays;
 import java.util.List;
 
-import org.springframework.cloud.skipper.server.db.migration.AbstractMigration;
-import org.springframework.cloud.skipper.server.db.migration.SqlCommand;
+import org.springframework.cloud.dataflow.common.flyway.AbstractMigration;
+import org.springframework.cloud.dataflow.common.flyway.SqlCommand;
 
 /**
  * Repeatable migration ensuring that {@code hibernate_sequence} table exists.

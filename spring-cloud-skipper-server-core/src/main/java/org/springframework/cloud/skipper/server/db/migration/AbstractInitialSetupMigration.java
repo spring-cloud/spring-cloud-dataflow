@@ -18,6 +18,9 @@ package org.springframework.cloud.skipper.server.db.migration;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.springframework.cloud.dataflow.common.flyway.AbstractMigration;
+import org.springframework.cloud.dataflow.common.flyway.SqlCommand;
+
 /**
  * Base implementation for initial schema setup.
  *

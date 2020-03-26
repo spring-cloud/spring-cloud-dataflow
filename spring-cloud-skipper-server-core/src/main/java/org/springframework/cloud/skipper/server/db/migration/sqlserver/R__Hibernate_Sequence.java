@@ -22,8 +22,8 @@ import org.flywaydb.core.api.migration.Context;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import org.springframework.cloud.skipper.server.db.migration.AbstractMigration;
-import org.springframework.cloud.skipper.server.db.migration.SqlCommand;
+import org.springframework.cloud.dataflow.common.flyway.AbstractMigration;
+import org.springframework.cloud.dataflow.common.flyway.SqlCommand;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.datasource.SingleConnectionDataSource;
 
