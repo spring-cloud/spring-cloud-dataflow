@@ -20,8 +20,8 @@ import java.util.Arrays;
 import org.flywaydb.core.api.migration.BaseJavaMigration;
 import org.flywaydb.core.api.migration.Context;
 
-import org.springframework.cloud.dataflow.server.db.migration.SqlCommand;
-import org.springframework.cloud.dataflow.server.db.migration.SqlCommandsRunner;
+import org.springframework.cloud.dataflow.common.flyway.SqlCommand;
+import org.springframework.cloud.dataflow.common.flyway.SqlCommandsRunner;
 
 /**
  * This migration class adds platformName column to audit_records.

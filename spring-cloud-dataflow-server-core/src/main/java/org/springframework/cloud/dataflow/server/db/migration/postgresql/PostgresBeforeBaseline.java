@@ -21,8 +21,8 @@ import java.util.List;
 import org.flywaydb.core.api.callback.Context;
 import org.flywaydb.core.api.callback.Event;
 
+import org.springframework.cloud.dataflow.common.flyway.SqlCommand;
 import org.springframework.cloud.dataflow.server.db.migration.AbstractBaselineCallback;
-import org.springframework.cloud.dataflow.server.db.migration.SqlCommand;
 
 /**
  * Baselining schema setup for {@code postgres}.
