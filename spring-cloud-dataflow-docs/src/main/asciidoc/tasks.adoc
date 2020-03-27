@@ -1063,9 +1063,8 @@ A schedule can be created through the RESTful API or the Spring Cloud Data Flow 
 Spring Cloud Data Flow will schedule the execution of its tasks via a scheduling agent that is available on the cloud platform.
 When using the Cloud Foundry platform Spring Cloud Data Flow will use the https://www.cloudfoundry.org/the-foundry/scheduler/[PCF Scheduler].
 When using Kubernetes, a https://kubernetes.io/docs/concepts/workloads/controllers/cron-jobs/[CronJob] will be used.
-The way that Spring Cloud Data Flow does this is by deploying a SchedulerTaskLauncher application to the platform and then
-the scheduling agent (e.g., CronJob in Kubernetes) is notified to schedule the SchedulerTaskLauncher.  When the scheduling agent launches the
-https://github.com/spring-cloud/spring-cloud-dataflow/blob/master/spring-cloud-dataflow-scheduler-task-launcher/src/main/java/org/springframework/cloud/dataflow/scheduler/launcher/SchedulerTaskLauncherApplication.java[SchedulerTaskLauncher], the SchedulerTaskLauncher will utilize Spring Cloud Data Flow's RESTFul API to launch the task.
+
+NOTE: Scheduled tasks do not implement the continuous deployment feature.  Any changes to application version or properties for a task definition via Spring Cloud Data Flow will not affect scheduled tasks.
 
 .Architectural Overview
 image::{dataflow-asciidoc}/images/dataflow-scheduling-architecture.png[Scheduler Architecture Overview, scaledwidth="50%"]
@@ -1107,8 +1106,6 @@ You can delete a schedule via the:
 
 To delete a schedule through the dashboard, select the Schedule tab under Tasks tab and click the dropdown icon next to the schedule you wish to delete and select the `Delete schedule` option.
 
-NOTE: Any currently running tasks that were run by the scheduling agent will not be stopped if the schedule is deleted.   It only prevents future executions.
-
 [[spring-cloud-data-flow-schedule-list]]
 ==== Listing Schedules
 To view your schedules click the Tasks tab and then click the Schedules tab on the Tasks page.
@@ -1117,7 +1114,7 @@ Spring Cloud Data Flow will have a suffix appended to it consisting of `-scdf-<t
 For example if I create a schedule name of `my-schedule` for a task definition of `tstamp` the
 schedule name will look like `my-schedule-scdf-tstamp`.
 
-NOTE: The `scdf-` separator is configurable by setting the `spring.cloud.dataflow.task.scheduleNamePrefix` property with the value you prefer.
+NOTE: Instructions to create, delete and list schedules via the Spring Cloud Data Flow UI can be found https://dataflow.spring.io/docs/feature-guides/batch/scheduling/[here].
 
 [[spring-cloud-dataflow-task-cd]]
 == Continuous Deployment

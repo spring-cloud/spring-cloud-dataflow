@@ -34,6 +34,7 @@ import org.mockito.Mockito;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.context.PropertyPlaceholderAutoConfiguration;
+import org.springframework.boot.autoconfigure.jdbc.DataSourceProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase.Replace;
@@ -168,7 +169,7 @@ public class DefaultSchedulerServiceTests {
 	@Test(expected = IllegalArgumentException.class)
 	public void testScheduleWithLongNameOnKuberenetesPlatform() {
 		getMockedKubernetesSchedulerService().schedule(BASE_SCHEDULE_NAME +
-				"12345677890123456", BASE_DEFINITION_NAME, this.testProperties,
+				"1234567789012345612345678901234567890123", BASE_DEFINITION_NAME, this.testProperties,
 				this.commandLineArgs);
 	}
 
@@ -178,7 +179,7 @@ public class DefaultSchedulerServiceTests {
 		testSchedulerService.schedule(BASE_SCHEDULE_NAME + "AB", BASE_DEFINITION_NAME, this.testProperties, this.commandLineArgs);
 		List<ScheduleInfo> scheduleInfos = testSchedulerService.list();
 		assertThat(scheduleInfos.size()).isEqualTo(1);
-		assertThat(scheduleInfos.get(0).getScheduleName()).isEqualTo("mytaskscheduleab-scdf-mytaskdefinition");
+		assertThat(scheduleInfos.get(0).getScheduleName()).isEqualTo("mytaskscheduleab");
 	}
 
 	private SchedulerService getMockedKubernetesSchedulerService() {
@@ -190,7 +191,7 @@ public class DefaultSchedulerServiceTests {
 		return  new DefaultSchedulerService(this.commonApplicationProperties,
 				taskPlatform, this.taskDefinitionRepository,
 				this.appRegistry, this.resourceLoader,
-				this.taskConfigurationProperties, null,
+				this.taskConfigurationProperties, mock(DataSourceProperties.class), null,
 				this.metaDataResolver, this.schedulerServiceProperties, this.auditRecordService);
 	}
 
@@ -258,14 +259,10 @@ public class DefaultSchedulerServiceTests {
 		verifyScheduleExistsInScheduler(createScheduleInfo(BASE_SCHEDULE_NAME + 2));
 		verifyScheduleExistsInScheduler(createScheduleInfo(BASE_SCHEDULE_NAME + 3));
 
-		schedulerService.unschedule(getFullyQualifiedScheduleName(BASE_DEFINITION_NAME, BASE_SCHEDULE_NAME + 2));
+		schedulerService.unschedule(BASE_SCHEDULE_NAME + 2);
 		validateSchedulesCount(2);
 		verifyScheduleExistsInScheduler(createScheduleInfo(BASE_SCHEDULE_NAME + 1));
 		verifyScheduleExistsInScheduler(createScheduleInfo(BASE_SCHEDULE_NAME + 3));
-	}
-
-	private String getFullyQualifiedScheduleName(String taskDefinitionName, String scheduleName) {
-		return scheduleName + "-" +  this.taskConfigurationProperties.getScheduleNamePrefix() + taskDefinitionName;
 	}
 
 	@Test
@@ -342,10 +339,9 @@ public class DefaultSchedulerServiceTests {
 		List<String> commandLineArguments = getCommandLineArguments(Arrays.asList("--myArg1", "--myArg2"));
 
 		assertNotNull("Command line arguments should not be null", commandLineArguments);
-		assertEquals("Invalid number of command line arguments", 3, commandLineArguments.size());
-		assertEquals("Invalid command line argument", "cmdarg.tasklauncher.--myArg1", commandLineArguments.get(0));
-		assertEquals("Invalid command line argument", "cmdarg.tasklauncher.--myArg2", commandLineArguments.get(1));
-		assertEquals("Missing task name", "--spring.cloud.scheduler.task.launcher.taskName=myTaskDefinition",commandLineArguments.get(2));
+		assertEquals("Invalid number of command line arguments", 2, commandLineArguments.size());
+		assertEquals("Invalid command line argument", "--myArg1", commandLineArguments.get(0));
+		assertEquals("Invalid command line argument", "--myArg2", commandLineArguments.get(1));
 	}
 
 	@Test
@@ -353,8 +349,7 @@ public class DefaultSchedulerServiceTests {
 		List<String> commandLineArguments = getCommandLineArguments(new ArrayList<>());
 
 		assertNotNull("Command line arguments should not be null", commandLineArguments);
-		assertEquals("Invalid number of command line arguments", 1, commandLineArguments.size());
-		assertEquals("Missing task name", "--spring.cloud.scheduler.task.launcher.taskName=myTaskDefinition",commandLineArguments.get(0));
+		assertEquals("Invalid number of command line arguments", 0, commandLineArguments.size());
 	}
 
 	private List<String> getCommandLineArguments(List<String> commandLineArguments) {
@@ -368,7 +363,7 @@ public class DefaultSchedulerServiceTests {
 		TaskPlatform taskPlatform = new TaskPlatform("testTaskPlatform", launchers);
 		SchedulerService mockSchedulerService = new DefaultSchedulerService(mock(CommonApplicationProperties.class),
 				taskPlatform, mockTaskDefinitionRepository, mockAppRegistryService, mock(ResourceLoader.class),
-				this.taskConfigurationProperties, "uri",
+				this.taskConfigurationProperties, mock(DataSourceProperties.class), "uri",
 				mock(ApplicationConfigurationMetadataResolver.class), mock(SchedulerServiceProperties.class),
 				mock(AuditRecordService.class));
 
@@ -415,7 +410,7 @@ public class DefaultSchedulerServiceTests {
 
 	private ScheduleInfo createScheduleInfo(String scheduleName, String taskDefinitionName) {
 		ScheduleInfo scheduleInfo = new ScheduleInfo();
-		scheduleInfo.setScheduleName(getFullyQualifiedScheduleName(taskDefinitionName, scheduleName));
+		scheduleInfo.setScheduleName(scheduleName);
 		scheduleInfo.setTaskDefinitionName(taskDefinitionName);
 		scheduleInfo.setScheduleProperties(this.resolvedProperties);
 		return scheduleInfo;
