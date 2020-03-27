@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2019 the original author or authors.
+ * Copyright 2018-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -119,7 +119,7 @@ public class TaskSchedulerControllerTests {
 		createSampleSchedule("schedule2");
 		mockMvc.perform(get("/tasks/schedules").accept(MediaType.APPLICATION_JSON)).andDo(print())
 				.andExpect(status().isOk())
-				.andExpect(jsonPath("$.content[*].scheduleName", containsInAnyOrder("schedule1-scdf-testDefinition", "schedule2-scdf-testDefinition")))
+				.andExpect(jsonPath("$.content[*].scheduleName", containsInAnyOrder("schedule1", "schedule2")))
 				.andExpect(jsonPath("$.content", hasSize(2)));
 	}
 
@@ -132,13 +132,13 @@ public class TaskSchedulerControllerTests {
 		repository.save(new TaskDefinition("testDefinition", "testApp"));
 		createSampleSchedule("schedule1");
 		createSampleSchedule("schedule2");
-		mockMvc.perform(get("/tasks/schedules/schedule1-scdf-testDefinition").accept(MediaType.APPLICATION_JSON))
+		mockMvc.perform(get("/tasks/schedules/schedule1").accept(MediaType.APPLICATION_JSON))
 				.andDo(print()).andExpect(status().isOk())
-				.andExpect(content().json("{scheduleName: \"schedule1-scdf-testDefinition\"}"))
+				.andExpect(content().json("{scheduleName: \"schedule1\"}"))
 				.andExpect(content().json("{taskDefinitionName: \"testDefinition\"}"));
-		mockMvc.perform(get("/tasks/schedules/schedule2-scdf-testDefinition").accept(MediaType.APPLICATION_JSON))
+		mockMvc.perform(get("/tasks/schedules/schedule2").accept(MediaType.APPLICATION_JSON))
 				.andDo(print()).andExpect(status().isOk())
-				.andExpect(content().json("{scheduleName: \"schedule2-scdf-testDefinition\"}"))
+				.andExpect(content().json("{scheduleName: \"schedule2\"}"))
 				.andExpect(content().json("{taskDefinitionName: \"testDefinition\"}"));
 		mockMvc.perform(get("/tasks/schedules/scheduleNotExisting").accept(MediaType.APPLICATION_JSON))
 				.andDo(print()).andExpect(status().isNotFound())
@@ -158,27 +158,27 @@ public class TaskSchedulerControllerTests {
 		createSampleSchedule("bar", "schedule2");
 		mockMvc.perform(get("/tasks/schedules/instances/bar").accept(MediaType.APPLICATION_JSON)).andDo(print())
 				.andExpect(status().isOk())
-				.andExpect(jsonPath("$.content[*].scheduleName", containsInAnyOrder("schedule2-scdf-bar")))
+				.andExpect(jsonPath("$.content[*].scheduleName", containsInAnyOrder("schedule2")))
 				.andExpect(jsonPath("$.content", hasSize(1)));
 	}
 
 	@Test
 	public void testCreateSchedule() throws Exception {
-		createAndVerifySchedule("mySchedule", "mySchedule-scdf-testDefinition");
+		createAndVerifySchedule("mySchedule", "mySchedule");
 	}
 
 	@Test
 	public void testCreateScheduleWithLeadingAndTrailingBlanks() throws Exception {
-		createAndVerifySchedule("    mySchedule    ", "mySchedule-scdf-testDefinition");
+		createAndVerifySchedule("    mySchedule    ", "mySchedule");
 	}
 
 	@Test
 	public void testCreateScheduleLeadingBlanks() throws Exception {
-		createAndVerifySchedule("    mySchedule", "mySchedule-scdf-testDefinition");
+		createAndVerifySchedule("    mySchedule", "mySchedule");
 	}
 	@Test
 	public void testCreateScheduleTrailingBlanks() throws Exception {
-		createAndVerifySchedule("mySchedule      ", "mySchedule-scdf-testDefinition");
+		createAndVerifySchedule("mySchedule      ", "mySchedule");
 	}
 
 	private void createAndVerifySchedule(String scheduleName, String createdScheduleName) throws Exception{
@@ -202,10 +202,10 @@ public class TaskSchedulerControllerTests {
 
 		assertEquals(AuditOperationType.SCHEDULE, auditRecord.getAuditOperation());
 		assertEquals(AuditActionType.CREATE, auditRecord.getAuditAction());
-		assertEquals("mySchedule-scdf-testDefinition", auditRecord.getCorrelationId());
+		assertEquals("mySchedule", auditRecord.getCorrelationId());
 
-		assertEquals("{\"commandlineArguments\":[\"--spring.cloud.scheduler.task.launcher.taskName=testDefinition\"],\"taskDefinitionName\":\"mySchedule-scdf-testDefinition\","
-				+ "\"taskDefinitionProperties\":{},"
+		assertEquals("{\"commandlineArguments\":[],\"taskDefinitionName\":\"testDefinition\","
+				+ "\"taskDefinitionProperties\":{\"spring.datasource.username\":null,\"spring.cloud.task.name\":\"testDefinition\",\"spring.datasource.url\":null,\"spring.datasource.driverClassName\":null},"
 				+ "\"deploymentProperties\":{}}", auditRecord.getAuditData());
 	}
 
@@ -214,8 +214,8 @@ public class TaskSchedulerControllerTests {
 		String auditData = createScheduleWithArguments("argument1=foo password=secret");
 
 		assertEquals(
-				"{\"commandlineArguments\":[\"cmdarg.tasklauncher.argument1=foo\",\"cmdarg.tasklauncher.password=******\",\"--spring.cloud.scheduler.task.launcher.taskName=testDefinition\"],\"taskDefinitionName\":\"mySchedule-scdf-testDefinition\","
-						+ "\"taskDefinitionProperties\":{\"tasklauncher.app.testApp.prop2.secret\":\"******\",\"tasklauncher.deployer.*.prop2.password\":\"******\",\"tasklauncher.app.testApp.prop1\":\"foo\",\"tasklauncher.deployer.*.prop1.secret\":\"******\"},"
+				"{\"commandlineArguments\":[\"argument1=foo\",\"password=******\"],\"taskDefinitionName\":\"testDefinition\","
+						+ "\"taskDefinitionProperties\":{\"prop1\":\"foo\",\"spring.datasource.username\":null,\"prop2.secret\":\"******\",\"spring.datasource.url\":null,\"spring.datasource.driverClassName\":null,\"spring.cloud.task.name\":\"testDefinition\"},"
 						+ "\"deploymentProperties\":{\"spring.cloud.deployer.prop1.secret\":\"******\",\"spring.cloud.deployer.prop2.password\":\"******\"}}",
 				auditData);
 	}
@@ -225,8 +225,8 @@ public class TaskSchedulerControllerTests {
 		String auditData = createScheduleWithArguments("argument1=foo spring.profiles.active=k8s,master argument3=bar");
 
 		assertEquals(
-				"{\"commandlineArguments\":[\"cmdarg.tasklauncher.argument1=foo\",\"cmdarg.tasklauncher.spring.profiles.active=k8s,master\",\"cmdarg.tasklauncher.argument3=bar\",\"--spring.cloud.scheduler.task.launcher.taskName=testDefinition\"],\"taskDefinitionName\":\"mySchedule-scdf-testDefinition\","
-						+ "\"taskDefinitionProperties\":{\"tasklauncher.app.testApp.prop2.secret\":\"******\",\"tasklauncher.deployer.*.prop2.password\":\"******\",\"tasklauncher.app.testApp.prop1\":\"foo\",\"tasklauncher.deployer.*.prop1.secret\":\"******\"},"
+				"{\"commandlineArguments\":[\"argument1=foo\",\"spring.profiles.active=k8s,master\",\"argument3=bar\"],\"taskDefinitionName\":\"testDefinition\","
+						+ "\"taskDefinitionProperties\":{\"prop1\":\"foo\",\"spring.datasource.username\":null,\"prop2.secret\":\"******\",\"spring.datasource.url\":null,\"spring.datasource.driverClassName\":null,\"spring.cloud.task.name\":\"testDefinition\"},"
 						+ "\"deploymentProperties\":{\"spring.cloud.deployer.prop1.secret\":\"******\",\"spring.cloud.deployer.prop2.password\":\"******\"}}",
 				auditData);
 	}
@@ -243,7 +243,7 @@ public class TaskSchedulerControllerTests {
 				.accept(MediaType.APPLICATION_JSON)).andDo(print()).andExpect(status().isCreated());
 		assertEquals(1, simpleTestScheduler.list().size());
 		ScheduleInfo scheduleInfo = simpleTestScheduler.list().get(0);
-		assertEquals("mySchedule-scdf-testDefinition", scheduleInfo.getScheduleName());
+		assertEquals("mySchedule", scheduleInfo.getScheduleName());
 		assertEquals(1, scheduleInfo.getScheduleProperties().size());
 		assertEquals("* * * * *", scheduleInfo.getScheduleProperties().get("spring.cloud.scheduler.cron.expression"));
 
@@ -254,7 +254,7 @@ public class TaskSchedulerControllerTests {
 
 		assertEquals(AuditOperationType.SCHEDULE, auditRecord.getAuditOperation());
 		assertEquals(AuditActionType.CREATE, auditRecord.getAuditAction());
-		assertEquals("mySchedule-scdf-testDefinition", auditRecord.getCorrelationId());
+		assertEquals("mySchedule", auditRecord.getCorrelationId());
 
 		return auditRecord.getAuditData();
 	}
@@ -295,7 +295,7 @@ public class TaskSchedulerControllerTests {
 		repository.save(new TaskDefinition("testDefinition", "testApp"));
 		createSampleSchedule("mySchedule");
 		assertEquals(1, simpleTestScheduler.list().size());
-		mockMvc.perform(delete("/tasks/schedules/" + "mySchedule-scdf-testDefinition").accept(MediaType.APPLICATION_JSON)).andDo(print())
+		mockMvc.perform(delete("/tasks/schedules/" + "mySchedule").accept(MediaType.APPLICATION_JSON)).andDo(print())
 				.andExpect(status().isOk());
 		assertEquals(0, simpleTestScheduler.list().size());
 
@@ -314,7 +314,7 @@ public class TaskSchedulerControllerTests {
 
 		assertEquals(AuditOperationType.SCHEDULE, auditRecord.getAuditOperation());
 		assertEquals(AuditActionType.DELETE, auditRecord.getAuditAction());
-		assertEquals("mySchedule-scdf-testDefinition", auditRecord.getCorrelationId());
+		assertEquals("mySchedule", auditRecord.getCorrelationId());
 		assertEquals("testDefinition", auditRecord.getAuditData());
 	}
 

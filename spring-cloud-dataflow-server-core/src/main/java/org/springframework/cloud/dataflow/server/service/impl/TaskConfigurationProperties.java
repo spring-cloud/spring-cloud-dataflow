@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2019 the original author or authors.
+ * Copyright 2018-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -42,26 +42,6 @@ public class TaskConfigurationProperties {
 	private String composedTaskRunnerName = "composed-task-runner";
 
 	/**
-	 * The schedule application name to be used for the scheduler task launcher.
-	 */
-	@NotBlank
-	private String schedulerTaskLauncherName = "scheduler-task-launcher";
-
-	/**
-	 * The URI of the resource to be used for launching apps via a schedule.
-	 */
-	private String schedulerTaskLauncherUrl;
-	/**
-	 * The prefix to be applied to schedule names.
-	 */
-	private String scheduleNamePrefix = "scdf-";
-
-	/**
-	 * The prefix to attach to the application properties to be sent to the schedule task launcher.
-	 */
-	private String taskLauncherPrefix = "tasklauncher";
-
-	/**
 	 * Whether the server should auto create task definitions if one does not exist for a launch request and
 	 * a registered task application with the same name does exist.
 	 */
@@ -78,38 +58,6 @@ public class TaskConfigurationProperties {
 
 	public void setComposedTaskRunnerName(String taskName) {
 		this.composedTaskRunnerName = taskName;
-	}
-
-	public String getSchedulerTaskLauncherName() {
-		return schedulerTaskLauncherName;
-	}
-
-	public void setSchedulerTaskLauncherName(String schedulerTaskLauncherName) {
-		this.schedulerTaskLauncherName = schedulerTaskLauncherName;
-	}
-
-	public String getScheduleNamePrefix() {
-		return scheduleNamePrefix;
-	}
-
-	public void setScheduleNamePrefix(String scheduleNamePrefix) {
-		this.scheduleNamePrefix = scheduleNamePrefix;
-	}
-
-	public String getTaskLauncherPrefix() {
-		return taskLauncherPrefix;
-	}
-
-	public void setTaskLauncherPrefix(String taskLauncherPrefix) {
-		this.taskLauncherPrefix = taskLauncherPrefix;
-	}
-
-	public String getSchedulerTaskLauncherUrl() {
-		return schedulerTaskLauncherUrl;
-	}
-
-	public void setSchedulerTaskLauncherUrl(String schedulerTaskLauncherUrl) {
-		this.schedulerTaskLauncherUrl = schedulerTaskLauncherUrl;
 	}
 
 	public DeployerProperties getDeployerProperties() {
