@@ -82,6 +82,7 @@ public class DataFlowClientProperties {
 	public static class Authentication {
 
 		private Basic basic = new Basic();
+		private Oauth2 oauth2 = new Oauth2();
 
 		/**
 		 * OAuth2 Access Token.
@@ -156,6 +157,14 @@ public class DataFlowClientProperties {
 			this.basic = basic;
 		}
 
+		public Oauth2 getOauth2() {
+			return oauth2;
+		}
+
+		public void setOauth2(Oauth2 oauth2) {
+			this.oauth2 = oauth2;
+		}
+
 		public static class Basic {
 
 			/**
@@ -185,6 +194,35 @@ public class DataFlowClientProperties {
 			}
 		}
 
+		public static class Oauth2 {
 
+			private String clientRegistrationId;
+			private String username;
+			private String password;
+
+			public String getClientRegistrationId() {
+				return clientRegistrationId;
+			}
+
+			public void setClientRegistrationId(String clientRegistrationId) {
+				this.clientRegistrationId = clientRegistrationId;
+			}
+
+			public String getUsername() {
+				return username;
+			}
+
+			public void setUsername(String username) {
+				this.username = username;
+			}
+
+			public String getPassword() {
+				return password;
+			}
+
+			public void setPassword(String password) {
+				this.password = password;
+			}
+		}
 	}
 }
