@@ -109,7 +109,6 @@
 		<module>spring-cloud-dataflow-rest-client</module>
 		<module>spring-cloud-dataflow-shell</module>
 		<module>spring-cloud-dataflow-shell-core</module>
-		<module>spring-cloud-dataflow-scheduler-task-launcher</module>
 		<module>spring-cloud-dataflow-classic-docs</module>
 		<module>spring-cloud-dataflow-docs</module>
 		<module>spring-cloud-dataflow-completion</module>
