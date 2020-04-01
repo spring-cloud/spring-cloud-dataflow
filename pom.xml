@@ -22,6 +22,7 @@
 		<maven.compiler.target>${java.version}</maven.compiler.target>
 		<main.basedir>${basedir}</main.basedir>
 		<docs.main>${project.artifactId}</docs.main>
+		<spring-cloud-dataflow-build.version>2.5.0.BUILD-SNAPSHOT</spring-cloud-dataflow-build.version>
 		<spring-boot.version>2.2.5.RELEASE</spring-boot.version>
 		<docs.resources.dir>${project.build.directory}/build-docs</docs.resources.dir>
 		<refdocs.build.directory>${project.build.directory}/refdocs/</refdocs.build.directory>
@@ -305,7 +306,7 @@
 						<dependency>
 							<groupId>org.springframework.cloud</groupId>
 							<artifactId>spring-cloud-dataflow-build-tools</artifactId>
-							<version>2.5.0.BUILD-SNAPSHOT</version>
+							<version>${spring-cloud-dataflow-build.version}</version>
 						</dependency>
 						<dependency>
 							<groupId>io.spring.nohttp</groupId>
