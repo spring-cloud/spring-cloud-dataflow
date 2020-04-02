@@ -490,7 +490,7 @@ The following example shows how to deploy the `http` health check type to an end
 [[configuration-cloudfoundry-app-resolution-options]]
 === Application Resolution Alternatives
 
-Though we recommend using a Maven Artifactory for application link:https://docs.spring.io/spring-cloud-dataflow/docs/{scdf-core-version}/reference/htmlsingle/#spring-cloud-dataflow-register-stream-apps[resolution and registration],
+Though we recommend using a Maven Artifactory for application <<spring-cloud-dataflow-register-stream-apps>>,
 there might be situations where one of the following alternative approaches would make sense.
 
 * We have custom-built and maintain a link:https://github.com/spring-cloud-stream-app-starters/scdf-app-tool[SCDF APP Tool]
@@ -519,7 +519,7 @@ By default, the Data Flow server is unsecured and runs on an unencrypted HTTP co
 (as well as the Data Flow Dashboard) by enabling HTTPS and requiring clients to authenticate.
 For more details about securing the
 REST endpoints and configuring to authenticate against an OAUTH backend (UAA and SSO running on Cloud Foundry),
-see the security section from the core https://docs.spring.io/spring-cloud-dataflow/docs/{scdf-core-version}/reference/htmlsingle/#configuration-security[reference guide]. You can configure the security details in `dataflow-server.yml` or pass them as environment variables through `cf set-env` commands.
+see the security section from the core <<configuration-local-security>>. You can configure the security details in `dataflow-server.yml` or pass them as environment variables through `cf set-env` commands.
 
 [[configuration-cloudfoundry-authentication]]
 ==== Authentication
@@ -552,7 +552,7 @@ SECURITY_OAUTH2_RESOURCE_USERINFOURI: "${security.oauth2.resource.userInfoUri}"
 <1> It is important that the property `spring.cloud.dataflow.security.cf-use-uaa` is set to `false`
 
 Authorization is similarly supported for non-Cloud Foundry security scenarios.
-See the security section from the core Data Flow https://docs.spring.io/spring-cloud-dataflow/docs/{scdf-core-version}/reference/htmlsingle/#configuration-security[reference guide].
+See the security section from the core Data Flow <<configuration-local-security>>.
 
 As the provisioning of roles can vary widely across environments, we by
 default assign all Spring Cloud Data Flow roles to users.
@@ -738,7 +738,7 @@ a configuration server to use the same capabilities.
 Similar to Spring Cloud Data Flow server, you can configure both the stream and task applications to resolve the centralized properties from the configuration server.
 Setting the `spring.cloud.config.uri` property for the deployed applications is a common way to bind to the configuration server.
 See the link:https://cloud.spring.io/spring-cloud-config/spring-cloud-config.html#_spring_cloud_config_client[Spring Cloud Config Client] reference guide for more information.
-Since this property is likely to be used across all applications deployed by the Data Flow server, the Data Flow server's `spring.cloud.dataflow.applicationProperties.stream` property for stream applications and `spring.cloud.dataflow.applicationProperties.task` property for task applications can be used to pass the `uri` of the Config Server to each deployed stream or task application. See the section on https://docs.spring.io/spring-cloud-dataflow/docs/{scdf-core-version}/reference/htmlsingle/#spring-cloud-dataflow-global-properties[common application properties] for more information.
+Since this property is likely to be used across all applications deployed by the Data Flow server, the Data Flow server's `spring.cloud.dataflow.applicationProperties.stream` property for stream applications and `spring.cloud.dataflow.applicationProperties.task` property for task applications can be used to pass the `uri` of the Config Server to each deployed stream or task application. See the section on <<spring-cloud-dataflow-global-properties>> for more information.
 
 Note that, if you use applications from the link:https://cloud.spring.io/spring-cloud-stream-app-starters/[App Starters project], these applications already embed the `spring-cloud-services-starter-config-client` dependency.
 If you build your application from scratch and want to add the client side support for config server, you can add a dependency reference to the config server client library. The following snippet shows a Maven example:
