@@ -34,6 +34,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.web.util.UriComponents;
+import org.springframework.web.util.UriComponentsBuilder;
 
 /**
  * Leverages the Docker Registry HTTP V2 API to retrieve the configuration object and the labels
@@ -181,11 +183,16 @@ public class DefaultContainerImageMetadataResolver implements ContainerImageMeta
 		httpHeaders.set(HttpHeaders.ACCEPT, imageManifestMediaType);
 
 		// Docker Registry HTTP V2 API pull manifest
-		ResponseEntity<T> manifest = getRestTemplate().exchange("https://{registryHost}/v2/{repository}/manifests/{tag}",
-				HttpMethod.GET, new HttpEntity<>(httpHeaders), responseClassType,
-				registryRequest.getContainerImage().getRegistryHost(),
-				registryRequest.getContainerImage().getRepository(),
-				registryRequest.getContainerImage().getRepositoryTag());
+		ContainerImage containerImage = registryRequest.getContainerImage();
+		UriComponents manifestUriComponents = UriComponentsBuilder.newInstance()
+				.scheme("https")
+				.host(containerImage.getHostname())
+				.port(StringUtils.hasText(containerImage.getPort()) ? containerImage.getPort() : null)
+				.path("v2/{repository}/manifests/{tag}")
+				.build().expand(containerImage.getRepository(), containerImage.getRepositoryTag());
+
+		ResponseEntity<T> manifest = getRestTemplate().exchange(manifestUriComponents.toUri(),
+				HttpMethod.GET, new HttpEntity<>(httpHeaders), responseClassType);
 		return manifest.getBody();
 	}
 
@@ -195,10 +202,16 @@ public class DefaultContainerImageMetadataResolver implements ContainerImageMeta
 		HttpHeaders httpHeaders = new HttpHeaders(authHttpHeaders);
 
 		// Docker Registry HTTP V2 API pull config blob
-		ResponseEntity<T> blob = getRestTemplate().exchange("https://{registryHost}/v2/{repository}/blobs/{digest}",
-				HttpMethod.GET, new HttpEntity<>(httpHeaders), responseClassType,
-				containerImage.getRegistryHost(),
-				containerImage.getRepository(), configDigest);
+		UriComponents blobUriComponents = UriComponentsBuilder.newInstance()
+				.scheme("https")
+				.host(containerImage.getHostname())
+				.port(StringUtils.hasText(containerImage.getPort()) ? containerImage.getPort() : null)
+				.path("v2/{repository}/blobs/{digest}")
+				.build().expand(containerImage.getRepository(), configDigest);
+
+		ResponseEntity<T> blob = getRestTemplate().exchange(blobUriComponents.toUri(),
+				HttpMethod.GET, new HttpEntity<>(httpHeaders), responseClassType);
+
 		return blob.getBody();
 	}
 }

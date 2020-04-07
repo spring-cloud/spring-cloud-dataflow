@@ -27,6 +27,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.web.util.UriComponents;
+import org.springframework.web.util.UriComponentsBuilder;
 
 /**
  * Docker Hub requires authorization per Repository (e.g. springcloudstream/rabbit-sink-rabbit).
@@ -65,10 +67,12 @@ public class DockerHubRegistryAuthorizer implements RegistryAuthorizer {
 
 		String registryAuthUri = registryConfiguration.getExtra().containsKey(DOCKER_REGISTRY_AUTH_URI_KEY) ?
 				registryConfiguration.getExtra().get(DOCKER_REGISTRY_AUTH_URI_KEY) : DEFAULT_DOCKER_REGISTRY_AUTH_URI;
+		UriComponents uriComponents = UriComponentsBuilder.newInstance()
+				.fromHttpUrl(registryAuthUri).build().expand(imageRepository);
 
 		final HttpEntity<String> entity = new HttpEntity<>(requestHttpHeaders);
-		ResponseEntity<Map> authorization = new RestTemplate().exchange(registryAuthUri, HttpMethod.GET,
-				entity, Map.class, imageRepository);
+		ResponseEntity<Map> authorization = new RestTemplate().exchange(uriComponents.toUri(),
+				HttpMethod.GET, entity, Map.class);
 		Map<String, String> authorizationBody = (Map<String, String>) authorization.getBody();
 
 		final HttpHeaders responseHttpHeaders = new HttpHeaders();
