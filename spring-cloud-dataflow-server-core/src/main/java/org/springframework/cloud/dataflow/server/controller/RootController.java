@@ -147,6 +147,8 @@ public class RootController {
 			root.add(entityLinks.linkToCollectionResource(JobExecutionResource.class).withRel("jobs/executions"));
 			taskTemplated = entityLinks.linkToCollectionResource(JobExecutionResource.class).getHref() + "{?name}";
 			root.add(new Link(taskTemplated).withRel("jobs/executions/name"));
+			taskTemplated = entityLinks.linkToCollectionResource(JobExecutionResource.class).getHref() + "{?status}";
+			root.add(new Link(taskTemplated).withRel("jobs/executions/status"));
 			root.add(unescapeTemplateVariables(entityLinks.linkToItemResource(JobExecutionResource.class, "{id}")
 					.withRel("jobs/executions/execution")));
 			root.add(unescapeTemplateVariables(entityLinks.linkFor(StepExecutionResource.class, "{jobExecutionId}")

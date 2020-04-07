@@ -132,7 +132,8 @@ public class JobExecutionControllerTests {
 		mockMvc.perform(put("/jobs/executions/6").accept(MediaType.APPLICATION_JSON).param("stop", "true"))
 				.andExpect(status().isOk());
 
-		final JobExecution jobExecution = jobRepository.getLastJobExecution(JobExecutionUtils.JOB_NAME_STARTED, new JobParameters());
+		final JobExecution jobExecution = jobRepository.getLastJobExecution(JobExecutionUtils.JOB_NAME_STARTED,
+				new JobParameters());
 		Assert.assertNotNull(jobExecution);
 		Assert.assertEquals(Long.valueOf(6), jobExecution.getId());
 		Assert.assertEquals(BatchStatus.STOPPING, jobExecution.getStatus());
@@ -146,7 +147,8 @@ public class JobExecutionControllerTests {
 		mockMvc.perform(put("/jobs/executions/7").accept(MediaType.APPLICATION_JSON).param("stop", "true"))
 				.andExpect(status().isUnprocessableEntity());
 
-		final JobExecution jobExecution = jobRepository.getLastJobExecution(JobExecutionUtils.JOB_NAME_STOPPED, new JobParameters());
+		final JobExecution jobExecution = jobRepository.getLastJobExecution(JobExecutionUtils.JOB_NAME_STOPPED,
+				new JobParameters());
 		Assert.assertNotNull(jobExecution);
 		Assert.assertEquals(Long.valueOf(7), jobExecution.getId());
 		Assert.assertEquals(BatchStatus.STOPPED, jobExecution.getStatus());
@@ -170,8 +172,8 @@ public class JobExecutionControllerTests {
 	@Test
 	public void testGetAllExecutions() throws Exception {
 		mockMvc.perform(get("/jobs/executions/").accept(MediaType.APPLICATION_JSON)).andExpect(status().isOk())
-				.andExpect(jsonPath("$.content[*].taskExecutionId", containsInAnyOrder(6, 5, 4, 3, 3, 2, 1)))
-				.andExpect(jsonPath("$.content", hasSize(7)));
+				.andExpect(jsonPath("$.content[*].taskExecutionId", containsInAnyOrder(8, 7, 6, 5, 4, 3, 3, 2, 1)))
+				.andExpect(jsonPath("$.content", hasSize(9)));
 	}
 
 	@Test
@@ -182,27 +184,67 @@ public class JobExecutionControllerTests {
 
 	@Test
 	public void testGetExecutionsByName() throws Exception {
-		mockMvc.perform(get("/jobs/executions/").param("name", JobExecutionUtils.JOB_NAME_ORIG).accept(MediaType.APPLICATION_JSON))
+		mockMvc.perform(get("/jobs/executions/").param("name", JobExecutionUtils.JOB_NAME_ORIG)
+				.accept(MediaType.APPLICATION_JSON))
 				.andExpect(status().isOk())
-				.andExpect(jsonPath("$.content[0].jobExecution.jobInstance.jobName", is(JobExecutionUtils.JOB_NAME_ORIG)))
+				.andExpect(
+						jsonPath("$.content[0].jobExecution.jobInstance.jobName", is(JobExecutionUtils.JOB_NAME_ORIG)))
 				.andExpect(jsonPath("$.content", hasSize(1)));
 	}
 
 	@Test
 	public void testGetExecutionsByNamePageOffsetLargerThanIntMaxValue() throws Exception {
-		verify5XXErrorIsThrownForPageOffsetError(get("/jobs/executions/").param("name", JobExecutionUtils.JOB_NAME_ORIG));
+		verify5XXErrorIsThrownForPageOffsetError(
+				get("/jobs/executions/").param("name", JobExecutionUtils.JOB_NAME_ORIG));
 		verifyBorderCaseForMaxInt(get("/jobs/executions/").param("name", JobExecutionUtils.JOB_NAME_ORIG));
 	}
 
 	@Test
 	public void testGetExecutionsByNameMultipleResult() throws Exception {
-		mockMvc.perform(get("/jobs/executions/").param("name", JobExecutionUtils.JOB_NAME_FOOBAR).accept(MediaType.APPLICATION_JSON))
+		mockMvc.perform(get("/jobs/executions/").param("name", JobExecutionUtils.JOB_NAME_FOOBAR)
+				.accept(MediaType.APPLICATION_JSON))
 				.andExpect(status().isOk())
-				.andExpect(jsonPath("$.content[0].jobExecution.jobInstance.jobName", is(JobExecutionUtils.JOB_NAME_FOOBAR)))
-				.andExpect(jsonPath("$.content[1].jobExecution.jobInstance.jobName", is(JobExecutionUtils.JOB_NAME_FOOBAR)))
+				.andExpect(jsonPath("$.content[0].jobExecution.jobInstance.jobName",
+						is(JobExecutionUtils.JOB_NAME_FOOBAR)))
+				.andExpect(jsonPath("$.content[1].jobExecution.jobInstance.jobName",
+						is(JobExecutionUtils.JOB_NAME_FOOBAR)))
 				.andExpect(jsonPath("$.content", hasSize(2)));
 	}
 
+	@Test
+	public void testFilteringByStatusAndName_EmptyNameAndStatusGiven() throws Exception {
+		mockMvc.perform(get("/jobs/executions/")
+				.param("name", "")
+				.param("status", "FAILED")
+				.accept(MediaType.APPLICATION_JSON))
+				.andExpect(status().isOk())
+				.andExpect(jsonPath("$.content[0].jobExecution.jobInstance.jobName",
+						is(JobExecutionUtils.JOB_NAME_FAILED2)))
+				.andExpect(jsonPath("$.content[1].jobExecution.jobInstance.jobName",
+						is(JobExecutionUtils.JOB_NAME_FAILED1)))
+				.andExpect(jsonPath("$.content", hasSize(2)));
+	}
+
+	@Test
+	public void testFilteringByUnknownStatus() throws Exception {
+		mockMvc.perform(get("/jobs/executions/")
+				.param("status", "UNKNOWN")
+				.accept(MediaType.APPLICATION_JSON))
+				.andExpect(status().isOk())
+				.andExpect(jsonPath("$.content", hasSize(4)));
+	}
+
+	@Test
+	public void testFilteringByStatusAndName_NameAndStatusGiven() throws Exception {
+		mockMvc.perform(get("/jobs/executions/")
+				.param("name", JobExecutionUtils.BASE_JOB_NAME + "%")
+				.param("status", "COMPLETED")
+				.accept(MediaType.APPLICATION_JSON))
+				.andExpect(status().isOk())
+				.andExpect(jsonPath("$.content[0].jobExecution.jobInstance.jobName",
+						is(JobExecutionUtils.JOB_NAME_COMPLETED)))
+				.andExpect(jsonPath("$.content", hasSize(1)));
+	}
 
 	@Test
 	public void testGetExecutionsByNameNotFound() throws Exception {
@@ -215,8 +257,10 @@ public class JobExecutionControllerTests {
 		mockMvc.perform(get("/jobs/executions/")
 				.param("name", JobExecutionUtils.BASE_JOB_NAME + "_FOO_ST%").accept(MediaType.APPLICATION_JSON))
 				.andExpect(status().isOk())
-				.andExpect(jsonPath("$.content[0].jobExecution.jobInstance.jobName", is(JobExecutionUtils.JOB_NAME_STOPPED)))
-				.andExpect(jsonPath("$.content[1].jobExecution.jobInstance.jobName", is(JobExecutionUtils.JOB_NAME_STARTED)))
+				.andExpect(jsonPath("$.content[0].jobExecution.jobInstance.jobName",
+						is(JobExecutionUtils.JOB_NAME_STOPPED)))
+				.andExpect(jsonPath("$.content[1].jobExecution.jobInstance.jobName",
+						is(JobExecutionUtils.JOB_NAME_STARTED)))
 				.andExpect(jsonPath("$.content", hasSize(2)));
 	}
 
@@ -225,12 +269,14 @@ public class JobExecutionControllerTests {
 		mockMvc.perform(get("/jobs/executions/")
 				.param("name", "m_Job_ORIG").accept(MediaType.APPLICATION_JSON))
 				.andExpect(status().isOk())
-				.andExpect(jsonPath("$.content[0].jobExecution.jobInstance.jobName", is(JobExecutionUtils.JOB_NAME_ORIG)))
+				.andExpect(
+						jsonPath("$.content[0].jobExecution.jobInstance.jobName", is(JobExecutionUtils.JOB_NAME_ORIG)))
 				.andExpect(jsonPath("$.content", hasSize(1)));
 	}
 
 	private void createDirtyJob() {
-		JobInstance instance = jobRepository.createJobInstance(JobExecutionUtils.BASE_JOB_NAME + "_NO_TASK", new JobParameters());
+		JobInstance instance = jobRepository.createJobInstance(JobExecutionUtils.BASE_JOB_NAME + "_NO_TASK",
+				new JobParameters());
 		JobExecution jobExecution = jobRepository.createJobExecution(
 				instance, new JobParameters(), null);
 		jobExecution.setStatus(BatchStatus.STOPPED);
@@ -238,15 +284,16 @@ public class JobExecutionControllerTests {
 		jobRepository.update(jobExecution);
 	}
 
-	private void verify5XXErrorIsThrownForPageOffsetError(MockHttpServletRequestBuilder builder) throws Exception{
+	private void verify5XXErrorIsThrownForPageOffsetError(MockHttpServletRequestBuilder builder) throws Exception {
 		mockMvc.perform(builder.param("page", String.valueOf(Integer.MAX_VALUE))
 				.accept(MediaType.APPLICATION_JSON))
 				.andExpect(status().is4xxClientError())
 				.andReturn().getResponse().getContentAsString()
 				.contains("OffsetOutOfBoundsException");
 	}
+
 	private void verifyBorderCaseForMaxInt(MockHttpServletRequestBuilder builder) throws Exception {
-		mockMvc.perform(builder.param("page", String.valueOf(Integer.MAX_VALUE - 1 ))
+		mockMvc.perform(builder.param("page", String.valueOf(Integer.MAX_VALUE - 1))
 				.param("size", "1")
 				.accept(MediaType.APPLICATION_JSON)).andExpect(status().isOk());
 	}

@@ -53,6 +53,12 @@ public class JdbcSearchableJobExecutionDao extends JdbcJobExecutionDao implement
 	private static final String GET_COUNT_BY_JOB_NAME = "SELECT COUNT(1) from %PREFIX%JOB_EXECUTION E, %PREFIX%JOB_INSTANCE I "
 			+ "where E.JOB_INSTANCE_ID=I.JOB_INSTANCE_ID and I.JOB_NAME=?";
 
+	private static final String GET_COUNT_BY_STATUS = "SELECT COUNT(1) from %PREFIX%JOB_EXECUTION E, %PREFIX%JOB_INSTANCE I "
+			+ "where E.JOB_INSTANCE_ID=I.JOB_INSTANCE_ID and E.STATUS = ?";
+
+	private static final String GET_COUNT_BY_JOB_NAME_AND_STATUS = "SELECT COUNT(1) from %PREFIX%JOB_EXECUTION E, %PREFIX%JOB_INSTANCE I "
+			+ "where E.JOB_INSTANCE_ID=I.JOB_INSTANCE_ID and I.JOB_NAME=? AND E.STATUS = ?";
+
 	private static final String FIELDS = "E.JOB_EXECUTION_ID, E.START_TIME, E.END_TIME, E.STATUS, E.EXIT_CODE, E.EXIT_MESSAGE, "
 			+ "E.CREATE_TIME, E.LAST_UPDATED, E.VERSION, I.JOB_INSTANCE_ID, I.JOB_NAME";
 
@@ -64,11 +70,19 @@ public class JdbcSearchableJobExecutionDao extends JdbcJobExecutionDao implement
 			+ " from %PREFIX%JOB_EXECUTION E, %PREFIX%JOB_INSTANCE I "
 			+ "where E.JOB_INSTANCE_ID=I.JOB_INSTANCE_ID and E.END_TIME is NULL";
 
-	private static final String NAME_FILTER = "I.JOB_NAME LIKE ?";
+    private static final String NAME_FILTER = "I.JOB_NAME LIKE ?";
+
+	private static final String STATUS_FILTER = "E.STATUS = ?";
+
+	private static final String NAME_AND_STATUS_FILTER = "I.JOB_NAME LIKE ? AND E.STATUS = ?";
 
 	private PagingQueryProvider allExecutionsPagingQueryProvider;
 
 	private PagingQueryProvider byJobNamePagingQueryProvider;
+
+	private PagingQueryProvider byStatusPagingQueryProvider;
+
+    private PagingQueryProvider byJobNameAndStatusPagingQueryProvider;
 
 	private PagingQueryProvider byJobNameWithStepCountPagingQueryProvider;
 
@@ -104,6 +118,8 @@ public class JdbcSearchableJobExecutionDao extends JdbcJobExecutionDao implement
 		allExecutionsPagingQueryProvider = getPagingQueryProvider();
 		executionsWithStepCountPagingQueryProvider = getPagingQueryProvider(FIELDS_WITH_STEP_COUNT, null, null);
 		byJobNamePagingQueryProvider = getPagingQueryProvider(NAME_FILTER);
+		byStatusPagingQueryProvider = getPagingQueryProvider(STATUS_FILTER);
+        byJobNameAndStatusPagingQueryProvider = getPagingQueryProvider(NAME_AND_STATUS_FILTER);
 		byJobNameWithStepCountPagingQueryProvider = getPagingQueryProvider(FIELDS_WITH_STEP_COUNT, null, NAME_FILTER);
 
 		super.afterPropertiesSet();
@@ -150,7 +166,7 @@ public class JdbcSearchableJobExecutionDao extends JdbcJobExecutionDao implement
 			fields = FIELDS;
 		}
 		factory.setSelectClause(getQuery(fields));
-		Map<String, Order> sortKeys = new HashMap<String, Order>();
+		Map<String, Order> sortKeys = new HashMap<>();
 		sortKeys.put("JOB_EXECUTION_ID", Order.DESCENDING);
 		factory.setSortKeys(sortKeys);
 		whereClause = "E.JOB_INSTANCE_ID=I.JOB_INSTANCE_ID" + (whereClause == null ? "" : " and " + whereClause);
@@ -176,6 +192,22 @@ public class JdbcSearchableJobExecutionDao extends JdbcJobExecutionDao implement
 	}
 
 	/**
+	 * @see SearchableJobExecutionDao#countJobExecutions(BatchStatus)
+	 */
+	@Override
+	public int countJobExecutions(BatchStatus status) {
+		return getJdbcTemplate().queryForObject(getQuery(GET_COUNT_BY_STATUS), Integer.class, status.name());
+	}
+
+	/**
+	 * @see SearchableJobExecutionDao#countJobExecutions(String, BatchStatus)
+	 */
+	@Override
+	public int countJobExecutions(String jobName, BatchStatus status) {
+		return getJdbcTemplate().queryForObject(getQuery(GET_COUNT_BY_JOB_NAME_AND_STATUS), Integer.class, jobName, status.name());
+	}
+
+	/**
 	 * @see SearchableJobExecutionDao#getRunningJobExecutions()
 	 */
 	@Override
@@ -184,19 +216,56 @@ public class JdbcSearchableJobExecutionDao extends JdbcJobExecutionDao implement
 	}
 
 	/**
-	 * @see SearchableJobExecutionDao#getJobExecutions(String, int, int)
+	 * @see SearchableJobExecutionDao#getJobExecutions(String, BatchStatus, int, int)
 	 */
 	@Override
-	public List<JobExecution> getJobExecutions(String jobName, int start, int count) {
+	public List<JobExecution> getJobExecutions(String jobName, BatchStatus status, int start, int count) {
+        if (start <= 0) {
+            return getJdbcTemplate().query(byJobNameAndStatusPagingQueryProvider.generateFirstPageQuery(count),
+                    new JobExecutionRowMapper(), jobName, status.name());
+        }
+        try {
+            Long startAfterValue = getJdbcTemplate().queryForObject(
+                    byJobNameAndStatusPagingQueryProvider.generateJumpToItemQuery(start, count), Long.class, jobName, status.name());
+            return getJdbcTemplate().query(byJobNameAndStatusPagingQueryProvider.generateRemainingPagesQuery(count),
+                    new JobExecutionRowMapper(), jobName, status.name(), startAfterValue);
+        }
+        catch (IncorrectResultSizeDataAccessException e) {
+            return Collections.emptyList();
+        }
+	}
+
+    /**
+     * @see SearchableJobExecutionDao#getJobExecutions(String, int, int)
+     */
+    @Override
+    public List<JobExecution> getJobExecutions(String jobName, int start, int count) {
+        if (start <= 0) {
+            return getJdbcTemplate().query(byJobNamePagingQueryProvider.generateFirstPageQuery(count),
+                    new JobExecutionRowMapper(), jobName);
+        }
+        try {
+            Long startAfterValue = getJdbcTemplate().queryForObject(
+                    byJobNamePagingQueryProvider.generateJumpToItemQuery(start, count), Long.class, jobName);
+            return getJdbcTemplate().query(byJobNamePagingQueryProvider.generateRemainingPagesQuery(count),
+                    new JobExecutionRowMapper(), jobName, startAfterValue);
+        }
+        catch (IncorrectResultSizeDataAccessException e) {
+            return Collections.emptyList();
+        }
+    }
+
+	@Override
+	public List<JobExecution> getJobExecutions(BatchStatus status, int start, int count) {
 		if (start <= 0) {
-			return getJdbcTemplate().query(byJobNamePagingQueryProvider.generateFirstPageQuery(count),
-					new JobExecutionRowMapper(), jobName);
+			return getJdbcTemplate().query(byStatusPagingQueryProvider.generateFirstPageQuery(count),
+					new JobExecutionRowMapper(), status.name());
 		}
 		try {
 			Long startAfterValue = getJdbcTemplate().queryForObject(
-					byJobNamePagingQueryProvider.generateJumpToItemQuery(start, count), Long.class, jobName);
-			return getJdbcTemplate().query(byJobNamePagingQueryProvider.generateRemainingPagesQuery(count),
-					new JobExecutionRowMapper(), jobName, startAfterValue);
+					byStatusPagingQueryProvider.generateJumpToItemQuery(start, count), Long.class, status.name());
+			return getJdbcTemplate().query(byStatusPagingQueryProvider.generateRemainingPagesQuery(count),
+					new JobExecutionRowMapper(), status.name(), startAfterValue);
 		}
 		catch (IncorrectResultSizeDataAccessException e) {
 			return Collections.emptyList();

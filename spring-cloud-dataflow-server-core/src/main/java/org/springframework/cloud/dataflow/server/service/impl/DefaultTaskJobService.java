@@ -25,6 +25,7 @@ import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import org.springframework.batch.core.BatchStatus;
 import org.springframework.batch.core.JobExecution;
 import org.springframework.batch.core.JobInstance;
 import org.springframework.batch.core.JobParameter;
@@ -105,7 +106,7 @@ public class DefaultTaskJobService implements TaskJobService {
 	}
 
 	@Override
-	public List<TaskJobExecution> listJobExecutionsWithStepCount(Pageable pageable) throws NoSuchJobExecutionException {
+	public List<TaskJobExecution> listJobExecutionsWithStepCount(Pageable pageable) {
 		Assert.notNull(pageable, "pageable must not be null");
 		List<JobExecutionWithStepCount> jobExecutions = new ArrayList<>(
 				jobService.listJobExecutionsWithStepCount(getPageOffset(pageable), pageable.getPageSize()));
@@ -113,17 +114,15 @@ public class DefaultTaskJobService implements TaskJobService {
 	}
 
 	@Override
-	public List<TaskJobExecution> listJobExecutionsForJob(Pageable pageable, String jobName) throws NoSuchJobException {
+	public List<TaskJobExecution> listJobExecutionsForJob(Pageable pageable, String jobName, BatchStatus status) throws NoSuchJobException {
 		Assert.notNull(pageable, "pageable must not be null");
-		Assert.notNull(jobName, "jobName must not be null");
 		return getTaskJobExecutionsForList(
-				jobService.listJobExecutionsForJob(jobName, getPageOffset(pageable), pageable.getPageSize()));
+				jobService.listJobExecutionsForJob(jobName, status, getPageOffset(pageable), pageable.getPageSize()));
 	}
 
 	@Override
 	public List<TaskJobExecution> listJobExecutionsForJobWithStepCount(Pageable pageable, String jobName) throws NoSuchJobException {
 		Assert.notNull(pageable, "pageable must not be null");
-		Assert.notNull(jobName, "jobName must not be null");
 		return getTaskJobExecutionsWithStepCountForList(
 				jobService.listJobExecutionsForJobWithStepCount(jobName, getPageOffset(pageable), pageable.getPageSize()));
 	}
@@ -164,9 +163,8 @@ public class DefaultTaskJobService implements TaskJobService {
 	}
 
 	@Override
-	public int countJobExecutionsForJob(String jobName) throws NoSuchJobException {
-		Assert.notNull(jobName, "jobName must not be null");
-		return jobService.countJobExecutionsForJob(jobName);
+	public int countJobExecutionsForJob(String jobName, BatchStatus status) throws NoSuchJobException {
+		return jobService.countJobExecutionsForJob(jobName, status);
 	}
 
 	@Override

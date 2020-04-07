@@ -22,7 +22,6 @@ import javax.sql.DataSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import org.springframework.batch.core.configuration.ListableJobLocator;
 import org.springframework.batch.core.explore.JobExplorer;
 import org.springframework.batch.core.jsr.JsrJobParametersConverter;
 import org.springframework.batch.core.jsr.launch.JsrJobOperator;
@@ -76,8 +75,6 @@ public class SimpleJobServiceFactoryBean implements FactoryBean<JobService>, Ini
 	private JobRepository jobRepository;
 
 	private JobLauncher jobLauncher;
-
-	private ListableJobLocator jobLocator;
 
 	private JobExplorer jobExplorer;
 
