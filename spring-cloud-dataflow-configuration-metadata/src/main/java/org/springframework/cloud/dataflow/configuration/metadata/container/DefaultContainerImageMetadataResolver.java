@@ -31,7 +31,6 @@ import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
-import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponents;
@@ -49,21 +48,26 @@ public class DefaultContainerImageMetadataResolver implements ContainerImageMeta
 			Collections.unmodifiableList(Arrays.asList(ContainerImageMetadataProperties.OCI_IMAGE_MANIFEST_MEDIA_TYPE,
 					ContainerImageMetadataProperties.DOCKER_IMAGE_MANIFEST_MEDIA_TYPE));
 
+	private final RestTemplate restTemplate;
+
+	private RestTemplate trustAnySslRestTemplate;
 	private final ContainerImageParser containerImageParser;
 	private final Map<RegistryConfiguration.AuthorizationType, RegistryAuthorizer> registryAuthorizerMap;
-	private final ContainerImageMetadataProperties registryProperties;
+	private Map<String, RegistryConfiguration> registryConfigurationMap;
 
 	public static class RegistryRequest {
 
 		private final ContainerImage containerImage;
 		private final RegistryConfiguration registryConf;
 		private final HttpHeaders authHttpHeaders;
+		private final RestTemplate restTemplate;
 
 		public RegistryRequest(ContainerImage containerImage,
-				RegistryConfiguration registryConf, HttpHeaders authHttpHeaders) {
+				RegistryConfiguration registryConf, HttpHeaders authHttpHeaders, RestTemplate requestRestTemplate) {
 			this.containerImage = containerImage;
 			this.registryConf = registryConf;
 			this.authHttpHeaders = authHttpHeaders;
+			this.restTemplate = requestRestTemplate;
 		}
 
 		public ContainerImage getContainerImage() {
@@ -77,13 +81,20 @@ public class DefaultContainerImageMetadataResolver implements ContainerImageMeta
 		public HttpHeaders getAuthHttpHeaders() {
 			return authHttpHeaders;
 		}
+
+		public RestTemplate getRestTemplate() {
+			return restTemplate;
+		}
 	}
 
-	public DefaultContainerImageMetadataResolver(ContainerImageParser containerImageParser,
-			List<RegistryAuthorizer> registryAuthorizes, ContainerImageMetadataProperties registryProperties) {
+	public DefaultContainerImageMetadataResolver(RestTemplate restTemplate, RestTemplate trustAnySslRestTemplate,
+			ContainerImageParser containerImageParser, Map<String, RegistryConfiguration> registryConfigurationMap,
+			List<RegistryAuthorizer> registryAuthorizes) {
 
+		this.restTemplate = restTemplate;
+		this.trustAnySslRestTemplate = trustAnySslRestTemplate;
 		this.containerImageParser = containerImageParser;
-		this.registryProperties = registryProperties;
+		this.registryConfigurationMap = registryConfigurationMap;
 		this.registryAuthorizerMap = new HashMap<>();
 		for (RegistryAuthorizer authorizer : registryAuthorizes) {
 			this.registryAuthorizerMap.put(authorizer.getType(), authorizer);
@@ -113,8 +124,7 @@ public class DefaultContainerImageMetadataResolver implements ContainerImageMeta
 					String.format("Missing or invalid Configuration Digest: [%s] for image [%s]", configDigest, imageName));
 		}
 
-		String configBlob = this.getImageBlob(registryRequest.getContainerImage(), registryRequest.getAuthHttpHeaders(),
-				configDigest, String.class);
+		String configBlob = this.getImageBlob(registryRequest, configDigest, String.class);
 
 		// Parse the config blob string into JSON instance.
 		try {
@@ -141,20 +151,13 @@ public class DefaultContainerImageMetadataResolver implements ContainerImageMeta
 		return object != null && (object instanceof Map);
 	}
 
-	protected RestTemplate getRestTemplate() {
-		return new RestTemplate();
-	}
-
 	private RegistryRequest getRegistryRequest(String imageName) {
 
 		// Convert the image name into a well-formed ContainerImage
 		ContainerImage containerImage = this.containerImageParser.parse(imageName);
 
 		// Find a registry configuration that matches the image's registry host
-		RegistryConfiguration registryConf = this.registryProperties.getRegistryConfigurations().stream()
-				.filter(conf -> containerImage.getRegistryHost().equals(conf.getRegistryHost()))
-				.findFirst().orElseThrow(() -> new AppMetadataResolutionException(
-						"Could not find a registry configuration for: " + containerImage));
+		RegistryConfiguration registryConf = this.registryConfigurationMap.get(containerImage.getRegistryHost());
 
 		// Retrieve a registry authorizer that supports the configured authorization type.
 		RegistryAuthorizer registryAuthorizer = this.registryAuthorizerMap.get(registryConf.getAuthorizationType());
@@ -170,7 +173,10 @@ public class DefaultContainerImageMetadataResolver implements ContainerImageMeta
 					"Could not obtain authorized headers for: " + containerImage + ", config:" + registryConf);
 		}
 
-		return new RegistryRequest(containerImage, registryConf, authHttpHeaders);
+		RestTemplate requestRestTemplate = registryConf.isDisableSslVerification() ?
+				this.trustAnySslRestTemplate : this.restTemplate;
+
+		return new RegistryRequest(containerImage, registryConf, authHttpHeaders, requestRestTemplate);
 	}
 
 	private <T> T getImageManifest(RegistryRequest registryRequest, Class<T> responseClassType) {
@@ -191,15 +197,14 @@ public class DefaultContainerImageMetadataResolver implements ContainerImageMeta
 				.path("v2/{repository}/manifests/{tag}")
 				.build().expand(containerImage.getRepository(), containerImage.getRepositoryTag());
 
-		ResponseEntity<T> manifest = getRestTemplate().exchange(manifestUriComponents.toUri(),
+		ResponseEntity<T> manifest = registryRequest.getRestTemplate().exchange(manifestUriComponents.toUri(),
 				HttpMethod.GET, new HttpEntity<>(httpHeaders), responseClassType);
 		return manifest.getBody();
 	}
 
-	private <T> T getImageBlob(ContainerImage containerImage,
-			HttpHeaders authHttpHeaders, String configDigest, Class<T> responseClassType) {
-		Assert.notNull(authHttpHeaders, "Missing authorization headers");
-		HttpHeaders httpHeaders = new HttpHeaders(authHttpHeaders);
+	private <T> T getImageBlob(RegistryRequest registryRequest, String configDigest, Class<T> responseClassType) {
+		ContainerImage containerImage = registryRequest.getContainerImage();
+		HttpHeaders httpHeaders = new HttpHeaders(registryRequest.getAuthHttpHeaders());
 
 		// Docker Registry HTTP V2 API pull config blob
 		UriComponents blobUriComponents = UriComponentsBuilder.newInstance()
@@ -209,7 +214,7 @@ public class DefaultContainerImageMetadataResolver implements ContainerImageMeta
 				.path("v2/{repository}/blobs/{digest}")
 				.build().expand(containerImage.getRepository(), configDigest);
 
-		ResponseEntity<T> blob = getRestTemplate().exchange(blobUriComponents.toUri(),
+		ResponseEntity<T> blob = registryRequest.getRestTemplate().exchange(blobUriComponents.toUri(),
 				HttpMethod.GET, new HttpEntity<>(httpHeaders), responseClassType);
 
 		return blob.getBody();

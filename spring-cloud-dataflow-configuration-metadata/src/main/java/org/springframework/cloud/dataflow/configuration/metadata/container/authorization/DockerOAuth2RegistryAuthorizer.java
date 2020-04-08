@@ -35,16 +35,22 @@ import org.springframework.web.util.UriComponentsBuilder;
  *
  * @author Christian Tzolov
  */
-public class DockerHubRegistryAuthorizer implements RegistryAuthorizer {
+public class DockerOAuth2RegistryAuthorizer implements RegistryAuthorizer {
 
 	public static final String DEFAULT_DOCKER_REGISTRY_AUTH_URI = "https://auth.docker.io/token?service=registry.docker.io&scope=repository:{repository}:pull&offline_token=1&client_id=shell";
 
 	public static final String TOKEN_KEY = "token";
 	public static final String DOCKER_REGISTRY_AUTH_URI_KEY = "registryAuthUri";
 
+	private final RestTemplate restTemplate;
+
+	public DockerOAuth2RegistryAuthorizer(RestTemplate restTemplate) {
+		this.restTemplate = restTemplate;
+	}
+
 	@Override
 	public RegistryConfiguration.AuthorizationType getType() {
-		return RegistryConfiguration.AuthorizationType.dockerhub;
+		return RegistryConfiguration.AuthorizationType.dockeroauth2;
 	}
 
 	@Override
@@ -71,7 +77,7 @@ public class DockerHubRegistryAuthorizer implements RegistryAuthorizer {
 				.fromHttpUrl(registryAuthUri).build().expand(imageRepository);
 
 		final HttpEntity<String> entity = new HttpEntity<>(requestHttpHeaders);
-		ResponseEntity<Map> authorization = new RestTemplate().exchange(uriComponents.toUri(),
+		ResponseEntity<Map> authorization = this.restTemplate.exchange(uriComponents.toUri(),
 				HttpMethod.GET, entity, Map.class);
 		Map<String, String> authorizationBody = (Map<String, String>) authorization.getBody();
 

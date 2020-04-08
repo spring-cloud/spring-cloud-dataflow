@@ -18,6 +18,10 @@ spec:
       - name: scdf-server
         image: springcloud/spring-cloud-dataflow-server:2.5.0.BUILD-SNAPSHOT
         imagePullPolicy: Always
+        volumeMounts:
+          - name: database
+            mountPath: /etc/secrets/database
+            readOnly: true
         ports:
         - containerPort: 80
         resources:
@@ -42,8 +46,8 @@ spec:
           value: 'true'
         - name: SPRING_CLOUD_KUBERNETES_SECRETS_ENABLE_API
           value: 'true'
-        - name: SPRING_CLOUD_KUBERNETES_SECRETS_NAME
-          value: mysql
+        - name: SPRING_CLOUD_KUBERNETES_SECRETS_PATHS
+          value: /etc/secrets
         - name: SPRING_CLOUD_KUBERNETES_CONFIG_NAME
           value: scdf-server
         - name: SPRING_CLOUD_DATAFLOW_SERVER_URI
@@ -59,3 +63,7 @@ spec:
         image: busybox
         command: ['sh', '-c', 'until nc -w3 -z mysql 3306; do echo waiting for mysql; sleep 3; done;']
       serviceAccountName: scdf-sa
+      volumes:
+        - name: database
+          secret:
+            secretName: mysql

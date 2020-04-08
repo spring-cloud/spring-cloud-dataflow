@@ -89,7 +89,7 @@ public class StreamCommandTemplate {
 	private void doCreate(String streamname, String streamdefinition, boolean deploy, Object... values) {
 		String actualDefinition = String.format(streamdefinition, values);
 		// Shell parser expects quotes to be escaped by \
-		String wholeCommand = String.format("stream create %s --definition \"%s\" --deploy %s", streamname,
+		String wholeCommand = String.format("stream create --name \"%s\" --definition \"%s\" --deploy %s", streamname,
 				actualDefinition.replaceAll("\"", "\\\\\""), deploy);
 		CommandResult cr = shell.executeCommand(wholeCommand);
 		// todo: Add deployment and verifier
