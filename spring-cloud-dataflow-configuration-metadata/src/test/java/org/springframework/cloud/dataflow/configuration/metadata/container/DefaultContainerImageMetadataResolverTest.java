@@ -251,12 +251,7 @@ public class DefaultContainerImageMetadataResolverTest {
 	private class MockedDefaultContainerImageMetadataResolver extends DefaultContainerImageMetadataResolver {
 		public MockedDefaultContainerImageMetadataResolver(ContainerImageParser containerImageParser,
 				List<RegistryAuthorizer> registryAuthorizes, ContainerImageMetadataProperties registryProperties) {
-			super(containerImageParser, registryAuthorizes, registryProperties);
-		}
-
-		@Override
-		protected RestTemplate getRestTemplate() {
-			return mockRestTemplate;
+			super(mockRestTemplate, containerImageParser, registryAuthorizes, registryProperties);
 		}
 	}
 }

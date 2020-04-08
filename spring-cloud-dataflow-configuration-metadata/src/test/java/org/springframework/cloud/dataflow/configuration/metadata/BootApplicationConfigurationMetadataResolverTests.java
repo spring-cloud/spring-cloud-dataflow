@@ -79,12 +79,13 @@ public class BootApplicationConfigurationMetadataResolverTests {
 		assertThat(properties.size(), is(3));
 	}
 
-	@Test(expected = AppMetadataResolutionException.class)
+	@Test
 	public void appDockerResourceBrokenFormat() {
 		byte[] bytes = "Invalid metadata json content1".getBytes();
 		Map<String, String> result = Collections.singletonMap("org.springframework.cloud.dataflow.spring-configuration-metadata.json", StringEscapeUtils.escapeJson(new String(bytes)));
 		when(containerImageMetadataResolver.getImageLabels("test/test:latest")).thenReturn(result);
-		resolver.listProperties(new DockerResource("test/test:latest"));
+		List<ConfigurationMetadataProperty> properties = resolver.listProperties(new DockerResource("test/test:latest"));
+		assertThat(properties.size(), is(0));
 	}
 
 	@Test

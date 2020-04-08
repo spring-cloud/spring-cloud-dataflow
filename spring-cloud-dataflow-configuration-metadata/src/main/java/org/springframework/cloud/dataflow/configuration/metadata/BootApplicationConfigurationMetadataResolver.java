@@ -33,6 +33,8 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.apache.commons.text.StringEscapeUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import org.springframework.boot.configurationmetadata.ConfigurationMetadataGroup;
 import org.springframework.boot.configurationmetadata.ConfigurationMetadataProperty;
@@ -63,6 +65,8 @@ import org.springframework.util.StringUtils;
  * @author Christian Tzolov
  */
 public class BootApplicationConfigurationMetadataResolver extends ApplicationConfigurationMetadataResolver {
+
+	private static final Logger logger = LoggerFactory.getLogger(BootApplicationConfigurationMetadataResolver.class);
 
 	private static final String CONFIGURATION_METADATA_PATTERN = "classpath*:/META-INF/spring-configuration-metadata.json";
 
@@ -136,7 +140,8 @@ public class BootApplicationConfigurationMetadataResolver extends ApplicationCon
 			}
 		}
 		catch (Exception e) {
-			throw new AppMetadataResolutionException("Failed to resolve application resource: " + app.getDescription(), e);
+			logger.warn("Failed to retrieve properties for resource:" + app, e);
+			return Collections.emptyList();
 		}
 
 		return Collections.emptyList();

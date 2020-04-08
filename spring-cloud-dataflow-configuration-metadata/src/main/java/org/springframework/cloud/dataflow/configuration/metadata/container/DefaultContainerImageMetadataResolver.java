@@ -49,6 +49,8 @@ public class DefaultContainerImageMetadataResolver implements ContainerImageMeta
 			Collections.unmodifiableList(Arrays.asList(ContainerImageMetadataProperties.OCI_IMAGE_MANIFEST_MEDIA_TYPE,
 					ContainerImageMetadataProperties.DOCKER_IMAGE_MANIFEST_MEDIA_TYPE));
 
+	private final RestTemplate restTemplate;
+
 	private final ContainerImageParser containerImageParser;
 	private final Map<RegistryConfiguration.AuthorizationType, RegistryAuthorizer> registryAuthorizerMap;
 	private final ContainerImageMetadataProperties registryProperties;
@@ -79,9 +81,10 @@ public class DefaultContainerImageMetadataResolver implements ContainerImageMeta
 		}
 	}
 
-	public DefaultContainerImageMetadataResolver(ContainerImageParser containerImageParser,
+	public DefaultContainerImageMetadataResolver(RestTemplate restTemplate, ContainerImageParser containerImageParser,
 			List<RegistryAuthorizer> registryAuthorizes, ContainerImageMetadataProperties registryProperties) {
 
+		this.restTemplate = restTemplate;
 		this.containerImageParser = containerImageParser;
 		this.registryProperties = registryProperties;
 		this.registryAuthorizerMap = new HashMap<>();
@@ -141,10 +144,6 @@ public class DefaultContainerImageMetadataResolver implements ContainerImageMeta
 		return object != null && (object instanceof Map);
 	}
 
-	protected RestTemplate getRestTemplate() {
-		return new RestTemplate();
-	}
-
 	private RegistryRequest getRegistryRequest(String imageName) {
 
 		// Convert the image name into a well-formed ContainerImage
@@ -191,7 +190,7 @@ public class DefaultContainerImageMetadataResolver implements ContainerImageMeta
 				.path("v2/{repository}/manifests/{tag}")
 				.build().expand(containerImage.getRepository(), containerImage.getRepositoryTag());
 
-		ResponseEntity<T> manifest = getRestTemplate().exchange(manifestUriComponents.toUri(),
+		ResponseEntity<T> manifest = this.restTemplate.exchange(manifestUriComponents.toUri(),
 				HttpMethod.GET, new HttpEntity<>(httpHeaders), responseClassType);
 		return manifest.getBody();
 	}
@@ -209,7 +208,7 @@ public class DefaultContainerImageMetadataResolver implements ContainerImageMeta
 				.path("v2/{repository}/blobs/{digest}")
 				.build().expand(containerImage.getRepository(), configDigest);
 
-		ResponseEntity<T> blob = getRestTemplate().exchange(blobUriComponents.toUri(),
+		ResponseEntity<T> blob = this.restTemplate.exchange(blobUriComponents.toUri(),
 				HttpMethod.GET, new HttpEntity<>(httpHeaders), responseClassType);
 
 		return blob.getBody();

@@ -41,6 +41,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.io.FileSystemResourceLoader;
 import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.web.client.RestTemplate;
 
 import static org.hamcrest.CoreMatchers.hasItems;
 import static org.hamcrest.CoreMatchers.is;
@@ -109,6 +110,12 @@ public class BootVersionsCompletionProviderTests {
 				BootVersionsCompletionProviderTests.Mocks.class.getPackage().getName().replace('.', '/')
 						+ "/boot_versions");
 
+		@MockBean
+		private DefaultContainerImageMetadataResolver containerImageMetadataResolver;
+
+		@MockBean
+		private RestTemplate restTemplate;
+
 		@Bean
 		public AppRegistryService appRegistry() {
 
@@ -152,9 +159,6 @@ public class BootVersionsCompletionProviderTests {
 				}
 			};
 		}
-
-		@MockBean
-		private DefaultContainerImageMetadataResolver containerImageMetadataResolver;
 
 		@Bean
 		public ApplicationConfigurationMetadataResolver metadataResolver() {

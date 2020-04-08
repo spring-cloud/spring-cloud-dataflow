@@ -39,6 +39,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.io.FileSystemResourceLoader;
 import org.springframework.util.Assert;
+import org.springframework.web.client.RestTemplate;
 
 import static org.mockito.Mockito.mock;
 
@@ -57,6 +58,9 @@ public class CompletionTestsMocks {
 			CompletionTestsMocks.class.getPackage().getName().replace('.', '/') + "/apps");
 
 	private static final FileFilter FILTER = pathname -> pathname.isDirectory() && pathname.getName().matches(".+-.+");
+
+	@MockBean
+	private RestTemplate restTemplate;
 
 	@Bean
 	public AppRegistryService appRegistry() {

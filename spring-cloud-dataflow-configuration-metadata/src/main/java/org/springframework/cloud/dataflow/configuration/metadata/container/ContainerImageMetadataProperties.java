@@ -57,6 +57,11 @@ public class ContainerImageMetadataProperties {
 	 */
 	private List<RegistryConfiguration> registryConfigurations = new ArrayList<>();
 
+	/**
+	 * Used for testing with self-signed certificates.
+	 */
+	private boolean disableSslVerification = false;
+
 	public List<RegistryConfiguration> getRegistryConfigurations() {
 		return registryConfigurations;
 	}
@@ -83,5 +88,13 @@ public class ContainerImageMetadataProperties {
 
 	public void setOfficialRepositoryNamespace(String officialRepositoryNamespace) {
 		this.officialRepositoryNamespace = officialRepositoryNamespace;
+	}
+
+	public boolean isDisableSslVerification() {
+		return disableSslVerification;
+	}
+
+	public void setDisableSslVerification(boolean disableSslVerification) {
+		this.disableSslVerification = disableSslVerification;
 	}
 }

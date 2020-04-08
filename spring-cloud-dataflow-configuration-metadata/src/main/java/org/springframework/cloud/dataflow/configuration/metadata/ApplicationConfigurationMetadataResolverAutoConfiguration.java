@@ -16,9 +16,23 @@
 
 package org.springframework.cloud.dataflow.configuration.metadata;
 
+import java.security.KeyManagementException;
+import java.security.NoSuchAlgorithmException;
+import java.security.cert.X509Certificate;
+import java.util.ArrayList;
 import java.util.List;
 
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.TrustManager;
+import javax.net.ssl.X509TrustManager;
+
+import org.apache.http.conn.ssl.NoopHostnameVerifier;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClients;
+
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
+import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.cloud.dataflow.configuration.metadata.container.ContainerImageMetadataProperties;
 import org.springframework.cloud.dataflow.configuration.metadata.container.ContainerImageMetadataResolver;
 import org.springframework.cloud.dataflow.configuration.metadata.container.ContainerImageParser;
@@ -29,7 +43,11 @@ import org.springframework.cloud.dataflow.configuration.metadata.container.autho
 import org.springframework.cloud.dataflow.configuration.metadata.container.authorization.RegistryAuthorizer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.MediaType;
+import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
+import org.springframework.http.converter.StringHttpMessageConverter;
 import org.springframework.validation.annotation.Validated;
+import org.springframework.web.client.RestTemplate;
 
 /**
  * Automatically exposes an {@link ApplicationConfigurationMetadataResolver} if none is already registered.
@@ -69,9 +87,11 @@ public class ApplicationConfigurationMetadataResolverAutoConfiguration {
 
 	@Bean
 	@ConditionalOnMissingBean(ContainerImageMetadataResolver.class)
-	public DefaultContainerImageMetadataResolver containerImageMetadataResolver(ContainerImageParser imageNameParser,
-			List<RegistryAuthorizer> registryAuthorizers, ContainerImageMetadataProperties properties) {
-		return new DefaultContainerImageMetadataResolver(imageNameParser, registryAuthorizers, properties);
+	public DefaultContainerImageMetadataResolver containerImageMetadataResolver(
+			@Qualifier("metadataRestTemplate") RestTemplate metadataRestTemplate,
+			ContainerImageParser imageNameParser, List<RegistryAuthorizer> registryAuthorizers,
+			ContainerImageMetadataProperties properties) {
+		return new DefaultContainerImageMetadataResolver(metadataRestTemplate, imageNameParser, registryAuthorizers, properties);
 	}
 
 	@Bean
@@ -79,5 +99,49 @@ public class ApplicationConfigurationMetadataResolverAutoConfiguration {
 	public ApplicationConfigurationMetadataResolver metadataResolver(
 			DefaultContainerImageMetadataResolver containerImageMetadataResolver) {
 		return new BootApplicationConfigurationMetadataResolver(containerImageMetadataResolver);
+	}
+
+	@Bean
+	@ConditionalOnMissingBean
+	public RestTemplate metadataRestTemplate(RestTemplateBuilder builder, ContainerImageMetadataProperties properties)
+			throws NoSuchAlgorithmException, KeyManagementException {
+
+		StringHttpMessageConverter octetToStringMessageConverter = new StringHttpMessageConverter();
+		List<MediaType> mediaTypeList = new ArrayList(octetToStringMessageConverter.getSupportedMediaTypes());
+		mediaTypeList.add(MediaType.APPLICATION_OCTET_STREAM);
+		octetToStringMessageConverter.setSupportedMediaTypes(mediaTypeList);
+
+		if (!properties.isDisableSslVerification()) {
+			return builder.additionalMessageConverters(octetToStringMessageConverter).build();
+		}
+
+		// From https://www.javacodemonk.com/disable-ssl-certificate-check-resttemplate-e2c53583
+
+		// Trust manager that blindly trusts all SSL certificates.
+		TrustManager[] trustAllCerts = new TrustManager[] {
+				new X509TrustManager() {
+					public java.security.cert.X509Certificate[] getAcceptedIssuers() {
+						return new X509Certificate[0];
+					}
+
+					public void checkClientTrusted(java.security.cert.X509Certificate[] certs, String authType) {
+					}
+
+					public void checkServerTrusted(java.security.cert.X509Certificate[] certs, String authType) {
+					}
+				}
+		};
+		SSLContext sslContext = SSLContext.getInstance("SSL");
+		// Install trust manager to SSL Context.
+		sslContext.init(null, trustAllCerts, new java.security.SecureRandom());
+		// Create an HttpClient that uses the custom SSLContext and do not verify cert hostname.
+		CloseableHttpClient httpClient = HttpClients.custom().setSSLContext(sslContext)
+				.setSSLHostnameVerifier(NoopHostnameVerifier.INSTANCE).build();
+		HttpComponentsClientHttpRequestFactory customRequestFactory = new HttpComponentsClientHttpRequestFactory();
+		customRequestFactory.setHttpClient(httpClient);
+		// Create a RestTemplate that uses custom request factory
+		return builder.requestFactory(() -> customRequestFactory)
+				.additionalMessageConverters(octetToStringMessageConverter).build();
+
 	}
 }
