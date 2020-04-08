@@ -33,7 +33,10 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.util.StringUtils;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.web.util.UriComponents;
+import org.springframework.web.util.UriComponentsBuilder;
 
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
@@ -66,6 +69,12 @@ public class DefaultContainerImageMetadataResolverTest {
 		dockerHubAuthConfig.setAuthorizationType(RegistryConfiguration.AuthorizationType.dockerhub);
 
 		containerImageMetadataProperties.getRegistryConfigurations().add(dockerHubAuthConfig);
+
+		RegistryConfiguration privateRegistryConfig = new RegistryConfiguration();
+		privateRegistryConfig.setRegistryHost("my-private-repository.com:5000");
+		privateRegistryConfig.setAuthorizationType(RegistryConfiguration.AuthorizationType.dockerhub);
+
+		containerImageMetadataProperties.getRegistryConfigurations().add(privateRegistryConfig);
 	}
 
 	@Test(expected = AppMetadataResolutionException.class)
@@ -85,12 +94,32 @@ public class DefaultContainerImageMetadataResolverTest {
 				new ContainerImageParser(), Arrays.asList(registryAuthorizer), containerImageMetadataProperties);
 
 		Map<String, Object> manifestResponse = Collections.singletonMap("config", Collections.singletonMap("digest", "123"));
-		mockManifestRestTemplateCall(manifestResponse, "test/image", "latest");
+		mockManifestRestTemplateCall(manifestResponse, "registry-1.docker.io", null, "test/image", "latest");
 
 		mockBlogRestTemplateCall("{\"config\": { \"Labels\": { \"boza\": \"koza\"} } }",
-				"test/image", "123");
+				"registry-1.docker.io", null, "test/image", "123");
 
 		Map<String, String> labels = resolver.getImageLabels("test/image:latest");
+		assertThat(labels.size(), is(1));
+		assertThat(labels.get("boza"), is("koza"));
+	}
+
+	@Test
+	public void getImageLabelsFromPrivateRepository() {
+
+		when(registryAuthorizer.getType()).thenReturn(RegistryConfiguration.AuthorizationType.dockerhub);
+		when(registryAuthorizer.getAuthorizationHeaders(any(), any())).thenReturn(new HttpHeaders());
+
+		DefaultContainerImageMetadataResolver resolver = new MockedDefaultContainerImageMetadataResolver(
+				new ContainerImageParser(), Arrays.asList(registryAuthorizer), containerImageMetadataProperties);
+
+		Map<String, Object> manifestResponse = Collections.singletonMap("config", Collections.singletonMap("digest", "123"));
+		mockManifestRestTemplateCall(manifestResponse, "my-private-repository.com", "5000", "test/image", "latest");
+
+		mockBlogRestTemplateCall("{\"config\": { \"Labels\": { \"boza\": \"koza\"} } }",
+				"my-private-repository.com", "5000", "test/image", "123");
+
+		Map<String, String> labels = resolver.getImageLabels("my-private-repository.com:5000/test/image:latest");
 		assertThat(labels.size(), is(1));
 		assertThat(labels.get("boza"), is("koza"));
 	}
@@ -141,7 +170,8 @@ public class DefaultContainerImageMetadataResolverTest {
 				new ContainerImageParser(), Arrays.asList(registryAuthorizer), containerImageMetadataProperties);
 
 		Map<String, Object> manifestResponseWithoutConfig = Collections.emptyMap();
-		mockManifestRestTemplateCall(manifestResponseWithoutConfig, "test/image", "latest");
+		mockManifestRestTemplateCall(manifestResponseWithoutConfig, "registry-1.docker.io",
+				null, "test/image", "latest");
 
 		resolver.getImageLabels("test/image:latest");
 	}
@@ -156,7 +186,8 @@ public class DefaultContainerImageMetadataResolverTest {
 
 		String emptyDigest = "";
 		Map<String, Object> manifestResponse = Collections.singletonMap("config", Collections.singletonMap("digest", emptyDigest));
-		mockManifestRestTemplateCall(manifestResponse, "test/image", "latest");
+		mockManifestRestTemplateCall(manifestResponse, "registry-1.docker.io", null,
+				"test/image", "latest");
 
 		resolver.getImageLabels("test/image:latest");
 	}
@@ -171,36 +202,49 @@ public class DefaultContainerImageMetadataResolverTest {
 				new ContainerImageParser(), Arrays.asList(registryAuthorizer), containerImageMetadataProperties);
 
 		Map<String, Object> manifestResponse = Collections.singletonMap("config", Collections.singletonMap("digest", "123"));
-		mockManifestRestTemplateCall(manifestResponse, "test/image", "latest");
+		mockManifestRestTemplateCall(manifestResponse, "registry-1.docker.io", null,
+				"test/image", "latest");
 
 		mockBlogRestTemplateCall("{\"config\": { } }",
-				"test/image", "123");
+				"registry-1.docker.io", null, "test/image", "123");
 
 		Map<String, String> labels = resolver.getImageLabels("test/image:latest");
 		assertThat(labels.size(), is(0));
 	}
 
-	private void mockManifestRestTemplateCall(Map<String, Object> mapToReturn, String repository, String tag) {
+	private void mockManifestRestTemplateCall(Map<String, Object> mapToReturn, String registryHost,
+			String registryPort, String repository, String tag) {
+
+		UriComponents manifestUriComponents = UriComponentsBuilder.newInstance()
+				.scheme("https")
+				.host(registryHost)
+				.port(StringUtils.hasText(registryPort) ? registryPort : null)
+				.path("v2/{repository}/manifests/{tag}")
+				.build().expand(repository, tag);
+
+
 		when(mockRestTemplate.exchange(
-				eq("https://{registryHost}/v2/{repository}/manifests/{tag}"),
+				eq(manifestUriComponents.toUri()),
 				eq(HttpMethod.GET),
 				any(HttpEntity.class),
-				eq(Map.class),
-				any(String.class),
-				eq(repository),
-				eq(tag))).thenReturn(
-				new ResponseEntity<>(mapToReturn, HttpStatus.OK));
+				eq(Map.class))).thenReturn(new ResponseEntity<>(mapToReturn, HttpStatus.OK));
 	}
 
-	private void mockBlogRestTemplateCall(String jsonResponse, String repository, String digest) {
+	private void mockBlogRestTemplateCall(String jsonResponse, String registryHost, String registryPort,
+			String repository, String digest) {
+
+		UriComponents blobUriComponents = UriComponentsBuilder.newInstance()
+				.scheme("https")
+				.host(registryHost)
+				.port(StringUtils.hasText(registryPort) ? registryPort : null)
+				.path("v2/{repository}/blobs/{digest}")
+				.build().expand(repository, digest);
+
 		when(mockRestTemplate.exchange(
-				eq("https://{registryHost}/v2/{repository}/blobs/{digest}"),
+				eq(blobUriComponents.toUri()),
 				eq(HttpMethod.GET),
 				any(HttpEntity.class),
-				eq(String.class),
-				any(String.class),
-				eq(repository),
-				eq(digest)))
+				eq(String.class)))
 				.thenReturn(new ResponseEntity<>(jsonResponse, HttpStatus.OK));
 	}
 
