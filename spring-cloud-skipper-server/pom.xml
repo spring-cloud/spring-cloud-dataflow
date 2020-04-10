@@ -98,6 +98,44 @@
 				</executions>
 			</plugin>
 			<plugin>
+				<groupId>io.fabric8</groupId>
+				<artifactId>docker-maven-plugin</artifactId>
+				<version>0.21.0</version>
+				<configuration>
+					<images>
+						<image>
+							<name>springcloud/${project.artifactId}</name>
+							<build>
+								<tags>
+									<tag>latest</tag>
+									<tag>${project.version}</tag>
+								</tags>
+								<from>springcloud/openjdk:2.0.1.RELEASE</from>
+								<volumes>
+									<volume>/tmp</volume>
+								</volumes>
+								<env>
+									<LANG>C.UTF-8</LANG>
+								</env>
+								<entryPoint>
+									<exec>
+										<arg>java</arg>
+										<arg>-Djava.security.egd=file:/dev/./urandom</arg>
+										<arg>-jar</arg>
+										<arg>/maven/spring-cloud-skipper-server.jar</arg>
+									</exec>
+								</entryPoint>
+								<assembly>
+									<name>maven</name>
+									<descriptor>assembly.xml</descriptor>
+									<targetDir>/</targetDir>
+								</assembly>
+							</build>
+						</image>
+					</images>
+				</configuration>
+			</plugin>
+			<plugin>
 				<groupId>com.spotify</groupId>
 				<artifactId>dockerfile-maven-plugin</artifactId>
 				<version>${dockerfile-maven-plugin.version}</version>
