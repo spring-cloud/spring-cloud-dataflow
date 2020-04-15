@@ -216,8 +216,8 @@ public class DataFlowClientAutoConfiguration {
 				.attribute(OAuth2AuthorizationContext.PASSWORD_ATTRIBUTE_NAME, password)
 				.build();
 
-		OAuth2AuthorizedClient authorizedClient = authorizedClientManager.authorize(authorizeRequest);
 		return (request, body, execution) -> {
+			OAuth2AuthorizedClient authorizedClient = authorizedClientManager.authorize(authorizeRequest);
 			request.getHeaders().setBearerAuth(authorizedClient.getAccessToken().getTokenValue());
 			return execution.execute(request, body);
 		};
