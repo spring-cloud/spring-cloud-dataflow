@@ -37,6 +37,7 @@ data:
               kubernetes:
                 accounts:
                   default:
+                    imagePullSecret: harborsec
                     limits:
                       memory: 1024Mi
           container:
@@ -44,10 +45,6 @@ data:
               disableSslVerification: true
               registry-configurations:
                 - registry-host: 'myregistrydomain.com:5000'
-                  authorization-type: basicauth
-                  user: testuser
-                  secret: testpassword
-                - registry-host: '192.168.178.10:5000'
                   authorization-type: basicauth
                   user: testuser
                   secret: testpassword

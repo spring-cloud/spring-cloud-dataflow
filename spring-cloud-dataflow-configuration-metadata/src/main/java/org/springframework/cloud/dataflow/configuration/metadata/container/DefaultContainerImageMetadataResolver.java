@@ -53,7 +53,7 @@ public class DefaultContainerImageMetadataResolver implements ContainerImageMeta
 
 	private final ContainerImageParser containerImageParser;
 	private final Map<RegistryConfiguration.AuthorizationType, RegistryAuthorizer> registryAuthorizerMap;
-	private final ContainerImageMetadataProperties registryProperties;
+	private Map<String, RegistryConfiguration> registryConfigurationMap;
 
 	public static class RegistryRequest {
 
@@ -82,11 +82,11 @@ public class DefaultContainerImageMetadataResolver implements ContainerImageMeta
 	}
 
 	public DefaultContainerImageMetadataResolver(RestTemplate restTemplate, ContainerImageParser containerImageParser,
-			List<RegistryAuthorizer> registryAuthorizes, ContainerImageMetadataProperties registryProperties) {
+			Map<String, RegistryConfiguration> registryConfigurationMap, List<RegistryAuthorizer> registryAuthorizes) {
 
 		this.restTemplate = restTemplate;
 		this.containerImageParser = containerImageParser;
-		this.registryProperties = registryProperties;
+		this.registryConfigurationMap = registryConfigurationMap;
 		this.registryAuthorizerMap = new HashMap<>();
 		for (RegistryAuthorizer authorizer : registryAuthorizes) {
 			this.registryAuthorizerMap.put(authorizer.getType(), authorizer);
@@ -150,10 +150,7 @@ public class DefaultContainerImageMetadataResolver implements ContainerImageMeta
 		ContainerImage containerImage = this.containerImageParser.parse(imageName);
 
 		// Find a registry configuration that matches the image's registry host
-		RegistryConfiguration registryConf = this.registryProperties.getRegistryConfigurations().stream()
-				.filter(conf -> containerImage.getRegistryHost().equals(conf.getRegistryHost()))
-				.findFirst().orElseThrow(() -> new AppMetadataResolutionException(
-						"Could not find a registry configuration for: " + containerImage));
+		RegistryConfiguration registryConf = this.registryConfigurationMap.get(containerImage.getRegistryHost());
 
 		// Retrieve a registry authorizer that supports the configured authorization type.
 		RegistryAuthorizer registryAuthorizer = this.registryAuthorizerMap.get(registryConf.getAuthorizationType());

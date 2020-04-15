@@ -20,7 +20,11 @@ import java.security.KeyManagementException;
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.TrustManager;
@@ -29,23 +33,29 @@ import javax.net.ssl.X509TrustManager;
 import org.apache.http.conn.ssl.NoopHostnameVerifier;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.cloud.dataflow.configuration.metadata.container.ContainerImageMetadataProperties;
 import org.springframework.cloud.dataflow.configuration.metadata.container.ContainerImageMetadataResolver;
 import org.springframework.cloud.dataflow.configuration.metadata.container.ContainerImageParser;
 import org.springframework.cloud.dataflow.configuration.metadata.container.DefaultContainerImageMetadataResolver;
+import org.springframework.cloud.dataflow.configuration.metadata.container.RegistryConfiguration;
 import org.springframework.cloud.dataflow.configuration.metadata.container.authorization.AwsEcrAuthorizer;
 import org.springframework.cloud.dataflow.configuration.metadata.container.authorization.BasicAuthRegistryAuthorizer;
 import org.springframework.cloud.dataflow.configuration.metadata.container.authorization.DockerHubRegistryAuthorizer;
 import org.springframework.cloud.dataflow.configuration.metadata.container.authorization.RegistryAuthorizer;
+import org.springframework.cloud.dataflow.configuration.metadata.container.authorization.SecretToRegistryConfigurationConverter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.MediaType;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.http.converter.StringHttpMessageConverter;
+import org.springframework.util.StringUtils;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.client.RestTemplate;
 
@@ -57,6 +67,8 @@ import org.springframework.web.client.RestTemplate;
  */
 @Configuration
 public class ApplicationConfigurationMetadataResolverAutoConfiguration {
+
+	private static final Logger logger = LoggerFactory.getLogger(ApplicationConfigurationMetadataResolverAutoConfiguration.class);
 
 	@Bean
 	public RegistryAuthorizer dockerHubRegistryAuthorizer() {
@@ -89,9 +101,11 @@ public class ApplicationConfigurationMetadataResolverAutoConfiguration {
 	@ConditionalOnMissingBean(ContainerImageMetadataResolver.class)
 	public DefaultContainerImageMetadataResolver containerImageMetadataResolver(
 			@Qualifier("metadataRestTemplate") RestTemplate metadataRestTemplate,
-			ContainerImageParser imageNameParser, List<RegistryAuthorizer> registryAuthorizers,
-			ContainerImageMetadataProperties properties) {
-		return new DefaultContainerImageMetadataResolver(metadataRestTemplate, imageNameParser, registryAuthorizers, properties);
+			ContainerImageParser imageNameParser,
+			Map<String, RegistryConfiguration> registryConfigurationMap,
+			List<RegistryAuthorizer> registryAuthorizers) {
+		return new DefaultContainerImageMetadataResolver(metadataRestTemplate, imageNameParser,
+				registryConfigurationMap, registryAuthorizers);
 	}
 
 	@Bean
@@ -143,5 +157,31 @@ public class ApplicationConfigurationMetadataResolverAutoConfiguration {
 		return builder.requestFactory(() -> customRequestFactory)
 				.additionalMessageConverters(octetToStringMessageConverter).build();
 
+	}
+
+	@Value("${.dockerconfigjson}")
+	public String dockerconfigjson;
+
+	@Bean
+	public Map<String, RegistryConfiguration> registryConfigurationMap(ContainerImageMetadataProperties properties) {
+
+		logger.info("dockerconfigjson  >>>> :" + dockerconfigjson);
+
+		// Retrieve declared registries.
+		Map<String, RegistryConfiguration> propertiesRegistryConfigurationMap = properties.getRegistryConfigurations().stream()
+				.collect(Collectors.toMap(RegistryConfiguration::getRegistryHost, Function.identity()));
+
+		HashMap<String, RegistryConfiguration> registryConfigurationMap = new HashMap<>(propertiesRegistryConfigurationMap);
+
+		if (!StringUtils.isEmpty(this.dockerconfigjson)) {
+			Map<String, RegistryConfiguration> secretsRegistryConfigurationMap
+					= new SecretToRegistryConfigurationConverter().convert(this.dockerconfigjson);
+			logger.info("secretsRegistryConfigurationMap: " + secretsRegistryConfigurationMap);
+			registryConfigurationMap.putAll(secretsRegistryConfigurationMap);
+		}
+
+		System.out.println(registryConfigurationMap);
+
+		return registryConfigurationMap;
 	}
 }
