@@ -48,7 +48,7 @@ import java.util.Map;
  *
  *  Harbor Registry. Same as DockerHub but with different registryAuthUri
  *    - spring.cloud.dataflow.container.metadata.registry-configurations[3].registry-host=demo.goharbor.io
- *    - spring.cloud.dataflow.container.metadata.registry-configurations[3].authorization-type=dockerhub
+ *    - spring.cloud.dataflow.container.metadata.registry-configurations[3].authorization-type=dockeroauth2
  *    - spring.cloud.dataflow.container.metadata.registry-configurations[3].user=admin
  *    - spring.cloud.dataflow.container.metadata.registry-configurations[3].secret=Harbor12345
  *    - spring.cloud.dataflow.container.metadata.registry-configurations[3].extra[registryAuthUri]=https://demo.goharbor.io/service/token?service=harbor-registry&scope=repository:{repository}:pull
@@ -73,7 +73,7 @@ public class RegistryConfiguration {
 		 * OAuth2 token based authorization.
 		 * Can be used the DockerHub or Harbor registries.
 		 */
-		dockerhub,
+		dockeroauth2,
 
 		/**
 		 * AWS ECR authorization model.

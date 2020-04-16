@@ -76,7 +76,7 @@ public class KubernetesSecretToRegistryConfigurationConverter implements Convert
 						rc.setAuthorizationType(RegistryConfiguration.AuthorizationType.basicauth);
 					}
 					else {
-						rc.setAuthorizationType(RegistryConfiguration.AuthorizationType.dockerhub);
+						rc.setAuthorizationType(RegistryConfiguration.AuthorizationType.dockeroauth2);
 						rc.getExtra().put("registryAuthUri", tokenAccessUrl);
 					}
 
@@ -97,7 +97,7 @@ public class KubernetesSecretToRegistryConfigurationConverter implements Convert
 	 * @param registryHost
 	 * @param username
 	 * @param password
-	 * @return Returns Token Endpoint Url if dockerhub authorization-type or null for basic auth.
+	 * @return Returns Token Endpoint Url if dockeroauth2 authorization-type or null for basic auth.
 	 */
 	private String determineAuthorizationType(String registryHost, String username, String password) {
 

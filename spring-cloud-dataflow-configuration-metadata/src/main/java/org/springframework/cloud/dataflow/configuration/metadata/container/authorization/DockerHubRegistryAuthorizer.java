@@ -44,7 +44,7 @@ public class DockerHubRegistryAuthorizer implements RegistryAuthorizer {
 
 	@Override
 	public RegistryConfiguration.AuthorizationType getType() {
-		return RegistryConfiguration.AuthorizationType.dockerhub;
+		return RegistryConfiguration.AuthorizationType.dockeroauth2;
 	}
 
 	@Override

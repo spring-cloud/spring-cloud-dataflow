@@ -65,11 +65,11 @@ public class DefaultContainerImageMetadataResolverTest {
 		// DockerHub registry configuration by default.
 		RegistryConfiguration dockerHubAuthConfig = new RegistryConfiguration();
 		dockerHubAuthConfig.setRegistryHost(ContainerImageMetadataProperties.DOCKER_HUB_HOST);
-		dockerHubAuthConfig.setAuthorizationType(RegistryConfiguration.AuthorizationType.dockerhub);
+		dockerHubAuthConfig.setAuthorizationType(RegistryConfiguration.AuthorizationType.dockeroauth2);
 
 		RegistryConfiguration privateRegistryConfig = new RegistryConfiguration();
 		privateRegistryConfig.setRegistryHost("my-private-repository.com:5000");
-		privateRegistryConfig.setAuthorizationType(RegistryConfiguration.AuthorizationType.dockerhub);
+		privateRegistryConfig.setAuthorizationType(RegistryConfiguration.AuthorizationType.dockeroauth2);
 
 		registryConfigurationMap.put(dockerHubAuthConfig.getRegistryHost(), dockerHubAuthConfig);
 		registryConfigurationMap.put(privateRegistryConfig.getRegistryHost(), privateRegistryConfig);
@@ -85,7 +85,7 @@ public class DefaultContainerImageMetadataResolverTest {
 	@Test
 	public void getImageLabels() {
 
-		when(registryAuthorizer.getType()).thenReturn(RegistryConfiguration.AuthorizationType.dockerhub);
+		when(registryAuthorizer.getType()).thenReturn(RegistryConfiguration.AuthorizationType.dockeroauth2);
 		when(registryAuthorizer.getAuthorizationHeaders(any(), any())).thenReturn(new HttpHeaders());
 
 		DefaultContainerImageMetadataResolver resolver = new MockedDefaultContainerImageMetadataResolver(
@@ -105,7 +105,7 @@ public class DefaultContainerImageMetadataResolverTest {
 	@Test
 	public void getImageLabelsFromPrivateRepository() {
 
-		when(registryAuthorizer.getType()).thenReturn(RegistryConfiguration.AuthorizationType.dockerhub);
+		when(registryAuthorizer.getType()).thenReturn(RegistryConfiguration.AuthorizationType.dockeroauth2);
 		when(registryAuthorizer.getAuthorizationHeaders(any(), any())).thenReturn(new HttpHeaders());
 
 		DefaultContainerImageMetadataResolver resolver = new MockedDefaultContainerImageMetadataResolver(
@@ -125,7 +125,7 @@ public class DefaultContainerImageMetadataResolverTest {
 	@Test(expected = AppMetadataResolutionException.class)
 	public void getImageLabelsMissingRegistryConfiguration() {
 
-		when(registryAuthorizer.getType()).thenReturn(RegistryConfiguration.AuthorizationType.dockerhub);
+		when(registryAuthorizer.getType()).thenReturn(RegistryConfiguration.AuthorizationType.dockeroauth2);
 		when(registryAuthorizer.getAuthorizationHeaders(any(), any())).thenReturn(new HttpHeaders());
 
 		DefaultContainerImageMetadataResolver resolver = new MockedDefaultContainerImageMetadataResolver(
@@ -147,7 +147,7 @@ public class DefaultContainerImageMetadataResolverTest {
 
 	@Test(expected = AppMetadataResolutionException.class)
 	public void getImageLabelsMissingAuthorizationHeader() {
-		when(registryAuthorizer.getType()).thenReturn(RegistryConfiguration.AuthorizationType.dockerhub);
+		when(registryAuthorizer.getType()).thenReturn(RegistryConfiguration.AuthorizationType.dockeroauth2);
 		when(registryAuthorizer.getAuthorizationHeaders(any(), any())).thenReturn(null);
 
 		DefaultContainerImageMetadataResolver resolver = new MockedDefaultContainerImageMetadataResolver(
@@ -159,7 +159,7 @@ public class DefaultContainerImageMetadataResolverTest {
 	@Test(expected = AppMetadataResolutionException.class)
 	public void getImageLabelsInvalidManifestResponse() {
 
-		when(registryAuthorizer.getType()).thenReturn(RegistryConfiguration.AuthorizationType.dockerhub);
+		when(registryAuthorizer.getType()).thenReturn(RegistryConfiguration.AuthorizationType.dockeroauth2);
 		when(registryAuthorizer.getAuthorizationHeaders(any(), any())).thenReturn(new HttpHeaders());
 
 		DefaultContainerImageMetadataResolver resolver = new MockedDefaultContainerImageMetadataResolver(
@@ -174,7 +174,7 @@ public class DefaultContainerImageMetadataResolverTest {
 
 	@Test(expected = AppMetadataResolutionException.class)
 	public void getImageLabelsInvalidDigest() {
-		when(registryAuthorizer.getType()).thenReturn(RegistryConfiguration.AuthorizationType.dockerhub);
+		when(registryAuthorizer.getType()).thenReturn(RegistryConfiguration.AuthorizationType.dockeroauth2);
 		when(registryAuthorizer.getAuthorizationHeaders(any(), any())).thenReturn(new HttpHeaders());
 
 		DefaultContainerImageMetadataResolver resolver = new MockedDefaultContainerImageMetadataResolver(
@@ -191,7 +191,7 @@ public class DefaultContainerImageMetadataResolverTest {
 	@Test
 	public void getImageLabelsWithInvalidLabels() {
 
-		when(registryAuthorizer.getType()).thenReturn(RegistryConfiguration.AuthorizationType.dockerhub);
+		when(registryAuthorizer.getType()).thenReturn(RegistryConfiguration.AuthorizationType.dockeroauth2);
 		when(registryAuthorizer.getAuthorizationHeaders(any(), any())).thenReturn(new HttpHeaders());
 
 		DefaultContainerImageMetadataResolver resolver = new MockedDefaultContainerImageMetadataResolver(

@@ -102,7 +102,7 @@ public class KubernetesSecretToRegistryConfigurationConverterTest {
 		assertThat(registryConfiguration.getRegistryHost(), is("demo.repository.io"));
 		assertThat(registryConfiguration.getUser(), is("testuser"));
 		assertThat(registryConfiguration.getSecret(), is("testpassword"));
-		assertThat(registryConfiguration.getAuthorizationType(), is(RegistryConfiguration.AuthorizationType.dockerhub));
+		assertThat(registryConfiguration.getAuthorizationType(), is(RegistryConfiguration.AuthorizationType.dockeroauth2));
 		assertThat(registryConfiguration.getExtra().get("registryAuthUri"),
 				is("https://demo.repository.io/service/token?service=demo-registry&scope=repository:{repository}:pull"));
 

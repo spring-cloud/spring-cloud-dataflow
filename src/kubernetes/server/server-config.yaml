@@ -49,7 +49,7 @@ data:
                   user: testuser
                   secret: testpassword
                 - registry-host: registry-1.docker.io
-                  authorization-type: dockerhub
+                  authorization-type: dockeroauth2
       datasource:
         url: jdbc:mysql://${MYSQL_SERVICE_HOST}:${MYSQL_SERVICE_PORT}/mysql
         username: root

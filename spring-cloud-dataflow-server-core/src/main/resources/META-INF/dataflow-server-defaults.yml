@@ -200,4 +200,4 @@ spring:
         metadata:
           registry-configurations:
             - registry-host: registry-1.docker.io
-              authorization-type: dockerhub
+              authorization-type: dockeroauth2
