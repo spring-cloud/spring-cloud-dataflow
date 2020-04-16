@@ -28,6 +28,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import org.springframework.cloud.dataflow.configuration.metadata.container.RegistryConfiguration;
+import org.springframework.core.convert.converter.Converter;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -39,9 +40,15 @@ import org.springframework.web.util.UriComponentsBuilder;
 /**
  * @author Christian Tzolov
  */
-public class SecretToRegistryConfigurationConverter {
+public class KubernetesSecretToRegistryConfigurationConverter implements Converter<String, Map<String, RegistryConfiguration>> {
 
-	private static final Logger logger = LoggerFactory.getLogger(SecretToRegistryConfigurationConverter.class);
+	private static final Logger logger = LoggerFactory.getLogger(KubernetesSecretToRegistryConfigurationConverter.class);
+
+	private RestTemplate restTemplate;
+
+	public KubernetesSecretToRegistryConfigurationConverter(RestTemplate restTemplate) {
+		this.restTemplate = restTemplate;
+	}
 
 	/**
 	 * {"auths":{"demo.goharbor.io":{"username":"admin","password":"Harbor12345","auth":"YWRtaW46SGFyYm9yMTIzNDU="}}}
@@ -49,38 +56,40 @@ public class SecretToRegistryConfigurationConverter {
 	 * @param dockerconfigjson
 	 * @return
 	 */
+	@Override
 	public Map<String, RegistryConfiguration> convert(String dockerconfigjson) {
 
-		try {
-			Map authsMap = (Map) new ObjectMapper().readValue(dockerconfigjson, Map.class).get("auths");
+		if (StringUtils.hasText(dockerconfigjson)) {
+			try {
+				Map authsMap = (Map) new ObjectMapper().readValue(dockerconfigjson, Map.class).get("auths");
 
-			Map<String, RegistryConfiguration> registryConfigurationMap = new HashMap<>();
-			for (Object registryUrl : authsMap.keySet()) {
-				RegistryConfiguration rc = new RegistryConfiguration();
-				rc.setRegistryHost(registryUrl.toString());
-				Map registryMap = (Map) authsMap.get(registryUrl.toString());
-				rc.setUser((String) registryMap.get("username"));
-				rc.setSecret((String) registryMap.get("password"));
+				Map<String, RegistryConfiguration> registryConfigurationMap = new HashMap<>();
+				for (Object registryUrl : authsMap.keySet()) {
+					RegistryConfiguration rc = new RegistryConfiguration();
+					rc.setRegistryHost(registryUrl.toString());
+					Map registryMap = (Map) authsMap.get(registryUrl.toString());
+					rc.setUser((String) registryMap.get("username"));
+					rc.setSecret((String) registryMap.get("password"));
 
-				String tokenAccessUrl = determineAuthorizationType(rc.getRegistryHost(), rc.getUser(), rc.getSecret());
-				if (StringUtils.isEmpty(tokenAccessUrl)) {
-					rc.setAuthorizationType(RegistryConfiguration.AuthorizationType.basicauth);
+					String tokenAccessUrl = determineAuthorizationType(rc.getRegistryHost(), rc.getUser(), rc.getSecret());
+					if (StringUtils.isEmpty(tokenAccessUrl)) {
+						rc.setAuthorizationType(RegistryConfiguration.AuthorizationType.basicauth);
+					}
+					else {
+						rc.setAuthorizationType(RegistryConfiguration.AuthorizationType.dockerhub);
+						rc.getExtra().put("registryAuthUri", tokenAccessUrl);
+					}
+
+					logger.info("Registry Secret: " + rc.toString());
+
+					registryConfigurationMap.put(rc.getRegistryHost(), rc);
 				}
-				else {
-					rc.setAuthorizationType(RegistryConfiguration.AuthorizationType.dockerhub);
-					rc.getExtra().put("registryAuthUri", tokenAccessUrl);
-				}
-
-				logger.info("Registry Secret: " + rc.toString());
-
-				registryConfigurationMap.put(rc.getRegistryHost(), rc);
+				return registryConfigurationMap;
 			}
-			return registryConfigurationMap;
+			catch (Exception e) {
+				logger.error("Failed to parse the Secret:" + dockerconfigjson);
+			}
 		}
-		catch (Exception e) {
-			logger.error("Failed to parse the Secret:" + dockerconfigjson);
-		}
-
 		return Collections.emptyMap();
 	}
 
@@ -96,7 +105,7 @@ public class SecretToRegistryConfigurationConverter {
 		httpHeaders.setBasicAuth(username, password);
 
 		try {
-			new RestTemplate().exchange(
+			this.restTemplate.exchange(
 					UriComponentsBuilder.newInstance().scheme("https").host(registryHost).path("v2/_catalog").build().toUri(),
 					HttpMethod.GET,
 					new HttpEntity<>(httpHeaders),

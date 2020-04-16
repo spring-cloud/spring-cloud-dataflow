@@ -18,6 +18,7 @@ package org.springframework.cloud.dataflow.configuration.metadata.container;
 
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -55,7 +56,7 @@ public class DefaultContainerImageMetadataResolverTest {
 	@Mock
 	private RegistryAuthorizer registryAuthorizer;
 
-	private Map<String, RegistryConfiguration> registryConfigurationMap;
+	private Map<String, RegistryConfiguration> registryConfigurationMap = new HashMap<>();
 
 	@Before
 	public void init() {
@@ -127,10 +128,8 @@ public class DefaultContainerImageMetadataResolverTest {
 		when(registryAuthorizer.getType()).thenReturn(RegistryConfiguration.AuthorizationType.dockerhub);
 		when(registryAuthorizer.getAuthorizationHeaders(any(), any())).thenReturn(new HttpHeaders());
 
-		ContainerImageMetadataProperties propertiesWithoutRegistryConfiguration = new ContainerImageMetadataProperties();
-
 		DefaultContainerImageMetadataResolver resolver = new MockedDefaultContainerImageMetadataResolver(
-				new ContainerImageParser(), registryConfigurationMap, Arrays.asList(registryAuthorizer));
+				new ContainerImageParser(), registryConfigurationMap, Collections.emptyList());
 
 		resolver.getImageLabels("test/image:latest");
 	}

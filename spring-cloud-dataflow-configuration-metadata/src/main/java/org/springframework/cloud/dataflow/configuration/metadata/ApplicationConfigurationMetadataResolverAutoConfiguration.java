@@ -48,8 +48,8 @@ import org.springframework.cloud.dataflow.configuration.metadata.container.Regis
 import org.springframework.cloud.dataflow.configuration.metadata.container.authorization.AwsEcrAuthorizer;
 import org.springframework.cloud.dataflow.configuration.metadata.container.authorization.BasicAuthRegistryAuthorizer;
 import org.springframework.cloud.dataflow.configuration.metadata.container.authorization.DockerHubRegistryAuthorizer;
+import org.springframework.cloud.dataflow.configuration.metadata.container.authorization.KubernetesSecretToRegistryConfigurationConverter;
 import org.springframework.cloud.dataflow.configuration.metadata.container.authorization.RegistryAuthorizer;
-import org.springframework.cloud.dataflow.configuration.metadata.container.authorization.SecretToRegistryConfigurationConverter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.MediaType;
@@ -76,7 +76,7 @@ public class ApplicationConfigurationMetadataResolverAutoConfiguration {
 	}
 
 	@Bean
-	public RegistryAuthorizer artifactoryRegistryAuthorizer() {
+	public RegistryAuthorizer basicAuthRegistryAuthorizer() {
 		return new BasicAuthRegistryAuthorizer();
 	}
 
@@ -156,32 +156,35 @@ public class ApplicationConfigurationMetadataResolverAutoConfiguration {
 		// Create a RestTemplate that uses custom request factory
 		return builder.requestFactory(() -> customRequestFactory)
 				.additionalMessageConverters(octetToStringMessageConverter).build();
-
 	}
 
-	@Value("${.dockerconfigjson}")
-	public String dockerconfigjson;
-
 	@Bean
-	public Map<String, RegistryConfiguration> registryConfigurationMap(ContainerImageMetadataProperties properties) {
+	public Map<String, RegistryConfiguration> registryConfigurationMap(ContainerImageMetadataProperties properties,
+			@Value("${.dockerconfigjson:null}") String dockerconfigjson,
+			KubernetesSecretToRegistryConfigurationConverter secretToRegistryConfigurationConverter) {
 
-		logger.info("dockerconfigjson  >>>> :" + dockerconfigjson);
+		HashMap<String, RegistryConfiguration> registryConfigurationMap = new HashMap<>();
 
-		// Retrieve declared registries.
+		// Retrieve registry configurations, explicitly declared via properties.
 		Map<String, RegistryConfiguration> propertiesRegistryConfigurationMap = properties.getRegistryConfigurations().stream()
 				.collect(Collectors.toMap(RegistryConfiguration::getRegistryHost, Function.identity()));
 
-		HashMap<String, RegistryConfiguration> registryConfigurationMap = new HashMap<>(propertiesRegistryConfigurationMap);
+		registryConfigurationMap.putAll(propertiesRegistryConfigurationMap);
 
-		if (!StringUtils.isEmpty(this.dockerconfigjson)) {
+		if (!StringUtils.isEmpty(dockerconfigjson)) {
+			// Retrieve registry configurations from mounted kubernetes Secret.
 			Map<String, RegistryConfiguration> secretsRegistryConfigurationMap
-					= new SecretToRegistryConfigurationConverter().convert(this.dockerconfigjson);
-			logger.info("secretsRegistryConfigurationMap: " + secretsRegistryConfigurationMap);
+					= secretToRegistryConfigurationConverter.convert(dockerconfigjson);
 			registryConfigurationMap.putAll(secretsRegistryConfigurationMap);
 		}
 
-		System.out.println(registryConfigurationMap);
+		logger.info("Registry Configurations: " + registryConfigurationMap);
 
 		return registryConfigurationMap;
+	}
+
+	@Bean
+	public KubernetesSecretToRegistryConfigurationConverter secretToRegistryConfigurationConverter(RestTemplate restTemplate) {
+		return new KubernetesSecretToRegistryConfigurationConverter(restTemplate);
 	}
 }

@@ -162,7 +162,7 @@ public class RegistryConfiguration {
 		return "RegistryConfiguration{" +
 				"registryHost='" + registryHost + '\'' +
 				", user='" + user + '\'' +
-				", secret='" + secret + '\'' +
+				", secret='****'" + '\'' +
 				", authorizationType=" + authorizationType +
 				", manifestMediaType='" + manifestMediaType + '\'' +
 				", extra=" + extra +
