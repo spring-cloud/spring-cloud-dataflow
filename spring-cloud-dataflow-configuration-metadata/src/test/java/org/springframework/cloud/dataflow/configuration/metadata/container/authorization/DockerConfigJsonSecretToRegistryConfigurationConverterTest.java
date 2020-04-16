@@ -44,17 +44,17 @@ import static org.mockito.Mockito.when;
 /**
  * @author Christian Tzolov
  */
-public class KubernetesSecretToRegistryConfigurationConverterTest {
+public class DockerConfigJsonSecretToRegistryConfigurationConverterTest {
 
 	@Mock
 	private RestTemplate mockRestTemplate;
 
-	private KubernetesSecretToRegistryConfigurationConverter converter;
+	private DockerConfigJsonSecretToRegistryConfigurationConverter converter;
 
 	@Before
 	public void init() {
 		MockitoAnnotations.initMocks(this);
-		converter = new KubernetesSecretToRegistryConfigurationConverter(mockRestTemplate);
+		converter = new DockerConfigJsonSecretToRegistryConfigurationConverter(mockRestTemplate);
 	}
 
 	@Test

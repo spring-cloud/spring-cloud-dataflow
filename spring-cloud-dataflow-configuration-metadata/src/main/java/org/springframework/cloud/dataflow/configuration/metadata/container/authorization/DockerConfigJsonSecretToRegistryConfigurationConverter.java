@@ -40,13 +40,13 @@ import org.springframework.web.util.UriComponentsBuilder;
 /**
  * @author Christian Tzolov
  */
-public class KubernetesSecretToRegistryConfigurationConverter implements Converter<String, Map<String, RegistryConfiguration>> {
+public class DockerConfigJsonSecretToRegistryConfigurationConverter implements Converter<String, Map<String, RegistryConfiguration>> {
 
-	private static final Logger logger = LoggerFactory.getLogger(KubernetesSecretToRegistryConfigurationConverter.class);
+	private static final Logger logger = LoggerFactory.getLogger(DockerConfigJsonSecretToRegistryConfigurationConverter.class);
 
 	private RestTemplate restTemplate;
 
-	public KubernetesSecretToRegistryConfigurationConverter(RestTemplate restTemplate) {
+	public DockerConfigJsonSecretToRegistryConfigurationConverter(RestTemplate restTemplate) {
 		this.restTemplate = restTemplate;
 	}
 
