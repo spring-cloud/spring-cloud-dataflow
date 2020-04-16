@@ -47,8 +47,8 @@ import org.springframework.cloud.dataflow.configuration.metadata.container.Defau
 import org.springframework.cloud.dataflow.configuration.metadata.container.RegistryConfiguration;
 import org.springframework.cloud.dataflow.configuration.metadata.container.authorization.AwsEcrAuthorizer;
 import org.springframework.cloud.dataflow.configuration.metadata.container.authorization.BasicAuthRegistryAuthorizer;
-import org.springframework.cloud.dataflow.configuration.metadata.container.authorization.DockerHubRegistryAuthorizer;
 import org.springframework.cloud.dataflow.configuration.metadata.container.authorization.DockerConfigJsonSecretToRegistryConfigurationConverter;
+import org.springframework.cloud.dataflow.configuration.metadata.container.authorization.DockerOAuth2RegistryAuthorizer;
 import org.springframework.cloud.dataflow.configuration.metadata.container.authorization.RegistryAuthorizer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -71,8 +71,8 @@ public class ApplicationConfigurationMetadataResolverAutoConfiguration {
 	private static final Logger logger = LoggerFactory.getLogger(ApplicationConfigurationMetadataResolverAutoConfiguration.class);
 
 	@Bean
-	public RegistryAuthorizer dockerHubRegistryAuthorizer() {
-		return new DockerHubRegistryAuthorizer();
+	public RegistryAuthorizer dockerOAuth2RegistryAuthorizer() {
+		return new DockerOAuth2RegistryAuthorizer();
 	}
 
 	@Bean
@@ -128,34 +128,33 @@ public class ApplicationConfigurationMetadataResolverAutoConfiguration {
 		if (!properties.isDisableSslVerification()) {
 			return builder.additionalMessageConverters(octetToStringMessageConverter).build();
 		}
+		else {
+			// Trust manager that blindly trusts all SSL certificates.
+			TrustManager[] trustAllCerts = new TrustManager[] {
+					new X509TrustManager() {
+						public java.security.cert.X509Certificate[] getAcceptedIssuers() {
+							return new X509Certificate[0];
+						}
 
-		// From https://www.javacodemonk.com/disable-ssl-certificate-check-resttemplate-e2c53583
+						public void checkClientTrusted(java.security.cert.X509Certificate[] certs, String authType) {
+						}
 
-		// Trust manager that blindly trusts all SSL certificates.
-		TrustManager[] trustAllCerts = new TrustManager[] {
-				new X509TrustManager() {
-					public java.security.cert.X509Certificate[] getAcceptedIssuers() {
-						return new X509Certificate[0];
+						public void checkServerTrusted(java.security.cert.X509Certificate[] certs, String authType) {
+						}
 					}
-
-					public void checkClientTrusted(java.security.cert.X509Certificate[] certs, String authType) {
-					}
-
-					public void checkServerTrusted(java.security.cert.X509Certificate[] certs, String authType) {
-					}
-				}
-		};
-		SSLContext sslContext = SSLContext.getInstance("SSL");
-		// Install trust manager to SSL Context.
-		sslContext.init(null, trustAllCerts, new java.security.SecureRandom());
-		// Create an HttpClient that uses the custom SSLContext and do not verify cert hostname.
-		CloseableHttpClient httpClient = HttpClients.custom().setSSLContext(sslContext)
-				.setSSLHostnameVerifier(NoopHostnameVerifier.INSTANCE).build();
-		HttpComponentsClientHttpRequestFactory customRequestFactory = new HttpComponentsClientHttpRequestFactory();
-		customRequestFactory.setHttpClient(httpClient);
-		// Create a RestTemplate that uses custom request factory
-		return builder.requestFactory(() -> customRequestFactory)
-				.additionalMessageConverters(octetToStringMessageConverter).build();
+			};
+			SSLContext sslContext = SSLContext.getInstance("SSL");
+			// Install trust manager to SSL Context.
+			sslContext.init(null, trustAllCerts, new java.security.SecureRandom());
+			// Create an HttpClient that uses the custom SSLContext and do not verify cert hostname.
+			CloseableHttpClient httpClient = HttpClients.custom().setSSLContext(sslContext)
+					.setSSLHostnameVerifier(NoopHostnameVerifier.INSTANCE).build();
+			HttpComponentsClientHttpRequestFactory customRequestFactory = new HttpComponentsClientHttpRequestFactory();
+			customRequestFactory.setHttpClient(httpClient);
+			// Create a RestTemplate that uses custom request factory
+			return builder.requestFactory(() -> customRequestFactory)
+					.additionalMessageConverters(octetToStringMessageConverter).build();
+		}
 	}
 
 	@Bean

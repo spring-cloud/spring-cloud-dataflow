@@ -35,7 +35,7 @@ import org.springframework.web.util.UriComponentsBuilder;
  *
  * @author Christian Tzolov
  */
-public class DockerHubRegistryAuthorizer implements RegistryAuthorizer {
+public class DockerOAuth2RegistryAuthorizer implements RegistryAuthorizer {
 
 	public static final String DEFAULT_DOCKER_REGISTRY_AUTH_URI = "https://auth.docker.io/token?service=registry.docker.io&scope=repository:{repository}:pull&offline_token=1&client_id=shell";
 
