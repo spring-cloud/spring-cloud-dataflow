@@ -23,8 +23,8 @@ import org.junit.Test;
 
 import org.springframework.cloud.dataflow.core.TaskPlatform;
 import org.springframework.cloud.deployer.spi.kubernetes.KubernetesDeployerProperties;
+import org.springframework.cloud.deployer.spi.kubernetes.KubernetesSchedulerProperties;
 import org.springframework.cloud.deployer.spi.kubernetes.KubernetesTaskLauncher;
-import org.springframework.cloud.deployer.spi.scheduler.kubernetes.KubernetesSchedulerProperties;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
