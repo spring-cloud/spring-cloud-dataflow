@@ -120,23 +120,15 @@ public class ApplicationConfigurationMetadataResolverAutoConfiguration {
 			@Value("${.dockerconfigjson:null}") String dockerConfigJsonSecret,
 			DockerConfigJsonSecretToRegistryConfigurationConverter secretToRegistryConfigurationConverter) {
 
-		logger.info(".dockerconfigjson: " + dockerConfigJsonSecret);
-
-		logger.info("ContainerImageMetadataProperties: " + properties);
-
 		// Retrieve registry configurations, explicitly declared via properties.
 		Map<String, RegistryConfiguration> registryConfigurationMap =
 				properties.getRegistryConfigurations().entrySet().stream()
 						.collect(Collectors.toMap(e -> e.getValue().getRegistryHost(), Map.Entry::getValue));
 
-		logger.info("Properties Registry Configurations: " + registryConfigurationMap);
-
 		if (!StringUtils.isEmpty(dockerConfigJsonSecret)) {
 			// Retrieve registry configurations from mounted kubernetes Secret.
 			Map<String, RegistryConfiguration> secretsRegistryConfigurationMap
 					= secretToRegistryConfigurationConverter.convert(dockerConfigJsonSecret);
-
-			logger.info("Secret Registry Configurations: " + secretsRegistryConfigurationMap);
 
 			// Merge the Secret and the Property based registry configurations.
 			Map<String, RegistryConfiguration> result = Stream.concat(
