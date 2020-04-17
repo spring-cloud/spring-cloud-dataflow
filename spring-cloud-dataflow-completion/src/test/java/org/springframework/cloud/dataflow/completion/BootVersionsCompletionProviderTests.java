@@ -24,6 +24,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.cloud.dataflow.audit.service.DefaultAuditRecordService;
@@ -114,7 +115,12 @@ public class BootVersionsCompletionProviderTests {
 		private DefaultContainerImageMetadataResolver containerImageMetadataResolver;
 
 		@MockBean
-		private RestTemplate restTemplate;
+		@Qualifier("containerRestTemplate")
+		private RestTemplate containerRestTemplate;
+
+		@MockBean
+		@Qualifier("noSslVerificationContainerRestTemplate")
+		private RestTemplate noSslVerificationContainerRestTemplate;
 
 		@Bean
 		public AppRegistryService appRegistry() {

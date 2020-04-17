@@ -37,19 +37,13 @@ data:
               kubernetes:
                 accounts:
                   default:
-                    imagePullSecret: harborsec
                     limits:
                       memory: 1024Mi
           container:
-            metadata:
-              disableSslVerification: true
-              registry-configurations:
-                - registry-host: 'myregistrydomain.com:5000'
-                  authorization-type: basicauth
-                  user: testuser
-                  secret: testpassword
-                - registry-host: registry-1.docker.io
-                  authorization-type: dockeroauth2
+            registry-configurations:
+              default:
+                registry-host: registry-1.docker.io
+                authorization-type: dockeroauth2
       datasource:
         url: jdbc:mysql://${MYSQL_SERVICE_HOST}:${MYSQL_SERVICE_PORT}/mysql
         username: root

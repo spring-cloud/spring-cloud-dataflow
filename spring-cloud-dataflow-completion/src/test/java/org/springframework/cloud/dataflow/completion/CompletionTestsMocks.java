@@ -23,6 +23,7 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.cloud.dataflow.audit.service.DefaultAuditRecordService;
 import org.springframework.cloud.dataflow.configuration.metadata.ApplicationConfigurationMetadataResolver;
@@ -60,7 +61,12 @@ public class CompletionTestsMocks {
 	private static final FileFilter FILTER = pathname -> pathname.isDirectory() && pathname.getName().matches(".+-.+");
 
 	@MockBean
-	private RestTemplate restTemplate;
+	@Qualifier("containerRestTemplate")
+	private RestTemplate containerRestTemplate;
+
+	@MockBean
+	@Qualifier("noSslVerificationContainerRestTemplate")
+	private RestTemplate noSslVerificationContainerRestTemplate;
 
 	@Bean
 	public AppRegistryService appRegistry() {

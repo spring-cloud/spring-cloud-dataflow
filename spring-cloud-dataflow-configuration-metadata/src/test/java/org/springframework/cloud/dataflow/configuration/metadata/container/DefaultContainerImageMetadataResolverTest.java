@@ -248,7 +248,7 @@ public class DefaultContainerImageMetadataResolverTest {
 		public MockedDefaultContainerImageMetadataResolver(ContainerImageParser containerImageParser,
 				Map<String, RegistryConfiguration> registryConfigurationMap,
 				List<RegistryAuthorizer> registryAuthorizes) {
-			super(mockRestTemplate, containerImageParser, registryConfigurationMap, registryAuthorizes);
+			super(mockRestTemplate, mockRestTemplate, containerImageParser, registryConfigurationMap, registryAuthorizes);
 		}
 	}
 }

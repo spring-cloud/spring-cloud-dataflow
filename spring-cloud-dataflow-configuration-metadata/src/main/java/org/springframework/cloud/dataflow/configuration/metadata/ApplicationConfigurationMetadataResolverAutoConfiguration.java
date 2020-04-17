@@ -20,11 +20,10 @@ import java.security.KeyManagementException;
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.function.Function;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.TrustManager;
@@ -100,11 +99,12 @@ public class ApplicationConfigurationMetadataResolverAutoConfiguration {
 	@Bean
 	@ConditionalOnMissingBean(ContainerImageMetadataResolver.class)
 	public DefaultContainerImageMetadataResolver containerImageMetadataResolver(
-			@Qualifier("metadataRestTemplate") RestTemplate metadataRestTemplate,
+			@Qualifier("containerRestTemplate") RestTemplate metadataRestTemplate,
+			@Qualifier("noSslVerificationContainerRestTemplate") RestTemplate trustAnySslRestTemplate,
 			ContainerImageParser imageNameParser,
 			Map<String, RegistryConfiguration> registryConfigurationMap,
 			List<RegistryAuthorizer> registryAuthorizers) {
-		return new DefaultContainerImageMetadataResolver(metadataRestTemplate, imageNameParser,
+		return new DefaultContainerImageMetadataResolver(metadataRestTemplate, trustAnySslRestTemplate, imageNameParser,
 				registryConfigurationMap, registryAuthorizers);
 	}
 
@@ -116,74 +116,104 @@ public class ApplicationConfigurationMetadataResolverAutoConfiguration {
 	}
 
 	@Bean
-	@ConditionalOnMissingBean
-	public RestTemplate metadataRestTemplate(RestTemplateBuilder builder, ContainerImageMetadataProperties properties)
-			throws NoSuchAlgorithmException, KeyManagementException {
-
-		StringHttpMessageConverter octetToStringMessageConverter = new StringHttpMessageConverter();
-		List<MediaType> mediaTypeList = new ArrayList(octetToStringMessageConverter.getSupportedMediaTypes());
-		mediaTypeList.add(MediaType.APPLICATION_OCTET_STREAM);
-		octetToStringMessageConverter.setSupportedMediaTypes(mediaTypeList);
-
-		if (!properties.isDisableSslVerification()) {
-			return builder.additionalMessageConverters(octetToStringMessageConverter).build();
-		}
-		else {
-			// Trust manager that blindly trusts all SSL certificates.
-			TrustManager[] trustAllCerts = new TrustManager[] {
-					new X509TrustManager() {
-						public java.security.cert.X509Certificate[] getAcceptedIssuers() {
-							return new X509Certificate[0];
-						}
-
-						public void checkClientTrusted(java.security.cert.X509Certificate[] certs, String authType) {
-						}
-
-						public void checkServerTrusted(java.security.cert.X509Certificate[] certs, String authType) {
-						}
-					}
-			};
-			SSLContext sslContext = SSLContext.getInstance("SSL");
-			// Install trust manager to SSL Context.
-			sslContext.init(null, trustAllCerts, new java.security.SecureRandom());
-			// Create an HttpClient that uses the custom SSLContext and do not verify cert hostname.
-			CloseableHttpClient httpClient = HttpClients.custom().setSSLContext(sslContext)
-					.setSSLHostnameVerifier(NoopHostnameVerifier.INSTANCE).build();
-			HttpComponentsClientHttpRequestFactory customRequestFactory = new HttpComponentsClientHttpRequestFactory();
-			customRequestFactory.setHttpClient(httpClient);
-			// Create a RestTemplate that uses custom request factory
-			return builder.requestFactory(() -> customRequestFactory)
-					.additionalMessageConverters(octetToStringMessageConverter).build();
-		}
-	}
-
-	@Bean
 	public Map<String, RegistryConfiguration> registryConfigurationMap(ContainerImageMetadataProperties properties,
 			@Value("${.dockerconfigjson:null}") String dockerConfigJsonSecret,
 			DockerConfigJsonSecretToRegistryConfigurationConverter secretToRegistryConfigurationConverter) {
 
-		HashMap<String, RegistryConfiguration> registryConfigurationMap = new HashMap<>();
+		logger.info(".dockerconfigjson: " + dockerConfigJsonSecret);
+
+		logger.info("ContainerImageMetadataProperties: " + properties);
 
 		// Retrieve registry configurations, explicitly declared via properties.
-		Map<String, RegistryConfiguration> propertiesRegistryConfigurationMap = properties.getRegistryConfigurations().stream()
-				.collect(Collectors.toMap(RegistryConfiguration::getRegistryHost, Function.identity()));
+		Map<String, RegistryConfiguration> registryConfigurationMap =
+				properties.getRegistryConfigurations().entrySet().stream()
+						.collect(Collectors.toMap(e -> e.getValue().getRegistryHost(), Map.Entry::getValue));
 
-		registryConfigurationMap.putAll(propertiesRegistryConfigurationMap);
+		logger.info("Properties Registry Configurations: " + registryConfigurationMap);
 
 		if (!StringUtils.isEmpty(dockerConfigJsonSecret)) {
 			// Retrieve registry configurations from mounted kubernetes Secret.
 			Map<String, RegistryConfiguration> secretsRegistryConfigurationMap
 					= secretToRegistryConfigurationConverter.convert(dockerConfigJsonSecret);
-			registryConfigurationMap.putAll(secretsRegistryConfigurationMap);
+
+			logger.info("Secret Registry Configurations: " + secretsRegistryConfigurationMap);
+
+			// Merge the Secret and the Property based registry configurations.
+			Map<String, RegistryConfiguration> result = Stream.concat(
+					secretsRegistryConfigurationMap.entrySet().stream(),
+					registryConfigurationMap.entrySet().stream())
+					.collect(Collectors.toMap(
+							Map.Entry::getKey,
+							Map.Entry::getValue,
+							(secretConf, propConf) -> {
+								RegistryConfiguration rc = new RegistryConfiguration();
+								rc.setRegistryHost(secretConf.getRegistryHost());
+								rc.setUser(StringUtils.hasText(propConf.getUser()) ? propConf.getUser() : secretConf.getUser());
+								rc.setSecret(StringUtils.hasText(propConf.getSecret()) ? propConf.getSecret() : secretConf.getSecret());
+								rc.setAuthorizationType(propConf.getAuthorizationType() != null ? propConf.getAuthorizationType() : secretConf.getAuthorizationType());
+								rc.setManifestMediaType(StringUtils.hasText(propConf.getManifestMediaType()) ? propConf.getManifestMediaType() : secretConf.getManifestMediaType());
+								rc.setDisableSslVerification(propConf.isDisableSslVerification());
+								rc.getExtra().putAll(secretConf.getExtra());
+								rc.getExtra().putAll(propConf.getExtra());
+								return rc;
+							}
+					));
+			registryConfigurationMap = result;
 		}
 
-		logger.info("Registry Configurations: " + registryConfigurationMap);
+		logger.info("Final Registry Configurations: " + registryConfigurationMap);
 
 		return registryConfigurationMap;
 	}
 
 	@Bean
-	public DockerConfigJsonSecretToRegistryConfigurationConverter secretToRegistryConfigurationConverter(RestTemplate restTemplate) {
-		return new DockerConfigJsonSecretToRegistryConfigurationConverter(restTemplate);
+	public DockerConfigJsonSecretToRegistryConfigurationConverter secretToRegistryConfigurationConverter(
+			@Qualifier("noSslVerificationContainerRestTemplate") RestTemplate trustAnySslRestTemplate) {
+		return new DockerConfigJsonSecretToRegistryConfigurationConverter(trustAnySslRestTemplate);
+	}
+
+	@Bean
+	@ConditionalOnMissingBean
+	public RestTemplate containerRestTemplate(RestTemplateBuilder builder) {
+		return this.initRestTemplateBuilder(builder).build();
+	}
+
+	@Bean
+	public RestTemplate noSslVerificationContainerRestTemplate(RestTemplateBuilder builder)
+			throws NoSuchAlgorithmException, KeyManagementException {
+
+		// Trust manager that blindly trusts all SSL certificates.
+		TrustManager[] trustAllCerts = new TrustManager[] {
+				new X509TrustManager() {
+					public java.security.cert.X509Certificate[] getAcceptedIssuers() {
+						return new X509Certificate[0];
+					}
+
+					public void checkClientTrusted(java.security.cert.X509Certificate[] certs, String authType) {
+					}
+
+					public void checkServerTrusted(java.security.cert.X509Certificate[] certs, String authType) {
+					}
+				}
+		};
+		SSLContext sslContext = SSLContext.getInstance("SSL");
+		// Install trust manager to SSL Context.
+		sslContext.init(null, trustAllCerts, new java.security.SecureRandom());
+		// Create an HttpClient that uses the custom SSLContext and do not verify cert hostname.
+		CloseableHttpClient httpClient = HttpClients.custom().setSSLContext(sslContext)
+				.setSSLHostnameVerifier(NoopHostnameVerifier.INSTANCE).build();
+		HttpComponentsClientHttpRequestFactory customRequestFactory = new HttpComponentsClientHttpRequestFactory();
+		customRequestFactory.setHttpClient(httpClient);
+		// Create a RestTemplate that uses custom request factory
+		return this.initRestTemplateBuilder(builder).requestFactory(() -> customRequestFactory).build();
+	}
+
+	private RestTemplateBuilder initRestTemplateBuilder(RestTemplateBuilder builder) {
+		StringHttpMessageConverter octetToStringMessageConverter = new StringHttpMessageConverter();
+		List<MediaType> mediaTypeList = new ArrayList(octetToStringMessageConverter.getSupportedMediaTypes());
+		mediaTypeList.add(MediaType.APPLICATION_OCTET_STREAM);
+		octetToStringMessageConverter.setSupportedMediaTypes(mediaTypeList);
+
+		return builder.additionalMessageConverters(octetToStringMessageConverter);
 	}
 }

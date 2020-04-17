@@ -120,6 +120,7 @@ public class ConfigCommands implements CommandMarker, InitializingBean, Applicat
 	private DataFlowShell shell;
 
 	@Autowired
+	@Qualifier("restTemplate")
 	private RestTemplate restTemplate;
 
 	@Value("${dataflow.uri:" + Target.DEFAULT_TARGET + "}")

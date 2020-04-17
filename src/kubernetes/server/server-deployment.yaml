@@ -17,13 +17,10 @@ spec:
       containers:
       - name: scdf-server
         image: springcloud/spring-cloud-dataflow-server:2.5.0.BUILD-SNAPSHOT
-        imagePullPolicy: IfNotPresent
+        imagePullPolicy: Always
         volumeMounts:
           - name: database
             mountPath: /etc/secrets/database
-            readOnly: true
-          - name: harborsec
-            mountPath: /etc/secrets/harborsec
             readOnly: true
         ports:
         - containerPort: 80
@@ -70,6 +67,3 @@ spec:
         - name: database
           secret:
             secretName: mysql
-        - name: harborsec
-          secret:
-            secretName: harborsec

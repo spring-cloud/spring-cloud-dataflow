@@ -16,8 +16,8 @@
 
 package org.springframework.cloud.dataflow.configuration.metadata.container;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
@@ -27,7 +27,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 @ConfigurationProperties(prefix = ContainerImageMetadataProperties.CONTAINER_IMAGE_METADATA_PREFIX)
 public class ContainerImageMetadataProperties {
 
-	public static final String CONTAINER_IMAGE_METADATA_PREFIX = "spring.cloud.dataflow.container.metadata";
+	public static final String CONTAINER_IMAGE_METADATA_PREFIX = "spring.cloud.dataflow.container";
 	public static final String OCI_IMAGE_MANIFEST_MEDIA_TYPE = "application/vnd.oci.image.manifest.v1+json";
 	public static final String DOCKER_IMAGE_MANIFEST_MEDIA_TYPE = "application/vnd.docker.distribution.manifest.v2+json";
 	public static final String DOCKER_HUB_HOST = "registry-1.docker.io";
@@ -55,15 +55,14 @@ public class ContainerImageMetadataProperties {
 	/**
 	 * Registry authentication configuration
 	 */
-	private List<RegistryConfiguration> registryConfigurations = new ArrayList<>();
+	private Map<String, RegistryConfiguration> registryConfigurations = new HashMap<>();
 
-	/**
-	 * Used for testing with self-signed certificates.
-	 */
-	private boolean disableSslVerification = false;
-
-	public List<RegistryConfiguration> getRegistryConfigurations() {
+	public Map<String, RegistryConfiguration> getRegistryConfigurations() {
 		return registryConfigurations;
+	}
+
+	public void setRegistryConfigurations(Map<String, RegistryConfiguration> registryConfigurations) {
+		this.registryConfigurations = registryConfigurations;
 	}
 
 	public String getDefaultRegistryHost() {
@@ -90,11 +89,13 @@ public class ContainerImageMetadataProperties {
 		this.officialRepositoryNamespace = officialRepositoryNamespace;
 	}
 
-	public boolean isDisableSslVerification() {
-		return disableSslVerification;
-	}
-
-	public void setDisableSslVerification(boolean disableSslVerification) {
-		this.disableSslVerification = disableSslVerification;
+	@Override
+	public String toString() {
+		return "ContainerImageMetadataProperties{" +
+				"defaultRegistryHost='" + defaultRegistryHost + '\'' +
+				", defaultRepositoryTag='" + defaultRepositoryTag + '\'' +
+				", officialRepositoryNamespace='" + officialRepositoryNamespace + '\'' +
+				", registryConfigurations=" + registryConfigurations +
+				'}';
 	}
 }
