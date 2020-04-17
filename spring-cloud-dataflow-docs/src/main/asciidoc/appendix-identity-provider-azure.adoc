@@ -1,0 +1,269 @@
+[[appendix-identity-provider-azure]]
+=== Azure
+Azure AD is a fully fledged identity provider providing wide range of features
+around authentication and authorization. Just like any other provider it has its
+own nuances meaning care must be taken to set it up.
+
+In this section we go through how _oauth2_ setup is done for _AD_ and
+_Spring Cloud Data Flow_.
+
+[NOTE]
+====
+You'll need a full organization access rights to setup everything correctly.
+====
+
+[[appendix-identity-provider-azure-adenv]]
+==== Creating new AD Environment
+To get started you can simply create a new _Active Directory_ environment. Choose a
+type as _Azure Active Directory_ (not the b2c type) and then pick your _org_ name and
+_initial domain_.
+
+image::./images/azure-create-ad-env.png[Create AD Environment, width="60%"]
+
+[[appendix-identity-provider-azure-appreg]]
+==== Creating new App Registration
+_App registration_ is where _oauth_ clients are created to get used from _oauth_
+applications. At minimum it's recommended to create two clients, one for
+dataflow and skipper servers and one for dataflow shell as these two will have
+a slightly different configuration. _Server applications_ can be considered to be
+trusted applications while _shell_ not so as use would be able to see its full
+configuration.
+
+[NOTE]
+====
+We recommend to use same _oauth client_ for both dataflow and skipper servers. While
+it's possible to use different clients it currently would not provide any value as
+configs needs to be same.
+====
+
+image::./images/azure-create-app-registration.png[Create App Registration, width="60%"]
+
+[IMPORTANT]
+====
+_Client secret_ when needed is created under `Certificates & secrets` in AD.
+====
+
+[[appendix-identity-provider-azure-exposeapi]]
+==== Expose Dataflow Api’s
+To prepare _oauth_ scopes create one for each dataflow security roles. In this example those would be `api://dataflow-server/dataflow.create`,
+`api://dataflow-server/dataflow.deploy`, `api://dataflow-server/dataflow.destroy`,
+`api://dataflow-server/dataflow.manage`, `api://dataflow-server/dataflow.schedule`,
+`api://dataflow-server/dataflow.modify` and `api://dataflow-server/dataflow.view`.
+
+image::./images/azure-expose-apis.png[Expose APIs, width="60%"]
+
+Previously created scopes needs to be added as _API Permissions_.
+
+image::./images/azure-api-permissions.png[Api Permissions, width="60%"]
+
+[[appendix-identity-provider-azure-privclient]]
+==== Creating a Privileged Client
+For _oauth_ client which is about to use _password_ grants, same _Api permissions_ needs
+to be created than with _oauth_ client used for server. Additional step required is that
+all these permissions needs to be granted with admin consent as otherwise it doesn't work.
+
+image::./images/azure-privileged-client.png[Privileged Client, width="60%"]
+
+[IMPORTANT]
+====
+Privileged client needs a _Client secret_ which needs to be exposed to a client
+configuration when used in a shell. If you don't want to expose that secret, use
+public client <<appendix-identity-provider-azure-pubclient>>.
+====
+
+[[appendix-identity-provider-azure-pubclient]]
+==== Creating a Public Client
+Public client is basically a client without client secret and type set to public.
+
+image::./images/azure-public-client.png[Public Client, width="60%"]
+
+==== Config examples
+Here is a list of config examples for servers and shell.
+
+Starting a dataflow server:
+
+[source,bash]
+----
+$ java -jar spring-cloud-dataflow-server.jar \
+  --spring.config.additional-location=dataflow-azure.yml
+----
+
+[source,yaml]
+.dataflow-azure.yml
+----
+spring:
+  cloud:
+    dataflow:
+      security:
+        authorization:
+          provider-role-mappings:
+            dataflow-server:
+              map-oauth-scopes: false
+              role-mappings:
+                ROLE_VIEW: dataflow.view
+                ROLE_CREATE: dataflow.create
+                ROLE_MANAGE: dataflow.manage
+                ROLE_DEPLOY: dataflow.deploy
+                ROLE_DESTROY: dataflow.destroy
+                ROLE_MODIFY: dataflow.modify
+                ROLE_SCHEDULE: dataflow.schedule
+  security:
+    oauth2:
+      client:
+        registration:
+          dataflow-server:
+            provider: azure
+            redirect-uri: '{baseUrl}/login/oauth2/code/{registrationId}'
+            client-id: <client id>
+            client-secret: <client secret>
+            scope:
+            - openid
+            - profile
+            - email
+            - offline_access
+            - api://dataflow-server/dataflow.view
+            - api://dataflow-server/dataflow.deploy
+            - api://dataflow-server/dataflow.destroy
+            - api://dataflow-server/dataflow.manage
+            - api://dataflow-server/dataflow.modify
+            - api://dataflow-server/dataflow.schedule
+            - api://dataflow-server/dataflow.create
+        provider:
+          azure:
+            issuer-uri: https://login.microsoftonline.com/799dcfde-b9e3-4dfc-ac25-659b326e0bcd/v2.0
+            user-name-attribute: name
+      resourceserver:
+        jwt:
+          jwk-set-uri: https://login.microsoftonline.com/799dcfde-b9e3-4dfc-ac25-659b326e0bcd/discovery/v2.0/keys
+----
+
+Starting a skipper server:
+
+[source,bash]
+----
+$ java -jar spring-cloud-skipper-server.jar \
+  --spring.config.additional-location=skipper-azure.yml
+----
+
+[source,yaml]
+.skipper-azure.yml
+----
+spring:
+  cloud:
+    skipper:
+      security:
+        authorization:
+          provider-role-mappings:
+            skipper-server:
+              map-oauth-scopes: false
+              role-mappings:
+                ROLE_VIEW: dataflow.view
+                ROLE_CREATE: dataflow.create
+                ROLE_MANAGE: dataflow.manage
+                ROLE_DEPLOY: dataflow.deploy
+                ROLE_DESTROY: dataflow.destroy
+                ROLE_MODIFY: dataflow.modify
+                ROLE_SCHEDULE: dataflow.schedule
+  security:
+    oauth2:
+      client:
+        registration:
+          skipper-server:
+            provider: azure
+            redirect-uri: '{baseUrl}/login/oauth2/code/{registrationId}'
+            client-id: <client id>
+            client-secret: <client secret>
+            scope:
+            - openid
+            - profile
+            - email
+            - offline_access
+            - api://dataflow-server/dataflow.view
+            - api://dataflow-server/dataflow.deploy
+            - api://dataflow-server/dataflow.destroy
+            - api://dataflow-server/dataflow.manage
+            - api://dataflow-server/dataflow.modify
+            - api://dataflow-server/dataflow.schedule
+            - api://dataflow-server/dataflow.create
+        provider:
+          azure:
+            issuer-uri: https://login.microsoftonline.com/799dcfde-b9e3-4dfc-ac25-659b326e0bcd/v2.0
+            user-name-attribute: name
+      resourceserver:
+        jwt:
+          jwk-set-uri: https://login.microsoftonline.com/799dcfde-b9e3-4dfc-ac25-659b326e0bcd/discovery/v2.0/keys
+----
+
+Starting a shell and optionally passing credentials as options:
+
+[source,bash]
+----
+$ java -jar spring-cloud-dataflow-shell.jar \
+  --spring.config.additional-location=dataflow-azure-shell.yml \
+  --dataflow.username=<USERNAME> \
+  --dataflow.password=<PASSWORD>
+----
+
+[source,yaml]
+.dataflow-azure-shell.yml
+----
+  security:
+    oauth2:
+      client:
+        registration:
+          dataflow-shell:
+            provider: azure
+            client-id: <client id>
+            client-secret: <client secret>
+            authorization-grant-type: password
+            scope:
+            - offline_access
+            - api://dataflow-server/dataflow.create
+            - api://dataflow-server/dataflow.deploy
+            - api://dataflow-server/dataflow.destroy
+            - api://dataflow-server/dataflow.manage
+            - api://dataflow-server/dataflow.modify
+            - api://dataflow-server/dataflow.schedule
+            - api://dataflow-server/dataflow.view
+        provider:
+          azure:
+            issuer-uri: https://login.microsoftonline.com/799dcfde-b9e3-4dfc-ac25-659b326e0bcd/v2.0
+
+----
+
+Starting a shell and optionally passing credentials as options:
+
+[source,bash]
+----
+$ java -jar spring-cloud-dataflow-shell.jar \
+  --spring.config.additional-location=dataflow-azure-shell-public.yml \
+  --dataflow.username=<USERNAME> \
+  --dataflow.password=<PASSWORD>
+----
+
+[source,yaml]
+.dataflow-azure-shell-public.yml
+----
+spring:
+  security:
+    oauth2:
+      client:
+        registration:
+          dataflow-shell:
+            provider: azure
+            client-id: <client id>
+            authorization-grant-type: password
+            client-authentication-method: post
+            scope:
+            - offline_access
+            - api://dataflow-server/dataflow.create
+            - api://dataflow-server/dataflow.deploy
+            - api://dataflow-server/dataflow.destroy
+            - api://dataflow-server/dataflow.manage
+            - api://dataflow-server/dataflow.modify
+            - api://dataflow-server/dataflow.schedule
+            - api://dataflow-server/dataflow.view
+        provider:
+          azure:
+            issuer-uri: https://login.microsoftonline.com/799dcfde-b9e3-4dfc-ac25-659b326e0bcd/v2.0
+----

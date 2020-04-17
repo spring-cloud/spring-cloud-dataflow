@@ -1,0 +1,7 @@
+[appendix]
+[[identity-providers]]
+== Identity Providers
+This appendix contains information how a spesific providers can be setup to work
+with dataflow security.
+
+include::appendix-identity-provider-azure.adoc[]

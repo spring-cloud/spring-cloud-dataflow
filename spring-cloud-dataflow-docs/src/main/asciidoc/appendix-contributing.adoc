@@ -29,3 +29,4 @@ If using IntelliJ, you can use the https://plugins.jetbrains.com/plugin/6546[Ecl
 * If no one else uses your branch, rebase it against the current master (or other target branch in the main project).
 * When writing a commit message, follow https://tbaggery.com/2008/04/19/a-note-about-git-commit-messages.html[these conventions].
 If you fix an existing issue, add `Fixes gh-XXXX` (where XXXX is the issue number) at the end of the commit message.
+

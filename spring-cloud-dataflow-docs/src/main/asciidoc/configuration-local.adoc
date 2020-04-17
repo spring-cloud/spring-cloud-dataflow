@@ -365,6 +365,12 @@ and requiring clients to authenticate using https://oauth.net/2/[OAuth 2.0].
 
 [NOTE]
 ====
+Appendix <<appendix-identity-provider-azure>> contains more information how to
+setup _Azure Active Directory_ integration.
+====
+
+[NOTE]
+====
 By default, the REST endpoints (administration, management, and health) as well as the Dashboard UI do not require authenticated access.
 ====
 
