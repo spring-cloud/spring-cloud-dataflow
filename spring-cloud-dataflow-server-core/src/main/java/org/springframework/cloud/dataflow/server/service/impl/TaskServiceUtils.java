@@ -23,6 +23,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.springframework.boot.autoconfigure.jdbc.DataSourceProperties;
+import org.springframework.cloud.context.encrypt.EncryptorFactory;
 import org.springframework.cloud.dataflow.core.TaskDefinition;
 import org.springframework.cloud.dataflow.core.dsl.TaskApp;
 import org.springframework.cloud.dataflow.core.dsl.TaskNode;
@@ -39,6 +40,10 @@ import org.springframework.util.StringUtils;
  */
 public class TaskServiceUtils {
 	private static final String DATAFLOW_SERVER_URI_KEY = "dataflowServerUri";
+
+	private static final String ENCRYPT_KEY = "ENCRYPT_KEY";
+
+	private static final String CIPHER = "{cipher}";
 
 	/**
 	 * Parses the task DSL to see if it is a composed task definition
@@ -122,7 +127,10 @@ public class TaskServiceUtils {
 		builder.setProperty("spring.datasource.username", dataSourceProperties.getUsername());
 		// password may be empty
 		if (StringUtils.hasText(dataSourceProperties.getPassword())) {
-			builder.setProperty("spring.datasource.password", dataSourceProperties.getPassword());
+			builder.setProperty("spring.datasource.password", StringUtils.isEmpty(System.getenv(ENCRYPT_KEY))
+					? dataSourceProperties.getPassword()
+					: CIPHER + new EncryptorFactory().create(System.getenv(ENCRYPT_KEY))
+					.encrypt(dataSourceProperties.getPassword()));
 		}
 		builder.setProperty("spring.datasource.driverClassName", dataSourceProperties.getDriverClassName());
 		builder.setTaskName(taskDefinition.getTaskName());
