@@ -58,6 +58,7 @@ import org.springframework.util.StringUtils;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.client.RestTemplate;
 
+
 /**
  * Automatically exposes an {@link ApplicationConfigurationMetadataResolver} if none is already registered.
  *
@@ -125,13 +126,29 @@ public class ApplicationConfigurationMetadataResolverAutoConfiguration {
 				properties.getRegistryConfigurations().entrySet().stream()
 						.collect(Collectors.toMap(e -> e.getValue().getRegistryHost(), Map.Entry::getValue));
 
+		// For dockeroauth2 configuration that doesn't have the Docker OAuth2 Access Token entry point set,
+		// use the secretToRegistryConfigurationConverter.getDockerTokenServiceUri() tor retrieve the entry point.
+		registryConfigurationMap.values().stream()
+				.filter(rc -> rc.getAuthorizationType() == RegistryConfiguration.AuthorizationType.dockeroauth2)
+				.filter(rc -> !rc.getExtra().containsKey(DockerOAuth2RegistryAuthorizer.DOCKER_REGISTRY_AUTH_URI_KEY))
+				.forEach(rc -> {
+							String tokenServiceUri = secretToRegistryConfigurationConverter.getDockerTokenServiceUri(
+									rc.getRegistryHost(), rc.getUser(), rc.getSecret());
+							if (StringUtils.hasText(tokenServiceUri)) {
+								rc.getExtra().put(DockerOAuth2RegistryAuthorizer.DOCKER_REGISTRY_AUTH_URI_KEY, tokenServiceUri);
+							}
+						}
+				);
+
 		if (!StringUtils.isEmpty(dockerConfigJsonSecret)) {
 			// Retrieve registry configurations from mounted kubernetes Secret.
 			Map<String, RegistryConfiguration> secretsRegistryConfigurationMap
 					= secretToRegistryConfigurationConverter.convert(dockerConfigJsonSecret);
 
 			// Merge the Secret and the Property based registry configurations.
-			Map<String, RegistryConfiguration> result = Stream.concat(
+			// The properties values when set has precedence over the Secret retrieved one. Later allow to override
+			// some of the Secret properties or set the disableSslVerification for secret based configs.
+			Map<String, RegistryConfiguration> mergedConfigurations = Stream.concat(
 					secretsRegistryConfigurationMap.entrySet().stream(),
 					registryConfigurationMap.entrySet().stream())
 					.collect(Collectors.toMap(
@@ -150,7 +167,7 @@ public class ApplicationConfigurationMetadataResolverAutoConfiguration {
 								return rc;
 							}
 					));
-			registryConfigurationMap = result;
+			registryConfigurationMap = mergedConfigurations;
 		}
 
 		logger.info("Final Registry Configurations: " + registryConfigurationMap);

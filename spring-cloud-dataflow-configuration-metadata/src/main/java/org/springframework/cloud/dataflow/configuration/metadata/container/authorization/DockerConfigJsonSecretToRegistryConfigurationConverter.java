@@ -71,13 +71,13 @@ public class DockerConfigJsonSecretToRegistryConfigurationConverter implements C
 					rc.setUser((String) registryMap.get("username"));
 					rc.setSecret((String) registryMap.get("password"));
 
-					String tokenAccessUrl = determineAuthorizationType(rc.getRegistryHost(), rc.getUser(), rc.getSecret());
+					String tokenAccessUrl = getDockerTokenServiceUri(rc.getRegistryHost(), rc.getUser(), rc.getSecret());
 					if (StringUtils.isEmpty(tokenAccessUrl)) {
 						rc.setAuthorizationType(RegistryConfiguration.AuthorizationType.basicauth);
 					}
 					else {
 						rc.setAuthorizationType(RegistryConfiguration.AuthorizationType.dockeroauth2);
-						rc.getExtra().put("registryAuthUri", tokenAccessUrl);
+						rc.getExtra().put(DockerOAuth2RegistryAuthorizer.DOCKER_REGISTRY_AUTH_URI_KEY, tokenAccessUrl);
 					}
 
 					logger.info("Registry Secret: " + rc.toString());
@@ -99,17 +99,17 @@ public class DockerConfigJsonSecretToRegistryConfigurationConverter implements C
 	 * @param password
 	 * @return Returns Token Endpoint Url if dockeroauth2 authorization-type or null for basic auth.
 	 */
-	private String determineAuthorizationType(String registryHost, String username, String password) {
+	public String getDockerTokenServiceUri(String registryHost, String username, String password) {
 
 		final HttpHeaders httpHeaders = new HttpHeaders();
-		httpHeaders.setBasicAuth(username, password);
+		if (StringUtils.hasText(username) && StringUtils.hasText(password)) {
+			httpHeaders.setBasicAuth(username, password);
+		}
 
 		try {
 			this.restTemplate.exchange(
 					UriComponentsBuilder.newInstance().scheme("https").host(registryHost).path("v2/_catalog").build().toUri(),
-					HttpMethod.GET,
-					new HttpEntity<>(httpHeaders),
-					Map.class);
+					HttpMethod.GET, new HttpEntity<>(httpHeaders), Map.class);
 			return null;
 		}
 		catch (HttpClientErrorException httpError) {
