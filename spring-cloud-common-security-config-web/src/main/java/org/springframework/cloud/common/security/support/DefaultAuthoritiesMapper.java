@@ -15,6 +15,7 @@
  */
 package org.springframework.cloud.common.security.support;
 
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -149,7 +150,7 @@ public class DefaultAuthoritiesMapper implements AuthoritiesMapper {
 				for (Map.Entry<CoreSecurityRoles, String> roleMappingEngtry : roleMapping.convertRoleMappingKeysToCoreSecurityRoles().entrySet()) {
 					final CoreSecurityRoles role = roleMappingEngtry.getKey();
 					final String expectedOAuthScope = roleMappingEngtry.getValue();
-					for (String scope : scopes) {
+					for (String scope : pathParts(scopes)) {
 						if (scope.equalsIgnoreCase(expectedOAuthScope)) {
 							final SimpleGrantedAuthority oauthRoleAuthority = new SimpleGrantedAuthority(roleMapping.getRolePrefix() + role.getKey());
 							rolesAsStrings.add(oauthRoleAuthority.getAuthority());
@@ -170,6 +171,23 @@ public class DefaultAuthoritiesMapper implements AuthoritiesMapper {
 			logger.info("Adding ALL roles: {}.", StringUtils.collectionToCommaDelimitedString(rolesAsStrings));
 		}
 		return grantedAuthorities;
+	}
+
+	private Set<String> pathParts(Set<String> scopes) {
+		// String away leading part if scope is something like
+		// api://dataflow-server/dataflow.create resulting dataflow.create
+		return scopes.stream().map(scope -> {
+			try {
+				URI uri = URI.create(scope);
+				String path = uri.getPath();
+				if (StringUtils.hasText(path) && path.charAt(0) == '/') {
+					return path.substring(1);
+				}
+			} catch (Exception e) {
+			}
+			return scope;
+		})
+		.collect(Collectors.toSet());
 	}
 
 }

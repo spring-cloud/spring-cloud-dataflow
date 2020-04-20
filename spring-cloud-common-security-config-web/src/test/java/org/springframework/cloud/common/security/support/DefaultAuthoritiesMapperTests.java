@@ -242,4 +242,29 @@ public class DefaultAuthoritiesMapperTests {
 			containsInAnyOrder("ROLE_CREATE", "ROLE_DEPLOY", "ROLE_DESTROY", "ROLE_MANAGE", "ROLE_MODIFY", "ROLE_SCHEDULE", "ROLE_VIEW"));
 	}
 
+	@Test
+	public void testThatUriStyleScopeRemovesLeadingPart() throws Exception {
+		final Map<String, String> roleMappings = new HashMap<>();
+
+		roleMappings.put("ROLE_MANAGE", "foo-manage");
+		roleMappings.put("ROLE_VIEW", "foo-manage");
+		roleMappings.put("ROLE_DEPLOY", "foo-manage");
+		roleMappings.put("ROLE_DESTROY", "foo-manage");
+		roleMappings.put("ROLE_MODIFY", "foo-manage");
+		roleMappings.put("ROLE_SCHEDULE", "foo-manage");
+		roleMappings.put("ROLE_CREATE", "blubba-create");
+
+		final Set<String> scopes = new HashSet<>();
+		scopes.add("api://foobar/foo-manage");
+		scopes.add("blubba-create");
+
+		final DefaultAuthoritiesMapper defaultAuthoritiesExtractor = new DefaultAuthoritiesMapper("uaa", true, roleMappings);
+
+		final Collection<? extends GrantedAuthority> authorities = defaultAuthoritiesExtractor.mapScopesToAuthorities("uaa", scopes, null);
+
+		assertThat(authorities, hasSize(7));
+
+		assertThat(authorities.stream().map(authority -> authority.getAuthority()).collect(Collectors.toList()),
+			containsInAnyOrder("ROLE_CREATE", "ROLE_DEPLOY", "ROLE_DESTROY", "ROLE_MANAGE", "ROLE_MODIFY", "ROLE_SCHEDULE", "ROLE_VIEW"));
+	}
 }
