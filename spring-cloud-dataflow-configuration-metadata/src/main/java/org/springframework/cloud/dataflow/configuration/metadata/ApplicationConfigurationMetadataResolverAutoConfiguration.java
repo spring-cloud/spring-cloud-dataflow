@@ -38,6 +38,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.cloud.dataflow.configuration.metadata.container.ContainerImageMetadataProperties;
 import org.springframework.cloud.dataflow.configuration.metadata.container.ContainerImageMetadataResolver;
@@ -55,9 +56,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.http.converter.StringHttpMessageConverter;
 import org.springframework.util.StringUtils;
-import org.springframework.validation.annotation.Validated;
 import org.springframework.web.client.RestTemplate;
-
 
 /**
  * Automatically exposes an {@link ApplicationConfigurationMetadataResolver} if none is already registered.
@@ -66,13 +65,15 @@ import org.springframework.web.client.RestTemplate;
  * @author Christian Tzolov
  */
 @Configuration
+@EnableConfigurationProperties({ ContainerImageMetadataProperties.class })
 public class ApplicationConfigurationMetadataResolverAutoConfiguration {
 
 	private static final Logger logger = LoggerFactory.getLogger(ApplicationConfigurationMetadataResolverAutoConfiguration.class);
 
 	@Bean
-	public RegistryAuthorizer dockerOAuth2RegistryAuthorizer() {
-		return new DockerOAuth2RegistryAuthorizer();
+	public RegistryAuthorizer dockerOAuth2RegistryAuthorizer(
+			@Qualifier("noSslVerificationContainerRestTemplate") RestTemplate trustAnySslRestTemplate) {
+		return new DockerOAuth2RegistryAuthorizer(trustAnySslRestTemplate);
 	}
 
 	@Bean
@@ -89,12 +90,6 @@ public class ApplicationConfigurationMetadataResolverAutoConfiguration {
 	public ContainerImageParser containerImageParser(ContainerImageMetadataProperties properties) {
 		return new ContainerImageParser(properties.getDefaultRegistryHost(),
 				properties.getDefaultRepositoryTag(), properties.getOfficialRepositoryNamespace());
-	}
-
-	@Bean
-	@Validated
-	public ContainerImageMetadataProperties containerImageMetadataProperties() {
-		return new ContainerImageMetadataProperties();
 	}
 
 	@Bean
@@ -188,6 +183,7 @@ public class ApplicationConfigurationMetadataResolverAutoConfiguration {
 	}
 
 	@Bean
+	@ConditionalOnMissingBean
 	public RestTemplate noSslVerificationContainerRestTemplate(RestTemplateBuilder builder)
 			throws NoSuchAlgorithmException, KeyManagementException {
 

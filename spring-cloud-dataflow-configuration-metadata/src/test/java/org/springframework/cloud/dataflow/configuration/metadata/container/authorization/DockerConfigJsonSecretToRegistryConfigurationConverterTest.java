@@ -66,7 +66,6 @@ public class DockerConfigJsonSecretToRegistryConfigurationConverterTest {
 
 		String b = "{\"auths\":{\"demo.repository.io\":{\"username\":\"testuser\",\"password\":\"testpassword\",\"auth\":\"YWRtaW46SGFyYm9yMTIzNDU=\"}}}";
 		Map<String, RegistryConfiguration> result = converter.convert(b);
-		System.out.println(result);
 
 		assertThat(result.size(), is(1));
 		assertTrue(result.containsKey("demo.repository.io"));
@@ -92,7 +91,6 @@ public class DockerConfigJsonSecretToRegistryConfigurationConverterTest {
 
 		String b = "{\"auths\":{\"demo.repository.io\":{\"username\":\"testuser\",\"password\":\"testpassword\",\"auth\":\"YWRtaW46SGFyYm9yMTIzNDU=\"}}}";
 		Map<String, RegistryConfiguration> result = converter.convert(b);
-		System.out.println(result);
 
 		assertThat(result.size(), is(1));
 		assertTrue(result.containsKey("demo.repository.io"));
