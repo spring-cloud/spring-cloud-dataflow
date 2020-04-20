@@ -116,7 +116,7 @@ public class ApplicationConfigurationMetadataResolverAutoConfigurationTest {
 
 		@Bean
 		@Qualifier("noSslVerificationContainerRestTemplate")
-		RestTemplate testNoSslVerificationContainerRestTemplate() throws URISyntaxException {
+		RestTemplate noSslVerificationContainerRestTemplate() throws URISyntaxException {
 			RestTemplate restTemplate = Mockito.mock(RestTemplate.class);
 
 			HttpHeaders authenticateHeader = new HttpHeaders();
@@ -147,7 +147,7 @@ public class ApplicationConfigurationMetadataResolverAutoConfigurationTest {
 
 		@Bean
 		@Qualifier("containerRestTemplate")
-		RestTemplate testContainerRestTemplate() throws URISyntaxException {
+		RestTemplate containerRestTemplate() throws URISyntaxException {
 			RestTemplate restTemplate = Mockito.mock(RestTemplate.class);
 
 			when(restTemplate

@@ -72,8 +72,8 @@ public class ApplicationConfigurationMetadataResolverAutoConfiguration {
 
 	@Bean
 	public RegistryAuthorizer dockerOAuth2RegistryAuthorizer(
-			@Qualifier("noSslVerificationContainerRestTemplate") RestTemplate trustAnySslRestTemplate) {
-		return new DockerOAuth2RegistryAuthorizer(trustAnySslRestTemplate);
+			@Qualifier("noSslVerificationContainerRestTemplate") RestTemplate noSslVerificationContainerRestTemplate) {
+		return new DockerOAuth2RegistryAuthorizer(noSslVerificationContainerRestTemplate);
 	}
 
 	@Bean
@@ -95,12 +95,12 @@ public class ApplicationConfigurationMetadataResolverAutoConfiguration {
 	@Bean
 	@ConditionalOnMissingBean(ContainerImageMetadataResolver.class)
 	public DefaultContainerImageMetadataResolver containerImageMetadataResolver(
-			@Qualifier("containerRestTemplate") RestTemplate metadataRestTemplate,
+			@Qualifier("containerRestTemplate") RestTemplate containerRestTemplate,
 			@Qualifier("noSslVerificationContainerRestTemplate") RestTemplate trustAnySslRestTemplate,
 			ContainerImageParser imageNameParser,
 			Map<String, RegistryConfiguration> registryConfigurationMap,
 			List<RegistryAuthorizer> registryAuthorizers) {
-		return new DefaultContainerImageMetadataResolver(metadataRestTemplate, trustAnySslRestTemplate, imageNameParser,
+		return new DefaultContainerImageMetadataResolver(containerRestTemplate, trustAnySslRestTemplate, imageNameParser,
 				registryConfigurationMap, registryAuthorizers);
 	}
 
