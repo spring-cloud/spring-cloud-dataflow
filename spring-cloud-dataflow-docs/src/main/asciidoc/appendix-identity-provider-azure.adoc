@@ -98,7 +98,7 @@ spring:
         authorization:
           provider-role-mappings:
             dataflow-server:
-              map-oauth-scopes: false
+              map-oauth-scopes: true
               role-mappings:
                 ROLE_VIEW: dataflow.view
                 ROLE_CREATE: dataflow.create
@@ -155,7 +155,7 @@ spring:
         authorization:
           provider-role-mappings:
             skipper-server:
-              map-oauth-scopes: false
+              map-oauth-scopes: true
               role-mappings:
                 ROLE_VIEW: dataflow.view
                 ROLE_CREATE: dataflow.create
