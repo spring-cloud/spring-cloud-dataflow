@@ -177,13 +177,13 @@ public class ApplicationConfigurationMetadataResolverAutoConfiguration {
 	}
 
 	@Bean
-	@ConditionalOnMissingBean
+	@ConditionalOnMissingBean(name = "containerRestTemplate")
 	public RestTemplate containerRestTemplate(RestTemplateBuilder builder) {
 		return this.initRestTemplateBuilder(builder).build();
 	}
 
 	@Bean
-	@ConditionalOnMissingBean
+	@ConditionalOnMissingBean(name = "noSslVerificationContainerRestTemplate")
 	public RestTemplate noSslVerificationContainerRestTemplate(RestTemplateBuilder builder)
 			throws NoSuchAlgorithmException, KeyManagementException {
 
