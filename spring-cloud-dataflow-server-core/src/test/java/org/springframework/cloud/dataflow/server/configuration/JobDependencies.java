@@ -156,8 +156,7 @@ public class JobDependencies {
 	public TaskValidationService taskValidationService(AppRegistryService appRegistry,
 			DockerValidatorProperties dockerValidatorProperties, TaskDefinitionRepository taskDefinitionRepository,
 			TaskConfigurationProperties taskConfigurationProperties) {
-		return new DefaultTaskValidationService(appRegistry, dockerValidatorProperties, taskDefinitionRepository,
-				taskConfigurationProperties.getComposedTaskRunnerName());
+		return new DefaultTaskValidationService(appRegistry, dockerValidatorProperties, taskDefinitionRepository);
 	}
 
 	@Bean

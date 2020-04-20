@@ -52,16 +52,16 @@ public class TaskServiceUtilsTests {
 	@Test
 	public void testCreateComposedTaskDefinition() {
 		TaskConfigurationProperties props = new TaskConfigurationProperties();
-		props.setComposedTaskRunnerName("FOO");
-		assertThat(TaskServiceUtils.createComposedTaskDefinition(BASE_GRAPH, props)).isEqualTo("FOO --graph=\"AAA && BBB\"");
+		props.setComposedTaskRunnerUri("maven://org.springframework.cloud.task.app:composedtaskrunner-task:2.1.3.RELEASE");
+		assertThat(TaskServiceUtils.createComposedTaskDefinition(BASE_GRAPH)).isEqualTo("composed-task-runner --graph=\"AAA && BBB\"");
 	}
 
 	@Test
 	public void testCreateComposeTaskDefinitionNullNameCheck() {
 		this.expectedException.expect(IllegalArgumentException.class);
 		TaskConfigurationProperties props = new TaskConfigurationProperties();
-		TaskServiceUtils.createComposedTaskDefinition(BASE_GRAPH, props);
-		TaskServiceUtils.createComposedTaskDefinition(null, props);
+		TaskServiceUtils.createComposedTaskDefinition(BASE_GRAPH);
+		TaskServiceUtils.createComposedTaskDefinition(null);
 	}
 
 	@Test

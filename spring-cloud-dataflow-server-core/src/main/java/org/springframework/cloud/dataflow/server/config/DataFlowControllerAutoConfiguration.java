@@ -288,8 +288,7 @@ public class DataFlowControllerAutoConfiguration {
 				TaskConfigurationProperties taskConfigurationProperties) {
 			return new DefaultTaskValidationService(appRegistry,
 					dockerValidatorProperties,
-					taskDefinitionRepository,
-					taskConfigurationProperties.getComposedTaskRunnerName());
+					taskDefinitionRepository);
 		}
 
 		@Bean

@@ -72,7 +72,15 @@ public class DefaultValidationService implements ValidationService {
 		AppRegistration registration = appRegistry.find(name, appType);
 
 		if (registration != null) {
-			Resource resource = appRegistry.getAppResource(registration);
+			result = validateResource(appRegistry.getAppResource(registration));
+
+		}
+		return result;
+	}
+
+	private boolean validateResource(Resource resource) {
+		boolean result = false;
+		if(resource != null) {
 			try {
 				if ((resource instanceof DockerResource)) {
 					result = validateDockerResource(dockerValidatorProperties, (DockerResource) resource);
@@ -84,7 +92,7 @@ public class DefaultValidationService implements ValidationService {
 				}
 			}
 			catch (Exception ex) {
-				logger.info(String.format("The app %s was marked invalid because: ", name), ex);
+				logger.info("The app was marked invalid because: ", ex);
 			}
 		}
 		return result;

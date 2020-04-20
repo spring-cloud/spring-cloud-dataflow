@@ -149,18 +149,6 @@ public class TaskCommandTests extends AbstractShellIntegrationTest {
 		task().getTaskExecutionLogInvalidId();
 	}
 
-	@Test
-	public void testTaskLaunchCTRUsingInvalidAltCtrAppName() {
-		testInvalidCTRLaunch("1: timestamp && 2: timestamp", "timesdaftamp",
-				"The 'timesdaftamp' application could not be found.");
-	}
-
-	@Test
-	public void testTaskLaunchAltNameAgainstaNonCTRTaskDefinition() {
-		testInvalidCTRLaunch("timestamp", "composed-task-runner",
-				"Can not specify a Composed Task Runner Name when launching a non composed task definition");
-	}
-
 	private void testInvalidCTRLaunch(String taskDefinition, String ctrAppName, String expectedExceptionMessage) {
 		logger.info("Launching instance of task");
 		String taskName = generateUniqueStreamOrTaskName();

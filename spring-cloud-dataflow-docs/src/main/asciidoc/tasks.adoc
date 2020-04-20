@@ -454,20 +454,18 @@ Composed tasks are executed through a task application called the https://github
 
 ==== Registering the Composed Task Runner
 
-By default, the Composed Task Runner application is not registered with Spring Cloud Data Flow.
-Consequently, to launch composed tasks, we must first register the Composed
-Task Runner as an application with Spring Cloud Data Flow, as follows:
+By default, Spring Cloud Data Flow retrieves the Composed Task Runner application from
+Maven Central for Cloud Foundry and local deployments and DockerHub for Kubernetes.  It
+retrieves the Composed Task Runner upon the first use of composed tasks.
 
-`app register --name composed-task-runner --type task --uri maven://org.springframework.cloud.task.app:composedtaskrunner-task:{composed-task-version}`
-
-You can also configure Spring Cloud Data Flow to use a different task definition name for the composed task runner.
-This can be done by setting the `spring.cloud.dataflow.task.composedTaskRunnerName` property to the name of your choice.
-You can then register the composed task runner application with the name you set by using that property.
+If Maven Central or DockerHub cannot be reached for a given Spring Cloud Data Flow
+deployment a new URI can be specified to retrieve the Composed Task Runner using the
+`spring.cloud.dataflow.task.composed.task.runner.uri` property.
 
 ==== Configuring the Composed Task Runner
 
 The Composed Task Runner application has a `dataflow.server.uri` property that is used for validation and for launching child tasks.
-This defaults to `http://localhost:9393`. If you run a distributed Spring Cloud Data Flow server, as you would if you deploy the server on Cloud Foundry, YARN, or Kubernetes, you need to provide the URI that can be used to access the server.
+This defaults to `http://localhost:9393`. If you run a distributed Spring Cloud Data Flow server, as you would if you deploy the server on Cloud Foundry or Kubernetes, you need to provide the URI that can be used to access the server.
 You can either provide this `dataflow.server.uri` property for the Composed Task Runner application when launching a composed task or you can provide a `spring.cloud.dataflow.server.uri` property for the Spring Cloud Data Flow server when it is started.
 For the latter case, the `dataflow.server.uri` Composed Task Runner application property is automatically set when a composed task is launched.
 

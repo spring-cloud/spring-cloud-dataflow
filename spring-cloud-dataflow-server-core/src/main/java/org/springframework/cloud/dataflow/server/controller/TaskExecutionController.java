@@ -154,7 +154,6 @@ public class TaskExecutionController {
 	 * The name must be included in the path.
 	 *
 	 * @param taskName the name of the task to be executed (required)
-	 * @param ctrname user specified name of a ctr app if different than the default.
 	 * @param properties the runtime properties for the task, as a comma-delimited list of
 	 *     key=value pairs
 	 * @param arguments the runtime commandline arguments
@@ -163,13 +162,12 @@ public class TaskExecutionController {
 	@RequestMapping(value = "", method = RequestMethod.POST, params = "name")
 	@ResponseStatus(HttpStatus.CREATED)
 	public long launch(@RequestParam("name") String taskName,
-			@RequestParam(required = false) String ctrname,
 			@RequestParam(required = false) String properties,
 			@RequestParam(required = false) String arguments) {
 		Map<String, String> propertiesToUse = DeploymentPropertiesUtils.parse(properties);
 		List<String> argumentsToUse = DeploymentPropertiesUtils.parseArgumentList(arguments, " ");
 
-		return this.taskExecutionService.executeTask(taskName, propertiesToUse, argumentsToUse, ctrname);
+		return this.taskExecutionService.executeTask(taskName, propertiesToUse, argumentsToUse);
 	}
 
 	/**
