@@ -54,31 +54,22 @@ public class TaskServiceUtils {
 	/**
 	 * Creates a properly formatted CTR definition based on the graph provided.
 	 * @param graph the graph for the CTR to execute.
-	 * @param taskConfigurationProperties the properties that contain the name
-	 * of the CTR app to be launched.
 	 * @return String containing the CTR task definition.
 	 */
-	public static String createComposedTaskDefinition(String graph,
-			TaskConfigurationProperties taskConfigurationProperties) {
-			return createComposedTaskDefinition(null, graph, taskConfigurationProperties);
+	public static String createComposedTaskDefinition(String graph) {
+			return createComposedTaskDefinition(null, graph);
 	}
 
 	/**
 	 * Creates a properly formatted CTR definition based on the graph provided.
 	 * @param alternateComposedTaskRunnerName a ctr name to be used instead of the default.
 	 * @param graph the graph for the CTR to execute.
-	 * @param taskConfigurationProperties the properties that contain the name
 	 * of the CTR app to be launched.
 	 * @return String containing the CTR task definition.
 	 */
-	public static String createComposedTaskDefinition(String alternateComposedTaskRunnerName, String graph,
-			TaskConfigurationProperties taskConfigurationProperties) {
+	public static String createComposedTaskDefinition(String alternateComposedTaskRunnerName, String graph) {
 		Assert.hasText(graph, "graph must not be empty or null");
-		Assert.notNull(taskConfigurationProperties,
-				"taskConfigurationProperties must not be null");
-		Assert.hasText(taskConfigurationProperties.getComposedTaskRunnerName(),
-				"taskConfigurationProperties.composedTaskRunnerName must not be null");
-		String composedTaskRunnerName = taskConfigurationProperties.getComposedTaskRunnerName();
+		String composedTaskRunnerName = TaskConfigurationProperties.COMPOSED_TASK_RUNNER_NAME;
 		if(StringUtils.hasText(alternateComposedTaskRunnerName)) {
 			composedTaskRunnerName = alternateComposedTaskRunnerName;
 		}

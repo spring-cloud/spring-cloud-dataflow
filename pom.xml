@@ -113,6 +113,7 @@
 		<module>spring-cloud-dataflow-platform-cloudfoundry</module>
 		<module>spring-cloud-starter-dataflow-server</module>
 		<module>spring-cloud-dataflow-audit</module>
+		<module>spring-cloud-dataflow-composed-task-runner</module>
 	</modules>
 	<dependencyManagement>
 		<dependencies>

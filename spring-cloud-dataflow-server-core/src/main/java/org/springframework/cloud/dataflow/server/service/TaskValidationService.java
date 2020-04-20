@@ -28,4 +28,5 @@ public interface TaskValidationService extends ValidationService {
 	 * @return the validation status
 	 */
 	ValidationStatus validateTask(String name);
+
 }
