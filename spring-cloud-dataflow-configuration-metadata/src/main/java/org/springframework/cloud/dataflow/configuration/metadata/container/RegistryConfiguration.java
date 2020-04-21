@@ -47,11 +47,11 @@ import java.util.Map;
  *    - spring.cloud.dataflow.container.registry-configurations[tzolovazureregistry].secret=[your Azure registry access password]
  *
  *  Harbor Registry. Same as DockerHub but with different registryAuthUri
- *    - spring.cloud.dataflow.container.registry-configurations[goharbor].registry-host=demo.goharbor.io
- *    - spring.cloud.dataflow.container.registry-configurations[goharbor].authorization-type=dockeroauth2
- *    - spring.cloud.dataflow.container.registry-configurations[goharbor].user=admin
- *    - spring.cloud.dataflow.container.registry-configurations[goharbor].secret=Harbor12345
- *    - spring.cloud.dataflow.container.registry-configurations[goharbor].extra[registryAuthUri]=https://demo.goharbor.io/service/token?service=harbor-registry&scope=repository:{repository}:pull
+ *    - spring.cloud.dataflow.container.registry-configurations[harbor].registry-host=demo.goharbor.io
+ *    - spring.cloud.dataflow.container.registry-configurations[harbor].authorization-type=dockeroauth2
+ *    - spring.cloud.dataflow.container.registry-configurations[harbor].user=admin
+ *    - spring.cloud.dataflow.container.registry-configurations[harbor].secret=Harbor12345
+ *    - spring.cloud.dataflow.container.registry-configurations[harbor].extra[registryAuthUri]=https://demo.goharbor.io/service/token?service=harbor-registry&scope=repository:{repository}:pull
  * </code>
  *
  * @author Christian Tzolov
