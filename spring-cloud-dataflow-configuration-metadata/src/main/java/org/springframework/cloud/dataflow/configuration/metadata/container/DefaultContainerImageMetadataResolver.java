@@ -48,9 +48,8 @@ public class DefaultContainerImageMetadataResolver implements ContainerImageMeta
 			Collections.unmodifiableList(Arrays.asList(ContainerImageMetadataProperties.OCI_IMAGE_MANIFEST_MEDIA_TYPE,
 					ContainerImageMetadataProperties.DOCKER_IMAGE_MANIFEST_MEDIA_TYPE));
 
-	private final RestTemplate restTemplate;
-
-	private RestTemplate trustAnySslRestTemplate;
+	private final RestTemplate containerRestTemplate;
+	private RestTemplate noSslVerificationContainerRestTemplate;
 	private final ContainerImageParser containerImageParser;
 	private final Map<RegistryConfiguration.AuthorizationType, RegistryAuthorizer> registryAuthorizerMap;
 	private Map<String, RegistryConfiguration> registryConfigurationMap;
@@ -87,12 +86,12 @@ public class DefaultContainerImageMetadataResolver implements ContainerImageMeta
 		}
 	}
 
-	public DefaultContainerImageMetadataResolver(RestTemplate restTemplate, RestTemplate trustAnySslRestTemplate,
+	public DefaultContainerImageMetadataResolver(RestTemplate restTemplate, RestTemplate noSslVerificationContainerRestTemplate,
 			ContainerImageParser containerImageParser, Map<String, RegistryConfiguration> registryConfigurationMap,
 			List<RegistryAuthorizer> registryAuthorizes) {
 
-		this.restTemplate = restTemplate;
-		this.trustAnySslRestTemplate = trustAnySslRestTemplate;
+		this.containerRestTemplate = restTemplate;
+		this.noSslVerificationContainerRestTemplate = noSslVerificationContainerRestTemplate;
 		this.containerImageParser = containerImageParser;
 		this.registryConfigurationMap = registryConfigurationMap;
 		this.registryAuthorizerMap = new HashMap<>();
@@ -174,7 +173,7 @@ public class DefaultContainerImageMetadataResolver implements ContainerImageMeta
 		}
 
 		RestTemplate requestRestTemplate = registryConf.isDisableSslVerification() ?
-				this.trustAnySslRestTemplate : this.restTemplate;
+				this.noSslVerificationContainerRestTemplate : this.containerRestTemplate;
 
 		return new RegistryRequest(containerImage, registryConf, authHttpHeaders, requestRestTemplate);
 	}
