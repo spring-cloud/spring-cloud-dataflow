@@ -43,9 +43,11 @@ public class DockerOAuth2RegistryAuthorizer implements RegistryAuthorizer {
 	public static final String DOCKER_REGISTRY_AUTH_URI_KEY = "registryAuthUri";
 
 	private final RestTemplate restTemplate;
+	private final RestTemplate noSslVerificationContainerRestTemplate;
 
-	public DockerOAuth2RegistryAuthorizer(RestTemplate restTemplate) {
+	public DockerOAuth2RegistryAuthorizer(RestTemplate restTemplate, RestTemplate noSslVerificationContainerRestTemplate) {
 		this.restTemplate = restTemplate;
+		this.noSslVerificationContainerRestTemplate = noSslVerificationContainerRestTemplate;
 	}
 
 	@Override
@@ -76,13 +78,18 @@ public class DockerOAuth2RegistryAuthorizer implements RegistryAuthorizer {
 		UriComponents uriComponents = UriComponentsBuilder.newInstance()
 				.fromHttpUrl(registryAuthUri).build().expand(imageRepository);
 
-		final HttpEntity<String> entity = new HttpEntity<>(requestHttpHeaders);
-		ResponseEntity<Map> authorization = this.restTemplate.exchange(uriComponents.toUri(),
-				HttpMethod.GET, entity, Map.class);
+		ResponseEntity<Map> authorization = this.getRestTemplate(registryConfiguration)
+				.exchange(uriComponents.toUri(), HttpMethod.GET, new HttpEntity<>(requestHttpHeaders), Map.class);
+
 		Map<String, String> authorizationBody = (Map<String, String>) authorization.getBody();
 
 		final HttpHeaders responseHttpHeaders = new HttpHeaders();
 		responseHttpHeaders.setBearerAuth(authorizationBody.get(TOKEN_KEY));
 		return responseHttpHeaders;
+	}
+
+	private RestTemplate getRestTemplate(RegistryConfiguration registryConfiguration) {
+		return registryConfiguration.isDisableSslVerification() ?
+				this.noSslVerificationContainerRestTemplate : this.restTemplate;
 	}
 }

@@ -72,8 +72,9 @@ public class ApplicationConfigurationMetadataResolverAutoConfiguration {
 
 	@Bean
 	public RegistryAuthorizer dockerOAuth2RegistryAuthorizer(
+			@Qualifier("containerRestTemplate") RestTemplate containerRestTemplate,
 			@Qualifier("noSslVerificationContainerRestTemplate") RestTemplate noSslVerificationContainerRestTemplate) {
-		return new DockerOAuth2RegistryAuthorizer(noSslVerificationContainerRestTemplate);
+		return new DockerOAuth2RegistryAuthorizer(containerRestTemplate, noSslVerificationContainerRestTemplate);
 	}
 
 	@Bean

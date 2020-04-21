@@ -19,10 +19,8 @@ package org.springframework.cloud.dataflow.configuration.metadata;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Collections;
-import java.util.List;
 import java.util.Map;
 
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
@@ -30,10 +28,9 @@ import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.ImportAutoConfiguration;
-import org.springframework.boot.configurationmetadata.ConfigurationMetadataProperty;
+import org.springframework.cloud.dataflow.configuration.metadata.container.ContainerImageMetadataResolver;
 import org.springframework.cloud.dataflow.configuration.metadata.container.RegistryConfiguration;
 import org.springframework.cloud.dataflow.configuration.metadata.container.authorization.DockerOAuth2RegistryAuthorizer;
-import org.springframework.cloud.deployer.resource.docker.DockerResource;
 import org.springframework.context.annotation.Bean;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -48,6 +45,7 @@ import org.springframework.web.client.RestTemplate;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 /**
@@ -71,10 +69,18 @@ public class ApplicationConfigurationMetadataResolverAutoConfigurationTest {
 	Map<String, RegistryConfiguration> registryConfigurationMap;
 
 	@Autowired
-	BootApplicationConfigurationMetadataResolver bootApplicationConfigurationMetadataResolver;
+	ContainerImageMetadataResolver containerImageMetadataResolver;
+
+	@Autowired
+	@Qualifier("noSslVerificationContainerRestTemplate")
+	RestTemplate noSslVerificationContainerRestTemplate;
+
+	@Autowired
+	@Qualifier("containerRestTemplate")
+	RestTemplate containerRestTemplate;
 
 	@Test
-	public void registryConfiguration() {
+	public void registryConfigurationBeanCreationTest() {
 		assertThat(registryConfigurationMap).hasSize(2);
 
 		RegistryConfiguration secretConf = registryConfigurationMap.get("demo.repository.io");
@@ -103,22 +109,57 @@ public class ApplicationConfigurationMetadataResolverAutoConfigurationTest {
 	}
 
 	@Test
-	@Ignore
-	public void inProgress() {
-		assertThat(bootApplicationConfigurationMetadataResolver).isNotNull();
-		DockerResource dockerResource = new DockerResource("demo.goharbor.io/test/image:1.0.0");
-		List<ConfigurationMetadataProperty> properties = bootApplicationConfigurationMetadataResolver.listProperties(dockerResource, false);
-		System.out.println(properties);
+	public void containerImageMetadataResolverWithActiveSSL() throws URISyntaxException {
+		assertThat(containerImageMetadataResolver).isNotNull();
+		Map<String, String> labels = containerImageMetadataResolver.getImageLabels("demo.goharbor.io/test/image:1.0.0");
+		assertThat(labels).containsExactly(Collections.singletonMap("foo", "bar").entrySet().iterator().next());
+
+		// Determine the OAuth2 token service entry point.
+		verify(noSslVerificationContainerRestTemplate)
+				.exchange(eq(new URI("https://demo.goharbor.io/v2/_catalog")), eq(HttpMethod.GET), any(), eq(Map.class));
+
+		// Get authorization token
+		verify(containerRestTemplate).exchange(
+				eq(new URI("https://demo.goharbor.io/service/token?service=demo-registry2&scope=repository:test/image:pull")),
+				eq(HttpMethod.GET), any(), eq(Map.class));
+		// Get Manifest
+		verify(containerRestTemplate).exchange(eq(new URI("https://demo.goharbor.io/v2/test/image/manifests/1.0.0")),
+				eq(HttpMethod.GET), any(), eq(Map.class));
+		// Get Blobs
+		verify(containerRestTemplate).exchange(eq(new URI("https://demo.goharbor.io/v2/test/image/blobs/test_digest")),
+				eq(HttpMethod.GET), any(), eq(String.class));
+	}
+
+	@Test
+	public void containerImageMetadataResolverWithDisabledSSL() throws URISyntaxException {
+		assertThat(containerImageMetadataResolver).isNotNull();
+		Map<String, String> labels = containerImageMetadataResolver.getImageLabels("demo.repository.io/disabledssl/image:1.0.0");
+		assertThat(labels).containsExactly(Collections.singletonMap("foo", "bar").entrySet().iterator().next());
+
+		// Determine the OAuth2 token service entry point.
+		verify(noSslVerificationContainerRestTemplate)
+				.exchange(eq(new URI("https://demo.repository.io/v2/_catalog")), eq(HttpMethod.GET), any(), eq(Map.class));
+
+		// Get authorization token
+		verify(noSslVerificationContainerRestTemplate).exchange(
+				eq(new URI("https://demo.repository.io/service/token?service=demo-registry&scope=repository:disabledssl/image:pull")),
+				eq(HttpMethod.GET), any(), eq(Map.class));
+		// Get Manifest
+		verify(noSslVerificationContainerRestTemplate).exchange(eq(new URI("https://demo.repository.io/v2/disabledssl/image/manifests/1.0.0")),
+				eq(HttpMethod.GET), any(), eq(Map.class));
+		// Get Blobs
+		verify(noSslVerificationContainerRestTemplate).exchange(eq(new URI("https://demo.repository.io/v2/disabledssl/image/blobs/test_digest")),
+				eq(HttpMethod.GET), any(), eq(String.class));
 	}
 
 	@ImportAutoConfiguration(ApplicationConfigurationMetadataResolverAutoConfiguration.class)
 	static class TestConfig {
 
-		@Bean
-		@Qualifier("noSslVerificationContainerRestTemplate")
+		@Bean(name = "noSslVerificationContainerRestTemplate")
 		RestTemplate noSslVerificationContainerRestTemplate() throws URISyntaxException {
 			RestTemplate restTemplate = Mockito.mock(RestTemplate.class);
 
+			// demo.repository.io
 			HttpHeaders authenticateHeader = new HttpHeaders();
 			authenticateHeader.add("Www-Authenticate", "Bearer realm=\"https://demo.repository.io/service/token\",service=\"demo-registry\",scope=\"registry:category:pull\"");
 			HttpClientErrorException httpClientErrorException =
@@ -128,6 +169,25 @@ public class ApplicationConfigurationMetadataResolverAutoConfigurationTest {
 					eq(HttpMethod.GET), any(), eq(Map.class))).thenThrow(httpClientErrorException);
 
 
+			when(restTemplate
+					.exchange(
+							eq(new URI("https://demo.repository.io/service/token?service=demo-registry&scope=repository:disabledssl/image:pull")),
+							eq(HttpMethod.GET), any(), eq(Map.class)))
+					.thenReturn(new ResponseEntity<>(Collections.singletonMap("token", "my_token_999"), HttpStatus.OK));
+
+			when(restTemplate
+					.exchange(
+							eq(new URI("https://demo.repository.io/v2/disabledssl/image/manifests/1.0.0")),
+							eq(HttpMethod.GET), any(), eq(Map.class)))
+					.thenReturn(new ResponseEntity<>(Collections.singletonMap("config", Collections.singletonMap("digest", "test_digest")), HttpStatus.OK));
+
+			when(restTemplate
+					.exchange(
+							eq(new URI("https://demo.repository.io/v2/disabledssl/image/blobs/test_digest")),
+							eq(HttpMethod.GET), any(), eq(String.class)))
+					.thenReturn(new ResponseEntity<>("{\"config\": {\"Labels\": {\"foo\": \"bar\"} } }", HttpStatus.OK));
+
+			// demo.goharbor.io
 			HttpHeaders authenticateHeader2 = new HttpHeaders();
 			authenticateHeader2.add("Www-Authenticate", "Bearer realm=\"https://demo.goharbor.io/service/token\",service=\"demo-registry2\",scope=\"registry:category:pull\"");
 			HttpClientErrorException httpClientErrorException2 =
@@ -136,19 +196,18 @@ public class ApplicationConfigurationMetadataResolverAutoConfigurationTest {
 			when(restTemplate.exchange(eq(new URI("https://demo.goharbor.io/v2/_catalog")),
 					eq(HttpMethod.GET), any(), eq(Map.class))).thenThrow(httpClientErrorException2);
 
+			return restTemplate;
+		}
+
+		@Bean(name = "containerRestTemplate")
+		RestTemplate containerRestTemplate() throws URISyntaxException {
+			RestTemplate restTemplate = Mockito.mock(RestTemplate.class);
+
 			when(restTemplate
 					.exchange(
 							eq(new URI("https://demo.goharbor.io/service/token?service=demo-registry2&scope=repository:test/image:pull")),
 							eq(HttpMethod.GET), any(), eq(Map.class)))
 					.thenReturn(new ResponseEntity<>(Collections.singletonMap("token", "my_token_999"), HttpStatus.OK));
-
-			return restTemplate;
-		}
-
-		@Bean
-		@Qualifier("containerRestTemplate")
-		RestTemplate containerRestTemplate() throws URISyntaxException {
-			RestTemplate restTemplate = Mockito.mock(RestTemplate.class);
 
 			when(restTemplate
 					.exchange(
@@ -160,7 +219,7 @@ public class ApplicationConfigurationMetadataResolverAutoConfigurationTest {
 					.exchange(
 							eq(new URI("https://demo.goharbor.io/v2/test/image/blobs/test_digest")),
 							eq(HttpMethod.GET), any(), eq(String.class)))
-					.thenReturn(new ResponseEntity<>("{\"config\": {\"Labels\": {\"org.springframework.cloud.dataflow.spring-configuration-metadata.json\": \"bar\"} } }", HttpStatus.OK));
+					.thenReturn(new ResponseEntity<>("{\"config\": {\"Labels\": {\"foo\": \"bar\"} } }", HttpStatus.OK));
 
 			return restTemplate;
 		}
