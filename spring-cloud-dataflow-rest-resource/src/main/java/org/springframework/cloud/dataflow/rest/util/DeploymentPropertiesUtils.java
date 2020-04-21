@@ -148,24 +148,26 @@ public final class DeploymentPropertiesUtils {
 	 */
 	public static List<String> parseArgumentList(String s, String delimiter) {
 		ArrayList<String> pairs = new ArrayList<>();
-
-		// get raw candidates as simple comma split
-		String[] candidates = StringUtils.delimitedListToStringArray(s, delimiter);
-		for (int i = 0; i < candidates.length; i++) {
-			if (i > 0 && !candidates[i].contains("=")) {
-				// we don't have '=' so this has to be latter parts of
-				// a comma delimited value, append it to previously added
-				// key/value pair.
-				// we skip first as we would not have anything to append to. this
-				// would happen if dep prop string is malformed and first given
-				// key/value pair is not actually a key/value.
-				pairs.set(pairs.size() - 1, pairs.get(pairs.size() - 1) + delimiter + candidates[i]);
-			}
-			else {
-				// we have a key/value pair having '=', or malformed first pair
-				pairs.add(candidates[i]);
+		if(s != null && s.contains("=")) {
+			// get raw candidates as simple comma split
+			String[] candidates = StringUtils.delimitedListToStringArray(s, delimiter);
+			for (int i = 0; i < candidates.length; i++) {
+				if (i > 0 && !candidates[i].contains("=")) {
+					// we don't have '=' so this has to be latter parts of
+					// a comma delimited value, append it to previously added
+					// key/value pair.
+					// we skip first as we would not have anything to append to. this
+					// would happen if dep prop string is malformed and first given
+					// key/value pair is not actually a key/value.
+					pairs.set(pairs.size() - 1, pairs.get(pairs.size() - 1) + delimiter + candidates[i]);
+				}
+				else {
+					// we have a key/value pair having '=', or malformed first pair
+					pairs.add(candidates[i]);
+				}
 			}
 		}
+
 
 		return pairs;
 	}

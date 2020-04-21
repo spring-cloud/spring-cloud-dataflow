@@ -68,7 +68,7 @@ public class TaskScheduleCommandTemplate {
 				name, definition, expression, properties, args);
 		CommandResult cr = dataFlowShell.executeCommand(wholeCommand);
 		verify(schedule).schedule(name, definition, Collections.singletonMap("scheduler.cron.expression", "* * * * *"),
-				Collections.singletonList("[]"));
+				Collections.emptyList());
 		assertEquals("Created schedule 'schedName'", cr.getResult());
 	}
 
