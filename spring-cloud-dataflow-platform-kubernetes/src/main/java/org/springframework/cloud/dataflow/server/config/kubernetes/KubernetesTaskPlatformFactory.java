@@ -26,10 +26,10 @@ import org.springframework.cloud.deployer.spi.kubernetes.ContainerFactory;
 import org.springframework.cloud.deployer.spi.kubernetes.DefaultContainerFactory;
 import org.springframework.cloud.deployer.spi.kubernetes.KubernetesClientFactory;
 import org.springframework.cloud.deployer.spi.kubernetes.KubernetesDeployerProperties;
+import org.springframework.cloud.deployer.spi.kubernetes.KubernetesScheduler;
+import org.springframework.cloud.deployer.spi.kubernetes.KubernetesSchedulerProperties;
 import org.springframework.cloud.deployer.spi.kubernetes.KubernetesTaskLauncher;
 import org.springframework.cloud.deployer.spi.scheduler.Scheduler;
-import org.springframework.cloud.deployer.spi.scheduler.kubernetes.KubernetesScheduler;
-import org.springframework.cloud.deployer.spi.scheduler.kubernetes.KubernetesSchedulerProperties;
 
 /**
  * @author David Turanski

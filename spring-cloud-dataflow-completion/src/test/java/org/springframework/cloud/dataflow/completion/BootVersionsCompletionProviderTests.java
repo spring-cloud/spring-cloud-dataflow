@@ -24,6 +24,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.cloud.dataflow.audit.service.DefaultAuditRecordService;
@@ -41,6 +42,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.io.FileSystemResourceLoader;
 import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.web.client.RestTemplate;
 
 import static org.hamcrest.CoreMatchers.hasItems;
 import static org.hamcrest.CoreMatchers.is;
@@ -109,6 +111,17 @@ public class BootVersionsCompletionProviderTests {
 				BootVersionsCompletionProviderTests.Mocks.class.getPackage().getName().replace('.', '/')
 						+ "/boot_versions");
 
+		@MockBean
+		private DefaultContainerImageMetadataResolver containerImageMetadataResolver;
+
+		@MockBean
+		@Qualifier("containerRestTemplate")
+		private RestTemplate containerRestTemplate;
+
+		@MockBean
+		@Qualifier("noSslVerificationContainerRestTemplate")
+		private RestTemplate noSslVerificationContainerRestTemplate;
+
 		@Bean
 		public AppRegistryService appRegistry() {
 
@@ -152,9 +165,6 @@ public class BootVersionsCompletionProviderTests {
 				}
 			};
 		}
-
-		@MockBean
-		private DefaultContainerImageMetadataResolver containerImageMetadataResolver;
 
 		@Bean
 		public ApplicationConfigurationMetadataResolver metadataResolver() {

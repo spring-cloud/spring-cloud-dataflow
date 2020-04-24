@@ -19,10 +19,11 @@ package org.springframework.cloud.dataflow.server.config.kubernetes;
 
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.cloud.dataflow.server.config.features.SchedulerConfiguration;
-import org.springframework.cloud.deployer.spi.scheduler.kubernetes.KubernetesSchedulerProperties;
+import org.springframework.cloud.deployer.spi.kubernetes.KubernetesSchedulerProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Conditional;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Primary;
 import org.springframework.context.annotation.Profile;
 
 /**
@@ -38,6 +39,7 @@ public class KubernetesSchedulerAutoConfiguration {
 
 	@Bean
 	@ConditionalOnMissingBean
+	@Primary
 	public KubernetesSchedulerProperties kubernetesSchedulerProperties() {
 		return new KubernetesSchedulerProperties();
 	}
