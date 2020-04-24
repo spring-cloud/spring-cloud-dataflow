@@ -39,11 +39,6 @@ data:
                   default:
                     limits:
                       memory: 1024Mi
-          container:
-            registry-configurations:
-              default:
-                registry-host: registry-1.docker.io
-                authorization-type: dockeroauth2
       datasource:
         url: jdbc:mysql://${MYSQL_SERVICE_HOST}:${MYSQL_SERVICE_PORT}/mysql
         username: root
