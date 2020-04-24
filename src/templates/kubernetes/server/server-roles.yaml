@@ -7,7 +7,7 @@ rules:
     resources: ["services", "pods", "replicationcontrollers", "persistentvolumeclaims"]
     verbs: ["get", "list", "watch", "create", "delete", "update"]
   - apiGroups: [""]
-    resources: ["configmaps", "secrets", "pods/log"]
+    resources: ["pods/log"]
     verbs: ["get", "list", "watch"]
   - apiGroups: ["apps"]
     resources: ["statefulsets", "deployments", "replicasets"]

@@ -19,6 +19,9 @@ spec:
         image: springcloud/spring-cloud-dataflow-server:@project.version@
         imagePullPolicy: Always
         volumeMounts:
+          - name: config
+            mountPath: /config
+            readOnly: true
           - name: database
             mountPath: /etc/secrets/database
             readOnly: true
@@ -54,12 +57,12 @@ spec:
           value: 'true'
         - name: SPRING_CLOUD_DATAFLOW_FEATURES_SCHEDULES_ENABLED
           value: 'true'
+        - name: SPRING_CLOUD_KUBERNETES_CONFIG_ENABLE_API
+          value: 'false'
         - name: SPRING_CLOUD_KUBERNETES_SECRETS_ENABLE_API
-          value: 'true'
+          value: 'false'
         - name: SPRING_CLOUD_KUBERNETES_SECRETS_PATHS
           value: /etc/secrets
-        - name: SPRING_CLOUD_KUBERNETES_CONFIG_NAME
-          value: scdf-server
         - name: SPRING_CLOUD_DATAFLOW_SERVER_URI
           value: 'http://${SCDF_SERVER_SERVICE_HOST}:${SCDF_SERVER_SERVICE_PORT}'
           # Provide the Skipper service location
@@ -74,6 +77,12 @@ spec:
         command: ['sh', '-c', 'until nc -w3 -z mysql 3306; do echo waiting for mysql; sleep 3; done;']
       serviceAccountName: scdf-sa
       volumes:
+        - name: config
+          configMap:
+            name: scdf-server
+            items:
+            - key: application.yaml
+              path: application.yaml
         - name: database
           secret:
             secretName: mysql
