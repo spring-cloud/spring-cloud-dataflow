@@ -24,6 +24,16 @@ spec:
             readOnly: true
         ports:
         - containerPort: 80
+        livenessProbe:
+          httpGet:
+            path: /management/health
+            port: 80
+          initialDelaySeconds: 45
+        readinessProbe:
+          httpGet:
+            path: /management/info
+            port: 80
+          initialDelaySeconds: 45
         resources:
           limits:
             cpu: 1.0
