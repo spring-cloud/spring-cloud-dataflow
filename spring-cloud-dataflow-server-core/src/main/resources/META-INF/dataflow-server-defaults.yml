@@ -201,3 +201,5 @@ spring:
           default:
             registry-host: registry-1.docker.io
             authorization-type: dockeroauth2
+            extra:
+              "registryAuthUri": 'https://auth.docker.io/token?service=registry.docker.io&scope=repository:{repository}:pull&offline_token=1&client_id=shell'
