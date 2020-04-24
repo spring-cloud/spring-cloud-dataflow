@@ -320,21 +320,7 @@ You can configure the Data Flow server that is on Kubernetes to deploy tasks to 
 [[configuration-kubernetes-general]]
 === General Configuration
 
-The Spring Cloud Data Flow server for Kubernetes uses the https://github.com/fabric8io/spring-cloud-kubernetes[`spring-cloud-kubernetes`] module process both the ConfigMap and the secrets settings. To enable the ConfigMap support, pass in an environment variable of `SPRING_CLOUD_KUBERNETES_CONFIG_NAME` and set it to the name of the ConfigMap. The same is true for the secrets, where the environment variable is `SPRING_CLOUD_KUBERNETES_SECRETS_NAME`. To use the secrets, you also need to set `SPRING_CLOUD_KUBERNETES_SECRETS_ENABLE_API` to `true`.
-
-The following example shows a snippet from a deployment script that sets these environment variables:
-
-
-[source,yaml]
-----
-env:
-- name: SPRING_CLOUD_KUBERNETES_SECRETS_ENABLE_API
-  value: 'true'
-- name: SPRING_CLOUD_KUBERNETES_SECRETS_NAME
-  value: mysql
-- name: SPRING_CLOUD_KUBERNETES_CONFIG_NAME
-  value: scdf-server
-----
+The Spring Cloud Data Flow server for Kubernetes uses the https://github.com/fabric8io/spring-cloud-kubernetes[`spring-cloud-kubernetes`] module to process secrets that are mounted under `/etc/secrets`. ConfigMaps must be mounted as `application.yaml` in the `/config` directory that is processed by Spring Boot. To avoid access to the Kubernetes API server the `SPRING_CLOUD_KUBERNETES_CONFIG_ENABLE_API` and `SPRING_CLOUD_KUBERNETES_SECRETS_ENABLE_API` are set to `false`.
 
 
 ==== Using ConfigMap and Secrets
@@ -372,7 +358,6 @@ data:
         testOnBorrow: true
         validationQuery: "SELECT 1"
 ----
-
 
 The preceding example assumes that MySQL is deployed with `mysql` as the service name. Kubernetes publishes the host and port values of these services as environment variables that we can use when configuring the apps we deploy.
 
@@ -449,6 +434,36 @@ data:
         username: sa
         driverClassName: org.hsqldb.jdbc.JDBCDriver
 ----
+
+The following YAML snippet from a Deployment is an example of mounting a ConfigMap as `application.yaml` under `/config` where Spring Boot will process it plus a Secret mounted under `/etc/secrets` where it will get picked up by the spring-cloud-kubernetes library due to the environment variable `SPRING_CLOUD_KUBERNETES_SECRETS_PATHS` being set to `/etc/secrets`.
+
+[source,yaml]
+----
+...
+      containers:
+      - name: scdf-server
+        image: springcloud/spring-cloud-dataflow-server:2.5.0.BUILD-SNAPSHOT
+        imagePullPolicy: Always
+        volumeMounts:
+          - name: config
+            mountPath: /config
+            readOnly: true
+          - name: database
+            mountPath: /etc/secrets/database
+            readOnly: true
+        ports:
+...
+      volumes:
+        - name: config
+          configMap:
+            name: scdf-server
+            items:
+            - key: application.yaml
+              path: application.yaml
+        - name: database
+          secret:
+            secretName: mysql
+---- 
 
 
 You can find migration scripts for specific database types in the https://github.com/spring-cloud/spring-cloud-task/tree/master/spring-cloud-task-core/src/main/resources/org/springframework/cloud/task/migration[spring-cloud-task] repo.
