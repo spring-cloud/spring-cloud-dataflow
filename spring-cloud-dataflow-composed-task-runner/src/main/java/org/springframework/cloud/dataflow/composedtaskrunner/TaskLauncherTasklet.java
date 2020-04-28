@@ -132,6 +132,15 @@ public class TaskLauncherTasklet implements Tasklet {
 			if (stepExecutionContext.containsKey("task-arguments")) {
 				args = (List<String>) stepExecutionContext.get("task-arguments");
 			}
+			List<String> cleansedArgs = new ArrayList<>();
+			if(args != null) {
+				for(String argument : args) {
+					if(!argument.startsWith("--spring.cloud.task.parent-execution-id=")) {
+						cleansedArgs.add(argument);
+					}
+				}
+				args = cleansedArgs;
+			}
 			if(this.taskProperties.getExecutionid() != null) {
 				args.add("--spring.cloud.task.parent-execution-id=" + this.taskProperties.getExecutionid());
 			}

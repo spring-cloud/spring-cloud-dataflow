@@ -16,6 +16,7 @@
 
 package org.springframework.cloud.dataflow.composedtaskrunner;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -137,6 +138,51 @@ public class TaskLauncherTaskletTests {
 	@Test
 	@DirtiesContext
 	public void testTaskLauncherTaskletWithTaskExecutionId() throws Exception{
+		TaskLauncherTasklet taskLauncherTasklet = prepTaskLauncherTests();
+
+		TaskProperties taskProperties = new TaskProperties();
+		taskProperties.setExecutionid(88L);
+		mockReturnValForTaskExecution(2L);
+		ChunkContext chunkContext = chunkContext();
+		createCompleteTaskExecution(0);
+		taskLauncherTasklet = getTaskExecutionTasklet(taskProperties);
+		taskLauncherTasklet.setArguments(null);
+		execute(taskLauncherTasklet, null, chunkContext);
+		assertEquals(2L, chunkContext.getStepContext()
+				.getStepExecution().getExecutionContext()
+				.get("task-execution-id"));
+		assertEquals("--spring.cloud.task.parent-execution-id=88", ((List)chunkContext.getStepContext()
+				.getStepExecution().getExecutionContext()
+				.get("task-arguments")).get(0));
+	}
+
+	@Test
+	@DirtiesContext
+	public void testTaskLauncherTaskletWithTaskExecutionIdWithPreviousParentID() throws Exception{
+
+		TaskLauncherTasklet taskLauncherTasklet = prepTaskLauncherTests();
+		TaskProperties taskProperties = new TaskProperties();
+		taskProperties.setExecutionid(88L);
+		mockReturnValForTaskExecution(2L);
+		ChunkContext chunkContext = chunkContext();
+		createCompleteTaskExecution(0);
+		chunkContext.getStepContext()
+				.getStepExecution().getExecutionContext().put("task-arguments", new ArrayList<String>());
+		((List)chunkContext.getStepContext()
+				.getStepExecution().getExecutionContext()
+				.get("task-arguments")).add("--spring.cloud.task.parent-execution-id=84");
+		taskLauncherTasklet = getTaskExecutionTasklet(taskProperties);
+		taskLauncherTasklet.setArguments(null);
+		execute(taskLauncherTasklet, null, chunkContext);
+		assertEquals(2L, chunkContext.getStepContext()
+				.getStepExecution().getExecutionContext()
+				.get("task-execution-id"));
+		assertEquals("--spring.cloud.task.parent-execution-id=88", ((List)chunkContext.getStepContext()
+				.getStepExecution().getExecutionContext()
+				.get("task-arguments")).get(0));
+	}
+
+	private TaskLauncherTasklet prepTaskLauncherTests() throws Exception{
 		createCompleteTaskExecution(0);
 		TaskLauncherTasklet taskLauncherTasklet =
 				getTaskExecutionTasklet();
@@ -149,21 +195,7 @@ public class TaskLauncherTaskletTests {
 		assertNull(chunkContext.getStepContext()
 				.getStepExecution().getExecutionContext()
 				.get("task-arguments"));
-
-		TaskProperties taskProperties = new TaskProperties();
-		taskProperties.setExecutionid(88L);
-		mockReturnValForTaskExecution(2L);
-		chunkContext = chunkContext();
-		createCompleteTaskExecution(0);
-		taskLauncherTasklet = getTaskExecutionTasklet(taskProperties);
-		taskLauncherTasklet.setArguments(null);
-		execute(taskLauncherTasklet, null, chunkContext);
-		assertEquals(2L, chunkContext.getStepContext()
-				.getStepExecution().getExecutionContext()
-				.get("task-execution-id"));
-		assertEquals("--spring.cloud.task.parent-execution-id=88", ((List)chunkContext.getStepContext()
-				.getStepExecution().getExecutionContext()
-				.get("task-arguments")).get(0));
+		return taskLauncherTasklet;
 	}
 
 	@Test
