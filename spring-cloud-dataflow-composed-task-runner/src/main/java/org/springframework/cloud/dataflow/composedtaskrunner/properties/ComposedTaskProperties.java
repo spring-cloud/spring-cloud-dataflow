@@ -166,6 +166,11 @@ public class ComposedTaskProperties {
 	 */
 	private boolean incrementInstanceEnabled = false;
 
+	/**
+	 * The platform property that will be used for each task in the workflow when it is launched.
+	 */
+	private String platformName;
+
 	public ComposedTaskProperties() {
 		try {
 			this.dataflowServerUri = new URI("http://localhost:9393");
@@ -335,4 +340,11 @@ public class ComposedTaskProperties {
 		this.oauth2ClientCredentialsScopes = oauth2ClientCredentialsScopes;
 	}
 
+	public String getPlatformName() {
+		return platformName;
+	}
+
+	public void setPlatformName(String platformName) {
+		this.platformName = platformName;
+	}
 }

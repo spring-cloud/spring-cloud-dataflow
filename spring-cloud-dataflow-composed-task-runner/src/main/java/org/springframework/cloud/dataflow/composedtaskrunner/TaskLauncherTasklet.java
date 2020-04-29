@@ -37,6 +37,7 @@ import org.springframework.cloud.task.configuration.TaskProperties;
 import org.springframework.cloud.task.repository.TaskExecution;
 import org.springframework.cloud.task.repository.TaskExplorer;
 import org.springframework.util.Assert;
+import org.springframework.util.StringUtils;
 
 /**
  * Executes task launch request using Spring Cloud Data Flow's Restful API
@@ -134,6 +135,9 @@ public class TaskLauncherTasklet implements Tasklet {
 			}
 			if(this.taskProperties.getExecutionid() != null) {
 				args.add("--spring.cloud.task.parent-execution-id=" + this.taskProperties.getExecutionid());
+			}
+			if(StringUtils.hasText(this.composedTaskProperties.getPlatformName())) {
+				properties.put("spring.cloud.dataflow.task.platformName", this.composedTaskProperties.getPlatformName());
 			}
 			this.executionId = this.taskOperations.launch(tmpTaskName,
 					this.properties, args, null);
