@@ -18,8 +18,11 @@ package org.springframework.cloud.dataflow.composedtaskrunner;
 
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
+
+import org.codehaus.plexus.util.cli.CommandLineUtils;
 
 import org.springframework.beans.factory.support.BeanDefinitionBuilder;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
@@ -33,6 +36,7 @@ import org.springframework.context.EnvironmentAware;
 import org.springframework.context.annotation.ImportBeanDefinitionRegistrar;
 import org.springframework.core.env.Environment;
 import org.springframework.core.type.AnnotationMetadata;
+import org.springframework.util.StringUtils;
 
 /**
  * Creates the Steps necessary to execute the directed graph of a Composed
@@ -47,10 +51,16 @@ public class StepBeanDefinitionRegistrar implements ImportBeanDefinitionRegistra
 
 	private Environment env;
 
+	private boolean firstAdd;
+
 	@Override
 	public void registerBeanDefinitions(AnnotationMetadata importingClassMetadata,
 			BeanDefinitionRegistry registry) {
 		ComposedTaskProperties properties = composedTaskProperties();
+		String ctrName = this.env.getProperty("spring.cloud.task.name");
+		if(ctrName == null) {
+			throw  new IllegalStateException("spring.cloud.task.name property must have a value.");
+		}
 		TaskParser taskParser = new TaskParser("bean-registration",
 				properties.getGraph(), false, true);
 		Map<String, Integer> taskSuffixMap = getTaskApps(taskParser);
@@ -65,12 +75,79 @@ public class StepBeanDefinitionRegistrar implements ImportBeanDefinitionRegistra
 						taskName, taskSuffix));
 				builder.addPropertyValue("taskSpecificProps",
 						getPropertiesForTask(taskName, properties));
-				builder.addPropertyValue("arguments", properties.getComposedTaskArguments());
-
+				String args = getCommandLineArgsForTask(properties.getComposedTaskArguments(), taskName, taskSuffixMap, ctrName);
+				builder.addPropertyValue("arguments", args);
 				registry.registerBeanDefinition(String.format("%s_%s",
 						taskName, taskSuffix), builder.getBeanDefinition());
 			}
 		}
+	}
+	private String getCommandLineArgsForTask(String arguments, String taskName, Map<String, Integer> taskSuffixMap, String ctrName ) {
+		String result = "";
+		if(!StringUtils.hasText(arguments)) {
+			return arguments;
+		}
+		if(arguments.startsWith("\"") && arguments.endsWith("\"")) {
+			arguments = arguments.substring(1, arguments.length() - 1);
+		}
+		arguments = arguments.replace('\n', ' ').replace('\t', ' ');
+		this.firstAdd = true;
+		try {
+			String[] args = CommandLineUtils.translateCommandline(arguments);
+			String taskNamePrefix = taskName + ".";
+			String taskNameNonIdentify = "--" + taskNamePrefix;
+			for(String commandLineArg : Arrays.asList(args)) {
+				String userPrefix = getPrefix(commandLineArg);
+				String commandLineArgPrefix = ctrName + "-" + userPrefix;
+				String commandLineArgToken = commandLineArgPrefix + ".";
+				if(commandLineArgToken.equals(taskNameNonIdentify) || commandLineArgToken.equals(taskNamePrefix)) {
+					result = addBlankToCommandLineArgs(result);
+					if(commandLineArg.startsWith(userPrefix)) {
+						result = result.concat(commandLineArg.substring(userPrefix.length() + 1));
+					}
+					else {
+						result = result + "--" + commandLineArg.substring(userPrefix.length() + 3);
+					}
+					continue;
+				}
+				if(!taskSuffixMap.containsKey(commandLineArgPrefix)) {
+					result = addBlankToCommandLineArgs(result);
+					if(commandLineArg.contains(" ")) {
+						commandLineArg = commandLineArg.substring(0, commandLineArg.indexOf("=")) +
+								"=\"" + commandLineArg.substring(commandLineArg.indexOf("=") + 1 )+ "\"";
+					}
+					result = result.concat(commandLineArg);
+				}
+			}
+		}
+		catch (Exception e) {
+			throw new IllegalArgumentException("Unable to extract command line args for task " + taskName, e);
+		}
+
+		return result;
+	}
+
+	private String addBlankToCommandLineArgs(String commandArgs) {
+		String result = commandArgs;
+		if(firstAdd) {
+			this.firstAdd = false;
+		}
+		else {
+			result = result.concat(" ");
+		}
+		return result;
+	}
+
+	private String getPrefix(String commandLineArg) {
+		String commandLineArgPrefix = (!commandLineArg.contains("="))? commandLineArg : commandLineArg.substring(0, commandLineArg.indexOf("="));
+		int indexOfSeparator = commandLineArgPrefix.indexOf(".");
+		if(indexOfSeparator > -1) {
+			commandLineArgPrefix = commandLineArg.substring(0, indexOfSeparator);
+		}
+		if(commandLineArgPrefix.startsWith("--")) {
+			commandLineArgPrefix = commandLineArgPrefix.substring(2);
+		}
+		return commandLineArgPrefix;
 	}
 
 	private Map<String, String> getPropertiesForTask(String taskName, ComposedTaskProperties properties) {
@@ -96,7 +173,6 @@ public class StepBeanDefinitionRegistrar implements ImportBeanDefinitionRegistra
 	public void setEnvironment(Environment environment) {
 		this.env = environment;
 	}
-
 
 	private ComposedTaskProperties composedTaskProperties() {
 		ComposedTaskProperties properties = new ComposedTaskProperties();

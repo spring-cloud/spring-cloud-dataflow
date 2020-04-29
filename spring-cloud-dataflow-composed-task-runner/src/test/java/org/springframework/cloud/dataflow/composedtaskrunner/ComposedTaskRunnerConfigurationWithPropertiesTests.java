@@ -55,10 +55,10 @@ import static org.mockito.Mockito.verify;
 		DataFlowTestConfiguration.class,StepBeanDefinitionRegistrar.class,
 		ComposedTaskRunnerConfiguration.class,
 		StepBeanDefinitionRegistrar.class})
-@TestPropertySource(properties = {"graph=AAA && BBB && CCC","max-wait-time=1010",
+@TestPropertySource(properties = {"graph=ComposedTest-AAA && ComposedTest-BBB && ComposedTest-CCC","max-wait-time=1010",
 		"composed-task-properties=" + ComposedTaskRunnerConfigurationWithPropertiesTests.COMPOSED_TASK_PROPS ,
-		"interval-time-between-checks=1100", "composed-task-arguments=--baz=boo",
-		"dataflow-server-uri=https://bar"})
+		"interval-time-between-checks=1100", "composed-task-arguments=--baz=boo --AAA.foo=bar BBB.que=qui",
+		"dataflow-server-uri=https://bar", "spring.cloud.task.name=ComposedTest"})
 @EnableAutoConfiguration(exclude = { CommonSecurityAutoConfiguration.class})
 public class ComposedTaskRunnerConfigurationWithPropertiesTests {
 
@@ -74,9 +74,9 @@ public class ComposedTaskRunnerConfigurationWithPropertiesTests {
 	@Autowired
 	private ComposedTaskProperties composedTaskProperties;
 
-	protected static final String COMPOSED_TASK_PROPS = "app.AAA.format=yyyy, "
-			+ "app.BBB.format=mm, "
-			+ "deployer.AAA.memory=2048m";
+	protected static final String COMPOSED_TASK_PROPS = "app.ComposedTest-AAA.format=yyyy, "
+			+ "app.ComposedTest-BBB.format=mm, "
+			+ "deployer.ComposedTest-AAA.memory=2048m";
 
 	@Test
 	@DirtiesContext
@@ -93,8 +93,8 @@ public class ComposedTaskRunnerConfigurationWithPropertiesTests {
 		assertEquals(1100, composedTaskProperties.getIntervalTimeBetweenChecks());
 		assertEquals("https://bar", composedTaskProperties.getDataflowServerUri().toASCIIString());
 		List<String> args = new ArrayList<>(1);
-		args.add("--baz=boo");
+		args.add("--baz=boo --foo=bar");
 		Assert.isNull(job.getJobParametersIncrementer(), "JobParametersIncrementer must be null.");
-		verify(this.taskOperations).launch("AAA", props, args, null);
+		verify(this.taskOperations).launch("ComposedTest-AAA", props, args, null);
 	}
 }

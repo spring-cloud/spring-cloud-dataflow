@@ -24,6 +24,9 @@
 	</parent>
 	<artifactId>spring-cloud-dataflow-composed-task-runner</artifactId>
 	<packaging>jar</packaging>
+	<properties>
+		<plexus.utils.version>3.3.0</plexus.utils.version>
+	</properties>
 	<dependencies>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
@@ -100,7 +103,6 @@
 		<dependency>
 			<groupId>org.assertj</groupId>
 			<artifactId>assertj-core</artifactId>
-			<version>3.15.0</version>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
@@ -113,6 +115,12 @@
 					<artifactId>junit-vintage-engine</artifactId>
 				</exclusion>
 			</exclusions>
+		</dependency>
+		<dependency>
+			<groupId>org.codehaus.plexus</groupId>
+			<artifactId>plexus-utils</artifactId>
+			<version>${plexus.utils.version}</version>
+			<scope>compile</scope>
 		</dependency>
 	</dependencies>
 	<build>

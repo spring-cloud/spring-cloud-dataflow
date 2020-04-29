@@ -43,7 +43,7 @@ import org.springframework.util.Assert;
 		ComposedTaskRunnerConfiguration.class,
 		StepBeanDefinitionRegistrar.class})
 @EnableAutoConfiguration(exclude = { CommonSecurityAutoConfiguration.class})
-@TestPropertySource(properties = {"graph=AAA && BBB && CCC","max-wait-time=1000", "increment-instance-enabled=true"})
+@TestPropertySource(properties = {"graph=AAA && BBB && CCC","max-wait-time=1000", "increment-instance-enabled=true", "spring.cloud.task.name=footest"})
 public class ComposedTaskRunnerConfigurationJobIncrementerTests {
 
 	@Autowired
