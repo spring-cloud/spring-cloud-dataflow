@@ -114,7 +114,7 @@ public class ApplicationConfigurationMetadataResolverAutoConfiguration {
 
 	@Bean
 	public Map<String, RegistryConfiguration> registryConfigurationMap(ContainerImageMetadataProperties properties,
-			@Value("${.dockerconfigjson:null}") String dockerConfigJsonSecret,
+			@Value("${.dockerconfigjson:#{null}}") String dockerConfigJsonSecret,
 			DockerConfigJsonSecretToRegistryConfigurationConverter secretToRegistryConfigurationConverter) {
 
 		// Retrieve registry configurations, explicitly declared via properties.
