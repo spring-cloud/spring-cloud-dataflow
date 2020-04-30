@@ -1,5 +1,5 @@
 /*
- * Copyright 2016-2019 the original author or authors.
+ * Copyright 2016-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,7 +33,17 @@ import org.springframework.cloud.dataflow.rest.client.dsl.StreamBuilder;
 import org.springframework.cloud.dataflow.rest.util.HttpClientConfigurer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.client.ClientHttpRequestInterceptor;
 import org.springframework.lang.Nullable;
+import org.springframework.security.authentication.AbstractAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.oauth2.client.AuthorizedClientServiceOAuth2AuthorizedClientManager;
+import org.springframework.security.oauth2.client.InMemoryOAuth2AuthorizedClientService;
+import org.springframework.security.oauth2.client.OAuth2AuthorizeRequest;
+import org.springframework.security.oauth2.client.OAuth2AuthorizedClient;
+import org.springframework.security.oauth2.client.OAuth2AuthorizedClientProvider;
+import org.springframework.security.oauth2.client.OAuth2AuthorizedClientProviderBuilder;
+import org.springframework.security.oauth2.client.OAuth2AuthorizedClientService;
 import org.springframework.security.oauth2.client.endpoint.DefaultClientCredentialsTokenResponseClient;
 import org.springframework.security.oauth2.client.endpoint.OAuth2AccessTokenResponseClient;
 import org.springframework.security.oauth2.client.endpoint.OAuth2ClientCredentialsGrantRequest;
@@ -41,7 +51,6 @@ import org.springframework.security.oauth2.client.registration.ClientRegistratio
 import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository;
 import org.springframework.security.oauth2.client.registration.InMemoryClientRegistrationRepository;
 import org.springframework.security.oauth2.core.AuthorizationGrantType;
-import org.springframework.security.oauth2.core.endpoint.OAuth2AccessTokenResponse;
 import org.springframework.util.StringUtils;
 import org.springframework.web.client.RestTemplate;
 
@@ -67,9 +76,6 @@ public class DataFlowClientAutoConfiguration {
 	@Autowired
 	private @Nullable ClientRegistrationRepository clientRegistrations;
 
-	@Autowired
-	private @Nullable OAuth2AccessTokenResponseClient<OAuth2ClientCredentialsGrantRequest> clientCredentialsTokenResponseClient;
-
 	@Bean
 	@ConditionalOnMissingBean(DataFlowOperations.class)
 	public DataFlowOperations dataFlowOperations() throws Exception{
@@ -82,11 +88,8 @@ public class DataFlowClientAutoConfiguration {
 			logger.debug("Configured OAuth2 Access Token for accessing the Data Flow Server");
 		}
 		else if (StringUtils.hasText(this.properties.getAuthentication().getClientId())) {
-			ClientRegistration clientRegistration = clientRegistrations.findByRegistrationId(DEFAULT_REGISTRATION_ID);
-			OAuth2ClientCredentialsGrantRequest grantRequest = new OAuth2ClientCredentialsGrantRequest(clientRegistration);
-			OAuth2AccessTokenResponse res = clientCredentialsTokenResponseClient.getTokenResponse(grantRequest);
-			String accessTokenValue = res.getAccessToken().getTokenValue();
-			template.getInterceptors().add(new OAuth2AccessTokenProvidingClientHttpRequestInterceptor(accessTokenValue));
+			template.getInterceptors().add(clientCredentialsTokenResolvingInterceptor(clientRegistrations,
+					this.properties.getAuthentication().getClientId()));
 			logger.debug("Configured OAuth2 Client Credentials for accessing the Data Flow Server");
 		}
 		else if(!StringUtils.isEmpty(properties.getAuthentication().getBasic().getUsername()) &&
@@ -128,5 +131,43 @@ public class DataFlowClientAutoConfiguration {
 		OAuth2AccessTokenResponseClient<OAuth2ClientCredentialsGrantRequest> clientCredentialsTokenResponseClient() {
 			return new DefaultClientCredentialsTokenResponseClient();
 		}
+	}
+
+	private ClientHttpRequestInterceptor clientCredentialsTokenResolvingInterceptor(
+			ClientRegistrationRepository clientRegistrationRepository,
+			String clientId) {
+		Authentication principal = createAuthentication(clientId);
+		OAuth2AuthorizedClientService authorizedClientService = new InMemoryOAuth2AuthorizedClientService(
+				clientRegistrationRepository);
+		AuthorizedClientServiceOAuth2AuthorizedClientManager authorizedClientManager = new AuthorizedClientServiceOAuth2AuthorizedClientManager(
+				clientRegistrationRepository, authorizedClientService);
+		OAuth2AuthorizedClientProvider authorizedClientProvider = OAuth2AuthorizedClientProviderBuilder.builder()
+				.clientCredentials().build();
+		authorizedClientManager.setAuthorizedClientProvider(authorizedClientProvider);
+
+		OAuth2AuthorizeRequest authorizeRequest = OAuth2AuthorizeRequest
+				.withClientRegistrationId(DEFAULT_REGISTRATION_ID).principal(principal).build();
+
+		return (request, body, execution) -> {
+			OAuth2AuthorizedClient authorizedClient = authorizedClientManager.authorize(authorizeRequest);
+			request.getHeaders().setBearerAuth(authorizedClient.getAccessToken().getTokenValue());
+			return execution.execute(request, body);
+		};
+	}
+
+	private static Authentication createAuthentication(final String principalName) {
+		return new AbstractAuthenticationToken(null) {
+			private static final long serialVersionUID = -2038812908189509872L;
+
+			@Override
+			public Object getCredentials() {
+				return "";
+			}
+
+			@Override
+			public Object getPrincipal() {
+				return principalName;
+			}
+		};
 	}
 }
