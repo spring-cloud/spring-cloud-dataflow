@@ -59,7 +59,6 @@ import org.springframework.security.oauth2.client.registration.ClientRegistratio
 import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository;
 import org.springframework.security.oauth2.client.registration.InMemoryClientRegistrationRepository;
 import org.springframework.security.oauth2.core.AuthorizationGrantType;
-import org.springframework.security.oauth2.core.endpoint.OAuth2AccessTokenResponse;
 import org.springframework.util.StringUtils;
 import org.springframework.web.client.RestTemplate;
 
@@ -104,10 +103,8 @@ public class DataFlowClientAutoConfiguration {
 		}
 		else if (StringUtils.hasText(this.properties.getAuthentication().getClientId())) {
 			ClientRegistration clientRegistration = clientRegistrations.findByRegistrationId(DEFAULT_REGISTRATION_ID);
-			OAuth2ClientCredentialsGrantRequest grantRequest = new OAuth2ClientCredentialsGrantRequest(clientRegistration);
-			OAuth2AccessTokenResponse res = clientCredentialsTokenResponseClient.getTokenResponse(grantRequest);
-			String accessTokenValue = res.getAccessToken().getTokenValue();
-			template.getInterceptors().add(new OAuth2AccessTokenProvidingClientHttpRequestInterceptor(accessTokenValue));
+			template.getInterceptors().add(clientCredentialsTokenResolvingInterceptor(clientRegistration,
+					clientRegistrations, this.properties.getAuthentication().getClientId()));
 			logger.debug("Configured OAuth2 Client Credentials for accessing the Data Flow Server");
 		}
 		else if(!StringUtils.isEmpty(properties.getAuthentication().getBasic().getUsername()) &&
@@ -161,6 +158,28 @@ public class DataFlowClientAutoConfiguration {
 		OAuth2AccessTokenResponseClient<OAuth2ClientCredentialsGrantRequest> clientCredentialsTokenResponseClient() {
 			return new DefaultClientCredentialsTokenResponseClient();
 		}
+	}
+
+	private ClientHttpRequestInterceptor clientCredentialsTokenResolvingInterceptor(
+			ClientRegistration clientRegistration, ClientRegistrationRepository clientRegistrationRepository,
+			String clientId) {
+		Authentication principal = createAuthentication(clientId);
+		OAuth2AuthorizedClientService authorizedClientService = new InMemoryOAuth2AuthorizedClientService(
+				clientRegistrationRepository);
+		AuthorizedClientServiceOAuth2AuthorizedClientManager authorizedClientManager = new AuthorizedClientServiceOAuth2AuthorizedClientManager(
+				clientRegistrationRepository, authorizedClientService);
+		OAuth2AuthorizedClientProvider authorizedClientProvider = OAuth2AuthorizedClientProviderBuilder.builder()
+				.clientCredentials().build();
+		authorizedClientManager.setAuthorizedClientProvider(authorizedClientProvider);
+
+		OAuth2AuthorizeRequest authorizeRequest = OAuth2AuthorizeRequest
+				.withClientRegistrationId(DEFAULT_REGISTRATION_ID).principal(principal).build();
+
+		return (request, body, execution) -> {
+			OAuth2AuthorizedClient authorizedClient = authorizedClientManager.authorize(authorizeRequest);
+			request.getHeaders().setBearerAuth(authorizedClient.getAccessToken().getTokenValue());
+			return execution.execute(request, body);
+		};
 	}
 
 	private static final Authentication DEFAULT_PRINCIPAL = createAuthentication("dataflow-client-principal");
