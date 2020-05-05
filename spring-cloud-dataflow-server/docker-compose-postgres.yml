@@ -34,5 +34,5 @@ services:
       - SPRING_DATASOURCE_USERNAME=root
       - SPRING_DATASOURCE_PASSWORD=rootpw
       - SPRING_DATASOURCE_DRIVER_CLASS_NAME=org.postgresql.Driver
-    entrypoint: "./wait-for-it.sh -t 240 postgres:5432 -- java -Djava.security.egd=file:/dev/./urandom -jar /spring-cloud-skipper-server.jar"
+    entrypoint: "./wait-for-it.sh -t 240 postgres:5432 -- java -jar /maven/spring-cloud-skipper-server.jar"
 
