@@ -1,12 +1,12 @@
-name: Java CI - master
+name: Java CI - 2.5.x
 
 on:
   push:
     branches:
-      - master
+      - 2.5.x
   pull_request:
     branches:
-      - master
+      - 2.5.x
 
 jobs:
   build:
