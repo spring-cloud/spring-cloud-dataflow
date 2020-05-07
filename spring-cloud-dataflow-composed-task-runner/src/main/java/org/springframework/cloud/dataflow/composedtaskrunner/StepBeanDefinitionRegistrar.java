@@ -107,6 +107,7 @@ public class StepBeanDefinitionRegistrar implements ImportBeanDefinitionRegistra
 		properties.setGraph(this.env.getProperty("graph"));
 		properties.setComposedTaskArguments(
 				this.env.getProperty("composed-task-arguments"));
+		properties.setPlatformName(this.env.getProperty("platform-name"));
 		properties.setComposedTaskProperties(this.env.getProperty("composed-task-properties"));
 
 		if (maxWaitTime != null) {

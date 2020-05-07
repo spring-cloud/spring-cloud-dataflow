@@ -112,6 +112,9 @@ public class TaskAppDeploymentRequestCreator {
 			TaskServiceUtils.updateDataFlowUriIfNeeded(this.dataflowServerUri, appDeploymentProperties,
 					commandLineArgs);
 		}
+		if(taskExecutionInformation.isComposed()) {
+			appDeploymentProperties.put("platform-name", platformName);
+		}
 		AppDefinition revisedDefinition = TaskServiceUtils.mergeAndExpandAppProperties(taskDefinition,
 				taskExecutionInformation.getMetadataResource(),
 				appDeploymentProperties, this.whitelistProperties);
