@@ -187,6 +187,7 @@
 					<include>META-INF/dataflow-server-defaults.yml</include>
 					<include>schemas/**</include>
 					<include>org/**</include>
+					<include>application-*.yml</include>
 				</includes>
 			</resource>
 		</resources>
