@@ -17,8 +17,10 @@
 package org.springframework.cloud.dataflow.server.controller;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.function.Function;
 
 import org.springframework.cloud.dataflow.core.TaskDefinition;
@@ -26,6 +28,7 @@ import org.springframework.cloud.dataflow.rest.resource.TaskDefinitionResource;
 import org.springframework.cloud.dataflow.rest.resource.TaskExecutionResource;
 import org.springframework.cloud.dataflow.rest.util.ArgumentSanitizer;
 import org.springframework.cloud.dataflow.server.controller.support.TaskExecutionAwareTaskDefinition;
+import org.springframework.cloud.dataflow.server.controller.support.TaskExecutionControllerDeleteAction;
 import org.springframework.cloud.dataflow.server.repository.NoSuchTaskDefinitionException;
 import org.springframework.cloud.dataflow.server.repository.TaskDefinitionRepository;
 import org.springframework.cloud.dataflow.server.service.TaskDeleteService;
@@ -123,8 +126,17 @@ public class TaskDefinitionController {
 	 */
 	@RequestMapping(value = "/{name}", method = RequestMethod.DELETE)
 	@ResponseStatus(HttpStatus.OK)
-	public void destroyTask(@PathVariable("name") String name) {
-		taskDeleteService.deleteTaskDefinition(name);
+	public void destroyTask(@PathVariable("name") String name, @RequestParam(required = false) Boolean cleanup) {
+		if (cleanup != null && cleanup.equals(Boolean.TRUE)) {
+			Set<Long> taskExecutionIds = this.explorer.getTaskExecutionIdsByTaskName(name);
+			final Set<TaskExecutionControllerDeleteAction> actionsAsSet = new HashSet<>();
+			actionsAsSet.add(TaskExecutionControllerDeleteAction.CLEANUP);
+			actionsAsSet.add(TaskExecutionControllerDeleteAction.REMOVE_DATA);
+			if (!taskExecutionIds.isEmpty()) {
+				this.taskDeleteService.cleanupExecutions(actionsAsSet, taskExecutionIds);
+			}
+		}
+		this.taskDeleteService.deleteTaskDefinition(name);
 	}
 
 	/**
@@ -202,7 +214,7 @@ public class TaskDefinitionController {
 	}
 
 	/**
-	 * {@link org.springframework.hateoas.server.ResourceAssembler} implementation that converts
+	 * {@link org.springframework.hateoas.server.RepresentationModelAssembler} implementation that converts
 	 * {@link TaskDefinition}s to {@link TaskDefinitionResource}s.
 	 */
 	class Assembler extends RepresentationModelAssemblerSupport<TaskExecutionAwareTaskDefinition, TaskDefinitionResource> {

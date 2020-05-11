@@ -17,7 +17,6 @@
 package org.springframework.cloud.dataflow.rest.client;
 
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -184,7 +183,13 @@ public class TaskTemplate implements TaskOperations {
 
 	@Override
 	public void destroy(String name) {
-		restTemplate.delete(definitionLink.expand(name).getHref(), Collections.singletonMap("name", name));
+		restTemplate.delete(definitionLink.expand(name).getHref());
+	}
+
+	@Override
+	public void destroy(String name, boolean cleanup) {
+		String url = (cleanup) ? definitionLink.expand(name).getHref() + "?cleanup=true" : definitionLink.expand(name).getHref();
+		restTemplate.delete(url);
 	}
 
 	@Override

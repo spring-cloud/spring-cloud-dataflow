@@ -214,6 +214,28 @@ public class TaskCommandTests extends AbstractShellIntegrationTest {
 	}
 
 	@Test
+	public void destroySpecificTaskWithCleanup() {
+		logger.info("Create Task Test");
+		String taskName = generateUniqueStreamOrTaskName();
+		task().create(taskName, "timestamp");
+		CommandResult cr = task().taskExecutionList();
+		assertTrue("task execution list by name command must be successful", cr.isSuccess());
+		Table table = (Table) cr.getResult();
+		int rowCountBeforeLaunch = table.getModel().getRowCount();
+		task().launch(taskName);
+		cr = task().taskExecutionListByName(taskName);
+		assertTrue("task execution list by name command must be successful", cr.isSuccess());
+		table = (Table) cr.getResult();
+		assertEquals("Number of rows returned was not expected", 2, table.getModel().getRowCount());
+		logger.info("Destroy created task with the cleanup");
+		task().destroyTask(taskName, true);
+		cr = task().taskExecutionList();
+		assertTrue("task execution list by name command must be successful", cr.isSuccess());
+		table = (Table) cr.getResult();
+		assertEquals("Number of rows returned was not expected", rowCountBeforeLaunch, table.getModel().getRowCount());
+	}
+
+	@Test
 	public void destroyAllTasks() {
 		logger.info("Create Task Test");
 		String taskName1 = generateUniqueStreamOrTaskName();
