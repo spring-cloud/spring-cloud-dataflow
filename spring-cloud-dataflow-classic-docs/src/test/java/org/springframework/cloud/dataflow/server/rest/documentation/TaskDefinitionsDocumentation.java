@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 the original author or authors.
+ * Copyright 2017-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,6 +40,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  * Documentation for the /tasks/definitions endpoint.
  *
  * @author Eric Bottard
+ * @author Ilayaperumal Gopinathan
  */
 
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
@@ -133,12 +134,15 @@ public class TaskDefinitionsDocumentation extends BaseDocumentation {
 	@Test
 	public void taskDefinitionDelete() throws Exception {
 		this.mockMvc.perform(
-			delete("/tasks/definitions/{my-task}", "my-task"))
+			delete("/tasks/definitions/{my-task}", "my-task")
+			.param("cleanup", "true"))
 			.andDo(print())
 			.andExpect(status().isOk())
 			.andDo(this.documentationHandler.document(
 				pathParameters(
-					parameterWithName("my-task").description("The name of an existing task definition (required)")
+					parameterWithName("my-task").description("The name of an existing task definition (required)")),
+				requestParameters(
+						parameterWithName("cleanup").description("The flag to indicate if the associated task executions needed to be cleaned up")
 				)
 			));
 	}

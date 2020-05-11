@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2019 the original author or authors.
+ * Copyright 2017-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,6 +27,7 @@ import org.springframework.cloud.task.repository.dao.TaskExecutionDao;
  *
  * @author Gunnar Hillert
  * @author Glenn Renfro
+ * @author Ilayaperumal Gopinathan
  */
 public interface DataflowTaskExecutionDao {
 
@@ -61,4 +62,11 @@ public interface DataflowTaskExecutionDao {
 	 * @return a list of child {@link TaskExecution}s that correspond to the {@link TaskExecution}s passed.
 	 */
 	Set<Long> findChildTaskExecutionIds(Set<Long> taskExecutionIds);
+
+	/**
+	 * Returns the Set of task execution IDs by the given task name.
+	 * @param taskName the task name
+	 * @return the Set of task execution IDs
+	 */
+	Set<Long> getTaskExecutionIdsByTaskName(String taskName);
 }

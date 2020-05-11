@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2019 the original author or authors.
+ * Copyright 2017-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,7 @@ package org.springframework.cloud.dataflow.server.repository;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Types;
 import java.util.Collections;
 import java.util.Set;
 import java.util.TreeSet;
@@ -40,6 +41,7 @@ import org.springframework.util.StringUtils;
  *
  * @author Gunnar Hillert
  * @author Glenn Renfro
+ * @author Ilayaperumal Gopinathan
  */
 public class JdbcDataflowTaskExecutionDao implements DataflowTaskExecutionDao {
 
@@ -56,6 +58,9 @@ public class JdbcDataflowTaskExecutionDao implements DataflowTaskExecutionDao {
 
 	private static final String SELECT_CHILD_TASK_EXECUTION_IDS = "SELECT task_execution_id FROM %PREFIX%EXECUTION "
 			+ "WHERE parent_execution_id in (:parentTaskExecutionIds)";
+
+	private static final String FIND_TASK_EXECUTION_IDS_BY_TASK_NAME = "SELECT TASK_EXECUTION_ID "
+			+ "from %PREFIX%EXECUTION where TASK_NAME = :taskName";
 
 	private TaskProperties taskProperties;
 
@@ -133,5 +138,31 @@ public class JdbcDataflowTaskExecutionDao implements DataflowTaskExecutionDao {
 
 		return childTaskExecutionIds;
 
+	}
+
+	@Override
+	public Set<Long> getTaskExecutionIdsByTaskName(String taskName) {
+		final MapSqlParameterSource queryParameters = new MapSqlParameterSource()
+				.addValue("taskName", taskName, Types.VARCHAR);
+
+		try {
+			return this.jdbcTemplate.query(getQuery(FIND_TASK_EXECUTION_IDS_BY_TASK_NAME),
+					queryParameters, new ResultSetExtractor<Set<Long>>() {
+						@Override
+						public Set<Long> extractData(ResultSet resultSet)
+								throws SQLException, DataAccessException {
+							Set<Long> taskExecutionIds = new TreeSet<>();
+
+							while (resultSet.next()) {
+								taskExecutionIds
+										.add(resultSet.getLong("TASK_EXECUTION_ID"));
+							}
+							return taskExecutionIds;
+						}
+					});
+		}
+		catch (DataAccessException e) {
+			return Collections.emptySet();
+		}
 	}
 }
