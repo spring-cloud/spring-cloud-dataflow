@@ -82,6 +82,7 @@ import org.springframework.cloud.dataflow.server.controller.ToolsController;
 import org.springframework.cloud.dataflow.server.controller.UiController;
 import org.springframework.cloud.dataflow.server.controller.security.SecurityController;
 import org.springframework.cloud.dataflow.server.job.LauncherRepository;
+import org.springframework.cloud.dataflow.server.repository.DataflowTaskExecutionDao;
 import org.springframework.cloud.dataflow.server.repository.StreamDefinitionRepository;
 import org.springframework.cloud.dataflow.server.repository.TaskDefinitionRepository;
 import org.springframework.cloud.dataflow.server.service.SchedulerService;
@@ -252,8 +253,9 @@ public class DataFlowControllerAutoConfiguration {
 		@Bean
 		public TaskDefinitionController taskDefinitionController(TaskExplorer taskExplorer,
 				TaskDefinitionRepository repository, TaskSaveService taskSaveService,
-				TaskDeleteService taskDeleteService) {
-			return new TaskDefinitionController(taskExplorer, repository, taskSaveService, taskDeleteService);
+				TaskDeleteService taskDeleteService, DataflowTaskExecutionDao dataflowTaskExecutionDao) {
+			return new TaskDefinitionController(taskExplorer, repository, taskSaveService, taskDeleteService,
+					dataflowTaskExecutionDao);
 		}
 
 		@Bean

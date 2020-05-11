@@ -40,6 +40,7 @@ import org.springframework.cloud.dataflow.registry.service.AppRegistryService;
 import org.springframework.cloud.dataflow.server.TaskValidationController;
 import org.springframework.cloud.dataflow.server.configuration.TestDependencies;
 import org.springframework.cloud.dataflow.server.job.LauncherRepository;
+import org.springframework.cloud.dataflow.server.repository.DataflowTaskExecutionDao;
 import org.springframework.cloud.dataflow.server.repository.TaskDefinitionRepository;
 import org.springframework.cloud.dataflow.server.service.TaskDeleteService;
 import org.springframework.cloud.dataflow.server.service.TaskExecutionService;
@@ -124,6 +125,9 @@ public class TaskControllerTests {
 	@Autowired
 	private TaskDeleteService taskDeleteService;
 
+	@Autowired
+	private DataflowTaskExecutionDao dataflowTaskExecutionDao;
+
 	@Before
 	public void setupMockMVC() {
 		this.mockMvc = MockMvcBuilders.webAppContextSetup(wac)
@@ -149,12 +153,12 @@ public class TaskControllerTests {
 
 	@Test(expected = IllegalArgumentException.class)
 	public void testTaskDefinitionControllerConstructorMissingRepository() {
-		new TaskDefinitionController(mock(TaskExplorer.class), null, taskSaveService, taskDeleteService);
+		new TaskDefinitionController(mock(TaskExplorer.class), null, taskSaveService, taskDeleteService, dataflowTaskExecutionDao);
 	}
 
 	@Test(expected = IllegalArgumentException.class)
 	public void testTaskDefinitionControllerConstructorMissingTaskExplorer() {
-		new TaskDefinitionController(null, mock(TaskDefinitionRepository.class), taskSaveService, taskDeleteService);
+		new TaskDefinitionController(null, mock(TaskDefinitionRepository.class), taskSaveService, taskDeleteService, dataflowTaskExecutionDao);
 	}
 
 	@Test
