@@ -142,7 +142,7 @@ public class TaskDefinitionsDocumentation extends BaseDocumentation {
 				pathParameters(
 					parameterWithName("my-task").description("The name of an existing task definition (required)")),
 				requestParameters(
-						parameterWithName("cleanup").description("The flag to indicate if the associated task executions needed to be cleanedup")
+						parameterWithName("cleanup").description("The flag to indicate if the associated task executions needed to be cleaned up")
 				)
 			));
 	}

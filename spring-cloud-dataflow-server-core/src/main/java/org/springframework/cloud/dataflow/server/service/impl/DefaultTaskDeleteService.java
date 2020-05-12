@@ -310,6 +310,20 @@ public class DefaultTaskDeleteService implements TaskDeleteService {
 	}
 
 	@Override
+	public void deleteTaskDefinition(String name, boolean cleanup) {
+		if (cleanup) {
+			Set<Long> taskExecutionIds = this.dataflowTaskExecutionDao.getTaskExecutionIdsByTaskName(name);
+			final Set<TaskExecutionControllerDeleteAction> actionsAsSet = new HashSet<>();
+			actionsAsSet.add(TaskExecutionControllerDeleteAction.CLEANUP);
+			actionsAsSet.add(TaskExecutionControllerDeleteAction.REMOVE_DATA);
+			if (!taskExecutionIds.isEmpty()) {
+				cleanupExecutions(actionsAsSet, taskExecutionIds);
+			}
+		}
+		this.deleteTaskDefinition(name);
+	}
+
+	@Override
 	public void deleteAll() {
 		Iterable<TaskDefinition> allTaskDefinition = this.taskDefinitionRepository.findAll();
 

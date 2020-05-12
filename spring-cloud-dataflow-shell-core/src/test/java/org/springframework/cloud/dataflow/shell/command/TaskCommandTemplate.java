@@ -286,7 +286,6 @@ public class TaskCommandTemplate {
 	public void destroyTask(String task, boolean cleanup) {
 		String cleanupString = (cleanup) ? "--cleanup" : "";
 		CommandResult cr = shell.executeCommand("task destroy --name " + task + " " + cleanupString);
-		// stateVerifier.waitForDestroy(task);
 		assertTrue("Failure to destroy task " + task + ".  CommandResult = " + cr.toString(), cr.isSuccess());
 		tasks.remove(task);
 	}

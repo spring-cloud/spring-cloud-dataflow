@@ -1,5 +1,5 @@
 /*
- * Copyright 2016-2019 the original author or authors.
+ * Copyright 2016-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,6 +25,7 @@ import org.springframework.cloud.dataflow.server.controller.support.TaskExecutio
  *
  * @author Daniel Serleg
  * @author Gunnar Hillert
+ * @author Ilayaperumal Gopinathan
  */
 public interface TaskDeleteService {
 	/**
@@ -57,6 +58,16 @@ public interface TaskDeleteService {
 	 * @param name The name of the task.
 	 */
 	void deleteTaskDefinition(String name);
+
+	/**
+	 * Destroy the task definition. If it is a Composed Task then the task definitions
+	 * required for a ComposedTaskRunner task are also destroyed.
+	 * If the cleanup flag is set to true, delete all the task executions associated with the task definition.
+	 *
+	 * @param name The name of the task.
+	 * @param cleanup the flag to indicate the cleanup of the task executions for the task definition.
+	 */
+	void deleteTaskDefinition(String name, boolean cleanup);
 
 	/**
 	 * Destroy all task definitions. If it is a Composed Task then the task definitions

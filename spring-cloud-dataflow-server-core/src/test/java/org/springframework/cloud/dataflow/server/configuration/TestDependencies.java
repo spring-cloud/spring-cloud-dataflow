@@ -390,8 +390,8 @@ public class TestDependencies extends WebMvcConfigurationSupport {
 
 	@Bean
 	public TaskDefinitionController taskDefinitionController(TaskExplorer explorer, TaskDefinitionRepository repository,
-			TaskSaveService taskSaveService, TaskDeleteService taskDeleteService, DataflowTaskExecutionDao dataflowTaskExecutionDao) {
-		return new TaskDefinitionController(explorer, repository, taskSaveService, taskDeleteService, dataflowTaskExecutionDao);
+			TaskSaveService taskSaveService, TaskDeleteService taskDeleteService) {
+		return new TaskDefinitionController(explorer, repository, taskSaveService, taskDeleteService);
 	}
 
 	@Bean

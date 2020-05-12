@@ -17,10 +17,8 @@
 package org.springframework.cloud.dataflow.server.controller;
 
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.function.Function;
 
 import org.springframework.cloud.dataflow.core.TaskDefinition;
@@ -28,8 +26,6 @@ import org.springframework.cloud.dataflow.rest.resource.TaskDefinitionResource;
 import org.springframework.cloud.dataflow.rest.resource.TaskExecutionResource;
 import org.springframework.cloud.dataflow.rest.util.ArgumentSanitizer;
 import org.springframework.cloud.dataflow.server.controller.support.TaskExecutionAwareTaskDefinition;
-import org.springframework.cloud.dataflow.server.controller.support.TaskExecutionControllerDeleteAction;
-import org.springframework.cloud.dataflow.server.repository.DataflowTaskExecutionDao;
 import org.springframework.cloud.dataflow.server.repository.NoSuchTaskDefinitionException;
 import org.springframework.cloud.dataflow.server.repository.TaskDefinitionRepository;
 import org.springframework.cloud.dataflow.server.service.TaskDeleteService;
@@ -78,8 +74,6 @@ public class TaskDefinitionController {
 
 	private final TaskExplorer explorer;
 
-	private final DataflowTaskExecutionDao dataflowTaskExecutionDao;
-
 	private final ArgumentSanitizer argumentSanitizer = new ArgumentSanitizer();
 
 	/**
@@ -93,21 +87,17 @@ public class TaskDefinitionController {
 	 * @param repository the repository this controller will use for task CRUD operations.
 	 * @param taskSaveService handles Task saving related operations.
 	 * @param taskDeleteService handles Task deletion related operations.
-	 * @param dataflowTaskExecutionDao the SCDF task execution DAO
 	 */
 	public TaskDefinitionController(TaskExplorer taskExplorer, TaskDefinitionRepository repository,
-			TaskSaveService taskSaveService, TaskDeleteService taskDeleteService,
-			DataflowTaskExecutionDao dataflowTaskExecutionDao) {
+			TaskSaveService taskSaveService, TaskDeleteService taskDeleteService) {
 		Assert.notNull(taskExplorer, "taskExplorer must not be null");
 		Assert.notNull(repository, "repository must not be null");
 		Assert.notNull(taskSaveService, "taskSaveService must not be null");
 		Assert.notNull(taskDeleteService, "taskDeleteService must not be null");
-		Assert.notNull(dataflowTaskExecutionDao, "dataflowTaskExecutionDao must not be null");
 		this.explorer = taskExplorer;
 		this.repository = repository;
 		this.taskSaveService = taskSaveService;
 		this.taskDeleteService = taskDeleteService;
-		this.dataflowTaskExecutionDao = dataflowTaskExecutionDao;
 	}
 
 	/**
@@ -134,16 +124,8 @@ public class TaskDefinitionController {
 	@RequestMapping(value = "/{name}", method = RequestMethod.DELETE)
 	@ResponseStatus(HttpStatus.OK)
 	public void destroyTask(@PathVariable("name") String name, @RequestParam(required = false) Boolean cleanup) {
-		if (cleanup != null && cleanup.equals(Boolean.TRUE)) {
-			Set<Long> taskExecutionIds = this.dataflowTaskExecutionDao.getTaskExecutionIdsByTaskName(name);
-			final Set<TaskExecutionControllerDeleteAction> actionsAsSet = new HashSet<>();
-			actionsAsSet.add(TaskExecutionControllerDeleteAction.CLEANUP);
-			actionsAsSet.add(TaskExecutionControllerDeleteAction.REMOVE_DATA);
-			if (!taskExecutionIds.isEmpty()) {
-				this.taskDeleteService.cleanupExecutions(actionsAsSet, taskExecutionIds);
-			}
-		}
-		this.taskDeleteService.deleteTaskDefinition(name);
+		boolean taskExecutionCleanup = (cleanup != null && cleanup) ? cleanup : false;
+		this.taskDeleteService.deleteTaskDefinition(name, taskExecutionCleanup);
 	}
 
 	/**
