@@ -57,6 +57,8 @@ spec:
           value: 'true'
         - name: SPRING_CLOUD_DATAFLOW_FEATURES_SCHEDULES_ENABLED
           value: 'true'
+        - name: SPRING_CLOUD_DATAFLOW_TASK_COMPOSED_TASK_RUNNER_URI
+          value: 'docker://springcloud/spring-cloud-dataflow-composed-task-runner:@project.version@'
         - name: SPRING_CLOUD_KUBERNETES_CONFIG_ENABLE_API
           value: 'false'
         - name: SPRING_CLOUD_KUBERNETES_SECRETS_ENABLE_API
