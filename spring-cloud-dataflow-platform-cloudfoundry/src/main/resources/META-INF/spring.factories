@@ -1,4 +1,3 @@
 org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
   org.springframework.cloud.dataflow.server.config.cloudfoundry.CloudFoundryDataFlowServerConfiguration,\
-  org.springframework.cloud.dataflow.server.config.cloudfoundry.CloudFoundrySchedulerConfiguration,\
   org.springframework.cloud.dataflow.server.config.cloudfoundry.CloudFoundryTaskPlatformAutoConfiguration

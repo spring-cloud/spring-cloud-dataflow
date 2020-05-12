@@ -74,6 +74,7 @@ import org.springframework.cloud.dataflow.server.repository.JdbcDataflowTaskExec
 import org.springframework.cloud.dataflow.server.repository.JdbcDataflowTaskExecutionMetadataDao;
 import org.springframework.cloud.dataflow.server.repository.TaskDefinitionRepository;
 import org.springframework.cloud.dataflow.server.repository.TaskDeploymentRepository;
+import org.springframework.cloud.dataflow.server.service.LauncherService;
 import org.springframework.cloud.dataflow.server.service.SchedulerService;
 import org.springframework.cloud.dataflow.server.service.TaskDeleteService;
 import org.springframework.cloud.dataflow.server.service.TaskExecutionCreationService;
@@ -82,6 +83,7 @@ import org.springframework.cloud.dataflow.server.service.TaskExecutionService;
 import org.springframework.cloud.dataflow.server.service.TaskJobService;
 import org.springframework.cloud.dataflow.server.service.TaskSaveService;
 import org.springframework.cloud.dataflow.server.service.TaskValidationService;
+import org.springframework.cloud.dataflow.server.service.impl.DefaultLauncherService;
 import org.springframework.cloud.dataflow.server.service.impl.DefaultTaskDeleteService;
 import org.springframework.cloud.dataflow.server.service.impl.DefaultTaskExecutionInfoService;
 import org.springframework.cloud.dataflow.server.service.impl.DefaultTaskExecutionRepositoryService;
@@ -200,9 +202,15 @@ public class JobDependencies {
 	}
 
 	@Bean
-	public TaskPlatformController taskPlatformController(LauncherRepository launcherRepository) {
-		return new TaskPlatformController(launcherRepository);
+	public TaskPlatformController taskPlatformController(LauncherService launcherService) {
+		return new TaskPlatformController(launcherService);
 	}
+
+	@Bean
+	LauncherService launcherService(LauncherRepository launcherRepository) {
+		return new DefaultLauncherService(launcherRepository);
+	}
+
 
 	@Bean
 	public TaskLogsController taskLogsController(TaskExecutionService taskExecutionService) {
@@ -403,7 +411,17 @@ public class JobDependencies {
 	public SchedulerService schedulerService() {
 		return new SchedulerService() {
 			@Override
+			public void schedule(String scheduleName, String taskDefinitionName, Map<String, String> taskProperties, List<String> commandLineArgs, String platformName) {
+
+			}
+
+			@Override
 			public void schedule(String scheduleName, String taskDefinitionName, Map<String, String> taskProperties, List<String> commandLineArgs) {
+
+			}
+
+			@Override
+			public void unschedule(String scheduleName, String platformName) {
 
 			}
 
@@ -418,7 +436,12 @@ public class JobDependencies {
 			}
 
 			@Override
-			public List<ScheduleInfo> list(Pageable pageable, String taskDefinitionName) {
+			public List<ScheduleInfo> list(Pageable pageable, String taskDefinitionName, String platformName) {
+				return null;
+			}
+
+			@Override
+			public Page<ScheduleInfo> list(Pageable pageable, String platformName) {
 				return null;
 			}
 
@@ -428,12 +451,27 @@ public class JobDependencies {
 			}
 
 			@Override
+			public List<ScheduleInfo> list(String taskDefinitionName, String platformName) {
+				return null;
+			}
+
+			@Override
 			public List<ScheduleInfo> list(String taskDefinitionName) {
 				return null;
 			}
 
 			@Override
+			public List<ScheduleInfo> listForPlatform(String platformName) {
+				return null;
+			}
+
+			@Override
 			public List<ScheduleInfo> list() {
+				return null;
+			}
+
+			@Override
+			public ScheduleInfo getSchedule(String scheduleName, String platformName) {
 				return null;
 			}
 

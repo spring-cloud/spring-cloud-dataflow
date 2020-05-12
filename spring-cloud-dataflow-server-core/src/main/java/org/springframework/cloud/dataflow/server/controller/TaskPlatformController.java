@@ -17,15 +17,17 @@ package org.springframework.cloud.dataflow.server.controller;
 
 import org.springframework.cloud.dataflow.core.Launcher;
 import org.springframework.cloud.dataflow.rest.resource.LauncherResource;
-import org.springframework.cloud.dataflow.server.job.LauncherRepository;
+import org.springframework.cloud.dataflow.server.service.LauncherService;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PagedResourcesAssembler;
 import org.springframework.hateoas.PagedModel;
 import org.springframework.hateoas.server.ExposesResourceFor;
 import org.springframework.hateoas.server.mvc.RepresentationModelAssemblerSupport;
 import org.springframework.http.HttpStatus;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -39,12 +41,12 @@ import org.springframework.web.bind.annotation.RestController;
 @ExposesResourceFor(LauncherResource.class)
 public class TaskPlatformController {
 
-	private final LauncherRepository launcherRepository;
+	private final LauncherService launcherService;
 
 	private final Assembler launcherAssembler = new Assembler();
 
-	public TaskPlatformController(LauncherRepository LauncherRepository) {
-		this.launcherRepository = LauncherRepository;
+	public TaskPlatformController(LauncherService launcherService) {
+		this.launcherService = launcherService;
 	}
 
 	/**
@@ -56,8 +58,15 @@ public class TaskPlatformController {
 	@RequestMapping(value = "", method = RequestMethod.GET)
 	@ResponseStatus(HttpStatus.OK)
 	public PagedModel<LauncherResource> list(Pageable pageable,
+			@RequestParam(value = "schedulesEnabled", required = false) String schedulesEnabled,
 			PagedResourcesAssembler<Launcher> assembler) {
-		return assembler.toModel(this.launcherRepository.findAll(pageable), this.launcherAssembler);
+		PagedModel<LauncherResource> result;
+		if(StringUtils.hasText(schedulesEnabled) && schedulesEnabled.toLowerCase().equals("true")) {
+			result = assembler.toModel(this.launcherService.getLaunchersWithSchedules(pageable), this.launcherAssembler);
+		} else {
+			result = assembler.toModel(this.launcherService.getAllLaunchers(pageable), this.launcherAssembler);
+		}
+		return result;
 	}
 
 	/**

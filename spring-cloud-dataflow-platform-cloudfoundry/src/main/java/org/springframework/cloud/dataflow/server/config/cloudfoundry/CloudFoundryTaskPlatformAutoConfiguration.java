@@ -17,16 +17,12 @@ package org.springframework.cloud.dataflow.server.config.cloudfoundry;
 
 import java.util.Optional;
 
-import org.springframework.boot.autoconfigure.condition.ConditionalOnCloudPlatform;
-import org.springframework.boot.cloud.CloudPlatform;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.cloud.dataflow.core.TaskPlatform;
 import org.springframework.cloud.dataflow.server.config.CloudProfileProvider;
 import org.springframework.cloud.dataflow.server.config.features.ConditionalOnTasksEnabled;
-import org.springframework.cloud.dataflow.server.config.features.SchedulerConfiguration.SchedulerConfigurationPropertyChecker;
 import org.springframework.cloud.deployer.spi.scheduler.cloudfoundry.CloudFoundrySchedulerProperties;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Conditional;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.env.Environment;
 
@@ -73,8 +69,6 @@ public class CloudFoundryTaskPlatformAutoConfiguration {
 	}
 
 	@Bean
-	@ConditionalOnCloudPlatform(CloudPlatform.CLOUD_FOUNDRY)
-	@Conditional(SchedulerConfigurationPropertyChecker.class)
 	public CloudFoundrySchedulerClientProvider schedulerClientProvider(
 			CloudFoundryPlatformConnectionContextProvider connectionContextProvider,
 			CloudFoundryPlatformTokenProvider platformTokenProvider,

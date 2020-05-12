@@ -21,6 +21,7 @@ import org.springframework.cloud.dataflow.core.AbstractPlatformProperties;
 import org.springframework.cloud.dataflow.server.config.cloudfoundry.CloudFoundryPlatformProperties.CloudFoundryProperties;
 import org.springframework.cloud.deployer.spi.cloudfoundry.CloudFoundryConnectionProperties;
 import org.springframework.cloud.deployer.spi.cloudfoundry.CloudFoundryDeploymentProperties;
+import org.springframework.cloud.deployer.spi.scheduler.cloudfoundry.CloudFoundrySchedulerProperties;
 
 /**
  * @author Mark Pollack
@@ -39,6 +40,8 @@ public class CloudFoundryPlatformProperties extends AbstractPlatformProperties<C
 
 		private CloudFoundryDeploymentProperties deployment;
 
+		private CloudFoundrySchedulerProperties schedulerProperties;
+
 		public CloudFoundryConnectionProperties getConnection() {
 			return connection;
 		}
@@ -53,6 +56,14 @@ public class CloudFoundryPlatformProperties extends AbstractPlatformProperties<C
 
 		public void setDeployment(CloudFoundryDeploymentProperties deployment) {
 			this.deployment = deployment;
+		}
+
+		public CloudFoundrySchedulerProperties getSchedulerProperties() {
+			return schedulerProperties;
+		}
+
+		public void setSchedulerProperties(CloudFoundrySchedulerProperties schedulerProperties) {
+			this.schedulerProperties = schedulerProperties;
 		}
 	}
 }

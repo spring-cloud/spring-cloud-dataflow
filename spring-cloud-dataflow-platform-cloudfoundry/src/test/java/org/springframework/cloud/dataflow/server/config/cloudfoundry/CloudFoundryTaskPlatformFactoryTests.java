@@ -18,6 +18,8 @@ package org.springframework.cloud.dataflow.server.config.cloudfoundry;
 
 import java.net.URL;
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Optional;
 
 import io.pivotal.scheduler.SchedulerClient;
@@ -35,6 +37,7 @@ import org.junit.Before;
 import org.junit.Test;
 import reactor.core.publisher.Mono;
 
+import org.springframework.cloud.dataflow.core.Launcher;
 import org.springframework.cloud.dataflow.core.TaskPlatform;
 import org.springframework.cloud.dataflow.core.TaskPlatformFactory;
 import org.springframework.cloud.dataflow.server.config.cloudfoundry.CloudFoundryPlatformProperties.CloudFoundryProperties;
@@ -51,6 +54,7 @@ import static org.mockito.Mockito.when;
 
 /**
  * @author David Turanski
+ * @author Glenn Renfro
  **/
 public class CloudFoundryTaskPlatformFactoryTests {
 
@@ -68,93 +72,160 @@ public class CloudFoundryTaskPlatformFactoryTests {
 
 	private CloudFoundryPlatformProperties cloudFoundryPlatformProperties;
 
-	private CloudFoundryConnectionProperties connectionProperties;
+	private CloudFoundryConnectionProperties defaultConnectionProperties;
+
+	private CloudFoundryConnectionProperties anotherOrgSpaceConnectionProperties;
 
 	private CloudFoundryDeploymentProperties deploymentProperties;
 
 	@Before
 	public void setUp() throws Exception {
-		when(cloudFoundryClient.info())
+		when(this.cloudFoundryClient.info())
 				.thenReturn(getInfoRequest -> Mono.just(GetInfoResponse.builder().apiVersion("0.0.0").build()));
-		when(cloudFoundryClient.organizations()).thenReturn(mock(Organizations.class));
-		when(cloudFoundryClient.spaces()).thenReturn(mock(Spaces.class));
-		when(cloudFoundryClient.organizations().list(any())).thenReturn(listOrganizationsResponse());
-		when(cloudFoundryClient.spaces().list(any())).thenReturn(listSpacesResponse());
-		when(cloudFoundryClientProvider.cloudFoundryClient(anyString())).thenReturn(cloudFoundryClient);
+		when(this.cloudFoundryClient.organizations()).thenReturn(mock(Organizations.class));
+		when(this.cloudFoundryClient.spaces()).thenReturn(mock(Spaces.class));
+		when(this.cloudFoundryClient.organizations().list(any())).thenReturn(listOrganizationsResponse());
+		when(this.cloudFoundryClient.spaces().list(any())).thenReturn(listSpacesResponse());
+		when(this.cloudFoundryClientProvider.cloudFoundryClient(anyString())).thenReturn(this.cloudFoundryClient);
+		this.cloudFoundryPlatformProperties = new CloudFoundryPlatformProperties();
 
-		cloudFoundryPlatformProperties = new CloudFoundryPlatformProperties();
-		CloudFoundryProperties cloudFoundryProperties = new CloudFoundryProperties();
-		connectionProperties = new CloudFoundryConnectionProperties();
-		connectionProperties.setOrg("org");
-		connectionProperties.setSpace("space");
-		connectionProperties.setUrl(new URL("https://localhost:9999"));
+		this.defaultConnectionProperties = new CloudFoundryConnectionProperties();
+		this.defaultConnectionProperties.setOrg("org");
+		this.defaultConnectionProperties.setSpace("space");
+		this.defaultConnectionProperties.setUrl(new URL("https://localhost:9999"));
 
-		deploymentProperties = new CloudFoundryDeploymentProperties();
-		deploymentProperties.setApiTimeout(1L);
-		cloudFoundryProperties.setDeployment(new CloudFoundryDeploymentProperties());
-		cloudFoundryProperties.setConnection(connectionProperties);
-		cloudFoundryPlatformProperties.setAccounts(Collections.singletonMap("default", cloudFoundryProperties));
-
-		connectionContextProvider = new CloudFoundryPlatformConnectionContextProvider(cloudFoundryPlatformProperties);
-		platformTokenProvider = mock(CloudFoundryPlatformTokenProvider.class);
-		when(platformTokenProvider.tokenProvider(anyString())).thenReturn(mock(TokenProvider.class));
+		this.deploymentProperties = new CloudFoundryDeploymentProperties();
+		this.deploymentProperties.setApiTimeout(1L);
 	}
 
 	@Test
 	public void cloudFoundryTaskPlatformNoScheduler() {
-
+		setupSinglePlatform();
 		TaskPlatformFactory taskPlatformFactory = CloudFoundryTaskPlatformFactory
 				.builder()
-				.platformProperties(cloudFoundryPlatformProperties)
-				.platformTokenProvider(platformTokenProvider)
-				.connectionContextProvider(connectionContextProvider)
-				.cloudFoundryClientProvider(cloudFoundryClientProvider)
+				.platformProperties(this.cloudFoundryPlatformProperties)
+				.platformTokenProvider(this.platformTokenProvider)
+				.connectionContextProvider(this.connectionContextProvider)
+				.cloudFoundryClientProvider(this.cloudFoundryClientProvider)
 				.build();
 
 		TaskPlatform taskPlatform = taskPlatformFactory.createTaskPlatform();
 		assertThat(taskPlatform.getName()).isEqualTo("Cloud Foundry");
 		assertThat(taskPlatform.getLaunchers()).hasSize(1);
-		assertThat(taskPlatform.getLaunchers().get(0).getType()).isEqualTo("Cloud Foundry");
-		assertThat(taskPlatform.getLaunchers().get(0).getName()).isEqualTo("default");
-		assertThat(taskPlatform.getLaunchers().get(0).getTaskLauncher()).isInstanceOf(
-				CloudFoundryTaskLauncher.class);
-		assertThat(taskPlatform.getLaunchers().get(0).getDescription()).isEqualTo(
+		Launcher launcher = taskPlatform.getLaunchers().get(0);
+		validateBasicLauncherInfo(launcher, "default");
+		assertThat(launcher.getDescription()).isEqualTo(
 				"org = [org], space = [space], url = [https://localhost:9999]");
-		assertThat(taskPlatform.getLaunchers().get(0).getScheduler()).isNull();
+		assertThat(launcher.getScheduler()).isNull();
 	}
 
 	@Test
 	public void cloudFoundryTaskPlatformWithScheduler() {
-
-		when(cloudFoundrySchedulerClientProvider.cloudFoundrySchedulerClient(anyString())).thenReturn(
+		setupSinglePlatform();
+		when(this.cloudFoundrySchedulerClientProvider.cloudFoundrySchedulerClient(anyString())).thenReturn(
 				mock(SchedulerClient.class));
-		when(cloudFoundrySchedulerClientProvider.schedulerProperties())
-				.thenReturn(new CloudFoundrySchedulerProperties());
 
-		CloudFoundrySchedulerProperties schedulerProperties = new CloudFoundrySchedulerProperties();
-		schedulerProperties.setSchedulerUrl("https://localhost:9999");
+		CloudFoundryProperties cloudFoundryProperties = this.cloudFoundryPlatformProperties.getAccounts().get("default");
+		CloudFoundrySchedulerProperties cloudFoundrySchedulerProperties = new CloudFoundrySchedulerProperties();
+		cloudFoundrySchedulerProperties.setSchedulerUrl("https://localhost:9999");
+		cloudFoundryProperties.setSchedulerProperties(cloudFoundrySchedulerProperties);
+
+		TaskPlatform taskPlatform = getSchedulePlatform("default");
+		assertThat(taskPlatform.getLaunchers()).hasSize(1);
+		Launcher launcher = taskPlatform.getLaunchers().get(0);
+		validateBasicLauncherInfo(launcher, "default");
+		assertThat(launcher.getDescription()).isEqualTo(
+				"org = [org], space = [space], url = [https://localhost:9999]");
+		assertThat(launcher.getScheduler()).isNotNull();
+	}
+
+	@Test
+	public void cloudFoundryTaskMultiPlatformWithScheduler() throws Exception{
+		setupMultiPlatform();
+		when(this.cloudFoundrySchedulerClientProvider.cloudFoundrySchedulerClient(anyString())).thenReturn(
+				mock(SchedulerClient.class));
+
+		TaskPlatform taskPlatform = getSchedulePlatform("default");
+		assertThat(taskPlatform.getLaunchers()).hasSize(2);
+		Launcher launcher = taskPlatform.getLaunchers().get(0);
+		validateBasicLauncherInfo(launcher, "default");
+		assertThat(launcher.getDescription()).isEqualTo(
+				"org = [org], space = [space], url = [https://localhost:9999]");
+		assertThat(launcher.getScheduler()).isNotNull();
+
+		launcher = taskPlatform.getLaunchers().get(1);
+		validateBasicLauncherInfo(launcher, "anotherOrgSpace");
+		assertThat(launcher.getScheduler()).isNotNull();
+
+		assertThat(launcher.getDescription()).isEqualTo(
+				"org = [another-org], space = [another-space], url = [https://localhost:9999]");
+	}
+
+	private void validateBasicLauncherInfo(Launcher launcher, String platformName) {
+		assertThat(launcher.getType()).isEqualTo("Cloud Foundry");
+		assertThat(launcher.getName()).isEqualTo(platformName);
+		assertThat(launcher.getTaskLauncher()).isInstanceOf(CloudFoundryTaskLauncher.class);
+	}
+
+	private void setupSinglePlatform() {
+		CloudFoundryProperties cloudFoundryProperties = new CloudFoundryProperties();
+		cloudFoundryProperties.setDeployment(new CloudFoundryDeploymentProperties());
+		cloudFoundryProperties.setConnection(this.defaultConnectionProperties);
+		this.cloudFoundryPlatformProperties.setAccounts(Collections.singletonMap("default", cloudFoundryProperties));
+
+		this.connectionContextProvider = new CloudFoundryPlatformConnectionContextProvider(this.cloudFoundryPlatformProperties);
+		this.platformTokenProvider = mock(CloudFoundryPlatformTokenProvider.class);
+		when(this.platformTokenProvider.tokenProvider(anyString())).thenReturn(mock(TokenProvider.class));
+	}
+
+
+	private TaskPlatform getSchedulePlatform(String platformName) {
+		CloudFoundryProperties cloudFoundryProperties = this.cloudFoundryPlatformProperties.getAccounts().get(platformName);
 
 		TaskPlatformFactory taskPlatformFactory = CloudFoundryTaskPlatformFactory
 				.builder()
-				.platformProperties(cloudFoundryPlatformProperties)
-				.platformTokenProvider(platformTokenProvider)
-				.connectionContextProvider(connectionContextProvider)
-				.cloudFoundryClientProvider(cloudFoundryClientProvider)
-				.cloudFoundrySchedulerClientProvider(Optional.of(cloudFoundrySchedulerClientProvider))
+				.platformProperties(this.cloudFoundryPlatformProperties)
+				.platformTokenProvider(this.platformTokenProvider)
+				.connectionContextProvider(this.connectionContextProvider)
+				.cloudFoundryClientProvider(this.cloudFoundryClientProvider)
+				.cloudFoundrySchedulerClientProvider(Optional.of(this.cloudFoundrySchedulerClientProvider))
 				.schedulesEnabled(true)
-				.schedulerProperties(Optional.of(schedulerProperties))
+				.schedulerProperties(Optional.of(cloudFoundryProperties.getSchedulerProperties()))
 				.build();
 
-		TaskPlatform taskPlatform = taskPlatformFactory.createTaskPlatform();
+		TaskPlatform taskPlatform =  taskPlatformFactory.createTaskPlatform();
 		assertThat(taskPlatform.getName()).isEqualTo("Cloud Foundry");
-		assertThat(taskPlatform.getLaunchers()).hasSize(1);
-		assertThat(taskPlatform.getLaunchers().get(0).getType()).isEqualTo("Cloud Foundry");
-		assertThat(taskPlatform.getLaunchers().get(0).getName()).isEqualTo("default");
-		assertThat(taskPlatform.getLaunchers().get(0).getTaskLauncher()).isInstanceOf(
-				CloudFoundryTaskLauncher.class);
-		assertThat(taskPlatform.getLaunchers().get(0).getDescription()).isEqualTo(
-				"org = [org], space = [space], url = [https://localhost:9999]");
-		assertThat(taskPlatform.getLaunchers().get(0).getScheduler()).isNotNull();
+		return taskPlatform;
+	}
+
+	private void setupMultiPlatform() throws Exception{
+		this.anotherOrgSpaceConnectionProperties = new CloudFoundryConnectionProperties();
+		this.anotherOrgSpaceConnectionProperties.setOrg("another-org");
+		this.anotherOrgSpaceConnectionProperties.setSpace("another-space");
+		this.anotherOrgSpaceConnectionProperties.setUrl(new URL("https://localhost:9999"));
+
+
+		CloudFoundryProperties cloudFoundryProperties = new CloudFoundryProperties();
+		CloudFoundrySchedulerProperties cloudFoundrySchedulerProperties = new CloudFoundrySchedulerProperties();
+		cloudFoundrySchedulerProperties.setSchedulerUrl("https://localhost:9999");
+		cloudFoundryProperties.setSchedulerProperties(cloudFoundrySchedulerProperties);
+		cloudFoundryProperties.setDeployment(new CloudFoundryDeploymentProperties());
+		cloudFoundryProperties.setConnection(this.defaultConnectionProperties);
+		Map<String, CloudFoundryProperties> platformMap = new HashMap<>();
+		platformMap.put("default", cloudFoundryProperties);
+		cloudFoundryProperties = new CloudFoundryProperties();
+		cloudFoundryProperties.setDeployment(new CloudFoundryDeploymentProperties());
+		cloudFoundryProperties.setConnection(this.anotherOrgSpaceConnectionProperties);
+		cloudFoundryProperties.setSchedulerProperties(cloudFoundrySchedulerProperties);
+
+
+		platformMap.put("anotherOrgSpace", cloudFoundryProperties);
+
+		this.cloudFoundryPlatformProperties.setAccounts(platformMap);
+
+		this.connectionContextProvider = new CloudFoundryPlatformConnectionContextProvider(this.cloudFoundryPlatformProperties);
+		this.platformTokenProvider = mock(CloudFoundryPlatformTokenProvider.class);
+		when(this.platformTokenProvider.tokenProvider(anyString())).thenReturn(mock(TokenProvider.class));
 	}
 
 	private Mono<ListOrganizationsResponse> listOrganizationsResponse() {

@@ -68,14 +68,14 @@ public class TaskScheduleCommandTemplate {
 				name, definition, expression, properties, args);
 		CommandResult cr = dataFlowShell.executeCommand(wholeCommand);
 		verify(schedule).schedule(name, definition, Collections.singletonMap("scheduler.cron.expression", "* * * * *"),
-				Collections.emptyList());
+				Collections.emptyList(), null);
 		assertEquals("Created schedule 'schedName'", cr.getResult());
 	}
 
 	public void unschedule(String name) {
 		String wholeCommand = String.format("task schedule destroy --name \"%s\"", name);
 		CommandResult cr = dataFlowShell.executeCommand(wholeCommand);
-		verify(schedule).unschedule(name);
+		verify(schedule).unschedule(name, null);
 		assertEquals("Deleted task schedule 'schedName'", cr.getResult());
 	}
 
@@ -85,7 +85,7 @@ public class TaskScheduleCommandTemplate {
 		scheduleInfo.setTaskDefinitionName("testDefinition");
 		scheduleInfo.setScheduleProperties(Collections.EMPTY_MAP);
 
-		when(schedule.list()).thenReturn(Arrays.asList(scheduleInfo));
+		when(schedule.listForPlatform(null)).thenReturn(Arrays.asList(scheduleInfo));
 
 		String wholeCommand = "task schedule list";
 		CommandResult cr = dataFlowShell.executeCommand(wholeCommand);
@@ -100,7 +100,7 @@ public class TaskScheduleCommandTemplate {
 		scheduleInfo.setTaskDefinitionName("testDefinition");
 		scheduleInfo.setScheduleProperties(Collections.EMPTY_MAP);
 
-		when(schedule.list(definitionName)).thenReturn(Arrays.asList(scheduleInfo));
+		when(schedule.list(definitionName, null)).thenReturn(Arrays.asList(scheduleInfo));
 
 		String wholeCommand = String.format("task schedule list --definitionName %s", definitionName);
 		CommandResult cr = dataFlowShell.executeCommand(wholeCommand);

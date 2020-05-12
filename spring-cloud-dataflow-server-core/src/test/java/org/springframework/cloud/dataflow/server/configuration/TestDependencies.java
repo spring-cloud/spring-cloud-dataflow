@@ -104,6 +104,7 @@ import org.springframework.cloud.dataflow.server.repository.JdbcDataflowTaskExec
 import org.springframework.cloud.dataflow.server.repository.StreamDefinitionRepository;
 import org.springframework.cloud.dataflow.server.repository.TaskDefinitionRepository;
 import org.springframework.cloud.dataflow.server.repository.TaskDeploymentRepository;
+import org.springframework.cloud.dataflow.server.service.LauncherService;
 import org.springframework.cloud.dataflow.server.service.SchedulerService;
 import org.springframework.cloud.dataflow.server.service.SchedulerServiceProperties;
 import org.springframework.cloud.dataflow.server.service.StreamService;
@@ -115,6 +116,7 @@ import org.springframework.cloud.dataflow.server.service.TaskExecutionService;
 import org.springframework.cloud.dataflow.server.service.TaskSaveService;
 import org.springframework.cloud.dataflow.server.service.TaskValidationService;
 import org.springframework.cloud.dataflow.server.service.impl.AppDeploymentRequestCreator;
+import org.springframework.cloud.dataflow.server.service.impl.DefaultLauncherService;
 import org.springframework.cloud.dataflow.server.service.impl.DefaultSchedulerService;
 import org.springframework.cloud.dataflow.server.service.impl.DefaultStreamService;
 import org.springframework.cloud.dataflow.server.service.impl.DefaultTaskDeleteService;
@@ -425,8 +427,14 @@ public class TestDependencies extends WebMvcConfigurationSupport {
 	}
 
 	@Bean
-	public TaskPlatformController taskPlatformController(LauncherRepository launcherRepository) {
-		return new TaskPlatformController(launcherRepository);
+	public TaskPlatformController taskPlatformController(LauncherService launcherService) {
+		return new TaskPlatformController(launcherService);
+	}
+
+
+	@Bean
+	LauncherService launcherService(LauncherRepository launcherRepository) {
+		return new DefaultLauncherService(launcherRepository);
 	}
 
 	@Bean
@@ -580,7 +588,7 @@ public class TestDependencies extends WebMvcConfigurationSupport {
 			ApplicationConfigurationMetadataResolver metaDataResolver, AuditRecordService auditRecordService,
 			TaskConfigurationProperties taskConfigurationProperties, DataSourceProperties dataSourceProperties) {
 		return new DefaultSchedulerService(commonApplicationProperties,
-				taskPlatform, taskDefinitionRepository,
+				Collections.singletonList(taskPlatform), taskDefinitionRepository,
 				registry, resourceLoader,
 				taskConfigurationProperties, dataSourceProperties, null,
 				metaDataResolver, new SchedulerServiceProperties(), auditRecordService);

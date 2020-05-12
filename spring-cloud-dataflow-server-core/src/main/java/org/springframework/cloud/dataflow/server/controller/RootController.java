@@ -123,6 +123,7 @@ public class RootController {
 		}
 		if (featuresProperties.isTasksEnabled()) {
 			root.add(entityLinks.linkToCollectionResource(LauncherResource.class).withRel("tasks/platforms"));
+
 			root.add(entityLinks.linkToCollectionResource(TaskDefinitionResource.class).withRel("tasks/definitions"));
 			root.add(unescapeTemplateVariables(entityLinks.linkToItemResource(TaskDefinitionResource.class, "{name}")
 					.withRel("tasks/definitions/definition")));

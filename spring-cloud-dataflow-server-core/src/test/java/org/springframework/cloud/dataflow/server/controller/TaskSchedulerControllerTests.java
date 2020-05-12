@@ -325,7 +325,7 @@ public class TaskSchedulerControllerTests {
 	private void createSampleSchedule(String taskDefinitionName, String scheduleName) {
 		Map<String, String> properties = new HashMap<>();
 		properties.put("scheduler.testApp." + SchedulerPropertyKeys.CRON_EXPRESSION, "* * * * *");
-		schedulerService.schedule(scheduleName, taskDefinitionName, properties, new ArrayList<>());
+		schedulerService.schedule(scheduleName, taskDefinitionName, properties, new ArrayList<>(), null);
 	}
 
 }
