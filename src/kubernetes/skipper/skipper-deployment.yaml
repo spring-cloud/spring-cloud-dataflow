@@ -18,13 +18,6 @@ spec:
       - name: skipper
         image: springcloud/spring-cloud-skipper-server:2.5.0.BUILD-SNAPSHOT
         imagePullPolicy: Always
-        volumeMounts:
-          - name: config
-            mountPath: /config
-            readOnly: true
-          - name: database
-            mountPath: /etc/secrets/database
-            readOnly: true
         ports:
         - containerPort: 80
         livenessProbe:
