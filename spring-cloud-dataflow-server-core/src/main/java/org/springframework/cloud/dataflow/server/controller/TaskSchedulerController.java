@@ -76,14 +76,16 @@ public class TaskSchedulerController {
 	 * Return a page-able list of {@link ScheduleInfo}s.
 	 *
 	 * @param assembler assembler for the {@link ScheduleInfo}
+	 * @param platform the name of the platform from which schedules will be retrieved.
 	 * @param pageable {@link Pageable} to be used
 	 * @return a list of Schedules
 	 */
 	@RequestMapping(value = "", method = RequestMethod.GET)
 	@ResponseStatus(HttpStatus.OK)
 	public PagedModel<ScheduleInfoResource> list(Pageable pageable,
+			@RequestParam(value = "platform", required = false) String platform,
 			PagedResourcesAssembler<ScheduleInfo> assembler) {
-		List<ScheduleInfo> result = this.schedulerService.list();
+		List<ScheduleInfo> result = this.schedulerService.listForPlatform(platform);
 		return assembler.toModel(new PageImpl<>(result, pageable, result.size()), taskAssembler);
 	}
 
@@ -91,12 +93,14 @@ public class TaskSchedulerController {
 	 * Return a {@link ScheduleInfo} for a specific Schedule.
 	 *
 	 * @param scheduleName assembler for the {@link ScheduleInfo}
+	 * @param platform the name of the platform from which the schedule will be retrieved.
 	 * @return a {@link ScheduleInfoResource} instance for the scheduleName specified.
 	 */
 	@RequestMapping(value = "/{name}", method = RequestMethod.GET)
 	@ResponseStatus(HttpStatus.OK)
-	public ScheduleInfoResource getSchedule(@PathVariable("name") String scheduleName) {
-		ScheduleInfo schedule = this.schedulerService.getSchedule(scheduleName);
+	public ScheduleInfoResource getSchedule(@PathVariable("name") String scheduleName,
+			@RequestParam(value = "platform", required = false) String platform) {
+		ScheduleInfo schedule = this.schedulerService.getSchedule(scheduleName, platform);
 		if (schedule == null) {
 			throw new NoSuchScheduleException(String.format("Schedule [%s] doesn't exist" , scheduleName));
 		}
@@ -108,13 +112,15 @@ public class TaskSchedulerController {
 	 * {@link org.springframework.cloud.dataflow.core.TaskDefinition} name.
 	 *
 	 * @param taskDefinitionName name of the taskDefinition to search.
+	 * @param platform name of the platform from which the list is retrieved.
 	 * @param assembler assembler for the {@link ScheduleInfo}.
 	 * @return a list of Schedules.
 	 */
 	@RequestMapping("/instances/{taskDefinitionName}")
 	public PagedModel<ScheduleInfoResource> filteredList(@PathVariable String taskDefinitionName,
+			@RequestParam(value = "platform", required = false) String platform,
 			PagedResourcesAssembler<ScheduleInfo> assembler) {
-		List<ScheduleInfo> result = this.schedulerService.list(taskDefinitionName);
+		List<ScheduleInfo> result = this.schedulerService.list(taskDefinitionName, platform);
 		int resultSize = result.size();
 		Pageable pageable = PageRequest.of(0,
 				(resultSize == 0) ? resultSize = 1 : resultSize); //handle empty result set
@@ -142,27 +148,32 @@ public class TaskSchedulerController {
 	 * @param properties the runtime properties for the task, as a comma-delimited list of
 	 * key=value pairs
 	 * @param arguments the runtime commandline arguments
+	 * @param platform the name of the platform for which the schedule is created.
 	 */
 	@RequestMapping(value = "", method = RequestMethod.POST)
 	@ResponseStatus(HttpStatus.CREATED)
 	public void save(@RequestParam("scheduleName") String scheduleName,
 			@RequestParam("taskDefinitionName") String taskDefinitionName,
 			@RequestParam String properties,
-			@RequestParam(required = false) String arguments) {
+			@RequestParam(required = false) String arguments,
+			@RequestParam(value = "platform", required = false) String platform) {
 		Map<String, String> propertiesToUse = DeploymentPropertiesUtils.parse(properties);
 		List<String> argumentsToUse = DeploymentPropertiesUtils.parseArgumentList(arguments, " ");
-		this.schedulerService.schedule(StringUtils.trim(scheduleName), taskDefinitionName, propertiesToUse, argumentsToUse);
+		this.schedulerService.schedule(StringUtils.trim(scheduleName), taskDefinitionName,
+				propertiesToUse, argumentsToUse, platform);
 	}
 
 	/**
 	 * Unschedule the schedule from the Scheduler.
 	 *
 	 * @param scheduleName name of the schedule to be deleted
+	 * @param platform name of the platform from which the schedule is deleted.
 	 */
 	@RequestMapping(value = "/{scheduleName}", method = RequestMethod.DELETE)
 	@ResponseStatus(HttpStatus.OK)
-	public void unschedule(@PathVariable("scheduleName") String scheduleName) {
-		schedulerService.unschedule(scheduleName);
+	public void unschedule(@PathVariable("scheduleName") String scheduleName,
+			@RequestParam(value = "platform", required = false) String platform) {
+		schedulerService.unschedule(scheduleName, platform);
 	}
 
 	/**

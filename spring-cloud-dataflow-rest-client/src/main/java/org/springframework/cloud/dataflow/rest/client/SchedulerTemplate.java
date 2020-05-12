@@ -27,6 +27,7 @@ import org.springframework.hateoas.RepresentationModel;
 import org.springframework.util.Assert;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
+import org.springframework.util.StringUtils;
 import org.springframework.web.client.RestTemplate;
 
 /**
@@ -61,7 +62,7 @@ public class SchedulerTemplate implements SchedulerOperations {
 	}
 
 	@Override
-	public void schedule(String scheduleName, String taskDefinitionName, Map<String, String> taskProperties, List<String> commandLineArgs) {
+	public void schedule(String scheduleName, String taskDefinitionName, Map<String, String> taskProperties, List<String> commandLineArgs, String platform) {
 		MultiValueMap<String, Object> values = new LinkedMultiValueMap<>();
 		values.add("scheduleName", scheduleName);
 		values.add("properties", DeploymentPropertiesUtils.format(taskProperties));
@@ -78,28 +79,70 @@ public class SchedulerTemplate implements SchedulerOperations {
 			commandLineArgValue += command;
 		}
 		values.add("arguments", commandLineArgValue);
+		if(StringUtils.hasText(platform)) {
+			values.add("platform", platform);
+		}
 		restTemplate.postForObject(schedulesLink.getHref(), values, Long.class);
 	}
 
 	@Override
+	public void schedule(String scheduleName, String taskDefinitionName, Map<String, String> taskProperties, List<String> commandLineArgs) {
+		schedule(scheduleName, taskDefinitionName, taskProperties, commandLineArgs, null);
+	}
+
+	@Override
+	public void unschedule(String scheduleName, String platform) {
+		String url = schedulesLink.getHref() + "/" + scheduleName;
+		if(platform != null) {
+			url = url + "?platform=" + platform;
+		}
+		restTemplate.delete(url);
+	}
+
+	@Override
 	public void unschedule(String scheduleName) {
-		restTemplate.delete(schedulesLink.getHref() + "/" + scheduleName);
+		unschedule(scheduleName, null);
+	}
+
+	@Override
+	public PagedModel<ScheduleInfoResource> list(String taskDefinitionName, String platform) {
+		String url = schedulesInstanceLink.expand(taskDefinitionName).getHref();
+		if(platform != null) {
+			url = url + "?platform=" + platform;
+		}
+		return restTemplate.getForObject(url , ScheduleInfoResource.Page.class);
 	}
 
 	@Override
 	public PagedModel<ScheduleInfoResource> list(String taskDefinitionName) {
-		return restTemplate.getForObject(schedulesInstanceLink.expand(taskDefinitionName).getHref(),
-				ScheduleInfoResource.Page.class);
+		return list(taskDefinitionName, null);
+	}
+
+	@Override
+	public PagedModel<ScheduleInfoResource> listByPlatform(String platform) {
+		String url = schedulesLink.getHref();
+		if(platform != null) {
+			url = url + "?platform=" + platform;
+		}
+		return restTemplate.getForObject(url, ScheduleInfoResource.Page.class);
 	}
 
 	@Override
 	public PagedModel<ScheduleInfoResource> list() {
-		return restTemplate.getForObject(schedulesLink.getHref(), ScheduleInfoResource.Page.class);
+		return listByPlatform(null);
+	}
+
+	@Override
+	public ScheduleInfoResource getSchedule(String scheduleName, String platform) {
+		String url = schedulesLink.getHref() + "/" + scheduleName;
+		if(platform != null) {
+			url = url + "?platform=" + platform;
+		}
+		return restTemplate.getForObject(url, ScheduleInfoResource.class);
 	}
 
 	@Override
 	public ScheduleInfoResource getSchedule(String scheduleName) {
-		return restTemplate.getForObject(schedulesLink.getHref() + "/" + scheduleName,
-				ScheduleInfoResource.class);
+		return getSchedule(scheduleName, null);
 	}
 }

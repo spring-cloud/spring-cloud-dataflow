@@ -31,6 +31,7 @@ import org.springframework.cloud.dataflow.core.Launcher;
 import org.springframework.cloud.dataflow.server.config.apps.CommonApplicationProperties;
 import org.springframework.cloud.dataflow.server.configuration.JobDependencies;
 import org.springframework.cloud.dataflow.server.job.LauncherRepository;
+import org.springframework.cloud.deployer.spi.scheduler.Scheduler;
 import org.springframework.cloud.deployer.spi.task.TaskLauncher;
 import org.springframework.http.MediaType;
 import org.springframework.test.annotation.DirtiesContext;
@@ -73,8 +74,10 @@ public class TaskPlatformControllerTests {
 				.defaultRequest(get("/").accept(MediaType.APPLICATION_JSON)).build();
 		Launcher launcher = new Launcher("default", "local", taskLauncher);
 		Launcher cfLauncher = new Launcher("cf", "Cloud Foundry", mock(TaskLauncher.class));
+		Launcher cfLauncherWithScheduler = new Launcher("cfsched", "Cloud Foundry", mock(TaskLauncher.class), mock(Scheduler.class));
 		this.launcherRepository.save(launcher);
 		this.launcherRepository.save(cfLauncher);
+		this.launcherRepository.save(cfLauncherWithScheduler);
 	}
 
 	@Test
@@ -84,6 +87,25 @@ public class TaskPlatformControllerTests {
 				.andExpect(status().isOk()).andReturn().getResponse().getContentAsString();
 		assertTrue(responseString.contains("{\"name\":\"default\",\"type\":\"local\",\"description\":null"));
 		assertTrue(responseString.contains("{\"name\":\"cf\",\"type\":\"Cloud Foundry\",\"description\":null"));
+		assertTrue(responseString.contains("{\"name\":\"cfsched\",\"type\":\"Cloud Foundry\",\"description\":null"));
+	}
+
+	@Test
+	public void testGetPlatformSchedulerList() throws Exception {
+		String responseString = mockMvc
+				.perform(get("/tasks/platforms?schedulesEnabled=true").accept(MediaType.APPLICATION_JSON)).andDo(print())
+				.andExpect(status().isOk()).andReturn().getResponse().getContentAsString();
+		assertTrue(responseString.contains("{\"name\":\"cfsched\",\"type\":\"Cloud Foundry\",\"description\":null"));
+	}
+
+	@Test
+	public void testGetPlatformSchedulerListFalse() throws Exception {
+		String responseString = mockMvc
+				.perform(get("/tasks/platforms?schedulesEnabled=false").accept(MediaType.APPLICATION_JSON)).andDo(print())
+				.andExpect(status().isOk()).andReturn().getResponse().getContentAsString();
+		assertTrue(responseString.contains("{\"name\":\"default\",\"type\":\"local\",\"description\":null"));
+		assertTrue(responseString.contains("{\"name\":\"cf\",\"type\":\"Cloud Foundry\",\"description\":null"));
+		assertTrue(responseString.contains("{\"name\":\"cfsched\",\"type\":\"Cloud Foundry\",\"description\":null"));
 	}
 
 }

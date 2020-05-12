@@ -108,7 +108,7 @@ public class ApiDocumentation extends BaseDocumentation {
 				linkWithRel("tasks/schedules/instances").description("Provides schedule information of a specific task	"),
 				linkWithRel("tasks/executions/name").description("Returns all task executions for a given Task name"),
 				linkWithRel("tasks/executions/execution").description("Provides details for a specific task execution"),
-				linkWithRel("tasks/platforms").description("Provides platform accounts for launching tasks"),
+				linkWithRel("tasks/platforms").description("Provides platform accounts for launching tasks.  The results can be filtered to show the platforms that support scheduling by adding a request parameter of 'schedulesEnabled=true"),
 				linkWithRel("tasks/logs").description("Retrieve the task application log"),
 
 				linkWithRel("streams/definitions").description("Exposes the Streams resource"),

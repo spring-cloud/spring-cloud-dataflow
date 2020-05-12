@@ -81,24 +81,26 @@ public class TaskSchedulerCommands implements CommandMarker {
 			@CliOption(key = {
 					"properties" }, help = "a task properties (coma separated string eg.: --properties 'prop.first=prop,prop.sec=prop2'") String properties,
 			@CliOption(key = {
-					"arguments" }, help = "command line args (space separated string eg.: --arguments 'a b c d'") String arguments) {
+					"arguments" }, help = "command line args (space separated string eg.: --arguments 'a b c d'") String arguments,
+			@CliOption(key = { "platform" }, help = "the name of the platform from which to create the schedule") String platform) {
 		Map<String, String> params = DeploymentPropertiesUtils.parse(properties);
 		List<String> args = DeploymentPropertiesUtils.parseArgumentList(arguments, " ");
 		params.put("scheduler.cron.expression", expression);
 
-		scheduleOperations().schedule(name, definitionName, params, args);
+		scheduleOperations().schedule(name, definitionName, params, args, platform);
 		return String.format("Created schedule '%s'", name);
 	}
 
 	@CliCommand(value = SCHEDULER_LIST, help = "List task schedules by task definition name")
 	public Table listByDefinition(
+			@CliOption(key = { "platform" }, help = "the name platform from which to retrieve a list of schedules") String platform,
 			@CliOption(key = { "definitionName" }, help = "the task definition name") String definitionName) {
 		PagedModel<ScheduleInfoResource> schedules;
 		if (Strings.isEmpty(definitionName)) {
-			schedules = scheduleOperations().list();
+			schedules = scheduleOperations().listByPlatform(platform);
 		}
 		else {
-			schedules = scheduleOperations().list(definitionName);
+			schedules = scheduleOperations().list(definitionName, platform);
 		}
 
 		LinkedHashMap<String, Object> headers = new LinkedHashMap<>();
@@ -111,8 +113,9 @@ public class TaskSchedulerCommands implements CommandMarker {
 
 	@CliCommand(value = SCHEDULER_UNSCHEDULE, help = "Delete task schedule")
 	public String unschedule(
-			@CliOption(mandatory = true, key = { "name" }, help = "The name of the task schedule") String name) {
-		scheduleOperations().unschedule(name);
+			@CliOption(mandatory = true, key = { "name" }, help = "The name of the task schedule") String name,
+			@CliOption(key = { "platform" }, help = "the name platform from which to unschedule") String platform) {
+		scheduleOperations().unschedule(name, platform);
 		return String.format("Deleted task schedule '%s'", name);
 	}
 

@@ -85,6 +85,7 @@ import org.springframework.cloud.dataflow.server.controller.security.SecurityCon
 import org.springframework.cloud.dataflow.server.job.LauncherRepository;
 import org.springframework.cloud.dataflow.server.repository.StreamDefinitionRepository;
 import org.springframework.cloud.dataflow.server.repository.TaskDefinitionRepository;
+import org.springframework.cloud.dataflow.server.service.LauncherService;
 import org.springframework.cloud.dataflow.server.service.SchedulerService;
 import org.springframework.cloud.dataflow.server.service.SpringSecurityAuditorAware;
 import org.springframework.cloud.dataflow.server.service.StreamService;
@@ -96,6 +97,7 @@ import org.springframework.cloud.dataflow.server.service.TaskJobService;
 import org.springframework.cloud.dataflow.server.service.TaskSaveService;
 import org.springframework.cloud.dataflow.server.service.TaskValidationService;
 import org.springframework.cloud.dataflow.server.service.impl.AppDeploymentRequestCreator;
+import org.springframework.cloud.dataflow.server.service.impl.DefaultLauncherService;
 import org.springframework.cloud.dataflow.server.service.impl.DefaultStreamService;
 import org.springframework.cloud.dataflow.server.service.impl.TaskConfigurationProperties;
 import org.springframework.cloud.dataflow.server.service.impl.validation.DefaultStreamValidationService;
@@ -246,8 +248,8 @@ public class DataFlowControllerAutoConfiguration {
 		}
 
 		@Bean
-		public TaskPlatformController taskLauncherController(LauncherRepository launcherRepository) {
-			return new TaskPlatformController(launcherRepository);
+		public TaskPlatformController taskLauncherController(LauncherService launcherService) {
+			return new TaskPlatformController(launcherService);
 		}
 
 		@Bean
@@ -301,6 +303,11 @@ public class DataFlowControllerAutoConfiguration {
 		@Bean
 		public TaskLogsController taskLogsController(TaskExecutionService taskExecutionService) {
 			return new TaskLogsController(taskExecutionService);
+		}
+
+		@Bean
+		public LauncherService launcherService(LauncherRepository launcherRepository) {
+			return new DefaultLauncherService(launcherRepository);
 		}
 	}
 

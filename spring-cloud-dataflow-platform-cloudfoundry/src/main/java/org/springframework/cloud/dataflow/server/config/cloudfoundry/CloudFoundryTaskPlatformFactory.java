@@ -99,15 +99,18 @@ public class CloudFoundryTaskPlatformFactory extends AbstractTaskPlatformFactory
 	private Scheduler scheduler(String account, CloudFoundryTaskLauncher taskLauncher,
 			CloudFoundryOperations cloudFoundryOperations) {
 		Scheduler scheduler = null;
-		if (cloudFoundrySchedulerClientProvider.isPresent()) {
+		if (cloudFoundrySchedulerClientProvider.isPresent() && this.platformProperties.getAccounts().get(account).getSchedulerProperties() != null) {
+			Optional<CloudFoundrySchedulerProperties> schedulerProperties = Optional.of(this.platformProperties.getAccounts().get(account).getSchedulerProperties());
+			CloudFoundrySchedulerClientProvider cloudFoundrySchedulerClientProviderLocal = new CloudFoundrySchedulerClientProvider(
+					connectionContextProvider, platformTokenProvider, schedulerProperties);
 			SchedulerClient schedulerClient =
-				cloudFoundrySchedulerClientProvider.get().cloudFoundrySchedulerClient(account);
+					cloudFoundrySchedulerClientProviderLocal.cloudFoundrySchedulerClient(account);
 			scheduler = new CloudFoundryAppScheduler(
 					schedulerClient,
 					cloudFoundryOperations,
 					connectionProperties(account),
 					taskLauncher,
-					cloudFoundrySchedulerClientProvider.get().schedulerProperties());
+					schedulerProperties.get());
 		}
 		return scheduler;
 	}

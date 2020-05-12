@@ -60,15 +60,28 @@ public class SchedulerTemplateTests {
 
 	@Test
 	public void scheduleTest() {
+		verifyControllerResult(null);
+	}
+
+	@Test
+	public void multiPlatformScheduleTest() {
+		verifyControllerResult("default");
+		verifyControllerResult("foo");
+	}
+
+	private void verifyControllerResult(String platform) {
 		Map<String, String> props = Collections.singletonMap("Hello", "World");
 		List<String> args = Collections.singletonList("args=vals");
-		template.schedule(DEFAULT_SCHEDULE_NAME, DEFAULT_DEFINITION_NAME, props, args);
+		template.schedule(DEFAULT_SCHEDULE_NAME, DEFAULT_DEFINITION_NAME, props, args, platform);
 
 		MultiValueMap<String, Object> values = new LinkedMultiValueMap<>();
 		values.add("scheduleName", DEFAULT_SCHEDULE_NAME);
 		values.add("properties", DeploymentPropertiesUtils.format(props));
 		values.add("taskDefinitionName", DEFAULT_DEFINITION_NAME);
 		values.add("arguments", args.get(0));
+		if(platform != null) {
+			values.add("platform", platform);
+		}
 		Mockito.verify(restTemplate).postForObject(SCHEDULES_RELATION, values, Long.class);
 	}
 
@@ -79,9 +92,33 @@ public class SchedulerTemplateTests {
 	}
 
 	@Test
+	public void unSchedulePlatformTest() {
+		template.unschedule(DEFAULT_SCHEDULE_NAME, "foo");
+		Mockito.verify(restTemplate).delete(SCHEDULES_RELATION + "/testSchedule?platform=foo");
+	}
+
+	@Test
+	public void unScheduleNullTest() {
+		template.unschedule(DEFAULT_SCHEDULE_NAME, null);
+		Mockito.verify(restTemplate).delete(SCHEDULES_RELATION + "/testSchedule");
+	}
+
+	@Test
 	public void listTest() {
 		template.list();
 		Mockito.verify(restTemplate).getForObject(SCHEDULES_RELATION, ScheduleInfoResource.Page.class);
+	}
+
+	@Test
+	public void listByPlatformNullTest() {
+		template.listByPlatform(null);
+		Mockito.verify(restTemplate).getForObject(SCHEDULES_RELATION, ScheduleInfoResource.Page.class);
+	}
+
+	@Test
+	public void listByPlatformTest() {
+		template.listByPlatform("foo");
+		Mockito.verify(restTemplate).getForObject(SCHEDULES_RELATION + "?platform=foo", ScheduleInfoResource.Page.class);
 	}
 
 	@Test
@@ -91,10 +128,35 @@ public class SchedulerTemplateTests {
 	}
 
 	@Test
+	public void listTaskDefNameNullTest() {
+		template.list(DEFAULT_DEFINITION_NAME, null);
+		Mockito.verify(restTemplate).getForObject(SCHEDULES_RELATION_INSTANCE, ScheduleInfoResource.Page.class);
+	}
+
+	@Test
+	public void listTaskDefNamePlatformTest() {
+		template.list(DEFAULT_DEFINITION_NAME, "foo");
+		Mockito.verify(restTemplate).getForObject(SCHEDULES_RELATION_INSTANCE + "?platform=foo", ScheduleInfoResource.Page.class);
+	}
+
+	@Test
 	public void getScheduleTest() {
 		template.getSchedule(DEFAULT_SCHEDULE_NAME);
 		Mockito.verify(restTemplate).getForObject(SCHEDULES_RELATION + "/" + DEFAULT_SCHEDULE_NAME,
 				ScheduleInfoResource.class);
 	}
 
+	@Test
+	public void getScheduleNullTest() {
+		template.getSchedule(DEFAULT_SCHEDULE_NAME, null);
+		Mockito.verify(restTemplate).getForObject(SCHEDULES_RELATION + "/" + DEFAULT_SCHEDULE_NAME,
+				ScheduleInfoResource.class);
+	}
+
+	@Test
+	public void getSchedulePlatformTest() {
+		template.getSchedule(DEFAULT_SCHEDULE_NAME, "foo");
+		Mockito.verify(restTemplate).getForObject(SCHEDULES_RELATION + "/" +
+						DEFAULT_SCHEDULE_NAME + "?platform=foo", ScheduleInfoResource.class);
+	}
 }
