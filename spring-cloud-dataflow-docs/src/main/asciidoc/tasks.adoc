@@ -280,6 +280,16 @@ dataflow:>task destroy mytask
 Destroyed task 'mytask'
 ----
 
+The `task destroy` command also has an option to `cleanup` the task executions of the task being destroyed, as shown in the following example:
+
+[source,bash,subs=attributes]
+----
+dataflow:>task destroy mytask --cleanup
+Destroyed task 'mytask'
+----
+
+By default, the `cleanup` option is set to `false` (ie., by default, the task executions are not cleaned up when destroying the task).
+
 To destroy all tasks through the shell, use the `task all destroy` command as shown in the following example:
 
 [source,bash,subs=attributes]
