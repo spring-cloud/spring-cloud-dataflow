@@ -148,10 +148,21 @@ public final class DeploymentPropertiesUtils {
 	 */
 	public static List<String> parseArgumentList(String s, String delimiter) {
 		ArrayList<String> pairs = new ArrayList<>();
-		if(s != null && s.contains("=")) {
+		if (s != null && s.contains("=")) {
 			// get raw candidates as simple comma split
 			String[] candidates = StringUtils.delimitedListToStringArray(s, delimiter);
 			for (int i = 0; i < candidates.length; i++) {
+				int elementsInQuotesIndex = findEndToken(candidates, i) +1;
+				if (elementsInQuotesIndex > -1) {
+					pairs.add(candidates[i]);
+					i++;
+					for (; i < elementsInQuotesIndex; i++) {
+						pairs.set(pairs.size() - 1, pairs.get(pairs.size() - 1) + delimiter + candidates[i]);
+					}
+					if(!(i < candidates.length)) {
+						break;
+					}
+				}
 				if (i > 0 && !candidates[i].contains("=")) {
 					// we don't have '=' so this has to be latter parts of
 					// a comma delimited value, append it to previously added
@@ -167,9 +178,21 @@ public final class DeploymentPropertiesUtils {
 				}
 			}
 		}
-
-
 		return pairs;
+	}
+
+	private  static int findEndToken(String[] candidates, int currentPos) {
+		int result = -1;
+		if(!candidates[currentPos].contains("=\"")) {
+			return -1;
+		}
+		for(int i = currentPos; i < candidates.length; i++) {
+			if(candidates[i].endsWith("\"" )) {
+				result = i;
+				break;
+			}
+		}
+		return result;
 	}
 
 
