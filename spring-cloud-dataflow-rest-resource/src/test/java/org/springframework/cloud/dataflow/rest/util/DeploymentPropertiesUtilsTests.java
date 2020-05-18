@@ -141,6 +141,23 @@ public class DeploymentPropertiesUtilsTests {
 	}
 
 	@Test
+	public void parseArgumentTestsWithQuotes() {
+
+		List<String> props = DeploymentPropertiesUtils.parseArgumentList("a=\"b c\" e=f g=h", " ");
+		assertTrue(props.contains("a=\"b c\""));
+		assertTrue(props.contains("e=f"));
+		assertTrue(props.contains("g=h"));
+		props = DeploymentPropertiesUtils.parseArgumentList("--composedTaskArguments=\"1.timestamp.format=YYYY " +
+				"--timestamp.timestamp.format=MM --foo=bar bar=\"bazzz buzz\"\" " +
+				"a=b c=d --foo=bar", " ");
+		assertTrue(props.contains("--composedTaskArguments=\"1.timestamp.format=YYYY " +
+				"--timestamp.timestamp.format=MM --foo=bar bar=\"bazzz buzz\"\""));
+		assertTrue(props.contains("a=b"));
+		assertTrue(props.contains("c=d"));
+		assertTrue(props.contains("--foo=bar"));
+	}
+
+	@Test
 	public void testLongDeploymentPropertyValues() {
 		Map<String, String> props = DeploymentPropertiesUtils
 				.parse("app.foo.bar=FoooooooooooooooooooooBar,app.foo" + ".bar2=FoooooooooooooooooooooBar");
