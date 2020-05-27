@@ -1,0 +1,21 @@
+version: '3'
+
+# Extends the default docker-compose.yml with Wavefront monitoring configuration
+# Usage: docker-compose -f ./docker-compose.yml -f ./docker-compose-wavefront.yml up
+# Configuration:
+#  - WAVEFRONT_KEY environment variable MUST be set to the user's wavefront api key.
+#  - WAVEFRONT_URI (optional) can be used to set the wavefront uri. Defaults to https://vmware.wavefront.com
+#  - WAVEFRONT_SOURCE (optional) can be used to set the wavefront source name. Defaults to scdf-docker-compose
+
+services:
+  dataflow-server:
+    environment:
+      - spring.cloud.dataflow.applicationProperties.stream.management.metrics.export.wavefront.enabled=true
+      - spring.cloud.dataflow.applicationProperties.stream.management.metrics.export.wavefront.api-token=${WAVEFRONT_KEY:?WAVEFRONT_KEY is not set!}
+      - spring.cloud.dataflow.applicationProperties.stream.management.metrics.export.wavefront.uri=${WAVEFRONT_URI:-https://vmware.wavefront.com}
+      - spring.cloud.dataflow.applicationProperties.stream.management.metrics.export.wavefront.source=${WAVEFRONT_SOURCE:-scdf-docker-compose}
+      - spring.cloud.dataflow.applicationProperties.task.management.metrics.export.wavefront.enabled=true
+      - spring.cloud.dataflow.applicationProperties.task.management.metrics.export.wavefront.api-token=${WAVEFRONT_KEY:?WAVEFRONT_KEY is not set!}
+      - spring.cloud.dataflow.applicationProperties.task.management.metrics.export.wavefront.uri=${WAVEFRONT_URI:-https://vmware.wavefront.com}
+      - spring.cloud.dataflow.applicationProperties.task.management.metrics.export.wavefront.source=${WAVEFRONT_SOURCE:-scdf-docker-compose}
+      - spring.cloud.dataflow.grafana-info.url=${WAVEFRONT_URI:-https://vmware.wavefront.com}/dashboards/scdf-applications
