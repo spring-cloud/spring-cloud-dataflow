@@ -285,8 +285,9 @@ public class TaskCommands implements CommandMarker {
 	@CliCommand(value = DESTROY, help = "Destroy an existing task")
 	public String destroy(
 			@CliOption(key = { "",
-					"name" }, help = "the name of the task to destroy", mandatory = true, optionContext = "existing-task disable-string-converter") String name) {
-		taskOperations().destroy(name);
+					"name" }, help = "the name of the task to destroy", mandatory = true, optionContext = "existing-task disable-string-converter") String name,
+			@CliOption(key = { "cleanup" }, help = "the boolean flag to set if task executions and related resources need to be cleaned", unspecifiedDefaultValue = "false", specifiedDefaultValue = "true") boolean cleanup) {
+		taskOperations().destroy(name, cleanup);
 		return String.format("Destroyed task '%s'", name);
 	}
 

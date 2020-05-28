@@ -29,7 +29,6 @@ import org.springframework.cloud.dataflow.server.service.impl.NodeStatus;
 import org.springframework.cloud.dataflow.server.service.impl.TaskServiceUtils;
 import org.springframework.cloud.task.listener.TaskException;
 import org.springframework.util.Assert;
-import org.springframework.util.StringUtils;
 
 /**
  * Implementation of the TaskValidationService that delegates to the task definition repository and is able to validate
@@ -45,16 +44,12 @@ public class DefaultTaskValidationService extends DefaultValidationService imple
 
 	private final TaskDefinitionRepository taskDefinitionRepository;
 
-	private final String composedTaskRunnerName;
 
 	public DefaultTaskValidationService(AppRegistryService appRegistry,
-			DockerValidatorProperties dockerValidatorProperties, TaskDefinitionRepository taskDefinitionRepository,
-			String composedTaskRunnerName) {
+			DockerValidatorProperties dockerValidatorProperties, TaskDefinitionRepository taskDefinitionRepository) {
 		super(appRegistry, dockerValidatorProperties);
 		Assert.notNull(taskDefinitionRepository, "TaskDefinitionRepository must not be null");
-		Assert.isTrue(StringUtils.hasText(composedTaskRunnerName), "ComposedTaskRunnerName must have a value");
 		this.taskDefinitionRepository = taskDefinitionRepository;
-		this.composedTaskRunnerName = composedTaskRunnerName;
 	}
 
 	@Override
@@ -70,26 +65,17 @@ public class DefaultTaskValidationService extends DefaultValidationService imple
 				definition.getDescription());
 		ApplicationType appType = ApplicationType.task;
 		if (TaskServiceUtils.isComposedTaskDefinition(definition.getDslText())) {
-			// First verify that CTR is valid
-
-			if (this.validate(this.composedTaskRunnerName, ApplicationType.task)) {
-				TaskParser taskParser = new TaskParser(name, definition.getDslText(), true, true);
-				TaskNode taskNode = taskParser.parse();
-				String childTaskPrefix = TaskNode.getTaskPrefix(name);
-				taskNode.getTaskApps().stream().forEach(task -> {
-					TaskDefinition childDefinition = this.taskDefinitionRepository.findByTaskName(childTaskPrefix + task.getName());
-					validateTaskName(childTaskPrefix + task.getName());
-					boolean status = this.validate(childDefinition.getRegisteredAppName(), ApplicationType.task);
-					validationStatus.getAppsStatuses().put(
-							String.format("%s:%s", appType.name(), childDefinition.getName()),
-							(status) ? NodeStatus.valid.name() : NodeStatus.invalid.name());
-				});
-			}
-			else {
+			TaskParser taskParser = new TaskParser(name, definition.getDslText(), true, true);
+			TaskNode taskNode = taskParser.parse();
+			String childTaskPrefix = TaskNode.getTaskPrefix(name);
+			taskNode.getTaskApps().stream().forEach(task -> {
+				TaskDefinition childDefinition = this.taskDefinitionRepository.findByTaskName(childTaskPrefix + task.getName());
+				validateTaskName(childTaskPrefix + task.getName());
+				boolean status = this.validate(childDefinition.getRegisteredAppName(), ApplicationType.task);
 				validationStatus.getAppsStatuses().put(
-						String.format("%s:%s", appType.name(), this.composedTaskRunnerName),
-						NodeStatus.invalid.name());
-			}
+						String.format("%s:%s", appType.name(), childDefinition.getName()),
+						(status) ? NodeStatus.valid.name() : NodeStatus.invalid.name());
+			});
 		}
 		else {
 			boolean status = this.validate(definition.getRegisteredAppName(), ApplicationType.task);

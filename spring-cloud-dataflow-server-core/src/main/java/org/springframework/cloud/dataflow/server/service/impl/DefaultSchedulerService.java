@@ -16,6 +16,8 @@
 
 package org.springframework.cloud.dataflow.server.service.impl;
 
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -139,7 +141,7 @@ public class DefaultSchedulerService implements SchedulerService {
 		if (taskNode.isComposed()) {
 			taskDefinition = new TaskDefinition(taskDefinition.getName(),
 					TaskServiceUtils.createComposedTaskDefinition(
-							taskNode.toExecutableDSL(), this.taskConfigurationProperties));
+							taskNode.toExecutableDSL()));
 			taskDeploymentProperties = TaskServiceUtils.establishComposedTaskProperties(taskDeploymentProperties, taskNode);
 		}
 
@@ -307,8 +309,15 @@ public class DefaultSchedulerService implements SchedulerService {
 				.orElseThrow(() -> new NoSuchTaskDefinitionException(taskDefinitionName));
 		AppRegistration appRegistration = null;
 		if (TaskServiceUtils.isComposedTaskDefinition(taskDefinition.getDslText())) {
-			appRegistration = this.registry.find(taskConfigurationProperties.getComposedTaskRunnerName(),
-					ApplicationType.task);
+			URI composedTaskUri = null;
+			try {
+				composedTaskUri = new URI(taskConfigurationProperties.getComposedTaskRunnerUri());
+			}
+			catch (URISyntaxException e) {
+				throw new IllegalArgumentException("Invalid Composed Task Url: " +
+						taskConfigurationProperties.getComposedTaskRunnerUri());
+			}
+			appRegistration = new AppRegistration(TaskConfigurationProperties.COMPOSED_TASK_RUNNER_NAME, ApplicationType.task, composedTaskUri);
 		}
 		else {
 			appRegistration = this.registry.find(taskDefinition.getRegisteredAppName(),

@@ -202,12 +202,10 @@ public class DefaultTaskExecutionService implements TaskExecutionService {
 	 *                 If a task definition does not exist, one will be created if `autoCreateTask-Definitions` is true.  Must not be null or empty.
 	 * @param taskDeploymentProperties Optional deployment properties. Must not be null.
 	 * @param commandLineArgs Optional runtime commandline argument
-	 * @param composedTaskRunnerName the name of the app the user would like to use if they don't want the default.  If null default will be used.
 	 * @return the task execution ID.
 	 */
 	@Override
-	public long executeTask(String taskName, Map<String, String> taskDeploymentProperties, List<String> commandLineArgs,
-			String composedTaskRunnerName) {
+	public long executeTask(String taskName, Map<String, String> taskDeploymentProperties, List<String> commandLineArgs) {
 		// Get platform name and fallback to 'default'
 		String platformName = getPlatform(taskDeploymentProperties);
 
@@ -241,7 +239,7 @@ public class DefaultTaskExecutionService implements TaskExecutionService {
 
 
 		TaskExecutionInformation taskExecutionInformation =
-				findOrCreateTaskExecutionInformation(taskName, taskDeploymentProperties, composedTaskRunnerName);
+				findOrCreateTaskExecutionInformation(taskName, taskDeploymentProperties);
 
 		if (taskExecutionInformation.isComposed()) {
 			handleAccessToken(commandLineArgs, taskExecutionInformation);
@@ -321,12 +319,12 @@ public class DefaultTaskExecutionService implements TaskExecutionService {
 		return taskExecution.getExecutionId();
 	}
 
-	private TaskExecutionInformation findOrCreateTaskExecutionInformation(String taskName, Map<String, String> taskDeploymentProperties, String composedTaskRunnerName) {
+	private TaskExecutionInformation findOrCreateTaskExecutionInformation(String taskName, Map<String, String> taskDeploymentProperties) {
 
 		TaskExecutionInformation taskExecutionInformation;
 		try {
 			 taskExecutionInformation = taskExecutionInfoService
-					.findTaskExecutionInformation(taskName, taskDeploymentProperties, composedTaskRunnerName);
+					.findTaskExecutionInformation(taskName, taskDeploymentProperties);
 
 		} catch (NoSuchTaskDefinitionException e) {
 			if (autoCreateTaskDefinitions) {
@@ -334,7 +332,7 @@ public class DefaultTaskExecutionService implements TaskExecutionService {
 				TaskDefinition taskDefinition = new TaskDefinition(taskName, taskName);
 				taskSaveService.saveTaskDefinition(taskDefinition);
 				taskExecutionInformation = taskExecutionInfoService
-						.findTaskExecutionInformation(taskName, taskDeploymentProperties, composedTaskRunnerName);
+						.findTaskExecutionInformation(taskName, taskDeploymentProperties);
 			}
 			else {
 				throw e;
@@ -556,11 +554,6 @@ public class DefaultTaskExecutionService implements TaskExecutionService {
 		same = same && previousDeploymentProperties.equals(newDeploymentProperties) && previousAppProperties.equals(newAppProperties);
 
 		return same;
-	}
-
-	@Override
-	public long executeTask(String taskName, Map<String, String> taskDeploymentProperties, List<String> commandLineArgs) {
-		return executeTask(taskName, taskDeploymentProperties, commandLineArgs, null);
 	}
 
 	@Override

@@ -18,6 +18,13 @@ spec:
       - name: skipper
         image: springcloud/spring-cloud-skipper-server:@spring-cloud-skipper.version@
         imagePullPolicy: Always
+        volumeMounts:
+          - name: config
+            mountPath: /config
+            readOnly: true
+          - name: database
+            mountPath: /etc/secrets/database
+            readOnly: true
         ports:
         - containerPort: 80
         livenessProbe:
@@ -38,12 +45,14 @@ spec:
             cpu: 0.5
             memory: 640Mi
         env:
-        - name: SPRING_CLOUD_KUBERNETES_CONFIG_NAME
-          value: skipper
+        - name: SPRING_CLOUD_CONFIG_ENABLED
+          value: 'false'
+        - name: SPRING_CLOUD_KUBERNETES_CONFIG_ENABLE_API
+          value: 'false'
         - name: SPRING_CLOUD_KUBERNETES_SECRETS_ENABLE_API
-          value: 'true'
-        - name: SPRING_CLOUD_KUBERNETES_SECRETS_NAME
-          value: mysql
+          value: 'false'
+        - name: SPRING_CLOUD_KUBERNETES_SECRETS_PATHS
+          value: /etc/secrets
       initContainers:
       - name: init-mysql-wait
         image: busybox
@@ -58,3 +67,13 @@ spec:
               key: mysql-root-password
         command: ['sh', '-c', 'mysql -h mysql -u root -e "CREATE DATABASE IF NOT EXISTS skipper;"']
       serviceAccountName: scdf-sa
+      volumes:
+        - name: config
+          configMap:
+            name: skipper
+            items:
+            - key: application.yaml
+              path: application.yaml
+        - name: database
+          secret:
+            secretName: mysql

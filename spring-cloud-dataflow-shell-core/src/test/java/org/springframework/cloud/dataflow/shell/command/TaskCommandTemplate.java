@@ -266,13 +266,26 @@ public class TaskCommandTemplate {
 	}
 
 	/**
-	 * Destroy a specific task name.
+	 * Destroy a specific task identified by the given name.
 	 *
 	 * @param task The task to destroy
 	 */
 	public void destroyTask(String task) {
 		CommandResult cr = shell.executeCommand("task destroy --name " + task);
 		// stateVerifier.waitForDestroy(task);
+		assertTrue("Failure to destroy task " + task + ".  CommandResult = " + cr.toString(), cr.isSuccess());
+		tasks.remove(task);
+	}
+
+	/**
+	 * Destroy a specific task identified by the given name and cleanup if set to true.
+	 *
+	 * @param task The task to destroy
+	 * @param cleanup the boolean flag to clean up task executions and other resources
+	 */
+	public void destroyTask(String task, boolean cleanup) {
+		String cleanupString = (cleanup) ? "--cleanup" : "";
+		CommandResult cr = shell.executeCommand("task destroy --name " + task + " " + cleanupString);
 		assertTrue("Failure to destroy task " + task + ".  CommandResult = " + cr.toString(), cr.isSuccess());
 		tasks.remove(task);
 	}

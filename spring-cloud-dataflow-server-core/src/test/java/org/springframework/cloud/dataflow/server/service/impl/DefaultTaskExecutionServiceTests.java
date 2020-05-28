@@ -57,8 +57,6 @@ import org.springframework.cloud.dataflow.core.TaskPlatform;
 import org.springframework.cloud.dataflow.core.TaskPlatformFactory;
 import org.springframework.cloud.dataflow.registry.service.AppRegistryService;
 import org.springframework.cloud.dataflow.server.configuration.TaskServiceDependencies;
-import org.springframework.cloud.dataflow.server.controller.InvalidCTRLaunchRequestException;
-import org.springframework.cloud.dataflow.server.controller.NoSuchAppException;
 import org.springframework.cloud.dataflow.server.job.LauncherRepository;
 import org.springframework.cloud.dataflow.server.repository.DataflowTaskExecutionDao;
 import org.springframework.cloud.dataflow.server.repository.DataflowTaskExecutionMetadataDao;
@@ -90,6 +88,7 @@ import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.util.ReflectionTestUtils;
+import org.springframework.util.StringUtils;
 
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.core.Is.is;
@@ -565,21 +564,6 @@ public abstract class DefaultTaskExecutionServiceTests {
 			assertNotNull("TaskDeployment createdOn field should not be null", taskDeployment.getCreatedOn());
 		}
 
-		@Test(expected = InvalidCTRLaunchRequestException.class)
-		@DirtiesContext
-		public void executeSingleTaskTestWithCtrNameSpecified() {
-			initializeSuccessfulRegistry(appRegistry);
-			when(taskLauncher.launch(any())).thenReturn("0");
-			this.taskExecutionService.executeTask(TASK_NAME_ORIG, new HashMap<>(), new LinkedList<>(), "anotherctr");
-
-			TaskDeployment taskDeployment = taskDeploymentRepository.findByTaskDeploymentId("0");
-			assertNotNull("TaskDeployment should not be null", taskDeployment);
-			assertEquals("0", taskDeployment.getTaskDeploymentId());
-			assertEquals(TASK_NAME_ORIG, taskDeployment.getTaskDefinitionName());
-			assertEquals("default", taskDeployment.getPlatformName());
-			assertNotNull("TaskDeployment createdOn field should not be null", taskDeployment.getCreatedOn());
-		}
-
 		@Test
 		@DirtiesContext
 		public void executeStopTaskTest() {
@@ -893,22 +877,7 @@ public abstract class DefaultTaskExecutionServiceTests {
 		@Test
 		@DirtiesContext
 		public void executeComposedTask() {
-			String dsl = "AAA && BBB";
-			initializeSuccessfulRegistry(appRegistry);
-
-			taskSaveService.saveTaskDefinition(new TaskDefinition("seqTask", dsl));
-			when(taskLauncher.launch(any())).thenReturn("0");
-			when(appRegistry.appExist(anyString(), any(ApplicationType.class))).thenReturn(true);
-			Map<String, String> properties = new HashMap<>();
-			properties.put("app.foo", "bar");
-			properties.put("app.seqTask.AAA.timestamp.format", "YYYY");
-			properties.put("deployer.seqTask.AAA.memory", "1240m");
-			properties.put("app.composed-task-runner.interval-time-between-checks", "1000");
-			assertEquals(1L, this.taskExecutionService.executeTask("seqTask", properties, new LinkedList<>()));
-			ArgumentCaptor<AppDeploymentRequest> argumentCaptor = ArgumentCaptor.forClass(AppDeploymentRequest.class);
-			verify(this.taskLauncher, atLeast(1)).launch(argumentCaptor.capture());
-
-			AppDeploymentRequest request = argumentCaptor.getValue();
+			AppDeploymentRequest request = prepComposedTaskRunner(null);
 			assertEquals("seqTask", request.getDefinition().getProperties().get("spring.cloud.task.name"));
 			assertTrue(request.getDefinition().getProperties().containsKey("composed-task-properties"));
 			assertEquals(
@@ -919,6 +888,45 @@ public abstract class DefaultTaskExecutionServiceTests {
 			assertFalse(request.getDefinition().getProperties().containsKey("app.foo"));
 			assertEquals("globalvalue", request.getDefinition().getProperties().get("globalkey"));
 			assertNull(request.getDefinition().getProperties().get("globalstreamkey"));
+			assertEquals("default", request.getDefinition().getProperties().get("platform-name"));
+		}
+
+		@Test
+		@DirtiesContext
+		public void executeComposedTaskNewPlatform() {
+			AppDeploymentRequest request = prepComposedTaskRunner("MyPlatform");
+			assertEquals("seqTask", request.getDefinition().getProperties().get("spring.cloud.task.name"));
+			assertTrue(request.getDefinition().getProperties().containsKey("composed-task-properties"));
+			assertEquals(
+					"app.seqTask-AAA.app.AAA.timestamp.format=YYYY, deployer.seqTask-AAA.deployer.AAA.memory=1240m",
+					request.getDefinition().getProperties().get("composed-task-properties"));
+			assertTrue(request.getDefinition().getProperties().containsKey("interval-time-between-checks"));
+			assertEquals("1000", request.getDefinition().getProperties().get("interval-time-between-checks"));
+			assertFalse(request.getDefinition().getProperties().containsKey("app.foo"));
+			assertEquals("globalvalue", request.getDefinition().getProperties().get("globalkey"));
+			assertNull(request.getDefinition().getProperties().get("globalstreamkey"));
+			assertEquals("MyPlatform", request.getDefinition().getProperties().get("platform-name"));
+		}
+
+		private AppDeploymentRequest prepComposedTaskRunner(String platformName) {
+			String dsl = "AAA && BBB";
+			initializeSuccessfulRegistry(appRegistry);
+
+			taskSaveService.saveTaskDefinition(new TaskDefinition("seqTask", dsl));
+			when(taskLauncher.launch(any())).thenReturn("0");
+			when(appRegistry.appExist(anyString(), any(ApplicationType.class))).thenReturn(true);
+			Map<String, String> properties = new HashMap<>();
+			if(StringUtils.hasText(platformName)) {
+				properties.put("spring.cloud.dataflow.task.platformName", platformName);
+			}
+			properties.put("app.foo", "bar");
+			properties.put("app.seqTask.AAA.timestamp.format", "YYYY");
+			properties.put("deployer.seqTask.AAA.memory", "1240m");
+			properties.put("app.composed-task-runner.interval-time-between-checks", "1000");
+			assertEquals(1L, this.taskExecutionService.executeTask("seqTask", properties, new LinkedList<>()));
+			ArgumentCaptor<AppDeploymentRequest> argumentCaptor = ArgumentCaptor.forClass(AppDeploymentRequest.class);
+			verify(this.taskLauncher, atLeast(1)).launch(argumentCaptor.capture());
+			return argumentCaptor.getValue();
 		}
 
 		@Test
@@ -1042,22 +1050,6 @@ public abstract class DefaultTaskExecutionServiceTests {
 			return request;
 		}
 
-		@Test(expected = NoSuchAppException.class)
-		@DirtiesContext
-		public void executeComposedTaskwithUserCTRNameInvalidAppName() {
-			String dsl = "AAA && BBB";
-			initializeSuccessfulRegistry(appRegistry);
-
-			taskSaveService.saveTaskDefinition(new TaskDefinition("seqTask", dsl));
-			when(taskLauncher.launch(any())).thenReturn("0");
-			Map<String, String> properties = new HashMap<>();
-			properties.put("app.foo", "bar");
-			properties.put("app.seqTask.AAA.timestamp.format", "YYYY");
-			properties.put("deployer.seqTask.AAA.memory", "1240m");
-			properties.put("app.composed-task-runner.interval-time-between-checks", "1000");
-			this.taskExecutionService.executeTask("seqTask", properties, new LinkedList<>(), "anotherctr");
-		}
-
 		@Test
 		@DirtiesContext
 		public void executeComposedTaskwithUserCTRName() {
@@ -1073,14 +1065,14 @@ public abstract class DefaultTaskExecutionServiceTests {
 			properties.put("app.seqTask.AAA.timestamp.format", "YYYY");
 			properties.put("deployer.seqTask.AAA.memory", "1240m");
 			properties.put("app.composed-task-runner.interval-time-between-checks", "1000");
-			assertEquals(1L, this.taskExecutionService.executeTask("seqTask", properties, new LinkedList<>(),"anotherctr"));
+			assertEquals(1L, this.taskExecutionService.executeTask("seqTask", properties, new LinkedList<>()));
 			ArgumentCaptor<AppDeploymentRequest> argumentCaptor = ArgumentCaptor.forClass(AppDeploymentRequest.class);
 			verify(this.taskLauncher, atLeast(1)).launch(argumentCaptor.capture());
 
 			AppDeploymentRequest request = argumentCaptor.getValue();
 			assertEquals("seqTask", request.getDefinition().getProperties().get("spring.cloud.task.name"));
 			assertTrue(request.getDefinition().getProperties().containsKey("composed-task-properties"));
-			assertEquals(request.getCommandlineArguments().get(2),"--spring.cloud.data.flow.taskappname=anotherctr");
+			assertEquals(request.getCommandlineArguments().get(2),"--spring.cloud.data.flow.taskappname=composed-task-runner");
 			assertEquals(
 					"app.seqTask-AAA.app.AAA.timestamp.format=YYYY, deployer.seqTask-AAA.deployer.AAA.memory=1240m",
 					request.getDefinition().getProperties().get("composed-task-properties"));

@@ -123,8 +123,9 @@ public class TaskDefinitionController {
 	 */
 	@RequestMapping(value = "/{name}", method = RequestMethod.DELETE)
 	@ResponseStatus(HttpStatus.OK)
-	public void destroyTask(@PathVariable("name") String name) {
-		taskDeleteService.deleteTaskDefinition(name);
+	public void destroyTask(@PathVariable("name") String name, @RequestParam(required = false) Boolean cleanup) {
+		boolean taskExecutionCleanup = (cleanup != null && cleanup) ? cleanup : false;
+		this.taskDeleteService.deleteTaskDefinition(name, taskExecutionCleanup);
 	}
 
 	/**
@@ -202,7 +203,7 @@ public class TaskDefinitionController {
 	}
 
 	/**
-	 * {@link org.springframework.hateoas.server.ResourceAssembler} implementation that converts
+	 * {@link org.springframework.hateoas.server.RepresentationModelAssembler} implementation that converts
 	 * {@link TaskDefinition}s to {@link TaskDefinitionResource}s.
 	 */
 	class Assembler extends RepresentationModelAssemblerSupport<TaskExecutionAwareTaskDefinition, TaskDefinitionResource> {

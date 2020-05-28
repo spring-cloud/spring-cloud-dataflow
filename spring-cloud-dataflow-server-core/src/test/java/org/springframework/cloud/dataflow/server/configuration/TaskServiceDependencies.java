@@ -149,12 +149,10 @@ public class TaskServiceDependencies extends WebMvcConfigurationSupport {
 
 	@Bean
 	public TaskValidationService taskValidationService(AppRegistryService appRegistry,
-			DockerValidatorProperties dockerValidatorProperties, TaskDefinitionRepository taskDefinitionRepository,
-			TaskConfigurationProperties taskConfigurationProperties) {
+			DockerValidatorProperties dockerValidatorProperties, TaskDefinitionRepository taskDefinitionRepository) {
 		return new DefaultTaskValidationService(appRegistry,
 				dockerValidatorProperties,
-				taskDefinitionRepository,
-				taskConfigurationProperties.getComposedTaskRunnerName());
+				taskDefinitionRepository);
 	}
 
 	@Bean

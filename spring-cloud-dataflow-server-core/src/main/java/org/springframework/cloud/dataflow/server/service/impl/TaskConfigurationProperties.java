@@ -35,11 +35,13 @@ public class TaskConfigurationProperties {
 
 	public static final String COMPOSED_TASK_PREFIX = DataFlowPropertyKeys.PREFIX + "task";
 
+	public static final String COMPOSED_TASK_RUNNER_NAME = "composed-task-runner";
+
 	/**
-	 * The task application name to be used for the composed task runner.
+	 * The task application uri to be used for the composed task runner.
 	 */
 	@NotBlank
-	private String composedTaskRunnerName = "composed-task-runner";
+	private String composedTaskRunnerUri = "composed-task-runner";
 
 	/**
 	 * Whether the server should auto create task definitions if one does not exist for a launch request and
@@ -52,12 +54,12 @@ public class TaskConfigurationProperties {
 	 */
 	private DeployerProperties deployerProperties = new DeployerProperties();
 
-	public String getComposedTaskRunnerName() {
-		return composedTaskRunnerName;
+	public String getComposedTaskRunnerUri() {
+		return composedTaskRunnerUri;
 	}
 
-	public void setComposedTaskRunnerName(String taskName) {
-		this.composedTaskRunnerName = taskName;
+	public void setComposedTaskRunnerUri(String composedTaskRunnerUri) {
+		this.composedTaskRunnerUri = composedTaskRunnerUri;
 	}
 
 	public DeployerProperties getDeployerProperties() {

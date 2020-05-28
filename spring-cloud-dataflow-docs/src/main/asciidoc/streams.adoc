@@ -1127,6 +1127,10 @@ One can override any of the binder configuration properties by specifying them t
 
 Function composition allows you can attach a functional logic dynamically to an existing event streaming application. Please see the link:https://dataflow.spring.io/docs/feature-guides/streams/function-composition/[Function Composition] section of the microsite for more details.
 
+== Functional Applications
+
+With Spring Cloud Stream 3.x adding link:https://cloud.spring.io/spring-cloud-static/spring-cloud-stream/current/reference/html/spring-cloud-stream.html#spring-cloud-stream-overview-producing-consuming-messages[functional support], users can build `Source`, `Sink` and `Processor` applications by merely implementing the Java Util's `Supplier`, `Consumer` and `Function` interfaces respectively.
+You can refer to the link:https://dataflow.spring.io/docs/recipes/functional-apps/[Functional Application Recipe] of the SCDF site for more information on this.
 
 [[spring-cloud-dataflow-stream-examples]]
 == Examples
