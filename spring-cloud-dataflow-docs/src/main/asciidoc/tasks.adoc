@@ -546,13 +546,13 @@ However, for special use-cases this value can also be set explicitly.
 [INFO]
 ====
 A special boolean property `dataflow-server-use-user-access-token` exists for the case
-where you want to use the access token of the currently logged user and propgate it to the Composed Task Runner. This property is only used
-by Spring Cloud Data Flow and if set to `true` will auto-populate the property `dataflow-server-access-token`.
+where you want to use the access token of the currently logged user and propagate it to the Composed Task Runner. This property is used
+by Spring Cloud Data Flow and if set to `true` will auto-populate the property `dataflow-server-access-token`.  When using `dataflow-server-use-user-access-token` it must be passed for each task execution.
+In some cases it maybe preferred that the user's `dataflow-server-access-token` must be passed for each composed task launch by default.
+In this case set the Spring Cloud Data Flow property `spring.cloud.dataflow.task.useUserAccessToken` to true.
 ====
 
 Note when using the options above as environment variables, convert to uppercase, remove the dash character and replace with the underscore character. For example: increment-instance-enabled would be INCREMENT_INSTANCE_ENABLED.
-
-NOTE: For the latest configuration options for Composed Task Runner click the link https://github.com/spring-cloud-task-app-starters/composed-task-runner/blob/master/spring-cloud-starter-task-composedtaskrunner/README.adoc#options[here].
 
 === The Lifecycle of a Composed Task
 

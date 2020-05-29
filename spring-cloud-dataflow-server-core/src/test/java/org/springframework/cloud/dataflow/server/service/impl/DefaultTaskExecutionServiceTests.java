@@ -757,16 +757,17 @@ public abstract class DefaultTaskExecutionServiceTests {
 		public void executeTaskWithNullDefinitionTest() {
 			boolean errorCaught = false;
 			when(this.taskLauncher.launch(any())).thenReturn("0");
+			TaskConfigurationProperties taskConfigurationProperties = new TaskConfigurationProperties();
 			TaskExecutionInfoService taskExecutionInfoService = new DefaultTaskExecutionInfoService(
 					this.dataSourceProperties, this.appRegistry, this.taskExplorer,
-					mock(TaskDefinitionRepository.class), new TaskConfigurationProperties(),
+					mock(TaskDefinitionRepository.class), taskConfigurationProperties,
 					mock(LauncherRepository.class), Collections.singletonList(mock(TaskPlatform.class)));
 			TaskExecutionService taskExecutionService = new DefaultTaskExecutionService(
 					launcherRepository, auditRecordService, taskRepository,
 					taskExecutionInfoService, mock(TaskDeploymentRepository.class),
 					taskExecutionRepositoryService, taskAppDeploymentRequestCreator,
 					this.taskExplorer, this.dataflowTaskExecutionDao, this.dataflowTaskExecutionMetadataDao,
-					mock(OAuth2TokenUtilsService.class), this.taskSaveService);
+					mock(OAuth2TokenUtilsService.class), this.taskSaveService, taskConfigurationProperties);
 			try {
 				taskExecutionService.executeTask(TASK_NAME_ORIG, new HashMap<>(), new LinkedList<>());
 			}
@@ -933,7 +934,9 @@ public abstract class DefaultTaskExecutionServiceTests {
 		@DirtiesContext
 		public void executeComposedTaskWithAccessTokenDisabled1() {
 			initializeSuccessfulRegistry(appRegistry);
-			AppDeploymentRequest request = getAppDeploymentRequestForToken(prepareEnvironmentForTokenTests(), Collections.emptyList());
+			AppDeploymentRequest request = getAppDeploymentRequestForToken(prepareEnvironmentForTokenTests(this.taskSaveService,
+					this.taskLauncher, this.appRegistry), Collections.emptyList(),
+					this.taskExecutionService, this.taskLauncher);
 			assertFalse("Should not contain the property 'dataflow-server-access-token'",
 				request.getDefinition().getProperties().containsKey("dataflow-server-access-token"));
 		}
@@ -945,7 +948,9 @@ public abstract class DefaultTaskExecutionServiceTests {
 
 			final List<String> arguments = new ArrayList<>();
 			arguments.add("--dataflow-server-use-user-access-token=false");
-			AppDeploymentRequest request = getAppDeploymentRequestForToken(prepareEnvironmentForTokenTests(), Collections.emptyList());
+			AppDeploymentRequest request = getAppDeploymentRequestForToken(prepareEnvironmentForTokenTests(this.taskSaveService,
+					this.taskLauncher, this.appRegistry), Collections.emptyList(),
+					this.taskExecutionService, this.taskLauncher);
 			assertFalse("Should not contain the property 'dataflow-server-access-token'",
 				request.getDefinition().getProperties().containsKey("dataflow-server-access-token"));
 		}
@@ -957,7 +962,9 @@ public abstract class DefaultTaskExecutionServiceTests {
 
 			final List<String> arguments = new ArrayList<>();
 			arguments.add("--dataflow-server-use-user-access-token=true");
-			AppDeploymentRequest request = getAppDeploymentRequestForToken(prepareEnvironmentForTokenTests(), arguments);
+			AppDeploymentRequest request = getAppDeploymentRequestForToken(prepareEnvironmentForTokenTests(this.taskSaveService,
+					this.taskLauncher, this.appRegistry), arguments,  this.taskExecutionService,
+					this.taskLauncher);
 			assertTrue("Should contain the property 'dataflow-server-access-token'",
 				request.getDefinition().getProperties().containsKey("dataflow-server-access-token"));
 			assertEquals("foo-bar-123-token", request.getDefinition().getProperties().get("dataflow-server-access-token"));
@@ -970,7 +977,10 @@ public abstract class DefaultTaskExecutionServiceTests {
 
 			final List<String> arguments = new ArrayList<>();
 			arguments.add("--dataflow-server-use-user-access-token =  true");
-			AppDeploymentRequest request = getAppDeploymentRequestForToken(prepareEnvironmentForTokenTests(), arguments);
+			AppDeploymentRequest request = getAppDeploymentRequestForToken(
+					prepareEnvironmentForTokenTests(this.taskSaveService,
+					this.taskLauncher, this.appRegistry), arguments,
+					this.taskExecutionService, this.taskLauncher);
 			assertTrue("Should contain the property 'dataflow-server-access-token'",
 				request.getDefinition().getProperties().containsKey("dataflow-server-access-token"));
 			assertEquals("foo-bar-123-token", request.getDefinition().getProperties().get("dataflow-server-access-token"));
@@ -981,10 +991,12 @@ public abstract class DefaultTaskExecutionServiceTests {
 		public void executeComposedTaskWithAccessTokenOverrideAsProperty() {
 			initializeSuccessfulRegistry(appRegistry);
 
-			Map<String, String> properties = prepareEnvironmentForTokenTests();
+			Map<String, String> properties = prepareEnvironmentForTokenTests(this.taskSaveService,
+					this.taskLauncher, this.appRegistry);
 			properties.put("app.composed-task-runner.dataflow-server-access-token", "foo-bar-123-token-override");
 
-			AppDeploymentRequest request = getAppDeploymentRequestForToken(properties, Collections.emptyList());
+			AppDeploymentRequest request = getAppDeploymentRequestForToken(properties, Collections.emptyList(),
+					this.taskExecutionService, this.taskLauncher);
 
 			assertTrue("Should contain the property 'dataflow-server-access-token'",
 				request.getDefinition().getProperties().containsKey("dataflow-server-access-token"));
@@ -1007,7 +1019,9 @@ public abstract class DefaultTaskExecutionServiceTests {
 
 			List<String> args = Collections.singletonList("--dataflow-server-access-token=foo-bar-123-token-override");
 
-			AppDeploymentRequest request = getAppDeploymentRequestForToken(prepareEnvironmentForTokenTests(), args);
+			AppDeploymentRequest request = getAppDeploymentRequestForToken(prepareEnvironmentForTokenTests(this.taskSaveService,
+					this.taskLauncher, this.appRegistry), args,  this.taskExecutionService,
+					this.taskLauncher);
 
 			assertFalse("Should not contain the property 'dataflow-server-access-token'",
 				request.getDefinition().getProperties().containsKey("dataflow-server-access-token"));
@@ -1024,30 +1038,6 @@ public abstract class DefaultTaskExecutionServiceTests {
 					request.getCommandlineArguments().contains("dataflow-server-access-token"));
 			assertTrue("Should contain the argument 'dataflow-server-access-token'", containsArgument);
 			assertEquals("--dataflow-server-access-token=foo-bar-123-token-override", argumentValue);
-		}
-
-
-		private Map<String, String> prepareEnvironmentForTokenTests() {
-			taskSaveService.saveTaskDefinition(new TaskDefinition("seqTask", "AAA && BBB"));
-			when(taskLauncher.launch(any())).thenReturn("0");
-			when(appRegistry.appExist(anyString(), any(ApplicationType.class))).thenReturn(true);
-			Map<String, String> properties = new HashMap<>();
-			properties.put("app.foo", "bar");
-			properties.put("app.seqTask.AAA.timestamp.format", "YYYY");
-			properties.put("deployer.seqTask.AAA.memory", "1240m");
-			properties.put("app.composed-task-runner.interval-time-between-checks", "1000");
-			return properties;
-		}
-
-		private AppDeploymentRequest getAppDeploymentRequestForToken(Map<String, String> taskDeploymentProperties, List<String> commandLineArgs) {
-			assertEquals(1L, this.taskExecutionService.executeTask("seqTask", taskDeploymentProperties, commandLineArgs));
-
-			ArgumentCaptor<AppDeploymentRequest> argumentCaptor = ArgumentCaptor.forClass(AppDeploymentRequest.class);
-			verify(this.taskLauncher, atLeast(1)).launch(argumentCaptor.capture());
-
-			final AppDeploymentRequest request = argumentCaptor.getValue();
-
-			return request;
 		}
 
 		@Test
@@ -1332,7 +1322,79 @@ public abstract class DefaultTaskExecutionServiceTests {
 		}
 	}
 
-	private static void initializeSuccessfulRegistry(AppRegistryService appRegistry) {
+	@TestPropertySource(properties = { "spring.cloud.dataflow.applicationProperties.task.globalkey=globalvalue",
+			"spring.cloud.dataflow.applicationProperties.stream.globalstreamkey=nothere",
+			"spring.cloud.dataflow.task.useUserAccessToken=true"})
+	@AutoConfigureTestDatabase(replace = Replace.ANY)
+	public static class ComposedTaskWithSystemUseUserAccessTokenTests extends DefaultTaskExecutionServiceTests {
+
+		@Autowired
+		TaskRepository taskExecutionRepository;
+
+		@Autowired
+		DataSourceProperties dataSourceProperties;
+
+		@Autowired
+		private AppRegistryService appRegistry;
+
+		@Autowired
+		private TaskLauncher taskLauncher;
+
+		@Autowired
+		private LauncherRepository launcherRepository;
+
+		@Autowired
+		private TaskExecutionService taskExecutionService;
+
+		@Before
+		public void setupMocks() {
+			this.launcherRepository.save(new Launcher("default", "local", taskLauncher));
+			this.launcherRepository.save(new Launcher("MyPlatform", "local", taskLauncher));
+		}
+
+		@Test
+		@DirtiesContext
+		public void executeComposedTaskWithEnabledUserAccessToken1() {
+			initializeSuccessfulRegistry(appRegistry);
+
+			final List<String> arguments = new ArrayList<>();
+			AppDeploymentRequest request = getAppDeploymentRequestForToken(
+					prepareEnvironmentForTokenTests(this.taskSaveService,
+							this.taskLauncher, this.appRegistry), arguments, this.taskExecutionService,
+							this.taskLauncher);
+			assertTrue("Should contain the property 'dataflow-server-access-token'",
+					request.getDefinition().getProperties().containsKey("dataflow-server-access-token"));
+			assertEquals("foo-bar-123-token", request.getDefinition().getProperties().get("dataflow-server-access-token"));
+		}
+	}
+
+	static AppDeploymentRequest getAppDeploymentRequestForToken(Map<String, String> taskDeploymentProperties,
+			List<String> commandLineArgs, TaskExecutionService taskExecutionService,
+			TaskLauncher taskLauncher) {
+		assertEquals(1L, taskExecutionService.executeTask("seqTask", taskDeploymentProperties, commandLineArgs));
+
+		ArgumentCaptor<AppDeploymentRequest> argumentCaptor = ArgumentCaptor.forClass(AppDeploymentRequest.class);
+		verify(taskLauncher, atLeast(1)).launch(argumentCaptor.capture());
+
+		final AppDeploymentRequest request = argumentCaptor.getValue();
+
+		return request;
+	}
+
+	static Map<String, String> prepareEnvironmentForTokenTests(TaskSaveService taskSaveService,
+			TaskLauncher taskLauncher, AppRegistryService appRegistry) {
+		taskSaveService.saveTaskDefinition(new TaskDefinition("seqTask", "AAA && BBB"));
+		when(taskLauncher.launch(any())).thenReturn("0");
+		when(appRegistry.appExist(anyString(), any(ApplicationType.class))).thenReturn(true);
+		Map<String, String> properties = new HashMap<>();
+		properties.put("app.foo", "bar");
+		properties.put("app.seqTask.AAA.timestamp.format", "YYYY");
+		properties.put("deployer.seqTask.AAA.memory", "1240m");
+		properties.put("app.composed-task-runner.interval-time-between-checks", "1000");
+		return properties;
+	}
+
+		private static void initializeSuccessfulRegistry(AppRegistryService appRegistry) {
 		when(appRegistry.find(anyString(), any(ApplicationType.class))).thenReturn(
 				new AppRegistration("some-name", ApplicationType.task, URI.create("https://helloworld")));
 		try {

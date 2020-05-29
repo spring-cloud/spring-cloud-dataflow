@@ -268,7 +268,7 @@ public class JobDependencies {
 			TaskExplorer taskExplorer, DataflowTaskExecutionDao dataflowTaskExecutionDao,
 			DataflowTaskExecutionMetadataDao dataflowTaskExecutionMetadataDao,
 			OAuth2TokenUtilsService oauth2TokenUtilsService,
-			TaskSaveService taskSaveService) {
+			TaskSaveService taskSaveService, TaskConfigurationProperties taskConfigurationProperties) {
 		return new DefaultTaskExecutionService(
 				launcherRepository, auditRecordService,
 				taskRepository,
@@ -276,7 +276,7 @@ public class JobDependencies {
 				taskExecutionRepositoryService, taskAppDeploymentRequestCreator,
 				taskExplorer, dataflowTaskExecutionDao,
 				dataflowTaskExecutionMetadataDao, oauth2TokenUtilsService,
-				taskSaveService);
+				taskSaveService, taskConfigurationProperties);
 	}
 
 	@Bean

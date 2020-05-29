@@ -146,7 +146,7 @@ public class DefaultTaskExecutionServiceTransactionTests {
 				taskExecutionInfoService, mock(TaskDeploymentRepository.class),
 				taskExecutionRepositoryService, taskAppDeploymentRequestCreator,
 				this.taskExplorer, this.dataflowTaskExecutionDao, this.dataflowTaskExecutionMetadataDao,
-				mock(OAuth2TokenUtilsService.class), this.taskSaveService);
+				mock(OAuth2TokenUtilsService.class), this.taskSaveService, this.taskConfigurationProperties);
 	}
 
 	@Test

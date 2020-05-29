@@ -194,8 +194,9 @@ public class TaskConfiguration {
 				launcherRepository, auditRecordService, taskRepository,
 				taskExecutionInfoService, taskDeploymentRepository, taskExecutionRepositoryService,
 				taskAppDeploymentRequestCreator, taskExplorer, dataflowTaskExecutionDao,
-				dataflowTaskExecutionMetadataDao, oauth2TokenUtilsService, taskSaveService);
-		defaultTaskExecutionService.setAutoCreateTaskDefinitions(taskConfigurationProperties.isAutoCreateTaskDefinitions());
+				dataflowTaskExecutionMetadataDao, oauth2TokenUtilsService, taskSaveService,
+				this.taskConfigurationProperties);
+		defaultTaskExecutionService.setAutoCreateTaskDefinitions(this.taskConfigurationProperties.isAutoCreateTaskDefinitions());
 		return defaultTaskExecutionService;
 	}
 
