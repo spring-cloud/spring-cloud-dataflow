@@ -164,7 +164,7 @@ public class ComposedTaskProperties {
 	 * ComposedTaskRunner instance can only be executed once with a given set
 	 * of parameters, if true it can be re-executed.
 	 */
-	private boolean incrementInstanceEnabled = false;
+	private boolean incrementInstanceEnabled = true;
 
 	/**
 	 * The platform property that will be used for each task in the workflow when it is launched.

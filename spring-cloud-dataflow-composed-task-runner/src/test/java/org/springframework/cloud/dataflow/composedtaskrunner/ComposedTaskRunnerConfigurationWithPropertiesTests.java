@@ -94,7 +94,7 @@ public class ComposedTaskRunnerConfigurationWithPropertiesTests {
 		assertEquals("https://bar", composedTaskProperties.getDataflowServerUri().toASCIIString());
 		List<String> args = new ArrayList<>(1);
 		args.add("--baz=boo --foo=bar");
-		Assert.isNull(job.getJobParametersIncrementer(), "JobParametersIncrementer must be null.");
+		Assert.notNull(job.getJobParametersIncrementer(), "JobParametersIncrementer must not be null.");
 		verify(this.taskOperations).launch("ComposedTest-AAA", props, args, null);
 	}
 }

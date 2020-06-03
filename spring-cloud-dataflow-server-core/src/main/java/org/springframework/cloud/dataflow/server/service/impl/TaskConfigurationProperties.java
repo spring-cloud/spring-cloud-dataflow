@@ -30,10 +30,10 @@ import org.springframework.validation.annotation.Validated;
  * @author David Turanski
  */
 @Validated
-@ConfigurationProperties(prefix = TaskConfigurationProperties.COMPOSED_TASK_PREFIX)
+@ConfigurationProperties(prefix = TaskConfigurationProperties.TASK_PREFIX)
 public class TaskConfigurationProperties {
 
-	public static final String COMPOSED_TASK_PREFIX = DataFlowPropertyKeys.PREFIX + "task";
+	public static final String TASK_PREFIX = DataFlowPropertyKeys.PREFIX + "task";
 
 	public static final String COMPOSED_TASK_RUNNER_NAME = "composed-task-runner";
 

@@ -78,6 +78,7 @@ public class TaskDefinitionsDocumentation extends BaseDocumentation {
 					fieldWithPath("lastTaskExecution")
 							.description("The last task execution of the created task definition"),
 					fieldWithPath("status").description("The status of the created task definition"),
+					fieldWithPath("composedTaskElement").description("specifies whether a definition is member of a composed task"),
 					subsectionWithPath("_links.self").description("Link to the created task definition resource")
 				)
 			));
@@ -132,6 +133,7 @@ public class TaskDefinitionsDocumentation extends BaseDocumentation {
 					fieldWithPath("lastTaskExecution")
 						.description("The last task execution of the created task definition"),
 					fieldWithPath("status").description("The status of the created task definition"),
+					fieldWithPath("composedTaskElement").description("specifies whether a definition is member of a composed task"),
 					subsectionWithPath("_links.self").description("Link to the created task definition resource")
 				)
 			));
