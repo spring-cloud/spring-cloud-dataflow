@@ -1,5 +1,5 @@
 /*
- * Copyright 2016-2019 the original author or authors.
+ * Copyright 2016-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 
 package org.springframework.cloud.dataflow.server.controller;
 
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -23,6 +24,8 @@ import java.util.function.Function;
 
 import org.springframework.cloud.dataflow.core.TaskDefinition;
 import org.springframework.cloud.dataflow.core.TaskManifest;
+import org.springframework.cloud.dataflow.core.dsl.TaskNode;
+import org.springframework.cloud.dataflow.core.dsl.TaskParser;
 import org.springframework.cloud.dataflow.rest.resource.TaskDefinitionResource;
 import org.springframework.cloud.dataflow.rest.resource.TaskExecutionResource;
 import org.springframework.cloud.dataflow.rest.util.ArgumentSanitizer;
@@ -191,6 +194,28 @@ public class TaskDefinitionController {
 				.map(new TaskDefinitionConverter(taskExecutions));
 
 		PagedModel<TaskDefinitionResource> taskDefinitionResources = assembler.toModel(taskExecutionAwareTaskDefinitions, new Assembler(manifest));
+		// Classify the composed task elements by iterating through the task definitions that are part of this page.
+		updateComposedTaskElement(taskDefinitionResources.getContent());
+		return taskDefinitionResources;
+	}
+
+
+	private Collection<TaskDefinitionResource> updateComposedTaskElement(Collection<TaskDefinitionResource> taskDefinitionResources) {
+		Map<String, TaskDefinitionResource> taskNameResources = new HashMap<>();
+		for (TaskDefinitionResource taskDefinitionResource: taskDefinitionResources) {
+			taskNameResources.put(taskDefinitionResource.getName(), taskDefinitionResource);
+		}
+		for (TaskDefinitionResource taskDefinition: taskDefinitionResources) {
+			TaskParser taskParser = new TaskParser(taskDefinition.getName(), taskDefinition.getDslText(), true, true);
+			TaskNode taskNode = taskParser.parse();
+			if (taskNode.isComposed()) {
+				taskNode.getTaskApps().forEach(task -> {
+					if (taskNameResources.keySet().contains(task.getExecutableDSLName())) {
+						taskNameResources.get(task.getExecutableDSLName()).setComposedTaskElement(true);
+					}
+				});
+			}
+		}
 		return taskDefinitionResources;
 	}
 
@@ -205,15 +230,29 @@ public class TaskDefinitionController {
 	public TaskDefinitionResource display(@PathVariable("name") String name, @RequestParam(required = false, name = "manifest") boolean manifest) {
 		TaskDefinition definition = this.repository.findById(name)
 				.orElseThrow(() -> new NoSuchTaskDefinitionException(name));
-
 		final TaskExecution taskExecution = this.explorer.getLatestTaskExecutionForTaskName(name);
 		final Assembler taskAssembler = new Assembler(manifest);
+		TaskDefinitionResource taskDefinitionResource;
 		if (taskExecution != null) {
-			TaskExecutionAwareTaskDefinition taskExecutionAwareTaskDefinition = new TaskExecutionAwareTaskDefinition(definition, taskExecution);
-			return taskAssembler.toModel(taskExecutionAwareTaskDefinition);
+			taskDefinitionResource = taskAssembler.toModel(new TaskExecutionAwareTaskDefinition(definition, taskExecution));
 		}
 		else {
-			return taskAssembler.toModel(new TaskExecutionAwareTaskDefinition(definition));
+			taskDefinitionResource = taskAssembler.toModel(new TaskExecutionAwareTaskDefinition(definition));
+		}
+		// Identify if the task definition is a composed task element
+		updateComposedTaskElement(taskDefinitionResource);
+		return taskDefinitionResource;
+	}
+
+
+	private void updateComposedTaskElement(TaskDefinitionResource taskDefinitionResource) {
+		if (taskDefinitionResource.getName().contains("-")) {
+			String prefix = taskDefinitionResource.getName().split("-")[0];
+			TaskDefinition taskDefinition = this.repository.findById(prefix).orElse(null);
+			if (taskDefinition != null && TaskServiceUtils
+					.isComposedTaskDefinition(taskDefinition.getDslText())) {
+				taskDefinitionResource.setComposedTaskElement(true);
+			}
 		}
 	}
 

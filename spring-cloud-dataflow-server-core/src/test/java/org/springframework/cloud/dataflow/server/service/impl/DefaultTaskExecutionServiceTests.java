@@ -1,5 +1,5 @@
 /*
- * Copyright 2015-2019 the original author or authors.
+ * Copyright 2015-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -1363,6 +1363,9 @@ public abstract class DefaultTaskExecutionServiceTests {
 			TaskDefinitionRepository taskDefinitionRepository) {
 		TaskDefinition taskDefinition = taskDefinitionRepository.findById(taskName).get();
 		assertThat(taskDefinition.getName(), is(equalTo(taskName)));
+		if (taskDefinition.getProperties().containsKey("spring.cloud.dataflow.task.composed-task-element")) {
+			dsl = dsl + " --spring.cloud.dataflow.task.composed-task-element=true";
+		}
 		assertThat(taskDefinition.getDslText(), is(equalTo(dsl)));
 	}
 

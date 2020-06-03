@@ -41,6 +41,11 @@ public class TaskDefinitionResource extends RepresentationModel<TaskDefinitionRe
 	private boolean composed;
 
 	/**
+	 * Indicates whether this is a composed task element.
+	 */
+	private boolean composedTaskElement;
+
+	/**
 	 * The last execution of this task execution.
 	 */
 	private TaskExecutionResource lastTaskExecution;
@@ -86,6 +91,15 @@ public class TaskDefinitionResource extends RepresentationModel<TaskDefinitionRe
 	 */
 	public void setComposed(boolean composed) {
 		this.composed = composed;
+	}
+
+
+	public boolean isComposedTaskElement() {
+		return composedTaskElement;
+	}
+
+	public void setComposedTaskElement(boolean composedTaskElement) {
+		this.composedTaskElement = composedTaskElement;
 	}
 
 	/**
