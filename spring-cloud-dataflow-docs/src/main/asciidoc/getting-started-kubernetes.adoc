@@ -635,6 +635,77 @@ data:
 
 Replacing the `tolerations` key / value pairs according to your desired toleration configuration.
 
+==== Secret References
+
+Secrets can be referenced and their entire data contents decoded and inserted into the pod(s) environment as individual variables.
+Refer to the https://kubernetes.io/docs/tasks/inject-data-application/distribute-credentials-secure/#configure-all-key-value-pairs-in-a-secret-as-container-environment-variables[Configure all key-value pairs in a Secret as container environment variables] section of the Kubernetes reference for more information.
+
+The following example shows how you can individually configure applications:
+
+====
+[source,options=nowrap]
+----
+deployer.<app>.kubernetes.secretRefs=testsecret
+----
+====
+
+Multiple secrets can also be specified, for example:
+
+====
+[source,options=nowrap]
+----
+deployer.<app>.kubernetes.secretRefs=[testsecret,anothersecret]
+----
+====
+
+Replace `<app>` with the name of your application and the `secretRefs` attribute with the appropriate values for your application environment and secret.
+
+You can configure secret references at the global server level as well.
+
+The following example shows how to do so for streams:
+
+====
+[source,yaml]
+----
+data:
+  application.yaml: |-
+    spring:
+      cloud:
+        skipper:
+          server:
+            platform:
+              kubernetes:
+                accounts:
+                  default:
+                    secretRefs:
+                      - testsecret
+                      - anothersecret
+----
+====
+
+The following example shows how to do so for tasks:
+
+====
+[source,yaml]
+----
+data:
+  application.yaml: |-
+    spring:
+      cloud:
+        dataflow:
+          task:
+            platform:
+              kubernetes:
+                accounts:
+                  default:
+                    secretRefs:
+                      - testsecret
+                      - anothersecret
+----
+====
+
+Replacing the items of `secretRefs` with one or more secret names.
+
 ==== Secret Key References
 
 Secrets can be referenced and their decoded value inserted into the pod(s) environment.
@@ -698,6 +769,77 @@ data:
 ====
 
 Replacing the `envVarName`, `secretName` and `dataKey` attributes with the appropriate values for your secret.
+
+==== Config Map References
+
+ConfigMap's can be referenced and their entire data contents decoded and inserted into the pod(s) environment as individual variables.
+Refer to the https://kubernetes.io/docs/tasks/configure-pod-container/configure-pod-configmap/#configure-all-key-value-pairs-in-a-configmap-as-container-environment-variables[Configure all key-value pairs in a ConfigMap as container environment variables] section of the Kubernetes reference for more information.
+
+The following example shows how you can individually configure applications:
+
+====
+[source,options=nowrap]
+----
+deployer.<app>.kubernetes.configMapRefs=testcm
+----
+====
+
+Multiple ConfigMap's can also be specified, for example:
+
+====
+[source,options=nowrap]
+----
+deployer.<app>.kubernetes.configMapRefs=[testcm,anothercm]
+----
+====
+
+Replace `<app>` with the name of your application and the `configMapRefs` attribute with the appropriate values for your application environment and ConfigMap.
+
+You can configure ConfigMap references at the global server level as well.
+
+The following example shows how to do so for streams. Edit the appropriate `skipper-config-(binder).yaml`, replacing `(binder)` with the corresponding binder in use:
+
+====
+[source,yaml]
+----
+data:
+  application.yaml: |-
+    spring:
+      cloud:
+        skipper:
+          server:
+            platform:
+              kubernetes:
+                accounts:
+                  default:
+                    configMapRefs:
+                      - testcm
+                      - anothercm
+----
+====
+
+The following example shows how to do so for tasks by editing the `server-config.yaml` file:
+
+====
+[source,yaml]
+----
+data:
+  application.yaml: |-
+    spring:
+      cloud:
+        dataflow:
+          task:
+            platform:
+              kubernetes:
+                accounts:
+                  default:
+                    configMapRefs:
+                      - testcm
+                      - anothercm
+----
+====
+
+Replacing the items of `configMapRefs` with one or more secret names.
 
 ==== Config Map Key References
 
