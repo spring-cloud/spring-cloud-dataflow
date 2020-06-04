@@ -1,5 +1,5 @@
 /*
- * Copyright 2016-2019 the original author or authors.
+ * Copyright 2016-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,6 +23,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.springframework.batch.core.JobExecution;
+import org.springframework.cloud.dataflow.core.TaskManifest;
 import org.springframework.cloud.dataflow.rest.job.TaskJobExecutionRel;
 import org.springframework.cloud.task.repository.TaskExecution;
 import org.springframework.hateoas.PagedModel;
@@ -161,6 +162,30 @@ public class TaskExecutionResource extends RepresentationModel<TaskExecutionReso
 		this.endTime = taskExecution.getEndTime();
 		this.errorMessage = taskExecution.getErrorMessage();
 		this.externalExecutionId = taskExecution.getExternalExecutionId();
+	}
+
+	/**
+	 * Constructor to initialize the TaskExecutionResource using a
+	 * {@link TaskExecution} and {@link TaskManifest}.
+	 *
+	 * @param taskExecution contains the {@link TaskExecution}
+	 * @param taskManifest contains the (@link TaskManifest}
+	 */
+	public TaskExecutionResource(TaskExecution taskExecution, TaskManifest taskManifest) {
+		Assert.notNull(taskExecution, "taskExecution must not be null");
+		Assert.notNull(taskManifest, "taskManifest must not be null");
+		this.executionId = taskExecution.getExecutionId();
+		this.exitCode = taskExecution.getExitCode();
+		this.taskName = taskExecution.getTaskName();
+		this.exitMessage = taskExecution.getExitMessage();
+		this.arguments = Collections.unmodifiableList(taskExecution.getArguments());
+		this.startTime = taskExecution.getStartTime();
+		this.endTime = taskExecution.getEndTime();
+		this.errorMessage = taskExecution.getErrorMessage();
+		this.externalExecutionId = taskExecution.getExternalExecutionId();
+		this.resourceUrl = taskManifest.getTaskDeploymentRequest().getResource().toString();
+		this.appProperties = taskManifest.getTaskDeploymentRequest().getDefinition().getProperties();
+		this.deploymentProperties = taskManifest.getTaskDeploymentRequest().getDeploymentProperties();
 	}
 
 	public long getExecutionId() {

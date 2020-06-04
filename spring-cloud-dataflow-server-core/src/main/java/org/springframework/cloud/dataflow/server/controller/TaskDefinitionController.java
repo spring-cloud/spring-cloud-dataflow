@@ -22,13 +22,16 @@ import java.util.Map;
 import java.util.function.Function;
 
 import org.springframework.cloud.dataflow.core.TaskDefinition;
+import org.springframework.cloud.dataflow.core.TaskManifest;
 import org.springframework.cloud.dataflow.rest.resource.TaskDefinitionResource;
 import org.springframework.cloud.dataflow.rest.resource.TaskExecutionResource;
 import org.springframework.cloud.dataflow.rest.util.ArgumentSanitizer;
+import org.springframework.cloud.dataflow.rest.util.TaskSanitizer;
 import org.springframework.cloud.dataflow.server.controller.support.TaskExecutionAwareTaskDefinition;
 import org.springframework.cloud.dataflow.server.repository.NoSuchTaskDefinitionException;
 import org.springframework.cloud.dataflow.server.repository.TaskDefinitionRepository;
 import org.springframework.cloud.dataflow.server.service.TaskDeleteService;
+import org.springframework.cloud.dataflow.server.service.TaskExecutionService;
 import org.springframework.cloud.dataflow.server.service.TaskSaveService;
 import org.springframework.cloud.dataflow.server.service.impl.TaskServiceUtils;
 import org.springframework.cloud.deployer.spi.task.TaskLauncher;
@@ -58,13 +61,12 @@ import org.springframework.web.bind.annotation.RestController;
  * @author Mark Fisher
  * @author Gunnar Hillert
  * @author Daniel Serleg
+ * @author Ilayaperumal Gopinathan
  */
 @RestController
 @RequestMapping("/tasks/definitions")
 @ExposesResourceFor(TaskDefinitionResource.class)
 public class TaskDefinitionController {
-
-	private final Assembler taskAssembler = new Assembler();
 
 	private final TaskDefinitionRepository repository;
 
@@ -74,7 +76,11 @@ public class TaskDefinitionController {
 
 	private final TaskExplorer explorer;
 
+	private final TaskExecutionService taskExecutionService;
+
 	private final ArgumentSanitizer argumentSanitizer = new ArgumentSanitizer();
+
+	private final TaskSanitizer taskSanitizer = new TaskSanitizer();
 
 	/**
 	 * Creates a {@code TaskDefinitionController} that delegates
@@ -87,17 +93,21 @@ public class TaskDefinitionController {
 	 * @param repository the repository this controller will use for task CRUD operations.
 	 * @param taskSaveService handles Task saving related operations.
 	 * @param taskDeleteService handles Task deletion related operations.
+	 * @param taskExecutionService handles Task execution related operations.
 	 */
 	public TaskDefinitionController(TaskExplorer taskExplorer, TaskDefinitionRepository repository,
-			TaskSaveService taskSaveService, TaskDeleteService taskDeleteService) {
+			TaskSaveService taskSaveService, TaskDeleteService taskDeleteService,
+			TaskExecutionService taskExecutionService) {
 		Assert.notNull(taskExplorer, "taskExplorer must not be null");
 		Assert.notNull(repository, "repository must not be null");
 		Assert.notNull(taskSaveService, "taskSaveService must not be null");
 		Assert.notNull(taskDeleteService, "taskDeleteService must not be null");
+		Assert.notNull(taskExecutionService, "taskExecutionService must not be null");
 		this.explorer = taskExplorer;
 		this.repository = repository;
 		this.taskSaveService = taskSaveService;
 		this.taskDeleteService = taskDeleteService;
+		this.taskExecutionService = taskExecutionService;
 	}
 
 	/**
@@ -113,7 +123,7 @@ public class TaskDefinitionController {
 									   @RequestParam(value = "description", defaultValue = "") String description) {
 		TaskDefinition taskDefinition = new TaskDefinition(name, dsl, description);
 		taskSaveService.saveTaskDefinition(taskDefinition);
-		return taskAssembler.toModel(new TaskExecutionAwareTaskDefinition(taskDefinition));
+		return new Assembler().toModel(new TaskExecutionAwareTaskDefinition(taskDefinition));
 	}
 
 	/**
@@ -141,14 +151,16 @@ public class TaskDefinitionController {
 	/**
 	 * Return a page-able list of {@link TaskDefinitionResource} defined tasks.
 	 *
-	 * @param pageable page-able collection of {@code TaskDefinitionResource}.
-	 * @param assembler assembler for the {@link TaskDefinition}
+	 * @param pageable page-able collection of {@code TaskDefinitionResource}
 	 * @param search optional findByTaskNameContains parameter
+	 * @param manifest optional manifest flag to indicate whether the latest task execution requires task manifest update
+	 * @param assembler assembler for the {@link TaskDefinition}
 	 * @return a list of task definitions
 	 */
 	@RequestMapping(value = "", method = RequestMethod.GET)
 	@ResponseStatus(HttpStatus.OK)
 	public PagedModel<TaskDefinitionResource> list(Pageable pageable, @RequestParam(required = false) String search,
+			@RequestParam(required = false) boolean manifest,
 			PagedResourcesAssembler<TaskExecutionAwareTaskDefinition> assembler) {
 
 		final Page<TaskDefinition> taskDefinitions;
@@ -178,7 +190,8 @@ public class TaskDefinitionController {
 		final Page<TaskExecutionAwareTaskDefinition> taskExecutionAwareTaskDefinitions = taskDefinitions
 				.map(new TaskDefinitionConverter(taskExecutions));
 
-		return assembler.toModel(taskExecutionAwareTaskDefinitions, taskAssembler);
+		PagedModel<TaskDefinitionResource> taskDefinitionResources = assembler.toModel(taskExecutionAwareTaskDefinitions, new Assembler(manifest));
+		return taskDefinitionResources;
 	}
 
 	/**
@@ -189,13 +202,15 @@ public class TaskDefinitionController {
 	 */
 	@RequestMapping(value = "/{name}", method = RequestMethod.GET)
 	@ResponseStatus(HttpStatus.OK)
-	public TaskDefinitionResource display(@PathVariable("name") String name) {
+	public TaskDefinitionResource display(@PathVariable("name") String name, @RequestParam(required = false, name = "manifest") boolean manifest) {
 		TaskDefinition definition = this.repository.findById(name)
 				.orElseThrow(() -> new NoSuchTaskDefinitionException(name));
-		final TaskExecution taskExecution = this.explorer.getLatestTaskExecutionForTaskName(name);
 
+		final TaskExecution taskExecution = this.explorer.getLatestTaskExecutionForTaskName(name);
+		final Assembler taskAssembler = new Assembler(manifest);
 		if (taskExecution != null) {
-			return taskAssembler.toModel(new TaskExecutionAwareTaskDefinition(definition, taskExecution));
+			TaskExecutionAwareTaskDefinition taskExecutionAwareTaskDefinition = new TaskExecutionAwareTaskDefinition(definition, taskExecution);
+			return taskAssembler.toModel(taskExecutionAwareTaskDefinition);
 		}
 		else {
 			return taskAssembler.toModel(new TaskExecutionAwareTaskDefinition(definition));
@@ -208,8 +223,24 @@ public class TaskDefinitionController {
 	 */
 	class Assembler extends RepresentationModelAssemblerSupport<TaskExecutionAwareTaskDefinition, TaskDefinitionResource> {
 
+		private boolean enableManifest;
+
 		public Assembler() {
 			super(TaskDefinitionController.class, TaskDefinitionResource.class);
+		}
+
+		public Assembler(boolean enableManifest) {
+			super(TaskDefinitionController.class, TaskDefinitionResource.class);
+			this.enableManifest = enableManifest;
+		}
+
+		TaskDefinitionResource updateTaskExecutionResource(TaskExecutionAwareTaskDefinition taskExecutionAwareTaskDefinition, TaskDefinitionResource taskDefinitionResource, boolean manifest) {
+			TaskExecution taskExecution = taskExecutionAwareTaskDefinition.getLatestTaskExecution();
+			TaskManifest taskManifest = taskExecutionService.findTaskManifestById(taskExecution.getExecutionId());
+			taskManifest = taskSanitizer.sanitizeTaskManifest(taskManifest);
+			TaskExecutionResource taskExecutionResource = (manifest) ? new TaskExecutionResource(taskExecution, taskManifest) : new TaskExecutionResource(taskExecution);
+			taskDefinitionResource.setLastTaskExecution(taskExecutionResource);
+			return taskDefinitionResource;
 		}
 
 		@Override
@@ -227,12 +258,28 @@ public class TaskDefinitionController {
 					taskExecutionAwareTaskDefinition.getTaskDefinition().getName(),
 					argumentSanitizer.sanitizeTaskDsl(taskExecutionAwareTaskDefinition.getTaskDefinition()),
 					taskExecutionAwareTaskDefinition.getTaskDefinition().getDescription());
-			if (taskExecutionAwareTaskDefinition.getLatestTaskExecution() != null) {
-				taskDefinitionResource.setLastTaskExecution(
-						new TaskExecutionResource(taskExecutionAwareTaskDefinition.getLatestTaskExecution()));
-			}
 			taskDefinitionResource.setComposed(composed);
+			if (taskExecutionAwareTaskDefinition.getLatestTaskExecution() != null) {
+				updateTaskExecutionResource(taskExecutionAwareTaskDefinition, taskDefinitionResource,
+						this.isEnableManifest());
+			}
 			return taskDefinitionResource;
+		}
+
+		/**
+		 * Returns if the TaskExecution needs to be updated with the task manifest.
+		 * @return the boolean value of to enable setting the manifest
+		 */
+		public boolean isEnableManifest() {
+			return enableManifest;
+		}
+
+		/**
+		 * Set the flag to indicate whether the task manifest needs to be updated for the TaskExecution.
+		 * @param enableManifest the boolean value of to enable setting the manifest
+		 */
+		public void setEnableManifest(boolean enableManifest) {
+			this.enableManifest = enableManifest;
 		}
 	}
 

@@ -252,8 +252,9 @@ public class DataFlowControllerAutoConfiguration {
 		@Bean
 		public TaskDefinitionController taskDefinitionController(TaskExplorer taskExplorer,
 				TaskDefinitionRepository repository, TaskSaveService taskSaveService,
-				TaskDeleteService taskDeleteService) {
-			return new TaskDefinitionController(taskExplorer, repository, taskSaveService, taskDeleteService);
+				TaskDeleteService taskDeleteService, TaskExecutionService taskExecutionService) {
+			return new TaskDefinitionController(taskExplorer, repository, taskSaveService, taskDeleteService,
+					taskExecutionService);
 		}
 
 		@Bean

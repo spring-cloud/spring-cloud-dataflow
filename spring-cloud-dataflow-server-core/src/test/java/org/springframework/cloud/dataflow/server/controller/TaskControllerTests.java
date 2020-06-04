@@ -1,5 +1,5 @@
 /*
- * Copyright 2015-2019 the original author or authors.
+ * Copyright 2015-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,7 +18,10 @@ package org.springframework.cloud.dataflow.server.controller;
 
 import java.net.URI;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.message.BasicNameValuePair;
@@ -36,19 +39,22 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.cloud.dataflow.core.ApplicationType;
 import org.springframework.cloud.dataflow.core.Launcher;
 import org.springframework.cloud.dataflow.core.TaskDefinition;
+import org.springframework.cloud.dataflow.core.TaskManifest;
 import org.springframework.cloud.dataflow.registry.service.AppRegistryService;
-import org.springframework.cloud.dataflow.server.TaskValidationController;
 import org.springframework.cloud.dataflow.server.configuration.TestDependencies;
 import org.springframework.cloud.dataflow.server.job.LauncherRepository;
-import org.springframework.cloud.dataflow.server.repository.DataflowTaskExecutionDao;
+import org.springframework.cloud.dataflow.server.repository.DataflowTaskExecutionMetadataDao;
 import org.springframework.cloud.dataflow.server.repository.TaskDefinitionRepository;
 import org.springframework.cloud.dataflow.server.service.TaskDeleteService;
+import org.springframework.cloud.dataflow.server.service.TaskExecutionCreationService;
 import org.springframework.cloud.dataflow.server.service.TaskExecutionService;
 import org.springframework.cloud.dataflow.server.service.TaskSaveService;
+import org.springframework.cloud.deployer.spi.core.AppDefinition;
 import org.springframework.cloud.deployer.spi.core.AppDeploymentRequest;
 import org.springframework.cloud.deployer.spi.task.TaskLauncher;
 import org.springframework.cloud.task.repository.TaskExecution;
 import org.springframework.cloud.task.repository.TaskExplorer;
+import org.springframework.core.io.FileSystemResource;
 import org.springframework.http.MediaType;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.junit4.SpringRunner;
@@ -61,6 +67,7 @@ import static org.hamcrest.Matchers.hasEntry;
 import static org.hamcrest.Matchers.hasItems;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.nullValue;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
 import static org.mockito.ArgumentMatchers.any;
@@ -108,16 +115,10 @@ public class TaskControllerTests {
 	private TaskLauncher taskLauncher;
 
 	@Autowired
-	private Launcher launcher;
-
-	@Autowired
 	private LauncherRepository launcherRepository;
 
 	@Autowired
 	private TaskExplorer taskExplorer;
-
-	@Autowired
-	private TaskValidationController taskValidationController;
 
 	@Autowired
 	private TaskSaveService taskSaveService;
@@ -126,7 +127,10 @@ public class TaskControllerTests {
 	private TaskDeleteService taskDeleteService;
 
 	@Autowired
-	private DataflowTaskExecutionDao dataflowTaskExecutionDao;
+	private DataflowTaskExecutionMetadataDao dataflowTaskExecutionMetadataDao;
+
+	@Autowired
+	private TaskExecutionCreationService taskExecutionCreationService;
 
 	@Before
 	public void setupMockMVC() {
@@ -136,29 +140,40 @@ public class TaskControllerTests {
 		launcherRepository.save(new Launcher("default", "local", taskLauncher));
 		when(taskLauncher.launch(any(AppDeploymentRequest.class))).thenReturn("testID");
 
-		final TaskExecution taskExecutionRunning = new TaskExecution();
-		taskExecutionRunning.setTaskName("myTask");
+
+		Map<String, String> deploymentProperties = new HashMap<>();
+		deploymentProperties.put("app.test.key1", "value1");
+		TaskManifest taskManifest = new TaskManifest();
+		AppDeploymentRequest request = new AppDeploymentRequest(new AppDefinition("test", Collections.emptyMap()), new FileSystemResource(""), deploymentProperties, null);
+		taskManifest.setTaskDeploymentRequest(request);
+		taskManifest.setPlatformName("test");
+
+		final TaskExecution taskExecutionRunning = this.taskExecutionCreationService.createTaskExecution("myTask");
 		taskExecutionRunning.setStartTime(new Date());
 		when(taskExplorer.getLatestTaskExecutionForTaskName("myTask")).thenReturn(taskExecutionRunning);
+		when(taskExplorer.getTaskExecution(taskExecutionRunning.getExecutionId())).thenReturn(taskExecutionRunning);
+		this.dataflowTaskExecutionMetadataDao.save(taskExecutionRunning, taskManifest);
 
-		final TaskExecution taskExecutionComplete = new TaskExecution();
+		final TaskExecution taskExecutionComplete = this.taskExecutionCreationService.createTaskExecution("myTask2");
 		taskExecutionComplete.setTaskName("myTask2");
 		taskExecutionComplete.setStartTime(new Date());
 		taskExecutionComplete.setEndTime(new Date());
 		taskExecutionComplete.setExitCode(0);
 		when(taskExplorer.getLatestTaskExecutionForTaskName("myTask2")).thenReturn(taskExecutionComplete);
+		when(taskExplorer.getTaskExecution(taskExecutionComplete.getExecutionId())).thenReturn(taskExecutionComplete);
 		when(taskExplorer.getLatestTaskExecutionsByTaskNames(any()))
 				.thenReturn(Arrays.asList(taskExecutionRunning, taskExecutionComplete));
+		this.dataflowTaskExecutionMetadataDao.save(taskExecutionComplete, taskManifest);
 	}
 
 	@Test(expected = IllegalArgumentException.class)
 	public void testTaskDefinitionControllerConstructorMissingRepository() {
-		new TaskDefinitionController(mock(TaskExplorer.class), null, taskSaveService, taskDeleteService);
+		new TaskDefinitionController(mock(TaskExplorer.class), null, taskSaveService, taskDeleteService, taskExecutionService);
 	}
 
 	@Test(expected = IllegalArgumentException.class)
 	public void testTaskDefinitionControllerConstructorMissingTaskExplorer() {
-		new TaskDefinitionController(null, mock(TaskDefinitionRepository.class), taskSaveService, taskDeleteService);
+		new TaskDefinitionController(null, mock(TaskDefinitionRepository.class), taskSaveService, taskDeleteService, taskExecutionService);
 	}
 
 	@Test
@@ -225,6 +240,27 @@ public class TaskControllerTests {
 		assertEquals("task --foo=bar --bar=baz", myTask.getDslText());
 		assertEquals("task", myTask.getRegisteredAppName());
 		assertEquals("myTask", myTask.getName());
+
+	}
+
+	@Test
+	public void testTaskDefinitionWithLastExecutionDetail() throws Exception {
+		this.registry.save("task", ApplicationType.task, "1.0.0", new URI("https://fake.example.com/"), null);
+		mockMvc.perform(post("/tasks/definitions/").param("name", "myTask")
+				.param("definition", "task --foo=bar --bar=baz").accept(MediaType.APPLICATION_JSON)).andDo(print())
+				.andExpect(status().isOk());
+		mockMvc.perform(get("/tasks/definitions/myTask")
+				.accept(MediaType.APPLICATION_JSON)).andDo(print()).andExpect(status().isOk())
+				.andExpect(jsonPath("$.lastTaskExecution.deploymentProperties",  is(nullValue())));
+		mockMvc.perform(get("/tasks/definitions/myTask?manifest=true")
+				.accept(MediaType.APPLICATION_JSON)).andDo(print()).andExpect(status().isOk())
+				.andExpect(jsonPath("$.lastTaskExecution.deploymentProperties",  hasEntry("app.test.key1", "value1")));
+		mockMvc.perform(get("/tasks/definitions")
+				.accept(MediaType.APPLICATION_JSON)).andDo(print()).andExpect(status().isOk())
+				.andExpect(jsonPath("$.content[0].lastTaskExecution.deploymentProperties",  is(nullValue())));
+		mockMvc.perform(get("/tasks/definitions?manifest=true")
+				.accept(MediaType.APPLICATION_JSON)).andDo(print()).andExpect(status().isOk())
+				.andExpect(jsonPath("$.content[0].lastTaskExecution.deploymentProperties",  hasEntry("app.test.key1", "value1")));
 	}
 
 	@Test
