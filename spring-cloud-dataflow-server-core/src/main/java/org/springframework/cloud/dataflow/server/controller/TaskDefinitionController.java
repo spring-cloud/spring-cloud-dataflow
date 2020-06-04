@@ -22,13 +22,16 @@ import java.util.Map;
 import java.util.function.Function;
 
 import org.springframework.cloud.dataflow.core.TaskDefinition;
+import org.springframework.cloud.dataflow.core.TaskManifest;
 import org.springframework.cloud.dataflow.rest.resource.TaskDefinitionResource;
 import org.springframework.cloud.dataflow.rest.resource.TaskExecutionResource;
 import org.springframework.cloud.dataflow.rest.util.ArgumentSanitizer;
+import org.springframework.cloud.dataflow.rest.util.TaskSanitizer;
 import org.springframework.cloud.dataflow.server.controller.support.TaskExecutionAwareTaskDefinition;
 import org.springframework.cloud.dataflow.server.repository.NoSuchTaskDefinitionException;
 import org.springframework.cloud.dataflow.server.repository.TaskDefinitionRepository;
 import org.springframework.cloud.dataflow.server.service.TaskDeleteService;
+import org.springframework.cloud.dataflow.server.service.TaskExecutionService;
 import org.springframework.cloud.dataflow.server.service.TaskSaveService;
 import org.springframework.cloud.dataflow.server.service.impl.TaskServiceUtils;
 import org.springframework.cloud.deployer.spi.task.TaskLauncher;
@@ -58,6 +61,7 @@ import org.springframework.web.bind.annotation.RestController;
  * @author Mark Fisher
  * @author Gunnar Hillert
  * @author Daniel Serleg
+ * @author Ilayaperumal Gopinathan
  */
 @RestController
 @RequestMapping("/tasks/definitions")
@@ -74,7 +78,11 @@ public class TaskDefinitionController {
 
 	private final TaskExplorer explorer;
 
+	private final TaskExecutionService taskExecutionService;
+
 	private final ArgumentSanitizer argumentSanitizer = new ArgumentSanitizer();
+
+	private final TaskSanitizer taskSanitizer = new TaskSanitizer();
 
 	/**
 	 * Creates a {@code TaskDefinitionController} that delegates
@@ -87,17 +95,21 @@ public class TaskDefinitionController {
 	 * @param repository the repository this controller will use for task CRUD operations.
 	 * @param taskSaveService handles Task saving related operations.
 	 * @param taskDeleteService handles Task deletion related operations.
+	 * @param taskExecutionService handles Task execution related operations.
 	 */
 	public TaskDefinitionController(TaskExplorer taskExplorer, TaskDefinitionRepository repository,
-			TaskSaveService taskSaveService, TaskDeleteService taskDeleteService) {
+			TaskSaveService taskSaveService, TaskDeleteService taskDeleteService,
+			TaskExecutionService taskExecutionService) {
 		Assert.notNull(taskExplorer, "taskExplorer must not be null");
 		Assert.notNull(repository, "repository must not be null");
 		Assert.notNull(taskSaveService, "taskSaveService must not be null");
 		Assert.notNull(taskDeleteService, "taskDeleteService must not be null");
+		Assert.notNull(taskExecutionService, "taskExecutionService must not be null");
 		this.explorer = taskExplorer;
 		this.repository = repository;
 		this.taskSaveService = taskSaveService;
 		this.taskDeleteService = taskDeleteService;
+		this.taskExecutionService = taskExecutionService;
 	}
 
 	/**
@@ -193,7 +205,6 @@ public class TaskDefinitionController {
 		TaskDefinition definition = this.repository.findById(name)
 				.orElseThrow(() -> new NoSuchTaskDefinitionException(name));
 		final TaskExecution taskExecution = this.explorer.getLatestTaskExecutionForTaskName(name);
-
 		if (taskExecution != null) {
 			return taskAssembler.toModel(new TaskExecutionAwareTaskDefinition(definition, taskExecution));
 		}
@@ -228,8 +239,10 @@ public class TaskDefinitionController {
 					argumentSanitizer.sanitizeTaskDsl(taskExecutionAwareTaskDefinition.getTaskDefinition()),
 					taskExecutionAwareTaskDefinition.getTaskDefinition().getDescription());
 			if (taskExecutionAwareTaskDefinition.getLatestTaskExecution() != null) {
-				taskDefinitionResource.setLastTaskExecution(
-						new TaskExecutionResource(taskExecutionAwareTaskDefinition.getLatestTaskExecution()));
+				TaskExecution taskExecution = taskExecutionAwareTaskDefinition.getLatestTaskExecution();
+				TaskManifest taskManifest = taskExecutionService.findTaskManifestById(taskExecution.getExecutionId());
+				taskManifest = taskSanitizer.sanitizeTaskManifest(taskManifest);
+				taskDefinitionResource.setLastTaskExecution(new TaskExecutionResource(taskExecution, taskManifest));
 			}
 			taskDefinitionResource.setComposed(composed);
 			return taskDefinitionResource;
