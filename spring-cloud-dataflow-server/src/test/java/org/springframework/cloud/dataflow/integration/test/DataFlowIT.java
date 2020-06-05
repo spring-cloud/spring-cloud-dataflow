@@ -835,15 +835,15 @@ public class DataFlowIT {
 			// second launch
 			long launchId2 = task.launch();
 
-			Awaitility.await().until(() -> task.executionStatus(launchId2) == TaskExecutionStatus.ERROR);
+			Awaitility.await().until(() -> task.executionStatus(launchId2) == TaskExecutionStatus.COMPLETE);
 
 			assertThat(task.executions().size()).isEqualTo(2);
-			assertThat(task.executionStatus(launchId2)).isEqualTo(TaskExecutionStatus.ERROR);
-			assertThat(task.execution(launchId2).get().getExitCode()).isEqualTo(EXIT_CODE_ERROR);
+			assertThat(task.executionStatus(launchId2)).isEqualTo(TaskExecutionStatus.COMPLETE);
+			assertThat(task.execution(launchId2).get().getExitCode()).isEqualTo(EXIT_CODE_SUCCESS);
 
 			task.children().forEach(childTask -> {
 				assertThat(childTask.executions().size()).isEqualTo(1);
-				assertThat(childTask.executionByParentExecutionId(launchId2).isPresent()).isFalse();
+				assertThat(childTask.executionByParentExecutionId(launchId2).get().getExitCode()).isEqualTo(EXIT_CODE_SUCCESS);
 			});
 
 			assertThat(tasks.list().size()).isEqualTo(3);
