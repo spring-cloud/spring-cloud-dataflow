@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 the original author or authors.
+ * Copyright 2019-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,8 +18,10 @@ package org.springframework.cloud.dataflow.server.config.cloudfoundry;
 
 import org.cloudfoundry.reactor.TokenProvider;
 import org.cloudfoundry.reactor.tokenprovider.PasswordGrantTokenProvider;
+import org.cloudfoundry.reactor.tokenprovider.PasswordGrantTokenProvider.Builder;
 
 import org.springframework.cloud.deployer.spi.cloudfoundry.CloudFoundryConnectionProperties;
+import org.springframework.util.StringUtils;
 
 /**
  * @author David Turanski
@@ -34,11 +36,18 @@ public class CloudFoundryPlatformTokenProvider {
 	}
 
 	public TokenProvider tokenProvider(String account) {
-		CloudFoundryConnectionProperties connectionProperties = platformProperties.accountProperties(account).getConnection();
-		return PasswordGrantTokenProvider.builder()
-			.username(connectionProperties.getUsername())
-			.password(connectionProperties.getPassword())
-			.loginHint(connectionProperties.getLoginHint())
-			.build();
+		CloudFoundryConnectionProperties connectionProperties = platformProperties.accountProperties(account)
+				.getConnection();
+		Builder tokenProviderBuilder = PasswordGrantTokenProvider.builder()
+				.username(connectionProperties.getUsername())
+				.password(connectionProperties.getPassword())
+				.loginHint(connectionProperties.getLoginHint());
+		if (StringUtils.hasText(connectionProperties.getClientId())) {
+			tokenProviderBuilder.clientId(connectionProperties.getClientId());
+		}
+		if (StringUtils.hasText(connectionProperties.getClientSecret())) {
+			tokenProviderBuilder.clientSecret(connectionProperties.getClientSecret());
+		}
+		return tokenProviderBuilder.build();
 	}
 }
