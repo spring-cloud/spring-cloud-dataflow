@@ -1,5 +1,5 @@
 /*
- * Copyright 2015-2016 the original author or authors.
+ * Copyright 2015-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,14 +27,14 @@ public class AppNode extends AstNode {
 
 	private static final ArgumentNode[] NO_ARGUMENTS = new ArgumentNode[0];
 
-	private final String appName;
+	protected final String appName;
 
-	private LabelNode label;
+	protected LabelNode label;
 
-	private ArgumentNode[] arguments;
+	protected ArgumentNode[] arguments;
 	
-	private boolean isUnboundStreamApp = true;
-
+	protected boolean isUnboundStreamApp = true;
+	
 	public AppNode(LabelNode label, String appName, int startPos, int endPos, ArgumentNode[] arguments) {
 		super(startPos, endPos);
 		this.label = label;

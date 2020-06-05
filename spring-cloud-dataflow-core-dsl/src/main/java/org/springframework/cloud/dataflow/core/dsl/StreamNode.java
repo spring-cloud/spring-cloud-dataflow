@@ -23,15 +23,15 @@ import java.util.List;
  */
 public class StreamNode extends AstNode {
 
-	private final String streamText;
+	protected final String streamText;
 
-	private final String streamName;
+	protected final String streamName;
 
-	private final List<AppNode> appNodes;
+	protected final List<AppNode> appNodes;
 
-	private SourceDestinationNode sourceDestinationNode;
+	protected SourceDestinationNode sourceDestinationNode;
 
-	private SinkDestinationNode sinkDestinationNode;
+	protected SinkDestinationNode sinkDestinationNode;
 
 	public StreamNode(String streamText, String streamName, List<AppNode> appNodes,
 			SourceDestinationNode sourceDestinationNode, SinkDestinationNode sinkDestinationNode) {

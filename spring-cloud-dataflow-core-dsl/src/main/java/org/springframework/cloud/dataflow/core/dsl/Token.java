@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 the original author or authors.
+ * Copyright 2015-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,22 +27,22 @@ public class Token {
 	/**
 	 * The kind of token.
 	 */
-	TokenKind kind;
+	public TokenKind kind;
 
 	/**
 	 * Any extra data for this token instance, e.g. the text for an identifier token.
 	 */
-	String data;
+	public String data;
 
 	/**
 	 * Index of first character.
 	 */
-	int startPos;
+	public int startPos;
 
 	/**
 	 * Index of char after the last character.
 	 */
-	int endPos;
+	public int endPos;
 
 	/**
 	 * Constructor for use when there is no particular data for the token

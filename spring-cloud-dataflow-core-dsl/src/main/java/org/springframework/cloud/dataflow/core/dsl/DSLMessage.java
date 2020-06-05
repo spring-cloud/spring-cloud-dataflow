@@ -1,5 +1,5 @@
 /*
- * Copyright 2015-2018 the original author or authors.
+ * Copyright 2015-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -95,7 +95,7 @@ public enum DSLMessage {
 	TASK_UNQUOTED_TRANSITION_CHECK_MUST_BE_NUMBER(Kind.ERROR, 154,
 			"transition conditions must be quoted literals, " + "numerics or '*' but ''{0}'' is not"), //
 	TASK_NO_LABELS_ON_PARENS(Kind.ERROR, 155, "labels cannot be specified on parenthesized groups"), //
-	TASK_NO_DOUBLE_LABELS(Kind.ERROR, 156, "double labels are not supported"), //
+	NO_DOUBLE_LABELS(Kind.ERROR, 156, "multiple labels are not supported"), //
 	TASK_ARROW_SHOULD_BE_PRECEDED_BY_CODE(Kind.ERROR, 157,
 			"transition arrow must be preceeded by the exit code that " + "should drive the transition"), //
 	TASK_VALIDATION_SECONDARY_SEQUENCES_MUST_BE_NAMED(Kind.ERROR, 158,
