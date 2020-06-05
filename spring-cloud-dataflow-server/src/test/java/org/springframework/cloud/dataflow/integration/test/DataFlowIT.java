@@ -842,7 +842,7 @@ public class DataFlowIT {
 			assertThat(task.execution(launchId2).get().getExitCode()).isEqualTo(EXIT_CODE_SUCCESS);
 
 			task.children().forEach(childTask -> {
-				assertThat(childTask.executions().size()).isEqualTo(1);
+				assertThat(childTask.executions().size()).isEqualTo(2);
 				assertThat(childTask.executionByParentExecutionId(launchId2).get().getExitCode()).isEqualTo(EXIT_CODE_SUCCESS);
 			});
 
