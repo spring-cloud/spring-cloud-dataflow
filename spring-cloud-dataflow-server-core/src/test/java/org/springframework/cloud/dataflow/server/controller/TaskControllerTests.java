@@ -67,6 +67,7 @@ import static org.hamcrest.Matchers.hasEntry;
 import static org.hamcrest.Matchers.hasItems;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.nullValue;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
 import static org.mockito.ArgumentMatchers.any;
@@ -243,14 +244,23 @@ public class TaskControllerTests {
 	}
 
 	@Test
-	public void testTaskDefintiionWithLastExecutionDetail() throws Exception {
+	public void testTaskDefinitionWithLastExecutionDetail() throws Exception {
 		this.registry.save("task", ApplicationType.task, "1.0.0", new URI("https://fake.example.com/"), null);
 		mockMvc.perform(post("/tasks/definitions/").param("name", "myTask")
 				.param("definition", "task --foo=bar --bar=baz").accept(MediaType.APPLICATION_JSON)).andDo(print())
 				.andExpect(status().isOk());
 		mockMvc.perform(get("/tasks/definitions/myTask")
 				.accept(MediaType.APPLICATION_JSON)).andDo(print()).andExpect(status().isOk())
+				.andExpect(jsonPath("$.lastTaskExecution.deploymentProperties",  is(nullValue())));
+		mockMvc.perform(get("/tasks/definitions/myTask?manifest=true")
+				.accept(MediaType.APPLICATION_JSON)).andDo(print()).andExpect(status().isOk())
 				.andExpect(jsonPath("$.lastTaskExecution.deploymentProperties",  hasEntry("app.test.key1", "value1")));
+		mockMvc.perform(get("/tasks/definitions")
+				.accept(MediaType.APPLICATION_JSON)).andDo(print()).andExpect(status().isOk())
+				.andExpect(jsonPath("$.content[0].lastTaskExecution.deploymentProperties",  is(nullValue())));
+		mockMvc.perform(get("/tasks/definitions?manifest=true")
+				.accept(MediaType.APPLICATION_JSON)).andDo(print()).andExpect(status().isOk())
+				.andExpect(jsonPath("$.content[0].lastTaskExecution.deploymentProperties",  hasEntry("app.test.key1", "value1")));
 	}
 
 	@Test

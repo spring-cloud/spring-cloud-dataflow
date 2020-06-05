@@ -28,6 +28,7 @@ import org.springframework.util.Assert;
 public class TaskExecutionAwareTaskDefinition {
 
 	final TaskDefinition taskDefinition;
+
 	final TaskExecution latestTaskExecution;
 
 	/**

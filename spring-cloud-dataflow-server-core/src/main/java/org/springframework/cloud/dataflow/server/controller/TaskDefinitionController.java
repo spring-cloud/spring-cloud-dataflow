@@ -68,8 +68,6 @@ import org.springframework.web.bind.annotation.RestController;
 @ExposesResourceFor(TaskDefinitionResource.class)
 public class TaskDefinitionController {
 
-	private final Assembler taskAssembler = new Assembler();
-
 	private final TaskDefinitionRepository repository;
 
 	private final TaskSaveService taskSaveService;
@@ -125,7 +123,7 @@ public class TaskDefinitionController {
 									   @RequestParam(value = "description", defaultValue = "") String description) {
 		TaskDefinition taskDefinition = new TaskDefinition(name, dsl, description);
 		taskSaveService.saveTaskDefinition(taskDefinition);
-		return taskAssembler.toModel(new TaskExecutionAwareTaskDefinition(taskDefinition));
+		return new Assembler().toModel(new TaskExecutionAwareTaskDefinition(taskDefinition));
 	}
 
 	/**
@@ -153,14 +151,16 @@ public class TaskDefinitionController {
 	/**
 	 * Return a page-able list of {@link TaskDefinitionResource} defined tasks.
 	 *
-	 * @param pageable page-able collection of {@code TaskDefinitionResource}.
-	 * @param assembler assembler for the {@link TaskDefinition}
+	 * @param pageable page-able collection of {@code TaskDefinitionResource}
 	 * @param search optional findByTaskNameContains parameter
+	 * @param manifest optional manifest flag to indicate whether the latest task execution requires task manifest update
+	 * @param assembler assembler for the {@link TaskDefinition}
 	 * @return a list of task definitions
 	 */
 	@RequestMapping(value = "", method = RequestMethod.GET)
 	@ResponseStatus(HttpStatus.OK)
 	public PagedModel<TaskDefinitionResource> list(Pageable pageable, @RequestParam(required = false) String search,
+			@RequestParam(required = false) boolean manifest,
 			PagedResourcesAssembler<TaskExecutionAwareTaskDefinition> assembler) {
 
 		final Page<TaskDefinition> taskDefinitions;
@@ -190,7 +190,8 @@ public class TaskDefinitionController {
 		final Page<TaskExecutionAwareTaskDefinition> taskExecutionAwareTaskDefinitions = taskDefinitions
 				.map(new TaskDefinitionConverter(taskExecutions));
 
-		return assembler.toModel(taskExecutionAwareTaskDefinitions, taskAssembler);
+		PagedModel<TaskDefinitionResource> taskDefinitionResources = assembler.toModel(taskExecutionAwareTaskDefinitions, new Assembler(manifest));
+		return taskDefinitionResources;
 	}
 
 	/**
@@ -201,12 +202,15 @@ public class TaskDefinitionController {
 	 */
 	@RequestMapping(value = "/{name}", method = RequestMethod.GET)
 	@ResponseStatus(HttpStatus.OK)
-	public TaskDefinitionResource display(@PathVariable("name") String name) {
+	public TaskDefinitionResource display(@PathVariable("name") String name, @RequestParam(required = false, name = "manifest") boolean manifest) {
 		TaskDefinition definition = this.repository.findById(name)
 				.orElseThrow(() -> new NoSuchTaskDefinitionException(name));
+
 		final TaskExecution taskExecution = this.explorer.getLatestTaskExecutionForTaskName(name);
+		final Assembler taskAssembler = new Assembler(manifest);
 		if (taskExecution != null) {
-			return taskAssembler.toModel(new TaskExecutionAwareTaskDefinition(definition, taskExecution));
+			TaskExecutionAwareTaskDefinition taskExecutionAwareTaskDefinition = new TaskExecutionAwareTaskDefinition(definition, taskExecution);
+			return taskAssembler.toModel(taskExecutionAwareTaskDefinition);
 		}
 		else {
 			return taskAssembler.toModel(new TaskExecutionAwareTaskDefinition(definition));
@@ -219,8 +223,24 @@ public class TaskDefinitionController {
 	 */
 	class Assembler extends RepresentationModelAssemblerSupport<TaskExecutionAwareTaskDefinition, TaskDefinitionResource> {
 
+		private boolean enableManifest = false;
+
 		public Assembler() {
 			super(TaskDefinitionController.class, TaskDefinitionResource.class);
+		}
+
+		public Assembler(boolean enableManifest) {
+			super(TaskDefinitionController.class, TaskDefinitionResource.class);
+			this.enableManifest = enableManifest;
+		}
+
+		TaskDefinitionResource updateTaskExecutionResource(TaskExecutionAwareTaskDefinition taskExecutionAwareTaskDefinition, TaskDefinitionResource taskDefinitionResource, boolean manifest) {
+			TaskExecution taskExecution = taskExecutionAwareTaskDefinition.getLatestTaskExecution();
+			TaskManifest taskManifest = taskExecutionService.findTaskManifestById(taskExecution.getExecutionId());
+			taskManifest = taskSanitizer.sanitizeTaskManifest(taskManifest);
+			TaskExecutionResource taskExecutionResource = (manifest) ? new TaskExecutionResource(taskExecution, taskManifest) : new TaskExecutionResource(taskExecution);
+			taskDefinitionResource.setLastTaskExecution(taskExecutionResource);
+			return taskDefinitionResource;
 		}
 
 		@Override
@@ -238,14 +258,28 @@ public class TaskDefinitionController {
 					taskExecutionAwareTaskDefinition.getTaskDefinition().getName(),
 					argumentSanitizer.sanitizeTaskDsl(taskExecutionAwareTaskDefinition.getTaskDefinition()),
 					taskExecutionAwareTaskDefinition.getTaskDefinition().getDescription());
-			if (taskExecutionAwareTaskDefinition.getLatestTaskExecution() != null) {
-				TaskExecution taskExecution = taskExecutionAwareTaskDefinition.getLatestTaskExecution();
-				TaskManifest taskManifest = taskExecutionService.findTaskManifestById(taskExecution.getExecutionId());
-				taskManifest = taskSanitizer.sanitizeTaskManifest(taskManifest);
-				taskDefinitionResource.setLastTaskExecution(new TaskExecutionResource(taskExecution, taskManifest));
-			}
 			taskDefinitionResource.setComposed(composed);
+			if (taskExecutionAwareTaskDefinition.getLatestTaskExecution() != null) {
+				updateTaskExecutionResource(taskExecutionAwareTaskDefinition, taskDefinitionResource,
+						this.isEnableManifest());
+			}
 			return taskDefinitionResource;
+		}
+
+		/**
+		 * Returns if the TaskExecution needs to be updated with the task manifest.
+		 * @return the boolean value of to enable setting the manifest
+		 */
+		public boolean isEnableManifest() {
+			return enableManifest;
+		}
+
+		/**
+		 * Set the flag to indicate whether the task manifest needs to be updated for the TaskExecution.
+		 * @param enableManifest the boolean value of to enable setting the manifest
+		 */
+		public void setEnableManifest(boolean enableManifest) {
+			this.enableManifest = enableManifest;
 		}
 	}
 

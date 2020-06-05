@@ -91,6 +91,7 @@ public class TaskDefinitionsDocumentation extends BaseDocumentation {
 				.param("size", "10")
 				.param("sort", "taskName,ASC")
 				.param("search", "")
+				.param("manifest", "true")
 			)
 			.andDo(print())
 			.andExpect(status().isOk())
@@ -99,7 +100,8 @@ public class TaskDefinitionsDocumentation extends BaseDocumentation {
 					parameterWithName("page").description("The zero-based page number (optional)"),
 					parameterWithName("size").description("The requested page size (optional)"),
 					parameterWithName("search").description("The search string performed on the name (optional)"),
-					parameterWithName("sort").description("The sort on the list (optional)")
+					parameterWithName("sort").description("The sort on the list (optional)"),
+					parameterWithName("manifest").description("The flag to include the task manifest into the latest task execution (optional)")
 				),
 				responseFields(
 					subsectionWithPath("_embedded.taskDefinitionResourceList")
@@ -111,12 +113,16 @@ public class TaskDefinitionsDocumentation extends BaseDocumentation {
 	@Test
 	public void displayDetail() throws Exception {
 		this.mockMvc.perform(
-			get("/tasks/definitions/{my-task}","my-task"))
+			get("/tasks/definitions/{my-task}","my-task")
+			.param("manifest", "true"))
 			.andDo(print())
 			.andExpect(status().isOk())
 			.andDo(this.documentationHandler.document(
 				pathParameters(
 					parameterWithName("my-task").description("The name of an existing task definition (required)")
+				),
+				requestParameters(
+					parameterWithName("manifest").description("The flag to include the task manifest into the latest task execution (optional)")
 				),
 				responseFields(
 					fieldWithPath("name").description("The name of the created task definition"),
