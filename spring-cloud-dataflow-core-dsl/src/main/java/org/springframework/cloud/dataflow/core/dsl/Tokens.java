@@ -74,7 +74,7 @@ public class Tokens {
 	 *
 	 * @return expression string
 	 */
-	protected String getExpression() {
+	public String getExpression() {
 		return expression;
 	}
 
@@ -83,7 +83,7 @@ public class Tokens {
 	 *
 	 * @return new token position
 	 */
-	protected int decrementPosition() {
+	public int decrementPosition() {
 		return --position;
 	}
 
@@ -92,7 +92,7 @@ public class Tokens {
 	 *
 	 * @return current token position
 	 */
-	protected int position() {
+	public int position() {
 		return position;
 	}
 
@@ -127,7 +127,7 @@ public class Tokens {
 	 *
 	 * @return {@code true} if there are more tokens to process
 	 */
-	protected boolean hasNext() {
+	public boolean hasNext() {
 		return position < tokenStream.size();
 	}
 
@@ -137,7 +137,7 @@ public class Tokens {
 	 *
 	 * @return token at current position or {@code null} if there are no more tokens
 	 */
-	protected Token peek() {
+	public Token peek() {
 		return hasNext() ? tokenStream.get(position) : null;
 	}
 
@@ -164,7 +164,7 @@ public class Tokens {
 	 * @param desiredTokenKind token to match
 	 * @return true if the current token kind matches the provided token kind
 	 */
-	protected boolean peek(TokenKind desiredTokenKind) {
+	public boolean peek(TokenKind desiredTokenKind) {
 		return peek(desiredTokenKind, false);
 	}
 
@@ -196,7 +196,7 @@ public class Tokens {
 	 *
 	 * @return next {@code Token}
 	 */
-	protected Token next() {
+	public Token next() {
 		if (!hasNext()) {
 			raiseException(expression.length(), DSLMessage.OOD);
 		}
@@ -212,7 +212,7 @@ public class Tokens {
 	 * @throws CheckPointedParseException if the next token does not match the expected
 	 * token kind
 	 */
-	protected Token eat(TokenKind expectedKind) {
+	public Token eat(TokenKind expectedKind) {
 		Token t = next();
 		if (t == null) {
 			raiseException(expression.length(), DSLMessage.OOD);
@@ -246,7 +246,7 @@ public class Tokens {
 	 * @return true if the first character of the current token matches the last character
 	 * of the previous token
 	 */
-	protected boolean isNextAdjacent() {
+	public boolean isNextAdjacent() {
 		if (!hasNext()) {
 			return false;
 		}
@@ -273,7 +273,7 @@ public class Tokens {
 	 * @param message parse exception message
 	 * @param inserts variables that may be inserted in the error message
 	 */
-	protected void raiseException(int position, DSLMessage message, Object... inserts) {
+	public void raiseException(int position, DSLMessage message, Object... inserts) {
 		throw new CheckPointedParseException(expression, position, this.position, lastGoodPosition, tokenStream,
 				message, inserts);
 	}

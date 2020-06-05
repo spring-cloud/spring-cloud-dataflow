@@ -109,7 +109,7 @@ public class StreamParser extends AppParser {
 	 *
 	 * @return stream name if present
 	 */
-	private String eatStreamName() {
+	protected String eatStreamName() {
 		Tokens tokens = getTokens();
 		String streamName = null;
 		if (tokens.lookAhead(1, TokenKind.EQUALS)) {
@@ -132,7 +132,7 @@ public class StreamParser extends AppParser {
 	 *
 	 * @return {@code StreamNode} based on parsed DSL
 	 */
-	private StreamNode eatStream() {
+	protected StreamNode eatStream() {
 		String streamName = eatStreamName();
 		SourceDestinationNode sourceDestinationNode = eatSourceDestination();
 		// This construct: :foo > :bar is a source then a sink destination
@@ -148,7 +148,7 @@ public class StreamParser extends AppParser {
 		if (bridge) {
 			// Create a bridge app to hang the source/sink destinations off
 			tokens.decrementPosition(); // Rewind so we can nicely eat the sink destination
-			AppNode bridgeAppNode = new AppNode(null, "bridge", tokens.peek().startPos, tokens.peek().endPos, null);
+			AppNode bridgeAppNode = makeAppNode(null, "bridge", tokens.peek().startPos, tokens.peek().endPos, null);
 			bridgeAppNode.setUnboundStreamApp(false);
 			appNodes.add(bridgeAppNode);
 		}
@@ -168,7 +168,7 @@ public class StreamParser extends AppParser {
 			}
 			tokens.raiseException(t.startPos, errorMessage, toString(t));
 		}
-		return new StreamNode(tokens.getExpression(), streamName, appNodes, sourceDestinationNode, sinkDestinationNode);
+		return makeStreamNode(tokens.getExpression(), streamName, appNodes, sourceDestinationNode, sinkDestinationNode);
 	}
 
 	/**
@@ -176,7 +176,7 @@ public class StreamParser extends AppParser {
 	 *
 	 * @return {@code true} if no more pipes are present from the current token position
 	 */
-	private boolean noMorePipes() {
+	protected boolean noMorePipes() {
 		return noMorePipes(getTokens().position());
 	}
 
@@ -186,7 +186,7 @@ public class StreamParser extends AppParser {
 	 * @param position token position from which to check for the presence of pipes
 	 * @return {@code true} if no more pipes are present from the given position
 	 */
-	private boolean noMorePipes(int position) {
+	protected boolean noMorePipes(int position) {
 		List<Token> tokenList = getTokens().getTokenStream();
 		int tokenStreamLength = tokenList.size();
 		while (position < tokenStreamLength) {
@@ -204,7 +204,7 @@ public class StreamParser extends AppParser {
 	 * @return {@code true} if the current token position appears to be pointing at a
 	 * destination
 	 */
-	private boolean looksLikeDestination() {
+	protected boolean looksLikeDestination() {
 		return looksLikeDestination(getTokens().position());
 	}
 
@@ -216,7 +216,7 @@ public class StreamParser extends AppParser {
 	 * @return {@code true} if the indicated position appears to be pointing at a
 	 * destination.
 	 */
-	private boolean looksLikeDestination(int position) {
+	protected boolean looksLikeDestination(int position) {
 		Tokens tokens = getTokens();
 		List<Token> tokenList = tokens.getTokenStream();
 		if (tokens.hasNext() && tokenList.get(position).getKind() == TokenKind.COLON) {
@@ -237,7 +237,7 @@ public class StreamParser extends AppParser {
 	 * @return a {@code SourceDestinationNode} or {@code null} if the token position is
 	 * not pointing at a source destination
 	 */
-	private SourceDestinationNode eatSourceDestination() {
+	protected SourceDestinationNode eatSourceDestination() {
 		Tokens tokens = getTokens();
 		boolean gtBeforePipe = false;
 		// Seek for a GT(>) before a PIPE(|)
@@ -256,7 +256,7 @@ public class StreamParser extends AppParser {
 			return null;
 		}
 
-		DestinationNode destinationNode = eatDestinationReference();
+		DestinationNode destinationNode = eatDestinationReference(false);
 		if (destinationNode == null) {
 			return null;
 		}
@@ -274,12 +274,12 @@ public class StreamParser extends AppParser {
 	 * @return a {@code SinkDestinationNode} or {@code null} if the token position is not
 	 * pointing at a sink destination
 	 */
-	private SinkDestinationNode eatSinkDestination() {
+	protected SinkDestinationNode eatSinkDestination() {
 		Tokens tokens = getTokens();
 		SinkDestinationNode SinkDestinationNode = null;
 		if (tokens.peek(TokenKind.GT)) {
 			Token gt = tokens.eat(TokenKind.GT);
-			DestinationNode destinationNode = eatDestinationReference();
+			DestinationNode destinationNode = eatDestinationReference(false);
 			if (destinationNode == null) {
 				return null;
 			}
@@ -288,7 +288,7 @@ public class StreamParser extends AppParser {
 		return SinkDestinationNode;
 	}
 
-	private Token peekDestinationComponentToken() {
+	protected Token peekDestinationComponentToken() {
 		Token t = getTokens().peek();
 		if (t == null) {
 			return null;
@@ -302,7 +302,7 @@ public class StreamParser extends AppParser {
 		}
 	}
 
-	private String getTokenData(Token token) {
+	protected String getTokenData(Token token) {
 		return token.kind.hasPayload() ? token.data : new String(token.kind.getTokenChars());
 	}
 
@@ -317,7 +317,7 @@ public class StreamParser extends AppParser {
 	 *
 	 * @return {@code DestinationNode} representing the destination reference
 	 */
-	private DestinationNode eatDestinationReference() {
+	protected DestinationNode eatDestinationReference(boolean canDefault) {
 		Tokens tokens = getTokens();
 		Token firstToken = tokens.next();
 		if (!firstToken.isKind(TokenKind.COLON)) {
@@ -358,7 +358,7 @@ public class StreamParser extends AppParser {
 		}
 		int endPos = token.endPos;
 		ArgumentNode[] argumentNodes = eatAppArgs();
-		return new DestinationNode(startpos, endPos, destinationName.toString(), argumentNodes);
+		return makeDestinationNode(startpos, endPos, destinationName.toString(), argumentNodes);
 	}
 
 	/**
@@ -369,7 +369,7 @@ public class StreamParser extends AppParser {
 	 *
 	 * @return a list of {@code AppNode}
 	 */
-	private List<AppNode> eatAppList(boolean preceedingSourceChannelSpecified) {
+	protected List<AppNode> eatAppList(boolean preceedingSourceChannelSpecified) {
 		Tokens tokens = getTokens();
 		List<AppNode> appNodes = new ArrayList<AppNode>();
 		int usedListDelimiter = -1;
@@ -415,6 +415,15 @@ public class StreamParser extends AppParser {
 	public String toString() {
 		Tokens tokens = getTokens();
 		return String.valueOf(tokens.getTokenStream()) + "\n" + "tokenStreamPointer=" + tokens.position() + "\n";
+	}
+
+	protected DestinationNode makeDestinationNode(int startpos, int endPos, String destinationName, ArgumentNode[] argumentNodes) {
+		return new DestinationNode(startpos, endPos, destinationName, argumentNodes);
+	}
+
+	protected StreamNode makeStreamNode(String streamText, String streamName, List<AppNode> appNodes,
+			SourceDestinationNode sourceDestinationNode, SinkDestinationNode sinkDestinationNode) {
+		return new StreamNode(streamText, streamName, appNodes, sourceDestinationNode, sinkDestinationNode);
 	}
 
 }

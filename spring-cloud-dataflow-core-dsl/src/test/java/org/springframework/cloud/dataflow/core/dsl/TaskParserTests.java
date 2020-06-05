@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2019 the original author or authors.
+ * Copyright 2017-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -910,7 +910,7 @@ public class TaskParserTests {
 		assertEquals("aaa", taskApp.getLabelString());
 
 		checkForParseError("aaa: (appA)", DSLMessage.TASK_NO_LABELS_ON_PARENS, 5);
-		checkForParseError("aaa: bbb: appA", DSLMessage.TASK_NO_DOUBLE_LABELS, 5);
+		checkForParseError("aaa: bbb: appA", DSLMessage.NO_DOUBLE_LABELS, 5);
 		checkForParseError("aaa: >", DSLMessage.EXPECTED_APPNAME, 5);
 		checkForParseError("aaa: &&", DSLMessage.EXPECTED_APPNAME, 5);
 		checkForParseError("aaa:: appA", DSLMessage.EXPECTED_APPNAME, 4);

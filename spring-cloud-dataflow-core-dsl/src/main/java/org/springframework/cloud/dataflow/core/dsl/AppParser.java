@@ -1,5 +1,5 @@
 /*
- * Copyright 2015-2016 the original author or authors.
+ * Copyright 2015-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,7 +33,7 @@ public class AppParser {
 	/**
 	 * Tokens resulting from DSL parsing.
 	 */
-	private final Tokens tokens;
+	protected final Tokens tokens;
 
 	/**
 	 * Construct a {@code AppParser} based on the provided {@link Tokens}.
@@ -73,22 +73,22 @@ public class AppParser {
 			tokens.raiseException(name.startPos, DSLMessage.EXPECTED_APPNAME,
 					name.data != null ? name.data : new String(name.getKind().tokenChars));
 		}
-		if (tokens.peek(TokenKind.COLON)) {
-			if (!tokens.isNextAdjacent()) {
-				tokens.raiseException(tokens.peek().startPos, DSLMessage.NO_WHITESPACE_BETWEEN_LABEL_NAME_AND_COLON);
-			}
+		if (tokens.peek(TokenKind.COLON) && tokens.isNextAdjacent()) {
 			tokens.next(); // swallow colon
 			if (tokens.isNextAdjacent()) {
 				tokens.raiseException(tokens.peek().startPos, DSLMessage.EXPECTED_WHITESPACE_AFTER_LABEL_COLON);
 			}
 			label = name;
 			name = tokens.eat(TokenKind.IDENTIFIER);
+			if (tokens.peek(TokenKind.COLON) && tokens.isNextAdjacent()) {
+				tokens.raiseException(name.startPos, DSLMessage.NO_DOUBLE_LABELS);
+			}
 		}
 		Token appName = name;
 		tokens.checkpoint();
 		ArgumentNode[] args = eatAppArgs();
 		int startPos = label != null ? label.startPos : appName.startPos;
-		return new AppNode(toLabelNode(label), appName.data, startPos, appName.endPos, args);
+		return makeAppNode(toLabelNode(label), appName.data, startPos, appName.endPos, args);
 	}
 
 	/**
@@ -258,6 +258,10 @@ public class AppParser {
 			}
 		}
 		return true;
+	}
+	
+	protected AppNode makeAppNode(LabelNode label, String appName, int startPos, int endPos, ArgumentNode[] arguments) {
+		return new AppNode(label, appName, startPos, endPos, arguments);
 	}
 
 }

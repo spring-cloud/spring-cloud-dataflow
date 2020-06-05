@@ -1,5 +1,5 @@
 /*
- * Copyright 2015-2018 the original author or authors.
+ * Copyright 2015-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,9 +27,9 @@ import org.springframework.util.Assert;
  */
 public class DestinationNode extends AstNode {
 
-	private final String destinationName;
+	protected final String destinationName;
 
-	private final ArgumentNode[] arguments;
+	protected final ArgumentNode[] arguments;
 
 	public DestinationNode(int startPos, int endPos, String destinationName, ArgumentNode[] arguments) {
 		super(startPos, endPos);
@@ -61,7 +61,7 @@ public class DestinationNode extends AstNode {
 		return ":" + getDestinationName();
 	}
 
-	String getDestinationName() {
+	public String getDestinationName() {
 		return this.destinationName;
 	}
 
