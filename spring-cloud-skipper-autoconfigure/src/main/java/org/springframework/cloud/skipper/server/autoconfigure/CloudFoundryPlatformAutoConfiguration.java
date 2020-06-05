@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2019 the original author or authors.
+ * Copyright 2017-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,6 +30,7 @@ import org.cloudfoundry.reactor.TokenProvider;
 import org.cloudfoundry.reactor.client.ReactorCloudFoundryClient;
 import org.cloudfoundry.reactor.doppler.ReactorDopplerClient;
 import org.cloudfoundry.reactor.tokenprovider.PasswordGrantTokenProvider;
+import org.cloudfoundry.reactor.tokenprovider.PasswordGrantTokenProvider.Builder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -51,6 +52,7 @@ import org.springframework.cloud.skipper.server.config.EnableSkipperServerConfig
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
+import org.springframework.util.StringUtils;
 
 /**
  * @author Donovan Muller
@@ -90,11 +92,18 @@ public class CloudFoundryPlatformAutoConfiguration {
 					.apiHost(connectionProperties.getUrl().getHost())
 					.skipSslValidation(connectionProperties.isSkipSslValidation())
 					.build();
-			TokenProvider tokenProvider = PasswordGrantTokenProvider.builder()
+			Builder tokenProviderBuilder = PasswordGrantTokenProvider.builder()
 					.username(connectionProperties.getUsername())
 					.password(connectionProperties.getPassword())
-					.loginHint(connectionProperties.getLoginHint())
-					.build();
+					.loginHint(connectionProperties.getLoginHint());
+			if (StringUtils.hasText(connectionProperties.getClientId())) {
+				tokenProviderBuilder.clientId(connectionProperties.getClientId());
+			}
+			if (StringUtils.hasText(connectionProperties.getClientSecret())) {
+				tokenProviderBuilder.clientSecret(connectionProperties.getClientSecret());
+			}
+			TokenProvider tokenProvider = tokenProviderBuilder.build();
+
 			CloudFoundryClient cloudFoundryClient = ReactorCloudFoundryClient.builder()
 					.connectionContext(connectionContext).tokenProvider(tokenProvider)
 					.build();

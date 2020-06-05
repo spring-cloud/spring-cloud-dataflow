@@ -17,6 +17,8 @@ spring:
                   domain: cfapps.io
                   username: skipper@example.com
                   password: drowssap
+                  clientId: id1
+                  clientSecret: secret1
                   skipSslValidation: false
                 deployment:
                   memory: 512m
@@ -32,6 +34,8 @@ spring:
                   domain: cfapps.io
                   username: skipper@example.com
                   password: drowssap
+                  clientId: id2
+                  clientSecret: secret2
                   skipSslValidation: true
                 deployment:
                   memory: 756m
