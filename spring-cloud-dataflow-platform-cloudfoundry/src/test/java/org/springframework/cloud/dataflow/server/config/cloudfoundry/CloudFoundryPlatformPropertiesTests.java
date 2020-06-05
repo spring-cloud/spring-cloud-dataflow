@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 the original author or authors.
+ * Copyright 2017-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -49,7 +49,8 @@ public class CloudFoundryPlatformPropertiesTests {
 		Assertions.assertThat(cfAccounts).hasSize(2);
 		Assertions.assertThat(cfAccounts).containsKeys("dev", "qa");
 		assertThat(cfAccounts.get("dev").getConnection().getOrg()).isEqualTo("myOrg");
-		assertThat(cfAccounts.get("qa").getConnection().getOrg()).isEqualTo("myOrgQA");
+		assertThat(cfAccounts.get("dev").getConnection().getClientId()).isEqualTo("id1");
+		assertThat(cfAccounts.get("dev").getConnection().getClientSecret()).isEqualTo("secret1");
 		assertThat(cfAccounts.get("dev").getDeployment().getMemory()).isEqualTo("512m");
 		assertThat(cfAccounts.get("dev").getDeployment().getDisk()).isEqualTo("2048m");
 		assertThat(cfAccounts.get("dev").getDeployment().getInstances()).isEqualTo(4);
@@ -57,6 +58,9 @@ public class CloudFoundryPlatformPropertiesTests {
 		assertThat(cfAccounts.get("dev").getDeployment().getServices())
 				.containsExactly("rabbit", "mysql");
 
+		assertThat(cfAccounts.get("qa").getConnection().getOrg()).isEqualTo("myOrgQA");
+		assertThat(cfAccounts.get("qa").getConnection().getClientId()).isEqualTo("id2");
+		assertThat(cfAccounts.get("qa").getConnection().getClientSecret()).isEqualTo("secret2");
 		assertThat(cfAccounts.get("qa").getDeployment().getMemory()).isEqualTo("756m");
 		assertThat(cfAccounts.get("qa").getDeployment().getDisk()).isEqualTo("724m");
 		assertThat(cfAccounts.get("qa").getDeployment().getInstances()).isEqualTo(2);
