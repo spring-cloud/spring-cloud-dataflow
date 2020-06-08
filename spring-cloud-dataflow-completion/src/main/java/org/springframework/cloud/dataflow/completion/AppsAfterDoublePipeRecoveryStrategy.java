@@ -21,6 +21,7 @@ import java.util.List;
 import org.springframework.cloud.dataflow.core.AppRegistration;
 import org.springframework.cloud.dataflow.core.ApplicationType;
 import org.springframework.cloud.dataflow.core.StreamDefinition;
+import org.springframework.cloud.dataflow.core.StreamDefinitionService;
 import org.springframework.cloud.dataflow.core.dsl.CheckPointedParseException;
 import org.springframework.cloud.dataflow.registry.service.AppRegistryService;
 
@@ -34,10 +35,12 @@ import org.springframework.cloud.dataflow.registry.service.AppRegistryService;
  */
 public class AppsAfterDoublePipeRecoveryStrategy
 		extends StacktraceFingerprintingRecoveryStrategy<CheckPointedParseException> {
+
 	private final AppRegistryService appRegistryService;
 
-	AppsAfterDoublePipeRecoveryStrategy(AppRegistryService appRegistryService) {
-		super(CheckPointedParseException.class, "foo ||", "foo || ");
+	AppsAfterDoublePipeRecoveryStrategy(AppRegistryService appRegistryService,
+			StreamDefinitionService streamDefinitionService) {
+		super(CheckPointedParseException.class, streamDefinitionService,"foo ||", "foo || ");
 		this.appRegistryService = appRegistryService;
 	}
 
@@ -49,7 +52,8 @@ public class AppsAfterDoublePipeRecoveryStrategy
 		CompletionProposal.Factory proposals = CompletionProposal.expanding(dsl);
 		for (AppRegistration appRegistration : appRegistryService.findAll()) {
 			if (appRegistration.getType() == ApplicationType.app) {
-				String expansion = CompletionUtils.maybeQualifyWithLabel(appRegistration.getName(), streamDefinition);
+				String expansion = CompletionUtils.maybeQualifyWithLabel(appRegistration.getName(),
+						this.streamDefinitionService.getAppDefinitions(streamDefinition));
 				collector.add(proposals.withSeparateTokens(expansion,
 						"Continue stream definition with a " + appRegistration.getType()));
 			}

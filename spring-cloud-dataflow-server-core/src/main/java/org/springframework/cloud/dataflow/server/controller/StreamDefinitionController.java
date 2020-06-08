@@ -24,9 +24,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import org.springframework.cloud.dataflow.core.StreamDefinition;
+import org.springframework.cloud.dataflow.core.StreamDefinitionService;
 import org.springframework.cloud.dataflow.rest.resource.DeploymentStateResource;
 import org.springframework.cloud.dataflow.rest.resource.StreamDefinitionResource;
-import org.springframework.cloud.dataflow.rest.util.ArgumentSanitizer;
 import org.springframework.cloud.dataflow.server.controller.support.ControllerUtils;
 import org.springframework.cloud.dataflow.server.controller.support.InvalidStreamDefinitionException;
 import org.springframework.cloud.dataflow.server.repository.DuplicateStreamDefinitionException;
@@ -74,14 +74,17 @@ public class StreamDefinitionController {
 	 */
 	private final StreamService streamService;
 
+	private final StreamDefinitionService streamDefinitionService;
+
 	/**
 	 * Create a {@code StreamDefinitionController} that delegates to {@link StreamService}.
 	 *
 	 * @param streamService the stream service to use
 	 */
-	public StreamDefinitionController(StreamService streamService) {
+	public StreamDefinitionController(StreamService streamService, StreamDefinitionService streamDefinitionService) {
 		Assert.notNull(streamService, "StreamService must not be null");
 		this.streamService = streamService;
+		this.streamDefinitionService = streamDefinitionService;
 	}
 
 	/**
@@ -205,10 +208,12 @@ public class StreamDefinitionController {
 		}
 
 		@Override
-		public StreamDefinitionResource instantiateModel(StreamDefinition stream) {
-			final StreamDefinitionResource resource = new StreamDefinitionResource(stream.getName(),
-					new ArgumentSanitizer().sanitizeStream(stream), new ArgumentSanitizer().sanitizeOriginalStreamDsl(stream), stream.getDescription());
-			DeploymentState deploymentState = streamDeploymentStates.get(stream);
+		public StreamDefinitionResource instantiateModel(StreamDefinition streamDefinition) {
+			final StreamDefinition originalStreamDefinition = new StreamDefinition(streamDefinition.getName(), streamDefinition.getOriginalDslText());
+			final StreamDefinitionResource resource = new StreamDefinitionResource(streamDefinition.getName(),
+					streamDefinitionService.sanitizeStreamDefinition(streamDefinition),
+					streamDefinitionService.sanitizeStreamDefinition(originalStreamDefinition), streamDefinition.getDescription());
+			DeploymentState deploymentState = streamDeploymentStates.get(streamDefinition);
 			if (deploymentState != null) {
 				final DeploymentStateResource deploymentStateResource = ControllerUtils
 						.mapState(deploymentState);

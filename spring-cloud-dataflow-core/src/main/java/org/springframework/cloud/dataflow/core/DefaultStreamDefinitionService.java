@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 the original author or authors.
+ * Copyright 2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,28 +13,23 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.springframework.cloud.dataflow.core;
 
 import java.util.Arrays;
+import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.apache.commons.lang.StringEscapeUtils;
 
+import org.springframework.cloud.dataflow.core.dsl.StreamNode;
+import org.springframework.cloud.dataflow.core.dsl.StreamParser;
 import org.springframework.util.StringUtils;
 
-/**
- * Reverse engineers a {@link StreamDefinition} into a semantically equivalent DSL text representation.
- * @author Christian Tzolov
- */
-public class StreamDefinitionToDslConverter {
+public class DefaultStreamDefinitionService implements StreamDefinitionService {
 
-	private final StreamDefinitionService streamDefinitionService;
-
-	public StreamDefinitionToDslConverter(StreamDefinitionService streamDefinitionService) {
-		this.streamDefinitionService = streamDefinitionService;
-	}
 
 	private final static List<String> dataFlowAddedProperties = Arrays.asList(
 			DataFlowPropertyKeys.STREAM_APP_TYPE,
@@ -48,14 +43,77 @@ public class StreamDefinitionToDslConverter {
 			BindingPropertyKeys.OUTPUT_DESTINATION,
 			BindingPropertyKeys.INPUT_DESTINATION);
 
+
+	public StreamNode parse(StreamDefinition streamDefinition) {
+		return new StreamParser(streamDefinition.getName(), streamDefinition.getDslText()).parse();
+	}
+
+	/**
+	 * Return the ordered list of application definitions for this stream as a
+	 * {@link List}. This allows for retrieval of application definitions in the stream by
+	 * index. Application definitions are maintained in stream flow order (source is
+	 * first, sink is last).
+	 *
+	 * @return list of application definitions for this stream definition
+	 */
+	public LinkedList<StreamAppDefinition> getAppDefinitions(StreamDefinition streamDefinition) {
+		LinkedList<StreamAppDefinition> appDefinitions = new LinkedList<>();
+		String streamName = streamDefinition.getName();
+		for (StreamAppDefinition appDefinition : new StreamApplicationDefinitionBuilder(streamName, parse(streamDefinition)).build()) {
+			appDefinitions.addFirst(appDefinition);
+		}
+		return appDefinitions;
+	}
+
+	/**
+	 * Return an iterator that indicates the order of application deployments for this
+	 * stream. The application definitions are returned in reverse order; i.e. the sink is
+	 * returned first followed by the processors in reverse order followed by the source.
+	 *
+	 * @return iterator that iterates over the application definitions in deployment order
+	 */
+	public Iterator<StreamAppDefinition> getDeploymentOrderIterator(StreamDefinition streamDefinition) {
+		return new ReadOnlyIterator<>(getAppDefinitions(streamDefinition).descendingIterator());
+	}
+
+
+	/**
+	 * Redacts sensitive property values in a stream.
+	 *
+	 * @param streamDefinition the stream definition to sanitize
+	 * @return Stream definition text that has sensitive data redacted.
+	 */
+	public String sanitizeStreamDefinition(StreamDefinition streamDefinition) {
+		List<StreamAppDefinition> sanitizedAppDefinitions = getAppDefinitions(streamDefinition).stream()
+				.map(app -> StreamAppDefinition.Builder
+						.from(app)
+						.setProperties(new ArgumentSanitizer().sanitizeProperties(app.getProperties()))
+						.build(streamDefinition.getName())
+				).collect(Collectors.toList());
+
+		return toDsl(sanitizedAppDefinitions);
+	}
+
+
+	/**
+	 * Redacts sensitive property values in a stream.
+	 *
+	 * @param streamDefinition the stream definition to sanitize
+	 * @return Stream definition with the original DSL text that has sensitive data redacted.
+	 */
+	public String sanitizeOriginalStreamDsl(StreamDefinition streamDefinition) {
+		return sanitizeStreamDefinition(new StreamDefinition(streamDefinition.getName(), streamDefinition.getOriginalDslText()));
+	}
+
 	/**
 	 * Reverse engineers a {@link StreamDefinition} into a semantically equivalent DSL text representation.
 	 * @param streamDefinition stream to be converted into DSL
 	 * @return the textual DSL representation of the stream
 	 */
 	public String toDsl(StreamDefinition streamDefinition) {
-		return toDsl(this.streamDefinitionService.getAppDefinitions(streamDefinition));
+		return toDsl(getAppDefinitions(streamDefinition));
 	}
+
 
 	/**
 	 * Reverse engineers a stream, represented by ordered {@link StreamAppDefinition} list, into a semantically
@@ -126,4 +184,34 @@ public class StreamDefinitionToDslConverter {
 	private String unescape(String text) {
 		return StringEscapeUtils.unescapeHtml(text);
 	}
+
+
+	/**
+	 * Iterator that prevents mutation of its backing data structure.
+	 *
+	 * @param <T> the type of elements returned by this iterator
+	 */
+	private static class ReadOnlyIterator<T> implements Iterator<T> {
+		private final Iterator<T> wrapped;
+
+		ReadOnlyIterator(Iterator<T> wrapped) {
+			this.wrapped = wrapped;
+		}
+
+		@Override
+		public boolean hasNext() {
+			return wrapped.hasNext();
+		}
+
+		@Override
+		public T next() {
+			return wrapped.next();
+		}
+
+		@Override
+		public void remove() {
+			throw new UnsupportedOperationException();
+		}
+	}
+
 }

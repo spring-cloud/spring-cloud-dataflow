@@ -20,6 +20,7 @@ import java.util.List;
 
 import org.springframework.cloud.dataflow.core.AppRegistration;
 import org.springframework.cloud.dataflow.core.ApplicationType;
+import org.springframework.cloud.dataflow.core.StreamDefinitionService;
 import org.springframework.cloud.dataflow.registry.service.AppRegistryService;
 
 /**
@@ -33,8 +34,8 @@ class EmptyStartYieldsSourceOrUnboundAppsRecoveryStrategy
 
 	private final AppRegistryService registry;
 
-	public EmptyStartYieldsSourceOrUnboundAppsRecoveryStrategy(AppRegistryService registry) {
-		super(IllegalArgumentException.class, "");
+	public EmptyStartYieldsSourceOrUnboundAppsRecoveryStrategy(AppRegistryService registry, StreamDefinitionService streamDefinitionService) {
+		super(IllegalArgumentException.class, streamDefinitionService, "");
 		this.registry = registry;
 	}
 

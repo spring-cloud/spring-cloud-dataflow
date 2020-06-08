@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.cloud.dataflow.server.stream;
 
 import java.io.File;
@@ -46,6 +47,7 @@ import org.springframework.cloud.dataflow.core.ApplicationType;
 import org.springframework.cloud.dataflow.core.DataFlowPropertyKeys;
 import org.springframework.cloud.dataflow.core.StreamAppDefinition;
 import org.springframework.cloud.dataflow.core.StreamDefinition;
+import org.springframework.cloud.dataflow.core.StreamDefinitionService;
 import org.springframework.cloud.dataflow.core.StreamDeployment;
 import org.springframework.cloud.dataflow.registry.service.AppRegistryService;
 import org.springframework.cloud.dataflow.rest.SkipperStream;
@@ -115,16 +117,21 @@ public class SkipperStreamDeployer implements StreamDeployer {
 
 	private final ForkJoinPool forkJoinPool;
 
+	private final StreamDefinitionService streamDefinitionService;
+
 	public SkipperStreamDeployer(SkipperClient skipperClient, StreamDefinitionRepository streamDefinitionRepository,
-			AppRegistryService appRegistryService, ForkJoinPool forkJoinPool) {
+			AppRegistryService appRegistryService, ForkJoinPool forkJoinPool,
+			StreamDefinitionService streamDefinitionService) {
 		Assert.notNull(skipperClient, "SkipperClient can not be null");
 		Assert.notNull(streamDefinitionRepository, "StreamDefinitionRepository can not be null");
 		Assert.notNull(appRegistryService, "StreamDefinitionRepository can not be null");
 		Assert.notNull(forkJoinPool, "ForkJoinPool can not be null");
+		Assert.notNull(streamDefinitionService, "StreamDefinitionService can not be null");
 		this.skipperClient = skipperClient;
 		this.streamDefinitionRepository = streamDefinitionRepository;
 		this.appRegistryService = appRegistryService;
 		this.forkJoinPool = forkJoinPool;
+		this.streamDefinitionService = streamDefinitionService;
 	}
 
 	public static List<AppStatus> deserializeAppStatus(String platformStatus) {
@@ -338,7 +345,7 @@ public class SkipperStreamDeployer implements StreamDeployer {
 	}
 
 	private String getRegisteredName(StreamDefinition streamDefinition, String adrAppName) {
-		for (StreamAppDefinition appDefinition : streamDefinition.getAppDefinitions()) {
+		for (StreamAppDefinition appDefinition : this.streamDefinitionService.getAppDefinitions(streamDefinition)) {
 			if (appDefinition.getName().equals(adrAppName)) {
 				return appDefinition.getRegisteredAppName();
 			}

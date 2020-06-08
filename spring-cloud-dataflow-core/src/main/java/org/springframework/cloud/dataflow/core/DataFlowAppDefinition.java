@@ -109,4 +109,34 @@ abstract class DataFlowAppDefinition {
 		return applicationType;
 	}
 
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (getClass() != obj.getClass())
+			return false;
+		DataFlowAppDefinition other = (DataFlowAppDefinition) obj;
+		if (!this.getName().equals(other.getName())) {
+			return false;
+		}
+		else if (!this.registeredAppName.equals(other.registeredAppName)) {
+			return false;
+		}
+		else if (!this.applicationType.equals(other.applicationType)) {
+			return false;
+		}
+		else if (!this.getProperties().equals(other.getProperties())) {
+			return false;
+		}
+
+		return true;
+	}
+
+	@Override
+	public String toString() {
+		return "DataFlowAppDefinition [name=" + getName()
+				+ ", type=" + getApplicationType()+", registeredAppName=" + getRegisteredAppName()
+				+ ", properties=" + this.appDefinition.getProperties() + "]";
+	}
+
 }

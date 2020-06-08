@@ -40,18 +40,20 @@ import static org.junit.Assert.assertTrue;
  */
 public class StreamDefinitionTests {
 
+	StreamDefinitionService streamDefinitionService = new DefaultStreamDefinitionService();
+
 	@Test
 	public void testStreamCreation() {
 		StreamDefinition stream = new StreamDefinition("ticktock", "time | log");
-		assertEquals(2, stream.getAppDefinitions().size());
-		StreamAppDefinition time = stream.getAppDefinitions().get(0);
+		assertEquals(2, this.streamDefinitionService.getAppDefinitions(stream).size());
+		StreamAppDefinition time = this.streamDefinitionService.getAppDefinitions(stream).get(0);
 		assertEquals("time", time.getName());
 		assertEquals("time", time.getRegisteredAppName());
 		assertEquals("ticktock.time", time.getProperties().get(BindingPropertyKeys.OUTPUT_DESTINATION));
 		assertEquals("ticktock", time.getProperties().get(BindingPropertyKeys.OUTPUT_REQUIRED_GROUPS));
 		assertFalse(time.getProperties().containsKey(BindingPropertyKeys.INPUT_DESTINATION));
 
-		StreamAppDefinition log = stream.getAppDefinitions().get(1);
+		StreamAppDefinition log = this.streamDefinitionService.getAppDefinitions(stream).get(1);
 		assertEquals("log", log.getName());
 		assertEquals("log", log.getRegisteredAppName());
 		assertEquals("ticktock.time", log.getProperties().get(BindingPropertyKeys.INPUT_DESTINATION));
@@ -62,19 +64,19 @@ public class StreamDefinitionTests {
 	@Test
 	public void testLongRunningNonStreamApps() {
 		StreamDefinition sd = new StreamDefinition("something","aaa");
-		assertEquals(ApplicationType.app, sd.getAppDefinitions().get(0).getApplicationType());
+		assertEquals(ApplicationType.app, this.streamDefinitionService.getAppDefinitions(sd).get(0).getApplicationType());
 		sd = new StreamDefinition("something","aaa|| bbb");
-		assertEquals(ApplicationType.app, sd.getAppDefinitions().get(0).getApplicationType());
-		assertEquals(ApplicationType.app, sd.getAppDefinitions().get(1).getApplicationType());
+		assertEquals(ApplicationType.app, this.streamDefinitionService.getAppDefinitions(sd).get(0).getApplicationType());
+		assertEquals(ApplicationType.app, this.streamDefinitionService.getAppDefinitions(sd).get(1).getApplicationType());
 		sd = new StreamDefinition("something","aaa --aaa=bbb || bbb");
-		assertEquals(ApplicationType.app, sd.getAppDefinitions().get(0).getApplicationType());
-		assertEquals(ApplicationType.app, sd.getAppDefinitions().get(1).getApplicationType());
+		assertEquals(ApplicationType.app, this.streamDefinitionService.getAppDefinitions(sd).get(0).getApplicationType());
+		assertEquals(ApplicationType.app, this.streamDefinitionService.getAppDefinitions(sd).get(1).getApplicationType());
 	}
 
 	@Test
 	public void simpleStream() {
 		StreamDefinition streamDefinition = new StreamDefinition("test", "foo | bar");
-		List<StreamAppDefinition> requests = streamDefinition.getAppDefinitions();
+		List<StreamAppDefinition> requests = this.streamDefinitionService.getAppDefinitions(streamDefinition);
 		assertEquals(2, requests.size());
 		StreamAppDefinition source = requests.get(0);
 		StreamAppDefinition sink = requests.get(1);
@@ -95,7 +97,7 @@ public class StreamDefinitionTests {
 	public void quotesInParams() {
 		StreamDefinition streamDefinition = new StreamDefinition("test",
 				"foo --bar='payload.matches(''hello'')' | " + "file");
-		List<StreamAppDefinition> requests = streamDefinition.getAppDefinitions();
+		List<StreamAppDefinition> requests = this.streamDefinitionService.getAppDefinitions(streamDefinition);
 		assertEquals(2, requests.size());
 		StreamAppDefinition source = requests.get(0);
 		assertEquals("foo", source.getName());
@@ -109,7 +111,7 @@ public class StreamDefinitionTests {
 	public void quotesInParams2() {
 		StreamDefinition streamDefinition = new StreamDefinition("test",
 				"http --port=9700 | filter --expression=payload.matches('hello world') | file");
-		List<StreamAppDefinition> requests = streamDefinition.getAppDefinitions();
+		List<StreamAppDefinition> requests = this.streamDefinitionService.getAppDefinitions(streamDefinition);
 		assertEquals(3, requests.size());
 		StreamAppDefinition filter = requests.get(1);
 		assertEquals("filter", filter.getName());
@@ -122,7 +124,7 @@ public class StreamDefinitionTests {
 	@Test
 	public void parameterizedApps() {
 		StreamDefinition streamDefinition = new StreamDefinition("test", "foo --x=1 --y=two | bar --z=3");
-		List<StreamAppDefinition> requests = streamDefinition.getAppDefinitions();
+		List<StreamAppDefinition> requests = this.streamDefinitionService.getAppDefinitions(streamDefinition);
 		assertEquals(2, requests.size());
 		StreamAppDefinition source = requests.get(0);
 		StreamAppDefinition sink = requests.get(1);
@@ -144,7 +146,7 @@ public class StreamDefinitionTests {
 	@Test
 	public void sourceDestinationNameIsAppliedToSourceApp() throws Exception {
 		StreamDefinition streamDefinition = new StreamDefinition("test", ":foo > goo | blah | file");
-		List<StreamAppDefinition> requests = streamDefinition.getAppDefinitions();
+		List<StreamAppDefinition> requests = this.streamDefinitionService.getAppDefinitions(streamDefinition);
 		assertEquals(3, requests.size());
 		assertEquals("foo", requests.get(0).getProperties().get(BindingPropertyKeys.INPUT_DESTINATION));
 		assertEquals("test", requests.get(0).getProperties().get(BindingPropertyKeys.INPUT_GROUP));
@@ -156,7 +158,7 @@ public class StreamDefinitionTests {
 	@Test
 	public void sinkDestinationNameIsAppliedToSinkApp() throws Exception {
 		StreamDefinition streamDefinition = new StreamDefinition("test", "boo | blah | aaak > :foo");
-		List<StreamAppDefinition> requests = streamDefinition.getAppDefinitions();
+		List<StreamAppDefinition> requests = this.streamDefinitionService.getAppDefinitions(streamDefinition);
 		assertEquals(3, requests.size());
 		assertEquals("foo", requests.get(2).getProperties().get(BindingPropertyKeys.OUTPUT_DESTINATION));
 	}
@@ -164,7 +166,7 @@ public class StreamDefinitionTests {
 	@Test
 	public void simpleSinkDestination() throws Exception {
 		StreamDefinition streamDefinition = new StreamDefinition("test", "bart > :foo");
-		List<StreamAppDefinition> requests = streamDefinition.getAppDefinitions();
+		List<StreamAppDefinition> requests = this.streamDefinitionService.getAppDefinitions(streamDefinition);
 		assertEquals(1, requests.size());
 		assertEquals("foo", requests.get(0).getProperties().get(BindingPropertyKeys.OUTPUT_DESTINATION));
 	}
@@ -184,7 +186,7 @@ public class StreamDefinitionTests {
 	@Test
 	public void simpleSourceDestination() throws Exception {
 		StreamDefinition streamDefinition = new StreamDefinition("test", ":foo > boot");
-		List<StreamAppDefinition> requests = streamDefinition.getAppDefinitions();
+		List<StreamAppDefinition> requests = this.streamDefinitionService.getAppDefinitions(streamDefinition);
 		assertEquals(1, requests.size());
 		assertEquals("foo", requests.get(0).getProperties().get(BindingPropertyKeys.INPUT_DESTINATION));
 		assertEquals("test", requests.get(0).getProperties().get(BindingPropertyKeys.INPUT_GROUP));
@@ -213,7 +215,7 @@ public class StreamDefinitionTests {
 	@Test
 	public void testBindings2Apps() {
 		StreamDefinition streamDefinition = new StreamDefinition("ticktock", "time | log");
-		List<StreamAppDefinition> apps = streamDefinition.getAppDefinitions();
+		List<StreamAppDefinition> apps = this.streamDefinitionService.getAppDefinitions(streamDefinition);
 		StreamAppDefinition source = apps.get(0);
 		StreamAppDefinition sink = apps.get(1);
 		assertEquals("time", source.getRegisteredAppName());
@@ -229,7 +231,7 @@ public class StreamDefinitionTests {
 	@Test
 	public void testBindings3Apps() {
 		StreamDefinition streamDefinition = new StreamDefinition("ticktock", "time | filter |log");
-		List<StreamAppDefinition> apps = streamDefinition.getAppDefinitions();
+		List<StreamAppDefinition> apps = this.streamDefinitionService.getAppDefinitions(streamDefinition);
 
 		StreamAppDefinition source = apps.get(0);
 		StreamAppDefinition processor = apps.get(1);

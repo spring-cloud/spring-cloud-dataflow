@@ -20,6 +20,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.cloud.dataflow.core.StreamDefinition;
+import org.springframework.cloud.dataflow.core.StreamDefinitionService;
 
 /**
  * Provides code completion on a (maybe ill-formed) stream definition.
@@ -33,10 +34,14 @@ public class StreamCompletionProvider {
 
 	private final List<ExpansionStrategy> completionExpansionStrategies;
 
+	private final StreamDefinitionService streamDefinitionService;
+
 	public StreamCompletionProvider(List<RecoveryStrategy<?>> completionRecoveryStrategies,
-			List<ExpansionStrategy> completionExpansionStrategies) {
+			List<ExpansionStrategy> completionExpansionStrategies,
+			StreamDefinitionService streamDefinitionService) {
 		this.completionRecoveryStrategies = new ArrayList<>(completionRecoveryStrategies);
 		this.completionExpansionStrategies = new ArrayList<>(completionExpansionStrategies);
+		this.streamDefinitionService = streamDefinitionService;
 	}
 
 	/*
@@ -49,9 +54,10 @@ public class StreamCompletionProvider {
 	public List<CompletionProposal> complete(String dslStart, int detailLevel) {
 		List<CompletionProposal> collector = new ArrayList<>();
 
-		StreamDefinition parsed;
+		StreamDefinition streamDefinition = null;
 		try {
-			parsed = new StreamDefinition("__dummy", dslStart);
+			streamDefinition = new StreamDefinition("__dummy", dslStart);
+			this.streamDefinitionService.parse(streamDefinition);
 		}
 		catch (Exception recoverable) {
 			for (RecoveryStrategy strategy : completionRecoveryStrategies) {
@@ -64,7 +70,7 @@ public class StreamCompletionProvider {
 		}
 
 		for (ExpansionStrategy strategy : completionExpansionStrategies) {
-			strategy.addProposals(dslStart, parsed, detailLevel, collector);
+			strategy.addProposals(dslStart, streamDefinition, detailLevel, collector);
 		}
 		return collector;
 	}

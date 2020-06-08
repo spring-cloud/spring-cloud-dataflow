@@ -29,6 +29,8 @@ import static org.junit.Assert.assertEquals;
  */
 public class StreamDefinitionToDslConverterTests {
 
+	StreamDefinitionService streamDefinitionService = new DefaultStreamDefinitionService();
+
 	@Test
 	public void testStreamCreation() {
 		reverseDslTest("time | log", 2);
@@ -116,13 +118,13 @@ public class StreamDefinitionToDslConverterTests {
 
 	private void reverseDslTest(String dslText, int expectedAppSize) {
 		StreamDefinition streamDefinition = new StreamDefinition("streamName", dslText);
-		assertEquals(expectedAppSize, streamDefinition.getAppDefinitions().size());
+		assertEquals(expectedAppSize, this.streamDefinitionService.getAppDefinitions(streamDefinition).size());
 
 		assertEquals(streamDefinition.getDslText(),
-				new StreamDefinitionToDslConverter().toDsl(streamDefinition));
+				new StreamDefinitionToDslConverter(this.streamDefinitionService).toDsl(streamDefinition));
 
 		assertEquals(streamDefinition.getDslText(),
-				new StreamDefinitionToDslConverter().toDsl(streamDefinition.getAppDefinitions()));
+				new StreamDefinitionToDslConverter(this.streamDefinitionService).toDsl(this.streamDefinitionService.getAppDefinitions(streamDefinition)));
 	}
 
 	@Test
@@ -146,7 +148,7 @@ public class StreamDefinitionToDslConverterTests {
 			StreamDefinition streamDefinition = new StreamDefinition("streamName", dslText);
 
 			assertEquals("foo | bar",
-					new StreamDefinitionToDslConverter().toDsl(streamDefinition.getAppDefinitions()));
+					new StreamDefinitionToDslConverter(this.streamDefinitionService).toDsl(this.streamDefinitionService.getAppDefinitions(streamDefinition)));
 		}
 	}
 
@@ -159,7 +161,7 @@ public class StreamDefinitionToDslConverterTests {
 		StreamDefinition streamDefinition = new StreamDefinition("streamName", dslText);
 
 		assertEquals(":boza > foo | bar",
-				new StreamDefinitionToDslConverter().toDsl(streamDefinition.getAppDefinitions()));
+				new StreamDefinitionToDslConverter(this.streamDefinitionService).toDsl(this.streamDefinitionService.getAppDefinitions(streamDefinition)));
 	}
 
 	@Test
@@ -167,8 +169,8 @@ public class StreamDefinitionToDslConverterTests {
 
 		StreamDefinition streamDefinition = new StreamDefinition("streamName", "foo | bar");
 
-		StreamAppDefinition foo = streamDefinition.getAppDefinitions().get(0);
-		StreamAppDefinition bar = streamDefinition.getAppDefinitions().get(1);
+		StreamAppDefinition foo = this.streamDefinitionService.getAppDefinitions(streamDefinition).get(0);
+		StreamAppDefinition bar = this.streamDefinitionService.getAppDefinitions(streamDefinition).get(1);
 
 		StreamAppDefinition foo2 = StreamAppDefinition.Builder.from(foo)
 				.setProperty("p1", "a b")
@@ -185,7 +187,7 @@ public class StreamDefinitionToDslConverterTests {
 				.build("stream2");
 
 		assertEquals("foo --p1='a b' --p2=\"'c d'\" --p3=ef --p4=\"'i' 'j'\" --p5=\"k l\" | bar --p1='a b' --p2=\"'c d'\" --p3=ef",
-				new StreamDefinitionToDslConverter().toDsl(Arrays.asList(foo2, bar2)));
+				new StreamDefinitionToDslConverter(this.streamDefinitionService).toDsl(Arrays.asList(foo2, bar2)));
 	}
 
 	@Test
@@ -197,7 +199,7 @@ public class StreamDefinitionToDslConverterTests {
 
 		assertEquals("http-source-kafka --server.port=9900 | couchbase-sink-kafka " +
 						"--spring.cloud.stream.bindings.input.contentType='application/x-java-object;type=com.example.dto.InputDto'",
-				new StreamDefinitionToDslConverter().toDsl(streamDefinition));
+				new StreamDefinitionToDslConverter(this.streamDefinitionService).toDsl(streamDefinition));
 
 
 		streamDefinition = new StreamDefinition("stream2", "jdbc-mssql --cron='/10 * * * * *' " +
@@ -211,7 +213,7 @@ public class StreamDefinitionToDslConverterTests {
 						"OUTPUT Inserted.* WHERE assurance_flag IS NULL' " +
 						"--url='jdbc:sqlserver://db:1433;databaseName=Spring' --username='*****' | " +
 						"cust-processor | router --default-output-channel=out",
-				new StreamDefinitionToDslConverter().toDsl(streamDefinition));
+				new StreamDefinitionToDslConverter(this.streamDefinitionService).toDsl(streamDefinition));
 
 	}
 
@@ -229,7 +231,7 @@ public class StreamDefinitionToDslConverterTests {
 						"OUTPUT Inserted.* WHERE assurance_flag IS NULL' " +
 						"--url='jdbc:sqlserver://db:1433;databaseName=Spring' --username='*****' | " +
 						"cust-processor | router --default-output-channel=out",
-				new StreamDefinitionToDslConverter().toDsl(streamDefinition));
+				new StreamDefinitionToDslConverter(this.streamDefinitionService).toDsl(streamDefinition));
 
 	}
 

@@ -16,23 +16,14 @@
 
 package org.springframework.cloud.dataflow.core;
 
-import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.List;
-
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.Lob;
-import javax.persistence.PostLoad;
 import javax.persistence.Table;
-import javax.persistence.Transient;
 
-import org.springframework.cloud.dataflow.core.dsl.StreamNode;
-import org.springframework.cloud.dataflow.core.dsl.StreamParser;
 import org.springframework.core.style.ToStringCreator;
 import org.springframework.util.Assert;
-import org.springframework.util.CollectionUtils;
 
 /**
  * Representation of a defined stream. A stream consists of an ordered list of apps used
@@ -77,13 +68,6 @@ public class StreamDefinition {
 	@Column(name = "DESCRIPTION")
 	private String description;
 
-	/**
-	 * Ordered list of {@link StreamAppDefinition}s comprising this stream. The source is
-	 * the first entry and the sink is the last entry.
-	 */
-	@Transient
-	private LinkedList<StreamAppDefinition> applicationDefinitions;
-
 	public StreamDefinition() {
 	}
 
@@ -99,7 +83,6 @@ public class StreamDefinition {
 		this.name = name;
 		this.dslText = dslText;
 		this.originalDslText = dslText;
-		this.applicationDefinitions = getAppDefinitions(name, dslText);
 	}
 
 	/**
@@ -156,47 +139,6 @@ public class StreamDefinition {
 		return description;
 	}
 
-	private LinkedList<StreamAppDefinition> getAppDefinitions(String name, String dslText) {
-		LinkedList<StreamAppDefinition> appDefinitions = new LinkedList<>();
-		StreamNode streamNode = new StreamParser(name, dslText).parse();
-		for (StreamAppDefinition appDefinition : new StreamApplicationDefinitionBuilder(name, streamNode).build()) {
-			appDefinitions.addFirst(appDefinition);
-		}
-		return appDefinitions;
-	}
-	/**
-	 * Return the ordered list of application definitions for this stream as a
-	 * {@link List}. This allows for retrieval of application definitions in the stream by
-	 * index. Application definitions are maintained in stream flow order (source is
-	 * first, sink is last).
-	 *
-	 * @return list of application definitions for this stream definition
-	 */
-	public LinkedList<StreamAppDefinition> getAppDefinitions() {
-		if (CollectionUtils.isEmpty(this.applicationDefinitions)) {
-			return getAppDefinitions(this.name, this.dslText);
-		}
-		return this.applicationDefinitions;
-	}
-
-	/**
-	 * Return an iterator that indicates the order of application deployments for this
-	 * stream. The application definitions are returned in reverse order; i.e. the sink is
-	 * returned first followed by the processors in reverse order followed by the source.
-	 *
-	 * @return iterator that iterates over the application definitions in deployment order
-	 */
-	public Iterator<StreamAppDefinition> getDeploymentOrderIterator() {
-		return new ReadOnlyIterator<>(getAppDefinitions().descendingIterator());
-	}
-
-	@PostLoad
-	public void initialize() {
-		if (CollectionUtils.isEmpty(this.applicationDefinitions)) {
-			this.applicationDefinitions = getAppDefinitions(this.name, this.dslText);
-		}
-	}
-
 	@Override
 	public int hashCode() {
 		final int prime = 31;
@@ -233,34 +175,6 @@ public class StreamDefinition {
 	@Override
 	public String toString() {
 		return new ToStringCreator(this).append("name", this.name).append("definition", this.dslText).toString();
-	}
-
-	/**
-	 * Iterator that prevents mutation of its backing data structure.
-	 *
-	 * @param <T> the type of elements returned by this iterator
-	 */
-	private static class ReadOnlyIterator<T> implements Iterator<T> {
-		private final Iterator<T> wrapped;
-
-		ReadOnlyIterator(Iterator<T> wrapped) {
-			this.wrapped = wrapped;
-		}
-
-		@Override
-		public boolean hasNext() {
-			return wrapped.hasNext();
-		}
-
-		@Override
-		public T next() {
-			return wrapped.next();
-		}
-
-		@Override
-		public void remove() {
-			throw new UnsupportedOperationException();
-		}
 	}
 
 }

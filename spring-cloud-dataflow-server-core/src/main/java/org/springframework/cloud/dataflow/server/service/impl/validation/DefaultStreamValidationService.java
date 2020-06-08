@@ -18,6 +18,7 @@ package org.springframework.cloud.dataflow.server.service.impl.validation;
 import org.springframework.cloud.dataflow.core.ApplicationType;
 import org.springframework.cloud.dataflow.core.StreamAppDefinition;
 import org.springframework.cloud.dataflow.core.StreamDefinition;
+import org.springframework.cloud.dataflow.core.StreamDefinitionService;
 import org.springframework.cloud.dataflow.registry.service.AppRegistryService;
 import org.springframework.cloud.dataflow.server.DockerValidatorProperties;
 import org.springframework.cloud.dataflow.server.repository.NoSuchStreamDefinitionException;
@@ -35,22 +36,27 @@ public class DefaultStreamValidationService extends DefaultValidationService imp
 
 	private final StreamDefinitionRepository streamDefinitionRepository;
 
+	private final StreamDefinitionService streamDefinitionService;
+
 	public DefaultStreamValidationService(AppRegistryService appRegistry,
-			DockerValidatorProperties dockerValidatorProperties, StreamDefinitionRepository streamDefinitionRepository) {
+			DockerValidatorProperties dockerValidatorProperties, StreamDefinitionRepository streamDefinitionRepository,
+			StreamDefinitionService streamDefinitionService) {
 		super(appRegistry, dockerValidatorProperties);
 		Assert.notNull(streamDefinitionRepository, "StreamDefinitionRepository must not be null");
+		Assert.notNull(streamDefinitionService, "StreamDefinitionService must not be null");
 		this.streamDefinitionRepository = streamDefinitionRepository;
+		this.streamDefinitionService = streamDefinitionService;
 	}
 
 	@Override
 	public ValidationStatus validateStream(String name) {
-		StreamDefinition definition = streamDefinitionRepository.findById(name)
+		StreamDefinition streamDefinition = streamDefinitionRepository.findById(name)
 				.orElseThrow(() -> new NoSuchStreamDefinitionException(name));
 		ValidationStatus validationStatus = new ValidationStatus(
-				definition.getName(),
-				definition.getDslText(),
-				definition.getDescription());
-		for (StreamAppDefinition streamAppDefinition : definition.getAppDefinitions()) {
+				streamDefinition.getName(),
+				streamDefinition.getDslText(),
+				streamDefinition.getDescription());
+		for (StreamAppDefinition streamAppDefinition : this.streamDefinitionService.getAppDefinitions(streamDefinition)) {
 			ApplicationType appType = streamAppDefinition.getApplicationType();
 			boolean status = this.validate(streamAppDefinition.getName(), appType);
 			validationStatus.getAppsStatuses().put(

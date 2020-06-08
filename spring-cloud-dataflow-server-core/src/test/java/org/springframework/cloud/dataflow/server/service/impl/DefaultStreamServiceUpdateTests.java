@@ -33,6 +33,7 @@ import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabas
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.cloud.dataflow.audit.service.AuditRecordService;
 import org.springframework.cloud.dataflow.core.ApplicationType;
+import org.springframework.cloud.dataflow.core.DefaultStreamDefinitionService;
 import org.springframework.cloud.dataflow.core.StreamDefinition;
 import org.springframework.cloud.dataflow.registry.service.AppRegistryService;
 import org.springframework.cloud.dataflow.server.configuration.TestDependencies;
@@ -101,7 +102,8 @@ public class DefaultStreamServiceUpdateTests {
 
 		DefaultStreamService streamService = new DefaultStreamService(streamDefinitionRepository,
 				skipperStreamDeployer,
-				appDeploymentRequestCreator, streamValidationService, auditRecordService);
+				appDeploymentRequestCreator, streamValidationService, auditRecordService,
+				new DefaultStreamDefinitionService());
 		StreamDefinition streamDefinition = new StreamDefinition("test", "time | log");
 		this.streamDefinitionRepository.save(streamDefinition);
 		Map<String, String> updateProperties = new HashMap<>();

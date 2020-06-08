@@ -45,6 +45,7 @@ import org.springframework.cloud.dataflow.core.AuditRecord;
 import org.springframework.cloud.dataflow.core.BindingPropertyKeys;
 import org.springframework.cloud.dataflow.core.StreamAppDefinition;
 import org.springframework.cloud.dataflow.core.StreamDefinition;
+import org.springframework.cloud.dataflow.core.StreamDefinitionService;
 import org.springframework.cloud.dataflow.core.StreamPropertyKeys;
 import org.springframework.cloud.dataflow.server.config.apps.CommonApplicationProperties;
 import org.springframework.cloud.dataflow.server.configuration.TestDependencies;
@@ -133,6 +134,9 @@ public class StreamControllerTests {
 
 	private Info streamStatusInfo;
 
+	@Autowired
+	private StreamDefinitionService streamDefinitionService;
+
 	@Before
 	public void setupMocks() {
 		this.mockMvc = MockMvcBuilders.webAppContextSetup(wac)
@@ -159,7 +163,7 @@ public class StreamControllerTests {
 
 	@Test(expected = IllegalArgumentException.class)
 	public void testConstructorMissingStreamService() {
-		new StreamDefinitionController(null);
+		new StreamDefinitionController(null, null);
 	}
 
 	@Test
@@ -171,9 +175,9 @@ public class StreamControllerTests {
 		StreamDefinition myStream = repository.findById("myStream").get();
 		assertEquals("time | log", myStream.getDslText());
 		assertEquals("myStream", myStream.getName());
-		assertEquals(2, myStream.getAppDefinitions().size());
-		StreamAppDefinition timeDefinition = myStream.getAppDefinitions().get(0);
-		StreamAppDefinition logDefinition = myStream.getAppDefinitions().get(1);
+		assertEquals(2, this.streamDefinitionService.getAppDefinitions(myStream).size());
+		StreamAppDefinition timeDefinition = this.streamDefinitionService.getAppDefinitions(myStream).get(0);
+		StreamAppDefinition logDefinition = this.streamDefinitionService.getAppDefinitions(myStream).get(1);
 		assertEquals(2, timeDefinition.getProperties().size());
 		assertEquals("myStream.time", timeDefinition.getProperties().get(BindingPropertyKeys.OUTPUT_DESTINATION));
 		assertEquals("myStream", timeDefinition.getProperties().get(BindingPropertyKeys.OUTPUT_REQUIRED_GROUPS));
@@ -517,8 +521,8 @@ public class StreamControllerTests {
 				.accept(MediaType.APPLICATION_JSON)).andDo(print()).andExpect(status().isCreated());
 		assertEquals(1, repository.count());
 		StreamDefinition myStream = repository.findById("myStream").get();
-		StreamAppDefinition timeDefinition = myStream.getAppDefinitions().get(0);
-		StreamAppDefinition logDefinition = myStream.getAppDefinitions().get(1);
+		StreamAppDefinition timeDefinition = this.streamDefinitionService.getAppDefinitions(myStream).get(0);
+		StreamAppDefinition logDefinition = this.streamDefinitionService.getAppDefinitions(myStream).get(1);
 		assertEquals("time", timeDefinition.getName());
 		assertEquals("log", logDefinition.getName());
 		assertEquals("500", timeDefinition.getProperties().get("fixedDelay"));
@@ -539,10 +543,10 @@ public class StreamControllerTests {
 		StreamDefinition myStream = repository.findById("myStream").get();
 		assertEquals(definition, myStream.getDslText());
 		assertEquals("myStream", myStream.getName());
-		assertEquals(3, myStream.getAppDefinitions().size());
-		StreamAppDefinition timeDefinition = myStream.getAppDefinitions().get(0);
-		StreamAppDefinition filterDefinition = myStream.getAppDefinitions().get(1);
-		StreamAppDefinition logDefinition = myStream.getAppDefinitions().get(2);
+		assertEquals(3, this.streamDefinitionService.getAppDefinitions(myStream).size());
+		StreamAppDefinition timeDefinition = this.streamDefinitionService.getAppDefinitions(myStream).get(0);
+		StreamAppDefinition filterDefinition = this.streamDefinitionService.getAppDefinitions(myStream).get(1);
+		StreamAppDefinition logDefinition = this.streamDefinitionService.getAppDefinitions(myStream).get(2);
 		assertEquals(2, timeDefinition.getProperties().size());
 		assertEquals("myStream.time", timeDefinition.getProperties().get(BindingPropertyKeys.OUTPUT_DESTINATION));
 		assertEquals("myStream", timeDefinition.getProperties().get(BindingPropertyKeys.OUTPUT_REQUIRED_GROUPS));
@@ -568,8 +572,8 @@ public class StreamControllerTests {
 		StreamDefinition myStream = repository.findById("myStream").get();
 		assertEquals(definition, myStream.getDslText());
 		assertEquals("myStream", myStream.getName());
-		assertEquals(1, myStream.getAppDefinitions().size());
-		StreamAppDefinition logDefinition = myStream.getAppDefinitions().get(0);
+		assertEquals(1, this.streamDefinitionService.getAppDefinitions(myStream).size());
+		StreamAppDefinition logDefinition = this.streamDefinitionService.getAppDefinitions(myStream).get(0);
 		assertEquals(2, logDefinition.getProperties().size());
 		assertEquals("foo", logDefinition.getProperties().get(BindingPropertyKeys.INPUT_DESTINATION));
 		assertEquals("myStream", logDefinition.getProperties().get(BindingPropertyKeys.INPUT_GROUP));
@@ -587,14 +591,14 @@ public class StreamControllerTests {
 		StreamDefinition myStream = repository.findById("myStream").get();
 		assertEquals(definition, myStream.getDslText());
 		assertEquals("myStream", myStream.getName());
-		assertEquals(2, myStream.getAppDefinitions().size());
-		StreamAppDefinition filterDefinition = myStream.getAppDefinitions().get(0);
+		assertEquals(2, this.streamDefinitionService.getAppDefinitions(myStream).size());
+		StreamAppDefinition filterDefinition = this.streamDefinitionService.getAppDefinitions(myStream).get(0);
 		assertEquals(4, filterDefinition.getProperties().size());
 		assertEquals("foo", filterDefinition.getProperties().get(BindingPropertyKeys.INPUT_DESTINATION));
 		assertEquals("myStream", filterDefinition.getProperties().get(BindingPropertyKeys.INPUT_GROUP));
 		assertEquals("myStream.filter", filterDefinition.getProperties().get(BindingPropertyKeys.OUTPUT_DESTINATION));
 		assertEquals("myStream", filterDefinition.getProperties().get(BindingPropertyKeys.OUTPUT_REQUIRED_GROUPS));
-		StreamAppDefinition logDefinition = myStream.getAppDefinitions().get(1);
+		StreamAppDefinition logDefinition = this.streamDefinitionService.getAppDefinitions(myStream).get(1);
 		assertEquals(2, logDefinition.getProperties().size());
 		assertEquals("myStream.filter", logDefinition.getProperties().get(BindingPropertyKeys.INPUT_DESTINATION));
 		assertEquals("myStream", logDefinition.getProperties().get(BindingPropertyKeys.INPUT_GROUP));
@@ -612,8 +616,8 @@ public class StreamControllerTests {
 		StreamDefinition myStream = repository.findById("myStream").get();
 		assertEquals(definition, myStream.getDslText());
 		assertEquals("myStream", myStream.getName());
-		assertEquals(1, myStream.getAppDefinitions().size());
-		StreamAppDefinition timeDefinition = myStream.getAppDefinitions().get(0);
+		assertEquals(1, this.streamDefinitionService.getAppDefinitions(myStream).size());
+		StreamAppDefinition timeDefinition = this.streamDefinitionService.getAppDefinitions(myStream).get(0);
 		assertEquals(1, timeDefinition.getProperties().size());
 		assertEquals("foo", timeDefinition.getProperties().get(BindingPropertyKeys.OUTPUT_DESTINATION));
 	}
@@ -630,12 +634,12 @@ public class StreamControllerTests {
 		StreamDefinition myStream = repository.findById("myStream").get();
 		assertEquals(definition, myStream.getDslText());
 		assertEquals("myStream", myStream.getName());
-		assertEquals(2, myStream.getAppDefinitions().size());
-		StreamAppDefinition timeDefinition = myStream.getAppDefinitions().get(0);
+		assertEquals(2, this.streamDefinitionService.getAppDefinitions(myStream).size());
+		StreamAppDefinition timeDefinition = this.streamDefinitionService.getAppDefinitions(myStream).get(0);
 		assertEquals(2, timeDefinition.getProperties().size());
 		assertEquals("myStream.time", timeDefinition.getProperties().get(BindingPropertyKeys.OUTPUT_DESTINATION));
 		assertEquals("myStream", timeDefinition.getProperties().get(BindingPropertyKeys.OUTPUT_REQUIRED_GROUPS));
-		StreamAppDefinition filterDefinition = myStream.getAppDefinitions().get(1);
+		StreamAppDefinition filterDefinition = this.streamDefinitionService.getAppDefinitions(myStream).get(1);
 		assertEquals(3, filterDefinition.getProperties().size());
 		assertEquals("myStream.time", filterDefinition.getProperties().get(BindingPropertyKeys.INPUT_DESTINATION));
 		assertEquals("myStream", filterDefinition.getProperties().get(BindingPropertyKeys.INPUT_GROUP));
@@ -656,8 +660,8 @@ public class StreamControllerTests {
 		StreamDefinition myStream = repository.findById("myStream").get();
 		assertEquals(definition, myStream.getDslText());
 		assertEquals("myStream", myStream.getName());
-		assertEquals(1, myStream.getAppDefinitions().size());
-		StreamAppDefinition filterDefinition = myStream.getAppDefinitions().get(0);
+		assertEquals(1, this.streamDefinitionService.getAppDefinitions(myStream).size());
+		StreamAppDefinition filterDefinition = this.streamDefinitionService.getAppDefinitions(myStream).get(0);
 		assertEquals(3, filterDefinition.getProperties().size());
 		assertEquals("bar", filterDefinition.getProperties().get(BindingPropertyKeys.INPUT_DESTINATION));
 		assertEquals("myStream", filterDefinition.getProperties().get(BindingPropertyKeys.INPUT_GROUP));

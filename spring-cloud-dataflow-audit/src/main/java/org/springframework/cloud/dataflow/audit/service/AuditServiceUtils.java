@@ -19,7 +19,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.springframework.cloud.dataflow.core.AppRegistration;
-import org.springframework.cloud.dataflow.core.StreamDefinition;
 import org.springframework.cloud.dataflow.rest.util.ArgumentSanitizer;
 import org.springframework.cloud.deployer.spi.scheduler.ScheduleRequest;
 import org.springframework.util.Assert;
@@ -70,20 +69,16 @@ public class AuditServiceUtils {
 		return auditData;
 	}
 
-	public String convertStreamDefinitionToAuditData(StreamDefinition streamDefinition) {
-		return this.argumentSanitizer.sanitizeStream(streamDefinition);
-	}
-
 	public Map<String, String> sanitizeProperties(Map<String, String> properties) {
 		return this.argumentSanitizer.sanitizeProperties(properties);
 	}
 
 	public Map<String, Object> convertStreamDefinitionToAuditData(
-			StreamDefinition streamDefinition,
+			String streamDefinition,
 			Map<String, String> deploymentProperties) {
 
 		final Map<String, Object> auditedData = new HashMap<>(2);
-		auditedData.put(STREAM_DEFINITION_DSL_TEXT, this.argumentSanitizer.sanitizeStream(streamDefinition));
+		auditedData.put(STREAM_DEFINITION_DSL_TEXT, streamDefinition);
 		auditedData.put(DEPLOYMENT_PROPERTIES, this.argumentSanitizer.sanitizeProperties(deploymentProperties));
 		return auditedData;
 	}

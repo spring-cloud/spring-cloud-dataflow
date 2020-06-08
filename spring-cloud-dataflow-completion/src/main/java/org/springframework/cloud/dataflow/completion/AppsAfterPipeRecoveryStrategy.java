@@ -21,6 +21,7 @@ import java.util.List;
 import org.springframework.cloud.dataflow.core.AppRegistration;
 import org.springframework.cloud.dataflow.core.ApplicationType;
 import org.springframework.cloud.dataflow.core.StreamDefinition;
+import org.springframework.cloud.dataflow.core.StreamDefinitionService;
 import org.springframework.cloud.dataflow.core.dsl.CheckPointedParseException;
 import org.springframework.cloud.dataflow.registry.service.AppRegistryService;
 
@@ -36,8 +37,8 @@ public class AppsAfterPipeRecoveryStrategy
 
 	private final AppRegistryService appRegistry;
 
-	AppsAfterPipeRecoveryStrategy(AppRegistryService appRegistry) {
-		super(CheckPointedParseException.class, "foo |", "foo | ");
+	AppsAfterPipeRecoveryStrategy(AppRegistryService appRegistry, StreamDefinitionService streamDefinitionService) {
+		super(CheckPointedParseException.class, streamDefinitionService, "foo |", "foo | ");
 		this.appRegistry = appRegistry;
 	}
 
@@ -54,7 +55,8 @@ public class AppsAfterPipeRecoveryStrategy
 		// processor or sink
 		for (AppRegistration appRegistration : appRegistry.findAll()) {
 			if (appRegistration.getType() == ApplicationType.processor || appRegistration.getType() == ApplicationType.sink) {
-				String expansion = CompletionUtils.maybeQualifyWithLabel(appRegistration.getName(), streamDefinition);
+				String expansion = CompletionUtils.maybeQualifyWithLabel(appRegistration.getName(),
+						this.streamDefinitionService.getAppDefinitions(streamDefinition));
 				collector.add(proposals.withSeparateTokens(expansion,
 						"Continue stream definition with a " + appRegistration.getType()));
 			}

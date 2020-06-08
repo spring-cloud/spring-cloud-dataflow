@@ -38,6 +38,7 @@ import org.springframework.cloud.dataflow.core.AuditOperationType;
 import org.springframework.cloud.dataflow.core.DataFlowPropertyKeys;
 import org.springframework.cloud.dataflow.core.StreamAppDefinition;
 import org.springframework.cloud.dataflow.core.StreamDefinition;
+import org.springframework.cloud.dataflow.core.StreamDefinitionService;
 import org.springframework.cloud.dataflow.core.StreamDefinitionToDslConverter;
 import org.springframework.cloud.dataflow.core.StreamDeployment;
 import org.springframework.cloud.dataflow.core.dsl.ParseException;
@@ -109,17 +110,21 @@ public class DefaultStreamService implements StreamService {
 
 	private final AppDeploymentRequestCreator appDeploymentRequestCreator;
 
+	private final StreamDefinitionService streamDefinitionService;
+
 	public DefaultStreamService(StreamDefinitionRepository streamDefinitionRepository,
 			SkipperStreamDeployer skipperStreamDeployer,
 			AppDeploymentRequestCreator appDeploymentRequestCreator,
 			StreamValidationService streamValidationService,
-			AuditRecordService auditRecordService) {
+			AuditRecordService auditRecordService,
+			StreamDefinitionService streamDefinitionService) {
 
 		Assert.notNull(skipperStreamDeployer, "SkipperStreamDeployer must not be null");
 		Assert.notNull(appDeploymentRequestCreator, "AppDeploymentRequestCreator must not be null");
 		Assert.notNull(streamDefinitionRepository, "StreamDefinitionRepository must not be null");
 		Assert.notNull(streamValidationService, "StreamValidationService must not be null");
 		Assert.notNull(auditRecordService, "AuditRecordService must not be null");
+		Assert.notNull(streamDefinitionService, "StreamDefinitionService must not be null");
 
 		this.skipperStreamDeployer = skipperStreamDeployer;
 		this.appDeploymentRequestCreator = appDeploymentRequestCreator;
@@ -127,6 +132,7 @@ public class DefaultStreamService implements StreamService {
 		this.streamValidationService = streamValidationService;
 		this.auditRecordService = auditRecordService;
 		this.auditServiceUtils = new AuditServiceUtils();
+		this.streamDefinitionService = streamDefinitionService;
 
 	}
 
@@ -182,7 +188,7 @@ public class DefaultStreamService implements StreamService {
 
 		auditRecordService.populateAndSaveAuditRecord(
 				AuditOperationType.STREAM, AuditActionType.UNDEPLOY,
-				streamDefinition.getName(), this.auditServiceUtils.convertStreamDefinitionToAuditData(streamDefinition),
+				streamDefinition.getName(), this.streamDefinitionService.sanitizeStreamDefinition(streamDefinition),
 				null);
 	}
 
@@ -202,7 +208,7 @@ public class DefaultStreamService implements StreamService {
 				.orElseThrow(() -> new NoSuchStreamDefinitionException(streamName));
 
 		LinkedList<StreamAppDefinition> updatedStreamAppDefinitions = new LinkedList<>();
-		for (StreamAppDefinition appDefinition : streamDefinition.getAppDefinitions()) {
+		for (StreamAppDefinition appDefinition : this.streamDefinitionService.getAppDefinitions(streamDefinition)) {
 			StreamAppDefinition.Builder appDefinitionBuilder = StreamAppDefinition.Builder.from(appDefinition);
 			SpringCloudDeployerApplicationManifest applicationManifest = appManifestMap.get(appDefinition.getName());
 			// overrides app definition properties with those from the release manifest
@@ -210,7 +216,7 @@ public class DefaultStreamService implements StreamService {
 			updatedStreamAppDefinitions.addLast(appDefinitionBuilder.build(streamDefinition.getName()));
 		}
 
-		String updatedDslText = new StreamDefinitionToDslConverter().toDsl(updatedStreamAppDefinitions);
+		String updatedDslText = new StreamDefinitionToDslConverter(this.streamDefinitionService).toDsl(updatedStreamAppDefinitions);
 
 		StreamDefinition updatedStreamDefinition = new StreamDefinition(streamName, updatedDslText,
 				streamDefinition.getOriginalDslText(), streamDefinition.getDescription());
@@ -222,7 +228,7 @@ public class DefaultStreamService implements StreamService {
 		this.streamDefinitionRepository.save(updatedStreamDefinition);
 		this.auditRecordService.populateAndSaveAuditRecord(
 				AuditOperationType.STREAM, AuditActionType.UPDATE, streamName,
-				this.auditServiceUtils.convertStreamDefinitionToAuditData(streamDefinition), null);
+				this.streamDefinitionService.sanitizeStreamDefinition(streamDefinition), null);
 	}
 
 	@Override
@@ -383,7 +389,7 @@ public class DefaultStreamService implements StreamService {
 		StreamDefinition streamDefinition = createStreamDefinition(streamName, dsl, description);
 		List<String> errorMessages = new ArrayList<>();
 
-		for (StreamAppDefinition streamAppDefinition : streamDefinition.getAppDefinitions()) {
+		for (StreamAppDefinition streamAppDefinition : this.streamDefinitionService.getAppDefinitions(streamDefinition)) {
 			final String appName = streamAppDefinition.getRegisteredAppName();
 			ApplicationType applicationType = streamAppDefinition.getApplicationType();
 			if (!streamValidationService.isRegistered(appName, applicationType)) {
@@ -411,7 +417,7 @@ public class DefaultStreamService implements StreamService {
 
 		auditRecordService.populateAndSaveAuditRecord(
 				AuditOperationType.STREAM, AuditActionType.CREATE, streamDefinition.getName(),
-				this.auditServiceUtils.convertStreamDefinitionToAuditData(savedStreamDefinition), null);
+				this.streamDefinitionService.sanitizeStreamDefinition(savedStreamDefinition), null);
 
 		return streamDefinition;
 
@@ -419,7 +425,9 @@ public class DefaultStreamService implements StreamService {
 
 	public StreamDefinition createStreamDefinition(String streamName, String dsl, String description) {
 		try {
-			return new StreamDefinition(streamName, dsl, dsl, description);
+			StreamDefinition streamDefinition = new StreamDefinition(streamName, dsl, dsl, description);
+			this.streamDefinitionService.parse(streamDefinition);
+			return streamDefinition;
 		}
 		catch (ParseException ex) {
 			throw new InvalidStreamDefinitionException(ex.getMessage());
@@ -453,7 +461,8 @@ public class DefaultStreamService implements StreamService {
 		auditRecordService.populateAndSaveAuditRecordUsingMapData(
 				AuditOperationType.STREAM, AuditActionType.DEPLOY,
 				streamDefinition.getName(),
-				this.auditServiceUtils.convertStreamDefinitionToAuditData(streamDefinition, deploymentProperties),
+				this.auditServiceUtils.convertStreamDefinitionToAuditData(
+						this.streamDefinitionService.sanitizeStreamDefinition(streamDefinition), deploymentProperties),
 				platformName);
 	}
 
@@ -470,7 +479,7 @@ public class DefaultStreamService implements StreamService {
 		auditRecordService.populateAndSaveAuditRecord(
 				AuditOperationType.STREAM, AuditActionType.DELETE,
 				streamDefinition.getName(),
-				this.auditServiceUtils.convertStreamDefinitionToAuditData(streamDefinition), null);
+				this.streamDefinitionService.sanitizeStreamDefinition(streamDefinition), null);
 	}
 
 	/**
@@ -487,7 +496,7 @@ public class DefaultStreamService implements StreamService {
 			auditRecordService.populateAndSaveAuditRecord(
 					AuditOperationType.STREAM, AuditActionType.DELETE,
 					streamDefinition.getName(),
-					this.auditServiceUtils.convertStreamDefinitionToAuditData(streamDefinition), null);
+					this.streamDefinitionService.sanitizeStreamDefinition(streamDefinition), null);
 		}
 	}
 

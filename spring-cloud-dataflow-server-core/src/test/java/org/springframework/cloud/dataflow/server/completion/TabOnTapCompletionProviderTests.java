@@ -39,6 +39,7 @@ import org.springframework.cloud.dataflow.configuration.metadata.BootApplication
 import org.springframework.cloud.dataflow.core.AppRegistration;
 import org.springframework.cloud.dataflow.core.ApplicationType;
 import org.springframework.cloud.dataflow.core.StreamDefinition;
+import org.springframework.cloud.dataflow.core.StreamDefinitionService;
 import org.springframework.cloud.dataflow.registry.repository.AppRegistrationRepository;
 import org.springframework.cloud.dataflow.registry.service.AppRegistryService;
 import org.springframework.cloud.dataflow.registry.service.DefaultAppRegistryService;
@@ -74,6 +75,9 @@ public class TabOnTapCompletionProviderTests {
 	@Autowired
 	private StreamDefinitionRepository streamDefinitionRepository;
 
+	@Autowired
+	private StreamDefinitionService streamDefinitionService;
+
 	private static org.hamcrest.Matcher<CompletionProposal> proposalThat(org.hamcrest.Matcher<String> matcher) {
 		return new FeatureMatcher<CompletionProposal, String>(matcher, "a proposal whose text", "text") {
 			@Override
@@ -88,7 +92,7 @@ public class TabOnTapCompletionProviderTests {
 		this.streamDefinitionRepository.save(new StreamDefinition("foo", "time | transform | log"));
 		this.streamDefinitionRepository.save(new StreamDefinition("bar", "time | log"));
 		this.completionProvider
-				.addCompletionRecoveryStrategy(new TapOnDestinationRecoveryStrategy(streamDefinitionRepository));
+				.addCompletionRecoveryStrategy(new TapOnDestinationRecoveryStrategy(streamDefinitionRepository, this.streamDefinitionService));
 	}
 
 	@Test
