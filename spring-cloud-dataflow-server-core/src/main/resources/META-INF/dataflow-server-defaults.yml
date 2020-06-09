@@ -86,7 +86,7 @@ spring:
         authorization:
           enabled: true
           loginUrl: "/"
-          permit-all-paths: "/management/health,/authenticate,/security/info,/assets/**,/dashboard/logout-success-oauth.html,/favicon.ico"
+          permit-all-paths: "/management/health,/management/info,/authenticate,/security/info,/assets/**,/dashboard/logout-success-oauth.html,/favicon.ico"
           rules:
             # About
 
