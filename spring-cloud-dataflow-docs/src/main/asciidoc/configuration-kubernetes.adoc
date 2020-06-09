@@ -217,6 +217,10 @@ These properties are also used when configuring the <<configuration-kubernetes-t
 |The toleration value to apply, used in conjunction with `operator` to select to appropriate `effect`.
 |<none>
 
+|secretRefs
+|The name of the secret(s) to load the entire data contents into individual environment variables. Multiple secrets may be comma separated.
+|<none>
+
 |secretKeyRefs.envVarName
 |The environment variable name to hold the secret data
 |<none>
@@ -227,6 +231,10 @@ These properties are also used when configuring the <<configuration-kubernetes-t
 
 |secretKeyRefs.dataKey
 |The key name to obtain secret data from
+|<none>
+
+|configMapRefs
+|The name of the ConfigMap(s) to load the entire data contents into individual environment variables. Multiple ConfigMaps be comma separated.
 |<none>
 
 |configMapKeyRefs.envVarName
