@@ -516,14 +516,15 @@ public class TestDependencies extends WebMvcConfigurationSupport {
 			TaskExplorer taskExplorer, DataflowTaskExecutionDao dataflowTaskExecutionDao,
 			DataflowTaskExecutionMetadataDao dataflowTaskExecutionMetadataDao,
 			OAuth2TokenUtilsService oauth2TokenUtilsService,
-			TaskSaveService taskSaveService) {
+			TaskSaveService taskSaveService,
+			TaskConfigurationProperties taskConfigurationProperties) {
 
 		return new DefaultTaskExecutionService(
 				launcherRepository, auditRecordService, taskRepository,
 				taskExecutionInfoService, taskDeploymentRepository,
 				taskExecutionRepositoryService, taskAppDeploymentRequestCreator,
 				taskExplorer, dataflowTaskExecutionDao, dataflowTaskExecutionMetadataDao,
-				oauth2TokenUtilsService, taskSaveService);
+				oauth2TokenUtilsService, taskSaveService, taskConfigurationProperties);
 	}
 
 	@Bean

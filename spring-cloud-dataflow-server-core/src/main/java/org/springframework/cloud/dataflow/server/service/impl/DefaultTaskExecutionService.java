@@ -140,6 +140,8 @@ public class DefaultTaskExecutionService implements TaskExecutionService {
 
 	private boolean autoCreateTaskDefinitions;
 
+	private TaskConfigurationProperties taskConfigurationProperties;
+
 	/**
 	 * Initializes the {@link DefaultTaskExecutionService}.
 	 *
@@ -168,7 +170,8 @@ public class DefaultTaskExecutionService implements TaskExecutionService {
 			DataflowTaskExecutionDao dataflowTaskExecutionDao,
 			DataflowTaskExecutionMetadataDao dataflowTaskExecutionMetadataDao,
 			OAuth2TokenUtilsService oauth2TokenUtilsService,
-			TaskSaveService taskSaveService) {
+			TaskSaveService taskSaveService,
+			TaskConfigurationProperties taskConfigurationProperties) {
 		Assert.notNull(launcherRepository, "launcherRepository must not be null");
 		Assert.notNull(auditRecordService, "auditRecordService must not be null");
 		Assert.notNull(taskExecutionInfoService, "taskExecutionInfoService must not be null");
@@ -181,6 +184,7 @@ public class DefaultTaskExecutionService implements TaskExecutionService {
 		Assert.notNull(dataflowTaskExecutionDao, "dataflowTaskExecutionDao must not be null");
 		Assert.notNull(dataflowTaskExecutionMetadataDao, "dataflowTaskExecutionMetadataDao must not be null");
 		Assert.notNull(taskSaveService, "taskSaveService must not be null");
+		Assert.notNull(taskConfigurationProperties, "taskConfigurationProperties must not be null");
 
 		this.oauth2TokenUtilsService = oauth2TokenUtilsService;
 		this.launcherRepository = launcherRepository;
@@ -194,6 +198,7 @@ public class DefaultTaskExecutionService implements TaskExecutionService {
 		this.dataflowTaskExecutionDao = dataflowTaskExecutionDao;
 		this.dataflowTaskExecutionMetadataDao = dataflowTaskExecutionMetadataDao;
 		this.taskSaveService = taskSaveService;
+		this.taskConfigurationProperties = taskConfigurationProperties;
 	}
 
 	/**
@@ -369,7 +374,9 @@ public class DefaultTaskExecutionService implements TaskExecutionService {
 				containsAccessToken = true;
 			}
 		}
-
+		if(this.taskConfigurationProperties.isUseUserAccessToken()) {
+			useUserAccessToken = true;
+		}
 		if (!containsAccessToken && useUserAccessToken && oauth2TokenUtilsService != null) {
 			final String token = oauth2TokenUtilsService.getAccessTokenOfAuthenticatedUser();
 

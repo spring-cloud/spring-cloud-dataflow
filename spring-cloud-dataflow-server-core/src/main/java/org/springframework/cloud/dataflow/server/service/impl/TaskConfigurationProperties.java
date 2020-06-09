@@ -54,6 +54,13 @@ public class TaskConfigurationProperties {
 	 */
 	private DeployerProperties deployerProperties = new DeployerProperties();
 
+	/**
+	 * If true SCDF will set the dataflow-server-access-token for the composed
+	 * task runner to the user's token when launching composed tasks.
+	 * Default is false.
+	 */
+	private boolean useUserAccessToken = false;
+
 	public String getComposedTaskRunnerUri() {
 		return composedTaskRunnerUri;
 	}
@@ -76,6 +83,14 @@ public class TaskConfigurationProperties {
 
 	public void setAutoCreateTaskDefinitions(boolean autoCreateTaskDefinitions) {
 		this.autoCreateTaskDefinitions = autoCreateTaskDefinitions;
+	}
+
+	public boolean isUseUserAccessToken() {
+		return useUserAccessToken;
+	}
+
+	public void setUseUserAccessToken(boolean useUserAccessToken) {
+		this.useUserAccessToken = useUserAccessToken;
 	}
 
 	public static class DeployerProperties {
