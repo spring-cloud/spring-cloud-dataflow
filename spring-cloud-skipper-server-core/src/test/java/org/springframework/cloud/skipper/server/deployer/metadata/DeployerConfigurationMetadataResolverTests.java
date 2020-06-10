@@ -40,7 +40,7 @@ public class DeployerConfigurationMetadataResolverTests {
 							skipperServerProperties.getDeployerProperties());
 					resolver.setApplicationContext(context);
 				List<ConfigurationMetadataProperty> data = resolver.resolve();
-				assertThat(data.size()).isEqualTo(13);
+				assertThat(data.size()).isEqualTo(14);
 			});
 	}
 
@@ -56,7 +56,7 @@ public class DeployerConfigurationMetadataResolverTests {
 							skipperServerProperties.getDeployerProperties());
 					resolver.setApplicationContext(context);
 				List<ConfigurationMetadataProperty> data = resolver.resolve();
-				assertThat(data.size()).isEqualTo(11);
+				assertThat(data.size()).isEqualTo(12);
 			});
 	}
 
@@ -72,7 +72,7 @@ public class DeployerConfigurationMetadataResolverTests {
 							skipperServerProperties.getDeployerProperties());
 					resolver.setApplicationContext(context);
 				List<ConfigurationMetadataProperty> data = resolver.resolve();
-				assertThat(data.size()).isEqualTo(12);
+				assertThat(data.size()).isEqualTo(13);
 			});
 	}
 
