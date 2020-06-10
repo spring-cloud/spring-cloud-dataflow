@@ -610,9 +610,9 @@ public class LocalServerSecurityWithUsersFileTests {
 				{ HttpMethod.GET, HttpStatus.UNAUTHORIZED, "/management", null, null },
 
 				{ HttpMethod.GET, HttpStatus.OK, "/management/info", manageOnlyUser, null },
-				{ HttpMethod.GET, HttpStatus.FORBIDDEN, "/management/info", viewOnlyUser, null },
-				{ HttpMethod.GET, HttpStatus.FORBIDDEN, "/management/info", createOnlyUser, null },
-				{ HttpMethod.GET, HttpStatus.UNAUTHORIZED, "/management/info", null, null },
+				{ HttpMethod.GET, HttpStatus.OK, "/management/info", viewOnlyUser, null },
+				{ HttpMethod.GET, HttpStatus.OK, "/management/info", createOnlyUser, null },
+				{ HttpMethod.GET, HttpStatus.OK, "/management/info", null, null },
 
 				{ HttpMethod.GET, HttpStatus.NOT_FOUND, "/management/does-not-exist", manageOnlyUser, null },
 				{ HttpMethod.GET, HttpStatus.FORBIDDEN, "/management/does-not-exist", viewOnlyUser, null },
