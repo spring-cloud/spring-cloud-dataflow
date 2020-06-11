@@ -78,6 +78,7 @@ public class JobCommandTests extends AbstractShellIntegrationTest {
 
 	@BeforeClass
 	public static void setUp() throws Exception {
+		Thread.sleep(2000);
 		DataSource dataSource = applicationContext.getBean(DataSource.class);
 		taskBatchDao = new JdbcTaskBatchDao(dataSource);
 		JobRepositoryFactoryBean repositoryFactoryBean = new JobRepositoryFactoryBean();
