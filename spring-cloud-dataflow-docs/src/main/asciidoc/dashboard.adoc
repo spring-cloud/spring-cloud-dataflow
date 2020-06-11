@@ -317,6 +317,9 @@ image::{dataflow-asciidoc}/images/dataflow-ctr-flo-tab.png[Composed Task Designe
 Once the task definition has been created, the tasks can be launched through the dashboard.
 To do so, click the Definitions tab and select the task you want to launch by pressing `Launch`.
 
+.Task Launch Page
+image::{dataflow-asciidoc}/images/dataflow-task-launch.png[Task Launch, scaledwidth="100%"]
+
 
 ==== Import/Export Tasks
 
