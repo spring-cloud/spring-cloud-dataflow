@@ -44,7 +44,6 @@ import org.springframework.cloud.dataflow.completion.CompletionConfiguration;
 import org.springframework.cloud.dataflow.completion.StreamCompletionProvider;
 import org.springframework.cloud.dataflow.completion.TaskCompletionProvider;
 import org.springframework.cloud.dataflow.configuration.metadata.ApplicationConfigurationMetadataResolver;
-import org.springframework.cloud.dataflow.core.DefaultStreamDefinitionService;
 import org.springframework.cloud.dataflow.core.StreamDefinitionService;
 import org.springframework.cloud.dataflow.registry.repository.AppRegistrationRepository;
 import org.springframework.cloud.dataflow.registry.service.AppRegistryService;
@@ -309,12 +308,6 @@ public class DataFlowControllerAutoConfiguration {
 	@ConditionalOnStreamsEnabled
 	@EnableConfigurationProperties(SkipperClientProperties.class)
 	public static class StreamEnabledConfiguration {
-
-		@Bean
-		@ConditionalOnMissingBean
-		public StreamDefinitionService streamDefinitionService() {
-			return new DefaultStreamDefinitionService();
-		}
 
 		@Bean
 		public StreamValidationService streamValidationService(AppRegistryService appRegistry,

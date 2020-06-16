@@ -39,7 +39,7 @@ import org.springframework.cloud.dataflow.core.DataFlowPropertyKeys;
 import org.springframework.cloud.dataflow.core.StreamAppDefinition;
 import org.springframework.cloud.dataflow.core.StreamDefinition;
 import org.springframework.cloud.dataflow.core.StreamDefinitionService;
-import org.springframework.cloud.dataflow.core.StreamDefinitionToDslConverter;
+import org.springframework.cloud.dataflow.core.StreamDefinitionServiceUtils;
 import org.springframework.cloud.dataflow.core.StreamDeployment;
 import org.springframework.cloud.dataflow.core.dsl.ParseException;
 import org.springframework.cloud.dataflow.core.dsl.StreamNode;
@@ -188,7 +188,8 @@ public class DefaultStreamService implements StreamService {
 
 		auditRecordService.populateAndSaveAuditRecord(
 				AuditOperationType.STREAM, AuditActionType.UNDEPLOY,
-				streamDefinition.getName(), this.streamDefinitionService.sanitizeStreamDefinition(streamDefinition),
+				streamDefinition.getName(), StreamDefinitionServiceUtils.sanitizeStreamDefinition(streamDefinition.getName(),
+						streamDefinitionService.getAppDefinitions(streamDefinition)),
 				null);
 	}
 
@@ -216,7 +217,7 @@ public class DefaultStreamService implements StreamService {
 			updatedStreamAppDefinitions.addLast(appDefinitionBuilder.build(streamDefinition.getName()));
 		}
 
-		String updatedDslText = new StreamDefinitionToDslConverter(this.streamDefinitionService).toDsl(updatedStreamAppDefinitions);
+		String updatedDslText =  StreamDefinitionServiceUtils.toDsl(updatedStreamAppDefinitions);
 
 		StreamDefinition updatedStreamDefinition = new StreamDefinition(streamName, updatedDslText,
 				streamDefinition.getOriginalDslText(), streamDefinition.getDescription());
@@ -228,7 +229,8 @@ public class DefaultStreamService implements StreamService {
 		this.streamDefinitionRepository.save(updatedStreamDefinition);
 		this.auditRecordService.populateAndSaveAuditRecord(
 				AuditOperationType.STREAM, AuditActionType.UPDATE, streamName,
-				this.streamDefinitionService.sanitizeStreamDefinition(streamDefinition), null);
+				StreamDefinitionServiceUtils.sanitizeStreamDefinition(streamDefinition.getName(),
+						this.streamDefinitionService.getAppDefinitions(streamDefinition)), null);
 	}
 
 	@Override
@@ -417,7 +419,8 @@ public class DefaultStreamService implements StreamService {
 
 		auditRecordService.populateAndSaveAuditRecord(
 				AuditOperationType.STREAM, AuditActionType.CREATE, streamDefinition.getName(),
-				this.streamDefinitionService.sanitizeStreamDefinition(savedStreamDefinition), null);
+				StreamDefinitionServiceUtils.sanitizeStreamDefinition(streamDefinition.getName(),
+						streamDefinitionService.getAppDefinitions(streamDefinition)), null);
 
 		return streamDefinition;
 
@@ -462,7 +465,8 @@ public class DefaultStreamService implements StreamService {
 				AuditOperationType.STREAM, AuditActionType.DEPLOY,
 				streamDefinition.getName(),
 				this.auditServiceUtils.convertStreamDefinitionToAuditData(
-						this.streamDefinitionService.sanitizeStreamDefinition(streamDefinition), deploymentProperties),
+						StreamDefinitionServiceUtils.sanitizeStreamDefinition(streamDefinition.getName(),
+								this.streamDefinitionService.getAppDefinitions(streamDefinition)), deploymentProperties),
 				platformName);
 	}
 
@@ -479,7 +483,8 @@ public class DefaultStreamService implements StreamService {
 		auditRecordService.populateAndSaveAuditRecord(
 				AuditOperationType.STREAM, AuditActionType.DELETE,
 				streamDefinition.getName(),
-				this.streamDefinitionService.sanitizeStreamDefinition(streamDefinition), null);
+				StreamDefinitionServiceUtils.sanitizeStreamDefinition(streamDefinition.getName(),
+						this.streamDefinitionService.getAppDefinitions(streamDefinition)), null);
 	}
 
 	/**
@@ -496,7 +501,8 @@ public class DefaultStreamService implements StreamService {
 			auditRecordService.populateAndSaveAuditRecord(
 					AuditOperationType.STREAM, AuditActionType.DELETE,
 					streamDefinition.getName(),
-					this.streamDefinitionService.sanitizeStreamDefinition(streamDefinition), null);
+					StreamDefinitionServiceUtils.sanitizeStreamDefinition(streamDefinition.getName(),
+							this.streamDefinitionService.getAppDefinitions(streamDefinition)), null);
 		}
 	}
 

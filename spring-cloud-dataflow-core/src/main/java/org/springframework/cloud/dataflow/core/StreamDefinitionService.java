@@ -16,20 +16,30 @@
 
 package org.springframework.cloud.dataflow.core;
 
-import java.util.Iterator;
 import java.util.LinkedList;
 
 import org.springframework.cloud.dataflow.core.dsl.StreamNode;
 
+/**
+ * Contract for the core operations against {@link StreamDefinition}.
+ *
+ * @author Ilayaperumal Gopinathan
+ */
 public interface StreamDefinitionService {
 
+	/**
+	 * Parse the given stream definition and return the AST representation of the stream DSL in {@link StreamNode}.
+	 *
+	 * @param streamDefinition the stream definition
+	 * @return the StreamNode representation of the stream definition
+	 */
 	StreamNode parse(StreamDefinition streamDefinition);
 
+	/**
+	 * Return the linked list of {@link StreamAppDefinition}s associated with the stream definition.
+	 *
+	 * @param streamDefinition the stream definition
+	 * @return the linked list of stream app definitions
+	 */
 	LinkedList<StreamAppDefinition> getAppDefinitions(StreamDefinition streamDefinition);
-
-	Iterator<StreamAppDefinition> getDeploymentOrderIterator(StreamDefinition streamDefinition);
-
-	String sanitizeStreamDefinition(StreamDefinition streamDefinition);
-
-	String toDsl(StreamDefinition streamDefinition);
 }

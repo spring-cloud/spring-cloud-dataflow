@@ -23,11 +23,15 @@ import org.junit.Test;
 import org.springframework.boot.Banner;
 import org.springframework.boot.WebApplicationType;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.builder.SpringApplicationBuilder;
+import org.springframework.cloud.dataflow.core.DefaultStreamDefinitionService;
+import org.springframework.cloud.dataflow.core.StreamDefinitionService;
 import org.springframework.cloud.dataflow.core.TaskPlatform;
 import org.springframework.cloud.dataflow.server.EnableDataFlowServer;
 import org.springframework.cloud.deployer.spi.local.LocalTaskLauncher;
 import org.springframework.context.ApplicationContext;
+import org.springframework.context.annotation.Bean;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -74,6 +78,11 @@ public class LocalPlatformTests {
 	@SpringBootApplication
 	@EnableDataFlowServer
 	static class TestConfig {
+		@Bean
+		@ConditionalOnMissingBean
+		public StreamDefinitionService streamDefinitionService() {
+			return new DefaultStreamDefinitionService();
+		}
 	}
 
 	private String[] testProperties(String... additional) {

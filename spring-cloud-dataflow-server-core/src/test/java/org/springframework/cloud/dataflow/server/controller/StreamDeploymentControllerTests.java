@@ -19,6 +19,7 @@ package org.springframework.cloud.dataflow.server.controller;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.Map;
 import java.util.Optional;
 
@@ -33,6 +34,8 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
+import org.springframework.cloud.dataflow.core.ApplicationType;
+import org.springframework.cloud.dataflow.core.StreamAppDefinition;
 import org.springframework.cloud.dataflow.core.StreamDefinition;
 import org.springframework.cloud.dataflow.core.StreamDefinitionService;
 import org.springframework.cloud.dataflow.core.StreamDeployment;
@@ -176,10 +179,17 @@ public class StreamDeploymentControllerTests {
 		Map<StreamDefinition, DeploymentState> streamDeploymentStates = new HashMap<>();
 		streamDeploymentStates.put(streamDefinition, DeploymentState.deployed);
 
+		StreamAppDefinition streamAppDefinition1 = new StreamAppDefinition("time", "time", ApplicationType.source, streamDefinition.getName(), new HashMap<>());
+		StreamAppDefinition streamAppDefinition2 = new StreamAppDefinition("log", "log", ApplicationType.sink, streamDefinition.getName(), new HashMap<>());
+
 		when(this.streamDefinitionRepository.findById(streamDefinition.getName())).thenReturn(Optional.of(streamDefinition));
 		when(this.streamService.info(streamDefinition.getName())).thenReturn(streamDeployment);
 		when(this.streamService.state(anyList())).thenReturn(streamDeploymentStates);
-		when(this.streamDefinitionService.sanitizeStreamDefinition(any())).thenReturn(streamDefinition.getDslText());
+		LinkedList<StreamAppDefinition> streamAppDefinitions = new LinkedList<>();
+		streamAppDefinitions.add(streamAppDefinition1);
+		streamAppDefinitions.add(streamAppDefinition2);
+		when(this.streamDefinitionService.getAppDefinitions(any())).thenReturn(streamAppDefinitions);
+
 		StreamDeploymentResource streamDeploymentResource = this.controller.info(streamDefinition.getName());
 		Assert.assertEquals(streamDeploymentResource.getStreamName(), streamDefinition.getName());
 		Assert.assertEquals(streamDeploymentResource.getDslText(), streamDefinition.getDslText());

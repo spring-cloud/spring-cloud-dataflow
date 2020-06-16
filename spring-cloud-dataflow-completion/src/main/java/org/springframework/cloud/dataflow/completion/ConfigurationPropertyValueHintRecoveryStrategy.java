@@ -16,6 +16,7 @@
 
 package org.springframework.cloud.dataflow.completion;
 
+import java.util.LinkedList;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,6 +25,7 @@ import org.springframework.cloud.dataflow.core.AppRegistration;
 import org.springframework.cloud.dataflow.core.StreamAppDefinition;
 import org.springframework.cloud.dataflow.core.StreamDefinition;
 import org.springframework.cloud.dataflow.core.StreamDefinitionService;
+import org.springframework.cloud.dataflow.core.StreamDefinitionServiceUtils;
 import org.springframework.cloud.dataflow.core.dsl.CheckPointedParseException;
 import org.springframework.cloud.dataflow.core.dsl.Token;
 import org.springframework.cloud.dataflow.core.dsl.TokenKind;
@@ -68,10 +70,10 @@ public class ConfigurationPropertyValueHintRecoveryStrategy
 	private AppRegistration lookupLastApp(CheckPointedParseException exception) {
 		String safe = exception.getExpressionStringUntilCheckpoint();
 		StreamDefinition streamDefinition = new StreamDefinition("__dummy", safe);
-		StreamAppDefinition lastApp = this.streamDefinitionService.getDeploymentOrderIterator(streamDefinition).next();
+		LinkedList<StreamAppDefinition> streamAppDefinitions = this.streamDefinitionService.getAppDefinitions(streamDefinition);
+		StreamAppDefinition lastApp = StreamDefinitionServiceUtils.getDeploymentOrderIterator(streamAppDefinitions).next();
 		return this.collectorSupport.findAppRegistration(lastApp.getName(),
-				CompletionUtils.determinePotentialTypes(lastApp,
-						this.streamDefinitionService.getAppDefinitions(streamDefinition).size() > 1));
+				CompletionUtils.determinePotentialTypes(lastApp, streamAppDefinitions.size() > 1));
 	}
 
 	private String recoverPropertyName(CheckPointedParseException exception) {

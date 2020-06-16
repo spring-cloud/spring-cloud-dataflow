@@ -25,6 +25,7 @@ import org.slf4j.LoggerFactory;
 
 import org.springframework.cloud.dataflow.core.StreamDefinition;
 import org.springframework.cloud.dataflow.core.StreamDefinitionService;
+import org.springframework.cloud.dataflow.core.StreamDefinitionServiceUtils;
 import org.springframework.cloud.dataflow.rest.resource.DeploymentStateResource;
 import org.springframework.cloud.dataflow.rest.resource.StreamDefinitionResource;
 import org.springframework.cloud.dataflow.server.controller.support.ControllerUtils;
@@ -80,9 +81,11 @@ public class StreamDefinitionController {
 	 * Create a {@code StreamDefinitionController} that delegates to {@link StreamService}.
 	 *
 	 * @param streamService the stream service to use
+	 * @param streamDefinitionService the stream definition service to use
 	 */
 	public StreamDefinitionController(StreamService streamService, StreamDefinitionService streamDefinitionService) {
 		Assert.notNull(streamService, "StreamService must not be null");
+		Assert.notNull(streamDefinitionService, "StreamDefinitionService must not be null");
 		this.streamService = streamService;
 		this.streamDefinitionService = streamDefinitionService;
 	}
@@ -211,8 +214,10 @@ public class StreamDefinitionController {
 		public StreamDefinitionResource instantiateModel(StreamDefinition streamDefinition) {
 			final StreamDefinition originalStreamDefinition = new StreamDefinition(streamDefinition.getName(), streamDefinition.getOriginalDslText());
 			final StreamDefinitionResource resource = new StreamDefinitionResource(streamDefinition.getName(),
-					streamDefinitionService.sanitizeStreamDefinition(streamDefinition),
-					streamDefinitionService.sanitizeStreamDefinition(originalStreamDefinition), streamDefinition.getDescription());
+					StreamDefinitionServiceUtils.sanitizeStreamDefinition(streamDefinition.getName(),
+							streamDefinitionService.getAppDefinitions(streamDefinition)),
+					StreamDefinitionServiceUtils.sanitizeStreamDefinition(originalStreamDefinition.getName(),
+							streamDefinitionService.getAppDefinitions(originalStreamDefinition)), originalStreamDefinition.getDescription());
 			DeploymentState deploymentState = streamDeploymentStates.get(streamDefinition);
 			if (deploymentState != null) {
 				final DeploymentStateResource deploymentStateResource = ControllerUtils

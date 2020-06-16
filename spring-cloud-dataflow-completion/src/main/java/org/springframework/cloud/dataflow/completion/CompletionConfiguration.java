@@ -20,10 +20,8 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.cloud.dataflow.configuration.metadata.ApplicationConfigurationMetadataResolver;
 import org.springframework.cloud.dataflow.configuration.metadata.ApplicationConfigurationMetadataResolverAutoConfiguration;
-import org.springframework.cloud.dataflow.core.DefaultStreamDefinitionService;
 import org.springframework.cloud.dataflow.core.StreamDefinitionService;
 import org.springframework.cloud.dataflow.registry.service.AppRegistryService;
 import org.springframework.context.annotation.Bean;
@@ -48,89 +46,86 @@ public class CompletionConfiguration {
 	@Autowired
 	private ApplicationConfigurationMetadataResolver metadataResolver;
 
-	@Bean
-	@ConditionalOnMissingBean
-	public StreamDefinitionService streamDefinitionService() {
-		return new DefaultStreamDefinitionService();
-	}
+	@Autowired
+	private StreamDefinitionService streamDefinitionService;
 
 	@Bean
-	public StreamCompletionProvider streamCompletionProvider(StreamDefinitionService streamDefinitionService) {
+	public StreamCompletionProvider streamCompletionProvider() {
 		List<RecoveryStrategy<?>> recoveryStrategies = Arrays.asList(
-				emptyStartYieldsAppsRecoveryStrategy(streamDefinitionService),
-				expandOneDashToTwoDashesRecoveryStrategy(streamDefinitionService),
-				configurationPropertyNameAfterDashDashRecoveryStrategy(streamDefinitionService),
-				unfinishedConfigurationPropertyNameRecoveryStrategy(streamDefinitionService),
-				destinationNameYieldsAppsRecoveryStrategy(streamDefinitionService),
-				appsAfterPipeRecoveryStrategy(streamDefinitionService), appsAfterDoublePipeRecoveryStrategy(streamDefinitionService),
-				configurationPropertyValueHintRecoveryStrategy(streamDefinitionService));
-		List<ExpansionStrategy> expansionStrategies = Arrays.asList(addAppOptionsExpansionStrategy(streamDefinitionService),
-				pipeIntoOtherAppsExpansionStrategy(streamDefinitionService), unfinishedAppNameExpansionStrategy(streamDefinitionService),
+				emptyStartYieldsAppsRecoveryStrategy(),
+				expandOneDashToTwoDashesRecoveryStrategy(),
+				configurationPropertyNameAfterDashDashRecoveryStrategy(),
+				unfinishedConfigurationPropertyNameRecoveryStrategy(),
+				destinationNameYieldsAppsRecoveryStrategy(),
+				appsAfterPipeRecoveryStrategy(), appsAfterDoublePipeRecoveryStrategy(),
+				configurationPropertyValueHintRecoveryStrategy());
+		List<ExpansionStrategy> expansionStrategies = Arrays.asList(addAppOptionsExpansionStrategy(),
+				pipeIntoOtherAppsExpansionStrategy(), unfinishedAppNameExpansionStrategy(),
 				// Make sure this one runs last, as it may clear already computed
 				// proposals
 				// and return its own as the sole candidates
-				configurationPropertyValueHintExpansionStrategy(streamDefinitionService));
+				configurationPropertyValueHintExpansionStrategy());
 
 		return new StreamCompletionProvider(recoveryStrategies, expansionStrategies, streamDefinitionService);
 	}
 
 	@Bean
-	public RecoveryStrategy<?> emptyStartYieldsAppsRecoveryStrategy(StreamDefinitionService streamDefinitionService) {
-		return new EmptyStartYieldsSourceOrUnboundAppsRecoveryStrategy(appRegistry, streamDefinitionService());
+	public RecoveryStrategy<?> emptyStartYieldsAppsRecoveryStrategy() {
+		return new EmptyStartYieldsSourceOrUnboundAppsRecoveryStrategy(appRegistry, streamDefinitionService);
 	}
 
 	@Bean
-	public RecoveryStrategy<?> expandOneDashToTwoDashesRecoveryStrategy(StreamDefinitionService streamDefinitionService) {
+	public RecoveryStrategy<?> expandOneDashToTwoDashesRecoveryStrategy() {
 		return new ExpandOneDashToTwoDashesRecoveryStrategy(streamDefinitionService);
 	}
 
 	@Bean
-	public ConfigurationPropertyNameAfterDashDashRecoveryStrategy configurationPropertyNameAfterDashDashRecoveryStrategy(StreamDefinitionService streamDefinitionService) {
+	public ConfigurationPropertyNameAfterDashDashRecoveryStrategy configurationPropertyNameAfterDashDashRecoveryStrategy() {
 		return new ConfigurationPropertyNameAfterDashDashRecoveryStrategy(appRegistry, metadataResolver, streamDefinitionService);
 	}
 
 	@Bean
-	public RecoveryStrategy<?> unfinishedConfigurationPropertyNameRecoveryStrategy(StreamDefinitionService streamDefinitionService) {
+	public RecoveryStrategy<?> unfinishedConfigurationPropertyNameRecoveryStrategy() {
 		return new UnfinishedConfigurationPropertyNameRecoveryStrategy(appRegistry, metadataResolver, streamDefinitionService);
 	}
 
 	@Bean
-	public RecoveryStrategy<?> appsAfterPipeRecoveryStrategy(StreamDefinitionService streamDefinitionService) {
+	public RecoveryStrategy<?> appsAfterPipeRecoveryStrategy() {
 		return new AppsAfterPipeRecoveryStrategy(appRegistry, streamDefinitionService);
 	}
 
 	@Bean
-	public RecoveryStrategy<?> appsAfterDoublePipeRecoveryStrategy(StreamDefinitionService streamDefinitionService) {
+	public RecoveryStrategy<?> appsAfterDoublePipeRecoveryStrategy() {
 		return new AppsAfterDoublePipeRecoveryStrategy(appRegistry, streamDefinitionService);
 	}
 
 	@Bean
-	public RecoveryStrategy<?> destinationNameYieldsAppsRecoveryStrategy(StreamDefinitionService streamDefinitionService) {
+	public RecoveryStrategy<?> destinationNameYieldsAppsRecoveryStrategy() {
 		return new DestinationNameYieldsAppsRecoveryStrategy(appRegistry, streamDefinitionService);
 	}
 
 	@Bean
-	public RecoveryStrategy<?> configurationPropertyValueHintRecoveryStrategy(StreamDefinitionService streamDefinitionService) {
+	public RecoveryStrategy<?> configurationPropertyValueHintRecoveryStrategy() {
 		return new ConfigurationPropertyValueHintRecoveryStrategy(appRegistry, metadataResolver, streamDefinitionService);
 	}
 
 	@Bean
-	public ExpansionStrategy addAppOptionsExpansionStrategy(StreamDefinitionService streamDefinitionService) {
+	public ExpansionStrategy addAppOptionsExpansionStrategy() {
 		return new AddAppOptionsExpansionStrategy(appRegistry, metadataResolver, streamDefinitionService);
 	}
 
 	@Bean
-	public ExpansionStrategy unfinishedAppNameExpansionStrategy(StreamDefinitionService streamDefinitionService) {
+	public ExpansionStrategy unfinishedAppNameExpansionStrategy() {
 		return new UnfinishedAppNameExpansionStrategy(appRegistry, streamDefinitionService);
 	}
 
 	@Bean
-	public ExpansionStrategy pipeIntoOtherAppsExpansionStrategy(StreamDefinitionService streamDefinitionService) {
+	public ExpansionStrategy pipeIntoOtherAppsExpansionStrategy() {
 		return new PipeIntoOtherAppsExpansionStrategy(appRegistry, streamDefinitionService);
 	}
 
 	@Bean
-	public ExpansionStrategy configurationPropertyValueHintExpansionStrategy(StreamDefinitionService streamDefinitionService) {
+	public ExpansionStrategy configurationPropertyValueHintExpansionStrategy() {
 		return new ConfigurationPropertyValueHintExpansionStrategy(appRegistry, metadataResolver, streamDefinitionService);
 	}
 

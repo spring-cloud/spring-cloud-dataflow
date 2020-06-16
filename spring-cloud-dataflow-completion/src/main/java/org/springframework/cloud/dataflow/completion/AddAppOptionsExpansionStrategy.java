@@ -17,6 +17,7 @@
 package org.springframework.cloud.dataflow.completion;
 
 import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
@@ -25,6 +26,7 @@ import org.springframework.cloud.dataflow.core.AppRegistration;
 import org.springframework.cloud.dataflow.core.StreamAppDefinition;
 import org.springframework.cloud.dataflow.core.StreamDefinition;
 import org.springframework.cloud.dataflow.core.StreamDefinitionService;
+import org.springframework.cloud.dataflow.core.StreamDefinitionServiceUtils;
 import org.springframework.cloud.dataflow.registry.service.AppRegistryService;
 
 /**
@@ -51,9 +53,10 @@ class AddAppOptionsExpansionStrategy implements ExpansionStrategy {
 	@Override
 	public boolean addProposals(String text, StreamDefinition streamDefinition, int detailLevel,
 			List<CompletionProposal> collector) {
-		StreamAppDefinition lastApp = this.streamDefinitionService.getDeploymentOrderIterator(streamDefinition).next();
+		LinkedList<StreamAppDefinition> streamAppDefinitions = this.streamDefinitionService.getAppDefinitions(streamDefinition);
+		StreamAppDefinition lastApp = StreamDefinitionServiceUtils.getDeploymentOrderIterator(streamAppDefinitions).next();
 		AppRegistration appRegistration = this.collectorSupport.findAppRegistration(lastApp.getName(),
-				CompletionUtils.determinePotentialTypes(lastApp,this.streamDefinitionService.getAppDefinitions(streamDefinition).size() > 1));
+				CompletionUtils.determinePotentialTypes(lastApp,streamAppDefinitions.size() > 1));
 
 		if (appRegistration != null) {
 			Set<String> alreadyPresentOptions = new HashSet<>(lastApp.getProperties().keySet());

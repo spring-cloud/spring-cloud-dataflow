@@ -1,5 +1,5 @@
 /*
- * Copyright 2015-2016 the original author or authors.
+ * Copyright 2015-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,8 +26,9 @@ import static org.junit.Assert.assertEquals;
 
 /**
  * @author Christian Tzolov
+ * @author Ilayaperumal Gopinathan
  */
-public class StreamDefinitionToDslConverterTests {
+public class StreamDefinitionServiceUtilsTests {
 
 	StreamDefinitionService streamDefinitionService = new DefaultStreamDefinitionService();
 
@@ -121,10 +122,7 @@ public class StreamDefinitionToDslConverterTests {
 		assertEquals(expectedAppSize, this.streamDefinitionService.getAppDefinitions(streamDefinition).size());
 
 		assertEquals(streamDefinition.getDslText(),
-				new StreamDefinitionToDslConverter(this.streamDefinitionService).toDsl(streamDefinition));
-
-		assertEquals(streamDefinition.getDslText(),
-				new StreamDefinitionToDslConverter(this.streamDefinitionService).toDsl(this.streamDefinitionService.getAppDefinitions(streamDefinition)));
+				StreamDefinitionServiceUtils.toDsl(this.streamDefinitionService.getAppDefinitions(streamDefinition)));
 	}
 
 	@Test
@@ -148,7 +146,7 @@ public class StreamDefinitionToDslConverterTests {
 			StreamDefinition streamDefinition = new StreamDefinition("streamName", dslText);
 
 			assertEquals("foo | bar",
-					new StreamDefinitionToDslConverter(this.streamDefinitionService).toDsl(this.streamDefinitionService.getAppDefinitions(streamDefinition)));
+							StreamDefinitionServiceUtils.toDsl(this.streamDefinitionService.getAppDefinitions(streamDefinition)));
 		}
 	}
 
@@ -161,7 +159,7 @@ public class StreamDefinitionToDslConverterTests {
 		StreamDefinition streamDefinition = new StreamDefinition("streamName", dslText);
 
 		assertEquals(":boza > foo | bar",
-				new StreamDefinitionToDslConverter(this.streamDefinitionService).toDsl(this.streamDefinitionService.getAppDefinitions(streamDefinition)));
+				StreamDefinitionServiceUtils.toDsl(this.streamDefinitionService.getAppDefinitions(streamDefinition)));
 	}
 
 	@Test
@@ -187,7 +185,7 @@ public class StreamDefinitionToDslConverterTests {
 				.build("stream2");
 
 		assertEquals("foo --p1='a b' --p2=\"'c d'\" --p3=ef --p4=\"'i' 'j'\" --p5=\"k l\" | bar --p1='a b' --p2=\"'c d'\" --p3=ef",
-				new StreamDefinitionToDslConverter(this.streamDefinitionService).toDsl(Arrays.asList(foo2, bar2)));
+				StreamDefinitionServiceUtils.toDsl(Arrays.asList(foo2, bar2)));
 	}
 
 	@Test
@@ -199,7 +197,7 @@ public class StreamDefinitionToDslConverterTests {
 
 		assertEquals("http-source-kafka --server.port=9900 | couchbase-sink-kafka " +
 						"--spring.cloud.stream.bindings.input.contentType='application/x-java-object;type=com.example.dto.InputDto'",
-				new StreamDefinitionToDslConverter(this.streamDefinitionService).toDsl(streamDefinition));
+				StreamDefinitionServiceUtils.toDsl(this.streamDefinitionService.getAppDefinitions(streamDefinition)));
 
 
 		streamDefinition = new StreamDefinition("stream2", "jdbc-mssql --cron='/10 * * * * *' " +
@@ -213,7 +211,7 @@ public class StreamDefinitionToDslConverterTests {
 						"OUTPUT Inserted.* WHERE assurance_flag IS NULL' " +
 						"--url='jdbc:sqlserver://db:1433;databaseName=Spring' --username='*****' | " +
 						"cust-processor | router --default-output-channel=out",
-				new StreamDefinitionToDslConverter(this.streamDefinitionService).toDsl(streamDefinition));
+				StreamDefinitionServiceUtils.toDsl(this.streamDefinitionService.getAppDefinitions(streamDefinition)));
 
 	}
 
@@ -231,8 +229,7 @@ public class StreamDefinitionToDslConverterTests {
 						"OUTPUT Inserted.* WHERE assurance_flag IS NULL' " +
 						"--url='jdbc:sqlserver://db:1433;databaseName=Spring' --username='*****' | " +
 						"cust-processor | router --default-output-channel=out",
-				new StreamDefinitionToDslConverter(this.streamDefinitionService).toDsl(streamDefinition));
-
+				StreamDefinitionServiceUtils.toDsl(this.streamDefinitionService.getAppDefinitions(streamDefinition)));
 	}
 
 }

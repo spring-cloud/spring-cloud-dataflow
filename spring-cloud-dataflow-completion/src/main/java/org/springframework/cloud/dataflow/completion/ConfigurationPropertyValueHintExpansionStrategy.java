@@ -17,6 +17,7 @@
 package org.springframework.cloud.dataflow.completion;
 
 import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
@@ -26,6 +27,7 @@ import org.springframework.cloud.dataflow.core.AppRegistration;
 import org.springframework.cloud.dataflow.core.StreamAppDefinition;
 import org.springframework.cloud.dataflow.core.StreamDefinition;
 import org.springframework.cloud.dataflow.core.StreamDefinitionService;
+import org.springframework.cloud.dataflow.core.StreamDefinitionServiceUtils;
 import org.springframework.cloud.dataflow.core.dsl.CheckPointedParseException;
 import org.springframework.cloud.dataflow.core.dsl.Token;
 import org.springframework.cloud.dataflow.core.dsl.TokenKind;
@@ -58,8 +60,9 @@ public class ConfigurationPropertyValueHintExpansionStrategy implements Expansio
 	@Override
 	public boolean addProposals(String text, StreamDefinition streamDefinition, int detailLevel,
 			List<CompletionProposal> collector) {
+		LinkedList<StreamAppDefinition> streamAppDefinitions = this.streamDefinitionService.getAppDefinitions(streamDefinition);
 		Set<String> propertyNames = new HashSet<>(
-				this.streamDefinitionService.getDeploymentOrderIterator(streamDefinition).next().getProperties().keySet());
+				StreamDefinitionServiceUtils.getDeploymentOrderIterator(streamAppDefinitions).next().getProperties().keySet());
 		propertyNames.removeAll(CompletionUtils.IMPLICIT_PARAMETER_NAMES);
 		if (text.endsWith(" ") || propertyNames.isEmpty()) {
 			return false;
@@ -67,12 +70,11 @@ public class ConfigurationPropertyValueHintExpansionStrategy implements Expansio
 
 		String propertyName = recoverPropertyName(text);
 
-		StreamAppDefinition lastApp = this.streamDefinitionService.getDeploymentOrderIterator(streamDefinition).next();
+		StreamAppDefinition lastApp = StreamDefinitionServiceUtils.getDeploymentOrderIterator(streamAppDefinitions).next();
 		String alreadyTyped = lastApp.getProperties().get(propertyName);
 
 		AppRegistration lastAppRegistration = this.collectorSupport.findAppRegistration(lastApp.getName(),
-				CompletionUtils.determinePotentialTypes(lastApp,
-						this.streamDefinitionService.getAppDefinitions(streamDefinition).size() > 1));
+				CompletionUtils.determinePotentialTypes(lastApp, streamAppDefinitions.size() > 1));
 		if (lastAppRegistration != null) {
 			return this.collectorSupport.addAlreadyTypedValueHintsProposals(text, lastAppRegistration, collector, propertyName, valueHintProviders, alreadyTyped);
 		}

@@ -39,4 +39,5 @@ public class StreamConfiguration {
 		streamCompletionProvider.addCompletionRecoveryStrategy(recoveryStrategy);
 		return recoveryStrategy;
 	}
+
 }
