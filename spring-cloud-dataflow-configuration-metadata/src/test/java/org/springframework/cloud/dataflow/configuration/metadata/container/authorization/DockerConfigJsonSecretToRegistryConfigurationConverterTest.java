@@ -35,6 +35,7 @@ import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 
 import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.nullValue;
 import static org.junit.Assert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
@@ -55,6 +56,27 @@ public class DockerConfigJsonSecretToRegistryConfigurationConverterTest {
 	public void init() {
 		MockitoAnnotations.initMocks(this);
 		converter = new DockerConfigJsonSecretToRegistryConfigurationConverter(mockRestTemplate);
+	}
+
+	@Test
+	public void testConvertAnonymousRegistry() throws URISyntaxException {
+
+		when(mockRestTemplate.exchange(
+				eq(new URI("https://demo.repository.io/v2/_catalog")), eq(HttpMethod.GET), any(), eq(Map.class)))
+				.thenReturn(new ResponseEntity<>(new HashMap<>(), HttpStatus.OK));
+
+		String b = "{\"auths\":{\"demo.repository.io\":{}}}";
+		Map<String, RegistryConfiguration> result = converter.convert(b);
+
+		assertThat(result.size(), is(1));
+		assertTrue(result.containsKey("demo.repository.io"));
+
+		RegistryConfiguration registryConfiguration = result.get("demo.repository.io");
+
+		assertThat(registryConfiguration.getRegistryHost(), is("demo.repository.io"));
+		assertThat(registryConfiguration.getUser(), nullValue());
+		assertThat(registryConfiguration.getSecret(), nullValue());
+		assertThat(registryConfiguration.getAuthorizationType(), is(RegistryConfiguration.AuthorizationType.anonymous));
 	}
 
 	@Test

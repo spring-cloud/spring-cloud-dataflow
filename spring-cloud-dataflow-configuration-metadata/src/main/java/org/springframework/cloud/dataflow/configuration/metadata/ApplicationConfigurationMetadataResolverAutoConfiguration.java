@@ -45,6 +45,7 @@ import org.springframework.cloud.dataflow.configuration.metadata.container.Conta
 import org.springframework.cloud.dataflow.configuration.metadata.container.ContainerImageParser;
 import org.springframework.cloud.dataflow.configuration.metadata.container.DefaultContainerImageMetadataResolver;
 import org.springframework.cloud.dataflow.configuration.metadata.container.RegistryConfiguration;
+import org.springframework.cloud.dataflow.configuration.metadata.container.authorization.AnonymousRegistryAuthorizer;
 import org.springframework.cloud.dataflow.configuration.metadata.container.authorization.AwsEcrAuthorizer;
 import org.springframework.cloud.dataflow.configuration.metadata.container.authorization.BasicAuthRegistryAuthorizer;
 import org.springframework.cloud.dataflow.configuration.metadata.container.authorization.DockerConfigJsonSecretToRegistryConfigurationConverter;
@@ -75,6 +76,11 @@ public class ApplicationConfigurationMetadataResolverAutoConfiguration {
 			@Qualifier("containerRestTemplate") RestTemplate containerRestTemplate,
 			@Qualifier("noSslVerificationContainerRestTemplate") RestTemplate noSslVerificationContainerRestTemplate) {
 		return new DockerOAuth2RegistryAuthorizer(containerRestTemplate, noSslVerificationContainerRestTemplate);
+	}
+
+	@Bean
+	public RegistryAuthorizer anonymousRegistryAuthorizer() {
+		return new AnonymousRegistryAuthorizer();
 	}
 
 	@Bean
