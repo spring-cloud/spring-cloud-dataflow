@@ -277,7 +277,7 @@ public class TaskDefinitionController {
 			TaskExecution taskExecution = taskExecutionAwareTaskDefinition.getLatestTaskExecution();
 			TaskManifest taskManifest = taskExecutionService.findTaskManifestById(taskExecution.getExecutionId());
 			taskManifest = taskSanitizer.sanitizeTaskManifest(taskManifest);
-			TaskExecutionResource taskExecutionResource = (manifest) ? new TaskExecutionResource(taskExecution, taskManifest) : new TaskExecutionResource(taskExecution);
+			TaskExecutionResource taskExecutionResource = (manifest && taskManifest != null) ? new TaskExecutionResource(taskExecution, taskManifest) : new TaskExecutionResource(taskExecution);
 			taskDefinitionResource.setLastTaskExecution(taskExecutionResource);
 			return taskDefinitionResource;
 		}
