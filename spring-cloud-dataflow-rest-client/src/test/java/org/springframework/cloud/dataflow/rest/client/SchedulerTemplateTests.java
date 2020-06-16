@@ -68,7 +68,7 @@ public class SchedulerTemplateTests {
 		values.add("scheduleName", DEFAULT_SCHEDULE_NAME);
 		values.add("properties", DeploymentPropertiesUtils.format(props));
 		values.add("taskDefinitionName", DEFAULT_DEFINITION_NAME);
-		values.add("arguments", args);
+		values.add("arguments", args.get(0));
 		Mockito.verify(restTemplate).postForObject(SCHEDULES_RELATION, values, Long.class);
 	}
 
