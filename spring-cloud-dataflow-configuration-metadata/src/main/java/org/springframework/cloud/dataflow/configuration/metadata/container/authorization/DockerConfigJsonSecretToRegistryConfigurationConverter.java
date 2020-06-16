@@ -73,7 +73,11 @@ public class DockerConfigJsonSecretToRegistryConfigurationConverter implements C
 
 					String tokenAccessUrl = getDockerTokenServiceUri(rc.getRegistryHost(), rc.getUser(), rc.getSecret());
 					if (StringUtils.isEmpty(tokenAccessUrl)) {
-						rc.setAuthorizationType(RegistryConfiguration.AuthorizationType.basicauth);
+						if (StringUtils.isEmpty(rc.getUser()) && StringUtils.isEmpty(rc.getSecret())) {
+							rc.setAuthorizationType(RegistryConfiguration.AuthorizationType.anonymous);
+						} else {
+							rc.setAuthorizationType(RegistryConfiguration.AuthorizationType.basicauth);
+						}
 					}
 					else {
 						rc.setAuthorizationType(RegistryConfiguration.AuthorizationType.dockeroauth2);

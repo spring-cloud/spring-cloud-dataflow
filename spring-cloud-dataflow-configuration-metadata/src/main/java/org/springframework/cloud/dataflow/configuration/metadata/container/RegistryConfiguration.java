@@ -80,7 +80,12 @@ public class RegistryConfiguration {
 		 * Set the 'user' to your AWS accessKey as the 'secret' to the AWS secretKey.
 		 * You have to provided the AWS region via the extra[region]=your AWS region
 		 */
-		awsecr
+		awsecr,
+
+		/**
+		 * Anonymous authentication.
+		 */
+		anonymous
 	}
 
 	/**
