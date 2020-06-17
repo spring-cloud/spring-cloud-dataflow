@@ -58,8 +58,10 @@ import org.springframework.cloud.dataflow.server.service.TaskExecutionCreationSe
 import org.springframework.cloud.dataflow.server.service.TaskExecutionInfoService;
 import org.springframework.cloud.dataflow.server.service.TaskExecutionService;
 import org.springframework.cloud.dataflow.server.service.TaskSaveService;
+import org.springframework.cloud.dataflow.server.service.impl.diff.PropertiesDiff;
 import org.springframework.cloud.dataflow.server.service.impl.diff.TaskAnalysisReport;
 import org.springframework.cloud.dataflow.server.service.impl.diff.TaskAnalyzer;
+import org.springframework.cloud.dataflow.server.service.impl.diff.PropertiesDiff.PropertyChange;
 import org.springframework.cloud.deployer.spi.core.AppDeploymentRequest;
 import org.springframework.cloud.deployer.spi.task.LaunchState;
 import org.springframework.cloud.deployer.spi.task.TaskLauncher;
@@ -255,35 +257,23 @@ public class DefaultTaskExecutionService implements TaskExecutionService {
 			isCTRSplitValidForCurrentCTR(taskLauncher, taskExecutionInformation.getTaskDefinition());
 		}
 
-		// Build app deploy request and stash deploy props there
+		// Create task execution for the task
 		TaskExecution taskExecution = taskExecutionRepositoryService.createTaskExecution(taskName);
-		AppDeploymentRequest appDeploymentRequest = this.taskAppDeploymentRequestCreator.
-				createRequest(taskExecution, taskExecutionInformation, commandLineArgs, platformName);
 
-		// Come up with existing and new manifests, analyze difference and update
-		// new new manifest accordingly.
-		TaskManifest taskManifest = createTaskManifest(platformName, taskExecutionInformation, appDeploymentRequest);
+		// Get the previous manifest
 		TaskManifest previousManifest = this.dataflowTaskExecutionMetadataDao.getLatestManifest(taskName);
 
-		// Analysing task to know what to bring forward from existing
-		TaskAnalysisReport report = taskAnalyzer.analyze(previousManifest, taskManifest);
-		logger.debug("Task analysis report {}", report);
+		// Get the merged deployment properties and update the task exec. info
+		taskExecutionInformation
+				.setTaskDeploymentProperties(getMergedProperties(taskExecutionInformation, previousManifest));
 
-		// We now have a new props and args what should really get used.
-		Map<String, String> mergedTaskDeploymentProperties = report.getMergedDeploymentProperties();
+		// Finally create App deployment request
+		AppDeploymentRequest request = this.taskAppDeploymentRequestCreator.createRequest(taskExecution,
+				taskExecutionInformation, commandLineArgs, platformName);
 
-		taskExecutionInformation.setTaskDeploymentProperties(mergedTaskDeploymentProperties);
-		appDeploymentRequest = updateDeploymentProperties(commandLineArgs, platformName, taskExecutionInformation,
-				taskExecution, mergedTaskDeploymentProperties);
-
-		AppDeploymentRequest request = new AppDeploymentRequest(appDeploymentRequest.getDefinition(),
-				appDeploymentRequest.getResource(),
-				mergedTaskDeploymentProperties,
-				appDeploymentRequest.getCommandlineArguments());
-
-		taskManifest.setTaskDeploymentRequest(request);
-
+		TaskManifest taskManifest = createTaskManifest(platformName, request);
 		String taskDeploymentId = null;
+		
 		try {
 			Launcher launcher = this.launcherRepository.findByName(platformName);
 			if(launcher.getType().equals(TaskPlatformFactory.CLOUDFOUNDRY_PLATFORM_TYPE) && !isAppDeploymentSame(previousManifest, taskManifest)) {
@@ -293,7 +283,7 @@ public class DefaultTaskExecutionService implements TaskExecutionService {
 				taskLauncher.destroy(taskName);
 			}
 			this.dataflowTaskExecutionMetadataDao.save(taskExecution, taskManifest);
-			taskDeploymentId = taskLauncher.launch(appDeploymentRequest);
+			taskDeploymentId = taskLauncher.launch(request);
 			saveExternalExecutionId(taskExecution, taskDeploymentId);
 		}
 		finally {
@@ -322,6 +312,40 @@ public class DefaultTaskExecutionService implements TaskExecutionService {
 						), platformName);
 
 		return taskExecution.getExecutionId();
+	}
+	
+	/**
+	 * Method to merge the task deployment properties from current task execution and
+	 * previous manifest.
+	 * @param taskExecutionInformation Current task execution information
+	 * @param previousManifest previous manifest info. *
+	 * @return mergedTaskDeploymentProperties Final Merged task deployment properties map
+	 */
+	private Map<String, String> getMergedProperties(TaskExecutionInformation taskExecutionInformation,
+			TaskManifest previousManifest) {
+
+		Map<String, String> mergedTaskDeploymentProperties = null;
+		Map<String, String> replacingDeploymentProperties = null;
+
+		Map<String, String> existingDeploymentProperties = DeploymentPropertiesUtils.qualifyDeployerProperties(
+				taskExecutionInformation.getTaskDeploymentProperties(), taskExecutionInformation.isComposed()
+						? "composed-task-runner" : taskExecutionInformation.getTaskDefinition().getRegisteredAppName());
+		if (previousManifest != null && previousManifest.getTaskDeploymentRequest() != null) {
+			replacingDeploymentProperties = previousManifest.getTaskDeploymentRequest().getDeploymentProperties();
+		}
+		PropertiesDiff deploymentPropertiesDifference = PropertiesDiff.builder().left(existingDeploymentProperties)
+				.right(replacingDeploymentProperties).build();
+		if (deploymentPropertiesDifference != null) {
+			mergedTaskDeploymentProperties = new HashMap<>();
+			mergedTaskDeploymentProperties.putAll(deploymentPropertiesDifference.getCommon());
+			mergedTaskDeploymentProperties.putAll(deploymentPropertiesDifference.getAdded());
+			mergedTaskDeploymentProperties.putAll(deploymentPropertiesDifference.getRemoved());
+			for (Map.Entry<String, PropertyChange> entry : deploymentPropertiesDifference.getChanged().entrySet()) {
+				mergedTaskDeploymentProperties.put(entry.getKey(), entry.getValue().getReplaced());
+			}
+		}
+
+		return mergedTaskDeploymentProperties;
 	}
 
 	private TaskExecutionInformation findOrCreateTaskExecutionInformation(String taskName, Map<String, String> taskDeploymentProperties) {
@@ -486,13 +510,11 @@ public class DefaultTaskExecutionService implements TaskExecutionService {
 	/**
 	 * Create a {@code TaskManifest}
 	 *
-	 * @param platformName name of the platform configuration to run the task on
-	 * @param taskExecutionInformation details about the task to be run
+	 * @param platformName name of the platform configuration to run the task on	 * 
 	 * @param appDeploymentRequest the details about the deployment to be executed
 	 * @return {@code TaskManifest}
 	 */
-	private TaskManifest createTaskManifest(String platformName, TaskExecutionInformation taskExecutionInformation,
-			AppDeploymentRequest appDeploymentRequest) {
+	private TaskManifest createTaskManifest(String platformName, AppDeploymentRequest appDeploymentRequest) {
 		TaskManifest taskManifest = new TaskManifest();
 		taskManifest.setPlatformName(platformName);
 		taskManifest.setTaskDeploymentRequest(appDeploymentRequest);
